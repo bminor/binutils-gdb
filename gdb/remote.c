@@ -18,188 +18,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-/* *INDENT-OFF* */
-/* Remote communication protocol.
 
-   A debug packet whose contents are <data>
-   is encapsulated for transmission in the form:
-
-	$ <data> # CSUM1 CSUM2
-
-	<data> must be ASCII alphanumeric and cannot include characters
-	'$' or '#'.  If <data> starts with two characters followed by
-	':', then the existing stubs interpret this as a sequence number.
-
-	CSUM1 and CSUM2 are ascii hex representation of an 8-bit 
-	checksum of <data>, the most significant nibble is sent first.
-	the hex digits 0-9,a-f are used.
-
-   Receiver responds with:
-
-	+	- if CSUM is correct and ready for next packet
-	-	- if CSUM is incorrect
-
-   <data> is as follows:
-   Most values are encoded in ascii hex digits.  Signal numbers are according
-   to the numbering in target.h.
-
-	Request		Packet
-
-	set thread	Hct...		Set thread for subsequent operations.
-					c = 'c' for thread used in step and 
-					continue; t... can be -1 for all
-					threads.
-					c = 'g' for thread used in other
-					operations.  If zero, pick a thread,
-					any thread.
-	reply		OK		for success
-			ENN		for an error.
-
-	read registers  g
-	reply		XX....X		Each byte of register data
-					is described by two hex digits.
-					Registers are in the internal order
-					for GDB, and the bytes in a register
-					are in the same order the machine uses.
-			or ENN		for an error.
-
-	write regs	GXX..XX		Each byte of register data
-					is described by two hex digits.
-	reply		OK		for success
-			ENN		for an error
-
-        write reg	Pn...=r...	Write register n... with value r...,
-					which contains two hex digits for each
-					byte in the register (target byte
-					order).
-	reply		OK		for success
-			ENN		for an error
-	(not supported by all stubs).
-
-	read mem	mAA..AA,LLLL	AA..AA is address, LLLL is length.
-	reply		XX..XX		XX..XX is mem contents
-					Can be fewer bytes than requested
-					if able to read only part of the data.
-			or ENN		NN is errno
-
-	write mem	MAA..AA,LLLL:XX..XX
-					AA..AA is address,
-					LLLL is number of bytes,
-					XX..XX is data
-	reply		OK		for success
-			ENN		for an error (this includes the case
-					where only part of the data was
-					written).
-
-        write mem       XAA..AA,LLLL:XX..XX
-         (binary)                       AA..AA is address,
-                                        LLLL is number of bytes,
-                                        XX..XX is binary data
-        reply           OK              for success
-                        ENN             for an error
-
-	continue	cAA..AA		AA..AA is address to resume
-					If AA..AA is omitted,
-					resume at same address.
-
-	step		sAA..AA		AA..AA is address to resume
-					If AA..AA is omitted,
-					resume at same address.
-
-	continue with	Csig;AA..AA	Continue with signal sig (hex signal
-	signal				number).  If ;AA..AA is omitted, 
-					resume at same address.
-
-	step with	Ssig;AA..AA	Like 'C' but step not continue.
-	signal
-
-	last signal     ?               Reply the current reason for stopping.
-                                        This is the same reply as is generated
-					for step or cont : SAA where AA is the
-					signal number.
-
-	detach          D               Reply OK.
-
-	There is no immediate reply to step or cont.
-	The reply comes when the machine stops.
-	It is		SAA		AA is the signal number.
-
-	or...		TAAn...:r...;n...:r...;n...:r...;
-					AA = signal number
-					n... = register number (hex)
-					  r... = register contents
-					n... = `thread'
-					  r... = thread process ID.  This is
-						 a hex integer.
-					n... = other string not starting 
-					    with valid hex digit.
-					  gdb should ignore this n,r pair
-					  and go on to the next.  This way
-					  we can extend the protocol.
-	or...		WAA		The process exited, and AA is
-					the exit status.  This is only
-					applicable for certains sorts of
-					targets.
-	or...		XAA		The process terminated with signal
-					AA.
-	or (obsolete)	NAA;tttttttt;dddddddd;bbbbbbbb
-					AA = signal number
-					tttttttt = address of symbol "_start"
-					dddddddd = base of data section
-					bbbbbbbb = base of bss  section.
-					Note: only used by Cisco Systems 
-					targets.  The difference between this
-					reply and the "qOffsets" query is that
-					the 'N' packet may arrive spontaneously
-					whereas the 'qOffsets' is a query
-					initiated by the host debugger.
-        or...           OXX..XX	XX..XX  is hex encoding of ASCII data. This
-					can happen at any time while the 
-					program is running and the debugger 
-					should continue to wait for 
-					'W', 'T', etc.
-
-	thread alive	TXX		Find out if the thread XX is alive.
-	reply		OK		thread is still alive
-			ENN		thread is dead
-	
-	remote restart	RXX		Restart the remote server
-
-	extended ops 	!		Use the extended remote protocol.
-					Sticky -- only needs to be set once.
-
-	kill request	k
-
-	toggle debug	d		toggle debug flag (see 386 & 68k stubs)
-	reset		r		reset -- see sparc stub.
-	reserved	<other>		On other requests, the stub should
-					ignore the request and send an empty
-					response ($#<checksum>).  This way
-					we can extend the protocol and GDB
-					can tell whether the stub it is
-					talking to uses the old or the new.
-	search		tAA:PP,MM	Search backwards starting at address
-					AA for a match with pattern PP and
-					mask MM.  PP and MM are 4 bytes.
-					Not supported by all stubs.
-
-	general query	qXXXX		Request info about XXXX.
-	general set	QXXXX=yyyy	Set value of XXXX to yyyy.
-	query sect offs	qOffsets	Get section offsets.  Reply is
-					Text=xxx;Data=yyy;Bss=zzz
-
-	Responses can be run-length encoded to save space.  A '*' means that
-	the next character is an ASCII encoding giving a repeat count which
-	stands for that many repititions of the character preceding the '*'.
-	The encoding is n+29, yielding a printable character where n >=3 
-	(which is where rle starts to win).  Don't use an n > 126.
-
-	So 
-	"0* " means the same as "0000".  */
-/* *INDENT-ON* */
-
-
-
+/* See the GDB User Guide for details of the GDB remote protocol. */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -401,6 +221,13 @@ static void set_remote_protocol_P_packet_cmd PARAMS ((char *args,
 static void show_remote_protocol_P_packet_cmd PARAMS ((char *args,
 						       int from_tty));
 
+static void set_remote_protocol_Z_packet_cmd PARAMS ((char *args,
+						      int from_tty,
+					      struct cmd_list_element * c));
+
+static void show_remote_protocol_Z_packet_cmd PARAMS ((char *args,
+						       int from_tty));
+
 
 
 
@@ -446,17 +273,6 @@ static serial_t remote_desc = NULL;
 /* This is set by the target (thru the 'S' message)
    to denote that the target is in kernel mode.  */
 static int cisco_kernel_mode = 0;
-
-/* This variable (available to the user via "set remotebinarydownload")
-   dictates whether downloads are sent in binary (via the 'X' packet).
-   We assume that the stub can, and attempt to do it. This will be cleared if
-   the stub does not understand it. This switch is still needed, though
-   in cases when the packet is supported in the stub, but the connection
-   does not allow it (i.e., 7-bit serial connection only). */
-static int remote_binary_download = 1;
-
-/* Have we already checked whether binary downloads work? */
-static int remote_binary_checked;
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
@@ -558,7 +374,7 @@ set_packet_config_cmd (config, c)
       config->support = PACKET_SUPPORT_UNKNOWN;
     }
   else
-    fatal ("Bad enum value");
+    internal_error ("Bad enum value");
 }
 
 static void
@@ -655,6 +471,54 @@ show_remote_protocol_P_packet_cmd (args, from_tty)
      int from_tty;
 {
   show_packet_config_cmd (&remote_protocol_P);
+}
+
+/* Should we try the 'Z' (set breakpoint) request?  */
+
+static struct packet_config remote_protocol_Z;
+
+static void
+set_remote_protocol_Z_packet_cmd (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  set_packet_config_cmd (&remote_protocol_Z, c);
+}
+
+static void
+show_remote_protocol_Z_packet_cmd (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  show_packet_config_cmd (&remote_protocol_Z);
+}
+
+/* Should we try the 'X' (remote binary download) packet?
+
+   This variable (available to the user via "set remote X-packet")
+   dictates whether downloads are sent in binary (via the 'X' packet).
+   We assume that the stub can, and attempt to do it. This will be
+   cleared if the stub does not understand it. This switch is still
+   needed, though in cases when the packet is supported in the stub,
+   but the connection does not allow it (i.e., 7-bit serial connection
+   only). */
+
+static struct packet_config remote_protocol_binary_download;
+
+static void
+set_remote_protocol_binary_download_cmd (char *args,
+					 int from_tty,
+					 struct cmd_list_element *c)
+{
+  set_packet_config_cmd (&remote_protocol_binary_download, c);
+}
+
+static void
+show_remote_protocol_binary_download_cmd (char *args,
+					  int from_tty)
+{
+  show_packet_config_cmd (&remote_protocol_binary_download);
 }
 
 
@@ -1742,7 +1606,7 @@ remote_cisco_section_offsets (text_addr, data_addr, bss_addr,
  * Relocate the symbol file for a remote target. 
  */
 
-static void
+void
 remote_cisco_objfile_relocate (text_off, data_off, bss_off)
      bfd_signed_vma text_off;
      bfd_signed_vma data_off;
@@ -1902,13 +1766,14 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
   push_target (target);		/* Switch to using remote target now */
 
   init_packet_config (&remote_protocol_P);
-
+  init_packet_config (&remote_protocol_Z);
+  
   general_thread = -2;
   continue_thread = -2;
 
   /* Force remote_write_bytes to check whether target supports
      binary downloading. */
-  remote_binary_checked = 0;
+  init_packet_config (&remote_protocol_binary_download);
 
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
@@ -1992,13 +1857,14 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
   push_target (target);		/* Switch to using remote target now */
 
   init_packet_config (&remote_protocol_P);
+  init_packet_config (&remote_protocol_Z);
 
   general_thread = -2;
   continue_thread = -2;
 
   /* Force remote_write_bytes to check whether target supports
      binary downloading. */
-  remote_binary_checked = 0;
+  init_packet_config (&remote_protocol_binary_download);
 
   /* If running asynchronously, set things up for telling the target
      to use the extended protocol. This will happen only after the
@@ -2074,6 +1940,7 @@ remote_detach (args, from_tty)
   pop_target ();
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
+
 }
 
 /* Same as remote_detach, but with async support. */
@@ -3103,41 +2970,52 @@ remote_address_masked (addr)
    the whole packet, since many stubs strip the eighth bit and subsequently
    compute a wrong checksum, which causes real havoc with remote_write_bytes.
 
-   NOTE: This can still lose if the serial line is not eight-bit clean. In
-   cases like this, the user should clear "remotebinarydownload". */
+   NOTE: This can still lose if the serial line is not eight-bit
+   clean. In cases like this, the user should clear "remote
+   X-packet". */
+
 static void
 check_binary_download (addr)
      CORE_ADDR addr;
 {
-  if (remote_binary_download && !remote_binary_checked)
+  switch (remote_protocol_binary_download.support)
     {
-      char *buf = alloca (PBUFSIZ);
-      char *p;
-      remote_binary_checked = 1;
+    case PACKET_DISABLE:
+      break;
+    case PACKET_ENABLE:
+      break;
+    case PACKET_SUPPORT_UNKNOWN:
+      {
+	char *buf = alloca (PBUFSIZ);
+	char *p;
+	
+	p = buf;
+	*p++ = 'X';
+	p += hexnumstr (p, (ULONGEST) addr);
+	*p++ = ',';
+	p += hexnumstr (p, (ULONGEST) 0);
+	*p++ = ':';
+	*p = '\0';
+	
+	putpkt_binary (buf, (int) (p - buf));
+	getpkt (buf, 0);
 
-      p = buf;
-      *p++ = 'X';
-      p += hexnumstr (p, (ULONGEST) addr);
-      *p++ = ',';
-      p += hexnumstr (p, (ULONGEST) 0);
-      *p++ = ':';
-      *p = '\0';
-
-      putpkt_binary (buf, (int) (p - buf));
-      getpkt (buf, 0);
-
-      if (buf[0] == '\0')
-	remote_binary_download = 0;
-    }
-
-  if (remote_debug)
-    {
-      if (remote_binary_download)
-	fprintf_unfiltered (gdb_stdlog,
-			    "binary downloading suppported by target\n");
-      else
-	fprintf_unfiltered (gdb_stdlog,
-			    "binary downloading NOT suppported by target\n");
+	if (buf[0] == '\0')
+	  {
+	    if (remote_debug)
+	      fprintf_unfiltered (gdb_stdlog,
+				  "binary downloading NOT suppported by target\n");
+	    remote_protocol_binary_download.support = PACKET_DISABLE;
+	  }
+	else
+	  {
+	    if (remote_debug)
+	      fprintf_unfiltered (gdb_stdlog,
+				  "binary downloading suppported by target\n");
+	    remote_protocol_binary_download.support = PACKET_ENABLE;
+	  }
+	break;
+      }
     }
 }
 
@@ -3182,15 +3060,18 @@ remote_write_bytes (memaddr, myaddr, len)
       /* sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo); */
       memaddr = remote_address_masked (memaddr);
       p = buf;
-      if (remote_binary_download)
+      switch (remote_protocol_binary_download.support)
 	{
+	case PACKET_ENABLE:
 	  *p++ = 'X';
 	  todo = min (len, max_buf_size);
-	}
-      else
-	{
+	  break;
+	case PACKET_DISABLE:
 	  *p++ = 'M';
 	  todo = min (len, max_buf_size / 2);	/* num bytes that will fit */
+	  break;
+	case PACKET_SUPPORT_UNKNOWN:
+	  internal_error ("remote_write_bytes: bad switch");
 	}
 
       p += hexnumstr (p, (ULONGEST) memaddr);
@@ -3204,50 +3085,57 @@ remote_write_bytes (memaddr, myaddr, len)
       /* We send target system values byte by byte, in increasing byte
          addresses, each byte encoded as two hex characters (or one
          binary character).  */
-      if (remote_binary_download)
+      switch (remote_protocol_binary_download.support)
 	{
-	  int escaped = 0;
-	  for (i = 0;
-	       (i < todo) && (i + escaped) < (max_buf_size - 2);
-	       i++)
-	    {
-	      switch (myaddr[i] & 0xff)
-		{
-		case '$':
-		case '#':
-		case 0x7d:
-		  /* These must be escaped */
-		  escaped++;
-		  *p++ = 0x7d;
-		  *p++ = (myaddr[i] & 0xff) ^ 0x20;
-		  break;
-		default:
-		  *p++ = myaddr[i] & 0xff;
-		  break;
-		}
-	    }
-
-	  if (i < todo)
-	    {
-	      /* Escape chars have filled up the buffer prematurely, 
-	         and we have actually sent fewer bytes than planned.
-	         Fix-up the length field of the packet.  */
-
-	      /* FIXME: will fail if new len is a shorter string than 
-	         old len.  */
-
-	      plen += hexnumstr (plen, (ULONGEST) i);
-	      *plen++ = ':';
-	    }
-	}
-      else
-	{
-	  for (i = 0; i < todo; i++)
-	    {
-	      *p++ = tohex ((myaddr[i] >> 4) & 0xf);
-	      *p++ = tohex (myaddr[i] & 0xf);
-	    }
-	  *p = '\0';
+	case PACKET_ENABLE:
+	  {
+	    int escaped = 0;
+	    for (i = 0;
+		 (i < todo) && (i + escaped) < (max_buf_size - 2);
+		 i++)
+	      {
+		switch (myaddr[i] & 0xff)
+		  {
+		  case '$':
+		  case '#':
+		  case 0x7d:
+		    /* These must be escaped */
+		    escaped++;
+		    *p++ = 0x7d;
+		    *p++ = (myaddr[i] & 0xff) ^ 0x20;
+		    break;
+		  default:
+		    *p++ = myaddr[i] & 0xff;
+		    break;
+		  }
+	      }
+	    
+	    if (i < todo)
+	      {
+		/* Escape chars have filled up the buffer prematurely, 
+		   and we have actually sent fewer bytes than planned.
+		   Fix-up the length field of the packet.  */
+		
+		/* FIXME: will fail if new len is a shorter string than 
+		   old len.  */
+		
+		plen += hexnumstr (plen, (ULONGEST) i);
+		*plen++ = ':';
+	      }
+	    break;
+	  }
+	case PACKET_DISABLE:
+	  {
+	    for (i = 0; i < todo; i++)
+	      {
+		*p++ = tohex ((myaddr[i] >> 4) & 0xf);
+		*p++ = tohex (myaddr[i] & 0xf);
+	      }
+	    *p = '\0';
+	    break;
+	  }
+	case PACKET_SUPPORT_UNKNOWN:
+	  internal_error ("remote_write_bytes: bad switch");
 	}
 
       putpkt_binary (buf, (int) (p - buf));
@@ -4032,7 +3920,52 @@ remote_insert_breakpoint (addr, contents_cache)
 {
 #ifdef REMOTE_BREAKPOINT
   int val;
+#endif  
+  int bp_size;
 
+  /* Try the "Z" packet if it is not already disabled.
+     If it succeeds, then set the support to PACKET_ENABLE.
+     If it fails, and the user has explicitly requested the Z support 
+     then report an error, otherwise, mark it disabled and go on. */
+  
+  if ((remote_protocol_Z.support == PACKET_ENABLE)
+      || (remote_protocol_Z.support == PACKET_SUPPORT_UNKNOWN)) 
+    {
+      char buf[PBUFSIZ], *p = buf;
+      
+      addr = remote_address_masked (addr);
+      *(p++) = 'Z';
+      *(p++) = '0';
+      *(p++) = ',';
+      p += hexnumstr (p, (ULONGEST) addr);
+      BREAKPOINT_FROM_PC (&addr, &bp_size);
+      sprintf (p, ",%d", bp_size);
+      
+      putpkt (buf);
+      getpkt (buf, 0);
+
+      if (buf[0] != '\0')
+	{
+	  remote_protocol_Z.support = PACKET_ENABLE;
+	  return (buf[0] == 'E');
+	}
+      
+      /* The stub does not support the 'Z' request.  If the user has
+         explicitly requested the Z support, or if the stub previously
+	 said it supported the packet, this is an error,
+         otherwise, mark it disabled. */
+      
+      else if (remote_protocol_Z.support == PACKET_ENABLE)
+	{
+	  error ("Protocol error: Z packet not recognized by stub");
+	}
+      else
+	{
+	  remote_protocol_Z.support = PACKET_DISABLE;
+	}
+    }
+
+#ifdef REMOTE_BREAKPOINT  
   val = target_read_memory (addr, contents_cache, sizeof big_break_insn);
 
   if (val == 0)
@@ -4056,12 +3989,136 @@ remote_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
+  char buf[PBUFSIZ];
+  int bp_size;
+
+  if ((remote_protocol_Z.support == PACKET_ENABLE)
+      || (remote_protocol_Z.support == PACKET_SUPPORT_UNKNOWN))
+    {
+      char buf[PBUFSIZ], *p = buf;
+      
+      *(p++) = 'z';
+      *(p++) = '0';
+      *(p++) = ',';
+
+      addr = remote_address_masked (addr);
+      p += hexnumstr (p, (ULONGEST) addr);
+      BREAKPOINT_FROM_PC (&addr, &bp_size);
+      sprintf (p, ",%d", bp_size);
+      
+      putpkt (buf);
+      getpkt (buf, 0);
+
+      return (buf[0] == 'E');
+    }
+
 #ifdef REMOTE_BREAKPOINT
   return target_write_memory (addr, contents_cache, sizeof big_break_insn);
 #else
   return memory_remove_breakpoint (addr, contents_cache);
 #endif /* REMOTE_BREAKPOINT */
 }
+
+#ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
+int
+remote_insert_watchpoint (addr, len, type)
+     CORE_ADDR addr;
+     int len;
+     int type;
+{
+  char buf[PBUFSIZ], *p;
+
+  if (remote_protocol_Z.support == PACKET_DISABLE)
+    error ("Can't set hardware watchpoints without the 'Z' packet\n");
+  
+  sprintf (buf, "Z%x,", type + 2 );
+  p = strchr (buf, '\0');
+  addr = remote_address_masked (addr);
+  p += hexnumstr (p, (ULONGEST) addr);
+  sprintf (p, ",%lx", len);
+  
+  putpkt (buf);
+  getpkt (buf, 0);
+
+  if (buf[0] == '\0' || buf [0] == 'E')
+    return -1;
+
+  return 0;
+}
+
+int
+remote_remove_watchpoint (addr, len, type)
+     CORE_ADDR addr;
+     int len;
+     int type;
+{
+  char buf[PBUFSIZ], *p;
+  
+  sprintf (buf, "z%x,", type + 2 );
+  p = strchr (buf, '\0');
+  addr = remote_address_masked (addr);
+  p += hexnumstr (p, (ULONGEST) addr);
+  sprintf (p, ",%lx", len);
+  putpkt (buf);
+  getpkt (buf, 0);
+
+  if (buf[0] == '\0' || buf [0] == 'E')
+    return -1;
+
+  return 0;
+}
+
+int
+remote_insert_hw_breakpoint (addr, len)
+     CORE_ADDR addr;
+     int len;
+{
+  char buf[PBUFSIZ], *p = buf;
+      
+  if (remote_protocol_Z.support == PACKET_DISABLE)
+    error ("Can't set hardware breakpoints without the 'Z' packet\n");
+
+  *(p++) = 'Z';
+  *(p++) = '1';
+  *(p++) = ',';
+  
+  addr = remote_address_masked (addr);
+  p += hexnumstr (p, (ULONGEST) addr);
+  *p = '\0';
+
+  putpkt (buf);
+  getpkt (buf, 0);
+
+  if (buf[0] == '\0' || buf [0] == 'E')
+    return -1;
+
+  return 0;
+}
+
+int 
+remote_remove_hw_breakpoint (addr, len)
+     CORE_ADDR addr;
+     int len;
+{
+  char buf[PBUFSIZ], *p = buf;
+  
+  *(p++) = 'z';
+  *(p++) = '1';
+  *(p++) = ',';
+  
+  addr = remote_address_masked (addr);
+  p += hexnumstr (p, (ULONGEST) addr);
+  *p = '\0';
+
+  putpkt(buf);
+  getpkt (buf, 0);
+  
+  if (buf[0] == '\0' || buf [0] == 'E')
+    return -1;
+
+  return 0;
+}
+#endif
 
 /* Some targets are only capable of doing downloads, and afterwards
    they switch to the remote serial protocol.  This function provides
@@ -4287,6 +4344,59 @@ remote_query (query_type, buf, outbuf, bufsiz)
 }
 
 static void
+remote_rcmd (char *command,
+	     struct gdb_file *outbuf)
+{
+  int i;
+  char *buf = alloca (PBUFSIZ);
+  char *p = buf;
+
+  if (!remote_desc)
+    error ("remote rcmd is only available after target open");
+
+  /* The query prefix */
+  strcpy (buf, "qRcmd,");
+  p = strchr (buf, '\0');
+
+  if ((strlen (buf) + strlen (command) * 2 + 8/*misc*/) > PBUFSIZ)
+    error ("\"monitor\" command ``%s'' is too long\n", command);
+
+  /* Encode the actual command */
+  for (i = 0; command[i]; i++)
+    {
+      *p++ = tohex ((command[i] >> 4) & 0xf);
+      *p++ = tohex (command[i] & 0xf);
+    }
+  *p = '\0';
+
+  if (putpkt (buf) < 0)
+    error ("Communication problem with target\n");
+
+  /* get/display the response */
+  while (1)
+    {
+      /* XXX - see also tracepoint.c:remote_get_noisy_reply() */
+      buf[0] = '\0';
+      getpkt (buf, 0);
+      if (buf[0] == '\0')
+	error ("Target does not support this command\n");
+      if (buf[0] == 'O' && buf[1] != 'K')
+	{
+	  remote_console_output (buf + 1); /* 'O' message from stub */
+	  continue;
+	}
+      if (strcmp (buf, "OK") == 0)
+	break;
+      for (p = buf; p[0] != '\0' && p[1] != '\0'; p += 2)
+	{
+	  char c = (fromhex (p[0]) << 4) + fromhex (p[1]);
+	  fputc_unfiltered (c, outbuf);
+	}
+      break;
+    }
+}
+
+static void
 packet_command (args, from_tty)
      char *args;
      int from_tty;
@@ -4498,6 +4608,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
+  remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;
   remote_ops.to_has_memory = 1;
@@ -4623,13 +4734,14 @@ device is attached to the remote system (e.g. host:port).");
   push_target (&remote_cisco_ops);	/* Switch to using cisco target now */
 
   init_packet_config (&remote_protocol_P);
+  init_packet_config (&remote_protocol_Z);
 
   general_thread = -2;
   continue_thread = -2;
 
   /* Force remote_write_bytes to check whether target supports
      binary downloading. */
-  remote_binary_checked = 0;
+  init_packet_config (&remote_protocol_binary_download);
 
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
@@ -4952,6 +5064,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_find_new_threads = remote_threads_info;
   remote_async_ops.to_stop = remote_stop;
   remote_async_ops.to_query = remote_query;
+  remote_async_ops.to_rcmd = remote_rcmd;
   remote_async_ops.to_stratum = process_stratum;
   remote_async_ops.to_has_all_memory = 1;
   remote_async_ops.to_has_memory = 1;
@@ -5088,11 +5201,20 @@ in a memory packet.\n",
 		  &setlist),
      &showlist);
 
+  add_packet_config_cmd (&remote_protocol_binary_download,
+			 "X", "binary-download",
+			 set_remote_protocol_binary_download_cmd,
+			 show_remote_protocol_binary_download_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist);
+#if 0
+  /* XXXX - should ``set remotebinarydownload'' be retained for
+     compatibility. */
   add_show_from_set
     (add_set_cmd ("remotebinarydownload", no_class,
 		  var_boolean, (char *) &remote_binary_download,
 		  "Set binary downloads.\n", &setlist),
      &showlist);
+#endif
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
@@ -5100,5 +5222,10 @@ in a memory packet.\n",
   add_packet_config_cmd (&remote_protocol_P, "P", "set-register",
 			 set_remote_protocol_P_packet_cmd,
 			 show_remote_protocol_P_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist);
+
+  add_packet_config_cmd (&remote_protocol_Z, "Z", "breakpoint",
+			 set_remote_protocol_Z_packet_cmd,
+			 show_remote_protocol_Z_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist);
 }

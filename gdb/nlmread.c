@@ -38,7 +38,7 @@ static void
 nlm_symfile_init PARAMS ((struct objfile *));
 
 static void
-nlm_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+nlm_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 nlm_symfile_finish PARAMS ((struct objfile *));
@@ -182,9 +182,8 @@ nlm_symtab_read (abfd, addr, objfile)
    is not currently used. */
 
 static void
-nlm_symfile_read (objfile, section_offsets, mainline)
+nlm_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;
@@ -197,14 +196,14 @@ nlm_symfile_read (objfile, section_offsets, mainline)
 
   /* FIXME, should take a section_offsets param, not just an offset.  */
 
-  offset = ANOFFSET (section_offsets, 0);
+  offset = ANOFFSET (objfile->section_offsets, 0);
 
   /* Process the NLM export records, which become the bfd's canonical symbol
      table. */
 
   nlm_symtab_read (abfd, offset, objfile);
 
-  stabsect_build_psymtabs (objfile, section_offsets, mainline, ".stab",
+  stabsect_build_psymtabs (objfile, mainline, ".stab",
 			   ".stabstr", ".text");
 
   mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
@@ -252,8 +251,7 @@ static struct sym_fns nlm_sym_fns =
   nlm_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
   nlm_symfile_read,		/* sym_read: read a symbol file into symtab */
   nlm_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,
-			/* sym_offsets:  Translate ext. to int. relocation */
+  default_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

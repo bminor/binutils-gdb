@@ -205,7 +205,7 @@ select_source_symtab (s)
     {
       if (cs_pst->readin)
 	{
-	  fatal ("Internal: select_source_symtab: readin pst found and no symtabs.");
+	  internal_error ("select_source_symtab: readin pst found and no symtabs.");
 	}
       else
 	{

@@ -29,6 +29,8 @@ extern const IDESC *fr30bf_decode (SIM_CPU *, IADDR,
                                   CGEN_INSN_INT,
                                   ARGBUF *);
 extern void fr30bf_init_idesc_table (SIM_CPU *);
+extern void fr30bf_sem_init_idesc_table (SIM_CPU *);
+extern void fr30bf_semf_init_idesc_table (SIM_CPU *);
 
 /* Enum declaration for instructions in cpu family fr30bf.  */
 typedef enum fr30bf_insn_type {
@@ -77,200 +79,34 @@ typedef enum fr30bf_insn_type {
  , FR30BF_INSN_ENTER, FR30BF_INSN_LEAVE, FR30BF_INSN_XCHB, FR30BF_INSN_MAX
 } FR30BF_INSN_TYPE;
 
-#if ! WITH_SEM_SWITCH_FULL
-#define SEMFULL(fn) extern SEMANTIC_FN CONCAT3 (fr30bf,_sem_,fn);
-#else
-#define SEMFULL(fn)
-#endif
-
-#if ! WITH_SEM_SWITCH_FAST
-#define SEMFAST(fn) extern SEMANTIC_FN CONCAT3 (fr30bf,_semf_,fn);
-#else
-#define SEMFAST(fn)
-#endif
-
-#define SEM(fn) SEMFULL (fn) SEMFAST (fn)
-
-/* The function version of the before/after handlers is always needed,
-   so we always want the SEMFULL declaration of them.  */
-extern SEMANTIC_FN CONCAT3 (fr30bf,_sem_,x_before);
-extern SEMANTIC_FN CONCAT3 (fr30bf,_sem_,x_after);
-
-SEM (x_invalid)
-SEM (x_after)
-SEM (x_before)
-SEM (x_cti_chain)
-SEM (x_chain)
-SEM (x_begin)
-SEM (add)
-SEM (addi)
-SEM (add2)
-SEM (addc)
-SEM (addn)
-SEM (addni)
-SEM (addn2)
-SEM (sub)
-SEM (subc)
-SEM (subn)
-SEM (cmp)
-SEM (cmpi)
-SEM (cmp2)
-SEM (and)
-SEM (or)
-SEM (eor)
-SEM (andm)
-SEM (andh)
-SEM (andb)
-SEM (orm)
-SEM (orh)
-SEM (orb)
-SEM (eorm)
-SEM (eorh)
-SEM (eorb)
-SEM (bandl)
-SEM (borl)
-SEM (beorl)
-SEM (bandh)
-SEM (borh)
-SEM (beorh)
-SEM (btstl)
-SEM (btsth)
-SEM (mul)
-SEM (mulu)
-SEM (mulh)
-SEM (muluh)
-SEM (div0s)
-SEM (div0u)
-SEM (div1)
-SEM (div2)
-SEM (div3)
-SEM (div4s)
-SEM (lsl)
-SEM (lsli)
-SEM (lsl2)
-SEM (lsr)
-SEM (lsri)
-SEM (lsr2)
-SEM (asr)
-SEM (asri)
-SEM (asr2)
-SEM (ldi8)
-SEM (ldi20)
-SEM (ldi32)
-SEM (ld)
-SEM (lduh)
-SEM (ldub)
-SEM (ldr13)
-SEM (ldr13uh)
-SEM (ldr13ub)
-SEM (ldr14)
-SEM (ldr14uh)
-SEM (ldr14ub)
-SEM (ldr15)
-SEM (ldr15gr)
-SEM (ldr15dr)
-SEM (ldr15ps)
-SEM (st)
-SEM (sth)
-SEM (stb)
-SEM (str13)
-SEM (str13h)
-SEM (str13b)
-SEM (str14)
-SEM (str14h)
-SEM (str14b)
-SEM (str15)
-SEM (str15gr)
-SEM (str15dr)
-SEM (str15ps)
-SEM (mov)
-SEM (movdr)
-SEM (movps)
-SEM (mov2dr)
-SEM (mov2ps)
-SEM (jmp)
-SEM (jmpd)
-SEM (callr)
-SEM (callrd)
-SEM (call)
-SEM (calld)
-SEM (ret)
-SEM (ret_d)
-SEM (int)
-SEM (inte)
-SEM (reti)
-SEM (brad)
-SEM (bra)
-SEM (bnod)
-SEM (bno)
-SEM (beqd)
-SEM (beq)
-SEM (bned)
-SEM (bne)
-SEM (bcd)
-SEM (bc)
-SEM (bncd)
-SEM (bnc)
-SEM (bnd)
-SEM (bn)
-SEM (bpd)
-SEM (bp)
-SEM (bvd)
-SEM (bv)
-SEM (bnvd)
-SEM (bnv)
-SEM (bltd)
-SEM (blt)
-SEM (bged)
-SEM (bge)
-SEM (bled)
-SEM (ble)
-SEM (bgtd)
-SEM (bgt)
-SEM (blsd)
-SEM (bls)
-SEM (bhid)
-SEM (bhi)
-SEM (dmovr13)
-SEM (dmovr13h)
-SEM (dmovr13b)
-SEM (dmovr13pi)
-SEM (dmovr13pih)
-SEM (dmovr13pib)
-SEM (dmovr15pi)
-SEM (dmov2r13)
-SEM (dmov2r13h)
-SEM (dmov2r13b)
-SEM (dmov2r13pi)
-SEM (dmov2r13pih)
-SEM (dmov2r13pib)
-SEM (dmov2r15pd)
-SEM (ldres)
-SEM (stres)
-SEM (copop)
-SEM (copld)
-SEM (copst)
-SEM (copsv)
-SEM (nop)
-SEM (andccr)
-SEM (orccr)
-SEM (stilm)
-SEM (addsp)
-SEM (extsb)
-SEM (extub)
-SEM (extsh)
-SEM (extuh)
-SEM (ldm0)
-SEM (ldm1)
-SEM (stm0)
-SEM (stm1)
-SEM (enter)
-SEM (leave)
-SEM (xchb)
-
-#undef SEMFULL
-#undef SEMFAST
-#undef SEM
+/* Enum declaration for semantic formats in cpu family fr30bf.  */
+typedef enum fr30bf_sfmt_type {
+  FR30BF_SFMT_EMPTY, FR30BF_SFMT_ADD, FR30BF_SFMT_ADDI, FR30BF_SFMT_ADD2
+ , FR30BF_SFMT_ADDC, FR30BF_SFMT_ADDN, FR30BF_SFMT_ADDNI, FR30BF_SFMT_ADDN2
+ , FR30BF_SFMT_CMP, FR30BF_SFMT_CMPI, FR30BF_SFMT_CMP2, FR30BF_SFMT_AND
+ , FR30BF_SFMT_ANDM, FR30BF_SFMT_ANDH, FR30BF_SFMT_ANDB, FR30BF_SFMT_BANDL
+ , FR30BF_SFMT_BTSTL, FR30BF_SFMT_MUL, FR30BF_SFMT_MULU, FR30BF_SFMT_MULH
+ , FR30BF_SFMT_DIV0S, FR30BF_SFMT_DIV0U, FR30BF_SFMT_DIV1, FR30BF_SFMT_DIV2
+ , FR30BF_SFMT_DIV3, FR30BF_SFMT_DIV4S, FR30BF_SFMT_LSL, FR30BF_SFMT_LSLI
+ , FR30BF_SFMT_LDI8, FR30BF_SFMT_LDI20, FR30BF_SFMT_LDI32, FR30BF_SFMT_LD
+ , FR30BF_SFMT_LDR13, FR30BF_SFMT_LDR14, FR30BF_SFMT_LDR14UH, FR30BF_SFMT_LDR14UB
+ , FR30BF_SFMT_LDR15, FR30BF_SFMT_LDR15GR, FR30BF_SFMT_LDR15DR, FR30BF_SFMT_LDR15PS
+ , FR30BF_SFMT_ST, FR30BF_SFMT_STR13, FR30BF_SFMT_STR14, FR30BF_SFMT_STR14H
+ , FR30BF_SFMT_STR14B, FR30BF_SFMT_STR15, FR30BF_SFMT_STR15GR, FR30BF_SFMT_STR15DR
+ , FR30BF_SFMT_STR15PS, FR30BF_SFMT_MOV, FR30BF_SFMT_MOVDR, FR30BF_SFMT_MOVPS
+ , FR30BF_SFMT_MOV2DR, FR30BF_SFMT_MOV2PS, FR30BF_SFMT_JMP, FR30BF_SFMT_CALLR
+ , FR30BF_SFMT_CALL, FR30BF_SFMT_RET, FR30BF_SFMT_INT, FR30BF_SFMT_INTE
+ , FR30BF_SFMT_RETI, FR30BF_SFMT_BRAD, FR30BF_SFMT_BNOD, FR30BF_SFMT_BEQD
+ , FR30BF_SFMT_BCD, FR30BF_SFMT_BND, FR30BF_SFMT_BVD, FR30BF_SFMT_BLTD
+ , FR30BF_SFMT_BLED, FR30BF_SFMT_BLSD, FR30BF_SFMT_DMOVR13, FR30BF_SFMT_DMOVR13H
+ , FR30BF_SFMT_DMOVR13B, FR30BF_SFMT_DMOVR13PI, FR30BF_SFMT_DMOVR13PIH, FR30BF_SFMT_DMOVR13PIB
+ , FR30BF_SFMT_DMOVR15PI, FR30BF_SFMT_DMOV2R13, FR30BF_SFMT_DMOV2R13H, FR30BF_SFMT_DMOV2R13B
+ , FR30BF_SFMT_DMOV2R13PI, FR30BF_SFMT_DMOV2R13PIH, FR30BF_SFMT_DMOV2R13PIB, FR30BF_SFMT_DMOV2R15PD
+ , FR30BF_SFMT_LDRES, FR30BF_SFMT_COPOP, FR30BF_SFMT_ANDCCR, FR30BF_SFMT_STILM
+ , FR30BF_SFMT_ADDSP, FR30BF_SFMT_EXTSB, FR30BF_SFMT_EXTUB, FR30BF_SFMT_EXTSH
+ , FR30BF_SFMT_EXTUH, FR30BF_SFMT_LDM0, FR30BF_SFMT_LDM1, FR30BF_SFMT_STM0
+ , FR30BF_SFMT_STM1, FR30BF_SFMT_ENTER, FR30BF_SFMT_LEAVE, FR30BF_SFMT_XCHB
+} FR30BF_SFMT_TYPE;
 
 /* Function unit handlers (user written).  */
 

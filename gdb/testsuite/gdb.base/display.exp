@@ -46,6 +46,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+
 # Some coverage stuff
 #
 gdb_test "kill" ".*The program is not being run.*"
@@ -59,9 +60,16 @@ gdb_test "detach" ".*"
 # Ok, on to real life
 #
 
-if {![runto main]} {
-  fail "Could not run to main - other tests will fail."
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if ![runto_main] then {
+    fail "Could not run to main - other tests will fail."
+    continue
 }
+
 gdb_test "b 14" ".*Breakpoint 2.*" "break do_loops"
 gdb_test "c"          ".*Breakpoint 2, do_loops.*" "get to do_loops"
 
@@ -133,7 +141,7 @@ gdb_test "printf" ".*Argument required.*"
 gdb_test "printf %d" ".*Bad format string, missing.*"
 gdb_test "printf \"%d" ".*Bad format string, non-terminated.*"
 gdb_test "printf \"%d%d\",i" ".*Wrong number of arguments.*"
-gdb_test "printf \"\\\\!\\a\\f\\r\\t\\v\\b\"" ".*!.*"
+gdb_test "printf \"\\\\!\\a\\f\\r\\t\\v\\b\\n\"" ".*!.*"
 gdb_test "printf \"\"" ".*" "re-set term"
 gdb_test "printf \"\\w\"" ".*Unrecognized escape character.*"
 gdb_test "printf \"%d\" j" ".*Invalid argument syntax.*"
@@ -159,7 +167,6 @@ gdb_test "p/i sum" ".*Format letter.*is meaningless.*.*" "no i"
 gdb_test "p/a &sum" ".*= $hex.*<sum>.*"
 gdb_test "p/a main+1000" ".*= $hex.*<.*>.*"
 gdb_test "p/a \$pc" ".*= $hex.*<do_vars+.*>.*"
-gdb_test "p/a &j" ".*= $hex.*<do_vars+.*>.*"
 gdb_test "p/a &&j" ".*A parse error.*"
 
 # Done!

@@ -217,7 +217,7 @@ peek_token_ (i)
      int i;
 {
   if (i > MAX_LOOK_AHEAD)
-    fatal ("internal error - too much lookahead");
+    internal_error ("ch-exp.c - too much lookahead");
   if (terminal_buffer[i] == TOKEN_NOT_READ)
     {
       terminal_buffer[i] = ch_lex ();
@@ -235,7 +235,7 @@ pushback_token (code, node)
 {
   int i;
   if (terminal_buffer[MAX_LOOK_AHEAD] != TOKEN_NOT_READ)
-    fatal ("internal error - cannot pushback token");
+    internal_error ("ch-exp.c - cannot pushback token");
   for (i = MAX_LOOK_AHEAD; i > 0; i--)
     {
       terminal_buffer[i] = terminal_buffer[i - 1];
@@ -269,9 +269,7 @@ require (token)
 {
   if (PEEK_TOKEN () != token)
     {
-      char buf[80];
-      sprintf (buf, "internal parser error - expected token %d", (int) token);
-      fatal (buf);
+      internal_error ("ch-exp.c - expected token %d", (int) token);
     }
   FORWARD_TOKEN ();
 }

@@ -591,7 +591,7 @@ symbol_add_stub (arg)
       lowest_sect = bfd_get_section_by_name (so->abfd, ".text");
       if (lowest_sect == NULL)
 	bfd_map_over_sections (so->abfd, find_lowest_section,
-			       (PTR) & lowest_sect);
+			       (PTR) &lowest_sect);
       if (lowest_sect)
 	text_addr = bfd_section_vma (so->abfd, lowest_sect) + LM_OFFSET (so);
     }

@@ -88,7 +88,7 @@ struct sym_fns
        symbol file (e.g. shared library or dynamically loaded file)
        is being read.  */
 
-    void (*sym_read) PARAMS ((struct objfile *, struct section_offsets *, int));
+    void (*sym_read) PARAMS ((struct objfile *, int));
 
     /* Called when we are finished with an objfile.  Should do all cleanup
        that is specific to the object file format for the particular objfile. */
@@ -116,7 +116,7 @@ struct sym_fns
    do anything special.  */
 
 extern struct section_offsets *
-  default_symfile_offsets PARAMS ((struct objfile * objfile, CORE_ADDR addr));
+default_symfile_offsets PARAMS ((struct objfile * objfile, CORE_ADDR addr));
 
 
 extern void

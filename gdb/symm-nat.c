@@ -543,7 +543,7 @@ child_wait (pid, status)
 	    }
 	  break;
 	case PTS_WATCHPT_HIT:
-	  fatal ("PTS_WATCHPT_HIT\n");
+	  internal_error ("PTS_WATCHPT_HIT\n");
 	  break;
 	default:
 	  /* stopped by signal */
@@ -873,8 +873,8 @@ _initialize_symm_nat ()
   rv = mptrace (XPT_MPDEBUGGER, 0, 0, 0);
   if (-1 == rv)
     {
-      fatal ("_initialize_symm_nat(): mptrace(XPT_MPDEBUGGER): %s",
-	     safe_strerror (errno));
+      internal_error ("_initialize_symm_nat(): mptrace(XPT_MPDEBUGGER): %s",
+		      safe_strerror (errno));
     }
 
   /*
@@ -891,14 +891,14 @@ _initialize_symm_nat ()
   rv = sigaddset (&set, SIGCHLD);
   if (-1 == rv)
     {
-      fatal ("_initialize_symm_nat(): sigaddset(SIGCHLD): %s",
-	     safe_strerror (errno));
+      internal_error ("_initialize_symm_nat(): sigaddset(SIGCHLD): %s",
+		      safe_strerror (errno));
     }
   rv = sigprocmask (SIG_BLOCK, &set, (sigset_t *) NULL);
   if (-1 == rv)
     {
-      fatal ("_initialize_symm_nat(): sigprocmask(SIG_BLOCK): %s",
-	     safe_strerror (errno));
+      internal_error ("_initialize_symm_nat(): sigprocmask(SIG_BLOCK): %s",
+		      safe_strerror (errno));
     }
 
   sact.sa_handler = sigchld_handler;
@@ -907,8 +907,8 @@ _initialize_symm_nat ()
   rv = sigaction (SIGCHLD, &sact, (struct sigaction *) NULL);
   if (-1 == rv)
     {
-      fatal ("_initialize_symm_nat(): sigaction(SIGCHLD): %s",
-	     safe_strerror (errno));
+      internal_error ("_initialize_symm_nat(): sigaction(SIGCHLD): %s",
+		      safe_strerror (errno));
     }
 #endif
 }

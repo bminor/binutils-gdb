@@ -149,7 +149,6 @@ test_i "stepi into function" "stepi" \
 send_gdb "finish\n"
 gdb_expect {
   -re ".*(Program received|Program exited).*$gdb_prompt $" {
-    puts "*** Matched Program recieved"
     # Oops... We ran to the end of the program...  Better reset     
     if {![runto_main]} then {
       fail "Can't run to main"
@@ -162,13 +161,11 @@ gdb_expect {
     fail "stepi: finish call"
   }
   -re ".*${decimal}.*callee.*NEXTI.*$gdb_prompt $" {
-    puts "*** Matched success..."
     pass "stepi: finish call"
   }
   -re ".*${decimal}.*callee.*STEPI.*$gdb_prompt $" {
     # On PA64 we end up at a different instruction than PA32
     if { [istarget "hppa2.0w-hp-hpux*"] } {
-        puts "*** Matched success..."
         pass "stepi: finish call 2"
     } else {
 	fail "stepi: finish call 2"

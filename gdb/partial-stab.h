@@ -47,19 +47,19 @@ switch (CUR_SYMBOL_TYPE)
 
   case N_TEXT | N_EXT:
   case N_NBTEXT | N_EXT:
-    CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
     goto record_it;
 
   case N_DATA | N_EXT:
   case N_NBDATA | N_EXT:
-    CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
     goto record_it;
 
   case N_BSS:
   case N_BSS | N_EXT:
   case N_NBBSS | N_EXT:
   case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
-    CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_BSS);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
     goto record_it;
 
   case N_ABS | N_EXT:
@@ -86,7 +86,7 @@ switch (CUR_SYMBOL_TYPE)
   case N_FN_SEQ:
   case N_TEXT:
 #ifdef DBXREAD_ONLY
-    CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
     SET_NAMESTRING ();
     if ((namestring[0] == '-' && namestring[1] == 'l')
 	|| (namestring[(nsl = strlen (namestring)) - 1] == 'o'
@@ -122,7 +122,7 @@ switch (CUR_SYMBOL_TYPE)
     continue;
 
   case N_DATA:
-    CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
+    CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
     goto record_it;
 
   case N_UNDF | N_EXT:
@@ -204,7 +204,7 @@ switch (CUR_SYMBOL_TYPE)
       char *p;
       int prev_textlow_not_set;
 
-      valu = CUR_SYMBOL_VALUE + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      valu = CUR_SYMBOL_VALUE + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 
       prev_textlow_not_set = textlow_not_set;
 
@@ -266,7 +266,7 @@ switch (CUR_SYMBOL_TYPE)
          immediately follow the first.  */
 
       if (!pst)
-	pst = START_PSYMTAB (objfile, section_offsets,
+	pst = START_PSYMTAB (objfile, objfile->section_offsets,
 			     namestring, valu,
 			     first_so_symnum * symbol_size,
 			     objfile->global_psymbols.next,
@@ -424,7 +424,7 @@ switch (CUR_SYMBOL_TYPE)
     switch (p[1])
       {
       case 'S':
-	CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
 #ifdef STATIC_TRANSFORM_NAME
 	namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
@@ -435,7 +435,7 @@ switch (CUR_SYMBOL_TYPE)
 			     psymtab_language, objfile);
 	continue;
       case 'G':
-	CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
 	/* The addresses in these entries are reported to be
 	   wrong.  See the code that reads 'G's for symtabs. */
 	add_psymbol_to_list (namestring, p - namestring,
@@ -576,7 +576,7 @@ switch (CUR_SYMBOL_TYPE)
 	continue;
 
       case 'f':
-	CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
 	/* Keep track of the start of the last function so we
 	   can handle end of function symbols.  */
@@ -602,7 +602,7 @@ switch (CUR_SYMBOL_TYPE)
 	if (textlow_not_set
 	    || (CUR_SYMBOL_VALUE < pst->textlow
 		&& CUR_SYMBOL_VALUE
-		!= ANOFFSET (section_offsets, SECT_OFF_TEXT)))
+		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
@@ -619,7 +619,7 @@ switch (CUR_SYMBOL_TYPE)
 	   are put into the global psymtab like one would expect.
 	   They're also in the minimal symbol table.  */
       case 'F':
-	CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
 	/* Keep track of the start of the last function so we
 	   can handle end of function symbols.  */
@@ -644,7 +644,7 @@ switch (CUR_SYMBOL_TYPE)
 	if (textlow_not_set
 	    || (CUR_SYMBOL_VALUE < pst->textlow
 		&& CUR_SYMBOL_VALUE
-		!= ANOFFSET (section_offsets, SECT_OFF_TEXT)))
+		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT)))
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;

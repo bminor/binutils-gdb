@@ -48,11 +48,7 @@
 
 #include "ansidecl.h"
 
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+#include <stdarg.h> /* for va_list */
 
 #include "libiberty.h"
 
@@ -226,7 +222,7 @@ struct cleanup
 #endif
 
 #ifndef ATTR_FORMAT
-# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4 && defined (__ANSI_PROTOTYPES)
+# if defined(__GNUC__) && __GNUC__ >= 2 && __GNUC_MINOR__ >= 4
 #  define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
 # else
 #  define ATTR_FORMAT(type, x, y) /* nothing */
@@ -823,7 +819,7 @@ extern NORETURN void error PARAMS((const char *, ...)) ATTR_NORETURN;
 
 extern void error_begin PARAMS ((void));
 
-extern NORETURN void fatal PARAMS((char *, ...)) ATTR_NORETURN;
+extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
 
 extern NORETURN void nomem PARAMS ((long)) ATTR_NORETURN;
 
@@ -1159,6 +1155,7 @@ extern void (*readline_begin_hook) PARAMS ((char *, ...));
 extern char * (*readline_hook) PARAMS ((char *));
 extern void (*readline_end_hook) PARAMS ((void));
 extern void (*register_changed_hook) PARAMS ((int regno));
+extern void (*disassembly_flavor_hook) PARAMS((char *args, int from_tty));
 extern void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
 extern void (*context_hook) PARAMS ((int));
 extern int (*target_wait_hook) PARAMS ((int pid,
@@ -1166,6 +1163,8 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
+
+extern void (*set_hook) PARAMS ((struct cmd_list_element *c));
 
 extern NORETURN void (*error_hook) PARAMS ((void)) ATTR_NORETURN;
 
@@ -1227,6 +1226,17 @@ extern int use_windows;
 #ifndef __CYGWIN__
 #define __CYGWIN__
 #endif
+#endif
+
+/* Define well known filenos if the system does not define them.  */
+#ifndef STDIN_FILENO
+#define STDIN_FILENO   0
+#endif
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO  1
+#endif
+#ifndef STDERR_FILENO
+#define STDERR_FILENO  2
 #endif
 
 #endif /* #ifndef DEFS_H */

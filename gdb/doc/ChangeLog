@@ -1,3 +1,16 @@
+1999-08-06  Tom Tromey  <tromey@cygnus.com>
+
+	* gdb.texinfo (KOD): New node.
+
+Fri Aug  6 17:05:48 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.texi (Rcmd): Fix minor formatting typos.
+
+Thu Aug  5 17:57:41 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.texi (protocol qRcmd): Allow ``OK'' and ``O...'' response
+ 	packets.
+
 1999-07-14  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* gdbint.texinfo (PREPARE_TO_PROCEED, ADDR_BITS_REMOVE): Doc

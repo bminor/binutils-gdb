@@ -152,7 +152,7 @@ static void
 os9k_new_init PARAMS ((struct objfile *));
 
 static void
-os9k_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+os9k_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 os9k_symfile_finish PARAMS ((struct objfile *));
@@ -332,9 +332,8 @@ read_minimal_symbols (objfile, section_offsets)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-os9k_symfile_read (objfile, section_offsets, mainline)
+os9k_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;		/* FIXME comments above */
 {
   bfd *sym_bfd;
@@ -350,11 +349,11 @@ os9k_symfile_read (objfile, section_offsets, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
-  read_minimal_symbols (objfile, section_offsets);
+  read_minimal_symbols (objfile, objfile->section_offsets);
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
-  read_os9k_psymtab (section_offsets, objfile,
+  read_os9k_psymtab (objfile->section_offsets, objfile,
 		     DBX_TEXT_ADDR (objfile),
 		     DBX_TEXT_SIZE (objfile));
 
@@ -1663,8 +1662,7 @@ static struct sym_fns os9k_sym_fns =
   os9k_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
   os9k_symfile_read,		/* sym_read: read a symbol file into symtab */
   os9k_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,
-			/* sym_offsets: parse user's offsets to internal form */
+  default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

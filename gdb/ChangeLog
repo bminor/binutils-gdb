@@ -1,3 +1,297 @@
+Sun Aug  8 12:06:47 1999  Fred Fish  <fnf@cygnus.com>
+
+	* coffread.c (process_coff_symbol): Remove section_offsets from
+	prototype and function definition.  Get section_offsets from the
+	passed objfile and pass it on to callees the same way.
+	(coff_symtab_read): Ditto.
+	(coff_symfile_read): Ditto.
+	* dbxread.c (read_dbx_dynamic_symtab): Ditto.
+	(read_dbx_symtab): Ditto.
+	(dbx_symfile_read): Ditto.
+	(coffstab_build_psymtabs): Ditto.
+	(elfstab_build_psymtabs): Ditto.
+	(stabsect_build_psymtabs): Ditto.
+	* dstread.c (dst_symfile_read): Ditto.
+	* elfread.c (elf_symfile_read): Ditto.
+	* jv-class.c (jv_class_symfile_read): Ditto.
+	* mipsread.c (mipscoff_symfile_read): Ditto.
+	* nlmread.c (nlm_symfile_read): Ditto.
+	* os9kread.c (os9k_symfile_read): Ditto.
+	* somread.c (som_symfile_read): Ditto.
+	* stabsread.h (elfstab_build_psymtabs): Ditto.
+	* xcoffread.c (xcoff_initial_scan): Ditto.
+
+	* symfile.h (sym_read): Remove section_offsets from prototype.
+	* symfile.c (syms_from_objfile): Call sym_read without
+ 	section_offsets.
+	(reread_symbols): Ditto.
+
+	* elfread.c (elfstab_offset_sections): Use SIZEOF_SECTION_OFFSETS
+	to allocate sections offsets array.
+	* xcoffread.c (xcoff_symfile_offsets): Ditto.
+
+	* partial-stab.h (section_offsets): Get from objfile.
+	* dbxread.c (read_dbx_symtab): Fix typo that made -1 casted
+	to a CORE_ADDR look like an subtraction expression.
+	* objfiles.h: Add some comments.
+	* symfile.c: Add some comments.
+	* objfiles.c: Add some comments.
+	(objfile_relocated): Use ALL_OBJFILE_OSECTIONS to iterate over
+	sections.
+	(find_pc_sect_sections): Use ALL_OBJSECTIONS to iterate over all
+	sections in all objfiles.
+	* symfile.c (syms_from_objfile): Use ALL_OBJFILE_OSECTIONS.
+
+	* irix5-nat.c (symbol_add_stub): Fix typo that made taking the
+	address of lowest_sect with '&' look like a bitwise and op.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* solib.c (symbol_add_stub): Ditto.
+	* symfile.c (syms_from_objfile): Ditto.
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Minor format tweak.
+	* symfile.c (syms_from_objfile): Ditto, and fix typo.
+	* top.c (init_main): Fix typo in comment (DEFULAT_PROMPT).
+	* doc/gdbint.texinfo (find_sym_fns): This replaces symfile_init.
+
+1999-08-08  James Ingham  <jingham@leda.cygnus.com>
+
+	* remote.c (remote_insert_breakpoint): Fix typo in Z packet support. 
+        Also move Z packet support OUTSIDE of REMOTE_BREAKPOINT ifdef,
+        since this is not set for all targets that support the Z packet.
+
+Fri Aug  6 17:17:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (fatal): Delete declaration.
+	(internal_error): Declare.
+	* utils.c (nomem): Call internal_error instead of fatal.
+	(fatal_dump_core): Delete.
+	(malloc_botch): Print message direct to stderr.
+	(fatal): Delete definition.
+	* utils.c (internal_error): Define.
+	
+	* gdbarch.h, gdbarch.c, hppah-nat.c, ch-exp.c, dsrec.c, sh-tdep.c,
+ 	infptrace.c, f-lang.c, symm-nat.c, top.c, m3-nat.c, v850-tdep.c,
+ 	remote-vx.c, remote-sim.c, remote-mips.c, source.c, infcmd.c,
+ 	findvar.c, remote.c: Replace fatal with call to internal_error.
+
+Sun Aug  8 15:28:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-pipe.c (STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO): Move
+ 	definition from here.
+	* defs.h: To here.
+	
+Sat Aug  7 21:44:59 1999  Fred Fish  <fnf@cygnus.com>
+
+	* remote.c (remote_insert_breakpoint): Fix typo, missing ';'.
+
+Sun Aug  8 11:26:57 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Add break; to the default case.
+
+Fri Aug  6 19:26:03 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h: Delete #if ANSI_PROTOTYPES code, GDB assumes ISO-C.
+	* remote-rdp.c (send_rdp), remote-os9k.c (printf_monitor),
+ 	remote-mips.c: (mips_error), remote-array.c: (printf_monitor,
+ 	debuglogs), complaints.c (complain), monitor.c:
+ 	(monitor_printf_noecho, monitor_printf), language.c (type_error,
+ 	range_error), remote-st.c: (printf_stdebug), remote-sim.c
+ 	(gdb_os_printf_filtered, gdb_os_vprintf_filtered,
+ 	gdb_os_evprintf_filtered, gdb_os_error), serial.c (serial_printf),
+ 	utils.c (warning, error, fatal, fatal_dump_core, (query,
+ 	fprintf_filtered, fprintf_unfiltered, fprintfi_filtered,
+ 	printf_filtered, printf_unfiltered, printfi_filtered): Delete
+ 	legacy #ifndef ANSI_PROTOTYPES varargs code.
+
+	* defs.h: Don't #include <varargs.h>.
+	* remote-rdp.c, remote-os9k.c, remote-mips.c, remote-array.c,
+ 	monitor.c, remote-st.c: Don't include <varargs.h> or <stdarg.h>.
+
+1999-08-06  James Ingham  <jingham@leda.cygnus.com>
+
+	* configure.in, configure: add the --enable-multi-ice to determine 
+	whether to configure and build the multi-ice-gdb-server.  Note,
+	for now this only builds on cygwin, so don't enable it for other
+	platforms... 
+
+1999-08-06  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (SFILES): Added kod.c and kod-cisco.c.
+	(COMMON_OBS): Added kod.o and kod-cisco.o.
+	(kod-cisco.o): New target.
+	(kod.o): New target.
+	* kod-cisco.c: New file.
+	* kod.c: New file.
+
+1999-08-06  James Ingham  <jingham@leda.cygnus.com>
+
+	These are some fixups for the Arm, and support for the
+	disassembly-flavor for the ARM.
+	
+	* defs.h: Declare the disassembly_flavor_hook
+	* top.c: Define the disassembly_flavor_hook
+	* i386-tdep.c: Remove unnecessary declaration of the
+	disassembly_flavor_hook.
+
+	* config/arm/tm-arm.h: Change definition of
+	arm_init_extra_frame_info.
+	Add a few more comments.
+	* arm-tdep.c (arm_init_extra_frame_info): Listen to and use the
+	fromleaf parameter passed into init_extra_frame_info.
+	(set_disassembly_flavor_sfunc): New Function.
+	(set_disassembly_flavor): New Function.
+	(arm_othernames): Use the set_disassembly_flavor.
+	(_initialize_arm_tdep): Setup the disassembly flavor commands, and 
+	initialize the flavor.
+        (arm_frameless_function_invocation): Adjust for
+	frameless functions that have 1 or 2 instructions that mimic the
+	standard APCS form.
+	(arm_scan_prologue): Be more careful about scanning the function
+	prologue.  Don't match things that just have a few of the prologue 
+	instructions out of order, and don't get thrown by the scheduler
+	migrating instructions into the prologue.
+
+	Add support for the "Z" and "z" packets to request the stub
+	to set a breakpoint.
+	
+	* remote.c (set_remote_protocol_Z_packet_cmd): New function.
+	(show_remote_protocol_Z_packet_cmd): New Function.
+	(remote_open_1): Init the Z packet config.
+	(remote_async_open_1): Init the Z packet config.
+	(remote_insert_breakpoint): Use the "Z" packet if supported.
+	(remote_remove_breakpoint): Use the "z" packet if supported.
+	(remote_insert_watchpoint): New Function - currently wired to
+	nothing. 
+	(remote_remove_watchpoint): Ditto.
+	(remote_insert_hw_breakpoint): Ditto.
+	(remote_remove_hw_breakpoint): Ditto.
+
+1999-08-06  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infcmd.c: Include parser-defs.h.
+	(interrupt_target_command): Declare.
+	(stack_dummy_testing): Remove old funky flag.
+	(run_stack_dummy): Remove unused reference to old funky flag.
+
+1999-08-06  Tom Tromey  <tromey@cygnus.com>
+
+	* command.c (do_setshow_command): Call set_hook if not NULL.
+	* top.c (set_hook): New hook definition.
+	* defs.h (set_hook): Declare.
+
+1999-08-05  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c: Convert code to pure standard C, elim some warnings.
+	(stopped_for_shlib_catchpoint): Remove, never used.
+
+1999-08-05  Keith Seitz  <keiths@cygnus.com>
+
+	* NEWS: Mention new Motorola MCore target.
+
+	* sparc-tdep.c (gdb_print_insn_sparc): Print insns of the current
+	architecture.
+
+Thu Aug  5 20:41:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (configdirs): Add check for socketpair.
+	* configure, config.in: Re-generate.
+
+	From Mon Jul 19 10:46:18 1999 Philippe De Muyter <phdm@macqel.be>:
+	* ser-pipe.c (sys/wait.h): Include this file only #if HAVE_SYS_WAIT_H.
+	(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO): Macros defined if needed.
+
+Thu Aug  5 20:04:17 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.c (debug_to_open, debug_to_attach, debug_to_post_attach,
+ 	debug_to_require_attach, debug_to_detach, debug_to_require_detach,
+ 	debug_to_wait, debug_to_post_wait, debug_to_fetch_registers,
+ 	debug_to_store_registers, debug_to_prepare_to_store,
+ 	debug_to_xfer_memory, debug_to_files_info,
+ 	debug_to_insert_breakpoint, debug_to_remove_breakpoint,
+ 	debug_to_terminal_init, debug_to_terminal_inferior,
+ 	debug_to_terminal_ours_for_output, debug_to_terminal_ours,
+ 	debug_to_terminal_info, debug_to_kill, debug_to_load,
+ 	debug_to_lookup_symbol, debug_to_create_inferior,
+ 	debug_to_post_startup_inferior,
+ 	debug_to_acknowledge_created_inferior,
+ 	debug_to_clone_and_follow_inferior,
+ 	debug_to_post_follow_inferior_by_clone,
+ 	debug_to_insert_fork_catchpoint, debug_to_remove_fork_catchpoint,
+ 	debug_to_insert_vfork_catchpoint,
+ 	debug_to_remove_vfork_catchpoint, debug_to_has_forked,
+ 	debug_to_has_vforked, debug_to_can_follow_vfork_prior_to_exec,
+ 	debug_to_post_follow_vfork, debug_to_insert_exec_catchpoint,
+ 	debug_to_remove_exec_catchpoint, debug_to_has_execd,
+ 	debug_to_reported_exec_events_per_exec_call,
+ 	debug_to_has_syscall_event, debug_to_has_exited,
+ 	debug_to_mourn_inferior, debug_to_can_run,
+ 	debug_to_notice_signals, debug_to_thread_alive, debug_to_stop,
+ 	debug_to_query, debug_to_rcmd, debug_to_enable_exception_callback,
+ 	debug_to_get_current_exception_event, debug_to_pid_to_exec_file,
+ 	debug_to_core_file_to_sym_file, debug_to_close): Send trace output
+ 	to ``gdb_stdlog'' instead of ``gdb_stderr''.
+
+Thu Aug  5 16:22:10 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (init_remote_ops): Initialize remote_ops.to_rcmd.
+	(init_remote_async_ops): Initialize remote_async_ops.to_query.
+	(remote_rcmd): New function.
+
+	* monitor.c (monitor_rcmd): Rename monitor_command.
+	(init_base_monitor_ops): Initialize monitor_ops.to_rcmd.
+	(_initialize_remote_monitors): Move "monitor" command from here.
+	* target.c (initialize_targets): To here.
+	(monitor_command): New function.  Implement "monitor" command.
+
+	* target.c (cleanup_target): de_fault to_rcmd.
+	(update_current_target): INHERIT to_rcmd.
+	(debug_to_rcmd): New function.
+	(setup_target_debug): Initialize current_target.to_rcmd.
+
+	* target.h (struct target_ops): Add field to_rcmd.
+	(target_rcmd): Define.
+
+Thu Aug  5 14:24:07 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c: Replace comment describing remote protocol with
+ 	pointer to official document.
+	
+Thu Aug  5 11:59:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_protocol_binary_download): New variable.
+  	Replace ``remote_binary_download'' and ``remote_binary_checked''.
+	(set_remote_protocol_binary_download_cmd,
+ 	show_remote_protocol_binary_download_cmd): New functions.
+	(remote_open_1, remote_async_open_1, remote_cisco_open):
+ 	Initialize ``remote_protocol_binary_download'' instead of
+ 	``remote_binary_download''.
+	(check_binary_download): Re-write.
+	(remote_write_bytes): Ditto.
+	(_initialize_remote): Add ``set remote X-packet'' and ``show
+ 	remote X-packet'' commands.  Disable old ``set
+ 	remotebinarydownload'' command.
+
+1999-08-04  Keith Seitz  <keiths@cygnus.com>
+
+	* remote-rdi.c (arm_rdi_close): Close the transport device, too.
+
+Wed Aug  4 10:42:58 1999  Fred Fish  <fnf@cygnus.com>
+
+	* xcoffread.c (scan_xcoff_symtab): Change main_aux into
+	an array of 5 internal_auxent to leave room for bfd to
+	write n_numaux entries.  Change code to use the first one.
+
+1999-08-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* c-valprint.c (c_val_print): When printing decimal equivalent
+	of a char, cast appropriately.
+
+1999-08-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Jonathan Larmour <jlarmour@cygnus.co.uk>:
+	* main.c (print_gdb_help): Use gdbinit variable to determine file
+ 	name used for --nx help
+
 1999-08-01  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* config/mips/tm-mips.h (BIG_ENDIAN): Don't define here.
@@ -898,6 +1192,16 @@ Thu Jun 10 20:04:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	mn10300-tdep.c: New function.
 	* config/mn10300/tm-mn10300.h (SAVED_PC_AFTER_CALL): Update.
 
+1999-06-10  Keith Seitz  <keiths@cygnus.com>
+
+	* mcore-rom.c (picobug_dumpregs): Return a value. Any value, it
+	doesn't matter.
+	* mcore-tdep.c (mcore_analyze_prologue): Set NO_MORE_FRAMES
+	if the start of the function is the entry point.
+	(mcore_analyze_prologue): rotli takes an immediate, not an
+	offset immediate.
+	(mcore_push_arguments): Fix compiler warning.
+
 1999-06-09  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
    
         * rs6000-tdep.c (skip_prologue): Don't mistake a branch for a     
@@ -1376,6 +1680,12 @@ Tue May 25 16:05:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	(value_from_register, value_of_register): Remove #ifdef
  	REGISTER_CONVERTIBLE.  Assume REGISTER_CONVERTIBLE etc defined.
 
+1999-05-25  Keith Seitz  <keiths@cygnus.com>
+
+	* config/mcore/tm-mcore.h (FRAME_NUM_ARGS): Re-write definition of
+ 	FRAME_NUM_ARGS so that it returns NUM_ARGS as a result instead of
+ 	setting a variable as a side effect.
+
 Tue May 25 16:18:25 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* remote-d10v.c (d10v_eva_prepare_to_trace,
@@ -1622,6 +1932,16 @@ Thu May 20 12:18:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	
 1999-05-19  Keith Seitz  <keiths@cygnus.com>
 
+	* config/mcore/tm-mcore.h (BELIEVE_PCC_PROMOTION): Define. We
+	really do want to believe what gcc tells us about types...
+
+1999-05-19  Keith Seitz  <keiths@cygnus.com>
+
+	* config/mcore/tm-mcore.h (FRAME_ARGS_ADDRESS): Define to a function.
+	 (FRAME_LOCALS_ADDRESS): Ditto.
+	* mcore-tdep.c (mcore_frame_args_addcress): New function.
+	(mcore_frame_locals_address): New function.
+
 	* monitor.c (monitor_open): Only assume we have eight
 	breakpoints if the monitor implementation does not tell
 	us how many there really are. Alloc memory for these
@@ -1637,11 +1957,23 @@ Thu May 20 12:18:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	individual monitor implementations can tell us how many
 	breakpoints the monitor supports.
 
+	* mcore-rom.c (init_picobug_cmds): Add number of breakpoints supported
+	by picobug monitor.
+
 1999-05-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Philippe De Muyter  <phdm@macqel.be>:
 	* event-loop.h: Include sys/wait.h only if HAVE_SYS_WAIT_H.
 	
+1999-05-17  Keith Seitz  <keiths@cygnus.com>
+
+	* configure.tgt: Add MCore target.
+	* Makefile.in: Add mcore-tdep.c and mcore-rom.c
+	* config/mcore/tm-mcore.h: New file.
+	* config/mcore/mcore.mt: New file.
+	* mcore-rom.c: New file.
+	* mcore-tdep.c: New file.
+
 1999-05-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* top.c (print_command_line): Added the missing stream argument.

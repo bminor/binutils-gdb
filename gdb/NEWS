@@ -5,6 +5,7 @@
 
 * New targets
 
+Motorola MCore					mcore-*-*
 x86 VxWorks					i[3456]86-*-vxworks*
 PowerPC VxWorks					powerpc-*-vxworks*
 TI TMS320C80					tic80-*-*
@@ -33,6 +34,12 @@ instead of 64 bits has been fixed.
 
 The command ``set remote-mips64-transfers-32bit-regs on'' has been
 added to provide backward compatibility with older versions of GDB.
+
+* ``set remotebinarydownload'' replaced by ``set remote X-packet''
+
+The command ``set remotebinarydownload'' command has been replaced by
+``set remote X-packet''.  Other commands in ``set remote'' family
+include ``set remote P-packet''.
 
 *** Changes in GDB-4.18:
 

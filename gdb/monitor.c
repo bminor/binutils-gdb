@@ -42,11 +42,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_string.h"
@@ -66,8 +61,6 @@ static struct target_ops *targ_ops;
 static void monitor_vsprintf PARAMS ((char *sndbuf, char *pattern, va_list args));
 
 static int readchar PARAMS ((int timeout));
-
-static void monitor_command PARAMS ((char *args, int fromtty));
 
 static void monitor_fetch_register PARAMS ((int regno));
 static void monitor_store_register PARAMS ((int regno));
@@ -322,24 +315,13 @@ monitor_vsprintf (sndbuf, pattern, args)
    Works just like printf.  */
 
 void
-#ifdef ANSI_PROTOTYPES
 monitor_printf_noecho (char *pattern,...)
-#else
-monitor_printf_noecho (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char sndbuf[2000];
   int len;
 
-#if ANSI_PROTOTYPES
   va_start (args, pattern);
-#else
-  char *pattern;
-  va_start (args);
-  pattern = va_arg (args, char *);
-#endif
 
   monitor_vsprintf (sndbuf, pattern, args);
 
@@ -366,24 +348,13 @@ monitor_printf_noecho (va_alist)
    printf.  */
 
 void
-#ifdef ANSI_PROTOTYPES
 monitor_printf (char *pattern,...)
-#else
-monitor_printf (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char sndbuf[2000];
   int len;
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
-#else
-  char *pattern;
-  va_start (args);
-  pattern = va_arg (args, char *);
-#endif
 
   monitor_vsprintf (sndbuf, pattern, args);
 
@@ -2261,14 +2232,13 @@ monitor_stop ()
     monitor_printf_noecho (current_monitor->stop);
 }
 
-/* Put a command string, in args, out to MONITOR.  Output from MONITOR
-   is placed on the users terminal until the prompt is seen. FIXME: We
-   read the characters ourseleves here cause of a nasty echo.  */
+/* Put a COMMAND string out to MONITOR.  Output from MONITOR is placed
+   in OUTPUT until the prompt is seen. FIXME: We read the characters
+   ourseleves here cause of a nasty echo.  */
 
 static void
-monitor_command (args, from_tty)
-     char *args;
-     int from_tty;
+monitor_rcmd (char *command,
+	      struct gdb_file *outbuf)
 {
   char *p;
   int resp_len;
@@ -2282,11 +2252,11 @@ monitor_command (args, from_tty)
   /* Send the command.  Note that if no args were supplied, then we're
      just sending the monitor a newline, which is sometimes useful.  */
 
-  monitor_printf ("%s\r", (args ? args : ""));
+  monitor_printf ("%s\r", (command ? command : ""));
 
   resp_len = monitor_expect_prompt (buf, sizeof buf);
 
-  fputs_unfiltered (buf, gdb_stdout);	/* Output the response */
+  fputs_unfiltered (buf, outbuf);	/* Output the response */
 }
 
 /* Convert hex digit A to a number.  */
@@ -2369,6 +2339,7 @@ init_base_monitor_ops (void)
   monitor_ops.to_notice_signals = 0;
   monitor_ops.to_thread_alive = 0;
   monitor_ops.to_stop = monitor_stop;
+  monitor_ops.to_rcmd = monitor_rcmd;
   monitor_ops.to_pid_to_exec_file = NULL;
   monitor_ops.to_core_file_to_sym_file = NULL;
   monitor_ops.to_stratum = process_stratum;
@@ -2407,7 +2378,4 @@ _initialize_remote_monitors ()
 When enabled, a hashmark \'#\' is displayed.",
 				  &setlist),
 		     &showlist);
-
-  add_com ("monitor", class_obscure, monitor_command,
-	   "Send a command to the debug monitor.");
 }

@@ -37,7 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static int
 model_i960KA_mulo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -53,7 +53,7 @@ model_i960KA_mulo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_mulo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -69,7 +69,7 @@ model_i960KA_mulo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_mulo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -85,7 +85,7 @@ model_i960KA_mulo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_mulo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -101,7 +101,7 @@ model_i960KA_mulo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -117,7 +117,7 @@ model_i960KA_remo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -133,7 +133,7 @@ model_i960KA_remo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -149,7 +149,7 @@ model_i960KA_remo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -165,7 +165,7 @@ model_i960KA_remo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -181,7 +181,7 @@ model_i960KA_divo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -197,7 +197,7 @@ model_i960KA_divo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -213,7 +213,7 @@ model_i960KA_divo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -229,7 +229,7 @@ model_i960KA_divo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remi (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -245,7 +245,7 @@ model_i960KA_remi (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remi1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -261,7 +261,7 @@ model_i960KA_remi1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remi2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -277,7 +277,7 @@ model_i960KA_remi2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_remi3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -293,7 +293,7 @@ model_i960KA_remi3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divi (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -309,7 +309,7 @@ model_i960KA_divi (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divi1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -325,7 +325,7 @@ model_i960KA_divi1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divi2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -341,7 +341,7 @@ model_i960KA_divi2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_divi3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -357,7 +357,7 @@ model_i960KA_divi3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_addo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -373,7 +373,7 @@ model_i960KA_addo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_addo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -389,7 +389,7 @@ model_i960KA_addo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_addo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -405,7 +405,7 @@ model_i960KA_addo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_addo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -421,7 +421,7 @@ model_i960KA_addo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_subo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -437,7 +437,7 @@ model_i960KA_subo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_subo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -453,7 +453,7 @@ model_i960KA_subo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_subo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -469,7 +469,7 @@ model_i960KA_subo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_subo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -485,7 +485,7 @@ model_i960KA_subo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notbit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -501,7 +501,7 @@ model_i960KA_notbit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notbit1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -517,7 +517,7 @@ model_i960KA_notbit1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notbit2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -533,7 +533,7 @@ model_i960KA_notbit2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notbit3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -549,7 +549,7 @@ model_i960KA_notbit3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_and (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -565,7 +565,7 @@ model_i960KA_and (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_and1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -581,7 +581,7 @@ model_i960KA_and1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_and2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -597,7 +597,7 @@ model_i960KA_and2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_and3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -613,7 +613,7 @@ model_i960KA_and3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_andnot (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -629,7 +629,7 @@ model_i960KA_andnot (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_andnot1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -645,7 +645,7 @@ model_i960KA_andnot1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_andnot2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -661,7 +661,7 @@ model_i960KA_andnot2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_andnot3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -677,7 +677,7 @@ model_i960KA_andnot3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_setbit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -693,7 +693,7 @@ model_i960KA_setbit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_setbit1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -709,7 +709,7 @@ model_i960KA_setbit1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_setbit2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -725,7 +725,7 @@ model_i960KA_setbit2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_setbit3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -741,7 +741,7 @@ model_i960KA_setbit3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notand (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -757,7 +757,7 @@ model_i960KA_notand (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notand1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -773,7 +773,7 @@ model_i960KA_notand1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notand2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -789,7 +789,7 @@ model_i960KA_notand2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_notand3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -805,7 +805,7 @@ model_i960KA_notand3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xor (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -821,7 +821,7 @@ model_i960KA_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xor1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -837,7 +837,7 @@ model_i960KA_xor1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xor2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -853,7 +853,7 @@ model_i960KA_xor2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -869,7 +869,7 @@ model_i960KA_xor3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_or (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -885,7 +885,7 @@ model_i960KA_or (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_or1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -901,7 +901,7 @@ model_i960KA_or1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_or2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -917,7 +917,7 @@ model_i960KA_or2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_or3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -933,7 +933,7 @@ model_i960KA_or3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_nor (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -949,7 +949,7 @@ model_i960KA_nor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_nor1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -965,7 +965,7 @@ model_i960KA_nor1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_nor2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -981,7 +981,7 @@ model_i960KA_nor2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_nor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -997,7 +997,7 @@ model_i960KA_nor3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xnor (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1013,7 +1013,7 @@ model_i960KA_xnor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xnor1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1029,7 +1029,7 @@ model_i960KA_xnor1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xnor2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1045,7 +1045,7 @@ model_i960KA_xnor2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_xnor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1061,7 +1061,7 @@ model_i960KA_xnor3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1077,7 +1077,7 @@ model_i960KA_not (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_not1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not1.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1093,7 +1093,7 @@ model_i960KA_not1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_not2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1109,7 +1109,7 @@ model_i960KA_not2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_not3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1125,7 +1125,7 @@ model_i960KA_not3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ornot (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1141,7 +1141,7 @@ model_i960KA_ornot (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ornot1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1157,7 +1157,7 @@ model_i960KA_ornot1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ornot2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1173,7 +1173,7 @@ model_i960KA_ornot2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ornot3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1189,7 +1189,7 @@ model_i960KA_ornot3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_clrbit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1205,7 +1205,7 @@ model_i960KA_clrbit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_clrbit1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1221,7 +1221,7 @@ model_i960KA_clrbit1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_clrbit2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1237,7 +1237,7 @@ model_i960KA_clrbit2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_clrbit3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1253,7 +1253,7 @@ model_i960KA_clrbit3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shlo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1269,7 +1269,7 @@ model_i960KA_shlo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shlo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1285,7 +1285,7 @@ model_i960KA_shlo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shlo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1301,7 +1301,7 @@ model_i960KA_shlo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shlo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1317,7 +1317,7 @@ model_i960KA_shlo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shro (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1333,7 +1333,7 @@ model_i960KA_shro (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shro1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1349,7 +1349,7 @@ model_i960KA_shro1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shro2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1365,7 +1365,7 @@ model_i960KA_shro2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shro3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1381,7 +1381,7 @@ model_i960KA_shro3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shli (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1397,7 +1397,7 @@ model_i960KA_shli (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shli1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1413,7 +1413,7 @@ model_i960KA_shli1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shli2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1429,7 +1429,7 @@ model_i960KA_shli2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shli3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1445,7 +1445,7 @@ model_i960KA_shli3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shri (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1461,7 +1461,7 @@ model_i960KA_shri (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shri1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1477,7 +1477,7 @@ model_i960KA_shri1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shri2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1493,7 +1493,7 @@ model_i960KA_shri2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_shri3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1509,7 +1509,7 @@ model_i960KA_shri3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_emul (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1525,7 +1525,7 @@ model_i960KA_emul (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_emul1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1541,7 +1541,7 @@ model_i960KA_emul1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_emul2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1557,7 +1557,7 @@ model_i960KA_emul2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_emul3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1573,7 +1573,7 @@ model_i960KA_emul3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_mov (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1589,7 +1589,7 @@ model_i960KA_mov (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_mov1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1605,7 +1605,7 @@ model_i960KA_mov1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_movl (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movl.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1621,7 +1621,7 @@ model_i960KA_movl (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_movl1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movl1.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1637,7 +1637,7 @@ model_i960KA_movl1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_movt (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movt.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1653,7 +1653,7 @@ model_i960KA_movt (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_movt1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movt1.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1669,7 +1669,7 @@ model_i960KA_movt1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_movq (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movq.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1685,7 +1685,7 @@ model_i960KA_movq (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_movq1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movq1.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1701,7 +1701,7 @@ model_i960KA_movq1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_modpc (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_modpc.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1717,7 +1717,7 @@ model_i960KA_modpc (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_modac (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_modpc.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1733,7 +1733,7 @@ model_i960KA_modac (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1749,7 +1749,7 @@ model_i960KA_lda_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1765,7 +1765,7 @@ model_i960KA_lda_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1781,7 +1781,7 @@ model_i960KA_lda_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1797,7 +1797,7 @@ model_i960KA_lda_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1813,7 +1813,7 @@ model_i960KA_lda_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1829,7 +1829,7 @@ model_i960KA_lda_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1845,7 +1845,7 @@ model_i960KA_lda_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_lda_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1861,7 +1861,7 @@ model_i960KA_lda_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1877,7 +1877,7 @@ model_i960KA_ld_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1893,7 +1893,7 @@ model_i960KA_ld_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1909,7 +1909,7 @@ model_i960KA_ld_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1925,7 +1925,7 @@ model_i960KA_ld_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1941,7 +1941,7 @@ model_i960KA_ld_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1957,7 +1957,7 @@ model_i960KA_ld_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1973,7 +1973,7 @@ model_i960KA_ld_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ld_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -1989,7 +1989,7 @@ model_i960KA_ld_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2005,7 +2005,7 @@ model_i960KA_ldob_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2021,7 +2021,7 @@ model_i960KA_ldob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2037,7 +2037,7 @@ model_i960KA_ldob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2053,7 +2053,7 @@ model_i960KA_ldob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2069,7 +2069,7 @@ model_i960KA_ldob_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2085,7 +2085,7 @@ model_i960KA_ldob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2101,7 +2101,7 @@ model_i960KA_ldob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2117,7 +2117,7 @@ model_i960KA_ldob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2133,7 +2133,7 @@ model_i960KA_ldos_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2149,7 +2149,7 @@ model_i960KA_ldos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2165,7 +2165,7 @@ model_i960KA_ldos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2181,7 +2181,7 @@ model_i960KA_ldos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2197,7 +2197,7 @@ model_i960KA_ldos_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2213,7 +2213,7 @@ model_i960KA_ldos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2229,7 +2229,7 @@ model_i960KA_ldos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2245,7 +2245,7 @@ model_i960KA_ldos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2261,7 +2261,7 @@ model_i960KA_ldib_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2277,7 +2277,7 @@ model_i960KA_ldib_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2293,7 +2293,7 @@ model_i960KA_ldib_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2309,7 +2309,7 @@ model_i960KA_ldib_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2325,7 +2325,7 @@ model_i960KA_ldib_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2341,7 +2341,7 @@ model_i960KA_ldib_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2357,7 +2357,7 @@ model_i960KA_ldib_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldib_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2373,7 +2373,7 @@ model_i960KA_ldib_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2389,7 +2389,7 @@ model_i960KA_ldis_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2405,7 +2405,7 @@ model_i960KA_ldis_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2421,7 +2421,7 @@ model_i960KA_ldis_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2437,7 +2437,7 @@ model_i960KA_ldis_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2453,7 +2453,7 @@ model_i960KA_ldis_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2469,7 +2469,7 @@ model_i960KA_ldis_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2485,7 +2485,7 @@ model_i960KA_ldis_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldis_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2501,7 +2501,7 @@ model_i960KA_ldis_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2517,7 +2517,7 @@ model_i960KA_ldl_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2533,7 +2533,7 @@ model_i960KA_ldl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2549,7 +2549,7 @@ model_i960KA_ldl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2565,7 +2565,7 @@ model_i960KA_ldl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2581,7 +2581,7 @@ model_i960KA_ldl_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2597,7 +2597,7 @@ model_i960KA_ldl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2613,7 +2613,7 @@ model_i960KA_ldl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2629,7 +2629,7 @@ model_i960KA_ldl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2645,7 +2645,7 @@ model_i960KA_ldt_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2661,7 +2661,7 @@ model_i960KA_ldt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2677,7 +2677,7 @@ model_i960KA_ldt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2693,7 +2693,7 @@ model_i960KA_ldt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2709,7 +2709,7 @@ model_i960KA_ldt_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2725,7 +2725,7 @@ model_i960KA_ldt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2741,7 +2741,7 @@ model_i960KA_ldt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2757,7 +2757,7 @@ model_i960KA_ldt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2773,7 +2773,7 @@ model_i960KA_ldq_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2789,7 +2789,7 @@ model_i960KA_ldq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2805,7 +2805,7 @@ model_i960KA_ldq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2821,7 +2821,7 @@ model_i960KA_ldq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2837,7 +2837,7 @@ model_i960KA_ldq_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2853,7 +2853,7 @@ model_i960KA_ldq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2869,7 +2869,7 @@ model_i960KA_ldq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ldq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2885,7 +2885,7 @@ model_i960KA_ldq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2901,7 +2901,7 @@ model_i960KA_st_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2917,7 +2917,7 @@ model_i960KA_st_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2933,7 +2933,7 @@ model_i960KA_st_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2949,7 +2949,7 @@ model_i960KA_st_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2965,7 +2965,7 @@ model_i960KA_st_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2981,7 +2981,7 @@ model_i960KA_st_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -2997,7 +2997,7 @@ model_i960KA_st_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_st_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3013,7 +3013,7 @@ model_i960KA_st_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3029,7 +3029,7 @@ model_i960KA_stob_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3045,7 +3045,7 @@ model_i960KA_stob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3061,7 +3061,7 @@ model_i960KA_stob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3077,7 +3077,7 @@ model_i960KA_stob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3093,7 +3093,7 @@ model_i960KA_stob_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3109,7 +3109,7 @@ model_i960KA_stob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3125,7 +3125,7 @@ model_i960KA_stob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3141,7 +3141,7 @@ model_i960KA_stob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3157,7 +3157,7 @@ model_i960KA_stos_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3173,7 +3173,7 @@ model_i960KA_stos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3189,7 +3189,7 @@ model_i960KA_stos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3205,7 +3205,7 @@ model_i960KA_stos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3221,7 +3221,7 @@ model_i960KA_stos_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3237,7 +3237,7 @@ model_i960KA_stos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3253,7 +3253,7 @@ model_i960KA_stos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3269,7 +3269,7 @@ model_i960KA_stos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3285,7 +3285,7 @@ model_i960KA_stl_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3301,7 +3301,7 @@ model_i960KA_stl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3317,7 +3317,7 @@ model_i960KA_stl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3333,7 +3333,7 @@ model_i960KA_stl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3349,7 +3349,7 @@ model_i960KA_stl_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3365,7 +3365,7 @@ model_i960KA_stl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3381,7 +3381,7 @@ model_i960KA_stl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3397,7 +3397,7 @@ model_i960KA_stl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3413,7 +3413,7 @@ model_i960KA_stt_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3429,7 +3429,7 @@ model_i960KA_stt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3445,7 +3445,7 @@ model_i960KA_stt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3461,7 +3461,7 @@ model_i960KA_stt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3477,7 +3477,7 @@ model_i960KA_stt_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3493,7 +3493,7 @@ model_i960KA_stt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3509,7 +3509,7 @@ model_i960KA_stt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3525,7 +3525,7 @@ model_i960KA_stt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3541,7 +3541,7 @@ model_i960KA_stq_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3557,7 +3557,7 @@ model_i960KA_stq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3573,7 +3573,7 @@ model_i960KA_stq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3589,7 +3589,7 @@ model_i960KA_stq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3605,7 +3605,7 @@ model_i960KA_stq_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3621,7 +3621,7 @@ model_i960KA_stq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3637,7 +3637,7 @@ model_i960KA_stq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_stq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3653,7 +3653,7 @@ model_i960KA_stq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobe_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3669,7 +3669,7 @@ model_i960KA_cmpobe_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobe_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3685,7 +3685,7 @@ model_i960KA_cmpobe_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobne_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3701,7 +3701,7 @@ model_i960KA_cmpobne_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobne_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3717,7 +3717,7 @@ model_i960KA_cmpobne_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobl_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3733,7 +3733,7 @@ model_i960KA_cmpobl_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobl_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3749,7 +3749,7 @@ model_i960KA_cmpobl_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpoble_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3765,7 +3765,7 @@ model_i960KA_cmpoble_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpoble_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3781,7 +3781,7 @@ model_i960KA_cmpoble_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobg_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3797,7 +3797,7 @@ model_i960KA_cmpobg_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobg_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3813,7 +3813,7 @@ model_i960KA_cmpobg_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobge_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3829,7 +3829,7 @@ model_i960KA_cmpobge_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpobge_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3845,7 +3845,7 @@ model_i960KA_cmpobge_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibe_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3861,7 +3861,7 @@ model_i960KA_cmpibe_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibe_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3877,7 +3877,7 @@ model_i960KA_cmpibe_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibne_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3893,7 +3893,7 @@ model_i960KA_cmpibne_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibne_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3909,7 +3909,7 @@ model_i960KA_cmpibne_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibl_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3925,7 +3925,7 @@ model_i960KA_cmpibl_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibl_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3941,7 +3941,7 @@ model_i960KA_cmpibl_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpible_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3957,7 +3957,7 @@ model_i960KA_cmpible_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpible_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3973,7 +3973,7 @@ model_i960KA_cmpible_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibg_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -3989,7 +3989,7 @@ model_i960KA_cmpibg_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibg_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4005,7 +4005,7 @@ model_i960KA_cmpibg_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibge_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4021,7 +4021,7 @@ model_i960KA_cmpibge_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpibge_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4037,7 +4037,7 @@ model_i960KA_cmpibge_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bbc_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4053,7 +4053,7 @@ model_i960KA_bbc_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bbc_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4069,7 +4069,7 @@ model_i960KA_bbc_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bbs_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4085,7 +4085,7 @@ model_i960KA_bbs_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bbs_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4101,7 +4101,7 @@ model_i960KA_bbs_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpi (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4117,7 +4117,7 @@ model_i960KA_cmpi (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpi1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4133,7 +4133,7 @@ model_i960KA_cmpi1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpi2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4149,7 +4149,7 @@ model_i960KA_cmpi2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpi3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4165,7 +4165,7 @@ model_i960KA_cmpi3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4181,7 +4181,7 @@ model_i960KA_cmpo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4197,7 +4197,7 @@ model_i960KA_cmpo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4213,7 +4213,7 @@ model_i960KA_cmpo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_cmpo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4229,7 +4229,7 @@ model_i960KA_cmpo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testno_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4245,7 +4245,7 @@ model_i960KA_testno_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testg_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4261,7 +4261,7 @@ model_i960KA_testg_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_teste_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4277,7 +4277,7 @@ model_i960KA_teste_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testge_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4293,7 +4293,7 @@ model_i960KA_testge_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testl_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4309,7 +4309,7 @@ model_i960KA_testl_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testne_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4325,7 +4325,7 @@ model_i960KA_testne_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testle_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4341,7 +4341,7 @@ model_i960KA_testle_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_testo_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4357,7 +4357,7 @@ model_i960KA_testo_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bno (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4373,7 +4373,7 @@ model_i960KA_bno (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4389,7 +4389,7 @@ model_i960KA_bg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_be (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4405,7 +4405,7 @@ model_i960KA_be (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bge (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4421,7 +4421,7 @@ model_i960KA_bge (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bl (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4437,7 +4437,7 @@ model_i960KA_bl (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bne (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4453,7 +4453,7 @@ model_i960KA_bne (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ble (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4469,7 +4469,7 @@ model_i960KA_ble (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4485,7 +4485,7 @@ model_i960KA_bo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_b (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_b.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4501,7 +4501,7 @@ model_i960KA_b (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4517,7 +4517,7 @@ model_i960KA_bx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4533,7 +4533,7 @@ model_i960KA_bx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bx_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4549,7 +4549,7 @@ model_i960KA_bx_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bx_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4565,7 +4565,7 @@ model_i960KA_bx_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_bx_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4581,7 +4581,7 @@ model_i960KA_bx_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_callx_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_callx_disp.f
+#define FLD(f) abuf->fields.sfmt_callx_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4597,7 +4597,7 @@ model_i960KA_callx_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_callx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_callx_indirect.f
+#define FLD(f) abuf->fields.sfmt_callx_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4613,7 +4613,7 @@ model_i960KA_callx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_callx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_callx_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_callx_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4629,7 +4629,7 @@ model_i960KA_callx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_ret (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_ret.f
+#define FLD(f) abuf->fields.sfmt_callx_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4645,7 +4645,7 @@ model_i960KA_ret (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_calls (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_calls.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4661,7 +4661,7 @@ model_i960KA_calls (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_fmark (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_fmark.f
+#define FLD(f) abuf->fields.fmt_empty.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4677,7 +4677,7 @@ model_i960KA_fmark (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960KA_flushreg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_flushreg.f
+#define FLD(f) abuf->fields.fmt_empty.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4693,7 +4693,7 @@ model_i960KA_flushreg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_mulo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4709,7 +4709,7 @@ model_i960CA_mulo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_mulo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4725,7 +4725,7 @@ model_i960CA_mulo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_mulo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4741,7 +4741,7 @@ model_i960CA_mulo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_mulo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4757,7 +4757,7 @@ model_i960CA_mulo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4773,7 +4773,7 @@ model_i960CA_remo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4789,7 +4789,7 @@ model_i960CA_remo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4805,7 +4805,7 @@ model_i960CA_remo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4821,7 +4821,7 @@ model_i960CA_remo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4837,7 +4837,7 @@ model_i960CA_divo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4853,7 +4853,7 @@ model_i960CA_divo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4869,7 +4869,7 @@ model_i960CA_divo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4885,7 +4885,7 @@ model_i960CA_divo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remi (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4901,7 +4901,7 @@ model_i960CA_remi (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remi1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4917,7 +4917,7 @@ model_i960CA_remi1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remi2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4933,7 +4933,7 @@ model_i960CA_remi2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_remi3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4949,7 +4949,7 @@ model_i960CA_remi3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divi (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4965,7 +4965,7 @@ model_i960CA_divi (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divi1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4981,7 +4981,7 @@ model_i960CA_divi1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divi2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -4997,7 +4997,7 @@ model_i960CA_divi2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_divi3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5013,7 +5013,7 @@ model_i960CA_divi3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_addo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5029,7 +5029,7 @@ model_i960CA_addo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_addo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5045,7 +5045,7 @@ model_i960CA_addo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_addo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5061,7 +5061,7 @@ model_i960CA_addo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_addo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5077,7 +5077,7 @@ model_i960CA_addo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_subo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5093,7 +5093,7 @@ model_i960CA_subo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_subo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5109,7 +5109,7 @@ model_i960CA_subo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_subo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5125,7 +5125,7 @@ model_i960CA_subo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_subo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5141,7 +5141,7 @@ model_i960CA_subo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notbit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5157,7 +5157,7 @@ model_i960CA_notbit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notbit1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5173,7 +5173,7 @@ model_i960CA_notbit1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notbit2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5189,7 +5189,7 @@ model_i960CA_notbit2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notbit3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5205,7 +5205,7 @@ model_i960CA_notbit3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_and (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5221,7 +5221,7 @@ model_i960CA_and (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_and1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5237,7 +5237,7 @@ model_i960CA_and1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_and2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5253,7 +5253,7 @@ model_i960CA_and2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_and3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5269,7 +5269,7 @@ model_i960CA_and3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_andnot (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5285,7 +5285,7 @@ model_i960CA_andnot (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_andnot1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5301,7 +5301,7 @@ model_i960CA_andnot1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_andnot2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5317,7 +5317,7 @@ model_i960CA_andnot2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_andnot3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5333,7 +5333,7 @@ model_i960CA_andnot3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_setbit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5349,7 +5349,7 @@ model_i960CA_setbit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_setbit1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5365,7 +5365,7 @@ model_i960CA_setbit1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_setbit2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5381,7 +5381,7 @@ model_i960CA_setbit2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_setbit3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5397,7 +5397,7 @@ model_i960CA_setbit3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notand (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5413,7 +5413,7 @@ model_i960CA_notand (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notand1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5429,7 +5429,7 @@ model_i960CA_notand1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notand2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5445,7 +5445,7 @@ model_i960CA_notand2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_notand3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5461,7 +5461,7 @@ model_i960CA_notand3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xor (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5477,7 +5477,7 @@ model_i960CA_xor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xor1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5493,7 +5493,7 @@ model_i960CA_xor1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xor2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5509,7 +5509,7 @@ model_i960CA_xor2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5525,7 +5525,7 @@ model_i960CA_xor3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_or (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5541,7 +5541,7 @@ model_i960CA_or (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_or1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5557,7 +5557,7 @@ model_i960CA_or1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_or2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5573,7 +5573,7 @@ model_i960CA_or2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_or3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5589,7 +5589,7 @@ model_i960CA_or3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_nor (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5605,7 +5605,7 @@ model_i960CA_nor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_nor1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5621,7 +5621,7 @@ model_i960CA_nor1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_nor2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5637,7 +5637,7 @@ model_i960CA_nor2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_nor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5653,7 +5653,7 @@ model_i960CA_nor3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xnor (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5669,7 +5669,7 @@ model_i960CA_xnor (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xnor1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5685,7 +5685,7 @@ model_i960CA_xnor1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xnor2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5701,7 +5701,7 @@ model_i960CA_xnor2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_xnor3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5717,7 +5717,7 @@ model_i960CA_xnor3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_not (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5733,7 +5733,7 @@ model_i960CA_not (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_not1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not1.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5749,7 +5749,7 @@ model_i960CA_not1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_not2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5765,7 +5765,7 @@ model_i960CA_not2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_not3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5781,7 +5781,7 @@ model_i960CA_not3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ornot (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5797,7 +5797,7 @@ model_i960CA_ornot (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ornot1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5813,7 +5813,7 @@ model_i960CA_ornot1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ornot2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5829,7 +5829,7 @@ model_i960CA_ornot2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ornot3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_mulo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5845,7 +5845,7 @@ model_i960CA_ornot3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_clrbit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5861,7 +5861,7 @@ model_i960CA_clrbit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_clrbit1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5877,7 +5877,7 @@ model_i960CA_clrbit1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_clrbit2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5893,7 +5893,7 @@ model_i960CA_clrbit2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_clrbit3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_notbit3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5909,7 +5909,7 @@ model_i960CA_clrbit3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shlo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5925,7 +5925,7 @@ model_i960CA_shlo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shlo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5941,7 +5941,7 @@ model_i960CA_shlo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shlo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5957,7 +5957,7 @@ model_i960CA_shlo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shlo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5973,7 +5973,7 @@ model_i960CA_shlo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shro (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -5989,7 +5989,7 @@ model_i960CA_shro (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shro1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6005,7 +6005,7 @@ model_i960CA_shro1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shro2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6021,7 +6021,7 @@ model_i960CA_shro2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shro3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6037,7 +6037,7 @@ model_i960CA_shro3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shli (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6053,7 +6053,7 @@ model_i960CA_shli (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shli1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6069,7 +6069,7 @@ model_i960CA_shli1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shli2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6085,7 +6085,7 @@ model_i960CA_shli2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shli3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6101,7 +6101,7 @@ model_i960CA_shli3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shri (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6117,7 +6117,7 @@ model_i960CA_shri (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shri1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6133,7 +6133,7 @@ model_i960CA_shri1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shri2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6149,7 +6149,7 @@ model_i960CA_shri2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_shri3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_shlo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6165,7 +6165,7 @@ model_i960CA_shri3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_emul (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6181,7 +6181,7 @@ model_i960CA_emul (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_emul1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6197,7 +6197,7 @@ model_i960CA_emul1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_emul2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6213,7 +6213,7 @@ model_i960CA_emul2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_emul3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_emul3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6229,7 +6229,7 @@ model_i960CA_emul3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_mov (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6245,7 +6245,7 @@ model_i960CA_mov (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_mov1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_not3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6261,7 +6261,7 @@ model_i960CA_mov1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_movl (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movl.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6277,7 +6277,7 @@ model_i960CA_movl (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_movl1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movl1.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6293,7 +6293,7 @@ model_i960CA_movl1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_movt (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movt.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6309,7 +6309,7 @@ model_i960CA_movt (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_movt1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movt1.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6325,7 +6325,7 @@ model_i960CA_movt1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_movq (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movq.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6341,7 +6341,7 @@ model_i960CA_movq (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_movq1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_movq1.f
+#define FLD(f) abuf->fields.sfmt_movq.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6357,7 +6357,7 @@ model_i960CA_movq1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_modpc (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_modpc.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6373,7 +6373,7 @@ model_i960CA_modpc (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_modac (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_modpc.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6389,7 +6389,7 @@ model_i960CA_modac (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6405,7 +6405,7 @@ model_i960CA_lda_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6421,7 +6421,7 @@ model_i960CA_lda_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6437,7 +6437,7 @@ model_i960CA_lda_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6453,7 +6453,7 @@ model_i960CA_lda_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6469,7 +6469,7 @@ model_i960CA_lda_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6485,7 +6485,7 @@ model_i960CA_lda_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6501,7 +6501,7 @@ model_i960CA_lda_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_lda_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_lda_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6517,7 +6517,7 @@ model_i960CA_lda_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6533,7 +6533,7 @@ model_i960CA_ld_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6549,7 +6549,7 @@ model_i960CA_ld_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6565,7 +6565,7 @@ model_i960CA_ld_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6581,7 +6581,7 @@ model_i960CA_ld_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6597,7 +6597,7 @@ model_i960CA_ld_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6613,7 +6613,7 @@ model_i960CA_ld_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6629,7 +6629,7 @@ model_i960CA_ld_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ld_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ld_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6645,7 +6645,7 @@ model_i960CA_ld_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6661,7 +6661,7 @@ model_i960CA_ldob_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6677,7 +6677,7 @@ model_i960CA_ldob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6693,7 +6693,7 @@ model_i960CA_ldob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6709,7 +6709,7 @@ model_i960CA_ldob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6725,7 +6725,7 @@ model_i960CA_ldob_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6741,7 +6741,7 @@ model_i960CA_ldob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6757,7 +6757,7 @@ model_i960CA_ldob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldob_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6773,7 +6773,7 @@ model_i960CA_ldob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6789,7 +6789,7 @@ model_i960CA_ldos_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6805,7 +6805,7 @@ model_i960CA_ldos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6821,7 +6821,7 @@ model_i960CA_ldos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6837,7 +6837,7 @@ model_i960CA_ldos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6853,7 +6853,7 @@ model_i960CA_ldos_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6869,7 +6869,7 @@ model_i960CA_ldos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6885,7 +6885,7 @@ model_i960CA_ldos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldos_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6901,7 +6901,7 @@ model_i960CA_ldos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6917,7 +6917,7 @@ model_i960CA_ldib_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6933,7 +6933,7 @@ model_i960CA_ldib_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6949,7 +6949,7 @@ model_i960CA_ldib_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6965,7 +6965,7 @@ model_i960CA_ldib_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6981,7 +6981,7 @@ model_i960CA_ldib_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -6997,7 +6997,7 @@ model_i960CA_ldib_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7013,7 +7013,7 @@ model_i960CA_ldib_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldib_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldib_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7029,7 +7029,7 @@ model_i960CA_ldib_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7045,7 +7045,7 @@ model_i960CA_ldis_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7061,7 +7061,7 @@ model_i960CA_ldis_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7077,7 +7077,7 @@ model_i960CA_ldis_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7093,7 +7093,7 @@ model_i960CA_ldis_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7109,7 +7109,7 @@ model_i960CA_ldis_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7125,7 +7125,7 @@ model_i960CA_ldis_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7141,7 +7141,7 @@ model_i960CA_ldis_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldis_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldis_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7157,7 +7157,7 @@ model_i960CA_ldis_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7173,7 +7173,7 @@ model_i960CA_ldl_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7189,7 +7189,7 @@ model_i960CA_ldl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7205,7 +7205,7 @@ model_i960CA_ldl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7221,7 +7221,7 @@ model_i960CA_ldl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7237,7 +7237,7 @@ model_i960CA_ldl_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7253,7 +7253,7 @@ model_i960CA_ldl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7269,7 +7269,7 @@ model_i960CA_ldl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldl_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7285,7 +7285,7 @@ model_i960CA_ldl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7301,7 +7301,7 @@ model_i960CA_ldt_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7317,7 +7317,7 @@ model_i960CA_ldt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7333,7 +7333,7 @@ model_i960CA_ldt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7349,7 +7349,7 @@ model_i960CA_ldt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7365,7 +7365,7 @@ model_i960CA_ldt_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7381,7 +7381,7 @@ model_i960CA_ldt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7397,7 +7397,7 @@ model_i960CA_ldt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldt_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7413,7 +7413,7 @@ model_i960CA_ldt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7429,7 +7429,7 @@ model_i960CA_ldq_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7445,7 +7445,7 @@ model_i960CA_ldq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7461,7 +7461,7 @@ model_i960CA_ldq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7477,7 +7477,7 @@ model_i960CA_ldq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7493,7 +7493,7 @@ model_i960CA_ldq_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7509,7 +7509,7 @@ model_i960CA_ldq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7525,7 +7525,7 @@ model_i960CA_ldq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ldq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_ldq_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_ldq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7541,7 +7541,7 @@ model_i960CA_ldq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7557,7 +7557,7 @@ model_i960CA_st_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7573,7 +7573,7 @@ model_i960CA_st_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7589,7 +7589,7 @@ model_i960CA_st_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7605,7 +7605,7 @@ model_i960CA_st_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7621,7 +7621,7 @@ model_i960CA_st_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7637,7 +7637,7 @@ model_i960CA_st_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7653,7 +7653,7 @@ model_i960CA_st_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_st_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_st_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7669,7 +7669,7 @@ model_i960CA_st_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7685,7 +7685,7 @@ model_i960CA_stob_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7701,7 +7701,7 @@ model_i960CA_stob_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7717,7 +7717,7 @@ model_i960CA_stob_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7733,7 +7733,7 @@ model_i960CA_stob_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7749,7 +7749,7 @@ model_i960CA_stob_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7765,7 +7765,7 @@ model_i960CA_stob_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7781,7 +7781,7 @@ model_i960CA_stob_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stob_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7797,7 +7797,7 @@ model_i960CA_stob_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7813,7 +7813,7 @@ model_i960CA_stos_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7829,7 +7829,7 @@ model_i960CA_stos_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7845,7 +7845,7 @@ model_i960CA_stos_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7861,7 +7861,7 @@ model_i960CA_stos_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7877,7 +7877,7 @@ model_i960CA_stos_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7893,7 +7893,7 @@ model_i960CA_stos_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7909,7 +7909,7 @@ model_i960CA_stos_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stos_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7925,7 +7925,7 @@ model_i960CA_stos_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7941,7 +7941,7 @@ model_i960CA_stl_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7957,7 +7957,7 @@ model_i960CA_stl_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7973,7 +7973,7 @@ model_i960CA_stl_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -7989,7 +7989,7 @@ model_i960CA_stl_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8005,7 +8005,7 @@ model_i960CA_stl_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8021,7 +8021,7 @@ model_i960CA_stl_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8037,7 +8037,7 @@ model_i960CA_stl_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stl_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8053,7 +8053,7 @@ model_i960CA_stl_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8069,7 +8069,7 @@ model_i960CA_stt_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8085,7 +8085,7 @@ model_i960CA_stt_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8101,7 +8101,7 @@ model_i960CA_stt_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8117,7 +8117,7 @@ model_i960CA_stt_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8133,7 +8133,7 @@ model_i960CA_stt_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8149,7 +8149,7 @@ model_i960CA_stt_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8165,7 +8165,7 @@ model_i960CA_stt_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stt_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8181,7 +8181,7 @@ model_i960CA_stt_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8197,7 +8197,7 @@ model_i960CA_stq_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8213,7 +8213,7 @@ model_i960CA_stq_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8229,7 +8229,7 @@ model_i960CA_stq_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8245,7 +8245,7 @@ model_i960CA_stq_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8261,7 +8261,7 @@ model_i960CA_stq_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8277,7 +8277,7 @@ model_i960CA_stq_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8293,7 +8293,7 @@ model_i960CA_stq_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_stq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_stq_indirect_index_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8309,7 +8309,7 @@ model_i960CA_stq_indirect_index_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobe_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8325,7 +8325,7 @@ model_i960CA_cmpobe_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobe_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8341,7 +8341,7 @@ model_i960CA_cmpobe_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobne_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8357,7 +8357,7 @@ model_i960CA_cmpobne_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobne_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8373,7 +8373,7 @@ model_i960CA_cmpobne_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobl_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8389,7 +8389,7 @@ model_i960CA_cmpobl_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobl_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8405,7 +8405,7 @@ model_i960CA_cmpobl_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpoble_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8421,7 +8421,7 @@ model_i960CA_cmpoble_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpoble_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8437,7 +8437,7 @@ model_i960CA_cmpoble_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobg_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8453,7 +8453,7 @@ model_i960CA_cmpobg_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobg_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8469,7 +8469,7 @@ model_i960CA_cmpobg_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobge_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8485,7 +8485,7 @@ model_i960CA_cmpobge_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpobge_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobl_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8501,7 +8501,7 @@ model_i960CA_cmpobge_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibe_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8517,7 +8517,7 @@ model_i960CA_cmpibe_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibe_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8533,7 +8533,7 @@ model_i960CA_cmpibe_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibne_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8549,7 +8549,7 @@ model_i960CA_cmpibne_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibne_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8565,7 +8565,7 @@ model_i960CA_cmpibne_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibl_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8581,7 +8581,7 @@ model_i960CA_cmpibl_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibl_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8597,7 +8597,7 @@ model_i960CA_cmpibl_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpible_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8613,7 +8613,7 @@ model_i960CA_cmpible_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpible_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8629,7 +8629,7 @@ model_i960CA_cmpible_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibg_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8645,7 +8645,7 @@ model_i960CA_cmpibg_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibg_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8661,7 +8661,7 @@ model_i960CA_cmpibg_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibge_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8677,7 +8677,7 @@ model_i960CA_cmpibge_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpibge_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_cmpobe_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8693,7 +8693,7 @@ model_i960CA_cmpibge_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bbc_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8709,7 +8709,7 @@ model_i960CA_bbc_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bbc_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8725,7 +8725,7 @@ model_i960CA_bbc_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bbs_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_reg.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8741,7 +8741,7 @@ model_i960CA_bbs_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bbs_lit (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bbc_lit.f
+#define FLD(f) abuf->fields.sfmt_cmpobe_lit.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8757,7 +8757,7 @@ model_i960CA_bbs_lit (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpi (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8773,7 +8773,7 @@ model_i960CA_cmpi (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpi1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8789,7 +8789,7 @@ model_i960CA_cmpi1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpi2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8805,7 +8805,7 @@ model_i960CA_cmpi2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpi3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpi3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8821,7 +8821,7 @@ model_i960CA_cmpi3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo.f
+#define FLD(f) abuf->fields.sfmt_emul.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8837,7 +8837,7 @@ model_i960CA_cmpo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpo1 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo1.f
+#define FLD(f) abuf->fields.sfmt_emul1.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8853,7 +8853,7 @@ model_i960CA_cmpo1 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpo2 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo2.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8869,7 +8869,7 @@ model_i960CA_cmpo2 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_cmpo3 (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_cmpo3.f
+#define FLD(f) abuf->fields.sfmt_emul3.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8885,7 +8885,7 @@ model_i960CA_cmpo3 (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testno_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8901,7 +8901,7 @@ model_i960CA_testno_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testg_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8917,7 +8917,7 @@ model_i960CA_testg_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_teste_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8933,7 +8933,7 @@ model_i960CA_teste_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testge_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8949,7 +8949,7 @@ model_i960CA_testge_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testl_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8965,7 +8965,7 @@ model_i960CA_testl_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testne_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8981,7 +8981,7 @@ model_i960CA_testne_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testle_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -8997,7 +8997,7 @@ model_i960CA_testle_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_testo_reg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_testno_reg.f
+#define FLD(f) abuf->fields.sfmt_testno_reg.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9013,7 +9013,7 @@ model_i960CA_testo_reg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bno (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9029,7 +9029,7 @@ model_i960CA_bno (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9045,7 +9045,7 @@ model_i960CA_bg (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_be (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9061,7 +9061,7 @@ model_i960CA_be (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bge (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9077,7 +9077,7 @@ model_i960CA_bge (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bl (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9093,7 +9093,7 @@ model_i960CA_bl (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bne (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9109,7 +9109,7 @@ model_i960CA_bne (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ble (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9125,7 +9125,7 @@ model_i960CA_ble (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bo (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bno.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9141,7 +9141,7 @@ model_i960CA_bo (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_b (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_b.f
+#define FLD(f) abuf->fields.sfmt_bno.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9157,7 +9157,7 @@ model_i960CA_b (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9173,7 +9173,7 @@ model_i960CA_bx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9189,7 +9189,7 @@ model_i960CA_bx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bx_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_index.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9205,7 +9205,7 @@ model_i960CA_bx_indirect_index (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bx_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9221,7 +9221,7 @@ model_i960CA_bx_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_bx_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_bx_indirect_disp.f
+#define FLD(f) abuf->fields.sfmt_stq_indirect_index_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9237,7 +9237,7 @@ model_i960CA_bx_indirect_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_callx_disp (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_callx_disp.f
+#define FLD(f) abuf->fields.sfmt_callx_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9253,7 +9253,7 @@ model_i960CA_callx_disp (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_callx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_callx_indirect.f
+#define FLD(f) abuf->fields.sfmt_callx_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9269,7 +9269,7 @@ model_i960CA_callx_indirect (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_callx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_callx_indirect_offset.f
+#define FLD(f) abuf->fields.sfmt_callx_indirect_offset.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9285,7 +9285,7 @@ model_i960CA_callx_indirect_offset (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_ret (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_ret.f
+#define FLD(f) abuf->fields.sfmt_callx_disp.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9301,7 +9301,7 @@ model_i960CA_ret (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_calls (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_calls.f
+#define FLD(f) abuf->fields.sfmt_emul2.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9317,7 +9317,7 @@ model_i960CA_calls (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_fmark (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.cti.fields.fmt_fmark.f
+#define FLD(f) abuf->fields.fmt_empty.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -9333,7 +9333,7 @@ model_i960CA_fmark (SIM_CPU *current_cpu, void *sem_arg)
 static int
 model_i960CA_flushreg (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.fmt_flushreg.f
+#define FLD(f) abuf->fields.fmt_empty.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;

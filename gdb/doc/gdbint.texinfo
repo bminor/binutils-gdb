@@ -361,7 +361,7 @@ command), and it can also read more symbols via the ``add-file'' and
 
 Symbol files are initially opened by code in @file{symfile.c} using the
 BFD library.  BFD identifies the type of the file by examining its
-header.  @code{symfile_init} then uses this identification to locate a
+header.  @code{find_sym_fns} then uses this identification to locate a
 set of symbol-reading functions.
 
 Symbol reading modules identify themselves to GDB by calling

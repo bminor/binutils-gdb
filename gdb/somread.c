@@ -43,7 +43,7 @@ static void
 som_new_init PARAMS ((struct objfile *));
 
 static void
-som_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+som_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 som_symfile_finish PARAMS ((struct objfile *));
@@ -53,7 +53,7 @@ som_symtab_read PARAMS ((bfd *, struct objfile *,
 			 struct section_offsets *));
 
 static struct section_offsets *
-  som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
+som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
 /* FIXME: These should really be in a common header somewhere */
 
@@ -356,9 +356,8 @@ som_symtab_read (abfd, objfile, section_offsets)
    capability even for files compiled without -g.  */
 
 static void
-som_symfile_read (objfile, section_offsets, mainline)
+som_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;
@@ -386,20 +385,20 @@ som_symfile_read (objfile, section_offsets, mainline)
      actually scan the DNTT. It does scan the linker symbol
      table and thus build up a "minimal symbol table". */
 
-  som_symtab_read (abfd, objfile, section_offsets);
+  som_symtab_read (abfd, objfile, objfile->section_offsets);
 
   /* Now read information from the stabs debug sections.
      This is a no-op for SOM.
      Perhaps it is intended for some kind of mixed STABS/SOM
      situation? */
-  stabsect_build_psymtabs (objfile, section_offsets, mainline,
+  stabsect_build_psymtabs (objfile, mainline,
 			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
 
   /* Now read the native debug information. 
      This builds the psymtab. This used to be done via a scan of
      the DNTT, but is now done via the PXDB-built quick-lookup tables
      together with a scan of the GNTT. See hp-psymtab-read.c. */
-  hpread_build_psymtabs (objfile, section_offsets, mainline);
+  hpread_build_psymtabs (objfile, objfile->section_offsets, mainline);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. 

@@ -376,9 +376,13 @@ struct objfile
     struct section_offsets *section_offsets;
     int num_sections;
 
-    /* set of section begin and end addresses used to map pc addresses
-       into sections.  Currently on the psymbol_obstack (which makes no
-       sense, but I'm not sure it's harming anything).  */
+    /* These pointers are used to locate the section table, which
+       among other thigs, is used to map pc addresses into sections.
+       SECTIONS points to the first entry in the table, and
+       SECTIONS_END points to the first location past the last entry
+       in the table.  Currently the table is stored on the
+       psymbol_obstack (which makes no sense, but I'm not sure it's
+       harming anything).  */
 
     struct obj_section
      *sections, *sections_end;

@@ -257,8 +257,8 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   else if (tmp & SREC_4_BYTE_ADDR)
     addr_size = 4;
   else
-    fatal ("make_srec:  Bad address (0x%x), or bad flags (0x%x).",
-	   targ_addr, flags);
+    internal_error ("make_srec:  Bad address (0x%x), or bad flags (0x%x).",
+		    targ_addr, flags);
 
   /* Now that we know the address size, we can figure out how much
      data this record can hold.  */

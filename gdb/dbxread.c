@@ -286,12 +286,10 @@ static void
 dbx_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
 
 static void
-read_dbx_dynamic_symtab PARAMS ((struct section_offsets *,
-				 struct objfile * objfile));
+read_dbx_dynamic_symtab PARAMS ((struct objfile * objfile));
 
 static void
-read_dbx_symtab PARAMS ((struct section_offsets *, struct objfile *,
-			 CORE_ADDR, int));
+read_dbx_symtab PARAMS ((struct objfile *, CORE_ADDR, int));
 
 static void
 free_bincl_list PARAMS ((struct objfile *));
@@ -318,7 +316,7 @@ static void
 dbx_new_init PARAMS ((struct objfile *));
 
 static void
-dbx_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+dbx_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 dbx_symfile_finish PARAMS ((struct objfile *));
@@ -579,9 +577,8 @@ record_minimal_symbol (name, address, type, objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-dbx_symfile_read (objfile, section_offsets, mainline)
+dbx_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;		/* FIXME comments above */
 {
   bfd *sym_bfd;
@@ -631,13 +628,13 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  read_dbx_symtab (section_offsets, objfile,
+  read_dbx_symtab (objfile,
 		   DBX_TEXT_ADDR (objfile),
 		   DBX_TEXT_SIZE (objfile));
 
   /* Add the dynamic symbols.  */
 
-  read_dbx_dynamic_symtab (section_offsets, objfile);
+  read_dbx_dynamic_symtab (objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
@@ -1103,8 +1100,7 @@ free_bincl_list (objfile)
    add them to the minimal symbol table.  */
 
 static void
-read_dbx_dynamic_symtab (section_offsets, objfile)
-     struct section_offsets *section_offsets;
+read_dbx_dynamic_symtab (objfile)
      struct objfile *objfile;
 {
   bfd *abfd = objfile->obfd;
@@ -1163,17 +1159,17 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 
 	  if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
 	    {
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	      type = N_TEXT;
 	    }
 	  else if (bfd_get_section_flags (abfd, sec) & SEC_DATA)
 	    {
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_DATA);
+	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
 	      type = N_DATA;
 	    }
 	  else if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
 	    {
-	      sym_value += ANOFFSET (section_offsets, SECT_OFF_BSS);
+	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS);
 	      type = N_BSS;
 	    }
 	  else
@@ -1214,7 +1210,7 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
     {
       arelent *rel = *relptr;
       CORE_ADDR address =
-      rel->address + ANOFFSET (section_offsets, SECT_OFF_DATA);
+      rel->address + ANOFFSET (objfile->section_offsets, SECT_OFF_DATA);
 
       switch (bfd_get_arch (abfd))
 	{
@@ -1251,8 +1247,7 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
    of the file (a set of zeros if the mainline program).  */
 
 static void
-read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
-     struct section_offsets *section_offsets;
+read_dbx_symtab (objfile, text_addr, text_size)
      struct objfile *objfile;
      CORE_ADDR text_addr;
      int text_size;
@@ -1307,7 +1302,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 
   last_source_file = NULL;
 
-  lowest_text_address = (CORE_ADDR) - 1;
+  lowest_text_address = (CORE_ADDR) -1;
 
   symfile_bfd = objfile->obfd;	/* For next_text_symbol */
   abfd = objfile->obfd;
@@ -1389,8 +1384,8 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
     {
       /* Don't set pst->texthigh lower than it already is.  */
       CORE_ADDR text_end =
-      (lowest_text_address == (CORE_ADDR) - 1
-       ? (text_addr + section_offsets->offsets[SECT_OFF_TEXT])
+      (lowest_text_address == (CORE_ADDR) -1
+       ? (text_addr + objfile->section_offsets->offsets[SECT_OFF_TEXT])
        : lowest_text_address)
       + text_size;
 
@@ -2525,11 +2520,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
    adjusted for coff details. */
 
 void
-coffstab_build_psymtabs (objfile, section_offsets, mainline,
+coffstab_build_psymtabs (objfile, mainline,
 			 textaddr, textsize, stabsects,
 			 stabstroffset, stabstrsize)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
      CORE_ADDR textaddr;
      unsigned int textsize;
@@ -2603,7 +2597,7 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
       symbuf_read = 0;
     }
 
-  dbx_symfile_read (objfile, section_offsets, 0);
+  dbx_symfile_read (objfile, 0);
 }
 
 /* Scan and build partial symbols for an ELF symbol file.
@@ -2627,11 +2621,10 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
    adjusted for elf details. */
 
 void
-elfstab_build_psymtabs (objfile, section_offsets, mainline,
+elfstab_build_psymtabs (objfile, mainline,
 			staboffset, stabsize,
 			stabstroffset, stabstrsize)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
      file_ptr staboffset;
      unsigned int stabsize;
@@ -2684,7 +2677,7 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
      incremental load here. */
-  dbx_symfile_read (objfile, section_offsets, 0);
+  dbx_symfile_read (objfile, 0);
 }
 
 /* Scan and build partial symbols for a file with special sections for stabs
@@ -2705,10 +2698,9 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
    This routine is mostly copied from dbx_symfile_init and dbx_symfile_read. */
 
 void
-stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
+stabsect_build_psymtabs (objfile, mainline, stab_name,
 			 stabstr_name, text_name)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
      char *stab_name;
      char *stabstr_name;
@@ -2773,7 +2765,7 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
   /* Now, do an incremental load */
 
   processing_acc_compilation = 1;
-  dbx_symfile_read (objfile, section_offsets, 0);
+  dbx_symfile_read (objfile, 0);
 }
 
 static struct sym_fns aout_sym_fns =
@@ -2783,8 +2775,7 @@ static struct sym_fns aout_sym_fns =
   dbx_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
   dbx_symfile_read,		/* sym_read: read a symbol file into symtab */
   dbx_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,
-			/* sym_offsets: parse user's offsets to internal form */
+  default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

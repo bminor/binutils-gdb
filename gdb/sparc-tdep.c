@@ -454,7 +454,7 @@ setup_arbitrary_frame (argc, argv)
   frame = create_new_frame (argv[0], 0);
 
   if (!frame)
-    fatal ("internal: create_new_frame returned invalid frame");
+    internal_error ("create_new_frame returned invalid frame");
 
   frame->bottom = argv[1];
   frame->pc = FRAME_SAVED_PC (frame);
@@ -974,7 +974,7 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
   CORE_ADDR frame_addr = FRAME_FP (fi);
 
   if (!fi)
-    fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
+    internal_error ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
 
   memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
 
@@ -1735,7 +1735,7 @@ gdb_print_insn_sparc (memaddr, info)
      disassemble_info *info;
 {
   /* It's necessary to override mach again because print_insn messes it up. */
-  info->mach = TM_PRINT_INSN_MACH;
+  info->mach = TARGET_ARCHITECTURE->mach;
   return print_insn_sparc (memaddr, info);
 }
 

@@ -29,6 +29,8 @@ extern const IDESC *m32rbf_decode (SIM_CPU *, IADDR,
                                   CGEN_INSN_INT, CGEN_INSN_INT,
                                   ARGBUF *);
 extern void m32rbf_init_idesc_table (SIM_CPU *);
+extern void m32rbf_sem_init_idesc_table (SIM_CPU *);
+extern void m32rbf_semf_init_idesc_table (SIM_CPU *);
 
 /* Enum declaration for instructions in cpu family m32rbf.  */
 typedef enum m32rbf_insn_type {
@@ -61,134 +63,22 @@ typedef enum m32rbf_insn_type {
  , M32RBF_INSN_UNLOCK, M32RBF_INSN_MAX
 } M32RBF_INSN_TYPE;
 
-#if ! WITH_SEM_SWITCH_FULL
-#define SEMFULL(fn) extern SEMANTIC_FN CONCAT3 (m32rbf,_sem_,fn);
-#else
-#define SEMFULL(fn)
-#endif
-
-#if ! WITH_SEM_SWITCH_FAST
-#define SEMFAST(fn) extern SEMANTIC_FN CONCAT3 (m32rbf,_semf_,fn);
-#else
-#define SEMFAST(fn)
-#endif
-
-#define SEM(fn) SEMFULL (fn) SEMFAST (fn)
-
-/* The function version of the before/after handlers is always needed,
-   so we always want the SEMFULL declaration of them.  */
-extern SEMANTIC_FN CONCAT3 (m32rbf,_sem_,x_before);
-extern SEMANTIC_FN CONCAT3 (m32rbf,_sem_,x_after);
-
-SEM (x_invalid)
-SEM (x_after)
-SEM (x_before)
-SEM (x_cti_chain)
-SEM (x_chain)
-SEM (x_begin)
-SEM (add)
-SEM (add3)
-SEM (and)
-SEM (and3)
-SEM (or)
-SEM (or3)
-SEM (xor)
-SEM (xor3)
-SEM (addi)
-SEM (addv)
-SEM (addv3)
-SEM (addx)
-SEM (bc8)
-SEM (bc24)
-SEM (beq)
-SEM (beqz)
-SEM (bgez)
-SEM (bgtz)
-SEM (blez)
-SEM (bltz)
-SEM (bnez)
-SEM (bl8)
-SEM (bl24)
-SEM (bnc8)
-SEM (bnc24)
-SEM (bne)
-SEM (bra8)
-SEM (bra24)
-SEM (cmp)
-SEM (cmpi)
-SEM (cmpu)
-SEM (cmpui)
-SEM (div)
-SEM (divu)
-SEM (rem)
-SEM (remu)
-SEM (jl)
-SEM (jmp)
-SEM (ld)
-SEM (ld_d)
-SEM (ldb)
-SEM (ldb_d)
-SEM (ldh)
-SEM (ldh_d)
-SEM (ldub)
-SEM (ldub_d)
-SEM (lduh)
-SEM (lduh_d)
-SEM (ld_plus)
-SEM (ld24)
-SEM (ldi8)
-SEM (ldi16)
-SEM (lock)
-SEM (machi)
-SEM (maclo)
-SEM (macwhi)
-SEM (macwlo)
-SEM (mul)
-SEM (mulhi)
-SEM (mullo)
-SEM (mulwhi)
-SEM (mulwlo)
-SEM (mv)
-SEM (mvfachi)
-SEM (mvfaclo)
-SEM (mvfacmi)
-SEM (mvfc)
-SEM (mvtachi)
-SEM (mvtaclo)
-SEM (mvtc)
-SEM (neg)
-SEM (nop)
-SEM (not)
-SEM (rac)
-SEM (rach)
-SEM (rte)
-SEM (seth)
-SEM (sll)
-SEM (sll3)
-SEM (slli)
-SEM (sra)
-SEM (sra3)
-SEM (srai)
-SEM (srl)
-SEM (srl3)
-SEM (srli)
-SEM (st)
-SEM (st_d)
-SEM (stb)
-SEM (stb_d)
-SEM (sth)
-SEM (sth_d)
-SEM (st_plus)
-SEM (st_minus)
-SEM (sub)
-SEM (subv)
-SEM (subx)
-SEM (trap)
-SEM (unlock)
-
-#undef SEMFULL
-#undef SEMFAST
-#undef SEM
+/* Enum declaration for semantic formats in cpu family m32rbf.  */
+typedef enum m32rbf_sfmt_type {
+  M32RBF_SFMT_EMPTY, M32RBF_SFMT_ADD, M32RBF_SFMT_ADD3, M32RBF_SFMT_AND3
+ , M32RBF_SFMT_OR3, M32RBF_SFMT_ADDI, M32RBF_SFMT_ADDV, M32RBF_SFMT_ADDV3
+ , M32RBF_SFMT_ADDX, M32RBF_SFMT_BC8, M32RBF_SFMT_BC24, M32RBF_SFMT_BEQ
+ , M32RBF_SFMT_BEQZ, M32RBF_SFMT_BL8, M32RBF_SFMT_BL24, M32RBF_SFMT_BRA8
+ , M32RBF_SFMT_BRA24, M32RBF_SFMT_CMP, M32RBF_SFMT_CMPI, M32RBF_SFMT_DIV
+ , M32RBF_SFMT_JL, M32RBF_SFMT_JMP, M32RBF_SFMT_LD, M32RBF_SFMT_LD_D
+ , M32RBF_SFMT_LD_PLUS, M32RBF_SFMT_LD24, M32RBF_SFMT_LDI8, M32RBF_SFMT_LDI16
+ , M32RBF_SFMT_LOCK, M32RBF_SFMT_MACHI, M32RBF_SFMT_MULHI, M32RBF_SFMT_MV
+ , M32RBF_SFMT_MVFACHI, M32RBF_SFMT_MVFC, M32RBF_SFMT_MVTACHI, M32RBF_SFMT_MVTC
+ , M32RBF_SFMT_NOP, M32RBF_SFMT_RAC, M32RBF_SFMT_RTE, M32RBF_SFMT_SETH
+ , M32RBF_SFMT_SLL3, M32RBF_SFMT_SLLI, M32RBF_SFMT_ST, M32RBF_SFMT_ST_D
+ , M32RBF_SFMT_STB, M32RBF_SFMT_STB_D, M32RBF_SFMT_STH, M32RBF_SFMT_STH_D
+ , M32RBF_SFMT_ST_PLUS, M32RBF_SFMT_TRAP, M32RBF_SFMT_UNLOCK
+} M32RBF_SFMT_TYPE;
 
 /* Function unit handlers (user written).  */
 

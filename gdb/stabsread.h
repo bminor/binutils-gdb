@@ -208,7 +208,6 @@ process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
 
 extern void elfstab_build_psymtabs
   PARAMS ((struct objfile * objfile,
-	   struct section_offsets * section_offsets,
 	   int mainline,
 	   file_ptr staboff, unsigned int stabsize,
 	   file_ptr stabstroffset,
@@ -216,7 +215,6 @@ extern void elfstab_build_psymtabs
 
 extern void coffstab_build_psymtabs
   PARAMS ((struct objfile * objfile,
-	   struct section_offsets * section_offsets,
 	   int mainline,
 	   CORE_ADDR textaddr, unsigned int textsize,
 	   struct stab_section_list * stabs,
@@ -225,7 +223,6 @@ extern void coffstab_build_psymtabs
 
 extern void stabsect_build_psymtabs
   PARAMS ((struct objfile * objfile,
-	   struct section_offsets * section_offsets,
 	   int mainline,
 	   char *stab_name,
 	   char *stabstr_name,

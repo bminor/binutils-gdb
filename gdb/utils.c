@@ -66,9 +66,6 @@ static void malloc_botch PARAMS ((void));
 #endif
 
 static void
-fatal_dump_core PARAMS ((char *,...));
-
-static void
 prompt_for_continue PARAMS ((void));
 
 static void
@@ -431,24 +428,11 @@ warning_begin ()
    The primary difference between warnings and errors is that a warning
    does not force the return to command level.  */
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 warning (const char *string,...)
-#else
-warning (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  char *string;
-
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
   if (warning_hook)
     (*warning_hook) (string, args);
   else
@@ -487,36 +471,17 @@ error_begin ()
    The first argument STRING is the error message, used as a fprintf string,
    and the remaining args are passed as arguments to it.  */
 
-/* VARARGS */
 NORETURN void
-#ifdef ANSI_PROTOTYPES
 error (const char *string,...)
-#else
-error (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  va_start (args);
-#endif
   if (error_hook)
     (*error_hook) ();
   else
     {
       error_begin ();
-#ifdef ANSI_PROTOTYPES
       vfprintf_filtered (gdb_stderr, string, args);
-#else
-      {
-	char *string1;
-
-	string1 = va_arg (args, char *);
-	vfprintf_filtered (gdb_stderr, string1, args);
-      }
-#endif
       fprintf_filtered (gdb_stderr, "\n");
       va_end (args);
       return_to_top_level (RETURN_ERROR);
@@ -524,69 +489,46 @@ error (va_alist)
 }
 
 
-/* Print an error message and exit reporting failure.
-   This is for a error that we cannot continue from.
-   The arguments are printed a la printf.
+/* Print a message reporting an internal error. Ask the user if they
+   want to continue, dump core, or just exit. */
 
-   This function cannot be declared volatile (NORETURN) in an
-   ANSI environment because exit() is not declared volatile. */
-
-/* VARARGS */
 NORETURN void
-#ifdef ANSI_PROTOTYPES
-fatal (char *string,...)
-#else
-fatal (va_alist)
-     va_dcl
-#endif
+internal_error (char *string, ...)
 {
+  static char msg[] = "Internal GDB error: recursive internal error.\n";
+  static int dejavu = 0;
   va_list args;
-#ifdef ANSI_PROTOTYPES
+
+  /* don't allow infinite error recursion. */
+  switch (dejavu)
+    {
+    case 0:
+      dejavu = 1;
+      break;
+    case 1:
+      dejavu = 2;
+      fputs_unfiltered (msg, gdb_stderr);
+      abort ();
+    default:
+      dejavu = 3;
+      write (STDERR_FILENO, msg, sizeof (msg));
+      exit (1);
+    }
+
+  /* Try to get the message out */
+  fputs_unfiltered ("\nGDB-INTERNAL-ERROR: ", gdb_stderr);
   va_start (args, string);
-#else
-  char *string;
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
-  fprintf_unfiltered (gdb_stderr, "\ngdb: ");
   vfprintf_unfiltered (gdb_stderr, string, args);
-  fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
-  exit (1);
-}
+  fputs_unfiltered ("\n", gdb_stderr);
 
-/* Print an error message and exit, dumping core.
-   The arguments are printed a la printf ().  */
+  if (query ("\
+An internal GDB error has been detected.\n\
+Do you want to quit GDB (dumping core)? "))
+    abort ();
 
-/* VARARGS */
-static void
-#ifdef ANSI_PROTOTYPES
-fatal_dump_core (char *string,...)
-#else
-fatal_dump_core (va_alist)
-     va_dcl
-#endif
-{
-  va_list args;
-#ifdef ANSI_PROTOTYPES
-  va_start (args, string);
-#else
-  char *string;
-
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
-  /* "internal error" is always correct, since GDB should never dump
-     core, no matter what the input.  */
-  fprintf_unfiltered (gdb_stderr, "\ngdb internal error: ");
-  vfprintf_unfiltered (gdb_stderr, string, args);
-  fprintf_unfiltered (gdb_stderr, "\n");
-  va_end (args);
-
-  signal (SIGQUIT, SIG_DFL);
-  kill (getpid (), SIGQUIT);
-  /* We should never get here, but just in case...  */
-  exit (1);
+  dejavu = 0;
+  return_to_top_level (RETURN_ERROR);
 }
 
 /* The strerror() function can return NULL for errno values that are
@@ -847,7 +789,8 @@ init_malloc (md)
 static void
 malloc_botch ()
 {
-  fatal_dump_core ("Memory corruption");
+  fprintf_unfiltered (gdb_stderr, "Memory corruption\n");
+  abort ();
 }
 
 /* Attempt to install hooks in mmalloc/mrealloc/mfree for the heap specified
@@ -898,11 +841,11 @@ nomem (size)
 {
   if (size > 0)
     {
-      fatal ("virtual memory exhausted: can't allocate %ld bytes.", size);
+      internal_error ("virtual memory exhausted: can't allocate %ld bytes.", size);
     }
   else
     {
-      fatal ("virtual memory exhausted.");
+      internal_error ("virtual memory exhausted.");
     }
 }
 
@@ -1075,25 +1018,14 @@ gdb_print_address (addr, stream)
 
 /* VARARGS */
 int
-#ifdef ANSI_PROTOTYPES
 query (char *ctlstr,...)
-#else
-query (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   register int answer;
   register int ans2;
   int retval;
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, ctlstr);
-#else
-  char *ctlstr;
-  va_start (args);
-  ctlstr = va_arg (args, char *);
-#endif
 
   if (query_hook)
     {
@@ -2443,50 +2375,20 @@ vprintf_unfiltered (format, args)
   vfprintf_unfiltered (gdb_stdout, format, args);
 }
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 fprintf_filtered (GDB_FILE * stream, const char *format,...)
-#else
-fprintf_filtered (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  GDB_FILE *stream;
-  char *format;
-
-  va_start (args);
-  stream = va_arg (args, GDB_FILE *);
-  format = va_arg (args, char *);
-#endif
   vfprintf_filtered (stream, format, args);
   va_end (args);
 }
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 fprintf_unfiltered (GDB_FILE * stream, const char *format,...)
-#else
-fprintf_unfiltered (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  GDB_FILE *stream;
-  char *format;
-
-  va_start (args);
-  stream = va_arg (args, GDB_FILE *);
-  format = va_arg (args, char *);
-#endif
   vfprintf_unfiltered (stream, format, args);
   va_end (args);
 }
@@ -2494,28 +2396,11 @@ fprintf_unfiltered (va_alist)
 /* Like fprintf_filtered, but prints its result indented.
    Called as fprintfi_filtered (spaces, stream, format, ...);  */
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 fprintfi_filtered (int spaces, GDB_FILE * stream, const char *format,...)
-#else
-fprintfi_filtered (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  int spaces;
-  GDB_FILE *stream;
-  char *format;
-
-  va_start (args);
-  spaces = va_arg (args, int);
-  stream = va_arg (args, GDB_FILE *);
-  format = va_arg (args, char *);
-#endif
   print_spaces_filtered (spaces, stream);
 
   vfprintf_filtered (stream, format, args);
@@ -2523,47 +2408,21 @@ fprintfi_filtered (va_alist)
 }
 
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 printf_filtered (const char *format,...)
-#else
-printf_filtered (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *format;
-
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
   vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);
 }
 
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 printf_unfiltered (const char *format,...)
-#else
-printf_unfiltered (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *format;
-
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
   vfprintf_unfiltered (gdb_stdout, format, args);
   va_end (args);
 }
@@ -2571,26 +2430,11 @@ printf_unfiltered (va_alist)
 /* Like printf_filtered, but prints it's result indented.
    Called as printfi_filtered (spaces, format, ...);  */
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 printfi_filtered (int spaces, const char *format,...)
-#else
-printfi_filtered (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  int spaces;
-  char *format;
-
-  va_start (args);
-  spaces = va_arg (args, int);
-  format = va_arg (args, char *);
-#endif
   print_spaces_filtered (spaces, gdb_stdout);
   vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);

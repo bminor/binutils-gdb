@@ -1683,9 +1683,9 @@ catch_exception_raise (port, thread, task, exception, code, subcode)
     }
 
   if (exception < 0 || exception > MAX_EXCEPTION)
-    fatal ("catch_exception_raise: unknown exception code %d thread %d",
-	   exception,
-	   mid);
+    internal_error ("catch_exception_raise: unknown exception code %d thread %d",
+		    exception,
+		    mid);
 
   if (!MACH_PORT_VALID (inferior_task))
     error ("got an exception, but inferior_task is null or dead");
@@ -3598,7 +3598,7 @@ mach3_exception_actions (w, force_print_only, who)
 			   stop_code);
 	  break;
 	default:
-	  fatal ("Unknown exception");
+	  internal_error ("Unknown exception");
 	}
     }
 }
@@ -3624,13 +3624,13 @@ setup_notify_port (create_new)
 				MACH_PORT_RIGHT_RECEIVE,
 				&our_notify_port);
       if (ret != KERN_SUCCESS)
-	fatal ("Creating notify port %s", mach_error_string (ret));
+	internal_error ("Creating notify port %s", mach_error_string (ret));
 
       ret = mach_port_move_member (mach_task_self (),
 				   our_notify_port,
 				   inferior_wait_port_set);
       if (ret != KERN_SUCCESS)
-	fatal ("initial move member %s", mach_error_string (ret));
+	internal_error ("initial move member %s", mach_error_string (ret));
     }
 }
 
@@ -4650,7 +4650,7 @@ _initialize_m3_nat ()
 			    MACH_PORT_RIGHT_PORT_SET,
 			    &inferior_wait_port_set);
   if (ret != KERN_SUCCESS)
-    fatal ("initial port set %s", mach_error_string (ret));
+    internal_error ("initial port set %s", mach_error_string (ret));
 
   /* mach_really_wait now waits for this */
   currently_waiting_for = inferior_wait_port_set;

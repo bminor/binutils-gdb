@@ -1,3 +1,32 @@
+1999-08-05  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/display.exp: Help expect by putting a newline in the
+ 	funky printf, remove a bogus p/a test.
+
+1999-08-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/display.exp: Make sure that when we say 'run', we are
+ 	connected to the target. This is necessary when running not
+ 	natively.
+
+1999-08-03  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/step-test.exp: Removed some extraneous messages.
+
+	* gdb.base/long_long.exp: Don't run memory examination tests
+	on little-endian targets (they will need a different set of
+	results to match).
+
+1999-08-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.c++/virtfunc.exp: Expect to fail the virtual call tests
+	until somebody decides to fix GDB.
+
+	* gdb.base/long_long.c: Stop compiler complaint by specifying long
+ 	constant as "ULL".
+	* gdb.base/long_long.exp: Loosen x/c test, add partial result
+	matches for a couple x/2 commands.
+
 1999-07-30  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.c++/ref-types.cc, gdb.c++/ref-types.exp: Appease doschk

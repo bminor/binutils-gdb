@@ -29,11 +29,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <ctype.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -200,24 +195,13 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
  * printf_monitor -- send data to monitor.  Works just like printf.
  */
 static void
-#ifdef ANSI_PROTOTYPES
 printf_monitor (char *pattern,...)
-#else
-printf_monitor (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char buf[PBUFSIZ];
   int i;
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
-#else
-  char *pattern;
-  va_start (args);
-  pattern = va_arg (args, char *);
-#endif
 
   vsprintf (buf, pattern, args);
 
@@ -251,12 +235,7 @@ write_monitor (data, len)
  *      to be formatted and printed. A CR is added after each string is printed.
  */
 static void
-#ifdef ANSI_PROTOTYPES
 debuglogs (int level, char *pattern,...)
-#else
-debuglogs (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char *p;
@@ -264,15 +243,7 @@ debuglogs (va_alist)
   char newbuf[PBUFSIZ];
   int i;
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
-#else
-  char *pattern;
-  int level;
-  va_start (args);
-  level = va_arg (args, int);	/* get the debug level */
-  pattern = va_arg (args, char *);	/* get the printf style pattern */
-#endif
 
   if ((level < 0) || (level > 100))
     {

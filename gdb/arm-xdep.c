@@ -538,7 +538,7 @@ xfer_core_file (memaddr, myaddr, len)
 	{
 	  /* Address did not classify into one of the known ranges.
 	     This shouldn't happen; we catch the endpoints.  */
-	  fatal ("Internal: Bad case logic in xfer_core_file.");
+	  internal_error ("Bad case logic in xfer_core_file.");
 	}
 
       /* Now we know which file to use.

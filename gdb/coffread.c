@@ -193,7 +193,6 @@ static struct type *coff_read_enum_type PARAMS ((int, int, int));
 
 static struct symbol *process_coff_symbol PARAMS ((struct coff_symbol *,
 						   union internal_auxent *,
-						   struct section_offsets *,
 						   struct objfile *));
 
 static void patch_opaque_types PARAMS ((struct symtab *));
@@ -218,8 +217,7 @@ static void read_one_sym PARAMS ((struct coff_symbol *,
 				  struct internal_syment *,
 				  union internal_auxent *));
 
-static void coff_symtab_read PARAMS ((long, int, struct section_offsets *,
-				      struct objfile *));
+static void coff_symtab_read PARAMS ((long, int, struct objfile *));
 
 static void find_linenos PARAMS ((bfd *, sec_ptr, PTR));
 
@@ -227,8 +225,7 @@ static void coff_symfile_init PARAMS ((struct objfile *));
 
 static void coff_new_init PARAMS ((struct objfile *));
 
-static void coff_symfile_read PARAMS ((struct objfile *,
-				       struct section_offsets *, int));
+static void coff_symfile_read PARAMS ((struct objfile *, int));
 
 static void coff_symfile_finish PARAMS ((struct objfile *));
 
@@ -596,9 +593,8 @@ static bfd *symfile_bfd;
 
 /* ARGSUSED */
 static void
-coff_symfile_read (objfile, section_offsets, mainline)
+coff_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   struct coff_symfile_info *info;
@@ -673,8 +669,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  coff_symtab_read ((long) symtab_offset, num_symbols, section_offsets,
-		    objfile);
+  coff_symtab_read ((long) symtab_offset, num_symbols, objfile);
 
   /* Sort symbols alphabetically within each block.  */
 
@@ -712,7 +707,6 @@ coff_symfile_read (objfile, section_offsets, mainline)
       stabstrsize = bfd_section_size (abfd, info->stabstrsect);
 
       coffstab_build_psymtabs (objfile,
-			       section_offsets,
 			       mainline,
 			       info->textaddr, info->textsize,
 			       info->stabsects,
@@ -750,10 +744,9 @@ coff_symfile_finish (objfile)
    We read them one at a time using read_one_sym ().  */
 
 static void
-coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
+coff_symtab_read (symtab_offset, nsyms, objfile)
      long symtab_offset;
      int nsyms;
-     struct section_offsets *section_offsets;
      struct objfile *objfile;
 {
   register struct context_stack *new;
@@ -841,7 +834,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
       if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
 	{
 	  /* Record all functions -- external and static -- in minsyms. */
-	  tmpaddr = cs->c_value + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	  record_minimal_symbol (cs->c_name, tmpaddr, mst_text, objfile);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
@@ -906,7 +899,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		     followed by a later file with no symbols.  */
 		  if (in_source_file)
 		    complete_symtab (filestring,
-		    cs->c_value + ANOFFSET (section_offsets, SECT_OFF_TEXT),
+		    cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT),
 				     main_aux.x_scn.x_scnlen);
 		  in_source_file = 0;
 		}
@@ -965,7 +958,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		tmpaddr = cs->c_value;
 		if (cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
 		    || cs->c_sclass == C_THUMBEXT)
-		  tmpaddr += ANOFFSET (section_offsets, sec);
+		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
 
 		switch (sec)
 		  {
@@ -1012,7 +1005,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	      {
 		struct symbol *sym;
 		sym = process_coff_symbol
-		  (cs, &main_aux, section_offsets, objfile);
+		  (cs, &main_aux, objfile);
 		SYMBOL_VALUE (sym) = tmpaddr;
 		SYMBOL_SECTION (sym) = sec;
 	      }
@@ -1039,8 +1032,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	      new = push_context (depth, fcn_start_addr);
 	      fcn_cs_saved.c_name = getsymname (&fcn_sym_saved);
 	      new->name =
-		process_coff_symbol (&fcn_cs_saved, &fcn_aux_saved,
-				     section_offsets, objfile);
+		process_coff_symbol (&fcn_cs_saved, &fcn_aux_saved, objfile);
 	    }
 	  else if (STREQ (cs->c_name, ".ef"))
 	    {
@@ -1084,7 +1076,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 			     fcn_first_line_addr);
 	      else
 		enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line,
-			       section_offsets);
+			       objfile->section_offsets);
 
 	      finish_block (new->name, &local_symbols, new->old_blocks,
 			    new->start_addr,
@@ -1098,11 +1090,11 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	         of the epilogue.  */
 			    cs->c_value
 			    + FUNCTION_EPILOGUE_SIZE
-			    + ANOFFSET (section_offsets, SECT_OFF_TEXT),
+			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT),
 #else
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
-			    + ANOFFSET (section_offsets, SECT_OFF_TEXT),
+			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT),
 #endif
 			    objfile
 		);
@@ -1114,7 +1106,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	  if (STREQ (cs->c_name, ".bb"))
 	    {
 	      tmpaddr = cs->c_value;
-	      tmpaddr += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	      tmpaddr += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	      push_context (++depth, tmpaddr);
 	    }
 	  else if (STREQ (cs->c_name, ".eb"))
@@ -1134,7 +1126,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	      if (local_symbols && context_stack_depth > 0)
 		{
 		  tmpaddr =
-		    cs->c_value + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		    cs->c_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 		  /* Make a block for the local symbols within.  */
 		  finish_block (0, &local_symbols, new->old_blocks,
 				new->start_addr, tmpaddr, objfile);
@@ -1145,7 +1137,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 	  break;
 
 	default:
-	  process_coff_symbol (cs, &main_aux, section_offsets, objfile);
+	  process_coff_symbol (cs, &main_aux, objfile);
 	  break;
 	}
     }
@@ -1521,10 +1513,9 @@ patch_opaque_types (s)
 }
 
 static struct symbol *
-process_coff_symbol (cs, aux, section_offsets, objfile)
+process_coff_symbol (cs, aux, objfile)
      register struct coff_symbol *cs;
      register union internal_auxent *aux;
-     struct section_offsets *section_offsets;
      struct objfile *objfile;
 {
   register struct symbol *sym
@@ -1547,7 +1538,7 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_VALUE (sym) += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+      SYMBOL_VALUE (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
       SYMBOL_TYPE (sym) =
 	lookup_function_type (decode_function_type (cs, cs->c_type, aux));
 
@@ -1577,7 +1568,7 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
 	case C_EXT:
 	  SYMBOL_CLASS (sym) = LOC_STATIC;
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
-	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	  add_symbol_to_list (sym, &global_symbols);
 	  break;
 
@@ -1586,7 +1577,7 @@ process_coff_symbol (cs, aux, section_offsets, objfile)
 	case C_STAT:
 	  SYMBOL_CLASS (sym) = LOC_STATIC;
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
-	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT);
 	  if (within_function)
 	    {
 	      /* Static symbol of local scope */
@@ -2211,8 +2202,7 @@ static struct sym_fns coff_sym_fns =
   coff_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
   coff_symfile_read,		/* sym_read: read a symbol file into symtab */
   coff_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,
-			/* sym_offsets:  xlate external to internal form */
+  default_symfile_offsets,	/* sym_offsets:  xlate external to internal form */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

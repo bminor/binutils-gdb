@@ -770,9 +770,13 @@ See @code{remote.c:remote_unpack_thread_info_response()}.
 execution.  @emph{Implementors should note that providing access to a
 stubs's interpreter may have security implications}.
 @item
-@tab reply @var{OUTPUT}
+@tab reply @var{OUTPUT} or @code{OK}
 @tab
-The @var{OUTPUT} (hex encoded).  Must be non-empty.
+The @var{OUTPUT} is the hex encoded output from the command.  @code{OK}
+is returned when the @var{OUTPUT} would have been empty.  The target may
+also respond with a number of intermediate @code{O}@var{OUTPUT} console
+output packets.
+
 @item
 @tab reply @samp{}
 @tab

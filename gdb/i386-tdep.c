@@ -62,8 +62,6 @@ static char *disassembly_flavor = att_flavor;
 static void set_disassembly_flavor_sfunc PARAMS ((char *, int, struct cmd_list_element *));
 static void set_disassembly_flavor ();
 
-void (*disassembly_flavor_hook) PARAMS ((char *args, int from_tty));
-
 /* Stdio style buffering was used to minimize calls to ptrace, but this
    buffering did not take into account that the code section being accessed
    may not be an even number of buffers long (even if the buffer is only

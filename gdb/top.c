@@ -445,6 +445,9 @@ void (*registers_changed_hook) PARAMS ((void));
    that several registers have changed (see value_assign). */
 void (*register_changed_hook) PARAMS ((int regno));
 
+/* Tell the GUI that the disassembly flavor has changed */
+void (*disassembly_flavor_hook) PARAMS((char *args, int from_tty));
+
 /* Tell the GUI someone changed LEN bytes of memory at ADDR */
 void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
 
@@ -458,6 +461,11 @@ int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus * status));
 
 void (*call_command_hook) PARAMS ((struct cmd_list_element * c, char *cmd,
 				   int from_tty));
+
+/* Called after a `set' command has finished.  Is only run if the
+   `set' command succeeded.  */
+
+void (*set_hook) PARAMS ((struct cmd_list_element *c));
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
@@ -1045,7 +1053,7 @@ arg_cleanup ()
 {
   struct user_args *oargs = user_args;
   if (!user_args)
-    fatal ("Internal error, arg_cleanup called with no user args.\n");
+    internal_error ("Internal error, arg_cleanup called with no user args.\n");
 
   user_args = user_args->next;
   free (oargs);
@@ -3808,7 +3816,7 @@ init_main ()
   else
     {
       /* initialize the prompt stack to a simple "(gdb) " prompt or to
-         whatever the DEFULAT_PROMPT is. */
+         whatever the DEFAULT_PROMPT is. */
       the_prompts.top = 0;
       PREFIX (0) = "";
 #ifdef DEFAULT_PROMPT

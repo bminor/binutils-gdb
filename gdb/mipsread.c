@@ -51,8 +51,7 @@ static void
 mipscoff_symfile_init PARAMS ((struct objfile *));
 
 static void
-mipscoff_symfile_read PARAMS ((struct objfile *, struct section_offsets *,
-			       int));
+mipscoff_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 mipscoff_symfile_finish PARAMS ((struct objfile *));
@@ -87,9 +86,8 @@ mipscoff_symfile_init (objfile)
 /* Read a symbol file from a file.  */
 
 static void
-mipscoff_symfile_read (objfile, section_offsets, mainline)
+mipscoff_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;
@@ -106,11 +104,11 @@ mipscoff_symfile_read (objfile, section_offsets, mainline)
     error ("Error reading symbol table: %s", bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, &ecoff_backend (abfd)->debug_swap,
-			 &ecoff_data (abfd)->debug_info, section_offsets);
+			 &ecoff_data (abfd)->debug_info, objfile->section_offsets);
 
   /* Add alpha coff dynamic symbols.  */
 
-  read_alphacoff_dynamic_symtab (section_offsets, objfile);
+  read_alphacoff_dynamic_symtab (objfile->section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */

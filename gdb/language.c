@@ -1076,21 +1076,10 @@ op_error (fmt, op, fatal)
    by the value of warning_pre_print and we do not return to the top level. */
 
 void
-#ifdef ANSI_PROTOTYPES
 type_error (char *string,...)
-#else
-type_error (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  char *string;
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
 
   if (type_check == type_check_warn)
     fprintf_filtered (gdb_stderr, warning_pre_print);
@@ -1105,21 +1094,10 @@ type_error (va_alist)
 }
 
 void
-#ifdef ANSI_PROTOTYPES
 range_error (char *string,...)
-#else
-range_error (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  char *string;
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
 
   if (range_check == range_check_warn)
     fprintf_filtered (gdb_stderr, warning_pre_print);

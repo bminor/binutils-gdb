@@ -74,6 +74,11 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
 #define TARGET_KEEP_SECTION(ASECT)	0
 #endif
 
+/* Called via bfd_map_over_sections to build up the section table that
+   the objfile references.  The objfile contains pointers to the start
+   of the table (objfile->sections) and to the first location after
+   the end of the table (objfile->sections_end). */
+
 static void
 add_to_objfile_sections (abfd, asect, objfile_p_char)
      bfd *abfd;
@@ -103,7 +108,19 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
 
 /* Builds a section table for OBJFILE.
    Returns 0 if OK, 1 on error (in which case bfd_error contains the
-   error).  */
+   error).
+
+   Note that while we are building the table, which goes into the
+   psymbol obstack, we hijack the sections_end pointer to instead hold
+   a count of the number of sections.  When bfd_map_over_sections
+   returns, this count is used to compute the pointer to the end of
+   the sections table, which then overwrites the count.
+
+   Also note that the OFFSET and OVLY_MAPPED in each table entry
+   are initialized to zero.
+
+   Also note that if anything else writes to the psymbol obstack while
+   we are building the table, we're pretty much hosed. */
 
 int
 build_objfile_section_table (objfile)
@@ -632,8 +649,7 @@ objfile_relocate (objfile, new_offsets)
 
     abfd = objfile->obfd;
 
-    for (s = objfile->sections;
-	 s < objfile->sections_end; ++s)
+    ALL_OBJFILE_OSECTIONS (objfile, s)
       {
 	flagword flags;
 
@@ -944,8 +960,7 @@ find_pc_sect_section (pc, section)
   struct obj_section *s;
   struct objfile *objfile;
 
-  ALL_OBJFILES (objfile)
-    for (s = objfile->sections; s < objfile->sections_end; ++s)
+  ALL_OBJSECTIONS (objfile, s)
 #if defined(HPUXHPPA)
     if ((section == 0 || section == s->the_bfd_section) &&
 	s->addr <= pc && pc <= s->endaddr)

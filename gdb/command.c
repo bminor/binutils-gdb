@@ -1418,6 +1418,8 @@ do_setshow_command (arg, from_tty, c)
   else
     error ("gdb internal error: bad cmd_type in do_setshow_command");
   (*c->function.sfunc) (NULL, from_tty, c);
+  if (c->type == set_cmd && set_hook)
+    set_hook (c);
 }
 
 /* Show all the settings in a list of show commands.  */

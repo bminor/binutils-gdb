@@ -157,7 +157,7 @@ fetch_register (regno)
 	    + (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
 
   else
-    fatal ("hppa-nat.c (fetch_register): unexpected register size");
+    internal_error ("hppa-nat.c (fetch_register): unexpected register size");
 
   for (i = 0; i < len; i += sizeof (int))
     {

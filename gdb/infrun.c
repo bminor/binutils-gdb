@@ -38,33 +38,66 @@
 
 /* Prototypes for local functions */
 
-static void signals_info PARAMS ((char *, int));
+static void signals_info (char *, int);
 
-static void handle_command PARAMS ((char *, int));
+static void handle_command (char *, int);
 
-static void sig_print_info PARAMS ((enum target_signal));
+static void sig_print_info (enum target_signal);
 
-static void sig_print_header PARAMS ((void));
+static void sig_print_header (void);
 
-static void resume_cleanups PARAMS ((int));
+static void resume_cleanups (int);
 
-static int hook_stop_stub PARAMS ((PTR));
+static int hook_stop_stub (void *);
 
-static void delete_breakpoint_current_contents PARAMS ((PTR));
+static void delete_breakpoint_current_contents (void *);
 
-static void set_follow_fork_mode_command PARAMS ((char *arg, int from_tty, struct cmd_list_element * c));
+static void set_follow_fork_mode_command (char *arg, int from_tty,
+					  struct cmd_list_element * c);
 
-static void complete_execution PARAMS ((void));
+static void complete_execution (void);
+
+static struct inferior_status *xmalloc_inferior_status (void);
+
+static void free_inferior_status (struct inferior_status *);
+
+static int restore_selected_frame (void *);
+
+static void build_infrun (void);
+
+static void follow_inferior_fork (int parent_pid, int child_pid,
+				  int has_forked, int has_vforked);
+
+static void follow_fork (int parent_pid, int child_pid);
+
+static void follow_vfork (int parent_pid, int child_pid);
+
+static void set_schedlock_func (char *args, int from_tty,
+				struct cmd_list_element * c);
+
+static int is_internal_shlib_eventpoint (struct breakpoint * ep);
+
+static int stopped_for_internal_shlib_event (bpstat bs);
+
+struct execution_control_state;
+
+static int currently_stepping (struct execution_control_state *ecs);
+
+static void xdb_handle_command (char *args, int from_tty);
+
+void _initialize_infrun (void);
 
 int inferior_ignoring_startup_exec_events = 0;
 int inferior_ignoring_leading_exec_events = 0;
 
 /* In asynchronous mode, but simulating synchronous execution. */
+
 int sync_execution = 0;
 
 /* wait_for_inferior and normal_stop use this to notify the user
    when the inferior stopped in a different thread than it had been
-   running in. */
+   running in.  */
+
 static int switched_from_inferior_pid;
 
 /* This will be true for configurations that may actually report an
@@ -98,7 +131,8 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 
    Versions of gdb which don't use the "step == this thread steps
    and others continue" model but instead use the "step == this
-   thread steps and others wait" shouldn't do this. */
+   thread steps and others wait" shouldn't do this.  */
+
 static int thread_step_needed = 0;
 
 /* This is true if thread_step_needed should actually be used.  At
@@ -109,34 +143,6 @@ static int thread_step_needed = 0;
 #endif
 
 static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
-
-static void follow_inferior_fork PARAMS ((int parent_pid,
-					  int child_pid,
-					  int has_forked,
-					  int has_vforked));
-
-static void follow_fork PARAMS ((int parent_pid, int child_pid));
-
-static void follow_vfork PARAMS ((int parent_pid, int child_pid));
-
-static void set_schedlock_func PARAMS ((char *args, int from_tty,
-					struct cmd_list_element * c));
-
-static int is_internal_shlib_eventpoint PARAMS ((struct breakpoint * ep));
-
-static int stopped_for_internal_shlib_event PARAMS ((bpstat bs));
-
-static int stopped_for_shlib_catchpoint PARAMS ((bpstat bs,
-						 struct breakpoint ** cp_p));
-
-#if __STDC__
-struct execution_control_state;
-#endif
-static int currently_stepping PARAMS ((struct execution_control_state * ecs));
-
-static void xdb_handle_command PARAMS ((char *args, int from_tty));
-
-void _initialize_infrun PARAMS ((void));
 
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
    program.  It needs to examine the jmp_buf argument and extract the PC
@@ -393,19 +399,15 @@ static char *follow_fork_mode_string = NULL;
 
 
 static void
-follow_inferior_fork (parent_pid, child_pid, has_forked, has_vforked)
-     int parent_pid;
-     int child_pid;
-     int has_forked;
-     int has_vforked;
+follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
+		      int has_vforked)
 {
   int followed_parent = 0;
   int followed_child = 0;
-  int ima_clone = 0;
 
   /* Which process did the user want us to follow? */
   char *follow_mode =
-  savestring (follow_fork_mode_string, strlen (follow_fork_mode_string));
+    savestring (follow_fork_mode_string, strlen (follow_fork_mode_string));
 
   /* Or, did the user not know, and want us to ask? */
   if (STREQ (follow_fork_mode_string, "ask"))
@@ -568,21 +570,17 @@ follow_inferior_fork (parent_pid, child_pid, has_forked, has_vforked)
 }
 
 static void
-follow_fork (parent_pid, child_pid)
-     int parent_pid;
-     int child_pid;
+follow_fork (int parent_pid, int child_pid)
 {
   follow_inferior_fork (parent_pid, child_pid, 1, 0);
 }
 
 
 /* Forward declaration. */
-static void follow_exec PARAMS ((int, char *));
+static void follow_exec (int, char *);
 
 static void
-follow_vfork (parent_pid, child_pid)
-     int parent_pid;
-     int child_pid;
+follow_vfork (int parent_pid, int child_pid)
 {
   follow_inferior_fork (parent_pid, child_pid, 0, 1);
 
@@ -597,9 +595,7 @@ follow_vfork (parent_pid, child_pid)
 }
 
 static void
-follow_exec (pid, execd_pathname)
-     int pid;
-     char *execd_pathname;
+follow_exec (int pid, char *execd_pathname)
 {
   int saved_pid = pid;
   struct target_ops *tgt;
@@ -707,8 +703,7 @@ static int singlestep_breakpoints_inserted_p = 0;
 /* Things to clean up if we QUIT out of resume ().  */
 /* ARGSUSED */
 static void
-resume_cleanups (arg)
-     int arg;
+resume_cleanups (int arg)
 {
   normal_stop ();
 }
@@ -721,10 +716,7 @@ static char *scheduler_enums[] =
 {schedlock_off, schedlock_on, schedlock_step};
 
 static void
-set_schedlock_func (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 {
   if (c->type == set_cmd)
     if (!target_can_lock_scheduler)
@@ -745,9 +737,7 @@ set_schedlock_func (args, from_tty, c)
    STEP nonzero if we should step (zero to continue instead).
    SIG is the signal to give the inferior (zero for none).  */
 void
-resume (step, sig)
-     int step;
-     enum target_signal sig;
+resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup ((make_cleanup_func)
@@ -867,7 +857,7 @@ resume (step, sig)
    First do this, then set the ones you want, then call `proceed'.  */
 
 void
-clear_proceed_status ()
+clear_proceed_status (void)
 {
   trap_expected = 0;
   step_range_start = 0;
@@ -896,10 +886,7 @@ clear_proceed_status ()
    You should call clear_proceed_status before calling proceed.  */
 
 void
-proceed (addr, siggnal, step)
-     CORE_ADDR addr;
-     enum target_signal siggnal;
-     int step;
+proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 {
   int oneproc = 0;
 
@@ -1031,8 +1018,9 @@ static char *prev_func_name;
 
 
 /* Start remote-debugging of a machine over a serial link.  */
+
 void
-start_remote ()
+start_remote (void)
 {
   init_thread_list ();
   init_wait_for_inferior ();
@@ -1061,7 +1049,7 @@ start_remote ()
 /* Initialize static vars when a new inferior begins.  */
 
 void
-init_wait_for_inferior ()
+init_wait_for_inferior (void)
 {
   /* These are meaningless until the first time through wait_for_inferior.  */
   prev_pc = 0;
@@ -1090,8 +1078,7 @@ init_wait_for_inferior ()
 }
 
 static void
-delete_breakpoint_current_contents (arg)
-     PTR arg;
+delete_breakpoint_current_contents (void *arg)
 {
   struct breakpoint **breakpointp = (struct breakpoint **) arg;
   if (*breakpointp != NULL)
@@ -1145,9 +1132,9 @@ struct execution_control_state
     int wait_some_more;
   };
 
-void init_execution_control_state PARAMS ((struct execution_control_state * ecs));
+void init_execution_control_state (struct execution_control_state * ecs);
 
-void handle_inferior_event PARAMS ((struct execution_control_state * ecs));
+void handle_inferior_event (struct execution_control_state * ecs);
 
 /* Wait for control to return from inferior to debugger.
    If inferior gets a signal, we may decide to start it up again
@@ -1156,7 +1143,7 @@ void handle_inferior_event PARAMS ((struct execution_control_state * ecs));
    should be left stopped and GDB should read more commands.  */
 
 void
-wait_for_inferior ()
+wait_for_inferior (void)
 {
   struct cleanup *old_cleanups;
   struct execution_control_state ecss;
@@ -1219,7 +1206,7 @@ struct execution_control_state async_ecss;
 struct execution_control_state *async_ecs;
 
 void
-fetch_inferior_event ()
+fetch_inferior_event (void)
 {
   static struct cleanup *old_cleanups;
 
@@ -1279,8 +1266,7 @@ fetch_inferior_event ()
    wait_for_inferior-type loop.  */
 
 void
-init_execution_control_state (ecs)
-     struct execution_control_state *ecs;
+init_execution_control_state (struct execution_control_state *ecs)
 {
   ecs->random_signal = 0;
   ecs->remove_breakpoints_on_following_step = 0;
@@ -1302,7 +1288,7 @@ init_execution_control_state (ecs)
    sanity check.  We should never be setting a new
    step_resume_breakpoint when we have an old one active.  */
 static void
-check_for_old_step_resume_breakpoint ()
+check_for_old_step_resume_breakpoint (void)
 {
   if (step_resume_breakpoint)
     warning ("GDB bug: infrun.c (wait_for_inferior): dropping old step_resume breakpoint");
@@ -1313,8 +1299,7 @@ check_for_old_step_resume_breakpoint ()
    appropriate action.  */
 
 void
-handle_inferior_event (ecs)
-     struct execution_control_state *ecs;
+handle_inferior_event (struct execution_control_state *ecs)
 {
   CORE_ADDR tmp;
   int stepped_after_stopped_by_watchpoint;
@@ -1599,8 +1584,9 @@ handle_inferior_event (ecs)
 	inferior_ignoring_leading_exec_events =
 	  target_reported_exec_events_per_exec_call () - 1;
 
-	pending_follow.execd_pathname = savestring (ecs->ws.value.execd_pathname,
-				     strlen (ecs->ws.value.execd_pathname));
+	pending_follow.execd_pathname =
+	  savestring (ecs->ws.value.execd_pathname,
+		      strlen (ecs->ws.value.execd_pathname));
 
 	/* Did inferior_pid exec, or did a (possibly not-yet-followed)
 	   child of a vfork exec?
@@ -3046,8 +3032,7 @@ stop_stepping:
 /* Are we in the middle of stepping?  */
 
 static int
-currently_stepping (ecs)
-     struct execution_control_state *ecs;
+currently_stepping (struct execution_control_state *ecs)
 {
   return ((through_sigtramp_breakpoint == NULL
 	   && !ecs->handling_longjmp
@@ -3064,8 +3049,7 @@ currently_stepping (ecs)
    something gdb sets for its own use, and isn't ever shown to a
    user.) */
 static int
-is_internal_shlib_eventpoint (ep)
-     struct breakpoint *ep;
+is_internal_shlib_eventpoint (struct breakpoint *ep)
 {
   return
     (ep->type == bp_shlib_event)
@@ -3075,9 +3059,9 @@ is_internal_shlib_eventpoint (ep)
 /* This function returns TRUE if bs indicates that the inferior
    stopped due to a shared library (aka dynamically-linked library)
    event. */
+
 static int
-stopped_for_internal_shlib_event (bs)
-     bpstat bs;
+stopped_for_internal_shlib_event (bpstat bs)
 {
   /* Note that multiple eventpoints may've caused the stop.  Any
      that are associated with shlib events will be accepted. */
@@ -3091,45 +3075,15 @@ stopped_for_internal_shlib_event (bs)
   /* If we get here, then no candidate was found. */
   return 0;
 }
-
-/* This function returns TRUE if bs indicates that the inferior
-   stopped due to a shared library (aka dynamically-linked library)
-   event caught by a catchpoint.
-
-   If TRUE, cp_p is set to point to the catchpoint.
-
-   Else, the value of cp_p is undefined. */
-static int
-stopped_for_shlib_catchpoint (bs, cp_p)
-     bpstat bs;
-     struct breakpoint **cp_p;
-{
-  /* Note that multiple eventpoints may've caused the stop.  Any
-     that are associated with shlib events will be accepted. */
-  *cp_p = NULL;
-
-  for (; bs != NULL; bs = bs->next)
-    {
-      if ((bs->breakpoint_at != NULL)
-	  && ep_is_shlib_catchpoint (bs->breakpoint_at))
-	{
-	  *cp_p = bs->breakpoint_at;
-	  return 1;
-	}
-    }
-
-  /* If we get here, then no candidate was found. */
-  return 0;
-}
 
-
 /* Reset proper settings after an asynchronous command has finished.
    If the execution command was in synchronous mode, register stdin
    with the event loop, and reset the prompt. */
+
 static void
-complete_execution ()
+complete_execution (void)
 {
-  extern cleanup_sigint_signal_handler PARAMS ((void));
+  extern int cleanup_sigint_signal_handler (void);
 
   target_executing = 0;
   if (sync_execution)
@@ -3151,7 +3105,7 @@ complete_execution ()
    attempting to insert breakpoints.  */
 
 void
-normal_stop ()
+normal_stop (void)
 {
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
@@ -3313,47 +3267,43 @@ done:
 }
 
 static int
-hook_stop_stub (cmd)
-     PTR cmd;
+hook_stop_stub (void *cmd)
 {
   execute_user_command ((struct cmd_list_element *) cmd, 0);
   return (0);
 }
 
 int
-signal_stop_state (signo)
-     int signo;
+signal_stop_state (int signo)
 {
   return signal_stop[signo];
 }
 
 int
-signal_print_state (signo)
-     int signo;
+signal_print_state (int signo)
 {
   return signal_print[signo];
 }
 
 int
-signal_pass_state (signo)
-     int signo;
+signal_pass_state (int signo)
 {
   return signal_program[signo];
 }
 
 static void
-sig_print_header ()
+sig_print_header (void)
 {
   printf_filtered ("\
 Signal        Stop\tPrint\tPass to program\tDescription\n");
 }
 
 static void
-sig_print_info (oursig)
-     enum target_signal oursig;
+sig_print_info (enum target_signal oursig)
 {
   char *name = target_signal_to_name (oursig);
   int name_padding = 13 - strlen (name);
+
   if (name_padding <= 0)
     name_padding = 0;
 
@@ -3369,9 +3319,7 @@ sig_print_info (oursig)
 /* Specify how various signals in the inferior should be handled.  */
 
 static void
-handle_command (args, from_tty)
-     char *args;
-     int from_tty;
+handle_command (char *args, int from_tty)
 {
   char **argv;
   int digits, wordlen;
@@ -3553,9 +3501,7 @@ Are you sure you want to change it? ",
 }
 
 static void
-xdb_handle_command (args, from_tty)
-     char *args;
-     int from_tty;
+xdb_handle_command (char *args, int from_tty)
 {
   char **argv;
   struct cleanup *old_chain;
@@ -3627,9 +3573,7 @@ xdb_handle_command (args, from_tty)
    targets, all signals should be in the signal tables).  */
 
 static void
-signals_info (signum_exp, from_tty)
-     char *signum_exp;
-     int from_tty;
+signals_info (char *signum_exp, int from_tty)
 {
   enum target_signal oursig;
   sig_print_header ();
@@ -3695,10 +3639,8 @@ struct inferior_status
   int proceed_to_finish;
 };
 
-
-static struct inferior_status *xmalloc_inferior_status PARAMS ((void));
 static struct inferior_status *
-xmalloc_inferior_status ()
+xmalloc_inferior_status (void)
 {
   struct inferior_status *inf_status;
   inf_status = xmalloc (sizeof (struct inferior_status));
@@ -3707,10 +3649,8 @@ xmalloc_inferior_status ()
   return inf_status;
 }
 
-static void free_inferior_status PARAMS ((struct inferior_status *));
 static void
-free_inferior_status (inf_status)
-     struct inferior_status *inf_status;
+free_inferior_status (struct inferior_status *inf_status)
 {
   free (inf_status->registers);
   free (inf_status->stop_registers);
@@ -3718,10 +3658,8 @@ free_inferior_status (inf_status)
 }
 
 void
-write_inferior_status_register (inf_status, regno, val)
-     struct inferior_status *inf_status;
-     int regno;
-     LONGEST val;
+write_inferior_status_register (struct inferior_status *inf_status, int regno,
+				LONGEST val)
 {
   int size = REGISTER_RAW_SIZE (regno);
   void *buf = alloca (size);
@@ -3729,15 +3667,12 @@ write_inferior_status_register (inf_status, regno, val)
   memcpy (&inf_status->registers[REGISTER_BYTE (regno)], buf, size);
 }
 
-
-
 /* Save all of the information associated with the inferior<==>gdb
    connection.  INF_STATUS is a pointer to a "struct inferior_status"
    (defined in inferior.h).  */
 
 struct inferior_status *
-save_inferior_status (restore_stack_info)
-     int restore_stack_info;
+save_inferior_status (int restore_stack_info)
 {
   struct inferior_status *inf_status = xmalloc_inferior_status ();
 
@@ -3778,11 +3713,8 @@ struct restore_selected_frame_args
   int level;
 };
 
-static int restore_selected_frame PARAMS ((PTR));
-
 static int
-restore_selected_frame (args)
-     PTR args;
+restore_selected_frame (void *args)
 {
   struct restore_selected_frame_args *fr =
   (struct restore_selected_frame_args *) args;
@@ -3813,8 +3745,7 @@ restore_selected_frame (args)
 }
 
 void
-restore_inferior_status (inf_status)
-     struct inferior_status *inf_status;
+restore_inferior_status (struct inferior_status *inf_status)
 {
   stop_signal = inf_status->stop_signal;
   stop_pc = inf_status->stop_pc;
@@ -3871,8 +3802,7 @@ restore_inferior_status (inf_status)
 }
 
 void
-discard_inferior_status (inf_status)
-     struct inferior_status *inf_status;
+discard_inferior_status (struct inferior_status *inf_status)
 {
   /* See save_inferior_status for info on stop_bpstat. */
   bpstat_clear (&inf_status->stop_bpstat);
@@ -3880,10 +3810,8 @@ discard_inferior_status (inf_status)
 }
 
 static void
-set_follow_fork_mode_command (arg, from_tty, c)
-     char *arg;
-     int from_tty;
-     struct cmd_list_element *c;
+set_follow_fork_mode_command (char *arg, int from_tty,
+			      struct cmd_list_element *c)
 {
   if (!STREQ (arg, "parent") &&
       !STREQ (arg, "child") &&
@@ -3896,18 +3824,14 @@ set_follow_fork_mode_command (arg, from_tty, c)
   follow_fork_mode_string = savestring (arg, strlen (arg));
 }
 
-
-
-static void build_infrun PARAMS ((void));
 static void
-build_infrun ()
+build_infrun (void)
 {
   stop_registers = xmalloc (REGISTER_BYTES);
 }
 
-
 void
-_initialize_infrun ()
+_initialize_infrun (void)
 {
   register int i;
   register int numsigs;

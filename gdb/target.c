@@ -444,6 +444,7 @@ cleanup_target (t)
   de_fault (to_thread_alive, (int (*)PARAMS ((int))) target_ignore);
   de_fault (to_stop, (void (*)PARAMS ((void))) target_ignore);
   de_fault (to_query, (int (*)PARAMS ((int /*char */ , char *, char *, int *))) target_ignore);
+  de_fault (to_rcmd, (void (*) (char *, struct gdb_file *)) tcomplain);
   de_fault (to_enable_exception_callback, (struct symtab_and_line * (*)PARAMS ((enum exception_event_kind, int))) nosupport_runtime);
   de_fault (to_get_current_exception_event, (struct exception_event_record * (*)PARAMS ((void))) nosupport_runtime);
 
@@ -527,6 +528,7 @@ update_current_target ()
       INHERIT (to_find_new_threads, t);
       INHERIT (to_stop, t);
       INHERIT (to_query, t);
+      INHERIT (to_rcmd, t);
       INHERIT (to_enable_exception_callback, t);
       INHERIT (to_get_current_exception_event, t);
       INHERIT (to_pid_to_exec_file, t);
@@ -1937,7 +1939,7 @@ debug_to_open (args, from_tty)
 {
   debug_target.to_open (args, from_tty);
 
-  fprintf_unfiltered (gdb_stderr, "target_open (%s, %d)\n", args, from_tty);
+  fprintf_unfiltered (gdb_stdlog, "target_open (%s, %d)\n", args, from_tty);
 }
 
 static void
@@ -1946,7 +1948,7 @@ debug_to_close (quitting)
 {
   debug_target.to_close (quitting);
 
-  fprintf_unfiltered (gdb_stderr, "target_close (%d)\n", quitting);
+  fprintf_unfiltered (gdb_stdlog, "target_close (%d)\n", quitting);
 }
 
 static void
@@ -1956,7 +1958,7 @@ debug_to_attach (args, from_tty)
 {
   debug_target.to_attach (args, from_tty);
 
-  fprintf_unfiltered (gdb_stderr, "target_attach (%s, %d)\n", args, from_tty);
+  fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n", args, from_tty);
 }
 
 
@@ -1966,7 +1968,7 @@ debug_to_post_attach (pid)
 {
   debug_target.to_post_attach (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_post_attach (%d)\n", pid);
+  fprintf_unfiltered (gdb_stdlog, "target_post_attach (%d)\n", pid);
 }
 
 static void
@@ -1976,7 +1978,7 @@ debug_to_require_attach (args, from_tty)
 {
   debug_target.to_require_attach (args, from_tty);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_require_attach (%s, %d)\n", args, from_tty);
 }
 
@@ -1987,7 +1989,7 @@ debug_to_detach (args, from_tty)
 {
   debug_target.to_detach (args, from_tty);
 
-  fprintf_unfiltered (gdb_stderr, "target_detach (%s, %d)\n", args, from_tty);
+  fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
 }
 
 static void
@@ -1998,7 +2000,7 @@ debug_to_require_detach (pid, args, from_tty)
 {
   debug_target.to_require_detach (pid, args, from_tty);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 	       "target_require_detach (%d, %s, %d)\n", pid, args, from_tty);
 }
 
@@ -2010,7 +2012,7 @@ debug_to_resume (pid, step, siggnal)
 {
   debug_target.to_resume (pid, step, siggnal);
 
-  fprintf_unfiltered (gdb_stderr, "target_resume (%d, %s, %s)\n", pid,
+  fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n", pid,
 		      step ? "step" : "continue",
 		      target_signal_to_name (siggnal));
 }
@@ -2024,40 +2026,40 @@ debug_to_wait (pid, status)
 
   retval = debug_target.to_wait (pid, status);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_wait (%d, status) = %d,   ", pid, retval);
-  fprintf_unfiltered (gdb_stderr, "status->kind = ");
+  fprintf_unfiltered (gdb_stdlog, "status->kind = ");
   switch (status->kind)
     {
     case TARGET_WAITKIND_EXITED:
-      fprintf_unfiltered (gdb_stderr, "exited, status = %d\n",
+      fprintf_unfiltered (gdb_stdlog, "exited, status = %d\n",
 			  status->value.integer);
       break;
     case TARGET_WAITKIND_STOPPED:
-      fprintf_unfiltered (gdb_stderr, "stopped, signal = %s\n",
+      fprintf_unfiltered (gdb_stdlog, "stopped, signal = %s\n",
 			  target_signal_to_name (status->value.sig));
       break;
     case TARGET_WAITKIND_SIGNALLED:
-      fprintf_unfiltered (gdb_stderr, "signalled, signal = %s\n",
+      fprintf_unfiltered (gdb_stdlog, "signalled, signal = %s\n",
 			  target_signal_to_name (status->value.sig));
       break;
     case TARGET_WAITKIND_LOADED:
-      fprintf_unfiltered (gdb_stderr, "loaded\n");
+      fprintf_unfiltered (gdb_stdlog, "loaded\n");
       break;
     case TARGET_WAITKIND_FORKED:
-      fprintf_unfiltered (gdb_stderr, "forked\n");
+      fprintf_unfiltered (gdb_stdlog, "forked\n");
       break;
     case TARGET_WAITKIND_VFORKED:
-      fprintf_unfiltered (gdb_stderr, "vforked\n");
+      fprintf_unfiltered (gdb_stdlog, "vforked\n");
       break;
     case TARGET_WAITKIND_EXECD:
-      fprintf_unfiltered (gdb_stderr, "execd\n");
+      fprintf_unfiltered (gdb_stdlog, "execd\n");
       break;
     case TARGET_WAITKIND_SPURIOUS:
-      fprintf_unfiltered (gdb_stderr, "spurious\n");
+      fprintf_unfiltered (gdb_stdlog, "spurious\n");
       break;
     default:
-      fprintf_unfiltered (gdb_stderr, "unknown???\n");
+      fprintf_unfiltered (gdb_stdlog, "unknown???\n");
       break;
     }
 
@@ -2071,7 +2073,7 @@ debug_to_post_wait (pid, status)
 {
   debug_target.to_post_wait (pid, status);
 
-  fprintf_unfiltered (gdb_stderr, "target_post_wait (%d, %d)\n",
+  fprintf_unfiltered (gdb_stdlog, "target_post_wait (%d, %d)\n",
 		      pid, status);
 }
 
@@ -2081,13 +2083,13 @@ debug_to_fetch_registers (regno)
 {
   debug_target.to_fetch_registers (regno);
 
-  fprintf_unfiltered (gdb_stderr, "target_fetch_registers (%s)",
+  fprintf_unfiltered (gdb_stdlog, "target_fetch_registers (%s)",
 		      regno != -1 ? REGISTER_NAME (regno) : "-1");
   if (regno != -1)
-    fprintf_unfiltered (gdb_stderr, " = 0x%x %d",
+    fprintf_unfiltered (gdb_stdlog, " = 0x%x %d",
 			(unsigned long) read_register (regno),
 			read_register (regno));
-  fprintf_unfiltered (gdb_stderr, "\n");
+  fprintf_unfiltered (gdb_stdlog, "\n");
 }
 
 static void
@@ -2097,12 +2099,12 @@ debug_to_store_registers (regno)
   debug_target.to_store_registers (regno);
 
   if (regno >= 0 && regno < NUM_REGS)
-    fprintf_unfiltered (gdb_stderr, "target_store_registers (%s) = 0x%x %d\n",
+    fprintf_unfiltered (gdb_stdlog, "target_store_registers (%s) = 0x%x %d\n",
 			REGISTER_NAME (regno),
 			(unsigned long) read_register (regno),
 			(unsigned long) read_register (regno));
   else
-    fprintf_unfiltered (gdb_stderr, "target_store_registers (%d)\n", regno);
+    fprintf_unfiltered (gdb_stdlog, "target_store_registers (%d)\n", regno);
 }
 
 static void
@@ -2110,7 +2112,7 @@ debug_to_prepare_to_store ()
 {
   debug_target.to_prepare_to_store ();
 
-  fprintf_unfiltered (gdb_stderr, "target_prepare_to_store ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_prepare_to_store ()\n");
 }
 
 static int
@@ -2125,7 +2127,7 @@ debug_to_xfer_memory (memaddr, myaddr, len, write, target)
 
   retval = debug_target.to_xfer_memory (memaddr, myaddr, len, write, target);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
 		      (unsigned int) memaddr,	/* possable truncate long long */
 		      len, write ? "write" : "read", retval);
@@ -2136,16 +2138,16 @@ debug_to_xfer_memory (memaddr, myaddr, len, write, target)
     {
       int i;
 
-      fputs_unfiltered (", bytes =", gdb_stderr);
+      fputs_unfiltered (", bytes =", gdb_stdlog);
       for (i = 0; i < retval; i++)
 	{
 	  if ((((long) &(myaddr[i])) & 0xf) == 0)
-	    fprintf_unfiltered (gdb_stderr, "\n");
-	  fprintf_unfiltered (gdb_stderr, " %02x", myaddr[i] & 0xff);
+	    fprintf_unfiltered (gdb_stdlog, "\n");
+	  fprintf_unfiltered (gdb_stdlog, " %02x", myaddr[i] & 0xff);
 	}
     }
 
-  fputc_unfiltered ('\n', gdb_stderr);
+  fputc_unfiltered ('\n', gdb_stdlog);
 
   return retval;
 }
@@ -2156,7 +2158,7 @@ debug_to_files_info (target)
 {
   debug_target.to_files_info (target);
 
-  fprintf_unfiltered (gdb_stderr, "target_files_info (xxx)\n");
+  fprintf_unfiltered (gdb_stdlog, "target_files_info (xxx)\n");
 }
 
 static int
@@ -2168,7 +2170,7 @@ debug_to_insert_breakpoint (addr, save)
 
   retval = debug_target.to_insert_breakpoint (addr, save);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_insert_breakpoint (0x%x, xxx) = %d\n",
 		      (unsigned long) addr, retval);
   return retval;
@@ -2183,7 +2185,7 @@ debug_to_remove_breakpoint (addr, save)
 
   retval = debug_target.to_remove_breakpoint (addr, save);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_breakpoint (0x%x, xxx) = %d\n",
 		      (unsigned long) addr, retval);
   return retval;
@@ -2194,7 +2196,7 @@ debug_to_terminal_init ()
 {
   debug_target.to_terminal_init ();
 
-  fprintf_unfiltered (gdb_stderr, "target_terminal_init ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_terminal_init ()\n");
 }
 
 static void
@@ -2202,7 +2204,7 @@ debug_to_terminal_inferior ()
 {
   debug_target.to_terminal_inferior ();
 
-  fprintf_unfiltered (gdb_stderr, "target_terminal_inferior ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_terminal_inferior ()\n");
 }
 
 static void
@@ -2210,7 +2212,7 @@ debug_to_terminal_ours_for_output ()
 {
   debug_target.to_terminal_ours_for_output ();
 
-  fprintf_unfiltered (gdb_stderr, "target_terminal_ours_for_output ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_terminal_ours_for_output ()\n");
 }
 
 static void
@@ -2218,7 +2220,7 @@ debug_to_terminal_ours ()
 {
   debug_target.to_terminal_ours ();
 
-  fprintf_unfiltered (gdb_stderr, "target_terminal_ours ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_terminal_ours ()\n");
 }
 
 static void
@@ -2228,7 +2230,7 @@ debug_to_terminal_info (arg, from_tty)
 {
   debug_target.to_terminal_info (arg, from_tty);
 
-  fprintf_unfiltered (gdb_stderr, "target_terminal_info (%s, %d)\n", arg,
+  fprintf_unfiltered (gdb_stdlog, "target_terminal_info (%s, %d)\n", arg,
 		      from_tty);
 }
 
@@ -2237,7 +2239,7 @@ debug_to_kill ()
 {
   debug_target.to_kill ();
 
-  fprintf_unfiltered (gdb_stderr, "target_kill ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_kill ()\n");
 }
 
 static void
@@ -2247,7 +2249,7 @@ debug_to_load (args, from_tty)
 {
   debug_target.to_load (args, from_tty);
 
-  fprintf_unfiltered (gdb_stderr, "target_load (%s, %d)\n", args, from_tty);
+  fprintf_unfiltered (gdb_stdlog, "target_load (%s, %d)\n", args, from_tty);
 }
 
 static int
@@ -2259,7 +2261,7 @@ debug_to_lookup_symbol (name, addrp)
 
   retval = debug_target.to_lookup_symbol (name, addrp);
 
-  fprintf_unfiltered (gdb_stderr, "target_lookup_symbol (%s, xxx)\n", name);
+  fprintf_unfiltered (gdb_stdlog, "target_lookup_symbol (%s, xxx)\n", name);
 
   return retval;
 }
@@ -2272,7 +2274,7 @@ debug_to_create_inferior (exec_file, args, env)
 {
   debug_target.to_create_inferior (exec_file, args, env);
 
-  fprintf_unfiltered (gdb_stderr, "target_create_inferior (%s, %s, xxx)\n",
+  fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx)\n",
 		      exec_file, args);
 }
 
@@ -2282,7 +2284,7 @@ debug_to_post_startup_inferior (pid)
 {
   debug_target.to_post_startup_inferior (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_post_startup_inferior (%d)\n",
+  fprintf_unfiltered (gdb_stdlog, "target_post_startup_inferior (%d)\n",
 		      pid);
 }
 
@@ -2292,7 +2294,7 @@ debug_to_acknowledge_created_inferior (pid)
 {
   debug_target.to_acknowledge_created_inferior (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_acknowledge_created_inferior (%d)\n",
+  fprintf_unfiltered (gdb_stdlog, "target_acknowledge_created_inferior (%d)\n",
 		      pid);
 }
 
@@ -2303,7 +2305,7 @@ debug_to_clone_and_follow_inferior (child_pid, followed_child)
 {
   debug_target.to_clone_and_follow_inferior (child_pid, followed_child);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_clone_and_follow_inferior (%d, %d)\n",
 		      child_pid, *followed_child);
 }
@@ -2313,7 +2315,7 @@ debug_to_post_follow_inferior_by_clone ()
 {
   debug_target.to_post_follow_inferior_by_clone ();
 
-  fprintf_unfiltered (gdb_stderr, "target_post_follow_inferior_by_clone ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_post_follow_inferior_by_clone ()\n");
 }
 
 static int
@@ -2324,7 +2326,7 @@ debug_to_insert_fork_catchpoint (pid)
 
   retval = debug_target.to_insert_fork_catchpoint (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_insert_fork_catchpoint (%d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_insert_fork_catchpoint (%d) = %d\n",
 		      pid, retval);
 
   return retval;
@@ -2338,7 +2340,7 @@ debug_to_remove_fork_catchpoint (pid)
 
   retval = debug_target.to_remove_fork_catchpoint (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_remove_fork_catchpoint (%d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_remove_fork_catchpoint (%d) = %d\n",
 		      pid, retval);
 
   return retval;
@@ -2352,7 +2354,7 @@ debug_to_insert_vfork_catchpoint (pid)
 
   retval = debug_target.to_insert_vfork_catchpoint (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_insert_vfork_catchpoint (%d)= %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_insert_vfork_catchpoint (%d)= %d\n",
 		      pid, retval);
 
   return retval;
@@ -2366,7 +2368,7 @@ debug_to_remove_vfork_catchpoint (pid)
 
   retval = debug_target.to_remove_vfork_catchpoint (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_remove_vfork_catchpoint (%d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_remove_vfork_catchpoint (%d) = %d\n",
 		      pid, retval);
 
   return retval;
@@ -2381,7 +2383,7 @@ debug_to_has_forked (pid, child_pid)
 
   has_forked = debug_target.to_has_forked (pid, child_pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_has_forked (%d, %d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_has_forked (%d, %d) = %d\n",
 		      pid, *child_pid, has_forked);
 
   return has_forked;
@@ -2396,7 +2398,7 @@ debug_to_has_vforked (pid, child_pid)
 
   has_vforked = debug_target.to_has_vforked (pid, child_pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_has_vforked (%d, %d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_has_vforked (%d, %d) = %d\n",
 		      pid, *child_pid, has_vforked);
 
   return has_vforked;
@@ -2409,7 +2411,7 @@ debug_to_can_follow_vfork_prior_to_exec ()
 
   can_immediately_follow_vfork = debug_target.to_can_follow_vfork_prior_to_exec ();
 
-  fprintf_unfiltered (gdb_stderr, "target_can_follow_vfork_prior_to_exec () = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_can_follow_vfork_prior_to_exec () = %d\n",
 		      can_immediately_follow_vfork);
 
   return can_immediately_follow_vfork;
@@ -2424,7 +2426,7 @@ debug_to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_chi
 {
   debug_target.to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child);
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_post_follow_vfork (%d, %d, %d, %d)\n",
 		    parent_pid, followed_parent, child_pid, followed_child);
 }
@@ -2437,7 +2439,7 @@ debug_to_insert_exec_catchpoint (pid)
 
   retval = debug_target.to_insert_exec_catchpoint (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_insert_exec_catchpoint (%d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_insert_exec_catchpoint (%d) = %d\n",
 		      pid, retval);
 
   return retval;
@@ -2451,7 +2453,7 @@ debug_to_remove_exec_catchpoint (pid)
 
   retval = debug_target.to_remove_exec_catchpoint (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_remove_exec_catchpoint (%d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_remove_exec_catchpoint (%d) = %d\n",
 		      pid, retval);
 
   return retval;
@@ -2466,7 +2468,7 @@ debug_to_has_execd (pid, execd_pathname)
 
   has_execd = debug_target.to_has_execd (pid, execd_pathname);
 
-  fprintf_unfiltered (gdb_stderr, "target_has_execd (%d, %s) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_has_execd (%d, %s) = %d\n",
 		      pid, (*execd_pathname ? *execd_pathname : "<NULL>"),
 		      has_execd);
 
@@ -2480,7 +2482,7 @@ debug_to_reported_exec_events_per_exec_call ()
 
   reported_exec_events = debug_target.to_reported_exec_events_per_exec_call ();
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_reported_exec_events_per_exec_call () = %d\n",
 		      reported_exec_events);
 
@@ -2512,7 +2514,7 @@ debug_to_has_syscall_event (pid, kind, syscall_id)
 	}
     }
 
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target_has_syscall_event (%d, %s, %d) = %d\n",
 		      pid, kind_spelling, *syscall_id, has_syscall_event);
 
@@ -2529,7 +2531,7 @@ debug_to_has_exited (pid, wait_status, exit_status)
 
   has_exited = debug_target.to_has_exited (pid, wait_status, exit_status);
 
-  fprintf_unfiltered (gdb_stderr, "target_has_exited (%d, %d, %d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_has_exited (%d, %d, %d) = %d\n",
 		      pid, wait_status, *exit_status, has_exited);
 
   return has_exited;
@@ -2540,7 +2542,7 @@ debug_to_mourn_inferior ()
 {
   debug_target.to_mourn_inferior ();
 
-  fprintf_unfiltered (gdb_stderr, "target_mourn_inferior ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
 }
 
 static int
@@ -2550,7 +2552,7 @@ debug_to_can_run ()
 
   retval = debug_target.to_can_run ();
 
-  fprintf_unfiltered (gdb_stderr, "target_can_run () = %d\n", retval);
+  fprintf_unfiltered (gdb_stdlog, "target_can_run () = %d\n", retval);
 
   return retval;
 }
@@ -2561,7 +2563,7 @@ debug_to_notice_signals (pid)
 {
   debug_target.to_notice_signals (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_notice_signals (%d)\n", pid);
+  fprintf_unfiltered (gdb_stdlog, "target_notice_signals (%d)\n", pid);
 }
 
 static int
@@ -2572,7 +2574,7 @@ debug_to_thread_alive (pid)
 
   retval = debug_target.to_thread_alive (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_thread_alive (%d) = %d\n",
+  fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
 		      pid, retval);
 
   return retval;
@@ -2583,7 +2585,7 @@ debug_to_stop ()
 {
   debug_target.to_stop ();
 
-  fprintf_unfiltered (gdb_stderr, "target_stop ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_stop ()\n");
 }
 
 static int
@@ -2597,9 +2599,17 @@ debug_to_query (type, req, resp, siz)
 
   retval = debug_target.to_query (type, req, resp, siz);
 
-  fprintf_unfiltered (gdb_stderr, "target_query (%c, %s, %s,  %d) = %d\n", type, req, resp, *siz, retval);
+  fprintf_unfiltered (gdb_stdlog, "target_query (%c, %s, %s,  %d) = %d\n", type, req, resp, *siz, retval);
 
   return retval;
+}
+
+static void
+debug_to_rcmd (char *command,
+	       struct gdb_file *outbuf)
+{
+  debug_target.to_rcmd (command, outbuf);
+  fprintf_unfiltered (gdb_stdlog, "target_rcmd (%s, ...)\n", command);
 }
 
 static struct symtab_and_line *
@@ -2609,7 +2619,7 @@ debug_to_enable_exception_callback (kind, enable)
 {
   struct symtab_and_line *result;
   result = debug_target.to_enable_exception_callback (kind, enable);
-  fprintf_unfiltered (gdb_stderr,
+  fprintf_unfiltered (gdb_stdlog,
 		      "target get_exception_callback_sal (%d, %d)\n",
 		      kind, enable);
   return result;
@@ -2620,7 +2630,7 @@ debug_to_get_current_exception_event ()
 {
   struct exception_event_record *result;
   result = debug_target.to_get_current_exception_event ();
-  fprintf_unfiltered (gdb_stderr, "target get_current_exception_event ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target get_current_exception_event ()\n");
   return result;
 }
 
@@ -2632,7 +2642,7 @@ debug_to_pid_to_exec_file (pid)
 
   exec_file = debug_target.to_pid_to_exec_file (pid);
 
-  fprintf_unfiltered (gdb_stderr, "target_pid_to_exec_file (%d) = %s\n",
+  fprintf_unfiltered (gdb_stdlog, "target_pid_to_exec_file (%d) = %s\n",
 		      pid, exec_file);
 
   return exec_file;
@@ -2646,7 +2656,7 @@ debug_to_core_file_to_sym_file (core)
 
   sym_file = debug_target.to_core_file_to_sym_file (core);
 
-  fprintf_unfiltered (gdb_stderr, "target_core_file_to_sym_file (%s) = %s\n",
+  fprintf_unfiltered (gdb_stdlog, "target_core_file_to_sym_file (%s) = %s\n",
 		      core, sym_file);
 
   return sym_file;
@@ -2707,6 +2717,7 @@ setup_target_debug ()
   current_target.to_thread_alive = debug_to_thread_alive;
   current_target.to_stop = debug_to_stop;
   current_target.to_query = debug_to_query;
+  current_target.to_rcmd = debug_to_rcmd;
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
@@ -2719,6 +2730,19 @@ static char targ_desc[] =
 "Names of targets and files being debugged.\n\
 Shows the entire stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
+
+static void
+do_monitor_command (char *cmd,
+		 int from_tty)
+{
+  if ((current_target.to_rcmd == (void*) tcomplain)
+      || (current_target.to_rcmd == debug_to_rcmd
+	  && (debug_target.to_rcmd == (void*) tcomplain)))
+    {
+      error ("\"monitor\" command not supported by this target.\n");
+    }
+  target_rcmd (cmd, gdb_stdtarg);
+}
 
 void
 initialize_targets ()
@@ -2735,6 +2759,10 @@ initialize_targets ()
 			     "Set target debugging.\n\
 When non-zero, target debugging is enabled.", &setlist),
 		      &showlist);
+
+
+  add_com ("monitor", class_obscure, do_monitor_command,
+	   "Send a command to the remote monitor (remote targets only).");
 
   if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
     abort ();

@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1997, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ if [get_compiler_info ${binfile} "c++"] {
     return -1
 }
 
+source ${binfile}.ci
 
 # Check to see if we have an executable to test.  If not, then either we
 # haven't tried to compile one, or the compilation failed for some reason.
@@ -678,12 +679,19 @@ proc test_virtual_calls {} {
     global gdb_prompt
     global GDB
     global nl
+    global gcc_compiled
 
     if [target_info exists gdb,cannot_call_functions] {
 	setup_xfail "*-*-*" 2416
 	fail "This target can not call functions"
 	return 0
     }
+
+    # FIXME: In fall 1998, GCC's virtual function type info was changed,
+    # which causes GDB to be unable to resolve these calls.  Until the
+    # problem is fixed, XFAIL these tests. -sts 1999-08-02
+
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pAe->f()\n"
     gdb_expect {
@@ -706,6 +714,8 @@ proc test_virtual_calls {} {
 	eof { fail "print pAe->f() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
+
     send_gdb "print pAa->f()\n"
     gdb_expect {
 	-re ".* = 1$nl$gdb_prompt $" { pass "print pAa->f()" }
@@ -717,6 +727,8 @@ proc test_virtual_calls {} {
 	timeout { fail "print pAa->f() (timeout)" }
 	eof { fail "print pAa->f() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pDe->vg()\n"
     gdb_expect {
@@ -730,6 +742,8 @@ proc test_virtual_calls {} {
 	eof { fail "print pDe->vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
+
     send_gdb "print pADe->vg()\n"
     gdb_expect {
 	-re ".* = 202$nl$gdb_prompt $" { pass "print pADe->vg()" }
@@ -741,6 +755,8 @@ proc test_virtual_calls {} {
 	timeout { fail "print pADe->vg() (timeout)" }
 	eof { fail "print pADe->vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pDd->vg()\n"
     gdb_expect {
@@ -754,6 +770,8 @@ proc test_virtual_calls {} {
 	eof { fail "print pDd->vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
+
     send_gdb "print pEe->vvb()\n"
     gdb_expect {
 	-re ".* = 411$nl$gdb_prompt $" { pass "print pEe->vvb()" }
@@ -765,6 +783,8 @@ proc test_virtual_calls {} {
 	timeout { fail "print pEe->vvb() (timeout)" }
 	eof { fail "print pEe->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pVB->vvb()\n"
     gdb_expect {
@@ -778,6 +798,8 @@ proc test_virtual_calls {} {
 	eof { fail "print pVB->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
+
     send_gdb "print pBe->vvb()\n"
     gdb_expect {
 	-re ".* = 411$nl$gdb_prompt $" { pass "print pBe->vvb()" }
@@ -789,6 +811,8 @@ proc test_virtual_calls {} {
 	timeout { fail "print pBe->vvb() (timeout)" }
 	eof { fail "print pBe->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pDe->vvb()\n"
     gdb_expect {
@@ -802,6 +826,8 @@ proc test_virtual_calls {} {
 	eof { fail "print pDe->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
+
     send_gdb "print pEe->vd()\n"
     gdb_expect {
 	-re ".* = 282$nl$gdb_prompt $" { pass "print pEe->vd()" }
@@ -814,6 +840,8 @@ proc test_virtual_calls {} {
 	eof { fail "print pEe->vd() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
+
     send_gdb "print pEe->fvb()\n"
     gdb_expect {
 	-re ".* = 311$nl$gdb_prompt $" { pass "print pEe->fvb()" }
@@ -825,6 +853,8 @@ proc test_virtual_calls {} {
 	timeout { fail "print pEe->fvb() (timeout)" }
 	eof { fail "print pEe->fvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pEe->D::vg()\n"
     setup_xfail "*-*-*"

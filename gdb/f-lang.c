@@ -920,7 +920,7 @@ get_bf_for_fcn (the_function)
      item at the head of the queue is the one you want)  */
 
   if (saved_bf_list == NULL)
-    fatal ("cannot get .bf node off empty list");
+    internal_error ("cannot get .bf node off empty list");
 
   if (current_head_bf_list != NULL)
     if (current_head_bf_list->symnum_fcn == the_function)

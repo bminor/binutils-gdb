@@ -1,5 +1,5 @@
 /* Memory-access and commands for "inferior" process, for GDB.
-   Copyright 1986, 87, 88, 89, 91, 92, 95, 96, 1998 
+   Copyright 1986, 87, 88, 89, 91, 92, 95, 96, 1998, 1999
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -35,6 +35,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "event-loop.h"
+#include "parser-defs.h"
 
 /* Functions exported for general use: */
 
@@ -63,6 +64,8 @@ static void unset_command PARAMS ((char *, int));
 static void float_info PARAMS ((char *, int));
 
 static void detach_command PARAMS ((char *, int));
+
+static void interrupt_target_command (char *args, int from_tty);
 
 #if !defined (DO_REGISTERS_INFO)
 static void do_registers_info PARAMS ((int, int));
@@ -707,10 +710,6 @@ breakpoint_auto_delete_contents (arg)
    Otherwise, run_stack-dummy returns 1 (the frame will eventually be popped
    when we do hit that breakpoint).  */
 
-/* DEBUG HOOK:  4 => return instead of letting the stack dummy run.  */
-
-static int stack_dummy_testing = 0;
-
 int
 run_stack_dummy (addr, buffer)
      CORE_ADDR addr;
@@ -720,11 +719,7 @@ run_stack_dummy (addr, buffer)
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
-  if (stack_dummy_testing & 4)
-    {
-      POP_FRAME;
-      return (0);
-    }
+
   if (CALL_DUMMY_BREAKPOINT_OFFSET_P)
     {
       struct breakpoint *bpt;
@@ -899,7 +894,7 @@ finish_command_continuation (arg)
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (!value_type)
-	fatal ("internal: finish_command: function has no target type");
+	internal_error ("finish_command: function has no target type");
 
       if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	{
@@ -1052,7 +1047,7 @@ finish_command (arg, from_tty)
 
 	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
 	  if (!value_type)
-	    fatal ("internal: finish_command: function has no target type");
+	    internal_error ("finish_command: function has no target type");
 
 	  /* FIXME: Shouldn't we do the cleanups before returning? */
 	  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)

@@ -23,7 +23,9 @@
 #include "defs.h"
 #include "serial.h"
 #include <sys/types.h>
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>
@@ -70,7 +72,7 @@ pipe_open (scb, name)
      serial_t scb;
      const char *name;
 {
-#if !defined(O_NONBLOCK) || !defined(F_GETFL) || !defined(F_SETFL)
+#if !defined(O_NONBLOCK) || !defined(F_GETFL) || !defined(F_SETFL) || !HAVE_SOCKETPAIR
   return -1;
 #else
   struct pipe_state *state;

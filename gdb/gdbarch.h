@@ -1013,10 +1013,10 @@ extern disassemble_info tm_print_insn_info;
 
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
 #ifndef D10V_MAKE_DADDR
-#define D10V_MAKE_DADDR(X) (fatal ("gdbarch: D10V_MAKE_DADDR"), 0)
+#define D10V_MAKE_DADDR(X) (internal_error ("gdbarch: D10V_MAKE_DADDR"), 0)
 #endif
 #ifndef D10V_MAKE_IADDR
-#define D10V_MAKE_IADDR(X) (fatal ("gdbarch: D10V_MAKE_IADDR"), 0)
+#define D10V_MAKE_IADDR(X) (internal_error ("gdbarch: D10V_MAKE_IADDR"), 0)
 #endif
 
 
@@ -1042,7 +1042,7 @@ extern int generic_register_convertible_not PARAMS ((int reg_nr));
 /* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
-#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (fatal ("gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
+#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error ("gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
 #else
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)

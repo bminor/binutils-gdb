@@ -35,11 +35,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 /* Microsoft C's stat.h doesn't define all the POSIX file modes.  */
 #ifndef S_IROTH
@@ -487,22 +482,11 @@ close_ports ()
    inconsistent state.  */
 
 static NORETURN void
-#ifdef ANSI_PROTOTYPES
 mips_error (char *string,...)
-#else
-mips_error (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, string);
-#else
-  char *string;
-  va_start (args);
-  string = va_arg (args, char *);
-#endif
 
   target_terminal_ours ();
   wrap_here ("");		/* Force out any buffered output */
@@ -1279,7 +1263,7 @@ mips_request (cmd, addr, data, perr, timeout, buff)
   if (cmd != '\0')
     {
       if (mips_need_reply)
-	fatal ("mips_request: Trying to send command before reply");
+	internal_error ("mips_request: Trying to send command before reply");
       sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr_nz (addr), paddr_nz (data));
       mips_send_packet (buff, 1);
       mips_need_reply = 1;
@@ -1289,7 +1273,7 @@ mips_request (cmd, addr, data, perr, timeout, buff)
     return 0;
 
   if (!mips_need_reply)
-    fatal ("mips_request: Trying to get reply before command");
+    internal_error ("mips_request: Trying to get reply before command");
 
   mips_need_reply = 0;
 

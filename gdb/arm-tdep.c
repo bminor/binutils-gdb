@@ -47,30 +47,45 @@
 #define ROUND_DOWN(n,a) 	((n) & ~((a) - 1))
 #define ROUND_UP(n,a) 		(((n) + (a) - 1) & ~((a) - 1))
 
-static char *APCS_register_names[] =
-{"a1", "a2", "a3", "a4",	/*  0  1  2  3 */
- "v1", "v2", "v3", "v4",	/*  4  5  6  7 */
- "v5", "v6", "sl", "fp",	/*  8  9 10 11 */
- "ip", "sp", "lr", "pc",	/* 12 13 14 15 */
- "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
- "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
- "fps", "ps"} /* 24 25       */ ;
+static char *apcs_register_names[] =
+{ "a1", "a2", "a3", "a4", /*  0  1  2  3 */
+  "v1", "v2", "v3", "v4", /*  4  5  6  7 */
+  "v5", "v6", "sl", "fp", /*  8  9 10 11 */
+  "ip", "sp", "lr", "pc", /* 12 13 14 15 */
+  "f0", "f1", "f2", "f3", /* 16 17 18 19 */
+  "f4", "f5", "f6", "f7", /* 20 21 22 23 */
+  "fps","ps" }            /* 24 25       */;
 
 /* These names are the ones which gcc emits, and 
    I find them less confusing.  Toggle between them
    using the `othernames' command. */
 static char *additional_register_names[] =
-{"r0", "r1", "r2", "r3",	/*  0  1  2  3 */
- "r4", "r5", "r6", "r7",	/*  4  5  6  7 */
- "r8", "r9", "r10", "r11",	/*  8  9 10 11 */
- "r12", "r13", "r14", "pc",	/* 12 13 14 15 */
- "f0", "f1", "f2", "f3",	/* 16 17 18 19 */
- "f4", "f5", "f6", "f7",	/* 20 21 22 23 */
- "fps", "ps"} /* 24 25       */ ;
+{ "r0", "r1", "r2", "r3", /*  0  1  2  3 */
+  "r4", "r5", "r6", "r7",    /*  4  5  6  7 */
+  "r8", "r9", "r10", "r11",  /*  8  9 10 11 */
+  "r12", "r13", "r14", "pc", /* 12 13 14 15 */
+  "f0", "f1", "f2", "f3",    /* 16 17 18 19 */
+  "f4", "f5", "f6", "f7",    /* 20 21 22 23 */
+  "fps","ps" }               /* 24 25       */;
 
 /* By default use the APCS registers names */
 
-char **arm_register_names = APCS_register_names;
+char **arm_register_names = apcs_register_names;
+/* This is the variable the is set with "set disassembly-flavor",
+ and its legitimate values. */
+static char apcs_flavor[] = "apcs";
+static char r_prefix_flavor[] = "r-prefix";
+static char *valid_flavors[] = {
+  apcs_flavor,
+  r_prefix_flavor,
+  NULL
+};
+static char *disassembly_flavor = apcs_flavor;
+
+/* This is used to keep the bfd arch_info in sync with the disassembly flavor.  */
+static void set_disassembly_flavor_sfunc PARAMS ((char *, int, \
+						  struct cmd_list_element *));
+static void set_disassembly_flavor ();
 
 /* Should call_function allocate stack space for a struct return?  */
 /* The system C compiler uses a similar structure return convention to gcc */
@@ -167,12 +182,17 @@ int
 arm_frameless_function_invocation (fi)
      struct frame_info *fi;
 {
-  int frameless;
   CORE_ADDR func_start, after_prologue;
+  int frameless;
+  
   func_start = (get_pc_function_start ((fi)->pc) + FUNCTION_START_OFFSET);
   after_prologue = func_start;
   SKIP_PROLOGUE (after_prologue);
-  frameless = (after_prologue == func_start);
+  /* There are some frameless functions whose first two instructions
+     follow the standard APCS form, in which case after_prologue
+     will be func_start + 8. */
+  
+  frameless = (after_prologue < func_start + 12);
   return frameless;
 }
 
@@ -226,11 +246,12 @@ arm_skip_prologue (pc)
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
 
-  /* See what the symbol table says. */
+  /* See what the symbol table says.  */
+  
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       sal = find_pc_line (func_addr, 0);
-      if (sal.line != 0 && sal.end < func_end)
+      if ((sal.line != 0) && (sal.end < func_end))
 	return sal.end;
     }
 
@@ -464,20 +485,65 @@ save_prologue_cache (fi)
    4) the offset from the stack pointer to the frame pointer
    This information is stored in the "extra" fields of the frame_info.
 
-   A typical Arm function prologue might look like this:
-   mov    ip, sp
-   stmfd  sp!, {fp, ip, lr, pc}
-   sub    fp, ip, #4
-   sub    sp, sp, #16
+   There are two basic forms for the ARM prologue.  The fixed argument
+   function call will look like:
+   
+	mov    ip, sp
+	stmfd  sp!, {fp, ip, lr, pc}
+	sub    fp, ip, #4
+        [sub sp, sp, #4]
+
    Which would create this stack frame (offsets relative to FP):
-   IP ->   4    (caller's stack)
-   FP ->   0    PC (points to address of stmfd instruction + 12 in callee)
-   -4   LR (return address in caller)
-   -8   IP (copy of caller's SP)
-   -12  FP (caller's FP)
-   SP -> -28    Local variables
+     IP ->   4	(caller's stack)
+     FP ->   0	PC (points to address of stmfd instruction + 8 in callee)
+	    -4	LR (return address in caller)
+	    -8	IP (copy of caller's SP)
+     	   -12	FP (caller's FP)
+     SP -> -28	Local variables
+     
    The frame size would thus be 32 bytes, and the frame offset would be
-   28 bytes.  */
+   28 bytes.  The stmfd call can also save any of the vN registers it
+   plans to use, which increases the frame size accordingly.
+
+   Note: The stored PC is 8 off of the STMFD instruction that stored it
+   because the ARM Store instructions always store PC + 8 when you read
+   the PC register.
+   
+   A variable argument function call will look like:
+
+	mov    ip, sp
+	stmfd  sp!, {a1, a2, a3, a4}
+	stmfd  sp!, {fp, ip, lr, pc}
+	sub    fp, ip, #20
+   
+   Which would create this stack frame (offsets relative to FP):
+     IP ->  20	(caller's stack)
+            16  A4
+	    12  A3
+	     8  A2
+	     4  A1
+     FP ->   0	PC (points to address of stmfd instruction + 8 in callee)
+	    -4	LR (return address in caller)
+	    -8	IP (copy of caller's SP)
+     	   -12	FP (caller's FP)
+     SP -> -28	Local variables
+
+   The frame size would thus be 48 bytes, and the frame offset would be
+   28 bytes.
+
+   There is another potential complication, which is that the optimizer
+   will try to separate the store of fp in the "stmfd" instruction from
+   the "sub fp, ip, #NN" instruction.  Almost anything can be there, so
+   we just key on the stmfd, and then scan for the "sub fp, ip, #NN"...
+
+   Also, note, the original version of the ARM toolchain claimed that there
+   should be an
+
+   instruction at the end of the prologue.  I have never seen GCC produce
+   this, and the ARM docs don't mention it.  We still test for it below in
+   case it happens...
+   
+*/
 
 static void
 arm_scan_prologue (fi)
@@ -519,56 +585,106 @@ arm_scan_prologue (fi)
   else
     {
       /* Get address of the stmfd in the prologue of the callee; the saved
-         PC is the address of the stmfd + 12.  */
-      prologue_start = ADDR_BITS_REMOVE (read_memory_integer (fi->frame, 4)) - 12;
-      prologue_end = prologue_start + 40;	/* FIXME: should be big enough */
+         PC is the address of the stmfd + 8.  */
+      prologue_start = ADDR_BITS_REMOVE(read_memory_integer (fi->frame, 4))
+	- 8;
+      prologue_end = prologue_start + 64; /* This is all the insn's
+					     that could be in the prologue,
+					     plus room for 5 insn's inserted
+					     by the scheduler.  */
     }
 
   /* Now search the prologue looking for instructions that set up the
-     frame pointer, adjust the stack pointer, and save registers.  */
+     frame pointer, adjust the stack pointer, and save registers.
+     
+     Be careful, however, and if it doesn't look like a prologue,
+     don't try to scan it.  If, for instance, a frameless function
+     begins with stmfd sp!, then we will tell ourselves there is
+     a frame, which will confuse stack traceback, as well ad"finish" 
+     and other operations that rely on a knowledge of the stack
+     traceback.
+
+     In the APCS, the prologue should start with  "mov ip, sp" so
+     if we don't see this as the first insn, we will stop.  */
 
   sp_offset = fp_offset = 0;
-  for (current_pc = prologue_start; current_pc < prologue_end; current_pc += 4)
+
+  if (read_memory_unsigned_integer (prologue_start, 4) 
+                                           == 0xe1a0c00d)  /* mov ip, sp */
     {
-      unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
-
-      if ((insn & 0xffff0000) == 0xe92d0000)	/* stmfd sp!, {..., r7, lr} */
+      for (current_pc = prologue_start +4; current_pc < prologue_end;
+	   current_pc += 4)
 	{
-	  int mask = insn & 0xffff;
-
-	  /* Calculate offsets of saved registers. */
-	  for (regno = PC_REGNUM; regno >= 0; regno--)
-	    if (mask & (1 << regno))
-	      {
-		sp_offset -= 4;
-		fi->fsr.regs[regno] = sp_offset;
-	      }
+	  unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
+	  
+	  if ((insn & 0xffff0000) == 0xe92d0000)
+	    /* stmfd sp!, {..., fp, ip, lr, pc}
+	       or
+	       stmfd sp!, {a1, a2, a3, a4}  */
+	    {
+	      int mask = insn & 0xffff;
+	      
+	      /* Calculate offsets of saved registers. */
+	      for (regno = PC_REGNUM; regno >= 0; regno--)
+		if (mask & (1 << regno))
+		  {
+		    sp_offset -= 4;
+		    fi->fsr.regs[regno] = sp_offset;
+		  }
+	    }
+	  else if ((insn & 0xfffff000) == 0xe24cb000)	  /* sub fp, ip #n */
+	    {
+	      unsigned imm = insn & 0xff;		  /* immediate value */
+	      unsigned rot = (insn & 0xf00) >> 7;	  /* rotate amount */
+	      imm = (imm >> rot) | (imm << (32-rot));
+	      fp_offset = -imm;
+	      fi->framereg = FP_REGNUM;
+	    }
+	  else if ((insn & 0xfffff000) == 0xe24dd000)	  /* sub sp, sp #n */
+	    {
+	      unsigned imm = insn & 0xff;		  /* immediate value */
+	      unsigned rot = (insn & 0xf00) >> 7;	  /* rotate amount */
+	      imm = (imm >> rot) | (imm << (32-rot));
+	      sp_offset -= imm;
+	    }
+	  else if ((insn & 0xffff7fff) == 0xed6d0103) /* stfe f?, [sp, -#c]! */
+	    {
+	      sp_offset -= 12;
+	      regno = F0_REGNUM + ((insn >> 12) & 0x07);
+	      fi->fsr.regs[regno] = sp_offset;
+	    }
+	  else if ((insn & 0xffbf0fff) == 0xec2d0200) /* sfmfd f0, 4, [sp!] */
+	    {
+	      int n_saved_fp_regs, i;
+	      unsigned int fp_start_reg, fp_bound_reg;
+	      
+	      if ((insn & 0x800) == 0x800) /* N0 is set */
+		{  
+		  if ((insn & 0x40000) == 0x40000) /* N1 is set */
+		    n_saved_fp_regs = 3;
+		  else
+		    n_saved_fp_regs = 1;
+		}
+	      else
+		{  
+		  if ((insn & 0x40000) == 0x40000) /* N1 is set */
+		    n_saved_fp_regs = 2;
+		  else
+		    n_saved_fp_regs = 4;
+		}
+	      
+	      fp_start_reg = F0_REGNUM + ((insn >> 12) & 0x7);
+	      fp_bound_reg = fp_start_reg + n_saved_fp_regs;
+	      for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
+		{
+		  sp_offset -= 12;
+		  fi->fsr.regs[fp_start_reg++] = sp_offset;
+		}
+	    }
+	  else
+	    continue;  /* The optimizer might shove anything into the
+			  prologue, so we just skip what we don't recognize. */
 	}
-      else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
-	{
-	  unsigned imm = insn & 0xff;	/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
-	  imm = (imm >> rot) | (imm << (32 - rot));
-	  fp_offset = -imm;
-	  fi->framereg = FP_REGNUM;
-	}
-      else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
-	{
-	  unsigned imm = insn & 0xff;	/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
-	  imm = (imm >> rot) | (imm << (32 - rot));
-	  sp_offset -= imm;
-	}
-      else if ((insn & 0xffff7fff) == 0xed6d0103)	/* stfe f?, [sp, -#c]! */
-	{
-	  sp_offset -= 12;
-	  regno = F0_REGNUM + ((insn >> 12) & 0x07);
-	  fi->fsr.regs[regno] = sp_offset;
-	}
-      else if (insn == 0xe1a0c00d)	/* mov ip, sp */
-	continue;
-      else
-	break;			/* not a recognized prologue instruction */
     }
 
   /* The frame size is just the negative of the offset (from the original SP)
@@ -576,7 +692,7 @@ arm_scan_prologue (fi)
      [new FP] - [new SP].  */
   fi->framesize = -sp_offset;
   fi->frameoffset = fp_offset - sp_offset;
-
+  
   save_prologue_cache (fi);
 }
 
@@ -685,11 +801,15 @@ arm_frame_chain (fi)
    sp.  This is tricky  because we sometimes don't use an explicit
    frame pointer, and the previous stack pointer isn't necessarily recorded
    on the stack.  The only reliable way to get this info is to
-   examine the prologue.  */
+   examine the prologue.
+   FROMLEAF is a little confusing, it means this is the next frame up
+   the chain AFTER a frameless function.  If this is true, then the
+   frame value for this frame is still in the fp register.  */
 
 void
-arm_init_extra_frame_info (fi)
-     struct frame_info *fi;
+arm_init_extra_frame_info (fromleaf, fi)
+     int fromleaf;
+     struct frame_info * fi;
 {
   int reg;
 
@@ -715,12 +835,16 @@ arm_init_extra_frame_info (fi)
 
       if (!fi->next)		/* this is the innermost frame? */
 	fi->frame = read_register (fi->framereg);
-      else
-	/* not the innermost frame */
-	/* If we have an FP,  the callee saved it. */ if (fi->framereg == FP_REGNUM || fi->framereg == THUMB_FP_REGNUM)
-	if (fi->next->fsr.regs[fi->framereg] != 0)
-	  fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
-					   4);
+      else			 	/* not the innermost frame */
+	/* If we have an FP,  the callee saved it. */
+	if (fi->framereg == FP_REGNUM || fi->framereg == THUMB_FP_REGNUM)
+	  if (fi->next->fsr.regs[fi->framereg] != 0)
+	    fi->frame = read_memory_integer (fi->next->fsr.regs[fi->framereg],
+					     4);
+          else if (fromleaf) /* If we were called by a frameless fn.
+				 then our frame is still in the frame pointer
+				 register on the board... */
+	    fi->frame = read_fp ();
 
       /* Calculate actual addresses of saved registers using offsets determined
          by arm_scan_prologue.  */
@@ -1058,7 +1182,7 @@ arm_float_info ()
 
   type = (status >> 24) & 127;
   printf ("%s FPU type %d\n",
-	  (status & (1 << 31)) ? "Hardware" : "Software",
+	  (status & (1<<31)) ? "Hardware" : "Software",
 	  type);
   fputs ("mask: ", stdout);
   print_fpu_flags (status >> 16);
@@ -1066,21 +1190,57 @@ arm_float_info ()
   print_fpu_flags (status);
 }
 
+/* If the disassembly mode is APCS, we have to also switch the
+   bfd mach_type.  This function is run in the set disassembly_flavor
+   command, and does that.  */
+
+static void
+set_disassembly_flavor_sfunc (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  set_disassembly_flavor ();
+  
+  if (disassembly_flavor_hook != NULL)
+    disassembly_flavor_hook(args, from_tty);
+}
+
+static void
+set_disassembly_flavor ()
+{
+  if (disassembly_flavor == apcs_flavor)
+    {
+      if (arm_toggle_regnames () == 0)
+	arm_toggle_regnames ();
+      arm_register_names = apcs_register_names;
+    }
+  else if (disassembly_flavor == r_prefix_flavor)
+    {
+      if (arm_toggle_regnames () == 1)
+	arm_toggle_regnames ();
+      arm_register_names =  additional_register_names;
+    }       
+}
+
+/* arm_othernames implements the "othernames" command.  This is kind of
+   hacky, and I prefer the set-show disassembly-flavor which is also used
+   for the x86 gdb.  I will keep this around, however, in case anyone is
+   actually using it. */
+
 static void
 arm_othernames ()
 {
-
-  if (arm_register_names == APCS_register_names)
+  if (disassembly_flavor == r_prefix_flavor)
     {
-      arm_register_names = additional_register_names;
-      arm_toggle_regnames ();
+      disassembly_flavor = apcs_flavor;
+      set_disassembly_flavor ();
     }
   else
     {
-      arm_register_names = APCS_register_names;
-      arm_toggle_regnames ();
+      disassembly_flavor = r_prefix_flavor;
+      set_disassembly_flavor ();
     }
-
 }
 
 /* FIXME:  Fill in with the 'right thing', see asm 
@@ -1646,23 +1806,37 @@ arm_skip_stub (pc)
 void
 _initialize_arm_tdep ()
 {
-  int regname_is_APCS = (arm_register_names == APCS_register_names);
+  struct cmd_list_element *new_cmd;
 
   tm_print_insn = gdb_print_insn_arm;
-
+  
   /* Sync the opcode insn printer with our register viewer: */
 
-  if (arm_toggle_regnames () != regname_is_APCS)
+  if (arm_toggle_regnames () != 1)
     arm_toggle_regnames ();
 
+  /* Add the deprecated "othernames" command */
+  
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the other set of register names.");
 
+  /* Add the disassembly-flavor command */
+  
+  new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
+				  valid_flavors,
+				  (char *) &disassembly_flavor,
+				  "Set the disassembly flavor, \
+the valid values are \"apcs\" and \"r-prefix\", \
+and the default value is \"apcs\".",
+				  &setlist);
+  new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
+  add_show_from_set(new_cmd, &showlist);
+  
   /* ??? Maybe this should be a boolean.  */
   add_show_from_set (add_set_cmd ("apcs32", no_class,
-				  var_zinteger, (char *) &arm_apcs_32,
-			       "Set usage of ARM 32-bit mode.\n", &setlist),
-		     &showlist);
+				  var_zinteger, (char *)&arm_apcs_32,
+				  "Set usage of ARM 32-bit mode.\n", &setlist),
+		     & showlist);
 
 }
 

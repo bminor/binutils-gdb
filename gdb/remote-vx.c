@@ -1026,8 +1026,8 @@ vx_wait (pid_to_wait_for, status)
 	  sleep_ms (200);	/* FIXME Don't kill the network too badly */
 	}
       else if (pid != inferior_pid)
-	fatal ("Bad pid for debugged task: %s\n",
-	       local_hex_string ((unsigned long) pid));
+	internal_error ("Bad pid for debugged task: %s\n",
+			local_hex_string ((unsigned long) pid));
     }
   while (pid == 0);
 

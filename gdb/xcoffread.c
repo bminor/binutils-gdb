@@ -196,7 +196,7 @@ static struct complaint eb_complaint =
 {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
 static void
-xcoff_initial_scan PARAMS ((struct objfile *, struct section_offsets *, int));
+xcoff_initial_scan PARAMS ((struct objfile *, int));
 
 static void
 scan_xcoff_symtab PARAMS ((struct section_offsets *, struct objfile *));
@@ -2230,7 +2230,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 
   char *sraw_symbol;
   struct internal_syment symbol;
-  union internal_auxent main_aux;
+  union internal_auxent main_aux[5];
   unsigned int ssymnum;
 
   char *last_csect_name = NULL;	/* last seen csect's name and value */
@@ -2279,7 +2279,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 	    union internal_auxent csect_aux;
 	    unsigned int symnum_before = ssymnum;
 
-	    swap_sym (&symbol, &main_aux, &namestring, &sraw_symbol,
+	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
 	    if (symbol.n_numaux > 1)
 	      {
@@ -2293,7 +2293,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 		   &csect_aux);
 	      }
 	    else
-	      csect_aux = main_aux;
+	      csect_aux = main_aux[0];
 
 	    /* If symbol name starts with ".$" or "$", ignore it.  */
 	    if (namestring[0] == '$'
@@ -2401,7 +2401,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 
 		    if (first_fun_line_offset == 0 && symbol.n_numaux > 1)
 		      first_fun_line_offset =
-			main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
+			main_aux[0].x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		    RECORD_MINIMAL_SYMBOL
 		      (namestring, symbol.n_value,
 		       sclass == C_HIDEXT ? mst_file_text : mst_text,
@@ -2476,7 +2476,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 	    unsigned int symnum_before;
 
 	    symnum_before = ssymnum;
-	    swap_sym (&symbol, &main_aux, &namestring, &sraw_symbol,
+	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
 
 	    /* See if the last csect needs to be recorded.  */
@@ -2510,7 +2510,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 	       exists, otherwise use the symbol itself.  */
 	    if (!strcmp (namestring, ".file") && symbol.n_numaux > 0)
 	      {
-		filestring = coff_getfilename (&main_aux, objfile);
+		filestring = coff_getfilename (&main_aux[0], objfile);
 	      }
 	    else
 	      filestring = namestring;
@@ -2600,7 +2600,7 @@ scan_xcoff_symtab (section_offsets, objfile)
 	case C_STSYM:
 	  stype = N_LSYM;
 	pstab:;
-	  swap_sym (&symbol, &main_aux, &namestring, &sraw_symbol,
+	  swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		    &ssymnum, objfile);
 #define CUR_SYMBOL_TYPE stype
 #define CUR_SYMBOL_VALUE symbol.n_value
@@ -2654,9 +2654,8 @@ get_toc_offset (objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-xcoff_initial_scan (objfile, section_offsets, mainline)
+xcoff_initial_scan (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;		/* FIXME comments above */
 {
   bfd *abfd;
@@ -2751,7 +2750,7 @@ xcoff_initial_scan (objfile, section_offsets, mainline)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  scan_xcoff_symtab (section_offsets, objfile);
+  scan_xcoff_symtab (objfile->section_offsets, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
@@ -2771,10 +2770,7 @@ xcoff_symfile_offsets (objfile, addr)
 
   objfile->num_sections = SECT_OFF_MAX;
   section_offsets = (struct section_offsets *)
-    obstack_alloc
-    (&objfile->psymbol_obstack,
-     sizeof (struct section_offsets)
-     + sizeof (section_offsets->offsets) * objfile->num_sections);
+    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
 
   /* syms_from_objfile kindly subtracts from addr the bfd_section_vma
      of the .text section.  This strikes me as wrong--whether the

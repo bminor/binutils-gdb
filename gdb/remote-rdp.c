@@ -42,11 +42,6 @@
 #include "value.h"
 #include "callback.h"
 #include "command.h"
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <ctype.h>
 #include <fcntl.h>
 #include "symfile.h"
@@ -379,23 +374,13 @@ rdp_init (cold, tty)
 }
 
 
-#ifdef ANSI_PROTOTYPES
 void
 send_rdp (char *template,...)
-#else
-void
-send_rdp (char *template, va_alist)
-     va_dcl
-#endif
 {
   char buf[200];
   char *dst = buf;
   va_list alist;
-#ifdef ANSI_PROTOTYPES
   va_start (alist, template);
-#else
-  va_start (alist);
-#endif
 
   while (*template)
     {

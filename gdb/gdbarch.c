@@ -1,22 +1,24 @@
-/* *INDENT-OFF* */ /* typedef (f)();'' confuses indent */
 /* Dynamic architecture support for GDB, the GNU debugger.
    Copyright 1998-1999, Free Software Foundation, Inc.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
+
+/* *INDENT-OFF* */ /* typedef (f)();'' confuses indent */
 
 
 #include "defs.h"
@@ -336,235 +338,235 @@ verify_gdbarch (gdbarch)
     return;
   /* fundamental */
   if (gdbarch->byte_order == 0)
-    fatal ("verify_gdbarch: byte-order unset");
+    internal_error ("verify_gdbarch: byte-order unset");
   if (gdbarch->bfd_arch_info == NULL)
-    fatal ("verify_gdbarch: bfd_arch_info unset");
+    internal_error ("verify_gdbarch: bfd_arch_info unset");
   /* Check those that need to be defined for the given multi-arch level. */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->ptr_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: ptr_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: ptr_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->short_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: short_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: short_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->int_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: int_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: int_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->long_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: long_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: long_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->long_long_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: long_long_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: long_long_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->float_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: float_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: float_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->double_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: double_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: double_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->long_double_bit == 0))
-    fatal ("gdbarch: verify_gdbarch: long_double_bit invalid");
+    internal_error ("gdbarch: verify_gdbarch: long_double_bit invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->read_pc == 0))
-    fatal ("gdbarch: verify_gdbarch: read_pc invalid");
+    internal_error ("gdbarch: verify_gdbarch: read_pc invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->write_pc == 0))
-    fatal ("gdbarch: verify_gdbarch: write_pc invalid");
+    internal_error ("gdbarch: verify_gdbarch: write_pc invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->read_fp == 0))
-    fatal ("gdbarch: verify_gdbarch: read_fp invalid");
+    internal_error ("gdbarch: verify_gdbarch: read_fp invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->write_fp == 0))
-    fatal ("gdbarch: verify_gdbarch: write_fp invalid");
+    internal_error ("gdbarch: verify_gdbarch: write_fp invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->read_sp == 0))
-    fatal ("gdbarch: verify_gdbarch: read_sp invalid");
+    internal_error ("gdbarch: verify_gdbarch: read_sp invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->write_sp == 0))
-    fatal ("gdbarch: verify_gdbarch: write_sp invalid");
+    internal_error ("gdbarch: verify_gdbarch: write_sp invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->num_regs == -1))
-    fatal ("gdbarch: verify_gdbarch: num_regs invalid");
+    internal_error ("gdbarch: verify_gdbarch: num_regs invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->sp_regnum == -1))
-    fatal ("gdbarch: verify_gdbarch: sp_regnum invalid");
+    internal_error ("gdbarch: verify_gdbarch: sp_regnum invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->fp_regnum == -1))
-    fatal ("gdbarch: verify_gdbarch: fp_regnum invalid");
+    internal_error ("gdbarch: verify_gdbarch: fp_regnum invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->pc_regnum == -1))
-    fatal ("gdbarch: verify_gdbarch: pc_regnum invalid");
+    internal_error ("gdbarch: verify_gdbarch: pc_regnum invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_name == 0))
-    fatal ("gdbarch: verify_gdbarch: register_name invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_name invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_size == -1))
-    fatal ("gdbarch: verify_gdbarch: register_size invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_size invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_bytes == -1))
-    fatal ("gdbarch: verify_gdbarch: register_bytes invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_bytes invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_byte == 0))
-    fatal ("gdbarch: verify_gdbarch: register_byte invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_byte invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_raw_size == 0))
-    fatal ("gdbarch: verify_gdbarch: register_raw_size invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_raw_size invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->max_register_raw_size == -1))
-    fatal ("gdbarch: verify_gdbarch: max_register_raw_size invalid");
+    internal_error ("gdbarch: verify_gdbarch: max_register_raw_size invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_virtual_size == 0))
-    fatal ("gdbarch: verify_gdbarch: register_virtual_size invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_virtual_size invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->max_register_virtual_size == -1))
-    fatal ("gdbarch: verify_gdbarch: max_register_virtual_size invalid");
+    internal_error ("gdbarch: verify_gdbarch: max_register_virtual_size invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_virtual_type == 0))
-    fatal ("gdbarch: verify_gdbarch: register_virtual_type invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_virtual_type invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
-    fatal ("gdbarch: verify_gdbarch: use_generic_dummy_frames invalid");
+    internal_error ("gdbarch: verify_gdbarch: use_generic_dummy_frames invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_location == 0))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_location invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_location invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_address invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_start_offset == -1))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_start_offset invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_start_offset invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_breakpoint_offset == -1))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_breakpoint_offset invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_breakpoint_offset invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->call_dummy_breakpoint_offset_p == -1))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_breakpoint_offset_p invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_breakpoint_offset_p invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_length == -1))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_length invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_length invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->pc_in_call_dummy == 0))
-    fatal ("gdbarch: verify_gdbarch: pc_in_call_dummy invalid");
+    internal_error ("gdbarch: verify_gdbarch: pc_in_call_dummy invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->call_dummy_p == -1))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_p invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_p invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->call_dummy_stack_adjust_p == -1))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_stack_adjust_p invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_stack_adjust_p invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0))
-    fatal ("gdbarch: verify_gdbarch: call_dummy_stack_adjust invalid");
+    internal_error ("gdbarch: verify_gdbarch: call_dummy_stack_adjust invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->fix_call_dummy == 0))
-    fatal ("gdbarch: verify_gdbarch: fix_call_dummy invalid");
+    internal_error ("gdbarch: verify_gdbarch: fix_call_dummy invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->get_saved_register == 0))
-    fatal ("gdbarch: verify_gdbarch: get_saved_register invalid");
+    internal_error ("gdbarch: verify_gdbarch: get_saved_register invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->register_convertible == 0))
-    fatal ("gdbarch: verify_gdbarch: register_convertible invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_convertible invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_convert_to_virtual == 0))
-    fatal ("gdbarch: verify_gdbarch: register_convert_to_virtual invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_convert_to_virtual invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_convert_to_raw == 0))
-    fatal ("gdbarch: verify_gdbarch: register_convert_to_raw invalid");
+    internal_error ("gdbarch: verify_gdbarch: register_convert_to_raw invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->extract_return_value == 0))
-    fatal ("gdbarch: verify_gdbarch: extract_return_value invalid");
+    internal_error ("gdbarch: verify_gdbarch: extract_return_value invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->push_arguments == 0))
-    fatal ("gdbarch: verify_gdbarch: push_arguments invalid");
+    internal_error ("gdbarch: verify_gdbarch: push_arguments invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->push_dummy_frame == 0))
-    fatal ("gdbarch: verify_gdbarch: push_dummy_frame invalid");
+    internal_error ("gdbarch: verify_gdbarch: push_dummy_frame invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->push_return_address == 0))
-    fatal ("gdbarch: verify_gdbarch: push_return_address invalid");
+    internal_error ("gdbarch: verify_gdbarch: push_return_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->pop_frame == 0))
-    fatal ("gdbarch: verify_gdbarch: pop_frame invalid");
+    internal_error ("gdbarch: verify_gdbarch: pop_frame invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->d10v_make_daddr == 0))
-    fatal ("gdbarch: verify_gdbarch: d10v_make_daddr invalid");
+    internal_error ("gdbarch: verify_gdbarch: d10v_make_daddr invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->d10v_make_iaddr == 0))
-    fatal ("gdbarch: verify_gdbarch: d10v_make_iaddr invalid");
+    internal_error ("gdbarch: verify_gdbarch: d10v_make_iaddr invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->d10v_daddr_p == 0))
-    fatal ("gdbarch: verify_gdbarch: d10v_daddr_p invalid");
+    internal_error ("gdbarch: verify_gdbarch: d10v_daddr_p invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->d10v_iaddr_p == 0))
-    fatal ("gdbarch: verify_gdbarch: d10v_iaddr_p invalid");
+    internal_error ("gdbarch: verify_gdbarch: d10v_iaddr_p invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->d10v_convert_daddr_to_raw == 0))
-    fatal ("gdbarch: verify_gdbarch: d10v_convert_daddr_to_raw invalid");
+    internal_error ("gdbarch: verify_gdbarch: d10v_convert_daddr_to_raw invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->d10v_convert_iaddr_to_raw == 0))
-    fatal ("gdbarch: verify_gdbarch: d10v_convert_iaddr_to_raw invalid");
+    internal_error ("gdbarch: verify_gdbarch: d10v_convert_iaddr_to_raw invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->store_struct_return == 0))
-    fatal ("gdbarch: verify_gdbarch: store_struct_return invalid");
+    internal_error ("gdbarch: verify_gdbarch: store_struct_return invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->store_return_value == 0))
-    fatal ("gdbarch: verify_gdbarch: store_return_value invalid");
+    internal_error ("gdbarch: verify_gdbarch: store_return_value invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->extract_struct_value_address == 0))
-    fatal ("gdbarch: verify_gdbarch: extract_struct_value_address invalid");
+    internal_error ("gdbarch: verify_gdbarch: extract_struct_value_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->use_struct_convention == 0))
-    fatal ("gdbarch: verify_gdbarch: use_struct_convention invalid");
+    internal_error ("gdbarch: verify_gdbarch: use_struct_convention invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_init_saved_regs == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_init_saved_regs invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_init_saved_regs invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->init_extra_frame_info == 0))
-    fatal ("gdbarch: verify_gdbarch: init_extra_frame_info invalid");
+    internal_error ("gdbarch: verify_gdbarch: init_extra_frame_info invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->skip_prologue == 0))
-    fatal ("gdbarch: verify_gdbarch: skip_prologue invalid");
+    internal_error ("gdbarch: verify_gdbarch: skip_prologue invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->inner_than == 0))
-    fatal ("gdbarch: verify_gdbarch: inner_than invalid");
+    internal_error ("gdbarch: verify_gdbarch: inner_than invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->breakpoint_from_pc == 0))
-    fatal ("gdbarch: verify_gdbarch: breakpoint_from_pc invalid");
+    internal_error ("gdbarch: verify_gdbarch: breakpoint_from_pc invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->decr_pc_after_break == -1))
-    fatal ("gdbarch: verify_gdbarch: decr_pc_after_break invalid");
+    internal_error ("gdbarch: verify_gdbarch: decr_pc_after_break invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->function_start_offset == -1))
-    fatal ("gdbarch: verify_gdbarch: function_start_offset invalid");
+    internal_error ("gdbarch: verify_gdbarch: function_start_offset invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->remote_translate_xfer_address == 0))
-    fatal ("gdbarch: verify_gdbarch: remote_translate_xfer_address invalid");
+    internal_error ("gdbarch: verify_gdbarch: remote_translate_xfer_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_args_skip == -1))
-    fatal ("gdbarch: verify_gdbarch: frame_args_skip invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_args_skip invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frameless_function_invocation == 0))
-    fatal ("gdbarch: verify_gdbarch: frameless_function_invocation invalid");
+    internal_error ("gdbarch: verify_gdbarch: frameless_function_invocation invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_chain == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_chain invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_chain invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->frame_chain_valid == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_chain_valid invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_chain_valid invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_saved_pc == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_saved_pc invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_saved_pc invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_args_address == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_args_address invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_args_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_locals_address == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_locals_address invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_locals_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->saved_pc_after_call == 0))
-    fatal ("gdbarch: verify_gdbarch: saved_pc_after_call invalid");
+    internal_error ("gdbarch: verify_gdbarch: saved_pc_after_call invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->frame_num_args == 0))
-    fatal ("gdbarch: verify_gdbarch: frame_num_args invalid");
+    internal_error ("gdbarch: verify_gdbarch: frame_num_args invalid");
 }
 
 
@@ -908,7 +910,7 @@ gdbarch_ptr_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->ptr_bit == 0)
-    fatal ("gdbarch: gdbarch_ptr_bit invalid");
+    internal_error ("gdbarch: gdbarch_ptr_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_ptr_bit called\n");
@@ -928,7 +930,7 @@ gdbarch_short_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->short_bit == 0)
-    fatal ("gdbarch: gdbarch_short_bit invalid");
+    internal_error ("gdbarch: gdbarch_short_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_short_bit called\n");
@@ -948,7 +950,7 @@ gdbarch_int_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->int_bit == 0)
-    fatal ("gdbarch: gdbarch_int_bit invalid");
+    internal_error ("gdbarch: gdbarch_int_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_int_bit called\n");
@@ -968,7 +970,7 @@ gdbarch_long_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->long_bit == 0)
-    fatal ("gdbarch: gdbarch_long_bit invalid");
+    internal_error ("gdbarch: gdbarch_long_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_long_bit called\n");
@@ -988,7 +990,7 @@ gdbarch_long_long_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->long_long_bit == 0)
-    fatal ("gdbarch: gdbarch_long_long_bit invalid");
+    internal_error ("gdbarch: gdbarch_long_long_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_long_long_bit called\n");
@@ -1008,7 +1010,7 @@ gdbarch_float_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->float_bit == 0)
-    fatal ("gdbarch: gdbarch_float_bit invalid");
+    internal_error ("gdbarch: gdbarch_float_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_float_bit called\n");
@@ -1028,7 +1030,7 @@ gdbarch_double_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->double_bit == 0)
-    fatal ("gdbarch: gdbarch_double_bit invalid");
+    internal_error ("gdbarch: gdbarch_double_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_double_bit called\n");
@@ -1048,7 +1050,7 @@ gdbarch_long_double_bit (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->long_double_bit == 0)
-    fatal ("gdbarch: gdbarch_long_double_bit invalid");
+    internal_error ("gdbarch: gdbarch_long_double_bit invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_long_double_bit called\n");
@@ -1067,7 +1069,7 @@ CORE_ADDR
 gdbarch_read_pc (struct gdbarch *gdbarch, int pid)
 {
   if (gdbarch->read_pc == 0)
-    fatal ("gdbarch: gdbarch_read_pc invalid");
+    internal_error ("gdbarch: gdbarch_read_pc invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_read_pc called\n");
@@ -1086,7 +1088,7 @@ void
 gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, int pid)
 {
   if (gdbarch->write_pc == 0)
-    fatal ("gdbarch: gdbarch_write_pc invalid");
+    internal_error ("gdbarch: gdbarch_write_pc invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_write_pc called\n");
@@ -1105,7 +1107,7 @@ CORE_ADDR
 gdbarch_read_fp (struct gdbarch *gdbarch)
 {
   if (gdbarch->read_fp == 0)
-    fatal ("gdbarch: gdbarch_read_fp invalid");
+    internal_error ("gdbarch: gdbarch_read_fp invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_read_fp called\n");
@@ -1124,7 +1126,7 @@ void
 gdbarch_write_fp (struct gdbarch *gdbarch, CORE_ADDR val)
 {
   if (gdbarch->write_fp == 0)
-    fatal ("gdbarch: gdbarch_write_fp invalid");
+    internal_error ("gdbarch: gdbarch_write_fp invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_write_fp called\n");
@@ -1143,7 +1145,7 @@ CORE_ADDR
 gdbarch_read_sp (struct gdbarch *gdbarch)
 {
   if (gdbarch->read_sp == 0)
-    fatal ("gdbarch: gdbarch_read_sp invalid");
+    internal_error ("gdbarch: gdbarch_read_sp invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_read_sp called\n");
@@ -1162,7 +1164,7 @@ void
 gdbarch_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
 {
   if (gdbarch->write_sp == 0)
-    fatal ("gdbarch: gdbarch_write_sp invalid");
+    internal_error ("gdbarch: gdbarch_write_sp invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_write_sp called\n");
@@ -1182,7 +1184,7 @@ gdbarch_num_regs (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->num_regs == -1)
-    fatal ("gdbarch: gdbarch_num_regs invalid");
+    internal_error ("gdbarch: gdbarch_num_regs invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_num_regs called\n");
@@ -1202,7 +1204,7 @@ gdbarch_sp_regnum (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->sp_regnum == -1)
-    fatal ("gdbarch: gdbarch_sp_regnum invalid");
+    internal_error ("gdbarch: gdbarch_sp_regnum invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_sp_regnum called\n");
@@ -1222,7 +1224,7 @@ gdbarch_fp_regnum (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->fp_regnum == -1)
-    fatal ("gdbarch: gdbarch_fp_regnum invalid");
+    internal_error ("gdbarch: gdbarch_fp_regnum invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_fp_regnum called\n");
@@ -1242,7 +1244,7 @@ gdbarch_pc_regnum (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->pc_regnum == -1)
-    fatal ("gdbarch: gdbarch_pc_regnum invalid");
+    internal_error ("gdbarch: gdbarch_pc_regnum invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_pc_regnum called\n");
@@ -1260,8 +1262,8 @@ set_gdbarch_pc_regnum (gdbarch, pc_regnum)
 char *
 gdbarch_register_name (struct gdbarch *gdbarch, int regnr)
 {
-  if (gdbarch->register_name == 0)
-    fatal ("gdbarch: gdbarch_register_name invalid");
+  if (gdbarch->register_name == 0 || 1)
+    internal_error ("gdbarch: gdbarch_register_name invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_name called\n");
@@ -1281,7 +1283,7 @@ gdbarch_register_size (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->register_size == -1)
-    fatal ("gdbarch: gdbarch_register_size invalid");
+    internal_error ("gdbarch: gdbarch_register_size invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_size called\n");
@@ -1301,7 +1303,7 @@ gdbarch_register_bytes (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->register_bytes == -1)
-    fatal ("gdbarch: gdbarch_register_bytes invalid");
+    internal_error ("gdbarch: gdbarch_register_bytes invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_bytes called\n");
@@ -1320,7 +1322,7 @@ int
 gdbarch_register_byte (struct gdbarch *gdbarch, int reg_nr)
 {
   if (gdbarch->register_byte == 0)
-    fatal ("gdbarch: gdbarch_register_byte invalid");
+    internal_error ("gdbarch: gdbarch_register_byte invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_byte called\n");
@@ -1339,7 +1341,7 @@ int
 gdbarch_register_raw_size (struct gdbarch *gdbarch, int reg_nr)
 {
   if (gdbarch->register_raw_size == 0)
-    fatal ("gdbarch: gdbarch_register_raw_size invalid");
+    internal_error ("gdbarch: gdbarch_register_raw_size invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_raw_size called\n");
@@ -1359,7 +1361,7 @@ gdbarch_max_register_raw_size (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->max_register_raw_size == -1)
-    fatal ("gdbarch: gdbarch_max_register_raw_size invalid");
+    internal_error ("gdbarch: gdbarch_max_register_raw_size invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_max_register_raw_size called\n");
@@ -1378,7 +1380,7 @@ int
 gdbarch_register_virtual_size (struct gdbarch *gdbarch, int reg_nr)
 {
   if (gdbarch->register_virtual_size == 0)
-    fatal ("gdbarch: gdbarch_register_virtual_size invalid");
+    internal_error ("gdbarch: gdbarch_register_virtual_size invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_virtual_size called\n");
@@ -1398,7 +1400,7 @@ gdbarch_max_register_virtual_size (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->max_register_virtual_size == -1)
-    fatal ("gdbarch: gdbarch_max_register_virtual_size invalid");
+    internal_error ("gdbarch: gdbarch_max_register_virtual_size invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_max_register_virtual_size called\n");
@@ -1417,7 +1419,7 @@ struct type *
 gdbarch_register_virtual_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (gdbarch->register_virtual_type == 0)
-    fatal ("gdbarch: gdbarch_register_virtual_type invalid");
+    internal_error ("gdbarch: gdbarch_register_virtual_type invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_virtual_type called\n");
@@ -1437,7 +1439,7 @@ gdbarch_use_generic_dummy_frames (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->use_generic_dummy_frames == -1)
-    fatal ("gdbarch: gdbarch_use_generic_dummy_frames invalid");
+    internal_error ("gdbarch: gdbarch_use_generic_dummy_frames invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_use_generic_dummy_frames called\n");
@@ -1457,7 +1459,7 @@ gdbarch_call_dummy_location (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_location == 0)
-    fatal ("gdbarch: gdbarch_call_dummy_location invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_location invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_location called\n");
@@ -1476,7 +1478,7 @@ CORE_ADDR
 gdbarch_call_dummy_address (struct gdbarch *gdbarch)
 {
   if (gdbarch->call_dummy_address == 0)
-    fatal ("gdbarch: gdbarch_call_dummy_address invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_address invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_address called\n");
@@ -1496,7 +1498,7 @@ gdbarch_call_dummy_start_offset (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_start_offset == -1)
-    fatal ("gdbarch: gdbarch_call_dummy_start_offset invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_start_offset invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_start_offset called\n");
@@ -1516,7 +1518,7 @@ gdbarch_call_dummy_breakpoint_offset (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_breakpoint_offset == -1)
-    fatal ("gdbarch: gdbarch_call_dummy_breakpoint_offset invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_breakpoint_offset invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_breakpoint_offset called\n");
@@ -1536,7 +1538,7 @@ gdbarch_call_dummy_breakpoint_offset_p (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_breakpoint_offset_p == -1)
-    fatal ("gdbarch: gdbarch_call_dummy_breakpoint_offset_p invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_breakpoint_offset_p invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_breakpoint_offset_p called\n");
@@ -1556,7 +1558,7 @@ gdbarch_call_dummy_length (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_length == -1)
-    fatal ("gdbarch: gdbarch_call_dummy_length invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_length invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_length called\n");
@@ -1575,7 +1577,7 @@ int
 gdbarch_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
 {
   if (gdbarch->pc_in_call_dummy == 0)
-    fatal ("gdbarch: gdbarch_pc_in_call_dummy invalid");
+    internal_error ("gdbarch: gdbarch_pc_in_call_dummy invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_pc_in_call_dummy called\n");
@@ -1595,7 +1597,7 @@ gdbarch_call_dummy_p (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_p == -1)
-    fatal ("gdbarch: gdbarch_call_dummy_p invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_p invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_p called\n");
@@ -1651,7 +1653,7 @@ gdbarch_call_dummy_stack_adjust_p (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_stack_adjust_p == -1)
-    fatal ("gdbarch: gdbarch_call_dummy_stack_adjust_p invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_stack_adjust_p invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_stack_adjust_p called\n");
@@ -1671,7 +1673,7 @@ gdbarch_call_dummy_stack_adjust (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0)
-    fatal ("gdbarch: gdbarch_call_dummy_stack_adjust invalid");
+    internal_error ("gdbarch: gdbarch_call_dummy_stack_adjust invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_stack_adjust called\n");
@@ -1690,7 +1692,7 @@ void
 gdbarch_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p)
 {
   if (gdbarch->fix_call_dummy == 0)
-    fatal ("gdbarch: gdbarch_fix_call_dummy invalid");
+    internal_error ("gdbarch: gdbarch_fix_call_dummy invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_fix_call_dummy called\n");
@@ -1745,7 +1747,7 @@ void
 gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval)
 {
   if (gdbarch->get_saved_register == 0)
-    fatal ("gdbarch: gdbarch_get_saved_register invalid");
+    internal_error ("gdbarch: gdbarch_get_saved_register invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_get_saved_register called\n");
@@ -1764,7 +1766,7 @@ int
 gdbarch_register_convertible (struct gdbarch *gdbarch, int nr)
 {
   if (gdbarch->register_convertible == 0)
-    fatal ("gdbarch: gdbarch_register_convertible invalid");
+    internal_error ("gdbarch: gdbarch_register_convertible invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_convertible called\n");
@@ -1783,7 +1785,7 @@ void
 gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to)
 {
   if (gdbarch->register_convert_to_virtual == 0)
-    fatal ("gdbarch: gdbarch_register_convert_to_virtual invalid");
+    internal_error ("gdbarch: gdbarch_register_convert_to_virtual invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_convert_to_virtual called\n");
@@ -1802,7 +1804,7 @@ void
 gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to)
 {
   if (gdbarch->register_convert_to_raw == 0)
-    fatal ("gdbarch: gdbarch_register_convert_to_raw invalid");
+    internal_error ("gdbarch: gdbarch_register_convert_to_raw invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_convert_to_raw called\n");
@@ -1821,7 +1823,7 @@ void
 gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf)
 {
   if (gdbarch->extract_return_value == 0)
-    fatal ("gdbarch: gdbarch_extract_return_value invalid");
+    internal_error ("gdbarch: gdbarch_extract_return_value invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_return_value called\n");
@@ -1840,7 +1842,7 @@ CORE_ADDR
 gdbarch_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
   if (gdbarch->push_arguments == 0)
-    fatal ("gdbarch: gdbarch_push_arguments invalid");
+    internal_error ("gdbarch: gdbarch_push_arguments invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_push_arguments called\n");
@@ -1859,7 +1861,7 @@ void
 gdbarch_push_dummy_frame (struct gdbarch *gdbarch)
 {
   if (gdbarch->push_dummy_frame == 0)
-    fatal ("gdbarch: gdbarch_push_dummy_frame invalid");
+    internal_error ("gdbarch: gdbarch_push_dummy_frame invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_frame called\n");
@@ -1878,7 +1880,7 @@ CORE_ADDR
 gdbarch_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp)
 {
   if (gdbarch->push_return_address == 0)
-    fatal ("gdbarch: gdbarch_push_return_address invalid");
+    internal_error ("gdbarch: gdbarch_push_return_address invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_push_return_address called\n");
@@ -1897,7 +1899,7 @@ void
 gdbarch_pop_frame (struct gdbarch *gdbarch)
 {
   if (gdbarch->pop_frame == 0)
-    fatal ("gdbarch: gdbarch_pop_frame invalid");
+    internal_error ("gdbarch: gdbarch_pop_frame invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_pop_frame called\n");
@@ -1916,7 +1918,7 @@ CORE_ADDR
 gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, CORE_ADDR x)
 {
   if (gdbarch->d10v_make_daddr == 0)
-    fatal ("gdbarch: gdbarch_d10v_make_daddr invalid");
+    internal_error ("gdbarch: gdbarch_d10v_make_daddr invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_make_daddr called\n");
@@ -1935,7 +1937,7 @@ CORE_ADDR
 gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, CORE_ADDR x)
 {
   if (gdbarch->d10v_make_iaddr == 0)
-    fatal ("gdbarch: gdbarch_d10v_make_iaddr invalid");
+    internal_error ("gdbarch: gdbarch_d10v_make_iaddr invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_make_iaddr called\n");
@@ -1954,7 +1956,7 @@ int
 gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, CORE_ADDR x)
 {
   if (gdbarch->d10v_daddr_p == 0)
-    fatal ("gdbarch: gdbarch_d10v_daddr_p invalid");
+    internal_error ("gdbarch: gdbarch_d10v_daddr_p invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_daddr_p called\n");
@@ -1973,7 +1975,7 @@ int
 gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, CORE_ADDR x)
 {
   if (gdbarch->d10v_iaddr_p == 0)
-    fatal ("gdbarch: gdbarch_d10v_iaddr_p invalid");
+    internal_error ("gdbarch: gdbarch_d10v_iaddr_p invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_iaddr_p called\n");
@@ -1992,7 +1994,7 @@ CORE_ADDR
 gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x)
 {
   if (gdbarch->d10v_convert_daddr_to_raw == 0)
-    fatal ("gdbarch: gdbarch_d10v_convert_daddr_to_raw invalid");
+    internal_error ("gdbarch: gdbarch_d10v_convert_daddr_to_raw invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_convert_daddr_to_raw called\n");
@@ -2011,7 +2013,7 @@ CORE_ADDR
 gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x)
 {
   if (gdbarch->d10v_convert_iaddr_to_raw == 0)
-    fatal ("gdbarch: gdbarch_d10v_convert_iaddr_to_raw invalid");
+    internal_error ("gdbarch: gdbarch_d10v_convert_iaddr_to_raw invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_convert_iaddr_to_raw called\n");
@@ -2030,7 +2032,7 @@ void
 gdbarch_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp)
 {
   if (gdbarch->store_struct_return == 0)
-    fatal ("gdbarch: gdbarch_store_struct_return invalid");
+    internal_error ("gdbarch: gdbarch_store_struct_return invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_store_struct_return called\n");
@@ -2049,7 +2051,7 @@ void
 gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, char *valbuf)
 {
   if (gdbarch->store_return_value == 0)
-    fatal ("gdbarch: gdbarch_store_return_value invalid");
+    internal_error ("gdbarch: gdbarch_store_return_value invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_store_return_value called\n");
@@ -2068,7 +2070,7 @@ CORE_ADDR
 gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf)
 {
   if (gdbarch->extract_struct_value_address == 0)
-    fatal ("gdbarch: gdbarch_extract_struct_value_address invalid");
+    internal_error ("gdbarch: gdbarch_extract_struct_value_address invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_struct_value_address called\n");
@@ -2087,7 +2089,7 @@ int
 gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type)
 {
   if (gdbarch->use_struct_convention == 0)
-    fatal ("gdbarch: gdbarch_use_struct_convention invalid");
+    internal_error ("gdbarch: gdbarch_use_struct_convention invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_use_struct_convention called\n");
@@ -2106,7 +2108,7 @@ void
 gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   if (gdbarch->frame_init_saved_regs == 0)
-    fatal ("gdbarch: gdbarch_frame_init_saved_regs invalid");
+    internal_error ("gdbarch: gdbarch_frame_init_saved_regs invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_init_saved_regs called\n");
@@ -2125,7 +2127,7 @@ void
 gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame)
 {
   if (gdbarch->init_extra_frame_info == 0)
-    fatal ("gdbarch: gdbarch_init_extra_frame_info invalid");
+    internal_error ("gdbarch: gdbarch_init_extra_frame_info invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_init_extra_frame_info called\n");
@@ -2144,7 +2146,7 @@ CORE_ADDR
 gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 {
   if (gdbarch->skip_prologue == 0)
-    fatal ("gdbarch: gdbarch_skip_prologue invalid");
+    internal_error ("gdbarch: gdbarch_skip_prologue invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_prologue called\n");
@@ -2163,7 +2165,7 @@ int
 gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs)
 {
   if (gdbarch->inner_than == 0)
-    fatal ("gdbarch: gdbarch_inner_than invalid");
+    internal_error ("gdbarch: gdbarch_inner_than invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_inner_than called\n");
@@ -2182,7 +2184,7 @@ unsigned char *
 gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   if (gdbarch->breakpoint_from_pc == 0)
-    fatal ("gdbarch: gdbarch_breakpoint_from_pc invalid");
+    internal_error ("gdbarch: gdbarch_breakpoint_from_pc invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_breakpoint_from_pc called\n");
@@ -2202,7 +2204,7 @@ gdbarch_decr_pc_after_break (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->decr_pc_after_break == -1)
-    fatal ("gdbarch: gdbarch_decr_pc_after_break invalid");
+    internal_error ("gdbarch: gdbarch_decr_pc_after_break invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_decr_pc_after_break called\n");
@@ -2222,7 +2224,7 @@ gdbarch_function_start_offset (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->function_start_offset == -1)
-    fatal ("gdbarch: gdbarch_function_start_offset invalid");
+    internal_error ("gdbarch: gdbarch_function_start_offset invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_function_start_offset called\n");
@@ -2241,7 +2243,7 @@ void
 gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len)
 {
   if (gdbarch->remote_translate_xfer_address == 0)
-    fatal ("gdbarch: gdbarch_remote_translate_xfer_address invalid");
+    internal_error ("gdbarch: gdbarch_remote_translate_xfer_address invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_translate_xfer_address called\n");
@@ -2261,7 +2263,7 @@ gdbarch_frame_args_skip (gdbarch)
     struct gdbarch *gdbarch;
 {
   if (gdbarch->frame_args_skip == -1)
-    fatal ("gdbarch: gdbarch_frame_args_skip invalid");
+    internal_error ("gdbarch: gdbarch_frame_args_skip invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_args_skip called\n");
@@ -2280,7 +2282,7 @@ int
 gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_info *fi)
 {
   if (gdbarch->frameless_function_invocation == 0)
-    fatal ("gdbarch: gdbarch_frameless_function_invocation invalid");
+    internal_error ("gdbarch: gdbarch_frameless_function_invocation invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frameless_function_invocation called\n");
@@ -2299,7 +2301,7 @@ CORE_ADDR
 gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   if (gdbarch->frame_chain == 0)
-    fatal ("gdbarch: gdbarch_frame_chain invalid");
+    internal_error ("gdbarch: gdbarch_frame_chain invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_chain called\n");
@@ -2318,7 +2320,7 @@ int
 gdbarch_frame_chain_valid (struct gdbarch *gdbarch, CORE_ADDR chain, struct frame_info *thisframe)
 {
   if (gdbarch->frame_chain_valid == 0)
-    fatal ("gdbarch: gdbarch_frame_chain_valid invalid");
+    internal_error ("gdbarch: gdbarch_frame_chain_valid invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_chain_valid called\n");
@@ -2337,7 +2339,7 @@ CORE_ADDR
 gdbarch_frame_saved_pc (struct gdbarch *gdbarch, struct frame_info *fi)
 {
   if (gdbarch->frame_saved_pc == 0)
-    fatal ("gdbarch: gdbarch_frame_saved_pc invalid");
+    internal_error ("gdbarch: gdbarch_frame_saved_pc invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_saved_pc called\n");
@@ -2356,7 +2358,7 @@ CORE_ADDR
 gdbarch_frame_args_address (struct gdbarch *gdbarch, struct frame_info *fi)
 {
   if (gdbarch->frame_args_address == 0)
-    fatal ("gdbarch: gdbarch_frame_args_address invalid");
+    internal_error ("gdbarch: gdbarch_frame_args_address invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_args_address called\n");
@@ -2375,7 +2377,7 @@ CORE_ADDR
 gdbarch_frame_locals_address (struct gdbarch *gdbarch, struct frame_info *fi)
 {
   if (gdbarch->frame_locals_address == 0)
-    fatal ("gdbarch: gdbarch_frame_locals_address invalid");
+    internal_error ("gdbarch: gdbarch_frame_locals_address invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_locals_address called\n");
@@ -2394,7 +2396,7 @@ CORE_ADDR
 gdbarch_saved_pc_after_call (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   if (gdbarch->saved_pc_after_call == 0)
-    fatal ("gdbarch: gdbarch_saved_pc_after_call invalid");
+    internal_error ("gdbarch: gdbarch_saved_pc_after_call invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_saved_pc_after_call called\n");
@@ -2413,7 +2415,7 @@ int
 gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   if (gdbarch->frame_num_args == 0)
-    fatal ("gdbarch: gdbarch_frame_num_args invalid");
+    internal_error ("gdbarch: gdbarch_frame_num_args invalid");
   if (gdbarch_debug >= 2)
     /* FIXME: gdb_std??? */
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_num_args called\n");
@@ -2500,7 +2502,7 @@ gdbarch_data (data)
      struct gdbarch_data *data;
 {
   if (data->index >= current_gdbarch->nr_data)
-    fatal ("gdbarch_data: request for non-existant data.");
+    internal_error ("gdbarch_data: request for non-existant data.");
   return current_gdbarch->data[data->index];
 }
 
@@ -2625,7 +2627,7 @@ register_gdbarch_init (bfd_architecture, init)
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
   if (bfd_arch_info == NULL)
     {
-      fatal ("gdbarch: Attempt to register unknown architecture (%d)", bfd_architecture);
+      internal_error ("gdbarch: Attempt to register unknown architecture (%d)", bfd_architecture);
     }
   /* Check that we haven't seen this architecture before */
   for (curr = &gdbarch_init_registrary;
@@ -2633,7 +2635,7 @@ register_gdbarch_init (bfd_architecture, init)
        curr = &(*curr)->next)
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
-	fatal ("gdbarch: Duplicate registraration of architecture (%s)",
+	internal_error ("gdbarch: Duplicate registraration of architecture (%s)",
 	       bfd_arch_info->printable_name);
     }
   /* log it */
@@ -3157,7 +3159,7 @@ set_architecture_from_arch_mach (arch, mach)
   if (wanted != NULL)
     set_arch (wanted, set_arch_manual);
   else
-    fatal ("gdbarch: hardwired architecture/machine not reconized");
+    internal_error ("gdbarch: hardwired architecture/machine not reconized");
 }
 
 /* Set the architecture from a BFD */

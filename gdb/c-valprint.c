@@ -403,10 +403,13 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 	}
       else
 	{
-	  fprintf_filtered (stream, TYPE_UNSIGNED (type) ? "%u" : "%d",
-			    unpack_long (type, valaddr + embedded_offset));
+	  val = unpack_long (type, valaddr + embedded_offset);
+	  if (TYPE_UNSIGNED (type))
+	    fprintf_filtered (stream, "%u", (unsigned int) val);
+	  else
+	    fprintf_filtered (stream, "%d", (int) val);
 	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR ((unsigned char) unpack_long (type, valaddr + embedded_offset), stream);
+	  LA_PRINT_CHAR ((unsigned char) val, stream);
 	}
       break;
 

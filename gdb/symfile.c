@@ -483,14 +483,16 @@ default_symfile_offsets (objfile, addr)
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
-   NAME is the file name (which will be tilde-expanded and made
-   absolute herein) (but we don't free or modify NAME itself).
-   FROM_TTY says how verbose to be.  MAINLINE specifies whether this
-   is the main symbol file, or whether it's an extra symbol file such
-   as dynamically loaded code.  If !mainline, ADDR is the address
-   where the text segment was loaded.  If VERBO, the caller has printed
-   a verbose message about the symbol reading (and complaints can be
-   more terse about it).  */
+   OBJFILE is where the symbols are to be read from.
+
+   ADDR is the address where the text segment was loaded, unless the
+   objfile is the main symbol file, in which case it is zero.
+
+   MAINLINE is nonzero if this is the main symbol file, or zero if
+   it's an extra symbol file such as dynamically loaded code.
+
+   VERBO is nonzero if the caller has printed a verbose message about
+   the symbol reading (and complaints can be more terse about it).  */
 
 void
 syms_from_objfile (objfile, addr, mainline, verbo)
@@ -546,7 +548,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
       lowest_sect = bfd_get_section_by_name (objfile->obfd, ".text");
       if (lowest_sect == NULL)
 	bfd_map_over_sections (objfile->obfd, find_lowest_section,
-			       (PTR) & lowest_sect);
+			       (PTR) &lowest_sect);
 
       if (lowest_sect == NULL)
 	warning ("no loadable sections found in added symbol-file %s",
@@ -557,7 +559,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	warning ("Lowest section in %s is %s at 0x%lx",
 		 objfile->name,
 		 bfd_section_name (objfile->obfd, lowest_sect),
-	      (unsigned long) bfd_section_vma (objfile->obfd, lowest_sect));
+		 (unsigned long) bfd_section_vma (objfile->obfd, lowest_sect));
 
       if (lowest_sect)
 	addr -= bfd_section_vma (objfile->obfd, lowest_sect);
@@ -587,7 +589,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
      Section offsets are built similarly, except that they are built
      by adding addr in all cases because there is no clear mapping
      from section_offsets into actual sections.  Note that solib.c
-     has a different algorythm for finding section offsets.
+     has a different algorithm for finding section offsets.
 
      These should probably all be collapsed into some target
      independent form of shared library support.  FIXME.  */
@@ -596,7 +598,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
     {
       struct obj_section *s;
 
-      for (s = objfile->sections; s < objfile->sections_end; ++s)
+      ALL_OBJFILE_OSECTIONS (objfile, s)
 	{
 	  s->addr -= s->offset;
 	  s->addr += addr;
@@ -607,7 +609,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
     }
 #endif /* not IBM6000_TARGET */
 
-  (*objfile->sf->sym_read) (objfile, section_offsets, mainline);
+  (*objfile->sf->sym_read) (objfile, mainline);
 
   if (!have_partial_symbols () && !have_full_symbols ())
     {
@@ -633,10 +635,10 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
   discard_cleanups (old_chain);
 
-/* Call this after reading in a new symbol table to give target dependant code
-   a crack at the new symbols.  For instance, this could be used to update the
-   values of target-specific symbols GDB needs to keep track of (such as
-   _sigtramp, or whatever).  */
+  /* Call this after reading in a new symbol table to give target
+     dependant code a crack at the new symbols.  For instance, this
+     could be used to update the values of target-specific symbols GDB
+     needs to keep track of (such as _sigtramp, or whatever).  */
 
   TARGET_SYMFILE_POSTREAD (objfile);
 }
@@ -1506,7 +1508,7 @@ reread_symbols ()
 	      /* The "mainline" parameter is a hideous hack; I think leaving it
 	         zero is OK since dbxread.c also does what it needs to do if
 	         objfile->global_psymbols.size is 0.  */
-	      (*objfile->sf->sym_read) (objfile, objfile->section_offsets, 0);
+	      (*objfile->sf->sym_read) (objfile, 0);
 	      if (!have_partial_symbols () && !have_full_symbols ())
 		{
 		  wrap_here ("");

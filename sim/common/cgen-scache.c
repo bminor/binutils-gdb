@@ -313,6 +313,8 @@ scache_flush_cpu (SIM_CPU *cpu)
 SCACHE *
 scache_lookup (SIM_CPU *cpu, IADDR pc)
 {
+  /* FIXME: hash computation is wrong, doesn't take into account
+     NUM_HASH_CHAIN_ENTRIES.  A lot of the hash table will be unused!  */
   unsigned int slot = HASH_PC (pc) & (CPU_SCACHE_NUM_HASH_CHAINS (cpu) - 1);
   int i, max_i = CPU_SCACHE_NUM_HASH_CHAIN_ENTRIES (cpu);
   SCACHE_MAP *scm;
@@ -343,6 +345,8 @@ scache_lookup (SIM_CPU *cpu, IADDR pc)
 SCACHE *
 scache_lookup_or_alloc (SIM_CPU *cpu, IADDR pc, int n, SCACHE **bufp)
 {
+  /* FIXME: hash computation is wrong, doesn't take into account
+     NUM_HASH_CHAIN_ENTRIES.  A lot of the hash table will be unused!  */
   unsigned int slot = HASH_PC (pc) & (CPU_SCACHE_NUM_HASH_CHAINS (cpu) - 1);
   int i, max_i = CPU_SCACHE_NUM_HASH_CHAIN_ENTRIES (cpu);
   SCACHE_MAP *scm;
@@ -372,6 +376,7 @@ scache_lookup_or_alloc (SIM_CPU *cpu, IADDR pc, int n, SCACHE **bufp)
       static int next_free = 0;
 
       scm = & CPU_SCACHE_HASH_TABLE (cpu) [slot];
+      /* FIXME: This seems rather clumsy.  */
       for (i = 0; i < next_free; ++i, ++scm)
 	continue;
       ++next_free;
@@ -381,6 +386,8 @@ scache_lookup_or_alloc (SIM_CPU *cpu, IADDR pc, int n, SCACHE **bufp)
 
   /* At this point SCM points to the hash table entry to use.
      Now make sure there's room in the cache.  */
+  /* FIXME: Kinda weird to use a next_free adjusted scm when cache is
+     flushed.  */
 
   {
     int elm_size = IMP_PROPS_SCACHE_ELM_SIZE (MACH_IMP_PROPS (CPU_MACH (cpu)));

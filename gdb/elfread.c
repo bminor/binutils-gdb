@@ -71,7 +71,7 @@ static void
 elf_new_init PARAMS ((struct objfile *));
 
 static void
-elf_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+elf_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 elf_symfile_finish PARAMS ((struct objfile *));
@@ -584,9 +584,8 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
    capability even for files compiled without -g.  */
 
 static void
-elf_symfile_read (objfile, section_offsets, mainline)
+elf_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;
@@ -610,7 +609,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
      which can later be used by elfstab_offset_sections.  */
 
   /* FIXME, should take a section_offsets param, not just an offset.  */
-  offset = ANOFFSET (section_offsets, 0);
+  offset = ANOFFSET (objfile->section_offsets, 0);
   elf_symtab_read (abfd, offset, objfile, 0);
 
   /* Add the dynamic symbols.  */
@@ -653,7 +652,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
       swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
       if (swap)
 	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect,
-				  section_offsets);
+				  objfile->section_offsets);
     }
   if (ei.stabsect)
     {
@@ -666,7 +665,6 @@ elf_symfile_read (objfile, section_offsets, mainline)
       /* FIXME should probably warn about a stab section without a stabstr.  */
       if (str_sect)
 	elfstab_build_psymtabs (objfile,
-				section_offsets,
 				mainline,
 				ei.stabsect->filepos,
 				bfd_section_size (abfd, ei.stabsect),
@@ -676,13 +674,13 @@ elf_symfile_read (objfile, section_offsets, mainline)
   if (dwarf2_has_info (abfd))
     {
       /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile, section_offsets, mainline);
+      dwarf2_build_psymtabs (objfile, objfile->section_offsets, mainline);
     }
   else if (ei.dboffset && ei.lnoffset)
     {
       /* DWARF sections */
       dwarf_build_psymtabs (objfile,
-			    section_offsets, mainline,
+			    objfile->section_offsets, mainline,
 			    ei.dboffset, ei.dbsize,
 			    ei.lnoffset, ei.lnsize);
     }
@@ -818,10 +816,7 @@ elfstab_offset_sections (objfile, pst)
       /* Found it!  Allocate a new psymtab struct, and fill it in.  */
       maybe->found++;
       pst->section_offsets = (struct section_offsets *)
-	obstack_alloc (&objfile->psymbol_obstack,
-		       sizeof (struct section_offsets) +
-	       sizeof (pst->section_offsets->offsets) * (SECT_OFF_MAX - 1));
-
+	obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
       for (i = 0; i < SECT_OFF_MAX; i++)
 	ANOFFSET (pst->section_offsets, i) = maybe->sections[i];
       return;
@@ -841,8 +836,7 @@ static struct sym_fns elf_sym_fns =
   elf_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
   elf_symfile_read,		/* sym_read: read a symbol file into symtab */
   elf_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,
-			/* sym_offsets:  Translate ext. to int. relocation */
+  default_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

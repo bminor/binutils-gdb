@@ -684,7 +684,9 @@ Options:\n\n\
   fputs_unfiltered ("\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --nw		     Do not use a window interface.\n\
-  --nx               Do not read .gdbinit file.\n\
+  --nx               Do not read ", stream);
+  fputs_unfiltered (gdbinit, stream);
+  fputs_unfiltered (" file.\n\
   --quiet            Do not print version number on startup.\n\
   --readnow          Fully read symbol files on first access.\n\
 ", stream);

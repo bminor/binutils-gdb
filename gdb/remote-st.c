@@ -39,11 +39,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <signal.h>
 #include "gdb_string.h"
 #include <sys/types.h>
@@ -71,23 +66,12 @@ static serial_t st2000_desc;
 /* Send data to stdebug.  Works just like printf. */
 
 static void
-#ifdef ANSI_PROTOTYPES
 printf_stdebug (char *pattern,...)
-#else
-printf_stdebug (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char buf[200];
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
-#else
-  char *pattern;
-  va_start (args);
-  pattern = va_arg (args, char *);
-#endif
 
   vsprintf (buf, pattern, args);
   va_end (args);

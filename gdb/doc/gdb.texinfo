@@ -8325,6 +8325,7 @@ targets}).
 * Target Commands::             Commands for managing targets
 * Byte Order::                  Choosing target byte order
 * Remote::                      Remote debugging
+* KOD::                         Kernel Object Display
 
 @end menu
 
@@ -8703,7 +8704,7 @@ Note that these commands merely adjust interpretation of symbolic
 data on the host, and that they have absolutely no effect on the
 target system.
 
-@node Remote,  , Byte Order, Targets
+@node Remote, KOD, Byte Order, Targets
 @section Remote debugging
 @cindex remote debugging
 
@@ -8740,6 +8741,44 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 @end menu
 
 @include remote.texi
+
+
+@node KOD,  , Remote, Targets
+@section Kernel Object Display
+@cindex kernel object display
+@cindex kernel object
+@cindex KOD
+
+Some targets support kernel object display.  Using this facility,
+@value{GDBN} communicates specially with the underlying operating system
+and can display information about operating system-level objects such as
+mutexes and other synchronization objects.  Exactly which objects can be
+displayed is determined on a per-OS basis.
+
+Use the @code{set os} command to set the operating system.  This tells
+@value{GDBN} which kernel object display module to initialize:
+
+@example
+(gdb) set os cisco
+@end example
+
+If @code{set os} succeeds, @value{GDBN} will display some information
+about the operating system, and will create a new @code{info} command
+which can be used to query the target.  The @code{info} command is named
+after the operating system:
+
+@example
+(gdb) info cisco
+List of Cisco Kernel Objects
+Object     Description
+any        Any and all objects
+@end example
+
+Further subcommands can be used to query about particular objects known
+by the kernel.
+
+There is currently no way to determine whether a given operating system
+is supported other than to try it.
 
 
 @node Controlling GDB

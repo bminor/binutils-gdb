@@ -31,7 +31,7 @@ int known_types()
     */
    bin = 0x123456789abcdefLL; /* 64 bits = 16 hex digits */
    oct = 01234567123456701234567LL; /*  = 21+ octal digits */
-   dec = 12345678901234567890LL;    /*  = 19+ decimal digits */
+   dec = 12345678901234567890ULL;    /*  = 19+ decimal digits */
 
    /* Stop here and look!
     */

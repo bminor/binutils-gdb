@@ -1003,7 +1003,7 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
 
       /* Allocate a new partial symbol table structure */
       pst = start_psymtab_common (objfile, section_offsets,
-			       comp_unit_die.name ? comp_unit_die.name : "",
+				  comp_unit_die.name ? comp_unit_die.name : "",
 				  comp_unit_die.lowpc,
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);

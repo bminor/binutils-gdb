@@ -35,6 +35,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CGEN_INSN_LSB0_P 0
 
+/* Minimum size of any insn (in bytes).  */
+#define CGEN_MIN_INSN_SIZE 4
+
 /* Maximum size of any insn (in bytes).  */
 #define CGEN_MAX_INSN_SIZE 8
 

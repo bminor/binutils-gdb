@@ -376,6 +376,7 @@ struct target_ops
     void (*to_find_new_threads) PARAMS ((void));
     void (*to_stop) PARAMS ((void));
     int (*to_query) PARAMS ((int /*char */ , char *, char *, int *));
+    void (*to_rcmd) (char *command, struct gdb_file *output);
     struct symtab_and_line *(*to_enable_exception_callback) PARAMS ((enum exception_event_kind, int));
     struct exception_event_record *(*to_get_current_exception_event) PARAMS ((void));
     char *(*to_pid_to_exec_file) PARAMS ((int pid));
@@ -929,6 +930,14 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 
 #define	target_query(query_type, query, resp_buffer, bufffer_size)	\
 	(*current_target.to_query) (query_type, query, resp_buffer, bufffer_size)
+
+/* Send the specified COMMAND to the target's monitor
+   (shell,interpreter) for execution.  The result of the query is
+   placed in OUTBUF. */
+
+#define target_rcmd(command, outbuf) \
+     (*current_target.to_rcmd) (command, outbuf)
+
 
 /* Get the symbol information for a breakpointable routine called when
    an exception event occurs. 

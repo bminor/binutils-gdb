@@ -290,8 +290,10 @@ extern use_struct_convention_fn arm_use_struct_convention;
   int frameoffset;		\
   int framereg;
 
-extern void arm_init_extra_frame_info PARAMS ((struct frame_info * fi));
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) arm_init_extra_frame_info (fi)
+extern void arm_init_extra_frame_info PARAMS ((int fromleaf,
+					       struct frame_info *fi));
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
+  arm_init_extra_frame_info (fromleaf, fi)
 
 /* Return the frame address.  On ARM, it is R11; on Thumb it is R7.  */
 CORE_ADDR arm_target_read_fp PARAMS ((void));
@@ -314,11 +316,25 @@ extern int arm_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 
 /* Define other aspects of the stack frame.  */
 
-/* An expression that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it. */
-extern int arm_frameless_function_invocation PARAMS ((struct frame_info * frame));
-#define FRAMELESS_FUNCTION_INVOCATION(FI) (arm_frameless_function_invocation (FI))
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.
 
+   Sometimes we have functions that do a little setup (like saving the vN
+   registers with the stmdb instruction, but DO NOT set up a frame.
+   The symbol table will report this as a prologue.  However, it is
+   important not to try to parse these partial frames as frames, or we 
+   will get really confused.
+
+   So I will demand 3 instructions between the start & end of the prologue
+   before I call it a real prologue, i.e. at least
+         mov ip, sp,
+	 stmdb sp!, {}
+	 sub sp, ip, #4. */
+
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+(arm_frameless_function_invocation (FI))
+     
 /* Saved Pc.  */
 
 #define FRAME_SAVED_PC(FRAME)	arm_frame_saved_pc (FRAME)

@@ -922,7 +922,7 @@ setup_arbitrary_frame (argc, argv)
   frame = create_new_frame (argv[0], argv[1]);
 
   if (!frame)
-    fatal ("internal: create_new_frame returned invalid frame id");
+    internal_error ("create_new_frame returned invalid frame id");
 
   /* Creating a new frame munges the `frame' value from the current
      GR1, so we restore it again here.  FIXME, untangle all this

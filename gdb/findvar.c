@@ -606,9 +606,11 @@ value_of_register (regnum)
     memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
 	    REGISTER_RAW_SIZE (regnum));
   else
-    fatal ("Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
-	   REGISTER_NAME (regnum), regnum,
-	   REGISTER_RAW_SIZE (regnum), REGISTER_VIRTUAL_SIZE (regnum));
+    internal_error ("Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
+		    REGISTER_NAME (regnum),
+		    regnum,
+		    REGISTER_RAW_SIZE (regnum),
+		    REGISTER_VIRTUAL_SIZE (regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
   VALUE_REGNO (reg_val) = regnum;
@@ -1025,7 +1027,7 @@ generic_target_read_pc (pid)
       return pc_val;
     }
 #endif
-  fatal ("generic_target_read_pc");
+  internal_error ("generic_target_read_pc");
   return 0;
 }
 
@@ -1073,7 +1075,7 @@ generic_target_write_pc (pc, pid)
 #endif
 #endif
 #else
-  fatal ("generic_target_write_pc");
+  internal_error ("generic_target_write_pc");
 #endif
 }
 
@@ -1113,7 +1115,7 @@ generic_target_read_sp ()
   if (SP_REGNUM >= 0)
     return read_register (SP_REGNUM);
 #endif
-  fatal ("generic_target_read_sp");
+  internal_error ("generic_target_read_sp");
 }
 
 CORE_ADDR
@@ -1137,7 +1139,7 @@ generic_target_write_sp (val)
       return;
     }
 #endif
-  fatal ("generic_target_write_sp");
+  internal_error ("generic_target_write_sp");
 }
 
 void
@@ -1158,7 +1160,7 @@ generic_target_read_fp ()
   if (FP_REGNUM >= 0)
     return read_register (FP_REGNUM);
 #endif
-  fatal ("generic_target_read_fp");
+  internal_error ("generic_target_read_fp");
 }
 
 CORE_ADDR
@@ -1182,7 +1184,7 @@ generic_target_write_fp (val)
       return;
     }
 #endif
-  fatal ("generic_target_write_fp");
+  internal_error ("generic_target_write_fp");
 }
 
 void
@@ -1609,7 +1611,7 @@ value_from_register (type, regnum, frame)
 	  VALUE_ADDRESS (v) = first_addr;
 	}
       else
-	fatal ("value_from_register: Value not stored anywhere!");
+	internal_error ("value_from_register: Value not stored anywhere!");
 
       VALUE_OPTIMIZED_OUT (v) = optim;
 

@@ -68,7 +68,7 @@ static void
 dst_new_init PARAMS ((struct objfile *));
 
 static void
-dst_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+dst_symfile_read PARAMS ((struct objfile *, int));
 
 static void
 dst_symfile_finish PARAMS ((struct objfile *));
@@ -263,9 +263,8 @@ static bfd *symfile_bfd;
 
 /* ARGSUSED */
 static void
-dst_symfile_read (objfile, section_offsets, mainline)
+dst_symfile_read (objfile, mainline)
      struct objfile *objfile;
-     struct section_offsets *section_offsets;
      int mainline;
 {
   bfd *abfd = objfile->obfd;

@@ -41,11 +41,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef ANSI_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <signal.h>
 #include "gdb_string.h"
 #include <sys/types.h>
@@ -93,24 +88,13 @@ static char readbuf[16];
 
 /* Send data to monitor.  Works just like printf. */
 static void
-#ifdef ANSI_PROTOTYPES
 printf_monitor (char *pattern,...)
-#else
-printf_monitor (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char buf[200];
   int i;
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
-#else
-  char *pattern;
-  va_start (args);
-  pattern = va_arg (args, char *);
-#endif
 
   vsprintf (buf, pattern, args);
   va_end (args);

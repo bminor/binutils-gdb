@@ -60,24 +60,11 @@ extern int info_verbose;
 /* Print a complaint about the input symbols, and link the complaint block
    into a chain for later handling.  */
 
-/* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
 complain (struct complaint *complaint,...)
-#else
-complain (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, complaint);
-#else
-  struct complaint *complaint;
-
-  va_start (args);
-  complaint = va_arg (args, struct complaint *);
-#endif
 
   complaint->counter++;
   if (complaint->next == NULL)

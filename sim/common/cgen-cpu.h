@@ -63,8 +63,8 @@ typedef struct {
   IDESC *idesc;
 #define CPU_IDESC(cpu) ((cpu)->cgen_cpu.idesc)
 
-  /* Whether the read,write,semantic entries (computed goto labels) have been
-     initialized or not.  */
+  /* Whether the read,write,semantic entries (function pointers or computed
+     goto labels) have been initialized or not.  */
   int idesc_read_init_p;
 #define CPU_IDESC_READ_INIT_P(cpu) ((cpu)->cgen_cpu.idesc_read_init_p)
   int idesc_write_init_p;

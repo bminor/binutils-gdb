@@ -1,3 +1,35 @@
+1999-08-08  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-engine.h (SEM_FN_NAME,SEMF_FN_NAME): Delete.
+	(insn_sem): Rewrite.
+	(sem_fn_desc): New struct.
+	(idesc): Rewrite.
+	* genmloop.sh (scache case,@cpu@_scache_lookup): Profile scache hit,
+	misses if ! FAST_P.
+	(scache case): Split into non-parallel/parallel versions.
+	(@cpu@_engine_run_{full,fast}): Call @cpu@_{sem,semf}_init_idesc_table
+	if not use semantic switch version.
+
+1999-08-04  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-defs.h (SEM_BRANCH_TYPE): New enum.
+	* cgen-engine.h (SEM_BRANCH_UNTAKEN,SEM_BRANCH_UNCACHEABLE): Delete.
+	(SEM_BRANCH_INIT_EXTRACT): Delete.
+	(SEM_BRANCH_INIT): Replace npc_ptr with br_type.
+	(SEM_BRANCH_FINI): Ditto.
+	(SEM_BRANCH_VIA_ADDR): Ditto.
+	(SEM_BRANCH_VIA_CACHE): Ditto.  Delete cachvarptr arg.
+	(SEM_BRANCH_ADDR_CACHE): Delete.
+	(SEM_SKIP_COMPILE,SEM_SKIP_INSN): New macros.
+	* cgen-scache.h (cpu_scache): Replace member pbb_pr_npc_ptr with
+	pbb_br_type.
+	* genmloop.sh (eng.hin): Update prototype of ${cpu}_pbb_cti_chain.
+	(@cpu@_pbb_begin): Initialize branch_target.
+	(@cpu@_pbb_cti_chain): Replace arg new_vpc_ptr with br_type.
+	(@cpu@_engine_run_full): Replace local pbb_br_npc_ptr with
+	pbb_br_type.
+	(@cpu@_engine_run_fast): Ditto.
+
 Fri Jul 16 14:47:53 1999  Dave Brolley  <brolley@cygnus.com>
 
 	* cgen-utils.c (RORSI): New function.

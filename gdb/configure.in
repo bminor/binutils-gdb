@@ -44,6 +44,19 @@ CONFIG_SRCS=
 
 configdirs="doc testsuite"
 
+AC_ARG_ENABLE(multi-ice,
+[  --enable-multi-ice            Build the multi-ice-gdb-server],
+[case "${enableval}" in
+    yes ) enable_multi_ice="yes" ;;
+    no)  enable_multi_ice="no" ;;
+    *) AC_MSG_ERROR(Bad value for --enable-multi-ice: ${enableval}) ;;
+  esac
+])
+
+if test "${enable_multi_ice}" = "yes"; then
+  configdirs="${configdirs} multi-ice"
+fi
+
 dnl
 changequote(,)dnl
 
@@ -75,7 +88,8 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll)
+AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll \
+	socketpair)
 AC_FUNC_ALLOCA
 
 BFD_NEED_DECLARATION(malloc)
@@ -603,6 +617,13 @@ s/NAT_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 # configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 changequote([,])
+
+SUBDIRS="doc testsuite nlm"
+if test "${enable_multi_ice}" = "yes"; then
+  SUBDIRS="${SUBDIRS} multi-ice"
+fi
+
+AC_SUBST(SUBDIRS)
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
 # (NAT_FILE) is not set in config/*/*.m[ht] files, we don't make the

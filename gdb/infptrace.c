@@ -330,7 +330,7 @@ _initialize_kernel_u_addr ()
   if (nlist ("/vmunix", names) == 0)
     kernel_u_addr = names[0].n_value;
   else
-    fatal ("Unable to get kernel u area address.");
+    internal_error ("Unable to get kernel u area address.");
 #endif /* KERNEL_U_ADDR_BSD.  */
 }
 

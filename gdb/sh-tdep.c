@@ -620,7 +620,7 @@ sh_target_architecture_hook (ap)
 	}
     }
 
-  fatal ("Architecture `%s' unreconized", ap->printable_name);
+  internal_error ("Architecture `%s' unreconized", ap->printable_name);
 }
 
 /* Print the registers in a form similar to the E7000 */

@@ -92,6 +92,15 @@ typedef SCACHE *SEM_PC;
 #else
 typedef IADDR SEM_PC;
 #endif
+
+/* Kinds of branches.  */
+typedef enum {
+  SEM_BRANCH_UNTAKEN,
+  /* Branch to an uncacheable address (e.g. j reg).  */
+  SEM_BRANCH_UNCACHEABLE,
+  /* Branch to a cacheable (fixed) address.  */
+  SEM_BRANCH_CACHEABLE
+} SEM_BRANCH_TYPE;
 
 /* Virtual insn support.  */
 

@@ -243,25 +243,11 @@ gdb_os_flush_stderr (p)
 
 /* GDB version of printf_filtered callback.  */
 
-/* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 gdb_os_printf_filtered (host_callback * p, const char *format,...)
-#else
-gdb_os_printf_filtered (p, va_alist)
-     host_callback *p;
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *format;
-
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   vfprintf_filtered (gdb_stdout, format, args);
 
@@ -270,61 +256,31 @@ gdb_os_printf_filtered (p, va_alist)
 
 /* GDB version of error vprintf_filtered.  */
 
-/* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
-#else
-gdb_os_vprintf_filtered (p, format, ap)
-     host_callback *p;
-     char *format;
-     va_list ap;
-#endif
 {
   vfprintf_filtered (gdb_stdout, format, ap);
 }
 
 /* GDB version of error evprintf_filtered.  */
 
-/* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
-#else
-gdb_os_evprintf_filtered (p, format, ap)
-     host_callback *p;
-     char *format;
-     va_list ap;
-#endif
 {
   vfprintf_filtered (gdb_stderr, format, ap);
 }
 
 /* GDB version of error callback.  */
 
-/* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 gdb_os_error (host_callback * p, const char *format,...)
-#else
-gdb_os_error (p, va_alist)
-     host_callback *p;
-     va_dcl
-#endif
 {
   if (error_hook)
     (*error_hook) ();
   else
     {
       va_list args;
-#ifdef ANSI_PROTOTYPES
       va_start (args, format);
-#else
-      char *format;
-
-      va_start (args);
-      format = va_arg (args, char *);
-#endif
 
       error_begin ();
       vfprintf_filtered (gdb_stderr, format, args);
@@ -386,7 +342,7 @@ gdbsim_store_register (regno)
       read_register_gen (regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc, regno, tmp, REGISTER_RAW_SIZE (regno));
       if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
-	fatal ("Register size different to expected");
+	internal_error ("Register size different to expected");
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
@@ -539,7 +495,7 @@ gdbsim_open (args, from_tty)
 	  strcat (arg_buf, " -E little");
 	  break;
 	default:
-	  fatal ("Value of TARGET_BYTE_ORDER unknown");
+	  internal_error ("Value of TARGET_BYTE_ORDER unknown");
 	}
     }
   /* Specify the architecture of the target when it has been

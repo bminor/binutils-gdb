@@ -51,6 +51,9 @@ struct argbuf {
   const IDESC *idesc;
   char trace_p;
   char profile_p;
+  /* ??? Temporary hack for skip insns.  */
+  char skip_count;
+  char unused;
   /* cpu specific data follows */
 };
 #endif

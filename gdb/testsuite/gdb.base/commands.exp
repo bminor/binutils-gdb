@@ -185,7 +185,7 @@ proc infrun_breakpoint_command_test {} {
     if { [istarget "hppa*-hp-hpux*"] } {
 	gdb_test "continue" \
 	    "Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*" \
-	    "contiune in infrun_breakpoint_command_test"
+	    "continue in infrun_breakpoint_command_test"
     } else {
 	gdb_test "continue" \
 	    "Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*

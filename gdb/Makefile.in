@@ -224,7 +224,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990802
+VERSION = 19990809
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -381,6 +381,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
 	findvar.c gdbarch.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
+	kod.c kod-cisco.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
@@ -508,6 +509,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	event-loop.o event-top.o \
 	gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
+	kod.o kod-cisco.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
@@ -954,6 +956,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	lynx-nat.c m3-nat.c \
 	m68k-tdep.c \
 	m88k-nat.c m88k-tdep.c mac-nat.c \
+	mcore-tdep.c \
 	mips-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
@@ -1231,6 +1234,10 @@ jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(INCLUDE_DIR)/demangle.h valprint.h \
 	language.h jv-lang.h c-lang.h gdbcore.h annotate.h
 
+kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) target.h gdb_string.h
+
+kod-cisco.o: kod-cisco.c $(defs_h) gdb_string.h
+
 language.o: language.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) language.h parser-defs.h $(symtab_h) \
 	target.h $(value_h) gdb_string.h
@@ -1269,6 +1276,11 @@ main.o: main.c top.h $(defs_h) gdb_string.h $(event_loop_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h) objfiles.h symfile.h
+
+mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(gdbcmd_h) $(value_h) $(symtab_h)
+
+mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) target.h monitor.h \
+	gdb_string.h
 
 mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
