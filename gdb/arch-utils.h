@@ -35,8 +35,6 @@ extern int gdbarch_debug;
 /* Fallback for register convertible. */
 extern gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible_not;
 
-extern CORE_ADDR generic_cannot_extract_struct_value_address (char *dummy);
-
 /* Implementation of extract return value that grubs around in the
    register cache.  */
 extern gdbarch_extract_return_value_ftype legacy_extract_return_value;

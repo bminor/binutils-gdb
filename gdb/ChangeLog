@@ -1,5 +1,8 @@
 2003-11-23  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.h (generic_cannot_extract_struct_value_address):
+	Delete declaration.
+
 	* defs.h (DEPRECATED_STREQN): Rename STREQN.
 	(DEPRECATED_STREQ): Rename STREQ.
 	* ada-exp.y, ada-lang.c, ada-lex.l, coffread.c: Update.
