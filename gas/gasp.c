@@ -34,6 +34,7 @@ suitable for gas to consume.
 
 
 #include <stdio.h>
+#include <ctype.h>
 #include "host.h"
 
 #define MAX_INCLUDES 30		/* Maximum include depth */
