@@ -16,17 +16,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* Symbol read-in occurs in two phases:
-   1.  A scan (read_dbx_symtab()) of the entire executable, whose sole
-       purpose is to make a list of symbols (partial symbol table)
-       which will cause symbols
-       to be read in if referenced.  This scan happens when the
-       "symbol-file" command is given (symbol_file_command()).
-   1a. The "add-file" command.  Similar to #1.
-   2.  Full read-in of symbols.  (dbx_psymtab_to_symtab()).  This happens
-       when a symbol in a file for which symbols have not yet been
-       read in is referenced.  */
+
+/* This module provides three functions: dbx_symfile_init,
+   which initializes to read a symbol file; dbx_new_init, which 
+   discards existing cached information when all symbols are being
+   discarded; and dbx_symfile_read, which reads a symbol table
+   from a file.
+
+   dbx_symfile_read only does the minimum work necessary for letting the
+   user "name" things symbolically; it does not read the entire symtab.
+   Instead, it reads the external and static symbols and puts them in partial
+   symbol tables.  When more extensive information is requested of a
+   file, the corresponding partial symbol table is mutated into a full
+   fledged symbol table by going back and reading the symbols
+   for real.  dbx_psymtab_to_symtab() is the function that does this */
 
 #include <stdio.h>
 #include <string.h>
@@ -151,14 +154,14 @@ static void fix_common_block ();
 static void add_undefined_type ();
 static void cleanup_undefined_types ();
 static void scan_file_globals ();
-static void read_ofile_symtab ();
+static struct symtab *read_ofile_symtab ();
 static void dbx_psymtab_to_symtab ();
 
 /* C++ */
 static struct type **read_args ();
 
-static const char vptr_name[] = { '_','v','p','t','r',CPLUS_MARKER };
-static const char vb_name[] =   { '_','v','b',CPLUS_MARKER };
+static const char vptr_name[] = { '_','v','p','t','r',CPLUS_MARKER,'\0' };
+static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 
 /* Macro to determine which symbols to ignore when reading the first symbol
    of a file.  Some machines override this definition. */
@@ -1094,7 +1097,7 @@ start_subfile (name, dirname)
 
    END_ADDR is the address of the end of the file's text.  */
 
-static void
+static struct symtab *
 end_symtab (end_addr)
      CORE_ADDR end_addr;
 {
@@ -1130,7 +1133,7 @@ end_symtab (end_addr)
   current_subfile->line_vector_index = line_vector_index;
 
   /* Now create the symtab objects proper, one for each subfile.  */
-  /* (The main file is one of them.)  */
+  /* (The main file is the last one on the chain.)  */
 
   for (subfile = subfiles; subfile; subfile = nextsub)
     {
@@ -1178,6 +1181,8 @@ end_symtab (end_addr)
   line_vector = 0;
   line_vector_length = -1;
   last_source_file = 0;
+
+  return symtab;
 }
 
 /* Handle the N_BINCL and N_EINCL symbol types
@@ -1315,26 +1320,11 @@ dbx_symfile_read (sf, addr, mainline)
   free (info);
   sf->sym_private = 0;		/* Zap pointer to our (now gone) info struct */
 
-  if (!partial_symtab_list)
-    printf_filtered ("\n(no debugging symbols found)...");
-}
-
-/* Discard any information we have cached during the reading of a
-   single symbol file.  This should not toss global information
-   from previous symbol files that have been read.  E.g. we might
-   be discarding info from reading a shared library, and should not
-   throw away the info from the main file.  */
-
-void
-dbx_symfile_discard ()
-{
-
-  /* Empty the hash table of global syms looking for values.  */
-  bzero (global_sym_chain, sizeof global_sym_chain);
-
-  free_pendings = 0;
-  file_symbols = 0;
-  global_symbols = 0;
+  if (!partial_symtab_list) {
+    wrap_here ("");
+    printf_filtered ("(no debugging symbols found)...");
+    wrap_here ("");
+  }
 }
 
 /* Initialize anything that needs initializing when a completely new
@@ -1344,10 +1334,15 @@ dbx_symfile_discard ()
 void
 dbx_new_init ()
 {
-  dbx_symfile_discard ();
+  /* Empty the hash table of global syms looking for values.  */
+  bzero (global_sym_chain, sizeof global_sym_chain);
+
+  free_pendings = 0;
+  file_symbols = 0;
+  global_symbols = 0;
+
   /* Don't put these on the cleanup chain; they need to stick around
-     until the next call to symbol_file_command.  *Then* we'll free
-     them. */
+     until the next call to dbx_new_init.  *Then* we'll free them. */
   if (symfile_string_table)
     {
       free (symfile_string_table);
@@ -2568,11 +2563,12 @@ psymtab_to_symtab_1 (pst, desc, stringtab, stringtab_size, sym_offset)
 
       /* Read in this files symbols */
       lseek (desc, sym_offset, L_SET);
-      read_ofile_symtab (desc, stringtab, stringtab_size,
-			 pst->ldsymoff,
-			 pst->ldsymlen, pst->textlow,
-			 pst->texthigh - pst->textlow, pst->addr);
-      sort_symtab_syms (symtab_list); /* At beginning since just added */
+      pst->symtab =
+	read_ofile_symtab (desc, stringtab, stringtab_size,
+			   pst->ldsymoff,
+			   pst->ldsymlen, pst->textlow,
+			   pst->texthigh - pst->textlow, pst->addr);
+      sort_symtab_syms (pst->symtab);
 
       do_cleanups (old_chain);
     }
@@ -2776,7 +2772,7 @@ process_symbol_pair (type1, desc1, value1, name1,
   /* No need to check PCC_SOL_BROKEN, on the assumption that such
      broken PCC's don't put out N_SO pairs.  */
   if (last_source_file)
-    end_symtab (value2);
+    (void)end_symtab (value2);
   start_symtab (name2, name1, value2);
 }
 
@@ -2795,7 +2791,7 @@ process_symbol_pair (type1, desc1, value1, name1,
  * OFFSET is a relocation offset which gets added to each symbol
  */
 
-static void
+static struct symtab *
 read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 		   sym_size, text_offset, text_size, offset)
      int desc;
@@ -2941,7 +2937,8 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 	     section. */
 	  ;
     }
-  end_symtab (text_offset + text_size);
+
+  return end_symtab (text_offset + text_size);
 }
 
 static int
@@ -3168,7 +3165,7 @@ process_one_symbol (type, desc, valu, name)
 	}
 #endif
       if (last_source_file)
-	end_symtab (valu);
+	(void)end_symtab (valu);
       start_symtab (name, NULL, valu);
       break;
 
@@ -4360,6 +4357,9 @@ read_struct_type (pp, type)
 	      /* This field is unpacked.  */
 	      list->field.bitsize = 0;
 	    }
+	  /* GNU C++ anonymous type.  */
+	  else if (*p == '_')
+	    break;
 	  else
 	    error ("invalid abbreviation at symtab pos %d.", symnum);
 
@@ -5382,16 +5382,13 @@ fix_common_block (sym, valu)
 /* Register our willingness to decode symbols for SunOS and a.out and
    b.out files handled by BFD... */
 static struct sym_fns sunos_sym_fns = {"sunOs", 6,
-              dbx_new_init, dbx_symfile_init,
-              dbx_symfile_read, dbx_symfile_discard};
+              dbx_new_init, dbx_symfile_init, dbx_symfile_read};
 
 static struct sym_fns aout_sym_fns = {"a.out", 5,
-              dbx_new_init, dbx_symfile_init,
-              dbx_symfile_read, dbx_symfile_discard};
+              dbx_new_init, dbx_symfile_init, dbx_symfile_read};
 
 static struct sym_fns bout_sym_fns = {"b.out", 5,
-              dbx_new_init, dbx_symfile_init,
-              dbx_symfile_read, dbx_symfile_discard};
+              dbx_new_init, dbx_symfile_init, dbx_symfile_read};
 
 void
 _initialize_dbxread ()
@@ -5404,6 +5401,4 @@ _initialize_dbxread ()
   undef_types_length = 0;
   undef_types = (struct type **) xmalloc (undef_types_allocated *
 					  sizeof (struct type *));
-
-  dbx_new_init ();
 }
