@@ -53,6 +53,7 @@ AS = as
 AR = ar
 AR_FLAGS = qc
 CFLAGS = -g
+C++FLAGS = -g -O
 RANLIB = ranlib
 NM = nm
 
@@ -72,8 +73,9 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 # C compiler to use to create programs which must be run in the build
 # environment.
 CC_FOR_BUILD = $(CC)
+C++_FOR_BUILD = gcc
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib deja-gnu
 OTHERS = 
 
 ALL = all.normal
@@ -88,6 +90,17 @@ CC_FOR_TARGET = ` \
   else \
     if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
       echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+C++_FOR_TARGET = ` \
+  if [ -f $${rootme}/gcc/Makefile ] ; then \
+    echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
+  else \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo gcc; \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
@@ -160,6 +173,7 @@ FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
+	"C++FLAGS=$(C++FLAGS)" \
 	"RANLIB=$(RANLIB)" \
 	"LOADLIBES=$(LOADLIBES)" \
 	"LDFLAGS=$(LDFLAGS)" \
@@ -169,7 +183,8 @@ FLAGS_TO_PASS = \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)"
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"C++_FOR_BUILD=$(C++_FOR_BUILD)"
 
 # Flags to pass down to makes which are built with the target
 # environment (e.g. libg++, xiberty, newlib).
@@ -188,17 +203,20 @@ TARGET_FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"C++_FOR_BUILD=$(C++_FOR_BUILD)" \
 	"CC=$(CC_FOR_TARGET)" \
+	"C++=$(C++_FOR_TARGET)" \
 	"AS=$(AS_FOR_TARGET)" \
 	"AR=$(AR_FOR_TARGET)" \
 	"RANLIB=$(RANLIB_FOR_TARGET)" \
 	"NM=$(NM_FOR_TARGET)" \
 	"XTRAFLAGS=$(XTRAFLAGS)"
 
+# The first rule in the file had better be this one.  Don't put any above it.
+all:	$(ALL)
+
 .PHONY: all info install-info clean-info
 .NOEXPORT:
-
-all:	$(ALL)
 
 info:	
 	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=info "DODIRS=$(SUBDIRS)" 
@@ -227,11 +245,11 @@ all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-gcc all-binutils  all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
-	all-newlib all-gprof all-send_pr all-libm
+	all-newlib all-gprof all-send_pr all-libm all-deja-gnu
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
 	 all-opcodes all-bfd all-readline all-gdb all-binutils all-gcc \
-	all-newlib
+	all-newlib all-deja-gnu
 
 clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bfd clean-newlib clean-binutils clean-flex \
@@ -239,7 +257,8 @@ clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-gcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
-	clean-libg++ clean-gprof clean-send_pr clean-libm clean-xiberty
+	clean-libg++ clean-gprof clean-send_pr clean-libm clean-xiberty \
+	clean-deja-gnu
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 clean-stamps:
@@ -267,6 +286,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-byacc \
 	install-cvs \
 	install-diff \
+	install-deja-gnu \
 	install-emacs \
 	install-etc \
 	install-flex \
@@ -303,7 +323,32 @@ install.cross: install-dirs install-libiberty install-mmalloc \
         install-binutils install-opcodes install-byacc install-flex \
         install-ld install-gas install-readline \
         install-glob install-gdb install-mmalloc \
-        install-newlib install-gcc install-etc
+        install-newlib install-gcc install-etc install-deja-gnu
+
+### deja-gnu
+all-deja-gnu: force
+	@if [ -f ./deja-gnu/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./deja-gnu; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-deja-gnu: force
+	@if [ -f ./deja-gnu/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./deja-gnu;	$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-deja-gnu: force
+	@if [ -f ./deja-gnu/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./deja-gnu;	$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
 
 ### autoconf
 all-autoconf: force
@@ -1274,7 +1319,8 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
 DEVO_SUPPORT= README cfg-paper.texi Makefile.in configure configure.in \
-	config.sub config configure.man configure.texi move-if-change
+	config.sub config configure.man configure.texi move-if-change \
+	COPYING.LIB
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
 
