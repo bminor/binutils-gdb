@@ -1,3 +1,11 @@
+2004-10-05  Tomer Levi  <Tomer.Levi@nsc.com>
+ 
+	* emultempl/crxelf.em (disable_relaxation): Add.
+ 	(crxelf_before_allocation): Enable --relax option by default.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_NO_RELAX.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add --no-relax.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_NO_RELAX.
+
 2004-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention SORT_BY_NAME, SORT_BY_ALIGNMENT and
