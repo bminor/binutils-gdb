@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
+#include <stdlib.h>
 
 #ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
@@ -26,10 +27,7 @@ extern void	exit	PARAMS ((int));
 extern int	fclose	PARAMS ((FILE*));
 extern void	free	PARAMS ((PTR));
 extern int	fseek	PARAMS ((FILE*, long, int));
-extern PTR	malloc	PARAMS ((unsigned));
 extern void	perror	PARAMS ((CONST char *));
-extern int	qsort	PARAMS ((void *data, int els, int siz, int func()));
-extern PTR	realloc	PARAMS ((PTR, unsigned));
 
 extern char *getenv();
 extern int chmod();
