@@ -1036,7 +1036,7 @@ type_name_no_tag (const struct type *type)
 struct type *
 lookup_primitive_typename (char *name)
 {
-  return language_lookup_primative_type_by_name (current_language,
+  return language_lookup_primitive_type_by_name (current_language,
 						 current_gdbarch,
 						 name);
 }

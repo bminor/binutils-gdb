@@ -1283,7 +1283,7 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 			    struct language_arch_info *lai)
 {
   lai->string_char_type = builtin_type (gdbarch)->builtin_char;
-  lai->primative_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
+  lai->primitive_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
 						       struct type *);
 }
 
@@ -1443,16 +1443,16 @@ language_string_char_type (const struct language_defn *la,
 }
 
 struct type *
-language_lookup_primative_type_by_name (const struct language_defn *la,
+language_lookup_primitive_type_by_name (const struct language_defn *la,
 					struct gdbarch *gdbarch,
 					const char *name)
 {
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
-  if (ld->arch_info[la->la_language].primative_type_vector != NULL)
+  if (ld->arch_info[la->la_language].primitive_type_vector != NULL)
     {
       struct type *const *p;
-      for (p = ld->arch_info[la->la_language].primative_type_vector;
+      for (p = ld->arch_info[la->la_language].primitive_type_vector;
 	   (*p) != NULL;
 	   p++)
 	{

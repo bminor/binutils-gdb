@@ -141,11 +141,11 @@ struct language_format_info
 
 struct language_arch_info
 {
-  /* Its primative types.  This is a vector ended by a NULL pointer.
+  /* Its primitive types.  This is a vector ended by a NULL pointer.
      These types can be specified by name in parsing types in
      expressions, regardless of whether the program being debugged
      actually defines such a type.  */
-  struct type **primative_type_vector;
+  struct type **primitive_type_vector;
   /* Type of elements of strings. */
   struct type *string_char_type;
 };
@@ -153,7 +153,7 @@ struct language_arch_info
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
-struct type *language_lookup_primative_type_by_name (const struct language_defn *l,
+struct type *language_lookup_primitive_type_by_name (const struct language_defn *l,
 						     struct gdbarch *gdbarch,
 						     const char *name);
 

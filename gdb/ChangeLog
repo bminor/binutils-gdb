@@ -1,3 +1,11 @@
+2004-07-28  Andrew Cagney  <cagney@gnu.org>
+
+	* language.h (struct language_arch_info): Fix typo
+	s/primative/primitive/.
+	* gdbtypes.c (lookup_primitive_typename): Ditto.
+	* language.c (language_lookup_primitive_type_by_name)
+	(unknown_language_arch_info): Ditto.
+
 2004-07-27  Andrew Cagney  <cagney@gnu.org>
 
 	* defs.h (enum language): Add nr_languages.
