@@ -1,5 +1,8 @@
 Tue Dec 20 11:44:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* sparc-tdep.c, a29k-tdep.c, findvar.c (get_saved_register):
+	if !target_has_registers, call error().
+
 	* value.h: Remove obsolete comments about FRAME vs struct
 	frame_info *.
 

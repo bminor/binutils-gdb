@@ -519,6 +519,9 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   struct frame_info *frame1;
   CORE_ADDR addr;
 
+  if (!target_has_registers)
+    error ("No registers.");
+
   if (optimized)
     *optimized = 0;
 

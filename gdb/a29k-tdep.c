@@ -667,6 +667,10 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
   CORE_ADDR addr;
   enum lval_type lval;
 
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Probably now redundant with the target_has_registers check.  */
   if (frame == 0)
     return;
 
