@@ -1,3 +1,7 @@
+Wed Dec  1 03:34:53 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c, m10300-dis.c: Add am33 support.
+
 Wed Nov 24 20:29:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* hppa-dis.c (unit_cond_names): Add PA2.0 unit condition names.
