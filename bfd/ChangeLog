@@ -1,3 +1,8 @@
+2001-02-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (elf32_hppa_set_gp): Handle weak $global$.  If
+	$global$ referenced but not defined, set its value here.
+
 2001-02-09  Bo Thorsen  <bo@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_check_relocs): Set .rela.got section
