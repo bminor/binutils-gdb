@@ -1,3 +1,8 @@
+Mon Apr 13 16:17:52 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_loadfile): Change fstat() call to stat().
+	Needed because you can't convert a FILE* to an fd.
+
 Mon Apr 13 16:28:07 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	
 	* gdbtk.c: (perror_with_name_wrapper) new function to call 

@@ -3094,7 +3094,7 @@ gdb_loadfile (clientData, interp, objc, objv)
       return TCL_ERROR;
     }
 
-  if (fstat (fp->_file, &st) < 0)
+  if (stat (file, &st) < 0)
     {
       catch_errors (perror_with_name_wrapper, "gdbtk: get time stamp", "",
                     RETURN_MASK_ALL);
