@@ -44,9 +44,6 @@ other things to work on, if you get bored. :-)
 #include "gdbtypes.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include <time.h> /* For time_t in libbfd.h.  */
-#include <sys/types.h> /* For time_t, if not in time.h.  */
-#include "libbfd.h"	/* FIXME Secret Internal BFD stuff (bfd_read) */
 #include "elf/dwarf.h"
 #include "buildsym.h"
 #include "demangle.h"

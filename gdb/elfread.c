@@ -20,9 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
-#include <time.h> /* For time_t in libbfd.h.  */
-#include <sys/types.h> /* For time_t, if not in time.h.  */
-#include "libbfd.h"		/* For bfd_elf_find_section */
+#include <string.h>
 #include "libelf.h"
 #include "elf/mips.h"
 #include "symtab.h"
@@ -32,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "stabsread.h"
 #include "gdb-stabs.h"
 #include "complaints.h"
-#include <string.h>
 #include "demangle.h"
 
 /* The struct elfinfo is available only during ELF symbol table and
@@ -579,25 +576,21 @@ elf_symfile_read (objfile, section_offsets, mainline)
     }
   if (ei.stabsect)
     {
-      /* STABS sections */
+      asection *str_sect;
 
-      /* FIXME:  Sun didn't really know how to implement this well.
-	 They made .stab sections that don't point to the .stabstr
-	 section with the sh_link field.  BFD doesn't make string table
-	 sections visible to the caller.  So we have to search the
-	 ELF section table, not the BFD section table, for the string
-	 table.  */
-      struct elf32_internal_shdr *elf_sect;
+      /* Stab sections have an associated string table that looks like
+	 a separate section.  */
+      str_sect = bfd_get_section_by_name (abfd, ".stabstr");
 
-      elf_sect = bfd_elf_find_section (abfd, ".stabstr");
-      if (elf_sect)
+      /* FIXME should probably warn about a stab section without a stabstr.  */
+      if (str_sect)
 	elfstab_build_psymtabs (objfile,
-  	  section_offsets,
-	  mainline,
-	  ei.stabsect->filepos,				/* .stab offset */
-	  bfd_get_section_size_before_reloc (ei.stabsect),/* .stab size */
-	  (file_ptr) elf_sect->sh_offset,		/* .stabstr offset */
-	  elf_sect->sh_size);				/* .stabstr size */
+				section_offsets,
+				mainline,
+				ei.stabsect->filepos,
+				bfd_section_size (abfd, ei.stabsect),
+				str_sect->filepos,
+				bfd_section_size (abfd, str_sect));
     }
   if (ei.mdebugsect)
     {

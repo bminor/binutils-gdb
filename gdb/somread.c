@@ -20,9 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
-#include <time.h> /* For time_t in libbfd.h.  */
-#include <sys/types.h> /* For time_t, if not in time.h.  */
-#include "libbfd.h"
 #include "som.h"
 #include "libhppa.h"
 #include <syms.h>

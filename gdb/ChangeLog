@@ -1,3 +1,11 @@
+Thu Jul 14 14:22:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* dbxread.c: Don't include libbfd.h.
+	* dwarfread.c, elfread.c somread.c: Don't include libbfd.h,
+	<time.h>, or <sys/types.h>.
+	* elfread.c (elf_symfile_read): Use only standard BFD functions to
+	collect information about the stab and stab string sections.
+
 Thu Jul 14 13:17:39 1994  Kung Hsu  (kung@x1.cygnus.com)
 
 	* stabsread.c (read_huge_number): handle large unsigned number
