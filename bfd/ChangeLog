@@ -1,3 +1,8 @@
+Tue Oct 26 02:40:46 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* som.c (hppa_object_setup):  Set SEC_CODE for .text section so
+	that GDB can figure out text_start and text_end.
+
 Mon Oct 25 16:05:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Fix up warnings from gcc -Wall:
