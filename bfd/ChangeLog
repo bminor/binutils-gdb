@@ -1,3 +1,7 @@
+Mon Oct 24 15:33:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ecoff.c (ecoff_set_symbol_info): Set udata.i to 0, not NULL.
+
 Fri Oct 21 16:43:13 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* libaout.h (machine_type): added M_68K_NETBSD and M_SPARC_NETBSD.

@@ -861,7 +861,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
   asym->the_bfd = abfd;
   asym->value = ecoff_sym->value;
   asym->section = &bfd_debug_section;
-  asym->udata = NULL;
+  asym->udata.i = 0;
 
   /* An indirect symbol requires two consecutive stabs symbols.  */
   if (*indirect_ptr_ptr != (asymbol *) NULL)
@@ -920,11 +920,12 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
       /* Normally, a local stProc symbol will have a corresponding
          external symbol.  We mark the local symbol as a debugging
          symbol, in order to prevent nm from printing both out.
-         Similarly, we mark stLabel fields as debugging symbols.  In
-         both cases, we do want to set the value correctly based on
-         the symbol class.  */
+         Similarly, we mark stLabel and stabs symbols as debugging
+         symbols.  In both cases, we do want to set the value
+         correctly based on the symbol class.  */
       if (ecoff_sym->st == stProc
-	  || ecoff_sym->st == stLabel)
+	  || ecoff_sym->st == stLabel
+	  || ECOFF_IS_STAB (ecoff_sym))
 	asym->flags |= BSF_DEBUGGING;
     }
   switch (ecoff_sym->sc)
