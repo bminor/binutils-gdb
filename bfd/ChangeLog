@@ -1,5 +1,16 @@
 Fri Jul 14 13:13:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (KEEPIT): Change definition to udata.i.
+	(KEEPITTYPE): Remove.
+	(NAME(aout,reloc_type_lookup)): Add cases to the
+	extended reloc type switch: SPARC_GOT10, SPARC_GOT13, SPARC_GOT22,
+	SPARC_PC10, SPARC_PC22, SPARC_WPLT30.
+	(NAME(aout,swap_std_reloc_out)): Don't bother to use stoi when
+	retrieving KEEPIT value.
+	(NAME(aout,swap_ext_reloc_out)): Likewise.  Also, only add in
+	output section VMA for section symbols, and check BSF_SECTION_SYM
+	to control whether to set r_extern to 1.
+
 	* syms.c: Fix comments so that `make info' works.
 
 	* elf32-mips.c (mips_elf_find_nearest_line): Set SEC_HAS_CONTENTS
