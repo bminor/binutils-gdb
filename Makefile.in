@@ -53,10 +53,13 @@ AS = as
 AR = ar
 AR_FLAGS = rc
 CC = cc
+$(start-sanitize-chill)
 CFLAGS = -g
+CHILLFLAGS = $(CFLAGS)
+CHILL_LIB = -lchill
+$(end-sanitize-chill)
 CXX = gcc
 CXXFLAGS = -g -O
-GCC_FOR_TARGET = ./xgcc -B./
 RANLIB = ranlib
 NM = nm
 
@@ -97,6 +100,30 @@ CC_FOR_TARGET = ` \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
+
+GCC_FOR_TARGET = ` \
+  if [ -f $${rootme}/gcc/Makefile ] ; then \
+    echo $${rootme}/gcc/xgcc -B$${rootme}/gcc/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+$(start-sanitize-chill)
+CHILL_FOR_TARGET = ` \
+  if [ -f $${rootme}/gcc/Makefile ] ; then \
+    echo $${rootme}/gcc/xgcc -B$${rootme}/gcc/ -L$${rootme}/chillrt/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+$(end-sanitize-chill)
 
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
@@ -179,6 +206,11 @@ FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CFLAGS=$(CFLAGS)" \
+$(start-sanitize-chill)\
+	"CHILLFLAGS=$(CHILLFLAGS)" \
+	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
+	"CHILL_LIB=$(CHILL_LIB)" \
+$(start-sanitize-chill)\
 	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \

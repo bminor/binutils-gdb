@@ -1,3 +1,13 @@
+Fri Jan 15 16:40:54 1993  Mike Werner  (mtw@rtl.cygnus.com)
+
+        **** start-sanitize-chill ****
+	* Makefile.in: added variables CHILL_FOR_TARGET, CHILLFLAGS,
+	  and CHILL_LIB.
+	* deja-gnu/gdb.t31/Makefile.in: removed explicit setting of
+	  CHILL variables as these are now passed down from the top
+	  level makefile using FLAGS_TO_PASS.
+        **** end-sanitize-chill ****
+
 Fri Jan 15 10:27:02 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (GCC_FLAGS_TO_PASS): New variable.
