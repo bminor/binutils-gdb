@@ -1,5 +1,11 @@
 2002-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_extract_struct_value_address): Use
+	regcache_raw_read_unsigned instead of
+	regcache_cooked_read_unsigned since we know that the register
+	we're reading isn't a pseudo register.  Rename variable 'val' into
+	the more descriptive 'addr'.
+
 	* x86-64-tdep.c: Fix some formatting problems, mostly in comments.
 	(x86_64_push_return_address): Add comment.
 	(x86_64_pop_frame): Make static.
