@@ -2402,15 +2402,12 @@ elf_link_output_extsym (h, data)
      linker will complain that the symbol is undefined when the
      program is run.  We don't have to worry about symbols that are
      referenced by regular files, because we will already have issued
-     warnings for them.  FIXME: _rld_new_interface is apparently
-     supposed to be undefined on Irix 5.3.  This should be handled in
-     a better way.  */
+     warnings for them.  */
   if (! finfo->info->relocateable
       && ! finfo->info->shared
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
-      && strcmp (h->root.root.string, "_rld_new_interface") != 0)
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
     {
       if (! ((*finfo->info->callbacks->undefined_symbol)
 	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
