@@ -1,5 +1,8 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Fix minor typos.  Handle "cmp", "setf", "tst"
+	"di", and "ei" instructions correctly.
+
 	* interp.c (do_format_3): Get operands correctly and call
 	the target function.
 	* simops.c: Handle bCC instructions.

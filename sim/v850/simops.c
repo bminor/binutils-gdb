@@ -401,7 +401,6 @@ OP_1A0 ()
   State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
   State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
-  State.regs[OP[1]] = State.regs[OP[0]];
 }
 
 /* subr reg1, reg2 */
@@ -498,6 +497,145 @@ OP_40 ()
 		| (ov ? PSW_OV : 0));
 }
 
+/* cmp reg, reg */
+void
+OP_1E0 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op1 - op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+
+  /* Set condition codes.  */
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
+}
+
+/* cmp sign_extend(imm5), reg */
+void
+OP_260 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov;
+  int temp;
+
+  /* Compute the result.  */
+  temp = OP[0];
+  temp = (temp << 27) >> 27;
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+  result = op1 - op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < -op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+
+  /* Set condition codes.  */
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
+}
+
+/* setf cccc,reg2 */
+void
+OP_7E0 ()
+{
+  /* Hack alert.  We turn off a bit in op0 since we really only
+     wanted 4 bits.  */
+  unsigned int op0, psw, result;
+
+  op0 = OP[0] & 0xf;
+  psw = State.psw;
+
+  switch (op0)
+    {
+      case 0x0:
+	result = ((psw & PSW_OV) != 0);
+	break;
+      case 0x1:
+	result = ((psw & PSW_CY) != 0);
+	break;
+      case 0x2:
+	result = ((psw & PSW_Z) != 0);
+	break;
+      case 0x3:
+	result = ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) != 0);
+	break;
+      case 0x4:
+	result = ((psw & PSW_S) != 0);
+	break;
+      case 0x5:
+	result = 1;
+	break;
+      case 0x6:
+	result = ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) != 0);
+	break;
+      case 0x7:
+	result = (((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))
+		  || ((psw & PSW_Z) != 0)) != 0);
+	break;
+      case 0x8:
+	result = ((psw & PSW_OV) == 0);
+	break;
+      case 0x9:
+	result = ((psw & PSW_CY) == 0);
+	break;
+      case 0xa:
+	result = ((psw & PSW_Z) == 0);
+	break;
+      case 0xb:
+	result = ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) == 0);
+	break;
+      case 0xc:
+	result = ((psw & PSW_S) == 0);
+	break;
+      case 0xd:
+	result = ((psw & PSW_SAT) != 0);
+	break;
+      case 0xe:
+	result = ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) == 0);
+	break;
+      case 0xf:
+	result = (((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))
+		  || ((psw & PSW_Z) != 0)) == 0);
+	break;
+    }
+  
+  State.regs[OP[1]] = result;
+}
+
+/* tst reg,reg */
+void
+OP_160 ()
+{
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 & op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the condition codes.  */
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+}
+
 void
 OP_10720 ()
 {
@@ -579,17 +717,7 @@ OP_1687E0 ()
 }
 
 void
-OP_1E0 ()
-{
-}
-
-void
 OP_A0 ()
-{
-}
-
-void
-OP_260 ()
 {
 }
 
@@ -742,11 +870,6 @@ OP_500 ()
 
 void
 OP_47C0 ()
-{
-}
-
-void
-OP_7E0 ()
 {
 }
 
@@ -912,18 +1035,18 @@ OP_501 ()
 {
 }
 
-/* di, not supported */
+/* di */
 void
 OP_16007E0 ()
 {
-  abort ();
+  State.psw |= PSW_ID;
 }
 
-/* ei, not supported */
+/* ei */
 void
 OP_16087E0 ()
 {
-  abort ();
+  State.psw &= ~PSW_ID;
 }
 
 /* halt, not supported */
@@ -963,11 +1086,6 @@ OP_4007E0 ()
 
 void
 OP_400 ()
-{
-}
-
-void
-OP_160 ()
 {
 }
 
