@@ -1,3 +1,7 @@
+Wed Jan 29 09:37:25 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200.h (MN10200_OPERAND_RELAX): Define.
+
 start-sanitize-tic80
 Sat Jan 18 15:18:59 1997  Fred Fish  <fnf@cygnus.com>
 
