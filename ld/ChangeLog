@@ -1,3 +1,7 @@
+Fri May  9 17:45:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (i[3456]86-*-gnu*): Don't include Mach support.
+
 Tue May  6 13:21:19 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Sean McNeil <sean@mcneil.com>:
