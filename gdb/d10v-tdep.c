@@ -414,7 +414,7 @@ show_regs (args, from_tty)
      char *args;
      int from_tty;
 {
-  LONGEST num1, num2;
+  int a;
   printf_filtered ("PC=%04x (0x%x) PSW=%04x RPT_S=%04x RPT_E=%04x RPT_C=%04x\n",
                    read_register (PC_REGNUM), D10V_MAKE_IADDR (read_register (PC_REGNUM)),
                    read_register (PSW_REGNUM),
@@ -443,9 +443,19 @@ show_regs (args, from_tty)
                    read_register (IMAP0_REGNUM),
                    read_register (IMAP1_REGNUM),
                    read_register (DMAP_REGNUM));
-  read_register_gen (A0_REGNUM, (char *)&num1);
-  read_register_gen (A0_REGNUM+1, (char *)&num2);
-  printf_filtered ("A0-A1  %010llx %010llx\n",num1, num2);
+  printf_filtered ("A0-A1");
+  for (a = A0_REGNUM; a <= A0_REGNUM + 1; a++)
+    {
+      char num[MAX_REGISTER_RAW_SIZE];
+      int i;
+      printf_filtered ("  ");
+      read_register_gen (a, (char *)&num);
+      for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
+	{
+	  printf_filtered ("%02x", (num[i] & 0xff));
+	}
+    }
+  printf_filtered ("\n");
 }
 
 CORE_ADDR

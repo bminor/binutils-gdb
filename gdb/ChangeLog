@@ -1,3 +1,8 @@
+Thu Feb 12 18:25:42 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (show_regs): Avoid use of %llx when printing 8 byte
+ 	accumulators.
+
 Thu Feb 12 17:10:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* valops.c (value_at): For d10v, make read pointers with
