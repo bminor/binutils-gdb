@@ -245,7 +245,8 @@ Write cached information into a file being written, at <<bfd_close>>.
 
 .  boolean             (*_bfd_write_contents[bfd_type_end]) PARAMS ((bfd *));
 
-The general target vector.
+The general target vector.  These vectors are initialized using the
+BFD_JUMP_TABLE macros.
 
 .
 .  {* Generic entry points.  *}
