@@ -36,6 +36,7 @@
 
 #include <errno.h>
 #include "gdb_string.h"
+#include "gdb_assert.h"
 
 /* Flag indicating HP compilers were used; needed to correctly handle some
    value operations with HP aCC code/runtime. */
@@ -66,7 +67,7 @@ static CORE_ADDR allocate_space_in_inferior (int);
 static struct value *cast_into_complex (struct type *, struct value *);
 
 static struct fn_field *find_method_list (struct value ** argp, char *method,
-					  int offset, int *static_memfuncp,
+					  int offset,
 					  struct type *type, int *num_fns,
 					  struct type **basetype,
 					  int *boffset);
@@ -1963,10 +1964,13 @@ typecmp (int staticp, struct type *t1[], struct value *t2[])
     return t2[1] != 0;
   if (t1 == 0)
     return 1;
-  if (TYPE_CODE (t1[0]) == TYPE_CODE_VOID)
-    return 0;
   if (t1[!staticp] == 0)
     return 0;
+  if (TYPE_CODE (t1[0]) == TYPE_CODE_VOID)
+    return 0;
+  /* Skip ``this'' argument if applicable.  T2 will always include THIS.  */
+  if (staticp)
+    t2++;
   for (i = !staticp; t1[i] && TYPE_CODE (t1[i]) != TYPE_CODE_VOID; i++)
     {
       struct type *tt1, *tt2;
@@ -2520,7 +2524,7 @@ value_struct_elt (struct value **argp, struct value **args,
 
 static struct fn_field *
 find_method_list (struct value **argp, char *method, int offset,
-		  int *static_memfuncp, struct type *type, int *num_fns,
+		  struct type *type, int *num_fns,
 		  struct type **basetype, int *boffset)
 {
   int i;
@@ -2536,10 +2540,22 @@ find_method_list (struct value **argp, char *method, int offset,
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
       if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
 	{
-	  *num_fns = TYPE_FN_FIELDLIST_LENGTH (type, i);
+	  /* Resolve any stub methods.  */
+	  int len = TYPE_FN_FIELDLIST_LENGTH (type, i);
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
+	  int j;
+
+	  *num_fns = len;
 	  *basetype = type;
 	  *boffset = offset;
-	  return TYPE_FN_FIELDLIST1 (type, i);
+
+	  for (j = 0; j < len; j++)
+	    {
+	      if (TYPE_FN_FIELD_STUB (f, j))
+		check_stub_method (type, i, j);
+	    }
+
+	  return f;
 	}
     }
 
@@ -2579,7 +2595,8 @@ find_method_list (struct value **argp, char *method, int offset,
 	  base_offset = TYPE_BASECLASS_BITPOS (type, i) / 8;
 	}
       f = find_method_list (argp, method, base_offset + offset,
-      static_memfuncp, TYPE_BASECLASS (type, i), num_fns, basetype, boffset);
+			    TYPE_BASECLASS (type, i), num_fns, basetype,
+			    boffset);
       if (f)
 	return f;
     }
@@ -2597,8 +2614,8 @@ find_method_list (struct value **argp, char *method, int offset,
 
 struct fn_field *
 value_find_oload_method_list (struct value **argp, char *method, int offset,
-			      int *static_memfuncp, int *num_fns,
-			      struct type **basetype, int *boffset)
+			      int *num_fns, struct type **basetype,
+			      int *boffset)
 {
   struct type *t;
 
@@ -2621,12 +2638,7 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
       && TYPE_CODE (t) != TYPE_CODE_UNION)
     error ("Attempt to extract a component of a value that is not a struct or union");
 
-  /* Assume it's not static, unless we see that it is.  */
-  if (static_memfuncp)
-    *static_memfuncp = 0;
-
-  return find_method_list (argp, method, 0, static_memfuncp, t, num_fns, basetype, boffset);
-
+  return find_method_list (argp, method, 0, t, num_fns, basetype, boffset);
 }
 
 /* Given an array of argument types (ARGTYPES) (which includes an
@@ -2685,6 +2697,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int boffset;
   register int jj;
   register int ix;
+  int static_offset;
 
   char *obj_type_name = NULL;
   char *func_name = NULL;
@@ -2692,9 +2705,6 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   /* Get the list of overloaded methods or functions */
   if (method)
     {
-      int i;
-      int len;
-      struct type *domain;
       obj_type_name = TYPE_NAME (VALUE_TYPE (obj));
       /* Hack: evaluate_subexp_standard often passes in a pointer
          value rather than the object itself, so try again */
@@ -2703,7 +2713,6 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	obj_type_name = TYPE_NAME (TYPE_TARGET_TYPE (VALUE_TYPE (obj)));
 
       fns_ptr = value_find_oload_method_list (&temp, name, 0,
-					      staticp,
 					      &num_fns,
 					      &basetype, &boffset);
       if (!fns_ptr || !num_fns)
@@ -2711,26 +2720,10 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name);
-      domain = TYPE_DOMAIN_TYPE (fns_ptr[0].type);
-      len = TYPE_NFN_FIELDS (domain);
-      /* NOTE: dan/2000-03-10: This stuff is for STABS, which won't
-         give us the info we need directly in the types. We have to
-         use the method stub conversion to get it. Be aware that this
-         is by no means perfect, and if you use STABS, please move to
-         DWARF-2, or something like it, because trying to improve
-         overloading using STABS is really a waste of time. */
-      for (i = 0; i < len; i++)
-	{
-	  int j;
-	  struct fn_field *f = TYPE_FN_FIELDLIST1 (domain, i);
-	  int len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-	  for (j = 0; j < len2; j++)
-	    {
-	      if (TYPE_FN_FIELD_STUB (f, j) && (!strcmp_iw (TYPE_FN_FIELDLIST_NAME (domain,i),name)))
-		check_stub_method (domain, i, j);
-	    }
-	}
+      /* If we are dealing with stub method types, they should have
+	 been resolved by find_method_list via value_find_oload_method_list
+	 above.  */
+      gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
     }
   else
     {
@@ -2757,10 +2750,11 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   /* Consider each candidate in turn */
   for (ix = 0; ix < num_fns; ix++)
     {
+      static_offset = 0;
       if (method)
 	{
-	  /* For static member functions, we won't have a this pointer, but nothing
-	     else seems to handle them right now, so we just pretend ourselves */
+	  if (TYPE_FN_FIELD_STATIC_P (fns_ptr, ix))
+	    static_offset = 1;
 	  nparms=0;
 
 	  if (TYPE_FN_FIELD_ARGS(fns_ptr,ix))
@@ -2782,8 +2776,10 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj])
 			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
 
-      /* Compare parameter types to supplied argument types */
-      bv = rank_function (parm_types, nparms, arg_types, nargs);
+      /* Compare parameter types to supplied argument types.  Skip THIS for
+         static methods.  */
+      bv = rank_function (parm_types, nparms, arg_types + static_offset,
+			  nargs - static_offset);
 
       if (!oload_champ_bv)
 	{
@@ -2821,7 +2817,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	    fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
 	  else
 	    fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-	  for (jj = 0; jj < nargs; jj++)
+	  for (jj = 0; jj < nargs - static_offset; jj++)
 	    fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
 	  fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
 	}
@@ -2844,8 +2840,11 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
     }
 #endif
 
-  /* Check how bad the best match is */
-  for (ix = 1; ix <= nargs; ix++)
+  /* Check how bad the best match is.  */
+  static_offset = 0;
+  if (method && TYPE_FN_FIELD_STATIC_P (fns_ptr, oload_champ))
+    static_offset = 1;
+  for (ix = 1; ix <= nargs - static_offset; ix++)
     {
       if (oload_champ_bv->rank[ix] >= 100)
 	oload_incompatible = 1;	/* truly mismatched types */
@@ -2878,6 +2877,10 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 
   if (method)
     {
+      if (staticp && TYPE_FN_FIELD_STATIC_P (fns_ptr, oload_champ))
+	*staticp = 1;
+      else if (staticp)
+	*staticp = 0;
       if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, oload_champ))
 	*valp = value_virtual_fn_field (&temp, fns_ptr, oload_champ, basetype, boffset);
       else

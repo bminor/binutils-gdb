@@ -1,3 +1,19 @@
+2005-05-11  Daniel Jacobowitz  <drow@mvista.com>
+	    Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* Makefile.in: Update dependencies for valops.c.
+	* valops.c: Include "gdb_assert.h".
+	(typecmp): Skip THIS parameter to methods.
+	(find_method_list): Remove static_memfuncp argument,
+	update callers.  Check for stub methods.
+	(find_value_oload_method_list): Don't set *static_memfuncp.
+	(find_overload_match): Don't check for stub methods.  Assert
+	that methods are not stubbed.  Handle static methods.
+	(value_find_oload_method_list): Remove static_memfuncp argument.
+	* gdbtypes.c (check_stub_method): Do not add THIS pointer
+	to the argument list for static stub methods.
+	* value.h (value_find_oload_method_list): Update prototype.
+
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.h (generic_register_size): Declare.

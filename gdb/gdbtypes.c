@@ -1649,9 +1649,16 @@ check_stub_method (struct type *type, int method_id, int signature_id)
   argtypes = (struct type **)
     TYPE_ALLOC (type, (argcount + 2) * sizeof (struct type *));
   p = argtypetext;
-  /* FIXME: This is wrong for static member functions.  */
-  argtypes[0] = lookup_pointer_type (type);
-  argcount = 1;
+
+  /* Add THIS pointer for non-static methods.  */
+  f = TYPE_FN_FIELDLIST1 (type, method_id);
+  if (TYPE_FN_FIELD_STATIC_P (f, signature_id))
+    argcount = 0;
+  else
+    {
+      argtypes[0] = lookup_pointer_type (type);
+      argcount = 1;
+    }
 
   if (*p != ')')		/* () means no args, skip while */
     {
@@ -1693,8 +1700,6 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     }
 
   xfree (demangled_name);
-
-  f = TYPE_FN_FIELDLIST1 (type, method_id);
 
   TYPE_FN_FIELD_PHYSNAME (f, signature_id) = mangled_name;
 

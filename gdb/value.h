@@ -375,7 +375,7 @@ extern struct value *value_struct_elt_for_reference (struct type *domain,
 extern struct value *value_static_field (struct type *type, int fieldno);
 
 extern struct fn_field *value_find_oload_method_list (struct value **, char *,
-						      int, int *, int *,
+						      int, int *,
 						      struct type **, int *);
 
 extern int find_overload_match (struct type **arg_types, int nargs,
