@@ -1,3 +1,8 @@
+2001-11-21  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/Make-in (distclean): Move SRC-POTFILES.in and
+	BLD-POTFILES.in to maintainer-clean target.
+
 2001-11-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfxx-ia64.c (elfNN_ia64_relocate_section): Test r_symndx rather
