@@ -1,3 +1,7 @@
+2004-04-19  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* read.c (do_align): Call md_flush_pending_output, if defined.
+
 2004-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (operand): Correct checks for ++ and --.

@@ -1155,6 +1155,9 @@ do_align (int n, char *fill, int len, int max)
       len = 0;
     }
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
 #ifdef md_do_align
   md_do_align (n, fill, len, max, just_record_alignment);
 #endif
