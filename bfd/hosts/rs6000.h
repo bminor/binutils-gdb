@@ -8,9 +8,6 @@
 #include <sys/file.h>
 #include <stdlib.h>		/* for malloc() */
 
-/* fdopen() won't let you open read-only files for update */
-#define	FASCIST_FDOPEN
-
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif

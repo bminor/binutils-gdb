@@ -1,3 +1,11 @@
+Thu Sep 10 13:28:24 1992  John Gilmore  (gnu@cygnus.com)
+
+	* opncls.c (bfd_fdopenr):  Determine whether to fdopen for
+	update, based on how the underlying file was opened.  Obsoletes
+	FASCIST_FDOPEN.
+	* hosts/rs6000.h, hosts/tahoe.h, hosts/vaxbsd.h:  Remove
+	all FASCIST_FDOPEN config defines.
+
 Tue Sep  8 21:37:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* sparc-opc.c: Moved to opcodes library, now that we have one.
