@@ -1199,6 +1199,38 @@ static reloc_howto_type elf_mips_gnu_vtentry_howto =
 	 0,			/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
+/* 16 bit offset for pc-relative branches.  */
+static reloc_howto_type elf_mips_gnu_rel16_s2 =
+  HOWTO (R_MIPS_GNU_REL16_S2,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_GNU_REL16_S2",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 TRUE);			/* pcrel_offset */
+
+/* 16 bit offset for pc-relative branches.  */
+static reloc_howto_type elf_mips_gnu_rela16_s2 =
+  HOWTO (R_MIPS_GNU_REL16_S2,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_GNU_REL16_S2",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 TRUE);			/* pcrel_offset */
+
 /* This is derived from bfd_elf_generic_reloc.  NewABI allows us to have
    several relocations against the same address.  The addend is derived
    from the addends of preceding relocations.  If we don't need to
@@ -1897,6 +1929,8 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
+    case BFD_RELOC_16_PCREL_S2:
+      return &elf_mips_gnu_rela16_s2;
     default:
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -1920,6 +1954,11 @@ mips_elf_n32_rtype_to_howto (r_type, rela_p)
       return &elf_mips_gnu_vtinherit_howto;
     case R_MIPS_GNU_VTENTRY:
       return &elf_mips_gnu_vtentry_howto;
+    case R_MIPS_GNU_REL16_S2:
+      if (rela_p)
+	return &elf_mips_gnu_rela16_s2;
+      else
+	return &elf_mips_gnu_rel16_s2;
     default:
       BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
       if (rela_p)

@@ -1,3 +1,14 @@
+2003-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf64-mips.c (elf_mips_gnu_rel16_s2): Add internally used
+	R_MIPS_GNU_REL16_S2 support.
+	(bfd_elf64_bfd_reloc_type_lookup): Use it.
+	(mips_elf64_rtype_to_howto): Use it.
+	* elfn32-mips.c (elf_mips_gnu_rel16_s2): Add internally used
+	R_MIPS_GNU_REL16_S2 support.
+	(bfd_elf32_bfd_reloc_type_lookup): Use it.
+	(mips_elf_n32_rtype_to_howto): Use it.
+
 2003-05-21  Stuart F. Downing  <sdowning@fame.com>
 
 	* som.h: Define PA_2_0 before including a.out.h
