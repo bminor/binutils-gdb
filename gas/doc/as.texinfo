@@ -201,6 +201,11 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
+@c start-sanitize-arc
+@ifset ARC
+ [ -mbig-endian | -mlittle-endian ]
+@end ifset
+@c end-sanitize-arc
 @ifset H8
 @c Hitachi family chips have no machine-dependent assembler options
 @end ifset
@@ -315,6 +320,25 @@ Generate an object file even after errors.
 Standard input, or source files to assemble.
 
 @end table
+
+@ifset ARC
+The following options are available when @value{AS} is configured for
+an ARC processor.
+
+@table @code
+
+@cindex ARC endianness
+@cindex endianness, ARC
+@cindex big endian output, ARC
+@item -mbig-endian
+Generate ``big endian'' format output.
+
+@cindex little endian output, ARC
+@item -mlittle-endian
+Generate ``little endian'' format output.
+
+@end table
+@end ifset
 
 @ifset I960
 The following options are available when @value{AS} is configured for the
@@ -920,6 +944,11 @@ target is allowed to redefine the local label prefix.
 @ifset HPPA
 On the HPPA local labels begin with @samp{L$}.
 @end ifset
+@c start-sanitize-arc
+@ifset ARC
+On the ARC local labels begin with @samp{.L}.
+@end ifset
+@c end-sanitize-arc
 
 @node o
 @section Name the Object File: @code{-o}
@@ -1134,6 +1163,11 @@ This means you may not nest these comments.
 @cindex line comment character
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
+@c start-sanitize-arc
+@ifset ARC
+@samp{;} on the ARC;
+@end ifset
+@c end-sanitize-arc
 @ifset VAX
 @samp{#} on the Vax;
 @end ifset
@@ -1598,6 +1632,11 @@ Hitachi SH,
 and AMD 29K architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
+@c start-sanitize-arc
+On the ARC, the letter one of the letters @samp{DFRS}
+(in upper or lower case).
+@c end-sanitize-arc
+
 On the Intel 960 architecture, the letter must be
 one of the letters @samp{DFT} (in upper or lower case).
 
@@ -1607,6 +1646,11 @@ On the HPPA architecture, the letter must be @samp{E} (upper case only).
 @ifset A29K
 One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
+@c start-sanitize-arc
+@ifset ARC
+One of the letters @samp{DFRS} (in upper or lower case).
+@end ifset
+@c end-sanitize-arc
 @ifset H8
 One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
@@ -3869,6 +3913,11 @@ include details on any machine's instruction set.  For details on that
 subject, see the hardware manufacturer's manual.
 
 @menu
+@c start-sanitize-arc
+@ifset ARC
+* ARC-Dependent::               ARC Dependent Features
+@end ifset
+@c end-sanitize-arc
 @ifset VAX
 * Vax-Dependent::               VAX Dependent Features
 @end ifset
@@ -3917,7 +3966,84 @@ subject, see the hardware manufacturer's manual.
 @c major node below.  Node defaulting in makeinfo requires adjacency of
 @c node and sectioning commands; hence the repetition of @chapter BLAH
 @c in both conditional blocks.
-@c
+
+@c start-sanitize-arc
+@ifset ARC
+@ifset GENERIC
+@page
+@node ARC-Dependent
+@chapter ARC Dependent Features
+@end ifset
+@ifclear GENERIC
+@node Machine Dependencies
+@chapter ARC Dependent Features
+@end ifclear
+
+@cindex ARC support
+@menu
+* ARC-Opts::                    Options
+* ARC-Float::                   Floating Point
+* ARC-Directives::              Sparc Machine Directives
+@end menu
+
+@node ARC-Opts
+@section Options
+
+@cindex options for ARC
+@cindex ARC options
+@cindex architectures, ARC
+@cindex ARC architectures
+The ARC chip family includes several successive levels (or other
+variants) of chip, using the same core instruction set, but including
+a few additional instructions at each level.
+
+By default, @code{@value{AS}} assumes the core instruction set (ARC
+base).  The @code{.cpu} pseudo-op is used to select a different variant.
+
+@table @code
+@cindex @code{-mbig-endian} option (ARC)
+@cindex @code{-mlittle-endian} option (ARC)
+@cindex ARC big-endian output
+@cindex ARC little-endian output
+@cindex big-endian output, ARC
+@cindex little-endian output, ARC
+@item -mbig-endian
+@itemx -mlittle-endian
+Any @sc{arc} configuration of @code{@value{AS}} can select big-endian or
+little-endian output at run time (unlike most other @sc{gnu} development
+tools, which must be configured for one or the other).  Use
+@samp{-mbig-endian} to select big-endian output, and @samp{-mlittle-endian}
+for little-endian.
+@end table
+
+@node ARC-Float
+@section Floating Point
+
+@cindex floating point, ARC (@sc{ieee})
+@cindex ARC floating point (@sc{ieee})
+The ARC cpu family currently does not have hardware floating point
+support.  Software floating point support is provided by @code{GCC}
+and uses @sc{ieee} floating-point numbers.
+
+@node ARC-Directives
+@section ARC Machine Directives
+
+@cindex ARC machine directives
+@cindex machine directives, ARC
+The ARC version of @code{@value{AS}} supports the following additional
+machine directives:
+
+@table @code
+@item .cpu
+@cindex @code{cpu} directive, SPARC
+This must be followed by the desired cpu.  It must be one of
+@code{base}, @code{host}, @code{graphics}, or @code{audio}.
+
+@end table
+
+@end ifset
+@c end-sanitize-arc
+
 @ifset VAX
 @ifset GENERIC
 @node Vax-Dependent
@@ -4241,6 +4367,7 @@ Vax bit fields can not be assembled with @code{@value{AS}}.  Someone
 can add the required code if they really need it.
 
 @end ifset
+
 @ifset A29K
 @ifset GENERIC
 @page
@@ -4908,7 +5035,9 @@ Register indirect with post-increment
 
 @cindex floating point, H8/500 (@sc{ieee})
 @cindex H8/500 floating point (@sc{ieee})
-The H8/500 family uses @sc{ieee} floating-point numbers.
+The H8/500 family has no hardware floating point, but the @code{.float}
+directive generates @sc{ieee} floating-point numbers for compatibility
+with other development tools.
 
 @node H8/500 Directives
 @section H8/500 Machine Directives
@@ -5437,7 +5566,9 @@ Immediate data
 
 @cindex floating point, SH (@sc{ieee})
 @cindex SH floating point (@sc{ieee})
-The SH family uses @sc{ieee} floating-point numbers.
+The SH family has no hardware floating point, but the @code{.float}
+directive generates @sc{ieee} floating-point numbers for compatibility
+with other development tools.
 
 @node SH Directives
 @section SH Machine Directives
