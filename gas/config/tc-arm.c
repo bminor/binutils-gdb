@@ -104,16 +104,16 @@ static boolean		pic_code = false;
 #endif
 
 /* This array holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful */
+   pre-processor is disabled, these aren't very useful.  */
 CONST char comment_chars[] = "@";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
-   .line and .file directives will appear in the pre-processed output */
+   .line and .file directives will appear in the pre-processed output.  */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
-/* Also note that comments like this one will always work. */
+   #NO_APP at the beginning of its output.  */
+/* Also note that comments like this one will always work.  */
 CONST char line_comment_chars[] = "#";
 
 #ifdef TE_LINUX
@@ -122,7 +122,8 @@ CONST char line_separator_chars[] = ";";
 CONST char line_separator_chars[] = "";
 #endif
 
-/* Chars that can be used to separate mant from exp in floating point nums */
+/* Chars that can be used to separate mant
+   from exp in floating point numbers.  */
 CONST char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant */
@@ -143,7 +144,7 @@ CONST int md_reloc_size = 8;	/* Size of relocation record */
 
 static int thumb_mode = 0;      /* 0: assemble for ARM, 1: assemble for Thumb,
 				   2: assemble for Thumb even though target cpu
-				   does not support thumb instructions */
+				   does not support thumb instructions.  */
 typedef struct arm_fix
 {
   int thumb_mode;
@@ -197,7 +198,7 @@ CONST char * fp_const[] =
   "0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0", 0
 };
 
-/* Number of littlenums required to hold an extended precision number */
+/* Number of littlenums required to hold an extended precision number.  */
 #define MAX_LITTLENUMS 6
 
 LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
@@ -226,7 +227,7 @@ struct asm_cond
   unsigned long value;
 };
 
-/* This is to save a hash look-up in the common case */
+/* This is to save a hash look-up in the common case.  */
 #define COND_ALWAYS 0xe0000000
 
 static CONST struct asm_cond conds[] = 
@@ -251,7 +252,7 @@ static CONST struct asm_cond conds[] =
 
 /* Warning: If the top bit of the set_bits is set, then the standard
    instruction bitmask is ignored, and the new bitmask is taken from
-   the set_bits: */
+   the set_bits:  */
 struct asm_flg
 {
   CONST char *  template;	/* Basic flag string */
@@ -416,7 +417,7 @@ static CONST struct asm_psr psrs[] =
   {"spsr_ctl",	SPSR_CTL}
 };
 
-/* Functions called by parser */
+/* Functions called by parser.  */
 /* ARM instructions */
 static void do_arit		PARAMS ((char *, unsigned long));
 static void do_cmp		PARAMS ((char *, unsigned long));
@@ -497,13 +498,11 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 #endif
 
 /* ARM instructions take 4bytes in the object file, Thumb instructions
-   take 2: */
+   take 2:  */
 #define INSN_SIZE       4
 
 /* LONGEST_INST is the longest basic instruction name without conditions or 
- * flags.
- * ARM7M has 4 of length 5
- */
+   flags.  ARM7M has 4 of length 5.  */
 
 #define LONGEST_INST 5
 
@@ -631,7 +630,7 @@ static CONST struct asm_opcode insns[] =
   {"flt",   0x0e000110, "sde",  round_flags, FPU_ALL,      do_fp_from_reg},
   {"fix",   0x0e100110, NULL,   fix_flags,   FPU_ALL,      do_fp_to_reg},
 
-/* Generic copressor instructions */
+/* Generic copressor instructions.  */
   {"cdp",   0x0e000000, NULL,  NULL,         ARM_2UP,      do_cdp},
   {"ldc",   0x0c100000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
   {"stc",   0x0c000000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
@@ -639,8 +638,7 @@ static CONST struct asm_opcode insns[] =
   {"mrc",   0x0e100010, NULL,  NULL,         ARM_2UP,      do_co_reg},
 };
 
-/* defines for various bits that we will want to toggle */
-
+/* Defines for various bits that we will want to toggle.  */
 #define INST_IMMEDIATE	0x02000000
 #define OFFSET_REG	0x02000000
 #define HWOFFSET_IMM    0x00400000
@@ -655,8 +653,7 @@ static CONST struct asm_opcode insns[] =
 #define OPCODE_MASK	0xfe1fffff
 #define DATA_OP_SHIFT	21
 
-/* Codes to distinguish the arithmetic instructions */
-
+/* Codes to distinguish the arithmetic instructions.  */
 #define OPCODE_AND	0
 #define OPCODE_EOR	1
 #define OPCODE_SUB	2
@@ -753,7 +750,7 @@ static void do_t_adr		PARAMS ((char *));
 
 static int thumb_reg		PARAMS ((char ** str, int hi_lo));
 
-#define THUMB_SIZE	2	/* Size of thumb instruction */
+#define THUMB_SIZE	2	/* Size of thumb instruction.  */
 #define THUMB_REG_LO	0x1
 #define THUMB_REG_HI	0x2
 #define THUMB_REG_ANY	0x3
@@ -773,7 +770,7 @@ static int thumb_reg		PARAMS ((char ** str, int hi_lo));
 
 #define THUMB_PP_PC_LR 0x0100
 
-/* These three are used for immediate shifts, do not alter */
+/* These three are used for immediate shifts, do not alter.  */
 #define THUMB_WORD 2
 #define THUMB_HALFWORD 1
 #define THUMB_BYTE 0
@@ -862,7 +859,7 @@ struct reg_entry
 #define REG_LR  14
 #define REG_SP  13
 
-/* These are the standard names.  Users can add aliases with .req */
+/* These are the standard names.  Users can add aliases with .req  */
 static CONST struct reg_entry reg_table[] =
 {
   /* Processor Register Numbers.  */
@@ -912,10 +909,9 @@ static struct hash_control * arm_psr_hsh = NULL;
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
-   pseudo-op name without dot
-   function to call to execute this pseudo-op
-   Integer arg to pass to the function
-   */
+     pseudo-op name without dot
+     function to call to execute this pseudo-op
+     Integer arg to pass to the function.  */
 
 static void s_req PARAMS ((int));
 static void s_align PARAMS ((int));
@@ -1007,12 +1003,13 @@ add_to_lit_pool ()
     current_poolP = symbol_create (FAKE_LABEL_NAME, undefined_section,
 				   (valueT) 0, &zero_address_frag);
 
-  /* Check if this literal value is already in the pool: */
+  /* Check if this literal value is already in the pool:  */
   while (lit_count < next_literal_pool_place)
     {
       if (literals[lit_count].exp.X_op == inst.reloc.exp.X_op
           && inst.reloc.exp.X_op == O_constant
-          && literals[lit_count].exp.X_add_number == inst.reloc.exp.X_add_number
+          && literals[lit_count].exp.X_add_number
+	     == inst.reloc.exp.X_add_number
           && literals[lit_count].exp.X_unsigned == inst.reloc.exp.X_unsigned)
         break;
       lit_count++;
@@ -1091,8 +1088,8 @@ symbol_locate (symbolP, name, segment, valu, frag)
 #endif /* DEBUG_SYMS */
 }
 
-/* Check that an immediate is valid, and if so, convert it to the right format.  */
-
+/* Check that an immediate is valid, and if so,
+   convert it to the right format.  */
 static unsigned int
 validate_immediate (val)
      unsigned int val;
@@ -1112,7 +1109,6 @@ validate_immediate (val)
 /* Check to see if an immediate can be computed as two seperate immediate
    values, added together.  We already know that this value cannot be
    computed by just one ARM instruction.  */
-
 static unsigned int
 validate_immediate_twopart (val, highpart)
      unsigned int val;
@@ -1220,7 +1216,7 @@ s_ltorg (ignored)
 #endif
   
   while (lit_count < next_literal_pool_place)
-    /* First output the expression in the instruction to the pool */
+    /* First output the expression in the instruction to the pool.  */
     emit_expr (&(literals[lit_count++].exp), 4); /* .word */
 
   next_literal_pool_place = 0;
@@ -1538,8 +1534,7 @@ skip_past_comma (str)
 /* A standard register must be given at this point.
    Shift is the place to put it in inst.instruction.
    Restores input start point on err.
-   Returns the reg#, or FAIL. */
-
+   Returns the reg#, or FAIL.  */
 static int
 reg_required_here (str, shift)
      char ** str;
@@ -4983,6 +4978,7 @@ set_constant_flonums ()
 void
 md_begin ()
 {
+  unsigned mach;
   unsigned int i;
   
   if (   (arm_ops_hsh = hash_new ()) == NULL
@@ -5013,7 +5009,7 @@ md_begin ()
   {
     unsigned int flags = 0;
     
-    /* Set the flags in the private structure */
+    /* Set the flags in the private structure.  */
     if (uses_apcs_26)      flags |= F_APCS26;
     if (support_interwork) flags |= F_INTERWORK;
     if (uses_apcs_float)   flags |= F_APCS_FLOAT;
@@ -5024,47 +5020,43 @@ md_begin ()
   }
 #endif
   
-  {
-    unsigned mach;
-    
-    /* Record the CPU type as well */
-    switch (cpu_variant & ARM_CPU_MASK)
-      {
-      case ARM_2:
-	mach = bfd_mach_arm_2;
-	break;
-	
-      case ARM_3: /* also ARM_250 */
-	mach = bfd_mach_arm_2a;
-	break;
-
-      default:
-      case ARM_6 | ARM_3 | ARM_2:	/* Actually no CPU type defined */
+  /* Record the CPU type as well.  */
+  switch (cpu_variant & ARM_CPU_MASK)
+    {
+    case ARM_2:
+      mach = bfd_mach_arm_2;
+      break;
+      
+    case ARM_3: 		/* Also ARM_250.  */
+      mach = bfd_mach_arm_2a;
+      break;
+      
+    default:
+    case ARM_6 | ARM_3 | ARM_2:	/* Actually no CPU type defined.  */
+      mach = bfd_mach_arm_4;
+      break;
+      
+    case ARM_7: 		/* Also ARM_6.  */
+      mach = bfd_mach_arm_3;
+      break;
+    }
+  
+  /* Catch special cases.  */
+  if (cpu_variant != (FPU_DEFAULT | CPU_DEFAULT))
+    {
+      if (cpu_variant & (ARM_EXT_V5 & ARM_THUMB))
+	mach = bfd_mach_arm_5T;
+      else if (cpu_variant & ARM_EXT_V5)
+	mach = bfd_mach_arm_5;
+      else if (cpu_variant & ARM_THUMB)
+	mach = bfd_mach_arm_4T;
+      else if ((cpu_variant & ARM_ARCH_V4) == ARM_ARCH_V4)
 	mach = bfd_mach_arm_4;
-	break;
-	
-      case ARM_7: 			/* also ARM_6 */
-	mach = bfd_mach_arm_3;
-	break;
-      }
-
-    /* Catch special cases.  */
-    if (cpu_variant != (FPU_DEFAULT | CPU_DEFAULT))
-      {
-	if (cpu_variant & (ARM_EXT_V5 & ARM_THUMB))
-	  mach = bfd_mach_arm_5T;
-	else if (cpu_variant & ARM_EXT_V5)
-	  mach = bfd_mach_arm_5;
-	else if (cpu_variant & ARM_THUMB)
-	  mach = bfd_mach_arm_4T;
-	else if ((cpu_variant & ARM_ARCH_V4) == ARM_ARCH_V4)
-	  mach = bfd_mach_arm_4;
-	else if (cpu_variant & ARM_LONGMUL)
-	  mach = bfd_mach_arm_3M;
-      }
-	
-    bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
-  }
+      else if (cpu_variant & ARM_LONGMUL)
+	mach = bfd_mach_arm_3M;
+    }
+  
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
 }
 
 /* Turn an integer of n bytes (in val) into a stream of bytes appropriate
@@ -6360,7 +6352,8 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 	  else if (regnum != FAIL)
 	    {
 	      if (reg != regnum)
-		as_warn (_("ignoring redefinition of register alias '%s'"), copy_of_str );
+		as_warn (_("ignoring redefinition of register alias '%s'"),
+			 copy_of_str );
 	      
 	      /* Do not warn about redefinitions to the same alias.  */
 	    }
@@ -6644,20 +6637,25 @@ md_parse_option (c, arg)
 
 	    case '8':
 	      if (streq (str, "8") || streq (str, "810"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
 	      else
 		goto bad;
 	      break;
 	      
 	    case '9':
 	      if (streq (str, "9"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
 	      else if (streq (str, "920"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL;
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL;
 	      else if (streq (str, "920t"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
 	      else if (streq (str, "9tdmi"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
 	      else
 		goto bad;
 	      break;
@@ -6667,21 +6665,28 @@ md_parse_option (c, arg)
 	      if (streq (str, "strongarm")
 		  || streq (str, "strongarm110")
 		  || streq (str, "strongarm1100"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
+		cpu_variant = (cpu_variant & ~ARM_ANY)
+		  | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
 	      else
 		goto bad;
 	      break;
 		
 	    case 'v':
-	      /* Select variant based on architecture rather than processor */
+	      /* Select variant based on architecture rather than processor.  */
 	      switch (*++str)
 		{
 		case '2':
 		  switch (*++str)
 		    {
-		    case 'a': cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_3; break;
-		    case 0:   cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_2; break;
-		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
+		    case 'a':
+		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_3;
+		      break;
+		    case 0:
+		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_2;
+		      break;
+		    default:
+		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      break;
 		    }
 		  break;
 		  
@@ -6692,7 +6697,9 @@ md_parse_option (c, arg)
 		    {
 		    case 'm': cpu_variant |= ARM_LONGMUL; break;
 		    case 0:   break;
-		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
+		    default:
+		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      break;
 		    }
 		  break;
 		  
@@ -6703,7 +6710,9 @@ md_parse_option (c, arg)
 		    {
 		    case 't': cpu_variant |= ARM_THUMB; break;
 		    case 0:   break;
-		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
+		    default:
+		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      break;
 		    }
 		  break;
 
@@ -6714,7 +6723,9 @@ md_parse_option (c, arg)
 		    case 't': cpu_variant |= ARM_THUMB; break;
 		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
-		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
+		    default:
+		      as_bad (_("Invalid architecture variant -m%s"), arg);
+		      break;
 		    }
 		  break;
 		  
@@ -6749,8 +6760,7 @@ void
 md_show_usage (fp)
      FILE * fp;
 {
-  fprintf (fp,
-_("\
+  fprintf (fp, _("\
  ARM Specific Assembler Options:\n\
   -m[arm][<processor name>] select processor variant\n\
   -m[arm]v[2|2a|3|3m|4|4t|5[t][e]] select architecture variant\n\
@@ -6759,29 +6769,20 @@ _("\
   -mall                     allow any instruction\n\
   -mfpa10, -mfpa11          select floating point architecture\n\
   -mfpe-old                 don't allow floating-point multiple instructions\n\
-  -mno-fpu                  don't allow any floating-point instructions.\n"));
-  fprintf (fp,
-_("\
+  -mno-fpu                  don't allow any floating-point instructions.\n\
   -k                        generate PIC code.\n"));
 #if defined OBJ_COFF || defined OBJ_ELF
-  fprintf (fp,
-_("\
-  -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard to use\n"));
-  fprintf (fp,
-_("\
-  -mapcs-float              floating point args are passed in FP regs\n"));
-  fprintf (fp,
-_("\
+  fprintf (fp, _("\
+  -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard to use\n\
+  -mapcs-float              floating point args are passed in FP regs\n\
   -mapcs-reentrant          the code is position independent/reentrant\n"));
   #endif
 #ifdef OBJ_ELF
-  fprintf (fp,
-_("\
+  fprintf (fp, _("\
   -moabi                    support the old ELF ABI\n"));
 #endif
 #ifdef ARM_BI_ENDIAN
-  fprintf (fp,
-_("\
+  fprintf (fp, _("\
   -EB                       assemble code for a big endian cpu\n\
   -EL                       assemble code for a little endian cpu\n"));
 #endif
@@ -6966,11 +6967,14 @@ arm_adjust_symtab ()
 	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
 	  bind = ELF_ST_BIND (elf_sym);
 	  
-	  /* If it's a .thumb_func, declare it as so, else tag label as .code 16.  */
+	  /* If it's a .thumb_func, declare it as so,
+	     otherwise tag label as .code 16.  */
 	  if (THUMB_IS_FUNC (sym))
-	    elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
+	    elf_sym->internal_elf_sym.st_info =
+	      ELF_ST_INFO (bind, STT_ARM_TFUNC);
 	  else
-	    elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_16BIT);
+	    elf_sym->internal_elf_sym.st_info =
+	      ELF_ST_INFO (bind, STT_ARM_16BIT);
          }
      }
 #endif
@@ -7172,7 +7176,8 @@ s_arm_elf_cons (nbytes)
           int size = bfd_get_reloc_size (howto);
 
           if (size > nbytes)
-            as_bad ("%s relocations do not fit in %d bytes", howto->name, nbytes);
+            as_bad ("%s relocations do not fit in %d bytes",
+		    howto->name, nbytes);
           else
             {
               register char * p = frag_more ((int) nbytes);
@@ -7187,7 +7192,7 @@ s_arm_elf_cons (nbytes)
     }
   while (*input_line_pointer++ == ',');
 
-  input_line_pointer--;		/* Put terminator back into stream. */
+  input_line_pointer--;		/* Put terminator back into stream.  */
   demand_empty_rest_of_line ();
 }
 
