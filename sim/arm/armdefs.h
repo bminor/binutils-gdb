@@ -226,7 +226,7 @@ struct ARMul_State
 #define ABORTBANK 4
 #define UNDEFBANK 5
 #define DUMMYBANK 6
-#define SYSTEMBANK 7
+#define SYSTEMBANK USERBANK
 
 #define BANK_CAN_ACCESS_SPSR(bank)  \
   ((bank) != USERBANK && (bank) != SYSTEMBANK && (bank) != DUMMYBANK)

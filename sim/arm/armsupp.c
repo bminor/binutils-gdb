@@ -369,10 +369,6 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
     {				/* really need to do it */
       switch (oldbank)
 	{			/* save away the old registers */
-	case SYSTEMBANK:
-	  /* The System mode uses the USER bank.  */
-	  oldbank = USERBANK;
-	  /* Fall through.  */
 	case USERBANK:
 	case IRQBANK:
 	case SVCBANK:
@@ -398,9 +394,6 @@ ARMul_SwitchMode (ARMul_State * state, ARMword oldmode, ARMword newmode)
       
       switch (newbank)
 	{			/* restore the new registers */
-	case SYSTEMBANK:
-	  newbank = USERBANK;
-	  /* Fall through.  */
 	case USERBANK:
 	case IRQBANK:
 	case SVCBANK:
