@@ -1,3 +1,18 @@
+2004-07-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* vaxbsd-nat.c: Include <sys/types.h>, <machine/pcb.h> and
+	"bsd-kvm.h".
+	(vaxbsd_supply_pcb): New function.
+	(_initialize_vaxbsd_nat): New prototype and function.
+	* config/vax/nbsdaout.mh (NATDEPFILES): Add bsd-kvm.o, solib.o and
+	solib-sunos.o.
+	(LOADLIBES): New variable.
+	* config/vax/nbsdelf.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+	* config/vax/obsd.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+	* Makefile.in (vaxbsd-nat.o): Update dependencies.
+
 2004-07-16  Andrew Cagney  <cagney@gnu.org>
 
 	* defs.h (event_loop_p): Replace variable declaration with macro,
