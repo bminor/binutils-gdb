@@ -251,7 +251,7 @@ extern CORE_ADDR saved_pc_after_call (struct frame_info *);
    clean them up using this macro.  BUF is a char pointer to
    the raw value of the register in the registers[] array.  */
 
-#define	CLEAN_UP_REGISTER_VALUE(regno, buf) \
+#define	DEPRECATED_CLEAN_UP_REGISTER_VALUE(regno, buf) \
   do {	\
     if ((regno) == PCOQ_HEAD_REGNUM || (regno) == PCOQ_TAIL_REGNUM) \
       (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \

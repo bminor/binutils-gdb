@@ -571,8 +571,8 @@ supply_register (int regnum, char *val)
      through the method gdbarch_register_read() clean up the
      values. */
 
-#ifdef CLEAN_UP_REGISTER_VALUE
-  CLEAN_UP_REGISTER_VALUE (regnum, register_buffer (regnum));
+#ifdef DEPRECATED_CLEAN_UP_REGISTER_VALUE
+  DEPRECATED_CLEAN_UP_REGISTER_VALUE (regnum, register_buffer (regnum));
 #endif
 }
 
