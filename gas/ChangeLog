@@ -1,3 +1,18 @@
+Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
+
+	* tc-i386.c (md_assemble): Refuse 's' and 'l' suffixes in the intel
+	mode; convert 'd' suffix to 's' or 'l'; remove all DWORD_MNEM_SUFFIX
+	references.
+	(intel_e09_1): Convert QWORD to 'l' suffix for FP operations; refuse
+	otherwise.
+	* tc-i386.h (DWORD_MNEM_SUFFIX): Kill.
+	(No_dSuf): Kill.
+
+	* i386.h (*_Suf): Remove No_dSuf.
+	(d_suf, wld_Suf,sld_Suf, sldx_Suf, bwld_Suf, d_FP, sld_FP, sldx_FP)
+	Remove.
+	(i386_optab): Remove 'd' in the suffixes.
+
 2000-12-06  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/tc-i386.c (T_SHORT): Undefine before defining.

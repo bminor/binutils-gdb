@@ -231,8 +231,6 @@ extern const char extra_symbol_chars[];
 #define LONG_MNEM_SUFFIX  'l'
 /* Intel Syntax */
 #define LONG_DOUBLE_MNEM_SUFFIX 'x'
-/* Intel Syntax */
-#define DWORD_MNEM_SUFFIX 'd'
 
 /* modrm.mode = REGMEM_FIELD_HAS_REG when a register is in there */
 #define REGMEM_FIELD_HAS_REG 0x3/* always = 0x3 */
@@ -313,14 +311,13 @@ typedef struct
 #define No_wSuf	       0x40000	/* w suffix on instruction illegal */
 #define No_lSuf	       0x80000	/* l suffix on instruction illegal */
 #define No_sSuf	      0x100000	/* s suffix on instruction illegal */
-#define No_dSuf       0x200000  /* d suffix on instruction illegal */
-#define No_xSuf       0x400000  /* x suffix on instruction illegal */
-#define FWait	      0x800000	/* instruction needs FWAIT */
-#define IsString     0x1000000	/* quick test for string instructions */
-#define regKludge    0x2000000	/* fake an extra reg operand for clr, imul */
-#define IsPrefix     0x4000000	/* opcode is a prefix */
-#define ImmExt	     0x8000000	/* instruction has extension in 8 bit imm */
-#define Ugh	    0x80000000	/* deprecated fp insn, gets a warning */
+#define No_xSuf       0x200000  /* x suffix on instruction illegal */
+#define FWait	      0x400000	/* instruction needs FWAIT */
+#define IsString      0x800000	/* quick test for string instructions */
+#define regKludge    0x1000000	/* fake an extra reg operand for clr, imul */
+#define IsPrefix     0x2000000	/* opcode is a prefix */
+#define ImmExt	     0x4000000	/* instruction has extension in 8 bit imm */
+#define Ugh	     0x8000000	/* deprecated fp insn, gets a warning */
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.

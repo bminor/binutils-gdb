@@ -1182,22 +1182,32 @@ md_assemble (line)
 	  {
 	  case WORD_MNEM_SUFFIX:
 	  case BYTE_MNEM_SUFFIX:
-	  case SHORT_MNEM_SUFFIX:
-	  case LONG_MNEM_SUFFIX:
 	    i.suffix = mnem_p[-1];
 	    mnem_p[-1] = '\0';
 	    current_templates = hash_find (op_hash, mnemonic);
 	    break;
-
-	  /* Intel Syntax.  */
-	  case DWORD_MNEM_SUFFIX:
-	    if (intel_syntax)
+	  case SHORT_MNEM_SUFFIX:
+	  case LONG_MNEM_SUFFIX:
+	    if (!intel_syntax)
 	      {
 		i.suffix = mnem_p[-1];
 		mnem_p[-1] = '\0';
 		current_templates = hash_find (op_hash, mnemonic);
-		break;
 	      }
+	    break;
+
+	  /* Intel Syntax.  */
+	  case 'd':
+	    if (intel_syntax)
+	      {
+		if (intel_float_operand (mnemonic))
+		  i.suffix = SHORT_MNEM_SUFFIX;
+		else
+		  i.suffix = LONG_MNEM_SUFFIX;
+		mnem_p[-1] = '\0';
+		current_templates = hash_find (op_hash, mnemonic);
+	      }
+	    break;
 	  }
 	if (!current_templates)
 	  {
@@ -1514,9 +1524,7 @@ md_assemble (line)
 			  ? No_sSuf
 			  : (i.suffix == LONG_MNEM_SUFFIX
 			     ? No_lSuf
-			     : (i.suffix == DWORD_MNEM_SUFFIX
-				? No_dSuf
-				: (i.suffix == LONG_DOUBLE_MNEM_SUFFIX ? No_xSuf : 0))))));
+			     : (i.suffix == LONG_DOUBLE_MNEM_SUFFIX ? No_xSuf : 0)))));
 
     for (t = current_templates->start;
 	 t < current_templates->end;
@@ -1923,8 +1931,7 @@ md_assemble (line)
 	/* Now select between word & dword operations via the operand
 	   size prefix, except for instructions that will ignore this
 	   prefix anyway.  */
-	if (((intel_syntax && (i.suffix == DWORD_MNEM_SUFFIX))
-	     || i.suffix == LONG_MNEM_SUFFIX) == flag_16bit_code
+	if ((i.suffix == LONG_MNEM_SUFFIX) == flag_16bit_code
 	    && !(i.tm.opcode_modifier & IgnoreSize))
 	  {
 	    unsigned int prefix = DATA_PREFIX_OPCODE;
@@ -1935,8 +1942,7 @@ md_assemble (line)
 	      return;
 	  }
 	/* Size floating point instruction.  */
-	if (i.suffix == LONG_MNEM_SUFFIX
-	    || (intel_syntax && i.suffix == DWORD_MNEM_SUFFIX))
+	if (i.suffix == LONG_MNEM_SUFFIX)
 	  {
 	    if (i.tm.opcode_modifier & FloatMF)
 	      i.tm.base_opcode ^= 4;
@@ -4554,7 +4560,16 @@ intel_e09_1 ()
 	}
 
       else if (prev_token.code == T_QWORD)
-	i.suffix = DWORD_MNEM_SUFFIX;
+	{
+	  if (intel_parser.got_a_float == 1)	/* "f..." */
+	    i.suffix = LONG_MNEM_SUFFIX;
+	  else
+	    {
+	      as_bad (_("operand modifier `%s' supported only for i387 operations\n"),
+		      prev_token.str);
+	      return 0;
+	    }
+	}
 
       else if (prev_token.code == T_XWORD)
 	i.suffix = LONG_DOUBLE_MNEM_SUFFIX;
