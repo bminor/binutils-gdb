@@ -1,5 +1,9 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* cp-valprint.c (cp_print_class_method)
+	(cp_print_class_member): Make buffer a const bfd_byte.
+	* c-lang.h (cp_print_class_member, cp_print_class_method): Ditto.
+
 	* ada-lang.c (value_from_contents_and_address)
 	(to_record_with_fixed_variant_part)
 	(value_tag_from_contents_and_address, ada_to_fixed_type)

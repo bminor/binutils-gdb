@@ -1,6 +1,7 @@
 /* C language support definitions for GDB, the GNU debugger.
-   Copyright 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2002, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -75,10 +76,11 @@ extern int vtblprint;		/* Controls printing of vtbl's */
 
 extern int static_field_print;
 
-extern void cp_print_class_member (char *, struct type *, struct ui_file *,
-				   char *);
+extern void cp_print_class_member (const bfd_byte *, struct type *,
+				   struct ui_file *, char *);
 
-extern void cp_print_class_method (char *, struct type *, struct ui_file *);
+extern void cp_print_class_method (const bfd_byte *, struct type *,
+				   struct ui_file *);
 
 extern void cp_print_value_fields (struct type *, struct type *, char *,
 				   int, CORE_ADDR, struct ui_file *, int,

@@ -62,7 +62,7 @@ static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
 
 
 void
-cp_print_class_method (char *valaddr,
+cp_print_class_method (const bfd_byte *valaddr,
 		       struct type *type,
 		       struct ui_file *stream)
 {
@@ -673,7 +673,7 @@ cp_print_static_field (struct type *type,
 }
 
 void
-cp_print_class_member (char *valaddr, struct type *domain,
+cp_print_class_member (const bfd_byte *valaddr, struct type *domain,
 		       struct ui_file *stream, char *prefix)
 {
 
