@@ -5030,11 +5030,11 @@ do
     bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.lo elf64.lo $elf"
 				target64=true ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
-    bfd_elf32_littlearm_vec)	tb="$tb elf32-arm-newabi.lo elf32.lo $elf" ;;
-    bfd_elf32_littlearm_oabi_vec) tb="$tb elf32-arm-oldabi.lo elf32.lo $elf" ;;
+    bfd_elf32_littlearm_vec)	tb="$tb elfarm-nabi.lo elf32.lo $elf" ;;
+    bfd_elf32_littlearm_oabi_vec) tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
     bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
-    bfd_elf32_bigarm_vec)	tb="$tb elf32-arm-newabi.lo elf32.lo $elf" ;;
-    bfd_elf32_bigarm_oabi_vec)	tb="$tb elf32-arm-oldabi.lo elf32.lo $elf" ;;
+    bfd_elf32_bigarm_vec)	tb="$tb elfarm-nabi.lo elf32.lo $elf" ;;
+    bfd_elf32_bigarm_oabi_vec)	tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.lo elf64.lo elf32-mips.lo elf32.lo $elf ecofflink.lo"
