@@ -1,5 +1,10 @@
 2003-09-03  Michael Snyder  <msnyder@redhat.com>
 
+	* sim/frv/fr500/mclracc.cgs: Change mach to 'all', 
+	to be consistant with other tests in the directory.
+
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
 	* sim/frv/interrupts/Ipipe-fr400.cgs: New file.
 	* sim/frv/interrupts/Ipipe-fr500.cgs: New file.
 	* sim/frv/interrupts/Ipipe.cgs: Remove (replaced by above).
