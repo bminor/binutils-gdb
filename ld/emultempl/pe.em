@@ -418,7 +418,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       pe_dll_export_everything = 1;
       break;
     case OPTION_EXCLUDE_SYMBOLS:
+#ifdef TARGET_IS_i386pe
       pe_dll_add_excludes (optarg);
+#endif
       break;
     case OPTION_KILL_ATS:
       pe_dll_kill_ats = 1;
@@ -616,10 +618,10 @@ gld_${EMULATION_NAME}_after_open ()
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
 
+#ifdef TARGET_IS_i386pe
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
     pe_fixup_stdcalls ();
 
-#ifdef TARGET_IS_i386pe
   pe_process_import_defs(output_bfd, &link_info);
   if (link_info.shared)
     pe_dll_build_sections (output_bfd, &link_info);

@@ -1,3 +1,8 @@
+1998-11-23  DJ Delorie  <dj@cygnus.com>
+
+	* emultempl/pe.em (gld_i386pe_parse_args): Conditionalize call to
+	pe_dll_add_excludes
+
 Mon Nov 23 14:36:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* emultempl/pe.em (after_parse): Only create an undefined entry
