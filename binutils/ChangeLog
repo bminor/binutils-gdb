@@ -1,3 +1,10 @@
+Wed Sep 12 20:07:16 2001  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (guess_is_rela, dump_relocations, get_machine_name,
+	get_machine_flags): Added EM_M32R, EM_D10V, EM_V850, EM_D30V,
+	EM_MN10200, EM_MN10300, EM_FR30, EM_AVR_OLD and EM_PJ_OLD.
+	Removed EM_CYGNUS_ARC.
+
 Tue Sep  4 20:26:08 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* readelf.c: Include elf/h8 for H8 series definitions.

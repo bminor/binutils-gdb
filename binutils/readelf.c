@@ -582,7 +582,9 @@ guess_is_rela (e_machine)
     case EM_386:
     case EM_486:
     case EM_960:
+    case EM_M32R:
     case EM_CYGNUS_M32R:
+    case EM_D10V:
     case EM_CYGNUS_D10V:
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
@@ -597,16 +599,22 @@ guess_is_rela (e_machine)
     case EM_SPARCV9:
     case EM_SPARC:
     case EM_PPC:
+    case EM_V850:
     case EM_CYGNUS_V850:
+    case EM_D30V:
     case EM_CYGNUS_D30V:
+    case EM_MN10200:
     case EM_CYGNUS_MN10200:
+    case EM_MN10300:
     case EM_CYGNUS_MN10300:
+    case EM_FR30:
     case EM_CYGNUS_FR30:
     case EM_SH:
     case EM_ALPHA:
     case EM_MCORE:
     case EM_IA_64:
     case EM_AVR:
+    case EM_AVR_OLD:
     case EM_CRIS:
     case EM_860:
     case EM_X86_64:
@@ -898,6 +906,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  rtype = NULL;
 	  break;
 
+	case EM_M32R:
 	case EM_CYGNUS_M32R:
 	  rtype = elf_m32r_reloc_type (type);
 	  break;
@@ -916,6 +925,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_AVR:
+	case EM_AVR_OLD:
 	  rtype = elf_avr_reloc_type (type);
 	  break;
 
@@ -926,14 +936,17 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  rtype = elf_sparc_reloc_type (type);
 	  break;
 
+	case EM_V850:
 	case EM_CYGNUS_V850:
 	  rtype = v850_reloc_type (type);
 	  break;
 
+	case EM_D10V:
 	case EM_CYGNUS_D10V:
 	  rtype = elf_d10v_reloc_type (type);
 	  break;
 
+	case EM_D30V:
 	case EM_CYGNUS_D30V:
 	  rtype = elf_d30v_reloc_type (type);
 	  break;
@@ -942,14 +955,17 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  rtype = elf_sh_reloc_type (type);
 	  break;
 
+	case EM_MN10300:
 	case EM_CYGNUS_MN10300:
 	  rtype = elf_mn10300_reloc_type (type);
 	  break;
 
+	case EM_MN10200:
 	case EM_CYGNUS_MN10200:
 	  rtype = elf_mn10200_reloc_type (type);
 	  break;
 
+	case EM_FR30:
 	case EM_CYGNUS_FR30:
 	  rtype = elf_fr30_reloc_type (type);
 	  break;
@@ -976,7 +992,6 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  rtype = elf_arm_reloc_type (type);
 	  break;
 
-	case EM_CYGNUS_ARC:
 	case EM_ARC:
 	  rtype = elf_arc_reloc_type (type);
 	  break;
@@ -992,6 +1007,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_PJ:
+	case EM_PJ_OLD:
 	  rtype = elf_pj_reloc_type (type);
 	  break;
 	case EM_IA_64:
@@ -1355,14 +1371,21 @@ get_machine_name (e_machine)
     case EM_COLDFIRE:		return "Motorola Coldfire";
     case EM_68HC12:		return "Motorola M68HC12";
     case EM_ALPHA:		return "Alpha";
-    case EM_CYGNUS_D10V:        return "d10v";
-    case EM_CYGNUS_D30V:        return "d30v";
-    case EM_CYGNUS_ARC:		return "ARC";
-    case EM_CYGNUS_M32R:	return "Mitsubishi M32r";
-    case EM_CYGNUS_V850:	return "NEC v850";
-    case EM_CYGNUS_MN10300:	return "mn10300";
-    case EM_CYGNUS_MN10200:	return "mn10200";
-    case EM_CYGNUS_FR30:	return "Fujitsu FR30";
+    case EM_CYGNUS_D10V:
+    case EM_D10V:		return "d10v";
+    case EM_CYGNUS_D30V:
+    case EM_D30V:	        return "d30v";
+    case EM_CYGNUS_M32R:
+    case EM_M32R:		return "Mitsubishi M32r";
+    case EM_CYGNUS_V850:
+    case EM_V850:		return "NEC v850";
+    case EM_CYGNUS_MN10300:
+    case EM_MN10300:		return "mn10300";
+    case EM_CYGNUS_MN10200:
+    case EM_MN10200:		return "mn10200";
+    case EM_CYGNUS_FR30:
+    case EM_FR30:		return "Fujitsu FR30";
+    case EM_PJ_OLD:
     case EM_PJ:                 return "picoJava";
     case EM_MMA:		return "Fujitsu Multimedia Accelerator";
     case EM_PCP:		return "Siemens PCP";
@@ -1382,6 +1405,7 @@ get_machine_name (e_machine)
     case EM_SVX:		return "Silicon Graphics SVx";
     case EM_ST19:		return "STMicroelectronics ST19 8-bit microcontroller";
     case EM_VAX:		return "Digital VAX";
+    case EM_AVR_OLD:
     case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
     case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
     case EM_JAVELIN:		return "Infineon Technologies 32-bit embedded cpu";
@@ -1577,6 +1601,7 @@ get_machine_flags (e_flags, e_machine)
 	    strcat (buf, ", relocatable-lib");
 	  break;
 
+	case EM_V850:
 	case EM_CYGNUS_V850:
 	  switch (e_flags & EF_V850_ARCH)
 	    {
@@ -1595,6 +1620,7 @@ get_machine_flags (e_flags, e_machine)
 	    }
 	  break;
 
+	case EM_M32R:
 	case EM_CYGNUS_M32R:
 	  if ((e_flags & EF_M32R_ARCH) == E_M32R_ARCH)
 	    strcat (buf, ", m32r");
@@ -1710,6 +1736,7 @@ get_machine_flags (e_flags, e_machine)
 	  break;
 
 	case EM_PJ:
+	case EM_PJ_OLD:
 	  if ((e_flags & EF_PICOJAVA_NEWCALLS) == EF_PICOJAVA_NEWCALLS)
 	    strcat (buf, ", new calling convention");
 
