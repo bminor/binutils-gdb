@@ -1,0 +1,140 @@
+# Makefile for blah ...
+# Copyright blah ...
+
+
+
+## COMMON_PRE_CONFIG_FRAG
+
+# These variables are given default values in COMMON_PRE_CONFIG_FRAG.
+# We override the ones we need to here.
+# Not all of these need to be mentioned, only the necessary ones.
+
+# List of object files, less common parts.
+SIM_OBJS = \
+	$(SIM_NEW_COMMON_OBJS) \
+	support.o idecode.o semantics.o itable.o misc.o \
+	sim-engine.o \
+	sim-calls.o \
+	sim-hload.o \
+	sim-hrw.o \
+	sim-reason.o \
+	sim-resume.o \
+	sim-run.o \
+	sim-stop.o \
+
+# List of extra dependencies.
+# Generally this consists of simulator specific files included by sim-main.h.
+SIM_EXTRA_DEPS = itable.h idecode.h cpu.h alu.h
+
+# List of extra libraries to link with
+SIM_EXTRA_LIBS = -lm
+
+# List of generators
+SIM_GEN=tmp-igen
+
+# List of flags to always pass to $(CC).
+
+SIM_EXTRA_CFLAGS = \
+	-DWITH_TARGET_WORD_MSB=31
+
+# List of main object files for `run'.
+SIM_RUN_OBJS = nrun.o
+
+# Dependency of `clean' to clean any extra files.
+SIM_EXTRA_CLEAN = clean-igen
+
+
+## COMMON_POST_CONFIG_FRAG
+
+# Rules need to build $(SIM_OBJS), plus whatever else the target wants.
+
+# ... target specific rules ...
+
+BUILT_SRC_FROM_IGEN = \
+	icache.h \
+	icache.c \
+	idecode.h \
+	idecode.c \
+	semantics.h \
+	semantics.c \
+	model.h \
+	model.c \
+	support.h \
+	support.c \
+	itable.h itable.c
+$(BUILT_SRC_FROM_IGEN): tmp-igen
+#
+
+.PHONY: clean-igen
+clean-igen:
+	rm -f $(BUILT_SRC_FROM_IGEN)
+	rm -f tmp-igen tmp-insns
+
+../igen/igen:
+	cd ../igen && $(MAKE)
+
+tmp-igen: $(srcdir)/tic80.dc $(srcdir)/tic80.igen $(srcdir)/tic80.ic ../igen/igen
+	cd ../igen && $(MAKE)
+	../igen/igen \
+		-F f \
+		-G direct-access \
+		-G delayed-branch \
+		-G zero-r0 \
+		-F short,emul \
+		-B 32 -H 31 \
+		-o $(srcdir)/tic80.dc \
+		-k $(srcdir)/tic80.ic \
+		-i $(srcdir)/tic80.igen \
+		-n icache.h    -hc tmp-icache.h \
+		-n icache.c    -c  tmp-icache.c \
+		-n semantics.h -hs tmp-semantics.h \
+		-n semantics.c -s  tmp-semantics.c \
+		-n idecode.h   -hd tmp-idecode.h \
+		-n idecode.c   -d  tmp-idecode.c \
+		-n model.h     -hm tmp-model.h \
+		-n model.c     -m  tmp-model.c \
+		-n support.h   -hf tmp-support.h \
+		-n support.c   -f  tmp-support.c \
+		-n itable.h    -ht tmp-itable.h \
+		-n itable.c    -t  tmp-itable.c
+	$(srcdir)/../../move-if-change tmp-icache.h icache.h
+	$(srcdir)/../../move-if-change tmp-icache.c icache.c
+	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
+	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
+	$(srcdir)/../../move-if-change tmp-semantics.h semantics.h
+	$(srcdir)/../../move-if-change tmp-semantics.c semantics.c
+	$(srcdir)/../../move-if-change tmp-model.h model.h
+	$(srcdir)/../../move-if-change tmp-model.c model.c
+	$(srcdir)/../../move-if-change tmp-support.h support.h
+	$(srcdir)/../../move-if-change tmp-support.c support.c
+	$(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(srcdir)/../../move-if-change tmp-itable.c itable.c
+	touch tmp-igen
+
+ENGINE_H = \
+	sim-main.h \
+	$(srcdir)/../common/sim-basics.h \
+	config.h \
+	$(srcdir)/../common/sim-config.h \
+	$(srcdir)/../common/sim-inline.h \
+	$(srcdir)/../common/sim-types.h \
+	$(srcdir)/../common/sim-bits.h \
+	$(srcdir)/../common/sim-endian.h \
+	$(srcdir)/../common/sim-options.h \
+	itable.h \
+	idecode.h \
+	cpu.h \
+	alu.h \
+	$(srcdir)/../common/sim-alu.h \
+	$(srcdir)/../common/sim-core.h \
+	$(srcdir)/../common/sim-events.h \
+	$(srcdir)/../common/sim-fpu.h \
+	$(srcdir)/../common/sim-engine.h \
+
+idecode.o: $(ENGINE_H)
+semantics.o: $(ENGINE_H)
+support.o: $(ENGINE_H)
+interp.o: interp.c $(ENGINE_H)
+sim-calls.o: sim-calls.c $(ENGINE_H)
+cpu.o: cpu.c $(ENGINE_H)
+misc.o: $(ENGINE_H)

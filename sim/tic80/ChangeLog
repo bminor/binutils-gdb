@@ -1,0 +1,662 @@
+Tue Jul  4 13:58:43 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tic80.igen: Rename insns.  Re-format.
+	* tic80.dc: rename dc.
+	* tic80.ic: rename ic. Replace ``compute'' with ``cache''.
+
+Wed May 24 14:40:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2000-04-12  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cpu.h (GPR_CLEAR): New macro.
+	(GPR_SET): Removed macro.
+
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
+Fri May  1 14:41:11 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns: Pass correct arguments to sim_engine_abort.
+
+Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Sun Apr 26 15:19:45 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h: New file.
+	* configure.in: Reverted change of Apr 24; use sinclude again.
+
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:18:28 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
+Fri Apr 24 19:43:30 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ic (rBase, rLink): Make the type a pointer.
+
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Mar 25 12:35:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Mar 11 14:12:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (IMEM32_IMMED, IMEM32, STORE, MEM): Replace sim_core_*_map
+ 	with read_map, write_map, exec_map resp.
+
+Thu Feb 26 19:08:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_info): Delete.
+
+Tue Feb 17 14:35:05 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* misc.c (tic80_trace_cond_br): Take size/code arguments, and
+	decode bcond conditions and bbo/bbz comparison bits.
+
+	* cpu.h (tic80_trace_cond_br): Update prototype.
+	(TRACE_COND_PR): Take size/code additional arguments.
+
+	* insns: (bbo/bbz/bcnd): Update call to TRACE_COND_PR.
+
+Tue Feb 17 12:50:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_store_register, sim_fetch_register): Pass in
+ 	length parameter.  Return -1.
+
+Fri Feb 13 17:11:22 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* insns ({get,set}_fp_reg): Tic80 floating point is little endian,
+	not big endian.
+
+	* misc.c (tic80_trace_fpu*): Pass address of sim_fpu structure,
+	not the structure itself.  Use %g consistantly to print floating
+	point.
+
+	* cpu.h: (tic80_trace_fpu*): Update prototypes.
+
+Tue Feb  3 16:25:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (IMEM32, IMEM32_IMMED): Rename IMEM and IMEM_IMMED so that
+ 	in sync with recent igen change.
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Jan 30 11:47:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (CPU_CIA): Delete macro, replace with...
+ 	(CIA_SET, CIA_GET): Define.
+
+Wed Jan 28 18:44:33 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* misc.c (tic80_trace_cmp_internal): New function to return
+	compare bits as a string.
+	(tic80_trace_{,fpu2}cmp): New functions for tracing cmp and fcmp.
+
+	* cpu.h (tic80_trace_{,fpu2}cmp): Add declaration.
+	(TRACE_{,FPU2}CMP): New macros for tracing compares.
+
+	* insns (do_{,f}cmp): Use compare specific tracing functions to
+	print out the flag bits.
+
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Nov 24 14:57:58 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* cpu.h (TRACE_COND_BR): Use TRACE_BRANCH_P, not TRACE_ALU_P.
+
+Sat Nov 22 21:42:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (engine_step): Replace SIGTRAP with SIM_SIGTRAP.
+	(engine_run_until_stop): Replace SIGINT with SIM_SIGINT.
+
+	* sim-main.h: Include sim-signal.h.
+	(SIGTRAP): Delete definition.
+
+	* interp.c, sim-calls.c: Do not include signal.h.
+
+	* insns (illegal): SIGILL -> SIM_SIGILL.
+ 	(fp_unavailable): SIGFPE -> SIM_SIGFPE.
+	(do_trap): SIGTRAP -> SIM_SIGTRAP.
+	
+Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-main.h (CIA_ADDR): Define.
+
+	* Makefile.in (SIM_OBJS): Use $(SIM_NEW_COMMON_OBJS).
+
+Fri Oct 17 17:26:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (ALU32_END): Use ALU32_RESULT.
+
+Mon Sep 29 12:49:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (get_fp_reg, set_fp_reg): Update to use changed sim_fpu
+ 	interface.
+	(do_fadd, do_fcmp, do_fdiv, do_fmpy, do_frnd, do_fsub): Ditto.
+
+	* misc.c (tic80_trace_fpu3, tic80_trace_fpu2, tic80_trace_fpu1,
+ 	tic80_trace_fpu2i) Update to use changed sim_fpu interface.
+	
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SIM_AC_OPTIONS_BITSIZE): Define.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Tue Sep 23 11:04:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Tue Sep 23 10:19:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_WARNINGS, SIM_ALIGNMENT, SIM_ENDIAN,
+ 	SIM_HOSTENDIAN, SIM_INLINE, SIM_RESERVED_BITS): Delete, moved to
+ 	common.
+	(SIM_EXTRA_CFLAGS): Update.
+	
+Mon Sep 22 11:46:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Tue Sep 16 23:10:03 1997  Felix Lee  <flee@cygnus.com>
+
+	* sim-main.h (kill): macro was missing args.
+	(SIGTRAP): define for MSVC.
+
+Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Sep  8 20:10:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (CPU_CIA): Define.
+
+	* sim-main.h (struct sim_state): Delete halt_ok, path_to_halt,
+ 	restart_ok, path_to_restart members.
+	(struct sim_state): Delete reason, siggnal members.
+	
+Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Thu Sep  4 17:45:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Add memory before parsing arguments.
+	(sim_read): Delete, replace with sim-hrw.
+	(sim_write): Delete, replace with sim-hrw.
+
+Thu Sep  4 10:48:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Use sim_do_command to add memory, only
+ 	add memory if none already present.
+	(sim_open): Move init of registers from here.
+	(sim_create_inferior): To here. Init modules.
+
+	* Makefile.in (SIM_OBJS): Add sim-memopt.o module.
+
+	* sim-calls.c (sim_open): Add zero modulo arg to sim_core_attach.
+
+Mon Sep  1 11:06:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Use sim_state_alloc
+	(simulation): Delete.
+
+Sat Aug 30 09:40:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (do_trap): Unsigned `i' for unsigned iterator.
+	(do_trap): Ditto for comparison with getpid.
+
+Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Wed Aug 27 13:41:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (do_st): Use U8_4 instead of V4_L8.
+
+	* sim-calls.c (sim_open): Add call to sim_analyze_program, update
+ 	call to sim_config.
+
+	* sim-calls.c (sim_kill): Delete.
+	(sim_create_inferior): Add ABFD argument.  Initialize PC from ABFD
+ 	and not SD.
+	(sim_load): Delete, use sim-hload.c.
+
+	* Makefile.in (SIM_OBJS): Add sim-hload.o module.
+
+Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Mon Aug 25 16:33:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Add ABFD argument.
+	(sim_open): Move sim_config call to just after argument
+ 	parsing. Check return status.
+
+Fri Aug  8 21:52:27 1997  Mark Alexander  <marka@cygnus.com>
+
+	* sim-calls.c (sim_store_register): Allow accumulators
+	other than A0 to be modified.  Correct error message.
+
+Thu May 29 14:02:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* misc.c (tic80_trace_fpu3, tic80_trace_fpu2, tic80_trace_fpu1,
+ 	tic80_trace_fpu2i): Pass in function prefix.
+	(tic80_trace_ldst): Rewrite so it calls print_one_insn directly.
+	
+	* Makefile.in (SIM_OBJS): Include sim-watch.o module.
+
+	* sim-main.h (WITH_WATCHPOINTS): Enable watchpoints.
+
+	* ic (bitnum): Compute bitnum from BITNUM.
+	* insn (bbo, bbz): Use.
+	
+	* insn: Convert long immediate instructions to igen long immediate
+ 	form.
+	* insn: Add disasembler information.
+	
+Thu May 29 12:09:13 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* alu.h (IMEM_IMMED): New macro, fetch 32bit immediate operand N.
+
+	* insns (subu i): Immediate is signed not unsigned.
+
+Tue May 27 13:22:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_read): Pass NULL cpu to sim_core_read_buffer.
+	(sim_write): Ditto for write.
+
+Tue May 20 09:33:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_load): Set STATE_LOADED_P.
+
+	* sim-main.h: Include <unistd.h>.
+
+	* sim-calls.c (sim_set_callback): Delete.
+	(sim_open): Add/install callback argument.
+	(sim_size): Delete.
+	
+Mon May 19 18:59:33 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* configure.in: Check for getpid, kill functions.
+	* config{.in,ure}: Regenerate.
+
+	* insns (do_trap): Add support for kill, getpid system calls.
+
+	* sim-main.h (errno.h): Include.
+	(getpid,kill): Define as NOPs if the host doesn't have them.
+
+Mon May 19 14:58:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Set the simulator base magic number.
+	(sim_load): Delete prototype of sim_load_file.
+	(sim_open): Define sd to be &simulation.
+
+Fri May 16 14:35:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (illegal, fp_unavailable): Halt instead of abort the
+ 	simulator.
+
+	* insns: Replace calls to engine_error with sim_engine_abort.
+  	Ditto for engine_halt V sim_engine_halt.
+	
+Tue May 13 15:24:12 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* interp.c (engine_run_until_stop): Delete. Moved to common.
+	(engine_step): Ditto.
+	(engine_step): Ditto.
+	(engine_halt): Ditto.
+	(engine_restart): Ditto.
+	(engine_halt): Ditto.
+	(engine_error): Ditto.
+
+	* sim-calls.c (sim_stop): Delete. Moved to common.
+	(sim_stop_reason): Ditto.
+	(sim_resume): Ditto.
+
+	* Makefile.in (SIM_OBJS): Link in generic sim-engine, sim-run,
+ 	sim-resume, sim-reason, sim-stop modules.
+
+Fri May 16 11:57:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ic (compute): Drop check for REG == 0, now always forced to
+ 	zero.
+
+	* cpu.h (GPR_SET): New macro update the gpr.
+	* insns (do_add): Use GPR_SET to update the GPR register.
+
+	* sim-calls.c (sim_fetch_register): Pretend that r0 is zero.
+
+	* Makefile.in (tmp-igen): Specify zero-r0 so that every
+ 	instruction clears r0.
+
+	* interp.c (engine_run_until_stop): Igen now generates code to
+ 	clear r0.
+	(engine_step): Ditto.
+
+Thu May 15 11:45:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (do_shift): When rot==0 and zero/sign merge treat it as
+ 	32.
+	(set_fp_reg): For interger conversion, use sim-fpu fpu2i
+ 	functions.
+	(do_fmpy): Perform iii and uuu using integer arithmetic.
+	
+	* Makefile.in (ENGINE_H): Assume everything depends on the fpu.
+
+	* insns (get_fp_reg): Use sim_fpu_u32to to perform unsigned
+ 	conversion.
+	(do_fcmp): Update to use new fp compare functions. Make reg nr arg
+ 	instead of reg.  Stops fp overflow.
+	(get_fp_reg): Assume val is valid when reg == 0.
+	(set_fp_reg): Fix double conversion.
+
+	* misc.c (tic80_trace_fpu1): New function, trace simple fp op.
+	
+	* insns (do_frnd): Add tracing.
+
+	* cpu.h (TRACE_FPU1): Ditto.
+
+	* insns (do_trap): Printf formatting.
+
+Wed May 14 18:05:50 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* misc.c (tic80_trace_fpu{3,2,2i}): Align columns with other
+	insns.  Use %g to print floating point instead of %f in case the
+	numbers are real large.
+
+Tue May 13 18:00:10 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* insns (do_trap): For system calls that are defined, but not
+	provided return EINVAL. Temporarily add traps 74-79 to just print
+	the register state.
+
+	* interp.c (engine_{run_until_stop,step}): Before executing
+	instructions, make sure r0 == 0.
+
+Tue May 13 16:39:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (IMEM): Take full cia not just IP as argument.
+
+	* interp.c (engine_run_until_stop): Delete handling of annuled
+ 	instructions.
+	(engine_step): Ditto.
+
+	* insn (do_branch): New function.
+	(do_bbo, do_bbz, do_bcnd, do_bsr, do_jsr): Use do_branch to handle
+ 	annuled branches.
+
+Mon May 12 17:15:52 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* insns (do_{ld,st}): Fix tracing for ld/st.
+
+Mon May 12 11:12:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_stop_reason): Restore keep_running after a
+ 	CNTRL-C, don't re-clear it.
+
+	* interp.c (engine_error): stop rather than signal with SIGABRT
+ 	when an error.
+
+	* insns (do_ld): For 64bit loads, always store LSW in rDest, MSW in
+ 	rDest + 1. Also done by Michael Meissner  <meissner@cygnus.com>
+	(do_st): Converse for store.
+
+	* misc.c (tic80_trace_fpu2i): Correct printf format for int type.
+
+Sun May 11 11:02:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_stop_reason): Return a SIGINT if keep_running
+ 	was cleared.
+
+	* interp.c (engine_step): New function.  Single step the simulator
+ 	taking care of cntrl-c during a step.
+
+	* sim-calls.c (sim_resume): Differentiate between stepping and
+ 	running so that a cntrl-c during a step is reported.
+
+Sun May 11 10:54:31 1997  Mark Alexander    <marka@cygnus.com>
+
+	* sim-calls.c (sim_fetch_register): Use correct reg base.
+	(sim_store_register): Ditto.
+
+Sun May 11 10:25:14 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* cpu.h (tic80_trace_shift): Add declaration.
+	(TRACE_SHIFT): New macro to trace shift instructions.
+
+	* misc.c (tic80_trace_alu2): Align spacing.
+	(tic80_trace_shift): New function to trace shifts.
+
+	* insns (lmo): Add missing 0b prefix to bits.
+	(do_shift): Use ~ (unsigned32)0, instead of -1.  Use TRACE_SHIFT
+	instead of TRACE_ALU2.
+	(sl r): Use EndMask as is, instead of using Source+1 register.
+	(subu): Operands are unsigned, not signed.
+	(do_{ld,st}): Fix endian problems with ld.d/st.d.
+
+Sat May 10 12:35:47 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* insns (and{.tt,.tf,.ft,.ff}): Immediate values are unsigned, not
+	signed.
+
+Fri May  9 15:47:36 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* insns (cmp_vals,do_cmp): Produce the correct bits as specified
+	by the architecture.
+	(xor): Fix xor immediate patterns to use the correct bits.
+
+Fri May  9 09:55:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (long_immediate): Adjust the CIA delay-pointer as well as
+ 	the NIA when a 64bit insn.
+
+Thu May  8 11:57:47 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* insns (jsr,bsr): For non-allulled calls, set r31 so that the
+	return address does not reexecute the instruction in the delay
+	slot.
+	(bbo,bbz): Complement bit number to reverse the one's complement
+	that the assembler is required to do.
+
+	* misc.c (tic80_trace_*): Change format slightly to accomidate
+	real large decimal values.
+
+Thu May  8 14:07:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_do_command): Implement.
+	(sim_store_register): Fix typo T2H v H2T.
+
+Wed May  7 11:48:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (TRACE_FPU2, TRACE_FPU3, TRACE_FPU2I): Add.
+	* insn: Clean up fpu tracing.
+
+	* sim-calls.c (sim_create_inferior): Start out with interrupts
+ 	enabled.
+
+	* cpu.h (TRACE_SINK3), misc.c (tic80_trace_sink3): Three argument
+ 	sink
+
+	* insns (rdcr, swcr, wrcr, brcr, rmo, lmo): Implement.
+
+	* insns (do_*): Remove MY_INDEX/indx argument from support functions,
+ 	igen now handles this.
+	
+	* cpu.h (CR): New macro - access TIc80 control registers.
+	
+	* misc.c: New file.
+	(tic80_cr2index): New function, map control register opcode index
+ 	into the internal CR enum.
+
+	* interp.c
+ 	(tic80_trace_{alu{2,3},nop,sink{1,2},{,u}cond_br,ldst}): Move from
+ 	here
+	* misc.c: to here.
+	
+	* Makefile.in (SIM_OBJS): Add misc.o.
+
+Tue May  6 15:22:58 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* cpu.h ({,v}{S,D}P_FPR): Delete unused macros that won't work on
+	big endian hosts.
+	(tic80_trace_{alu{2,3},nop,sink{1,2},{,u}cond_br,ldst}): Declare
+	new functions.
+	(TRACE_{ALU{2,3},NOP,SINK{1,2},{,U}COND_BR,LD,ST}): New macros to
+	trace various instruction types.
+
+	* insns: Modify all instructions to support semantic tracing.
+
+	* interp.c (toplevel): Include itable.h.
+	(tic80_trace_{alu{2,3},nop,sink{1,2},{,u}cond_br,ldst}): New
+	functions to provide semantic level tracing information.
+
+Mon May  5 11:50:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h: Update usage of core object to reflect recent changes in
+ 	../common/sim-*core.
+	* sim-calls.c (sim_open): Ditto.
+
+Mon May  5 14:10:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insn (cmnd): No-op cache flushes.
+	
+	* insns (do_trap): Allow writes to STDERR.
+
+	* Makefile.in (SIM_OBJS): Link in sim-fpu.o.
+	(SIM_EXTRA_LIBS): Link in the math library.
+
+	* alu.h: Add support for floating point unit using sim-alu.
+	
+	* insns (fadd, fsub, fmpy, fdiv, fcmp, frnd*): Implement.
+
+Fri May  2 14:57:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c: Include sim-utils.h and sim-options.h.
+
+	* sim-main.h (sim_state): Drop sim_events and sim_core members,
+ 	moved to simulator base type.
+
+	* alu.h (IMEM, MEM, STORE): Update track changes in common
+ 	directory.
+
+	* insns: Drop cia argument from functions, igen now handles this.
+
+	* interp.c (engine_init): Include string.h/strings.h to define
+ 	memset et.al.
+
+	* sim-main.h (sim_cia): Delcare, tracking common dir changes.
+
+	* cpu.h (sim_cpu): Update instruction_address with sim_cia.
+
+Wed Apr 30 11:26:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (signal.h): Include so that SIG* available to all
+ 	callers of sig_halt.
+
+	* insns (do_shift): New function, implement shift operations.
+	(do_trap): Add handler for trap 73 - SIGTRAP.
+	
+Tue Apr 29 10:58:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (MEM, STORE): Force addresses to be correctly aligned.
+
+	* insns (do_jsr): Fix.
+	(do_st, do_ld): Handle 64bit transfers.
+	(do_trap): Match libgloss.
+	(rdcr): Implement nop - Dest == r0 - variant.
+
+	* sim-calls.c (sim_create_inferior): Initialize SP.
+
+	* Makefile.in (ENGINE_H): Everything now depends on sim-options.h.
+	(support.o): Depends on ENGINE_H.
+
+	* cpu.h: Four accumulators.
+
+	* Makefile.in (tmp-igen): Include line number information in
+ 	generated files.
+
+	* insns (dld, dst): Fill in.
+
+Mon Apr 28 13:02:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (vld): Fix instruction format wrong.
+
+Thu Apr 24 16:43:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dc: Add additional rules so that minor opcode files are
+ 	detected.
+	* insns: Enable more instructions.
+	
+	* sim-calls.c (sim_fetch_register,sim_store_register, sim_write):
+ 	Implement.
+
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* Makefile.in (SIM_OBJS): Add sim-module.o, sim-profile.o.
+	* sim-calls.c (sim_open): Call sim_module_uninstall if argument
+	parsing fails.  Call sim_post_argv_init.
+	(sim_close): Call sim_module_uninstall.
+
+Wed Apr 23 20:05:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (and, bbo, bcnd, bsr, dcache, jsr, or, xor, nor): Enable.
+  	* ic: Add fields for enabled instructions.
+

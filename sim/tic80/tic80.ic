@@ -1,0 +1,52 @@
+cache:Dest:Dest:
+cache:Dest:rDest:signed_word *:(&(CPU)->reg[Dest])
+#
+cache:Source1:Source1:
+cache:Source1:vSource1:signed_word:(GPR (Source1) + 0)
+#cache:Source1:vSource1:signed_word:(Source1 == 0 ? 0 : (CPU)->reg[Source1])
+#
+cache:Source2:Source2:
+cache:Source2:vSource2:signed_word:(GPR (Source2) + 0)
+#cache:Source2:vSource2:signed_word:(Source2 == 0 ? 0 : (CPU)->reg[Source2])
+#
+cache:Source:Source:
+cache:Source:vSource:signed_word:(GPR (Source) + 0)
+#cache:Source:vSource:signed_word:(Source == 0 ? 0 : (CPU)->reg[Source])
+#
+cache:IndOff:IndOff:
+cache:IndOff:rIndOff:signed_word:(GPR (IndOff) + 0)
+#cache:IndOff:rIndOff:signed_word:(IndOff == 0 ? 0 : (CPU)->reg[IndOff])
+#
+cache:Base:Base:
+cache:Base:vBase:signed_word:(GPR (Base) + 0)
+cache:Base:rBase:signed_word*:(&GPR (Base))
+#cache:Base:vBase:signed_word:(Base == 0 ? 0 : (CPU)->reg[Base])
+#
+cache:Link:Link:
+cache:Link:rLink:signed_word*:(&(CPU)->reg[Link])
+#
+# Trap Number
+cache:UTN:UTN:
+cache:INDTR:INDTR:
+cache:INDTR:UTN:unsigned_word:(INDTR == 0 ? 0 : (CPU)->reg[INDTR])
+#
+cache:A:A:
+#
+cache:SignedImmediate:SignedImmediate:
+cache:SignedImmediate:vSource1:signed_word:SEXT (SignedImmediate, 14)
+#
+cache:UnsignedImmediate:UnsignedImmediate:
+cache:UnsignedImmediate:vSource1:signed_word:UnsignedImmediate
+#
+cache:BITNUM:BITNUM:
+cache:Code:Code:
+cache:BITNUM:bitnum:int:(~BITNUM) & 0x1f
+
+#
+cache:SignedOffset:SignedOffset:
+cache:SignedOffset:vSignedOffset:signed_word:SEXT (SignedOffset, 14)
+#
+cache:UCRN:UCRN:
+cache:INDCR:INDCR:
+cache:INDCR:UCRN:unsigned32:(GPR (INDCR) + 0)
+#cache:INDCR:UCRN:unsigned32:(INDCR == 0 ? 0 : (CPU)->reg[INDCR])
