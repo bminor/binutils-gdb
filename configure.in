@@ -196,6 +196,7 @@ if [ x${shared} = xyes ]; then
     hppa*)		waugh=config/mh-papic ;;
     i[3456]86-*)	waugh=config/mh-x86pic ;;
     sparc64-*)		waugh=config/mh-sparcpic ;;
+    powerpc*-*)		waugh=config/mh-ppcpic ;;
     *)			waugh=config/mh-${host_cpu}pic ;;
   esac
   if [ -f ${srcdir}/${waugh} ]; then
@@ -790,7 +791,8 @@ fi
 if [ x${shared} = xyes ]; then
   case "${target}" in
     hppa*)		target_makefile_frag=config/mt-papic ;;
-    i[3456]86-*)		target_makefile_frag=config/mt-x86pic ;;
+    i[3456]86-*)	target_makefile_frag=config/mt-x86pic ;;
+    powerpc*-*)		target_makefile_frag=config/mt-ppcpic ;;
     *)			target_makefile_frag=config/mt-${target_cpu}pic ;;
   esac
 fi

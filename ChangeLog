@@ -1,5 +1,7 @@
 Mon Jun 16 11:11:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Use mh-ppcpic and mt-ppcpic for powerpc*-* targets.
+
 	* configure: Set CFLAGS and CXXFLAGS, and substitute them into
 	Makefile.  From Jeff Makey <jeff@cts.com>.
 	* Makefile.in: Add comment for CFLAGS and CXXFLAGS.
