@@ -501,10 +501,10 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when fi->saved_regs == 0.
      When the saved registers are allocated full information is required.  */
-  if (fi->saved_regs)
+  if (get_frame_saved_regs (fi))
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-        fi->saved_regs[regno] = 0;
+        get_frame_saved_regs (fi)[regno] = 0;
     }
  
   /* Find the prologue instructions.  */
@@ -676,34 +676,34 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when
      fi->saved_regs == 0.  */ 
-  if (!fi->saved_regs)
+  if (!get_frame_saved_regs (fi))
     return ip;
 
   if (have_fp)
     {
-      fi->saved_regs[FP_REGNUM] = get_frame_base (fi);
+      get_frame_saved_regs (fi)[FP_REGNUM] = get_frame_base (fi);
       
       /* Calculate the addresses.  */
       for (regno = regsave; regno >= 0; regno--)
         {
-          fi->saved_regs[regno] = get_frame_base (fi) - val;
+          get_frame_saved_regs (fi)[regno] = get_frame_base (fi) - val;
           val -= 4;
         }
       if (fi->extra_info->leaf_function)
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          fi->saved_regs[SP_REGNUM] = get_frame_base (fi) + 4;
+          get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 4;
         }
       else
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          fi->saved_regs[SP_REGNUM] = get_frame_base (fi) + 8;
+          get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 8;
       
           /* Set the register SRP to contain the return address of 
              the caller.  */
-          fi->saved_regs[SRP_REGNUM] = get_frame_base (fi) + 4;
+          get_frame_saved_regs (fi)[SRP_REGNUM] = get_frame_base (fi) + 4;
         }
     }
   return ip;
@@ -743,7 +743,7 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
   /* frame_info now contains dynamic memory.  Since fi is a dummy here,
      I use static memory for extra_info, and don't bother allocating
      memory for saved_regs.  */
-  fi.saved_regs = 0;
+  memset (&fi, 0, sizeof (fi));
   fi.extra_info = &fei;
 
   /* If there is no symbol information then sal.end == 0, and we end up
@@ -1164,7 +1164,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
   register int frameless_p = 0; 
 
   /* Has this frame's registers already been initialized?  */
-  if (fi->saved_regs)
+  if (get_frame_saved_regs (fi))
     return;
 
   frame_saved_regs_zalloc (fi);
@@ -1231,11 +1231,11 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       /* Check fromleaf/frameless_function_invocation.  (FIXME)  */
 
-      if (fi->saved_regs[SRP_REGNUM] != 0)
+      if (get_frame_saved_regs (fi)[SRP_REGNUM] != 0)
         {
           /* SRP was saved on the stack; non-leaf function.  */
           fi->extra_info->return_pc =
-            read_memory_integer (fi->saved_regs[SRP_REGNUM], 
+            read_memory_integer (get_frame_saved_regs (fi)[SRP_REGNUM], 
                                  REGISTER_RAW_SIZE (SRP_REGNUM));
         }
       else
@@ -1533,30 +1533,30 @@ cris_pop_frame (void)
          after SP was saved.  */
       for (regno = 0; regno < FP_REGNUM; regno++)
         {
-          if (fi->saved_regs[regno])
+          if (get_frame_saved_regs (fi)[regno])
             {
               write_register (regno, 
-                              read_memory_integer (fi->saved_regs[regno], 4));
+                              read_memory_integer (get_frame_saved_regs (fi)[regno], 4));
             }
         }
      
-      if (fi->saved_regs[FP_REGNUM])
+      if (get_frame_saved_regs (fi)[FP_REGNUM])
         {
           /* Pop the frame pointer (R8).  It was pushed before SP 
              was saved.  */
           write_register (FP_REGNUM, 
-                          read_memory_integer (fi->saved_regs[FP_REGNUM], 4));
+                          read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4));
           stack_offset += 4;
 
           /* Not a leaf function.  */
-          if (fi->saved_regs[SRP_REGNUM])
+          if (get_frame_saved_regs (fi)[SRP_REGNUM])
             {     
               /* SRP was pushed before SP was saved.  */
               stack_offset += 4;
             }
       
           /* Restore the SP and adjust for R8 and (possibly) SRP.  */
-          write_register (SP_REGNUM, fi->saved_regs[FP_REGNUM] + stack_offset);
+          write_register (SP_REGNUM, get_frame_saved_regs (fi)[FP_REGNUM] + stack_offset);
         } 
       else
         {

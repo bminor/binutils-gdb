@@ -707,7 +707,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
   CORE_ADDR pc;
   int i;
 
-  if (fip->saved_regs)
+  if (get_frame_saved_regs (fip))
     return;
 
   frame_saved_regs_zalloc (fip);
@@ -726,16 +726,16 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 	    break;
 #ifdef I386_REGNO_TO_SYMMETRY
 	  /* Dynix uses different internal numbering.  Ick.  */
-	  fip->saved_regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = addr;
+	  get_frame_saved_regs (fip)[I386_REGNO_TO_SYMMETRY (op - 0x50)] = addr;
 #else
-	  fip->saved_regs[op - 0x50] = addr;
+	  get_frame_saved_regs (fip)[op - 0x50] = addr;
 #endif
 	  addr -= 4;
 	}
     }
 
-  fip->saved_regs[PC_REGNUM] = fip->frame + 4;
-  fip->saved_regs[FP_REGNUM] = fip->frame;
+  get_frame_saved_regs (fip)[PC_REGNUM] = fip->frame + 4;
+  get_frame_saved_regs (fip)[FP_REGNUM] = fip->frame;
 }
 
 /* Return PC of first real instruction.  */
@@ -867,7 +867,7 @@ i386_do_pop_frame (struct frame_info *frame)
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       CORE_ADDR addr;
-      addr = frame->saved_regs[regnum];
+      addr = get_frame_saved_regs (frame)[regnum];
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));

@@ -591,7 +591,7 @@ thumb_scan_prologue (struct frame_info *fi)
 	    if (mask & (1 << regno))
 	      {
 		fi->extra_info->framesize += 4;
-		fi->saved_regs[saved_reg[regno]] =
+		get_frame_saved_regs (fi)[saved_reg[regno]] =
 		  -(fi->extra_info->framesize);
 		/* Reset saved register map.  */
 		saved_reg[regno] = regno;
@@ -670,7 +670,7 @@ check_prologue_cache (struct frame_info *fi)
       fi->extra_info->framesize = prologue_cache.extra_info->framesize;
       fi->extra_info->frameoffset = prologue_cache.extra_info->frameoffset;
       for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-	fi->saved_regs[i] = prologue_cache.saved_regs[i];
+	get_frame_saved_regs (fi)[i] = get_frame_saved_regs (&prologue_cache)[i];
       return 1;
     }
   else
@@ -691,7 +691,7 @@ save_prologue_cache (struct frame_info *fi)
   prologue_cache.extra_info->frameoffset = fi->extra_info->frameoffset;
 
   for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    prologue_cache.saved_regs[i] = fi->saved_regs[i];
+    get_frame_saved_regs (&prologue_cache)[i] = get_frame_saved_regs (fi)[i];
 }
 
 
@@ -890,7 +890,7 @@ arm_scan_prologue (struct frame_info *fi)
 	    if (mask & (1 << regno))
 	      {
 		sp_offset -= 4;
-		fi->saved_regs[regno] = sp_offset;
+		get_frame_saved_regs (fi)[regno] = sp_offset;
 	      }
 	}
       else if ((insn & 0xffffc000) == 0xe54b0000 ||	/* strb rx,[r11,#-n] */
@@ -926,7 +926,7 @@ arm_scan_prologue (struct frame_info *fi)
 	{
 	  sp_offset -= 12;
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
-	  fi->saved_regs[regno] = sp_offset;
+	  get_frame_saved_regs (fi)[regno] = sp_offset;
 	}
       else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
 	{
@@ -953,7 +953,7 @@ arm_scan_prologue (struct frame_info *fi)
 	  for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
 	    {
 	      sp_offset -= 12;
-	      fi->saved_regs[fp_start_reg++] = sp_offset;
+	      get_frame_saved_regs (fi)[fp_start_reg++] = sp_offset;
 	    }
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
@@ -997,14 +997,14 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 	{
 	  return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
 	}
-      else if (fi->saved_regs[regnum] != 0)
+      else if (get_frame_saved_regs (fi)[regnum] != 0)
 	{
 	  /* NOTE: cagney/2002-05-03: This would normally need to
              handle ARM_SP_REGNUM as a special case as, according to
              the frame.h comments, saved_regs[SP_REGNUM] contains the
              SP value not its address.  It appears that the ARM isn't
              doing this though.  */
-	  return read_memory_integer (fi->saved_regs[regnum],
+	  return read_memory_integer (get_frame_saved_regs (fi)[regnum],
 				      REGISTER_RAW_SIZE (regnum));
 	}
     }
@@ -1086,7 +1086,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   int reg;
   CORE_ADDR sp;
 
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
 
   fi->extra_info = (struct frame_extra_info *)
@@ -1099,7 +1099,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (fi->next)
     deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
-  memset (fi->saved_regs, '\000', sizeof fi->saved_regs);
+  memset (get_frame_saved_regs (fi), '\000', sizeof get_frame_saved_regs (fi));
 
   /* Compute stack pointer for this frame.  We use this value for both
      the sigtramp and call dummy cases.  */
@@ -1135,12 +1135,12 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       && ((get_frame_type (fi) == SIGTRAMP_FRAME) || PC_IN_SIGTRAMP (get_frame_pc (fi), (char *)0)))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
-	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, get_frame_pc (fi), reg);
+	get_frame_saved_regs (fi)[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, get_frame_pc (fi), reg);
 
       /* FIXME: What about thumb mode?  */
       fi->extra_info->framereg = ARM_SP_REGNUM;
       fi->frame =
-	read_memory_integer (fi->saved_regs[fi->extra_info->framereg],
+	read_memory_integer (get_frame_saved_regs (fi)[fi->extra_info->framereg],
 			     REGISTER_RAW_SIZE (fi->extra_info->framereg));
       fi->extra_info->framesize = 0;
       fi->extra_info->frameoffset = 0;
@@ -1162,10 +1162,9 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	{
 	  /* not the innermost frame */
 	  /* If we have an FP, the callee saved it.  */
-	  if (fi->next->saved_regs[fi->extra_info->framereg] != 0)
+	  if (get_frame_saved_regs (get_next_frame (fi))[fi->extra_info->framereg] != 0)
 	    fi->frame =
-	      read_memory_integer (fi->next
-				   ->saved_regs[fi->extra_info->framereg], 4);
+	      read_memory_integer (get_frame_saved_regs (get_next_frame (fi))[fi->extra_info->framereg], 4);
 	  else if (fromleaf)
 	    /* If we were called by a frameless fn.  then our frame is
 	       still in the frame pointer register on the board...  */
@@ -1175,9 +1174,9 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* Calculate actual addresses of saved registers using offsets
          determined by arm_scan_prologue.  */
       for (reg = 0; reg < NUM_REGS; reg++)
-	if (fi->saved_regs[reg] != 0)
-	  fi->saved_regs[reg] += (fi->frame + fi->extra_info->framesize
-				  - fi->extra_info->frameoffset);
+	if (get_frame_saved_regs (fi)[reg] != 0)
+	  get_frame_saved_regs (fi)[reg] += (fi->frame + fi->extra_info->framesize
+					     - fi->extra_info->frameoffset);
     }
 }
 
@@ -1200,7 +1199,7 @@ arm_frame_saved_pc (struct frame_info *fi)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame - fi->extra_info->frameoffset,
 			fi->frame))
     {
-      return read_memory_integer (fi->saved_regs[ARM_PC_REGNUM],
+      return read_memory_integer (get_frame_saved_regs (fi)[ARM_PC_REGNUM],
 				  REGISTER_RAW_SIZE (ARM_PC_REGNUM));
     }
   else
@@ -1232,7 +1231,7 @@ static void
 arm_frame_init_saved_regs (struct frame_info *fip)
 {
 
-  if (fip->saved_regs)
+  if (get_frame_saved_regs (fip))
     return;
 
   arm_init_extra_frame_info (0, fip);
@@ -1531,9 +1530,9 @@ arm_pop_frame (void)
     }
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (frame->saved_regs[regnum] != 0)
+    if (get_frame_saved_regs (frame)[regnum] != 0)
       write_register (regnum,
-		  read_memory_integer (frame->saved_regs[regnum],
+		  read_memory_integer (get_frame_saved_regs (frame)[regnum],
 				       REGISTER_RAW_SIZE (regnum)));
 
   write_register (ARM_PC_REGNUM, FRAME_SAVED_PC (frame));
@@ -3039,8 +3038,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We can't use SIZEOF_FRAME_SAVED_REGS here, since that still
      references the old architecture vector, not the one we are
      building here.  */
-  if (prologue_cache.saved_regs != NULL)
-    xfree (prologue_cache.saved_regs);
+  if (get_frame_saved_regs (&prologue_cache) != NULL)
+    xfree (get_frame_saved_regs (&prologue_cache));
 
   /* We can't use NUM_REGS nor NUM_PSEUDO_REGS here, since that still
      references the old architecture vector, not the one we are

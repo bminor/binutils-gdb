@@ -443,9 +443,9 @@ m68hc11_pop_frame (void)
 
       /* Copy regs from where they were saved in the frame.  */
       for (regnum = 0; regnum < M68HC11_ALL_REGS; regnum++)
-	if (frame->saved_regs[regnum])
+	if (get_frame_saved_regs (frame)[regnum])
 	  write_register (regnum,
-                          read_memory_integer (frame->saved_regs[regnum], 2));
+                          read_memory_integer (get_frame_saved_regs (frame)[regnum], 2));
 
       write_register (HARD_PC_REGNUM, frame->extra_info->return_pc);
       sp = (fp + frame->extra_info->size + 2) & 0x0ffff;
@@ -840,36 +840,36 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
   CORE_ADDR pc;
   CORE_ADDR addr;
 
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (fi->saved_regs, 0, sizeof (fi->saved_regs));
+    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
 
   pc = get_frame_pc (fi);
   fi->extra_info->return_kind = m68hc11_get_return_insn (pc);
   m68hc11_guess_from_prologue (pc, fi->frame, &pc, &fi->extra_info->size,
-                               fi->saved_regs);
+                               get_frame_saved_regs (fi));
 
   addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
   if (soft_regs[SOFT_FP_REGNUM].name)
-    fi->saved_regs[SOFT_FP_REGNUM] = addr - 2;
+    get_frame_saved_regs (fi)[SOFT_FP_REGNUM] = addr - 2;
 
   /* Take into account how the function was called/returns.  */
   if (fi->extra_info->return_kind == RETURN_RTC)
     {
-      fi->saved_regs[HARD_PAGE_REGNUM] = addr;
+      get_frame_saved_regs (fi)[HARD_PAGE_REGNUM] = addr;
       addr++;
     }
   else if (fi->extra_info->return_kind == RETURN_RTI)
     {
-      fi->saved_regs[HARD_CCR_REGNUM] = addr;
-      fi->saved_regs[HARD_D_REGNUM] = addr + 1;
-      fi->saved_regs[HARD_X_REGNUM] = addr + 3;
-      fi->saved_regs[HARD_Y_REGNUM] = addr + 5;
+      get_frame_saved_regs (fi)[HARD_CCR_REGNUM] = addr;
+      get_frame_saved_regs (fi)[HARD_D_REGNUM] = addr + 1;
+      get_frame_saved_regs (fi)[HARD_X_REGNUM] = addr + 3;
+      get_frame_saved_regs (fi)[HARD_Y_REGNUM] = addr + 5;
       addr += 7;
     }
-  fi->saved_regs[HARD_SP_REGNUM] = addr;
-  fi->saved_regs[HARD_PC_REGNUM] = fi->saved_regs[HARD_SP_REGNUM];
+  get_frame_saved_regs (fi)[HARD_SP_REGNUM] = addr;
+  get_frame_saved_regs (fi)[HARD_PC_REGNUM] = get_frame_saved_regs (fi)[HARD_SP_REGNUM];
 }
 
 static void
@@ -892,7 +892,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
     {
-      addr = fi->saved_regs[HARD_PC_REGNUM];
+      addr = get_frame_saved_regs (fi)[HARD_PC_REGNUM];
       addr = read_memory_unsigned_integer (addr, 2) & 0x0ffff;
 
       /* Take into account the 68HC12 specific call (PC + page).  */
@@ -900,7 +900,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
           && addr >= 0x08000 && addr < 0x0c000
           && USE_PAGE_REGISTER)
         {
-          CORE_ADDR page_addr = fi->saved_regs[HARD_PAGE_REGNUM];
+          CORE_ADDR page_addr = get_frame_saved_regs (fi)[HARD_PAGE_REGNUM];
 
           unsigned page = read_memory_unsigned_integer (page_addr, 1);
           addr -= 0x08000;

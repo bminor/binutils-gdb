@@ -710,8 +710,8 @@ ia64_frame_chain (struct frame_info *frame)
   else
     {
       FRAME_INIT_SAVED_REGS (frame);
-      if (frame->saved_regs[IA64_VFP_REGNUM])
-	return read_memory_integer (frame->saved_regs[IA64_VFP_REGNUM], 8);
+      if (get_frame_saved_regs (frame)[IA64_VFP_REGNUM])
+	return read_memory_integer (get_frame_saved_regs (frame)[IA64_VFP_REGNUM], 8);
       else
 	return frame->frame + frame->extra_info->mem_stack_frame_size;
     }
@@ -728,8 +728,8 @@ ia64_frame_saved_pc (struct frame_info *frame)
     {
       FRAME_INIT_SAVED_REGS (frame);
 
-      if (frame->saved_regs[IA64_VRAP_REGNUM])
-	return read_memory_integer (frame->saved_regs[IA64_VRAP_REGNUM], 8);
+      if (get_frame_saved_regs (frame)[IA64_VRAP_REGNUM])
+	return read_memory_integer (get_frame_saved_regs (frame)[IA64_VRAP_REGNUM], 8);
       else if (frame->next && (get_frame_type (frame->next) == SIGTRAMP_FRAME))
 	return read_sigcontext_register (frame->next, IA64_BR0_REGNUM);
       else	/* either frameless, or not far enough along in the prologue... */
@@ -832,7 +832,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
   memset (instores, 0, sizeof instores);
   memset (infpstores, 0, sizeof infpstores);
 
-  if (frame && !frame->saved_regs)
+  if (frame && !get_frame_saved_regs (frame))
     {
       frame_saved_regs_zalloc (frame);
       do_fsr_stuff = 1;
@@ -960,7 +960,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	      && ((2 <= fM && fM <= 5) || (16 <= fM && fM <= 31)))
 	    {
 	      if (do_fsr_stuff)
-	        frame->saved_regs[IA64_FR0_REGNUM + fM] = spill_addr;
+	        get_frame_saved_regs (frame)[IA64_FR0_REGNUM + fM] = spill_addr;
 
               if ((instr & 0x1efc0000000) == 0x0eec0000000)
 		spill_addr += imm;
@@ -1019,14 +1019,14 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 		{
 		  /* Track UNAT register */
 		  if (do_fsr_stuff)
-		    frame->saved_regs[IA64_UNAT_REGNUM] = spill_addr;
+		    get_frame_saved_regs (frame)[IA64_UNAT_REGNUM] = spill_addr;
 		  unat_save_reg = 0;
 		}
 	      else
 	        {
 		  /* Track PR register */
 		  if (do_fsr_stuff)
-		    frame->saved_regs[IA64_PR_REGNUM] = spill_addr;
+		    get_frame_saved_regs (frame)[IA64_PR_REGNUM] = spill_addr;
 		  pr_save_reg = 0;
 		}
 	      if ((instr & 0x1efc0000000LL) == 0x0acc0000000LL)
@@ -1095,7 +1095,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	         regs.  Record the spill address and advance the spill
 		 register if appropriate. */
 	      if (do_fsr_stuff)
-		frame->saved_regs[IA64_GR0_REGNUM + rM] = spill_addr;
+		get_frame_saved_regs (frame)[IA64_GR0_REGNUM + rM] = spill_addr;
 	      if ((instr & 0x1efc0000000LL) == 0x0aec0000000LL)
 	        /* st8.spill [rN] = rM, imm9 */
 		spill_addr += imm9(instr);
@@ -1128,17 +1128,17 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	    addr += 8;
 	  }
 	if (i < sor)
-	  frame->saved_regs[IA64_GR32_REGNUM + ((i + (sor - rrb_gr)) % sor)] 
+	  get_frame_saved_regs (frame)[IA64_GR32_REGNUM + ((i + (sor - rrb_gr)) % sor)] 
 	    = addr;
 	else
-	  frame->saved_regs[IA64_GR32_REGNUM + i] = addr;
+	  get_frame_saved_regs (frame)[IA64_GR32_REGNUM + i] = addr;
 
 	if (i+32 == cfm_reg)
-	  frame->saved_regs[IA64_CFM_REGNUM] = addr;
+	  get_frame_saved_regs (frame)[IA64_CFM_REGNUM] = addr;
 	if (i+32 == ret_reg)
-	  frame->saved_regs[IA64_VRAP_REGNUM] = addr;
+	  get_frame_saved_regs (frame)[IA64_VRAP_REGNUM] = addr;
 	if (i+32 == fp_reg)
-	  frame->saved_regs[IA64_VFP_REGNUM] = addr;
+	  get_frame_saved_regs (frame)[IA64_VFP_REGNUM] = addr;
       }
   }
 
@@ -1160,7 +1160,7 @@ ia64_skip_prologue (CORE_ADDR pc)
 void
 ia64_frame_init_saved_regs (struct frame_info *frame)
 {
-  if (frame->saved_regs)
+  if (get_frame_saved_regs (frame))
     return;
 
   if ((get_frame_type (frame) == SIGTRAMP_FRAME) && SIGCONTEXT_REGISTER_ADDRESS)
@@ -1169,37 +1169,37 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
 
       frame_saved_regs_zalloc (frame);
 
-      frame->saved_regs[IA64_VRAP_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_VRAP_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_IP_REGNUM);
-      frame->saved_regs[IA64_CFM_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_CFM_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_CFM_REGNUM);
-      frame->saved_regs[IA64_PSR_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_PSR_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_PSR_REGNUM);
 #if 0
-      frame->saved_regs[IA64_BSP_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_BSP_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_BSP_REGNUM);
 #endif
-      frame->saved_regs[IA64_RNAT_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_RNAT_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_RNAT_REGNUM);
-      frame->saved_regs[IA64_CCV_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_CCV_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_CCV_REGNUM);
-      frame->saved_regs[IA64_UNAT_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_UNAT_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_UNAT_REGNUM);
-      frame->saved_regs[IA64_FPSR_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_FPSR_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_FPSR_REGNUM);
-      frame->saved_regs[IA64_PFS_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_PFS_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_PFS_REGNUM);
-      frame->saved_regs[IA64_LC_REGNUM] = 
+      get_frame_saved_regs (frame)[IA64_LC_REGNUM] = 
 	SIGCONTEXT_REGISTER_ADDRESS (frame->frame, IA64_LC_REGNUM);
       for (regno = IA64_GR1_REGNUM; regno <= IA64_GR31_REGNUM; regno++)
 	if (regno != sp_regnum)
-	  frame->saved_regs[regno] =
+	  get_frame_saved_regs (frame)[regno] =
 	    SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
       for (regno = IA64_BR0_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
-	frame->saved_regs[regno] =
+	get_frame_saved_regs (frame)[regno] =
 	  SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
       for (regno = IA64_FR2_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
-	frame->saved_regs[regno] =
+	get_frame_saved_regs (frame)[regno] =
 	  SIGCONTEXT_REGISTER_ADDRESS (frame->frame, regno);
     }
   else
@@ -1301,8 +1301,8 @@ ia64_get_saved_register (char *raw_buffer,
       if (!is_dummy_frame)
 	{
 	  FRAME_INIT_SAVED_REGS (frame);
-	  gr_addr = frame->saved_regs[ regnum - IA64_NAT0_REGNUM 
-	                                      + IA64_GR0_REGNUM];
+	  gr_addr = get_frame_saved_regs (frame)[ regnum - IA64_NAT0_REGNUM 
+						+ IA64_GR0_REGNUM];
 	}
       if (gr_addr)
 	{
@@ -1343,7 +1343,7 @@ ia64_get_saved_register (char *raw_buffer,
       if (!is_dummy_frame)
 	{
 	  FRAME_INIT_SAVED_REGS (frame);
-	  addr = frame->saved_regs[regnum];
+	  addr = get_frame_saved_regs (frame)[regnum];
 	}
 
       if (addr != 0)
@@ -1513,8 +1513,8 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 
       FRAME_INIT_SAVED_REGS (frn);
 
-      if (frn->saved_regs[IA64_CFM_REGNUM] != 0)
-	cfm = read_memory_integer (frn->saved_regs[IA64_CFM_REGNUM], 8);
+      if (get_frame_saved_regs (frn)[IA64_CFM_REGNUM] != 0)
+	cfm = read_memory_integer (get_frame_saved_regs (frn)[IA64_CFM_REGNUM], 8);
       else if (frn->next && (get_frame_type (frn->next) == SIGTRAMP_FRAME))
 	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
       else if (frn->next
@@ -1978,7 +1978,7 @@ ia64_pop_frame_regular (struct frame_info *frame)
 
   for (regno = 0; regno < ia64_num_regs; regno++)
     {
-      if (frame->saved_regs[regno]
+      if (get_frame_saved_regs (frame)[regno]
 	  && (!(IA64_GR32_REGNUM <= regno && regno <= IA64_GR127_REGNUM))
 	  && regno != pc_regnum
 	  && regno != sp_regnum
@@ -1988,7 +1988,7 @@ ia64_pop_frame_regular (struct frame_info *frame)
 	  && regno != IA64_BSPSTORE_REGNUM)
 	{
 	  write_register (regno, 
-			  read_memory_integer (frame->saved_regs[regno],
+			  read_memory_integer (get_frame_saved_regs (frame)[regno],
 					       REGISTER_RAW_SIZE (regno)));
 	}
     }
@@ -1998,9 +1998,9 @@ ia64_pop_frame_regular (struct frame_info *frame)
 
   cfm = read_register (IA64_CFM_REGNUM);
 
-  if (frame->saved_regs[IA64_PFS_REGNUM])
+  if (get_frame_saved_regs (frame)[IA64_PFS_REGNUM])
     {
-      pfs = read_memory_integer (frame->saved_regs[IA64_PFS_REGNUM],
+      pfs = read_memory_integer (get_frame_saved_regs (frame)[IA64_PFS_REGNUM],
 				 REGISTER_RAW_SIZE (IA64_PFS_REGNUM));
     }
   else

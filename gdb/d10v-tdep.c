@@ -555,23 +555,23 @@ do_d10v_pop_frame (struct frame_info *fi)
   /* now update the current registers with the old values */
   for (regnum = A0_REGNUM; regnum < A0_REGNUM + NR_A_REGS; regnum++)
     {
-      if (fi->saved_regs[regnum])
+      if (get_frame_saved_regs (fi)[regnum])
 	{
-	  read_memory (fi->saved_regs[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
+	  read_memory (get_frame_saved_regs (fi)[regnum], raw_buffer, REGISTER_RAW_SIZE (regnum));
 	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
 					   REGISTER_RAW_SIZE (regnum));
 	}
     }
   for (regnum = 0; regnum < SP_REGNUM; regnum++)
     {
-      if (fi->saved_regs[regnum])
+      if (get_frame_saved_regs (fi)[regnum])
 	{
-	  write_register (regnum, read_memory_unsigned_integer (fi->saved_regs[regnum], REGISTER_RAW_SIZE (regnum)));
+	  write_register (regnum, read_memory_unsigned_integer (get_frame_saved_regs (fi)[regnum], REGISTER_RAW_SIZE (regnum)));
 	}
     }
-  if (fi->saved_regs[PSW_REGNUM])
+  if (get_frame_saved_regs (fi)[PSW_REGNUM])
     {
-      write_register (PSW_REGNUM, read_memory_unsigned_integer (fi->saved_regs[PSW_REGNUM], REGISTER_RAW_SIZE (PSW_REGNUM)));
+      write_register (PSW_REGNUM, read_memory_unsigned_integer (get_frame_saved_regs (fi)[PSW_REGNUM], REGISTER_RAW_SIZE (PSW_REGNUM)));
     }
 
   write_register (PC_REGNUM, read_register (LR_REGNUM));
@@ -703,16 +703,16 @@ d10v_frame_chain (struct frame_info *fi)
 	return (CORE_ADDR) 0;
     }
 
-  if (!fi->saved_regs[FP_REGNUM])
+  if (!get_frame_saved_regs (fi)[FP_REGNUM])
     {
-      if (!fi->saved_regs[SP_REGNUM]
-	  || fi->saved_regs[SP_REGNUM] == STACK_START)
+      if (!get_frame_saved_regs (fi)[SP_REGNUM]
+	  || get_frame_saved_regs (fi)[SP_REGNUM] == STACK_START)
 	return (CORE_ADDR) 0;
 
-      return fi->saved_regs[SP_REGNUM];
+      return get_frame_saved_regs (fi)[SP_REGNUM];
     }
 
-  addr = read_memory_unsigned_integer (fi->saved_regs[FP_REGNUM],
+  addr = read_memory_unsigned_integer (get_frame_saved_regs (fi)[FP_REGNUM],
 				       REGISTER_RAW_SIZE (FP_REGNUM));
   if (addr == 0)
     return (CORE_ADDR) 0;
@@ -732,7 +732,7 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
     {
       n = (op & 0x1E0) >> 5;
       next_addr -= 2;
-      fi->saved_regs[n] = next_addr;
+      get_frame_saved_regs (fi)[n] = next_addr;
       return 1;
     }
 
@@ -741,8 +741,8 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
     {
       n = (op & 0x1E0) >> 5;
       next_addr -= 4;
-      fi->saved_regs[n] = next_addr;
-      fi->saved_regs[n + 1] = next_addr + 2;
+      get_frame_saved_regs (fi)[n] = next_addr;
+      get_frame_saved_regs (fi)[n + 1] = next_addr + 2;
       return 1;
     }
 
@@ -771,7 +771,7 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
   if ((op & 0x7E1F) == 0x681E)
     {
       n = (op & 0x1E0) >> 5;
-      fi->saved_regs[n] = next_addr;
+      get_frame_saved_regs (fi)[n] = next_addr;
       return 1;
     }
 
@@ -779,8 +779,8 @@ prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
   if ((op & 0x7E3F) == 0x3A1E)
     {
       n = (op & 0x1E0) >> 5;
-      fi->saved_regs[n] = next_addr;
-      fi->saved_regs[n + 1] = next_addr + 2;
+      get_frame_saved_regs (fi)[n] = next_addr;
+      get_frame_saved_regs (fi)[n + 1] = next_addr + 2;
       return 1;
     }
 
@@ -802,7 +802,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   int i;
 
   fp = fi->frame;
-  memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+  memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
   next_addr = 0;
 
   pc = get_pc_function_start (get_frame_pc (fi));
@@ -825,15 +825,15 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
 	      /* st  rn, @(offset,sp) */
 	      short offset = op & 0xFFFF;
 	      short n = (op >> 20) & 0xF;
-	      fi->saved_regs[n] = next_addr + offset;
+	      get_frame_saved_regs (fi)[n] = next_addr + offset;
 	    }
 	  else if ((op & 0x3F1F0000) == 0x350F0000)
 	    {
 	      /* st2w  rn, @(offset,sp) */
 	      short offset = op & 0xFFFF;
 	      short n = (op >> 20) & 0xF;
-	      fi->saved_regs[n] = next_addr + offset;
-	      fi->saved_regs[n + 1] = next_addr + offset + 2;
+	      get_frame_saved_regs (fi)[n] = next_addr + offset;
+	      get_frame_saved_regs (fi)[n + 1] = next_addr + offset + 2;
 	    }
 	  else
 	    break;
@@ -864,15 +864,15 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
     fp = d10v_read_sp ();
 
   for (i = 0; i < NUM_REGS - 1; i++)
-    if (fi->saved_regs[i])
+    if (get_frame_saved_regs (fi)[i])
       {
-	fi->saved_regs[i] = fp - (next_addr - fi->saved_regs[i]);
+	get_frame_saved_regs (fi)[i] = fp - (next_addr - get_frame_saved_regs (fi)[i]);
       }
 
-  if (fi->saved_regs[LR_REGNUM])
+  if (get_frame_saved_regs (fi)[LR_REGNUM])
     {
       CORE_ADDR return_pc 
-	= read_memory_unsigned_integer (fi->saved_regs[LR_REGNUM], 
+	= read_memory_unsigned_integer (get_frame_saved_regs (fi)[LR_REGNUM], 
 					REGISTER_RAW_SIZE (LR_REGNUM));
       fi->extra_info->return_pc = d10v_make_iaddr (return_pc);
     }
@@ -882,18 +882,18 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
     }
 
   /* The SP is not normally (ever?) saved, but check anyway */
-  if (!fi->saved_regs[SP_REGNUM])
+  if (!get_frame_saved_regs (fi)[SP_REGNUM])
     {
       /* if the FP was saved, that means the current FP is valid, */
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
-	fi->saved_regs[SP_REGNUM] 
+	get_frame_saved_regs (fi)[SP_REGNUM] 
 	  = d10v_read_fp () + fi->extra_info->size;
       else
 	{
-	  fi->saved_regs[SP_REGNUM] = fp + fi->extra_info->size;
+	  get_frame_saved_regs (fi)[SP_REGNUM] = fp + fi->extra_info->size;
 	  fi->extra_info->frameless = 1;
-	  fi->saved_regs[FP_REGNUM] = 0;
+	  get_frame_saved_regs (fi)[FP_REGNUM] = 0;
 	}
     }
 }

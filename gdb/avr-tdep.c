@@ -593,13 +593,13 @@ avr_scan_prologue (struct frame_info *fi)
       if (num_pushes)
 	{
 	  int from;
-	  fi->saved_regs[AVR_FP_REGNUM + 1] = num_pushes;
+	  get_frame_saved_regs (fi)[AVR_FP_REGNUM + 1] = num_pushes;
 	  if (num_pushes >= 2)
-	    fi->saved_regs[AVR_FP_REGNUM] = num_pushes - 1;
+	    get_frame_saved_regs (fi)[AVR_FP_REGNUM] = num_pushes - 1;
 	  i = 0;
 	  for (from = AVR_LAST_PUSHED_REGNUM + 1 - (num_pushes - 2);
 	       from <= AVR_LAST_PUSHED_REGNUM; ++from)
-	    fi->saved_regs[from] = ++i;
+	    get_frame_saved_regs (fi)[from] = ++i;
 	}
       fi->extra_info->locals_size = loc_size;
       fi->extra_info->framesize = loc_size + num_pushes;
@@ -622,15 +622,15 @@ avr_scan_prologue (struct frame_info *fi)
       if (memcmp (prologue, img, sizeof (img)) == 0)
 	{
 	  vpc += sizeof (img);
-	  fi->saved_regs[0] = 2;
-	  fi->saved_regs[1] = 1;
+	  get_frame_saved_regs (fi)[0] = 2;
+	  get_frame_saved_regs (fi)[1] = 1;
 	  fi->extra_info->framesize += 3;
 	}
       else if (memcmp (img + 1, prologue, sizeof (img) - 1) == 0)
 	{
 	  vpc += sizeof (img) - 1;
-	  fi->saved_regs[0] = 2;
-	  fi->saved_regs[1] = 1;
+	  get_frame_saved_regs (fi)[0] = 2;
+	  get_frame_saved_regs (fi)[1] = 1;
 	  fi->extra_info->framesize += 3;
 	}
     }
@@ -646,7 +646,7 @@ avr_scan_prologue (struct frame_info *fi)
 	  /* Bits 4-9 contain a mask for registers R0-R32. */
 	  regno = (insn & 0x1f0) >> 4;
 	  ++fi->extra_info->framesize;
-	  fi->saved_regs[regno] = fi->extra_info->framesize;
+	  get_frame_saved_regs (fi)[regno] = fi->extra_info->framesize;
 	  scan_stage = 1;
 	}
       else
@@ -776,11 +776,11 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  for (; next_fi; next_fi = next_fi->next)
 	    {
 	      /* look for saved AVR_FP_REGNUM */
-	      if (next_fi->saved_regs[AVR_FP_REGNUM] && !fp)
-		fp = next_fi->saved_regs[AVR_FP_REGNUM];
+	      if (get_frame_saved_regs (next_fi)[AVR_FP_REGNUM] && !fp)
+		fp = get_frame_saved_regs (next_fi)[AVR_FP_REGNUM];
 	      /* look for saved AVR_FP_REGNUM + 1 */
-	      if (next_fi->saved_regs[AVR_FP_REGNUM + 1] && !fp1)
-		fp1 = next_fi->saved_regs[AVR_FP_REGNUM + 1];
+	      if (get_frame_saved_regs (next_fi)[AVR_FP_REGNUM + 1] && !fp1)
+		fp1 = get_frame_saved_regs (next_fi)[AVR_FP_REGNUM + 1];
 	    }
 	  fp_low = (fp ? read_memory_unsigned_integer (avr_make_saddr (fp), 1)
 		    : read_register (AVR_FP_REGNUM)) & 0xff;
@@ -815,8 +815,8 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       /* Resolve a pushed registers addresses */
       for (i = 0; i < NUM_REGS; i++)
 	{
-	  if (fi->saved_regs[i])
-	    fi->saved_regs[i] = addr - fi->saved_regs[i];
+	  if (get_frame_saved_regs (fi)[i])
+	    get_frame_saved_regs (fi)[i] = addr - get_frame_saved_regs (fi)[i];
 	}
     }
 }
@@ -844,13 +844,13 @@ avr_pop_frame (void)
 	{
 	  /* Don't forget AVR_SP_REGNUM in a frame_saved_regs struct is the
 	     actual value we want, not the address of the value we want.  */
-	  if (frame->saved_regs[regnum] && regnum != AVR_SP_REGNUM)
+	  if (get_frame_saved_regs (frame)[regnum] && regnum != AVR_SP_REGNUM)
 	    {
-	      saddr = avr_make_saddr (frame->saved_regs[regnum]);
+	      saddr = avr_make_saddr (get_frame_saved_regs (frame)[regnum]);
 	      write_register (regnum,
 			      read_memory_unsigned_integer (saddr, 1));
 	    }
-	  else if (frame->saved_regs[regnum] && regnum == AVR_SP_REGNUM)
+	  else if (get_frame_saved_regs (frame)[regnum] && regnum == AVR_SP_REGNUM)
 	    write_register (regnum, frame->frame + 2);
 	}
 

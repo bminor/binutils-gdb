@@ -1000,8 +1000,8 @@ sh_find_callers_reg (struct frame_info *fi, int regnum)
 	FRAME_INIT_SAVED_REGS (fi);
 	if (!get_frame_pc (fi))
 	  return 0;
-	if (fi->saved_regs[regnum] != 0)
-	  return read_memory_integer (fi->saved_regs[regnum],
+	if (get_frame_saved_regs (fi)[regnum] != 0)
+	  return read_memory_integer (get_frame_saved_regs (fi)[regnum],
 				      REGISTER_RAW_SIZE (regnum));
       }
   return read_register (regnum);
@@ -1025,13 +1025,13 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
 
 	media_mode = pc_is_isa32 (get_frame_pc (fi));
 
-	if (fi->saved_regs[pr_regnum] != 0)
+	if (get_frame_saved_regs (fi)[pr_regnum] != 0)
 	  {
 	    int gdb_reg_num = translate_insn_rn (pr_regnum, media_mode);
 	    int size = ((gdbarch_tdep (current_gdbarch)->sh_abi == SH_ABI_32)
 			? 4
 			: REGISTER_RAW_SIZE (gdb_reg_num));
-	    return read_memory_integer (fi->saved_regs[pr_regnum], size);
+	    return read_memory_integer (get_frame_saved_regs (fi)[pr_regnum], size);
 	  }
       }
   return read_register (pr_regnum);
@@ -1055,10 +1055,10 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
   int r3_val = 0;
   char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), fi->frame);
   
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
@@ -1140,21 +1140,21 @@ sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 	  if (rn == FP_REGNUM)
 	    have_fp = 1;
 
-	  fi->saved_regs[rn] = fi->frame - where[rn] + depth - 4;
+	  get_frame_saved_regs (fi)[rn] = fi->frame - where[rn] + depth - 4;
 	}
       else
 	{
-	  fi->saved_regs[rn] = 0;
+	  get_frame_saved_regs (fi)[rn] = 0;
 	}
     }
 
   if (have_fp)
     {
-      fi->saved_regs[SP_REGNUM] = read_memory_integer (fi->saved_regs[FP_REGNUM], 4);
+      get_frame_saved_regs (fi)[SP_REGNUM] = read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4);
     }
   else
     {
-      fi->saved_regs[SP_REGNUM] = fi->frame - 4;
+      get_frame_saved_regs (fi)[SP_REGNUM] = fi->frame - 4;
     }
 
   fi->extra_info->f_offset = depth - where[FP_REGNUM] - 4;
@@ -1395,10 +1395,10 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
   char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), fi->frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
@@ -1553,11 +1553,11 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 
 	  /* Watch out! saved_regs is only for the real registers, and
 	     doesn't include space for the pseudo registers. */
-	  fi->saved_regs[register_number]= fi->frame - where[rn] + depth; 
+	  get_frame_saved_regs (fi)[register_number]= fi->frame - where[rn] + depth; 
 	    
 	} 
       else 
-	fi->saved_regs[register_number] = 0; 
+	get_frame_saved_regs (fi)[register_number] = 0; 
     }
 
   if (have_fp)
@@ -1574,10 +1574,10 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 	size = 4;
       else
 	size = REGISTER_RAW_SIZE (fp_regnum);
-      fi->saved_regs[sp_regnum] = read_memory_integer (fi->saved_regs[fp_regnum], size);
+      get_frame_saved_regs (fi)[sp_regnum] = read_memory_integer (get_frame_saved_regs (fi)[fp_regnum], size);
     }
   else
-    fi->saved_regs[sp_regnum] = fi->frame;
+    get_frame_saved_regs (fi)[sp_regnum] = fi->frame;
 
   fi->extra_info->f_offset = depth - where[fp_regnum]; 
 }
@@ -1596,10 +1596,10 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
   char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), fi->frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
@@ -1692,22 +1692,22 @@ sh_fp_frame_init_saved_regs (struct frame_info *fi)
 	  if (rn == FP_REGNUM)
 	    have_fp = 1;
 
-	  fi->saved_regs[rn] = fi->frame - where[rn] + depth - 4;
+	  get_frame_saved_regs (fi)[rn] = fi->frame - where[rn] + depth - 4;
 	}
       else
 	{
-	  fi->saved_regs[rn] = 0;
+	  get_frame_saved_regs (fi)[rn] = 0;
 	}
     }
 
   if (have_fp)
     {
-      fi->saved_regs[SP_REGNUM] =
-	read_memory_integer (fi->saved_regs[FP_REGNUM], 4);
+      get_frame_saved_regs (fi)[SP_REGNUM] =
+	read_memory_integer (get_frame_saved_regs (fi)[FP_REGNUM], 4);
     }
   else
     {
-      fi->saved_regs[SP_REGNUM] = fi->frame - 4;
+      get_frame_saved_regs (fi)[SP_REGNUM] = fi->frame - 4;
     }
 
   fi->extra_info->f_offset = depth - where[FP_REGNUM] - 4;
@@ -1828,8 +1828,8 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	}
 
       FRAME_INIT_SAVED_REGS (frame);
-      if (frame->saved_regs != NULL
-	  && frame->saved_regs[regnum] != 0)
+      if (get_frame_saved_regs (frame) != NULL
+	  && get_frame_saved_regs (frame)[regnum] != 0)
 	{
 	  if (lval)		/* found it saved on the stack */
 	    *lval = lval_memory;
@@ -1837,13 +1837,13 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    {
 	      if (raw_buffer)	/* SP register treated specially */
 		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			       frame->saved_regs[regnum]);
+			       get_frame_saved_regs (frame)[regnum]);
 	    }
 	  else
 	    { /* any other register */
 	      
 	      if (addrp)
-		*addrp = frame->saved_regs[regnum];
+		*addrp = get_frame_saved_regs (frame)[regnum];
 	      if (raw_buffer)
 		{
 		  int size;
@@ -1854,9 +1854,9 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 		  else
 		    size = REGISTER_RAW_SIZE (live_regnum);
 		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-		    read_memory (frame->saved_regs[regnum], raw_buffer, size);
+		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer, size);
 		  else
-		    read_memory (frame->saved_regs[regnum],
+		    read_memory (get_frame_saved_regs (frame)[regnum],
 				 raw_buffer
 				 + REGISTER_RAW_SIZE (live_regnum)
 				 - size,
@@ -1918,9 +1918,9 @@ sh_pop_frame (void)
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	if (frame->saved_regs[regnum])
+	if (get_frame_saved_regs (frame)[regnum])
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum], 4));
+			  read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
 
       write_register (PC_REGNUM, frame->extra_info->return_pc);
       write_register (SP_REGNUM, fp + 4);
@@ -1948,7 +1948,7 @@ sh64_pop_frame (void)
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	if (frame->saved_regs[regnum])
+	if (get_frame_saved_regs (frame)[regnum])
 	  {
 	    int size;
 	    if (tdep->sh_abi == SH_ABI_32
@@ -1959,7 +1959,7 @@ sh64_pop_frame (void)
 	      size = REGISTER_RAW_SIZE (translate_insn_rn (regnum,
 							   media_mode));
 	    write_register (regnum,
-			    read_memory_integer (frame->saved_regs[regnum],
+			    read_memory_integer (get_frame_saved_regs (frame)[regnum],
 						 size));
 	  }
 

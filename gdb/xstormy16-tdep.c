@@ -341,15 +341,15 @@ xstormy16_pop_frame (void)
     {
       /* Restore the saved regs. */
       for (i = 0; i < NUM_REGS; i++)
-	if (fi->saved_regs[i])
+	if (get_frame_saved_regs (fi)[i])
 	  {
 	    if (i == SP_REGNUM)
-	      write_register (i, fi->saved_regs[i]);
+	      write_register (i, get_frame_saved_regs (fi)[i]);
 	    else if (i == E_PC_REGNUM)
-	      write_register (i, read_memory_integer (fi->saved_regs[i],
+	      write_register (i, read_memory_integer (get_frame_saved_regs (fi)[i],
 						      xstormy16_pc_size));
 	    else
-	      write_register (i, read_memory_integer (fi->saved_regs[i],
+	      write_register (i, read_memory_integer (get_frame_saved_regs (fi)[i],
 						      xstormy16_reg_size));
 	  }
       /* Restore the PC */
@@ -490,7 +490,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	  if (fi)
 	    {
 	      regnum = inst & 0x000f;
-	      fi->saved_regs[regnum] = fi->extra_info->framesize;
+	      get_frame_saved_regs (fi)[regnum] = fi->extra_info->framesize;
 	      fi->extra_info->framesize += xstormy16_reg_size;
 	    }
 	}
@@ -546,7 +546,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	      if (offset & 0x0800)
 		offset -= 0x1000;
 
-	      fi->saved_regs[regnum] = fi->extra_info->framesize + offset;
+	      get_frame_saved_regs (fi)[regnum] = fi->extra_info->framesize + offset;
 	    }
 	  next_addr += xstormy16_inst_size;
 	}
@@ -593,12 +593,12 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          previous value would have been pushed).  */
       if (fi->extra_info->frameless_p)
 	{
-	  fi->saved_regs[E_SP_REGNUM] = sp - fi->extra_info->framesize;
+	  get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - fi->extra_info->framesize;
 	  fi->frame = sp;
 	}
       else
 	{
-	  fi->saved_regs[E_SP_REGNUM] = fp - fi->extra_info->framesize;
+	  get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - fi->extra_info->framesize;
 	  fi->frame = fp;
 	}
 
@@ -607,11 +607,11 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          sp, fp and framesize. We know the beginning of the frame
          so we can translate the register offsets to real addresses. */
       for (regnum = 0; regnum < E_SP_REGNUM; ++regnum)
-	if (fi->saved_regs[regnum])
-	  fi->saved_regs[regnum] += fi->saved_regs[E_SP_REGNUM];
+	if (get_frame_saved_regs (fi)[regnum])
+	  get_frame_saved_regs (fi)[regnum] += get_frame_saved_regs (fi)[E_SP_REGNUM];
 
       /* Save address of PC on stack. */
-      fi->saved_regs[E_PC_REGNUM] = fi->saved_regs[E_SP_REGNUM];
+      get_frame_saved_regs (fi)[E_PC_REGNUM] = get_frame_saved_regs (fi)[E_SP_REGNUM];
     }
 
   return next_addr;
@@ -732,7 +732,7 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR func_addr, func_end;
 
-  if (!fi->saved_regs)
+  if (!get_frame_saved_regs (fi))
     {
       frame_saved_regs_zalloc (fi);
 
@@ -763,7 +763,7 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
     }
   else
     {
-      saved_pc = read_memory_unsigned_integer (fi->saved_regs[E_PC_REGNUM],
+      saved_pc = read_memory_unsigned_integer (get_frame_saved_regs (fi)[E_PC_REGNUM],
 					       xstormy16_pc_size);
     }
 

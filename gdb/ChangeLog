@@ -1,3 +1,12 @@
+2003-01-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* alpha-tdep.c: Use get_frame_saved_regs.
+	* arm-tdep.c, avr-tdep.c, cris-tdep.c, d10v-tdep.c: Ditto.
+	* h8300-tdep.c, i386-tdep.c, ia64-tdep.c, m68hc11-tdep.c: Ditto.
+	* m68k-tdep.c, mcore-tdep.c, mips-tdep.c, mn10300-tdep.c: Ditto.
+	* ns32k-tdep.c, s390-tdep.c, sh-tdep.c, v850-tdep.c: Ditto.
+	* vax-tdep.c, xstormy16-tdep.c: Ditto.
+
 2003-01-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Remove all use of the SUBDIRS variable; add

@@ -802,8 +802,8 @@ v850_find_callers_reg (struct frame_info *fi, int regnum)
   for (; fi; fi = fi->next)
     if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
       return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
-    else if (fi->saved_regs[regnum] != 0)
-      return read_memory_unsigned_integer (fi->saved_regs[regnum],
+    else if (get_frame_saved_regs (fi)[regnum] != 0)
+      return read_memory_unsigned_integer (get_frame_saved_regs (fi)[regnum],
 					   v850_register_raw_size (regnum));
 
   return read_register (regnum);
@@ -890,9 +890,9 @@ v850_pop_frame (void)
       write_register (E_PC_REGNUM, FRAME_SAVED_PC (frame));
 
       for (regnum = 0; regnum < E_NUM_REGS; regnum++)
-	if (frame->saved_regs[regnum] != 0)
+	if (get_frame_saved_regs (frame)[regnum] != 0)
 	  write_register (regnum,
-		      read_memory_unsigned_integer (frame->saved_regs[regnum],
+		      read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
 					     v850_register_raw_size (regnum)));
 
       write_register (E_SP_REGNUM, get_frame_base (frame));
@@ -1105,7 +1105,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
   struct pifsr pifsrs[E_NUM_REGS + 1], *pifsr;
   CORE_ADDR func_addr, func_end;
 
-  if (!fi->saved_regs)
+  if (!get_frame_saved_regs (fi))
     {
       frame_saved_regs_zalloc (fi);
 
@@ -1127,10 +1127,10 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
 	  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
 	    {
-	      fi->saved_regs[pifsr->reg] = pifsr->offset + fi->frame;
+	      get_frame_saved_regs (fi)[pifsr->reg] = pifsr->offset + fi->frame;
 
 	      if (pifsr->framereg == E_SP_REGNUM)
-		fi->saved_regs[pifsr->reg] += pi.frameoffset;
+		get_frame_saved_regs (fi)[pifsr->reg] += pi.frameoffset;
 	    }
 	}
       /* Else we're out of luck (can't debug completely stripped code). 

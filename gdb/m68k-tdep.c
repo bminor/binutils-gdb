@@ -478,25 +478,25 @@ m68k_pop_frame (void)
   m68k_frame_init_saved_regs (frame);
   for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)
     {
-      if (frame->saved_regs[regnum])
+      if (get_frame_saved_regs (frame)[regnum])
 	{
-	  read_memory (frame->saved_regs[regnum], raw_buffer, 12);
+	  read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer, 12);
 	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
 					   12);
 	}
     }
   for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)
     {
-      if (frame->saved_regs[regnum])
+      if (get_frame_saved_regs (frame)[regnum])
 	{
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum], 4));
+			  read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
 	}
     }
-  if (frame->saved_regs[PS_REGNUM])
+  if (get_frame_saved_regs (frame)[PS_REGNUM])
     {
       write_register (PS_REGNUM,
-		      read_memory_integer (frame->saved_regs[PS_REGNUM], 4));
+		      read_memory_integer (get_frame_saved_regs (frame)[PS_REGNUM], 4));
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
@@ -592,12 +592,12 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 
   int nextinsn;
 
-  if (frame_info->saved_regs)
+  if (get_frame_saved_regs (frame_info))
     return;
 
   frame_saved_regs_zalloc (frame_info);
 
-  memset (frame_info->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+  memset (get_frame_saved_regs (frame_info), 0, SIZEOF_FRAME_SAVED_REGS);
 
   if (get_frame_pc (frame_info) >= possible_call_dummy_start
       && get_frame_pc (frame_info) <= frame_info->frame)
@@ -658,7 +658,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  /* Regmask's low bit is for register fp7, the first pushed */
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
-	      frame_info->saved_regs[regnum] = (next_addr -= 12);
+	      get_frame_saved_regs (frame_info)[regnum] = (next_addr -= 12);
 	  pc += 4;
 	}
       /* fmovemx to (fp + displacement) */
@@ -671,7 +671,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = addr;
+		get_frame_saved_regs (frame_info)[regnum] = addr;
 		addr += 12;
 	      }
 	  pc += 6;
@@ -683,7 +683,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = next_addr;
+		get_frame_saved_regs (frame_info)[regnum] = next_addr;
 		next_addr += 4;
 	      }
 	  pc += 4;
@@ -698,7 +698,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = addr;
+		get_frame_saved_regs (frame_info)[regnum] = addr;
 		addr += 4;
 	      }
 	  pc += 6;
@@ -709,14 +709,14 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  /* Regmask's low bit is for register 15, the first pushed */
 	  for (regnum = 16; --regnum >= 0; regmask >>= 1)
 	    if (regmask & 1)
-	      frame_info->saved_regs[regnum] = (next_addr -= 4);
+	      get_frame_saved_regs (frame_info)[regnum] = (next_addr -= 4);
 	  pc += 4;
 	}
       /* movl r,-(sp) */
       else if (0x2f00 == (0xfff0 & nextinsn))
 	{
 	  regnum = 0xf & nextinsn;
-	  frame_info->saved_regs[regnum] = (next_addr -= 4);
+	  get_frame_saved_regs (frame_info)[regnum] = (next_addr -= 4);
 	  pc += 2;
 	}
       /* fmovemx to index of sp */
@@ -726,7 +726,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = next_addr;
+		get_frame_saved_regs (frame_info)[regnum] = next_addr;
 		next_addr += 12;
 	      }
 	  pc += 10;
@@ -734,16 +734,16 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
       /* clrw -(sp); movw ccr,-(sp) */
       else if (0x4267 == nextinsn && 0x42e7 == regmask)
 	{
-	  frame_info->saved_regs[PS_REGNUM] = (next_addr -= 4);
+	  get_frame_saved_regs (frame_info)[PS_REGNUM] = (next_addr -= 4);
 	  pc += 4;
 	}
       else
 	break;
     }
 lose:;
-  frame_info->saved_regs[SP_REGNUM] = (frame_info)->frame + 8;
-  frame_info->saved_regs[FP_REGNUM] = (frame_info)->frame;
-  frame_info->saved_regs[PC_REGNUM] = (frame_info)->frame + 4;
+  get_frame_saved_regs (frame_info)[SP_REGNUM] = (frame_info)->frame + 8;
+  get_frame_saved_regs (frame_info)[FP_REGNUM] = (frame_info)->frame;
+  get_frame_saved_regs (frame_info)[PC_REGNUM] = (frame_info)->frame + 4;
 #ifdef SIG_SP_FP_OFFSET
   /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
   if ((get_frame_type (frame_info) == SIGTRAMP_FRAME) && frame_info->next)

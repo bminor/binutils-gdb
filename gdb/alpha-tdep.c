@@ -389,14 +389,14 @@ alpha_find_saved_regs (struct frame_info *frame)
       for (ireg = 0; ireg < 32; ireg++)
 	{
 	  reg_position = sigcontext_addr + SIGFRAME_REGSAVE_OFF + ireg * 8;
-	  frame->saved_regs[ireg] = reg_position;
+	  get_frame_saved_regs (frame)[ireg] = reg_position;
 	}
       for (ireg = 0; ireg < 32; ireg++)
 	{
 	  reg_position = sigcontext_addr + SIGFRAME_FPREGSAVE_OFF + ireg * 8;
-	  frame->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	  get_frame_saved_regs (frame)[FP0_REGNUM + ireg] = reg_position;
 	}
-      frame->saved_regs[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
+      get_frame_saved_regs (frame)[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
       return;
     }
 
@@ -419,7 +419,7 @@ alpha_find_saved_regs (struct frame_info *frame)
      register number.  */
   if (mask & (1 << returnreg))
     {
-      frame->saved_regs[returnreg] = reg_position;
+      get_frame_saved_regs (frame)[returnreg] = reg_position;
       reg_position += 8;
       mask &= ~(1 << returnreg);	/* Clear bit for RA so we
 					   don't save again later. */
@@ -428,7 +428,7 @@ alpha_find_saved_regs (struct frame_info *frame)
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	frame->saved_regs[ireg] = reg_position;
+	get_frame_saved_regs (frame)[ireg] = reg_position;
 	reg_position += 8;
       }
 
@@ -441,19 +441,19 @@ alpha_find_saved_regs (struct frame_info *frame)
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	frame->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	get_frame_saved_regs (frame)[FP0_REGNUM + ireg] = reg_position;
 	reg_position += 8;
       }
 
-  frame->saved_regs[PC_REGNUM] = frame->saved_regs[returnreg];
+  get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_saved_regs (frame)[returnreg];
 }
 
 static void
 alpha_frame_init_saved_regs (struct frame_info *fi)
 {
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     alpha_find_saved_regs (fi);
-  fi->saved_regs[SP_REGNUM] = fi->frame;
+  get_frame_saved_regs (fi)[SP_REGNUM] = fi->frame;
 }
 
 static CORE_ADDR
@@ -475,10 +475,10 @@ read_next_frame_reg (struct frame_info *fi, int regno)
 	return fi->frame;
       else
 	{
-	  if (fi->saved_regs == NULL)
+	  if (get_frame_saved_regs (fi) == NULL)
 	    alpha_find_saved_regs (fi);
-	  if (fi->saved_regs[regno])
-	    return read_memory_integer (fi->saved_regs[regno], 8);
+	  if (get_frame_saved_regs (fi)[regno])
+	    return read_memory_integer (get_frame_saved_regs (fi)[regno], 8);
 	}
     }
   return read_register (regno);
@@ -984,7 +984,9 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   frame->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
 
-  frame->saved_regs = NULL;
+  /* NOTE: cagney/2003-01-03: No need to set saved_regs to NULL,
+     always NULL by default.  */
+  /* frame->saved_regs = NULL; */
   frame->extra_info->localoff = 0;
   frame->extra_info->pc_reg = ALPHA_RA_REGNUM;
   frame->extra_info->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
@@ -1028,12 +1030,11 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
 	  if (!PC_IN_SIGTRAMP (get_frame_pc (frame), name))
 	    {
-	      frame->saved_regs = (CORE_ADDR *)
-		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
-	      memcpy (frame->saved_regs, temp_saved_regs,
+	      frame_saved_regs_zalloc (frame);
+	      memcpy (get_frame_saved_regs (frame), temp_saved_regs,
 	              SIZEOF_FRAME_SAVED_REGS);
-	      frame->saved_regs[PC_REGNUM]
-		= frame->saved_regs[ALPHA_RA_REGNUM];
+	      get_frame_saved_regs (frame)[PC_REGNUM]
+		= get_frame_saved_regs (frame)[ALPHA_RA_REGNUM];
 	    }
 	}
     }
@@ -1302,19 +1303,19 @@ alpha_pop_frame (void)
      For now, we don't save a copy... */
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-  if (frame->saved_regs == NULL)
+  if (get_frame_saved_regs (frame) == NULL)
     alpha_find_saved_regs (frame);
   if (proc_desc)
     {
       for (regnum = 32; --regnum >= 0;)
 	if (PROC_REG_MASK (proc_desc) & (1 << regnum))
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum],
+			  read_memory_integer (get_frame_saved_regs (frame)[regnum],
 					       8));
       for (regnum = 32; --regnum >= 0;)
 	if (PROC_FREG_MASK (proc_desc) & (1 << regnum))
 	  write_register (regnum + FP0_REGNUM,
-	   read_memory_integer (frame->saved_regs[regnum + FP0_REGNUM], 8));
+	   read_memory_integer (get_frame_saved_regs (frame)[regnum + FP0_REGNUM], 8));
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();

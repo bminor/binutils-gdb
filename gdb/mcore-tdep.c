@@ -301,7 +301,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   deprecated_update_frame_base_hack (dummy, frame);
   dummy->extra_info->status = 0;
   dummy->extra_info->framesize = 0;
-  memset (dummy->saved_regs, '\000', SIZEOF_FRAME_SAVED_REGS);
+  memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mcore_analyze_prologue (dummy, 0, 0);
   return dummy;
 }
@@ -626,7 +626,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
 	{
 	  if (register_offsets[rn] >= 0)
 	    {
-	      fi->saved_regs[rn] = fi->frame - register_offsets[rn];
+	      get_frame_saved_regs (fi)[rn] = fi->frame - register_offsets[rn];
 	      mcore_insn_debug (("Saved register %s stored at 0x%08x, value=0x%08x\n",
 			       mcore_register_names[rn], fi->saved_regs[rn],
 			      read_memory_integer (fi->saved_regs[rn], 4)));
@@ -675,11 +675,11 @@ mcore_frame_chain (struct frame_info * fi)
       int fp = dummy->extra_info->fp_regnum;
 
       /* Our caller has a frame pointer. */
-      if (fi->saved_regs[fp] != 0)
+      if (get_frame_saved_regs (fi)[fp] != 0)
 	{
 	  /* The "FP" was saved on the stack.  Don't forget to adjust
 	     the "FP" with the framesize to get a real FP. */
-	  callers_addr = read_memory_integer (fi->saved_regs[fp], REGISTER_SIZE)
+	  callers_addr = read_memory_integer (get_frame_saved_regs (fi)[fp], REGISTER_SIZE)
 	    + dummy->extra_info->framesize;
 	}
       else
@@ -759,8 +759,8 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
     {
       if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
 	return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
-      else if (fi->saved_regs[regnum] != 0)
-	return read_memory_integer (fi->saved_regs[regnum],
+      else if (get_frame_saved_regs (fi)[regnum] != 0)
+	return read_memory_integer (get_frame_saved_regs (fi)[regnum],
 				    REGISTER_SIZE);
     }
 
@@ -800,11 +800,11 @@ mcore_pop_frame (void)
       /* Restore any saved registers. */
       for (rn = 0; rn < NUM_REGS; rn++)
 	{
-	  if (fi->saved_regs[rn] != 0)
+	  if (get_frame_saved_regs (fi)[rn] != 0)
 	    {
 	      ULONGEST value;
 
-	      value = read_memory_unsigned_integer (fi->saved_regs[rn],
+	      value = read_memory_unsigned_integer (get_frame_saved_regs (fi)[rn],
 						    REGISTER_SIZE);
 	      write_register (rn, value);
 	    }

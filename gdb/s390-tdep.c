@@ -290,7 +290,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
           orig_sp = fi->frame;
           if (! init_extra_info && fextra_info->initialised)
             orig_sp += fextra_info->stack_bought;
-	  saved_regs = fi->saved_regs;
+	  saved_regs = get_frame_saved_regs (fi);
 	}
       if (init_extra_info || !fextra_info->initialised)
 	{
@@ -922,7 +922,7 @@ s390_frame_init_saved_regs (struct frame_info *fi)
 
   int quick;
 
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     {
       /* zalloc memsets the saved regs */
       frame_saved_regs_zalloc (fi);
@@ -962,10 +962,10 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
     {
       fi->extra_info->saved_pc_valid = 1;
       if (fi->extra_info->good_prologue
-          && fi->saved_regs[S390_RETADDR_REGNUM])
+          && get_frame_saved_regs (fi)[S390_RETADDR_REGNUM])
         fi->extra_info->saved_pc
           = ADDR_BITS_REMOVE (read_memory_integer
-                              (fi->saved_regs[S390_RETADDR_REGNUM],
+                              (get_frame_saved_regs (fi)[S390_RETADDR_REGNUM],
                                S390_GPR_SIZE));
       else
         fi->extra_info->saved_pc
@@ -1046,24 +1046,24 @@ s390_frame_chain (struct frame_info *thisframe)
 	}
       else
 	{
-	  if (thisframe->saved_regs)
+	  if (get_frame_saved_regs (thisframe))
 	    {
 	      int regno;
 
               if (prev_fextra_info.frame_pointer_saved_pc
-                  && thisframe->saved_regs[S390_FRAME_REGNUM])
+                  && get_frame_saved_regs (thisframe)[S390_FRAME_REGNUM])
                 regno = S390_FRAME_REGNUM;
               else
                 regno = S390_SP_REGNUM;
 
-	      if (thisframe->saved_regs[regno])
+	      if (get_frame_saved_regs (thisframe)[regno])
                 {
                   /* The SP's entry of `saved_regs' is special.  */
                   if (regno == S390_SP_REGNUM)
-                    prev_fp = thisframe->saved_regs[regno];
+                    prev_fp = get_frame_saved_regs (thisframe)[regno];
                   else
                     prev_fp =
-                      read_memory_integer (thisframe->saved_regs[regno],
+                      read_memory_integer (get_frame_saved_regs (thisframe)[regno],
                                            S390_GPR_SIZE);
                 }
 	    }
@@ -1217,14 +1217,14 @@ s390_pop_frame_regular (struct frame_info *frame)
   write_register (S390_PC_REGNUM, FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
-  if (frame->saved_regs)
+  if (get_frame_saved_regs (frame))
     {
       for (regnum = 0; regnum < NUM_REGS; regnum++)
-        if (frame->saved_regs[regnum] != 0)
+        if (get_frame_saved_regs (frame)[regnum] != 0)
           {
             ULONGEST value;
             
-            value = read_memory_unsigned_integer (frame->saved_regs[regnum],
+            value = read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
                                                   REGISTER_RAW_SIZE (regnum));
             write_register (regnum, value);
           }
@@ -1232,7 +1232,7 @@ s390_pop_frame_regular (struct frame_info *frame)
       /* Actually cut back the stack.  Remember that the SP's element of
          saved_regs is the old SP itself, not the address at which it is
          saved.  */
-      write_register (S390_SP_REGNUM, frame->saved_regs[S390_SP_REGNUM]);
+      write_register (S390_SP_REGNUM, get_frame_saved_regs (frame)[S390_SP_REGNUM]);
     }
 
   /* Throw away any cached frame information.  */

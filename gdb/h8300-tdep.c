@@ -464,7 +464,7 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR func_addr, func_end;
 
-  if (!fi->saved_regs)
+  if (!get_frame_saved_regs (fi))
     {
       frame_saved_regs_zalloc (fi);
 
@@ -475,7 +475,7 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 	  struct symtab_and_line sal = find_pc_line (func_addr, 0);
 	  CORE_ADDR limit = (sal.end && sal.end < get_frame_pc (fi)) ? sal.end : get_frame_pc (fi);
 	  /* This will fill in fields in fi. */
-	  h8300_examine_prologue (func_addr, limit, fi->frame, fi->saved_regs, fi);
+	  h8300_examine_prologue (func_addr, limit, fi->frame, get_frame_saved_regs (fi), fi);
 	}
       /* Else we're out of luck (can't debug completely stripped code). 
 	 FIXME. */
@@ -500,7 +500,7 @@ h8300_frame_chain (struct frame_info *thisframe)
 					E_PC_REGNUM);
       return thisframe->frame;
     }
-  return thisframe->saved_regs[E_SP_REGNUM];
+  return get_frame_saved_regs (thisframe)[E_SP_REGNUM];
 }
 
 /* Return the saved PC from this frame.
@@ -757,11 +757,11 @@ h8300_pop_frame (void)
 	{
 	  /* Don't forget E_SP_REGNUM is a frame_saved_regs struct is the
 	     actual value we want, not the address of the value we want.  */
-	  if (frame->saved_regs[regno] && regno != E_SP_REGNUM)
+	  if (get_frame_saved_regs (frame)[regno] && regno != E_SP_REGNUM)
 	    write_register (regno,
-			    read_memory_integer (frame->saved_regs[regno],
+			    read_memory_integer (get_frame_saved_regs (frame)[regno],
 			    			 BINWORD));
-	  else if (frame->saved_regs[regno] && regno == E_SP_REGNUM)
+	  else if (get_frame_saved_regs (frame)[regno] && regno == E_SP_REGNUM)
 	    write_register (regno, frame->frame + 2 * BINWORD);
 	}
 

@@ -1424,15 +1424,15 @@ mips_find_saved_regs (struct frame_info *fci)
 	{
 	  reg_position = fci->frame + SIGFRAME_REGSAVE_OFF
 	    + ireg * SIGFRAME_REG_SIZE;
-	  fci->saved_regs[ireg] = reg_position;
+	  get_frame_saved_regs (fci)[ireg] = reg_position;
 	}
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
 	  reg_position = fci->frame + SIGFRAME_FPREGSAVE_OFF
 	    + ireg * SIGFRAME_REG_SIZE;
-	  fci->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	  get_frame_saved_regs (fci)[FP0_REGNUM + ireg] = reg_position;
 	}
-      fci->saved_regs[PC_REGNUM] = fci->frame + SIGFRAME_PC_OFF;
+      get_frame_saved_regs (fci)[PC_REGNUM] = fci->frame + SIGFRAME_PC_OFF;
       return;
     }
 
@@ -1502,7 +1502,7 @@ mips_find_saved_regs (struct frame_info *fci)
   for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
     if (gen_mask & 0x80000000)
       {
-	fci->saved_regs[ireg] = reg_position;
+	get_frame_saved_regs (fci)[ireg] = reg_position;
 	reg_position -= MIPS_SAVED_REGSIZE;
       }
 
@@ -1526,7 +1526,7 @@ mips_find_saved_regs (struct frame_info *fci)
 	  /* Check if the s0 and s1 registers were pushed on the stack.  */
 	  for (reg = 16; reg < sreg_count + 16; reg++)
 	    {
-	      fci->saved_regs[reg] = reg_position;
+	      get_frame_saved_regs (fci)[reg] = reg_position;
 	      reg_position -= MIPS_SAVED_REGSIZE;
 	    }
 	}
@@ -1557,11 +1557,11 @@ mips_find_saved_regs (struct frame_info *fci)
   for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
     if (float_mask & 0x80000000)
       {
-	fci->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	get_frame_saved_regs (fci)[FP0_REGNUM + ireg] = reg_position;
 	reg_position -= MIPS_SAVED_REGSIZE;
       }
 
-  fci->saved_regs[PC_REGNUM] = fci->saved_regs[RA_REGNUM];
+  get_frame_saved_regs (fci)[PC_REGNUM] = get_frame_saved_regs (fci)[RA_REGNUM];
 }
 
 /* Set up the 'saved_regs' array.  This is a data structure containing
@@ -1574,11 +1574,11 @@ mips_find_saved_regs (struct frame_info *fci)
 static void
 mips_frame_init_saved_regs (struct frame_info *frame)
 {
-  if (frame->saved_regs == NULL)
+  if (get_frame_saved_regs (frame) == NULL)
     {
       mips_find_saved_regs (frame);
     }
-  frame->saved_regs[SP_REGNUM] = frame->frame;
+  get_frame_saved_regs (frame)[SP_REGNUM] = frame->frame;
 }
 
 static CORE_ADDR
@@ -2512,15 +2512,15 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	  if (!PC_IN_SIGTRAMP (get_frame_pc (fci), name))
 	    {
 	      frame_saved_regs_zalloc (fci);
-	      memcpy (fci->saved_regs, temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
-	      fci->saved_regs[PC_REGNUM]
-		= fci->saved_regs[RA_REGNUM];
+	      memcpy (get_frame_saved_regs (fci), temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
+	      get_frame_saved_regs (fci)[PC_REGNUM]
+		= get_frame_saved_regs (fci)[RA_REGNUM];
 	      /* Set value of previous frame's stack pointer.  Remember that
 	         saved_regs[SP_REGNUM] is special in that it contains the
 		 value of the stack pointer register.  The other saved_regs
 		 values are addresses (in the inferior) at which a given
 		 register's value may be found.  */
-	      fci->saved_regs[SP_REGNUM] = fci->frame;
+	      get_frame_saved_regs (fci)[SP_REGNUM] = fci->frame;
 	    }
 	}
 
@@ -3823,22 +3823,22 @@ mips_pop_frame (void)
     }
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-  if (frame->saved_regs == NULL)
+  if (get_frame_saved_regs (frame) == NULL)
     FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	&& frame->saved_regs[regnum])
+	&& get_frame_saved_regs (frame)[regnum])
       {
 	/* Floating point registers must not be sign extended, 
 	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
 
 	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
 	  write_register (regnum,
-			  read_memory_unsigned_integer (frame->saved_regs[regnum],
+			  read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
 							MIPS_SAVED_REGSIZE));
 	else
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum],
+			  read_memory_integer (get_frame_saved_regs (frame)[regnum],
 					       MIPS_SAVED_REGSIZE));
       }
 
