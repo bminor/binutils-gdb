@@ -1,3 +1,16 @@
+Wed Nov  2 15:24:51 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* archive.c (normalize): Change to take a BFD as an argument.
+	Change VMS version to use bfd_alloc rather than malloc, so that we
+	don't lose the memory forever.
+	(_bfd_construct_extended_name_table): Check the name of an archive
+	entry which is not being extended, and correct it if it is wrong.
+	This is necessary in case the archive was constructed by another
+	program which put an entry in the extended name table which we
+	don't plan to put in ourselves.  From jjc@jclark.com (James
+	Clark).
+	(bfd_dont_truncate_arname): Check return value of normalize.
+
 Mon Oct 31 14:19:08 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elf32-hppa.c (ELF32_PARISC_SX_SIZE): Define.
