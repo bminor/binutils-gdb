@@ -1,3 +1,25 @@
+Tue Dec 10 11:32:04 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* gencode.c (build_instruction, case JUMP): Truncate PC to 32 bits.
+	* interp.c (CHECKHILO): Define away.
+	(simSIGINT): New macro.
+	(membank_size): Increase from 1MB to 2MB.
+	(control_c): New function.
+	(sim_resume): Rename parameter signal to signal_number.  Add local
+	variable prev.  Call signal before and after simulate.
+	(sim_stop_reason): Add simSIGINT support.
+	(sim_warning, sim_error, dotrace, SignalException): Define as stdarg
+	functions always.
+	(sim_warning): Delete call to SignalException.  Do call printf_filtered
+	if logfh is NULL.
+	(AddressTranslation): Add #ifdef DEBUG around debugging message and
+	a call to sim_warning.
+
+Wed Nov 27 11:53:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gencode.c (process_instructions): If ! proc64, skip DOUBLEWORD
+	16 bit instructions.
+
 Tue Nov 26 11:53:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add support for mips16 (16 bit MIPS implementation):

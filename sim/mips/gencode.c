@@ -1862,6 +1862,9 @@ build_instruction (doisa, features, mips16, insn)
      if (insn->flags & NOT)
        printf("   op1 ^= 1;\n");
 
+     printf("   /* NOTE: ??? Gdb gets confused if the PC is sign-extended,\n");
+     printf("            so we just truncate it to 32 bits here.  */\n");
+     printf("   op1 = WORD64LO(op1);\n");
      printf("   /* NOTE: The jump occurs AFTER the next instruction has been executed */\n");
      printf("   DSPC = op1;\n");
      printf("   DELAYSLOT();\n");

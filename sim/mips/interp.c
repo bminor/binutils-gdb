@@ -375,7 +375,12 @@ static int LOACCESS = 0;
    following operation are spotted. */
 static ut_reg HLPC = 0;
 
-/* TODO: The 4300 has interlocks so we should not need to warn of the possible over-write (CHECK THIS) */
+/* ??? The 4300 and a few other processors have interlocks on hi/lo register
+   reads, and hence do not have this problem.  To avoid spurious warnings,
+   we just disable this always.  */
+#if 1
+#define CHECKHILO(s)
+#else
 /* If either of the preceding two instructions have accessed the HI or
    LO registers, then the values they see should be
    undefined. However, to keep the simulator world simple, we just let
@@ -384,6 +389,7 @@ static ut_reg HLPC = 0;
                           if ((HIACCESS != 0) || (LOACCESS != 0))\
                             sim_warning("%s over-writing HI and LO registers values (PC = 0x%08X%08X HLPC = 0x%08X%08X)\n",(s),(unsigned int)(PC>>32),(unsigned int)(PC&0xFFFFFFFF),(unsigned int)(HLPC>>32),(unsigned int)(HLPC&0xFFFFFFFF));\
                         }
+#endif
 
 /* NOTE: We keep the following status flags as bit values (1 for true,
    0 for false). This allows them to be used in binary boolean
@@ -442,6 +448,7 @@ static unsigned int pipeline_ticks = 0;
 #define simSKIPNEXT     (1 << 25) /* 0 = do nothing; 1 = skip instruction */
 #define simEXCEPTION    (1 << 26) /* 0 = no exception; 1 = exception has occurred */
 #define simEXIT         (1 << 27) /* 0 = do nothing; 1 = run-time exit() processing */
+#define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
 
 static unsigned int state = 0;
 static unsigned int rcexit = 0; /* _exit() reason code holder */
@@ -465,7 +472,11 @@ static unsigned int rcexit = 0; /* _exit() reason code holder */
 /* Very simple memory model to start with: */
 static unsigned char *membank = NULL;
 static ut_reg membank_base = K1BASE;
-static unsigned membank_size = (1 << 20); /* (16 << 20); */ /* power-of-2 */
+/* The ddb.ld linker script loads text at K1BASE+1MB, and the idt.ld linker
+   script loads text at K1BASE+128KB.  We allocate 2MB, so that we have a
+   minimum of 1 MB available for the user process.  We must have memory
+   above _end in order for sbrk to work.  */
+static unsigned membank_size = (2 << 20);
 
 /* Simple run-time monitor support */
 static unsigned char *monitor = NULL;
@@ -478,6 +489,7 @@ static FILE *logfh = NULL;
 #if defined(TRACE)
 static char *tracefile = "trace.din"; /* default filename for trace log */
 static FILE *tracefh = NULL;
+static void open_trace PARAMS((void));
 #endif /* TRACE */
 
 #if defined(PROFILE)
@@ -818,17 +830,25 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
   }
 
 #if defined(TRACE)
-   if (state & simTRACE) {
-     tracefh = fopen(tracefile,"wb+");
-     if (tracefh == NULL) {
-       sim_warning("Failed to create file \"%s\", writing trace information to stderr.",tracefile);
-       tracefh = stderr;
-     }
-   }
+  if (state & simTRACE)
+    open_trace();
 #endif /* TRACE */
 
   return;
 }
+
+#if defined(TRACE)
+static void
+open_trace()
+{
+  tracefh = fopen(tracefile,"wb+");
+  if (tracefh == NULL)
+    {
+      sim_warning("Failed to create file \"%s\", writing trace information to stderr.",tracefile);
+      tracefh = stderr;
+  }
+}
+#endif /* TRACE */
 
 /* For the profile writing, we write the data in the host
    endianness. This unfortunately means we are assuming that the
@@ -954,11 +974,23 @@ sim_close (quitting)
 }
 
 void
-sim_resume (step,signal)
-     int step, signal;
+control_c (sig, code, scp, addr)
+     int sig;
+     int code;
+     char *scp;
+     char *addr;
 {
+  state |= (simSTOP | simSIGINT);
+}
+
+void
+sim_resume (step,signal_number)
+     int step, signal_number;
+{
+  void (*prev) ();
+
 #ifdef DEBUG
-  printf("DBG: sim_resume entered: step = %d, signal = %d (membank = 0x%08X)\n",step,signal,membank);
+  printf("DBG: sim_resume entered: step = %d, signal = %d (membank = 0x%08X)\n",step,signal_number,membank);
 #endif /* DEBUG */
 
   if (step)
@@ -971,7 +1003,12 @@ sim_resume (step,signal)
   /* Start executing instructions from the current state (set
      explicitly by register updates, or by sim_create_inferior): */
 
+  prev = signal (SIGINT, control_c);
+
   simulate();
+
+  signal (SIGINT, prev);
+
   return;
 }
 
@@ -1222,11 +1259,14 @@ sim_stop_reason (reason,sigrc)
 #endif
     *reason = sim_exited;
     *sigrc = rcexit;
+  } else if (state & simSIGINT) {
+    *reason = sim_stopped;
+    *sigrc = SIGINT;
   } else { /* assume single-stepping */
     *reason = sim_stopped;
     *sigrc = SIGTRAP;
   }
-  state &= ~(simEXCEPTION | simEXIT);
+  state &= ~(simEXCEPTION | simEXIT | simSIGINT);
   return;
 }
 
@@ -1516,8 +1556,11 @@ sim_trace()
 
 #if defined(TRACE)
   /* Ensure tracing is enabled, if available */
-  if (tracefh != NULL)
-   state |= simTRACE;
+  if (tracefh == NULL)
+    {
+      open_trace();
+      state |= simTRACE;
+    }
 #endif /* TRACE */
 
   state &= ~(simSTOP | simSTEP); /* execute until event */
@@ -1766,44 +1809,37 @@ sim_monitor(reason)
 }
 
 void
-#ifdef _MSC_VER
 sim_warning(char *fmt,...)
-#else
-sim_warning(fmt)
-     char *fmt;
-#endif
 {
+  char buf[256];
   va_list ap;
-  va_start(ap,fmt);
+
+  va_start (ap,fmt);
+  vsprintf (buf, fmt, ap);
+  va_end (ap);
+  
   if (logfh != NULL) {
-#if 1
-    fprintf(logfh,"SIM Warning: ");
-    fprintf(logfh,fmt,ap);
-    fprintf(logfh,"\n");
-#else /* we should provide a method of routing log messages to the simulator output stream */
-    callback->printf_filtered(callback,"SIM Warning: ");
-    callback->printf_filtered(callback,fmt,ap);
-#endif
+    fprintf(logfh,"SIM Warning: %s\n", buf);
+  } else {
+    callback->printf_filtered(callback,"SIM Warning: %s\n", buf);
   }
-  va_end(ap);
-  SignalException(SimulatorFault,"");
+  /* This used to call SignalException with a SimulatorFault, but that causes
+     the simulator to exit, and that is inappropriate for a warning.  */
   return;
 }
 
 void
-#ifdef _MSC_VER
 sim_error(char *fmt,...)
-#else
-sim_error(fmt)
-     char *fmt;
-#endif
 {
+  char buf[256];
   va_list ap;
-  va_start(ap,fmt);
-  callback->printf_filtered(callback,"SIM Error: ");
-  callback->printf_filtered(callback,fmt,ap);
-  va_end(ap);
-  SignalException(SimulatorFault,"");
+
+  va_start (ap,fmt);
+  vsprintf (buf, fmt, ap);
+  va_end (ap);
+
+  callback->printf_filtered(callback,"SIM Error: %s", buf);
+  SignalException (SimulatorFault, buf);
   return;
 }
 
@@ -1888,23 +1924,16 @@ getnum(value)
 
 
 static
-#ifdef _MSC_VER
 void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
-#else
-void dotrace(tracefh,type,address,width,comment)
-     FILE *tracefh;
-     int type;
-     SIM_ADDR address;
-     int width;
-     char *comment;
-#endif
 {
   if (state & simTRACE) {
     va_list ap;
     fprintf(tracefh,"%d %08x%08x ; width %d ; ", 
-		type,(unsigned long)(address>>32),(unsigned long)(address&0xffffffff),width);
+		type,
+		sizeof (address) > 4 ? (unsigned long)(address>>32) : 0,
+		(unsigned long)(address&0xffffffff),width);
     va_start(ap,comment);
-    fprintf(tracefh,comment,ap);
+    vfprintf(tracefh,comment,ap);
     va_end(ap);
     fprintf(tracefh,"\n");
   }
@@ -2195,15 +2224,21 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
     if (host)
      *pAddr = (int)&monitor[((unsigned int)(vAddr - monitor_base) & (monitor_size - 1))];
   } else {
-#if 1 /* def DEBUG */
+#ifdef DEBUG
     sim_warning("Failed: AddressTranslation(0x%08X%08X,%s,%s,...) IPC = 0x%08X%08X",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
     res = 0; /* AddressTranslation has failed */
     *pAddr = (SIM_ADDR)-1;
     if (!raw) /* only generate exceptions on real memory transfers */
      SignalException((LorS == isSTORE) ? AddressStore : AddressLoad);
+#ifdef DEBUG
     else
+     /* This is a normal occurance during gdb operation, for instance trying
+	to print parameters at function start before they have been setup,
+	and hence we should not print a warning except when debugging the
+	simulator.  */
      sim_warning("AddressTranslation for %s %s from 0x%08X%08X failed",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),WORD64HI(vAddr),WORD64LO(vAddr));
+#endif
   }
 
   return(res);
@@ -2280,7 +2315,9 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
   /* If instruction fetch then we need to check that the two lo-order
      bits are zero, otherwise raise a InstructionFetch exception: */
-  if ((IorD == isINSTRUCTION) && ((pAddr & 0x3) != 0))
+  if ((IorD == isINSTRUCTION)
+      && ((pAddr & 0x3) != 0)
+      && (((pAddr & 0x1) != 0) || ((vAddr & 0x1) == 0)))
    SignalException(InstructionFetch);
   else {
     unsigned int index;
@@ -2537,12 +2574,7 @@ SyncOperation(stype)
    that aborts the instruction. The instruction operation pseudocode
    will never see a return from this function call. */
 static void
-#ifdef _MSC_VER
 SignalException (int exception,...)
-#else
-SignalException(exception)
-     int exception;
-#endif
 {
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
@@ -3857,15 +3889,31 @@ simulate ()
      callback->printf_filtered(callback,"DBG: DSPC = 0x%08X%08X\n",WORD64HI(DSPC),WORD64LO(DSPC));
 #endif /* DEBUG */
 
-    if (AddressTranslation(PC,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) { /* Copy the action of the LW instruction */
-      unsigned int reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
-      unsigned int bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
-      uword64 value;
-      unsigned int byte;
-      paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
-      value = LoadMemory(cca,AccessLength_WORD,paddr,vaddr,isINSTRUCTION,isREAL);
-      byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
-      instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
+    if (AddressTranslation(PC,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) {
+      if ((vaddr & 1) == 0) {
+	/* Copy the action of the LW instruction */
+	unsigned int reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
+	unsigned int bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
+	uword64 value;
+	unsigned int byte;
+	paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
+	value = LoadMemory(cca,AccessLength_WORD,paddr,vaddr,isINSTRUCTION,isREAL);
+	byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
+	instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
+      } else {
+	/* Copy the action of the LH instruction */
+	unsigned int reverse = (ReverseEndian ? (LOADDRMASK >> 1) : 0);
+	unsigned int bigend = (BigEndianCPU ? (LOADDRMASK >> 1) : 0);
+	uword64 value;
+	unsigned int byte;
+	paddr = (((paddr & ~ (uword64) 1) & ~LOADDRMASK)
+		 | (((paddr & ~ (uword64) 1) & LOADDRMASK) ^ (reverse << 1)));
+	value = LoadMemory(cca, AccessLength_HALFWORD,
+			   paddr & ~ (uword64) 1,
+			   vaddr, isINSTRUCTION, isREAL);
+	byte = (((vaddr &~ (uword64) 1) & LOADDRMASK) ^ (bigend << 1));
+	instruction = ((value >> (8 * byte)) & 0xFFFF);
+      }
     } else {
       fprintf(stderr,"Cannot translate address for PC = 0x%08X%08X failed\n",WORD64HI(PC),WORD64LO(PC));
       exit(1);
@@ -3897,7 +3945,10 @@ simulate ()
     /* This is required by exception processing, to ensure that we can
        cope with exceptions in the delay slots of branches that may
        already have changed the PC. */
-    PC += 4; /* increment ready for the next fetch */
+    if ((vaddr & 1) == 0)
+      PC += 4; /* increment ready for the next fetch */
+    else
+      PC += 2;
     /* NOTE: If we perform a delay slot change to the PC, this
        increment is not requuired. However, it would make the
        simulator more complicated to try and avoid this small hit. */
