@@ -1,4 +1,4 @@
-@c Copyright (C) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @ifset GENERIC
@@ -20,10 +20,13 @@ of @sc{mips} assembly conventions, see ``Appendix D: Assembly Language
 Programming'' in the same work.
 
 @menu
-* MIPS Opts::   Assembler options
-* MIPS Object:: ECOFF object code
-* MIPS Stabs::  Directives for debugging information
-* MIPS ISA::    Directives to override the ISA level
+* MIPS Opts::   	Assembler options
+* MIPS Object:: 	ECOFF object code
+* MIPS Stabs::  	Directives for debugging information
+* MIPS ISA::    	Directives to override the ISA level
+* MIPS autoextend::	Directives for extending MIPS 16 bit instructions
+* MIPS insn::		Directive to mark data as an instruction
+* MIPS option stack::	Directives to save and restore options
 @end menu
 
 @node MIPS Opts
@@ -70,13 +73,6 @@ Generate code for the MIPS 16 processor.  This is equivalent to putting
 @samp{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
-@item -m4650
-@itemx -no-m4650
-Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
-the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
-instructions around accesses to the @samp{HI} and @samp{LO} registers.
-@samp{-no-m4650} turns off this option.
-
 @item -m4010
 @itemx -no-m4010
 Generate code for the LSI @sc{r4010} chip.  This tells the assembler to
@@ -85,9 +81,86 @@ etc.), and to not schedule @samp{nop} instructions around accesses to
 the @samp{HI} and @samp{LO} registers.  @samp{-no-m4010} turns off this
 option.
 
-@item -mcpu=@var{CPU}
-Generate code for a particular MIPS cpu.  This has little effect on the
-assembler, but it is passed by @code{@value{GCC}}.
+@item -m4650
+@itemx -no-m4650
+Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
+the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
+instructions around accesses to the @samp{HI} and @samp{LO} registers.
+@samp{-no-m4650} turns off this option.
+
+@c start-sanitize-tx19
+@item -m1900
+@itemx -no-m1900
+@c end-sanitize-tx19
+@itemx -m3900
+@itemx -no-m3900
+@itemx -m4100
+@itemx -no-m4100
+@c start-sanitize-vr4xxx
+@itemx -m4121
+@itemx -no-m4121
+@c end-sanitize-vr4xxx
+@c start-sanitize-4320
+@itemx -m4320
+@itemx -no-m4320
+@c end-sanitize-4320
+@c start-sanitize-tx49
+@itemx -m4900
+@itemx -no-m4900
+@c end-sanitize-tx49
+@c start-sanitize-cygnus
+@itemx -m5400
+@itemx -no-m5400
+@c end-sanitize-cygnus
+@c start-sanitize-r5900
+@itemx -m5900
+@itemx -no-m5900
+@c end-sanitize-r5900
+For each option @samp{-m@var{nnnn}}, generate code for the MIPS
+@sc{r@var{nnnn}} chip.  This tells the assembler to accept instructions
+specific to that chip, and to schedule for that chip's hazards.
+
+@item -mcpu=@var{cpu}
+Generate code for a particular MIPS cpu.  It is exactly equivalent to
+@samp{-m@var{cpu}}, except that there are more value of @var{cpu}
+understood.  Valid @var{cpu} value are:
+
+@quotation
+@c start-sanitize-tx19
+1900,
+@c end-sanitize-tx19
+2000,
+3000,
+3900,
+4000,
+4010,
+4100,
+@c start-sanitize-vr4xxx
+4111,
+4121,
+@c end-sanitize-vr4xxx
+4300,
+@c start-sanitize-vr4320
+4320,
+@c end-sanitize-vr4320
+4400,
+4600,
+4650,
+@c start-sanitize-tx49
+4900,
+@c end-sanitize-tx49
+5000,
+@c start-sanitize-cygnus
+5400,
+@c end-sanitize-cygnus
+@c start-sanitize-r5900
+5900,
+@c end-sanitize-r5900
+6000,
+8000,
+10000
+@end quotation
+
 
 @cindex @code{-nocpp} ignored (MIPS)
 @item -nocpp
@@ -181,3 +254,46 @@ in which it will assemble instructions for the MIPS 16 processor.  Use
 @samp{.set nomips16} to return to normal 32 bit mode.
 
 Traditional @sc{mips} assemblers do not support this directive.  
+
+@node MIPS autoextend
+@section Directives for extending MIPS 16 bit instructions
+
+@kindex @code{.set autoextend}
+@kindex @code{.set noautoextend}
+By default, MIPS 16 instructions are automatically extended to 32 bits
+when necessary.  The directive @samp{.set noautoextend} will turn this
+off.  When @samp{.set noautoextend} is in effect, any 32 bit instruction
+must be explicitly extended with the @samp{.e} modifier (e.g.,
+@samp{li.e $4,1000}).  The directive @samp{.set autoextend} may be used
+to once again automatically extend instructions when necessary.
+
+This directive is only meaningful when in MIPS 16 mode.  Traditional
+@sc{mips} assemblers do not support this directive.
+
+@node MIPS insn
+@section Directive to mark data as an instruction
+
+@kindex @code{.insn}
+The @code{.insn} directive tells @code{@value{AS}} that the following
+data is actually instructions.  This makes a difference in MIPS 16 mode:
+when loading the address of a label which precedes instructions,
+@code{@value{AS}} automatically adds 1 to the value, so that jumping to
+the loaded address will do the right thing.
+
+@node MIPS option stack
+@section Directives to save and restore options
+
+@cindex MIPS option stack
+@kindex @code{.set push}
+@kindex @code{.set pop}
+The directives @code{.set push} and @code{.set pop} may be used to save
+and restore the current settings for all the options which are
+controlled by @code{.set}.  The @code{.set push} directive saves the
+current settings on a stack.  The @code{.set pop} directive pops the
+stack and restores the settings.
+
+These directives can be useful inside an macro which must change an
+option such as the ISA level or instruction reordering but does not want
+to change the state of the code which invoked the macro.
+
+Traditional @sc{mips} assemblers do not support these directives.
