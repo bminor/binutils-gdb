@@ -51,21 +51,17 @@ Mon Aug 10 14:08:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.c: Regenerate (remove semantic descriptions).
 
-start-sanitize-armelf
 Mon Aug 10 12:51:12 1998  Catherine Moore  <clm@cygnus.com>
 
         * arm-dis.c (print_insn_big_arm):  Fix indentation.
         (print_insn_little_arm): Likewise.
 
-end-sanitize-armelf
-start-sanitize-armelf
 Sun Aug  9 20:17:28 1998  Catherine Moore  <clm@cygnus.com>
 
         * arm-dis.c (print_insn_big_arm):  Check for thumb symbol
         attributes.
         (print_insn_little_arm): Likewise.
 
-end-sanitize-armelf
 Mon Aug  3 12:43:16 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	Move all global state data into opcode table struct, and treat
