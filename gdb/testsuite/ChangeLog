@@ -1,5 +1,8 @@
 Tue Jul 12 12:22:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* gdb.base/interrupt.c: Do not test if errno == EINTR if it's not
+	  defined.
+
 	* gdb.base/Makefile.in: Added support for systems that name core
 	  files by appending "core" to the program name.
 	* gdb.base/a1-selftest.exp: Likewise.
