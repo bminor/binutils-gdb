@@ -15,6 +15,10 @@
 
 Do-first:
 
+if ( echo $* | grep keep\-chill > /dev/null ) ; then
+	keep_these_too="chillrt"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -116,6 +120,55 @@ else
 			mv new $i
 		fi
 	done
+fi
+
+echo Thawing away the \"chill\"...
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-chill > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
+			echo Keeping chill stuff in $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
+			echo Thawing the \"chill\" out of $i...
+			cp $i new
+			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+	echo Thawing more \"chill\" out of Makefile.in...
+	cp Makefile.in new
+	sed -e 's/ chillrt / /g' \
+	    -e 's/newlib, chillrt/newlib/g' \
+	    -e 's/ all-chillrt / /g' \
+	    -e '/^[ 	]*install-chillrt[ 	]*\\$/d' \
+	    -e 's/ install-chillrt / /g' \
+	    -e 's/newlib \| chillrt/newlib/g' \
+	    -e 's/install-man install-libchill install-librmt/install-man/g' \
+	    < Makefile.in > new
+	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
+		echo Caching Makefile.in in .Recover...
+		mv Makefile.in .Recover
+	fi
+	mv new Makefile.in
+	echo Thawing the \"chill\" out of configure.in...
+	cp configure.in new
+	sed -e 's/ chillrt / /g' \
+	    < configure.in > new
+	if [ -n "${safe}" -a ! -f .Recover/configure.in ] ; then
+		echo Caching configure.in in .Recover...
+		mv configure.in .Recover
+	fi
+	mv new configure.in
 fi
 
 for i in * ; do
