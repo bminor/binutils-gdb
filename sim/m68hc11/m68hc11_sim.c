@@ -627,8 +627,9 @@ void
 cpu_info (SIM_DESC sd, sim_cpu *cpu)
 {
   sim_io_printf (sd, "CPU info:\n");
-  sim_io_printf (sd, "  Absolute cycle: %llu\n",
-                 cpu->cpu_absolute_cycle);
+  sim_io_printf (sd, "  Absolute cycle: %s\n",
+                 cycle_to_string (cpu, cpu->cpu_absolute_cycle));
+  
   sim_io_printf (sd, "  Syscall emulation: %s\n",
                  cpu->cpu_emul_syscall ? "yes, via 0xcd <n>" : "no");
   sim_io_printf (sd, "  Memory errors detection: %s\n",

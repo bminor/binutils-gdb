@@ -355,8 +355,12 @@ m68hc11spi_info (struct hw *me)
       sim_io_printf (sd, "  SPI has %d bits to send\n",
                      controller->tx_bit + 1);
       t = hw_event_remain_time (me, controller->spi_event);
-      sim_io_printf (sd, "  SPI operation finished in %ld cycles\n",
-		     (long) t);
+      sim_io_printf (sd, "  SPI current bit-cycle finished in %s\n",
+		     cycle_to_string (cpu, t));
+
+      t += (controller->tx_bit + 1) * 2 * controller->clock;
+      sim_io_printf (sd, "  SPI operation finished in %s\n",
+		     cycle_to_string (cpu, t));
     }
 }
 

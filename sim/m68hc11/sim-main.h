@@ -497,6 +497,8 @@ extern void sim_set_profile (int n);
 extern void sim_set_profile_size (int n);
 extern void sim_board_reset (SIM_DESC sd);
 
+extern const char *cycle_to_string (sim_cpu *cpu, signed64 t);
+
 #endif
 
 

@@ -407,6 +407,24 @@ to_realtime (sim_cpu *cpu, signed64 t)
   return (double) (t) / (double) (cpu->cpu_frequency / 4);
 }
 
+const char*
+cycle_to_string (sim_cpu *cpu, signed64 t)
+{
+  double dt;
+  static char buf[64];
+  
+  dt = to_realtime (cpu, t);
+  if (dt < 0.001)
+    sprintf (buf, "%llu cycle%s (%3.1f us)", t,
+             (t > 1 ? "s" : ""), dt * 1000000.0);
+  else if (dt < 1.0)
+    sprintf (buf, "%llu cycles (%3.1f ms)", t, dt * 1000.0);
+  else
+    sprintf (buf, "%llu cycles (%3.1f s)", t, dt);
+
+  return buf;
+}
+
 static void
 m68hc11tim_print_timer (struct hw *me, const char *name,
                         struct hw_event *event)
@@ -421,15 +439,13 @@ m68hc11tim_print_timer (struct hw *me, const char *name,
   else
     {
       signed64 t;
-      double dt;
       sim_cpu* cpu;
 
       cpu = STATE_CPU (sd, 0);
 
       t  = hw_event_remain_time (me, event);
-      dt = to_realtime (cpu, t) * 1000.0;
-      sim_io_printf (sd, "  Next %s interrupt in %ld cycles (%3.3f ms)\n",
-                     name, (long) t, dt);
+      sim_io_printf (sd, "  Next %s interrupt in %s\n",
+                     name, cycle_to_string (cpu, t));
     }
 }
 

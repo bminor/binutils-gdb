@@ -262,9 +262,11 @@ interrupts_raise (struct interrupts *interrupts, enum M6811_INT number)
 void
 interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
 {
+  signed64 t;
+  
   if (interrupts->start_mask_cycle >= 0)
     {
-      signed64 t = cpu_current_cycle (interrupts->cpu);
+      t = cpu_current_cycle (interrupts->cpu);
 
       t -= interrupts->start_mask_cycle;
       if (t > interrupts->max_mask_cycles)
@@ -272,7 +274,7 @@ interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
     }
   if (interrupts->xirq_start_mask_cycle >= 0)
     {
-      signed64 t = cpu_current_cycle (interrupts->cpu);
+      t = cpu_current_cycle (interrupts->cpu);
 
       t -= interrupts->xirq_start_mask_cycle;
       if (t > interrupts->xirq_max_mask_cycles)
@@ -282,16 +284,24 @@ interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
   sim_io_printf (sd, "Interrupts Info:\n");
   sim_io_printf (sd, "  Interrupts raised: %lu\n",
                  interrupts->nb_interrupts_raised);
-  sim_io_printf (sd, "  Min interrupts masked sequence: %llu cycles\n",
-                 interrupts->min_mask_cycles == CYCLES_MAX ?
-                 interrupts->max_mask_cycles :
-                 interrupts->min_mask_cycles);
-  sim_io_printf (sd, "  Max interrupts masked sequence: %llu cycles\n",
-                 interrupts->max_mask_cycles);
-  sim_io_printf (sd, "  XIRQ Min interrupts masked sequence: %llu cycles\n",
-                 interrupts->xirq_min_mask_cycles == CYCLES_MAX ?
-                 interrupts->xirq_max_mask_cycles :
-                 interrupts->xirq_min_mask_cycles);
-  sim_io_printf (sd, "  XIRQ Max interrupts masked sequence: %llu cycles\n",
-                 interrupts->xirq_max_mask_cycles);
+
+  t = interrupts->min_mask_cycles == CYCLES_MAX ?
+    interrupts->max_mask_cycles :
+    interrupts->min_mask_cycles;
+  sim_io_printf (sd, "  Shortest interrupts masked sequence: %s\n",
+                 cycle_to_string (interrupts->cpu, t));
+
+  t = interrupts->max_mask_cycles;
+  sim_io_printf (sd, "  Longest interrupts masked sequence: %s\n",
+                 cycle_to_string (interrupts->cpu, t));
+
+  t = interrupts->xirq_min_mask_cycles == CYCLES_MAX ?
+    interrupts->xirq_max_mask_cycles :
+    interrupts->xirq_min_mask_cycles;
+  sim_io_printf (sd, "  XIRQ Min interrupts masked sequence: %s\n",
+                 cycle_to_string (interrupts->cpu, t));
+
+  t = interrupts->xirq_max_mask_cycles;
+  sim_io_printf (sd, "  XIRQ Max interrupts masked sequence: %s\n",
+                 cycle_to_string (interrupts->cpu, t));
 }
