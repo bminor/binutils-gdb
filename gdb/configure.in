@@ -330,7 +330,6 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
             AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
             CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
-	    CONFIG_INITS="${CONFIG_INITS} hpux-thread.c"
          else
             AC_MSG_RESULT(no (suppressed because you are not using GCC))
          fi

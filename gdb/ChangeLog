@@ -1,3 +1,11 @@
+Mon Mar 20 17:33:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Thu Mar 16 16:49:27 EST 2000 John David Anglin
+ 	<dave@hiauly1.hia.nrc.ca>:
+	* configure.in (CONFIG_INITS): Don't include hpux-thread.c. Stops
+ 	_initialize_hpux_thread being called twice.
+	* configure: Regenerated.
+
 2000-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* event-top.c (_initialize_event_loop): If instream is not
