@@ -2263,7 +2263,7 @@ for this_target in $target $canon_targets ; do
       strongarm*)	cpu_type=arm endian=little ;;
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
-      i[456]86)		cpu_type=i386 arch=i386;;
+      i[3456]86)	cpu_type=i386 arch=i386;;
       x86_64)		cpu_type=i386 arch=x86_64;;
       ia64)		cpu_type=ia64 ;;
       m6811|m6812|m68hc12) cpu_type=m68hc11 ;;
