@@ -16,7 +16,7 @@ ppc		Andrew Cagney <ac131313@redhat.com>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
 mips		Chris Demetriou <cgd@broadcom.com>
 sh		(global maintainers)
-common		Ben Elliston <bje@wasabisystems.com>
+common		Ben Elliston <bje@gnu.org>
 common		Frank Ch. Eigler <fche@redhat.com>
 *		(target, then global maintainers)
 
