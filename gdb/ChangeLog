@@ -1,3 +1,10 @@
+2004-02-25  Andrew Cagney  <cagney@redhat.com>
+
+	PR cli/1566.  Problem found, and fix suggested by David Allan. 
+	* cli/cli-script.c (execute_control_command): Unconditionally
+	install a cleanup.  Default "ret" to "invalid_control".  Use
+	"break" instead of "return" to escape from the switch.
+
 2004-02-24  J. Brobecker  <brobecker@gnat.com>
 
 	* tui/tui-disasm.c: %s/lines/asm_lines/g to avoid a collision
