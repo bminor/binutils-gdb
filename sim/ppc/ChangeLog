@@ -1,4 +1,14 @@
+Sun Nov 19 23:00:52 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-instructions (model data, model_busy): Rather than using a
+	bit mask for the busy units, just use a char array.  Also, only
+	support 2 function units an insn can use, rather than a loop.
+
 Fri Nov 17 14:08:08 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* table.c (table_entry_read): Move setting entry->line_nr to after
+	the model specific fields so the line numbers for the annex are
+	correct.
 
 	* cpu.c (cpu_{create,init,halt}): Check for WITH_MODEL_ISSUE
 	before calling the model functions.
@@ -8,15 +18,21 @@ Fri Nov 17 14:08:08 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c (gen_icache_h): Create type idecode_cache as void if not
 	caching instructions.
-	(lf_print_c_semantic): Pass idecode_cache and instruction word to
-	model_issue.
-	(gen_model_{c,h}): Model_issue now takes two more arguments.
-
+	(gen_model_{c,h}): Drop model_issue support.  Add support for
+	model_cleanup.
+	(lf_print_my_prefix): Initialize a const itable_index with the
+	current index.
+	(lf_print_c_semantic): Call model_cleanup at the end of the
+	function to check for instructions that aren't supported yet by
+	the scheduling code.
+	
 	* mon.h (count_type): New type for counters.
 	* mon.c: Use count_type instead of unsigned.
 
-	* ppc-instructions: Reorganize so insn dependent routine is called
-	via a function pointer.  Add initial scheduling code.
+	* ppc-instructions: Redo scheduling code once again.  Make it all
+	inline friendly.  Instead of having general code emitted by igen,
+	go the route of having each semantic routine call the appropriate
+	module.
 
 Thu Nov 16 09:52:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -89,7 +89,7 @@
 	/* Structure to hold timing information on a per instruction basis */
 	struct _model_time {
 	  ppc_function_unit first_unit;			/* first functional unit this insn could use */
-	  ppc_function_unit last_unit;			/* last functional unit this insn could use */
+	  ppc_function_unit second_unit;		/* second functional unit this insn could use */
 	  signed16	    issue;			/* # cycles before function unit can process other insns */
 	  signed16	    done;			/* # cycles before insn is done */
 	  unsigned32	    flags;			/* any flags that are needed */
@@ -128,7 +128,6 @@
 	  model_busy *busy_list;			/* list of busy function units */
 	  model_busy *free_list;			/* list of model_busy structs not in use */
 	  model_reg registers[NR_PPC_REGS];		/* register status */
-	  unsigned32 busy_mask;				/* bitmask of busy function units */
 	  count_type nr_cycles;				/* # cycles */
 	  count_type nr_branches;			/* # branches */
 	  count_type nr_branches_fallthrough;		/* # conditional branches that fell through */
@@ -140,6 +139,7 @@
 	  count_type nr_insns_not_handled;		/* # of instructions not handled */
 	  count_type nr_units[nr_ppc_function_units];	/* function unit counts */
 	  int insn_handled;				/* whether last insn was handled */
+	  unsigned_1 busy[nr_ppc_function_units];	/* whether a function is busy or not */
 	};
 
 	STATIC_MODEL const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
@@ -168,7 +168,6 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 	model_busy *cur_busy  = model_ptr->busy_list;
 	model_busy *free_list = model_ptr->free_list;
 	model_busy *next_busy = (model_busy *)0;
-	unsigned32 busy_mask  = model_ptr->busy_mask;
 	model_busy *next;
 
 	model_ptr->nr_cycles++;
@@ -182,13 +181,13 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 	      reg->in_use = 0;
 	      reg = reg->next;
 	    }
-	    busy_mask &= ~(1 << cur_busy->unit);
+	    model_ptr->busy[cur_busy->unit] = 0;
 	    cur_busy->next = free_list;
 	    free_list = cur_busy;
 	  }
 	  else if (--cur_busy->issue <= 0) {	/* function unit pipelined, allow new use */
 	    TRACE(trace_model,("pipeline, %s ready for next client\n", ppc_function_unit_name[cur_busy->unit]));
-	    busy_mask &= ~(1 << cur_busy->unit);
+	    model_ptr->busy[cur_busy->unit] = 0;
 	    cur_busy->next = next_busy;
 	    next_busy = cur_busy;
 	  }
@@ -204,7 +203,6 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 
 	model_ptr->busy_list = next_busy;
 	model_ptr->free_list = free_list;
-	model_ptr->busy_mask = busy_mask;
 
 # Mark a function unit as busy, return the busy structure so regs can be added to be released
 model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_function_unit unit, int issue, int done
@@ -226,27 +224,27 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	busy->issue = issue;
 	busy->done = done;
 	model_ptr->busy_list = busy;
-	model_ptr->busy_mask |= (1 << unit);
+	model_ptr->busy[unit] = 1;
 	model_ptr->nr_units[unit]++;
 	return busy;
 
 # Wait until a function unit is non-busy, and then allocate a busy pointer & return the pointer
 model_busy *::model-internal::model_wait_for_unit:itable_index index, model_data *const model_ptr, const model_time *const time_ptr
 	ppc_function_unit first_unit = time_ptr->first_unit;
-	ppc_function_unit last_unit = time_ptr->last_unit;
-	ppc_function_unit unit;
+	ppc_function_unit second_unit = time_ptr->second_unit;
 	int stall_increment = 0;
 
 	for (;;) {
-	  unsigned32 busy_mask = model_ptr->busy_mask;
-	  for (unit = first_unit; unit <= last_unit; unit++) {
-	    if (((1 << unit) & busy_mask) == 0) {
-	      return model_make_busy(model_ptr, unit,
-				     model_ptr->timing[index].issue,
-				     model_ptr->timing[index].done);
+	  if (!model_ptr->busy[first_unit])
+	    return model_make_busy(model_ptr, first_unit,
+				   model_ptr->timing[index].issue,
+				   model_ptr->timing[index].done);
 
-	    }
-	  }
+	  if (!model_ptr->busy[second_unit])
+	    return model_make_busy(model_ptr, second_unit,
+				   model_ptr->timing[index].issue,
+				   model_ptr->timing[index].done);
+
 	  TRACE(trace_model,("all function units are busy for %s\n", itable[index].name));
 	  model_ptr->nr_stalls_unit += stall_increment;		/* don't count first stall */
 	  stall_increment = 1;
@@ -644,6 +642,62 @@ void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_da
 	    prev_reg = &ppc_regs[i + PPC_CR_REG];
 	  }
 	  busy_ptr->reg = prev_reg;
+	}
+
+# Convert a BIT32(x) number back into the original number
+int::model-internal::ppc_undo_bit32:unsigned bitmask
+	unsigned u = 0x80000000;
+	int i = 0;
+	while (u && (u & bitmask) == 0) {
+	  u >>= 1;
+	  i++;
+	}
+
+	return i;
+
+# Schedule an instruction that takes 2 CR input registers and produces an output CR register
+void::model-function::ppc_insn_cr2:itable_index index, cpu *processor, model_data *model_ptr, unsigned crD, unsigned crA_bit, unsigned crB_bit
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  const unsigned ppc_CRA = ppc_undo_bit32(crA_bit) + PPC_CR_REG;
+	  const unsigned ppc_CRB = ppc_undo_bit32(crB_bit) + PPC_CR_REG;
+	  const unsigned ppc_CRD = crD + PPC_CR_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  while (ppc_regs[ppc_CRA].in_use | ppc_regs[ppc_CRB].in_use) {
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_CRD].next = (model_reg *)0;
+	  ppc_regs[ppc_CRD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	}
+
+# Schedule an instruction that takes 1 CR input registers and produces an output CR register
+void::model-function::ppc_insn_cr1:itable_index index, cpu *processor, model_data *model_ptr, unsigned crD, unsigned CRA
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  const unsigned ppc_CRA = CRA + PPC_CR_REG;
+	  const unsigned ppc_CRD = crD + PPC_CR_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  while (ppc_regs[ppc_CRA].in_use) {
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_CRD].next = (model_reg *)0;
+	  ppc_regs[ppc_CRD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_CRD];
 	}
 
 model_data *::model-function::model_create:cpu *processor
@@ -1361,6 +1415,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} && CR{BB});
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.449,31./:XL::cror:Condition Register OR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1368,6 +1423,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} || CR{BB});
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.193,31./:XL::crxor:Condition Register XOR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1375,6 +1431,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} != CR{BB});
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.225,31./:XL::crnand:Condition Register NAND
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1382,6 +1439,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, !(CR{BA} && CR{BB}));
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.33,31./:XL::crnor:Condition Register NOR
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1389,6 +1447,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, !(CR{BA} || CR{BB}));
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.289,31./:XL::creqv:Condition Register Equivalent
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1396,6 +1455,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} == CR{BB});
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.129,31./:XL::crandc:Condition Register AND with Complement
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1403,6 +1463,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} && !CR{BB});
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 0.19,6.BT,11.BA,16.BB,21.417,31./:XL::crorc:Condition Register OR with Complement
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -1410,6 +1471,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} || !CR{BB});
+	ppc_insn_cr2(my_index, processor, cpu_model(processor), BT, BIT32_BA, BIT32_BB);
 
 #
 # I.2.4.4 Condition Register Field Instruction
@@ -1420,6 +1482,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	MBLIT32(CR, 4*BF, 4*BF+3, EXTRACTED32(CR, 4*BFA, 4*BFA+3));
+	ppc_insn_cr1(my_index, processor, cpu_model(processor), BF, BFA);
 
 
 #
