@@ -39,7 +39,6 @@
 #include "target.h"
 #include "value.h"
 #include "command.h"
-#include <signal.h>
 #include "gdb_string.h"
 #include "gdbcmd.h"
 #include <sys/types.h>

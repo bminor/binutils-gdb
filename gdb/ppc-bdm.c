@@ -32,7 +32,6 @@
 #include "objfiles.h"
 #include "gdb-stabs.h"
 #include <sys/types.h>
-#include <signal.h>
 #include "serial.h"
 #include "ocd.h"
 #include "ppc-tdep.h"

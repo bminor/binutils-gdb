@@ -1,5 +1,4 @@
 /* Am29k-dependent portions of the RPC protocol
-   used with a VxWorks target 
 
    Contributed by Wind River Systems.
 
@@ -34,7 +33,6 @@
 
 #include "gdb_string.h"
 #include <errno.h>
-#include <signal.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>

@@ -38,7 +38,6 @@
 #include "value.h"
 #include <ctype.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <errno.h>
 #include "gdb_string.h"
 #include "terminal.h"

@@ -26,7 +26,6 @@
 #include "gdb_string.h"
 #include <ctype.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <setjmp.h>
 #include <errno.h>
 

@@ -31,10 +31,8 @@
 #include "remote-utils.h"
 #include "gdb_string.h"
 
-#include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <ctype.h>
 
 /* Microsoft C's stat.h doesn't define all the POSIX file modes.  */

@@ -1,3 +1,19 @@
+2001-02-02  J.T. Conklin  <jtc@redback.com>
+
+	* ppc-bdm.c (#include <signal.h>): Removed.
+	* remote-array.c: Likewise.
+	* remote-bug.c: Likewise.
+	* remote-e7000.c: Likewise.
+	* remote-mips.c: Likewise.
+	* remote-os9k.c: Likewise.
+	* remote-st.c: Likewise.
+	* remote-udi.c: Likewise.
+	* remote-vx29k.c: Likewise.
+	* remote-vx68.c: Likewise.
+	* remote-vx960.c: Likewise.
+	* remote-vxmips.c: Likewise.
+	* remote-vxsparc.c: Likewise.
+
 2001-02-02  John Moore  <jmoore@redhat.com>
 
 	* remote-utils.h (sr_set_device): Changed free() to xfree() where 

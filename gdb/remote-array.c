@@ -29,7 +29,6 @@
 #include "gdbcore.h"
 #include "target.h"
 #include <ctype.h>
-#include <signal.h>
 #include <sys/types.h>
 #include "gdb_string.h"
 #include "command.h"
