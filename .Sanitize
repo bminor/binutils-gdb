@@ -238,10 +238,6 @@ else
 fi
 
 if [ -n "${verbose}" ] ; then
-	echo Processing \"d10v\"...
-fi
-
-if [ -n "${verbose}" ] ; then
 	echo Processing \"d30v\"...
 fi
 
