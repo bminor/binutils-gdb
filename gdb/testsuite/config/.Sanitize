@@ -26,7 +26,9 @@ Things-to-keep:
 cpu32bug.exp
 est.exp
 gdbserver.exp
+hppro.exp
 mips-gdb.exp
+monitor.exp
 mt-a29k-udi
 mt-hpux
 mt-i386-aout
