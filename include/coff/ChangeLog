@@ -1,3 +1,17 @@
+Sat Feb 26 10:26:38 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.h: Add casts to avoid warnings from SVR4 cc.
+
+Mon Feb 21 09:48:46 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
+
+	* sym.h (struct runtime_pdr): Make field adr bfd_vma, not unsigned
+	long.
+	(SYMR): Make field value bfd_vma, not long.
+
+Fri Feb  4 23:35:53 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* rs6000.h (STYP_DEBUG): Define.
+
 Wed Feb  2 14:31:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* internal.h (union internal_auxent): Change x_csect.x_scnlen into
