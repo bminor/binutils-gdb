@@ -338,6 +338,9 @@
 #ifndef elf_backend_ecoff_debug_swap
 #define elf_backend_ecoff_debug_swap	0
 #endif
+#ifndef elf_backend_bfd_from_remote_memory
+#define elf_backend_bfd_from_remote_memory _bfd_elfNN_bfd_from_remote_memory
+#endif
 #ifndef elf_backend_got_header_size
 #define elf_backend_got_header_size	0
 #endif
@@ -490,6 +493,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
+  elf_backend_bfd_from_remote_memory,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,

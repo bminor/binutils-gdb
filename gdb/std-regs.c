@@ -98,20 +98,19 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame)
 static struct value *
 value_of_builtin_frame_pc_reg (struct frame_info *frame)
 {
-#ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
     return value_of_register (PC_REGNUM, frame);
-#endif
-  {
-    struct value *val = allocate_value (builtin_type_void_data_ptr);
-    char *buf = VALUE_CONTENTS_RAW (val);
-    if (frame == NULL)
-      memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
-    else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
-			  get_frame_pc (frame));
-    return val;
-  }
+  else
+    {
+      struct value *val = allocate_value (builtin_type_void_data_ptr);
+      char *buf = VALUE_CONTENTS_RAW (val);
+      if (frame == NULL)
+	memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
+      else
+	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			    get_frame_pc (frame));
+      return val;
+    }
 }
 
 static struct value *

@@ -68,25 +68,9 @@ static CORE_ADDR
 tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
 {
   struct ui_file *gdb_dis_out;
-  disassemble_info asm_info;
 
   /* now init the ui_file structure */
   gdb_dis_out = tui_sfileopen (256);
-
-  /* FIXME: cagney/2003-04-28: Should instead be using the generic
-     disassembler but first need to clean that up and stop it trying
-     to access the exec file.  */
-
-  memcpy (&asm_info, &deprecated_tm_print_insn_info, sizeof (asm_info));
-  asm_info.stream = gdb_dis_out;
-
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    asm_info.endian = BFD_ENDIAN_BIG;
-  else
-    asm_info.endian = BFD_ENDIAN_LITTLE;
-
-  if (TARGET_ARCHITECTURE != NULL)
-    asm_info.mach = TARGET_ARCHITECTURE->mach;
 
   /* Now construct each line */
   for (; count > 0; count--, lines++)
@@ -102,7 +86,7 @@ tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
 
       ui_file_rewind (gdb_dis_out);
 
-      pc = pc + TARGET_PRINT_INSN (pc, &asm_info);
+      pc = pc + gdb_print_insn (pc, gdb_dis_out);
 
       lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
 

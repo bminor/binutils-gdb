@@ -68,10 +68,32 @@
 /* Some local constants.  */
 static const int hppa_num_regs = 128;
 
+/* Get at various relevent fields of an instruction word. */
+#define MASK_5 0x1f
+#define MASK_11 0x7ff
+#define MASK_14 0x3fff
+#define MASK_21 0x1fffff
+
+/* Define offsets into the call dummy for the target function address.
+   See comments related to CALL_DUMMY for more info.  */
+#define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 9)
+#define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 10)
+
+/* Define offsets into the call dummy for the _sr4export address.
+   See comments related to CALL_DUMMY for more info.  */
+#define SR4EXPORT_LDIL_OFFSET (INSTRUCTION_SIZE * 12)
+#define SR4EXPORT_LDO_OFFSET (INSTRUCTION_SIZE * 13)
+
 /* To support detection of the pseudo-initial frame
    that threads have. */
 #define THREAD_INITIAL_FRAME_SYMBOL  "__pthread_exit"
 #define THREAD_INITIAL_FRAME_SYM_LEN  sizeof(THREAD_INITIAL_FRAME_SYMBOL)
+
+/* Sizes (in bytes) of the native unwind entries.  */
+#define UNWIND_ENTRY_SIZE 16
+#define STUB_UNWIND_ENTRY_SIZE 8
+
+static int get_field (unsigned word, int from, int to);
 
 static int extract_5_load (unsigned int);
 
@@ -200,7 +222,7 @@ extern int exception_catchpoints_are_fragile;
 int
 hppa_use_struct_convention (int gcc_p, struct type *type)
 {
-  return (TYPE_LENGTH (type) > 2 * REGISTER_SIZE);
+  return (TYPE_LENGTH (type) > 2 * DEPRECATED_REGISTER_SIZE);
 }
 
 
@@ -222,6 +244,15 @@ static int
 low_sign_extend (unsigned val, unsigned bits)
 {
   return (int) ((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);
+}
+
+/* Extract the bits at positions between FROM and TO, using HP's numbering
+   (MSB = 0). */
+
+static int
+get_field (unsigned word, int from, int to)
+{
+  return ((word) >> (31 - (to)) & ((1 << ((to) - (from) + 1)) - 1));
 }
 
 /* extract the immediate field from a ld{bhw}s instruction */
@@ -275,15 +306,15 @@ extract_21 (unsigned word)
 
   word &= MASK_21;
   word <<= 11;
-  val = GET_FIELD (word, 20, 20);
+  val = get_field (word, 20, 20);
   val <<= 11;
-  val |= GET_FIELD (word, 9, 19);
+  val |= get_field (word, 9, 19);
   val <<= 2;
-  val |= GET_FIELD (word, 5, 6);
+  val |= get_field (word, 5, 6);
   val <<= 5;
-  val |= GET_FIELD (word, 0, 4);
+  val |= get_field (word, 0, 4);
   val <<= 2;
-  val |= GET_FIELD (word, 7, 8);
+  val |= get_field (word, 7, 8);
   return sign_extend (val, 21) << 11;
 }
 
@@ -296,15 +327,15 @@ deposit_21 (unsigned opnd, unsigned word)
 {
   unsigned val = 0;
 
-  val |= GET_FIELD (opnd, 11 + 14, 11 + 18);
+  val |= get_field (opnd, 11 + 14, 11 + 18);
   val <<= 2;
-  val |= GET_FIELD (opnd, 11 + 12, 11 + 13);
+  val |= get_field (opnd, 11 + 12, 11 + 13);
   val <<= 2;
-  val |= GET_FIELD (opnd, 11 + 19, 11 + 20);
+  val |= get_field (opnd, 11 + 19, 11 + 20);
   val <<= 11;
-  val |= GET_FIELD (opnd, 11 + 1, 11 + 11);
+  val |= get_field (opnd, 11 + 1, 11 + 11);
   val <<= 1;
-  val |= GET_FIELD (opnd, 11 + 0, 11 + 0);
+  val |= get_field (opnd, 11 + 0, 11 + 0);
   return word | val;
 }
 
@@ -314,9 +345,9 @@ deposit_21 (unsigned opnd, unsigned word)
 static int
 extract_17 (unsigned word)
 {
-  return sign_extend (GET_FIELD (word, 19, 28) |
-		      GET_FIELD (word, 29, 29) << 10 |
-		      GET_FIELD (word, 11, 15) << 11 |
+  return sign_extend (get_field (word, 19, 28) |
+		      get_field (word, 29, 29) << 10 |
+		      get_field (word, 11, 15) << 11 |
 		      (word & 0x1) << 16, 17) << 2;
 }
 
@@ -642,6 +673,14 @@ find_unwind_entry (CORE_ADDR pc)
   return NULL;
 }
 
+const unsigned char *
+hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static const char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
+  (*len) = sizeof (breakpoint);
+  return breakpoint;
+}
+
 /* Return the adjustment necessary to make for addresses on the stack
    as presented by hpread.c.
 
@@ -904,16 +943,16 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	       /* A call dummy is sized in words, but it is actually a
 		  series of instructions.  Account for that scaling
 		  factor.  */
-	       + ((REGISTER_SIZE / INSTRUCTION_SIZE)
-		  * CALL_DUMMY_LENGTH)
+	       + ((DEPRECATED_REGISTER_SIZE / INSTRUCTION_SIZE)
+		  * DEPRECATED_CALL_DUMMY_LENGTH)
 	       /* Similarly we have to account for 64bit wide register
 		  saves.  */
-	       + (32 * REGISTER_SIZE)
+	       + (32 * DEPRECATED_REGISTER_SIZE)
 	       /* We always consider FP regs 8 bytes long.  */
 	       + (NUM_REGS - FP0_REGNUM) * 8
 	       /* Similarly we have to account for 64bit wide register
 		  saves.  */
-	       + (6 * REGISTER_SIZE)))))
+	       + (6 * DEPRECATED_REGISTER_SIZE)))))
     {
       return read_memory_integer ((get_frame_base (frame)
 				   + (TARGET_PTR_BIT == 64 ? -16 : -20)),
@@ -1467,24 +1506,24 @@ hppa_push_dummy_frame (void)
 
   /* The 32bit and 64bit ABIs save the return pointer into different
      stack slots.  */
-  if (REGISTER_SIZE == 8)
-    write_memory (sp - 16, (char *) &int_buffer, REGISTER_SIZE);
+  if (DEPRECATED_REGISTER_SIZE == 8)
+    write_memory (sp - 16, (char *) &int_buffer, DEPRECATED_REGISTER_SIZE);
   else
-    write_memory (sp - 20, (char *) &int_buffer, REGISTER_SIZE);
+    write_memory (sp - 20, (char *) &int_buffer, DEPRECATED_REGISTER_SIZE);
 
   int_buffer = deprecated_read_fp ();
-  write_memory (sp, (char *) &int_buffer, REGISTER_SIZE);
+  write_memory (sp, (char *) &int_buffer, DEPRECATED_REGISTER_SIZE);
 
   write_register (DEPRECATED_FP_REGNUM, sp);
 
-  sp += 2 * REGISTER_SIZE;
+  sp += 2 * DEPRECATED_REGISTER_SIZE;
 
   for (regnum = 1; regnum < 32; regnum++)
     if (regnum != RP_REGNUM && regnum != DEPRECATED_FP_REGNUM)
       sp = push_word (sp, read_register (regnum));
 
   /* This is not necessary for the 64bit ABI.  In fact it is dangerous.  */
-  if (REGISTER_SIZE != 8)
+  if (DEPRECATED_REGISTER_SIZE != 8)
     sp += 4;
 
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
@@ -1510,37 +1549,37 @@ find_dummy_frame_regs (struct frame_info *frame,
   int i;
 
   /* The 32bit and 64bit ABIs save RP into different locations.  */
-  if (REGISTER_SIZE == 8)
+  if (DEPRECATED_REGISTER_SIZE == 8)
     frame_saved_regs[RP_REGNUM] = (fp - 16) & ~0x3;
   else
     frame_saved_regs[RP_REGNUM] = (fp - 20) & ~0x3;
 
   frame_saved_regs[DEPRECATED_FP_REGNUM] = fp;
 
-  frame_saved_regs[1] = fp + (2 * REGISTER_SIZE);
+  frame_saved_regs[1] = fp + (2 * DEPRECATED_REGISTER_SIZE);
 
-  for (fp += 3 * REGISTER_SIZE, i = 3; i < 32; i++)
+  for (fp += 3 * DEPRECATED_REGISTER_SIZE, i = 3; i < 32; i++)
     {
       if (i != DEPRECATED_FP_REGNUM)
 	{
 	  frame_saved_regs[i] = fp;
-	  fp += REGISTER_SIZE;
+	  fp += DEPRECATED_REGISTER_SIZE;
 	}
     }
 
   /* This is not necessary or desirable for the 64bit ABI.  */
-  if (REGISTER_SIZE != 8)
+  if (DEPRECATED_REGISTER_SIZE != 8)
     fp += 4;
 
   for (i = FP0_REGNUM; i < NUM_REGS; i++, fp += 8)
     frame_saved_regs[i] = fp;
 
   frame_saved_regs[IPSW_REGNUM] = fp;
-  frame_saved_regs[SAR_REGNUM] = fp + REGISTER_SIZE;
-  frame_saved_regs[PCOQ_HEAD_REGNUM] = fp + 2 * REGISTER_SIZE;
-  frame_saved_regs[PCSQ_HEAD_REGNUM] = fp + 3 * REGISTER_SIZE;
-  frame_saved_regs[PCOQ_TAIL_REGNUM] = fp + 4 * REGISTER_SIZE;
-  frame_saved_regs[PCSQ_TAIL_REGNUM] = fp + 5 * REGISTER_SIZE;
+  frame_saved_regs[SAR_REGNUM] = fp + DEPRECATED_REGISTER_SIZE;
+  frame_saved_regs[PCOQ_HEAD_REGNUM] = fp + 2 * DEPRECATED_REGISTER_SIZE;
+  frame_saved_regs[PCSQ_HEAD_REGNUM] = fp + 3 * DEPRECATED_REGISTER_SIZE;
+  frame_saved_regs[PCOQ_TAIL_REGNUM] = fp + 4 * DEPRECATED_REGISTER_SIZE;
+  frame_saved_regs[PCSQ_TAIL_REGNUM] = fp + 5 * DEPRECATED_REGISTER_SIZE;
 }
 
 void
@@ -1564,7 +1603,7 @@ hppa_pop_frame (void)
   for (regnum = 31; regnum > 0; regnum--)
     if (fsr[regnum])
       write_register (regnum, read_memory_integer (fsr[regnum],
-		      REGISTER_SIZE));
+						   DEPRECATED_REGISTER_SIZE));
 
   for (regnum = NUM_REGS - 1; regnum >= FP0_REGNUM; regnum--)
     if (fsr[regnum])
@@ -1577,18 +1616,18 @@ hppa_pop_frame (void)
   if (fsr[IPSW_REGNUM])
     write_register (IPSW_REGNUM,
 		    read_memory_integer (fsr[IPSW_REGNUM],
-					 REGISTER_SIZE));
+					 DEPRECATED_REGISTER_SIZE));
 
   if (fsr[SAR_REGNUM])
     write_register (SAR_REGNUM,
 		    read_memory_integer (fsr[SAR_REGNUM],
-					 REGISTER_SIZE));
+					 DEPRECATED_REGISTER_SIZE));
 
   /* If the PC was explicitly saved, then just restore it.  */
   if (fsr[PCOQ_TAIL_REGNUM])
     {
       npc = read_memory_integer (fsr[PCOQ_TAIL_REGNUM],
-				 REGISTER_SIZE);
+				 DEPRECATED_REGISTER_SIZE);
       write_register (PCOQ_TAIL_REGNUM, npc);
     }
   /* Else use the value in %rp to set the new PC.  */
@@ -1598,7 +1637,7 @@ hppa_pop_frame (void)
       write_pc (npc);
     }
 
-  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, REGISTER_SIZE));
+  write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, DEPRECATED_REGISTER_SIZE));
 
   if (fsr[IPSW_REGNUM])	/* call dummy */
     write_register (SP_REGNUM, fp - 48);
@@ -1667,7 +1706,7 @@ restore_pc_queue (CORE_ADDR *fsr)
      right place. */
 
   write_register (21, read_memory_integer (fsr[PCSQ_HEAD_REGNUM],
-					   REGISTER_SIZE));
+					   DEPRECATED_REGISTER_SIZE));
   write_register (22, new_pc);
 
   for (insn_count = 0; insn_count < 3; insn_count++)
@@ -1747,7 +1786,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
          the left.  We do this by promoting them to full-width,
          although the ABI says to pad them with garbage.  */
       if (is_integral_type (arg_type)
-	  && TYPE_LENGTH (arg_type) < REGISTER_SIZE)
+	  && TYPE_LENGTH (arg_type) < DEPRECATED_REGISTER_SIZE)
 	{
 	  args[i] = value_cast ((TYPE_UNSIGNED (arg_type)
 				 ? builtin_type_unsigned_long
@@ -1760,7 +1799,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       /* Align the size of the argument to the word size for this
 	 target.  */
-      bytes_reserved = (lengths[i] + REGISTER_SIZE - 1) & -REGISTER_SIZE;
+      bytes_reserved = (lengths[i] + DEPRECATED_REGISTER_SIZE - 1) & -DEPRECATED_REGISTER_SIZE;
 
       offset[i] = cum_bytes_reserved;
 
@@ -1772,8 +1811,8 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (bytes_reserved > 8)
 	{
 	  /* Round up the offset to a multiple of two slots.  */
-	  int new_offset = ((offset[i] + 2*REGISTER_SIZE-1)
-			    & -(2*REGISTER_SIZE));
+	  int new_offset = ((offset[i] + 2*DEPRECATED_REGISTER_SIZE-1)
+			    & -(2*DEPRECATED_REGISTER_SIZE));
 
 	  /* Note the space we've wasted, if any.  */
 	  bytes_reserved += new_offset - offset[i];
@@ -1860,15 +1899,15 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       /* Align the size of the argument to the word size for this
 	 target.  */
-      bytes_reserved = (lengths[i] + REGISTER_SIZE - 1) & -REGISTER_SIZE;
+      bytes_reserved = (lengths[i] + DEPRECATED_REGISTER_SIZE - 1) & -DEPRECATED_REGISTER_SIZE;
 
       offset[i] = (cum_bytes_reserved
 		   + (lengths[i] > 4 ? bytes_reserved : lengths[i]));
 
       /* If the argument is a double word argument, then it needs to be
 	 double word aligned.  */
-      if ((bytes_reserved == 2 * REGISTER_SIZE)
-	  && (offset[i] % 2 * REGISTER_SIZE))
+      if ((bytes_reserved == 2 * DEPRECATED_REGISTER_SIZE)
+	  && (offset[i] % 2 * DEPRECATED_REGISTER_SIZE))
 	{
 	  int new_offset = 0;
 	  /* BYTES_RESERVED is already aligned to the word, so we put
@@ -1876,13 +1915,13 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
 	     This will leave one empty word on the stack, and one unused
 	     register as mandated by the ABI.  */
-	  new_offset = ((offset[i] + 2 * REGISTER_SIZE - 1)
-			& -(2 * REGISTER_SIZE));
+	  new_offset = ((offset[i] + 2 * DEPRECATED_REGISTER_SIZE - 1)
+			& -(2 * DEPRECATED_REGISTER_SIZE));
 
-	  if ((new_offset - offset[i]) >= 2 * REGISTER_SIZE)
+	  if ((new_offset - offset[i]) >= 2 * DEPRECATED_REGISTER_SIZE)
 	    {
-	      bytes_reserved += REGISTER_SIZE;
-	      offset[i] += REGISTER_SIZE;
+	      bytes_reserved += DEPRECATED_REGISTER_SIZE;
+	      offset[i] += DEPRECATED_REGISTER_SIZE;
 	    }
 	}
 
@@ -2036,9 +2075,9 @@ cover_find_stub_with_shl_get (void *args_untyped)
    into a call sequence of the above form stored at DUMMYNAME.
 
    On the hppa we need to call the stack dummy through $$dyncall.
-   Therefore our version of FIX_CALL_DUMMY takes an extra argument,
-   real_pc, which is the location where gdb should start up the
-   inferior to do the function call. 
+   Therefore our version of DEPRECATED_FIX_CALL_DUMMY takes an extra
+   argument, real_pc, which is the location where gdb should start up
+   the inferior to do the function call.
 
    This has to work across several versions of hpux, bsd, osf1.  It has to
    work regardless of what compiler was used to build the inferior program.
@@ -2194,7 +2233,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
          at *(fun+4).  Note the call dummy is *NOT* allowed to
          trash %r19 before calling the target function.  */
       write_register (19, read_memory_integer ((fun & ~0x3) + 4,
-		      REGISTER_SIZE));
+					       DEPRECATED_REGISTER_SIZE));
 
       /* Now get the real address for the function we are calling, it's
          at *fun.  */
@@ -2528,7 +2567,7 @@ hppa_alignof (struct type *type)
 void
 pa_do_registers_info (int regnum, int fpregs)
 {
-  char raw_regs[REGISTER_BYTES];
+  char *raw_regs = alloca (DEPRECATED_REGISTER_BYTES);
   int i;
 
   /* Make a copy of gdb's save area (may cause actual
@@ -2572,7 +2611,7 @@ void
 pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
 			     enum precision_type precision)
 {
-  char raw_regs[REGISTER_BYTES];
+  char *raw_regs = alloca (DEPRECATED_REGISTER_BYTES);
   int i;
 
   /* Make a copy of gdb's save area (may cause actual
@@ -2629,7 +2668,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
   int start;
 
 
-  char *buf = alloca (max_register_size (current_gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   long long reg_val;
 
   if (!know_which)
@@ -2826,8 +2865,8 @@ pa_strcat_registers (char *raw_regs, int regnum, int fpregs,
 static void
 pa_print_fp_reg (int i)
 {
-  char *raw_buffer = alloca (max_register_size (current_gdbarch));
-  char *virtual_buffer = alloca (max_register_size (current_gdbarch));
+  char raw_buffer[MAX_REGISTER_SIZE];
+  char virtual_buffer[MAX_REGISTER_SIZE];
 
   /* Get 32bits of data.  */
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
@@ -2869,8 +2908,8 @@ pa_print_fp_reg (int i)
 static void
 pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
 {
-  char *raw_buffer = alloca (max_register_size (current_gdbarch));
-  char *virtual_buffer = alloca (max_register_size (current_gdbarch));
+  char raw_buffer[MAX_REGISTER_SIZE];
+  char virtual_buffer[MAX_REGISTER_SIZE];
 
   fputs_filtered (REGISTER_NAME (i), stream);
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), stream);
@@ -2884,7 +2923,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   if (precision == double_precision && (i % 2) == 0)
     {
 
-      char *raw_buf = alloca (max_register_size (current_gdbarch));
+      char raw_buf[MAX_REGISTER_SIZE];
 
       /* Get the data in raw format for the 2nd half.  */
       frame_register_read (deprecated_selected_frame, i + 1, raw_buf);
@@ -3881,16 +3920,16 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 	       /* A call dummy is sized in words, but it is actually a
 		  series of instructions.  Account for that scaling
 		  factor.  */
-	       + ((REGISTER_SIZE / INSTRUCTION_SIZE)
-		  * CALL_DUMMY_LENGTH)
+	       + ((DEPRECATED_REGISTER_SIZE / INSTRUCTION_SIZE)
+		  * DEPRECATED_CALL_DUMMY_LENGTH)
 	       /* Similarly we have to account for 64bit wide register
 		  saves.  */
-	       + (32 * REGISTER_SIZE)
+	       + (32 * DEPRECATED_REGISTER_SIZE)
 	       /* We always consider FP regs 8 bytes long.  */
 	       + (NUM_REGS - FP0_REGNUM) * 8
 	       /* Similarly we have to account for 64bit wide register
 		  saves.  */
-	       + (6 * REGISTER_SIZE)))))
+	       + (6 * DEPRECATED_REGISTER_SIZE)))))
     find_dummy_frame_regs (frame_info, frame_saved_regs);
 
   /* Interrupt handlers are special too.  They lay out the register
@@ -4368,7 +4407,7 @@ initialize_hp_cxx_exception_support (void)
     }
 
   /* Next look for the catch enable flag provided end.o */
-  sym = lookup_symbol (HP_ACC_EH_catch_catch);
+  sym = lookup_symbol_linkage (HP_ACC_EH_catch_catch);
   if (sym)			/* sometimes present in debug info */
     {
       eh_catch_throw_addr = SYMBOL_VALUE_ADDRESS (sym);
@@ -4857,7 +4896,7 @@ int
 hppa_register_raw_size (int reg_nr)
 {
   /* All registers have the same size.  */
-  return REGISTER_SIZE;
+  return DEPRECATED_REGISTER_SIZE;
 }
 
 /* Index within the register vector of the first byte of the space i
@@ -4986,7 +5025,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
   set_gdbarch_stack_align (gdbarch, hppa_stack_align);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_num_regs (gdbarch, hppa_num_regs);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
   set_gdbarch_sp_regnum (gdbarch, 30);
@@ -4994,7 +5033,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
   set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_register_raw_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_register_bytes (gdbarch, hppa_num_regs * 4);
+  set_gdbarch_deprecated_register_bytes (gdbarch, hppa_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_register_virtual_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
@@ -5020,8 +5059,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
-  set_gdbarch_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
-  /* set_gdbarch_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
+  set_gdbarch_deprecated_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
+  /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
   set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);

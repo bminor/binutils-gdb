@@ -615,9 +615,24 @@ frame_info (char *addr_exp, int from_tty)
   int i, count, numregs;
   const char *funname = 0;
   enum language funlang = language_unknown;
+  const char *pc_regname;
 
   if (!target_has_stack)
     error ("No stack.");
+
+  /* Name of the value returned by get_frame_pc().  Per comments, "pc"
+     is not a good name.  */
+  if (PC_REGNUM >= 0)
+    /* OK, this is weird.  The PC_REGNUM hardware register's value can
+       easily not match that of the internal value returned by
+       get_frame_pc().  */
+    pc_regname = REGISTER_NAME (PC_REGNUM);
+  else
+    /* But then, this is weird to.  Even without PC_REGNUM, an
+       architectures will often have a hardware register called "pc",
+       and that register's value, again, can easily not match
+       get_frame_pc().  */
+    pc_regname = "pc";
 
   fi = parse_frame_specification (addr_exp);
   if (fi == NULL)
@@ -681,7 +696,7 @@ frame_info (char *addr_exp, int from_tty)
       print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
       printf_filtered (":\n");
     }
-  printf_filtered (" %s = ", REGISTER_NAME (PC_REGNUM));
+  printf_filtered (" %s = ", pc_regname);
   print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
 
   wrap_here ("   ");
@@ -696,7 +711,7 @@ frame_info (char *addr_exp, int from_tty)
     printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
-  printf_filtered ("saved %s ", REGISTER_NAME (PC_REGNUM));
+  printf_filtered ("saved %s ", pc_regname);
   print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
@@ -800,11 +815,14 @@ frame_info (char *addr_exp, int from_tty)
 			       &realnum, NULL);
 	if (!optimized && lval == not_lval)
 	  {
-	    void *value = alloca (MAX_REGISTER_RAW_SIZE);
+	    char value[MAX_REGISTER_SIZE];
 	    CORE_ADDR sp;
 	    frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
 				   &realnum, value);
-	    sp = extract_address (value, REGISTER_RAW_SIZE (SP_REGNUM));
+	    /* NOTE: cagney/2003-05-22: This is assuming that the
+               stack pointer was packed as an unsigned integer.  That
+               may or may not be valid.  */
+	    sp = extract_unsigned_integer (value, REGISTER_RAW_SIZE (SP_REGNUM));
 	    printf_filtered (" Previous frame's sp is ");
 	    print_address_numeric (sp, 1, gdb_stdout);
 	    printf_filtered ("\n");
@@ -1319,7 +1337,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	     are not combined in symbol-reading.  */
 
 	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-		   b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+		   b, VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
 	  print_variable_value (sym2, fi, stream);
 	  fprintf_filtered (stream, "\n");
 	  break;

@@ -41,7 +41,7 @@ tie_undo_reloc_l (uint32 offset, uint32 pc)
 }
 
 xtensa_opcode_internal** get_opcodes (void);
-const int get_num_opcodes (void);
+int get_num_opcodes (void);
 int decode_insn (const xtensa_insnbuf);
 int interface_version (void);
 
@@ -5463,7 +5463,7 @@ get_opcodes (void)
   return &opcodes[0];
 }
 
-const int
+int
 get_num_opcodes (void)
 {
   return 149;

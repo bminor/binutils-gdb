@@ -461,7 +461,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
   set_gdbarch_register_reggroup_p (gdbarch, i386_linux_register_reggroup_p);
-  set_gdbarch_register_bytes (gdbarch, I386_SSE_SIZEOF_REGS + 4);
+  set_gdbarch_deprecated_register_bytes (gdbarch, I386_SSE_SIZEOF_REGS + 4);
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 

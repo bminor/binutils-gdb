@@ -847,9 +847,9 @@ ip2k_elf_relax_section (abfd, sec, link_info, again)
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
-  internal_relocs = _bfd_elf32_link_read_relocs (abfd, sec, NULL,
-						 (Elf_Internal_Rela *)NULL,
-						 link_info->keep_memory);
+  internal_relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL,
+					       (Elf_Internal_Rela *)NULL,
+					       link_info->keep_memory);
   if (internal_relocs == NULL)
     goto error_return;
 
@@ -861,9 +861,9 @@ ip2k_elf_relax_section (abfd, sec, link_info, again)
       /* So stab does exits.  */
       Elf_Internal_Rela * irelbase;
 
-      irelbase = _bfd_elf32_link_read_relocs (abfd, stab, NULL,
-					      (Elf_Internal_Rela *)NULL,
-					      link_info->keep_memory);
+      irelbase = _bfd_elf_link_read_relocs (abfd, stab, NULL,
+					    (Elf_Internal_Rela *)NULL,
+					    link_info->keep_memory);
     }
 
   /* Get section contents cached copy if it exists.  */

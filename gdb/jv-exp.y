@@ -1235,7 +1235,7 @@ push_variable (name)
   char *tmp = copy_name (name);
   int is_a_field_of_this = 0;
   struct symbol *sym;
-  sym = lookup_symbol (tmp, expression_context_block, VAR_NAMESPACE,
+  sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN,
 		       &is_a_field_of_this, (struct symtab **) NULL);
   if (sym && SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {

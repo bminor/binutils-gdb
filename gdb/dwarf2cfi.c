@@ -1751,7 +1751,7 @@ cfi_write_fp (CORE_ADDR val)
 void
 cfi_pop_frame (struct frame_info *fi)
 {
-  char *regbuf = alloca (MAX_REGISTER_RAW_SIZE);
+  char regbuf[MAX_REGISTER_SIZE];
   int regnum;
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)

@@ -35,60 +35,66 @@ set asm-arch ""
 set asm-flags ""
 set link-flags ""
 
-if [istarget "*arm-*-*"] then {
-    set asm-arch arm
-}
-if [istarget "xscale-*-*"] then {
-    set asm-arch arm
-}
-if [istarget "d10v-*-*"] then {
-    set asm-arch d10v
-}
-if [istarget "s390-*-*"] then {
-    set asm-arch s390
-}
-if [istarget "x86_64-*-*"] then {
-    set asm-arch x86_64
-    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "i\[3456\]86-*-*"] then {
-    set asm-arch i386
-    if [istarget "*-*-cygwin*"] then {
-        set link-flags "--entry _start"
+switch -glob -- [istarget] {
+    "*arm-*-*" {
+        set asm-arch arm
+    }
+    "xscale-*-*" {
+        set asm-arch arm
+    }
+    "d10v-*-*" {
+        set asm-arch d10v
+    }
+    "s390-*-*" {
+        set asm-arch s390
+    }
+    "s390x-*-*" {
+        set asm-arch s390x
+    }
+    "x86_64-*-*" {
+        set asm-arch x86_64
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "i\[3456\]86-*-*" {
+        set asm-arch i386
+        if [istarget "*-*-cygwin*"] then {
+            set link-flags "--entry _start"
+        }
+    }
+    "m32r*-*" {
+        set asm-arch m32r
+    }
+    "m6811-*-*" {
+        set asm-arch m68hc11
+        set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "m6812-*-*" {
+        set asm-arch m68hc11
+        set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "mips*-*" {
+        set asm-arch mips
+    }
+    "powerpc*-*" {
+        set asm-arch powerpc
+    }
+    "sparc-*-*" {
+        set asm-arch sparc
+    }
+    "sparc64-*-*" {
+        set asm-arch sparc64
+        set asm-flags "-xarch=v9 -gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "xstormy16-*-*" {
+        set asm-arch xstormy16
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
+    "v850-*-*" {
+        set asm-arch v850
+        set gdb_wrapper_initialized 1
     }
 }
-if [istarget "m32r*-*"] then {
-    set asm-arch m32r
-}
-if [istarget "m6811-*-*"] then {
-    set asm-arch m68hc11
-    set asm-flags "-mshort-double -m68hc11 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "m6812-*-*"] then {
-    set asm-arch m68hc11
-    set asm-flags "-mshort-double -m68hc12 -gdwarf2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "mips*-*"] then {
-    set asm-arch mips
-}
-if [istarget "powerpc*-*"] then {
-    set asm-arch powerpc
-}
-if [istarget "sparc-*-*"] then {
-    set asm-arch sparc
-}
-if [istarget "sparc64-*-*"] then {
-    set asm-arch sparc64
-    set asm-flags "-xarch=v9 -gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "xstormy16-*-*"] then {
-    set asm-arch xstormy16
-    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-}
-if [istarget "v850-*-*"] then {
-    set asm-arch v850
-    set gdb_wrapper_initialized 1
-}
+
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
@@ -293,11 +299,35 @@ gdb_test "next" "17\[ \t\]+gdbasm_leave" "next over foo3"
 gdb_test "return" "\#0  main .*37\[ \t\]+gdbasm_exit0" "return from foo2" \
 	"Make (foo2|selected stack frame) return now\?.*" "y"
 
-# See if we can look at a global variable
-gdb_test "print globalvar" ".* = 11" "look at global variable"
+# Disassemble something, check the output
+proc test_dis { command var } {
+    global gdb_prompt
+    send_gdb "${command}\n"
+    gdb_expect {
+	-re "${var}.*:.*Cannot access" {
+	    # The "disassembler" was only accessing the local
+	    # executable and that would cause attempts to disassemble
+	    # variables to fail (memory not valid).
+	    fail "${command} (memory read error)"
+	}
+	-re "${var}.*:.*${gdb_prompt}" {
+	    pass "${command}"
+	}
+	timeout {
+	    fail "${command} (timeout)"
+	}
+    }
+}
 
-# See if we can look at a static variable
+# See if we can look at a global variable, three ways
+gdb_test "print globalvar" ".* = 11" "look at global variable"
+test_dis "x/i globalvar" "globalvar"
+test_dis "disassem &globalvar &globalvar+1" "globalvar"
+
+# See if we can look at a static variable, three ways
 gdb_test "print staticvar" ".* = 5" "look at static variable"
+test_dis "x/i &staticvar" "staticvar"
+test_dis "disassem &staticvar &staticvar+1" "staticvar"
 
 # See if we can look at a static function
 gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \

@@ -204,7 +204,7 @@ fetch_register (int tid, int regno)
   char mess[128];              /* For messages */
   register int i;
   unsigned int offset;         /* Offset of registers within the u area. */
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
 
   if (altivec_register_p (regno))
@@ -364,7 +364,7 @@ store_register (int tid, int regno)
   char mess[128];              /* For messages */
   register int i;
   unsigned int offset;         /* Offset of registers within the u area.  */
-  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
 
   if (altivec_register_p (regno))
     {

@@ -188,7 +188,7 @@ namespace C
 
     void marker2 (void)
     {
-      // NOTE: carlton/2002-10-11: I'm listing the expressions that I
+      // NOTE: carlton/2003-04-23: I'm listing the expressions that I
       // plan to have GDB try to print out, just to make sure that the
       // compiler and I agree which ones should be legal!  It's easy
       // to screw up when testing the boundaries of namespace stuff.
@@ -205,6 +205,8 @@ namespace C
       F::cXfX;
       X;
       G::Xg;
+      //cXOtherFile;
+      //XOtherFile;
       G::XgX;
       I::h;
       j;
@@ -215,6 +217,7 @@ namespace C
       //o;
       r1;
       //r2;
+
       return;
     }
 
@@ -246,6 +249,6 @@ int main ()
   c1 = cl.xyzq('e');
 
   marker1();
-
+  
   C::D::marker2 ();
 }

@@ -1469,7 +1469,7 @@ process_xcoff_symbol (register struct coff_symbol *cs, struct objfile *objfile)
 
   /* default assumptions */
   SYMBOL_VALUE_ADDRESS (sym) = cs->c_value + off;
-  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
   SYMBOL_SECTION (sym) = secnum_to_section (cs->c_secnum, objfile);
 
   if (ISFCN (cs->c_type))
@@ -2592,7 +2592,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
 		add_psymbol_to_list (namestring, p - namestring,
-				     VAR_NAMESPACE, LOC_STATIC,
+				     VAR_DOMAIN, LOC_STATIC,
 				     &objfile->static_psymbols,
 				     0, symbol.n_value,
 				     psymtab_language, objfile);
@@ -2603,7 +2603,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		/* The addresses in these entries are reported to be
 		   wrong.  See the code that reads 'G's for symtabs. */
 		add_psymbol_to_list (namestring, p - namestring,
-				     VAR_NAMESPACE, LOC_STATIC,
+				     VAR_DOMAIN, LOC_STATIC,
 				     &objfile->global_psymbols,
 				     0, symbol.n_value,
 				     psymtab_language, objfile);
@@ -2621,7 +2621,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 			&& namestring[0] != ' '))
 		  {
 		    add_psymbol_to_list (namestring, p - namestring,
-					 STRUCT_NAMESPACE, LOC_TYPEDEF,
+					 STRUCT_DOMAIN, LOC_TYPEDEF,
 					 &objfile->static_psymbols,
 					 symbol.n_value, 0,
 					 psymtab_language, objfile);
@@ -2629,7 +2629,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		      {
 			/* Also a typedef with the same name.  */
 			add_psymbol_to_list (namestring, p - namestring,
-					     VAR_NAMESPACE, LOC_TYPEDEF,
+					     VAR_DOMAIN, LOC_TYPEDEF,
 					     &objfile->static_psymbols,
 					     symbol.n_value, 0,
 					     psymtab_language, objfile);
@@ -2645,7 +2645,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 // OBSOLETE  		      {
 // OBSOLETE  			/* Also a typedef with the same name.  */
 // OBSOLETE  			add_psymbol_to_list (namestring, p - namestring,
-// OBSOLETE  					     VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE  					     VAR_DOMAIN, LOC_TYPEDEF,
 // OBSOLETE  					     &objfile->static_psymbols,
 // OBSOLETE  					     symbol.n_value, 0,
 // OBSOLETE  					     psymtab_language, objfile);
@@ -2658,7 +2658,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		if (p != namestring)	/* a name is there, not just :T... */
 		  {
 		    add_psymbol_to_list (namestring, p - namestring,
-					 VAR_NAMESPACE, LOC_TYPEDEF,
+					 VAR_DOMAIN, LOC_TYPEDEF,
 					 &objfile->static_psymbols,
 					 symbol.n_value, 0,
 					 psymtab_language, objfile);
@@ -2720,7 +2720,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 			/* Note that the value doesn't matter for
 			   enum constants in psymtabs, just in symtabs.  */
 			add_psymbol_to_list (p, q - p,
-					     VAR_NAMESPACE, LOC_CONST,
+					     VAR_DOMAIN, LOC_CONST,
 					     &objfile->static_psymbols, 0,
 					     0, psymtab_language, objfile);
 			/* Point past the name.  */
@@ -2738,7 +2738,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	      case 'c':
 		/* Constant, e.g. from "const" in Pascal.  */
 		add_psymbol_to_list (namestring, p - namestring,
-				     VAR_NAMESPACE, LOC_CONST,
+				     VAR_DOMAIN, LOC_CONST,
 				     &objfile->static_psymbols, symbol.n_value,
 				     0, psymtab_language, objfile);
 		continue;
@@ -2755,7 +2755,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		  }
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		add_psymbol_to_list (namestring, p - namestring,
-				     VAR_NAMESPACE, LOC_BLOCK,
+				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->static_psymbols,
 				     0, symbol.n_value,
 				     psymtab_language, objfile);
@@ -2776,7 +2776,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		  }
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		add_psymbol_to_list (namestring, p - namestring,
-				     VAR_NAMESPACE, LOC_BLOCK,
+				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->global_psymbols,
 				     0, symbol.n_value,
 				     psymtab_language, objfile);

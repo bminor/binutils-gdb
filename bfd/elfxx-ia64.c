@@ -720,7 +720,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Load the relocations for this section.  */
-  internal_relocs = (_bfd_elfNN_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -796,7 +796,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		goto error_return;
 	    }
 
-	  isym = isymbuf + ELF64_R_SYM (irel->r_info);
+	  isym = isymbuf + ELFNN_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
 	    continue;	/* We can't do anthing with undefined symbols.  */
 	  else if (isym->st_shndx == SHN_ABS)
@@ -1089,7 +1089,7 @@ elfNN_ia64_relax_ldxmov (abfd, contents, off)
     case 0: shift =  5; break;
     case 1: shift = 14; off += 3; break;
     case 2: shift = 23; off += 6; break;
-    case 3:
+    default:
       abort ();
     }
 
@@ -1466,7 +1466,7 @@ elfNN_ia64_aix_link_add_symbols (abfd, info)
   if (! elf_hash_table (info)->dynamic_sections_created
       && abfd->xvec == info->hash->creator)
     {
-      if (! bfd_elfNN_link_create_dynamic_sections (abfd, info))
+      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	return FALSE;
     }
 
@@ -1792,7 +1792,10 @@ elfNN_ia64_hash_hide_symbol (info, xh, force_local)
   _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
 
   for (dyn_i = h->info; dyn_i; dyn_i = dyn_i->next)
-    dyn_i->want_plt2 = 0;
+    {
+      dyn_i->want_plt2 = 0;
+      dyn_i->want_plt = 0;
+    }
 }
 
 /* Create the derived linker hash table.  The IA-64 ELF port uses this
@@ -2635,7 +2638,10 @@ allocate_fptr (dyn_i, data)
 	       || h->root.type == bfd_link_hash_warning)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      if (x->info->shared
+      if ((x->info->shared
+	   && (!h
+	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || h->root.type != bfd_link_hash_undefweak))
 	  /* AIX needs an FPTR in this case. */
 	  || (elfNN_ia64_aix_vec (x->info->hash->creator)
 	      && (!h
@@ -2760,15 +2766,18 @@ allocate_dynrel_entries (dyn_i, data)
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
   struct elfNN_ia64_link_hash_table *ia64_info;
   struct elfNN_ia64_dyn_reloc_entry *rent;
-  bfd_boolean dynamic_symbol, shared;
+  bfd_boolean dynamic_symbol, shared, resolved_zero;
 
   ia64_info = elfNN_ia64_hash_table (x->info);
   dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
     || (elfNN_ia64_aix_vec (x->info->hash->creator)
 	/* Don't allocate an entry for __GLOB_DATA_PTR */
 	&& (!dyn_i->h || strcmp (dyn_i->h->root.root.string,
-	  "__GLOB_DATA_PTR") != 0));
+				 "__GLOB_DATA_PTR") != 0));
   shared = x->info->shared;
+  resolved_zero = (dyn_i->h
+		   && ELF_ST_VISIBILITY (dyn_i->h->other)
+		   && dyn_i->h->root.type == bfd_link_hash_undefweak);
 
   /* Take care of the normal data relocations.  */
 
@@ -2813,8 +2822,12 @@ allocate_dynrel_entries (dyn_i, data)
 
   /* Take care of the GOT and PLT relocations.  */
 
-  if (((dynamic_symbol || shared) && (dyn_i->want_got || dyn_i->want_gotx))
-      || (dyn_i->want_ltoff_fptr && dyn_i->h && dyn_i->h->dynindx != -1))
+  if ((!resolved_zero
+       && (dynamic_symbol || shared)
+       && (dyn_i->want_got || dyn_i->want_gotx))
+      || (dyn_i->want_ltoff_fptr
+	  && dyn_i->h
+	  && dyn_i->h->dynindx != -1))
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if ((dynamic_symbol || shared) && dyn_i->want_tprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
@@ -2823,7 +2836,7 @@ allocate_dynrel_entries (dyn_i, data)
   if (dynamic_symbol && dyn_i->want_dtprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
 
-  if (dyn_i->want_pltoff)
+  if (!resolved_zero && dyn_i->want_pltoff)
     {
       bfd_size_type t = 0;
 
@@ -3431,7 +3444,11 @@ set_got_entry (abfd, info, dyn_i, dynindx, addend, value, dyn_r_type)
       bfd_put_64 (abfd, value, got_sec->contents + got_offset);
 
       /* Install a dynamic relocation if needed.  */
-      if ((info->shared && dyn_r_type != R_IA64_DTPREL64LSB)
+      if ((info->shared
+	   && (!dyn_i->h
+	       || ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
+	       || dyn_i->h->root.type != bfd_link_hash_undefweak)
+	   && dyn_r_type != R_IA64_DTPREL64LSB)
           || elfNN_ia64_dynamic_symbol_p (dyn_i->h, info)
 	  || elfNN_ia64_aix_vec (abfd->xvec)
 	  || (dynindx != -1 && dyn_r_type == R_IA64_FPTR64LSB))
@@ -3552,7 +3569,11 @@ set_pltoff_entry (abfd, info, dyn_i, value, is_plt)
       bfd_put_64 (abfd, gp, pltoff_sec->contents + dyn_i->pltoff_offset + 8);
 
       /* Install dynamic relocations if needed.  */
-      if (!is_plt && info->shared)
+      if (!is_plt
+	  && info->shared
+	  && (!dyn_i->h
+	      || ELF_ST_VISIBILITY (dyn_i->h->other) == STV_DEFAULT
+	      || dyn_i->h->root.type != bfd_link_hash_undefweak))
 	{
 	  unsigned int dyn_r_type;
 
@@ -3872,6 +3893,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sym_sec;
       bfd_byte *hit_addr;
       bfd_boolean dynamic_symbol_p;
+      bfd_boolean local_symbol_p;
       bfd_boolean undef_weak_ref;
 
       r_type = ELFNN_R_TYPE (rel->r_info);
@@ -3983,6 +4005,11 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       hit_addr = contents + rel->r_offset;
       value += rel->r_addend;
       dynamic_symbol_p = elfNN_ia64_dynamic_symbol_p (h, info);
+      /* Is this symbol locally defined? A protected symbol is locallly
+	 defined. But its function descriptor may not. Use it with
+	 caution.  */
+      local_symbol_p = (! dynamic_symbol_p
+			|| ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);
 
       switch (r_type)
 	{
@@ -4015,7 +4042,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* If we don't need dynamic symbol lookup, find a
 		 matching RELATIVE relocation.  */
 	      dyn_r_type = r_type;
-	      if (dynamic_symbol_p)
+	      if (! local_symbol_p)
 		{
 		  dynindx = h->dynindx;
 		  addend = rel->r_addend;
@@ -4344,7 +4371,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* If we don't need dynamic symbol lookup, install two
 		 RELATIVE relocations.  */
-	      if (! dynamic_symbol_p)
+	      if (local_symbol_p)
 		{
 		  unsigned int dyn_r_type;
 

@@ -180,7 +180,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   write_register (SP_REGNUM, sp);
 
   /* write the backchain */
-  store_address (old_sp_buf, 4, saved_sp);
+  store_unsigned_integer (old_sp_buf, 4, saved_sp);
   write_memory (sp, old_sp_buf, 4);
 
   argoffset = 8;
@@ -261,7 +261,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      || TYPE_CODE (type) == TYPE_CODE_UNION)
 	    {
 	      write_memory (sp + structoffset, val, len);
-	      store_address (val_buf, 4, sp + structoffset);
+	      store_unsigned_integer (val_buf, 4, sp + structoffset);
 	      structoffset += round2 (len, 8);
 	    }
 	  else

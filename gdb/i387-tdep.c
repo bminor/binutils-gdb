@@ -522,19 +522,34 @@ static int fxsave_offset[] =
   20,				/* FOSEG_REGNUM (16 bits).  */
   16,				/* FOOFF_REGNUM.  */
   6,				/* FOP_REGNUM (bottom 11 bits).  */
-  160,				/* XMM0_REGNUM through ...  */
-  176,
-  192,
-  208,
-  224,
-  240,
-  256,
-  272,				/* ... XMM7_REGNUM (128 bits each).  */
-  24,				/* MXCSR_REGNUM.  */
+  160 + 0 * 16,			/* XMM0_REGNUM through ...  */
+  160 + 1 * 16,
+  160 + 2 * 16,
+  160 + 3 * 16,
+  160 + 4 * 16,
+  160 + 5 * 16,
+  160 + 6 * 16,
+  160 + 7 * 16,
+  160 + 8 * 16,
+  160 + 9 * 16,
+  160 + 10 * 16,
+  160 + 11 * 16,
+  160 + 12 * 16,
+  160 + 13 * 16,
+  160 + 14 * 16,
+  160 + 15 * 16,		/* ... XMM15_REGNUM (128 bits each).  */
+  24				/* MXCSR_REGNUM.  */
 };
 
+/* FIXME: kettenis/20030430: We made an unfortunate choice in putting
+   %mxcsr after the SSE registers %xmm0-%xmm7 instead of before, since
+   it makes supporting the registers %xmm8-%xmm15 on x86-64 a bit
+   involved.  Hack around it by explicitly overriding the offset for
+   %mxcsr here.  */
+
 #define FXSAVE_ADDR(fxsave, regnum) \
-  (fxsave + fxsave_offset[regnum - FP0_REGNUM])
+  ((regnum == MXCSR_REGNUM) ? (fxsave + 24) : \
+   (fxsave + fxsave_offset[regnum - FP0_REGNUM]))
 
 static int i387_tag (unsigned char *raw);
 

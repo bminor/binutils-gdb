@@ -211,6 +211,27 @@ struct language_defn
        if it isn't a language tramp for this language.  */
     CORE_ADDR (*skip_trampoline) (CORE_ADDR pc);
 
+    /* Now come some hooks for lookup_symbol.  */
+
+    /* If this is non-NULL, lookup_symbol will do the 'field_of_this'
+       check, using this function to find the value of this.  */
+
+    /* FIXME: carlton/2003-05-19: Audit all the language_defn structs
+       to make sure we're setting this appropriately: I'm sure it
+       could be NULL in more languages.  */
+
+    struct value *(*la_value_of_this) (int complain);
+
+    /* This is a function that lookup_symbol will call when it gets to
+       the part of symbol lookup where C looks up static and global
+       variables.  */
+
+    struct symbol *(*la_lookup_symbol_nonlocal) (const char *,
+						 const char *,
+						 const struct block *,
+						 const domain_enum,
+						 struct symtab **);
+
     /* Return demangled language symbol, or NULL.  */
     char *(*la_demangle) (const char *mangled, int options);
 

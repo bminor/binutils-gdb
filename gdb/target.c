@@ -1215,7 +1215,7 @@ find_default_create_inferior (char *exec_file, char *allargs, char **env)
 static int
 default_region_size_ok_for_hw_watchpoint (int byte_count)
 {
-  return (byte_count <= REGISTER_SIZE);
+  return (byte_count <= DEPRECATED_REGISTER_SIZE);
 }
 
 static int
@@ -1640,7 +1640,7 @@ debug_print_register (const char * func, int regno)
   if (regno >= 0)
     {
       int i;
-      unsigned char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+      unsigned char buf[MAX_REGISTER_SIZE];
       deprecated_read_register_gen (regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)

@@ -190,7 +190,7 @@ store_inferior_registers (int regno)
 static void
 fetch_register (int regno)
 {
-  char *buf = alloca (max_register_size (current_gdbarch));
+  char buf[MAX_REGISTER_SIZE];
   unsigned int addr, len, offset;
   int i;
 

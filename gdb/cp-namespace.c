@@ -1,7 +1,7 @@
 /* Helper routines for C++ support in GDB.
    Copyright 2003 Free Software Foundation, Inc.
 
-   Contributed by David Carlton.
+   Contributed by David Carlton and by Kealia, Inc.
 
    This file is part of GDB.
 
@@ -55,6 +55,21 @@ static struct using_direct *cp_add_using (const char *name,
 
 static struct using_direct *cp_copy_usings (struct using_direct *using,
 					    struct obstack *obstack);
+
+static struct symbol *lookup_namespace_scope (const char *name,
+					      const char *linkage_name,
+					      const struct block *block,
+					      const domain_enum domain,
+					      struct symtab **symtab,
+					      const char *scope,
+					      int scope_len);
+
+static struct symbol *lookup_symbol_file (const char *name,
+					  const char *linkage_name,
+					  const struct block *block,
+					  const domain_enum domain,
+					  struct symtab **symtab,
+					  int anonymous_namespace);
 
 /* This block exists only to store symbols associated to namespaces.
    Normally, try to avoid accessing it directly: instead, use
@@ -298,6 +313,214 @@ cp_copy_usings (struct using_direct *using,
     }
 }
 
+/* The C++-specific version of name lookup for static and global
+   names.  This makes sure that names get looked for in all namespaces
+   that are in scope.  NAME is the natural name of the symbol that
+   we're looking for, LINKAGE_NAME (which is optional) is its linkage
+   name, BLOCK is the block that we're searching within, DOMAIN says
+   what kind of symbols we're looking for, and if SYMTAB is non-NULL,
+   we should store the symtab where we found the symbol in it.  */
+
+struct symbol *
+cp_lookup_symbol_nonlocal (const char *name,
+			   const char *linkage_name,
+			   const struct block *block,
+			   const domain_enum domain,
+			   struct symtab **symtab)
+{
+  return lookup_namespace_scope (name, linkage_name, block, domain,
+				 symtab, block_scope (block), 0);
+}
+
+/* Lookup NAME at namespace scope (or, in C terms, in static and
+   global variables).  SCOPE is the namespace that the current
+   function is defined within; only consider namespaces whose length
+   is at least SCOPE_LEN.  Other arguments are as in
+   cp_lookup_symbol_nonlocal.
+
+   For example, if we're within a function A::B::f and looking for a
+   symbol f, this will get called with NAME = "f", SCOPE = "A::B", and
+   SCOPE_LEN = 0.  It then calls itself with NAME and SCOPE the same,
+   but with SCOPE_LEN = 1.  And then it calls itself with NAME and
+   SCOPE the same, but with SCOPE_LEN = 4.  This third call looks for
+   "A::B::x"; if it doesn't find it, then the second call looks for
+   "A::x", and if that call fails, then the first call looks for
+   "x".  */
+
+static struct symbol *
+lookup_namespace_scope (const char *name,
+			const char *linkage_name,
+			const struct block *block,
+			const domain_enum domain,
+			struct symtab **symtab,
+			const char *scope,
+			int scope_len)
+{
+  char *namespace;
+
+  if (scope[scope_len] != '\0')
+    {
+      /* Recursively search for names in child namespaces first.  */
+
+      struct symbol *sym;
+      int new_scope_len = scope_len;
+
+      /* If the current scope is followed by "::", skip past that.  */
+      if (new_scope_len != 0)
+	{
+	  gdb_assert (scope[new_scope_len] == ':');
+	  new_scope_len += 2;
+	}
+      new_scope_len += cp_find_first_component (scope + new_scope_len);
+      sym = lookup_namespace_scope (name, linkage_name, block,
+				    domain, symtab,
+				    scope, new_scope_len);
+      if (sym != NULL)
+	return sym;
+    }
+
+  /* Okay, we didn't find a match in our children, so look for the
+     name in the current namespace.  */
+
+  namespace = alloca (scope_len + 1);
+  strncpy (namespace, scope, scope_len);
+  namespace[scope_len] = '\0';
+  return cp_lookup_symbol_namespace (namespace, name, linkage_name,
+				     block, domain, symtab);
+}
+
+/* Look up NAME in the C++ namespace NAMESPACE, applying the using
+   directives that are active in BLOCK.  Other arguments are as in
+   cp_lookup_symbol_nonlocal.  */
+
+struct symbol *
+cp_lookup_symbol_namespace (const char *namespace,
+			    const char *name,
+			    const char *linkage_name,
+			    const struct block *block,
+			    const domain_enum domain,
+			    struct symtab **symtab)
+{
+  const struct using_direct *current;
+  struct symbol *sym;
+
+  /* First, go through the using directives.  If any of them add new
+     names to the namespace we're searching in, see if we can find a
+     match by applying them.  */
+
+  for (current = block_using (block);
+       current != NULL;
+       current = current->next)
+    {
+      if (strcmp (namespace, current->outer) == 0)
+	{
+	  sym = cp_lookup_symbol_namespace (current->inner,
+					    name,
+					    linkage_name,
+					    block,
+					    domain,
+					    symtab);
+	  if (sym != NULL)
+	    return sym;
+	}
+    }
+
+  /* We didn't find anything by applying any of the using directives
+     that are still applicable; so let's see if we've got a match
+     using the current namespace.  */
+  
+  if (namespace[0] == '\0')
+    {
+      return lookup_symbol_file (name, linkage_name, block,
+				 domain, symtab, 0);
+    }
+  else
+    {
+      char *concatenated_name
+	= alloca (strlen (namespace) + 2 + strlen (name) + 1);
+      strcpy (concatenated_name, namespace);
+      strcat (concatenated_name, "::");
+      strcat (concatenated_name, name);
+      sym = lookup_symbol_file (concatenated_name, linkage_name,
+				block, domain, symtab,
+				cp_is_anonymous (namespace));
+      return sym;
+    }
+}
+
+/* Look up NAME in BLOCK's static block and in global blocks.  If
+   ANONYMOUS_NAMESPACE is nonzero, the symbol in question is located
+   within an anonymous namespace.  Other arguments are as in
+   cp_lookup_symbol_nonlocal.  */
+
+static struct symbol *
+lookup_symbol_file (const char *name,
+		    const char *linkage_name,
+		    const struct block *block,
+		    const domain_enum domain,
+		    struct symtab **symtab,
+		    int anonymous_namespace)
+{
+  struct symbol *sym = NULL;
+
+  sym = lookup_symbol_static (name, linkage_name, block, domain, symtab);
+  if (sym != NULL)
+    return sym;
+
+  if (anonymous_namespace)
+    {
+      /* Symbols defined in anonymous namespaces have external linkage
+	 but should be treated as local to a single file nonetheless.
+	 So we only search the current file's global block.  */
+
+      const struct block *global_block = block_global_block (block);
+      
+      if (global_block != NULL)
+	sym = lookup_symbol_aux_block (name, linkage_name, global_block,
+				       domain, symtab);
+
+      if (sym == NULL || global_block == NULL)
+	sym = cp_lookup_namespace_symbol (name);
+    }
+  else
+    {
+      sym = lookup_symbol_global (name, linkage_name, domain, symtab);
+    }
+
+  if (sym != NULL)
+    return sym;
+
+  /* Now call "cp_lookup_possible_namespace_symbol".  Symbols in here
+     claim to be associated to namespaces, whereas the names in
+     question might actually correspond to either namespaces or to
+     classes.  But if they correspond to classes, then we should have
+     found a match to them above.  So if we find them now, they should
+     be genuine.  */
+
+  /* FIXME: carlton/2002-12-18: This is a hack and should eventually
+     be deleted: see cp-support.c.  */
+
+  /* FIXME: carlton/2003-01-06: Searching this seems a bit fishy if
+     anonymous_namespace is nonzero, since we might return a namespace
+     that's really a class that doesn't happen to be mentioned in the
+     current file.  Sigh.  Still, I don't think anything catastrophic
+     should happen in that case.  Probably the right thing to do is to
+     move anonymous namespace symbols to files' static blocks.  */
+
+  if (domain == VAR_DOMAIN)
+    {
+      sym = cp_lookup_possible_namespace_symbol (name);
+      if (sym != NULL)
+	{
+	  if (symtab != NULL)
+	    *symtab = NULL;
+	  return sym;
+	}
+    }
+
+  return NULL;
+}
+
 /* Allocate everything necessary for namespace_block and
    possible_namespace_block.  */
 
@@ -421,7 +644,7 @@ cp_check_namespace_symbol (const char *name, int len)
       DEPRECATED_SYMBOL_NAME (sym) = name_copy;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
       dict_add_symbol (BLOCK_DICT (get_namespace_block ()), sym);
     }
@@ -439,7 +662,7 @@ struct symbol *
 cp_lookup_namespace_symbol (const char *name)
 {
   return lookup_block_symbol (get_namespace_block (), name, NULL,
-			      VAR_NAMESPACE);
+			      VAR_DOMAIN);
 }
 
 /* The next few functions deal with "possible namespace symbols".
@@ -466,7 +689,7 @@ check_one_possible_namespace_symbol (const char *name, int len)
   char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
   const struct block *block = get_possible_namespace_block ();
   struct symbol *sym = lookup_block_symbol (block, name_copy,
-					    NULL, VAR_NAMESPACE);
+					    NULL, VAR_DOMAIN);
 
   if (sym == NULL)
     {
@@ -480,7 +703,7 @@ check_one_possible_namespace_symbol (const char *name, int len)
       DEPRECATED_SYMBOL_NAME (sym) = name_copy;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
-      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
       dict_add_symbol (BLOCK_DICT (block), sym);
       return 0;
@@ -537,7 +760,7 @@ struct symbol *
 cp_lookup_possible_namespace_symbol (const char *name)
 {
   return lookup_block_symbol (get_possible_namespace_block (),
-			      name, NULL, VAR_NAMESPACE);
+			      name, NULL, VAR_DOMAIN);
 }
 
 static void

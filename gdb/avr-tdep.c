@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Contributed by Theodore A. Roth, troth@verinet.com */
+/* Contributed by Theodore A. Roth, troth@openavr.org */
 
 /* Portions of this file were taken from the original gdb-4.18 patch developed
    by Denis Chertykov, denisc@overta.ru */
@@ -331,7 +331,7 @@ avr_pointer_to_address (struct type *type, const void *buf)
       fprintf_unfiltered (gdb_stderr, "CODE_SPACE ---->> ptr->addr: 0x%lx\n",
 			  addr);
       fprintf_unfiltered (gdb_stderr,
-			  "+++ If you see this, please send me an email <troth@verinet.com>\n");
+			  "+++ If you see this, please send me an email <troth@openavr.org>\n");
     }
 
   /* Is it a code address?  */
@@ -396,7 +396,9 @@ avr_read_fp (void)
    pointer? */
 
 static void
-avr_remote_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
+avr_remote_translate_xfer_address (struct gdbarch *gdbarch,
+				   struct regcache *regcache,
+				   CORE_ADDR memaddr, int nr_bytes,
 				   CORE_ADDR *targ_addr, int *targ_len)
 {
   long out_addr;
@@ -1089,6 +1091,18 @@ avr_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
+/* Not all avr devices support the BREAK insn. Those that don't should treat
+   it as a NOP. Thus, it should be ok. Since the avr is currently a remote
+   only target, this shouldn't be a problem (I hope). TRoth/2003-05-14  */
+
+const unsigned char *
+avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
+{
+    static unsigned char avr_break_insn [] = { 0x98, 0x95 };
+    *lenptr = sizeof (avr_break_insn);
+    return avr_break_insn;
+}
+
 /* Initialize the gdbarch structure for the AVR's. */
 
 static struct gdbarch *
@@ -1156,8 +1170,8 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, AVR_PC_REGNUM);
 
   set_gdbarch_register_name (gdbarch, avr_register_name);
-  set_gdbarch_register_size (gdbarch, 1);
-  set_gdbarch_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
+  set_gdbarch_deprecated_register_size (gdbarch, 1);
+  set_gdbarch_deprecated_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
   set_gdbarch_register_byte (gdbarch, avr_register_byte);
   set_gdbarch_register_raw_size (gdbarch, avr_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
@@ -1168,7 +1182,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
-  set_gdbarch_call_dummy_words (gdbarch, avr_call_dummy_words);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, avr_call_dummy_words);
 
 /*    set_gdbarch_believe_pcc_promotion (gdbarch, 1); // TRoth: should this be set? */
 
@@ -1187,6 +1201,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_breakpoint_from_pc (gdbarch, avr_breakpoint_from_pc);
 
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_remote_translate_xfer_address (gdbarch,

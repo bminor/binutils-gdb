@@ -305,14 +305,11 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-#define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
-#define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
-
 const static unsigned char *
 rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
-  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+  static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
+  static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
   *bp_size = 4;
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return big_breakpoint;
@@ -984,7 +981,7 @@ rs6000_pop_frame (void)
     }
 
   /* Make sure that all registers are valid.  */
-  deprecated_read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES);
 
   /* Figure out previous %pc value.  If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
@@ -1269,7 +1266,7 @@ ran_out_of_registers_for_arguments:
     write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
-  store_address (tmp_buffer, 4, saved_sp);
+  store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
   target_store_registers (-1);
@@ -1739,7 +1736,7 @@ frame_initial_stack_address (struct frame_info *fi)
   /* There is an alloca register, use its value, in the current frame,
      as the initial stack pointer.  */
   {
-    char *tmpbuf = alloca (MAX_REGISTER_RAW_SIZE);
+    char tmpbuf[MAX_REGISTER_SIZE];
     if (frame_register_read (fi, fdata.alloca_reg, tmpbuf))
       {
 	get_frame_extra_info (fi)->initial_sp
@@ -1921,7 +1918,7 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum;
   int offset = 0;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
@@ -1944,7 +1941,7 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum;
   int offset = 0;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
@@ -2878,8 +2875,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
-  set_gdbarch_register_size (gdbarch, wordsize);
-  set_gdbarch_register_bytes (gdbarch, off);
+  set_gdbarch_deprecated_register_size (gdbarch, wordsize);
+  set_gdbarch_deprecated_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
@@ -2900,7 +2897,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);

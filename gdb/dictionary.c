@@ -643,6 +643,7 @@ insert_symbol_hashed (struct dictionary *dict,
 
   hash_index = (msymbol_hash_iw (SYMBOL_NATURAL_NAME (sym))
 		% DICT_HASHED_NBUCKETS (dict));
+  gdb_assert (sym != buckets[hash_index]);
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
 }

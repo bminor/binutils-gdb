@@ -776,7 +776,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   /* Set argptr to skip over the name.  */
   *argptr = (*next_component == '\'') ? next_component + 1 : next_component;
   /* Look up entire name.  */
-  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+  sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
 
   if (sym != NULL)
     return symbol_found (funfirstline, canonical, copy,
@@ -899,9 +899,9 @@ locate_compound_sym (char **argptr, char *current_component,
     current_component++;
   *argptr = current_component;
 
-  return lookup_symbol_namespace (namespace, copy, NULL,
-				  get_selected_block(0),
-				  VAR_NAMESPACE, NULL);
+  return cp_lookup_symbol_namespace (namespace, copy, NULL,
+				     get_selected_block(0),
+				     VAR_DOMAIN, NULL);
 }
 
 /* Try to look up the symbol in the namespace NAMESPACE whose name
@@ -930,9 +930,9 @@ decode_namespace (char **argptr, int funfirstline,
   copy[next_component - *argptr] = '\0';
   *argptr = next_component;
 
-  sym = lookup_symbol_namespace (namespace, copy, NULL,
-				 get_selected_block(0),
-				 VAR_NAMESPACE, &sym_symtab);
+  sym = cp_lookup_symbol_namespace (namespace, copy, NULL,
+				    get_selected_block(0),
+				    VAR_DOMAIN, &sym_symtab);
 
   if (sym != NULL)
     {
@@ -1110,7 +1110,7 @@ find_methods (struct type *class_type, char *method,
      unless we figure out how to get the physname without the name of
      the class, then the loop can't do any good.  */
   if (class_name != NULL
-      && (lookup_symbol (class_name, NULL, STRUCT_NAMESPACE, NULL,
+      && (lookup_symbol (class_name, NULL, STRUCT_DOMAIN, NULL,
 			 NULL) != NULL))
     {
       int method_counter;
@@ -1659,7 +1659,7 @@ decode_dollar (char **argptr, int funfirstline, struct symtab *default_symtab,
       struct minimal_symbol *msymbol;
       
       /* Look up entire name as a symbol first.  */
-      sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
       if (sym != NULL)
 	return symbol_found (funfirstline, canonical, copy,
 			     sym, NULL, sym_symtab);
@@ -1754,7 +1754,7 @@ decode_variable (char **argptr, int funfirstline, char ***canonical,
 			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
 					     STATIC_BLOCK)
 			: get_selected_block (0)),
-		       VAR_NAMESPACE, NULL, &sym_symtab);
+		       VAR_DOMAIN, NULL, &sym_symtab);
 
   if (sym != NULL)
     {
@@ -1840,7 +1840,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	{
 	  struct blockvector *bv = BLOCKVECTOR (sym_symtab);
 	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	  if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
+	  if (lookup_block_symbol (b, copy, NULL, VAR_DOMAIN) != NULL)
 	    build_canonical_line_spec (values.sals, copy, canonical);
 	}
       return values;

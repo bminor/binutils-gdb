@@ -1791,7 +1791,7 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 		    &rpc, &rfp, &rsp, flags);
   if (nfields >= 3)
     {
-      char *buf = alloca (max_register_size (current_gdbarch));
+      char buf[MAX_REGISTER_SIZE];
 
       store_unsigned_integer (buf, REGISTER_RAW_SIZE (PC_REGNUM), rpc);
       supply_register (PC_REGNUM, buf);
@@ -1972,7 +1972,7 @@ mips_fetch_registers (int regno)
     }
 
   {
-    char *buf = alloca (max_register_size (current_gdbarch));
+    char buf[MAX_REGISTER_SIZE];
 
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */
@@ -2251,13 +2251,13 @@ mips_mourn_inferior (void)
 /* We can write a breakpoint and read the shadow contents in one
    operation.  */
 
-/* Insert a breakpoint.  On targets that don't have built-in breakpoint
-   support, we read the contents of the target location and stash it,
-   then overwrite it with a breakpoint instruction.  ADDR is the target
-   location in the target machine.  CONTENTS_CACHE is a pointer to 
-   memory allocated for saving the target contents.  It is guaranteed
-   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
-   is accomplished via BREAKPOINT_MAX).  */
+/* Insert a breakpoint.  On targets that don't have built-in
+   breakpoint support, we read the contents of the target location and
+   stash it, then overwrite it with a breakpoint instruction.  ADDR is
+   the target location in the target machine.  CONTENTS_CACHE is a
+   pointer to memory allocated for saving the target contents.  It is
+   guaranteed by the caller to be long enough to save the breakpoint
+   length returned by BREAKPOINT_FROM_PC.  */
 
 static int
 mips_insert_breakpoint (CORE_ADDR addr, char *contents_cache)

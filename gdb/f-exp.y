@@ -1141,7 +1141,7 @@ yylex ()
     int hextype;
     
     sym = lookup_symbol (tmp, expression_context_block,
-			 VAR_NAMESPACE,
+			 VAR_DOMAIN,
 			 current_language->la_language == language_cplus
 			 ? &is_a_field_of_this : NULL,
 			 NULL);

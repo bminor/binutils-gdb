@@ -171,10 +171,6 @@ Deprecate, if not delete, the following:
 		how it relates to rawreg and the
 		regnum is clear.
 
-	REGISTER_BYTES
-		The size of the cache can be computed
-		on the fly.
-
 --
 
 Obsolete the targets:

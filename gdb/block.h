@@ -161,41 +161,15 @@ extern const char *block_scope (const struct block *block);
 extern void block_set_scope (struct block *block, const char *scope,
 			     struct obstack *obstack);
 
+extern struct using_direct *block_using (const struct block *block);
+
 extern void block_set_using (struct block *block,
 			     struct using_direct *using,
 			     struct obstack *obstack);
 
 extern const struct block *block_static_block (const struct block *block);
 
-/* In an ideal world, this would be opaque: don't access it directly,
-   just use the iterator functions.  */
-
-struct block_using_iterator
-{
-  const struct block *current_block;
-  const struct using_direct *next_directive;
-};
-
-/* Initialize ITERATOR to point at the first using directive valid for
-   BLOCK, and return that using directive, or NULL if there aren't
-   any.  */
-
-extern const struct
-using_direct *block_using_iterator_first (const struct block *block,
-					  struct block_using_iterator
-					  *iterator);
-
-/* Advance ITERATOR, and return the next using directive, or NULL if
-   there aren't any more.  Don't call this if you've previously
-   received NULL from block_using_iterator_first or
-   block_using_iterator_next during this iteration.  */
-
-extern const struct
-using_direct *block_using_iterator_next (struct block_using_iterator
-					 *iterator);
-
-/* Allocate a dummy block.  See warnings before the source code of
-   this function about using it correctly.  */
+extern const struct block *block_global_block (const struct block *block);
 
 extern struct block *allocate_block (struct obstack *obstack);
 

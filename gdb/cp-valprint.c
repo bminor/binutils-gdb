@@ -34,6 +34,7 @@
 #include "c-lang.h"
 #include "target.h"
 #include "cp-abi.h"
+#include "valprint.h"
 
 /* Indication of presence of HP-compiled object files */
 extern int hp_som_som_object_present;	/* defined in symtab.c */
@@ -266,8 +267,6 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      extern int inspect_it;
-
       if (dont_print_statmem == 0)
 	{
 	  /* If we're at top level, carve out a completely fresh

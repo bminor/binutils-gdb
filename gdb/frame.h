@@ -28,6 +28,7 @@ struct frame_unwind;
 struct frame_base;
 struct block;
 struct gdbarch;
+struct ui_file;
 
 /* A legacy unwinder to prop up architectures using the old style
    saved regs array.  */
@@ -94,6 +95,10 @@ extern int frame_id_eq (struct frame_id l, struct frame_id r);
    different frame .bases).  Neither L, nor R can be `null'.  See note
    above about frameless functions.  */
 extern int frame_id_inner (struct frame_id l, struct frame_id r);
+
+/* Write the internal representation of a frame ID on the specified
+   stream.  */
+extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
 
 
 /* For every stopped thread, GDB tracks two frames: current and

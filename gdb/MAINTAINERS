@@ -67,7 +67,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Richard Earnshaw	rearnsha@arm.com
 
 	avr		--target=avr ,-Werror
-			Theodore A. Roth	troth@verinet.com
+			Theodore A. Roth	troth@openavr.org
 
 	cris		--target=cris-elf ,-Werror
 			Orjan Friberg		orjanf@axis.com
@@ -368,7 +368,7 @@ David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
 Bob Rossi 					bob_rossi@cox.net 
-Theodore A. Roth				troth@verinet.com
+Theodore A. Roth				troth@openavr.org
 Ian Roxborough					irox@redhat.com
 Grace Sainsbury					graces@redhat.com
 Mark Salter					msalter@redhat.com
@@ -383,6 +383,7 @@ Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
 Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
+Ian Lance Taylor				ian@airs.com
 Gary Thomas					gthomas@redhat.com
 Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com

@@ -24,11 +24,14 @@
 #ifndef CP_SUPPORT_H
 #define CP_SUPPORT_H
 
+/* We need this for 'domain_enum', alas...  */
+
+#include "symtab.h"
+
 /* Opaque declarations.  */
 
 struct obstack;
 struct block;
-struct symbol;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace INNER should be visible within
@@ -87,6 +90,19 @@ extern void cp_set_block_scope (const struct symbol *symbol,
 				struct obstack *obstack);
 
 extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
+
+extern struct symbol *cp_lookup_symbol_nonlocal (const char *name,
+						 const char *linkage_name,
+						 const struct block *block,
+						 const domain_enum domain,
+						 struct symtab **symtab);
+
+extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
+						  const char *name,
+						  const char *linkage_name,
+						  const struct block *block,
+						  const domain_enum domain,
+						  struct symtab **symtab);
 
 /* The list of "maint cplus" commands.  */
 

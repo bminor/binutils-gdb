@@ -37,9 +37,9 @@ ia64-*-hpux*)		host64=true
 			HOST_U_64BIT_TYPE="unsigned long long";
 			;;
 
-i[3456]86-sequent-bsd*)	HDEFINES=-Dshared=genshared ;;
-i[3456]86-sequent-sysv4*) ;;
-i[3456]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;
+i[3-7]86-sequent-bsd*)	HDEFINES=-Dshared=genshared ;;
+i[3-7]86-sequent-sysv4*) ;;
+i[3-7]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;
 
 mips*-*-netbsd*)	;;
 mips*-*-openbsd*)	;;

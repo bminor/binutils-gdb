@@ -896,7 +896,7 @@ char *
 monitor_supply_register (int regno, char *valstr)
 {
   ULONGEST val;
-  unsigned char *regbuf = alloca (max_register_size (current_gdbarch));
+  unsigned char regbuf[MAX_REGISTER_SIZE];
   char *p;
 
   val = 0;
@@ -1181,9 +1181,9 @@ monitor_fetch_register (int regno)
   char *regbuf;
   int i;
 
-  regbuf  = alloca (MAX_REGISTER_RAW_SIZE * 2 + 1);
-  zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  regbuf  = alloca (MAX_REGISTER_SIZE * 2 + 1);
+  zerobuf = alloca (MAX_REGISTER_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   if (current_monitor->regname != NULL)
     name = current_monitor->regname (regno);
@@ -2098,7 +2098,7 @@ monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
     addr = ADDR_BITS_REMOVE (addr);
 
   /* Determine appropriate breakpoint size for this address.  */
-  bp = memory_breakpoint_from_pc (&addr, &bplen);
+  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
 
   for (i = 0; i < current_monitor->num_breakpoints; i++)
     {

@@ -29,6 +29,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "m68k-tdep.h"
 
@@ -429,9 +430,9 @@ void
 m68k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 		     struct value **args, struct type *type, int gcc_p)
 {
-  bfd_putb32 (fun, (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 2);
+  bfd_putb32 (fun, (unsigned char *) dummy + DEPRECATED_CALL_DUMMY_START_OFFSET + 2);
   bfd_putb32 (nargs * 4,
-	      (unsigned char *) dummy + CALL_DUMMY_START_OFFSET + 8);
+	      (unsigned char *) dummy + DEPRECATED_CALL_DUMMY_START_OFFSET + 8);
 }
 
 
@@ -1025,11 +1026,11 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 12);
   set_gdbarch_register_virtual_type (gdbarch, m68k_register_virtual_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
-  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_register_byte (gdbarch, m68k_register_byte);
   set_gdbarch_num_regs (gdbarch, 29);
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
-  set_gdbarch_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
+  set_gdbarch_deprecated_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
   set_gdbarch_sp_regnum (gdbarch, M68K_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, M68K_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
@@ -1038,19 +1039,22 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24);
+  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 24);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-  set_gdbarch_call_dummy_length (gdbarch, 28);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 12);
+  set_gdbarch_deprecated_call_dummy_length (gdbarch, 28);
+  set_gdbarch_deprecated_call_dummy_start_offset (gdbarch, 12);
 
-  set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
-  set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
+  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
+  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
+  set_gdbarch_deprecated_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, m68k_pop_frame);
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

@@ -36,8 +36,6 @@ struct block_namespace_info
   struct using_direct *using;
 };
 
-static struct using_direct *block_using (const struct block *);
-
 static void block_initialize_namespace (struct block *block,
 					struct obstack *obstack);
 
@@ -190,16 +188,25 @@ block_set_scope (struct block *block, const char *scope,
   BLOCK_NAMESPACE (block)->scope = scope;
 }
 
-/* This returns the using directives associated to BLOCK (but _not_
-   its parents), if any.  */
+/* This returns the first using directives associated to BLOCK, if
+   any.  */
 
-static struct using_direct *
+/* FIXME: carlton/2003-04-23: This uses the fact that we currently
+   only have using directives in static blocks, because we only
+   generate using directives from anonymous namespaces.  Eventually,
+   when we support using directives everywhere, we'll want to replace
+   this by some iterator functions.  */
+
+struct using_direct *
 block_using (const struct block *block)
 {
-  if (BLOCK_NAMESPACE (block) == NULL)
+  const struct block *static_block = block_static_block (block);
+
+  if (static_block == NULL
+      || BLOCK_NAMESPACE (static_block) == NULL)
     return NULL;
   else
-    return BLOCK_NAMESPACE (block)->using;
+    return BLOCK_NAMESPACE (static_block)->using;
 }
 
 /* Set BLOCK's using member to USING; if needed, allocate memory via
@@ -246,55 +253,19 @@ block_static_block (const struct block *block)
   return block;
 }
 
-/* Initialize ITERATOR to point at the first using directive valid for
-   BLOCK, and return that using directive, or NULL if there aren't
-   any.  */
+/* Return the static block associated to BLOCK.  Return NULL if block
+   is NULL.  */
 
-const struct using_direct *
-block_using_iterator_first (const struct block *block,
-			    struct block_using_iterator *iterator)
+const struct block *
+block_global_block (const struct block *block)
 {
   if (block == NULL)
     return NULL;
-  
-  iterator->current_block = block;
-  iterator->next_directive = block_using (block);
 
-  return block_using_iterator_next (iterator);
-}
+  while (BLOCK_SUPERBLOCK (block) != NULL)
+    block = BLOCK_SUPERBLOCK (block);
 
-/* Advance ITERATOR, and return the next using directive, or NULL if
-   there aren't any more.  Don't call this if you've previously
-   received NULL from block_using_iterator_first or
-   block_using_iterator_next during this iteration.  */
-
-const struct using_direct *
-block_using_iterator_next (struct block_using_iterator *iterator)
-{
-  if (iterator->next_directive != NULL)
-    {
-      const struct using_direct *retval = iterator->next_directive;
-      iterator->next_directive = retval->next;
-      return retval;
-    }
-  else
-    {
-      while (BLOCK_SUPERBLOCK (iterator->current_block) != NULL)
-	{
-	  iterator->current_block
-	    = BLOCK_SUPERBLOCK (iterator->current_block);
-	  iterator->next_directive = block_using (iterator->current_block); 
-	  if (iterator->next_directive != NULL)
-	    {
-	      const struct using_direct *retval = iterator->next_directive;
-	      iterator->next_directive = retval->next;
-	      return retval;
-	    }
-	}
-
-      /* We didn't find any superblocks with using directives.  */
-      return NULL;
-    }
+  return block;
 }
 
 /* This allocates a block on OBSTACK, and initializes its elements to

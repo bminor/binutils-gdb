@@ -1,3 +1,8 @@
+2003-05-13  Andreas Jaeger  <aj@suse.de>
+
+        * support/config.guess: Update to 2003-05-09 version.
+        * support/config.sub: Update to 2003-05-09 version.
+
 2003-03-03  Joel Brobecker  <brobecker@gnat.com>
 
 	* aclocal.m4: Add check for mbrtowc.

@@ -1,7 +1,7 @@
-/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
-   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
-   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c", 
-   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c", 
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
+   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c",
+   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c",
+   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c",
    "linker.c" and "simple.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
@@ -658,9 +658,7 @@ struct bfd_link_needed_list
   const char *name;
 };
 
-extern bfd_boolean bfd_elf32_record_link_assignment
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, bfd_boolean));
-extern bfd_boolean bfd_elf64_record_link_assignment
+extern bfd_boolean bfd_elf_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *, bfd_boolean));
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -702,6 +700,22 @@ extern long bfd_get_elf_phdr_upper_bound
    error occurs; bfd_get_error will return an appropriate code.  */
 extern int bfd_get_elf_phdrs
   PARAMS ((bfd *abfd, void *phdrs));
+
+/* Create a new BFD as if by bfd_openr.  Rather than opening a file,
+   reconstruct an ELF file by reading the segments out of remote memory
+   based on the ELF file header at EHDR_VMA and the ELF program headers it
+   points to.  If not null, *LOADBASEP is filled in with the difference
+   between the VMAs from which the segments were read, and the VMAs the
+   file headers (and hence BFD's idea of each section's VMA) put them at.
+
+   The function TARGET_READ_MEMORY is called to copy LEN bytes from the
+   remote memory at target address VMA into the local buffer at MYADDR; it
+   should return zero on success or an `errno' code on failure.  TEMPL must
+   be a BFD for an ELF target with the word size and byte order found in
+   the remote memory.  */
+extern bfd *bfd_elf_bfd_from_remote_memory
+  PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	   int (*target_read_memory) (bfd_vma vma, char *myaddr, int len)));
 
 /* Return the arch_size field of an elf bfd, or -1 if not elf.  */
 extern int bfd_get_arch_size
@@ -1637,6 +1651,7 @@ enum bfd_architecture
 #define bfd_mach_h8300s   3
 #define bfd_mach_h8300hn  4
 #define bfd_mach_h8300sn  5
+#define bfd_mach_h8300sx  6
   bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           32
@@ -1777,7 +1792,7 @@ enum bfd_architecture
 #define bfd_mach_msp43          43
 #define bfd_mach_msp44          44
 #define bfd_mach_msp15          15
-#define bfd_mach_msp16          16  
+#define bfd_mach_msp16          16
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
   bfd_arch_last
@@ -3465,14 +3480,14 @@ instruction opcode.  */
   BFD_RELOC_XTENSA_OP1,
   BFD_RELOC_XTENSA_OP2,
 
-/* Xtensa relocation to mark that the assembler expanded the 
+/* Xtensa relocation to mark that the assembler expanded the
 instructions from an original target.  The expansion size is
 encoded in the reloc size.  */
   BFD_RELOC_XTENSA_ASM_EXPAND,
 
-/* Xtensa relocation to mark that the linker should simplify 
-assembler-expanded instructions.  This is commonly used 
-internally by the linker after analysis of a 
+/* Xtensa relocation to mark that the linker should simplify
+assembler-expanded instructions.  This is commonly used
+internally by the linker after analysis of a
 BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
   BFD_RELOC_UNUSED };

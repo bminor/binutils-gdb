@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -859,7 +859,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		{
 
 		  /* Get a copy of the native relocations.  */
-		  internal_relocs = (_bfd_elf32_link_read_relocs
+		  internal_relocs = (_bfd_elf_link_read_relocs
 				     (input_bfd, section, (PTR) NULL,
 				      (Elf_Internal_Rela *) NULL,
 				      link_info->keep_memory));
@@ -1125,7 +1125,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      if (section->reloc_count != 0)
 		{
 		  /* Get a copy of the native relocations.  */
-		  internal_relocs = (_bfd_elf32_link_read_relocs
+		  internal_relocs = (_bfd_elf_link_read_relocs
 				     (input_bfd, section, (PTR) NULL,
 				      (Elf_Internal_Rela *) NULL,
 				      link_info->keep_memory));
@@ -1351,7 +1351,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Get a copy of the native relocations.  */
-  internal_relocs = (_bfd_elf32_link_read_relocs
+  internal_relocs = (_bfd_elf_link_read_relocs
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
@@ -2577,7 +2577,7 @@ mn10300_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
       Elf_Internal_Sym *isym, *isymend;
       bfd_size_type amt;
 
-      internal_relocs = (_bfd_elf32_link_read_relocs
+      internal_relocs = (_bfd_elf_link_read_relocs
 			 (input_bfd, input_section, (PTR) NULL,
 			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)

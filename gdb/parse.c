@@ -646,17 +646,17 @@ parse_nested_classes_for_hpacc (char *name, int len, char **token,
       if (!done)
 	{
 	  /* More tokens to process, so this must be a class/namespace */
-	  sym_class = lookup_symbol (prefix, 0, STRUCT_NAMESPACE,
+	  sym_class = lookup_symbol (prefix, 0, STRUCT_DOMAIN,
 				     0, (struct symtab **) NULL);
 	}
       else
 	{
 	  /* No more tokens, so try as a variable first */
-	  sym_var = lookup_symbol (prefix, 0, VAR_NAMESPACE,
+	  sym_var = lookup_symbol (prefix, 0, VAR_DOMAIN,
 				   0, (struct symtab **) NULL);
 	  /* If failed, try as class/namespace */
 	  if (!sym_var)
-	    sym_class = lookup_symbol (prefix, 0, STRUCT_NAMESPACE,
+	    sym_class = lookup_symbol (prefix, 0, STRUCT_DOMAIN,
 				       0, (struct symtab **) NULL);
 	}
 

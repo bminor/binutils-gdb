@@ -1,3 +1,37 @@
+2003-05-18  Jason Eckhardt  <jle@rice.edu>
+
+	* i860-dis.c (print_insn_i860): Instruction shrd has a dual bit,
+	print it.
+
+2003-05-17  Andreas Jaeger  <aj@suse.de>
+
+        * Makefile.am (libopcodes_la_LIBADD): Add libbfd.la.
+        (libopcodes_la_DEPENDENCIES): Add libbfd.la.
+        * Makefile.in: Regenerated.
+
+2003-05-16  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add Romanian translation.
+	* configure: Regenerate.
+	* po/ro.po: New file: Romanian translation.
+
+2003-05-12  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
+	* disassemble.c (disassembler): Add support for h8300hn and h8300sn.
+
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (print_insn): Test intel_syntax against (char) -1 in
+	case char is unsigned.
+
+2003-05-01  Christian Groessler <chris@groessler.org>
+
+	* z8k-dis.c (z8k_lookup_instr): Optimize FETCH_DATA calls.
+	(unpack_instr): Fix representation of segmented addresses.
+	(intr_name): Added, contains names of the parameters to the EI/DI
+	instructions.
+	(unparse_instr): Fix display of EI/DI parameters.
+
 2003-04-22  Doug Evans  <dje@sebabeach.org>
 
 	* fr30-desc.c,fr30-desc.h,fr30-opc.c,fr30-opc.h: Regenerate.

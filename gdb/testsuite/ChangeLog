@@ -1,3 +1,77 @@
+2003-05-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/corefile.exp: Tolerate stuff after argument parens in
+	backtrace.
+	
+2003-05-20  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace1.cc: Actually do 'cvs add' before committing
+	this time.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/rtti.exp: New file, containing tests for PR c++/488.
+	* gdb.c++/rtti.h, gdb.c++/rtti1.cc, gdb.c++/rtti2.cc: Ditto.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/namespace.exp: Add namespace scope and anonymous
+	namespace tests.
+	Bump copyright date.
+	* gdb.c++/namespace.cc: Add anonymous namespace and namespace C.
+	(main): Call C::D::marker2.
+	* gdb.c++/namespace1.cc: New file.
+
+2003-05-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+	Roland McGrath  <roland@redhat.com>
+	* gdb.threads/linux-dp.exp: Account for fact that in nptl model 
+	there is no manager thread.
+
+2003-05-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.threads/schedlock.exp: Remove assumption that all threads 
+	will run in a particular small time slice.  Also ensure we break 
+	in one of the child threads rather than the main thread.
+
+2003-05-07  Jim Blandy  <jimb@redhat.com>
+
+	Add support for assembly source testing on the s390x.
+	* gdb.asm/asm-source.exp: Add a case for the s390x-*-*
+	architecture.
+	* gdb.asm/s390x.inc: New file.
+
+	* gdb.asm/asm-source.exp: Use a 'switch -glob' statement, not a
+	succession of 'if' statements.
+
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/maint.exp: Add tests for "maint print dummy-frames".
+
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/watchpoint.exp: Rename CALL_DUMMY_BREAKPOINT_OFFSET to
+	DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET in comments.
+
+2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/charset.exp: Update based on new behavior of set/show
+	charset commands.
+
+2003-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.asm/asm-source.exp: Check that "disassm" and "x/i" of a
+	variable do not give memory errors.
+
+2003-04-30  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.objc
+	* configure.in (AC_OUTPUT): Add gdb.objc/Makefile
+	* gdb.objc/Makefile.in, gdb.objc/basicclass.exp,
+	gdb.objc/basicclass.m: : New files
+
+	* lib/gdb.exp (gdb_compile_objc): New procedure.
+
 2003-05-16  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/rtti.exp: Convert the gdb/488 kfail into a fail, and

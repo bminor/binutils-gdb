@@ -1425,7 +1425,7 @@ patch_opaque_types (struct symtab *s)
          but search the whole chain, as there may be several syms
          from different files with the same name.  */
       if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF &&
-	  SYMBOL_NAMESPACE (real_sym) == VAR_NAMESPACE &&
+	  SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN &&
 	  TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&
 	  TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
@@ -1487,7 +1487,7 @@ process_coff_symbol (register struct coff_symbol *cs,
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
-  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
   SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
 
   if (ISFCN (cs->c_type))
@@ -1609,7 +1609,7 @@ process_coff_symbol (register struct coff_symbol *cs,
 
 	case C_TPDEF:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
 	  /* If type has no name, give it one */
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
@@ -1669,7 +1669,7 @@ process_coff_symbol (register struct coff_symbol *cs,
 	case C_UNTAG:
 	case C_ENTAG:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	  SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	  /* Some compilers try to be helpful by inventing "fake"
 	     names for anonymous enums, structures, and unions, like
@@ -2079,7 +2079,7 @@ coff_read_enum_type (int index, int length, int lastsym)
 	    obsavestring (name, strlen (name),
 			  &current_objfile->symbol_obstack);
 	  SYMBOL_CLASS (sym) = LOC_CONST;
-	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;
 	  add_symbol_to_list (sym, symlist);
 	  nsyms++;

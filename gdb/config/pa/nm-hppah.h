@@ -121,9 +121,10 @@ extern int hppa_can_use_hw_watchpoint (int type, int cnt, int ot);
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
         hppa_can_use_hw_watchpoint(type, cnt, ot)
 
-/* The PA can also watch memory regions of arbitrary size, since we're using
-   a page-protection scheme.  (On some targets, apparently watch registers
-   are used, which can only accomodate regions of REGISTER_SIZE.) */
+/* The PA can also watch memory regions of arbitrary size, since we're
+   using a page-protection scheme.  (On some targets, apparently watch
+   registers are used, which can only accomodate regions of
+   DEPRECATED_REGISTER_SIZE.)  */
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(byte_count) \
         (1)
 

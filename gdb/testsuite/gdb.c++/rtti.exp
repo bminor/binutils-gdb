@@ -19,10 +19,10 @@
 # This contains tests for GDB's use of RTTI information.  This stems
 # from a bug reported in PR gdb/488 and other places, which leads to
 # statements like 'warning: can't find class named 'C::D', as given by
-# C++ RTTI.  It arises from GDB not knowing about classes that are
+# C++ RTTI'.  It arises from GDB not knowing about classes that are
 # defined in namespaces.
 
-# NOTE: carlton/2003-05-02: I suspect it could arise from nested class
+# NOTE: carlton/2003-05-16: I suspect it could arise from nested class
 # issues, too, and even once we fix that, there might be situations
 # (involving templates, in particular) where this problem triggers
 # because GDB and GCC have different ideas what a class is called.
@@ -91,13 +91,15 @@ gdb_test_multiple "print *e1" "print *e1" {
     }
 }
 
-# NOTE: carlton/2003-05-02: This test fails on my branch because,
-# within rtt1.cc, GDB has no way of knowing that the class is called
-# 'n2::D2' instead of just 'D2'.  This is an artifical test case,
-# though: if we were using these classes in a more substantial way,
-# G++ would emit more debug info.  Arguably, the "incomplete type"
-# kfail should really be an xfail, because it works using a compiler
-# that generates DW_TAG_namespace tags.
+# NOTE: carlton/2003-05-16: This test fails on my branch with an
+# "<incomplete type>" message because, within rtt1.cc, GDB has no way
+# of knowing that the class is called 'n2::D2' instead of just 'D2'.
+# This is an artifical test case, though: if we were using these
+# classes in a more substantial way, G++ would emit more debug info.
+# As is, I don't think there's anything that GDB can do about this
+# case until G++ starts emitting DW_TAG_namespace info; when that part
+# of the branch gets merged in, then we'll probably want to convert
+# that fail branch to an xfail.
 
 gdb_test_multiple "print *e2" "print *e2" {
     -re "warning: can't find class named `n2::D2', as given by C\\+\\+ RTTI.*$gdb_prompt $" {

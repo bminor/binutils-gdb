@@ -1,3 +1,70 @@
+2003-05-21  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to "extract_address" and "store_address".
+
+2003-05-16  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	REGISTER_BYTES with DEPRECATED_REGISTER_BYTES.  Fix typo,
+	DEPRECATED_REGISTER_SIZE instead of REGISTER_BYTE.
+
+2003-05-14  Theodore A. Roth  <troth@openavr.org>
+
+	* gdbint.texinfo (Breakpoint Handling): Correct a double negative.
+
+2003-05-10  H.J. Lu <hongjiu.lu@intel.com>
+
+	* Makefile.in (gdb-cfg.texi): Replace $$LN_S with $(LN_S).
+	(gdb.dvi): Likewise.
+	(gdb.pdf): Likewise.
+	(links2roff): Likewise.
+
+2003-05-08  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Dump/Restore Files): Update documentation for
+	'dump', 'append', and 'restore': note that format argument is
+	optional; simplify presentation of the command variants; and be
+	more precise about the formats.
+
+2003-05-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Symbols): Update documentation: 'maint list
+	symtabs' and 'maint list psymtabs' have been renamed 'maint info
+	symtabs' and 'maint info psymtabs'.
+
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Make
+	CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY_LENGTH,
+	FIX_CALL_DUMMY, CALL_DUMMY_BREAKPOINT_OFFSET and
+	CALL_DUMMY_BREAKPOINT_OFFSET deprecated.
+
+2003-05-04  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint print
+	dummy-frames".
+
+2003-05-04  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (GDB/MI Symbol Query): Use @{ and @}.
+
+2003-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	Thierry Schneider  <tpschneider1@yahoo.com>
+	* gdb.texinfo (section GDB/MI Symbol Query): Add documentation
+	for new MI command.
+
+2003-05-03  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	push_dummy_code.  Add cross references.
+
+2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.texinfo (Character Sets): Update to reflect new behavior of
+	set/show charsets commands.
+
 2003-04-28  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace

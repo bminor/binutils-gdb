@@ -30,6 +30,7 @@
 #include "language.h"
 #include "f-lang.h"
 #include "valprint.h"
+#include "value.h"
 
 /* The built-in types of F77.  FIXME: integer*4 is missing, plain
    logical is missing (builtin_type_logical is logical*4).  */
@@ -167,7 +168,6 @@ f_printstr (struct ui_file *stream, char *string, unsigned int length,
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  extern int inspect_it;
 
   if (length == 0)
     {
@@ -473,6 +473,8 @@ const struct language_defn f_language_defn =
   f_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* FIXME */
   NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%o", "0", "o", ""},	/* Octal format info */

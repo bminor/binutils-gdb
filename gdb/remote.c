@@ -263,7 +263,7 @@ init_remote_state (struct gdbarch *gdbarch)
 
   /* Start out by having the remote protocol mimic the existing
      behavour - just copy in the description of the register cache.  */
-  rs->sizeof_g_packet = REGISTER_BYTES; /* OK use.   */
+  rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES; /* OK */
 
   /* Assume a 1:1 regnum<->pnum table.  */
   rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
@@ -2951,7 +2951,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
-	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	    char regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -3202,7 +3202,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
-	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	    char regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -3532,7 +3532,7 @@ remote_prepare_to_store (void)
          forcing the register cache to read its and not the target
          registers.  */
       deprecated_read_register_bytes (0, (char *) NULL,
-				      REGISTER_BYTES); /* OK use.  */
+				      DEPRECATED_REGISTER_BYTES); /* OK */
       break;
     case PACKET_ENABLE:
       break;
@@ -3549,7 +3549,7 @@ store_register_using_P (int regnum)
   struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
-  char *regp = alloca (MAX_REGISTER_RAW_SIZE);
+  char regp[MAX_REGISTER_SIZE];
   char *p;
   int i;
 
@@ -3976,7 +3976,10 @@ remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
   int targ_len;
   int res;
 
-  REMOTE_TRANSLATE_XFER_ADDRESS (mem_addr, mem_len, &targ_addr, &targ_len);
+  /* Should this be the selected frame?  */
+  gdbarch_remote_translate_xfer_address (current_gdbarch, current_regcache,
+					 mem_addr, mem_len,
+					 &targ_addr, &targ_len);
   if (targ_len <= 0)
     return 0;
 
@@ -4624,11 +4627,12 @@ extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
 }
 
 
-/* On some machines, e.g. 68k, we may use a different breakpoint instruction
-   than other targets; in those use REMOTE_BREAKPOINT instead of just
-   BREAKPOINT.  Also, bi-endian targets may define LITTLE_REMOTE_BREAKPOINT
-   and BIG_REMOTE_BREAKPOINT.  If none of these are defined, we just call
-   the standard routines that are in mem-break.c.  */
+/* On some machines, e.g. 68k, we may use a different breakpoint
+   instruction than other targets; in those use REMOTE_BREAKPOINT
+   instead of just BREAKPOINT_FROM_PC.  Also, bi-endian targets may
+   define LITTLE_REMOTE_BREAKPOINT and BIG_REMOTE_BREAKPOINT.  If none
+   of these are defined, we just call the standard routines that are
+   in mem-break.c.  */
 
 /* FIXME, these ought to be done in a more dynamic fashion.  For instance,
    the choice of breakpoint instruction affects target program design and
@@ -4652,13 +4656,13 @@ static unsigned char little_break_insn[] = LITTLE_REMOTE_BREAKPOINT;
 
 #endif /* REMOTE_BREAKPOINT */
 
-/* Insert a breakpoint on targets that don't have any better breakpoint
-   support.  We read the contents of the target location and stash it,
-   then overwrite it with a breakpoint instruction.  ADDR is the target
-   location in the target machine.  CONTENTS_CACHE is a pointer to 
-   memory allocated for saving the target contents.  It is guaranteed
-   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
-   is accomplished via BREAKPOINT_MAX).  */
+/* Insert a breakpoint on targets that don't have any better
+   breakpoint support.  We read the contents of the target location
+   and stash it, then overwrite it with a breakpoint instruction.
+   ADDR is the target location in the target machine.  CONTENTS_CACHE
+   is a pointer to memory allocated for saving the target contents.
+   It is guaranteed by the caller to be long enough to save the number
+   of bytes returned by BREAKPOINT_FROM_PC.  */
 
 static int
 remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)

@@ -30,6 +30,10 @@ Fix for gdb/672: update changelist is now output in mi list format.
 Fix for gdb/702: a -var-assign that updates the value now shows up
                  in a subsequent -var-update.
 
+* Multi-arched targets.
+
+HP/PA HPUX11, 32bit ABI (partial)	hppa*-*-hpux* except hppa*64*-*-hpux11*
+
 * OBSOLETE configurations and files
 
 Configurations that have been declared obsolete in this release have

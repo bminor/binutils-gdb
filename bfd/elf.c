@@ -271,7 +271,7 @@ bfd_elf_hash (namearg)
 	  h ^= g;
 	}
     }
-  return h;
+  return h & 0xffffffff;
 }
 
 /* Read a specified number of bytes at a specified offset in an ELF
@@ -1616,7 +1616,7 @@ bfd_elf_get_needed_list (abfd, info)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (! is_elf_hash_table (info))
     return NULL;
   return elf_hash_table (info)->needed;
 }
@@ -1629,7 +1629,7 @@ bfd_elf_get_runpath_list (abfd, info)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+  if (! is_elf_hash_table (info))
     return NULL;
   return elf_hash_table (info)->runpath;
 }
@@ -2335,7 +2335,7 @@ _bfd_elf_init_reloc_shdr (abfd, rel_hdr, asect, use_rela_p)
   rel_hdr->sh_entsize = (use_rela_p
 			 ? bed->s->sizeof_rela
 			 : bed->s->sizeof_rel);
-  rel_hdr->sh_addralign = bed->s->file_align;
+  rel_hdr->sh_addralign = 1 << bed->s->log_file_align;
   rel_hdr->sh_flags = 0;
   rel_hdr->sh_addr = 0;
   rel_hdr->sh_size = 0;
@@ -2365,9 +2365,9 @@ elf_fake_sections (abfd, asect, failedptrarg)
 
   this_hdr = &elf_section_data (asect)->this_hdr;
 
-  this_hdr->sh_name = (unsigned long) _bfd_elf_strtab_add (elf_shstrtab (abfd),
-							   asect->name, FALSE);
-  if (this_hdr->sh_name == (unsigned long) -1)
+  this_hdr->sh_name = (unsigned int) _bfd_elf_strtab_add (elf_shstrtab (abfd),
+							  asect->name, FALSE);
+  if (this_hdr->sh_name == (unsigned int) -1)
     {
       *failedptr = TRUE;
       return;
@@ -3748,7 +3748,7 @@ assign_file_positions_for_segments (abfd)
 	  && (abfd->flags & D_PAGED) != 0)
 	p->p_align = bed->maxpagesize;
       else if (m->count == 0)
-	p->p_align = bed->s->file_align;
+	p->p_align = 1 << bed->s->log_file_align;
       else
 	p->p_align = 0;
 
@@ -4245,7 +4245,7 @@ assign_file_positions_except_relocs (abfd)
     }
 
   /* Place the section headers.  */
-  off = align_file_position (off, bed->s->file_align);
+  off = align_file_position (off, 1 << bed->s->log_file_align);
   i_ehdrp->e_shoff = off;
   off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
 
@@ -5302,7 +5302,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
   symtab_hdr->sh_entsize = bed->s->sizeof_sym;
   symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
   symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
-  symtab_hdr->sh_addralign = bed->s->file_align;
+  symtab_hdr->sh_addralign = 1 << bed->s->log_file_align;
 
   symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
   symstrtab_hdr->sh_type = SHT_STRTAB;
@@ -6884,6 +6884,20 @@ elfcore_grok_note (abfd, note)
 #else
       return TRUE;
 #endif
+
+    case NT_AUXV:
+      {
+	asection *sect = bfd_make_section (abfd, ".auxv");
+
+	if (sect == NULL)
+	  return FALSE;
+	sect->_raw_size = note->descsz;
+	sect->filepos = note->descpos;
+	sect->flags = SEC_HAS_CONTENTS;
+	sect->alignment_power = 1 + bfd_get_arch_size (abfd) / 32;
+
+	return TRUE;
+      }
     }
 }
 
@@ -7125,7 +7139,7 @@ elfcore_write_note (abfd, buf, bufsiz, name, type, input, size)
 
       namesz = strlen (name) + 1;
       bed = get_elf_backend_data (abfd);
-      pad = -namesz & (bed->s->file_align - 1);
+      pad = -namesz & ((1 << bed->s->log_file_align) - 1);
     }
 
   newspace = sizeof (Elf_External_Note) - 1 + namesz + pad + size;
@@ -7534,4 +7548,28 @@ _bfd_elf_section_offset (abfd, info, sec, offset)
     default:
       return offset;
     }
+}
+
+/* Create a new BFD as if by bfd_openr.  Rather than opening a file,
+   reconstruct an ELF file by reading the segments out of remote memory
+   based on the ELF file header at EHDR_VMA and the ELF program headers it
+   points to.  If not null, *LOADBASEP is filled in with the difference
+   between the VMAs from which the segments were read, and the VMAs the
+   file headers (and hence BFD's idea of each section's VMA) put them at.
+
+   The function TARGET_READ_MEMORY is called to copy LEN bytes from the
+   remote memory at target address VMA into the local buffer at MYADDR; it
+   should return zero on success or an `errno' code on failure.  TEMPL must
+   be a BFD for an ELF target with the word size and byte order found in
+   the remote memory.  */
+
+bfd *
+bfd_elf_bfd_from_remote_memory (templ, ehdr_vma, loadbasep, target_read_memory)
+     bfd *templ;
+     bfd_vma ehdr_vma;
+     bfd_vma *loadbasep;
+     int (*target_read_memory) PARAMS ((bfd_vma vma, char *myaddr, int len));
+{
+  return (*get_elf_backend_data (templ)->elf_backend_bfd_from_remote_memory)
+    (templ, ehdr_vma, loadbasep, target_read_memory);
 }

@@ -169,6 +169,7 @@ DESCRIPTION
 .#define bfd_mach_h8300s   3
 .#define bfd_mach_h8300hn  4
 .#define bfd_mach_h8300sn  5
+.#define bfd_mach_h8300sx  6
 .  bfd_arch_pdp11,     {* DEC PDP-11 *}
 .  bfd_arch_powerpc,   {* PowerPC *}
 .#define bfd_mach_ppc		32
