@@ -1357,7 +1357,6 @@ gdb_search (clientData, interp, objc, objv)
           result_ptr->flags |= GDBTK_IN_TCL_RESULT;
           return TCL_ERROR;
         }
-    }
 
       switch ((enum switches_opts) index)
         {
