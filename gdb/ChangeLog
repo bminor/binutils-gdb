@@ -1,3 +1,45 @@
+Wed May  1 14:10:22 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* signame.c: Include defs.h and param.h.
+
+	* cplus-dem.c: Include defs.h and param.h.
+	Makefile.dist: Don't hack in the "param.h".
+	param.h: Don't include defs.h.
+
+	* expread.y: Use a union to deal with the fact that type_stack
+	can have both ints and enum type_pieces in it.
+	({push,pop}_type_int): New functions.
+
+Tue Apr 30 13:18:58 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* cplus-dem.c (cplus_mangle_opname): Don't call error.
+	values.c (check_stub_method): Call error if NULL return from
+	cplus_mangle_opname.
+
+	* blockframe.c, breakpoint.c, core.c, command.c, findvar.c,
+	eval.c, expprint.c, infcmd.c, infrun.c, main.c, printcmd.c,
+	remote.c, source.c, stack.c, dbxread.c, coffread.c, symfile.h,
+	symfile.c, utils.c, valarith.c, values.c, valops.c, tm-68k.h,
+	target.c, inftarg.c, ieee-float.c, environ.c, defs.h,
+	command.h, inferior.h, gdbcore.h, symtab.h, expression.h,
+	symtab.c, cplus-dem.c, value.h, expread.y, valprint.c,
+	copying.awk, solib.c
+	: Lint.  Use read_memory not read_memory_integer on CORE_ADDR's.
+	Use {value_as,unpack}_pointer (added to values.c)
+	not {value_as,unpack}_long on CORE_ADDR's.
+	Use longest_to_int (added to defs.h) instead of cast to int.
+	Remove from_tty arg to mod_path.
+	Put symfile_bfd in {coff,dbx}read.c not symfile.h.
+	Use OP_NULL instead of 0 where dummy enum exp_opcode needed.
+
+	* tm-sparc.h: Remove GET_RWINDOW_REG.
+	(FRAME_CHAIN): Call sparc_frame_chain.
+	sparc-tdep.c (sparc_frame_chain): New function.
+	tm-sparc.h (EXTRACT_STRUCT_VALUE_ADDRESS): call
+	sparc_extract_struct_value_address (added to sparc-tdep.c).
+
+	* xm-sun386.h: Don't define SET_STACK_LIMIT_HUGE.
+
 Tue Apr 30 13:13:33 1991  Michael Tiemann  (tiemann at cygint.cygnus.com)
 
 	* valprint.c (type_print_base): If the type being printed is a

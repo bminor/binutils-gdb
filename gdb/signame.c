@@ -19,6 +19,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include "signame.h"
 
+/* GDB-specific, FIXME.  (This is for the SYS_SIGLIST_MISSING define).  */
+#include "defs.h"
+#include "param.h"
+
 #ifdef __STDC__
 #define CONST const
 #else
