@@ -1,3 +1,8 @@
+2001-06-19  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix creation of
+	dynamic symbols.
+
 2001-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elflink.h (struct elf_assign_sym_version_info): Remove member

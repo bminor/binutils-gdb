@@ -1439,13 +1439,16 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ h->plt.offset);
 	  break;
 
+	case R_X86_64_PC8:
+	case R_X86_64_PC16:
+	case R_X86_64_PC32:
+	  if (h == NULL)
+	    break;
+	  /* Fall through.  */
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
 	case R_X86_64_64:
-	case R_X86_64_PC8:
-	case R_X86_64_PC16:
-	case R_X86_64_PC32:
 	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
 	  if (info->shared
@@ -1453,11 +1456,10 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && ((r_type != R_X86_64_PC8
 		   && r_type != R_X86_64_PC16
 		   && r_type != R_X86_64_PC32)
-		  || (h != NULL
-		      && h->dynindx != -1
-		      && (! info->symbolic
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		  || (! info->symbolic
+		      || (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip, relocate;
@@ -1512,23 +1514,21 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  memset (&outrel, 0, sizeof outrel);
 		  relocate = false;
 		}
-	      else if ((r_type == R_X86_64_PC8)
-		       || (r_type == R_X86_64_PC16)
-		       || (r_type == R_X86_64_PC32))
+	      /* h->dynindx may be -1 if this symbol was marked to
+		 become local.  */
+	      else if (h != NULL
+		       && ((! info->symbolic && h->dynindx != -1)
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
-		  BFD_ASSERT (h != NULL && h->dynindx != -1);
+		  BFD_ASSERT (h->dynindx != -1);
 		  relocate = false;
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = relocation + rela->r_addend;
 		}
 	      else
 		{
-		  /* h->dynindx may be -1 if this symbol was marked to
-		     become local.  */
-		  if (h == NULL
-		      || ((info->symbolic || h->dynindx == -1)
-			  && (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) != 0))
+		  if (r_type == R_X86_64_64)
 		    {
 		      relocate = true;
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
@@ -1536,11 +1536,38 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		  else
 		    {
-		      BFD_ASSERT (h->dynindx != -1);
-		      relocate = false;
-		      outrel.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_32);
-		      outrel.r_addend = relocation + rela->r_addend;
-		    }
+		      long indx;
+
+		      if (h == NULL)
+			sec = local_sections[r_symndx];
+		      else
+			{
+			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+				      || (h->root.type
+					  == bfd_link_hash_defweak));
+			  sec = h->root.u.def.section;
+			}
+		      if (sec != NULL && bfd_is_abs_section (sec))
+			indx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
+			{
+			  bfd_set_error (bfd_error_bad_value);
+			  return false;
+			}
+		      else
+			{
+			  asection *osec;
+
+			  osec = sec->output_section;
+			  indx = elf_section_data (osec)->dynindx;
+			  BFD_ASSERT (indx > 0);
+			}
+
+ 		      relocate = false;
+		      outrel.r_info = ELF64_R_INFO (indx, r_type);
+ 		      outrel.r_addend = relocation + rela->r_addend;
+ 		    }
+
 		}
 
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
