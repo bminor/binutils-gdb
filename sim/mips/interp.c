@@ -1624,7 +1624,14 @@ sim_monitor(reason)
         uword64 paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
-         V0 = callback->write(callback,(int)A0,(const char *)((int)paddr),(int)A2);
+	  {
+	    if (A0 == 1)
+	      V0 = callback->write_stdout(callback,(const char *)((int)paddr),
+					  (int)A2);
+	    else
+	      V0 = callback->write(callback,(int)A0,(const char *)((int)paddr),
+				   (int)A2);
+	  }
         else
          sim_error("Attempt to pass pointer that does not reference simulated memory");
       }
@@ -1895,11 +1902,11 @@ mips16_entry (insn)
   sregs = (insn & 0x0c0) >> 6;
   rreg =  (insn & 0x020) >> 5;
 
-  /* These should be checked by the caller.  */
-  if (aregs == 5 || aregs == 6 || sregs == 3)
+  /* This should be checked by the caller.  */
+  if (sregs == 3)
     abort ();
 
-  if (aregs != 7)
+  if (aregs < 5)
     {
       int i;
       t_reg tsp;
@@ -1946,6 +1953,19 @@ mips16_entry (insn)
 	}
 
       SP += 32;
+
+      if (aregs == 5)
+	{
+	  FGR[0] = WORD64LO (GPR[4]);
+	  fpr_state[0] = fmt_uninterpreted;
+	}
+      else if (aregs == 6)
+	{
+	  FGR[0] = WORD64LO (GPR[5]);
+	  FGR[1] = WORD64LO (GPR[4]);
+	  fpr_state[0] = fmt_uninterpreted;
+	  fpr_state[1] = fmt_uninterpreted;
+	}
 
       PC = RA;
     }
@@ -2704,8 +2724,6 @@ SignalException (int exception,...)
           simulate a handler for them.  */
        else if ((IPC & 1) != 0
 		&& (instruction & 0xf81f) == 0xe809
-		&& (instruction & 0x700) != 0x500
-		&& (instruction & 0x700) != 0x600
 		&& (instruction & 0x0c0) != 0x0c0) {
 	 mips16_entry (instruction);
 	 break;
@@ -3000,7 +3018,7 @@ ValueFPR(fpr,fmt)
       err = -1;
       break;
     }
-  } else if ((fpr & 1) == 0) { /* even registers only */
+  } else {
     switch (fmt) {
      case fmt_single:
      case fmt_word:
@@ -3010,7 +3028,11 @@ ValueFPR(fpr,fmt)
      case fmt_uninterpreted:
      case fmt_double:
      case fmt_long:
-      value = ((((uword64)FGR[fpr+1]) << 32) | (FGR[fpr] & 0xFFFFFFFF));
+      if ((fpr & 1) == 0) { /* even registers only */
+	value = ((((uword64)FGR[fpr+1]) << 32) | (FGR[fpr] & 0xFFFFFFFF));
+      } else {
+	SignalException (ReservedInstruction, 0);
+      }
       break;
 
      default :
@@ -3061,23 +3083,27 @@ StoreFPR(fpr,fmt,value)
        err = -1;
        break;
     }
-  } else if ((fpr & 1) == 0) { /* even register number only */
+  } else {
     switch (fmt) {
       case fmt_single :
       case fmt_word :
-       FGR[fpr+1] = 0xDEADC0DE;
        FGR[fpr] = (value & 0xFFFFFFFF);
-       fpr_state[fpr + 1] = fmt;
        fpr_state[fpr] = fmt;
        break;
 
       case fmt_uninterpreted:
       case fmt_double :
       case fmt_long :
-       FGR[fpr+1] = (value >> 32);
-       FGR[fpr] = (value & 0xFFFFFFFF);
-       fpr_state[fpr + 1] = fmt;
-       fpr_state[fpr] = fmt;
+	if ((fpr & 1) == 0) { /* even register number only */
+	  FGR[fpr+1] = (value >> 32);
+	  FGR[fpr] = (value & 0xFFFFFFFF);
+	  fpr_state[fpr + 1] = fmt;
+	  fpr_state[fpr] = fmt;
+	} else {
+	  fpr_state[fpr] = fmt_unknown;
+	  fpr_state[fpr + 1] = fmt_unknown;
+	  SignalException (ReservedInstruction, 0);
+	}
        break;
 
       default :
@@ -3754,7 +3780,8 @@ COP_LW(coproc_num,coproc_reg,memword)
 #ifdef DEBUG
     printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%08X%08X\n",memword,WORD64HI(memword),WORD64LO(memword));
 #endif
-     StoreFPR(coproc_reg,fmt_uninterpreted,(uword64)memword);
+     StoreFPR(coproc_reg,fmt_word,(uword64)memword);
+     fpr_state[coproc_reg] = fmt_uninterpreted;
      break;
 #endif /* HASFPU */
 
@@ -3795,11 +3822,16 @@ COP_SW(coproc_num,coproc_reg)
      int coproc_num, coproc_reg;
 {
   unsigned int value = 0;
+  FP_formats hold;
+
   switch (coproc_num) {
 #if defined(HASFPU)
     case 1:
 #if 1
+     hold = fpr_state[coproc_reg];
+     fpr_state[coproc_reg] = fmt_word;
      value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
+     fpr_state[coproc_reg] = hold;
 #else
 #if 1
      value = (unsigned int)ValueFPR(coproc_reg,fpr_state[coproc_reg]);

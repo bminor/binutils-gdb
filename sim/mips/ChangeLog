@@ -1,3 +1,16 @@
+Thu Feb  6 17:16:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* interp.c (mips16_entry): Add support for floating point cases.
+	(SignalException): Pass floating point cases to mips16_entry.
+	(ValueFPR): Don't restrict fmt_single and fmt_word to even
+	registers.
+	(StoreFPR): Likewise.  Also, don't clobber fpr + 1 for fmt_single
+	or fmt_word.
+	(COP_LW): Pass fmt_word rather than fmt_uninterpreted to StoreFPR,
+	and then set the state to fmt_uninterpreted.
+	(COP_SW): Temporarily set the state to fmt_word while calling
+	ValueFPR.
+
 Tue Feb  4 16:48:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gencode.c (build_instruction): The high order may be set in the
