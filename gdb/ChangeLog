@@ -1,3 +1,9 @@
+Sat Feb  3 10:45:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* exec.c (exec_file_command): Fix problem reported by Hans Verkuil
+	(hans@wyst.hobby.nl) where filename in malloc'd memory is referenced
+	after being freed.
+
 Sat Feb  3 03:26:21 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dwarfread.c (read_func_scope):  Avoid GDB core dumps if
