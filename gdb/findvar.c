@@ -289,10 +289,6 @@ extract_floating (void *addr, int len)
       else
 	floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
     }
-#ifdef TARGET_EXTRACT_FLOATING
-  else if (TARGET_EXTRACT_FLOATING (addr, len, &dretval))
-    return dretval;
-#endif
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
@@ -333,10 +329,6 @@ store_floating (void *addr, int len, DOUBLEST val)
       else
 	floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
     }
-#ifdef TARGET_STORE_FLOATING
-  else if (TARGET_STORE_FLOATING (addr, len, val))
-    return;
-#endif 
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);

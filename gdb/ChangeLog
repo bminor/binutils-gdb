@@ -1,3 +1,9 @@
+2000-03-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* findvar.c (extract_floating): Remove reference to
+	TARGET_EXTRACT_FLOATING.
+	(store_floating): Remove reference to TARGET_STORE_FLOATING.
+
 2000-03-30  Fernando Nasser  <fnasser@cygnus.com>
 
 	* wrapper.c (gdb_value_subscript, wrap_value_subscript): New functions.
