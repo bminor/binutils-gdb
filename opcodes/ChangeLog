@@ -1,3 +1,7 @@
+Wed Dec 11 09:23:46 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-opc.c (mn10200_opcodes): Fix operands for "movb dm,(an)".
+
 Tue Dec 10 12:08:05 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (mn10200_opcodes): "mov imm8,d0" is a format 2

@@ -207,7 +207,7 @@ const struct mn10200_opcode mn10200_opcodes[] = {
 { "movb",	0xf4a00000,	0xfff00000,	FMT_7, {MEM2(IMM24,AN1), DM0}},
 { "movb",	0xf040,		0xffc0,		FMT_4, {MEM2(DI, AN1), DM0}},
 { "movb",	0xf4c40000,	0xfffc0000,	FMT_7, {MEM(IMM24_MEM), DN0}},
-{ "movb",	0x10,		0xf0,		FMT_1, {DM1, MEM(AN0)}},
+{ "movb",	0x10,		0xf0,		FMT_1, {DM0, MEM(AN1)}},
 { "movb",	0xf51000,	0xfff000,	FMT_5, {DM0, MEM2(SD8, AN1)}},
 { "movb",	0xf7900000,	0xfff00000,	FMT_6, {DM0, MEM2(SD16, AN1)}},
 { "movb",	0xf4200000,	0xfff00000,	FMT_7, {DM0, MEM2(IMM24, AN1)}},
