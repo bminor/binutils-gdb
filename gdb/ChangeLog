@@ -1,3 +1,10 @@
+2000-03-24  J.T. Conklin  <jtc@redback.com> 
+ 
+	* i386/tm-nbsd.h (USE_STRUCT_CONVENTION): Define. 
+	* i386nbsd-nat.c (i386nbsd_use_struct_convention): New function. 
+	(fetch_core_registers): Read fp registers. 
+	(i386nbsd_core_fns, _initialize_i386nbsd_nat): Added. 
+ 
 2000-03-24  Jonathan Larmour  <jlarmour@redhat.co.uk>
 
 	* arm-tdep.c (thumb_skip_prologue): Take function end addr argument

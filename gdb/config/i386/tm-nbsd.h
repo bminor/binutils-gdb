@@ -26,6 +26,11 @@
 #include "i386/tm-i386bsd.h"
 #include "tm-nbsd.h"
 
+extern use_struct_convention_fn i386nbsd_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+	i386nbsd_use_struct_convention(gcc_p, type)
+
+
 #define JB_ELEMENT_SIZE sizeof(int)	/* jmp_buf[_JBLEN] is array of ints */
 #define JB_PC	0		/* Setjmp()'s return PC saved here */
 

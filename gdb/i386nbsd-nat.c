@@ -148,11 +148,20 @@ store_inferior_registers (regno)
   ptrace (PT_SETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_fpregisters, 0);
 }
-
+
+int
+i386nbsd_use_struct_convention (int gcc_p, struct type *type)
+{
+  return !(TYPE_LENGTH (type) == 1
+	   || TYPE_LENGTH (type) == 2
+	   || TYPE_LENGTH (type) == 4
+	   || TYPE_LENGTH (type) == 8);
+}
+
 struct md_core
 {
   struct reg intreg;
-  struct fpreg freg;
+  struct env387 freg;
 };
 
 void
@@ -167,6 +176,43 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
   /* integer registers */
   memcpy (&registers[REGISTER_BYTE (0)], &core_reg->intreg,
 	  sizeof (struct reg));
+
   /* floating point registers */
-  /* XXX */
+  RF (FP0_REGNUM,     core_reg->freg.regs[0]);
+  RF (FP0_REGNUM + 1, core_reg->freg.regs[1]);
+  RF (FP0_REGNUM + 2, core_reg->freg.regs[2]);
+  RF (FP0_REGNUM + 3, core_reg->freg.regs[3]);
+  RF (FP0_REGNUM + 4, core_reg->freg.regs[4]);
+  RF (FP0_REGNUM + 5, core_reg->freg.regs[5]);
+  RF (FP0_REGNUM + 6, core_reg->freg.regs[6]);
+  RF (FP0_REGNUM + 7, core_reg->freg.regs[7]);
+
+  RF (FCTRL_REGNUM,   core_reg->freg.control);
+  RF (FSTAT_REGNUM,   core_reg->freg.status);
+  RF (FTAG_REGNUM,    core_reg->freg.tag);
+  RF (FCS_REGNUM,     core_reg->freg.code_seg);
+  RF (FCOFF_REGNUM,   core_reg->freg.eip);
+  RF (FDS_REGNUM,     core_reg->freg.operand_seg);
+  RF (FDOFF_REGNUM,   core_reg->freg.operand);
+  RF (FOP_REGNUM,     core_reg->freg.opcode);
+
+  registers_fetched ();
+}
+
+/* Register that we are able to handle i386nbsd core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns i386nbsd_core_fns =
+{
+  bfd_target_unknown_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  default_core_sniffer,			/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
+};
+
+void
+_initialize_i386nbsd_nat ()
+{
+  add_core_fns (&i386nbsd_core_fns);
 }
