@@ -1631,14 +1631,12 @@ else
 int main() { return 0; }
 int t() {
 
-long long foo;
-void bar ()
-{
-  switch (foo & 2) { case 0: return; }
-}
+  extern long long foo;
+  switch (foo & 2) { case 0: return 1; }
+
 ; return 0; }
 EOF
-if { (eval echo configure:1642: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1640: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   gdb_cv_c_long_long=yes
 else
@@ -1666,7 +1664,7 @@ else
   gdb_cv_printf_has_long_long=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1670 "configure"
+#line 1668 "configure"
 #include "confdefs.h"
 
 int main () {
@@ -1676,7 +1674,7 @@ int main () {
   return (strcmp ("12345", buf));
 }
 EOF
-{ (eval echo configure:1680: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:1678: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   gdb_cv_printf_has_long_long=yes
 else
@@ -1700,7 +1698,7 @@ if eval "test \"`echo '$''{'ac_cv_c_long_double'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1704 "configure"
+#line 1702 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1708,7 +1706,7 @@ int t() {
 long double foo;
 ; return 0; }
 EOF
-if { (eval echo configure:1712: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1710: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_c_long_double=yes
 else
@@ -1736,7 +1734,7 @@ else
   gdb_cv_printf_has_long_double=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1740 "configure"
+#line 1738 "configure"
 #include "confdefs.h"
 
 int main () {
@@ -1746,7 +1744,7 @@ int main () {
   return (strncmp ("3.14159", buf, 7));
 }
 EOF
-{ (eval echo configure:1750: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:1748: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   gdb_cv_printf_has_long_double=yes
 else
@@ -1771,7 +1769,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1775 "configure"
+#line 1773 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1795,7 +1793,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1799: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:1797: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1825,7 +1823,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1829 "configure"
+#line 1827 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1894,7 +1892,7 @@ main()
 }
 
 EOF
-{ (eval echo configure:1898: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:1896: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_func_mmap=yes
 else
@@ -1918,7 +1916,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1922 "configure"
+#line 1920 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1940,7 +1938,7 @@ int t() {
 char *(*pfn) = (char *(*)) malloc
 ; return 0; }
 EOF
-if { (eval echo configure:1944: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1942: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_malloc=no
 else
@@ -1965,7 +1963,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_realloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1969 "configure"
+#line 1967 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1987,7 +1985,7 @@ int t() {
 char *(*pfn) = (char *(*)) realloc
 ; return 0; }
 EOF
-if { (eval echo configure:1991: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1989: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_realloc=no
 else
@@ -2012,7 +2010,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2016 "configure"
+#line 2014 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -2034,7 +2032,7 @@ int t() {
 char *(*pfn) = (char *(*)) free
 ; return 0; }
 EOF
-if { (eval echo configure:2038: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:2036: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   bfd_cv_decl_needed_free=no
 else
@@ -2449,12 +2447,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2453 "configure"
+#line 2451 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2458: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2456: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2581,12 +2579,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2585 "configure"
+#line 2583 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2590: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2588: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*

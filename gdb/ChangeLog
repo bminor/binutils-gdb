@@ -1,3 +1,12 @@
+Wed Aug 21 16:31:27 1996  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* valprint.c (print_longest): Test for CC_HAS_LONG_LONG as well as
+	PRINTF_HAS_LONG_LONG.
+	* expprint.c (dump_expression): Ditto.
+	* configure.in: Fix check for long long support in compiler to
+	use a function body, not a nested function.
+	* configure: Rebuild with autoconf.
+	
 Tue Aug 20 17:59:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4: Include ../bfd/aclocal.m4.
