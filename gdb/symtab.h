@@ -357,10 +357,21 @@ struct minimal_symbol
 	mst_file_bss		/* Static version of mst_bss */
       }
     type BYTE_BITFIELD;
+
+    /* Minimal symbols with the same hash key are kept on a linked
+       list.  This is the link.  */
+
+    struct minimal_symbol *hash_next;
+
+    /* Minimal symbols are stored in two different hash tables.  This is
+       the `next' pointer for the demangled hash table.  */
+
+    struct minimal_symbol *demangled_hash_next;
   };
 
 #define MSYMBOL_INFO(msymbol)		(msymbol)->info
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
+
 
 
 /* All of the name-scope contours of the program
@@ -1242,6 +1253,16 @@ extern CORE_ADDR find_stab_function_addr PARAMS ((char *,
 						  char *,
 						  struct objfile *));
 #endif
+
+extern unsigned int
+msymbol_hash_iw PARAMS ((const char *));
+
+extern unsigned int
+msymbol_hash PARAMS ((const char *));
+
+extern void
+add_minsym_to_hash_table (struct minimal_symbol *sym,
+			  struct minimal_symbol **table);
 
 extern struct minimal_symbol *
   lookup_minimal_symbol PARAMS ((const char *, const char *, struct objfile *));

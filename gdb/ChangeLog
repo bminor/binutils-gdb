@@ -1,5 +1,27 @@
 2000-03-06  Jim Blandy  <jimb@redhat.com>
 
+	From Tom Tromey <tromey@cygnus.com> and Keith Seitz <?>:
+
+	* minsyms.c: #include <ctype.h>, for msymbol_hash_iw.
+	(compact_minimal_symbols): Added `objfile' argument.
+	Put symbols in the objfile's hash table.
+	(install_minimal_symbols): Put symbols in the objfile's demangled
+	hash table.
+	(lookup_minimal_symbol): Use hash table to find symbol in
+	objfile.
+	(msymbol_hash_iw, msymbol_hash, add_minsym_to_hash_table): New
+	functions.
+	(prim_record_minimal_symbol_and_info): Initialize the
+	hash link fields of the new minimal symbol.
+	* symtab.h (struct minimal_symbol): New fields `hash_next',
+	`demangled_hash_next'.
+	(msymbol_hash_iw, msymbol_hash, add_minsym_to_hash_table): Declare.
+	* objfiles.h (MINIMAL_SYMBOL_HASH_SIZE): New define.
+	(struct objfile): New fields `msymbol_hash',
+	`msymbol_demangled_hash'.
+
+2000-03-06  Jim Blandy  <jimb@redhat.com>
+
 	* solib.c (first_link_map_member): Doc fix.
 
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>

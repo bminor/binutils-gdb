@@ -1,5 +1,5 @@
 /* Definitions for symbol file management in GDB.
-   Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -200,6 +200,9 @@ struct objstats
 extern void print_objfile_statistics PARAMS ((void));
 extern void print_symbol_bcache_statistics PARAMS ((void));
 
+/* Number of entries in the minimal symbol hash table.  */
+#define MINIMAL_SYMBOL_HASH_SIZE 349
+
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
    The main symbol file, symfile_objfile, set by the symbol-file command,
@@ -291,6 +294,15 @@ struct objfile
 
     struct minimal_symbol *msymbols;
     int minimal_symbol_count;
+
+    /* This is a hash table used to index the minimal symbols by name.  */
+
+    struct minimal_symbol *msymbol_hash[MINIMAL_SYMBOL_HASH_SIZE];
+
+    /* This hash table is used to index the minimal symbols by their
+       demangled names.  */
+
+    struct minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE];
 
     /* For object file formats which don't specify fundamental types, gdb
        can create such types.  For now, it maintains a vector of pointers

@@ -39,6 +39,7 @@
 
 
 #include "defs.h"
+#include <ctype.h>
 #include "gdb_string.h"
 #include "symtab.h"
 #include "bfd.h"
@@ -78,7 +79,50 @@ static int
 compare_minimal_symbols PARAMS ((const void *, const void *));
 
 static int
-compact_minimal_symbols PARAMS ((struct minimal_symbol *, int));
+compact_minimal_symbols PARAMS ((struct minimal_symbol *, int,
+				 struct objfile *));
+
+/* Compute a hash code based using the same criteria as `strcmp_iw'.  */
+
+unsigned int
+msymbol_hash_iw (const char *string)
+{
+  unsigned int hash = 0;
+  while (*string && *string != '(')
+    {
+      while (isspace (*string))
+	++string;
+      if (*string && *string != '(')
+	hash = (31 * hash) + *string;
+      ++string;
+    }
+  return hash % MINIMAL_SYMBOL_HASH_SIZE;
+}
+
+/* Compute a hash code for a string.  */
+
+unsigned int
+msymbol_hash (const char *string)
+{
+  unsigned int hash = 0;
+  for (; *string; ++string)
+    hash = (31 * hash) + *string;
+  return hash % MINIMAL_SYMBOL_HASH_SIZE;
+}
+
+/* Add the minimal symbol SYM to an objfile's minsym hash table, TABLE.  */
+void
+add_minsym_to_hash_table (struct minimal_symbol *sym,
+			  struct minimal_symbol **table)
+{
+  if (sym->hash_next == NULL)
+    {
+      unsigned int hash = msymbol_hash (SYMBOL_NAME (sym));
+      sym->hash_next = table[hash];
+      table[hash] = sym;
+    }
+}
+
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
@@ -103,6 +147,9 @@ lookup_minimal_symbol (name, sfile, objf)
   struct minimal_symbol *found_file_symbol = NULL;
   struct minimal_symbol *trampoline_symbol = NULL;
 
+  unsigned int hash = msymbol_hash (name);
+  unsigned int dem_hash = msymbol_hash_iw (name);
+
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)
     {
@@ -118,10 +165,13 @@ lookup_minimal_symbol (name, sfile, objf)
     {
       if (objf == NULL || objf == objfile)
 	{
-	  for (msymbol = objfile->msymbols;
-	       msymbol != NULL && SYMBOL_NAME (msymbol) != NULL &&
-	       found_symbol == NULL;
-	       msymbol++)
+	  /* Do two passes: the first over the ordinary hash table,
+	     and the second over the demangled hash table.  */
+	  int pass = 1;
+
+	  msymbol = objfile->msymbol_hash[hash];
+	  
+	  while (msymbol != NULL && found_symbol == NULL)
 	    {
 	      if (SYMBOL_MATCHES_NAME (msymbol, name))
 		{
@@ -158,6 +208,19 @@ lookup_minimal_symbol (name, sfile, objf)
 		      found_symbol = msymbol;
 		      break;
 		    }
+		}
+
+	      /* Find the next symbol on the hash chain.  At the end
+		 of the first pass, try the demangled hash list.  */
+	      if (pass == 1)
+		msymbol = msymbol->hash_next;
+	      else
+		msymbol = msymbol->demangled_hash_next;
+	      if (msymbol == NULL)
+		{
+		  ++pass;
+		  if (pass == 2)
+		    msymbol = objfile->msymbol_demangled_hash[dem_hash];
 		}
 	    }
 	}
@@ -603,6 +666,10 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
   MSYMBOL_INFO (msymbol) = info;	/* FIXME! */
+
+  msymbol->hash_next = NULL;
+  msymbol->demangled_hash_next = NULL;
+
   msym_bunch_index++;
   msym_count++;
   OBJSTAT (objfile, n_minsyms++);
@@ -672,6 +739,7 @@ discard_minimal_symbols (foo)
     }
 }
 
+
 /* Compact duplicate entries out of a minimal symbol table by walking
    through the table and compacting out entries with duplicate addresses
    and matching names.  Return the number of entries remaining.
@@ -709,9 +777,10 @@ discard_minimal_symbols (foo)
    overwrite its type with the type from the one we are compacting out.  */
 
 static int
-compact_minimal_symbols (msymbol, mcount)
+compact_minimal_symbols (msymbol, mcount, objfile)
      struct minimal_symbol *msymbol;
      int mcount;
+     struct objfile *objfile;
 {
   struct minimal_symbol *copyfrom;
   struct minimal_symbol *copyto;
@@ -734,6 +803,8 @@ compact_minimal_symbols (msymbol, mcount)
 	  else
 	    {
 	      *copyto++ = *copyfrom++;
+
+	      add_minsym_to_hash_table (copyto - 1, objfile->msymbol_hash);
 	    }
 	}
       *copyto++ = *copyfrom++;
@@ -826,7 +897,7 @@ install_minimal_symbols (objfile)
       /* Compact out any duplicates, and free up whatever space we are
          no longer using.  */
 
-      mcount = compact_minimal_symbols (msymbols, mcount);
+      mcount = compact_minimal_symbols (msymbols, mcount, objfile);
 
       obstack_blank (&objfile->symbol_obstack,
 	       (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
@@ -860,6 +931,9 @@ install_minimal_symbols (objfile)
       for (; mcount-- > 0; msymbols++)
 	{
 	  SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
+	  if (SYMBOL_DEMANGLED_NAME (msymbols) != NULL)
+	    add_minsym_to_hash_table (msymbols,
+				      objfile->msymbol_demangled_hash);
 	}
     }
 }
