@@ -865,7 +865,24 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	    switch (tsym.st)
 	      {
 	      case stEnd:
-		goto end_of_fields;
+                /* C++ encodes class types as structures where there the
+                   methods are encoded as stProc. The scope of stProc
+                   symbols also ends with stEnd, thus creating a risk of
+                   taking the wrong stEnd symbol record as the end of
+                   the current struct, which would cause GDB to undercount
+                   the real number of fields in this struct.  To make sure
+                   we really reached the right stEnd symbol record, we
+                   check the associated name, and match it against the
+                   struct name.  Since method names are mangled while
+                   the class name is not, there is no risk of having a
+                   method whose name is identical to the class name
+                   (in particular constructor method names are different
+                   from the class name).  There is therefore no risk that
+                   this check stops the count on the StEnd of a method.  */
+                if (strcmp (debug_info->ss + cur_fdr->issBase + tsym.iss,
+                            name) == 0)
+                  goto end_of_fields;
+                break;
 
 	      case stMember:
 		if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
