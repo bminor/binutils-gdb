@@ -92,7 +92,7 @@ gdb_test "call" "The history is empty..*" "call"
 
 
 #test catch
-gdb_test "catch" "No selected frame..*" "catch"
+gdb_test "catch" "Catch requires an event name..*" "catch"
 
 #test cd
 gdb_test "cd" "Argument required .new working directory.*" "cd"
@@ -273,7 +273,7 @@ gdb_test "info bogus-gdb-command" "Undefined info command: \"bogus-gdb-command\"
 #test info breakpoints
 gdb_test "info breakpoints" "No breakpoints or watchpoints." "info breakpoints"
 #test info catch
-gdb_test "info catch" "No frame selected." "info catch"
+gdb_test "info catch" "You can't do that without a process to debug." "info catch"
 #test info copying
 # FIXME -- doesn't work worth a shit
 #send_gdb "info copying"
