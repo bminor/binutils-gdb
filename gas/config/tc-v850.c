@@ -448,15 +448,14 @@ md_begin ()
      the first opcode with a particular name in the opcode table.  */
 
   op     = v850_opcodes;
-  op_end = v850_opcodes + v850_num_opcodes;
-
-  for (; op < op_end; op++)
+  while (op->name)
     {
       if (strcmp (prev_name, op->name)) 
 	{
 	  prev_name = (char *) op->name;
 	  hash_insert (v850_hash, op->name, (char *) op);
 	}
+      op++;
     }
 }
 
@@ -598,7 +597,7 @@ md_assemble (str)
 		}
 	      
 	      if (ex.X_op == O_constant) 
-		ex.X_add_number &= 0xffff;
+		ex.X_add_number = (signed)((ex.X_add_number & 0xffff) << 16) >> 16;
 	      else
 		{
 		  if (fc > MAX_INSN_FIXUPS)
@@ -622,7 +621,39 @@ md_assemble (str)
 		}
 	      
 	      if (ex.X_op == O_constant)
-		ex.X_add_number = (ex.X_add_number >> 16) & 0xffff;
+		{
+		  unsigned long temp = ex.X_add_number;
+		  ex.X_add_number = (signed)(temp & 0xffff0000) >> 16;
+
+		  /* If the would be on for the low part, then we have
+		     to add it into the high part.  */
+		  if (temp & 0x8000)
+		    ex.X_add_number += 1;
+		}
+	      else 
+		{
+		  if (fc > MAX_INSN_FIXUPS)
+		    as_fatal ("too many fixups");
+		  
+		  fixups[fc].exp = ex;
+		  fixups[fc].opindex = *opindex_ptr;
+		  fixups[fc].reloc = BFD_RELOC_HI16_S;
+		  fc++;
+		}
+	    }
+	  else if (strncmp(input_line_pointer, "hi0(", 4) == 0) 
+	    {
+	      input_line_pointer += 4;
+	      expression(&ex);
+
+	      if (*input_line_pointer++ != ')')
+		{
+		  errmsg = "syntax error: expected `)'";
+		  goto error;
+		}
+	      
+	      if (ex.X_op == O_constant)
+		ex.X_add_number = (signed)(ex.X_add_number & 0xffff0000) >> 16;
 	      else 
 		{
 		  if (fc > MAX_INSN_FIXUPS)

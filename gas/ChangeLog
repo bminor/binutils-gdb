@@ -1,3 +1,15 @@
+start-sanitize-v850
+Fri Aug 30 00:44:13 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-850.c (md_assemble): Handle hi() correctly.  Handle
+	hi0() too.
+
+Wed Aug 28 23:11:08 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_begin): Deal with end of opcode
+	table marker.
+
+end-sanitize-v850
 start-sanitize-d10v
 Wed Aug 28 19:20:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
