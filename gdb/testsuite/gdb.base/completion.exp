@@ -414,7 +414,7 @@ gdb_expect  {
         -re "^p 'a\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Invalid character constant\\..*$gdb_prompt $"\
+                      -re "(Invalid character constant\\.|Unmatched single quote\\.).*$gdb_prompt $"\
                                         { pass "complete 'p \'a'"}
                       -re ".*$gdb_prompt $" { fail "complete 'p \'a'"}
                       timeout           {fail "(timeout) complete 'p \'a'"}
@@ -433,7 +433,7 @@ gdb_expect {
 	    -re ".*argv.*$gdb_prompt p .a$" {
 		send_gdb "\n"
 		gdb_expect {
-		    -re "Invalid character constant\\..*$gdb_prompt $" {
+		    -re "(Invalid character constant\\.|Unmatched single quote\\.).*$gdb_prompt $" {
 			pass "complete (2) 'p \'a'"
 		    }
 		    -re ".*$gdb_prompt $" { fail "complete (2) 'p \'a'" }
@@ -446,7 +446,7 @@ gdb_expect {
 		    -re "\\(gdb\\) p 'a$" {
 			send_gdb "\n"
 			gdb_expect {
-			    -re "Invalid character constant\\..*$gdb_prompt $" {
+			    -re "(Invalid character constant\\.|Unmatched single quote\\.).*$gdb_prompt $" {
 				pass "complete (2) 'p \'a'"
 			    }
 			    -re ".*$gdb_prompt $" { 

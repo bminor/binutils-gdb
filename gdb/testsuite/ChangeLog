@@ -1,3 +1,8 @@
+2002-05-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/completion.exp: Recognize the more detailed error
+	messages produced by the macro expander's lexical analyzer.
+
 2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.arch/altivec-abi.c: New file.
