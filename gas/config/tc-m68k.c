@@ -992,6 +992,7 @@ void m68k_ip (instring)
   char	*crack_operand();
   LITTLENUM_TYPE words[6];
   LITTLENUM_TYPE *wordp;
+  unsigned long ok_arch = 0;
 
   if (*instring == ' ')
     instring++;			/* skip leading whitespace */
@@ -1048,7 +1049,6 @@ void m68k_ip (instring)
     for(n=opsfound;n>0;--n)
       the_ins.operands[n]=the_ins.operands[n-1];
 
-    /* memcpy((char *)(&the_ins.operands[1]), (char *)(&the_ins.operands[0]), opsfound*sizeof(the_ins.operands[0])); */
     memset((char *)(&the_ins.operands[0]), '\0', sizeof(the_ins.operands[0]));
     the_ins.operands[0].mode=MSCR;
     the_ins.operands[0].reg=COPNUM; /* COP #1 */
@@ -1062,325 +1062,327 @@ void m68k_ip (instring)
        then reject this pattern. */
 
     if (opsfound != opcode->m_opnum
-	|| ((opcode->m_arch & current_architecture) == 0)) {
+	|| ((opcode->m_arch & current_architecture) == 0))
+      {
+	++losing;
+	ok_arch |= opcode->m_arch;
+      }
+    else {
+      for (s=opcode->m_operands, opP = &the_ins.operands[0]; *s && !losing; s += 2, opP++) {
+	/* Warning: this switch is huge! */
+	/* I've tried to organize the cases into  this order:
+	   non-alpha first, then alpha by letter.  lower-case goes directly
+	   before uppercase counterpart. */
+	/* Code with multiple case ...: gets sorted by the lowest case ...
+	   it belongs to.  I hope this makes sense. */
+	switch(*s) {
+	case '!':
+	  if (opP->mode == MSCR || opP->mode == IMMED
+	      || opP->mode == DREG || opP->mode == AREG
+	      || opP->mode == AINC || opP->mode == ADEC
+	      || opP->mode == REGLST)
+	    losing++;
+	  break;
 
-      ++losing;
+	case '#':
+	  if(opP->mode!=IMMED)
+	    losing++;
+	  else {
+	    long t;
 
-	} else {
-	  for (s=opcode->m_operands, opP = &the_ins.operands[0]; *s && !losing; s += 2, opP++) {
-	    /* Warning: this switch is huge! */
-	    /* I've tried to organize the cases into  this order:
-	       non-alpha first, then alpha by letter.  lower-case goes directly
-	       before uppercase counterpart. */
-	    /* Code with multiple case ...: gets sorted by the lowest case ...
-	       it belongs to.  I hope this makes sense. */
-	    switch(*s) {
-	    case '!':
-	      if (opP->mode == MSCR || opP->mode == IMMED
-		  || opP->mode == DREG || opP->mode == AREG
-		  || opP->mode == AINC || opP->mode == ADEC
-		  || opP->mode == REGLST)
-		losing++;
-	      break;
+	    t=get_num(opP->con1,80);
+	    if(s[1]=='b' && !isbyte(t))
+	      losing++;
+	    else if(s[1]=='w' && !isword(t))
+	      losing++;
+	  }
+	  break;
 
-	    case '#':
-	      if(opP->mode!=IMMED)
-		losing++;
-	      else {
-		long t;
+	case '^':
+	case 'T':
+	  if(opP->mode!=IMMED)
+	    losing++;
+	  break;
 
-		t=get_num(opP->con1,80);
-		if(s[1]=='b' && !isbyte(t))
-		  losing++;
-		else if(s[1]=='w' && !isword(t))
-		  losing++;
-	      }
-	      break;
+	case '$':
+	  if(opP->mode==MSCR || opP->mode==AREG ||
+	     opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case '^':
-	    case 'T':
-	      if(opP->mode!=IMMED)
-		losing++;
-	      break;
-
-	    case '$':
-	      if(opP->mode==MSCR || opP->mode==AREG ||
-		 opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
-		losing++;
-	      break;
-
-	    case '%':
-	      if(opP->mode==MSCR || opP->reg==PC ||
-		 opP->reg==ZPC || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '%':
+	  if(opP->mode==MSCR || opP->reg==PC ||
+	     opP->reg==ZPC || opP->mode==REGLST)
+	    losing++;
+	  break;
 
 
-	    case '&':
-	      if(opP->mode==MSCR || opP->mode==DREG ||
-		 opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC ||
-		 opP->mode==AINC || opP->mode==ADEC || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '&':
+	  if(opP->mode==MSCR || opP->mode==DREG ||
+	     opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC ||
+	     opP->mode==AINC || opP->mode==ADEC || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case '*':
-	      if(opP->mode==MSCR || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '*':
+	  if(opP->mode==MSCR || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case '+':
-	      if(opP->mode!=AINC)
-		losing++;
-	      break;
+	case '+':
+	  if(opP->mode!=AINC)
+	    losing++;
+	  break;
 
-	    case '-':
-	      if(opP->mode!=ADEC)
-		losing++;
-	      break;
+	case '-':
+	  if(opP->mode!=ADEC)
+	    losing++;
+	  break;
 
-	    case '/':
-	      if(opP->mode==MSCR || opP->mode==AREG ||
-		 opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '/':
+	  if(opP->mode==MSCR || opP->mode==AREG ||
+	     opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case ';':
-	      if(opP->mode==MSCR || opP->mode==AREG || opP->mode==REGLST)
-		losing++;
-	      break;
+	case ';':
+	  if(opP->mode==MSCR || opP->mode==AREG || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case '?':
-	      if(opP->mode==MSCR || opP->mode==AREG ||
-		 opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->reg==PC ||
-		 opP->reg==ZPC || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '?':
+	  if(opP->mode==MSCR || opP->mode==AREG ||
+	     opP->mode==AINC || opP->mode==ADEC || opP->mode==IMMED || opP->reg==PC ||
+	     opP->reg==ZPC || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case '@':
-	      if(opP->mode==MSCR || opP->mode==AREG ||
-		 opP->mode==IMMED || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '@':
+	  if(opP->mode==MSCR || opP->mode==AREG ||
+	     opP->mode==IMMED || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case '~':			/* For now! (JF FOO is this right?) */
-	      if(opP->mode==MSCR || opP->mode==DREG ||
-		 opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
-		losing++;
-	      break;
+	case '~':		/* For now! (JF FOO is this right?) */
+	  if(opP->mode==MSCR || opP->mode==DREG ||
+	     opP->mode==AREG || opP->mode==IMMED || opP->reg==PC || opP->reg==ZPC || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case 'A':
-	      if(opP->mode!=AREG)
-		losing++;
-	      break;
-	    case 'a':
-	      if (opP->mode != AINDR) {
-		++losing;
-	      } /* if not address register indirect */
-	      break;
-	    case 'B':			/* FOO */
-	      if(opP->mode!=ABSL || (flagseen['S'] && instring[0] == 'j'
-				     && instring[1] == 'b'
-				     && instring[2] == 's'
-				     && instring[3] == 'r'))
-		losing++;
-	      break;
+	case 'A':
+	  if(opP->mode!=AREG)
+	    losing++;
+	  break;
+	case 'a':
+	  if (opP->mode != AINDR) {
+	    ++losing;
+	  } /* if not address register indirect */
+	  break;
+	case 'B':		/* FOO */
+	  if(opP->mode!=ABSL || (flagseen['S'] && instring[0] == 'j'
+				 && instring[1] == 'b'
+				 && instring[2] == 's'
+				 && instring[3] == 'r'))
+	    losing++;
+	  break;
 
-	    case 'C':
-	      if(opP->mode!=MSCR || opP->reg!=CCR)
-		losing++;
-	      break;
+	case 'C':
+	  if(opP->mode!=MSCR || opP->reg!=CCR)
+	    losing++;
+	  break;
 
-	    case 'd':			/* FOO This mode is a KLUDGE!! */
-	      if(opP->mode!=AOFF && (opP->mode!=ABSL ||
-				     opP->con1->e_beg[0]!='(' || opP->con1->e_end[0]!=')'))
-		losing++;
-	      break;
+	case 'd':		/* FOO This mode is a KLUDGE!! */
+	  if(opP->mode!=AOFF && (opP->mode!=ABSL ||
+				 opP->con1->e_beg[0]!='(' || opP->con1->e_end[0]!=')'))
+	    losing++;
+	  break;
 
-	    case 'D':
-	      if(opP->mode!=DREG)
-		losing++;
-	      break;
+	case 'D':
+	  if(opP->mode!=DREG)
+	    losing++;
+	  break;
 
-	    case 'F':
-	      if(opP->mode!=MSCR || opP->reg<(FPREG+0) || opP->reg>(FPREG+7))
-		losing++;
-	      break;
+	case 'F':
+	  if(opP->mode!=MSCR || opP->reg<(FPREG+0) || opP->reg>(FPREG+7))
+	    losing++;
+	  break;
 
-	    case 'I':
-	      if(opP->mode!=MSCR || opP->reg<COPNUM ||
-		 opP->reg>=COPNUM+7)
-		losing++;
-	      break;
+	case 'I':
+	  if(opP->mode!=MSCR || opP->reg<COPNUM ||
+	     opP->reg>=COPNUM+7)
+	    losing++;
+	  break;
 
-	    case 'J':
-	      if (opP->mode != MSCR
-		  || opP->reg < USP
-		  || opP->reg > URP
-		  || cpu_of_arch(current_architecture) < m68010 /* before 68010 had none */
-		  || (cpu_of_arch(current_architecture) < m68020
-		      && opP->reg != SFC
-		      && opP->reg != DFC
-		      && opP->reg != USP
-		      && opP->reg != VBR) /* 68010's had only these */
-		  || (cpu_of_arch(current_architecture) < m68040
-		      && opP->reg != SFC
-		      && opP->reg != DFC
-		      && opP->reg != USP
-		      && opP->reg != VBR
-		      && opP->reg != CACR
-		      && opP->reg != CAAR
-		      && opP->reg != MSP
-		      && opP->reg != ISP) /* 680[23]0's have only these */
-		  || (cpu_of_arch(current_architecture) == m68040 /* 68040 has all but this */
-		      && opP->reg == CAAR)) {
-		losing++;
-	      } /* doesn't cut it */
-	      break;
+	case 'J':
+	  if (opP->mode != MSCR
+	      || opP->reg < USP
+	      || opP->reg > URP
+	      || cpu_of_arch(current_architecture) < m68010 /* before 68010 had none */
+	      || (cpu_of_arch(current_architecture) < m68020
+		  && opP->reg != SFC
+		  && opP->reg != DFC
+		  && opP->reg != USP
+		  && opP->reg != VBR) /* 68010's had only these */
+	      || (cpu_of_arch(current_architecture) < m68040
+		  && opP->reg != SFC
+		  && opP->reg != DFC
+		  && opP->reg != USP
+		  && opP->reg != VBR
+		  && opP->reg != CACR
+		  && opP->reg != CAAR
+		  && opP->reg != MSP
+		  && opP->reg != ISP) /* 680[23]0's have only these */
+	      || (cpu_of_arch(current_architecture) == m68040 /* 68040 has all but this */
+		  && opP->reg == CAAR)) {
+	    losing++;
+	  } /* doesn't cut it */
+	  break;
 
-	    case 'k':
-	      if(opP->mode!=IMMED)
-		losing++;
-	      break;
+	case 'k':
+	  if(opP->mode!=IMMED)
+	    losing++;
+	  break;
 
-	    case 'l':
-	    case 'L':
-	      if(opP->mode==DREG || opP->mode==AREG || opP->mode==FPREG) {
-		if(s[1]=='8')
-		  losing++;
-		else {
-		  opP->mode=REGLST;
-		  opP->reg=1<<(opP->reg-DATA);
-		}
-	      } else if(opP->mode!=REGLST) {
-		losing++;
-	      } else if(s[1]=='8' && opP->reg&0x0FFffFF)
-		losing++;
-	      else if(s[1]=='3' && opP->reg&0x7000000)
-		losing++;
-	      break;
+	case 'l':
+	case 'L':
+	  if(opP->mode==DREG || opP->mode==AREG || opP->mode==FPREG) {
+	    if(s[1]=='8')
+	      losing++;
+	    else {
+	      opP->mode=REGLST;
+	      opP->reg=1<<(opP->reg-DATA);
+	    }
+	  } else if(opP->mode!=REGLST) {
+	    losing++;
+	  } else if(s[1]=='8' && opP->reg&0x0FFffFF)
+	    losing++;
+	  else if(s[1]=='3' && opP->reg&0x7000000)
+	    losing++;
+	  break;
 
-	    case 'M':
-	      if(opP->mode!=IMMED)
-		losing++;
-	      else {
-		long t;
+	case 'M':
+	  if(opP->mode!=IMMED)
+	    losing++;
+	  else {
+	    long t;
 
-		t=get_num(opP->con1,80);
-		if(!issbyte(t) || isvar(opP->con1))
-		  losing++;
-	      }
-	      break;
+	    t=get_num(opP->con1,80);
+	    if(!issbyte(t) || isvar(opP->con1))
+	      losing++;
+	  }
+	  break;
 
-	    case 'O':
-	      if(opP->mode!=DREG && opP->mode!=IMMED)
-		losing++;
-	      break;
+	case 'O':
+	  if(opP->mode!=DREG && opP->mode!=IMMED)
+	    losing++;
+	  break;
 
-	    case 'Q':
-	      if(opP->mode!=IMMED)
-		losing++;
-	      else {
-		long t;
+	case 'Q':
+	  if(opP->mode!=IMMED)
+	    losing++;
+	  else {
+	    long t;
 
-		t=get_num(opP->con1,80);
-		if(t<1 || t>8 || isvar(opP->con1))
-		  losing++;
-	      }
-	      break;
+	    t=get_num(opP->con1,80);
+	    if(t<1 || t>8 || isvar(opP->con1))
+	      losing++;
+	  }
+	  break;
 
-	    case 'R':
-	      if(opP->mode!=DREG && opP->mode!=AREG)
-		losing++;
-	      break;
+	case 'R':
+	  if(opP->mode!=DREG && opP->mode!=AREG)
+	    losing++;
+	  break;
 
-	    case 's':
-	      if(opP->mode!=MSCR || !(opP->reg==FPI || opP->reg==FPS || opP->reg==FPC))
-		losing++;
-	      break;
+	case 's':
+	  if(opP->mode!=MSCR || !(opP->reg==FPI || opP->reg==FPS || opP->reg==FPC))
+	    losing++;
+	  break;
 
-	    case 'S':
-	      if(opP->mode!=MSCR || opP->reg!=SR)
-		losing++;
-	      break;
+	case 'S':
+	  if(opP->mode!=MSCR || opP->reg!=SR)
+	    losing++;
+	  break;
 
-	    case 'U':
-	      if(opP->mode!=MSCR || opP->reg!=USP)
-		losing++;
-	      break;
+	case 'U':
+	  if(opP->mode!=MSCR || opP->reg!=USP)
+	    losing++;
+	  break;
 
-	      /* JF these are out of order.  We could put them
-		 in order if we were willing to put up with
-		 bunches of #ifdef m68851s in the code */
+	  /* JF these are out of order.  We could put them
+	     in order if we were willing to put up with
+	     bunches of #ifdef m68851s in the code */
 #ifndef NO_68851
-	      /* Memory addressing mode used by pflushr */
-	    case '|':
-	      if(opP->mode==MSCR || opP->mode==DREG ||
-		 opP->mode==AREG || opP->mode==REGLST)
-		losing++;
-	      break;
+	  /* Memory addressing mode used by pflushr */
+	case '|':
+	  if(opP->mode==MSCR || opP->mode==DREG ||
+	     opP->mode==AREG || opP->mode==REGLST)
+	    losing++;
+	  break;
 
-	    case 'f':
-	      if (opP->mode != MSCR || (opP->reg != SFC && opP->reg != DFC))
-		losing++;
-	      break;
+	case 'f':
+	  if (opP->mode != MSCR || (opP->reg != SFC && opP->reg != DFC))
+	    losing++;
+	  break;
 
-	    case 'P':
-	      if (opP->mode != MSCR || (opP->reg != TC && opP->reg != CAL &&
-					opP->reg != VAL && opP->reg != SCC && opP->reg != AC))
-		losing++;
-	      break;
+	case 'P':
+	  if (opP->mode != MSCR || (opP->reg != TC && opP->reg != CAL &&
+				    opP->reg != VAL && opP->reg != SCC && opP->reg != AC))
+	    losing++;
+	  break;
 
-	    case 'V':
-	      if (opP->reg != VAL)
-		losing++;
-	      break;
+	case 'V':
+	  if (opP->reg != VAL)
+	    losing++;
+	  break;
 
-	    case 'W':
-	      if (opP->mode != MSCR || (opP->reg != DRP && opP->reg != SRP &&
-					opP->reg != CRP))
-		losing++;
-	      break;
+	case 'W':
+	  if (opP->mode != MSCR || (opP->reg != DRP && opP->reg != SRP &&
+				    opP->reg != CRP))
+	    losing++;
+	  break;
 
-	    case 'X':
-	      if (opP->mode != MSCR ||
-		  (!(opP->reg >= BAD && opP->reg <= BAD+7) &&
-		   !(opP->reg >= BAC && opP->reg <= BAC+7)))
-		losing++;
-	      break;
+	case 'X':
+	  if (opP->mode != MSCR ||
+	      (!(opP->reg >= BAD && opP->reg <= BAD+7) &&
+	       !(opP->reg >= BAC && opP->reg <= BAC+7)))
+	    losing++;
+	  break;
 
-	    case 'Y':
-	      if (opP->reg != PSR)
-		losing++;
-	      break;
+	case 'Y':
+	  if (opP->reg != PSR)
+	    losing++;
+	  break;
 
-	    case 'Z':
-	      if (opP->reg != PCSR)
-		losing++;
-	      break;
+	case 'Z':
+	  if (opP->reg != PCSR)
+	    losing++;
+	  break;
 #endif
-	    case 'c':
-	      if (opP->reg != NC
-		  && opP->reg != IC
-		  && opP->reg != DC
-		  && opP->reg != BC) {
-		losing++;
-	      } /* not a cache specifier. */
-	      break;
+	case 'c':
+	  if (opP->reg != NC
+	      && opP->reg != IC
+	      && opP->reg != DC
+	      && opP->reg != BC) {
+	    losing++;
+	  } /* not a cache specifier. */
+	  break;
 
-	    case '_':
-	      if (opP->mode != ABSL) {
-		++losing;
-	      } /* not absolute */
-	      break;
+	case '_':
+	  if (opP->mode != ABSL) {
+	    ++losing;
+	  } /* not absolute */
+	  break;
 
-	    default:
-	      as_fatal("Internal error:  Operand mode %c unknown in line %s of file \"%s\"",
-		       *s, __LINE__, __FILE__);
-	    } /* switch on type of operand */
+	default:
+	  as_fatal("Internal error:  Operand mode %c unknown in line %s of file \"%s\"",
+		   *s, __LINE__, __FILE__);
+	} /* switch on type of operand */
 
-	    if (losing) break;
-	  } /* for each operand */
-	} /* if immediately wrong */
+	if (losing)
+	  break;
+      } /* for each operand */
+    } /* if immediately wrong */
 
     if (!losing) {
       break;
@@ -1389,7 +1391,67 @@ void m68k_ip (instring)
     opcode = opcode->m_next;
 
     if (!opcode) {
-      the_ins.error = "instruction/operands mismatch or invalid\n    instruction for this architecture";
+      if (ok_arch)
+	{
+	  char buf[200], *cp;
+	  int len;
+	  strcpy (buf, "invalid instruction for this architecture; needs ");
+	  cp = buf + strlen (buf);
+	  switch (ok_arch)
+	    {
+	    case mfloat:
+	      strcpy (cp, "fpu");
+	      break;
+	    case mmmu:
+	      strcpy (cp, "mmu");
+	      break;
+	    case m68020up:
+	      strcpy (cp, "68020 or higher");
+	      break;
+	    case m68000up:
+	      strcpy (cp, "68000 or higher");
+	      break;
+	    case m68010up:
+	      strcpy (cp, "68010 or higher");
+	      break;
+	    default:
+	      {
+		int got_one = 0, idx;
+		const static struct {
+		  enum m68k_architecture arch;
+		  const char *name;
+		} archs[] = {
+		  m68000, "68000",
+		  m68010, "68010",
+		  m68020, "68020",
+		  m68030, "68030",
+		  m68040, "68040",
+		  m68881, "68881",
+		  m68851, "68851",
+		};
+		for (idx = 0; idx < sizeof (archs)/sizeof (archs[0]); idx++)
+		  {
+		    if (archs[idx].arch & ok_arch)
+		      {
+			if (got_one)
+			  {
+			    strcpy (cp, " or ");
+			    cp += strlen (cp);
+			  }
+			got_one = 1;
+			strcpy (cp, archs[idx].name);
+			cp += strlen (cp);
+		      }
+		  }
+	      }
+	    }
+	  len = cp - buf + 1;
+	  cp = malloc (len);
+	  strcpy (cp, buf);
+	  the_ins.error = cp;
+	}
+      else
+	the_ins.error = "operands mismatch";
       return;
     } /* Fell off the end */
 
