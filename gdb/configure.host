@@ -172,6 +172,11 @@ hppa*-*-linux*)
 	gdb_host_double_format="&floatformat_ieee_double_big"
 	gdb_host_long_double_format="&floatformat_ieee_double_big"
 	;;
+m68*-*-*)
+	gdb_host_float_format="&floatformat_ieee_single_big"
+	gdb_host_double_format="&floatformat_ieee_double_big"
+	gdb_host_long_double_format="&floatformat_m68881_ext"
+	;;
 *)
 	gdb_host_float_format=0
 	gdb_host_double_format=0
