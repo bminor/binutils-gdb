@@ -1,3 +1,13 @@
+2002-02-13  Michael Snyder  <msnyder@redhat.com>
+
+	* procfs.c (procfs_make_note_section): Make the default 
+	implementation return an error.
+
+2002-02-13  Rodney Brown  <rbrown64@csc.com.au>
+
+	* procfs.c (procfs_make_note_section): Provide a default definition
+	(for alpha-dec-osf4.0f). Fix typos.
+
 2002-02-13  Elena Zannoni  <ezannoni@redhat.com>
 
 	* linux-proc.c: Add include of regcache.h.
@@ -6,8 +16,9 @@
 2002-02-13  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-01-18 Greg McGary <greg@mcgary.org>:
-	* memattr.c (create_mem_region): Disallow useless empty region.  Regions
-	are half-open intervals, so allow [A..B) [B..C) as non-overlapping.
+	* memattr.c (create_mem_region): Disallow useless empty region.  
+	Regions are half-open intervals, so allow [A..B) [B..C) as 
+	non-overlapping.
 
 2002-02-13  Michael Chastain <mec@shout.net>
 
@@ -56,6 +67,16 @@
 
 	* arm-linux-nat.c: Really include arm-tdep.h.
 	* config/arm/tm-linux.h (struct type, struct value): Declare.
+
+2002-02-11  Michael Snyder  <msnyder@redhat.com>
+
+	* procfs.c: Include elf-bfd.h (for elfcore_write functions).
+	(gcore section): Ifdef for Solaris and Unixware only.
+	(procfs_do_thread_registers): Unixware needs one lwpstatus
+	per thread (not one prstatus or pstatus).
+	(procfs_make_note_section): Iterate only over kernel threads (lwps),
+	not over all gdb threads.  For unixware, call elfcore_write_pstatus
+	once before iterating over threads.
 
 2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
 
