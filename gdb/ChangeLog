@@ -1,3 +1,9 @@
+2002-06-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/m68k/tm-m68k.h: Fix typo.
+	(FRAME_INIT_SAVED_REGS): Define when non-multi-arch.
+	(m68k_frame_init_saved_regs): Declare.
+
 2002-06-21  Jim Blandy  <jimb@redhat.com>
 
 	Remove some vestiges of Harris 88k support.
