@@ -1,3 +1,11 @@
+Fri Jan  2 17:06:05 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+        * tracepoint.c (finish_tfind_command): improved algorithm for
+        deciding when we've "stepped" into a new stack frame.
+        (map_args_over_tracepoints): loop over tracepoint list "safely", 
+	since list elements may be deleted during loop.
+	(read_actions): add actions to history list.
+
 Fri Jan  2 16:56:16 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 [From Keith Seitz  (kseitz@cygnus.com)]
 

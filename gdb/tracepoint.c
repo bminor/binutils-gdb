@@ -617,12 +617,12 @@ map_args_over_tracepoints (args, from_tty, opcode)
      int from_tty;
      enum tracepoint_opcode opcode;
 {
-  struct tracepoint *t;
+  struct tracepoint *t, *tmp;
   int tpnum;
   char *cp;
 
   if (args == 0 || *args == 0)	/* do them all */
-    ALL_TRACEPOINTS (t)
+    ALL_TRACEPOINTS_SAFE (t, tmp)
       tracepoint_operation (t, from_tty, opcode);
   else
     while (*args)
@@ -830,7 +830,11 @@ read_actions (t)
       if (readline_hook && instream == NULL)
 	line = (*readline_hook) (prompt);
       else if (instream == stdin && ISATTY (instream))
-	line = readline (prompt);
+	{
+	  line = readline (prompt);
+	  if (line && *line)		/* add it to command history */
+	    add_history (line);
+	}
       else
 	line = gdb_readline (0);
 
@@ -1708,8 +1712,20 @@ finish_tfind_command (msg, from_tty)
     {
       int source_only;
 
-      if (old_frame_addr == FRAME_FP (get_current_frame ()) &&
-	  old_func       == find_pc_function (read_pc ()))
+      /* NOTE: in immitation of the step command, try to determine
+	 whether we have made a transition from one function to another.
+	 If so, we'll print the "stack frame" (ie. the new function and
+	 it's arguments) -- otherwise we'll just show the new source line.
+
+	 This determination is made by checking (1) whether the current
+	 function has changed, and (2) whether the current FP has changed.
+	 Hack: if the FP wasn't collected, either at the current or the
+	 previous frame, assume that the FP has NOT changed.  */
+
+      if (old_func       == find_pc_function (read_pc ()) &&
+	 (old_frame_addr == 0 ||
+	  FRAME_FP (get_current_frame ()) == 0 ||
+	  old_frame_addr == FRAME_FP (get_current_frame ())))
 	source_only = -1;
       else
 	source_only =  1;
