@@ -1,3 +1,8 @@
+Wed Oct 14 18:56:28 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* infrun.c: include ctype.h.  Otherwise some machines result in
+	  undefined for isdigit.
+
 Tue Oct 13 01:27:14 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in:  Convert m68k entries to m68* entries to handle
