@@ -1,3 +1,13 @@
+2004-04-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-x86-64.c (elf64_x86_64_copy_indirect_symbol): Copy also
+	ELF_LINK_POINTER_EQUALITY_NEEDED.
+	(elf64_x86_64_check_relocs): Set ELF_LINK_POINTER_EQUALITY_NEEDED
+	if r_type is not R_X86_64_PC32.
+	(elf64_x86_64_finish_dynamic_symbol): If
+	ELF_LINK_POINTER_EQUALITY_NEEDED is not set, clear st_value of
+	SHN_UNDEF symbols.
+
 2004-04-22  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_plt_sym_val): New function.
