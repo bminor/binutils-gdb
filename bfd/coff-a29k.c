@@ -353,7 +353,7 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
       symndx = rel->r_symndx;
       loc = contents + rel->r_vaddr - input_section->vma;
 
-      if (symndx == -1)
+      if (symndx == -1 || rel->r_type == R_IHCONST)
 	h = NULL;
       else
 	h = obj_coff_sym_hashes (input_bfd)[symndx];

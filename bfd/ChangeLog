@@ -1,3 +1,8 @@
+Mon Mar 31 16:11:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-a29k.c (coff_a29k_relocate_section): Don't use symndx as a
+	symbol index for a R_IHCONST reloc.
+
 Mon Mar 31 15:40:59 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* targmatch.sed: Do not use \(\) recursively.
