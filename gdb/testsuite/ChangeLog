@@ -1,3 +1,10 @@
+2003-08-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* gdb.asm/asm-source.exp : Add -lgloss to link-flags.
+	* gdb.asm/m32r.inc : Remove an illegal nop after bl instruction.
+	Replace ld24 with seth/add3.
+
 2003-08-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/annota3.exp: New file.
