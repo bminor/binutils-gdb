@@ -1,3 +1,8 @@
+Thu May 13 07:30:22 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* remote-nindy.c: Removed declaration of coffstrip.
+	* nindy-share/nindy.c: #if 0 coffstrip routine; no longer used.
+
 Wed May 12 00:35:19 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.9.1 after release and cvs
@@ -149,13 +154,6 @@ Tue May  4 12:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 	* xcoffread.c: Doc fix.
 
 	* Makefile.in (depend): Include $(CC) command in generated output.
-
-Mon May  3 23:34:09 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
-
-	* nindy-share/Onindy.c, nindy-share/nindy.c: convert malloc calls
-	  to xmalloc.  Include defs.h.  Rename local macro from
-	  REGISTER_BYTES to NINDY_REGISTER_BYTES to avoid conflict with
-	  defs.h.
 
 Mon May  3 22:51:05 1993  Fred Fish  (fnf@cygnus.com)
 
