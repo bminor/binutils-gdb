@@ -1,3 +1,7 @@
+2001-08-05  Philip Blundell  <philb@gnu.org>
+
+	* doc/binutils.texi: Use "Thumb" not "THUMB".
+
 2001-08-03  John Healy  <jhealy@redhat.com>
 
         Patch suggested by Frank Eigler <fche@redhat.com>.
