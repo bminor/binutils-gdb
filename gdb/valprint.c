@@ -515,7 +515,7 @@ val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
 
 	      /* Bitfields require special handling, especially due to byte
 		 order problems.  */
-	      v = value_from_long (TYPE_FIELD_TYPE (type, i),
+	      v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
 	      val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
@@ -670,7 +670,7 @@ val_print (type, valaddr, address, stream, format,
     {
     case TYPE_CODE_ARRAY:
       /* FIXME: TYPE_LENGTH (type) is unsigned and therefore always
-	 0.  Is "> 0" meant? I'm not sure what an "array of
+	 >= 0.  Is "> 0" meant? I'm not sure what an "array of
 	 unspecified length" (mentioned in the comment for the else-part
 	 of this if) is.  */
       if (TYPE_LENGTH (type) >= 0
@@ -1456,8 +1456,8 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
 	fprintf_filtered (stream, ")");
       
       fprintf_filtered (stream, "[");
-      if (/* always true */ /* TYPE_LENGTH (type) >= 0
-	  && */ TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      if (TYPE_LENGTH (type) > 0
+	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	fprintf_filtered (stream, "%d",
 			  (TYPE_LENGTH (type)
 			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
@@ -1746,19 +1746,19 @@ type_print_base (type, stream, show, level)
       break;
 
     case TYPE_CODE_INT:
-      if (TYPE_LENGTH (type) > sizeof (LONGEST))
-	{
-	  fprintf_filtered (stream, "<%d bit integer>",
-			    TYPE_LENGTH (type) * TARGET_CHAR_BIT);
-	}
-      else
+      name = 0;
+      if (TYPE_LENGTH (type) <= sizeof (LONGEST))
 	{
 	  if (TYPE_UNSIGNED (type))
 	    name = unsigned_type_table[TYPE_LENGTH (type)];
 	  else
 	    name = signed_type_table[TYPE_LENGTH (type)];
 	}
-      fputs_filtered (name, stream);
+      if (name)
+	fputs_filtered (name, stream);
+      else
+	fprintf_filtered (stream, "<%d bit integer>",
+			  TYPE_LENGTH (type) * TARGET_CHAR_BIT);
       break;
 
     case TYPE_CODE_FLT:
@@ -1974,6 +1974,8 @@ _initialize_valprint ()
 
   print_max = 200;
 
+  /* FIXME!  This assumes that these sizes and types are the same on the
+     host and target machines!  */
   unsigned_type_table
     = (char **) xmalloc ((1 + sizeof (unsigned LONGEST)) * sizeof (char *));
   bzero (unsigned_type_table, (1 + sizeof (unsigned LONGEST)));
@@ -1982,7 +1984,8 @@ _initialize_valprint ()
   unsigned_type_table[sizeof (unsigned long)] = "unsigned long";
   unsigned_type_table[sizeof (unsigned int)] = "unsigned int";
 #ifdef LONG_LONG
-  unsigned_type_table[sizeof (unsigned long long)] = "unsigned long long";
+  unsigned_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] =
+						"unsigned long long";
 #endif
 
   signed_type_table
@@ -1993,7 +1996,7 @@ _initialize_valprint ()
   signed_type_table[sizeof (long)] = "long";
   signed_type_table[sizeof (int)] = "int";
 #ifdef LONG_LONG
-  signed_type_table[sizeof (long long)] = "long long";
+  signed_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] = "long long";
 #endif
 
   float_type_table
