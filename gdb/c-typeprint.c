@@ -680,15 +680,24 @@ c_type_print_base (type, stream, show, level)
 		      /* Build something we can demangle.  */
 		      mangled_name = gdb_mangle_name (type, i, j);
 		      demangled_name =
-			  cplus_demangle (mangled_name,
-					  DMGL_ANSI | DMGL_PARAMS);
+			cplus_demangle (mangled_name,
+					DMGL_ANSI | DMGL_PARAMS);
 		      if (demangled_name == NULL)
 			fprintf_filtered (stream, "<badly mangled name %s>",
-			    mangled_name);
-		      else 
+					  mangled_name);
+		      else
 			{
-			  fprintf_filtered (stream, "%s",
-			      strchr (demangled_name, ':') + 2);
+			  char *demangled_no_class =
+			    strchr (demangled_name, ':');
+
+			  if (demangled_no_class == NULL)
+			    demangled_no_class = demangled_name;
+			  else
+			    {
+			      if (*++demangled_no_class == ':')
+				++demangled_no_class;
+			    }
+			  fputs_filtered (demangled_no_class, stream);
 			  free (demangled_name);
 			}
 		      free (mangled_name);
