@@ -1,6 +1,6 @@
 Fri Jun 12 22:23:35 1992  John Gilmore  (gnu at cygnus.com)
 
-	* size.c, objdump.c:  Lint.
+	* size.c, objdump.c, bucomm.c:  Lint.
 
 Thu Jun 11 01:19:06 1992  John Gilmore  (gnu at cygnus.com)
 

@@ -1,10 +1,27 @@
-/*** bucomm.c -- Bin Utils COMmon code.
+/* bucomm.c -- Bin Utils COMmon code.
+   Copyright (C) 1991 Free Software Foundation, Inc.
 
-     We might put this in a library someday so it could be dynamically
+This file is part of GNU Binutils.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/*   We might put this in a library someday so it could be dynamically
      loaded, but for now it's not necessary */
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include <varargs.h>
 
 char *target = NULL;		/* default as late as possible */
@@ -12,22 +29,19 @@ char *target = NULL;		/* default as late as possible */
 /* Yes, this is what atexit is for, but that isn't guaranteed yet.
    And yes, I know this isn't as good, but it does what is needed just fine */
 void (*exit_handler) ();
-
-/** Memory hackery */
 
-PROTO (char *, malloc, (unsigned size));
-PROTO (char *, realloc, (char *ptr, unsigned size));
 
-
+
+
 /* Error reporting */
 
 char *program_name;
 
 void
-bfd_fatal (string)
-     char *string;
+DEFUN(bfd_fatal,(string),
+     char *string)
 {
-  char *errmsg =  bfd_errmsg (bfd_error);
+  const char *errmsg =  bfd_errmsg (bfd_error);
   
   if (string)
     fprintf (stderr, "%s: %s: %s\n", program_name, string, errmsg);
@@ -38,7 +52,7 @@ bfd_fatal (string)
   exit (1);
 }
 
-#ifndef NO_STDARG
+#if 0 /* !defined(NO_STDARG) */
 void
 fatal (Format)
      const char *Format;
@@ -53,7 +67,6 @@ fatal (Format)
   exit (1);
 }
 #else
-#ifndef NO_VARARGS
 void fatal (va_alist)
      va_dcl
 {
@@ -68,19 +81,7 @@ void fatal (va_alist)
 	if (NULL != exit_handler) (*exit_handler) ();
 	exit (1);
 } /* fatal() */
-#else
-/*VARARGS1 */
-fatal (Format, args)
-     char *Format;
-{
-  as_where ();
-  _doprnt (Format, &args, stderr); /* not terribly portable, but... */
-  (void) putc ('\n', stderr);
-  if (NULL != exit_handler) (*exit_handler) ();
-  exit (1);
-}
-#endif /* not NO_VARARGS */
-#endif /* not NO_STDARG */
+#endif
 
 
 /** Display the archive header for an element as if it were an ls -l listing */
@@ -88,43 +89,33 @@ fatal (Format, args)
 /* Mode       User\tGroup\tSize\tDate               Name */
 
 void
-print_arelt_descr (abfd, verbose)
-     bfd *abfd;
-     boolean verbose;
+DEFUN(print_arelt_descr,(file, abfd, verbose),
+      FILE *file AND
+      bfd *abfd AND
+      boolean verbose)
 {
+  void mode_string ();
   struct stat buf;
-  char modebuf[11];
-  char timebuf[40];
-  long when;
-  long current_time = time ((long *) 0);
 
   if (verbose) {
 
     if (bfd_stat_arch_elt (abfd, &buf) == 0) { /* if not, huh? */
+      char modebuf[11];
+      char timebuf[40];
+      long when = buf.st_mtime;
+      CONST char *ctime_result = (CONST char *)ctime (&when);
+
+      /* Posix format:  skip weekday and seconds from ctime output. */
+      sprintf(timebuf, "%.12s %.4s", ctime_result+4, ctime_result+20);
 
       mode_string (buf.st_mode, modebuf);
       modebuf[10] = '\0';
-      fputs (modebuf, stdout);
-
-      when = buf.st_mtime;
-      strcpy (timebuf, ctime (&when));
-
-      /* This code comes from gnu ls.  */
-      if ((current_time - when > 6 * 30 * 24 * 60 * 60)
-	  || (current_time - when < 0)) {
-	/* The file is fairly old or in the future.
-	   POSIX says the cutoff is 6 months old;
-	   approximate this by 6*30 days.
-	   Show the year instead of the time of day.  */
-	strcpy (timebuf + 11, timebuf + 19);
-      }
-      timebuf[16] = 0;
-
-      printf (" %d\t%d\t%ld\t%s ", buf.st_uid, buf.st_gid, buf.st_size, timebuf);
+      /* Posix 1003.2/D11 says to skip first character (entry type). */
+      fprintf (file, "%s %d/%d %6ld %s ", modebuf+1, buf.st_uid, buf.st_gid, buf.st_size, timebuf);
     }
   }
 
-  puts (abfd->filename);
+  fprintf (file, "%s\n",abfd->filename);
 }
 
 /* Like malloc but get fatal error if memory is exhausted.  */
@@ -133,7 +124,9 @@ xmalloc (size)
      unsigned size;
 {
   register char *result = malloc (size);
-  if (result == NULL && size != NULL) fatal ("virtual memory exhausted");
+  if (result == (char *) NULL && size != 0) {
+    fatal ("virtual memory exhausted");
+  }
 
   return result;
 }
@@ -145,7 +138,9 @@ xrealloc (ptr, size)
      unsigned size;
 {
   register char *result = realloc (ptr, size);
-  if (result == 0 && size != 0) fatal ("virtual memory exhausted");
+  if (result == 0 && size != 0) {
+    fatal ("virtual memory exhausted");
+  }
 
   return result;
 }
