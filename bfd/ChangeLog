@@ -1,3 +1,8 @@
+2003-11-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (toc_adjusting_stub_needed): Exit early if section
+	size is zero.
+
 2003-11-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf.c (_bfd_elf_link_hash_copy_indirect): Copy

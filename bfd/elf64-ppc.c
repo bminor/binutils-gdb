@@ -6566,6 +6566,9 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
   if ((isec->flags & SEC_LINKER_CREATED) != 0)
     return 0;
 
+  if (isec->_raw_size == 0)
+    return 0;
+
   /* Hack for linux kernel.  .fixup contains branches, but only back to
      the function that hit an exception.  */
   branch_ok = strcmp (isec->name, ".fixup") == 0;
