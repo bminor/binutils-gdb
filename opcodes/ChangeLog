@@ -1,3 +1,29 @@
+start-sanitize-arc
+Thu Apr  6 20:36:08 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc-dis.c (print_insn): New parameter `big_p'.  Callers updated.
+	Call arc_get_opcode_mach to map bfd mach number to opcode value.
+	(print_insn_*): Pass bfd mach number, not opcode version.
+	* arc-opc.c (arc_get_opcode_mach): New function.
+end-sanitize-arc
+
+Fri Mar 31 14:23:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* alpha-dis.c (print_insn_alpha): Put empty statement after
+	default label.
+
+Tue Mar 21 10:51:40 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-dis.c (sign_extend): Delete, redundant with libhppa.h version.
+	(low_sign_extend): Likewise.
+	(get_field): Delete unused function.
+	(set_field, deposit_14, deposit_21): Likewise.
+
+Fri Mar 17 15:55:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* i386-dis.c: Support for more pentium opcodes.  From Guy Harris
+	  (guy@netapp.com).
+
 Tue Mar 14 00:52:57 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	Sat Feb 11 17:22:41 1995  Klaus Kaempf  (kkaempf@didymus.rmi.de)

@@ -16,9 +16,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* The ARC may eventually be bi-endian.
-   Keep this file byte order independent.  */
-
 #include "ansidecl.h"
 #include "opcode/arc.h"
 
@@ -40,6 +37,7 @@ INSERT_FN (insert_flagfinish);
 INSERT_FN (insert_cond);
 INSERT_FN (insert_forcelimm);
 INSERT_FN (insert_reladdr);
+INSERT_FN (insert_absaddr);
 INSERT_FN (insert_unopmacro);
 INSERT_FN (insert_multshift);
 
@@ -67,7 +65,8 @@ EXTRACT_FN (extract_multshift);
    'n'	DELAY		N field (nullify field)
    'q'	COND		condition code field
    'Q'	FORCELIMM	set `cond_p' to 1 to ensure a constant is a limm
-   'B'	BRANCH		branch address
+   'B'	BRANCH		branch address (22 bit pc relative)
+   'J'	JUMP		jump address (26 bit absolute)
    'z'	SIZE1		size field in ld a,[b,c]
    'Z'	SIZE10		size field in ld a,[b,shimm]
    'y'	SIZE22		size field in st c,[b,shimm]
@@ -76,9 +75,9 @@ EXTRACT_FN (extract_multshift);
    'w'	ADDRESS3	write-back field in ld a,[b,c]
    'W'	ADDRESS12	write-back field in ld a,[b,shimm]
    'v'	ADDRESS24	write-back field in st c,[b,shimm]
-   'D'	CACHEBYPASS5	direct to memory enable (cache bypass) in ld a,[b,c]
-   'e'	CACHEBYPASS14	direct to memory enable (cache bypass) in ld a,[b,shimm]
-   'E'	CACHEBYPASS26	direct to memory enable (cache bypass) in st c,[b,shimm]
+   'e'	CACHEBYPASS5	cache bypass in ld a,[b,c]
+   'E'	CACHEBYPASS14	cache bypass in ld a,[b,shimm]
+   'D'	CACHEBYPASS26	cache bypass in st c,[b,shimm]
    'u'	UNSIGNED	unsigned multiply
    's'	SATURATION	saturation limit in audio arc mac insn
    'U'	UNOPMACRO	fake operand to copy REGB to REGC for unop macros
@@ -116,9 +115,10 @@ const struct arc_operand arc_operands[] =
 #define SHIMMFINISH (REGC + 1)
   { 'S', 9, 0, ARC_OPERAND_SIGNED + ARC_OPERAND_FAKE, insert_shimmfinish, 0 },
 
-/* fake operand used to insert limm value into most instructions */
+/* fake operand used to insert limm value into most instructions;
+   this is also used for .word handling  */
 #define LIMMFINISH (SHIMMFINISH + 1)
-  { 'L', 32, 32, ARC_OPERAND_ABSOLUTE + ARC_OPERAND_FAKE, insert_limmfinish, 0 },
+  { 'L', 32, 32, ARC_OPERAND_ADDRESS + ARC_OPERAND_LIMM + ARC_OPERAND_FAKE, insert_limmfinish, 0 },
 
 /* shimm operand when there is no reg indicator (ld,st) */
 #define SHIMMOFFSET (LIMMFINISH + 1)
@@ -152,12 +152,17 @@ const struct arc_operand arc_operands[] =
 #define FORCELIMM (COND + 1)
   { 'Q', 0, 0, ARC_OPERAND_FAKE, insert_forcelimm },
 
-/* branch address b, bl, and lp insns */
+/* branch address; b, bl, and lp insns */
 #define BRANCH (FORCELIMM + 1)
-  { 'B', 20, 7, ARC_OPERAND_RELATIVE + ARC_OPERAND_SIGNED, insert_reladdr, extract_reladdr },
+  { 'B', 20, 7, ARC_OPERAND_RELATIVE_BRANCH + ARC_OPERAND_SIGNED, insert_reladdr, extract_reladdr },
+
+/* jump address; j insn (this is basically the same as 'L' except that the
+   value is right shifted by 2); this is also used for .word handling */
+#define JUMP (BRANCH + 1)
+  { 'J', 24, 32, ARC_OPERAND_ABSOLUTE_BRANCH + ARC_OPERAND_LIMM + ARC_OPERAND_FAKE, insert_absaddr },
 
 /* size field, stored in bit 1,2 */
-#define SIZE1 (BRANCH + 1)
+#define SIZE1 (JUMP + 1)
   { 'z', 2, 1, ARC_OPERAND_SUFFIX },
 
 /* size field, stored in bit 10,11 */
@@ -190,15 +195,15 @@ const struct arc_operand arc_operands[] =
 
 /* cache bypass, stored in bit 5 */
 #define CACHEBYPASS5 (ADDRESS24 + 1)
-  { 'D', 1, 5, ARC_OPERAND_SUFFIX },
+  { 'e', 1, 5, ARC_OPERAND_SUFFIX },
 
 /* cache bypass, stored in bit 14 */
 #define CACHEBYPASS14 (CACHEBYPASS5 + 1)
-  { 'e', 1, 14, ARC_OPERAND_SUFFIX },
+  { 'E', 1, 14, ARC_OPERAND_SUFFIX },
 
 /* cache bypass, stored in bit 26 */
 #define CACHEBYPASS26 (CACHEBYPASS14 + 1)
-  { 'E', 1, 26, ARC_OPERAND_SUFFIX },
+  { 'D', 1, 26, ARC_OPERAND_SUFFIX },
 
 /* unsigned multiply */
 #define UNSIGNED (CACHEBYPASS26 + 1)
@@ -229,7 +234,7 @@ const struct arc_operand arc_operands[] =
 /* end of list place holder */
   { 0 }
 };
-
+
 /* Given a format letter, yields the index into `arc_operands'.
    eg: arc_operand_map['a'] = REGA.  */
 unsigned char arc_operand_map[256];
@@ -252,7 +257,10 @@ unsigned char arc_operand_map[256];
 
    Longer versions of insns must appear before shorter ones (if gas sees
    "lsr r2,r3,1" when it's parsing "lsr %a,%b" it will think the ",1" is
-   junk).  */
+   junk).
+
+   This table is best viewed on a wide screen (161 columns).
+   I'd prefer to keep it this way.  */
 
 /* ??? This table also includes macros: asl, lsl, and mov.  The ppc port has
    a more general facility for dealing with macros which could be used if
@@ -287,12 +295,13 @@ const struct arc_opcode arc_opcodes[] = {
   { "extw%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(8) },
   { "flag%.q %b%G%S%L",			I(-1)+A(-1)+C(-1),		I(3)+A(ARC_REG_SHIMM_UPDATE)+C(0) },
   /* %Q: force cond_p=1 --> no shimm values */
-  { "j%q%Q%.n%.f %b%L",			I(-1)+A(-1)+C(-1)+R(-1,7,1),	I(7)+A(0)+C(0)+R(0,7,1) },
+  /* ??? This insn allows an optional flags spec.  */
+  { "j%q%Q%.n%.f %b%J",			I(-1)+A(-1)+C(-1)+R(-1,7,1),	I(7)+A(0)+C(0)+R(0,7,1) },
   /* Put opcode 1 ld insns first so shimm gets prefered over limm.  */
   /* "[%b]" is before "[%b,%d]" so 0 offsets don't get printed.  */
-  { "ld%Z%.X%.v%.e %0%a,[%b]%L",	I(-1)+R(-1,13,1)+R(-1,0,511),	I(1)+R(0,13,1)+R(0,0,511) },
-  { "ld%Z%.X%.v%.e %a,[%b,%d]%S%L",	I(-1)+R(-1,13,1),		I(1)+R(0,13,1) },
-  { "ld%z%.x%.u%.D %a,[%b,%c]",		I(-1)+R(-1,4,1)+R(-1,6,7),	I(0)+R(0,4,1)+R(0,6,7) },
+  { "ld%Z%.X%.W%.E %0%a,[%b]%L",	I(-1)+R(-1,13,1)+R(-1,0,511),	I(1)+R(0,13,1)+R(0,0,511) },
+  { "ld%Z%.X%.W%.E %a,[%b,%d]%S%L",	I(-1)+R(-1,13,1),		I(1)+R(0,13,1) },
+  { "ld%z%.x%.w%.e %a,[%b,%c]",		I(-1)+R(-1,4,1)+R(-1,6,7),	I(0)+R(0,4,1)+R(0,6,7) },
   { "lp%q%.n %B",			I(-1),		I(6), },
   { "lr %a,[%Ab]%S%L",			I(-1)+C(-1),	I(1)+C(0x10) },
   /* Note that "lsl" is really an "add".  */
@@ -320,13 +329,13 @@ const struct arc_opcode arc_opcodes[] = {
   { "sexw%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(6) },
   { "sr %c,[%Ab]%S%L",			I(-1)+A(-1),		I(2)+A(0x10) },
   /* "[%b]" is before "[%b,%d]" so 0 offsets don't get printed.  */
-  { "st%y%.w%.E %0%c,[%b]%L",		I(-1)+R(-1,25,3)+R(-1,21,1)+R(-1,0,511),	I(2)+R(0,25,3)+R(0,21,1)+R(0,0,511) },
-  { "st%y%.w%.E %c,[%b,%d]%S%L",	I(-1)+R(-1,25,3)+R(-1,21,1),			I(2)+R(0,25,3)+R(0,21,1) },
+  { "st%y%.v%.D %0%c,[%b]%L",		I(-1)+R(-1,25,3)+R(-1,21,1)+R(-1,0,511),	I(2)+R(0,25,3)+R(0,21,1)+R(0,0,511) },
+  { "st%y%.v%.D %c,[%b,%d]%S%L",	I(-1)+R(-1,25,3)+R(-1,21,1),			I(2)+R(0,25,3)+R(0,21,1) },
   { "sub%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(10) },
   { "swap%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(9),	ARC_MACH_AUDIO },
   { "xor%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(15) }
 };
-int arc_opcodes_count = sizeof (arc_opcodes) / sizeof (arc_opcodes[0]);
+const int arc_opcodes_count = sizeof (arc_opcodes) / sizeof (arc_opcodes[0]);
 
 const struct arc_operand_value arc_reg_names[] =
 {
@@ -432,7 +441,7 @@ const struct arc_operand_value arc_reg_names[] =
   { "sram",	0x400, AUXREG, ARC_MACH_AUDIO },
   { "reg_file",	0x800, AUXREG, ARC_MACH_AUDIO },
 };
-int arc_reg_names_count = sizeof (arc_reg_names) / sizeof (arc_reg_names[0]);
+const int arc_reg_names_count = sizeof (arc_reg_names) / sizeof (arc_reg_names[0]);
 
 /* The suffix table.
    Operands with the same name must be stored together.  */
@@ -472,13 +481,13 @@ const struct arc_operand_value arc_suffixes[] =
   { "nd", 0, DELAY },
   { "d", 1, DELAY },
   { "jd", 2, DELAY },
-/*  { "b", 7, SIZEEXT },*/
-/*  { "b", 5, SIZESEX },*/
+/*{ "b", 7, SIZEEXT },*/
+/*{ "b", 5, SIZESEX },*/
   { "b", 1, SIZE1 },
   { "b", 1, SIZE10 },
   { "b", 1, SIZE22 },
-/*  { "w", 8, SIZEEXT },*/
-/*  { "w", 6, SIZESEX },*/
+/*{ "w", 8, SIZEEXT },*/
+/*{ "w", 6, SIZESEX },*/
   { "w", 2, SIZE1 },
   { "w", 2, SIZE10 },
   { "w", 2, SIZE22 },
@@ -498,30 +507,53 @@ const struct arc_operand_value arc_suffixes[] =
   { "mh", 18, COND, ARC_MACH_AUDIO },
   { "ml", 19, COND, ARC_MACH_AUDIO },
 };
-int arc_suffixes_count = sizeof (arc_suffixes) / sizeof (arc_suffixes[0]);
-
+const int arc_suffixes_count = sizeof (arc_suffixes) / sizeof (arc_suffixes[0]);
+
 /* Configuration flags.  */
 
 /* Various ARC_HAVE_XXX bits.  */
 static int cpu_type;
 
+/* Translate a bfd_mach_arc_xxx value to a ARC_MACH_XXX value.  */
+
+int
+arc_get_opcode_mach (bfd_mach, big_p)
+     int bfd_mach, big_p;
+{
+  static int mach_type_map[] =
+    {
+      ARC_MACH_BASE, ARC_MACH_HOST, ARC_MACH_GRAPHICS, ARC_MACH_AUDIO
+    };
+
+  return mach_type_map[bfd_mach] | (big_p ? ARC_MACH_BIG : 0);
+}
+
 /* Initialize any tables that need it.
    Must be called once at start up (or when first needed).
 
-   FLAGS is a set of bits that say what version of the cpu we have.  */
+   FLAGS is a set of bits that say what version of the cpu we have,
+   and in particular at least (one of) ARC_MACH_XXX.  */
 
 void
 arc_opcode_init_tables (flags)
      int flags;
 {
   register int i,n;
+  static int map_init_p = 0;
 
   cpu_type = flags;
 
-  memset (arc_operand_map, 0, sizeof (arc_operand_map));
-  n = sizeof (arc_operands) / sizeof (arc_operands[0]);
-  for (i = 0; i < n; i++)
-    arc_operand_map[arc_operands[i].fmt] = i;
+  /* We may be intentionally called more than once (for example gdb will call
+     us each time the user switches cpu).  This table only needs to be init'd
+     once though.  */
+  if (!map_init_p)
+    {
+      memset (arc_operand_map, 0, sizeof (arc_operand_map));
+      n = sizeof (arc_operands) / sizeof (arc_operands[0]);
+      for (i = 0; i < n; i++)
+	arc_operand_map[arc_operands[i].fmt] = i;
+      map_init_p = 1;
+    }
 }
 
 /* Return non-zero if OPCODE is supported on the specified cpu.
@@ -531,9 +563,9 @@ int
 arc_opcode_supported (opcode)
      const struct arc_opcode *opcode;
 {
-  if (ARC_OPCODE_MACH (opcode->flags) == 0)
+  if (ARC_OPCODE_CPU (opcode->flags) == 0)
     return 1;
-  if (ARC_OPCODE_MACH (opcode->flags) & ARC_HAVE_MACH (cpu_type))
+  if (ARC_OPCODE_CPU (opcode->flags) & ARC_HAVE_CPU (cpu_type))
     return 1;
   return 0;
 }
@@ -545,9 +577,9 @@ int
 arc_opval_supported (opval)
      const struct arc_operand_value *opval;
 {
-  if (ARC_OPVAL_MACH (opval->flags) == 0)
+  if (ARC_OPVAL_CPU (opval->flags) == 0)
     return 1;
-  if (ARC_OPVAL_MACH (opval->flags) & ARC_HAVE_MACH (cpu_type))
+  if (ARC_OPVAL_CPU (opval->flags) & ARC_HAVE_CPU (cpu_type))
     return 1;
   return 0;
 }
@@ -575,6 +607,8 @@ static int limm_p;
 /* The value of the limm we inserted.  Each insn only gets one but it can
    appear multiple times.  */
 static long limm;
+
+/* Insertion functions.  */
 
 /* Called by the assembler before parsing an instruction.  */
 
@@ -806,10 +840,16 @@ insert_shimmfinish (insn, operand, mods, reg, value, errmsg)
 }
 
 /* Called at the end of processing normal insns (eg: add) to insert a limm
-   value (if present) into the insn.  Actually, there's nothing for us to do
-   as we can't call frag_more, the caller must do that.  */
-/* ??? The extract fns take a pointer to two words.  The insert insns could be
-   converted and then we could do something useful.  Not sure it's worth it.  */
+   value (if present) into the insn.
+
+   Note that this function is only intended to handle instructions (with 4 byte
+   immediate operands).  It is not intended to handle data.  */
+
+/* ??? Actually, there's nothing for us to do as we can't call frag_more, the
+   caller must do that.  The extract fns take a pointer to two words.  The
+   insert fns could be converted and then we could do something useful, but
+   then the reloc handlers would have to know to work on the second word of
+   a 2 word quantity.  That's too much so we don't handle them.  */
 
 static arc_insn
 insert_limmfinish (insn, operand, mods, reg, value, errmsg)
@@ -821,7 +861,8 @@ insert_limmfinish (insn, operand, mods, reg, value, errmsg)
      const char **errmsg;
 {
   if (limm_p)
-    ; /* nothing to do */
+    /* FIXME: put an abort here and see what happens.  */
+    ; /* nothing to do, gas does it */
   return insn;
 }
 
@@ -854,6 +895,32 @@ insert_reladdr (insn, operand, mods, reg, value, errmsg)
   if (value & 3)
     *errmsg = "branch address not on 4 byte boundary";
   insn |= ((value >> 2) & ((1 << operand->bits) - 1)) << operand->shift;
+  return insn;
+}
+
+/* Insert a limm value as a 26 bit address right shifted 2 into the insn.
+
+   Note that this function is only intended to handle instructions (with 4 byte
+   immediate operands).  It is not intended to handle data.  */
+
+/* ??? Actually, there's nothing for us to do as we can't call frag_more, the
+   caller must do that.  The extract fns take a pointer to two words.  The
+   insert fns could be converted and then we could do something useful, but
+   then the reloc handlers would have to know to work on the second word of
+   a 2 word quantity.  That's too much so we don't handle them.  */
+
+static arc_insn
+insert_absaddr (insn, operand, mods, reg, value, errmsg)
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value *reg;
+     long value;
+     const char **errmsg;
+{
+  if (limm_p)
+    /* FIXME: put an abort here and see what happens.  */
+    ; /* nothing to do */
   return insn;
 }
 
@@ -1000,8 +1067,8 @@ extract_cond (insn, operand, mods, opval, invalid)
   cond = (insn[0] >> operand->shift) & ((1 << operand->bits) - 1);
   val = arc_opcode_lookup_suffix (operand, cond);
 
-  /* Ignore NULL values of `val'.  Several condition code values aren't
-     implemented yet.  */
+  /* Ignore NULL values of `val'.  Several condition code values are
+     reserved for extensions.  */
   if (opval && val)
     *opval = val;
   return cond;

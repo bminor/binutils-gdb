@@ -21,19 +21,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libelf.h"
 #include "elf/arc.h"
 
-static int print_insn_arc_base PARAMS ((bfd_vma, disassemble_info *));
-static int print_insn_arc_host PARAMS ((bfd_vma, disassemble_info *));
-static int print_insn_arc_graphics PARAMS ((bfd_vma, disassemble_info *));
-static int print_insn_arc_audio PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_base_little PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_host_little PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_graphics_little PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_audio_little PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_base_big PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_host_big PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_graphics_big PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_arc_audio_big PARAMS ((bfd_vma, disassemble_info *));
+
+static int print_insn PARAMS ((bfd_vma, disassemble_info *, int, int));
 
 /* Print one instruction from PC on INFO->STREAM.
    Return the size of the instruction (4 or 8 for the ARC). */
 
 static int
-print_insn (pc, info, cpu)
+print_insn (pc, info, mach, big_p)
      bfd_vma pc;
      disassemble_info *info;
-     int cpu;
+     int mach;
+     int big_p;
 {
   const struct arc_opcode *opcode,*opcode_end;
   bfd_byte buffer[4];
@@ -44,15 +51,13 @@ print_insn (pc, info, cpu)
   arc_insn insn[2];
   int got_limm_p = 0;
   static int initialized = 0;
-  static int current_cpu = 0;
-  /* Not used yet.  Here to record byte order dependencies.  */
-  int bigendian_p = 0;
+  static int current_mach = 0;
 
-  if (!initialized || cpu != current_cpu)
+  if (!initialized || mach != current_mach)
     {
-      arc_opcode_init_tables (cpu);
       initialized = 1;
-      current_cpu = cpu;
+      current_mach = arc_get_opcode_mach (mach, big_p);
+      arc_opcode_init_tables (current_mach);
     }
 
   status = (*info->read_memory_func) (pc, buffer, 4, info);
@@ -61,12 +66,12 @@ print_insn (pc, info, cpu)
       (*info->memory_error_func) (status, pc, info);
       return -1;
     }
-  if (bigendian_p)
+  if (big_p)
     insn[0] = bfd_getb32 (buffer);
   else
     insn[0] = bfd_getl32 (buffer);
 
-  func (stream, "%08lx\t", insn[0]);
+  (*func) (stream, "%08lx\t", insn[0]);
 
   opcode_end = arc_opcodes + arc_opcodes_count;
   for (opcode = arc_opcodes; opcode < opcode_end; opcode++)
@@ -130,7 +135,7 @@ print_insn (pc, info, cpu)
 	      (*info->memory_error_func) (status, pc, info);
 	      return -1;
 	    }
-	  if (bigendian_p)
+	  if (big_p)
 	    insn[1] = bfd_getb32 (buffer);
 	  else
 	    insn[1] = bfd_getl32 (buffer);
@@ -141,7 +146,7 @@ print_insn (pc, info, cpu)
 	{
 	  if (*syn != '%' || *++syn == '%')
 	    {
-	      func (stream, "%c", *syn);
+	      (*func) (stream, "%c", *syn);
 	      continue;
 	    }
 
@@ -190,93 +195,121 @@ print_insn (pc, info, cpu)
 		     aren't defined yet.  For these cases just print the
 		     number suitably decorated.  */
 		  if (opval)
-		    func (stream, "%s%s",
-			  mods & ARC_MOD_DOT ? "." : "",
-			  opval->name);
+		    (*func) (stream, "%s%s",
+			     mods & ARC_MOD_DOT ? "." : "",
+			     opval->name);
 		  else
-		    func (stream, "%s%c%d",
-			  mods & ARC_MOD_DOT ? "." : "",
-			  operand->fmt, value);
+		    (*func) (stream, "%s%c%d",
+			     mods & ARC_MOD_DOT ? "." : "",
+			     operand->fmt, value);
 		}
 	    }
-	  else if (operand->flags & ARC_OPERAND_RELATIVE)
+	  else if (operand->flags & ARC_OPERAND_RELATIVE_BRANCH)
 	    (*info->print_address_func) (pc + 4 + value, info);
 	  /* ??? Not all cases of this are currently caught.  */
-	  else if (operand->flags & ARC_OPERAND_ABSOLUTE)
+	  else if (operand->flags & ARC_OPERAND_ABSOLUTE_BRANCH)
+	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
+	  else if (operand->flags & ARC_OPERAND_ADDRESS)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
 	  else if (opval)
 	    /* Note that this case catches both normal and auxiliary regs.  */
-	    func (stream, "%s", opval->name);
+	    (*func) (stream, "%s", opval->name);
 	  else
-	    func (stream, "%ld", value);
+	    (*func) (stream, "%ld", value);
 	}
 
       /* We have found and printed an instruction; return.  */
       return got_limm_p ? 8 : 4;
     }
 
-  func (stream, "*unknown*");
+  (*func) (stream, "*unknown*");
   return 4;
 }
 
-/* Given ABFD, return the print_insn function to use.
+/* Given MACH, one of bfd_mach_arc_xxx, return the print_insn function to use.
    This does things a non-standard way (the "standard" way would be to copy
    this code into disassemble.c).  Since there are more than a couple of
    variants, hiding all this crud here seems cleaner.  */
 
 disassembler_ftype
-arc_get_disassembler (bfd *abfd)
+arc_get_disassembler (mach, big_p)
+     int mach;
+     int big_p;
 {
-  int mach = bfd_get_mach (abfd);
-
   switch (mach)
     {
     case bfd_mach_arc_base:
-      return print_insn_arc_base;
+      return big_p ? print_insn_arc_base_big : print_insn_arc_base_little;
     case bfd_mach_arc_host:
-      return print_insn_arc_host;
+      return big_p ? print_insn_arc_host_big : print_insn_arc_host_little;
     case bfd_mach_arc_graphics:
-      return print_insn_arc_graphics;
+      return big_p ? print_insn_arc_graphics_big : print_insn_arc_graphics_little;
     case bfd_mach_arc_audio:
-      return print_insn_arc_audio;
+      return big_p ? print_insn_arc_audio_big : print_insn_arc_audio_little;
     }
-  return print_insn_arc_base;
+  return print_insn_arc_base_little;
 }
 
 static int
-print_insn_arc_base (pc, info)
+print_insn_arc_base_little (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
-  return print_insn (pc, info, ARC_MACH_BASE);
+  return print_insn (pc, info, bfd_mach_arc_base, 0);
 }
 
-/* Host CPU.  */
-
 static int
-print_insn_arc_host (pc, info)
+print_insn_arc_host_little (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
-  return print_insn (pc, info, ARC_MACH_HOST);
+  return print_insn (pc, info, bfd_mach_arc_host, 0);
 }
 
-/* Graphics CPU.  */
-
 static int
-print_insn_arc_graphics (pc, info)
+print_insn_arc_graphics_little (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
-  return print_insn (pc, info, ARC_MACH_GRAPHICS);
+  return print_insn (pc, info, bfd_mach_arc_graphics, 0);
 }
 
-/* Audio CPU.  */
-
 static int
-print_insn_arc_audio (pc, info)
+print_insn_arc_audio_little (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
-  return print_insn (pc, info, ARC_MACH_AUDIO);
+  return print_insn (pc, info, bfd_mach_arc_audio, 0);
+}
+
+static int
+print_insn_arc_base_big (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, bfd_mach_arc_base, 1);
+}
+
+static int
+print_insn_arc_host_big (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, bfd_mach_arc_host, 1);
+}
+
+static int
+print_insn_arc_graphics_big (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, bfd_mach_arc_graphics, 1);
+}
+
+static int
+print_insn_arc_audio_big (pc, info)
+     bfd_vma pc;
+     disassemble_info *info;
+{
+  return print_insn (pc, info, bfd_mach_arc_audio, 1);
 }
