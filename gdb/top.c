@@ -484,6 +484,9 @@ gdb_init ()
 {
   /* Run the init function of each source file */
 
+  getcwd (dirbuf, sizeof (dirbuf));
+  current_directory = dirbuf;
+
   init_cmd_lists ();	/* This needs to be done first */
   initialize_all_files ();
   init_main ();		/* But that omits this file!  Do it now */
