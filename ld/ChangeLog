@@ -1,3 +1,9 @@
+2001-02-09  David Mosberger  <davidm@hpl.hp.com>
+
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Add
+	.IA_64.unwind.* pattern to unwind table section and
+	.IA_64.unwind_info* pattern to unwind info section.
+
 2001-02-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* Makefile.am: Add linux target for S/390.
