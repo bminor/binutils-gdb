@@ -183,6 +183,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #  define MIPS_LAST_ARG_REGNUM 7  /* old ABI uses R4 through R7 for args */
 #  define MIPS_NUM_ARG_REGS 4
 #endif
+#define T9_REGNUM 25		/* Contains address of callee in PIC */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */
@@ -392,7 +393,10 @@ extern void mips_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-#define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p)
+/* On Irix, $t9 ($25) contains the address of the callee (used for PIC).
+   It doesn't hurt to do this on other systems; $t9 will be ignored.  */
+#define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
+    write_register(T9_REGNUM, fun)
 
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 
