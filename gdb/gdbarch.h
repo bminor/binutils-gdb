@@ -861,17 +861,6 @@ extern void set_gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch 
 #define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET (gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch))
 #endif
 
-/* DEPRECATED_CALL_DUMMY_LENGTH can be deleted. */
-
-extern int gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_call_dummy_length (struct gdbarch *gdbarch, int deprecated_call_dummy_length);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_LENGTH)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_LENGTH"
-#endif
-#if !defined (DEPRECATED_CALL_DUMMY_LENGTH)
-#define DEPRECATED_CALL_DUMMY_LENGTH (gdbarch_deprecated_call_dummy_length (current_gdbarch))
-#endif
-
 /* DEPRECATED_CALL_DUMMY_WORDS can be deleted. */
 
 extern LONGEST * gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch);

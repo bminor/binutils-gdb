@@ -3057,7 +3057,7 @@ This method has been replaced by @code{push_dummy_code}
 @item DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
 @findex DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
 The size of @code{DEPRECATED_CALL_DUMMY_WORDS}.  This must return a
-positive value.  See also @code{DEPRECATED_CALL_DUMMY_LENGTH}.
+positive value.
 
 This method has been replaced by @code{push_dummy_code}
 (@pxref{push_dummy_code}).

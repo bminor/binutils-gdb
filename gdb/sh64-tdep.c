@@ -1224,7 +1224,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       get_frame_extra_info (fi)->return_pc = 
 	deprecated_read_register_dummy (get_frame_pc (fi),
 					get_frame_base (fi), PC_REGNUM);
-      get_frame_extra_info (fi)->f_offset = -(DEPRECATED_CALL_DUMMY_LENGTH + 4);
+      get_frame_extra_info (fi)->f_offset = -4;
       get_frame_extra_info (fi)->leaf_function = 0;
       return;
     }
