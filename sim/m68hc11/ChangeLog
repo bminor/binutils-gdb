@@ -1,3 +1,24 @@
+2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* interrupts.c (interrupts_reset): New function, setup interrupt
+	vector address according to cpu mode.
+	(interrupts_initialize): Move reset portion to the above.
+	(interrupt_names): New table to give a name to interrupts.
+	(idefs): Handle pulse accumulator interrupts.
+	(interrupts_info): Print the interrupt history.
+	(interrupt_option_handler): New function.
+	(interrupt_options): New table of options.
+	(interrupts_update_pending): Keep track of when interrupts are
+	raised and implement breakpoint-on-raise-interrupt.
+	(interrupts_process): Keep track of when interrupts are taken
+	and implement breakpoint-on-interrupt.
+	* interrupts.h (struct interrupt_history): Define.
+	(struct interrupt): Keep track of the interrupt history.
+	(interrupts_reset): Declare.
+	(interrupts_initialize): Update prototype.
+	* m68hc11_sim.c (cpu_reset): Reset interrupts.
+	(cpu_initialize): Cleanup.
+
 2001-07-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* dv-m68hc11eepr.c (m68hc11eepr_info): Fix print of current write
