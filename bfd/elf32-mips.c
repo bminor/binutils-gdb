@@ -4980,7 +4980,19 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
   sym_hashes = elf_sym_hashes (abfd);
   extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
 
-  sgot = NULL;
+  if (dynobj == NULL)
+    {
+      sgot = NULL;
+      g = NULL;
+    }
+  else
+    {
+      sgot = bfd_get_section_by_name (dynobj, ".got");
+      BFD_ASSERT (elf_section_data (sgot) != NULL);
+      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+      BFD_ASSERT (g != NULL);
+    }
+
   sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
@@ -4997,7 +5009,7 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	h = sym_hashes[r_symndx - extsymoff];
 
       /* Some relocs require a global offset table.  */
-      if (dynobj == NULL)
+      if (dynobj == NULL || sgot == NULL)
 	{
 	  switch (ELF32_R_TYPE (rel->r_info))
 	    {
@@ -5007,9 +5019,23 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	    case R_MIPS_CALL_LO16:
 	    case R_MIPS_GOT_HI16:
 	    case R_MIPS_GOT_LO16:
-	      elf_hash_table (info)->dynobj = dynobj = abfd;
+	      if (dynobj == NULL)
+		elf_hash_table (info)->dynobj = dynobj = abfd;
 	      if (! mips_elf_create_got_section (dynobj, info))
 		return false;
+	      sgot = bfd_get_section_by_name (dynobj, ".got");
+	      BFD_ASSERT (sgot != NULL);
+	      BFD_ASSERT (elf_section_data (sgot) != NULL);
+	      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+	      BFD_ASSERT (g != NULL);
+	      break;
+
+	    case R_MIPS_32:
+	    case R_MIPS_REL32:
+	      if (dynobj == NULL
+		  && (info->shared || h != NULL)
+		  && (sec->flags & SEC_ALLOC) != 0)
+		elf_hash_table (info)->dynobj = dynobj = abfd;
 	      break;
 
 	    default:
@@ -5023,14 +5049,6 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MIPS_CALL_HI16:
 	case R_MIPS_CALL_LO16:
 	  /* This symbol requires a global offset table entry.  */
-	  if (sgot == NULL)
-	    {
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
-	      BFD_ASSERT (elf_section_data (sgot) != NULL);
-	      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
-	      BFD_ASSERT (g != NULL);
-	    }
 
 	  BFD_ASSERT (h != NULL);
 
@@ -5067,14 +5085,6 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MIPS_GOT_HI16:
 	case R_MIPS_GOT_LO16:
 	  /* This symbol requires a global offset table entry.  */
-	  if (sgot == NULL)
-	    {
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
-	      BFD_ASSERT (elf_section_data (sgot) != NULL);
-	      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
-	      BFD_ASSERT (g != NULL);
-	    }
 
 	  if (h != NULL)
 	    {
@@ -5107,37 +5117,38 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	  if ((info->shared || h != NULL)
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
+	      if (sreloc == NULL)
+		{
+		  const char *name = ".rel.dyn";
+
+		  sreloc = bfd_get_section_by_name (dynobj, name);
+		  if (sreloc == NULL)
+		    {
+		      sreloc = bfd_make_section (dynobj, name);
+		      if (sreloc == NULL
+			  || ! bfd_set_section_flags (dynobj, sreloc,
+						      (SEC_ALLOC
+						       | SEC_LOAD
+						       | SEC_HAS_CONTENTS
+						       | SEC_IN_MEMORY
+						       | SEC_READONLY))
+			  || ! bfd_set_section_alignment (dynobj, sreloc,
+							  4))
+			return false;
+		    }
+		}
 	      if (info->shared)
 		{
 		  /* When creating a shared object, we must copy these
 		     reloc types into the output file as R_MIPS_REL32
-		     relocs.  We create the .rel.dyn reloc section in
-		     dynobj and make room for this reloc.  */
-		  if (sreloc == NULL)
+		     relocs.  We make room for this reloc in the
+		     .rel.dyn reloc section */
+		  if (sreloc->_raw_size == 0)
 		    {
-		      const char *name = ".rel.dyn";
-
-		      sreloc = bfd_get_section_by_name (dynobj, name);
-		      if (sreloc == NULL)
-			{
-			  sreloc = bfd_make_section (dynobj, name);
-			  if (sreloc == NULL
-			      || ! bfd_set_section_flags (dynobj, sreloc,
-							  (SEC_ALLOC
-							   | SEC_LOAD
-							   | SEC_HAS_CONTENTS
-							   | SEC_IN_MEMORY
-							   | SEC_READONLY))
-			      || ! bfd_set_section_alignment (dynobj, sreloc,
-							      4))
-			    return false;
-
-			  /* Add a null element. */
-			  sreloc->_raw_size += sizeof (Elf32_External_Rel);
-			  ++sreloc->reloc_count;
-			}
+		      /* Add a null element. */
+		      sreloc->_raw_size += sizeof (Elf32_External_Rel);
+		      ++sreloc->reloc_count;
 		    }
-
 		  sreloc->_raw_size += sizeof (Elf32_External_Rel);
 		}
 	      else
@@ -5213,6 +5224,12 @@ mips_elf_adjust_dynamic_symbol (info, h)
       s = bfd_get_section_by_name (dynobj, ".rel.dyn");
       BFD_ASSERT (s != NULL);
 
+      if (s->_raw_size == 0)
+	{
+	  /* Make room for a null element. */
+	  s->_raw_size += sizeof (Elf32_External_Rel);
+	  ++s->reloc_count;
+	}
       s->_raw_size += hmips->mips_32_relocs * sizeof (Elf32_External_Rel);
     }
 
@@ -5599,18 +5616,19 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	  }
       }
 
-    s = bfd_get_section_by_name (dynobj, ".got");
-    BFD_ASSERT (s != NULL);
-    BFD_ASSERT (elf_section_data (s) != NULL);
-    g = (struct mips_got_info *) elf_section_data (s)->tdata;
-    BFD_ASSERT (g != NULL);
+    if (sgot != NULL)
+      {
+	BFD_ASSERT (elf_section_data (sgot) != NULL);
+	g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+	BFD_ASSERT (g != NULL);
 
-    /* If there are no global got symbols, fake the last symbol so for
-       safety.  */
-    if (g->global_gotsym)
-      g->global_gotsym += c;
-    else
-      g->global_gotsym = elf_hash_table (info)->dynsymcount - 1;
+	/* If there are no global got symbols, fake the last symbol so
+	   for safety.  */
+	if (g->global_gotsym)
+	  g->global_gotsym += c;
+	else
+	  g->global_gotsym = elf_hash_table (info)->dynsymcount - 1;
+      }
   }
 
   return true;
@@ -5800,17 +5818,21 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
   sgot = bfd_get_section_by_name (dynobj, ".got");
-  BFD_ASSERT (sgot != NULL);
-
-  BFD_ASSERT (elf_section_data (sgot) != NULL);
-  g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
-  BFD_ASSERT (g != NULL);
+  if (sgot == NULL)
+    g = NULL;
+  else
+    {
+      BFD_ASSERT (elf_section_data (sgot) != NULL);
+      g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
+      BFD_ASSERT (g != NULL);
+    }
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       Elf32_External_Dyn *dyncon, *dynconend;
 
       BFD_ASSERT (sdyn != NULL);
+      BFD_ASSERT (g != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
       dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
@@ -5956,13 +5978,14 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
   /* The first entry of the global offset table will be filled at
      runtime. The second entry will be used by some runtime loaders.
      This isn't the case of Irix rld. */
-  if (sgot->_raw_size > 0)
+  if (sgot != NULL && sgot->_raw_size > 0)
     {
       bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents);
       bfd_put_32 (output_bfd, (bfd_vma) 0x80000000, sgot->contents + 4);
     }
 
-  elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
+  if (sgot != NULL)
+    elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
 
   {
     asection *sdynsym;
@@ -6085,7 +6108,7 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 
     /* Clean up a first relocation in .rel.dyn.  */
     s = bfd_get_section_by_name (dynobj, ".rel.dyn");
-    if (s != NULL)
+    if (s != NULL && s->_raw_size > 0)
       memset (s->contents, 0, sizeof (Elf32_External_Rel));
   }
 

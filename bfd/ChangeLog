@@ -1,3 +1,10 @@
+Tue Aug 27 00:12:22 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_check_relocs): Set dynobj if needed for
+	R_MIPS_32 and R_MIPS_REL32.  Set sgot and g as soon as possible.
+	(mips_elf_size_dynamic_sections): Don't require .got to exist.
+	(mips_elf_finish_dynamic_sections): Likewise.
+
 Thu Aug 22 10:54:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host (HLDENV): New variable to set.  Set it for
