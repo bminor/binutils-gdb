@@ -93,7 +93,7 @@ va_dcl
 	  if (symbol) {
 	    asection *section = symbol->section;
 	    if ((symbol->flags & BSF_UNDEFINED) == 0) {
-	      char *section_name = section == (asection *)NULL ?
+	    CONST char *section_name = section == (asection *)NULL ?
 		"absolute" : section->name;
 	      fprintf(stderr,"%s (%s)", symbol->name, section_name);
 	    }
@@ -169,8 +169,8 @@ va_dcl
 	break;
       case 'C':
 	{
-	  char *filename;
-	  char *functionname;
+	 CONST char *filename;
+	 CONST char *functionname;
 	  unsigned int linenumber;
 	  bfd *abfd = va_arg(arg, bfd *);
 	  asection *section = va_arg(arg, asection *);
@@ -235,8 +235,10 @@ unsigned int line;
    whose contents concatenate those of S1, S2, S3.  */
 
 char *
-concat (s1, s2, s3)
-     char *s1, *s2, *s3;
+DEFUN(concat, (s1, s2, s3),
+      CONST char *s1 AND
+      CONST char *s2 AND
+      CONST char *s3)
 {
   size_t len1 = strlen (s1);
   size_t len2 = strlen (s2);

@@ -18,47 +18,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
  * $Id$ 
- *
- *  $Log$
- *  Revision 1.5  1991/04/14 03:22:42  steve
- *  checkpoint before a merge
- *
- * Revision 1.4  1991/03/22  23:02:40  steve
- * Brought up to sync with Intel again.
- *
- * Revision 1.2  1991/03/15  18:45:55  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:48:37  chrisb
- * Initial revision
- *
- * Revision 1.7  1991/03/10  19:15:03  sac
- * Took out the abort() which had been put in the wrong place
- * Updated the version #.
- *
- * Revision 1.6  1991/03/10  09:31:41  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.5  1991/03/09  03:25:08  sac
- * Added support for LONG, SHORT and BYTE keywords in scripts
- *
- * Revision 1.4  1991/03/06  21:59:34  sac
- * Completed G++ support
- *
- * Revision 1.3  1991/03/06  02:29:52  sac
- * Added support for partial linking.
- *
- * Revision 1.2  1991/02/22  17:15:11  sac
- * Added RCS keywords and copyrights
- *
 */
 
 /* 
@@ -250,7 +209,7 @@ asymbol **symbols;
 
 
 
-void  *data_area;
+PTR data_area;
 
 static void
 copy_and_relocate(statement)
@@ -260,65 +219,65 @@ lang_statement_union_type *statement;
   case lang_fill_statement_enum: 
       {
 #if 0
-	bfd_byte play_area[SHORT_SIZE];
-	unsigned int i;
-	bfd_putshort(output_bfd, statement->fill_statement.fill, play_area);
-	/* Write out all entire shorts */
-	for (i = 0;
-	     i < statement->fill_statement.size - SHORT_SIZE + 1;
-	     i+= SHORT_SIZE)
-	    {
-	      bfd_set_section_contents(output_bfd,
-				       statement->fill_statement.output_section,
-				       play_area,
-				       statement->data_statement.output_offset +i,
-				       SHORT_SIZE);
+      bfd_byte play_area[SHORT_SIZE];
+      unsigned int i;
+      bfd_putshort(output_bfd, statement->fill_statement.fill, play_area);
+      /* Write out all entire shorts */
+      for (i = 0;
+	   i < statement->fill_statement.size - SHORT_SIZE + 1;
+	   i+= SHORT_SIZE)
+	{
+	  bfd_set_section_contents(output_bfd,
+				   statement->fill_statement.output_section,
+				   play_area,
+				   statement->data_statement.output_offset +i,
+				   SHORT_SIZE);
 
-	    }
+	}
 
-	/* Now write any remaining byte */
-	if (i < statement->fill_statement.size) 
-	    {
-	      bfd_set_section_contents(output_bfd,
-				       statement->fill_statement.output_section,
-				       play_area,
-				       statement->data_statement.output_offset +i,
-				       1);
+      /* Now write any remaining byte */
+      if (i < statement->fill_statement.size) 
+	{
+	  bfd_set_section_contents(output_bfd,
+				   statement->fill_statement.output_section,
+				   play_area,
+				   statement->data_statement.output_offset +i,
+				   1);
 
-	    }
+	}
 #endif
-      }
+    }
     break;
   case lang_data_statement_enum:
-      {
-	bfd_vma value = statement->data_statement.value;
-	bfd_byte play_area[LONG_SIZE];
-	unsigned int size;
-	switch (statement->data_statement.type) {
-	case LONG:
-	  bfd_putlong(output_bfd, value,  play_area);
-	  size = LONG_SIZE;
-	  break;
-	case SHORT:
-	  bfd_putshort(output_bfd, value,  play_area);
-	  size = SHORT_SIZE;
-	  break;
-	case BYTE:
-	  bfd_putchar(output_bfd, value,  play_area);
-	  size = BYTE_SIZE;
-	  break;
-	}
-      
-	bfd_set_section_contents(output_bfd,
-				 statement->data_statement.output_section,
-				 play_area,
-				 statement->data_statement.output_vma,
-				 size);
-			       
-			       
-
-
+    {
+      bfd_vma value = statement->data_statement.value;
+      bfd_byte play_area[LONG_SIZE];
+      unsigned int size;
+      switch (statement->data_statement.type) {
+      case LONG:
+	bfd_putlong(output_bfd, value,  play_area);
+	size = LONG_SIZE;
+	break;
+      case SHORT:
+	bfd_putshort(output_bfd, value,  play_area);
+	size = SHORT_SIZE;
+	break;
+      case BYTE:
+	bfd_putchar(output_bfd, value,  play_area);
+	size = BYTE_SIZE;
+	break;
       }
+      
+      bfd_set_section_contents(output_bfd,
+			       statement->data_statement.output_section,
+			       play_area,
+			       statement->data_statement.output_vma,
+			       size);
+			       
+			       
+
+
+    }
     break;
   case lang_input_section_enum:
       {
@@ -432,7 +391,7 @@ write_rel()
 void
 ldwrite ()
 {
-  data_area = (void*) ldmalloc(largest_section);
+  data_area = (PTR) ldmalloc(largest_section);
   if (config.relocateable_output == true)
     {
       write_rel();

@@ -18,37 +18,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
    $Id$ 
-
-   $Log$
-   Revision 1.3  1991/04/14 03:22:11  steve
-   checkpoint before a merge
-
- * Revision 1.2  1991/03/22  23:02:30  steve
- * Brought up to sync with Intel again.
- *
- * Revision 1.3  1991/03/16  22:27:24  rich
- * fish
- *
- * Revision 1.2  1991/03/15  18:45:55  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:48:12  chrisb
- * Initial revision
- *
- * Revision 1.4  1991/03/10  09:31:19  rich
- *  Modified Files:
- *  	Makefile config.h ld-emul.c ld-emul.h ld-gld.c ld-gld960.c
- *  	ld-lnk960.c ld.h lddigest.c ldexp.c ldexp.h ldfile.c ldfile.h
- *  	ldgram.y ldinfo.h ldlang.c ldlang.h ldlex.h ldlex.l ldmain.c
- *  	ldmain.h ldmisc.c ldmisc.h ldsym.c ldsym.h ldversion.c
- *  	ldversion.h ldwarn.h ldwrite.c ldwrite.h y.tab.h
- *
- * As of this round of changes, ld now builds on all hosts of (Intel960)
- * interest and copy passes my copy test on big endian hosts again.
- *
- * Revision 1.3  1991/02/22  17:14:57  sac
- * Added RCS keywords and copyrights
- *
 */
 
 /* 
@@ -80,6 +49,26 @@ extern bfd *output_bfd;
 
 
 
+#ifdef GNU960
+
+static void
+gld960_before_parse()
+{
+  static char *env_variables[] = { "G960LIB", "G960BASE", 0 };
+  char **p;
+  char *env ;
+
+  for ( p = env_variables; *p; p++ ){
+    env =  (char *) getenv(*p);
+    if (env) {
+      ldfile_add_library_path(concat(env,"/lib/libbout",""));
+    }
+  }
+  ldfile_output_architecture = bfd_arch_i960;
+}
+
+#else	/* not GNU960 */
+
 static void gld960_before_parse()
 {
   char *env ;
@@ -93,6 +82,8 @@ static void gld960_before_parse()
   }
   ldfile_output_architecture = bfd_arch_i960;
 }
+
+#endif	/* GNU960 */
 
 
 static void 
@@ -125,12 +116,21 @@ gld960_set_output_arch()
 static char *
 gld960_choose_target()
 {
+#ifdef GNU960
+
+  output_filename = "b.out";
+  return bfd_make_targ_name(BFD_BOUT_FORMAT,HOST_BYTE_ORDER_BIG_P);
+
+#else
+
   char *from_outside = getenv(TARGET_ENVIRON);
   output_filename = "b.out";
 
   if (from_outside != (char *)NULL)
     return from_outside;
   return GLD960_TARGET;
+
+#endif
 }
 
 static void

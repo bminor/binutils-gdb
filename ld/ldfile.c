@@ -90,8 +90,9 @@ char *attempt;
 lang_input_statement_type  *entry;
 {
   entry->the_bfd = bfd_openr(attempt, entry->target);
-  if (option_v == true && entry->the_bfd == (bfd *)NULL) {
-    info("attempt to open %s failed\n", attempt);
+  if (option_v == true ) {
+    info("attempt to open %s %s\n", attempt,
+		(entry->the_bfd == (bfd *)NULL) ? "failed" : "succeeded" );
   }
   return entry->the_bfd;
 }
@@ -249,9 +250,71 @@ char *name;
 
 
 
+
+#ifdef GNU960
+static
+char *
+gnu960_map_archname( name )
+char *name;
+{
+  struct tabentry { char *cmd_switch; char *arch; };
+  static struct tabentry arch_tab[] = {
+	"",   "",
+	"KA", "ka",
+	"KB", "kb",
+	"KC", "mc",	/* Synonym for MC */
+	"MC", "mc",
+	"CA", "ca",
+	"SA", "ka",	/* Functionally equivalent to KA */
+	"SB", "kb",	/* Functionally equivalent to KB */
+	NULL, ""
+  };
+  struct tabentry *tp;
+  
+
+  for ( tp = arch_tab; tp->cmd_switch != NULL; tp++ ){
+    if ( !strcmp(name,tp->cmd_switch) ){
+      break;
+    }
+  }
+
+  if ( tp->cmd_switch == NULL ){
+    info("%P%F: unknown architecture: %s\n",name);
+  }
+  return tp->arch;
+}
+
+
+
+void
+ldfile_add_arch(name)
+char *name;
+{
+  search_arch_type *new =
+    (search_arch_type *)ldmalloc(sizeof(search_arch_type));
+
+
+  if (*name != '\0') {
+    if (ldfile_output_machine_name[0] != '\0') {
+      info("%P%F: target architecture respecified\n");
+      return;
+    }
+    ldfile_output_machine_name = name;
+  }
+
+  new->next = (search_arch_type*)NULL;
+  new->name = gnu960_map_archname( name );
+  *search_arch_tail_ptr = new;
+  search_arch_tail_ptr = &new->next;
+
+}
+
+#else	/* not GNU960 */
+
+
 void
 DEFUN(ldfile_add_arch,(in_name),
-      CONST char *CONST in_name)
+      CONST char * in_name)
 {
   char *name = buystring(in_name);
   search_arch_type *new =
@@ -269,3 +332,4 @@ DEFUN(ldfile_add_arch,(in_name),
   search_arch_tail_ptr = &new->next;
 
 }
+#endif

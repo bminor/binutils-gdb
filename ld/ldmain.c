@@ -137,7 +137,12 @@ main (argc, argv)
   char *emulation;
   program_name = argv[0];
   output_filename = "a.out";
-  emulation =  getenv(EMULATION_ENVIRON); 
+
+#ifdef GNU960
+  check_v960( argc, argv );
+#endif
+
+  emulation =  (char *) getenv(EMULATION_ENVIRON); 
 
   /* Initialize the data about options.  */
   strip_symbols = STRIP_NONE;
@@ -164,12 +169,16 @@ main (argc, argv)
   config.magic_demand_paged = true ;
   config.make_executable = true;
 
+#ifdef GNU960
+  ldemul_choose_mode(LNK960_EMULATION_NAME);
+#else
   if (emulation == (char *)NULL) {
     emulation= DEFAULT_EMULATION;
   }
 
 
   ldemul_choose_mode(emulation);
+#endif
 
   default_target =  ldemul_choose_target();
 
@@ -250,7 +259,7 @@ asymbol **nlist_p;
   sym->value = 0;
   sym->flags = BSF_UNDEFINED;
   sym->section = (asection *)NULL;
-  sym->udata =(void *)( sp->srefs_chain);
+  sym->udata =(PTR)( sp->srefs_chain);
   sp->srefs_chain = nlist_p;
 }
 /*
@@ -283,7 +292,7 @@ Q_enter_global_ref (nlist_p)
 
 {
   asymbol *sym = *nlist_p;
-  char *name = sym->name;
+  CONST char *name = sym->name;
   ldsym_type *sp = ldsym_get (name);
 
   flagword this_symbol_flags = sym->flags;
@@ -356,7 +365,7 @@ Q_enter_global_ref (nlist_p)
 	   sy->value);
     }
     else {
-      sym->udata =(void *)( sp->sdefs_chain);
+      sym->udata =(PTR)( sp->sdefs_chain);
       sp->sdefs_chain = nlist_p;
     }
     /* A definition overrides a common symbol */
@@ -445,6 +454,22 @@ search_library (entry)
 }
 
 
+#ifdef GNU960
+static
+boolean
+gnu960_check_format (abfd, format)
+bfd *abfd;
+bfd_format format;
+{
+  boolean retval;
+
+  if ((bfd_check_format(abfd,format) == true) && BFD_COFF_FILE_P(abfd)) {
+	return true;
+  }
+  return false;
+}
+#endif
+
 void
 ldmain_open_file_read_symbol (entry)
 struct lang_input_statement_struct *entry;
@@ -455,24 +480,33 @@ struct lang_input_statement_struct *entry;
     {
       ldfile_open_file (entry);
 
+#ifdef GNU960
+      if (gnu960_check_format(entry->the_bfd, bfd_object))
+#else
       if (bfd_check_format(entry->the_bfd, bfd_object))
+#endif
 	{
-	  entry->the_bfd->usrdata = (void*)entry;
+	  entry->the_bfd->usrdata = (PTR)entry;
 
 
 	  Q_read_entry_symbols (entry->the_bfd, entry);
 	  Q_enter_file_symbols (entry);
 	}
+#ifdef GNU960
+      else if (gnu960_check_format(entry->the_bfd, bfd_archive)) 
+#else
       else if (bfd_check_format(entry->the_bfd, bfd_archive)) 
+#endif
 	{
-	  entry->the_bfd->usrdata = (void *)entry;
+	  entry->the_bfd->usrdata = (PTR)entry;
 
 	  entry->subfiles = (lang_input_statement_type *)NULL;
 	  search_library (entry);
 	}
       else 
 	{
-	  info("%F%I: malformed input file (not rel or archive) \n", entry);
+	  info("%F%B: malformed input file (not rel or archive) \n",
+						entry->the_bfd);
 	}
     }
 
@@ -567,7 +601,11 @@ symdef_library (entry)
 		  bfd *archive_member_bfd = bfd_get_elt_at_index(entry->the_bfd, idx);
 		  struct lang_input_statement_struct *archive_member_lang_input_statement_struct;
 
+#ifdef GNU960
+		  if (archive_member_bfd && gnu960_check_format(archive_member_bfd, bfd_object)) 
+#else
 		  if (archive_member_bfd && bfd_check_format(archive_member_bfd, bfd_object)) 
+#endif
 		    {
 
 		      /* Don't think carefully about any archive member
@@ -579,7 +617,7 @@ symdef_library (entry)
 
 			  /* Read the symbol table of the archive member.  */
 
-			  if (archive_member_bfd->usrdata != (void *)NULL) {
+			  if (archive_member_bfd->usrdata != (PTR)NULL) {
 
 			    archive_member_lang_input_statement_struct =(lang_input_statement_type *) archive_member_bfd->usrdata;
 			  }
@@ -587,7 +625,7 @@ symdef_library (entry)
 
 			    archive_member_lang_input_statement_struct =
 			      decode_library_subfile (entry, archive_member_bfd);
-			    archive_member_bfd->usrdata = (void *) archive_member_lang_input_statement_struct;
+			    archive_member_bfd->usrdata = (PTR) archive_member_lang_input_statement_struct;
 
 			  }
 
@@ -652,14 +690,18 @@ struct lang_input_statement_struct *entry;
 
     more_to_do = false;
     while (archive) {
+#ifdef GNU960
+      if (gnu960_check_format(archive, bfd_object)) 
+#else
       if (bfd_check_format(archive, bfd_object)) 
+#endif
 	{
 	  register struct lang_input_statement_struct *subentry;
 
 	  subentry = decode_library_subfile (entry,
 					     archive);
 
-	  archive->usrdata = (void *) subentry;
+	  archive->usrdata = (PTR) subentry;
 	  if (!subentry) return;
 	  if (subentry->loaded == false) {
 	    Q_read_entry_symbols (archive, subentry);
@@ -742,7 +784,7 @@ struct lang_input_statement_struct *entry;
 		      sp->scoms_chain = sp->srefs_chain;
 		      sp->srefs_chain =
 			(asymbol **)((*(sp->srefs_chain))->udata);
-		      (*(sp->scoms_chain))->udata = (void*)NULL;
+		      (*(sp->scoms_chain))->udata = (PTR)NULL;
 
 		      (*(  sp->scoms_chain))->flags = BSF_FORT_COMM;
 		      /* Remember the size of this item */

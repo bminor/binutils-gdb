@@ -78,8 +78,8 @@ hash_string (key)
 /* Get the symbol table entry for the global symbol named KEY.
    Create one if there is none.  */
 ldsym_type *
-ldsym_get (key)
-     char *key;
+DEFUN(ldsym_get,(key),
+      CONST     char *key)
 {
   register int hashval;
   register ldsym_type *bp;
@@ -100,11 +100,7 @@ ldsym_get (key)
   bp->srefs_chain = (asymbol **)NULL;
   bp->sdefs_chain = (asymbol **)NULL;
   bp->scoms_chain = (asymbol **)NULL;
-  bp->name = (char *) ldmalloc (strlen (key) + 1);
-  strcpy (bp->name, key);
-
-
-
+  bp->name = buystring(key);
 
   /* Add the entry to the bucket.  */
 
@@ -123,8 +119,8 @@ ldsym_get (key)
 /* Like `ldsym_get' but return 0 if the symbol is not already known.  */
 
 ldsym_type *
-ldsym_get_soft (key)
-     char *key;
+DEFUN(ldsym_get_soft,(key),
+      CONST char *key)
 {
   register int hashval;
   register ldsym_type *bp;
@@ -433,8 +429,8 @@ return true if the supplied symbol name is not in the
 linker symbol table
 */
 boolean 
-ldsym_undefined(sym)
-char *sym;
+DEFUN(ldsym_undefined,(sym),
+      CONST char *sym)
 {
   ldsym_type *from_table = ldsym_get_soft(sym);
   if (from_table != (ldsym_type *)NULL) {

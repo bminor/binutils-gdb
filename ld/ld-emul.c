@@ -1,5 +1,3 @@
-
-
 /* Copyright (C) 1991 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -19,9 +17,9 @@ along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
-   $Id$ 
- *
-*/
+ * $Id$ 
+ */
+
 /*
  * clearing house for ld emulation states 
  */
@@ -110,6 +108,10 @@ char *target;
   if (strcmp(target,LNK960_EMULATION_NAME)==0) {
     ld_emulation = &ld_lnk960_emulation;
   }
+  else if (strcmp(target,GLD960_EMULATION_NAME)==0) {
+    ld_emulation = &ld_gld960_emulation;
+  }
+#ifndef GNU960
   else if (strcmp(target,GLD_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld_emulation;
   }
@@ -119,9 +121,7 @@ char *target;
   else if (strcmp(target,GLD68K_EMULATION_NAME)==0) {
     ld_emulation = &ld_gld68k_emulation;
   }
-  else if (strcmp(target,GLD960_EMULATION_NAME)==0) {
-    ld_emulation = &ld_gld960_emulation;
-  }
+#endif
   else {
     info("%P%F unrecognised emulation mode: %s\n",target);
   }

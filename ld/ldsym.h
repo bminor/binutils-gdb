@@ -24,7 +24,7 @@ typedef struct user_symbol_struct
   struct user_symbol_struct *link;
 
   /* Name of this symbol.  */
-  char *name;			
+  CONST char *name;			
 
   /* Pointer to next symbol in order of symbol creation */
   struct user_symbol_struct *next; 
