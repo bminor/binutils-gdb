@@ -1,3 +1,10 @@
+2005-04-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* netbsd-core.c (SPARC_WCOOKIE_OFFSET): Renamed from
+	CORE_WCOOKIE_OFFSET.
+	(SPARC64_WCOOKIE_OFFSET): New.
+	(netbsd_core_file_p): Provide .wcookie section for OpenBSD/sparc64.
+
 2005-04-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/rw.po: New translation: Kinyarwanda
