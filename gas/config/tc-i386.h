@@ -41,7 +41,7 @@ struct fix;
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
-#if (defined (OBJ_ELF) || defined (OBJ_COFF)) && !defined (TE_PE)
+#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF) || defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)) && !defined (TE_PE)
 /* This arranges for gas/write.c to not apply a relocation if
    tc_fix_adjustable() says it is not adjustable.  */
 #define TC_FIX_ADJUSTABLE(fixP) tc_fix_adjustable (fixP)
