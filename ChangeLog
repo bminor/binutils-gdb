@@ -1,4 +1,6 @@
-Tue Nov 21 16:06:13 1995  Doug Evans  <dje@canuck.cygnus.com>
+Tue Nov 21 16:48:02 1995  Doug Evans  <dje@deneb.cygnus.com>
+
+	* configure.in (targargs): Fix typo.
 
 	* Makefile.in (DEVO_SUPPORT): Add symlink-tree.
 

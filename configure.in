@@ -665,7 +665,7 @@ targargs=`echo "${arguments}" | \
 # sorts of decisions they want to make on this basis.  Please consider
 # this option to be deprecated.  FIXME.
 if [ x${is_cross_compiler} = xyes ]; then
-  targargs="--with-cross-host=${host_alias} $[targargs}"
+  targargs="--with-cross-host=${host_alias} ${targargs}"
 fi
 
 targargs="--host=${target_alias} ${targargs}"
