@@ -1,3 +1,17 @@
+Fri Jul  8 10:57:02 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): Use
+	bfd_abs_section_ptr, not &bfd_abs_section.
+
+	* lexsup.c (parse_args): Changed "retain-symbols-file" from
+	no_argument to required_argument.  From djm.
+
+Thu Jul  7 12:29:53 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* scripttempl/elf.sc: Explicitly mention .stab and .stabstr
+	sections to force a VMA of 0; needed for ELF backends which have
+	not been converted to the new linker style.
+
 Mon Jul  4 19:35:45 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* scripttempl/hppaelf.sc (__stack_zero): Don't define this name,

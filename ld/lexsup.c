@@ -46,12 +46,15 @@ parse_args (argc, argv)
      int argc;
      char **argv;
 {
+  int ingroup = 0;
+
   /* Starting the short option string with '-' is for programs that
      expect options and other ARGV-elements in any order and that care about
      the ordering of the two.  We describe each non-option ARGV-element
      as if it were the argument of an option with character code 1.  */
 
-  const char *shortopts = "-A:B::b:cde:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:";
+  const char *shortopts =
+    "-A:B::b:cde:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:()";
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -69,7 +72,8 @@ parse_args (argc, argv)
 #define OPTION_OFORMAT			(OPTION_NON_SHARED + 1)
 #define OPTION_RELAX			(OPTION_OFORMAT + 1)
 #define OPTION_RETAIN_SYMBOLS_FILE	(OPTION_RELAX + 1)
-#define OPTION_SORT_COMMON		(OPTION_RETAIN_SYMBOLS_FILE + 1)
+#define OPTION_SHARED			(OPTION_RETAIN_SYMBOLS_FILE + 1)
+#define OPTION_SORT_COMMON		(OPTION_SHARED + 1)
 #define OPTION_STATS			(OPTION_SORT_COMMON + 1)
 #define OPTION_TBSS			(OPTION_STATS + 1)
 #define OPTION_TDATA			(OPTION_TBSS + 1)
@@ -80,6 +84,8 @@ parse_args (argc, argv)
 #define OPTION_WARN_COMMON		(OPTION_VERSION + 1)
 
   static struct option longopts[] = {
+    {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
+    {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
     {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
     {"dc", no_argument, NULL, 'd'},
     {"defsym", required_argument, NULL, OPTION_DEFSYM},
@@ -89,6 +95,7 @@ parse_args (argc, argv)
     {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
     {"EB", no_argument, NULL, OPTION_EB},
     {"EL", no_argument, NULL, OPTION_EL},
+    {"end-group", no_argument, NULL, ')'},
     {"format", required_argument, NULL, 'b'},
     {"help", no_argument, NULL, OPTION_HELP},
     {"Map", required_argument, NULL, OPTION_MAP},
@@ -100,9 +107,11 @@ parse_args (argc, argv)
     {"Qy", no_argument, NULL, OPTION_IGNORE},
     {"qmagic", no_argument, NULL, OPTION_IGNORE}, /* Linux compatibility.  */
     {"relax", no_argument, NULL, OPTION_RELAX},
-    {"retain-symbols-file", no_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
+    {"retain-symbols-file", required_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
+    {"shared", no_argument, NULL, OPTION_SHARED},
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
+    {"start-group", no_argument, NULL, '('},
     {"stats", no_argument, NULL, OPTION_STATS},
     {"static", no_argument, NULL, OPTION_NON_SHARED},
     {"Tbss", required_argument, NULL, OPTION_TBSS},
@@ -138,9 +147,6 @@ parse_args (argc, argv)
 	  break;
 	case 'A':
 	  ldfile_add_arch (optarg);
-	  break;
-	case 'B':
-	  /* Ignore.  */
 	  break;
 	case 'b':
 	  lang_add_target (optarg);
@@ -266,6 +272,9 @@ parse_args (argc, argv)
 	case 's':
 	  link_info.strip = strip_all;
 	  break;
+	case OPTION_SHARED:
+	  link_info.shared = true;
+	  break;
 	case OPTION_SORT_COMMON:
 	  config.sort_common = true;
 	  break;
@@ -330,8 +339,33 @@ parse_args (argc, argv)
 	case 'y':
 	  add_ysym (optarg);
 	  break;
+	case '(':
+	  if (ingroup)
+	    {
+	      fprintf (stderr,
+		       "%s: may not nest groups (--help for usage)\n",
+		       program_name);
+	      xexit (1);
+	    }
+	  lang_enter_group ();
+	  ingroup = 1;
+	  break;
+	case ')':
+	  if (! ingroup)
+	    {
+	      fprintf (stderr,
+		       "%s: group ended before it began (--help for usage)\n",
+		       program_name);
+	      xexit (1);
+	    }
+	  lang_leave_group ();
+	  ingroup = 0;
+	  break;
 	}
     }
+
+  if (ingroup)
+    lang_leave_group ();
 }
 
 /* Add the (colon-separated) elements of DIRLIST_PTR to the
