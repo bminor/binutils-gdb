@@ -1,3 +1,31 @@
+Sun May 17 16:51:20 1992  Fred Fish  (fnf@cygnus.com)
+
+	* inflow.c (new_tty):  Temporarily ignore SIGTTOU when
+	disconnecting from controlling terminal, to avoid gdb hanging
+	on SVR4.  Fixes bug reported by Oliver Okrongli.
+	* procfs.c (PROC_NAME_FMT):  Change format to match default used
+	by system, as suggested by Oliver Okrongli.
+	* tm-68k.h (FRAME_FIND_SAVED_REGS):  Apply missing parentheses
+	bug fix from Brent Townshend (bst%tt@cam.ORG).
+	* c-exp.y (nonempty_typelist):  Fix memory overrun bug reported
+	by turlais@rechser.total.fr.
+	* dwarfread.c (decode_subscr_data):  Fix bug in calculation of
+	length of non-zero lowerbound arrays.  Bug fix from Peggy Fieland.
+	* objfiles.h (unlink_objfile):  Add prototype.
+	* objfiles.c (unlink_objfile):  Add function.
+	* objfiles.c (free_objfile):  Call unlink_objfile.
+	* objfiles.c (allocate_objfile):  Call unlink_objfile on newly
+	remapped objfiles.  Bug reported by hahn@sunshine.labs.tek.com.
+	Also, discard old possibly bogus sf struct.
+	* symfile.c (symbol_file_add):  Call init_entry_point_info() and
+	find_sym_fns() for remapped symbol files, in case of any changes
+	since the last mapping.
+
+Wed May 13 18:28:20 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* findvar.c (read_relative_register_raw_bytes): use the raw size
+	of a register to bcopy, rather than the host's sizeof(CORE_ADDR).
+
 Tue May 12 17:44:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	Changes to support GDB running on DOS using GO32 and H8 support
 

@@ -437,7 +437,7 @@ extern const struct ext_format ext_format_68881;
       for (regnum = 15; regnum >= 0; regnum--, regmask >>= 1)		\
 	if (regmask & 1)						\
           (frame_saved_regs).regs[regnum] = (next_addr -= 4); }		\
-  else if (0x2f00 == 0xfff0 & read_memory_integer (pc, 2))		\
+  else if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))		\
     { regnum = 0xf & read_memory_integer (pc, 2); pc += 2;		\
       (frame_saved_regs).regs[regnum] = (next_addr -= 4); }		\
   /* clrw -(sp); movw ccr,-(sp) may follow.  */				\

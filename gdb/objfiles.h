@@ -293,6 +293,9 @@ extern struct objfile *
 allocate_objfile PARAMS ((bfd *, int));
 
 extern void
+unlink_objfile PARAMS ((struct objfile *));
+
+extern void
 free_objfile PARAMS ((struct objfile *));
 
 extern void

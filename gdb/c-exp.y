@@ -895,13 +895,13 @@ typename:	TYPENAME
 
 nonempty_typelist
 	:	type
-		{ $$ = (struct type **)xmalloc (sizeof (struct type *) * 2);
-		  $$[0] = (struct type *)0;
+		{ $$ = (struct type **) xmalloc (sizeof (struct type *) * 2);
+		  $<ivec>$[0] = 1;	/* Number of types in vector */
 		  $$[1] = $1;
 		}
 	|	nonempty_typelist ',' type
-		{ int len = sizeof (struct type *) * ++($<ivec>1[0]);
-		  $$ = (struct type **)xrealloc ((char *) $1, len);
+		{ int len = sizeof (struct type *) * (++($<ivec>1[0]) + 1);
+		  $$ = (struct type **) xrealloc ((char *) $1, len);
 		  $$[$<ivec>$[0]] = $3;
 		}
 	;

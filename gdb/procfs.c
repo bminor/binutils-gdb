@@ -47,7 +47,7 @@ regardless of whether or not the actual target has floating point hardware.
 #define MAX_SYSCALLS	256	/* Maximum number of syscalls for table */
 
 #ifndef PROC_NAME_FMT
-#define PROC_NAME_FMT "/proc/%d"
+#define PROC_NAME_FMT "/proc/%05d"
 #endif
 
 #if 1	/* FIXME: Gross and ugly hack to resolve coredep.c global */

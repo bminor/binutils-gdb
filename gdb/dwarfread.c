@@ -1114,7 +1114,7 @@ decode_subscr_data (scan, end)
 	      TYPE_OBJFILE (typep) = current_objfile;
 	      TYPE_CODE (typep) = TYPE_CODE_ARRAY;
 	      TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
-	      TYPE_LENGTH (typep) *= lowbound + highbound + 1;
+	      TYPE_LENGTH (typep) *= (highbound - lowbound) + 1;
 	      TYPE_TARGET_TYPE (typep) = nexttype;
 	    }		    
 	}

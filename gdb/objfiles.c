@@ -110,6 +110,10 @@ allocate_objfile (abfd, mapped)
 	  obstack_freefun (&objfile -> symbol_obstack, mfree);
 	  obstack_chunkfun (&objfile -> type_obstack, xmmalloc);
 	  obstack_freefun (&objfile -> type_obstack, mfree);
+	  /* If already in objfile list, unlink it. */
+	  unlink_objfile (objfile);
+	  /* Forget things specific to a particular gdb, may have changed. */
+	  objfile -> sf = NULL;
 	}
       else
 	{
@@ -193,6 +197,36 @@ allocate_objfile (abfd, mapped)
   return (objfile);
 }
 
+/* Unlink OBJFILE from the list of known objfiles, if it is found in the
+   list.
+
+   It is not a bug, or error, to call this function if OBJFILE is not known
+   to be in the current list.  This is done in the case of mapped objfiles,
+   for example, just to ensure that the mapped objfile doesn't appear twice
+   in the list.  Since the list is threaded, linking in a mapped objfile
+   twice would create a circular list.
+
+   If OBJFILE turns out to be in the list, we zap it's NEXT pointer after
+   unlinking it, just to ensure that we have completely severed any linkages
+   between the OBJFILE and the list. */
+
+void
+unlink_objfile (objfile)
+     struct objfile *objfile;
+{
+  struct objfile** objpp;
+
+  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp) -> next))
+    {
+      if (*objpp == objfile) 
+	{
+	  *objpp = (*objpp) -> next;
+	  objfile -> next = NULL;
+	  break;
+	}
+    }
+}
+
 
 /* Destroy an objfile and all the symtabs and psymtabs under it.  Note
    that as much as possible is allocated on the symbol_obstack and
@@ -238,22 +272,7 @@ free_objfile (objfile)
 
   /* Remove it from the chain of all objfiles. */
 
-  if (object_files == objfile)
-    {
-      object_files = objfile -> next;
-    }
-  else
-    {
-      for (ofp = object_files; ofp; ofp = ofp -> next)
-	{
-	  if (ofp -> next == objfile)
-	    {
-	      ofp -> next = objfile -> next;
-	      break;
-	    }
-	}
-    }
-  objfile -> next = NULL;
+  unlink_objfile (objfile);
 
 #if 0	/* FIXME!! */
 
