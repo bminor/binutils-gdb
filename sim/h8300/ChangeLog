@@ -1,4 +1,41 @@
+Fri Sep  8 12:18:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_CONFIG_HEADER.  Don't try to use
+	bfd/hosts/*.h file or bfd/config/*.mh file.  Call AC_PROG_CC and
+	AC_PROG_RANLIB.  Substitute in values for CFLAGS, HDEFINES and AR.
+	Call AC_CHECK_HEADERS for stdlib.h and time.h.  Touch stamp.h if
+	creating config.h.
+	* configure: Rebuild.
+	* Makefile.in (AR): Define as @AR@.
+	(CC): New variable, defined as @CC@.
+	(CFLAGS): Define as @CFLAGS@.
+	(RANLIB): Define as @RANLIB@.
+	(HDEFINES, TDEFINES): New variables.
+	(@host_makefile_frag@): Remove.
+	(compile.o, run.o): Depend upon config.h.
+	(mostlyclean): Make the same as clean, not distclean.
+	(clean): Remove config.log.
+	(distclean): Remove config.h and stamp-h.
+	(Makefile): Don't depend upon @frags@.  Just rebuild Makefile when
+	invoking config.status.
+	(config.h, stamp-h): New targets.
+	* compile.c: Include "config.h".  Don't include <sys/times.h>.
+	Include <time.h> and <stdlib.h> if they exist.  Don't include
+	"sysdep.h".
+	(get_now): Remove unused local b.
+	* run.c: Include "config.h".  Include <stdlib.h> if it exists.
+	Don't include "sysdep.h".
+	* writecode.c: Don't include "bfd.h" or "sysdep.h".  Include
+	<stdio.h>.
+
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
 Wed Jul  5 14:32:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (clean): Remove run.
+	(distclean): Remove Makefile.
 
 	* h8300.mt: Removed.
 

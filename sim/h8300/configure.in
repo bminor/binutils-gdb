@@ -2,31 +2,22 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.3)dnl
 AC_INIT(Makefile.in)
 
+AC_CONFIG_HEADER(config.h:config.in)
+
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
 
-# Set up to make a link between the host's include file and "sysdep.h".
-files="../../bfd/hosts/${my_host}.h"
-if test ! -f ${srcdir}/${files} ; then
-	files=../../bfd/hosts/std-host.h
-	AC_MSG_WARN(h8300sim has no specific support for host ${host} -- using std-host)
-fi
-AC_LINK_FILES($files, sysdep.h)
+AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AR=${AR-ar}
+AC_SUBST(AR)
+AC_PROG_RANLIB
 
-if test -f ${srcdir}/../../bfd/config/${my_host}.mh; then
-	host_makefile_frag=../../bfd/config/${my_host}.mh
-else
-	host_makefile_frag=/dev/null
-fi
+AC_CHECK_HEADERS(stdlib.h time.h)
 
-frags=
-if test $host_makefile_frag != /dev/null; then
-	frags="$frags $host_makefile_frag"
-fi
-AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST(frags)
-
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile,
+[case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

@@ -27,6 +27,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+config.in
 configure
 configure.in
 compile.c

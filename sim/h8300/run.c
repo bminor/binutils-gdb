@@ -18,10 +18,15 @@
 
 */
 
+#include "config.h"
+
 #include <varargs.h>
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include "getopt.h"
 #include "bfd.h"
-#include "sysdep.h"
 #include "remote-sim.h"
 
 void usage();

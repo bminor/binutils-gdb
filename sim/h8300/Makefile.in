@@ -14,7 +14,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 VPATH = @srcdir@
 srcdir = @srcdir@
@@ -54,12 +54,16 @@ INSTALL_DATA = $(INSTALL)
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
-AR = ar
+AR = @AR@
 AR_FLAGS = rc
-CFLAGS = -g
+CC = @CC@
+CFLAGS = @CFLAGS@
 BISON = bison
 MAKEINFO = makeinfo
-RANLIB = ranlib
+RANLIB = @RANLIB@
+
+HDEFINES = @HDEFINES@
+TDEFINES =
 
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -68,17 +72,13 @@ INCDIR = $(srcdir)/../../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I../../bfd -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb
 DEP = mkdep
 
-#### Makefile fragments come in here.
-# @host_makefile_frag@
-###
-
 all:	run
 
 run:	compile.o run.o
 	$(CC) -o run compile.o  run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a
 
-compile.o:compile.c
-run.o:run.c 
+compile.o: compile.c config.h
+run.o: run.c config.h
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
@@ -94,12 +94,13 @@ tags etags: TAGS
 TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
-clean:
+mostlyclean clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
+	rm -f run config.log
 
-distclean mostlyclean realclean: clean
+distclean realclean: clean
 	rm -f TAGS
-	rm -f config.log config.cache config.status
+	rm -f Makefile config.log config.cache config.status config.h stamp-h
 
 # Dummy target to force execution of dependent targets.
 #
@@ -118,8 +119,12 @@ install:
 	else true; fi
 
 
-Makefile: Makefile.in config.status @frags
-	$(SHELL) ./config.status
+Makefile: Makefile.in config.status
+	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.h: stamp-h ; @true
+stamp-h: config.in config.status
+	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
 config.status: configure
 	$(SHELL) ./config.status --recheck
