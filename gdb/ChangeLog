@@ -1,5 +1,13 @@
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc32_extract_struct_value_address): Rename from
+	sparc_extract_struct_value_address.
+	(sparc32_gdbarch_init): Set extract_struct_value_address.
+	* sparc64-tdep.c (sparc64_extract_struct_value_address): New
+	function.
+	(sparc64_init_abi): Set extract_struct_value_address.  Don't set
+	return_value_on_stack.
+
 	* NEWS: Mention that %cs and %ss have been added to the AMD64
 	configurations
 

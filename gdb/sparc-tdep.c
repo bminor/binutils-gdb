@@ -839,7 +839,7 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
    CORE_ADDR.  */
 
 static CORE_ADDR
-sparc_extract_struct_value_address (struct regcache *regcache)
+sparc32_extract_struct_value_address (struct regcache *regcache)
 {
   ULONGEST sp;
 
@@ -1069,6 +1069,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
 
   set_gdbarch_return_value (gdbarch, sparc32_return_value);
+  set_gdbarch_extract_struct_value_address
+    (gdbarch, sparc32_extract_struct_value_address);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, sparc32_stabs_argument_has_addr);
 
