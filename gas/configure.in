@@ -87,6 +87,7 @@ changequote([,])dnl
       rs6000*)		cpu_type=ppc ;;
       sparc64)		cpu_type=sparc want_sparc_v9=true ;;
       sparc*)		cpu_type=sparc ;;
+      v850*)		cpu_type=v850 ;;
       *)		cpu_type=${cpu} ;;
     esac
 
