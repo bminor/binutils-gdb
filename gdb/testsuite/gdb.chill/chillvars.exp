@@ -89,13 +89,13 @@ proc test_BOOL {} {
 proc test_CHAR {} {
     gdb_test "ptype control_char"	"type = (CHAR|char)"
     gdb_test "whatis control_char"	"type = (CHAR|char)"
-    gdb_test "print control_char"	" = C'07'"
+    gdb_test "print control_char"	{ = '\^[(]7[)]'}
     gdb_test "ptype printable_char"	"type = (CHAR|char)"
     gdb_test "whatis printable_char"	"type = (CHAR|char)"
     gdb_test "print printable_char"	" = 'a'"
 
-    gdb_test "print lower(char)"	" = C'00'"
-    gdb_test "print upper(char)"	" = C'ff'"
+    gdb_test "print lower(char)"	{ = '\^[(]0[)]'}
+    gdb_test "print upper(char)"	{ = '\^[(]255[)]'}
 }
 
 proc test_BYTE {} {
@@ -181,11 +181,11 @@ proc test_arrays {} {
     gdb_test_exact "print booltable2" { = [(4): TRUE, (5:6): FALSE, (7): TRUE]}
 
     gdb_test "ptype chartable1"		"type = ARRAY \\(+0:2\\)+ (CHAR|char)"
-    gdb_test_exact "print chartable1"  {= [(0): C'00', (1): C'01', (2): C'02']}
+    gdb_test_exact "print chartable1"  {= [(0): '^(0)', (1): '^(1)', (2): '^(2)']}
 
     gdb_test "ptype chartable2"		"type = ARRAY \\(+3:5\\)+ (CHAR|char)"
     gdb_test_exact "print chartable2"	\
-	{= [(3): C'00', (4): C'01', (5): C'02']}
+	{= [(3): '^(0)', (4): '^(1)', (5): '^(2)']}
 
     gdb_test "ptype bytetable1"		"type = ARRAY \\(+0:4\\)+ (BYTE|byte)"
     gdb_test_exact "print bytetable1"		\
@@ -271,23 +271,23 @@ proc test_strings {} {
     gdb_test "print string1"		" = \"abcd\""
 
     gdb_test "ptype string2"		"type = CHARS \[(\]+5\[)\]+"
-    gdb_test "print string2"		" = \"ef\"//c\"00\"//\"gh\""
+    gdb_test "print string2"		{ = \"ef\^\(0\)gh\"}
 
     gdb_test "ptype string3"		"type = CHARS \[(\]+6\[)\]+"
     gdb_test "print string3"		" = \"efghij\""
 
     gdb_test "ptype string4"		"type = CHARS \[(\]+7\[)\]+"
-    gdb_test "print string4"		" = \"zzzzzz\"//c\"00\""
+    gdb_test "print string4"		{ = \"zzzzzz\^\(0\)\"}
 
     # These tests require a running process, so run to one of the procs
     # and then do the tests.
 
     if [runto scalar_arithmetic] then {
 	gdb_test "ptype string1//string2"	"type = CHARS \\(9\\)"
-	gdb_test "print string1//string2"    " = \"abcdef\"//c\"00\"//\"gh\""
+	gdb_test "print string1//string2"    { = \"abcdef\^\(0\)gh\"}
 	gdb_test_exact {ptype "a chill string"} {type = CHARS (14)}
 	gdb_test "print 'a chill string'"	" = \"a chill string\""
-	gdb_test "print \"ef\"//c'00'//\"gh\""	" = \"ef\"//c\"00\"//\"gh\""
+	gdb_test "print \"ef\"//c'00'//\"gh\""	{ = \"ef\^\(0\)gh\"}
 	gdb_test "print string1 // \"efgh\""	" = \"abcdefgh\""
 	gdb_test "print (6) 'z'"		" = \"zzzzzz\""
 	gdb_test "ptype (6) 'z'"		"type = CHARS \[(\]+6\[)\]+"

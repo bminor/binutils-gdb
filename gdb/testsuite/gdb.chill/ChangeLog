@@ -1,3 +1,11 @@
+Tue Mar  5 23:41:39 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* gch922.{ch,exp}, powerset.{ch,exp}: New test cases.
+
+	* builtins.exp, chillvars.exp, misc.exp, tests1.exp: Updated
+	due to new format of nonprintable characters (control sequence
+	instead of C'xx').
+	
 Tue Mar  5 00:09:17 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* string.ch, string.exp:  Add tests (from Cygnus PR chill/9078).

@@ -505,12 +505,12 @@ proc test_locations {} {
     test_print_accept "whatis strl1" "strm2" \
 	"print string locationa mode name"
     test_print_accept "print strl1" \
-	"\"hansi\"//c\"00\"" \
+	{\"hansi\^\(0\)\"} \
 	"print string location"
     # string elements
     test_print_accept "print strl1(0)" "\'h\'" \
 	"print string element 1"
-    test_print_accept "print strl1(5)" "C\'00\'" \
+    test_print_accept "print strl1(5)" {'\^[(]0[)]'} \
 	"print string element 2"
     test_print_accept "print strl1(3)" "\'s\'" \
 	"print string element 3"
@@ -520,12 +520,12 @@ proc test_locations {} {
     test_print_accept "print strl1(3:4)" "\"si\"" \
 	"print string slice 1"
     test_print_accept "print strl1(0:5)" \
-	"\"hansi\"//c\"00\"" \
+	{\"hansi\^\(0\)\"} \
 	"print string slice 2"
     test_print_accept "print strl1(0:0)" "\"h\"" \
 	"print string slice 3"
     test_print_accept "print strl1(0 up 6)" \
-	"\"hansi\"//c\"00\"" \
+	{\"hansi\^\(0\)\"} \
 	"print string slice 4"
     # FIXME: adjust error message, when implented
     gdb_test "print strl1(6 up 1)" \

@@ -40,8 +40,12 @@ extstruct.ch
 extstruct-grt.ch
 extstruct.exp
 func1.ch
+gch922.ch
+gch922.exp
 misc.ch
 misc.exp
+powerset.ch
+powerset.exp
 pr-4975.ch
 pr-4975-grt.ch
 pr-4975.exp

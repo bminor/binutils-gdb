@@ -114,7 +114,7 @@ proc test_lower {} {
 
     # discrete mode names
     test_print_accept "print lower(bool)" "FALSE"
-    test_print_accept "print lower(char)" "C'00'"
+    test_print_accept "print lower(char)" {'\^[(]0[)]'}
     test_print_accept "print lower(byte)" "-128"
     test_print_accept "print lower(ubyte)" "0"
     if [istarget "alpha-*-*"] then {
@@ -136,7 +136,7 @@ proc test_lower {} {
 
     # discrete locations
     test_print_accept "print lower(v_bool)" "FALSE"
-    test_print_accept "print lower(v_char)" "C'00'"
+    test_print_accept "print lower(v_char)" {'\^[(]0[)]'}
     test_print_accept "print lower(v_byte)" "-128"
     test_print_accept "print lower(v_ubyte)" "0"
     if [istarget "alpha-*-*"] then {
@@ -172,7 +172,7 @@ proc test_lower {} {
 
     # array mode name
     test_print_accept "print lower(m_arr)" "1";
-    test_print_accept "print lower(m_char_arr)" "C'00'"
+    test_print_accept "print lower(m_char_arr)" {'\^[(]0[)]'}
     test_print_accept "print lower(m_bool_arr)" "FALSE"
     if [istarget "alpha-*-*"] then {
 	test_print_accept "print lower(m_int_arr)" "-2147483648"
@@ -189,7 +189,7 @@ proc test_lower {} {
 
     # array locations
     test_print_accept "print lower(v_arr)" "1";
-    test_print_accept "print lower(v_char_arr)" "C'00'"
+    test_print_accept "print lower(v_char_arr)" {'\^[(]0[)]'}
     test_print_accept "print lower(v_bool_arr)" "FALSE"
     if [istarget "alpha-*-*"] then {
 	test_print_accept "print lower(v_int_arr)" "-2147483648"
@@ -213,7 +213,7 @@ proc test_upper {} {
 
     # discrete mode names
     test_print_accept "print upper(bool)" "TRUE"
-    test_print_accept "print upper(char)" "C'ff'"
+    test_print_accept "print upper(char)" {'\^[(]255[)]'}
     test_print_accept "print upper(byte)" "127"
     test_print_accept "print upper(ubyte)" "255"
     if [istarget "alpha-*-*"] then {
@@ -238,7 +238,7 @@ proc test_upper {} {
 
     # discrete locations
     test_print_accept "print upper(v_bool)" "TRUE"
-    test_print_accept "print upper(v_char)" "C'ff'"
+    test_print_accept "print upper(v_char)" {'\^[(]255[)]'}
     test_print_accept "print upper(v_byte)" "127"
     test_print_accept "print upper(v_ubyte)" "255"
     if [istarget "alpha-*-*"] then {
@@ -277,7 +277,7 @@ proc test_upper {} {
 
     # array mode name
     test_print_accept "print upper(m_arr)" "10";
-    test_print_accept "print upper(m_char_arr)" "C'ff'"
+    test_print_accept "print upper(m_char_arr)" {'\^[(]255[)]'}
     test_print_accept "print upper(m_bool_arr)" "TRUE"
     if [istarget "alpha-*-*"] then {
 	test_print_accept "print upper(m_int_arr)" "2147483647"
@@ -294,7 +294,7 @@ proc test_upper {} {
 
     # array locations
     test_print_accept "print upper(v_arr)" "10";
-    test_print_accept "print upper(v_char_arr)" "C'ff'"
+    test_print_accept "print upper(v_char_arr)" {'\^[(]255[)]'}
     test_print_accept "print upper(v_bool_arr)" "TRUE"
     if [istarget "alpha-*-*"] then {
 	test_print_accept "print upper(v_int_arr)" "2147483647"
