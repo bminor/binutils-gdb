@@ -1,3 +1,7 @@
+Fri Jan 21 14:28:30 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (realclean):  Remove info files per make-stds.texi.
+
 Fri Jan 21 12:47:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c (end_psymtab): Only patch psymtab textlow and texthigh

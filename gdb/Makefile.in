@@ -729,7 +729,7 @@ distclean: clean
 
 realclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
-	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
+	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS $(INFOFILES)
 	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f Makefile
