@@ -337,7 +337,7 @@ extern char *
 gdb_readline PARAMS ((char *));
 
 extern char *
-command_line_input PARAMS ((char *, int));
+command_line_input PARAMS ((char *, int, char *));
 
 extern void
 print_prompt PARAMS ((void));
@@ -622,6 +622,8 @@ extern char *warning_pre_print;
 
 extern NORETURN void			/* Does not return to the caller.  */
 error ();
+
+extern void error_begin PARAMS ((void));
 
 extern NORETURN void			/* Does not return to the caller.  */
 fatal ();

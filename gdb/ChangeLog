@@ -1,11 +1,21 @@
 Thu Apr 28 08:40:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* utils.c, defs.h (error_begin): New function.
+	(quit): Print annotation before printing the error message.
+	* main.c (return_to_top_level): Print annotation before doing the
+	longjmp.
+	* symtab.c (decode_line_1): Call error not warning and then
+	return_to_top_level.  Call error_begin and printf_unfiltered
+	rather calling warning (before calls to return_to_top_level).
+	* core.c (memory_error): Use error_begin, printf_unfiltered,
+	print_address_numeric and return_to_top_level instead of error.
+	Cleans up a FIXME-32x64.
+	* language.c (type_error, range_error): Call error_begin
+	not just target_terminal_ours.
+
 	* dbxread.c (stabsect_build_psymtabs): Assign to sym_stab_info
 	directly, rather than via DBX_SYMFILE_INFO.  A cast on the left
 	side of an assignment is non-portable.
-
-	* symtab.c (decode_line_1): Call error not warning and then
-	return_to_top_level. 
 
 	* utils.c (query): Change syntax of query annotations to be
 	consistent with other input annotations.

@@ -983,18 +983,18 @@ type_error (va_alist)
    va_list args;
    char *string;
 
-   if (type_check==type_check_warn)
-      fprintf_unfiltered(gdb_stderr,warning_pre_print);
+   if (type_check == type_check_warn)
+     fprintf_unfiltered (gdb_stderr, warning_pre_print);
    else
-      target_terminal_ours();
+     error_begin ();
 
    va_start (args);
    string = va_arg (args, char *);
    vfprintf_unfiltered (gdb_stderr, string, args);
    fprintf_unfiltered (gdb_stderr, "\n");
    va_end (args);
-   if (type_check==type_check_on)
-      return_to_top_level (RETURN_ERROR);
+   if (type_check == type_check_on)
+     return_to_top_level (RETURN_ERROR);
 }
 
 void
@@ -1004,18 +1004,18 @@ range_error (va_alist)
    va_list args;
    char *string;
 
-   if (range_check==range_check_warn)
-      fprintf_unfiltered(gdb_stderr,warning_pre_print);
+   if (range_check == range_check_warn)
+     fprintf_unfiltered (gdb_stderr, warning_pre_print);
    else
-      target_terminal_ours();
+     error_begin ();
 
    va_start (args);
    string = va_arg (args, char *);
    vfprintf_unfiltered (gdb_stderr, string, args);
    fprintf_unfiltered (gdb_stderr, "\n");
    va_end (args);
-   if (range_check==range_check_on)
-      return_to_top_level (RETURN_ERROR);
+   if (range_check == range_check_on)
+     return_to_top_level (RETURN_ERROR);
 }
 
 

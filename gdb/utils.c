@@ -250,6 +250,25 @@ warning (va_alist)
   va_end (args);
 }
 
+/* Start the printing of an error message.  Way to use this is to call
+   this, output the error message, and then call
+   return_to_top_level (RETURN_ERROR).  error() provides a convenient way to
+   do this for the special case that the error message can be formatted with
+   a single printf call, but this is more general.  */
+void
+error_begin ()
+{
+  target_terminal_ours ();
+  wrap_here ("");			/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+
+  if (annotation_level > 1)
+    fprintf_filtered (gdb_stderr, "\n\032\032error-begin\n");
+
+  if (error_pre_print)
+    fprintf_filtered (gdb_stderr, error_pre_print);
+}
+
 /* Print an error message and return to command level.
    The first argument STRING is the error message, used as a fprintf string,
    and the remaining args are passed as arguments to it.  */
@@ -262,12 +281,8 @@ error (va_alist)
   va_list args;
   char *string;
 
+  error_begin ();
   va_start (args);
-  target_terminal_ours ();
-  wrap_here("");			/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-  if (error_pre_print)
-    fprintf_filtered (gdb_stderr, error_pre_print);
   string = va_arg (args, char *);
   vfprintf_filtered (gdb_stderr, string, args);
   fprintf_filtered (gdb_stderr, "\n");
@@ -437,6 +452,9 @@ quit ()
   /* 3.  The system-level buffer.  */
   SERIAL_FLUSH_OUTPUT (gdb_stdout_serial);
   SERIAL_UN_FDOPEN (gdb_stdout_serial);
+
+  if (annotation_level > 1)
+    fprintf_filtered (gdb_stderr, "\n\032\032error-begin\n");
 
   /* Don't use *_filtered; we don't want to prompt the user to continue.  */
   if (error_pre_print)

@@ -1038,8 +1038,14 @@ find_pc_symtab (pc)
   return (s);
 }
 
+#if 0
+
 /* Find the closest symbol value (of any sort -- function or variable)
-   for a given address value.  Slow but complete.  */
+   for a given address value.  Slow but complete.  (currently unused,
+   mainly because it is too slow.  We could fix it if each symtab and
+   psymtab had contained in it the addresses ranges of each of its
+   sections, which also would be required to make things like "info
+   line *0x2345" cause psymtabs to be converted to symtabs).  */
 
 struct symbol *
 find_addr_symbol (addr, symtabp, symaddrp)
@@ -1110,7 +1116,7 @@ find_addr_symbol (addr, symtabp, symaddrp)
     *symaddrp = best_sym_addr;
   return best_sym;
 }
-
+#endif /* 0 */
 
 /* Find the source file and line number for a given PC value.
    Return a structure containing a symtab pointer, a line number,
@@ -1863,10 +1869,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	  while(!++p && *p != '>');
 	  if (!p)
 	    {
-	      /* FIXME: Why warning() and then return_to_top_level?
-		 What's wrong with error()?  */
-	      warning("non-matching '<' and '>' in command");
-	      return_to_top_level (RETURN_ERROR);
+	      error ("non-matching '<' and '>' in command");
 	    }
 	}
       if (p[0] == ':' || p[0] == ' ' || p[0] == '\t')
@@ -1923,7 +1926,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		  opname = cplus_mangle_opname (tmp, DMGL_ANSI);
 		  if (opname == NULL)
 		    {
-		      warning ("no mangling for \"%s\"", tmp);
+		      error_begin ();
+		      printf_unfiltered ("no mangling for \"%s\"\n", tmp);
 		      cplusplus_hint (saved_arg);
 		      return_to_top_level (RETURN_ERROR);
 		    }
@@ -2015,21 +2019,25 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		    }
 		  else
 		    tmp = copy;
+		  error_begin ();
 		  if (tmp[0] == '~')
-		    warning ("the class `%s' does not have destructor defined",
-			     SYMBOL_SOURCE_NAME(sym_class));
+		    printf_unfiltered
+		      ("the class `%s' does not have destructor defined\n",
+		       SYMBOL_SOURCE_NAME(sym_class));
 		  else
-		    warning ("the class %s does not have any method named %s",
-			     SYMBOL_SOURCE_NAME(sym_class), tmp);
+		    printf_unfiltered
+		      ("the class %s does not have any method named %s\n",
+		       SYMBOL_SOURCE_NAME(sym_class), tmp);
 		  cplusplus_hint (saved_arg);
 		  return_to_top_level (RETURN_ERROR);
 		}
 	    }
 	  else
 	    {
+	      error_begin ();
 	      /* The quotes are important if copy is empty.  */
-	      warning ("can't find class, struct, or union named \"%s\"",
-		       copy);
+	      printf_unfiltered
+		("can't find class, struct, or union named \"%s\"\n", copy);
 	      cplusplus_hint (saved_arg);
 	      return_to_top_level (RETURN_ERROR);
 	    }
@@ -2338,7 +2346,7 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
   printf_unfiltered("%s ",prompt);
   gdb_flush(gdb_stdout);
 
-  args = command_line_input ((char *) NULL, 0);
+  args = command_line_input ((char *) NULL, 0, "overload-choice");
   
   if (args == 0 || *args == 0)
     error_no_arg ("one or more choice numbers");
