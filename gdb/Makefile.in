@@ -518,6 +518,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
+	cp-names.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
@@ -924,11 +925,13 @@ SUBDIRS = @subdirs@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c \
+	cp-names.tab.c \
 	objc-exp.tab.c \
 	ada-exp.tab.c \
 	jv-exp.tab.c \
 	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 YYOBJ = c-exp.tab.o \
+	cp-names.tab.o \
 	objc-exp.tab.o \
 	jv-exp.tab.o \
 	f-exp.tab.o m2-exp.tab.o p-exp.tab.o
@@ -1169,6 +1172,7 @@ local-maintainer-clean:
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.tab.c \
+		cp-names.tab.c \
 		ada-lex.c ada-exp.tab.c \
 	        objc-exp.tab.c \
 		jv-exp.tab \
@@ -1431,6 +1435,23 @@ c-exp.tab.c: c-exp.y
 	  < c-exp.tmp > c-exp.new
 	-rm c-exp.tmp
 	mv c-exp.new ./c-exp.tab.c
+.PRECIOUS: cp-names.tab.c
+cp-names.tab.o: cp-names.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
+cp-names.tab.c: cp-names.y
+	$(SHELL) $(YLWRAP) "$(YACC)" \
+	    $(srcdir)/cp-names.y  y.tab.c cp-names.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < cp-names.tmp > cp-names.new
+	-rm cp-names.tmp
+	mv cp-names.new ./cp-names.tab.c
 .PRECIOUS: f-exp.tab.c
 f-exp.tab.o: f-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) \

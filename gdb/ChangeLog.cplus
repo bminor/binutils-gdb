@@ -1,3 +1,8 @@
+2003-12-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in: Add cp-names.y.
+	* cp-names.y: New file.
+
 2002-11-22  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.h: Add opaque declarations for struct namespace_info and
