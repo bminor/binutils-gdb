@@ -491,8 +491,9 @@ print_itrace (lf *file,
   lf_indent_suppress (file);
   lf_printf (file, "#if defined (WITH_TRACE)\n");
   lf_printf (file, "/* trace the instructions execution if enabled */\n");
-  lf_printf (file, "if (TRACE_%s_P (CPU)) {\n", phase);
-  lf_indent (file, +2);
+  lf_printf (file, "if (TRACE_%s_P (CPU))\n", phase);
+  lf_printf (file, "  {\n");
+  lf_indent (file, +4);
   if (insn->mnemonics != NULL)
     {
       insn_mnemonic_entry *assembler = insn->mnemonics;
@@ -541,8 +542,8 @@ print_itrace (lf *file,
       lf_printf (file, "itable[MY_INDEX].name);\n");
       lf_indent (file, -indent);
     }
-  lf_indent (file, -2);
-  lf_printf (file, "}\n");
+  lf_indent (file, -4);
+  lf_printf (file, "  }\n");
   lf_indent_suppress (file);
   lf_printf (file, "#endif\n");
 }
@@ -989,6 +990,8 @@ main (int argc,
       printf ("\n");
       printf ("  -Werror\n");
       printf ("\t Make warnings errors\n");
+      printf ("  -Wnodiscard\n");
+      printf ("\t Suppress warnings about discarded instructions\n");
       printf ("\n");
       printf ("  -G [!]<gen-option>\n");
       printf ("\t Any of the following options:\n");
@@ -1186,6 +1189,10 @@ main (int argc,
 	  {
 	    if (strcmp (optarg, "error") == 0)
 	      options.warning = error;
+	    else if (strcmp (optarg, "nodiscard") == 0)
+	      options.warn.discard = 0;
+	    else if (strcmp (optarg, "discard") == 0)
+	      options.warn.discard = 1;
 	    else
 	      error (NULL, "Unknown -W argument `%s'\n", optarg);
 	    break;

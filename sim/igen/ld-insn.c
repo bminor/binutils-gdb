@@ -23,997 +23,1531 @@
 #include "lf.h"
 #include "table.h"
 #include "filter.h"
-#include "ld-decode.h"
-#include "ld-cache.h"
+#include "igen.h"
 #include "ld-insn.h"
 
-#include "igen.h"
-
-static void
-update_depth(insn_table *entry,
-	     lf *file,
-	     void *data,
-	     insn *instruction,
-	     int depth)
-{
-  int *max_depth = (int*)data;
-  if (*max_depth < depth)
-    *max_depth = depth;
-}
-
-
-int
-insn_table_depth(insn_table *table)
-{
-  int depth = 0;
-  insn_table_traverse_tree(table,
-			   NULL,
-			   &depth,
-			   1,
-			   NULL, /*start*/
-			   update_depth,
-			   NULL, /*end*/
-			   NULL); /*padding*/
-  return depth;
-}
-
-
-static insn_fields *
-parse_insn_format(table_entry *entry,
-		  char *format)
+static insn_word_entry *
+parse_insn_word (line_ref *line,
+		 char *string,
+		 int word_nr)
 {
   char *chp;
-  insn_fields *fields = ZALLOC(insn_fields);
+  insn_word_entry *word = ZALLOC (insn_word_entry);
 
   /* create a leading sentinal */
-  fields->first = ZALLOC(insn_field);
-  fields->first->first = -1;
-  fields->first->last = -1;
-  fields->first->width = 0;
+  word->first = ZALLOC (insn_field_entry);
+  word->first->first = -1;
+  word->first->last = -1;
+  word->first->width = 0;
 
   /* and a trailing sentinal */
-  fields->last = ZALLOC(insn_field);
-  fields->last->first = insn_bit_size;
-  fields->last->last = insn_bit_size;
-  fields->last->width = 0;
+  word->last = ZALLOC (insn_field_entry);
+  word->last->first = options.insn_bit_size;
+  word->last->last = options.insn_bit_size;
+  word->last->width = 0;
 
   /* link them together */
-  fields->first->next = fields->last;
-  fields->last->prev = fields->first;
+  word->first->next = word->last;
+  word->last->prev = word->first;
 
   /* now work through the formats */
-  chp = format;
+  chp = skip_spaces (string);
 
   while (*chp != '\0') {
     char *start_pos;
+    int strlen_pos;
     char *start_val;
     int strlen_val;
-    int strlen_pos;
-    insn_field *new_field;
+    insn_field_entry *new_field;
 
-    /* skip leading spaces */
-    while (isspace(*chp) && *chp != '\n')
-      chp++;
+    /* create / link in the new field */
+    new_field = ZALLOC (insn_field_entry);
+    new_field->next = word->last;
+    new_field->prev = word->last->prev;
+    new_field->next->prev = new_field;
+    new_field->prev->next = new_field;
+    new_field->word_nr = word_nr;
 
     /* break out the first field (if present) */
     start_pos = chp;
-    while (*chp != '\0'
-	   && !isspace(*chp)
-	   && *chp != '.'
-	   && *chp != ',') {
-      chp++;
-    }
-    strlen_pos = chp - start_pos;
+    chp = skip_to_separator (chp, ".,!");
+    strlen_pos = back_spaces (start_pos, chp) - start_pos;
 
     /* break out the second field (if present) */
-    if (*chp != '.') {
-      /* assume that the value length specifies the nr of bits */
-      start_val = start_pos;
-      strlen_val = strlen_pos;
-      start_pos = "";
-      strlen_pos = 0;
-    }
-    else {
-      chp++;
-      start_val = chp;
-      if (*chp == '/' || *chp == '*') {
-	do {
-	  chp++;
-	} while (*chp == '/' || *chp == '*');
+    if (*chp != '.')
+      {
+	/* assume what was specified was the value (and not the start
+           position).  Assume the value length implicitly specifies
+           the number of bits */
+	start_val = start_pos;
+	strlen_val = strlen_pos;
+	start_pos = "";
+	strlen_pos = 0;
       }
-      else if (isalpha(*start_val)) {
-	do {
-	  chp++;
-	} while (isalnum(*chp) || *chp == '_');
+    else
+      {
+	chp++; /* skip `.' */
+	chp = skip_spaces (chp);
+	start_val = chp;
+	if (*chp == '/' || *chp == '*')
+	  {
+	    do
+	      {
+		chp++;
+	      }
+	    while (*chp == '/' || *chp == '*');
+	  }
+	else if (isalpha(*start_val))
+	  {
+	    do
+	      {
+		chp++;
+	      }
+	    while (isalnum(*chp) || *chp == '_');
+	  }
+	else if (isdigit(*start_val))
+	  {
+	    do {
+	      chp++;
+	    }
+	    while (isalnum(*chp));
+	  }
+	strlen_val = chp - start_val;
+	chp = skip_spaces (chp);
       }
-      else if (isdigit(*start_val)) {
-	do {
-	  chp++;
-	} while (isalnum(*chp));
-      }
-      strlen_val = chp - start_val;
-    }
-
-    /* skip trailing spaces */
-    while (isspace(*chp))
-      chp++;
-
-    /* verify field finished */
-    if (*chp == ',')
-      chp++;
-    else if (*chp != '\0' || strlen_val == 0) {
-      error("%s:%d: missing field terminator at %s\n",
-	    entry->file_name, entry->line_nr, chp);
-      break;
-    }
-
-    /* create a new field and insert it */
-    new_field = ZALLOC(insn_field);
-    new_field->next = fields->last;
-    new_field->prev = fields->last->prev;
-    new_field->next->prev = new_field;
-    new_field->prev->next = new_field;
-
-    /* the value */
-    new_field->val_string = (char*)zalloc(strlen_val+1);
-    strncpy(new_field->val_string, start_val, strlen_val);
-    if (isdigit(new_field->val_string[0])) {
-      if (strlen_pos == 0) {
-	insn_int val = 0;
-	int i;
-	for (i = 0; i < strlen_val; i++) {
-	  if (start_val[i] != '0' && start_val[i] != '1')
-	    error("%s:%d: invalid binary field %s\n",
-		  entry->file_name, entry->line_nr, start_val);
-	  val = (val << 1) + (start_val[i] == '1');
-	}
-	new_field->val_int = val;
-	new_field->is_int = 1;
-      }
-      else {
-	new_field->val_int = a2i(new_field->val_string);
-	new_field->is_int = 1;
-      }
-    }
-    else if (new_field->val_string[0] == '/') {
-      new_field->is_reserved = 1;
-    }
-    else if (new_field->val_string[0] == '*') {
-      new_field->is_wild = 1;
-    }
-    else {
-      new_field->is_string = 1;
-    }
+    if (strlen_val == 0)
+      error (line, "Empty value field");
     
-    /* the pos */
-    new_field->pos_string = (char*)zalloc(strlen_pos+1);
-    strncpy(new_field->pos_string, start_pos, strlen_pos);
-    if (strlen_pos == 0) {
-      new_field->first = new_field->prev->last + 1;
-      new_field->width = strlen_val;
-      new_field->last = new_field->first + new_field->width - 1;
-      if (new_field->last >= insn_bit_size)
-	error("%s:%d: Bit position %d exceed instruction bit size (%d)",
-	      entry->file_name, entry->line_nr,
-	      new_field->last, insn_bit_size);
-    }
-    else if (insn_specifying_widths) {
-      new_field->first = new_field->prev->last + 1;
-      new_field->width = a2i(new_field->pos_string);
-      new_field->last = new_field->first + new_field->width - 1;
-      if (new_field->last >= insn_bit_size)
-	error("%s:%d: Bit position %d exceed instruction bit size (%d)",
-	      entry->file_name, entry->line_nr,
-	      new_field->last, insn_bit_size);
-    }
-    else {
-      new_field->first = target_a2i(hi_bit_nr, new_field->pos_string);
-      new_field->last = new_field->next->first - 1; /* guess */
-      new_field->width = new_field->last - new_field->first + 1; /* guess */
-      new_field->prev->last = new_field->first - 1; /*fix*/
-      new_field->prev->width = new_field->first - new_field->prev->first; /*fix*/
-    }
+    /* break out any conditional fields - { "!" <value> } */
+    while (*chp == '!')
+      {
+	char *start;
+	int len;
+	insn_field_exclusion *new_exclusion = ZALLOC (insn_field_exclusion);
+	insn_field_exclusion **last;
+	
+	/* what type of conditional field */
+	chp++; 
+	chp = skip_spaces (chp);
+	/* the value */
+	start = chp;
+	chp = skip_digits (chp);
+	len = chp - start;
+	if (len == 0)
+	  error (line, "Missing or invalid conditional value\n");
+	/* fill in the entry */
+	new_exclusion->string = NZALLOC (char, len + 1);
+	strncpy (new_exclusion->string, start, len);
+	new_exclusion->value = a2i (new_exclusion->string);
+	/* insert it */
+	last = &new_field->exclusions;
+	while (*last != NULL)
+	  last = &(*last)->next;
+	*last = new_exclusion;
+	chp = skip_spaces (chp);
+      }
+
+    /* NOW verify that the field ws finished */
+    if (*chp == ',')
+      {
+	chp = skip_spaces (chp + 1);
+	if (*chp == '\0')
+	  error (line, "empty field\n");
+      }
+    else if (*chp != '\0')
+      {
+	error (line, "Missing field separator");
+      }
+
+    /* copy the value */
+    new_field->val_string = NZALLOC (char, strlen_val+1);
+    strncpy (new_field->val_string, start_val, strlen_val);
+    if (isdigit (new_field->val_string[0]))
+      {
+	if (strlen_pos == 0)
+	  {
+	    /* when the length/pos field is omited, an integer field
+               is always binary */
+	    unsigned64 val = 0;
+	    int i;
+	    for (i = 0; i < strlen_val; i++)
+	      {
+		if (new_field->val_string[i] != '0'
+		    && new_field->val_string[i] != '1')
+		  error (line, "invalid binary field %s\n",
+			 new_field->val_string);
+		val = (val << 1) + (new_field->val_string[i] == '1');
+	      }
+	    new_field->val_int = val;
+	    new_field->type = insn_field_int;
+	  }
+	else
+	  {
+	    new_field->val_int = a2i (new_field->val_string);
+	    new_field->type = insn_field_int;
+	  }
+      }
+    else if (new_field->val_string[0] == '/')
+      {
+	new_field->type = insn_field_reserved;
+      }
+    else if (new_field->val_string[0] == '*')
+      {
+	new_field->type = insn_field_wild;
+      }
+    else
+      {
+	new_field->type = insn_field_string;
+	if (filter_is_member (word->field_names, new_field->val_string))
+	  error (line, "Field name %s is duplicated\n", new_field->val_string);
+	filter_parse (&word->field_names, new_field->val_string);
+      }
+    if (new_field->type != insn_field_string
+	&& new_field->exclusions != NULL)
+      error (line, "Exclusions only apply to name fields\n");
+
+    /* the copy the position */
+    new_field->pos_string = NZALLOC (char, strlen_pos + 1);
+    strncpy (new_field->pos_string, start_pos, strlen_pos);
+    if (strlen_pos == 0)
+      {
+	new_field->first = new_field->prev->last + 1;
+	if (new_field->first == 0 /* first field */
+	    && *chp == '\0' /* no further fields */
+	    && new_field->type == insn_field_string)
+	  {
+	    /* A single string without any position, assume that it
+               represents the entire instruction word */
+	    new_field->width = options.insn_bit_size;
+	  }
+	else
+	  {
+	    /* No explicit width/position, assume value implicitly
+	       supplies the width */
+	    new_field->width = strlen_val;
+	  }
+	new_field->last = new_field->first + new_field->width - 1;
+	if (new_field->last >= options.insn_bit_size)
+	  error (line, "Bit position %d exceed instruction bit size (%d)\n",
+		 new_field->last, options.insn_bit_size);
+      }
+    else if (options.insn_specifying_widths)
+      {
+	new_field->first = new_field->prev->last + 1;
+	new_field->width = a2i(new_field->pos_string);
+	new_field->last = new_field->first + new_field->width - 1;
+	if (new_field->last >= options.insn_bit_size)
+	  error (line, "Bit position %d exceed instruction bit size (%d)\n",
+		 new_field->last, options.insn_bit_size);
+      }
+    else
+      {
+	new_field->first = target_a2i(options.hi_bit_nr,
+				      new_field->pos_string);
+	new_field->last = new_field->next->first - 1; /* guess */
+	new_field->width = new_field->last - new_field->first + 1; /* guess */
+	new_field->prev->last = new_field->first - 1; /*fix*/
+	new_field->prev->width = new_field->first - new_field->prev->first; /*fix*/
+      }
   }
 
-  /* fiddle first/last so that the sentinals `disapear' */
-  ASSERT(fields->first->last < 0);
-  ASSERT(fields->last->first >= insn_bit_size);
-  fields->first = fields->first->next;
-  fields->last = fields->last->prev;
+  /* fiddle first/last so that the sentinals disapear */
+  ASSERT(word->first->last < 0);
+  ASSERT(word->last->first >= options.insn_bit_size);
+  word->first = word->first->next;
+  word->last = word->last->prev;
+
+  /* check that the last field goes all the way to the last bit */
+  if (word->last->last != options.insn_bit_size - 1)
+    {
+      options.warning (line, "Instruction format is not %d bits wide\n",
+		       options.insn_bit_size);
+      word->last->last = options.insn_bit_size - 1;
+    }
 
   /* now go over this again, pointing each bit position at a field
      record */
   {
-    int i;
-    insn_field *field;
-    field = fields->first;
-    for (i = 0; i < insn_bit_size; i++) {
-      while (field->last < i)
-	field = field->next;
-      fields->bits[i] = field;
-    }
+    insn_field_entry *field;
+    for (field = word->first;
+	 field->last < options.insn_bit_size;
+	 field = field->next)
+      {
+	int i;
+	for (i = field->first; i <= field->last; i++)
+	  {
+	    word->bit[i] = ZALLOC (insn_bit_entry);
+	    word->bit[i]->field = field;
+	    switch (field->type)
+	      {
+	      case insn_field_int:
+		word->bit[i]->mask = 1;
+		word->bit[i]->value = ((field->val_int
+					& ((insn_uint)1 << (field->last - i)))
+				       != 0);
+	      case insn_field_reserved:
+	      case insn_field_wild:
+	      case insn_field_string:
+		break;
+	      }
+	  }
+      }
   }
 
-  /* go over each of the fields, and compute a `value' for the insn */
-  {
-    insn_field *field;
-    fields->value = 0;
-    for (field = fields->first;
-	 field->last < insn_bit_size;
-	 field = field->next) {
-      fields->value <<= field->width;
-      if (field->is_int)
-	fields->value |= field->val_int;
-    }
-  }
-  return fields;
+  return word;
 }
 
 
 static void
-model_table_insert(insn_table *table,
-		   table_entry *file_entry)
+parse_insn_words (insn_entry *insn,
+		  char *formats)
 {
-  int len;
+  insn_word_entry **last_word = &insn->words;
+  char *chp;
 
-  /* create a new model */
-  model *new_model = ZALLOC(model);
+  /* now work through the formats */
+  insn->nr_words = 0;
+  chp = formats;
 
-  new_model->name = file_entry->fields[model_identifer];
-  new_model->printable_name = file_entry->fields[model_name];
-  new_model->insn_default = file_entry->fields[model_default];
+  while (1)
+    {
+      char *start_pos;
+      char *end_pos;
+      int strlen_pos;
+      char *format;
+      insn_word_entry *new_word;
 
-  while (*new_model->insn_default && isspace(*new_model->insn_default))
-    new_model->insn_default++;
+      /* skip leading spaces */
+      chp = skip_spaces (chp);
 
-  len = strlen(new_model->insn_default);
-  if (max_model_fields_len < len)
-    max_model_fields_len = len;
+      /* break out the format */
+      start_pos = chp;
+      chp = skip_to_separator (chp, "+");
+      end_pos = back_spaces (start_pos, chp);
+      strlen_pos = end_pos - start_pos;
 
-  /* append it to the end of the model list */
-  if (last_model)
-    last_model->next = new_model;
-  else
-    models = new_model;
-  last_model = new_model;
-}
+      /* check that something was there */
+      if (strlen_pos == 0)
+	error (insn->line, "missing or empty instruction format\n");
 
-static void
-model_table_insert_specific(insn_table *table,
-			    table_entry *file_entry,
-			    insn **start_ptr,
-			    insn **end_ptr)
-{
-  insn *ptr = ZALLOC(insn);
-  ptr->file_entry = file_entry;
-  if (*end_ptr)
-    (*end_ptr)->next = ptr;
-  else
-    (*start_ptr) = ptr;
-  (*end_ptr) = ptr;
-}
+      /* parse the field */
+      format = NZALLOC (char, strlen_pos + 1);
+      strncpy (format, start_pos, strlen_pos);
+      new_word = parse_insn_word (insn->line, format, insn->nr_words);
+      insn->nr_words++;
+      if (filter_is_common (insn->field_names, new_word->field_names))
+	error (insn->line, "Field name duplicated between two words\n");
+      filter_add (&insn->field_names, new_word->field_names);
 
+      /* insert it */
+      *last_word = new_word;
+      last_word = &new_word->next;
 
-static void
-insn_table_insert_function(insn_table *table,
-			   table_entry *file_entry)
-{
-  /* create a new function */
-  insn *new_function = ZALLOC(insn);
-  new_function->file_entry = file_entry;
-
-  /* append it to the end of the function list */
-  if (table->last_function)
-    table->last_function->next = new_function;
-  else
-    table->functions = new_function;
-  table->last_function = new_function;
-}
-
-extern void
-insn_table_insert_insn(insn_table *table,
-		       table_entry *file_entry,
-		       insn_fields *fields)
-{
-  insn **ptr_to_cur_insn = &table->insns;
-  insn *cur_insn = *ptr_to_cur_insn;
-  table_model_entry *insn_model_ptr;
-  model *model_ptr;
-
-  /* create a new instruction */
-  insn *new_insn = ZALLOC(insn);
-  new_insn->file_entry = file_entry;
-  new_insn->fields = fields;
-
-  /* Check out any model information returned to make sure the model
-     is correct.  */
-  for(insn_model_ptr = file_entry->model_first; insn_model_ptr; insn_model_ptr = insn_model_ptr->next) {
-    char *name = insn_model_ptr->fields[insn_model_name];
-    int len = strlen (insn_model_ptr->fields[insn_model_fields]);
-
-    while (len > 0 && isspace(*insn_model_ptr->fields[insn_model_fields])) {
-      len--;
-      insn_model_ptr->fields[insn_model_fields]++;
-    }
-
-    if (max_model_fields_len < len)
-      max_model_fields_len = len;
-
-    for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
-      if (strcmp(name, model_ptr->printable_name) == 0) {
-
-	/* Replace the name field with that of the global model, so that when we
-	   want to print it out, we can just compare pointers.  */
-	insn_model_ptr->fields[insn_model_name] = model_ptr->printable_name;
+      /* last format? */
+      if (*chp == '\0')
 	break;
-      }
+      ASSERT (*chp == '+');
+      chp++;
     }
 
-    if (!model_ptr)
-      error("%s:%d: machine model `%s' was not known about\n",
-	    file_entry->file_name, file_entry->line_nr, name);
-  }
-
-  /* insert it according to the order of the fields */
-  while (cur_insn != NULL
-	 && new_insn->fields->value >= cur_insn->fields->value) {
-    ptr_to_cur_insn = &cur_insn->next;
-    cur_insn = *ptr_to_cur_insn;
-  }
-
-  new_insn->next = cur_insn;
-  *ptr_to_cur_insn = new_insn;
-
-  table->nr_insn++;
-}
-
-
-
-insn_table *
-load_insn_table(const char *file_name,
-		decode_table *decode_rules,
-		filter *filters)
-{
-  table *file = table_open(file_name, nr_insn_table_fields, nr_insn_model_table_fields);
-  insn_table *table = ZALLOC(insn_table);
-  table_entry *file_entry;
-  table->opcode_rule = decode_rules;
-
-  while ((file_entry = table_entry_read(file)) != NULL) {
-    if (it_is("function", file_entry->fields[insn_flags])
-	|| it_is("internal", file_entry->fields[insn_flags])) {
-      insn_table_insert_function(table, file_entry);
-    }
-    else if (it_is("model", file_entry->fields[insn_flags])) {
-      model_table_insert(table, file_entry);
-    }
-    else if (it_is("model-macro", file_entry->fields[insn_flags])) {
-      model_table_insert_specific(table, file_entry, &model_macros, &last_model_macro);
-    }
-    else if (it_is("model-function", file_entry->fields[insn_flags])) {
-      model_table_insert_specific(table, file_entry, &model_functions, &last_model_function);
-    }
-    else if (it_is("model-internal", file_entry->fields[insn_flags])) {
-      model_table_insert_specific(table, file_entry, &model_internal, &last_model_internal);
-    }
-    else if (it_is("model-static", file_entry->fields[insn_flags])) {
-      model_table_insert_specific(table, file_entry, &model_static, &last_model_static);
-    }
-    else if (it_is("model-data", file_entry->fields[insn_flags])) {
-      model_table_insert_specific(table, file_entry, &model_data, &last_model_data);
-    }
-    else {
-      insn_fields *fields;
-      /* skip instructions that aren't relevant to the mode */
-      if (is_filtered_out(file_entry->fields[insn_flags], filters)) {
-	fprintf(stderr, "Dropping %s - %s\n",
-		file_entry->fields[insn_name],
-		file_entry->fields[insn_flags]);
-      }
-      else {
-	/* create/insert the new instruction */
-	fields = parse_insn_format(file_entry,
-				   file_entry->fields[insn_format]);
-	insn_table_insert_insn(table, file_entry, fields);
-      }
-    }
-  }
-  return table;
-}
-
-
-extern void
-insn_table_traverse_tree(insn_table *table,
-			 lf *file,
-			 void *data,
-			 int depth,
-			 leaf_handler *start,
-			 insn_handler *leaf,
-			 leaf_handler *end,
-			 padding_handler *padding)
-{
-  insn_table *entry;
-  int entry_nr;
-  
-  ASSERT(table != NULL
-	 && table->opcode != NULL
-	 && table->nr_entries > 0
-	 && table->entries != 0);
-
-  if (start != NULL && depth >= 0)
-    start(table, file, data, depth);
-
-  for (entry_nr = 0, entry = table->entries;
-       entry_nr < (table->opcode->is_boolean
-		   ? 2
-		   : (1 << (table->opcode->last - table->opcode->first + 1)));
-       entry_nr ++) {
-    if (entry == NULL
-	|| (!table->opcode->is_boolean
-	    && entry_nr < entry->opcode_nr)) {
-      if (padding != NULL && depth >= 0)
-	padding(table, file, data, depth, entry_nr);
-    }
-    else {
-      ASSERT(entry != NULL && (entry->opcode_nr == entry_nr
-			       || table->opcode->is_boolean));
-      if (entry->opcode != NULL && depth != 0) {
-	insn_table_traverse_tree(entry, file, data, depth+1,
-				 start, leaf, end, padding);
-      }
-      else if (depth >= 0) {
-	if (leaf != NULL)
-	  leaf(entry, file, data, entry->insns, depth);
-      }
-      entry = entry->sibling;
-    }
-  }
-  if (end != NULL && depth >= 0)
-    end(table, file, data, depth);
-}
-
-
-extern void
-insn_table_traverse_function(insn_table *table,
-			     lf *file,
-			     void *data,
-			     function_handler *leaf)
-{
-  insn *function;
-  for (function = table->functions;
-       function != NULL;
-       function = function->next) {
-    leaf(table, file, data, function->file_entry);
+  /* now create a quick access array of the same structure */
+  {
+    int i;
+    insn_word_entry *word;
+    insn->word = NZALLOC (insn_word_entry *, insn->nr_words + 1);
+    for (i = 0, word = insn->words;
+	 i < insn->nr_words;
+	 i++, word = word->next)
+      insn->word[i] = word;
   }
 }
-
-extern void
-insn_table_traverse_insn(insn_table *table,
-			 lf *file,
-			 void *data,
-			 insn_handler *handler)
-{
-  insn *instruction;
-  for (instruction = table->insns;
-       instruction != NULL;
-       instruction = instruction->next) {
-    handler(table, file, data, instruction, 0);
-  }
-}
-
-
-/****************************************************************/
 
 typedef enum {
-  field_constant_int = 1,
-  field_constant_reserved = 2,
-  field_constant_string = 3
-} constant_field_types;
+  unknown_record = 0,
+  insn_record, /* default */
+  code_record,
+  cache_record,
+  compute_record,
+  scratch_record,
+  option_record,
+  string_function_record,
+  function_record,
+  internal_record,
+  define_record,
+  model_processor_record,
+  model_macro_record,
+  model_data_record,
+  model_static_record,
+  model_function_record,
+  model_internal_record,
+} insn_record_type;
+
+static const name_map insn_type_map[] = {
+  { "option", option_record },
+  { "cache", cache_record },
+  { "compute", compute_record },
+  { "scratch", scratch_record },
+  { "define", define_record },
+  { "%s", string_function_record },
+  { "function", function_record },
+  { "internal", internal_record },
+  { "model", model_processor_record },
+  { "model-macro", model_macro_record },
+  { "model-data", model_data_record },
+  { "model-static", model_static_record },
+  { "model-internal", model_internal_record },
+  { "model-function", model_function_record },
+  { NULL, insn_record },
+};
 
 
 static int
-insn_field_is_constant(insn_field *field,
-		       decode_table *rule)
+record_is_old (table_entry *entry)
 {
-  /* field is an integer */
-  if (field->is_int)
-    return field_constant_int;
-  /* field is `/' and treating that as a constant */
-  if (field->is_reserved && rule->force_reserved)
-    return field_constant_reserved;
-  /* field, though variable is on the list */
-  if (field->is_string && rule->force_expansion != NULL) {
-    char *forced_fields = rule->force_expansion;
-    while (*forced_fields != '\0') {
-      int field_len;
-      char *end = strchr(forced_fields, ',');
-      if (end == NULL)
-	field_len = strlen(forced_fields);
-      else
-	field_len = end-forced_fields;
-      if (strncmp(forced_fields, field->val_string, field_len) == 0
-	  && field->val_string[field_len] == '\0')
-	return field_constant_string;
-      forced_fields += field_len;
-      if (*forced_fields == ',')
-	forced_fields++;
-    }
-  }
+  if (entry->nr_fields > record_type_field
+      && strlen (entry->field[record_type_field]) == 0)
+    return 1;
   return 0;
 }
 
-
-static opcode_field *
-insn_table_find_opcode_field(insn *insns,
-			     decode_table *rule,
-			     int string_only)
+static insn_record_type
+record_type (table_entry *entry)
 {
-  opcode_field *curr_opcode = ZALLOC(opcode_field);
-  insn *entry;
-  ASSERT(rule);
+  switch (entry->type)
+    {
+    case table_code_entry:
+      return code_record;
 
-  curr_opcode->first = insn_bit_size;
-  curr_opcode->last = -1;
-  for (entry = insns; entry != NULL; entry = entry->next) {
-    insn_fields *fields = entry->fields;
-    opcode_field new_opcode;
-
-    /* find a start point for the opcode field */
-    new_opcode.first = rule->first;
-    while (new_opcode.first <= rule->last
-	   && (!string_only
-	       || insn_field_is_constant(fields->bits[new_opcode.first],
-					 rule) != field_constant_string)
-	   && (string_only
-	       || !insn_field_is_constant(fields->bits[new_opcode.first],
-					  rule)))
-      new_opcode.first = fields->bits[new_opcode.first]->last + 1;
-    ASSERT(new_opcode.first > rule->last
-	   || (string_only
-	       && insn_field_is_constant(fields->bits[new_opcode.first],
-					 rule) == field_constant_string)
-	   || (!string_only
-	       && insn_field_is_constant(fields->bits[new_opcode.first],
-					 rule)));
-  
-    /* find the end point for the opcode field */
-    new_opcode.last = rule->last;
-    while (new_opcode.last >= rule->first
-	   && (!string_only
-	       || insn_field_is_constant(fields->bits[new_opcode.last],
-					 rule) != field_constant_string)
-	   && (string_only
-	       || !insn_field_is_constant(fields->bits[new_opcode.last],
-					  rule)))
-      new_opcode.last = fields->bits[new_opcode.last]->first - 1;
-    ASSERT(new_opcode.last < rule->first
-	   || (string_only
-	       && insn_field_is_constant(fields->bits[new_opcode.last],
-					 rule) == field_constant_string)
-	   || (!string_only
-	       && insn_field_is_constant(fields->bits[new_opcode.last],
-					 rule)));
-
-    /* now see if our current opcode needs expanding */
-    if (new_opcode.first <= rule->last
-	&& curr_opcode->first > new_opcode.first)
-      curr_opcode->first = new_opcode.first;
-    if (new_opcode.last >= rule->first
-	&& curr_opcode->last < new_opcode.last)
-      curr_opcode->last = new_opcode.last;
-    
-  }
-
-  /* was any thing interesting found? */
-  if (curr_opcode->first > rule->last) {
-    ASSERT(curr_opcode->last < rule->first);
-    return NULL;
-  }
-  ASSERT(curr_opcode->last >= rule->first);
-  ASSERT(curr_opcode->first <= rule->last);
-
-  /* if something was found, check it includes the forced field range */
-  if (!string_only
-      && curr_opcode->first > rule->force_first) {
-    curr_opcode->first = rule->force_first;
-  }
-  if (!string_only
-      && curr_opcode->last < rule->force_last) {
-    curr_opcode->last = rule->force_last;
-  }
-  /* handle special case elminating any need to do shift after mask */
-  if (string_only
-      && rule->force_last == insn_bit_size-1) {
-    curr_opcode->last = insn_bit_size-1;
-  }
-
-  /* handle any special cases */
-  switch (rule->type) {
-  case normal_decode_rule:
-    /* let the above apply */
-    break;
-  case expand_forced_rule:
-    /* expand a limited nr of bits, ignoring the rest */
-    curr_opcode->first = rule->force_first;
-    curr_opcode->last = rule->force_last;
-    break;
-  case boolean_rule:
-    curr_opcode->is_boolean = 1;
-    curr_opcode->boolean_constant = rule->special_constant;
-    break;
-  default:
-    error("Something is going wrong\n");
-  }
-
-  return curr_opcode;
-}
-
-
-static void
-insn_table_insert_expanded(insn_table *table,
-			   insn *old_insn,
-			   int new_opcode_nr,
-			   insn_bits *new_bits)
-{
-  insn_table **ptr_to_cur_entry = &table->entries;
-  insn_table *cur_entry = *ptr_to_cur_entry;
-
-  /* find the new table for this entry */
-  while (cur_entry != NULL
-	 && cur_entry->opcode_nr < new_opcode_nr) {
-    ptr_to_cur_entry = &cur_entry->sibling;
-    cur_entry = *ptr_to_cur_entry;
-  }
-
-  if (cur_entry == NULL || cur_entry->opcode_nr != new_opcode_nr) {
-    insn_table *new_entry = ZALLOC(insn_table);
-    new_entry->opcode_nr = new_opcode_nr;
-    new_entry->expanded_bits = new_bits;
-    new_entry->opcode_rule = table->opcode_rule->next;
-    new_entry->sibling = cur_entry;
-    new_entry->parent = table;
-    *ptr_to_cur_entry = new_entry;
-    cur_entry = new_entry;
-    table->nr_entries++;
-  }
-  /* ASSERT new_bits == cur_entry bits */
-  ASSERT(cur_entry != NULL && cur_entry->opcode_nr == new_opcode_nr);
-  insn_table_insert_insn(cur_entry,
-			 old_insn->file_entry,
-			 old_insn->fields);
-}
-
-static void
-insn_table_expand_opcode(insn_table *table,
-			 insn *instruction,
-			 int field_nr,
-			 int opcode_nr,
-			 insn_bits *bits)
-{
-
-  if (field_nr > table->opcode->last) {
-    insn_table_insert_expanded(table, instruction, opcode_nr, bits);
-  }
-  else {
-    insn_field *field = instruction->fields->bits[field_nr];
-    if (field->is_int) {
-      if (!(field->first >= table->opcode->first
-	    && field->last <= table->opcode->last))
-	error("%s:%d: Instruction field %s.%s [%d..%d] overlaps sub-field [%d..%d] boundary",
-	      instruction->file_entry->file_name,
-	      instruction->file_entry->line_nr,
-	      field->pos_string, field->val_string,
-	      field->first, field->last,
-	      table->opcode->first, table->opcode->last);
-      insn_table_expand_opcode(table, instruction, field->last + 1,
-			       ((opcode_nr << field->width) + field->val_int),
-			       bits);
-    }
-    else {
-      int val;
-      int last_pos = ((field->last < table->opcode->last)
-			? field->last : table->opcode->last);
-      int first_pos = ((field->first > table->opcode->first)
-		       ? field->first : table->opcode->first);
-      int width = last_pos - first_pos + 1;
-      if (field->is_reserved)
-	insn_table_expand_opcode(table, instruction, last_pos + 1,
-				 ((opcode_nr << width)),
-				 bits);
-      else {
-	int last_val = (table->opcode->is_boolean
-			? 2 : (1 << width));
-	for (val = 0; val < last_val; val++) {
-	  insn_bits *new_bits = ZALLOC(insn_bits);
-	  new_bits->field = field;
-	  new_bits->value = val;
-	  new_bits->last = bits;
-	  new_bits->opcode = table->opcode;
-	  insn_table_expand_opcode(table, instruction, last_pos+1,
-				   ((opcode_nr << width) | val),
-				   new_bits);
+    case table_colon_entry:
+      if (record_is_old (entry))
+	{
+	  /* old-format? */
+	  if (entry->nr_fields > old_record_type_field)
+	    {
+	      int i = name2i (entry->field[old_record_type_field],
+			      insn_type_map);
+	      return i;
+	    }
+	  else
+	    {
+	      return unknown_record;
+	    }
 	}
-      }
+      else if (entry->nr_fields > record_type_field
+	       && entry->field[0][0] == '\0')
+	{
+	  /* new-format? */
+	  int i = name2i (entry->field[record_type_field],
+			  insn_type_map);
+	  return i;
+	}
+      else
+	return insn_record; /* default */
     }
-  }
+  return unknown_record;
 }
-
-static void
-insn_table_insert_expanding(insn_table *table,
-			    insn *entry)
-{
-  insn_table_expand_opcode(table,
-			   entry,
-			   table->opcode->first,
-			   0,
-			   table->expanded_bits);
-}
-
 
 static int
-special_matches_all_insns (unsigned mask, unsigned value, insn *insns)
+record_prefix_is (table_entry *entry,
+		  char ch,
+		  int nr_fields)
 {
-  insn *i;
-  for (i = insns; i != NULL; i = i->next)
-    if ((i->fields->value & mask) != value)
-      return 0;
+  if (entry->type != table_colon_entry)
+    return 0;
+  if (entry->nr_fields < nr_fields)
+    return 0;
+  if (entry->field[0][0] != ch && ch != '\0')
+    return 0;
   return 1;
+}
+
+static table_entry *
+parse_model_data_record (insn_table *isa,
+			 table *file,
+			 table_entry *record,
+			 int nr_fields,
+			 model_data **list)
+{
+  table_entry *model_record = record;
+  table_entry *code_record = NULL;
+  model_data *new_data;
+  if (record->nr_fields < nr_fields)
+    error (record->line, "Incorrect number of fields\n");
+  record = table_read (file);
+  if (record->type == table_code_entry)
+    {
+      code_record = record;
+      record = table_read (file);
+    }
+  /* create the new data record */
+  new_data = ZALLOC (model_data);
+  new_data->line = model_record->line;
+  filter_parse (&new_data->flags,
+		model_record->field[record_filter_flags_field]);
+  new_data->entry = model_record;
+  new_data->code = code_record;
+  /* append it */
+  while (*list != NULL)
+    list = &(*list)->next;
+  *list = new_data;
+  return record;
+}
+
+
+typedef enum {
+  insn_bit_size_option = 1,
+  insn_specifying_widths_option,
+  hi_bit_nr_option,
+  flags_filter_option,
+  model_filter_option,
+  multi_sim_option,
+  format_names_option,
+  unknown_option,
+} option_names;
+
+static const name_map option_map[] = {
+  { "insn-bit-size", insn_bit_size_option },
+  { "insn-specifying-widths", insn_specifying_widths_option },
+  { "hi-bit-nr", hi_bit_nr_option },
+  { "flags-filter", flags_filter_option },
+  { "model-filter", model_filter_option },
+  { "multi-sim", multi_sim_option },
+  { "format-names", format_names_option },
+  { NULL, unknown_option },
+};
+
+static table_entry *
+parse_option_record (table *file,
+		     table_entry *record)
+{
+  table_entry *option_record;
+  /* parse the option record */
+  option_record = record;
+  if (record->nr_fields < nr_option_fields)
+    error (record->line, "Incorrect nr of fields for option record\n");
+  record = table_read (file);
+  /* process it */
+  if (!is_filtered_out (options.flags_filter,
+			option_record->field[record_filter_flags_field]))
+    {
+      char *name = option_record->field[option_name_field];
+      option_names option = name2i (name, option_map);
+      char *value = option_record->field[option_value_field];
+      switch (option)
+	{
+	case insn_bit_size_option:
+	  {
+	    options.insn_bit_size = a2i (value);
+	    if (options.insn_bit_size < 0
+		|| options.insn_bit_size > max_insn_bit_size)
+	      error (option_record->line, "Instruction bit size out of range\n");
+	    if (options.hi_bit_nr != options.insn_bit_size - 1
+		&& options.hi_bit_nr != 0)
+	      error (option_record->line, "insn-bit-size / hi-bit-nr conflict\n");
+	    break;
+	  }
+	case insn_specifying_widths_option:
+	  {
+	    options.insn_specifying_widths = a2i (value);
+	    break;
+	  }
+	case hi_bit_nr_option:
+	  {
+	    options.hi_bit_nr = a2i (value);
+	    if (options.hi_bit_nr != 0
+		&& options.hi_bit_nr != options.insn_bit_size - 1)
+	      error (option_record->line, "hi-bit-nr / insn-bit-size conflict\n");
+	    break;
+	  }
+	case flags_filter_option:
+	  {
+	    filter_parse (&options.flags_filter, value);
+	    break;
+	  }
+	case model_filter_option:
+	  {
+	    filter_parse (&options.model_filter, value);
+	    break;
+	  }
+	case multi_sim_option:
+	  {
+	    options.gen.multi_sim = a2i (value);
+	    break;
+	  }
+	case format_names_option:
+	  {
+	    filter_parse (&options.format_name_filter, value);
+	    break;
+	  }
+	case unknown_option:
+	  {
+	    error (option_record->line, "Unknown option - %s\n", name);
+	    break;
+	  }
+	}
+    }  
+  return record;
+}
+
+static table_entry *
+parse_function_record (table *file,
+		       table_entry *record,
+		       function_entry **list,
+		       function_entry **list_entry,
+		       int is_internal)
+{
+  function_entry *new_function;
+  if (record->nr_fields < nr_function_fields)
+    error (record->line, "Missing fields from function record\n");
+  /* look for a body to the function */
+  new_function = ZALLOC (function_entry);
+  /* parse the function header */
+  new_function->line = record->line;
+  filter_parse (&new_function->flags,
+		record->field[record_filter_flags_field]);
+  if (record_is_old (record))
+    new_function->type = record->field[old_function_typedef_field];
+  else
+    new_function->type = record->field[function_typedef_field];
+  new_function->name = record->field[function_name_field];
+  if (record->nr_fields > function_param_field)
+    new_function->param = record->field[function_param_field];
+  new_function->is_internal = is_internal;
+  /* parse the function body */
+  record = table_read (file);
+  if (record->type == table_code_entry)
+    {
+      new_function->code = record;
+      record = table_read (file);
+    }
+  /* insert it */
+  while (*list != NULL)
+    list = &(*list)->next;
+  *list = new_function;
+  if (list_entry != NULL)
+    *list_entry = new_function;
+  /* done */
+  return record;
+}
+
+static void
+parse_insn_model_record (table *file,
+			 table_entry *record,
+			 insn_entry *insn,
+			 model_table *model)
+{
+  insn_model_entry **last_insn_model;
+  insn_model_entry *new_insn_model = ZALLOC (insn_model_entry);
+  /* parse it */
+  new_insn_model->line = record->line;
+  if (record->nr_fields > insn_model_name_field)
+    new_insn_model->name = record->field[insn_model_name_field];
+  if (record->nr_fields > insn_model_unit_data_field)
+    new_insn_model->unit_data = record->field[insn_model_unit_data_field];
+  new_insn_model->insn = insn;
+  /* strip "\*[ ]*" from name */
+  new_insn_model->name = skip_spaces (new_insn_model->name + 1);
+  if (strlen (new_insn_model->name) == 0)
+    {
+      /* No processor name - a generic model entry, enter it into all
+	 the non-empty fields */
+      int index;
+      for (index = 0; index < model->nr_models; index++)
+	if (insn->model[index] == 0)
+	  {
+	    insn->model[index] = new_insn_model;
+	  }
+      /* also add the complete processor set to this processor's set */
+      filter_add (&insn->processors, model->processors);
+    }
+  else
+    {
+      /* Find the corresponding master model record so it can be
+	 linked in correctly */
+      int index;
+      index = filter_is_member (model->processors, new_insn_model->name) - 1;
+      if (index < 0)
+	{
+	  error (record->line, "machine model `%s' undefined\n",
+		 new_insn_model->name);
+	}
+      /* store it in the corresponding model array entry */
+      insn->model[index] = new_insn_model;
+      /* also add the name to the instructions processor set as an
+	 alternative lookup mechanism */
+      filter_parse (&insn->processors, new_insn_model->name);
+    }
+#if 0
+  /* for some reason record the max length of any
+     function unit field */
+  int len = strlen (insn_model_ptr->field[insn_model_fields]);
+  if (model->max_model_fields_len < len)
+    model->max_model_fields_len = len;
+#endif
+  /* link it in */
+  last_insn_model = &insn->models;
+  while ((*last_insn_model) != NULL)
+    last_insn_model = &(*last_insn_model)->next;
+  *last_insn_model = new_insn_model;
+}
+
+
+static void
+parse_insn_mnemonic_record (table *file,
+			    table_entry *record,
+			    insn_entry *insn)
+{
+  insn_mnemonic_entry **last_insn_mnemonic;
+  insn_mnemonic_entry *new_insn_mnemonic = ZALLOC (insn_mnemonic_entry);
+  /* parse it */
+  new_insn_mnemonic->line = record->line;
+  if (record->nr_fields > insn_mnemonic_format_field)
+    new_insn_mnemonic->format = record->field[insn_mnemonic_format_field];
+  if (record->nr_fields > insn_mnemonic_condition_field)
+    new_insn_mnemonic->condition = record->field[insn_mnemonic_condition_field];
+  new_insn_mnemonic->insn = insn;
+  /* insert it */
+  last_insn_mnemonic = &insn->mnemonics;
+  while ((*last_insn_mnemonic) != NULL)
+    last_insn_mnemonic = &(*last_insn_mnemonic)->next;
+  insn->nr_mnemonics++;
+  *last_insn_mnemonic = new_insn_mnemonic;
+}
+
+
+insn_table *
+load_insn_table (char *file_name,
+		 cache_entry *cache)
+{
+  table *file = table_open (file_name);
+  table_entry *record = table_read (file);
+
+  insn_table *isa = ZALLOC (insn_table);
+  model_table *model = ZALLOC (model_table);
+  
+  isa->model = model;
+  isa->caches = cache;
+
+  while (record != NULL)
+    {
+
+      switch (record_type (record))
+	{
+
+	case option_record:
+	  {
+	    if (isa->insns != NULL)
+	      error (record->line, "Option after first instruction\n");
+	    record = parse_option_record (file, record);
+	    break;
+	  }
+	
+	case string_function_record:
+	  {
+	    /* convert a string function field into an internal function field */
+	    char *name;
+	    if (record->nr_fields < nr_function_fields)
+	      error (record->line, "Incorrect nr of fields for %s record\n");
+	    name = NZALLOC (char,
+			    (strlen ("str_")
+			     + strlen (record->field[function_name_field])
+			     + 1));
+	    strcat (name, "str_");
+	    strcat (name, record->field[function_name_field]);
+	    record->field[record_type_field] = "function";
+	    record->field[function_typedef_field] = "const char *";
+	    record->field[function_name_field] = name;
+	    /* HACK - comes round back as a function/internal record */
+	    break;
+	  }
+	
+	case function_record: /* function record */
+	  {
+	    record = parse_function_record (file, record,
+					    &isa->functions,
+					    NULL,
+					    0/*is-internal*/);
+	    break;
+	  }
+
+	case internal_record:
+	  {
+	    /* only insert it into the function list if it is unknown */
+	    function_entry *function = NULL;
+	    record = parse_function_record (file, record,
+					    &isa->functions,
+					    &function,
+					    1/*is-internal*/);
+	    /* check what was inserted to see if a pseudo-instruction
+               entry also needs to be created */
+	    if (function != NULL)
+	      {
+		insn_entry **insn = NULL;
+		if (strcmp (function->name, "illegal") == 0)
+		  {
+		    /* illegal function save it away */
+		    if (isa->illegal_insn != NULL)
+		      {
+			warning (function->line,
+				 "Multiple illegal instruction definitions\n");
+			error (isa->illegal_insn->line,
+			       "Location of first illegal instruction\n");
+		      }
+		    else
+		      insn = &isa->illegal_insn;
+		  }
+		if (insn != NULL)
+		  {
+		    *insn = ZALLOC (insn_entry);
+		    (*insn)->line = function->line;
+		    (*insn)->name = function->name;
+		    (*insn)->code = function->code;
+		  }
+	      }
+	    break;
+	  }
+	  
+	case scratch_record: /* cache macro records */
+	case cache_record:
+	case compute_record:
+	  {
+	    cache_entry *new_cache;
+	    /* parse the cache record */
+	    if (record->nr_fields < nr_cache_fields)
+	      error (record->line,
+		     "Incorrect nr of fields for scratch/cache/compute record\n");
+	    /* create it */
+	    new_cache = ZALLOC (cache_entry);
+	    new_cache->line = record->line;
+	    filter_parse (&new_cache->flags,
+			  record->field[record_filter_flags_field]);
+	    new_cache->type = record->field[cache_type_field];
+	    new_cache->name = record->field[cache_name_field];
+	    filter_parse (&new_cache->original_fields,
+			  record->field[cache_original_fields_field]);
+	    new_cache->expression = record->field[cache_expression_field];
+	    /* insert it but only if not filtered out */
+	    if (!filter_is_subset (options.flags_filter, new_cache->flags))
+	      {
+		notify (new_cache->line, "Discarding cache entry %s\n",
+			new_cache->name);
+	      }
+	    else
+	      {
+		cache_entry **last;
+		last = &isa->caches;
+		while (*last != NULL)
+		  last = &(*last)->next;
+		*last = new_cache;
+	      }
+	    /* advance things */
+	    record = table_read (file);
+	    break;
+	  }
+	
+	/* model records */
+	case model_processor_record:
+	  {
+	    model_entry *new_model;
+	    /* parse the model */
+	    if (record->nr_fields < nr_model_processor_fields)
+	      error (record->line, "Incorrect nr of fields for model record\n");
+	    if (isa->insns != NULL)
+	      error (record->line, "Model appears after first instruction\n");
+	    new_model = ZALLOC (model_entry);
+	    filter_parse (&new_model->flags,
+			  record->field[record_filter_flags_field]);
+	    new_model->line = record->line;
+	    new_model->name = record->field[model_name_field];
+	    new_model->full_name = record->field[model_full_name_field];
+	    new_model->unit_data = record->field[model_unit_data_field];
+	    /* only insert it if not filtered out */
+	    if (!filter_is_subset (options.flags_filter, new_model->flags))
+	      {
+		notify (new_model->line, "Discarding processor model %s\n",
+			new_model->name);
+	      }
+	    else if (filter_is_member (model->processors, new_model->name))
+	      {
+		error (new_model->line, "Duplicate processor model %s\n",
+		       new_model->name);
+	      }
+	    else
+	      {
+		model_entry **last;
+		last = &model->models;
+		while (*last != NULL)
+		  last = &(*last)->next;
+		*last = new_model;
+		/* count it */
+		model->nr_models ++;
+		filter_parse (&model->processors, new_model->name);
+	      }
+	    /* advance things */
+	    record = table_read (file);
+	  }
+	  break;
+	  
+	case model_macro_record:
+	  record = parse_model_data_record (isa, file, record,
+					    nr_model_macro_fields,
+					    &model->macros);
+	  break;
+	  
+	case model_data_record:
+	  record = parse_model_data_record (isa, file, record,
+					    nr_model_data_fields,
+					    &model->data);
+	  break;
+	  
+	case model_static_record:
+	  record = parse_function_record (file, record,
+					  &model->statics,
+					  NULL,
+					  0/*is internal*/);
+	  break;
+	  
+	case model_internal_record:
+	  record = parse_function_record (file, record,
+					  &model->internals,
+					  NULL,
+					  1/*is internal*/);
+	  break;
+	  
+	case model_function_record:
+	  record = parse_function_record (file, record,
+					  &model->functions,
+					  NULL,
+					  0/*is internal*/);
+	  break;
+	  
+	case insn_record: /* instruction records */
+	  {
+	    insn_entry *new_insn;
+	    char *format;
+	    /* parse the instruction */
+	    if (record->nr_fields < nr_insn_fields)
+	      error (record->line, "Incorrect nr of fields for insn record\n");
+	    new_insn = ZALLOC (insn_entry);
+	    new_insn->line = record->line;
+	    filter_parse (&new_insn->flags,
+			  record->field[record_filter_flags_field]);
+	    /* save the format field.  Can't parse it until after the
+               filter-out checks.  Could be filtered out because the
+               format is invalid */
+	    format = record->field[insn_word_field];
+	    new_insn->format_name = record->field[insn_format_name_field];
+	    if (options.format_name_filter != NULL
+		&& !filter_is_member (options.format_name_filter,
+				      new_insn->format_name))
+	      error (new_insn->line, "Unreconized instruction format name `%s'\n",
+		     new_insn->format_name);
+	    filter_parse (&new_insn->options,
+			  record->field[insn_options_field]);
+	    new_insn->name = record->field[insn_name_field];
+	    record = table_read (file);
+	    /* Parse any model/assember records */
+	    new_insn->nr_models = model->nr_models;
+	    new_insn->model = NZALLOC (insn_model_entry*, model->nr_models + 1);
+	    while (record != NULL)
+	      {
+		if (record_prefix_is (record, '*', nr_insn_model_fields))
+		  parse_insn_model_record (file, record, new_insn, model);
+		else if (record_prefix_is (record, '"', nr_insn_mnemonic_fields))
+		  parse_insn_mnemonic_record (file, record, new_insn);
+		else
+		  break;
+		/* advance */
+		record = table_read (file);
+	      }
+	    /* Parse the code record */
+	    if (record != NULL && record->type == table_code_entry)
+	      {
+		new_insn->code = record;
+		record = table_read (file);
+	      }
+	    /* insert it */
+	    if (!filter_is_subset (options.flags_filter, new_insn->flags))
+	      {
+		if (options.warn.discard)
+		  notify (new_insn->line,
+			  "Discarding instruction %s (flags-filter)\n",
+			  new_insn->name);
+	      }
+	    else if (new_insn->processors != NULL
+		     && options.model_filter != NULL
+		     && !filter_is_common (options.model_filter,
+					   new_insn->processors))
+	      {
+		/* only discard an instruction based in the processor
+                   model when both the instruction and the options are
+                   nonempty */
+		if (options.warn.discard)
+		  notify (new_insn->line,
+			  "Discarding instruction %s (processor-model)\n",
+			  new_insn->name);
+	      }
+	    else
+	      {
+		insn_entry **last;
+		/* finish the parsing */
+		parse_insn_words (new_insn, format);
+		/* append it */
+		last = &isa->insns;
+		while (*last)
+		  last = &(*last)->next;
+		*last = new_insn;
+		/* update global isa counters */
+		isa->nr_insns ++;
+		if (isa->max_nr_words < new_insn->nr_words)
+		  isa->max_nr_words = new_insn->nr_words;
+		filter_add (&isa->flags, new_insn->flags);
+		filter_add (&isa->options, new_insn->options);
+	      }
+	    break;
+	  }
+      
+	default:
+	  error (record->line, "Unknown entry\n");
+	}
+    }
+  return isa;
 }
 
 
 void
-insn_table_expand_insns(insn_table *table)
+print_insn_words (lf *file,
+		  insn_entry *insn)
 {
-
-  ASSERT(table->nr_insn >= 1);
-
-  /* determine a valid opcode */
-  while (table->opcode_rule) {
-    /* specials only for single instructions or normal rules when
-       matches all */
-    if ((table->nr_insn > 1
-	 && table->opcode_rule->special_mask == 0
-	 && table->opcode_rule->type == normal_decode_rule)
-	|| (table->nr_insn > 1
-	    && table->opcode_rule->special_mask != 0
-	    && table->opcode_rule->type == normal_decode_rule
-	    && special_matches_all_insns (table->opcode_rule->special_mask,
-					  table->opcode_rule->special_value,
-					  table->insns))
-	|| (table->nr_insn == 1
-	    && table->opcode_rule->special_mask != 0
-	    && ((table->insns->fields->value
-		 & table->opcode_rule->special_mask)
-		== table->opcode_rule->special_value))
-	|| (generate_expanded_instructions
-	    && table->opcode_rule->special_mask == 0
-	    && table->opcode_rule->type == normal_decode_rule))
-      table->opcode =
-	insn_table_find_opcode_field(table->insns,
-				     table->opcode_rule,
-				     table->nr_insn == 1/*string*/
-				     );
-    if (table->opcode != NULL)
-      break;
-    table->opcode_rule = table->opcode_rule->next;
-  }
-
-  /* did we find anything */
-  if (table->opcode == NULL) {
-    return;
-  }
-  ASSERT(table->opcode != NULL);
-
-  /* back link what we found to its parent */
-  if (table->parent != NULL) {
-    ASSERT(table->parent->opcode != NULL);
-    table->opcode->parent = table->parent->opcode;
-  }
-
-  /* expand the raw instructions according to the opcode */
-  {
-    insn *entry;
-    for (entry = table->insns; entry != NULL; entry = entry->next) {
-      insn_table_insert_expanding(table, entry);
+  insn_word_entry *word = insn->words;
+  if (word != NULL)
+    {
+      while (1)
+	{
+	  insn_field_entry *field = word->first;
+	  while (1)
+	    {
+	      if (options.insn_specifying_widths)
+		lf_printf (file, "%d.", field->width);
+	      else
+		lf_printf (file, "%d.", i2target (options.hi_bit_nr, field->first));
+	      switch (field->type)
+		{
+		case insn_field_int:
+		  lf_printf (file, "0x%lx", (long) field->val_int);
+		  break;
+		case insn_field_reserved:
+		  lf_printf (file, "/");
+		  break;
+		case insn_field_wild:
+		  lf_printf (file, "*");
+		  break;
+		case insn_field_string:
+		  lf_printf (file, "%s", field->val_string);
+		  break;
+		}
+	      if (field == word->last)
+		break;
+	      field = field->next;
+	      lf_printf (file, ",");
+	    }
+	  word = word->next;
+	  if (word == NULL)
+	    break;
+	  lf_printf (file, "+");
+	}
     }
-  }
+}
 
-  /* and do the same for the sub entries */
-  {
-    insn_table *entry;
-    for (entry = table->entries; entry != NULL; entry =  entry->sibling) {
-      insn_table_expand_insns(entry);
+
+
+void
+function_entry_traverse (lf *file,
+			 function_entry *functions,
+			 function_entry_handler *handler,
+			 void *data)
+{
+  function_entry *function;
+  for (function = functions; function != NULL; function = function->next)
+    {
+      handler (file, function, data);
     }
+}
+
+void
+insn_table_traverse_insn (lf *file,
+			  insn_table *isa,
+			  insn_entry_handler *handler,
+			  void *data)
+{
+  insn_entry *insn;
+  for (insn = isa->insns; insn != NULL; insn = insn->next)
+    {
+      handler (file, isa, insn, data);
+    }
+}
+
+
+static void
+dump_function_entry (lf *file,
+		     char *prefix,
+		     function_entry *entry,
+		     char *suffix)
+{
+  lf_printf (file, "%s(function_entry *) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      dump_line_ref (file, "\n(line ", entry->line, ")");
+      dump_filter (file, "\n(flags ", entry->flags, ")");
+      lf_printf (file, "\n(type \"%s\")", entry->type);
+      lf_printf (file, "\n(name \"%s\")", entry->name);
+      lf_printf (file, "\n(param \"%s\")", entry->param);
+      dump_table_entry (file, "\n(code ", entry->code, ")");
+      lf_printf (file, "\n(is_internal %d)", entry->is_internal);
+      lf_printf (file, "\n(next 0x%lx)", (long) entry->next);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_function_entries (lf *file,
+		       char *prefix,
+		       function_entry *entry,
+		       char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  lf_indent (file, +1);
+  while (entry != NULL)
+    {
+      dump_function_entry (file, "\n(", entry, ")");
+      entry = entry->next;
+    }
+  lf_indent (file, -1);
+  lf_printf (file, "%s", suffix);
+}
+
+static char *
+cache_entry_type_to_str (cache_entry_type type)
+{
+  switch (type)
+    {
+    case scratch_value: return "scratch";
+    case cache_value: return "cache";
+    case compute_value: return "compute";
+    }
+  ERROR ("Bad switch");
+  return 0;
+}
+
+static void
+dump_cache_entry (lf *file,
+		  char *prefix,
+		  cache_entry *entry,
+		  char *suffix)
+{
+  lf_printf (file, "%s(cache_entry *) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      dump_line_ref (file, "\n(line ", entry->line, ")");
+      dump_filter (file, "\n(flags ", entry->flags, ")");
+      lf_printf (file, "\n(entry_type \"%s\")", cache_entry_type_to_str (entry->entry_type));
+      lf_printf (file, "\n(name \"%s\")", entry->name);
+      dump_filter (file, "\n(original_fields ", entry->original_fields, ")");
+      lf_printf (file, "\n(type \"%s\")", entry->type);
+      lf_printf (file, "\n(expression \"%s\")", entry->expression);
+      lf_printf (file, "\n(next 0x%lx)", (long) entry->next);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+void
+dump_cache_entries (lf *file,
+		    char *prefix,
+		    cache_entry *entry,
+		    char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  lf_indent (file, +1);
+  while (entry != NULL)
+    {
+      dump_cache_entry (file, "\n(", entry, ")");
+      entry = entry->next;
+    }
+  lf_indent (file, -1);
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_model_data (lf *file,
+		 char *prefix,
+		 model_data *entry,
+		 char *suffix)
+{
+  lf_printf (file, "%s(model_data *) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      lf_indent (file, +1);
+      dump_line_ref (file, "\n(line ", entry->line, ")");
+      dump_filter (file, "\n(flags ", entry->flags, ")");
+      dump_table_entry (file, "\n(entry ", entry->entry, ")");
+      dump_table_entry (file, "\n(code ", entry->code, ")");
+      lf_printf (file, "\n(next 0x%lx)", (long) entry->next);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", prefix);
+}
+
+static void
+dump_model_datas (lf *file,
+		  char *prefix,
+		  model_data *entry,
+		  char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  lf_indent (file, +1);
+  while (entry != NULL)
+    {
+      dump_model_data (file, "\n(", entry, ")");
+      entry = entry->next;
+    }
+  lf_indent (file, -1);
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_model_entry (lf *file,
+		  char *prefix,
+		  model_entry *entry,
+		  char *suffix)
+{
+  lf_printf (file, "%s(model_entry *) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      lf_indent (file, +1);
+      dump_line_ref (file, "\n(line ", entry->line, ")");
+      dump_filter (file, "\n(flags ", entry->flags, ")");
+      lf_printf (file, "\n(name \"%s\")", entry->name);
+      lf_printf (file, "\n(full_name \"%s\")", entry->full_name);
+      lf_printf (file, "\n(unit_data \"%s\")", entry->unit_data);
+      lf_printf (file, "\n(next 0x%lx)", (long) entry->next);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", prefix);
+}
+
+static void
+dump_model_entries (lf *file,
+		    char *prefix,
+		    model_entry *entry,
+		    char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  lf_indent (file, +1);
+  while (entry != NULL)
+    {
+      dump_model_entry (file, "\n(", entry, ")");
+      entry = entry->next;
+    }
+  lf_indent (file, -1);
+  lf_printf (file, "%s", suffix);
+}
+
+
+static void
+dump_model_table (lf *file,
+		  char *prefix,
+		  model_table *entry,
+		  char *suffix)
+{
+  lf_printf (file, "%s(model_table *) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      lf_indent (file, +1);
+      dump_filter (file, "\n(processors ", entry->processors, ")");
+      lf_printf (file, "\n(nr_models %d)", entry->nr_models);
+      dump_model_entries (file, "\n(models ", entry->models, ")");
+      dump_model_datas (file, "\n(macros ", entry->macros, ")");
+      dump_model_datas (file, "\n(data ", entry->data, ")");
+      dump_function_entries (file, "\n(statics ", entry->statics, ")");
+      dump_function_entries (file, "\n(internals ", entry->functions, ")");
+      dump_function_entries (file, "\n(functions ", entry->functions, ")");
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+
+static char *
+insn_field_type_to_str (insn_field_type type)
+{
+  switch (type)
+    {
+    case insn_field_int: return "int";
+    case insn_field_reserved: return "reserved";
+    case insn_field_wild: return "wild";
+    case insn_field_string: return "string";
+    }
+  ERROR ("bad switch");
+  return 0;
+}
+
+void
+dump_insn_field (lf *file,
+		 char *prefix,
+		 insn_field_entry *field,
+		 char *suffix)
+{
+  char *sep = " ";
+  lf_printf (file, "%s(insn_field_entry *) 0x%lx", prefix, (long) field);
+  if (field != NULL)
+    {
+      lf_indent (file, +1);
+      lf_printf (file, "%s(first %d)", sep, field->first);
+      lf_printf (file, "%s(last %d)", sep, field->last);
+      lf_printf (file, "%s(width %d)", sep, field->width);
+      lf_printf (file, "%s(type %s)", sep, insn_field_type_to_str (field->type));
+      switch (field->type)
+	{
+	case insn_field_int:
+	  lf_printf (file, "%s(val 0x%lx)", sep, (long) field->val_int);
+	  break;
+	case insn_field_reserved:
+	  /* nothing output */
+	  break;
+	case insn_field_wild:
+	  /* nothing output */
+	  break;
+	case insn_field_string:
+	  lf_printf (file, "%s(val \"%s\")", sep, field->val_string);
+	  break;
+	}
+      lf_printf (file, "%s(next 0x%lx)", sep, (long) field->next);
+      lf_printf (file, "%s(prev 0x%lx)", sep, (long) field->prev);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+void
+dump_insn_word_entry (lf *file,
+		      char *prefix,
+		      insn_word_entry *word,
+		      char *suffix)
+{
+  lf_printf (file, "%s(insn_word_entry *) 0x%lx", prefix, (long) word);
+  if (word != NULL)
+    {
+      int i;
+      insn_field_entry *field;
+      lf_indent (file, +1);
+      lf_printf (file, "\n(first 0x%lx)", (long) word->first);
+      lf_printf (file, "\n(last 0x%lx)", (long) word->last);
+      lf_printf (file, "\n(bit");
+      for (i = 0; i < options.insn_bit_size; i++)
+	lf_printf (file, "\n ((value %d) (mask %d) (field 0x%lx))",
+		   word->bit[i]->value, word->bit[i]->mask, (long) word->bit[i]->field);
+      lf_printf (file, ")");
+      for (field = word->first; field != NULL; field = field->next)
+	dump_insn_field (file, "\n(", field, ")");
+      dump_filter (file, "\n(field_names ", word->field_names, ")");
+      lf_printf (file, "\n(next 0x%lx)", (long) word->next);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_insn_word_entries (lf *file,
+			char *prefix,
+			insn_word_entry *word,
+			char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  while (word != NULL)
+    {
+      dump_insn_word_entry (file, "\n(", word, ")");
+      word = word->next;
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_insn_model_entry (lf *file,
+		       char *prefix,
+		       insn_model_entry *model,
+		       char *suffix)
+{
+  lf_printf (file, "%s(insn_model_entry *) 0x%lx", prefix, (long) model);
+  if (model != NULL)
+    {
+      lf_indent (file, +1);
+      dump_line_ref (file, "\n(line ", model->line, ")");
+      lf_printf (file, "\n(name \"%s\")", model->name);
+      lf_printf (file, "\n(full_name \"%s\")", model->full_name);
+      lf_printf (file, "\n(unit_data \"%s\")", model->unit_data);
+      lf_printf (file, "\n(insn (insn_entry *) 0x%lx)", (long) model->insn);
+      lf_printf (file, "\n(next (insn_model_entry *) 0x%lx)",
+		 (long) model->next);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_insn_model_entries (lf *file,
+			 char *prefix,
+			 insn_model_entry *model,
+			 char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  while (model != NULL)
+    {
+      dump_insn_model_entry (file, "\n", model, "");
+      model = model->next;
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+
+static void
+dump_insn_mnemonic_entry (lf *file,
+			  char *prefix,
+			  insn_mnemonic_entry *mnemonic,
+			  char *suffix)
+{
+  lf_printf (file, "%s(insn_mnemonic_entry *) 0x%lx", prefix, (long) mnemonic);
+  if (mnemonic != NULL)
+    {
+      lf_indent (file, +1);
+      dump_line_ref (file, "\n(line ", mnemonic->line, ")");
+      lf_printf (file, "\n(format \"%s\")", mnemonic->format);
+      lf_printf (file, "\n(condition \"%s\")", mnemonic->condition);
+      lf_printf (file, "\n(insn (insn_entry *) 0x%lx)",
+		 (long) mnemonic->insn);
+      lf_printf (file, "\n(next (insn_mnemonic_entry *) 0x%lx)",
+		 (long) mnemonic->next);
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_insn_mnemonic_entries (lf *file,
+			    char *prefix,
+			    insn_mnemonic_entry *mnemonic,
+			    char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  while (mnemonic != NULL)
+    {
+      dump_insn_mnemonic_entry (file, "\n", mnemonic, "");
+      mnemonic = mnemonic->next;
+    }
+  lf_printf (file, "%s", suffix);
+}
+
+void
+dump_insn_entry (lf *file,
+		 char *prefix,
+		 insn_entry *entry,
+		 char *suffix)
+{
+  lf_printf (file, "%s(insn_entry *) 0x%lx", prefix, (long) entry);
+  if (entry != NULL)
+    {
+      int i;
+      lf_indent (file, +1);
+      dump_line_ref (file, "\n(line ", entry->line, ")");
+      dump_filter (file, "\n(flags ", entry->flags, ")");
+      lf_printf (file, "\n(nr_words %d)", entry->nr_words);
+      dump_insn_word_entries (file, "\n(words ", entry->words, ")");
+      lf_printf (file, "\n(word");
+      for (i = 0; i < entry->nr_models; i++)
+	lf_printf (file, " 0x%lx", (long) entry->word[i]);
+      lf_printf (file, ")");
+      dump_filter (file, "\n(field_names ", entry->field_names, ")");
+      lf_printf (file, "\n(format_name \"%s\")", entry->format_name);
+      dump_filter (file, "\n(options ", entry->options, ")");
+      lf_printf (file, "\n(name \"%s\")", entry->name);
+      lf_printf (file, "\n(nr_models %d)", entry->nr_models);
+      dump_insn_model_entries (file, "\n(models ", entry->models, ")");
+      lf_printf (file, "\n(model");
+      for (i = 0; i < entry->nr_models; i++)
+	lf_printf (file, " 0x%lx", (long) entry->model[i]);
+      lf_printf (file, ")");
+      dump_filter (file, "\n(processors ", entry->processors, ")");
+      dump_insn_mnemonic_entries (file, "\n(mnemonics ", entry->mnemonics, ")");
+      dump_table_entry (file, "\n(code ", entry->code, ")");
+      lf_printf (file, "\n(next 0x%lx)", (long) entry->next);
+      lf_indent (file, -1);
   }
+  lf_printf (file, "%s", suffix);
+}
+
+static void
+dump_insn_entries (lf *file,
+		   char *prefix,
+		   insn_entry *entry,
+		   char *suffix)
+{
+  lf_printf (file, "%s", prefix);
+  lf_indent (file, +1);
+  while (entry != NULL)
+    {
+      dump_insn_entry (file, "\n(", entry, ")");
+      entry = entry->next;
+    }
+  lf_indent (file, -1);
+  lf_printf (file, "%s", suffix);
 }
 
 
 
+void
+dump_insn_table (lf *file,
+		 char *prefix,
+		 insn_table *isa,
+		 char *suffix)
+{
+  lf_printf (file, "%s(insn_table *) 0x%lx", prefix, (long) isa);
+  if (isa != NULL)
+    {
+      lf_indent (file, +1);
+      dump_cache_entries (file, "\n(caches ", isa->caches, ")");
+      lf_printf (file, "\n(nr_insns %d)", isa->nr_insns);
+      lf_printf (file, "\n(max_nr_words %d)", isa->max_nr_words);
+      dump_insn_entries (file, "\n(insns ", isa->insns, ")");
+      dump_function_entries (file, "\n(functions ", isa->functions, ")");
+      dump_insn_entry (file, "\n(illegal_insn ", isa->illegal_insn, ")");
+      dump_model_table (file, "\n(model ", isa->model, ")");
+      dump_filter (file, "\n(flags ", isa->flags, ")");
+      dump_filter (file, "\n(options ", isa->options, ")");
+      lf_indent (file, -1);
+    }
+  lf_printf (file, "%s", suffix);
+}
 
 #ifdef MAIN
 
-static void
-dump_insn_field(insn_field *field,
-		int indent)
-{
-
-  printf("(insn_field*)0x%x\n", (unsigned)field);
-
-  dumpf(indent, "(first %d)\n", field->first);
-
-  dumpf(indent, "(last %d)\n", field->last);
-
-  dumpf(indent, "(width %d)\n", field->width);
-
-  if (field->is_int)
-    dumpf(indent, "(is_int %d)\n", field->val_int);
-
-  if (field->is_reserved)
-    dumpf(indent, "(is_wild)\n");
-
-  if (field->is_wild)
-    dumpf(indent, "(is_wild)\n");
-
-  if (field->is_string)
-    dumpf(indent, "(is_string `%s')\n", field->val_string);
-  
-  dumpf(indent, "(next 0x%x)\n", field->next);
-  
-  dumpf(indent, "(prev 0x%x)\n", field->prev);
-  
-
-}
-
-static void
-dump_insn_fields(insn_fields *fields,
-		 int indent)
-{
-  int i;
-
-  printf("(insn_fields*)%p\n", fields);
-
-  dumpf(indent, "(first 0x%x)\n", fields->first);
-  dumpf(indent, "(last 0x%x)\n", fields->last);
-
-  dumpf(indent, "(value 0x%x)\n", fields->value);
-
-  for (i = 0; i < insn_bit_size; i++) {
-    dumpf(indent, "(bits[%d] ", i, fields->bits[i]);
-    dump_insn_field(fields->bits[i], indent+1);
-    dumpf(indent, " )\n");
-  }
-
-}
-
-
-static void
-dump_opcode_field(opcode_field *field, int indent, int levels)
-{
-  printf("(opcode_field*)%p\n", field);
-  if (levels && field != NULL) {
-    dumpf(indent, "(first %d)\n", field->first);
-    dumpf(indent, "(last %d)\n", field->last);
-    dumpf(indent, "(is_boolean %d)\n", field->is_boolean);
-    dumpf(indent, "(parent ");
-    dump_opcode_field(field->parent, indent, levels-1);
-  }
-}
-
-
-static void
-dump_insn_bits(insn_bits *bits, int indent, int levels)
-{
-  printf("(insn_bits*)%p\n", bits);
-
-  if (levels && bits != NULL) {
-    dumpf(indent, "(value %d)\n", bits->value);
-    dumpf(indent, "(opcode ");
-    dump_opcode_field(bits->opcode, indent+1, 0);
-    dumpf(indent, " )\n");
-    dumpf(indent, "(field ");
-    dump_insn_field(bits->field, indent+1);
-    dumpf(indent, " )\n");
-    dumpf(indent, "(last ");
-    dump_insn_bits(bits->last, indent+1, levels-1);
-  }
-}
-
-
-
-static void
-dump_insn(insn *entry, int indent, int levels)
-{
-  printf("(insn*)%p\n", entry);
-
-  if (levels && entry != NULL) {
-
-    dumpf(indent, "(file_entry ");
-    dump_table_entry(entry->file_entry, indent+1);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(fields ");
-    dump_insn_fields(entry->fields, indent+1);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(next ");
-    dump_insn(entry->next, indent+1, levels-1);
-    dumpf(indent, " )\n");
-
-  }
-
-}
-
-
-static void
-dump_insn_table(insn_table *table,
-		int indent, int levels)
-{
-
-  printf("(insn_table*)%p\n", table);
-
-  if (levels && table != NULL) {
-
-    dumpf(indent, "(opcode_nr %d)\n", table->opcode_nr);
-
-    dumpf(indent, "(expanded_bits ");
-    dump_insn_bits(table->expanded_bits, indent+1, -1);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(int nr_insn %d)\n", table->nr_insn);
-
-    dumpf(indent, "(insns ");
-    dump_insn(table->insns, indent+1, table->nr_insn);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(opcode_rule ");
-    dump_decode_rule(table->opcode_rule, indent+1);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(opcode ");
-    dump_opcode_field(table->opcode, indent+1, 1);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(nr_entries %d)\n", table->entries);
-    dumpf(indent, "(entries ");
-    dump_insn_table(table->entries, indent+1, table->nr_entries);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(sibling ", table->sibling);
-    dump_insn_table(table->sibling, indent+1, levels-1);
-    dumpf(indent, " )\n");
-
-    dumpf(indent, "(parent ", table->parent);
-    dump_insn_table(table->parent, indent+1, 0);
-    dumpf(indent, " )\n");
-
-  }
-}
-
-int insn_bit_size = default_insn_bit_size;
-int hi_bit_nr;
-int generate_expanded_instructions;
-int insn_specifying_widths;
+igen_options options;
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-  filter *filters = NULL;
-  decode_table *decode_rules = NULL;
-  insn_table *instructions = NULL;
+  insn_table *isa;
+  lf *l;
 
-  if (argc != 7)
-    error("Usage: insn <filter-in> <hi-bit-nr> <insn-bit-size> <widths> <decode-table> <insn-table>\n");
+  INIT_OPTIONS (options);
 
-  filters = new_filter(argv[1], filters);
-  hi_bit_nr = a2i(argv[2]);
-  insn_bit_size = a2i(argv[3]);
-  insn_specifying_widths = a2i(argv[4]);
-  ASSERT(hi_bit_nr < insn_bit_size);
-  decode_rules = load_decode_table(argv[5], hi_bit_nr);
-  instructions = load_insn_table(argv[6], decode_rules, filters);
-  insn_table_expand_insns(instructions);
+  if (argc == 3)
+    filter_parse (&options.flags_filter, argv[2]);
+  else if (argc != 2)
+    error (NULL, "Usage: insn <insn-table> [ <filter-in> ]\n");
 
-  dump_insn_table(instructions, 0, -1);
+  isa = load_insn_table (argv[1], NULL);
+  l = lf_open ("-", "stdout", lf_omit_references, lf_is_text, "tmp-ld-insn");
+  dump_insn_table (l, "(isa ", isa, ")\n");
+
   return 0;
 }
 

@@ -1,7 +1,40 @@
+Wed Oct  8 13:10:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen.c (insn_list_insert): Missing \n in warning.
+
+	* ld-insn.c (load_insn_table): Only notify of discarded
+ 	instrctions when warn.discard enabled.
+
+	* igen.h: Add option.warn.discard, default enabled.
+
+	* igen.c (main): Add -Wnodiscard option.
+
+	* ld-insn.c (record_type): For old record type, check the number
+ 	of fields is correct.
+	(load_insn_table): Allow insn assembler and insn model records to
+ 	appear in any order.
+	(parse_insn_model_record): Rename from parse_insn_model_records.
+  	Parse only one record.
+	(parse_insn_mnemonic_record): Rename from
+ 	parse_insn_mnemonic_records.  Parse only one record.
+
+Tue Sep 23 15:52:06 1997  Felix Lee  <flee@yin.cygnus.com>
+
+	* gen-itable.c (gen_itable_h): [nr_itable_* + 1] to avoid
+ 	illegal zero-sized array.
+	(itable_print_set): likewise, avoid empty initializers.
+
+Mon Sep 22 18:49:07 1997  Felix Lee  <flee@cygnus.com>
+
+	* configure.in: i386-windows is a cross, so don't expect
+ 	libiberty to be there.
+	* configure: updated.
+	
 Fri Sep 19 10:36:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (print_function_name): Put the format name after the
  	function / instruction name, not before.
+	(print_itrace): Better format trace code.
 
 Tue Sep 16 11:01:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
