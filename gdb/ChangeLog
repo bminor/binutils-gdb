@@ -1,3 +1,18 @@
+2003-09-22  Andrew Cagney  <cagney@redhat.com>
+
+	* arch-utils.h (init_frame_pc_noop): Delete declaration.
+	* arch-utils.c (init_frame_pc_noop): Delete function.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Do not set
+	"init_frame_pc".
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* i386-interix-tdep.c (i386_interix_init_abi): Ditto.
+	* config/sparc/tm-sparc.h (init_frame_pc_noop): Delete
+	declaration.
+	(DEPRECATED_INIT_FRAME_PC): Delete macro.
+	* config/rs6000/tm-rs6000.h (init_frame_pc_noop): Delete
+	declaration.
+	(DEPRECATED_INIT_FRAME_PC): Delete macro.
+
 2003-09-22  Anthony Green  <green@redhat.com>
 
 	* monitor.c (monitor_expect): Delete unused conflicting targ_ops

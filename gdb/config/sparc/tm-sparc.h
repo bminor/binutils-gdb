@@ -211,11 +211,6 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 /* DEPRECATED_INIT_EXTRA_FRAME_INFO needs the PC to detect flat
    frames.  */
 
-/* NOTE: cagney/2002-12-08: Add local declaration of
-   init_frame_pc_noop() because it isn't possible to include
-   "arch-utils.h" here.  */
-extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
-#define	DEPRECATED_INIT_FRAME_PC(FROMLEAF, PREV)	(init_frame_pc_noop (FROMLEAF, PREV))
 #define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
   ((FROMLEAF) ? DEPRECATED_SAVED_PC_AFTER_CALL ((PREV)->next) : \
 	      (PREV)->next ? DEPRECATED_FRAME_SAVED_PC ((PREV)->next) : read_pc ())

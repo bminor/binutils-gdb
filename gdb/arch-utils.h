@@ -85,8 +85,6 @@ extern int no_op_reg_to_regnum (int reg);
 
 /* Versions of init_frame_pc().  Do nothing; do the default. */
 
-extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
-
 extern CORE_ADDR init_frame_pc_default (int fromleaf, struct frame_info *prev);
 
 /* Do nothing version of elf_make_msymbol_special. */

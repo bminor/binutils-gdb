@@ -228,13 +228,6 @@ no_op_reg_to_regnum (int reg)
 }
 
 CORE_ADDR
-init_frame_pc_noop (int fromleaf, struct frame_info *prev)
-{
-  /* Do nothing, implies return the same PC value.  */
-  return get_frame_pc (prev);
-}
-
-CORE_ADDR
 init_frame_pc_default (int fromleaf, struct frame_info *prev)
 {
   if (fromleaf && DEPRECATED_SAVED_PC_AFTER_CALL_P ())
