@@ -1,7 +1,22 @@
 Fri May 23 13:28:29 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* gdb.c++/virtfunc.exp(gdb_virtfunc_restart): Make sure we run
+ 	test_calls after restarting.
+
+	* lib/gdb.exp(gdb_run_cmd): Send jump command again after
+ 	reloading.
+
+	* gdb.base/watchpoint.exp: Fix typo.
+
+	* gdb.base/setshow.exp: Check for use_gdb_stub.
+
+	* gdb.base/break.exp: Fix continue until exit test for the gdb
+ 	stub case.
+	* gdb.base/langs.exp: Ditto.
+
 	* config/monitor.exp(gdb_load): Handle gdb_sect_offset and
- 	gdb_load_offset.
+ 	gdb_load_offset. If we weren't given a file to load, figure out
+ 	what the current file is and use it.
 
 	* config/i386-bozo.exp: New file.
 
