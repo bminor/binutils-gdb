@@ -1,3 +1,7 @@
+Fri Oct 29 16:02:34 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objdump.c: Use xmalloc instead of malloc.
+
 Fri Oct 29 11:11:14 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* objdump.c (info): Rename to formats_info.
