@@ -1,5 +1,9 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (value_next): Declare.
+	* value.c (value_next): Define.
+	* breakpoint.c: Update.
+
 	* value.h (deprecated_set_value_modifiable)
 	(deprecated_value_modifiable): Declare.
 	* value.c (deprecated_set_value_modifiable): Define.

@@ -173,6 +173,11 @@ struct value
 };
 
 
+/* Values are stored in a chain, so that they can be deleted easily
+   over calls to the inferior.  Values assigned to internal variables
+   or put into the value history are taken off this list.  */
+struct value *value_next (struct value *);
+
 extern struct type *value_type (struct value *);
 /* This is being used to change the type of an existing value, that
    code should instead be creating a new value with the changed type

@@ -123,6 +123,12 @@ allocate_repeat_value (struct type *type, int count)
 
 /* Accessor methods.  */
 
+struct value *
+value_next (struct value *value)
+{
+  return value->next;
+}
+
 struct type *
 value_type (struct value *value)
 {

@@ -743,7 +743,7 @@ static void free_valchain (struct bp_location *b)
      the next time the watchpoint is inserted.  */
   for (v = b->owner->val_chain; v; v = n)
     {
-      n = v->next;
+      n = value_next (v);
       value_free (v);
     }
   b->owner->val_chain = NULL;
@@ -938,7 +938,7 @@ insert_bp_location (struct bp_location *bpt,
 	  bpt->inserted = 1;
 
 	  /* Look at each value on the value chain.  */
-	  for (; v; v = v->next)
+	  for (; v; v = value_next (v))
 	    {
 	      /* If it's a memory location, and GDB actually needed
 		 its contents to evaluate the expression, then we
@@ -1470,7 +1470,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 
       b->inserted = (is == mark_inserted);
       /* Walk down the saved value chain.  */
-      for (v = b->owner->val_chain; v; v = v->next)
+      for (v = b->owner->val_chain; v; v = value_next (v))
 	{
 	  /* For each memory reference remove the watchpoint
 	     at that address.  */
@@ -2725,7 +2725,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 
 	if (!target_stopped_data_address (&current_target, &addr))
 	  continue;
-	for (v = b->val_chain; v; v = v->next)
+	for (v = b->val_chain; v; v = value_next (v))
 	  {
 	    if (VALUE_LVAL (v) == lval_memory
 		&& ! value_lazy (v))
@@ -5789,7 +5789,7 @@ can_use_hardware_watchpoint (struct value *v)
      function calls are special in any way.  So this function may not
      notice that an expression involving an inferior function call
      can't be watched with hardware watchpoints.  FIXME.  */
-  for (; v; v = v->next)
+  for (; v; v = value_next (v))
     {
       if (VALUE_LVAL (v) == lval_memory)
 	{
