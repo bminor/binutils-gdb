@@ -567,8 +567,8 @@ DEFUN(bfd_perform_relocation,(abfd,
     {
       /* We can detect overflow safely here */
 
-      bfd_signed_vma reloc_max = (~(1 << (howto->bitsize - 1)));
-      bfd_signed_vma reloc_min = (-reloc_max - 1);
+      bfd_signed_vma reloc_max = (1 << (howto->bitsize - 1))-1;
+      bfd_signed_vma reloc_min = ~(reloc_max);
 
       if ((bfd_signed_vma) relocation > reloc_max
 	  || (bfd_signed_vma) relocation < reloc_min)
@@ -698,28 +698,33 @@ CODE_FRAGMENT
 .typedef enum bfd_reloc_code_real 
 .
 .{
+.	{* 64 bits wide, simple reloc *}
+.  BFD_RELOC_64,
+.	{* 64 bits, PC-relative *}
+.  BFD_RELOC_64_PCREL,
+.
+.       {* 32 bits wide, simple reloc *}
+.  BFD_RELOC_32,
+.	{* 32 bits, PC-relative *}
+.  BFD_RELOC_32_PCREL,
+.
 .       {* 16 bits wide, simple reloc *}
 .  BFD_RELOC_16,        
-.
-.       {* 8 bits wide, but used to form an address like 0xffnn *}
-.  BFD_RELOC_8_FFnn,
+.	{* 16 bits, PC-relative *}
+.  BFD_RELOC_16_PCREL,
 .
 .       {* 8 bits wide, simple *}
 .  BFD_RELOC_8,
-.
 .       {* 8 bits wide, pc relative *}
 .  BFD_RELOC_8_PCREL,
+.       {* 8 bits wide, but used to form an address like 0xffnn *}
+.  BFD_RELOC_8_FFnn,
 .
 .       {* The type of reloc used to build a contructor table - at the
 .          moment probably a 32 bit wide abs address, but the cpu can
 .          choose. *}
 .
 .  BFD_RELOC_CTOR,
-.
-.       {* 32 bits wide, simple reloc *}
-.  BFD_RELOC_32,
-.	{* 32 bits, PC-relative *}
-.  BFD_RELOC_32_PCREL,
 .
 .	{* High 22 bits of 32-bit value; simple reloc.  *}
 .  BFD_RELOC_HI22,
@@ -730,7 +735,6 @@ CODE_FRAGMENT
 .  BFD_RELOC_24_PCREL,
 .  BFD_RELOC_I960_CALLJ,
 .
-.  BFD_RELOC_16_PCREL,
 .	{* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
 .	   word displacement, e.g. for SPARC) *}
 .  BFD_RELOC_32_PCREL_S2,
@@ -756,6 +760,22 @@ CODE_FRAGMENT
 .  {* this one is a.out specific? *}
 .  BFD_RELOC_SPARC_BASE22,
 .
+.  {* start-sanitize-v9 *}
+.  BFD_RELOC_SPARC_WDISP19,
+.  BFD_RELOC_SPARC_10,
+.  BFD_RELOC_SPARC_11,
+.#define  BFD_RELOC_SPARC_64 BFD_RELOC_64
+.  BFD_RELOC_SPARC_OLO10,
+.  BFD_RELOC_SPARC_HH22,
+.  BFD_RELOC_SPARC_HM10,
+.  BFD_RELOC_SPARC_LM22,
+.  BFD_RELOC_SPARC_PC_HH22,
+.  BFD_RELOC_SPARC_PC_HM10,
+.  BFD_RELOC_SPARC_PC_LM22,
+.  BFD_RELOC_SPARC_WDISP16,
+.  BFD_RELOC_SPARC_GLOB_JMP,
+.  BFD_RELOC_SPARC_LO7,
+.  {* end-sanitize-v9 *}
 .       {* Bits 27..2 of the relocation address shifted right 2 bits;
 .         simple reloc otherwise.  *}
 .  BFD_RELOC_MIPS_JMP,
@@ -1006,8 +1026,7 @@ DEFUN(bfd_generic_get_relocated_section_contents,(abfd,
 
 
 
-  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
-						       input_section);
+  size_t reloc_size = bfd_get_reloc_upper_bound(input_bfd, input_section);
   arelent **reloc_vector = (arelent **) alloca(reloc_size);
   
   /* read in the section */
