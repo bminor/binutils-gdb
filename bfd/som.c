@@ -4953,7 +4953,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		      /* Got to read the damn contents first.  We don't
 			 bother saving the contents (yet).  Add it one
 			 day if the need arises.  */
-		      bfd_bute *contents;
+		      bfd_byte *contents;
 		      if (!bfd_malloc_and_get_section (section->owner, section,
 						       &contents))
 			{

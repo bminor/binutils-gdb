@@ -1,3 +1,7 @@
+2004-06-25  Joel Brobecker  <brobecker@gnat.com>
+
+	* som.c (som_set_reloc_info): Correct small typo.
+
 2004-06-25  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* elf32-m32r.c (m32r_elf_howto_table): Support R_M32R_GOTOFF.
