@@ -1,3 +1,8 @@
+Tue Oct 19 14:57:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t15/funcargs.exp: Don't put comments on same line as
+	setup_xfail (@#$*%& tcl braindamage!).
+
 Mon Oct 18 21:50:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.disasm/hppa.exp: Use $objdir/$subdir/$binfile not just $binfile.
