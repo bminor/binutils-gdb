@@ -1,5 +1,5 @@
 /* Symbol table definitions for GDB.
-   Copyright 1986, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
@@ -120,9 +120,6 @@ struct general_symbol_info
 
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.language_specific.cplus_specific.demangled_name
-
-
-extern int demangle;	/* We reference it, so go ahead and declare it. */
 
 /* Macro that initializes the language dependent portion of a symbol
    depending upon the language for the symbol. */
@@ -232,10 +229,6 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
    ? SYMBOL_DEMANGLED_NAME (symbol)					\
    : SYMBOL_NAME (symbol))
 
-/* From utils.c.  */
-extern int demangle;
-extern int asm_demangle;
-
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
    name if it exists.  Note that whitespace is ignored while attempting to
@@ -290,6 +283,11 @@ struct minimal_symbol
      of compatibility with older compilers.  This field is optional. */
 
   char *info;
+
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+  /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
+  char *filename;
+#endif
 
   /* Classification types for this symbol.  These should be taken as "advisory
      only", since if gdb can't easily figure out a classification it simply
@@ -584,7 +582,7 @@ struct symbol
 
   /* Address class */
 
-  enum address_class class BYTE_BITFIELD;
+  enum address_class aclass BYTE_BITFIELD;
 
   /* Line number of definition.  FIXME:  Should we really make the assumption
      that nobody will try to debug files longer than 64K lines?  What about
@@ -604,7 +602,7 @@ struct symbol
 };
 
 #define SYMBOL_NAMESPACE(symbol)	(symbol)->namespace
-#define SYMBOL_CLASS(symbol)		(symbol)->class
+#define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
@@ -629,12 +627,12 @@ struct partial_symbol
 
   /* Address class (for info_symbols) */
 
-  enum address_class class BYTE_BITFIELD;
+  enum address_class aclass BYTE_BITFIELD;
 
 };
 
 #define PSYMBOL_NAMESPACE(psymbol)	(psymbol)->namespace
-#define PSYMBOL_CLASS(psymbol)		(psymbol)->class
+#define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
 
 /* Source-file information.  This describes the relation between source files,
@@ -728,7 +726,7 @@ struct symtab
     struct linetable *linetable;
 
     /* Section in objfile->section_offsets for the blockvector and
-       the linetable.  */
+       the linetable.  Probably always SECT_OFF_TEXT.  */
 
     int block_line_section;
 
@@ -924,10 +922,14 @@ struct partial_symtab
   ((NAME)[0] == 'o' && (NAME)[1] == 'p' && (NAME)[2] == CPLUS_MARKER)
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
-   names.  Note that this macro is g++ specific (FIXME).  */
+   names.  Note that this macro is g++ specific (FIXME).
+   '_vt$' is the old cfront-style vtables; '_VT$' is the new
+   style, using thunks (where '$' is really CPLUS_MARKER). */
 
 #define VTBL_PREFIX_P(NAME) \
-  ((NAME)[3] == CPLUS_MARKER && !strncmp ((NAME), "_vt", 3))
+  ((NAME)[3] == CPLUS_MARKER && (NAME)[0] == '_' \
+   && (((NAME)[1] == 'V' && (NAME)[2] == 'T') \
+       || ((NAME)[1] == 'v' && (NAME)[2] == 't')))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
    names.  Note that this macro is g++ specific (FIXME).  */
@@ -949,6 +951,10 @@ extern int current_source_line;
 /* See the comment in symfile.c about how current_objfile is used. */
 
 extern struct objfile *current_objfile;
+
+/* From utils.c.  */
+extern int demangle;
+extern int asm_demangle;
 
 extern struct symtab *
 lookup_symtab PARAMS ((char *));
@@ -1020,14 +1026,23 @@ extern void prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
 						enum minimal_symbol_type,
 						struct objfile *));
 
-extern void prim_record_minimal_symbol_and_info
+extern struct minimal_symbol *prim_record_minimal_symbol_and_info
   PARAMS ((const char *, CORE_ADDR,
 	   enum minimal_symbol_type,
 	   char *info, int section,
 	   struct objfile *));
 
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+extern CORE_ADDR find_stab_function_addr PARAMS ((char *,
+						  struct partial_symtab *,
+						  struct objfile *));
+#endif
+
 extern struct minimal_symbol *
-lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
+lookup_minimal_symbol PARAMS ((const char *, const char *, struct objfile *));
+
+extern struct minimal_symbol *
+lookup_minimal_symbol_text PARAMS ((const char *, const char *, struct objfile *));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
@@ -1046,6 +1061,10 @@ discard_minimal_symbols PARAMS ((int));
 
 extern void
 install_minimal_symbols PARAMS ((struct objfile *));
+
+/* Sort all the minimal symbols in OBJFILE.  */
+
+extern void msymbols_sort PARAMS ((struct objfile *objfile));
 
 struct symtab_and_line
 {
@@ -1140,8 +1159,6 @@ symbol_file_add PARAMS ((char *, int, CORE_ADDR, int, int, int));
 
 /* source.c */
 
-extern int frame_file_full_name; /* in stack.c */
-
 extern int
 identify_source_line PARAMS ((struct symtab *, int, int, CORE_ADDR));
 
@@ -1173,5 +1190,10 @@ clear_symtab_users PARAMS ((void));
 
 extern enum language
 deduce_language_from_filename PARAMS ((char *));
+
+/* symtab.c */
+
+extern int
+in_prologue PARAMS ((CORE_ADDR pc, CORE_ADDR func_start));
 
 #endif /* !defined(SYMTAB_H) */

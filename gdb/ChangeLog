@@ -1,3 +1,23 @@
+Tue Oct 24 12:26:14 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Disable questionable code near
+	the step range test.  Replace call detection test with much
+	simpler (and more efficient) test that doesn't require prologue
+	examination (as often).
+	* symtab.c symtab.h (in_prologue):  New function that indicates
+	whether or not we are in a function prologue.  This uses the
+	symbol table, and then falls back to prologue examination if that
+	fails.  It's much more efficient for remote debugging because it
+	avoids examining memory, which is very slow.  This is used in
+	wait_for_inferior to determine if we've made a function call that
+	needs to be skipped over (for next/nexti).
+	* mips-tdep.c (after_prologue):  New function, returns the PC
+	after the prologue.  Uses PDRs and the symbol table.
+	(mips_find_saved_regs):  Use in_prologue() to avoid costly
+	prologue examination if possible.
+	(mips_skip_prologue):  Use after_prologue() if possible to avoid
+	costly prologue examination.
+
 Mon Oct 23 16:03:33 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* configure.in (configdirs): Added support for the VR4300 default

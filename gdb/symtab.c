@@ -2874,7 +2874,7 @@ list_symbols (regexp, class, bpt, from_tty)
                           if (bpt)
                             {
                               break_command (SYMBOL_NAME (msymbol), from_tty);
-                              printf_filtered ("<function, no debug info>%s;\n",
+                              printf_filtered ("<function, no debug info> %s;\n",
                                                SYMBOL_SOURCE_NAME (msymbol));
                               continue;
                             }
@@ -3238,6 +3238,51 @@ make_symbol_completion_list (text, word)
     }
 
   return (return_val);
+}
+
+/* Determine if PC is in the prologue of a function.  The prologue is the area
+   between the first instruction of a function, and the first executable line.
+   Returns 1 if PC *might* be in prologue, 0 if definately *not* in prologue.
+ */
+
+int
+in_prologue (pc, func_start)
+     CORE_ADDR pc;
+     CORE_ADDR func_start;
+{
+  struct symtab_and_line sal;
+  CORE_ADDR func_addr, func_end;
+
+  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    goto nosyms;		/* Might be in prologue */
+
+  sal = find_pc_line (func_addr, 0);
+
+  if (sal.line == 0)
+    goto nosyms;
+
+  if (sal.end > func_addr
+      && sal.end <= func_end)	/* Is prologue in function? */
+    return pc < sal.end;	/* Yes, is pc in prologue? */
+
+  /* The line after the prologue seems to be outside the function.  In this
+     case, tell the caller to find the prologue the hard way.  */
+
+  return 1;
+
+/* Come here when symtabs don't contain line # info.  In this case, it is
+   likely that the user has stepped into a library function w/o symbols, or
+   is doing a stepi/nexti through code without symbols.  */
+
+ nosyms:
+
+/* We need to call the target-specific prologue skipping functions with the
+   function's start address because PC may be pointing at an instruction that
+   could be mistakenly considered part of the prologue.  */
+
+  SKIP_PROLOGUE (func_start);
+
+  return pc < func_start;
 }
 
 

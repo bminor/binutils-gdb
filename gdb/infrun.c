@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -1068,6 +1068,10 @@ wait_for_inferior ()
       /* If stepping through a line, keep going if still within it.  */
       if (stop_pc >= step_range_start
 	  && stop_pc < step_range_end
+#if 0
+/* I haven't a clue what might trigger this clause, and it seems wrong anyway,
+   so I've disabled it until someone complains.  -Stu 10/24/95 */
+
 	  /* The step range might include the start of the
 	     function, so if we are at the start of the
 	     step range and either the stack or frame pointers
@@ -1075,7 +1079,9 @@ wait_for_inferior ()
 	  && !(stop_pc == step_range_start
 	       && FRAME_FP (get_current_frame ())
 	       && (read_sp () INNER_THAN step_sp
-		   || FRAME_FP (get_current_frame ()) != step_frame_address)))
+		   || FRAME_FP (get_current_frame ()) != step_frame_address))
+#endif
+)
 	{
 	  /* We might be doing a BPSTAT_WHAT_SINGLE and getting a signal.
 	     So definately need to check for sigtramp here.  */
@@ -1131,7 +1137,13 @@ wait_for_inferior ()
 	  goto keep_going;
 	}
 
-#if 1
+#if 0
+      /* I disabled this test because it was too complicated and slow.  The
+	 SKIP_PROLOGUE was especially slow, because it caused unnecessary
+	 prologue examination on various architectures.  The code in the #else
+	 clause has been tested on the Sparc, Mips, PA, and Power
+	 architectures, so it's pretty likely to be correct.  -Stu 10/24/95 */
+
       /* See if we left the step range due to a subroutine call that
 	 we should proceed to the end of.  */
 
@@ -1199,10 +1211,12 @@ wait_for_inferior ()
 /* This is experimental code which greatly simplifies the subroutine call
    test.  I've actually tested on the Alpha, and it works great. -Stu */
 
-	if (in_prologue (stop_pc, NULL)
-	    || (prev_func_start != 0
-		&& stop_func_start == 0))
+	if (stop_pc == stop_func_start /* Quick test */
+	    || in_prologue (stop_pc, stop_func_start)
+	    || IN_SOLIB_CALL_TRAMPOLINE (stop_pc, stop_func_name)
+	    || stop_func_start == 0)
 #endif
+
 	{
 	  /* It's a subroutine call.  */
 
