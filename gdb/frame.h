@@ -25,6 +25,7 @@
 
 struct symtab_and_line;
 struct frame_unwind;
+struct frame_base;
 struct block;
 
 /* A legacy unwinder to prop up architectures using the old style
@@ -169,47 +170,25 @@ extern CORE_ADDR get_frame_pc (struct frame_info *);
 extern void find_frame_sal (struct frame_info *frame,
 			    struct symtab_and_line *sal);
 
-/* Return the frame address from FI.  Except in the machine-dependent
-   *FRAME* macros, a frame address has no defined meaning other than
-   as a magic cookie which identifies a frame over calls to the
-   inferior (um, SEE NOTE BELOW).  The only known exception is
-   inferior.h (DEPRECATED_PC_IN_CALL_DUMMY) [ON_STACK]; see comments
-   there.  You cannot assume that a frame address contains enough
-   information to reconstruct the frame; if you want more than just to
-   identify the frame (e.g. be able to fetch variables relative to
-   that frame), then save the whole struct frame_info (and the next
-   struct frame_info, since the latter is used for fetching variables
-   on some machines) (um, again SEE NOTE BELOW).
+/* Return the frame base (what ever that is) (DEPRECATED).
 
-   NOTE: cagney/2002-11-18: Actually, the frame address isn't
-   sufficient for identifying a frame, and the counter examples are
-   wrong!
+   Old code was trying to use this single method for two conflicting
+   purposes.  Such code needs to be updated to use either of:
 
-   Code that needs to (re)identify a frame must use get_frame_id() and
-   frame_find_by_id() (and in the future, a frame_compare() function
-   instead of INNER_THAN()).  Two reasons: an architecture (e.g.,
-   ia64) can have more than one frame address (due to multiple stack
-   pointers) (frame ID is going to be expanded to accomodate this);
-   successive frameless function calls can only be differientated by
-   comparing both the frame's base and the frame's enclosing function
-   (frame_find_by_id() is going to be modified to perform this test). 
+   get_frame_id: A low level frame unique identifier, that consists of
+   both a stack and a function address, that can be used to uniquely
+   identify a frame.  This value is determined by the frame's
+   low-level unwinder, the stack part [typically] being the
+   top-of-stack of the previous frame, and the function part being the
+   function's start address.  Since the correct identification of a
+   frameless function requires both the a stack and function address,
+   the old get_frame_base method was not sufficient.
 
-   The generic dummy frame version of DEPRECATED_PC_IN_CALL_DUMMY() is
-   able to identify a dummy frame using only the PC value.  So the
-   frame address is not needed.  In fact, most
-   DEPRECATED_PC_IN_CALL_DUMMY() calls now pass zero as the frame/sp
-   values as the caller knows that those values won't be used.  Once
-   all architectures are using generic dummy frames,
-   DEPRECATED_PC_IN_CALL_DUMMY() can drop the sp/frame parameters.
-   When it comes to finding a dummy frame, the next frame's frame ID
-   (with out duing an unwind) can be used (ok, could if it wasn't for
-   the need to change the way the PPC defined frame base in a strange
-   way).
-
-   Modern architectures should be using something like dwarf2's
-   location expression to describe where a variable lives.  Such
-   expressions specify their own debug info centric frame address.
-   Consequently, a generic frame address is pretty meaningless.  */
+   get_frame_base_address: get_frame_locals_address:
+   get_frame_args_address: A set of high-level debug-info dependant
+   addresses that fall within the frame.  These addresses almost
+   certainly will not match the stack address part of a frame ID (as
+   returned by get_frame_base).  */
 
 extern CORE_ADDR get_frame_base (struct frame_info *);
 
@@ -217,6 +196,25 @@ extern CORE_ADDR get_frame_base (struct frame_info *);
    frame after a frame cache flush (and other similar operations).  If
    FI is NULL, return the null_frame_id.  */
 extern struct frame_id get_frame_id (struct frame_info *fi);
+
+/* Assuming that a frame is `normal', return its base-address, or 0 if
+   the information isn't available.  NOTE: This address is really only
+   meaningful to the frame's high-level debug info.  */
+extern CORE_ADDR get_frame_base_address (struct frame_info *);
+
+/* Assuming that a frame is `normal', return the address of the first
+   local variable, or 0 if the information isn't available.  NOTE:
+   This address is really only meaningful to the frame's high-level
+   debug info.  Typically, the argument and locals share a single
+   base-address.  */
+extern CORE_ADDR get_frame_locals_address (struct frame_info *);
+
+/* Assuming that a frame is `normal', return the address of the first
+   parameter, or 0 if that information isn't available.  NOTE: This
+   address is really only meaningful to the frame's high-level debug
+   info.  Typically, the argument and locals share a single
+   base-address.  */
+extern CORE_ADDR get_frame_args_address (struct frame_info *);
 
 /* The frame's level: 0 for innermost, 1 for its caller, ...; or -1
    for an invalid frame).  */
@@ -398,11 +396,12 @@ struct frame_info
        related unwind data.  */
     struct context *context;
 
-    /* Prologue cache shared between the unwind functions.  See
-       "frame-unwind.h" for more information.  */
+    /* The frame's low-level unwinder and corresponding cache.  The
+       low-level unwinder is responsible for unwinding register values
+       for the previous frame.  The low-level unwind methods are
+       selected based on the presence, or otherwize, of register
+       unwind information such as CFI.  */
     void *prologue_cache;
-
-    /* The frame's unwinder.  */
     const struct frame_unwind *unwind;
 
     /* Cached copy of the previous frame's resume address.  */
@@ -413,6 +412,12 @@ struct frame_info
        redundant information.  */
     int id_p;
     struct frame_id id;
+
+    /* The frame's high-level base methods, and corresponding cache.
+       The high level base methods are selected based on the frame's
+       debug info.  */
+    const struct frame_base *base;
+    void *base_cache;
 
     /* Pointers to the next (down, inner, younger) and previous (up,
        outer, older) frame_info's in the frame cache.  */

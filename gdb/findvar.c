@@ -508,7 +508,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_ARG:
       if (frame == NULL)
 	return 0;
-      addr = FRAME_ARGS_ADDRESS (frame);
+      addr = get_frame_args_address (frame);
       if (!addr)
 	return 0;
       addr += SYMBOL_VALUE (var);
@@ -520,7 +520,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	CORE_ADDR argref;
 	if (frame == NULL)
 	  return 0;
-	argref = FRAME_ARGS_ADDRESS (frame);
+	argref = get_frame_args_address (frame);
 	if (!argref)
 	  return 0;
 	argref += SYMBOL_VALUE (var);
@@ -533,7 +533,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_LOCAL_ARG:
       if (frame == NULL)
 	return 0;
-      addr = FRAME_LOCALS_ADDRESS (frame);
+      addr = get_frame_locals_address (frame);
       addr += SYMBOL_VALUE (var);
       break;
 

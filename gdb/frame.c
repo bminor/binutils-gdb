@@ -36,6 +36,7 @@
 #include "annotate.h"
 #include "language.h"
 #include "frame-unwind.h"
+#include "frame-base.h"
 #include "command.h"
 #include "gdbcmd.h"
 
@@ -1628,6 +1629,58 @@ get_frame_base (struct frame_info *fi)
       get_frame_id (fi);
     }
   return fi->frame;
+}
+
+/* High-level offsets into the frame.  Used by the debug info.  */
+
+CORE_ADDR
+get_frame_base_address (struct frame_info *fi)
+{
+  if (fi->type != NORMAL_FRAME)
+    return 0;
+  if (fi->base == NULL)
+    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+  /* Sneaky: If the low-level unwind and high-level base code share a
+     common unwinder, let them share the prologue cache.  */
+  if (fi->base->unwind == fi->unwind)
+    return fi->base->this_base (fi->next, &fi->prologue_cache);
+  return fi->base->this_base (fi->next, &fi->base_cache);
+}
+
+CORE_ADDR
+get_frame_locals_address (struct frame_info *fi)
+{
+  void **cache;
+  if (fi->type != NORMAL_FRAME)
+    return 0;
+  /* If there isn't a frame address method, find it.  */
+  if (fi->base == NULL)
+    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+  /* Sneaky: If the low-level unwind and high-level base code share a
+     common unwinder, let them share the prologue cache.  */
+  if (fi->base->unwind == fi->unwind)
+    cache = &fi->prologue_cache;
+  else
+    cache = &fi->base_cache;
+  return fi->base->this_locals (fi->next, cache);
+}
+
+CORE_ADDR
+get_frame_args_address (struct frame_info *fi)
+{
+  void **cache;
+  if (fi->type != NORMAL_FRAME)
+    return 0;
+  /* If there isn't a frame address method, find it.  */
+  if (fi->base == NULL)
+    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+  /* Sneaky: If the low-level unwind and high-level base code share a
+     common unwinder, let them share the prologue cache.  */
+  if (fi->base->unwind == fi->unwind)
+    cache = &fi->prologue_cache;
+  else
+    cache = &fi->base_cache;
+  return fi->base->this_args (fi->next, cache);
 }
 
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...

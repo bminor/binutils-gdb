@@ -1,5 +1,38 @@
 2003-04-01  Andrew Cagney  <cagney@redhat.com>
 
+	Add frame debug info addresses:
+	* frame-base.c: New file.
+	* frame-base.h: New file.
+	* frame.h (struct frame_base): Add opaque declaration.
+	(get_frame_base): Update comment.
+	(get_frame_base_address): Declare.
+	(get_frame_locals_address): Declare.
+	(get_frame_args_address): Declare.
+	(struct frame_info): Add "base" and "base_cache".  Update
+	comments on the unwinder.
+	* frame.c: Include "frame-base.h".
+	(get_frame_locals_address): New function.
+	(get_frame_base_address): New function.
+	(get_frame_args_address): New function.
+	* findvar.c (read_var_value): Use get_frame_locals_address and
+	get_frame_args_address.
+	* stack.c (frame_info): Use get_frame_locals_address and
+	get_frame_args_address.
+	(FRAME_ARGS_ADDRESS_CORRECT): Delete conditionally defined macro,
+	moved to "frame-base.c".
+	* printcmd.c (print_frame_nameless_args): Ditto.
+	* symtab.h (address_class): Update comments.
+	* dwarf2loc.c (dwarf_expr_frame_base): Add note about
+	get_frame_base_address.
+	* dwarf2expr.c (execute_stack_op): Ditto.
+	* Makefile.in (frame_base_h): Define.
+	(frame.o): Update dependencies.
+	(frame-base.o): Add dependencies.
+	(SFILES): Add frame-base.c.
+	(COMMON_OBS): Add frame-base.o.
+
+2003-04-01  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (CALL_DUMMY_START_OFFSET): Default to zero.
 	CALL_DUMMY_LENGTH): Ditto.
 	* gdbarch.c: Re-generate.
