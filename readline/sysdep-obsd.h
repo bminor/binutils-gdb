@@ -7,5 +7,6 @@
 extern char *alloca ();
 #endif
 
+#include <sys/types.h>
 #include <sys/dir.h>
 typedef struct direct dirent;
