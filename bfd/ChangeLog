@@ -11,6 +11,12 @@ Thu Nov  3 18:19:13 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	underscore also
 	* makefile.dos: del ctor.o, add cofflink.o and elf32.o
 
+	* aoutx.h (adjust_o_magic): If user set data section vma, use it
+	to determine the default bss vma.  Patch from Takada Hiroaki,
+	hiro@is.s.u-tokyo.ac.jp.
+	(machine_type, case bfd_arch_vax): Set *unknown to false.  Patch
+	from John David Anglin <dave@hiauly1.hia.nrc.ca>.
+
 Wed Nov  2 15:24:51 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* archive.c (normalize): Change to take a BFD as an argument.
