@@ -357,49 +357,12 @@ pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
   status = target_read_memory (text_addr, buf, 4);
   if (status != 0)
     {
-      int old, new;
-      int update_coreops;
-      int update_execops;
-
-      /* We must update the to_sections field in the core_ops structure
-	 here, otherwise we dereference a potential dangling pointer
-	 for each call to target_read/write_memory within this routine.  */
-      update_coreops = core_ops.to_sections == target->to_sections;
-
-      /* Ditto exec_ops (this was a bug).  */
-      update_execops = exec_ops.to_sections == target->to_sections;
-
+      int new, old;
+      
       new = so->sections_end - so->sections;
-      /* Add sections from the shared library to the core target.  */
-      if (target->to_sections)
-	{
-	  old = target->to_sections_end - target->to_sections;
-	  target->to_sections = (struct section_table *)
-	    xrealloc ((char *) target->to_sections,
-		      ((sizeof (struct section_table)) * (old + new)));
-	}
-      else
-	{
-	  old = 0;
-	  target->to_sections = (struct section_table *)
-	    xmalloc ((sizeof (struct section_table)) * new);
-	}
-      target->to_sections_end = (target->to_sections + old + new);
 
-      /* Update the to_sections field in the core_ops structure
-	 if needed, ditto exec_ops.  */
-      if (update_coreops)
-	{
-	  core_ops.to_sections = target->to_sections;
-	  core_ops.to_sections_end = target->to_sections_end;
-	}
-
-      if (update_execops)
-	{
-	  exec_ops.to_sections = target->to_sections;
-	  exec_ops.to_sections_end = target->to_sections_end;
-	}
-
+      old = target_resize_to_sections (target, new);
+      
       /* Copy over the old data before it gets clobbered.  */
       memcpy ((char *) (target->to_sections + old),
 	      so->sections,

@@ -53,7 +53,9 @@
 #include "serial.h"
 
 /* Prototypes for local functions */
-static void initialize_sigint_signal_handler PARAMS ((void));
+static void cleanup_sigint_signal_handler (void *dummy);
+static void initialize_sigint_signal_handler (void);
+
 static void handle_remote_sigint PARAMS ((int));
 static void handle_remote_sigint_twice PARAMS ((int));
 static void async_remote_interrupt PARAMS ((gdb_client_data));
@@ -83,7 +85,6 @@ static void remote_resume PARAMS ((int pid, int step,
 				   enum target_signal siggnal));
 static void remote_async_resume PARAMS ((int pid, int step,
 					 enum target_signal siggnal));
-
 static int remote_start_remote PARAMS ((PTR));
 
 static void remote_open PARAMS ((char *name, int from_tty));
@@ -253,6 +254,16 @@ static struct target_ops extended_async_remote_ops;
    was static int remote_timeout = 2; */
 extern int remote_timeout;
 
+/* FIXME: cagney/1999-09-23: Even though getpkt was called with
+   ``forever'' still use the normal timeout mechanism.  This is
+   currently used by the ASYNC code to guarentee that target reads
+   during the initial connect always time-out.  Once getpkt has been
+   modified to return a timeout indication and, in turn
+   remote_wait()/wait_for_inferior() have gained a timeout parameter
+   this can go away. */
+static int wait_forever_enabled_p = 1;
+
+
 /* This variable chooses whether to send a ^C or a break when the user
    requests program interruption.  Although ^C is usually what remote
    systems expect, and that is the default here, sometimes a break is
@@ -310,6 +321,11 @@ static int remote_address_size;
    trailers, it is only the payload size. */
 
 static int remote_register_buf_size = 0;
+
+/* Tempoary to track who currently owns the terminal.  See
+   target_async_terminal_* for more details.  */
+
+static int remote_async_terminal_ours_p;
 
 /* Generic configuration support for packets the stub optionally
    supports. Allows the user to specify the use of the packet as well
@@ -1717,6 +1733,9 @@ remote_open_1 (name, from_tty, target, extended_p)
     error ("To open a remote debug connection, you need to specify what\n\
 serial device is attached to the remote system (e.g. /dev/ttya).");
 
+  /* See FIXME above */
+  wait_forever_enabled_p = 1;
+
   target_preopen (from_tty);
 
   unpush_target (target);
@@ -1832,15 +1851,6 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
       puts_filtered ("\n");
     }
 
-  /* If running in asynchronous mode, register the target with the
-     event loop.  Set things up so that when there is an event on the
-     file descriptor, the event loop will call fetch_inferior_event,
-     which will do the proper analysis to determine what happened. */
-  if (async_p && SERIAL_CAN_ASYNC_P (remote_desc))
-    SERIAL_ASYNC (remote_desc, inferior_event_handler, 0);
-  if (remote_debug && SERIAL_IS_ASYNC_P (remote_desc))
-    fputs_unfiltered ("Async mode.\n", gdb_stdlog);
-
   push_target (target);		/* Switch to using remote target now */
 
   init_packet_config (&remote_protocol_P);
@@ -1853,20 +1863,26 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
      binary downloading. */
   init_packet_config (&remote_protocol_binary_download);
 
-  /* If running asynchronously, set things up for telling the target
-     to use the extended protocol. This will happen only after the
-     target has been connected to, in fetch_inferior_event. */
-  if (extended_p && SERIAL_IS_ASYNC_P (remote_desc))
-    add_continuation (set_extended_protocol, NULL);
-
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
      as both the pid of the target process (if it has such), and as a
      flag indicating that a target is active.  These functions should
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
-
   inferior_pid = MAGIC_NULL_PID;
+
+  /* With this target we start out by owning the terminal. */
+  remote_async_terminal_ours_p = 1;
+
+  /* FIXME: cagney/1999-09-23: During the initial connection it is
+     assumed that the target is already ready and able to respond to
+     requests. Unfortunatly remote_start_remote() eventually calls
+     wait_for_inferior() with no timeout.  wait_forever_enabled_p gets
+     around this. Eventually a mechanism that allows
+     wait_for_inferior() to expect/get timeouts will be
+     implemented. */
+  wait_forever_enabled_p = 0;
+
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -1874,35 +1890,32 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
 		     "Couldn't establish connection to remote target\n",
 		     RETURN_MASK_ALL))
     {
-      /* Unregister the file descriptor from the event loop. */
-      if (SERIAL_IS_ASYNC_P (remote_desc))
-	SERIAL_ASYNC (remote_desc, NULL, 0);
       pop_target ();
+      wait_forever_enabled_p = 1;
       return;
     }
 
-  if (!SERIAL_IS_ASYNC_P (remote_desc))
-    {
-      if (extended_p)
-	{
-	  /* tell the remote that we're using the extended protocol.  */
-	  char *buf = alloca (PBUFSIZ);
-	  putpkt ("!");
-	  getpkt (buf, 0);
-	}
-    }
-}
+  wait_forever_enabled_p = 1;
 
-/* This will be called by fetch_inferior_event, via the
-   cmd_continuation pointer, only after the target has stopped. */
-static void
-set_extended_protocol (arg)
-     struct continuation_arg *arg;
-{
-  /* tell the remote that we're using the extended protocol.  */
-  char *buf = alloca (PBUFSIZ);
-  putpkt ("!");
-  getpkt (buf, 0);
+  if (extended_p)
+    {
+      /* tell the remote that we're using the extended protocol.  */
+      char *buf = alloca (PBUFSIZ);
+      putpkt ("!");
+      getpkt (buf, 0);
+    }
+
+  /* If running in asynchronous mode, register the target with the
+     event loop.  Set things up so that when there is an event on the
+     file descriptor, the event loop will call fetch_inferior_event,
+     which will do the proper analysis to determine what happened. */
+  /* FIXME: cagney/1999-09-26: We shouldn't just put the target into
+     async mode.  Instead we should leave the target synchronous and
+     then leave it to the client to flip modes. */
+  if (event_loop_p && target_can_async_p ())
+    target_async (inferior_event_handler, 0);
+  if (remote_debug && SERIAL_IS_ASYNC_P (remote_desc))
+    fputs_unfiltered ("Serial put into async mode.\n", gdb_stdlog);
 }
 
 /* This takes a program previously attached to and detaches it.  After
@@ -2046,25 +2059,13 @@ remote_async_resume (pid, step, siggnal)
   if (target_resume_hook)
     (*target_resume_hook) ();
 
-  /* Set things up before execution starts for async commands. */
-  /* This function can be entered more than once for the same execution
-     command, because it is also called by handle_inferior_event. So
-     we make sure that we don't do the initialization for sync
-     execution more than once. */
-  if (SERIAL_IS_ASYNC_P (remote_desc) && !target_executing)
-    {
-      target_executing = 1;
-
-      /* If the command must look synchronous, fake it, by making gdb
-         display an empty prompt after the command has completed. Also
-         disable input. */
-      if (sync_execution)
-	{
-	  push_prompt ("", "", "");
-	  delete_file_handler (input_fd);
-	  initialize_sigint_signal_handler ();
-	}
-    }
+  /* Tell the world that the target is now executing. */
+  /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
+     this?  Instead, should the client of target just assume (for
+     async targets) that the target is going to start executing?  Is
+     this information already found in the continuation block?  */
+  if (SERIAL_IS_ASYNC_P (remote_desc))
+    target_executing = 1;
 
   if (siggnal != TARGET_SIGNAL_0)
     {
@@ -2110,11 +2111,11 @@ handle_remote_sigint_twice (sig)
 {
   signal (sig, handle_sigint);
   sigint_remote_twice_token =
-    create_async_signal_handler (async_remote_interrupt, NULL);
+    create_async_signal_handler (async_remote_interrupt_twice, NULL);
   mark_async_signal_handler_wrapper (sigint_remote_twice_token);
 }
 
-/* Perform the real interruption of hte target execution, in response
+/* Perform the real interruption of the target execution, in response
    to a ^C. */
 static void
 async_remote_interrupt (arg)
@@ -2132,14 +2133,19 @@ static void
 async_remote_interrupt_twice (arg)
      gdb_client_data arg;
 {
-  interrupt_query ();
-  signal (SIGINT, handle_remote_sigint);
+  /* Do something only if the target was not killed by the previous
+     cntl-C. */
+  if (target_executing)
+    {
+      interrupt_query ();
+      signal (SIGINT, handle_remote_sigint);
+    }
 }
 
 /* Reinstall the usual SIGINT handlers, after the target has
    stopped. */
-void
-cleanup_sigint_signal_handler ()
+static void
+cleanup_sigint_signal_handler (void *dummy)
 {
   signal (SIGINT, handle_sigint);
   if (sigint_remote_twice_token)
@@ -2212,6 +2218,51 @@ Give up (and stop debugging it)? "))
     }
 
   target_terminal_inferior ();
+}
+
+/* Enable/disable target terminal ownership.  Most targets can use
+   terminal groups to control terminal ownership.  Remote targets are
+   different in that explicit transfer of ownership to/from GDB/target
+   is required. */
+
+static void
+remote_async_terminal_inferior (void)
+{
+  /* FIXME: cagney/1999-09-27: Shouldn't need to test for
+     sync_execution here.  This function should only be called when
+     GDB is resuming the inferior in the forground.  A background
+     resume (``run&'') should leave GDB in control of the terminal and
+     consequently should not call this code. */
+  if (!sync_execution)
+    return;
+  /* FIXME: cagney/1999-09-27: Closely related to the above.  Make
+     calls target_terminal_*() idenpotent. The event-loop GDB talking
+     to an asynchronous target with a synchronous command calls this
+     function from both event-top.c and infrun.c/infcmd.c.  Once GDB
+     stops trying to transfer the terminal to the target when it
+     shouldn't this guard can go away.  */
+  if (!remote_async_terminal_ours_p)
+    return;
+  delete_file_handler (input_fd);
+  remote_async_terminal_ours_p = 0;
+  initialize_sigint_signal_handler ();
+  /* NOTE: At this point we could also register our selves as the
+     recipient of all input.  Any characters typed could then be
+     passed on down to the target. */
+}
+
+static void
+remote_async_terminal_ours (void)
+{
+  /* See FIXME in remote_async_terminal_inferior. */
+  if (!sync_execution)
+    return;
+  /* See FIXME in remote_async_terminal_inferior. */
+  if (remote_async_terminal_ours_p)
+    return;
+  cleanup_sigint_signal_handler (NULL);
+  add_file_handler (input_fd, stdin_event_handler, 0);
+  remote_async_terminal_ours_p = 1;
 }
 
 /* If nonzero, ignore the next kill.  */
@@ -2473,7 +2524,11 @@ remote_async_wait (pid, status)
 
       if (!SERIAL_IS_ASYNC_P (remote_desc))
 	ofunc = signal (SIGINT, remote_interrupt);
-      getpkt ((char *) buf, 1);
+      /* FIXME: cagney/1999-09-27: If we're in async mode we should
+         _never_ wait for ever -> test on target_is_async_p().
+         However, before we do that we need to ensure that the caller
+         knows how to take the target into/out of async mode. */
+      getpkt ((char *) buf, wait_forever_enabled_p);
       if (!SERIAL_IS_ASYNC_P (remote_desc))
 	signal (SIGINT, ofunc);
 
@@ -3832,7 +3887,7 @@ extended_remote_async_create_inferior (exec_file, args, env)
 
   /* If running asynchronously, register the target file descriptor
      with the event loop. */
-  if (async_p && SERIAL_CAN_ASYNC_P (remote_desc))
+  if (event_loop_p && SERIAL_CAN_ASYNC_P (remote_desc))
     SERIAL_ASYNC (remote_desc, inferior_event_handler, 0);
 
   /* Now restart the remote server.  */
@@ -4673,6 +4728,9 @@ remote_cisco_open (name, from_tty)
 	    "To open a remote debug connection, you need to specify what \n\
 device is attached to the remote system (e.g. host:port).");
 
+  /* See FIXME above */
+  wait_forever_enabled_p = 1;
+
   target_preopen (from_tty);
 
   unpush_target (&remote_cisco_ops);
@@ -5010,6 +5068,26 @@ Specify the serial device it is connected to (e.g. host:2020).";
   remote_cisco_ops.to_magic = OPS_MAGIC;
 }
 
+static int
+remote_can_async_p (void)
+{
+  /* We're async whenever the serial device is. */
+  return SERIAL_CAN_ASYNC_P (remote_desc);
+}
+
+static int
+remote_is_async_p (void)
+{
+  /* We're async whenever the serial device is. */
+  return SERIAL_IS_ASYNC_P (remote_desc);
+}
+
+static void
+remote_async (void (*callback) (int error, void *context, int fd), void *context)
+{
+  SERIAL_ASYNC (remote_desc, callback, context);
+}
+
 /* Target async and target extended-async.
 
    This are temporary targets, until it is all tested.  Eventually
@@ -5036,6 +5114,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_files_info = remote_files_info;
   remote_async_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_async_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_async_ops.to_terminal_inferior = remote_async_terminal_inferior;
+  remote_async_ops.to_terminal_ours = remote_async_terminal_ours;
   remote_async_ops.to_kill = remote_async_kill;
   remote_async_ops.to_load = generic_load;
   remote_async_ops.to_mourn_inferior = remote_async_mourn;
@@ -5051,7 +5131,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_has_registers = 1;
   remote_async_ops.to_has_execution = 1;
   remote_async_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
-  remote_async_ops.to_has_async_exec = 1;
+  remote_async_ops.to_can_async_p = remote_can_async_p;
+  remote_async_ops.to_is_async_p = remote_is_async_p;
+  remote_async_ops.to_async = remote_async;
   remote_async_ops.to_magic = OPS_MAGIC;
 }
 

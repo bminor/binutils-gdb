@@ -2265,9 +2265,6 @@ init_procinfo (pid, kill)
 
   prfillset (&sctl.sigset);
   notice_signals (pi, &sctl);
-  prfillset (&fctl.fltset);
-  prdelset (&fctl.fltset, FLTPAGE);
-
 #else /* ! UNIXWARE */
   ioctl (pi->ctl_fd, PIOCGTRACE, &pi->saved_trace.sigset);
   ioctl (pi->ctl_fd, PIOCGHOLD, &pi->saved_sighold.sigset);
@@ -2280,11 +2277,6 @@ init_procinfo (pid, kill)
   memset ((char *) &pi->prrun, 0, sizeof (pi->prrun));
   prfillset (&pi->prrun.pr_trace);
   procfs_notice_signals (pid);
-  prfillset (&pi->prrun.pr_fault);
-  prdelset (&pi->prrun.pr_fault, FLTPAGE);
-#ifdef PROCFS_DONT_TRACE_FAULTS
-  premptyset (&pi->prrun.pr_fault);
-#endif
 #endif /* UNIXWARE */
 
   if (!procfs_read_status (pi))
@@ -2340,9 +2332,17 @@ create_procinfo (pid)
 
 #ifdef PROCFS_USE_READ_WRITE
   fctl.cmd = PCSFAULT;
+  prfillset (&fctl.fltset);
+  prdelset (&fctl.fltset, FLTPAGE);
+
   if (write (pi->ctl_fd, (char *) &fctl, sizeof (struct flt_ctl)) < 0)
       proc_init_failed (pi, "PCSFAULT failed", 1);
 #else
+  prfillset (&pi->prrun.pr_fault);
+  prdelset (&pi->prrun.pr_fault, FLTPAGE);
+#ifdef PROCFS_DONT_TRACE_FAULTS
+  premptyset (&pi->prrun.pr_fault);
+#endif
   if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->prrun.pr_fault) < 0)
     proc_init_failed (pi, "PIOCSFAULT failed", 1);
 #endif
@@ -3318,9 +3318,17 @@ do_attach (pid)
 
 #ifdef PROCFS_USE_READ_WRITE
       fctl.cmd = PCSFAULT;
+      prfillset (&fctl.fltset);
+      prdelset (&fctl.fltset, FLTPAGE);
+
       if (write (pi->ctl_fd, (char *) &fctl, sizeof (struct flt_ctl)) < 0)
 	  print_sys_errmsg ("PCSFAULT failed", errno);
 #else /* PROCFS_USE_READ_WRITE */
+      prfillset (&pi->prrun.pr_fault);
+      prdelset (&pi->prrun.pr_fault, FLTPAGE);
+#ifdef PROCFS_DONT_TRACE_FAULTS
+      premptyset (&pi->prrun.pr_fault);
+#endif
       if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->prrun.pr_fault))
 	{
 	  print_sys_errmsg ("PIOCSFAULT failed", errno);

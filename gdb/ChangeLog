@@ -1,3 +1,245 @@
+Tue Sep 28 11:08:34 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Ignore IMPORT_SHLIB stubs
+	except for hpux11 native.  Break out of the loop to find a
+	stub as soon as we find an IMPORT stub.
+	(skip_prologue_hard_way): Also recognize copy %ret1,target and
+	all PA64 argument stores as prologue instructions.
+
+1999-09-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.c, defs.h, event-top.c, infcmd.c, infrun.c, main.c,
+ 	remote.c, top.c, tracepoint.c, utils.c (async_p): Change var name
+ 	to event_loop_p.
+	
+1999-09-28  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* hppa-tdep.c (skip_prologue_hard_way): Recognize ldo insns
+	which generate pointers into the argument list.
+
+Tue Sep 28 13:56:49 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.h (cleanup_sigint_signal_handler,
+ 	initialize_sigint_signal_handler): Delete extern declarations.
+	* event-top.c, infrun.c: No longer need to include "remote.h".
+	* remote.c (cleanup_sigint_signal_handler,
+ 	initialize_sigint_signal_handler): Make static.
+	* Makefile.in (event-top.o): Delete dependency on "remote.h".
+
+	* remote.c (remote_async_terminal_ours_p): New static global. Keep
+ 	track of who currently owns the terminal.
+ 	(remote_async_open_1): Initialize.
+	(remote_async_terminal_inferior): Test
+ 	remote_async_terminal_ours_p.  Claim CNTRL-C handler as part of
+ 	transfering the terminal to the target.
+	(remote_async_terminal_ours): Similar.
+
+Mon Sep 27 12:33:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (async_interrupt_query): Delete function.  Merged into
+ 	interrupt_query.  Async cases handled by target_terminal_ours,
+ 	target_terminal_inferior and SERIAL_CLOSE.
+	(async_remote_interrupt_twice): Update.
+	(remote_async_terminal_ours, remote_async_terminal_inferior): New
+ 	functions. Steal STDIN from GDB's CLI.
+	(init_remote_async_ops): Initialize to_terminal_ours and
+ 	to_terminal_inferior.
+
+	* event-top.c (async_disable_stdin, async_disable_stdin): Use
+ 	target_terminal_ours / target_terminal_inferior to transfer
+ 	ownership of the terminal between GDB and the target.
+
+1999-09-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c (run_command): Call async_disable_stdin() only if
+	dealing with an asynchronous target.
+
+Mon Sep 27 11:48:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.h (struct target_ops): Add to_can_async_p, to_is_async_p,
+ 	to_async.  Delete to_has_async.  These correspond well with
+ 	SERIAL* async methods.
+	(target_can_async_p, target_is_async_p, target_async): Define.
+	* target.c (update_current_target, cleanup_target): Update.
+
+	* remote.c (remote_async_open_1): Change target to async using
+ 	target_async.
+	(remote_can_async_p, remote_is_async_p, remote_async): New
+ 	functions.
+	(remote_async_wait, remote_async_open_1): Add FIXME about how
+ 	wait_forever_enabled_p can almost be deleted once the client can
+ 	enable/disable target_async.
+
+	* breakpoint.c (until_break_command), infrun.c (proceed), infcmd.c
+ 	(run_command, continue_command, step_1, jump_command,
+ 	until_command, finish_command, interrupt_target_command), top.c
+ 	(return_to_top_level, execute_command), event-top.c
+ 	(command_handler): Replace target_has_async with
+ 	target_can_async_p.
+
+Sun Sep 26 02:10:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_async_open_1): If we go into async mode, never
+ 	wait for ever.
+
+	* infcmd.c: Include "event-top.h".
+	(run_command, continue_command, jump_command, until_command,
+ 	finish_command): Use async_disable_stdin to disable the console
+ 	for synchronous commands.
+
+	* remote.c (async_interrupt_query): Only disconnect the console
+ 	from the terminal when sync_execution.
+
+	* remote.c (initialize_sigint_signal_handler): Move declaration
+ 	from here.
+	* remote.h: To here.  Make non-static.
+
+	* remote.c (remote_async_resume, async_interrupt_query): Move
+ 	prompt code from here.
+	* event-top.c (async_disable_stdin, async_enable_stdin): To
+ 	here. New function.
+
+	* infrun.c (start_remote): Delete commented out code.
+
+Fri Sep 24 12:38:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (remote_async_open_1): Perform the initial async_open
+ 	using only synchronous calls.  Only after the target is fully
+ 	connected, switch to async mode.  Include FIXME about now it
+ 	currently works VS how it should be working.
+	(remote_async_open_1, set_extended_protocol): Delete function
+ 	set_extended_protocol.  All open communication is now done
+ 	synchronously.
+	(forever_enabled_p): New variable.  Determine if remote_async_wait
+ 	should block FOREVER when fetching target information.
+	(remote_cisco_open, remote_open_1): Set forever_enabled_p.
+
+	* infrun.c (start_remote): During the initial connect, always use
+ 	a synchronous wait.
+
+Sat Sep 25 18:13:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (event-top.o): Add dependency.
+	* event-top.c: Include "remote.h".
+	* remote.c (async_interrupt_query), event-top.c:
+ 	(async_enable_stdin): Pass dummy parameter to
+ 	cleanup_sigint_signal_handler.
+	* remote.c (cleanup_sigint_signal_handler), remote.h
+ 	(cleanup_sigint_signal_handler), event-top.c (async_enable_stdin),
+ 	event-top.h (async_enable_stdin): Change signature to match
+ 	make_exec_error_cleanup handler pararameter.
+
+Thu Sep 23 20:48:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (enum command_class): Move from here.
+	* command.h (command_class): To here.
+
+1999-09-24  Kevin Buettner  <kevinb@cygnus.com>
+	* breakpoint.c (bpstat_stop_status): Use not_a_breakpoint to
+	help properly set bp_addr.
+	* infrun.c (handle_inferior_event): Simplify calls to
+	bp_stop_status.
+
+1999-09-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c (return_to_top_level): Do exec_error cleanups if are
+ 	interrupting a simulated synchronous execution command.
+
+	* infrun.c (start_remote): Create a cleanup to enable stdin in
+ 	case of error from this command.
+	(complete_execution): Do the enabling of stdin via the exec_error
+ 	cleanups, when needed.
+
+	* remote.c (remote_async_resume): Make sure we re-enable stdin in
+ 	case of error from the target.
+	(handle_remote_sigint_twice): The handler to be set is
+ 	async_remote_interrupt_twice, not async_remote_interrupt.
+	(async_remote_interrupt_twice): Don't do anything if the target
+ 	has been killed already. Call async_interrupt_query, instead of
+ 	interrupt_query.
+	(async_interrupt_query): New function. Async case of
+ 	interrupt_query().
+	
+	* event-top.c (async_enable_stdin): New function. Reinstate stdin
+ 	with the event loop.
+	* event-top.h (async_enable_stdin): Export.
+
+	* utils.c (exec_error_cleanup_chain): New cleanup chain.
+	(make_exec_error_cleanup, do_exec_error_cleanups,
+ 	discard_exec_error_cleanups): New functions.
+	* defs.h (make_exec_error_cleanup, do_exec_error_cleanups,
+ 	discard_exec_error_cleanups): Export.
+
+1999-09-24  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c (expr_to_agent): Don't forget to pass argument to
+ 	new_agent_expr.
+
+1999-09-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (fetch_inferior_event_wrapper): New
+ 	function. Wrapper to pass to catch_errors.
+	(inferior_event_handler): Pop the target if things go bad with it.
+	Call fetch_inferior_event() from within catch_errors(). 
+
+1999-09-24  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c: Use internal_error instead of error, where
+	appropriate.
+
+1999-09-23  James Ingham  <jingham@leda.cygnus.com>
+
+	* target.c (target_resize_to_sections): New function.  Gather the
+	resizing code for the to_sections field into one place, and make
+	sure you update the other targets that are sharing the to_sections 
+	structure.
+	* target.h: Declare the target_resize_to_sections function.
+	* solib.c (solib_add): use target_resize_to_sections.
+	* somsolib.c (som_solib_load_symbols): ditto
+	* rs6000-nat.c (xcoff_relocate_core): ditto
+	* pa64solib.c (pa64_solib_load_symbols): ditto
+	* irix5-nat.c (solib_add):ditto
+
+	* top.c: Define the attach & detach hooks
+	* defs.h: Declare the attach & detach hooks.
+	* infcmd.c (attach_command): call the attach hook if it exists.
+	(detach_command): call the detach hook if it exists.
+
+	* complaints.c (complain): Send the complaints to stderr rather
+	than stdout, so they don't get mixed into the result stream from
+	commands. 
+
+1999-09-23  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (poll_timers): Use correct timeval field names,
+ 	when setting the notifier timeouts, in case of select() used.
+	(gdb_wait_for_event): Pass a pointer to the timeout structure to
+ 	select(), not the structure.
+
+Wed Sep 22 10:35:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (init.c): Change generated file to include "defs.h"
+ 	and "call-cmds.h". Use initialize_file_ftype when declaring
+ 	each initialize functions.
+	(call_cmds_h): Add definition.
+	(init.o): Add target and dependencies.
+	(init.c): Don't grep for _initialize* in init.c.
+
+	* defs.h (initialize_file_ftype): Add function typedef.
+
+1999-09-22  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* procfs.c (init_procinfo): move fltset initialization to caller.
+	(do_attach, create_procinfo): initialize fltset.
+
+1999-09-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c, event-top.c, event-loop.h: Rerun indent.
+
+1999-09-21  Doug Evans  <devans@casey.cygnus.com>
+
+	* m32r-stub.c (handle_exception): Fix typo in patch of 1999-08-26.
+
 Tue Sep 21 14:55:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 1999-08-20 J.T. Conklin  <jtc@redback.com>:

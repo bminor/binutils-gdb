@@ -86,15 +86,11 @@ queue_position;
 
 extern void start_event_loop (void);
 extern void delete_file_handler (int fd);
-extern void add_file_handler (int fd, handler_func *proc, gdb_client_data client_data);
+extern void add_file_handler (int fd, handler_func * proc, gdb_client_data client_data);
 extern void mark_async_signal_handler (struct async_signal_handler *async_handler_ptr);
-extern struct async_signal_handler * 
-  create_async_signal_handler (sig_handler_func *proc, gdb_client_data client_data);
-extern void delete_async_signal_handler (struct async_signal_handler ** async_handler_ptr);
+extern struct async_signal_handler *
+  create_async_signal_handler (sig_handler_func * proc, gdb_client_data client_data);
+extern void delete_async_signal_handler (struct async_signal_handler **async_handler_ptr);
 extern void inferior_event_handler (int error, gdb_client_data client_data, int fd);
-extern int  create_timer (int milliseconds, timer_handler_func *proc, gdb_client_data client_data);
+extern int create_timer (int milliseconds, timer_handler_func * proc, gdb_client_data client_data);
 extern void delete_timer (int id);
-
-
-
-

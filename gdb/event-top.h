@@ -90,6 +90,8 @@ extern void gdb_readline2 (gdb_client_data client_data);
 extern void mark_async_signal_handler_wrapper (PTR token);
 extern void async_request_quit (gdb_client_data arg);
 extern void stdin_event_handler (int error, int fd, gdb_client_data client_data);
+extern void async_disable_stdin (void);
+extern void async_enable_stdin (void *dummy);
 
 /* Exported variables from event-top.c.
    FIXME: these should really go into top.h. */

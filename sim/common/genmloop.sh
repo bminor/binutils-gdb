@@ -651,7 +651,7 @@ if [ x$scache = xyes -a x$parallel != xno ] ; then
 
 static INLINE SCACHE *
 @cpu@_scache_lookup (SIM_CPU *current_cpu, PCADDR vpc, SCACHE *scache,
-                     unsigned int hash_mask, int *last_insn_p, int FAST_P)
+                     unsigned int hash_mask, int FAST_P)
 {
   /* First step: look up current insn in hash table.  */
   SCACHE *sc = scache + SCACHE_HASH_PC (vpc, hash_mask);
@@ -663,7 +663,7 @@ static INLINE SCACHE *
       if (! FAST_P)
 	PROFILE_COUNT_SCACHE_MISS (current_cpu);
 
-#define SET_LAST_INSN_P(last_p) do { *last_insn_p = (last_p); } while (0)
+#define SET_LAST_INSN_P(last_p) do { sc->last_insn_p = (last_p); } while (0)
 /* begin extract-scache */
 EOF
 

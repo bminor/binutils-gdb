@@ -19,6 +19,23 @@
 #if !defined (COMMAND_H)
 #define COMMAND_H 1
 
+/* Command classes are top-level categories into which commands are broken
+   down for "help" purposes.  
+   Notes on classes: class_alias is for alias commands which are not
+   abbreviations of the original command.  class-pseudo is for
+   commands which are not really commands nor help topics ("stop").  */
+
+enum command_class
+{
+  /* Special args to help_list */
+  class_deprecated, all_classes = -2, all_commands = -1,
+  /* Classes of commands */
+  no_class = -1, class_run = 0, class_vars, class_stack,
+  class_files, class_support, class_info, class_breakpoint, class_trace,
+  class_alias, class_obscure, class_user, class_maintenance,
+  class_pseudo, class_tui, class_xdb,
+};
+
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
    not fall into one of the following categories.  */

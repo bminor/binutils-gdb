@@ -36,7 +36,7 @@
 extern void _initialize_elfread PARAMS ((void));
 
 /* The struct elfinfo is available only during ELF symbol table and
-   psymtab reading.  It is destroyed at the complation of psymtab-reading.
+   psymtab reading.  It is destroyed at the completion of psymtab-reading.
    It's local to elf_symfile_read.  */
 
 struct elfinfo

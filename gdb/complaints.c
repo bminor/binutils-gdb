@@ -84,18 +84,18 @@ complain (struct complaint *complaint,...)
       /* Isolated messages, must be self-explanatory.  */
     case 0:
       begin_line ();
-      puts_filtered ("During symbol reading, ");
+      fputs_filtered ("During symbol reading, ", gdb_stderr);
       wrap_here ("");
-      vprintf_filtered (complaint->message, args);
-      puts_filtered (".\n");
+      vfprintf_filtered (gdb_stderr, complaint->message, args);
+      fputs_filtered (".\n", gdb_stderr);
       break;
 
       /* First of a series, without `set verbose'.  */
     case 1:
       begin_line ();
-      puts_filtered ("During symbol reading...");
-      vprintf_filtered (complaint->message, args);
-      puts_filtered ("...");
+      fputs_filtered ("During symbol reading...", gdb_stderr);
+      vfprintf_filtered (gdb_stderr, complaint->message, args);
+      fputs_filtered ("...", gdb_stderr);
       wrap_here ("");
       complaint_series++;
       break;
@@ -104,14 +104,14 @@ complain (struct complaint *complaint,...)
          (We'll already have produced a "Reading in symbols for XXX..."
          message and will clean up at the end with a newline.)  */
     default:
-      vprintf_filtered (complaint->message, args);
-      puts_filtered ("...");
+      vfprintf_filtered (gdb_stderr, complaint->message, args);
+      fputs_filtered ("...", gdb_stderr);
       wrap_here ("");
     }
   /* If GDB dumps core, we'd like to see the complaints first.  Presumably
      GDB will not be sending so many complaints that this becomes a
      performance hog.  */
-  gdb_flush (gdb_stdout);
+  gdb_flush (gdb_stderr);
   va_end (args);
 }
 

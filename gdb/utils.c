@@ -84,6 +84,8 @@ static struct cleanup *cleanup_chain;	/* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain;	/* cleaned up when gdb exits */
 static struct cleanup *run_cleanup_chain;	/* cleaned up on each 'run' */
 static struct cleanup *exec_cleanup_chain;	/* cleaned up on each execution command */
+/* cleaned up on each error from within an execution command */
+static struct cleanup *exec_error_cleanup_chain; 
 
 /* Pointer to what is left to do for an execution command after the
    target stops. Used only in asynchronous mode, by targets that
@@ -181,6 +183,14 @@ make_exec_cleanup (function, arg)
   return make_my_cleanup (&exec_cleanup_chain, function, arg);
 }
 
+struct cleanup *
+make_exec_error_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
+{
+  return make_my_cleanup (&exec_error_cleanup_chain, function, arg);
+}
+
 static void
 do_freeargv (arg)
      void *arg;
@@ -245,6 +255,13 @@ do_exec_cleanups (old_chain)
 }
 
 void
+do_exec_error_cleanups (old_chain)
+     register struct cleanup *old_chain;
+{
+  do_my_cleanups (&exec_error_cleanup_chain, old_chain);
+}
+
+void
 do_my_cleanups (pmy_chain, old_chain)
      register struct cleanup **pmy_chain;
      register struct cleanup *old_chain;
@@ -273,6 +290,13 @@ discard_final_cleanups (old_chain)
      register struct cleanup *old_chain;
 {
   discard_my_cleanups (&final_cleanup_chain, old_chain);
+}
+
+void
+discard_exec_error_cleanups (old_chain)
+     register struct cleanup *old_chain;
+{
+  discard_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void
@@ -1487,7 +1511,7 @@ prompt_for_continue ()
 	++p;
       if (p[0] == 'q')
 	{
-	  if (!async_p)
+	  if (!event_loop_p)
 	    request_quit (SIGINT);
 	  else
 	    async_request_quit (0);

@@ -655,38 +655,10 @@ solib_add (arg_string, from_tty, target)
 
       if (count)
 	{
-	  int update_coreops;
-
-	  /* We must update the to_sections field in the core_ops structure
-	     here, otherwise we dereference a potential dangling pointer
-	     for each call to target_read/write_memory within this routine.  */
-	  update_coreops = core_ops.to_sections == target->to_sections;
-
-	  /* Reallocate the target's section table including the new size.  */
-	  if (target->to_sections)
-	    {
-	      old = target->to_sections_end - target->to_sections;
-	      target->to_sections = (struct section_table *)
-		xrealloc ((char *) target->to_sections,
-			  (sizeof (struct section_table)) * (count + old));
-	    }
-	  else
-	    {
-	      old = 0;
-	      target->to_sections = (struct section_table *)
-		xmalloc ((sizeof (struct section_table)) * count);
-	    }
-	  target->to_sections_end = target->to_sections + (count + old);
-
-	  /* Update the to_sections field in the core_ops structure
-	     if needed.  */
-	  if (update_coreops)
-	    {
-	      core_ops.to_sections = target->to_sections;
-	      core_ops.to_sections_end = target->to_sections_end;
-	    }
-
 	  /* Add these section table entries to the target's table.  */
+
+	  old = target_resize_to_sections (target, count);
+	  
 	  while ((so = find_solib (so)) != NULL)
 	    {
 	      if (so->so_name[0])

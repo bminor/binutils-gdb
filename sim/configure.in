@@ -47,7 +47,10 @@ extra_subdirs=common
 #  convention, else the table becomes a real mess to understand and maintain.
 
 case "${target}" in
-  arm*-*-*)		sim_target=arm ;;
+  arm*-*-*)
+	sim_target=arm
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   strongarm*-*-*)	sim_target=arm ;;
   thumb*-*-*)           sim_target=arm ;;
   d10v-*-*)		sim_target=d10v ;;

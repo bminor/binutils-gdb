@@ -842,7 +842,7 @@ read_actions (t)
 #ifdef STOP_SIGNAL
   if (job_control)
     {
-      if (async_p)
+      if (event_loop_p)
 	signal (STOP_SIGNAL, handle_stop_sig);
       else
 	signal (STOP_SIGNAL, stop_sig);

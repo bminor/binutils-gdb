@@ -244,22 +244,22 @@ display_gdb_prompt (char *new_prompt)
   char *gdb_prompt = get_prompt ();
 
 
-  if (target_executing && sync_execution) 
+  if (target_executing && sync_execution)
     {
       /* This is to trick readline into not trying to display the
-	 prompt.  Even though we display the prompt using this
-	 function, readline still tries to do its own display if we
-	 don't call rl_callback_handler_install and
-	 rl_callback_handler_remove (which readline detects because a
-	 global variable is not set). If readline did that, it could
-	 mess up gdb signal handlers for SIGINT.  Readline assumes
-	 that between calls to rl_set_signals and rl_clear_signals gdb
-	 doesn't do anything with the signal handlers. Well, that's
-	 not the case, because when the target executes we change the
-	 SIGINT signal handler. If we allowed readline to display the
-	 prompt, the signal handler change would happen exactly
-	 between the calls to the above two functions.
-	 Calling rl_callback_handler_remove(), does the job. */
+         prompt.  Even though we display the prompt using this
+         function, readline still tries to do its own display if we
+         don't call rl_callback_handler_install and
+         rl_callback_handler_remove (which readline detects because a
+         global variable is not set). If readline did that, it could
+         mess up gdb signal handlers for SIGINT.  Readline assumes
+         that between calls to rl_set_signals and rl_clear_signals gdb
+         doesn't do anything with the signal handlers. Well, that's
+         not the case, because when the target executes we change the
+         SIGINT signal handler. If we allowed readline to display the
+         prompt, the signal handler change would happen exactly
+         between the calls to the above two functions.
+         Calling rl_callback_handler_remove(), does the job. */
 
       rl_callback_handler_remove ();
       return;
@@ -410,10 +410,44 @@ stdin_event_handler (int error, int fd, gdb_client_data client_data)
       exit (1);
     }
   else
-    (*call_readline) (client_data);      
+    (*call_readline) (client_data);
 }
 
+/* Re-enable stdin after the end of an execution command in
+   synchronous mode, or after an error from the target, and we aborted
+   the exec operation. */
+
+void
+async_enable_stdin (void *dummy)
+{
+  /* See NOTE in async_disable_stdin() */
+  /* FIXME: cagney/1999-09-27: Call this before clearing
+     sync_execution.  Current target_terminal_ours() implementations
+     check for sync_execution before switching the terminal. */
+  target_terminal_ours ();
+  pop_prompt ();
+  sync_execution = 0;
+}
+
+/* Disable reads from stdin (the console) marking the command as
+   synchronous. */
+
+void
+async_disable_stdin (void)
+{
+  sync_execution = 1;
+  push_prompt ("", "", "");
+  /* FIXME: cagney/1999-09-27: At present this call is technically
+     redundant since infcmd.c and infrun.c both already call
+     target_terminal_inferior().  As the terminal handling (in
+     sync/async mode) is refined, the duplicate calls can be
+     eliminated (Here or in infcmd.c/infrun.c). */
+  target_terminal_inferior ();
+  make_exec_cleanup (async_enable_stdin, NULL);
+  make_exec_error_cleanup (async_enable_stdin, NULL);
+}
 
+
 /* Handles a gdb command. This function is called by
    command_line_handler, which has processed one or more input lines
    into COMMAND. */
@@ -471,7 +505,7 @@ command_handler (char *command)
   /* Set things up for this function to be compete later, once the
      executin has completed, if we are doing an execution command,
      otherwise, just go ahead and finish. */
-  if (target_has_async && target_executing)
+  if (target_can_async_p () && target_executing)
     {
       arg1 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
@@ -487,7 +521,7 @@ command_handler (char *command)
   /* Do any commands attached to breakpoint we stopped at. Only if we
      are always running synchronously. Or if we have just executed a
      command that doesn't start the target. */
-  if (!target_has_async || !target_executing)
+  if (!target_can_async_p () || !target_executing)
     {
       bpstat_do_actions (&stop_bpstat);
       do_cleanups (old_chain);
@@ -1077,7 +1111,7 @@ set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
 void
 _initialize_event_loop (void)
 {
-  if (async_p)
+  if (event_loop_p)
     {
       /* When a character is detected on instream by select or poll,
          readline will be invoked via this callback function. */

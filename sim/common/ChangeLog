@@ -1,3 +1,14 @@
+1999-09-25  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen-ops.h (SUBWORD*): Delete cpu arg.
+	(JOIN*): Delete cpu arg.
+
+Tue Sep 21 17:14:16 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* genmloop.sh (@cpu@_scache_lookup): No longer takes last_insn_p
+	parameter.
+	(SET_LAST_INSN_P): Set last_insn_p flag in the scache element.
+
 Mon Sep 20 21:44:06 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
         * sim-fpu.c (i2fpu): Keep the guard bits sticky when converting

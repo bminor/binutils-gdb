@@ -165,23 +165,6 @@ extern void quit PARAMS ((void));
 }
 #endif
 
-/* Command classes are top-level categories into which commands are broken
-   down for "help" purposes.  
-   Notes on classes: class_alias is for alias commands which are not
-   abbreviations of the original command.  class-pseudo is for commands
-   which are not really commands nor help topics ("stop").  */
-
-enum command_class
-{
-  /* Special args to help_list */
-  all_classes = -2, all_commands = -1,
-  /* Classes of commands */
-  no_class = -1, class_run = 0, class_vars, class_stack,
-  class_files, class_support, class_info, class_breakpoint, class_trace,
-  class_alias, class_obscure, class_user, class_maintenance,
-  class_pseudo, class_tui, class_xdb
-};
-
 /* Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't
    be forward declared to satisfy opaque references before their
@@ -303,9 +286,11 @@ extern void do_final_cleanups PARAMS ((struct cleanup *));
 extern void do_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 extern void do_run_cleanups PARAMS ((struct cleanup *));
 extern void do_exec_cleanups PARAMS ((struct cleanup *));
+extern void do_exec_error_cleanups PARAMS ((struct cleanup *));
 
 extern void discard_cleanups PARAMS ((struct cleanup *));
 extern void discard_final_cleanups PARAMS ((struct cleanup *));
+extern void discard_exec_error_cleanups PARAMS ((struct cleanup *));
 extern void discard_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 
 typedef void (*make_cleanup_func) PARAMS ((void *));
@@ -322,6 +307,7 @@ extern struct cleanup *make_my_cleanup PARAMS ((struct cleanup **,
 extern struct cleanup *make_run_cleanup PARAMS ((make_cleanup_func, void *));
 
 extern struct cleanup *make_exec_cleanup PARAMS ((make_cleanup_func, void *));
+extern struct cleanup *make_exec_error_cleanup PARAMS ((make_cleanup_func, void *));
 
 extern struct cleanup *save_cleanups PARAMS ((void));
 extern struct cleanup *save_final_cleanups PARAMS ((void));
@@ -551,6 +537,8 @@ extern char *re_comp PARAMS ((const char *));
 extern void symbol_file_command PARAMS ((char *, int));
 
 /* From top.c */
+
+typedef void initialize_file_ftype (void);
 
 extern char *skip_quoted PARAMS ((char *));
 
@@ -1146,7 +1134,7 @@ struct cmd_list_element;
 
 /* Should the asynchronous variant of the interpreter (using the
    event-loop) be enabled? */
-extern int async_p;
+extern int event_loop_p;
                                                                    
 extern void (*init_ui_hook) PARAMS ((char *argv0));
 extern void (*command_loop_hook) PARAMS ((void));
@@ -1173,6 +1161,8 @@ extern void (*context_hook) PARAMS ((int));
 extern int (*target_wait_hook) PARAMS ((int pid,
 					struct target_waitstatus *status));
 
+extern void (*attach_hook) PARAMS ((void));
+extern void (*detach_hook) PARAMS ((void));
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
 

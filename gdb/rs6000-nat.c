@@ -755,28 +755,9 @@ xcoff_relocate_core (target)
          add our sections to the section table for the core target.  */
       if (vp != vmap)
 	{
-	  int count;
 	  struct section_table *stp;
-	  int update_coreops;
 
-	  /* We must update the to_sections field in the core_ops structure
-	     now to avoid dangling pointer dereferences.  */
-	  update_coreops = core_ops.to_sections == target->to_sections;
-
-	  count = target->to_sections_end - target->to_sections;
-	  count += 2;
-	  target->to_sections = (struct section_table *)
-	    xrealloc (target->to_sections,
-		      sizeof (struct section_table) * count);
-	  target->to_sections_end = target->to_sections + count;
-
-	  /* Update the to_sections field in the core_ops structure
-	     if needed.  */
-	  if (update_coreops)
-	    {
-	      core_ops.to_sections = target->to_sections;
-	      core_ops.to_sections_end = target->to_sections_end;
-	    }
+	  target_resize_to_sections (target, 2);
 	  stp = target->to_sections_end - 2;
 
 	  stp->bfd = vp->bfd;

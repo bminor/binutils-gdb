@@ -46,7 +46,7 @@ int display_space;
    invoked on the command line with the -nw --async options.  In this
    version, the usual command_loop is substituted by and event loop which
    processes UI events asynchronously. */
-int async_p = 1;
+int event_loop_p = 1;
 
 /* Whether this is the command line version or not */
 int tui_version = 0;
@@ -177,8 +177,8 @@ main (argc, argv)
        with no equivalent).  */
     static struct option long_options[] =
     {
-      {"async", no_argument, &async_p, 1},
-      {"noasync", no_argument, &async_p, 0},
+      {"async", no_argument, &event_loop_p, 1},
+      {"noasync", no_argument, &event_loop_p, 0},
 #if defined(TUI)
       {"tui", no_argument, &tui_version, 1},
 #endif

@@ -450,6 +450,9 @@ cleanup_target (t)
 
   de_fault (to_pid_to_exec_file, (char *(*)PARAMS ((int))) return_zero);
   de_fault (to_core_file_to_sym_file, (char *(*)PARAMS ((char *))) return_zero);
+  de_fault (to_can_async_p, (int (*) (void)) return_zero);
+  de_fault (to_is_async_p, (int (*) (void)) return_zero);
+  de_fault (to_async, (void (*) (void (*) (int, void*, int), void*)) tcomplain);
 #undef de_fault
 }
 
@@ -541,9 +544,11 @@ update_current_target ()
       INHERIT (to_has_registers, t);
       INHERIT (to_has_execution, t);
       INHERIT (to_has_thread_control, t);
-      INHERIT (to_has_async_exec, t);
       INHERIT (to_sections, t);
       INHERIT (to_sections_end, t);
+      INHERIT (to_can_async_p, t);
+      INHERIT (to_is_async_p, t);
+      INHERIT (to_async, t);
       INHERIT (to_magic, t);
 
 #undef INHERIT
@@ -1111,6 +1116,56 @@ static int
 return_one ()
 {
   return 1;
+}
+
+/*
+ * Resize the to_sections pointer.  Also make sure that anyone that
+ * was holding on to an old value of it gets updated.
+ * Returns the old size.
+ */
+
+int
+target_resize_to_sections (struct target_ops *target, int num_added)
+{
+  struct target_ops **t;
+  struct section_table *old_value;
+  int old_count;
+
+  old_value = target->to_sections;
+
+  if (target->to_sections)
+    {
+      old_count = target->to_sections_end - target->to_sections;
+      target->to_sections = (struct section_table *)
+	xrealloc ((char *) target->to_sections,
+		  (sizeof (struct section_table)) * (num_added + old_count));
+    }
+  else
+    {
+      old_count = 0;
+      target->to_sections = (struct section_table *)
+	xmalloc ((sizeof (struct section_table)) * num_added);
+    }
+  target->to_sections_end = target->to_sections + (num_added + old_count);
+
+  /* Check to see if anyone else was pointing to this structure.
+     If old_value was null, then no one was. */
+     
+  if (old_value)
+    {
+      for (t = target_structs; t < target_structs + target_struct_size;
+	   ++t)
+	{
+	  if ((*t)->to_sections == old_value)
+	    {
+	      (*t)->to_sections = target->to_sections;
+	      (*t)->to_sections_end = target->to_sections_end;
+	    }
+	}
+    }
+  
+  return old_count;
+
 }
 
 /* Find a single runnable target in the stack and return it.  If for

@@ -2155,7 +2155,8 @@ bpstat_stop_status (pc, not_a_breakpoint)
   char message[sizeof (message1) + 30 /* slop */ ];
 
   /* Get the address where the breakpoint would have been.  */
-  bp_addr = *pc - DECR_PC_AFTER_BREAK;
+  bp_addr = *pc - (not_a_breakpoint && !SOFTWARE_SINGLE_STEP_P ? 
+                   0 : DECR_PC_AFTER_BREAK);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -2182,13 +2183,6 @@ bpstat_stop_status (pc, not_a_breakpoint)
 
     if (b->type == bp_hardware_breakpoint
 	&& b->address != (*pc - DECR_PC_AFTER_HW_BREAK))
-      continue;
-
-    if (b->type != bp_watchpoint
-	&& b->type != bp_hardware_watchpoint
-	&& b->type != bp_read_watchpoint
-	&& b->type != bp_access_watchpoint
-	&& not_a_breakpoint)
       continue;
 
     /* Is this a catchpoint of a load or unload?  If so, did we
@@ -4757,7 +4751,7 @@ until_break_command (arg, from_tty)
 
   breakpoint = set_momentary_breakpoint (sal, selected_frame, bp_until);
 
-  if (!async_p || !target_has_async)
+  if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, 
 			      breakpoint);
   else
@@ -4770,7 +4764,7 @@ until_break_command (arg, from_tty)
      where we get a chance to do that is in fetch_inferior_event, so
      we must set things up for that. */
 
-  if (async_p && target_has_async)
+  if (event_loop_p && target_can_async_p ())
     {
       /* In this case we don't need args for the continuation, because
          all it needs to do is do the cleanups in the
@@ -4786,7 +4780,7 @@ until_break_command (arg, from_tty)
       sal = find_pc_line (prev_frame->pc, 0);
       sal.pc = prev_frame->pc;
       breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
-      if (!async_p || !target_has_async)
+      if (!event_loop_p || !target_can_async_p ())
 	make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
       else
 	make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
@@ -4795,7 +4789,7 @@ until_break_command (arg, from_tty)
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
   /* Do the cleanups now, anly if we are not running asynchronously,
      of if we are, but the target is still synchronous. */
-  if (!async_p || !target_has_async)
+  if (!event_loop_p || !target_can_async_p ())
     do_cleanups (old_chain);
 }
 

@@ -417,6 +417,12 @@ void (*create_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
 void (*delete_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
 void (*modify_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
 
+/* Called as appropriate to notify the interface that we have attached
+   to or detached from an already running process. */
+
+void (*attach_hook) PARAMS ((void));
+void (*detach_hook) PARAMS ((void));
+
 /* Called during long calculations to allow GUI to repair window damage, and to
    check for stop buttons, etc... */
 
@@ -471,7 +477,7 @@ PARAMS ((void)) ATTR_NORETURN;
    loop, but can be caught via catch_errors.  */
 
      NORETURN void
-       return_to_top_level (reason)
+return_to_top_level (reason)
      enum return_reason reason;
 {
   quit_flag = 0;
@@ -483,8 +489,10 @@ PARAMS ((void)) ATTR_NORETURN;
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
-  if (async_p && target_has_async)
+  if (event_loop_p && target_can_async_p ())
     do_exec_cleanups (ALL_CLEANUPS);
+  if (event_loop_p && sync_execution)
+    do_exec_error_cleanups (ALL_CLEANUPS);
 
   if (annotation_level > 1)
     switch (reason)
@@ -688,7 +696,7 @@ gdb_init (argv0)
      not the async version is run. NOTE: in the future we plan to make
      the event loop be the default engine of gdb, and this difference
      will disappear. */
-  if (async_p)
+  if (event_loop_p)
     async_init_signals ();
   else
     init_signals ();
@@ -1275,7 +1283,7 @@ execute_command (p, from_tty)
 
       /* If the target is running, we allow only a limited set of
          commands. */
-      if (async_p && target_has_async && target_executing)
+      if (event_loop_p && target_can_async_p () && target_executing)
 	if (!strcmp (c->name, "help")
 	    && !strcmp (c->name, "pwd")
 	    && !strcmp (c->name, "show")
@@ -2100,7 +2108,7 @@ command_line_input (prompt_arg, repeat, annotation_suffix)
 #ifdef STOP_SIGNAL
   if (job_control)
     {
-      if (async_p)
+      if (event_loop_p)
 	signal (STOP_SIGNAL, handle_stop_sig);
       else
 	signal (STOP_SIGNAL, stop_sig);
@@ -2965,7 +2973,7 @@ get_prompt_1 (formatted_prompt)
 {
   char *local_prompt;
 
-  if (async_p)
+  if (event_loop_p)
     local_prompt = PROMPT (0);
   else
     local_prompt = gdb_prompt_string;
@@ -3201,7 +3209,7 @@ get_prompt ()
   else
     {
       /* Prompt could not be formatted.  */
-      if (async_p)
+      if (event_loop_p)
 	return PROMPT (0);
       else
 	return gdb_prompt_string;
@@ -3217,7 +3225,7 @@ set_prompt (s)
    if (prompt != NULL)
    free (prompt);
  */
-  if (async_p)
+  if (event_loop_p)
     PROMPT (0) = savestring (s, strlen (s));
   else
     gdb_prompt_string = savestring (s, strlen (s));
@@ -3789,7 +3797,7 @@ init_main ()
 
   /* If we are running the asynchronous version,
      we initialize the prompts differently. */
-  if (!async_p)
+  if (!event_loop_p)
     {
       gdb_prompt_string = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
     }
@@ -3862,7 +3870,7 @@ until the next time it is started.", &cmdlist);
      async version is run. NOTE: this difference is going to
      disappear as we make the event loop be the default engine of
      gdb. */
-  if (!async_p)
+  if (!event_loop_p)
     {
       add_show_from_set
 	(add_set_cmd ("prompt", class_support, var_string,
@@ -3938,7 +3946,7 @@ hitting return.");
   /* The set editing command is different depending whether or not the
      async version is run. NOTE: this difference is going to disappear
      as we make the event loop be the default engine of gdb. */
-  if (!async_p)
+  if (!event_loop_p)
     {
       add_show_from_set
 	(add_set_cmd ("editing", class_support, var_boolean, (char *) &command_editing_p,
@@ -4062,7 +4070,7 @@ from the target.", &setlist),
      the async version is run. NOTE: this difference is going to
      disappear as we make the event loop be the default engine of
      gdb. */
-  if (!async_p)
+  if (!event_loop_p)
     {
       c = add_set_cmd ("annotate", class_obscure, var_zinteger,
 		       (char *) &annotation_level, "Set annotation_level.\n\
@@ -4081,7 +4089,7 @@ from the target.", &setlist),
       add_show_from_set (c, &showlist);
       c->function.sfunc = set_async_annotation_level;
     }
-  if (async_p)
+  if (event_loop_p)
     {
       add_show_from_set
 	(add_set_cmd ("exec-done-display", class_support, var_boolean, (char *) &exec_done_display_p,

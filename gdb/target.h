@@ -397,11 +397,14 @@ struct target_ops
     int to_has_registers;
     int to_has_execution;
     int to_has_thread_control;	/* control thread execution */
-    int to_has_async_exec;
     struct section_table
      *to_sections;
     struct section_table
      *to_sections_end;
+    /* ASYNC target controls */
+    int (*to_can_async_p) (void);
+    int (*to_is_async_p) (void);
+    void (*to_async) (void (*cb) (int error, void *context, int fd), void *context);
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related? */
   };
@@ -1009,9 +1012,14 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 #define target_can_switch_threads \
  	(current_target.to_has_thread_control & tc_switch)
 
-/* Does the target support asynchronous execution? */
-#define target_has_async  \
-        (current_target.to_has_async_exec)
+/* Can the target support asynchronous execution? */
+#define target_can_async_p() (current_target.to_can_async_p ())
+
+/* Is the target in asynchronous execution mode? */
+#define target_is_async_p() (current_target.to_is_async_p())
+
+/* Put the target in async mode with the specified callback function. */
+#define target_async(CALLBACK,CONTEXT) (current_target.to_async((CALLBACK), (CONTEXT)))
 
 extern void target_link PARAMS ((char *, CORE_ADDR *));
 
@@ -1266,6 +1274,9 @@ extern struct target_ops *find_run_target PARAMS ((void));
 
 extern struct target_ops *
   find_core_target PARAMS ((void));
+
+int
+target_resize_to_sections PARAMS ((struct target_ops *target, int num_added));
 
 /* Stuff that should be shared among the various remote targets.  */
 

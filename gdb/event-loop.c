@@ -23,7 +23,7 @@
 #include "top.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "inferior.h"   /* For fetch_inferior_event. */
+#include "inferior.h"		/* For fetch_inferior_event. */
 #ifdef HAVE_POLL
 #include <poll.h>
 #else
@@ -103,9 +103,9 @@ typedef struct file_handler
     int mask;			/* Events we want to monitor: POLLIN, etc. */
     int ready_mask;		/* Events that have been seen since
 				   the last time. */
-    handler_func *proc;	        /* Procedure to call when fd is ready. */
+    handler_func *proc;		/* Procedure to call when fd is ready. */
     gdb_client_data client_data;	/* Argument to pass to proc. */
-    int error;                          /* Was an error detected on this fd? */
+    int error;			/* Was an error detected on this fd? */
     struct file_handler *next_file;	/* Next registered file descriptor. */
   }
 file_handler;
@@ -123,7 +123,7 @@ typedef struct async_signal_handler
     int ready;			/* If ready, call this handler from the main event loop, 
 				   using invoke_async_handler. */
     struct async_signal_handler *next_handler;	/* Ptr to next handler */
-    sig_handler_func *proc;	                /* Function to call to do the work */
+    sig_handler_func *proc;	/* Function to call to do the work */
     gdb_client_data client_data;	/* Argument to async_handler_func */
   }
 async_signal_handler;
@@ -206,7 +206,7 @@ static struct
 
     /* Flag to tell whether the timeout struct should be used. */
     int timeout_valid;
-   }
+  }
 gdb_notifier;
 
 #endif /* HAVE_POLL */
@@ -218,13 +218,13 @@ struct gdb_timer
     struct timeval when;
     int timer_id;
     struct gdb_timer *next;
-    timer_handler_func *proc;         /* Function to call to do the work */
-    gdb_client_data client_data;      /* Argument to async_handler_func */
+    timer_handler_func *proc;	/* Function to call to do the work */
+    gdb_client_data client_data;	/* Argument to async_handler_func */
   }
 gdb_timer;
 
 /* List of currently active timers. It is sorted in order of
-   increasing timers.*/
+   increasing timers. */
 static struct
   {
     /* Pointer to first in timer list. */
@@ -253,17 +253,18 @@ sighandler_list;
    function. */
 static int async_handler_ready = 0;
 
-static void create_file_handler (int fd, int mask, handler_func *proc, gdb_client_data client_data);
+static void create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data client_data);
 static void invoke_async_signal_handler (void);
 static void handle_file_event (int event_file_desc);
 static int gdb_wait_for_event (void);
 static int gdb_do_one_event (void);
 static int check_async_ready (void);
-static void async_queue_event (gdb_event *event_ptr, queue_position position);
-static gdb_event * create_file_event (int fd);
+static void async_queue_event (gdb_event * event_ptr, queue_position position);
+static gdb_event *create_file_event (int fd);
 static int process_event (void);
 static void handle_timer_event (int dummy);
 static void poll_timers (void);
+static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
 
 /* Insert an event object into the gdb event queue at 
@@ -277,7 +278,7 @@ static void poll_timers (void);
    as last in first out. Event appended at the tail of the queue
    will be processed first in first out. */
 static void
-async_queue_event (gdb_event *event_ptr, queue_position position)
+async_queue_event (gdb_event * event_ptr, queue_position position)
 {
   if (position == TAIL)
     {
@@ -407,7 +408,7 @@ gdb_do_one_event (void)
 	      break;
 	    }
 
-	  /* Are any timers that are ready? If so, put an event on the queue.*/
+	  /* Are any timers that are ready? If so, put an event on the queue. */
 	  poll_timers ();
 
 	  /* Wait for a new event.  If gdb_wait_for_event returns -1,
@@ -470,7 +471,7 @@ start_event_loop (void)
    doesn't have to know implementation details about the use of poll
    vs. select. */
 void
-add_file_handler (int fd, handler_func *proc, gdb_client_data client_data)
+add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
 {
 #ifdef HAVE_POLL
   create_file_handler (fd, POLLIN, proc, client_data);
@@ -490,7 +491,7 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data)
    PROC is the procedure that will be called when an event occurs for
    FD.  CLIENT_DATA is the argument to pass to PROC. */
 static void
-create_file_handler (int fd, int mask, handler_func *proc, gdb_client_data client_data)
+create_file_handler (int fd, int mask, handler_func * proc, gdb_client_data client_data)
 {
   file_handler *file_ptr;
 
@@ -508,7 +509,7 @@ create_file_handler (int fd, int mask, handler_func *proc, gdb_client_data clien
     }
 
   /* It is a new file descriptor. Add it to the list. Otherwise, just
-     change the data associated with it.*/
+     change the data associated with it. */
   if (file_ptr == NULL)
     {
       file_ptr = (file_handler *) xmalloc (sizeof (file_handler));
@@ -703,16 +704,16 @@ handle_file_event (int event_file_desc)
 	  if (error_mask_returned != 0)
 	    {
 	      /* Work in progress. We may need to tell somebody what
-                 kind of error we had. */
+	         kind of error we had. */
 	      /*if (error_mask_returned & POLLHUP)
-		printf_unfiltered ("Hangup detected on fd %d\n", file_ptr->fd);
-	      if (error_mask_returned & POLLERR)
-		printf_unfiltered ("Error detected on fd %d\n", file_ptr->fd);
-	      if (error_mask_returned & POLLNVAL)
-		printf_unfiltered ("Invalid fd %d\n", file_ptr->fd);*/
+	         printf_unfiltered ("Hangup detected on fd %d\n", file_ptr->fd);
+	         if (error_mask_returned & POLLERR)
+	         printf_unfiltered ("Error detected on fd %d\n", file_ptr->fd);
+	         if (error_mask_returned & POLLNVAL)
+	         printf_unfiltered ("Invalid fd %d\n", file_ptr->fd); */
 	      file_ptr->error = 1;
-           }
-	  else 
+	    }
+	  else
 	    file_ptr->error = 0;
 #else /* ! HAVE_POLL */
 	  if (file_ptr->ready_mask & GDB_EXCEPTION)
@@ -764,12 +765,12 @@ gdb_wait_for_event (void)
 
 #ifdef HAVE_POLL
   num_found =
-    poll (gdb_notifier.poll_fds, 
-	  (unsigned long) gdb_notifier.num_fds, 
+    poll (gdb_notifier.poll_fds,
+	  (unsigned long) gdb_notifier.num_fds,
 	  gdb_notifier.timeout_valid ? gdb_notifier.timeout : -1);
 
   /* Don't print anything if we get out of poll because of a
-     signal.*/
+     signal. */
   if (num_found == -1 && errno != EINTR)
     perror_with_name ("Poll");
 
@@ -780,8 +781,8 @@ gdb_wait_for_event (void)
   num_found = select (gdb_notifier.num_fds,
 		      (SELECT_MASK *) & gdb_notifier.ready_masks[0],
 		      (SELECT_MASK *) & gdb_notifier.ready_masks[MASK_SIZE],
-		      (SELECT_MASK *) & gdb_notifier.ready_masks[2 * MASK_SIZE],
-		      gdb_notifier.timeout_valid ? gdb_notifier.timeout : NULL);
+		  (SELECT_MASK *) & gdb_notifier.ready_masks[2 * MASK_SIZE],
+		  gdb_notifier.timeout_valid ? &gdb_notifier.timeout : NULL);
 
   /* Clear the masks after an error from select. */
   if (num_found == -1)
@@ -871,7 +872,7 @@ gdb_wait_for_event (void)
    PROC is the function to call with CLIENT_DATA argument 
    whenever the handler is invoked. */
 async_signal_handler *
-create_async_signal_handler (sig_handler_func *proc, gdb_client_data client_data)
+create_async_signal_handler (sig_handler_func * proc, gdb_client_data client_data)
 {
   async_signal_handler *async_handler_ptr;
 
@@ -894,7 +895,7 @@ create_async_signal_handler (sig_handler_func *proc, gdb_client_data client_data
    some event.  The caller of this function is the interrupt handler
    associated with a signal. */
 void
-mark_async_signal_handler (async_signal_handler *async_handler_ptr)
+mark_async_signal_handler (async_signal_handler * async_handler_ptr)
 {
   ((async_signal_handler *) async_handler_ptr)->ready = 1;
   async_handler_ready = 1;
@@ -933,7 +934,7 @@ invoke_async_signal_handler (void)
 /* Delete an asynchronous handler (ASYNC_HANDLER_PTR). 
    Free the space allocated for it.  */
 void
-delete_async_signal_handler (async_signal_handler **async_handler_ptr)
+delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
 {
   async_signal_handler *prev_ptr;
 
@@ -975,18 +976,36 @@ inferior_event_handler (int error, gdb_client_data client_data, int fd)
     {
       printf_unfiltered ("error detected on fd %d\n", fd);
       delete_file_handler (fd);
+      pop_target ();
       discard_all_continuations ();
     }
   else
-    fetch_inferior_event (client_data);
+    /* Use catch errors for now, until the inner layers of
+       fetch_inferior_event (i.e. readchar) can return meaningful
+       error status.  If an error occurs while getting an event from
+       the target, just get rid of the target. */
+    if (!catch_errors (fetch_inferior_event_wrapper, client_data, "", RETURN_MASK_ALL))
+      {
+	delete_file_handler (fd);
+	discard_all_continuations ();
+	pop_target ();
+	display_gdb_prompt (0);
+      }
+}
+
+static int 
+fetch_inferior_event_wrapper (gdb_client_data client_data)
+{
+  fetch_inferior_event (client_data);
+  return 1;
 }
 
 /* Create a timer that will expire in MILLISECONDS from now. When the
    timer is ready, PROC will be executed. At creation, the timer is
    aded to the timers queue.  This queue is kept sorted in order of
-   increasing timers. Return a handle to the timer struct.*/
+   increasing timers. Return a handle to the timer struct. */
 int
-create_timer (int milliseconds, timer_handler_func *proc, gdb_client_data client_data)
+create_timer (int milliseconds, timer_handler_func * proc, gdb_client_data client_data)
 {
   struct gdb_timer *timer_ptr, *timer_index, *prev_timer;
   struct timeval time_now, delta;
@@ -994,39 +1013,39 @@ create_timer (int milliseconds, timer_handler_func *proc, gdb_client_data client
   /* compute seconds */
   delta.tv_sec = milliseconds / 1000;
   /* compute microseconds */
-  delta.tv_usec = (milliseconds % 1000) * 1000; 
-  
+  delta.tv_usec = (milliseconds % 1000) * 1000;
+
   gettimeofday (&time_now, NULL);
 
   timer_ptr = (struct gdb_timer *) xmalloc (sizeof (gdb_timer));
   timer_ptr->when.tv_sec = time_now.tv_sec + delta.tv_sec;
   timer_ptr->when.tv_usec = time_now.tv_usec + delta.tv_usec;
   /* carry? */
-  if (timer_ptr->when.tv_usec >= 1000000 )
+  if (timer_ptr->when.tv_usec >= 1000000)
     {
       timer_ptr->when.tv_sec += 1;
       timer_ptr->when.tv_usec -= 1000000;
     }
   timer_ptr->proc = proc;
   timer_ptr->client_data = client_data;
-  timer_list.num_timers ++;
+  timer_list.num_timers++;
   timer_ptr->timer_id = timer_list.num_timers;
 
   /* Now add the timer to the timer queue, making sure it is sorted in
      increasing order of expiration. */
 
-  for (timer_index = timer_list.first_timer; 
-       timer_index != NULL; 
+  for (timer_index = timer_list.first_timer;
+       timer_index != NULL;
        timer_index = timer_index->next)
     {
       /* If the seconds field is greater or if it is the same, but the
          microsecond field is greater. */
-      if ((timer_index->when.tv_sec > timer_ptr->when.tv_sec) || 
+      if ((timer_index->when.tv_sec > timer_ptr->when.tv_sec) ||
 	  ((timer_index->when.tv_sec == timer_ptr->when.tv_sec)
 	   && (timer_index->when.tv_usec > timer_ptr->when.tv_usec)))
 	break;
     }
-  
+
   if (timer_index == timer_list.first_timer)
     {
       timer_ptr->next = timer_list.first_timer;
@@ -1035,11 +1054,11 @@ create_timer (int milliseconds, timer_handler_func *proc, gdb_client_data client
     }
   else
     {
-      for (prev_timer = timer_list.first_timer; 
-	   prev_timer->next != timer_index; 
+      for (prev_timer = timer_list.first_timer;
+	   prev_timer->next != timer_index;
 	   prev_timer = prev_timer->next)
 	;
-      
+
       prev_timer->next = timer_ptr;
       timer_ptr->next = timer_index;
     }
@@ -1085,20 +1104,20 @@ delete_timer (int id)
 /* When a timer event is put on the event queue, it will be handled by
    this function.  Just call the assiciated procedure and delete the
    timer event from the event queue. Repeat this for each timer that
-   has expired.*/
+   has expired. */
 static void
 handle_timer_event (int dummy)
 {
   struct timeval time_now;
   struct gdb_timer *timer_ptr, *saved_timer;
- 
+
   gettimeofday (&time_now, NULL);
   timer_ptr = timer_list.first_timer;
 
   while (timer_ptr != NULL)
     {
-      if ((timer_ptr->when.tv_sec > time_now.tv_sec) || 
-	  ((timer_ptr->when.tv_sec == time_now.tv_sec) && 
+      if ((timer_ptr->when.tv_sec > time_now.tv_sec) ||
+	  ((timer_ptr->when.tv_sec == time_now.tv_sec) &&
 	   (timer_ptr->when.tv_usec > time_now.tv_usec)))
 	break;
 
@@ -1113,19 +1132,19 @@ handle_timer_event (int dummy)
 
   gdb_notifier.timeout_valid = 0;
 }
- 
+
 /* Check whether any timers in the timers queue are ready. If at least
    one timer is ready, stick an event onto the event queue.  Even in
    case more than one timer is ready, one event is enough, because the
    handle_timer_event() will go through the timers list and call the
    procedures associated with all that have expired. Update the
-   timeout for the select() or poll() as well.*/
+   timeout for the select() or poll() as well. */
 static void
 poll_timers (void)
 {
   struct timeval time_now, delta;
   gdb_event *event_ptr;
- 
+
   if (timer_list.num_timers)
     {
       gettimeofday (&time_now, NULL);
@@ -1137,9 +1156,9 @@ poll_timers (void)
 	  delta.tv_sec -= 1;
 	  delta.tv_usec += 1000000;
 	}
- 
+
       /* Oops it expired already. Tell select / poll to return
-	 immediately. */
+         immediately. */
       if (delta.tv_sec < 0)
 	{
 	  delta.tv_sec = 0;
@@ -1155,15 +1174,15 @@ poll_timers (void)
 	}
 
       /* Now we need to update the timeout for select/ poll, because we
-	 don't want to sit there while this timer is expiring. */
+         don't want to sit there while this timer is expiring. */
 #ifdef HAVE_POLL
-      gdb_notifier.timeout = delta.tv_sec * 1000; 
+      gdb_notifier.timeout = delta.tv_sec * 1000;
 #else
-      gdb_notifier.timeout.sec = delta.tv_sec;
-      gdb_notifier.timeout.usec = delta.tv_usec;
+      gdb_notifier.timeout.tv_sec = delta.tv_sec;
+      gdb_notifier.timeout.tv_usec = delta.tv_usec;
 #endif
       gdb_notifier.timeout_valid = 1;
     }
-  else 
+  else
     gdb_notifier.timeout_valid = 0;
 }

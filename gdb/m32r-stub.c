@@ -429,7 +429,7 @@ handle_exception(int exceptionVector)
 	  break;
 	}
       case 'G': /* set the value of the CPU registers - return OK */
-	hex2mem(&ptr, (unsigned char*) registers, NUMREGBYTES, 0);
+	hex2mem(ptr, (unsigned char*) registers, NUMREGBYTES, 0);
 	strcpy(remcomOutBuffer,"OK");
 	break;
       case 's': /* sAA..AA	Step one instruction from AA..AA(optional) */

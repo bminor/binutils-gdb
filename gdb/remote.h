@@ -43,11 +43,6 @@ extern int putpkt (char *buf);
 extern void remote_console_output PARAMS ((char *));
 
 
-/* FIXME: cagney/1999-09-20: This function is going to be replaced
-   with a more generic (non remote specific) mechanism. */
-
-extern void cleanup_sigint_signal_handler (void);
-
 /* FIXME: cagney/1999-09-20: The remote cisco stuff in remote.c needs
    to be broken out into a separate file (remote-cisco.[hc]?).  Before
    that can happen, a remote protocol stack framework needs to be

@@ -1,4 +1,3 @@
-
 /* Semantics ops support for CGEN-based simulators.
    Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
@@ -285,15 +284,15 @@ extern SI TRUNCDISI (DI);
 #define TRUNCDISI(x) ((SI) (DI) (x))
 #endif
 
-/* Composing/decomposing the various types.  */
-
-/* ??? endianness issues undecided */
-/* ??? CURRENT_TARGET_BYTE_ORDER usage wip */
+/* Composing/decomposing the various types.
+   Word ordering is endian-independent.  Words are specified most to least
+   significant and word number 0 is the most significant word.
+   ??? May also wish an endian-dependent version.  Later.  */
 
 #ifdef SEMOPS_DEFINE_INLINE
 
 SEMOPS_INLINE SF
-SUBWORDSISF (SIM_CPU *cpu, SI in)
+SUBWORDSISF (SI in)
 {
   union { SI in; SF out; } x;
   x.in = in;
@@ -301,7 +300,7 @@ SUBWORDSISF (SIM_CPU *cpu, SI in)
 }
 
 SEMOPS_INLINE SI
-SUBWORDSFSI (SIM_CPU *cpu, SF in)
+SUBWORDSFSI (SF in)
 {
   union { SF in; SI out; } x;
   x.in = in;
@@ -309,59 +308,44 @@ SUBWORDSFSI (SIM_CPU *cpu, SF in)
 }
 
 SEMOPS_INLINE SI
-SUBWORDDISI (SIM_CPU *cpu, DI in, int word)
+SUBWORDDISI (DI in, int word)
 {
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
-    {
-      if (word == 0)
-	return (UDI) in >> 32;
-      else
-	return in;
-    }
+  if (word == 0)
+    return (UDI) in >> 32;
   else
-    {
-      if (word == 1)
-	return (UDI) in >> 32;
-      else
-	return in;
-    }
+    return in;
 }
 
 SEMOPS_INLINE SI
-SUBWORDDFSI (SIM_CPU *cpu, DF in, int word)
+SUBWORDDFSI (DF in, int word)
 {
-  union { DF in; SI out[2]; } x;
-  x.in = in;
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
-    return x.out[word];
+  /* Note: typedef UDI DF; */
+  if (word == 0)
+    return (UDI) in >> 32;
   else
-    return x.out[!word];
+    return in;
 }
 
 SEMOPS_INLINE SI
-SUBWORDXFSI (SIM_CPU *cpu, XF in, int word)
+SUBWORDXFSI (XF in, int word)
 {
+  /* Note: typedef struct { SI parts[3]; } XF; */
   union { XF in; SI out[3]; } x;
   x.in = in;
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
-    return x.out[word];
-  else
-    return x.out[2 - word];
+  return x.out[word];
 }
 
 SEMOPS_INLINE SI
-SUBWORDTFSI (SIM_CPU *cpu, TF in, int word)
+SUBWORDTFSI (TF in, int word)
 {
+  /* Note: typedef struct { SI parts[4]; } TF; */
   union { TF in; SI out[4]; } x;
   x.in = in;
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
-    return x.out[word];
-  else
-    return x.out[3 - word];
+  return x.out[word];
 }
 
 SEMOPS_INLINE DI
-JOINSIDI (SIM_CPU *cpu, SI x0, SI x1)
+JOINSIDI (SI x0, SI x1)
 {
   if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
     return MAKEDI (x0, x1);
@@ -370,7 +354,7 @@ JOINSIDI (SIM_CPU *cpu, SI x0, SI x1)
 }
 
 SEMOPS_INLINE DF
-JOINSIDF (SIM_CPU *cpu, SI x0, SI x1)
+JOINSIDF (SI x0, SI x1)
 {
   union { SI in[2]; DF out; } x;
   if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -381,7 +365,7 @@ JOINSIDF (SIM_CPU *cpu, SI x0, SI x1)
 }
 
 SEMOPS_INLINE XF
-JOINSIXF (SIM_CPU *cpu, SI x0, SI x1, SI x2)
+JOINSIXF (SI x0, SI x1, SI x2)
 {
   union { SI in[3]; XF out; } x;
   if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -392,7 +376,7 @@ JOINSIXF (SIM_CPU *cpu, SI x0, SI x1, SI x2)
 }
 
 SEMOPS_INLINE TF
-JOINSITF (SIM_CPU *cpu, SI x0, SI x1, SI x2, SI x3)
+JOINSITF (SI x0, SI x1, SI x2, SI x3)
 {
   union { SI in[4]; TF out; } x;
   if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
@@ -404,17 +388,17 @@ JOINSITF (SIM_CPU *cpu, SI x0, SI x1, SI x2, SI x3)
 
 #else
 
-SF SUBWORDSISF (SIM_CPU *, SI);
-SI SUBWORDSFSI (SIM_CPU *, SF);
-SI SUBWORDDISI (SIM_CPU *, DI, int);
-SI SUBWORDDFSI (SIM_CPU *, DF, int);
-SI SUBWORDXFSI (SIM_CPU *, XF, int);
-SI SUBWORDTFSI (SIM_CPU *, TF, int);
+SF SUBWORDSISF (SI);
+SI SUBWORDSFSI (SF);
+SI SUBWORDDISI (DI, int);
+SI SUBWORDDFSI (DF, int);
+SI SUBWORDXFSI (XF, int);
+SI SUBWORDTFSI (TF, int);
 
-DI JOINSIDI (SIM_CPU *, SI, SI);
-DF JOINSIDF (SIM_CPU *, SI, SI);
-XF JOINSIXF (SIM_CPU *, SI, SI, SI);
-TF JOINSITF (SIM_CPU *, SI, SI, SI, SI);
+DI JOINSIDI (SI, SI);
+DF JOINSIDF (SI, SI);
+XF JOINSIXF (SI, SI, SI);
+TF JOINSITF (SI, SI, SI, SI);
 
 #endif /* SUBWORD,JOIN */
 

@@ -31,10 +31,11 @@
 #include "ax.h"
 #include "ax-gdb.h"
 
-/* Probably the best way to read this file is to start with the types
-   and enums in ax-gdb.h, and then look at gen_expr, towards the
-   bottom; that's the main function that looks at the GDB expressions
-   and calls everything else to generate code.
+/* To make sense of this file, you should read doc/agentexpr.texi.
+   Then look at the types and enums in ax-gdb.h.  For the code itself,
+   look at gen_expr, towards the bottom; that's the main function that
+   looks at the GDB expressions and calls everything else to generate
+   code.
 
    I'm beginning to wonder whether it wouldn't be nicer to internally
    generate trees, with types, and then spit out the bytecode in
@@ -439,7 +440,7 @@ gen_fetch (ax, type)
 	     implementing something we should be (this code's fault).
 	     In any case, it's a bug the user shouldn't see.  */
 	default:
-	  error ("GDB bug: ax-gdb.c (gen_fetch): strange size");
+	  internal_error ("ax-gdb.c (gen_fetch): strange size");
 	}
 
       gen_sign_extend (ax, type);
@@ -450,7 +451,7 @@ gen_fetch (ax, type)
          pointer (other code's fault), or we're not implementing
          something we should be (this code's fault).  In any case,
          it's a bug the user shouldn't see.  */
-      error ("GDB bug: ax-gdb.c (gen_fetch): bad type code");
+      internal_error ("ax-gdb.c (gen_fetch): bad type code");
     }
 }
 
@@ -571,7 +572,7 @@ gen_var_ref (ax, value, var)
       break;
 
     case LOC_CONST_BYTES:
-      error ("GDB bug: ax-gdb.c (gen_var_ref): LOC_CONST_BYTES symbols are not supported");
+      internal_error ("ax-gdb.c (gen_var_ref): LOC_CONST_BYTES symbols are not supported");
 
       /* Variable at a fixed location in memory.  Easy.  */
     case LOC_STATIC:
@@ -1162,7 +1163,7 @@ gen_deref (ax, value)
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
   if (value->type->code != TYPE_CODE_PTR)
-    error ("GDB bug: ax-gdb.c (gen_deref): expected a pointer");
+    internal_error ("ax-gdb.c (gen_deref): expected a pointer");
 
   /* We've got an rvalue now, which is a pointer.  We want to yield an
      lvalue, whose address is exactly that pointer.  So we don't
@@ -1221,7 +1222,7 @@ find_field (type, name)
 
   /* Make sure this isn't C++.  */
   if (TYPE_N_BASECLASSES (type) != 0)
-    error ("GDB bug: ax-gdb.c (find_field): derived classes supported");
+    internal_error ("ax-gdb.c (find_field): derived classes supported");
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
@@ -1231,7 +1232,7 @@ find_field (type, name)
 	return i;
 
       if (this_name[0] == '\0')
-	error ("GDB bug: ax-gdb.c (find_field): anonymous unions not supported");
+	internal_error ("ax-gdb.c (find_field): anonymous unions not supported");
     }
 
   error ("Couldn't find member named `%s' in struct/union `%s'",
@@ -1306,7 +1307,7 @@ gen_bitfield_ref (ax, value, type, start, end)
 
   /* Can we fetch the number of bits requested at all?  */
   if ((end - start) > ((1 << num_ops) * 8))
-    error ("GDB bug: ax-gdb.c (gen_bitfield_ref): bitfield too wide");
+    internal_error ("ax-gdb.c (gen_bitfield_ref): bitfield too wide");
 
   /* Note that we know here that we only need to try each opcode once.
      That may not be true on machines with weird byte sizes.  */
@@ -1626,7 +1627,7 @@ gen_expr (pc, ax, value)
 	default:
 	  /* We should only list operators in the outer case statement
 	     that we actually handle in the inner case statement.  */
-	  error ("GDB bug: ax-gdb.c (gen_expr): op case sets don't match");
+	  internal_error ("ax-gdb.c (gen_expr): op case sets don't match");
 	}
       break;
 
@@ -1701,7 +1702,7 @@ gen_expr (pc, ax, value)
 	   the given type, and dereference it.  */
 	if (value->kind != axs_rvalue)
 	  /* This would be weird.  */
-	  error ("GDB bug: ax-gdb.c (gen_expr): OP_MEMVAL operand isn't an rvalue???");
+	  internal_error ("ax-gdb.c (gen_expr): OP_MEMVAL operand isn't an rvalue???");
 	value->type = type;
 	value->kind = axs_lvalue_memory;
       }
@@ -1769,7 +1770,7 @@ gen_expr (pc, ax, value)
 	else
 	  /* If this `if' chain doesn't handle it, then the case list
 	     shouldn't mention it, and we shouldn't be here.  */
-	  error ("GDB bug: ax-gdb.c (gen_expr): unhandled struct case");
+	  internal_error ("ax-gdb.c (gen_expr): unhandled struct case");
       }
       break;
 
@@ -1783,7 +1784,6 @@ gen_expr (pc, ax, value)
 
 
 
-#if 0				/* not used */
 /* Generating bytecode from GDB expressions: driver */
 
 /* Given a GDB expression EXPR, produce a string of agent bytecode
@@ -1795,7 +1795,7 @@ expr_to_agent (expr, value)
      struct axs_value *value;
 {
   struct cleanup *old_chain = 0;
-  struct agent_expr *ax = new_agent_expr ();
+  struct agent_expr *ax = new_agent_expr (0);
   union exp_element *pc;
 
   old_chain = make_cleanup ((make_cleanup_func) free_agent_expr, ax);
@@ -1812,6 +1812,7 @@ expr_to_agent (expr, value)
 }
 
 
+#if 0				/* not used */
 /* Given a GDB expression EXPR denoting an lvalue in memory, produce a
    string of agent bytecode which will leave its address and size on
    the top of stack.  Return the agent expression.
@@ -1836,7 +1837,7 @@ expr_to_address_and_size (expr)
 
   return ax;
 }
-#endif /* 0 */
+#endif
 
 /* Given a GDB expression EXPR, return bytecode to trace its value.
    The result will use the `trace' and `trace_quick' bytecodes to
@@ -1909,7 +1910,7 @@ agent_command (exp, from_tty)
   struct cleanup *old_chain = 0;
   struct expression *expr;
   struct agent_expr *agent;
-  struct frame_info *fi = get_current_frame ();		/* need current scope */
+  struct frame_info *fi = get_current_frame ();	/* need current scope */
 
   /* We don't deal with overlay debugging at the moment.  We need to
      think more carefully about this.  If you copy this code into

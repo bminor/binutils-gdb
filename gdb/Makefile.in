@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990921
+VERSION = 19990928
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -448,6 +448,7 @@ breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
 
+call_cmds_h =	call-cmds.h
 defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h
 
 top_h =		top.h
@@ -622,15 +623,11 @@ uninstall: force
 
 init.c: $(OBS) $(TSOBS)
 	@echo Making init.c
-	@rm -f init.c-tmp
-	@echo '/* Do not modify this file.  */' >init.c-tmp
-	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	@echo '#include "ansidecl.h"' >>init.c-tmp
-	@echo 'extern void initialize_all_files PARAMS ((void));' >>init.c-tmp
-	@echo 'void initialize_all_files PARAMS ((void)) {' >>init.c-tmp
+	@rm -f init.c-tmp init.l-tmp
 	@-echo $(OBS) $(TSOBS) | \
 	tr ' ' '\012' | \
 	sed -e '/^Onindy.o/d' \
+	    -e '/^init.o/d' \
 	    -e '/^nindy.o/d' \
 	    -e '/ttyflush.o/d' \
 	    -e '/xdr_ld.o/d' \
@@ -645,11 +642,23 @@ init.c: $(OBS) $(TSOBS)
 	    -e 's/\.o/.c/' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
-	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/' >>init.c-tmp
+	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' > init.l-tmp
+	@echo '/* Do not modify this file.  */' >>init.c-tmp
+	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
+	@echo '#include "defs.h"' >>init.c-tmp
+	@echo '#include "call-cmds.h"' >>init.c-tmp
+	@sed -e 's/\(.*\)/extern initialize_file_ftype \1;/' <init.l-tmp >>init.c-tmp
+	@echo 'void' >>init.c-tmp
+	@echo 'initialize_all_files (void)' >>init.c-tmp
+	@echo '{' >>init.c-tmp
+	@sed -e 's/\(.*\)/  \1 ();/' <init.l-tmp >>init.c-tmp
 	@echo '}' >>init.c-tmp
+	@rm init.l-tmp
 	@mv init.c-tmp init.c
 
 .PRECIOUS: init.c
+
+init.o: init.c $(defs_h) $(call_cmds_h)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb$(EXEEXT): main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
@@ -755,7 +764,7 @@ tags: TAGS
 
 clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
-	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp
+	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
@@ -1127,7 +1136,8 @@ eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h) $(event_top_h)
 
 event-top.o: event-top.c top.h $(readline_headers) \
-      $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) terminal.h $(gdbcmd_h)
+      $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) terminal.h \
+	$(gdbcmd_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	target.h language.h gdb_string.h
@@ -1698,6 +1708,5 @@ m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(bfd_h) objfiles.h symfile.h
 
 gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
-
 
 ### end of the gdb Makefile.in.

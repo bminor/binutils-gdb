@@ -36,7 +36,6 @@
 #include <signal.h>
 #include "event-loop.h"
 #include "event-top.h"
-#include "remote.h" /* For cleanup_sigint_signal_handler. */
 
 /* Prototypes for local functions */
 
@@ -1070,7 +1069,7 @@ The same program may be running in another process.");
      and in any case decode why it stopped, and act accordingly.  */
   /* Do this only if we are not using the event loop, or if the target
      does not support asynchronous execution. */
-  if (!async_p || !target_has_async)
+  if (!event_loop_p || !target_can_async_p ())
     {
       wait_for_inferior ();
       normal_stop ();
@@ -1096,23 +1095,22 @@ start_remote (void)
   stop_soon_quietly = 1;
   trap_expected = 0;
 
-  /* Go on waiting only in case gdb is not started in async mode, or
-     in case the target doesn't support async execution. */
-  if (!async_p || !target_has_async)
-    {
-      wait_for_inferior ();
-      normal_stop ();
-    }
-  else
-    {
-      /* The 'tar rem' command should always look synchronous,
-         i.e. display the prompt only once it has connected and
-         started the target. */
-      sync_execution = 1;
-      push_prompt ("", "", "");
-      delete_file_handler (input_fd);
-      target_executing = 1;
-    }
+  /* Always go on waiting for the target, regardless of the mode. */
+  /* FIXME: cagney/1999-09-23: At present it isn't possible to
+     indicate th wait_for_inferior that a target should timeout if
+     nothing is returned (instead of just blocking).  Because of this,
+     targets expecting an immediate response need to, internally, set
+     things up so that the target_wait() is forced to eventually
+     timeout. */
+  /* FIXME: cagney/1999-09-24: It isn't possible for target_open() to
+     differentiate to its caller what the state of the target is after
+     the initial open has been performed.  Here we're assuming that
+     the target has stopped.  It should be possible to eventually have
+     target_open() return to the caller an indication that the target
+     is currently running and GDB state should be set to the same as
+     for an async run. */
+  wait_for_inferior ();
+  normal_stop ();
 }
 
 /* Initialize static vars when a new inferior begins.  */
@@ -1588,13 +1586,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_pc = read_pc_pid (ecs->pid);
 	ecs->saved_inferior_pid = inferior_pid;
 	inferior_pid = ecs->pid;
-	stop_bpstat = bpstat_stop_status
-	  (&stop_pc,
-	   (DECR_PC_AFTER_BREAK ?
-	    (prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-	     && currently_stepping (ecs))
-	    : 0)
-	  );
+	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	inferior_pid = ecs->saved_inferior_pid;
 	goto process_event_stop_test;
@@ -1642,13 +1634,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 
 	stop_pc = read_pc ();
-	stop_bpstat = bpstat_stop_status
-	  (&stop_pc,
-	   (DECR_PC_AFTER_BREAK ?
-	    (prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-	     && currently_stepping (ecs))
-	    : 0)
-	  );
+	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	goto process_event_stop_test;
 
@@ -1713,13 +1699,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_pc = read_pc_pid (ecs->pid);
 	ecs->saved_inferior_pid = inferior_pid;
 	inferior_pid = ecs->pid;
-	stop_bpstat = bpstat_stop_status
-	  (&stop_pc,
-	   (DECR_PC_AFTER_BREAK ?
-	    (prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-	     && currently_stepping (ecs))
-	    : 0)
-	  );
+	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	inferior_pid = ecs->saved_inferior_pid;
 	goto process_event_stop_test;
@@ -2105,22 +2085,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    /* See if there is a breakpoint at the current PC.  */
 	    stop_bpstat = bpstat_stop_status
 	      (&stop_pc,
-	       (DECR_PC_AFTER_BREAK ?
-	    /* Notice the case of stepping through a jump
-	       that lands just after a breakpoint.
-	       Don't confuse that with hitting the breakpoint.
-	       What we check for is that 1) stepping is going on
-	       and 2) the pc before the last insn does not match
-	       the address of the breakpoint before the current pc
-	       and 3) we didn't hit a breakpoint in a signal handler
-	       without an intervening stop in sigtramp, which is
-	       detected by a new stack pointer value below
-	       any usual function calling stack adjustments.  */
+	    /* Pass TRUE if our reason for stopping is something other
+	       than hitting a breakpoint.  We do this by checking that
+	       1) stepping is going on and 2) we didn't hit a breakpoint
+	       in a signal handler without an intervening stop in
+	       sigtramp, which is detected by a new stack pointer value
+	       below any usual function calling stack adjustments.  */
 		(currently_stepping (ecs)
-		 && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
 		 && !(step_range_end
-		      && INNER_THAN (read_sp (), (step_sp - 16)))) :
-		0)
+		      && INNER_THAN (read_sp (), (step_sp - 16))))
 	      );
 	    /* Following in case break condition called a
 	       function.  */
@@ -3274,12 +3247,10 @@ static void
 complete_execution (void)
 {
   target_executing = 0;
+
   if (sync_execution)
     {
-      add_file_handler (input_fd, stdin_event_handler, 0);
-      pop_prompt ();
-      sync_execution = 0;
-      cleanup_sigint_signal_handler ();
+      do_exec_error_cleanups (ALL_CLEANUPS);
       display_gdb_prompt (0);
     }
   else

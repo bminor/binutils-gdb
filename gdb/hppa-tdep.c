@@ -2254,14 +2254,34 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
 		/* It must also be an import stub.  */
 		u = find_unwind_entry (SYMBOL_VALUE (stub_symbol));
-		if (!u
-		    || (u->stub_unwind.stub_type != IMPORT)
-		    && u->stub_unwind.stub_type != IMPORT_SHLIB)
+		if (u == NULL
+		    || (u->stub_unwind.stub_type != IMPORT
+#ifdef GDB_NATIVE_HPUX_11
+			/* Sigh.  The hpux 10.20 dynamic linker will blow
+			   chunks if we perform a call to an unbound function
+			   via the IMPORT_SHLIB stub.  The hpux 11.00 dynamic
+			   linker will blow chunks if we do not call the
+			   unbound function via the IMPORT_SHLIB stub.
+
+			   We currently have no way to select bevahior on just
+			   the target.  However, we only support HPUX/SOM in
+			   native mode.  So we conditinalize on a native
+			   #ifdef.  Ugly.  Ugly.  Ugly  */
+			&& u->stub_unwind.stub_type != IMPORT_SHLIB
+#endif
+			))
 		  continue;
 
 		/* OK.  Looks like the correct import stub.  */
 		newfun = SYMBOL_VALUE (stub_symbol);
 		fun = newfun;
+
+		/* If we found an IMPORT stub, then we want to stop
+		   searching now.  If we found an IMPORT_SHLIB, we want
+		   to continue the search in the hopes that we will find
+		   an IMPORT stub.  */
+		if (u->stub_unwind.stub_type == IMPORT)
+		  break;
 	      }
 	  }
 
@@ -3671,6 +3691,15 @@ restart:
 	  || (inst & 0xffffc00c) == 0x73c10008)
 	save_sp = 0;
 
+      /* Are we loading some register with an offset from the argument
+         pointer?  */
+      if ((inst & 0xffe00000) == 0x37a00000
+	  || (inst & 0xffffffe0) == 0x081d0240)
+	{
+	  pc += 4;
+	  continue;
+	}
+
       /* Account for general and floating-point register saves.  */
       reg_num = inst_saves_gr (inst);
       save_gr &= ~(1 << reg_num);
@@ -3685,9 +3714,9 @@ restart:
 
          FIXME.  Can still die if we have a mix of GR and FR argument
          stores!  */
-      if (reg_num >= 23 && reg_num <= 26)
+      if (reg_num >= (TARGET_PTR_BIT == 64 ? 19 : 23) && reg_num <= 26)
 	{
-	  while (reg_num >= 23 && reg_num <= 26)
+	  while (reg_num >= (TARGET_PTR_BIT == 64 ? 19 : 23) && reg_num <= 26)
 	    {
 	      pc += 4;
 	      status = target_read_memory (pc, buf, 4);
@@ -3714,7 +3743,7 @@ restart:
          save.  */
       if ((inst & 0xfc000000) == 0x34000000
 	  && inst_saves_fr (next_inst) >= 4
-	  && inst_saves_fr (next_inst) <= 7)
+	  && inst_saves_fr (next_inst) <= (TARGET_PTR_BIT == 64 ? 11 : 7))
 	{
 	  /* So we drop into the code below in a reasonable state.  */
 	  reg_num = inst_saves_fr (next_inst);
@@ -3725,9 +3754,9 @@ restart:
          This is a kludge as on the HP compiler sets this bit and it
          never does prologue scheduling.  So once we see one, skip past
          all of them.  */
-      if (reg_num >= 4 && reg_num <= 7)
+      if (reg_num >= 4 && reg_num <= (TARGET_PTR_BIT == 64 ? 11 : 7))
 	{
-	  while (reg_num >= 4 && reg_num <= 7)
+	  while (reg_num >= 4 && reg_num <= (TARGET_PTR_BIT == 64 ? 11 : 7))
 	    {
 	      pc += 8;
 	      status = target_read_memory (pc, buf, 4);
