@@ -47,18 +47,18 @@ struct internal_aouthdr {
 	unsigned long	tagentries;	/* number of tag entries to follow */
 
 	/* RS/6000 stuff */
-        ulong   o_toc;          /* address of TOC                       */
-        short   o_snentry;      /* section number for entry point       */
-        short   o_sntext;       /* section number for text              */
-        short   o_sndata;       /* section number for data              */
-        short   o_sntoc;        /* section number for toc               */
-        short   o_snloader;     /* section number for loader section    */
-        short   o_snbss;        /* section number for bss               */
-        short   o_algntext;     /* max alignment for text               */
-        short   o_algndata;     /* max alignment for data               */
-        short   o_modtype;      /* Module type field, 1R,RE,RO          */
-        ulong   o_maxstack;     /* max stack size allowed.              */
-} ;
+        unsigned long   o_toc;	/* address of TOC			*/
+        short		o_snentry;	/* section number for entry point */
+        short		o_sntext;	/* section number for text	*/
+        short		o_sndata;	/* section number for data	*/
+        short		o_sntoc;	/* section number for toc	*/
+        short		o_snloader;	/* section number for loader section */
+        short		o_snbss;	/* section number for bss	*/
+        short		o_algntext;	/* max alignment for text	*/
+        short		o_algndata;	/* max alignment for data	*/
+        short		o_modtype;	/* Module type field, 1R,RE,RO	*/
+        unsigned long   o_maxstack;     /* max stack size allowed.	*/
+};
 
 /********************** STORAGE CLASSES **********************/
 
