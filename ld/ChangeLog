@@ -1,3 +1,22 @@
+Mon Aug 19 11:28:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* genscripts.sh: Undo 8/16 change.
+
+start-sanitize-d10v
+	* emulparams/d10velf.sh (MACHINE): Explicitly set to nothing.
+end-sanitize-d10v
+
+Fri Aug 16 19:18:08 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* genscripts.sh: Explicitly reset any shell variables set or used
+	by the various .sc scripts to allow inadvertant use of these
+	names as normal environment variables by the person running
+	configure.
+
+start-sanitize-d10v
+	* Makefile.in (ed10velf.c): Use tdir_d10v, not tdir_arcelf.
+end-sanitize-d10v
+
 Fri Aug 16 14:15:41 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* scripttempl/armcoff.sc (__bss_start__, __bss_end__,
