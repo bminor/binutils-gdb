@@ -227,9 +227,6 @@ whitespace, or be given as separate arguments immediately following the
 option that requires them.
 
 @table @code
-@item @var{objfile}@dots{}
-The object files to be linked.
-
 @ifset I960
 @cindex architectures
 @kindex -A@var{arch}
@@ -558,6 +555,10 @@ For anything other than C++ programs, this option is equivalent to
 @samp{-r}: it generates relocatable output---i.e., an output file that can in
 turn serve as input to @code{ld}.  When linking C++ programs, @samp{-Ur}
 @emph{will} resolve references to constructors, unlike @samp{-r}.
+It does not work to use @samp{-Ur} on files that were themselves linked
+with @samp{-Ur}; once the constructor table has been built, it can not
+be added to.  Use @samp{-Ur} only for the last partial link, and
+@samp{-r} for the others.
 
 @item -V
 @kindex -V
@@ -2006,14 +2007,12 @@ conversion and during output. @xref{BFD information loss}.
 
 @menu
 * BFD outline::                 How it works: an outline of BFD
-* BFD information loss::        Information Loss
-* Mechanism::                   Mechanism 
 @end menu
 
 @node BFD outline
 @section How it works: an outline of BFD
 @cindex opening object files
-@include ../bfd/doc/bfdsumm.texi
+@include bfdsumm.texi
 @end ifclear
 
 @node MRI
