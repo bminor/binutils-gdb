@@ -258,6 +258,27 @@ proc gdb_test { args } {
     return $result
 }
 
+# Given an input string, adds backslashes as needed to create a
+# regexp that will match the string.
+proc string_to_regexp {str} {
+    regsub -all {[]*+.|()^$[]} $str {\\&} result
+    return $result
+}
+
+# Same as gdb_test, but the second parameter is not a regexp,
+# but a string that must match exactly.
+
+proc gdb_test_exact { args } {
+    set command [lindex $args 0]
+    set pattern [string_to_regexp [lindex args 1]]
+    if [llength $args]==3 then {
+	set message [lindex $args 2]
+    } else {
+	set message $command
+    }
+    return [gdb_test $command $pattern $message]
+}
+
 proc gdb_reinitialize_dir { subdir } {
     global prompt
 
