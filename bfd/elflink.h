@@ -2881,9 +2881,20 @@ elf_link_input_bfd (finfo, input_bfd)
       if (finfo->info->discard == discard_all)
 	continue;
 
+      /* If this symbol is defined in a section which we are
+         discarding, we don't need to keep it.  For the benefit of the
+         MIPS ELF linker, we check SEC_EXCLUDE as well as linker_mark.  */
+      if (isym->st_shndx > 0
+	  && isym->st_shndx < SHN_LORESERVE
+	  && isec != NULL
+	  && (! isec->linker_mark
+	      || (! finfo->info->relocateable
+		  && (isec->flags & SEC_EXCLUDE) != 0)))
+	continue;
+
       /* Get the name of the symbol.  */
       name = bfd_elf_string_from_elf_section (input_bfd, symtab_hdr->sh_link,
-					  isym->st_name);
+					      isym->st_name);
       if (name == NULL)
 	return false;
 
