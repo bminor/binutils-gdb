@@ -517,15 +517,15 @@ text_space				; Otherwise, go through _sr4export,
     {                                                                   \
       struct minimal_symbol *msymbol;                                   \
       msymbol = lookup_minimal_symbol ("$$dyncall", (struct objfile *) NULL);\
-      if (msymbol == NULL)                                               \
-        error ("Can't find an address for $$dyncall trampoline");      \
+      if (msymbol == NULL)                                              \
+        error ("Can't find an address for $$dyncall trampoline");       \
       else                                                              \
-        dyncall_addr = msymbol -> address;                         \
+        dyncall_addr = SYMBOL_VALUE_ADDRESS (msymbol);                  \
       msymbol = lookup_minimal_symbol ("_sr4export", (struct objfile *) NULL);\
-      if (msymbol == NULL)                                               \
+      if (msymbol == NULL)                                              \
         error ("Can't find an address for _sr4export trampoline");      \
       else                                                              \
-        sr4export_addr = msymbol -> address;                         \
+        sr4export_addr = SYMBOL_VALUE_ADDRESS (msymbol);                \
     }                                                                   \
   dummyname[9] = deposit_21 (fun >> 11, dummyname[9]);                  \
   dummyname[10] = deposit_14 (fun & MASK_11, dummyname[10]);            \

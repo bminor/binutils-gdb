@@ -768,7 +768,7 @@ skip_trampoline_code (pc, name)
     {
       msym = lookup_minimal_symbol ("$$dyncall", NULL);
       if (msym)
-	dyncall = msym->address;
+	dyncall = SYMBOL_VALUE_ADDRESS (msym);
       else
 	dyncall = -1;
     }
@@ -826,6 +826,6 @@ _initialize_hppah_tdep ()
   add_show_from_set
     (add_set_cmd ("use_unwind", class_obscure, var_boolean,
 		  (char *)&use_unwind,
-		  "Control the useage of unwind info.\n", &setlist),
+		  "Set the usage of unwind info", &setlist),
      &showlist);
 }

@@ -1,5 +1,12 @@
 Mon Dec 28 15:00:01 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* hppah-tdep.c (skip_trampoline_code):  Use new macros for
+	accessing minimal symbol data.
+	* infcmd.c (read_pc):  Use #ifdef, not #if.
+	* symfile.c (syms_from_objfile):  Add CONST to decl for targets.
+	* tm-hppa.h (FIX_CALL_DUMMY):  Use new macros for accessing
+	minimal symbol data.
+
 	* hppah-tdep.c (frame_saved_pc):  Use better test for outermost
 	frame.  Use find_return_regnum to find the caller.
 	* (find_unwind_entry):  New routine to locate stack frame info

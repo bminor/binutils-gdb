@@ -455,7 +455,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
      list with the one for the bfd we are using.
      FIXME:  Remove this check after a round of testing.  
 						-- gnu@cygnus.com, 16dec92 */
-    char **targets = bfd_target_list ();
+    CONST char **targets = bfd_target_list ();
     if (targets != NULL && *targets != NULL)
       {
 	if (bfd_get_symbol_leading_char (objfile->obfd) !=
