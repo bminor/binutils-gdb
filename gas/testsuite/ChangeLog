@@ -1,3 +1,18 @@
+2004-01-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-11-05  Alexandre Oliva  <aoliva@redhat.com>
+	* lib/gas-defs.exp (is_elf_format): Match frv-uclinux.
+	2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/frv/fdpic.s, gas/frv/fdpic.d: Renamed from ucpic*.
+	2003-09-15  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/frv/ucpic.s, gas/frv/ucpic.d: Use gr15 as PIC register.  Use
+	gprel12 for rodata symbol and gotoff12 for sdata symbol.
+	2003-08-08  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/frv/ucpic.d: Test gotoff and gotofffuncdesc.
+	2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/frv/ucpic.d, gas/frv/ucpic.s: New.
+	* gas/frv/allinsns.exp: Run it.
+
 2004-01-02  Albert Bartoszko  <albar@nt.kegel.com.pl>
 
 	* gas/msp430/opcode.s: Add test for an 'add' instruction which

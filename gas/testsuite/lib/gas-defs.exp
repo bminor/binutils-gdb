@@ -1,4 +1,4 @@
-# Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002
+# Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -193,6 +193,7 @@ proc is_elf_format {} {
 	 && ![istarget *-*-eabi*] \
 	 && ![istarget hppa*64*-*-hpux*] \
 	 && ![istarget *-*-linux*] \
+	 && ![istarget frv-*-uclinux*] \
 	 && ![istarget *-*-irix5*] \
 	 && ![istarget *-*-irix6*] \
 	 && ![istarget *-*-netbsd*] \
