@@ -1,3 +1,7 @@
+Sun May 19 21:22:00 1996  Rob Savoye  <rob@chinadoll>
+
+	* config/sparc/sparclite.mt: Add the sparc simulator.
+
 Sun May 19 16:49:37 1996  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h (read_command_lines, query_hook): Update prototypes.
