@@ -42,8 +42,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldctor.h"
 #include "ldfile.h"
 #include "coff/internal.h"
+
+/* FIXME: This is a BFD internal header file, and we should not be
+   using it here.  */
 #include "../bfd/libcoff.h"
-#include "../bfd/libbfd.h"
+
 #include "deffile.h"
 #include "pe-dll.h"
 
@@ -749,12 +752,11 @@ gld_${EMULATION_NAME}_after_open ()
 		else /* sentinel */
 		  seq = 'c';
 
-		new_name = bfd_alloc (is->the_bfd,
-				      strlen (is->the_bfd->filename)+2);
+		new_name = xmalloc (strlen (is->the_bfd->filename) + 2);
 		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
 		is->the_bfd->filename = new_name;
 
-		new_name = bfd_alloc(is->the_bfd, strlen(is->filename)+2);
+		new_name = xmalloc (strlen(is->filename) + 2);
 		sprintf (new_name, "%s.%c", is->filename, seq);
 		is->filename = new_name;
 	      }
