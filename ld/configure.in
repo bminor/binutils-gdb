@@ -8,83 +8,127 @@ srcname="linker"
 
 # per-host:
 
-if [ "${host_os}" = "posix" ] ; then
-	my_host=posix
-else
-	case "${host_cpu}" in
-	rs6000)	my_host=aix ;;
-	mips)
-		case "${host_vendor}" in
-		dec)	my_host=dec3100 ;;
-		esac
-		;;
-	m88k)
-		case "${host_vendor}" in
-		*)
-			case "${host_os}" in
-			dgux)	my_host=dgux ;;
-			esac
-			;;
-		esac
-		;;
+case "${host_cpu}" in
 
-	m68k)
-		case "${host_vendor}" in
-		hp)	my_host=hp9000 ;;
-		sony)	my_host=news ;;
-		sun)	my_host=sun3 ;;
-		esac
-		;;
+rs6000)	my_host=rs6000
+	;;
 
-	i386)
-		case "${host_vendor}" in
-		*)
-			case "${host_os}" in
-			sysv)	my_host=i386v ;;
-			esac
-			;;
-		esac
-		;;
-
-	sparc)
-		case "${host_vendor}" in
-		sun)	my_host=sun4 ;;
-		esac
-		;;
-
-	rtpc)	my_host=rtbsd ;;
-	tahoe | vax)	my_host=${host_cpu} ;;
+mips)
+	case "${host_vendor}" in
+	dec)	my_host=decstation ;;
+	sgi)	my_host=irix3 ;;
 	esac
-fi
+	;;
 
-if [ ! -f config/h-${my_host} ] ; then
-	echo '***' The linker do not support host ${host}
+m88k)
+	case "${host_vendor}" in
+	*)
+		case "${host_os}" in
+		dgux)	my_host=dgux ;;
+		esac
+		;;
+	esac
+	;;
+
+m68k)
+	case "${host_vendor}" in
+	cbm)
+		case ${host_os} in
+		amigados)	my_host=amigados ;;
+		svr4)		my_host=amix ;;
+		esac
+		;;
+	hp)	
+		case "${host_os}" in
+		hpux)	my_host=hp9000 ;;
+		bsd)	my_host=hp300bsd ;;
+		esac
+		;;
+	sony)	my_host=news ;;
+	sun)	my_host=sun3 ;;
+	esac
+	;;
+
+i386)
+	case "${host_vendor}" in
+	*)
+		case "${host_os}" in
+		sysv)	my_host=i386v ;;
+		mach)	my_host=i386mach ;;
+		msdos)	my_host=dose ;;
+		esac
+		;;
+	esac
+	;;
+
+sparc)
+	case "${host_os}" in
+	sunos64)	my_host=sparc-64 ;;
+	*)		my_host=sparc ;;
+	esac
+	;;
+
+romp)	my_host=rtbsd
+	;;
+
+a29k)	my_host=ultra3
+	;;
+
+tahoe)
+	my_host=tahoe
+	;;
+
+vax)
+	case "${host_os}" in
+	ultrix) my_host=vaxult ;;
+	*) my_host=vaxbsd ;;
+	esac
+	;;
+esac
+
+# Set up to make a link between the host's include file and "sysdep.h".
+files="../bfd/hosts/h-${my_host}.h"
+links="sysdep.h"
+
+if [ ! -f ${files} ] ; then
+	if [ -n "${my_host}" ] ; then
+		echo '***' No file ${files}
+	fi
+	echo '***' ${srcname} does not support host ${host}
 	exit 1
 fi
 
-host_makefile_frag=config/h-${my_host}
+host_makefile_frag=
+if [ -f config/h-${my_host} ] ; then
+	host_makefile_frag=config/h-${my_host}
+fi
 
 # per-target:
 
-case ${target_cpu} in
-sparc)
-	case ${target_vendor} in
-	sun) my_target=sun4 ;;
+case ${target_vendor} in
+aout | coff)	my_target=${target_cpu}-${target_vendor} ;;
+sun)
+	case ${target_cpu} in
+	sparc)	my_target=sun4 ;;
+	m68k)	my_target=sun3 ;;
 	esac
 	;;
-m88k)	my_target=m88k-bcs ;;
-a29k)	my_target=coff-a29k ;;
-h8300)	my_target=h8300hds ;;
-m68k)	
-	case ${target_vendor} in
-	sun) my_target=sun3 ;;
-	sony) my_target=news;;
-	*) echo "Unknown 68k target vendor:" ${target_vendor} ;;
+*)
+	case ${target_cpu} in
+	m88k)	my_target=m88k-bcs ;;
+	a29k)	my_target=coff-a29k ;;
+	h8300)	my_target=h8300hds ;;
+	m68k)	
+		case ${target_vendor} in
+		sony)	my_target=news;;
+		*)
+			echo "Unknown m68k target vendor:" ${target_vendor}
+			exit 1
+			;;
+		esac
+		;;
 	esac
-
+	;;
 esac
 
 target_makefile_frag=config/t-${my_target}
-
-files=
-links=
