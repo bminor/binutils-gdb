@@ -294,19 +294,19 @@ changequote([,])dnl
   trad-core.lo)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
   esac
 
-  # The ELF code uses the native <sys/procfs.h> to handle core files.
-  # Define HAVE_SYS_PROCFS_H if the file exists and defines
-  # prstatus_t.
-  AC_MSG_CHECKING([for sys/procfs.h])
-  AC_CACHE_VAL(bfd_cv_header_sys_procfs_h,
-  [AC_TRY_COMPILE([#include <sys/procfs.h>],
-  [prstatus_t t;],
-  bfd_cv_header_sys_procfs_h=yes, bfd_cv_header_sys_procfs_h=no)])
-  AC_MSG_RESULT($bfd_cv_header_sys_procfs_h)
-  if test $bfd_cv_header_sys_procfs_h = yes; then
-    AC_DEFINE(HAVE_SYS_PROCFS_H)
+  # ELF corefile support has several flavors, but all of
+  # them use something called <sys/procfs.h>
+  AC_CHECK_HEADERS(sys/procfs.h)
+  if test "$ac_cv_header_sys_procfs_h" = yes; then
+    BFD_HAVE_SYS_PROCFS_TYPE(prstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(prstatus_t, pr_who)
+    BFD_HAVE_SYS_PROCFS_TYPE(pstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(prpsinfo_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(psinfo_t)
+    BFD_HAVE_SYS_PROCFS_TYPE(lwpstatus_t)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_context)
+    BFD_HAVE_SYS_PROCFS_TYPE_MEMBER(lwpstatus_t, pr_reg)
   fi
-
 fi
 AC_SUBST(COREFILE)
 AC_SUBST(COREFLAG)
@@ -315,10 +315,10 @@ AC_SUBST(COREFLAG)
 WIN32LDFLAGS=
 WIN32LIBADD=
 case "${host}" in
-*-*-cygwin32*)
+*-*-cygwin*)
   if test "$enable_shared" = "yes"; then
     WIN32LDFLAGS="-no-undefined"
-    WIN32LIBADD="-L`pwd`/../libiberty -liberty -lcygwin -lkernel32"
+    WIN32LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   fi
   ;;
 esac
@@ -397,7 +397,7 @@ selarchs="$f"
 # Target backend .o files.
 tb=
 
-elf="elf.lo elflink.lo dwarf2.lo"
+elf="elf.lo elflink.lo dwarf2.lo dwarf1.lo"
 
 for vec in $selvecs
 do
@@ -423,15 +423,15 @@ do
     bfd_elf64_alpha_vec)	tb="$tb elf64-alpha.lo elf64.lo $elf"
 				target64=true ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
+    bfd_elf32_littlearm_vec)	tb="$tb elf32-arm.lo elf32.lo $elf" ;;
     bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
+    bfd_elf32_bigarm_vec)	tb="$tb elf32-arm.lo elf32.lo $elf" ;;
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.lo elf64.lo elf32-mips.lo elf32.lo $elf ecofflink.lo"
 				target64=true ;;
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.lo elf32.lo $elf" ;;
-# start-sanitize-d30v
     bfd_elf32_d30v_vec)		tb="$tb elf32-d30v.lo elf32.lo $elf" ;;
-# end-sanitize-d30v
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.lo elf32.lo $elf" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.lo elf32.lo $elf" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.lo elf32.lo $elf" ;;

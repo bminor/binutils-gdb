@@ -1,3 +1,8 @@
+Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: detect cygwin* instead of cygwin32*
+        * configure: regenerate
+
 Fri Oct 30 15:14:49 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * dllwrap.c: change all references to cygwin32_ to cygwin_,

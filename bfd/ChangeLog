@@ -1,3 +1,8 @@
+Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: detect cygwin* instead of cygwin32*
+	* configure: regenerate
+
 Sun Nov  1 19:32:28 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-m10300.c (mn10300_elf_relax_section): Do not use alloca,
