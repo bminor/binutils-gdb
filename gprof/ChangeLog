@@ -1,3 +1,7 @@
+Fri Jun 16 15:29:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure.in: Use changequote around use of [].
+
 Mon Jun 12 12:14:52 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in (distclean, realclean): Remove config.cache and

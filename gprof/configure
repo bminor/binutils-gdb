@@ -599,7 +599,7 @@ test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 case "${target}" in
 alpha-*-*)	MY_TARGET=alpha ;;
-i34586-*-*)	MY_TARGET=i386 ;;
+i[345]86-*-*)	MY_TARGET=i386 ;;
 sparc-*-*)	MY_TARGET=sparc ;;
 tahoe-*-*)	MY_TARGET=tahoe ;;
 vax-*-*)	MY_TARGET=vax ;;

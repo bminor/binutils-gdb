@@ -10,7 +10,9 @@ AC_ARG_PROGRAM
 
 case "${target}" in
 alpha-*-*)	MY_TARGET=alpha ;;
+changequote(,)dnl
 i[345]86-*-*)	MY_TARGET=i386 ;;
+changequote([,])dnl
 sparc-*-*)	MY_TARGET=sparc ;;
 tahoe-*-*)	MY_TARGET=tahoe ;;
 vax-*-*)	MY_TARGET=vax ;;
