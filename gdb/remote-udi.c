@@ -1526,7 +1526,7 @@ Arguments are\n\
     configuration-id is unused.\n\
 \n\
 `configuration-id AF_UNIX socket-name tip-program'\n\
-    To connect using a local connection to the "tip.exe" program which is\n\
+    To connect using a local connection to the \"tip.exe\" program which is\n\
     supplied by AMD.  If socket-name specifies an AF_UNIX socket then the\n\
     tip program must already be started; connect to it using that socket.\n\
     If not, start up tip-program, which should be the name of the tip\n\
