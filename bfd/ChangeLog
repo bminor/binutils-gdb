@@ -1,3 +1,25 @@
+1998-10-26 15:58  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add new field elf_hash_value.
+	* elflink.h (elf_collect_hash_codes): New function.  This function is
+	called for each exported symbol and we compute the ELF hash value for
+	it.
+	(compute_bucket_value): New function.  It is called from
+	size_dynamic_sections to determine the hash table size.  When we are
+	optimizing a better, but slower, algorithm is used.
+	(size_dynamic_sections): Call compute_bucket_value.
+
+	* elf.c (bfd_elf_hash): Optimize the hash function a bit.
+
+Mon Oct 19 20:03:21 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-sh.c:  Add HOWTO entries for R_SH_GNU_VTINHERIT and
+        R_SH_GNU_VTENTRY.
+        (sh_elf_gc_mark_hook):  New.
+        (sh_elf_gc_sweep_hook):  New.
+        (sh_elf_check_relocs):  New.
+        (elf_backend_can_gc_sections):  Define.
+
 Mon Oct 19 16:57:05 1998  Felix Lee  <flee@cygnus.com>
 
 	* acinclude.m4: undo previous gettext change
@@ -7,7 +29,7 @@ Mon Oct 19 01:47:21 1998  Felix Lee  <flee@cygnus.com>
 
 	* acinclude.m4, aclocal.m4: move gettext-related fragments from
  	aclocal.m4 to acinclude.m4, so they don't get lost.
-	
+
 	* elfcore.h: rewrite for better corefile support.
 	* elf.c (elfcore_*): new functions.
 	* elf-bfd.h (elf_obj_tdata): new structure members.
@@ -28,18 +50,18 @@ Fri Oct 16 14:07:45 1998  Catherine Moore  <clm@cygnus.com>
 Mon Oct 12 14:18:40 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (arm_relocate_section): Remove redundant test.
-	
+
 	* bfd-in2.h (struct reloc_howto_struct): Improve comment to make
 	cleat that the 'bitsize' field is the size of the bitfield AFTER
 	relocation not before.
-	
+
 	* elf32-m32r.c (R_M32R_18_PCREL): Fix size of bitfield.
 
 	* coff-mips.c (mips_relocate_hi): Cope with missing refhi or reflo
 	relocs.
 
 Tue Oct  6 09:20:44 1998  Catherine Moore  <clm@cygnus.com>
- 
+
         * elf32-sparc.c:  Add HOWTO entries for R_SPARC_GNU_VTINHERIT and
         R_SPARC_GNU_VTENTRY.
         (elf32_sparc_check_relocs):  Handle them.
@@ -47,7 +69,7 @@ Tue Oct  6 09:20:44 1998  Catherine Moore  <clm@cygnus.com>
         (elf32_sparc_relocate_section):  Likewise.
         (elf32_sparc_gc_mark_hook):  New.
         (elf32_sparc_gc_sweep_hook):  New.
- 
+
 Mon Oct  5 14:55:30 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_finish_writing): Perform some sanity checks when
@@ -58,9 +80,9 @@ Mon Oct  5 12:02:31 1998  Gavin Romig-Koch  <gavin@cygnus.com>
 	* dwarf1.c : New file.  Adds _bfd_dwarf1_find_nearest_line.
 	* configure.in (elf): Add dwarf1.lo.
 	* elf_bfd.h (elf_ob_tdata): Add dwarf1_find_line_info.
-	* elf.c (_bfd_elf_find_nearest_line): Add call to 
+	* elf.c (_bfd_elf_find_nearest_line): Add call to
 	_bfd_dwarf1_find_nearest_line.
-	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): 
+	* elf32-mips.c (_bfd_mips_elf_find_nearest_line):
 	Add call to _bfd_dwarf1_find_nearest_line.
 	* configure: Rebuilt.
 
@@ -90,7 +112,7 @@ Sun Oct  4 23:29:34 1998  David Edelsohn  <edelsohn@mhpcc.edu>
 
 	* rs6000-core.c (rs6000coff_core_file_matches_executable_p):
 	Declare size as bfd_size_type.
-	(rs6000coff_get_section_contents): Declare count as bfd_size_type. 
+	(rs6000coff_get_section_contents): Declare count as bfd_size_type.
 
 Sun Oct  4 20:38:29 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -178,10 +200,10 @@ Wed Sep 16 10:34:13 1998  Nick Clifton  <nickc@cygnus.com>
 	common sections.
 	(v850_elf_add_symbol_hook): Move symbols in sections with v850
 	common section attributes into named v850 common sections.
-	
+
 Wed Sep 16 11:26:49 CDT 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-arm.c (elf32_arm_gc_mark_hook):  Remove print 
+        * elf32-arm.c (elf32_arm_gc_mark_hook):  Remove print
         statement.
 
 1998-09-15  Geoff Keating  <geoffk@ozemail.com.au>
@@ -296,11 +318,11 @@ Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* elfcode.h (elf_object_p): Reject files of header type ET_CORE
 	(core files are treated differently than object files).
-	* elf-bfd.h (_bfd_elf_write_corefile_contents, 
+	* elf-bfd.h (_bfd_elf_write_corefile_contents,
 	bfd_elf_mkcorefile): declare.
-	* elfxx-target.h (_bfd_elf_write_corefile_contents, 
+	* elfxx-target.h (_bfd_elf_write_corefile_contents,
 	bfd_elf_mkcorefile): add to bfd_target vector.
-	* elfcore.h (elf_core_file_p): save the program header table, 
+	* elfcore.h (elf_core_file_p): save the program header table,
 	and set the bfd architecture from the elf file header.
 	* elf.c (bfd_elf_mkcorefile): new function.
 	(_bfd_elf_write_corefile_contents): new function.
@@ -310,10 +332,10 @@ Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	(prep_headers): identify core files as type ET_CORE.
 	(copy_private_bfd_data): identify the sections belonging to
 	the PT_NOTE segment.
-	
+
 	* elf32-sparc.c (elf32_sparc_final_write_processing):
 	add break statement to default case.
-	
+
 1998-08-19  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Check that output
@@ -333,7 +355,7 @@ Tue Aug 18 11:46:00 1998  Nick Clifton  <nickc@cygnus.com>
         * bfd-in.h: Ammend prototype for
         elf32_arm_process_before_allocation to remove surplus third
         argument.
- 
+
         * bfd-in2.h: Regenerate.
 
 Sat Aug 15 20:55:08 1998  Richard Henderson  <rth@cygnus.com>
@@ -391,7 +413,7 @@ Tue Aug 11 14:42:26 1998  Catherine Moore  <clm@cygnus.com>
        argument is_local.  Add argument sym_flags.  Check sym_flags
        in R_ARM_ABS32 case.  Include addend for R_ARM_THM_PC22 case.
        (elf32_arm_relocate_section):  Don't pass local sym and pass
-       sym_flags to elf32_arm_final_link_relocate. 
+       sym_flags to elf32_arm_final_link_relocate.
 
 Mon Aug 10 20:38:39 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -482,7 +504,7 @@ Tue Jun 28 19:05:28 1998  Stan Cox  <scox@cygnus.com>
 	be BFD_RELOC_SPARC_REV32.
 	* reloc.c: Ditto.
 	* config.bfd (sparc86x-*-aout): New
-	
+
 Fri Jul 24 13:54:19 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* linker.c (_bfd_generic_final_link): Allocate NULL symbol before
