@@ -1,3 +1,9 @@
+Thu Dec 21 12:54:32 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (mapping): Make @got give a real GOT relocation,
+	and xgot give the old toc16 relocation.
+	(md_apply_fix3): Support all GOT relocations.
+
 Wed Dec 20 14:57:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (load_address): Correctly handle a constant in
