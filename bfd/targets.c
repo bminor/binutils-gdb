@@ -46,7 +46,7 @@ DESCRIPTION
 	look up the environment variable <<GNUTARGET>> and use
 	that as the target string. 
 
-	o If the target string is still NULL, or the target string is
+	o If the target string is still <<NULL>>, or the target string is
 	<<default>>, then use the first item in the target vector
 	as the target type, and set <<target_defaulted>> in the BFD to
 	cause <<bfd_check_format>> to loop through all the targets.
@@ -375,6 +375,7 @@ extern bfd_target m88kbcs_vec;
 extern bfd_target newsos3_vec;
 extern bfd_target nlm32_big_generic_vec;
 extern bfd_target nlm32_i386_vec;
+extern bfd_target nlm32_sparc_vec;
 extern bfd_target nlm32_little_generic_vec;
 extern bfd_target nlm64_big_generic_vec;
 extern bfd_target nlm64_little_generic_vec;
@@ -395,6 +396,7 @@ extern bfd_target symbolsrec_vec;
 /* All of the xvecs for core files.  */
 extern bfd_target aix386_core_vec;
 extern bfd_target hpux_core_vec;
+extern bfd_target hppabsd_core_vec;
 extern bfd_target osf_core_vec;
 extern bfd_target sco_core_vec;
 extern bfd_target trad_core_vec;
@@ -492,7 +494,7 @@ bfd_target *target_vector[] = {
 	&newsos3_vec,
 	&nlm32_big_generic_vec,
 	&nlm32_i386_vec,
-	&nlm32_little_generic_vec,
+	&nlm32_sparc_vec,
 #ifdef BFD64
 	&nlm64_big_generic_vec,
 	&nlm64_little_generic_vec,
@@ -530,6 +532,9 @@ bfd_target *target_vector[] = {
 #ifdef HPUX_CORE
 	&hpux_core_vec,
 #endif
+#ifdef HPPABSD_CORE
+	&hppabsd_core_vec,
+#endif
 #ifdef OSF_CORE
 	&osf_core_vec,
 #endif
@@ -562,8 +567,8 @@ SYNOPSIS
 
 DESCRIPTION
 	Return a pointer to the transfer vector for the object target
-	named @var{target_name}.  If @var{target_name} is NULL, choose the
-	one in the environment variable GNUTARGET; if that is null or not
+	named @var{target_name}.  If @var{target_name} is <<NULL>>, choose the
+	one in the environment variable <<GNUTARGET>>; if that is null or not
 	defined, then choose the first entry in the target list.
 	Passing in the string "default" or setting the environment
 	variable to "default" will cause the first entry in the target
