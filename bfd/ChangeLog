@@ -1,3 +1,7 @@
+Wed Apr  6 20:44:56 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config.bfd, configure.host:  Add mips-*-sysv4* support.
+
 Thu Apr  7 14:23:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-mips.c (mips_howto_table): Add entry for MIPS_R_SWITCH.
