@@ -1,3 +1,9 @@
+Wed Jul  5 20:48:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SER_HARDWIRE): When go32 or DJGPP, set to
+ 	ser-go32.c.
+	* configure: Re-generate.
+	
 Wed Jul  5 20:28:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.h (command_loop_marker), top.c (command_loop_marker):
