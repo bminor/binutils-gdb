@@ -1,5 +1,17 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386v4-nat.c: Include "i386-tdep.h".  Reformat and tweak various
+	comments.
+	(fill_gregset, supply_gregset, supply_fpregset, fill_fpregset):
+	Remove prototypes.
+	(supply_gregset, fill_gregset): Remove use of register keyword and
+	remove declaration for regmap.  Use I386_NUM_GREGS instead of
+	NUM_REGS and NUM_FREGS.
+	(FPREGSET_FSAVE_OFFSET): Remove.
+	(supply_fpregset, fill_fpregset): Use FPO_REGNUM instead of
+	NUM_FREGS to determine whether the floating-point registers are
+	available.
+
 	* i386gnu-nat.c (supply_gregset, gnu_fetch_registers,
 	gnu_store_registers): Replace usage of NUM_GREGS with
 	I386_NUM_GREGS.
