@@ -1,3 +1,11 @@
+Wed Jun  3 17:48:04 1992  John Gilmore  (gnu@pluto)
+
+	* xcoffread.c (read_xcoff_symtab):  Set c_sclass from n_sclass
+	without masking, since it is signed and will later be compared
+	against signed quantities.  The right fix is probably to make
+	it all unsigned, but this is a small, safe fix for this release.
+	FIXME -- make the real change sometime soon.
+
 Mon Jun  1 16:16:12 1992  Michael Tiemann  (tiemann@cygnus.com)
 
 	* remote-vx.c (vx_load_command,add_symbol_stub): Default READNOW
