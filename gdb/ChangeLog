@@ -1,3 +1,8 @@
+Fri Aug  8 13:11:01 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* config/powerpc/ppc{,le}-{eabi,sim}.mt (TDEPFILES): Make sure
+	ppc-bdm.o and ocd.o are used for all powerpc-eabi targets.
+
 start-sanitize-gdbtk
 Fri Aug  8 00:13:32 1997  Martin M. Hunt  <hunt@cygnus.com>
 
