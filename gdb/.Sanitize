@@ -138,6 +138,7 @@ mips-tdep.c
 mips-xdep.c
 mipsread.c
 munch
+nat-sparc.c
 nat-sun4os4.h
 nat-trash.h
 news-xdep.c
