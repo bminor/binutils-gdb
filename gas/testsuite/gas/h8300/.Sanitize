@@ -26,28 +26,46 @@ Do-first:
 
 Things-to-keep:
 
-CVS
 addsub.s
+addsubh.s
 bitops1.s
+bitops1h.s
 bitops2.s
+bitops2h.s
 bitops3.s
+bitops3h.s
 bitops4.s
+bitops4h.s
 branches.s
+branchesh.s
 cbranch.s
+cbranchh.s
 cmpsi2.s
 compare.s
+compareh.s
 decimal.s
+decimalh.s
 divmul.s
+divmulh.s
+extendh.s
 ffxx1.d
 ffxx1.s
 h8300.exp
 incdec.s
+incdech.s
 logical.s
+logicalh.s
 misc.s
+misch.s
 movb.s
+movbh.s
+movlh.s
 movw.s
+movwh.s
 pushpop.s
+pushpoph.s
 rotshift.s
+rotshifth.s
 
 Things-to-lose:
 

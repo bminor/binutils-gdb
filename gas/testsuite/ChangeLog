@@ -1,5 +1,13 @@
 Fri Apr  5 10:13:28 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/h8300/{addsubh.s,bitops1h.s,bitops2h.s}: New h8300h tests.
+	* gas/h8300/{bitops3h.s,bitops4h.s,branchesh.s}: New h8300h tests.
+	* gas/h8300/{cbranchh.s,compareh.s,decimalh.s}: New h8300h tests.
+	* gas/h8300/{divmulh.s,incdech.s,logicalh.s}: New h8300h tests.
+	* gas/h8300/{misch.s,movbh.s,movwh.s}: New h8300h tests.
+	* gas/h8300/{pushpoph.s,rotshifth.s}: New h8300h tests.
+	* gas/h8300/h8300.exp: Run them.
+
 	* gas/h8300/{movb.s,movw.s}: Correct predecrement syntax.
 
 	* gas/h8300/h8300.exp: Fix typos in bitops4 and movb tests.
