@@ -7,6 +7,10 @@ Thu Dec 10 16:07:09 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (FRAME_FIND_SAVED_REGS): Document.
 
+1998-12-09  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* agentexpr.texi: New file.
+
 Wed Dec  9 21:13:57 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbint.texinfo (REGISTER_NAME): Replace REGISTER_NAMES.
