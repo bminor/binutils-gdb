@@ -58,6 +58,7 @@
 #include "elf/d30v.h"
 #include "elf/dlx.h"
 #include "elf/fr30.h"
+#include "elf/frv.h"
 #include "elf/h8.h"
 #include "elf/hppa.h"
 #include "elf/i386.h"
@@ -633,6 +634,7 @@ guess_is_rela (e_machine)
     case EM_CYGNUS_MN10300:
     case EM_FR30:
     case EM_CYGNUS_FR30:
+    case EM_CYGNUS_FRV:
     case EM_SH:
     case EM_ALPHA:
     case EM_MCORE:
@@ -1030,6 +1032,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_CYGNUS_FR30:
 	  rtype = elf_fr30_reloc_type (type);
 	  break;
+
+        case EM_CYGNUS_FRV:
+          rtype = elf_frv_reloc_type (type);
+          break;
 
 	case EM_MCORE:
 	  rtype = elf_mcore_reloc_type (type);
@@ -1508,6 +1514,7 @@ get_machine_name (e_machine)
     case EM_MN10200:		return "mn10200";
     case EM_CYGNUS_FR30:
     case EM_FR30:		return "Fujitsu FR30";
+    case EM_CYGNUS_FRV:	        return "Fujitsu FR-V";
     case EM_PJ_OLD:
     case EM_PJ:                 return "picoJava";
     case EM_MMA:		return "Fujitsu Multimedia Accelerator";

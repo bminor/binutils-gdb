@@ -501,6 +501,7 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/arm.h \
   $(INCDIR)/elf/avr.h $(INCDIR)/elf/cris.h $(INCDIR)/elf/d10v.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/dlx.h $(INCDIR)/elf/fr30.h \
+  $(INCDIR)/elf/frv.h \
   $(INCDIR)/elf/h8.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/i386.h \
   $(INCDIR)/elf/i860.h $(INCDIR)/elf/i960.h $(INCDIR)/elf/ia64.h \
   $(INCDIR)/elf/m32r.h $(INCDIR)/elf/m68k.h $(INCDIR)/elf/mcore.h \

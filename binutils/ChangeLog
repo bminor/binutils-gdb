@@ -1,3 +1,12 @@
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	From Catherine Moore:
+	* readelf.c (elf/frv.h): #include it.
+	(guess_is_rela): Support EM_CYGNUS_FRV.
+	(dump_relocations): Ditto.
+	(get_machine_name): Ditto.
+	* Makefile.am (readelf.o): add dependency on $(INCDIR)/elf/frv.h.
+
 2002-06-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (get_file_header): Only read the first section header if
