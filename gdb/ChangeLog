@@ -1,3 +1,9 @@
+start-sanitize-gdbtk
+Mon Aug 11 10:43:04 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk.c (gdbtk_init): Use ide_event_init_from_environment.
+
+end-sanitize-gdbtk
 Sun Aug 10 19:08:26 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* utils.c (error): Fix return type for !ANSI_PROTOTYPES.

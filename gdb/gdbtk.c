@@ -1363,7 +1363,7 @@ gdbtk_init ( argv0 )
 
   IluTk_Init ();
 
-  h = ide_event_init_client (&errmsg, libexecdir);
+  h = ide_event_init_from_environment (&errmsg, libexecdir);
   if (h == NULL)
     {
       Tcl_AppendResult (interp, "can't initialize event system: ", errmsg,
