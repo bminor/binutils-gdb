@@ -2977,6 +2977,15 @@ ppc_pe_function (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* Don't adjust TOC relocs to use the section symbol.  */
+
+int
+ppc_pe_fix_adjustable (fix)
+     fixS *fix;
+{
+  return fix->fx_r_type != BFD_RELOC_PPC_TOC16;
+}
+
 #endif
 
 #ifdef OBJ_XCOFF
