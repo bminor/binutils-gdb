@@ -1,3 +1,7 @@
+Fri Dec  3 19:13:19 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Fix a few typos.
+
 Sun Nov 28 18:06:25 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo, remote.texi: formatting improvements
