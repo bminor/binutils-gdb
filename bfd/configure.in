@@ -54,7 +54,7 @@ case "${target}" in
   i[34]86-*-isc*)	bfd_target=i386-sco ;; # gets core dump reading right
   i[34]86-*-sco*)	bfd_target=i386-sco ;;
   i[34]86-*-bsd*)	bfd_target=i386-bsd ;;
-  o[34]86-*-lynxos*)	bfd_target=i386-lynx ;;
+  i[34]86-*-lynxos*)	bfd_target=i386-lynx ;;
   i[34]86-*-coff)	bfd_target=i386-coff ;;
   i[34]86-*-aix*)	bfd_target=i386-coff ;;
   i[34]86-*-elf)	bfd_target=i386-elf ;;
