@@ -162,6 +162,9 @@ void elf_hppa_final_processing PARAMS ((void));
 #endif
 
 #define md_operand(x)
+#ifdef OBJ_ELF
+#define md_end() pa_end_of_source ()
+#endif
 
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)

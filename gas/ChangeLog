@@ -1,3 +1,13 @@
+Wed Sep 15 05:14:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c: Include dwarf2dbg.h if OBJ_ELF.  Declare
+	debug_line.
+	(md_pseudo_table): Add .file and .line pseudo-ops for OBJ_ELF.
+	(md_assemble): Call dwarf2_where for OBJ_ELF.
+	(pa_ip): Call dwarf2_gen_line_info for OBJ_ELF.
+	(pa_end_of_source): New function.
+	* tc-hppa.h (md_end): Define for OBJ_ELF.
+
 1999-09-14  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (Canonicalization of target names): Remove adding

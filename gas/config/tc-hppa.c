@@ -39,6 +39,14 @@
 error only one of OBJ_ELF and OBJ_SOM can be defined
 #endif
 
+/* If we are using ELF, then we probably can support dwarf2 debug
+   records.  Furthermore, if we are supporting dwarf2 debug records,
+   then we want to use the assembler support for compact line numbers.  */
+#ifdef OBJ_ELF
+#include "dwarf2dbg.h"
+struct dwarf2_line_info debug_line;
+#endif
+
 /* A "convient" place to put object file dependencies which do
    not need to be seen outside of tc-hppa.c.  */
 #ifdef OBJ_ELF
@@ -630,6 +638,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"equ", pa_equ, 0},
   {"exit", pa_exit, 0},
   {"export", pa_export, 0},
+#ifdef OBJ_ELF
+  { "file", dwarf2_directive_file },
+#endif
   {"fill", pa_fill, 0},
   {"float", pa_float_cons, 'f'},
   {"half", pa_cons, 2},
@@ -639,6 +650,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"lcomm", pa_lcomm, 0},
   {"leave", pa_leave, 0},
   {"level", pa_level, 0},
+#ifdef OBJ_ELF
+  { "loc", dwarf2_directive_loc },
+#endif
   {"long", pa_cons, 4},
   {"lsym", pa_lsym, 0},
 #ifdef OBJ_SOM
@@ -1443,6 +1457,12 @@ md_assemble (str)
 		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
 		  the_insn.reloc, the_insn.field_selector,
 		  the_insn.format, the_insn.arg_reloc, NULL);
+
+#ifdef OBJ_ELF
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_where (&debug_line);
+#endif
+
 }
 
 /* Do the real work for assembling a single instruction.  Store results
@@ -3356,6 +3376,16 @@ pa_ip (str)
 	}
       break;
     }
+
+#ifdef OBJ_ELF
+  if (debug_type == DEBUG_DWARF2)
+    {
+      bfd_vma addr;
+
+      addr = frag_now->fr_address + frag_now_fix ();
+      dwarf2_gen_line_info (addr, &debug_line);
+    }
+#endif
 
   the_insn.opcode = opcode;
 }
@@ -7502,5 +7532,13 @@ elf_hppa_final_processing ()
 	S_GET_VALUE (call_info_pointer->end_symbol)
 	- S_GET_VALUE (call_info_pointer->start_symbol) + 4;
     }
+}
+#endif
+
+#ifdef OBJ_ELF
+pa_end_of_source ()
+{
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_finish ();
 }
 #endif
