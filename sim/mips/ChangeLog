@@ -1,4 +1,8 @@
 2002-06-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c: Add an FSF Copyright notice to this file.
+
+2002-06-04  Chris Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 
 	* cp1.c (Infinity): Remove.
