@@ -27,6 +27,7 @@ PowerPC Netware					powerpc-*-netware*
 SunOS 4.0.Xi on i386				i[3456]86-*-sunos*
 Sony NEWS (68K) running NEWSOS 3.x		m68*-sony-sysv news
 ISI Optimum V (3.05) under 4.3bsd.		m68*-isi-*
+Apple Macintosh (MPW) host			N/A
 
 stuff.c (Program to stuff files into a specially prepared space in kdb)
 kdb-start.c (Main loop for the standalone kernel debugger)

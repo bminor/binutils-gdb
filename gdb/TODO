@@ -160,8 +160,6 @@ MAINTAINERS file.
 	o	arm-* vs NetBSD's lack of ``unix''
 	o	arm-* vs IRIX (see below)
 
-	o	delete mpw?
-
 -- 2001-03-15
 
 			Obsolete some targets.
@@ -201,6 +199,8 @@ Steps:
 		  powerpc-*-netware*	powerpc  -	  ppc-nw     yes
 		  w65-*-*		w65	 -	  w65        yes
 		  i[3456]86-*-sunos*	i386	 sun386	  sun386     yes
+		  mpw			m68k	 mpw	  mpw	     yes
+		  mpw			powerpc	 mpw	  mpw	     yes
 
 		(DONE)
 

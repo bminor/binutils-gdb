@@ -609,22 +609,22 @@ done:
 				     filename, NULL);
 	}
     }
-#ifdef MPW
-  /* This is a debugging hack that can go away when all combinations
-     of Mac and Unix names are handled reasonably.  */
-  {
-    extern int debug_openp;
-
-    if (debug_openp)
-      {
-	printf ("openp on %s, path %s mode %d prot %d\n  returned %d",
-		string, path, mode, prot, fd);
-	if (*filename_opened)
-	  printf (" (filename is %s)", *filename_opened);
-	printf ("\n");
-      }
-  }
-#endif /* MPW */
+  /* OBSOLETE #ifdef MPW  */
+  /* OBSOLETE This is a debugging hack that can go away when all combinations */
+  /* OBSOLETE of Mac and Unix names are handled reasonably.  */
+  /* OBSOLETE   { */
+  /* OBSOLETE     extern int debug_openp; */
+  /* OBSOLETE  */
+  /* OBSOLETE     if (debug_openp) */
+  /* OBSOLETE       { */
+  /* OBSOLETE 	printf ("openp on %s, path %s mode %d prot %d\n  returned %d", */
+  /* OBSOLETE 		string, path, mode, prot, fd); */
+  /* OBSOLETE 	if (*filename_opened) */
+  /* OBSOLETE 	  printf (" (filename is %s)", *filename_opened); */
+  /* OBSOLETE 	printf ("\n"); */
+  /* OBSOLETE       } */
+  /* OBSOLETE   } */
+  /* OBSOLETE #endif  *//* MPW */
 
   return fd;
 }
@@ -710,22 +710,22 @@ open_source_file (struct symtab *s)
       if (p != s->filename)
 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
     }
-#ifdef MPW
-  if (result < 0)
-    {
-      /* Didn't work.  Try using just the MPW basename. */
-      p = (char *) mpw_basename (s->filename);
-      if (p != s->filename)
-	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
-    }
-  if (result < 0)
-    {
-      /* Didn't work.  Try using the mixed Unix/MPW basename. */
-      p = (char *) mpw_mixed_basename (s->filename);
-      if (p != s->filename)
-	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
-    }
-#endif /* MPW */
+  /* OBSOLETE #ifdef MPW */
+  /* OBSOLETE   if (result < 0) */
+  /* OBSOLETE     { */
+  /* OBSOLETE        *//* Didn't work.  Try using just the MPW basename. */
+  /* OBSOLETE       p = (char *) mpw_basename (s->filename); */
+  /* OBSOLETE       if (p != s->filename) */
+  /* OBSOLETE 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname); */
+  /* OBSOLETE     } */
+  /* OBSOLETE   if (result < 0) */
+  /* OBSOLETE     { */
+  /* OBSOLETE        *//* Didn't work.  Try using the mixed Unix/MPW basename. */
+  /* OBSOLETE       p = (char *) mpw_mixed_basename (s->filename); */
+  /* OBSOLETE       if (p != s->filename) */
+  /* OBSOLETE 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname); */
+  /* OBSOLETE     } */
+  /* OBSOLETE #endif MPW */
 
   if (result >= 0)
     {

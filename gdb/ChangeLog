@@ -1,3 +1,21 @@
+2001-04-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* source.c (openp): Obsolete #ifdef MPW code.
+	(open_source_file): Ditto.
+	* event-top.c (display_gdb_prompt): Ditto.
+	* utils.c (query): Ditto.
+	(init_page_info): Ditto.
+	(init_page_info): Delete #ifndef MPW.
+	* top.c (gdb_readline): Ditto.
+	* mac-xdep.c: Obsolete.
+	* mac-gdb.r: Obsolete.
+	* config/powerpc/xm-mpw.h: Obsolete.
+	* config/xm-mpw.h: Obsolete.
+	* mpw-make.sed: Obsolete.
+	* mpw-config.in: Obsolete.
+	* TODO: Update
+	* NEWS: Update
+
 2001-04-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_frameless_function_invocation): New function.

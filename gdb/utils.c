@@ -1262,11 +1262,11 @@ query (char *ctlstr,...)
   /* Automatically answer "yes" if input is not from a terminal.  */
   if (!input_from_terminal_p ())
     return 1;
-#ifdef MPW
-  /* FIXME Automatically answer "yes" if called from MacGDB.  */
-  if (mac_app)
-    return 1;
-#endif /* MPW */
+  /* OBSOLETE #ifdef MPW */
+  /* OBSOLETE    *//* FIXME Automatically answer "yes" if called from MacGDB.  */
+  /* OBSOLETE   if (mac_app) */
+  /* OBSOLETE     return 1; */
+  /* OBSOLETE #endif  *//* MPW */
 
   while (1)
     {
@@ -1282,12 +1282,12 @@ query (char *ctlstr,...)
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032query\n");
 
-#ifdef MPW
-      /* If not in MacGDB, move to a new line so the entered line doesn't
-         have a prompt on the front of it. */
-      if (!mac_app)
-	fputs_unfiltered ("\n", gdb_stdout);
-#endif /* MPW */
+      /* OBSOLETE #ifdef MPW */
+      /* OBSOLETE        *//* If not in MacGDB, move to a new line so the entered line doesn't */
+      /* OBSOLETE          have a prompt on the front of it. */
+      /* OBSOLETE       if (!mac_app) */
+      /* OBSOLETE 	fputs_unfiltered ("\n", gdb_stdout); */
+      /* OBSOLETE #endif  *//* MPW */
 
       wrap_here ("");
       gdb_flush (gdb_stdout);
@@ -1562,7 +1562,7 @@ init_page_info (void)
       lines_per_page = 24;
       chars_per_line = 80;
 
-#if !defined (MPW) && !defined (_WIN32)
+#if !defined (_WIN32)
       /* No termcap under MPW, although might be cool to do something
          by looking at worksheet or console window sizes. */
       /* Initialize the screen height and width from termcap.  */

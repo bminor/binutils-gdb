@@ -1002,11 +1002,11 @@ gdb_readline (char *prompt_arg)
          character position to be off, since the newline we read from
          the user is not accounted for.  */
       fputs_unfiltered (prompt_arg, gdb_stdout);
-#ifdef MPW
-      /* Move to a new line so the entered line doesn't have a prompt
-         on the front of it. */
-      fputs_unfiltered ("\n", gdb_stdout);
-#endif /* MPW */
+      /* OBSOLETE #ifdef MPW */
+      /* OBSOLETE          Move to a new line so the entered line doesn't have a prompt */
+      /* OBSOLETE          on the front of it. */
+      /* OBSOLETE       fputs_unfiltered ("\n", gdb_stdout); */
+      /* OBSOLETE #endif  *//* MPW */
       gdb_flush (gdb_stdout);
     }
 
