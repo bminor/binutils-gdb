@@ -38,9 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (They should have just made it varadic).  */
 #define FIVE_ARG_PTRACE
 
-#ifndef hp800
 #define USG
-#endif
 
 #ifndef __STDC__
 /* This define is discussed in decode_line_1 in symtab.c  */

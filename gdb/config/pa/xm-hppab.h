@@ -39,10 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (They should have just made it varadic).  */
 #define FIVE_ARG_PTRACE
 
-#ifndef hp800
-#define USG
-#endif
-
 #define KERNEL_U_ADDR 0
 
 #ifndef SEEK_SET
