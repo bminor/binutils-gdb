@@ -41,6 +41,8 @@ struct ieee_block
   const char *filename;
   /* The index of the function type, for a BB4 or BB6 block.  */
   unsigned int fnindx;
+  /* True if this function is being skipped.  */
+  boolean skip;
 };
 
 /* This structure is the block stack.  */
@@ -974,6 +976,7 @@ parse_ieee_bb (info, pp)
   unsigned long namlen;
   char *namcopy;
   unsigned int fnindx;
+  boolean skip;
 
   block_start = *pp;
 
@@ -985,6 +988,7 @@ parse_ieee_bb (info, pp)
     return false;
 
   fnindx = (unsigned int) -1;
+  skip = false;
 
   switch (b)
     {
@@ -1098,33 +1102,44 @@ parse_ieee_bb (info, pp)
 	  }
 	else
 	  {
-	    debug_type return_type;
-
-	    if (typindx < 256)
-	      {
-		return_type = ieee_builtin_type (info, block_start, typindx);
-		if (return_type == NULL)
-		  return false;
-	      }
+	    /* The MRI C++ compiler will output a fake function named
+	       __XRYCPP to hold C++ debugging information.  We skip
+	       that function.  This is not crucial, but it makes
+	       converting from IEEE to other debug formats work
+	       better.  */
+	    if (strncmp (name, "__XRYCPP", namlen) == 0)
+	      skip = true;
 	    else
 	      {
-		typindx -= 256;
-		if (! ieee_alloc_type (info, typindx, true))
-		  return false;
-		fnindx = typindx;
-		return_type = info->types.types[typindx].type;
-		if (debug_get_type_kind (info->dhandle, return_type)
-		    == DEBUG_KIND_FUNCTION)
-		  return_type = debug_get_return_type (info->dhandle,
-						       return_type);
-	      }
+		debug_type return_type;
 
-	    namcopy = savestring (name, namlen);
-	    if (namcopy == NULL)
-	      return false;
-	    if (! debug_record_function (info->dhandle, namcopy, return_type,
-					 false, offset))
-	      return false;
+		if (typindx < 256)
+		  {
+		    return_type = ieee_builtin_type (info, block_start,
+						     typindx);
+		    if (return_type == NULL)
+		      return false;
+		  }
+		else
+		  {
+		    typindx -= 256;
+		    if (! ieee_alloc_type (info, typindx, true))
+		      return false;
+		    fnindx = typindx;
+		    return_type = info->types.types[typindx].type;
+		    if (debug_get_type_kind (info->dhandle, return_type)
+			== DEBUG_KIND_FUNCTION)
+		      return_type = debug_get_return_type (info->dhandle,
+							   return_type);
+		  }
+
+		namcopy = savestring (name, namlen);
+		if (namcopy == NULL)
+		  return false;
+		if (! debug_record_function (info->dhandle, namcopy,
+					     return_type, false, offset))
+		  return false;
+	      }
 	  }
       }
       break;
@@ -1188,6 +1203,7 @@ parse_ieee_bb (info, pp)
   if (b == 5)
     info->blockstack.bsp->filename = namcopy;
   info->blockstack.bsp->fnindx = fnindx;
+  info->blockstack.bsp->skip = skip;
   ++info->blockstack.bsp;
 
   return true;
@@ -1215,8 +1231,11 @@ parse_ieee_be (info, pp)
     case 6:
       if (! ieee_read_expression (info, pp, &offset))
 	return false;
-      if (! debug_end_function (info->dhandle, offset))
-	return false;
+      if (! info->blockstack.bsp->skip)
+	{
+	  if (! debug_end_function (info->dhandle, offset + 1))
+	    return false;
+	}
       break;
 
     case 0x86:
@@ -1224,7 +1243,7 @@ parse_ieee_be (info, pp)
 	 function.  */
       if (! ieee_read_expression (info, pp, &offset))
 	return false;
-      if (! debug_end_block (info->dhandle, offset))
+      if (! debug_end_block (info->dhandle, offset + 1))
 	return false;
       break;
 
@@ -1734,6 +1753,11 @@ parse_ieee_ty (info, pp)
       }
       break;
 
+    case 'V':
+      /* Void.  This is not documented, but the MRI compiler emits it.  */
+      type = debug_make_void_type (dhandle);
+      break;
+
     case 'Z':
       /* Array with 0 lower bound.  */
       {
@@ -2185,9 +2209,11 @@ parse_ieee_atn (info, pp)
       return true;
 
     case 10:
-      /* Locked register.  */
+      /* Locked register.  The spec says that there are two required
+         fields, but at least on occasion the MRI compiler only emits
+         one.  */
       if (! ieee_read_number (info, pp, &v)
-	  || ! ieee_read_number (info, pp, &v2))
+	  || ! ieee_read_optional_number (info, pp, &v2, &present))
 	return false;
 
       /* I think this means a variable that is both in a register and
@@ -3741,6 +3767,10 @@ struct ieee_handle
   struct ieee_modified_type *modified;
   /* Number of entries allocated in modified.  */
   unsigned int modified_alloc;
+  /* 4 byte complex type.  */
+  unsigned int complex_float_index;
+  /* 8 byte complex type.  */
+  unsigned int complex_double_index;
   /* The depth of block nesting.  This is 0 outside a function, and 1
      just after start_function is called.  */
   unsigned int block_depth;
@@ -5086,7 +5116,7 @@ ieee_empty_type (p)
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
 
-  return ieee_push_type (info, 0, 0, false, false);
+  return ieee_push_type (info, (int) builtin_unknown, 0, false, false);
 }
 
 /* Make a void type.  */
@@ -5097,7 +5127,7 @@ ieee_void_type (p)
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
 
-  return ieee_push_type (info, 1, 0, false, false);
+  return ieee_push_type (info, (int) builtin_void, 0, false, false);
 }
 
 /* Make an integer type.  */
@@ -5182,6 +5212,9 @@ ieee_complex_type (p, size)
   switch (size)
     {
     case 4:
+      if (info->complex_float_index != 0)
+	return ieee_push_type (info, info->complex_float_index, size * 2,
+			       false, false);
       code = 'c';
       break;
     case 12:
@@ -5189,6 +5222,9 @@ ieee_complex_type (p, size)
       /* These cases can be output by gcc -gstabs.  Outputting the
          wrong type is better than crashing.  */
     case 8:
+      if (info->complex_double_index != 0)
+	return ieee_push_type (info, info->complex_double_index, size * 2,
+			       false, false);
       code = 'd';
       break;
     default:
@@ -5197,9 +5233,17 @@ ieee_complex_type (p, size)
     }
 
   /* FIXME: I don't know what the string is for.  */
-  return (ieee_define_type (info, size, false, false)
-	  && ieee_write_number (info, code)
-	  && ieee_write_id (info, ""));
+  if (! ieee_define_type (info, size * 2, false, false)
+      || ! ieee_write_number (info, code)
+      || ! ieee_write_id (info, ""))
+    return false;
+
+  if (size == 4)
+    info->complex_float_index = info->type_stack->type.indx;
+  else
+    info->complex_double_index = info->type_stack->type.indx;
+
+  return true;
 }
 
 /* Make a boolean type.  IEEE doesn't support these, so we just make
@@ -7327,7 +7371,7 @@ ieee_lineno (p, filename, lineno, addr)
 		return false;
 	      if (strcmp (info->filename, info->pending_lineno_filename) == 0)
 		{
-		  /* We need a new NN record, and we aren't output to
+		  /* We need a new NN record, and we aren't about to
 		     output one.  */
 		  info->lineno_name_indx = info->name_indx;
 		  ++info->name_indx;
