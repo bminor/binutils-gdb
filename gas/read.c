@@ -573,8 +573,8 @@ read_a_source_file (name)
 	  if (is_end_of_line[(unsigned char) c])
 	    continue;
 
-#if defined(LOCAL_LABELS_DOLLAR) || defined(LOCAL_LABELS_FB)
-	  if (isdigit (c))
+	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB)
+	      && isdigit (c))
 	    {
 	      /* local label  ("4:") */
 	      char *backup = input_line_pointer;
@@ -589,8 +589,8 @@ read_a_source_file (name)
 		  ++input_line_pointer;
 		}		/* read the whole number */
 
-#ifdef LOCAL_LABELS_DOLLAR
-	      if (*input_line_pointer == '$'
+	      if (LOCAL_LABELS_DOLLAR
+		  && *input_line_pointer == '$'
 		  && *(input_line_pointer + 1) == ':')
 		{
 		  input_line_pointer += 2;
@@ -604,20 +604,17 @@ read_a_source_file (name)
 		  colon (dollar_label_name (temp, 0));
 		  continue;
 		}
-#endif /* LOCAL_LABELS_DOLLAR */
 
-#ifdef LOCAL_LABELS_FB
-	      if (*input_line_pointer++ == ':')
+	      if (LOCAL_LABELS_FB
+		  && *input_line_pointer++ == ':')
 		{
 		  fb_label_instance_inc (temp);
 		  colon (fb_label_name (temp, 0));
 		  continue;
 		}
-#endif /* LOCAL_LABELS_FB */
 
 	      input_line_pointer = backup;
 	    }			/* local label  ("4:") */
-#endif /* LOCAL_LABELS_DOLLAR or LOCAL_LABELS_FB */
 
 	  if (c && strchr (line_comment_chars, c))
 	    {			/* Its a comment.  Better say APP or NO_APP */

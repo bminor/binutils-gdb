@@ -17,8 +17,8 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define LOCAL_LABELS_DOLLAR
-#define LOCAL_LABELS_FB
+#define LOCAL_LABELS_DOLLAR 1
+#define LOCAL_LABELS_FB 1
 
 #include "obj-format.h"
 

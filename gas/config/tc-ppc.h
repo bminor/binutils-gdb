@@ -37,17 +37,19 @@ extern enum bfd_architecture ppc_arch PARAMS ((void));
 #endif
 
 /* Permit temporary numeric labels.  */
-#define LOCAL_LABELS_FB
+#define LOCAL_LABELS_FB 1
 
 /* $ is used to refer to the current location.  */
 #define DOLLAR_DOT
 
-/* Strings do not use backslash escapes.  */
-#define NO_STRING_ESCAPES
-
+/* Strings do not use backslash escapes under COFF.  */
 #ifdef OBJ_COFF
+#define NO_STRING_ESCAPES
+#endif
+
 /* When using COFF, we determine whether or not to output a symbol
    based on sy_tc.output, not on the name.  */
+#ifdef OBJ_COFF
 #define LOCAL_LABEL(name) 0
 #endif
 #ifdef OBJ_ELF
@@ -55,6 +57,7 @@ extern enum bfd_architecture ppc_arch PARAMS ((void));
 #define LOCAL_LABEL(name) (name[0] == '.' \
 			   && (name[1] == 'L' || name[1] == '.'))
 #define FAKE_LABEL_NAME ".L0\001"
+#define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
 #endif
 
 /* Set the endianness we are using.  Default to big endian.  */
@@ -154,4 +157,9 @@ extern void ppc_frob_file PARAMS ((void));
 #ifndef GLOBAL_OFFSET_TABLE_NAME
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 #endif
-#endif
+#endif /* OBJ_ELF */
+
+/* call md_apply_fix3 with segment instead of md_apply_fix */
+#define MD_APPLY_FIX3
+
+#define md_operand(x)

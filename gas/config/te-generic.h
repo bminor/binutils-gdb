@@ -9,8 +9,8 @@
 /* Added these, because if we don't know what we're targetting we may
    need an assembler version of libgcc, and that will use local
    labels.  */
-#define LOCAL_LABELS_DOLLAR
-#define LOCAL_LABELS_FB
+#define LOCAL_LABELS_DOLLAR 1
+#define LOCAL_LABELS_FB 1
 
 /* these define interfaces */
 #include "obj-format.h"

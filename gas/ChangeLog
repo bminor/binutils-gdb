@@ -1,3 +1,17 @@
+Wed May  3 21:38:20 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* as.h (LOCAL_LABELS_DOLLAR, LOCAL_LABELS_FB): If not already
+	defined, define them to zero.
+	* config/tc-*.h, config/te-*.h: If defining them, define them to
+	be 1 instead of empty.
+	* expr.c (integer_constant, operand): Test them at run time
+	instead of compile time.
+	* read.c (read_a_source_file): Ditto.
+	* symbols.c (colon): Ditto.
+	(dollar_*, define_dollar_label, fb_*): Define unconditionally.
+	* symbols.h (dollar_*, define_dollar_label, fb_*): Declare
+	unconditionally.
+
 Wed May  3 13:08:53 1995  Jeff Law  (law@snake.cs.utah.edu)
 
  	* config/tc-hppa.c (md_apply_fix): Do nothing for an out of range

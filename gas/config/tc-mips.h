@@ -31,7 +31,7 @@
 #define REPEAT_CONS_EXPRESSIONS
 #define RELOC_EXPANSION_POSSIBLE
 #define MAX_RELOC_EXPANSION 3
-#define LOCAL_LABELS_FB
+#define LOCAL_LABELS_FB 1
 
 /* The MIPS assembler appears to keep all symbols.  */
 #define LOCAL_LABEL(name) 0

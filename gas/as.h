@@ -105,6 +105,7 @@ extern char *strdup (/* const char * */);
 #define __PRETTY_FUNCTION__  ((char*)0)
 #endif
 #if 0
+
 /* Handle lossage with assert.h.  */
 #ifndef BROKEN_ASSERT
 #include <assert.h>
@@ -115,8 +116,13 @@ extern char *strdup (/* const char * */);
 #define assert(p) ((p), 0)
 #endif
 #endif /* BROKEN_ASSERT */
+
 #else
+
 #define assert(P) ((P) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0))
+#undef abort
+#define abort()		as_abort (__FILE__, __LINE__, __PRETTY_FUNCTION__)
+
 #endif
 
 
@@ -149,6 +155,11 @@ extern int errno;
 /* This is needed for VMS.  */
 #if ! defined (HAVE_UNLINK) && defined (HAVE_REMOVE)
 #define unlink remove
+#endif
+
+/* Hack to make "gcc -Wall" not complain about obstack macros.  */
+#if !defined (memcpy) && !defined (bcopy)
+#define bcopy(src,dest,size)	memcpy(dest,src,size)
 #endif
 
 #ifdef BFD_ASSEMBLER
@@ -309,7 +320,7 @@ COMMON segT now_seg;
 #ifdef BFD_ASSEMBLER
 #define segment_name(SEG)	bfd_get_section_name (stdoutput, SEG)
 #else
-extern char *const seg_name[];
+extern char const *const seg_name[];
 #define segment_name(SEG)	seg_name[(int) (SEG)]
 #endif
 
@@ -498,7 +509,7 @@ extern int listing;
 struct _pseudo_type
   {
     /* assembler mnemonic, lower case, no '.' */
-    char *poc_name;
+    const char *poc_name;
     /* Do the work */
     void (*poc_handler) PARAMS ((int));
     /* Value to pass to handler */
@@ -546,6 +557,7 @@ PRINTF_LIKE (as_warn);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
 void as_assert PARAMS ((const char *, int, const char *));
+void as_abort PARAMS ((const char *, int, const char *));
 
 void fprint_value PARAMS ((FILE *file, addressT value));
 void sprint_value PARAMS ((char *buf, addressT value));
@@ -593,6 +605,7 @@ segT subseg_get PARAMS ((const char *, int));
 struct expressionS;
 struct fix;
 struct symbol;
+struct relax_type;
 
 #ifdef BFD_ASSEMBLER
 /* literal.c */
@@ -616,21 +629,13 @@ valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
 
 #include "listing.h"
 
-#ifdef BFD_ASSEMBLER
-/* Someday perhaps this will be selectable at run-time.  */
-#if defined (OBJ_AOUT) || defined (OBJ_BOUT)
-#define OUTPUT_FLAVOR bfd_target_aout_flavour
+#ifndef LOCAL_LABELS_DOLLAR
+#define LOCAL_LABELS_DOLLAR 0
 #endif
-#ifdef OBJ_COFF
-#define OUTPUT_FLAVOR bfd_target_coff_flavour
+
+#ifndef LOCAL_LABELS_FB
+#define LOCAL_LABELS_FB 0
 #endif
-#ifdef OBJ_ECOFF
-#define OUTPUT_FLAVOR bfd_target_ecoff_flavour
-#endif
-#ifdef OBJ_ELF
-#define OUTPUT_FLAVOR bfd_target_elf_flavour
-#endif
-#endif /* BFD_ASSEMBLER */
 
 #endif /* GAS */
 
