@@ -51,7 +51,7 @@ struct tui_asm_line
    Disassemble count lines starting at pc.
    Return address of the count'th instruction after pc.  */
 static CORE_ADDR
-tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
+tui_disassemble (struct tui_asm_line* asm_lines, CORE_ADDR pc, int count)
 {
   struct ui_file *gdb_dis_out;
 
@@ -59,22 +59,22 @@ tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
   gdb_dis_out = tui_sfileopen (256);
 
   /* Now construct each line */
-  for (; count > 0; count--, lines++)
+  for (; count > 0; count--, asm_lines++)
     {
-      if (lines->addr_string)
-        xfree (lines->addr_string);
-      if (lines->insn)
-        xfree (lines->insn);
+      if (asm_lines->addr_string)
+        xfree (asm_lines->addr_string);
+      if (asm_lines->insn)
+        xfree (asm_lines->insn);
       
       print_address (pc, gdb_dis_out);
-      lines->addr = pc;
-      lines->addr_string = xstrdup (tui_file_get_strbuf (gdb_dis_out));
+      asm_lines->addr = pc;
+      asm_lines->addr_string = xstrdup (tui_file_get_strbuf (gdb_dis_out));
 
       ui_file_rewind (gdb_dis_out);
 
       pc = pc + gdb_print_insn (pc, gdb_dis_out);
 
-      lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
+      asm_lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
 
       /* reset the buffer to empty */
       ui_file_rewind (gdb_dis_out);
@@ -92,21 +92,21 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
   CORE_ADDR new_low;
   int max_lines;
   int i;
-  struct tui_asm_line* lines;
+  struct tui_asm_line* asm_lines;
 
   max_lines = (from > 0) ? from : - from;
   if (max_lines <= 1)
      return pc;
 
-  lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
+  asm_lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
                                          * max_lines);
-  memset (lines, 0, sizeof (struct tui_asm_line) * max_lines);
+  memset (asm_lines, 0, sizeof (struct tui_asm_line) * max_lines);
 
   new_low = pc;
   if (from > 0)
     {
-      tui_disassemble (lines, pc, max_lines);
-      new_low = lines[max_lines - 1].addr;
+      tui_disassemble (asm_lines, pc, max_lines);
+      new_low = asm_lines[max_lines - 1].addr;
     }
   else
     {
@@ -127,8 +127,8 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
          else
             new_low += 1 * max_lines;
 
-         tui_disassemble (lines, new_low, max_lines);
-         last_addr = lines[pos].addr;
+         tui_disassemble (asm_lines, new_low, max_lines);
+         last_addr = asm_lines[pos].addr;
       } while (last_addr > pc && msymbol);
 
       /* Scan forward disassembling one instruction at a time
@@ -145,7 +145,7 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
             if (pos >= max_lines)
               pos = 0;
 
-            next_addr = tui_disassemble (&lines[pos], last_addr, 1);
+            next_addr = tui_disassemble (&asm_lines[pos], last_addr, 1);
 
             /* If there are some problems while disassembling exit.  */
             if (next_addr <= last_addr)
@@ -155,12 +155,12 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
       pos++;
       if (pos >= max_lines)
          pos = 0;
-      new_low = lines[pos].addr;
+      new_low = asm_lines[pos].addr;
     }
   for (i = 0; i < max_lines; i++)
     {
-      xfree (lines[i].addr_string);
-      xfree (lines[i].insn);
+      xfree (asm_lines[i].addr_string);
+      xfree (asm_lines[i].insn);
     }
   return new_low;
 }
@@ -176,7 +176,7 @@ tui_set_disassem_content (CORE_ADDR pc)
   CORE_ADDR cur_pc;
   struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
   int tab_len = tui_default_tab_len ();
-  struct tui_asm_line* lines;
+  struct tui_asm_line* asm_lines;
   int insn_pos;
   int addr_size, max_size;
   char* line;
@@ -195,24 +195,24 @@ tui_set_disassem_content (CORE_ADDR pc)
   max_lines = TUI_DISASM_WIN->generic.height - 2;	/* account for hilite */
 
   /* Get temporary table that will hold all strings (addr & insn).  */
-  lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
+  asm_lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
                                          * max_lines);
-  memset (lines, 0, sizeof (struct tui_asm_line) * max_lines);
+  memset (asm_lines, 0, sizeof (struct tui_asm_line) * max_lines);
 
   line_width = TUI_DISASM_WIN->generic.width - 1;
 
-  tui_disassemble (lines, pc, max_lines);
+  tui_disassemble (asm_lines, pc, max_lines);
 
   /* See what is the maximum length of an address and of a line.  */
   addr_size = 0;
   max_size = 0;
   for (i = 0; i < max_lines; i++)
     {
-      size_t len = strlen (lines[i].addr_string);
+      size_t len = strlen (asm_lines[i].addr_string);
       if (len > addr_size)
         addr_size = len;
 
-      len = strlen (lines[i].insn) + tab_len;
+      len = strlen (asm_lines[i].insn) + tab_len;
       if (len > max_size)
         max_size = len;
     }
@@ -231,7 +231,7 @@ tui_set_disassem_content (CORE_ADDR pc)
 
       element = (struct tui_win_element *) TUI_DISASM_WIN->generic.content[i];
       src = &element->which_element.source;
-      strcpy (line, lines[i].addr_string);
+      strcpy (line, asm_lines[i].addr_string);
       cur_len = strlen (line);
 
       /* Add spaces to make the instructions start on the same column */
@@ -241,7 +241,7 @@ tui_set_disassem_content (CORE_ADDR pc)
           cur_len++;
         }
 
-      strcat (line, lines[i].insn);
+      strcat (line, asm_lines[i].insn);
 
       /* Now copy the line taking the offset into account */
       if (strlen (line) > offset)
@@ -249,15 +249,15 @@ tui_set_disassem_content (CORE_ADDR pc)
       else
         src->line[0] = '\0';
 
-      src->line_or_addr.addr = lines[i].addr;
-      src->is_exec_point = lines[i].addr == cur_pc;
+      src->line_or_addr.addr = asm_lines[i].addr;
+      src->is_exec_point = asm_lines[i].addr == cur_pc;
 
       /* See whether there is a breakpoint installed.  */
       src->has_break = (!src->is_exec_point
                        && breakpoint_here_p (pc) != no_breakpoint_here);
 
-      xfree (lines[i].addr_string);
-      xfree (lines[i].insn);
+      xfree (asm_lines[i].addr_string);
+      xfree (asm_lines[i].insn);
     }
   TUI_DISASM_WIN->generic.content_size = i;
   return TUI_SUCCESS;

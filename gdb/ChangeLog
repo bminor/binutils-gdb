@@ -1,3 +1,10 @@
+2004-02-24  J. Brobecker  <brobecker@gnat.com>
+
+	* tui/tui-disasm.c: %s/lines/asm_lines/g to avoid a collision
+	with the lines macro defined in term.h on AiX.
+	* tui/tui-regs.c: %s/label_width/tui_label_width/g, to avoid
+	a collision with the label_width macro defined in term.h on AiX.
+
 2004-02-23  David Mosberger  <davidm@hpl.hp.com>
 
 	Committed by Kevin Buettner <kevinb@redhat.com>.
