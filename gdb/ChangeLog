@@ -1,3 +1,7 @@
+Wed Jan 17 09:41:58 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Add J.T. Conklin to Blanket Write Privs.
+
 2001-01-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* procfs.c (procfs_stopped_by_watchpoint): Don't die if process
