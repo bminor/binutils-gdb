@@ -25,17 +25,6 @@
 #ifndef TUI_H
 #define TUI_H
 
-#include <stdarg.h>
-#include <string.h>
-#include "ansidecl.h"
-
-#if defined(reg)
-#undef reg
-#endif
-#if defined(chtype)
-#undef chtype
-#endif
-
 struct ui_file;
 
 extern void strcat_to_buf (char *, int, const char *);
@@ -91,13 +80,13 @@ extern void tui_disable (void);
 enum tui_key_mode
 {
   /* Plain command mode to enter gdb commands.  */
-  tui_command_mode,
+  TUI_COMMAND_MODE,
 
   /* SingleKey mode with some keys bound to gdb commands.  */
-  tui_single_key_mode,
+  TUI_SINGLE_KEY_MODE,
 
   /* Read/edit one command and return to SingleKey after it's processed.  */
-  tui_one_command_mode
+  TUI_ONE_COMMAND_MODE
 };
 
 extern enum tui_key_mode tui_current_key_mode;
@@ -124,4 +113,5 @@ extern enum tui_status tui_set_layout_for_display_command (const char *name);
 /* tui-winsource.c */
 extern void tui_update_all_exec_infos (void);
 
-#endif /* TUI_H */
+#endif
+

@@ -42,11 +42,4 @@ extern void tui_refresh_all (struct tui_win_info **);
 extern void tui_delete_win (WINDOW * window);
 extern void tui_refresh_win (struct tui_gen_win_info *);
 
-/*
-   ** Macros
- */
-#define    m_beVisible(winInfo)   makeVisible((struct tui_gen_win_info *)(winInfo), TRUE)
-#define    m_beInvisible(winInfo) \
-                            makeVisible((struct tui_gen_win_info *)(winInfo), FALSE)
-
 #endif

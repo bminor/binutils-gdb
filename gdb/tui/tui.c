@@ -66,7 +66,7 @@
 int tui_active = 0;
 static int tui_finish_init = 1;
 
-enum tui_key_mode tui_current_key_mode = tui_command_mode;
+enum tui_key_mode tui_current_key_mode = TUI_COMMAND_MODE;
 
 struct tui_char_command
 {
@@ -224,9 +224,9 @@ tui_rl_other_window (int count, int key)
   if (winInfo)
     {
       tui_set_win_focus_to (winInfo);
-      if (dataWin && dataWin->generic.isVisible)
+      if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
         tui_refresh_data_win ();
-      keypad (cmdWin->generic.handle, (winInfo != cmdWin));
+      keypad (TUI_CMD_WIN->generic.handle, (winInfo != TUI_CMD_WIN));
     }
   return 0;
 }
@@ -261,7 +261,7 @@ tui_rl_command_key (int count, int key)
 static int
 tui_rl_command_mode (int count, int key)
 {
-  tui_set_key_mode (tui_one_command_mode);
+  tui_set_key_mode (TUI_ONE_COMMAND_MODE);
   return rl_insert (count, key);
 }
 
@@ -273,8 +273,8 @@ tui_rl_next_keymap (int notused1, int notused2)
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
-  tui_set_key_mode (tui_current_key_mode == tui_command_mode
-                    ? tui_single_key_mode : tui_command_mode);
+  tui_set_key_mode (tui_current_key_mode == TUI_COMMAND_MODE
+                    ? TUI_SINGLE_KEY_MODE : TUI_COMMAND_MODE);
   return 0;
 }
 
@@ -286,8 +286,8 @@ static int
 tui_rl_startup_hook ()
 {
   rl_already_prompted = 1;
-  if (tui_current_key_mode != tui_command_mode)
-    tui_set_key_mode (tui_single_key_mode);
+  if (tui_current_key_mode != TUI_COMMAND_MODE)
+    tui_set_key_mode (TUI_SINGLE_KEY_MODE);
   tui_redisplay_readline ();
   return 0;
 }
@@ -297,7 +297,7 @@ void
 tui_set_key_mode (enum tui_key_mode mode)
 {
   tui_current_key_mode = mode;
-  rl_set_keymap (mode == tui_single_key_mode
+  rl_set_keymap (mode == TUI_SINGLE_KEY_MODE
                  ? tui_keymap : tui_readline_standard_keymap);
   tui_show_locator_content ();
 }
@@ -390,9 +390,9 @@ tui_enable (void)
 
       tui_show_frame_info (0);
       tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
-      tui_set_win_focus_to (srcWin);
-      keypad (cmdWin->generic.handle, TRUE);
-      wrefresh (cmdWin->generic.handle);
+      tui_set_win_focus_to (TUI_SRC_WIN);
+      keypad (TUI_CMD_WIN->generic.handle, TRUE);
+      wrefresh (TUI_CMD_WIN->generic.handle);
       tui_finish_init = 0;
     }
   else
@@ -571,21 +571,21 @@ tui_is_window_visible (enum tui_win_type type)
   if (tui_active == 0)
     return 0;
 
-  if (winList[type] == 0)
+  if (tui_win_list[type] == 0)
     return 0;
   
-  return winList[type]->generic.isVisible;
+  return tui_win_list[type]->generic.is_visible;
 }
 
 int
 tui_get_command_dimension (int *width, int *height)
 {
-  if (!tui_active || !m_winPtrNotNull (cmdWin))
+  if (!tui_active || (TUI_CMD_WIN == NULL))
     {
       return 0;
     }
   
-  *width = cmdWin->generic.width;
-  *height = cmdWin->generic.height;
+  *width = TUI_CMD_WIN->generic.width;
+  *height = TUI_CMD_WIN->generic.height;
   return 1;
 }

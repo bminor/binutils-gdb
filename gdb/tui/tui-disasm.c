@@ -29,7 +29,7 @@
 #include "value.h"
 #include "source.h"
 #include "disasm.h"
-
+#include "gdb_string.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-win.h"
@@ -177,7 +177,7 @@ tui_set_disassem_content (CORE_ADDR pc)
 {
   enum tui_status ret = TUI_FAILURE;
   register int i;
-  register int offset = disassemWin->detail.sourceInfo.horizontalOffset;
+  int offset = TUI_DISASM_WIN->detail.source_info.horizontal_offset;
   register int lineWidth, maxLines;
   CORE_ADDR cur_pc;
   struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
@@ -190,22 +190,22 @@ tui_set_disassem_content (CORE_ADDR pc)
   if (pc == 0)
     return TUI_FAILURE;
 
-  ret = tui_alloc_source_buffer (disassemWin);
+  ret = tui_alloc_source_buffer (TUI_DISASM_WIN);
   if (ret != TUI_SUCCESS)
     return ret;
 
-  disassemWin->detail.sourceInfo.startLineOrAddr.addr = pc;
+  TUI_DISASM_WIN->detail.source_info.start_line_or_addr.addr = pc;
   cur_pc = (CORE_ADDR)
-    (((struct tui_win_element *) locator->content[0])->whichElement.locator.addr);
+    (((struct tui_win_element *) locator->content[0])->which_element.locator.addr);
 
-  maxLines = disassemWin->generic.height - 2;	/* account for hilite */
+  maxLines = TUI_DISASM_WIN->generic.height - 2;	/* account for hilite */
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
                                          * maxLines);
   memset (lines, 0, sizeof (struct tui_asm_line) * maxLines);
 
-  lineWidth = disassemWin->generic.width - 1;
+  lineWidth = TUI_DISASM_WIN->generic.width - 1;
 
   tui_disassemble (lines, pc, maxLines);
 
@@ -235,8 +235,8 @@ tui_set_disassem_content (CORE_ADDR pc)
       struct tui_source_element* src;
       int curLen;
 
-      element = (struct tui_win_element *) disassemWin->generic.content[i];
-      src = &element->whichElement.source;
+      element = (struct tui_win_element *) TUI_DISASM_WIN->generic.content[i];
+      src = &element->which_element.source;
       strcpy (line, lines[i].addr_string);
       curLen = strlen (line);
 
@@ -255,17 +255,17 @@ tui_set_disassem_content (CORE_ADDR pc)
       else
         src->line[0] = '\0';
 
-      src->lineOrAddr.addr = lines[i].addr;
-      src->isExecPoint = lines[i].addr == cur_pc;
+      src->line_or_addr.addr = lines[i].addr;
+      src->is_exec_point = lines[i].addr == cur_pc;
 
       /* See whether there is a breakpoint installed.  */
-      src->hasBreak = (!src->isExecPoint
+      src->has_break = (!src->is_exec_point
                        && breakpoint_here_p (pc) != no_breakpoint_here);
 
       xfree (lines[i].addr_string);
       xfree (lines[i].insn);
     }
-  disassemWin->generic.contentSize = i;
+  TUI_DISASM_WIN->generic.content_size = i;
   return TUI_SUCCESS;
 }
 
@@ -280,13 +280,13 @@ tui_show_disassem (CORE_ADDR startAddr)
 
   val.addr = startAddr;
   tui_add_win_to_layout (DISASSEM_WIN);
-  tui_update_source_window (disassemWin, s, val, FALSE);
+  tui_update_source_window (TUI_DISASM_WIN, s, val, FALSE);
   /*
      ** if the focus was in the src win, put it in the asm win, if the
      ** source view isn't split
    */
-  if (tui_current_layout () != SRC_DISASSEM_COMMAND && winWithFocus == srcWin)
-    tui_set_win_focus_to (disassemWin);
+  if (tui_current_layout () != SRC_DISASSEM_COMMAND && winWithFocus == TUI_SRC_WIN)
+    tui_set_win_focus_to (TUI_DISASM_WIN);
 
   return;
 }
@@ -308,8 +308,8 @@ tui_show_disassem_and_update_source (CORE_ADDR startAddr)
          ** note that it follows what is in the disassembly window and visa-versa
        */
       sal = find_pc_line (startAddr, 0);
-      val.lineNo = sal.line;
-      tui_update_source_window (srcWin, sal.symtab, val, TRUE);
+      val.line_no = sal.line;
+      tui_update_source_window (TUI_SRC_WIN, sal.symtab, val, TRUE);
       if (sal.symtab)
 	{
 	  set_current_source_symtab_and_line (&sal);
@@ -330,7 +330,7 @@ tui_get_begin_asm_address (void)
   CORE_ADDR addr;
 
   locator = tui_locator_win_info_ptr ();
-  element = &((struct tui_win_element *) locator->content[0])->whichElement.locator;
+  element = &((struct tui_win_element *) locator->content[0])->which_element.locator;
 
   if (element->addr == 0)
     {
@@ -377,7 +377,7 @@ void
 tui_vertical_disassem_scroll (enum tui_scroll_direction scrollDirection,
 			      int numToScroll)
 {
-  if (disassemWin->generic.content != NULL)
+  if (TUI_DISASM_WIN->generic.content != NULL)
     {
       CORE_ADDR pc;
       tui_win_content content;
@@ -386,18 +386,18 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scrollDirection,
       int maxLines, dir;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-      content = (tui_win_content) disassemWin->generic.content;
+      content = (tui_win_content) TUI_DISASM_WIN->generic.content;
       if (cursal.symtab == (struct symtab *) NULL)
 	s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
       else
 	s = cursal.symtab;
 
       /* account for hilite */
-      maxLines = disassemWin->generic.height - 2;
-      pc = content[0]->whichElement.source.lineOrAddr.addr;
+      maxLines = TUI_DISASM_WIN->generic.height - 2;
+      pc = content[0]->which_element.source.line_or_addr.addr;
       dir = (scrollDirection == FORWARD_SCROLL) ? maxLines : - maxLines;
 
       val.addr = tui_find_disassembly_address (pc, dir);
-      tui_update_source_window_as_is (disassemWin, s, val, FALSE);
+      tui_update_source_window_as_is (TUI_DISASM_WIN, s, val, FALSE);
     }
 }

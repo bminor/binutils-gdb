@@ -52,15 +52,15 @@
 unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
-  struct tui_win_info * winInfo = tui_win_with_focus ();
-  WINDOW *w = cmdWin->generic.handle;
+  struct tui_win_info *win_info = tui_win_with_focus ();
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
 
   /*
      ** If the command window has the logical focus, or no-one does
      ** assume it is the command window; in this case, pass the
      ** character on through and do nothing here.
    */
-  if (winInfo == (struct tui_win_info *) NULL || winInfo == cmdWin)
+  if (win_info == NULL || win_info == TUI_CMD_WIN)
     return ch;
   else
     {
@@ -104,24 +104,24 @@ tui_dispatch_ctrl_char (unsigned int ch)
       switch (chCopy)
 	{
 	case KEY_NPAGE:
-	  tui_scroll_forward (winInfo, 0);
+	  tui_scroll_forward (win_info, 0);
 	  break;
 	case KEY_PPAGE:
-	  tui_scroll_backward (winInfo, 0);
+	  tui_scroll_backward (win_info, 0);
 	  break;
 	case KEY_DOWN:
 	case KEY_SF:
-	  tui_scroll_forward (winInfo, 1);
+	  tui_scroll_forward (win_info, 1);
 	  break;
 	case KEY_UP:
 	case KEY_SR:
-	  tui_scroll_backward (winInfo, 1);
+	  tui_scroll_backward (win_info, 1);
 	  break;
 	case KEY_RIGHT:
-	  tui_scroll_left (winInfo, 1);
+	  tui_scroll_left (win_info, 1);
 	  break;
 	case KEY_LEFT:
-	  tui_scroll_right (winInfo, 1);
+	  tui_scroll_right (win_info, 1);
 	  break;
 	case '\f':
 	  tui_refresh_all_win ();

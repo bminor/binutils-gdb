@@ -42,31 +42,31 @@
 
 /* Refresh the window.   */
 void
-tui_refresh_win (struct tui_gen_win_info * winInfo)
+tui_refresh_win (struct tui_gen_win_info * win_info)
 {
-  if (winInfo->type == DATA_WIN && winInfo->contentSize > 0)
+  if (win_info->type == DATA_WIN && win_info->content_size > 0)
     {
       int i;
 
-      for (i = 0; (i < winInfo->contentSize); i++)
+      for (i = 0; (i < win_info->content_size); i++)
 	{
 	  struct tui_gen_win_info * dataItemWinPtr;
 
 	  dataItemWinPtr = &((tui_win_content)
-			     winInfo->content)[i]->whichElement.dataWindow;
-	  if (m_genWinPtrNotNull (dataItemWinPtr) &&
-	      dataItemWinPtr->handle != (WINDOW *) NULL)
+			     win_info->content)[i]->which_element.data_window;
+	  if (dataItemWinPtr != NULL
+	      && dataItemWinPtr->handle != (WINDOW *) NULL)
 	    wrefresh (dataItemWinPtr->handle);
 	}
     }
-  else if (winInfo->type == CMD_WIN)
+  else if (win_info->type == CMD_WIN)
     {
       /* Do nothing */
     }
   else
     {
-      if (winInfo->handle != (WINDOW *) NULL)
-	wrefresh (winInfo->handle);
+      if (win_info->handle != (WINDOW *) NULL)
+	wrefresh (win_info->handle);
     }
 
   return;
@@ -86,14 +86,14 @@ tui_delete_win (WINDOW * window)
 
 /* Draw a border arround the window.  */
 void
-boxWin (struct tui_gen_win_info * winInfo, int highlightFlag)
+boxWin (struct tui_gen_win_info * win_info, int highlightFlag)
 {
-  if (winInfo && winInfo->handle)
+  if (win_info && win_info->handle)
     {
       WINDOW *win;
       int attrs;
 
-      win = winInfo->handle;
+      win = win_info->handle;
       if (highlightFlag == HILITE)
         attrs = tui_active_border_attrs;
       else
@@ -104,46 +104,47 @@ boxWin (struct tui_gen_win_info * winInfo, int highlightFlag)
                tui_border_hline, tui_border_hline,
                tui_border_ulcorner, tui_border_urcorner,
                tui_border_llcorner, tui_border_lrcorner);
-      if (winInfo->title)
-        mvwaddstr (win, 0, 3, winInfo->title);
+      if (win_info->title)
+        mvwaddstr (win, 0, 3, win_info->title);
       wattroff (win, attrs);
     }
 }
 
 
 void
-tui_unhighlight_win (struct tui_win_info * winInfo)
+tui_unhighlight_win (struct tui_win_info * win_info)
 {
-  if (m_winPtrNotNull (winInfo) && winInfo->generic.handle != (WINDOW *) NULL)
+  if (win_info != NULL && win_info->generic.handle != (WINDOW *) NULL)
     {
-      boxWin ((struct tui_gen_win_info *) winInfo, NO_HILITE);
-      wrefresh (winInfo->generic.handle);
-      m_setWinHighlightOff (winInfo);
+      boxWin ((struct tui_gen_win_info *) win_info, NO_HILITE);
+      wrefresh (win_info->generic.handle);
+      tui_set_win_highlight (win_info, 0);
     }
 }
 
 
 void
-tui_highlight_win (struct tui_win_info * winInfo)
+tui_highlight_win (struct tui_win_info * win_info)
 {
-  if (m_winPtrNotNull (winInfo) &&
-      winInfo->canHighlight && winInfo->generic.handle != (WINDOW *) NULL)
+  if (win_info != NULL
+      && win_info->can_highlight
+      && win_info->generic.handle != (WINDOW *) NULL)
     {
-      boxWin ((struct tui_gen_win_info *) winInfo, HILITE);
-      wrefresh (winInfo->generic.handle);
-      m_setWinHighlightOn (winInfo);
+      boxWin ((struct tui_gen_win_info *) win_info, HILITE);
+      wrefresh (win_info->generic.handle);
+      tui_set_win_highlight (win_info, 1);
     }
 }
 
 void
-tui_check_and_display_highlight_if_needed (struct tui_win_info * winInfo)
+tui_check_and_display_highlight_if_needed (struct tui_win_info * win_info)
 {
-  if (m_winPtrNotNull (winInfo) && winInfo->generic.type != CMD_WIN)
+  if (win_info != NULL && win_info->generic.type != CMD_WIN)
     {
-      if (winInfo->isHighlighted)
-	tui_highlight_win (winInfo);
+      if (win_info->is_highlighted)
+	tui_highlight_win (win_info);
       else
-	tui_unhighlight_win (winInfo);
+	tui_unhighlight_win (win_info);
 
     }
   return;
@@ -151,20 +152,20 @@ tui_check_and_display_highlight_if_needed (struct tui_win_info * winInfo)
 
 
 void
-tui_make_window (struct tui_gen_win_info * winInfo, int boxIt)
+tui_make_window (struct tui_gen_win_info * win_info, int boxIt)
 {
   WINDOW *handle;
 
-  handle = newwin (winInfo->height,
-		   winInfo->width,
-		   winInfo->origin.y,
-		   winInfo->origin.x);
-  winInfo->handle = handle;
+  handle = newwin (win_info->height,
+		   win_info->width,
+		   win_info->origin.y,
+		   win_info->origin.x);
+  win_info->handle = handle;
   if (handle != (WINDOW *) NULL)
     {
       if (boxIt == BOX_WINDOW)
-	boxWin (winInfo, NO_HILITE);
-      winInfo->isVisible = TRUE;
+	boxWin (win_info, NO_HILITE);
+      win_info->is_visible = TRUE;
       scrollok (handle, TRUE);
     }
 }
@@ -182,18 +183,18 @@ make_visible (struct tui_gen_win_info *win_info, int visible)
 
   if (visible)
     {
-      if (!win_info->isVisible)
+      if (!win_info->is_visible)
 	{
 	  tui_make_window (win_info,
 			   (win_info->type != CMD_WIN
-			    && !m_winIsAuxillary (win_info->type)));
-	  win_info->isVisible = TRUE;
+			    && !tui_win_is_auxillary (win_info->type)));
+	  win_info->is_visible = TRUE;
 	}
     }
   else if (!visible &&
-	   win_info->isVisible && win_info->handle != (WINDOW *) NULL)
+	   win_info->is_visible && win_info->handle != (WINDOW *) NULL)
     {
-      win_info->isVisible = FALSE;
+      win_info->is_visible = FALSE;
       tui_delete_win (win_info->handle);
       win_info->handle = (WINDOW *) NULL;
     }
@@ -222,13 +223,13 @@ make_all_visible (int visible)
 
   for (i = 0; i < MAX_MAJOR_WINDOWS; i++)
     {
-      if (m_winPtrNotNull (winList[i]) &&
-	  ((winList[i])->generic.type) != CMD_WIN)
+      if (tui_win_list[i] != NULL
+	  && ((tui_win_list[i])->generic.type) != CMD_WIN)
 	{
-	  if (m_winIsSourceType ((winList[i])->generic.type))
-	    make_visible ((winList[i])->detail.sourceInfo.executionInfo,
+	  if (tui_win_is_source_type ((tui_win_list[i])->generic.type))
+	    make_visible ((tui_win_list[i])->detail.source_info.execution_info,
 			  visible);
-	  make_visible ((struct tui_gen_win_info *) winList[i], visible);
+	  make_visible ((struct tui_gen_win_info *) tui_win_list[i], visible);
 	}
     }
 
@@ -257,18 +258,18 @@ tui_refresh_all (struct tui_win_info * * list)
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {
-      if (list[type] && list[type]->generic.isVisible)
+      if (list[type] && list[type]->generic.is_visible)
 	{
 	  if (type == SRC_WIN || type == DISASSEM_WIN)
 	    {
-	      touchwin (list[type]->detail.sourceInfo.executionInfo->handle);
-	      tui_refresh_win (list[type]->detail.sourceInfo.executionInfo);
+	      touchwin (list[type]->detail.source_info.execution_info->handle);
+	      tui_refresh_win (list[type]->detail.source_info.execution_info);
 	    }
 	  touchwin (list[type]->generic.handle);
 	  tui_refresh_win (&list[type]->generic);
 	}
     }
-  if (locator->isVisible)
+  if (locator->is_visible)
     {
       touchwin (locator->handle);
       tui_refresh_win (locator);

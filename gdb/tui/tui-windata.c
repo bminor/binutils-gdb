@@ -59,13 +59,13 @@ tuiFirstDataItemDisplayed (void)
   int elementNo = (-1);
   int i;
 
-  for (i = 0; (i < dataWin->generic.contentSize && elementNo < 0); i++)
+  for (i = 0; (i < TUI_DATA_WIN->generic.content_size && elementNo < 0); i++)
     {
       struct tui_gen_win_info * dataItemWin;
 
       dataItemWin = &((tui_win_content)
-		      dataWin->generic.content)[i]->whichElement.dataWindow;
-      if (dataItemWin->handle != (WINDOW *) NULL && dataItemWin->isVisible)
+		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
+      if (dataItemWin->handle != (WINDOW *) NULL && dataItemWin->is_visible)
 	elementNo = i;
     }
 
@@ -108,13 +108,13 @@ tuiDeleteDataContentWindows (void)
   int i;
   struct tui_gen_win_info * dataItemWinPtr;
 
-  for (i = 0; (i < dataWin->generic.contentSize); i++)
+  for (i = 0; (i < TUI_DATA_WIN->generic.content_size); i++)
     {
       dataItemWinPtr = &((tui_win_content)
-		      dataWin->generic.content)[i]->whichElement.dataWindow;
+		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
       tui_delete_win (dataItemWinPtr->handle);
       dataItemWinPtr->handle = (WINDOW *) NULL;
-      dataItemWinPtr->isVisible = FALSE;
+      dataItemWinPtr->is_visible = FALSE;
     }
 
   return;
@@ -124,23 +124,23 @@ tuiDeleteDataContentWindows (void)
 void
 tui_erase_data_content (char *prompt)
 {
-  werase (dataWin->generic.handle);
-  tui_check_and_display_highlight_if_needed (dataWin);
+  werase (TUI_DATA_WIN->generic.handle);
+  tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
   if (prompt != (char *) NULL)
     {
-      int halfWidth = (dataWin->generic.width - 2) / 2;
+      int halfWidth = (TUI_DATA_WIN->generic.width - 2) / 2;
       int xPos;
 
       if (strlen (prompt) >= halfWidth)
 	xPos = 1;
       else
 	xPos = halfWidth - strlen (prompt);
-      mvwaddstr (dataWin->generic.handle,
-		 (dataWin->generic.height / 2),
+      mvwaddstr (TUI_DATA_WIN->generic.handle,
+		 (TUI_DATA_WIN->generic.height / 2),
 		 xPos,
 		 prompt);
     }
-  wrefresh (dataWin->generic.handle);
+  wrefresh (TUI_DATA_WIN->generic.handle);
 }
 
 
@@ -149,20 +149,20 @@ tui_erase_data_content (char *prompt)
 void
 tui_display_all_data (void)
 {
-  if (dataWin->generic.contentSize <= 0)
+  if (TUI_DATA_WIN->generic.content_size <= 0)
     tui_erase_data_content (NO_DATA_STRING);
   else
     {
       tui_erase_data_content ((char *) NULL);
       tuiDeleteDataContentWindows ();
-      tui_check_and_display_highlight_if_needed (dataWin);
+      tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
       tui_display_registers_from (0);
       /*
          ** Then display the other data
        */
-      if (dataWin->detail.dataDisplayInfo.dataContent !=
+      if (TUI_DATA_WIN->detail.data_display_info.data_content !=
 	  (tui_win_content) NULL &&
-	  dataWin->detail.dataDisplayInfo.dataContentCount > 0)
+	  TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
 	{
 	}
     }
@@ -182,10 +182,10 @@ tuiDisplayDataFromLine (int lineNo)
   if (lineNo < 0)
     _lineNo = 0;
 
-  tui_check_and_display_highlight_if_needed (dataWin);
+  tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
 
   /* there is no general data, force regs to display (if there are any) */
-  if (dataWin->detail.dataDisplayInfo.dataContentCount <= 0)
+  if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0)
     tui_display_registers_from_line (_lineNo, TRUE);
   else
     {
@@ -227,7 +227,7 @@ tuiDisplayDataFrom (int elementNo, int reuseWindows)
 {
   int firstLine = (-1);
 
-  if (elementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
+  if (elementNo < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
     firstLine = tui_line_from_reg_element_no (elementNo);
   else
     {				/* calculate the firstLine from the element number */
@@ -250,7 +250,7 @@ void
 tui_refresh_data_win (void)
 {
   tui_erase_data_content ((char *) NULL);
-  if (dataWin->generic.contentSize > 0)
+  if (TUI_DATA_WIN->generic.content_size > 0)
     {
       int firstElement = tuiFirstDataItemDisplayed ();
 
@@ -267,21 +267,21 @@ tui_check_data_values (struct frame_info *frame)
   tui_check_register_values (frame);
 
   /* Now check any other data values that there are */
-  if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
+  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
     {
       int i;
 
-      for (i = 0; dataWin->detail.dataDisplayInfo.dataContentCount; i++)
+      for (i = 0; TUI_DATA_WIN->detail.data_display_info.data_content_count; i++)
 	{
 #ifdef LATER
 	  TuiDataElementPtr dataElementPtr;
 	  struct tui_gen_win_info * dataItemWinPtr;
 	  Opaque newValue;
 
-	  dataItemPtr = &dataWin->detail.dataDisplayInfo.
-	    dataContent[i]->whichElement.dataWindow;
+	  dataItemPtr = &TUI_DATA_WIN->detail.data_display_info.
+	    data_content[i]->which_element.data_window;
 	  dataElementPtr = &((tui_win_content)
-			     dataItemWinPtr->content)[0]->whichElement.data;
+			     dataItemWinPtr->content)[0]->which_element.data;
 	  if value
 	    has changed (dataElementPtr, frame, &newValue)
 	    {
@@ -302,7 +302,7 @@ tui_vertical_data_scroll (enum tui_scroll_direction scrollDirection, int numToSc
   int firstLine = (-1);
 
   firstElementNo = tuiFirstDataItemDisplayed ();
-  if (firstElementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
+  if (firstElementNo < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
     firstLine = tui_line_from_reg_element_no (firstElementNo);
   else
     {				/* calculate the first line from the element number which is in

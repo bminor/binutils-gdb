@@ -1,3 +1,34 @@
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui.h: Do not include <stdarg.h>, <string.h>, and
+	"ansidecl.h".  Do not undef "reg" and "chtype".  Fix case of
+	fields and variables.
+	* tui/tui-wingeneral.h (m_beVisible): Delete macro.
+	(m_beInvisible): Delete macro.
+	* tui/tui-data.h: Fix case case fields and variables.
+	(m_genWinPtrIsNull): Delete macro.
+	(tui_win_list): Rename winList.
+	(TUI_SRC_WIN): Rename srcWin.
+	(TUI_DISASM_WIN): Rename disassemWin.
+	(TUI_DATA_WIN): Rename dataWin.
+	(TUI_CMD_WIN): Rename cmdWin.
+	(m_genWinPtrNotNull): Delete macro.
+	(m_winPtrIsNull): Delete macro.
+	(m_winPtrNotNull): Delete macro.
+	(tui_win_is_source_type): Replace m_winIsSourceType
+	(tui_win_is_auxillary): Replace m_winIsAuzillary.
+	(tui_win_has_locator): Replace m_hasLocator.
+	(tui_set_win_highlight): Replace m_setWinHighlightOn and
+	m_setWinHighlightOff.
+	* tui/tui-data.c: Update references.
+	(tui_win_is_source_type, tui_set_win_highlight): New functions.
+	(tui_win_has_locator, tui_win_is_auxillary): New functions.
+	* tui/tui-command.c, tui/tui-disasm.c: Update references.
+	* tui/tui-io.c, tui/tui-layout.c, tui/tui-regs.c: Ditto.
+	* tui/tui-regs.h, tui/tui-source.c, tui/tui-stack.c: Ditto.
+	* tui/tui-win.c, tui/tui-windata.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c, tui/tui.c: Ditto.
+
 2004-02-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.h (sparc_fetch_wcookie): New prototype.
