@@ -1,3 +1,19 @@
+Mon Apr  8 23:57:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* dbxread.c (dbx_symfile_read):  Initialize psymbol list if this
+	is the first symbol read, even if not mainline.
+	(dbx_psymtab_to_symtab):  symfile might be zero, cope.
+	* exec.c (exec_ops):  Add_syms_addr is valid in our tvec.
+	(set_section_command):  New command ("section xxx yyy" -- should
+	be renamed to "set section xxx yyy" FIXME) which sets the
+	base address of a section of the exec file, overriding the
+	virtual address that BFD reports.
+
+Fri Apr  5 17:14:39 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* exec.c:  Add add_syms_addr_command to exec_ops, so you can
+	load symbols at any address while examining an exec file.
+
 Thu Apr  4 10:09:35 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* tm-i386v.h (FLOAT_INFO):  Don't define it, since the code
