@@ -1,11 +1,17 @@
 \input texinfo
 @setfilename binutils.info
 
-@c start-menu
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+
 * Binutils: (binutils).	
 		The GNU binary utilities "ar", "ld", "objdump", "nm",
 		"size", "strip", and "ranlib".
-@c end-menu
+
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
 
 @synindex ky cp
 @c
