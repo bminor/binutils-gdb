@@ -421,6 +421,7 @@ extern bfd_target a29kcoff_big_vec;
 extern bfd_target a_out_adobe_vec;
 extern bfd_target aout_mips_big_vec;
 extern bfd_target aout_mips_little_vec;
+extern bfd_target aout0_big_vec;
 extern bfd_target apollocoff_vec;
 extern bfd_target b_out_vec_big_host;
 extern bfd_target b_out_vec_little_host;
@@ -472,9 +473,7 @@ extern bfd_target newsos3_vec;
 extern bfd_target nlm32_i386_vec;
 extern bfd_target nlm32_sparc_vec;
 extern bfd_target nlm32_alpha_vec;
-/*start-sanitize-powerpc-netware*/
 extern bfd_target nlm32_powerpc_vec;
-/*end-sanitize-powerpc-netware*/
 extern bfd_target oasys_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target shcoff_vec;
@@ -541,6 +540,7 @@ bfd_target *bfd_target_vector[] = {
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
+	&bfd_elf32_powerpc_vec,
 #ifdef BFD64			/* No one seems to use this.  */
 	&bfd_elf64_big_generic_vec,
 	&bfd_elf64_little_generic_vec,
@@ -614,6 +614,7 @@ bfd_target *bfd_target_vector[] = {
 	&sparclynx_aout_vec,
 	&sparclynx_coff_vec,
 	&sunos_big_vec,
+	&aout0_big_vec,
 #if 0
 	&tekhex_vec,
 #endif

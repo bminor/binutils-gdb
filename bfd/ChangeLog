@@ -531,11 +531,9 @@ Wed Apr 20 16:45:51 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	ones defined in stdlib.h.  (From Minh Tran-Le.)
 
 Wed Apr 20 14:15:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
-start-sanitize-powerpc-netware
 
 	* nlm32-ppc.c: Complete rewrite for new version of PowerPC
 	NetWare.  Old code still present, but ifdeffed out.
-end-sanitize-powerpc-netware
 
 	* nlmcode.h (nlm_swap_auxiliary_headers_in): Don't assume a
 	particular format for the customer header.  Allocate a block of
@@ -1664,9 +1662,7 @@ Mon Mar 14 11:41:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 Sat Mar 12 09:46:09 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* elf32-ppc.c: Renamed from elf32-powerpc.c.
- 	start-sanitize-powerpc-netware
 	* nlm32-ppc.c: Renamed from nlm32-powerpc.c.
- 	end-sanitize-powerpc-netware
 	* Makefile.in, configure.in: Corresponding changes.
 
 Fri Mar 11 22:27:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
@@ -1955,7 +1951,6 @@ Sat Feb 19 03:17:32 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 Fri Feb 18 11:41:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
- 	start-sanitize-powerpc-netware
 	Support for PowerPC NetWare.
 	* nlm32-powerpc.c: New file.
 	* config.bfd (powerpc-*-netware*): New target; use ppc-nlm.
@@ -1964,9 +1959,7 @@ Fri Feb 18 11:41:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	nlm32-powerpc.o, nlm32.o, nlm.o.
 	* targets.c (nlm32_powerpc_vec): Declare.
 	* Makefile.in (BFD32_BACKENDS): Add nlm32-powerpc.o.
-	(CFILES): Should add nlm32-powerpc.c, but didn't, because the
-	dependencies can't be sanitized.
-	end-sanitize-powerpc-netware
+	(CFILES): Add nlm32-powerpc.c.
 
 	Initial support for PowerPC ELF.  Done without an ABI, and
 	probably to be changed when I get an ABI.
