@@ -3403,7 +3403,7 @@ elf64_alpha_merge_ind_symbols (hi, dummy)
 	{
 	  rin = ri->next;
 	  for (rs = rsh; rs ; rs = rs->next)
-	    if (ri->rtype == rs->rtype)
+	    if (ri->rtype == rs->rtype && ri->srel == rs->srel)
 	      {
 		rs->count += ri->count;
 		goto found_reloc;

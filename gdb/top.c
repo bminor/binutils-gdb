@@ -82,7 +82,7 @@ int inhibit_gdbinit = 0;
 /* If nonzero, and GDB has been configured to be able to use windows,
    attempt to open them upon startup.  */
 
-int use_windows = 1;
+int use_windows = 0;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
 

@@ -1,3 +1,148 @@
+2002-09-27  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (cris-tdep.o): Depend on gdb_string_h.
+	(mcore-tdep.o): Ditto.
+	(ns32k-tdep.o): Ditto.
+	(ns32knbsd-tdep.o): Ditto.
+	(sh3-rom.o): Ditto.
+	(vax-tdep.o): Ditto.
+	* cris-tdep.c: #include "gdb_string.h"
+	* mcore-tdep.c: Ditto.
+	* ns32k-tdep.c: Ditto.
+	* ns32knbsd-tdep.c: Ditto.
+	* sh3-rom.c: Ditto.
+	* vax-tdep.c: Ditto.
+
+2002-09-27  David Carlton  <carlton@math.stanford.edu>
+
+	* config/djgpp/fnchange.lst: Add entries for
+	gdb/testsuite/gdb.c++/m-static files.
+
+2002-09-27  Jim Wilson  <wilson@redhat.com>
+
+	* MAINTAINERS: Add myself to the Write After Approval list.
+
+2002-09-26  Martin M. Hunt  <hunt@redhat.com>
+
+	* mips-tdep.c (find_proc_desc): Initialize startaddr.
+
+
+2002-09-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_frame_chain): Don't chain past the dummy
+	frame.
+
+2002-09-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_extract_struct_value_address): Return 0.
+	(rs6000_struct_return_address): Delete variable.
+	(rs6000_store_struct_return): Update.
+	(rs6000_gdbarch_init): Set extract_struct_value_address instead of
+	deprecated_extract_struct_value_address.
+	(rs6000_frame_align): New function.
+	(rs6000_gdbarch_init): Set frame_align.
+
+2002-09-26  Andrew Cagney  <ac131313@redhat.com>
+
+	From Grace Sainsbury <graces@redhat.com>:
+	* Makefile.in (gdbtk-main.o): New target.
+	(gdb.o): New target.
+	(main_h): Define.
+	(main.o): Update dependencies.
+	(gdb$(EXEEXT)): Add gdb.o.
+	(SUBDIR_GDBTK_SRCS): Add gdbtk-main.c.
+	(SUBDIR_GDBTK_ALL, SUBDIR_GDBTK_UNINSTALL): Set.
+	(SUBDIR_GDBTK_CLEAN): Set.
+	(install-gdbtk): Install the insight binary.
+	(uninstall-gdbtk): New target.
+	(all-gdbtk, clean-gdbtk): New rule.
+	* top.c (use_windows): Default to zero.
+	* main.c: Include "main.h".
+	(main): Delete.
+	(struct captured_main_args): Delete.
+	(gdb_main): New function.
+	* main.h: New file.
+	* gdb.c: New File.
+
+2002-09-25  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c: Include "gdb_string.h" and "builtin-regs.h".
+	(frame_map_regnum_to_name): New function.
+	(frame_map_name_to_regnum): New function.
+	* frame.h (frame_map_name_to_regnum): Declare.
+	(frame_map_regnum_to_name): Declare.
+	* builtin-regs.c (builtin_reg_map_regnum_to_name): New function.
+	* builtin-regs.h (builtin_reg_map_regnum_to_name): Declare.
+	* parse.c: Do not include "builtin-regs.h".
+	(target_map_name_to_register): Delete function.
+	(write_dollar_variable): Use frame_map_name_to_regnum.
+	* parser-defs.h (target_map_name_to_register): Delete declaration.
+	* expprint.c: Include "frame.h".
+	(print_subexp): Use frame_map_regnum_to_name.
+	* eval.c (evaluate_subexp_standard): Use frame_map_regnum_to_name.
+	* infcmd.c (registers_info): Use frame_map_name_to_regnum.
+
+2002-09-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_frame_saved_pc): If the link register
+	wasn't saved, and the next innermost frame is a dummy, return the
+	dummy frame's link register.
+
+2002-09-24  Jim Blandy  <jimb@redhat.com>
+
+	Fix from Paul Breed:
+	* main.c (captured_main): Add a `break' after the case for 'b'.
+
+2002-09-24  Keith Seitz  <keiths@redhat.com>
+
+	* varobj.c (c_type_of_child): Use get_target_type instead
+	of TYPE_TARGET_TYPE.
+
+2002-09-22  Fernando Nasser  <fnasser@redhat.com>
+
+	* source.c (get_current_or_default_source_symtab_and_line): Remove
+	function.
+	(set_default_source_symtab_and_line): New function. Attempts to
+	determine a source file to list lines from if one is not currently
+	defined.
+	(get_current_source_symtab_and_line): Initialize sal.pc and
+        sal.end fields.
+	(set_current_source_symtab_and_line): Mark argument as const.
+	* source.h: Update declarations and comments.
+	* linespec.c (decode_line_1): Replace call to removed routine above.
+	* stack.c (print_frame_info_base): Ditto.
+	* cli/cli-cmds.c (edit_command): Ditto.
+	(list_command): Ditto.
+
+2002-09-22  Fernando Nasser  <fnasser@redhat.com>
+
+	* source.c (get_current__or_default_source_symtab_and_line): Initialize
+	sal.pc and sal.end fields.
+	(get_current_or_default_source_symtab_and_line): Ditto.
+	* breakpoint.c (parse_breakpoint_sals): Use correct accessor function
+	so we do not cause a new source symtab to be searched for (reverting an
+	unintentional change from the 2002-09-20 patch).
+	* scm-lang.c (scm_unpac): Ditto.
+
+2002-09-21  Andrew Cagney  <cagney@redhat.com>
+
+	* complaints.c (symfile_explanations): Remove new-line from
+	``isolated_message''.
+	(vcomplaint): When ISOLATED_MESSAGE, force a line break.
+	(clear_complaints): When a SUBSEQUENT_MESSAGE, force a line break.
+
+2002-09-20  Nick Clifton  <nickc@redhat.com>
+	
+	* NEWS: Announce that V850EA ISA is no longer supported.
+        * v850-tdep.c: Remove reference to bfd_mach_v850ea.
+
+2002-09-20  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (c-lang.o): Correct dependencies.
+	(utils.o): Gather dependencies.
+	(charset.o): Move.
+	* c-lang.c: #include "gdb_string.h"
+
 2002-09-20  Fernando Nasser  <fnasser@redhat.com>
 
 	From 2002-07-02  George Helffrich <george@gly.bris.ac.uk>

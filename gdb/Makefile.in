@@ -290,16 +290,17 @@ SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-bp.c \
 	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c \
 	gdbtk/generic/gdbtk-register.c gdbtk/generic/gdbtk-stack.c \
-	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c
+	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c \
+	gdbtk/generic/gdbtk-main.c
 SUBDIR_GDBTK_DEPS = \
 	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)
 SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
-SUBDIR_GDBTK_ALL=
-SUBDIR_GDBTK_CLEAN=
+SUBDIR_GDBTK_ALL= all-gdbtk
+SUBDIR_GDBTK_CLEAN= clean-gdbtk
 SUBDIR_GDBTK_INSTALL= install-gdbtk
-SUBDIR_GDBTK_UNINSTALL= 
+SUBDIR_GDBTK_UNINSTALL= uninstall-gdbtk
 
 CONFIG_OBS= @CONFIG_OBS@
 CONFIG_LIB_OBS= @CONFIG_LIB_OBS@
@@ -679,6 +680,7 @@ m2_lang_h = m2-lang.h
 macroexp_h = macroexp.h
 macroscope_h = macroscope.h $(macrotab_h) $(symtab_h)
 macrotab_h = macrotab.h
+main_h = main.h
 memattr_h = memattr.h
 minimon_h = minimon.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
@@ -929,24 +931,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 		  true ; \
 		fi ; \
 		rm -f $(bindir)/$$transformed_name$(EXEEXT) $(man1dir)/$$transformed_name.1
-	rm -rf $(GDBTK_LIBRARY)
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
-
-install-gdbtk:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
-	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(GDBTK_LIBRARY)/images \
-		$(GDBTK_LIBRARY)/images2 ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
-		$(GDBTK_LIBRARY)/help/images \
-		$(GDBTK_LIBRARY)/help/trace ; \
-	cd $(srcdir)/gdbtk/library ; \
-	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
-	  do \
-		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
-	  done ;
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
@@ -1017,11 +1002,11 @@ init.c: $(INIT_FILES)
 init.o: init.c $(defs_h) $(call_cmds_h)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): gdb.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
-	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
-	main.o libgdb.a $(CONFIG_OBS) $(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS)\
-	$(LOADLIBES)
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+		-o gdb$(EXEEXT) gdb.o main.o $(CONFIG_OBS) libgdb.a \
+		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
@@ -1560,7 +1545,7 @@ builtin-regs.o: builtin-regs.c $(defs_h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(valprint_h) \
-	$(macroscope_h) $(gdb_assert_h)
+	$(macroscope_h) $(gdb_assert_h) $(charset_h) $(gdb_string_h)
 c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(language_h) $(demangle_h) $(c_lang_h) $(typeprint_h) $(cp_abi_h) \
@@ -1572,6 +1557,7 @@ c-valprint.o: c-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 # OBSOLETE ch-lang.o: ch-lang.c
 # OBSOLETE ch-typeprint.o: ch-typeprint.c
 # OBSOLETE ch-valprint.o: ch-valprint.c
+charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h) $(gdb_string_h) \
 	$(gdb_assert_h)
 coff-solib.o: coff-solib.c $(defs_h) $(frame_h) $(bfd_h) $(gdbcore_h) \
@@ -1609,7 +1595,7 @@ cpu32bug-rom.o: cpu32bug-rom.c $(defs_h) $(gdbcore_h) $(target_h) \
 cris-tdep.o: cris-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(inferior_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(value_h) \
 	$(opcode_cris_h) $(arch_utils_h) $(regcache_h) $(symfile_h) \
-	$(solib_h) $(solib_svr4_h)
+	$(solib_h) $(solib_svr4_h) $(gdb_string_h)
 # OBSOLETE cxux-nat.o: cxux-nat.c
 d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) $(inferior_h) \
@@ -1690,6 +1676,7 @@ frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 gcore.o: gcore.c $(defs_h) $(cli_decode_h) $(inferior_h) $(gdbcore_h) \
 	$(elf_bfd_h) $(symfile_h) $(objfiles_h)
+gdb.o: gdb.c $(defs_h) $(main_h) $(gdb_string_h)
 gdb-events.o: gdb-events.c $(defs_h) $(gdb_events_h) $(gdbcmd_h)
 gdbarch.o: gdbarch.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_string_h) $(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) \
@@ -1883,7 +1870,7 @@ macrotab.o: macrotab.c $(defs_h) $(gdb_obstack_h) $(splay_tree_h) \
 	$(bcache_h) $(complaints_h)
 main.o: main.c $(defs_h) $(top_h) $(target_h) $(inferior_h) $(symfile_h) \
 	$(gdbcore_h) $(getopt_h) $(gdb_stat_h) $(gdb_string_h) \
-	$(event_loop_h) $(ui_out_h)
+	$(event_loop_h) $(ui_out_h) $(main_h)
 maint.o: maint.c $(defs_h) $(command_h) $(gdbcmd_h) $(symtab_h) \
 	$(gdbtypes_h) $(demangle_h) $(gdbcore_h) $(expression_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(value_h) $(cli_decode_h)
@@ -1891,7 +1878,7 @@ mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(gdb_string_h) $(regcache_h) $(serial_h)
 mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcmd_h) $(regcache_h) $(symfile_h) $(gdbcore_h) $(inferior_h) \
-	$(arch_utils_h)
+	$(arch_utils_h) $(gdb_string_h)
 mdebugread.o: mdebugread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_obstack_h) $(buildsym_h) \
 	$(stabsread_h) $(complaints_h) $(demangle_h) $(gdb_assert_h) \
@@ -1944,10 +1931,10 @@ nlmread.o: nlmread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h)
 ns32k-tdep.o: ns32k-tdep.c $(defs_h) $(frame_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(target_h) $(arch_utils_h) \
-	$(ns32k_tdep_h)
+	$(ns32k_tdep_h) $(gdb_string_h)
 ns32knbsd-nat.o: ns32knbsd-nat.c $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
-ns32knbsd-tdep.o: ns32knbsd-tdep.c $(defs_h) $(ns32k_tdep_h)
+ns32knbsd-tdep.o: ns32knbsd-tdep.c $(defs_h) $(ns32k_tdep_h) $(gdb_string_h)
 objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_stat_h) \
 	$(gdb_obstack_h) $(gdb_string_h) $(breakpoint_h) $(mmalloc_h)
@@ -2121,7 +2108,8 @@ sh-tdep.o: sh-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(symfile_h) \
 	$(regcache_h) $(doublest_h) $(sh_tdep_h) $(elf_bfd_h) \
 	$(solib_svr4_h) $(elf_sh_h) $(gdb_sim_sh_h)
 sh3-rom.o: sh3-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
-	$(serial_h) $(srec_h) $(arch_utils_h) $(regcache_h) $(sh_tdep_h)
+	$(serial_h) $(srec_h) $(arch_utils_h) $(regcache_h) $(gdb_string_h) \
+	$(sh_tdep_h)
 shnbsd-nat.o: shnbsd-nat.c $(defs_h) $(inferior_h) $(shnbsd_tdep_h)
 shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) $(value_h) \
 	$(solib_svr4_h) $(nbsd_tdep_h) $(sh_tdep_h) $(shnbsd_tdep_h)
@@ -2242,7 +2230,7 @@ ui-out.o: ui-out.c $(defs_h) $(gdb_string_h) $(expression_h) $(language_h) \
 utils.o: utils.c $(config_h) $(defs_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(event_top_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) \
 	$(demangle_h) $(expression_h) $(language_h) $(annotate_h) \
-	$(filenames_h) $(inferior_h) $(mmalloc_h)
+	$(filenames_h) $(inferior_h) $(mmalloc_h) $(charset_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
 v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
@@ -2269,7 +2257,7 @@ varobj.o: varobj.c $(defs_h) $(value_h) $(expression_h) $(frame_h) \
 	$(language_h) $(wrapper_h) $(gdbcmd_h) $(gdb_string_h) $(varobj_h)
 vax-tdep.o: vax-tdep.c $(defs_h) $(symtab_h) $(opcode_vax_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(frame_h) $(value_h) $(arch_utils_h) \
-	$(vax_tdep_h)
+	$(gdb_string_h) $(vax_tdep_h)
 w89k-rom.o: w89k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(xmodem_h) $(regcache_h)
 win32-nat.o: win32-nat.c $(defs_h) $(tm_h) $(frame_h) $(inferior_h) \
@@ -2340,6 +2328,55 @@ cli-utils.o: $(srcdir)/cli/cli-utils.c $(defs_h) $(cli_utils_h)
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the mi directory.
 
+all-gdbtk: insight$(EXEEXT)
+
+install-gdbtk:
+	transformed_name=`t='$(program_transform_name)'; \
+		  echo insight | sed -e $$t` ; \
+	if test "x$$transformed_name" = x; then \
+	  transformed_name=insight ; \
+	else \
+	  true ; \
+	fi ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir)
+	$(INSTALL_PROGRAM) insight$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
+	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(GDBTK_LIBRARY)/images \
+		$(GDBTK_LIBRARY)/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
+		$(GDBTK_LIBRARY)/help/images \
+		$(GDBTK_LIBRARY)/help/trace ; \
+	cd $(srcdir)/gdbtk/library ; \
+	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	  do \
+		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
+	  done ;
+
+uninstall-gdbtk:
+	transformed_name=`t='$(program_transform_name)'; \
+		  echo insight | sed -e $$t` ; \
+	if test "x$$transformed_name" = x; then \
+		transformed_name=insight ; \
+	else \
+		true ; \
+	fi ; \
+	rm -f $(bindir)/$$transformed_name$(EXEEXT) ; \
+	rm -rf $(GDBTK_LIBRARY)
+
+clean-gdbtk:
+	rm -f insight$(EXEEXT)
+
+# Removing the old gdb first works better if it is running, at least on SunOS.
+insight$(EXEEXT): gdbtk-main.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) \
+		$(CDEPS) $(TDEPLIBS)
+	rm -f insight$(EXEEXT)
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+		-o insight$(EXEEXT) gdbtk-main.o main.o libgdb.a $(CONFIG_OBS)\
+		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+
 gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
 	$(WINDRES) --include $(srcdir)/gdbtk $(srcdir)/gdbtk/gdb.rc gdbres.o
 
@@ -2382,6 +2419,12 @@ gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+
+gdbtk-main.o: $(srcdir)/gdbtk/generic/gdbtk-main.c $(defs_h) $(main_h) \
+	$(gdb_string_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-main.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-register.o: $(srcdir)/gdbtk/generic/gdbtk-register.c \
 		$(srcdir)/gdbtk/generic/gdbtk.h \
@@ -2588,8 +2631,4 @@ xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_rdb.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
 
-charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
-
-c-lang.o: $(charset_h)
-utils.o: $(charset_h)
 ### end of the gdb Makefile.in.

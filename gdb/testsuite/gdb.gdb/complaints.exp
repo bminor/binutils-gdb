@@ -101,7 +101,7 @@ proc setup_test { executable } {
     return 0
 }
 
-proc test_isolated_complaints { } {
+proc test_initial_complaints { } {
 
     global gdb_prompt
 
@@ -233,6 +233,41 @@ proc test_short_complaints { } {
     return 0
 }
 
+# Check that nothing comes out when there haven't been any real
+# complaints.  Note that each test is really checking the previous
+# command.
+
+proc test_empty_complaint { cmd msg } {
+    global gdb_prompt
+    send_gdb $cmd
+    gdb_expect {
+	-re "\r\n\r\n$gdb_prompt " {
+	    fail $msg
+	}
+	"\r\n$gdb_prompt" {
+	    pass $msg
+	}
+	timeout {
+	    fail "$msg (timeout)"
+	}
+    }
+  
+}
+
+proc test_empty_complaints { } {
+
+    test_empty_complaint "call clear_complaints(&symfile_complaints,0,0)\n" \
+	    "empty non-verbose non-noisy clear"
+    test_empty_complaint "call clear_complaints(&symfile_complaints,1,0)\n" \
+	    "empty verbose non-noisy clear"
+    test_empty_complaint "call clear_complaints(&symfile_complaints,1,1)\n" \
+	    "empty verbose noisy clear"
+    test_empty_complaint "call clear_complaints(&symfile_complaints,0,1)\n" \
+	    "empty non-verbose noisy clear"
+
+    return 0
+}
+
 # Find a pathname to a file that we would execute if the shell was asked
 # to run $arg using the current PATH.
 
@@ -274,9 +309,10 @@ if {$setup_result <0} then {
     return -1
 }
 
-test_isolated_complaints
+test_initial_complaints
 test_serial_complaints
 test_short_complaints
+test_empty_complaints
 
 gdb_exit;
 catch "remote_file host delete $file";

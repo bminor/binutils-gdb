@@ -1701,7 +1701,7 @@ registers_info (char *addr_exp, int fpregs)
 	++end;
       numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
-      regnum = target_map_name_to_register (addr_exp, end - addr_exp);
+      regnum = frame_map_name_to_regnum (addr_exp, end - addr_exp);
       if (regnum >= 0)
 	goto found;
 

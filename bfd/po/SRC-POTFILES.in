@@ -45,6 +45,7 @@ coff-sparc.c
 coff-stgo32.c
 coff-svm68k.c
 coff-tic30.c
+coff-tic4x.c
 coff-tic54x.c
 coff-tic80.c
 coff-u68k.c
@@ -98,6 +99,7 @@ cpu-s390.c
 cpu-sh.c
 cpu-sparc.c
 cpu-tic30.c
+cpu-tic4x.c
 cpu-tic54x.c
 cpu-tic80.c
 cpu-v850.c
@@ -135,6 +137,7 @@ elf32-h8300.c
 elf32-hppa.c
 elf32-hppa.h
 elf32-i370.c
+elf32-i386-fbsd.c
 elf32-i386.c
 elf32-i386qnx.c
 elf32-i860.c
@@ -151,6 +154,7 @@ elf32-openrisc.c
 elf32-or32.c
 elf32-pj.c
 elf32-ppc.c
+elf32-ppcqnx.c
 elf32-s390.c
 elf32-sh-lin.c
 elf32-sh-nbsd.c
@@ -158,11 +162,13 @@ elf32-sh.c
 elf32-sh64-com.c
 elf32-sh64-nbsd.c
 elf32-sh64.c
+elf32-shqnx.c
 elf32-sparc.c
 elf32-v850.c
 elf32-vax.c
 elf32-xstormy16.c
 elf32.c
+elf64-alpha-fbsd.c
 elf64-alpha.c
 elf64-gen.c
 elf64-hppa.c
@@ -178,10 +184,12 @@ elf64-x86-64.c
 elf64.c
 elfarm-nabi.c
 elfarm-oabi.c
+elfarmqnx-nabi.c
 elfcode.h
 elfcore.h
 elflink.c
 elflink.h
+elfn32-mips.c
 elfxx-mips.c
 epoc-pe-arm.c
 epoc-pei-arm.c

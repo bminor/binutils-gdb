@@ -1168,10 +1168,10 @@ elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
-elf32-i386-fbsd.lo: elf32-i386-fbsd.c elf32-i386.c $(INCDIR)/filenames.h \
-  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
-  $(INCDIR)/elf/reloc-macros.h elf32-target.h
+elf32-i386-fbsd.lo: elf32-i386-fbsd.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-i386.c \
+  $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-i386qnx.lo: elf32-i386qnx.c elf32-i386.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
@@ -1533,13 +1533,13 @@ elf64-alpha.lo: elf64-alpha.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
   libecoff.h ecoffswap.h elf64-target.h
-elf64-alpha-fbsd.lo: elf64-alpha-fbsd.c elf64-alpha.c $(INCDIR)/filenames.h \
+elf64-alpha-fbsd.lo: elf64-alpha-fbsd.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/alpha.h \
-  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
-  libecoff.h ecoffswap.h elf64-target.h
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf64-alpha.c \
+  $(INCDIR)/elf/alpha.h $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
+  $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h \
+  libcoff.h libecoff.h ecoffswap.h elf64-target.h
 elf64-hppa.lo: elf64-hppa.c $(INCDIR)/alloca-conf.h \
   $(INCDIR)/filenames.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \

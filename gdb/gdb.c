@@ -1,8 +1,5 @@
-/* Builtin registers, for GDB, the GNU debugger.
-
+/* Main function for CLI gdb.  
    Copyright 2002 Free Software Foundation, Inc.
-
-   Contributed by Red Hat.
 
    This file is part of GDB.
 
@@ -21,17 +18,17 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef BUILTIN_REGS_H
-#define BUILTIN_REGS_H
+#include "defs.h"
+#include "main.h"
+#include "gdb_string.h"
 
-extern int builtin_reg_map_name_to_regnum (const char *str, int len);
-
-extern const char *builtin_reg_map_regnum_to_name (int regnum);
-
-extern struct value *value_of_builtin_reg (int regnum,
-					   struct frame_info *frame);
-
-extern void add_builtin_reg (const char *name,
-			     struct value *(value) (struct frame_info * frame));
-
-#endif
+int
+main (int argc, char **argv)
+{
+  struct captured_main_args args;
+  memset (&args, 0, sizeof args);
+  args.argc = argc;
+  args.argv = argv;
+  args.use_windows = 0;
+  return gdb_main (&args);
+}

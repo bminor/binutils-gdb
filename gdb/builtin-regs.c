@@ -68,6 +68,15 @@ builtin_reg_map_name_to_regnum (const char *name, int len)
   return -1;
 }
 
+const char *
+builtin_reg_map_regnum_to_name (int regnum)
+{
+  int reg = regnum - (NUM_REGS + NUM_PSEUDO_REGS);
+  if (reg < 0 || reg >= nr_builtin_regs)
+    return NULL;
+  return builtin_regs[reg].name;
+}
+
 struct value *
 value_of_builtin_reg (int regnum, struct frame_info *frame)
 {

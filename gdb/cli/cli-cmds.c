@@ -552,7 +552,10 @@ edit_command (char *arg, int from_tty)
 
   /* Pull in the current default source line if necessary */
   if (arg == 0)
-    sal = get_current_or_default_source_symtab_and_line ();
+    {
+      set_default_source_symtab_and_line ();
+      sal = get_current_source_symtab_and_line ();
+    }
 
   /* bare "edit" edits file with present line.  */
 
@@ -655,7 +658,10 @@ list_command (char *arg, int from_tty)
 
   /* Pull in the current default source line if necessary */
   if (arg == 0 || arg[0] == '+' || arg[0] == '-')
-    cursal = get_current_or_default_source_symtab_and_line ();
+    {
+      set_default_source_symtab_and_line ();
+      cursal = get_current_source_symtab_and_line ();
+    }
 
   /* "l" or "l +" lists next ten lines.  */
 

@@ -1,3 +1,15 @@
+2002-09-27  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-07-12 Mo DeJong <supermo@bayarea.net>
+	* gdbmi.texinfo (var-evaluate-expression): Note that
+	var-list-children must be invoked before child variable
+	values can be evaluated.
+
+2002-09-26  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-disas.c (dump_insns): Add text only output for CLI.
+        (do_mixed_source_and_assembly): Ditto.
+
 2002-09-11  Keith Seitz  <keiths@redhat.com>
 
 	* mi-main.c (mi_cmd_data_list_register_names): Use cleanups

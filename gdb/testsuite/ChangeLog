@@ -1,3 +1,21 @@
+2002-09-26  Keith Seitz  <keiths@redhat.com>
+
+	* lib/insight-support.exp (gdbtk_start): Figure out where
+	the insight executable is based on where gdb is. Use this
+	executable to start insight instead of gdb.
+
+2002-09-25  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/pc-fp.exp, gdb.base/pc-fp.c: New test.
+
+2002-09-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.gdb/complaints.exp (test_initial_complaints): Rename
+	test_isolated_complaints.
+	(test_empty_complaint): New function.
+	(test_empty_complaints): New function.  Check no output when no
+	complaints.
+	
 2002-09-19  Jim Blandy  <jimb@redhat.com>
 
         * gdb.base/charset.exp, gdb.base/charset.c: New files.

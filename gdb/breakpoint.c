@@ -4620,8 +4620,7 @@ parse_breakpoint_sals (char **address,
          should produce the results we want almost all of the time while
          leaving default_breakpoint_* alone.  */
 	 
-      struct symtab_and_line cursal = 
-      			get_current_or_default_source_symtab_and_line ();
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 			
       if (default_breakpoint_valid
 	  && (!cursal.symtab
