@@ -1,6 +1,18 @@
 2004-11-13  Eli Zaretskii  <eliz@gnu.org>
 
+	* config/i386/xm-go32.h: Don't include fopen-bin.h.
+	Don't define CRLF_SOURCE_FILES and DIRNAME_SEPARATOR.
+
+	* source.c (OPEN_MODE, FDOPEN_MODE): Remove the definitions in the
+	branch that doesn't define CRLF_SOURCE_FILES; always use
+	binary-mode open.
+	(print_source_lines_base, forward_search_command)
+	(reverse_search_command): Enable the code that accepts DOS-style
+	CRLF line endings on all platforms (this removes the need for
+	CRLF_SOURCE_FILES).
+
 	* defs.h: Fix wording of the comment before FOPEN_RB.
+	(DIRNAME_SEPARATOR) [__MSDOS__]: Define to ';'.
 
 	* config/djgpp/fnchange.lst: Group renames for opcode directory
 	together.

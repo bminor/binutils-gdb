@@ -1226,17 +1226,18 @@ extern int use_windows;
 /* FIXME, this doesn't work very well if host and executable
    filesystems conventions are different.  */
 
+#ifdef __MSDOS__
+# define CANT_FORK
+# define GLOBAL_CURDIR
+# define DIRNAME_SEPARATOR ';'
+#endif
+
 #ifndef DIRNAME_SEPARATOR
 #define DIRNAME_SEPARATOR ':'
 #endif
 
 #ifndef SLASH_STRING
 #define SLASH_STRING "/"
-#endif
-
-#ifdef __MSDOS__
-# define CANT_FORK
-# define GLOBAL_CURDIR
 #endif
 
 /* Provide default definitions of PIDGET, TIDGET, and MERGEPID.

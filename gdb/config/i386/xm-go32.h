@@ -18,8 +18,4 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "fopen-bin.h"
-
 #define GDBINIT_FILENAME "gdb.ini"
-#define CRLF_SOURCE_FILES
-#define DIRNAME_SEPARATOR ';'

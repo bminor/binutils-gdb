@@ -50,21 +50,8 @@
 #define O_BINARY 0
 #endif
 
-#ifdef CRLF_SOURCE_FILES
-
-/* Define CRLF_SOURCE_FILES in an xm-*.h file if source files on the
-   host use \r\n rather than just \n.  Defining CRLF_SOURCE_FILES is
-   much faster than defining LSEEK_NOT_LINEAR.  */
-
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
-
-#else /* ! defined (CRLF_SOURCE_FILES) */
-
-#define OPEN_MODE O_RDONLY
-#define FDOPEN_MODE FOPEN_RT
-
-#endif /* ! defined (CRLF_SOURCE_FILES) */
 
 /* Prototypes for exported functions. */
 
@@ -1263,7 +1250,6 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	    }
 	  else if (c == 0177)
 	    ui_out_text (uiout, "^?");
-#ifdef CRLF_SOURCE_FILES
 	  else if (c == '\r')
 	    {
 	      /* Skip a \r character, but only before a \n.  */
@@ -1274,7 +1260,6 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	      if (c1 != EOF)
 		ungetc (c1, stream);
 	    }
-#endif
 	  else
 	    {
 	      sprintf (buf, "%c", c);
@@ -1462,7 +1447,6 @@ forward_search_command (char *regex, int from_tty)
 	}
       while (c != '\n' && (c = getc (stream)) >= 0);
 
-#ifdef CRLF_SOURCE_FILES
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
       if (p - buf > 1 && p[-2] == '\r')
@@ -1470,7 +1454,6 @@ forward_search_command (char *regex, int from_tty)
 	  p--;
 	  p[-1] = '\n';
 	}
-#endif
 
       /* we now have a source line in buf, null terminate and match */
       *p = 0;
@@ -1546,7 +1529,6 @@ reverse_search_command (char *regex, int from_tty)
 	}
       while (c != '\n' && (c = getc (stream)) >= 0);
 
-#ifdef CRLF_SOURCE_FILES
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
       if (p - buf > 1 && p[-2] == '\r')
@@ -1554,7 +1536,6 @@ reverse_search_command (char *regex, int from_tty)
 	  p--;
 	  p[-1] = '\n';
 	}
-#endif
 
       /* We now have a source line in buf; null terminate and match.  */
       *p = 0;
