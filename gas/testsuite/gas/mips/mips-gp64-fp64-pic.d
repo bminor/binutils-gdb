@@ -22,12 +22,12 @@ Disassembly of section .text:
   30:	24840000 	addiu	a0,a0,0
   34:	8f840000 	lw	a0,0\(gp\)
   38:	00000000 	nop
-  3c:	2484022c 	addiu	a0,a0,556
-  40:	1000007a 	b	22c <[^>]*>
+  3c:	24840234 	addiu	a0,a0,564
+  40:	1000007c 	b	234 <[^>]*>
   44:	00000000 	nop
   48:	8f990000 	lw	t9,0\(gp\)
   4c:	00000000 	nop
-  50:	2739022c 	addiu	t9,t9,556
+  50:	27390234 	addiu	t9,t9,564
   54:	0320f809 	jalr	t9
   58:	00000000 	nop
   5c:	8fbc0008 	lw	gp,8\(sp\)
@@ -41,7 +41,7 @@ Disassembly of section .text:
   7c:	8c840000 	lw	a0,0\(a0\)
   80:	8f840000 	lw	a0,0\(gp\)
   84:	00000000 	nop
-  88:	2484022c 	addiu	a0,a0,556
+  88:	24840234 	addiu	a0,a0,564
   8c:	8c840000 	lw	a0,0\(a0\)
   90:	8f840000 	lw	a0,0\(gp\)
   94:	00000000 	nop
@@ -53,7 +53,7 @@ Disassembly of section .text:
   ac:	dc840000 	ld	a0,0\(a0\)
   b0:	8f840000 	lw	a0,0\(gp\)
   b4:	00000000 	nop
-  b8:	2484022c 	addiu	a0,a0,556
+  b8:	24840234 	addiu	a0,a0,564
   bc:	dc840000 	ld	a0,0\(a0\)
   c0:	8f810000 	lw	at,0\(gp\)
   c4:	00000000 	nop
@@ -111,10 +111,10 @@ Disassembly of section .text:
  194:	64a40064 	daddiu	a0,a1,100
  198:	0004202b 	sltu	a0,zero,a0
  19c:	00a0202d 	move	a0,a1
- 1a0:	df840000 	ld	a0,0\(gp\)
+ 1a0:	8f840000 	lw	a0,0\(gp\)
  1a4:	00000000 	nop
  1a8:	24840000 	addiu	a0,a0,0
- 1ac:	df840000 	ld	a0,0\(gp\)
+ 1ac:	8f840000 	lw	a0,0\(gp\)
  1b0:	00000000 	nop
  1b4:	24840000 	addiu	a0,a0,0
  1b8:	8f810000 	lw	at,0\(gp\)
@@ -127,25 +127,27 @@ Disassembly of section .text:
  1d4:	24210000 	addiu	at,at,0
  1d8:	b0240000 	sdl	a0,0\(at\)
  1dc:	b4240007 	sdr	a0,7\(at\)
- 1e0:	3c018000 	lui	at,0x8000
- 1e4:	0081082a 	slt	at,a0,at
- 1e8:	10200010 	beqz	at,22c <[^>]*>
- 1ec:	00000000 	nop
- 1f0:	34018000 	li	at,0x8000
- 1f4:	00010c78 	dsll	at,at,0x11
- 1f8:	0081082b 	sltu	at,a0,at
- 1fc:	1020000b 	beqz	at,22c <[^>]*>
- 200:	00000000 	nop
- 204:	3c018000 	lui	at,0x8000
- 208:	0081082a 	slt	at,a0,at
- 20c:	14200007 	bnez	at,22c <[^>]*>
- 210:	00000000 	nop
- 214:	34018000 	li	at,0x8000
- 218:	00010c78 	dsll	at,at,0x11
- 21c:	0081082b 	sltu	at,a0,at
- 220:	14200002 	bnez	at,22c <[^>]*>
- 224:	00000000 	nop
- 228:	46231040 	add.d	\$f1,\$f2,\$f3
+ 1e0:	34018000 	li	at,0x8000
+ 1e4:	00010c38 	dsll	at,at,0x10
+ 1e8:	0081082a 	slt	at,a0,at
+ 1ec:	10200011 	beqz	at,234 <[^>]*>
+ 1f0:	00000000 	nop
+ 1f4:	34018000 	li	at,0x8000
+ 1f8:	00010c78 	dsll	at,at,0x11
+ 1fc:	0081082b 	sltu	at,a0,at
+ 200:	1020000c 	beqz	at,234 <[^>]*>
+ 204:	00000000 	nop
+ 208:	34018000 	li	at,0x8000
+ 20c:	00010c38 	dsll	at,at,0x10
+ 210:	0081082a 	slt	at,a0,at
+ 214:	14200007 	bnez	at,234 <[^>]*>
+ 218:	00000000 	nop
+ 21c:	34018000 	li	at,0x8000
+ 220:	00010c78 	dsll	at,at,0x11
+ 224:	0081082b 	sltu	at,a0,at
+ 228:	14200002 	bnez	at,234 <[^>]*>
+ 22c:	00000000 	nop
+ 230:	46231040 	add.d	\$f1,\$f2,\$f3
 
-0+022c <[^>]*>:
+0+0234 <[^>]*>:
 	...

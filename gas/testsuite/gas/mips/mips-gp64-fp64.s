@@ -85,22 +85,24 @@ func:
 				# 0114 sdl	a0,0(at)
 				# 0118 sdr	a0,7(at)
 
-	bgt	$4, 0x7fffffff, end	# 011c lui	at,0x8000
-					# 0120 slt	at,a0,at
-					# 0124 beqz	at,end
-	bgtu	$4, 0xffffffff, end	# 0128 li	at,0x8000
-					# 012c dsll	at,at,17
-					# 0130 sltu	at,a0,at
-					# 0134 beqz	at,end
-	ble	$4, 0x7fffffff, end	# 0138 lui	at,0x8000
-					# 013c slt	at,a0,at
-					# 0140 bnez	at,end
-	bleu	$4, 0xffffffff, end	# 0144 li	at,0x8000
-					# 0148 dsll	at,at,17
-					# 014c sltu	at,a0,at
-					# 0150 bnez	at,end
+	bgt	$4, 0x7fffffff, end	# 011c li	at,0x8000
+					# 0120 dsll	at,at,0x10
+					# 0124 slt	at,a0,at
+					# 0128 beqz	at,end
+	bgtu	$4, 0xffffffff, end	# 012c li	at,0x8000
+					# 0130 dsll	at,at,17
+					# 0134 sltu	at,a0,at
+					# 0138 beqz	at,end
+	ble	$4, 0x7fffffff, end	# 013c li	at,0x8000
+					# 0140 dsll	at,at,0x10
+					# 0144 slt	at,a0,at
+					# 0148 bnez	at,end
+	bleu	$4, 0xffffffff, end	# 014c li	at,0x8000
+					# 0150 dsll	at,at,17
+					# 0154 sltu	at,a0,at
+					# 0158 bnez	at,end
 
-	add.d	$f1, $f2, $f3	# 0154 add.d	$f1,$f2,$f3
+	add.d	$f1, $f2, $f3	# 015c add.d	$f1,$f2,$f3
 end:
 
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...

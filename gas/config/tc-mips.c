@@ -3257,7 +3257,7 @@ set_at (counter, reg, unsignedp)
 		 "t,r,j", AT, reg, (int) BFD_RELOC_LO16);
   else
     {
-      load_register (counter, AT, &imm_expr, 0);
+      load_register (counter, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, counter, (expressionS *) NULL,
 		   unsignedp ? "sltu" : "slt",
 		   "d,v,t", AT, reg, AT);
@@ -4024,7 +4024,7 @@ macro (ip)
 		       0);
 	  return;
 	}
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "s,t,p", sreg, AT);
       break;
 
@@ -4616,11 +4616,11 @@ macro (ip)
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 			   tempreg, (int) BFD_RELOC_PCREL_HI16_S);
 	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
+			   (dbl || HAVE_64BIT_ADDRESSES) ? "daddu" : "addu",
 			   "d,v,t", tempreg, tempreg, breg);
 	    }
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+		       (dbl || HAVE_64BIT_ADDRESSES) ? "daddiu" : "addiu",
 		       "t,r,j", treg, tempreg, (int) BFD_RELOC_PCREL_LO16);
 	  if (! used_at)
 	    return;
@@ -4635,7 +4635,10 @@ macro (ip)
 	}
 
       if (offset_expr.X_op == O_constant)
-	load_register (&icnt, tempreg, &offset_expr, dbl);
+	load_register (&icnt, tempreg, &offset_expr,
+		       ((mips_pic == EMBEDDED_PIC || mips_pic == NO_PIC)
+			? (dbl || HAVE_64BIT_ADDRESSES)
+			: HAVE_64BIT_ADDRESSES));
       else if (mips_pic == NO_PIC)
 	{
 	  /* If this is a reference to a GP relative symbol, we want
@@ -4707,8 +4710,7 @@ macro (ip)
 		&& ! nopic_need_relax (offset_expr.X_add_symbol, 1))
 	      {
 		frag_grow (20);
-		macro_build ((char *) NULL, &icnt, &offset_expr,
-			     HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+		macro_build ((char *) NULL, &icnt, &offset_expr, "addiu",
 			     "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
 		p = frag_var (rs_machine_dependent, 8, 0,
 			      RELAX_ENCODE (4, 8, 0, 4, 0,
@@ -4718,8 +4720,7 @@ macro (ip)
 	    macro_build_lui (p, &icnt, &offset_expr, tempreg);
 	    if (p != NULL)
 	      p += 4;
-	    macro_build (p, &icnt, &offset_expr,
-			 HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+	    macro_build (p, &icnt, &offset_expr, "addiu",
 			 "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
 	  }
 	}
@@ -4760,7 +4761,8 @@ macro (ip)
 	  frag_grow (32);
 	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
 	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
-	  macro_build ((char *) NULL, &icnt, &offset_expr, dbl ? "ld" : "lw",
+	  macro_build ((char *) NULL, &icnt, &offset_expr,
+		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		       "t,o(b)", tempreg, lw_reloc_type, GP);
 	  if (expr1.X_add_number == 0)
 	    {
@@ -4915,7 +4917,7 @@ macro (ip)
 		       HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
 		       "d,v,t", tempreg, tempreg, GP);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       dbl ? "ld" : "lw",
+		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		       "t,o(b)", tempreg, lw_reloc_type, tempreg);
 	  if (expr1.X_add_number == 0)
 	    {
@@ -5018,7 +5020,7 @@ macro (ip)
 	      p += 4;
 	    }
 	  macro_build (p, &icnt, &offset_expr,
-		       dbl ? "ld" : "lw",
+		       HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  p += 4;
 	  if (expr1.X_add_number >= -0x8000
@@ -5079,9 +5081,17 @@ macro (ip)
 	abort ();
 
       if (breg != 0)
-	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
-		     "d,v,t", treg, tempreg, breg);
+	{
+	  char *s;
+
+	  if (mips_pic == EMBEDDED_PIC || mips_pic == NO_PIC)
+	    s = (dbl || HAVE_64BIT_ADDRESSES) ? "daddu" : "addu";
+	  else
+	    s = HAVE_64BIT_ADDRESSES ? "daddu" : "addu";
+
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s,
+		       "d,v,t", treg, tempreg, breg);
+	}
 
       if (! used_at)
 	return;
@@ -6751,7 +6761,7 @@ macro2 (ip)
 	}
       else
 	{
-	  load_register (&icnt, AT, &imm_expr, 0);
+	  load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "xor",
 		       "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
@@ -6787,7 +6797,7 @@ macro2 (ip)
 	}
       else
 	{
-	  load_register (&icnt, AT, &imm_expr, 0);
+	  load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       mask == M_SGE_I ? "slt" : "sltu", "d,v,t", dreg, sreg,
 		       AT);
@@ -6815,7 +6825,7 @@ macro2 (ip)
     case M_SGTU_I:
       s = "sltu";
     sgti:
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
 		   dreg, AT, sreg);
       break;
@@ -6838,7 +6848,7 @@ macro2 (ip)
     case M_SLEU_I:
       s = "sltu";
     slei:
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
 		   dreg, AT, sreg);
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", dreg, dreg,
@@ -6854,7 +6864,7 @@ macro2 (ip)
 		       dreg, sreg, (int) BFD_RELOC_LO16);
 	  return;
 	}
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "slt", "d,v,t",
 		   dreg, sreg, AT);
       break;
@@ -6868,7 +6878,7 @@ macro2 (ip)
 		       dreg, sreg, (int) BFD_RELOC_LO16);
 	  return;
 	}
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
 		   "d,v,t", dreg, sreg, AT);
       break;
@@ -6925,7 +6935,7 @@ macro2 (ip)
 	}
       else
 	{
-	  load_register (&icnt, AT, &imm_expr, 0);
+	  load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "xor",
 		       "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
@@ -6990,7 +7000,7 @@ macro2 (ip)
     case M_TNE_I:
       s = "tne";
     trap:
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "s,t", sreg,
 		   AT);
       break;

@@ -1,3 +1,14 @@
+2002-02-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-gp64-fp32-pic.d: Fix test of 64bit register loads.
+	* mips-gp64-fp32-pic.s: Likewise.
+	* mips-gp64-fp32.d: Likewise.
+	* mips-gp64-fp32.s: Likewise.
+	* mips-gp64-fp64-pic.d: Likewise.
+	* mips-gp64-fp64-pic.s: Likewise.
+	* mips-gp64-fp64.d: Likewise.
+	* mips-gp64-fp64.s: Likewise.
+
 2002-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/hppa/reloc/reloc.exp: Update copyright date.

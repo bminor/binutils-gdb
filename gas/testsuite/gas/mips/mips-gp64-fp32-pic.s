@@ -120,10 +120,10 @@ func:
 				# 0198 sltu	a0,zero,a0
 	move	$4, $5		# 019c move	a0,a1
 
-	dla	$4, shared	# 01a0 ld	a0,got(.sdata)(gp)
+	dla	$4, shared	# 01a0 lw	a0,got(.sdata)(gp)
 				# 01a4 nop
 				# 01a8 addiu	a0,a0,lo(shared) 
-	dla	$4, unshared	# 01ac ld	a0,got(.data)(gp)
+	dla	$4, unshared	# 01ac lw	a0,got(.data)(gp)
 				# 01b0 nop
 				# 01b4 addiu	a0,a0,lo(unshared)
 	uld	$4, unshared	# 01b8 lw	at,got(.data)(gp)
@@ -137,24 +137,26 @@ func:
 				# 01d8 sdl	a0,0(at)
 				# 01dc sdr	a0,7(at)
 
-	bgt	$4, 0x7fffffff, end	# 01e0 lui	at,0x8000
-					# 01e4 slt	at,a0,at
-					# 01e8 beqz	at,end
-					# 01ec nop
-	bgtu	$4, 0xffffffff, end	# 01f0 li	at,0x8000
-					# 01f4 dsll	at,at,17
-					# 01f8 sltu	at,a0,at
-					# 01fc beqz	at,end
-					# 0200 nop
-	ble	$4, 0x7fffffff, end	# 0204 lui	at,0x8000
-					# 0208 slt	at,a0,at
-					# 020c bnez	at,end
-					# 0210 nop
-	bleu	$4, 0xffffffff, end	# 0214 li	at,0x8000
-					# 0218 dsll	at,at,17
-					# 021c sltu	at,a0,at
-					# 0220 bnez	at,end
-					# 0224 nop
+	bgt	$4, 0x7fffffff, end	# 01e0 li	at,0x8000
+					# 01e4 dsll	at,at,0x10
+					# 01e8 slt	at,a0,at
+					# 01ec beqz	at,end
+					# 01f0 nop
+	bgtu	$4, 0xffffffff, end	# 01f4 li	at,0x8000
+					# 01f8 dsll	at,at,17
+					# 01fc sltu	at,a0,at
+					# 0200 beqz	at,end
+					# 0204 nop
+	ble	$4, 0x7fffffff, end	# 0208 li	at,0x8000
+					# 020c dsll	at,at,0x10
+					# 0210 slt	at,a0,at
+					# 0214 bnez	at,end
+					# 0218 nop
+	bleu	$4, 0xffffffff, end	# 021c li	at,0x8000
+					# 0220 dsll	at,at,17
+					# 0224 sltu	at,a0,at
+					# 0228 bnez	at,end
+					# 022c nop
 
 # Should produce warnings given -mfp32
 #	add.d	$f1, $f2, $f3
