@@ -1,3 +1,11 @@
+Mon Mar 24 13:41:00 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Don't
+	count section symbols for sections that were created by the
+	linker, or are not allocatable or not loadable.
+	(elf32_sparc_finish_dynamic_sections): Output output section
+	symbols for section for which we made space for them.
+
 Fri Mar 21 13:08:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): If there is

@@ -896,26 +896,34 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
     }
 
   /* If we are generating a shared library, we generate a section
-     symbol for each output section.  These are local symbols, which
-     means that they must come first in the dynamic symbol table.
-     That means we must increment the dynamic symbol index of every
-     other dynamic symbol.  */
+     symbol for each output section for which we might need to copy
+     relocs.  These are local symbols, which means that they must come
+     first in the dynamic symbol table.  That means we must increment
+     the dynamic symbol index of every other dynamic symbol.  */
   if (info->shared)
     {
-      int c, i;
+      int c;
 
-      c = bfd_count_sections (output_bfd);
+      c = 0;
+      for (s = output_bfd->sections; s != NULL; s = s->next)
+	{
+	  if ((s->flags & SEC_LINKER_CREATED) != 0
+	      || (s->flags & SEC_ALLOC) == 0
+	      || (s->flags & SEC_LOAD) == 0)
+	    continue;
+
+	  elf_section_data (s)->dynindx = c + 1;
+
+	  /* These symbols will have no names, so we don't need to
+             fiddle with dynstr_index.  */
+
+	  ++c;
+	}
+
       elf_link_hash_traverse (elf_hash_table (info),
 			      elf32_sparc_adjust_dynindx,
 			      (PTR) &c);
       elf_hash_table (info)->dynsymcount += c;
-
-      for (i = 1, s = output_bfd->sections; s != NULL; s = s->next, i++)
-	{
-	  elf_section_data (s)->dynindx = i;
-	  /* These symbols will have no names, so we don't need to
-             fiddle with dynstr_index.  */
-	}
     }
 
   return true;
@@ -1630,6 +1638,7 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
       asection *sdynsym;
       asection *s;
       Elf_Internal_Sym sym;
+      int c;
 
       /* Set up the section symbols for the output sections.  */
 
@@ -1641,9 +1650,13 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
       sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
       sym.st_other = 0;
 
+      c = 0;
       for (s = output_bfd->sections; s != NULL; s = s->next)
 	{
 	  int indx;
+
+	  if (elf_section_data (s)->dynindx == 0)
+	    continue;
 
 	  sym.st_value = s->vma;
 
@@ -1655,12 +1668,13 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 				     (PTR) (((Elf32_External_Sym *)
 					     sdynsym->contents)
 					    + elf_section_data (s)->dynindx));
+
+	  ++c;
 	}
 
       /* Set the sh_info field of the output .dynsym section to the
          index of the first global symbol.  */
-      elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
-	bfd_count_sections (output_bfd) + 1;
+      elf_section_data (sdynsym->output_section)->this_hdr.sh_info = c + 1;
     }
 
   return true;
