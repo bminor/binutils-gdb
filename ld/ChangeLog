@@ -1,3 +1,17 @@
+2003-08-15 Dmitry Diky <diwil@mail.ru>
+	
+	* Makefile.am (GENSCRIPTS_EXTRA): New script definition which
+	calls genscripts_extra.sh.
+	Rearrange all msp430 depends using this script.
+	* Makefile.in: Regenerate.
+	* genscripts_extra.sh: New file: Similar to genscripts.sh, except
+	that the script to be run to generate the emulations can be passed
+	as an optional parameter instead of being computed from the
+	emulation name.
+	* emulparams/msp430all.sh: New file: Combine all msp430 subdevice
+	definitions into one file.
+	* emulparams/msp430x*.sh: Removed.
+
 2003-08-15  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (Options): Put keywords for the -z option into a
