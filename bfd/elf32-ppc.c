@@ -116,6 +116,8 @@ static boolean ppc_elf_modify_segment_map PARAMS ((bfd *));
 static boolean ppc_elf_section_from_shdr PARAMS ((bfd *,
 						  Elf32_Internal_Shdr *,
 						  char *));
+static boolean ppc_elf_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 
 static elf_linker_section_t *ppc_elf_create_linker_section
   PARAMS ((bfd *abfd,
@@ -1249,7 +1251,7 @@ ppc_elf_section_from_shdr (abfd, hdr, name)
 
 /* Set up any other section flags and such that may be necessary.  */
 
-boolean
+static boolean
 ppc_elf_fake_sections (abfd, shdr, asect)
      bfd *abfd;
      Elf32_Internal_Shdr *shdr;
@@ -1829,7 +1831,6 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel_end;
   bfd_vma *local_got_offsets;
   elf_linker_section_t *got;
-  elf_linker_section_t *plt;
   elf_linker_section_t *sdata;
   elf_linker_section_t *sdata2;
   asection *sreloc;
@@ -2632,6 +2633,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      Elf_Internal_Rela outrel;
+	      boolean skip;
 
 #ifdef DEBUG
 	      fprintf (stderr, "ppc_elf_relocate_section need to create relocation for %s\n",
@@ -2662,13 +2664,35 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (sreloc != NULL);
 		}
 
-	      outrel.r_offset = (rel->r_offset
-				 + input_section->output_section->vma
-				 + input_section->output_offset);
-	      if (h != NULL
-		  && (! info->symbolic
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0))
+	      skip = false;
+
+	      if (elf_section_data (input_section)->stab_info == NULL)
+		outrel.r_offset = rel->r_offset;
+	      else
+		{
+		  bfd_vma off;
+
+		  off = (_bfd_stab_section_offset
+			 (output_bfd, &elf_hash_table (info)->stab_info,
+			  input_section,
+			  &elf_section_data (input_section)->stab_info,
+			  rel->r_offset));
+		  if (off == (bfd_vma) -1)
+		    skip = true;
+		  outrel.r_offset = off;
+		}
+
+	      outrel.r_offset += (input_section->output_section->vma
+				  + input_section->output_offset);
+
+	      if (skip)
+		memset (&outrel, 0, sizeof outrel);
+	      /* h->dynindx may be -1 if this symbol was marked to
+                 become local.  */
+	      else if (h != NULL
+		       && ((! info->symbolic && h->dynindx != -1)
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
 		  BFD_ASSERT (h->dynindx != -1);
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);

@@ -1,5 +1,16 @@
 Tue Mar 25 14:35:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* stabs.c (_bfd_stab_section_offset): New function.
+	* libbfd-in.h (_bfd_stab_section_offset): Declare.
+	* libbfd.h: Rebuild.
+	* elf32-i386.c (elf_i386_relocate_section): Adjust the offset of a
+	stab reloc.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+
 	* stabs.c (_bfd_link_section_stabs): Copy over the first header
 	symbol.  Check for memory allocation failure of *psinfo.
 	(_bfd_write_section_stabs): Add psinfo parameter.  Change all
