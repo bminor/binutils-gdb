@@ -245,6 +245,9 @@ patch_type PARAMS ((struct type *, struct type *));
 static void
 enter_linenos PARAMS ((long, int, int));
 
+static void
+free_linetab PARAMS ((void));
+
 static int
 init_lineno PARAMS ((int, long, int));
 
@@ -675,11 +678,7 @@ record_minimal_symbol (name, address, type)
   /* We don't want TDESC entry points in the minimal symbol table */
   if (name[0] == '@') return;
 
-  /* mst_text isn't true, but apparently COFF doesn't tell us what it really
-     is, so this guess is more useful than mst_unknown.  */
-  prim_record_minimal_symbol (savestring (name, strlen (name)),
-			     address,
-			     type);
+  prim_record_minimal_symbol (savestring (name, strlen (name)), address, type);
 }
 
 /* coff_symfile_init ()
@@ -785,6 +784,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   int num_symbols;
   int symtab_offset;
   int stringtab_offset;
+  struct cleanup *back_to;
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd;			/* Kludge for swap routines */
@@ -812,7 +812,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   temp_sym = (char *) xmalloc
 	 (cdata->local_symesz + cdata->local_auxesz);
   temp_aux = temp_sym + cdata->local_symesz;
-  make_cleanup (free_current_contents, &temp_sym);
+  back_to = make_cleanup (free_current_contents, &temp_sym);
 /* End of warning */
 
   /* Read the line number table, all at once.  */
@@ -820,6 +820,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   info->max_lineno_offset = 0;
   bfd_map_over_sections (abfd, find_linenos, (PTR)info);
 
+  make_cleanup (free_linetab, 0);
   val = init_lineno (desc, info->min_lineno_offset, 
 		     info->max_lineno_offset - info->min_lineno_offset);
   if (val < 0)
@@ -827,10 +828,10 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   /* Now read the string table, all at once.  */
 
+  make_cleanup (free_stringtab, 0);
   val = init_stringtab (desc, stringtab_offset);
   if (val < 0)
     error ("\"%s\": can't get string table", name);
-  make_cleanup (free_stringtab, 0);
 
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
@@ -848,6 +849,8 @@ coff_symfile_read (objfile, section_offsets, mainline)
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
+
+  do_cleanups (back_to);
 }
 
 static void
@@ -907,7 +910,6 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   int fcn_last_line = 0;
   int fcn_start_addr = 0;
   long fcn_line_ptr = 0;
-  struct cleanup *old_chain;
   int val;
 
   stream = bfd_cache_lookup(objfile->obfd);
@@ -934,9 +936,6 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
   val = fseek (stream, (long)symtab_offset, 0);
   if (val < 0)
     perror_with_name (objfile->name);
-
-  /* This cleanup will be discarded below if we succeed.  */
-  old_chain = make_cleanup (free_objfile, objfile);
 
   current_objfile = objfile;
   nlist_stream_global = stream;
@@ -984,9 +983,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
       /* Typedefs should not be treated as symbol definitions.  */
       if (ISFCN (cs->c_type) && cs->c_sclass != C_TPDEF)
 	{
-	  /* record as a minimal symbol.  if we get '.bf' next,
-	   * then we undo this step
-	   */
+	  /* Record all functions -- external and static -- in minsyms. */
 	  record_minimal_symbol (cs->c_name, cs->c_value, mst_text);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
@@ -1064,6 +1061,11 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 	      break;
 	    /* fall in for static symbols that don't start with '.' */
 	  case C_EXT:
+	    /* Record external symbols in minsyms if we don't have debug
+	       info for them.  FIXME, this is probably the wrong thing
+	       to do.  Why don't we record them even if we do have
+	       debug symbol info?  What really belongs in the minsyms
+	       anyway?  Fred!??  */
 	    if (!SDB_TYPE (cs->c_type)) {
 		/* FIXME: This is BOGUS Will Robinson! 
 	 	Coff should provide the SEC_CODE flag for executable sections,
@@ -1197,14 +1199,12 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 
   if (last_source_file)
     coff_end_symtab (objfile);
-  fclose (stream);
 
   /* Patch up any opaque types (references to types that are not defined
      in the file where they are referenced, e.g. "struct foo *bar").  */
   ALL_OBJFILE_SYMTABS (objfile, s)
     patch_opaque_types (s);
 
-  discard_cleanups (old_chain);
   current_objfile = NULL;
 }
 
@@ -1323,11 +1323,7 @@ init_stringtab (chan, offset)
   int val;
   unsigned char lengthbuf[4];
 
-  if (stringtab)
-    {
-      free (stringtab);
-      stringtab = NULL;
-    }
+  free_stringtab ();
 
   if (lseek (chan, offset, 0) < 0)
     return -1;
@@ -1337,7 +1333,7 @@ init_stringtab (chan, offset)
 
   /* If no string table is needed, then the file may end immediately
      after the symbols.  Just return with `stringtab' set to null. */
-  if (val != sizeof length || length < sizeof length)
+  if (val != sizeof lengthbuf || length < sizeof lengthbuf)
     return 0;
 
   stringtab = (char *) xmalloc (length);
@@ -1348,8 +1344,8 @@ init_stringtab (chan, offset)
   if (length == sizeof length)		/* Empty table -- just the count */
     return 0;
 
-  val = myread (chan, stringtab + sizeof length, length - sizeof length);
-  if (val != length - sizeof length || stringtab[length - 1] != '\0')
+  val = myread (chan, stringtab + sizeof lengthbuf, length - sizeof lengthbuf);
+  if (val != length - sizeof lengthbuf || stringtab[length - 1] != '\0')
     return -1;
 
   return 0;
@@ -1428,6 +1424,8 @@ init_lineno (chan, offset, size)
   linetab_offset = offset;
   linetab_size = size;
 
+  free_linetab();
+
   if (size == 0)
     return 0;
 
@@ -1437,6 +1435,9 @@ init_lineno (chan, offset, size)
   /* Allocate the desired table, plus a sentinel */
   linetab = (char *) xmalloc (size + local_linesz);
 
+  if (linetab == NULL)
+    return -1;
+
   val = myread (chan, linetab, size);
   if (val != size)
     return -1;
@@ -1444,8 +1445,15 @@ init_lineno (chan, offset, size)
   /* Terminate it with an all-zero sentinel record */
   memset (linetab + size, 0, local_linesz);
 
-  make_cleanup (free, linetab);		/* Be sure it gets de-allocated. */
   return 0;
+}
+
+static void
+free_linetab ()
+{
+  if (linetab)
+    free (linetab);
+  linetab = NULL;
 }
 
 #if !defined (L_LNNO32)
@@ -1741,14 +1749,17 @@ process_coff_symbol (cs, aux, objfile)
 	  case C_ENTAG:
 	    SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	    SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
-	    if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	      TYPE_NAME (SYMBOL_TYPE (sym))
-		= concat ("",
-			  (cs->c_sclass == C_ENTAG
-			   ? "enum "
-			   : (cs->c_sclass == C_STRTAG
-			      ? "struct " : "union ")),
-			  SYMBOL_NAME (sym), NULL);
+
+            /* Some compilers try to be helpful by inventing "fake"
+               names for anonymous enums, structures, and unions, like
+               "~0fake" or ".0fake".  Thanks, but no thanks... */
+	    if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
+	      if (SYMBOL_NAME(sym) != NULL
+		  && *SYMBOL_NAME(sym) != '~'
+		  && *SYMBOL_NAME(sym) != '.')
+		TYPE_TAG_NAME (SYMBOL_TYPE (sym)) =
+		  concat (SYMBOL_NAME (sym), NULL);
+
 	    coff_add_symbol_to_list (sym, &coff_file_symbols);
 	    break;
 
@@ -1911,7 +1922,11 @@ decode_base_type (cs, c_type, aux)
 	    /* anonymous structure type */
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	    TYPE_NAME (type) = concat ("struct ", "<opaque>", NULL);
+	    TYPE_NAME (type) = NULL;
+	    /* This used to set the tag to "<opaque>".  But I think setting it
+	       to NULL is right, and the printing code can print it as
+	       "struct {...}".  */
+	    TYPE_TAG_NAME (type) = NULL;
 	    INIT_CPLUS_SPECIFIC(type);
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
@@ -1930,9 +1945,12 @@ decode_base_type (cs, c_type, aux)
 	  {
 	    /* anonymous union type */
 	    type = coff_alloc_type (cs->c_symnum);
-	    TYPE_NAME (type) = concat ("union ", "<opaque>", NULL);
+	    TYPE_NAME (type) = NULL;
+	    /* This used to set the tag to "<opaque>".  But I think setting it
+	       to NULL is right, and the printing code can print it as
+	       "union {...}".  */
+	    TYPE_TAG_NAME (type) = NULL;
 	    INIT_CPLUS_SPECIFIC(type);
-	    TYPE_LENGTH (type) = 0;
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;
@@ -1947,9 +1965,27 @@ decode_base_type (cs, c_type, aux)
 	return type;
 
       case T_ENUM:
-	return coff_read_enum_type (cs->c_symnum,
-				    aux->x_sym.x_misc.x_lnsz.x_size,
-				    aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
+	if (cs->c_naux != 1)
+	  {
+	    /* anonymous enum type */
+	    type = coff_alloc_type (cs->c_symnum);
+	    TYPE_CODE (type) = TYPE_CODE_ENUM;
+	    TYPE_NAME (type) = NULL;
+	    /* This used to set the tag to "<opaque>".  But I think setting it
+	       to NULL is right, and the printing code can print it as
+	       "enum {...}".  */
+	    TYPE_TAG_NAME (type) = NULL;
+	    TYPE_LENGTH (type) = 0;
+	    TYPE_FIELDS (type) = 0;
+	    TYPE_NFIELDS(type) = 0;
+	  }
+	else
+	  {
+	    type = coff_read_enum_type (cs->c_symnum,
+					aux->x_sym.x_misc.x_lnsz.x_size,
+					aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
+	  }
+	return type;
 
       case T_MOE:
 	/* shouldn't show up here */
@@ -2147,6 +2183,8 @@ coff_read_enum_type (index, length, lastsym)
       TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (syms->symbol);
       TYPE_FIELD_BITSIZE (type, n) = 0;
     }
+#if 0
+  /* This screws up perfectly good C programs with enums.  FIXME.  */
   /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
   if(TYPE_NFIELDS(type) == 2 &&
      ((STREQ(TYPE_FIELD_NAME(type,0),"TRUE") &&
@@ -2154,6 +2192,7 @@ coff_read_enum_type (index, length, lastsym)
       (STREQ(TYPE_FIELD_NAME(type,1),"TRUE") &&
        STREQ(TYPE_FIELD_NAME(type,0),"FALSE"))))
      TYPE_CODE(type) = TYPE_CODE_BOOL;
+#endif
   return type;
 }
 

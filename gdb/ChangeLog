@@ -1,5 +1,10 @@
 Thu Aug 19 17:58:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* coffread.c (process_coff_symbol): Ignore tagnames like .0fake.
+
+	* coffread.c (coff_read_enum_type): #if 0 out code which changes
+	enum {FALSE, TRUE} into boolean.
+
 	* config/m68k/delta68.m{t,h}: Use nm-delta68.h, etc. not
 	non-existent files nm-delta.h, etc.
 	* config/m68k/tm-delta68.h: Define CANNOT_STORE_REGISTER.
