@@ -1,3 +1,10 @@
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.am (ldmain.o): Pass BINDIR.
+	* Makefile.in: Regenerated.
+	* ldmain.c (set_scripts_dir): Use make_relative_prefix for the first
+	search path.
+
 2003-01-02  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32iq2000.o.

@@ -1,6 +1,6 @@
 /* Main program of GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002
+   2002, 2003
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -612,14 +612,25 @@ check_for_scripts_dir (dir)
    We look for the "ldscripts" directory in:
 
    SCRIPTDIR (passed from Makefile)
+	     (adjusted according to the current location of the binary)
+   SCRIPTDIR (passed from Makefile)
    the dir where this program is (for using it from the build tree)
-   the dir where this program is/../lib (for installing the tool suite elsewhere) */
+   the dir where this program is/../lib
+	     (for installing the tool suite elsewhere)  */
 
 static void
 set_scripts_dir ()
 {
   char *end, *dir;
   size_t dirlen;
+
+  dir = make_relative_prefix (program_name, BINDIR, SCRIPTDIR);
+  if (dir && check_for_scripts_dir (dir))
+    /* Success.  Don't free dir.  */
+    return;
+
+  if (dir)
+    free (dir);
 
   if (check_for_scripts_dir (SCRIPTDIR))
     /* We've been installed normally.  */
