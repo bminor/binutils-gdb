@@ -4554,8 +4554,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    indx = 0;
 	    if (tls_type == (TLS_TLS | TLS_LD)
-		&& ((tls_mask & TLS_LD) == 0
-		    || h == NULL
+		&& (h == NULL
 		    || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)))
 	      offp = &htab->tlsld_got.offset;
 	    else if (h != NULL)

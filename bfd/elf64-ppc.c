@@ -5238,10 +5238,10 @@ ppc64_elf_tls_optimize (obfd, info)
 		    /* These relocs should never be against a symbol
 		       defined in a shared lib.  Leave them alone if
 		       that turns out to be the case.  */
+		    htab->tlsld_got.refcount -= 1;
 		    if (!is_local)
 		      continue;
 
-		    htab->tlsld_got.refcount -= 1;
 		    /* LD -> LE */
 		    tls_set = 0;
 		    tls_clear = TLS_LD;
@@ -5559,7 +5559,8 @@ allocate_dynrelocs (h, inf)
 	      return FALSE;
 	  }
 
-	if ((gent->tls_type & TLS_LD) != 0)
+	if ((gent->tls_type & TLS_LD) != 0
+	    && !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC))
 	  {
 	    gent->got.offset = htab->tlsld_got.offset;
 	    continue;
@@ -5567,7 +5568,8 @@ allocate_dynrelocs (h, inf)
 
 	s = htab->sgot;
 	gent->got.offset = s->_raw_size;
-	s->_raw_size += (gent->tls_type & eh->tls_mask & TLS_GD) ? 16 : 8;
+	s->_raw_size
+	  += (gent->tls_type & eh->tls_mask & (TLS_GD | TLS_LD)) ? 16 : 8;
 	dyn = htab->elf.dynamic_sections_created;
 	if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
 	  htab->srelgot->_raw_size
@@ -6961,26 +6963,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     ppc_howto_init ();
 
   htab = ppc_hash_table (info);
-  if ((htab->tlsld_got.offset & 1) == 0)
-    {
-      if (info->shared)
-	{
-	  outrel.r_offset = (htab->sgot->output_section->vma
-			     + htab->sgot->output_offset
-			     + htab->tlsld_got.offset);
-	  outrel.r_info = ELF64_R_INFO (0, R_PPC64_DTPMOD64);
-	  outrel.r_addend = 0;
-
-	  loc = htab->srelgot->contents;
-	  loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
-	  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-	}
-      else
-	bfd_put_64 (output_bfd, (bfd_vma) 1,
-		    htab->sgot->contents + htab->tlsld_got.offset);
-
-      htab->tlsld_got.offset |= 1;
-    }
   local_got_ents = elf_local_got_ents (input_bfd);
   TOCstart = elf_gp (output_bfd);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -7087,7 +7069,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	 for the final instruction stream.  */
       tls_mask = 0;
       tls_gd = 0;
-      if (IS_TLS_RELOC (r_type))
+      if (IS_PPC64_TLS_RELOC (r_type))
 	{
 	  if (h != NULL)
 	    tls_mask = ((struct ppc_link_hash_entry *) h)->tls_mask;
@@ -7565,57 +7547,64 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  {
 	    /* Relocation is to the entry for this symbol in the global
 	       offset table.  */
-	    struct got_entry *ent;
+	    bfd_vma *offp;
 	    bfd_vma off;
-	    unsigned long indx;
+	    unsigned long indx = 0;
 
 	    if (htab->sgot == NULL)
 	      abort ();
 
-	    if (h != NULL)
-	      ent = h->got.glist;
+	    if (tls_type == (TLS_TLS | TLS_LD)
+		&& (h == NULL
+		    || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)))
+	      offp = &htab->tlsld_got.offset;
 	    else
 	      {
-		if (local_got_ents == NULL)
-		  abort ();
-		ent = local_got_ents[r_symndx];
-	      }
+		struct got_entry *ent;
 
-	    for (; ent != NULL; ent = ent->next)
-	      if (ent->addend == rel->r_addend
-		  && ent->tls_type == tls_type)
-		break;
-	    if (ent == NULL)
-	      abort ();
-
-	    off = ent->got.offset;
-	    indx = 0;
-	    if (h != NULL)
-	      {
-		bfd_boolean dyn = htab->elf.dynamic_sections_created;
-		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
-		    || (info->shared
-			&& (info->symbolic
-			    || h->dynindx == -1
-			    || (h->elf_link_hash_flags
-				& ELF_LINK_FORCED_LOCAL))
-			&& (h->elf_link_hash_flags
-			    & ELF_LINK_HASH_DEF_REGULAR)))
-		  /* This is actually a static link, or it is a
-		     -Bsymbolic link and the symbol is defined
-		     locally, or the symbol was forced to be local
-		     because of a version file.  */
-		  ;
+		if (h != NULL)
+		  {
+		    bfd_boolean dyn = htab->elf.dynamic_sections_created;
+		    if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+			|| (info->shared
+			    && (info->symbolic
+				|| h->dynindx == -1
+				|| (h->elf_link_hash_flags
+				    & ELF_LINK_FORCED_LOCAL))
+			    && (h->elf_link_hash_flags
+				& ELF_LINK_HASH_DEF_REGULAR)))
+		      /* This is actually a static link, or it is a
+			 -Bsymbolic link and the symbol is defined
+			 locally, or the symbol was forced to be local
+			 because of a version file.  */
+		      ;
+		    else
+		      {
+			indx = h->dynindx;
+			unresolved_reloc = FALSE;
+		      }
+		    ent = h->got.glist;
+		  }
 		else
 		  {
-		    indx = h->dynindx;
-		    unresolved_reloc = FALSE;
+		    if (local_got_ents == NULL)
+		      abort ();
+		    ent = local_got_ents[r_symndx];
 		  }
+
+		for (; ent != NULL; ent = ent->next)
+		  if (ent->addend == rel->r_addend
+		      && ent->tls_type == tls_type)
+		    break;
+		if (ent == NULL)
+		  abort ();
+		offp = &ent->got.offset;
 	      }
 
 	    /* The offset must always be a multiple of 8.  We use the
 	       least significant bit to record whether we have already
 	       processed this entry.  */
+	    off = *offp;
 	    if ((off & 1) != 0)
 	      off &= ~1;
 	    else
@@ -7623,22 +7612,27 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		/* Generate relocs for the dynamic linker, except in
 		   the case of TLSLD where we'll use one entry per
 		   module.  */
-		if ((info->shared || indx != 0)
-		    && tls_type != (TLS_TLS | TLS_LD))
+		*offp = off | 1;
+		if (info->shared || indx != 0)
 		  {
 		    outrel.r_offset = (htab->sgot->output_section->vma
 				       + htab->sgot->output_offset
 				       + off);
-		    if (tls_type == (TLS_TLS | TLS_GD))
+		    if (tls_type & (TLS_LD | TLS_GD))
 		      {
 			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPMOD64);
 			outrel.r_addend = 0;
-			loc = htab->srelgot->contents;
-			loc += (htab->srelgot->reloc_count++
-				* sizeof (Elf64_External_Rela));
-			bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
-			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
-			outrel.r_offset += 8;
+			if (tls_type == (TLS_TLS | TLS_GD))
+			  {
+			    loc = htab->srelgot->contents;
+			    loc += (htab->srelgot->reloc_count++
+				    * sizeof (Elf64_External_Rela));
+			    bfd_elf64_swap_reloca_out (output_bfd,
+						       &outrel, loc);
+			    outrel.r_info
+			      = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
+			    outrel.r_offset += 8;
+			  }
 		      }
 		    else if (tls_type == (TLS_TLS | TLS_DTPREL))
 		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
@@ -7659,10 +7653,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		/* Init the .got section contents if we're not
 		   emitting a reloc.  */
-		if (!(info->shared || indx != 0)
-		    && tls_type != (TLS_TLS | TLS_LD))
+		else
 		  {
-		    relocation += ent->addend;
+		    relocation += rel->r_addend;
 		    if (tls_type != 0)
 		      {
 			relocation -= htab->tls_sec->vma + DTP_OFFSET;
@@ -7676,10 +7669,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				    htab->sgot->contents + off + 8);
 			relocation = 1;
 		      }
+		    else if (tls_type == (TLS_TLS | TLS_LD))
+		      relocation = 1;
 		    bfd_put_64 (output_bfd, relocation,
 				htab->sgot->contents + off);
 		  }
-		ent->got.offset |= 1;
 	      }
 
 	    if (off >= (bfd_vma) -2)

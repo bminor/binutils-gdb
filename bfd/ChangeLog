@@ -1,5 +1,12 @@
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_relocate_section): Remove unnecessary test.
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Decrement tlsld_got.refcount
+	on invalid LD relocs.
+	(allocate_dynrelocs): Invalid LD relocs don't use tlsld_got entry.
+	(ppc64_elf_relocate_section): Unify new handling of LD relocs and
+	tlsld_got entry.  Use IS_PPC64_TLS_RELOC.
+
 	* elf32-ppc.h: New file.
 	* elf32-ppc.c: Include elf32-ppc.h.
 	(NOP, CROR_151515, CROR_313131, TP_OFFSET, DTP_OFFSET): Define.
