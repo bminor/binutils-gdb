@@ -102,6 +102,7 @@ struct elfNN_ia64_dyn_sym_info
 
   /* TRUE for the different kinds of linker data we want created.  */
   unsigned want_got : 1;
+  unsigned want_gotx : 1;
   unsigned want_fptr : 1;
   unsigned want_ltoff_fptr : 1;
   unsigned want_plt : 1;
@@ -154,6 +155,12 @@ struct elfNN_ia64_link_hash_table
   struct elfNN_ia64_local_hash_table loc_hash_table;
 };
 
+struct elfNN_ia64_allocate_data
+{
+  struct bfd_link_info *info;
+  bfd_size_type ofs;
+};
+
 #define elfNN_ia64_hash_table(p) \
   ((struct elfNN_ia64_link_hash_table *) ((p)->hash))
 
@@ -169,6 +176,8 @@ static void elfNN_ia64_info_to_howto
 static bfd_boolean elfNN_ia64_relax_section
   PARAMS((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
 	  bfd_boolean *again));
+static void elfNN_ia64_relax_ldxmov
+  PARAMS((bfd *abfd, bfd_byte *contents, bfd_vma off));
 static bfd_boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
 static bfd_boolean elfNN_ia64_section_from_shdr
@@ -299,6 +308,8 @@ static bfd_vma elfNN_ia64_dtprel_base
   PARAMS ((struct bfd_link_info *info));
 static int elfNN_ia64_unwind_entry_compare
   PARAMS ((const PTR, const PTR));
+static bfd_boolean elfNN_ia64_choose_gp
+  PARAMS ((bfd *abfd, struct bfd_link_info *info));
 static bfd_boolean elfNN_ia64_final_link
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
 static bfd_boolean elfNN_ia64_relocate_section
@@ -671,11 +682,7 @@ static const bfd_byte oor_ip[48] =
 };
 #endif
 
-/* These functions do relaxation for IA-64 ELF.
-
-   This is primarily to support branches to targets out of range;
-   relaxation of R_IA64_LTOFF22X and R_IA64_LDXMOV is handled in
-   relocate_section directly.  */
+/* These functions do relaxation for IA-64 ELF.  */
 
 static bfd_boolean
 elfNN_ia64_relax_section (abfd, sec, link_info, again)
@@ -701,6 +708,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   struct one_fixup *fixups = NULL;
   bfd_boolean changed_contents = FALSE;
   bfd_boolean changed_relocs = FALSE;
+  bfd_boolean changed_got = FALSE;
+  bfd_vma gp = 0;
 
   /* Assume we're not going to change any sizes, and we'll only need
      one pass.  */
@@ -728,24 +737,6 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   ia64_info = elfNN_ia64_hash_table (link_info);
   irelend = internal_relocs + sec->reloc_count;
 
-  for (irel = internal_relocs; irel < irelend; irel++)
-    {
-      unsigned long r_type = ELFNN_R_TYPE (irel->r_info);
-      if (r_type == R_IA64_PCREL21B
-	  || r_type == R_IA64_PCREL21BI
-	  || r_type == R_IA64_PCREL21M
-	  || r_type == R_IA64_PCREL21F)
-	break;
-    }
-
-  /* No branch-type relocations.  */
-  if (irel == irelend)
-    {
-      if (elf_section_data (sec)->relocs != internal_relocs)
-	free (internal_relocs);
-      return TRUE;
-    }
-
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
     contents = elf_section_data (sec)->this_hdr.contents;
@@ -760,19 +751,33 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	goto error_return;
     }
 
-  for (; irel < irelend; irel++)
+  for (irel = internal_relocs; irel < irelend; irel++)
     {
       unsigned long r_type = ELFNN_R_TYPE (irel->r_info);
       bfd_vma symaddr, reladdr, trampoff, toff, roff;
       asection *tsec;
       struct one_fixup *f;
       bfd_size_type amt;
+      bfd_boolean is_branch;
+      struct elfNN_ia64_dyn_sym_info *dyn_i;
 
-      if (r_type != R_IA64_PCREL21B
-	  && r_type != R_IA64_PCREL21BI
-	  && r_type != R_IA64_PCREL21M
-	  && r_type != R_IA64_PCREL21F)
-	continue;
+      switch (r_type)
+	{
+	case R_IA64_PCREL21B:
+	case R_IA64_PCREL21BI:
+	case R_IA64_PCREL21M:
+	case R_IA64_PCREL21F:
+	  is_branch = TRUE;
+	  break;
+
+	case R_IA64_LTOFF22X:
+	case R_IA64_LDXMOV:
+	  is_branch = FALSE;
+	  break;
+
+	default:
+	  continue;
+	}
 
       /* Get the value of the symbol referred to by the reloc.  */
       if (ELFNN_R_SYM (irel->r_info) < symtab_hdr->sh_info)
@@ -805,12 +810,12 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
 	  toff = isym->st_value;
+	  dyn_i = get_dyn_sym_info (ia64_info, NULL, abfd, irel, FALSE);
 	}
       else
 	{
 	  unsigned long indx;
 	  struct elf_link_hash_entry *h;
-          struct elfNN_ia64_dyn_sym_info *dyn_i;
 
 	  indx = ELFNN_R_SYM (irel->r_info) - symtab_hdr->sh_info;
 	  h = elf_sym_hashes (abfd)[indx];
@@ -824,7 +829,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  /* For branches to dynamic symbols, we're interested instead
 	     in a branch to the PLT entry.  */
-	  if (dyn_i && dyn_i->want_plt2)
+	  if (is_branch && dyn_i && dyn_i->want_plt2)
 	    {
 	      /* Internal branches shouldn't be sent to the PLT.
 		 Leave this for now and we'll give an error later.  */
@@ -834,6 +839,11 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      tsec = ia64_info->plt_sec;
 	      toff = dyn_i->plt2_offset;
 	    }
+
+	  /* Can't do anything else with dynamic symbols.  */
+	  else if (elfNN_ia64_dynamic_symbol_p (h, link_info))
+	    continue;
+
 	  else
 	    {
 	      /* We can't do anthing with undefined symbols.  */
@@ -852,103 +862,152 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		 + irel->r_addend);
 
       roff = irel->r_offset;
-      reladdr = (sec->output_section->vma
-		 + sec->output_offset
-		 + roff) & (bfd_vma) -4;
 
-      /* If the branch is in range, no need to do anything.  */
-      if ((bfd_signed_vma) (symaddr - reladdr) >= -0x1000000
-	  && (bfd_signed_vma) (symaddr - reladdr) <= 0x0FFFFF0)
-	continue;
-
-      /* If the branch and target are in the same section, you've
-	 got one honking big section and we can't help you.  You'll
-	 get an error message later.  */
-      if (tsec == sec)
-	continue;
-
-      /* Look for an existing fixup to this address.  */
-      for (f = fixups; f ; f = f->next)
-	if (f->tsec == tsec && f->toff == toff)
-	  break;
-
-      if (f == NULL)
+      if (is_branch)
 	{
-	  /* Two alternatives: If it's a branch to a PLT entry, we can
-	     make a copy of the FULL_PLT entry.  Otherwise, we'll have
-	     to use a `brl' insn to get where we're going.  */
+	  reladdr = (sec->output_section->vma
+		     + sec->output_offset
+		     + roff) & (bfd_vma) -4;
 
-	  size_t size;
+	  /* If the branch is in range, no need to do anything.  */
+	  if ((bfd_signed_vma) (symaddr - reladdr) >= -0x1000000
+	      && (bfd_signed_vma) (symaddr - reladdr) <= 0x0FFFFF0)
+	    continue;
 
-	  if (tsec == ia64_info->plt_sec)
-	    size = sizeof (plt_full_entry);
+	  /* If the branch and target are in the same section, you've
+	     got one honking big section and we can't help you.  You'll
+	     get an error message later.  */
+	  if (tsec == sec)
+	    continue;
+
+	  /* Look for an existing fixup to this address.  */
+	  for (f = fixups; f ; f = f->next)
+	    if (f->tsec == tsec && f->toff == toff)
+	      break;
+
+	  if (f == NULL)
+	    {
+	      /* Two alternatives: If it's a branch to a PLT entry, we can
+		 make a copy of the FULL_PLT entry.  Otherwise, we'll have
+		 to use a `brl' insn to get where we're going.  */
+
+	      size_t size;
+
+	      if (tsec == ia64_info->plt_sec)
+		size = sizeof (plt_full_entry);
+	      else
+		{
+#ifdef USE_BRL
+		  size = sizeof (oor_brl);
+#else
+		  size = sizeof (oor_ip);
+#endif
+		}
+
+	      /* Resize the current section to make room for the new branch. */
+	      trampoff = (sec->_cooked_size + 15) & (bfd_vma) -16;
+	      amt = trampoff + size;
+	      contents = (bfd_byte *) bfd_realloc (contents, amt);
+	      if (contents == NULL)
+		goto error_return;
+	      sec->_cooked_size = amt;
+
+	      if (tsec == ia64_info->plt_sec)
+		{
+		  memcpy (contents + trampoff, plt_full_entry, size);
+
+		  /* Hijack the old relocation for use as the PLTOFF reloc.  */
+		  irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
+					       R_IA64_PLTOFF22);
+		  irel->r_offset = trampoff;
+		}
+	      else
+		{
+#ifdef USE_BRL
+		  memcpy (contents + trampoff, oor_brl, size);
+		  irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
+					       R_IA64_PCREL60B);
+		  irel->r_offset = trampoff + 2;
+#else
+		  memcpy (contents + trampoff, oor_ip, size);
+		  irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
+					       R_IA64_PCREL64I);
+		  irel->r_addend -= 16;
+		  irel->r_offset = trampoff + 2;
+#endif
+		}
+
+	      /* Record the fixup so we don't do it again this section.  */
+	      f = (struct one_fixup *)
+		bfd_malloc ((bfd_size_type) sizeof (*f));
+	      f->next = fixups;
+	      f->tsec = tsec;
+	      f->toff = toff;
+	      f->trampoff = trampoff;
+	      fixups = f;
+	    }
 	  else
 	    {
-#ifdef USE_BRL
-	      size = sizeof (oor_brl);
-#else
-	      size = sizeof (oor_ip);
-#endif
+	      /* Nop out the reloc, since we're finalizing things here.  */
+	      irel->r_info = ELFNN_R_INFO (0, R_IA64_NONE);
 	    }
 
-	  /* Resize the current section to make room for the new branch.  */
-	  trampoff = (sec->_cooked_size + 15) & (bfd_vma) -16;
-	  amt = trampoff + size;
-	  contents = (bfd_byte *) bfd_realloc (contents, amt);
-	  if (contents == NULL)
+	  /* Fix up the existing branch to hit the trampoline.  Hope like
+	     hell this doesn't overflow too.  */
+	  if (elfNN_ia64_install_value (abfd, contents + roff,
+					f->trampoff - (roff & (bfd_vma) -4),
+					r_type) != bfd_reloc_ok)
 	    goto error_return;
-	  sec->_cooked_size = amt;
 
-	  if (tsec == ia64_info->plt_sec)
-	    {
-	      memcpy (contents + trampoff, plt_full_entry, size);
-
-	      /* Hijack the old relocation for use as the PLTOFF reloc.  */
-	      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
-					   R_IA64_PLTOFF22);
-	      irel->r_offset = trampoff;
-	    }
-	  else
-	    {
-#ifdef USE_BRL
-	      memcpy (contents + trampoff, oor_brl, size);
-	      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
-					   R_IA64_PCREL60B);
-	      irel->r_offset = trampoff + 2;
-#else
-	      memcpy (contents + trampoff, oor_ip, size);
-	      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
-					   R_IA64_PCREL64I);
-	      irel->r_addend -= 16;
-	      irel->r_offset = trampoff + 2;
-#endif
-	    }
-
-	  /* Record the fixup so we don't do it again this section.  */
-	  f = (struct one_fixup *) bfd_malloc ((bfd_size_type) sizeof (*f));
-	  f->next = fixups;
-	  f->tsec = tsec;
-	  f->toff = toff;
-	  f->trampoff = trampoff;
-	  fixups = f;
+	  changed_contents = TRUE;
+	  changed_relocs = TRUE;
 	}
       else
 	{
-	  /* Nop out the reloc, since we're finalizing things here.  */
-	  irel->r_info = ELFNN_R_INFO (0, R_IA64_NONE);
+	  /* Fetch the gp.  */
+	  if (gp == 0)
+	    {
+	      bfd *obfd = sec->output_section->owner;
+	      gp = _bfd_get_gp_value (obfd);
+	      if (gp == 0)
+		{
+		  if (!elfNN_ia64_choose_gp (obfd, link_info))
+		    goto error_return;
+		  gp = _bfd_get_gp_value (obfd);
+		}
+	    }
+
+	  /* If the data is out of range, do nothing.  */
+	  if ((bfd_signed_vma) (symaddr - gp) >= 0x400000
+	      ||(bfd_signed_vma) (symaddr - gp) < -0x400000)
+	    continue;
+
+	  if (r_type == R_IA64_LTOFF22X)
+	    {
+	      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
+					   R_IA64_GPREL22);
+	      changed_relocs = TRUE;
+	      if (dyn_i->want_gotx)
+		{
+		  dyn_i->want_gotx = 0;
+		  changed_got |= !dyn_i->want_got;
+		}
+	    }
+	  else
+	    {
+	      elfNN_ia64_relax_ldxmov (abfd, contents, roff);
+	      irel->r_info = ELFNN_R_INFO (0, R_IA64_NONE);
+	      changed_contents = TRUE;
+	      changed_relocs = TRUE;
+	    }
 	}
-
-      /* Fix up the existing branch to hit the trampoline.  Hope like
-	 hell this doesn't overflow too.  */
-      if (elfNN_ia64_install_value (abfd, contents + roff,
-				    f->trampoff - (roff & (bfd_vma) -4),
-				    r_type) != bfd_reloc_ok)
-	goto error_return;
-
-      changed_contents = TRUE;
-      changed_relocs = TRUE;
     }
 
+  /* ??? If we created fixups, this may push the code segment large
+     enough that the data segment moves, which will change the GP.
+     Reset the GP so that we re-calculate next round.  We need to
+     do this at the _beginning_ of the next round; now will not do.  */
+      
   /* Clean up and go home.  */
   while (fixups)
     {
@@ -989,6 +1048,21 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	elf_section_data (sec)->relocs = internal_relocs;
     }
 
+  if (changed_got)
+    {
+      struct elfNN_ia64_allocate_data data;
+      data.info = link_info;
+      data.ofs = 0;
+
+      elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_data_got, &data);
+      elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_fptr_got, &data);
+      elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_local_got, &data);
+      ia64_info->got_sec->_raw_size = data.ofs;
+      ia64_info->got_sec->_cooked_size = data.ofs;
+
+      /* ??? Resize .rela.got too.  */
+    }
+
   *again = changed_contents || changed_relocs;
   return TRUE;
 
@@ -1002,6 +1076,39 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       && elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
+}
+
+static void
+elfNN_ia64_relax_ldxmov (abfd, contents, off)
+     bfd *abfd;
+     bfd_byte *contents;
+     bfd_vma off;
+{
+  int shift, r1, r3;
+  bfd_vma dword, insn;
+
+  switch ((int)off & 0x3)
+    {
+    case 0: shift =  5; break;
+    case 1: shift = 14; off += 3; break;
+    case 2: shift = 23; off += 6; break;
+    case 3:
+      abort ();
+    }
+
+  dword = bfd_get_64 (abfd, contents + off);
+  insn = (dword >> shift) & 0x1ffffffffffLL;
+
+  r1 = (insn >> 6) & 127;
+  r3 = (insn >> 20) & 127;
+  if (r1 == r3)
+    insn = 0x8000000;				   /* nop */
+  else
+    insn = (insn & 0x7f01fff) | 0x10800000000LL;   /* (qp) mov r1 = r3 */
+
+  dword &= ~(0x1ffffffffffLL << shift);
+  dword |= (insn << shift);
+  bfd_put_64 (abfd, dword, contents + off);
 }
 
 /* Return TRUE if NAME is an unwind table section name.  */
@@ -2125,15 +2232,16 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
     {
       enum {
 	NEED_GOT = 1,
-	NEED_FPTR = 2,
-	NEED_PLTOFF = 4,
-	NEED_MIN_PLT = 8,
-	NEED_FULL_PLT = 16,
-	NEED_DYNREL = 32,
-	NEED_LTOFF_FPTR = 64,
-	NEED_TPREL = 128,
-	NEED_DTPMOD = 256,
-	NEED_DTPREL = 512
+	NEED_GOTX = 2,
+	NEED_FPTR = 4,
+	NEED_PLTOFF = 8,
+	NEED_MIN_PLT = 16,
+	NEED_FULL_PLT = 32,
+	NEED_DYNREL = 64,
+	NEED_LTOFF_FPTR = 128,
+	NEED_TPREL = 256,
+	NEED_DTPMOD = 512,
+	NEED_DTPREL = 1024
       };
 
       struct elf_link_hash_entry *h = NULL;
@@ -2230,9 +2338,12 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	case R_IA64_LTOFF22:
-	case R_IA64_LTOFF22X:
 	case R_IA64_LTOFF64I:
 	  need_entry = NEED_GOT;
+	  break;
+
+	case R_IA64_LTOFF22X:
+	  need_entry = NEED_GOTX;
 	  break;
 
 	case R_IA64_PLTOFF22:
@@ -2316,7 +2427,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
       dyn_i->h = h;
 
       /* Create what's needed.  */
-      if (need_entry & (NEED_GOT | NEED_TPREL | NEED_DTPMOD | NEED_DTPREL))
+      if (need_entry & (NEED_GOT | NEED_GOTX | NEED_TPREL
+			| NEED_DTPMOD | NEED_DTPREL))
 	{
 	  if (!got)
 	    {
@@ -2326,6 +2438,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	    }
 	  if (need_entry & NEED_GOT)
 	    dyn_i->want_got = 1;
+	  if (need_entry & NEED_GOTX)
+	    dyn_i->want_gotx = 1;
 	  if (need_entry & NEED_TPREL)
 	    dyn_i->want_tprel = 1;
 	  if (need_entry & NEED_DTPMOD)
@@ -2385,12 +2499,6 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
   return TRUE;
 }
 
-struct elfNN_ia64_allocate_data
-{
-  struct bfd_link_info *info;
-  bfd_size_type ofs;
-};
-
 /* For cleanliness, and potentially faster dynamic loading, allocate
    external GOT entries first.  */
 
@@ -2401,7 +2509,7 @@ allocate_global_data_got (dyn_i, data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
-  if (dyn_i->want_got
+  if ((dyn_i->want_got || dyn_i->want_gotx)
       && ! dyn_i->want_fptr
       && (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
 	  || (elfNN_ia64_aix_vec (x->info->hash->creator)
@@ -2473,7 +2581,7 @@ allocate_local_got (dyn_i, data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
-  if (dyn_i->want_got
+  if ((dyn_i->want_got || dyn_i->want_gotx)
       && ! (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info)
 	    || elfNN_ia64_aix_vec (x->info->hash->creator)))
     {
@@ -2699,7 +2807,7 @@ allocate_dynrel_entries (dyn_i, data)
 
   /* Take care of the GOT and PLT relocations.  */
 
-  if (((dynamic_symbol || shared) && dyn_i->want_got)
+  if (((dynamic_symbol || shared) && (dyn_i->want_got || dyn_i->want_gotx))
       || (dyn_i->want_ltoff_fptr && dyn_i->h && dyn_i->h->dynindx != -1))
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if ((dynamic_symbol || shared) && dyn_i->want_tprel)
@@ -3516,6 +3624,123 @@ elfNN_ia64_unwind_entry_compare (a, b)
   return (av < bv ? -1 : av > bv ? 1 : 0);
 }
 
+/* Make sure we've got ourselves a nice fat __gp value.  */
+static bfd_boolean
+elfNN_ia64_choose_gp (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  bfd_vma min_vma = (bfd_vma) -1, max_vma = 0;
+  bfd_vma min_short_vma = min_vma, max_short_vma = 0;
+  struct elf_link_hash_entry *gp;
+  bfd_vma gp_val;
+  asection *os;
+  struct elfNN_ia64_link_hash_table *ia64_info;
+
+  ia64_info = elfNN_ia64_hash_table (info);
+
+  /* Find the min and max vma of all sections marked short.  Also collect
+     min and max vma of any type, for use in selecting a nice gp.  */
+  for (os = abfd->sections; os ; os = os->next)
+    {
+      bfd_vma lo, hi;
+
+      if ((os->flags & SEC_ALLOC) == 0)
+	continue;
+
+      lo = os->vma;
+      hi = os->vma + os->_raw_size;
+      if (hi < lo)
+	hi = (bfd_vma) -1;
+
+      if (min_vma > lo)
+	min_vma = lo;
+      if (max_vma < hi)
+	max_vma = hi;
+      if (os->flags & SEC_SMALL_DATA)
+	{
+	  if (min_short_vma > lo)
+	    min_short_vma = lo;
+	  if (max_short_vma < hi)
+	    max_short_vma = hi;
+	}
+    }
+
+  /* See if the user wants to force a value.  */
+  gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
+			     FALSE, FALSE);
+
+  if (gp
+      && (gp->root.type == bfd_link_hash_defined
+	  || gp->root.type == bfd_link_hash_defweak))
+    {
+      asection *gp_sec = gp->root.u.def.section;
+      gp_val = (gp->root.u.def.value
+		+ gp_sec->output_section->vma
+		+ gp_sec->output_offset);
+    }
+  else
+    {
+      /* Pick a sensible value.  */
+
+      asection *got_sec = ia64_info->got_sec;
+
+      /* Start with just the address of the .got.  */
+      if (got_sec)
+	gp_val = got_sec->output_section->vma;
+      else if (max_short_vma != 0)
+	gp_val = min_short_vma;
+      else
+	gp_val = min_vma;
+
+      /* If it is possible to address the entire image, but we
+	 don't with the choice above, adjust.  */
+      if (max_vma - min_vma < 0x400000
+	  && max_vma - gp_val <= 0x200000
+	  && gp_val - min_vma > 0x200000)
+	gp_val = min_vma + 0x200000;
+      else if (max_short_vma != 0)
+	{
+	  /* If we don't cover all the short data, adjust.  */
+	  if (max_short_vma - gp_val >= 0x200000)
+	    gp_val = min_short_vma + 0x200000;
+
+	  /* If we're addressing stuff past the end, adjust back.  */
+	  if (gp_val > max_vma)
+	    gp_val = max_vma - 0x200000 + 8;
+	}
+    }
+
+  /* Validate whether all SHF_IA_64_SHORT sections are within
+     range of the chosen GP.  */
+
+  if (max_short_vma != 0)
+    {
+      if (max_short_vma - min_short_vma >= 0x400000)
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: short data segment overflowed (0x%lx >= 0x400000)"),
+	     bfd_get_filename (abfd),
+	     (unsigned long) (max_short_vma - min_short_vma));
+	  return FALSE;
+	}
+      else if ((gp_val > min_short_vma
+		&& gp_val - min_short_vma > 0x200000)
+	       || (gp_val < max_short_vma
+		   && max_short_vma - gp_val >= 0x200000))
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: __gp does not cover short data segment"),
+	     bfd_get_filename (abfd));
+	  return FALSE;
+	}
+    }
+
+  _bfd_set_gp_value (abfd, gp_val);
+
+  return TRUE;
+}
+
 static bfd_boolean
 elfNN_ia64_final_link (abfd, info)
      bfd *abfd;
@@ -3529,112 +3754,18 @@ elfNN_ia64_final_link (abfd, info)
   /* Make sure we've got ourselves a nice fat __gp value.  */
   if (!info->relocateable)
     {
-      bfd_vma min_vma = (bfd_vma) -1, max_vma = 0;
-      bfd_vma min_short_vma = min_vma, max_short_vma = 0;
+      bfd_vma gp_val = _bfd_get_gp_value (abfd);
       struct elf_link_hash_entry *gp;
-      bfd_vma gp_val;
-      asection *os;
 
-      /* Find the min and max vma of all sections marked short.  Also
-	 collect min and max vma of any type, for use in selecting a
-	 nice gp.  */
-      for (os = abfd->sections; os ; os = os->next)
+      if (gp_val == 0)
 	{
-	  bfd_vma lo, hi;
-
-	  if ((os->flags & SEC_ALLOC) == 0)
-	    continue;
-
-	  lo = os->vma;
-	  hi = os->vma + os->_raw_size;
-	  if (hi < lo)
-	    hi = (bfd_vma) -1;
-
-	  if (min_vma > lo)
-	    min_vma = lo;
-	  if (max_vma < hi)
-	    max_vma = hi;
-	  if (os->flags & SEC_SMALL_DATA)
-	    {
-	      if (min_short_vma > lo)
-		min_short_vma = lo;
-	      if (max_short_vma < hi)
-		max_short_vma = hi;
-	    }
+	  if (! elfNN_ia64_choose_gp (abfd, info))
+	    return FALSE;
+	  gp_val = _bfd_get_gp_value (abfd);
 	}
 
-      /* See if the user wants to force a value.  */
       gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
-				 FALSE, FALSE);
-
-      if (gp
-	  && (gp->root.type == bfd_link_hash_defined
-	      || gp->root.type == bfd_link_hash_defweak))
-	{
-	  asection *gp_sec = gp->root.u.def.section;
-	  gp_val = (gp->root.u.def.value
-		    + gp_sec->output_section->vma
-		    + gp_sec->output_offset);
-	}
-      else
-	{
-	  /* Pick a sensible value.  */
-
-	  asection *got_sec = ia64_info->got_sec;
-
-	  /* Start with just the address of the .got.  */
-	  if (got_sec)
-	    gp_val = got_sec->output_section->vma;
-	  else if (max_short_vma != 0)
-	    gp_val = min_short_vma;
-	  else
-	    gp_val = min_vma;
-
-	  /* If it is possible to address the entire image, but we
-	     don't with the choice above, adjust.  */
-	  if (max_vma - min_vma < 0x400000
-	      && max_vma - gp_val <= 0x200000
-	      && gp_val - min_vma > 0x200000)
-	    gp_val = min_vma + 0x200000;
-	  else if (max_short_vma != 0)
-	    {
-	      /* If we don't cover all the short data, adjust.  */
-	      if (max_short_vma - gp_val >= 0x200000)
-		gp_val = min_short_vma + 0x200000;
-
-	      /* If we're addressing stuff past the end, adjust back.  */
-	      if (gp_val > max_vma)
-		gp_val = max_vma - 0x200000 + 8;
-	    }
-	}
-
-      /* Validate whether all SHF_IA_64_SHORT sections are within
-	 range of the chosen GP.  */
-
-      if (max_short_vma != 0)
-	{
-	  if (max_short_vma - min_short_vma >= 0x400000)
-	    {
-	      (*_bfd_error_handler)
-		(_("%s: short data segment overflowed (0x%lx >= 0x400000)"),
-		 bfd_get_filename (abfd),
-		 (unsigned long) (max_short_vma - min_short_vma));
-	      return FALSE;
-	    }
-	  else if ((gp_val > min_short_vma
-		    && gp_val - min_short_vma > 0x200000)
-		   || (gp_val < max_short_vma
-		       && max_short_vma - gp_val >= 0x200000))
-	    {
-	      (*_bfd_error_handler)
-		(_("%s: __gp does not cover short data segment"),
-		 bfd_get_filename (abfd));
-	      return FALSE;
-	    }
-	}
-
-      _bfd_set_gp_value (abfd, gp_val);
-
+			         FALSE, FALSE);
       if (gp)
 	{
 	  gp->root.type = bfd_link_hash_defined;
