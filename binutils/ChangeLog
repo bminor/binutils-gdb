@@ -1,3 +1,8 @@
+2003-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (disassemble_data): Use disasm_info.fprintf_func not
+	printf for emitting new lines.
+
 2003-03-16  Elias Athanasopoulos  <elathan@phys.uoa.gr>
 
 	* nm.c (print_symbol_info_bsd): Print the symbol's size instead of

@@ -45,9 +45,9 @@ extern int fprintf
 /* Exit status.  */
 static int exit_status = 0;
 
-static char *default_target = NULL;	/* default at runtime */
+static char *default_target = NULL;	/* Default at runtime.  */
 
-static int show_version = 0;		/* show the version number */
+static int show_version = 0;		/* Show the version number.  */
 static int dump_section_contents;	/* -s */
 static int dump_section_headers;	/* -h */
 static bfd_boolean dump_file_header;	/* -f */
@@ -109,6 +109,12 @@ static asymbol **dynsyms;
 
 /* Number of symbols in `dynsyms'.  */
 static long dynsymcount = 0;
+
+static bfd_byte *stabs;
+static bfd_size_type stab_size;
+
+static char *strtab;
+static bfd_size_type stabstr_size;
 
 /* Static declarations.  */
 
@@ -188,6 +194,8 @@ static bfd_boolean read_section_stabs
   PARAMS ((bfd *, const char *, const char *));
 static void print_section_stabs
   PARAMS ((bfd *, const char *, const char *));
+static void dump_section_stabs
+  PARAMS ((bfd *, char *, char *));
 
 static void
 usage (stream, status)
@@ -523,7 +531,6 @@ compare_symbols (ap, bp)
 
   /* The symbols gnu_compiled and gcc2_compiled convey no real
      information, so put them after other symbols with the same value.  */
-
   af = (strstr (an, "gnu_compiled") != NULL
 	|| strstr (an, "gcc2_compiled") != NULL);
   bf = (strstr (bn, "gnu_compiled") != NULL
@@ -744,7 +751,6 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
      sections have overlapping memory ranges, but in that case there's
      no way to tell what's desired without looking at the relocation
      table.  */
-
   if (sorted_syms[thisplace]->section != sec
       && (require_sec
 	  || ((abfd->flags & HAS_RELOC) != 0
@@ -760,7 +766,9 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
 	      != bfd_asymbol_value (sorted_syms[thisplace]))
 	    break;
 	}
+
       --i;
+
       for (; i >= 0; i--)
 	{
 	  if (sorted_syms[i]->section == sec
@@ -1555,10 +1563,11 @@ disassemble_data (abfd)
 
   sorted_symcount = remove_useless_symbols (sorted_syms, symcount);
 
-  /* Sort the symbols into section and symbol order */
+  /* Sort the symbols into section and symbol order.  */
   qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
-  INIT_DISASSEMBLE_INFO(disasm_info, stdout, fprintf);
+  INIT_DISASSEMBLE_INFO (disasm_info, stdout, fprintf);
+
   disasm_info.application_data = (PTR) &aux;
   aux.abfd = abfd;
   aux.require_sec = FALSE;
@@ -1568,10 +1577,10 @@ disassemble_data (abfd)
   if (machine != (char *) NULL)
     {
       const bfd_arch_info_type *info = bfd_scan_arch (machine);
+
       if (info == NULL)
-	{
-	  fatal (_("Can't use supplied machine %s"), machine);
-	}
+	fatal (_("Can't use supplied machine %s"), machine);
+
       abfd->arch_info = info;
     }
 
@@ -1662,11 +1671,9 @@ disassemble_data (abfd)
 	      /* Skip over the relocs belonging to addresses below the
 		 start address.  */
 	      if (start_address != (bfd_vma) -1)
-		{
-		  while (relpp < relppend
-			 && (*relpp)->address < start_address)
-		    ++relpp;
-		}
+		while (relpp < relppend
+		       && (*relpp)->address < start_address)
+		  ++relpp;
 	    }
 	}
 
@@ -1685,11 +1692,13 @@ disassemble_data (abfd)
       disasm_info.buffer_vma = section->vma;
       disasm_info.buffer_length = datasize;
       disasm_info.section = section;
+
       if (start_address == (bfd_vma) -1
 	  || start_address < disasm_info.buffer_vma)
 	addr_offset = 0;
       else
 	addr_offset = start_address - disasm_info.buffer_vma;
+
       if (stop_address == (bfd_vma) -1)
 	stop_offset = datasize / opb;
       else
@@ -1720,6 +1729,7 @@ disassemble_data (abfd)
 		    && bfd_asymbol_value (sorted_syms[x]) <= section->vma + addr_offset);
 		   ++x)
 		continue;
+
 	      disasm_info.symbols = & sorted_syms[place];
 	      disasm_info.num_symbols = x - place;
 	    }
@@ -1728,12 +1738,12 @@ disassemble_data (abfd)
 
 	  if (! prefix_addresses)
 	    {
-	      printf ("\n");
+	      (* disasm_info.fprintf_func) (disasm_info.stream, "\n");
 	      objdump_print_addr_with_sym (abfd, section, sym,
 					   section->vma + addr_offset,
 					   &disasm_info,
 					   FALSE);
-	      printf (":\n");
+	      (* disasm_info.fprintf_func) (disasm_info.stream, ":\n");
 	    }
 
 	  if (sym != NULL && bfd_asymbol_value (sym) > section->vma + addr_offset)
@@ -1796,20 +1806,13 @@ disassemble_data (abfd)
 	}
 
       free (data);
+
       if (relbuf != NULL)
 	free (relbuf);
     }
   free (sorted_syms);
 }
 
-
-/* Define a table of stab values and print-strings.  We wish the initializer
-   could be a direct-mapped table, but instead we build one the first
-   time we need it.  */
-
-static void dump_section_stabs
-  PARAMS ((bfd *abfd, char *stabsect_name, char *strsect_name));
-
 /* Dump the stabs sections from an object file that has a section that
    uses Sun stabs encoding.  */
 
@@ -1822,12 +1825,6 @@ dump_stabs (abfd)
   dump_section_stabs (abfd, ".stab.index", ".stab.indexstr");
   dump_section_stabs (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
 }
-
-static bfd_byte *stabs;
-static bfd_size_type stab_size;
-
-static char *strtab;
-static bfd_size_type stabstr_size;
 
 /* Read ABFD's stabs section STABSECT_NAME into `stabs'
    and string table section STRSECT_NAME into `strtab'.
@@ -1928,7 +1925,6 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
 
      We start the index at -1 because there is a dummy symbol on
      the front of stabs-in-{coff,elf} sections that supplies sizes.  */
-
   for (i = -1; stabp < stabs_end; stabp += STABSIZE, i++)
     {
       const char *name;
@@ -1960,7 +1956,6 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
       /* Symbols with type == 0 (N_UNDF) specify the length of the
 	 string table associated with this file.  We use that info
 	 to know how to relocate the *next* file's string table indices.  */
-
       if (type == N_UNDF)
 	{
 	  file_string_table_offset = next_file_string_table_offset;
@@ -1970,7 +1965,6 @@ print_section_stabs (abfd, stabsect_name, strsect_name)
 	{
 	  /* Using the (possibly updated) string table offset, print the
 	     string (if any) associated with this symbol.  */
-
 	  if ((strx + file_string_table_offset) < stabstr_size)
 	    printf (" %s", &strtab[strx + file_string_table_offset]);
 	  else
@@ -2014,6 +2008,7 @@ dump_section_stabs (abfd, stabsect_name, strsect_name)
 	}
     }
 }
+
 
 static void
 dump_bfd_header (abfd)
@@ -2042,6 +2037,7 @@ dump_bfd_header (abfd)
   bfd_printf_vma (abfd, abfd->start_address);
   printf ("\n");
 }
+
 
 static void
 dump_bfd_private_header (abfd)
@@ -2050,7 +2046,7 @@ bfd *abfd;
   bfd_print_private_bfd_data (abfd, stdout);
 }
 
-/* Dump selected contents of ABFD */
+/* Dump selected contents of ABFD.  */
 
 static void
 dump_bfd (abfd)
@@ -2218,7 +2214,7 @@ display_file (filename, target)
   bfd_close (file);
 }
 
-/* Actually display the various requested regions */
+/* Actually display the various requested regions.  */
 
 static void
 dump_data (abfd)
@@ -2302,7 +2298,8 @@ dump_data (abfd)
     }
 }
 
-/* Should perhaps share code and display with nm? */
+/* Should perhaps share code and display with nm?  */
+
 static void
 dump_symbols (abfd, dynamic)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -2346,7 +2343,6 @@ dump_symbols (abfd, dynamic)
 		  /* If we want to demangle the name, we demangle it
                      here, and temporarily clobber it while calling
                      bfd_print_symbol.  FIXME: This is a gross hack.  */
-
 		  alloc = demangle (cur_bfd, name);
 		  (*current)->name = alloc;
 		}
@@ -2408,12 +2404,11 @@ dump_relocs (abfd)
 	{
 	  relpp = (arelent **) xmalloc (relsize);
 	  relcount = bfd_canonicalize_reloc (abfd, a, relpp, syms);
+
 	  if (relcount < 0)
 	    bfd_fatal (bfd_get_filename (abfd));
 	  else if (relcount == 0)
-	    {
-	      printf (" (none)\n\n");
-	    }
+	    printf (" (none)\n\n");
 	  else
 	    {
 	      printf ("\n");
@@ -2440,19 +2435,16 @@ dump_dynamic_relocs (abfd)
   printf ("DYNAMIC RELOCATION RECORDS");
 
   if (relsize == 0)
-    {
-      printf (" (none)\n\n");
-    }
+    printf (" (none)\n\n");
   else
     {
       relpp = (arelent **) xmalloc (relsize);
       relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
+
       if (relcount < 0)
 	bfd_fatal (bfd_get_filename (abfd));
       else if (relcount == 0)
-	{
-	  printf (" (none)\n\n");
-	}
+	printf (" (none)\n\n");
       else
 	{
 	  printf ("\n");
@@ -2477,6 +2469,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
   /* Get column headers lined up reasonably.  */
   {
     static int width;
+
     if (width == 0)
       {
 	char buf[30];
@@ -2519,6 +2512,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 		free (last_functionname);
 	      last_functionname = xstrdup (functionname);
 	    }
+
 	  if (line > 0
 	      && (line != last_line
 		  || (filename != NULL
@@ -2546,6 +2540,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 	  sym_name = NULL;
 	  section_name = NULL;
 	}
+
       if (sym_name)
 	{
 	  bfd_printf_vma (abfd, q->address);
@@ -2565,11 +2560,13 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 		  q->howto->name,
 		  section_name);
 	}
+
       if (q->addend)
 	{
 	  printf ("+0x");
 	  bfd_printf_vma (abfd, q->addend);
 	}
+
       printf ("\n");
     }
 }
