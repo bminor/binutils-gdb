@@ -1,5 +1,5 @@
 /* Print National Semiconductor 32000 instructions.
-   Copyright 1986, 1988, 1991, 1992, 1994, 1998
+   Copyright 1986, 1988, 1991, 1992, 1994, 1998, 2001
    Free Software Foundation, Inc.
 
 This file is part of opcodes library.
@@ -39,6 +39,16 @@ static int print_insn_arg
   PARAMS ((int, int, int *, char *, bfd_vma, char *, int));
 static int get_displacement PARAMS ((char *, int *));
 static int invalid_float PARAMS ((char *, int));
+static long int read_memory_integer PARAMS ((unsigned char *, int));
+static int fetch_data PARAMS ((struct disassemble_info *, bfd_byte *));
+struct ns32k_option;
+static void optlist PARAMS ((int, const struct ns32k_option *, char *));
+static void list_search PARAMS ((int, const struct ns32k_option *, char *));
+static int bit_extract PARAMS ((bfd_byte *, int, int));
+static int bit_extract_simple PARAMS ((bfd_byte *, int, int));
+static void bit_copy PARAMS ((char *, int, int, char *));
+static int sign_extend PARAMS ((int, int));
+static void flip_bytes PARAMS ((char *, int));
 
 static long read_memory_integer(addr, nr)
      unsigned char *addr;
@@ -308,7 +318,6 @@ bit_extract_simple (buffer, offset, count)
      int count;
 {
   int result;
-  int mask;
   int bit;
 
   buffer += offset >> 3;

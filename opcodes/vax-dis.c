@@ -21,12 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 
 /* Local function prototypes */
-static int
-print_insn_arg PARAMS ((const char *, unsigned char *, bfd_vma,
-			disassemble_info *));
+static int fetch_data PARAMS ((struct disassemble_info *, bfd_byte *));
+static int print_insn_arg
+  PARAMS ((const char *, unsigned char *, bfd_vma, disassemble_info *));
+static int print_insn_mode
+  PARAMS ((int, unsigned char *, bfd_vma, disassemble_info *));
 
-static int
-print_insn_mode PARAMS ((int, unsigned char *, bfd_vma, disassemble_info *));
 
 static char *reg_names[] =
 {

@@ -1,5 +1,5 @@
 /* Assemble V850 instructions.
-   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,6 +34,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* two-word opcodes */
 #define two(x,y)	((unsigned int) (x) | ((unsigned int) (y) << 16))
 
+static long unsigned int insert_d9
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d9
+  PARAMS ((long unsigned int, int *));
+static long unsigned int insert_d22
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d22
+  PARAMS ((long unsigned int, int *));
+static long unsigned int insert_d16_15
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d16_15
+  PARAMS ((long unsigned int, int *));
+static long unsigned int insert_d8_7
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d8_7 PARAMS ((long unsigned int, int *));
+static long unsigned int insert_d8_6
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d8_6 PARAMS ((long unsigned int, int *));
+static long unsigned int insert_d5_4
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d5_4 PARAMS ((long unsigned int, int *));
+static long unsigned int insert_d16_16
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_d16_16 PARAMS ((long unsigned int, int *));
+static long unsigned int insert_i9
+  PARAMS ((long unsigned int, long int, const char **));
+static long unsigned int extract_i9 PARAMS ((long unsigned int, int *));
+static long unsigned int insert_u9
+  PARAMS ((long unsigned int, long unsigned int, const char **));
+static long unsigned int extract_u9 PARAMS ((long unsigned int, int *));
+static long unsigned int insert_spe
+  PARAMS ((long unsigned int, long unsigned int, const char **));
+static long unsigned int extract_spe PARAMS ((long unsigned int, int *));
+static long unsigned int insert_i5div
+  PARAMS ((long unsigned int, long unsigned int, const char **));
+static long unsigned int extract_i5div PARAMS ((long unsigned int, int *));
 
 
 /* The functions used to insert and extract complicated operands.  */
@@ -71,7 +107,7 @@ insert_d9 (insn, value, errmsg)
 static unsigned long
 extract_d9 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   unsigned long ret = ((insn & 0xf800) >> 7) | ((insn & 0x0070) >> 3);
 
@@ -103,7 +139,7 @@ insert_d22 (insn, value, errmsg)
 static unsigned long
 extract_d22 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   signed long ret = ((insn & 0xfffe0000) >> 16) | ((insn & 0x3f) << 16);
 
@@ -132,7 +168,7 @@ insert_d16_15 (insn, value, errmsg)
 static unsigned long
 extract_d16_15 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   signed long ret = (insn & 0xfffe0000);
 
@@ -163,7 +199,7 @@ insert_d8_7 (insn, value, errmsg)
 static unsigned long
 extract_d8_7 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   unsigned long ret = (insn & 0x7f);
 
@@ -194,7 +230,7 @@ insert_d8_6 (insn, value, errmsg)
 static unsigned long
 extract_d8_6 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   unsigned long ret = (insn & 0x7e);
 
@@ -225,7 +261,7 @@ insert_d5_4 (insn, value, errmsg)
 static unsigned long
 extract_d5_4 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   unsigned long ret = (insn & 0x0f);
 
@@ -247,7 +283,7 @@ insert_d16_16 (insn, value, errmsg)
 static unsigned long
 extract_d16_16 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   signed long ret = insn & 0xfffe0000;
 
@@ -273,7 +309,7 @@ insert_i9 (insn, value, errmsg)
 static unsigned long
 extract_i9 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   signed long ret = insn & 0x003c0000;
 
@@ -300,7 +336,7 @@ insert_u9 (insn, value, errmsg)
 static unsigned long
 extract_u9 (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   unsigned long ret = insn & 0x003c0000;
 
@@ -325,8 +361,8 @@ insert_spe (insn, value, errmsg)
 
 static unsigned long
 extract_spe (insn, invalid)
-     unsigned long insn;
-     int *         invalid;
+     unsigned long insn ATTRIBUTE_UNUSED;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   return 3;
 }
@@ -355,7 +391,7 @@ insert_i5div (insn, value, errmsg)
 static unsigned long
 extract_i5div (insn, invalid)
      unsigned long insn;
-     int *         invalid;
+     int *         invalid ATTRIBUTE_UNUSED;
 {
   unsigned long ret = insn & 0x3c0000;
 

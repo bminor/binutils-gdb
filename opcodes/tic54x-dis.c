@@ -1,5 +1,5 @@
 /* Disassembly routines for TMS320C54X architecture
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This program is free software; you can redistribute it and/or modify
@@ -31,20 +31,21 @@ typedef struct _instruction {
   partemplate *ptm;
 } instruction;
 
+static int has_lkaddr PARAMS ((unsigned short, template *));
 static int get_insn_size PARAMS ((unsigned short, instruction *));
-static int get_instruction PARAMS ((disassemble_info *, bfd_vma, 
+static int get_instruction PARAMS ((disassemble_info *, bfd_vma,
                                     unsigned short, instruction *));
-static int print_instruction PARAMS ((disassemble_info *, bfd_vma, 
-                                      unsigned short, char *, 
+static int print_instruction PARAMS ((disassemble_info *, bfd_vma,
+                                      unsigned short, char *,
                                       enum optype [], int, int));
 static int print_parallel_instruction PARAMS ((disassemble_info *, bfd_vma,
                                                unsigned short, partemplate *,
-                                               int)); 
-static int sprint_dual_address (disassemble_info *,char [], 
+                                               int));
+static int sprint_dual_address (disassemble_info *,char [],
                                 unsigned short);
-static int sprint_indirect_address (disassemble_info *,char [], 
+static int sprint_indirect_address (disassemble_info *,char [],
                                     unsigned short);
-static int sprint_direct_address (disassemble_info *,char [], 
+static int sprint_direct_address (disassemble_info *,char [],
                                   unsigned short);
 static int sprint_mmr (disassemble_info *,char [],int);
 static int sprint_condition (disassemble_info *,char *,unsigned short);
@@ -55,7 +56,7 @@ print_insn_tic54x (memaddr, info)
   bfd_vma memaddr;
   disassemble_info *info;
 {
-  bfd_byte opbuf[2]; 
+  bfd_byte opbuf[2];
   unsigned short opcode;
   int status, size;
   instruction insn;
@@ -84,8 +85,8 @@ print_insn_tic54x (memaddr, info)
   }
   else
   {
-    if (!print_instruction (info, memaddr, opcode, 
-                            (char *) insn.tm->name, 
+    if (!print_instruction (info, memaddr, opcode,
+                            (char *) insn.tm->name,
                             insn.tm->operand_types,
                             size, (insn.tm->flags & FL_EXT)))
       return -1;
@@ -108,7 +109,7 @@ has_lkaddr (opcode, tm)
 
 /* always returns 1 (whether an insn template was found) since we provide an
    "unknown instruction" template */
-static int 
+static int
 get_instruction (info, addr, opcode, insn)
   disassemble_info *info;
   bfd_vma addr;
@@ -162,7 +163,7 @@ get_instruction (info, addr, opcode, insn)
   return 1;
 }
 
-static int 
+static int
 get_insn_size (opcode, insn)
   unsigned short opcode;
   instruction *insn;
@@ -248,11 +249,11 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
                   if (mod == 15)
                       info->fprintf_func (info->stream, "*(");
                   else
-                      info->fprintf_func (info->stream, "*%sar%d(", 
+                      info->fprintf_func (info->stream, "*%sar%d(",
                                           (mod == 13 || mod == 14 ? "+" : ""),
                                           arf);
                   (*(info->print_address_func)) ((bfd_vma) addr, info);
-                  info->fprintf_func (info->stream, ")%s", 
+                  info->fprintf_func (info->stream, ")%s",
                                       mod == 14 ? "%" : "");
                 }
               else
@@ -407,7 +408,7 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
             break;
           }
         case OP_k5:
-          sprintf (operand[i], "#%d", 
+          sprintf (operand[i], "#%d",
                    (int) (((signed char) opcode & 0x1F) << 3) >> 3);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
@@ -431,15 +432,15 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
         case OP_SBIT:
         {
           const char *status0[] = {
-            "0", "1", "2", "3", "4", "5", "6", "7", "8", 
+            "0", "1", "2", "3", "4", "5", "6", "7", "8",
             "ovb", "ova", "c", "tc", "13", "14", "15"
           };
           const char *status1[] = {
-            "0", "1", "2", "3", "4", 
+            "0", "1", "2", "3", "4",
             "cmpt", "frct", "c16", "sxm", "ovm", "10",
             "intm", "hm", "xf", "cpl", "braf"
           };
-          sprintf (operand[i], "%s", 
+          sprintf (operand[i], "%s",
                    n ? status1[SBIT (opcode)] : status0[SBIT (opcode)]);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
@@ -487,16 +488,16 @@ print_parallel_instruction (info, memaddr, opcode, ptm, size)
   partemplate *ptm;
   int size;
 {
-  print_instruction (info, memaddr, opcode, 
+  print_instruction (info, memaddr, opcode,
                      ptm->name, ptm->operand_types, size, 0);
   info->fprintf_func (info->stream, " || ");
-  return print_instruction (info, memaddr, opcode, 
+  return print_instruction (info, memaddr, opcode,
                             ptm->parname, ptm->paroperand_types, size, 0);
 }
 
 static int
 sprint_dual_address (info, buf, code)
-  disassemble_info *info;
+  disassemble_info *info ATTRIBUTE_UNUSED;
   char buf[];
   unsigned short code;
 {
@@ -511,7 +512,7 @@ sprint_dual_address (info, buf, code)
 
 static int
 sprint_indirect_address (info, buf, opcode)
-  disassemble_info *info;
+  disassemble_info *info ATTRIBUTE_UNUSED;
   char buf[];
   unsigned short opcode;
 {
@@ -534,7 +535,7 @@ sprint_indirect_address (info, buf, opcode)
 
 static int
 sprint_direct_address (info, buf, opcode)
-  disassemble_info *info;
+  disassemble_info *info ATTRIBUTE_UNUSED;
   char buf[];
   unsigned short opcode;
 {
@@ -544,7 +545,7 @@ sprint_direct_address (info, buf, opcode)
 
 static int
 sprint_mmr (info, buf, mmr)
-  disassemble_info *info;
+  disassemble_info *info ATTRIBUTE_UNUSED;
   char buf[];
   int mmr;
 {
@@ -564,7 +565,7 @@ sprint_mmr (info, buf, mmr)
 
 static int
 sprint_cc2 (info, buf, opcode)
-  disassemble_info *info;
+  disassemble_info *info ATTRIBUTE_UNUSED;
   char *buf;
   unsigned short opcode;
 {
@@ -577,7 +578,7 @@ sprint_cc2 (info, buf, opcode)
 
 static int
 sprint_condition (info, buf, opcode)
-  disassemble_info *info;
+  disassemble_info *info ATTRIBUTE_UNUSED;
   char *buf;
   unsigned short opcode;
 {
@@ -597,15 +598,15 @@ sprint_condition (info, buf, opcode)
   else if (opcode & 0x3F)
     {
       if (opcode & 0x30)
-        buf += sprintf (buf, "%s%s", 
+        buf += sprintf (buf, "%s%s",
                         ((opcode & 0x30) == 0x30) ? "tc" : "ntc",
                         (opcode & 0x0F) ? ", " : "");
       if (opcode & 0x0C)
-        buf += sprintf (buf, "%s%s", 
+        buf += sprintf (buf, "%s%s",
                         ((opcode & 0x0C) == 0x0C) ? "c" : "nc",
                         (opcode & 0x03) ? ", " : "");
       if (opcode & 0x03)
-        buf += sprintf (buf, "%s", 
+        buf += sprintf (buf, "%s",
                         ((opcode & 0x03) == 0x03) ? "bio" : "nbio");
     }
   else

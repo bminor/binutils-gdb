@@ -50,6 +50,9 @@ typedef struct {
   unsigned long interrupts;
 } instr_data_s;
 
+static int fetch_data PARAMS ((struct disassemble_info *, int));
+
+
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
    to ADDR (exclusive) are valid.  Returns 1 for success, longjmps
    on error.  */
@@ -134,6 +137,7 @@ static char *ctrl_names[8] = {
 };
 
 static int seg_length;
+static int print_insn_z8k PARAMS ((bfd_vma, disassemble_info *, int));
 int z8k_lookup_instr PARAMS ((unsigned char *, disassemble_info *));
 static void output_instr
   PARAMS ((instr_data_s *, unsigned long, disassemble_info *));
@@ -274,7 +278,7 @@ z8k_lookup_instr (nibbles, info)
 static void
 output_instr (instr_data, addr, info)
      instr_data_s *instr_data;
-     unsigned long addr;
+     unsigned long addr ATTRIBUTE_UNUSED;
      disassemble_info *info;
 {
   int loop, loop_limit;

@@ -1,3 +1,33 @@
+2001-08-25  Andreas Jaeger  <aj@suse.de>
+
+	* tic54x-dis.c: Add unused attributes where needed.
+
+	* z8k-dis.c (output_instr): Add unused attribute.
+
+	* h8300-dis.c: Add missing prototypes.
+	(bfd_h8_disassemble): Make static.
+
+	* cris-dis.c: Add missing prototype.
+	* h8500-dis.c: Likewise.
+	* m68hc11-dis.c: Likewise.
+	* pj-dis.c: Likewise.
+	* tic54x-dis.c: Likewise.
+	* v850-dis.c: Likewise.
+	* vax-dis.c: Likewise.
+	* w65-dis.c: Likewise.
+	* z8k-dis.c: Likewise.
+
+	* d10v-dis.c: Add missing prototype.
+	(dis_long): Remove unused variable.
+	(dis_2_short): Likewise.
+
+	* sh-dis.c: Add missing prototypes.
+	* v850-opc.c: Likewise.
+	Add unused attributes where needed.
+
+	* ns32k-dis.c: Add missing prototypes.
+	(bit_extract_simple): Remove unused variable.
+
 2001-08-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* opcodes/s390-opc.c: Add "low or high" and "not low or high"

@@ -29,6 +29,9 @@ static void dis_2_short PARAMS ((unsigned long insn, bfd_vma memaddr,
 				 struct disassemble_info *info, int order));
 static void dis_long PARAMS ((unsigned long insn, bfd_vma memaddr,
 			      struct disassemble_info *info));
+static void print_operand
+  PARAMS ((struct d10v_operand *, long unsigned int, struct d10v_opcode *,
+	   bfd_vma, struct disassemble_info *));
 
 int
 print_insn_d10v (memaddr, info)
@@ -192,7 +195,6 @@ dis_long (insn, memaddr, info)
      struct disassemble_info *info;
 {
   int i;
-  char buf[32];
   struct d10v_opcode *op = (struct d10v_opcode *) d10v_opcodes;
   struct d10v_operand *oper;
   int need_paren = 0;
@@ -235,10 +237,8 @@ dis_2_short (insn, memaddr, info, order)
      int order;
 {
   int i, j;
-  char astr[2][32];
   unsigned int ins[2];
   struct d10v_opcode *op;
-  char buf[32];
   int match, num_match = 0;
   struct d10v_operand *oper;
   int need_paren = 0;

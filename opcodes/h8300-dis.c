@@ -1,5 +1,5 @@
 /* Disassemble h8300 instructions.
-   Copyright 1993, 1994, 1996, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1998, 2000, 2001 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,6 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/h8300.h"
 #include "dis-asm.h"
 #include "opintl.h"
+
+static void bfd_h8_disassemble_init PARAMS ((void));
+static unsigned int bfd_h8_disassemble
+  PARAMS ((bfd_vma, disassemble_info *, int));
 
 /* Run through the opcodes and sort them into order to make them easy
    to disassemble.  */
@@ -58,7 +62,7 @@ bfd_h8_disassemble_init ()
     }
 }
 
-unsigned int
+static unsigned int
 bfd_h8_disassemble (addr, info, mode)
      bfd_vma addr;
      disassemble_info *info;

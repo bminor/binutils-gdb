@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern const pj_opc_info_t pj_opc_info[512];
 
+static int get_int PARAMS ((bfd_vma, int *, struct disassemble_info *));
+
+
 static int
 get_int (memaddr, iptr, info)
      bfd_vma memaddr;
