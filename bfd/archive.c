@@ -2198,7 +2198,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
       /* For each symbol which is used defined in this object, write
 	 out the object file's address in the archive.  */
 
-      while (((bfd *) (map[count]).pos) == current)
+      while (count < symbol_count && ((bfd *) (map[count]).pos) == current)
 	{
 	  bfd_write_bigendian_4byte_int (arch, archive_member_file_ptr);
 	  count++;
