@@ -1,3 +1,9 @@
+Fri Dec 15 14:25:07 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config/tc-sh.c (parse_reg): Recognize SH3 registers.
+	(get_specific): Handle A_SSR, A_SPC and A_REG_B.
+	(build_Mbytes): Handle REG_B.
+
 Fri Dec 15 16:07:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_build_aux): Use new bfd_big_endian macro.
