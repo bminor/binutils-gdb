@@ -51,7 +51,7 @@ extern const char *architecture_pname[];
 /* Sparclite and v9 are both supersets of v8; we can't bump between them.  */
 
 #define ARCHITECTURES_CONFLICT_P(ARCH1, ARCH2) \
-((ARCH1) == sparclite && ((ARCH2) == v9 || (ARCH2) == v9vis))
+((ARCH1) == sparclite && ((ARCH2) == v9 || (ARCH2) == v9a))
 
 struct sparc_opcode {
 	const char *name;

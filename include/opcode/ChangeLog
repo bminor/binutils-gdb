@@ -1,6 +1,7 @@
 Mon Jan 22 08:24:32 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc.h (enum sparc_architecture): Add v9a.
+	(ARCHITECTURES_CONFLICT_P): Update.
 
 Thu Dec 28 13:27:53 1995  John Hassey  <hassey@rtp.dg.com>
 
