@@ -568,7 +568,7 @@ md_assemble (str)
 					       NULL);
 		  else
 		    insn |= suf->value << operand->shift;
-
+		  suffix = suf;
 		  str = t;
 		  found = 1;
 		}
