@@ -1,9 +1,6 @@
 Sat Aug  1 13:49:59 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config/stratus.mt (CC):  Remove definition.
-	* elf.c (bfd_section_from_shdr, elf_section_from_bfd_section,
-	section_from_elf_index):  Add SHT_BEPROGBITS case for i860 in
-	big endian mode.
 	* elf.c (bfd_section_from_shdr):  Test for the possibility that
 	section_from_elf_index returns NULL and don't dereference it.
 
