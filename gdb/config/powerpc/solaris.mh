@@ -1,7 +1,7 @@
 # Host: PowerPC, running Solaris 2
 
 XM_FILE= xm-solaris.h
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-solaris.h

@@ -2,7 +2,7 @@
 
 XM_FILE= xm-m68klynx.h
 XM_CLIBS= -lbsd
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 
 NAT_FILE= nm-m68klynx.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o lynx-nat.o

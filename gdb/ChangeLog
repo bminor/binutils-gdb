@@ -1,3 +1,28 @@
+Mon Jun 12 15:24:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SER_HARDWIRE): Set using autoconf.
+	* configure.in (SER_HARDWIRE): Define, add ser-tcp.o.
+	* configure: Re-generate.
+
+	* config/i386/go32.mh (SER_HARDWIRE): Delete.  Handled by
+ 	configure.in.
+	* config/sparc/sun4sol2.mh, config/sparc/sun4os4.mh,
+ 	config/sparc/sparclynx.mh, config/sparc/nbsdelf.mh,
+ 	config/sparc/nbsd.mh, config/sparc/linux.mh,
+ 	config/rs6000/rs6000lynx.mh, config/powerpc/solaris.mh,
+ 	config/powerpc/nbsd.mh, config/powerpc/linux.mh,
+ 	config/powerpc/cygwin.mh, config/pa/hpux11w.mh,
+ 	config/pa/hpux11.mh, config/pa/hpux1020.mh, config/pa/hppaosf.mh,
+ 	config/pa/hppahpux.mh, config/pa/hppabsd.mh, config/ns32k/nbsd.mh,
+ 	config/mips/irix5.mh, config/mips/irix4.mh, config/m68k/nbsd.mh,
+ 	config/m68k/m68klynx.mh, config/m68k/linux.mh,
+ 	config/i386/nbsdelf.mh, config/i386/nbsd.mh, config/i386/linux.mh,
+ 	config/i386/i386sco5.mh, config/i386/i386lynx.mh,
+ 	config/i386/i386dgux.mh, config/i386/fbsd.mh,
+ 	config/i386/cygwin.mh, config/arm/linux.mh, config/alpha/fbsd.mh,
+ 	config/alpha/alpha-osf3.mh, config/alpha/alpha-linux.mh: Remove
+ 	ser-tcp.o from XDEPFILES.
+
 Mon Jun 12 14:26:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (GDB_TARGET_IS_MIPS64): Define.

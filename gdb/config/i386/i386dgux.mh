@@ -1,7 +1,7 @@
 # Host: Intel 386 running DGUX, cloned from SVR4
 
 XM_FILE= xm-i386v4.h
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 # for network communication
 XM_CLIBS= -lsocket -lnsl
 

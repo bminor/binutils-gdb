@@ -626,6 +626,15 @@ AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
 lose
 #endif],[gdb_cv_os_cygwin=yes],[gdb_cv_os_cygwin=no])])
 
+
+dnl Figure out which of the many generic ser-*.c files the _host_ supports.
+SER_HARDWIRE="ser-unix.o ser-pipe.o ser-tcp.o"
+case ${host} in
+  go32*-*-* ) SER_HARDWIRE=ser-go32.o ;;
+esac
+AC_SUBST(SER_HARDWIRE)
+
+
 dnl Figure out which term library to use.
 if test x$gdb_host = xgo32; then
   TERM_LIB=

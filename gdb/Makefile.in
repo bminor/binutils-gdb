@@ -342,7 +342,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE = ser-unix.o ser-pipe.o
+SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
