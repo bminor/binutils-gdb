@@ -2,6 +2,11 @@ Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
 
+2000-04-12  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cpu.h (GPR_CLEAR): New macro.	
+	(GPR_SET): Removed macro.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
