@@ -35,6 +35,14 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
+sky_files="tc-txvu.c tc-txvu.h"
+
+if ( echo $* | grep keep\-sky > /dev/null ) ; then
+	keep_these_too="${sky_files} ${keep_these_too}"
+else
+	lose_these_too="${sky_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
