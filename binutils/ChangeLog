@@ -1,6 +1,9 @@
 Mon Jul 24 13:52:28 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* srconv.c (wr_hd): Set afl field to 4 for bfd_arch_sh.
+	(writeINT): When size == -2, use 2 bytes for the h8300 and 4 bytes 
+	for the	sh.
+
 	* sysdump.c (fillup): Return size - 1, the last byte is a checksum
 	and shouldn't be counted.
 	* sysroff.info (hd): Changed segment identifier from a byte to a 1
