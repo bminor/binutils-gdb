@@ -1,5 +1,25 @@
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (MIPS_DEFAULT_MASK_ADDRESS_P): Delete macro.
+	(mips_mask_address_p): Add "tdep" parameter.
+	(show_mask_address, mips_addr_bits_remove): Update.
+	(mips_dump_tdep): Update.
+	(MIPS_DEFAULT_STACK_ARGSIZE): Delete macro.
+	(MIPS_STACK_ARGSIZE): Delete macro.
+	(mips_stack_argsize, mips_eabi_push_dummy_call): Update.
+	(mips_n32n64_push_dummy_call, mips_o32_push_dummy_call): Update.
+	(mips_o64_push_dummy_call, mips_o32_return_value): Update.
+	(mips_dump_tdep): Update.
+	(MIPS_SAVED_REGSIZE): Delete macro.
+	(MIPS_DEFAULT_SAVED_REGSIZE): Delete macro.
+	(mips_saved_regsize, mips_eabi_use_struct_convention): Update.
+	(mips_eabi_reg_struct_has_addr, mips_find_saved_regs): Update.
+	(mips_frame_saved_pc, mips16_heuristic_proc_desc): Update.
+	(mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call): Update.
+	(mips_o32_push_dummy_call, mips_o64_push_dummy_call): Update.
+	(mips_pop_frame, return_value_location): Update.
+	(mips_n32n64_return_value, mips_dump_tdep): Update.
+
 	* mips-tdep.c (mips_gdbarch_init): Clean up code selecting the
 	MIPS ABI.
 
