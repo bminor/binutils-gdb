@@ -74,15 +74,6 @@ struct objc_method {
 
 /* Complaints about ObjC classes, selectors, etc.  */
 
-static struct deprecated_complaint noclass_lookup_complaint = {
-  "no way to lookup Objective-C classes", 0, 0
-};
-
-static struct deprecated_complaint nosel_lookup_complaint = {
-  "no way to lookup Objective-C selectors", 0, 0
-};
-
-
 #if (!defined __GNUC__ || __GNUC__ < 2 || __GNUC_MINOR__ < (defined __cplusplus ? 6 : 4))
 #define __CHECK_FUNCTION ((__const char *) 0)
 #else
@@ -160,7 +151,8 @@ lookup_objc_class (char *classname)
     function = find_function_in_inferior("objc_lookup_class");
   else
     {
-      complain (&noclass_lookup_complaint, 0);
+      complaint (&symfile_complaints, "no way to lookup Objective-C classes",
+		 0);
       return 0;
     }
 
@@ -187,7 +179,8 @@ lookup_child_selector (char *selname)
     function = find_function_in_inferior("sel_get_any_uid");
   else
     {
-      complain (&nosel_lookup_complaint, 0);
+      complaint (&symfile_complaints, "no way to lookup Objective-C selectors",
+		 0);
       return 0;
     }
 

@@ -820,9 +820,6 @@ net_get_symbols (ldtabl *pLoadTable)
    Returns status of symbol read on target side (0=success, -1=fail)
    Returns -1 and complain()s if rpc fails.  */
 
-struct deprecated_complaint cant_contact_target =
-{"Lost contact with VxWorks target", 0, 0};
-
 static int
 vx_lookup_symbol (char *name,	/* symbol name */
 		  CORE_ADDR *pAddr)
@@ -837,7 +834,7 @@ vx_lookup_symbol (char *name,	/* symbol name */
 			  xdr_SYMBOL_ADDR, &symbolAddr);
   if (status != RPC_SUCCESS)
     {
-      complain (&cant_contact_target);
+      complaint (&symfile_complaints, "Lost contact with VxWorks target");
       return -1;
     }
 

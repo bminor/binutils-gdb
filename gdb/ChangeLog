@@ -1,3 +1,136 @@
+2002-12-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* buildsym.c (block_end_complaint, anon_block_end_complaint)
+	(innerblock_complaint, innerblock_anon_complaint)
+	(blockvector_complaint): Delete deprecated complaint structs.
+	(finish_block, make_blockvector, end_symtab): Replace calls
+	to complain() with calls to complaint().
+	* coffread.c (ef_complaint, ef_stack_complaint, eb_stack_complaint)
+	(bf_no_aux_complaint, ef_no_aux_complaint, lineno_complaint)
+	(unexpected_type_complaint, bad_sclass_complaint)
+	(misordered_blocks_complaint, tagndx_bad_complaint, eb_complaint):
+	Delete deprecated complaint structs.
+	(coff_symtab_read, enter_linenos, decode_type, decode_base_type):
+	Replace calls to complain() with calls to complaint().
+	* dbxread.c (lbrac_complaint, string_table_offset_complaint)
+	(unknown_symtype_complaint, unknown_symchar_complaint)
+	(lbrac_rbrac_complaint, lbrac_unmatched_complaint)
+	(lbrac_mismatch_complaint, repeated_header_complaint)
+	(unclaimed_bincl_complaint, discarding_local_symbols_complaint):
+	Delete deprecated complaint structs.
+	(unknown_symtype_complaint, lbrac_mismatch_complaint)
+	(repeated_header_complaint)
+	(function_outside_compiliation_unit_complaint): New functions.
+	(add_old_header_file, find_corresponding_bincl_psymtab)
+	(set_namestring, find_stab_function_addr, read_dbx_symtab)
+	(process_one_symbol): Replace calls to complain() with, possibly
+	indirect, calls to complaint().
+	* dwarfread.c (no_bfd_get_N, malformed_die, bad_die_ref)
+	(unknown_attribute_form, unknown_attribute_length)
+	(unexpected_fund_type, unknown_type_modifier, volatile_ignored)
+	(const_ignored, botched_modified_type, op_deref2, op_deref4)
+	(basereg_not_handled, dup_user_type_allocation)
+	(dup_user_type_definition, missing_tag, bad_array_element_type)
+	(subscript_data_items, unhandled_array_subscript_format)
+	(unknown_array_subscript_format, not_row_major)
+	(missing_at_name): Delete deprecated complaint structs.
+	(bad_die_ref_complaint, unknown_attribute_form_complaint)
+	(dup_user_type_definition_complaint)
+	(bad_array_element_type_complaint): New functions.
+	(lookup_utype, alloc_utype, struct_type, decode_array_element_type)
+	(decode_subscript_data_item, dwarf_read_array_type)
+	(read_tag_string_type, read_subroutine_type, read_func_scope)
+	(locval, scan_partial_symbols, decode_modified_type)
+	(decode_func_type, basicdieinfo, completeddieinfo, target_to_host)
+	(attribute_size): Replace calls to complain() with, possibly
+	indirect, calls to complaint().
+	* elfread.c (section_info_complaint, section_info_dup_complaint)
+	(stab_info_mismatch_complaint, stab_info_questionable_complaint):
+	Delete deprecated complaint structs.
+	(elf_symtab_read, elfstab_offset_sections): Replace calls to
+	complain() with calls to complaint().
+	* gdbtypes.c (stub_noname_complaint): Delete deprecated complaint
+	struct.
+	(stub_noname_complaint): New function.
+	(check_typedef, add_mangled_type): Replace calls to complain()
+	with calls to complaint().
+	* hpread.c (string_table_offset_complaint, lbrac_unmatched_complaint)
+	(lbrac_mismatch_complaint, hpread_unhandled_end_common_complaint)
+	(hpread_unhandled_type_complaint, hpread_struct_complaint)
+	(hpread_array_complaint, hpread_type_lookup_complaint)
+	(hpread_unexpected_end_complaint, hpread_tagdef_complaint)
+	(hpread_unhandled_common_complaint)
+	(hpread_unhandled_blockdata_complaint): Delete deprecated complaint
+	struct definitions and declarations.
+	(lbrac_unmatched_complaint, lbrac_mismatch_complaint): New functions.
+	(SET_NAMESTRING, hpread_type_lookup, hpread_process_one_debug_symbol):
+	Replace calls to complain() with, possibly indirect, calls to
+	complaint().
+	* macrotab.c (macro_include, check_for_redefinition, macro_undef):
+	Likewise.
+	* mdebugread.c (bad_file_number_complaint, index_complaint)
+	(aux_index_complaint, block_index_complaint)
+	(unknown_ext_complaint, unknown_sym_complaint)
+	(unknown_st_complaint, block_overflow_complaint)
+	(basic_type_complaint, unknown_type_qual_complaint)
+	(array_index_type_complaint, bad_tag_guess_complaint)
+	(block_member_complaint, stEnd_complaint)
+	(unknown_mdebug_symtype_complaint, stab_unknown_complaint)
+	(pdr_for_nonsymbol_complaint, pdr_static_symbol_complaint)
+	(bad_setjmp_pdr_complaint, bad_fbitfield_complaint)
+	(bad_continued_complaint, bad_rfd_entry_complaint)
+	(unexpected_type_code_complaint, unable_to_cross_ref_complaint)
+	(bad_indirect_xref_complaint, illegal_forward_tq0_complaint)
+	(illegal_forward_bt_complaint, bad_linetable_guess_complaint)
+	(bad_ext_ifd_complaint, bad_ext_iss_complaint): Delete deprecated
+	complaint structs.
+	(index_complaint, unknown_ext_complaint, basic_type_complaint)
+	(bad_tag_guess_complaint, bad_rfd_entry_complaint)
+	(unexpected_type_code_complaint)
+	(function_outside_compilation_unit_complaint): New functions.
+	(parse_symbol, parse_type, upgrade_type, parse_procedure)
+	(parse_partial_symbols, psymtab_to_symtab_1, cross_ref, add_symbol):
+	Replace calls to complain() with, possibly indirect calls to
+	complaint().
+	* objc-lang.c (noclass_lookup_complaint, nosel_lookup_complaint):
+	Delete deprecated complaint structs.
+	(lookup__objc_class, lookup_child_selector): Replace complain()
+	with complaint().
+	* remote-vx.c (cant_contact_target): Delete deprecated complaint
+	struct.
+	(vx_lookup_symbol): Replace complain() with complaint().
+	* stabsread.c (invalid_cpp_abbrev_complaint)
+	(invalid_cpp_type_complaint, member_fn_complaint)
+	(const_vol_complaint, error_type_complaint)
+	(invalid_member_complaint, range_type_base_complaint)
+	(reg_value_complaint, vtbl_notfound_complaint)
+	(unrecognized_cplus_name_complaint, rs6000_builtin_complaint)
+	(unresolved_sym_chain_complaint, stabs_general_complaint)
+	(lrs_general_complaint, multiply_defined_struct): Delete
+	deprecated complaint structs.
+	(invalid_cpp_abbrev_complaint, ref_value_complaint)
+	(stabs_general_complaint, lrs_general_complaint)
+	(msg_unknown_complaint): New functions.
+	(dbx_lookup_type, read_cfront_baseclasses)
+	(read_cfront_member_functions, resolve_symbol_reference)
+	(define_symbol, resolve_live_range, add_live_range, read_type)
+	(rs6000_builtin_type, read_member_functions, read_cpp_abbrev)
+	(read_one_struct_field, read_baseclasses, read_tilde_fields)
+	(read_cfront_static_fields, attach_fields_to_type)
+	(complain_about_struct_wipeout, read_range_type)
+	(common_block_start, common_block_end, cleanup_undefined_types)
+	(scan_file_globals): Replace complain() with complaint().
+	* stabsread.h (unknown_symtype_complaint, unknown_symchar_complaint):
+	Delete deprecated complaint struct declarations.
+	* xcoffread.c (storclass_complaint, bf_notfound_complaint)
+	(ef_complaint, eb_complaint): Delete deprecated complaint structs.
+	(bf_not_found_complaint, ef_complaint, eb_complaint)
+	(function_outside_compilation_unit_complaint): New functions.
+	(record_include_begin, record_include_end, enter_line_range)
+	(xcoff_next_symbol_text, read_xcoff_symtab, process_xcoff_symbol)
+	(read_symbol, read_symbol_lineno, scan_xcoff_symtab) Replace
+	complain() with complaint().
+
 2002-12-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/arc/arc.mt, config/arc/tm-arc.h: Delete.

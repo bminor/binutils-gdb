@@ -167,36 +167,27 @@ static int has_line_numbers;
 
 /* Complaints about the symbols we have encountered.  */
 
-struct deprecated_complaint lbrac_complaint =
-{"bad block start address patched", 0, 0};
+static void
+unknown_symtype_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "unknown symbol type %s", arg1);
+}
 
-struct deprecated_complaint string_table_offset_complaint =
-{"bad string table offset in symbol %d", 0, 0};
+static void
+lbrac_mismatch_complaint (int arg1)
+{
+  complaint (&symfile_complaints,
+	     "N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", arg1);
+}
 
-struct deprecated_complaint unknown_symtype_complaint =
-{"unknown symbol type %s", 0, 0};
+static void
+repeated_header_complaint (const char *arg1, int arg2)
+{
+  complaint (&symfile_complaints,
+	     "\"repeated\" header file %s not previously seen, at symtab pos %d",
+	     arg1, arg2);
+}
 
-struct deprecated_complaint unknown_symchar_complaint =
-{"unknown symbol descriptor `%c'", 0, 0};
-
-struct deprecated_complaint lbrac_rbrac_complaint =
-{"block start larger than block end", 0, 0};
-
-struct deprecated_complaint lbrac_unmatched_complaint =
-{"unmatched N_LBRAC before symtab pos %d", 0, 0};
-
-struct deprecated_complaint lbrac_mismatch_complaint =
-{"N_LBRAC/N_RBRAC symbol mismatch at symtab pos %d", 0, 0};
-
-struct deprecated_complaint repeated_header_complaint =
-{"\"repeated\" header file %s not previously seen, at symtab pos %d", 0, 0};
-
-struct deprecated_complaint unclaimed_bincl_complaint =
-{"N_BINCL %s not in entries for any file, at symtab pos %d", 0, 0};
-
-struct deprecated_complaint discarding_local_symbols_complaint =
-{"misplaced N_LBRAC entry; discarding local symbols which have no enclosing block", 0, 0};
-
 /* find_text_range --- find start and end of loadable code sections
 
    The find_text_range function finds the shortest address range that
@@ -367,7 +358,7 @@ add_old_header_file (char *name, int instance)
 	add_this_object_header_file (i);
 	return;
       }
-  complain (&repeated_header_complaint, name, symnum);
+  repeated_header_complaint (name, symnum);
 }
 
 /* Add to this file a "new" header file: definitions for its types follow.
@@ -1022,7 +1013,7 @@ find_corresponding_bincl_psymtab (char *name, int instance)
 	&& STREQ (name, bincl->name))
       return bincl->pst;
 
-  complain (&repeated_header_complaint, name, symnum);
+  repeated_header_complaint (name, symnum);
   return (struct partial_symtab *) 0;
 }
 
@@ -1059,7 +1050,8 @@ set_namestring (struct objfile *objfile, struct internal_nlist nlist)
   if (((unsigned) nlist.n_strx + file_string_table_offset) >=
       DBX_STRINGTAB_SIZE (objfile))
     {
-      complain (&string_table_offset_complaint, symnum);
+      complaint (&symfile_complaints, "bad string table offset in symbol %d",
+		 symnum);
       namestring = "<bad string table offset>";
     } 
   else
@@ -1256,6 +1248,14 @@ find_stab_function_addr (char *namestring, char *filename,
 }
 #endif /* SOFUN_ADDRESS_MAYBE_MISSING */
 
+static void
+function_outside_compilation_unit_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints,
+	     "function `%s' appears to be defined outside of all compilation units",
+	     arg1);
+}
+
 /* Setup partial_symtab's describing each source file for which
    debugging information is available. */
 
@@ -1360,9 +1360,6 @@ read_dbx_symtab (struct objfile *objfile)
 
       switch (nlist.n_type)
 	{
-	  static struct deprecated_complaint function_outside_compilation_unit = {
-	    "function `%s' appears to be defined outside of all compilation units", 0, 0
-	  };
 	  char *p;
 	  /*
 	   * Standard, external, non-debugger, symbols
@@ -1613,7 +1610,9 @@ read_dbx_symtab (struct objfile *objfile)
 	    {
 	      /* FIXME: we should not get here without a PST to work on.
 		 Attempt to recover.  */
-	      complain (&unclaimed_bincl_complaint, namestring, symnum);
+	      complaint (&symfile_complaints,
+			 "N_BINCL %s not in entries for any file, at symtab pos %d",
+			 namestring, symnum);
 	      continue;
 	    }
 	    add_bincl_to_list (pst, namestring, nlist.n_value);
@@ -1887,7 +1886,7 @@ read_dbx_symtab (struct objfile *objfile)
 		char *name = xmalloc (name_len + 1);
 		memcpy (name, namestring, name_len);
 		name[name_len] = '\0';
-		complain (&function_outside_compilation_unit, name);
+		function_outside_compilation_unit_complaint (name);
 		xfree (name);
 	      }
 	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -1952,7 +1951,7 @@ read_dbx_symtab (struct objfile *objfile)
 		char *name = xmalloc (name_len + 1);
 		memcpy (name, namestring, name_len);
 		name[name_len] = '\0';
-		complain (&function_outside_compilation_unit, name);
+		function_outside_compilation_unit_complaint (name);
 		xfree (name);
 	      }
 	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -2047,7 +2046,8 @@ read_dbx_symtab (struct objfile *objfile)
 	       time searching to the end of every string looking for
 	       a backslash.  */
 
-	    complain (&unknown_symchar_complaint, p[1]);
+	    complaint (&symfile_complaints, "unknown symbol descriptor `%c'",
+		       p[1]);
 
 	    /* Ignore it; perhaps it is an extension that we don't
 	       know about.  */
@@ -2161,8 +2161,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  default:
 	  /* If we haven't found it yet, ignore it.  It's probably some
 	     new type we don't know about yet.  */
-	  complain (&unknown_symtype_complaint,
-		    local_hex_string (nlist.n_type));
+	  unknown_symtype_complaint (local_hex_string (nlist.n_type));
 	  continue;
 	}
     }
@@ -2777,7 +2776,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
  	  if (context_stack_depth <= 0)
  	    {
- 	      complain (&lbrac_mismatch_complaint, symnum);
+	      lbrac_mismatch_complaint (symnum);
  	      break;
  	    }
 
@@ -2827,7 +2826,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       if (!SUN_FIXED_LBRAC_BUG && valu < last_pc_address)
 	{
 	  /* Patch current LBRAC pc value to match last handy pc value */
-	  complain (&lbrac_complaint);
+	  complaint (&symfile_complaints, "bad block start address patched");
 	  valu = last_pc_address;
 	}
 #endif
@@ -2852,13 +2851,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       if (context_stack_depth <= 0)
 	{
-	  complain (&lbrac_mismatch_complaint, symnum);
+	  lbrac_mismatch_complaint (symnum);
 	  break;
 	}
 
       new = pop_context ();
       if (desc != new->depth)
-	complain (&lbrac_mismatch_complaint, symnum);
+	lbrac_mismatch_complaint (symnum);
 
       /* Some compilers put the variable decls inside of an
          LBRAC/RBRAC block.  This macro should be nonzero if this
@@ -2883,7 +2882,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		 symbols within an LBRAC/RBRAC block; this complaint
 		 might also help sort out problems in which
 		 VARIABLES_INSIDE_BLOCK is incorrectly defined.  */
-	      complain (&discarding_local_symbols_complaint);
+	      complaint (&symfile_complaints,
+			 "misplaced N_LBRAC entry; discarding local symbols which have no enclosing block");
 	    }
 	  local_symbols = new->locals;
 	}
@@ -2903,7 +2903,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	         compilers?  Is this ever harmful?).  */
 	      if (new->start_addr > valu)
 		{
-		  complain (&lbrac_rbrac_complaint);
+		  complaint (&symfile_complaints,
+			     "block start larger than block end");
 		  new->start_addr = valu;
 		}
 	      /* Make a block for the local symbols within.  */
@@ -3127,7 +3128,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
     case N_NBBSS:
     case N_NBSTS:
     case N_NBLCS:
-      complain (&unknown_symtype_complaint, local_hex_string (type));
+      unknown_symtype_complaint (local_hex_string (type));
       /* FALLTHROUGH */
 
       /* The following symbol types don't need the address field relocated,
@@ -3239,7 +3240,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
 	      if (context_stack_depth > 1)
 		{
-		  complain (&lbrac_unmatched_complaint, symnum);
+		  complaint (&symfile_complaints,
+			     "unmatched N_LBRAC before symtab pos %d", symnum);
 		  break;
 		}
 

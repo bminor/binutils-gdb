@@ -150,17 +150,25 @@ struct coff_symfile_info
     CORE_ADDR toc_offset;
   };
 
-static struct deprecated_complaint storclass_complaint =
-{"Unexpected storage class: %d", 0, 0};
+static void
+bf_notfound_complaint (void)
+{
+  complaint (&symfile_complaints, "line numbers off, `.bf' symbol not found");
+}
 
-static struct deprecated_complaint bf_notfound_complaint =
-{"line numbers off, `.bf' symbol not found", 0, 0};
+static void
+ef_complaint (int arg1)
+{
+  complaint (&symfile_complaints,
+	     "Mismatched .ef symbol ignored starting at symnum %d", arg1);
+}
 
-static struct deprecated_complaint ef_complaint =
-{"Mismatched .ef symbol ignored starting at symnum %d", 0, 0};
-
-static struct deprecated_complaint eb_complaint =
-{"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
+static void
+eb_complaint (int arg1)
+{
+  complaint (&symfile_complaints,
+	     "Mismatched .eb symbol ignored starting at symnum %d", arg1);
+}
 
 static void xcoff_initial_scan (struct objfile *, int);
 
@@ -483,9 +491,7 @@ record_include_begin (struct coff_symbol *cs)
       /* This can happen with old versions of GCC.
          GCC 2.3.3-930426 does not exhibit this on a test case which
          a user said produced the message for him.  */
-      static struct deprecated_complaint msg =
-      {"Nested C_BINCL symbols", 0, 0};
-      complain (&msg);
+      complaint (&symfile_complaints, "Nested C_BINCL symbols");
     }
   ++inclDepth;
 
@@ -502,9 +508,7 @@ record_include_end (struct coff_symbol *cs)
 
   if (inclDepth == 0)
     {
-      static struct deprecated_complaint msg =
-      {"Mismatched C_BINCL/C_EINCL pair", 0, 0};
-      complain (&msg);
+      complaint (&symfile_complaints, "Mismatched C_BINCL/C_EINCL pair");
     }
 
   allocate_include_entry ();
@@ -766,9 +770,8 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
     {
       if (endoffset >= limit_offset)
 	{
-	  static struct deprecated_complaint msg =
-	  {"Bad line table offset in C_EINCL directive", 0, 0};
-	  complain (&msg);
+	  complaint (&symfile_complaints,
+		     "Bad line table offset in C_EINCL directive");
 	  return;
 	}
       limit_offset = endoffset;
@@ -864,8 +867,6 @@ static char *
 xcoff_next_symbol_text (struct objfile *objfile)
 {
   struct internal_syment symbol;
-  static struct deprecated_complaint msg =
-  {"Unexpected symbol continuation", 0, 0};
   char *retval;
   /* FIXME: is this the same as the passed arg? */
   objfile = this_symtab_psymtab->objfile;
@@ -873,7 +874,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
   bfd_coff_swap_sym_in (objfile->obfd, raw_symbol, &symbol);
   if (symbol.n_zeroes)
     {
-      complain (&msg);
+      complaint (&symfile_complaints, "Unexpected symbol continuation");
 
       /* Return something which points to '\0' and hope the symbol reading
          code does something reasonable.  */
@@ -890,7 +891,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
     }
   else
     {
-      complain (&msg);
+      complaint (&symfile_complaints, "Unexpected symbol continuation");
 
       /* Return something which points to '\0' and hope the symbol reading
          code does something reasonable.  */
@@ -1282,7 +1283,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */
-		  complain (&ef_complaint, cs->c_symnum);
+		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
 		  break;
 		}
@@ -1290,7 +1291,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	      /* Stack must be empty now.  */
 	      if (context_stack_depth > 0 || new == NULL)
 		{
-		  complain (&ef_complaint, cs->c_symnum);
+		  ef_complaint (cs->c_symnum);
 		  within_function = 0;
 		  break;
 		}
@@ -1332,9 +1333,8 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	case C_UNTAG:
 	case C_ENTAG:
 	  {
-	    static struct deprecated_complaint msg =
-	    {"Unrecognized storage class %d.", 0, 0};
-	    complain (&msg, cs->c_sclass);
+	    complaint (&symfile_complaints, "Unrecognized storage class %d.",
+		       cs->c_sclass);
 	  }
 	  break;
 
@@ -1376,13 +1376,13 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	    {
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */
-		  complain (&eb_complaint, cs->c_symnum);
+		  eb_complaint (cs->c_symnum);
 		  break;
 		}
 	      new = pop_context ();
 	      if (depth-- != new->depth)
 		{
-		  complain (&eb_complaint, cs->c_symnum);
+		  eb_complaint (cs->c_symnum);
 		  break;
 		}
 	      if (local_symbols && context_stack_depth > 0)
@@ -1520,7 +1520,8 @@ process_xcoff_symbol (register struct coff_symbol *cs, struct objfile *objfile)
 	  break;
 
 	default:
-	  complain (&storclass_complaint, cs->c_sclass);
+	  complaint (&symfile_complaints, "Unexpected storage class: %d",
+		     cs->c_sclass);
 	  /* FALLTHROUGH */
 
 	case C_DECL:
@@ -1603,9 +1604,7 @@ read_symbol (struct internal_syment *symbol, int symno)
   ->symtbl;
   if (symno < 0 || symno >= nsyms)
     {
-      static struct deprecated_complaint msg =
-      {"Invalid symbol offset", 0, 0};
-      complain (&msg);
+      complaint (&symfile_complaints, "Invalid symbol offset");
       symbol->n_value = 0;
       symbol->n_scnum = -1;
       return;
@@ -1647,7 +1646,7 @@ read_symbol_lineno (int symno)
 
   if (symno < 0)
     {
-      complain (&bf_notfound_complaint);
+      bf_notfound_complaint ();
       return 0;
     }
 
@@ -1680,7 +1679,7 @@ read_symbol_lineno (int symno)
       symno += symbol->n_numaux + 1;
     }
 
-  complain (&bf_notfound_complaint);
+  bf_notfound_complaint ();
   return 0;
 
 gotit:
@@ -2118,6 +2117,14 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 }
 
 static void
+function_outside_compilation_unit_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints,
+	     "function `%s' appears to be defined outside of all compilation units",
+	     arg1);
+}
+
+static void
 scan_xcoff_symtab (struct objfile *objfile)
 {
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section. */
@@ -2442,9 +2449,8 @@ scan_xcoff_symtab (struct objfile *objfile)
 
 	default:
 	  {
-	    static struct deprecated_complaint msg =
-	    {"Storage class %d not recognized during scan", 0, 0};
-	    complain (&msg, sclass);
+	    complaint (&symfile_complaints,
+		       "Storage class %d not recognized during scan", sclass);
 	  }
 	  /* FALLTHROUGH */
 
@@ -2564,11 +2570,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 	case C_DECL:
 	case C_STSYM:
 	  {
-
-	    static struct deprecated_complaint function_outside_compilation_unit = {
-	      "function `%s' appears to be defined outside of all compilation units", 0, 0
-	    };
-
 	    char *p;
 	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
@@ -2748,7 +2749,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    char *name = xmalloc (name_len + 1);
 		    memcpy (name, namestring, name_len);
 		    name[name_len] = '\0';
-		    complain (&function_outside_compilation_unit, name);
+		    function_outside_compilation_unit_complaint (name);
 		    xfree (name);
 		  }
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -2769,7 +2770,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    char *name = xmalloc (name_len + 1);
 		    memcpy (name, namestring, name_len);
 		    name[name_len] = '\0';
-		    complain (&function_outside_compilation_unit, name);
+		    function_outside_compilation_unit_complaint (name);
 		    xfree (name);
 		  }
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -2820,7 +2821,8 @@ scan_xcoff_symtab (struct objfile *objfile)
 		   time searching to the end of every string looking for
 		   a backslash.  */
 
-		complain (&unknown_symchar_complaint, p[1]);
+		complaint (&symfile_complaints,
+			   "unknown symbol descriptor `%c'", p[1]);
 
 		/* Ignore it; perhaps it is an extension that we don't
 		   know about.  */
