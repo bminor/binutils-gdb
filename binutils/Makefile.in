@@ -336,6 +336,7 @@ $(DIST_NAME).tar.Z:
 alloca.o:alloca.c
 am29k-pinsn.o: am29k-pinsn.c
 ar.o: ar.c
+arsup.o: arsup.c
 bucomm.o: bucomm.c
 copy.o: copy.c
 cplus-dem.o:cplus-dem.c

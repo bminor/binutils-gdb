@@ -1,3 +1,9 @@
+Mon May  4 23:29:51 1992  John Gilmore  (gnu@cygnus.com)
+
+	* objdump.c (display_info):  Handle error cases without coredump.
+	Close the dummy temporary file we open in the loop.
+	* Makefile.in (arsup.o):  Add kludge to build with Sun Make.
+
 Fri May  1 16:20:23 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: added test-install target.
