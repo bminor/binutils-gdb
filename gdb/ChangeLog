@@ -1,3 +1,13 @@
+2002-06-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention below.
+
+	Merge from mainline:
+	2002-05-12 Fred Fish <fnf@redhat.com>:
+	* symfile.c (default_symfile_offsets): Arrange for uninitialized
+	sect_index_xxx members to index the first slot in section_offsets
+	if all of the section_offsets are zero.
+
 2002-06-20  Elena Zannoni  <ezannoni@redhat.com>
 
         * event-top.c (command_handler): Don't use space_at_cmd_start

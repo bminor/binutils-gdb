@@ -13,6 +13,10 @@ gdb/182: gdb/323: gdb/237: On alpha, gdb was reporting:
 mdebugread.c:2443: gdb-internal-error: sect_index_data not initialized
 Fix, by Joel Brobecker imported from mainline.
 
+gdb/439: gdb/291: On some ELF object files, gdb was reporting:
+dwarf2read.c:1072: gdb-internal-error: sect_index_text not initialize
+Fix, by Fred Fish, imported from mainline.
+
 *** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".
