@@ -1,3 +1,8 @@
+2004-08-10  Mark Mitchell  <mark@codesourcery.com>
+
+	* expr.c (operand): Handle the "~", "-", and "!" operators applied
+	to bignums.
+
 2004-08-06  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (md_apply_fix3, tc_gen_reloc, arm_parse_reloc):
