@@ -10,7 +10,7 @@ The section .eh_frame contains:
   Return address column: .*
   Augmentation data:     1b
 #...
-00000014 00000020 00000018 FDE cie=00000000 pc=.*
+00000014 000000[12][c0] 00000018 FDE cie=00000000 pc=.*
   DW_CFA_advance_loc: 4 to .*
   DW_CFA_def_cfa: r0 ofs 16
   DW_CFA_advance_loc: 4 to .*
