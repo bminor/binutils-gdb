@@ -1,3 +1,16 @@
+Tue Oct  7 12:48:30 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-sparc.h (TARGET_FORMAT support): Moved to tc-sparc.c.
+	Redefine TARGET_FORMAT to call sparc_target_format.
+	* config/tc-sparc.c (in_unsigned_range): New function.
+	(sparc_arch_size): Make static.
+	(sparc_target_format): New function.
+	(sparc_ip): Delete variable immediate_max.  Rewrite %hi/etc reloc
+	handling.  Add support for %hh,%hm,%lm,%h44,%m44,%l44.
+	(output_insn): Set `fx_no_overflow'.
+	(md_apply_fix3): Handle BFD_RELOC_SPARC_{7,H44,M44,L44}.
+	(tc_gen_reloc): Likewise.
+
 Mon Oct  6 14:04:50 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (v850_section): Remove.
