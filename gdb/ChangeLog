@@ -1,3 +1,8 @@
+2004-03-16  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (process_structure_scope): Process children even
+	when we're a declaration.
+
 2004-03-15  David Carlton  <carlton@kealia.com>
 
 	Fix for PR c++/1553:
