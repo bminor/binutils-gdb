@@ -1,3 +1,7 @@
+2004-05-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* dwarfread.c: Update documentation on the state of dwarf-1.
+
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* stack.c (select_frame_command): Delete call to
