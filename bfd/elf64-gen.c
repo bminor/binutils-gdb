@@ -42,23 +42,23 @@ static reloc_howto_type dummy =
 
 static void
 elf_generic_info_to_howto (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf64_Internal_Rela *elf_reloc;
+     Elf64_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
 {
   bfd_reloc->howto = &dummy;
 }
 
 static void
 elf_generic_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf64_Internal_Rel *elf_reloc;
+     Elf64_Internal_Rel *elf_reloc ATTRIBUTE_UNUSED;
 {
   bfd_reloc->howto = &dummy;
 }
 
-static boolean 
+static boolean
 elf64_generic_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;

@@ -76,7 +76,10 @@
 #endif
 #endif
 
-#ifdef isascii
+/* Not all printable characters have ASCII codes (depending upon the
+   LOCALE set) but on some older systems it is not safe to test isprint
+   without first testing isascii...  */
+#if defined isascii && !defined HAVE_LOCALE_H
 #define isgraphic(c) (isascii (c) && (isprint (c) || (c) == '\t'))
 #else
 #define isgraphic(c) (isprint (c) || (c) == '\t')
@@ -141,7 +144,7 @@ main (argc, argv)
   boolean files_given = false;
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
-  setlocale (LC_MESSAGES, "");
+  setlocale (LC_ALL, "");
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);

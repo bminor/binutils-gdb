@@ -68,7 +68,8 @@ DEFUN (print_name_only, (self), Sym * self)
 		  filename = self->file->name;
 		}
 	    }
-	  sprintf (buf, " (%s:%d)", filename, self->line_num);
+	  sprintf (buf, " (%s:%d @ %lx)", filename, self->line_num,
+		   (unsigned long) self->addr);
 	  printf ("%s", buf);
 	  size += strlen (buf);
 	}

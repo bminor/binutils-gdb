@@ -1801,6 +1801,15 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 						copy, false);
 	    if (inh == (struct bfd_link_hash_entry *) NULL)
 	      return false;
+	    if (inh->type == bfd_link_hash_indirect
+		&& inh->u.i.link == h)
+	      {
+		(*_bfd_error_handler)
+		  (_("%s: indirect symbol `%s' to `%s' is a loop"),  
+		   bfd_get_filename (abfd), name, string);
+		bfd_set_error (bfd_error_invalid_operation);
+		return false;
+	      }
 	    if (inh->type == bfd_link_hash_new)
 	      {
 		inh->type = bfd_link_hash_undefined;

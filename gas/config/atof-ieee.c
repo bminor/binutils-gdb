@@ -19,6 +19,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
+/* Some float formats are based on the IEEE standard, but use the
+   largest exponent for normal numbers instead of NaNs and infinites.
+   The macro TC_LARGEST_EXPONENT_IS_NORMAL should evaluate to true
+   if the target machine uses such a format.  The macro can depend on
+   command line flags if necessary.  There is no need to define the
+   macro if it would always be 0.  */
+
 #include "as.h"
 
 /* Flonums returned here.  */
@@ -39,6 +46,10 @@ extern const char EXP_CHARS[];
 
 /* Length in LittleNums of guard bits.  */
 #define GUARD (2)
+
+#ifndef TC_LARGEST_EXPONENT_IS_NORMAL
+#define TC_LARGEST_EXPONENT_IS_NORMAL 0
+#endif
 
 static const unsigned long mask[] =
 {
@@ -291,6 +302,8 @@ gen_to_words (words, precision, exponent_bits)
   /* NaN:  Do the right thing.  */
   if (generic_floating_point_number.sign == 0)
     {
+      if (TC_LARGEST_EXPONENT_IS_NORMAL)
+	as_warn ("NaNs are not supported by this target\n");
       if (precision == F_PRECISION)
 	{
 	  words[0] = 0x7fff;
@@ -328,6 +341,9 @@ gen_to_words (words, precision, exponent_bits)
     }
   else if (generic_floating_point_number.sign == 'P')
     {
+      if (TC_LARGEST_EXPONENT_IS_NORMAL)
+	as_warn ("Infinities are not supported by this target\n");
+
       /* +INF:  Do the right thing.  */
       if (precision == F_PRECISION)
 	{
@@ -366,6 +382,9 @@ gen_to_words (words, precision, exponent_bits)
     }
   else if (generic_floating_point_number.sign == 'N')
     {
+      if (TC_LARGEST_EXPONENT_IS_NORMAL)
+	as_warn ("Infinities are not supported by this target\n");
+
       /* Negative INF.  */
       if (precision == F_PRECISION)
 	{
@@ -578,7 +597,9 @@ gen_to_words (words, precision, exponent_bits)
 
       return return_value;
     }
-  else if ((unsigned long) exponent_4 >= mask[exponent_bits])
+  else if ((unsigned long) exponent_4 > mask[exponent_bits]
+	   || (! TC_LARGEST_EXPONENT_IS_NORMAL
+	       && (unsigned long) exponent_4 == mask[exponent_bits]))
     {
       /* Exponent overflow.  Lose immediately.  */
 

@@ -80,6 +80,10 @@ DESCRIPTION
 .#define bfd_mach_m68040 6
 .#define bfd_mach_m68060 7
 .#define bfd_mach_cpu32  8
+.#define bfd_mach_mcf5200  9
+.#define bfd_mach_mcf5206e 10
+.#define bfd_mach_mcf5307  11
+.#define bfd_mach_mcf5407  12
 .  bfd_arch_vax,       {* DEC Vax *}
 .  bfd_arch_i960,      {* Intel 960 *}
 .    {* The order of the following is important.
@@ -131,6 +135,7 @@ DESCRIPTION
 .#define bfd_mach_mips6000		6000
 .#define bfd_mach_mips8000		8000
 .#define bfd_mach_mips10000		10000
+.#define bfd_mach_mips12000		12000
 .#define bfd_mach_mips16		16
 .#define bfd_mach_mips32                32
 .#define bfd_mach_mips32_4k             3204113 {* 32, 04, octal 'K' *}
@@ -848,6 +853,22 @@ bfd_default_scan (info, string)
     case 68332:
       arch = bfd_arch_m68k;
       number = bfd_mach_cpu32;
+      break;
+    case 5200:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_mcf5200;
+      break;
+    case 5206:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_mcf5206e;
+      break;
+    case 5307:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_mcf5307;
+      break;
+    case 5407:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_mcf5407;
       break;
 
     case 32000:

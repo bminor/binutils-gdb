@@ -1,6 +1,5 @@
 #objdump: -sr -j .data
 #name: MIPS ELF reloc 3
-#source: elf-rel3.s
 
 .*:     file format elf.*mips
 

@@ -71,7 +71,7 @@ i386_find_call (parent, p_lowpc, p_highpc)
 		       (unsigned long) (instructp - (unsigned char *) delta)));
 	  /*
 	   *  regular pc relative addressing
-	   *    check that this is the address of 
+	   *    check that this is the address of
 	   *    a function.
 	   */
 

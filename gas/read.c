@@ -2379,9 +2379,17 @@ do_org (segment, exp, fill)
   else
     {
       char *p;
+      symbolS *sym = exp->X_add_symbol;
+      offsetT off = exp->X_add_number * OCTETS_PER_BYTE;
 
-      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp->X_add_symbol,
-		    exp->X_add_number * OCTETS_PER_BYTE, (char *) NULL);
+      if (exp->X_op != O_constant && exp->X_op != O_symbol)
+	{
+	  /* Handle complex expressions.  */
+	  sym = make_expr_symbol (exp);
+	  off = 0;
+	}
+
+      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, sym, off, (char *) 0);
       *p = fill;
     }
 }

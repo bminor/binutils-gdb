@@ -304,7 +304,7 @@ tahoe_find_call (parent, p_lowpc, p_highpc)
 	    case longrel:
 	      /*
 	       *    regular pc relative addressing
-	       *      check that this is the address of 
+	       *      check that this is the address of
 	       *      a function.
 	       */
 	      destpc = tahoe_reladdr (instructp + length)

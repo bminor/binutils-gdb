@@ -1,3 +1,84 @@
+2001-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2001-06-06  Peter Jakubek <pjak@snafu.de>
+	* m68k-dis.c (print_insn_m68k): Fix typo.
+	* m68k-opc.c (m68k_opcodes): Correct allowed operands for
+	mcf (ColdFire) div, rem and moveb instructions.
+
+	2001-06-06  Alan Modra  <amodra@bigpond.net.au>
+	* i386-dis.c (cond_jump_flag, loop_jcxz_flag): Define.
+	(cond_jump_mode, loop_jcxz_mode): Define.
+	(dis386_att): Add cond_jump_flag and loop_jcxz_flag as
+	appropriate, and 'F' suffix to loop insns.
+	(disx86_64_att): Likewise.
+	(dis386_twobyte_att): Likewise.
+	(print_insn_i386): Don't output addr prefix for loop, jcxz insns.
+	Output data size prefix for long conditional jumps.  Output cs and
+	ds branch hints.
+	(putop): Handle 'F', and mark PREFIX_ADDR used for case 'E'.
+	(OP_J): Don't make PREFIX_DATA used.
+
+	2001-05-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+	* mips-dis.c (mips_isa_type): Add MIPS r12k support.
+
+	2001-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+	* mips-dis.c (INSNLEN): Rename MAXLEN.
+	(std_reg_names): Replace by mips32_reg_names and mips64_reg_names.
+	(print_insn_arg): Remove $ prefix of register names.
+	(set_mips_isa_type): Remove.
+	(mips_isa_type): New function.
+	(get_mips_isa): New Function.
+	(print_insn_mips): Rename _print_insn_mips.
+	(_print_insn_mips): New function, contains code which was
+	duplicated in print_insn_big_mips and print_insn_little_mips.
+	(print_insn_big_mips): Moved code to _print_insn_mips.
+	(print_insn_little_mips): Likewise.
+	(print_mips16_insn_arg): Remove $ prefix of register names.
+	Print error message before abort.
+
+	2001-05-14  J.T. Conklin  <jtc@redback.com>
+	* ppc-opc.c (powerpc_opcodes): Fixed extended opcode field of
+ 	simplified mnemonics used for setting PPC750-specific special
+	purpose	registers.
+
+	2001-03-23  Nick Clifton  <nickc@redhat.com>
+	* mips-opc.c: Remove extraneous whitespace.
+	* mips-dis.c: Remove extraneous whitespace.
+
+	2001-03-06  Igor Shevlyakov  <igor@windriver.com>
+	* m68k-dis.c (print_insn_m68k): Recognize Coldfire CPUs
+	so command line switches will work.
+
+	2001-02-28  Igor Shevlyakov  <igor@windriver.com>
+	* m68k-opc.c: fix cpushl according to Motorola. Enable
+	bunch of instructions for Coldfire 5407 and add all new.
+
+	2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+	* configure.in (BFD_VERSION): Do without grep.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	2001-02-20  H.J. Lu  <hjl@gnu.org>
+	* Makefile.am (ia64-ic.tbl): Remove the target.
+	(ia64-raw.tbl): Likewise.
+	(ia64-waw.tbl): Likewise.
+	(ia64-war.tbl): Likewise.
+	(ia64-asmtab.c): Generate it in the source directory.
+	* Makefile.in: Regenerated.
+
+	2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+        * mips-dis.c (print_insn_arg): Use top four bits of the address of
+	the following instruction not of the jump itself for the jump
+	target.
+	(print_mips16_insn_arg): Likewise.
+
+	2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+	* Makefile.am (stamp-lib): ranlib the libopcodes.a in the build
+	directory.
+	* Makefile.in: Regenerate.
+
 2001-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* Many files: Update copyright notices.

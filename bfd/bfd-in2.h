@@ -1353,6 +1353,10 @@ enum bfd_architecture
 #define bfd_mach_m68040 6
 #define bfd_mach_m68060 7
 #define bfd_mach_cpu32  8
+#define bfd_mach_mcf5200  9
+#define bfd_mach_mcf5206e 10
+#define bfd_mach_mcf5307  11
+#define bfd_mach_mcf5407  12
   bfd_arch_vax,       /* DEC Vax */
   bfd_arch_i960,      /* Intel 960 */
     /* The order of the following is important.
@@ -1404,6 +1408,7 @@ enum bfd_architecture
 #define bfd_mach_mips6000              6000
 #define bfd_mach_mips8000              8000
 #define bfd_mach_mips10000             10000
+#define bfd_mach_mips12000             12000
 #define bfd_mach_mips16                16
 #define bfd_mach_mips32                32
 #define bfd_mach_mips32_4k             3204113 /* 32, 04, octal 'K' */
@@ -2056,6 +2061,17 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT_PAGE,
   BFD_RELOC_MIPS_GOT_OFST,
   BFD_RELOC_MIPS_GOT_DISP,
+  BFD_RELOC_MIPS_SHIFT5,
+  BFD_RELOC_MIPS_SHIFT6,
+  BFD_RELOC_MIPS_INSERT_A,
+  BFD_RELOC_MIPS_INSERT_B,
+  BFD_RELOC_MIPS_DELETE,
+  BFD_RELOC_MIPS_HIGHEST,
+  BFD_RELOC_MIPS_HIGHER,
+  BFD_RELOC_MIPS_SCN_DISP,
+  BFD_RELOC_MIPS_REL16,
+  BFD_RELOC_MIPS_RELGOT,
+  BFD_RELOC_MIPS_JALR,
 
 
 /* i386/elf relocations */

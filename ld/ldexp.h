@@ -37,6 +37,7 @@ typedef struct {
 	   etree_name,
 	   etree_assign,
 	   etree_provide,
+	   etree_provided,
 	   etree_undef,
 	   etree_unspec,
 	   etree_value,

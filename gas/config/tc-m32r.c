@@ -1441,8 +1441,6 @@ md_estimate_size_before_relax (fragP, segment)
      fragS *fragP;
      segT segment;
 {
-  int old_fr_fix = fragP->fr_fix;
-
   /* The only thing we have to handle here are symbols outside of the
      current segment.  They may be undefined or in a different segment in
      which case linker scripts may place them anywhere.
@@ -1451,6 +1449,8 @@ md_estimate_size_before_relax (fragP, segment)
 
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
     {
+      int old_fr_fix = fragP->fr_fix;
+
       /* The symbol is undefined in this segment.
 	 Change the relaxation subtype to the max allowable and leave
 	 all further handling to md_convert_frag.  */
@@ -1474,6 +1474,7 @@ md_estimate_size_before_relax (fragP, segment)
 
       /* Mark this fragment as finished.  */
       frag_wane (fragP);
+      return fragP->fr_fix - old_fr_fix;
 #else
       {
 	const CGEN_INSN *insn;
@@ -1500,7 +1501,7 @@ md_estimate_size_before_relax (fragP, segment)
 #endif
     }
 
-  return (fragP->fr_var + fragP->fr_fix - old_fr_fix);
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 /* *FRAGP has been relaxed to its final size, and now needs to have

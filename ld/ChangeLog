@@ -1,3 +1,48 @@
+2001-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2001-06-05  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+	* emultempl/pe.em (init): Reduce default stack reserve to 0x200000.
+
+	2001-05-25  Alan Modra  <amodra@one.net.au>
+	* configure.host: Replace linuxoldld with linux*oldld.
+	* configure.tgt: Likewise.
+
+	2001-05-14  DJ Delorie  <dj@delorie.com>
+	* Makefile.am (ld.dvi): Search bfd/doc for texinfo files.
+	* Makefile.in: Ditto.
+
+	2001-04-05  Steven J. Hill  <sjhill@cotw.com>
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ltsmip.o.
+	(ALL_64_EMULATIONS): Add eelf64btsmip.o and eelf64ltsmip.o.
+	(eelf32ltsmip.c): New target.
+	(eelf64btsmip.c): Likewise.
+	(eelf64ltsmip.c): Likewise.
+	* Makefile.in: Regenerated.
+	* configure.tgt (mips*el-*-linux-gnu): Uses traditional MIPS
+	target.
+	(mips*-*-linux-gnu*): Likewise.
+	* emulparams/elf32ltsmip.sh: New. Traditional little endian
+	MIPS taget.
+	* emulparams/elf64btsmip.sh: New. Traditional 64bit big endian
+	target.
+	* emulparams/elf64ltsmip.sh: New. Traditional 64bit little
+	endian target.
+
+	2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+	* configure.in (BFD_VERSION): New.
+	(AM_INIT_AUTOMAKE): Use $BFD_VERSION.
+	* configure: Regenerate.
+
+	2001-02-13  H.J. Lu  <hjl@gnu.org>
+	* ldexp.h (node_type): Add etree_provided.
+	* ldexp.c (exp_fold_tree): Handle etree_provided. Set the node
+	type to etree_provided if defined by PROVIDE. Allow updating
+	for etree_provided.
+	(exp_print_tree): Handle etree_provided.
+	* mpw-elfmips.c (gldelf32ebmip_find_exp_assignment): Handle
+	etree_provided.
+
 2001-06-10  Philip Blundell  <philb@gnu.org>
 
 	* configure.in: Set version to 2.11.1.
@@ -37,9 +82,7 @@
 	(gld${EMULATION_NAME}_open_dynamic_archive): Likewise.
 
 	2001-03-17  Ulrich Drepper  <drepper@redhat.com>
-	* emultmpl/elf32.em (gld${EMULATION_NAME}_search_needed): If NAME
-	is an absolute path look only for this file and not along the path.
-	(OPTION_GROUP): New macro.
+	* emultmpl/elf32.em (OPTION_GROUP): New macro.
 	Add new option Bgroup to longopts.
 	(gld*_parse_args): Handle GROUP_OPTION and recognize -z defs.
 	(gld*_list_options): Add -Bgroup and -z defs.

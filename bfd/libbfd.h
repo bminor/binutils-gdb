@@ -522,7 +522,7 @@ extern bfd *bfd_last_cache;
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
-extern const bfd_target * const bfd_target_vector[];
+extern const bfd_target * const *bfd_target_vector;
 extern const bfd_target *bfd_default_vector[];
 
 /* Functions shared by the ECOFF and MIPS ELF backends, which have no
@@ -709,6 +709,17 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MIPS_GOT_PAGE",
   "BFD_RELOC_MIPS_GOT_OFST",
   "BFD_RELOC_MIPS_GOT_DISP",
+  "BFD_RELOC_MIPS_SHIFT5",
+  "BFD_RELOC_MIPS_SHIFT6",
+  "BFD_RELOC_MIPS_INSERT_A",
+  "BFD_RELOC_MIPS_INSERT_B",
+  "BFD_RELOC_MIPS_DELETE",
+  "BFD_RELOC_MIPS_HIGHEST",
+  "BFD_RELOC_MIPS_HIGHER",
+  "BFD_RELOC_MIPS_SCN_DISP",
+  "BFD_RELOC_MIPS_REL16",
+  "BFD_RELOC_MIPS_RELGOT",
+  "BFD_RELOC_MIPS_JALR",
 
   "BFD_RELOC_386_GOT32",
   "BFD_RELOC_386_PLT32",

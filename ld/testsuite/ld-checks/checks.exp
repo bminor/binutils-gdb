@@ -24,6 +24,11 @@ proc section_check {} {
     global srcdir
     global subdir
     
+    # The usage of .lcomm in asm.s is incompatible with ia64.
+    if { [istarget ia64-*-elf*]
+	 || [istarget ia64-*-linux*] } {
+	return
+    }
     set test "check sections 1"
     
     set ldflags "--check-sections"

@@ -1,3 +1,23 @@
+2001-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+	* configure.in (BFD_VERSION): New.
+	(AM_INIT_AUTOMAKE): Use $BFD_VERSION.
+	* configure: Regenerate.
+
+	2001-04-27  Michal Svec <rebel@atrey.karlin.mff.cuni.cz>
+	* strings.c (isgraphic): Do not use isascii() unless it is needed
+	for isprint() to work.
+	(main): Set the locale domain to LC_ALL not just LC_MESSAGES.
+
+	2001-04-10  Alan Modra  <amodra@one.net.au>
+	* nm.c (print_symbol_info_bsd): Use a simple printf string.
+
+	2001-02-07  Todd Vierling  <tv@wasabisystems.com>
+	* bucomm.c (bfd_target_vector): Change extern array to pointer.
+	* objdump.c (bfd_target_vector): Likewise.
+
 2001-06-10  Philip Blundell  <philb@gnu.org>
 
 	* configure.in: Set version to 2.11.1.

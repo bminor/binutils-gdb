@@ -296,7 +296,7 @@ The target vector starts with a set of constants.
 @item name
 The name of the target vector.  This is an arbitrary string.  This is
 how the target vector is named in command line options for tools which
-use BFD, such as the @samp{-oformat} linker option.
+use BFD, such as the @samp{--oformat} linker option.
 
 @item flavour
 A general description of the type of target.  The following flavours are

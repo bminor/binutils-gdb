@@ -46,14 +46,18 @@ static int
 print_insn_arg PARAMS ((const char *, unsigned char *, unsigned char *,
 			bfd_vma, disassemble_info *));
 
-CONST char * CONST fpcr_names[] = {
-  "", "%fpiar", "%fpsr", "%fpiar/%fpsr", "%fpcr",
-  "%fpiar/%fpcr", "%fpsr/%fpcr", "%fpiar/%fpsr/%fpcr"};
+CONST char * CONST fpcr_names[] =
+  {
+    "", "%fpiar", "%fpsr", "%fpiar/%fpsr", "%fpcr",
+    "%fpiar/%fpcr", "%fpsr/%fpcr", "%fpiar/%fpsr/%fpcr"
+  };
 
-static char *const reg_names[] = {
-  "%d0", "%d1", "%d2", "%d3", "%d4", "%d5", "%d6", "%d7",
-  "%a0", "%a1", "%a2", "%a3", "%a4", "%a5", "%fp", "%sp",
-  "%ps", "%pc"};
+static char *const reg_names[] =
+  {
+    "%d0", "%d1", "%d2", "%d3", "%d4", "%d5", "%d6", "%d7",
+    "%a0", "%a1", "%a2", "%a3", "%a4", "%a5", "%fp", "%sp",
+    "%ps", "%pc"
+  };
 
 /* Sign-extend an (unsigned char). */
 #if __STDC__ == 1
@@ -179,7 +183,7 @@ print_insn_m68k (memaddr, info)
   unsigned char *save_p;
   register const char *d;
   register unsigned long bestmask;
-  const struct m68k_opcode *best = 0;
+  const struct m68k_opcode *best;
   unsigned int arch_mask;
   struct private priv;
   bfd_byte *buffer = priv.the_buffer;
@@ -229,6 +233,7 @@ print_insn_m68k (memaddr, info)
     /* Error return.  */
     return -1;
 
+  best = NULL;
   switch (info->mach)
     {
     default:
@@ -255,6 +260,18 @@ print_insn_m68k (memaddr, info)
       break;
     case bfd_mach_m68060:
       arch_mask = m68060;
+      break;
+    case bfd_mach_mcf5200:
+      arch_mask = mcf5200;
+      break;
+    case bfd_mach_mcf5206e:
+      arch_mask = mcf5206e;
+      break;
+    case bfd_mach_mcf5307:
+      arch_mask = mcf5307;
+      break;
+    case bfd_mach_mcf5407:
+      arch_mask = mcf5407;
       break;
     }
 
@@ -320,7 +337,7 @@ print_insn_m68k (memaddr, info)
 	}
     }
 
-  if (best == 0)
+  if (best == NULL)
     goto invalid;
 
   /* Point at first word of argument data,

@@ -429,18 +429,18 @@ This program is free software.  This program has absolutely no warranty.\n"));
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
-	      
+
 	      style = cplus_demangle_name_to_style (optarg);
-	      if (style == unknown_demangling) 
+	      if (style == unknown_demangling)
 		{
 		  fprintf (stderr,
 			   _("%s: unknown demangling style `%s'\n"),
 			   whoami, optarg);
 		  xexit (1);
 		}
-	      
+
 	      cplus_demangle_set_style (style);
-           }
+	   }
 	  break;
 	case OPTION_NO_DEMANGLE:
 	  demangle = FALSE;

@@ -500,7 +500,7 @@ unsigned long
 itbl_assemble (char *name, char *s)
 {
   unsigned long opcode;
-  struct itbl_entry *e;
+  struct itbl_entry *e = NULL;
   struct itbl_field *f;
   char *n;
   int processor;

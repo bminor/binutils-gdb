@@ -102,7 +102,7 @@ DEFUN (arc_add, (parent, child, count),
 	  if (maxarcs == 0)
 	    maxarcs = 1;
 	  maxarcs *= 2;
-	
+
 	  /* Allocate the new array.  */
 	  newarcs = (Arc **)xmalloc(sizeof (Arc *) * maxarcs);
 

@@ -3582,6 +3582,10 @@ ieee_write_processor (abfd)
 	  case bfd_mach_m68040: id = "68040"; break;
 	  case bfd_mach_m68060: id = "68060"; break;
 	  case bfd_mach_cpu32:  id = "cpu32"; break;
+	  case bfd_mach_mcf5200:id = "5200";  break;
+	  case bfd_mach_mcf5206e:id = "5206e"; break;
+	  case bfd_mach_mcf5307:id = "5307";  break;
+	  case bfd_mach_mcf5407:id = "5407";  break;
 	  }
 
 	if (! ieee_write_id (abfd, id))

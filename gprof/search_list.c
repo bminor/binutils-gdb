@@ -37,7 +37,7 @@ DEFUN (search_list_append, (list, paths),
     {
       beg = colon + 1;
       colon = strchr (beg, PATH_SEP_CHAR);
-      
+
       if (colon)
 	len = colon - beg;
       else
@@ -49,7 +49,7 @@ DEFUN (search_list_append, (list, paths),
 
       /* Append new path at end of list.  */
       new_el->next = 0;
-      
+
       if (list->tail)
 	list->tail->next = new_el;
       else
