@@ -23,21 +23,22 @@ else
 ###
 
 ### from which cvs tree are we working?
-TREE := progressive
+TREE := devo
 
 ### binaries should be installed into?
 ROOTING := /usr/cygnus
 
 ### When working from a tagged set of source, this should be the tag.  If not,
 ### then set the macro to be empty.
-CVS_TAG := -r emacs-920529
+#CVS_TAG := -r emacs-920529
+CVS_TAG :=
 
 ### The name of the cvs module for this release.  The intersection of
 ### CVS_MODULE and CVS_TAG defines the source files in this release.
-CVS_MODULE := progressive-emacs
+CVS_MODULE := devo
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := progressive-920529
+RELEASE_TAG := latest
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
