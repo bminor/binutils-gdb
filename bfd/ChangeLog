@@ -1,5 +1,15 @@
 Fri May 10 12:34:48 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
+	* ../include/bfd.h
+	changed forward declaration struct stat; to reduce warnings. Changed
+	comment on bfd_h_<x>_x.
+
+	* ../include/m68kcoff.h, ../include/intel-coff.h,
+	../include/m88k-bcs.h
+	Now there are two incarnations of relocs, linenos and syments. One for
+	internal digestion, and one full of char arrays for I/O. The original
+	names have gone to detect errors.
+
 	* Makefile.in, m68kcoff.c, targets.c
 	Test new structure code with a 68k coff implementaion
 
