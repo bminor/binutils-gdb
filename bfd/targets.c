@@ -384,6 +384,7 @@ extern bfd_target rs6000coff_vec;
 extern bfd_target shcoff_vec;
 extern bfd_target sparclynx_aout_vec;
 extern bfd_target sparclynx_coff_vec;
+extern bfd_target sparccoff_vec;
 extern bfd_target sunos_big_vec;
 extern bfd_target tekhex_vec;
 extern bfd_target we32kcoff_vec;
