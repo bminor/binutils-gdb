@@ -6,3 +6,4 @@
 /\/\*:cpu-i960.c\*\//r cpu-i960.ip
 /\/\*:cpu-empty.c\*\//r cpu-empty.ip
 /\/\*:archures.c\*\//r archures.ip
+/\/\*:reloc.c\*\//r reloc.ip
