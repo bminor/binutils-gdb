@@ -107,9 +107,11 @@ static void d10v_eva_prepare_to_trace (void);
 static void d10v_eva_get_trace_data (void);
 
 static CORE_ADDR
-d10v_stack_align (CORE_ADDR len)
+d10v_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
-  return (len + 1) & ~1;
+  /* Align to the size of an instruction (so that they can safely be
+     pushed onto the stack.  */
+  return sp & ~3;
 }
 
 /* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
@@ -1636,7 +1638,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
 
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  set_gdbarch_stack_align (gdbarch, d10v_stack_align);
+  set_gdbarch_frame_align (gdbarch, d10v_frame_align);
 
   set_gdbarch_register_sim_regno (gdbarch, d10v_register_sim_regno);
 
