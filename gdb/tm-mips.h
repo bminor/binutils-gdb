@@ -134,7 +134,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
    of register dumps. */
 
-#define DO_REGISTERS_INFO(_regnum) mips_do_registers_info(_regnum)
+#define DO_REGISTERS_INFO(_regnum, fp) mips_do_registers_info(_regnum, fp)
 
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
    if (blockend == 0) {					\

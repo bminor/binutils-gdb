@@ -181,7 +181,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
    of register dumps. */
 
-#define DO_REGISTERS_INFO(_regnum) pyr_do_registers_info(_regnum)
+#define DO_REGISTERS_INFO(_regnum, fp) pyr_do_registers_info(_regnum, fp)
 
 /* need this so we can find the global registers: they never get saved. */
 extern unsigned int global_reg_offset;

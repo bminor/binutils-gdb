@@ -46,10 +46,12 @@ pyr_print_registers(reg_buf, regnum)
 		   "usp", usp);
 }
 
-/* Print the register regnum, or all registers if regnum is -1. */
+/* Print the register regnum, or all registers if regnum is -1.
+   fpregs is currently ignored.  */
 
-pyr_do_registers_info (regnum)
+pyr_do_registers_info (regnum, fpregs)
     int regnum;
+    int fpregs;
 {
   /* On a pyr, we know a virtual register can always fit in an long.
      Here (and elsewhere) we take advantage of that.  Yuk.  */

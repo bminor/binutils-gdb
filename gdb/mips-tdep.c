@@ -8,19 +8,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* FIXME: Can a MIPS porter/tester determine which of these include
    files we still need?   -- gnu@cygnus.com */
@@ -295,7 +295,8 @@ FRAME_ADDR mips_frame_chain(frame)
     else
       { /* This hack depends on the internals of __start. */
 	/* We also assume the breakpoints are *not* inserted */
-        if (read_memory_integer (saved_pc + 8, 4) & 0xFC00003F == 0xD)
+        if (saved_pc == 0
+	    || read_memory_integer (saved_pc + 8, 4) & 0xFC00003F == 0xD)
 	    return 0;  /* break */
       }
     proc_desc = find_proc_desc(saved_pc, frame);
@@ -579,8 +580,10 @@ static mips_print_register(regnum, all)
 	}
 }
 
-mips_do_registers_info(regnum)
+/* Replacement for generic do_registers_info.  fpregs is currently ignored. */
+mips_do_registers_info (regnum, fpregs)
      int regnum;
+     int fpregs;
 {
   if (regnum != -1) {
       mips_print_register (regnum, 0);
