@@ -1,3 +1,9 @@
+2001-08-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/readelf.s-64: Adjust offsets for powerpc64.  Don't
+	use constructs like [45][08] when all combinations are not valid.
+	Instead use (48|50) to explicitly state which values are correct.
+
 2001-08-21  H.J. Lu  <hjl@gnu.org>
 
 	* binutils-all/readelf.r: Updated for the readelf change.
