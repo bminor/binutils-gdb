@@ -19,11 +19,11 @@ compute:IndOff:rIndOff:signed_word:(GPR (IndOff) + 0)
 #
 compute:Base:Base:
 compute:Base:vBase:signed_word:(GPR (Base) + 0)
-compute:Base:rBase:signed_word:(&GPR (Base))
+compute:Base:rBase:signed_word*:(&GPR (Base))
 #compute:Base:vBase:signed_word:(Base == 0 ? 0 : (CPU)->reg[Base])
 #
 compute:Link:Link:
-compute:Link:rLink:signed_word:(&(CPU)->reg[Link])
+compute:Link:rLink:signed_word*:(&(CPU)->reg[Link])
 #
 # Trap Number
 compute:UTN:UTN:
