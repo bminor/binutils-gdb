@@ -60,7 +60,7 @@ static void initialize_sigint_signal_handler (void);
 static void handle_remote_sigint PARAMS ((int));
 static void handle_remote_sigint_twice PARAMS ((int));
 static void async_remote_interrupt PARAMS ((gdb_client_data));
-static void async_remote_interrupt_twice PARAMS ((gdb_client_data));
+void async_remote_interrupt_twice PARAMS ((gdb_client_data));
 
 static void build_remote_gdbarch_data PARAMS ((void));
 
@@ -165,6 +165,8 @@ static int stubhex PARAMS ((int ch));
 static int remote_query PARAMS ((int /*char */ , char *, char *, int *));
 
 static int hexnumstr PARAMS ((char *, ULONGEST));
+
+static int hexnumnstr PARAMS ((char *, ULONGEST, int));
 
 static CORE_ADDR remote_address_masked PARAMS ((CORE_ADDR));
 
@@ -2106,7 +2108,7 @@ handle_remote_sigint_twice (sig)
 {
   signal (sig, handle_sigint);
   sigint_remote_twice_token =
-    create_async_signal_handler (async_remote_interrupt_twice, NULL);
+    create_async_signal_handler (inferior_event_handler_wrapper, NULL);
   mark_async_signal_handler_wrapper (sigint_remote_twice_token);
 }
 
@@ -2124,10 +2126,12 @@ async_remote_interrupt (arg)
 
 /* Perform interrupt, if the first attempt did not succeed. Just give
    up on the target alltogether. */
-static void
+void
 async_remote_interrupt_twice (arg)
      gdb_client_data arg;
 {
+  if (remote_debug)
+    fprintf_unfiltered (gdb_stdlog, "remote_interrupt_twice called\n");
   /* Do something only if the target was not killed by the previous
      cntl-C. */
   if (target_executing)
@@ -2962,25 +2966,37 @@ hexnumlen (num)
   return max (i, 1);
 }
 
-/* Set BUF to the hex digits representing NUM.  */
+/* Set BUF to the minimum number of hex digits representing NUM.  */
 
 static int
 hexnumstr (buf, num)
      char *buf;
      ULONGEST num;
 {
-  int i;
   int len = hexnumlen (num);
+  return hexnumnstr (buf, num, len);
+}
 
-  buf[len] = '\0';
 
-  for (i = len - 1; i >= 0; i--)
+/* Set BUF to the hex digits representing NUM, padded to WIDTH characters.  */
+
+static int
+hexnumnstr (buf, num, width)
+     char *buf;
+     ULONGEST num;
+     int width;
+{
+  int i;
+
+  buf[width] = '\0';
+
+  for (i = width - 1; i >= 0; i--)
     {
       buf[i] = "0123456789abcdef"[(num & 0xf)];
       num >>= 4;
     }
 
-  return len;
+  return width;
 }
 
 /* Mask all but the least significant REMOTE_ADDRESS_SIZE bits. */
@@ -3090,6 +3106,7 @@ remote_write_bytes (memaddr, myaddr, len)
   while (len > 0)
     {
       unsigned char *p, *plen;
+      int plenlen;
       int todo;
       int i;
 
@@ -3115,7 +3132,8 @@ remote_write_bytes (memaddr, myaddr, len)
       *p++ = ',';
 
       plen = p;			/* remember where len field goes */
-      p += hexnumstr (p, (ULONGEST) todo);
+      plenlen = hexnumstr (p, (ULONGEST) todo);
+      p += plenlen;
       *p++ = ':';
       *p = '\0';
 
@@ -3151,13 +3169,11 @@ remote_write_bytes (memaddr, myaddr, len)
 	      {
 		/* Escape chars have filled up the buffer prematurely, 
 		   and we have actually sent fewer bytes than planned.
-		   Fix-up the length field of the packet.  */
+		   Fix-up the length field of the packet.  Use the same
+		   number of characters as before.  */
 		
-		/* FIXME: will fail if new len is a shorter string than 
-		   old len.  */
-		
-		plen += hexnumstr (plen, (ULONGEST) i);
-		*plen++ = ':';
+		plen += hexnumnstr (plen, (ULONGEST) i, plenlen);
+		*plen = ':';  /* overwrite \0 from hexnumnstr() */
 	      }
 	    break;
 	  }

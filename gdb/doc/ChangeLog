@@ -1,3 +1,16 @@
+1999-10-11  Jim Kingdon  <kingdon@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add PARM_BOUNDARY.
+
+1999-10-05  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Dmitry Sivachenko <demon@gpad.ac.ru>:
+	* gdb.texinfo: Use GDBP and GDBN everywhere, fix a couple other
+	typos.
+
+	* gdb.texinfo: Various minor wording and formatting improvements,
+	mentions of additional command-line options.
+
 1999-09-30  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.texinfo:  Document additional forms of specifying section

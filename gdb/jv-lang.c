@@ -73,7 +73,7 @@ get_dynamics_objfile ()
 {
   if (dynamics_objfile == NULL)
     {
-      dynamics_objfile = allocate_objfile (NULL, 0, 0, 0);
+      dynamics_objfile = allocate_objfile (NULL, 0);
     }
   return dynamics_objfile;
 }

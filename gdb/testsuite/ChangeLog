@@ -1,3 +1,8 @@
+Wed Oct  6 12:05:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/watchpoint.exp: Match fail ``finish from marker1'' with
+ 	a pass case.
+
 1999-10-01  Kevin Buettner <kevinb@cygnus.com>
 
 	* gdb.base/break.c (main): Added a statement that we can step

@@ -1061,7 +1061,12 @@ push_bytes (sp, buffer, len)
   return sp;
 }
 
-/* Push onto the stack the specified value VALUE.  */
+#ifndef PARM_BOUNDARY
+#define PARM_BOUNDARY (0)
+#endif
+
+/* Push onto the stack the specified value VALUE.  Pad it correctly for
+   it to be an argument to a function.  */
 
 static CORE_ADDR
 value_push (sp, arg)
@@ -1069,18 +1074,31 @@ value_push (sp, arg)
      value_ptr arg;
 {
   register int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+  register int container_len;
+  register int offset;
+
+  /* How big is the container we're going to put this value in?  */
+  if (PARM_BOUNDARY)
+    container_len = ((len + PARM_BOUNDARY / TARGET_CHAR_BIT - 1)
+		     & ~(PARM_BOUNDARY / TARGET_CHAR_BIT - 1));
+
+  /* Are we going to put it at the high or low end of the container?  */
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    offset = container_len - len;
+  else
+    offset = 0;
 
   if (INNER_THAN (1, 2))
     {
       /* stack grows downward */
-      sp -= len;
-      write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
+      sp -= container_len;
+      write_memory (sp + offset, VALUE_CONTENTS_ALL (arg), len);
     }
   else
     {
       /* stack grows upward */
-      write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
-      sp += len;
+      write_memory (sp + offset, VALUE_CONTENTS_ALL (arg), len);
+      sp += container_len;
     }
 
   return sp;

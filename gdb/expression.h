@@ -78,7 +78,6 @@ enum exp_opcode
 
     BINOP_MIN,			/* <? */
     BINOP_MAX,			/* >? */
-    BINOP_SCOPE,		/* :: */
 
     /* STRUCTOP_MEMBER is used for pointer-to-member constructs.
        X . * Y translates into X STRUCTOP_MEMBER Y.  */

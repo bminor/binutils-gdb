@@ -31,7 +31,6 @@
 #undef MIPS_REGISTER_NAMES
 #undef FP0_REGNUM
 #undef PC_REGNUM
-#undef PS_REGNUM
 #undef HI_REGNUM
 #undef LO_REGNUM
 #undef CAUSE_REGNUM

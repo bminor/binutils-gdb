@@ -389,8 +389,6 @@ const struct op_print c_op_print_tab[] =
   {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
   {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
   {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-    /* C++  */
-  {"::", BINOP_SCOPE, PREC_PREFIX, 0},
   {NULL, 0, 0, 0}
 };
 

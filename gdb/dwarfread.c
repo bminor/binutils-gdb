@@ -1866,11 +1866,6 @@ read_func_scope (dip, thisdie, enddie, objfile)
       objfile->ei.entry_func_lowpc = dip->at_low_pc;
       objfile->ei.entry_func_highpc = dip->at_high_pc;
     }
-  if (STREQ (dip->at_name, "main"))	/* FIXME: hardwired name */
-    {
-      objfile->ei.main_func_lowpc = dip->at_low_pc;
-      objfile->ei.main_func_highpc = dip->at_high_pc;
-    }
   new = push_context (0, dip->at_low_pc);
   new->name = new_symbol (dip, objfile);
   list_in_scope = &local_symbols;

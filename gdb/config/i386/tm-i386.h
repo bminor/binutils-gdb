@@ -250,6 +250,11 @@ extern void i386_frame_find_saved_regs PARAMS ((struct frame_info *,
 
 /* Things needed for making the inferior call functions.  */
 
+/* "An argument's size is increased, if necessary, to make it a
+   multiple of [32 bit] words.  This may require tail padding,
+   depending on the size of the argument" - from the x86 ABI.  */
+#define PARM_BOUNDARY 32
+
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 #define PUSH_DUMMY_FRAME { i386_push_dummy_frame (); }

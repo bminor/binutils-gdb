@@ -1444,6 +1444,15 @@ conditional should be eliminated (FIXME) and replaced by
 feature-specific macros.  It was introduced in haste and we are
 repenting at leisure.
 
+@item SYMBOLS_CAN_START_WITH_DOLLAR
+Some systems have routines whose names start with @samp{$}.  Giving this
+macro a non-zero value tells GDB's expression parser to check for such
+routines when parsing tokens that begin with @samp{$}.
+
+On HP-UX, certain system routines (millicode) have names beginning with
+@samp{$} or @samp{$$}.  For example, @code{$$dyncall} is a millicode
+routine that handles inter-space procedure calls on PA-RISC.
+
 @item IEEE_FLOAT
 Define this if the target system uses IEEE-format floating point numbers.
 
@@ -1538,6 +1547,10 @@ The number of the ``next program counter'' register, if defined.
 @item NNPC_REGNUM
 The number of the ``next next program counter'' register, if defined.
 Currently, this is only defined for the Motorola 88K.
+
+@item PARM_BOUNDARY
+If non-zero, round arguments to a boundary of this many bits before
+pushing them on the stack.
 
 @item PRINT_REGISTER_HOOK (regno)
 If defined, this must be a function that prints the contents of the

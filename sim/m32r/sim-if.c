@@ -235,6 +235,11 @@ print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
 		     PROFILE_LABEL_WIDTH, "Fill nops:",
 		     sim_add_commas (buf, sizeof (buf),
 				     CPU_M32R_MISC_PROFILE (cpu)->fillnop_count));
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_m32rx)
+	sim_io_printf (sd, "  %-*s %s\n\n",
+		       PROFILE_LABEL_WIDTH, "Parallel insns:",
+		       sim_add_commas (buf, sizeof (buf),
+				       CPU_M32R_MISC_PROFILE (cpu)->parallel_count));
     }
 }
 

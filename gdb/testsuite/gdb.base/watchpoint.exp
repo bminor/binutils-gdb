@@ -388,7 +388,9 @@ proc test_stepping {} {
 
 	send_gdb "finish\n"
 	gdb_expect {
-	    -re "Run.*exit from.*marker1.* at" { }
+	    -re "Run.*exit from.*marker1.* at" {
+		pass "finish from marker1"
+	    }
 	    default { fail "finish from marker1" ; return }
 	}
 

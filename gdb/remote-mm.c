@@ -1118,7 +1118,7 @@ mm_load (arg_string, from_tty)
   /* You may need to do an init_target_mm() */
   /* init_target_mm(?,?,?,?,?,?,?,?); */
   immediate_quit--;
-  /* symbol_file_add (arg_string, from_tty, text_addr, 0, 0, 0, 0); */
+  /* symbol_file_add (arg_string, from_tty, text_addr, 0, 0); */
 #endif
 
 }

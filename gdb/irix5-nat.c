@@ -854,8 +854,7 @@ symbol_add_stub (arg)
 
   section_addrs.text_addr = text_addr;
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
-				 &section_addrs,
-				 0, 0, 0, 0);
+				 &section_addrs, 0, 0);
   return (1);
 }
 

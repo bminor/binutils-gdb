@@ -1,3 +1,11 @@
+1999-10-07  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.h (CGEN_FN_HI_WRITE): New enumerator. 
+	(fn_hi_write): New union member.
+	(sim_queue_fn_hi_write): New function.
+	* cgen-par.c (sim_queue_fn_hi_write): New function.
+	(cgen_write_queue_element_execute): Handle CGEN_FN_HI_WRITE.
+
 1999-09-29  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-defs.h (sim_engine_invalid_insn): New arg `vpc'.

@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19991004
+VERSION = 19991011
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1336,14 +1336,8 @@ mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
-# FIXME: Monitor.c has -Wformat problems.  The code using the macros
-# RDEBUG and EXTRA_RDEBUG needs be replaced with something that:
-# doesn't cause -Wformat errors; sends all output to gdb_stdlog
-# instead of stdout; and controls the output throug a ``set
-# monitordebug'' command/variable. cagney, 1999-09-01.
 monitor.o: monitor.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h gdb_string.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 news-xdep.o: news-xdep.c
 

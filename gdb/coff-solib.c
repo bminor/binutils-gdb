@@ -94,9 +94,7 @@ coff_solib_add (arg_string, from_tty, target)
 	  objfile = symbol_file_add (filename, from_tty,
 				     NULL,	/* no offsets */
 				     0,		/* not mainline */
-				     0,		/* flags */
-				     0,		/* Not user loaded */
-				     1);	/* Is a solib */
+				     OBJF_SHARED);	/* flags */
 
 	  libsize -= len * 4;
 	  lib += len * 4;

@@ -291,7 +291,7 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
 
   memset (&section_addrs, 0, sizeof (section_addrs));
   section_addrs.text_addr = text_addr;
-  so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, 0, 0, 1);
+  so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 
   /* Mark this as a shared library and save private data.

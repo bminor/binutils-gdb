@@ -30,6 +30,9 @@ const MACH *sim_machs[] =
 #ifdef HAVE_CPU_M32RBF
   & m32r_mach,
 #endif
+#ifdef HAVE_CPU_M32RXF
+  & m32rx_mach,
+#endif
   0
 };
 

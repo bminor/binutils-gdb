@@ -65,8 +65,8 @@ static int readchar PARAMS ((int timeout));
 static void monitor_fetch_register PARAMS ((int regno));
 static void monitor_store_register PARAMS ((int regno));
 
-static int monitor_printable_string PARAMS ((char *newstr, char *oldstr));
-static void monitor_error PARAMS ((char *format, CORE_ADDR memaddr, int len, char *string, int final_char));
+static void monitor_printable_string (char *newstr, char *oldstr, int len);
+static void monitor_error (char *function, char *message, CORE_ADDR memaddr, int len, char *string, int final_char);
 static void monitor_detach PARAMS ((char *args, int from_tty));
 static void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
 static void monitor_interrupt PARAMS ((int signo));
@@ -116,12 +116,6 @@ static void (*ofunc) ();	/* Old SIGINT signal handler */
 
 static CORE_ADDR *breakaddr;
 
-/* Extra remote debugging for developing a new rom monitor variation */
-#if ! defined(EXTRA_RDEBUG)
-#define EXTRA_RDEBUG 0
-#endif
-#define RDEBUG(stuff) { if (EXTRA_RDEBUG && remote_debug) printf stuff ; }
-
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so
    that monitor_open knows that we don't have a file open when the
    program starts.  */
@@ -145,19 +139,46 @@ static int first_time = 0;	/* is this the first time we're executing after
 
 #define TARGET_BUF_SIZE 2048
 
-/* Convert a string into a printable representation, Return # byte in the
-   new string.  */
+/* Monitor specific debugging information.  Typically only useful to
+   the developer of a new monitor interface. */
 
-static int
-monitor_printable_string (newstr, oldstr)
-     char *newstr;
-     char *oldstr;
+static void monitor_debug (const char *fmt, ...) ATTR_FORMAT(printf, 1, 2);
+
+static int monitor_debug_p = 0;
+
+/* NOTE: This file alternates between monitor_debug_p and remote_debug
+   when determining if debug information is printed.  Perhaphs this
+   could be simplified. */
+
+static void
+monitor_debug (const char *fmt, ...)
 {
-  char *save = newstr;
-  int ch;
-
-  while ((ch = *oldstr++) != '\0')
+  if (monitor_debug_p)
     {
+      va_list args;
+      va_start (args, fmt);
+      vfprintf_filtered (gdb_stdlog, fmt, args);
+      va_end (args);
+    }
+}
+
+
+/* Convert a string into a printable representation, Return # byte in
+   the new string.  When LEN is >0 it specifies the size of the
+   string.  Otherwize strlen(oldstr) is used. */
+
+static void
+monitor_printable_string (char *newstr, char *oldstr, int len)
+{
+  int ch;
+  int i;
+
+  if (len <= 0)
+    len = strlen (oldstr);
+
+  for (i = 0; i < len; i++)
+    {
+      ch = oldstr[i];
       switch (ch)
 	{
 	default:
@@ -203,29 +224,23 @@ monitor_printable_string (newstr, oldstr)
     }
 
   *newstr++ = '\0';
-  return newstr - save;
 }
 
 /* Print monitor errors with a string, converting the string to printable
    representation.  */
 
 static void
-monitor_error (format, memaddr, len, string, final_char)
-     char *format;
-     CORE_ADDR memaddr;
-     int len;
-     char *string;
-     int final_char;
+monitor_error (char *function, char *message,
+	       CORE_ADDR memaddr, int len, char *string, int final_char)
 {
   int real_len = (len == 0 && string != (char *) 0) ? strlen (string) : len;
   char *safe_string = alloca ((real_len * 4) + 1);
-  char *p;
-  int safe_len = monitor_printable_string (safe_string, string);
+  monitor_printable_string (safe_string, string, real_len);
 
   if (final_char)
-    error (format, (int) memaddr, p - safe_string, safe_string, final_char);
+    error ("%s (0x%s): %s: %s%c", function, paddr_nz (memaddr), message, safe_string, final_char);
   else
-    error (format, (int) memaddr, p - safe_string, safe_string);
+    error ("%s (0x%s): %s: %s", function, paddr_nz (memaddr), message, safe_string);
 }
 
 /* Convert hex digit A to a number.  */
@@ -330,16 +345,11 @@ monitor_printf_noecho (char *pattern,...)
   if (len + 1 > sizeof sndbuf)
     abort ();
 
-#if 0
-  if (remote_debug > 0)
-    puts_debug ("sent -->", sndbuf, "<--");
-#endif
-  if (EXTRA_RDEBUG
-      && remote_debug)
+  if (monitor_debug_p)
     {
       char *safe_string = (char *) alloca ((strlen (sndbuf) * 4) + 1);
-      monitor_printable_string (safe_string, sndbuf);
-      printf ("sent[%s]\n", safe_string);
+      monitor_printable_string (safe_string, sndbuf, 0);
+      fprintf_unfiltered (gdb_stdlog, "sent[%s]\n", safe_string);
     }
 
   monitor_write (sndbuf, len);
@@ -363,16 +373,11 @@ monitor_printf (char *pattern,...)
   if (len + 1 > sizeof sndbuf)
     abort ();
 
-#if 0
-  if (remote_debug > 0)
-    puts_debug ("sent -->", sndbuf, "<--");
-#endif
-  if (EXTRA_RDEBUG
-      && remote_debug)
+  if (monitor_debug_p)
     {
       char *safe_string = (char *) alloca ((len * 4) + 1);
-      monitor_printable_string (safe_string, sndbuf);
-      printf ("sent[%s]\n", safe_string);
+      monitor_printable_string (safe_string, sndbuf, 0);
+      fprintf_unfiltered (gdb_stdlog, "sent[%s]\n", safe_string);
     }
 
   monitor_write (sndbuf, len);
@@ -381,8 +386,8 @@ monitor_printf (char *pattern,...)
      just output, but sometimes some extra junk appeared before the characters
      we expected, like an extra prompt, or a portmaster sending telnet negotiations.
      So, just start searching for what we sent, and skip anything unknown.  */
-  RDEBUG (("ExpectEcho\n"))
-    monitor_expect (sndbuf, (char *) 0, 0);
+  monitor_debug ("ExpectEcho\n");
+  monitor_expect (sndbuf, (char *) 0, 0);
 }
 
 
@@ -454,7 +459,7 @@ readchar (timeout)
 	  c &= 0x7f;
 	  /* This seems to interfere with proper function of the
 	     input stream */
-	  if (remote_debug > 0)
+	  if (monitor_debug_p || remote_debug)
 	    {
 	      char buf[2];
 	      buf[0] = c;
@@ -522,12 +527,11 @@ monitor_expect (string, buf, buflen)
   int c;
   extern struct target_ops *targ_ops;
 
-  if (EXTRA_RDEBUG
-      && remote_debug)
+  if (monitor_debug_p)
     {
       char *safe_string = (char *) alloca ((strlen (string) * 4) + 1);
-      monitor_printable_string (safe_string, string);
-      printf ("MON Expecting '%s'\n", safe_string);
+      monitor_printable_string (safe_string, string, 0);
+      fprintf_unfiltered (gdb_stdlog, "MON Expecting '%s'\n", safe_string);
     }
 
   immediate_quit = 1;
@@ -628,7 +632,7 @@ monitor_expect_regexp (pat, buf, buflen)
 {
   char *mybuf;
   char *p;
-  RDEBUG (("MON Expecting regexp\n"));
+  monitor_debug ("MON Expecting regexp\n");
   if (buf)
     mybuf = buf;
   else
@@ -679,8 +683,8 @@ monitor_expect_prompt (buf, buflen)
      char *buf;
      int buflen;
 {
-  RDEBUG (("MON Expecting prompt\n"))
-    return monitor_expect (current_monitor->prompt, buf, buflen);
+  monitor_debug ("MON Expecting prompt\n");
+  return monitor_expect (current_monitor->prompt, buf, buflen);
 }
 
 /* Get N 32-bit words from remote, each preceded by a space, and put
@@ -808,7 +812,7 @@ monitor_open (args, mon_ops, from_tty)
       monitor_stop ();
       if ((current_monitor->flags & MO_NO_ECHO_ON_OPEN) == 0)
 	{
-	  RDEBUG (("EXP Open echo\n"));
+	  monitor_debug ("EXP Open echo\n");
 	  monitor_expect_prompt (NULL, 0);
 	}
     }
@@ -930,7 +934,7 @@ monitor_supply_register (regno, valstr)
       val <<= 4;
       val += fromhex (*p++);
     }
-  RDEBUG (("Supplying Register %d %s\n", regno, valstr));
+  monitor_debug ("Supplying Register %d %s\n", regno, valstr);
 
   if (*p != '\0')
     error ("monitor_supply_register (%d):  bad value from monitor: %s.",
@@ -959,7 +963,7 @@ monitor_resume (pid, step, sig)
      enum target_signal sig;
 {
   /* Some monitors require a different command when starting a program */
-  RDEBUG (("MON resume\n"));
+  monitor_debug ("MON resume\n");
   if (current_monitor->flags & MO_RUN_FIRST_TIME && first_time == 1)
     {
       first_time = 0;
@@ -992,8 +996,8 @@ parse_register_dump (buf, len)
      char *buf;
      int len;
 {
-  RDEBUG (("MON Parsing  register dump\n"))
-    while (1)
+  monitor_debug ("MON Parsing  register dump\n");
+  while (1)
     {
       int regnamelen, vallen;
       char *regname, *val;
@@ -1029,8 +1033,8 @@ monitor_interrupt (signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, monitor_interrupt_twice);
 
-  if (remote_debug)
-    printf_unfiltered ("monitor_interrupt called\n");
+  if (monitor_debug_p || remote_debug)
+    fprintf_unfiltered (gdb_stdlog, "monitor_interrupt called\n");
 
   target_stop ();
 }
@@ -1096,8 +1100,8 @@ monitor_wait_filter (char *buf,
 
   /* Print any output characters that were preceded by ^O.  */
   /* FIXME - This would be great as a user settabgle flag */
-  if (remote_debug ||
-      current_monitor->flags & MO_PRINT_PROGRAM_OUTPUT)
+  if (monitor_debug_p || remote_debug
+      || current_monitor->flags & MO_PRINT_PROGRAM_OUTPUT)
     {
       int i;
 
@@ -1126,14 +1130,14 @@ monitor_wait (pid, status)
   status->value.integer = 0;
 
   old_chain = make_cleanup (monitor_wait_cleanup, &old_timeout);
-  RDEBUG (("MON wait\n"))
+  monitor_debug ("MON wait\n");
 
 #if 0
   /* This is somthing other than a maintenance command */
     in_monitor_wait = 1;
   timeout = watchdog > 0 ? watchdog : -1;
 #else
-    timeout = -1;		/* Don't time out -- user program is running. */
+  timeout = -1;		/* Don't time out -- user program is running. */
 #endif
 
   ofunc = (void (*)()) signal (SIGINT, monitor_interrupt);
@@ -1155,8 +1159,8 @@ monitor_wait (pid, status)
 
   /* Print any output characters that were preceded by ^O.  */
   /* FIXME - This would be great as a user settabgle flag */
-  if (remote_debug ||
-      current_monitor->flags & MO_PRINT_PROGRAM_OUTPUT)
+  if (monitor_debug_p || remote_debug
+      || current_monitor->flags & MO_PRINT_PROGRAM_OUTPUT)
     {
       int i;
 
@@ -1180,7 +1184,7 @@ monitor_wait (pid, status)
   if (current_monitor->register_pattern)
     parse_register_dump (buf, resp_len);
 #else
-  RDEBUG (("Wait fetching registers after stop\n"));
+  monitor_debug ("Wait fetching registers after stop\n");
   monitor_dump_regs ();
 #endif
 
@@ -1208,12 +1212,12 @@ monitor_fetch_register (regno)
   int i;
 
   name = current_monitor->regnames[regno];
-  RDEBUG (("MON fetchreg %d '%s'\n", regno, name ? name : "(null name)"))
+  monitor_debug ("MON fetchreg %d '%s'\n", regno, name ? name : "(null name)");
 
-    if (!name || (*name == '\0'))
+  if (!name || (*name == '\0'))
     {
-      RDEBUG (("No register known for %d\n", regno))
-	supply_register (regno, zerobuf);
+      monitor_debug ("No register known for %d\n", regno);
+      supply_register (regno, zerobuf);
       return;
     }
 
@@ -1227,13 +1231,13 @@ monitor_fetch_register (regno)
 
   if (current_monitor->getreg.resp_delim)
     {
-      RDEBUG (("EXP getreg.resp_delim\n"))
-	monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
+      monitor_debug ("EXP getreg.resp_delim\n");
+      monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
       /* Handle case of first 32 registers listed in pairs.  */
       if (current_monitor->flags & MO_32_REGS_PAIRED
 	  && (regno & 1) != 0 && regno < 32)
 	{
-	  RDEBUG (("EXP getreg.resp_delim\n"));
+	  monitor_debug ("EXP getreg.resp_delim\n");
 	  monitor_expect (current_monitor->getreg.resp_delim, NULL, 0);
 	}
     }
@@ -1270,7 +1274,7 @@ monitor_fetch_register (regno)
     }
 
   regbuf[i] = '\000';		/* terminate the number */
-  RDEBUG (("REGVAL '%s'\n", regbuf));
+  monitor_debug ("REGVAL '%s'\n", regbuf);
 
   /* If TERM is present, we wait for that to show up.  Also, (if TERM
      is present), we will send TERM_CMD if that is present.  In any
@@ -1279,14 +1283,14 @@ monitor_fetch_register (regno)
 
   if (current_monitor->getreg.term)
     {
-      RDEBUG (("EXP getreg.term\n"))
-	monitor_expect (current_monitor->getreg.term, NULL, 0);		/* get response */
+      monitor_debug ("EXP getreg.term\n");
+      monitor_expect (current_monitor->getreg.term, NULL, 0);		/* get response */
     }
 
   if (current_monitor->getreg.term_cmd)
     {
-      RDEBUG (("EMIT getreg.term.cmd\n"))
-	monitor_printf (current_monitor->getreg.term_cmd);
+      monitor_debug ("EMIT getreg.term.cmd\n");
+      monitor_printf (current_monitor->getreg.term_cmd);
     }
   if (!current_monitor->getreg.term ||	/* Already expected or */
       current_monitor->getreg.term_cmd)		/* ack expected */
@@ -1335,7 +1339,7 @@ static void
 monitor_fetch_registers (regno)
      int regno;
 {
-  RDEBUG (("MON fetchregs\n"));
+  monitor_debug ("MON fetchregs\n");
   if (current_monitor->getreg.cmd)
     {
       if (regno >= 0)
@@ -1365,16 +1369,16 @@ monitor_store_register (regno)
   name = current_monitor->regnames[regno];
   if (!name || (*name == '\0'))
     {
-      RDEBUG (("MON Cannot store unknown register\n"))
-	return;
+      monitor_debug ("MON Cannot store unknown register\n");
+      return;
     }
 
   val = read_register (regno);
-  RDEBUG (("MON storeg %d %08lx\n", regno, (ULONGEST) val))
+  monitor_debug ("MON storeg %d %s\n", regno, preg (val));
 
   /* send the register deposit command */
 
-    if (current_monitor->flags & MO_REGISTER_VALUE_FIRST)
+  if (current_monitor->flags & MO_REGISTER_VALUE_FIRST)
     monitor_printf (current_monitor->setreg.cmd, val, name);
   else if (current_monitor->flags & MO_SETREG_INTERACTIVE)
     monitor_printf (current_monitor->setreg.cmd, name);
@@ -1383,17 +1387,17 @@ monitor_store_register (regno)
 
   if (current_monitor->setreg.term)
     {
-      RDEBUG (("EXP setreg.term\n"))
-	monitor_expect (current_monitor->setreg.term, NULL, 0);
+      monitor_debug ("EXP setreg.term\n");
+      monitor_expect (current_monitor->setreg.term, NULL, 0);
       if (current_monitor->flags & MO_SETREG_INTERACTIVE)
-	monitor_printf ("%A\r", val);
+	monitor_printf ("%s\r", paddr_nz (val));
       monitor_expect_prompt (NULL, 0);
     }
   else
     monitor_expect_prompt (NULL, 0);
   if (current_monitor->setreg.term_cmd)		/* Mode exit required */
     {
-      RDEBUG (("EXP setreg_termcmd\n"));
+      monitor_debug ("EXP setreg_termcmd\n");
       monitor_printf ("%s", current_monitor->setreg.term_cmd);
       monitor_expect_prompt (NULL, 0);
     }
@@ -1444,9 +1448,9 @@ monitor_write_memory (memaddr, myaddr, len)
   char *cmd;
   int i;
 
-  RDEBUG (("MON write %d %08x\n", len, (unsigned long) memaddr))
+  monitor_debug ("MON write %d %s\n", len, paddr (memaddr));
 
-    if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
+  if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
     memaddr = ADDR_BITS_REMOVE (memaddr);
 
   /* Use memory fill command for leading 0 bytes.  */
@@ -1459,8 +1463,8 @@ monitor_write_memory (memaddr, myaddr, len)
 
       if (i > 4)		/* More than 4 zeros is worth doing */
 	{
-	  RDEBUG (("MON FILL %d\n", i))
-	    if (current_monitor->flags & MO_FILL_USES_ADDR)
+	  monitor_debug ("MON FILL %d\n", i);
+	  if (current_monitor->flags & MO_FILL_USES_ADDR)
 	    monitor_printf (current_monitor->fill, memaddr, (memaddr + i) - 1, 0);
 	  else
 	    monitor_printf (current_monitor->fill, memaddr, i, 0);
@@ -1501,7 +1505,7 @@ monitor_write_memory (memaddr, myaddr, len)
   if (len == 4)
     {
       hostval = *(unsigned int *) myaddr;
-      RDEBUG (("Hostval(%08x) val(%08x)\n", hostval, val));
+      monitor_debug ("Hostval(%08x) val(%08x)\n", hostval, val);
     }
 
 
@@ -1514,7 +1518,7 @@ monitor_write_memory (memaddr, myaddr, len)
 
       if (current_monitor->setmem.term)
 	{
-	  RDEBUG (("EXP setmem.term"));
+	  monitor_debug ("EXP setmem.term");
 	  monitor_expect (current_monitor->setmem.term, NULL, 0);
 	  monitor_printf ("%x\r", val);
 	}
@@ -1552,9 +1556,9 @@ monitor_write_even_block (memaddr, myaddr, len)
       myaddr += 4;
       memaddr += 4;
       written += 4;
-      RDEBUG ((" @ %08x\n", memaddr))
+      monitor_debug (" @ %s\n", paddr (memaddr));
       /* If we wanted to, here we could validate the address */
-	monitor_expect_prompt (NULL, 0);
+      monitor_expect_prompt (NULL, 0);
     }
   /* Now exit the sub mode */
   monitor_printf (current_monitor->getreg.term_cmd);
@@ -1754,7 +1758,7 @@ monitor_read_memory_single (memaddr, myaddr, len)
   char *cmd;
   int i;
 
-  RDEBUG (("MON read single\n"));
+  monitor_debug ("MON read single\n");
 #if 0
   /* Can't actually use long longs (nice idea, though).  In fact, the
      call to strtoul below will fail if it tries to convert a value
@@ -1792,7 +1796,7 @@ monitor_read_memory_single (memaddr, myaddr, len)
 
   if (current_monitor->getmem.resp_delim)
     {
-      RDEBUG (("EXP getmem.resp_delim\n"));
+      monitor_debug ("EXP getmem.resp_delim\n");
       monitor_expect_regexp (&getmem_resp_delim_pattern, NULL, 0);
     }
 
@@ -1810,7 +1814,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
       if ((c == '0') && ((c = readchar (timeout)) == 'x'))
 	;
       else
-	monitor_error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+	monitor_error ("monitor_read_memory_single", 
+		       "bad response from monitor",
 		       memaddr, i, membuf, c);
     }
   for (i = 0; i < len * 2; i++)
@@ -1825,7 +1830,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
 	  if (c == ' ')
 	    continue;
 
-	  monitor_error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+	  monitor_error ("monitor_read_memory_single",
+			 "bad response from monitor",
 			 memaddr, i, membuf, c);
 	}
 
@@ -1855,7 +1861,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
   val = strtoul (membuf, &p, 16);
 
   if (val == 0 && membuf == p)
-    monitor_error ("monitor_read_memory_single (0x%x):  bad value from monitor: %s.",
+    monitor_error ("monitor_read_memory_single",
+		   "bad value from monitor",
 		   memaddr, 0, membuf, 0);
 
   /* supply register stores in target byte order, so swap here */
@@ -1884,13 +1891,12 @@ monitor_read_memory (memaddr, myaddr, len)
 
   if (len <= 0)
     {
-      RDEBUG (("Zero length call to monitor_read_memory\n"));
+      monitor_debug ("Zero length call to monitor_read_memory\n");
       return 0;
     }
 
-  if (remote_debug)
-    printf ("MON read block ta(%08x) ha(%08x) %d\n",
-	    (unsigned long) memaddr, (unsigned long) myaddr, len);
+  monitor_debug ("MON read block ta(%s) ha(%lx) %d\n",
+		 paddr_nz (memaddr), (long) myaddr, len);
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
     memaddr = ADDR_BITS_REMOVE (memaddr);
@@ -1931,7 +1937,8 @@ monitor_read_memory (memaddr, myaddr, len)
       resp_len = monitor_expect (current_monitor->getmem.term, buf, sizeof buf);	/* get response */
 
       if (resp_len <= 0)
-	monitor_error ("monitor_read_memory (0x%x):  excessive response from monitor: %.*s.",
+	monitor_error ("monitor_read_memory",
+		       "excessive response from monitor",
 		       memaddr, resp_len, buf, 0);
 
       if (current_monitor->getmem.term_cmd)
@@ -1954,7 +1961,7 @@ monitor_read_memory (memaddr, myaddr, len)
     {
       int retval, tmp;
       struct re_registers resp_strings;
-      RDEBUG (("MON getmem.resp_delim %s\n", current_monitor->getmem.resp_delim));
+      monitor_debug ("MON getmem.resp_delim %s\n", current_monitor->getmem.resp_delim);
 
       memset (&resp_strings, 0, sizeof (struct re_registers));
       tmp = strlen (p);
@@ -1962,20 +1969,21 @@ monitor_read_memory (memaddr, myaddr, len)
 			  &resp_strings);
 
       if (retval < 0)
-	monitor_error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
+	monitor_error ("monitor_read_memory",
+		       "bad response from monitor",
 		       memaddr, resp_len, buf, 0);
 
       p += resp_strings.end[0];
 #if 0
       p = strstr (p, current_monitor->getmem.resp_delim);
       if (!p)
-	monitor_error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
+	monitor_error ("monitor_read_memory",
+		       "bad response from monitor",
 		       memaddr, resp_len, buf, 0);
       p += strlen (current_monitor->getmem.resp_delim);
 #endif
     }
-  if (remote_debug)
-    printf ("MON scanning  %d ,%08x '%s'\n", len, p, p);
+  monitor_debug ("MON scanning  %d ,%lx '%s'\n", len, (long) p, p);
   if (current_monitor->flags & MO_GETMEM_16_BOUNDARY)
     {
       char c;
@@ -1992,8 +2000,8 @@ monitor_read_memory (memaddr, myaddr, len)
 		{
 		  val = fromhex (c) * 16 + fromhex (*(p + 1));
 		  *myaddr++ = val;
-		  if (remote_debug)
-		    printf ("[%02x]", val);
+		  if (monitor_debug_p || remote_debug)
+		    fprintf_unfiltered (gdb_stdlog, "[%02x]", val);
 		  --i;
 		  fetched++;
 		}
@@ -2005,11 +2013,11 @@ monitor_read_memory (memaddr, myaddr, len)
 	}
       if (fetched == 0)
 	error ("Failed to read via monitor");
-      if (remote_debug)
-	printf ("\n");
+      if (monitor_debug_p || remote_debug)
+	fprintf_unfiltered (gdb_stdlog, "\n");
       return fetched;		/* Return the number of bytes actually read */
     }
-  RDEBUG (("MON scanning bytes\n"));
+  monitor_debug ("MON scanning bytes\n");
 
   for (i = len; i > 0; i--)
     {
@@ -2021,7 +2029,8 @@ monitor_read_memory (memaddr, myaddr, len)
 	    break;
 
 	  if (*p == '\000' || *p == '\n' || *p == '\r')
-	    monitor_error ("monitor_read_memory (0x%x):  badly terminated response from monitor: %.*s",
+	    monitor_error ("monitor_read_memory",
+			   "badly terminated response from monitor",
 			   memaddr, resp_len, buf, 0);
 	  p++;
 	}
@@ -2029,7 +2038,8 @@ monitor_read_memory (memaddr, myaddr, len)
       val = strtoul (p, &p1, 16);
 
       if (val == 0 && p == p1)
-	monitor_error ("monitor_read_memory (0x%x):  bad value from monitor: %.*s.",
+	monitor_error ("monitor_read_memory",
+		       "bad value from monitor",
 		       memaddr, resp_len, buf, 0);
 
       *myaddr++ = val;
@@ -2100,8 +2110,8 @@ monitor_insert_breakpoint (addr, shadow)
   unsigned char *bp;
   int bplen;
 
-  RDEBUG (("MON inst bkpt %08x\n", addr))
-    if (current_monitor->set_break == NULL)
+  monitor_debug ("MON inst bkpt %s\n", paddr (addr));
+  if (current_monitor->set_break == NULL)
     error ("No set_break defined for this monitor");
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
@@ -2134,8 +2144,8 @@ monitor_remove_breakpoint (addr, shadow)
 {
   int i;
 
-  RDEBUG (("MON rmbkpt %08x\n", addr))
-    if (current_monitor->clr_break == NULL)
+  monitor_debug ("MON rmbkpt %s\n", paddr (addr));
+  if (current_monitor->clr_break == NULL)
     error ("No clr_break defined for this monitor");
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
@@ -2158,7 +2168,8 @@ monitor_remove_breakpoint (addr, shadow)
 	}
     }
   fprintf_unfiltered (gdb_stderr,
-		      "Can't find breakpoint associated with 0x%x\n", addr);
+		      "Can't find breakpoint associated with 0x%s\n",
+		      paddr_nz (addr));
   return 1;
 }
 
@@ -2197,9 +2208,9 @@ monitor_load (file, from_tty)
      int from_tty;
 {
   dcache_flush (remote_dcache);
-  RDEBUG (("MON load\n"))
+  monitor_debug ("MON load\n");
 
-    if (current_monitor->load_routine)
+  if (current_monitor->load_routine)
     current_monitor->load_routine (monitor_desc, file, hashmark);
   else
     {				/* The default is ascii S-records */
@@ -2245,7 +2256,7 @@ monitor_load (file, from_tty)
 static void
 monitor_stop ()
 {
-  RDEBUG (("MON stop\n"));
+  monitor_debug ("MON stop\n");
   if ((current_monitor->flags & MO_SEND_BREAK_ON_STOP) != 0)
     SERIAL_SEND_BREAK (monitor_desc);
   if (current_monitor->stop)
@@ -2398,4 +2409,16 @@ _initialize_remote_monitors ()
 When enabled, a hashmark \'#\' is displayed.",
 				  &setlist),
 		     &showlist);
+
+#if 0
+  /* FIXME: cagney/1999-10-07: Wait until there is a generic ``set
+     debug ...'' rather than another ``set ...debug'' command. */
+  add_show_from_set
+    (add_set_cmd ("monitordebug", no_class, var_zinteger,
+		  (char *) &monitor_debug_p,
+		  "Set debugging of remote monitor communication.\n\
+When enabled, communication between GDB and the remote monitor\n\
+is displayed.", &setlist),
+     &showlist);
+#endif
 }

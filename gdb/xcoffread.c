@@ -2759,7 +2759,7 @@ xcoff_initial_scan (objfile, mainline)
 }
 
 static void
-xcoff_symfile_offsets (objfile, addr)
+xcoff_symfile_offsets (objfile, addrs)
      struct objfile *objfile;
      struct section_addr_info *addrs;
 {

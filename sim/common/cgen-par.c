@@ -68,6 +68,21 @@ void sim_queue_pc_write (SIM_CPU *cpu, USI value)
   element->kinds.pc_write.value = value;
 }
 
+void sim_queue_fn_hi_write (
+  SIM_CPU *cpu,
+  void (*write_function)(SIM_CPU *cpu, UINT, UHI),
+  UINT regno,
+  UHI value
+)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_FN_HI_WRITE;
+  element->kinds.fn_hi_write.function = write_function;
+  element->kinds.fn_hi_write.regno = regno;
+  element->kinds.fn_hi_write.value = value;
+}
+
 void sim_queue_fn_si_write (
   SIM_CPU *cpu,
   void (*write_function)(SIM_CPU *cpu, UINT, USI),
@@ -161,6 +176,11 @@ cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
       break;
     case CGEN_PC_WRITE:
       CPU_PC_SET (cpu, item->kinds.pc_write.value);
+      break;
+    case CGEN_FN_HI_WRITE:
+      item->kinds.fn_hi_write.function (cpu,
+					item->kinds.fn_hi_write.regno,
+					item->kinds.fn_hi_write.value);
       break;
     case CGEN_FN_SI_WRITE:
       item->kinds.fn_si_write.function (cpu,

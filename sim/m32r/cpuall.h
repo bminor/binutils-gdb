@@ -42,6 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 extern const MACH m32r_mach;
+extern const MACH m32rx_mach;
 
 #ifndef WANT_CPU
 /* The ARGBUF struct.  */

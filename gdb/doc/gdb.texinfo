@@ -347,19 +347,19 @@ information in this manual.
 
 Cygnus Solutions has sponsored GDB maintenance and much of its
 development since 1991.  Cygnus engineers who have worked on GDB
-fulltime include Mark Alexander, Jim Blandy, Per Bothner, Edith Epstein,
-Chris Faylor, Fred Fish, Martin Hunt, Jim Ingham, John Gilmore, Stu
-Grossman, Kung Hsu, Jim Kingdon, John Metzler, Fernando Nasser, Geoffrey
-Noer, Dawn Perchik, Rich Pixley, Zdenek Radouch, Keith Seitz, Stan
-Shebs, David Taylor, and Elena Zannoni.  In addition, Dave Brolley, Ian
-Carmichael, Steve Chamberlain, Nick Clifton, JT Conklin, Stan Cox, DJ
-Delorie, Ulrich Drepper, Frank Eigler, Doug Evans, Sean Fagan, David
-Henkel-Wallace, Richard Henderson, Jeff Holcomb, Jeff Law, Jim Lemke,
-Tom Lord, Bob Manson, Michael Meissner, Jason Merrill, Catherine Moore,
-Drew Moseley, Ken Raeburn, Gavin Romig-Koch, Rob Savoye, Jamie Smith,
-Mike Stump, Ian Taylor, Angela Thomas, Michael Tiemann, Tom Tromey, Ron
-Unrau, Jim Wilson, and David Zuhn have made contributions both large
-and small.
+fulltime include Mark Alexander, Jim Blandy, Per Bothner, Kevin
+Buettner, Edith Epstein, Chris Faylor, Fred Fish, Martin Hunt, Jim
+Ingham, John Gilmore, Stu Grossman, Kung Hsu, Jim Kingdon, John Metzler,
+Fernando Nasser, Geoffrey Noer, Dawn Perchik, Rich Pixley, Zdenek
+Radouch, Keith Seitz, Stan Shebs, David Taylor, and Elena Zannoni.  In
+addition, Dave Brolley, Ian Carmichael, Steve Chamberlain, Nick Clifton,
+JT Conklin, Stan Cox, DJ Delorie, Ulrich Drepper, Frank Eigler, Doug
+Evans, Sean Fagan, David Henkel-Wallace, Richard Henderson, Jeff
+Holcomb, Jeff Law, Jim Lemke, Tom Lord, Bob Manson, Michael Meissner,
+Jason Merrill, Catherine Moore, Drew Moseley, Ken Raeburn, Gavin
+Romig-Koch, Rob Savoye, Jamie Smith, Mike Stump, Ian Taylor, Angela
+Thomas, Michael Tiemann, Tom Tromey, Ron Unrau, Jim Wilson, and David
+Zuhn have made contributions both large and small.
 
 
 @node Sample Session
@@ -690,9 +690,10 @@ would attach @value{GDBN} to process @code{1234} (unless you also have a file
 named @file{1234}; @value{GDBN} does check for a core file first).
 
 Taking advantage of the second command-line argument requires a fairly
-complete operating system; when you use @value{GDBN} as a remote debugger
-attached to a bare board, there may not be any notion of ``process'',
-and there is often no way to get a core dump.
+complete operating system; when you use @value{GDBN} as a remote
+debugger attached to a bare board, there may not be any notion of
+``process'', and there is often no way to get a core dump.  @value{GDBN}
+will warn you if it is unable to attach or to read core dumps.
 
 You can run @code{gdb} without printing the front material, which describes
 @value{GDBN}'s non-warranty, by specifying @code{-silent}:
@@ -729,7 +730,7 @@ in sequential order.  The order makes a difference when the
 @node File Options
 @subsection Choosing files
 
-When @value{GDBN} starts
+When @value{GDBN} starts, it reads any arguments other than options as
 specifying an executable file and core file (or process ID).  This is
 the same as if the arguments were specified by the @samp{-se} and
 @samp{-c} options respectively.  (@value{GDBN} reads the first argument
@@ -805,14 +806,14 @@ This makes startup slower, but makes future operations faster.
 
 @end table
 
-The @code{-mapped} and @code{-readnow} options are typically combined in
+You typically combine the @code{-mapped} and @code{-readnow} options in
 order to build a @file{.syms} file that contains complete symbol
-information.  (@xref{Files,,Commands to specify files}, for
-information on @file{.syms} files.)  A simple @value{GDBN} invocation to do
-nothing but build a @file{.syms} file for future use is:
+information.  (@xref{Files,,Commands to specify files}, for information
+on @file{.syms} files.)  A simple @value{GDBN} invocation to do nothing
+but build a @file{.syms} file for future use is:
 
 @example
-	gdb -batch -nx -mapped -readnow programname
+gdb -batch -nx -mapped -readnow programname
 @end example
 
 @node Mode Options
@@ -824,10 +825,11 @@ batch mode or quiet mode.
 @table @code
 @item -nx
 @itemx -n
-Do not execute commands from any initialization files (normally called
-@file{.gdbinit}, or @file{gdb.ini} on PCs).  Normally, the commands in
-these files are executed after all the command options and arguments
-have been processed.  @xref{Command Files,,Command files}.
+Do not execute commands found in any initialization files (normally
+called @file{.gdbinit}, or @file{gdb.ini} on PCs).  Normally,
+@value{GDBN} executes the commands in these files after all the command
+options and arguments have been processed.  @xref{Command Files,,Command
+files}.
 
 @item -quiet
 @itemx -q
@@ -841,17 +843,29 @@ initialization files, if not inhibited with @samp{-n}).  Exit with
 nonzero status if an error occurs in executing the @value{GDBN} commands
 in the command files.
 
-Batch mode may be useful for running @value{GDBN} as a filter, for example to
-download and run a program on another computer; in order to make this
-more useful, the message
+Batch mode may be useful for running @value{GDBN} as a filter, for
+example to download and run a program on another computer; in order to
+make this more useful, the message
 
 @example
 Program exited normally.
 @end example
 
 @noindent
-(which is ordinarily issued whenever a program running under @value{GDBN} control
-terminates) is not issued when running in batch mode.
+(which is ordinarily issued whenever a program running under
+@value{GDBN} control terminates) is not issued when running in batch
+mode.
+
+@item -nowindows
+@itemx -nw
+``No windows''.  If @value{GDBN} comes with a graphical user interface
+(GUI) built in, then this option tells GDB to only use the command-line
+interface.  If no GUI is available, this option has no effect.
+
+@item -windows
+@itemx -w
+If @value{GDBN} includes a GUI, then this option requires it to be
+used if possible.
 
 @item -cd @var{directory}
 Run @value{GDBN} using @var{directory} as its working directory,
@@ -869,7 +883,8 @@ and a newline.  The Emacs-to-@value{GDBN} interface program uses the two
 @samp{\032} characters as a signal to display the source code for the
 frame.
 
-@item -b @var{bps}
+@item -baud @var{bps}
+@itemx -b @var{bps}
 Set the line speed (baud rate or bits per second) of any serial
 interface used by @value{GDBN} for remote debugging.
 
@@ -1144,16 +1159,18 @@ display a short list of named classes of commands:
 (@value{GDBP}) help
 List of classes of commands:
 
+aliases -- Aliases of other commands
+breakpoints -- Making program stop at certain points
+data -- Examining data
+files -- Specifying and examining files
+internals -- Maintenance commands
+obscure -- Obscure features
 running -- Running the program
 stack -- Examining the stack
-data -- Examining data
-breakpoints -- Making program stop at certain points
-files -- Specifying and examining files
 status -- Status inquiries
 support -- Support facilities
+tracepoints -- Tracing of program execution without stopping the program
 user-defined -- User-defined commands
-aliases -- Aliases of other commands
-obscure -- Obscure features
 
 Type "help" followed by a class name for a list of 
 commands in that class.
@@ -1176,9 +1193,10 @@ List of commands:
 
 @c Line break in "show" line falsifies real output, but needed
 @c to fit in smallbook page size.
-show -- Generic command for showing things set
- with "set"
-info -- Generic command for printing status
+info -- Generic command for showing things
+ about the program being debugged
+show -- Generic command for showing things
+ about the debugger
 
 Type "help" followed by command name for full 
 documentation.
@@ -1204,9 +1222,10 @@ complete i
 
 @smallexample
 @group
+if
+ignore
 info
 inspect
-ignore
 @end group
 @end smallexample
 
@@ -1265,11 +1284,14 @@ exceptional in lacking corresponding @code{set} commands:
 @cindex version number
 @item show version
 Show what version of @value{GDBN} is running.  You should include this
-information in @value{GDBN} bug-reports.  If multiple versions of @value{GDBN} are in
-use at your site, you may occasionally want to determine which version
-of @value{GDBN} you are running; as @value{GDBN} evolves, new commands are introduced,
-and old ones may wither away.  The version number is also announced
-when you start @value{GDBN}.
+information in @value{GDBN} bug-reports.  If multiple versions of
+@value{GDBN} are in use at your site, you may need to determine which
+version of @value{GDBN} you are running; as @value{GDBN} evolves, new
+commands are introduced, and old ones may wither away.  Also, many
+system vendors ship variant versions of @value{GDBN}, and there are
+variant versions of @value{GDBN} in GNU/Linux distributions as well.
+The version number is the same as the one announced when you start
+@value{GDBN}.
 
 @kindex show copying
 @item show copying
@@ -1277,7 +1299,9 @@ Display information about permission for copying @value{GDBN}.
 
 @kindex show warranty
 @item show warranty
-Display the @sc{gnu} ``NO WARRANTY'' statement.
+Display the @sc{gnu} ``NO WARRANTY'' statement, or a warranty,
+if your version of @value{GDB} comes with one.
+
 @end table
 
 @node Running
@@ -1961,7 +1985,7 @@ process.  The @var{mode} can be:
 @table @code
 @item parent
 The original process is debugged after a fork.  The child process runs
-unimpeded.
+unimpeded.  This is the default.
 
 @item child
 The new process is debugged after a fork.  The parent process runs
@@ -1972,7 +1996,7 @@ The debugger will ask for one of the above choices.
 @end table
 
 @item show follow-fork-mode
-Display the current debugger response to a fork or vfork call.
+Display the current debugger response to a @code{fork} or @code{vfork} call.
 @end table
 
 If you ask to debug a child process and a @code{vfork} is followed by an
@@ -2119,7 +2143,7 @@ C++, @var{function} may refer to more than one possible place to break.
 @itemx break -@var{offset}
 Set a breakpoint some number of lines forward or back from the position
 at which execution stopped in the currently selected @dfn{stack frame}.
-(@xref{Frames, , Frames}, for a description of stack frames.)
+(@xref{Frames, ,Frames}, for a description of stack frames.)
 
 @item break @var{linenum}
 Set a breakpoint at line @var{linenum} in the current source file.
@@ -2236,7 +2260,7 @@ Whether the breakpoint is marked to be disabled or deleted when hit.
 Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
 that are not enabled.
 @item Address
-Where the breakpoint is in your program, as a memory address
+Where the breakpoint is in your program, as a memory address.
 @item What
 Where the breakpoint is in the source for your program, as a file and
 line number.
@@ -2326,14 +2350,14 @@ expression changes, without having to predict a particular place where
 this may happen.
 
 Depending on your system, watchpoints may be implemented in software or
-hardware.  GDB does software watchpointing by single-stepping your
+hardware.  @value{GDBN} does software watchpointing by single-stepping your
 program and testing the variable's value each time, which is hundreds of
 times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
 On some systems, such as HP-UX, Linux and some other x86-based targets,
-GDB includes support for
+@value{GDBN} includes support for
 hardware watchpoints, which do not slow down the running of your
 program.
 
@@ -2349,7 +2373,7 @@ Set a watchpoint that will break when watch @var{expr} is read by the program.
 
 @kindex awatch
 @item awatch @var{expr}
-Set a watchpoint that will break when @var{args} is either read or written into
+Set a watchpoint that will break when @var{expr} is either read or written into
 by the program.
 
 @kindex info watchpoints
@@ -2421,7 +2445,7 @@ watchpoint with one command and the other with a different command.
 Delete or disable unused watchpoint commands before setting new ones.
 
 If you call a function interactively using @code{print} or @code{call},
-any watchpoints you have set will be inactive until GDB reaches another
+any watchpoints you have set will be inactive until @value{GDBN} reaches another
 kind of breakpoint or the call completes.
 
 @value{GDBN} automatically deletes watchpoints that watch local
@@ -3308,7 +3332,7 @@ well; in this case, place @samp{thread @var{threadno}} before the
 breakpoint condition, like this:
 
 @smallexample
-(gdb) break frik.c:13 thread 28 if bartab > lim
+(@value{GDBP}) break frik.c:13 thread 28 if bartab > lim
 @end smallexample
 
 @end table
@@ -3355,7 +3379,7 @@ when you step.  They are more likely to run when you @samp{next} over a
 function call, and they are completely free to run when you use commands
 like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
 thread hits a breakpoint during its timeslice, they will never steal the
-GDB prompt away from the thread that you are debugging.
+@value{GDBN} prompt away from the thread that you are debugging.
 
 @item show scheduler-locking
 Display the current scheduler locking mode.
@@ -7374,7 +7398,7 @@ type = double
 (@value{GDBP}) p g
 $1 = 1
 (@value{GDBP}) set g=4
-(gdb) p g
+(@value{GDBP}) p g
 $2 = 1
 (@value{GDBP}) r
 The program being debugged has been started already.
@@ -8103,7 +8127,7 @@ it somewhere in memory where it won't get clobbered by the download.
 
 @kindex target sim
 @item target sim
-Builtin CPU simulator.  GDB includes simulators for most architectures.
+Builtin CPU simulator.  @value{GDBN} includes simulators for most architectures.
 In general,
 @example
         target sim
@@ -8772,12 +8796,12 @@ toggle debug flag.
 @item detach @emph{(optional)}
 @tab @code{D}
 @tab
-Detach GDB from the remote system.  Sent to the remote target before
-GDB disconnects.
+Detach @value{GDBN} from the remote system.  Sent to the remote target before
+@value{GDBN} disconnects.
 @item
 @tab reply @emph{no response}
 @tab
-GDB does not check for any response after sending this packet
+@value{GDBN} does not check for any response after sending this packet
 
 @item reserved
 @tab @code{e}
@@ -8804,7 +8828,7 @@ GDB does not check for any response after sending this packet
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} @var{packet} are
-determined by the GDB internal macros @var{REGISTER_RAW_SIZE} and
+determined by the @value{GDBN} internal macros @var{REGISTER_RAW_SIZE} and
 @var{REGISTER_NAME} macros.  The specification of several standard
 @code{g} packets is specified below.
 @item
@@ -8893,14 +8917,14 @@ thread context has been selected (ie. does 'k' kill only that thread?)}.
 @tab @code{m}@var{addr}@code{,}@var{length}
 @tab
 Read @var{length} bytes of memory starting at address @var{addr}.
-Neither GDB nor the stub assume that sized memory transfers are assumed
+Neither @value{GDBN} nor the stub assume that sized memory transfers are assumed
 using word alligned accesses. FIXME: @emph{A word aligned memory
 transfer mechanism is needed.}
 @item
 @tab reply @var{XX...}
 @tab
 @var{XX...} is mem contents. Can be fewer bytes than requested if able
-to read only part of the data.  Neither GDB nor the stub assume that
+to read only part of the data.  Neither @value{GDBN} nor the stub assume that
 sized memory transfers are assumed using word alligned accesses. FIXME:
 @emph{A word aligned memory transfer mechanism is needed.}
 @item
@@ -9484,7 +9508,7 @@ Use the @code{set os} command to set the operating system.  This tells
 @value{GDBN} which kernel object display module to initialize:
 
 @example
-(gdb) set os cisco
+(@value{GDBP}) set os cisco
 @end example
 
 If @code{set os} succeeds, @value{GDBN} will display some information
@@ -9493,7 +9517,7 @@ which can be used to query the target.  The @code{info} command is named
 after the operating system:
 
 @example
-(gdb) info cisco
+(@value{GDBP}) info cisco
 List of Cisco Kernel Objects
 Object     Description
 any        Any and all objects
@@ -10092,7 +10116,7 @@ Hitachi SH, H8/300, or H8/500:
 that you want to use @samp{target hms}, the remote debugging interface
 for Hitachi microprocessors, or @samp{target e7000}, the in-circuit
 emulator for the Hitachi SH and the Hitachi 300H.  (@samp{target hms} is
-the default when GDB is configured specifically for the Hitachi SH,
+the default when @value{GDBN} is configured specifically for the Hitachi SH,
 H8/300, or H8/500.)
 
 @item
@@ -10124,7 +10148,7 @@ hosts, where it is typically something like @file{/dev/ttya}.
 @cindex serial line speed, Hitachi micros
 @code{@value{GDBP}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
-hosts; on DOS hosts, set the line speed as usual from outside GDB with
+hosts; on DOS hosts, set the line speed as usual from outside @value{GDBN} with
 the DOS @code{mode} command (for instance,
 @w{@kbd{mode com2:9600,n,8,1,p}} for a 9600@dmn{bps} connection).
 
@@ -10182,15 +10206,15 @@ itself, are described in @ref{Files,,Commands to specify files}.)
 
 @smallexample
 (eg-C:\H8300\TEST) @value{GDBP} t.x
-GDB is free software and you are welcome to distribute copies
+@value{GDBN} is free software and you are welcome to distribute copies
  of it under certain conditions; type "show copying" to see 
  the conditions.
-There is absolutely no warranty for GDB; type "show warranty" 
+There is absolutely no warranty for @value{GDBN}; type "show warranty" 
 for details.
-GDB @value{GDBVN}, Copyright 1992 Free Software Foundation, Inc...
-(gdb) target hms
+@value{GDBN} @value{GDBVN}, Copyright 1992 Free Software Foundation, Inc...
+(@value{GDBP}) target hms
 Connected to remote H8/300 HMS system.
-(gdb) load t.x
+(@value{GDBP}) load t.x
 .text   : 0x8000 .. 0xabde ***********
 .data   : 0xabde .. 0xad30 *
 .stack  : 0xf000 .. 0xf014 *
@@ -10502,10 +10526,10 @@ debugger:
 
 @example
 host$ @value{GDBP} @var{prog}
-GDB is free software and @dots{}
-(gdb) target mips /dev/ttyb
-(gdb) load @var{prog}
-(gdb) run
+@value{GDBN} is free software and @dots{}
+(@value{GDBP}) target mips /dev/ttyb
+(@value{GDBP}) load @var{prog}
+(@value{GDBP}) run
 @end example
 
 @item target mips @var{hostname}:@var{portnumber}
@@ -10844,7 +10868,7 @@ remote protocol.
 @node ST2000
 @subsection Tandem ST2000
 
-GDB may be used with a Tandem ST2000 phone switch, running Tandem's
+@value{GDBN} may be used with a Tandem ST2000 phone switch, running Tandem's
 STDBUG protocol.
 
 To connect your ST2000 to the host system, see the manufacturer's
@@ -10945,7 +10969,7 @@ simulated clock ticks.
 @section Architectures
 
 This section describes characteristics of architectures that affect
-all uses of GDB with this architecture, both native and cross.
+all uses of @value{GDBN} with the architecture, both native and cross.
 
 @menu
 * A29K::
@@ -11236,13 +11260,14 @@ from wrapping its output.
 @cindex number representation
 @cindex entering numbers
 
-You can always enter numbers in octal, decimal, or hexadecimal in @value{GDBN} by
-the usual conventions: octal numbers begin with @samp{0}, decimal
-numbers end with @samp{.}, and hexadecimal numbers begin with @samp{0x}.
-Numbers that begin with none of these are, by default, entered in base
-10; likewise, the default display for numbers---when no particular
-format is specified---is base 10.  You can change the default base for
-both input and output with the @code{set radix} command.
+You can always enter numbers in octal, decimal, or hexadecimal in
+@value{GDBN} by the usual conventions: octal numbers begin with
+@samp{0}, decimal numbers end with @samp{.}, and hexadecimal numbers
+begin with @samp{0x}.  Numbers that begin with none of these are, by
+default, entered in base 10; likewise, the default display for
+numbers---when no particular format is specified---is base 10.  You can
+change the default base for both input and output with the @code{set
+radix} command.
 
 @table @code
 @kindex set input-radix
@@ -11280,10 +11305,10 @@ Display the current default base for numeric display.
 @node Messages/Warnings
 @section Optional warnings and messages
 
-By default, @value{GDBN} is silent about its inner workings.  If you are running
-on a slow machine, you may want to use the @code{set verbose} command.
-This makes @value{GDBN} tell you when it does a lengthy internal operation, so
-you will not think it has crashed.
+By default, @value{GDBN} is silent about its inner workings.  If you are
+running on a slow machine, you may want to use the @code{set verbose}
+command.  This makes @value{GDBN} tell you when it does a lengthy
+internal operation, so you will not think it has crashed.
 
 Currently, the messages controlled by @code{set verbose} are those
 which announce that the symbol table for a source file is being read;
@@ -11302,21 +11327,24 @@ Disables @value{GDBN} output of certain informational messages.
 Displays whether @code{set verbose} is on or off.
 @end table
 
-By default, if @value{GDBN} encounters bugs in the symbol table of an object
-file, it is silent; but if you are debugging a compiler, you may find
-this information useful (@pxref{Symbol Errors, ,Errors reading symbol files}).
+By default, if @value{GDBN} encounters bugs in the symbol table of an
+object file, it is silent; but if you are debugging a compiler, you may
+find this information useful (@pxref{Symbol Errors, ,Errors reading
+symbol files}).
 
 @table @code
+
 @kindex set complaints
 @item set complaints @var{limit}
-Permits @value{GDBN} to output @var{limit} complaints about each type of unusual
-symbols before becoming silent about the problem.  Set @var{limit} to
-zero to suppress all complaints; set it to a large number to prevent
-complaints from being suppressed.
+Permits @value{GDBN} to output @var{limit} complaints about each type of
+unusual symbols before becoming silent about the problem.  Set
+@var{limit} to zero to suppress all complaints; set it to a large number
+to prevent complaints from being suppressed.
 
 @kindex show complaints
 @item show complaints
 Displays how many symbol complaints @value{GDBN} is permitted to produce.
+
 @end table
 
 By default, @value{GDBN} is cautious, and asks what sometimes seems to be a
@@ -11333,6 +11361,7 @@ If you are willing to unflinchingly face the consequences of your own
 commands, you can disable this ``feature'':
 
 @table @code
+
 @kindex set confirm
 @cindex flinching
 @cindex confirmation
@@ -11346,14 +11375,16 @@ Enables confirmation requests (the default).
 @kindex show confirm
 @item show confirm
 Displays state of confirmation requests.
+
 @end table
 
 @node Sequences
 @chapter Canned Sequences of Commands
 
 Aside from breakpoint commands (@pxref{Break Commands, ,Breakpoint
-command lists}), @value{GDBN} provides two ways to store sequences of commands
-for execution as a unit: user-defined commands and command files.
+command lists}), @value{GDBN} provides two ways to store sequences of
+commands for execution as a unit: user-defined commands and command
+files.
 
 @menu
 * Define::                      User-defined commands
@@ -11366,11 +11397,11 @@ for execution as a unit: user-defined commands and command files.
 @section User-defined commands
 
 @cindex user-defined command
-A @dfn{user-defined command} is a sequence of @value{GDBN} commands to which 
-you assign a new name as a command.  This is done with the @code{define}
-command.  User commands may accept up to 10 arguments separated by whitespace.
-Arguments are accessed within the user command via @var{$arg0@dots{}$arg9}.
-A trivial example:
+A @dfn{user-defined command} is a sequence of @value{GDBN} commands to
+which you assign a new name as a command.  This is done with the
+@code{define} command.  User commands may accept up to 10 arguments
+separated by whitespace.  Arguments are accessed within the user command
+via @var{$arg0@dots{}$arg9}.  A trivial example:
 
 @smallexample
 define adder
@@ -11391,6 +11422,7 @@ reference variables, use complex expressions, or even perform inferior
 functions calls.
 
 @table @code
+
 @kindex define
 @item define @var{commandname}
 Define a command named @var{commandname}.  If there is already a command
@@ -11439,9 +11471,10 @@ List all user-defined commands, with the first line of the documentation
 @kindex show user
 @item show user
 @itemx show user @var{commandname}
-Display the @value{GDBN} commands used to define @var{commandname} (but not its
-documentation).  If no @var{commandname} is given, display the
+Display the @value{GDBN} commands used to define @var{commandname} (but
+not its documentation).  If no @var{commandname} is given, display the
 definitions for all user-defined commands.
+
 @end table
 
 When user-defined commands are executed, the
@@ -11515,13 +11548,13 @@ When you start @value{GDBN}, it automatically executes commands from its
 @dfn{init files}.  These are files named @file{.gdbinit} on Unix, or
 @file{gdb.ini} on DOS/Windows.  @value{GDBN} reads the init file (if
 any) in your home directory@footnote{On DOS/Windows systems, the home
-directory is the one pointed to by the @code{HOME} environment variable.},
-then processes command line options and
-operands, and then reads the init file (if any) in the current working
-directory.  This is so the init file in your home directory can set
-options (such as @code{set complaints}) which affect the processing of
-the command line options and operands.  The init files are not executed
-if you use the @samp{-nx} option; @pxref{Mode Options, ,Choosing modes}.
+directory is the one pointed to by the @code{HOME} environment
+variable.}, then processes command line options and operands, and then
+reads the init file (if any) in the current working directory.  This is
+so the init file in your home directory can set options (such as
+@code{set complaints}) which affect the processing of the command line
+options and operands.  The init files are not executed if you use the
+@samp{-nx} option; @pxref{Mode Options, ,Choosing modes}.
 
 @cindex init file name
 On some configurations of @value{GDBN}, the init file is known by a

@@ -820,24 +820,16 @@ new_symfile_objfile (objfile, mainline, verbo)
    as dynamically loaded code.  If !mainline, ADDR is the address
    where the text segment was loaded.
 
-   USER_LOADED is TRUE if the add-symbol-file command was how this
-   symbol file came to be processed.
-
-   IS_SOLIB is TRUE if this symbol file represents a solib, as discovered
-   by the target's implementation of the solib package.
-
    Upon success, returns a pointer to the objfile that was added.
    Upon failure, jumps back to command level (never returns). */
 
 struct objfile *
-symbol_file_add (name, from_tty, addrs, mainline, flags, user_loaded, is_solib)
+symbol_file_add (name, from_tty, addrs, mainline, flags)
      char *name;
      int from_tty;
      struct section_addr_info *addrs;
      int mainline;
      int flags;
-     int user_loaded;
-     int is_solib;
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
@@ -854,7 +846,7 @@ symbol_file_add (name, from_tty, addrs, mainline, flags, user_loaded, is_solib)
       && !query ("Load new symbol table from \"%s\"? ", name))
     error ("Not confirmed.");
 
-  objfile = allocate_objfile (abfd, flags & OBJF_MAPPED, user_loaded, is_solib);
+  objfile = allocate_objfile (abfd, flags);
 
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */
@@ -952,7 +944,7 @@ symbol_file_command (args, from_tty)
   char *name = NULL;
   CORE_ADDR text_relocation = 0;	/* text_relocation */
   struct cleanup *cleanups;
-  int flags = 0;
+  int flags = OBJF_USERLOADED;
 
   dont_repeat ();
 
@@ -1023,8 +1015,7 @@ symbol_file_command (args, from_tty)
 		return;
 	      else if (text_relocation == (CORE_ADDR) -1)
 		{
-		  symbol_file_add (name, from_tty, NULL,
-				   1, flags, 1, 0);
+		  symbol_file_add (name, from_tty, NULL, 1, flags);
 #ifdef HPUXHPPA
 		  RESET_HP_UX_GLOBALS ();
 #endif
@@ -1034,8 +1025,7 @@ symbol_file_command (args, from_tty)
 		  struct section_addr_info section_addrs;
 		  memset (&section_addrs, 0, sizeof (section_addrs));
 		  section_addrs.text_addr = (CORE_ADDR) text_relocation;
-		  symbol_file_add (name, from_tty, &section_addrs,
-				   0, flags, 1, 0);
+		  symbol_file_add (name, from_tty, &section_addrs, 0, flags);
 		}
 
 	      /* Getting new symbols may change our opinion about what is
@@ -1386,7 +1376,7 @@ add_symbol_file_command (args, from_tty)
 {
   char *name = NULL;
   CORE_ADDR text_addr;
-  int flags = 0;
+  int flags = OBJF_USERLOADED;
   char *arg;
   int expecting_option = 0;
   int option_index = 0;
@@ -1572,9 +1562,7 @@ add_symbol_file_command (args, from_tty)
   if (from_tty && (!query ("%s", "")))
     error ("Not confirmed.");
 
-  symbol_file_add (name, from_tty, &section_addrs, 0, flags,
-		   1,		/* user_loaded */
-		   0);		/* We'll guess it's ! is_solib */
+  symbol_file_add (name, from_tty, &section_addrs, 0, flags);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */

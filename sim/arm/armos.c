@@ -295,7 +295,7 @@ SWIopen (ARMul_State *state, ARMword name, ARMword SWIflags)
     }
   else
     {
-      state->Reg[0] = (int) open (dummy, flags);
+      state->Reg[0] = (int) open (dummy, flags, 0666);
       OSptr->ErrorNo = errno;
     }
 }

@@ -55,6 +55,15 @@ extern void m32rbf_h_psw_set_handler (SIM_CPU *, UQI);
 extern DI m32rbf_h_accum_get_handler (SIM_CPU *);
 extern void m32rbf_h_accum_set_handler (SIM_CPU *, DI);
 
+extern USI m32rxf_h_cr_get_handler (SIM_CPU *, UINT);
+extern void m32rxf_h_cr_set_handler (SIM_CPU *, UINT, USI);
+extern UQI m32rxf_h_psw_get_handler (SIM_CPU *);
+extern void m32rxf_h_psw_set_handler (SIM_CPU *, UQI);
+extern DI m32rxf_h_accum_get_handler (SIM_CPU *);
+extern void m32rxf_h_accum_set_handler (SIM_CPU *, DI);
+
+extern DI m32rxf_h_accums_get_handler (SIM_CPU *, UINT);
+extern void m32rxf_h_accums_set_handler (SIM_CPU *, UINT, DI);
 
 /* Misc. profile data.  */
 
@@ -121,6 +130,32 @@ do { \
 
 /* Additional execution support.  */
 
+/* Result of semantic function is one of
+   - next address, branch only
+   - NEW_PC_SKIP, sc/snc insn
+   - NEW_PC_2, 2 byte non-branch non-sc/snc insn
+   - NEW_PC_4, 4 byte non-branch insn
+   The special values have bit 1 set so it's cheap to distinguish them.
+   This works because all cti's are defined to zero the bottom two bits
+   Note that the m32rx no longer doesn't implement its semantics with
+   functions, so this isn't used.  It's kept around should it be needed
+   again.  */
+/* FIXME: replace 0xffff0001 with 1?  */
+#define NEW_PC_BASE 0xffff0001
+#define NEW_PC_SKIP NEW_PC_BASE
+#define NEW_PC_2 (NEW_PC_BASE + 2)
+#define NEW_PC_4 (NEW_PC_BASE + 4)
+#define NEW_PC_BRANCH_P(addr) (((addr) & 1) == 0)
+
+/* Modify "next pc" support to handle parallel execution.
+   This is for the non-pbb case.  The m32rx no longer implements this.
+   It's kept around should it be needed again.  */
+#if defined (WANT_CPU_M32RXF) && ! WITH_SCACHE_PBB_M32RXF
+#undef SEM_NEXT_VPC
+#define SEM_NEXT_VPC(abuf, len) (NEW_PC_BASE + (len))
+#undef SEM_SKIP_INSN
+#define SEM_SKIP_INSN(cpu, sc, vpcvar, yes) FIXME
+#endif
 
 /* Hardware/device support.
    ??? Will eventually want to move device stuff to config files.  */

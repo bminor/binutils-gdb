@@ -25,9 +25,16 @@
 #include "event-loop.h"
 #include "event-top.h"
 #include "inf-loop.h"
+#include "remote.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 static void complete_execution (void);
+
+void
+inferior_event_handler_wrapper (gdb_client_data client_data)
+{
+  inferior_event_handler (INF_QUIT_REQ, client_data);
+}
 
 /* General function to handle events in the inferior. So far it just
    takes care of detecting errors reported by select() or poll(),
@@ -71,7 +78,13 @@ inferior_event_handler (enum inferior_event_type event_type,
       complete_execution ();
       break;
 
-    case INF_QUIT_REQ:
+    case INF_QUIT_REQ: 
+      /* FIXME: ezannoni 1999-10-04. This call should really be a
+	 target vector entry, so that it can be used for any kind of
+	 targets. */
+      async_remote_interrupt_twice (NULL);
+      break;
+
     case INF_TIMER:
     default:
       printf_unfiltered ("Event type not recognized.\n");

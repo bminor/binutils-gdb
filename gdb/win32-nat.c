@@ -420,7 +420,7 @@ handle_load_dll (PTR dummy)
 
   printf_unfiltered ("%x:%s", event->lpBaseOfDll, dll_name);
   section_addrs.text_addr = (int) event->lpBaseOfDll + 0x1000;
-  symbol_file_add (dll_name, 0, &section_addrs, 0, 0, 0, 1);
+  symbol_file_add (dll_name, 0, &section_addrs, 0, OBJF_SHARED);
   printf_unfiltered ("\n");
 
   return 1;

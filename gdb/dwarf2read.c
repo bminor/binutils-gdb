@@ -631,6 +631,10 @@ static struct symbol *new_symbol PARAMS ((struct die_info *, struct type *,
 static void dwarf2_const_value PARAMS ((struct attribute *, struct symbol *,
 					struct objfile *));
 
+static void dwarf2_const_value_data (struct attribute *attr,
+				     struct symbol *sym,
+				     int bits);
+
 static struct type *die_type PARAMS ((struct die_info *, struct objfile *));
 
 static struct type *die_containing_type PARAMS ((struct die_info *,
@@ -666,8 +670,6 @@ static void dwarf2_add_field PARAMS ((struct field_info *, struct die_info *,
 static void dwarf2_attach_fields_to_type PARAMS ((struct field_info *,
 						  struct type *,
 						  struct objfile *));
-
-static char *skip_member_fn_name PARAMS ((char *));
 
 static void dwarf2_add_member_fn PARAMS ((struct field_info *,
 					  struct die_info *, struct type *,
@@ -1597,12 +1599,6 @@ read_func_scope (die, objfile)
       objfile->ei.entry_func_highpc = highpc;
     }
 
-  if (STREQ (name, "main"))	/* FIXME: hardwired name */
-    {
-      objfile->ei.main_func_lowpc = lowpc;
-      objfile->ei.main_func_highpc = highpc;
-    }
-
   /* Decode DW_AT_frame_base location descriptor if present, keep result
      for DW_OP_fbreg operands in decode_locdesc.  */
   frame_base_reg = -1;
@@ -1854,23 +1850,17 @@ dwarf2_add_field (fip, die, objfile)
   else if (die->tag == DW_TAG_variable)
     {
       char *physname;
-      char *cp;
 
       /* C++ static member.
-         Get physical name, extract field name from physical name.  */
-      physname = dwarf2_linkage_name (die);
-      if (physname == NULL)
+	 Get name of field.  */
+      attr = dwarf_attr (die, DW_AT_name);
+      if (attr && DW_STRING (attr))
+	fieldname = DW_STRING (attr);
+      else
 	return;
 
-      cp = physname;
-      while (*cp && !is_cplus_marker (*cp))
-	cp++;
-      if (*cp)
-	fieldname = cp + 1;
-      if (*fieldname == '\0')
-	{
-	  complain (&dwarf2_bad_static_member_name, physname);
-	}
+      /* Get physical name.  */
+      physname = dwarf2_linkage_name (die);
 
       SET_FIELD_PHYSNAME (*fp, obsavestring (physname, strlen (physname),
 					     &objfile->type_obstack));
@@ -1980,37 +1970,6 @@ dwarf2_attach_fields_to_type (fip, type, objfile)
     }
 }
 
-/* Skip to the end of a member function name in a mangled name.  */
-
-static char *
-skip_member_fn_name (physname)
-     char *physname;
-{
-  char *endname = physname;
-
-  /* Skip over leading underscores.  */
-  while (*endname == '_')
-    endname++;
-
-  /* Find two succesive underscores.  */
-  do
-    endname = strchr (endname, '_');
-  while (endname != NULL && *++endname != '_');
-
-  if (endname == NULL)
-    {
-      complain (&dwarf2_bad_member_name_complaint, physname);
-      endname = physname;
-    }
-  else
-    {
-      /* Take care of trailing underscores.  */
-      if (endname[1] != '_')
-	endname--;
-    }
-  return endname;
-}
-
 /* Add a member function to the proper fieldlist.  */
 
 static void
@@ -2028,46 +1987,15 @@ dwarf2_add_member_fn (fip, die, type, objfile)
   char *physname;
   struct nextfnfield *new_fnfield;
 
-  /* Extract member function name from mangled name.  */
-  physname = dwarf2_linkage_name (die);
-  if (physname == NULL)
-    return;
-  if ((physname[0] == '_' && physname[1] == '_'
-       && strchr ("0123456789Qt", physname[2]))
-      || DESTRUCTOR_PREFIX_P (physname))
-    {
-      /* Constructor and destructor field names are set to the name
-         of the class, but without template parameter lists.
-         The name might be missing for anonymous aggregates.  */
-      if (TYPE_TAG_NAME (type))
-	{
-	  char *p = strchr (TYPE_TAG_NAME (type), '<');
-
-	  if (p == NULL)
-	    fieldname = TYPE_TAG_NAME (type);
-	  else
-	    fieldname = obsavestring (TYPE_TAG_NAME (type),
-				      p - TYPE_TAG_NAME (type),
-				      &objfile->type_obstack);
-	}
-      else
-	{
-	  char *anon_name = "";
-	  fieldname = obsavestring (anon_name, strlen (anon_name),
-				    &objfile->type_obstack);
-	}
-    }
+  /* Get name of member function.  */
+  attr = dwarf_attr (die, DW_AT_name);
+  if (attr && DW_STRING (attr))
+    fieldname = DW_STRING (attr);
   else
-    {
-      char *endname = skip_member_fn_name (physname);
+    return;
 
-      /* Ignore member function if we were unable not extract the member
-         function name.  */
-      if (endname == physname)
-	return;
-      fieldname = obsavestring (physname, endname - physname,
-				&objfile->type_obstack);
-    }
+  /* Get the mangled name.  */
+  physname = dwarf2_linkage_name (die);
 
   /* Look up member function name in fieldlist.  */
   for (i = 0; i < fip->nfnfields; i++)
@@ -4095,8 +4023,7 @@ dwarf2_start_subfile (filename, dirname)
    to make a symbol table entry for it, and if so, create a new entry
    and return a pointer to it.
    If TYPE is NULL, determine symbol type from the die, otherwise
-   used the passed type.
- */
+   used the passed type.  */
 
 static struct symbol *
 new_symbol (die, type, objfile)
@@ -4383,15 +4310,35 @@ dwarf2_const_value (attr, sym, objfile)
       memcpy (SYMBOL_VALUE_BYTES (sym), blk->data, blk->size);
       SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
       break;
-    case DW_FORM_data2:
-    case DW_FORM_data4:
-    case DW_FORM_data8:
+
+      /* The DW_AT_const_value attributes are supposed to carry the
+	 symbol's value "represented as it would be on the target
+	 architecture."  By the time we get here, it's already been
+	 converted to host endianness, so we just need to sign- or
+	 zero-extend it as appropriate.  */
     case DW_FORM_data1:
+      dwarf2_const_value_data (attr, sym, 8);
+      break;
+    case DW_FORM_data2:
+      dwarf2_const_value_data (attr, sym, 16);
+      break;
+    case DW_FORM_data4:
+      dwarf2_const_value_data (attr, sym, 32);
+      break;
+    case DW_FORM_data8:
+      dwarf2_const_value_data (attr, sym, 64);
+      break;
+
     case DW_FORM_sdata:
+      SYMBOL_VALUE (sym) = DW_SND (attr);
+      SYMBOL_CLASS (sym) = LOC_CONST;
+      break;
+
     case DW_FORM_udata:
       SYMBOL_VALUE (sym) = DW_UNSND (attr);
       SYMBOL_CLASS (sym) = LOC_CONST;
       break;
+
     default:
       complain (&dwarf2_unsupported_const_value_attr,
 		dwarf_form_name (attr->form));
@@ -4400,6 +4347,29 @@ dwarf2_const_value (attr, sym, objfile)
       break;
     }
 }
+
+
+/* Given an attr with a DW_FORM_dataN value in host byte order, sign-
+   or zero-extend it as appropriate for the symbol's type.  */
+static void
+dwarf2_const_value_data (struct attribute *attr,
+			 struct symbol *sym,
+			 int bits)
+{
+  LONGEST l = DW_UNSND (attr);
+
+  if (bits < sizeof (l) * 8)
+    {
+      if (TYPE_UNSIGNED (SYMBOL_TYPE (sym)))
+	l &= ((LONGEST) 1 << bits) - 1;
+      else
+	l = (l << (sizeof (l) - bits)) >> (sizeof (l) - bits);
+    }
+
+  SYMBOL_VALUE (sym) = l;
+  SYMBOL_CLASS (sym) = LOC_CONST;
+}
+
 
 /* Return the type of the die in question using its DW_AT_type attribute.  */
 

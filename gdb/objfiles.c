@@ -46,7 +46,7 @@ static int
 open_existing_mapped_file PARAMS ((char *, long, int));
 
 static int
-open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
+open_mapped_file PARAMS ((char *filename, long mtime, int flags));
 
 static PTR
   map_to_file PARAMS ((int));
@@ -140,29 +140,27 @@ build_objfile_section_table (objfile)
   return (0);
 }
 
-/* Given a pointer to an initialized bfd (ABFD) and a flag that indicates
-   whether or not an objfile is to be mapped (MAPPED), allocate a new objfile
-   struct, fill it in as best we can, link it into the list of all known
-   objfiles, and return a pointer to the new objfile struct.
+/* Given a pointer to an initialized bfd (ABFD) and some flag bits
+   allocate a new objfile struct, fill it in as best we can, link it
+   into the list of all known objfiles, and return a pointer to the
+   new objfile struct.
 
-   USER_LOADED is simply recorded in the objfile.  This record offers a way for
-   run_command to remove old objfile entries which are no longer valid (i.e.,
-   are associated with an old inferior), but to preserve ones that the user
-   explicitly loaded via the add-symbol-file command.
-
-   IS_SOLIB is also simply recorded in the objfile. */
+   The FLAGS word contains various bits (OBJF_*) that can be taken as
+   requests for specific operations, like trying to open a mapped
+   version of the objfile (OBJF_MAPPED).  Other bits like
+   OBJF_SHARED are simply copied through to the new objfile flags
+   member. */
 
 struct objfile *
-allocate_objfile (abfd, mapped, user_loaded, is_solib)
+allocate_objfile (abfd, flags)
      bfd *abfd;
-     int mapped;
-     int user_loaded;
-     int is_solib;
+     int flags;
 {
   struct objfile *objfile = NULL;
   struct objfile *last_one = NULL;
 
-  mapped |= mapped_symbol_files;
+  if (mapped_symbol_files)
+    flags |= OBJF_MAPPED;
 
 #if defined(USE_MMALLOC) && defined(HAVE_MMAP)
   if (abfd != NULL)
@@ -181,7 +179,7 @@ allocate_objfile (abfd, mapped, user_loaded, is_solib)
       int fd;
 
       fd = open_mapped_file (bfd_get_filename (abfd), bfd_get_mtime (abfd),
-			     mapped);
+			     flags);
       if (fd >= 0)
 	{
 	  PTR md;
@@ -241,15 +239,16 @@ allocate_objfile (abfd, mapped, user_loaded, is_solib)
 	    }
 	}
 
-      if (mapped && (objfile == NULL))
+      if ((flags & OBJF_MAPPED) && (objfile == NULL))
 	{
 	  warning ("symbol table for '%s' will not be mapped",
 		   bfd_get_filename (abfd));
+	  flags &= ~OBJF_MAPPED;
 	}
     }
 #else /* !defined(USE_MMALLOC) || !defined(HAVE_MMAP) */
 
-  if (mapped)
+  if (flags & OBJF_MAPPED)
     {
       warning ("mapped symbol tables are not supported on this machine; missing or broken mmap().");
 
@@ -258,6 +257,7 @@ allocate_objfile (abfd, mapped, user_loaded, is_solib)
          "mapped" keyword again. */
 
       mapped_symbol_files = 0;
+      flags &= ~OBJF_MAPPED;
     }
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
@@ -279,6 +279,7 @@ allocate_objfile (abfd, mapped, user_loaded, is_solib)
 				  free);
       obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
 				  free);
+      flags &= ~OBJF_MAPPED;
     }
 
   /* Update the per-objfile information that comes from the bfd, ensuring
@@ -317,13 +318,8 @@ allocate_objfile (abfd, mapped, user_loaded, is_solib)
       last_one->next = objfile;
     }
 
-  /* Record whether this objfile was created because the user explicitly
-     caused it (e.g., used the add-symbol-file command).
-   */
-  objfile->user_loaded = user_loaded;
-
-  /* Record whether this objfile definitely represents a solib. */
-  objfile->is_solib = is_solib;
+  /* Save passed in flag bits. */
+  objfile->flags |= flags;
 
   return (objfile);
 }
@@ -751,7 +747,7 @@ objfile_purge_solibs ()
     /* We assume that the solib package has been purged already, or will
        be soon.
      */
-    if (!objf->user_loaded && objf->is_solib)
+    if (!(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED))
       free_objfile (objf);
   }
 }
@@ -798,10 +794,10 @@ have_minimal_symbols ()
    Otherwise, returns the open file descriptor.  */
 
 static int
-open_existing_mapped_file (symsfilename, mtime, mapped)
+open_existing_mapped_file (symsfilename, mtime, flags)
      char *symsfilename;
      long mtime;
-     int mapped;
+     int flags;
 {
   int fd = -1;
   struct stat sbuf;
@@ -810,7 +806,7 @@ open_existing_mapped_file (symsfilename, mtime, mapped)
     {
       if (sbuf.st_mtime < mtime)
 	{
-	  if (!mapped)
+	  if (!(flags & OBJF_MAPPED))
 	    {
 	      warning ("mapped symbol file `%s' is out of date, ignored it",
 		       symsfilename);
@@ -853,10 +849,10 @@ open_existing_mapped_file (symsfilename, mtime, mapped)
    /bin for example).  */
 
 static int
-open_mapped_file (filename, mtime, mapped)
+open_mapped_file (filename, mtime, flags)
      char *filename;
      long mtime;
-     int mapped;
+     int flags;
 {
   int fd;
   char *symsfilename;
@@ -865,7 +861,7 @@ open_mapped_file (filename, mtime, mapped)
      then try the directory where the symbol file is located. */
 
   symsfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
-  if ((fd = open_existing_mapped_file (symsfilename, mtime, mapped)) < 0)
+  if ((fd = open_existing_mapped_file (symsfilename, mtime, flags)) < 0)
     {
       free (symsfilename);
       symsfilename = concat (filename, ".syms", (char *) NULL);

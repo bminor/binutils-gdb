@@ -29,8 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Enum declaration for model types.  */
 typedef enum model_type {
-  MODEL_M32R_D, MODEL_TEST
- , MODEL_MAX
+  MODEL_M32R_D, MODEL_TEST, MODEL_M32RX, MODEL_MAX
 } MODEL_TYPE;
 
 #define MAX_MODELS ((int) MODEL_MAX)
@@ -39,7 +38,8 @@ typedef enum model_type {
 typedef enum unit_type {
   UNIT_NONE, UNIT_M32R_D_U_STORE, UNIT_M32R_D_U_LOAD, UNIT_M32R_D_U_CTI
  , UNIT_M32R_D_U_MAC, UNIT_M32R_D_U_CMP, UNIT_M32R_D_U_EXEC, UNIT_TEST_U_EXEC
- , UNIT_MAX
+ , UNIT_M32RX_U_STORE, UNIT_M32RX_U_LOAD, UNIT_M32RX_U_CTI, UNIT_M32RX_U_MAC
+ , UNIT_M32RX_U_CMP, UNIT_M32RX_U_EXEC, UNIT_MAX
 } UNIT_TYPE;
 
 #define MAX_UNITS (2)

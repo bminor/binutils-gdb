@@ -44,6 +44,21 @@
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
 
+/* Symbols which architectures can redefine.  */
+
+/* Some systems have routines whose names start with `$'.  Giving this
+   macro a non-zero value tells GDB's expression parser to check for
+   such routines when parsing tokens that begin with `$'.
+
+   On HP-UX, certain system routines (millicode) have names beginning
+   with `$' or `$$'.  For example, `$$dyncall' is a millicode routine
+   that handles inter-space procedure calls on PA-RISC.  */
+#ifndef SYMBOLS_CAN_START_WITH_DOLLAR
+#define SYMBOLS_CAN_START_WITH_DOLLAR (0)
+#endif
+
+
+
 /* Global variables declared in parser-defs.h (and commented there).  */
 struct expression *expout;
 int expout_size;
@@ -460,9 +475,6 @@ write_dollar_variable (str)
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
      and $$digits (equivalent to $<-digits> if you could type that). */
 
-  struct symbol *sym = NULL;
-  struct minimal_symbol *msym = NULL;
-
   int negate = 0;
   int i = 1;
   /* Double dollar means negate the number and add -1 as well.
@@ -496,27 +508,36 @@ write_dollar_variable (str)
   if (i >= 0)
     goto handle_register;
 
-  /* On HP-UX, certain system routines (millicode) have names beginning
-     with $ or $$, e.g. $$dyncall, which handles inter-space procedure
-     calls on PA-RISC. Check for those, first. */
+  if (SYMBOLS_CAN_START_WITH_DOLLAR)
+    {
+      struct symbol *sym = NULL;
+      struct minimal_symbol *msym = NULL;
 
-  sym = lookup_symbol (copy_name (str), (struct block *) NULL,
-		       VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
-  if (sym)
-    {
-      write_exp_elt_opcode (OP_VAR_VALUE);
-      write_exp_elt_block (block_found);	/* set by lookup_symbol */
-      write_exp_elt_sym (sym);
-      write_exp_elt_opcode (OP_VAR_VALUE);
-      return;
-    }
-  msym = lookup_minimal_symbol (copy_name (str), NULL, NULL);
-  if (msym)
-    {
-      write_exp_msymbol (msym,
-			 lookup_function_type (builtin_type_int),
-			 builtin_type_int);
-      return;
+      /* On HP-UX, certain system routines (millicode) have names beginning
+	 with $ or $$, e.g. $$dyncall, which handles inter-space procedure
+	 calls on PA-RISC. Check for those, first. */
+
+      /* This code is not enabled on non HP-UX systems, since worst case 
+	 symbol table lookup performance is awful, to put it mildly. */
+
+      sym = lookup_symbol (copy_name (str), (struct block *) NULL,
+			   VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+      if (sym)
+	{
+	  write_exp_elt_opcode (OP_VAR_VALUE);
+	  write_exp_elt_block (block_found);	/* set by lookup_symbol */
+	  write_exp_elt_sym (sym);
+	  write_exp_elt_opcode (OP_VAR_VALUE);
+	  return;
+	}
+      msym = lookup_minimal_symbol (copy_name (str), NULL, NULL);
+      if (msym)
+	{
+	  write_exp_msymbol (msym,
+			     lookup_function_type (builtin_type_int),
+			     builtin_type_int);
+	  return;
+	}
     }
 
   /* Any other names starting in $ are debugger internal variables.  */

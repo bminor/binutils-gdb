@@ -1,3 +1,195 @@
+1999-10-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* config/pa/tm-hppa.h (SYMBOLS_CAN_START_WITH_DOLLAR): It's not
+	enough to #define this; you have to give it a non-zero value.
+
+1999-10-11  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	Fix from Jim Kingdon <kingdon@redhat.com>, with tweaks to make it
+	gdbarch- and bigendian-friendly:
+	* valops.c (PARM_BOUNDARY): If not #defined, default to zero.
+	(value_push): If PARM_BOUNDARY is not zero, align arguments to
+	that boundary.
+	* config/i386/tm-i386.h: Define PARM_BOUNDARY.
+
+Mon Oct 11 14:23:55 1999  Fred Fish  <fnf@cygnus.com>
+
+	* config/mips/tm-irix3.h (PS_REGNUM): Don't undef if we aren't
+	going to redefine it to something else.
+
+1999-10-11  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* dwarfread.c (read_func_scope): Don't try to set main_func_*;
+	we handle that in blockframe.c:inside_main_func.
+	* dwarf2read.c (read_func_scope): Likewise.
+	(dwarf2_add_field, dwarf2_add_member_fn): Get member function name
+	directly, not from mangled name.
+	(skip_member_fn_name): Lose.
+
+Mon Oct 11 12:24:52 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.h (enum serial_rc): Clarify SERIAL_TIMEOUT and
+ 	restrictions on TIMEOUT in ASYNC mode.
+
+	* serial.c (serial_readchar): Check for invalid timeout when in
+ 	async mode.  Disable test.
+
+Thu Oct  7 17:20:01 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* monitor.c (monitor_printable_string): Add length argument. Don't
+ 	return final string length.
+	(monitor_printf_noecho, monitor_printf, monitor_expect): Update.
+	(monitor_error): Pass real_len to monitor_printable_string.
+	(monitor_error): Rewrite. Replace printf fmt string parameter with
+ 	function name and message parameters.
+	(monitor_read_memory_single, monitor_read_memory): Update.
+
+1999-10-07  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* main.c (print_gdb_help): Fix bug reporting address.
+	* gnu-regex.h, gnu-regex.c: Ditto.
+
+1999-10-07  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* parse.c (SYMBOLS_CAN_START_WITH_DOLLAR): New macro,
+	whose value can be overridden by target files.
+	(write_dollar_variable): Don't check the symbol table for
+	identifiers beginning with `$' unless
+	SYMBOLS_CAN_START_WITH_DOLLAR is non-zero.
+	* config/pa/tm-hppa.h (SYMBOLS_CAN_START_WITH_DOLLAR): Define.
+	* doc/gdbint.texinfo (SYMBOLS_CAN_START_WITH_DOLLAR): Document.
+
+	Remove all traces of the BINOP_SCOPE operator.  It's never
+ 	generated, and not implemented.
+	* expression.h (enum exp_opcode): Delete BINOP_SCOPE.
+	* c-lang.c (c_op_print_tab): Delete entry for BINOP_SCOPE.
+	* eval.c (evaluate_subexp_standard): Doc fix.
+	* expprint.c (op_name): Remove case for BINOP_SCOPE.
+	(dump_subexp): Same.
+
+	* dwarf2read.c (dwarf2_const_value): Treat DW_FORM_data1,
+	DW_FORM_data2, DW_FORM_data4, and DW_FORM_data8 as signed values,
+	since that's what read_var_value will do anyway.
+
+1999-10-07  Fred Fish  <fnf@cygnus.com>
+
+	* objfiles.h (struct objfile): Delete is_solib member, now handled
+	by OBJF_SHARED bit in struct objfile's flags.
+	* objfiles.c (objfile_purge_solibs): Check OBJF_SHARED bit in flags
+	instead of old is_solib int member in objfile struct.
+
+	* objfiles.c (allocate_objfile): Remove is_solib arg.  Now passed
+	as a bit in combined flags arg.
+	* symfile.c (symbol_file_add): Ditto.
+	* objfiles.h (allocate_objfile): Adjust prototype after removal
+	of is_solib arg.
+	* symtab.h (symbol_file_add): Ditto.
+
+	* cxux-nat.c (add_shared_symbol_files): Remove zero passed to
+	symbol_file_add in old is_solib arg, defaults to zero now in
+	flags.
+	* irix5-nat.c (symbol_add_stub): Ditto.
+	* remote-mm.c (mm_load): Ditto.
+	* remote-udi.c (udi_load): Ditto.
+	* remote-vx.c (vx_add_symbols): Ditto.
+	* symfile.c (symbol_file_command): Ditto.
+	(add_symbol_file_command): Ditto.
+
+	* coff-solib.c (coff_solib_add): Call symbol_file_add with
+	OBJF_SHARED in flags bit, rather than 1 in old is_solib
+	arg.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Ditto.
+	* solib.c (symbol_add_stub): Ditto.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* win32-nat.c (handle_load_dll): Ditto.
+
+	* objfiles.c (allocate_objfile): Remove old args "mapped" and
+	"user_loaded".  Replaced with new arg "flags" containing specific
+	If global var mapped_symbol_files is nonzero
+	then set OBJF_MAPPED in flags arg.  Check for OBJF_MAPPED bit in
+	flags where we used to check mapped arg.
+	Pass flags to open_mapped_file instead of mapped arg.
+	Ensure that OBJF_MAPPED bit is reset in flags when the objfile
+	is not mapped.  Add passed flags bits to objfile's flags bits.
+	(open_mapped_file): Replace "mapped" arg with new "flags" arg.
+	Adjust prototype.  Pass flags to open_existing_mapped_file.
+	(open_existing_mapped_file): Replace "mapped" arg with new "flags".
+	Check flags for OBJF_MAPPED.
+	* objfiles.h (allocate_objfile): Adjust prototype.
+	* rs6000-nat.c (add_vmap): Pass zero for combined flags, rather
+	than separate zero ints for old "mapped" and "user_loaded" flags.
+	* symfile.c (symbol_file_add): Pass allocate_objfile combined flags
+	rather than individual mapped and user loaded bits.
+
+	* symfile.c (symbol_file_add): Delete user_loaded arg.
+	* symtab.h (symbol_file_add): Adjust prototype for deleted
+	user_loaded arg.
+	* objfiles.h (struct objfile): Delete user_loaded member.
+	(OBJF_USERLOADED): New flag bit to replace user_loaded.
+
+	* symfile.c (symbol_file_command): Add OBJF_USER_LOADED to flags
+	passed to symbol_file_add.  Delete previous passing of explicit 1
+	for user_loaded.
+	(add_symbol_file_command): Ditto.
+
+	* coff-solib.c (coff_solib_add): No longer pass zero for user loaded,
+	now defaults to zero in flags.
+	* cxux-nat.c (add_shared_symbol_files): Ditto.
+	* irix5-nat.c (symbol_add_stub): Ditto.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* remote-mm.c (mm_load): Ditto.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Ditto.
+	* remote-udi.c (udi_load): Ditto.
+	* remote-vx.c (vx_add_symbols): Ditto.
+	* solib.c (symbol_add_stub): Ditto.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* win32-nat.c (handle_load_dll): Ditto.
+
+Thu Oct  7 19:24:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (monitor.o): Allow monitor.o to be compiled with
+ 	-Werror.
+
+	* monitor.c (monitor_debug_p): New variable. Replaces macro.
+	(EXTRA_RDEBUG): Delete.  Update all uses.
+	(monitor_debug): New function.  Replaces macro.
+ 	(RDEBUG): Delete macro.  Update all uses.
+ 	debug output to gdb_stdlog and not the console.
+
+	* monitor.c: Fix printf formating.  Replace printf calls with
+ 	fprintf_unfiltered.
+
+1999-10-06  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* MAINTAINERS: Switch ARM target maintenance from Elena
+	Zannoni to Jim Ingham.
+
+1999-10-06  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* remote.c (hexnumnstr): New function.  Allow setting of width.
+	(hexnumstr): Call the above.
+	(remote_write_bytes): Fill in X-protocol address field more
+	reliably.
+
+1999-10-06  Fred Fish  <fnf@cygnus.com>
+
+	* xcoffread.c (xcoff_symfile_offsets): Fix typo, addr->addrs.
+
+1999-10-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c (handle_remote_sigint_twice): Make this signal be
+ 	handled by inferior_event_handler, via the wrapper function.
+	(async_remote_interrupt_twice): Make not static. Add debug print.
+	* remote.h (async_remote_interrupt_twice): Export for use in
+ 	inf-loop.c.
+
+	* inf-loop.c (inferior_event_handler_wrapper): New function.
+	(inferior_event_handler): Handle a request to quit and kill the
+ 	target.
+	Include remote.h.
+	* inf-loop.h (inferior_event_handler_wrapper): Export.
+
 1999-10-04  James Ingham  <jingham@leda.cygnus.com>
 
 	* remote-rdi.c (arm_rdi_open): If the angel_RDI_Open fails, close
@@ -300,7 +492,6 @@ Wed Sep 29 21:27:16 1999  Jeffrey A Law  (law@cygnus.com)
 	* remote-sim.c (gdbsim_create_inferior): Ditto.
 	* target.c (target_link): Ditto.
 	* win32-nat.c (child_create_inferior): Ditto.
-	* varobj.c (varobj_create, new_root_variable): Ditto.
 
 Thu Sep 30 10:36:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 

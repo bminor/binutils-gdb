@@ -344,6 +344,11 @@ serial_readchar (serial_t scb, int timeout)
 {
   int ch;
 
+  /* FIXME: cagney/1999-10-11: Don't enable this check until the ASYNC
+     code is finished. */
+  if (0 && SERIAL_IS_ASYNC_P (scb) && timeout < 0)
+    internal_error ("serial_readchar: blocking read in async mode");
+
   ch = scb->ops->readchar (scb, timeout);
   if (serial_logfp != NULL)
     {

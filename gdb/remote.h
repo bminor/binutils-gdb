@@ -52,4 +52,6 @@ extern void remote_cisco_objfile_relocate (bfd_signed_vma text_off,
 					   bfd_signed_vma data_off,
 					   bfd_signed_vma bss_off);
 
+extern void async_remote_interrupt_twice (void *arg);
+
 #endif

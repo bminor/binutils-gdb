@@ -54,14 +54,16 @@ extern void serial_un_fdopen (serial_t scb);
 #define SERIAL_UN_FDOPEN(SERIAL_T) serial_un_fdopen ((SERIAL_T))
 
 /* Read one char from the serial device with TIMEOUT seconds to wait
-   or -1 to wait forever.  Use timeout of 0 to effect a poll. Returns
-   unsigned char if ok, else one of the following codes.  Note that
-   all error return-codes are guaranteed to be < 0. */
+   or -1 to wait forever.  Use timeout of 0 to effect a poll.
+   Infinite waits are not permitted. Returns unsigned char if ok, else
+   one of the following codes.  Note that all error return-codes are
+   guaranteed to be < 0. */
 
 enum serial_rc {
   SERIAL_ERROR = -1,	/* General error. */
-  SERIAL_TIMEOUT = -2,	/* Timeout during read. ui_loop_hook() can,
-			   unfortunatly, force this to be returned. */
+  SERIAL_TIMEOUT = -2,	/* Timeout or data-not-ready during read.
+			   Unfortunatly, through ui_loop_hook(), this
+			   can also be a QUIT indication.  */
   SERIAL_EOF = -3	/* General end-of-file or remote target
 			   connection closed, indication.  Includes
 			   things like the line dropping dead. */

@@ -232,22 +232,6 @@ struct objfile
 
     char *name;
 
-    /* TRUE if this objfile was created because the user explicitly caused
-       it (e.g., used the add-symbol-file command).
-     */
-    int user_loaded;
-
-    /* TRUE if this objfile was explicitly created to represent a solib.
-
-       (If FALSE, the objfile may actually be a solib.  This can happen if
-       the user created the objfile by using the add-symbol-file command.
-       GDB doesn't in that situation actually check whether the file is a
-       solib.  Rather, the target's implementation of the solib interface
-       is responsible for setting this flag when noticing solibs used by
-       an inferior.)
-     */
-    int is_solib;
-
     /* Some flag bits for this objfile. */
 
     unsigned short flags;
@@ -430,14 +414,28 @@ struct objfile
 
 #define OBJF_REORDERED	(1 << 2)	/* Functions are reordered */
 
-/* Distinguish between an objfile for a shared library and a
-   "vanilla" objfile. */
+/* Distinguish between an objfile for a shared library and a "vanilla"
+   objfile. (If not set, the objfile may still actually be a solib.
+   This can happen if the user created the objfile by using the
+   add-symbol-file command.  GDB doesn't in that situation actually
+   check whether the file is a solib.  Rather, the target's
+   implementation of the solib interface is responsible for setting
+   this flag when noticing solibs used by an inferior.)  */
 
 #define OBJF_SHARED     (1 << 3)	/* From a shared library */
 
 /* User requested that this objfile be read in it's entirety. */
 
 #define OBJF_READNOW	(1 << 4)	/* Immediate full read */
+
+/* This objfile was created because the user explicitly caused it
+   (e.g., used the add-symbol-file command).  This bit offers a way
+   for run_command to remove old objfile entries which are no longer
+   valid (i.e., are associated with an old inferior), but to preserve
+   ones that the user explicitly loaded via the add-symbol-file
+   command. */
+
+#define OBJF_USERLOADED	(1 << 5)	/* User loaded */
 
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
@@ -472,7 +470,7 @@ extern struct objfile *object_files;
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *
-  allocate_objfile PARAMS ((bfd *, int, int, int));
+allocate_objfile PARAMS ((bfd *, int));
 
 extern int
 build_objfile_section_table PARAMS ((struct objfile *));

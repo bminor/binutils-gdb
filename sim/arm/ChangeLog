@@ -1,3 +1,9 @@
+1999-10-08  Ulrich Drepper  <drepper@cygnus.com>
+
+	* armos.c (SWIopen): Always pass third parameter with 0666 since
+	otherwise uninitialized memory gets access if the O_CREAT bit is
+	set and so we possibly cannot access the file afterwards.
+
 1999-09-29  Doug Evans  <devans@casey.cygnus.com>
 
 	* armos.c (SWIWrite0): Send output to stdout instead of stderr.

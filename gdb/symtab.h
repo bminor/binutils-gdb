@@ -1419,7 +1419,7 @@ extern void
 clear_solib PARAMS ((void));
 
 extern struct objfile *
-  symbol_file_add PARAMS ((char *, int, struct section_addr_info *, int, int, int, int));
+symbol_file_add PARAMS ((char *, int, struct section_addr_info *, int, int));
 
 /* source.c */
 

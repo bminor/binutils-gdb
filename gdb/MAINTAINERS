@@ -10,7 +10,6 @@ djgpp native		DJ Delorie		dj@cygnus.com
 win32 host & native	Chris Faylor		cgf@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 readline		Elena Zannoni		ezannoni@cygnus.com
-arm target		Elena Zannoni		ezannoni@cygnus.com
 powerpc target		Elena Zannoni		ezannoni@cygnus.com
 command interpreter	Fernando Nasser		fnasser@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
@@ -20,6 +19,7 @@ stabs reader		Jim Blandy		jimb@cygnus.com
 x86 linux native	Jim Blandy		jimb@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
 svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
+arm target		Jim Ingham		jingham@cygnus.com
 hurd native		Mark Kettenis		kettenis@wins.va.nl
 hpux, hp pa native	Jeff Law		law@cygnus.com
 m32r target		Michael Snyder		msnyder@cygnus.com

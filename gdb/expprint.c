@@ -575,8 +575,6 @@ op_name (opcode)
       return "BINOP_MIN";
     case BINOP_MAX:
       return "BINOP_MAX";
-    case BINOP_SCOPE:
-      return "BINOP_SCOPE";
     case STRUCTOP_MEMBER:
       return "STRUCTOP_MEMBER";
     case STRUCTOP_MPTR:
@@ -790,7 +788,6 @@ dump_subexp (exp, stream, elt)
     case BINOP_EXP:
     case BINOP_MIN:
     case BINOP_MAX:
-    case BINOP_SCOPE:
     case BINOP_INTDIV:
     case BINOP_ASSIGN_MODIFY:
     case BINOP_VAL:

@@ -1738,9 +1738,8 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
     default:
       /* Removing this case and compiling with gcc -Wall reveals that
          a lot of cases are hitting this case.  Some of these should
-         probably be removed from expression.h (e.g. do we need a BINOP_SCOPE
-         and an OP_SCOPE?); others are legitimate expressions which are
-         (apparently) not fully implemented.
+         probably be removed from expression.h; others are legitimate
+         expressions which are (apparently) not fully implemented.
 
          If there are any cases landing here which mean a user error,
          then they should be separate cases, with more descriptive
