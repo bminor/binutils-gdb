@@ -1774,20 +1774,14 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
      CONST char **functionname_ptr;
      unsigned int *line_ptr;
 {
-  static bfd *cache_abfd;
-  static asection *cache_section;
-  static bfd_vma cache_offset;
-  static unsigned int cache_i;
-  static CONST char *cache_function;
-  static unsigned int line_base = 0;
-
   unsigned int i;
+  unsigned int line_base;
   coff_data_type *cof = coff_data (abfd);
   /* Run through the raw syments if available */
   combined_entry_type *p;
   combined_entry_type *pend;
   alent *l;
-
+  struct coff_section_tdata *sec_data;
 
   *filename_ptr = 0;
   *functionname_ptr = 0;
@@ -1857,20 +1851,23 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
     }
 
   /* Now wander though the raw linenumbers of the section */
-  /* If this is the same BFD as we were previously called with and
-     this is the same section, and the offset we want is further down
-     then we can prime the lookup loop.  */
-  if (abfd == cache_abfd &&
-      section == cache_section &&
-      offset >= cache_offset)
+  /* If we have been called on this section before, and the offset we
+     want is further down then we can prime the lookup loop.  */
+  sec_data = coff_section_data (abfd, section);
+  if (sec_data != NULL
+      && sec_data->i > 0
+      && offset >= sec_data->offset)
     {
-      i = cache_i;
-      *functionname_ptr = cache_function;
+      i = sec_data->i;
+      *functionname_ptr = sec_data->function;
+      line_base = sec_data->line_base;
     }
   else
     {
       i = 0;
+      line_base = 0;
     }
+
   l = &section->lineno[i];
 
   for (; i < section->lineno_count; i++)
@@ -1915,11 +1912,21 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
       l++;
     }
 
-  cache_abfd = abfd;
-  cache_section = section;
-  cache_offset = offset;
-  cache_i = i;
-  cache_function = *functionname_ptr;
+  /* Cache the results for the next call.  */
+  if (sec_data == NULL)
+    {
+      section->used_by_bfd =
+	((PTR) bfd_zalloc (abfd,
+			   sizeof (struct coff_section_tdata)));
+      sec_data = section->used_by_bfd;
+    }
+  if (sec_data != NULL)
+    {
+      sec_data->offset = offset;
+      sec_data->i = i;
+      sec_data->function = *functionname_ptr;
+      sec_data->line_base = line_base;
+    }
 
   return true;
 }

@@ -115,6 +115,11 @@ struct coff_section_tdata
   bfd_byte *contents;
   /* If this is true, the contents entry may not be freed.  */
   boolean keep_contents;
+  /* Information cached by coff_find_nearest_line.  */
+  bfd_vma offset;
+  unsigned int i;
+  const char *function;
+  int line_base;
   /* Available for individual backends.  */
   PTR tdata;
 };

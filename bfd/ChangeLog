@@ -1,5 +1,11 @@
 Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libcoff-in.h (struct coff_section_tdata): Add offset, i,
+	function, and line_base fields.
+	* libcoff.h: Rebuild.
+	* coffgen.c (coff_find_nearest_line): Use section tdata to cache
+	information, rather than using static variables.
+
 	* sunos.c (sunos_read_dynamic_info): Adjust offsets in an NMAGIC
 	file.  From Peter DeWolf <pld@amt.tay1.dec.com>.
 
