@@ -184,6 +184,9 @@ proc stepi_out { name args } {
 	-re "pc *[after_segv] .*bowler.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (skipped fault insn)"
 	}
+	-re "pc *0x\[a-z0-9\]* .*bowler.*$gdb_prompt $" {
+	    kfail gdb/1702 "$test (corrupt pc)"
+	}
     }
 
     # Clear any breakpoints

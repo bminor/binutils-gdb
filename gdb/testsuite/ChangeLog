@@ -1,3 +1,8 @@
+2004-07-07  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/sigbpt.exp (stepi_out): Check for a single step
+	corrupting the PC.
+
 2004-07-06  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/templates.exp: Accept whitespace change in demangler
