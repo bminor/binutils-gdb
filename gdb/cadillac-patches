@@ -1,6 +1,32 @@
 # Apply these patches to GDB to produce an Energize GDB.
 # To apply these patches, first cd to gdb-XX/gdb, then run patch -p0 < thisfile.
 ===================================================================
+diff -rc Makefile.in.orig Makefile.in
+*** Makefile.in.orig	Tue Jun 23 08:59:44 1992
+--- Makefile.in	Tue Jun 23 12:00:54 1992
+***************
+*** 182,188 ****
+  # demangling.  For other demangling styles, such as the Annotated C++
+  # Reference Manual (section 7.2.1c) style, set this define in the target-
+  # dependent makefile fragment.
+! DEMANGLE_OPTS=
+  
+  # Host and target-dependent makefile fragments come in here.
+  ####
+--- 182,193 ----
+  # demangling.  For other demangling styles, such as the Annotated C++
+  # Reference Manual (section 7.2.1c) style, set this define in the target-
+  # dependent makefile fragment.
+! #
+! # For Energize, default to using style specified in the Annotated C++
+! # Reference Manual, section 7.2.1c, which is what is used by the Lucid C++
+! # compiler for most things.  But there are places where Lucid varies from
+! # the ARM, so select the Lucid specific code also.
+! DEMANGLE_OPTS=-DARM_DEMANGLING -DLUCID_DEMANGLING
+  
+  # Host and target-dependent makefile fragments come in here.
+  ####
+===================================================================
 RCS file: /local/cvsfiles/devo/gdb/.Sanitize,v
 retrieving revision 2.55
 diff -c -r2.55 .Sanitize
@@ -579,22 +605,6 @@ diff -c -r1.47 main.c
     fflush (stdout);
   }
   
-===================================================================
-RCS file: /local/cvsfiles/devo/gdb/mipsread.c,v
-retrieving revision 1.71
-diff -c -r1.71 mipsread.c
-*** 1.71	1992/06/17 18:14:19
---- mipsread.c	1992/06/23 04:19:41
-***************
-*** 67,72 ****
---- 67,73 ----
-  #include <sys/param.h>
-  #include <sys/file.h>
-  #include <sys/stat.h>
-+ #include <strings.h>
-  
-  #include "coff/mips.h"		/* COFF-like aspects of ecoff files */
-  #include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
 ===================================================================
 RCS file: /local/cvsfiles/devo/gdb/printcmd.c,v
 retrieving revision 1.28
