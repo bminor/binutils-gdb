@@ -1,5 +1,11 @@
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Add [sic] to Linux.
+	* ppc-linux-nat.c: Use "Linux kernel".
+	* hppa-linux-tdep.c: Use GNU/Linux.
+	* hppa-linux-nat.c: Use GNU/Linux.
+	* dwarfread.c: Add [sic] to use of Linux.
+
 	* hppa-linux-nat.c: Do not include <string.h>.
 	(supply_fpregset): Remove "register" attribute.
 
