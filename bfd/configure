@@ -50,30 +50,35 @@ symbolic_link='ln -s'
 
 # clear some things potentially inherited from environment.
 ansi=
+destdir=
 hostsubdir=
 norecurse=
 removing=
 srcdir=
+srctrigger=
 target=
 targetsubdir=
 template=
 
 for arg in $*;
 do
-	case $arg in
+	case ${arg} in
 	-ansi | +ansi)
 		ansi=true
+		;;
+	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
+		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
 		;;
 	-forcesubdirs | +f*)
 		forcesubdirs=${arg}
 		;;
 	-host=* | +host=* | +hos=* | +ho=* | +h=*)
-		host=`echo $arg | sed 's/[+-]h[a-z]*=//'`
+		host=`echo ${arg} | sed 's/[+-]h[a-z]*=//'`
 		;; 
 	-languages=* | +languages=* | +language=* | +languag=* \
 		| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
 		| +l=*)
-		languages="$languages `echo $arg | sed 's/[+-]l[a-z]*=//'`"
+		languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
 		;;
 	-gas | +gas | +ga | +g)
 		gas=yes
@@ -85,29 +90,29 @@ do
 		norecurse=true
 		;;
 	-rm | +rm)
-		removing=$arg
+		removing=${arg}
 		;;
 	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
-		srcdir=`echo $arg | sed 's/[+-]s[a-z]*=//'`
+		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
 		;;
 	-template=* | +template=*)
-		template=`echo $arg | sed 's/[+-]template=//'`
+		template=`echo ${arg} | sed 's/[+-]template=//'`
 		;;
 	*)
 # Allow configure HOST TARGET
-		if [ x$host = x ] ; then host=$target ; fi
-		target=$arg
+		if [ -z "${host}" ] ; then host=${target} ; fi
+		target=${arg}
 		;;
 	esac
 done
 
 # process host and target only if not rebuilding configure itself or removing.
-if [ -z "$template" -a -z "$removing" ]
+if [ -z "${template}" -a -z "${removing}" ]
 then
 	# Complain if an arg is missing
-	if [ -z "$target" ]
+	if [ -z "${target}" ]
 	then
-		echo "Usage: $progname [+srcdir=DIR] [+host=HOST] [+gas] [+nfp] TARGET"
+		echo "Usage: ${progname} [+srcdir=DIR] [+host=HOST] [+gas] [+nfp] TARGET"
 		echo -n "Where HOST and TARGET are something like "
 		echo "\`vax', \`sun3', \`encore', etc."
 		if [ -r config.status ]
@@ -119,9 +124,9 @@ then
 fi
 
 # Default other arg
-if [ -z "$host" ]
+if [ -z "${host}" ]
 then
-	host=$target
+	host=${target}
 fi
 
 #### configure.in files come in here.
@@ -137,9 +142,9 @@ links=
 ### end of configure.in
 
 # are we rebuilding config itself?
-if [ -n "$template" ]
+if [ -n "${template}" ]
 then
-	if [ ! -r $template ]
+	if [ ! -r ${template} ]
 	then
 		echo "Can't find template ${template}."
 		exit 1
@@ -154,21 +159,22 @@ then
 
 	if [ -r configure.in ]
 	then
-		sed -e "/^####/  r configure.in" $template >> configure
+		sed -e "/^####/  r configure.in" ${template} >> configure
 	else
-		cat $template >> configure
+		echo Warning: no configure.in in `pwd`
+		cat ${template} >> configure
 	fi
 
 	chmod a+x configure
 	rm configure.old
 	echo Rebuilt configure in `pwd`
 
-	if [ x$norecurse = x ]
+	if [ -z "${norecurse}" ]
 	then
-		while [ -n "$configdirs" ]
+		while [ -n "${configdirs}" ]
 		do
 			# set configdir to car of configdirs, configdirs to cdr of configdirs
-			set $configdirs; configdir=$1; shift; configdirs=$*
+			set ${configdirs}; configdir=$1; shift; configdirs=$*
 
 			if [ "`echo ${configdir}.*`" != "${configdir}.*" ]
 			then
@@ -193,6 +199,13 @@ then
 	exit 0
 fi
 
+# some sanity checks on configure.in
+if [ -z "${srctrigger}" ]
+then
+	echo srctrigger not set in configure.in. `pwd` not configured.
+	exit 1
+fi
+
 # Temporarily, we support only direct subdir builds.
 hostsubdir=Host-${host}
 targetsubdir=Target-${target}
@@ -208,10 +221,10 @@ then
 			rm -rf ${hostsubdir}
 		fi
 	else
-		rm -f .gdbinit Makefile config.status $links
+		rm -f .gdbinit Makefile config.status ${links}
 	fi
 else
-	if [ -n "$forcesubdirs" ]
+	if [ -n "${forcesubdirs}" ]
 	then
 		# check for existing status before allowing forced subdirs.
 		if [ -f Makefile ]
@@ -220,11 +233,11 @@ else
 			exit 1
 		fi
 
-		if [ ! -d $hostsubdir ] ; then mkdir $hostsubdir ; fi
-		cd $hostsubdir
+		if [ ! -d ${hostsubdir} ] ; then mkdir ${hostsubdir} ; fi
+		cd ${hostsubdir}
 	
-		if [ ! -d $targetsubdir ] ; then mkdir $targetsubdir ; fi
-		cd $targetsubdir
+		if [ ! -d ${targetsubdir} ] ; then mkdir ${targetsubdir} ; fi
+		cd ${targetsubdir}
 	
 		srcdir=../..
 	else
@@ -237,61 +250,61 @@ else
 	fi
 
 	# Find the source files, if location was not specified.
-	if [ x$srcdir = x ]
+	if [ -z "${srcdir}" ]
 	then
 		srcdirdefaulted=1
 		srcdir=.
-		if [ ! -r ${srctrigger} ]
+		if [ -n "${srctrigger}" -a ! -r ${srctrigger} ]
 		then
 			srcdir=..
 		fi
 	fi
 	
-	if [ ! -r ${srcdir}/${srctrigger} ]
+	if [ -n "${srctrigger}" -a ! -r ${srcdir}/${srctrigger} ]
 	then
-		if [ -z "$srcdirdefaulted" ]
+		if [ -z "${srcdirdefaulted}" ]
 		then
-		  echo "$progname: Can't find ${srcname} sources in \`${srcdir}'." 1>&2
+		  echo "${progname}: Can't find ${srcname} sources in \`${srcdir}'." 1>&2
 		else
-		  echo "$progname: Can't find ${srcname} sources in \`.' or \`..'." 1>&2
+		  echo "${progname}: Can't find ${srcname} sources in \`.' or \`..'." 1>&2
 		fi
 		exit 1
 	fi
 
 	# Set up the list of links to be made.
-	# $links is the list of link names, and $files is the list of names to link to.
+	# ${links} is the list of link names, and ${files} is the list of names to link to.
 
 	# Make the links.
-	while [ -n "$files" ]
+	while [ -n "${files}" ]
 	do
 		# set file to car of files, files to cdr of files
-		set $files; file=$1; shift; files=$*
-		set $links; link=$1; shift; links=$*
+		set ${files}; file=$1; shift; files=$*
+		set ${links}; link=$1; shift; links=$*
 
 		if [ ! -r ${srcdir}/${file} ]
 		then
-			echo "$progname: cannot create a link \"${link}\"," 1>&2
-			echo "since the file \"$file\" does not exist." 1>&2
+			echo "${progname}: cannot create a link \"${link}\"," 1>&2
+			echo "since the file \"${file}\" does not exist." 1>&2
 			exit 1
 		fi
 
-		$remove -f $link
+		${remove} -f ${link}
 		rm -f config.status
 		# Make a symlink if possible, otherwise try a hard link
-		$symbolic_link ${srcdir}/$file $link 2>/dev/null || $hard_link ${srcdir}/$file $link
+		${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
 
-		if [ ! -r $link ]
+		if [ ! -r ${link} ]
 		then
-			echo "$progname: unable to link \"$link\" to \"${srcdir}/$file\"." 1>&2
+			echo "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
 			exit 1
 		fi
-		echo "Linked \"$link\" to \"${srcdir}/${file}\"."
+		echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
 	done
 
 	# Create a .gdbinit file which runs the one in srcdir
 	# and tells GDB to look there for source files.
 
-	case $srcdir in
+	case ${srcdir} in
 	.)
 		;;
 	*)
@@ -310,7 +323,7 @@ else
 # template is stable, these should be optimized. xoxorich.
 
 	# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
-	if [ x$host != x$target ]
+	if [ "${host}" != "${target}" ]
 	then
 		echo "CROSS=-DCROSS_COMPILE" > Makefile
 		echo "ALL=start.encap" >> Makefile
@@ -319,8 +332,8 @@ else
 	fi
 
 	# set target, host, VPATH
-	echo "host = $host" >> Makefile
-	echo "target = $target" >> Makefile
+	echo "host = ${host}" >> Makefile
+	echo "target = ${target}" >> Makefile
 
 	if [ -n "${forcesubdirs}" ]
 	then
@@ -339,21 +352,30 @@ else
 	host_var_file=hmake-${host}
 	target_var_file=tmake-${target}
 
-	# Conditionalize the makefile for this machine.
+	# Conditionalize the makefile for this host.
 	if [ -f ${srcdir}/config/${host_var_file} ]
 	then
 		sed -e "/^####/  r ${srcdir}/config/${host_var_file}" Makefile > Makefile.tem
 		mv Makefile.tem Makefile
 	fi
 
+	# Conditionalize the makefile for this target.
 	if [ -f ${srcdir}/config/${target_var_file} ]
 	then
 		sed -e "/^####/  r ${srcdir}/config/${target_var_file}" Makefile > Makefile.tem
 		mv Makefile.tem Makefile
 	fi
 
+	# set srcdir
 	sed "s@^srcdir = \.@srcdir = ${srcdir}@" Makefile > Makefile.tem
 	mv Makefile.tem Makefile
+
+	# set destdir
+	if [ -n "${destdir}" ]
+	then
+		sed "s:^destdir =.*$:destdir = ${destdir}:" Makefile > Makefile.tem
+		mv Makefile.tem Makefile
+	fi
 
 	# Remove all formfeeds, since some Makes get confused by them.
 	sed "s///" Makefile >> Makefile.tem
@@ -387,13 +409,13 @@ else
 
 	echo "Created \"Makefile\""${andusing}.
 
-	if [ x$host = x$target ]
+	if [ "${host}" = "${target}" ]
 	then
-		echo "Links are now set up for use with a $target." \
+		echo "Links are now set up for use with a ${target}." \
 			> config.status
 #			| tee ${srcdir}/config.status
 	else
-		echo "Links are now set up for host $host and target $target." \
+		echo "Links are now set up for host ${host} and target ${target}." \
 			> config.status
 #			| tee ${srcdir}/config.status
 	fi
@@ -404,12 +426,12 @@ fi
 
 # If there are subdirectories, then recurse. 
 
-if [ -n "$norecurse" ] ; then exit 0 ; fi
+if [ -n "${norecurse}" ] ; then exit 0 ; fi
 
-while [ -n "$configdirs" ]
+while [ -n "${configdirs}" ]
 do
 	# set configdir to car of configdirs, configdirs to cdr of configdirs
-	set $configdirs; configdir=$1; shift; configdirs=$*
+	set ${configdirs}; configdir=$1; shift; configdirs=$*
 
 	# check for target override
 	targetspecificdir=${configdir}.${target}
@@ -428,8 +450,11 @@ exit 0
 
 #
 # $Log$
-# Revision 1.3  1991/04/10 22:56:14  rich
-# Cut 2.  Subdirs.
+# Revision 1.4  1991/04/13 02:12:45  rich
+# Config cut 3.  We now almost install a29k.
+#
+# Revision 1.3  1991/04/11  02:41:54  rich
+# Cut 2 config.  Subdirs.
 #
 #
 #

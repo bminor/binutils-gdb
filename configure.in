@@ -3,6 +3,6 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="bfd binutils ld gas gcc"
+configdirs="bfd binutils ld gas gcc clib"
 srctrigger=README.configure
 srcname="gnu development package"

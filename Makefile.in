@@ -1,14 +1,14 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Wed Apr 10 12:24:44 PDT 1991, by rich@sendai
+# Last Mod Fri Apr 12 15:58:12 PDT 1991, by rich@sendai
 #
 
 srcdir = .
-subdir = Host-$(host)/Target-$(target)
+destdir = /usr/local
 
-CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
-CFLAGS = -g -nostdinc -nostdlib -I- -I/usr/local/lib/gcc/$(target)/1.92/include -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
+#CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
+#CFLAGS = -g -nostdinc -nostdlib -I- -I/usr/local/lib/gcc/$(target)/1.92/include -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
 
 # These are roughly topologically sorted in order to make porting more
 # streamlined.
@@ -17,57 +17,37 @@ SUBDIRS =
 NONSUBDIRS =
 SUBDIRS_INCLUDE = machine-dep
 
-TARGETLIB = libc.a
 RANLIB = ranlib
-AR = ar cqv
+AR = ar
+AR_FLAGS = cqv
 
 #### host and target specific makefile fragments come in here.
-
-all: $(TARGETLIB)
+###
 
 subdir_do: $(SUBDIRS) $(TARGETDIRS)
 	for i in $(SUBDIRS); \
 	  do \
 	    if (cd $(srcdir)/$$i`if [ -d $(srcdir)/$$i.$(target) ] ; \
-		then echo .$(target) ; fi`/$(subdir); \
-		$(MAKE)  \
-		    "OSLAYER=../$(OSLAYER)" \
-		    "TARGETLIB=../$(srcdir)/$(subdir)/$(TARGETLIB)" \
+		then echo .$(target) ; fi`$(subdir); \
+		$(MAKE) \
+		    "destdir=$(destdir)" \
 		    "AR=$(AR)" \
+		    "AR_FLAGS=$(AR_FLAGS)" \
 		    "RANLIB=$(RANLIB)" $(DO)) ; \
 	    then true ; \
 	    else exit 1 ; \
 	    fi ;\
 	  done
 
-$(TARGETLIB): remove-old-copy
-	@$(MAKE) subdir_do "DO=all"
-	$(RANLIB) $(TARGETLIB)
-
-remove-old-copy: FORCE
-	rm -f $(TARGETLIB)
-
-oldlibc.a: $(SUBDIRS) FORCE
-	@$(MAKE) subdir_do DO=all
-	rm -rf TEMP
-	mkdir TEMP
-# Extract files from all subdirs, making sure that none overwrites others.
-	cd TEMP; for i in $(SUBDIRS); do\
-	   ar x ../$$i/library.a;\
-	   chmod a-w *;\
-	done;
-# Be sure if interrupted, no libc.a exists.
-	rm -f libc.new
-	cd TEMP; ar cq ../libc.new *
-	ranlib libc.new
-	mv libc.new libc.a
-	rm -rf TEMP
+all:
+	$(MAKE) subdir_do DO=all
 
 clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean
 
-install: all install_include install_crt install_gnulib install_lib
+install:
+	$(MAKE) subdir_do DO=install
 
 # When installing include files, be sure that machine-dependent
 # files override machine-independent files.
@@ -108,11 +88,14 @@ FORCE:
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
-		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
+		./configure +norecurse `if [ "$(srcdir)" != "." ] ; then echo +f; fi` +host=$(host) $(target))
 
 #
 # $Log$
-# Revision 1.3  1991/04/11 02:41:53  rich
+# Revision 1.4  1991/04/13 02:11:09  rich
+# Config cut 3.  We now almost install a29k.
+#
+# Revision 1.3  1991/04/11  02:41:53  rich
 # Cut 2 config.  Subdirs.
 #
 #
