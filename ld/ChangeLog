@@ -1,3 +1,14 @@
+Thu Aug 13 11:49:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldlex.l: now parses comment correctly, added ~ to acceptable
+	chars in filenames
+	
+	* ldexp.c (exp_unop): pass down abs_output_section - now can have
+	unary -ve constants.
+
+	* ldlang.c (lang_finish): warn when an entry symbol supplied on
+	the command line can't be found.
+
 Fri Aug  7 12:31:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldlang.h: add new field "loadable" to output_section_statement.

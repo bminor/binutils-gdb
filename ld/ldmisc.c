@@ -19,12 +19,6 @@ You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
-$Id$ 
-
-
- */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include <varargs.h>
@@ -41,12 +35,6 @@ extern FILE *ldlex_input_stack;
 extern char *ldfile_input_filename;
 extern ld_config_type config;
 
-void
-yyerror(arg) 
-char *arg;
-{ 
-  einfo("%P%F: %S %s\n",arg);
-}
 
 extern int errno;
 extern   int  sys_nerr;
@@ -86,67 +74,67 @@ vfinfo(fp, fmt, arg)
       fmt ++;
       switch (*fmt++) 
       {
-      case 'X':
+       case 'X':
 	config.make_executable = false;
 	break;
-      case 'V':
-      {
-	bfd_vma value = va_arg(arg, bfd_vma);
-	fprintf_vma(fp, value);
-      }
+       case 'V':
+       {
+	 bfd_vma value = va_arg(arg, bfd_vma);
+	 fprintf_vma(fp, value);
+       }
 	break;
-      case 'T':
-      {
-	asymbol *symbol = va_arg(arg, asymbol *);
-	if (symbol) 
-	{
+       case 'T':
+       {
+	 asymbol *symbol = va_arg(arg, asymbol *);
+	 if (symbol) 
+	 {
 
 	    
-	  asection *section = symbol->section;
-	  char *cplusname = cplus_demangle(symbol->name, 1);
-	  CONST char *section_name =  section->name;
-	  if (section != &bfd_und_section) 
-	  {
-	    fprintf(fp,"%s (%s)", cplusname ? cplusname :
-		    symbol->name, section_name);
-	  }
-	  else 
-	  {
-	    fprintf(fp,"%s", cplusname ? cplusname : symbol->name);
-	  }
+	   asection *section = symbol->section;
+	   char *cplusname = cplus_demangle(symbol->name, 1);
+	   CONST char *section_name =  section->name;
+	   if (section != &bfd_und_section) 
+	   {
+	     fprintf(fp,"%s (%s)", cplusname ? cplusname :
+		     symbol->name, section_name);
+	   }
+	   else 
+	   {
+	     fprintf(fp,"%s", cplusname ? cplusname : symbol->name);
+	   }
 	    
-	  if (cplusname) 
-	  {
-	    free(cplusname);
-	  }
+	   if (cplusname) 
+	   {
+	     free(cplusname);
+	   }
 	    
-	}
-	else 
-	{
-	  fprintf(fp,"no symbol");
-	}
-      }
+	 }
+	 else 
+	 {
+	   fprintf(fp,"no symbol");
+	 }
+       }
 	break;
-      case 'B':
-      { 
-	bfd *abfd = va_arg(arg, bfd *);
-	if (abfd->my_archive) {
-	    fprintf(fp,"%s(%s)", abfd->my_archive->filename,
-		    abfd->filename);
-	  }
-	else {
-	    fprintf(fp,"%s", abfd->filename);
+       case 'B':
+       { 
+	 bfd *abfd = va_arg(arg, bfd *);
+	 if (abfd->my_archive) {
+	   fprintf(fp,"%s(%s)", abfd->my_archive->filename,
+		   abfd->filename);
+	 }
+	 else {
+	   fprintf(fp,"%s", abfd->filename);
 
-	  }
-      }
+	 }
+       }
 	break;
-      case 'F':
+       case 'F':
 	fatal = true;
 	break;
-      case 'P':
+       case 'P':
 	fprintf(fp,"%s", program_name);
 	break;
-      case 'E':
+       case 'E':
 	/* Replace with the most recent errno explanation */
 
 
@@ -154,115 +142,124 @@ vfinfo(fp, fmt, arg)
 
 
 	break;
-      case 'I':
-      {
-	lang_input_statement_type *i =
-	 va_arg(arg,lang_input_statement_type *);
+       case 'I':
+       {
+	 lang_input_statement_type *i =
+	  va_arg(arg,lang_input_statement_type *);
 	
-	fprintf(fp,"%s", i->local_sym_name);
-      }
+	 fprintf(fp,"%s", i->local_sym_name);
+       }
 	break;
-      case 'S':
+       case 'S':
 	/* Print source script file and line number */
 
-      {
+       {
 	
 	 
-	    extern unsigned int lineno;
-	    if (ldfile_input_filename == (char *)NULL) {
-		fprintf(fp,"command line");
-	      }
-	    else {
-		fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
-	      }
-	  }
+	 extern unsigned int lineno;
+	 if (ldfile_input_filename == (char *)NULL) {
+	   fprintf(fp,"command line");
+	 }
+	 else {
+	   fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
+	 }
+       }
 	
 	break;
 
-      case 'R':
+       case 'R':
 	/* Print all that's interesting about a relent */
-      {
-	arelent *relent = va_arg(arg, arelent *);
+       {
+	 arelent *relent = va_arg(arg, arelent *);
 	
-	fprintf(fp,"%s+0x%x (type %s)",
-		(*(relent->sym_ptr_ptr))->name,
-		relent->addend,
-		relent->howto->name);
+	 fprintf(fp,"%s+0x%x (type %s)",
+		 (*(relent->sym_ptr_ptr))->name,
+		 relent->addend,
+		 relent->howto->name);
 	
 
-      }
+       }
 	break;
 	
 
 
 	
-      case 'C':
-      {
-	CONST char *filename;
-	CONST char *functionname;
-	char *cplus_name;
+       case 'C':
+       {
+	 CONST char *filename;
+	 CONST char *functionname;
+	 char *cplus_name;
 	 
-	unsigned int linenumber;
-	bfd *abfd = va_arg(arg, bfd *);
-	asection *section = va_arg(arg, asection *);
-	asymbol **symbols = va_arg(arg, asymbol **);
-	bfd_vma offset = va_arg(arg, bfd_vma);
+	 unsigned int linenumber;
+	 bfd *abfd = va_arg(arg, bfd *);
+	 asection *section = va_arg(arg, asection *);
+	 asymbol **symbols = va_arg(arg, asymbol **);
+	 bfd_vma offset = va_arg(arg, bfd_vma);
 	 
-	if (bfd_find_nearest_line(abfd,
-				  section,
-				  symbols,
-				  offset,
-				  &filename,
-				  &functionname,
-				  &linenumber))
-	{
-	  if (filename == (char *)NULL) 	
-	   filename = abfd->filename;
-	  if (functionname != (char *)NULL) 
-	  {
-	    cplus_name = cplus_demangle(functionname, 1);
-	    fprintf(fp,"%s:%u: (%s)", filename, linenumber,
-		    cplus_name? cplus_name: functionname);
-	    if (cplus_name) 
-	     free(cplus_name);
+	 if (bfd_find_nearest_line(abfd,
+				   section,
+				   symbols,
+				   offset,
+				   &filename,
+				   &functionname,
+				   &linenumber))
+	 {
+	   if (filename == (char *)NULL) 	
+	    filename = abfd->filename;
+	   if (functionname != (char *)NULL) 
+	   {
+	     cplus_name = cplus_demangle(functionname, 1);
+	     fprintf(fp,"%s:%u: (%s)", filename, linenumber,
+		     cplus_name? cplus_name: functionname);
+	     if (cplus_name) 
+	      free(cplus_name);
 		  
 
-	  }
+	   }
 		
-	  else if (linenumber != 0) 
-	   fprintf(fp,"%s:%u", filename, linenumber);
-	  else
-	   fprintf(fp,"%s(%s+%0x)", filename,
-		   section->name,
-		   offset);
-
-	}
-	else {
-	    fprintf(fp,"%s(%s+%0x)", abfd->filename,
+	   else if (linenumber != 0) 
+	    fprintf(fp,"%s:%u", filename, linenumber);
+	   else
+	    fprintf(fp,"%s(%s+%0x)", filename,
 		    section->name,
 		    offset);
-	  }
-      }
+
+	 }
+	 else {
+	   fprintf(fp,"%s(%s+%0x)", abfd->filename,
+		   section->name,
+		   offset);
+	 }
+       }
 	break;
 		
-      case 's':
+       case 's':
 	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
-      case 'd':
+       case 'd':
 	fprintf(fp,"%d", va_arg(arg, int));
 	break;
-      default:
+       default:
 	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
       }
     }
   }
-  if (fatal == true) {
-      extern char *output_filename;
-      if (output_filename)
-       unlink(output_filename);
-      exit(1);
+  if (fatal == true) 
+  {
+    extern char *output_filename;
+    if (output_filename) 
+    {
+      char *new = malloc(strlen(output_filename)+2);
+      extern bfd *output_bfd;
+      
+      strcpy(new, output_filename);
+      if (output_bfd && output_bfd->iostream)
+       fclose((FILE *)(output_bfd->iostream));
+      unlink(new);
     }
+    exit(1);
+  }
 }
 
 /* Format info message and print on stdout. */
@@ -325,7 +322,6 @@ DEFUN(concat, (s1, s2, s3),
 }
 
 
-
 PTR
 DEFUN(ldmalloc, (size),
 bfd_size_type size)
@@ -337,6 +333,13 @@ bfd_size_type size)
 
   return result;
 } 
+
+PTR
+DEFUN(xmalloc,(size),
+int size)
+{
+return ldmalloc(size);
+}
 
 
 PTR

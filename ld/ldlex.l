@@ -43,6 +43,37 @@ char *buystring();
 unsigned int lineno = 1;
 int old;
 
+comment()
+{
+  int c;
+  while (1)
+  {
+    c = input();
+    while (c !='*' && c != EOF) 
+    {
+      if (c == '\n') lineno++;
+      c = input();
+    }
+
+
+    if (c == '*')
+    {
+      c = input();
+      while ( c == '*')
+       c = input();
+      if ( c == '/' )
+       break;			/* found the end */
+    }
+
+    if ( c == EOF )
+    {
+      einfo( "%F%P :EOF in comment");
+      break;
+    }
+  }
+}
+
+
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) yy_input(buf, &result, max_size)
 #undef YY_FATAL_ERROR
@@ -66,11 +97,11 @@ unsigned int include_stack_ptr = 0;
 %a 4000
 %o 5000
 
-CMDFILENAMECHAR   [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\-]
-CMDFILENAMECHAR1  [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>]
-FILENAMECHAR1	[_a-zA-Z\/\.\\]
+CMDFILENAMECHAR   [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\-\~]
+CMDFILENAMECHAR1  [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\~]
+FILENAMECHAR1	[_a-zA-Z\/\.\\\$\_\~]
 SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
-FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\]
+FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~]
 FILENAME	{FILENAMECHAR}+
 WHITE		[ \t\n]+ 
 
@@ -82,6 +113,10 @@ WHITE		[ \t\n]+
 %s DEFSYMEXP
 %s MRI
 %%
+
+
+<BOTH,SCRIPT,EXPRESSION,COMMAND>"/*"	{ comment(); }
+
 
 <DEFSYMEXP>"-"                  { RTOKEN('-');}
 <DEFSYMEXP>"+"                  { RTOKEN('+');}
@@ -300,7 +335,7 @@ WHITE		[ \t\n]+
 <MRI>"FORMAT"                   { RTOKEN(FORMAT); }
 <MRI>"LIST".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"SECT"			{ RTOKEN(SECT); }
-<MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
+<EXPRESSION,BOTH,SCRIPT,MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
 <MRI>"end"                      { RTOKEN(ENDWORD); }
 <MRI>"chip"                     { RTOKEN(CHIP); }
 <MRI>"load"                     { RTOKEN(LOAD); }
@@ -309,7 +344,7 @@ WHITE		[ \t\n]+
 <MRI>"format"                   { RTOKEN(FORMAT); }
 <MRI>"list".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"sect"			{ RTOKEN(SECT); }
-<MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
+<EXPRESSION,BOTH,SCRIPT,MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
 
 <COMMAND>{CMDFILENAMECHAR1}{CMDFILENAMECHAR}*	{
 				 yylval.name = buystring(yytext); 
@@ -335,16 +370,6 @@ WHITE		[ \t\n]+
 <BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}
 <MRI,COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
 
-"/*"				{ old = INITIAL; BEGIN(COMMENT); }
-<COMMAND>"/*"			{ old = COMMAND; BEGIN(COMMENT); }
-<BOTH>"/*"			{ old =BOTH; BEGIN(COMMENT); }
-<SCRIPT>"/*"			{ old = EXPRESSION; BEGIN(COMMENT); }
-<EXPRESSION>"/*"		{ old = SCRIPT; BEGIN(COMMENT); }
-"/*"				{ old = INITIAL; BEGIN(COMMENT); }
-<COMMENT>[^*\\n]*
-<COMMENT>"*"+[^*/\\n]*
-<COMMENT>\\n             	{ ++lineno;}
-<COMMENT>"*"+"/" 		{ BEGIN(old); }
 <<EOF>> {
     include_stack_ptr--;
     
@@ -501,3 +526,4 @@ int max_size;
       YY_FATAL_ERROR( "read() in flex scanner failed" );
   }
 }
+
