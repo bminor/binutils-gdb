@@ -41,6 +41,7 @@ GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@wins.va.nl
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
+UnixWare Threads	Nick Duffek		nsd@cygnus.com
 
 
 Core: Generic components used by all of GDB
