@@ -80,6 +80,7 @@ tcl
 test-build.mk
 texinfo
 tgas
+z8ksim
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
