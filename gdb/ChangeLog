@@ -1,3 +1,9 @@
+2004-05-13  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (handle_inferior_event): Check for
+	STEP_OVER_UNDEBUGGABLE after signal trampolines and function
+	calls.  Update comments.
+
 2004-05-13  Jim Blandy  <jimb@redhat.com>
 
 	* aix-thread.c (supply_gprs64, fetch_regs_user_thread)

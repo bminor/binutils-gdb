@@ -2411,18 +2411,6 @@ process_event_stop_test:
       return;
     }
 
-  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
-      && ecs->stop_func_name == NULL)
-    {
-      /* There is no symbol, not even a minimal symbol, corresponding
-         to the address where we just stopped.  So we just stepped
-         inside undebuggable code.  Since we want to step over this
-         kind of code, we keep going until the inferior returns from
-         the current function.  */
-      handle_step_into_function (ecs);
-      return;
-    }
-
   if (step_range_end != 1
       && (step_over_calls == STEP_OVER_UNDEBUGGABLE
 	  || step_over_calls == STEP_OVER_ALL)
@@ -2434,6 +2422,22 @@ process_event_stop_test:
 	 inferior leaves the trampoline (either by calling the handler
 	 or returning).  */
       keep_going (ecs);
+      return;
+    }
+
+  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
+      && ecs->stop_func_name == NULL)
+    {
+      /* The inferior just stepped into, or returned to, an
+         undebuggable function (where there is no symbol, not even a
+         minimal symbol, corresponding to the address where the
+         inferior stopped).  Since we want to skip this kind of code,
+         we keep going until the inferior returns from this
+         function.  */
+      /* NOTE: cagney/2004-05-12: This test is performed after the
+	 sigtramp test as often sigtramps, while recognized by GDB,
+	 have no symbol information.  */
+      handle_step_into_function (ecs);
       return;
     }
 
