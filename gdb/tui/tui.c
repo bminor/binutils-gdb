@@ -63,7 +63,6 @@ extern char *tgoto ();
 static void _tuiReset (void);
 static void _toggle_command (char *, int);
 static void _tui_vToggle_command (va_list);
-static Opaque _tui_vDo (TuiOpaqueFuncPtr, va_list);
 
 
 
@@ -277,92 +276,6 @@ tui_vGetLowDisassemblyAddress (va_list args)
 }				/* tui_vGetLowDisassemblyAddress */
 
 
-/*
-   ** tuiDo().
-   **        General purpose function to execute a tui function.  Transitions
-   **        between curses and the are handled here.  This function is called
-   **        by non-tui gdb functions.
-   **
-   **        Errors are caught here.
-   **        If there is no error, the value returned by 'func' is returned.
-   **        If there is an error, then zero is returned.
-   **
-   **       Must not be called with immediate_quit in effect (bad things might
-   **       happen, say we got a signal in the middle of a memcpy to quit_return).
-   **       This is an OK restriction; with very few exceptions immediate_quit can
-   **       be replaced by judicious use of QUIT.
- */
-Opaque
-tuiDo (TuiOpaqueFuncPtr func, ...)
-{
-  extern int terminal_is_ours;
-
-  Opaque ret = (Opaque) NULL;
-
-  /* It is an error to be tuiDo'ing if we
-     * don't own the terminal.
-   */
-  if (!terminal_is_ours)
-    return ret;
-
-  if (tui_version)
-    {
-      va_list args;
-
-      va_start (args, func);
-      ret = _tui_vDo (func, args);
-      va_end (args);
-    }
-
-  return ret;
-}				/* tuiDo */
-
-
-/*
-   ** tuiDoAndReturnToTop().
-   **        General purpose function to execute a tui function.  Transitions
-   **        between curses and the are handled here.  This function is called
-   **        by non-tui gdb functions who wish to reset gdb to the top level.
-   **        After the tuiDo is performed, a return to the top level occurs.
-   **
-   **        Errors are caught here.
-   **        If there is no error, the value returned by 'func' is returned.
-   **        If there is an error, then zero is returned.
-   **
-   **       Must not be called with immediate_quit in effect (bad things might
-   **       happen, say we got a signal in the middle of a memcpy to quit_return).
-   **       This is an OK restriction; with very few exceptions immediate_quit can
-   **       be replaced by judicious use of QUIT.
-   **
- */
-Opaque
-tuiDoAndReturnToTop (TuiOpaqueFuncPtr func, ...)
-{
-  extern int terminal_is_ours;
-
-  Opaque ret = (Opaque) NULL;
-
-  /* It is an error to be tuiDo'ing if we
-     * don't own the terminal.
-   */
-  if (!terminal_is_ours)
-    return ret;
-
-  if (tui_version)
-    {
-      va_list args;
-
-      va_start (args, func);
-      ret = _tui_vDo (func, args);
-
-      /* force a return to the top level */
-      return_to_top_level (RETURN_ERROR);
-    }
-
-  return ret;
-}				/* tuiDoAndReturnToTop */
-
-
 void
 tui_vSelectSourceSymtab (va_list args)
 {
@@ -407,84 +320,6 @@ Usage:\ttoggle $fregs\n\ttoggle breakpoints";
 }				/* _initialize_tui */
 
 
-/*
-   ** va_catch_errors().
-   **       General purpose function to execute a function, catching errors.
-   **       If there is no error, the value returned by 'func' is returned.
-   **       If there is error, then zero is returned.
-   **       Note that 'func' must take a variable argument list as well.
-   **
-   **       Must not be called with immediate_quit in effect (bad things might
-   **       happen, say we got a signal in the middle of a memcpy to quit_return).
-   **       This is an OK restriction; with very few exceptions immediate_quit can
-   **       be replaced by judicious use of QUIT.
- */
-Opaque
-va_catch_errors (TuiOpaqueFuncPtr func, va_list args)
-{
-  Opaque ret = (Opaque) NULL;
-
-  /*
-     ** We could have used catch_errors(), but it doesn't handle variable args.
-     ** Also, for the tui, we always want to catch all errors, so we don't
-     ** need to pass a mask, or an error string.
-   */
-  jmp_buf saved_error;
-  jmp_buf saved_quit;
-  jmp_buf tmp_jmp;
-  struct cleanup *saved_cleanup_chain;
-  char *saved_error_pre_print;
-  char *saved_quit_pre_print;
-  extern jmp_buf error_return;
-  extern jmp_buf quit_return;
-
-  saved_cleanup_chain = save_cleanups ();
-  saved_error_pre_print = error_pre_print;
-  saved_quit_pre_print = quit_pre_print;
-
-  memcpy ((char *) saved_error, (char *) error_return, sizeof (jmp_buf));
-  error_pre_print = "";
-  memcpy (saved_quit, quit_return, sizeof (jmp_buf));
-  quit_pre_print = "";
-
-  if (setjmp (tmp_jmp) == 0)
-    {
-      va_list argList = args;
-      memcpy (error_return, tmp_jmp, sizeof (jmp_buf));
-      memcpy (quit_return, tmp_jmp, sizeof (jmp_buf));
-      ret = func (argList);
-    }
-  restore_cleanups (saved_cleanup_chain);
-  memcpy (error_return, saved_error, sizeof (jmp_buf));
-  error_pre_print = saved_error_pre_print;
-  memcpy (quit_return, saved_quit, sizeof (jmp_buf));
-  quit_pre_print = saved_quit_pre_print;
-
-  return ret;
-}
-
-/*
-   ** vcatch_errors().
-   **        Catch errors occurring in tui or non tui function, handling
-   **        variable param lists. Note that 'func' must take a variable
-   **        argument list as well.
- */
-Opaque
-vcatch_errors (OpaqueFuncPtr func, ...)
-{
-  Opaque ret = (Opaque) NULL;
-  va_list args;
-  va_start (args, func);
-/*
-   va_arg(args, OpaqueFuncPtr);
- */
-  ret = va_catch_errors (func, args);
-  va_end (args);
-
-  return ret;
-}
-
-
 void
 strcat_to_buf (char *buf, int buflen, char *itemToAdd)
 {
@@ -522,51 +357,6 @@ strcat_to_buf_with_fmt (char *buf, int bufLen, char *format, ...)
 ** Static Functions
 ************************/
 
-
-/*
-   ** _tui_vDo().
-   **        General purpose function to execute a tui function.  Transitions
-   **        between curses and the are handled here.  This function is called
-   **        by non-tui gdb functions.
-   **
-   **        Errors are caught here.
-   **        If there is no error, the value returned by 'func' is returned.
-   **        If there is an error, then zero is returned.
-   **
-   **       Must not be called with immediate_quit in effect (bad things might
-   **       happen, say we got a signal in the middle of a memcpy to quit_return).
-   **       This is an OK restriction; with very few exceptions immediate_quit can
-   **       be replaced by judicious use of QUIT.
- */
-static Opaque
-_tui_vDo (TuiOpaqueFuncPtr func, va_list args)
-{
-  extern int terminal_is_ours;
-
-  Opaque ret = (Opaque) NULL;
-
-  /* It is an error to be tuiDo'ing if we
-     * don't own the terminal.
-   */
-  if (!terminal_is_ours)
-    return ret;
-
-  if (tui_version)
-    {
-      /* If doing command window the "XDB way" (command window
-         * is unmanaged by curses...
-       */
-      /* Set up terminal for TUI */
-      tuiTermSetup (1);
-
-      ret = va_catch_errors (func, args);
-
-      /* Set up terminal for command window */
-      tuiTermUnsetup (1, cmdWin->detail.commandInfo.curch);
-    }
-
-  return ret;
-}				/* _tui_vDo */
 
 
 static void

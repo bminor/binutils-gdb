@@ -277,39 +277,6 @@ tui_vwgetch (va_list args)
 
 
 /*
-   ** tui_vread()
-   **   Wrapper around read() with paramets in a va_list
- */
-unsigned int
-tui_vread (va_list args)
-{
-  int result = 0;
-  int filedes = va_arg (args, int);
-  char *buf = va_arg (args, char *);
-  int nbytes = va_arg (args, int);
-
-  result = read (filedes, buf, nbytes);
-
-  return result;
-}				/* tui_vread() */
-
-/*
-   ** tuiRead()
-   **    Function to perform a read() catching resize events
- */
-int
-tuiRead (int filedes, char *buf, int nbytes)
-{
-  int result = 0;
-
-  result = (int) vcatch_errors ((OpaqueFuncPtr) tui_vread, filedes, buf, nbytes);
-  *buf = _tuiHandleResizeDuringIO (*buf);
-
-  return result;
-}				/* tuiRead */
-
-
-/*
    ** tuiGetc().
    **        Get a character from the command window.
    **           This is called from the readline package,
@@ -464,7 +431,7 @@ _tuiHandleResizeDuringIO (unsigned int originalCh)
 {
   if (tuiWinResized ())
     {
-      tuiDo ((TuiOpaqueFuncPtr) tuiRefreshAll);
+      tuiRefreshAll ();
       dont_repeat ();
       tuiSetWinResizedTo (FALSE);
       rl_reset ();

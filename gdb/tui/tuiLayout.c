@@ -60,7 +60,6 @@ static void _tuiToggleSplitLayout_command (char *, int);
 static void _tui_vToggleSplitLayout_command (va_list);
 static CORE_ADDR _extractDisplayStartAddr (void);
 static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
-static TuiStatus _tuiSetLayoutTo (char *);
 
 
 /***************************************
@@ -201,8 +200,7 @@ tuiSetLayout (TuiLayoutType layoutType,
 		         ** 2. if target was compiled without -g
 		         ** We still want to show the assembly though!
 		       */
-		      addr = vcatch_errors ((OpaqueFuncPtr)
-					    tuiGetBeginAsmAddress);
+		      addr = tuiGetBeginAsmAddress ();
 		      tuiSetWinFocusTo (disassemWin);
 		      layoutDef->displayMode = DISASSEM_WIN;
 		      layoutDef->split = FALSE;
@@ -215,8 +213,7 @@ tuiSetLayout (TuiLayoutType layoutType,
 		         ** 2. if target was compiled without -g
 		         ** We still want to show the assembly though!
 		       */
-		      addr = vcatch_errors ((OpaqueFuncPtr)
-					    tuiGetBeginAsmAddress);
+		      addr = tuiGetBeginAsmAddress ();
 		      if (winWithFocus == srcWin)
 			tuiSetWinFocusTo (srcWin);
 		      else
@@ -239,8 +236,7 @@ tuiSetLayout (TuiLayoutType layoutType,
 		         ** 2. if target was compiled without -g
 		         ** We still want to show the assembly though!
 		       */
-		      addr = vcatch_errors ((OpaqueFuncPtr)
-					    tuiGetBeginAsmAddress);
+		      addr = tuiGetBeginAsmAddress ();
 		      if (winWithFocus != dataWin)
 			tuiSetWinFocusTo (disassemWin);
 		      else
@@ -478,8 +474,8 @@ Source/Disassembly/Command layouts.\n");
    **    Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, REGS,
    **        $REGS, $GREGS, $FREGS, $SREGS.
  */
-static TuiStatus
-_tuiSetLayoutTo (char *layoutName)
+TuiStatus
+tui_set_layout (const char *layoutName)
 {
   TuiStatus status = TUI_SUCCESS;
 
@@ -578,7 +574,7 @@ _tuiSetLayoutTo (char *layoutName)
     status = TUI_FAILURE;
 
   return status;
-}				/* _tuiSetLayoutTo */
+}
 
 
 static CORE_ADDR
@@ -635,12 +631,6 @@ _tuiHandleXDBLayout (TuiLayoutDefPtr layoutDef)
 static void
 _tuiToggleLayout_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vToggleLayout_command, arg, fromTTY);
-}
-
-static void
-_tui_vToggleLayout_command (va_list args)
-{
   TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
 
   if (layoutDef->displayMode == SRC_WIN)
@@ -651,37 +641,27 @@ _tui_vToggleLayout_command (va_list args)
   if (!layoutDef->split)
     _tuiHandleXDBLayout (layoutDef);
 
-  return;
-}				/* _tuiToggleLayout_command */
+}
 
 
 static void
 _tuiToggleSplitLayout_command (char *arg, int fromTTY)
-{
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vToggleSplitLayout_command, arg, fromTTY);
-}
-
-static void
-_tui_vToggleSplitLayout_command (va_list args)
 {
   TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
 
   layoutDef->split = (!layoutDef->split);
   _tuiHandleXDBLayout (layoutDef);
 
-  return;
-}				/* _tui_vToggleSplitLayout_command */
+}
 
 
 static void
 _tuiLayout_command (char *arg, int fromTTY)
 {
-  if ((TuiStatus) tuiDo (
-		   (TuiOpaqueFuncPtr) tui_vSetLayoutTo, arg) != TUI_SUCCESS)
+  if (tui_set_layout (arg) != TUI_SUCCESS)
     warning ("Invalid layout specified.\n%s", LAYOUT_USAGE);
 
-  return;
-}				/* _tuiLayout_command */
+}
 
 /*
    ** _nextLayout().

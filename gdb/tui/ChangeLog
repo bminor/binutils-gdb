@@ -1,5 +1,37 @@
 2001-07-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiIO.c (_tuiHandleResizeDuringIO): Call tuiRefreshAll.
+	(tuiRead, tui_vread): Remove.
+	
+	* tui.c (va_catch_errors, tuiDo, tuiDoAndReturnToTop): Remove.
+	(vcatch_errors, _tui_vDo): Remove.
+	* tui.h (tuiDo, tuiDoAndReturnToTop): Remove.
+
+	* tuiLayout.c (tuiSetLayout): Remove vcatch_errors.
+	(tui_set_layout): Rename of _tuiSetLayoutTo, public.
+	(_tuiToggleLayout_command): Merge with _tui_vToggleLayout_command.
+	(_tuiToggleSplitLayout_command): Merge with _tui_vToggleSplitLayout_command.
+	(_tuiLayout_command): Call tui_set_layout.
+
+	* tuiRegs.c (_tuiScrollRegsBackward_command): Call tui_scroll.
+	(_tuiScrollRegsForward_command): Likewise.
+	(_tuiShowFloat_command): Call _tui_vShowRegisters_commandSupport.
+	(_tuiShowGeneral_command): Likewise.
+	(_tuiShowSpecial_command): Likewise.
+	(_tuiToggleFloatRegs_command): Call tuiToggleFloatRegs.
+	* tuiWin.c (tui_scroll): Rename of tui_vScroll, update parameters.
+	(_tuiScrollForward_command): Call tui_scroll.
+	(_tuiScrollBackward_command): Likewise.
+	(_tuiScrollLeft_command): Likewise.
+	(_tuiScrollRight_command): Likewise.
+	(_tuiSetFocus_command): Call _tuiSetFocus.
+	(_tuiRefreshAll_command): Call tuiRefreshAll.
+	(_tuiSetWinHeight_command): Call _tuiSetWinHeight.
+	(_tuiXDBsetWinHeight_command): Call _tuiXDBsetWinHeight.
+	* tuiWin.h (tui_scroll): Rename of tui_vScroll, update parameters.
+
+2001-07-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiData.h (TuiLocatorElement): Use CORE_ADDR for address member.
 	(TuiLineOrAddress): Likewise.
 	* tuiDisassem.c (tuiGetBeginAsmAddress): Use CORE_ADDR to specify

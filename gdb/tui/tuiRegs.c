@@ -30,6 +30,8 @@
 #include "target.h"
 #include "tuiLayout.h"
 #include "tuiWin.h"
+#include "tuiDataWin.h"
+#include "tuiGeneralWin.h"
 #include "tui-file.h"
 
 /*****************************************
@@ -80,11 +82,10 @@ static int _tuiRegValueHasChanged
 static void _tuiShowFloat_command (char *, int);
 static void _tuiShowGeneral_command (char *, int);
 static void _tuiShowSpecial_command (char *, int);
-static void _tui_vShowRegisters_commandSupport (va_list);
+static void _tui_vShowRegisters_commandSupport (TuiRegisterDisplayType);
 static void _tuiToggleFloatRegs_command (char *, int);
 static void _tuiScrollRegsForward_command (char *, int);
 static void _tuiScrollRegsBackward_command (char *, int);
-static void _tui_vShowRegisters_commandSupport (va_list);
 
 
 
@@ -961,9 +962,8 @@ _tuiDisplayRegister (int regNum,
 
 
 static void
-_tui_vShowRegisters_commandSupport (va_list args)
+_tui_vShowRegisters_commandSupport (TuiRegisterDisplayType dpyType)
 {
-  TuiRegisterDisplayType dpyType = va_arg (args, TuiRegisterDisplayType);
 
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
     {				/* Data window already displayed, show the registers */
@@ -983,8 +983,7 @@ _tuiShowFloat_command (char *arg, int fromTTY)
   if (m_winPtrIsNull (dataWin) || !dataWin->generic.isVisible ||
       (dataWin->detail.dataDisplayInfo.regsDisplayType != TUI_SFLOAT_REGS &&
        dataWin->detail.dataDisplayInfo.regsDisplayType != TUI_DFLOAT_REGS))
-    tuiDo ((TuiOpaqueFuncPtr) _tui_vShowRegisters_commandSupport,
-	   (tuiLayoutDef ())->floatRegsDisplayType);
+    _tui_vShowRegisters_commandSupport ((tuiLayoutDef ())->floatRegsDisplayType);
 
   return;
 }				/* _tuiShowFloat_command */
@@ -993,28 +992,22 @@ _tuiShowFloat_command (char *arg, int fromTTY)
 static void
 _tuiShowGeneral_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vShowRegisters_commandSupport,
-	 TUI_GENERAL_REGS);
-
-  return;
-}				/* _tuiShowGeneral_command */
+  _tui_vShowRegisters_commandSupport (TUI_GENERAL_REGS);
+}
 
 
 static void
 _tuiShowSpecial_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vShowRegisters_commandSupport,
-	 TUI_SPECIAL_REGS);
-
-  return;
-}				/* _tuiShowSpecial_command */
+  _tui_vShowRegisters_commandSupport (TUI_SPECIAL_REGS);
+}
 
 
 static void
 _tuiToggleFloatRegs_command (char *arg, int fromTTY)
 {
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
-    tuiDo ((TuiOpaqueFuncPtr) tuiToggleFloatRegs);
+    tuiToggleFloatRegs ();
   else
     {
       TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
@@ -1033,16 +1026,12 @@ _tuiToggleFloatRegs_command (char *arg, int fromTTY)
 static void
 _tuiScrollRegsForward_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) tui_vScroll, FORWARD_SCROLL, dataWin, 1);
-
-  return;
-}				/* _tuiScrollRegsForward_command */
+  tui_scroll (FORWARD_SCROLL, dataWin, 1);
+}
 
 
 static void
 _tuiScrollRegsBackward_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) tui_vScroll, BACKWARD_SCROLL, dataWin, 1);
-
-  return;
-}				/* _tuiScrollRegsBackward_command */
+  tui_scroll (BACKWARD_SCROLL, dataWin, 1);
+}

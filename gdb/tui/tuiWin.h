@@ -35,7 +35,7 @@ extern void tuiScrollForward (TuiWinInfoPtr, int);
 extern void tuiScrollBackward (TuiWinInfoPtr, int);
 extern void tuiScrollLeft (TuiWinInfoPtr, int);
 extern void tuiScrollRight (TuiWinInfoPtr, int);
-extern void tui_vScroll (va_list);
+extern void tui_scroll (TuiScrollDirection, TuiWinInfoPtr, int);
 extern void tuiSetWinFocusTo (TuiWinInfoPtr);
 extern void tuiClearWinFocusFrom (TuiWinInfoPtr);
 extern void tuiClearWinFocus (void);

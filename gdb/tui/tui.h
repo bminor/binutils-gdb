@@ -97,8 +97,6 @@ extern void tuiCleanUp (void);
 extern void tuiError (char *, int);
 extern void tui_vError (va_list);
 extern void tuiFree (char *);
-extern Opaque tuiDo (TuiOpaqueFuncPtr, ...);
-extern Opaque tuiDoAndReturnToTop (TuiOpaqueFuncPtr, ...);
 extern Opaque tuiGetLowDisassemblyAddress (Opaque, Opaque);
 extern Opaque tui_vGetLowDisassemblyAddress (va_list);
 extern void tui_vSelectSourceSymtab (va_list);

@@ -311,16 +311,14 @@ tuiScrollRight (TuiWinInfoPtr winToScroll, int numToScroll)
 
 
 /*
-   ** tui_vScroll().
+   ** tui_scroll().
    **    Scroll a window.  Arguments are passed through a va_list.
  */
 void
-tui_vScroll (va_list args)
+tui_scroll (TuiScrollDirection direction,
+	    TuiWinInfoPtr winToScroll,
+	    int numToScroll)
 {
-  TuiScrollDirection direction = va_arg (args, TuiScrollDirection);
-  TuiWinInfoPtr winToScroll = va_arg (args, TuiWinInfoPtr);
-  int numToScroll = va_arg (args, int);
-
   switch (direction)
     {
     case FORWARD_SCROLL:
@@ -338,9 +336,7 @@ tui_vScroll (va_list args)
     default:
       break;
     }
-
-  return;
-}				/* tui_vScroll */
+}
 
 
 /*
@@ -583,13 +579,8 @@ _tuiScrollForward_command (char *arg, int fromTTY)
     _parseScrollingArgs (arg, &winToScroll, (int *) NULL);
   else
     _parseScrollingArgs (arg, &winToScroll, &numToScroll);
-  tuiDo ((TuiOpaqueFuncPtr) tui_vScroll,
-	 FORWARD_SCROLL,
-	 winToScroll,
-	 numToScroll);
-
-  return;
-}				/* _tuiScrollForward_command */
+  tui_scroll (FORWARD_SCROLL, winToScroll, numToScroll);
+}
 
 
 /*
@@ -605,13 +596,8 @@ _tuiScrollBackward_command (char *arg, int fromTTY)
     _parseScrollingArgs (arg, &winToScroll, (int *) NULL);
   else
     _parseScrollingArgs (arg, &winToScroll, &numToScroll);
-  tuiDo ((TuiOpaqueFuncPtr) tui_vScroll,
-	 BACKWARD_SCROLL,
-	 winToScroll,
-	 numToScroll);
-
-  return;
-}				/* _tuiScrollBackward_command */
+  tui_scroll (BACKWARD_SCROLL, winToScroll, numToScroll);
+}
 
 
 /*
@@ -624,13 +610,8 @@ _tuiScrollLeft_command (char *arg, int fromTTY)
   TuiWinInfoPtr winToScroll;
 
   _parseScrollingArgs (arg, &winToScroll, &numToScroll);
-  tuiDo ((TuiOpaqueFuncPtr) tui_vScroll,
-	 LEFT_SCROLL,
-	 winToScroll,
-	 numToScroll);
-
-  return;
-}				/* _tuiScrollLeft_command */
+  tui_scroll (LEFT_SCROLL, winToScroll, numToScroll);
+}
 
 
 /*
@@ -643,13 +624,8 @@ _tuiScrollRight_command (char *arg, int fromTTY)
   TuiWinInfoPtr winToScroll;
 
   _parseScrollingArgs (arg, &winToScroll, &numToScroll);
-  tuiDo ((TuiOpaqueFuncPtr) tui_vScroll,
-	 RIGHT_SCROLL,
-	 winToScroll,
-	 numToScroll);
-
-  return;
-}				/* _tuiScrollRight_command */
+  tui_scroll (RIGHT_SCROLL, winToScroll, numToScroll);
+}
 
 
 /*
@@ -718,10 +694,8 @@ _tui_vSetFocus (va_list args)
 static void
 _tuiSetFocus_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vSetFocus, arg, fromTTY);
-
-  return;
-}				/* tui_SetFocus */
+  _tuiSetFocus (arg, fromTTY);
+}
 
 
 /*
@@ -756,7 +730,7 @@ _tuiAllWindowsInfo (char *arg, int fromTTY)
 static void
 _tuiRefreshAll_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) tuiRefreshAll);
+  tuiRefreshAll ();
 }
 
 
@@ -894,10 +868,8 @@ _tui_vSetWinHeight (va_list args)
 static void
 _tuiSetWinHeight_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vSetWinHeight, arg, fromTTY);
-
-  return;
-}				/* _tuiSetWinHeight_command */
+  _tuiSetWinHeight (arg, fromTTY);
+}
 
 
 /*
@@ -956,10 +928,8 @@ _tui_vXDBsetWinHeight (va_list args)
 static void
 _tuiXDBsetWinHeight_command (char *arg, int fromTTY)
 {
-  tuiDo ((TuiOpaqueFuncPtr) _tui_vXDBsetWinHeight, arg, fromTTY);
-
-  return;
-}				/* _tuiXDBsetWinHeight_command */
+  _tuiXDBsetWinHeight (arg, fromTTY);
+}
 
 
 /*
