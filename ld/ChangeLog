@@ -1,3 +1,10 @@
+2003-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/tic3xcoff-onchip.sh: Rename to
+	* emulparams/tic3xcoff_onchip.sh: Rename to
+	* Makefile.am (etic3xcoff_onchip.c): Fx name of generated C file.
+	* Makefile.in: Regenerate.
+
 2003-01-21  Fabio Alemagna  <falemagn@aros.org>
 
 	* configure.tgt: Handle i[3456]86-*-aros*

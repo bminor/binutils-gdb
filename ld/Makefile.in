@@ -2032,7 +2032,7 @@ etic3xcoff.c: $(srcdir)/emulparams/tic3xcoff.sh \
 	${GENSCRIPTS} tic3xcoff "$(tdir_tic4xcoff)"
 etic3xcoff_onchip.c: $(srcdir)/emulparams/tic3xcoff_onchip.sh \
   $(srcdir)/emultempl/ticoff.em $(srcdir)/scripttempl/tic4xcoff.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} tic3xcoff "$(tdir_tic4xcoff)"
+	${GENSCRIPTS} tic3xcoff_onchip "$(tdir_tic4xcoff)"
 etic4xcoff.c: $(srcdir)/emulparams/tic4xcoff.sh \
   $(srcdir)/emultempl/ticoff.em $(srcdir)/scripttempl/tic4xcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic4xcoff "$(tdir_tic4xcoff)"
