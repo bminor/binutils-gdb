@@ -41,4 +41,3 @@
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 
 /* end of tc-h8500.h */
-
