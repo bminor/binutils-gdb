@@ -26,6 +26,7 @@ Things-to-keep:
 
 README
 aix.em
+armcoff.em
 elf32.em
 generic.em
 gld960.em
