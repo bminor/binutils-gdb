@@ -30,7 +30,6 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#include "wait.h"
 #include "ansidecl.h"
 #include "bfd.h"
 #include "callback.h"
@@ -1355,32 +1354,17 @@ sim_resume (sd, step, siggnal)
 	  cpu.exception = SIGILL;
 	  goto end;
 	case O (O_SLEEP, SN):
-	  /* The format of r0 is defined by devo/include/wait.h.  */
-#if 0 /* FIXME: Ugh.  A breakpoint is the sleep insn.  */
-	  if (WIFEXITED (cpu.regs[0]))
-	    {
-	      cpu.state = SIM_STATE_EXITED;
-	      cpu.exception = WEXITSTATUS (cpu.regs[0]);
-	    }
-	  else if (WIFSTOPPED (cpu.regs[0]))
-	    {
-	      cpu.state = SIM_STATE_STOPPED;
-	      cpu.exception = WSTOPSIG (cpu.regs[0]);
-	    }
-	  else
-	    {
-	      cpu.state = SIM_STATE_SIGNALLED;
-	      cpu.exception = WTERMSIG (cpu.regs[0]);
-	    }
-#else
 	  /* FIXME: Doesn't this break for breakpoints when r0
 	     contains just the right (er, wrong) value?  */
 	  cpu.state = SIM_STATE_STOPPED;
-	  if (! WIFEXITED (cpu.regs[0]) && WIFSIGNALED (cpu.regs[0]))
+	  /* The format of r0 is defined by target newlib.  Expand
+             the macros here instead of looking for .../sys/wait.h.  */
+#define SIM_WIFEXITED(v) (((v) & 0xff) == 0)
+#define SIM_WIFSIGNALED(v) (((v) & 0x7f) > 0 && (((v) & 0x7f) < 0x7f))
+  	  if (! SIM_WIFEXITED (cpu.regs[0]) && SIM_WIFSIGNALED (cpu.regs[0])) 
 	    cpu.exception = SIGILL;
 	  else
 	    cpu.exception = SIGTRAP;
-#endif
 	  goto end;
 	case O (O_BPT, SN):
 	  cpu.state = SIM_STATE_STOPPED;

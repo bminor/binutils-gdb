@@ -1,3 +1,9 @@
+2000-06-20  Frank Ch. Eigler  <fche@redhat.com>
+
+	* compile.c: Don't include "wait.h".
+	(sim_resume): Use local SIM_WIFEXITED and SIM_WIFSIGNALED macros
+	instead of WIF* from host.
+
 2000-06-13  Frank Ch. Eigler  <fche@redhat.com>
 
 	* compile.c, writecode.c: Correct typo.
