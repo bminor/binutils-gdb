@@ -1,3 +1,8 @@
+2004-03-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Coding): Update section on gdbarch_data,
+	describe pre_init and post_init.
+
 2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Debugging Output): Document values for "set debug

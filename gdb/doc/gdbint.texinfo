@@ -4872,133 +4872,103 @@ functions, since they might never return to your code (they
 @cindex multi-arch data
 @cindex data-pointer, per-architecture/per-module
 
-The multi-arch framework includes a mechanism for adding module specific
-per-architecture data-pointers to the @code{struct gdbarch} architecture
-object.
+The multi-arch framework includes a mechanism for adding module
+specific per-architecture data-pointers to the @code{struct gdbarch}
+architecture object.
 
-A module registers one or more per-architecture data-pointers using the
-function @code{register_gdbarch_data}:
+A module registers one or more per-architecture data-pointers using:
 
-@deftypefun struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *@var{init})
-
-The @var{init} function is used to obtain an initial value for a
-per-architecture data-pointer.  The function is called, after the
-architecture has been created, when the data-pointer is still
-uninitialized (@code{NULL}) and its value has been requested via a call
-to @code{gdbarch_data}.  A data-pointer can also be initialize
-explicitly using @code{set_gdbarch_data}.
-
-Any memory required by the @var{init} function should be allocated
-using @code{GDBARCH_OBSTACK_ZALLOC}.  That memory is automatically
-released when the corresponding architecture is deleted.
-
-The function @code{register_gdbarch_data} returns a @code{struct
-gdbarch_data} that is used to identify the data-pointer that was added
-to the module.
-
+@deftypefun struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *@var{pre_init})
+@var{pre_init} is used to, on-demand, allocate an initial value for a
+per-architecture data-pointer using the architecture's obstack (passed
+in as a parameter).  Since @var{pre_init} can be called during
+architecture creation, it is not parameterized with the architecture.
+and must not call modules that use per-architecture data.
 @end deftypefun
 
-A typical module has an @code{init} function of the form:
+@deftypefun struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *@var{post_init})
+@var{post_init} is used to obtain an initial value for a
+per-architecture data-pointer @emph{after}.  Since @var{post_init} is
+always called after architecture creation, it both receives the fully
+initialized architecture and is free to call modules that use
+per-architecture data (care needs to be taken to ensure that those
+other modules do not try to call back to this module as that will
+create in cycles in the initialization call graph).
+@end deftypefun
 
-@smallexample
-struct nozel @{ int total; @};
-static struct gdbarch_data *nozel_handle;
-static void *
-nozel_init (struct gdbarch *gdbarch)
-@{
-  struct nozel *data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nozel);
-  @dots{}
-  return data;
-@}
-@end smallexample
-
-Since uninitialized (@code{NULL}) data-pointers are initialized
-on-demand, an @code{init} function is free to call other modules that
-use data-pointers.  Those modules data-pointers will be initialized as
-needed.  Care should be taken to ensure that the @code{init} call graph
-does not contain cycles.
-
-The data-pointer is registered with the call:
-
-@smallexample
-void
-_initialize_nozel (void)
-@{
-  nozel_handle = register_gdbarch_data (nozel_init);
-@dots{}
-@end smallexample
+These functions return a @code{struct gdbarch_data} that is used to
+identify the per-architecture data-pointer added for that module.
 
 The per-architecture data-pointer is accessed using the function:
 
 @deftypefun void *gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{data_handle})
 Given the architecture @var{arch} and module data handle
-@var{data_handle} (returned by @code{register_gdbarch_data}, this
-function returns the current value of the per-architecture data-pointer.
+@var{data_handle} (returned by @code{gdbarch_data_register_pre_init}
+or @code{gdbarch_data_register_post_init}), this function returns the
+current value of the per-architecture data-pointer.  If the data
+pointer is @code{NULL}, it is first initialized by calling the
+corresponding @var{pre_init} or @var{post_init} method.
 @end deftypefun
 
-The non-@code{NULL} data-pointer returned by @code{gdbarch_data} should
-be saved in a local variable and then used directly:
+The examples below assume the following definitions:
 
 @smallexample
-int
-nozel_total (struct gdbarch *gdbarch)
-@{
-  int total;
-  struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
-  @dots{}
-  return total;
-@}
+struct nozel @{ int total; @};
+static struct gdbarch_data *nozel_handle;
 @end smallexample
 
-It is also possible to directly initialize the data-pointer using:
+A module can extend the architecture vector, adding additional
+per-architecture data, using the @var{pre_init} method.  The module's
+per-architecture data is then initialized during architecture
+creation.
 
-@deftypefun void set_gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{handle}, void *@var{pointer})
-Set the still @code{NULL} data-pointer corresponding to @var{handle}
-to the non-@code{NULL} @var{pointer} value.
-@end deftypefun
-
-This function is used by modules that require a mechanism for explicitly
-setting the per-architecture data-pointer during architecture creation:
+In the below, the module's per-architecture @emph{nozel} is added.  An
+architecture can specify its nozel by calling @code{set_gdbarch_nozel}
+from @code{gdbarch_init}.
 
 @smallexample
-/* Always return a non-NULL nozel.  */
-static struct nozel *
-gdbarch_nozel (struct gdbarch *gdbarch)
+static void *
+nozel_pre_init (struct obstack *obstack)
 @{
-  struct nozel *nozel = gdbarch_data (gdbarch, nozel_handle);
-  if (nozel == NULL)
-    @{
-      nozel = nozel_init (gdbarch);
-      set_gdbarch_data (gdbarch, nozel_handle, nozel);
-    @}
-  return nozel;
+  struct nozel *data = OBSTACK_ZALLOC (obstack, struct nozel);
+  return data;
 @}
 @end smallexample
 
 @smallexample
-/* Called during architecture creation.  */
 extern void
 set_gdbarch_nozel (struct gdbarch *gdbarch, int total)
 @{
-  struct nozel *data = gdbarch_nozel (gdbarch);
-  @dots{}
-  data->total = total;
+  struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
+  data->total = nozel;
+@}
+@end smallexample
+
+A module can on-demand create architecture dependant data structures
+using @code{post_init}.
+
+In the below, the nozel's total is computed on-demand by
+@code{nozel_post_init} using information obtained from the
+architecture.
+
+@smallexample
+static void *
+nozel_post_init (struct gdbarch *gdbarch)
+@{
+  struct nozel *data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nozel);
+  nozel->total = gdbarch@dots{} (gdbarch);
+  return data;
 @}
 @end smallexample
 
 @smallexample
-void
-_initialize_nozel (void)
+extern int
+nozel_total (struct gdbarch *gdbarch)
 @{
-  nozel_handle = register_gdbarch_data (nozel_init);
-  @dots{}
+  struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
+  return data->total;
+@}
 @end smallexample
-
-@noindent
-Note that an @code{init} function still needs to be registered.  It is
-used to initialize the data-pointer when the architecture creation phase
-fail to set an initial value.
-
 
 @section Wrapping Output Lines
 @cindex line wrap in output
