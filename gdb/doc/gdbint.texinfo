@@ -3175,6 +3175,23 @@ Define this to an expression that returns 1 if the function invocation
 represented by @var{fi} does not have a stack frame associated with it.
 Otherwise return 0.
 
+@item frame_align (@var{address})
+@anchor{frame_align}
+@findex frame_align
+Define this to adjust @var{address} so that it meets the alignment
+requirements for the start of a new stack frame.  A stack frame's
+alignment requirements are typically stronger than a target processors
+stack alignment requirements (@pxref{STACK_ALIGN}).
+
+This function is used to ensure that, when creating a dummy frame, both
+the initial stack pointer and (if needed) the address of the return
+value are correctly aligned.
+
+Unlike @code{STACK_ALIGN}, this function always adjusts the address in
+the direction of stack growth.
+
+By default, no frame based stack alignment is performed.
+
 @item FRAME_ARGS_ADDRESS_CORRECT
 @findex FRAME_ARGS_ADDRESS_CORRECT
 See @file{stack.c}.
@@ -3690,9 +3707,15 @@ declarations) into @value{GDBN} regnums.  If not defined, no conversion will be
 done.
 
 @item STACK_ALIGN (@var{addr})
+@anchor{STACK_ALIGN}
 @findex STACK_ALIGN
-Define this to adjust the address to the alignment required for the
-processor's stack.
+Define this to increase @var{addr} so that it meets the alignment
+requirements for the processor's stack.
+
+Unlike @ref{frame_align}, this function always adjusts @var{addr}
+upwards.
+
+By default, no stack alignment is performed.
 
 @item STEP_SKIPS_DELAY (@var{addr})
 @findex STEP_SKIPS_DELAY
