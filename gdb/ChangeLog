@@ -1,3 +1,9 @@
+2003-08-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	PR c++/1267
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): If SECTION is
+	NULL, default to the section containing PC.
+
 2003-08-02  Andrew Cagney  <cagney@redhat.com>
 
 	* config/djgpp/fnchange.lst: Fix up testsuite/gdb.c++/annota3.cc,
