@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Tue Aug  6 12:54:56 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* elf32-d10v.c (elf_d10v_howto_table): Added R_D10V_32.
+
+end-sanitize-d10v	
 Mon Aug  5 13:42:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): For a loadable section,
