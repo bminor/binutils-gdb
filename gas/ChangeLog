@@ -1,3 +1,7 @@
+2000-09-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c: Correct comment typos.
+
 2000-09-05  Eric Christopher  <echristo@cygnus.com>
 
 	* config/tc-mn10300.c: Cleanup.

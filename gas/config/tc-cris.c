@@ -391,7 +391,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 
 	      /* Modify the byte-offset BDAP into a word or dword offset
 		 BDAP.	Or really, a BDAP rX,8bit into a
-		 BDAP.[wd] rX,[PC+] followed by a and a word or dword.  */
+		 BDAP.[wd] rX,[PC+] followed by a word or dword.  */
 	      (fragP->fr_opcode)[0] = BDAP_PC_LOW + pow2_of_size * 16;
 
 	      /* Keep the register number in the highest four bits.  */
@@ -1451,7 +1451,7 @@ get_bw_size_modifier (cPP, size_bitsp)
     }
 }
 
-/* Get a general register from the string pointed out by *cPP.	The
+/* Get a general register from the string pointed out by *cPP.  The
    variable *cPP is advanced to the character following the general
    register name on a successful return, and has its initial position
    otherwise.
@@ -1956,7 +1956,7 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 		   | prefixp->base_reg_number /* << 0 */
 		   | (index_reg_number << 12));
 
-	      /*  */
+	      /* Consume the ".S".  */
 	      if (! get_bwd_size_modifier (cPP, &size_bits))
 		/* Missing size, so fail.  */
 		return 0;
