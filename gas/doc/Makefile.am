@@ -84,7 +84,7 @@ info: $(MANS)
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-as.1: $(srcdir)/as.texinfo
+as.1: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/as.texinfo > as.pod
 	-($(POD2MAN) as.pod | \

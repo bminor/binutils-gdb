@@ -1,3 +1,9 @@
+2003-01-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* doc/Makefile.am (as.1): Depend on "asconfig.texi gasver.texi
+	$(CPU_DOCS)".
+	* doc/Makefile.in: Regenerate.
+
 2003-01-01  John David Anglin  <dave.anglin@nrc.ca>
 
         * config/obj-elf.c (special_sections): Work around HP's incorrect usage
