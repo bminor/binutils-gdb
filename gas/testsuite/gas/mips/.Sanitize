@@ -77,7 +77,7 @@ lifloat.s
 mips.exp
 mips4.d
 mips4.s
-div-ilocks.d
+mul-ilocks.d
 mul.d
 mul.s
 rol.d
