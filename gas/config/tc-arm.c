@@ -13313,7 +13313,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1026ejs",	ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1026ej-s",	ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
   {"arm1136js",		ARM_ARCH_V6,     FPU_NONE},
-  {"arm1136j-s"		ARM_ARCH_V6,     FPU_NONE},
+  {"arm1136j-s",	ARM_ARCH_V6,     FPU_NONE},
   {"arm1136jfs",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
   {"arm1136jf-s",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
