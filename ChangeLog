@@ -1,3 +1,7 @@
+Tue Sep  1 15:48:30 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in: all-opcodes, cd into the right directory
+
 Sun Aug 30 21:12:11 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure: added -program_transform_name option, used as
