@@ -87,8 +87,7 @@ static boolean h8300_bfd_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *
    the generic linker hash table, not the COFF backend linker hash
    table!  We use this to attach additional data structures we
    need while linking on the h8300.  */
-struct h8300_coff_link_hash_table
-{
+struct h8300_coff_link_hash_table {
   /* The main hash table.  */
   struct generic_link_hash_table root;
 
@@ -135,7 +134,7 @@ funcvec_hash_newfunc (entry, gen_table, string)
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct funcvec_hash_entry *)
-         bfd_hash_newfunc ((struct bfd_hash_entry *) ret, gen_table, string));
+	 bfd_hash_newfunc ((struct bfd_hash_entry *) ret, gen_table, string));
 
   if (ret == NULL)
     return NULL;
@@ -165,8 +164,8 @@ funcvec_hash_table_init (table, abfd, newfunc)
      struct funcvec_hash_table *table;
      bfd *abfd;
      struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
-                                                struct bfd_hash_table *,
-                                                const char *));
+						struct bfd_hash_table *,
+						const char *));
 {
   /* Initialize our local fields, then call the generic initialization
      routine.  */
@@ -232,8 +231,7 @@ special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   return bfd_reloc_ok;
 }
 
-static reloc_howto_type howto_table[] =
-{
+static reloc_howto_type howto_table[] = {
   HOWTO (R_RELBYTE, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "8", false, 0x000000ff, 0x000000ff, false),
   HOWTO (R_RELWORD, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "16", false, 0x0000ffff, 0x0000ffff, false),
   HOWTO (R_RELLONG, 0, 2, 32, false, 0, complain_overflow_bitfield, special, "32", false, 0xffffffff, 0xffffffff, false),
@@ -270,9 +268,9 @@ static reloc_howto_type howto_table[] =
 /* Turn a howto into a reloc number.  */
 
 #define SELECT_RELOC(x,howto) \
-  { x.r_type = select_reloc(howto); }
+  { x.r_type = select_reloc (howto); }
 
-#define BADMAG(x) (H8300BADMAG(x) && H8300HBADMAG(x) && H8300SBADMAG(x))
+#define BADMAG(x) (H8300BADMAG (x) && H8300HBADMAG (x) && H8300SBADMAG (x))
 #define H8300 1			/* Customize coffcode.h */
 #define __A_MAGIC_SET__
 
@@ -365,15 +363,15 @@ rtype2howto (internal, dst)
     }
 }
 
-#define RTYPE2HOWTO(internal, relocentry) rtype2howto(internal,relocentry)
+#define RTYPE2HOWTO(internal, relocentry) rtype2howto (internal, relocentry)
 
 /* Perform any necessary magic to the addend in a reloc entry.  */
 
 #define CALC_ADDEND(abfd, symbol, ext_reloc, cache_ptr) \
- cache_ptr->addend =  ext_reloc.r_offset;
+ cache_ptr->addend = ext_reloc.r_offset;
 
 #define RELOC_PROCESSING(relent,reloc,symbols,abfd,section) \
- reloc_processing(relent, reloc, symbols, abfd, section)
+ reloc_processing (relent, reloc, symbols, abfd, section)
 
 static void
 reloc_processing (relent, reloc, symbols, abfd, section)
@@ -483,7 +481,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
       /* If the distance is within -128..+128 inclusive, then we can relax
 	 this jump.  +128 is valid since the target will move two bytes
 	 closer if we do relax this branch.  */
-      if ((int)gap >= -128 && (int)gap <= 128 )
+      if ((int) gap >= -128 && (int) gap <= 128)
 	{
 	  /* It's possible we may be able to eliminate this branch entirely;
 	     if the previous instruction is a branch around this instruction,
@@ -546,7 +544,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
       /* If the distance is within -128..+128 inclusive, then we can relax
 	 this jump.  +128 is valid since the target will move two bytes
 	 closer if we do relax this branch.  */
-      if ((int)gap >= -128 && (int)gap <= 128 )
+      if ((int) gap >= -128 && (int) gap <= 128)
 	{
 	  /* Change the reloc type.  */
 	  reloc->howto = howto_table + 15;
@@ -736,7 +734,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       /* Sanity check.  */
       if (value <= 0xff
 	  || (value >= 0x0000ff00 && value <= 0x0000ffff)
-  	  || (value >= 0x00ffff00 && value <= 0x00ffffff)
+	  || (value >= 0x00ffff00 && value <= 0x00ffffff)
 	  || (value >= 0xffffff00 && value <= 0xffffffff))
 	{
 	  /* Everything looks OK.  Apply the relocation and update the
@@ -804,7 +802,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 
 	  /* Fix the opcode.  For all the move insns, we simply
 	     need to turn off bit 0x20 in the previous byte.  */
-          data[dst_address - 1] &= ~0x20;
+	  data[dst_address - 1] &= ~0x20;
 	  dst_address += 2;
 	  src_address += 4;
 	}
@@ -815,7 +813,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 		  reloc->howto->name, reloc->addend, input_section->owner,
 		  input_section, reloc->address)))
 	    abort ();
-        }
+	}
       break;
 
     /* A 16bit absolute branch that is now an 8-bit pc-relative branch.  */
@@ -912,14 +910,14 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  abort ();
 	}
 
-	/* Output the target.  */
-	bfd_put_8 (abfd, gap, data + dst_address - 1);
+      /* Output the target.  */
+      bfd_put_8 (abfd, gap, data + dst_address - 1);
 
-	/* We don't advance dst_address -- the 8bit reloc is applied at
-	   dst_address - 1, so the next insn should begin at dst_address.  */
-	src_address += 2;
+      /* We don't advance dst_address -- the 8bit reloc is applied at
+	 dst_address - 1, so the next insn should begin at dst_address.  */
+      src_address += 2;
 
-	break;
+      break;
 
     /* Similarly for a 24bit absolute that is now 8 bits.  */
     case R_JMPL2:
