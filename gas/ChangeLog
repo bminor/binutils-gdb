@@ -1,3 +1,8 @@
+2001-06-18  Philip Blundell  <philb@gnu.org>
+
+	* config/tc-arm.c (do_msr): Remove restriction on usage of
+	immediate operands.
+
 2001-06-13  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (thumb_shift): Improve wording of error message.

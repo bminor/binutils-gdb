@@ -2289,12 +2289,17 @@ do_msr (str, flags)
       return;
     }
 
+#if 0  /* The first edition of the ARM architecture manual stated that
+	  writing anything other than the flags with an immediate operation
+	  had UNPREDICTABLE effects.  This constraint was removed in the
+	  second edition of the specification.  */
   if ((cpu_variant & ARM_EXT_V5) != ARM_EXT_V5
       && inst.instruction & ((PSR_c | PSR_x | PSR_s) << PSR_SHIFT))
     {
       inst.error = _("immediate value cannot be used to set this field");
       return;
     }
+#endif
 
   flags |= INST_IMMEDIATE;
 
