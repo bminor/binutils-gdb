@@ -1334,137 +1334,6 @@ arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   write_register (4, fun);
 }
 
-/* Note: ScottB
-
-   This function does not support passing parameters using the FPA
-   variant of the APCS.  It passes any floating point arguments in the
-   general registers and/or on the stack.  */
-
-static CORE_ADDR
-arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		    int struct_return, CORE_ADDR struct_addr)
-{
-  CORE_ADDR fp;
-  int argnum;
-  int argreg;
-  int nstack;
-  int simd_argreg;
-  int second_pass;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  /* Walk through the list of args and determine how large a temporary
-     stack is required.  Need to take care here as structs may be
-     passed on the stack, and we have to to push them.  On the second
-     pass, do the store.  */
-  nstack = 0;
-  fp = sp;
-  for (second_pass = 0; second_pass < 2; second_pass++)
-    {
-      /* Compute the FP using the information computed during the
-         first pass.  */
-      if (second_pass)
-	fp = sp - nstack;
-
-      simd_argreg = 0;
-      argreg = ARM_A1_REGNUM;
-      nstack = 0;
-
-      /* The struct_return pointer occupies the first parameter
-	 passing register.  */
-      if (struct_return)
-	{
-	  if (second_pass)
-	    {
-	      if (arm_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "struct return in %s = 0x%s\n",
-				    REGISTER_NAME (argreg),
-				    paddr (struct_addr));
-	      write_register (argreg, struct_addr);
-	    }
-	  argreg++;
-	}
-
-      for (argnum = 0; argnum < nargs; argnum++)
-	{
-	  int len;
-	  struct type *arg_type;
-	  struct type *target_type;
-	  enum type_code typecode;
-	  char *val;
-	  
-	  arg_type = check_typedef (VALUE_TYPE (args[argnum]));
-	  len = TYPE_LENGTH (arg_type);
-	  target_type = TYPE_TARGET_TYPE (arg_type);
-	  typecode = TYPE_CODE (arg_type);
-	  val = VALUE_CONTENTS (args[argnum]);
-	  
-	  /* If the argument is a pointer to a function, and it is a
-	     Thumb function, create a LOCAL copy of the value and set
-	     the THUMB bit in it.  */
-	  if (second_pass
-	      && TYPE_CODE_PTR == typecode
-	      && target_type != NULL
-	      && TYPE_CODE_FUNC == TYPE_CODE (target_type))
-	    {
-	      CORE_ADDR regval = extract_address (val, len);
-	      if (arm_pc_is_thumb (regval))
-		{
-		  val = alloca (len);
-		  store_address (val, len, MAKE_THUMB_ADDR (regval));
-		}
-	    }
-
-	  /* Copy the argument to general registers or the stack in
-	     register-sized pieces.  Large arguments are split between
-	     registers and stack.  */
-	  while (len > 0)
-	    {
-	      int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
-	      
-	      if (argreg <= ARM_LAST_ARG_REGNUM)
-		{
-		  /* The argument is being passed in a general purpose
-		     register.  */
-		  if (second_pass)
-		    {
-		      CORE_ADDR regval = extract_address (val,
-							  partial_len);
-		      if (arm_debug)
-			fprintf_unfiltered (gdb_stdlog,
-					    "arg %d in %s = 0x%s\n",
-					    argnum,
-					    REGISTER_NAME (argreg),
-					    phex (regval, REGISTER_SIZE));
-		      write_register (argreg, regval);
-		    }
-		  argreg++;
-		}
-	      else
-		{
-		  if (second_pass)
-		    {
-		      /* Push the arguments onto the stack.  */
-		      if (arm_debug)
-			fprintf_unfiltered (gdb_stdlog,
-					    "arg %d @ 0x%s + %d\n",
-					    argnum, paddr (fp), nstack);
-		      write_memory (fp + nstack, val, REGISTER_SIZE);
-		    }
-		  nstack += REGISTER_SIZE;
-		}
-	      
-	      len -= partial_len;
-	      val += partial_len;
-	    }
-
-	}
-    }
-
-  /* Return the bottom of the argument list (pointed to by fp).  */
-  return fp;
-}
-
 /* Pop the current frame.  So long as the frame info has been
    initialized properly (see arm_init_extra_frame_info), this code
    works for dummy frames as well as regular frames.  I.e, there's no
@@ -1497,6 +1366,161 @@ arm_pop_frame (void)
   write_register (ARM_SP_REGNUM, old_SP);
 
   flush_cached_frames ();
+}
+
+/* When arguments must be pushed onto the stack, they go on in reverse
+   order.  The code below implements a FILO (stack) to do this.  */
+
+struct stack_item
+{
+  int len;
+  struct stack_item *prev;
+  void *data;
+};
+
+static struct stack_item *
+push_stack_item (struct stack_item *prev, void *contents, int len)
+{
+  struct stack_item *si;
+  si = xmalloc (sizeof (struct stack_item));
+  si->data = malloc (len);
+  si->len = len;
+  si->prev = prev;
+  memcpy (si->data, contents, len);
+  return si;
+}
+
+static struct stack_item *
+pop_stack_item (struct stack_item *si)
+{
+  struct stack_item *dead = si;
+  si = si->prev;
+  xfree (dead->data);
+  xfree (dead);
+  return si;
+}
+
+/* We currently only support passing parameters in integer registers.  This
+   conforms with GCC's default model.  Several other variants exist and
+   we should probably support some of them based on the selected ABI.  */
+
+static CORE_ADDR
+arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
+		     CORE_ADDR dummy_addr, int nargs, struct value **args,
+		     CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+{
+  int argnum;
+  int argreg;
+  int nstack;
+  struct stack_item *si = NULL;
+
+  /* Set the return address.  For the ARM, the return breakpoint is always
+     at DUMMY_ADDR.  */
+  /* XXX Fix for Thumb.  */
+  regcache_cooked_write_unsigned (regcache, ARM_LR_REGNUM, dummy_addr);
+
+  /* Walk through the list of args and determine how large a temporary
+     stack is required.  Need to take care here as structs may be
+     passed on the stack, and we have to to push them.  */
+  nstack = 0;
+
+  argreg = ARM_A1_REGNUM;
+  nstack = 0;
+
+  /* Some platforms require a double-word aligned stack.  Make sure sp
+     is correctly aligned before we start.  We always do this even if
+     it isn't really needed -- it can never hurt things.  */
+  sp &= ~(CORE_ADDR)(2 * REGISTER_SIZE - 1);
+
+  /* The struct_return pointer occupies the first parameter
+     passing register.  */
+  if (struct_return)
+    {
+      if (arm_debug)
+	fprintf_unfiltered (gdb_stdlog, "struct return in %s = 0x%s\n",
+			    REGISTER_NAME (argreg), paddr (struct_addr));
+      regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
+      argreg++;
+    }
+
+  for (argnum = 0; argnum < nargs; argnum++)
+    {
+      int len;
+      struct type *arg_type;
+      struct type *target_type;
+      enum type_code typecode;
+      char *val;
+
+      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
+      len = TYPE_LENGTH (arg_type);
+      target_type = TYPE_TARGET_TYPE (arg_type);
+      typecode = TYPE_CODE (arg_type);
+      val = VALUE_CONTENTS (args[argnum]);
+
+      /* If the argument is a pointer to a function, and it is a
+	 Thumb function, create a LOCAL copy of the value and set
+	 the THUMB bit in it.  */
+      if (TYPE_CODE_PTR == typecode
+	  && target_type != NULL
+	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
+	{
+	  CORE_ADDR regval = extract_address (val, len);
+	  if (arm_pc_is_thumb (regval))
+	    {
+	      val = alloca (len);
+	      store_address (val, len, MAKE_THUMB_ADDR (regval));
+	    }
+	}
+
+      /* Copy the argument to general registers or the stack in
+	 register-sized pieces.  Large arguments are split between
+	 registers and stack.  */
+      while (len > 0)
+	{
+	  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+
+	  if (argreg <= ARM_LAST_ARG_REGNUM)
+	    {
+	      /* The argument is being passed in a general purpose
+		 register.  */
+	      CORE_ADDR regval = extract_address (val, partial_len);
+	      if (arm_debug)
+		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
+				    argnum, REGISTER_NAME (argreg),
+				    phex (regval, REGISTER_SIZE));
+	      regcache_cooked_write_unsigned (regcache, argreg, regval);
+	      argreg++;
+	    }
+	  else
+	    {
+	      /* Push the arguments onto the stack.  */
+	      if (arm_debug)
+		fprintf_unfiltered (gdb_stdlog, "arg %d @ sp + %d\n",
+				    argnum, nstack);
+	      si = push_stack_item (si, val, REGISTER_SIZE);
+	      nstack += REGISTER_SIZE;
+	    }
+	      
+	  len -= partial_len;
+	  val += partial_len;
+	}
+    }
+  /* If we have an odd number of words to push, then decrement the stack
+     by one word now, so first stack argument will be dword aligned.  */
+  if (nstack & 4)
+    sp -= 4;
+
+  while (si)
+    {
+      sp -= si->len;
+      write_memory (sp, si->data, si->len);
+      si = pop_stack_item (si);
+    }
+
+  /* Finally, update teh SP register.  */
+  regcache_cooked_write_unsigned (regcache, ARM_SP_REGNUM, sp);
+
+  return sp;
 }
 
 static void
@@ -2456,15 +2480,6 @@ arm_store_return_value (struct type *type, struct regcache *regs,
     }
 }
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function.  */
-
-static void
-arm_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  write_register (ARM_A1_REGNUM, addr);
-}
-
 static int
 arm_get_longjmp_target (CORE_ADDR *pc)
 {
@@ -2929,8 +2944,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
-
-  set_gdbarch_deprecated_push_arguments (gdbarch, arm_push_arguments);
+  set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
   /* Frame handling.  */
   set_gdbarch_deprecated_frame_chain_valid (gdbarch, arm_frame_chain_valid);
@@ -2994,7 +3008,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Returning results.  */
   set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    arm_extract_struct_value_address);

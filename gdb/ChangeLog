@@ -1,3 +1,12 @@
+2003-03-29  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_push_arguments): Delete.
+	(struct stack_item): New type.
+	(push_stack_item, pop_stack_item, arm_push_dummy_call): New functions.
+	(arm_store_struct_return): Delte.
+	(arm_gdbarch_init): Register arm_push_dummy_call.  Don't register
+	arm_push_arguments or arm_store_struct_return.
+
 2003-03-28  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (d10v-tdep.o): Update dependencies.
