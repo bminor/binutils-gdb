@@ -435,6 +435,8 @@ static void xcoff_swap_ldsym_in
   PARAMS ((bfd *, const struct external_ldsym *, struct internal_ldsym *));
 static void xcoff_swap_ldsym_out
   PARAMS ((bfd *, const struct internal_ldsym *, struct external_ldsym *));
+static void xcoff_swap_ldrel_in
+  PARAMS ((bfd *, const struct external_ldrel *, struct internal_ldrel *));
 static void xcoff_swap_ldrel_out
   PARAMS ((bfd *, const struct internal_ldrel *, struct external_ldrel *));
 static struct bfd_hash_entry *xcoff_link_hash_newfunc
@@ -447,6 +449,8 @@ static boolean xcoff_link_add_object_symbols
 static boolean xcoff_link_check_archive_element
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
 static boolean xcoff_link_check_ar_symbols
+  PARAMS ((bfd *, struct bfd_link_info *, boolean *));
+static boolean xcoff_link_check_dynamic_ar_symbols
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
 static bfd_size_type xcoff_find_reloc
   PARAMS ((struct internal_reloc *, bfd_size_type, bfd_vma));
@@ -553,7 +557,19 @@ xcoff_swap_ldsym_out (abfd, src, dst)
   bfd_put_32 (abfd, src->l_parm, dst->l_parm);
 }
 
-/* As it happens, we never need to swap in the ldrel structure.  */
+/* Swap in the ldrel structure.  */
+
+static void
+xcoff_swap_ldrel_in (abfd, src, dst)
+     bfd *abfd;
+     const struct external_ldrel *src;
+     struct internal_ldrel *dst;
+{
+  dst->l_vaddr = bfd_get_32 (abfd, src->l_vaddr);
+  dst->l_symndx = bfd_get_32 (abfd, src->l_symndx);
+  dst->l_rtype = bfd_get_16 (abfd, src->l_rtype);
+  dst->l_rsecnm = bfd_get_16 (abfd, src->l_rsecnm);
+}
 
 /* Swap out the ldrel structure.  */
 
@@ -567,6 +583,316 @@ xcoff_swap_ldrel_out (abfd, src, dst)
   bfd_put_32 (abfd, src->l_symndx, dst->l_symndx);
   bfd_put_16 (abfd, src->l_rtype, dst->l_rtype);
   bfd_put_16 (abfd, src->l_rsecnm, dst->l_rsecnm);
+}
+
+/* Routines to read XCOFF dynamic information.  This don't really
+   belong here, but we already have the ldsym manipulation routines
+   here.  */
+
+/* Read the contents of a section.  */
+
+static boolean
+xcoff_get_section_contents (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  if (coff_section_data (abfd, sec) == NULL)
+    {
+      sec->used_by_bfd = bfd_zalloc (abfd,
+				     sizeof (struct coff_section_tdata));
+      if (sec->used_by_bfd == NULL)
+	return false;
+    }
+
+  if (coff_section_data (abfd, sec)->contents == NULL)
+    {
+      coff_section_data (abfd, sec)->contents = bfd_malloc (sec->_raw_size);
+      if (coff_section_data (abfd, sec)->contents == NULL)
+	return false;
+
+      if (! bfd_get_section_contents (abfd, sec,
+				      coff_section_data (abfd, sec)->contents,
+				      (file_ptr) 0, sec->_raw_size))
+	return false;
+    }
+
+  return true;
+}
+
+/* Get the size required to hold the dynamic symbols.  */
+
+long
+_bfd_xcoff_get_dynamic_symtab_upper_bound (abfd)
+     bfd *abfd;
+{
+  asection *lsec;
+  bfd_byte *contents;
+  struct internal_ldhdr ldhdr;
+
+  if ((abfd->flags & DYNAMIC) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  lsec = bfd_get_section_by_name (abfd, ".loader");
+  if (lsec == NULL)
+    {
+      bfd_set_error (bfd_error_no_symbols);
+      return -1;
+    }
+
+  if (! xcoff_get_section_contents (abfd, lsec))
+    return -1;
+  contents = coff_section_data (abfd, lsec)->contents;
+
+  xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) contents, &ldhdr);
+
+  return (ldhdr.l_nsyms + 1) * sizeof (asymbol *);
+}
+
+/* Get the dynamic symbols.  */
+
+long
+_bfd_xcoff_canonicalize_dynamic_symtab (abfd, psyms)
+     bfd *abfd;
+     asymbol **psyms;
+{
+  asection *lsec;
+  bfd_byte *contents;
+  struct internal_ldhdr ldhdr;
+  const char *strings;
+  struct external_ldsym *elsym, *elsymend;
+  coff_symbol_type *symbuf;
+
+  if ((abfd->flags & DYNAMIC) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  lsec = bfd_get_section_by_name (abfd, ".loader");
+  if (lsec == NULL)
+    {
+      bfd_set_error (bfd_error_no_symbols);
+      return -1;
+    }
+
+  if (! xcoff_get_section_contents (abfd, lsec))
+    return -1;
+  contents = coff_section_data (abfd, lsec)->contents;
+
+  coff_section_data (abfd, lsec)->keep_contents = true;
+
+  xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) contents, &ldhdr);
+
+  strings = (char *) contents + ldhdr.l_stoff;
+
+  symbuf = ((coff_symbol_type *)
+	    bfd_zalloc (abfd, ldhdr.l_nsyms * sizeof (coff_symbol_type)));
+  if (symbuf == NULL)
+    return -1;
+
+  elsym = (struct external_ldsym *) (contents + LDHDRSZ);
+  elsymend = elsym + ldhdr.l_nsyms;
+  for (; elsym < elsymend; elsym++, symbuf++, psyms++)
+    {
+      struct internal_ldsym ldsym;
+
+      xcoff_swap_ldsym_in (abfd, elsym, &ldsym);
+
+      symbuf->symbol.the_bfd = abfd;
+
+      if (ldsym._l._l_l._l_zeroes == 0)
+	symbuf->symbol.name = strings + ldsym._l._l_l._l_offset;
+      else
+	{
+	  int i;
+
+	  for (i = 0; i < SYMNMLEN; i++)
+	    if (ldsym._l._l_name[i] == '\0')
+	      break;
+	  if (i < SYMNMLEN)
+	    symbuf->symbol.name = elsym->_l._l_name;
+	  else
+	    {
+	      char *c;
+
+	      c = bfd_alloc (abfd, SYMNMLEN + 1);
+	      if (c == NULL)
+		return -1;
+	      memcpy (c, ldsym._l._l_name, SYMNMLEN);
+	      c[SYMNMLEN] = '\0';
+	      symbuf->symbol.name = c;
+	    }
+	}
+
+      if (ldsym.l_smclas == XMC_XO)
+	symbuf->symbol.section = bfd_abs_section_ptr;
+      else
+	symbuf->symbol.section = coff_section_from_bfd_index (abfd,
+							      ldsym.l_scnum);
+      symbuf->symbol.value = ldsym.l_value - symbuf->symbol.section->vma;
+
+      symbuf->symbol.flags = BSF_NO_FLAGS;
+      if ((ldsym.l_smtype & L_EXPORT) != 0)
+	symbuf->symbol.flags |= BSF_GLOBAL;
+
+      /* FIXME: We have no way to record the other information stored
+         with the loader symbol.  */
+
+      *psyms = (asymbol *) symbuf;
+    }
+
+  *psyms = NULL;
+
+  return ldhdr.l_nsyms;
+}
+
+/* Get the size required to hold the dynamic relocs.  */
+
+long
+_bfd_xcoff_get_dynamic_reloc_upper_bound (abfd)
+     bfd *abfd;
+{
+  asection *lsec;
+  bfd_byte *contents;
+  struct internal_ldhdr ldhdr;
+
+  if ((abfd->flags & DYNAMIC) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  lsec = bfd_get_section_by_name (abfd, ".loader");
+  if (lsec == NULL)
+    {
+      bfd_set_error (bfd_error_no_symbols);
+      return -1;
+    }
+
+  if (! xcoff_get_section_contents (abfd, lsec))
+    return -1;
+  contents = coff_section_data (abfd, lsec)->contents;
+
+  xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) contents, &ldhdr);
+
+  return (ldhdr.l_nreloc + 1) * sizeof (arelent *);
+}
+
+/* The typical dynamic reloc.  */
+
+static reloc_howto_type xcoff_dynamic_reloc =
+  HOWTO (0,	                /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,		        /* special_function */                     
+	 "R_POS",               /* name */                                 
+	 true,	                /* partial_inplace */                      
+	 0xffffffff,            /* src_mask */                             
+	 0xffffffff,            /* dst_mask */                             
+	 false);                /* pcrel_offset */
+
+/* Get the dynamic relocs.  */
+
+long
+_bfd_xcoff_canonicalize_dynamic_reloc (abfd, prelocs, syms)
+     bfd *abfd;
+     arelent **prelocs;
+     asymbol **syms;
+{
+  asection *lsec;
+  bfd_byte *contents;
+  struct internal_ldhdr ldhdr;
+  arelent *relbuf;
+  struct external_ldrel *elrel, *elrelend;
+
+  if ((abfd->flags & DYNAMIC) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  lsec = bfd_get_section_by_name (abfd, ".loader");
+  if (lsec == NULL)
+    {
+      bfd_set_error (bfd_error_no_symbols);
+      return -1;
+    }
+
+  if (! xcoff_get_section_contents (abfd, lsec))
+    return -1;
+  contents = coff_section_data (abfd, lsec)->contents;
+
+  xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) contents, &ldhdr);
+
+  relbuf = (arelent *) bfd_alloc (abfd, ldhdr.l_nreloc * sizeof (arelent));
+  if (relbuf == NULL)
+    return -1;
+
+  elrel = ((struct external_ldrel *)
+	   (contents + LDHDRSZ + ldhdr.l_nsyms * LDSYMSZ));
+  elrelend = elrel + ldhdr.l_nreloc;
+  for (; elrel < elrelend; elrel++, relbuf++, prelocs++)
+    {
+      struct internal_ldrel ldrel;
+
+      xcoff_swap_ldrel_in (abfd, elrel, &ldrel);
+
+      if (ldrel.l_symndx >= 3)
+	relbuf->sym_ptr_ptr = syms + (ldrel.l_symndx - 3);
+      else
+	{
+	  const char *name;
+	  asection *sec;
+
+	  switch (ldrel.l_symndx)
+	    {
+	    case 0:
+	      name = ".text";
+	      break;
+	    case 1:
+	      name = ".data";
+	      break;
+	    case 2:
+	      name = ".bss";
+	      break;
+	    default:
+	      abort ();
+	      break;
+	    }
+
+	  sec = bfd_get_section_by_name (abfd, name);
+	  if (sec == NULL)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      return -1;
+	    }
+
+	  relbuf->sym_ptr_ptr = sec->symbol_ptr_ptr;
+	}
+
+      relbuf->address = ldrel.l_vaddr;
+      relbuf->addend = 0;
+
+      /* Most dynamic relocs have the same type.  FIXME: This is only
+         correct if ldrel.l_rtype == 0.  In other cases, we should use
+         a different howto.  */
+      relbuf->howto = &xcoff_dynamic_reloc;
+
+      /* FIXME: We have no way to record the l_rsecnm field.  */
+
+      *prelocs = relbuf;
+    }
+
+  *prelocs = NULL;
+
+  return ldhdr.l_nreloc;
 }
 
 /* Routine to create an entry in an XCOFF link hash table.  */
@@ -736,8 +1062,34 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
     case bfd_object:
       return xcoff_link_add_object_symbols (abfd, info);
     case bfd_archive:
-      return (_bfd_generic_link_add_archive_symbols
-	      (abfd, info, xcoff_link_check_archive_element));
+      /* We need to look through the archive for stripped dynamic
+         objects, because they will not appear in the archive map even
+         though they should, perhaps, be included.  */
+      {
+	bfd *member;
+
+	member = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
+	while (member != NULL)
+	  {
+	    if (bfd_check_format (member, bfd_object)
+		&& (member->flags & DYNAMIC) != 0
+		&& (member->flags & HAS_SYMS) == 0)
+	      {
+		boolean needed;
+
+		if (! xcoff_link_check_archive_element (member, info, &needed))
+		  return false;
+		if (needed)
+		  member->archive_pass = -1;
+	      }
+	    member = bfd_openr_next_archived_file (abfd, member);
+	  }
+
+	/* Now do the usual search.  */
+	return (_bfd_generic_link_add_archive_symbols
+		(abfd, info, xcoff_link_check_archive_element));
+      }
+
     default:
       bfd_set_error (bfd_error_wrong_format);
       return false;
@@ -810,6 +1162,11 @@ xcoff_link_check_ar_symbols (abfd, info, pneeded)
 
   *pneeded = false;
 
+  if ((abfd->flags & DYNAMIC) != 0
+      && ! info->static_link
+      && info->hash->creator == abfd->xvec)
+    return xcoff_link_check_dynamic_ar_symbols (abfd, info, pneeded);
+
   symesz = bfd_coff_symesz (abfd);
   esym = (bfd_byte *) obj_coff_external_syms (abfd);
   esym_end = esym + obj_raw_syment_count (abfd) * symesz;
@@ -852,6 +1209,87 @@ xcoff_link_check_ar_symbols (abfd, info, pneeded)
     }
 
   /* We do not need this object file.  */
+  return true;
+}
+
+/* Look through the loader symbols to see if this dynamic object
+   should be included in the link.  The native linker uses the loader
+   symbols, not the normal symbol table, so we do too.  */
+
+static boolean
+xcoff_link_check_dynamic_ar_symbols (abfd, info, pneeded)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     boolean *pneeded;
+{
+  asection *lsec;
+  bfd_byte *buf;
+  struct internal_ldhdr ldhdr;
+  const char *strings;
+  struct external_ldsym *elsym, *elsymend;
+
+  *pneeded = false;
+
+  lsec = bfd_get_section_by_name (abfd, ".loader");
+  if (lsec == NULL)
+    {
+      /* There are no symbols, so don't try to include it.  */
+      return true;
+    }
+
+  if (! xcoff_get_section_contents (abfd, lsec))
+    return false;
+  buf = coff_section_data (abfd, lsec)->contents;
+
+  xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) buf, &ldhdr);
+
+  strings = (char *) buf + ldhdr.l_stoff;
+
+  elsym = (struct external_ldsym *) (buf + LDHDRSZ);
+  elsymend = elsym + ldhdr.l_nsyms;
+  for (; elsym < elsymend; elsym++)
+    {
+      struct internal_ldsym ldsym;
+      char nambuf[SYMNMLEN + 1];
+      const char *name;
+      struct bfd_link_hash_entry *h;
+
+      xcoff_swap_ldsym_in (abfd, elsym, &ldsym);
+
+      /* We are only interested in exported symbols.  */
+      if ((ldsym.l_smtype & L_EXPORT) == 0)
+	continue;
+
+      if (ldsym._l._l_l._l_zeroes == 0)
+	name = strings + ldsym._l._l_l._l_offset;
+      else
+	{
+	  memcpy (nambuf, ldsym._l._l_name, SYMNMLEN);
+	  nambuf[SYMNMLEN] = '\0';
+	  name = nambuf;
+	}
+
+      h = bfd_link_hash_lookup (info->hash, name, false, false, true);
+
+      /* We are only interested in symbols that are currently
+         undefined.  */
+      if (h != NULL && h->type == bfd_link_hash_undefined)
+	{
+	  if (! (*info->callbacks->add_archive_element) (info, abfd, name))
+	    return false;
+	  *pneeded = true;
+	  return true;
+	}
+    }
+
+  /* We do not need this shared object.  */
+
+  if (buf != NULL && ! coff_section_data (abfd, lsec)->keep_contents)
+    {
+      free (coff_section_data (abfd, lsec)->contents);
+      coff_section_data (abfd, lsec)->contents = NULL;
+    }
+
   return true;
 }
 
@@ -1903,7 +2341,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
      struct bfd_link_info *info;
 {
   asection *lsec;
-  bfd_byte *buf = NULL;
+  bfd_byte *buf;
   struct internal_ldhdr ldhdr;
   const char *strings;
   struct external_ldsym *elsym, *elsymend;
@@ -1922,7 +2360,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	("%s: XCOFF shared object when not producing XCOFF output",
 	 bfd_get_filename (abfd));
       bfd_set_error (bfd_error_invalid_operation);
-      goto error_return;
+      return false;
     }
 
   /* The symbols we use from a dynamic object are not the symbols in
@@ -1943,16 +2381,12 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	("%s: dynamic object with no .loader section",
 	 bfd_get_filename (abfd));
       bfd_set_error (bfd_error_no_symbols);
-      goto error_return;
+      return false;
     }
 
-  buf = (bfd_byte *) bfd_malloc (lsec->_raw_size);
-  if (buf == NULL && lsec->_raw_size > 0)
-    goto error_return;
-
-  if (! bfd_get_section_contents (abfd, lsec, (PTR) buf, (file_ptr) 0,
-				  lsec->_raw_size))
-    goto error_return;
+  if (! xcoff_get_section_contents (abfd, lsec))
+    return false;
+  buf = coff_section_data (abfd, lsec)->contents;
 
   /* Remove the sections from this object, so that they do not get
      included in the link.  */
@@ -1995,7 +2429,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
       h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, true,
 				  true, true);
       if (h == NULL)
-	goto error_return;
+	return false;
 
       h->flags |= XCOFF_DEF_DYNAMIC;
 
@@ -2036,10 +2470,10 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	}
     }
 
-  if (buf != NULL)
+  if (buf != NULL && ! coff_section_data (abfd, lsec)->keep_contents)
     {
-      free (buf);
-      buf = NULL;
+      free (coff_section_data (abfd, lsec)->contents);
+      coff_section_data (abfd, lsec)->contents = NULL;
     }
 
   /* Record this file in the import files.  */
@@ -2047,7 +2481,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
   n = ((struct xcoff_import_file *)
        bfd_alloc (abfd, sizeof (struct xcoff_import_file)));
   if (n == NULL)
-    goto error_return;
+    return false;
   n->next = NULL;
 
   /* For some reason, the path entry in the import file list for a
@@ -2081,11 +2515,6 @@ xcoff_link_add_dynamic_symbols (abfd, info)
   xcoff_data (abfd)->import_file_id = c;
 
   return true;
-
- error_return:
-  if (buf != NULL)
-    free (buf);
-  return false;
 }
 
 /* Routines that are called after all the input files have been
@@ -4350,7 +4779,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 		  if (ISFCN (isymp->n_type)
 		      || ISTAG (isymp->n_sclass)
-		      || isymp->n_sclass == C_BLOCK)
+		      || isymp->n_sclass == C_BLOCK
+		      || isymp->n_sclass == C_FCN)
 		    {
 		      indx = aux.x_sym.x_fcnary.x_fcn.x_endndx.l;
 		      if (indx > 0

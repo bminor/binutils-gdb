@@ -1,3 +1,35 @@
+Wed Apr 24 14:04:07 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Look through the
+	members of an archive for dynamic objects with no symbols, and
+	pass them directly to check_archive_element.
+	(xcoff_link_check_ar_symbols): Pass dynamic objects to
+	xcoff_link_check_dynamic_ar_symbols.
+	(xcoff_link_check_dynamic_ar_symbols): New static function.
+
+	* coff-rs6000.c (rs6000coff_vec): Change BFD_JUMP_TABLE_DYNAMIC
+	from _bfd_nodynamic to _bfd_xcoff.
+	* libcoff-in.h (_bfd_xcoff_get_dynamic_symtab_upper_bound):
+	Declare.
+	(_bfd_xcoff_canonicalize_dynamic_symtab): Declare.
+	(_bfd_xcoff_get_dynamic_reloc_upper_bound): Declare.
+	(_bfd_xcoff_canonicalize_dynamic_reloc): Declare.
+	* libcoff.h: Rebuild.
+	* xcofflink.c (xcoff_swap_ldrel_in): New static function.
+	(xcoff_get_section_contents): New static function.
+	(_bfd_xcoff_get_dynamic_symtab_upper_bound): New function.
+	(_bfd_xcoff_canonicalize_dynamic_symtab): New function.
+	(_bfd_xcoff_get_dynamic_reloc_upper_bound): New function.
+	(xcoff_dynamic_reloc): New static variable.
+	(_bfd_xcoff_canonicalize_dynamic_reloc): New function.
+	(xcoff_link_add_dynamic_symbols): Use xcoff_get_section_contents.
+	
+Tue Apr 23 12:48:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sparc.c (bfd_coff_generic_reloc): Return bfd_reloc_ok even
+	if reloc_entry->addend is not 0.
+	(CALC_ADDEND): Just set the addend to reloc.r_offset.
+
 Mon Apr 22 18:29:01 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Fix spelling of

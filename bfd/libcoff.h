@@ -177,6 +177,8 @@ struct coff_section_tdata
   unsigned int i;
   const char *function;
   int line_base;
+  /* A pointer used for .stab linking optimizations.  */
+  PTR stab_info;
   /* Available for individual backends.  */
   PTR tdata;
 };
@@ -236,6 +238,8 @@ struct coff_link_hash_entry
 struct coff_link_hash_table
 {
   struct bfd_link_hash_table root;
+  /* A pointer to information used to link stabs in sections.  */
+  PTR stab_info;
 };
 
 /* Look up an entry in a COFF linker hash table.  */
@@ -473,6 +477,12 @@ extern boolean _bfd_coff_reloc_link_order
 
 /* Functions in xcofflink.c.  */
 
+extern long _bfd_xcoff_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
+extern long _bfd_xcoff_canonicalize_dynamic_symtab
+  PARAMS ((bfd *, asymbol **));
+extern long _bfd_xcoff_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
+extern long _bfd_xcoff_canonicalize_dynamic_reloc
+  PARAMS ((bfd *, arelent **, asymbol **));
 extern struct bfd_link_hash_table *_bfd_xcoff_bfd_link_hash_table_create
   PARAMS ((bfd *));
 extern boolean _bfd_xcoff_bfd_link_add_symbols
