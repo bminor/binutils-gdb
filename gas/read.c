@@ -141,7 +141,17 @@ char is_end_of_line[256] =
 static char *buffer;	/* 1st char of each buffer of lines is here. */
 static char *buffer_limit;	/*->1 + last char in buffer. */
 
-int target_big_endian;
+#ifdef TARGET_BYTES_BIG_ENDIAN
+/* Hack to deal with tc-*.h defining TARGET_BYTES_BIG_ENDIAN to empty
+   instead of to 0 or 1.  */
+#if 5 - TARGET_BYTES_BIG_ENDIAN - 5 == 10
+#undef  TARGET_BYTES_BIG_ENDIAN
+#define TARGET_BYTES_BIG_ENDIAN 1
+#endif
+int target_big_endian = TARGET_BYTES_BIG_ENDIAN;
+#else
+int target_big_endian /* = 0 */;
+#endif
 
 static char *old_buffer;	/* JF a hack */
 static char *old_input;
@@ -278,66 +288,49 @@ static const pseudo_typeS potable[] =
   {NULL}			/* end sentinel */
 };
 
+static int pop_override_ok = 0;
+static const char *pop_table_name;
+
+void
+pop_insert (table)
+     const pseudo_typeS *table;
+{
+  const char *errtxt;
+  const pseudo_typeS *pop;
+  for (pop = table; pop->poc_name; pop++)
+    {
+      errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
+      if (errtxt && (!pop_override_ok || strcmp (errtxt, "exists")))
+	as_fatal ("error constructing %s pseudo-op table", pop_table_name);
+    }
+}
+
+#ifndef md_pop_insert
+#define md_pop_insert()		pop_insert(md_pseudo_table)
+#endif
+
+#ifndef obj_pop_insert
+#define obj_pop_insert()	pop_insert(obj_pseudo_table)
+#endif
+
 static void 
 pobegin ()
 {
-  const char *errtxt;			/* error text */
-  const pseudo_typeS *pop;
-
   po_hash = hash_new ();
 
   /* Do the target-specific pseudo ops. */
-  for (pop = md_pseudo_table; pop->poc_name; pop++)
-    {
-      errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt)
-	{
-	  as_fatal ("error constructing md pseudo-op table");
-	}			/* on error */
-    }				/* for each op */
+  pop_table_name = "md";
+  md_pop_insert ();
 
   /* Now object specific.  Skip any that were in the target table. */
-  for (pop = obj_pseudo_table; pop->poc_name; pop++)
-    {
-      errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt)
-	{
-	  if (!strcmp (errtxt, "exists"))
-	    {
-#ifdef DIE_ON_OVERRIDES
-	      as_fatal ("pseudo op \".%s\" overridden.\n", pop->poc_name);
-#endif /* DIE_ON_OVERRIDES */
-	      continue;		/* OK if target table overrides. */
-	    }
-	  else
-	    {
-	      as_fatal ("error constructing obj pseudo-op table");
-	    }			/* if overridden */
-	}			/* on error */
-    }				/* for each op */
+  pop_table_name = "obj";
+  pop_override_ok = 1;
+  obj_pop_insert ();
 
   /* Now portable ones.  Skip any that we've seen already. */
-  for (pop = potable; pop->poc_name; pop++)
-    {
-      errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt)
-	{
-	  if (!strcmp (errtxt, "exists"))
-	    {
-#ifdef DIE_ON_OVERRIDES
-	      as_fatal ("pseudo op \".%s\" overridden.\n", pop->poc_name);
-#endif /* DIE_ON_OVERRIDES */
-	      continue;		/* OK if target table overrides. */
-	    }
-	  else
-	    {
-	      as_fatal ("error constructing obj pseudo-op table");
-	    }			/* if overridden */
-	}			/* on error */
-    }				/* for each op */
-
-  return;
-}				/* pobegin() */
+  pop_table_name = "standard";
+  pop_insert (potable);
+}
 
 #define HANDLE_CONDITIONAL_ASSEMBLY()					\
   if (ignore_input ())							\
@@ -969,11 +962,8 @@ s_app_file (appfile)
 	listing_source_file (s);
 #endif
     }
-#ifdef OBJ_COFF
-  c_dot_file_symbol (s);
-#endif /* OBJ_COFF */
-#ifdef OBJ_ELF
-  elf_file_symbol (s);
+#ifdef obj_app_file
+  obj_app_file (s);
 #endif
 }
 
