@@ -104,6 +104,10 @@ romp)
 	gdb_host=rtbsd
 	;;
 
+rs6000)
+	gdb_host=rs6000
+	;;
+
 a29k)
 	gdb_host=ultra3
 	;;
@@ -240,6 +244,10 @@ ns32k)
 	case "${target_vendor}" in
 	utek)	gdb_target=umax ;;
 	esac
+	;;
+
+rs6000)
+	gdb_target=rs6000
 	;;
 
 ### unhandled targets

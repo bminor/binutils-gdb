@@ -1398,7 +1398,7 @@ void
 yyerror (msg)
      char *msg;
 {
-  error ("Invalid syntax in expression.");
+  error (msg ? msg : "Invalid syntax in expression.");
 }
 
 /* Table mapping opcodes into strings for printing operators
