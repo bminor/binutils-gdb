@@ -1,3 +1,10 @@
+Thu Sep  5 01:29:42 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure:  Update aclocal.m4 and re-run autoconf to get correct
+	defs for BFD stuff.
+	* remote-wiggler.c (wiggler_error):  Error codes are hex.  Also,
+	fix default message generation.
+
 Wed Sep  4 17:28:40 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in:  Add mswin to SUBDIRS.  Add rules for

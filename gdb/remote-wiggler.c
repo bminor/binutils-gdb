@@ -198,19 +198,22 @@ wiggler_error (s, error_code)
 
   switch (error_code)
     {
-    case 1: s = "Unknown fault"; break;
-    case 2: s = "Power failed"; break;
-    case 3: s = "Cable disconnected"; break;
-    case 4: s = "Couldn't enter BDM"; break;
-    case 5: s = "Target stuck in reset"; break;
-    case 6: s = "Port not configured"; break;
-    case 7: s = "Write verify failed"; break;
-    case 11: s = "Bus error"; break;
-    case 12: s = "Checksum error"; break;
-    case 13: s = "Illegal command"; break;
-    case 14: s = "Parameter error"; break;
+    case 0x1: s = "Unknown fault"; break;
+    case 0x2: s = "Power failed"; break;
+    case 0x3: s = "Cable disconnected"; break;
+    case 0x4: s = "Couldn't enter BDM"; break;
+    case 0x5: s = "Target stuck in reset"; break;
+    case 0x6: s = "Port not configured"; break;
+    case 0x7: s = "Write verify failed"; break;
+    case 0x11: s = "Bus error"; break;
+    case 0x12: s = "Checksum error"; break;
+    case 0x13: s = "Illegal command"; break;
+    case 0x14: s = "Parameter error"; break;
+    case 0x15: s = "Internal error"; break;
+    case 0x16: s = "Register buffer error"; break;
     default:
       sprintf (buf, "Unknown error code %d", error_code);
+      s = buf;
     }
 
   error (s);
