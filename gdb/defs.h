@@ -1225,13 +1225,6 @@ extern void *alloca ();
 #endif /* Not GNU C */
 #endif /* alloca not defined */
 
-/* Get a definition of BFD_ENDIAN_BIG and BFD_ENDIAN_LITTLE.  */
-/* FIXME: cagney/2001-10-31: GDB should just use BFD's definitions.  */
-
-#ifdef HAVE_ENDIAN_H
-#include <endian.h>
-#endif
-
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
 #if (GDB_MULTI_ARCH == 0)
