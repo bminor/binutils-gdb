@@ -1,3 +1,7 @@
+Wed May  6 15:11:12 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* doc/c-vax.texi: Correct and extend vax/vms documentation.
+
 Wed May  6 11:51:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (do_assemble): Accept a new parameter requesting
