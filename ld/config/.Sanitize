@@ -83,6 +83,7 @@ ieee-h8300.mt
 irix4.mh
 m68k-coff.mt
 m68k.mt
+m68k-elf.mt
 m68k-lynx.mt
 m68k-nbsd.mt
 m68klynx.mh

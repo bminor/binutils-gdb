@@ -75,6 +75,7 @@ i386nw.sh
 lnk960.sh
 m68kaout.sh
 m68kcoff.sh
+m68kelf.sh
 m68klynx.sh
 m68knbsd.sh
 m88kbcs.sh
