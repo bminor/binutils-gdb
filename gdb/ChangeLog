@@ -1,3 +1,8 @@
+Wed Nov 16 00:12:21 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (skip_trampoline_code): Handle shared library import
+	trampolines.
+
 Tue Nov 15 16:18:52 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* c-exp.y (yylex): Fix a bug in template scanning.

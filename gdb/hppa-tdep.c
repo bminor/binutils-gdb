@@ -1684,6 +1684,45 @@ skip_trampoline_code (pc, name)
 	    }
 	}
 
+      /* Does it look like a be 0(sr0,%r21)?  That's the branch from an
+	 import stub to an export stub.
+
+	 It is impossible to determine the target of the branch via
+	 simple examination of instructions and/or data (consider
+	 that the address in the plabel may be the address of the
+	 bind-on-reference routine in the dynamic loader).
+
+	 So we have try an alternative approach.
+
+	 Get the name of the symbol at our current location; it should
+	 be a stub symbol with the same name as the symbol in the
+	 shared library.
+
+	 Then lookup a minimal symbol with the same name; we should
+	 get the minimal symbol for the target routine in the shared
+	 library as those take precedence of import/export stubs.  */
+      if (curr_inst == 0xe2a00000)
+	{
+	  struct minimal_symbol *stubsym, *libsym;
+
+	  stubsym = lookup_minimal_symbol_by_pc (loc);
+	  if (stubsym == NULL)
+	    {
+	      warning ("Unable to find symbol for 0x%x", loc);
+	      return orig_pc == pc ? 0 : pc & ~0x3;
+	    }
+
+	  libsym = lookup_minimal_symbol (SYMBOL_NAME (stubsym), NULL);
+	  if (libsym == NULL)
+	    {
+	      warning ("Unable to find library symbol for %s\n",
+		       SYMBOL_NAME (stubsym));
+	      return orig_pc == pc ? 0 : pc & ~0x3;
+	    }
+
+	  return SYMBOL_VALUE (libsym);
+	}
+
       /* Does it look like bl X,%rp or bl X,%r0?  Another way to do a
 	 branch from the stub to the actual function.  */
       else if ((curr_inst & 0xffe0e000) == 0xe8400000
