@@ -1,3 +1,10 @@
+2004-05-06  David Mosberger-Tang  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (dot_serialize): Declare.
+	(dot_serialize): New function.
+	(md_pseudo_table): Add ".serialize.data" and
+	".serialize.instruction" directives.
+
 2004-05-06  Nick Clifton  <nickc@redhat.com>
 
 	* messages (as_internal_value_out_of_range): Print a message about

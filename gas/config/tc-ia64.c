@@ -750,6 +750,7 @@ static void dot_xfloat_cons_ua PARAMS ((int));
 static void print_prmask PARAMS ((valueT mask));
 static void dot_pred_rel PARAMS ((int));
 static void dot_reg_val PARAMS ((int));
+static void dot_serialize PARAMS ((int));
 static void dot_dv_mode PARAMS ((int));
 static void dot_entry PARAMS ((int));
 static void dot_mem_offset PARAMS ((int));
@@ -4651,6 +4652,23 @@ dot_reg_val (dummy)
   demand_empty_rest_of_line ();
 }
 
+/*
+  .serialize.data
+  .serialize.instruction
+ */
+static void
+dot_serialize (type)
+     int type;
+{
+  insn_group_break (0, 0, 0);
+  if (type)
+    instruction_serialization ();
+  else
+    data_serialization ();
+  insn_group_break (0, 0, 0);
+  demand_empty_rest_of_line ();
+}
+
 /* select dv checking mode
    .auto
    .explicit
@@ -5033,6 +5051,8 @@ const pseudo_typeS md_pseudo_table[] =
     { "pred.rel.mutex", dot_pred_rel, 'm' },
     { "pred.safe_across_calls", dot_pred_rel, 's' },
     { "reg.val", dot_reg_val, 0 },
+    { "serialize.data", dot_serialize, 0 },
+    { "serialize.instruction", dot_serialize, 1 },
     { "auto", dot_dv_mode, 'a' },
     { "explicit", dot_dv_mode, 'e' },
     { "default", dot_dv_mode, 'd' },
