@@ -2671,8 +2671,10 @@ fixup_segment (fixP, this_segment_type)
 #if !(defined (TC_V850) && defined (OBJ_ELF))
 #if !(defined (TC_M68K) && defined (OBJ_ELF))
 #if !(defined (TC_ARM)  && defined (OBJ_ELF))
+#if !(defined (TC_I960) && defined (OBJ_ELF))
 #if !defined (TC_I386) || !(defined (OBJ_ELF) || defined (OBJ_COFF)) || defined (TE_PE)
 		  add_number += S_GET_VALUE (add_symbolP);
+#endif
 #endif
 #endif
 #endif

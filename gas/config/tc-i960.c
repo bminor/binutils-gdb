@@ -2638,7 +2638,9 @@ s_leafproc (n_ops, args)
 	}
       TC_S_FORCE_TO_BALNAME (balP);
 
+#ifndef OBJ_ELF
       tc_set_bal_of_call (callP, balP);
+#endif
     }				/* if only one arg, or the args are the same */
 }
 
@@ -2863,34 +2865,13 @@ md_apply_fix (fixP, val)
 
   if (!fixP->fx_bit_fixP)
     {
+#ifndef BFD_ASSEMBLER
       /* For callx, we always want to write out zero, and emit a
 	 symbolic relocation.  */
       if (fixP->fx_bsr)
 	val = 0;
 
-#ifdef OBJ_ELF
-      /* For ELF, we always emit relocations for external or weak
-         symbols.  */
-      if (fixP->fx_addsy != NULL
-	  && (S_IS_EXTERNAL (fixP->fx_addsy)
-	      || S_IS_WEAK (fixP->fx_addsy)))
-	val = 0;
-#endif
-
       fixP->fx_addnumber = val;
-
-#ifdef BFD_ASSEMBLER
-      /* HACK: With REL relocations this causes the offset in the code
-         to be doubled.
-
-	 Guess: val is the old offset in the code, addnumber gets
-	 passed back to md_gen_reloc() where it gets assigned to
-	 addend, which the backend then writes back to the code (as
-	 we're using REL, not RELA relocations).  COFF must be working
-	 without this hack, but I don't see how or why.
-
-	 apeppere and martindo 22-10-1998.  */
-      fixP->fx_addnumber = 0;
 #endif
 
       md_number_to_imm (place, val, fixP->fx_size, fixP);

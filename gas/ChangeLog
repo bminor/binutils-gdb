@@ -1,3 +1,10 @@
+1999-06-11  Martin Dorey  <mdorey@madge.com>
+
+	* write.c (fixup_segment): Don't add symbol value for i960 ELF.
+	* config/tc-i960.c (s_leafproc): Don't call tc_set_bal_of_cal if
+	OBJ_ELF.
+	(md_apply_fix): Simplify BFD_ASSEMBLER handling.
+
 1999-06-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-i386.c (md_apply_fix3): Add default case to switch.
