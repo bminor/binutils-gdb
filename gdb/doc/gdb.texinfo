@@ -6971,9 +6971,9 @@ printf (@var{string}, @var{expressions}@dots{});
 
 For example, you can print two values in hex like this:
 
-@example
+@smallexample
 printf "foo, bar-foo = 0x%x, 0x%x\n", foo, bar-foo
-@end example
+@end smallexample
 
 The only backslash-escape sequences that you can use in the format
 string are the simple ones that consist of backslash followed by a
