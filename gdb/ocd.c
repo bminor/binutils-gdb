@@ -38,13 +38,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
-static int wiggler_write_bytes PARAMS ((CORE_ADDR memaddr,
+static int ocd_write_bytes PARAMS ((CORE_ADDR memaddr,
 				       char *myaddr, int len));
 
-static int wiggler_read_bytes PARAMS ((CORE_ADDR memaddr,
+static int ocd_read_bytes PARAMS ((CORE_ADDR memaddr,
 				      char *myaddr, int len));
 
-static int wiggler_start_remote PARAMS ((char *dummy));
+static int ocd_start_remote PARAMS ((char *dummy));
 
 static int readchar PARAMS ((int timeout));
 
@@ -56,17 +56,17 @@ static int get_quoted_char PARAMS ((int timeout));
 
 static void put_quoted_char PARAMS ((int c));
 
-static void wiggler_interrupt PARAMS ((int signo));
+static void ocd_interrupt PARAMS ((int signo));
 
-static void wiggler_interrupt_twice PARAMS ((int signo));
+static void ocd_interrupt_twice PARAMS ((int signo));
 
 static void interrupt_query PARAMS ((void));
 
 static unsigned char * do_command PARAMS ((int cmd, int *statusp, int *lenp));
 
-static void wiggler_put_packet PARAMS ((unsigned char *packet, int pktlen));
+static void ocd_put_packet PARAMS ((unsigned char *packet, int pktlen));
 
-static unsigned char * wiggler_get_packet PARAMS ((int cmd, int *pktlen, int timeout));
+static unsigned char * ocd_get_packet PARAMS ((int cmd, int *pktlen, int timeout));
 
 static struct target_ops *current_ops = NULL;
 
@@ -82,12 +82,12 @@ static int last_run_status;
 extern int remote_timeout;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
-   wiggler_open knows that we don't have a file open when the program
+   ocd_open knows that we don't have a file open when the program
    starts.  */
-static serial_t wiggler_desc = NULL;
+static serial_t ocd_desc = NULL;
 
 void
-wiggler_error (s, error_code)
+ocd_error (s, error_code)
      char *s;
      int error_code;
 {
@@ -123,7 +123,7 @@ wiggler_error (s, error_code)
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
 
 int
-wiggler_thread_alive (th)
+ocd_thread_alive (th)
      int th;
 {
   return 1;
@@ -133,18 +133,18 @@ wiggler_thread_alive (th)
 
 /* ARGSUSED */
 void
-wiggler_close (quitting)
+ocd_close (quitting)
      int quitting;
 {
-  if (wiggler_desc)
-    SERIAL_CLOSE (wiggler_desc);
-  wiggler_desc = NULL;
+  if (ocd_desc)
+    SERIAL_CLOSE (ocd_desc);
+  ocd_desc = NULL;
 }
 
 /* Stub for catch_errors.  */
 
 static int
-wiggler_start_remote (dummy)
+ocd_start_remote (dummy)
      char *dummy;
 {
   unsigned char buf[10], *p;
@@ -152,17 +152,17 @@ wiggler_start_remote (dummy)
   int status;
   int error_code;
   int speed;
-  enum wiggler_target_type target_type;
+  enum ocd_target_type target_type;
 
-  target_type = (enum wiggler_target_type)dummy;
+  target_type = (enum ocd_target_type)dummy;
 
   immediate_quit = 1;		/* Allow user to interrupt it */
 
-  SERIAL_SEND_BREAK (wiggler_desc); /* Wake up the wiggler */
+  SERIAL_SEND_BREAK (ocd_desc); /* Wake up the wiggler */
 
-  do_command (WIGGLER_AYT, &status, &pktlen);
+  do_command (OCD_AYT, &status, &pktlen);
 
-  p = do_command (WIGGLER_GET_VERSION, &status, &pktlen);
+  p = do_command (OCD_GET_VERSION, &status, &pktlen);
 
   printf_unfiltered ("[Wiggler version %x.%x, capability 0x%x]\n",
 		     p[0], p[1], (p[2] << 16) | p[3]);
@@ -170,51 +170,51 @@ wiggler_start_remote (dummy)
 #if 1
   speed = 80;			/* Divide clock by 4000 */
 
-  buf[0] = WIGGLER_INIT;
+  buf[0] = OCD_INIT;
   buf[1] = speed >> 8;
   buf[2] = speed & 0xff;
   buf[3] = target_type;
-  wiggler_put_packet (buf, 4);	/* Init Wiggler params */
-  p = wiggler_get_packet (buf[0], &pktlen, remote_timeout);
+  ocd_put_packet (buf, 4);	/* Init OCD params */
+  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
 
   if (pktlen < 2)
-    error ("Truncated response packet from Wiggler");
+    error ("Truncated response packet from OCD device");
 
   status = p[1];
   error_code = p[2];
 
   if (error_code != 0)
-    wiggler_error ("WIGGLER_INIT:", error_code);
+    ocd_error ("OCD_INIT:", error_code);
 #endif
 
 #if 0
   /* Reset the target */
 
-  do_command (WIGGLER_RESET_RUN, &status, &pktlen);
-/*  do_command (WIGGLER_RESET, &status, &pktlen);*/
+  do_command (OCD_RESET_RUN, &status, &pktlen);
+/*  do_command (OCD_RESET, &status, &pktlen);*/
 #endif
 
   /* If processor is still running, stop it.  */
 
-  if (!(status & WIGGLER_FLAG_BDM))
-    wiggler_stop ();
+  if (!(status & OCD_FLAG_BDM))
+    ocd_stop ();
 
 #if 1
-  buf[0] = WIGGLER_SET_CTL_FLAGS;
+  buf[0] = OCD_SET_CTL_FLAGS;
   buf[1] = 0;
   buf[2] = 1;		/* Asynchronously return status when target stops */
-  wiggler_put_packet (buf, 3);
+  ocd_put_packet (buf, 3);
 
-  p = wiggler_get_packet (buf[0], &pktlen, remote_timeout);
+  p = ocd_get_packet (buf[0], &pktlen, remote_timeout);
 
   if (pktlen < 2)
-    error ("Truncated response packet from Wiggler");
+    error ("Truncated response packet from OCD device");
 
   status = p[1];
   error_code = p[2];
 
   if (error_code != 0)
-    wiggler_error ("WIGGLER_SET_CTL_FLAGS:", error_code);
+    ocd_error ("OCD_SET_CTL_FLAGS:", error_code);
 #endif
 
   immediate_quit = 0;
@@ -237,18 +237,18 @@ wiggler_start_remote (dummy)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-static DCACHE *wiggler_dcache;
+static DCACHE *ocd_dcache;
 
 void
-wiggler_open (name, from_tty, target_type, ops)
+ocd_open (name, from_tty, target_type, ops)
      char *name;
      int from_tty;
-     enum wiggler_target_type target_type;
+     enum ocd_target_type target_type;
      struct target_ops *ops;
 {
   if (name == 0)
-    error ("To open a Wiggler connection, you need to specify what serial\n\
-device the Wiggler is attached to (e.g. /dev/ttya).");
+    error ("To open an OCD connection, you need to specify the\n\
+device the OCD device is attached to (e.g. /dev/ttya).");
 
   target_preopen (from_tty);
 
@@ -256,26 +256,26 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
 
   unpush_target (current_ops);
 
-  wiggler_dcache = dcache_init (wiggler_read_bytes, wiggler_write_bytes);
+  ocd_dcache = dcache_init (ocd_read_bytes, ocd_write_bytes);
 
-  wiggler_desc = SERIAL_OPEN (name);
-  if (!wiggler_desc)
+  ocd_desc = SERIAL_OPEN (name);
+  if (!ocd_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (wiggler_desc, baud_rate))
+      if (SERIAL_SETBAUDRATE (ocd_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (wiggler_desc);
+	  SERIAL_CLOSE (ocd_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (wiggler_desc);
+  SERIAL_RAW (ocd_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (wiggler_desc);
+  SERIAL_FLUSH_INPUT (ocd_desc);
 
   if (from_tty)
     {
@@ -296,7 +296,7 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
-  if (!catch_errors (wiggler_start_remote, (char *)target_type,
+  if (!catch_errors (ocd_start_remote, (char *)target_type,
 		     "Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
 }
@@ -307,7 +307,7 @@ device the Wiggler is attached to (e.g. /dev/ttya).");
    die when it hits one.  */
 
 void
-wiggler_detach (args, from_tty)
+ocd_detach (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -322,54 +322,54 @@ wiggler_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-wiggler_resume (pid, step, siggnal)
+ocd_resume (pid, step, siggnal)
      int pid, step;
      enum target_signal siggnal;
 {
   int pktlen;
 
-  dcache_flush (wiggler_dcache);
+  dcache_flush (ocd_dcache);
 
   if (step)
-    do_command (WIGGLER_STEP, &last_run_status, &pktlen);
+    do_command (OCD_STEP, &last_run_status, &pktlen);
   else
-    do_command (WIGGLER_RUN, &last_run_status, &pktlen);
+    do_command (OCD_RUN, &last_run_status, &pktlen);
 }
 
 void
-wiggler_stop ()
+ocd_stop ()
 {
   int status;
   int pktlen;
 
-  do_command (WIGGLER_STOP, &status, &pktlen);
+  do_command (OCD_STOP, &status, &pktlen);
 
-  if (!(status & WIGGLER_FLAG_BDM))
+  if (!(status & OCD_FLAG_BDM))
     error ("Can't stop target via BDM");
 }
 
-static volatile int wiggler_interrupt_flag;
+static volatile int ocd_interrupt_flag;
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
 
 static void
-wiggler_interrupt (signo)
+ocd_interrupt (signo)
      int signo;
 {
   /* If this doesn't work, try more severe steps.  */
-  signal (signo, wiggler_interrupt_twice);
+  signal (signo, ocd_interrupt_twice);
   
   if (remote_debug)
-    printf_unfiltered ("wiggler_interrupt called\n");
+    printf_unfiltered ("ocd_interrupt called\n");
 
   {
     char buf[1];
 
-    wiggler_stop ();
-    buf[0] = WIGGLER_AYT;
-    wiggler_put_packet (buf, 1);
-    wiggler_interrupt_flag = 1;
+    ocd_stop ();
+    buf[0] = OCD_AYT;
+    ocd_put_packet (buf, 1);
+    ocd_interrupt_flag = 1;
   }
 }
 
@@ -377,14 +377,14 @@ static void (*ofunc)();
 
 /* The user typed ^C twice.  */
 static void
-wiggler_interrupt_twice (signo)
+ocd_interrupt_twice (signo)
      int signo;
 {
   signal (signo, ofunc);
   
   interrupt_query ();
 
-  signal (signo, wiggler_interrupt);
+  signal (signo, ocd_interrupt);
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -413,54 +413,54 @@ static int kill_kludge;
    means in the case of this target).  */
 
 int
-wiggler_wait ()
+ocd_wait ()
 {
   unsigned char *p;
   int error_code, status;
   int pktlen;
 
-  wiggler_interrupt_flag = 0;
+  ocd_interrupt_flag = 0;
 
   /* Target may already be stopped by the time we get here. */
 
-  if (!(last_run_status & WIGGLER_FLAG_BDM))
+  if (!(last_run_status & OCD_FLAG_BDM))
     {
-      ofunc = (void (*)()) signal (SIGINT, wiggler_interrupt);
+      ofunc = (void (*)()) signal (SIGINT, ocd_interrupt);
 
-      p = wiggler_get_packet (WIGGLER_AYT, &pktlen, -1);
+      p = ocd_get_packet (OCD_AYT, &pktlen, -1);
 
       signal (SIGINT, ofunc);
 
       if (pktlen < 2)
-	error ("Truncated response packet from Wiggler");
+	error ("Truncated response packet from OCD device");
 
       status = p[1];
       error_code = p[2];
 
       if (error_code != 0)
-	wiggler_error ("target_wait:", error_code);
+	ocd_error ("target_wait:", error_code);
 
-      if (status & WIGGLER_FLAG_PWF)
-	error ("Wiggler lost VCC at BDM interface.");
-      else if (status & WIGGLER_FLAG_CABLE_DISC)
+      if (status & OCD_FLAG_PWF)
+	error ("OCD device lost VCC at BDM interface.");
+      else if (status & OCD_FLAG_CABLE_DISC)
 	error ("BDM cable appears to have been disconnected.");
 
-      if (!(status & WIGGLER_FLAG_BDM))
-	error ("Wiggler woke up, but wasn't stopped: 0x%x", status);
+      if (!(status & OCD_FLAG_BDM))
+	error ("OCD device woke up, but wasn't stopped: 0x%x", status);
     }
 
-  if (wiggler_interrupt_flag)
+  if (ocd_interrupt_flag)
     return 1;
   else
     return 0;
 }
 
-/* Read registers from the Wiggler.  Specify the starting and ending register
-   number.  Return the number of regs actually read in *NUMREGS.  Returns a
-   pointer to a static array containing the register contents.  */
+/* Read registers from the OCD device.  Specify the starting and ending
+   register number.  Return the number of regs actually read in *NUMREGS.
+   Returns a pointer to a static array containing the register contents.  */
 
 unsigned char *
-wiggler_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
+ocd_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
      int first_bdm_regno;
      int last_bdm_regno;
      int *reglen;
@@ -472,20 +472,20 @@ wiggler_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
   int error_code, status;
   int pktlen;
 
-  buf[0] = WIGGLER_READ_REGS;
+  buf[0] = OCD_READ_REGS;
   buf[1] = first_bdm_regno >> 8;
   buf[2] = first_bdm_regno & 0xff;
   buf[3] = last_bdm_regno >> 8;
   buf[4] = last_bdm_regno & 0xff;
 
-  wiggler_put_packet (buf, 5);
-  p = wiggler_get_packet (WIGGLER_READ_REGS, &pktlen, remote_timeout);
+  ocd_put_packet (buf, 5);
+  p = ocd_get_packet (OCD_READ_REGS, &pktlen, remote_timeout);
 
   status = p[1];
   error_code = p[2];
 
   if (error_code != 0)
-    wiggler_error ("read_bdm_registers:", error_code);
+    ocd_error ("read_bdm_registers:", error_code);
 
   i = p[3];
   if (i == 0)
@@ -505,21 +505,21 @@ wiggler_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
 /* Read register BDM_REGNO and returns its value ala read_register() */
 
 CORE_ADDR
-wiggler_read_bdm_register (bdm_regno)
+ocd_read_bdm_register (bdm_regno)
      int bdm_regno;
 {
   int reglen;
   unsigned char *p;
   CORE_ADDR regval;
 
-  p = wiggler_read_bdm_registers (bdm_regno, bdm_regno, &reglen);
+  p = ocd_read_bdm_registers (bdm_regno, bdm_regno, &reglen);
   regval = extract_unsigned_integer (p, reglen);
 
   return regval;
 }
 
 void
-wiggler_write_bdm_registers (first_bdm_regno, regptr, reglen)
+ocd_write_bdm_registers (first_bdm_regno, regptr, reglen)
      int first_bdm_regno;
      unsigned char *regptr;
      int reglen;
@@ -531,27 +531,27 @@ wiggler_write_bdm_registers (first_bdm_regno, regptr, reglen)
 
   buf = alloca (4 + reglen);
 
-  buf[0] = WIGGLER_WRITE_REGS;
+  buf[0] = OCD_WRITE_REGS;
   buf[1] = first_bdm_regno >> 8;
   buf[2] = first_bdm_regno & 0xff;
   buf[3] = reglen;
   memcpy (buf + 4, regptr, reglen);
 
-  wiggler_put_packet (buf, 4 + reglen);
-  p = wiggler_get_packet (WIGGLER_WRITE_REGS, &pktlen, remote_timeout);
+  ocd_put_packet (buf, 4 + reglen);
+  p = ocd_get_packet (OCD_WRITE_REGS, &pktlen, remote_timeout);
 
   if (pktlen < 3)
-    error ("Truncated response packet from Wiggler");
+    error ("Truncated response packet from OCD device");
 
   status = p[1];
   error_code = p[2];
 
   if (error_code != 0)
-    wiggler_error ("wiggler_write_bdm_registers:", error_code);
+    ocd_error ("ocd_write_bdm_registers:", error_code);
 }
 
 void
-wiggler_write_bdm_register (bdm_regno, reg)
+ocd_write_bdm_register (bdm_regno, reg)
      int bdm_regno;
      CORE_ADDR reg;
 {
@@ -559,11 +559,11 @@ wiggler_write_bdm_register (bdm_regno, reg)
 
   store_unsigned_integer (buf, 4, reg);
 
-  wiggler_write_bdm_registers (bdm_regno, buf, 4);
+  ocd_write_bdm_registers (bdm_regno, buf, 4);
 }
 
 void 
-wiggler_prepare_to_store ()
+ocd_prepare_to_store ()
 {
 }
 
@@ -575,10 +575,10 @@ wiggler_prepare_to_store ()
 
    Returns number of bytes transferred, or 0 for error.  */
 
-static int write_mem_command = WIGGLER_WRITE_MEM;
+static int write_mem_command = OCD_WRITE_MEM;
 
 static int
-wiggler_write_bytes (memaddr, myaddr, len)
+ocd_write_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
@@ -609,10 +609,10 @@ wiggler_write_bytes (memaddr, myaddr, len)
       buf[7] = numbytes;
 
       memcpy (&buf[8], myaddr, numbytes);
-      wiggler_put_packet (buf, 8 + numbytes);
-      p = wiggler_get_packet (WIGGLER_WRITE_MEM, &pktlen, remote_timeout);
+      ocd_put_packet (buf, 8 + numbytes);
+      p = ocd_get_packet (OCD_WRITE_MEM, &pktlen, remote_timeout);
       if (pktlen < 3)
-	error ("Truncated response packet from Wiggler");
+	error ("Truncated response packet from OCD device");
 
       status = p[1];
       error_code = p[2];
@@ -634,7 +634,7 @@ wiggler_write_bytes (memaddr, myaddr, len)
 	  break;
 	}
       else if (error_code != 0)
-	wiggler_error ("wiggler_write_bytes:", error_code);
+	ocd_error ("ocd_write_bytes:", error_code);
 
       len -= numbytes;
       memaddr += numbytes;
@@ -653,7 +653,7 @@ wiggler_write_bytes (memaddr, myaddr, len)
    Returns number of bytes transferred, or 0 for error.  */
 
 static int
-wiggler_read_bytes (memaddr, myaddr, len)
+ocd_read_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
@@ -664,7 +664,7 @@ wiggler_read_bytes (memaddr, myaddr, len)
 
   origlen = len;
 
-  buf[0] = WIGGLER_READ_MEM;
+  buf[0] = OCD_READ_MEM;
   buf[5] = 1;			/* Read as bytes */
 
   while (len > 0)
@@ -682,10 +682,10 @@ wiggler_read_bytes (memaddr, myaddr, len)
 
       buf[6] = numbytes;
 
-      wiggler_put_packet (buf, 7);
-      p = wiggler_get_packet (WIGGLER_READ_MEM, &pktlen, remote_timeout);
+      ocd_put_packet (buf, 7);
+      p = ocd_get_packet (OCD_READ_MEM, &pktlen, remote_timeout);
       if (pktlen < 4)
-	error ("Truncated response packet from Wiggler");
+	error ("Truncated response packet from OCD device");
 
       status = p[1];
       error_code = p[2];
@@ -707,7 +707,7 @@ wiggler_read_bytes (memaddr, myaddr, len)
 	  break;
 	}
       else if (error_code != 0)
-	wiggler_error ("wiggler_read_bytes:", error_code);
+	ocd_error ("ocd_read_bytes:", error_code);
 
       memcpy (myaddr, &p[4], numbytes);
 
@@ -725,18 +725,18 @@ wiggler_read_bytes (memaddr, myaddr, len)
 
 /* ARGSUSED */
 int
-wiggler_xfer_memory (memaddr, myaddr, len, should_write, target)
+ocd_xfer_memory (memaddr, myaddr, len, should_write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int should_write;
      struct target_ops *target;			/* ignored */
 {
-  return dcache_xfer_memory (wiggler_dcache, memaddr, myaddr, len, should_write);
+  return dcache_xfer_memory (ocd_dcache, memaddr, myaddr, len, should_write);
 }
 
 void
-wiggler_files_info (ignore)
+ocd_files_info (ignore)
      struct target_ops *ignore;
 {
   puts_filtered ("Debugging a target over a serial line.\n");
@@ -753,7 +753,7 @@ readchar (timeout)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (wiggler_desc, timeout);
+  ch = SERIAL_READCHAR (ocd_desc, timeout);
 
   switch (ch)
     {
@@ -808,7 +808,7 @@ reset_packet ()
 static void
 output_packet ()
 {
-  if (SERIAL_WRITE (wiggler_desc, pkt, pktp - pkt))
+  if (SERIAL_WRITE (ocd_desc, pkt, pktp - pkt))
     perror_with_name ("output_packet: write failed");
 
   reset_packet ();
@@ -832,14 +832,14 @@ put_quoted_char (c)
   *pktp++ = c;
 }
 
-/* Send a packet to the Wiggler.  The packet framed by a SYN character, a byte
-   count and a checksum.  The byte count only counts the number of bytes
-   between the count and the checksum.  A count of zero actually means 256.
-   Any SYNs within the packet (including the checksum and count) must be
-   quoted.  The quote character must be quoted as well.  Quoting is done by
-   replacing the character with the two-character sequence DLE, {char} | 0100.
-   Note that the quoting mechanism has no effect on the byte count.
- */
+/* Send a packet to the OCD device.  The packet framed by a SYN character,
+   a byte count and a checksum.  The byte count only counts the number of
+   bytes between the count and the checksum.  A count of zero actually
+   means 256.  Any SYNs within the packet (including the checksum and
+   count) must be quoted.  The quote character must be quoted as well.
+   Quoting is done by replacing the character with the two-character sequence
+   DLE, {char} | 0100.  Note that the quoting mechanism has no effect on the
+   byte count. */
 
 static void
 stu_put_packet (buf, len)
@@ -877,17 +877,17 @@ stu_put_packet (buf, len)
 
 #else
 
-/* Send a packet to the Wiggler.  The packet framed by a SYN character, a byte
-   count and a checksum.  The byte count only counts the number of bytes
-   between the count and the checksum.  A count of zero actually means 256.
-   Any SYNs within the packet (including the checksum and count) must be
-   quoted.  The quote character must be quoted as well.  Quoting is done by
-   replacing the character with the two-character sequence DLE, {char} | 0100.
-   Note that the quoting mechanism has no effect on the byte count.
- */
+/* Send a packet to the OCD device.  The packet framed by a SYN character,
+   a byte count and a checksum.  The byte count only counts the number of
+   bytes between the count and the checksum.  A count of zero actually
+   means 256.  Any SYNs within the packet (including the checksum and
+   count) must be quoted.  The quote character must be quoted as well.
+   Quoting is done by replacing the character with the two-character sequence
+   DLE, {char} | 0100.  Note that the quoting mechanism has no effect on the
+   byte count.  */
 
 static void
-wiggler_put_packet (buf, len)
+ocd_put_packet (buf, len)
      unsigned char *buf;
      int len;
 {
@@ -911,16 +911,16 @@ wiggler_put_packet (buf, len)
     }
 
   *packet_ptr++ = -checksum;
-  if (SERIAL_WRITE (wiggler_desc, packet, packet_ptr - packet))
+  if (SERIAL_WRITE (ocd_desc, packet, packet_ptr - packet))
     perror_with_name ("output_packet: write failed");
 }
 #endif
 
 #if 0
-/* Get a packet from the Wiggler.  Timeout is only enforced for the first byte
-   of the packet.  Subsequent bytes are expected to arrive in time <= 
-   remote_timeout.  Returns a pointer to a static buffer containing the payload
-   of the packet.  *LENP contains the length of the packet.
+/* Get a packet from the OCD device.  Timeout is only enforced for the
+   first byte of the packet.  Subsequent bytes are expected to arrive in
+   time <= remote_timeout.  Returns a pointer to a static buffer containing
+   the payload of the packet.  *LENP contains the length of the packet.
 */
 
 static unsigned char *
@@ -982,14 +982,14 @@ stu_get_packet (cmd, lenp, timeout)
 
 #else
 
-/* Get a packet from the Wiggler.  Timeout is only enforced for the first byte
-   of the packet.  Subsequent bytes are expected to arrive in time <= 
-   remote_timeout.  Returns a pointer to a static buffer containing the payload
-   of the packet.  *LENP contains the length of the packet.
+/* Get a packet from the OCD device.  Timeout is only enforced for the
+   first byte of the packet.  Subsequent bytes are expected to arrive in
+   time <= remote_timeout.  Returns a pointer to a static buffer containing
+   the payload of the packet.  *LENP contains the length of the packet.
 */
 
 static unsigned char *
-wiggler_get_packet (cmd, lenp, timeout)
+ocd_get_packet (cmd, lenp, timeout)
      int cmd;
      int *lenp;
 {
@@ -1005,7 +1005,7 @@ wiggler_get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("wiggler_get_packet (readchar): %d", ch);
+    error ("ocd_get_packet (readchar): %d", ch);
 
   if (ch != 0x55)
     goto find_packet;
@@ -1020,7 +1020,7 @@ wiggler_get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("wiggler_get_packet (readchar): %d", ch);
+    error ("ocd_get_packet (readchar): %d", ch);
 
   *packet_ptr++ = ch;
   checksum += ch;
@@ -1030,7 +1030,7 @@ wiggler_get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("wiggler_get_packet (readchar): %d", ch);
+    error ("ocd_get_packet (readchar): %d", ch);
   *packet_ptr++ = ch;
   checksum += ch;
 
@@ -1039,7 +1039,7 @@ wiggler_get_packet (cmd, lenp, timeout)
   ch = readchar (timeout);
 
   if (ch < 0)
-    error ("wiggler_get_packet (readchar): %d", ch);
+    error ("ocd_get_packet (readchar): %d", ch);
   *packet_ptr++ = ch;
   checksum += ch;
 
@@ -1059,41 +1059,41 @@ wiggler_get_packet (cmd, lenp, timeout)
     case 0x0:			/* Normal result */
       switch (packet[0])
 	{
-	case WIGGLER_AYT:	/* Are You There? */
-	case WIGGLER_SET_BAUD_RATE: /* Set Baud Rate */
-	case WIGGLER_INIT:	/* Initialize wiggler */
-	case WIGGLER_SET_SPEED:	/* Set Speed */
-	case WIGGLER_SET_FUNC_CODE: /* Set Function Code */
-	case WIGGLER_SET_CTL_FLAGS: /* Set Control Flags */
-	case WIGGLER_SET_BUF_ADDR: /* Set Register Buffer Address */
-	case WIGGLER_RUN:	/* Run Target from PC  */
-	case WIGGLER_RUN_ADDR:	/* Run Target from Specified Address  */
-	case WIGGLER_STOP:	/* Stop Target */
-	case WIGGLER_RESET_RUN:	/* Reset Target and Run */
-	case WIGGLER_RESET:	/* Reset Target and Halt */
-	case WIGGLER_STEP:	/* Single Step */
-	case WIGGLER_WRITE_REGS: /* Write Register */
-	case WIGGLER_WRITE_MEM:	/* Write Memory */
-	case WIGGLER_FILL_MEM:	/* Fill Memory */
-	case WIGGLER_MOVE_MEM:	/* Move Memory */
-	case WIGGLER_WRITE_INT_MEM: /* Write Internal Memory */
-	case WIGGLER_JUMP:	/* Jump to Subroutine */
-	case WIGGLER_ERASE_FLASH: /* Erase flash memory */
-	case WIGGLER_PROGRAM_FLASH: /* Write flash memory */
-	case WIGGLER_EXIT_MON:	/* Exit the flash programming monitor  */
-	case WIGGLER_ENTER_MON:	/* Enter the flash programming monitor  */
+	case OCD_AYT:	/* Are You There? */
+	case OCD_SET_BAUD_RATE: /* Set Baud Rate */
+	case OCD_INIT:	/* Initialize OCD device */
+	case OCD_SET_SPEED:	/* Set Speed */
+	case OCD_SET_FUNC_CODE: /* Set Function Code */
+	case OCD_SET_CTL_FLAGS: /* Set Control Flags */
+	case OCD_SET_BUF_ADDR: /* Set Register Buffer Address */
+	case OCD_RUN:	/* Run Target from PC  */
+	case OCD_RUN_ADDR:	/* Run Target from Specified Address  */
+	case OCD_STOP:	/* Stop Target */
+	case OCD_RESET_RUN:	/* Reset Target and Run */
+	case OCD_RESET:	/* Reset Target and Halt */
+	case OCD_STEP:	/* Single Step */
+	case OCD_WRITE_REGS: /* Write Register */
+	case OCD_WRITE_MEM:	/* Write Memory */
+	case OCD_FILL_MEM:	/* Fill Memory */
+	case OCD_MOVE_MEM:	/* Move Memory */
+	case OCD_WRITE_INT_MEM: /* Write Internal Memory */
+	case OCD_JUMP:	/* Jump to Subroutine */
+	case OCD_ERASE_FLASH: /* Erase flash memory */
+	case OCD_PROGRAM_FLASH: /* Write flash memory */
+	case OCD_EXIT_MON:	/* Exit the flash programming monitor  */
+	case OCD_ENTER_MON:	/* Enter the flash programming monitor  */
 	  len = 0;
 	  break;
-	case WIGGLER_GET_VERSION: /* Get Version */
+	case OCD_GET_VERSION: /* Get Version */
 	  len = 10;
 	  break;
-	case WIGGLER_GET_STATUS_MASK: /* Get Status Mask */
+	case OCD_GET_STATUS_MASK: /* Get Status Mask */
 	  len = 1;
 	  break;
-	case WIGGLER_GET_CTRS:	/* Get Error Counters */
-	case WIGGLER_READ_REGS:	/* Read Register */
-	case WIGGLER_READ_MEM:	/* Read Memory */
-	case WIGGLER_READ_INT_MEM: /* Read Internal Memory */
+	case OCD_GET_CTRS:	/* Get Error Counters */
+	case OCD_READ_REGS:	/* Read Register */
+	case OCD_READ_MEM:	/* Read Memory */
+	case OCD_READ_INT_MEM: /* Read Internal Memory */
 	  len = 257;
 	  break;
 	default:
@@ -1107,7 +1107,7 @@ wiggler_get_packet (cmd, lenp, timeout)
       ch = readchar (timeout);
 
       if (ch < 0)
-	error ("wiggler_get_packet (readchar): %d", ch);
+	error ("ocd_get_packet (readchar): %d", ch);
       *packet_ptr++ = ch;
       checksum += ch;
       len = ch;
@@ -1120,7 +1120,7 @@ wiggler_get_packet (cmd, lenp, timeout)
       ch = readchar (timeout);
 
       if (ch < 0)
-	error ("wiggler_get_packet (readchar): %d", ch);
+	error ("ocd_get_packet (readchar): %d", ch);
       *packet_ptr++ = ch;
       checksum += ch;
     }
@@ -1150,11 +1150,11 @@ do_command (cmd, statusp, lenp)
   char errbuf[100];
 
   buf[0] = cmd;
-  wiggler_put_packet (buf, 1);		/* Send command */
-  p = wiggler_get_packet (*buf, lenp, remote_timeout);
+  ocd_put_packet (buf, 1);		/* Send command */
+  p = ocd_get_packet (*buf, lenp, remote_timeout);
 
   if (*lenp < 3)
-    error ("Truncated response packet from Wiggler");
+    error ("Truncated response packet from OCD device");
 
   status = p[1];
   error_code = p[2];
@@ -1162,12 +1162,12 @@ do_command (cmd, statusp, lenp)
   if (error_code != 0)
     {
       sprintf (errbuf, "do_command (0x%x):", cmd);
-      wiggler_error (errbuf, error_code);
+      ocd_error (errbuf, error_code);
     }
 
-  if (status & WIGGLER_FLAG_PWF)
-    error ("Wiggler can't detect VCC at BDM interface.");
-  else if (status & WIGGLER_FLAG_CABLE_DISC)
+  if (status & OCD_FLAG_PWF)
+    error ("OCD device can't detect VCC at BDM interface.");
+  else if (status & OCD_FLAG_CABLE_DISC)
     error ("BDM cable appears to be disconnected.");
 
   *statusp = status;
@@ -1176,7 +1176,7 @@ do_command (cmd, statusp, lenp)
 }
 
 void
-wiggler_kill ()
+ocd_kill ()
 {
   /* For some mysterious reason, wait_for_inferior calls kill instead of
      mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
@@ -1193,7 +1193,7 @@ wiggler_kill ()
 }
 
 void
-wiggler_mourn ()
+ocd_mourn ()
 {
   unpush_target (current_ops);
   generic_mourn_inferior ();
@@ -1203,7 +1203,7 @@ wiggler_mourn ()
    the program at that point.  */
 
 void
-wiggler_create_inferior (exec_file, args, env)
+ocd_create_inferior (exec_file, args, env)
      char *exec_file;
      char *args;
      char **env;
@@ -1216,7 +1216,7 @@ wiggler_create_inferior (exec_file, args, env)
 }
 
 void
-wiggler_load (args, from_tty)
+ocd_load (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -1236,7 +1236,7 @@ wiggler_load (args, from_tty)
 /* BDM (at least on CPU32) uses a different breakpoint */
 
 static int
-wiggler_insert_breakpoint (addr, contents_cache)
+ocd_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
@@ -1266,11 +1266,11 @@ bdm_reset_command (args, from_tty)
 {
   int status, pktlen;
 
-  if (!wiggler_desc)
-    error ("Not connected to wiggler.");
+  if (!ocd_desc)
+    error ("Not connected to OCD device.");
 
-  do_command (WIGGLER_RESET, &status, &pktlen);
-  dcache_flush (wiggler_dcache);
+  do_command (OCD_RESET, &status, &pktlen);
+  dcache_flush (ocd_dcache);
   registers_changed ();
 }
 
@@ -1281,10 +1281,10 @@ bdm_restart_command (args, from_tty)
 {
   int status, pktlen;
 
-  if (!wiggler_desc)
-    error ("Not connected to wiggler.");
+  if (!ocd_desc)
+    error ("Not connected to OCD device.");
 
-  do_command (WIGGLER_RESET_RUN, &status, &pktlen);
+  do_command (OCD_RESET_RUN, &status, &pktlen);
   last_run_status = status;
   clear_proceed_status ();
   wait_for_inferior ();
@@ -1309,28 +1309,28 @@ bdm_update_flash_command (args, from_tty)
   struct cleanup *old_chain;
   void (*store_registers_tmp) PARAMS ((int));
 
-  if (!wiggler_desc)
-    error ("Not connected to wiggler.");
+  if (!ocd_desc)
+    error ("Not connected to OCD device.");
 
   if (!args)
-    error ("Must specify file containing new Wiggler code.");
+    error ("Must specify file containing new OCD code.");
 
 /*  old_chain = make_cleanup (flash_cleanup, 0);*/
 
-  do_command (WIGGLER_ENTER_MON, &status, &pktlen);
+  do_command (OCD_ENTER_MON, &status, &pktlen);
 
-  do_command (WIGGLER_ERASE_FLASH, &status, &pktlen);
+  do_command (OCD_ERASE_FLASH, &status, &pktlen);
 
-  write_mem_command = WIGGLER_PROGRAM_FLASH;
+  write_mem_command = OCD_PROGRAM_FLASH;
   store_registers_tmp = current_target.to_store_registers;
   current_target.to_store_registers = noop_store_registers;
 
   generic_load (args, from_tty);
 
   current_target.to_store_registers = store_registers_tmp;
-  write_mem_command = WIGGLER_WRITE_MEM;
+  write_mem_command = OCD_WRITE_MEM;
 
-  do_command (WIGGLER_EXIT_MON, &status, &pktlen);
+  do_command (OCD_EXIT_MON, &status, &pktlen);
 
 /*  discard_cleanups (old_chain);*/
 }
@@ -1342,8 +1342,8 @@ bdm_read_register_command (args, from_tty)
 {
   /* XXX repeat should go on to the next register */
 
-  if (!wiggler_desc)
-    error ("Not connected to wiggler.");
+  if (!ocd_desc)
+    error ("Not connected to OCD device.");
 
   if (!args)
     error ("Must specify BDM register number.");
@@ -1351,21 +1351,21 @@ bdm_read_register_command (args, from_tty)
 }
 
 void
-_initialize_remote_wiggler ()
+_initialize_remote_ocd ()
 {
   extern struct cmd_list_element *cmdlist;
-  static struct cmd_list_element *bdm_cmd_list = NULL;
+  static struct cmd_list_element *ocd_cmd_list = NULL;
 
   add_show_from_set (add_set_cmd ("remotetimeout", no_class,
 				  var_integer, (char *)&remote_timeout,
 				  "Set timeout value for remote read.\n", &setlist),
 		     &showlist);
 
-  add_prefix_cmd ("bdm", class_obscure, bdm_command, "", &bdm_cmd_list, "bdm ",
+  add_prefix_cmd ("ocd", class_obscure, bdm_command, "", &ocd_cmd_list, "ocd ",
 		  0, &cmdlist);
 
-  add_cmd ("reset", class_obscure, bdm_reset_command, "", &bdm_cmd_list);
-  add_cmd ("restart", class_obscure, bdm_restart_command, "", &bdm_cmd_list);
-  add_cmd ("update-flash", class_obscure, bdm_update_flash_command, "", &bdm_cmd_list);
-  /*  add_cmd ("read-register", class_obscure, bdm_read_register_command, "", &bdm_cmd_list);*/
+  add_cmd ("reset", class_obscure, bdm_reset_command, "", &ocd_cmd_list);
+  add_cmd ("restart", class_obscure, bdm_restart_command, "", &ocd_cmd_list);
+  add_cmd ("update-flash", class_obscure, bdm_update_flash_command, "", &ocd_cmd_list);
+  /*  add_cmd ("read-register", class_obscure, bdm_read_register_command, "", &ocd_cmd_list);*/
 }

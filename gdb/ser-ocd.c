@@ -145,7 +145,7 @@ static void
 ocd_close (scb)
      serial_t scb;
 {
-  wiggler_close (0);
+  ocd_close (0);
 }
 
 static struct serial_ops ocd_ops =

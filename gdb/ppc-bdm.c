@@ -55,7 +55,7 @@ bdm_ppc_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  wiggler_open (name, from_tty, WIGGLER_TARGET_MOTO_PPC, &bdm_ppc_ops);
+  ocd_open (name, from_tty, OCD_TARGET_MOTO_PPC, &bdm_ppc_ops);
 }
 
 /* Wait until the remote machine stops, then return,
@@ -72,7 +72,7 @@ bdm_ppc_wait (pid, target_status)
 
   target_status->kind = TARGET_WAITKIND_STOPPED;
 
-  stop_reason = wiggler_wait ();
+  stop_reason = ocd_wait ();
 
   if (stop_reason)
     {
@@ -85,8 +85,8 @@ bdm_ppc_wait (pid, target_status)
   {
     unsigned long ecr, der;
 
-    ecr = wiggler_read_bdm_register (148); /* Read the exception cause register */
-    der = wiggler_read_bdm_register (149); /* Read the debug enables register */
+    ecr = ocd_read_bdm_register (148); /* Read the exception cause register */
+    der = ocd_read_bdm_register (149); /* Read the debug enables register */
     fprintf_unfiltered (gdb_stdout, "ecr = 0x%x, der = 0x%x\n", ecr, der);
   }
 
@@ -146,7 +146,7 @@ bdm_ppc_fetch_registers (regno)
       return;			/* Unsupported register */
     }
 
-  regs = wiggler_read_bdm_registers (first_bdm_regno, last_bdm_regno, &reglen);
+  regs = ocd_read_bdm_registers (first_bdm_regno, last_bdm_regno, &reglen);
 
   for (i = first_regno; i <= last_regno; i++)
     {
@@ -204,27 +204,27 @@ bdm_ppc_store_registers (regno)
 
       bdm_regno = bdm_regmap [i];
 
-      wiggler_write_bdm_registers (bdm_regno, registers + REGISTER_BYTE (i), 4);
+      ocd_write_bdm_registers (bdm_regno, registers + REGISTER_BYTE (i), 4);
     }
 }
 
 /* Define the target subroutine names */
 
 struct target_ops bdm_ppc_ops = {
-  "wiggler",			/* to_shortname */
+  "ocd",			/* to_shortname */
   "",				/* to_longname */
   "",				/* to_doc */
   bdm_ppc_open,			/* to_open */
-  wiggler_close,		/* to_close */
+  ocd_close,		/* to_close */
   NULL,				/* to_attach */
-  wiggler_detach,		/* to_detach */
-  wiggler_resume,		/* to_resume */
+  ocd_detach,		/* to_detach */
+  ocd_resume,		/* to_resume */
   bdm_ppc_wait,			/* to_wait */
   bdm_ppc_fetch_registers,	/* to_fetch_registers */
   bdm_ppc_store_registers,	/* to_store_registers */
-  wiggler_prepare_to_store,	/* to_prepare_to_store */
-  wiggler_xfer_memory,		/* to_xfer_memory */
-  wiggler_files_info,		/* to_files_info */
+  ocd_prepare_to_store,	/* to_prepare_to_store */
+  ocd_xfer_memory,		/* to_xfer_memory */
+  ocd_files_info,		/* to_files_info */
   memory_insert_breakpoint,	/* to_insert_breakpoint */
   memory_remove_breakpoint,	/* to_remove_breakpoint */
   NULL,				/* to_terminal_init */
@@ -232,15 +232,15 @@ struct target_ops bdm_ppc_ops = {
   NULL,				/* to_terminal_ours_for_output */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
-  wiggler_kill,			/* to_kill */
-  wiggler_load,			/* to_load */
+  ocd_kill,			/* to_kill */
+  ocd_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
-  wiggler_create_inferior,	/* to_create_inferior */
-  wiggler_mourn,		/* to_mourn_inferior */
+  ocd_create_inferior,	/* to_create_inferior */
+  ocd_mourn,		/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
-  wiggler_thread_alive,		/* to_thread_alive */
-  wiggler_stop,			/* to_stop */
+  ocd_thread_alive,		/* to_thread_alive */
+  ocd_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,				/* to_has_all_memory */
