@@ -445,6 +445,29 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 	  "*"))
 
 
+(gdb-set-instance-buffer-rules 'gdb-inferior-io 'gdb-inferior-io-name)
+
+(defun gdb-inferior-io-name (instance)
+  (concat "*input/output of "
+	  (gdb-instance-target-string instance)
+	  "*"))
+
+(defvar gud-inferior-io-mode-map nil)
+(setq gud-inferior-io-mode-map (make-keymap))
+(suppress-keymap gud-inferior-io-mode-map)
+(define-key gud-inferior-io-mode-map " " 'gud-toggle-bp-this-line)
+(define-key gud-inferior-io-mode-map "d" 'gud-delete-bp-this-line)
+
+(defun gud-inferior-io-mode ()
+  "Major mode for gud inferior-io.
+
+\\{gud-inferior-io-mode-map}"
+  (setq major-mode 'gud-inferior-io-mode)
+  (setq mode-name "Debuggee I/O")
+  (use-local-map gud-inferior-io-mode-map)
+)
+
+
 
 ;;
 ;; gdb communications
@@ -565,6 +588,12 @@ This filter may simply queue output for a later time."
     ("prompt-for-continue" gdb-subprompt)
     ("post-prompt" gdb-post-prompt)
     ("source" gdb-source)
+    ("starting" gdb-starting)
+    ("exited" gdb-stopping)
+    ("signalled" gdb-stopping)
+    ("signal" gdb-stopping)
+    ("breakpoint" gdb-stopping)
+    ("watchpoint" gdb-stopping)
     )
   "An assoc mapping annotation tags to functions which process them.")
 
@@ -594,11 +623,9 @@ This filter may simply queue output for a later time."
      ((eq sink 'user) t)
      ((eq sink 'post-emacs)
       (set-gdb-instance-output-sink instance 'user))
-     ((or (eq sink 'emacs)
-	  (eq sink 'pre-emacs))
+     (t
       (set-gdb-instance-output-sink instance 'user)
-      (error "Phase error in gdb-prompt (got %s)" sink))
-     (t (set-gdb-instance-output-sink instance 'user))))
+      (error "Phase error in gdb-prompt (got %s)" sink))))
   (let ((highest (gdb-instance-dequeue-input instance)))
     (if highest
 	(gdb-send-item instance highest)
@@ -644,12 +671,30 @@ This filter may simply queue output for a later time."
 	  (set-buffer (gdb-get-create-instance-buffer
 		       instance 'gdb-partial-output-buffer))
 	  (funcall handler))))
-     ((eq sink 'pre-emacs)
+     (t
       (set-gdb-instance-output-sink instance 'user)
-      (error "Output sink phase error 1."))
-     ((eq sink 'post-emacs)
+      (error "Output sink phase error 1.")))))
+
+;; An annotation handler for `starting'.  This says that I/O for the subprocess
+;; is now the program being debugged, not GDB.
+(defun gdb-starting (instance ignored)
+  (let ((sink (gdb-instance-output-sink instance)))
+    (cond
+     ((eq sink 'user)
+      (set-gdb-instance-output-sink instance 'inferior)
+      ;; FIXME: need to send queued input
+      )
+     (t (error "Unexpected `starting' annotation")))))
+
+;; An annotation handler for `exited' and other annotations which say that
+;; I/O for the subprocess is now GDB, not the program being debugged.
+(defun gdb-stopping (instance ignored)
+  (let ((sink (gdb-instance-output-sink instance)))
+    (cond
+     ((eq sink 'inferior)
       (set-gdb-instance-output-sink instance 'user)
-      (error "Output sink phase error 2.")))))
+      )
+     (t (error "Unexpected stopping annotation")))))
 
 ;; An annotation handler for `post-prompt'.
 ;; This begins the collection of output from the current
@@ -662,11 +707,7 @@ This filter may simply queue output for a later time."
      ((eq sink 'pre-emacs)
       (set-gdb-instance-output-sink instance 'emacs))
 
-     ((eq sink 'emacs)
-      (set-gdb-instance-output-sink instance 'user)
-      (error "Output sink phase error 3."))
-
-     ((eq sink 'post-emacs)
+     (t
       (set-gdb-instance-output-sink instance 'user)
       (error "Output sink phase error 3.")))))
 
@@ -771,6 +812,9 @@ buffer."
      ((eq sink 'emacs)
       (gdb-append-to-partial-output instance new)
       so-far)
+     ((eq sink 'inferior)
+      (gdb-append-to-inferior-io instance new)
+      so-far)
      (t (error "Bogon output sink %S" sink)))))
 
 (defun gdb-append-to-partial-output (instance string)
@@ -786,6 +830,24 @@ buffer."
     (set-buffer
      (gdb-get-create-instance-buffer
       instance 'gdb-partial-output-buffer))
+    (delete-region (point-min) (point-max))))
+
+(defun gdb-append-to-inferior-io (instance string)
+  (save-excursion
+    (set-buffer
+     (gdb-get-create-instance-buffer
+      instance 'gdb-inferior-io))
+    (goto-char (point-max))
+    (insert string))
+  (gud-display-buffer
+   (gdb-get-create-instance-buffer instance
+				   'gdb-inferior-io)))
+
+(defun gdb-clear-inferior-io (instance)
+  (save-excursion
+    (set-buffer
+     (gdb-get-create-instance-buffer
+      instance 'gdb-inferior-io))
     (delete-region (point-min) (point-max))))
 
 
@@ -1581,6 +1643,18 @@ and source-file directory for your debugger."
      (gud-find-file . gud-gdb-find-file)
      ))
 
+  (let* ((words (gud-chop-words command-line))
+	 (program (car words))
+	 (file-word (let ((w (cdr words)))
+		      (while (and w (= ?- (aref (car w) 0)))
+			(setq w (cdr w)))
+		      (car w)))
+	 (args (delq file-word (cdr words)))
+	 (file (expand-file-name file-word))
+	 (filepart (file-name-nondirectory file))
+	 (buffer-name (concat "*gud-" filepart "*")))
+    (setq gdb-first-time (not (get-buffer-process buffer-name))))
+
   (gud-common-init command-line)
 
   (gud-def gud-break  "break %f:%l"  "\C-b" "Set breakpoint at current line.")
@@ -1600,7 +1674,10 @@ and source-file directory for your debugger."
   (setq comint-prompt-regexp "^(.*gdb[+]?) *")
   (setq comint-input-sender 'gdb-send)
   (run-hooks 'gdb-mode-hook)
-  (make-gdb-instance (get-buffer-process (current-buffer)))
+  (let ((instance
+	 (make-gdb-instance (get-buffer-process (current-buffer)))
+	 ))
+    (if gdb-first-time (gdb-clear-inferior-io instance)))
   )
 
 

@@ -1,3 +1,7 @@
+Wed Jun 22 17:48:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdba.el: Put program output in a separate buffer.
+
 Wed Jun 22 16:54:15 1994  Fred Fish  (fnf@cygnus.com)
 
 	* energize-patches, main.c (main), top.c (gdb_init, pwd_command),
