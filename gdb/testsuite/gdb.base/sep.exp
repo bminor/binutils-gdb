@@ -29,18 +29,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-# Get the debug info format, using the get_debug_format.
-# Note that the function above needs the current source file to be set,
-# so we need to send a dummy command first which side effect is to set
-# the current source file.
-gdb_exit
-gdb_start
-gdb_load ${binfile}
-gdb_test "list sep.c:1" ".*" "dummy command to set the current source file"
-get_debug_format
-
-# We need to restart the debugger, because the method used to compute
-# the debug format (above) affects this testcase.
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
@@ -56,10 +44,6 @@ gdb_load ${binfile}
 # say_hello is good enough, and avoid unnecessary failures is someone
 # decides later to reformat sep-proc.c.
 
-if { [test_debug_format "DWARF 2"] } then {
-    setup_kfail "symtab/1607" *-*-*
-}
-
 gdb_test "list sep-proc.c:23" \
          "void.*say_hello.*" \
          "list using location inside included file"
@@ -71,10 +55,6 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-
-if { [test_debug_format "DWARF 2"] } then {
-    setup_kfail "symtab/1607" *-*-*
-}
 
 set test "breakpoint inside included file"
 gdb_test_multiple "break sep-proc.c:25" "$test" {
