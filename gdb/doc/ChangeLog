@@ -1,3 +1,7 @@
+2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Logging output): New chapter.
+
 2003-06-24  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.texinfo (Unsupported languages): New section.

@@ -3,6 +3,11 @@
 
 *** Changes in GDB 6.0:
 
+* GDB supports logging output to a file
+
+There are two new commands, "set logging" and "show logging", which can be
+used to capture GDB's output to a file.
+
 * The meaning of "detach" has changed for gdbserver
 
 The "detach" command will now resume the application, as documented.  To

@@ -1,3 +1,23 @@
+2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-logging.c (pop_output_files): Add void to function
+	definition.
+
+2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-logging.c: New file.
+	* cli-out.c (struct ui_out_data): Add original_stream.
+	(cli_redirect): New function.
+	(cli_ui_out_impl): Add cli_redirect.
+	(cli_out_new): Initialize original_stream.
+	* ui-out.c (default_ui_out_impl): Add NULL for redirect member.
+	(uo_redirect, ui_out_redirect): New.
+	* ui-out.h (struct ui_out_impl): Add redirect member.
+	(redirect_ftype): New.
+	(ui_out_redirect): Add prototype.
+	* Makefile.in: Add rules for cli-logging.c.
+	* NEWS: Mention "set logging".
+
 2003-07-02  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (struct frame_extra_info): new member:

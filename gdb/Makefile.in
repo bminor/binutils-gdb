@@ -146,10 +146,12 @@ TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 SUBDIR_CLI_OBS = \
 	cli-dump.o \
 	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o \
+	cli-logging.o \
 	cli-interp.o
 SUBDIR_CLI_SRCS = \
 	cli/cli-dump.c \
 	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
+	cli/cli-logging.c \
 	cli/cli-interp.c \
 	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
@@ -2410,7 +2412,7 @@ z8k-tdep.o: z8k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcmd_h) \
 # gdb/cli/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the mi directory.
+# or try to compile the object file into the cli directory.
 
 cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
 	$(gdb_wait_h) $(gdb_regex_h) $(gdb_string_h) $(filenames_h) \
@@ -2429,6 +2431,8 @@ cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) \
 cli-interp.o: $(srcdir)/cli/cli-interp.c $(defs_h) $(interps_h) $(wrapper_h) \
 	$(event_top_h) $(ui_out_h) $(cli_out_h) $(top_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-interp.c
+cli-logging.o: $(srcdir)/cli/cli-logging.c $(defs_h) $(ui_out_h) $(gdbcmd_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-logging.c
 cli-script.o: $(srcdir)/cli/cli-script.c $(defs_h) $(value_h) $(language_h) \
 	$(ui_out_h) $(gdb_string_h) $(top_h) $(cli_cmds_h) $(cli_decode_h) \
 	$(cli_script_h)
