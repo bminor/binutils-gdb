@@ -4,6 +4,8 @@ srcdir = .
 
 prefix 	= /usr/local
 
+.SUFFIXES : .m
+
 program_prefix 	=
 exec_prefix 	= $(prefix)
 program_transform_name =
