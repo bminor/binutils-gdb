@@ -61,6 +61,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static int restore_pc_queue PARAMS ((struct frame_saved_regs *fsr));
 static int hppa_alignof PARAMS ((struct type *arg));
+CORE_ADDR frame_saved_pc PARAMS ((FRAME frame));
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -345,6 +346,26 @@ rp_saved(pc)
     return 0;
 }
 
+int
+frameless_function_invocation (frame)
+     FRAME frame;
+{
+
+  if (use_unwind)
+    {
+      struct unwind_table_entry *u;
+
+      u = find_unwind_entry (frame->pc);
+
+      if (u == 0)
+	return 0;
+
+      return (u->Total_frame_size == 0);
+    }
+  else
+    return frameless_look_for_prologue (frame);
+}
+
 CORE_ADDR
 saved_pc_after_call (frame)
      FRAME frame;
@@ -362,7 +383,7 @@ frame_saved_pc (frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
 
-  if (frameless_look_for_prologue (frame))
+  if (frameless_function_invocation (frame))
     {
       int ret_regnum;
 
@@ -401,7 +422,7 @@ init_extra_frame_info (fromleaf, frame)
   else
     frame->frame = read_register (SP_REGNUM) - framesize;
 
-  if (!frameless_look_for_prologue (frame)) /* Frameless? */
+  if (!frameless_function_invocation (frame)) /* Frameless? */
     return;				    /* No, quit now */
 
   /* For frameless functions, we need to look at the caller's frame */
