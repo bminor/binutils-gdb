@@ -186,6 +186,7 @@ tahoe-pinsn.c
 target.c
 target.h
 tconfig
+tdesc-lib
 tdesc.c
 tdesc.h
 terminal.h
