@@ -38,7 +38,7 @@
         <reg>.safe_across_calls and any other DV-related directives I don't
           have documentation for.
         verify mod-sched-brs reads/writes are checked/marked (and other
-        notes) 
+        notes)
 
  */
 
@@ -184,7 +184,7 @@ static struct
     expressionS qp;
 
     unsigned int
-      manual_bundling : 1, 
+      manual_bundling : 1,
       debug_dv: 1,
       detect_dv: 1,
       explicit_mode : 1,            /* which mode we're in */
@@ -194,7 +194,7 @@ static struct
 
     /* Each bundle consists of up to three instructions.  We keep
        track of four most recent instructions so we can correctly set
-       the end_of_insn_group for the last instruction in a bundle. */
+       the end_of_insn_group for the last instruction in a bundle.  */
     int curr_slot;
     int num_slots_in_use;
     struct slot
@@ -248,7 +248,7 @@ static struct
 
     int path;                       /* number of alt. entry points seen */
     const char **entry_labels;      /* labels of all alternate paths in
-                                       the current DV-checking block. */
+                                       the current DV-checking block.  */
     int maxpaths;                   /* size currently allocated for
                                        entry_labels */
   }
@@ -286,7 +286,7 @@ ar[] =
     {"ar.ccv",		32}, {"ar.unat",	36},
     {"ar.fpsr",		40}, {"ar.itc",		44},
     {"ar.pfs",		64}, {"ar.lc",		65},
-    {"ar.ec",		66}, 
+    {"ar.ec",		66},
   };
 
 #define CR_IPSR         16
@@ -536,7 +536,7 @@ static struct qpmutex {
 } *qp_mutexes = NULL;          /* QP mutex bitmasks */
 static int qp_mutexeslen = 0;
 static int qp_mutexestotlen = 0;
-static valueT qp_safe_across_calls = 0; 
+static valueT qp_safe_across_calls = 0;
 
 /* Current state of PR implications */
 static struct qp_imply {
@@ -548,8 +548,8 @@ static struct qp_imply {
 static int qp_implieslen = 0;
 static int qp_impliestotlen = 0;
 
-/* Keep track of static GR values so that indirect register usage can 
-   sometimes be tracked. */
+/* Keep track of static GR values so that indirect register usage can
+   sometimes be tracked.  */
 static struct gr {
   unsigned known:1;
   int path;
@@ -660,7 +660,7 @@ static struct ia64_opcode * parse_operands PARAMS ((struct ia64_opcode *));
 static void build_insn PARAMS ((struct slot *, bfd_vma *));
 static void emit_one_bundle PARAMS ((void));
 static void fix_insn PARAMS ((fixS *, const struct ia64_operand *, valueT));
-static bfd_reloc_code_real_type ia64_gen_real_reloc_type PARAMS ((struct symbol *sym, 
+static bfd_reloc_code_real_type ia64_gen_real_reloc_type PARAMS ((struct symbol *sym,
 								  bfd_reloc_code_real_type r_type));
 static void insn_group_break PARAMS ((int, int, int));
 static void mark_resource PARAMS ((struct ia64_opcode *, const struct ia64_dependency *,
@@ -925,7 +925,7 @@ ia64_cons_align (nbytes)
 /* Output COUNT bytes to a memory location.  */
 static unsigned char *vbyte_mem_ptr = NULL;
 
-void 
+void
 output_vbyte_mem (count, ptr, comment)
      int count;
      char *ptr;
@@ -943,7 +943,7 @@ output_vbyte_mem (count, ptr, comment)
 
 /* Count the number of bytes required for records.  */
 static int vbyte_count = 0;
-void 
+void
 count_output (count, ptr, comment)
      int count;
      char *ptr;
@@ -965,7 +965,7 @@ output_R1_format (f, rtype, rlen)
       output_R3_format (f, rtype, rlen);
       return;
     }
-  
+
   if (rtype == body)
     r = 1;
   else if (rtype != prologue)
@@ -1005,7 +1005,7 @@ output_R3_format (f, rtype, rlen)
       output_R1_format (f, rtype, rlen);
       return;
     }
-  
+
   if (rtype == body)
     r = 1;
   else if (rtype != prologue)
@@ -1093,7 +1093,6 @@ output_P3_format (f, rtype, reg)
   (*f) (2, bytes, NULL);
 }
 
-
 static void
 output_P4_format (f, imask, imask_size)
      vbyte_func f;
@@ -1128,7 +1127,7 @@ output_P6_format (f, rtype, rmask)
 {
   char byte;
   int r = 0;
-  
+
   if (rtype == gr_mem)
     r = 1;
   else if (rtype != fr_mem)
@@ -1317,7 +1316,7 @@ output_B1_format (f, rtype, label)
 {
   char byte;
   int r = 0;
-  if (label > 0x1f) 
+  if (label > 0x1f)
     {
       output_B4_format (f, rtype, label);
       return;
@@ -1377,12 +1376,12 @@ output_B4_format (f, rtype, label)
   char bytes[20];
   int r = 0;
   int count = 1;
-  if (label <= 0x1f) 
+  if (label <= 0x1f)
     {
       output_B1_format (f, rtype, label);
       return;
     }
-  
+
   if (rtype == copy_state)
     r = 1;
   else if (rtype != label_state)
@@ -1417,7 +1416,7 @@ output_X1_format (f, rtype, ab, reg, t, w1)
   int r = 0;
   int count = 2;
   bytes[0] = UNW_X1;
-  
+
   if (rtype == spill_sprel)
     r = 1;
   else if (rtype != spill_psprel)
@@ -1489,7 +1488,7 @@ output_X4_format (f, qp, ab, reg, x, y, treg, t)
 
 /* This function allocates a record list structure, and initializes fields.  */
 static unw_rec_list *
-alloc_record (unw_record_type t) 
+alloc_record (unw_record_type t)
 {
   unw_rec_list *ptr;
   ptr = xmalloc (sizeof (*ptr));
@@ -2125,7 +2124,7 @@ output_spill_reg_p (ab, reg, targ_reg, xy, predicate)
   return ptr;
 }
 
-/* Given a unw_rec_list process the correct format with the 
+/* Given a unw_rec_list process the correct format with the
    specified function.  */
 static void
 process_one_record (ptr, f)
@@ -2134,7 +2133,7 @@ process_one_record (ptr, f)
 {
   unsigned long fr_mask, gr_mask;
 
-  switch (ptr->r.type) 
+  switch (ptr->r.type)
     {
       case gr_mem:
       case fr_mem:
@@ -2180,7 +2179,7 @@ process_one_record (ptr, f)
 	break;
       case mem_stack_f:
       case mem_stack_v:
-	output_P7_format (f, ptr->r.type, ptr->r.record.p.t, 
+	output_P7_format (f, ptr->r.type, ptr->r.record.p.t,
 			  ptr->r.record.p.size);
 	break;
       case psp_gr:
@@ -2300,7 +2299,7 @@ process_one_record (ptr, f)
     }
 }
 
-/* Given a unw_rec_list list, process all the records with 
+/* Given a unw_rec_list list, process all the records with
    the specified function.  */
 static void
 process_unw_records (list, f)
@@ -2367,7 +2366,7 @@ set_imask (region, regmask, t, type)
 	}
 
       imask[i] |= (type & 0x3) << pos;
-	
+
       regmask &= (regmask - 1);
       pos -= 2;
       if (pos < 0)
@@ -2400,7 +2399,7 @@ slot_index (unsigned long slot_addr, unsigned long first_addr)
 
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
-   this has been run, all neccessary information should be available 
+   this has been run, all neccessary information should be available
    within each record to generate an image.  */
 static void
 fixup_unw_records (list)
@@ -2426,7 +2425,7 @@ fixup_unw_records (list)
 
 	      first_addr = ptr->slot_number;
 	      ptr->slot_number = 0;
-	      /* Find either the next body/prologue start, or the end of 
+	      /* Find either the next body/prologue start, or the end of
 		 the list, and determine the size of the region.  */
 	      last_addr = unwind.next_slot_number;
 	      for (last = ptr->next; last != NULL; last = last->next)
@@ -2440,7 +2439,7 @@ fixup_unw_records (list)
 		  {
 		    /* In the absence of an explicit .body directive,
 		       the prologue ends after the last instruction
-		       covered by an unwind directive. */
+		       covered by an unwind directive.  */
 		    if (ptr->r.type != body)
 		      {
 			last_addr = last->slot_number;
@@ -2547,7 +2546,7 @@ fixup_unw_records (list)
 		as_bad ("gr_gr record before region record!\n");
 		return;
 	      }
-	    set_imask (region, ptr->r.record.p.grmask, t, 2); 
+	    set_imask (region, ptr->r.record.p.grmask, t, 2);
 	    break;
 	  case br_gr:
 	    if (!region)
@@ -2555,7 +2554,7 @@ fixup_unw_records (list)
 		as_bad ("br_gr record before region record!\n");
 		return;
 	      }
-	    set_imask (region, ptr->r.record.p.brmask, t, 3); 
+	    set_imask (region, ptr->r.record.p.brmask, t, 3);
 	    break;
 
 	  default:
@@ -2652,7 +2651,7 @@ convert_expr_to_ab_reg (e, ab, regp)
 	}
     }
   return 1;
-} 
+}
 
 static int
 convert_expr_to_xy_reg (e, xy, regp)
@@ -2685,7 +2684,7 @@ convert_expr_to_xy_reg (e, xy, regp)
   else
     return -1;
   return 1;
-} 
+}
 
 static void
 dot_radix (dummy)
@@ -2727,21 +2726,21 @@ add_unwind_entry (ptr)
     unwind.current_entry = ptr;
 }
 
-static void 
+static void
 dot_fframe (dummy)
      int dummy;
 {
   expressionS e;
 
   parse_operand (&e);
-  
+
   if (e.X_op != O_constant)
     as_bad ("Operand to .fframe must be a constant");
   else
     add_unwind_entry (output_mem_stack_f (e.X_add_number));
 }
 
-static void 
+static void
 dot_vframe (dummy)
      int dummy;
 {
@@ -2760,7 +2759,7 @@ dot_vframe (dummy)
     as_bad ("First operand to .vframe must be a general register");
 }
 
-static void 
+static void
 dot_vframesp (dummy)
      int dummy;
 {
@@ -2776,7 +2775,7 @@ dot_vframesp (dummy)
     as_bad ("First operand to .vframesp must be a general register");
 }
 
-static void 
+static void
 dot_vframepsp (dummy)
      int dummy;
 {
@@ -2792,7 +2791,7 @@ dot_vframepsp (dummy)
     as_bad ("First operand to .vframepsp must be a general register");
 }
 
-static void 
+static void
 dot_save (dummy)
      int dummy;
 {
@@ -2807,7 +2806,7 @@ dot_save (dummy)
 
   reg1 = e1.X_add_number;
   reg2 = e2.X_add_number - REG_GR;
-  
+
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op == O_register)
     {
@@ -2869,7 +2868,7 @@ dot_save (dummy)
     as_bad ("First operand not a register");
 }
 
-static void 
+static void
 dot_restore (dummy)
      int dummy;
 {
@@ -2897,7 +2896,7 @@ dot_restore (dummy)
   add_unwind_entry (output_epilogue (ecount));
 }
 
-static void 
+static void
 dot_restorereg (dummy)
      int dummy;
 {
@@ -2914,7 +2913,7 @@ dot_restorereg (dummy)
   add_unwind_entry (output_spill_reg (ab, reg, 0, 0));
 }
 
-static void 
+static void
 dot_restorereg_p (dummy)
      int dummy;
 {
@@ -2998,7 +2997,7 @@ generate_unwind_image ()
   return size;
 }
 
-static void 
+static void
 dot_handlerdata  (dummy)
      int dummy;
 {
@@ -3006,14 +3005,14 @@ dot_handlerdata  (dummy)
   demand_empty_rest_of_line ();
 }
 
-static void 
+static void
 dot_unwentry (dummy)
      int dummy;
 {
   demand_empty_rest_of_line ();
 }
 
-static void 
+static void
 dot_altrp (dummy)
      int dummy;
 {
@@ -3028,7 +3027,7 @@ dot_altrp (dummy)
     as_bad ("First operand not a valid branch register");
 }
 
-static void 
+static void
 dot_savemem (psprel)
      int psprel;
 {
@@ -3043,7 +3042,7 @@ dot_savemem (psprel)
 
   reg1 = e1.X_add_number;
   val = e2.X_add_number;
-  
+
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op == O_register)
     {
@@ -3122,7 +3121,7 @@ dot_savemem (psprel)
     as_bad ("First operand not a register");
 }
 
-static void 
+static void
 dot_saveg (dummy)
      int dummy;
 {
@@ -3131,7 +3130,7 @@ dot_saveg (dummy)
   sep = parse_operand (&e1);
   if (sep == ',')
     parse_operand (&e2);
-  
+
   if (e1.X_op != O_constant)
     as_bad ("First operand to .save.g must be a constant.");
   else
@@ -3150,21 +3149,21 @@ dot_saveg (dummy)
     }
 }
 
-static void 
+static void
 dot_savef (dummy)
      int dummy;
 {
   expressionS e1;
   int sep;
   sep = parse_operand (&e1);
-  
+
   if (e1.X_op != O_constant)
     as_bad ("Operand to .save.f must be a constant.");
   else
     add_unwind_entry (output_fr_mem (e1.X_add_number));
 }
 
-static void 
+static void
 dot_saveb (dummy)
      int dummy;
 {
@@ -3199,7 +3198,7 @@ dot_saveb (dummy)
     ignore_rest_of_line ();
 }
 
-static void 
+static void
 dot_savegf (dummy)
      int dummy;
 {
@@ -3208,7 +3207,7 @@ dot_savegf (dummy)
   sep = parse_operand (&e1);
   if (sep == ',')
     parse_operand (&e2);
-  
+
   if (e1.X_op != O_constant || sep != ',' || e2.X_op != O_constant)
     as_bad ("Both operands of .save.gf must be constants.");
   else
@@ -3219,7 +3218,7 @@ dot_savegf (dummy)
     }
 }
 
-static void 
+static void
 dot_spill (dummy)
      int dummy;
 {
@@ -3229,7 +3228,7 @@ dot_spill (dummy)
   sep = parse_operand (&e);
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
     ignore_rest_of_line ();
-  
+
   if (e.X_op != O_constant)
     as_bad ("Operand to .spill must be a constant");
   else
@@ -3432,7 +3431,7 @@ dot_copy_state (dummy)
   add_unwind_entry (output_copy_state (e.X_add_number));
 }
 
-static void 
+static void
 dot_unwabi (dummy)
      int dummy;
 {
@@ -3464,7 +3463,7 @@ dot_unwabi (dummy)
   add_unwind_entry (output_unwabi (e1.X_add_number, e2.X_add_number));
 }
 
-static void 
+static void
 dot_personality (dummy)
      int dummy;
 {
@@ -3982,7 +3981,7 @@ dot_reg_val (dummy)
       as_bad (_("Comma expected"));
       ignore_rest_of_line ();
     }
-  else 
+  else
     {
       valueT value = get_absolute_expression ();
       int regno = reg.X_add_number;
@@ -3998,12 +3997,12 @@ dot_reg_val (dummy)
   demand_empty_rest_of_line ();
 }
 
-/* select dv checking mode 
+/* select dv checking mode
    .auto
    .explicit
    .default
 
-   A stop is inserted when changing modes 
+   A stop is inserted when changing modes
  */
 static void
 dot_dv_mode (type)
@@ -4050,7 +4049,7 @@ print_prmask (mask)
   char *comma = "";
   for (regno = 0;regno < 64;regno++)
     {
-      if (mask & ((valueT)1<<regno))
+      if (mask & ((valueT) 1<<regno))
         {
           fprintf (stderr, "%s p%d", comma, regno);
           comma = ",";
@@ -4080,17 +4079,17 @@ dot_pred_rel (type)
           ignore_rest_of_line ();
           return;
         }
-      else 
+      else
         {
           int len;
           char *form = demand_copy_C_string (&len);
-          if (strcmp (form, "mutex") == 0) 
+          if (strcmp (form, "mutex") == 0)
             type = 'm';
           else if (strcmp (form, "clear") == 0)
             type = 'c';
           else if (strcmp (form, "imply") == 0)
             type = 'i';
-          else 
+          else
             {
               as_bad (_("Unrecognized predicate relation type"));
               ignore_rest_of_line ();
@@ -4107,7 +4106,7 @@ dot_pred_rel (type)
     {
       valueT bit = 1;
       int regno;
-      
+
       if (toupper (*input_line_pointer) != 'P'
           || (regno = atoi (++input_line_pointer)) < 0
           || regno > 63)
@@ -4166,9 +4165,9 @@ dot_pred_rel (type)
     {
     case 'c':
       if (count == 0)
-        mask = ~(valueT)0;
+        mask = ~(valueT) 0;
       clear_qp_mutex (mask);
-      clear_qp_implies (mask, (valueT)0);
+      clear_qp_implies (mask, (valueT) 0);
       break;
     case 'i':
       if (count != 2 || p1 == -1 || p2 == -1)
@@ -4250,7 +4249,7 @@ dot_entry (dummy)
   demand_empty_rest_of_line ();
 }
 
-/* .mem.offset offset, base 
+/* .mem.offset offset, base
    "base" is used to distinguish between offsets from a different base.
  */
 static void
@@ -4313,8 +4312,8 @@ const pseudo_typeS md_pseudo_table[] =
     { "spillreg.p", dot_spillreg_p },
     { "spillsp.p", dot_spillmem_p, 0 },
     { "spillpsp.p", dot_spillmem_p, 1 },
-    { "label_state", dot_label_state }, 
-    { "copy_state", dot_copy_state }, 
+    { "label_state", dot_label_state },
+    { "copy_state", dot_copy_state },
     { "unwabi", dot_unwabi },
     { "personality", dot_personality },
 #if 0
@@ -4647,7 +4646,7 @@ operand_match (idesc, index, e)
 	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << 62))
             return 1;
         }
-      else 
+      else
         {
           /* FIXME -- need 62-bit relocation type */
           as_bad (_("62-bit relocation not yet implemented"));
@@ -4704,7 +4703,7 @@ operand_match (idesc, index, e)
         {
           int lobits = e->X_add_number & 0x3;
           if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
-            e->X_add_number |= (bfd_vma)0x3;
+            e->X_add_number |= (bfd_vma) 0x3;
           return 1;
         }
       break;
@@ -4742,7 +4741,7 @@ operand_match (idesc, index, e)
           if (e->X_add_number >= 0
               && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
             {
-              e->X_add_number |= ~(((bfd_vma)1 << 17) - 1);
+              e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
             }
           return 1;
         }
@@ -4798,8 +4797,8 @@ operand_match (idesc, index, e)
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
 	  val = e->X_add_number;
-	  if (((val & (~(bfd_vma)0 << 32)) == 0)
-	      && ((val & ((bfd_vma)1 << 31)) != 0))
+	  if (((val & (~(bfd_vma) 0 << 32)) == 0)
+	      && ((val & ((bfd_vma) 1 << 31)) != 0))
 	    val = ((val << 32) >> 32);
 
 	  /* Check for 0x100000000.  This is valid because
@@ -4838,8 +4837,8 @@ operand_match (idesc, index, e)
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
 	  val = e->X_add_number;
-	  if (((val & (~(bfd_vma)0 << 32)) == 0)
-	      && ((val & ((bfd_vma)1 << 31)) != 0))
+	  if (((val & (~(bfd_vma) 0 << 32)) == 0)
+	      && ((val & ((bfd_vma) 1 << 31)) != 0))
 	    val = ((val << 32) >> 32);
 	}
       else
@@ -4939,7 +4938,7 @@ parse_operand (e)
 
 /* Returns the next entry in the opcode table that matches the one in
    IDESC, and frees the entry in IDESC.  If no matching entry is
-   found, NULL is returned instead. */
+   found, NULL is returned instead.  */
 
 static struct ia64_opcode *
 get_next_opcode (struct ia64_opcode *idesc)
@@ -5007,7 +5006,7 @@ parse_operands (idesc)
       as_bad ("Illegal operand separator `%c'", sep);
       return 0;
     }
-  
+
   if (idesc->operands[2] == IA64_OPND_SOF)
     {
       /* map alloc r1=ar.pfs,i,l,o,r to alloc r1=ar.pfs,(i+l+o),(i+l),r */
@@ -5170,7 +5169,7 @@ build_insn (slot, insnp)
 	case IA64_OPND_PKR_R3:
 	case IA64_OPND_PMC_R3:
 	case IA64_OPND_PMD_R3:
-	case IA64_OPND_RR_R3:    
+	case IA64_OPND_RR_R3:
 	  val -= REG_GR;
 	  break;
 
@@ -5440,7 +5439,7 @@ emit_one_bundle ()
 	      && !(idesc->flags & IA64_OPCODE_X_IN_MLX))
 	    {
 	      /* we got ourselves an MLX template but the current
-		 instruction isn't an X-unit, or an I-unit instruction 
+		 instruction isn't an X-unit, or an I-unit instruction
 		 that can go into the X slot of an MLX template.  Duh.  */
 	      if (md.num_slots_in_use >= NUM_SLOTS)
 		{
@@ -5568,7 +5567,7 @@ md_parse_option (c, arg)
     case 'N':
       if (strcmp (arg, "so") == 0)
 	{
-          /* Suppress signon message. */
+          /* Suppress signon message.  */
 	}
       else if (strcmp (arg, "pi") == 0)
 	{
@@ -5754,7 +5753,7 @@ md_begin ()
       symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
 		  &zero_address_frag);
 
-  /* Compute the table of best templates.  We compute goodness as a 
+  /* Compute the table of best templates.  We compute goodness as a
      base 4 value, in which each match counts for 3, each F counts
      for 2, each B counts for 1.  This should maximize the number of
      F and B nops in the chosen bundles, which is good because these
@@ -6012,7 +6011,7 @@ ia64_unrecognized_line (ch)
       md.manual_bundling = 0;
 
       /* switch back to automatic mode, if applicable */
-      if (md.detect_dv 
+      if (md.detect_dv
           && md.explicit_mode
           && !md.mode_explicitly_set
           && !md.default_explicit_mode)
@@ -6227,7 +6226,7 @@ is_conditional_branch (idesc)
   struct ia64_opcode *idesc;
 {
   return (strncmp (idesc->name, "br", 2) == 0
-          && (strcmp (idesc->name, "br") == 0 
+          && (strcmp (idesc->name, "br") == 0
               || strncmp (idesc->name, "br.cond", 7) == 0
               || strncmp (idesc->name, "br.call", 7) == 0
               || strncmp (idesc->name, "br.ret", 6) == 0
@@ -6278,13 +6277,13 @@ depends_on (depind, idesc)
 /* Determine a set of specific resources used for a particular resource
    class.  Returns the number of specific resources identified  For those
    cases which are not determinable statically, the resource returned is
-   marked nonspecific.  
+   marked nonspecific.
 
    Meanings of value in 'NOTE':
    1) only read/write when the register number is explicitly encoded in the
    insn.
    2) only read CFM when accessing a rotating GR, FR, or PR.  mov pr only
-   accesses CFM when qualifying predicate is in the rotating region. 
+   accesses CFM when qualifying predicate is in the rotating region.
    3) general register value is used to specify an indirect register; not
    determinable statically.
    4) only read the given resource when bits 7:0 of the indirect index
@@ -6293,9 +6292,9 @@ depends_on (depind, idesc)
    5) all rules are implementation specific.
    6) only when both the index specified by the reader and the index specified
    by the writer have the same value in bits 63:61; not determinable
-   statically. 
+   statically.
    7) only access the specified resource when the corresponding mask bit is
-   set 
+   set
    8) PSR.dfh is only read when these insns reference FR32-127.  PSR.dfl is
    only read when these insns reference FR2-31
    9) PSR.mfl is only written when these insns write FR2-31.  PSR.mfh is only
@@ -6308,14 +6307,14 @@ depends_on (depind, idesc)
    12) This insn only reads the specified predicate register when that
    register is the PR[qp].
    13) This reference to ld-c only applies to teh GR whose value is loaded
-   with data returned from memory, not the post-incremented address register.  
+   with data returned from memory, not the post-incremented address register.
    14) The RSE resource includes the implementation-specific RSE internal
    state resources.  At least one (and possibly more) of these resources are
    read by each instruction listed in IC:rse-readers.  At least one (and
    possibly more) of these resources are written by each insn listed in
-   IC:rse-writers. 
+   IC:rse-writers.
    15+16) Represents reserved instructions, which the assembler does not
-   generate. 
+   generate.
 
    Memory resources (i.e. locations in memory) are *not* marked or tracked by
    this code; there are no dependency violations based on memory access.
@@ -6339,7 +6338,7 @@ specify_resource (dep, idesc, type, specs, note, path)
   int i;
   int rsrc_write = 0;
   struct rsrc tmpl;
- 
+
   if (dep->mode == IA64_DV_WAW
       || (dep->mode == IA64_DV_RAW && type == DV_REG)
       || (dep->mode == IA64_DV_WAR && type == DV_CHK))
@@ -6433,7 +6432,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 
     case IA64_RS_AR:
       if (note == 1)
-        { 
+        {
           if (idesc->operands[!rsrc_write] == IA64_OPND_AR3)
             {
               int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_AR;
@@ -6481,7 +6480,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
               specs[count++].index = i;
             }
         }
-      else 
+      else
         {
           UNHANDLED;
         }
@@ -6501,7 +6500,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                     || idesc->operands[i] == IA64_OPND_B2)
                   {
                     specs[count] = tmpl;
-                    specs[count++].index = 
+                    specs[count++].index =
                       CURR_SLOT.opnd[i].X_add_number - REG_BR;
                   }
             }
@@ -6512,7 +6511,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                     || idesc->operands[i] == IA64_OPND_B2)
                   {
                     specs[count] = tmpl;
-                    specs[count++].index = 
+                    specs[count++].index =
                       CURR_SLOT.opnd[i].X_add_number - REG_BR;
                   }
             }
@@ -6646,7 +6645,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
         }
       else if (note == 0)
         {
-          /* probe et al. */
+          /* probe et al.  */
           specs[count] = tmpl;
           specs[count++].specific = 0;
         }
@@ -6657,7 +6656,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
         {
           if (idesc->operands[!rsrc_write] == IA64_OPND_PMC_R3
               || (!rsrc_write && idesc->operands[1] == IA64_OPND_PMD_R3))
-            
+
             {
               int index = ((idesc->operands[1] == IA64_OPND_R3 && !rsrc_write)
                            ? 1 : !rsrc_write);
@@ -6730,18 +6729,18 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
           specs[count] = tmpl;
           specs[count++].specific = 0;
         }
-      else 
+      else
         {
           UNHANDLED;
         }
       break;
 
     case IA64_RS_CR_IRR:
-      if (note == 0) 
+      if (note == 0)
         {
           /* handle mov-from-CR-IVR; it's a read that writes CR[IRR] */
           int regno = CURR_SLOT.opnd[1].X_add_number - REG_CR;
-          if (rsrc_write 
+          if (rsrc_write
               && idesc->operands[1] == IA64_OPND_CR3
               && regno == CR_IVR)
             {
@@ -6774,7 +6773,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
         {
           UNHANDLED;
         }
-      else 
+      else
         {
           int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
           if (idesc->operands[!rsrc_write] == IA64_OPND_CR3
@@ -6792,7 +6791,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
           if (idesc->operands[!rsrc_write] == IA64_OPND_CR3)
             {
               specs[count] = tmpl;
-              specs[count++].index = 
+              specs[count++].index =
                 CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
             }
         }
@@ -6826,7 +6825,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                   || idesc->operands[i] == IA64_OPND_F4)
                 {
                   specs[count] = tmpl;
-                  specs[count++].index = 
+                  specs[count++].index =
                     CURR_SLOT.opnd[i].X_add_number - REG_FR;
                 }
             }
@@ -6851,7 +6850,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		    || idesc->operands[i] == IA64_OPND_R3)
 		  {
 		    specs[count] = tmpl;
-		    specs[count++].index = 
+		    specs[count++].index =
 		      CURR_SLOT.opnd[i].X_add_number - REG_GR;
 		  }
 	      if (idesc->flags & IA64_OPCODE_POSTINC)
@@ -6863,7 +6862,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 			CURR_SLOT.opnd[i].X_add_number - REG_GR;
 		    }
             }
-          else 
+          else
             {
               /* Look for anything that reads a GR */
               for (i=0;i < NELEMS(idesc->operands);i++)
@@ -6885,13 +6884,13 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 			      || idesc->operands[i] == IA64_OPND_R3_2)))
                     {
                       specs[count] = tmpl;
-                      specs[count++].index = 
+                      specs[count++].index =
                         CURR_SLOT.opnd[i].X_add_number - REG_GR;
                     }
                 }
             }
         }
-      else 
+      else
         {
           UNHANDLED;
         }
@@ -6925,11 +6924,11 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
               && idesc->operands[0] == IA64_OPND_PR)
             {
               mask = CURR_SLOT.opnd[2].X_add_number;
-              if (mask & ((valueT)1<<16))
-                mask |= ~(valueT)0xffff;
+              if (mask & ((valueT) 1<<16))
+                mask |= ~(valueT) 0xffff;
               for (i=1;i < 63;i++)
                 {
-                  if (mask & ((valueT)1<<i))
+                  if (mask & ((valueT) 1<<i))
                     {
                       specs[count] = tmpl;
                       specs[count++].index = i;
@@ -7019,14 +7018,14 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                 }
             }
         }
-      else 
+      else
         {
           UNHANDLED;
         }
       break;
 
     case IA64_RS_PSR:
-      /* Verify that the instruction is using the PSR bit indicated in 
+      /* Verify that the instruction is using the PSR bit indicated in
          dep->regindex */
       if (note == 0)
         {
@@ -7057,9 +7056,9 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                   specs[count++] = tmpl;
                 }
             }
-          else 
+          else
             {
-              /* Several PSR bits have very specific dependencies. */
+              /* Several PSR bits have very specific dependencies.  */
               switch (dep->regindex)
                 {
                 default:
@@ -7076,10 +7075,10 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                       if (idesc->operands[0] == IA64_OPND_CR3
                           || idesc->operands[1] == IA64_OPND_CR3)
                         {
-                          int index = 
+                          int index =
                             ((idesc->operands[0] == IA64_OPND_CR3)
                              ? 0 : 1);
-                          int regno = 
+                          int regno =
                             CURR_SLOT.opnd[index].X_add_number - REG_CR;
 
                           switch (regno)
@@ -7106,27 +7105,27 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                     {
                       specs[count++] = tmpl;
                     }
-                  else 
+                  else
                     {
                       /* Only some AR accesses use cpl */
                       if (idesc->operands[0] == IA64_OPND_AR3
                           || idesc->operands[1] == IA64_OPND_AR3)
                         {
-                          int index = 
+                          int index =
                             ((idesc->operands[0] == IA64_OPND_AR3)
                              ? 0 : 1);
-                          int regno = 
+                          int regno =
                             CURR_SLOT.opnd[index].X_add_number - REG_AR;
-                          
+
                           if (regno == AR_ITC
                               || (index == 0
-                                  && (regno == AR_ITC 
-                                      || regno == AR_RSC 
+                                  && (regno == AR_ITC
+                                      || regno == AR_RSC
                                       || (regno >= AR_K0
                                           && regno <= AR_K7))))
                             {
                               specs[count++] = tmpl;
-                            }                  
+                            }
                         }
                       else
                         {
@@ -7144,11 +7143,11 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
             {
               mask = CURR_SLOT.opnd[0].X_add_number;
             }
-          else 
+          else
             {
               UNHANDLED;
             }
-          if (mask & ((valueT)1<<dep->regindex))
+          if (mask & ((valueT) 1<<dep->regindex))
             {
               specs[count++] = tmpl;
             }
@@ -7178,7 +7177,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
           int min = dep->regindex == PSR_MFL ? 2 : 32;
           int max = dep->regindex == PSR_MFL ? 31 : 127;
           /* mfh is read on writes to FR32-127; mfl is read on writes to
-             FR2-31 */ 
+             FR2-31 */
           for (i=0;i < idesc->num_outputs;i++)
             {
               if (idesc->operands[i] == IA64_OPND_F1)
@@ -7228,7 +7227,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
         }
       break;
 
-    case IA64_RS_ARX: 
+    case IA64_RS_ARX:
       /* Handle all AR[REG] resources */
       if (note == 0 || note == 1)
         {
@@ -7255,7 +7254,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                     }
                 case AR_RSC:
                   if (!rsrc_write &&
-                      (regno == AR_BSPSTORE 
+                      (regno == AR_BSPSTORE
                        || regno == AR_RNAT))
                     {
                       specs[count++] = tmpl;
@@ -7279,7 +7278,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                   break;
                 }
             }
-          else 
+          else
             {
               specs[count++] = tmpl;
             }
@@ -7303,7 +7302,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                 }
               else if (!rsrc_write)
                 {
-                  /* Reads from CR[IVR] affect other resources. */
+                  /* Reads from CR[IVR] affect other resources.  */
                   if (regno == CR_IVR)
                     {
                       if ((dep->regindex >= CR_IRR0
@@ -7432,7 +7431,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
           valueT mask = 0;
           if (idesc->operands[2] == IA64_OPND_IMM17)
             mask = CURR_SLOT.opnd[2].X_add_number;
-          if (mask & ((valueT)1<<63))
+          if (mask & ((valueT) 1<<63))
             {
               specs[count++] = tmpl;
             }
@@ -7499,7 +7498,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
                 }
             }
         }
-      else 
+      else
         {
           specs[count++] = tmpl;
         }
@@ -7519,7 +7518,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 }
 
 /* Clear branch flags on marked resources.  This breaks the link between the
-   QP of the marking instruction and a subsequent branch on the same QP. 
+   QP of the marking instruction and a subsequent branch on the same QP.
 */
 static void
 clear_qp_branch_flag (mask)
@@ -7528,7 +7527,7 @@ clear_qp_branch_flag (mask)
   int i;
   for (i = 0;i < regdepslen;i++)
     {
-      valueT bit = ((valueT)1 << regdeps[i].qp_regno);
+      valueT bit = ((valueT) 1 << regdeps[i].qp_regno);
       if ((bit & mask) != 0)
         {
           regdeps[i].link_to_qp_branch = 0;
@@ -7536,10 +7535,10 @@ clear_qp_branch_flag (mask)
     }
 }
 
-/* Remove any mutexes which contain any of the PRs indicated in the mask. 
+/* Remove any mutexes which contain any of the PRs indicated in the mask.
 
    Any changes to a PR clears the mutex relations which include that PR.
-*/ 
+*/
 static void
 clear_qp_mutex (mask)
   valueT mask;
@@ -7578,15 +7577,15 @@ clear_qp_implies (p1_mask, p2_mask)
   i = 0;
   while (i < qp_implieslen)
     {
-      if ((((valueT)1 << qp_implies[i].p1) & p1_mask) != 0
-          || (((valueT)1 << qp_implies[i].p2) & p2_mask) != 0)
+      if ((((valueT) 1 << qp_implies[i].p1) & p1_mask) != 0
+          || (((valueT) 1 << qp_implies[i].p2) & p2_mask) != 0)
         {
           if (md.debug_dv)
-            fprintf (stderr, "Clearing implied relation PR%d->PR%d\n", 
+            fprintf (stderr, "Clearing implied relation PR%d->PR%d\n",
                      qp_implies[i].p1, qp_implies[i].p2);
           qp_implies[i] = qp_implies[--qp_implieslen];
         }
-      else 
+      else
         ++i;
     }
 }
@@ -7610,7 +7609,7 @@ add_qp_imply (p1, p2)
   /* if it exists already, ignore it */
   for (i=0;i < qp_implieslen;i++)
     {
-      if (qp_implies[i].p1 == p1 
+      if (qp_implies[i].p1 == p1
           && qp_implies[i].p2 == p2
           && qp_implies[i].path == md.path
           && !qp_implies[i].p2_branched)
@@ -7621,7 +7620,7 @@ add_qp_imply (p1, p2)
     {
       qp_impliestotlen += 20;
       qp_implies = (struct qp_imply *)
-        xrealloc ((void *)qp_implies, 
+        xrealloc ((void *)qp_implies,
                   qp_impliestotlen * sizeof (struct qp_imply));
     }
   if (md.debug_dv)
@@ -7633,7 +7632,7 @@ add_qp_imply (p1, p2)
 
   /* Add in the implied transitive relations; for everything that p2 implies,
      make p1 imply that, too; for everything that implies p1, make it imply p2
-     as well. */
+     as well.  */
   for (i=0;i < qp_implieslen;i++)
     {
       if (qp_implies[i].p1 == p2)
@@ -7642,16 +7641,15 @@ add_qp_imply (p1, p2)
         add_qp_imply (qp_implies[i].p1, p2);
     }
   /* Add in mutex relations implied by this implies relation; for each mutex
-     relation containing p2, duplicate it and replace p2 with p1. */
-  bit = (valueT)1 << p1;
-  mask = (valueT)1 << p2;
+     relation containing p2, duplicate it and replace p2 with p1.  */
+  bit = (valueT) 1 << p1;
+  mask = (valueT) 1 << p2;
   for (i=0;i < qp_mutexeslen;i++)
     {
       if (qp_mutexes[i].prmask & mask)
         add_qp_mutex ((qp_mutexes[i].prmask & ~mask) | bit);
     }
 }
-
 
 /* Add the PRs specified in the mask to the mutex list; this means that only
    one of the PRs can be true at any time.  PR0 should never be included in
@@ -7667,7 +7665,7 @@ add_qp_mutex (mask)
     {
       qp_mutexestotlen += 20;
       qp_mutexes = (struct qpmutex *)
-        xrealloc ((void *)qp_mutexes, 
+        xrealloc ((void *)qp_mutexes,
                   qp_mutexestotlen * sizeof (struct qpmutex));
     }
   if (md.debug_dv)
@@ -7706,7 +7704,7 @@ note_register_values (idesc)
   /* invalidate values for registers being written to */
   for (i=0;i < idesc->num_outputs;i++)
     {
-      if (idesc->operands[i] == IA64_OPND_R1 
+      if (idesc->operands[i] == IA64_OPND_R1
           || idesc->operands[i] == IA64_OPND_R2
           || idesc->operands[i] == IA64_OPND_R3)
         {
@@ -7720,27 +7718,27 @@ note_register_values (idesc)
 	  if (regno > 0 && regno < 4)
 	    gr_values[regno].known = 0;
 	}
-      else if (idesc->operands[i] == IA64_OPND_P1 
+      else if (idesc->operands[i] == IA64_OPND_P1
                || idesc->operands[i] == IA64_OPND_P2)
         {
           int regno = CURR_SLOT.opnd[i].X_add_number - REG_P;
-          qp_changemask |= (valueT)1 << regno;
+          qp_changemask |= (valueT) 1 << regno;
         }
       else if (idesc->operands[i] == IA64_OPND_PR)
         {
-          if (idesc->operands[2] & (valueT)0x10000)
-            qp_changemask = ~(valueT)0x1FFFF | idesc->operands[2];
-          else 
+          if (idesc->operands[2] & (valueT) 0x10000)
+            qp_changemask = ~(valueT) 0x1FFFF | idesc->operands[2];
+          else
             qp_changemask = idesc->operands[2];
           break;
         }
       else if (idesc->operands[i] == IA64_OPND_PR_ROT)
         {
-          if (idesc->operands[1] & ((valueT)1 << 43))
-            qp_changemask = ~(valueT)0xFFFFFFFFFFF | idesc->operands[1];
+          if (idesc->operands[1] & ((valueT) 1 << 43))
+            qp_changemask = ~(valueT) 0xFFFFFFFFFFF | idesc->operands[1];
           else
             qp_changemask = idesc->operands[1];
-          qp_changemask &= ~(valueT)0xFFFF;
+          qp_changemask &= ~(valueT) 0xFFFF;
           break;
         }
     }
@@ -7752,7 +7750,7 @@ note_register_values (idesc)
   /* invalidate rotating registers on insns which affect RRBs in CFM */
   if (idesc->flags & IA64_OPCODE_MOD_RRBS)
     {
-      qp_changemask |= ~(valueT)0xFFFF;
+      qp_changemask |= ~(valueT) 0xFFFF;
       if (strcmp (idesc->name, "clrrrb.pr") != 0)
         {
           for (i=32;i < 32+md.rot.num_regs;i++)
@@ -7776,19 +7774,19 @@ note_register_values (idesc)
            || is_taken_branch (idesc))
     {
       clear_register_values ();
-      clear_qp_mutex (~(valueT)0);
-      clear_qp_implies (~(valueT)0, ~(valueT)0);
+      clear_qp_mutex (~(valueT) 0);
+      clear_qp_implies (~(valueT) 0, ~(valueT) 0);
     }
   /* Look for mutex and implies relations */
-  else if ((idesc->operands[0] == IA64_OPND_P1 
+  else if ((idesc->operands[0] == IA64_OPND_P1
             || idesc->operands[0] == IA64_OPND_P2)
            && (idesc->operands[1] == IA64_OPND_P1
                || idesc->operands[1] == IA64_OPND_P2))
     {
       int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
-      int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P; 
-      valueT p1mask = (valueT)1 << p1;
-      valueT p2mask = (valueT)1 << p2;
+      int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
+      valueT p1mask = (valueT) 1 << p1;
+      valueT p2mask = (valueT) 1 << p2;
 
       /* if one of the PRs is PR0, we can't really do anything */
       if (p1 == 0 || p2 == 0)
@@ -7825,9 +7823,9 @@ note_register_values (idesc)
               add_qp_mutex (p1mask | p2mask);
               if (CURR_SLOT.qp_regno != 0)
                 {
-                  add_qp_imply (CURR_SLOT.opnd[0].X_add_number - REG_P, 
+                  add_qp_imply (CURR_SLOT.opnd[0].X_add_number - REG_P,
                                 CURR_SLOT.qp_regno);
-                  add_qp_imply (CURR_SLOT.opnd[1].X_add_number - REG_P, 
+                  add_qp_imply (CURR_SLOT.opnd[1].X_add_number - REG_P,
                                 CURR_SLOT.qp_regno);
                 }
             }
@@ -7835,7 +7833,7 @@ note_register_values (idesc)
             {
               add_qp_mutex (p1mask | p2mask);
             }
-          else 
+          else
             {
               clear_qp_mutex (p1mask | p2mask);
             }
@@ -7855,11 +7853,11 @@ note_register_values (idesc)
           gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
           gr_values[regno].path = md.path;
           if (md.debug_dv)
-            fprintf (stderr, "  Know gr%d = 0x%llx\n", 
+            fprintf (stderr, "  Know gr%d = 0x%llx\n",
                      regno, gr_values[regno].value);
         }
     }
-  else 
+  else
     {
       clear_qp_mutex (qp_changemask);
       clear_qp_implies (qp_changemask, qp_changemask);
@@ -7878,7 +7876,7 @@ qp_mutex (p1, p2, path)
 
   if (p1 != p2)
     {
-      mask = ((valueT)1<<p1) | (valueT)1<<p2;
+      mask = ((valueT) 1<<p1) | (valueT) 1<<p2;
       for (i=0;i < qp_mutexeslen;i++)
         {
           if (qp_mutexes[i].path >= path
@@ -7891,8 +7889,8 @@ qp_mutex (p1, p2, path)
 
 /* Return whether the given resource is in the given insn's list of chks
    Return 1 if the conflict is absolutely determined, 2 if it's a potential
-   conflict. 
- */ 
+   conflict.
+ */
 static int
 resources_match (rs, idesc, note, qp_regno, path)
   struct rsrc *rs;
@@ -7907,7 +7905,7 @@ resources_match (rs, idesc, note, qp_regno, path)
   /* If the marked resource's qp_regno and the given qp_regno are mutex,
      we don't need to check.  One exception is note 11, which indicates that
      target predicates are written regardless of PR[qp].  */
-  if (qp_mutex (rs->qp_regno, qp_regno, path) 
+  if (qp_mutex (rs->qp_regno, qp_regno, path)
       && note != 11)
     return 0;
 
@@ -7921,7 +7919,7 @@ resources_match (rs, idesc, note, qp_regno, path)
         {
           if (rs->mem_offset.base == specs[count].mem_offset.base)
             {
-              if (((rs->mem_offset.offset >> 3) & 0x3F) == 
+              if (((rs->mem_offset.offset >> 3) & 0x3F) ==
                   ((specs[count].mem_offset.offset >> 3) & 0x3F))
                 return 1;
               else
@@ -7930,7 +7928,7 @@ resources_match (rs, idesc, note, qp_regno, path)
         }
 
       /* If either resource is not specific, conservatively assume a conflict
-       */ 
+       */
       if (!specs[count].specific || !rs->specific)
         return 2;
       else if (specs[count].index == rs->index)
@@ -7949,8 +7947,8 @@ resources_match (rs, idesc, note, qp_regno, path)
    appropriately.  If QP_REGNO is non-zero, only apply the break to resources
    which use the same QP_REGNO and have the link_to_qp_branch flag set.
    If SAVE_CURRENT is non-zero, don't affect resources marked by the current
-   instruction. 
-*/ 
+   instruction.
+*/
 
 static void
 insn_group_break (insert_stop, qp_regno, save_current)
@@ -7965,7 +7963,7 @@ insn_group_break (insert_stop, qp_regno, save_current)
 
   if (md.debug_dv)
     {
-      fprintf (stderr, "  Insn group break%s", 
+      fprintf (stderr, "  Insn group break%s",
                (insert_stop ? " (w/stop)" : ""));
       if (qp_regno != 0)
         fprintf (stderr, " effective for QP=%d", qp_regno);
@@ -8018,7 +8016,7 @@ insn_group_break (insert_stop, qp_regno, save_current)
 }
 
 /* Add the given resource usage spec to the list of active dependencies */
-static void 
+static void
 mark_resource (idesc, dep, spec, depind, path)
   struct ia64_opcode *idesc;
   const struct ia64_dependency *dep;
@@ -8030,7 +8028,7 @@ mark_resource (idesc, dep, spec, depind, path)
     {
       regdepstotlen += 20;
       regdeps = (struct rsrc *)
-        xrealloc ((void *)regdeps, 
+        xrealloc ((void *)regdeps,
                   regdepstotlen * sizeof(struct rsrc));
     }
 
@@ -8052,7 +8050,7 @@ print_dependency (action, depind)
 {
   if (md.debug_dv)
     {
-      fprintf (stderr, "  %s %s '%s'", 
+      fprintf (stderr, "  %s %s '%s'",
                action, dv_mode[(regdeps[depind].dependency)->mode],
                (regdeps[depind].dependency)->name);
       if (regdeps[depind].specific && regdeps[depind].index != 0)
@@ -8107,7 +8105,7 @@ remove_marked_resource (rs)
     case IA64_DVS_SPECIFIC:
       if (md.debug_dv)
 	fprintf (stderr, "Implementation-specific, assume worst case...\n");
-      /* ...fall through... */
+      /* ...fall through...  */
     case IA64_DVS_INSTR:
       if (md.debug_dv)
         fprintf (stderr, "Inserting instr serialization\n");
@@ -8163,17 +8161,17 @@ remove_marked_resource (rs)
 }
 
 /* Check the resources used by the given opcode against the current dependency
-   list.  
+   list.
 
    The check is run once for each execution path encountered.  In this case,
    a unique execution path is the sequence of instructions following a code
    entry point, e.g. the following has three execution paths, one starting
    at L0, one at L1, and one at L2.
-   
+
    L0:     nop
    L1:     add
    L2:     add
-   br.ret        
+   br.ret
 */
 static void
 check_dependencies (idesc)
@@ -8184,7 +8182,7 @@ check_dependencies (idesc)
   int i;
 
   /* Note that the number of marked resources may change within the
-     loop if in auto mode. */
+     loop if in auto mode.  */
   i = 0;
   while (i < regdepslen)
     {
@@ -8214,7 +8212,7 @@ check_dependencies (idesc)
           /* If the QP for this insn implies a QP which has branched, don't
              bother checking.  Ed. NOTE: I don't think this check is terribly
              useful; what's the point of generating code which will only be
-             reached if its QP is zero? 
+             reached if its QP is zero?
              This code was specifically inserted to handle the following code,
              based on notes from Intel's DV checking code, where p1 implies p2.
 
@@ -8222,8 +8220,8 @@ check_dependencies (idesc)
              (p2) br.cond L
              (p1) mov r4 = 7
 
-          */  
-          if (CURR_SLOT.qp_regno != 0) 
+          */
+          if (CURR_SLOT.qp_regno != 0)
             {
               int skip = 0;
               int implies;
@@ -8241,7 +8239,7 @@ check_dependencies (idesc)
                 continue;
             }
 
-          if ((matchtype = resources_match (rs, idesc, note, 
+          if ((matchtype = resources_match (rs, idesc, note,
                                             CURR_SLOT.qp_regno, path)) != 0)
             {
               char msg[1024];
@@ -8253,12 +8251,12 @@ check_dependencies (idesc)
                 sprintf (pathmsg, " when entry is at label '%s'",
                          md.entry_labels[path-1]);
               if (rs->specific && rs->index != 0)
-                sprintf (indexmsg, ", specific resource number is %d", 
+                sprintf (indexmsg, ", specific resource number is %d",
                          rs->index);
               sprintf (msg, "Use of '%s' %s %s dependency '%s' (%s)%s%s",
-                       idesc->name, 
+                       idesc->name,
                        (certain ? "violates" : "may violate"),
-                       dv_mode[dep->mode], dep->name, 
+                       dv_mode[dep->mode], dep->name,
                        dv_sem[dep->semantics],
                        pathmsg, indexmsg);
 
@@ -8279,12 +8277,12 @@ check_dependencies (idesc)
                 {
                   if (md.debug_dv)
                     fprintf(stderr, "%s @ %s:%d\n", msg, rs->file, rs->line);
-                  
+
                   remove_marked_resource (rs);
-                  
+
                   /* since the set of dependencies has changed, start over */
                   /* FIXME -- since we're removing dvs as we go, we
-                     probably don't really need to start over... */
+                     probably don't really need to start over...  */
                   start_over = 1;
                   break;
                 }
@@ -8309,7 +8307,7 @@ mark_resources (idesc)
   /* A conditional branch only uses its resources if it is taken; if it is
      taken, we stop following that path.  The other branch types effectively
      *always* write their resources.  If it's not taken, register only QP
-     reads.  */ 
+     reads.  */
   if (is_conditional_branch (idesc) || is_interruption_or_rfi (idesc))
     {
       add_only_qp_reads = 1;
@@ -8325,7 +8323,7 @@ mark_resources (idesc)
       int note;
       int path;
       int count;
-      
+
       dep = ia64_find_dependency (opdeps->regs[i]);
       note = NOTE(opdeps->regs[i]);
 
@@ -8339,18 +8337,18 @@ mark_resources (idesc)
 
 #if 0
       if (md.debug_dv && !count)
-        fprintf (stderr, "  No %s %s usage found (path %d)\n", 
+        fprintf (stderr, "  No %s %s usage found (path %d)\n",
                  dv_mode[dep->mode], dep->name, md.path);
 #endif
-      
+
       while (count-- > 0)
         {
-          mark_resource (idesc, dep, &specs[count], 
+          mark_resource (idesc, dep, &specs[count],
                          DEP(opdeps->regs[i]), md.path);
         }
 
       /* The execution path may affect register values, which may in turn
-         affect which indirect-access resources are accessed. */
+         affect which indirect-access resources are accessed.  */
       switch (dep->specifier)
         {
         default:
@@ -8367,7 +8365,7 @@ mark_resources (idesc)
             {
               count = specify_resource (dep, idesc, DV_REG, specs, note, path);
               while (count-- > 0)
-                mark_resource (idesc, dep, &specs[count], 
+                mark_resource (idesc, dep, &specs[count],
                                DEP(opdeps->regs[i]), path);
             }
           break;
@@ -8429,7 +8427,7 @@ update_dependencies (idesc)
         }
       /* Any marked resources which have this same predicate should be
          cleared, provided that the QP hasn't been modified between the
-         marking instruction and the branch.  
+         marking instruction and the branch.
       */
       if (is_call)
         {
@@ -8442,7 +8440,7 @@ update_dependencies (idesc)
             {
               if (regdeps[i].qp_regno == CURR_SLOT.qp_regno
                   && regdeps[i].link_to_qp_branch
-                  && (regdeps[i].file != CURR_SLOT.src_file 
+                  && (regdeps[i].file != CURR_SLOT.src_file
                       || regdeps[i].line != CURR_SLOT.src_line))
                 {
                   /* Treat like a taken branch */
@@ -8463,15 +8461,15 @@ check_dv (idesc)
 {
   if (md.debug_dv)
     {
-      fprintf (stderr, "Checking %s for violations (line %d, %d/%d)\n", 
-               idesc->name, CURR_SLOT.src_line, 
-               idesc->dependencies->nchks, 
+      fprintf (stderr, "Checking %s for violations (line %d, %d/%d)\n",
+               idesc->name, CURR_SLOT.src_line,
+               idesc->dependencies->nchks,
                idesc->dependencies->nregs);
     }
 
-  /* Look through the list of currently marked resources; if the current 
+  /* Look through the list of currently marked resources; if the current
      instruction has the dependency in its chks list which uses that resource,
-     check against the specific resources used.  
+     check against the specific resources used.
   */
   check_dependencies (idesc);
 
@@ -8482,8 +8480,8 @@ check_dv (idesc)
   mark_resources (idesc);
 
   /* There are several types of dependency semantics, and each has its own
-     requirements for being cleared 
-     
+     requirements for being cleared
+
      Instruction serialization (insns separated by interruption, rfi, or
      writer + srlz.i + reader, all in separate groups) clears DVS_INSTR.
 
@@ -8498,10 +8496,10 @@ check_dv (idesc)
   update_dependencies (idesc);
 
   /* Sometimes, knowing a register value allows us to avoid giving a false DV
-     warning.  Keep track of as many as possible that are useful. */
+     warning.  Keep track of as many as possible that are useful.  */
   note_register_values (idesc);
 
-  /* We don't need or want this anymore. */
+  /* We don't need or want this anymore.  */
   md.mem_offset.hint = 0;
 
   return 0;
@@ -8826,7 +8824,7 @@ ia64_pcrel_from_section (fix, sec)
      segT sec;
 {
   unsigned long off = fix->fx_frag->fr_address + fix->fx_where;
-  
+
   if (bfd_get_section_flags (stdoutput, sec) & SEC_CODE)
     off &= ~0xfUL;
 
@@ -8887,7 +8885,7 @@ ia64_cons_fix_new (f, where, nbytes, exp)
 
 /* Return the actual relocation we wish to associate with the pseudo
    reloc described by SYM and R_TYPE.  SYM should be one of the
-   symbols in the pseudo_func array, or NULL. */
+   symbols in the pseudo_func array, or NULL.  */
 
 static bfd_reloc_code_real_type
 ia64_gen_real_reloc_type (sym, r_type)
@@ -9102,7 +9100,7 @@ fix_insn (fix, odesc, value)
    To indicate that a fixup has been eliminated, set FIXP->FX_DONE.
 
    If fixp->fx_addsy is non-NULL, we'll have to generate a reloc entry
-   (if possible). */
+   (if possible).  */
 int
 md_apply_fix3 (fix, valuep, seg)
      fixS *fix;
@@ -9271,7 +9269,7 @@ md_section_align (seg, size)
      valueT size;
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
-  valueT mask = ((valueT)1 << align) - 1;
+  valueT mask = ((valueT) 1 << align) - 1;
 
   return (size + mask) & ~mask;
 }
@@ -9303,7 +9301,7 @@ ia64_md_do_align (n, fill, len, max)
       static const unsigned char le_nop[]
 	= { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
 	    0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
-	    
+
       /* Make sure we are on a 16-byte boundary, in case someone has been
 	 putting data into a text section.  */
       frag_align (4, 0, 0);
