@@ -1,3 +1,9 @@
+start-sanitize-vr5400
+Fri Mar  6 08:30:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen (SHFL.REPA.fmt, SHFL.REPB.fmt): Fix bit fields.
+
+end-sanitize-vr5400
 start-sanitize-vr4320
 Tue Mar  3 11:56:29 1998  Gavin Koch  <gavin@cygnus.com>
 
