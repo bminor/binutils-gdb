@@ -1,3 +1,7 @@
+Thu Feb 18 09:16:17 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: make all-diff depend on all-libiberty
+
 Tue Feb 16 16:06:31 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* config.guess: add vax-ultrix in the spirit of mips-ultrix.

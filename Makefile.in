@@ -1004,7 +1004,7 @@ install-make: force
 	fi
 
 ### diff
-all-diff: force
+all-diff: all-libiberty
 	@if [ -f ./diff/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./diff; \
