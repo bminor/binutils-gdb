@@ -374,12 +374,7 @@ gdb_stop (clientData, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  extern pid_t inferior_process_group;
-
-  /* XXX - This is WRONG for remote targets.  Probably need a target vector
-     entry to do this right.  */
-
-  kill (-inferior_process_group, SIGINT);
+  target_stop ();
 }
 
 

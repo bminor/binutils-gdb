@@ -284,7 +284,7 @@ remote_close (quitting)
 static void
 get_offsets ()
 {
-  unsigned char buf[PBUFSIZ];
+  char buf[PBUFSIZ];
   int nvals;
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
@@ -460,7 +460,7 @@ fromhex (a)
   else if (a >= 'a' && a <= 'f')
     return a - 'a' + 10;
   else
-    error ("Reply contains invalid hex digit");
+    error ("Reply contains invalid hex digit %d", a);
 }
 
 /* Convert number NIB to a hex digit.  */
@@ -639,14 +639,13 @@ remote_wait (pid, status)
 	    return inferior_pid;
 	  }
 	case 'O':		/* Console output */
-	  fputs_filtered (buf + 1, gdb_stdout);
+	  fputs_filtered ((char *)(buf + 1), gdb_stdout);
 	  continue;
 	default:
 	  warning ("Invalid remote reply: %s", buf);
 	  continue;
 	}
     }
-  return inferior_pid;
 }
 
 /* Number of bytes of registers this stub implements.  */
@@ -1171,7 +1170,7 @@ putpkt (buf)
 	      break;		/* Retransmit buffer */
 	    case '$':
 	      {
-		unsigned char junkbuf[PBUFSIZ];
+		char junkbuf[PBUFSIZ];
 
 	      /* It's probably an old response, and we're out of sync.  Just
 		 gobble up the packet and ignore it.  */
@@ -1249,11 +1248,13 @@ read_frame (buf)
 	    if (csum == pktcsum)
 	      return 1;
 
-	    printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
-			     pktcsum, csum);
-	    puts_filtered (buf);
-	    puts_filtered ("\n");
-
+	    if (remote_debug) 
+	      {
+		printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
+				 pktcsum, csum);
+		puts_filtered (buf);
+		puts_filtered ("\n");
+	      }
 	    return 0;
 	  }
 	case '*':		/* Run length encoding */
@@ -1262,7 +1263,8 @@ read_frame (buf)
 	  csum += c;
 	  c = c - ' ' + 3;	/* Compute repeat count */
 
-	  if (bp + c - 1 < buf + PBUFSIZ - 1)
+
+	  if (c > 0 && c < 255 && bp + c - 1 < buf + PBUFSIZ - 1)
 	    {
 	      memset (bp, *(bp - 1), c);
 	      bp += c;
@@ -1460,6 +1462,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   remote_mourn,			/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
+  0,				/* to_stop */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,				/* to_has_all_memory */
