@@ -1,3 +1,7 @@
+Sun Dec  8 04:28:31 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* Makefile.in (ALL_MACHINES):  Add mips16-opc.o.
+
 Fri Dec  6 16:47:40 1996  J.T. Conklin  <jtc@rhino.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Revert change to use < and >
