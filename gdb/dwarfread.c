@@ -1,3 +1,4 @@
+
 /* DWARF debugging format support for GDB.
    Copyright (C) 1991 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support, portions based on dbxread.c,
@@ -874,9 +875,10 @@ SYNOPSIS
 DESCRIPTION
 
 	Given pointer to a die information structure for a die which
-	defines a union or structure, and pointers to the raw die data
-	that define the range of dies which define the members, compute
-	and return the user defined type for the structure or union.
+	defines a union or structure (and MUST define one or the other),
+	and pointers to the raw die data that define the range of dies which
+	define the members, compute and return the user defined type for the
+	structure or union.
  */
 
 static struct type *
@@ -896,8 +898,6 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
   int nfields = 0;
   int n;
   char *tpart1;
-  char *tpart2;
-  char *tpart3;
   struct dieinfo mbr;
   char *nextdie;
   
@@ -905,49 +905,40 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
     {
       type = alloc_utype (dip -> dieref, NULL);
     }
-  if (dip -> dietag == TAG_structure_type || dip -> dietag == TAG_union_type)
+  TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
+    obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+  (void) memset (TYPE_CPLUS_SPECIFIC (type), 0,
+		 sizeof (struct cplus_struct_type));
+  switch (dip -> dietag)
     {
-      TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-	obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-      (void) memset (TYPE_CPLUS_SPECIFIC (type), 0,
-		     sizeof (struct cplus_struct_type));
-      if (dip -> dietag == TAG_structure_type)
-	{
-	  TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	  tpart1 = "struct ";
-	}
-      else
-	{
-	  TYPE_CODE (type) = TYPE_CODE_UNION;
-	  tpart1 = "union ";
-	}
-    }
-  else
-    {
-      tpart1 = "";
-      SQUAWK (("missing structure or union tag"));
-      TYPE_CODE (type) = TYPE_CODE_UNDEF;
+      case TAG_structure_type:
+	TYPE_CODE (type) = TYPE_CODE_STRUCT;
+	tpart1 = "struct";
+	break;
+      case TAG_union_type:
+	TYPE_CODE (type) = TYPE_CODE_UNION;
+	tpart1 = "union";
+	break;
+      default:
+	/* Should never happen */
+	TYPE_CODE (type) = TYPE_CODE_UNDEF;
+	tpart1 = "???";
+	SQUAWK (("missing structure or union tag"));
+	break;
     }
   /* Some compilers try to be helpful by inventing "fake" names for anonymous
-     enums, structures, and unions, like "~0fake".  Thanks, but no thanks. */
-  if (dip -> at_name == NULL
-      || *dip -> at_name == '~'
-      || *dip -> at_name == '.')
+     enums, structures, and unions, like "~0fake" or ".0fake".  Thanks, but
+     no thanks... */
+  if (dip -> at_name != NULL
+      && *dip -> at_name != '~'
+      && *dip -> at_name != '.')
     {
-      tpart2 = "{...}";
+      TYPE_NAME (type) = obconcat (tpart1, " ", dip -> at_name);
     }
-  else
+  if (dip -> at_byte_size != 0)
     {
-      tpart2 = dip -> at_name;
-    }
-  if (dip -> at_byte_size == 0)
-    {
-      tpart3 = " <opaque>";
-    } else {
       TYPE_LENGTH (type) = dip -> at_byte_size;
-      tpart3 = "";
     }
-  TYPE_NAME (type) = concat (tpart1, tpart2, tpart3, NULL);
   thisdie += dip -> dielength;
   while (thisdie < enddie)
     {
@@ -1331,14 +1322,18 @@ DESCRIPTION
 	starts an enumeration, process all the dies that define the members
 	of the enumeration and return a type pointer for the enumeration.
 
+	At the same time, for each member of the enumeration, create a
+	symbol for it with namespace VAR_NAMESPACE and class LOC_CONST,
+	and give it the type of the enumeration itself.
+
+NOTES
+
 	Note that the DWARF specification explicitly mandates that enum
 	constants occur in reverse order from the source program order,
 	for "consistency" and because this ordering is easier for many
 	compilers to generate. (Draft 5, sec 3.9.5, Enumeration type
-	Entries)
-
-	Because gdb wants to see the enum members in program source
-	order, we have to ensure that the order gets reversed while
+	Entries).  Because gdb wants to see the enum members in program
+	source order, we have to ensure that the order gets reversed while
 	we are processing them.
  */
 
@@ -1354,40 +1349,30 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
   struct nextfield *new;
   int nfields = 0;
   int n;
-  char *tpart1;
-  char *tpart2;
-  char *tpart3;
   char *scan;
   char *listend;
   long ltemp;
   short stemp;
+  struct symbol *sym;
   
   if ((type = lookup_utype (dip -> dieref)) == NULL)
     {
       type = alloc_utype (dip -> dieref, NULL);
     }
   TYPE_CODE (type) = TYPE_CODE_ENUM;
-  tpart1 = "enum ";
   /* Some compilers try to be helpful by inventing "fake" names for anonymous
-     enums, structures, and unions, like "~0fake".  Thanks, but no thanks. */
-  if (dip -> at_name == NULL
-      || *dip -> at_name == '~'
-      || *dip -> at_name == '.')
+     enums, structures, and unions, like "~0fake" or ".0fake".  Thanks, but
+     no thanks... */
+  if (dip -> at_name != NULL
+      && *dip -> at_name != '~'
+      && *dip -> at_name != '.')
     {
-      tpart2 = "{...}";
-    } else {
-      tpart2 = dip -> at_name;
+      TYPE_NAME (type) = obconcat ("enum", " ", dip -> at_name);
     }
-  if (dip -> at_byte_size == 0)
-    {
-      tpart3 = " <opaque>";
-    }
-  else
+  if (dip -> at_byte_size != 0)
     {
       TYPE_LENGTH (type) = dip -> at_byte_size;
-      tpart3 = "";
     }
-  TYPE_NAME (type) = concat (tpart1, tpart2, tpart3, NULL);
   if ((scan = dip -> at_element_list) != NULL)
     {
       if (dip -> short_element_list)
@@ -1414,6 +1399,16 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
 	  list -> field.name = savestring (scan, strlen (scan));
 	  scan += strlen (scan) + 1;
 	  nfields++;
+	  /* Handcraft a new symbol for this enum member. */
+	  sym = (struct symbol *) obstack_alloc (symbol_obstack,
+						 sizeof (struct symbol));
+	  (void) memset (sym, 0, sizeof (struct symbol));
+	  SYMBOL_NAME (sym) = create_name (list -> field.name, symbol_obstack);
+	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  SYMBOL_CLASS (sym) = LOC_CONST;
+	  SYMBOL_TYPE (sym) = type;
+	  SYMBOL_VALUE (sym) = list -> field.bitpos;
+	  add_symbol_to_list (sym, &scope -> symbols);
 	}
     }
   /* Now create the vector of fields, and record how big it is. This is where
@@ -2670,6 +2665,51 @@ DEFUN(add_psymbol_to_list,
 
 LOCAL FUNCTION
 
+	add_enum_psymbol -- add enumeration members to partial symbol table
+
+DESCRIPTION
+
+	Given pointer to a DIE that is known to be for an enumeration,
+	extract the symbolic names of the enumeration members and add
+	partial symbols for them.
+*/
+
+static void
+DEFUN(add_enum_psymbol, (dip), struct dieinfo *dip)
+{
+  char *scan;
+  char *listend;
+  long ltemp;
+  short stemp;
+  
+  if ((scan = dip -> at_element_list) != NULL)
+    {
+      if (dip -> short_element_list)
+	{
+	  (void) memcpy (&stemp, scan, sizeof (stemp));
+	  listend = scan + stemp + sizeof (stemp);
+	  scan += sizeof (stemp);
+	}
+      else
+	{
+	  (void) memcpy (&ltemp, scan, sizeof (ltemp));
+	  listend = scan + ltemp + sizeof (ltemp);
+	  scan += sizeof (ltemp);
+	}
+      while (scan < listend)
+	{
+	  scan += sizeof (long);
+	  add_psymbol_to_list (&static_psymbols, scan, VAR_NAMESPACE,
+			       LOC_CONST, 0);
+	  scan += strlen (scan) + 1;
+	}
+    }
+}
+
+/*
+
+LOCAL FUNCTION
+
 	add_partial_symbol -- add symbol to partial symbol table
 
 DESCRIPTION
@@ -2710,9 +2750,16 @@ DEFUN(add_partial_symbol, (dip), struct dieinfo *dip)
       break;
     case TAG_structure_type:
     case TAG_union_type:
-    case TAG_enumeration_type:
       add_psymbol_to_list (&static_psymbols, dip -> at_name, STRUCT_NAMESPACE,
 			   LOC_TYPEDEF, 0);
+      break;
+    case TAG_enumeration_type:
+      if (dip -> at_name)
+	{
+	  add_psymbol_to_list (&static_psymbols, dip -> at_name,
+			       STRUCT_NAMESPACE, LOC_TYPEDEF, 0);
+	}
+      add_enum_psymbol (dip);
       break;
     }
 }
@@ -2730,17 +2777,20 @@ DESCRIPTION
 	for this compilation unit.  Since we cannot follow any sibling
 	chains without reading the complete DIE info for every DIE,
 	it is probably faster to just sequentially check each one to
-	see if it is one of the types we are interested in, and if
-	so, then extracting all the attributes info and generating a
-	partial symbol table entry.
+	see if it is one of the types we are interested in, and if so,
+	then extract all the attributes info and generate a partial
+	symbol table entry.
 
 NOTES
 
-	Don't attempt to add anonymous structures, unions, or enumerations
-	since they have no name.  Also, for variables and subroutines,
-	check that this is the place where the actual definition occurs,
-	rather than just a reference to an external.
+	Don't attempt to add anonymous structures or unions since they have
+	no name.  Anonymous enumerations however are processed, because we
+	want to extract their member names (the check for a tag name is
+	done later).
 
+	Also, for variables and subroutines, check that this is the place
+	where the actual definition occurs, rather than just a reference
+	to an external.
  */
 
 static void
@@ -2759,6 +2809,8 @@ DEFUN(scan_partial_symbols, (thisdie, enddie), char *thisdie AND char *enddie)
       else
 	{
 	  nextdie = thisdie + di.dielength;
+	  /* To avoid getting complete die information for every die, we
+	     only do it (below) for the cases we are interested in. */
 	  switch (di.dietag)
 	    {
 	    case TAG_global_subroutine:
@@ -2774,12 +2826,15 @@ DEFUN(scan_partial_symbols, (thisdie, enddie), char *thisdie AND char *enddie)
 	    case TAG_typedef:
 	    case TAG_structure_type:
 	    case TAG_union_type:
-	    case TAG_enumeration_type:
 	      completedieinfo (&di);
 	      if (di.at_name)
 		{
 		  add_partial_symbol (&di);
 		}
+	      break;
+	    case TAG_enumeration_type:
+	      completedieinfo (&di);
+	      add_partial_symbol (&di);
 	      break;
 	    }
 	}

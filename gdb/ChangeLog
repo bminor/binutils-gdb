@@ -1,3 +1,14 @@
+Thu Dec  5 18:19:43 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c (enum_type):  Build a correct TYPE_NAME, add a
+	symbol to the symbol table for each member of the enum.
+
+	* dwarfread.c (struct_type):  Build a correct TYPE_NAME.
+
+	* dwarfread.c (add_enum_psymbol):  New function to extract enum
+	member names and add them to the partial symbol table while
+	building partial symbol tables.
+
 Thu Dec  5 17:31:05 1991  John Gilmore  (gnu at cygnus.com)
 
 	* symtab.c (check_stub_method):  Must allocate two extra argument
