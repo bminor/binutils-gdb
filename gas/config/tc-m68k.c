@@ -4159,12 +4159,13 @@ md_estimate_size_before_relax (fragP, segment)
     {
     case TAB (BCC68000, BYTE):
     case TAB (ABRANCH, BYTE):
-      /* We can't do a short jump to the next instruction, so we force
-	 word mode.  At this point S_GET_VALUE should return the
-	 offset of the symbol within its frag.  If the symbol is at
-	 the start of a frag, and it is the next frag with any data in
-	 it (usually this just the next frag, but assembler listings
-	 may introduce empty frags), we must use word mode.  */
+      /* We can't do a short jump to the next instruction, so in that
+	 case we force word mode.  At this point S_GET_VALUE should
+	 return the offset of the symbol within its frag.  If the
+	 symbol is at the start of a frag, and it is the next frag
+	 with any data in it (usually this is just the next frag, but
+	 assembler listings may introduce empty frags), we must use
+	 word mode.  */
       if (fragP->fr_symbol && S_GET_VALUE (fragP->fr_symbol) == 0)
 	{
 	  fragS *l;
