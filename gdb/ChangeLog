@@ -1,3 +1,8 @@
+2004-03-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote.c (remote_open_1): Reopen the exec file and reread symbols
+	if necessary.
+
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (PC_IN_SIGTRAMP): Change to a function with

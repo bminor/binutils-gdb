@@ -2164,6 +2164,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (!async_p)
     wait_forever_enabled_p = 1;
 
+  reopen_exec_file ();
+  reread_symbols ();
+
   target_preopen (from_tty);
 
   unpush_target (target);
