@@ -1,6 +1,5 @@
-
-/* bfd back-end for ieee-695 objects.
-   Copyright (C) 1990-1992 Free Software Foundation, Inc.
+/* BFD back-end for ieee-695 objects.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -19,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define KEEPMINUSPCININST 1
+#define KEEPMINUSPCININST 0
 
 /* IEEE 695 format is a stream of records, which we parse using a simple one-
    token (which is one byte in this lexicon) lookahead recursive decent
@@ -529,26 +528,28 @@ DEFUN(parse_expression,(ieee, value, symbol, pcrel, extra, section),
 #define ieee_pos(abfd)   IEEE_DATA(abfd)->h.input_p -IEEE_DATA(abfd)->h.first_byte 
 
 static unsigned int last_index;
-
+static char last_type; /* is the index for an X or a D */
 static ieee_symbol_type *
 DEFUN(get_symbol,(abfd, 
 		  ieee,  
 		  last_symbol,
 		  symbol_count,
-pptr,
-max_index
+		  pptr,
+		  max_index,
+		  this_type
 		  ),
       bfd *abfd AND
       ieee_data_type *ieee AND
       ieee_symbol_type *last_symbol AND
       unsigned int *symbol_count AND
 		  ieee_symbol_type *** pptr AND
-      unsigned int *max_index
+      unsigned int *max_index AND
+      char this_type
       )
 {
   /* Need a new symbol */
   unsigned int new_index = must_parse_int(&(ieee->h));
-  if (new_index != last_index) {
+  if (new_index != last_index || this_type != last_type) {
     ieee_symbol_type  *   new_symbol = (ieee_symbol_type *)bfd_alloc(ieee->h.abfd,
 								     sizeof(ieee_symbol_type));
 
@@ -560,6 +561,7 @@ max_index
     if (new_index > *max_index) {
       *max_index = new_index;
     }
+    last_type = this_type;
     return new_symbol;
   }
   return last_symbol;
@@ -586,9 +588,11 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
     switch (this_byte(&(ieee->h))) {
     case ieee_nn_record:
       next_byte(&(ieee->h));
+
       symbol = get_symbol(abfd, ieee, symbol, &symbol_count,
 			  &prev_symbols_ptr, 
-			  &ieee->external_symbol_max_index);
+			  &ieee->external_symbol_max_index,'D');
+
 
       symbol->symbol.the_bfd = abfd;
       symbol->symbol.name = read_id(&(ieee->h));
@@ -602,7 +606,7 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
 					     
       symbol = get_symbol(abfd, ieee, symbol, &symbol_count,
 			  &prev_symbols_ptr,
-			  &ieee->external_symbol_max_index);
+			  &ieee->external_symbol_max_index,'D');
 
 
       BFD_ASSERT (symbol->index >= ieee->external_symbol_min_index);
@@ -683,7 +687,7 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
 
       symbol = get_symbol(abfd, ieee, symbol, &symbol_count,
 			  &prev_reference_ptr,
-			  &ieee->external_reference_max_index);
+			  &ieee->external_reference_max_index,'X');
 
 
       symbol->symbol.the_bfd = abfd;
@@ -810,7 +814,9 @@ DEFUN(ieee_get_symtab,(abfd, location),
 
 
   }
-  location[abfd->symcount] = (asymbol *)NULL;
+  if (abfd->symcount) {
+   location[abfd->symcount] = (asymbol *)NULL;
+  }
   return abfd->symcount;
 }
 static asection *
@@ -820,7 +826,10 @@ DEFUN(get_section_entry,(abfd, ieee,index),
       unsigned int index)
 {
   if (ieee->section_table[index] == (asection *)NULL) {
-    asection *section = bfd_make_section(abfd, " tempname");
+    char *tmp = bfd_alloc(abfd,11);
+    asection *section;
+    sprintf(tmp," fsec%4d", index);
+    section = bfd_make_section(abfd, tmp);
     ieee->section_table[index] = section;
     section->flags = SEC_NO_FLAGS;
     section->target_index = index;
@@ -908,7 +917,12 @@ DEFUN(ieee_slurp_sections,(abfd),
 		break;
 	      }
 	    }
-	    section->name = read_id(&(ieee->h));
+	    memcpy(section->name, read_id(&(ieee->h)),8);
+	    /* Truncate sections to 8 chars */
+	    if (strlen(section->name) > 8) 
+	    {
+	      section->name[8] = 0;
+	    }
 	      { bfd_vma parent, brother, context;
 		parse_int(&(ieee->h), &parent);
 		parse_int(&(ieee->h), &brother);
@@ -1021,7 +1035,7 @@ uint8e_type buffer[512];
     return (bfd_target *)NULL;
   }
   /* Throw away the filename */
-  free( read_id(&(ieee->h)));
+  read_id(&(ieee->h));
   /* This must be an IEEE archive, so we'll buy some space to do
      things */
 
@@ -1086,6 +1100,7 @@ uint8e_type buffer[512];
     }
   }
 
+/*  abfd->has_armap = ;*/
   return abfd->xvec;
 
 }
@@ -1291,7 +1306,7 @@ asection *section;
 			    r->next = (ieee_reloc_type *)NULL;
 			    next_byte(&(ieee->h));
 /*			    abort();*/
-			    
+			    r->relent.sym_ptr_ptr = 0;
 			    parse_expression(ieee,
 					     &r->relent.addend,
 					     &r->symbol,
@@ -1600,7 +1615,8 @@ DEFUN(ieee_canonicalize_reloc,(abfd, section, relptr, symbols),
 	symbols + src->symbol.index +  ieee->external_reference_base_offset;
       break;
     case 0:
-      src->relent.sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      src->relent.sym_ptr_ptr = 
+       src->relent.sym_ptr_ptr[0]->section->symbol_ptr_ptr;
       break;
     default:
 
@@ -1824,7 +1840,7 @@ DEFUN(do_with_relocs,(abfd, s),
 		BFD_FAIL();
 	      }
 	      ieee_write_byte(abfd, ieee_function_either_open_b_enum);
-	      abort();
+/*	      abort();*/
 	    
 	      if (r->sym_ptr_ptr != (asymbol **)NULL) {
 		ieee_write_expression(abfd, r->addend + ov,
@@ -1862,18 +1878,20 @@ DEFUN(do_as_repeat, (abfd, s),
       bfd *abfd AND
       asection *s)
 {
-  ieee_write_byte(abfd, ieee_set_current_section_enum);
-  ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
-  ieee_write_byte(abfd, ieee_set_current_pc_enum >> 8);
- ieee_write_byte(abfd, ieee_set_current_pc_enum  & 0xff);
-  ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
-  ieee_write_int(abfd,  s->vma );
+  if (s->_raw_size) {
+    ieee_write_byte(abfd, ieee_set_current_section_enum);
+    ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
+    ieee_write_byte(abfd, ieee_set_current_pc_enum >> 8);
+    ieee_write_byte(abfd, ieee_set_current_pc_enum  & 0xff);
+    ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
+    ieee_write_int(abfd,  s->vma );
 
-  ieee_write_byte(abfd,ieee_repeat_data_enum);
-  ieee_write_int(abfd, s->_raw_size);
-  ieee_write_byte(abfd, ieee_load_constant_bytes_enum);
-  ieee_write_byte(abfd, 1);
-  ieee_write_byte(abfd, 0);
+    ieee_write_byte(abfd,ieee_repeat_data_enum);
+    ieee_write_int(abfd, s->_raw_size);
+    ieee_write_byte(abfd, ieee_load_constant_bytes_enum);
+    ieee_write_byte(abfd, 1);
+    ieee_write_byte(abfd, 0);
+  }
 }
 
 static void 
@@ -2987,3 +3005,4 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
   },
   JUMP_TABLE(ieee)
 };
+

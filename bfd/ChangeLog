@@ -1,3 +1,11 @@
+,Wed Oct 28 16:11:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ieee.c (get_symbol): can now cope when two symbols of a
+	different class, but the same index number occur consecutively.
+	(get_section_entry): nicer name for sections being forward
+	referenced. (ieee_archive_p): don't free the filename string,
+	since it was never malloced.
+
 Wed Oct 28 13:42:09 1992  John Gilmore  (gnu@cygnus.com)
 
 	* coffcode.h (coff_write_object_contents):  Zero timestamp field.
