@@ -1,3 +1,15 @@
+2002-07-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (gdbcmd.h): Include.
+	(DEBUG, DBG, DBG2, dbg): Eliminate.
+	(debug_aix_thread): New static global.
+	(ptrace_check, pdc_symbol_addrs, pdc_read_regs, pdc_write_regs)
+	(pdc_read_data, pdc_write_data, pdc_alloc, pdc_realloc, pdc_dealloc)
+	(fetch_regs_lib, store_regs_lib, store_regs_kern): Rewrite
+	invocations to DBG and DBG2 macros to test against
+	``debug_aix_thread'' and call fprintf_unfiltered().
+	(_initialize_aix_thread): Add new command "set debug aix-thread".
+
 2002-07-15  Andrew Cagney  <ac131313@redhat.com>
 
 	From Gerhard Tonn <TON@de.ibm.com>:

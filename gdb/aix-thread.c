@@ -46,6 +46,7 @@
 #include "target.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "gdbcmd.h"
 
 #if 0
 #include "coff/internal.h"	/* for libcoff.h */
@@ -63,22 +64,7 @@
 #include <sys/pthdebug.h>
 
 /* Whether to emit debugging output. */
-
-#define DEBUG 0
-
-/* Default debugging output file, overridden by envvar UWTHR_DEBUG. */
-
-#define DEBUG_FILE "/dev/tty"
-
-/* #if DEBUG, write string S to the debugging output channel. */
-
-#if !DEBUG
-# define DBG(fmt_and_args)
-# define DBG2(fmt_and_args)
-#else
-# define DBG(fmt_and_args) dbg fmt_and_args
-# define DBG2(fmt_and_args) dbg fmt_and_args
-#endif
+static int debug_aix_thread;
 
 /* in AIX 5.1, functions use pthdb_tid_t instead of tid_t */
 #ifndef PTHDB_VERSION_3
@@ -200,40 +186,6 @@ static pthdb_callbacks_t pd_callbacks = {
 
 static pthdb_session_t pd_session;
 
-#if DEBUG
-/* DBG() helper: if printf-style FMT is non-null, format it with args and
-   display the result on the debugging output channel. */
-
-static void
-dbg (char *fmt, ...)
-{
-  static int fd = -1, len;
-  va_list args;
-  char buf[1024];
-  char *path;
-
-  if (!fmt)
-    return;
-
-  if (fd < 0)
-    {
-      path = getenv ("UWTHR_DEBUG");
-      if (!path)
-	path = DEBUG_FILE;
-      if ((fd = open (path, O_WRONLY | O_CREAT | O_TRUNC, 0664)) < 0)
-	error ("can't open %s\n", path);
-    }
-
-  va_start (args, fmt);
-  vsprintf (buf, fmt, args);
-  va_end (args);
-
-  len = strlen (buf);
-  buf[len] = '\n';
-  (void)write (fd, buf, len + 1);
-}
-#endif   /* DEBUG */
-
 /* Return a printable representation of pthdebug function return STATUS. */
 
 static char *
@@ -304,7 +256,9 @@ ptrace_check (int req, int id, int ret)
 	 req, id, ret, errno, strerror (errno));
 
  strange:
-  DBG2(("ptrace (%d, %d) = %d (errno = %d)", req, id, ret, errno));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "ptrace (%d, %d) = %d (errno = %d)",
+			req, id, ret, errno);
   return ret == -1 ? 0 : 1;
 }
 
@@ -348,13 +302,16 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
   int i;
   char *name;
 
-  DBG2(("pdc_symbol_addrs (user = %ld, symbols = 0x%x, count = %d)",
-	user, symbols, count));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog,
+      "pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)",
+      user, (long) symbols, count);
 
   for (i = 0; i < count; i++)
     {
       name = symbols[i].name;
-      DBG2(("  symbols[%d].name = \"%s\"", i, name));
+      if (debug_aix_thread)
+	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].name = \"%s\"", i, name);
 
       if (!*name)
 	symbols[i].addr = 0;
@@ -362,14 +319,18 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 	{
 	  if (!(ms = lookup_minimal_symbol (name, NULL, NULL)))
 	    {
-	      DBG2((" returning PDC_FAILURE"));
+	      if (debug_aix_thread)
+		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE");
 	      return PDC_FAILURE;
 	    }
 	  symbols[i].addr = SYMBOL_VALUE_ADDRESS (ms);
 	}
-      DBG2(("  symbols[%d].addr = 0x%llx", i, symbols[i].addr));
+      if (debug_aix_thread)
+	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = 0x%llx",
+			    i, symbols[i].addr);
     }
-  DBG2((" returning PDC_SUCCESS"));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, " returning PDC_SUCCESS");
   return PDC_SUCCESS;
 }
 
@@ -395,7 +356,9 @@ pdc_read_regs (pthdb_user_t user,
   struct ptxsprs sprs64;
   struct ptsprs sprs32;
   
-  DBG2(("pdc_read_regs tid=%d flags=%llx\n", (int)tid, flags));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%llx\n",
+                        (int)tid, flags);
 
   /* General-purpose registers. */
   if (flags & PTHDB_FLAG_GPRS)
@@ -456,7 +419,9 @@ pdc_write_regs (pthdb_user_t user,
   /* I have implemented what I think it should do, however this code is */
   /* untested. */
 
-  DBG2(("pdc_write_regs tid=%d flags=%llx\n", (int)tid, flags));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%llx\n",
+                        (int)tid, flags);
 
   /* General-purpose registers. */
   if (flags & PTHDB_FLAG_GPRS)
@@ -495,13 +460,17 @@ pdc_read_data (pthdb_user_t user, void *buf, pthdb_addr_t addr, size_t len)
 {
   int status, ret;
 
-  DBG2(("pdc_read_data (user = %ld, buf = 0x%x, addr = 0x%llx, len = %d)",
-	user, buf, addr, len));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog,
+      "pdc_read_data (user = %ld, buf = 0x%lx, addr = 0x%llx, len = %ld)",
+      user, (long) buf, addr, len);
 
   status = target_read_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
-  DBG2(("  status=%d, returning %s", status, pd_status2str (ret)));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s", status,
+			pd_status2str (ret));
   return ret;
 }
 
@@ -512,13 +481,17 @@ pdc_write_data (pthdb_user_t user, void *buf, pthdb_addr_t addr, size_t len)
 {
   int status, ret;
 
-  DBG2(("pdc_write_data (user = %ld, buf = 0x%x, addr = 0x%llx, len = %d)",
-	user, buf, addr, len));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog,
+      "pdc_write_data (user = %ld, buf = 0x%lx, addr = 0x%llx, len = %ld)",
+      user, (long) buf, addr, len);
 
   status = target_write_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
-  DBG2(("  status=%d, returning %s", status, pd_status2str (ret)));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s", status,
+			pd_status2str (ret));
   return ret;
 }
 
@@ -528,9 +501,13 @@ pdc_write_data (pthdb_user_t user, void *buf, pthdb_addr_t addr, size_t len)
 static int
 pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
 {
-  DBG2(("pdc_alloc (user = %ld, len = %d, bufp = 0x%x)", user, len, bufp));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog,
+                        "pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)",
+			user, len, (long) bufp);
   *bufp = xmalloc (len);
-  DBG2(("  malloc returned 0x%x", *bufp));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "  malloc returned 0x%lx", (long) *bufp);
   /* Note: xmalloc() can't return 0; therefore PDC_FAILURE will never be
      returned.  */
   return *bufp ? PDC_SUCCESS : PDC_FAILURE;
@@ -543,10 +520,13 @@ pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
 static int
 pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
 {
-  DBG2(("pdc_realloc (user = %ld, buf = 0x%x, len = %d, bufp = 0x%x)",
-	user, buf, len, bufp));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog,
+      "pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)",
+      user, (long) buf, len, (long) bufp);
   *bufp = realloc (buf, len);
-  DBG2(("  realloc returned 0x%x", *bufp));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "  realloc returned 0x%lx", (long) *bufp);
   return *bufp ? PDC_SUCCESS : PDC_FAILURE;
 }
 
@@ -556,7 +536,9 @@ pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
 static int
 pdc_dealloc (pthdb_user_t user, void *buf)
 {
-  DBG2(("pdc_free (user = %ld, buf = 0x%x)", user, buf));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "pdc_free (user = %ld, buf = 0x%lx)", user,
+                        (long) buf);
   xfree (buf);
   return PDC_SUCCESS;
 }
@@ -1053,7 +1035,8 @@ fetch_regs_lib (pthdb_pthread_t pdtid)
   int status, i;
   pthdb_context_t ctx;
 
-  DBG2 (("fetch_regs_lib %lx\n", (long)pdtid));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "fetch_regs_lib %lx\n", (long)pdtid);
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
     PD_ERROR ("fetch_registers: pthdb_pthread_context", status);
@@ -1101,7 +1084,10 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
   struct ptsprs sprs32;
   int i;
 
-  DBG2 (("fetch_regs_kern tid=%lx regno=%d arch64=%d\n", (long)tid, regno, arch64));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog,
+			"fetch_regs_kern tid=%lx regno=%d arch64=%d\n",
+			(long)tid, regno, arch64);
 
   /* General-purpose registers. */
   if (regno == -1 || regno < FP0_REGNUM)
@@ -1205,7 +1191,8 @@ store_regs_lib (pthdb_pthread_t pdtid)
   int status, i;
   pthdb_context_t ctx;
 
-  DBG2 (("store_regs_lib %lx\n", (long)pdtid));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "store_regs_lib %lx\n", (long)pdtid);
 
   /* Retrieve the thread's current context for its non-register values. */
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
@@ -1245,7 +1232,9 @@ store_regs_kern (int regno, pthdb_tid_t tid)
   struct ptsprs sprs32;
   char *regp;
 
-  DBG2 (("store_regs_kern tid=%lx regno=%d\n", (long)tid, regno));
+  if (debug_aix_thread)
+    fprintf_unfiltered (gdb_stdlog, "store_regs_kern tid=%lx regno=%d\n",
+                        (long)tid, regno);
 
   /* General-purpose registers. */
   if (regno == -1 || regno < FP0_REGNUM)
@@ -1489,4 +1478,11 @@ _initialize_aix_thread (void)
   /* Notice when object files get loaded and unloaded. */
   target_new_objfile_chain = target_new_objfile_hook;
   target_new_objfile_hook = new_objfile;
+
+  add_show_from_set (add_set_cmd ("aix-thread", no_class, var_zinteger,
+				  (char *) &debug_aix_thread, 
+				  "Set debugging of AIX thread module.\n"
+                                  "Enables printf debugging output.\n",
+				  &setdebuglist),
+		                  &showdebuglist);
 }
