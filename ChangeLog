@@ -1,3 +1,13 @@
+Thu Feb 12 15:03:08 1998  H.J. Lu  <hjl@gnu.org>
+
+	* ltmain.sh (mkdir): Check that the directory doesn't exist
+	before we exit with error, so that we don't get races during
+	parallel builds.
+
+Sat Feb  7 15:19:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig, ltmain.sh: Update from libtool 1.0i.
+
 Thu Feb  5 17:01:12 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * configure.in (host_tools, native_only): Add libtool.
@@ -11,12 +21,6 @@ Wed Feb  4 18:56:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltconfig, ltmain.sh: Update from libtool 1.0h.
 
-start-sanitize-sky
-Wed Feb  4 13:39:26 1998  Ian Carmichael  <iancarm@cygnus.com>
-
-	* configure.in: Make sim build under dvp-elf.
-
-end-sanitize-sky
 Mon Feb  2 19:38:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Add tic30 cases, and map c30 to tic30.
@@ -142,13 +146,6 @@ Tue Dec 23 12:45:50 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config.guess: HP 9000/803 is a PA1.1 machine.
 
-start-sanitize-sky
-Mon Dec 22 14:08:27 1997  Doug Evans  <devans@canuck.cygnus.com>
-
-	* configure.in: Add txvu-elf support.
-	* config.sub: Recognize txvu cpu.
-
-end-sanitize-sky
 start-sanitize-vr5400
 Mon Dec 22 11:27:12 1997  Jeffrey A Law  (law@cygnus.com)
 
