@@ -1,5 +1,8 @@
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* gdb.base/exprs.exp(test_expr): Make sure each test gets a unique
+	name.
+
 	* gdb.base/help.exp: Fix the syntax of a few gdb_test calls.
 
 	* gdb.base/scope.exp: Use gdb_test.

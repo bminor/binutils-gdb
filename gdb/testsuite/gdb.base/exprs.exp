@@ -65,7 +65,7 @@ proc test_expr { args } {
 	return 1;
     }
     for {set x 1} {$x < $last_ent} {set x [expr $x + 2]} {
-	if [gdb_test [lindex $args $x] [lindex $args [expr $x + 1]] $testname] {
+	if [gdb_test [lindex $args $x] [lindex $args [expr $x + 1]] "$testname ([lindex $args $x])"] {
 	    return 1;
 	}
     }
@@ -176,7 +176,6 @@ test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int < 0" "\\$\[
 test_expr "set variable v_unsigned_int=0x7FFF" "print v_unsigned_int > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int > 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned int >"
 # make int a minus
 test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int == 0" "\\$\[0-9\]* = 0"  "print v_unsigned_int == ~0" "\\$\[0-9\]* = 1"  "print v_unsigned_int == (unsigned int)~0" "\\$\[0-9\]* = 1"  "print unsigned int == (~0)"
-test_expr "\\$\[0-9\]* = 0"  "print v_unsigned_int == (unsigned int)~0" "\\$\[0-9\]* = 1"  "print unsigned int == (~0)"
 test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int != 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int != (unsigned int)~0" "\\$\[0-9\]* = 0"  "print unsigned int != (~0)"
 test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int < 0" "\\$\[0-9\]* = 0"  "print v_unsigned_int < 0x7FFF" "\\$\[0-9\]* = 0"  "print unsigned int < (~0)"
 test_expr "set variable v_unsigned_int=~0" "print v_unsigned_int > 0" "\\$\[0-9\]* = 1"  "print v_unsigned_int > 0x7FFF" "\\$\[0-9\]* = 1"  "print unsigned int > (~0)"
