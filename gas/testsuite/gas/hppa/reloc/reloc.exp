@@ -213,7 +213,9 @@ proc do_exit_relocation_test {} {
 
     # Elf (osf) does not use ENTRY/EXIT relocations.
     # I guess we could look at the unwind subspaces it builds...
+    # Until then, make sure it still assembles.
     if [istarget hppa*-*-osf*] then {
+	gas_test_old "exitbug.s" "" "Test for bogus R_EXIT relocation (part 1)"
 	return;
     }
 
@@ -240,7 +242,7 @@ proc do_exit_relocation_test {} {
     }
 }
 
-proc do_cross_space_fixup_test {} {
+proc do_cross_space_fixup_test_1 {} {
     set testname "fixupbug.s: Test cross space jump/call fixup bug (part 2)"
     set x 0
 
@@ -249,7 +251,7 @@ proc do_cross_space_fixup_test {} {
 	return;
     }
 
-    if [gas_test_old "fixupbug.s" "" "Test cross sapce jump/call fixup bug (part 1)"] {
+    if [gas_test_old "fixupbug.s" "" "Test cross space jump/call fixup bug (part 1)"] {
 	objdump_start_no_subdir "a.out" "-r"
 
 	# Make sure GAS generated a fixup/relocation for the cross-space
@@ -270,6 +272,108 @@ proc do_cross_space_fixup_test {} {
 
 	# Did we find what we were looking for?  If not, flunk it.
 	if [expr $x==1] then { pass $testname } else { fail $testname }
+    }
+}
+
+proc do_cross_space_fixup_test_2 {} {
+    set testname "fixupbug.s: Test cross space jump/call fixup bug (part 3)"
+    set x 0
+
+    # ELF (osf) doesn't really handle extra sections too well...
+    if [istarget hppa*-*-osf*] then {
+	return;
+    }
+
+    setup_xfail "hppa*-*-*"
+    gas_start "fixupbug2.s" "-al"
+
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 E8000002\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ error "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==1] then { pass $testname } else { fail $testname }
+}
+
+proc do_round_mode_test {} {
+    set testname "roundmode.s: Test switching of rounding modes (part 2)"
+    set x 0
+
+    if [gas_test_old "roundmode.s" "" "Test switch of rounding modes(part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Make sure GAS generated correct relocations to switch rounding modes.
+	# Also make sure (for SOM) that redundant rounding mode relocations
+	# were eliminated.
+	if [istarget hppa*-*-osf*] then {
+	    while 1 {
+		expect {
+	            -re "^00000000\[^\n\]*LR21\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^00000004\[^\n\]*RR14\[^\n\]*\n" 
+			{ set x [expr $x+1] }
+	            -re "^00000008\[^\n\]*L21\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^0000000c\[^\n\]*R14\[^\n\]*\n" 
+			{ set x [expr $x+1] }
+	            -re "^00000010\[^\n\]*LS21\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^00000014\[^\n\]*RS14\[^\n\]*\n" 
+			{ set x [expr $x+1] }
+	            -re "^00000018\[^\n\]*LD21\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^0000001c\[^\n\]*RD14\[^\n\]*\n" 
+			{ set x [expr $x+1] }
+	            -re "\[^\n\]*\n"		{ }
+	        timeout				{ error "timeout\n"; break }
+	        eof				{ break }
+		}
+            }
+	} else {
+	    while 1 {
+		expect {
+	            -re "^00000000\[^\n\]*R_R_MODE\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^00000004\[^\n\]*R_R_MODE\[^\n\]*\n" 
+			{ fail $testname }
+	            -re "^00000008\[^\n\]*R_N_MODE\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^0000000c\[^\n\]*R_N_MODE\[^\n\]*\n" 
+			{ fail $testname }
+	            -re "^00000010\[^\n\]*R_S_MODE\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^00000014\[^\n\]*R_S_MODE\[^\n\]*\n" 
+			{ fail $testname }
+	            -re "^00000018\[^\n\]*R_D_MODE\[^\n\]*\n"
+			{ set x [expr $x+1] }
+	            -re "^0000001c\[^\n\]*R_D_MODE\[^\n\]*\n" 
+			{ fail $testname }
+	            -re "\[^\n\]*\n"		{ }
+	        timeout				{ error "timeout\n"; break }
+	        eof				{ break }
+		}
+	    }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [istarget hppa*-*-osf*] then {
+	    if [expr $x==8] then { pass $testname } else { fail $testname }
+	} else {
+	    if [expr $x==4] then { pass $testname } else { fail $testname }
+	}
     }
 }
 
@@ -303,5 +407,10 @@ if [istarget hppa*-*-*] then {
 
     # GAS2 incorrectly thought it could apply a fixup for a pc-relative
     # branch/call which crossed different subspaces.
-    do_cross_space_fixup_test
+    # Also check that the assembled instruction is correct
+    do_cross_space_fixup_test_1
+    do_cross_space_fixup_test_2
+
+    # Make sure we switch rounding modes correctly
+    do_round_mode_test
 }
