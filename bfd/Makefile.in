@@ -55,6 +55,8 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
+CC_FOR_BUILD = $(CC)
+
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
@@ -78,14 +80,16 @@ BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-z8k.o cpu-we32k.o cpu-h8500.o cpu-alpha.o cpu-sh.o
 
 BFD_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
-	i386aout.o i386bsd.o i386linux.o \
+	i386aout.o i386bsd.o i386linux.o i386lynx.o \
 	aout64.o demo64.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
 	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
 	coff-mips.o coff-msym.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
+	elf32-hppa.o \
 	bout.o \
-	hppa.o oasys.o ieee.o srec.o stab-syms.o coff-alpha.o coff-sh.o
+	hppa.o oasys.o ieee.o srec.o stab-syms.o coff-alpha.o coff-sh.o \
+	hp300hpux.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -99,6 +103,7 @@ FLAGS_TO_PASS = \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CFLAGS=$(CFLAGS)" \
 	"RANLIB=$(RANLIB)" \
 	"MAKEINFO=$(MAKEINFO)" \
@@ -118,14 +123,17 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-i960.c srec.c tekhex.c oasys.c ieee.c coff-m68k.c \
 	 coff-a29k.c coff-rs6000.c coff-msym.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
-	 seclet.c coff-m88k.c coff-mips.c trad-core.c newsos3.c \
+	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
 	 i386aout.c i386linux.c bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
 	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
-	 mipsbsd.c \
+	 mipsbsd.c cpu-sh.c \
 	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
-	 coff-alpha.c cpu-alpha.c
+	 elf32-hppa.c \
+	 elf64.c \
+	 coff-alpha.c cpu-alpha.c \
+	 hp300hpux.c i386lynx.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -159,10 +167,10 @@ $(TARGETLIB): $(OFILES)
 # info from configure.
 
 
-targets.o: targets.c
+targets.o: targets.c Makefile
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
 
-archures.o: archures.c
+archures.o: archures.c Makefile
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
 
 subdir_do: force
@@ -405,6 +413,9 @@ coff-msym.o: coff-msym.c $(INCDIR)/bfd.h  $(INCDIR)/coff/ecoff-ext.h \
 newsos3.o : newsos3.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
+i386lynx.o : i386lynx.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h libaout.h 
 i386aout.o : i386aout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
@@ -418,7 +429,8 @@ bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
 mipsbsd.o : mipsbsd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h
-elf32.o : elf32.c libelf.h libbfd.h $(INCDIR)/bfd.h $(INCDIR)/obstack.h
+elf32.o : elf32.c elfcode.h libelf.h libbfd.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h
 elf32-sparc.o : elf32-sparc.c libelf.h libbfd.h $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h
 elf32-m68k.o : elf32-m68k.c libelf.h libbfd.h $(INCDIR)/bfd.h \
@@ -426,6 +438,10 @@ elf32-m68k.o : elf32-m68k.c libelf.h libbfd.h $(INCDIR)/bfd.h \
 elf32-i860.o : elf32-i860.c libelf.h libbfd.h $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h
 elf32-i386.o : elf32-i386.c libelf.h libbfd.h $(INCDIR)/bfd.h \
+  $(INCDIR)/obstack.h
+elf32-hppa.o : elf32-hppa.c $(srcdir)/elf32-hppa.h libelf.h libbfd.h \
+  $(INCDIR)/bfd.h $(INCDIR)/obstack.h
+elf64.o : elf64.c elfcode.h libelf.h libbfd.h $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
