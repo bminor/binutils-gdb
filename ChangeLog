@@ -1,3 +1,11 @@
+Tue May  3 21:48:11 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* configure.in (i[34]86-*-sco*): Move to be with other i386
+	targets.
+	(romp-*-*): New target.  Skip various binary utilities.
+	(vax-*-*): New target.  Don't build newlib.
+	(vax-*-vms): Renamed from *-*-vms.  Don't build opcodes or newlib.
+
 Thu Apr 28 15:03:05 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure.in: Only set host_makefile_frag if config

@@ -203,6 +203,9 @@ case "${target}" in
     # add the go32 support tools to the list
     configdirs=`echo go32 ${configdirs}`
     ;;
+  i[34]86-*-sco*)
+    noconfigdirs="$noconfigdirs gprof"
+    ;;
   i[34]86-*-solaris2*)
     # The linker does static linking correctly, but the Solaris C library
     # has bugs such that some important functions won't work when statically
@@ -242,6 +245,9 @@ case "${target}" in
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
+  romp-*-*)
+    noconfigdirs="bfd binutils ld gas opcodes"
+    ;;
   sh-*-*)
     case "${host}" in
       i[34]86-*-vsta) ;; # don't add gprof back in
@@ -257,19 +263,19 @@ case "${target}" in
     # See i386-*-solaris2* above.
     noconfigdirs="$noconfigdirs ld"
     ;;
-  i[34]86-*-sco*)
-    noconfigdirs="$noconfigdirs gprof"
+  vax-*-vms)
+    noconfigdirs="$noconfigdirs bfd binutils gdb ld newlib opcodes"
+    ;;
+  vax-*-*)
+    noconfigdirs="$noconfigdirs newlib"
     ;;
   *-*-sysv4)
     use_gnu_ld=no
     ;;
-   *-*-lynxos*)
+  *-*-lynxos*)
      # Newlib makes problems for libg++ in crosses.
      noconfigdirs="$noconfigdirs newlib"
      ;;    
-  *-*-vms)
-    noconfigdirs="$noconfigdirs bfd ld binutils gdb"
-    ;;
 esac
 
 notsupp=""
