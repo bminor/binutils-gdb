@@ -1,3 +1,16 @@
+Thu Feb 19 10:21:21 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* interp.c (load_memory): Add missing "break"'s.
+
+Tue Feb 17 12:45:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_store_register, sim_fetch_register): Pass in
+ 	length parameter.  Return -1.
+
+Tue Feb 10 11:57:40 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* interp.c: Added hardware init hook, fixed warnings.
+
 Sat Feb  7 17:16:20 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (itable.h itable.c): Depend on SIM_@sim_gen@_ALL.

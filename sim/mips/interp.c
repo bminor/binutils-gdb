@@ -586,11 +586,12 @@ sim_read (sd,addr,buffer,size)
   return(index);
 }
 
-void
-sim_store_register (sd,rn,memory)
+int
+sim_store_register (sd,rn,memory,length)
      SIM_DESC sd;
      int rn;
      unsigned char *memory;
+     int length;
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
@@ -645,14 +646,15 @@ sim_store_register (sd,rn,memory)
   else
     cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
 
-  return;
+  return -1;
 }
 
-void
-sim_fetch_register (sd,rn,memory)
+int
+sim_fetch_register (sd,rn,memory,length)
      SIM_DESC sd;
      int rn;
      unsigned char *memory;
+     int length;
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
   /* NOTE: gdb (the client) stores registers in target byte order
@@ -703,7 +705,7 @@ sim_fetch_register (sd,rn,memory)
   else /* 64bit register */
     *(unsigned64*)memory = H2T_8 ((unsigned64)(cpu->registers[rn]));
 
-  return;
+  return -1;
 }
 
 
@@ -1478,12 +1480,15 @@ load_memory (SIM_DESC sd,
     case AccessLength_SEPTIBYTE :
       value = sim_core_read_misaligned_7 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
+      break;
     case AccessLength_SEXTIBYTE :
       value = sim_core_read_misaligned_6 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
+      break;
     case AccessLength_QUINTIBYTE :
       value = sim_core_read_misaligned_5 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
+      break;
     case AccessLength_WORD :
       value = sim_core_read_aligned_4 (cpu, NULL_CIA,
 				       sim_core_read_map, pAddr);
@@ -1491,6 +1496,7 @@ load_memory (SIM_DESC sd,
     case AccessLength_TRIPLEBYTE :
       value = sim_core_read_misaligned_3 (cpu, NULL_CIA,
 					  sim_core_read_map, pAddr);
+      break;
     case AccessLength_HALFWORD :
       value = sim_core_read_aligned_2 (cpu, NULL_CIA,
 				       sim_core_read_map, pAddr);
