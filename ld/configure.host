@@ -100,6 +100,12 @@ i[3456]86-*-lynxos*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc -lm /lib/initn.o'
   ;;
 
+i[3456]86-pc-interix*)
+  HOSTING_CRT0='$$INTERIX_ROOT/usr/lib/crt0.o'
+  NATIVE_LIB_DIRS='$$INTERIX_ROOT/usr/lib/'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -L $$X/local_bin -L $$INTERIX_ROOT/usr/lib -lc -lcpsx -lc -lcpsx $$INTERIX_ROOT/usr/lib/psxdll.a $$INTERIX_ROOT/usr/lib/psxdll2.a'
+  ;;
+
 mips*-dec-bsd*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;
