@@ -1,3 +1,8 @@
+2002-04-04  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/step-test.exp: Update comment regarding stopping in
+	memcpy/bcopy calls inserted as part of the compiler runtime.
+
 2002-04-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/ovlymgr.c: Add overlay event breakpoint support.
