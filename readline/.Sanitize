@@ -17,8 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -45,29 +43,11 @@ keymaps.h
 readline.c
 readline.h
 readline.texinfo
+sysdep-norm.h
+sysdep-aix.h
 vi_keymap.c
 vi_mode.c
 
 Do-last:
-
-echo Done in `pwd`.
-
-#
-#
-# $Log$
-# Revision 1.4  1991/10/05 06:20:30  gnu
-# configure, config.sub gone
-#
-# Revision 1.3  1991/09/17  08:21:58  grossman
-# Add config directory.
-#
-# Revision 1.2  1991/08/22  09:02:14  gnu
-# add config.sub
-#
-# Revision 1.1  1991/05/23  17:44:08  rich
-# Initial revision
-#
-#
-#
 
 # End of file.
