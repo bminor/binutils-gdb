@@ -7,7 +7,9 @@ OUTPUT_FORMAT="elf64-ia64-little"
 ARCH=ia64
 MACHINE=
 MAXPAGESIZE=0x10000
-if test -n "$CREATE_SHLIB"; then
+# FIXME: It interferes with linker relaxation. Disable it until it is
+# fixed.
+if test "0" = "1" -a -n "$CREATE_SHLIB"; then
   # Optimize shared libraries for 16K page size
   COMMONPAGESIZE=0x4000
 fi
