@@ -11123,7 +11123,8 @@ md_estimate_size_before_relax (fragp, segtype)
 		&& !linkonce
 #ifdef OBJ_ELF
 		/* A global or weak symbol is treated as external.  */
-		&& ! (S_IS_EXTERN (sym) || S_IS_WEAK (sym))
+	  	&& (OUTPUT_FLAVOR == bfd_target_elf_flavour
+		    && ! (S_IS_EXTERN (sym) || S_IS_WEAK (sym)))
 #endif
 		);
     }
@@ -11163,7 +11164,8 @@ mips_fix_adjustable (fixp)
 {
 #ifdef OBJ_ELF
   /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && (S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)))
     return 0;
 #endif
   if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)

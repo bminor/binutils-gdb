@@ -1,3 +1,10 @@
+2001-07-25  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-mips.c (md_estimate_size_before_relax): Make sure
+	we treat weak like extern only for ELF.
+	(mips_fix_adjustable): Make sure we don't adjust extern/weak
+	symbols only for ELF.
+
 2001-07-25  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c: Fix spelling error in comment.
