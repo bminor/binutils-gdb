@@ -890,9 +890,6 @@ struct comp_unit
   /* Linked list of CIEs for this object.  */
   struct dwarf2_cie *cie;
 
-  /* Address size for this unit - from unit header.  */
-  unsigned char addr_size;
-
   /* Pointer to the .debug_frame section loaded into memory.  */
   char *dwarf_frame_buffer;
 
@@ -1284,9 +1281,8 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
       cie->cie_pointer = cie_pointer;
 
       /* The encoding for FDE's in a normal .debug_frame section
-         depends on the target address size as specified in the
-         Compilation Unit Header.  */
-      cie->encoding = encoding_for_size (unit->addr_size);
+         depends on the target address size.  */
+      cie->encoding = DW_EH_PE_absptr;
 
       /* Check version number.  */
       cie_version = read_1_byte (unit->abfd, buf);
@@ -1557,7 +1553,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
   unit.abfd = objfile->obfd;
   unit.objfile = objfile;
-  unit.addr_size = objfile->obfd->arch_info->bits_per_address / 8;
   unit.dbase = 0;
   unit.tbase = 0;
 

@@ -1,3 +1,11 @@
+2004-07-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (struct dwarf2_cie): Delete `addr_size' member.
+	(decode_frame_entry_1): Use DW_EH_PE_absptr as default for CIE
+	encoding.
+	(dwarf2_build_frame_info): Adjust for removal of `addr_size'
+	member of `struct comp_unit'.
+
 2004-07-23  Andrew Cagney  <cagney@gnu.org>
 
 	* infrun.c (handle_inferior_event): Separate the STEP_OVER_ALL and
