@@ -1,3 +1,10 @@
+start-sanitize-v850eq
+Fri Sep 12 13:10:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (extra_subdirs): v850eq needs igen.
+	* configure: Re-generate.
+	
+end-sanitize-v850eq
 Mon Sep  1 16:48:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (testdir): When a testsuite directory, add that to

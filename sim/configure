@@ -1341,6 +1341,7 @@ case "${target}" in
   v850eq-*-*)
 	# The V850 simulator can only be compiled by gcc.
 	sim_target=v850
+	extra_subdirs="${extra_subdirs} igen"
 	only_if_gcc=yes
 	;;
 # end-sanitize-v850eq
