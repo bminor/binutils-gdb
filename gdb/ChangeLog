@@ -1,3 +1,12 @@
+2002-11-01  Joel Brobecker  <brobecker@gnat.com>
+
+	New interix-specific files:
+	* config/i386/nm-interix.h: New file.
+	* config/i386/interix.mh: New file.
+	* config/i386/interix.mt: New file.
+	* i386-interix-nat.c: New file.
+	* i386-interix-tdep.c: New file.
+
 2002-11-01  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (deprecated_generic_get_saved_register): Rename
