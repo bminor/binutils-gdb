@@ -1,4 +1,10 @@
 start-sanitize-d10v
+Mon Aug 26 18:24:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Fixed ".word".  Fixed problem with range checking
+	on addresses.  Improved error messages.
+	* doc/c-d10v.texi: Added docs for register pairs.
+
 Mon Aug 26 13:39:27 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Fix bug in parallel 
