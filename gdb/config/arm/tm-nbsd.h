@@ -27,10 +27,6 @@
 #define JB_ELEMENT_SIZE sizeof(long)	/* jmp_buf[_JBLEN] is array of ints */
 #define JB_PC	24		/* Setjmp()'s return PC saved here */
 
-/* The first page is not writeable in NetBSD.  */
-#undef LOWEST_PC
-#define LOWEST_PC	0x8000
-
 /* Return non-zero if inside a shared-library entry stub.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \

@@ -1,3 +1,33 @@
+2002-02-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.h (enum arm_abi): New enum.
+	(struct gdbarch_tdep): New structure.
+	(LOWEST_PC): Provide a default.
+	(arm_gdbarch_register_os_abi): Declare new function.
+	* arm-tdep.c (arm_abi_names): New array.
+	(process_note_abi_tag_sections): New function.
+	(get_elfosabi): New function.
+	(arm_gdbarch_register_os_abi): New function.
+	(arm_gdbarch_init): Try to determine the ABI of the inferior.  If
+	support for that ABI has been built in, then call the appropriate
+	configuration routine.  Use gdbarch_num_regs() to get the number
+	of registers.
+	(arm_dump_tdep): New function.
+	(arm_init_abi_eabi_v1, arm_init_abi_eabi_v2, arm_init_abi_apcs): New
+	place-holder functions.
+	(_initialize_arm_tdep): Register them.
+	* config/arm/tm-arm.h (LOWEST_PC): Delete.
+
+	* armnbsd-tdep.c: New file.
+	* Makefile.in (armnbsd-tdep.o): Add dependencies.
+	* config/arm/nbsd.mt (TDEPFILES): Add it.
+	* config/arm/tm-nbsd.h (LOWEST_PC): Delete.
+
+	* armnbsd-nat.c: Include regcache.h.
+	* Makefile.in (armnbsd-nat.o): Update dependency list.
+
+	* arm-tdep.c (arm_get_next_pc): Use printf_filtered for error message.
+
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/Makefile.in: Fix typos in target rules.

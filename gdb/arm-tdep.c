@@ -39,6 +39,7 @@
 
 #include "elf-bfd.h"
 #include "coff/internal.h"
+#include "elf/arm.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -91,6 +92,23 @@
 
 #define MSYMBOL_SIZE(msym)				\
 	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
+
+/* This table matches the indicees assigned to enum arm_abi.  Keep
+   them in sync.  */
+
+static const char * const arm_abi_names[] =
+{
+  "<unknown>",
+  "ARM EABI (version 1)",
+  "ARM EABI (version 2)",
+  "GNU/Linux",
+  "NetBSD (a.out)",
+  "NetBSD (ELF)",
+  "APCS",
+  "FreeBSD",
+  "Windows CE",
+  NULL
+};
 
 /* Number of different reg name sets (options). */
 static int num_flavor_options;
@@ -1953,7 +1971,7 @@ arm_get_next_pc (CORE_ADDR pc)
 	  break;
 
 	default:
-	  fprintf (stderr, "Bad bit-field extraction\n");
+	  fprintf_filtered (gdb_stderr, "Bad bit-field extraction\n");
 	  return (pc);
 	}
     }
@@ -2420,16 +2438,277 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
     MSYMBOL_SET_SPECIAL (msym);
 }
 
+
+static void
+process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+{
+  enum arm_abi *os_ident_ptr = obj;
+  const char *name;
+  unsigned int sectsize;
+
+  name = bfd_get_section_name (abfd, sect);
+  sectsize = bfd_section_size (abfd, sect);
+
+  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, data_length, note_type;
+      char *note;
+
+      /* If the section is larger than this, it's probably not what we are
+	 looking for.  */
+      if (sectsize > 128)
+	sectsize = 128;
+
+      note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+                                (file_ptr) 0, (bfd_size_type) sectsize);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      data_length = bfd_h_get_32 (abfd, note + 4);
+      note_type   = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 4 && data_length == 16 && note_type == 1
+          && strcmp (note + 12, "GNU") == 0)
+	{
+	  int os_number = bfd_h_get_32 (abfd, note + 16);
+
+	  /* The case numbers are from abi-tags in glibc */
+	  switch (os_number)
+	    {
+	    case 0 :
+	      *os_ident_ptr = ARM_ABI_LINUX;
+	      break;
+
+	    case 1 :
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: Hurd objects not supported");
+	      break;
+
+	    case 2 :
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: Solaris objects not supported");
+	      break;
+
+	    default :
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: unknown OS number %d",
+		 os_number);
+	      break;
+	    }
+	}
+    }
+  /* NetBSD uses a similar trick.  */
+  else if (strcmp (name, ".note.netbsd.ident") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, desc_length, note_type;
+      char *note;
+
+      /* If the section is larger than this, it's probably not what we are
+	 looking for.  */
+      if (sectsize > 128)
+	sectsize = 128;
+
+      note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+                                (file_ptr) 0, (bfd_size_type) sectsize);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      desc_length = bfd_h_get_32 (abfd, note + 4);
+      note_type   = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 7 && desc_length == 4 && note_type == 1
+          && strcmp (note + 12, "NetBSD") == 0)
+	/* XXX Should we check the version here?
+	   Probably not necessary yet.  */
+	*os_ident_ptr = ARM_ABI_NETBSD_ELF;
+    }
+}
+
+/* Return one of the ELFOSABI_ constants for BFDs representing ELF
+   executables.  If it's not an ELF executable or if the OS/ABI couldn't
+   be determined, simply return -1. */
+
+static int
+get_elfosabi (bfd *abfd)
+{
+  int elfosabi;
+  enum arm_abi arm_abi = ARM_ABI_UNKNOWN;
+
+  elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
+
+  /* When elfosabi is 0 (ELFOSABI_NONE), this is supposed to indicate
+     that we're on a SYSV system.  However, GNU/Linux uses a note section
+     to record OS/ABI info, but leaves e_ident[EI_OSABI] zero.  So we
+     have to check the note sections too.
+
+     GNU/ARM tools set the EI_OSABI field to ELFOSABI_ARM, so handle that
+     as well.*/
+  if (elfosabi == 0 || elfosabi == ELFOSABI_ARM)
+    {
+      bfd_map_over_sections (abfd,
+			     process_note_abi_tag_sections,
+			     &arm_abi);
+    }
+
+  if (arm_abi != ARM_ABI_UNKNOWN)
+    return arm_abi;
+
+  switch (elfosabi)
+    {
+    case ELFOSABI_NONE:
+      /* Existing ARM Tools don't set this field, so look at the EI_FLAGS
+	 field for more information.  */
+
+      switch (EF_ARM_EABI_VERSION(elf_elfheader(abfd)->e_flags))
+	{
+	case EF_ARM_EABI_VER1:
+	  return ARM_ABI_EABI_V1;
+
+	case EF_ARM_EABI_VER2:
+	  return ARM_ABI_EABI_V2;
+
+	case EF_ARM_EABI_UNKNOWN:
+	  /* Assume GNU tools.  */
+	  return ARM_ABI_APCS;
+
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  "get_elfosabi: Unknown ARM EABI version 0x%lx",
+			  EF_ARM_EABI_VERSION(elf_elfheader(abfd)->e_flags));
+
+	}
+      break;
+
+    case ELFOSABI_NETBSD:
+      return ARM_ABI_NETBSD_ELF;
+
+    case ELFOSABI_FREEBSD:
+      return ARM_ABI_FREEBSD;
+
+    case ELFOSABI_LINUX:
+      return ARM_ABI_LINUX;
+
+    case ELFOSABI_ARM:
+      /* Assume GNU tools with the old APCS abi.  */
+      return ARM_ABI_APCS;
+
+    default:
+    }
+
+  return ARM_ABI_UNKNOWN;
+}
+
+struct arm_abi_handler
+{
+  struct arm_abi_handler *next;
+  enum arm_abi abi;
+  void (*init_abi)(struct gdbarch_info, struct gdbarch *);
+};
+
+struct arm_abi_handler *arm_abi_handler_list = NULL;
+
+void
+arm_gdbarch_register_os_abi (enum arm_abi abi,
+			     void (*init_abi)(struct gdbarch_info,
+					      struct gdbarch *))
+{
+  struct arm_abi_handler **handler_p;
+
+  for (handler_p = &arm_abi_handler_list; *handler_p != NULL;
+       handler_p = &(*handler_p)->next)
+    {
+      if ((*handler_p)->abi == abi)
+	{
+	  internal_error
+	    (__FILE__, __LINE__,
+	     "arm_gdbarch_register_os_abi: A handler for this ABI variant (%d)"
+	     " has already been registered", (int)abi);
+	  /* If user wants to continue, override previous definition.  */
+	  (*handler_p)->init_abi = init_abi;
+	  return;
+	}
+    }
+
+  (*handler_p)
+    = (struct arm_abi_handler *) xmalloc (sizeof (struct arm_abi_handler));
+  (*handler_p)->next = NULL;
+  (*handler_p)->abi = abi;
+  (*handler_p)->init_abi = init_abi;
+}
+
+/* Initialize the current architecture based on INFO.  If possible, re-use an
+   architecture from ARCHES, which is a list of architectures already created
+   during this debugging session.
+
+   Called e.g. at program startup, when reading a core file, and when reading
+   a binary file. */
+
 static struct gdbarch *
 arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
+  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  enum arm_abi arm_abi = ARM_ABI_UNKNOWN;
+  struct arm_abi_handler *abi_handler;
 
-  if (arches != NULL)
-    return arches->gdbarch;
+  /* Try to deterimine the ABI of the object we are loading.  */
 
-  /* XXX We'll probably need to set the tdep field soon.  */
-  gdbarch = gdbarch_alloc (&info, NULL);
+  if (info.abfd != NULL)
+    {
+      switch (bfd_get_flavour (info.abfd))
+	{
+	case bfd_target_elf_flavour:
+	  arm_abi = get_elfosabi (info.abfd);
+	  break;
+
+	case bfd_target_aout_flavour:
+	  if (strcmp (bfd_get_target(info.abfd), "a.out-arm-netbsd") == 0)
+	    arm_abi = ARM_ABI_NETBSD_AOUT;
+	  else
+	    /* Assume it's an old APCS-style ABI.  */
+	    arm_abi = ARM_ABI_APCS;
+	  break;
+
+	case bfd_target_coff_flavour:
+	  /* Assume it's an old APCS-style ABI.  */
+	  /* XXX WinCE?  */
+	  arm_abi = ARM_ABI_APCS;
+	  break;
+
+	default:
+	  /* Not sure what to do here, leave the ABI as unknown.  */
+	  break;
+	}
+    }
+
+  /* Find a candidate among extant architectures. */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->arm_abi == arm_abi)
+	return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->arm_abi = arm_abi;
+  if (arm_abi < ARM_ABI_INVALID)
+    tdep->abi_name = arm_abi_names[arm_abi];
+  else
+    {
+      internal_error (__FILE__, __LINE__, "Invalid setting of arm_abi %d",
+		      (int) arm_abi);
+      tdep->abi_name = "<invalid>";
+    }
 
   /* Floating point sizes and format.  */
   switch (info.byte_order)
@@ -2452,6 +2731,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__,
 		      "arm_gdbarch_init: bad byte order for float format");
     }
+
+  tdep->lowest_pc = 0x20;
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
@@ -2546,8 +2827,41 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_coff_make_msymbol_special (gdbarch,
 					 arm_coff_make_msymbol_special);
 
-  /* XXX We can't do this until NUM_REGS is set for the architecture.
-     Even then, we can't use SIZEOF_FRAME_SAVED_REGS, since that still
+  /* Hook in the ABI-specific overrides, if they have been registered.  */
+  if (arm_abi == ARM_ABI_UNKNOWN)
+    {
+      fprintf_filtered
+	(gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
+	 "Attempting to continue with the default ARM settings");
+    }
+  else
+    {
+      for (abi_handler = arm_abi_handler_list; abi_handler != NULL;
+	   abi_handler = abi_handler->next)
+	if (abi_handler->abi == arm_abi)
+	  break;
+
+      if (abi_handler)
+	abi_handler->init_abi (info, gdbarch);
+      else
+	{
+	  /* We assume that if GDB_MULTI_ARCH is less than 
+	     GDB_MULTI_ARCH_TM that an ABI variant can be supported by
+	     overriding definitions in this file.  */
+	  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+	    fprintf_filtered
+	      (gdb_stderr,
+	       "A handler for the ABI variant \"%s\" is not built into this "
+	       "configuration of GDB.  "
+	       "Attempting to continue with the default ARM settings",
+	       arm_abi_names[arm_abi]);
+	}
+    }
+
+  /* Now we have tuned the configuration, set a few final things,
+     based on what the OS ABI has told us.  */
+
+  /* We can't use SIZEOF_FRAME_SAVED_REGS here, since that still
      references the old architecture vector, not the one we are
      building here.  */
   if (prologue_cache.saved_regs != NULL)
@@ -2555,9 +2869,49 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   prologue_cache.saved_regs = (CORE_ADDR *)
     xcalloc (1, (sizeof (CORE_ADDR)
-		 * (NUM_GREGS + NUM_FREGS + NUM_SREGS + NUM_PSEUDO_REGS)));
+		 * (gdbarch_num_regs (gdbarch) + NUM_PSEUDO_REGS)));
 
   return gdbarch;
+}
+
+static void
+arm_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  if (tdep->abi_name != NULL)
+    fprintf_unfiltered (file, "arm_dump_tdep: ABI = %s\n", tdep->abi_name);
+  else
+    internal_error (__FILE__, __LINE__,
+		    "arm_dump_tdep: illegal setting of tdep->arm_abi (%d)",
+		    (int) tdep->arm_abi);
+
+  fprintf_unfiltered (file, "arm_dump_tdep: Lowest pc = 0x%lx",
+		      (unsigned long) tdep->lowest_pc);
+}
+
+static void
+arm_init_abi_eabi_v1 (struct gdbarch_info info,
+		      struct gdbarch *gdbarch)
+{
+  /* Place-holder.  */
+}
+
+static void
+arm_init_abi_eabi_v2 (struct gdbarch_info info,
+		      struct gdbarch *gdbarch)
+{
+  /* Place-holder.  */
+}
+
+static void
+arm_init_abi_apcs (struct gdbarch_info info,
+		   struct gdbarch *gdbarch)
+{
+  /* Place-holder.  */
 }
 
 void
@@ -2573,7 +2927,12 @@ _initialize_arm_tdep (void)
   static char *helptext;
 
   if (GDB_MULTI_ARCH)
-    register_gdbarch_init (bfd_arch_arm, arm_gdbarch_init);
+    gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
+
+  /* Register some ABI variants for embedded systems.  */
+  arm_gdbarch_register_os_abi (ARM_ABI_EABI_V1, arm_init_abi_eabi_v1);
+  arm_gdbarch_register_os_abi (ARM_ABI_EABI_V2, arm_init_abi_eabi_v2);
+  arm_gdbarch_register_os_abi (ARM_ABI_APCS, arm_init_abi_apcs);
 
   tm_print_insn = gdb_print_insn_arm;
 

@@ -99,6 +99,36 @@
 #define FLAG_C		0x20000000
 #define FLAG_V		0x10000000
 
+/* ABI variants that we know about.  If you add to this enum, please 
+   update the table of names in tm-arm.c.  */
+enum arm_abi
+{
+  ARM_ABI_UNKNOWN = 0,
+  ARM_ABI_EABI_V1,
+  ARM_ABI_EABI_V2,
+  ARM_ABI_LINUX,
+  ARM_ABI_NETBSD_AOUT,
+  ARM_ABI_NETBSD_ELF,
+  ARM_ABI_APCS,
+  ARM_ABI_FREEBSD,
+  ARM_ABI_WINCE,
+
+  ARM_ABI_INVALID	/* Keep this last.  */
+};
+
+/* Target-dependent structure in gdbarch.  */
+struct gdbarch_tdep
+{
+  enum arm_abi arm_abi;		/* OS/ABI of inferior.  */
+  const char *abi_name;		/* Name of the above.  */
+  CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
+				   will appear.  */
+};
+
+#ifndef LOWEST_PC
+#define LOWEST_PC (gdbarch_tdep (current_gdbarch)->lowest_pc)
+#endif
+
 /* Prototypes for internal interfaces needed by more than one MD file.  */
 int arm_pc_is_thumb_dummy (CORE_ADDR);
 
@@ -107,3 +137,10 @@ int arm_pc_is_thumb (CORE_ADDR);
 CORE_ADDR thumb_get_next_pc (CORE_ADDR);
 
 CORE_ADDR arm_get_next_pc (CORE_ADDR);
+
+/* How a OS variant tells the ARM generic code that it can handle an ABI
+   type. */
+void
+arm_gdbarch_register_os_abi (enum arm_abi abi,
+			     void (*init_abi)(struct gdbarch_info,
+					      struct gdbarch *));

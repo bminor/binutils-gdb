@@ -70,9 +70,6 @@
 #define CALL_DUMMY_BREAKPOINT_OFFSET arm_call_dummy_breakpoint_offset()
 extern int arm_call_dummy_breakpoint_offset (void);
 
-/* The first 0x20 bytes are the trap vectors.  */
-#define LOWEST_PC	0x20
-
 #define COERCE_FLOAT_TO_DOUBLE(formal, actual) (standard_coerce_float_to_double (formal, actual))
 
 #endif /* TM_ARM_H */

@@ -530,7 +530,17 @@ arm_linux_sigcontext_register_address (CORE_ADDR sp, CORE_ADDR pc, int regno)
   return reg_addr;
 }
 
+static void
+arm_linux_init_abi (struct gdbarch_info info,
+		    struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->lowest_pc = 0x8000;
+}
+
 void
 _initialize_arm_linux_tdep (void)
 {
+  arm_gdbarch_register_os_abi (ARM_ABI_LINUX, arm_linux_init_abi);
 }
