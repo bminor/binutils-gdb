@@ -1160,7 +1160,7 @@ translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd)
 	   pointer to the symbol. Build a reloc entry to relocate to this
 	   symbol attached to this section.  */
 
-	section->flags = SEC_CONSTRUCTOR;
+	section->flags = SEC_CONSTRUCTOR | SEC_RELOC;
 
 
 	section->reloc_count++;
