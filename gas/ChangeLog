@@ -1,3 +1,13 @@
+Sun Nov  2 14:46:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (STAGESTUFF): Change bin_PROGRAMS to
+	noinst_PROGRAMS.
+	(bootstrap, bootstrap2, bootstrap3): Likewise.
+	* Makefile.in: Rebuild.
+
+	* config/tc-ppc.c (ppc_fix_adjustable): Don't adjust relocs in the
+	TOC section to be against the csect.
+
 Fri Oct 31 18:19:55 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 start-sanitize-vr5400
