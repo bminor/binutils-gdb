@@ -40,3 +40,5 @@ bfd_boolean ppc64_elf_size_stubs
    asection *(*) (const char *, asection *), void (*) (void));
 bfd_boolean ppc64_elf_build_stubs
   (bfd_boolean, struct bfd_link_info *, char **);
+void ppc64_elf_restore_symbols
+  (struct bfd_link_info *info);

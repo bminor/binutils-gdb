@@ -1,3 +1,19 @@
+2004-08-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (struct ppc_link_hash_entry): Add was_undefined.
+	(struct ppc_link_hash_table): Remove no_multi_toc, multi_toc_needed.
+	Make emit_stub_syms, stub_error and has_14bit_branch bit-fields.
+	Add twiddled_syms.
+	(link_hash_newfunc): Init was_undefined.
+	(add_symbol_adjust): Don't set undefined dot symbols to defweak;
+	Use undefweak instead.
+	(ppc64_elf_check_directives): Fix undefs chain.
+	(ppc64_elf_next_toc_section): Remove no_multi_toc and multi_toc_needed
+	references.
+	(ppc64_elf_size_stubs): Adjust for add_symbol_adjust change.
+	(undo_symbol_twiddle, ppc64_elf_restore_symbols): New functions.
+	* elf64-ppc.h (ppc64_elf_restore_symbols): Declare.
+
 2004-08-09  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): For -fno-pic

@@ -2788,6 +2788,9 @@ struct ppc_link_hash_entry
      globals defined in any opd section.  */
   unsigned int adjust_done:1;
 
+  /* Set if we twiddled this symbol to weak at some stage.  */
+  unsigned int was_undefined:1;
+
   /* Contexts in which symbol is used in the GOT (or TOC).
      TLS_GD .. TLS_EXPLICIT bits are or'd into the mask as the
      corresponding relocs are encountered during check_relocs.
@@ -2836,10 +2839,6 @@ struct ppc_link_hash_table
     bfd_vma toc_off;
   } *stub_group;
 
-  /* Support for multiple toc sections.  */
-  unsigned int no_multi_toc;
-  unsigned int multi_toc_needed;
-
   /* Temp used when calculating TOC pointers.  */
   bfd_vma toc_curr;
 
@@ -2871,14 +2870,17 @@ struct ppc_link_hash_table
   unsigned long stub_count[ppc_stub_plt_call];
 
   /* Set if we should emit symbols for stubs.  */
-  unsigned int emit_stub_syms;
+  unsigned int emit_stub_syms:1;
 
   /* Set on error.  */
-  unsigned int stub_error;
+  unsigned int stub_error:1;
 
   /* Flag set when small branches are detected.  Used to
      select suitable defaults for the stub group size.  */
-  unsigned int has_14bit_branch;
+  unsigned int has_14bit_branch:1;
+
+  /* Temp used by ppc64_elf_check_directives.  */
+  unsigned int twiddled_syms:1;
 
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
@@ -2995,6 +2997,7 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->is_func = 0;
       eh->is_func_descriptor = 0;
       eh->adjust_done = 0;
+      eh->was_undefined = 0;
       eh->tls_mask = 0;
     }
 
@@ -3560,16 +3563,17 @@ ppc64_elf_archive_symbol_lookup (bfd *abfd,
 }
 
 /* This function satisfies all old ABI object references to ".bar" if a
-   new ABI object defines "bar".  This stops later archive searches from
-   including an object if we already have a function descriptor
-   definition.  It also prevents the linker complaining about undefined
-   symbols.  */
+   new ABI object defines "bar".  Well, at least, undefined dot symbols
+   are made weak.  This stops later archive searches from including an
+   object if we already have a function descriptor definition.  It also
+   prevents the linker complaining about undefined symbols.  */
 
 static bfd_boolean
 add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
+  struct ppc_link_hash_entry *eh;
   struct ppc_link_hash_entry *fdh;
 
   if (h->root.type == bfd_link_hash_indirect)
@@ -3584,13 +3588,15 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
 
   info = inf;
   htab = ppc_hash_table (info);
-  fdh = get_fdh ((struct ppc_link_hash_entry *) h, htab);
+  eh = (struct ppc_link_hash_entry *) h;
+  fdh = get_fdh (eh, htab);
   if (fdh != NULL)
     {
-      h->root.type = bfd_link_hash_defweak;
-      h->root.u.def.section = &bfd_und_section;
-      h->root.u.def.value = 0;
+      eh->elf.root.type = bfd_link_hash_undefweak;
+      eh->was_undefined = 1;
+      htab->twiddled_syms = 1;
     }
+
   return TRUE;
 }
 
@@ -3598,8 +3604,45 @@ static bfd_boolean
 ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info)
 {
-  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  struct ppc_link_hash_table *htab;
+
+  htab = ppc_hash_table (info);
   elf_link_hash_traverse (&htab->elf, add_symbol_adjust, info);
+
+  /* We need to fix the undefs list for any syms we have twiddled to
+     undef_weak.  */
+  if (htab->twiddled_syms)
+    {
+      struct bfd_link_hash_entry **pun;
+
+      pun = &htab->elf.root.undefs;
+      while (*pun != NULL)
+	{
+	  struct bfd_link_hash_entry *h = *pun;
+
+	  if (h->type != bfd_link_hash_undefined
+	      && h->type != bfd_link_hash_common)
+	    {
+	      *pun = h->und_next;
+	      h->und_next = NULL;
+	      if (h == htab->elf.root.undefs_tail)
+		{
+		  if (pun == &htab->elf.root.undefs)
+		    htab->elf.root.undefs_tail = NULL;
+		  else
+		    /* pun points at an und_next field.  Go back to
+		       the start of the link_hash_entry.  */
+		    htab->elf.root.undefs_tail = (struct bfd_link_hash_entry *)
+		      ((char *) pun - ((char *) &h->und_next - (char *) h));
+		  break;
+		}
+	    }
+	  else
+	    pun = &h->und_next;
+	}
+
+      htab->twiddled_syms = 0;
+    }
   return TRUE;
 }
 
@@ -6862,20 +6905,15 @@ void
 ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  bfd_vma addr = isec->output_offset + isec->output_section->vma;
+  bfd_vma off = addr - htab->toc_curr;
 
-  if (!htab->no_multi_toc)
-    {
-      bfd_vma addr = isec->output_offset + isec->output_section->vma;
-      bfd_vma off = addr - htab->toc_curr;
-      if (off + isec->size > 0x10000)
-	{
-	  htab->toc_curr = addr;
-	  htab->multi_toc_needed = 1;
-	}
-      elf_gp (isec->owner) = (htab->toc_curr
-			      - elf_gp (isec->output_section->owner)
-			      + TOC_BASE_OFF);
-    }
+  if (off + isec->size > 0x10000)
+    htab->toc_curr = addr;
+
+  elf_gp (isec->owner) = (htab->toc_curr
+			  - elf_gp (isec->output_section->owner)
+			  + TOC_BASE_OFF);
 }
 
 /* Called after the last call to the above function.  */
@@ -7222,15 +7260,12 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 		  else
 		    {
 		      sym_value = 0;
-		      /* Recognise an old ABI func code entry sym by
-			 the weird section for a defined sym, and use
-			 the func descriptor sym instead.  */
-		      if (hash->elf.root.type == bfd_link_hash_defweak
-			  && hash->elf.root.u.def.section == &bfd_und_section
+		      /* Recognise an old ABI func code entry sym, and
+			 use the func descriptor sym instead.  */
+		      if (hash->elf.root.type == bfd_link_hash_undefweak
 			  && hash->elf.root.root.string[0] == '.'
 			  && (fdh = get_fdh (hash, htab)) != NULL)
 			{
-			  sym_sec = NULL;
 			  if (fdh->elf.root.type == bfd_link_hash_defined
 			      || fdh->elf.root.type == bfd_link_hash_defweak)
 			    {
@@ -7239,6 +7274,8 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			      if (sym_sec->output_section != NULL)
 				ok_dest = TRUE;
 			    }
+			  else
+			    fdh = NULL;
 			}
 		      else if (hash->elf.root.type == bfd_link_hash_defined
 			       || hash->elf.root.type == bfd_link_hash_defweak)
@@ -7289,6 +7326,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			    {
 			      /* Fixup old ABI sym to point at code
 				 entry.  */
+			      hash->elf.root.type = bfd_link_hash_defweak;
 			      hash->elf.root.u.def.section = code_sec;
 			      hash->elf.root.u.def.value = sym_value;
 			    }
@@ -7660,6 +7698,34 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	       htab->stub_count[ppc_stub_plt_call - 1]);
     }
   return TRUE;
+}
+
+/* This function undoes the changes made by add_symbol_adjust.  */
+
+static bfd_boolean
+undo_symbol_twiddle (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
+{
+  struct ppc_link_hash_entry *eh;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  eh = (struct ppc_link_hash_entry *) h;
+  if (eh->elf.root.type != bfd_link_hash_undefweak || !eh->was_undefined)
+    return TRUE;
+
+  eh->elf.root.type = bfd_link_hash_undefined;
+  return TRUE;
+}
+
+void
+ppc64_elf_restore_symbols (struct bfd_link_info *info)
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  elf_link_hash_traverse (&htab->elf, undo_symbol_twiddle, info);
 }
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker

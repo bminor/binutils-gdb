@@ -379,6 +379,8 @@ gld${EMULATION_NAME}_finish (void)
       if (msg != NULL)
 	free (msg);
     }
+
+  ppc64_elf_restore_symbols (&link_info);
 }
 
 
