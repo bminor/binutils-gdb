@@ -1,6 +1,6 @@
 # Extra configuration fragment for LD.
 
-Else If "{target_canonical}" =~ /mips-idt-ecoff/
+If "{target_canonical}" =~ /mips-idt-ecoff/
 	forward-include "{srcdir}"mpw-em.c em_mipsidt.c
 End If
 
