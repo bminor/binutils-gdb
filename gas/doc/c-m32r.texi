@@ -11,7 +11,7 @@
 @chapter M32R Dependent Features
 @end ifclear
 
-@c start-sanitize-m32rx
+@c start-sanitize-cygnus
 
 @cindex M32R support
 @menu
@@ -134,4 +134,4 @@ For example these code fragments will produce this message:
 @samp{cmp r1, r2 || addx r3, r4} (Both write to the condition bit)
 
 @end table
-@c end-sanitize-m32rx
+@c end-sanitize-cygnus
