@@ -95,7 +95,11 @@ static struct section_list *adjust_sections;
 
 /* Filling gaps between sections.  */
 static boolean gap_fill_set = false;
-static bfd_byte gap_fill;
+static bfd_byte gap_fill = 0;
+
+/* Pad to a given address.  */
+static boolean pad_to_set = false;
+static bfd_vma pad_to;
 
 /* Options to handle if running as "strip".  */
 
@@ -128,7 +132,8 @@ static struct option strip_options[] =
 #define OPTION_ADJUST_WARNINGS (OPTION_ADJUST_SECTION_VMA + 1)
 #define OPTION_GAP_FILL (OPTION_ADJUST_WARNINGS + 1)
 #define OPTION_NO_ADJUST_WARNINGS (OPTION_GAP_FILL + 1)
-#define OPTION_SET_START (OPTION_NO_ADJUST_WARNINGS + 1)
+#define OPTION_PAD_TO (OPTION_NO_ADJUST_WARNINGS + 1)
+#define OPTION_SET_START (OPTION_PAD_TO + 1)
 
 static struct option copy_options[] =
 {
@@ -148,6 +153,7 @@ static struct option copy_options[] =
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_ADJUST_WARNINGS},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
+  {"pad-to", required_argument, 0, OPTION_PAD_TO},
   {"remove-section", required_argument, 0, 'R'},
   {"set-start", required_argument, 0, OPTION_SET_START},
   {"strip-all", no_argument, 0, 'S'},
@@ -178,8 +184,8 @@ Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
        [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--remove-section=section] [--gap-fill=val] [--set-start=val]\n\
-       [--adjust-start=incr] [--adjust-vma=incr]\n\
+       [--remove-section=section] [--gap-fill=val] [--pad-to=address]\n\
+       [--set-start=val] [--adjust-start=incr] [--adjust-vma=incr]\n\
        [--adjust-section-vma=section{=,+,-}val] [--adjust-warnings]\n\
        [--no-adjust-warnings] [--verbose] [--version] [--help]\n\
        in-file [out-file]\n",
@@ -361,14 +367,16 @@ copy_object (ibfd, obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
 
-  if (gap_fill_set)
+  if (gap_fill_set || pad_to_set)
     {
       asection **set;
       unsigned int c, i;
 
-      /* We must fill in gaps between the sections.  We do this by
+      /* We must fill in gaps between the sections and/or we must pad
+	 the last section to a specified address.  We do this by
 	 grabbing a list of the sections, sorting them by VMA, and
-	 adding new sections to occupy any gaps.  */
+	 increasing the section sizes as required to fill the gaps.
+	 We write out the gap contents below.  */
 
       c = bfd_count_sections (obfd);
       osections = (asection **) xmalloc (c * sizeof (asection *));
@@ -378,39 +386,69 @@ copy_object (ibfd, obfd)
       qsort (osections, c, sizeof (asection *), compare_section_vma);
 
       gaps = (bfd_size_type *) xmalloc (c * sizeof (bfd_size_type));
-      for (i = 0; i < c - 1; i++)
+      memset (gaps, 0, c * sizeof (bfd_size_type));
+
+      if (gap_fill_set)
 	{
-	  flagword flags;
-	  bfd_size_type size;
-	  bfd_vma gap_start, gap_stop;
-
-	  flags = bfd_get_section_flags (obfd, osections[i]);
-	  if ((flags & SEC_HAS_CONTENTS) == 0
-	      || (flags & SEC_LOAD) == 0)
-	    continue;
-
-	  size = bfd_section_size (obfd, osections[i]);
-	  gap_start = bfd_section_vma (obfd, osections[i]) + size;
-	  gap_stop = bfd_section_vma (obfd, osections[i + 1]);
-	  if (gap_start >= gap_stop)
-	    gaps[i] = 0;
-	  else
+	  for (i = 0; i < c - 1; i++)
 	    {
-	      if (! bfd_set_section_size (obfd, osections[i],
-					  size + (gap_stop - gap_start)))
+	      flagword flags;
+	      bfd_size_type size;
+	      bfd_vma gap_start, gap_stop;
+
+	      flags = bfd_get_section_flags (obfd, osections[i]);
+	      if ((flags & SEC_HAS_CONTENTS) == 0
+		  || (flags & SEC_LOAD) == 0)
+		continue;
+
+	      size = bfd_section_size (obfd, osections[i]);
+	      gap_start = bfd_section_vma (obfd, osections[i]) + size;
+	      gap_stop = bfd_section_vma (obfd, osections[i + 1]);
+	      if (gap_start < gap_stop)
 		{
-		  fprintf (stderr, "%s: Can't fill gap after %s: %s\n",
-			   program_name,
-			   bfd_get_section_name (obfd, osections[i]),
-			   bfd_errmsg (bfd_get_error()));
-		  status = 1;
-		  break;
+		  if (! bfd_set_section_size (obfd, osections[i],
+					      size + (gap_stop - gap_start)))
+		    {
+		      fprintf (stderr, "%s: Can't fill gap after %s: %s\n",
+			       program_name,
+			       bfd_get_section_name (obfd, osections[i]),
+			       bfd_errmsg (bfd_get_error()));
+		      status = 1;
+		      break;
+		    }
+		  gaps[i] = gap_stop - gap_start;
+		  if (max_gap < gap_stop - gap_start)
+		    max_gap = gap_stop - gap_start;
 		}
-	      gaps[i] = gap_stop - gap_start;
-	      if (max_gap < gap_stop - gap_start)
-		max_gap = gap_stop - gap_start;
 	    }
 	}
+
+      if (pad_to_set)
+	{
+	  bfd_vma vma;
+	  bfd_size_type size;
+
+	  vma = bfd_section_vma (obfd, osections[c - 1]);
+	  size = bfd_section_size (obfd, osections[c - 1]);
+	  if (vma + size < pad_to)
+	    {
+	      if (! bfd_set_section_size (obfd, osections[c - 1],
+					  pad_to - vma))
+		{
+		  fprintf (stderr, "%s: Can't add padding to %s: %s\n",
+			   program_name,
+			   bfd_get_section_name (obfd, osections[c - 1]),
+			   bfd_errmsg (bfd_get_error ()));
+		  status = 1;
+		}
+	      else
+		{
+		  gaps[c - 1] = pad_to - (vma + size);
+		  if (max_gap < pad_to - (vma + size))
+		    max_gap = pad_to - (vma + size);
+		}
+	    }
+	}	      
     }
 
   /* Symbol filtering must happen after the output sections have
@@ -460,7 +498,7 @@ copy_object (ibfd, obfd)
   /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, (void *) obfd);
 
-  if (gap_fill_set)
+  if (gap_fill_set || pad_to_set)
     {
       bfd_byte *buf;
       int c, i;
@@ -473,7 +511,7 @@ copy_object (ibfd, obfd)
       memset (buf, gap_fill, max_gap);
 
       c = bfd_count_sections (obfd);
-      for (i = 0; i < c - 1; i++)
+      for (i = 0; i < c; i++)
 	{
 	  if (gaps[i] != 0)
 	    {
@@ -541,6 +579,11 @@ copy_archive (ibfd, obfd, output_target)
      bfd *obfd;
      char *output_target;
 {
+  struct name_list
+    {
+      struct name_list *next;
+      char *name;
+    } *list, *l;
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
   char *dir = make_tempname (bfd_get_filename (obfd));
@@ -549,13 +592,20 @@ copy_archive (ibfd, obfd, output_target)
   mkdir (dir, 0700);
   obfd->has_armap = ibfd->has_armap;
 
+  list = NULL;
+
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
-  ibfd->archive_head = this_element;
   while (this_element != (bfd *) NULL)
     {
       /* Create an output file for this member.  */
       char *output_name = cat (dir, "/", bfd_get_filename(this_element));
       bfd *output_bfd = bfd_openw (output_name, output_target);
+      bfd *last_element;
+
+      l = (struct name_list *) xmalloc (sizeof (struct name_list));
+      l->name = output_name;
+      l->next = list;
+      list = l;
 
       if (output_bfd == (bfd *) NULL)
 	{
@@ -572,14 +622,18 @@ copy_archive (ibfd, obfd, output_target)
 	}
 
       bfd_close (output_bfd);
-      /* Open the newly output file and attatch to our list.  */
+
+      /* Open the newly output file and attach to our list.  */
       output_bfd = bfd_openr (output_name, output_target);
 
-      /* Mark it for deletion.  */
       *ptr = output_bfd;
       ptr = &output_bfd->next;
-      this_element->next = bfd_openr_next_archived_file (ibfd, this_element);
-      this_element = this_element->next;
+
+      last_element = this_element;
+
+      this_element = bfd_openr_next_archived_file (ibfd, last_element);
+
+      bfd_close (last_element);
     }
   *ptr = (bfd *) NULL;
 
@@ -588,16 +642,11 @@ copy_archive (ibfd, obfd, output_target)
       nonfatal (bfd_get_filename (obfd));
     }
 
-  /* Delete all the files that we opened.
-     Construct their names again, unfortunately, but
-     we're about to exit anyway.  */
-  for (this_element = ibfd->archive_head;
-       this_element != (bfd *) NULL;
-       this_element = this_element->next)
-    {
-      unlink (cat (dir, "/", bfd_get_filename (this_element)));
-    }
+  /* Delete all the files that we opened.  */
+  for (l = list; l != NULL; l = l->next)
+    unlink (l->name);
   rmdir (dir);
+
   if (!bfd_close (ibfd))
     {
       nonfatal (bfd_get_filename (ibfd));
@@ -878,7 +927,8 @@ copy_section (ibfd, isection, obfdarg)
     }
 }
 
-/* Get all the sections.  This is used when --gap-fill is used.  */
+/* Get all the sections.  This is used when --gap-fill or --pad-to is
+   used.  */
 
 static void
 get_sections (obfd, osection, secppparg)
@@ -893,7 +943,8 @@ get_sections (obfd, osection, secppparg)
 }
 
 /* Sort sections by VMA.  This is called via qsort, and is used when
-   --gap-fill is used.  */
+   --gap-fill or --pad-to is used.  We force non loadable or empty
+   sections to the front, where they are easier to ignore.  */
 
 static int
 compare_section_vma (arg1, arg2)
@@ -902,13 +953,38 @@ compare_section_vma (arg1, arg2)
 {
   const asection **sec1 = (const asection **) arg1;
   const asection **sec2 = (const asection **) arg2;
+  flagword flags1, flags2;
 
+  /* Sort non loadable sections to the front.  */
+  flags1 = (*sec1)->flags;
+  flags2 = (*sec2)->flags;
+  if ((flags1 & SEC_HAS_CONTENTS) == 0
+      || (flags1 & SEC_LOAD) == 0)
+    {
+      if ((flags2 & SEC_HAS_CONTENTS) != 0
+	  && (flags2 & SEC_LOAD) != 0)
+	return -1;
+    }
+  else
+    {
+      if ((flags2 & SEC_HAS_CONTENTS) == 0
+	  || (flags2 & SEC_LOAD) == 0)
+	return 1;
+    }
+
+  /* Sort sections by VMA.  */
   if ((*sec1)->vma > (*sec2)->vma)
     return 1;
   else if ((*sec1)->vma < (*sec2)->vma)
     return -1;
-  else
-    return 0;
+
+  /* Sort sections with the same VMA by size.  */
+  if ((*sec1)->_raw_size > (*sec2)->_raw_size)
+    return 1;
+  else if ((*sec1)->_raw_size < (*sec2)->_raw_size)
+    return -1;
+
+  return 0;
 }
 
 /* Mark all the symbols which will be used in output relocations with
@@ -1280,6 +1356,10 @@ copy_main (argc, argv)
 	case OPTION_NO_ADJUST_WARNINGS:
 	  adjust_warn = false;
 	  break;
+	case OPTION_PAD_TO:
+	  pad_to = parse_vma (optarg, "--pad-to");
+	  pad_to_set = true;
+	  break;
 	case OPTION_SET_START:
 	  set_start = parse_vma (optarg, "--set-start");
 	  set_start_set = true;
@@ -1373,7 +1453,7 @@ main (argc, argv)
   if (is_strip < 0)
     {
       int i = strlen (program_name);
-      is_strip = (i >= 5 && strcmp (program_name + i - 5, "strip"));
+      is_strip = (i >= 5 && strcmp (program_name + i - 5, "strip") == 0);
     }
 
   if (is_strip)

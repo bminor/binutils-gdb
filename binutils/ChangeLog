@@ -1,4 +1,13 @@
+Thu Nov 17 15:00:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* objcopy.c (main): Fix is_strip test.  From
+	pirker@eiunix.tuwien.ac.at (Martin Pirker).
+
 Tue Nov  8 13:12:54 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* objdump.c (display_target_list, display_info_table): Pass an
+	array to tmparg, rather than NULL, since some systems can't handle
+	NULL.
 
 	* objcopy.c (copy_archive): Keep a list of the names of the
         temporary files we created.  Close each input BFD after we open
