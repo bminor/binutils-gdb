@@ -1,3 +1,7 @@
+Tue Jan 23 16:28:22 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdb.fortran/exprs.exp:  .LT. and .GT. now return .TRUE. or .FALSE..
+
 Tue Jan 23 15:41:57 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/corefile.exp: Recognize "not found" as failure
