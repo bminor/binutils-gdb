@@ -1,3 +1,18 @@
+2003-07-28  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INFO_DEPS): Add annotate.info.
+	(dvi, ps, html, pdf): Add annotate.
+	(ANNOTATE_DOC_SOURCE_INCLUDES): New macro.
+	(ANNOTATE_DOC_BUILD_INCLUDES): New macro.
+	(ANNOTATE_DOC_FILES): New macro.
+	(ANNOTATE_TEX_TMPS): New macro.
+	(annotate.info, annotate_toc.html): Specify dependencies.
+	(annotate.ps, annotate.pdf, annotate.dvi): Ditto.
+	* annotate.texinfo: Rename annotate.texi.  Get building.  Add
+	"Migrating to GDB/MI" and "Limitations of the Annotation
+	Interface" chapters.  Mention why it is not part of the user
+	guide.  Update copyright notice.  Include "fdl.texi".
+
 2003-07-26  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.texinfo (TUI Keys): Document C-x o key to switch active window.

@@ -1,64 +1,71 @@
-@c  \input texinfo   @c -*-texinfo-*-
-@c  @c %**start of header
-@c  @setfilename annotate.info
-@c  @settitle GDB Annotations
-@c  @setchapternewpage off
-@c  @c %**end of header
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename annotate.info
+@c
+@include gdb-cfg.texi
+@c
+@settitle @value{GDBN}'s Obsolete Annotations
+@setchapternewpage off
+@c %**end of header
 
-@c  @set EDITION 0.5
-@c  @set DATE May 1994
+@set EDITION 1.0
+@set DATE July 2003
 
-@c @ifinfo
-@c This file documents GDB annotations.
+@c NOTE: cagney/2003-07-28:
+@c Don't make this migration doccument an appendix of GDB's user guide.
+@c By keeping this separate, the size of the user guide is contained. If
+@c the user guide to get much bigger it would need to switch to a larger,
+@c more expensive, form factor and would drive up the manuals publication
+@c cost.  Having a smaller cheaper manual helps the GNU Press with its sales.
 
-@c This is Edition @value{EDITION}, @value{DATE}, of @cite{GDB
-@c Annotations}.  Copyright 1994,1995,2000,2001 Free Software Foundation, Inc.
+@ifinfo
+This file documents @value{GDBN}'s obsolete annotations.
 
-@c Permission is granted to copy, distribute and/or modify this document
-@c under the terms of the GNU Free Documentation License, Version 1.1 or
-@c any later version published by the Free Software Foundation; with no
-@c Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
-@c and with the Back-Cover Texts as in (a) below.
+Copyright 1994, 1995, 2000, 2001, 2003 Free Software Foundation, Inc.
 
-@c (a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-@c this GNU Manual, like GNU software.  Copies published by the Free
-@c Software Foundation raise funds for GNU development.''
-@c @end ifinfo
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
 
-@c  @titlepage
-@c  @title GDB Annotations
-@c  @subtitle Edition @value{EDITION}
-@c  @subtitle @value{DATE}
-@c  @author Cygnus Support
-@c  @page
-@c  @vskip 0pt plus 1filll
-@c  Permission is granted to make and distribute verbatim copies of
-@c  this manual provided the copyright notice and this permission notice
-@c  are preserved on all copies.
+@end ifinfo
 
-@c  Copyright @copyright{} 1994,1995,2000,2001 Free Software Foundation
-@c  @end titlepage
+@titlepage
+@title @value{GDBN}'s Obsolete Annotations
+@subtitle Edition @value{EDITION}
+@subtitle @value{DATE}
+@author Free Software Foundation
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1994, 1995, 2000, 2001, 2003 Free Software
+Foundation, Inc.
 
-@c  @ifinfo
-@c  @node Top
-@c  @top GDB Annotations
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
+@end titlepage
 
-@c  @syncodeindex fn cp
+@ifinfo
+@node Top
+@top GDB Annotations
 
-@node Annotations
-@chapter @value{GDBN} Annotations
-
-This chapter describes annotations in @value{GDBN}.  Annotations are
-designed to interface @value{GDBN} to graphical user interfaces or
-other similar programs which want to interact with @value{GDBN} at a
-relatively high level.
+This document describes the obsolete level two annotation interface
+implemented in older @value{GDBN} versions.
 
 @ignore
 This is Edition @value{EDITION}, @value{DATE}.
 @end ignore
+@end ifinfo
 
 @menu
 * Annotations Overview::  What annotations are; the general syntax.
+* Limitations::           Limitations of the annotation interface.
+* Migrating to GDB/MI::   Migrating to GDB/MI
 * Server Prefix::       Issuing a command without affecting user state.
 * Value Annotations::   Values are marked as such.
 * Frame Annotations::   Stack frames are annotated.
@@ -70,14 +77,18 @@ This is Edition @value{EDITION}, @value{DATE}.
 * Annotations for Running::
                         Whether the program is running, how it stopped, etc.
 * Source Annotations::  Annotations describing source code.
-* TODO::                Annotations which might be added in the future.
+
+* GNU Free Documentation License::
 @end menu
 
+@contents
+
 @node Annotations Overview
-@section What is an Annotation?
+@chapter What is an Annotation?
 @cindex annotations
 
-To produce annotations, start @value{GDBN} with the @code{--annotate=2} option.
+To produce obsolete level two annotations, start @value{GDBN} with the
+@code{--annotate=2} option.
 
 Annotations start with a newline character, two @samp{control-z}
 characters, and the name of the annotation.  If there is no additional
@@ -122,8 +133,79 @@ Here @samp{quit} is input to @value{GDBN}; the rest is output from
 denotes a @samp{control-z} character) are annotations; the rest is
 output from @value{GDBN}.
 
+@node Limitations
+@chapter Limitations of the Annotation Interface
+
+The level two annotations mechanism is known to have a number of
+technical and architectural limitations.  As a consequence, in 2001,
+with the release of @value{GDBN} 5.1 and the addition of @sc{gdb/mi},
+the annotation interface was marked as deprecated.
+
+This chapter discusses the known problems.
+
+@section Dependant on @sc{cli} output
+
+The annotation interface works by interspersing markups with
+@value{GDBN} normal command-line interpreter output.  Unfortunatly, this
+makes the annotation client dependant on not just the annotations, but
+also the @sc{cli} output.  This is because the client is forced to
+assume that specific @value{GDBN} commands provide specific information.
+Any change to @value{GDBN}'s @sc{cli} output modifies or removes that
+information and, consequently, likely breaks the client.
+
+Since the @sc{gdb/mi} output is independant of the @sc{cli}, it does not
+have this problem.
+
+@section Scalability
+
+The annotation interface relies on value annotations (@pxref{Value
+Annotations}) and the display mechanism as a way of obtaining up-to-date
+value information.  These mechanisms are not scalable.
+
+In a graphical environment, where many values can be displayed
+simultaneously, a serious performance problem occurs when the client
+tries to first extract from @value{GDBN}, and then re-display, all those
+values.  The client should instead only request and update the values
+that changed.
+
+The @sc{gdb/mi} Variable Objects provide just that mechanism.
+
+@section Correctness
+
+The annotation interface assumes that a variable's value can only be
+changed when the target is running.  This assumption is not correct.  A
+single assignment to a single variable can result in the entire target,
+and all displayed values, needing an update.
+
+The @sc{gdb/mi} Variable Objects include a mechanism for efficiently
+reporting such changes.
+
+@section Reliability
+
+The @sc{gdb/mi} interface includes a dedicated test directory
+(@file{gdb/gdb.mi}), and any addition or fix to @sc{gdb/mi} must include
+testsuite changes.
+
+@section Maintainability
+
+The annotation mechanism was implemented by interspersing @sc{cli} print
+statements with various annotations.  As a consequence, any @sc{cli}
+output change can alter the annotation output.
+
+Since the @sc{gdb/mi} output is independant of the @sc{cli}, and the
+@sc{gdb/mi} is increasingly implemented independant of the @sc{cli}
+code, its long term maintenance is much easier.
+
+@node Migrating to GDB/MI
+@chapter Migrating to @sc{gdb/mi}
+
+By using the @samp{interp mi} command, it is possible for annotation
+clients to invoke @sc{gdb/mi} commands, and hence access the
+@sc{gdb/mi}.  By doing this, existing annotation clients have a
+migration path from this obsolete interface to @sc{gdb/mi}.
+
 @node Server Prefix
-@section The Server Prefix
+@chapter The Server Prefix
 @cindex server prefix for annotations
 
 To issue a command to @value{GDBN} without affecting certain aspects of
@@ -137,7 +219,10 @@ history; to print a value without recording it into the value history,
 use the @code{output} command instead of the @code{print} command.
 
 @node Value Annotations
-@section Values
+@chapter Values
+
+@emph{Value Annotations have been removed.  @sc{gdb/mi} instead provides
+Variable Objects.}
 
 @cindex annotations for values
 When a value is printed in various contexts, @value{GDBN} uses
@@ -268,7 +353,14 @@ ended with
 @end smallexample
 
 @node Frame Annotations
-@section Frames
+@chapter Frames
+
+@emph{Value Annotations have been removed.  @sc{gdb/mi} instead provides
+a number of frame commands.}
+
+@emph{Frame annotations are no longer available.  The @sc{gdb/mi}
+provides @samp{-stack-list-arguments}, @samp{-stack-list-locals}, and
+@samp{-stack-list-frames} commands.}
 
 @cindex annotations for frames
 Whenever @value{GDBN} prints a frame, it annotates it.  For example, this applies
@@ -403,7 +495,10 @@ output, not in addition.
 @end itemize
 
 @node Displays
-@section Displays
+@chapter Displays
+
+@emph{Display Annotations have been removed.  @sc{gdb/mi} instead
+provides Variable Objects.}
 
 @findex display-begin
 @findex display-number-end
@@ -442,7 +537,7 @@ to separate the expression from the text that follows for the user,
 and @var{value} is the actual value being displayed.
 
 @node Prompting
-@section Annotation for @value{GDBN} Input
+@chapter Annotation for @value{GDBN} Input
 
 @cindex annotations for prompts
 When @value{GDBN} prompts for input, it annotates this fact so it is possible
@@ -502,7 +597,7 @@ presence of annotations.
 @end table
 
 @node Errors
-@section Errors
+@chapter Errors
 @cindex annotations for errors, warnings and interrupts
 
 @findex quit
@@ -542,7 +637,10 @@ Warning messages are not yet annotated.
 @c range_error(), and possibly other places.
 
 @node Breakpoint Info
-@section Information on Breakpoints
+@chapter Information on Breakpoints
+
+@emph{Breakpoint Annotations have been removed.  @sc{gdb/mi} instead
+provides breakpoint commands.}
 
 @cindex annotations for breakpoints
 The output from the @code{info breakpoints} command is annotated as follows:
@@ -600,7 +698,7 @@ The output ends with
 @end smallexample
 
 @node Invalidation
-@section Invalidation Notices
+@chapter Invalidation Notices
 
 @cindex annotations for invalidation messages
 The following annotations say that certain pieces of state may have
@@ -621,7 +719,7 @@ deleted a breakpoint.
 @end table
 
 @node Annotations for Running
-@section Running the Program
+@chapter Running the Program
 @cindex annotations for running programs
 
 @findex starting
@@ -692,7 +790,7 @@ The program hit watchpoint number @var{number}.
 @end table
 
 @node Source Annotations
-@section Displaying Source
+@chapter Displaying Source
 @cindex annotations for source display
 
 @findex source
@@ -714,22 +812,7 @@ source which is being displayed.  @var{addr} is in the form @samp{0x}
 followed by one or more lowercase hex digits (note that this does not
 depend on the language).
 
-@node TODO
-@section Annotations We Might Want in the Future
-
-@format
-    - target-invalid
-      the target might have changed (registers, heap contents, or
-      execution status).  For performance, we might eventually want
-      to hit `registers-invalid' and `all-registers-invalid' with
-      greater precision
-
-    - systematic annotation for set/show parameters (including
-      invalidation notices).
-
-    - similarly, `info' returns a list of candidates for invalidation
-      notices.
-@end format
+@include fdl.texi
 
 @ignore
 @node Index
@@ -738,4 +821,4 @@ depend on the language).
 @printindex fn
 @end ignore
 
-@c @bye
+@bye
