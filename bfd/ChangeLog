@@ -1,3 +1,8 @@
+Mon Mar  6 23:31:36 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* elfcode.h (elf_sort_hdrs): Keep SHT_NOBITS sections after
+	!SHT_NOBITS ones.
+
 Mon Mar  6 09:53:08 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* cpu-hppa.c (arch_info_struct): Support both PA1.0 and PA1.1

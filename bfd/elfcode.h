@@ -867,7 +867,9 @@ elf_object_p (abfd)
 
   /* Check that the ELF e_machine field matches what this particular
      BFD format expects.  */
-  if (ebd->elf_machine_code != i_ehdrp->e_machine)
+  if (ebd->elf_machine_code != i_ehdrp->e_machine
+      && (ebd->elf_machine_alt1 == 0 || i_ehdrp->e_machine != ebd->elf_machine_alt1)
+      && (ebd->elf_machine_alt2 == 0 || i_ehdrp->e_machine != ebd->elf_machine_alt2))
     {
       const bfd_target * const *target_ptr;
 
@@ -2265,8 +2267,21 @@ elf_sort_hdrs (arg1, arg2)
 	return -1;
       else if (hdr1->sh_addr > hdr2->sh_addr)
 	return 1;
+      if (hdr1->sh_size == 0)
+	{
+	  if (hdr2->sh_size == 0)
+	    {
+	      /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
+		 The main loop in map_program_segments requires this. */
+	      return (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
+	    }
+	  else
+	    return -1;
+	}
+      else if (hdr2->sh_size == 0)
+	return 1;
       /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
-         The main loop in map_program_segments assumes this. */
+         The main loop in map_program_segments requires this. */
       return (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
     }
   else
@@ -3764,7 +3779,9 @@ elf_core_file_p (abfd)
 
   /* Check that the ELF e_machine field matches what this particular
      BFD format expects.  */
-  if (ebd->elf_machine_code != i_ehdrp->e_machine)
+  if (ebd->elf_machine_code != i_ehdrp->e_machine
+      && (ebd->elf_machine_alt1 == 0 || i_ehdrp->e_machine != ebd->elf_machine_alt1)
+      && (ebd->elf_machine_alt2 == 0 || i_ehdrp->e_machine != ebd->elf_machine_alt2))
     {
       const bfd_target * const *target_ptr;
 
