@@ -913,7 +913,7 @@ batch mode or quiet mode.
 @cindex @code{--nx}
 @cindex @code{-n}
 Do not execute commands found in any initialization files (normally
-called @file{.gdbinit}, or @file{gdb.ini} on PCs).  Normally,
+called @file{.gdbinit} or @file{gdb.ini} under MS-DOS).  Normally,
 @value{GDBN} executes the commands in these files after all the command
 options and arguments have been processed.  @xref{Command Files,,Command
 files}.
@@ -13067,8 +13067,9 @@ the last command, as it would from the terminal.
 @cindex @file{.gdbinit}
 @cindex @file{gdb.ini}
 When you start @value{GDBN}, it automatically executes commands from its
-@dfn{init files}.  These are files named @file{.gdbinit} on Unix and
-@file{gdb.ini} on DOS/Windows.  During startup, @value{GDBN} does the
+@dfn{init files}.  These files are normally named @file{.gdbinit} although
+filename limitations require that they be named @file{gdb.ini} on MS-DOS.
+During startup, @value{GDBN} does the
 following:
 
 @enumerate

@@ -1,3 +1,9 @@
+2001-11-24  Christopher Faylor  <cgf@redhat.com>
+
+	* gdb.texinfo (File Options): Change description of -nx and gdb.ini to
+	specifically refer to MS-DOS.
+	(command files): Mention gdb.ini is only used on MS-DOS.
+
 2001-11-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Invoking GDB): Document --args.

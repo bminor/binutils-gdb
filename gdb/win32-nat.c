@@ -32,6 +32,7 @@
 #include "command.h"
 #include "completer.h"
 #include "regcache.h"
+#include "top.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1752,4 +1753,32 @@ void
 _initialize_core_win32 (void)
 {
   add_core_fns (&win32_elf_core_fns);
+}
+
+void
+_initialize_check_for_gdb_ini (void)
+{
+  char *homedir;
+  if (inhibit_gdbinit)
+    return;
+
+  homedir = getenv ("HOME");
+  if (homedir)
+    {
+      char *p;
+      char *oldini = (char *) alloca (strlen (homedir) +
+				      sizeof ("/gdb.ini"));
+      strcpy (oldini, homedir);
+      p = strchr (oldini, '\0');
+      if (p > oldini && p[-1] != '/')
+	*p++ = '/';
+      strcpy (p, "gdb.ini");
+      if (access (oldini, 0) == 0)
+	{
+	  int len = strlen (oldini);
+	  char *newini = alloca (len + 1);
+	  sprintf (newini, "%.*s.gdbinit", len - (sizeof ("gdb.ini") - 1), oldini);
+	  warning ("obsolete '%s' found. Rename to '%s'.", oldini, newini);
+	}
+    }
 }
