@@ -668,7 +668,8 @@ when gdb is started.", &cmdlist);
   c->completer = filename_completer;
 
   add_com ("quit", class_support, quit_command, "Exit gdb.");
-  add_com ("help", class_support, help_command, "Print list of commands.");
+  c = add_com ("help", class_support, help_command, "Print list of commands.");
+  c->completer = command_completer;
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 

@@ -339,6 +339,14 @@ location_completer (char *text, char *word)
   return list;
 }
 
+/* Complete on command names.  Used by "help".  */
+char **
+command_completer (char *text, char *word)
+{
+  return complete_on_cmdlist (cmdlist, text, word);
+}
+
+
 /* Here are some useful test cases for completion.  FIXME: These should
    be put in the test suite.  They should be tested with both M-? and TAB.
 
