@@ -1,5 +1,9 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* lib/gdb.exp: Provide default value for noinferiorio.
+	* gdb.base/interrupt.exp: Skip tests if we can't handle IO to/from
+	the inferior.
+
 	* gdb.base/break.exp: Always check for a program already being
 	started after sending a "run" command to gdb.
 	(text_next_with_recursion): Don't check the output from the
