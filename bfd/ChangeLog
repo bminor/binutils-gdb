@@ -1,3 +1,13 @@
+Wed Oct 12 11:54:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Makefile.in (INSTALL): Use top level install.sh script.
+	* config/README (INSTALL): Remove.
+	* config/delta88.mh (INSTALL): Remove.
+	* config/i386v4.mh (INSTALL): Remove.
+	* config/irix4.mh (INSTALL): Remove.
+	* config/irix5.mh (INSTALL): Remove.
+	* config/ncrt3000.mh (INSTALL): Remove.
+
 Tue Oct 11 13:57:56 1994  Eric Youngdale  (eric@andante.aib.com)
 
 	* elf32-i386.c (elf_i386_check_relocs): Make sure that a symbol
