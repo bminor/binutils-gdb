@@ -817,11 +817,11 @@ struct funcinfo
   bfd_vma high;
 };
 
-/* add_line_info: adds a new entry to the line_info list in the
-   line_info_table, ensuring that the list is sorted.  Note that the
-   line_info list is sorted from highest to lowest VMA (with possible
-   duplicates); that is, line_info->prev_line always accesses an equal
-   or smaller VMA.  */
+/* Adds a new entry to the line_info list in the line_info_table, ensuring
+   that the list is sorted.  Note that the line_info list is sorted from
+   highest to lowest VMA (with possible duplicates); that is,
+   line_info->prev_line always accesses an equal or smaller VMA.  */
+
 static void
 add_line_info (table, address, filename, line, column, end_sequence)
      struct line_info_table* table;
@@ -908,7 +908,8 @@ add_line_info (table, address, filename, line, column, end_sequence)
 }
 
 /* Extract a fully qualified filename from a line info table.
-   The returned string has been xmalloc'ed.  */
+   The returned string has been malloc'ed and it is the caller's
+   responsibility to free it.  */
 
 static char *
 concat_filename (table, file)
@@ -921,26 +922,32 @@ concat_filename (table, file)
     {
       (*_bfd_error_handler)
 	(_("Dwarf Error: mangled line number section (bad file number)."));
-      return concat ("<unknown>");
+      return strdup ("<unknown>");
     }
 
   filename = table->files[file - 1].name;
 
-  if (IS_ABSOLUTE_PATH (filename))
-    return concat (filename);
-  else
+  if (! IS_ABSOLUTE_PATH (filename))
     {
       char* dirname = (table->files[file - 1].dir
 		       ? table->dirs[table->files[file - 1].dir - 1]
 		       : table->comp_dir);
 
-      /* Not all tools set DW_AT_comp_dir, so dirname may be unknown.  The
-	 best we can do is return the filename part.  */
-      if (dirname == NULL)
-	return concat (filename);
-      else
-	return concat (dirname, "/", filename, NULL);
+      /* Not all tools set DW_AT_comp_dir, so dirname may be unknown.
+	 The best we can do is return the filename part.  */
+      if (dirname != NULL)
+	{
+	  unsigned int len = strlen (dirname) + strlen (filename) + 2;
+	  char * name;
+
+	  name = bfd_malloc (len);
+	  if (name)
+	    sprintf (name, "%s/%s", dirname, filename);
+	  return name;
+	}
     }
+
+  return strdup (filename);
 }
 
 static void
@@ -1266,7 +1273,8 @@ decode_line_info (unit, stash)
 		   based, the references are 1 based.  */
 		file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 		line_ptr += bytes_read;
-		free (filename);
+		if (filename)
+		  free (filename);
 		filename = concat_filename (table, file);
 		break;
 	      }
@@ -1302,7 +1310,8 @@ decode_line_info (unit, stash)
 	    }
 	}
 
-      free (filename);
+      if (filename)
+	free (filename);
     }
 
   return table;

@@ -1,3 +1,9 @@
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (concat_filename): Use bfd_malloc() and strdup()
+	instead of concat().
+	(decode_line_info): Only free filename if it is not NULL.
+
 2003-03-31  Andreas Schwab  <schwab@suse.de>
 	    Daniel Jacobowitz  <drow@mvista.com>
 
