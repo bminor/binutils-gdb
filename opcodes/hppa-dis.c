@@ -1081,10 +1081,6 @@ print_insn_hppa (memaddr, info)
 						+ extract_22 (insn)),
 					       info);
 		  break;
-		case 'Y':
-		  /* be,l %sr0,%r31 implicit output.  */
-		  (*info->fprintf_func) (info->stream, "%%sr0,%%r31");
-		  break;
 		case 'L':
 		  fputs_filtered (",%r2", info);
 		  break;
