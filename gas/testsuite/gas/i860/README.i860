@@ -25,10 +25,12 @@ TODO:
    tests of the Intel syntax should be added to prevent bitrot (including
    relocatable expression syntax, etc).  Test file dual03.s uses Intel
    syntax lightly (i.e., register names without '%' prefix).
+ - Currently, .align in a .text section fills with 0x00000000.  This is
+   a defect and it needs to fill with nop (0xa0000000).  Write a testcase
+   for it.
 
 Contact me (Jason Eckhardt, jle@rice.edu) if you'd like to help.
 
 Known testsuite failures:
-  - dual02-err.s: GAS currently doesn't check that dual mode pairs
-      are properly aligned.
+  - none.
 

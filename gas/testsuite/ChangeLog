@@ -1,3 +1,8 @@
+2003-08-06  Jason Eckhardt  <jle@rice.edu>
+
+	* gas/i860/dual02-err.l: Update expected error message.
+	* gas/i860/README.i860: Remove dual02-err from known failure list.
+
 2003-08-05  Jason Eckhardt  <jle@rice.edu>
 
 	* gas/i860/README.i860: Remove dual01 from the known failures.

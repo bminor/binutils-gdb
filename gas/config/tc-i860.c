@@ -933,7 +933,13 @@ i860_process_insn (char *str)
     {
       if ((opcode & 0xfc000000) == 0x48000000 || opcode == 0xb0000000)
         {
-	  opcode |= (1 << 9);
+	  /* The instruction is a flop or a fnop, so set its dual bit
+	     (but check that it is 8-byte aligned).  */
+	  if (((frag_now->fr_address + frag_now_fix_octets ()) & 7) == 0)
+	    opcode |= (1 << 9);
+	  else
+            as_bad (_("'d.%s' must be 8-byte aligned"), insn->name);
+
           if (dual_mode == DUAL_DDOT)
 	    dual_mode = DUAL_OFF;
           else if (dual_mode == DUAL_ONDDOT)

@@ -1,3 +1,8 @@
+2003-08-06  Jason Eckhardt  <jle@rice.edu>
+
+	* config/tc-i860.c (i860_process_insn): Check that instructions
+	with their dual-bit set are 8-byte aligned.
+
 2003-08-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
