@@ -1,3 +1,10 @@
+Fri Jul 24 19:55:24 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (INSTALL_TARGET): Move EXTRA_TARGET_HOST_INSTALL_MODULES
+	to here ...
+	(install-no-fixedincludes): and here
+	(INSTALL_MODULES): ... to here.
+
 Fri Jul 24 17:01:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Merge with FSF.
