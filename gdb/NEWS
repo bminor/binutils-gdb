@@ -51,6 +51,12 @@ Tahoe						tahoe-*-*
 
 Multi-arch support is enabled for all MIPS configurations.
 
+* GDB's version number moved to ``version.in''
+
+The Makefile variable VERSION has been replaced by the file
+``version.in''.  People creating GDB distributions should update the
+contents of this file.
+
 * gdba.el deleted
 
 GUD support is now a standard part of the EMACS distribution.

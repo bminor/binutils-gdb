@@ -11,6 +11,7 @@
 	number from ``version.in'' file.
 	(clean mostlyclean): Update.
 	* version.in: New file.
+	* NEWS: Update.
 	
 2001-05-11  Kevin Buettner  <kevinb@redhat.com>
 
