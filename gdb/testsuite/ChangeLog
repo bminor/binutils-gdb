@@ -1,5 +1,34 @@
 Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	The following changes were made by David Taylor
+ 	<taylor@cygnus.com>, Elena Zannoni <ezannoni@cygnus.com>, and
+ 	Edith Epstein <eepstein@cygnus.com> as part of a project to merge
+ 	in changes by HP.
+	
+	* configure.in (hpdir): decide whether to configure gdb.hp.
+	* configure: regenerated.
+
+	* gdb.base/Makefile.in (MISCELLANEOUS): new macros -- extra things
+	to delete on clean.
+	(EXECUTABLES): update to reflect new additions.
+	* gdb.base/commands.exp: update message expected.
+	* gdb.base/default.exp: add copyright notice.
+	* gdb.base/funcargs.exp (timeout): if hpux, increase timeout.
+	* gdb.base/help.exp: update messages to reflect current text.
+	* gdb.base/recurse.exp: add hpppa*-*-bsd* to 'list' of enabled
+	targets for recurse tests.
+	* gdb.base/watchpoint.exp: if on hpux and not gcc compiled, then
+	skip this file.
+
+	* gdb.c++/Makefile.in (PROGS): update to reflect new executables.
+	* gdb.c++/cplusfuncs.exp: tell gdb_compile that it's a c++
+	compilation.
+	* gdb.c++/misc.exp: ditto.
+	* gdb.c++/templates.exp: if we're on hpux and it's not gcc, don't
+	run the tests.  tell gdb_compile that it's a c++ compilation.
+
+	* gdb.threads/pthreads.exp: fix typo in message.
+	
 	* gdb.base/all-bin.exp: new file.
 	* gdb.base/arithmet.exp: new file.
 	* gdb.base/assign.exp: new file.
