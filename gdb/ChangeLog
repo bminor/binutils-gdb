@@ -1,5 +1,8 @@
 2002-06-22  Andrew Cagney  <ac131313@redhat.com>
 
+	* infrun.c (_initialize_infrun): Delete unnecessary call to
+	build_infrun.
+
 	* regcache.h: Update comments describing the regcache_cpy family
 	of functions.
 	(regcache_save, regcache_restore): Delete declaration.

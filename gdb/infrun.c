@@ -4183,8 +4183,6 @@ _initialize_infrun (void)
   register int numsigs;
   struct cmd_list_element *c;
 
-  build_infrun ();
-
   register_gdbarch_swap (&stop_registers, sizeof (stop_registers), NULL);
   register_gdbarch_swap (NULL, 0, build_infrun);
 
