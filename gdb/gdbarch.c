@@ -53,10 +53,6 @@
 /* Static function declarations */
 
 static void alloc_gdbarch_data (struct gdbarch *);
-static void init_gdbarch_swap (struct gdbarch *);
-static void clear_gdbarch_swap (struct gdbarch *);
-static void swapout_gdbarch_swap (struct gdbarch *);
-static void swapin_gdbarch_swap (struct gdbarch *);
 
 /* Non-zero if we want to trace architecture code.  */
 
@@ -447,19 +443,6 @@ struct gdbarch startup_gdbarch =
 };
 
 struct gdbarch *current_gdbarch = &startup_gdbarch;
-
-/* Do any initialization needed for a non-multiarch configuration
-   after the _initialize_MODULE functions have been run.  */
-void
-initialize_non_multiarch (void)
-{
-  alloc_gdbarch_data (&startup_gdbarch);
-  /* Ensure that all swap areas are zeroed so that they again think
-     they are starting from scratch.  */
-  clear_gdbarch_swap (&startup_gdbarch);
-  init_gdbarch_swap (&startup_gdbarch);
-}
-
 
 /* Create a new ``struct gdbarch'' based on information provided by
    ``struct gdbarch_info''. */
@@ -5742,31 +5725,21 @@ register_gdbarch_swap (void *data,
 }
 
 static void
-clear_gdbarch_swap (struct gdbarch *gdbarch)
-{
-  struct gdbarch_swap *curr;
-  for (curr = gdbarch->swap;
-       curr != NULL;
-       curr = curr->next)
-    {
-      memset (curr->source->data, 0, curr->source->sizeof_data);
-    }
-}
-
-static void
-init_gdbarch_swap (struct gdbarch *gdbarch)
+current_gdbarch_swap_init_hack (void)
 {
   struct gdbarch_swap_registration *rego;
-  struct gdbarch_swap **curr = &gdbarch->swap;
+  struct gdbarch_swap **curr = &current_gdbarch->swap;
   for (rego = gdbarch_swap_registry.registrations;
        rego != NULL;
        rego = rego->next)
     {
       if (rego->data != NULL)
 	{
-	  (*curr) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct gdbarch_swap);
+	  (*curr) = GDBARCH_OBSTACK_ZALLOC (current_gdbarch,
+					    struct gdbarch_swap);
 	  (*curr)->source = rego;
-	  (*curr)->swap = gdbarch_obstack_zalloc (gdbarch, rego->sizeof_data);
+	  (*curr)->swap = gdbarch_obstack_zalloc (current_gdbarch,
+						  rego->sizeof_data);
 	  (*curr)->next = NULL;
 	  curr = &(*curr)->next;
 	}
@@ -5775,24 +5748,35 @@ init_gdbarch_swap (struct gdbarch *gdbarch)
     }
 }
 
-static void
-swapout_gdbarch_swap (struct gdbarch *gdbarch)
+static struct gdbarch *
+current_gdbarch_swap_out_hack (void)
 {
+  struct gdbarch *old_gdbarch = current_gdbarch;
   struct gdbarch_swap *curr;
-  for (curr = gdbarch->swap;
+
+  gdb_assert (old_gdbarch != NULL);
+  for (curr = old_gdbarch->swap;
        curr != NULL;
        curr = curr->next)
-    memcpy (curr->swap, curr->source->data, curr->source->sizeof_data);
+    {
+      memcpy (curr->swap, curr->source->data, curr->source->sizeof_data);
+      memset (curr->source->data, 0, curr->source->sizeof_data);
+    }
+  current_gdbarch = NULL;
+  return old_gdbarch;
 }
 
 static void
-swapin_gdbarch_swap (struct gdbarch *gdbarch)
+current_gdbarch_swap_in_hack (struct gdbarch *new_gdbarch)
 {
   struct gdbarch_swap *curr;
-  for (curr = gdbarch->swap;
+
+  gdb_assert (current_gdbarch == NULL);
+  for (curr = new_gdbarch->swap;
        curr != NULL;
        curr = curr->next)
     memcpy (curr->source->data, curr->swap, curr->source->sizeof_data);
+  current_gdbarch = new_gdbarch;
 }
 
 
@@ -5972,8 +5956,7 @@ gdbarch_update_p (struct gdbarch_info info)
   /* Swap the data belonging to the old target out setting the
      installed data to zero.  This stops the ->init() function trying
      to refer to the previous architecture's global data structures.  */
-  swapout_gdbarch_swap (current_gdbarch);
-  clear_gdbarch_swap (current_gdbarch);
+  current_gdbarch_swap_out_hack ();
 
   /* Save the previously selected architecture, setting the global to
      NULL.  This stops ->init() trying to use the previous
@@ -5993,8 +5976,7 @@ gdbarch_update_p (struct gdbarch_info info)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\n");
-      swapin_gdbarch_swap (old_gdbarch);
-      current_gdbarch = old_gdbarch;
+      current_gdbarch_swap_in_hack (old_gdbarch);
       return 0;
     }
 
@@ -6006,8 +5988,7 @@ gdbarch_update_p (struct gdbarch_info info)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
-      swapin_gdbarch_swap (old_gdbarch);
-      current_gdbarch = old_gdbarch;
+      current_gdbarch_swap_in_hack (old_gdbarch);
       return 1;
     }
 
@@ -6035,8 +6016,7 @@ gdbarch_update_p (struct gdbarch_info info)
 	    this->next = rego->arches;
 	    rego->arches = this;
 	    /* Copy the new architecture in.  */
-	    current_gdbarch = new_gdbarch;
-	    swapin_gdbarch_swap (new_gdbarch);
+	    current_gdbarch_swap_in_hack (new_gdbarch);
 	    architecture_changed_event ();
 	    return 1;
 	  }
@@ -6071,7 +6051,7 @@ gdbarch_update_p (struct gdbarch_info info)
   /* Initialize the per-architecture memory (swap) areas.
      CURRENT_GDBARCH must be update before these modules are
      called. */
-  init_gdbarch_swap (new_gdbarch);
+  current_gdbarch_swap_init_hack ();
   
   /* Initialize the per-architecture data.  CURRENT_GDBARCH
      must be updated before these modules are called. */
