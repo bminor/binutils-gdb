@@ -1,3 +1,12 @@
+2001-06-04  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (go32_wait): Change the return value to ptid_t.
+
+	* config/djgpp/fnchange.lst: Add two new files in the
+	gdb/testsuite/gdb.c++/ directory to the remapped names.
+
+	* config/djgpp/djconfig.sh (lt_cv_sys_max_cmd_len): Set to 12KB.
+
 2001-06-01  Jim Blandy  <jimb@redhat.com>
 
 	Expand the gdbarch per-architecture data vector as needed, rather
