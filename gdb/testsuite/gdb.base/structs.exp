@@ -299,6 +299,7 @@ proc test_struct_returns { n } {
 
     set test "return foo<n>; ${tests}"
     set return_value_unknown 0
+    set return_value_unimplemented 0
     gdb_test_multiple "return foo${n}" "${test}" {
 	-re "The location" {
 	    # Ulgh, a struct return, remember this (still need prompt).
@@ -307,10 +308,10 @@ proc test_struct_returns { n } {
 	}
 	-re "A structure or union" {
 	    # Ulgh, a struct return, remember this (still need prompt).
-	    # Set it to something unique so that it won't match a
-	    # struct return convention value.
-	    # set return_value_unknown -1
 	    set return_value_unknown 1
+	    # Double ulgh.  Architecture doesn't use return_value and
+	    # hence hasn't implemented small structure return.
+	    set return_value_unimplemented 1
 	    exp_continue
 	}
 	-re "Make fun${n} return now.*y or n. $" {
@@ -353,6 +354,15 @@ proc test_struct_returns { n } {
 		# This contradicts the above claim that GDB knew
 		# the location of the return-value.
 		fail "${test}"
+	    }
+	}
+	-re ".*${gdb_prompt} $" {
+	    if $return_value_unimplemented {
+		# What a suprize.  The architecture hasn't implemented
+		# return_value, and hence has to fail.
+		kfail "$test" gdb/1444
+	    } else {
+		fail "$test"
 	    }
 	}
     }	

@@ -1,3 +1,9 @@
+2003-12-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/structs.exp (test_struct_returns): When applicable, set
+	"return_value_unimplemented".  When an unimplemented struct return
+	architecture, report incorrect values as a KFAIL
+
 2003-12-05  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/rtti.exp: Accept new wording of warning from
