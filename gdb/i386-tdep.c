@@ -1357,7 +1357,7 @@ i386_next_regnum (int regnum)
     I386_EBP_REGNUM		/* Slot for %edi.  */
   };
 
-  if (regnum < sizeof (next_regnum) / sizeof (next_regnum[0]))
+  if (regnum >= 0 && regnum < sizeof (next_regnum) / sizeof (next_regnum[0]))
     return next_regnum[regnum];
 
   return -1;
@@ -1369,13 +1369,26 @@ i386_next_regnum (int regnum)
 static int
 i386_convert_register_p (int regnum, struct type *type)
 {
+  int len = TYPE_LENGTH (type);
+
   /* Values may be spread across multiple registers.  Most debugging
      formats aren't expressive enough to specify the locations, so
      some heuristics is involved.  Right now we only handle types that
-     are exactly 8 bytes long as GCC doesn't seem to put any other
-     types into registers.  */
-  if (TYPE_LENGTH (type) == 8 && i386_next_regnum (regnum) != -1)
-    return 1;
+     have a length that is a multiple of the word size, since GCC
+     doesn't seem to put any other types into registers.  */
+  if (len > 4 && len % 4 == 0)
+    {
+      int last_regnum = regnum;
+
+      while (len > 4)
+	{
+	  last_regnum = i386_next_regnum (last_regnum);
+	  len -= 4;
+	}
+
+      if (last_regnum != -1)
+	return 1;
+    }
 
   return i386_fp_regnum_p (regnum);
 }
@@ -1387,6 +1400,9 @@ static void
 i386_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, void *to)
 {
+  int len = TYPE_LENGTH (type);
+  char *buf = to;
+
   /* FIXME: kettenis/20030609: What should we do if REGNUM isn't
      available in FRAME (i.e. if it wasn't saved)?  */
 
@@ -1396,17 +1412,20 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       return;
     }
 
-  gdb_assert (TYPE_LENGTH (type) == 8);
+  /* Read a value spread accross multiple registers.  */
 
-  /* Read the first part.  */
-  gdb_assert (register_size (current_gdbarch, regnum) == 4);
-  frame_read_register (frame, regnum, (char *) to + 0);
+  gdb_assert (len > 4 && len % 4 == 0);
 
-  /* Read the second part.  */
-  regnum = i386_next_regnum (regnum);
-  gdb_assert (regnum != -1);
-  gdb_assert (register_size (current_gdbarch, regnum));
-  frame_read_register (frame, regnum, (char *) to + 4);
+  while (len > 0)
+    {
+      gdb_assert (regnum != -1);
+      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+
+      frame_read_register (frame, regnum, buf);
+      regnum = i386_next_regnum (regnum);
+      len -= 4;
+      buf += 4;
+    }
 }
 
 /* Write the contents FROM of a value of type TYPE into register
@@ -1416,23 +1435,29 @@ static void
 i386_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const void *from)
 {
+  int len = TYPE_LENGTH (type);
+  const char *buf = from;
+
   if (i386_fp_regnum_p (regnum))
     {
       i387_value_to_register (frame, regnum, type, from);
       return;
     }
 
-  gdb_assert (TYPE_LENGTH (type) == 8);
+  /* Write a value spread accross multiple registers.  */
 
-  /* Write the first part.  */
-  gdb_assert (register_size (current_gdbarch, regnum) == 4);
-  put_frame_register (frame, regnum, (const char *) from + 0);
+  gdb_assert (len > 4 && len % 4 == 0);
 
-  /* Write the second part.  */
-  regnum = i386_next_regnum (regnum);
-  gdb_assert (regnum != -1);
-  gdb_assert (register_size (current_gdbarch, regnum) == 4);
-  put_frame_register (frame, regnum, (const char *) from + 4);
+  while (len > 0)
+    {
+      gdb_assert (regnum != -1);
+      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+
+      put_frame_register (frame, regnum, buf);
+      regnum = i386_next_regnum (regnum);
+      len -= 4;
+      buf += 4;
+    }
 }
 
 
