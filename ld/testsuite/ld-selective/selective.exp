@@ -41,9 +41,10 @@ set seltests {
   {selective1 C 1.c {} {} {dropme1 dropme2} {alpha*-*}}
   {selective2 C 2.c {} {} {foo} {alpha*-* mips*-*}}
   {selective3 C 2.c {-u foo} {foo} {{foo 0}} {mips*-*}}
-  {selective4 C++ 3.cc {} {start foo__1A foo__1B} {bar__1A} {alpha*-* mips*-*}}
-  {selective5 C++ 4.cc {} {} {foo__1B foo__1A} {alpha*-* mips*-*}}
-  {selective6 C++ 5.cc {} {} {foo__1B foo__1A dropme1__Fv dropme2__Fv} {*-*-*}}
+  {selective4 C++ 3.cc {} {start a A::foo() B::foo()} {A::bar()} {mips*-*}}
+  {selective5 C++ 4.cc {} {start a A::bar()} {A::foo() B::foo()} {mips*-*}}
+  {selective6 C++ 5.cc {} {start a A::bar()}
+    {A::foo() B::foo() dropme1() dropme2()} {*-*-*}}
 }
 
 set cflags "-w -O -ffunction-sections -fdata-sections"
@@ -106,9 +107,16 @@ foreach testitem $seltests {
 	continue
     }
 
-    if ![ld_nm $nm "" $ldfile] {
+    if ![ld_nm $nm --demangle $ldfile] {
 	unresolved $testname
 	continue
+    }
+
+    # Must make V2 demangled names look like V3
+    foreach nm_output_key [array names nm_output] {
+	if [regsub \\(void\\) $nm_output_key () new_nm_output_key] {
+	    set nm_output($new_nm_output_key) nm_output($nm_output_key)
+	}
     }
 
     # Check each mandated symbol and optionally mandated values. 

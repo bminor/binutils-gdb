@@ -1,3 +1,9 @@
+2001-07-24  Loren J. Rittle  <ljrittle@acm.org>
+
+	* ld-selective/selective.exp: Support g++ V3 ABI (along side
+	the old ABI).  Make comparisons against normalized (to
+	V3-style) demangled nm output.
+
 2001-07-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/default.exp (ld_nm): Add "nmflags" arg.
