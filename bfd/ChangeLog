@@ -1,3 +1,15 @@
+Tue Apr  8 00:01:31 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10300.c (bfd_elf32_mn10300_reloc): Remove prototype
+	for non-existent function.
+
+	* elf-m10300.c (mn10300_elf_relax_section): New function.
+	(mn10300_elf_relax_delete_bytes): Likewise.
+	(mn10300_elf_symbol_address_p): Likewise.
+	(mn10300_elf_get_relocated_section_contents): Likewise.
+	(bfd_elf32_bfd_relax_section): Define.
+	(bfd_elf32_bfd_get_relocated_section_contents): Likewise.
+
 Mon Apr  7 16:47:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Set SHLIB_LIBS.
