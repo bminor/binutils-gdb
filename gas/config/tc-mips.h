@@ -58,8 +58,7 @@ extern int mips_relax_frag PARAMS ((struct frag *, long));
 #define DIFF_EXPR_OK
 
 /* Default to big endian.  */
-#ifndef TARGET_BYTES_LITTLE_ENDIAN
-#undef  TARGET_BYTES_BIG_ENDIAN
+#ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN		1
 #endif
 

@@ -1,5 +1,5 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright (C) 1994 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 #define TC_PPC
 
@@ -88,12 +89,10 @@ extern int target_big_endian;
 
 /* Set the endianness we are using.  Default to big endian.  */
 #ifndef TARGET_BYTES_BIG_ENDIAN
-#ifndef TARGET_BYTES_LITTLE_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN 1
 #endif
-#endif
 
-#ifdef TARGET_BYTES_BIG_ENDIAN
+#if TARGET_BYTES_BIG_ENDIAN
 #define PPC_BIG_ENDIAN 1
 #else
 #define PPC_BIG_ENDIAN 0
@@ -174,6 +173,10 @@ extern void ppc_frob_label PARAMS ((struct symbol *));
 #define tc_fix_adjustable(fixp) ppc_fix_adjustable (fixp)
 extern int ppc_fix_adjustable PARAMS ((struct fix *));
 
+/* A relocation from one csect to another must be kept.  */
+#define TC_FORCE_RELOCATION(FIXP) ppc_force_relocation (FIXP)
+extern int ppc_force_relocation PARAMS ((struct fix *));
+
 /* We need to set the section VMA.  */
 #define tc_frob_section(sec) ppc_frob_section (sec)
 extern void ppc_frob_section PARAMS ((asection *));
@@ -217,6 +220,22 @@ extern int ppc_section_flags PARAMS ((int, int, int));
 #define md_elf_section_type(PTR_STR)		ppc_section_type (PTR_STR)
 #define md_elf_section_word(PTR_STR)		ppc_section_word (PTR_STR)
 #define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
+
+/* Add extra PPC sections -- Note, for now, make .sbss2 and .PPC.EMB.sbss0 a
+   normal section, and not a bss section so that the linker doesn't crater
+   when trying to make more than 2 sections.  */
+#define ELF_TC_SPECIAL_SECTIONS \
+  { ".tags",		SHT_ORDERED,	SHF_ALLOC }, \
+  { ".sdata",		SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE }, \
+  { ".sbss",		SHT_NOBITS,	SHF_ALLOC + SHF_WRITE }, \
+  { ".sdata2",		SHT_PROGBITS,	SHF_ALLOC }, \
+  { ".sbss2",		SHT_PROGBITS,	SHF_ALLOC }, \
+  { ".PPC.EMB.sdata0",	SHT_PROGBITS,	SHF_ALLOC }, \
+  { ".PPC.EMB.sbss0",	SHT_PROGBITS,	SHF_ALLOC },
+
+#define tc_comment_chars ppc_comment_chars
+extern const char *ppc_comment_chars;
+
 #endif /* OBJ_ELF */
 
 /* call md_apply_fix3 with segment instead of md_apply_fix */
@@ -224,6 +243,9 @@ extern int ppc_section_flags PARAMS ((int, int, int));
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
+
+#define md_parse_name(name, exp) ppc_parse_name (name, exp)
+extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 
 #define md_operand(x)
 

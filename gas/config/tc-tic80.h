@@ -21,7 +21,10 @@
 #define TC_TIC80
 
 #define TARGET_ARCH	bfd_arch_tic80
+#define TARGET_FORMAT	"coff-tic80"
 #define BFD_ARCH	TARGET_ARCH
+
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 #define md_number_to_chars number_to_chars_littleendian
 

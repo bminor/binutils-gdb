@@ -32,19 +32,15 @@
 #define LITTLE_ENDIAN 1234
 #define BIG_ENDIAN 4321
 
-/* If neither TARGET_BYTES_BIG_ENDIAN nor TARGET_BYTES_LITTLE_ENDIAN
-   is specified, default to little endian.  */
 #ifndef TARGET_BYTES_BIG_ENDIAN
-#ifndef TARGET_BYTES_LITTLE_ENDIAN
-#define TARGET_BYTES_LITTLE_ENDIAN
-#endif
+#define TARGET_BYTES_BIG_ENDIAN 0
 #endif
 
 #ifdef OBJ_AOUT
 #ifdef TE_RISCIX
 #define TARGET_FORMAT "a.out-riscix"
 #else
-#ifdef TARGET_BYTES_BIG_ENDIAN
+#if TARGET_BYTES_BIG_ENDIAN
 #define TARGET_FORMAT "a.out-arm-big"
 #else
 #define TARGET_FORMAT "a.out-arm-little"
@@ -57,11 +53,13 @@
 #endif
 
 #ifdef OBJ_COFF
-#ifdef TE_PE
-#define TC_FORCE_RELOCATION(x) ((x)->fx_r_type==11)
-#define TARGET_FORMAT (target_big_endian ? "pe-arm-big" : "pe-arm-little")
-/* Tell tc-arm.c to support runtime endian selection.  */
 #define ARM_BI_ENDIAN
+#ifdef TE_PE
+#define TC_FORCE_RELOCATION(x) ((x)->fx_r_type==BFD_RELOC_RVA)
+#define TARGET_FORMAT (target_big_endian ? "pe-arm-big" : "pe-arm-little")
+#else
+#define TARGET_FORMAT (target_big_endian ? "coff-arm-big" : "coff-arm-little")
+/* Tell tc-arm.c to support runtime endian selection.  */
 #endif
 #endif
 
@@ -72,6 +70,17 @@
 #define tc_frob_label(S) arm_frob_label (S) 
 
 #define obj_fix_adjustable(fixP) 0
+
+#define TC_FIX_TYPE PTR
+#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
+
+#define TC_START_LABEL(C,STR) \
+  (c == ':' || (c == '/' && arm_data_in_code ()))
+int arm_data_in_code PARAMS ((void));
+
+#define tc_canonicalize_symbol_name(str) \
+  arm_canonicalize_symbol_name (str);
+char *arm_canonicalize_symbol_name PARAMS ((char *));
 
 #if 0	/* It isn't as simple as this */
 #define tc_frob_symbol(sym,punt)	\
@@ -94,6 +103,10 @@
 #define OPTIONAL_REGISTER_PREFIX '%'
 
 #define md_operand(x)
+
+#define TC_HANDLES_FX_DONE
+
+#define MD_APPLY_FIX3
 
 #define LOCAL_LABELS_FB  1
 

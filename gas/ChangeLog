@@ -1,3 +1,41 @@
+Thu Feb 13 16:29:04 1997  Fred Fish  <fnf@cygnus.com>
+
+	* doc/Makefile.in (TEXI2DVI): Set to just name of program.
+	(DVIPS): Set to dvips.
+	(ps, as.ps, gasp.ps): New targets.
+	(internals.info, gasp.dvi, internals.dvi): Set both TEXINPUTS
+ 	and MAKEINFO env variables.
+	(internals.ps): Use DVIPS macro.
+	(clean): Remove core and backup files.
+	(distclean): Remove temporary files from building internals.
+	(clean-dvi): Ditto.
+	* doc/internals.texi (Frags): Fix typo.
+	(GAS processing): Ditto.
+	(CPU backend): Ditto.
+	* ecoff.c (init_file): Use TARGET_BYTES_BIG_ENDIAN value directly.
+	* mpw-config.in: Define TARGET_BYTES_BIG_ENDIAN as 1.
+	* read.c: Remove ugly hack that dealt with config files not
+	correctly defining TARGET_BYTES_BIG_ENDIAN.
+	(target_big_endian): Use TARGET_BYTES_BIG_ENDIAN directly.
+	* config/arm-big.mt: Define TARGET_BYTES_BIG_ENDIAN to 1.
+	* config/arm-lit.mt: Define TARGET_BYTES_BIG_ENDIAN to 0.
+	* config/mips-big.mt: Define TARGET_BYTES_BIG_ENDIAN to 1.
+	* config/mips-lit.mt: Define TARGET_BYTES_BIG_ENDIAN to 0.
+	* config/ppc-lit.mt: Define TARGET_BYTES_BIG_ENDIAN to 1.
+	* config/ppc-sol.mt: Replace TARGET_BYTES_LITTLE_ENDIAN
+	with TARGET_BYTES_BIG_ENDIAN defined to 0.
+	* config/tc-arm.h: Remove use of TARGET_BYTES_LITTLE_ENDIAN
+	and simplify.  Test value of TARGET_BYTES_BIG_ENDIAN, not just
+	whether it is defined or not.
+	* config/tc-mips.h: Remove use of TARGET_BYTES_LITTLE_ENDIAN.
+	* config/tc-ppc.h: Remove use of TARGET_BYTES_LITTLE_ENDIAN
+	and simplify. Test value of TARGET_BYTES_BIG_ENDIAN, not just
+	whether it is defined or not.
+start-sanitize-tic80
+	* config/tic80.h (TARGET_FORMAT): Define to coff-tic80.
+	(TARGET_BYTES_BIG_ENDIAN): Define to 0.
+end-sanitize-tic80
+	
 Thu Feb 13 14:40:16 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* write.c (write_relocs): Correct text in as_fatal error message,
