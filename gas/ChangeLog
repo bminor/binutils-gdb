@@ -1,3 +1,7 @@
+Fri Nov  7 10:36:22 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* frags.h: Handle multiple inclusion.
+
 Wed Nov  5 10:51:49 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	Based on a patch from Ian.Dall@dsto.defence.gov.au.
