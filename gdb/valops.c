@@ -1349,7 +1349,8 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 /* Helper function used by value_struct_elt to recurse through baseclasses.
    Look for a field NAME in ARG1. Adjust the address of ARG1 by OFFSET bytes,
    and search in it assuming it has (class) type TYPE.
-   If found, return value, else return NULL. */
+   If found, return value, else if name matched and args not return -1, 
+   else return NULL. */
 
 static value
 search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
@@ -1359,6 +1360,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
      register struct type *type;
 {
   int i;
+  static int name_matched = 0;
 
   check_stub_type (type);
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
@@ -1368,6 +1370,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
+ 	  name_matched = 1; 
 
 	  if (j > 0 && args == 0)
 	    error ("cannot resolve overloaded method `%s'", name);
@@ -1406,14 +1409,19 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
         }
       v = search_struct_method (name, arg1p, args, base_offset + offset,
 				static_memfuncp, TYPE_BASECLASS (type, i));
-      if (v)
+      if (v == -1)
+	{
+	  name_matched = 1;
+	}
+      else if (v)
 	{
 /* FIXME-bothner:  Why is this commented out?  Why is it here?  */
 /*	  *arg1p = arg1_tmp;*/
 	  return v;
         }
     }
-  return NULL;
+  if (name_matched) return -1;
+  else return NULL;
 }
 
 /* Given *ARGP, a value of type (pointer to a)* structure/union,
@@ -1511,7 +1519,11 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
   else
     v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
-  if (v == 0)
+  if (v == -1)
+    {
+	error("Argument list of %s mismatch with component in the structure.", name);
+    }
+  else if (v == 0)
     {
       /* See if user tried to invoke data as function.  If so,
 	 hand it back.  If it's not callable (i.e., a pointer to function),
@@ -1520,14 +1532,6 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
     }
 
   if (!v)
-    /* FIXME: This error message is very confusing, since it can also
-       mean that argument matching failed.  But I don't want to say
-       "or argument matching failed" for C programs.  Checking the
-       current language isn't right, because whether we attempt
-       argument matching does not depend on the language.  The right
-       fix is to restructure the above code to be able to distinguish
-       between argument matching failure and the field not being found
-       at all.  */
     error ("Structure has no component named %s.", name);
   return v;
 }
