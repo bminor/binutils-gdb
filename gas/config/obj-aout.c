@@ -219,7 +219,7 @@ obj_aout_frob_file ()
   assert (x == true);
 }
 
-#else
+#else /* ! BFD_ASSEMBLER */
 
 /* Relocation. */
 
@@ -295,7 +295,7 @@ obj_header_append (where, headers)
 #endif /* CROSS_COMPILE */
 
 }
-#endif
+#endif /* ! defined (obj_header_append) */
 
 void
 obj_symbol_to_chars (where, symbolP)
