@@ -68,6 +68,7 @@ RANLIB = @RANLIB@
 
 HDEFINES = @HDEFINES@
 TDEFINES =
+IGEN_FLAGS = $(IGEN_DUPLICATE) $(IGEN_FILTER)
 
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -77,24 +78,15 @@ BFD_INCLUDES	= -I../../bfd -I$(srcdir)/../../bfd
 GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config -I$(srcdir)/../../mmalloc
 INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES)
 
-CONFIG_FILE	= std-config.h
-
-# See inline.h for appropriate flags to set
-INLINE_CFLAGS	=			# -g0 -DDEFAULT_INLINE=2
-IGEN_FLAGS = -f 64			# -f 64 -e
-IGEN_OPCODE_RULES = ppc-opcode-simple	# ppc-opcode-complex
-DGEN_FLAGS =				# # -s
-
-
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
 
-TARGETLIB = libsim.a
+TARGETLIB	= libsim.a
 
 all:	run $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 
 
@@ -104,6 +96,7 @@ BASICS_H = \
 	words.h \
 	ppc-endian.h \
 	debug.h \
+	filter_filename.h \
 	bits.h \
 	sim_callbacks.h
 
@@ -183,6 +176,7 @@ MAIN_SRC = \
 #       first
 LIB_OBJ = \
 	debug.o \
+	filter_filename.o \
 	bits.o \
 	ppc-endian.o \
 	os_emul.o \
@@ -221,11 +215,12 @@ $(TARGETLIB): tmp-igen tmp-dgen $(LIB_OBJ) $(GDB_OBJ)
 
 # Given that inlines are turned on now, rebuild psim whenever
 # anything changes.
-psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC)
+psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC)
 
 bits.o: bits.c $(BASICS_H)
 
 debug.o: debug.c $(BASICS_H)
+filter_filename.o: filter_filename.c $(BASICS_H)
 
 ppc-endian.o: ppc-endian.c ppc-endian.h \
 	config.h ppc-config.h words.h sim_callbacks.h
@@ -314,16 +309,16 @@ tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/.
 # itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c: tmp-igen
 # spreg.h spreg.c: tmp-dgen
 
-dgen: dgen.o table.o lf.o misc.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o dgen dgen.o table.o lf.o misc.o $(LIBIBERTY_LIB) $(LIBS)
+dgen: dgen.o table.o lf.o misc.o filter_filename.o
+	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
 
-igen: igen.o table.o lf.o misc.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o igen igen.o table.o lf.o misc.o $(LIBIBERTY_LIB) $(LIBS)
+igen: igen.o table.o lf.o misc.o filter_filename.o
+	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
 
-table.o: misc.h lf.h table.h
-lf.o: misc.h lf.h
-dgen.o igen.o: misc.h lf.h table.h
-misc.o: misc.h
+table.o: misc.h filter_filename.h lf.h table.h
+lf.o: misc.h filter_filename.h lf.h
+dgen.o igen.o: misc.h filter_filename.h lf.h table.h
+misc.o: misc.h filter_filename.h
 # With out this #, make thinks that misc.o doesn't have a rule
 
 tags etags: TAGS
@@ -344,9 +339,11 @@ config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
-config.status: configure
+config.status: configure config.make config.hdr
 	$(SHELL) ./config.status --recheck
 
 install:
 	$(INSTALL_XFORM) run $(bindir)/run
 
+
+# Make variables generated automatically by configure follow this

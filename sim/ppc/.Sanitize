@@ -33,6 +33,8 @@ bits.c
 bits.h
 build-psim
 config.in
+config.make
+config.hdr
 configure
 configure.in
 core.c
@@ -55,6 +57,8 @@ emul_netbsd.c
 emul_netbsd.h
 events.c
 events.h
+filter_filename.c
+filter_filename.h
 idecode_branch.h
 idecode_expression.h
 idecode_fields.h
