@@ -1,3 +1,10 @@
+2001-07-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Only invoke AC_FUNC_SETPGRP if not cross-compiling.
+	Check for SETPGRP_VOID separately if cross-compiling and ISO C
+	headers are available.
+	* configure: Regenerated.
+
 2001-08-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Update.
