@@ -5,7 +5,7 @@
 #include "remote-sim.h"
 
 #include "d10v_sim.h"
-#include "sim-d10v.h"
+#include "gdb/sim-d10v.h"
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 

@@ -572,7 +572,7 @@ dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h
 remote_sim_h =	$(INCLUDE_DIR)/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
-sim_d10v_h =	$(INCLUDE_DIR)/sim-d10v.h
+sim_d10v_h =	$(INCLUDE_DIR)/gdb/sim-d10v.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 
 readline_headers = \

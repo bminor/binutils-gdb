@@ -1,3 +1,8 @@
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (INCLUDE): Add "gdb/sim-d10v.h".
+	* interp.c: Include "gdb/sim-d10v.h" instead of "sim-d10v.h".
+
 2001-08-01  John R. Moore  <jmoore@redhat.com>
 
 	* interp.c (sim_create_inferior): Removed a hack that stated

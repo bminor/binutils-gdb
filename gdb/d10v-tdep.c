@@ -40,7 +40,7 @@
 #include "regcache.h"
 
 #include "floatformat.h"
-#include "sim-d10v.h"
+#include "gdb/sim-d10v.h"
 
 struct frame_extra_info
   {
