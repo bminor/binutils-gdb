@@ -1,3 +1,23 @@
+Wed Feb 25 14:40:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.c (trace_result0): New function.
+
+	* sim-trace.h (TRACE_FP_*, TRACE_FPU_*): Rename TRACE_FPU_*
+ 	macro's to TRACE_FP_*. TRACE_FPU_* should be defined and used when
+ 	tracing sim_fpu variables.
+	(TRACE_ALU_RESULT0): Define.
+	(TRACE_FP_RESULT_WORD): Define.
+	(TRACE_FP_INPUT_WORD1): Define.
+
+	* sim-fpu.c, sim-fpu.h (sim_fpu_max32, sim_fpu_max64, sim_fpu_one,
+ 	sim_fpu_two): New constants.
+	(sim_fpu_op1, sim_fpu_op2): New types.
+	(struct _sim_fpu): Delete member result.  Re-order other members.
+	(sim_fpu_sign, sim_fpu_exp): New functions.
+	(sim_fpu_max, sim_fpu_min): new functions.
+	(EXPMAX32, EXPMAX64, NR_PAD32, NR_PAD64, NR_GUARDS32, NR_GUARDS64,
+ 	NORMAL_EXPMAX32, NORMAL_EXPMAX64): Define.
+	
 Tue Feb 24 22:45:39 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-profile.c (profile_print): Delete duplicate test of

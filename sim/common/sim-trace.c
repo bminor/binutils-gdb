@@ -865,6 +865,20 @@ trace_result_word1 (SIM_DESC sd,
 }	      
 
 void
+trace_result0 (SIM_DESC sd,
+	       sim_cpu *cpu,
+	       int trace_idx)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  int last_input;
+
+  /* Append any results to the end of the inputs */
+  last_input = TRACE_INPUT_IDX (data);
+
+  trace_results (sd, cpu, trace_idx, last_input);
+}	      
+
+void
 trace_result_word2 (SIM_DESC sd,
 		    sim_cpu *cpu,
 		    int trace_idx,

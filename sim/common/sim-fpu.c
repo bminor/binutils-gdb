@@ -110,11 +110,16 @@ typedef union {
    */
 
 #define NR_EXPBITS  (is_double ?   11 :   8)
-#define NR_FRACBITS (is_double ?   52 :  23)
+#define NR_FRACBITS (is_double ?   52 : 23)
 #define SIGNBIT     (is_double ? MSBIT64 (0) : MSBIT64 (32))
 
-#define EXPMAX      ((unsigned) (is_double ? 2047 : 255))
-#define EXPBIAS     (is_double ? 1023 : 127)
+#define EXPMAX32    (255)
+#define EXMPAX64    (2047)
+#define EXPMAX      ((unsigned) (is_double ? EXMPAX64 : EXPMAX32))
+
+#define EXPBIAS32   (127)
+#define EXPBIAS64   (1023)
+#define EXPBIAS     (is_double ? EXPBIAS64 : EXPBIAS32)
 
 #define QUIET_NAN   LSBIT64 (NR_FRACBITS - 1)
 
@@ -128,10 +133,16 @@ typedef union {
    64 bit - <IMPLICIT_1:1><FRACBITS:52><GUARDS:8><PAD:00>
    32 bit - <IMPLICIT_1:1><FRACBITS:23><GUARDS:7><PAD:30> */
 
-#define NR_PAD    (is_double ? 0 : 30)
-#define PADMASK   (is_double ? 0 : LSMASK64 (29, 0))
-#define NR_GUARDS  ((is_double ? 8 :  7 ) + NR_PAD)
+#define NR_PAD32    (30)
+#define NR_PAD64    (0)
+#define NR_PAD      (is_double ? NR_PAD64 : NR_PAD32)
+#define PADMASK     (is_double ? 0 : LSMASK64 (NR_PAD32 - 1, 0))
+
+#define NR_GUARDS32 (7 + NR_PAD32)
+#define NR_GUARDS64 (8 + NR_PAD32)
+#define NR_GUARDS  (is_double ? NR_GUARDS64 : NR_GUARDS32)
 #define GUARDMASK  LSMASK64 (NR_GUARDS - 1, 0)
+
 #define GUARDMSB   LSBIT64  (NR_GUARDS - 1)
 #define GUARDLSB   LSBIT64  (NR_PAD)
 #define GUARDROUND LSMASK64 (NR_GUARDS - 2, 0)
@@ -145,6 +156,9 @@ typedef union {
 #define FRAC32MASK LSMASK64 (63, NR_FRAC_GUARD - 32 + 1)
 
 #define NORMAL_EXPMIN (-(EXPBIAS)+1)
+
+#define NORMAL_EXPMAX32 (EXPBIAS32)
+#define NORMAL_EXPMAX64 (EXPBIAS64)
 #define NORMAL_EXPMAX (EXPBIAS)
 
 
@@ -1512,6 +1526,172 @@ sim_fpu_div (sim_fpu *f,
 
 
 INLINE_SIM_FPU (int)
+sim_fpu_max (sim_fpu *f,
+	     const sim_fpu *l,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (l))
+    {
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (sim_fpu_is_infinity (r)
+	  && l->sign == r->sign)
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_isi;
+	}
+      if (l->sign)
+	*f = *r; /* -inf < anything */
+      else
+	*f = *l; /* +inf > anthing */
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      if (r->sign)
+	*f = *l; /* anything > -inf */
+      else
+	*f = *r; /* anthing < +inf */
+      return 0;
+    }
+  if (l->sign > r->sign)
+    {
+      *f = *r; /* -ve < +ve */
+      return 0;
+    }
+  if (l->sign < r->sign)
+    {
+      *f = *l; /* +ve > -ve */
+      return 0;
+    }
+  ASSERT (l->sign == r->sign);
+  if (l->normal_exp > r->normal_exp
+      || (l->normal_exp == r->normal_exp && 
+	  l->fraction > r->fraction))
+    {
+      /* |l| > |r| */
+      if (l->sign)
+	*f = *r; /* -ve < -ve */
+      else
+	*f = *l; /* +ve > +ve */
+      return 0;
+    }
+  else
+    {
+      /* |l| <= |r| */
+      if (l->sign)
+	*f = *l; /* -ve > -ve */
+      else
+	*f = *r; /* +ve < +ve */
+      return 0;
+    }
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_min (sim_fpu *f,
+	     const sim_fpu *l,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (l))
+    {
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (sim_fpu_is_infinity (r)
+	  && l->sign == r->sign)
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_isi;
+	}
+      if (l->sign)
+	*f = *l; /* -inf < anything */
+      else
+	*f = *r; /* +inf > anthing */
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      if (r->sign)
+	*f = *r; /* anything > -inf */
+      else
+	*f = *l; /* anything < +inf */
+      return 0;
+    }
+  if (l->sign > r->sign)
+    {
+      *f = *l; /* -ve < +ve */
+      return 0;
+    }
+  if (l->sign < r->sign)
+    {
+      *f = *r; /* +ve > -ve */
+      return 0;
+    }
+  ASSERT (l->sign == r->sign);
+  if (l->normal_exp > r->normal_exp
+      || (l->normal_exp == r->normal_exp && 
+	  l->fraction > r->fraction))
+    {
+      /* |l| > |r| */
+      if (l->sign)
+	*f = *l; /* -ve < -ve */
+      else
+	*f = *r; /* +ve > +ve */
+      return 0;
+    }
+  else
+    {
+      /* |l| <= |r| */
+      if (l->sign)
+	*f = *r; /* -ve > -ve */
+      else
+	*f = *l; /* +ve < +ve */
+      return 0;
+    }
+}
+
+
+INLINE_SIM_FPU (int)
 sim_fpu_neg (sim_fpu *f,
 	     const sim_fpu *r)
 {
@@ -1991,6 +2171,21 @@ sim_fpu_is_denorm (const sim_fpu *d)
     }
 }
 
+
+INLINE_SIM_FPU (int)
+sim_fpu_sign (const sim_fpu *d)
+{
+  return d->sign;
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_exp (const sim_fpu *d)
+{
+  return d->normal_exp;
+}
+
+
 INLINE_SIM_FPU (int)
 sim_fpu_is (const sim_fpu *d)
 {
@@ -2208,6 +2403,10 @@ sim_fpu_gt (int *is,
 
 const sim_fpu sim_fpu_zero = { sim_fpu_class_zero, };
 const sim_fpu sim_fpu_qnan = { sim_fpu_class_qnan, };
+const sim_fpu sim_fpu_one = { sim_fpu_class_number, 0, IMPLICIT_1, 1 };
+const sim_fpu sim_fpu_two = { sim_fpu_class_number, 0, IMPLICIT_1, 2 };
+const sim_fpu sim_fpu_max32 = { sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS32), NORMAL_EXPMAX32 };
+const sim_fpu sim_fpu_max64 = { sim_fpu_class_number, 0, LSMASK64 (NR_FRAC_GUARD, NR_GUARDS64), NORMAL_EXPMAX64 };
 
 
 /* For debugging */
