@@ -4625,8 +4625,9 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
        2. It is an allocated segment,
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.
-       5. PT_TLS segment includes only SHF_TLS sections.
-       6. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.  */
+       5. PT_GNU_STACK segments do not include any sections.
+       6. PT_TLS segment includes only SHF_TLS sections.
+       7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.  */
 #define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
   ((((segment->p_paddr							\
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
@@ -4634,6 +4635,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
      && (section->flags & SEC_ALLOC) != 0)				\
     || IS_COREFILE_NOTE (segment, section))				\
    && section->output_section != NULL					\
+   && segment->p_type != PT_GNU_STACK					\
    && (segment->p_type != PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL))				\
    && (segment->p_type == PT_LOAD					\

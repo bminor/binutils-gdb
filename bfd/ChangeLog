@@ -1,3 +1,7 @@
+2003-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (INCLUDE_SECTION_IN_SEGMENT): Skip PT_GNU_STACK segments.
+
 2003-12-08  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.h, elfxx-mips.c, cpu-mips.c: Convert prototypes.
