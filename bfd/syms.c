@@ -1016,6 +1016,10 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      asymbol *sym;
 
 	      r = *pr;
+	      /* Ignore R_*_NONE relocs.  */
+	      if (r->howto->dst_mask == 0)
+		continue;
+
 	      if (r->howto->rightshift != 0
 		  || r->howto->size != 2
 		  || r->howto->bitsize != 32

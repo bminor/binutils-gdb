@@ -1,3 +1,8 @@
+2004-10-05  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 425
+	* syms.c (_bfd_stab_section_find_nearest_line): Ignore R_*_NONE relocs.
+
 2004-10-01  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.h (elf32_arm_fake_sections,
