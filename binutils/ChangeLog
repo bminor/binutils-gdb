@@ -1,3 +1,9 @@
+2001-11-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* arlex.l: Accept `\' in filenames.  Patch by <earl_chew@agilent.com>.
+
+	* arsup.c (ar_open): Prepend tmp- to basename, not whole path.
+
 2001-11-05  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* MAINTAINERS: Add self as s390/s390x maintainer.
