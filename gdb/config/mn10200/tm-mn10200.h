@@ -191,7 +191,7 @@ mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
 #define REG_STRUCT_HAS_ADDR(gcc_p,TYPE) \
-  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 8)
+  	(TYPE_LENGTH (TYPE) > 8)
 
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
   	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 8)
