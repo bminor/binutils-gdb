@@ -55,10 +55,7 @@ struct machine_it
     int reloc_offset;		/* Offset of reloc within insn */
 
     int reloc;
-
-
   }
-
 the_insn;
 
 static void machine_ip PARAMS ((char *str));
@@ -69,7 +66,7 @@ static void s_use PARAMS ((int));
 #endif
 
 const pseudo_typeS
-  md_pseudo_table[] =
+md_pseudo_table[] =
 {
   {"align", s_align_bytes, 4},
   {"block", s_space, 0},
@@ -78,7 +75,7 @@ const pseudo_typeS
   {"space", s_ignore, 0},	/* Listing control */
   {"sect", s_ignore, 0},	/* Creation of coff sections */
 #ifndef OBJ_COFF
-/* We can do this right with coff */
+  /* We can do this right with coff.  */
   {"use", s_use, 0},
 #endif
   {"word", cons, 4},
@@ -123,9 +120,8 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
-   changed in read.c .  Ideally it shouldn't have to know about it at all,
-   but nothing is ideal around here.
-   */
+   changed in read.c.  Ideally it shouldn't have to know about it at
+   all, but nothing is ideal around here.  */
 
 static unsigned char octal[256];
 #define isoctal(c)  octal[c]
@@ -142,7 +138,6 @@ static void
 s_use (ignore)
      int ignore;
 {
-
   if (strncmp (input_line_pointer, ".text", 5) == 0)
     {
       input_line_pointer += 5;
@@ -161,8 +156,8 @@ s_use (ignore)
       s_data1 ();
       return;
     }
-  /* Literals can't go in the text segment because you can't read
-	   from instruction memory on some 29k's.  So, into initialized data. */
+  /* Literals can't go in the text segment because you can't read from
+     instruction memory on some 29k's.  So, into initialized data. */
   if (strncmp (input_line_pointer, ".lit", 4) == 0)
     {
       input_line_pointer += 4;
@@ -194,8 +189,8 @@ insert_sreg (regname, regnum)
      char *regname;
      int regnum;
 {
-  /* FIXME-SOON, put something in these syms so they won't be output to the symbol
-	   table of the resulting object file.  */
+  /* FIXME-SOON, put something in these syms so they won't be output
+     to the symbol table of the resulting object file.  */
 
   /* Must be large enough to hold the names of the special registers.  */
   char buf[80];
@@ -209,7 +204,7 @@ insert_sreg (regname, regnum)
 
   symbol_table_insert (symbol_new (buf, SEG_REGISTER, (valueT) regnum,
 				   &zero_address_frag));
-}				/* insert_sreg() */
+}
 
 /* Install symbol definitions for assorted special registers.
    See ASM29K Ref page 2-9.  */
@@ -264,10 +259,11 @@ define_some_regs ()
   insert_sreg ("fps", SREG + 162);
   /*  "",    SREG+163);	  Reserved */
   insert_sreg ("exop", SREG + 164);
-}				/* define_some_regs() */
+}
 
 /* This function is called once, at assembler startup time.  It should
-   set up all the tables, etc. that the MD part of the assembler will need.  */
+   set up all the tables, etc., that the MD part of the assembler will
+   need.  */
 void
 md_begin ()
 {
@@ -292,7 +288,7 @@ md_begin ()
 	}
 
       /* Hack to avoid multiple opcode entries.  We pre-locate all the
-		       variations (b/i field and P/A field) and handle them. */
+	 variations (b/i field and P/A field) and handle them. */
 
       if (!strcmp (name, machine_opcodes[i + 1].name))
 	{
@@ -321,12 +317,14 @@ md_begin ()
 	      break;
 	    default:
 	    bad_table:
-	      fprintf (stderr, "internal error: can't handle opcode %s\n", name);
+	      fprintf (stderr, "internal error: can't handle opcode %s\n",
+		       name);
 	      lose = 1;
 	    }
 
-	  /* OK, this is an i/b or A/P pair.  We skip the higher-valued one,
-			       and let the code for operand checking handle OR-ing in the bit.  */
+	  /* OK, this is an i/b or A/P pair.  We skip the
+	     higher-valued one, and let the code for operand checking
+	     handle OR-ing in the bit.  */
 	  if (machine_opcodes[i].opcode & 1)
 	    continue;
 	  else
@@ -372,7 +370,6 @@ md_assemble (str)
      char *str;
 {
   char *toP;
-  /* !!!!    int rsd; */
 
   know (str);
   machine_ip (str);
@@ -419,12 +416,9 @@ machine_ip (str)
 {
   char *s;
   const char *args;
-  /* !!!!    char c; */
-  /* !!!!    unsigned long i; */
   struct machine_opcode *insn;
   char *argsStart;
   unsigned long opcode;
-  /* !!!!    unsigned int mask; */
   expressionS the_operand;
   expressionS *operand = &the_operand;
   unsigned int reg;
@@ -459,13 +453,12 @@ machine_ip (str)
   memset (&the_insn, '\0', sizeof (the_insn));
   the_insn.reloc = NO_RELOC;
 
-  /*
-	 * Build the opcode, checking as we go to make
-	 * sure that the operands match.
-	 *
-	 * If an operand matches, we modify the_insn or opcode appropriately,
-	 * and do a "continue".  If an operand fails to match, we "break".
-	 */
+  /* Build the opcode, checking as we go to make sure that the
+     operands match.
+   
+     If an operand matches, we modify the_insn or opcode appropriately,
+     and do a "continue".  If an operand fails to match, we "break".  */
+
   if (insn->args[0] != '\0')
     s = parse_operand (s, operand);	/* Prime the pump */
 
@@ -515,7 +508,7 @@ machine_ip (str)
 	case 'b':		/* A general register or 8-bit immediate */
 	case 'i':
 	  /* We treat the two cases identically since we mashed
-			   them together in the opcode table.  */
+	     them together in the opcode table.  */
 	  if (operand->X_op == O_register)
 	    goto general_reg;
 
@@ -551,10 +544,8 @@ machine_ip (str)
 	  if (reg >= SREG)
 	    break;		/* No special registers */
 
-	  /*
-			 * Got the register, now figure out where
-			 * it goes in the opcode.
-			 */
+	  /* Got the register, now figure out where it goes in the
+	     opcode.  */
 	  switch (*args)
 	    {
 	    case 'a':
@@ -611,7 +602,8 @@ machine_ip (str)
 	  the_insn.reloc = RELOC_JUMPTARG;
 	  the_insn.exp = *operand;
 	  the_insn.pcrel = 1;	/* Assume PC-relative jump */
-	  /* FIXME-SOON, Do we figure out whether abs later, after know sym val? */
+	  /* FIXME-SOON, Do we figure out whether abs later, after
+             know sym val? */
 	  continue;
 
 	case 'e':		/* Coprocessor enable bit for LOAD/STORE insn */
@@ -712,14 +704,13 @@ machine_ip (str)
     }
 }
 
-/*
-  This is identical to the md_atof in m68k.c.  I think this is right,
-  but I'm not sure.
+/* This is identical to the md_atof in m68k.c.  I think this is right,
+   but I'm not sure.
 
-  Turn a string in input_line_pointer into a floating point constant of type
-  type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
-  emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
-  */
+   Turn a string in input_line_pointer into a floating point constant
+   of type type, and store the appropriate bytes in *litP.  The number
+   of LITTLENUMS emitted is stored in *sizeP .  An error message is
+   returned, or NULL on OK.  */
 
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
@@ -775,7 +766,7 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
+  return "";
 }
 
 /*
@@ -819,10 +810,7 @@ md_apply_fix (fixP, val)
   know (fixP->fx_size == 4);
   know (fixP->fx_r_type < NO_RELOC);
 
-  /*
-	 * This is a hack.  There should be a better way to
-	 * handle this.
-	 */
+  /* This is a hack.  There should be a better way to handle this.  */
   if (fixP->fx_r_type == RELOC_WDISP30 && fixP->fx_addsy)
     {
       val += fixP->fx_where + fixP->fx_frag->fr_address;
@@ -931,11 +919,11 @@ tc_coff_fix2rtype (fixP)
     }				/* switch on type */
 
   return (0);
-}				/* tc_coff_fix2rtype() */
+}
 
 #endif /* OBJ_COFF */
 
-/* should never be called for sparc */
+/* should never be called for 29k */
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
@@ -952,7 +940,7 @@ md_convert_frag (headers, fragP)
      object_headers *headers;
      register fragS *fragP;
 {
-  as_fatal ("sparc_convert_frag\n");
+  as_fatal ("a29k_convert_frag\n");
 }
 
 /* should never be called for 29k */
@@ -964,7 +952,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      fragS *frag;
      symbolS *to_symbol;
 {
-  as_fatal ("sparc_create_long_jump\n");
+  as_fatal ("a29k_create_long_jump\n");
 }
 
 /* should never be called for a29k */
@@ -973,8 +961,8 @@ md_estimate_size_before_relax (fragP, segtype)
      register fragS *fragP;
      segT segtype;
 {
-  as_fatal ("sparc_estimate_size_before_relax\n");
-  return (0);
+  as_fatal ("a29k_estimate_size_before_relax\n");
+  return 0;
 }
 
 #if 0
@@ -1070,9 +1058,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
   where[7] = (((!S_IS_DEFINED (fixP->fx_addsy)) << 7) & 0x80) | (0 & 0x60) | (fixP->fx_r_type & 0x1F);
   /* Also easy */
   md_number_to_chars (&where[8], fixP->fx_addnumber, 4);
-
-  return;
-}				/* tc_aout_fix_to_chars() */
+}
 
 #endif /* OBJ_AOUT */
 
@@ -1082,7 +1068,7 @@ md_parse_option (argP, cntP, vecP)
      int *cntP;
      char ***vecP;
 {
-  return (0);
+  return 0;
 }
 
 
@@ -1171,11 +1157,5 @@ md_pcrel_from (fixP)
 {
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
-
-/*
- * Local Variables:
- * comment-column: 0
- * End:
- */
 
 /* end of tc-a29k.c */
