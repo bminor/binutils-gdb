@@ -32,6 +32,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "thread.h"
 
+/* List of all available core_fns.  On gdb startup, each core file register
+   reader calls add_core_fns() to register information on each core format it
+   is prepared to read. */
+
+static struct core_fns *core_file_fns = NULL;
+
 static void core_files_info PARAMS ((struct target_ops *));
 
 #ifdef SOLIB_ADD
@@ -45,6 +51,20 @@ static void core_detach PARAMS ((char *, int));
 static void core_close PARAMS ((int));
 
 static void get_core_registers PARAMS ((int));
+
+/* Link a new core_fns into the global core_file_fns list.  Called on gdb
+   startup by the _initialize routine in each core file register reader, to
+   register information about each format the the reader is prepared to
+   handle. */
+
+void
+add_core_fns (cf)
+     struct core_fns *cf;
+{
+  cf -> next = core_file_fns;
+  core_file_fns = cf;
+}
+
 
 /* Discard all vestiges of any previous core file and mark data and stack
    spaces as empty.  */
@@ -253,6 +273,15 @@ get_core_registers (regno)
   unsigned size;
   char *the_regs;
   char secname[10];
+  enum bfd_flavour our_flavour = bfd_get_flavour (core_bfd);
+  struct core_fns *cf;
+
+  if (core_file_fns == NULL)
+    {
+      fprintf_filtered (gdb_stderr,
+			"Can't fetch registers from this type of core file\n");
+      return;
+    }
 
   /* Thread support.  If inferior_pid is non-zero, then we have found a core
      file with threads (or multiple processes).  In that case, we need to
@@ -270,10 +299,25 @@ get_core_registers (regno)
     goto cant;
   size = bfd_section_size (core_bfd, reg_sec);
   the_regs = alloca (size);
-  if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size))
+  /* Look for the core functions that match this flavor.  Default to the
+     first one if nothing matches. */
+  for (cf = core_file_fns; cf != NULL; cf = cf -> next)
     {
-      fetch_core_registers (the_regs, size, 0,
-			    (unsigned) bfd_section_vma (abfd,reg_sec));
+      if (our_flavour == cf -> core_flavour)
+	{
+	  break;
+	}
+    }
+  if (cf == NULL)
+    {
+      cf = core_file_fns;
+    }
+  if (cf != NULL &&
+      bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size) &&
+      cf -> core_read_registers != NULL)
+    {
+      (cf -> core_read_registers (the_regs, size, 0,
+				  (unsigned) bfd_section_vma (abfd,reg_sec)));
     }
   else
     {
@@ -289,11 +333,12 @@ cant:
     {
       size = bfd_section_size (core_bfd, reg_sec);
       the_regs = alloca (size);
-      if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0,
-				    size))
+      if (cf != NULL &&
+	  bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size) &&
+	  cf -> core_read_registers != NULL)
 	{
-	  fetch_core_registers (the_regs, size, 2,
-				(unsigned) bfd_section_vma (abfd,reg_sec));
+	  (cf -> core_read_registers (the_regs, size, 2,
+				      (unsigned) bfd_section_vma (abfd,reg_sec)));
 	}
       else
 	{

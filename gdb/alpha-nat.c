@@ -73,7 +73,7 @@ get_longjmp_target (pc)
 	    Original upage address X is at location core_reg_sect+x+reg_addr.
  */
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -225,3 +225,19 @@ fill_fpregset (fpregsetp, regno)
     }
 }
 #endif
+
+
+/* Register that we are able to handle alpha core file formats. */
+
+static struct core_fns alpha_core_fns =
+{
+  bfd_target_aout_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_alpha ()
+{
+  add_core_fns (&alpha_core_fns);
+}

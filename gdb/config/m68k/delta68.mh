@@ -3,4 +3,4 @@
 XM_FILE= xm-delta68.h
 
 NAT_FILE= nm-delta68.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o delta68-nat.o
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o delta68-nat.o

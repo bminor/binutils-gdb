@@ -4,7 +4,7 @@ XM_FILE= xm-cxux.h
 XDEPFILES= 
 
 NAT_FILE= nm-cxux.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o cxux-nat.o corelow.o coredep.o
+NATDEPFILES= infptrace.o inftarg.o fork-child.o cxux-nat.o corelow.o core-aout.o
 
 MMALLOC=
 MMALLOC_DISABLE= -DNO_MMALLOC

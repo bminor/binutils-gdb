@@ -113,7 +113,7 @@ store_inferior_registers (regno)
 
 /* Work with core files, for GDB. */
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -143,4 +143,21 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 #endif
     break;
   }
+}
+
+
+/* Register that we are able to handle i386mach core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns i386mach_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_i386mach ()
+{
+  add_core_fns (&i386mach_core_fns);
 }

@@ -1,5 +1,5 @@
 /* Extract registers from a "standard" core file, for GDB.
-   Copyright (C) 1988-1991  Free Software Foundation, Inc.
+   Copyright (C) 1988-1995  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,8 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* corefile.c is supposed to be the more machine-independent aspects of this;
-   this file is more machine-specific.  */
+/* Typically used on systems that have a.out format executables.
+   corefile.c is supposed to contain the more machine-independent
+   aspects of reading registers from core files, while this file is
+   more machine specific.  */
 
 #include "defs.h"
 #include <sys/types.h>
@@ -63,7 +65,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	    Original upage address X is at location core_reg_sect+x+reg_addr.
  */
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -123,3 +125,19 @@ register_addr (regno, blockend)
 }
 
 #endif /* REGISTER_U_ADDR */
+
+
+/* Register that we are able to handle aout (trad-core) file formats.  */
+
+static struct core_fns aout_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_aout ()
+{
+  add_core_fns (&aout_core_fns);
+}

@@ -98,7 +98,7 @@ store_inferior_registers (regno)
 /* All of this stuff is only relevant if both host and target are sun3.  */
 /* Machine-dependent code for pulling registers out of a Sun-3 core file. */
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -135,4 +135,21 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     else
       fprintf_unfiltered (gdb_stderr, "Couldn't read float regs from core file\n");
   }
+}
+
+
+/* Register that we are able to handle sun3 core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns sun3_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_sun3 ()
+{
+  add_core_fns (&sun3_core_fns);
 }

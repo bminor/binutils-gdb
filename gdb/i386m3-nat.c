@@ -216,7 +216,7 @@ store_inferior_registers (regno)
  * core file. If your UX does something else, adapt the routine
  * below to return the offset to the given register.
  * 
- * Called by coredep.c(fetch_core_registers)
+ * Called by core-aout.c(fetch_core_registers)
  */
 
 unsigned int

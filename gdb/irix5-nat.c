@@ -159,7 +159,7 @@ get_longjmp_target (pc)
   return 1;
 }
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -1046,4 +1046,21 @@ automatically when the inferior begins execution.  Otherwise, symbols\n\
 must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
+}
+
+
+/* Register that we are able to handle irix5 core file formats.
+   This really is bfd_target_unknown_flavour */
+
+static struct core_fns irix5_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_irix5 ()
+{
+  add_core_fns (&irix5_core_fns);
 }

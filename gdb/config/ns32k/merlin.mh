@@ -1,5 +1,5 @@
 # Host: Merlin running utek 2.1
-XDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o
+XDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o
 XM_FILE= xm-merlin.h
 
 # FIXME: M_INSTALL is gone from the gdb makefile.  If anyone cares

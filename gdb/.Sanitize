@@ -139,10 +139,10 @@ convex-tdep.c
 convex-xdep.c
 copying.awk
 copying.c
+core-aout.c
+core-regset.c
 core-sol2.c
-core-svr4.c
 corefile.c
-coredep.c
 corelow.c
 cp-valprint.c
 cpu32bug-rom.c

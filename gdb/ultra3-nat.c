@@ -241,7 +241,7 @@ fetch_register (regno)
  * struct ptrace_user is the first thing in the core file
  */
 
-void
+static void
 fetch_core_registers ()
 {
   register int regno;
@@ -305,4 +305,19 @@ register_addr (regno,blockend)
   }
 }
 
+
+/* Register that we are able to handle ultra3 core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
 
+static struct core_fns ultra3_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_ultra3 ()
+{
+  add_core_fns (&ultra3_core_fns);
+}

@@ -223,7 +223,7 @@ store_inferior_registers (regno)
 #define e_PC e_regs[PC]
 #endif /* HPUX_VERSION_5 */
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned int core_reg_size;
@@ -265,4 +265,21 @@ int
 getpagesize ()
 {
   return 4096;
+}
+
+
+/* Register that we are able to handle hp300ux core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns hp300ux_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_hp300ux ()
+{
+  add_core_fns (&hp300ux_core_fns);
 }

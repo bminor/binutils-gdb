@@ -875,9 +875,9 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
 	altos-xdep.c arm-convert.s \
 	arm-tdep.c arm-xdep.c coff-solib.c \
-	convex-tdep.c \
-	convex-xdep.c core-sol2.c core-svr4.c coredep.c corelow.c dcache.c \
-	delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
+	convex-tdep.c convex-xdep.c \
+	core-sol2.c core-regset.c core-aout.c corelow.c \
+	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-xdep.c gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	hpread.c \
@@ -1060,16 +1060,16 @@ convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 copying.o: copying.c $(defs_h) $(gdbcmd_h)
 
+core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
+
 core-sol2.o: core-sol2.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h
 
-core-svr4.o: core-svr4.c $(command_h) $(defs_h) $(gdbcore_h) \
+core-regset.o: core-regset.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h
 
 corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h
-
-coredep.o: coredep.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h thread.h

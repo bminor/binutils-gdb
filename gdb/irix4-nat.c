@@ -157,7 +157,7 @@ get_longjmp_target (pc)
   return 1;
 }
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -171,4 +171,21 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     }
 
   memcpy ((char *)registers, core_reg_sect, core_reg_size);
+}
+
+
+/* Register that we are able to handle irix4 core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns irix4_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_irix4 ()
+{
+  add_core_fns (&irix4_core_fns);
 }

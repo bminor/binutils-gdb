@@ -60,7 +60,7 @@ as unused statics functions.
 
 Perhaps "i source" should take an argument like that of "list".
 
-See if coredep.c's fetch_core_registers can be used on more machines.
+See if core-aout.c's fetch_core_registers can be used on more machines.
 E.g. MIPS (mips-xdep.c).
 
 unpack_double() does not handle IEEE float on the target unless the host

@@ -162,7 +162,7 @@ get_longjmp_target(pc)
 	    Original upage address X is at location core_reg_sect+x+reg_addr.
  */
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -222,4 +222,21 @@ register_addr (regno, blockend)
   REGISTER_U_ADDR (addr, blockend, regno);
 
   return addr;
+}
+
+
+/* Register that we are able to handle mips core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns mips_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_mips ()
+{
+  add_core_fns (&mips_core_fns);
 }

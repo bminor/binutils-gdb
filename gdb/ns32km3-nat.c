@@ -68,18 +68,6 @@ static int reg_offset[] =
 	  &registers[REGISTER_BYTE (regnum)], \
 	  count*REGISTER_SIZE)
 
-/* 4.4 bfd support function */
-/* jtv@hut.fi: UNIMPLEMENTED!!!!! */
-
-void
-fetch_core_registers (core_regs, core_reg_size, which)
-     char *core_regs;
-     unsigned int core_reg_size;
-     int which;
-{
-  error ("Unimplemented routine fetch_core_registers called");
-}
-
 /*
  * Fetch inferiors registers for gdb.
  * REGNO specifies which (as gdb views it) register, -1 for all.

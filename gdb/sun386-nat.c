@@ -19,8 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#if defined (GDB_TARGET_IS_SUN386)
-
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
@@ -184,21 +182,6 @@ double_to_i387 (from, to)
   asm ("fstpt (%eax)");
   asm ("fwait");
 }
-#else /* Not sun386 target.  */
-
-/* These functions shouldn't be called when we're cross-debugging.  */
-
-/* ARGSUSED */
-void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     unsigned int reg_addr;	/* Unused in this version */
-{
-}
-
-#endif /* Not sun386 target.  */
 
 void
 fetch_inferior_registers (regno)
@@ -273,4 +256,3 @@ store_inferior_registers (regno)
   ptrace (PTRACE_SETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers);
 }
-

@@ -238,7 +238,7 @@ store_inferior_registers (regno)
 }
 
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
   char *core_reg_sect;
   unsigned core_reg_size;
@@ -300,4 +300,21 @@ int
 kernel_u_size ()
 {
   return (sizeof (struct user));
+}
+
+
+/* Register that we are able to handle sparc core file formats.
+   FIXME: is this really bfd_target_unknown_flavour? */
+
+static struct core_fns sparc_core_fns =
+{
+  bfd_target_unknown_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_sparc ()
+{
+  add_core_fns (&sparc_core_fns);
 }

@@ -6,7 +6,7 @@ XDEPFILES= ser-tcp.o
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-i386v4.h
-NATDEPFILES= corelow.o core-svr4.o solib.o procfs.o fork-child.o i386v4-nat.o
+NATDEPFILES= corelow.o core-regset.o solib.o procfs.o fork-child.o i386v4-nat.o
 
 # SVR4 comes standard with terminfo, and in some implementations, the
 # old termcap descriptions are incomplete.  So ensure that we use the

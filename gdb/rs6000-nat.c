@@ -249,7 +249,7 @@ exec_one_dummy_insn ()
   target_remove_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 }
 
-void
+static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
@@ -794,3 +794,18 @@ kernel_u_size ()
   return (sizeof (struct user));
 }
 
+
+/* Register that we are able to handle rs6000 core file formats. */
+
+static struct core_fns rs6000_core_fns =
+{
+  bfd_target_coff_flavour,
+  fetch_core_registers,
+  NULL
+};
+
+void
+_initialize_core_rs6000 ()
+{
+  add_core_fns (&rs6000_core_fns);
+}

@@ -1,3 +1,94 @@
+Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@cygnus.com>
+
+	* coredep.c: Renamed to core-aout.c
+	* core-svr4.c: Renamed to core-regset.c
+	* Makefile.in (ALLDEPFILES): Account for renamings.
+	* corelow.c (core_file_fns): Add, points to chain of structs.
+	(add_core_fns): New function to build chain of structs.
+	(get_core_registers): Modify to search core functions chain and call
+ 	appropriate fetch_core_registers function based on core file flavour.
+	* gdbcore.h (fetch_core_registers):  Remove declaration.
+	(struct core_fns): Define struct for core function info.
+	* i386m3-nat.c: Update comment for filename change (coredep->core-aout)
+	* a68v-nat.c (fetch_core_registers): Remove stub, not needed now.
+	* alpha-nat.c (fetch_core_registers): Make static.
+	(alpha_core_fns, _initialize_core_alpha): New struct and func.
+	* core-aout.c (fetch_core_registers): Make static
+	(aout_core_fns, _initialize_core_aout): New struct and func.
+	* core-regset.c (fetch_core_registers): Make static.
+	(regset_core_fns, _initialize_core_regset): New struct and func.
+	* core-sol2.c (fetch_core_registers): Make static.
+	(solaris_core_fns, _initialize_core_solaris): New struct and func.
+	* hp300ux-nat.c (fetch_core_registers): Make static.
+	(hp300ux_core_fns, _initialize_core_hp300ux): New struct and func.
+	* i386aix-nat.c (fetch_core_registers): Make static.
+	(i386aix_core_fns, _initialize_core_i386aix): New struct and func.
+	* i386mach-nat.c (fetch_core_registers: Make static.
+	(i386mach_core_fns, _initialize_core_i386mach): New struct and func.
+	* irix4-nat.c (fetch_core_registers): Make static.
+	(irix4_core_fns, _initialize_core_irix4): New struct and func.
+	* irix5-nat.c (fetch_core_registers): 
+	(irix5_core_fns, _initialize_core_irix5): New struct and func.
+	* lynx-nat.c (fetch_core_registers): Make static.
+	(lynx_core_fns, _initialize_core_lynx): New struct and func.
+	* mips-nat.c (fetch_core_registers): Make static.
+	(mips_core_fns, _initialize_core_mips): New struct and func.
+	* ns32km3-nat.c (fetch_core_registers): Remove stub.
+	* rs6000-nat.c (fetch_core_registers): Make static.
+	(rs6000_core_fns, _initialize_core_rs6000): New struct and func.
+	* sparc-nat.c (fetch_core_registers): Make static.
+	(sparc_core_fns, _initialize_core_sparc): New struct and func.
+	* sun3-nat.c (fetch_core_registers): 
+	(sun3_core_fns, _initialize_core_sun3): New struct and func.
+	* sun386-nat.c (fetch_core_registers): Remove stub.
+	* ultra3-nat.c (fetch_core_registers): Make static.
+	(ultra3_core_fns, _initialize_core_ultra3): New struct and func.
+	* config/gould/pn.mh (XDEPFILES),
+ 	config/i386/fbsd.mh (NATDEPFILES),
+	config/i386/i386bsd.mh (NATDEPFILES),
+ 	config/i386/i386m3.mh (XDEPFILES),
+	config/i386/i386sco.mh (NATDEPFILES),
+	config/i386/i386sco4.mh (NATDEPFILES),
+	config/i386/i386v.mh (NATDEPFILES),
+	config/i386/i386v32.mh (NATDEPFILES),
+	config/i386/nbsd.mh (NATDEPFILES),
+	config/i386/ptx.mh (XDEPFILES),
+	config/i386/ptx4.mh (XDEPFILES),
+	config/i386/symmetry.mh (NATDEPFILES),
+	config/m68k/3b1.mh (XDEPFILES),
+	config/m68k/cisco.mt (TDEPFILES),
+	config/m68k/delta68.mh (NATDEPFILES),
+	config/m68k/dpx2.mh (NATDEPFILES),
+	config/m68k/hp300bsd.mh (NATDEPFILES),
+	config/m68k/hp300hpux.mh (NATDEPFILES),
+	config/m68k/isi.mh (XDEPFILES),
+	config/m68k/news.mh (NATDEPFILES),
+	config/m68k/news1000.mh (XDEPFILES),
+	config/m88k/cxux.mh (NATDEPFILES),
+	config/m88k/delta88.mh (NATDEPFILES),
+	config/mips/littlemips.mh (XDEPFILES),
+	config/mips/mipsm3.mh (XDEPFILES),
+	config/ns32k/merlin.mh (XDEPFILES),
+	config/ns32k/nbsd.mh (NATDEPFILES),
+	config/ns32k/ns32km3.mh (NATDEPFILES),
+	config/pa/hppabsd.mh (NATDEPFILES),
+	config/pa/hppahpux.mh (NATDEPFILES),
+	config/romp/rtbsd.mh (XDEPFILES),
+	config/tahoe/tahoe.mh (XDEPFILES),
+	config/vax/vaxbsd.mh (XDEPFILES),
+	config/vax/vaxult.mh (NATDEPFILES),
+	config/vax/vaxult2.mh (NATDEPFILES),
+	Account for coredep.o to core-aout.o name change.	
+	* config/i386/i386dgux (NATDEPFILES),
+	config/i386/i386sol2.mh (NATDEPFILES),
+	config/i386/i386v4.mh (NATDEPFILES),
+	config/i386/linux.mh (NATDEPFILES),
+	config/i386/ncr3000.mh (NATDEPFILES),
+	config/m68k/m68kv4.mh (NATDEPFILES),
+	config/m88k/delta88v4.mh (NATDEPFILES),
+	config/mips/mipsv4.mh (NATDEPFILES),
+	Account for core-svr4.o to core-regset.o name change.
+	
 Wed Jan 10 16:08:49 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in, configure: Recognize rs6000-*-aix4*.
