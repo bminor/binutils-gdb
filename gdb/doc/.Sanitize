@@ -50,7 +50,7 @@ Things-to-lose:
 # Obsolete; only exists because CVS can't delete directories.
 config
 
-# Cygnus trademark, not for random use (? - is this the reason?).
+# Cygnus logo bitmap, huge file, no point in bundling all over the place.
 cyglogo.eps
 # Includes cyglogo.eps.
 cygref.tex
