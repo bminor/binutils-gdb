@@ -167,6 +167,7 @@ i386linux.c
 i386netbsd.c
 i386lynx.c
 i386mach3.c
+i386msdos.c
 i386os9k.c
 ieee.c
 init.c
