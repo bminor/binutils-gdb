@@ -135,6 +135,12 @@ print_insn (memaddr, stream)
 
   find_bytes (insn, &insn0, &insn8, &insn16, &insn24);
 
+  /* Handle the nop (aseq 0x40,gr1,gr1) specially */
+  if ((insn24==0x70) && (insn16==0x40) && (insn8==0x01) && (insn0==0x01)) {
+    fprintf_filtered (stream,"nop");
+    return 4;
+  }
+
   /* The opcode is always in insn24.  */
   for (opcode = &am29k_opcodes[0];
        opcode < &am29k_opcodes[NUM_OPCODES];
@@ -203,7 +209,7 @@ print_insn (memaddr, stream)
 		  break;
 
 		case 'v':
-		  fprintf_filtered (stream, "%#x", insn16);
+		  fprintf_filtered (stream, "0x%x", insn16);
 		  break;
 
 		case 's':
@@ -290,7 +296,7 @@ print_insn (memaddr, stream)
 	  return 4;
 	}
     }
-  fprintf_filtered (stream, ".word %#8x",
+  fprintf_filtered (stream, ".word 0x%8x",
 		    (insn24 << 24) + (insn16 << 16) + (insn8 << 8) + insn0);
   return 4;
 }
