@@ -439,7 +439,7 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: Stu
-Grossman and John Gilmore (release 4.4), John Gilmore (releases 4.3, 4.2,
+Grossman and John Gilmore (releases 4.5, 4.4), John Gilmore (releases 4.3, 4.2,
 4.1, 4.0, and 3.9); Jim Kingdon (releases 3.5, 3.4, 3.3); and Randy
 Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB for some
 period, each contributed significantly to the structure, stability, and
@@ -490,6 +490,8 @@ command-line editing and command history.
 Andrew Beers of SUNY Buffalo wrote the language-switching code and
 the Modula-2 support, and contributed the Languages chapter of this
 manual.
+
+Fred Fish wrote most of the support for Unix System Vr4.
 
 @node New Features, Sample Session, Summary, Top
 @unnumbered New Features since GDB version 3.5
@@ -979,6 +981,17 @@ Execute _GDBN__ commands from file @var{file}.  @xref{Command Files}.
 @item -directory=@var{directory}
 @itemx -d @var{directory}
 Add @var{directory} to the path to search for source files.
+
+@item -m
+@itemx -mapped
+@emph{Warning: this option depends on operating system facilities that are not
+supported on all systems.}@*
+If memory-mapped files are available through the @code{mmap} system
+call, you can use this option to get _GDBN__ to write out the symbols
+for your program in a reusable file.  Next time _GDBN__ starts up (if the
+program hasn't changed), it will map in symbol information from this
+auxiliary symbol file, rather than spending time reading the symbol
+table from the executable program.
 @end table
 
 _if__(!_GENERIC__)
@@ -5879,6 +5892,13 @@ search, just as the shell does when looking for a program to run.  You
 can change the value of this variable, for both _GDBN__ and your program,
 using the @code{path} command.
 
+On systems with memory-mapped files, an auxiliary symbol table file
+@file{@var{filename}.syms} may be available for @var{filename}.  If it
+is, _GDBN__ will map in the symbol table from
+@file{@var{filename}.syms}, starting up more quickly.  See the
+descriptions of the keywords @samp{mapped} and @samp{readnow} (available
+with either @code{file} or @code{symbol-file}), for more information.
+
 @item file
 @code{file} with no argument makes _GDBN__ discard any information it
 has on both executable file and the symbol table.
@@ -5908,8 +5928,15 @@ the old symbol table data being discarded inside _GDBN__.
 @code{symbol-file} will not repeat if you press @key{RET} again after
 executing it once.
 
+When _GDBN__ is configured for a particular environment, it will
+understand debugging information in whatever format is the standard
+generated for that environment; you may use either a GNU compiler, or
+other compilers that adhere to the local conventions.  Best results are
+usually obtained from GNU compilers; for example, using @code{_GCC__}
+you can generate debugging information for optimized code.
+
 On some kinds of object files, the @code{symbol-file} command does not
-actually read the symbol table in full right away.  Instead, it scans
+normally read the symbol table in full right away.  Instead, it scans
 the symbol table quickly to find which source files and which symbols
 are present.  The details are read later, one source file at a time,
 as they are needed.
@@ -5925,12 +5952,43 @@ When the symbol table is stored in COFF format, @code{symbol-file} does
 read the symbol table data in full right away.  We have not implemented
 the two-stage strategy for COFF yet.
 
-When _GDBN__ is configured for a particular environment, it will
-understand debugging information in whatever format is the standard
-generated for that environment; you may use either a GNU compiler, or
-other compilers that adhere to the local conventions.  Best results are
-usually obtained from GNU compilers; for example, using @code{_GCC__}
-you can generate debugging information for optimized code.
+@item symbol-file @var{filename} @r{[} readnow @r{]} @r{[} mapped @r{]}
+@itemx file @var{filename} @r{[} readnow @r{]} @r{[} mapped @r{]}
+@kindex readnow
+@cindex reading symbols immediately
+@cindex symbols, reading immediately
+@kindex mapped
+@cindex memory-mapped symbol file
+@cindex saving symbol table with memory mapping
+You can override the _GDBN__ two-stage strategy for reading symbol
+tables by using the @samp{readnow} keyword with any of the commands that
+load symbol table information, if you want to be sure _GDBN__ has the
+entire symbol table available.  
+
+If memory-mapped files are available on your system through the
+@code{mmap} system call, you can use another keyword, @samp{mapped}, to
+get _GDBN__ to write out the symbols for your program in a reusable
+file.  Next time _GDBN__ starts up (if the program hasn't changed), it
+will map in symbol information from this auxiliary symbol file, rather
+than spending time reading the symbol table from the executable program.
+Using the @samp{mapped} keyword has the same effect as starting _GDBN__
+with the @samp{-m} command-line option.
+
+You can use both keywords together, to make sure the auxiliary symbol
+file has all the symbol information for your program.
+
+The auxiliary symbol file for a program called @var{myprog} is called
+@samp{@var{myprog}.syms}.  Once this file exists (so long as it is newer
+than the corresponding executable), _GDBN__ will always attempt to use
+it when you debug @var{myprog}; no special options or commands are
+needed.
+@c FIXME: for now no mention of directories, since this seems to be in
+@c flux.  13mar1992 status is that in theory GDB would look either in
+@c current dir or in same dir as myprog; but issues like competing
+@c GDB's, or clutter in system dirs, mean that in practice right now
+@c only current dir is used.  FFish says maybe a special GDB hierarchy
+@c (eg rooted in val of env var GDBSYMS) could exist for mappable symbol
+@c files.
 
 @item core-file @r{[} @var{filename} @r{]}
 @kindex core
@@ -6032,6 +6090,7 @@ function in a shared library, however---unless you are debugging a core
 file).
 @c FIXME: next _GDBN__ release should permit some refs to undef
 @c FIXME...symbols---eg in a break cmd---assuming they are from a shared lib
+@c FIXME: still only SunOS??
 
 @table @code
 @item info share
