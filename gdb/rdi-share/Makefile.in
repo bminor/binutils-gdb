@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.2e from Makefile.am
+# Makefile.in generated automatically by automake 1.3b from Makefile.am
 
 # Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -31,6 +31,8 @@ infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
+
+DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -79,7 +81,7 @@ noinst_HEADERS = adp.h adperr.h angel.h ardi.h armdbg.h buffers.h bytesex.h \
 
 EXTRA_DIST = README.CYGNUS
 
-libangsd_a_INCLUDES =  -DRETRANS DARM_RELEASE='"Berkeley Licence for Cygnus"'
+INCLUDES =  -DRETRANS DARM_RELEASE='"Berkeley Licence for Cygnus"'
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../../mkinstalldirs
 CONFIG_CLEAN_FILES = 
@@ -96,8 +98,8 @@ etherdrv.o hostchan.o hsys.o logging.o msgbuild.o params.o rx.o \
 serdrv.o serpardr.o tx.o unixcomm.o
 AR = ar
 CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 HEADERS =  $(noinst_HEADERS)
 
 DIST_COMMON =  Makefile.am Makefile.in aclocal.m4 configure configure.in
@@ -110,21 +112,21 @@ GZIP = --best
 SOURCES = $(libangsd_a_SOURCES)
 OBJECTS = $(libangsd_a_OBJECTS)
 
-default: all
+all: Makefile $(LIBRARIES) $(HEADERS)
 
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 $(ACLOCAL_M4): @MAINT@ configure.in 
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -201,12 +203,12 @@ distcheck: dist
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
 	-rm -rf $(distdir)
 	@echo "========================"; \
 	echo "$(distdir).tar.gz is ready for distribution"; \
@@ -232,7 +234,6 @@ distdir: $(DISTFILES)
 info:
 dvi:
 check:
-	$(MAKE)
 installcheck:
 install-info:
 install-exec: 
@@ -246,27 +247,20 @@ install: install-exec install-data all
 
 uninstall: 
 
-all: Makefile $(LIBRARIES) $(HEADERS)
-
 install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs:
 
 
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 
 maintainer-clean-generic:
-	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
 		mostlyclean-tags mostlyclean-generic
 
@@ -284,7 +278,7 @@ maintainer-clean:  maintainer-clean-noinstLIBRARIES \
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f config.status
 
-.PHONY: default mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
 clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile tags mostlyclean-tags distclean-tags \

@@ -1,3 +1,8 @@
+1998-08-19  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * rdi-share/Makefile.am: Use just `INCLUDES' not `libname_INCLUDES'.
+        * rdi-share/Makefile.in: Regenerated.
+
 1998-08-19  Keith Seitz  <keiths@cygnus.com>
 
 	* v850ice.c (v850ice_stop): New function to stop the ICE.
