@@ -1,3 +1,12 @@
+2002-03-27  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-i386.c (output_jump): Set fx_pcrel_adjust to size of
+	field for pc-relative fixups.
+	(output_disp): Likewise.
+	(md_estimate_size_before_relax): Likewise.
+	(tc_gen_reloc): Subtract fx_pcrel_adjust instead of fx_size for
+	pc-relative fixups in 64bit mode.
+
 2002-03-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/te-aix5.h: Typo fix.
