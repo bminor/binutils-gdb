@@ -243,9 +243,7 @@ DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c
 diststuff: $(DISTSTUFF) info
 
-# FIXME: Shouldn't automake take care of the first four .h files anyhow?
-DISTCLEANFILES = defparse.h arparse.h rcparse.h nlmheader.h \
-	stamp-under sysinfo underscore.c sysroff.c sysroff.h
+DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -297,6 +295,8 @@ binutils.info: $(srcdir)/binutils.texi config.texi
 $(DEMANGLER_PROG).1: cxxfilt.man Makefile
 	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
 		> $(DEMANGLER_PROG).1
+
+MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1
 
 CLEANFILES = dep.sed .dep .dep1
 

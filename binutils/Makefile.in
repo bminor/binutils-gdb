@@ -238,9 +238,9 @@ windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c
 
-# FIXME: Shouldn't automake take care of the first four .h files anyhow?
-DISTCLEANFILES = defparse.h arparse.h rcparse.h nlmheader.h \
-	stamp-under sysinfo underscore.c sysroff.c sysroff.h
+DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h
+
+MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1
 
 CLEANFILES = dep.sed .dep .dep1
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
