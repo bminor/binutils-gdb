@@ -50,7 +50,7 @@ RANLIB = ranlib
 
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
 	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ -y ; \
-	else echo yacc ; fi`
+	else echo bison -y ; fi`
 
 MAKEINFO = makeinfo
 FRESHMAKEINFO = `if [ -d $(unsubdir)/../texinfo/C ] ; \
@@ -67,7 +67,7 @@ INSTALL_TARGET = install.all
 ### for debugging
 #GCCVERBOSE=-v
 
-
+
 #### host and target specific makefile fragments come in here.
 ###
 
@@ -122,7 +122,7 @@ install.all: install-dirs install-libiberty install-texinfo \
 install.cross: install-dirs install-libiberty install-binutils install-bison \
 	install-byacc install-ld install-gas install-gnulib \
 	install-readline install-glob install-gdb
-
+
 ### libiberty
 .PHONY: all-libiberty just-libiberty
 all-libiberty: just-libiberty
@@ -179,7 +179,7 @@ install-libiberty: force
 	else \
 		true ; \
 	fi
-
+
 ### texinfo
 .PHONY: all-texinfo just-texinfo
 all-texinfo: just-texinfo
@@ -236,7 +236,7 @@ install-texinfo: force
 	else \
 		true ; \
 	fi
-
+
 ### bfd
 .PHONY: all-bfd just-bfd
 all-bfd: just-bfd
@@ -293,7 +293,7 @@ install-bfd: force
 	else \
 		true ; \
 	fi
-
+
 ### binutils
 .PHONY: all-binutils just-binutils
 all-binutils: just-binutils
@@ -350,7 +350,7 @@ install-binutils: force
 	else \
 		true ; \
 	fi
-
+
 ### byacc
 .PHONY: all-byacc just-byacc
 all-byacc: just-byacc
@@ -407,7 +407,7 @@ install-byacc: force
 	else \
 		true ; \
 	fi
-
+
 ### bison
 .PHONY: all-bison just-bison
 all-bison: just-bison
@@ -464,7 +464,7 @@ install-bison: force
 	else \
 		true ; \
 	fi
-
+
 ### gcc
 .PHONY: all-gcc just-gcc
 all-gcc: just-gcc
@@ -522,7 +522,7 @@ install-gcc:
 	else \
 		true ; \
 	fi
-
+
 ### readline
 .PHONY: all-readline just-readline
 all-readline: just-readline
@@ -579,7 +579,7 @@ install-readline: force
 	else \
 		true ; \
 	fi
-
+
 ### glob
 .PHONY: all-glob just-glob
 all-glob: just-glob
@@ -636,7 +636,7 @@ install-glob: force
 	else \
 		true ; \
 	fi
-
+
 ### gas
 .PHONY: all-gas just-gas
 all-gas: just-gas
@@ -693,7 +693,7 @@ install-gas: force
 	else \
 		true ; \
 	fi
-
+
 ### ld
 .PHONY: all-ld just-ld
 all-ld: just-ld
@@ -750,7 +750,7 @@ install-ld: force
 	else \
 		true ; \
 	fi
-
+
 ### gnulib (and gnulib1)
 .PHONY: all-gnulib just-gnulib1 just-gnulib
 just-gnulib1: all-gas all-binutils force
@@ -847,7 +847,7 @@ install-gnulib: force
 	else \
 		true ; \
 	fi
-
+
 ### gdb
 .PHONY: all-gdb just-gdb
 all-gdb: just-gdb
@@ -904,7 +904,7 @@ install-gdb: force
 	else \
 		true ; \
 	fi
-
+
 ### make
 .PHONY: all-make just-make
 all-make: just-make
@@ -961,7 +961,7 @@ install-make: force
 	else \
 		true ; \
 	fi
-
+
 ### diff
 .PHONY: all-diff just-diff
 all-diff: just-diff
@@ -1018,7 +1018,7 @@ install-diff: force
 	else \
 		true ; \
 	fi
-
+
 ### grep
 .PHONY: all-grep just-grep
 all-grep: just-grep
@@ -1075,7 +1075,7 @@ install-grep: force
 	else \
 		true ; \
 	fi
-
+
 ### rcs
 .PHONY: all-rcs just-rcs
 all-rcs: just-rcs
@@ -1132,7 +1132,7 @@ install-rcs: install-grep install-diff force
 	else \
 		true ; \
 	fi
-
+
 ### gdbm
 .PHONY: all-gdbm just-gdbm
 all-gdbm: just-gdbm
@@ -1189,7 +1189,7 @@ install-gdbm: force
 	else \
 		true ; \
 	fi
-
+
 ### cvs
 .PHONY: all-cvs just-cvs
 all-cvs: just-cvs just-rcs just-grep just-diff
@@ -1246,7 +1246,7 @@ install-cvs: install-rcs install-gdbm force
 	else \
 		true ; \
 	fi
-
+
 ### emacs
 .PHONY: all-emacs just-emacs
 all-emacs: just-emacs
@@ -1303,7 +1303,7 @@ install-emacs: install-rcs install-gdbm force
 	else \
 		true ; \
 	fi
-
+
 ### ispell
 .PHONY: all-ispell just-ispell
 all-ispell: just-ispell
@@ -1360,7 +1360,7 @@ install-ispell: install-rcs install-gdbm force
 	else \
 		true ; \
 	fi
-
+
 ### flex
 .PHONY: all-flex just-flex
 all-flex: just-flex
@@ -1417,7 +1417,7 @@ install-flex: force
 	else \
 		true ; \
 	fi
-
+
 ### fileutils
 .PHONY: all-fileutils just-fileutils
 all-fileutils: just-fileutils
@@ -1483,17 +1483,16 @@ install-fileutils: force
 	else \
 		true ; \
 	fi
-
+
 ### libg++
 .PHONY: all-libg++ just-libg++
 all-libg++: just-libg++
 # NOTE!  We have added GXX= to the $(MAKE) line!!!  Do not clone this one.
 just-libg++: just-gcc force
 	if [ -d $(unsubdir)/libg++ ] ; then \
-		MYGCC="`pwd`/gcc"; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
-			GXX="$(GCCDIR)/gcc -B$(GCCDIR)/" \
+			GXX=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/ -I"`cd $(unsubdir)/..$(subdir); pwd`/gcc/include \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
@@ -1552,7 +1551,7 @@ install-libg++: force
 	else \
 		true ; \
 	fi
-
+
 ### other supporting targets
 # this is a bad hack.
 all.xclib:	all.normal
@@ -1713,7 +1712,7 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 #
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
-DEVO_SUPPORT= README DOC.configure Makefile.in configure configure.in \
+DEVO_SUPPORT= README cfg-paper.texi Makefile.in configure configure.in \
 	config.sub config
 GDB_SUPPORT_DIRS= bfd include libiberty readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex

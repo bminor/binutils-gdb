@@ -1,3 +1,19 @@
+Fri Jan 17 17:58:05 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  remove form feeds to make Sun's make happy.
+	(DEVO_SUPPORT):  DOC.configure => cfg-paper.texi.
+
+Sat Jan  4 16:11:44 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in (AR_FLAGS):  Make quieter.
+
+Thu Jan  2 22:57:12 1992  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in:  Add libg++.
+	* configure:  When verbose, don't output the command line at each
+	level; it will be unremarkably the same as the previous version,
+	which will be the same as what the user typed.
+
 Fri Dec 27 16:26:47 1991  K. Richard Pixley  (rich at cygnus.com)
 
 	* configure.in, Makefile.in: fix clean-info, add flex.  add
