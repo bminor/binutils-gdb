@@ -14,7 +14,7 @@
 @c defaults, config file may override:
 @set have-stabs
 @c ---
-@include asdoc-config.texi
+@include asconfig.texi
 @c ---
 @c common OR combinations of conditions
 @ifset AOUT
@@ -3435,6 +3435,11 @@ Assemble the following code into end of subsection numbered
 @var{subsection}, @code{@value{AS}} uses subsection number zero.
 @samp{.section .text} is equivalent to the @code{.text} directive;
 @samp{.section .data} is equivalent to the @code{.data} directive.
+@ifset GENERIC
+This directive is only supported for targets that actually support arbitrarily
+named sections; on @code{a.out} targets, for example, it is not accepted, even
+with a standard @code{a.out} section name as its parameter.
+@end ifset
 @end ifset
 
 @node Set
