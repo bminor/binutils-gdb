@@ -23,14 +23,6 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-armelf_files="elf32-arm.c"
-if ( echo $* | grep keep\-armelf > /dev/null ) ; then
-	keep_these_too="${armelf_files} ${keep_these_too}"
-else
-	lose_these_too="${armelf_files} ${lose_these_too}"
-fi
-
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -610,33 +602,6 @@ else
 	done
 fi
 
-armelf_files="ChangeLog Makefile.am Makefile.in config.bfd configure configure.in elf.c targets.c"
-if ( echo $* | grep keep\-armelf > /dev/null ) ; then
-	for i in $armelf_files ; do
-		if test ! -d $i && (grep sanitize-armelf $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping armelf stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $armelf_files ; do
-		if test ! -d $i && (grep sanitize-armelf $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"armelf\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-armelf/,/end-\sanitize\-armelf/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 for i in *; do
   if test ! -d $i && (grep sanitize $i > /dev/null) ; then
