@@ -1,3 +1,8 @@
+Wed Aug 31 09:17:02 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* value.h (struct value): Change literal_data from PTR to char *,
+	since that is the way it is used.
+
 Tue Aug 30 21:56:54 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somread.c (som_symfile_read): Force unwinds to be re-read after
