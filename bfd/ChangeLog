@@ -1,5 +1,8 @@
 Wed Oct 12 11:54:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* rs6000-core.c (rs6000coff_core_file_matches_executable_p): Make
+	str1 and str2 const pointers.
+
 	* Makefile.in (INSTALL): Use top level install.sh script.
 	* config/README (INSTALL): Remove.
 	* config/delta88.mh (INSTALL): Remove.
