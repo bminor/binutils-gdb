@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.2  1991/04/18 21:14:21  steve
-   Send the right # of args to an fprintf
+   Revision 1.3  1991/05/19 08:00:57  rich
+   Updated to relect a gdb change in sparc-opcode.h.
 
+ * Revision 1.2  1991/04/18  21:14:21  steve
+ * Send the right # of args to an fprintf
+ *
  * Revision 1.1.1.1  1991/03/21  21:26:56  gumby
  * Back from Intel with Steve
  *
@@ -129,7 +132,7 @@ is_delayed_branch (insn)
       const struct sparc_opcode *opcode = &sparc_opcodes[i];
       if ((opcode->match & insn.code) == opcode->match
 	  && (opcode->lose & insn.code) == 0
-	  && (opcode->delayed))
+	  && (opcode->flags&F_DELAYED))
 	return 1;
     }
   return 0;
