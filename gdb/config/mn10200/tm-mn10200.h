@@ -19,9 +19,32 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* The mn10200 is little endian.  */
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-/* 24 bit registers but we'll pretend that they are 32 bits */
+/* ints are only 16bits on the mn10200.  */
+#undef TARGET_INT_BIT
+#define TARGET_INT_BIT 16
+
+/* The mn10200 doesn't support long long types.  */
+#undef TARGET_LONG_LONG_BIT
+#define TARGET_LONG_LONG_BIT 32
+
+/* The mn10200 doesn't support double or long double either.  */
+#undef TARGET_DOUBLE_BIT
+#undef TARGET_LONG_DOUBLE_BIT
+#define TARGET_DOUBLE_BIT 32
+#define TARGET_LONG_DOUBLE_BIT 32
+
+/* Not strictly correct, but the machine independent code is not
+   ready to handle any of the basic sizes not being a power of two.  */
+#undef TARGET_PTR_BIT
+#define TARGET_PTR_BIT 32
+
+/* The mn10200 really has 24 bit registers but the simulator reads/writes
+   them as 32bit values, so we claim they're 32bits each.  This may have
+   to be tweaked if the Matsushita emulator/board really deals with them
+   as 24bits each.  */
 #define REGISTER_SIZE 4
 
 #define MAX_REGISTER_RAW_SIZE REGISTER_SIZE
@@ -39,7 +62,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define MDR_REGNUM 9
 #define PSW_REGNUM 10
 
-#define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
+/* Treat the registers as 32bit values.  */
+#define REGISTER_VIRTUAL_TYPE(REG) builtin_type_long
 
 #define REGISTER_BYTE(REG) ((REG) * REGISTER_SIZE)
 #define REGISTER_VIRTUAL_SIZE(REG) REGISTER_SIZE
@@ -47,16 +71,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE REGISTER_SIZE
 
+/* The breakpoint instruction must be the same size as te smallest
+   instruction in the instruction set.
+
+   The Matsushita mn10x00 processors have single byte instructions
+   so we need a single byte breakpoint.  Matsushita hasn't defined
+   one, so we defined it ourselves.
+
+   0xff is the only available single byte insn left on the mn10200.  */
 #define BREAKPOINT {0xff}
 
 #define FUNCTION_START_OFFSET 0
 
 #define DECR_PC_AFTER_BREAK 0
 
+/* Stacks grow the normal way.  */
 #define INNER_THAN <
 
 #define SAVED_PC_AFTER_CALL(frame) \
-  read_memory_integer (read_register (SP_REGNUM), REGISTER_SIZE)
+  (read_memory_integer (read_register (SP_REGNUM), REGISTER_SIZE) & 0xffff)
 
 #ifdef __STDC__
 struct frame_info;
@@ -65,38 +98,66 @@ struct type;
 struct value;
 #endif
 
-#define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
+#define EXTRA_FRAME_INFO struct frame_saved_regs fsr; int status; int stack_size;
 
-extern void mn10200_init_extra_frame_info PARAMS ((struct frame_info *fi));
+extern void mn10200_init_extra_frame_info PARAMS ((struct frame_info *));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10200_init_extra_frame_info (fi)
-#define INIT_FRAME_PC		/* Not necessary */
+#define INIT_FRAME_PC(x,y)
 
-extern void mn10200_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *regaddr));
+extern void mn10200_frame_find_saved_regs PARAMS ((struct frame_info *,
+						   struct frame_saved_regs *));
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
 
-extern CORE_ADDR mn10200_frame_chain PARAMS ((struct frame_info *fi));
+extern CORE_ADDR mn10200_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN(fi) mn10200_frame_chain (fi)
 #define FRAME_CHAIN_VALID(FP, FI)	generic_frame_chain_valid (FP, FI)
 
-extern CORE_ADDR mn10200_find_callers_reg PARAMS ((struct frame_info *fi, int regnum));
+extern CORE_ADDR mn10200_find_callers_reg PARAMS ((struct frame_info *, int));
 extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(FI) (mn10200_frame_saved_pc (FI))
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF. */
+   into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
-  memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE))
+  { \
+    if (TYPE_LENGTH (TYPE) > 4) \
+      abort (); \
+    else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
+      { \
+	memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), 2); \
+	memcpy (VALBUF, REGBUF + REGISTER_BYTE (1), 2); \
+      } \
+    else \
+      { \
+        memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE)); \
+      } \
+  }
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   extract_address (REGBUF + REGISTER_BYTE (0), \
 		   REGISTER_RAW_SIZE (0))
 
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
-  write_register_bytes(REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE));
+  { \
+    if (TYPE_LENGTH (TYPE) > 4) \
+      abort (); \
+    else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
+      { \
+	write_register_bytes (REGISTER_BYTE (0), VALBUF, 2); \
+	write_register_bytes (REGISTER_BYTE (1), VALBUF + 2, 2); \
+      } \
+    else \
+      { \
+        write_register_bytes (REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE)); \
+      } \
+  }
 
-extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR pc));
+#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) write_register (0, STRUCT_ADDR);
+
+
+extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR));
 #define SKIP_PROLOGUE(pc) pc = mn10200_skip_prologue (pc)
 
 #define FRAME_ARGS_SKIP 0
@@ -105,7 +166,7 @@ extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR pc));
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_NUM_ARGS(val, fi) ((val) = -1)
 
-extern void mn10200_pop_frame PARAMS ((struct frame_info *frame));
+extern void mn10200_pop_frame PARAMS ((struct frame_info *));
 #define POP_FRAME mn10200_pop_frame (get_current_frame ())
 
 #define USE_GENERIC_DUMMY_FRAMES
@@ -123,23 +184,19 @@ extern CORE_ADDR mn10200_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
 extern CORE_ADDR
-mn10200_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
-			     unsigned char struct_return,
-			     CORE_ADDR struct_addr));
+mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
+			     unsigned char, CORE_ADDR));
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
-
-#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
   	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 4)
 
-/* override the default get_saved_register function with
-   one that takes account of generic CALL_DUMMY frames */
+/* Override the default get_saved_register function with
+   one that takes account of generic CALL_DUMMY frames.  */
 #define GET_SAVED_REGISTER
 
 /* Define this for Wingdb */
-
 #define TARGET_MN10200

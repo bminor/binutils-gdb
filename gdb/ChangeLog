@@ -1,5 +1,20 @@
 Mon Feb 10 16:11:57 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10200-tdep.c: Remove lots of debugging printfs, update/improve
+	comments, formatting, etc.  Plus other minor fixes for problems
+	I found during my first pass over the mn10200 port.
+	(mn10200_analyze_prologue): New function.
+	(mn10200_frame_chain, mn10200_init_extra_frame_info): Use it.
+	* config/mn10200/tm-mn10200.h: Lots of updates/improvements to
+	comments, formatting, etc.  Minor fixes for problems I found during
+	my first pass over the mn10200 port.
+	(TARGET_*_BIT): Define appropriately for ints, long longs, doubles and
+	pointers.
+	(REGISTER_VIRTUAL_TYPE): Define as a long.
+	(EXTRACT_RETURN_VALUE): Rework to deal with long ints living
+	in register pairs.
+	(STORE_RETURN_VALUE): Similarly.
+
 	* blockframe.c (generic_get_saved_regs): Remove unused variable
 	"addr".
 	* breakpoint.c (frame_in_dummy): Move struct breakpoint *b decl
