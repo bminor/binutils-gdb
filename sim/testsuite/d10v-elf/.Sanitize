@@ -2,6 +2,9 @@ Do-first:
 
 Things-to-keep:
 
+Makefile.in
+configure
+configure.in
 exit47.s
 hello.s
 loop.s
