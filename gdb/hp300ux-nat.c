@@ -24,10 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Defining this means some system include files define some extra stuff.  */
 #define WOPR
 #include <sys/param.h>
-#include <sys/dir.h>
 #include <signal.h>
 #include <sys/user.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
 
 #include <sys/ptrace.h>
@@ -37,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 
 #include <sys/file.h>
-#include <sys/stat.h>
 
 /* Get kernel_u_addr using HPUX-style nlist().  */
 CORE_ADDR kernel_u_addr;
