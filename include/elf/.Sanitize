@@ -17,10 +17,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="ch-exp.y"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -37,30 +33,5 @@ external.h
 internal.h
 
 Do-last:
-
-echo Thawing away the \"chill\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Keeping chill stuff in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Thawing the \"chill\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 # End of file.
