@@ -1,3 +1,7 @@
+Fri Jan 21 19:13:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc.h: New file.  Header file for PowerPC opcode table.
+
 Mon Jan 17 00:14:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa.h: More minor template fixes for sfu and copr (to allow
