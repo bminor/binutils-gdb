@@ -59,6 +59,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    user to turn it off.  */
 int mips_fpu = 1;
 
+/* Heuristic_proc_start may hunt through the text section for a long
+   time across a 2400 baud serial line.  Allows the user to limit this
+   search.  */
+static unsigned int heuristic_fence_post = 0;
+
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr) /* least address */
 #define PROC_HIGH_ADDR(proc) ((proc)->pdr.iline) /* upper address bound */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
@@ -126,24 +131,39 @@ static struct frame_saved_regs temp_saved_regs;
 
 /* This fencepost looks highly suspicious to me.  Removing it also
    seems suspicious as it could affect remote debugging across serial
-   lines.  At the very least, this needs a warning message.
-   rich@cygnus.com 12mar93. */
+   lines.  */
 
 static CORE_ADDR
 heuristic_proc_start(pc)
     CORE_ADDR pc;
 {
     CORE_ADDR start_pc = pc;
-    CORE_ADDR fence = start_pc - 200;
+    CORE_ADDR fence = start_pc - heuristic_fence_post;
 
     if (start_pc == 0)	return 0;
-    if (fence < VM_MIN_ADDRESS) fence = VM_MIN_ADDRESS;
+
+    if (heuristic_fence_post == UINT_MAX
+	|| fence < VM_MIN_ADDRESS)
+      fence = VM_MIN_ADDRESS;
 
     /* search back for previous return */
     for (start_pc -= 4; ; start_pc -= 4)
 	if (start_pc < fence)
 	  {
-	    warning("Cannot find enclosing function for pc 0x%x", pc);
+	    /* It's not clear to me why we reach this point when
+	       stop_soon_quietly, but with this test, at least we
+	       don't print out warnings for every child forked (eg, on
+	       decstation).  22apr93 rich@cygnus.com.  */
+	    if (!stop_soon_quietly)
+	      {
+		if (fence == VM_MIN_ADDRESS)
+		  warning("Hit beginning of text section without finding");
+		else
+		  warning("Hit heuristic-fence-post without finding");
+		
+		warning("enclosing function for pc 0x%x", pc);
+	      }
+
 	    return 0; 
 	  }
 	else if (ABOUT_TO_RETURN(start_pc))
@@ -781,7 +801,8 @@ mips_skip_prologue(pc)
 #endif
 }
 
-/* Let the user turn off floating point.  */
+/* Let the user turn off floating point and set the fence post for
+   heuristic_proc_start.  */
 
 void
 _initialize_mips_tdep ()
@@ -792,5 +813,13 @@ _initialize_mips_tdep ()
 		  "Set use of floating point coprocessor.\n\
 Turn off to avoid using floating point instructions when calling functions\n\
 or dealing with return values.", &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("heuristic-fence-post", class_support, var_uinteger,
+		  (char *) &heuristic_fence_post,
+		  "Set the distance searched for the start of a function.\n\
+Set number of bytes to be searched backward to find the beginning of a
+function without symbols.", &setlist),
      &showlist);
 }
