@@ -1,3 +1,10 @@
+Mon Apr  6 16:24:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (PROGS): Move $(ADDR2LINE_PROG) to end, so that
+	Makefile.in doesn't have an empty continuation line.
+	(bin_PROGRAMS): Likewise.
+	* Makefile.in: Rebuild.
+
 Fri Apr  3 14:48:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (DISTCLEANFILES): Add site.exp and site.bak.
