@@ -12,14 +12,14 @@ Fri Jan 29 16:44:01 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 
 Fri Jan 29 12:57:34 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* infrun.c (_initialize_infrun): do not stop or print anything
+	* infrun.c (_initialize_infrun): Do not stop or print anything
 	when a SIGWINCH is received.
 
-	* Makefile.in (m2-exp.tab.c): use YACC not BISON.
-	(f-exp.tab.c): ditto
-	(jv-exp.tab.c): ditto
-	(c-exp.tab.c): ditto
-	(YACC): define as @YACC@
+	* Makefile.in (m2-exp.tab.c): Use YACC not BISON.
+	(f-exp.tab.c): Ditto.
+	(jv-exp.tab.c): Ditto.
+	(c-exp.tab.c): Ditto.
+	(YACC): Define as @YACC@.
 
 1999-01-29  Martin Hunt  <hunt@cygnus.com>
 
@@ -47,11 +47,11 @@ Fri Jan 29 12:57:34 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 Wed Jan 27 16:50:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* hp-psymtab-read.c: reformatted using indent.
+	* hp-psymtab-read.c: Reformat using indent.
 
 Wed Jan 27 13:20:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* hp-psymtab-read.c: reformatted comments, updated copyright.
+	* hp-psymtab-read.c: Reformat comments, update copyright.
 
 start-sanitize-carp start-sanitize-vr4xxx
 Wed Jan 27 15:09:22 1999  Andrew Cagney  <cagney@chook.cygnus.com>
@@ -81,11 +81,11 @@ Tue Jan 26 16:02:47 1999  Mark Alexander  <marka@cygnus.com>
 
 Tue Jan 26 18:27:26 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	* Makefile.in (c-exp.tab.c): use BISON instead of YACC, to pick
+	* Makefile.in (c-exp.tab.c): Use BISON instead of YACC, to pick
 	the correct value from configure output.
-	(jv-exp.tab.c): ditto.
-	(f-exp.tab.c): ditto.
-	(m2-exp.tab.c): ditto.
+	(jv-exp.tab.c): Ditto.
+	(f-exp.tab.c): Ditto.
+	(m2-exp.tab.c): Ditto.
 
 1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
 
