@@ -356,8 +356,8 @@ copies from the publishers that paid for their writing or for major
 improvements.  Meanwhile, try to avoid buying non-free documentation
 at all.  Check the distribution terms of a manual before you buy it,
 and insist that whoever seeks your business must respect your freedom.
-Check the history of the book, and try reward the publishers that have
-paid or pay the authors to work on it.
+Check the history of the book, and try to reward the publishers that
+have paid or pay the authors to work on it.
 
 The Free Software Foundation maintains a list of free documentation
 published by other publishers, at

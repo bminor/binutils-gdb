@@ -1,3 +1,7 @@
+2002-01-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Free Software): Fix wording.
+
 2001-12-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Free Software): New section ``Free Software Needs
