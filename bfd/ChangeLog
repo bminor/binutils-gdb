@@ -1,3 +1,9 @@
+Fri Aug 28 19:44:07 1998  Richard Henderson  <rth@cygnus.com>
+
+	* archures.c (bfd_mach_alpha_ev[456]): New.
+	* cpu-alpha.c: Rework to match these types.
+	* bfd-in2.h: Rebuild.
+
 Fri Aug 28 19:38:53 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf-bfd.h (_bfd_elf_rel_vtable_reloc_fn): Declare.
