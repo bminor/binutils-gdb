@@ -1,3 +1,12 @@
+2004-06-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386v4-nat.c: Update copyright year and tweak comment.
+	(regmap): Remove trailing comma.
+	(supply_gregset): Rename local variable i to regnum.  Call
+	regcache_raw_supply instead of supply_register.
+	(fill_gregset): Rename argument regno to regnum.  Call
+	regcache_raw_collect instead of regcache_collect.
+
 2004-06-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* frame.h (struct frame_id): New fields stack_addr_p, code_addr_p
