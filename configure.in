@@ -23,6 +23,10 @@ esac
 
 case "${host_vendor}" in
 sco*)		host_makefile_frag=config/mh-sco ;;
+apollo*)	case "${host_cpu}" in
+		m68k*)
+			host_makefile_frag=config/mh-apollo68 ;;
+		esac ;;
 esac
 
 # per-target:

@@ -334,6 +334,10 @@ case $basic_machine in
 		basic_machine=m68k-cbm
 		os=-sysv4
 		;;
+	stratus)
+		basic_machine=i860-stratus
+		os=-sysv4
+		;;
 	cray | ymp)
 		basic_machine=ymp-cray
 		os=-unicos
@@ -414,6 +418,10 @@ case $basic_machine in
 		basic_machine=m68k-wrs
 		os=-vxworks
 		;;
+	os68k)
+		basic_machine=m68k-none
+		os=-os68k
+		;;
 	none)
 		basic_machine=none-none
 		os=-none
@@ -456,7 +464,7 @@ case $os in
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* | -sym* \
-	      | -amigados* | -msdos* | -none* \
+	      | -amigados* | -msdos* | -none* | -os68k* \
 	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs*)
 		;;
 # start-sanitize-v9
