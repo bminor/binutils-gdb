@@ -1,5 +1,19 @@
 2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-names.y (%union): Remove typed_val_float.
+	(INT, FLOAT): Change to type comp.
+	(CONSTRUCTION_VTABLE): Change to untyped.
+	(demangler_special): Use D_COMP_CONSTRUCTION_VTABLE.
+	(array_indicator, exp): Update for new types of INT and FLOAT.
+	Handle D_COMP_LITERAL_NEG.
+	(parse_number): Simplify.  Use D_COMP_LITERAL_NEG.
+	(HANDLE_SPECIAL): Define.
+	(tokentab_big): Remove.
+	(yylex): Remove unused variables.  Optimize calls to strncmp
+	and handling of multi-word tokens.
+
+2003-12-19  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y (symbol_end): New function.
 	(trim_chars): Use it.
 	(start_opt, function): New non-terminals used to support

@@ -187,9 +187,6 @@ void yyerror (char *);
       LONGEST val;
       struct d_comp *type;
     } typed_val_int;
-    struct {
-      DOUBLEST dval;
-    } typed_val_float;
     const char *opname;
   }
 
@@ -221,8 +218,8 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %type <lval> sign size int_type
 
-%token <typed_val_int> INT
-%token <typed_val_float> FLOAT
+%token <comp> INT
+%token <comp> FLOAT
 
 %token <comp> NAME
 %type <comp> name
@@ -245,8 +242,8 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %token FALSEKEYWORD
 
 /* Non-C++ things we get from the demangler.  */
-%token <lval> DEMANGLER_SPECIAL CONSTRUCTION_VTABLE
-%token CONSTRUCTION_IN
+%token <lval> DEMANGLER_SPECIAL
+%token CONSTRUCTION_VTABLE CONSTRUCTION_IN
 %token <typed_val_int> GLOBAL
 
 %{
@@ -336,7 +333,7 @@ demangler_special
 			  d_left ($$) = $2;
 			  d_right ($$) = NULL; }
 		|	CONSTRUCTION_VTABLE start CONSTRUCTION_IN start
-			{ $$ = d_make_comp (di, $1, $2, $4); }
+			{ $$ = d_make_comp (di, D_COMP_CONSTRUCTION_VTABLE, $2, $4); }
 		|	GLOBAL
 			{ $$ = d_make_empty (di, $1.val);
 			  d_left ($$) = $1.type;
@@ -672,14 +669,8 @@ array_indicator	:	'[' ']'
 			  d_left ($$) = NULL;
 			}
 		|	'[' INT ']'
-			{ struct d_comp *i;
-			  /* FIXME: Blatant memory leak.  */
-			  char *buf = malloc (24);
-			  sprintf (buf, "%d", (int) $2.val);
-			  i = d_make_name (di, buf, strlen (buf));
-			  i = d_make_comp (di, D_COMP_LITERAL, $2.type, i);
-			  $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
-			  d_left ($$) = i;
+			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
+			  d_left ($$) = $2;
 			}
 
 /* Details of this approach inspired by the G++ < 3.4 parser.  */
@@ -849,7 +840,8 @@ exp	:	'~' exp    %prec UNARY
    its type.  */
 
 exp	:	'(' type ')' exp  %prec UNARY
-		{ if ($4->type == D_COMP_LITERAL)
+		{ if ($4->type == D_COMP_LITERAL
+		      || $4->type == D_COMP_LITERAL_NEG)
 		    {
 		      $$ = $4;
 		      d_left ($4) = $2;
@@ -986,26 +978,10 @@ exp	:	exp '?' exp ':' exp	%prec '?'
 	;
 			  
 exp	:	INT
-			{ struct d_comp *i;
-			  /* FIXME: Blatant memory leak.  */
-			  char *buf = malloc (24);
-			  sprintf (buf, "%d", (int) $1.val);
-			  i = d_make_name (di, buf, strlen (buf));
-			  $$ = d_make_comp (di, D_COMP_LITERAL, $1.type, i);
-			}
 	;
 
 /* Not generally allowed.  */
 exp	:	FLOAT
-			{ struct d_comp *i;
-			  /* FIXME: Blatant memory leak.  */
-			  char *buf = malloc (24);
-			  sprintf (buf, "%f", (double) $1.dval);
-			  i = d_make_name (di, buf, strlen (buf));
-			  $$ = d_make_comp (di, D_COMP_LITERAL,
-					    d_make_builtin_type (di, &d_builtin_types['d' - 'a']),
-					    i);
-			}
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
@@ -1172,228 +1148,107 @@ parse_number (p, len, parsed_float, putithere)
      int parsed_float;
      YYSTYPE *putithere;
 {
-  /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
-     here, and we do kind of silly things like cast to unsigned.  */
-  LONGEST n = 0;
-  LONGEST prevn = 0;
-  ULONGEST un;
-
-  int i = 0;
-  int c;
-  int base = 10;
   int unsigned_p = 0;
-  int negative_p = 0;
 
   /* Number of "L" suffixes encountered.  */
   int long_p = 0;
 
-  /* We have found a "L" or "U" suffix.  */
-  int found_suffix = 0;
-
-  ULONGEST high_bit;
   struct d_comp *signed_type;
   struct d_comp *unsigned_type;
+  struct d_comp *type, *name;
+  enum d_comp_type literal_type;
+
+  if (p[0] == '-')
+    {
+      literal_type = D_COMP_LITERAL_NEG;
+      p++;
+      len--;
+    }
+  else
+    literal_type = D_COMP_LITERAL;
 
   if (parsed_float)
     {
       /* It's a float since it contains a point or an exponent.  */
       char c;
-      int num = 0;	/* number of tokens scanned by scanf */
-      char saved_char = p[len];
 
-      p[len] = 0;	/* null-terminate the token */
-      if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
-	num = sscanf (p, "%g%c", (float *) &putithere->typed_val_float.dval,&c);
-      else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
-	num = sscanf (p, "%lg%c", (double *) &putithere->typed_val_float.dval,&c);
-      else
-	{
-#ifdef SCANF_HAS_LONG_DOUBLE
-	  num = sscanf (p, "%Lg%c", &putithere->typed_val_float.dval,&c);
-#else
-	  /* Scan it into a double, then assign it to the long double.
-	     This at least wins with values representable in the range
-	     of doubles. */
-	  double temp;
-	  num = sscanf (p, "%lg%c", &temp,&c);
-	  putithere->typed_val_float.dval = temp;
-#endif
-	}
-      p[len] = saved_char;	/* restore the input stream */
-      if (num != 1) 		/* check scanf found ONLY a float ... */
-	return ERROR;
+      /* The GDB lexer checks the result of scanf at this point.  Not doing
+         this leaves our error checking slightly weaker but only for invalid
+         data.  */
+
       /* See if it has `f' or `l' suffix (float or long double).  */
 
       c = TOLOWER (p[len - 1]);
 
-#if 0
       if (c == 'f')
-	putithere->typed_val_float.type = builtin_type_float;
+      	{
+      	  len--;
+      	  type = d_make_builtin_type (di, &d_builtin_types ['f' - 'a']);
+      	}
       else if (c == 'l')
-	putithere->typed_val_float.type = builtin_type_long_double;
-      else if (isdigit (c) || c == '.')
-	putithere->typed_val_float.type = builtin_type_double;
+	{
+	  len--;
+	  type = d_make_builtin_type (di, &d_builtin_types ['e' - 'a']);
+	}
+      else if (ISDIGIT (c) || c == '.')
+	type = d_make_builtin_type (di, &d_builtin_types ['d' - 'a']);
       else
 	return ERROR;
-#endif
+
+      name = d_make_name (di, p, len);
+      putithere->comp = d_make_comp (di, literal_type, type, name);
 
       return FLOAT;
     }
 
-  if (p[0] == '-')
+  /* This treats 0x1 and 1 as different literals.  We also do not
+     automatically generate unsigned types.  */
+
+  long_p = 0;
+  unsigned_p = 0;
+  while (len > 0)
     {
-      negative_p = 1;
-      p++;
-      len--;
-    }
-  else
-    negative_p = 0;
-
-  /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
-  if (p[0] == '0')
-    switch (p[1])
-      {
-      case 'x':
-      case 'X':
-	if (len >= 3)
-	  {
-	    p += 2;
-	    base = 16;
-	    len -= 2;
-	  }
-	break;
-
-      case 't':
-      case 'T':
-      case 'd':
-      case 'D':
-	if (len >= 3)
-	  {
-	    p += 2;
-	    base = 10;
-	    len -= 2;
-	  }
-	break;
-
-      default:
-	base = 8;
-	break;
-      }
-
-  while (len-- > 0)
-    {
-      c = *p++;
-      if (c >= 'A' && c <= 'Z')
-	c += 'a' - 'A';
-      if (c != 'l' && c != 'u')
-	n *= base;
-      if (c >= '0' && c <= '9')
+      if (p[len - 1] == 'l' || p[len - 1] == 'L')
 	{
-	  if (found_suffix)
-	    return ERROR;
-	  n += i = c - '0';
+	  len--;
+	  long_p++;
+	  continue;
 	}
-      else
+      if (p[len - 1] == 'u' || p[len - 1] == 'U')
 	{
-	  if (base > 10 && c >= 'a' && c <= 'f')
-	    {
-	      if (found_suffix)
-		return ERROR;
-	      n += i = c - 'a' + 10;
-	    }
-	  else if (c == 'l')
-	    {
-	      ++long_p;
-	      found_suffix = 1;
-	    }
-	  else if (c == 'u')
-	    {
-	      unsigned_p = 1;
-	      found_suffix = 1;
-	    }
-	  else
-	    return ERROR;	/* Char not a digit */
+	  len--;
+	  unsigned_p++;
+	  continue;
 	}
-      if (i >= base)
-	return ERROR;		/* Invalid digit in this base */
-
-      /* Portably test for overflow (only works for nonzero values, so make
-	 a second check for zero).  FIXME: Can't we just make n and prevn
-	 unsigned and avoid this?  */
-      if (c != 'l' && c != 'u' && (prevn >= n) && n != 0)
-	unsigned_p = 1;		/* Try something unsigned */
-
-      /* Portably test for unsigned overflow.
-	 FIXME: This check is wrong; for example it doesn't find overflow
-	 on 0x123456789 when LONGEST is 32 bits.  */
-      if (c != 'l' && c != 'u' && n != 0)
-	{	
-	  if ((unsigned_p && (ULONGEST) prevn >= (ULONGEST) n))
-	    error ("Numeric constant too large.");
-	}
-      prevn = n;
+      break;
     }
 
-  /* An integer constant is an int, a long, or a long long.  An L
-     suffix forces it to be long; an LL suffix forces it to be long
-     long.  If not forced to a larger size, it gets the first type of
-     the above that it fits in.  To figure out whether it fits, we
-     shift it right and see whether anything remains.  Note that we
-     can't shift sizeof (LONGEST) * HOST_CHAR_BIT bits or more in one
-     operation, because many compilers will warn about such a shift
-     (which always produces a zero result).  Sometimes TARGET_INT_BIT
-     or TARGET_LONG_BIT will be that big, sometimes not.  To deal with
-     the case where it is we just always shift the value more than
-     once, with fewer bits each time.  */
-
-  un = (ULONGEST)n >> 2;
-  if (long_p == 0
-      && (un >> (TARGET_INT_BIT - 2)) == 0)
+  if (long_p == 0)
     {
-      high_bit = ((ULONGEST)1) << (TARGET_INT_BIT-1);
-
-      /* A large decimal (not hex or octal) constant (between INT_MAX
-	 and UINT_MAX) is a long or unsigned long, according to ANSI,
-	 never an unsigned int, but this code treats it as unsigned
-	 int.  This probably should be fixed.  GCC gives a warning on
-	 such constants.  */
-
       unsigned_type = d_int_type ('j' - 'a');
       signed_type = d_int_type ('i' - 'a');
     }
-  else if (long_p <= 1
-	   && (un >> (TARGET_LONG_BIT - 2)) == 0)
+  else if (long_p == 1)
     {
-      high_bit = ((ULONGEST)1) << (TARGET_LONG_BIT-1);
       unsigned_type = d_int_type ('m' - 'a');
       signed_type = d_int_type ('l' - 'a');
     }
   else
     {
-      int shift;
-      if (sizeof (ULONGEST) * HOST_CHAR_BIT < TARGET_LONG_LONG_BIT)
-	/* A long long does not fit in a LONGEST.  */
-	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
-      else
-	shift = (TARGET_LONG_LONG_BIT - 1);
-      high_bit = (ULONGEST) 1 << shift;
       unsigned_type = d_int_type ('x' - 'a');
       signed_type = d_int_type ('y' - 'a');
     }
 
-  /* FIXME: overflow, et cetera.  Dumb this whole function down a notch.  */
-  if (negative_p)
-    n = -n;
-
-   putithere->typed_val_int.val = n;
-
    /* If the high bit of the worked out type is set then this number
       has to be unsigned. */
 
-   if (unsigned_p || (n & high_bit)) 
-     putithere->typed_val_int.type = unsigned_type;
+   if (unsigned_p)
+     type = unsigned_type;
    else
-     putithere->typed_val_int.type = signed_type;
+     type = signed_type;
+
+   name = d_make_name (di, p, len);
+   putithere->comp = d_make_comp (di, literal_type, type, name);
 
    return INT;
 }
@@ -1588,26 +1443,18 @@ static const struct token tokentab2[] =
     {">=", GEQ, BINOP_END}
   };
 
-static const struct token tokentab_big[] = {
-  { "global constructors keyed to", 28, GLOBAL_CONSTRUCTORS},
-  { "global destructors keyed to", 27, GLOBAL_DESTRUCTORS},
-  { "construction vtable for", 23, D_COMP_CONSTRUCTION_VTABLE},
-  { "VTT for", 7, D_COMP_VTT},
-  { "vtable for", 10, D_COMP_VTABLE},
-  { "typeinfo for", 12, D_COMP_TYPEINFO},
-  { "typeinfo fn for", 15, D_COMP_TYPEINFO_FN},
-  { "typeinfo name for", 17, D_COMP_TYPEINFO_NAME},
-  { "non-virtual thunk to", 20, D_COMP_THUNK},
-  { "virtual thunk to", 16, D_COMP_VIRTUAL_THUNK},
-  { "covariant return thunk to", 25, D_COMP_COVARIANT_THUNK},
-  { "guard variable for", 18, D_COMP_GUARD},
-  { "reference temporary for", 23, D_COMP_REFTEMP}
-};
+#define HANDLE_SPECIAL(string, len, comp)		\
+  if (strncmp (tokstart, string, len) == 0)		\
+    {							\
+      lexptr = tokstart + len;				\
+      yylval.lval = comp;				\
+      return DEMANGLER_SPECIAL;				\
+    }
 
 /* Read one token, getting characters through lexptr.  */
 
 static int
-yylex ()
+yylex (void)
 {
   int c;
   int namelen;
@@ -1617,9 +1464,6 @@ yylex ()
   int tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
-  struct symbol * sym_class = NULL;
-  char * token_string = NULL;
-  int class_prefix = 0;
   int unquoted_expr;
    
  retry:
@@ -1630,7 +1474,9 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
+    if (tokstart[0] == tokentab3[i].operator[0]
+        && tokstart[1] == tokentab3[i].operator[1]
+        && tokstart[2] == tokentab3[i].operator[2])
       {
 	lexptr += 3;
 	yylval.opname = tokentab3[i].operator;
@@ -1639,27 +1485,13 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
+    if (tokstart[0] == tokentab2[i].operator[0]
+        && tokstart[1] == tokentab2[i].operator[1])
       {
 	lexptr += 2;
 	yylval.opname = tokentab2[i].operator;
 	return tokentab2[i].token;
       }
-
-  /* For construction vtables.  This is kind of hokey.  */
-  if (strncmp (tokstart, "-in-", 4) == 0)
-    {
-      lexptr += 4;
-      return CONSTRUCTION_IN;
-    }
-
-  if (strncmp (tokstart, "(anonymous namespace)", 21) == 0)
-    {
-      lexptr += 21;
-      yylval.comp = d_make_name (di, "(anonymous namespace)",
-				 sizeof "(anonymous namespace)" - 1);
-      return NAME;
-    }
 
   switch (c = *tokstart)
     {
@@ -1702,6 +1534,15 @@ yylex ()
       return INT;
 
     case '(':
+      if (strncmp (tokstart, "(anonymous namespace)", 21) == 0)
+	{
+	  lexptr += 21;
+	  yylval.comp = d_make_name (di, "(anonymous namespace)",
+				     sizeof "(anonymous namespace)" - 1);
+	  return NAME;
+	}
+	/* FALL THROUGH */
+
     case ')':
     case ',':
       lexptr++;
@@ -1720,6 +1561,13 @@ yylex ()
       /* FALL THRU into number case.  */
 
     case '-':
+      /* For construction vtables.  This is kind of hokey.  */
+      if (strncmp (tokstart, "-in-", 4) == 0)
+	{
+	  lexptr += 4;
+	  return CONSTRUCTION_IN;
+	}
+
       if (lexptr[1] < '0' || lexptr[1] > '9')
 	{
 	  lexptr++;
@@ -1893,27 +1741,6 @@ yylex ()
     /* We must have come across a bad character (e.g. ';').  */
     error ("Invalid character '%c' in expression.", c);
 
-  /* Tokens containing spaces.  */
-  for (i = 0; i < sizeof tokentab_big / sizeof tokentab_big[0]; i++)
-    if (strncmp (tokstart, tokentab_big[i].operator, tokentab_big[i].token) == 0)
-      {
-	lexptr += tokentab_big[i].token;
-	yylval.lval = tokentab_big[i].opcode;
-	if (yylval.lval == D_COMP_CONSTRUCTION_VTABLE)
-	  return CONSTRUCTION_VTABLE;
-	else if (yylval.lval == GLOBAL_CONSTRUCTORS
-		 || yylval.lval == GLOBAL_DESTRUCTORS)
-	  {
-	    /* Skip the trailing space, find the end of the symbol.  */
-	    char *p = symbol_end (lexptr + 1);
-	    yylval.typed_val_int.val = yylval.lval;
-	    yylval.typed_val_int.type = d_make_name (di, lexptr + 1, p - (lexptr + 1));
-	    lexptr = p;
-	    return GLOBAL;
-	  }
-	return DEMANGLER_SPECIAL;
-      }  
-
   /* It's a name.  See how long it is.  */
   namelen = 0;
   for (c = tokstart[namelen];
@@ -1923,8 +1750,6 @@ yylex ()
 
   lexptr += namelen;
 
-  tryname:
-
   /* Catch specific keywords.  Should be done with a data structure.  */
   switch (namelen)
     {
@@ -1933,6 +1758,11 @@ yylex ()
         return REINTERPRET_CAST;
       break;
     case 12:
+      if (strncmp (tokstart, "construction vtable for", 23) == 0)
+	{
+	  lexptr = tokstart + 23;
+	  return CONSTRUCTION_VTABLE;
+	}
       if (strncmp (tokstart, "dynamic_cast", 12) == 0)
         return DYNAMIC_CAST;
       break;
@@ -1940,7 +1770,14 @@ yylex ()
       if (strncmp (tokstart, "static_cast", 11) == 0)
         return STATIC_CAST;
       break;
+    case 9:
+      HANDLE_SPECIAL ("covariant return thunk to", 25, D_COMP_COVARIANT_THUNK);
+      HANDLE_SPECIAL ("reference temporary for", 23, D_COMP_REFTEMP);
+      break;
     case 8:
+      HANDLE_SPECIAL ("typeinfo for", 12, D_COMP_TYPEINFO);
+      HANDLE_SPECIAL ("typeinfo fn for", 15, D_COMP_TYPEINFO_FN);
+      HANDLE_SPECIAL ("typeinfo name for", 17, D_COMP_TYPEINFO_NAME);
       if (strncmp (tokstart, "operator", 8) == 0)
 	return OPERATOR;
       if (strncmp (tokstart, "restrict", 8) == 0)
@@ -1953,10 +1790,35 @@ yylex ()
 	return VOLATILE_KEYWORD;
       break;
     case 7:
+      HANDLE_SPECIAL ("virtual thunk to", 16, D_COMP_VIRTUAL_THUNK);
       if (strncmp (tokstart, "wchar_t", 7) == 0)
 	return WCHAR_T;
       break;
     case 6:
+      if (strncmp (tokstart, "global constructors keyed to", 28) == 0)
+	{
+	  char *p;
+	  lexptr = tokstart + 28;
+	  yylval.typed_val_int.val = GLOBAL_CONSTRUCTORS;
+	  /* Skip the trailing space, find the end of the symbol.  */
+	  p = symbol_end (lexptr + 1);
+	  yylval.typed_val_int.type = d_make_name (di, lexptr + 1, p - (lexptr + 1));
+	  lexptr = p;
+	  return GLOBAL;
+	}
+      if (strncmp (tokstart, "global destructors keyed to", 27) == 0)
+	{
+	  char *p;
+	  lexptr = tokstart + 27;
+	  yylval.typed_val_int.val = GLOBAL_DESTRUCTORS;
+	  /* Skip the trailing space, find the end of the symbol.  */
+	  p = symbol_end (lexptr + 1);
+	  yylval.typed_val_int.type = d_make_name (di, lexptr + 1, p - (lexptr + 1));
+	  lexptr = p;
+	  return GLOBAL;
+	}
+
+      HANDLE_SPECIAL ("vtable for", 10, D_COMP_VTABLE);
       if (strncmp (tokstart, "delete", 6) == 0)
 	return DELETE;
       if (strncmp (tokstart, "struct", 6) == 0)
@@ -1969,6 +1831,7 @@ yylex ()
 	return DOUBLE_KEYWORD;
       break;
     case 5:
+      HANDLE_SPECIAL ("guard variable for", 18, D_COMP_GUARD);
       if (strncmp (tokstart, "false", 5) == 0)
 	return FALSEKEYWORD;
       if (strncmp (tokstart, "class", 5) == 0)
@@ -1997,6 +1860,8 @@ yylex ()
 	return TRUEKEYWORD;
       break;
     case 3:
+      HANDLE_SPECIAL ("VTT for", 7, D_COMP_VTT);
+      HANDLE_SPECIAL ("non-virtual thunk to", 20, D_COMP_THUNK);
       if (strncmp (tokstart, "new", 3) == 0)
 	return NEW;
       if (strncmp (tokstart, "int", 3) == 0)
