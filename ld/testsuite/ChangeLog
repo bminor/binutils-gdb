@@ -1,3 +1,8 @@
+2003-05-07  Andreas Schwab  <schwab@suse.de>
+
+	* ld-elfvsb/elfvsb.exp: Run dump tests even when cross
+	compiling.
+
 2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/default.exp (gcc_gas_flags): Force ABI to n32 on

@@ -21,9 +21,6 @@
 
 # Make sure that ld can generate ELF shared libraries with visibility.
 
-# This test can only be run if ld generates native executables.
-if ![isnative] then {return}
-
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
 if { ![istarget hppa*64*-*-hpux*] \
@@ -52,6 +49,9 @@ foreach t $test_list {
     verbose [file rootname $t]
     run_dump_test [file rootname $t]
 }
+
+# The remaining tests can only be run if ld generates native executables.
+if ![isnative] then {return}
 
 set tmpdir tmpdir
 set SHCFLAG ""
