@@ -1736,7 +1736,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 	elf_elfheader (obfd)->e_flags &= ~EF_PPC_RELOCATABLE_LIB;
 
       /* The output is -mrelocatable iff it can't be -mrelocatable-lib,
-         but each input file is either -mrelocatable or -mrelocatable-lib.  */
+	 but each input file is either -mrelocatable or -mrelocatable-lib.  */
       if (! (elf_elfheader (obfd)->e_flags & EF_PPC_RELOCATABLE_LIB)
 	  && (new_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE))
 	  && (old_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE)))
@@ -2708,14 +2708,14 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_PLT32:
 	case R_PPC64_PLT64:
 	  /* This symbol requires a procedure linkage table entry.  We
-             actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code without
-             linking in any dynamic objects, in which case we don't
-             need to generate a procedure linkage table after all.  */
+	     actually build the entry in adjust_dynamic_symbol,
+	     because this might be a case of linking PIC code without
+	     linking in any dynamic objects, in which case we don't
+	     need to generate a procedure linkage table after all.  */
 	  if (h == NULL)
 	    {
 	      /* It does not make sense to have a procedure linkage
-                 table entry for a local symbol.  */
+		 table entry for a local symbol.  */
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
 	    }
@@ -5614,12 +5614,17 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  relocate = true;
 		  if (r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		    {
-		      if (is_opd && h != NULL && info->shared)
+		      if (is_opd && h != NULL)
 			{
 			  /* Lie about opd entries.  This case occurs
 			     when building shared libraries and we
 			     reference a function in another shared
-			     lib.  In that case we won't use the opd
+			     lib.  The same thing happens for a weak
+			     definition in an application that's
+			     overridden by a strong definition in a
+			     shared lib.  (I believe this is a generic
+			     bug in binutils handling of weak syms.)
+			     In these cases we won't use the opd
 			     entry in this lib;  We ought to edit the
 			     opd section to remove unused entries.  */
 			  unresolved_reloc = false;
@@ -5877,7 +5882,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf64_External_Rela *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
-         it up.  */
+	 it up.  */
 
       if (htab->splt == NULL
 	  || htab->srelplt == NULL
@@ -5904,7 +5909,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf64_External_Rela *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
-         up.  */
+	 up.  */
 
       if (htab->sgot == NULL || htab->srelgot == NULL)
 	abort ();
