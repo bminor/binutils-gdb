@@ -247,8 +247,7 @@ pc_rel_disp? That sort of thing.) */
 /* This is the table used by gas to figure out relaxing modes. The fields are
    forward_branch reach, backward_branch reach, number of bytes it would take,
    where the next biggest branch is. */
-const relax_typeS
-  md_relax_table[] =
+const relax_typeS md_relax_table[] =
 {
   {
     1, 1, 0, 0

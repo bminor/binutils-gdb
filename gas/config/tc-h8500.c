@@ -87,7 +87,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define WORD_F 32767
 #define WORD_B 32768
 
-const relax_typeS md_relax_table[C (END, 0)];
+relax_typeS md_relax_table[C (END, 0)];
 
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 

@@ -252,6 +252,7 @@ md_parse_option (c, arg)
          Motorola PowerPC 603/604.  */
       else if (strcmp (arg, "ppc") == 0
 	       || strcmp (arg, "ppc32") == 0
+	       || strcmp (arg, "403") == 0
 	       || strcmp (arg, "603") == 0
 	       || strcmp (arg, "604") == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
@@ -306,7 +307,7 @@ PowerPC options:\n\
 -mpwrx			generate code for IBM POWER/2 (RIOS2)\n\
 -mpwr			generate code for IBM POWER (RIOS1)\n\
 -m601			generate code for Motorola PowerPC 601\n\
--mppc, -mppc32, -m603, -m604\n\
+-mppc, -mppc32, -m403, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n");
 #ifdef OBJ_ELF
@@ -592,6 +593,8 @@ ppc_elf_validate_fix (fixS *fixp, segT seg)
       && !fixp->fx_pcrel
       && fixp->fx_r_type <= BFD_RELOC_UNUSED
       && strcmp (segment_name (seg), ".got2") != 0
+      && strcmp (segment_name (seg), ".dtors") != 0
+      && strcmp (segment_name (seg), ".ctors") != 0
       && strcmp (segment_name (seg), ".stab") != 0)
     {
       as_warn_where (fixp->fx_file, fixp->fx_line,
@@ -2370,11 +2373,6 @@ md_estimate_size_before_relax (fragp, seg)
 {
   abort ();
 }
-
-const relax_typeS md_relax_table[] =
-{
-  { 0 }
-};
 
 /* Convert a machine dependent frag.  We never generate these.  */
 

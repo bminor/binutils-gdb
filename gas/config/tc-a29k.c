@@ -32,11 +32,6 @@
 #define	machine_ip	a29k_ip
 #define	machine_it	a29k_it
 
-const relax_typeS md_relax_table[] =
-{
-  { 0, 0, 0, 0 }
-};
-
 #define	IMMEDIATE_BIT	0x01000000	/* Turns RB into Immediate */
 #define	ABSOLUTE_BIT	0x01000000	/* Turns PC-relative to Absolute */
 #define	CE_BIT		0x00800000	/* Coprocessor enable in LOAD */

@@ -108,7 +108,7 @@ int X;				/* X flag */
 #define WORD_F 32767
 #define WORD_B 32768
 
-const relax_typeS md_relax_table[C (END, 0)];
+relax_typeS md_relax_table[C (END, 0)];
 
 /*
    This function is called once, at assembler startup time.  This should

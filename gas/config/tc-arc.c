@@ -49,9 +49,6 @@ const pseudo_typeS md_pseudo_table[] =
   { NULL, 0, 0 },
 };
 
-const int md_short_jump_size = 4;
-const int md_long_jump_size = 4;
-
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
 const char comment_chars[] = "#;";
@@ -1008,11 +1005,6 @@ md_estimate_size_before_relax (fragp, seg)
 {
   abort ();
 }
-
-const relax_typeS md_relax_table[] =
-{
-  { 0 }
-};
 
 /* Convert a machine dependent frag.  We never generate these.  */
 

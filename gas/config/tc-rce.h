@@ -53,4 +53,7 @@
 
 #define md_operand(x)
 
+extern const struct relax_type md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
+
 #endif

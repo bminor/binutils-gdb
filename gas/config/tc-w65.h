@@ -46,4 +46,7 @@ int tc_cons_reloc;
 
 #define md_operand(x)
 
+extern struct relax_type md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
+
 /* end of tc-w65.h */
