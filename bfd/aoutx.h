@@ -1038,7 +1038,8 @@ NAME(aout,set_section_contents) (abfd, section, location, offset, count)
   /* regardless, once we know what we're doing, we might as well get going */
   if (section != obj_bsssec(abfd))
       {
-	bfd_seek (abfd, section->filepos + offset, SEEK_SET);
+	if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
+	  return false;
 
 	if (count) {
 	  return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
@@ -1945,7 +1946,7 @@ add_to_stringtab (abfd, str, tab)
   return entry->index;
 }
 
-static void
+static boolean
 emit_strtab (abfd, tab)
      bfd *abfd;
      struct stringtab_data *tab;
@@ -1960,11 +1961,16 @@ emit_strtab (abfd, tab)
   char buffer[BYTES_IN_WORD];
 
   PUT_WORD (abfd, tab->index, (unsigned char *) buffer);
-  bfd_write ((PTR) buffer, 1, BYTES_IN_WORD, abfd);
+  if (bfd_write ((PTR) buffer, 1, BYTES_IN_WORD, abfd) != BYTES_IN_WORD)
+    return false;
 
   for (entry = tab->output_order; entry; entry = entry->next_to_output)
     {
-      bfd_write ((PTR) entry->string, 1, strlen (entry->string) + 1, abfd);
+      size_t len = strlen (entry->string) + 1;
+
+      if (bfd_write ((PTR) entry->string, 1, len, abfd) != len)
+	return false;
+
 #ifdef GATHER_STATISTICS
       count++;
 #endif
@@ -2012,6 +2018,8 @@ emit_strtab (abfd, tab)
 	}
       g->KEEPIT = (KEEPITTYPE) count;
     } */
+
+  return true;
 }
 
 boolean
@@ -2060,9 +2068,7 @@ NAME(aout,write_syms) (abfd)
       g->KEEPIT = count;
     }
 
-  emit_strtab (abfd, &strtab);
-
-  return true;
+  return emit_strtab (abfd, &strtab);
 }
 
 
@@ -3600,9 +3606,7 @@ NAME(aout,final_link) (abfd, info, callback)
   /* Write out the string table.  */
   if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0)
     return false;
-  emit_strtab (abfd, &aout_info.strtab);
-
-  return true;
+  return emit_strtab (abfd, &aout_info.strtab);
 }
 
 /* Link an a.out input BFD into the output file.  */
