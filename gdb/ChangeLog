@@ -1,5 +1,7 @@
 2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* config/djgpp/README: Update.
+
 	* go32-nat.c (store_register): Cast &a_tss to `char *', to avoid
 	compiler warning.
 

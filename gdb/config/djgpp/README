@@ -98,16 +98,17 @@ follows:
 3. How to build
    ------------
 
-The source distribution available from DJGPP archives is already
-configured for DJGPP v2.x, so if you only want to compile it, just
-invoke Make:
+If the source distribution available from DJGPP archives is already
+configured for DJGPP v2.x (if it is, you will find files named
+`Makefile' in each subdirectory), then just invoke Make:
 
 		make
 
-To build a package downloaded from a GNU FTP site, you will need o
-configure it first.  You will also need to configure it if you want to
-change the configuration options (e.g., compile without support for the
-GDBMI interface).  To configure GDB, type this command:
+To build a package that is not yet configured, or if you downloaded
+GDB from a GNU FTP site, you will need to configure it first.  You
+will also need to configure it if you want to change the configuration
+options (e.g., compile without support for the GDBMI interface).  To
+configure GDB, type this command:
 
 		sh ./gdb/config/djgpp/djconfig.sh
 
