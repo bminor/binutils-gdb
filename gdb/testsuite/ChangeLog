@@ -1,3 +1,7 @@
+2001-03-16  Orjan Friberg  <orjanf@axis.com>
+
+	* gdb.base/signals.exp: Set count to 0 explicitly.
+
 2001-03-15  Mark Salter  <msalter@redhat.com>
 
 	* config/monitor.exp (gdb_target_cmd): Add explicit error return.
