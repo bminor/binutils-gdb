@@ -1,3 +1,9 @@
+2001-10-26  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (constraint): Loop through the whole cris_spec_regs
+	struct, not just the NUM_SPECREGS first entries.
+	(bdap_prefix): Read PC before autoincrement.
+
 2001-10-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* top.c (print_gdb_version): Do not print ``(MI_OUT)''.  MI

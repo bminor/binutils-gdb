@@ -1613,26 +1613,30 @@ constraint (unsigned int insn, const signed char *inst_args,
 
       case 'P':
         tmp = (insn >> 0xC) & 0xF;
-        for (i = 0; i < NUM_SPECREGS; i++)
-          /* Since we match four bits, we will give a value of
-             4 - 1 = 3 in a match.  If there is a corresponding
-             exact match of a special register in another pattern, it
-             will get a value of 4, which will be higher.  This should
-             be correct in that an exact pattern would match better that
-             a general pattern.
-             Note that there is a reason for not returning zero; the
-             pattern for "clear" is partly  matched in the bit-pattern
-             (the two lower bits must be zero), while the bit-pattern
-             for a move from a special register is matched in the
-             register constraint.
-             This also means we will will have a race condition if
-             there is a partly match in three bits in the bit pattern.  */
-          if (tmp == cris_spec_regs[i].number)
-            {
-              retval += 3;
-              break;
-            }
-        if (i == NUM_SPECREGS)
+
+        for (i = 0; cris_spec_regs[i].name != NULL; i++)
+          {
+            /* Since we match four bits, we will give a value of
+               4 - 1 = 3 in a match.  If there is a corresponding
+               exact match of a special register in another pattern, it
+               will get a value of 4, which will be higher.  This should
+               be correct in that an exact pattern would match better that
+               a general pattern.
+               Note that there is a reason for not returning zero; the
+               pattern for "clear" is partly  matched in the bit-pattern
+               (the two lower bits must be zero), while the bit-pattern
+               for a move from a special register is matched in the
+               register constraint.
+               This also means we will will have a race condition if
+               there is a partly match in three bits in the bit pattern.  */
+            if (tmp == cris_spec_regs[i].number)
+              {
+                retval += 3;
+                break;
+              }
+          }
+        
+        if (cris_spec_regs[i].name == NULL)
           return -1;
         break;
       }
@@ -1872,17 +1876,22 @@ bdap_prefix (unsigned short inst, inst_env_type *inst_env)
       return; 
     }
 
-  if (cris_get_mode (inst) == AUTOINC_MODE)
-    {
-      process_autoincrement (cris_get_size (inst), inst, inst_env); 
-    }
-    
+  /* The calculation of prefix_value used to be after process_autoincrement,
+     but that fails for an instruction such as jsr [$r0+12] which is encoded
+     as 5f0d 0c00 30b9 when compiled with -fpic.  Since PC is operand1 it
+     mustn't be incremented until we have read it and what it points at.  */
   inst_env->prefix_value = inst_env->reg[cris_get_operand2 (inst)];
 
   /* The offset is an indirection of the contents of the operand1 register.  */
   inst_env->prefix_value += 
-    read_memory_integer (inst_env->reg[cris_get_operand1 (inst)], cris_get_size (inst));
-  
+    read_memory_integer (inst_env->reg[cris_get_operand1 (inst)], 
+                         cris_get_size (inst));
+
+  if (cris_get_mode (inst) == AUTOINC_MODE)
+    {
+      process_autoincrement (cris_get_size (inst), inst, inst_env); 
+    }
+   
   /* A prefix doesn't change the xflag_found.  But the rest of the flags
      need updating.  */
   inst_env->slot_needed = 0;
