@@ -1,3 +1,8 @@
+Sun Dec  6 12:46:36 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (operator): And with 0xff to avoid problems with signed
+	char.
+
 start-sanitize-fr30
 1998-12-03  Nick Clifton  <nickc@cygnus.com>
 
