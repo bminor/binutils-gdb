@@ -275,7 +275,9 @@ extern struct ext_format ext_format_68881;
 
 #if !defined (EXTRACT_RETURN_VALUE)
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE))
+  bcopy ((char *)(REGBUF) +						\
+	         (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	\
+	 VALBUF, TYPE_LENGTH(TYPE))
 #endif
 
 /* Write into appropriate registers a function return value

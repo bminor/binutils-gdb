@@ -267,7 +267,9 @@ extern CORE_ADDR sparc_pc_adjust();
 	       (VALBUF), TYPE_LENGTH(TYPE));		       		   \
       }							       		   \
     else						       		   \
-      bcopy (((int *)(REGBUF))+8, (VALBUF), TYPE_LENGTH (TYPE));           \
+      bcopy ((char *)(REGBUF) + 4 * 8 +					   \
+	             (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)), \
+	     (VALBUF), TYPE_LENGTH(TYPE));				   \
   }
 
 /* Write into appropriate registers a function return value

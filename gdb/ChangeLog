@@ -1,5 +1,8 @@
 Fri Oct 25 16:06:38 1991  Stu Grossman  (grossman at cygnus.com)
 
+	* tm-sparc.h, tm-68k.h (EXTRACT_RETURN_VALUE):  fix output of
+	short return values for sparc and 68k.  Patch from Paul Eggert.
+
 	* coffread.c, coredep.c, i386-xdep.c:  install patches for
 	SysV/386 3.2 from Mauro DePalma.
 
