@@ -1,3 +1,13 @@
+Fri Sep 15 17:27:41 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Tue Sep 12 17:08:23 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.c (VMS_stab_parse): simplify first loop;
+	use S_GET_NAME/modify/S_SET_NAME sequence instead of abusing
+	S_GET_NAME when updating symbol name.
+	(local_symbols_DST): first prefix/postfix typo from July 21st.
+	[plus comment reformatting --kr]
+
 Wed Sep 13 12:33:03 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (EXPECT): New variable.
