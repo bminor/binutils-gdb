@@ -1,3 +1,9 @@
+1998-02-23 15:53  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): A pc-relative
+	relocation against a now-local symbol should not have a dynamic
+	relocation.
+
 Mon Feb 23 16:17:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_filehdr_in): Don't set BFD flag HAS_SYMS in
@@ -8,8 +14,8 @@ Mon Feb 23 16:17:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 Sun Feb 22 20:39:00 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Don't create
-	a plt entry when we can determine that we authoritatively define 
-	the symbol.
+ 	a plt entry when we can determine that we authoritatively define
+ 	the symbol.
 
 Sun Feb 22 20:33:05 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -308,8 +314,8 @@ Tue Jan 27 21:43:55 1998  Richard Henderson  <rth@cygnus.com>
 	(sparc64_elf_build_plt): New function.
 	(sparc64_elf_plt_entry_offset): Likewise.
 	(sparc64_elf_plt_ptr_offset): Likewise.
-	(sparc64_elf_adjust_dynamic_symbol): Change h->plt_offset to 
-	contain the index for convenience.  Skip the initial entries 
+	(sparc64_elf_adjust_dynamic_symbol): Change h->plt_offset to
+	contain the index for convenience.  Skip the initial entries
 	in .rela.plt.
 	(sparc64_elf_size_dynamic_sections): Zero the allocated contents
 	memory for the benefit of .rela.plt.
@@ -324,7 +330,7 @@ Tue Jan 27 21:43:55 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf.c (_bfd_elf_close_and_cleanup): New function; free the shstrtab.
 	* elf-bfd.h (_bfd_elf_close_and_cleanup): Declare it.
-	* elfxx-target.h (bfd_elfNN_close_and_cleanup): Arrange for it 
+	* elfxx-target.h (bfd_elfNN_close_and_cleanup): Arrange for it
 	to be called.
 
 Tue Jan 27 21:45:15 1998  Jeffrey A Law  (law@cygnus.com)
@@ -341,7 +347,7 @@ Tue Jan 27 15:06:04 1998  Nick Clifton  <nickc@cygnus.com>
 
 Tue Jan 27 12:47:27 1998  Robert Lipe  <robertl@dgii.com>
 
-	* config.bfd (i[3456]86-sco3.2v5*): ELF now the default. 
+	* config.bfd (i[3456]86-sco3.2v5*): ELF now the default.
 	(i[3456]86sco3.2v5*coff): New target.
 
 Mon Jan 26 15:41:30 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -460,14 +466,14 @@ Tue Dec 16 08:09:56 1997  Gavin Koch  <gavin@cygnus.com>
 	* elf.c (_bfd_elf_find_nearest_line): Call
 	_bfd_dwarf2_find_nearest_line first.
 	* elf32-mips.c (_bfd_mips_elf_find_nearest_line): Same.
-	* dwarf2.c: New file; implement _bfd_dwarf2_find_nearest_line.	
+	* dwarf2.c: New file; implement _bfd_dwarf2_find_nearest_line.
 
 Mon Dec 15 16:08:52 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-m32rx
 	* elf32-m32r.c (m32r_elf_merge_private_bfd_data): Allow M32R
 	object files to be merged into a M32RX executable.
-	
+
 	* archures.c: Add bfd_mach_m32rx.
 end-sanitize-m32rx
 	* archures.c: Add bfd_mach_m32r.
@@ -491,24 +497,24 @@ Mon Dec 15 15:01:15 1997  Nick Clifton  <nickc@cygnus.com>
 	(m32r_elf_print_private_bfd_data):  New Function.
 	(elf_backend_object_p): Point to m32r_object_p.
 	(elf_backend_final_write_processing): Point to
-	m32r_elf_final_write_processing. 
+	m32r_elf_final_write_processing.
 	(bfd_elf32_bfd_copy_private_bfd_data): Point to
-	m32r_elf_copy_private_bfd_data. 
+	m32r_elf_copy_private_bfd_data.
 	(bfd_elf32_bfd_merge_private_bfd_data): Point to
-	m32r_elf_merge_private_bfd_data. 
+	m32r_elf_merge_private_bfd_data.
 	(bfd_elf32_bfd_set_private_flags): Point to
-	m32r_elf_set_private_bfd_data. 
+	m32r_elf_set_private_bfd_data.
 	(bfd_elf32_bfd_print_private_bfd_data): Point to
-	m32r_elf_print_private_bfd_data. 
+	m32r_elf_print_private_bfd_data.
 
 start-sanitize-m32rx
 	* cpu-m32r.c: Add m32rx cpu architecture.
 	* bfd-in2.h (bfd_mach_m32rx): Add identifier for M32RX
-	architecture machines. 
+	architecture machines.
 end-sanitize-m32rx
 
 	* bfd-in2.h (bfd_mach_m32r): Add identifier for M32R architecture
-	machines. 
+	machines.
 
 Fri Dec 12 11:30:28 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
 
@@ -593,7 +599,7 @@ Tue Dec  9 11:37:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri Dec  5 11:13:46 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_reloc, v850_elf_store_addend_in_insn,
-	v850_elf_relocate_section): Fix PR2 14180 and 14181 
+	v850_elf_relocate_section): Fix PR2 14180 and 14181
 	(v850_elf_section_from_bfd_section, v850_elf_symbol_processing,
 	v850_elf_add_symbol_hook, v850_elf_link_output_symbol_hook,
 	v850_elf_section_from_shdr, v850_elf_fake_sections): New functions
@@ -620,7 +626,7 @@ Wed Nov 26 14:13:34 1997  Nick Clifton  <nickc@cygnus.com>
 	gcc/config/arm/semi.h
 
 	* coffcode.h (coff_slurp_symbol_table): Add ARM and Thumb symbol
-	classes. 
+	classes.
 
 Sun Nov 23 16:02:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -733,7 +739,7 @@ Thu Oct 23 00:53:14 1997  Richard Henderson  <rth@dot.cygnus.com>
 Thu Oct 23 00:25:29 1997  Richard Henderson  <rth@dot.cygnus.com>
 
 	* config.bfd (sparc64-*-linux*): New target.
-	
+
 	* elf-bfd.h (struct elf_backend_data): Add plt_alignment member.
 	* elflink.c (_bfd_elf_create_got_section): Set .got alignment based
 	on arch_size.
@@ -743,7 +749,7 @@ Thu Oct 23 00:25:29 1997  Richard Henderson  <rth@dot.cygnus.com>
 	alignment to LOG_FILE_ALIGN.
 	* elfxx-target.h (elf_backend_plt_alignment): Provide default.
 	(elfXX_bed): Init plt_alignment.
-	
+
 	* elf64-sparc.c (sparc64_elf_check_relocs,
 	sparc64_elf_adjust_dynamic_symbol, sparc64_elf_size_dynamic_sections,
 	sparc64_elf_adjust_dynindx, sparc64_elf_finish_dynamic_symbol,
@@ -751,12 +757,12 @@ Thu Oct 23 00:25:29 1997  Richard Henderson  <rth@dot.cygnus.com>
 	(sparc64_elf_howto_table): Fix a few name strings.
 	(ELF_DYNAMIC_INTERPRETER): New definition.
 	(sparc64_elf_relocate_section): Handle shared libraries.
-	
+
 	* elf64-sparc.c (struct plt_template, plt_*_header, plt_*_entry,
 	sparc64_elf_build_plt_entry, sparc64_elf_finish_dynamic_symbol):
-	PLT definitions sparc64-linux originally choose.  These will go 
+	PLT definitions sparc64-linux originally choose.  These will go
 	away soon in favour of the official abi definitions.
-	
+
 Wed Oct 22 16:08:45 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (coff_small_object_p): New static function.
@@ -875,7 +881,7 @@ Fri Oct 10 16:01:30 1997  Nick Clifton  <nickc@cygnus.com>
 	* elf32-v850.c (v850_elf_reloc, v850_elf_final_link_relocate):
 	Correct value for maximum positive 22 bit PC relative relocation.
 	(v850_elf_final_link_relocate):  Prevent overflow from HI16_S and
-	HI_16 relocations.  Correct bit adjustment in TDA offsets. 
+	HI_16 relocations.  Correct bit adjustment in TDA offsets.
 
 Thu Oct  9 16:43:39 1997  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -914,7 +920,7 @@ Fri Oct  3 14:02:17 1997  Richard Henderson  <rth@cygnus.com>
 	* config.bfd: Change alpha-*-* to alpha*-*-*; config.guess now
 	recognizes alphaev5 etc.
 	* configure.host: Likewise.
-	
+
 Fri Oct  3 11:23:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Make ld -s work on AIX:
@@ -1028,7 +1034,7 @@ start-sanitize-v850e
 	Add support for the CALLT relocs.
 
 	* reloc.c (COMMENT): Add BFD_RELOC_V850_CALLT_6_7_OFFSET and
-	BFD_RELOC_V850_CALLT_16_16_OFFSET. 
+	BFD_RELOC_V850_CALLT_16_16_OFFSET.
 end-sanitize-v850e
 
 	* elf32-v850.c (v850_elf_final_link_relocate): Add checks to catch
@@ -1109,7 +1115,7 @@ Thu Sep  4 09:44:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 Wed Sep  3 11:23:23 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* libbfd.h, bfd-in2.h, elf32-v850.c: Removed
-	BFD_RELOC_V850_16_PCREL. 
+	BFD_RELOC_V850_16_PCREL.
 
 Tue Sep  2 20:44:10 1997  Fred Fish  <fnf@cygnus.com>
 
@@ -1149,11 +1155,11 @@ Tue Sep  2 18:29:37 1997  Jeffrey A Law  (law@cygnus.com)
 Tue Sep  2 15:45:45 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-v850.c: Use a macro to construct bfd_arch_info_type
-	entries. 
+	entries.
 
 	* reloc.c, libbfd.h, bfd-in2.h, elf32-v850.c: Replace
 	BFD_RELOC_V850_{SDA/TDA/ZDA}_OFFSET relocs with new bit pattern
-	specific versions: BFD_RELOC_V850_{area}_{bits}_OFFSET. 
+	specific versions: BFD_RELOC_V850_{area}_{bits}_OFFSET.
 
 Thu Aug 28 17:01:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1161,7 +1167,7 @@ Thu Aug 28 17:01:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	(scan): Use strcasecmp.
 
 	* archures.c (bfd_mach_v850): Define.
-	
+
 	* cpu-sh.c (scan_mach): Compare with table instead of hardwired to
  	just sh/SH, use strcasecmp.
 	(arch_info_struct): Add entries for sh3 et.al.
@@ -1199,28 +1205,28 @@ Mon Aug 25 15:35:46 1997  Nick Clifton  <nickc@cygnus.com>
 	(bfd_v850_arch): Add link into arch_info_structure.
 
 	* config.bfd (targ_cpu): All v850 variants use the bfd_arch_v850
-	architecture. 
+	architecture.
 
 	* elf32-v850.c (v850_elf_object_p): New function.
 
 start-sanitize-v850e
 	* archures.c (bfd_mach_v850e): Machine value for v850e.
-	
+
 	* bfd-in2.h (bfd_mach_v850e): Machine value for v850e.
-	
-	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850e machine	
+
+	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850e machine
 	number.
-	
-	* elf.c (prep_headers): Add support for v850e machine number. 
+
+	* elf.c (prep_headers): Add support for v850e machine number.
 
 	* archures.c (bfd_mach_v850ea): Machine value for v850ea.
-	
+
 	* bfd-in2.h (bfd_mach_v850ea): Machine value for v850ea.
-	
+
 	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850ea machine
 	number.
-	
-	* elf.c (prep_headers): Add support for v850ea machine number. 
+
+	* elf.c (prep_headers): Add support for v850ea machine number.
 end-sanitize-v850e
 
 Mon Aug 25 14:07:33 1997  Ian Lance Taylor  <ian@cygnus.com>
@@ -1274,11 +1280,11 @@ Mon Aug 18 11:36:19 1997  Nick Clifton  <nickc@cygnus.com>
 	* elf32-v850.c (v850_elf_howto_table, v850_elf_reloc_map,
 	v850_elf_check_relocs, v850_elf_reloc,
 	v850_elf_final_link_relocate):  Add support for
-	BFD_RELOC_V850_16_PCREL relocation. 
-	
+	BFD_RELOC_V850_16_PCREL relocation.
+
 	* reloc.c (COMMENT): Add suuport for BFD_RELOC_V850_16_PCREL
 	relocation.
-	
+
 	* libbfd.h: Add support for BFD_RELOC_V850_16_PCREL relocation.
 
 	* bfd-in2.h: Add support for BFD_RELOC_V850_16_PCREL relocation.
@@ -1287,11 +1293,11 @@ start-sanitize-v850e
 Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-v850e: New file.
-	
+
 	* elf.c (prep_headers): Add support for v850e target.
-	
-	* bfd-in2.h (bfd_architecture): Add support for v850e target. 
-	
+
+	* bfd-in2.h (bfd_architecture): Add support for v850e target.
+
 	* config.bfd: Add support for v850e target.
 
 	* archures.c: Add support for v850e target.
@@ -1299,11 +1305,11 @@ Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
 Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-v850ea: New file.
-	
+
 	* elf.c (prep_headers): Add support for v850ea target.
-	
-	* bfd-in2.h (bfd_architecture): Add support for v850ea target. 
-	
+
+	* bfd-in2.h (bfd_architecture): Add support for v850ea target.
+
 	* config.bfd: Add support for v850ea target.
 
 	* archures.c: Add support for v850ea target.
@@ -1418,7 +1424,7 @@ Thu Jul 31 12:09:20 1997  Geoff Keating  <geoffk@ozemail.com.au>
 	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Likewise.
 
 	* elf32-ppc.c (ppc_elf_howto_raw): Correct various comments.
-	(ppc_elf_create_linker_section): These sections are not 
+	(ppc_elf_create_linker_section): These sections are not
 	created by the linker (that is, they are created by the user
 	putting data in them). In particular, they can be the source
 	and target of relocations.
