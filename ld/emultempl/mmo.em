@@ -159,18 +159,13 @@ mmo_place_orphan (file, s)
 	/* Put orphans after the first section on the list.  */
 	place->section = &bfd_section->next;
 
-      /*  Unlink the section.  */
+      /* Unlink the section.  */
       for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
 	;
-      *pps = snew->next;
-      if (snew->next == NULL)
-	snew->owner->section_tail = pps;
+      bfd_section_list_remove (output_bfd, pps);
 
       /* Now tack it on to the "place->os" section list.  */
-      snew->next = *place->section;
-      *place->section = snew;
-      if (snew->next == NULL)
-	snew->owner->section_tail = &snew->next;
+      bfd_section_list_insert (output_bfd, place->section, snew);
     }
   place->section = &snew->next;	/* Save the end of this list.  */
 

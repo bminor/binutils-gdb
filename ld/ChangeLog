@@ -1,3 +1,10 @@
+2002-01-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Make use
+	of bfd_section_list_remove and bfd_section_list_insert macros.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+
 2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.tgt (x86_64-*-netbsd*): New target.
