@@ -1,6 +1,6 @@
 Fri May 21 09:04:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* complaint.c: Make sure all complain() pass the address of the struct.
+	* stabsread.c: Make sure all complain() pass the address of the struct.
 
 	* xcoffread.c: Make sure all struct complaints are static not auto.
 
