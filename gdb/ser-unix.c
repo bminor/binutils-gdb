@@ -83,6 +83,10 @@ static int hardwire_flush_input PARAMS ((serial_t));
 static int hardwire_send_break PARAMS ((serial_t));
 static int hardwire_setstopbits PARAMS ((serial_t, int));
 
+#ifdef __CYGWIN32__
+extern void ui_loop_hook PARAMS ((int));
+#endif
+
 /* Open up a real live device for serial I/O */
 
 static int
@@ -430,7 +434,9 @@ wait_for(scb, timeout)
      serial_t scb;
      int timeout;
 {
+#ifndef __CYGWIN32__
   scb->timeout_remaining = 0;
+#endif
 
 #ifdef HAVE_SGTTY
   {
@@ -539,21 +545,34 @@ wait_for(scb, timeout)
    to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
    char if successful.  Returns SERIAL_TIMEOUT if timeout expired, EOF if line
    dropped dead, or SERIAL_ERROR for any other error (see errno in that case).  */
-
 static int
 hardwire_readchar(scb, timeout)
      serial_t scb;
      int timeout;
 {
-  int status;
+  int status, t;
 
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
+#ifdef __CYGWIN32__
+  if (timeout > 0)
+    timeout++;
+#endif
+
   while (1)
     {
-      status = wait_for (scb, timeout);
+#ifdef __CYGWIN32__
+      t = timeout == 0 ? 0 : 1;
+      scb->timeout_remaining = timeout < 0 ? timeout : timeout - t;
+      status = wait_for (scb, t);
 
+      /* -2 means disable timer */
+      if (ui_loop_hook)
+        ui_loop_hook (-2);
+#else
+      status = wait_for (scb, timeout);
+#endif
       if (status < 0)
 	return status;
 
@@ -570,6 +589,10 @@ hardwire_readchar(scb, timeout)
 		  timeout = scb->timeout_remaining;
 		  continue;
 		}
+#ifdef __CYGWIN32__
+          else if (scb->timeout_remaining < 0)
+            continue;
+#endif
 	      else
 		return SERIAL_TIMEOUT;
 	    }

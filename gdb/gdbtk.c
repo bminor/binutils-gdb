@@ -91,6 +91,10 @@ int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
 
+#ifdef __CYGWIN32__
+extern void (*ui_loop_hook) PARAMS ((int));
+#endif
+
 char * get_prompt PARAMS ((void));
 
 static void null_routine PARAMS ((int));
@@ -1895,6 +1899,12 @@ x_event (signo)
 
   in_x_event = 1;
 
+#ifdef __CYGWIN32__
+  if (signo == -2)
+    if (gdbtk_timer_going)
+      gdbtk_stop_timer ();
+#endif
+
   /* Process pending events */
   while (Tcl_DoOneEvent (TCL_DONT_WAIT|TCL_ALL_EVENTS) != 0)
     ;
@@ -2305,6 +2315,9 @@ gdbtk_init ( argv0 )
   readline_hook = gdbtk_readline;
   readline_end_hook = gdbtk_readline_end;
   ui_load_progress_hook = gdbtk_load_hash;
+#ifdef __CYGWIN32__
+  ui_loop_hook = x_event;
+#endif
   pre_add_symbol_hook   = gdbtk_pre_add_symbol;
   post_add_symbol_hook  = gdbtk_post_add_symbol;
   create_tracepoint_hook = gdbtk_create_tracepoint;

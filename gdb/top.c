@@ -379,6 +379,9 @@ static void stop_sig PARAMS ((int));
    command file.  */
 
 void (*init_ui_hook) PARAMS ((char *argv0));
+#ifdef __CYGWIN32__
+void (*ui_loop_hook) PARAMS ((int));
+#endif
 
 /* Called instead of command_loop at top level.  Can be invoked via
    return_to_top_level.  */

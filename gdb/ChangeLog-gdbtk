@@ -1,3 +1,17 @@
+Sun May 24 14:00:24 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* ser-unix.c (wait_for): Do not reset timeout_remaining for cygwin32 so that
+	we can use this member to track real timeouts.
+	(hardwire_readchar): Modify for cygwin32 so that we only ever use a real
+	system timeout of one second. Track the "real" timeout as a series of these
+	one second timeouts.
+	Call ui_loop_hook to keep the gui alive.
+
+	* top.c: Define new hook for cygwin32, "ui_loop_hook".
+
+	* gdbtk.c (gdbtk_init): Add ui_loop_hook for CygWin32 to work around
+	update problems.
+
 Thu May 21 13:56:24 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
        
 	* gdbtk.c: reinserted the changes that were accidentally deleted:
