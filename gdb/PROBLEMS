@@ -3,4 +3,19 @@
 
 		See also: http://www.gnu.org/software/gdb/bugs/
 
+gdb/1091: Constructor breakpoints ignored
+gdb/1193: g++ 3.3 creates multiple constructors: gdb 5.3 can't set breakpoints
 
+When gcc 3.x compiles a C++ constructor or C++ destructor, it generates
+2 or 3 different versions of the object code.  These versions have
+unique mangled names (they have to, in order for linking to work), but
+they have identical source code names, which leads to a great deal of
+confusion.  Specifically, if you set a breakpoint in a constructor or a
+destructor, gdb will put a breakpoint in one of the versions, but your
+program may execute the other version.  This makes it impossible to set
+breakpoints reliably in constructors or destructors.
+
+gcc 3.x generates these multiple object code functions in order to
+implement virtual base classes.  gcc 2.x generated just one object code
+function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
+ABI for C++ which requires multiple object code functions.
