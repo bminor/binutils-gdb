@@ -1710,7 +1710,7 @@ parse_insn (ins *insn, char *operands)
       return;
     }
 
-  /* Handle load/stor post-increment instructions.  */
+  /* Handle load/stor unique instructions before parsing.  */
   if (IS_INSN_TYPE (LD_STOR_INS))
     handle_LoadStor (operands);
 
@@ -2111,6 +2111,22 @@ assemble_insn (char *mnemonic, ins *insn)
   else
     /* Full match - print the final image.  */
     {
+      /* Error checking for Co-Processor instructions : 
+	 The internal coprocessor 0 can only accept the 
+	 "mtcr" and "mfcr" instructions.  */
+      if (IS_INSN_TYPE (COP_REG_INS) || IS_INSN_TYPE (COPS_REG_INS)
+	  || IS_INSN_TYPE (COP_BRANCH_INS))
+	{
+	  /* The coprocessor id is always the first argument.  */
+	  if ((instruction->operands[0].op_type == i4)
+	      && (insn->arg[0].constant == 0)
+	      && (! IS_INSN_MNEMONIC ("mtcr")
+		  && ! IS_INSN_MNEMONIC ("mfcr")))
+	    {
+	      as_bad (_("Internal Coprocessor 0 doesn't support instruction `%s'"), 
+			mnemonic);
+	    }
+	}
       /* Handle positive constants.  */
       if (!signflag)
         {
