@@ -998,11 +998,22 @@ lookup_symbol (const char *name, const struct block *block,
 
   modified_name = name;
 
-  /* If we are using C++ language, demangle the name before doing a lookup, so
+  /* If we are using C++ or Java, demangle the name before doing a lookup, so
      we can always binary search. */
   if (current_language->la_language == language_cplus)
     {
       demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name)
+	{
+	  mangled_name = name;
+	  modified_name = demangled_name;
+	  needtofreename = 1;
+	}
+    }
+  else if (current_language->la_language == language_java)
+    {
+      demangled_name = cplus_demangle (name, 
+		      		       DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
       if (demangled_name)
 	{
 	  mangled_name = name;

@@ -791,7 +791,8 @@ static void read_type_die (struct die_info *, struct dwarf2_cu *);
 
 static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
-static char *typename_concat (const char *prefix, const char *suffix);
+static char *typename_concat (struct obstack *, const char *prefix, const char *suffix,
+			      struct dwarf2_cu *);
 
 static void read_typedef (struct die_info *, struct dwarf2_cu *);
 
@@ -1511,7 +1512,8 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 /* Functions used to compute the fully scoped name of a partial DIE.
 
    Normally, this is simple.  For C++, the parent DIE's fully scoped
-   name is concatenated with "::" and the partial DIE's name.
+   name is concatenated with "::" and the partial DIE's name.  For
+   Java, the same thing occurs except that "." is used instead of "::".
    Enumerators are an exception; they use the scope of their parent
    enumeration type, i.e. the name of the enumeration type is not
    prepended to the enumerator.
@@ -1566,8 +1568,8 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       if (grandparent_scope == NULL)
 	parent->scope = parent->name;
       else
-	parent->scope = obconcat (&cu->comp_unit_obstack, grandparent_scope,
-				  "::", parent->name);
+	parent->scope = typename_concat (&cu->comp_unit_obstack, grandparent_scope,
+					 parent->name, cu);
     }
   else if (parent->tag == DW_TAG_enumeration_type)
     /* Enumerators should not get the name of the enumeration as a prefix.  */
@@ -1599,7 +1601,7 @@ partial_die_full_name (struct partial_die_info *pdi,
   if (parent_scope == NULL)
     return NULL;
   else
-    return concat (parent_scope, "::", pdi->name, NULL);
+    return typename_concat (NULL, parent_scope, pdi->name, cu);
 }
 
 static void
@@ -1717,14 +1719,16 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	return;
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   STRUCT_DOMAIN, LOC_TYPEDEF,
-			   cu->language == language_cplus
+			   (cu->language == language_cplus
+			    || cu->language == language_java)
 			   ? &objfile->global_psymbols
 			   : &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
 
-      if (cu->language == language_cplus)
+      if (cu->language == language_cplus
+          || cu->language == language_java)
 	{
-	  /* For C++, these implicitly act as typedefs as well. */
+	  /* For C++ and Java, these implicitly act as typedefs as well. */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       VAR_DOMAIN, LOC_TYPEDEF,
 			       &objfile->global_psymbols,
@@ -1734,7 +1738,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     case DW_TAG_enumerator:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_DOMAIN, LOC_CONST,
-			   cu->language == language_cplus
+			   (cu->language == language_cplus
+			    || cu->language == language_java)
 			   ? &objfile->global_psymbols
 			   : &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
@@ -1814,7 +1819,8 @@ static void
 guess_structure_name (struct partial_die_info *struct_pdi,
 		      struct dwarf2_cu *cu)
 {
-  if (cu->language == language_cplus
+  if ((cu->language == language_cplus
+       || cu->language == language_java)
       && cu->has_namespace_info == 0
       && struct_pdi->has_children)
     {
@@ -2474,7 +2480,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (name == NULL || !dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu))
     return;
 
-  if (cu->language == language_cplus)
+  if (cu->language == language_cplus
+      || cu->language == language_java)
     {
       struct die_info *spec_die = die_specification (die, cu);
 
@@ -3272,10 +3279,13 @@ static int
 is_vtable_name (const char *name, struct dwarf2_cu *cu)
 {
   static const char vptr[] = "_vptr";
+  static const char vtable[] = "vtable";
 
-  /* C++ and some implementations of Java use this name.  */
-  if (strncmp (name, vptr, sizeof (vptr) - 1) == 0
-      && is_cplus_marker (name[sizeof (vptr) - 1]))
+  /* Look for the C++ and Java forms of the vtable.  */
+  if ((cu->language == language_java
+       && strncmp (name, vtable, sizeof (vtable) - 1) == 0)
+       || (strncmp (name, vptr, sizeof (vptr) - 1) == 0
+       && is_cplus_marker (name[sizeof (vptr) - 1])))
     return 1;
 
   return 0;
@@ -3316,7 +3326,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))
     {
-      if (cu->language == language_cplus)
+      if (cu->language == language_cplus
+	  || cu->language == language_java)
 	{
 	  char *new_prefix = determine_class_name (die, cu);
 	  TYPE_TAG_NAME (type) = obsavestring (new_prefix,
@@ -3518,11 +3529,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 
       if (processing_has_namespace_info)
 	{
-	  TYPE_TAG_NAME (type) = obconcat (&objfile->objfile_obstack,
-					   processing_current_prefix,
-					   processing_current_prefix[0] == '\0'
-					   ? "" : "::",
-					   name);
+	  TYPE_TAG_NAME (type) = typename_concat (&objfile->objfile_obstack,
+						  processing_current_prefix,
+						  name, cu);
 	}
       else
 	{
@@ -3546,7 +3555,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 /* Determine the name of the type represented by DIE, which should be
-   a named C++ compound type.  Return the name in question; the caller
+   a named C++ or Java compound type.  Return the name in question; the caller
    is responsible for xfree()'ing it.  */
 
 static char *
@@ -3593,8 +3602,9 @@ determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
   if (new_prefix == NULL)
     {
       const char *name = dwarf2_name (die, cu);
-      new_prefix = typename_concat (processing_current_prefix,
-				    name ? name : "<<anonymous>>");
+      new_prefix = typename_concat (NULL, processing_current_prefix,
+				    name ? name : "<<anonymous>>", 
+				    cu);
     }
 
   if (back_to != NULL)
@@ -3861,6 +3871,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
   const char *name;
   int is_anonymous;
   struct die_info *current_die;
+  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
 
   name = namespace_name (die, &is_anonymous, cu);
 
@@ -3872,14 +3883,8 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
     }
   else
     {
-      /* We need temp_name around because processing_current_prefix
-	 is a const char *.  */
-      char *temp_name = alloca (strlen (previous_prefix)
-				+ 2 + strlen(name) + 1);
-      strcpy (temp_name, previous_prefix);
-      strcat (temp_name, "::");
-      strcat (temp_name, name);
-
+      char *temp_name = typename_concat (NULL, previous_prefix, name, cu);
+      make_cleanup (xfree, temp_name);
       processing_current_prefix = temp_name;
     }
 
@@ -3919,6 +3924,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   processing_current_prefix = previous_prefix;
+  do_cleanups (back_to);
 }
 
 /* Return the name of the namespace represented by DIE.  Set
@@ -4166,10 +4172,11 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   type = die_type (die, cu);
   ftype = lookup_function_type (type);
 
-  /* All functions in C++ have prototypes.  */
+  /* All functions in C++ and Java have prototypes.  */
   attr = dwarf2_attr (die, DW_AT_prototyped, cu);
   if ((attr && (DW_UNSND (attr) != 0))
-      || cu->language == language_cplus)
+      || cu->language == language_cplus
+      || cu->language == language_java)
     TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
 
   if (die->child != NULL)
@@ -4820,7 +4827,8 @@ load_partial_dies (bfd *abfd, char *info_ptr, int building_psymtab,
 	  else if (building_psymtab)
 	    add_psymbol_to_list (part_die->name, strlen (part_die->name),
 				 VAR_DOMAIN, LOC_CONST,
-				 cu->language == language_cplus
+				 (cu->language == language_cplus
+				  || cu->language == language_java)
 				 ? &cu->objfile->global_psymbols
 				 : &cu->objfile->static_psymbols,
 				 0, (CORE_ADDR) 0, cu->language, cu->objfile);
@@ -6431,7 +6439,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     read_structure_type, and the correct name is saved in
 	     the type.  */
 
-	  if (cu->language == language_cplus)
+	  if (cu->language == language_cplus
+	      || cu->language == language_java)
 	    {
 	      struct type *type = SYMBOL_TYPE (sym);
 	      
@@ -6448,7 +6457,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    }
 
 	  {
-	    /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
+	    /* NOTE: carlton/2003-11-10: C++ and Java class symbols shouldn't
 	       really ever be static objects: otherwise, if you try
 	       to, say, break of a class's method and you're in a file
 	       which doesn't mention that class, it won't work unless
@@ -6459,15 +6468,18 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    struct pending **list_to_add;
 
 	    list_to_add = (cu->list_in_scope == &file_symbols
-			   && cu->language == language_cplus
+			   && (cu->language == language_cplus
+			       || cu->language == language_java)
 			   ? &global_symbols : cu->list_in_scope);
 	  
 	    add_symbol_to_list (sym, list_to_add);
 
 	    /* The semantics of C++ state that "struct foo { ... }" also
-	       defines a typedef for "foo". Synthesize a typedef symbol so
-	       that "ptype foo" works as expected.  */
-	    if (cu->language == language_cplus)
+	       defines a typedef for "foo".  A Java class declaration also
+	       defines a typedef for the class.  Synthesize a typedef symbol
+	       so that "ptype foo" works as expected.  */
+	    if (cu->language == language_cplus
+		|| cu->language == language_java)
 	      {
 		struct symbol *typedef_sym = (struct symbol *)
 		  obstack_alloc (&objfile->objfile_obstack,
@@ -6487,10 +6499,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->objfile_obstack,
-						    processing_current_prefix,
-						    "::",
-						    name);
+	      SYMBOL_LINKAGE_NAME (sym) = typename_concat (&objfile->objfile_obstack,
+							   processing_current_prefix,
+							   name, cu);
 	    }
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -6506,10 +6517,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      SYMBOL_LINKAGE_NAME (sym) = obconcat (&objfile->objfile_obstack,
-						    processing_current_prefix,
-						    "::",
-						    name);
+	      SYMBOL_LINKAGE_NAME (sym) = typename_concat (&objfile->objfile_obstack,
+							   processing_current_prefix,
+							   name, cu);
 	    }
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
@@ -6523,7 +6533,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    struct pending **list_to_add;
 
 	    list_to_add = (cu->list_in_scope == &file_symbols
-			   && cu->language == language_cplus
+			   && (cu->language == language_cplus
+			       || cu->language == language_java)
 			   ? &global_symbols : cu->list_in_scope);
 	  
 	    add_symbol_to_list (sym, list_to_add);
@@ -6832,7 +6843,8 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct die_info *parent;
 
-  if (cu->language != language_cplus)
+  if (cu->language != language_cplus
+      && cu->language != language_java)
     return NULL;
 
   parent = die->parent;
@@ -6856,9 +6868,10 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      int dummy;
 	      char *parent_prefix = determine_prefix (parent, cu);
-	      char *retval = typename_concat (parent_prefix,
+	      char *retval = typename_concat (NULL, parent_prefix,
 					      namespace_name (parent, &dummy,
-							      cu));
+							      cu),
+					      cu);
 	      xfree (parent_prefix);
 	      return retval;
 	    }
@@ -6891,24 +6904,46 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Return a newly-allocated string formed by concatenating PREFIX,
-   "::", and SUFFIX, except that if PREFIX is NULL or the empty
-   string, just return a copy of SUFFIX.  */
+/* Return a newly-allocated string formed by concatenating PREFIX and
+   SUFFIX with appropriate separator.  If PREFIX or SUFFIX is NULL or empty, then
+   simply copy the SUFFIX or PREFIX, respectively.  If OBS is non-null,
+   perform an obconcat, otherwise allocate storage for the result.  The CU argument
+   is used to determine the language and hence, the appropriate separator.  */
+
+#define MAX_SEP_LEN 2  /* sizeof ("::")  */
 
 static char *
-typename_concat (const char *prefix, const char *suffix)
+typename_concat (struct obstack *obs, const char *prefix, const char *suffix, 
+		 struct dwarf2_cu *cu)
 {
-  if (prefix == NULL || prefix[0] == '\0')
-    return xstrdup (suffix);
+  char *sep;
+
+  if (suffix == NULL || suffix[0] == '\0' || prefix == NULL || prefix[0] == '\0')
+    sep = "";
+  else if (cu->language == language_java)
+    sep = ".";
+  else
+    sep = "::";
+
+  if (obs == NULL)
+    {
+      char *retval = xmalloc (strlen (prefix) + MAX_SEP_LEN + strlen (suffix) + 1);
+      retval[0] = '\0';
+      
+      if (prefix)
+	{
+	  strcpy (retval, prefix);
+	  strcat (retval, sep);
+	}
+      if (suffix)
+	strcat (retval, suffix);
+      
+      return retval;
+    }
   else
     {
-      char *retval = xmalloc (strlen (prefix) + 2 + strlen (suffix) + 1);
-
-      strcpy (retval, prefix);
-      strcat (retval, "::");
-      strcat (retval, suffix);
-
-      return retval;
+      /* We have an obstack.  */
+      return obconcat (obs, prefix, sep, suffix);
     }
 }
 

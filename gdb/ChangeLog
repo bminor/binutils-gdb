@@ -1,3 +1,29 @@
+2004-09-20  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* dwarf2read.c (typename_concat): Change prototype to accept obstack
+	and dwarf2_cu struct pointer as arguments.  Change function to use
+	obstack if provided and use dwarf2_cu to determine language-specific
+	separator.
+	(partial_die_parent_scope): Change comment to include java.  Use
+	new version of typename_concat instead of obconcat.
+	(partial_die_full_name): Use typename_concat.
+	(read_namespace): Ditto.
+	(read_enumeration_type): Use typename_concat instead of obconcat.
+	(new_symbol): Ditto.
+	(add_partial_symbol): Enhance tests for C++ to also test for Java.
+	(guess_structure_name): Ditto.
+	(read_subroutine_type): Ditto.
+	(read_structure_type): Ditto.
+	(is_vtable_name): Add Java support.
+	(determine_class_name): Switch to new typename_concat call.
+	(determine_prefix): Switch to new typename_concat call.
+	* jv-exp.y (FuncStart): New pattern.
+	(MethodInvocation): Add support for simple function calls.  Change
+	warning message for other forms of inferior call currently not
+	supported.
+	* valarith.c (value_subscript): Treat an array with upper-bound
+	of -1 as unknown size.
+
 2004-09-20  Daniel Jacobowitz  <dan@debian.org>
 
 	* symtab.c (lookup_partial_symtab): Use psymtab_to_fullname.
