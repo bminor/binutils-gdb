@@ -1680,7 +1680,7 @@ dwarf2loc.o: dwarf2loc.c $(defs_h) $(ui_out_h) $(value_h) $(frame_h) \
 dwarf2-frame.o: $(defs_h) $(dwarf2expr_h) $(elf_dwarf2_h) $(frame_h) \
 	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
 	$(symtab_h) $(objfiles_h) $(regcache_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(dwarf2_frame_h)
+	$(gdb_string_h) $(dwarf2_frame_h) $(complaints_h)
 dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(objfiles_h) $(elf_dwarf2_h) $(buildsym_h) \
 	$(demangle_h) $(expression_h) $(filenames_h) $(macrotab_h) \

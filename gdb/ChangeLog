@@ -1,3 +1,11 @@
+2003-07-11  Richard Henderson  <rth@redhat.com>
+
+        * Makefile.in (dwarf2-frame.o): Add complaints_h.
+        * dwarf2-frame.c: Include complaints.h.
+        (decode_frame_entry_1): Rename from decode_frame_entry; tidy
+        variable initialization; return NULL on error.
+        (decode_frame_entry): New.
+
 2003-07-11  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (get_frame_address_in_block): Declare.
