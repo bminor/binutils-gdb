@@ -81,7 +81,7 @@ target_tools="target-examples target-groff"
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs emacs emacs19 fileutils find grep gzip hello
+native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello
 	     indent ispell m4 rcs recode sed shellutils tar textutils gash
 	     uudecode wdiff gprof target-groff guile perl apache inet time
 	     bash"
