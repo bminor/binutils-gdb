@@ -1677,27 +1677,27 @@ text section.  (Seems dubious.)
 
 @item REGISTER_CONVERTIBLE (@var{reg})
 Return non-zero if @var{reg} uses different raw and virtual formats.
-@xref{Using Different Target and Host Data Representations}.
+@xref{Using Different Register and Memory Data Representations}.
 
 @item REGISTER_RAW_SIZE (@var{reg})
 Return the raw size of @var{reg}.
-@xref{Using Different Target and Host Data Representations}.
+@xref{Using Different Register and Memory Data Representations}.
 
 @item REGISTER_VIRTUAL_SIZE (@var{reg})
 Return the virtual size of @var{reg}.
-@xref{Using Different Target and Host Data Representations}.
+@xref{Using Different Register and Memory Data Representations}.
 
 @item REGISTER_VIRTUAL_TYPE (@var{reg})
 Return the virtual type of @var{reg}.
-@xref{Using Different Target and Host Data Representations}.
+@xref{Using Different Register and Memory Data Representations}.
 
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
 Convert the value of register @var{reg} from its raw form to its virtual
-form.  @xref{Using Different Target and Host Data Representations}.
+form.  @xref{Using Different Register and Memory Data Representations}.
 
 @item REGISTER_CONVERT_TO_RAW(@var{type}, @var{reg}, @var{from}, @var{to})
 Convert the value of register @var{reg} from its virtual form to its raw
-form.  @xref{Using Different Target and Host Data Representations}.
+form.  @xref{Using Different Register and Memory Data Representations}.
 
 @item SOFTWARE_SINGLE_STEP_P
 Define this as 1 if the target does not have a hardware single-step
