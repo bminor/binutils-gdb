@@ -1,5 +1,10 @@
 2002-10-11  Adam Fedor  <fedor@gnu.org>
 
+	* expression.h: New ops OP_NSSTRING, OP_SELECTOR, OP_MSGCALL, and
+	OP_SELF.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
 	* language.h (CAST_IS_CONVERSION): Add language_objc.
 
 2002-10-11  Adam Fedor  <fedor@gnu.org>
