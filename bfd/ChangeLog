@@ -1,3 +1,8 @@
+2001-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_canonicalize_reloc): Remove spurious blank
+	line.
+
 2001-01-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in ([bfd_elf64_x86_64_vec]): Set target64.
