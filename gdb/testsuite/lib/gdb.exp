@@ -64,6 +64,9 @@ if ![info exists env(EXEEXT)] {
     set EXEEXT $env(EXEEXT)
 }
 
+# Make sure we are using the C locale.
+set env(LC_ALL) "C"
+
 ### Only procedures should come after this point.
 
 #
