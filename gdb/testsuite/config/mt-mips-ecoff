@@ -1,0 +1,1 @@
+CFLAGS_FOR_TARGET =  -nostartfiles /s1/cygnus/dejagnu/mips-idt-ecoff/crt0.o /s1/cygnus/dejagnu/mips-idt-ecoff/libc.a -g

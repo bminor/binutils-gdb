@@ -1,3 +1,9 @@
+Wed May 18 17:04:03 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* config/mt-lynx, config/mt-m68k, config/mt-mips-ecoff,
+	  config/mt-slite, config/mt-unix, config/mt-vxworks: Add
+	  Rob's new testing fragments.
+
 Tue May 17 15:04:14 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* config/mips-gdb.exp, config/udi-gdb.exp, config/vx-gdb.exp,
