@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -26,30 +26,210 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
+static bfd_reloc_status_type coff_i386_reloc PARAMS ((bfd *abfd,
+						      arelent *reloc_entry,
+						      asymbol *symbol,
+						      PTR data,
+						      asection *input_section,
+						      bfd *output_bfd));
+
+/* For some reason when using i386 COFF the value stored in the .text
+   section for a reference to a common symbol is the value itself plus
+   any desired offset.  Ian Taylor, Cygnus Support.  */
+
+/* If we are producing relocateable output, we need to do some
+   adjustments to the object file that are not done by the
+   bfd_perform_relocation function.  This function is called by every
+   reloc type to make any required adjustments.  */
+
+static bfd_reloc_status_type
+coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+{
+  symvalue diff;
+
+  if (output_bfd == (bfd *) NULL)
+    return bfd_reloc_continue;
+
+  if (bfd_is_com_section (symbol->section))
+    {
+      /* We are relocating a common symbol.  The current value in the
+	 object file is ORIG + OFFSET, where ORIG is the value of the
+	 common symbol as seen by the object file when it was compiled
+	 (this may be zero if the symbol was undefined) and OFFSET is
+	 the offset into the common symbol (normally zero, but may be
+	 non-zero when referring to a field in a common structure).
+	 ORIG is the negative of reloc_entry->addend, which is set by
+	 the CALC_ADDEND macro below.  We want to replace the value in
+	 the object file with NEW + OFFSET, where NEW is the value of
+	 the common symbol which we are going to put in the final
+	 object file.  NEW is symbol->value.  */
+      diff = symbol->value + reloc_entry->addend;
+    }
+  else
+    {
+      /* For some reason bfd_perform_relocation always effectively
+	 ignores the addend for a COFF target when producing
+	 relocateable output.  This seems to be always wrong for 386
+	 COFF, so we handle the addend here instead.  */
+      diff = reloc_entry->addend;
+    }
+
+#define DOIT(x) \
+  x = ((x & ~howto->dst_mask) | (((x & howto->src_mask) + diff) & howto->dst_mask))
+
+  if (diff != 0)
+    {
+      reloc_howto_type *howto = reloc_entry->howto;
+      unsigned char *addr = (unsigned char *) data + reloc_entry->address;
+
+      switch (howto->size)
+	{
+	case 0:
+	  {
+	    char x = bfd_get_8 (abfd, addr);
+	    DOIT (x);
+	    bfd_put_8 (abfd, x, addr);
+	  }
+	  break;
+
+	case 1:
+	  {
+	    short x = bfd_get_16 (abfd, addr);
+	    DOIT (x);
+	    bfd_put_16 (abfd, x, addr);
+	  }
+	  break;
+
+	case 2:
+	  {
+	    long x = bfd_get_32 (abfd, addr);
+	    DOIT (x);
+	    bfd_put_32 (abfd, x, addr);
+	  }
+	  break;
+
+	default:
+	  abort ();
+	}
+    }
+
+  /* Now let bfd_perform_relocation finish everything up.  */
+  return bfd_reloc_continue;
+}
 
 static reloc_howto_type howto_table[] = 
 {
-    {0},
-    {1},
-    {2},
-    {3},
-    {4},
-    {5},
-  HOWTO(R_DIR32,	       0,  2, 	32, false, 0, true,true,0,"dir32",	true, 0xffffffff,0xffffffff, false),
-    {7},
-    {010},
-    {011},
-    {012},
-    {013},
-    {014},
-    {015},
-    {016},
-  HOWTO(R_RELBYTE,	       0,  0,  	8,  false, 0, true,  true,0,"8",	true, 0x000000ff,0x000000ff, false),
-  HOWTO(R_RELWORD,	       0,  1, 	16, false, 0, true,  true,0,"16",	true, 0x0000ffff,0x0000ffff, false),
-  HOWTO(R_RELLONG,	       0,  2, 	32, false, 0, true,  true,0,"32",	true, 0xffffffff,0xffffffff, false),
-  HOWTO(R_PCRBYTE,	       0,  0, 	8,  true,  0, false, true,0,"DISP8",    true, 0x000000ff,0x000000ff, false),
-  HOWTO(R_PCRWORD,	       0,  1, 	16, true,  0, false, true,0,"DISP16",   true, 0x0000ffff,0x0000ffff, false),
-  HOWTO(R_PCRLONG,	       0,  2, 	32, true,  0, false, true,0,"DISP32",   true, 0xffffffff,0xffffffff, false),
+  {0},
+  {1},
+  {2},
+  {3},
+  {4},
+  {5},
+  HOWTO (R_DIR32,               /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,       /* special_function */                     
+	 "dir32",               /* name */                                 
+	 true,	                /* partial_inplace */                      
+	 0xffffffff,            /* src_mask */                             
+	 0xffffffff,            /* dst_mask */                             
+	 false),                /* pcrel_offset */
+  {7},
+  {010},
+  {011},
+  {012},
+  {013},
+  {014},
+  {015},
+  {016},
+  HOWTO (R_RELBYTE,		/* type */                                 
+	 0,			/* rightshift */                           
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */ 
+	 8,			/* bitsize */                   
+	 false,			/* pc_relative */                          
+	 0,			/* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */                     
+	 "8",			/* name */                                 
+	 true,			/* partial_inplace */                      
+	 0x000000ff,		/* src_mask */                             
+	 0x000000ff,		/* dst_mask */                             
+	 false),		/* pcrel_offset */
+  HOWTO (R_RELWORD,		/* type */                                 
+	 0,			/* rightshift */                           
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,			/* bitsize */                   
+	 false,			/* pc_relative */                          
+	 0,			/* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */                     
+	 "16",			/* name */                                 
+	 true,			/* partial_inplace */                      
+	 0x0000ffff,		/* src_mask */                             
+	 0x0000ffff,		/* dst_mask */                             
+	 false),		/* pcrel_offset */
+  HOWTO (R_RELLONG,		/* type */                                 
+	 0,			/* rightshift */                           
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,			/* bitsize */                   
+	 false,			/* pc_relative */                          
+	 0,			/* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */                     
+	 "32",			/* name */                                 
+	 true,			/* partial_inplace */                      
+	 0xffffffff,		/* src_mask */                             
+	 0xffffffff,		/* dst_mask */                             
+	 false),		/* pcrel_offset */
+  HOWTO (R_PCRBYTE,		/* type */                                 
+	 0,			/* rightshift */                           
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */ 
+	 8,			/* bitsize */                   
+	 true,			/* pc_relative */                          
+	 0,			/* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */                     
+	 "DISP8",		/* name */                                 
+	 true,			/* partial_inplace */                      
+	 0x000000ff,		/* src_mask */                             
+	 0x000000ff,		/* dst_mask */                             
+	 false),		/* pcrel_offset */
+  HOWTO (R_PCRWORD,		/* type */                                 
+	 0,			/* rightshift */                           
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,			/* bitsize */                   
+	 true,			/* pc_relative */                          
+	 0,			/* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */                     
+	 "DISP16",		/* name */                                 
+	 true,			/* partial_inplace */                      
+	 0x0000ffff,		/* src_mask */                             
+	 0x0000ffff,		/* dst_mask */                             
+	 false),		/* pcrel_offset */
+  HOWTO (R_PCRLONG,		/* type */                                 
+	 0,			/* rightshift */                           
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,			/* bitsize */                   
+	 true,			/* pc_relative */                          
+	 0,			/* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */                     
+	 "DISP32",		/* name */                                 
+	 true,			/* partial_inplace */                      
+	 0xffffffff,		/* src_mask */                             
+	 0xffffffff,		/* dst_mask */                             
+	 false)			/* pcrel_offset */
 };
 
 /* Turn a howto into a reloc  nunmber */
@@ -61,17 +241,67 @@ static reloc_howto_type howto_table[] =
 #define RTYPE2HOWTO(cache_ptr, dst) \
 	    cache_ptr->howto = howto_table + (dst)->r_type;
 
-#include "coffcode.h"
+/* On SCO Unix 3.2.2 the native assembler generates two .data
+   sections.  We handle that by renaming the second one to .data2.  It
+   does no harm to do this for any 386 COFF target.  */
+#define TWO_DATA_SECS
 
-#define coff_write_armap bsd_write_armap
+/* For 386 COFF a STYP_NOLOAD | STYP_BSS section is part of a shared
+   library.  On some other COFF targets STYP_BSS is normally
+   STYP_NOLOAD.  */
+#define BSS_NOLOAD_IS_SHARED_LIBRARY
+
+/* Compute the addend of a reloc.  If the reloc is to a common symbol,
+   the object file contains the value of the common symbol.  By the
+   time this is called, the linker may be using a different symbol
+   from a different object file with a different value.  Therefore, we
+   hack wildly to locate the original symbol from this file so that we
+   can make the correct adjustment.  This macro sets coffsym to the
+   symbol from the original file, and uses it to set the addend value
+   correctly.  If this is not a common symbol, the usual addend
+   calculation is done, except that an additional tweak is needed for
+   PC relative relocs.
+   FIXME: This macro refers to symbols and asect; these are from the
+   calling function, not the macro arguments.  */
+
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)		\
+  {								\
+    coff_symbol_type *coffsym = (coff_symbol_type *) NULL;	\
+    if (ptr && bfd_asymbol_bfd (ptr) != abfd)			\
+      coffsym = (obj_symbols (abfd)				\
+	         + (cache_ptr->sym_ptr_ptr - symbols));		\
+    else if (ptr)						\
+      coffsym = coff_symbol_from (abfd, ptr);			\
+    if (coffsym != (coff_symbol_type *) NULL			\
+	&& coffsym->native->u.syment.n_scnum == 0)		\
+      cache_ptr->addend = - coffsym->native->u.syment.n_value;	\
+    else if (ptr && bfd_asymbol_bfd (ptr) == abfd		\
+	     && ptr->section != (asection *) NULL)		\
+      cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
+    else							\
+      cache_ptr->addend = 0;					\
+    if (ptr && howto_table[reloc.r_type].pc_relative)		\
+      cache_ptr->addend += asect->vma;				\
+  }
+
+#include "coffcode.h"
 
 bfd_target *i3coff_object_p(a)
 bfd *a ;
 { return coff_object_p(a); }
 
-bfd_target i386coff_vec =
+bfd_target
+#ifdef TARGET_SYM
+  TARGET_SYM =
+#else
+  i386coff_vec =
+#endif
 {
+#ifdef TARGET_NAME
+  TARGET_NAME,
+#else
   "coff-i386",			/* name */
+#endif
   bfd_target_coff_flavour,
   false,			/* data byte order is little */
   false,			/* header byte order is little */
@@ -86,8 +316,12 @@ bfd_target i386coff_vec =
   15,				/* ar_max_namelen */
 
   2,				/* minimum alignment power */
-  _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
-  _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
 /* Note that we allow an object file to be treated as a core file as well. */
     {_bfd_dummy_target, i3coff_object_p, /* bfd_check_format */
@@ -98,5 +332,5 @@ bfd_target i386coff_vec =
        _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(coff),
-  COFF_SWAP_TABLE
-  };
+  COFF_SWAP_TABLE,
+};

@@ -1,8 +1,37 @@
+Fri Oct  1 13:14:17 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in: i386lynx_coff_vec requires coff-i386lynx.o.
+	* coff-i386lynx.c: New file, defines Lynx target vector and name,
+	includes coff-i386.c.
+	* coff-i386.c (i386coff_vec): Allow redefinition of target vector
+	symbol and name, if TARGET_SYM and/or TARGET_NAME are defined.
+	* i386lynx.c: Remove coff vector definition entirely.
+	(lynx_32_swap_ext_reloc_in): Define.
+	(lynx_32_swap_std_reloc_in): Define, get reloc bits in i386
+	Lynx-specific way.
+	(lynx_32_swap_ext_reloc_out): Define.
+	(lynx_32_swap_std_reloc_out): Define.
+	(lynx_32_slurp_reloc_table): Define, call Lynx swapping fns.
+	(lynx_32_squirt_out_relocs): Define, call Lynx swapping fns.
+	(lynx_32_canonicalize_reloc): Define, call Lynx swapping fns.
+	(WRITE_HEADERS): Define, call Lynx swapping fns.
+
+	* config/i386-lynx.mt (SELECT_VECS): Remove redundant vector.
+
 Thu Sep 30 17:50:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* reloc.c (bfd_reloc_code_type): Add linkage-table relative
 	relocations of size 8, 16, 32.  Sort generic relocs by type rather
 	than size.  Added a little documentation too.
+
+	* aoutx.h (howto_table_std): Add BASE16 and BASE32 relocs.
+	(TABLE_SIZE): New macro.
+	(reloc_type_lookup): Handle BFD_RELOC_{16,32}_BASEREL for std
+	relocs.
+	(swap_std_reloc_out): Write baserel relocs correctly.
+	(swap_std_reloc_in): Handle r_baserel field.  Assert that
+	r_jmptable and r_relative fields are clear, and that the computed
+	index does refer to a defined entry of the howto table.
 
 Tue Sep 28 14:47:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
