@@ -209,6 +209,10 @@
 @V@/gdb/testsuite/gdb.c++/inherit.exp @V@/gdb/testsuite/gdb.cxx/inherit.exp
 @V@/gdb/testsuite/gdb.c++/local.cc @V@/gdb/testsuite/gdb.cxx/local.cc
 @V@/gdb/testsuite/gdb.c++/local.exp @V@/gdb/testsuite/gdb.cxx/local.exp
+@V@/gdb/testsuite/gdb.c++/m-static.cc @V@/gdb/testsuite/gdb.cxx/m-static.cc
+@V@/gdb/testsuite/gdb.c++/m-static1.cc @V@/gdb/testsuite/gdb.cxx/m-stat1.cc
+@V@/gdb/testsuite/gdb.c++/m-static.exp @V@/gdb/testsuite/gdb.cxx/m-static.exp
+@V@/gdb/testsuite/gdb.c++/m-static.h @V@/gdb/testsuite/gdb.cxx/m-static.h
 @V@/gdb/testsuite/gdb.c++/member-ptr.cc @V@/gdb/testsuite/gdb.cxx/member-ptr.cc
 @V@/gdb/testsuite/gdb.c++/member-ptr.exp @V@/gdb/testsuite/gdb.cxx/member-ptr.exp
 @V@/gdb/testsuite/gdb.c++/method.cc @V@/gdb/testsuite/gdb.cxx/method.cc

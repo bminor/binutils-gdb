@@ -3644,7 +3644,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
      sh_offset == object size, and ld doesn't allow that.  While the check
      is arguably bogus for empty or SHT_NOBITS sections, it can easily be
      avoided by not emitting those useless sections in the first place.  */
-  if ((IRIX_COMPAT (abfd) != ict_irix5 && (IRIX_COMPAT (abfd) != ict_irix6))
+  if (! SGI_COMPAT (abfd) && ! NEWABI_P(abfd)
       && (sec->flags & SEC_RELOC) != 0)
     {
       struct bfd_elf_section_data *esd;

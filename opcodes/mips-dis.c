@@ -526,7 +526,9 @@ print_insn_mips (memaddr, word, info)
 	    {
 	      register const char *d;
 
-	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor))
+	      /* We always allow to disassemble the jalx instruction.  */
+	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor)
+		  && strcmp (op->name, "jalx"))
 		continue;
 
 	      /* Figure out instruction type and branch delay information.  */

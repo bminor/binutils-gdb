@@ -1057,6 +1057,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	case R_386_TLS_LE:
 	  if (!info->shared)
 	    break;
+	  info->flags |= DF_STATIC_TLS;
 	  /* Fall through */	    
 
 	case R_386_32:

@@ -84,7 +84,7 @@ static struct complain complaint_sentinel;
 /* The symbol table complaint table.  */
 
 static const char *symfile_explanations[] = {
-  "During symbol reading, %s.\n",
+  "During symbol reading, %s.",
   "During symbol reading...%s...",
   "%s...",
   "%s...",
@@ -181,6 +181,7 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
   else
     {
       if (complaints->explanation == NULL)
+	/* A [v]warning() call always appends a newline.  */
 	vwarning (complaint->fmt, args);
       else
 	{
@@ -194,7 +195,17 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 	  fprintf_filtered (gdb_stderr,
 			    complaints->explanation[series],
 			    msg);
-	  wrap_here ("");
+	  /* Force a line-break after any isolated message.  For the
+             other cases, clear_complaints() takes care of any missing
+             trailing newline, the wrap_here() is just a hint.  */
+	  if (series == ISOLATED_MESSAGE)
+	    /* It would be really nice to use begin_line() here.
+	       Unfortunatly that function doesn't track GDB_STDERR and
+	       consequently will sometimes supress a line when it
+	       shouldn't.  */
+	    fputs_filtered ("\n", gdb_stderr);
+	  else
+	    wrap_here ("");
 	  do_cleanups (cleanups);
 	}
     }
@@ -267,10 +278,26 @@ clear_complaints (struct complaints **c, int less_verbose, int noisy)
       p->counter = 0;
     }
 
-  if (complaints->series > 1 && !warning_hook)
+  switch (complaints->series)
     {
-      /* Terminate previous series, since caller won't.  */
-      puts_filtered ("\n");
+    case FIRST_MESSAGE:
+      /* Haven't yet printed anything.  */
+      break;
+    case SHORT_FIRST_MESSAGE:
+      /* Haven't yet printed anything.  */
+      break;
+    case ISOLATED_MESSAGE:
+      /* The code above, always forces a line-break.  No need to do it
+         here.  */
+      break;
+    case SUBSEQUENT_MESSAGE:
+      /* It would be really nice to use begin_line() here.
+         Unfortunatly that function doesn't track GDB_STDERR and
+         consequently will sometimes supress a line when it shouldn't.  */
+      fputs_unfiltered ("\n", gdb_stderr);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
 
   if (!less_verbose)

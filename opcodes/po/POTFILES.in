@@ -113,6 +113,7 @@ sparc-dis.c
 sparc-opc.c
 sysdep.h
 tic30-dis.c
+tic4x-dis.c
 tic54x-dis.c
 tic54x-opc.c
 tic80-dis.c

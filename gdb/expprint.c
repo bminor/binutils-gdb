@@ -26,6 +26,7 @@
 #include "value.h"
 #include "language.h"
 #include "parser-defs.h"
+#include "frame.h"		/* For frame_map_regnum_to_name.  */
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -119,10 +120,12 @@ print_subexp (register struct expression *exp, register int *pos,
       return;
 
     case OP_REGISTER:
-      (*pos) += 2;
-      fprintf_filtered (stream, "$%s",
-	      REGISTER_NAME (longest_to_int (exp->elts[pc + 1].longconst)));
-      return;
+      {
+	int regnum = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 2;
+	fprintf_filtered (stream, "$%s", frame_map_regnum_to_name (regnum));
+	return;
+      }
 
     case OP_BOOL:
       (*pos) += 2;

@@ -2727,11 +2727,12 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
       else
 	{
-	  bfd_put_64 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
 	  rela.r_info = ELF64_R_INFO (h->dynindx, R_SPARC_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
 
+      bfd_put_64 (output_bfd, (bfd_vma) 0,
+		  sgot->contents + (h->got.offset &~ (bfd_vma) 1));
       bfd_elf64_swap_reloca_out (output_bfd, &rela,
 				 ((Elf64_External_Rela *) srela->contents
 				  + srela->reloc_count));

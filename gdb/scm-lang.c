@@ -134,8 +134,7 @@ scm_unpack (struct type *type, char *valaddr, enum type_code context)
 static int
 in_eval_c (void)
 {
-  struct symtab_and_line cursal =
-	  get_current_or_default_source_symtab_and_line ();
+  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
   
   if (cursal.symtab && cursal.symtab->filename)
     {

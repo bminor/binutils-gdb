@@ -377,7 +377,7 @@ case "${targ}" in
   i[3456]86-*-chorus*)
     targ_defvec=bfd_elf32_i386_vec
     ;;
-  i[3456]86-*-msdosdjgpp* | i[3456]*-*-go32* | i[3456]86-go32-rtems* )
+  *-*-msdosdjgpp* | *-*-go32* | *-go32-rtems* )
     targ_defvec=go32coff_vec
     targ_selvecs="go32stubbedcoff_vec i386aout_vec"
     ;;

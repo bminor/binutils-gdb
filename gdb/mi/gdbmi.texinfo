@@ -3786,6 +3786,9 @@ for the object:
  value=@var{value}
 @end example
 
+Note that one must invoke @code{-var-list-children} for a variable
+before the value of a child variable can be evaluated.
+
 @subheading The @code{-var-assign} Command
 @findex -var-assign
 

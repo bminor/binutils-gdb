@@ -1281,7 +1281,6 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		off &= ~1;
 	      else
 		{
-		  bfd_put_32 (output_bfd, relocation, sgot->contents + off);
 
 		  if (info->shared)
 		    {
@@ -1297,7 +1296,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 					 + sgot->output_offset
 					 + off);
 		      outrel.r_info = ELF32_R_INFO (0, R_SPARC_RELATIVE);
-		      outrel.r_addend = 0;
+		      outrel.r_addend = relocation;
+		      relocation = 0;
 		      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
 						 (((Elf32_External_Rela *)
 						   srelgot->contents)
@@ -1305,6 +1305,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		      ++srelgot->reloc_count;
 		    }
 
+		  bfd_put_32 (output_bfd, relocation, sgot->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 		}
 	    }
@@ -1810,14 +1811,21 @@ elf32_sparc_finish_dynamic_symbol (output_bfd, info, h, sym)
       if (info->shared
 	  && (info->symbolic || h->dynindx == -1)
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
-	rela.r_info = ELF32_R_INFO (0, R_SPARC_RELATIVE);
+	{
+	  asection *sec = h->root.u.def.section;
+	  rela.r_info = ELF32_R_INFO (0, R_SPARC_RELATIVE);
+	  rela.r_addend = (h->root.u.def.value
+			   + sec->output_section->vma
+			   + sec->output_offset);
+	}
       else
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_SPARC_GLOB_DAT);
+	  rela.r_addend = 0;
 	}
 
-      rela.r_addend = 0;
+      bfd_put_32 (output_bfd, (bfd_vma) 0,
+		  sgot->contents + (h->got.offset &~ (bfd_vma) 1));
       bfd_elf32_swap_reloca_out (output_bfd, &rela,
 				 ((Elf32_External_Rela *) srela->contents
 				  + srela->reloc_count));

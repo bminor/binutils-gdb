@@ -44,23 +44,23 @@ extern int get_lines_to_list (void);
 
 /* Return the current source file for listing and next line to list.
    NOTE: The returned sal pc and end fields are not valid. */
-extern void clear_current_source_symtab_and_line (void);
-
-/* Return the current source file for listing and next line to list.
-   If a file is not set, try and get a default.
-   It may err out if a default cannot be determined.
-   Depending on where it is called, it can recurse as the process of
-   determining a new default may call the caler!
-   Use get_current_source_symtab_and_line instead to get whatever
-   we have without erroring out or trying to get a default.
-   NOTE: The returned sal pc and end fields are not valid. */
 extern struct symtab_and_line get_current_source_symtab_and_line (void);
+
+/* If the current source file for listing is not set, try and get a default.
+   Usually called before get_current_source_symtab_and_line() is called.
+   It may err out if a default cannot be determined.
+   We must be cautious about where it is called, as it can recurse as the
+   process of determining a new default may call the caller!
+   Use get_current_source_symtab_and_line only to get whatever
+   we have without erroring out or trying to get a default. */
+extern void set_default_source_symtab_and_line (void);
 
 /* Return the current default file for listing and next line to list
    (the returned sal pc and end fields are not valid.)
-   and set the surrent default to whatever is in SAL */
-extern struct symtab_and_line get_current_or_default_source_symtab_and_line (void);
+   and set the current default to whatever is in SAL.
+   NOTE: The returned sal pc and end fields are not valid. */
+extern struct symtab_and_line set_current_source_symtab_and_line (const struct symtab_and_line *);
 
 /* Reset any information stored about a default file and line to print. */
-extern struct symtab_and_line set_current_source_symtab_and_line (struct symtab_and_line *);
+extern void clear_current_source_symtab_and_line (void);
 #endif
