@@ -1,5 +1,8 @@
 Mon Dec  6 12:01:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* configure.in: Recognize mips* for all mips targets.
+	(mips*el-*-elf*, mips*-*-elf*): New targets; use idt and idtl.
+
 	Added Irix 5 support.
 	* configure.in (mips-sgi-irix5*): New host and target.  Use irix5
 	for both.
