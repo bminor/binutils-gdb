@@ -128,6 +128,9 @@ struct objdump_disasm_info
   arelent **         dynrelbuf;
   long               dynrelcount;
   disassembler_ftype disassemble_fn;
+#ifdef DISASSEMBLER_NEEDS_RELOCS
+  arelent *          reloc;
+#endif
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
@@ -852,6 +855,9 @@ objdump_print_addr (bfd_vma vma,
 {
   struct objdump_disasm_info *aux;
   asymbol *sym;
+#ifdef DISASSEMBLER_NEEDS_RELOCS
+  bfd_boolean skip_find = FALSE;
+#endif
 
   if (sorted_symcount < 1)
     {
@@ -861,7 +867,25 @@ objdump_print_addr (bfd_vma vma,
     }
 
   aux = (struct objdump_disasm_info *) info->application_data;
-  sym = find_symbol_for_address (vma, info, NULL);
+
+#ifdef DISASSEMBLER_NEEDS_RELOCS
+  if (aux->reloc != NULL
+      && aux->reloc->sym_ptr_ptr != NULL
+      && * aux->reloc->sym_ptr_ptr != NULL)
+    {
+      sym = * aux->reloc->sym_ptr_ptr;
+
+      /* Adjust the vma to the reloc.  */
+      vma += bfd_asymbol_value (sym);
+
+      if (bfd_is_und_section (bfd_get_section (sym)))
+	skip_find = TRUE;
+    }
+
+  if (!skip_find)
+#endif
+    sym = find_symbol_for_address (vma, info, NULL);
+
   objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info,
 			       skip_zeroes);
 }
@@ -1238,6 +1262,7 @@ disassemble_bytes (struct disassemble_info * info,
   unsigned int opb = info->octets_per_byte;
   unsigned int skip_zeroes = info->skip_zeroes;
   unsigned int skip_zeroes_at_end = info->skip_zeroes_at_end;
+  int octets = opb;
   SFILE sfile;
 
   aux = (struct objdump_disasm_info *) info->application_data;
@@ -1282,8 +1307,14 @@ disassemble_bytes (struct disassemble_info * info,
   while (addr_offset < stop_offset)
     {
       bfd_vma z;
-      int octets = 0;
       bfd_boolean need_nl = FALSE;
+#ifdef DISASSEMBLER_NEEDS_RELOCS
+      int previous_octets;
+
+      /* Remember the length of the previous instruction.  */
+      previous_octets = octets;
+#endif
+      octets = 0;
 
       /* If we see more than SKIP_ZEROES octets of zeroes, we just
 	 print `...'.  */
@@ -1348,19 +1379,40 @@ disassemble_bytes (struct disassemble_info * info,
 	      info->stream = (FILE *) &sfile;
 	      info->bytes_per_line = 0;
 	      info->bytes_per_chunk = 0;
+	      info->flags = 0;
 
 #ifdef DISASSEMBLER_NEEDS_RELOCS
-	      /* FIXME: This is wrong.  It tests the number of octets
-		 in the last instruction, not the current one.  */
-	      if (*relppp < relppend
-		  && (**relppp)->address >= rel_offset + addr_offset
-		  && ((**relppp)->address
-		      < rel_offset + addr_offset + octets / opb))
-		info->flags = INSN_HAS_RELOC;
-	      else
-#endif
-		info->flags = 0;
+	      if (*relppp < relppend)
+		{
+		  bfd_signed_vma distance_to_rel;
 
+		  distance_to_rel = (**relppp)->address
+		    - (rel_offset + addr_offset);
+
+		  /* Check to see if the current reloc is associated with
+		     the instruction that we are about to disassemble.  */
+		  if (distance_to_rel == 0
+		      /* FIXME: This is wrong.  We are trying to catch
+			 relocs that are addressed part way through the
+			 current instruction, as might happen with a packed
+			 VLIW instruction.  Unfortunately we do not know the
+			 length of the current instruction since we have not
+			 disassembled it yet.  Instead we take a guess based
+			 upon the length of the previous instruction.  The
+			 proper solution is to have a new target-specific
+			 disassembler function which just returns the length
+			 of an instruction at a given address without trying
+			 to display its disassembly. */
+		      || (distance_to_rel > 0
+			  && distance_to_rel < (bfd_signed_vma) (previous_octets/ opb)))
+		    {
+		      info->flags = INSN_HAS_RELOC;
+		      aux->reloc = **relppp;
+		    }
+		  else
+		    aux->reloc = NULL;
+		}
+#endif
 	      octets = (*disassemble_fn) (section->vma + addr_offset, info);
 	      info->fprintf_func = (fprintf_ftype) fprintf;
 	      info->stream = stdout;
@@ -1817,6 +1869,9 @@ disassemble_data (bfd *abfd)
   aux.require_sec = FALSE;
   aux.dynrelbuf = NULL;
   aux.dynrelcount = 0;
+#ifdef DISASSEMBLER_NEEDS_RELOCS
+  aux.reloc = NULL;
+#endif
 
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;

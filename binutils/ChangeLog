@@ -1,3 +1,17 @@
+2005-03-01  Stig Petter Olsroed  <stigpo@users.sourceforge.net>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c: Fix coding for DISASSEMBLER_NEEDS_RELOC:
+	(struct objdump_disasm_info): Add 'reloc' field.
+	(disassemble_bytes): Fix check for when an insn has a reloc
+	associated with it.  Improve comment explaining why the use of
+	octets is wrong.  Set the 'reloc' field in objdump_disasm_info
+	structure.
+	(objdump_print_addr): Use new 'reloc' field to lookup the correct
+	address for the symbol associated with the current instruction's
+	relocation.
+	(disassemble_info): Initialise 'reloc' field.
+
 2005-02-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (get_file_type, get_machine_name, get_osabi_name,

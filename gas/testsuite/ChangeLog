@@ -1,3 +1,12 @@
+2005-03-01  Stig Petter Olsroed  <stigpo@users.sourceforge.net>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/inst.d: Allow for ARM ports which decode the reloc
+	associated with branches and so show the exact symbolic
+	destination address rather than an offset from the start of the
+	section.
+	* gas/arm/pic.d: Likewise.
+	
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/mcf-emac.d: Allow for 64-bit addresses.
