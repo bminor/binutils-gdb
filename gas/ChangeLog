@@ -1,3 +1,8 @@
+Thu Jun 22 14:41:23 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* write.c (write_object_file): Cast decode_local_label_name
+	argument to char * to avoid warning.
+
 Wed Jun 21 18:07:59 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Changes from Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>:
