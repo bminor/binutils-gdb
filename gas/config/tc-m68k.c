@@ -1152,6 +1152,11 @@ m68k_ip (instring)
 			   && (opP->disp.exp.X_op != O_constant
 			       || ! isbyte (opP->disp.exp.X_add_number)))
 		    losing++;
+		  else if (s[1] == 'B'
+			   && ! isvar (&opP->disp)
+			   && (opP->disp.exp.X_op != O_constant
+			       || ! issbyte (opP->disp.exp.X_add_number)))
+		    losing++;
 		  else if (s[1] == 'w'
 			   && ! isvar (&opP->disp)
 			   && (opP->disp.exp.X_op != O_constant
@@ -2289,6 +2294,13 @@ m68k_ip (instring)
 		the_ins.reloc[the_ins.nrel - 1].n =
 		  (opcode->m_codenum) * 2 + 1;
 	      break;
+	    case 'B':
+	      if (!issbyte (tmpreg))
+		opP->error = "out of range";
+	      opcode->m_opcode |= tmpreg;
+	      if (isvar (&opP->disp))
+		the_ins.reloc[the_ins.nrel - 1].n = opcode->m_codenum * 2 - 1;
+	      break;
 	    case 'w':
 	      if (!isword (tmpreg))
 		opP->error = "out of range";
@@ -3337,6 +3349,8 @@ md_assemble (str)
 			      get_reloc_code (n, the_ins.reloc[m].pcrel,
 					      the_ins.reloc[m].pic_reloc));
 	  fixP->fx_pcrel_adjust = the_ins.reloc[m].pcrel_fix;
+	  if (the_ins.reloc[m].wid == 'B')
+	    fixP->fx_signed = 1;
 	}
       return;
     }
@@ -3888,7 +3902,7 @@ md_apply_fix_2 (fixP, val)
      like "0xff" for a byte field.  So extend the upper part of the range
      to accept such numbers.  We arbitrarily disallow "-0xff" or "0xff+0xff",
      so that we can do any range checking at all.  */
-  if (!fixP->fx_pcrel)
+  if (! fixP->fx_pcrel && ! fixP->fx_signed)
     upper_limit = upper_limit * 2 + 1;
 
   if ((addressT) val > upper_limit

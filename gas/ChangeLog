@@ -1,3 +1,17 @@
+Fri Jan  3 12:09:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip): Accept 'B' as a size for an
+	immediate value.
+	(md_assemble): If the size is 'B', set fx_signed.
+	(md_apply_fix_2): Use fx_signed when checking for overflow.
+
+	* write.h (struct fix): Add fx_signed field.
+	* write.c (fix_new_internal): Initialize fx_no_overflow and
+	fx_signed fields.
+	(fixup_segment): Use fx_signed when checking for overflow.
+	* config/obj-coff.c (fixup_segment): Check fx_no_overflow and
+	fx_signed when checking for overflow.
+
 Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* NOTES, NOTES.config: Removed.  These are rarely, if ever,

@@ -1,5 +1,5 @@
 /* write.c - emit .o file
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -162,6 +162,8 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_addnumber = 0;
   fixP->fx_tcbit = 0;
   fixP->fx_done = 0;
+  fixP->fx_no_overflow = 0;
+  fixP->fx_signed = 0;
 
 #ifdef TC_FIX_TYPE
   TC_INIT_FIX_DATA(fixP);
@@ -2560,8 +2562,12 @@ fixup_segment (fixP, this_segment_type)
 		 the host architecture.  */
 	      mask <<= size * 4;
 	      mask <<= size * 4;
-	      if ((add_number & mask) != 0
-		  && (add_number & mask) != mask)
+	      if (((add_number & mask) != 0
+		   || (fixP->fx_signed
+		       && (add_number & (mask >> 1)) != 0))
+		  && ((add_number & mask) != mask
+		      || (fixP->fx_signed
+			  && (add_number & (mask >> 1)) == 0)))
 		{
 		  char buf[50], buf2[50];
 		  sprint_value (buf, fragP->fr_address + where);

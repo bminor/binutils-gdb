@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -4083,17 +4083,21 @@ fixup_segment (segP, this_segment_type)
 #endif
 	}			/* if pcrel */
 
-      if (!fixP->fx_bit_fixP)
+      if (!fixP->fx_bit_fixP && ! fixP->fx_no_overflow)
 	{
 #ifndef TC_M88K
 	  /* The m88k uses the offset field of the reloc to get around
 	     this problem.  */
 	  if ((size == 1
-	       && (add_number & ~0xFF)
-	       && ((add_number & ~0xFF) != (-1 & ~0xFF)))
+	       && ((add_number & ~0xFF)
+		   || (fixP->fx_signed && (add_number & 0x80)))
+	       && ((add_number & ~0xFF) != (-1 & ~0xFF)
+		   || (fixP->fx_signed && (add_number & 0x80) == 0)))
 	      || (size == 2
-		  && (add_number & ~0xFFFF)
-		  && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF))))
+		  && ((add_number & ~0xFFFF)
+		      || (fixP->fx_signed && (add_number & 0x8000)))
+		  && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF)
+		      || (fixP->fx_signed && (add_number & 0x8000) == 0))))
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    "Value of %ld too large for field of %d bytes at 0x%lx",
