@@ -7,6 +7,20 @@ Tue Feb 23 12:17:16 1993  Ian Lance Taylor  (ian@cygnus.com)
 	from coff_make_debug_symbol.
 	* libcoff.h: Updated accordingly.
 
+	* Minor cleanups provoked by gcc warnings:
+	* aoutx.h (NAME(aout, reloc_type_lookup)),
+	cpu-h8300.c (local_bfd_reloc_type_lookup),
+	cpu-z8k.c (local_bfd_reloc_type_lookup): Added default case to
+	switches.
+	* archive.c (do_slurp_bsd_armap, do_slurp_coff_armap),
+	ieee.c (ieee_slurp_section_data),
+	elf.c (elf_make_sections, elf_fake_sections,
+	elf_compute_section_file_positions, elf_write_object_contents):
+	Removed unused variables.
+	* archures.c: Removed /* from within comment.
+	* bout.c (b_out_squirt_out_relocs): Initialize r_extern.
+	* oasys.c (oasys_write_data): Initialize i.
+
 Mon Feb 22 18:40:06 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* libcoff.h (obj_raw_syment_coun):  New macro.

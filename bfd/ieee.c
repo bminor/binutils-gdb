@@ -1497,7 +1497,6 @@ DEFUN(ieee_slurp_section_data,(abfd),
 	      case ieee_set_current_pc_enum & 0xff:
 		  {
 		    bfd_vma value;
-		    asection *dsection;
 		    ieee_symbol_index_type symbol;
 		    unsigned int extra;
 		    boolean pcrel;

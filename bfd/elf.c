@@ -1460,11 +1460,8 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
 	  /* emit a reloc section, and thus strtab and symtab... */
 	  Elf_Internal_Shdr *rela_hdr;
 	  Elf_Internal_Shdr *symtab_hdr;
-	  Elf_Internal_Shdr *symstrtab_hdr;
 	  Elf_External_Rela *outbound_relocs;
-	  Elf_External_Sym *outbound_syms;
 	  int rela_section;
-	  int symstrtab_section;
 	  
 	  symtab_hdr = &thunk->i_shdrp[thunk->symtab_section];
 
@@ -1515,7 +1512,6 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
   /* most of what is in bfd_shdr_from_section goes in here... */
   /* and all of these sections generate at *least* one ELF section. */
   int this_section;
-  int idx;
   
   /* check if we're making a PROGBITS section... */
   /* if ((asect->flags & SEC_ALLOC) && (asect->flags & SEC_LOAD)) */
@@ -1543,8 +1539,6 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
 	  Elf_Internal_Shdr *rela_hdr;
 	  Elf_Internal_Shdr *symtab_hdr;
 	  Elf_Internal_Shdr *symstrtab_hdr;
-	  Elf_External_Rela *outbound_relocs;
-	  Elf_External_Sym *outbound_syms;
 	  int rela_section;
 	  int symstrtab_section;
 	  
@@ -1594,7 +1588,6 @@ DEFUN (elf_compute_section_file_positions, (abfd), bfd *abfd)
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   struct strtab *shstrtab;
   int count, maxsections;
-  int outbase;
   elf_sect_thunk est;
 
   if (! elf_shstrtab (abfd)) {
@@ -1707,12 +1700,9 @@ DEFUN (elf_write_object_contents, (abfd), bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-  Elf_External_Phdr *x_phdrp;	/* Program header table, external form */
-  Elf_Internal_Phdr *i_phdrp;	/* Program header table, internal form */
   Elf_External_Shdr *x_shdrp;	/* Section header table, external form */
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   asection *nsect;
-  int maxsections;
   elf_sect_thunk est;
   
   int outbase = 0;
