@@ -28,7 +28,7 @@ alpha.mt
 alphaosf.mh
 coff-a29k.mt
 coff-h8300.mt
-coff-h8300h.mt
+cf-h8300h.mt
 coff-h8500.mt
 coff-sh.mt
 coff-sparc.mt
@@ -56,6 +56,7 @@ i386v.mh
 i386v.mt
 i386v4.mh
 i960.mt
+i960coff.mt
 ieee-h8300.mt
 irix4.mh
 m68k-coff.mt
@@ -63,10 +64,11 @@ m68k.mt
 m68k-lynx.mt
 m68kv.mt
 m88k-bcs.mt
+mipsbsd.mh
 mipsbsd.mt
 mips-big.mt
 mips-idt.mt
-mips-idtl.mt
+mipsl-idt.mt
 mips-lit.mt
 mipsb-elf32.mt
 news.mt
