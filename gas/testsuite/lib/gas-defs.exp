@@ -495,6 +495,20 @@ proc regexp_diff { file_1 file_2 } {
 		set end_2 1
 		set diff_pass 1
 		break
+	    } elseif [ string match "#..." $line_b ] {
+		if { [gets $file_b line_b] == $eof } {
+		    set end_2 1
+		    break
+		}
+		verbose "looking for \"^$line_b$\"" 3
+		while { ![regexp "^$line_b$" "$line_a"] } {
+		    verbose "skipping    \"$line_a\"" 3
+		    if { [gets $file_a line_a] == $eof } {
+			set end_1 1
+			break
+		    }
+		}
+		break
 	    }
 	    if { [gets $file_b line_b] == $eof } {
 		set end_2 1

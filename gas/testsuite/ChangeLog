@@ -1,3 +1,12 @@
+Mon Oct 11 13:37:51 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* lib/gas-defs.exp (regexp_diff): Allow '#...' to mean "some
+ 	indeterminate number of extra lines here".
+
+	* gas/elf/elf.exp: Remove XFAILs.
+	* gas/elf/section0.d: Make pass on MIPS (and hopefully alpha).
+	* gas/elf/section1.d: Likewise.
+
 Thu Oct  7 00:12:04 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* gas/d10v: New directory.
