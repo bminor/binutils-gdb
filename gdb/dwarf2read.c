@@ -133,6 +133,7 @@ static file_ptr dwarf_aranges_offset;
 static file_ptr dwarf_loc_offset;
 static file_ptr dwarf_macinfo_offset;
 static file_ptr dwarf_str_offset;
+static file_ptr dwarf_ranges_offset;
 file_ptr dwarf_frame_offset;
 file_ptr dwarf_eh_frame_offset;
 
@@ -144,6 +145,7 @@ static unsigned int dwarf_aranges_size;
 static unsigned int dwarf_loc_size;
 static unsigned int dwarf_macinfo_size;
 static unsigned int dwarf_str_size;
+static unsigned int dwarf_ranges_size;
 unsigned int dwarf_frame_size;
 unsigned int dwarf_eh_frame_size;
 
@@ -157,6 +159,7 @@ unsigned int dwarf_eh_frame_size;
 #define LOC_SECTION      ".debug_loc"
 #define MACINFO_SECTION  ".debug_macinfo"
 #define STR_SECTION      ".debug_str"
+#define RANGES_SECTION   ".debug_ranges"
 #define FRAME_SECTION    ".debug_frame"
 #define EH_FRAME_SECTION ".eh_frame"
 
@@ -202,6 +205,10 @@ struct comp_unit_head
     /* DWARF abbreviation table associated with this compilation unit */
 
     struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
+
+    /* Pointer to the DIE associated with the compilation unit.  */
+
+    struct die_info *die;
   };
 
 /* The line number information for a compilation unit (found in the
@@ -373,6 +380,7 @@ static char *dwarf_abbrev_buffer;
 static char *dwarf_line_buffer;
 static char *dwarf_str_buffer;
 static char *dwarf_macinfo_buffer;
+static char *dwarf_ranges_buffer;
 
 /* A zeroed version of a partial die for initialization purposes.  */
 static struct partial_die_info zeroed_partial_die;
@@ -481,6 +489,14 @@ struct dwarf2_pinfo
     
     unsigned int dwarf_macinfo_size;
 
+    /* Pointer to start of dwarf ranges buffer for the objfile.  */
+
+    char *dwarf_ranges_buffer;
+
+    /* Size of dwarf ranges buffer for the objfile.  */
+
+    unsigned int dwarf_ranges_size;
+
   };
 
 #define PST_PRIVATE(p) ((struct dwarf2_pinfo *)(p)->read_symtab_private)
@@ -494,6 +510,8 @@ struct dwarf2_pinfo
 #define DWARF_STR_SIZE(p)    (PST_PRIVATE(p)->dwarf_str_size)
 #define DWARF_MACINFO_BUFFER(p) (PST_PRIVATE(p)->dwarf_macinfo_buffer)
 #define DWARF_MACINFO_SIZE(p)   (PST_PRIVATE(p)->dwarf_macinfo_size)
+#define DWARF_RANGES_BUFFER(p)  (PST_PRIVATE(p)->dwarf_ranges_buffer)
+#define DWARF_RANGES_SIZE(p)    (PST_PRIVATE(p)->dwarf_ranges_size)
 
 /* Maintain an array of referenced fundamental types for the current
    compilation unit being read.  For DWARF version 1, we have to construct
@@ -751,7 +769,8 @@ static void read_lexical_block_scope (struct die_info *, struct objfile *,
 				      const struct comp_unit_head *);
 
 static int dwarf2_get_pc_bounds (struct die_info *,
-				 CORE_ADDR *, CORE_ADDR *, struct objfile *);
+				 CORE_ADDR *, CORE_ADDR *, struct objfile *,
+				 const struct comp_unit_head *);
 
 static void dwarf2_add_field (struct field_info *, struct die_info *,
 			      struct objfile *, const struct comp_unit_head *);
@@ -886,6 +905,8 @@ dwarf2_has_info (bfd *abfd)
   dwarf_macinfo_offset = 0;
   dwarf_frame_offset = 0;
   dwarf_eh_frame_offset = 0;
+  dwarf_ranges_offset = 0;
+  
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
   if (dwarf_info_offset && dwarf_abbrev_offset)
     {
@@ -954,6 +975,11 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
       dwarf_eh_frame_offset = sectp->filepos;
       dwarf_eh_frame_size = bfd_get_section_size_before_reloc (sectp);
     }
+  else if (STREQ (sectp->name, RANGES_SECTION))
+    {
+      dwarf_ranges_offset = sectp->filepos;
+      dwarf_ranges_size = bfd_get_section_size_before_reloc (sectp);
+    }
 }
 
 /* Build a partial symbol table.  */
@@ -991,6 +1017,13 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
                                                 dwarf_macinfo_size);
   else
     dwarf_macinfo_buffer = NULL;
+
+  if (dwarf_ranges_offset)
+    dwarf_ranges_buffer = dwarf2_read_section (objfile,
+					       dwarf_ranges_offset,
+					       dwarf_ranges_size);
+  else
+    dwarf_ranges_buffer = NULL;
 
   if (mainline
       || (objfile->global_psymbols.size == 0
@@ -1207,6 +1240,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       DWARF_STR_SIZE (pst) = dwarf_str_size;
       DWARF_MACINFO_BUFFER (pst) = dwarf_macinfo_buffer;
       DWARF_MACINFO_SIZE (pst) = dwarf_macinfo_size;
+      DWARF_RANGES_BUFFER (pst) = dwarf_ranges_buffer;
+      DWARF_RANGES_SIZE (pst) = dwarf_ranges_size;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
       /* Store the function that reads in the rest of the symbol table */
@@ -1543,6 +1578,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   dwarf_str_size = DWARF_STR_SIZE (pst);
   dwarf_macinfo_buffer = DWARF_MACINFO_BUFFER (pst);
   dwarf_macinfo_size = DWARF_MACINFO_SIZE (pst);
+  dwarf_ranges_buffer = DWARF_RANGES_BUFFER (pst);
+  dwarf_ranges_size = DWARF_RANGES_SIZE (pst);
   baseaddr = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (objfile));
   cu_header_offset = offset;
   info_ptr = dwarf_info_buffer + offset;
@@ -1565,9 +1602,10 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   make_cleanup_free_die_list (dies);
 
   /* Do line number decoding in read_file_scope () */
+  cu_header.die = dies;
   process_die (dies, objfile, &cu_header);
 
-  if (!dwarf2_get_pc_bounds (dies, &lowpc, &highpc, objfile))
+  if (!dwarf2_get_pc_bounds (dies, &lowpc, &highpc, objfile, &cu_header))
     {
       /* Some compilers don't define a DW_AT_high_pc attribute for
          the compilation unit.   If the DW_AT_high_pc is missing,
@@ -1582,7 +1620,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 		{
 		  CORE_ADDR low, high;
 
-		  if (dwarf2_get_pc_bounds (child_die, &low, &high, objfile))
+		  if (dwarf2_get_pc_bounds (child_die, &low, &high,
+					    objfile, &cu_header))
 		    {
 		      highpc = max (highpc, high);
 		    }
@@ -1711,7 +1750,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   bfd *abfd = objfile->obfd;
   struct line_header *line_header = 0;
 
-  if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile))
+  if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile, cu_header))
     {
       if (die->has_children)
 	{
@@ -1722,7 +1761,8 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
 		{
 		  CORE_ADDR low, high;
 
-		  if (dwarf2_get_pc_bounds (child_die, &low, &high, objfile))
+		  if (dwarf2_get_pc_bounds (child_die, &low, &high,
+					    objfile, cu_header))
 		    {
 		      lowpc = min (lowpc, low);
 		      highpc = max (highpc, high);
@@ -1868,7 +1908,7 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
 
   /* Ignore functions with missing or empty names and functions with
      missing or invalid low and high pc attributes.  */
-  if (name == NULL || !dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile))
+  if (name == NULL || !dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile, cu_header))
     return;
 
   lowpc += baseaddr;
@@ -1966,7 +2006,11 @@ read_lexical_block_scope (struct die_info *die, struct objfile *objfile,
   struct die_info *child_die;
 
   /* Ignore blocks with missing or invalid low and high pc attributes.  */
-  if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile))
+  /* ??? Perhaps consider discontiguous blocks defined by DW_AT_ranges
+     as multiple lexical blocks?  Handling children in a sane way would
+     be nasty.  Might be easier to properly extend generic blocks to 
+     describe ranges.  */
+  if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile, cu_header))
     return;
   lowpc += baseaddr;
   highpc += baseaddr;
@@ -1991,27 +2035,159 @@ read_lexical_block_scope (struct die_info *die, struct objfile *objfile,
   local_symbols = new->locals;
 }
 
-/* Get low and high pc attributes from a die.
-   Return 1 if the attributes are present and valid, otherwise, return 0.  */
-
+/* Get low and high pc attributes from a die.  Return 1 if the attributes
+   are present and valid, otherwise, return 0.  Return -1 if the range is
+   discontinuous, i.e. derived from DW_AT_ranges information.  */
 static int
-dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc, CORE_ADDR *highpc,
-		      struct objfile *objfile)
+dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
+		      CORE_ADDR *highpc, struct objfile *objfile,
+		      const struct comp_unit_head *cu_header)
 {
   struct attribute *attr;
-  CORE_ADDR low;
-  CORE_ADDR high;
+  bfd *obfd = objfile->obfd;
+  CORE_ADDR low = 0;
+  CORE_ADDR high = 0;
+  int ret = 0;
 
-  attr = dwarf_attr (die, DW_AT_low_pc);
-  if (attr)
-    low = DW_ADDR (attr);
-  else
-    return 0;
   attr = dwarf_attr (die, DW_AT_high_pc);
   if (attr)
-    high = DW_ADDR (attr);
+    {
+      high = DW_ADDR (attr);
+      attr = dwarf_attr (die, DW_AT_low_pc);
+      if (attr)
+	low = DW_ADDR (attr);
+      else
+	/* Found high w/o low attribute.  */
+	return 0;
+
+      /* Found consecutive range of addresses.  */
+      ret = 1;
+    }
   else
-    return 0;
+    {
+      attr = dwarf_attr (die, DW_AT_ranges);
+      if (attr != NULL)
+	{
+	  unsigned int addr_size = cu_header->addr_size;
+	  CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
+	  /* Value of the DW_AT_ranges attribute is the offset in the
+	     .debug_renges section.  */
+	  unsigned int offset = DW_UNSND (attr);
+	  /* Base address selection entry.  */
+	  CORE_ADDR base = 0;
+	  int found_base = 0;
+	  int dummy;
+	  unsigned int i;
+	  char *buffer;
+	  CORE_ADDR marker;
+	  int low_set;
+ 
+	  /* The applicable base address is determined by (1) the closest
+	     preceding base address selection entry in the range list or
+	     (2) the DW_AT_low_pc of the compilation unit.  */
+
+	  /* ??? Was in dwarf3 draft4, and has since been removed.
+	     GCC still uses it though.  */
+	  attr = dwarf_attr (cu_header->die, DW_AT_entry_pc);
+	  if (attr)
+	    {
+	      base = DW_ADDR (attr);
+	      found_base = 1;
+	    }
+
+	  if (!found_base)
+	    {
+	      attr = dwarf_attr (cu_header->die, DW_AT_low_pc);
+	      if (attr)
+		{
+		  base = DW_ADDR (attr);
+		  found_base = 1;
+		}
+	    }
+
+	  buffer = dwarf_ranges_buffer + offset;
+
+
+	  /* Read in the largest possible address.  */
+	  marker = read_address (obfd, buffer, cu_header, &dummy);
+	  if ((marker & mask) == mask)
+	    {
+	      /* If we found the largest possible address, then
+		 read the base address.  */
+	      base = read_address (obfd, buffer + addr_size,
+				   cu_header, &dummy);
+	      buffer += 2 * addr_size;
+	      offset += 2 * addr_size;
+	      found_base = 1;
+	    }
+
+	  low_set = 0;
+
+	  while (1)
+	    {
+	      CORE_ADDR range_beginning, range_end;
+
+	      range_beginning = read_address (obfd, buffer,
+					      cu_header, &dummy);
+	      buffer += addr_size;
+	      range_end = read_address (obfd, buffer, cu_header, &dummy);
+	      buffer += addr_size;
+	      offset += 2 * addr_size;
+
+	      /* An end of list marker is a pair of zero addresses.  */
+	      if (range_beginning == 0 && range_end == 0)
+		/* Found the end of list entry.  */
+		break;
+
+	      /* Each base address selection entry is a pair of 2 values.
+		 The first is the largest possible address, the second is
+		 the base address.  Check for a base address here.  */
+	      if ((range_beginning & mask) == mask)
+		{
+		  /* If we found the largest possible address, then
+		     read the base address.  */
+		  base = read_address (obfd, buffer + addr_size,
+				       cu_header, &dummy);
+		  found_base = 1;
+		  continue;
+		}
+
+	      if (!found_base)
+		{
+		  /* We have no valid base address for the ranges
+		     data.  */
+		  complaint (&symfile_complaints,
+			     "Invalid .debug_ranges data (no base address)");
+		  return 0;
+		}
+
+	      /* FIXME: This is recording everything as a low-high
+		 segment of consecutive addresses.  We should have a
+		 data structure for discontiguous block ranges
+		 instead.  */
+	      if (! low_set)
+		{
+		  low = range_beginning;
+		  high = range_end;
+		  low_set = 1;
+		}
+	      else
+		{
+		  if (range_beginning < low)
+		    low = range_beginning;
+		  if (range_end > high)
+		    high = range_end;
+		}
+	    }
+
+	  if (! low_set)
+	    /* If the first entry is an end-of-list marker, the range
+	       describes an empty scope, i.e. no instructions.  */
+	    return 0;
+
+	  ret = -1;
+	}
+    }
 
   if (high < low)
     return 0;
@@ -2024,12 +2200,12 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc, CORE_ADDR *highpc,
      labels are not in the output, so the relocs get a value of 0.
      If this is a discarded function, mark the pc bounds as invalid,
      so that GDB will ignore it.  */
-  if (low == 0 && (bfd_get_file_flags (objfile->obfd) & HAS_RELOC) == 0)
+  if (low == 0 && (bfd_get_file_flags (obfd) & HAS_RELOC) == 0)
     return 0;
 
   *lowpc = low;
   *highpc = high;
-  return 1;
+  return ret;
 }
 
 /* Add an aggregate field to the field list.  */

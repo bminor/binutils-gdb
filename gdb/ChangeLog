@@ -1,3 +1,23 @@
+2003-01-29  Richard Henderson  <rth@redhat.com>
+	    Elena Zannoni  <ezannoni@redhat.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/961.
+	* dwarf2read.c 	(dwarf_ranges_offset, dwarf_ranges_size): New
+	variables.
+	(RANGES_SECTION): New.
+	(dwarf_ranges_buffer): New variable.
+	(struct comp_unit_head): Add member "die".
+	(struct dwarf2_pinfo): Add dwarf_ranges_buffer, dwarf_ranges_size.
+	(DWARF_RANGES_BUFFER, DWARF_RANGES_SIZE): New.
+	(dwarf2_has_info): Init dwarf_ranges_offset and dwarf_ranges_size.
+	(dwarf2_locate_sections): Likewise.
+	(dwarf2_build_psymtabs): Read .debug_ranges.
+	(dwarf2_build_psymtabs_hard): Swap dwarf_ranges out.
+	(psymtab_to_symtab_1): Swap dwarf_ranges in.  Set cu_header.die.
+	(dwarf2_get_pc_bounds): New cu_header argument; adjust all callers.
+	Look for DW_AT_ranges and return the bounding box.
+
 2003-01-29  Brian Ford <ford@vss.fsi.com>
 
 	* win32-nat.c (cygwin_pid): Removed as unused.
