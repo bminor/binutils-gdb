@@ -1,3 +1,10 @@
+2004-07-27  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* remote-m32r-sdi.c: Fix breakpoint bug.
+	(send_cmd, send_one_arg_cmd, send_two_arg_cmd, send_three_arg_cmd,
+	recv_char_data, recv_long_data): New functions to replace communication
+	sequences.
+
 2004-07-26  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Document PR threads/1650.
