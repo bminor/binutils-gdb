@@ -1,4 +1,4 @@
-/* Copyright 2002 Free Software Foundation, Inc.
+/* Copyright 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 int extern_array[4] = {1, 2, 3, 4};
 static int static_array[4] = {5, 6, 7, 8};

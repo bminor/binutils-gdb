@@ -1,5 +1,9 @@
 2004-08-05  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/gcore.c: Include <string.h>.
+
+2004-08-05  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/gcore.c: Add copyright notice.
 
 2004-08-05  Michael Chastain  <mec.gnu@mindspring.com>
