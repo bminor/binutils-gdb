@@ -1,5 +1,12 @@
 2003-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (struct gdbarch_tdep): Delete member
+	gdb_target_is_mips64.
+	(GDB_TARGET_IS_MIPS64): Delete macro.
+	(mips_gdbarch_init): Do not set tdep's gdb_target_is_mips64.
+	(mips_dump_tdep): Do not print GDB_TARGET_IS_MIPS64.
+	(mips_addr_bits_remove): Simplify.
+
 	* mips-tdep.c: Replace DEPRECATED_REGISTER_VIRTUAL_SIZE with
 	register_size.
 

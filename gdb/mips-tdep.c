@@ -134,7 +134,6 @@ struct gdbarch_tdep
     int mips_default_saved_regsize;
     int mips_fp_register_double;
     int mips_default_stack_argsize;
-    int gdb_target_is_mips64;
     int default_mask_address_p;
   };
 
@@ -340,9 +339,7 @@ mips2_fp_compat (void)
 
 /* Indicate that the ABI makes use of double-precision registers
    provided by the FPU (rather than combining pairs of registers to
-   form double-precision values).  Do not use "TARGET_IS_MIPS64" to
-   determine if the ABI is using double-precision registers.  See also
-   MIPS_FPU_TYPE. */
+   form double-precision values).  See also MIPS_FPU_TYPE.  */
 #define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
 
 /* The amount of space reserved on the stack for registers. This is
@@ -365,8 +362,6 @@ mips_stack_argsize (void)
   else /* if (mips_stack_argsize_string == size_32) */
     return 4;
 }
-
-#define GDB_TARGET_IS_MIPS64 (gdbarch_tdep (current_gdbarch)->gdb_target_is_mips64 + 0)
 
 #define MIPS_DEFAULT_MASK_ADDRESS_P (gdbarch_tdep (current_gdbarch)->default_mask_address_p)
 
@@ -1784,40 +1779,26 @@ read_next_frame_reg (struct frame_info *fi, int regno)
 static CORE_ADDR
 mips_addr_bits_remove (CORE_ADDR addr)
 {
-  if (GDB_TARGET_IS_MIPS64)
-    {
-      if (mips_mask_address_p () && (addr >> 32 == (CORE_ADDR) 0xffffffff))
-	{
-	  /* This hack is a work-around for existing boards using
-	     PMON, the simulator, and any other 64-bit targets that
-	     doesn't have true 64-bit addressing.  On these targets,
-	     the upper 32 bits of addresses are ignored by the
-	     hardware.  Thus, the PC or SP are likely to have been
-	     sign extended to all 1s by instruction sequences that
-	     load 32-bit addresses.  For example, a typical piece of
-	     code that loads an address is this:
-	         lui $r2, <upper 16 bits>
-	         ori $r2, <lower 16 bits>
-	     But the lui sign-extends the value such that the upper 32
-	     bits may be all 1s.  The workaround is simply to mask off
-	     these bits.  In the future, gcc may be changed to support
-	     true 64-bit addressing, and this masking will have to be
-	     disabled.  */
-	  addr &= (CORE_ADDR) 0xffffffff;
-	}
-    }
-  else if (mips_mask_address_p ())
-    {
-      /* FIXME: This is wrong!  mips_addr_bits_remove() shouldn't be
-         masking off bits, instead, the actual target should be asking
-         for the address to be converted to a valid pointer. */
-      /* Even when GDB is configured for some 32-bit targets
-	 (e.g. mips-elf), BFD is configured to handle 64-bit targets,
-	 so CORE_ADDR is 64 bits.  So we still have to mask off
-	 useless bits from addresses.  */
-      addr &= (CORE_ADDR) 0xffffffff;
-    }
-  return addr;
+  if (mips_mask_address_p ()
+      && (((ULONGEST) addr) >> 32 == 0xffffffffUL))
+    /* This hack is a work-around for existing boards using PMON, the
+       simulator, and any other 64-bit targets that doesn't have true
+       64-bit addressing.  On these targets, the upper 32 bits of
+       addresses are ignored by the hardware.  Thus, the PC or SP are
+       likely to have been sign extended to all 1s by instruction
+       sequences that load 32-bit addresses.  For example, a typical
+       piece of code that loads an address is this:
+
+       lui $r2, <upper 16 bits>
+       ori $r2, <lower 16 bits>
+
+       But the lui sign-extends the value such that the upper 32 bits
+       may be all 1s.  The workaround is simply to mask off these
+       bits.  In the future, gcc may be changed to support true 64-bit
+       addressing, and this masking will have to be disabled.  */
+    return addr &= 0xffffffffUL;
+  else
+    return addr;
 }
 
 /* mips_software_single_step() is called just before we want to resume
@@ -5880,7 +5861,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 0;
       tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 4 - 1;
-      tdep->gdb_target_is_mips64 = 0;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
@@ -5899,7 +5879,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 4 - 1;
-      tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
@@ -5917,7 +5896,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 0;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->gdb_target_is_mips64 = 0;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
@@ -5936,7 +5914,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
@@ -5955,7 +5932,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
@@ -5974,7 +5950,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
@@ -6284,9 +6259,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: FPA0_REGNUM = %d\n",
 		      FPA0_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
-		      GDB_TARGET_IS_MIPS64);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep:  HI_REGNUM = %d\n",
 		      HI_REGNUM);
