@@ -1,3 +1,8 @@
+1998-12-10  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Don't fail relocations
+	in debug sections for symbol defined externally.
+
 Thu Dec 10 10:58:38 1998  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* targets.c (bfd_target_vector): Remove duplicate entry for
@@ -81,7 +86,7 @@ Wed Dec  2 15:03:59 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	* aclocal.m4, configure, Makefile.in: Rebuilt using latest
  	automake macro library.
-	
+
 	* hpux-core.c (hpux_core_core_file_p): this function now
  	understands HPUX 10.30 thread info. Yes, the thread stacks can be
  	found in the corefile! Also, in hpux_core_core_file_p, if we
