@@ -84,6 +84,7 @@ size_t md_longopts_size = sizeof(md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
+  {"word", cons, 4},
   { NULL,       NULL,           0 }
 };
 

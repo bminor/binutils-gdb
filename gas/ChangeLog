@@ -1,4 +1,9 @@
 start-sanitize-v850
+Wed Oct 23 16:21:28 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_pseudo_table): Add .word; allocates
+	4 bytes of space.
+
 Tue Oct 22 22:01:25 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_assemble): Handle TDAOFF relocs
