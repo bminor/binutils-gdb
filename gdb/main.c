@@ -397,6 +397,7 @@ extern int gdbtk_test (char *);
 	      else
 		baud_rate = i;
 	    }
+            break;
 	  case 'l':
 	    {
 	      int i;

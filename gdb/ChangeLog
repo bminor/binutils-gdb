@@ -1,5 +1,8 @@
 2002-09-24  Jim Blandy  <jimb@redhat.com>
 
+	Fix from Paul Breed:
+	* main.c (captured_main): Add a `break' after the case for 'b'.
+
 	* dbxread.c, mdebugread.c: Revert my change of 2001-10-23.  Moving
 	texthigh and textlow to reader-specific structs caused
 	objfile_relocate to miss them.  This is fixable, but the work that
