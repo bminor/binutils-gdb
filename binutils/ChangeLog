@@ -1,3 +1,7 @@
+2000-04-06  Timothy Wall  <twall@cygnus.com>
+
+	* objdump.c (dump_section_header): Print CLINK and BLOCK flags.
+
 2000-04-06  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* readelf.c (decode_location_expression): Loop through multiple

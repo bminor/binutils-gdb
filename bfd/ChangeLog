@@ -1,3 +1,10 @@
+2000-04-06  Timothy Wall  <twall@cygnus.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Handle C_STATLAB storage
+	class.  Handle SEC_CLINK and SEC_BLOCK flags.
+	* section.c: Add SEC_CLINK and SEC_BLOCK flags.
+	* bfd-in2.h: Add SEC_CLINK and SEC_BLOCK flags.
+
 2000-04-06  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.h (elf32_arm_set_private_flags): Only check for

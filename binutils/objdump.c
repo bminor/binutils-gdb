@@ -376,6 +376,8 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_NEVER_LOAD, "NEVER_LOAD");
   PF (SEC_EXCLUDE, "EXCLUDE");
   PF (SEC_SORT_ENTRIES, "SORT_ENTRIES");
+  PF (SEC_BLOCK, "BLOCK");
+  PF (SEC_CLINK, "CLINK");
   PF (SEC_SMALL_DATA, "SMALL_DATA");
   PF (SEC_SHARED, "SHARED");
 

@@ -608,8 +608,11 @@ fixup_symbol_value (abfd, coff_symbol_ptr, syment)
 	  syment->n_value = (coff_symbol_ptr->symbol.value
 			     + coff_symbol_ptr->symbol.section->output_offset);
 	  if (! obj_pe (abfd))
-	    syment->n_value +=
-	      coff_symbol_ptr->symbol.section->output_section->vma;
+            {
+              syment->n_value += (syment->n_sclass == C_STATLAB)
+                ? coff_symbol_ptr->symbol.section->output_section->lma
+                : coff_symbol_ptr->symbol.section->output_section->vma;
+            }
 	}
       else
 	{

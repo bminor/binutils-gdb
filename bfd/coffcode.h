@@ -436,6 +436,16 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_BSS;
     }
 
+#ifdef STYP_CLINK
+  if (sec_flags & SEC_CLINK)
+    styp_flags |= STYP_CLINK;
+#endif
+
+#ifdef STYP_BLOCK
+  if (sec_flags & SEC_BLOCK)
+    styp_flags |= STYP_BLOCK;
+#endif
+
 #ifdef STYP_NOLOAD
   if ((sec_flags & (SEC_NEVER_LOAD | SEC_COFF_SHARED_LIBRARY)) != 0)
     styp_flags |= STYP_NOLOAD;
@@ -532,6 +542,16 @@ styp_to_sec_flags (abfd, hdr, name, section)
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
   flagword sec_flags = 0;
+
+#ifdef STYP_BLOCK
+  if (styp_flags & STYP_BLOCK)
+      sec_flags |= SEC_BLOCK;
+#endif  
+
+#ifdef STYP_CLINK
+  if (styp_flags & STYP_CLINK)
+      sec_flags |= SEC_CLINK;
+#endif  
 
 #ifdef STYP_NOLOAD
   if (styp_flags & STYP_NOLOAD)
@@ -4304,6 +4324,11 @@ coff_slurp_symbol_table (abfd)
 #endif
 	      break;
 
+	    case C_STATLAB:	/* Static load time label */
+              dst->symbol.value = src->u.syment.n_value;
+              dst->symbol.flags = BSF_GLOBAL;
+              break;
+
 	    case C_NULL:
 	      /* PE DLLs sometimes have zeroed out symbols for some
                  reason.  Just ignore them without a warning.  */
@@ -4326,7 +4351,6 @@ coff_slurp_symbol_table (abfd)
 #ifdef TIC80COFF
 	    case C_UEXT:	/* Tentative external definition */
 #endif
-	    case C_STATLAB:	/* Static load time label */
 	    case C_EXTLAB:	/* External load time label */
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:

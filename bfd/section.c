@@ -336,6 +336,16 @@ CODE_FRAGMENT
 .	   executables or shared objects.  *}
 .#define SEC_SHARED 0x4000000
 .
+.	{* When a section with this flag is being linked, then if the size of
+.          the input section is less than a page, it should not cross a page
+.          boundary.  If the size of the input section is one page or more, it
+.          should be aligned on a page boundary.  *}
+.#define SEC_BLOCK 0x8000000
+.
+.	{* Conditionally link this section; do not link if there are no
+.          references found to any symbol in the section.  *}
+.#define SEC_CLINK 0x10000000
+.
 .	{*  End of section flags.  *}
 .
 .	{* Some internal packed boolean fields.  *}
