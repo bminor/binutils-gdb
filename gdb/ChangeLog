@@ -1,3 +1,8 @@
+2002-03-12  David O'Brien  <obrien@FreeBSD.org>
+
+	* config/sparc/fbsd.mh: Fix copyright.
+	* config/sparc/fbsd.mt: Likewise.
+
 2002-03-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Add Jim Ingham and Klee Dienes to ``write after
