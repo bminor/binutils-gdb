@@ -3519,7 +3519,7 @@ load_address (counter, reg, ep, used_at)
 	  /* We don't do GP optimization for now because RELAX_ENCODE can't
 	     hold the data for such large chunks.  */
 
-	  if (*used_at == 0)
+	  if (*used_at == 0 && ! mips_opts.noat)
 	    {
 	      macro_build (p, counter, ep, "lui", "t,u",
 			   reg, (int) BFD_RELOC_MIPS_HIGHEST);
@@ -4534,7 +4534,7 @@ macro (ip)
 	      /* We don't do GP optimization for now because RELAX_ENCODE can't
 		 hold the data for such large chunks.  */
 
-	      if (used_at == 0)
+	      if (used_at == 0 && ! mips_opts.noat)
 		{
 		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
 			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
@@ -5487,7 +5487,7 @@ macro (ip)
 	      /* We don't do GP optimization for now because RELAX_ENCODE can't
 		 hold the data for such large chunks.  */
 
-	      if (used_at == 0)
+	      if (used_at == 0 && ! mips_opts.noat)
 		{
 		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
 			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);

@@ -1,5 +1,11 @@
 2002-07-30  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
+	* tc-mips.c (load_address): Don't clobber $at when loading a
+	64-bit address in non-PIC code if noat is in effect.
+	(macro): Likewise.
+
+2002-07-30  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
 	* config/tc-mips.c (macro): Use codes 6 and 7 in trap instructions
 	used in division/multiply macro expansions similarly to how they
 	are used in the variants with break instructions.
