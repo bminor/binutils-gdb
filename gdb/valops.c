@@ -1550,7 +1550,7 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
 
       v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
-      if (v == 0)
+      if (v == 0 || v == (value) -1)
 	{
 	  if (TYPE_NFN_FIELDS (t))
 	    error ("There is no member or method named %s.", name);
