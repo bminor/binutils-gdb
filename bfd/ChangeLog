@@ -1,5 +1,11 @@
 Wed Apr 10 00:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libaout.h (WRITE_HEADERS): Write out the relocs even if there
+	aren't any symbols.
+	* aoutx.h (NAME(aout,swap_std_reloc_out)): Set r_index to N_ABS,
+	not 0, for an absolute symbol.
+	(NAME(aout,swap_ext_reloc_out)): Likewise.
+
 	* ihex.c (ihex_scan): Accept a length of 4 for record type 5.
 	(ihex_write_object_contents): For a large start address, output
 	the full 32 bit address in record type 5.

@@ -1971,7 +1971,7 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
       {
 	/* Whoops, looked like an abs symbol, but is really an offset
 	   from the abs section */
-	r_index = 0;
+	r_index = N_ABS;
 	r_extern = 0;
        }
       else
@@ -2050,7 +2050,7 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
   if (bfd_is_abs_section (bfd_get_section (sym)))
     {
       r_extern = 0;
-      r_index = 0;
+      r_index = N_ABS;
     }
   else if ((sym->flags & BSF_SECTION_SYM) == 0)
     {
