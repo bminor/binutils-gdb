@@ -515,18 +515,18 @@ CAT(NAME,_bfd_final_link)
 
 /* Byte swapping routines.  */
 
-bfd_vma		bfd_getb64	   PARAMS ((unsigned char *));
-bfd_vma 	bfd_getl64	   PARAMS ((unsigned char *));
-bfd_signed_vma	bfd_getb_signed_64 PARAMS ((unsigned char *));
-bfd_signed_vma	bfd_getl_signed_64 PARAMS ((unsigned char *));
-bfd_vma		bfd_getb32	   PARAMS ((unsigned char *));
-bfd_vma		bfd_getl32	   PARAMS ((unsigned char *));
-bfd_signed_vma	bfd_getb_signed_32 PARAMS ((unsigned char *));
-bfd_signed_vma	bfd_getl_signed_32 PARAMS ((unsigned char *));
-bfd_vma		bfd_getb16	   PARAMS ((unsigned char *));
-bfd_vma		bfd_getl16	   PARAMS ((unsigned char *));
-bfd_signed_vma	bfd_getb_signed_16 PARAMS ((unsigned char *));
-bfd_signed_vma	bfd_getl_signed_16 PARAMS ((unsigned char *));
+bfd_vma		bfd_getb64	   PARAMS ((const unsigned char *));
+bfd_vma 	bfd_getl64	   PARAMS ((const unsigned char *));
+bfd_signed_vma	bfd_getb_signed_64 PARAMS ((const unsigned char *));
+bfd_signed_vma	bfd_getl_signed_64 PARAMS ((const unsigned char *));
+bfd_vma		bfd_getb32	   PARAMS ((const unsigned char *));
+bfd_vma		bfd_getl32	   PARAMS ((const unsigned char *));
+bfd_signed_vma	bfd_getb_signed_32 PARAMS ((const unsigned char *));
+bfd_signed_vma	bfd_getl_signed_32 PARAMS ((const unsigned char *));
+bfd_vma		bfd_getb16	   PARAMS ((const unsigned char *));
+bfd_vma		bfd_getl16	   PARAMS ((const unsigned char *));
+bfd_signed_vma	bfd_getb_signed_16 PARAMS ((const unsigned char *));
+bfd_signed_vma	bfd_getl_signed_16 PARAMS ((const unsigned char *));
 void		bfd_putb64	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putl64	   PARAMS ((bfd_vma, unsigned char *));
 void		bfd_putb32	   PARAMS ((bfd_vma, unsigned char *));
