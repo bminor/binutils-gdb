@@ -258,6 +258,9 @@ static boolean get_dlt
 static boolean get_stub
   PARAMS ((bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *));
 
+static int elf64_hppa_elf_get_symbol_type
+  PARAMS ((Elf_Internal_Sym *, int));
+
 static boolean
 elf64_hppa_dyn_hash_table_init (ht, abfd, new)
      struct elf64_hppa_dyn_hash_table *ht;
@@ -2569,6 +2572,19 @@ elf64_hppa_modify_segment_map (abfd)
   return true;
 }
 
+/* Called when writing out an object file to decide the type of a
+   symbol.  */
+static int
+elf64_hppa_elf_get_symbol_type (elf_sym, type)
+     Elf_Internal_Sym *elf_sym;
+     int type;
+{
+  if (ELF_ST_TYPE (elf_sym->st_info) == STT_PARISC_MILLI)
+    return STT_PARISC_MILLI;
+  else
+    return type;
+}
+
 /* The hash bucket size is the standard one, namely 4.  */
 
 const struct elf_size_info hppa64_elf_size_info =
@@ -2662,6 +2678,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_got_header_size     0
 #define elf_backend_plt_header_size     0
 #define elf_backend_type_change_ok true
+#define elf_backend_get_symbol_type	     elf64_hppa_elf_get_symbol_type
 
 #include "elf64-target.h"
 
