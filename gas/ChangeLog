@@ -1,3 +1,8 @@
+Fri Jun 27 19:15:27 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.h (tc_fix_adjustable): Only check for GOT type
+	relocations, don't check for symbol being external, weak, etc.
+
 Mon Jun 16 19:12:51 1997  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* config/tc-ppc.h (tc_fix_adjustable): Don't let the assembler
