@@ -5983,12 +5983,13 @@ md_parse_option (c, arg)
       break;
 
     case 'a':
-      /* ??? Conflicts with gas' listing option.  */
       /* indirect=<tgt>	Assume unannotated indirect branches behavior
 			according to <tgt> --
 			exit:	branch out from the current context (default)
 			labels:	all labels in context may be branch targets
        */
+      if (strncmp (arg, "indirect=", 9) != 0)
+        return 0;
       break;
 
     case 'x':
