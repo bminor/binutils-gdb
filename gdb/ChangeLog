@@ -1,3 +1,10 @@
+start-sanitize-gdbtk
+Fri Aug  9 12:32:53 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (LIB_INSTALL_DIR): New macro.
+	(TCL): Include @TCL_LD_SEARCH_FLAGS@.
+
+end-sanitize-gdbtk
 Fri Aug  9 12:42:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* somread.c (som_symtab_read): Handle secondary definition

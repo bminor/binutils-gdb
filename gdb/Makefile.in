@@ -129,7 +129,8 @@ SIM =
 
 #start-sanitize-gdbtk
 # Where is the TCL library?  Typically in ../tcl.
-TCL = @TCL_BUILD_LIB_SPEC@
+LIB_INSTALL_DIR = $(libdir)
+TCL = @TCL_LD_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
 TCL_CFLAGS = @TCLHDIR@
 
 # Where is the TK library?  Typically in ../tk.
