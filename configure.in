@@ -460,9 +460,6 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-# start-sanitize-ide
-    noconfigdirs="$noconfigdirs libide vmake jstools"
-# end-sanitize-ide
     ;;
 # end-sanitize-d30v
   h8300*-*-* | \

@@ -1,3 +1,9 @@
+start-sanitize-d30v
+Wed Dec 17 09:53:02 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (d30v-*-*): Allow configuring of libide, vmake, etc.
+
+end-sanitize-d30v
 Tue Dec 16 17:36:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Add libgui directory.
