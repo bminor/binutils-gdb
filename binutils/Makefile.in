@@ -63,7 +63,7 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
 
 # Distribution version
-VERSION=1.97
+VERSION=1.97.90
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -351,7 +351,6 @@ ar.o: ar.c
 arsup.o: arsup.c
 bucomm.o: bucomm.c
 copy.o: copy.c
-cplus-dem.o:cplus-dem.c
 filemode.o:filemode.c
 getopt.o:getopt.c
 getopt1.o:getopt1.c

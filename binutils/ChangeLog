@@ -1,3 +1,10 @@
+Sun Aug 30 18:09:03 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Bump to versions 1.97.90.
+	* cplus-dem.c:  Removed.  Was nowhere used - and if some
+	programs are changed to to demangling should now use the
+	versions in libiberty.
+
 Thu Aug 27 12:58:09 1992  Brendan Kehoe  (brendan@cygnus.com)
 
 	* configure.in: add we32k

@@ -47,7 +47,6 @@ configure.bat
 configure.in
 config
 copy.c
-cplus-dem.c
 filemode.c
 gmalloc.c
 i386-pinsn.c
