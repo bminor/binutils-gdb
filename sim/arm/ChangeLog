@@ -1,3 +1,8 @@
+2002-05-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armos.c (ARMul_OSHandleSWI): Support the RedBoot SWI in ARM
+	mode and some of its system calls.
+
 2002-03-17  Anthony Green  <green@redhat.com>
 
 	* wrapper.c (mem_size): Increase the default target memory to 8MB.

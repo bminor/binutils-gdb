@@ -48,7 +48,7 @@
 #endif
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>		/* For SEEK_SET etc */
+#include <unistd.h>		/* For SEEK_SET etc.  */
 #endif
 
 #ifdef __riscos
@@ -86,13 +86,12 @@ extern int _fisatty (FILE *);
 #include "callback.h"
 extern host_callback *sim_callback;
 
-extern unsigned ARMul_OSInit (ARMul_State * state);
-extern void ARMul_OSExit (ARMul_State * state);
-extern unsigned ARMul_OSHandleSWI (ARMul_State * state, ARMword number);
-extern unsigned ARMul_OSException (ARMul_State * state, ARMword vector,
-				   ARMword pc);
-extern ARMword ARMul_OSLastErrorP (ARMul_State * state);
-extern ARMword ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr);
+extern unsigned ARMul_OSInit       (ARMul_State *);
+extern void     ARMul_OSExit       (ARMul_State *);
+extern unsigned ARMul_OSHandleSWI  (ARMul_State *, ARMword);
+extern unsigned ARMul_OSException  (ARMul_State *, ARMword, ARMword);
+extern ARMword  ARMul_OSLastErrorP (ARMul_State *);
+extern ARMword  ARMul_Debug        (ARMul_State *, ARMword, ARMword);
 
 #define BUFFERSIZE 4096
 #ifndef FOPEN_MAX
@@ -164,15 +163,15 @@ ARMul_OSInit (ARMul_State * state)
   
   OSptr = (struct OSblock *) state->OSptr;
   OSptr->ErrorP = 0;
-  state->Reg[13] = ADDRSUPERSTACK;	/* set up a stack for the current mode */
-  ARMul_SetReg (state, SVC32MODE, 13, ADDRSUPERSTACK);	/* and for supervisor mode */
-  ARMul_SetReg (state, ABORT32MODE, 13, ADDRSUPERSTACK);	/* and for abort 32 mode */
-  ARMul_SetReg (state, UNDEF32MODE, 13, ADDRSUPERSTACK);	/* and for undef 32 mode */
-  ARMul_SetReg (state, SYSTEMMODE, 13, ADDRSUPERSTACK);	/* and for system mode */
-  instr = 0xe59ff000 | (ADDRSOFTVECTORS - 8);	/* load pc from soft vector */
+  state->Reg[13] = ADDRSUPERSTACK;			/* Set up a stack for the current mode...  */
+  ARMul_SetReg (state, SVC32MODE,   13, ADDRSUPERSTACK);/* ...and for supervisor mode...  */
+  ARMul_SetReg (state, ABORT32MODE, 13, ADDRSUPERSTACK);/* ...and for abort 32 mode...  */
+  ARMul_SetReg (state, UNDEF32MODE, 13, ADDRSUPERSTACK);/* ...and for undef 32 mode...  */
+  ARMul_SetReg (state, SYSTEMMODE,  13, ADDRSUPERSTACK);/* ...and for system mode.  */
+  instr = 0xe59ff000 | (ADDRSOFTVECTORS - 8);		/* Load pc from soft vector */
   
   for (i = ARMul_ResetV; i <= ARMFIQV; i += 4)
-    ARMul_WriteWord (state, i, instr);	/* write hardware vectors */
+    ARMul_WriteWord (state, i, instr);	/* Write hardware vectors.  */
   
   SWI_vector_installed = 0;
 
@@ -196,16 +195,19 @@ ARMul_OSInit (ARMul_State * state)
 
 /* #ifndef ASIM */
 
-  /* install fpe */
-  for (i = 0; i < fpesize; i += 4)	/* copy the code */
+  /* Install FPE.  */
+  for (i = 0; i < fpesize; i += 4)
+    /* Copy the code.  */
     ARMul_WriteWord (state, FPESTART + i, fpecode[i >> 2]);
 
   for (i = FPESTART + fpesize;; i -= 4)
-    {				/* reverse the error strings */
+    {
+      /* Reverse the error strings.  */
       if ((j = ARMul_ReadWord (state, i)) == 0xffffffff)
 	break;
       if (state->bigendSig && j < 0x80000000)
-	{			/* it's part of the string so swap it */
+	{
+	  /* It's part of the string so swap it.  */
 	  j = ((j >> 0x18) & 0x000000ff) |
 	    ((j >> 0x08) & 0x0000ff00) |
 	    ((j << 0x08) & 0x00ff0000) | ((j << 0x18) & 0xff000000);
@@ -213,8 +215,10 @@ ARMul_OSInit (ARMul_State * state)
 	}
     }
 
-  ARMul_WriteWord (state, FPEOLDVECT, ARMul_ReadWord (state, 4));	/* copy old illegal instr vector */
-  ARMul_WriteWord (state, 4, FPENEWVECT (ARMul_ReadWord (state, i - 4)));	/* install new vector */
+  /* Copy old illegal instr vector.  */
+  ARMul_WriteWord (state, FPEOLDVECT, ARMul_ReadWord (state, 4));
+  /* Install new vector.  */
+  ARMul_WriteWord (state, 4, FPENEWVECT (ARMul_ReadWord (state, i - 4)));
   ARMul_ConsolePrint (state, ", FPE");
 
 /* #endif  ASIM */
@@ -321,8 +325,10 @@ SWIread (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
 
   if (local == NULL)
     {
-      sim_callback->printf_filtered (sim_callback, "sim: Unable to read 0x%ulx bytes - out of memory\n",
-	       len);
+      sim_callback->printf_filtered
+	(sim_callback,
+	 "sim: Unable to read 0x%ulx bytes - out of memory\n",
+	 len);
       return;
     }
 
@@ -346,8 +352,10 @@ SWIwrite (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
 
   if (local == NULL)
     {
-      sim_callback->printf_filtered (sim_callback, "sim: Unable to write 0x%lx bytes - out of memory\n",
-	       (long) len);
+      sim_callback->printf_filtered
+	(sim_callback,
+	 "sim: Unable to write 0x%lx bytes - out of memory\n",
+	 (long) len);
       return;
     }
 
@@ -580,10 +588,10 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  else
 	    temp = ADDRUSERSTACK;
 
-	  ARMul_WriteWord (state, addr, 0);	/* Heap base */
-	  ARMul_WriteWord (state, addr + 4, temp);	/* Heap limit */
-	  ARMul_WriteWord (state, addr + 8, temp);	/* Stack base */
-	  ARMul_WriteWord (state, addr + 12, temp);	/* Stack limit */
+	  ARMul_WriteWord (state, addr, 0);		/* Heap base.  */
+	  ARMul_WriteWord (state, addr + 4, temp);	/* Heap limit.  */
+	  ARMul_WriteWord (state, addr + 8, temp);	/* Stack base.  */
+	  ARMul_WriteWord (state, addr + 12, temp);	/* Stack limit.  */
 	  break;
 
 	case AngelSWI_Reason_ReportException:
@@ -635,6 +643,69 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
       /* These are used by the FPE code.  */
       break;
       
+    case 0x180001: /* RedBoot's Syscall SWI in ARM mode.  */
+      switch (state->Reg[0])
+	{
+	  /* These numbers are defined in libgloss/syscall.h
+	     but the simulator should not be dependend upon
+	     libgloss being installed.  */
+	case 1:  /* Exit.  */
+	  state->Emulate = FALSE;
+	  return TRUE;
+
+	case 2:  /* Open.  */
+	  SWIopen (state, state->Reg[1], state->Reg[2]);
+	  return TRUE;
+
+	case 3:  /* Close.  */
+	  state->Reg[0] = close (state->Reg[1]);
+	  OSptr->ErrorNo = errno;
+	  return TRUE;
+
+	case 4:  /* Read.  */
+	  SWIread (state, state->Reg[1], state->Reg[2], state->Reg[3]);
+	  return TRUE;
+
+	case 5:  /* Write.  */
+	  SWIwrite (state, state->Reg[1], state->Reg[2], state->Reg[3]);
+	  return TRUE;
+
+	case 6:  /* Lseek.  */
+	  state->Reg[0] = lseek (state->Reg[1], state->Reg[2], state->Reg[3]);
+	  OSptr->ErrorNo = errno;
+	  return TRUE;
+
+	case 17: /* Utime.  */
+	  state->Reg[0] = (ARMword) time (state->Reg[1]);
+	  OSptr->ErrorNo = errno;
+	  return (TRUE);
+
+	case 7:  /* Unlink.  */
+	case 8:  /* Getpid.  */
+	case 9:  /* Kill.  */
+	case 10: /* Fstat.  */
+	case 11: /* Sbrk.  */
+	case 12: /* Argvlen.  */
+	case 13: /* Argv.  */
+	case 14: /* ChDir.  */
+	case 15: /* Stat.  */
+	case 16: /* Chmod.  */
+	case 18: /* Time.  */
+	  sim_callback->printf_filtered
+	    (sim_callback,
+	     "sim: unhandled RedBoot syscall '%d' encountered - ignoring\n",
+	     state->Reg[0]);
+	  return FALSE;
+
+	default:
+	  sim_callback->printf_filtered
+	    (sim_callback,
+	     "sim: unknown RedBoot syscall '%d' encountered - ignoring\n",
+	     state->Reg[0]);
+	  return FALSE;
+	}
+      return TRUE;
+      
     default:
       /* If there is a SWI vector installed use it.  */
       if (state->is_XScale && saved_number != -1)
@@ -661,7 +732,10 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	}
       else
 	{
-	  sim_callback->printf_filtered (sim_callback, "sim: unknown SWI encountered - %x - ignoring\n", number);
+	  sim_callback->printf_filtered
+	    (sim_callback,
+	     "sim: unknown SWI encountered - %x - ignoring\n",
+	     number);
 	  return FALSE;
 	}
     }
