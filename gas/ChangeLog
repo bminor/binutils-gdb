@@ -1,5 +1,13 @@
 2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (set_at): Add cast needed for varargs.
+	(load_register): Likewise.
+	(macro): Likewise. Some code reformatting.
+	(macro2): Add cast needed for varargs.
+	(mips16_macro): Likewise.
+
+2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (md_assemble): Remove superflous casts.
 	(append_insn): Likewise.
 	(mips16_macro_build): Likewise.

@@ -3164,7 +3164,7 @@ set_at (counter, reg, unsignedp)
   else
     {
       load_register (counter, AT, &imm_expr, 0);
-      macro_build ((char *) NULL, counter, NULL,
+      macro_build ((char *) NULL, counter, (expressionS *) NULL,
 		   unsignedp ? "sltu" : "slt",
 		   "d,v,t", AT, reg, AT);
     }
@@ -3412,7 +3412,7 @@ load_register (counter, reg, ep, dbl)
 	      macro_build ((char *) NULL, counter, &tmp,
 			   "ori", "t,r,i", reg, 0,
 			   (int) BFD_RELOC_LO16);
-	      macro_build ((char *) NULL, counter, NULL,
+	      macro_build ((char *) NULL, counter, (expressionS *) NULL,
 			   (shift >= 32) ? "dsll32" : "dsll",
 			   "d,w,<", reg, reg,
 			   (shift >= 32) ? shift - 32 : shift);
@@ -3467,12 +3467,12 @@ load_register (counter, reg, ep, dbl)
 	      if (bit != 0)
 		{
 		  bit += shift;
-		  macro_build ((char *) NULL, counter, NULL,
+		  macro_build ((char *) NULL, counter, (expressionS *) NULL,
 			       (bit >= 32) ? "dsll32" : "dsll",
 			       "d,w,<", reg, reg,
 			       (bit >= 32) ? bit - 32 : bit);
 		}
-	      macro_build ((char *) NULL, counter, NULL,
+	      macro_build ((char *) NULL, counter, (expressionS *) NULL,
 			   (shift >= 32) ? "dsrl32" : "dsrl",
 			   "d,w,<", reg, reg,
 			   (shift >= 32) ? shift - 32 : shift);
@@ -3491,8 +3491,8 @@ load_register (counter, reg, ep, dbl)
     {
       if (freg != 0)
 	{
-	  macro_build ((char *) NULL, counter, NULL, "dsll32", "d,w,<", reg,
-		       freg, 0);
+	  macro_build ((char *) NULL, counter, (expressionS *) NULL,
+		       "dsll32", "d,w,<", reg, freg, 0);
 	  freg = reg;
 	}
     }
@@ -3596,10 +3596,10 @@ load_address (counter, reg, ep, dbl, used_at)
 			   reg, reg, (int) BFD_RELOC_MIPS_HIGHER);
 	      macro_build (p, counter, ep, "daddiu", "t,r,j",
 			   AT, AT, (int) BFD_RELOC_LO16);
-	      macro_build (p, counter, NULL, "dsll32", "d,w,<",
-			   reg, reg, 0);
-	      macro_build (p, counter, NULL, "dadd", "d,v,t",
-			   reg, reg, AT);
+	      macro_build (p, counter, (expressionS *) NULL, "dsll32",
+			   "d,w,<", reg, reg, 0);
+	      macro_build (p, counter, (expressionS *) NULL, "dadd",
+			   "d,v,t", reg, reg, AT);
 	      *used_at = 1;
 	    }
 	  else
@@ -3608,12 +3608,12 @@ load_address (counter, reg, ep, dbl, used_at)
 			   reg, (int) BFD_RELOC_MIPS_HIGHEST);
 	      macro_build (p, counter, ep, "daddiu", "t,r,j",
 			   reg, reg, (int) BFD_RELOC_MIPS_HIGHER);
-	      macro_build (p, counter, NULL, "dsll", "d,w,<",
-			   reg, reg, 16);
+	      macro_build (p, counter, (expressionS *) NULL, "dsll",
+			   "d,w,<", reg, reg, 16);
 	      macro_build (p, counter, ep, "daddiu", "t,r,j",
 			   reg, reg, (int) BFD_RELOC_HI16_S);
-	      macro_build (p, counter, NULL, "dsll", "d,w,<",
-			   reg, reg, 16);
+	      macro_build (p, counter, (expressionS *) NULL, "dsll",
+			   "d,w,<", reg, reg, 16);
 	      macro_build (p, counter, ep, "daddiu", "t,r,j",
 			   reg, reg, (int) BFD_RELOC_LO16);
 	    }
@@ -3832,10 +3832,11 @@ macro (ip)
       expr1.X_add_number = 8;
       macro_build ((char *) NULL, &icnt, &expr1, "bgez", "s,p", sreg);
       if (dreg == sreg)
-	macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "",
+		     0);
       else
 	move_register (&icnt, dreg, sreg);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dsub" : "sub", "d,v,t", dreg, 0, sreg);
 
       --mips_opts.noreorder;
@@ -3868,7 +3869,8 @@ macro (ip)
 	  return;
 	}
       load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL, s2, "d,v,t", treg, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s2, "d,v,t",
+		   treg, sreg, AT);
       break;
 
     case M_AND_I:
@@ -3898,14 +3900,15 @@ macro (ip)
 	    {
 	      macro_build ((char *) NULL, &icnt, &imm_expr, "ori", "t,r,i",
 			   treg, sreg, (int) BFD_RELOC_LO16);
-	      macro_build ((char *) NULL, &icnt, NULL, "nor", "d,v,t",
-			   treg, treg, 0);
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nor",
+			   "d,v,t", treg, treg, 0);
 	    }
 	  return;
 	}
 
       load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
-      macro_build ((char *) NULL, &icnt, NULL, s2, "d,v,t", treg, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s2, "d,v,t",
+		   treg, sreg, AT);
       break;
 
     case M_BEQ_I:
@@ -3938,18 +3941,17 @@ macro (ip)
       if (treg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bgezl" : "bgez",
-		       "s,p", sreg);
+		       likely ? "bgezl" : "bgez", "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "blezl" : "blez",
-		       "s,p", treg);
+		       likely ? "blezl" : "blez", "s,p", treg);
 	  return;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "slt", "d,v,t",
+		   AT, sreg, treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -3977,7 +3979,8 @@ macro (ip)
 	      if (warn_nops)
 		as_warn (_("Branch %s is always false (nop)"),
 			 ip->insn_mo->name);
-	      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop",
+			   "", 0);
 	    }
 	  else
 	    {
@@ -4044,8 +4047,8 @@ macro (ip)
 		       likely ? "beql" : "beq", "s,t,p", 0, treg);
 	  return;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, sreg,
-		   treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		   "d,v,t", AT, sreg, treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4094,7 +4097,8 @@ macro (ip)
 		       likely ? "bltzl" : "bltz", "s,p", treg);
 	  return;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "slt", "d,v,t",
+		   AT, treg, sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4110,8 +4114,8 @@ macro (ip)
 	}
       if (sreg == 0)
 	goto do_false;
-      macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, treg,
-		   sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		   "d,v,t", AT, treg, sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4131,7 +4135,8 @@ macro (ip)
 		       likely ? "bgezl" : "bgez", "s,p", treg);
 	  return;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "slt", "d,v,t",
+		   AT, treg, sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4187,8 +4192,8 @@ macro (ip)
 	}
       if (sreg == 0)
 	goto do_true;
-      macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, treg,
-		   sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		   "d,v,t", AT, treg, sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4238,7 +4243,8 @@ macro (ip)
 		       likely ? "bgtzl" : "bgtz", "s,p", treg);
 	  return;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "slt", "d,v,t",
+		   AT, sreg, treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4254,7 +4260,8 @@ macro (ip)
 		       likely ? "bnel" : "bne", "s,t,p", 0, treg);
 	  return;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, sreg,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		   "d,v,t", AT, sreg,
 		   treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
 		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
@@ -4274,9 +4281,11 @@ macro (ip)
 	{
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
-	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
+			 "s,t", 0, 0);
 	  else
-	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+			 "c", 7);
 	  return;
 	}
 
@@ -4285,17 +4294,19 @@ macro (ip)
       mips_any_noreorder = 1;
       if (mips_trap)
 	{
-	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
-	  macro_build ((char *) NULL, &icnt, NULL,
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
+		       "s,t", treg, 0);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
 	}
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
-	  macro_build ((char *) NULL, &icnt, NULL,
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		       "c", 7);
 	}
       expr1.X_add_number = -1;
       macro_build ((char *) NULL, &icnt, &expr1,
@@ -4308,8 +4319,8 @@ macro (ip)
 	  expr1.X_add_number = 1;
 	  macro_build ((char *) NULL, &icnt, &expr1, "daddiu", "t,r,j", AT, 0,
 		       (int) BFD_RELOC_LO16);
-	  macro_build ((char *) NULL, &icnt, NULL, "dsll32", "d,w,<", AT, AT,
-		       31);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsll32",
+		       "d,w,<", AT, AT, 31);
 	}
       else
 	{
@@ -4319,7 +4330,8 @@ macro (ip)
 	}
       if (mips_trap)
 	{
-	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", sreg, AT);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
+		       "s,t", sreg, AT);
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
@@ -4328,15 +4340,17 @@ macro (ip)
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", sreg, AT);
-	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "",
+		       0);
 
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
 
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		       "c", 6);
 	}
-      macro_build ((char *) NULL, &icnt, NULL, s, "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d", dreg);
       break;
 
     case M_DIV_3I:
@@ -4379,9 +4393,11 @@ macro (ip)
 	{
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
-	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
+			 "s,t", 0, 0);
 	  else
-	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+			 "c", 7);
 	  return;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
@@ -4398,8 +4414,8 @@ macro (ip)
 	{
 	  if (strcmp (s2, "mflo") == 0)
 	    {
-	      macro_build ((char *) NULL, &icnt, NULL, dbl ? "dneg" : "neg",
-			   "d,w", dreg, sreg);
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			   dbl ? "dneg" : "neg", "d,w", dreg, sreg);
 	    }
 	  else
 	    move_register (&icnt, dreg, 0);
@@ -4407,8 +4423,9 @@ macro (ip)
 	}
 
       load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, AT);
-      macro_build ((char *) NULL, &icnt, NULL, s2, "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "z,s,t",
+		   sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s2, "d", dreg);
       break;
 
     case M_DIVU_3:
@@ -4432,8 +4449,10 @@ macro (ip)
       mips_any_noreorder = 1;
       if (mips_trap)
 	{
-	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "teq",
+		       "s,t", treg, 0);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "z,s,t",
+		       sreg, treg);
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
@@ -4442,14 +4461,16 @@ macro (ip)
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, s, "z,s,t", sreg, treg);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "z,s,t",
+		       sreg, treg);
 
 	  /* We want to close the noreorder block as soon as possible, so
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		       "c", 7);
 	}
-      macro_build ((char *) NULL, &icnt, NULL, s2, "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s2, "d", dreg);
       return;
 
     case M_DLA_AB:
@@ -4565,9 +4586,9 @@ macro (ip)
 			     tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
 		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			     AT, AT, (int) BFD_RELOC_LO16);
-		macro_build (p, &icnt, NULL, "dsll32", "d,w,<",
-			     tempreg, tempreg, 0);
-		macro_build (p, &icnt, NULL, "dadd", "d,v,t",
+		macro_build (p, &icnt, (expressionS *) NULL, "dsll32",
+			     "d,w,<", tempreg, tempreg, 0);
+		macro_build (p, &icnt, (expressionS *) NULL, "dadd", "d,v,t",
 			     tempreg, tempreg, AT);
 		used_at = 1;
 	      }
@@ -4577,11 +4598,11 @@ macro (ip)
 			     tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
 		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			     tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
-		macro_build (p, &icnt, NULL, "dsll", "d,w,<",
+		macro_build (p, &icnt, (expressionS *) NULL, "dsll", "d,w,<",
 			     tempreg, tempreg, 16);
 		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			     tempreg, tempreg, (int) BFD_RELOC_HI16_S);
-		macro_build (p, &icnt, NULL, "dsll", "d,w,<",
+		macro_build (p, &icnt, (expressionS *) NULL, "dsll", "d,w,<",
 			     tempreg, tempreg, 16);
 		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			     tempreg, tempreg, (int) BFD_RELOC_LO16);
@@ -4647,8 +4668,7 @@ macro (ip)
 	  frag_grow (32);
 	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
 	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
-	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       dbl ? "ld" : "lw",
+	  macro_build ((char *) NULL, &icnt, &offset_expr, dbl ? "ld" : "lw",
 		       "t,o(b)", tempreg, lw_reloc_type, GP);
 	  if (expr1.X_add_number == 0)
 	    {
@@ -5428,12 +5448,12 @@ macro (ip)
 		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			       tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
 		  if (breg != 0)
-		    macro_build (p, &icnt, NULL, "daddu", "d,v,t",
-				 AT, AT, breg);
-		  macro_build (p, &icnt, NULL, "dsll32", "d,w,<",
-			       tempreg, tempreg, 0);
-		  macro_build (p, &icnt, NULL, "daddu", "d,v,t",
-			       tempreg, tempreg, AT);
+		    macro_build (p, &icnt, (expressionS *) NULL, "daddu",
+				 "d,v,t", AT, AT, breg);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dsll32",
+			       "d,w,<", tempreg, tempreg, 0);
+		  macro_build (p, &icnt, (expressionS *) NULL, "daddu",
+			       "d,v,t", tempreg, tempreg, AT);
 		  macro_build (p, &icnt, &offset_expr, s,
 			       fmt, treg, (int) BFD_RELOC_LO16, tempreg);
 		  used_at = 1;
@@ -5444,15 +5464,15 @@ macro (ip)
 			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
 		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			       tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
-		  macro_build (p, &icnt, NULL, "dsll", "d,w,<",
-			       tempreg, tempreg, 16);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dsll",
+			       "d,w,<", tempreg, tempreg, 16);
 		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
 			       tempreg, tempreg, (int) BFD_RELOC_HI16_S);
-		  macro_build (p, &icnt, NULL, "dsll", "d,w,<",
-			       tempreg, tempreg, 16);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dsll",
+			       "d,w,<", tempreg, tempreg, 16);
 		  if (breg != 0)
-		    macro_build (p, &icnt, NULL, "daddu", "d,v,t",
-				 tempreg, tempreg, breg);
+		    macro_build (p, &icnt, (expressionS *) NULL, "daddu",
+				 "d,v,t", tempreg, tempreg, breg);
 		  macro_build (p, &icnt, &offset_expr, s,
 			       fmt, treg, (int) BFD_RELOC_LO16, tempreg);
 		}
@@ -6401,10 +6421,10 @@ macro2 (ip)
     case M_DMUL:
       dbl = 1;
     case M_MUL:
-      macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dmultu" : "multu",
-		   "s,t", sreg, treg);
-      macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		   dbl ? "dmultu" : "multu", "s,t", sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d",
+		   dreg);
       return;
 
     case M_DMUL_I:
@@ -6414,9 +6434,10 @@ macro2 (ip)
 	 not trying to be that fancy. GCC should do this for us
 	 anyway.  */
       load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dmult" : "mult", "s,t", sreg, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d",
+		   dreg);
       break;
 
     case M_DMULO_I:
@@ -6434,23 +6455,29 @@ macro2 (ip)
       mips_any_noreorder = 1;
       if (imm)
 	load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dmult" : "mult", "s,t", sreg, imm ? AT : treg);
-      macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d",
+		   dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dsra32" : "sra", "d,w,<", dreg, dreg, 31);
-      macro_build ((char *) NULL, &icnt, NULL, "mfhi", "d", AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mfhi", "d",
+		   AT);
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, NULL, "tne", "s,t", dreg, AT);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "tne", "s,t",
+		     dreg, AT);
       else
 	{
 	  expr1.X_add_number = 8;
-	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", dreg, AT);
-	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", dreg,
+		       AT);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "",
+		       0);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		       "c", 6);
 	}
       --mips_opts.noreorder;
-      macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d", dreg);
       break;
 
     case M_DMULOU_I:
@@ -6468,57 +6495,70 @@ macro2 (ip)
       mips_any_noreorder = 1;
       if (imm)
 	load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dmultu" : "multu",
 		   "s,t", sreg, imm ? AT : treg);
-      macro_build ((char *) NULL, &icnt, NULL, "mfhi", "d", AT);
-      macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mfhi", "d",
+		   AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "d",
+		   dreg);
       if (mips_trap)
-	macro_build ((char *) NULL, &icnt, NULL, "tne", "s,t", AT, 0);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "tne", "s,t",
+		     AT, 0);
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", AT, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "",
+		       0);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		       "c", 6);
 	}
       --mips_opts.noreorder;
       break;
 
     case M_ROL:
-      macro_build ((char *) NULL, &icnt, NULL, "subu", "d,v,t", AT, 0, treg);
-      macro_build ((char *) NULL, &icnt, NULL, "srlv", "d,t,s", AT, sreg, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "sllv", "d,t,s", dreg, sreg,
-		   treg);
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "subu",
+		   "d,v,t", AT, 0, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srlv",
+		   "d,t,s", AT, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sllv",
+		   "d,t,s", dreg, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		   "d,v,t", dreg, dreg, AT);
       break;
 
     case M_ROL_I:
       if (imm_expr.X_op != O_constant)
 	as_bad (_("rotate count too large"));
-      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", AT, sreg,
-		   (int) (imm_expr.X_add_number & 0x1f));
-      macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", dreg, sreg,
-		   (int) ((0 - imm_expr.X_add_number) & 0x1f));
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
+		   AT, sreg, (int) (imm_expr.X_add_number & 0x1f));
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
+		   dreg, sreg, (int) ((0 - imm_expr.X_add_number) & 0x1f));
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
+		   dreg, dreg, AT);
       break;
 
     case M_ROR:
-      macro_build ((char *) NULL, &icnt, NULL, "subu", "d,v,t", AT, 0, treg);
-      macro_build ((char *) NULL, &icnt, NULL, "sllv", "d,t,s", AT, sreg, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "srlv", "d,t,s", dreg, sreg,
-		   treg);
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "subu",
+		   "d,v,t", AT, 0, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sllv",
+		   "d,t,s", AT, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srlv",
+		   "d,t,s", dreg, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		   "d,v,t", dreg, dreg, AT);
       break;
 
     case M_ROR_I:
       if (imm_expr.X_op != O_constant)
 	as_bad (_("rotate count too large"));
-      macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", AT, sreg,
-		   (int) (imm_expr.X_add_number & 0x1f));
-      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", dreg, sreg,
-		   (int) ((0 - imm_expr.X_add_number) & 0x1f));
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
+		   AT, sreg, (int) (imm_expr.X_add_number & 0x1f));
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
+		   dreg, sreg, (int) ((0 - imm_expr.X_add_number) & 0x1f));
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
+		   dreg, dreg, AT);
       break;
 
     case M_S_DOB:
@@ -6548,8 +6588,8 @@ macro2 (ip)
 		     sreg, (int) BFD_RELOC_LO16);
       else
 	{
-	  macro_build ((char *) NULL, &icnt, NULL, "xor", "d,v,t", dreg,
-		       sreg, treg);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "xor",
+		       "d,v,t", dreg, sreg, treg);
 	  macro_build ((char *) NULL, &icnt, &expr1, "sltiu", "t,r,j", dreg,
 		       dreg, (int) BFD_RELOC_LO16);
 	}
@@ -6591,8 +6631,8 @@ macro2 (ip)
       else
 	{
 	  load_register (&icnt, AT, &imm_expr, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "xor", "d,v,t", dreg,
-		       sreg, AT);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "xor",
+		       "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
 	}
       macro_build ((char *) NULL, &icnt, &expr1, "sltiu", "t,r,j", dreg, dreg,
@@ -6607,7 +6647,8 @@ macro2 (ip)
     case M_SGEU:
       s = "sltu";
     sge:
-      macro_build ((char *) NULL, &icnt, NULL, s, "d,v,t", dreg, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
+		   dreg, sreg, treg);
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", dreg, dreg,
 		   (int) BFD_RELOC_LO16);
       return;
@@ -6626,9 +6667,9 @@ macro2 (ip)
       else
 	{
 	  load_register (&icnt, AT, &imm_expr, 0);
-	  macro_build ((char *) NULL, &icnt, NULL,
-		       mask == M_SGE_I ? "slt" : "sltu",
-		       "d,v,t", dreg, sreg, AT);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		       mask == M_SGE_I ? "slt" : "sltu", "d,v,t", dreg, sreg,
+		       AT);
 	  used_at = 1;
 	}
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", dreg, dreg,
@@ -6643,7 +6684,8 @@ macro2 (ip)
     case M_SGTU:
       s = "sltu";
     sgt:
-      macro_build ((char *) NULL, &icnt, NULL, s, "d,v,t", dreg, treg, sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
+		   dreg, treg, sreg);
       return;
 
     case M_SGT_I:		/* sreg > I  <==>  I < sreg */
@@ -6653,28 +6695,31 @@ macro2 (ip)
       s = "sltu";
     sgti:
       load_register (&icnt, AT, &imm_expr, 0);
-      macro_build ((char *) NULL, &icnt, NULL, s, "d,v,t", dreg, AT, sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
+		   dreg, AT, sreg);
       break;
 
-    case M_SLE:		/* sreg <= treg  <==>  treg >= sreg  <==>  not (treg < sreg) */
+    case M_SLE:	/* sreg <= treg  <==>  treg >= sreg  <==>  not (treg < sreg) */
       s = "slt";
       goto sle;
     case M_SLEU:
       s = "sltu";
     sle:
-      macro_build ((char *) NULL, &icnt, NULL, s, "d,v,t", dreg, treg, sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
+		   dreg, treg, sreg);
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", dreg, dreg,
 		   (int) BFD_RELOC_LO16);
       return;
 
-    case M_SLE_I:		/* sreg <= I <==> I >= sreg <==> not (I < sreg) */
+    case M_SLE_I:	/* sreg <= I <==> I >= sreg <==> not (I < sreg) */
       s = "slt";
       goto slei;
     case M_SLEU_I:
       s = "sltu";
     slei:
       load_register (&icnt, AT, &imm_expr, 0);
-      macro_build ((char *) NULL, &icnt, NULL, s, "d,v,t", dreg, AT, sreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "d,v,t",
+		   dreg, AT, sreg);
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", dreg, dreg,
 		   (int) BFD_RELOC_LO16);
       break;
@@ -6689,7 +6734,8 @@ macro2 (ip)
 	  return;
 	}
       load_register (&icnt, AT, &imm_expr, 0);
-      macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", dreg, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "slt", "d,v,t",
+		   dreg, sreg, AT);
       break;
 
     case M_SLTU_I:
@@ -6702,31 +6748,31 @@ macro2 (ip)
 	  return;
 	}
       load_register (&icnt, AT, &imm_expr, 0);
-      macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, sreg,
-		   AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		   "d,v,t", dreg, sreg, AT);
       break;
 
     case M_SNE:
       if (sreg == 0)
-	macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0,
-		     treg);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		     "d,v,t", dreg, 0, treg);
       else if (treg == 0)
-	macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0,
-		     sreg);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		     "d,v,t", dreg, 0, sreg);
       else
 	{
-	  macro_build ((char *) NULL, &icnt, NULL, "xor", "d,v,t", dreg,
-		       sreg, treg);
-	  macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0,
-		       dreg);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "xor",
+		       "d,v,t", dreg, sreg, treg);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		       "d,v,t", dreg, 0, dreg);
 	}
       return;
 
     case M_SNE_I:
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
-	  macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0,
-		       sreg);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		       "d,v,t", dreg, 0, sreg);
 	  return;
 	}
       if (sreg == 0)
@@ -6759,11 +6805,12 @@ macro2 (ip)
       else
 	{
 	  load_register (&icnt, AT, &imm_expr, 0);
-	  macro_build ((char *) NULL, &icnt, NULL, "xor", "d,v,t", dreg,
-		       sreg, AT);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "xor",
+		       "d,v,t", dreg, sreg, AT);
 	  used_at = 1;
 	}
-      macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", dreg, 0, dreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sltu",
+		   "d,v,t", dreg, 0, dreg);
       if (used_at)
 	break;
       return;
@@ -6782,7 +6829,7 @@ macro2 (ip)
 	  return;
 	}
       load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dsub" : "sub", "d,v,t", dreg, sreg, AT);
       break;
 
@@ -6800,7 +6847,7 @@ macro2 (ip)
 	  return;
 	}
       load_register (&icnt, AT, &imm_expr, dbl);
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dsubu" : "subu", "d,v,t", dreg, sreg, AT);
       break;
 
@@ -6823,7 +6870,8 @@ macro2 (ip)
       s = "tne";
     trap:
       load_register (&icnt, AT, &imm_expr, 0);
-      macro_build ((char *) NULL, &icnt, NULL, s, "s,t", sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "s,t", sreg,
+		   AT);
       break;
 
     case M_TRUNCWS:
@@ -6839,21 +6887,25 @@ macro2 (ip)
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
-      macro_build ((char *) NULL, &icnt, NULL, "cfc1", "t,G", treg, 31);
-      macro_build ((char *) NULL, &icnt, NULL, "cfc1", "t,G", treg, 31);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "");
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "cfc1", "t,G",
+		   treg, 31);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "cfc1", "t,G",
+		   treg, 31);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
       expr1.X_add_number = 3;
       macro_build ((char *) NULL, &icnt, &expr1, "ori", "t,r,i", AT, treg,
 		   (int) BFD_RELOC_LO16);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "xori", "t,r,i", AT, AT,
 		     (int) BFD_RELOC_LO16);
-      macro_build ((char *) NULL, &icnt, NULL, "ctc1", "t,G", AT, 31);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "");
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "ctc1", "t,G",
+		   AT, 31);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 	      mask == M_TRUNCWD ? "cvt.w.d" : "cvt.w.s", "D,S", dreg, sreg);
-      macro_build ((char *) NULL, &icnt, NULL, "ctc1", "t,G", treg, 31);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "");
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "ctc1", "t,G",
+		   treg, 31);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
       --mips_opts.noreorder;
       break;
 
@@ -6876,8 +6928,10 @@ macro2 (ip)
 	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, "lbu", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, breg);
-      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg, treg, 8);
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg, treg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
+		   treg, treg, 8);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
+		   treg, treg, AT);
       break;
 
     case M_ULD:
@@ -6953,10 +7007,10 @@ macro2 (ip)
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
-		   treg, 8);
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg,
-		   treg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
+		   treg, treg, 8);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
+		   treg, treg, AT);
       break;
 
     case M_USH:
@@ -6966,7 +7020,8 @@ macro2 (ip)
 	offset_expr.X_add_number += 1;
       macro_build ((char *) NULL, &icnt, &offset_expr, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
-      macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", AT, treg, 8);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
+		   AT, treg, 8);
       if (target_big_endian)
 	offset_expr.X_add_number -= 1;
       else
@@ -7040,8 +7095,8 @@ macro2 (ip)
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", treg,
-		   treg, 8);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
+		   treg, treg, 8);
       if (! target_big_endian)
 	expr1.X_add_number = 1;
       else
@@ -7054,10 +7109,10 @@ macro2 (ip)
 	expr1.X_add_number = 1;
       macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
 		   (int) BFD_RELOC_LO16, AT);
-      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
-		   treg, 8);
-      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg,
-		   treg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
+		   treg, treg, 8);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
+		   treg, treg, AT);
       break;
 
     default:
@@ -7116,19 +7171,20 @@ mips16_macro (ip)
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "ddiv" : "div",
 		   "0,x,y", xreg, yreg);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-      macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break", "6",
+		   7);
 
       /* FIXME: The normal code checks for of -1 / -0x80000000 here,
          since that causes an overflow.  We should do that as well,
          but I don't see how to do the comparisons without a temporary
          register.  */
       --mips_opts.noreorder;
-      macro_build ((char *) NULL, &icnt, NULL, s, "x", zreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "x", zreg);
       break;
 
     case M_DIVU_3:
@@ -7150,20 +7206,23 @@ mips16_macro (ip)
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
-      macro_build ((char *) NULL, &icnt, NULL, s, "0,x,y", xreg, yreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "0,x,y",
+		   xreg, yreg);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-	macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		     "6", 7);
       --mips_opts.noreorder;
-      macro_build ((char *) NULL, &icnt, NULL, s2, "x", zreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s2, "x", zreg);
       break;
 
     case M_DMUL:
       dbl = 1;
     case M_MUL:
-      macro_build ((char *) NULL, &icnt, NULL,
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		   dbl ? "dmultu" : "multu", "x,y", xreg, yreg);
-      macro_build ((char *) NULL, &icnt, NULL, "mflo", "x", zreg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "mflo", "x",
+		   zreg);
       return;
 
     case M_DSUBU_I:
