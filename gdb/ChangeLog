@@ -1,3 +1,7 @@
+Fri Nov 22 08:27:40 1991  John Gilmore  (gnu at cygnus.com)
+
+	* infptrace.c:  Lint.
+
 Thu Nov 21 23:48:56 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Roll new files into various lists.
