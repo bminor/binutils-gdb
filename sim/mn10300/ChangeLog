@@ -1,3 +1,11 @@
+Thu Mar 26 11:22:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Make --enable-sim-common the default.
+	* configure: Re-generate.
+	
+	* sim-main.h (CIA_GET, CIA_SET): Save/restore current instruction
+ 	address into Sate.regs[REG_PC] instead of common struct.
+
 Wed Mar 25 17:42:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* mn10300.igen (cmp imm8,An): Do not sign extend imm8 value.
