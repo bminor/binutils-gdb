@@ -1,7 +1,9 @@
 Wed Jun 28 17:49:59 1995  Ken Raeburn  <raeburn@cygnus.com>
 
-	* doc/as.texinfo (H8/500, SH): Indicate that IEEE FP numbers are
-	for the standard emulation code.
+	* doc/as.texinfo (H8/500 Floating Point): Indicate that IEEE FP
+	numbers are for the standard emulation code.
+	(SH Floating Point): Ditto.
+	(Overview): Describe new --emulation option for MIPS.
 	* doc/*.m4: Deleted.
 
 Thu Jun 22 19:26:25 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
