@@ -95,7 +95,6 @@ proc set_lang_c {} {
 
 proc do_function_calls {} {
     global prototypes
-    global gcc_compiled
     global gdb_prompt
 
     # We need to up this because this can be really slow on some boards.
@@ -149,7 +148,7 @@ proc do_function_calls {} {
 	# to be a generic problem on quite a few platforms.
 	if $prototypes then {
 	    setup_xfail "sparc-*-*" "mips*-*-*" 5318
-	    if {!$gcc_compiled} then {
+	    if { ! [test_compiler_info gcc-*-*] } then {
 		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
 	    }
 	}

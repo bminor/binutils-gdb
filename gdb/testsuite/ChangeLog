@@ -1,3 +1,9 @@
+2003-12-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/callfuncs.exp (do_function_calls): Replace reference to
+	gcc_compiled with call to test_compiler_info.
+
 2003-11-30  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Partial fix for PR testsuite/1456.
