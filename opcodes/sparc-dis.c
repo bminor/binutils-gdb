@@ -21,6 +21,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libiberty.h"
 #include <string.h>
 
+/* Bitmask of v9 architectures.  */
+#define MASK_V9 ((1 << SPARC_OPCODE_ARCH_V9) \
+		 | (1 << SPARC_OPCODE_ARCH_V9A))
+/* 1 if INSN is for v9 only.  */
+#define V9_ONLY_P(insn) (! ((insn)->architecture & ~MASK_V9))
+/* 1 if INSN is for v9.  */
+#define V9_P(insn) (((insn)->architecture & MASK_V9) != 0)
+
 /* For faster lookup, after insns are sorted they are hashed.  */
 /* ??? I think there is room for even more improvement.  */
 
@@ -195,9 +203,9 @@ print_insn_sparc (memaddr, info)
 
   if (!opcodes_initialized)
     {
-      qsort ((char *) sparc_opcodes, NUMOPCODES,
+      qsort ((char *) sparc_opcodes, sparc_num_opcodes,
 	     sizeof (sparc_opcodes[0]), compare_opcodes);
-      build_hash_table (sparc_opcodes, opcode_hash_table, NUMOPCODES);
+      build_hash_table (sparc_opcodes, opcode_hash_table, sparc_num_opcodes);
       opcodes_initialized = 1;
     }
 
@@ -213,9 +221,6 @@ print_insn_sparc (memaddr, info)
 
   insn = bfd_getb32 (buffer);
 
-  if (DISASM_RAW_INSN (info))
-    (*info->fprintf_func) (stream, "0x%08lx\t", insn);
-
   info->insn_info_valid = 1;			/* We do return this info */
   info->insn_type = dis_nonbranch;		/* Assume non branch insn */
   info->branch_delay_insns = 0;			/* Assume no delay */
@@ -225,14 +230,16 @@ print_insn_sparc (memaddr, info)
     {
       CONST struct sparc_opcode *opcode = op->opcode;
 
+      /* ??? These architecture tests need to be more selective.  */
+
       /* If the current architecture isn't sparc64, skip sparc64 insns.  */
       if (!sparc_v9_p
-	  && opcode->architecture >= v9)
+	  && V9_ONLY_P (opcode))
 	continue;
 
       /* If the current architecture is sparc64, skip sparc32 only insns.  */
       if (sparc_v9_p
-	  && (opcode->flags & F_NOTV9))
+	  && ! V9_P (opcode))
 	continue;
 
       if ((opcode->match & insn) == opcode->match
@@ -591,6 +598,19 @@ print_insn_sparc (memaddr, info)
 		  case 'y':
 		    (*info->fprintf_func) (stream, "%%y");
 		    break;
+
+		  case 'u':
+		  case 'U':
+		    {
+		      int val = *s == 'U' ? X_RS1 (insn) : X_RD (insn);
+		      char *name = sparc_decode_sparclet_cpreg (val);
+
+		      if (name)
+			(*info->fprintf_func) (stream, "%s", name);
+		      else
+			(*info->fprintf_func) (stream, "%%cpreg(%d)", val);
+		      break;
+		    }
 		  }
 	      }
 	  }
@@ -667,7 +687,7 @@ print_insn_sparc (memaddr, info)
     }
 
   info->insn_type = dis_noninsn;	/* Mark as non-valid instruction */
-  (*info->fprintf_func) (stream, "%#8x", insn);
+  (*info->fprintf_func) (stream, "unknown");
   return sizeof (buffer);
 }
 
@@ -724,8 +744,8 @@ compare_opcodes (a, b)
     }
 
   /* Put non-sparc64 insns ahead of sparc64 ones.  */
-  if ((op0->architecture >= v9) != (op1->architecture >= v9))
-    return (op0->architecture >= v9) - (op1->architecture >= v9);
+  if (V9_ONLY_P (op0) != V9_ONLY_P (op1))
+    return V9_ONLY_P (op0) - V9_ONLY_P (op1);
 
   /* They are functionally equal.  So as long as the opcode table is
      valid, we can put whichever one first we want, on aesthetic grounds.  */

@@ -1,3 +1,22 @@
+Tue Feb 20 20:48:28 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-opc.c (v8,v6notv9): Add MASK_SPARCLET.
+	(sparc_opcode_archs): Add MASK_V8 to sparclet entry.
+	(sparc_opcodes): Add sparclet insns.
+	(sparclet_cpreg_table): New static local.
+	(sparc_{encode,decode}_sparclet_cpreg): New functions.
+	* sparc-dis.c (print_insn_sparc): Handle sparclet cpregs.
+
+Tue Feb 20 11:02:44 1996  Alan Modra  <alan@mullet.Levels.UniSA.Edu.Au>
+
+	* i386-dis.c (index16): New static variable.
+	(putop): Print jecxz for 32 bit case, jcxz for 16 bit, not the
+	other way around.
+	(OP_indirE): Return result of OP_E.
+	(OP_E): Check for 16 bit addressing mode, and disassemble
+	correctly.  Optimised 32 bit case a little.  Don't print
+	"(base,index,scale)" when sib specifies only an offset.
+
 Mon Feb 19 12:32:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set and substitute SHLIB_DEP.
