@@ -38,8 +38,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <signal.h>
 #include <ctype.h>
 
-#include "proc-utils.h"
-
 /* 
  * PROCFS.C
  *
@@ -84,6 +82,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <fcntl.h>	/* for O_RDONLY */
 #include <unistd.h>	/* for "X_OK" */
 #include "gdb_stat.h"	/* for struct stat */
+
+/* Note: procfs-utils.h must be included after the above system header
+   files, because it redefines various system calls using macros.
+   This may be incompatible with the prototype declarations.  */
+
+#define PROCFS_TRACE
+#include "proc-utils.h"
 
 /* =================== TARGET_OPS "MODULE" =================== */
 
@@ -154,8 +159,8 @@ init_procfs_ops ()
   procfs_ops.to_thread_alive       = procfs_thread_alive;
   procfs_ops.to_pid_to_str         = procfs_pid_to_str;
 
-  procfs_ops.to_has_all_memory    = 1;
-  procfs_ops.to_has_memory        = 1;
+  procfs_ops.to_has_all_memory     = 1;
+  procfs_ops.to_has_memory         = 1;
   procfs_ops.to_has_execution      = 1;
   procfs_ops.to_has_stack          = 1;
   procfs_ops.to_has_registers      = 1;
@@ -165,36 +170,6 @@ init_procfs_ops ()
 }
 
 /* =================== END, TARGET_OPS "MODULE" =================== */
-
-/*
- * Temporary debugging code:
- *
- * These macros allow me to trace the system calls that we make
- * to control the child process.  This is quite handy for comparing
- * with the older version of procfs.
- */
-
-#ifdef TRACE_PROCFS
-#ifdef NEW_PROC_API
-extern  int   write_with_trace PARAMS ((int, void *, size_t, char *, int));
-extern  off_t lseek_with_trace PARAMS ((int, off_t,  int,    char *, int));
-#define write(X,Y,Z)   write_with_trace (X, Y, Z, __FILE__, __LINE__)
-#define lseek(X,Y,Z)   lseek_with_trace (X, Y, Z, __FILE__, __LINE__)
-#else
-extern  int ioctl_with_trace PARAMS ((int, long, void *, char *, int));
-#define ioctl(X,Y,Z)   ioctl_with_trace (X, Y, Z, __FILE__, __LINE__)
-#endif
-#define open(X,Y)      open_with_trace  (X, Y,    __FILE__, __LINE__)
-#define close(X)       close_with_trace (X,       __FILE__, __LINE__)
-#define wait(X)        wait_with_trace  (X,       __FILE__, __LINE__)
-#define PROCFS_NOTE(X) procfs_note      (X,       __FILE__, __LINE__)
-#define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T) \
-proc_prettyfprint_status (X, Y, Z, T)
-#else
-#define PROCFS_NOTE(X)
-#define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T)
-#endif
-
 
 /*
  * World Unification:
@@ -4460,7 +4435,7 @@ unconditionally_kill_inferior (pi)
   }
 #else /* PROCFS_NEED_PIOCSSIG_FOR_KILL */
   if (!proc_kill (pi, SIGKILL))
-    proc_warn (pi, "unconditionally_kill, proc_kill", __LINE__);
+    proc_error (pi, "unconditionally_kill, proc_kill", __LINE__);
 #endif /* PROCFS_NEED_PIOCSSIG_FOR_KILL */
   destroy_procinfo (pi);
 

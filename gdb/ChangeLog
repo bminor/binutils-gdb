@@ -1,3 +1,16 @@
+2000-05-05  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* procfs.c: Cleanup of procfs tracing.  Move defines and 
+	prototypes to proc-utils.h
+	* proc-utils.h: Define tracing macros.  Declare trace functions.
+	* proc-api.c: Make procfs tracing a runtime option.
+	(prepare_to_trace): New function, abstracted out of several
+	places.  Open a trace file if one is required.
+	(ioctl_with_trace, write_with_trace, open_with_trace, 
+	close_with_trace, wait_with_trace, lseek_with_trace):
+	Report errno if an error occurs in a system call.
+	(write_with_trace): Make 2nd arg void *, to agree with write.
+
 2000-05-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * elfread.c (elf_symtab_read): The calculation of 'offset' 
