@@ -169,12 +169,6 @@ struct relocation_info {
 };
 #endif /* CUSTOM_RELOC_FORMAT */
 
-/* If compiler generate leading underscores, remove them. */
-
-#ifndef STRIP_UNDERSCORE
-#define STRIP_UNDERSCORE 0
-#endif /* STRIP_UNDERSCORE */
-
 /*
  *  Macros to extract information from a symbol table entry.
  *  This syntaxic indirection allows independence regarding a.out or coff.
