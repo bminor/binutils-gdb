@@ -1,3 +1,9 @@
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/printcmds.exp: Enable setup_kfail for gdb/538
+	(ptype &*"foo").
+	* gdb.c++/local.exp: Enable setup_kfail for gdb/482.
+
 2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.mi/mi-console.exp: Remove extra "(known bug)".
