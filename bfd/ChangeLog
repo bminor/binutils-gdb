@@ -1,3 +1,8 @@
+Wed Jul 14 15:29:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hppa.c [HOST_HPPABSD]: Use hpux-style core files.
+	* libhppa.h [HOST_HPPABSD]: Include hpux version of core.h
+
 Wed Jul 14 09:30:48 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Recognize h8300h-*-*.

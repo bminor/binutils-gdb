@@ -535,7 +535,9 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
   return asect;
 }
 
-#ifdef HOST_HPPAHPUX
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
+/* This requires system include files.  */
+
 static bfd_target *
 hppa_core_file_p (abfd)
      bfd *abfd;
@@ -635,7 +637,7 @@ hppa_core_file_matches_executable_p (core_bfd, exec_bfd)
   return true;			/* FIXME, We have no way of telling at this point */
 }
 
-#endif /* HOST_HPPAHPUX */
+#endif /* HPUX or BSD.  */
 
 /* Miscellaneous Support Functions -- Control Structures and Functions
    for the PA.  */
@@ -1009,16 +1011,6 @@ hppa_get_symbol_info (ignore_abfd, symbol, ret)
 }
 
 /* End of miscellaneous support functions. */
-
-#ifdef HOST_HPPABSD
-/* All the core file code for BSD needs to be rewritten cleanly.  For
-     now we do not support core files under BSD.  */
-
-#define hppa_core_file_p _bfd_dummy_target
-#define hppa_core_file_failing_command _bfd_dummy_core_file_failing_command
-#define hppa_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define hppa_core_file_matches_executable_p _bfd_dummy_core_file_matches_executable_p
-#endif /* HOST_HPPABSD */
 
 #define hppa_bfd_debug_info_start        bfd_void
 #define hppa_bfd_debug_info_end          bfd_void
