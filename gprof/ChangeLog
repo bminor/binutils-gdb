@@ -1,3 +1,8 @@
+Thu Feb 25 16:01:50 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* printgprof (xmalloc, xrealloc):  Cast results of malloc
+	and realloc to PTR.
+
 Wed Feb  3 13:55:33 1993  Jeffrey Osier  (jeffrey@fowanton.cygnus.com)
 
 	* Makefile.in: created info, install-info, dvi

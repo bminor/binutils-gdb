@@ -766,7 +766,7 @@ PTR
 xmalloc (size)
      long size;
 {
-    PTR val = malloc (size);
+    PTR val = (PTR) malloc (size);
     if (val == NULL) {
 	fprintf (stderr, "virtual memory exhaused\n");
 	exit (1);
@@ -779,7 +779,7 @@ xrealloc (oldval, size)
      PTR oldval;
      long size;
 {
-    PTR val = realloc (oldval, size);
+    PTR val = (PTR) realloc (oldval, size);
     if (val == NULL) {
 	fprintf (stderr, "virtual memory exhaused\n");
 	exit (1);
