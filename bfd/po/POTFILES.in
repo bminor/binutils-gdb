@@ -155,7 +155,6 @@ go32stub.h
 hash.c
 hp300bsd.c
 hp300hpux.c
-hppa_stubs.h
 hpux-core.c
 i386aout.c
 i386bsd.c

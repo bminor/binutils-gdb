@@ -1,3 +1,8 @@
+2000-07-10  Alexander Aganichev  <AAganichev@hypercom.com>
+
+	* archures.c (bfd_default_scan): Add set of bfd_mach_ cases for
+	compatibility with older binutils.
+
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* section.c (bfd_make_section_anyway): Start section_id at 0x10.

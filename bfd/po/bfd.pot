@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-07-03 10:46-0700\n"
+"POT-Creation-Date: 2000-07-10 11:23-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,16 +39,16 @@ msgstr ""
 msgid "%s: relocateable link from %s to %s not supported"
 msgstr ""
 
-#: archive.c:1808
+#: archive.c:1813
 msgid "Warning: writing archive was slow: rewriting timestamp\n"
 msgstr ""
 
-#: archive.c:2074
+#: archive.c:2079
 msgid "Reading archive file mod timestamp"
 msgstr ""
 
 #. FIXME: bfd can't call perror.
-#: archive.c:2098
+#: archive.c:2103
 msgid "Writing updated armap timestamp"
 msgstr ""
 
@@ -194,119 +194,119 @@ msgstr ""
 msgid "%s: unable to find ARM glue '%s' for `%s'"
 msgstr ""
 
-#: coff-arm.c:1331 coff-arm.c:1426 elf32-arm.h:857 elf32-arm.h:955
+#: coff-arm.c:1338 coff-arm.c:1433 elf32-arm.h:857 elf32-arm.h:955
 #, c-format
 msgid "%s(%s): warning: interworking not enabled."
 msgstr ""
 
-#: coff-arm.c:1335 elf32-arm.h:958
+#: coff-arm.c:1342 elf32-arm.h:958
 #, c-format
 msgid "  first occurrence: %s: arm call to thumb"
 msgstr ""
 
-#: coff-arm.c:1430 elf32-arm.h:860
+#: coff-arm.c:1437 elf32-arm.h:860
 #, c-format
 msgid "  first occurrence: %s: thumb call to arm"
 msgstr ""
 
-#: coff-arm.c:1433
+#: coff-arm.c:1440
 msgid "  consider relinking with --support-old-code enabled"
 msgstr ""
 
-#: coff-arm.c:1722 coff-tic80.c:682 cofflink.c:2979
+#: coff-arm.c:1729 coff-tic80.c:682 cofflink.c:2988
 #, c-format
 msgid "%s: bad reloc address 0x%lx in section `%s'"
 msgstr ""
 
-#: coff-arm.c:2060
+#: coff-arm.c:2067
 #, c-format
 msgid "%s: illegal symbol index in reloc: %d"
 msgstr ""
 
-#: coff-arm.c:2189
+#: coff-arm.c:2196
 #, c-format
 msgid "%s: ERROR: compiled for APCS-%d whereas target %s uses APCS-%d"
 msgstr ""
 
-#: coff-arm.c:2204
+#: coff-arm.c:2211
 #, c-format
 msgid ""
 "%s: ERROR: passes floats in float registers whereas target %s uses integer "
 "registers"
 msgstr ""
 
-#: coff-arm.c:2207
+#: coff-arm.c:2214
 #, c-format
 msgid ""
 "%s: ERROR: passes floats in integer registers whereas target %s uses float "
 "registers"
 msgstr ""
 
-#: coff-arm.c:2222
+#: coff-arm.c:2229
 #, c-format
 msgid ""
 "%s: ERROR: compiled as position independent code, whereas target %s is "
 "absolute position"
 msgstr ""
 
-#: coff-arm.c:2225
+#: coff-arm.c:2232
 #, c-format
 msgid ""
 "%s: ERROR: compiled as absolute position code, whereas target %s is position "
 "independent"
 msgstr ""
 
-#: coff-arm.c:2254
+#: coff-arm.c:2261
 #, c-format
 msgid "Warning: input file %s supports interworking, whereas %s does not."
 msgstr ""
 
-#: coff-arm.c:2257
+#: coff-arm.c:2264
 #, c-format
 msgid "Warning: input file %s does not support interworking, whereas %s does."
 msgstr ""
 
-#: coff-arm.c:2285
+#: coff-arm.c:2292
 #, c-format
 msgid "private flags = %x:"
 msgstr ""
 
-#: coff-arm.c:2293 elf32-arm.h:2142
+#: coff-arm.c:2300 elf32-arm.h:2142
 msgid " [floats passed in float registers]"
 msgstr ""
 
-#: coff-arm.c:2295
+#: coff-arm.c:2302
 msgid " [floats passed in integer registers]"
 msgstr ""
 
-#: coff-arm.c:2298 elf32-arm.h:2145
+#: coff-arm.c:2305 elf32-arm.h:2145
 msgid " [position independent]"
 msgstr ""
 
-#: coff-arm.c:2300
+#: coff-arm.c:2307
 msgid " [absolute position]"
 msgstr ""
 
-#: coff-arm.c:2304
+#: coff-arm.c:2311
 msgid " [interworking flag not initialised]"
 msgstr ""
 
-#: coff-arm.c:2306
+#: coff-arm.c:2313
 msgid " [interworking supported]"
 msgstr ""
 
-#: coff-arm.c:2308
+#: coff-arm.c:2315
 msgid " [interworking not supported]"
 msgstr ""
 
-#: coff-arm.c:2357
+#: coff-arm.c:2364
 #, c-format
 msgid ""
 "Warning: Not setting interworking flag of %s, since it has already been "
 "specified as non-interworking"
 msgstr ""
 
-#: coff-arm.c:2361
+#: coff-arm.c:2368
 #, c-format
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
 msgstr ""
@@ -360,27 +360,27 @@ msgstr ""
 msgid "uncertain calling convention for non-COFF symbol"
 msgstr ""
 
-#: cofflink.c:518 elflink.h:1567
+#: cofflink.c:526 elflink.h:1567
 #, c-format
 msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
 msgstr ""
 
-#: cofflink.c:2284
+#: cofflink.c:2288
 #, c-format
 msgid "%s: relocs in section `%s', but it has no contents"
 msgstr ""
 
-#: cofflink.c:2618 coffswap.h:897
+#: cofflink.c:2627 coffswap.h:897
 #, c-format
 msgid "%s: %s: reloc overflow: 0x%lx > 0xffff"
 msgstr ""
 
-#: cofflink.c:2627 coffswap.h:883
+#: cofflink.c:2636 coffswap.h:883
 #, c-format
 msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
 msgstr ""
 
-#: coff-mips.c:875 elf32-mips.c:1405
+#: coff-mips.c:875 elf32-mips.c:1410
 msgid "GP relative relocation when _gp not defined"
 msgstr ""
 
@@ -534,7 +534,7 @@ msgstr ""
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
 msgstr ""
 
-#: elf-hppa.h:1329 elf-hppa.h:1362 elf32-arm.h:1825 elf32-i386.c:1418
+#: elf-hppa.h:1336 elf-hppa.h:1369 elf32-arm.h:1825 elf32-i386.c:1418
 #: elf32-ppc.c:3082
 #, c-format
 msgid ""
@@ -641,7 +641,7 @@ msgid "does"
 msgstr ""
 
 #. Ignore init flag - it may not be set, despite the flags field containing valid data.
-#: elf32-arm.h:2125 elf32-m68k.c:430 elf32-mips.c:2620
+#: elf32-arm.h:2125 elf32-m68k.c:430 elf32-mips.c:2625
 #, c-format
 msgid "private flags = %lx:"
 msgstr ""
@@ -702,6 +702,21 @@ msgstr ""
 msgid "internal error: dangerous relocation"
 msgstr ""
 
+#: elf32-hppa.c:503 elf32-hppa.c:1257
+#, c-format
+msgid "%s: cannot find stub entry %s"
+msgstr ""
+
+#: elf32-hppa.c:520
+#, c-format
+msgid "%s: cannot reach stub %s, recompile with -ffunction-sections"
+msgstr ""
+
+#: elf32-hppa.c:683
+#, c-format
+msgid "%s: cannot handle relocation %s for %s at 0x%x in %s"
+msgstr ""
+
 #: elf32-i386.c:274
 #, c-format
 msgid "%s: invalid relocation type %d"
@@ -753,124 +768,124 @@ msgstr ""
 msgid "%s: Unknown relocation type %d\n"
 msgstr ""
 
-#: elf32-mips.c:1564
+#: elf32-mips.c:1569
 msgid "32bits gp relative relocation occurs for an external symbol"
 msgstr ""
 
-#: elf32-mips.c:1713
+#: elf32-mips.c:1718
 #, c-format
 msgid "Linking mips16 objects into %s format is not supported"
 msgstr ""
 
-#: elf32-mips.c:2506
+#: elf32-mips.c:2511
 #, c-format
 msgid "%s: linking PIC files with non-PIC files"
 msgstr ""
 
-#: elf32-mips.c:2516
+#: elf32-mips.c:2521
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
 msgstr ""
 
-#: elf32-mips.c:2546
+#: elf32-mips.c:2551
 #, c-format
 msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
 msgstr ""
 
-#: elf32-mips.c:2555
+#: elf32-mips.c:2560
 #, c-format
 msgid "%s: ISA mismatch (%d) with previous modules (%d)"
 msgstr ""
 
-#: elf32-mips.c:2578
+#: elf32-mips.c:2583
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elf32-mips.c:2592 elf32-ppc.c:1464 elf64-sparc.c:2957
+#: elf32-mips.c:2597 elf32-ppc.c:1464 elf64-sparc.c:2957
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
 msgstr ""
 
-#: elf32-mips.c:2623
+#: elf32-mips.c:2628
 msgid " [abi=O32]"
 msgstr ""
 
-#: elf32-mips.c:2625
+#: elf32-mips.c:2630
 msgid " [abi=O64]"
 msgstr ""
 
-#: elf32-mips.c:2627
+#: elf32-mips.c:2632
 msgid " [abi=EABI32]"
 msgstr ""
 
-#: elf32-mips.c:2629
+#: elf32-mips.c:2634
 msgid " [abi=EABI64]"
 msgstr ""
 
-#: elf32-mips.c:2631
+#: elf32-mips.c:2636
 msgid " [abi unknown]"
 msgstr ""
 
-#: elf32-mips.c:2633
+#: elf32-mips.c:2638
 msgid " [abi=N32]"
 msgstr ""
 
-#: elf32-mips.c:2635
+#: elf32-mips.c:2640
 msgid " [abi=64]"
 msgstr ""
 
-#: elf32-mips.c:2637
+#: elf32-mips.c:2642
 msgid " [no abi set]"
 msgstr ""
 
-#: elf32-mips.c:2640
+#: elf32-mips.c:2645
 msgid " [mips1]"
 msgstr ""
 
-#: elf32-mips.c:2642
+#: elf32-mips.c:2647
 msgid " [mips2]"
 msgstr ""
 
-#: elf32-mips.c:2644
+#: elf32-mips.c:2649
 msgid " [mips3]"
 msgstr ""
 
-#: elf32-mips.c:2646
+#: elf32-mips.c:2651
 msgid " [mips4]"
 msgstr ""
 
-#: elf32-mips.c:2648
+#: elf32-mips.c:2653
 msgid " [unknown ISA]"
 msgstr ""
 
-#: elf32-mips.c:2651
+#: elf32-mips.c:2656
 msgid " [32bitmode]"
 msgstr ""
 
-#: elf32-mips.c:2653
+#: elf32-mips.c:2658
 msgid " [not 32bitmode]"
 msgstr ""
 
-#: elf32-mips.c:4295
+#: elf32-mips.c:4300
 msgid "static procedure (no name)"
 msgstr ""
 
-#: elf32-mips.c:4912 elf64-alpha.c:4367
+#: elf32-mips.c:4917 elf64-alpha.c:4367
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr ""
 
-#: elf32-mips.c:5457
+#: elf32-mips.c:5482
 msgid "not enough GOT space for local GOT entries"
 msgstr ""
 
-#: elf32-mips.c:6571
+#: elf32-mips.c:6596
 #, c-format
 msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
 msgstr ""
 
-#: elf32-mips.c:7600
+#: elf32-mips.c:7625
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
 msgstr ""
