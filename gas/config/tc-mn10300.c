@@ -1901,14 +1901,17 @@ md_apply_fix3 (fixp, valuep, seg)
   switch (fixp->fx_r_type)
     {
     case BFD_RELOC_8:
+    case BFD_RELOC_8_PCREL:
       size = 1;
       break;
 
     case BFD_RELOC_16:
+    case BFD_RELOC_16_PCREL:
       size = 2;
       break;
 
     case BFD_RELOC_32:
+    case BFD_RELOC_32_PCREL:
       size = 4;
       break;
 

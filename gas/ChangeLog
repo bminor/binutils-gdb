@@ -1,3 +1,7 @@
+2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (md_apply_fix3): Accept PC-relative relocs.
+
 2001-05-08  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-m68k.c: Instead of replacing -1 by 64 in assignment to
