@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-if [ -z "$MACHINE" ]; then 
+if [ -z "$MACHINE" ]; then
   OUTPUT_ARCH=${ARCH}
 else
   OUTPUT_ARCH=${ARCH}:${MACHINE}
@@ -29,8 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    on whether certain switches were set, but these switches pertain to the
    Linux system and that particular version of coff.  In the NT case, we
    only determine if the subsystem is console or windows in order to select
-   the correct entry point by default. */ 
-  
+   the correct entry point by default. */
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -60,13 +60,11 @@ static boolean gld${EMULATION_NAME}_place_orphan
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 
-#if 0 /* argument to qsort so don't prototype */
-static int sort_by_file_name PARAMS ((void *, void *));
-static int sort_by_section_name PARAMS ((void *, void *));
-#endif
+static int sort_by_file_name PARAMS ((const PTR, const PTR));
+static int sort_by_section_name PARAMS ((const PTR, const PTR));
 static lang_statement_union_type **sort_sections_1
   PARAMS ((lang_statement_union_type **, lang_statement_union_type *, int,
-	   int (*)()));
+	   int (*) PARAMS((const PTR, const PTR))));
 static void sort_sections PARAMS ((lang_statement_union_type *));
 
 static void set_pe_name PARAMS ((char *, long int));
@@ -117,8 +115,8 @@ static struct option longopts[] = {
     {"base-file", required_argument, NULL, OPTION_BASE_FILE},
     {"dll", no_argument, NULL, OPTION_DLL},
     {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
-    {"heap", required_argument, NULL, OPTION_HEAP}, 
-    {"image-base", required_argument, NULL, OPTION_IMAGE_BASE}, 
+    {"heap", required_argument, NULL, OPTION_HEAP},
+    {"image-base", required_argument, NULL, OPTION_IMAGE_BASE},
     {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
     {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
     {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
@@ -196,7 +194,7 @@ set_pe_subsystem ()
   const char *sver;
   int len;
   int i;
-  static const struct 
+  static const struct
     {
       const char *name;
       const int value;
@@ -271,7 +269,7 @@ set_pe_subsystem ()
 static void
 set_pe_value (name)
      char *name;
-     
+
 {
   char *end;
   set_pe_name (name,  strtoul (optarg, &end, 0));
@@ -342,10 +340,10 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       break;
 
       /* PE options */
-    case OPTION_HEAP: 
+    case OPTION_HEAP:
       set_pe_stack_heap ("__size_of_heap_reserve__", "__size_of_heap_commit__");
       break;
-    case OPTION_STACK: 
+    case OPTION_STACK:
       set_pe_stack_heap ("__size_of_stack_reserve__", "__size_of_stack_commit__");
       break;
     case OPTION_SUBSYSTEM:
@@ -432,7 +430,7 @@ gld_${EMULATION_NAME}_set_symbols()
     }
   /* Restore the pointer. */
   stat_ptr = save;
-  
+
   if (pe.FileAlignment >
       pe.SectionAlignment)
     {
@@ -460,8 +458,8 @@ gld_${EMULATION_NAME}_after_open()
 
 static int
 sort_by_file_name (a, b)
-     void *a;
-     void *b;
+     const PTR a;
+     const PTR b;
 {
   lang_statement_union_type **ra = a;
   lang_statement_union_type **rb = b;
@@ -477,19 +475,19 @@ sort_by_file_name (a, b)
   if (i != 0)
     return i;
   /* the tail idata4/5 are the only ones without relocs to an
-     idata$6 section unless we are importing by ordinal, 
+     idata$6 section unless we are importing by ordinal,
      so sort them to last to terminate the IAT
      and HNT properly. if no reloc this one is import by ordinal
      so we have to sort by section contents */
 
   if ( ((*ra)->input_section.section->reloc_count + (*rb)->input_section.section->reloc_count) )
     {
-       i =  (((*ra)->input_section.section->reloc_count > 
+       i =  (((*ra)->input_section.section->reloc_count >
 		 (*rb)->input_section.section->reloc_count) ? -1 : 0);
        if ( i != 0)
          return i;
 
-        return  (((*ra)->input_section.section->reloc_count > 
+        return  (((*ra)->input_section.section->reloc_count >
 		 (*rb)->input_section.section->reloc_count) ? 0 : 1);
     }
   else
@@ -497,12 +495,12 @@ sort_by_file_name (a, b)
        if ( (strcmp( (*ra)->input_section.section->name, ".idata$6") == 0) )
           return 0; /* don't sort .idata$6 or .idata$7 FIXME dlltool eliminate .idata$7 */
 
-       if (! bfd_get_section_contents ((*ra)->input_section.ifile->the_bfd, 
+       if (! bfd_get_section_contents ((*ra)->input_section.ifile->the_bfd,
          (*ra)->input_section.section, &a_sec, (file_ptr) 0, (bfd_size_type)sizeof(a_sec)))
             einfo ("%F%B: Can't read contents of section .idata: %E\n",
                  (*ra)->input_section.ifile->the_bfd);
 
-       if (! bfd_get_section_contents ((*rb)->input_section.ifile->the_bfd, 
+       if (! bfd_get_section_contents ((*rb)->input_section.ifile->the_bfd,
         (*rb)->input_section.section, &b_sec, (file_ptr) 0, (bfd_size_type)sizeof(b_sec) ))
            einfo ("%F%B: Can't read contents of section .idata: %E\n",
                 (*rb)->input_section.ifile->the_bfd);
@@ -517,8 +515,8 @@ return 0;
 
 static int
 sort_by_section_name (a, b)
-     void *a;
-     void *b;
+     const PTR a;
+     const PTR b;
 {
   lang_statement_union_type **ra = a;
   lang_statement_union_type **rb = b;
@@ -546,7 +544,7 @@ static lang_statement_union_type **
 sort_sections_1 (startptr, next_after, count, sort_func)
      lang_statement_union_type **startptr,*next_after;
      int count;
-     int (*sort_func) ();
+     int (*sort_func) PARAMS ((const PTR, const PTR));
 {
   lang_statement_union_type **vec;
   lang_statement_union_type *p;
@@ -676,7 +674,7 @@ sort_sections (s)
       }
 }
 
-static void  
+static void
 gld_${EMULATION_NAME}_before_allocation()
 {
   extern lang_statement_list_type *stat_ptr;
@@ -833,7 +831,7 @@ EOF
 sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 0;
 
   if (link_info.relocateable == true && config.build_constructors == true)
@@ -853,7 +851,7 @@ echo '; }'                                                 >> e${EMULATION_NAME}
 cat >>e${EMULATION_NAME}.c <<EOF
 
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   gld_${EMULATION_NAME}_before_parse,
   syslib_default,
@@ -876,6 +874,6 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,	/* unrecognized file */
   NULL,	/* list options */
   NULL,	/* recognized file */
-  NULL 	/* find_potential_libraries */
+  NULL	/* find_potential_libraries */
 };
 EOF
