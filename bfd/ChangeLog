@@ -1,3 +1,8 @@
+2002-03-19  Tom Rix  <trix@redhat.com>
+
+	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Look through all 
+	dynamic objects in archives.
+
 2002-03-19  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* elflink.h (NAME(bfd_elf,record_link_assignment)): Don't set

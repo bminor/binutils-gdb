@@ -588,11 +588,11 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 
     case bfd_archive:
       /* If the archive has a map, do the usual search.  We then need
-         to check the archive for stripped dynamic objects, because
-         they will not appear in the archive map even though they
-         should, perhaps, be included.  If the archive has no map, we
-         just consider each object file in turn, since that apparently
-         is what the AIX native linker does.  */
+         to check the archive for dynamic objects, because they may not 
+	 appear in the archive map even though they should, perhaps, be 
+	 included.  If the archive has no map, we just consider each object 
+	 file in turn, since that apparently is what the AIX native linker 
+	 does.  */
       if (bfd_has_map (abfd))
 	{
 	  if (! (_bfd_generic_link_add_archive_symbols
@@ -602,18 +602,18 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 
       {
 	bfd *member;
-
+	
 	member = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
 	while (member != NULL)
 	  {
 	    if (bfd_check_format (member, bfd_object)
-		&& (! bfd_has_map (abfd)
-		    || ((member->flags & DYNAMIC) != 0
-			&& (member->flags & HAS_SYMS) == 0)))
+		&& (info->hash->creator == member->xvec)
+		&& (! bfd_has_map (abfd) || (member->flags & DYNAMIC) != 0))
 	      {
 		boolean needed;
-
-		if (! xcoff_link_check_archive_element (member, info, &needed))
+		
+		if (! xcoff_link_check_archive_element (member, info, 
+							&needed))
 		  return false;
 		if (needed)
 		  member->archive_pass = -1;
