@@ -117,7 +117,8 @@ if [ -n "${safe}" -a ! -f po/.Recover/gprof.pot ]; then
    fi
    mv po/gprof.pot po/.Recover
 fi
-xgettext `cat po/POTFILES.in` -o po/gprof.pot
+# If this fails, Sanitization must fail.
+xgettext `cat po/POTFILES.in` -o po/gprof.pot || exit 1
 
 
 # eof

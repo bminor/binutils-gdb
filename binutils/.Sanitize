@@ -142,7 +142,7 @@ if [ -n "${safe}" -a ! -f po/.Recover/binutils.pot ]; then
    fi
    mv po/binutils.pot po/.Recover
 fi
-xgettext `cat po/POTFILES.in` -o po/binutils.pot
-
+# If this fails, Sanitization must fail.
+xgettext `cat po/POTFILES.in` -o po/binutils.pot || exit 1
 
 # eof

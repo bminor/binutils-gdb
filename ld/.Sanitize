@@ -319,6 +319,6 @@ if [ -n "${safe}" -a ! -f po/.Recover/ld.pot ]; then
    fi
    mv po/ld.pot po/.Recover
 fi
-xgettext `cat po/POTFILES.in` -o po/ld.pot
-
+# If this fails, Sanitization must fail.
+xgettext `cat po/POTFILES.in` -o po/ld.pot || exit 1
 # eof
