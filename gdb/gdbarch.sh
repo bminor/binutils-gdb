@@ -384,6 +384,9 @@ v::TARGET_ADDR_BIT:int:addr_bit::::8 * sizeof (void*):0:TARGET_PTR_BIT:
 # Number of bits in a BFD_VMA for the target object file format.
 v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #
+# One if \`char' acts like \`signed char', zero if \`unsigned char'.
+v::TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::%d::
+#
 v::IEEE_FLOAT:int:ieee_float::::0:0::0:::
 #
 f::TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0

@@ -144,6 +144,7 @@ struct gdbarch
   int ptr_bit;
   int addr_bit;
   int bfd_vma_bit;
+  int char_signed;
   int ieee_float;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
@@ -285,6 +286,7 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (void*),
+  1,
   0,
   0,
   0,
@@ -446,6 +448,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->long_double_bit = 2*TARGET_DOUBLE_BIT;
   current_gdbarch->ptr_bit = TARGET_INT_BIT;
   current_gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
+  current_gdbarch->char_signed = -1;
   current_gdbarch->read_pc = generic_target_read_pc;
   current_gdbarch->write_pc = generic_target_write_pc;
   current_gdbarch->read_fp = generic_target_read_fp;
@@ -561,6 +564,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->addr_bit == 0)
     gdbarch->addr_bit = TARGET_PTR_BIT;
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
+  if (gdbarch->char_signed == -1)
+    gdbarch->char_signed = 1;
   /* Skip verify of ieee_float, invalid_p == 0 */
   /* Skip verify of read_pc, invalid_p == 0 */
   /* Skip verify of write_pc, invalid_p == 0 */
@@ -1867,6 +1872,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_BYTE_ORDER = %ld\n",
                       (long) TARGET_BYTE_ORDER);
 #endif
+#ifdef TARGET_CHAR_SIGNED
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_CHAR_SIGNED # %s\n",
+                      XSTRING (TARGET_CHAR_SIGNED));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_CHAR_SIGNED = %d\n",
+                      (long) TARGET_CHAR_SIGNED);
+#endif
 #ifdef TARGET_DOUBLE_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_DOUBLE_BIT # %s\n",
@@ -2263,6 +2276,24 @@ set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch,
                          int bfd_vma_bit)
 {
   gdbarch->bfd_vma_bit = bfd_vma_bit;
+}
+
+int
+gdbarch_char_signed (struct gdbarch *gdbarch)
+{
+  if (gdbarch->char_signed == -1)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_char_signed invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_char_signed called\n");
+  return gdbarch->char_signed;
+}
+
+void
+set_gdbarch_char_signed (struct gdbarch *gdbarch,
+                         int char_signed)
+{
+  gdbarch->char_signed = char_signed;
 }
 
 int

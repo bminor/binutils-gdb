@@ -287,6 +287,24 @@ extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
 #endif
 #endif
 
+/* One if `char' acts like `signed char', zero if `unsigned char'. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_CHAR_SIGNED)
+#define TARGET_CHAR_SIGNED (1)
+#endif
+
+extern int gdbarch_char_signed (struct gdbarch *gdbarch);
+extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_CHAR_SIGNED)
+#error "Non multi-arch definition of TARGET_CHAR_SIGNED"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_CHAR_SIGNED)
+#define TARGET_CHAR_SIGNED (gdbarch_char_signed (current_gdbarch))
+#endif
+#endif
+
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (IEEE_FLOAT)
 #define IEEE_FLOAT (0)

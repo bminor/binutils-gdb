@@ -3029,7 +3029,8 @@ build_gdbtypes (void)
 	       "void", (struct objfile *) NULL);
   builtin_type_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_NOSIGN,
+	       (TYPE_FLAG_NOSIGN
+                | (TARGET_CHAR_SIGNED ? 0 : TYPE_FLAG_UNSIGNED)),
 	       "char", (struct objfile *) NULL);
   builtin_type_true_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
