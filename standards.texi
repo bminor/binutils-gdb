@@ -1,6 +1,6 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
-@setfilename standards.text
+@setfilename standards.info
 @settitle GNU Coding Standards
 @c %**end of header
 
@@ -34,7 +34,7 @@ by the Free Software Foundation.
 @sp 10
 @titlefont{GNU Coding Standards}
 @author{Richard Stallman}
-@author{last updated 1 Jul 1992}
+@author{last updated 16 Jul 1992}
 @c Note date also appears below.
 @page
 
@@ -60,7 +60,7 @@ by Free Software Foundation.
 @node Top, Reading Non-Free Code, (dir), (dir)
 @top Version
 
-Last updated 1 Jul 1992.
+Last updated 16 Jul 1992.
 @c Note date also appears above.
 @end ifinfo
 
@@ -201,6 +201,12 @@ comment with the function in the source to explain what it does.
 
 However, sometimes it is useful to write one line to describe the
 overall purpose of a large batch of changes.
+
+You can think of the change log as a conceptual ``undo list'' which
+explains how earlier versions were different from the current version.
+People can see the current version; they don't need the change log
+to tell them what is in it.  What they want from a change log is a
+clear explanation of how the earlier version differed.
 
 When you change the calling sequence of a function in a simple
 fashion, and you change all the callers of the function, there is no
@@ -1252,12 +1258,20 @@ fit any naming convention.
 @chapter Portability As It Applies to GNU
 
 Much of what is called ``portability'' in the Unix world refers to
-porting to different Unix versions.  This is not relevant to GNU
-software, because its purpose is to run on top of one and only
-one kernel, the GNU kernel, compiled with one and only one C
-compiler, the GNU C compiler.  The amount and kinds of variation
-among GNU systems on different cpu's will be like the variation
-among Berkeley 4.3 systems on different cpu's.
+porting to different Unix versions.  This is a secondary consideration
+for GNU software, because its primary purpose is to run on top of one
+and only one kernel, the GNU kernel, compiled with one and only one C
+compiler, the GNU C compiler.  The amount and kinds of variation among
+GNU systems on different cpu's will be like the variation among Berkeley
+4.3 systems on different cpu's.
+
+All users today run GNU software on non-GNU systems.  So supporting a
+variety of non-GNU systems is desirable; simply not paramount.
+The easiest way to achieve portability to a reasonable range of systems
+is to use Autoconf.  It's unlikely that your program needs to know more
+information about the host machine than Autoconf can provide, simply
+because most of the programs that need such knowledge have already been
+written.
 
 It is difficult to be sure exactly what facilities the GNU kernel
 will provide, since it isn't finished yet.  Therefore, assume you can
@@ -1348,10 +1362,9 @@ option usage information.
 
 Please use Texinfo for documenting GNU programs.  See the Texinfo
 manual, either the hardcopy or the version in the GNU Emacs Info
-sub-system (@kbd{C-h i}).
-
-See existing GNU texinfo files (e.g. those under the @file{man/}
-directory in the GNU Emacs Distribution) for examples.
+subsystem (@kbd{C-h i}).  See existing GNU Texinfo files (e.g. those
+under the @file{man/} directory in the GNU Emacs Distribution) for
+examples.
 
 The title page of the manual should state the version of the program
 which the manual applies to.  The Top node of the manual should also
@@ -1366,6 +1379,12 @@ concepts a user will have before reaching that point in the manual.
 Address the goals that a user will have in mind, and explain how to
 accomplish them.
 
+In addition to its manual, the package should have a file named
+@file{NEWS} which contains a list of user-visible changes worth
+mentioning.  In each new release, add items to the front of the file,
+and identify the version they pertain to.  Don't discard old items.
+This way, a user upgrading from any previous version can see what
+is new.
 
 @node Releases
 @chapter Making Releases
