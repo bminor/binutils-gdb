@@ -799,22 +799,14 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  else if (opcode2->unit == MU)
 	    insn = FM00 | (insn2 << 15) | insn1;
 	  else
-	    {
-	      insn = FM00 | (insn1 << 15) | insn2;
-	      /* Advance over dummy fixup since packed insn1 in L.  */
-	      fx = fx->next;
-	    }
+	    insn = FM00 | (insn1 << 15) | insn2;
 	}
       else if (opcode1->unit == IU)
 	/* Reverse sequential with IU opcode1 on right and done first.  */
 	insn = FM10 | (insn2 << 15) | insn1;
       else
-	{
-	  /* Sequential with non-IU opcode1 on left and done first.  */
-	  insn = FM01 | (insn1 << 15) | insn2;
-	  /* Advance over dummy fixup since packed insn1 in L.  */
-	  fx = fx->next;
-	}
+	/* Sequential with non-IU opcode1 on left and done first.  */
+	insn = FM01 | (insn1 << 15) | insn2;
       break;
 
     case PACK_PARALLEL:
@@ -838,11 +830,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  insn = FM00 | (insn2 << 15) | insn1;
 	}
       else
-	{
-	  insn = FM00 | (insn1 << 15) | insn2;
-	  /* Advance over dummy fixup since packed insn1 in L.  */
-	  fx = fx->next;
-	}
+	insn = FM00 | (insn1 << 15) | insn2;
       break;
 
     case PACK_LEFT_RIGHT:
@@ -858,8 +846,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	as_fatal (_("IU instruction may not be in the left container"));
       if (opcode1->exec_type & ALONE)
 	as_warn (_("Instruction in R container is squashed by flow control instruction in L container."));
-      /* Advance over dummy fixup.  */
-      fx = fx->next;
       break;
 
     case PACK_RIGHT_LEFT:
@@ -875,8 +861,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	as_fatal (_("MU instruction may not be in the right container"));
       if (opcode2->exec_type & ALONE)
 	as_warn (_("Instruction in R container is squashed by flow control instruction in L container."));
-      /* Advance over dummy fixup.  */
-      fx = fx->next;
       break;
 
     default:
@@ -886,13 +870,8 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   f = frag_more (4);
   number_to_chars_bigendian (f, insn, 4);
 
-  /* Process fixup chains.
-     Note that the packing code above advanced fx conditionally.
-     dlindsay@cygnus.com:  There's something subtle going on here involving
-	_dummy_first_bfd_reloc_code_real.  This is related to the
-	difference between BFD_RELOC_D10V_10_PCREL_R and _L, ie whether
-	a fixup is done in the L or R container.  A bug in this code
-	can pass Plum Hall fine, yet still affect hand-written assembler.  */
+  /* Process fixup chains.  fx refers to insn2 when j == 0, and to
+     insn1 when j == 1.  Yes, it's reversed.  */
 
   for (j = 0; j < 2; j++)
     {
@@ -904,7 +883,18 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      if (fx->fix[i].size == 2)
 		where += 2;
 
-	      if ((fx->fix[i].reloc == BFD_RELOC_D10V_10_PCREL_R) && (j == 0))
+	      if (fx->fix[i].reloc == BFD_RELOC_D10V_10_PCREL_R
+		  /* A BFD_RELOC_D10V_10_PCREL_R relocation applied to
+		     the instruction in the L container has to be
+		     adjusted to BDF_RELOC_D10V_10_PCREL_L.  When
+		     j==0, we're processing insn2's operands, so we
+		     want to mark the operand if insn2 is *not* in the
+		     R container.  When j==1, we're processing insn1's
+		     operands, so we want to mark the operand if insn2
+		     *is* in the R container.  Note that, if two
+		     instructions are identical, we're never going to
+		     swap them, so the test is safe.  */
+		  && j == ((insn & 0x7fff) == insn2))
 		fx->fix[i].operand |= 1024;
 
 	      if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
