@@ -1,3 +1,16 @@
+Tue Sep  6 23:28:52 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_derive_misc_symbol_info): Treat undefined code
+	symbols and undefined symbols which no type in the same manner
+	if the associated BFD symbol has BSF_FUNCTION set.  For a defined
+	symbol which no type, select a SOM type based on the flags of the
+	section containing the symbol.
+	(som_slurp_symbol_type): Set BSF_FUNCTION for undefined ST_STUB
+	or ST_CODE symbols (importing a non-function code symbol is
+	meaningless in SOM).
+	(som_set_reloc_info): Don't set "offset" to the section's vma; it
+	should always start at zero.
+
 Tue Sep  6 14:51:11 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	Add new style linker support to COFF backend.  a29k only for now.
