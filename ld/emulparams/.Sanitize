@@ -82,6 +82,7 @@ ppcnw.sh
 riscix.sh
 sa29200.sh
 sh.sh
+shl.sh
 sparclynx.sh
 sparcnbsd.sh
 st2000.sh
