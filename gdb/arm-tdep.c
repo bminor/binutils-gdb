@@ -81,15 +81,10 @@ static int arm_debug;
 
 /* Macros for setting and testing a bit in a minimal symbol that marks
    it as Thumb function.  The MSB of the minimal symbol's "info" field
-   is used for this purpose. This field is already being used to store
-   the symbol size, so the assumption is that the symbol size cannot
-   exceed 2^31.
+   is used for this purpose.
 
    MSYMBOL_SET_SPECIAL	Actually sets the "special" bit.
-   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.
-   MSYMBOL_SIZE         Returns the size of the minimal symbol,
-   			i.e. the "info" field with the "special" bit
-   			masked out.  */
+   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.  */
 
 #define MSYMBOL_SET_SPECIAL(msym)					\
 	MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
@@ -97,9 +92,6 @@ static int arm_debug;
 
 #define MSYMBOL_IS_SPECIAL(msym)				\
 	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
-
-#define MSYMBOL_SIZE(msym)				\
-	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
 static struct cmd_list_element *setarmcmdlist = NULL;

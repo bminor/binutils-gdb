@@ -226,17 +226,13 @@ mips_saved_regsize (void)
 
 /* Functions for setting and testing a bit in a minimal symbol that
    marks it as 16-bit function.  The MSB of the minimal symbol's
-   "info" field is used for this purpose. This field is already
-   being used to store the symbol size, so the assumption is
-   that the symbol size cannot exceed 2^31.
+   "info" field is used for this purpose.
 
    ELF_MAKE_MSYMBOL_SPECIAL tests whether an ELF symbol is "special",
    i.e. refers to a 16-bit function, and sets a "special" bit in a
    minimal symbol to mark it as a 16-bit function
 
-   MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol
-   MSYMBOL_SIZE         returns the size of the minimal symbol, i.e.
-   the "info" field with the "special" bit masked out */
+   MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol  */
 
 static void
 mips_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)

@@ -64,14 +64,6 @@
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
 
 
-/* This macro returns the size field of a minimal symbol, which is normally
-   stored in the "info" field.  The macro can be overridden for specific
-   targets (e.g. MIPS16) that use the info field for other purposes.  */
-#ifndef MSYMBOL_SIZE
-#define MSYMBOL_SIZE(msym) ((long) MSYMBOL_INFO (msym))
-#endif
-
-
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 

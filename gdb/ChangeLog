@@ -1,3 +1,18 @@
+2003-11-07  Michael Chastain  <mec@shout.net>
+
+	* symtab.h (struct minimal_symbol): Add size.
+	* dbxread.c: Use it.
+	* elfread.c: (record_minimal_symbol_and_info): Do not use info.
+	Rename to record_minimal_symbol.
+	(elf_symtab_read): Set MSYMBOL_SIZE explicitly.
+	* minsyms.c (prim_record_minimal_symbol_and_info): Initialize MSYMBOL_SIZE.
+	(install_minimal_symbols): Ditto.
+	* objfiles.c (terminate_minimal_symbol_table): Ditto.
+	* arm-tdep.c: Delete unused MSYMBOL_SIZE.
+	* m68hc11-tdep.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* sh64-tdep.c: Ditto.
+
 2003-11-10  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* MAINTAINERS: Change my e-mail address.

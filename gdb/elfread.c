@@ -105,15 +105,15 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
 }
 
 static struct minimal_symbol *
-record_minimal_symbol_and_info (char *name, CORE_ADDR address,
-				enum minimal_symbol_type ms_type, char *info,	/* FIXME, is this really char *? */
-				asection *bfd_section, struct objfile *objfile)
+record_minimal_symbol (char *name, CORE_ADDR address,
+		       enum minimal_symbol_type ms_type,
+		       asection *bfd_section, struct objfile *objfile)
 {
   if (ms_type == mst_text || ms_type == mst_file_text)
     address = SMASH_TEXT_ADDRESS (address);
 
   return prim_record_minimal_symbol_and_info
-    (name, address, ms_type, info, bfd_section->index, bfd_section, objfile);
+    (name, address, ms_type, NULL, bfd_section->index, bfd_section, objfile);
 }
 
 /*
@@ -163,7 +163,6 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
   char *filesymname = obsavestring ("", 0, &objfile->symbol_obstack);
 #endif
   struct dbx_symfile_info *dbx = objfile->sym_stab_info;
-  unsigned long size;
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
 
   if (dynamic)
@@ -223,9 +222,9 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 	      if (symaddr == 0)
 		continue;
 	      symaddr += offset;
-	      msym = record_minimal_symbol_and_info
+	      msym = record_minimal_symbol
 		((char *) sym->name, symaddr,
-		 mst_solib_trampoline, NULL, sym->section, objfile);
+		 mst_solib_trampoline, sym->section, objfile);
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      if (msym != NULL)
 		msym->filename = filesymname;
@@ -436,11 +435,15 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		  /* ms_type = mst_unknown; */
 		  continue;	/* Skip this symbol. */
 		}
-	      /* Pass symbol size field in via BFD.  FIXME!!!  */
-	      size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-	      msym = record_minimal_symbol_and_info
+	      msym = record_minimal_symbol
 		((char *) sym->name, symaddr,
-		 ms_type, (void *) size, sym->section, objfile);
+		 ms_type, sym->section, objfile);
+	      if (msym)
+	      {
+		/* Pass symbol size field in via BFD.  FIXME!!!  */
+		unsigned long size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+		MSYMBOL_SIZE(msym) = size;
+	      }
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      if (msym != NULL)
 		msym->filename = filesymname;

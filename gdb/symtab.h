@@ -325,6 +325,12 @@ struct minimal_symbol
 
   char *info;
 
+  /* Size of this symbol.  end_psymtab in dbxread.c uses this
+     information to calculate the end of the partial symtab based on the
+     address of the last symbol plus the size of the last symbol.  */
+
+  unsigned long size;
+
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
   char *filename;
@@ -346,6 +352,7 @@ struct minimal_symbol
 };
 
 #define MSYMBOL_INFO(msymbol)		(msymbol)->info
+#define MSYMBOL_SIZE(msymbol)		(msymbol)->size
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
 
 
