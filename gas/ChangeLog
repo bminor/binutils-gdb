@@ -1,3 +1,8 @@
+Fri Feb 21 14:34:31 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (md_pcrel_from_section): Return 0 if
+        relocation is in different section. Fixes PR11574.
+
 Fri Feb 21 10:08:25 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* tc-mips.c (mips_ip): If configured for an embedded ELF system,

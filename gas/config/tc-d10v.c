@@ -1,6 +1,6 @@
 /* tc-d10v.c -- Assembler code for the Mitsubishi D10V
 
-   Copyright (C) 1996 Free Software Foundation.
+   Copyright (C) 1996, 1997 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1088,7 +1088,7 @@ find_opcode (opcode, myops)
 	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
 	      if (flags & OPERAND_ADDR)
 		bits += 2;
-	      if (myops[opnum].X_op == O_constant) 
+	      if (myops[opnum].X_op == O_constant)
 		{
 		  if (!check_range (myops[opnum].X_add_number, bits, flags))
 		    return next_opcode;
@@ -1106,18 +1106,18 @@ find_opcode (opcode, myops)
 		    value = S_GET_VALUE(myops[opnum].X_add_symbol) - value -
 		      (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
 		  else
-		    value = S_GET_VALUE(myops[opnum].X_add_symbol);		    
+		    value = S_GET_VALUE(myops[opnum].X_add_symbol);
 
 		  if (myops[opnum].X_add_number == AT_WORD)
 		    {
 		      if (bits > 4)
 			{
 			  bits += 2;
-			  if (!check_range (value, bits, flags)) 
+			  if (!check_range (value, bits, flags))
 			    return next_opcode;
 			}
 		    }
-		  else if (!check_range (value, bits, flags)) 
+		  else if (!check_range (value, bits, flags))
 		    return next_opcode;
 		}
 	      next_opcode++;
@@ -1126,7 +1126,7 @@ find_opcode (opcode, myops)
 	}
       else
 	{
-	  /* not a constant, so use a long instruction */	    
+	  /* not a constant, so use a long instruction */    
 	  return opcode+2;
 	}
     }
@@ -1144,13 +1144,13 @@ find_opcode (opcode, myops)
 	      int X_op = myops[i].X_op;
 	      int num = myops[i].X_add_number;
 
-	      if (X_op==0) 
+	      if (X_op==0)
 		{
 		  match=0;
 		  break;
 		}
 	      
-	      if (flags & OPERAND_REG) 
+	      if (flags & OPERAND_REG)
 		{
 		  if ((X_op != O_register) ||
 		      ((flags & OPERAND_ACC) != (num & OPERAND_ACC)) ||
@@ -1159,14 +1159,14 @@ find_opcode (opcode, myops)
 		    {
 		      match=0;
 		      break;
-		    }	  
+		    }
 		}
 	      
 	      if (((flags & OPERAND_MINUS) && ((X_op != O_absent) || (num != OPERAND_MINUS))) ||
 		  ((flags & OPERAND_PLUS) && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
 		  ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
 		  ((flags & OPERAND_ATPAR) && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-		  ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN)))) 
+		  ((flags & OPERAND_ATSIGN) && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
 		{
 		  match=0;
 		  break;
@@ -1253,7 +1253,8 @@ md_pcrel_from_section (fixp, sec)
      fixS *fixp;
      segT sec;
 {
-  if (fixp->fx_addsy != (symbolS *)NULL && !S_IS_DEFINED (fixp->fx_addsy))
+  if (fixp->fx_addsy != (symbolS *)NULL && (!S_IS_DEFINED (fixp->fx_addsy) ||
+      (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
     return 0;
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
@@ -1292,7 +1293,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    }
 	}
     }
-  
+
   op_type = fixp->fx_r_type;
   if (op_type & 2048)
     {
