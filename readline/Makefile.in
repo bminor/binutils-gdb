@@ -86,6 +86,8 @@ GCC_LINT_CFLAGS = $(XCCFLAGS) $(GCC_LINT_FLAGS) @CFLAGS@ @LOCAL_CFLAGS@
 LIBRARY_NAME = libreadline.a
 STATIC_LIBS = libreadline.a libhistory.a
 
+WCWIDTH_OBJ = @WCWIDTH_OBJ@
+
 # The C code source files for this library.
 CSOURCES = $(srcdir)/readline.c $(srcdir)/funmap.c $(srcdir)/keymaps.c \
 	   $(srcdir)/vi_mode.c $(srcdir)/parens.c $(srcdir)/rltty.c \
@@ -98,7 +100,7 @@ CSOURCES = $(srcdir)/readline.c $(srcdir)/funmap.c $(srcdir)/keymaps.c \
 	   $(srcdir)/histfile.c $(srcdir)/nls.c $(srcdir)/search.c \
 	   $(srcdir)/shell.c $(srcdir)/savestring.c $(srcdir)/tilde.c \
 	   $(srcdir)/text.c $(srcdir)/misc.c $(srcdir)/compat.c \
-	   $(srcdir)/mbutil.c
+	   $(srcdir)/mbutil.c $(srcdir)/support/wcwidth.c
 
 # The header files for this library.
 HSOURCES = readline.h rldefs.h chardefs.h keymaps.h history.h histlib.h \
@@ -111,7 +113,8 @@ TILDEOBJ = tilde.o
 OBJECTS = readline.o vi_mode.o funmap.o keymaps.o parens.o search.o \
 	  rltty.o complete.o bind.o isearch.o display.o signals.o \
 	  util.o kill.o undo.o macro.o input.o callback.o terminal.o \
-	  text.o nls.o misc.o compat.o xmalloc.o $(HISTOBJ) $(TILDEOBJ)
+	  text.o nls.o misc.o compat.o xmalloc.o $(HISTOBJ) $(TILDEOBJ) \
+	  $(WCWIDTH_OBJ)
 
 # The texinfo files which document this library.
 DOCSOURCE = doc/rlman.texinfo doc/rltech.texinfo doc/rluser.texinfo
@@ -146,6 +149,10 @@ libhistory.a: $(HISTOBJ) xmalloc.o
 	$(RM) $@
 	$(AR) $(ARFLAGS) $@ $(HISTOBJ) xmalloc.o
 	-test -n "$(RANLIB)" && $(RANLIB) $@
+
+wcwidth.o: $(srcdir)/support/wcwidth.c
+	$(RM) $@
+	$(CC) $(CCFLAGS) -c $(srcdir)/support/wcwidth.c
 
 # Since tilde.c is shared between readline and bash, make sure we compile
 # it with the right flags when it's built as part of readline

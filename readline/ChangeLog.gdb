@@ -1,3 +1,11 @@
+2003-03-03  Kris Warkentin  <kewarken@qnx.com>
+
+	* aclocal.m4: Cause wcwidth check to substitute
+	HAVE_WCWIDTH for building.
+	* Makefile.in: Add wcwidth object to lib if required.
+	* shlib/Makefile.in: Likewise.
+	* configure: Regenerate.
+	
 2003-01-09  Michael Chastain  <mec@shout.net>
 
 	From Chet Ramey, <chet@po.cwru.edu>, the readline maintainer:

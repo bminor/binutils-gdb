@@ -1653,7 +1653,13 @@ AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
-AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
+AC_CHECK_FUNC(wcwidth, have_wcwidth=yes)
+if test "$have_wcwidth" = yes; then
+  AC_DEFINE(HAVE_WCWIDTH)
+  AC_SUBST(WCWIDTH_OBJ,)
+else
+  AC_SUBST(WCWIDTH_OBJ,wcwidth.o)
+fi
 
 AC_CACHE_CHECK([for mbstate_t], bash_cv_have_mbstate_t,
 [AC_TRY_RUN([
