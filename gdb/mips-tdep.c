@@ -4863,6 +4863,21 @@ mips_n32n64_store_return_value (struct type *type, char *valbuf)
   mips_n32n64_xfer_return_value (type, current_regcache, NULL, valbuf);
 }
 
+static void
+mips_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  /* Nothing to do -- push_arguments does all the work.  */
+}
+
+static CORE_ADDR
+mips_extract_struct_value_address (struct regcache *ignore)
+{
+  /* FIXME: This will only work at random.  The caller passes the
+     struct_return address in V0, but it is not preserved.  It may
+     still be there, or this may be a random value.  */
+  return read_register (V0_REGNUM);
+}
+
 /* Exported procedure: Is PC in the signal trampoline code */
 
 static int
@@ -5934,6 +5949,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
 
+  set_gdbarch_store_struct_return (gdbarch, mips_store_struct_return);
+  set_gdbarch_extract_struct_value_address (gdbarch, 
+					    mips_extract_struct_value_address);
   return gdbarch;
 }
 
