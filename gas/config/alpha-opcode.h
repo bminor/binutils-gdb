@@ -86,7 +86,7 @@ Kinds of operands:
    e    fa floating point register.
    f    fb floating point register.
    g    fc floating point register.
-   I	26 bit immediate (PALcode function #)
+   I	26 bit immediate
    l	16 low bits of immediate
    h	16 high(er) bits of immediate		[Never used. KR]
    L	22 bit PC relative immediate.
@@ -172,33 +172,6 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "stq_u",      0x3c000000, 0, "1,P" },		/* regbase macro */
 { "stq_c",      0xbc000000, 0, "1,l(2)" },
 { "stq_c",      0xbc000000, 0, "1,P" },		/* regbase macro */
-
-{ "ldb",	0, 0,		"1,l(2)Bd" },
-{ "ldb",	0, 0,		"1,PBd" },
-{ "ldbu",	0, 0,		"1,l(2)Bd" },
-{ "ldbu",	0, 0,		"1,PBd" },
-{ "ldw",	0, 0,		"1,l(2)Bd" },
-{ "ldw",	0, 0,		"1,PBd" },
-{ "ldwu",	0, 0,		"1,l(2)Bd" },
-{ "ldwu",	0, 0,		"1,PBd" },
-{ "stb",	0, 0,		"1,l(2)Bd" },
-{ "stb",	0, 0,		"1,PBd" },
-{ "stw",	0, 0,		"1,l(2)Bd" },
-{ "stw",	0, 0,		"1,PBd" },
-{ "ustw",	0, 0,		"1,l(2)Bd" },
-{ "ustw",	0, 0,		"1,PBd" },
-{ "ustl",	0, 0,		"1,l(2)Bd" },
-{ "ustl",	0, 0,		"1,PBd" },
-{ "ustq",	0, 0,		"1,l(2)Bd" },
-{ "ustq",	0, 0,		"1,PBd" },
-{ "uldw",	0, 0,		"1,l(2)Bd" },
-{ "uldw",	0, 0,		"1,PBd" },
-{ "uldwu",	0, 0,		"1,l(2)Bd" },
-{ "uldwu",	0, 0,		"1,PBd" },
-{ "uldl",	0, 0,		"1,l(2)Bd" },
-{ "uldl",	0, 0,		"1,PBd" },
-{ "uldq",	0, 0,		"1,l(2)Bd" },
-{ "uldq",	0, 0,		"1,PBd" },
 
 { "beq",        0xe4000000, 0, "1,L" },		/* 6o+5a+21d */
 { "bne",        0xf4000000, 0, "1,L" },
@@ -758,7 +731,7 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "mult/suid",  0x5800fc40, 1, "e,f,g" },
 
 /*
- * Miscellaneous, including standard PAL instructions.
+ * Miscellaneous
  */
 { "pal",        0x00000000, 0, "I" },		/* 6o+26f */
 { "call_pal",   0x00000000, 0, "I" },		/* alias */
@@ -778,19 +751,8 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "rs",         0x6000f000, 0, "1" },
 
 /*
- * More macros
+ * PAL instructions
  */
-{ "nop",         0x47ff041f, 0, "" },		/* or zero,zero,zero */
-{ "mov",         0x47e00400, 0, "2,3" },		/* or zero,r2,r3 */
-};
-
-#define NUMOPCODES ((sizeof alpha_opcodes)/(sizeof alpha_opcodes[0]))
-
-/*
- * PAL instructions for 21064 (and 21066/68)
- */
-static const struct alpha_opcode alpha_pal21064_opcodes[] =
-{
 { "hw_ld",	0x6c000000, 0, "1,t(2)" },
 { "hw_ld/p",	0x6c008000, 0, "1,t(2)" },
 { "hw_ld/a",	0x6c004000, 0, "1,t(2)" },
@@ -862,42 +824,11 @@ static const struct alpha_opcode alpha_pal21064_opcodes[] =
 { "hw_mtpr", 	0x74000000, 0, "R,8" },
 
 { "hw_rei",	0x7bff8000, 0, "" },
-};
-
-#define NUM21064OPCODES ((sizeof alpha_pal21064_opcodes)/(sizeof alpha_pal21064_opcodes[0]))
-
 /*
- * 21164 (and 21166/68) specific PAL instructions.
+ * More macros
  */
-static const struct alpha_opcode alpha_pal21164_opcodes[] =
-{
-{ "hw_ld",	0x6c000000, 0, "1,l(2)" },      /* RA, 16 bit displacement (RB) */
-{ "hw_st",	0x7c000000, 0, "1,l(2)" },      /* RA, 16 bit displacement (RB) */
-
-{ "hw_ldl/a",	0x6c004000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_ldq/a",	0x6c005000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_stl/a",	0x7c004000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_stq/a",	0x7c005000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-
-{ "hw_ldl/p",	0x6c008000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_ldq/p",	0x6c009000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_stl/p",	0x7c008000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_stq/p",	0x7c009000, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-
-{ "hw_ldq/v",	0x6c001800, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-
-{ "hw_ldl/l",	0x6c000400, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_ldq/l",	0x6c001400, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-
-{ "hw_stl/c",	0x7c000400, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-{ "hw_stq/c",	0x7c001400, 0, "1,t(2)" },      /* RA, 12 bit displacement (RB) */
-
-{ "hw_mfpr",	0x64000000, 0, "R,l" },         /* RA,RB,16 bits displacement */
-{ "hw_mtpr", 	0x74000000, 0, "R,l" },         /* RA,RB,16 bits displacement */
-
-{ "hw_rei",	0x7bff8000, 0, "" },
-
-{ "hw_rei_stall",	0x7bffc000, 0, "" },
+{ "nop",         0x47ff041f, 0, "" },		/* or zero,zero,zero */
+{ "mov",         0x47e00400, 0, "2,3" },		/* or zero,r2,r3 */
 };
 
-#define NUM21164OPCODES ((sizeof alpha_pal21164_opcodes)/(sizeof alpha_pal21164_opcodes[0]))
+#define NUMOPCODES ((sizeof alpha_opcodes)/(sizeof alpha_opcodes[0]))

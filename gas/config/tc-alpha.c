@@ -63,10 +63,6 @@
 /* @@ Will a simple 0x8000 work here?  If not, why not?  */
 #define GP_ADJUSTMENT	(0x8000 - 0x10)
 
-/* Which machine type is this?  Currently stores an integer for the
-   model, one of: 21064, 21066, 21164.  */
-static unsigned long machine;
-
 /* These are exported to relaxing code, even though we don't do any
    relaxing on this processor currently.  */
 const relax_typeS md_relax_table[1];
@@ -554,72 +550,6 @@ get_lit4_offset (val)
   return retval;
 }
 
-#define load_insn(NAME, OP)	(hash_insert (op_hash, (NAME), (PTR) (OP)))
-
-static void
-load_insn_table (ops, size)
-     struct alpha_opcode *ops;
-     int size;
-{
-  struct alpha_opcode *end = ops + size;
-  struct alpha_opcode *op;
-  const char *name;
-
-  for (op = ops; op < end; )
-    {
-      const char *retval;
-
-      name = op->name;
-
-      retval = load_insn (op->name, op);
-      if (retval)
-	as_fatal ("internal error: can't hash opcode `%s': %s",
-		  op->name, retval);
-
-      do
-	op++;
-      while (op < end
-	     && (op->name == name
-		 || !strcmp (op->name, name)));
-    }
-  /* Some opcodes include modifiers of various sorts with a "/mod"
-     syntax, like the architecture documentation suggests.  However,
-     for use with gcc at least, we also need to access those same
-     opcodes without the "/".  */
-  for (op = ops; op < end; )
-    {
-      name = op->name;
-
-      if (strchr (name, '/'))
-	{
-	  char *name2, *p;
-	  const char *q;
-
-	  name2 = xmalloc (strlen (name));
-	  p = name2;
-	  q = name;
-
-	  while (*q)
-	    if (*q == '/')
-	      q++;
-	    else
-	      *p++ = *q++;
-	  *p = 0;
-	  /* Ignore failures -- the opcode table does duplicate some
-	     variants in different forms, like "hw_stq" and "hw_st/q".
-	     Maybe the variants can be eliminated, and this error checking
-	     restored.  */
-	  load_insn (name2, op);
-	}
-
-      do
-	op++;
-      while (op < end
-	     && (op->name == name
-		 || !strcmp (op->name, name)));
-    }
-}
-
 static struct alpha_it clear_insn;
 
 /* This function is called once, at assembler startup time.  It should
@@ -628,26 +558,56 @@ static struct alpha_it clear_insn;
 void
 md_begin ()
 {
-  int i;
+  const char *retval, *name;
+  unsigned int i = 0;
 
   op_hash = hash_new ();
-  load_insn_table (alpha_opcodes, NUMOPCODES);
 
-  /* Default to 21064 PAL instructions.  */
-  if (machine == 0)
-    machine = 21064;
-
-  switch (machine)
+  for (i = 0; i < NUMOPCODES; )
     {
-    case 21064:
-    case 21066:
-      load_insn_table (alpha_pal21064_opcodes, NUM21064OPCODES);
-      break;
-    case 21164:
-      load_insn_table (alpha_pal21164_opcodes, NUM21164OPCODES);
-      break;
-    default:
-      as_fatal ("palcode set unknown (internal error)");
+      const char *name = alpha_opcodes[i].name;
+      retval = hash_insert (op_hash, name, (PTR) &alpha_opcodes[i]);
+      if (retval)
+	as_fatal ("internal error: can't hash opcode `%s': %s",
+		  name, retval);
+
+      do
+	i++;
+      while (i < NUMOPCODES
+	     && (alpha_opcodes[i].name == name
+		 || !strcmp (alpha_opcodes[i].name, name)));
+    }
+  /* Some opcodes include modifiers of various sorts with a "/mod"
+     syntax, like the architecture documentation suggests.  However,
+     for use with gcc at least, we also need to access those same
+     opcodes without the "/".  */
+  for (i = 0; i < NUMOPCODES; )
+    {
+      name = alpha_opcodes[i].name;
+
+      if (strchr (name, '/'))
+	{
+	  char *p = xmalloc (strlen (name));
+	  const char *q = name;
+	  char *q2 = p;
+
+	  for (; *q; q++)
+	    if (*q /= '/')
+	      *q2++ = *q;
+
+	  *q2++ = 0;
+	  retval = hash_insert (op_hash, p, (PTR) &alpha_opcodes[i]);
+	  /* Ignore failures -- the opcode table does duplicate some
+	     variants in different forms, like "hw_stq" and "hw_st/q".
+	     Maybe the variants can be eliminated, and this error
+	     checking restored.  */
+	}
+
+      do
+	i++;
+      while (i < NUMOPCODES
+	     && (alpha_opcodes[i].name == name
+		 || !strcmp (alpha_opcodes[i].name, name)));
     }
 
   lituse_basereg.X_op = O_constant;
@@ -2261,31 +2221,6 @@ md_parse_option (c, arg)
 
     case OPTION_32ADDR:
       addr32 = 1;
-      break;
-
-    case 'm':
-      {
-	unsigned long mach;
-
-	if (!strcmp (arg, "21064"))
-	  mach = 21064;
-	else if (!strcmp (arg, "21066"))
-	  mach = 21066;
-	else if (!strcmp (arg, "21164"))
-	  mach = 21164;
-	else
-	  {
-	    as_bad ("invalid architecture %s", arg);
-	    return 0;
-	  }
-
-	if (machine != 0 && machine != mach)
-	  {
-	    as_warn ("machine type %lu already chosen, overriding with %lu",
-		     machine, mach);
-	  }
-	machine = mach;
-      }
       break;
 
     default:
