@@ -34,6 +34,7 @@ c[12]-*-*)		gdb_host=convex ;;
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
+hppa*-*-osf*)		gdb_host=hppabsd ;;
 
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
 i[34]86-sequent-bsd*)	gdb_host=symmetry ;; #dynix
@@ -186,6 +187,7 @@ sh-*-*)			gdb_target=sh ;;
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
+hppa*-*-osf*)		gdb_target=hppaosf ;;
 
 i[34]86-sequent-*)	gdb_target=symmetry ;;
 i[34]86-ncr-*)		gdb_target=ncr3000 ;;

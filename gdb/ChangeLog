@@ -1,3 +1,9 @@
+Thu Feb 24 08:06:52 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* configure.in (hppa*-*-osf*): New configuration.
+	* config/pa/hppaosf.mt: New target makefile fragment.
+	* config/pa/tm-hppao.h: New target include file.
+
 Thu Feb 24 04:29:19 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* exec.c (print_section_info):  Print entry point for exec_bfd only.
