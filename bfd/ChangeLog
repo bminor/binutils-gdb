@@ -1,3 +1,17 @@
+start-sanitize-tic80
+Thu May 22 20:22:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-tic80.c (tic80_howto_table): Add PP relocations.  Change
+	name of R_RELLONG to "RELLONG".  Set rightshift and complain for
+	M_PPCR.
+	(ppbase_reloc, glob15_reloc): New static functions.
+	(glob16_reloc, local16_reloc): New static functions.
+	(rtype2howto): Handle all relocation types.
+	(coff_tic80_relocate_section): New static function.
+	(coff_relocate_section): Define to coff_tic80_relocate_section.
+	* Makefile.in (coff-tic80.o): Depends upon include/coff/tic80.h.
+
+end-sanitize-tic80
 Wed May 21 17:15:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_slurp_symbol_table): If COFF_WITH_PE or
