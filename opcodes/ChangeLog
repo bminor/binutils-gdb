@@ -1,3 +1,26 @@
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	2000-05-25  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-dis.c (disassemble): Negate negative accumulator's shift.
+	2000-05-24  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-dis.c (disassemble, case FSREG, FDREG): Don't assume
+	32-bit longs when sign-extending operands.
+	2000-04-20  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-opc.c: Remove MN10300_OPERAND_RELAX from all FSREGs.
+	* m10300-dis.c (HAVE_AM33_2): Define.
+	(disassemble): Use it.
+	(HAVE_AM33): Redefine.
+	(print_insn_mn10300): Fix mask for 5-byte extended insns.
+	2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-opc.c: Renamed AM332 to AM33_2.
+	2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-opc.c: Defined AM33 2.0 register operands.  Added support
+	for AM33 2.0 `imm8,(abs16)' addressing mode for btst, bset and
+	bclr.  Implemented `fbCC', `flCC', `dcpf' and all FP insns.
+	* m10300-dis.c (print_insn_mn10300): Recognize 5byte extended
+	insn code of AM33 2.0.
+	(disassemble): Recognize FMT_D3.  Print out FP register names.
+
 2003-07-09  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (set_default_mips_dis_options): Get BFD from
