@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -80,10 +80,10 @@ core_close (quitting)
 {
   char *name;
 
-  inferior_pid = 0;		/* Avoid confusion from thread stuff */
-
   if (core_bfd)
     {
+      inferior_pid = 0;		/* Avoid confusion from thread stuff */
+
       name = bfd_get_filename (core_bfd);
       if (!bfd_close (core_bfd))
 	warning ("cannot close \"%s\": %s",

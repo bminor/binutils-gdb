@@ -351,7 +351,8 @@ cp_print_value_fields (type, valaddr, address, stream, format, recurse, pretty,
 		{
 	           val_print (TYPE_FIELD_TYPE (type, i), 
 			      valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
-			      0, stream, format, 0, recurse + 1, pretty);
+			      address + TYPE_FIELD_BITPOS (type, i) / 8,
+			      stream, format, 0, recurse + 1, pretty);
 		}
 	    }
 	  annotate_field_end ();

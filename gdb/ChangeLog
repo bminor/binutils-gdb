@@ -1,3 +1,15 @@
+Sun Oct 20 04:38:39 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* corelow.c (core_close):  Clear inferior_pid only if there is
+	an open core_bfd.
+
+	* cp-valprint.c (cp_print_value_fields):  Pass correct address
+	to val_print, not 0.
+
+	From Andreas Schwab (schwab@issan.informatik.uni-dortmund.de):
+	* eval.c (evaluate_subexp_standard) [case BINOP_REPEAT]: Chase
+	typedefs before checking for integral type of right operand.
+
 Fri Oct 18 17:26:22 1996  Mark Alexander  <marka@cygnus.com>
 
 	* mdebugread.c (parse_symbol): Fix crash when malloc has
