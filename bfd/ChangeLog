@@ -1,3 +1,17 @@
+Mon Jul 20 18:50:54 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add got_ & plt_header_size.
+	* elf32-i386.c (elf_backend_got_header_size): Define.
+	(elf_backend_plt_header_size): Define.
+	* elf32-m68k.c, elf32-mips.c, elf32-ppc.c: Likewise.
+	* elf32-sparc.c, elf64-alpha.c, elf64-sparc.c: Likewise.
+	* elfxx-target.h: Provide a default of zero.
+	* elflink.c (_bfd_elf_create_got_section): Use got_header_size.
+	* elflink.h (elf_gc_common_finalize_got_offsets): Likewise.
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't remove a PLT
+	entry from an executable, even if the plt refcount goes to 0.
+
 Mon Jul 20 12:47:26 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* aoutx.h (NAME(aout,find_nearest_line)): Also remember the

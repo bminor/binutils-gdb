@@ -5803,7 +5803,7 @@ elf_gc_common_finalize_got_offsets (abfd, info)
      struct bfd_link_info *info;
 {
   bfd *i;
-  bfd_vma off[2], gotoff = 0;
+  bfd_vma gotoff = get_elf_backend_data (abfd)->got_header_size;
 
   /* Do the local .got entries first.  */
   for (i = info->input_bfds; i; i = i->link_next)
@@ -5834,11 +5834,9 @@ elf_gc_common_finalize_got_offsets (abfd, info)
     }
 
   /* Then the global .got and .plt entries.  */
-  off[0] = gotoff;
-  off[1] = 0;
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_gc_allocate_got_offsets,
-			  (PTR) off);
+			  (PTR) &gotoff);
   return true;
 }
 
