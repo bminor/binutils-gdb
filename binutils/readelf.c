@@ -129,6 +129,7 @@ static bfd_vma (*         byte_get)                   PARAMS ((unsigned char *, 
 static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
 static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
+static const char *       get_sparc64_dynamic_type    PARAMS ((unsigned long));
 static const char *       get_dynamic_type            PARAMS ((unsigned long));
 static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
 static char *             get_file_type               PARAMS ((unsigned));
@@ -841,6 +842,18 @@ get_mips_dynamic_type (type)
 }
 
 static const char *
+get_sparc64_dynamic_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case DT_SPARC_REGISTER: return "SPARC_REGISTER";
+    default:
+      return NULL;
+    }
+}    
+
+static const char *
 get_dynamic_type (type)
      unsigned long type;
 {
@@ -913,6 +926,9 @@ get_dynamic_type (type)
 	    case EM_MIPS:
 	    case EM_MIPS_RS4_BE:
 	      result = get_mips_dynamic_type (type);
+	      break;
+	    case EM_SPARCV9:
+	      result = get_sparc64_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;

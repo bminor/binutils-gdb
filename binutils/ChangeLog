@@ -1,3 +1,8 @@
+1999-08-26  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* readelf.c (get_sparc64_dynamic_type): New function.
+	(get_dynamic_type): Use it.
+
 1999-08-26  Jim Wilson  <wilson@cygnus.com>
 
 	* readelf.c (display_debug_lines, case default): Change second line
