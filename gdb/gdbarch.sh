@@ -624,11 +624,6 @@ f:=:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc::generic_skip_trampoline_code
 # evaluates non-zero, this is the address where the debugger will place
 # a step-resume breakpoint to get us past the dynamic linker.
 m::CORE_ADDR:skip_solib_resolver:CORE_ADDR pc:pc::generic_skip_solib_resolver::0
-# For SVR4 shared libraries, each call goes through a small piece of
-# trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
-# to nonzero if we are currently stopped in one of these.
-f:=:int:in_solib_call_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_solib_call_trampoline::0
-
 # Some systems also have trampoline code for returning from shared libs.
 f:=:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_solib_return_trampoline::0
 

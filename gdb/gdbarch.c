@@ -215,7 +215,6 @@ struct gdbarch
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
-  gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
@@ -342,7 +341,6 @@ struct gdbarch startup_gdbarch =
   0,  /* print_insn */
   0,  /* skip_trampoline_code */
   generic_skip_solib_resolver,  /* skip_solib_resolver */
-  0,  /* in_solib_call_trampoline */
   0,  /* in_solib_return_trampoline */
   generic_in_function_epilogue_p,  /* in_function_epilogue_p */
   construct_inferior_arguments,  /* construct_inferior_arguments */
@@ -439,7 +437,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->smash_text_address = core_addr_identity;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
-  current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   current_gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
   current_gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
@@ -598,7 +595,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
     fprintf_unfiltered (log, "\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
-  /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
@@ -1181,15 +1177,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_function_epilogue_p = <0x%lx>\n",
                       (long) current_gdbarch->in_function_epilogue_p);
-#ifdef IN_SOLIB_CALL_TRAMPOLINE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "IN_SOLIB_CALL_TRAMPOLINE(pc, name)",
-                      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (pc, name)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: in_solib_call_trampoline = <0x%lx>\n",
-                      (long) current_gdbarch->in_solib_call_trampoline);
 #ifdef IN_SOLIB_RETURN_TRAMPOLINE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3427,23 +3414,6 @@ set_gdbarch_skip_solib_resolver (struct gdbarch *gdbarch,
                                  gdbarch_skip_solib_resolver_ftype skip_solib_resolver)
 {
   gdbarch->skip_solib_resolver = skip_solib_resolver;
-}
-
-int
-gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->in_solib_call_trampoline != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_in_solib_call_trampoline called\n");
-  return gdbarch->in_solib_call_trampoline (pc, name);
-}
-
-void
-set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch,
-                                      gdbarch_in_solib_call_trampoline_ftype in_solib_call_trampoline)
-{
-  gdbarch->in_solib_call_trampoline = in_solib_call_trampoline;
 }
 
 int

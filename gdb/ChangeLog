@@ -1,5 +1,8 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (in_solib_call_trampoline): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 	* hppa-tdep.c (hppa_stub_unwind_sniffer): Replace
 	IN_SOLIB_CALL_TRAMPOLINE with tdep.in_solib_call_trampoline.
 	* hppa-tdep.h (struct gdbarch_tdep): Add in_solib_call_trampoline.
