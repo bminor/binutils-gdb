@@ -423,11 +423,13 @@ elf_swap_dyn_in (abfd, p, dst)
 }
 
 INLINE void
-elf_swap_dyn_out (abfd, src, dst)
+elf_swap_dyn_out (abfd, src, p)
      bfd *abfd;
      const Elf_Internal_Dyn *src;
-     Elf_External_Dyn *dst;
+     PTR p;
 {
+  Elf_External_Dyn *dst = (Elf_External_Dyn *) p;
+
   put_word (abfd, src->d_tag, dst->d_tag);
   put_word (abfd, src->d_un.d_val, dst->d_un.d_val);
 }
@@ -1500,7 +1502,8 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   sizeof (Elf_External_Sym),
   sizeof (Elf_External_Dyn),
   sizeof (Elf_External_Note),
-
+  ARCH_SIZE / 8,
+  1,
   ARCH_SIZE, FILE_ALIGN,
   ELFCLASS, EV_CURRENT,
   elf_write_out_phdrs,
@@ -1509,5 +1512,10 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   elf_swap_symbol_out,
   elf_slurp_reloc_table,
   elf_slurp_symbol_table,
-  elf_swap_dyn_in
+  elf_swap_dyn_in,
+  elf_swap_dyn_out,
+  NULL,
+  NULL,
+  NULL,
+  NULL
 };

@@ -1532,7 +1532,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
   else if (strcmp (asect->name, ".hash") == 0)
     {
       this_hdr->sh_type = SHT_HASH;
-      this_hdr->sh_entsize = bed->s->arch_size / 8;
+      this_hdr->sh_entsize = bed->s->sizeof_hash_entry;
     }
   else if (strcmp (asect->name, ".dynsym") == 0)
     {

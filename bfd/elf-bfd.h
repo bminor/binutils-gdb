@@ -236,6 +236,13 @@ struct elf_size_info {
   unsigned char sizeof_ehdr, sizeof_phdr, sizeof_shdr;
   unsigned char sizeof_rel, sizeof_rela, sizeof_sym, sizeof_dyn, sizeof_note;
 
+  /* The size of entries in the .hash section.  */
+  unsigned char sizeof_hash_entry;
+
+  /* The number of internal relocations to allocate per external
+     relocation entry.  */
+  unsigned char int_rels_per_ext_rel;
+
   unsigned char arch_size, file_align;
   unsigned char elfclass, ev_current;
   int (*write_out_phdrs) PARAMS ((bfd *, const Elf_Internal_Phdr *, int));
@@ -246,6 +253,32 @@ struct elf_size_info {
     PARAMS ((bfd *, asection *, asymbol **, boolean));
   long (*slurp_symbol_table) PARAMS ((bfd *, asymbol **, boolean));
   void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
+  void (*swap_dyn_out) PARAMS ((bfd *, const Elf_Internal_Dyn *, PTR));
+
+  /* This function, if defined, is called to swap in a REL
+     relocation.  If an external relocation corresponds to more than
+     one internal relocation, then all relocations are swapped in at
+     once.  */
+  void (*swap_reloc_in)
+    PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rel *));
+
+  /* This function, if defined, is called to swap out a REL
+     relocation.  */
+  void (*swap_reloc_out)
+    PARAMS ((bfd *, const Elf_Internal_Rel *, bfd_byte *));
+
+  /* This function, if defined, is called to swap in a RELA
+     relocation.  If an external relocation corresponds to more than
+     one internal relocation, then all relocations are swapped in at
+     once.  */
+  void (*swap_reloca_in)
+    PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
+
+  /* This function, if defined, is called to swap out a RELA
+     relocation.  */
+  void (*swap_reloca_out)
+    PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+
 };
 
 #define elf_symbol_from(ABFD,S) \
@@ -1024,7 +1057,7 @@ extern void bfd_elf32_swap_phdr_out
 extern void bfd_elf32_swap_dyn_in
   PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 extern void bfd_elf32_swap_dyn_out
-  PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf32_External_Dyn *));
+  PARAMS ((bfd *, const Elf_Internal_Dyn *, PTR));
 extern long bfd_elf32_slurp_symbol_table
   PARAMS ((bfd *, asymbol **, boolean));
 extern boolean bfd_elf32_write_shdrs_and_ehdr PARAMS ((bfd *));
@@ -1067,7 +1100,7 @@ extern void bfd_elf64_swap_phdr_out
 extern void bfd_elf64_swap_dyn_in
   PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 extern void bfd_elf64_swap_dyn_out
-  PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf64_External_Dyn *));
+  PARAMS ((bfd *, const Elf_Internal_Dyn *, PTR));
 extern long bfd_elf64_slurp_symbol_table
   PARAMS ((bfd *, asymbol **, boolean));
 extern boolean bfd_elf64_write_shdrs_and_ehdr PARAMS ((bfd *));

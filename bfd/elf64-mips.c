@@ -52,14 +52,20 @@ static void mips_elf64_swap_reloc_in
 static void mips_elf64_swap_reloca_in
   PARAMS ((bfd *, const Elf64_Mips_External_Rela *,
 	   Elf64_Mips_Internal_Rela *));
-#if 0
 static void mips_elf64_swap_reloc_out
   PARAMS ((bfd *, const Elf64_Mips_Internal_Rel *,
 	   Elf64_Mips_External_Rel *));
-#endif
 static void mips_elf64_swap_reloca_out
   PARAMS ((bfd *, const Elf64_Mips_Internal_Rela *,
 	   Elf64_Mips_External_Rela *));
+static void mips_elf64_be_swap_reloc_in
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rel *));
+static void mips_elf64_be_swap_reloc_out
+  PARAMS ((bfd *, const Elf_Internal_Rel *, bfd_byte *));
+static void mips_elf64_be_swap_reloca_in
+  PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
+static void mips_elf64_be_swap_reloca_out
+  PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
 static reloc_howto_type *mips_elf64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static long mips_elf64_get_reloc_upper_bound PARAMS ((bfd *, asection *));
@@ -1220,10 +1226,6 @@ mips_elf64_swap_reloca_in (abfd, src, dst)
   dst->r_addend = bfd_h_get_signed_64 (abfd, (bfd_byte *) src->r_addend);
 }
 
-#if 0
-
-/* This is not currently used.  */
-
 /* Swap out a MIPS 64-bit Rel reloc.  */
 
 static void
@@ -1240,8 +1242,6 @@ mips_elf64_swap_reloc_out (abfd, src, dst)
   bfd_h_put_8 (abfd, src->r_type, (bfd_byte *) dst->r_type);
 }
 
-#endif /* 0 */
-
 /* Swap out a MIPS 64-bit Rela reloc.  */
 
 static void
@@ -1257,6 +1257,96 @@ mips_elf64_swap_reloca_out (abfd, src, dst)
   bfd_h_put_8 (abfd, src->r_type2, (bfd_byte *) dst->r_type2);
   bfd_h_put_8 (abfd, src->r_type, (bfd_byte *) dst->r_type);
   bfd_h_put_64 (abfd, src->r_addend, (bfd_byte *) dst->r_addend);
+}
+
+/* Swap in a MIPS 64-bit Rel reloc.  */
+
+static void
+mips_elf64_be_swap_reloc_in (abfd, src, dst)
+     bfd *abfd;
+     const bfd_byte *src;
+     Elf_Internal_Rel *dst;
+{
+  Elf64_Mips_Internal_Rel mirel;
+
+  mips_elf64_swap_reloc_in (abfd, 
+			    (const Elf64_Mips_External_Rel *) src,
+			    &mirel);
+
+  dst[0].r_offset = mirel.r_offset;
+  dst[0].r_info = ELF32_R_INFO (mirel.r_sym, mirel.r_type);
+  dst[1].r_offset = mirel.r_offset;
+  dst[1].r_info = ELF32_R_INFO (mirel.r_ssym, mirel.r_type2);
+  dst[2].r_offset = mirel.r_offset;
+  dst[2].r_info = ELF32_R_INFO (STN_UNDEF, mirel.r_type3);
+}
+
+/* Swap in a MIPS 64-bit Rela reloc.  */
+
+static void
+mips_elf64_be_swap_reloca_in (abfd, src, dst)
+     bfd *abfd;
+     const bfd_byte *src;
+     Elf_Internal_Rela *dst;
+{
+  Elf64_Mips_Internal_Rela mirela;
+
+  mips_elf64_swap_reloca_in (abfd, 
+			     (const Elf64_Mips_External_Rela *) src,
+			     &mirela);
+
+  dst[0].r_offset = mirela.r_offset;
+  dst[0].r_info = ELF32_R_INFO (mirela.r_sym, mirela.r_type);
+  dst[0].r_addend = mirela.r_addend;
+  dst[1].r_offset = mirela.r_offset;
+  dst[1].r_info = ELF32_R_INFO (mirela.r_ssym, mirela.r_type2);
+  dst[1].r_addend = 0;
+  dst[2].r_offset = mirela.r_offset;
+  dst[2].r_info = ELF32_R_INFO (STN_UNDEF, mirela.r_type3);
+  dst[2].r_addend = 0;
+}
+
+/* Swap out a MIPS 64-bit Rel reloc.  */
+
+static void
+mips_elf64_be_swap_reloc_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Rel *src;
+     bfd_byte *dst;
+{
+  Elf64_Mips_Internal_Rel mirel;
+
+  mirel.r_offset = src->r_offset;
+  mirel.r_type = ELF32_R_TYPE (src->r_info);
+  mirel.r_sym = ELF32_R_SYM (src->r_info);
+  mirel.r_type2 = R_MIPS_NONE;
+  mirel.r_ssym = STN_UNDEF;
+  mirel.r_type3 = R_MIPS_NONE;
+
+  mips_elf64_swap_reloc_out (abfd, &mirel, 
+			     (Elf64_Mips_External_Rel *) dst);
+}
+
+/* Swap out a MIPS 64-bit Rela reloc.  */
+
+static void
+mips_elf64_be_swap_reloca_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Rela *src;
+     bfd_byte *dst;
+{
+  Elf64_Mips_Internal_Rela mirela;
+
+  mirela.r_offset = src->r_offset;
+  mirela.r_type = ELF32_R_TYPE (src->r_info);
+  mirela.r_addend = src->r_addend;
+  mirela.r_sym = ELF32_R_SYM (src->r_info);
+  mirela.r_type2 = R_MIPS_NONE;
+  mirela.r_ssym = STN_UNDEF;
+  mirela.r_type3 = R_MIPS_NONE;
+
+  mips_elf64_swap_reloca_out (abfd, &mirela, 
+			      (Elf64_Mips_External_Rela *) dst);
 }
 
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
@@ -2099,6 +2189,8 @@ const struct elf_size_info mips_elf64_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
+  4,            /* hash-table entry size */
+  3,            /* internal relocations per external relocations */
   64,		/* arch_size */
   8,		/* file_align */
   ELFCLASS64,
@@ -2109,7 +2201,12 @@ const struct elf_size_info mips_elf64_size_info =
   bfd_elf64_swap_symbol_out,
   mips_elf64_slurp_reloc_table,
   bfd_elf64_slurp_symbol_table,
-  bfd_elf64_swap_dyn_in
+  bfd_elf64_swap_dyn_in,
+  bfd_elf64_swap_dyn_out,
+  mips_elf64_be_swap_reloc_in,
+  mips_elf64_be_swap_reloc_out,
+  mips_elf64_be_swap_reloca_in,
+  mips_elf64_be_swap_reloca_out
 };
 
 #define TARGET_LITTLE_SYM		bfd_elf64_littlemips_vec

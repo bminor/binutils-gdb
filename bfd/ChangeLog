@@ -1,3 +1,36 @@
+1999-07-07  Mark Mitchell  <mark@codesourcery.com>
+
+	* elflink.h (elf_link_create_dynamic_sections): Handle non-standard
+	hash-entry sizes.
+	(size_dynamic_sections): Likewise.
+	(elf_link_output_extsym): Likewise.
+	* elf.c: (elf_fake_sections): Likewise.
+	* libbfd.c (bfd_get): New macro.
+	(bfd_put): Likewise.
+	* bfd-in2.h: Regenerated.
+
+1999-07-07  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf-bfd.h (elf_size_info): Add hash_entry_size,
+	int_rels_per_ext_rel, swap_dyn_out, swap_reloc_in, swap_reloc_out,
+	wap_reloca_in, and swap_reloca_out. 
+	* elflink.h (elf_link_read_relocs_from_section): Adjust to handle
+	multiple internal relocations per external relocation.
+	(link_read_relocs): Likewise.
+	(elf_bfd_final_link): Likewise.
+	(elf_link_input_bfd): Likewise.
+	(elf_gc_mark): Likewise.
+	(elf_gc_smash_unused_vtentry_relocs): Likewise.
+	* elfcode.h (elf_swap_dyn_out): Adjust type to match
+	elf_swap_dyn_in.
+	(size_info): Add entries for new fields.
+	* elf64-mips.c (mips_elf64_swap_reloc_out): Enable.
+	(mips_elf64_be_swap_reloc_in): New function.
+	(mips_elf64_be_swap_reloc_out): Likewise.
+	(mips_elf64_be_swap_reloca_in): Likewise.
+	(mips_elf64_be_swap_reloca_out): Likewise.
+	(mips_elf64_size_info): Add entries for new fields.
+	
 1999-07-07  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_bfd_final_link): Assert that section reloc_count

@@ -1997,16 +1997,18 @@ elf_link_create_dynamic_sections (abfd, info)
       && ! _bfd_elf_link_record_dynamic_symbol (info, h))
     return false;
 
+  bed = get_elf_backend_data (abfd);
+
   s = bfd_make_section (abfd, ".hash");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, LOG_FILE_ALIGN))
     return false;
+  elf_section_data (s)->this_hdr.sh_entsize = bed->s->sizeof_hash_entry;
 
   /* Let the backend create the rest of the sections.  This lets the
      backend set the right flags.  The backend will normally create
      the .got and .plt sections.  */
-  bed = get_elf_backend_data (abfd);
   if (! (*bed->elf_backend_create_dynamic_sections) (abfd, info))
     return false;
 
@@ -2068,6 +2070,8 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
      PTR external_relocs;
      Elf_Internal_Rela *internal_relocs;
 {
+  struct elf_backend_data *bed;
+
   /* If there aren't any relocations, that's OK.  */
   if (!shdr)
     return true;
@@ -2081,24 +2085,36 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
       != shdr->sh_size)
     return false;
 
+  bed = get_elf_backend_data (abfd);
+
   /* Convert the external relocations to the internal format.  */
   if (shdr->sh_entsize == sizeof (Elf_External_Rel))
     {
       Elf_External_Rel *erel;
       Elf_External_Rel *erelend;
       Elf_Internal_Rela *irela;
+      Elf_Internal_Rel *irel;
 
       erel = (Elf_External_Rel *) external_relocs;
       erelend = erel + shdr->sh_size / shdr->sh_entsize;
       irela = internal_relocs;
-      for (; erel < erelend; erel++, irela++)
+      irel = bfd_alloc (abfd, (bed->s->int_rels_per_ext_rel
+			       * sizeof (Elf_Internal_Rel)));
+      for (; erel < erelend; erel++, irela += bed->s->int_rels_per_ext_rel)
 	{
-	  Elf_Internal_Rel irel;
+	  int i;
 
-	  elf_swap_reloc_in (abfd, erel, &irel);
-	  irela->r_offset = irel.r_offset;
-	  irela->r_info = irel.r_info;
-	  irela->r_addend = 0;
+	  if (bed->s->swap_reloc_in)
+	    (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, irel);
+	  else
+	    elf_swap_reloc_in (abfd, erel, irel);
+
+	  for (i = 0; i < bed->s->int_rels_per_ext_rel; ++i)
+	    {
+	      irela[i].r_offset = irel[i].r_offset;
+	      irela[i].r_info = irel[i].r_info;
+	      irela[i].r_addend = 0;
+	    }
 	}
     }
   else
@@ -2112,8 +2128,13 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
       erela = (Elf_External_Rela *) external_relocs;
       erelaend = erela + shdr->sh_size / shdr->sh_entsize;
       irela = internal_relocs;
-      for (; erela < erelaend; erela++, irela++)
-	elf_swap_reloca_in (abfd, erela, irela);
+      for (; erela < erelaend; erela++, irela += bed->s->int_rels_per_ext_rel)
+	{
+	  if (bed->s->swap_reloca_in)
+	    (*bed->s->swap_reloca_in) (abfd, (bfd_byte *) erela, irela);
+	  else
+	    elf_swap_reloca_in (abfd, erela, irela);
+	}
     }
 
   return true;
@@ -2141,6 +2162,7 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
   Elf_Internal_Shdr *rel_hdr;
   PTR alloc1 = NULL;
   Elf_Internal_Rela *alloc2 = NULL;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (elf_section_data (o)->relocs != NULL)
     return elf_section_data (o)->relocs;
@@ -2154,7 +2176,8 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
     {
       size_t size;
 
-      size = o->reloc_count * sizeof (Elf_Internal_Rela);
+      size = (o->reloc_count * bed->s->int_rels_per_ext_rel 
+	      * sizeof (Elf_Internal_Rela));
       if (keep_memory)
 	internal_relocs = (Elf_Internal_Rela *) bfd_alloc (abfd, size);
       else
@@ -2183,7 +2206,8 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
       (abfd, 
        elf_section_data (o)->rel_hdr2,
        ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
-       internal_relocs + rel_hdr->sh_size / rel_hdr->sh_entsize))
+       internal_relocs + (rel_hdr->sh_size / rel_hdr->sh_entsize
+			  * bed->s->int_rels_per_ext_rel)))
     goto error_return;
 
   /* Cache the results for next time, if we can.  */
@@ -2699,6 +2723,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       asection *s;
       size_t bucketcount = 0;
       Elf_Internal_Sym isym;
+      size_t hash_entry_size;
 
       /* Set up the version definition section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
@@ -3047,14 +3072,16 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       s = bfd_get_section_by_name (dynobj, ".hash");
       BFD_ASSERT (s != NULL);
-      s->_raw_size = (2 + bucketcount + dynsymcount) * (ARCH_SIZE / 8);
+      hash_entry_size = elf_section_data (s)->this_hdr.sh_entsize;
+      s->_raw_size = ((2 + bucketcount + dynsymcount) * hash_entry_size);
       s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
       if (s->contents == NULL)
 	return false;
       memset (s->contents, 0, (size_t) s->_raw_size);
 
-      put_word (output_bfd, bucketcount, s->contents);
-      put_word (output_bfd, dynsymcount, s->contents + (ARCH_SIZE / 8));
+      bfd_put (8 * hash_entry_size, output_bfd, bucketcount, s->contents);
+      bfd_put (8 * hash_entry_size, output_bfd, dynsymcount, 
+	       s->contents + hash_entry_size);
 
       elf_hash_table (info)->bucketcount = bucketcount;
 
@@ -4043,7 +4070,8 @@ elf_bfd_final_link (abfd, info)
   finfo.external_relocs = (PTR) bfd_malloc (max_external_reloc_size);
   finfo.internal_relocs = ((Elf_Internal_Rela *)
 			   bfd_malloc (max_internal_reloc_count
-				       * sizeof (Elf_Internal_Rela)));
+				       * sizeof (Elf_Internal_Rela)
+				       * bed->s->int_rels_per_ext_rel));
   finfo.external_syms = ((Elf_External_Sym *)
 			 bfd_malloc (max_sym_count
 				     * sizeof (Elf_External_Sym)));
@@ -4738,6 +4766,7 @@ elf_link_output_extsym (h, data)
     {
       size_t bucketcount;
       size_t bucket;
+      size_t hash_entry_size;
       bfd_byte *bucketpos;
       bfd_vma chain;
 
@@ -4750,13 +4779,15 @@ elf_link_output_extsym (h, data)
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
       bucket = h->elf_hash_value % bucketcount;
+      hash_entry_size 
+	= elf_section_data (finfo->hash_sec)->this_hdr.sh_entsize;
       bucketpos = ((bfd_byte *) finfo->hash_sec->contents
-		   + (bucket + 2) * (ARCH_SIZE / 8));
-      chain = get_word (finfo->output_bfd, bucketpos);
-      put_word (finfo->output_bfd, h->dynindx, bucketpos);
-      put_word (finfo->output_bfd, chain,
-		((bfd_byte *) finfo->hash_sec->contents
-		 + (bucketcount + 2 + h->dynindx) * (ARCH_SIZE / 8)));
+		   + (bucket + 2) * hash_entry_size);
+      chain = bfd_get (8 * hash_entry_size, finfo->output_bfd, bucketpos);
+      bfd_put (8 * hash_entry_size, finfo->output_bfd, h->dynindx, bucketpos);
+      bfd_put (8 * hash_entry_size, finfo->output_bfd, chain,
+	       ((bfd_byte *) finfo->hash_sec->contents
+		+ (bucketcount + 2 + h->dynindx) * hash_entry_size));
 
       if (finfo->symver_sec != NULL && finfo->symver_sec->contents != NULL)
 	{
@@ -4898,10 +4929,11 @@ elf_link_input_bfd (finfo, input_bfd)
   long *pindex;
   asection **ppsection;
   asection *o;
+  struct elf_backend_data *bed;
 
   output_bfd = finfo->output_bfd;
-  relocate_section =
-    get_elf_backend_data (output_bfd)->elf_backend_relocate_section;
+  bed = get_elf_backend_data (output_bfd);
+  relocate_section = bed->elf_backend_relocate_section;
 
   /* If this is a dynamic object, we don't want to do anything here:
      we don't want the local symbols, and we don't want the section
@@ -5138,7 +5170,8 @@ elf_link_input_bfd (finfo, input_bfd)
 	      /* Adjust the reloc addresses and symbol indices.  */
 
 	      irela = internal_relocs;
-	      irelaend = irela + o->reloc_count;
+	      irelaend = 
+		irela + o->reloc_count * bed->s->int_rels_per_ext_rel;
 	      rel_hash = (elf_section_data (o->output_section)->rel_hashes
 			  + elf_section_data (o->output_section)->rel_count);
 	      for (; irela < irelaend; irela++, rel_hash++)
@@ -5748,6 +5781,7 @@ elf_gc_mark (info, sec, gc_mark_hook)
       size_t extsymoff;
       Elf_External_Sym *locsyms, *freesyms = NULL;
       bfd *input_bfd = sec->owner;
+      struct elf_backend_data *bed = get_elf_backend_data (input_bfd);
 
       /* GCFIXME: how to arrange so that relocs and symbols are not
 	 reread continually?  */
@@ -5791,7 +5825,7 @@ elf_gc_mark (info, sec, gc_mark_hook)
 	  ret = false;
 	  goto out1;
 	}
-      relend = relstart + sec->reloc_count;
+      relend = relstart + sec->reloc_count * bed->s->int_rels_per_ext_rel;
 
       for (rel = relstart; rel < relend; rel++)
 	{
@@ -5997,6 +6031,7 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
   asection *sec;
   bfd_vma hstart, hend;
   Elf_Internal_Rela *relstart, *relend, *rel;
+  struct elf_backend_data *bed;
 
   /* Take care of both those symbols that do not describe vtables as
      well as those that are not loaded.  */
@@ -6014,7 +6049,8 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
 	      (sec->owner, sec, NULL, (Elf_Internal_Rela *) NULL, true));
   if (!relstart)
     return *(boolean *)okp = false;
-  relend = relstart + sec->reloc_count;
+  bed = get_elf_backend_data (sec->owner);
+  relend = relstart + sec->reloc_count * bed->s->int_rels_per_ext_rel;
 
   for (rel = relstart; rel < relend; ++rel)
     if (rel->r_offset >= hstart && rel->r_offset < hend)
