@@ -1147,7 +1147,9 @@ coff_obj_read_begin_hook ()
 }
 
 symbolS *coff_last_function;
+#ifndef OBJ_XCOFF
 static symbolS *coff_last_bf;
+#endif
 
 void
 coff_frob_symbol (symp, punt)
@@ -4100,8 +4102,8 @@ obj_coff_lcomm (ignore)
 
 static void
 fixup_mdeps (frags, h, this_segment)
-     fragS * frags;
-     object_headers * h;
+     fragS *frags;
+     object_headers *h ATTRIBUTE_UNUSED;
      segT this_segment;
 {
   subseg_change (this_segment, 0);

@@ -228,7 +228,7 @@ obj_symbol_new_hook (symbolP)
 
 static void
 obj_bout_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* Assume delimiter is part of expression.  */
   /* BSD4.2 as fails with delightful bug, so we are not being

@@ -572,62 +572,6 @@ obj_pre_write_hook (headers)
   tc_aout_pre_write_hook (headers);
 }
 
-void
-s_sect ()
-{
-  /* Strip out the section name */
-  char *section_name;
-  char *section_name_end;
-  char c;
-
-  unsigned int len;
-  unsigned int exp;
-  char *save;
-
-  section_name = input_line_pointer;
-  c = get_symbol_end ();
-  section_name_end = input_line_pointer;
-
-  len = section_name_end - section_name;
-  input_line_pointer++;
-  save = input_line_pointer;
-
-  SKIP_WHITESPACE ();
-  if (c == ',')
-    {
-      exp = get_absolute_expression ();
-    }
-  else if (*input_line_pointer == ',')
-    {
-      input_line_pointer++;
-      exp = get_absolute_expression ();
-    }
-  else
-    {
-      input_line_pointer = save;
-      exp = 0;
-    }
-  if (exp >= 1000)
-    {
-      as_bad (_("subsegment index too high"));
-    }
-
-  if (strcmp (section_name, ".text") == 0)
-    {
-      subseg_set (SEG_TEXT, (subsegT) exp);
-    }
-
-  if (strcmp (section_name, ".data") == 0)
-    {
-      if (flag_readonly_data_in_text)
-	subseg_set (SEG_TEXT, (subsegT) exp + 1000);
-      else
-	subseg_set (SEG_DATA, (subsegT) exp);
-    }
-
-  *section_name_end = c;
-}
-
 #endif /* ! BFD_ASSEMBLER */
 
 #ifdef BFD_ASSEMBLER

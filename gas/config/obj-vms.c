@@ -193,7 +193,7 @@ static const char *symbol_name;
  * whole thing each time.
  */
 
-static structure_count = 0;
+static int structure_count = 0;
 
 /* This variable is used to indicate that we are making the last attempt to
    parse the stabs, and that we should define as much as we can, and ignore
@@ -1862,7 +1862,7 @@ bitfield_suffix (spnt, width)
 
 static void
 setup_basic_type (spnt)
-     struct VMS_DBG_Symbol *spnt;
+     struct VMS_DBG_Symbol *spnt ATTRIBUTE_UNUSED;
 {
 #ifdef SETUP_BASIC_TYPES
   /* This would be very useful if "novel length" fields actually worked
@@ -2169,7 +2169,8 @@ VMS_STSYM_Parse (sp, Text_Psect)
 
 static void
 VMS_RSYM_Parse (sp, Current_Routine, Text_Psect)
-     symbolS *sp, *Current_Routine;
+     symbolS *sp;
+     symbolS *Current_Routine ATTRIBUTE_UNUSED;
      int Text_Psect;
 {
   symbolS *symbolP;
@@ -4494,7 +4495,7 @@ struct vms_obj_state {
 
 static void
 vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
-     unsigned text_siz;
+     unsigned text_siz ATTRIBUTE_UNUSED;
      struct frag *text_frag_root;
      struct frag *data_frag_root;
 {
@@ -4591,7 +4592,8 @@ vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
 
 static void
 synthesize_data_segment (data_siz, text_siz, data_frag_root)
-     unsigned data_siz, text_siz;
+     unsigned data_siz ATTRIBUTE_UNUSED;
+     unsigned text_siz;
      struct frag *data_frag_root;
 {
   register fragS *fragP;
@@ -4731,7 +4733,7 @@ vms_fixup_data_section (data_siz, text_siz)
 static void
 vms_fixup_xtors_section (symbols, sect_no)
 	struct VMS_Symbol *symbols;
-	int sect_no;
+	int sect_no ATTRIBUTE_UNUSED;
 {
   register struct VMS_Symbol *vsp;
 

@@ -207,7 +207,7 @@ ecoff_frob_file ()
 {
   const struct ecoff_debug_swap * const debug_swap
     = &ecoff_backend (stdoutput)->debug_swap;
-  bfd_vma addr;
+  bfd_vma addr ATTRIBUTE_UNUSED;
   HDRR *hdr;
   char *buf;
   char *set;

@@ -1624,7 +1624,7 @@ write_object_file ()
 #ifdef OBJ_BOUT
 	    || fragP->fr_next == data_frag_root
 #endif
-	    || ((fragP->fr_next->fr_address - fragP->fr_address)
+	    || ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
 		== (fragP->fr_fix + fragP->fr_offset * fragP->fr_var))))
 	abort ();
 #endif

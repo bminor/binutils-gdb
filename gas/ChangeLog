@@ -1,5 +1,19 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* write.c (write_object_file): Fix signed/unsigned warning.
+	* config/e-crisaout.c (crisaout_bfd_name): Prototype.
+	* config/e-criself.c (criself_bfd_name): Prototype.
+	* config/obj-aout.c (s_sect): Remove unused function.
+	* config/obj-bout.c (obj_bout_line <ignore>): Add ATTRIBUTE_UNUSED.
+	* config/obj-coff.c (coff_last_bf): Don't declare for OBJ_XCOFF.
+	(fixup_mdeps <h>): Add ATTRIBUTE_UNUSED.
+	* config/obj-ecoff.c (ecoff_frob_file <addr>): Likewise.
+	* config/obj-vms.c (setup_basic_type <spnt>): Likewise.
+	(VMS_RSYM_Parse <Current_Routine>): Likewise.
+	(vms_fixup_text_section <text_siz>): Likewise.
+	(synthesize_data_segment <data_size>): Likewise.
+	(vms_fixup_xtors_section <sect_no>): Likewise.
+	(structure_count): Don't use implicit int type.
 	* config/tc-a29k.c (insert_sreg): Prototype.
 	(define_some_regs): Prototype, make static.
 	(parse_operand): Likewise.
