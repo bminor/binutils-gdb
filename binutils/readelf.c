@@ -111,6 +111,7 @@ int			do_using_dynamic;
 int			do_header;
 int			do_dump;
 int			do_version;
+int			do_wide;
 int			do_histogram;
 int			do_debugging;
 int                     do_debug_info;
@@ -2071,6 +2072,7 @@ struct option options [] =
 #endif
 
   {"version",          no_argument, 0, 'v'},
+  {"wide",             no_argument, 0, 'W'},
   {"help",             no_argument, 0, 'H'},
   {0,                  no_argument, 0, 0}
 };
@@ -2105,6 +2107,7 @@ usage ()
 #endif
   fprintf (stdout, _("  -I or --histogram         Display histogram of bucket list lengths\n"));
   fprintf (stdout, _("  -v or --version           Display the version number of readelf\n"));
+  fprintf (stdout, _("  -W or --wide              Don't split lines to fit into 80 columns\n"));
   fprintf (stdout, _("  -H or --help              Display this information\n"));
   fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
@@ -2153,7 +2156,7 @@ parse_args (argc, argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAIw::x:i:vV", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAIw::x:i:vVW", options, NULL)) != EOF)
     {
       char *    cp;
       int	section;
@@ -2294,6 +2297,9 @@ parse_args (argc, argv)
 	  break;
 	case 'V':
 	  do_version ++;
+	  break;
+	case 'W':
+	  do_wide ++;
 	  break;
 	default:
 	oops:
@@ -2578,6 +2584,9 @@ process_program_headers (file)
       if (is_32bit_elf)
 	printf
 	  (_("  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
+      else if (do_wide)
+	printf
+	  (_("  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align\n"));
       else
 	{
 	  printf
@@ -2611,6 +2620,48 @@ process_program_headers (file)
 		      (segment->p_flags & PF_W ? 'W' : ' '),
 		      (segment->p_flags & PF_X ? 'E' : ' '));
 	      printf ("%#lx", (unsigned long) segment->p_align);
+	    }
+	  else if (do_wide)
+	    {
+	      if ((unsigned long) segment->p_offset == segment->p_offset)
+		printf ("0x%6.6lx ", (unsigned long) segment->p_offset);
+	      else
+		{
+		  print_vma (segment->p_offset, FULL_HEX);
+		  putchar (' ');
+		}
+
+	      print_vma (segment->p_vaddr, FULL_HEX);
+	      putchar (' ');
+	      print_vma (segment->p_paddr, FULL_HEX);
+	      putchar (' ');
+
+	      if ((unsigned long) segment->p_filesz == segment->p_filesz)
+		printf ("0x%6.6lx ", (unsigned long) segment->p_filesz);
+	      else
+		{
+		  print_vma (segment->p_filesz, FULL_HEX);
+		  putchar (' ');
+		}
+
+	      if ((unsigned long) segment->p_memsz == segment->p_memsz)
+		printf ("0x%6.6lx", (unsigned long) segment->p_memsz);
+	      else
+		{
+		  print_vma (segment->p_offset, FULL_HEX);
+		}
+
+	      printf (" %c%c%c ",
+		      (segment->p_flags & PF_R ? 'R' : ' '),
+		      (segment->p_flags & PF_W ? 'W' : ' '),
+		      (segment->p_flags & PF_X ? 'E' : ' '));
+
+	      if ((unsigned long) segment->p_align == segment->p_align)
+		printf ("%#lx", (unsigned long) segment->p_align);
+	      else
+		{
+		  print_vma (segment->p_align, PREFIX_HEX);
+		}
 	    }
 	  else
 	    {
@@ -3050,6 +3101,9 @@ process_section_headers (file)
   if (is_32bit_elf)
     printf
       (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+  else if (do_wide)
+    printf
+      (_("  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"));
   else
     {
       printf (_("  [Nr] Name              Type             Address           Offset\n"));
@@ -3081,11 +3135,59 @@ process_section_headers (file)
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
+      else if (do_wide)
+	{
+	  print_vma (section->sh_addr, LONG_HEX);
+
+	  if ((long) section->sh_offset == section->sh_offset)
+	    printf (" %6.6lx", (unsigned long) section->sh_offset);
+	  else
+	    {
+	      putchar (' ');
+	      print_vma (section->sh_offset, LONG_HEX);
+	    }
+
+	  if ((unsigned long) section->sh_size == section->sh_size)
+	    printf (" %6.6lx", (unsigned long) section->sh_size);
+	  else
+	    {
+	      putchar (' ');
+	      print_vma (section->sh_size, LONG_HEX);
+	    }
+
+	  if ((unsigned long) section->sh_entsize == section->sh_entsize)
+	    printf (" %2.2lx", (unsigned long) section->sh_entsize);
+	  else
+	    {
+	      putchar (' ');
+	      print_vma (section->sh_entsize, LONG_HEX);
+	    }
+
+	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
+
+	  printf ("%2ld %3lx ",
+		  (unsigned long) section->sh_link,
+		  (unsigned long) section->sh_info);
+
+	  if ((unsigned long) section->sh_addralign == section->sh_addralign)
+	    printf ("%2ld\n", (unsigned long) section->sh_addralign);
+	  else
+	    {
+	      print_vma (section->sh_addralign, DEC);
+	      putchar ('\n');
+	    }
+	}
       else
 	{
 	  putchar (' ');
 	  print_vma (section->sh_addr, LONG_HEX);
-	  printf ("  %8.8lx", (unsigned long) section->sh_offset);
+ 	  if ((long) section->sh_offset == section->sh_offset)
+ 	    printf ("  %8.8lx", (unsigned long) section->sh_offset);
+ 	  else
+ 	    {
+ 	      printf ("  ");
+ 	      print_vma (section->sh_offset, LONG_HEX);
+ 	    }
 	  printf ("\n       ");
 	  print_vma (section->sh_size, LONG_HEX);
 	  printf ("  ");

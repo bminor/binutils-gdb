@@ -1,5 +1,8 @@
 -*- text -*-
 
+* readelf: Add --wide option to not break section header or segment listing
+  lines to fit into 80 columns.
+
 * strings: Add --encoding to display wide character strings.  By Markus Kuhn.
 
 * objcopy: Add --rename-section to change section names.

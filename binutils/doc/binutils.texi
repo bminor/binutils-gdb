@@ -2837,6 +2837,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-w[liaprmf]}|@option{--debug-dump}[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames]]
         [@option{-histogram}]
         [@option{-v}|@option{--version}]
+        [@option{-W}|@option{--wide}]
         [@option{-H}|@option{--help}]
         @var{elffile}@dots{}
 @c man end
@@ -2948,6 +2949,14 @@ of the symbol tables.
 @item -v
 @itemx --version
 Display the version number of readelf.
+
+@item -W
+@itemx --wide
+Don't break output lines to fit into 80 columns. By default
+@command{readelf} breaks section header and segment listing lines for
+64-bit ELF files, so that they fit into 80 columns. This option causes
+@command{readelf} to print each section header resp. each segment one a
+single line, which is far more readable on terminals wider than 80 columns.
 
 @item -H
 @itemx --help

@@ -1,3 +1,15 @@
+2001-09-25  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (do_wide): New.
+	(options): Add --wide.
+	(usage, parse_args): Likewise.
+	(process_program_headers): Put each segment on a single line if
+	--wide is given.
+	(process_section_headers): Put each section on a single line if
+	--wide is given.
+	* doc/binutils.texi: Document it.
+	* NEWS: Likewise.
+
 2001-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (print_vma): Print 8 digits of low hex value.
