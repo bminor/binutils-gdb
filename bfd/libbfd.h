@@ -273,6 +273,6 @@ bfd_default_compatible
 boolean 
 bfd_default_scan PARAMS ((CONST struct bfd_arch_info *, CONST char *));
 
-struct elf_internal_shdr *
+Elf_Internal_Shdr *
 bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));
 
