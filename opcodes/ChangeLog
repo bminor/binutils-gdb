@@ -1,3 +1,28 @@
+2002-11-07  Klee Dienes  <kdienes@apple.com>
+
+         * Makefile.am (ia64-asmtab.c): Update to use the new '--srcdir'
+         argument to ia64-gen.
+	 Regenerate dependencies for ia64-len.lo.
+	 * Makefile.in: Regenerate.
+         * ia64-gen.c: Convert to use getopt().  Add the standard GNU
+         options, as well as '--srcdir', which controls the directory in
+         which ia64-gen looks for the sources it uses to generate the
+         output table.  Add a 'const' to the declaration of the final
+         output table.  Call xmalloc_set_program_name to set the program
+         name.
+	 * ia64-asmtab.c: Regenerate.
+	 
+2002-11-07  Nick Clifton  <nickc@redhat.com>
+
+	* ia64-gen.c: Fix comment formatting and compile time warnings.
+	* ia64-opc-a.c: Fix compile time warnings.
+	* ia64-opc-b.c: Likewise.
+	* ia64-opc-d.c: Likewise.
+	* ia64-opc-f.c: Likewise.
+	* ia64-opc-i.c: Likewise.
+	* ia64-opc-m.c: Likewise.
+	* ia64-opc-x.c: Likewise.
+
 2002-11-06  Aldy Hernandez  <aldyh@redhat.com>
 
         * opcodes/ppc-opc.c: Change RD to RS for evmerge*.
