@@ -1,3 +1,7 @@
+Thu Jan 30 17:21:14 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c, xm-i386sco.h:  SCO needs to use setpgid().
+
 Wed Jan 29 19:24:34 1992  Per Bothner  (bothner at cygnus.com)
 
 	* mipsread.c (parse_partial_symbols):  Make sure partial
