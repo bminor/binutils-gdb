@@ -1,3 +1,16 @@
+2003-08-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (FRAME_RED_ZONE_SIZE): New architecture method.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* infcall.c (call_function_by_hand): Adjust the SP by
+	frame_red_zone_size before allocating any stack space.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set "frame_red_zone_size".
+	* x86-64-tdep.c (x86_64_frame_align): New function.
+	(x86_64_init_abi): Set "frame_red_zone_size" and "frame_align".
+
+	* x86-64-tdep.c (x86_64_push_arguments): Revert 2003-08-07 change.
+	Remove code adjusting SP so that it skips over the Red Zone.
+
 2003-08-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS (New native configurations): Mention FreeBSD/amd64.

@@ -3229,6 +3229,24 @@ the direction of stack growth.
 
 By default, no frame based stack alignment is performed.
 
+@item int frame_red_zone_size
+
+The number of bytes, beyond the innermost-stack-address, reserved by the
+@sc{abi}.  A function is permitted to use this scratch area (instead of
+allocating extra stack space).
+
+When performing an inferior function call, to ensure that it does not
+modify this area, @value{GDBN} adjusts the innermost-stack-address by
+@var{frame_red_zone_size} bytes before pushing parameters onto the
+stack.
+
+By default, zero bytes are allocated.  The value must be aligned
+(@pxref{frame_align}).
+
+The @sc{amd64} (nee x86-64) @sc{abi} documentation refers to the
+@emph{red zone} when describing this scratch area.
+@cindex red zone
+
 @item DEPRECATED_FRAME_CHAIN(@var{frame})
 @findex DEPRECATED_FRAME_CHAIN
 Given @var{frame}, return a pointer to the calling frame.

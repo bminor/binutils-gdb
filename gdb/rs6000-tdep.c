@@ -2944,6 +2944,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
+  if (sysv_abi && wordsize == 8)
+    /* PPC64 SYSV.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 288);
+  else if (!sysv_abi && wordsize == 4)
+    /* PowerOpen / AIX 32 bit.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 220);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
