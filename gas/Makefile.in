@@ -28,10 +28,10 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 srcroot = $(srcdir)/..
 
-prefix = /usr/local
+prefix = @prefix@
 
 program_transform_name =
-exec_prefix = $(prefix)
+exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 tooldir = $(libdir)/$(target_alias)
@@ -267,7 +267,7 @@ LIBS = @OPCODES_LIB@ @BFDLIB@ $(LOCAL_LOADLIBES) ../libiberty/libiberty.a
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(srcdir)/../include -I$(srcdir)/..
+INCLUDES = -I. -I$(srcdir) -I../bfd -I.. -I$(srcdir)/config -I$(srcdir)/../include -I$(srcdir)/..
 SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 
 # Always use -I$(srcdir)/config when compiling.
