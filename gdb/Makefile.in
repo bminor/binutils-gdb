@@ -1404,8 +1404,8 @@ corefile.o: corefile.c $(dis_asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) $(gdbthread_h) $(gdb_string_h) $(regcache_h)
 
-gcore.o: gcore.c $(defs_h) $(command_h) $(inferior_h) $(gdbcore_h) \
-	$(BFD_SRC)/elf-bfd.h $(symfile_h) $(objfiles_h) 
+gcore.o: gcore.c $(defs_h) $(cli_decode_h) $(inferior_h) $(gdbcore_h) \
+	$(elf_bfd_h) $(symfile_h) $(objfiles_h)
 
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) $(gregset_h) \
 	$(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) $(cli_decode_h) \

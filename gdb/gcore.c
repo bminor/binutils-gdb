@@ -23,7 +23,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "elf-bfd.h"
-#include <sys/procfs.h>
 #include "symfile.h"
 #include "objfiles.h"
 
