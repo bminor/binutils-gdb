@@ -1,7 +1,17 @@
 Mon Sep 14 20:00:04 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/m68k-emc.exp: New file.
-
+	* lib/<emc-support.exp trace-support.exp}: New files.
+	* configure.in: add new test directory gdb.trace.
+	* gdb.trace/{configure configure.in Makefile.in}: New files.
+	* gdb.trace/{actions.c actions.exp gdb_c_test.c}: New files.
+	* gdb.trace/{circ.c circ.exp limits.c limits.exp}: New files.
+	* gdb.trace/{collection.c collection.exp tfind.exp }: New files.
+	* gdb.trace/{backtrace.exp deltrace.exp infotrace.exp}: New files.
+	* gdb.trace/{packetlen.exp passc-dyn.exp passcount.exp}: New files.
+	* gdb.trace/{report.exp save-trace.exp tracecmd.exp}: New files.
+	* gdb.trace/{while-dyn.exp while-stepping.exp}: New files.
+	
 Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.c++/classes.exp: Change all regular expressions to match
