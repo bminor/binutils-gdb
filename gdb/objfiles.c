@@ -126,15 +126,15 @@ allocate_objfile (abfd, mapped)
 	  objfile -> mmfd = fd;
 	  objfile -> flags |= OBJF_MAPPED;
 	  mmalloc_setkey (objfile -> md, 0, objfile);
-	  obstack_alloc_arg (&objfile -> psymbol_obstack, objfile -> md);
-	  obstack_full_begin (&objfile -> psymbol_obstack, 0, 0, xmmalloc,
-			      mfree);
-	  obstack_alloc_arg (&objfile -> symbol_obstack, objfile -> md);
-	  obstack_full_begin (&objfile -> symbol_obstack, 0, 0, xmmalloc,
-			      mfree);
-	  obstack_alloc_arg (&objfile -> type_obstack, objfile -> md);
-	  obstack_full_begin (&objfile -> type_obstack, 0, 0, xmmalloc,
-			      mfree);
+	  obstack_specify_allocation_with_arg (&objfile -> psymbol_obstack,
+					       0, 0, xmmalloc, mfree,
+					       objfile -> md);
+	  obstack_specify_allocation_with_arg (&objfile -> symbol_obstack,
+					       0, 0, xmmalloc, mfree,
+					       objfile -> md);
+	  obstack_specify_allocation_with_arg (&objfile -> type_obstack,
+					       0, 0, xmmalloc, mfree,
+					       objfile -> md);
 	}
     }
 
@@ -168,9 +168,12 @@ allocate_objfile (abfd, mapped)
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
       memset (objfile, 0, sizeof (struct objfile));
       objfile -> md = NULL;
-      obstack_full_begin (&objfile -> psymbol_obstack, 0, 0, xmalloc, free);
-      obstack_full_begin (&objfile -> symbol_obstack, 0, 0, xmalloc, free);
-      obstack_full_begin (&objfile -> type_obstack, 0, 0, xmalloc, free);
+      obstack_specify_allocation (&objfile -> psymbol_obstack, 0, 0, xmalloc,
+				  free);
+      obstack_specify_allocation (&objfile -> symbol_obstack, 0, 0, xmalloc,
+				  free);
+      obstack_specify_allocation (&objfile -> type_obstack, 0, 0, xmalloc,
+				  free);
     }
 
   /* Update the per-objfile information that comes from the bfd, ensuring
@@ -565,4 +568,3 @@ map_to_address ()
 }
 
 #endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
-

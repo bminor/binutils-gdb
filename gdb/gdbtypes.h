@@ -171,6 +171,9 @@ struct type
      For range types, there are two "fields",
      the minimum and maximum values (both inclusive).
      For enum types, each possible value is described by one "field".
+     For C++ classes, there is one field for each base class (if it is
+     a derived class) plus one field for each class data member.  Member
+     functions are recorded elsewhere.
 
      Using a pointer to a separate array of fields
      allows all types to have the same size, which is useful
@@ -260,10 +263,17 @@ struct cplus_struct_type
 
   int nfn_fields_total;
 
-  /* For derived classes, the number of base classes is given by
-     n_baseclasses and virtual_field_bits is a bit vector containing one bit
-     per base class.
-     If the base class is virtual, the corresponding bit will be set. */
+  /* For derived classes, the number of base classes is given by n_baseclasses
+     and virtual_field_bits is a bit vector containing one bit per base class.
+     If the base class is virtual, the corresponding bit will be set.
+     I.E, given:
+
+	class A{};
+	class B{};
+	class C : public B, public virtual A {};
+
+     B is a baseclass of C; A is a virtual baseclass for C.
+     This is a C++ 2.0 language feature. */
 
   B_TYPE *virtual_field_bits;
 

@@ -18,13 +18,18 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* Normally, i860 is little endian.  However, stratus uses the i860 in
+   big endian mode. */
+
+#define HOST_BYTE_ORDER BIG_ENDIAN
+
 /* Pick up most of what we need from the generic i860 host include file. */
 
 #include "xm-i860.h"
 
 /* Pick up more stuff from the generic SVR4 host include file. */
 
-#include "xm-svr4.h"
+#include "xm-sysv4.h"
 
 /* The native compiler complains about using volatile to indicate functions
    that never return.  So shut it up by simply defining away "NORETURN", which
@@ -33,5 +38,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef __GNUC__
 # define NORETURN /**/
 #endif
-
-#define NO_JOB_CONTROL

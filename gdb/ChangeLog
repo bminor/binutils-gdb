@@ -1,22 +1,63 @@
-<<<<<<< ChangeLog
-Wed Jul 22 04:23:03 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+Sat Aug  1 13:32:58 1992  Fred Fish  (fnf@cygnus.com)
 
-	* es1800.c: use FREAD|FWRITE rather than _FREAD|_FWRITE.
-	include <sgtty.h> on USG.  (from sef).
+	* dwarfread.c (struct dieinfo):  Remove obsolete at_visibility, 
+	at_import, at_frame_base.
+	* dwarfread.c (completedieinfo):  Remove cases for obsolete
+	AT_visibility, AT_import, and AT_frame_base attributes.
+	* breakpoint.h (BREAKPOINT_MAX):  Increase from 10 to 16 for
+	i860, which can keep up to 4 shadow breakpoints.
+	* tm-stratus.h (USG):  Define.
+	* tm-stratus.h (TARGET_BYTE_ORDER):  Define to BIG_ENDIAN.
+	* xm-stratus.h (HOST_BYTE_ORDER):  Define to BIG_ENDIAN.
+	* xm-stratus.h (xm-sysv4.h):  Include, name changed from xm-svr4.h.
+	* xm-stratus.h (NO_JOB_CONTROL):  Remove define.
+	* config/stratus.mt (TDEPFILES):  Include files available from
+	stratus that are not yet in release pending receipt of paperwork
+	at FSF.
+	* buildsym.c (finish_block):  Minor code format change.
+	* gdbtypes.h (struct field):  Add to comments.
+	* gdbtypes.h (virtual_field_bits):  Add to comments.
+	* objfiles.c (allocate_objfile):  Change obstack interface to
+	match FSF merging efforts.
 
-	* depend: es1800 dependency needed here.
+Mon Jul 27 21:14:44 1992  Fred Fish  (fnf@cygnus.com)
 
-Mon Jul 20 11:25:18 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+	* Makefile.in (VERSION):  Bump to 4.6.2.
+	* Makefile.in (SFILES_MAINDIR):  Add stabsread.c
+	* Makefile.in (OBS):  Add stabsread.o
+	* Makefile.in (stabsread.o):  Add build rule.
+	* stabsread.c, stabsread.h:  New files.
+	* buildsym.c:  Split out stabs specific support to stabsread.c.
+	* buildsym.h:  Split out stabs specific support to stabsread.h.
+	* dbxread.c (stabsread.h):  Include
+	* dbxread.c (dbx_new_init):  Call stabsread_new_init.
+	* dbxread.c (dbx_psymtab_to_symtab_1):  Call stabsread_init.
+	* dbxread.c (read_ofile_symtab):  Call end_stabs.
+	* dbxread.c (process_one_symbol):  Call end_stabs and start_stabs.
+	* dbxread.c (elfstab_build_psymtabs):  Call stabsread_new_init.
+	* dwarfread.c (psymtab_to_symtab_1):  Call buildsym_init, add
+	really_free_pendings to cleanups.
+	* elfread.c (elf_new_init):  Call stabsread_new_init.
+	* gdbtypes.c:  Small changes to maintenance commands.
+	* mipsread.c (stabsread.h):  Include.
+	* mipsread.c (psymtab_to_symtab_1):  Call end_stabs.
+	* xcoffread.c (stabsread.h):  Include.
+	* xcoffread.c (global_stabs):  Remove redundant def.
+	* xcoffread.c (read_xcoff_symtab):  Call start_stabs and end_stabs.
 
-	* configure.in: es1800 ok for 68000 too.
-
-=======
 Wed Jul 22 21:39:33 1992  Fred Fish  (fnf@cygnus.com)
 
 	* lmode_inferior_valid, lmode_ours_valid:  New static vars.
 	* inflow.c (terminal_init_inferior, terminal_inferior,
 	terminal_ours_1, initialize_inflow):  Record and use state
 	of lmode_inferior_valid and lmode_ours_valid.
+
+Wed Jul 22 04:23:03 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* es1800.c: use FREAD|FWRITE rather than _FREAD|_FWRITE.
+	include <sgtty.h> on USG.  (from sef).
+
+	* depend: es1800 dependency needed here.
 
 Mon Jul 20 21:09:53 1992  Fred Fish  (fnf@cygnus.com)
 
@@ -38,7 +79,10 @@ Mon Jul 20 21:09:53 1992  Fred Fish  (fnf@cygnus.com)
 	messages for C++ classes with no data members.  Also use new
 	fprintfi_filtered function.
 
->>>>>>> 1.651
+Mon Jul 20 11:25:18 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* configure.in: es1800 ok for 68000 too.
+
 Sat Jul 18 15:48:58 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: echo error messages to stderr, not stdout

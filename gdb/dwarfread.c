@@ -195,12 +195,9 @@ struct dieinfo {
   unsigned long		at_member;
   unsigned long		at_discr;
   BLOCK *		at_discr_value;
-  unsigned short	at_visibility;
-  unsigned long		at_import;
   BLOCK *		at_string_length;
   char *		at_comp_dir;
   char *		at_producer;
-  unsigned long		at_frame_base;
   unsigned long		at_start_scope;
   unsigned long		at_stride_size;
   unsigned long		at_src_info;
@@ -3196,10 +3193,6 @@ completedieinfo (dip, objfile)
 	  dip -> at_bit_offset = target_to_host (diep, nbytes, GET_UNSIGNED,
 						 objfile);
 	  break;
-	case AT_visibility:
-	  dip -> at_visibility = target_to_host (diep, nbytes, GET_UNSIGNED,
-						 objfile);
-	  break;
 	case AT_sibling:
 	  dip -> at_sibling = target_to_host (diep, nbytes, GET_UNSIGNED,
 					      objfile);
@@ -3243,10 +3236,6 @@ completedieinfo (dip, objfile)
 	case AT_discr:
 	  dip -> at_discr = target_to_host (diep, nbytes, GET_UNSIGNED,
 					    objfile);
-	  break;
-	case AT_import:
-	  dip -> at_import = target_to_host (diep, nbytes, GET_UNSIGNED,
-					     objfile);
 	  break;
 	case AT_location:
 	  dip -> at_location = diep;
@@ -3292,10 +3281,6 @@ completedieinfo (dip, objfile)
 	  break;
 	case AT_producer:
 	  dip -> at_producer = diep;
-	  break;
-	case AT_frame_base:
-	  dip -> at_frame_base = target_to_host (diep, nbytes, GET_UNSIGNED,
-						 objfile);
 	  break;
 	case AT_start_scope:
 	  dip -> at_start_scope = target_to_host (diep, nbytes, GET_UNSIGNED,

@@ -17,5 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* Normally, i860 is little endian.  However, stratus uses the i860 in
+   big endian mode. */
+#define TARGET_BYTE_ORDER BIG_ENDIAN
+
+#define USG
+
 #include "tm-sysv4.h"
 #include "tm-i860.h"

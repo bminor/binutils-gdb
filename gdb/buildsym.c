@@ -189,7 +189,9 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 
   /* Count the length of the list of symbols.  */
 
-  for (next = *listhead, i = 0; next; i += next->nsyms, next = next->next)
+  for (next = *listhead, i = 0;
+       next;
+       i += next->nsyms, next = next->next)
     {
       /*EMPTY*/;
     }
