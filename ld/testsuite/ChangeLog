@@ -1,3 +1,8 @@
+2004-01-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-selective/sel-dump.exp: Use is_elf_format, xfail assorted targets.
+	* ld-selective/selective.exp: Likewise.
+
 2003-12-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* ld-srec/srec.exp (run_srec_test): Remove -fgnu-linker, since GCC
