@@ -223,7 +223,7 @@ all-cygnus:
 	         echo "     completed successfully" ; \
 	    else \
 	      true ; \
-	    fi \
+	    fi ; \
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-cygnus $(cyglog) && \
@@ -255,7 +255,7 @@ build-cygnus:
 	      echo "3staging $(canonhost) native" ; \
 	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
 	         echo "     completed successfully" ; \
-	    fi \
+	    fi ; \
 	  else \
 	    echo "building $(canonhost) cross to $$i:" `date` ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(cyglog) && \
