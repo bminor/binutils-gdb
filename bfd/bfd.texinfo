@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename bfdinfo
 @c $Id$
-@synindex ky cp
+@syncodeindex fn cp
 @ifinfo
 This file documents the BFD library.
 
@@ -108,20 +108,30 @@ BFD backends:
 @chapter Introduction
 @cindex BFD
 @cindex what is it?
-Simply put, BFD is a package which allows applications to use the
+BFD is a package for manipulating binary files required for developing
+programs.  It implements a group of structured operations designed to
+shield the programmer from the underlying representation of these
+binary files.  It understands object (compiled) files, archive
+libraries, and core files.  It is designed to work in a variety of
+target environments.
+
+Most simply put, BFD is a package which allows applications to use the
 same routines to operate on object files whatever the object file
-format.  A different object file format can be supported simply by
-creating a new BFD back end and adding it to the library.
+format.  
 
 BFD is split into two parts; the front end and the many back ends.
 @itemize @bullet
-@item The front end of BFD provides the interface to the user. It manages
+@item 
+The front end of BFD provides the interface to the user. It manages
 memory, and various canonical data structures. The front end also
 decides which back end to use, and when to call back end routines.
-@item The back ends provide BFD its view of the real world. Each back
-end provides a set of calls which the BFD front end can use to maintain
-its canonical form. The back ends also may keep around information for
-their own use, for greater efficiency.
+@item 
+The back ends provide BFD its view of the real world.  A different
+object file format can be supported simply by creating a new BFD back
+end and adding it to the library.  Each back end provides a set of calls
+which the BFD front end can use to maintain its canonical form. The back
+ends also may keep around information for their own use, for greater
+efficiency.
 @end itemize
 @node History, How It Works, Overview,Top
 @section History
@@ -159,7 +169,11 @@ points to a structure called @code{bfd}, described in
 instances of it within code @code{abfd}.  All operations on
 the target object file are applied as methods to the BFD.  The mapping is
 defined within @code{bfd.h} in a set of macros, all beginning
-@samp{bfd}_.
+@samp{bfd_}.
+
+In short, a BFD is a representation for a particular file.  It is opened
+in a manner similar to a file; code then manipulates it rather than the
+raw files.
 
 For example, this sequence would do what you would probably expect:
 return the number of sections in an object file attached to a BFD
@@ -183,6 +197,26 @@ symbol information. Also, BFDs opened for archives have the
 additional attribute of an index and contain subordinate BFDs. This approach is
 fine for a.out and coff, but loses efficiency when applied to formats
 such as S-records and IEEE-695. 
+
+@cindex targets
+@cindex formats
+BFD makes a distinction between @dfn{targets} (families of file
+formats) and @dfn{formats} (individual file formats).  For instance,
+the @code{"sun4os4"} target can handle core, object and archive formats of
+files.  The exact layout of the different formats depends on the target
+environment.
+
+The target @code{"default"} means the first one known (usually used for
+environments that only support one format, or where the common format
+is known at compile or link time).  The target @code{NULL} means the one
+specified at runtime in the environment variable @code{GNUTARGET}; if that is
+null or not defined then, on output, the first entry in the target list
+is chosen; or, on input, all targets are searched to find a matching
+one.
+
+Most programs should use the target @code{NULL}.  See the descriptions
+of @code{bfd_target_list} and @code{bfd_format_string} for functions to
+inquire on targets and formats.
 
 @section What BFD Version 1 Can Do
 As different information from the the object files is required,
@@ -328,7 +362,7 @@ between formats (COFF, IEEE and Oasys).
 @chapter BFD front end
 @include  bfd.texi
 
-@node Memory Usage, Sections, bfd, Top
+@node Memory Usage, Errors, bfd, Top
 @section Memory Usage
 BFD keeps all its internal structures in obstacks. There is one obstack
 per open BFD file, into which the current state is stored. When a BFD is
@@ -348,9 +382,39 @@ the file has been copied. To help with the management of memory, there is a func
 (@code{bfd_alloc_size}) which returns the number of bytes in obstacks
 associated with the supplied BFD. This could be used to select the
 greediest open BFD, close it to reclaim the memory, perform some
-operation and reopen the BFD again, to get a fresh copy of the data structures.
+operation and reopen the BFD again, to get a fresh copy of the data
+structures.
 
-@node Sections,Symbols ,Memory Usage, Top
+@node Errors, Sections, Memory Usage, Top
+@section Error Handling
+
+@cindex errors
+In general, a boolean function returns true on success and false on failure
+(unless it's a predicate).  Functions which return pointers to
+objects return @code{NULL} on error.  The specifics are documented with each
+function.
+
+If a function fails, you should check the variable @code{bfd_error}.  If
+the value is @code{no_error}, then check the C variable @code{errno}
+just as you would with any other program.  Other values for
+@code{bfd_error} are documented in @file{bfd.h}.
+
+@findex bfd_errmsg
+If you would prefer a comprehensible string for the error message, use
+the function @code{bfd_errmsg}:
+@example
+char * bfd_errmsg (error_tag)
+@end example
+This function returns a read-only string which documents the error
+code.  If the error code is @code{no_error} then it will return a string
+depending on the value of @code{errno}.
+
+@findex bfd_perror
+@code{bfd_perror()} is like the @code{perror()} function except it understands
+@code{bfd_error}.
+
+
+@node Sections, Symbols, Errors, Top
 @include  section.texi
 
 @node Symbols, Archives ,Sections, To
@@ -403,8 +467,6 @@ All of BFD lives in one directory.
 @include  coffcode.texi
 
 @node Index,  , BFD, Top
-@unnumbered Function Index
-@printindex  fn
 @unnumbered Index
 @printindex cp
 
