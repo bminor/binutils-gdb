@@ -99,7 +99,7 @@ struct hpread_symfile_info
   else if (((unsigned)(SYM)->dsfile.name) >= VT_SIZE (OBJFILE)) \
     { \
       complaint (&symfile_complaints, "bad string table offset in symbol %d", \
-		 (char *) symnum); \
+		 symnum); \
       *NAMEP = ""; \
     } \
   else \
@@ -5233,7 +5233,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	lbrac_unmatched_complaint ((char *) symnum);
+	lbrac_unmatched_complaint (symnum);
       new = push_context (0, valu);
 
       /* Built a type for the function. This includes processing
@@ -5356,7 +5356,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       CURRENT_FUNCTION_VALUE (objfile) = valu;
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	lbrac_unmatched_complaint ((char *) symnum);
+	lbrac_unmatched_complaint (symnum);
       new = push_context (0, valu);
 
       /* Built a type for the function. This includes processing
@@ -5584,7 +5584,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	      new = pop_context ();
 	      desc = dn_bufp->dend.beginscope.dnttp.index;
 	      if (desc != new->depth)
-		lbrac_mismatch_complaint ((char *) symnum);
+		lbrac_mismatch_complaint (symnum);
 
 	      /* Make a block for the local symbols within.  */
 	      finish_block (new->name, &local_symbols, new->old_blocks,
