@@ -482,8 +482,8 @@ NORETURN void (*error_hook)
 PARAMS ((void)) ATTR_NORETURN;
 
 
-/* Generally one should use catch_errors rather than manipulating these
-   directly.  The exception is main().  */
+/* One should use catch_errors rather than manipulating these
+   directly.  */
 #if defined(HAVE_SIGSETJMP)
 #define SIGJMP_BUF		sigjmp_buf
 #define SIGSETJMP(buf)		sigsetjmp(buf, 1)
@@ -494,13 +494,10 @@ PARAMS ((void)) ATTR_NORETURN;
 #define SIGLONGJMP(buf,val)	longjmp(buf,val)
 #endif
 
-/* Where to go for return_to_top_level (RETURN_ERROR).  */
-static SIGJMP_BUF error_return;
-/* Where to go for return_to_top_level (RETURN_QUIT).  */
-static SIGJMP_BUF quit_return;
+/* Where to go for return_to_top_level.  */
+static SIGJMP_BUF *catch_return;
 
-/* Return for reason REASON.  This generally gets back to the command
-   loop, but can be caught via catch_errors.  */
+/* Return for reason REASON to the nearest containing catch_errors().  */
 
 NORETURN void
 return_to_top_level (reason)
@@ -531,8 +528,11 @@ return_to_top_level (reason)
 	break;
       }
 
-  (NORETURN void) SIGLONGJMP
-    (reason == RETURN_ERROR ? error_return : quit_return, 1);
+  /* Jump to the containing catch_errors() call, communicating REASON
+     to that call via setjmp's return value.  Note that REASON can't
+     be zero, by definition in defs.h. */
+
+  (NORETURN void) SIGLONGJMP (*catch_return, (int)reason);
 }
 
 /* Call FUNC with arg ARGS, catching any errors.  If there is no
@@ -562,13 +562,6 @@ return_to_top_level (reason)
    code also randomly used a SET_TOP_LEVEL macro that directly
    initialize the longjmp buffers. */
 
-/* MAYBE: cagney/1999-11-05: Since the SET_TOP_LEVEL macro has been
-   eliminated it is now possible to use the stack to directly store
-   each longjmp buffer.  The global code would just need to update a
-   pointer (onto the stack - ulgh!?) indicating the current longjmp
-   buffers. It would certainly improve the performance of the longjmp
-   code since the memcpy's would be eliminated. */
-
 /* MAYBE: cagney/1999-11-05: Should the catch_erros and cleanups code
    be consolidated into a single file instead of being distributed
    between utils.c and top.c? */
@@ -580,61 +573,89 @@ catch_errors (func, args, errstring, mask)
      char *errstring;
      return_mask mask;
 {
-  SIGJMP_BUF saved_error;
-  SIGJMP_BUF saved_quit;
-  SIGJMP_BUF tmp_jmp;
+  SIGJMP_BUF *saved_catch;
+  SIGJMP_BUF catch;
   int val;
   struct cleanup *saved_cleanup_chain;
   char *saved_error_pre_print;
   char *saved_quit_pre_print;
 
-  saved_cleanup_chain = save_cleanups ();
+  /* Return value from SIGSETJMP(): enum return_reason if error or
+     quit caught, 0 otherwise. */
+  int caught;
+
+  /* Override error/quit messages during FUNC. */
+
   saved_error_pre_print = error_pre_print;
   saved_quit_pre_print = quit_pre_print;
 
   if (mask & RETURN_MASK_ERROR)
-    {
-      memcpy ((char *) saved_error, (char *) error_return, sizeof (SIGJMP_BUF));
-      error_pre_print = errstring;
-    }
+    error_pre_print = errstring;
   if (mask & RETURN_MASK_QUIT)
-    {
-      memcpy (saved_quit, quit_return, sizeof (SIGJMP_BUF));
-      quit_pre_print = errstring;
-    }
+    quit_pre_print = errstring;
 
-  if (SIGSETJMP (tmp_jmp) == 0)
-    {
-      if (mask & RETURN_MASK_ERROR)
-	memcpy (error_return, tmp_jmp, sizeof (SIGJMP_BUF));
-      if (mask & RETURN_MASK_QUIT)
-	memcpy (quit_return, tmp_jmp, sizeof (SIGJMP_BUF));
-      val = (*func) (args);
-      /* FIXME: cagney/1999-11-05: A correct FUNC implementaton will
-         clean things up (restoring the cleanup chain) to the state
-         they were just prior to the call.  Technically, this means
-         that the below restore_cleanups call is redundant.
-         Unfortunatly, many FUNC's are not that well behaved.
-         restore_cleanups should either be replaced with a do_cleanups
-         call (to cover the problem) or an assertion check to detect
-         bad FUNCs code. */
-    }
-  else
-    val = 0;
+  /* Prevent error/quit during FUNC from calling cleanups established
+     prior to here. */
+
+  saved_cleanup_chain = save_cleanups ();
+
+  /* Call FUNC, catching error/quit events. */
+
+  saved_catch = catch_return;
+  catch_return = &catch;
+  caught = SIGSETJMP (catch);
+  if (!caught)
+    val = (*func) (args);
+  catch_return = saved_catch;
+
+  /* FIXME: cagney/1999-11-05: A correct FUNC implementaton will
+     clean things up (restoring the cleanup chain) to the state they
+     were just prior to the call.  Unfortunatly, many FUNC's are not
+     that well behaved.  This could be fixed by adding either a
+     do_cleanups call (to cover the problem) or an assertion check to
+     detect bad FUNCs code. */
+
+  /* Restore the cleanup chain and error/quit messages to their
+     original states. */
 
   restore_cleanups (saved_cleanup_chain);
 
-  if (mask & RETURN_MASK_ERROR)
-    {
-      memcpy (error_return, saved_error, sizeof (SIGJMP_BUF));
-      error_pre_print = saved_error_pre_print;
-    }
   if (mask & RETURN_MASK_QUIT)
-    {
-      memcpy (quit_return, saved_quit, sizeof (SIGJMP_BUF));
-      quit_pre_print = saved_quit_pre_print;
-    }
-  return val;
+    quit_pre_print = saved_quit_pre_print;
+  if (mask & RETURN_MASK_ERROR)
+    error_pre_print = saved_error_pre_print;
+
+  /* Return normally if no error/quit event occurred. */
+
+  if (!caught)
+    return val;
+
+  /* If the caller didn't request that the event be caught, relay the
+     event to the next containing catch_errors(). */
+
+  if (!(mask & RETURN_MASK (caught)))
+    return_to_top_level (caught);
+
+  /* Tell the caller that an event was caught.
+
+     FIXME: nsd/2000-02-22: When MASK is RETURN_MASK_ALL, the caller
+     can't tell what type of event occurred.
+
+     A possible fix is to add a new interface, catch_event(), that
+     returns enum return_reason after catching an error or a quit.
+
+     When returning normally, i.e. without catching an error or a
+     quit, catch_event() could return RETURN_NORMAL, which would be
+     added to enum return_reason.  FUNC would return information
+     exclusively via ARGS.
+
+     Alternatively, normal catch_event() could return FUNC's return
+     value.  The caller would need to be aware of potential overlap
+     with enum return_reason, which could be publicly restricted to
+     negative values to simplify return value processing in FUNC and
+     in the caller. */
+
+  return 0;
 }
 
 struct captured_command_args

@@ -801,21 +801,24 @@ extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 
-/* Reasons for calling return_to_top_level.  */
+/* Reasons for calling return_to_top_level.  Note: enum value 0 is
+   reserved for internal use as the return value from an initial
+   setjmp().  */
 
 enum return_reason
   {
     /* User interrupt.  */
-    RETURN_QUIT,
+    RETURN_QUIT = 1,
     /* Any other error.  */
     RETURN_ERROR
   };
 
 #define	ALL_CLEANUPS	((struct cleanup *)0)
 
-#define RETURN_MASK_QUIT (1 << (int)RETURN_QUIT)
-#define RETURN_MASK_ERROR (1 << (int)RETURN_ERROR)
-#define RETURN_MASK_ALL (RETURN_MASK_QUIT | RETURN_MASK_ERROR)
+#define RETURN_MASK(reason)	(1 << (int)(reason))
+#define RETURN_MASK_QUIT	RETURN_MASK (RETURN_QUIT)
+#define RETURN_MASK_ERROR	RETURN_MASK (RETURN_ERROR)
+#define RETURN_MASK_ALL		(RETURN_MASK_QUIT | RETURN_MASK_ERROR)
 typedef int return_mask;
 
 extern NORETURN void return_to_top_level (enum return_reason) ATTR_NORETURN;

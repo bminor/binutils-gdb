@@ -1,3 +1,20 @@
+Wed Feb 23 19:01:45 EST 2000  Nicholas Duffek <nsd@cygnus.com>
+
+	* top.c (SIGJMP_BUF, SIGSETJMP, SIGLONGJMP): Update comments.
+	(error_return, quit_return): Merge into catch_return pointer.
+	(return_to_top_level): Update comment.  Longjmp to *catch_errors,
+	and communicate reason to catch_errors via setjmp return value.
+	(catch_errors): Always catch both quit and error, and if a catch
+	wasn't requested by caller, throw it to the next catch_error.
+	Replace dual longjmp buffer memcpy with single pointer change.
+	Add FIXME for possibly adding new interface to tell caller what
+	event was caught.  Add extensive comments.
+	* defs.h (enum return_reason): Reserve 0 for use as initial
+	setjmp() return value.
+	(RETURN_MASK): New public macro to generate RETURN_MASK_* from
+	enum return_reason.
+	(RETURN_MASK_QUIT, RETURN_MASK_ERROR): Define using RETURN_MASK.
+
 2000-02-23  Fernando Nasser  <fnasser@cygnus.com>
 
 	* infcmd.c (run_stack_dummy): Do not pop frame on random signal.
