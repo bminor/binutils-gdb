@@ -1,3 +1,32 @@
+2004-01-03  Eli Zaretskii  <eliz@elta.co.il>
+
+	* config/djgpp/fnchange.lst: Add lines for COPYING.LIBGLOSS,
+	bfd/doc/ChangeLog-9103, bfd/elf32-m68hc1x.c,
+	gdb/config/alpha/xm-alphaosf.h,
+	gdb/config/powerpc/tm-ppcle-eabi.h,
+	gdb/config/rs6000/tm-rs6000-aix4.h, gdb/gdbtk/ChangeLog-2001,
+	gdb/gdbtk/ChangeLog-2002, gdb/gdbtk/ChangeLog-2003,
+	gdb/gdbtk/plugins/intel-pentium/intel-pentium.tcl.in,
+	gdb/gdbtk/plugins/rhabout/rhabout.tcl.in, gdb/i386-linux-nat.c,
+	gdb/ia64-aix-nat.c, gdb/ia64-aix-tdep.c, gdb/ia64-linux-nat.c,
+	gdb/ia64-linux-nat.c, gdb/ppc-linux-tdep.c, gdb/ppc-linux-nat.c,
+	gdb/sparc64nbsd-nat.c, gdb/sparc64nbsd-tdep.c,
+	gdb/sparc64-linux-nat.c, gdb/sparc64-linux-tdep.c,
+	gdb/sparc64-nat.c, gdb/sparc64-tdep.c, gdb/sparc64-sol2-tdep.c,
+	gdb/sparc-sol2-nat.c, gdb/sparc-sol2-tdep.c,
+	gdb/testsuite/gdb.gdbtk/, gdb/testsuite/gdb.mi/mi-var-child.exp,
+	nclude/ChangeLog-9103, include/coff/ChangeLog-9103,
+	include/elf/ChangeLog-9103, include/opcode/ChangeLog-9103,
+	opcodes/ChangeLog-0001, opcodes/ChangeLog-0203,
+	opcodes/openrisc-dis.c, opcodes/openrisc-desc.h,
+	sim/frv/profile-fr550.c, sim/frv/profile-fr550.h,
+	sim/sh64/sem-compact-switch.c, sim/sh64/sem-media-switch.c,
+	sim/testsuite/sim/sh64/compact/ldsl-mach.cgs,
+	sim/testsuite/sim/sh64/compact/ldsl-macl.cgs,
+	sim/testsuite/sim/sh64/compact/stsl-mach.cgs, and
+	sim/testsuite/sim/sh64/compact/stsl-macl.cgs.
+	Remove lines for .cvsignore files.
+
 2004-01-03  J. Brobecker  <brobecker@gnat.com>
 
 	* infrun.c: Back out the previous change.
