@@ -1,3 +1,14 @@
+Wed Mar 22 19:17:06 1995  Doug Evans  <dje@cygnus.com>
+
+	* mem-break.c (LITTLE_BREAKPOINT, BIG_BREAKPOINT): Define as
+	BREAKPOINT if mono-endian.
+	(break_insn): Deleted.
+	(big_break_insn, little_break_insn): Define.
+	(memory_insert_breakpoint): Handle bi-endian cpus.
+	(BREAKPOINT_LEN): Define.
+	(memory_remove_breakpoint): Use it.
+	(memory_breakpoint_size): Likewise.
+
 Tue Mar 21 17:03:17 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* sparc-stub.c: add nop after 'bg good_wim'.
