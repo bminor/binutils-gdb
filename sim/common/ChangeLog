@@ -1,3 +1,7 @@
+Tue May 19 23:55:30 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-ops.h (ADDCFSI): Fix typo.
+
 Sat May 16 12:44:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-sim.h (CGEN_CPU): New members idesc_{read,sem}_init_p.
