@@ -1,3 +1,11 @@
+2003-02-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (i[3456]86-*-sysv4.2*, i[3456]86-*-sysv4*,
+	i[3456]86-*-sysv5*, i[3456]86-*-sco3.2v5*): Remove.  These are all
+	handled fine by i[3456]86-*sco* and i[3456]86-sysv*.
+	* config/i386/i386sco5.mt, config/i386/i386v4.mt,
+	config/i386/i386v42mp.mt: Removed.
+
 2003-02-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt (*-*-solaris*): Set gdb_osabi to
