@@ -1,3 +1,12 @@
+2000-03-10  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* reloc.c (bfd_perform_relocation): Undo emacs formatting of
+	comment, and ensure it doesn't happen again.
+	(bfd_install_relocation): Same here.
+	(_bfd_relocate_contents): Don't bother assigning unused signmask
+	shift result.  Fix typos in comments.
+	Remove trailing whitespace throughout file.
+
 2000-03-07  Doug Evans  <dje@casey.transmeta.com>
 
 	* reloc.c (reloc_howto_struct): Fix partial_inplace comment.
