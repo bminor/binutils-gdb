@@ -101,7 +101,7 @@ you lose
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif /* OBJ_COFF_MAX_AUXENTRIES */
 
-extern const short seg_N_TYPE[];
+/*extern const short seg_N_TYPE[];*/
 extern const segT  N_TYPE_seg[];
 
 /* Magic number of paged executable. */
