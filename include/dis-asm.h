@@ -165,8 +165,8 @@ extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
 extern void generic_print_address
   PARAMS ((bfd_vma, struct disassemble_info *));
 
-#define INIT_DISASSEMBLE_INFO(INFO, STREAM) \
-  (INFO).fprintf_func = (fprintf_ftype)fprintf, \
+#define INIT_DISASSEMBLE_INFO(INFO, STREAM, FPRINTF_FUNC) \
+  (INFO).fprintf_func = (FPRINTF_FUNC), \
   (INFO).stream = (STREAM), \
   (INFO).buffer = NULL, \
   (INFO).buffer_vma = 0, \
