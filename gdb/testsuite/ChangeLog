@@ -1,7 +1,11 @@
 Tue Jul 19 10:26:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
-	* gdb.base/bitfields.exp: Simplify by using delete_breakpoints and
-	  gdb_test.
+	* lib/gdb.exp (gdb_run_cmd): New function, used to start program
+	  running.
+	* gdb.base/bitfields.exp: Use gdb_run_cmd to start program.
+
+	* gdb.base/funcargs.exp: Simplify by using gdb_test.
+	* gdb.base/bitfields.exp: Likewise.
 
 	* lib/gdb.exp (gdb_test): if match times out, don't call fail if
 	  message is "".
