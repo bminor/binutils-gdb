@@ -7,6 +7,9 @@ Mon Dec 19 16:53:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 Mon Dec 19 14:15:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (pa_subspace): Make sure SEC_HAS_CONTENTS is
+	clear for a section with the "ZERO" attribute.
+
 	* Reduce useless symbols for ELF in an attempt to make smaller
 	objects and speed up the linker.
 	* config/tc-hppa.c (struct call_info): Replace end_symbol field

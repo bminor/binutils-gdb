@@ -5351,11 +5351,12 @@ pa_subspace (unused)
       if (common || dup_common)
 	flags |= SEC_IS_COMMON;
 
+      flags |= SEC_RELOC | SEC_HAS_CONTENTS;
+
       /* This is a zero-filled subspace (eg BSS).  */
       if (zero)
-	flags &= ~SEC_LOAD;
+	flags &= ~(SEC_LOAD | SEC_HAS_CONTENTS);
 
-      flags |= SEC_RELOC | SEC_HAS_CONTENTS;
       applicable &= flags;
 
       /* If this is an existing subspace, then we want to use the
