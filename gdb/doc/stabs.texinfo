@@ -894,7 +894,9 @@ type declarations using @code{C_DECL}) can also be between the
 
 Initialized static variables are represented by the @samp{S} and
 @samp{V} symbol descriptors.  @samp{S} means file scope static, and
-@samp{V} means procedure scope static.
+@samp{V} means procedure scope static.  One exception: in XCOFF, IBM's
+xlc compiler always uses @samp{V}, and whether it is file scope or not
+is distinguished by whether the stab is located within a function.
 
 @c This is probably not worth mentioning; it is only true on the sparc
 @c for `double' variables which although declared const are actually in
@@ -930,8 +932,15 @@ yield the following stabs:
 .stabs "var_noinit:S1",40,0,0,_var_noinit    # @r{40 is N_LCSYM}
 @end example
 
-In XCOFF files, each symbol has a section number, so the stab type
-need not indicate the section.
+In XCOFF files, the stab type need not indicate the section;
+@code{C_STSYM} can be used for all statics.  Also, each static variable
+is enclosed in a static block.  A @code{C_BSTAT} (emitted with a
+@samp{.bs} assembler directive) symbol begins the static block; its
+value is the address of the static block, its section is the section of
+the variables in that static block, and its name is @samp{.bs}.  A
+@code{C_ESTAT} (emitted with a @samp{.es} assembler directive) symbol
+ends the static block; its name is @samp{.es} and its value and section
+are ignored.
 
 In ECOFF files, the storage class is used to specify the section, so the
 stab type need not indicate the section.
@@ -3748,15 +3757,6 @@ BSD a.out stab types correspond to AIX XCOFF storage classes. In general
 the mapping is @code{N_@var{stabtype}} becomes @code{C_@var{stabtype}}.
 Some stab types in a.out are not supported in XCOFF; most of these use
 @code{C_DECL}.
-
-@c FIXME: Get C_* types for the block, figure out whether it is always
-@c used (I suspect not), explain clearly, and move to node Statics.
-Exception: initialised static @code{N_STSYM} and un-initialized static
-@code{N_LCSYM} both map to the @code{C_STSYM} storage class.  But the
-distinction is preserved because in XCOFF @code{N_STSYM} and
-@code{N_LCSYM} must be emited in a named static block.  Begin the block
-with @samp{.bs s[RW] data_section_name} for @code{N_STSYM} or @samp{.bs
-s bss_section_name} for @code{N_LCSYM}.  End the block with @samp{.es}.
 
 @c FIXME: I think they are trying to say something about whether the
 @c assembler defaults the value to the location counter.
