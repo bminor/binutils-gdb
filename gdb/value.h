@@ -68,16 +68,55 @@ struct value
        at the same place in memory.  This will be described in the
        lval enum above as "lval_reg_frame_relative".  */
     CORE_ADDR frame_addr;
+
     /* Type of the value.  */
     struct type *type;
-    /* Type of the enclosing object if this is an embedded subobject.
-       The member embedded_offset gives the real position of the subobject
-       if type is not the same as enclosing_type.
 
-       If the type field is a pointer type, then enclosing_type is 
-       a pointer type pointing to the real (enclosing) type of the target
-       object. */
+    /* If a value represents a C++ object, then the `type' field gives
+       the object's compile-time type.  If the object actually belongs
+       to some class derived from `type', perhaps with other base
+       classes and additional members, then `type' is just a subobject
+       of the real thing, and the full object is probably larger than
+       `type' would suggest.
+
+       If `type' is a dynamic class (i.e. one with a vtable), then GDB
+       can actually determine the object's run-time type by looking at
+       the run-time type information in the vtable.  When this
+       information is available, we may elect to read in the entire
+       object, for several reasons:
+
+         - When printing the value, the user would probably rather see
+           the full object, not just the limited portion apparent from
+           the compile-time type.
+
+         - If `type' has virtual base classes, then even printing
+           `type' alone may require reaching outside the `type'
+           portion of the object to wherever the virtual base class
+           has been stored.
+
+       When we store the entire object, `enclosing_type' is the
+       run-time type --- the complete object --- and `embedded_offset'
+       is the offset of `type' within that larger type, in bytes.  The
+       VALUE_CONTENTS macro takes `embedded_offset' into account, so
+       most GDB code continues to see the `type' portion of the value,
+       just as the inferior would.
+
+       If `type' is a pointer to an object, then `enclosing_type' is a
+       pointer to the object's run-time type, and `pointed_to_offset'
+       is the offset in bytes from the full object to the pointed-to
+       object --- that is, the value `embedded_offset' would have if
+       we followed the pointer and fetched the complete object.  (I
+       don't really see the point.  Why not just determine the
+       run-time type when you indirect, and avoid the special case?
+       The contents don't matter until you indirect anyway.)
+
+       If we're not doing anything fancy, `enclosing_type' is equal to
+       `type', and `embedded_offset' is zero, so everything works
+       normally.  */
     struct type *enclosing_type;
+    int embedded_offset;
+    int pointed_to_offset;
+
     /* Values are stored in a chain, so that they can be deleted
        easily over calls to the inferior.  Values assigned to internal
        variables or put into the value history are taken off this
@@ -115,21 +154,6 @@ struct value
     /* If nonzero, this is the value of a variable which does not
        actually exist in the program.  */
     char optimized_out;
-    /* If this value represents an object that is embedded inside a
-       larger object (e.g., a base subobject in C++), this gives the
-       offset (in bytes) from the start of the contents buffer where
-       the embedded object begins. This is required because some C++
-       runtime implementations lay out objects (especially virtual bases
-       with possibly negative offsets to ancestors).
-       Note: This may be positive or negative! Also note that this offset
-       is not used when retrieving contents from target memory; the entire
-       enclosing object has to be retrieved always, and the offset for
-       that is given by the member offset above. */
-    int embedded_offset;
-    /* If this value represents a pointer to an object that is embedded
-       in another object, this gives the embedded_offset of the object
-       that is pointed to. */
-    int pointed_to_offset;
     /* The BFD section associated with this value.  */
     asection *bfd_section;
     /* Actual contents of the value.  For use of this value; setting

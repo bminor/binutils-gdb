@@ -1,3 +1,8 @@
+2001-05-21  Jim Blandy  <jimb@redhat.com>
+
+	* value.h (struct value): Doc fix, and rearrange members to place
+	them near their explanations.
+
 2001-05-21  Michael Snyder  <msnyder@redhat.com>
 
 	* remote.c (remote_async_wait): Added new variable fieldsize.
