@@ -4,6 +4,10 @@
 
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
+	* solib.c (info_sharedlibrary_command): Use TARGET_PTR_BIT
+	instead of bfd_get_arch_size.  Don't bail out just because
+	there's no exec_bfd.
+	
 	* cp-valprint.c (cp_print_value): FIXME comment, alloca size.
 	* p-valprint.c (pascal_object_print_value): Ditto.
 	* somread.c (som_symtab_read): Ditto.

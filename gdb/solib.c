@@ -618,25 +618,13 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   int header_done = 0;
   int addr_width;
   char *addr_fmt;
-  int arch_size;
 
-  if (exec_bfd == NULL)
-    {
-      printf_unfiltered ("No executable file.\n");
-      return;
-    }
-
-  arch_size = bfd_get_arch_size (exec_bfd);
-  if (arch_size == -1)
-    arch_size = bfd_arch_bits_per_address(exec_bfd);
-
-  /* Default to 32-bit in case of failure.  */
-  if (arch_size == 32 || arch_size == -1)
+  if (TARGET_PTR_BIT == 32)
     {
       addr_width = 8 + 4;
       addr_fmt = "08l";
     }
-  else if (arch_size == 64)
+  else if (TARGET_PTR_BIT == 64)
     {
       addr_width = 16 + 4;
       addr_fmt = "016l";
@@ -644,8 +632,8 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   else
     {
       internal_error (__FILE__, __LINE__,
-		      "bfd_get_arch_size() returned unknown size %d",
-		      arch_size);
+		      "TARGET_PTR_BIT returned unknown size %d",
+		      TARGET_PTR_BIT);
     }
 
   update_solib_list (from_tty, 0);
