@@ -11,6 +11,15 @@ Wed Nov 15 18:05:52 1995  Ian Lance Taylor  <ian@cygnus.com>
 	_bfd_generic_bfd_print_private_bfd_data rather than casting
 	bfd_true.
 
+Wed Nov 15 04:09:14 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (.dep1): Fix stupid typo in last change.  Remove any
+	"DO NOT DELETE" lines or blank lines that mkdep writes on some
+	systems.
+	(BFD_LIBS_CFILES, ALL_MACHINES_CFILES, BFD32_BACKENDS_CFILES,
+	BFD64_BACKENDS_CFILES): New variables.
+	(CFILES): Use them.
+	
 Tue Nov 14 11:52:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_out): For PPC PE, start isize at 0,
