@@ -4,6 +4,7 @@
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
    Modified by Richard Henderson for ELF support.
+   Modified by Klaus Kaempf for EVAX (openVMS/Alpha) support.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -175,17 +176,29 @@ static int load_expression PARAMS((int, const expressionS*, int *,
 static void emit_ldgp PARAMS((const expressionS*, int, void*));
 static void emit_division PARAMS((const expressionS*, int, void*));
 static void emit_lda PARAMS((const expressionS*, int, void*));
+static void emit_ldah PARAMS((const expressionS*, int, void*));
 static void emit_ir_load PARAMS((const expressionS*, int, void*));
 static void emit_loadstore PARAMS((const expressionS*, int, void*));
 static void emit_jsrjmp PARAMS((const expressionS*, int, void*));
+static void emit_ldX PARAMS((const expressionS*, int, void*));
+static void emit_ldXu PARAMS((const expressionS*, int, void*));
+static void emit_uldX PARAMS((const expressionS*, int, void*));
+static void emit_uldXu PARAMS((const expressionS*, int, void*));
+static void emit_ldil PARAMS((const expressionS*, int, void*));
+static void emit_stX PARAMS((const expressionS*, int, void*));
+static void emit_ustX PARAMS((const expressionS*, int, void*));
+static void emit_sextX PARAMS((const expressionS*, int, void*));
+static void emit_retjcr PARAMS((const expressionS*, int, void*));
 
 static void s_alpha_text PARAMS((int));
 static void s_alpha_data PARAMS((int));
 #ifndef OBJ_ELF
 static void s_alpha_comm PARAMS((int));
 #endif
-#ifdef OBJ_ECOFF
+#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
 static void s_alpha_rdata PARAMS((int));
+#endif
+#ifdef OBJ_ECOFF
 static void s_alpha_sdata PARAMS((int));
 #endif
 #ifdef OBJ_ELF
@@ -253,10 +266,6 @@ size_t md_longopts_size = sizeof(md_longopts);
 static unsigned alpha_target = AXP_OPCODE_ALL;
 static const char *alpha_target_name = "<all>";
 
-/* Forward declaration of the table of macros */
-static const struct alpha_macro alpha_macros[];
-static const int alpha_num_macros;
-
 /* The hash table of instruction opcodes */
 static struct hash_control *alpha_opcode_hash;
 
@@ -282,12 +291,18 @@ static symbolS *alpha_register_table[64];
 static segT alpha_lita_section;
 static segT alpha_lit4_section;
 #endif
+#ifdef OBJ_EVAX
+static segT alpha_link_section;
+#endif
 static segT alpha_lit8_section;
 
 /* Symbols referring to said sections. */
 #ifdef OBJ_ECOFF
 static symbolS *alpha_lita_symbol;
 static symbolS *alpha_lit4_symbol;
+#endif
+#ifdef OBJ_EVAX
+static symbolS *alpha_link_symbol;
 #endif
 static symbolS *alpha_lit8_symbol;
 
@@ -320,6 +335,239 @@ static int alpha_current_align;
 /* These are exported to ECOFF code.  */
 unsigned long alpha_gprmask, alpha_fprmask;
 
+#ifdef OBJ_EVAX
+/* Collect information about current procedure here.  */
+static evaxProcT alpha_evax_proc;
+#endif
+
+/* The macro table */
+
+static const struct alpha_macro alpha_macros[] = {
+/* Load/Store macros */
+  { "lda",	emit_lda, NULL,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldah",	emit_ldah, NULL,
+    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
+
+  { "ldl",	emit_ir_load, "ldl",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldl_l",	emit_ir_load, "ldl_l",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldq",	emit_ir_load, "ldq",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldq_l",	emit_ir_load, "ldq_l",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldq_u",	emit_ir_load, "ldq_u",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldf",	emit_loadstore, "ldf",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "ldg",	emit_loadstore, "ldg",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "lds",	emit_loadstore, "lds",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "ldt",	emit_loadstore, "ldt",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+
+  { "ldb",	emit_ldX, (void *)0,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldbu",	emit_ldXu, (void *)0,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldw",	emit_ldX, (void *)1,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldwu",	emit_ldXu, (void *)1,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+
+  { "uldw",	emit_uldX, (void*)1,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "uldwu",	emit_uldXu, (void*)1,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "uldl",	emit_uldX, (void*)2,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "uldlu",	emit_uldXu, (void*)2,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "uldq",	emit_uldXu, (void*)3,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+
+  { "ldgp",	emit_ldgp, NULL,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA } },
+
+  { "ldi",	emit_lda, NULL,
+    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldil",	emit_ldil, NULL,
+    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ldiq",	emit_lda, NULL,
+    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
+#if 0
+  { "ldif"	emit_ldiq, NULL,
+    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "ldid"	emit_ldiq, NULL,
+    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "ldig"	emit_ldiq, NULL,
+    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "ldis"	emit_ldiq, NULL,
+    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "ldit"	emit_ldiq, NULL,
+    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+#endif
+
+  { "stl",	emit_loadstore, "stl",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "stl_c",	emit_loadstore, "stl_c",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "stq",	emit_loadstore, "stq",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "stq_c",	emit_loadstore, "stq_c",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "stq_u",	emit_loadstore, "stq_u",
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "stf",	emit_loadstore, "stf",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "stg",	emit_loadstore, "stg",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "sts",	emit_loadstore, "sts",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+  { "stt",	emit_loadstore, "stt",
+    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
+
+  { "stb",	emit_stX, (void*)0,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "stw",	emit_stX, (void*)1,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ustw",	emit_ustX, (void*)1,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ustl",	emit_ustX, (void*)2,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+  { "ustq",	emit_ustX, (void*)3,
+    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA } },
+
+/* Arithmetic macros */
+#if 0
+  { "absl"	emit_absl, 1, { IR } },
+  { "absl"	emit_absl, 2, { IR, IR } },
+  { "absl"	emit_absl, 2, { EXP, IR } },
+  { "absq"	emit_absq, 1, { IR } },
+  { "absq"	emit_absq, 2, { IR, IR } },
+  { "absq"	emit_absq, 2, { EXP, IR } },
+#endif
+
+  { "sextb",	emit_sextX, (void *)0,
+    { MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EOA,
+      /* MACRO_EXP, MACRO_IR, MACRO_EOA */ } },
+  { "sextw",	emit_sextX, (void *)1,
+    { MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EOA,
+      /* MACRO_EXP, MACRO_IR, MACRO_EOA */ } },
+
+  { "divl",	emit_division, "__divl",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "divlu",	emit_division, "__divlu",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "divq",	emit_division, "__divq",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "divqu",	emit_division, "__divqu",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "reml",	emit_division, "__reml",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "remlu",	emit_division, "__remlu",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "remq",	emit_division, "__remq",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+  { "remqu",	emit_division, "__remqu",
+    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_IR, MACRO_EOA,
+      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
+
+  { "jsr",	emit_jsrjmp, "jsr",
+    { MACRO_PIR, MACRO_EXP, MACRO_EOA,
+      MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA,
+      MACRO_EXP, MACRO_EOA } },
+  { "jmp",	emit_jsrjmp, "jmp",
+    { MACRO_PIR, MACRO_EXP, MACRO_EOA,
+      MACRO_PIR, MACRO_EOA,
+      MACRO_IR, MACRO_EXP, MACRO_EOA,
+      MACRO_EXP, MACRO_EOA } },
+  { "ret",	emit_retjcr, "ret",
+    { MACRO_IR, MACRO_EXP, MACRO_EOA,
+      MACRO_IR, MACRO_EOA,
+      MACRO_PIR, MACRO_EXP, MACRO_EOA,
+      MACRO_PIR, MACRO_EOA,
+      MACRO_EXP, MACRO_EOA,
+      MACRO_EOA } },
+  { "jcr",	emit_retjcr, "jcr",
+    { MACRO_IR, MACRO_EXP, MACRO_EOA,
+      MACRO_IR, MACRO_EOA,
+      MACRO_PIR, MACRO_EXP, MACRO_EOA,
+      MACRO_PIR, MACRO_EOA,
+      MACRO_EXP, MACRO_EOA,
+      MACRO_EOA } },
+  { "jsr_coroutine",	emit_retjcr, "jcr",
+    { MACRO_IR, MACRO_EXP, MACRO_EOA,
+      MACRO_IR, MACRO_EOA,
+      MACRO_PIR, MACRO_EXP, MACRO_EOA,
+      MACRO_PIR, MACRO_EOA,
+      MACRO_EXP, MACRO_EOA,
+      MACRO_EOA } },
+};
+
+static const int alpha_num_macros
+  = sizeof(alpha_macros) / sizeof(*alpha_macros);
 
 /* Public interface functions */
 
@@ -421,6 +669,10 @@ md_begin ()
      symbol table.  We'll edit it out of relocs later.  */
   alpha_gp_symbol = symbol_create ("<GP value>", alpha_lita_section, 0x8000,
 				   &zero_address_frag);
+#endif
+
+#ifdef OBJ_EVAX
+  create_literal_section (".link", &alpha_link_section, &alpha_link_symbol);
 #endif
 
 #ifdef OBJ_ELF
@@ -763,6 +1015,10 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_ALPHA_LITUSE:
       return 1;
 #endif
+#ifdef OBJ_EVAX
+    case BFD_RELOC_ALPHA_LINKAGE:
+      return 1;
+#endif
 
     default:
       {
@@ -912,6 +1168,9 @@ alpha_force_relocation (f)
     case BFD_RELOC_ALPHA_LITERAL:
     case BFD_RELOC_ALPHA_LITUSE:
     case BFD_RELOC_GPREL32:
+#ifdef OBJ_EVAX
+    case BFD_RELOC_ALPHA_LINKAGE:
+#endif
       return 1;
 
     case BFD_RELOC_23_PCREL_S2:
@@ -1678,6 +1937,63 @@ FIXME
 #endif /* OBJ_ECOFF || OBJ_ELF */
 }
 
+#ifdef OBJ_EVAX
+
+/* Add symbol+addend to link pool.
+   Return offset from basesym to entry in link pool.
+
+   Add new fixup only if offset isn't 16bit.  */
+
+valueT
+add_to_link_pool (basesym, sym, addend)
+     symbolS *basesym;
+     symbolS *sym;
+     offsetT addend;
+{
+  segT current_section = now_seg;
+  int current_subsec = now_subseg;
+  valueT offset;
+  bfd_reloc_code_real_type reloc_type;
+  char *p;
+  segment_info_type *seginfo = seg_info (alpha_link_section);
+  fixS *fixp;
+
+  offset = -basesym->sy_obj;
+
+  /* @@ This assumes all entries in a given section will be of the same
+     size...  Probably correct, but unwise to rely on.  */
+  /* This must always be called with the same subsegment.  */
+
+  if (seginfo->frchainP)
+    for (fixp = seginfo->frchainP->fix_root;
+	 fixp != (fixS *) NULL;
+	 fixp = fixp->fx_next, offset += 8)
+      {
+	if (fixp->fx_addsy == sym && fixp->fx_offset == addend)
+	  {
+	    if (range_signed_16 (offset))
+	      {
+	        return offset;
+	      }
+	  }
+      }
+
+  /* Not found in 16bit signed range.  */
+
+  subseg_set (alpha_link_section, 0);
+  p = frag_more (8);
+  memset (p, 0, 8);
+
+  fix_new (frag_now, p - frag_now->fr_literal, 8, sym, addend, 0,
+	   BFD_RELOC_64);
+
+  subseg_set (current_section, current_subsec);
+  seginfo->literal_pool_size += 8;
+  return offset;
+}
+
+#endif /* OBJ_EVAX */
+
 /* Load a (partial) expression into a target register.
 
    If poffset is not null, after the call it will either contain
@@ -1788,8 +2104,51 @@ load_expression (targreg, exp, pbasereg, poffset)
 	assert (insn.nfixups == 1);
 	insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITERAL;
 #endif /* OBJ_ELF */
+#ifdef OBJ_EVAX
+	offsetT link;
+
+	/* Find symbol or symbol pointer in link section.  */
+
+	if (exp->X_add_symbol == alpha_evax_proc.symbol)
+	  {
+	    if (range_signed_16 (addend))
+	      {
+		set_tok_reg (newtok[0], targreg);
+		set_tok_const (newtok[1], addend);
+		set_tok_preg (newtok[2], basereg);
+		assemble_tokens_to_insn ("lda", newtok, 3, &insn);
+		addend = 0;
+	      }
+	    else
+	      {
+		set_tok_reg (newtok[0], targreg);
+		set_tok_const (newtok[1], 0);
+		set_tok_preg (newtok[2], basereg);
+		assemble_tokens_to_insn ("lda", newtok, 3, &insn);
+	      }
+	  }
+	else
+	  {
+	    if (!range_signed_32 (addend))
+	      {
+		link = add_to_link_pool (alpha_evax_proc.symbol,
+					 exp->X_add_symbol, addend);
+		addend = 0;
+	      }
+	    else
+	      {
+		link = add_to_link_pool (alpha_evax_proc.symbol,
+					 exp->X_add_symbol, 0);
+	      }
+	    set_tok_reg (newtok[0], targreg);
+	    set_tok_const (newtok[1], link);
+	    set_tok_preg (newtok[2], basereg);
+	    assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
+	  }
+#endif /* OBJ_EVAX */
 
 	emit_insn(&insn);
+#ifndef OBJ_EVAX
 	emit_lituse = 1;
 
 	if (basereg != alpha_gp_register && basereg != AXP_REG_ZERO)
@@ -1800,7 +2159,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 	    set_tok_reg (newtok[2], targreg);
 	    assemble_tokens ("addq", newtok, 3, 0);
 	  }
-
+#endif
 	basereg = targreg;
       }
       break;
@@ -1831,11 +2190,24 @@ load_expression (targreg, exp, pbasereg, poffset)
 
       /* for 64-bit addends, just put it in the literal pool */
 
+#ifdef OBJ_EVAX
+
+      /* emit "ldq targreg, lit(basereg)"  */
+      lit = add_to_link_pool (alpha_evax_proc.symbol,
+			      section_symbol (absolute_section), addend);
+      set_tok_reg (newtok[0], targreg);
+      set_tok_const (newtok[1], lit);
+      set_tok_preg (newtok[2], alpha_gp_register);
+      assemble_tokens ("ldq", newtok, 3, 0);
+
+#else
+
       if (alpha_lit8_section == NULL)
 	{
 	  create_literal_section (".lit8",
 				  &alpha_lit8_section,
 				  &alpha_lit8_symbol);
+	  S_SET_VALUE (alpha_lit8_symbol, 0x8000);
 	}
 
       lit = add_to_literal_pool (NULL, addend, alpha_lit8_section, 8) - 0x8000;
@@ -1867,6 +2239,7 @@ load_expression (targreg, exp, pbasereg, poffset)
 	  set_tok_reg (newtok[2], targreg);
 	  assemble_tokens ("addq", newtok, 3, 0);
 	}
+#endif /* !OBJ_EVAX */
 
       if (poffset)
 	set_tok_const (*poffset, 0);
@@ -2353,6 +2726,111 @@ emit_sextX (tok, ntok, vlgsize)
 
 /* Implement the division and modulus macros.  */
 
+#ifdef OBJ_EVAX
+
+/* Make register usage like in normal procedure call.
+   Don't clobber PV and RA.  */
+
+static void 
+emit_division (tok, ntok, symname)
+     const expressionS *tok;
+     int ntok;
+     void *symname;
+{
+  /* DIVISION and MODULUS. Yech.
+   *
+   * Convert
+   *    OP x,y,result
+   * to
+   *    mov x,R16	# if x != R16
+   *    mov y,R17	# if y != R17
+   *    lda AT,__OP
+   *    jsr AT,(AT),0
+   *    mov R0,result
+   *
+   * with appropriate optimizations if R0,R16,R17 are the registers
+   * specified by the compiler. 
+   */
+
+  int xr, yr, rr;
+  symbolS *sym;
+  expressionS newtok[3];
+
+  xr = regno (tok[0].X_add_number);
+  yr = regno (tok[1].X_add_number);
+    
+  if (ntok < 3)
+    rr = xr;
+  else
+    rr = regno (tok[2].X_add_number);
+
+  /* Move the operands into the right place */
+  if (yr == AXP_REG_R16 && xr == AXP_REG_R17)
+    {
+      /* They are in exactly the wrong order -- swap through AT */
+
+      if (alpha_noat_on)
+	as_bad ("macro requires $at register while noat in effect");
+
+      set_tok_reg (newtok[0], AXP_REG_R16);
+      set_tok_reg (newtok[1], AXP_REG_AT);
+      assemble_tokens ("mov", newtok, 2, 1);
+
+      set_tok_reg (newtok[0], AXP_REG_R17);
+      set_tok_reg (newtok[1], AXP_REG_R16);
+      assemble_tokens ("mov", newtok, 2, 1);
+
+      set_tok_reg (newtok[0], AXP_REG_AT);
+      set_tok_reg (newtok[1], AXP_REG_R17);
+      assemble_tokens ("mov", newtok, 2, 1);
+    }
+  else
+    {
+      if (yr == AXP_REG_R16)
+	{
+	  set_tok_reg (newtok[0], AXP_REG_R16);
+	  set_tok_reg (newtok[1], AXP_REG_R17);
+	  assemble_tokens ("mov", newtok, 2, 1);
+	}
+
+      if (xr != AXP_REG_R16)
+	{
+	  set_tok_reg (newtok[0], xr);
+	  set_tok_reg (newtok[1], AXP_REG_R16);
+          assemble_tokens ("mov", newtok, 2, 1);
+	}
+
+      if (yr != AXP_REG_R16 && yr != AXP_REG_R17)
+	{
+	  set_tok_reg (newtok[0], yr);
+	  set_tok_reg (newtok[1], AXP_REG_R17);
+	  assemble_tokens ("mov", newtok, 2, 1);
+	}
+    }
+
+  sym = symbol_find_or_make ((const char *)symname);
+
+  set_tok_reg (newtok[0], AXP_REG_AT);
+  set_tok_sym (newtok[1], sym, 0);
+  assemble_tokens ("lda", newtok, 2, 1);
+
+  /* Call the division routine */
+  set_tok_reg (newtok[0], AXP_REG_AT);
+  set_tok_cpreg (newtok[1], AXP_REG_AT);
+  set_tok_const (newtok[2], 0);
+  assemble_tokens ("jsr", newtok, 3, 1);
+
+  /* Move the result to the right place */
+  if (rr != AXP_REG_R0)
+    {
+      set_tok_reg (newtok[0], AXP_REG_R0);
+      set_tok_reg (newtok[1], rr);
+      assemble_tokens ("mov", newtok, 2, 1);
+    }
+}
+
+#else /* !OBJ_EVAX */
+
 static void 
 emit_division (tok, ntok, symname)
      const expressionS *tok;
@@ -2456,6 +2934,8 @@ FIXME
     }
 }
 
+#endif /* !OBJ_EVAX */
+
 /* The jsr and jmp macros differ from their instruction counterparts
    in that they can load the target address and default most
    everything.  */
@@ -2481,17 +2961,25 @@ emit_jsrjmp (tok, ntok, vopname)
   if (tokidx < ntok &&
       (tok[tokidx].X_op == O_pregister || tok[tokidx].X_op == O_cpregister))
     r = regno (tok[tokidx++].X_add_number);
+#ifdef OBJ_EVAX
+  /* keep register if jsr $n.<sym>  */
+#else
   else
     {
       int basereg = alpha_gp_register;
       lituse = load_expression (r = AXP_REG_PV, &tok[tokidx], &basereg, NULL);
     }
+#endif
 
   set_tok_cpreg (newtok[1], r);
 
+#ifdef OBJ_EVAX
+  /* FIXME: Add hint relocs to BFD for evax.  */
+#else
   if (tokidx < ntok)
     newtok[2] = tok[tokidx];
   else
+#endif
     set_tok_const (newtok[2], 0);
 
   assemble_tokens_to_insn (opname, newtok, 3, &insn);
@@ -2512,6 +3000,17 @@ emit_jsrjmp (tok, ntok, vopname)
     }
 
   emit_insn (&insn);
+
+#if OBJ_EVAX
+  /* reload PV from 0(FP) if it is our current base register.  */
+  if (alpha_gp_register == AXP_REG_PV)
+    {
+      set_tok_reg (newtok[0], AXP_REG_PV);
+      set_tok_const (newtok[1], 0);
+      set_tok_preg (newtok[2], AXP_REG_FP);
+      assemble_tokens ("ldq", newtok, 3, 0);
+    }
+#endif
 }
 
 /* The ret and jcr instructions differ from their instruction
@@ -2625,6 +3124,28 @@ s_alpha_comm (ignore)
       ignore_rest_of_line ();
       return;
     }
+
+#if OBJ_EVAX
+  {
+    /* Fill common area with zeros.  */
+    char *pfrag;
+    segT current_seg = now_seg;
+    subsegT current_subseg = now_subseg;
+  
+    subseg_set (bss_section, 1);
+    frag_align (3, 0);
+  
+    symbolP->sy_frag = frag_now;
+    pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+		      temp, (char *)0);
+      
+    *pfrag = 0;
+    S_SET_SEGMENT (symbolP, bss_section);
+
+    subseg_set (current_seg, current_subseg);
+  }
+#endif
+
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) temp)
@@ -2639,13 +3160,16 @@ s_alpha_comm (ignore)
       S_SET_EXTERNAL (symbolP);
     }
 
+#ifndef OBJ_EVAX
   know (symbolP->sy_frag == &zero_address_frag);
+#endif
+
   demand_empty_rest_of_line ();
 }
 
 #endif /* ! OBJ_ELF */
 
-#ifdef OBJ_ECOFF
+#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
 
 /* Handle the .rdata pseudo-op.  This is like the usual one, but it
    clears alpha_insn_label and restores auto alignment.  */
@@ -2663,6 +3187,10 @@ s_alpha_rdata (ignore)
   alpha_auto_align_on = 1;
   alpha_current_align = 0;
 }
+
+#endif
+
+#ifdef OBJ_ECOFF
 
 /* Handle the .sdata pseudo-op.  This is like the usual one, but it
    clears alpha_insn_label and restores auto alignment.  */
@@ -2700,6 +3228,374 @@ s_alpha_section (ignore)
 
 #endif  
 
+#ifdef OBJ_EVAX
+static void
+s_alpha_link (ignore)
+     int ignore;
+{
+  int temp;
+
+  temp = get_absolute_expression ();
+  subseg_new (".link", 0);
+  demand_empty_rest_of_line ();
+  alpha_insn_label = NULL;
+  alpha_auto_align_on = 1;
+  alpha_current_align = 0;
+}
+
+
+/* .prologue */
+
+static void
+s_alpha_prologue (ignore)
+     int ignore;
+{
+  demand_empty_rest_of_line ();
+
+  return;
+}
+
+
+/* Parse .ent directives.  */
+
+static void
+s_alpha_ent (ignore)
+     int ignore;
+{
+  symbolS *symbol;
+  expressionS symexpr;
+
+  alpha_evax_proc.pdsckind = 0;
+  alpha_evax_proc.framereg = -1;
+  alpha_evax_proc.framesize = 0;
+  alpha_evax_proc.rsa_offset = 0;
+  alpha_evax_proc.ra_save = AXP_REG_RA;
+  alpha_evax_proc.fp_save = -1;
+  alpha_evax_proc.imask = 0;
+  alpha_evax_proc.fmask = 0;
+  alpha_evax_proc.prologue = 0;
+  alpha_evax_proc.type = 0;
+
+  expression (&symexpr);
+
+  if (symexpr.X_op != O_symbol)
+    {
+      as_fatal (".ent directive has no symbol");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  symbol = make_expr_symbol (&symexpr);
+  symbol->bsym->flags |= BSF_FUNCTION;
+  alpha_evax_proc.symbol = symbol;
+
+  demand_empty_rest_of_line ();
+  return;
+}
+
+
+/* Parse .frame <framreg>,<framesize>,RA,<rsa_offset> directives.  */
+
+static void
+s_alpha_frame (ignore)
+     int ignore;
+{
+  long val;
+
+  alpha_evax_proc.framereg = tc_get_register (1);
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer++ != ','
+      || get_absolute_expression_and_terminator (&val) != ',')
+    {
+      as_warn ("Bad .frame directive 1./2. param");
+      --input_line_pointer;
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  alpha_evax_proc.framesize = val;
+
+  (void) tc_get_register (1);
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer++ != ',')
+    {
+      as_warn ("Bad .frame directive 3./4. param");
+      --input_line_pointer;
+      demand_empty_rest_of_line ();
+      return;
+    }
+  alpha_evax_proc.rsa_offset = get_absolute_expression ();
+
+  return;
+}
+
+static void
+s_alpha_pdesc (ignore)
+     int ignore;
+{
+  char *name;
+  char name_end;
+  long val;
+  register char *p;
+  expressionS exp;
+  symbolS *entry_sym;
+  fixS *fixp;
+  segment_info_type *seginfo = seg_info (alpha_link_section);
+
+  if (now_seg != alpha_link_section)
+    {
+      as_bad (".pdesc directive not in link (.link) section");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  if ((alpha_evax_proc.symbol == 0)
+      || (!S_IS_DEFINED (alpha_evax_proc.symbol)))
+    {
+      as_fatal (".pdesc has no matching .ent");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  alpha_evax_proc.symbol->sy_obj = (valueT)seginfo->literal_pool_size;
+
+  expression (&exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_warn (".pdesc directive has no entry symbol");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  entry_sym = make_expr_symbol (&exp);
+  /* Save bfd symbol of proc desc in function symbol.  */
+  alpha_evax_proc.symbol->bsym->udata.p = (PTR)entry_sym->bsym;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer++ != ',')
+    {
+      as_warn ("No comma after .pdesc <entryname>");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+  name = input_line_pointer;
+  name_end = get_symbol_end ();
+
+  if (strncmp(name, "stack", 5) == 0)
+    {
+      alpha_evax_proc.pdsckind = PDSC_S_K_KIND_FP_STACK;
+    }
+  else if (strncmp(name, "reg", 3) == 0)
+    {
+      alpha_evax_proc.pdsckind = PDSC_S_K_KIND_FP_REGISTER;
+    }
+  else if (strncmp(name, "null", 4) == 0)
+    {
+      alpha_evax_proc.pdsckind = PDSC_S_K_KIND_NULL;
+    }
+  else
+    {
+      as_fatal ("unknown procedure kind");
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  *input_line_pointer = name_end;
+  demand_empty_rest_of_line ();
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  frag_align (3, 0);
+  p = frag_more (16);
+  fixp = fix_new (frag_now, p - frag_now->fr_literal, 8, 0, 0, 0, 0);
+  fixp->fx_done = 1;
+  seginfo->literal_pool_size += 16;
+
+  *p = alpha_evax_proc.pdsckind
+       | ((alpha_evax_proc.framereg == 29) ? PDSC_S_M_BASE_REG_IS_FP : 0);
+  *(p+1) = PDSC_S_M_NATIVE
+	   | PDSC_S_M_NO_JACKET;
+
+  switch (alpha_evax_proc.pdsckind)
+    {
+      case PDSC_S_K_KIND_NULL:
+	*(p+2) = 0;
+	*(p+3) = 0;
+	break;
+      case PDSC_S_K_KIND_FP_REGISTER:
+	*(p+2) = alpha_evax_proc.fp_save;
+	*(p+3) = alpha_evax_proc.ra_save;
+	break;
+      case PDSC_S_K_KIND_FP_STACK:
+	md_number_to_chars (p+2, (valueT)alpha_evax_proc.rsa_offset, 2);
+	break;
+      default:		/* impossible */
+	break;
+    }
+
+  *(p+4) = 0;
+  *(p+5) = alpha_evax_proc.type & 0x0f;
+
+  /* Signature offset.  */
+  md_number_to_chars (p+6, (valueT)0, 2);
+
+  fix_new_exp (frag_now, p-frag_now->fr_literal+8, 8, &exp, 0, BFD_RELOC_64);
+
+  if (alpha_evax_proc.pdsckind == PDSC_S_K_KIND_NULL)
+    return;
+
+  /* Add dummy fix to make add_to_link_pool work.  */
+  p = frag_more (8);
+  fixp = fix_new (frag_now, p - frag_now->fr_literal, 8, 0, 0, 0, 0);
+  fixp->fx_done = 1;
+  seginfo->literal_pool_size += 8;
+
+  /* pdesc+16: Size.  */
+  md_number_to_chars (p, (valueT)alpha_evax_proc.framesize, 4);
+
+  md_number_to_chars (p+4, (valueT)0, 2);
+
+  /* Entry length.  */
+  md_number_to_chars (p+6, alpha_evax_proc.prologue, 2);
+
+  if (alpha_evax_proc.pdsckind == PDSC_S_K_KIND_FP_REGISTER)
+    return;
+
+  /* Add dummy fix to make add_to_link_pool work.  */
+  p = frag_more (8);
+  fixp = fix_new (frag_now, p - frag_now->fr_literal, 8, 0, 0, 0, 0);
+  fixp->fx_done = 1;
+  seginfo->literal_pool_size += 8;
+
+  /* pdesc+24: register masks.  */
+
+  md_number_to_chars (p, alpha_evax_proc.imask, 4);
+  md_number_to_chars (p+4, alpha_evax_proc.fmask, 4);
+
+  return;
+}
+
+
+static void
+s_alpha_linkage (ignore)
+     int ignore;
+{
+  expressionS exp;
+  char *p;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  expression (&exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_fatal ("No symbol after .linkage");
+    }
+  else
+    {
+      p = frag_more (LKP_S_K_SIZE);
+      memset (p, 0, LKP_S_K_SIZE);
+      fix_new_exp (frag_now, p - frag_now->fr_literal, LKP_S_K_SIZE, &exp, 0,\
+		   BFD_RELOC_ALPHA_LINKAGE);
+    }
+  demand_empty_rest_of_line ();
+
+  return;
+}
+
+
+static void
+s_alpha_fp_save (ignore)
+     int ignore;
+{
+
+  alpha_evax_proc.fp_save = tc_get_register (1);
+
+  demand_empty_rest_of_line ();
+  return;
+}
+
+
+static void
+s_alpha_mask (ignore)
+     int ignore;
+{
+  long val;
+
+  if (get_absolute_expression_and_terminator (&val) != ',')
+    {
+      as_warn ("Bad .mask directive");
+      --input_line_pointer;
+    }
+  else
+    {
+      alpha_evax_proc.imask = val;
+      (void)get_absolute_expression ();
+    }
+  demand_empty_rest_of_line ();
+
+  return;
+}
+
+
+static void
+s_alpha_fmask (ignore)
+     int ignore;
+{
+  long val;
+
+  if (get_absolute_expression_and_terminator (&val) != ',')
+    {
+      as_warn ("Bad .fmask directive");
+      --input_line_pointer;
+    }
+  else
+    {
+      alpha_evax_proc.fmask = val;
+      (void) get_absolute_expression ();
+    }
+  demand_empty_rest_of_line ();
+
+  return;
+}
+
+static void
+s_alpha_end (ignore)
+     int ignore;
+{
+  char c;
+
+  c = get_symbol_end ();
+  *input_line_pointer = c;
+  demand_empty_rest_of_line ();
+  alpha_evax_proc.symbol = 0;
+
+  return;
+}
+
+
+static void
+s_alpha_file (ignore)
+     int ignore;
+{
+  char* s;
+  int length;
+  extern char *demand_copy_string PARAMS ((int *lenP));
+
+  get_absolute_expression ();
+  s = demand_copy_string (&length);
+  demand_empty_rest_of_line ();
+
+  return;
+}
+#endif /* OBJ_EVAX  */
+
 /* Handle the .gprel32 pseudo op.  */
 
 static void
@@ -2725,6 +3621,7 @@ s_alpha_gprel32 (ignore)
       abort();
     }
 #else
+#ifdef OBJ_ECOFF
   switch (e.X_op)
     {
     case O_constant:
@@ -2737,6 +3634,7 @@ s_alpha_gprel32 (ignore)
     default:
       abort ();
     }
+#endif
 #endif
 
   if (alpha_auto_align_on && alpha_current_align < 2)
@@ -2989,235 +3887,6 @@ alpha_cons_align (size)
   alpha_insn_label = NULL;
 }
 
-/* The macro table */
-
-const struct alpha_macro alpha_macros[] = {
-/* Load/Store macros */
-  { "lda",	emit_lda, NULL,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldah",	emit_ldah, NULL,
-    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
-
-  { "ldl",	emit_ir_load, "ldl",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldl_l",	emit_ir_load, "ldl_l",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldq",	emit_ir_load, "ldq",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldq_l",	emit_ir_load, "ldq_l",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldq_u",	emit_ir_load, "ldq_u",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldf",	emit_loadstore, "ldf",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "ldg",	emit_loadstore, "ldg",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "lds",	emit_loadstore, "lds",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "ldt",	emit_loadstore, "ldt",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-
-  { "ldb",	emit_ldX, (void *)0,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldbu",	emit_ldXu, (void *)0,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldw",	emit_ldX, (void *)1,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldwu",	emit_ldXu, (void *)1,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-
-  { "uldw",	emit_uldX, (void*)1,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldwu",	emit_uldXu, (void*)1,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldl",	emit_uldX, (void*)2,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldlu",	emit_uldXu, (void*)2,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "uldq",	emit_uldXu, (void*)3,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-
-  { "ldgp",	emit_ldgp, NULL,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA } },
-
-  { "ldi",	emit_lda, NULL,
-    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldil",	emit_ldil, NULL,
-    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ldiq",	emit_lda, NULL,
-    { MACRO_IR, MACRO_EXP, MACRO_EOA } },
-#if 0
-  { "ldif"	emit_ldiq, NULL,
-    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "ldid"	emit_ldiq, NULL,
-    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "ldig"	emit_ldiq, NULL,
-    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "ldis"	emit_ldiq, NULL,
-    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "ldit"	emit_ldiq, NULL,
-    { MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-#endif
-
-  { "stl",	emit_loadstore, "stl",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stl_c",	emit_loadstore, "stl_c",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stq",	emit_loadstore, "stq",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stq_c",	emit_loadstore, "stq_c",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stq_u",	emit_loadstore, "stq_u",
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stf",	emit_loadstore, "stf",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "stg",	emit_loadstore, "stg",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "sts",	emit_loadstore, "sts",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-  { "stt",	emit_loadstore, "stt",
-    { MACRO_FPR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_FPR, MACRO_EXP, MACRO_EOA } },
-
-  { "stb",	emit_stX, (void*)0,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "stw",	emit_stX, (void*)1,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ustw",	emit_ustX, (void*)1,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ustl",	emit_ustX, (void*)2,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-  { "ustq",	emit_ustX, (void*)3,
-    { MACRO_IR, MACRO_EXP, MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA } },
-
-/* Arithmetic macros */
-#if 0
-  { "absl"	emit_absl, 1, { IR } },
-  { "absl"	emit_absl, 2, { IR, IR } },
-  { "absl"	emit_absl, 2, { EXP, IR } },
-  { "absq"	emit_absq, 1, { IR } },
-  { "absq"	emit_absq, 2, { IR, IR } },
-  { "absq"	emit_absq, 2, { EXP, IR } },
-#endif
-
-  { "sextb",	emit_sextX, (void *)0,
-    { MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EOA,
-      /* MACRO_EXP, MACRO_IR, MACRO_EOA */ } },
-  { "sextw",	emit_sextX, (void *)1,
-    { MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EOA,
-      /* MACRO_EXP, MACRO_IR, MACRO_EOA */ } },
-
-  { "divl",	emit_division, "__divl",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "divlu",	emit_division, "__divlu",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "divq",	emit_division, "__divq",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "divqu",	emit_division, "__divqu",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "reml",	emit_division, "__reml",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "remlu",	emit_division, "__remlu",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "remq",	emit_division, "__remq",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-  { "remqu",	emit_division, "__remqu",
-    { MACRO_IR, MACRO_IR, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_IR, MACRO_EOA,
-      /* MACRO_IR, MACRO_EXP, MACRO_IR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA */ } },
-
-  { "jsr",	emit_jsrjmp, "jsr",
-    { MACRO_PIR, MACRO_EXP, MACRO_EOA,
-      MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA,
-      MACRO_EXP, MACRO_EOA } },
-  { "jmp",	emit_jsrjmp, "jmp",
-    { MACRO_PIR, MACRO_EXP, MACRO_EOA,
-      MACRO_PIR, MACRO_EOA,
-      MACRO_IR, MACRO_EXP, MACRO_EOA,
-      MACRO_EXP, MACRO_EOA } },
-  { "ret",	emit_retjcr, "ret",
-    { MACRO_IR, MACRO_EXP, MACRO_EOA,
-      MACRO_IR, MACRO_EOA,
-      MACRO_PIR, MACRO_EXP, MACRO_EOA,
-      MACRO_PIR, MACRO_EOA,
-      MACRO_EXP, MACRO_EOA,
-      MACRO_EOA } },
-  { "jcr",	emit_retjcr, "jcr",
-    { MACRO_IR, MACRO_EXP, MACRO_EOA,
-      MACRO_IR, MACRO_EOA,
-      MACRO_PIR, MACRO_EXP, MACRO_EOA,
-      MACRO_PIR, MACRO_EOA,
-      MACRO_EXP, MACRO_EOA,
-      MACRO_EOA } },
-  { "jsr_coroutine",	emit_retjcr, "jcr",
-    { MACRO_IR, MACRO_EXP, MACRO_EOA,
-      MACRO_IR, MACRO_EOA,
-      MACRO_PIR, MACRO_EXP, MACRO_EOA,
-      MACRO_PIR, MACRO_EOA,
-      MACRO_EXP, MACRO_EOA,
-      MACRO_EOA } },
-};
-
-static const int alpha_num_macros
-  = sizeof(alpha_macros) / sizeof(*alpha_macros);
-
 /* The target specific pseudo-ops which we support.  */
 
 const pseudo_typeS md_pseudo_table[] =
@@ -3228,8 +3897,10 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
   {"text", s_alpha_text, 0},
   {"data", s_alpha_data, 0},
-#ifdef OBJ_ECOFF
+#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
   {"rdata", s_alpha_rdata, 0},
+#endif
+#ifdef OBJ_ECOFF
   {"sdata", s_alpha_sdata, 0},
 #endif
 #ifdef OBJ_ELF
@@ -3237,6 +3908,18 @@ const pseudo_typeS md_pseudo_table[] =
   {"section.s", s_alpha_section, 0},
   {"sect", s_alpha_section, 0},
   {"sect.s", s_alpha_section, 0},
+#endif
+#ifdef OBJ_EVAX
+  { "pdesc", s_alpha_pdesc, 0},
+  { "linkage", s_alpha_linkage, 0},
+  { "ent", s_alpha_ent, 0},
+  { "frame", s_alpha_frame, 0},
+  { "fp_save", s_alpha_fp_save, 0},
+  { "mask", s_alpha_mask, 0},
+  { "fmask", s_alpha_fmask, 0},
+  { "link", s_alpha_link, 0},
+  { "end", s_alpha_end, 0},
+  { "file", s_alpha_file, 0},
 #endif
   {"gprel32", s_alpha_gprel32, 0},
   {"t_floating", s_alpha_float_cons, 'd'},
@@ -3299,10 +3982,10 @@ create_literal_section (name, secp, symp)
   S_CLEAR_EXTERNAL (*symp = section_symbol (new_sec));
 }
 
-#ifndef OBJ_ELF
+#ifdef OBJ_ECOFF
 
 /* @@@ GP selection voodoo.  All of this seems overly complicated and
-   unnecessary; which is the primary reason I nixed it for ELF.  */
+   unnecessary; which is the primary reason it's for ECOFF only.  */
 
 static inline void
 maybe_set_gp (sec)
@@ -3344,7 +4027,7 @@ select_gp_value ()
   printf ("Chose GP value of %lx\n", alpha_gp_value);
 #endif
 }
-#endif /* !OBJ_ELF */
+#endif /* OBJ_ECOFF */
 
 /* Called internally to handle all alignment needs.  This takes care
    of eliding calls to frag_align if'n the cached current alignment

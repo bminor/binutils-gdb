@@ -1,3 +1,9 @@
+Tue Oct  1 12:37:48 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-alpha.c: Add some static function prototypes.
+ 	(alpha_macros): Move to top of file.  Make static.
+	(alpha_num_macros): Move to top of file.
+
 start-sanitize-v850
 Tue Oct  1 09:36:19 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
