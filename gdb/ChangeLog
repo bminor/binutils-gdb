@@ -1,5 +1,7 @@
 Wed Sep  1 19:31:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-udi.c (udi_wait): Call `warning' not `error'.
+
 	* symtab.c (COMPLETION_LIST_ADD_SYMBOL): If the symbol has a
 	demangling, don't put the mangled form in the completion list.
 
