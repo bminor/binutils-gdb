@@ -88,6 +88,25 @@ extern void supply_register (int regnum, const void *val);
 extern void regcache_collect (int regnum, void *buf);
 
 
+/* The type of a register.  This function is slightly more efficient
+   then its gdbarch vector counterpart since it returns a precomputed
+   value stored in a table.
+
+   NOTE: cagney/2002-08-17: The original macro was called
+   REGISTER_VIRTUAL_TYPE.  This was because the register could have
+   different raw and cooked (nee virtual) representations.  The
+   CONVERTABLE methods being used to convert between the two
+   representations.  Current code does not do this.  Instead, the
+   first [0..NUM_REGS) registers are 1:1 raw:cooked, and the type
+   exactly describes the register's representation.  Consequently, the
+   ``virtual'' has been dropped.
+
+   FIXME: cagney/2002-08-17: A number of architectures, including the
+   MIPS, are currently broken in this regard.  */
+
+extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
+
+
 /* Return the size of the largest register.  Used when allocating
    space for an aribtrary register value.  */
 

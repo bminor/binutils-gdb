@@ -1,5 +1,17 @@
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* regcache.c (struct regcache_descr): Add field register_type.
+	(init_legacy_regcache_descr): Pass a pre-allocated regcache_descr
+	in as a parameter
+	(init_regcache_descr): Initialize register_type.  Pass the descr
+	to init_legacy_regcache_descr.  Use register_type instead of
+	REGISTER_VIRTUAL_TYPE.
+	(register_type): New function.
+	(regcache_dump): Replace REGISTER_VIRTUAL_TYPE with register_type.
+	* regcache.h (register_type): Declare.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* rs6000-tdep.c (rs6000_gdbarch_init): Set store_struct_return
 	instead of deprecated_store_return_value.  Fix fallout from
 	2002-08-23 Andrew Cagney <cagney@redhat.com>.

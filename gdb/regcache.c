@@ -77,24 +77,22 @@ struct regcache_descr
 
   /* Useful constant.  Largest of all the registers.  */
   long max_register_size;
+
+  /* Cached table containing the type of each register.  */
+  struct type **register_type;
 };
 
-static void *
-init_legacy_regcache_descr (struct gdbarch *gdbarch)
+void
+init_legacy_regcache_descr (struct gdbarch *gdbarch,
+			    struct regcache_descr *descr)
 {
   int i;
-  struct regcache_descr *descr;
   /* FIXME: cagney/2002-05-11: gdbarch_data() should take that
      ``gdbarch'' as a parameter.  */
   gdb_assert (gdbarch != NULL);
 
-  descr = XMALLOC (struct regcache_descr);
-  descr->gdbarch = gdbarch;
-  descr->legacy_p = 1;
-
   /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
      in the register buffer.  Unfortunatly some architectures do.  */
-  descr->nr_cooked_registers = NUM_REGS + NUM_PSEUDO_REGS;
   descr->nr_raw_registers = descr->nr_cooked_registers;
   descr->sizeof_raw_register_valid_p = descr->nr_cooked_registers;
 
@@ -135,7 +133,6 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch)
       if (descr->sizeof_raw_registers < regend)
 	descr->sizeof_raw_registers = regend;
     }
-  return descr;
 }
 
 static void *
@@ -145,20 +142,32 @@ init_regcache_descr (struct gdbarch *gdbarch)
   struct regcache_descr *descr;
   gdb_assert (gdbarch != NULL);
 
-  /* If an old style architecture, construct the register cache
-     description using all the register macros.  */
-  if (!gdbarch_pseudo_register_read_p (gdbarch)
-      && !gdbarch_pseudo_register_write_p (gdbarch))
-    return init_legacy_regcache_descr (gdbarch);
-
-  descr = XMALLOC (struct regcache_descr);
+  /* Create an initial, zero filled, table.  */
+  descr = XCALLOC (1, struct regcache_descr);
   descr->gdbarch = gdbarch;
-  descr->legacy_p = 0;
 
   /* Total size of the register space.  The raw registers are mapped
      directly onto the raw register cache while the pseudo's are
      either mapped onto raw-registers or memory.  */
   descr->nr_cooked_registers = NUM_REGS + NUM_PSEUDO_REGS;
+
+  /* Fill in a table of register types.  */
+  descr->register_type = XCALLOC (descr->nr_cooked_registers,
+				  struct type *);
+  for (i = 0; i < descr->nr_cooked_registers; i++)
+    {
+      descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i);
+    }
+
+  /* If an old style architecture, fill in the remainder of the
+     register cache descriptor using the register macros.  */
+  if (!gdbarch_pseudo_register_read_p (gdbarch)
+      && !gdbarch_pseudo_register_write_p (gdbarch))
+    {
+      descr->legacy_p = 1;
+      init_legacy_regcache_descr (gdbarch, descr);
+      return descr;
+    }
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
@@ -175,10 +184,10 @@ init_regcache_descr (struct gdbarch *gdbarch)
      cache.  Some code, via read_register_bytes() access a register
      using an offset/length rather than a register number.
 
-     NOTE: cagney/2002-05-22: Only REGISTER_VIRTUAL_TYPE() needs to be
-     used when constructing the register cache.  It is assumed that
-     register raw size, virtual size and type length of the type are
-     all the same.  */
+     NOTE: cagney/2002-05-22: Only register_type() is used when
+     constructing the register cache.  It is assumed that the
+     register's raw size, virtual size and type length are all the
+     same.  */
 
   {
     long offset = 0;
@@ -187,7 +196,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
     descr->max_register_size = 0;
     for (i = 0; i < descr->nr_cooked_registers; i++)
       {
-	descr->sizeof_register[i] = TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
+	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
 	if (descr->max_register_size < descr->sizeof_register[i])
@@ -239,6 +248,17 @@ xfree_regcache_descr (struct gdbarch *gdbarch, void *ptr)
   descr->register_offset = NULL;
   descr->sizeof_register = NULL;
   xfree (descr);
+}
+
+/* Utility functions returning useful register attributes stored in
+   the regcache descr.  */
+
+struct type *
+register_type (struct gdbarch *gdbarch, int regnum)
+{
+  struct regcache_descr *descr = regcache_descr (gdbarch);
+  gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
+  return descr->register_type[regnum];
 }
 
 /* Utility functions returning useful register attributes stored in
@@ -1443,7 +1463,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      || (regcache->descr->sizeof_register[regnum]
 		  != REGISTER_VIRTUAL_SIZE (regnum))
 	      || (regcache->descr->sizeof_register[regnum]
-		  != TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum)))
+		  != TYPE_LENGTH (register_type (regcache->descr->gdbarch,
+						 regnum)))
 	      )
 	    {
 	      if (!footnote_register_size)
@@ -1460,7 +1481,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
       else
 	{
 	  static const char blt[] = "builtin_type";
-	  const char *t = TYPE_NAME (REGISTER_VIRTUAL_TYPE (regnum));
+	  const char *t = TYPE_NAME (register_type (regcache->descr->gdbarch,
+						    regnum));
 	  if (t == NULL)
 	    {
 	      char *n;
