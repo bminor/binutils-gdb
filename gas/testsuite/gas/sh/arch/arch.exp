@@ -503,7 +503,7 @@ foreach arch [array names insns_valid] {
     if {$errormessages == $expected} then {
 	pass "$expected insns should not assemble on $arch"
     } else {
-	if {[istarget sh*-*-coff] && [string match {*dsp} $arch]} {
+	if {([istarget sh*-*-coff] || [istarget sh*-hms]) && [string match {*dsp} $arch]} {
 	    xfail "$expected insns should not assemble on $arch ($errormessages did not)"
 	} else {
 	    fail "$expected insns should not assemble on $arch ($errormessages did not)"

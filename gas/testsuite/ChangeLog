@@ -4,6 +4,12 @@
 
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
+	* gas/sh/basic.exp: Add an sh-hms version of the pcrel test.
+	* gas/sh/pcrel-hms.d: New file.  Adjusted form of pcrel-coff.d for
+	the sh-hms target.
+	* gas/sh/arch/arch.exp: Expect the same failures for sh-hms port
+	as for the sh-coff port.
+
 	* gas/macros/macros.exp (run_list_test): Also expect the msp430
 	port to fail the strings test because it defines
 	ONLY_STANDARD_ESCAPES.
