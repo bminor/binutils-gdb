@@ -2308,7 +2308,7 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
      ??? A cleaner way would be if mpg took a new argument that named the
      overlay.  */
   vuoverlay_section = subseg_new (section_name, 0);
-  bfd_set_section_flags (stdoutput, vuoverlay_section, 0);
+  bfd_set_section_flags (stdoutput, vuoverlay_section, SEC_CODE);
   /* There's no point in setting the section vma as we can't get the linker
      to preserve it.  But what the heck ...  It might be useful to the
      objdump user.  */
@@ -2529,7 +2529,8 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   label = symbol_find_or_make (name);
   *end = c;
 
-  label2 = create_label ("_$", name);
+  /* Use the same prefix as vu labels here.  */
+  label2 = create_label (VU_LABEL_PREFIX, name);
   endlabel = create_label (END_LABEL_PREFIX, name);
 
   retval = eval_expr (DVP_DMA, dma_operand_addr, 4, name);
