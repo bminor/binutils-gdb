@@ -110,6 +110,7 @@ _fi__(!_GENERIC__)
 @tex
 {\parskip=0pt
 \hfill pesch\@cygnus.com\par
+\hfill (Send bugs and comments on _GDBN__ to bug-gdb\@prep.ai.mit.edu.)
 \hfill {\it Debugging with _GDBN__}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }

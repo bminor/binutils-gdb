@@ -944,3 +944,46 @@ to detect program completion.
 In either case, _GDBN__ will see the effect of a @sc{reset} on the
 H8/300 board as a ``normal exit'' of your program.
 _fi__(_H8__)
+
+_if__(_Z8000__)
+@node Z8000 Simulator
+@subsection _GDBN__ and its Zilog Z8000 Simulator
+
+@cindex simulator, Z8000
+@cindex Zilog Z8000 simulator
+When configured for debugging Zilog Z8000 targets, _GDBN__ includes a Z8000
+simulator. 
+
+@table @code
+@item target z8ksim
+@kindex z8ksim
+This debugging target is a simulator for the Z8002, the unsegmented
+variant of the Z8000 architecture.
+@end table
+
+@noindent
+After this point, you can debug Z8000 programs in the same style as
+programs for your host computer; use the @code{file} command to load a
+new program image, the @code{run} command to run your program, and so
+on.
+
+As well as making available all the usual Z8000 registers (see
+@code{info reg}), this debugging target provides three additional items
+of information as specially named registers:
+
+@table @code
+@item cycles
+Counts clock-ticks in the simulator.
+
+@item insts
+Counts instructions run in the simulator.
+
+@item time
+Execution time in 60ths of a second. 
+@end table
+
+You can refer to these values in _GDBN__ expressions with the usual
+conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
+conditional breakpoint that will suspend only after at least 5000
+simulated clock ticks.
+_fi__(_Z8000__)

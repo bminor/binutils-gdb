@@ -20,4 +20,6 @@ _fi__(_ST2000__)
 _if__(_H8__)
 * Hitachi H8/300 Remote::       _GDBN__ and the Hitachi H8/300
 _fi__(_H8__)
- 
+_if__(_Z8000__)
+* Z8000 Simulator::             _GDBN__ and its Zilog Z8000 Simulator
+_fi__(_Z8000__)
