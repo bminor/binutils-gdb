@@ -686,7 +686,7 @@ s_iq2000_set (int x ATTRIBUTE_UNUSED)
       "nobopt",
       NULL
     };
-  const char * ignored;
+  const char ** ignored;
   char *name = input_line_pointer, ch;
   char *save_ILP = input_line_pointer;
 
@@ -695,10 +695,10 @@ s_iq2000_set (int x ATTRIBUTE_UNUSED)
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
 
-  for (ignored = ignored_arguments[0]; ignored; ignored ++)
-    if (strcmp (ignored, name) == 0)
+  for (ignored = ignored_arguments; * ignored; ignored ++)
+    if (strcmp (* ignored, name) == 0)
       break;
-  if (ignored == NULL)
+  if (* ignored == NULL)
     {
       /* We'd like to be able to use .set symbol, expn */
       input_line_pointer = save_ILP;
