@@ -256,6 +256,7 @@ simple_exp :	type '\'' save_qualifier { type_qualifier = $1; } '(' exp ')'
 	;
 
 save_qualifier : 	{ $$ = type_qualifier; }
+	;
 
 simple_exp :
 		simple_exp '(' exp DOTDOT exp ')'
@@ -532,7 +533,7 @@ exp	:	CHARLIT
 			    (convert_char_literal (type_qualifier, $1.val));
 			  write_exp_elt_opcode (OP_LONG); 
 			}
-
+	;
 			      
 exp	:	FLOAT
 			{ write_exp_elt_opcode (OP_DOUBLE);
@@ -548,6 +549,7 @@ exp	:	NULL_PTR
 			  write_exp_elt_longcst ((LONGEST)(0));
 			  write_exp_elt_opcode (OP_LONG); 
 			 }
+	;
 
 exp	:	STRING
 			{ /* Ada strings are converted into array constants 
