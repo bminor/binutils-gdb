@@ -1,3 +1,26 @@
+2001-05-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/addi.d: Tweak for 64-bit BFD.
+	* gas/cris/binop-cmpmove.d, gas/cris/binop-cmpmovx.d,
+	gas/cris/binop-extx.d, gas/cris/binop.d, gas/cris/bork.d,
+	gas/cris/branch.d, gas/cris/break.d, gas/cris/brokw-1.d,
+	gas/cris/brokw-2.d, gas/cris/brokw-3.d, gas/cris/ccr.d,
+	gas/cris/clear.d, gas/cris/continue.d, gas/cris/fragtest.d,
+	gas/cris/jump-type.d, gas/cris/labfloat.d, gas/cris/macroat.d,
+	gas/cris/movem-to-reg.d, gas/cris/nosep.d, gas/cris/oneop-type.d,
+	gas/cris/prefix.d, gas/cris/pushpop-byte-sreg.d,
+	gas/cris/pushpop-dword-sreg.d, gas/cris/pushpop-word-sreg.d,
+	gas/cris/pushpop.d, gas/cris/quick-s6.d, gas/cris/quick-u5.d,
+	gas/cris/quick-u6.d, gas/cris/range-err-1.s, gas/cris/rd-pic-1.d,
+	gas/cris/rd-regprefix-1.d, gas/cris/rd-regprefix-1b.d,
+	gas/cris/reg-to-mem.d, gas/cris/regreg.d, gas/cris/return.d,
+	gas/cris/scc.d, gas/cris/separator.d, gas/cris/shexpr-1.d,
+	gas/cris/sreg-to-x.d, gas/cris/test.d, gas/cris/unimplemented.d,
+	gas/cris/unop-mem.d, gas/cris/x-to-byte-sreg.d,
+	gas/cris/x-to-dcr1-sreg.d, gas/cris/x-to-dword-sreg.d,
+	gas/cris/x-to-word-sreg.d: Ditto.
+	* gas/cris/shexpr-1.d: Ditto.  Correct format.
+
 2001-05-25  H.J. Lu  <hjl@gnu.org>
 
 	* gas/mips/e32el-rel2.d: New for little endian mips.
