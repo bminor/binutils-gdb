@@ -20,46 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef NM_M68KLYNX_H
 #define NM_M68KLYNX_H
 
-#include <sys/conf.h>
-#include <sys/kernel.h>
-#include <sys/mem.h>
-#include <sys/signal.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/itimer.h>
-#include <sys/file.h>
-#include <sys/proc.h>
-#include "thread.h"
-
-/* This is the amount to subtract from u.u_ar0 to get the offset in
-   the core file of the register values.  */
-
-#define KERNEL_U_ADDR USRSTACK
-
-#undef FLOAT_INFO	/* No float info yet */
-
-#define PTRACE_ARG3_TYPE char*
-
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-
-#define FETCH_INFERIOR_REGISTERS
-
-/* Thread ID of stopped thread.  */
-
-#define WIFTID(x) (((union wait *)&x)->w_tid)
-
-#define CHILD_WAIT
-
-extern int child_wait PARAMS ((int pid, int *status));
-
-#if 0 /* need a sparclynx-nat.c to define this */
-/* Lynx needs a special definition of this so that we can
-   print out the pid and thread number seperatly.  */
-
-#undef target_pid_to_str
-#define target_pid_to_str(PID) m68klynx_pid_to_str (PID)
-
-extern char *m68klynx_pid_to_str PARAMS ((int pid));
-#endif
+#include "nm-lynx.h"
 
 #endif /* NM_M68KLYNX_H */

@@ -1,4 +1,4 @@
-/* Macro definitions for Motorola 680x0 running under LynxOS.
+/* Macro definitions for LynxOS targets.
    Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,22 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef TM_M68KLYNX_H
-#define TM_M68KLYNX_H
+#ifndef TM_LYNX_H
+#define TM_LYNX_H
 
-#include "tm-lynx.h"
+/* Override number of expected traps from sysv. */
+#define START_INFERIOR_TRAPS_EXPECTED 2
 
-/* If PC-2 contains this instruction, then we know what we are in a system
-   call stub, and the return PC is is at SP+4, instead of SP. */
+#include "coff-solib.h"		/* COFF shared library support */
 
-#define SYSCALL_TRAP 0x4e4a	/* trap #10 */
-#define SYSCALL_TRAP_OFFSET 2	/* PC is after trap instruction */
-
-/* Use the generic 68k definitions. */
-
-#include "m68k/tm-m68k.h"
-
-/* Disable dumbshit alternate breakpoint mechanism needed by 68k stub. */
-#undef REMOTE_BREAKPOINT
-
-#endif /* TM_M68KLYNX_H */
+#endif /* TM_LYNX_H */

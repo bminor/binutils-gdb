@@ -33,6 +33,7 @@ i960
 m68k
 m88k
 mips
+nm-lynx.h
 nm-m3.h
 nm-sysv4.h
 nm-trash.h
@@ -45,6 +46,7 @@ rs6000
 sh
 sparc
 tahoe
+tm-lynx.h
 tm-sunos.h
 tm-sysv4.h
 vax

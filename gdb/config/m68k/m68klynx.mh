@@ -2,7 +2,7 @@
 XM_FILE= xm-m68klynx.h
 XDEPFILES=
 NAT_FILE= nm-m68klynx.h
-NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o m68kly-nat.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o lynx-nat.o
 REGEX=regex.o
 REGEX1=regex.o
 GDBSERVER_LIBS= -lbsd
