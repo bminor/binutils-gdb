@@ -351,10 +351,23 @@ mod_path (dirname, which_path)
 
       /* Unless it's a variable, check existence.  */
       if (name[0] != '$') {
+	/* These are warnings, not errors, since we don't want a
+	   non-existent directory in a .gdbinit file to stop processing
+	   of the .gdbinit file.
+
+	   Whether they get added to the path is more debatable.  Current
+	   answer is yes, in case the user wants to go make the directory
+	   or whatever.  If the directory continues to not exist/not be
+	   a directory/etc, then having them in the path should be
+	   harmless.  */
 	if (stat (name, &st) < 0)
-	  perror_with_name (name);
-	if ((st.st_mode & S_IFMT) != S_IFDIR)
-	  error ("%s is not a directory.", name);
+	  {
+	    int save_errno = errno;
+	    fprintf (stderr, "Warning: ");
+	    print_sys_errmsg (name, save_errno);
+	  }
+	else if ((st.st_mode & S_IFMT) != S_IFDIR)
+	  warning ("%s is not a directory.", name);
       }
 
     append:
@@ -788,8 +801,9 @@ identify_source_line (s, line, mid_statement, pc)
     get_filename_and_charpos (s, (char **)NULL);
   if (s->fullname == 0)
     return 0;
-  if (line >= s->nlines) 
-   return 0;
+  if (line > s->nlines)
+    /* Don't index off the end of the line_charpos array.  */
+    return 0;
   printf ("\032\032%s:%d:%d:%s:0x%x\n", s->fullname,
 	  line, s->line_charpos[line - 1],
 	  mid_statement ? "middle" : "beg",
@@ -1112,18 +1126,31 @@ line_info (arg, from_tty)
 	  && find_line_pc_range (sal.symtab, sal.line, &start_pc, &end_pc))
 	{
 	  if (start_pc == end_pc)
-	    printf_filtered ("Line %d of \"%s\" is at pc %s but contains no code.\n",
-			     sal.line, sal.symtab->filename, local_hex_string(start_pc));
+	    {
+	      printf_filtered ("Line %d of \"%s\"",
+			       sal.line, sal.symtab->filename);
+	      wrap_here ("  ");
+	      printf_filtered (" is at address ");
+	      print_address (start_pc, stdout);
+	      wrap_here ("  ");
+	      printf_filtered (" but contains no code.\n");
+	    }
 	  else
 	    {
-	      printf_filtered ("Line %d of \"%s\" starts at pc %s",
-			       sal.line, sal.symtab->filename, 
-			       local_hex_string(start_pc));
-	      printf_filtered (" and ends at %s.\n",
-			       local_hex_string(end_pc));
+	      printf_filtered ("Line %d of \"%s\"",
+			       sal.line, sal.symtab->filename);
+	      wrap_here ("  ");
+	      printf_filtered (" starts at address ");
+	      print_address (start_pc, stdout);
+	      wrap_here ("  ");
+	      printf_filtered (" and ends at ");
+	      print_address (end_pc, stdout);
+	      printf_filtered (".\n");
 	    }
+
 	  /* x/i should display this line's code.  */
 	  set_next_address (start_pc);
+
 	  /* Repeating "info line" should do the following line.  */
 	  last_line_listed = sal.line + 1;
 
@@ -1297,15 +1324,18 @@ reverse_search_command (regex, from_tty)
 void
 _initialize_source ()
 {
+  struct cmd_list_element *c;
   current_source_symtab = 0;
   init_source_path ();
 
-  add_com ("directory", class_files, directory_command,
+  c = add_cmd ("directory", class_files, directory_command,
 	   "Add directory DIR to beginning of search path for source files.\n\
 Forget cached info on source file locations and line positions.\n\
 DIR can also be $cwd for the current working directory, or $cdir for the\n\
 directory in which the source file was compiled into object code.\n\
-With no argument, reset the search path to $cdir:$cwd, the default.");
+With no argument, reset the search path to $cdir:$cwd, the default.",
+	       &cmdlist);
+  c->completer = filename_completer;
 
   add_cmd ("directories", no_class, show_directories,
 	   "Current search path for finding source files.\n\

@@ -1,5 +1,22 @@
 Sun Jul 11 19:35:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symtab.c (decode_line_1): Use end of block to figure out whether
+	val.end is in the same function, not minimal symbols.
+
+	* source.c (line_info): Add a few more wrap_here's.
+
+	* i386-tdep.c (i386_follow_jump): Do byteswapping where needed and
+	don't make assumptions about sizes of host data types.
+
+	* blockframe.c, symtab.h (find_pc_partial_function): New arg endaddr.
+	* infrun.c, breakpoint.c, printcmd.c: Change callers.
+	* printcmd.c (containing_function_bounds): Remove.
+	* printcmd.c (disassemble_command): Use find_pc_partial_function,
+	not containing_function_bounds.
+	* infcmd.c (step_1): Use find_pc_partial_function rather than
+	trying to roll our own.  Move check for a pc between SIGTRAMP_START and
+	SIGTRAMP_END in find_pc_partial_function, not step_1.
+
 	* sparc-tdep.c (sparc_frame_chain, frame_saved_pc):
 	Keep unswapped value in array of char, not REGISTER_TYPE.
 	Use REGISTER_RAW_SIZE not sizeof (REGISTER_TYPE).

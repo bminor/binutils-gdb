@@ -32,12 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "demangle.h"
 
-/* These are just for containing_function_bounds.  It might be better
-   to move containing_function_bounds to blockframe.c or thereabouts.  */
-#include "bfd.h"
-#include "symfile.h"
-#include "objfiles.h"
-
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
 
@@ -127,9 +121,6 @@ disable_display_command PARAMS ((char *, int));
 
 static void
 disassemble_command PARAMS ((char *, int));
-
-static int
-containing_function_bounds PARAMS ((CORE_ADDR, CORE_ADDR *, CORE_ADDR *));
 
 static void
 printf_command PARAMS ((char *, int));
@@ -1904,41 +1895,6 @@ printf_command (arg, from_tty)
   vprintf (string, args_to_vprintf);
 }
 
-/* Helper function for asdump_command.  Finds the bounds of a function
-   for a specified section of text.  PC is an address within the
-   function which you want bounds for; *LOW and *HIGH are set to the
-   beginning (inclusive) and end (exclusive) of the function.  This
-   function returns 1 on success and 0 on failure.  */
-
-static int
-containing_function_bounds (pc, low, high)
-     CORE_ADDR pc, *low, *high;
-{
-  CORE_ADDR scan;
-  CORE_ADDR limit;
-  struct obj_section *sec;
-
-  if (!find_pc_partial_function (pc, 0, low))
-    return 0;
-
-  sec = find_pc_section (pc);
-  if (sec == NULL)
-    return 0;
-  limit = sec->endaddr;
-  
-  scan = *low;
-  while (scan < limit)
-    {
-      ++scan;
-      if (!find_pc_partial_function (scan, 0, high))
-	return 0;
-      if (*low != *high)
-	return 1;
-    }
-  *high = limit;
-  return 1;
-}
-
 /* Dump a specified section of assembly code.  With no command line
    arguments, this command will dump the assembly code for the
    function surrounding the pc value in the selected frame.  With one
@@ -1953,24 +1909,26 @@ disassemble_command (arg, from_tty)
      int from_tty;
 {
   CORE_ADDR low, high;
+  char *name;
   CORE_ADDR pc;
   char *space_index;
 
+  name = NULL;
   if (!arg)
     {
       if (!selected_frame)
 	error ("No frame selected.\n");
 
       pc = get_frame_pc (selected_frame);
-      if (!containing_function_bounds (pc, &low, &high))
-	error ("No function contains pc specified by selected frame.\n");
+      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+	error ("No function contains program counter for selected frame.\n");
     }
   else if (!(space_index = (char *) strchr (arg, ' ')))
     {
       /* One argument.  */
       pc = parse_and_eval_address (arg);
-      if (!containing_function_bounds (pc, &low, &high))
-	error ("No function contains specified pc.\n");
+      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+	error ("No function contains specified address.\n");
     }
   else
     {
@@ -1981,10 +1939,8 @@ disassemble_command (arg, from_tty)
     }
 
   printf_filtered ("Dump of assembler code ");
-  if (!space_index)
+  if (name != NULL)
     {
-      char *name;
-      find_pc_partial_function (pc, &name, 0);
       printf_filtered ("for function %s:\n", name);
     }
   else

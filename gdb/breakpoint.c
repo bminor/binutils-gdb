@@ -852,7 +852,7 @@ within_scope (valid_block)
   static CORE_ADDR callee_func_start;
   static CORE_ADDR callee_prologue_end;
   
-  find_pc_partial_function (fi->pc, (PTR)NULL, &func_start);
+  find_pc_partial_function (fi->pc, (PTR)NULL, &func_start, (CORE_ADDR *)NULL);
   func_start += FUNCTION_START_OFFSET;
   if (fi->pc == func_start)
     {

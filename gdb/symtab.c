@@ -49,7 +49,7 @@ extern int
 find_methods PARAMS ((struct type *, char *, struct symbol **));
 
 static void
-completion_list_add_name PARAMS ((char *, char *, int));
+completion_list_add_name PARAMS ((char *, char *, int, char *, char *));
 
 static struct symtabs_and_lines
 decode_line_2 PARAMS ((struct symbol *[], int, int));
@@ -836,11 +836,13 @@ lookup_block_symbol (block, name, namespace)
 	    }
 	}
 
-      /* Now scan forward until we run out of symbols, find one whose name is
-	 greater than NAME, or find one we want.  If there is more than one
-	 symbol with the right name and namespace, we return the first one.
-	 dbxread.c is careful to make sure that if one is a register then it
-	 comes first.  */
+      /* Now scan forward until we run out of symbols, find one whose
+	 name is greater than NAME, or find one we want.  If there is
+	 more than one symbol with the right name and namespace, we
+	 return the first one; I believe it is now impossible for us
+	 to encounter two symbols with the same name and namespace
+	 here, because blocks containing argument symbols are no
+	 longer sorted.  */
 
       top = BLOCK_NSYMS (block);
       while (bot < top)
@@ -890,7 +892,8 @@ lookup_block_symbol (block, name, namespace)
 	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_REGPARM)
+		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
+		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR)
 		{
 		  break;
 		}
@@ -1592,7 +1595,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		    {
 		      warning ("no mangling for \"%s\"", tmp);
 		      cplusplus_hint (saved_arg);
-		      return_to_top_level ();
+		      return_to_top_level (RETURN_ERROR);
 		    }
 		  copy = (char*) alloca (3 + strlen(opname));
 		  sprintf (copy, "__%s", opname);
@@ -1682,7 +1685,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		    warning ("the class %s does not have any method named %s",
 			     SYMBOL_SOURCE_NAME(sym_class), tmp);
 		  cplusplus_hint (saved_arg);
-		  return_to_top_level ();
+		  return_to_top_level (RETURN_ERROR);
 		}
 	    }
 	  else
@@ -1691,7 +1694,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	      warning ("can't find class, struct, or union named \"%s\"",
 		       copy);
 	      cplusplus_hint (saved_arg);
-	      return_to_top_level ();
+	      return_to_top_level (RETURN_ERROR);
 	    }
 	}
       /*  end of C++  */
@@ -1821,15 +1824,17 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	  /* Convex: no need to suppress code on first line, if any */
 	  val.pc = pc;
 #else
-	  /* If SKIP_PROLOGUE left us in mid-line, and the next line is still
-	     part of the same function:
-		advance to next line, 
-	        recalculate its line number (might not be N+1).  */
-	  if (val.pc != pc && val.end &&
-	      lookup_minimal_symbol_by_pc (pc) == lookup_minimal_symbol_by_pc (val.end)) {
-	    pc = val.end;	/* First pc of next line */
-	    val = find_pc_line (pc, 0);
-	  }
+	  /* Check if SKIP_PROLOGUE left us in mid-line, and the next
+	     line is still part of the same function.  */
+	  if (val.pc != pc
+	      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= val.end
+	      && val.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
+	    {
+	      /* First pc of next line */
+	      pc = val.end;
+	      /* Recalculate the line number (might not be N+1).  */
+	      val = find_pc_line (pc, 0);
+	    }
 	  val.pc = pc;
 #endif
 	  values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
@@ -1859,6 +1864,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       else
 	/* This can happen if it is compiled with a compiler which doesn't
 	   put out line numbers for variables.  */
+	/* FIXME: Shouldn't we just set .line and .symtab to zero and
+	   return?  For example, "info line foo" could print the address.  */
 	error ("Line number not known for symbol \"%s\"", copy);
     }
 
@@ -2450,29 +2457,33 @@ static int return_val_size;
 static int return_val_index;
 static char **return_val;
 
-#define COMPLETION_LIST_ADD_SYMBOL(symbol, text, len) \
+#define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
   do { \
-    completion_list_add_name (SYMBOL_NAME (symbol), text, len); \
-      if (SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
-      completion_list_add_name (SYMBOL_DEMANGLED_NAME (symbol), text, len); \
+    completion_list_add_name (SYMBOL_NAME (symbol), (sym_text), (len), \
+			      (text), (word)); \
+    if (SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
+      completion_list_add_name \
+	(SYMBOL_DEMANGLED_NAME (symbol), (sym_text), (len), (text), (word)); \
   } while (0)
 
 /*  Test to see if the symbol specified by SYMNAME (which is already
-    demangled for C++ symbols) matches TEXT in the first TEXT_LEN
+    demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
     characters.  If so, add it to the current completion list. */
 
 static void
-completion_list_add_name (symname, text, text_len)
+completion_list_add_name (symname, sym_text, sym_text_len, text, word)
      char *symname;
+     char *sym_text;
+     int sym_text_len;
      char *text;
-     int text_len;
+     char *word;
 {
   int newsize;
   int i;
 
   /* clip symbols that cannot match */
 
-  if (strncmp (symname, text, text_len) != 0)
+  if (strncmp (symname, sym_text, sym_text_len) != 0)
     {
       return;
     }
@@ -2491,14 +2502,36 @@ completion_list_add_name (symname, text, text_len)
   /* We have a match for a completion, so add SYMNAME to the current list
      of matches. Note that the name is moved to freshly malloc'd space. */
 
-  symname = savestring (symname, strlen (symname));
-  if (return_val_index + 3 > return_val_size)
-    {
-      newsize = (return_val_size *= 2) * sizeof (char *);
-      return_val = (char **) xrealloc ((char *) return_val, newsize);
-    }
-  return_val[return_val_index++] = symname;
-  return_val[return_val_index] = NULL;
+  {
+    char *new;
+    if (word == sym_text)
+      {
+	new = xmalloc (strlen (symname) + 5);
+	strcpy (new, symname);
+      }
+    else if (word > sym_text)
+      {
+	/* Return some portion of symname.  */
+	new = xmalloc (strlen (symname) + 5);
+	strcpy (new, symname + (word - sym_text));
+      }
+    else
+      {
+	/* Return some of SYM_TEXT plus symname.  */
+	new = xmalloc (strlen (symname) + (sym_text - word) + 5);
+	strncpy (new, word, sym_text - word);
+	new[sym_text - word] = '\0';
+	strcat (new, symname);
+      }
+
+    if (return_val_index + 3 > return_val_size)
+      {
+	newsize = (return_val_size *= 2) * sizeof (char *);
+	return_val = (char **) xrealloc ((char *) return_val, newsize);
+      }
+    return_val[return_val_index++] = new;
+    return_val[return_val_index] = NULL;
+  }
 }
 
 /* Return a NULL terminated array of all symbols (regardless of class) which
@@ -2509,8 +2542,9 @@ completion_list_add_name (symname, text, text_len)
    I'm not going to worry about this; hopefully there won't be that many.  */
 
 char **
-make_symbol_completion_list (text)
-  char *text;
+make_symbol_completion_list (text, word)
+     char *text;
+     char *word;
 {
   register struct symbol *sym;
   register struct symtab *s;
@@ -2519,17 +2553,70 @@ make_symbol_completion_list (text)
   register struct objfile *objfile;
   register struct block *b, *surrounding_static_block = 0;
   register int i, j;
-  int text_len;
   struct partial_symbol *psym;
+  /* The symbol we are completing on.  Points in same buffer as text.  */
+  char *sym_text;
+  /* Length of sym_text.  */
+  int sym_text_len;
 
-  text_len = strlen (text);
+  /* Now look for the symbol we are supposed to complete on.
+     FIXME: This should be language-specific.  */
+  {
+    char *p;
+    char quote_found;
+    char *quote_pos;
+
+    /* First see if this is a quoted string.  */
+    quote_found = '\0';
+    for (p = text; *p != '\0'; ++p)
+      {
+	if (quote_found != '\0')
+	  {
+	    if (*p == quote_found)
+	      /* Found close quote.  */
+	      quote_found = '\0';
+	    else if (*p == '\\' && p[1] == quote_found)
+	      /* A backslash followed by the quote character
+		 doesn't end the string.  */
+	      ++p;
+	  }
+	else if (*p == '\'' || *p == '"')
+	  {
+	    quote_found = *p;
+	    quote_pos = p;
+	  }
+      }
+    if (quote_found == '\'')
+      /* A string within single quotes can be a symbol, so complete on it.  */
+      sym_text = quote_pos + 1;
+    else if (quote_found == '"')
+      /* A double-quoted string is never a symbol, nor does it make sense
+	 to complete it any other way.  */
+      return NULL;
+    else
+      {
+	/* It is not a quoted string.  Break it based on the characters
+	   which are in symbols.  */
+	while (p > text)
+	  {
+	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0')
+	      --p;
+	    else
+	      break;
+	  }
+	sym_text = p;
+      }
+  }
+
+  sym_text_len = strlen (sym_text);
+
   return_val_size = 100;
   return_val_index = 0;
   return_val = (char **) xmalloc ((return_val_size + 1) * sizeof (char *));
   return_val[0] = NULL;
 
   /* Look through the partial symtabs for all symbols which begin
-     by matching TEXT.  Add each one that you find to the list.  */
+     by matching SYM_TEXT.  Add each one that you find to the list.  */
 
   ALL_PSYMTABS (objfile, ps)
     {
@@ -2544,7 +2631,7 @@ make_symbol_completion_list (text)
 	{
 	  /* If interrupted, then quit. */
 	  QUIT;
-	  COMPLETION_LIST_ADD_SYMBOL (psym, text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (psym, sym_text, sym_text_len, text, word);
 	}
       
       for (psym = objfile->static_psymbols.list + ps->statics_offset;
@@ -2553,7 +2640,7 @@ make_symbol_completion_list (text)
 	   psym++)
 	{
 	  QUIT;
-	  COMPLETION_LIST_ADD_SYMBOL (psym, text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (psym, sym_text, sym_text_len, text, word);
 	}
     }
 
@@ -2565,7 +2652,7 @@ make_symbol_completion_list (text)
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      COMPLETION_LIST_ADD_SYMBOL (msymbol, text, text_len);
+      COMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text, word);
     }
 
   /* Search upwards from currently selected frame (so that we can
@@ -2584,7 +2671,7 @@ make_symbol_completion_list (text)
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	{
 	  sym = BLOCK_SYM (b, i);
-	  COMPLETION_LIST_ADD_SYMBOL (sym, text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
 	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	    {
 	      struct type *t = SYMBOL_TYPE (sym);
@@ -2597,7 +2684,7 @@ make_symbol_completion_list (text)
 		      if (TYPE_FIELD_NAME (t, j))
 			{
 			  completion_list_add_name (TYPE_FIELD_NAME (t, j),
-						      text, text_len);
+						      sym_text, sym_text_len, text, word);
 			}
 		    }
 		}
@@ -2615,7 +2702,7 @@ make_symbol_completion_list (text)
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	{
 	  sym = BLOCK_SYM (b, i);
-	  COMPLETION_LIST_ADD_SYMBOL (sym, text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
 	}
     }
 
@@ -2628,7 +2715,7 @@ make_symbol_completion_list (text)
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	{
 	  sym = BLOCK_SYM (b, i);
-	  COMPLETION_LIST_ADD_SYMBOL (sym, text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
 	}
     }
 

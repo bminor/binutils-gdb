@@ -938,8 +938,8 @@ block_function PARAMS ((struct block *));
 extern struct symbol *
 find_pc_function PARAMS ((CORE_ADDR));
 
-extern int
-find_pc_partial_function PARAMS ((CORE_ADDR, char **, CORE_ADDR *));
+extern int find_pc_partial_function
+  PARAMS ((CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *));
 
 extern void
 clear_pc_function_cache PARAMS ((void));
