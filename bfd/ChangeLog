@@ -1,5 +1,9 @@
 Thu Mar 20 12:39:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* binary.c (binary_set_section_contents): Don't get misled if the
+ 	first section is not loadable.  From Matthew L. Martin
+ 	<mlm@xedia.com>.
+
 	* elflink.h (elf_bfd_final_link): Set the value of a section
 	symbol to the section address unless doing a relocateable link.
 
