@@ -1,3 +1,10 @@
+2001-02-14  Philip Blundell  <pb@futuretv.com>
+
+	From 2001-02-08  H.J. Lu  <hjl@gnu.org>
+	* elf32-i386.c (elf_i386_check_relocs): Reserve R_386_32
+	relocation entries for weak definitions when building DSO with
+	-Bsymbolic.
+
 2001-02-13  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_final_link): Set __gp if required
