@@ -1,3 +1,9 @@
+Thu Oct 16 11:03:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-semantics.c (print_semantic_body): Use CIA not
+ 	cia.ip. Escape newlines at end of generated call to
+ 	sim_engine_abort.
+
 Tue Oct 14 11:13:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (print_itrace): Output line-ref to igen source file when
