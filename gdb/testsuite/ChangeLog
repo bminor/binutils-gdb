@@ -1,5 +1,7 @@
 Thu Nov  4 23:07:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.stabs/weird.exp, gdb.t22/virtfunc.exp: Accept "_vb." as well as
+	"_vb$".
 	* gdb.t00/teststrategy.exp: Add xfail for RS/6000.
 	* gdb.t03/ptype.exp: Add comments and messages about FAILs with xlc.
 
