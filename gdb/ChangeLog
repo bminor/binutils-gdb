@@ -1,3 +1,10 @@
+2004-05-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* sol-thread.c Update copyright year.  Fix various coding
+	standards violations.  Tweak a few comments.
+	(td_err_string, td_state_string, thread_to_lwp, lwp_to_thread):
+	Delete prototypes.
+
 2004-05-15  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.h (hppa_frame_prev_register_helper): Pass save_regs
