@@ -1,5 +1,10 @@
 2003-03-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-tdep.c (find_minsym_and_objfile): Replace usage of
+	DEPRECATED_SYMBOL_NAME with SYMBOL_LINKAGE_NAME.
+
+2003-03-01  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-linux-tdep.c (find_minsym_and_objfile): Use strcmp instead
 	of STREQ.
 
