@@ -1,3 +1,11 @@
+Wed Jan 28 14:35:00 1998  Bill Moyer <billm@cygnus.com>
+
+	* as.h (flag_warn_suppress_instructionswap): added new flag.
+	* tc-d10v.c (md_parse_option,md_longopts): added "--nowarnswap" 
+	command line argument.
+	* tc-d10v.c (write_2_short): emit "Swapping instructions"
+	warning only if flag_warn_suppress_instructionswap is false.
+
 Wed Jan 28 16:41:19 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwente.nl>
 
 	* configure.in (i386-*-mingw32*): New target.
@@ -20,13 +28,6 @@ Wed Jan 28 13:54:50 1998  Pat Rankin  <rankin@eql.caltech.edu>
 Wed Jan 28 13:48:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.h (RESOLVE_SYMBOL_REDEFINITION): Define.
-
-Fri Jan 28 10:18:06 1998  Bill Moyer <billm@cygnus.com>
-	 
-	* as.h (flag_warn_instructionswap): added new flag variable.
-	* as.c (parse_args): added "--nowarnswap" command line arg.
-	* tc-d10v.c (write_2_short): emit "Swapping instructions"
-	warning only if flag_warn_instructionswap is set.
 
 start-sanitize-sky
 Wed Jan 28 10:00:40 1998  Doug Evans  <devans@canuck.cygnus.com>

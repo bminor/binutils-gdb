@@ -356,9 +356,7 @@ parse_args (pargc, pargv)
 #define OPTION_GSTABS (OPTION_STD_BASE + 14)
     {"gstabs", no_argument, NULL, OPTION_GSTABS},
 #define OPTION_STRIP_LOCAL_ABSOLUTE (OPTION_STD_BASE + 15)
-    {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE},
-#define OPTION_NOWARNSWAP (OPTION_STD_BASE + 16)
-    {"nowarnswap", no_argument, NULL, OPTION_NOWARNSWAP}
+    {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
   };
 
   /* Construct the option lists from the standard list and the
@@ -535,10 +533,6 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 	  debug_type = DEBUG_STABS;
 	  break;
  
-        case OPTION_NOWARNSWAP:
-          flag_warn_instructionswap = 0;
-          break;
-
 	case 'J':
 	  flag_signed_overflow_ok = 1;
 	  break;
@@ -708,7 +702,6 @@ main (argc, argv)
 #endif
 
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
-  flag_warn_instructionswap = 1;
 
   hex_init ();
 #ifdef BFD_ASSEMBLER
