@@ -36,7 +36,7 @@ SECTION
 #include "bfdlink.h"
 #include "libbfd.h"
 #define ARCH_SIZE 0
-#include "libelf.h"
+#include "elf-bfd.h"
 
 static file_ptr map_program_segments PARAMS ((bfd *, file_ptr,
 					      Elf_Internal_Shdr *,

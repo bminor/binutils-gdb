@@ -44,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
 #define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
-#if 0 /* done in libelf.h */
+#if 0 /* done in elf-bfd.h */
 #define bfd_elfNN_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
 #endif
 #define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol
@@ -64,6 +64,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #ifndef elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym 0
+#endif
+
+#ifndef elf_backend_want_hdr_in_seg
+#define elf_backend_want_hdr_in_seg 0
 #endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
@@ -206,6 +210,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_final_write_processing
 #define elf_backend_final_write_processing	0
 #endif
+#ifndef elf_backend_create_program_headers
+#define elf_backend_create_program_headers	0
+#endif
 #ifndef elf_backend_ecoff_debug_swap
 #define elf_backend_ecoff_debug_swap	0
 #endif
@@ -252,6 +259,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_finish_dynamic_sections,
   elf_backend_begin_write_processing,
   elf_backend_final_write_processing,
+  elf_backend_create_program_headers,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
@@ -259,6 +267,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_want_got_plt,
   elf_backend_plt_readonly,
   elf_backend_want_plt_sym,
+  elf_backend_want_hdr_in_seg,
 };
 
 #ifdef TARGET_BIG_SYM
@@ -298,10 +307,6 @@ const bfd_target TARGET_BIG_SYM =
      of the archiver and should be independently tunable.  This value is
      a WAG (wild a** guess) */
   14,
-
-  /* align_power_min: minimum alignment restriction for any section
-     FIXME:  this value may be target machine dependent */
-  3,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
@@ -386,10 +391,6 @@ const bfd_target TARGET_LITTLE_SYM =
      of the archiver and should be independently tunable.  This value is
      a WAG (wild a** guess) */
   14,
-
-  /* align_power_min: minimum alignment restriction for any section
-     FIXME:  this value may be target machine dependent */
-  3,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,

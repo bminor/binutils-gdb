@@ -1,3 +1,15 @@
+Tue Oct 31 12:52:02 1995  Fred Fish  <fnf@cygnus.com>
+
+	* libelf.h:  Rename to elf-bfd.h to avoid conflict with
+	systems that have a system <libelf.h>.
+	* Makefile.in: Globally replace libelf.h with elf-bfd.h.
+	* bfd.c, elf.c, elf32-arc.c, elf32-gen.c, elf32-hppa.c,
+	elf32-hppa.h, elf32-i386.c, elf32-i860.c, elf32-m68k.c,
+	elf32-m88k.c, elf32-mips.c, elf32-ppc.c, elf32-sparc.c,
+	elf64-gen.c, elf64-sparc.c, elfcode.h, elflink.c,
+	elfxx-target.h: Include elf-bfd.h rather than libelf.h.
+	* elfxx-target.h: Change libelf.h reference to elf-bfd.h.
+
 Tue Oct 31 15:30:07 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* ecoff.c (ecoff_set_symbol_info): Add new parameter weak.  If

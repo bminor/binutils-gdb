@@ -287,7 +287,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
 	 coffswap.h ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
 	 elfcode.h hppa_stubs.h libaout.h libbfd.h \
-	 libcoff.h libecoff.h libelf.h libhppa.h libieee.h libnlm.h \
+	 libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h libnlm.h \
 	 liboasys.h nlm-target.h nlmcode.h som.h genlink.h netbsd.h
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
@@ -559,7 +559,7 @@ bfd.ps:
 	(cd $(docdir); $(MAKE) bfd.ps $(FLAGS_TO_PASS))
 
 start-sanitize-arc:
-elf32-arc.o: elf32-arc.c libelf.h $(INCDIR)/elf/common.h \
+elf32-arc.o: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h elf32-target.h
 end-sanitize-arc:
@@ -573,7 +573,7 @@ libbfd.o: libbfd.c
 opncls.o: opncls.c
 bfd.o: bfd.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
-  libelf.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h
 archive.o: archive.c $(INCDIR)/aout/ar.h $(INCDIR)/aout/ranlib.h
 targets.o: targets.c
@@ -707,51 +707,51 @@ mipsbsd.o: mipsbsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 cpu-sh.o: cpu-sh.c
-elf.o: elf.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
+elf.o: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
-elflink.o: elflink.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
+elflink.o: elflink.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
-elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h libelf.h \
+elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elfcore.h elflink.h
-elf32-sparc.o: elf32-sparc.c $(INCDIR)/bfdlink.h libelf.h \
+elf32-sparc.o: elf32-sparc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
-elf32-i386.o: elf32-i386.c $(INCDIR)/bfdlink.h libelf.h \
+elf32-i386.o: elf32-i386.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
-elf32-i860.o: elf32-i860.c libelf.h $(INCDIR)/elf/common.h \
+elf32-i860.o: elf32-i860.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
-elf32-m68k.o: elf32-m68k.c $(INCDIR)/bfdlink.h libelf.h \
+elf32-m68k.o: elf32-m68k.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
-elf32-hppa.o: elf32-hppa.c $(INCDIR)/bfdlink.h libelf.h \
+elf32-hppa.o: elf32-hppa.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-hppa.h libhppa.h $(INCDIR)/elf/hppa.h hppa_stubs.h \
   elf32-target.h
-elf32-m88k.o: elf32-m88k.c libelf.h $(INCDIR)/elf/common.h \
+elf32-m88k.o: elf32-m88k.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
 elf32-mips.o: elf32-mips.c $(INCDIR)/bfdlink.h genlink.h \
-  libelf.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/mips.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h ecoffswap.h \
   elf32-target.h
-elf32-gen.o: elf32-gen.c libelf.h $(INCDIR)/elf/common.h \
+elf32-gen.o: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
-elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h libelf.h \
+elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/ppc.h elf32-target.h
-elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h libelf.h \
+elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elfcore.h elflink.h
-elf64-gen.o: elf64-gen.c libelf.h $(INCDIR)/elf/common.h \
+elf64-gen.o: elf64-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf64-target.h
-elf64-sparc.o: elf64-sparc.c libelf.h $(INCDIR)/elf/common.h \
+elf64-sparc.o: elf64-sparc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf64-target.h
 nlm.o: nlm.c libnlm.h $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \

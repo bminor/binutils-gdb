@@ -68,7 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libbfd.h"
-#include "libelf.h"
+#include "elf-bfd.h"
 
 /* Renaming structures, typedefs, macros and functions to be size-specific.  */
 #define Elf_External_Ehdr	NAME(Elf,External_Ehdr)
@@ -646,7 +646,7 @@ write_relocs (abfd, sec, data)
   Elf_Internal_Shdr *rela_hdr;
   Elf_External_Rela *outbound_relocas;
   Elf_External_Rel *outbound_relocs;
-  int idx;
+  unsigned int idx;
   int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
   asymbol *last_sym = 0;
   int last_sym_idx = 9999999;	/* should always be written before use */

@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "bfdlink.h"
 #include "genlink.h"
-#include "libelf.h"
+#include "elf-bfd.h"
 #include "elf/mips.h"
 
 /* Get the ECOFF swapping routines.  */
@@ -882,7 +882,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-  int i;
+  unsigned int i;
 
   for (i = 0; i < sizeof (mips_reloc_map) / sizeof (struct elf_reloc_map); i++)
     {
@@ -1352,7 +1352,7 @@ mips_elf_symbol_processing (abfd, asym)
 	{
 	  /* Initialize the acommon section.  */
 	  mips_elf_acom_section.name = ".acommon";
-	  mips_elf_acom_section.flags = SEC_NO_FLAGS;
+	  mips_elf_acom_section.flags = SEC_ALLOC;
 	  mips_elf_acom_section.output_section = &mips_elf_acom_section;
 	  mips_elf_acom_section.symbol = &mips_elf_acom_symbol;
 	  mips_elf_acom_section.symbol_ptr_ptr = &mips_elf_acom_symbol_ptr;
@@ -1526,9 +1526,17 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
   msec = bfd_get_section_by_name (abfd, ".mdebug");
   if (msec != NULL)
     {
+      flagword origflags;
       struct mips_elf_find_line *fi;
       const struct ecoff_debug_swap * const swap =
 	get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+
+      /* If we are called during a link, mips_elf_final_link may have
+	 cleared the SEC_HAS_CONTENTS field.  We force it back on here
+	 if appropriate (which it normally will be).  */
+      origflags = msec->flags;
+      if (elf_section_data (msec)->this_hdr.sh_type != SHT_NOBITS)
+	msec->flags |= SEC_HAS_CONTENTS;
 
       fi = elf_tdata (abfd)->find_line_info;
       if (fi == NULL)
@@ -1543,13 +1551,17 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	  if (fi == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
+	      msec->flags = origflags;
 	      return false;
 	    }
 
 	  memset (fi, 0, sizeof (struct mips_elf_find_line));
 
 	  if (! mips_elf_read_ecoff_info (abfd, msec, &fi->d))
-	    return false;
+	    {
+	      msec->flags = origflags;
+	      return false;
+	    }
 
 	  /* Swap in the FDR information.  */
 	  fi->d.fdr = ((struct fdr *)
@@ -1559,6 +1571,7 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	  if (fi->d.fdr == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
+	      msec->flags = origflags;
 	      return false;
 	    }
 	  external_fdr_size = swap->external_fdr_size;
@@ -1582,7 +1595,12 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
       if (_bfd_ecoff_locate_line (abfd, section, offset, &fi->d, swap,
 				  &fi->i, filename_ptr, functionname_ptr,
 				  line_ptr))
-	return true;
+	{
+	  msec->flags = origflags;
+	  return true;
+	}
+
+      msec->flags = origflags;
     }
 
   /* Fall back on the generic ELF find_nearest_line routine.  */
@@ -2525,7 +2543,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     {
       int r_type;
       reloc_howto_type *howto;
-      long r_symndx;
+      unsigned long r_symndx;
       bfd_vma addend;
       struct elf_link_hash_entry *h;
       asection *sec;

@@ -130,6 +130,7 @@ doc
 ecoff.c
 ecofflink.c
 ecoffswap.h
+elf-bfd.h
 elf.c
 elf32-gen.c
 elf32-hppa.c
@@ -181,7 +182,6 @@ libbfd.h
 libcoff-in.h
 libcoff.h
 libecoff.h
-libelf.h
 libhppa.h
 libieee.h
 libnlm.h
