@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Jan 23 01:45:52 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* gas/txvu/br-1.[sd]: New testcase.
+	* gas/txvu/upper-1.[sd]: New testcase.
+
+end-sanitize-sky
 Thu Jan 22 17:29:07 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/high-1.d: Add hash prefix to constants.
