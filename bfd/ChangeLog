@@ -1,3 +1,9 @@
+2004-06-17  Jerome Guitton  <guitton@gnat.com>
+
+	* bfd-in.h (bfd_cache_close_all): New function declaration.
+	* bfd-in2.h: Regenerate.
+	* cache.c (bfd_cache_close_all): New function definition.
+
 2004-06-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Don't set COREFILE to trad-core.lo for FreeBSD
