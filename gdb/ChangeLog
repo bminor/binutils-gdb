@@ -1,3 +1,12 @@
+2003-11-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (offreg, basereg, isderef, frame_base_reg)
+	(frame_base_offset): Delete.
+	(read_func_scope): Delete call to decode_locdesc.
+	(decode_locdesc): Update comments.  Don't set the removed variables.
+	Complain for DW_OP_reg* not at the end.  Remove DW_OP_breg* and
+	DW_OP_fbreg support.
+
 2003-11-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (optimized_out, islocal): Remove.

@@ -446,20 +446,6 @@ static struct pending **list_in_scope = &file_symbols;
 static int isreg;		/* Object lives in register.
 				   decode_locdesc's return value is
 				   the register number.  */
-static int offreg;		/* Object's address is the sum of the
-				   register specified by basereg, plus
-				   the offset returned.  */
-static int basereg;		/* See `offreg'.  */
-static int isderef;		/* Value described by flags above is
-				   the address of a pointer to the object.  */
-
-/* DW_AT_frame_base values for the current function.
-   frame_base_reg is -1 if DW_AT_frame_base is missing, otherwise it
-   contains the register number for the frame register.
-   frame_base_offset is the offset from the frame register to the
-   virtual stack frame. */
-static int frame_base_reg;
-static CORE_ADDR frame_base_offset;
 
 /* This value is added to each symbol value.  FIXME:  Generalize to
    the section_offsets structure used by dbxread (once this is done,
@@ -2149,50 +2135,12 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       objfile->ei.entry_func_highpc = highpc;
     }
 
-  /* Decode DW_AT_frame_base location descriptor if present, keep result
-     for DW_OP_fbreg operands in decode_locdesc.  */
-  frame_base_reg = -1;
-  frame_base_offset = 0;
-  attr = dwarf_attr (die, DW_AT_frame_base);
-  if (attr)
-    {
-      CORE_ADDR addr;
-
-      /* Support the .debug_loc offsets */
-      if (attr_form_is_block (attr))
-        {
-          addr = decode_locdesc (DW_BLOCK (attr), cu);
-        }
-      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
-        {
-	  dwarf2_complex_location_expr_complaint ();
-          addr = 0;
-        }
-      else
-        {
-	  dwarf2_invalid_attrib_class_complaint ("DW_AT_frame_base", name);
-          addr = 0;
-        }
-    
-      if (isderef)
-	dwarf2_unsupported_at_frame_base_complaint (name);
-      else if (isreg)
-	frame_base_reg = addr;
-      else if (offreg)
-	{
-	  frame_base_reg = basereg;
-	  frame_base_offset = addr;
-	}
-      else
-	dwarf2_unsupported_at_frame_base_complaint (name);
-    }
-
   new = push_context (0, lowpc);
   new->name = new_symbol (die, die->type, cu);
 
-  /* If there was a location expression for DW_AT_frame_base above,
-     record it.  We still need to decode it above because not all
-     symbols use location expressions exclusively.  */
+  /* If there is a location expression for DW_AT_frame_base, record
+     it.  */
+  attr = dwarf_attr (die, DW_AT_frame_base);
   if (attr)
     dwarf2_symbol_mark_computed (attr, new->name, cu);
 
@@ -6876,26 +6824,23 @@ dwarf2_fundamental_type (struct objfile *objfile, int typeid)
    Given a pointer to a dwarf block that defines a location, compute
    the location and return the value.
 
-   FIXME: This is a kludge until we figure out a better
-   way to handle the location descriptions.
-   Gdb's design does not mesh well with the DWARF2 notion of a location
-   computing interpreter, which is a shame because the flexibility goes unused.
-   FIXME: Implement more operations as necessary.
+   NOTE drow/2003-11-18: This function is called in two situations
+   now: for the address of static or global variables (partial symbols
+   only) and for offsets into structures which are expected to be
+   (more or less) constant.  The partial symbol case should go away,
+   and only the constant case should remain.  That will let this
+   function complain more accurately.  A few special modes are allowed
+   without complaint for global variables (for instance, global
+   register values and thread-local values).
 
    A location description containing no operations indicates that the
-   object is optimized out.  The return value is meaningless for that case.
+   object is optimized out.  The return value is 0 for that case.
    FIXME drow/2003-11-16: No callers check for this case any more; soon all
    callers will only want a very basic result and this can become a
    complaint.
 
    When the result is a register number, the global isreg flag is set,
    otherwise it is cleared.
-
-   When the result is a base register offset, the global offreg flag is set
-   and the register number is returned in basereg, otherwise it is cleared.
-
-   When the DW_OP_fbreg operation is encountered without a corresponding
-   DW_AT_frame_base attribute, we complain.
 
    Note that stack[0] is unused except as a default error return.
    Note that stack overflow is not yet handled.  */
@@ -6917,8 +6862,6 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
   stacki = 0;
   stack[stacki] = 0;
   isreg = 0;
-  offreg = 0;
-  isderef = 0;
 
   while (i < size)
     {
@@ -6994,6 +6937,8 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	case DW_OP_reg31:
 	  isreg = 1;
 	  stack[++stacki] = op - DW_OP_reg0;
+	  if (i < size)
+	    dwarf2_complex_location_expr_complaint ();
 	  break;
 
 	case DW_OP_regx:
@@ -7001,68 +6946,8 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  unsnd = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
 	  i += bytes_read;
 	  stack[++stacki] = unsnd;
-	  break;
-
-	case DW_OP_breg0:
-	case DW_OP_breg1:
-	case DW_OP_breg2:
-	case DW_OP_breg3:
-	case DW_OP_breg4:
-	case DW_OP_breg5:
-	case DW_OP_breg6:
-	case DW_OP_breg7:
-	case DW_OP_breg8:
-	case DW_OP_breg9:
-	case DW_OP_breg10:
-	case DW_OP_breg11:
-	case DW_OP_breg12:
-	case DW_OP_breg13:
-	case DW_OP_breg14:
-	case DW_OP_breg15:
-	case DW_OP_breg16:
-	case DW_OP_breg17:
-	case DW_OP_breg18:
-	case DW_OP_breg19:
-	case DW_OP_breg20:
-	case DW_OP_breg21:
-	case DW_OP_breg22:
-	case DW_OP_breg23:
-	case DW_OP_breg24:
-	case DW_OP_breg25:
-	case DW_OP_breg26:
-	case DW_OP_breg27:
-	case DW_OP_breg28:
-	case DW_OP_breg29:
-	case DW_OP_breg30:
-	case DW_OP_breg31:
-	  offreg = 1;
-	  basereg = op - DW_OP_breg0;
-	  stack[++stacki] = read_signed_leb128 (NULL, (data + i), &bytes_read);
-	  i += bytes_read;
-	  break;
-
-	case DW_OP_bregx:
-	  offreg = 1;
-	  basereg = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
-	  i += bytes_read;
-	  stack[++stacki] = read_signed_leb128 (NULL, (data + i), &bytes_read);
-	  i += bytes_read;
-	  break;
-
-	case DW_OP_fbreg:
-	  stack[++stacki] = read_signed_leb128 (NULL, (data + i), &bytes_read);
-	  i += bytes_read;
-	  if (frame_base_reg >= 0)
-	    {
-	      offreg = 1;
-	      basereg = frame_base_reg;
-	      stack[stacki] += frame_base_offset;
-	    }
-	  else
-	    {
-	      complaint (&symfile_complaints,
-			 "DW_AT_frame_base missing for DW_OP_fbreg");
-	    }
+	  if (i < size)
+	    dwarf2_complex_location_expr_complaint ();
 	  break;
 
 	case DW_OP_addr:
@@ -7133,9 +7018,10 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  break;
 
 	case DW_OP_deref:
-	  isderef = 1;
 	  /* If we're not the last op, then we definitely can't encode
-	     this using GDB's address_class enum.  */
+	     this using GDB's address_class enum.  This is valid for partial
+	     global symbols, although the variable's address will be bogus
+	     in the psymtab.  */
 	  if (i < size)
 	    dwarf2_complex_location_expr_complaint ();
 	  break;
@@ -7145,6 +7031,8 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	     of the thread control block at which the variable is located.  */
 	  /* Nothing should follow this operator, so the top of stack would
 	     be returned.  */
+	  /* This is valid for partial global symbols, but the variable's
+	     address will be bogus in the psymtab.  */
 	  if (i < size)
 	    dwarf2_complex_location_expr_complaint ();
           break;
