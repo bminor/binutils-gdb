@@ -132,7 +132,7 @@ static int make_import_fixup PARAMS ((arelent *, asection *));
 static void pe_find_data_imports PARAMS ((void));
 #endif
 
-static bfd_boolean pr_sym PARAMS ((struct bfd_hash_entry *, PTR string));
+static bfd_boolean pr_sym PARAMS ((struct bfd_hash_entry *, PTR));
 static bfd_boolean gld_${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
 static bfd_boolean gld_${EMULATION_NAME}_recognized_file
@@ -148,7 +148,7 @@ static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
 
 #ifdef DLL_SUPPORT
-static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
+static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
 static char *pe_out_def_filename = NULL;
 static char *pe_implib_filename = NULL;
 static int pe_enable_auto_image_base = 0;
@@ -188,7 +188,7 @@ gld_${EMULATION_NAME}_before_parse()
 
 /* PE format extra command line options.  */
 
-/* Used for setting flags in the PE header. */
+/* Used for setting flags in the PE header.  */
 #define OPTION_BASE_FILE		(300  + 1)
 #define OPTION_DLL			(OPTION_BASE_FILE + 1)
 #define OPTION_FILE_ALIGNMENT		(OPTION_DLL + 1)
@@ -279,7 +279,7 @@ static struct option longopts[] = {
 
 
 /* PE/WIN32; added routines to get the subsystem type, heap and/or stack
-   parameters which may be input from the command line */
+   parameters which may be input from the command line.  */
 
 typedef struct
 {
@@ -319,6 +319,7 @@ static definfo init[] =
   D(LoaderFlags,"__loader_flags__", 0x0),
   { NULL, 0, 0, NULL, 0 }
 };
+
 
 static void
 gld_${EMULATION_NAME}_list_options (file)
@@ -371,13 +372,15 @@ gld_${EMULATION_NAME}_list_options (file)
 #endif
 }
 
+
 static void
 set_pe_name (name, val)
      char *name;
      long val;
 {
   int i;
-  /* Find the name and set it. */
+
+  /* Find the name and set it.  */
   for (i = 0; init[i].ptr; i++)
     {
       if (strcmp (name, init[i].symbol) == 0)
@@ -475,7 +478,6 @@ set_pe_subsystem ()
 }
 
 
-
 static void
 set_pe_value (name)
      char *name;
@@ -490,6 +492,7 @@ set_pe_value (name)
 
   optarg = end;
 }
+
 
 static void
 set_pe_stack_heap (resname, comname)
@@ -506,7 +509,6 @@ set_pe_stack_heap (resname, comname)
   else if (*optarg)
     einfo (_("%P%F: strange hex info for PE parameter '%s'\n"), optarg);
 }
-
 
 
 static int
@@ -549,7 +551,7 @@ gld_${EMULATION_NAME}_parse_args (argc, argv)
 	}
       break;
 
-      /* PE options */
+      /* PE options.  */
     case OPTION_HEAP:
       set_pe_stack_heap ("__size_of_heap_reserve__", "__size_of_heap_commit__");
       break;
@@ -686,7 +688,8 @@ strhash (const char *str)
   return hash;
 }
 
-/* Use the output file to create a image base for relocatable DLLs. */
+/* Use the output file to create a image base for relocatable DLLs.  */
+
 static unsigned long
 compute_dll_image_base (const char *ofile)
 {
@@ -702,7 +705,7 @@ static void
 gld_${EMULATION_NAME}_set_symbols ()
 {
   /* Run through and invent symbols for all the
-     names and insert the defaults. */
+     names and insert the defaults.  */
   int j;
   lang_statement_list_type *save;
 
@@ -725,7 +728,7 @@ gld_${EMULATION_NAME}_set_symbols ()
   if (link_info.relocateable)
     return;
 
-  /* Glue the assignments into the abs section */
+  /* Glue the assignments into the abs section.  */
   save = stat_ptr;
 
   stat_ptr = &(abs_output_section->children);
@@ -749,7 +752,7 @@ gld_${EMULATION_NAME}_set_symbols ()
       if (j == IMAGEBASEOFF)
 	image_base_statement = rv;
     }
-  /* Restore the pointer. */
+  /* Restore the pointer.  */
   stat_ptr = save;
 
   if (pe.FileAlignment >
@@ -798,7 +801,8 @@ pe_undef_cdecl_match (h, string)
   PTR string;
 {
   int sl;
-  sl = strlen (string); /* silence compiler warning */
+
+  sl = strlen (string); /* Silence compiler warning.  */
   if (h->type == bfd_link_hash_defined
       && strncmp (h->root.string, string, sl) == 0
       && h->root.string[sl] == '@')
@@ -839,6 +843,7 @@ pe_fixup_stdcalls ()
 		undef->type = bfd_link_hash_defined;
 		undef->u.def.value = sym->u.def.value;
 		undef->u.def.section = sym->u.def.section;
+
 		if (pe_enable_stdcall_fixup == -1)
 		  {
 		    einfo (_("Warning: resolving %s by linking to %s\n"),
@@ -855,7 +860,7 @@ pe_fixup_stdcalls ()
 	else
 	  {
 	    /* The symbol is a cdecl symbol, so we look for stdcall
-	       symbols - which means scanning the whole symbol table */
+	       symbols - which means scanning the whole symbol table.  */
 	    pe_undef_found_sym = 0;
 	    bfd_link_hash_traverse (link_info.hash, pe_undef_cdecl_match,
 				    (PTR) undef->root.string);
@@ -865,6 +870,7 @@ pe_fixup_stdcalls ()
 		undef->type = bfd_link_hash_defined;
 		undef->u.def.value = sym->u.def.value;
 		undef->u.def.section = sym->u.def.section;
+
 		if (pe_enable_stdcall_fixup == -1)
 		  {
 		    einfo (_("Warning: resolving %s by linking to %s\n"),
@@ -907,11 +913,14 @@ pe_find_data_imports ()
 {
   struct bfd_link_hash_entry *undef, *sym;
 
+  if (link_info.pei386_auto_import == 0)
+    return;
+
   for (undef = link_info.hash->undefs; undef; undef=undef->next)
     {
       if (undef->type == bfd_link_hash_undefined)
         {
-          /* C++ symbols are *long* */
+          /* C++ symbols are *long*.  */
           char buf[4096];
 
 	  if (pe_dll_extra_pe_debug)
@@ -923,45 +932,43 @@ pe_find_data_imports ()
 
           if (sym && sym->type == bfd_link_hash_defined)
             {
-             if (link_info.pei386_auto_import == -1)
-               info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
-			 undef->root.string, buf);
+	      bfd *b = sym->u.def.section->owner;
+	      asymbol **symbols;
+	      int nsyms, symsize, i;
 
-	     {
-	       bfd *b = sym->u.def.section->owner;
-	       asymbol **symbols;
-	       int nsyms, symsize, i;
+	      if (link_info.pei386_auto_import == -1)
+		info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
+			  undef->root.string, buf);
 
-	       symsize = bfd_get_symtab_upper_bound (b);
-	       symbols = (asymbol **) xmalloc (symsize);
-	       nsyms = bfd_canonicalize_symtab (b, symbols);
+	      symsize = bfd_get_symtab_upper_bound (b);
+	      symbols = (asymbol **) xmalloc (symsize);
+	      nsyms = bfd_canonicalize_symtab (b, symbols);
 
-	       for (i = 0; i < nsyms; i++)
-		 {
-		   if (memcmp (symbols[i]->name, "__head_",
-			       sizeof ("__head_") - 1))
-		     continue;
+	      for (i = 0; i < nsyms; i++)
+		{
+		  if (memcmp (symbols[i]->name, "__head_",
+			      sizeof ("__head_") - 1))
+		    continue;
 
-		   if (pe_dll_extra_pe_debug)
-		     printf ("->%s\n", symbols[i]->name);
+		  if (pe_dll_extra_pe_debug)
+		    printf ("->%s\n", symbols[i]->name);
 
-		   pe_data_import_dll = (char*) (symbols[i]->name +
-						 sizeof ("__head_") - 1);
-		   break;
-		 }
-	     }
+		  pe_data_import_dll = (char*) (symbols[i]->name +
+						sizeof ("__head_") - 1);
+		  break;
+		}
 
-	     pe_walk_relocs_of_symbol (&link_info, undef->root.string,
-				       make_import_fixup);
+	      pe_walk_relocs_of_symbol (&link_info, undef->root.string,
+					make_import_fixup);
 
-	     /* Let's differentiate it somehow from defined.  */
-	     undef->type = bfd_link_hash_defweak;
-	     /* We replace original name with __imp_ prefixed, this
-		1) may trash memory 2) leads to duplicate symbol generation.
-		Still, IMHO it's better than having name poluted.  */
-	     undef->root.string = sym->root.string;
-	     undef->u.def.value = sym->u.def.value;
-	     undef->u.def.section = sym->u.def.section;
+	      /* Let's differentiate it somehow from defined.  */
+	      undef->type = bfd_link_hash_defweak;
+	      /* We replace original name with __imp_ prefixed, this
+		 1) may trash memory 2) leads to duplicate symbol generation.
+		 Still, IMHO it's better than having name poluted.  */
+	      undef->root.string = sym->root.string;
+	      undef->u.def.value = sym->u.def.value;
+	      undef->u.def.section = sym->u.def.section;
             }
         }
     }
@@ -1056,7 +1063,7 @@ gld_${EMULATION_NAME}_after_open ()
        head/tail objects, causing an improper import table.  We detect
        those cases and rename the "other" import libraries to match
        the one the head/tail come from, so that the linker will sort
-       things nicely and produce a valid import table. */
+       things nicely and produce a valid import table.  */
 
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
@@ -1345,7 +1352,7 @@ gld_${EMULATION_NAME}_unrecognized_file (entry)
 	    }
 
 #if 0
-	  /* Not sure if these *should* be set */
+	  /* Not sure if these *should* be set.  */
 	  if (pe_def_file->version_major != -1)
 	    {
 	      pe.MajorImageVersion = pe_def_file->version_major;
@@ -1854,22 +1861,22 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 	     giving up -- once here, and once when searching for a "static" lib.
 	     for a "static" lib.  */
           /* Try "libfoo.a" (import lib, or static lib, but must
-             take precedence over dll's) */
+             take precedence over dll's).  */
           sprintf (string, "%s/lib%s.a", search->name, filename);
           if (! ldfile_try_open_bfd (string, entry))
             {
 #ifdef DLL_SUPPORT
               if (pe_dll_search_prefix)
                 {
-                  /* Try "<prefix>foo.dll" (preferred dll name, if specified) */
+                  /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
                   sprintf (string, "%s/%s%s.dll", search->name, pe_dll_search_prefix, filename);
                   if (! ldfile_try_open_bfd (string, entry))
                     {
-                      /* Try "libfoo.dll" (default preferred dll name) */
+                      /* Try "libfoo.dll" (default preferred dll name).  */
                       sprintf (string, "%s/lib%s.dll", search->name, filename);
                       if (! ldfile_try_open_bfd (string, entry))
                         {
-                          /* Finally, try "foo.dll" (alternate dll name) */
+                          /* Finally, try "foo.dll" (alternate dll name).  */
                           sprintf (string, "%s/%s.dll", search->name, filename);
                           if (! ldfile_try_open_bfd (string, entry))
                             {
@@ -1955,8 +1962,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  gld_${EMULATION_NAME}_finish, /* finish */
-  NULL, /* create output section statements */
+  gld_${EMULATION_NAME}_finish,
+  NULL, /* Create output section statements.  */
   gld_${EMULATION_NAME}_open_dynamic_archive,
   gld_${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
@@ -1965,6 +1972,6 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_list_options,
   gld_${EMULATION_NAME}_recognized_file,
   gld_${EMULATION_NAME}_find_potential_libraries,
-  NULL	/* new_vers_pattern */
+  NULL	/* new_vers_pattern.  */
 };
 EOF
