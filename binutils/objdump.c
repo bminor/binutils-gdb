@@ -1560,9 +1560,9 @@ disassemble_data (abfd)
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
   if (bfd_big_endian (abfd))
-    disasm_info.endian = BFD_ENDIAN_BIG;
+    disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;
   else if (bfd_little_endian (abfd))
-    disasm_info.endian = BFD_ENDIAN_LITTLE;
+    disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_LITTLE;
   else
     /* ??? Aborting here seems too drastic.  We could default to big or little
        instead.  */
