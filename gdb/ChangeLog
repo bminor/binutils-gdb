@@ -1,3 +1,9 @@
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/alpha/tm-alpha.h: Move alpha_software_single_step
+	prototype from here...
+	* alpha-tdep.h: ...to here.
+
 2002-04-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.h (selected_frame_level): Document as deprecated.

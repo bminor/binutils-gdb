@@ -135,7 +135,4 @@ extern struct frame_info *alpha_setup_arbitrary_frame (int, CORE_ADDR *);
 extern CORE_ADDR alpha_osf_skip_sigtramp_frame (struct frame_info *,
 						CORE_ADDR);
 
-/* Single step based on where the current instruction will take us.  */
-extern void alpha_software_single_step (enum target_signal, int);
-
 #endif /* TM_ALPHA_H */
