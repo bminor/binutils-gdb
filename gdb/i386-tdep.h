@@ -22,90 +22,92 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
-#define FPU_REG_RAW_SIZE 10
+/* GDB's i386 target supports both the 32-bit Intel Architecture
+   (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
+   a similar register layout for both.
 
-#if !defined (XMM0_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define XMM0_REGNUM FIRST_XMM_REGNUM
-#endif
-#if !defined (FIRST_FPU_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FIRST_FPU_REGNUM FP0_REGNUM
-#endif
-#if !defined (LAST_FPU_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define LAST_FPU_REGNUM (gdbarch_tdep (current_gdbarch)->last_fpu_regnum)
-#endif
-#if !defined (FIRST_XMM_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FIRST_XMM_REGNUM (gdbarch_tdep (current_gdbarch)->first_xmm_regnum)
-#endif
-#if !defined (LAST_XMM_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define LAST_XMM_REGNUM (gdbarch_tdep (current_gdbarch)->last_xmm_regnum)
-#endif
-#if !defined (MXCSR_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define MXCSR_REGNUM (gdbarch_tdep (current_gdbarch)->mxcsr_regnum)
-#endif
-#if !defined (FIRST_FPU_CTRL_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FIRST_FPU_CTRL_REGNUM (gdbarch_tdep (current_gdbarch)->first_fpu_ctrl_regnum)
-#endif
-#if !defined (LAST_FPU_CTRL_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define LAST_FPU_CTRL_REGNUM (FIRST_FPU_CTRL_REGNUM + 7)
-#endif
+   - General purpose registers
+   - FPU data registers
+   - FPU control registers
+   - SSE data registers
+   - SSE control register
 
-/* All of these control registers (except for FCOFF and FDOFF) are
-   sixteen bits long (at most) in the FPU, but are zero-extended to
-   thirty-two bits in GDB's register file.  This makes it easier to
-   compute the size of the control register file, and somewhat easier
-   to convert to and from the FSAVE instruction's 32-bit format.  */
-/* FPU control word.  */
-#if !defined (FCTRL_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FCTRL_REGNUM (FIRST_FPU_CTRL_REGNUM)
-#endif
-/* FPU status word.  */
-#if !defined (FSTAT_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FSTAT_REGNUM (FIRST_FPU_CTRL_REGNUM + 1)
-#endif
-/* FPU register tag word.  */
-#if !defined (FTAG_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FTAG_REGNUM  (FIRST_FPU_CTRL_REGNUM + 2)
-#endif
-/* FPU instruction's code segment selector 16 bits, called "FPU Instruction
-   Pointer Selector" in the x86 manuals.  */
-#if !defined (FCS_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FCS_REGNUM   (FIRST_FPU_CTRL_REGNUM + 3)
-#endif
-/* FPU instruction's offset within segment ("Fpu Code OFFset").  */
-#if !defined (FCOFF_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FCOFF_REGNUM (FIRST_FPU_CTRL_REGNUM + 4)
-#endif
-/* FPU operand's data segment.  */
-#if !defined (FDS_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FDS_REGNUM   (FIRST_FPU_CTRL_REGNUM + 5)
-#endif
-/* FPU operand's offset within segment.  */
-#if !defined (FDOFF_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FDOFF_REGNUM (FIRST_FPU_CTRL_REGNUM + 6)
-#endif
-/* FPU opcode, bottom eleven bits.  */
-#if !defined (FOP_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define FOP_REGNUM   (FIRST_FPU_CTRL_REGNUM + 7)
-#endif
+   The general purpose registers for the x86-64 architecture are quite
+   different from IA-32.  Therefore, the FP0_REGNUM target macro
+   determines the register number at which the FPU data registers
+   start.  The number of FPU data and control registers is the same
+   for both architectures.  The number of SSE registers however,
+   differs and is determined by the num_xmm_regs member of `struct
+   gdbarch_tdep'.  */
 
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
-  int last_fpu_regnum;
-  int first_xmm_regnum;
-  int last_xmm_regnum;
-  int mxcsr_regnum;		/* Streaming SIMD Extension control/status.  */
-  int first_fpu_ctrl_regnum;
+  /* Number of SSE registers.  */
+  int num_xmm_regs;
 };
 
-#if !defined (IS_FP_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define IS_FP_REGNUM(n) (FIRST_FPU_REGNUM <= (n) && (n) <= LAST_FPU_REGNUM)
-#endif
-#if !defined (IS_FPU_CTRL_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define IS_FPU_CTRL_REGNUM(n) (FIRST_FPU_CTRL_REGNUM <= (n) && (n) <= LAST_FPU_CTRL_REGNUM)
-#endif
-#if !defined (IS_SSE_REGNUM) || (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-#define IS_SSE_REGNUM(n) (FIRST_XMM_REGNUM <= (n) && (n) <= LAST_XMM_REGNUM)
-#endif
+/* Floating-point registers.  */
 
-#endif
+#define FPU_REG_RAW_SIZE 10
+
+/* All FPU control regusters (except for FIOFF and FOOFF) are 16-bit
+   (at most) in the FPU, but are zero-extended to 32 bits in GDB's
+   register cache.  */
+
+/* "Generic" floating point control register.  */
+#define FPC_REGNUM	(FP0_REGNUM + 8)
+
+/* FPU control word.  */
+#define FCTRL_REGNUM	FPC_REGNUM
+
+/* FPU status word.  */
+#define FSTAT_REGNUM	(FPC_REGNUM + 1)
+
+/* FPU register tag word.  */
+#define FTAG_REGNUM	(FPC_REGNUM + 2)
+
+/* FPU instruction's code segment selector, called "FPU Instruction
+   Pointer Selector" in the IA-32 manuals.  */
+#define FISEG_REGNUM	(FPC_REGNUM + 3)
+
+/* FPU instruction's offset within segment.  */
+#define FIOFF_REGNUM	(FPC_REGNUM + 4)
+
+/* FPU operand's data segment.  */
+#define FOSEG_REGNUM	(FPC_REGNUM + 5)
+
+/* FPU operand's offset within segment */
+#define FOOFF_REGNUM	(FPC_REGNUM + 6)
+
+/* FPU opcode, bottom eleven bits.  */
+#define FOP_REGNUM	(FPC_REGNUM + 7)
+
+/* Return non-zero if N corresponds to a FPU data registers.  */
+#define FP_REGNUM_P(n)	(FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
+
+/* Return non-zero if N corresponds to a FPU control register.  */
+#define FPC_REGNUM_P(n)	(FPC_REGNUM <= (n) && (n) < XMM0_REGNUM)
+
+/* SSE registers.  */
+
+/* First SSE data register.  */
+#define XMM0_REGNUM	(FPC_REGNUM + 8)
+
+/* SSE control/status register.  */
+#define MXCSR_REGNUM \
+  (XMM0_REGNUM + gdbarch_tdep (current_gdbarch)->num_xmm_regs)
+
+/* Return non-zero if N corresponds to a SSE data register.  */
+#define SSE_REGNUM_P(n) (XMM0_REGNUM <= (n) && (n) < MXCSR_REGNUM)
+
+/* FIXME: kettenis/2001-11-24: Obsolete macro's.  */
+#define FCS_REGNUM FISEG_REGNUM
+#define FCOFF_REGNUM FIOFF_REGNUM
+#define FDS_REGNUM FOSEG_REGNUM
+#define FDOFF_REGNUM FOOFF_REGNUM
+#define IS_FP_REGNUM(n) FP_REGNUM_P (n)
+#define IS_FPU_CTRL_REGNUM(n) FPC_REGNUM_P (n)
+#define IS_SSE_REGNUM(n) SSE_REGNUM_P (n)
+
+#endif /* i386-tdep.h */

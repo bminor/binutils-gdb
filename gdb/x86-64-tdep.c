@@ -817,11 +817,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_x86_64:
     case bfd_mach_x86_64_intel_syntax:
-      tdep->last_fpu_regnum = 25;
-      tdep->first_xmm_regnum = 34;
-      tdep->last_xmm_regnum = 49;
-      tdep->mxcsr_regnum = 50;
-      tdep->first_fpu_ctrl_regnum = 26;
+      tdep->num_xmm_regs = 16;
       break;
     case bfd_mach_i386_i386:
     case bfd_mach_i386_i8086:

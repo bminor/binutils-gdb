@@ -1218,6 +1218,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
+  /* FIXME: kettenis/2001-11-24: Although not all IA-32 processors
+     have the SSE registers, it's easier to set the default to 8.  */
+  tdep->num_xmm_regs = 8;
+
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
   /* Call dummy code.  */

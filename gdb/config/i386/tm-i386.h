@@ -140,39 +140,12 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 #define PC_REGNUM 8		/* (eip) Contains program counter */
 #define PS_REGNUM 9		/* (ps)  Contains processor status */
 
-/* These registers are present only if HAVE_I387_REGS is #defined.
-   We promise that FP0 .. FP7 will always be consecutive register numbers.  */
-#define FP0_REGNUM   16		/* first FPU floating-point register */
-#define FP7_REGNUM   23		/* last  FPU floating-point register */
-
-/* All of these control registers (except for FCOFF and FDOFF) are
-   sixteen bits long (at most) in the FPU, but are zero-extended to
-   thirty-two bits in GDB's register file.  This makes it easier to
-   compute the size of the control register file, and somewhat easier
-   to convert to and from the FSAVE instruction's 32-bit format.  */
-#define FIRST_FPU_CTRL_REGNUM 24
-#define FCTRL_REGNUM 24	        /* FPU control word */
-#define FPC_REGNUM   24		/* old name for FCTRL_REGNUM */
-#define FSTAT_REGNUM 25		/* FPU status word */
-#define FTAG_REGNUM  26		/* FPU register tag word */
-#define FCS_REGNUM   27		/* FPU instruction's code segment selector
-				   16 bits, called "FPU Instruction Pointer
-				   Selector" in the x86 manuals  */
-#define FCOFF_REGNUM 28		/* FPU instruction's offset within segment
-				   ("Fpu Code OFFset") */
-#define FDS_REGNUM   29		/* FPU operand's data segment */
-#define FDOFF_REGNUM 30		/* FPU operand's offset within segment */
-#define FOP_REGNUM   31		/* FPU opcode, bottom eleven bits */
-#define LAST_FPU_CTRL_REGNUM 31
-
-/* These registers are present only if HAVE_SSE_REGS is #defined.
-   We promise that XMM0 .. XMM7 will always have consecutive reg numbers. */
-#define XMM0_REGNUM  32		/* first SSE data register */
-#define XMM7_REGNUM  39		/* last  SSE data register */
-#define MXCSR_REGNUM 40		/* Streaming SIMD Extension control/status */
-
-#define IS_FP_REGNUM(n) (FP0_REGNUM <= (n) && (n) <= FP7_REGNUM)
-#define IS_SSE_REGNUM(n) (XMM0_REGNUM <= (n) && (n) <= XMM7_REGNUM)
+/* First FPU data register.  */
+#ifdef HAVE_I387_REGS
+#define FP0_REGNUM 16
+#else
+#define FP0_REGNUM 0
+#endif
 
 /* Return the name of register REG.  */
 
@@ -200,8 +173,7 @@ extern int i386_dwarf_reg_to_regnum (int reg);
    yields REGISTER_BYTES.  */
 #define SIZEOF_GREGS (NUM_GREGS * 4)
 #define SIZEOF_FPU_REGS (8 * 10)
-#define SIZEOF_FPU_CTRL_REGS \
-  ((LAST_FPU_CTRL_REGNUM - FIRST_FPU_CTRL_REGNUM + 1) * 4)
+#define SIZEOF_FPU_CTRL_REGS (8 * 4)
 #define SIZEOF_SSE_REGS (8 * 16 + 4)
 
 

@@ -1,3 +1,38 @@
+2001-12-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h (FP7_REGNUM, FIRST_FPU_CTRL_REGNUM,
+	FCTRL_REGNUM, FPC_REGNUM, FSTAT_REGNUM, FTAG_REGNUM, FCS_REGNUM,
+	FCOFF_REGNUM, FDS_REGNUM, FDOFF_REGNUM, FOP_REGNUM,
+	LAST_FPU_CTRL_REGNUM, XMM0_REGNUM, XMM7_REGNUM, MXCSR_REGNUM,
+	IS_FP_REGNUM, IS_SSE_REGNUM): Removed.
+	(FP0_REGNUM): Define conditionally depending on HAVE_I387_REGS.
+	(SIZEOF_FPU_CTRL_REGS): Hardcode value.
+	* i386-tdep.h (struct gdbarch_tdep): Change such that it contains
+	a single member `num_xmm_regs'.
+	(FPC_REGNUM): New macro.
+	(FIRST_FPU_REGNUM, LAST_FPU_REGNUM, FISRT_XMM_REGNUM,
+	LAST_XMM_REGNUM, MXCSR_REGNUM, FIRST_FPU_CTRL_REGNUM,
+	LAST_FPU_CTRL_REGNUM): Removed.
+	(FCTRL_REGNUM, FSTAT_REGNUM, FTAG_REGNUM, FOP_REGNUM, XMM0_REGNUM,
+	MXCSR_REGNUM): Define unconditionally.  Change macros to match the
+	comment describing the register layout.
+	(FISEG_REGNUM, FIOFF_REGNUM, FOSEG_REGNUM, FOOFF_REGNUM): New macros.
+	(FP_REGNUM_P, FPC_REGNUM_P, SSE_REGNUM_P): New macros.
+	(IS_FP_REGNUM, IS_FPU_CTRL_REGNUM, IS_SSE_REGNUM): Make obsolete,
+	unconditionally define in terms of FP_REGNUM_P, FPC_REGNUM_P and
+	SSE_REGNUM_P).
+	(FCS_REGNUM, FCOFF_REGNUM, FDS_REGNUM, FDOFF_REGNUM): Make
+	obsolete, unconditionally define in terms of FISEG_REGNUM,
+	FIOFF_REGNUM, FOSEG_REGNUM, FOOFF_REGNUM.
+	* i386-tdep.c (i386_gdbarch_init): Initialize `num_xmm_regs'
+	member of `struct gdbarch_tdep'.
+	* x86-64-tdep.c (i386_gdbarch_init): Change initialization of
+	`struct gdbarch_tdep'.
+	* i387-nat.c (FCS_REGNUM, FCOFF_REGNUM, FDS_REGNUM, FDOFF_REGNUM):
+	Replace with FISEG_REGNUM, FIOFF_REGNUM, FOSEG_REGNUM and
+	FOOFF_REGNUM.  Use FPC_REGNUM instead of FIRST_FPU_CTRL_REGNUM.
+	Use XMM0_REGNUM instead of LAST_FPU_CTRL_REGNUM.
+
 2001-12-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli/cli-script.c (execute_control_command): Replace value_ptr

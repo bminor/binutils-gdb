@@ -49,10 +49,10 @@ static int fsave_offset[] =
   0,				/* FCTRL_REGNUM (16 bits).  */
   4,				/* FSTAT_REGNUM (16 bits).  */
   8,				/* FTAG_REGNUM (16 bits).  */
-  16,				/* FCS_REGNUM (16 bits).  */
-  12,				/* FCOFF_REGNUM.  */
-  24,				/* FDS_REGNUM.  */
-  20,				/* FDOFF_REGNUM.  */
+  16,				/* FISEG_REGNUM (16 bits).  */
+  12,				/* FIOFF_REGNUM.  */
+  24,				/* FOSEG_REGNUM.  */
+  20,				/* FOOFF_REGNUM.  */
   18				/* FOP_REGNUM (bottom 11 bits).  */
 };
 
@@ -68,8 +68,8 @@ i387_supply_register (int regnum, char *fsave)
 {
   /* Most of the FPU control registers occupy only 16 bits in
      the fsave area.  Give those a special treatment.  */
-  if (regnum >= FIRST_FPU_CTRL_REGNUM
-      && regnum != FCOFF_REGNUM && regnum != FDOFF_REGNUM)
+  if (regnum >= FPC_REGNUM
+      && regnum != FIOFF_REGNUM && regnum != FOOFF_REGNUM)
     {
       unsigned int val = *(unsigned short *) (FSAVE_ADDR (fsave, regnum));
 
@@ -94,7 +94,7 @@ i387_supply_fsave (char *fsave)
 {
   int i;
 
-  for (i = FP0_REGNUM; i <= LAST_FPU_CTRL_REGNUM; i++)
+  for (i = FP0_REGNUM; i < XMM0_REGNUM; i++)
     i387_supply_register (i, fsave);
 }
 
@@ -108,13 +108,13 @@ i387_fill_fsave (char *fsave, int regnum)
 {
   int i;
 
-  for (i = FP0_REGNUM; i <= LAST_FPU_CTRL_REGNUM; i++)
+  for (i = FP0_REGNUM; i < XMM0_REGNUM; i++)
     if (regnum == -1 || regnum == i)
       {
 	/* Most of the FPU control registers occupy only 16 bits in
            the fsave area.  Give those a special treatment.  */
-	if (i >= FIRST_FPU_CTRL_REGNUM
-	    && i != FCOFF_REGNUM && i != FDOFF_REGNUM)
+	if (i >= FPC_REGNUM
+	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	  {
 	    if (i == FOP_REGNUM)
 	      {
@@ -154,10 +154,10 @@ static int fxsave_offset[] =
   0,				/* FCTRL_REGNUM (16 bits).  */
   2,				/* FSTAT_REGNUM (16 bits).  */
   4,				/* FTAG_REGNUM (16 bits).  */
-  12,				/* FCS_REGNUM (16 bits).  */
-  8,				/* FCOFF_REGNUM.  */
-  20,				/* FDS_REGNUM (16 bits).  */
-  16,				/* FDOFF_REGNUM.  */
+  12,				/* FISEG_REGNUM (16 bits).  */
+  8,				/* FIOFF_REGNUM.  */
+  20,				/* FOSEG_REGNUM (16 bits).  */
+  16,				/* FOOFF_REGNUM.  */
   6,				/* FOP_REGNUM (bottom 11 bits).  */
   160,				/* XMM0_REGNUM through ...  */
   176,
@@ -189,8 +189,8 @@ i387_supply_fxsave (char *fxsave)
     {
       /* Most of the FPU control registers occupy only 16 bits in
 	 the fxsave area.  Give those a special treatment.  */
-      if (i >= FIRST_FPU_CTRL_REGNUM && i < XMM0_REGNUM
-	  && i != FCOFF_REGNUM && i != FDOFF_REGNUM)
+      if (i >= FPC_REGNUM && i < XMM0_REGNUM
+	  && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	{
 	  unsigned long val = *(unsigned short *) (FXSAVE_ADDR (fxsave, i));
 
@@ -252,8 +252,8 @@ i387_fill_fxsave (char *fxsave, int regnum)
       {
 	/* Most of the FPU control registers occupy only 16 bits in
            the fxsave area.  Give those a special treatment.  */
-	if (i >= FIRST_FPU_CTRL_REGNUM && i < XMM0_REGNUM
-	    && i != FCOFF_REGNUM && i != FDOFF_REGNUM)
+	if (i >= FPC_REGNUM && i < XMM0_REGNUM
+	    && i != FIOFF_REGNUM && i != FDOFF_REGNUM)
 	  {
 	    if (i == FOP_REGNUM)
 	      {
