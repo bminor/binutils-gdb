@@ -1,5 +1,7 @@
 Tue Jul  6 10:23:39 1999  Jeffrey A Law  (law@cygnus.com)
 
+        * libhppa.h: Revert July 2, 1999 patch.
+
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): T mode selectors
 	need to generate DLTIND relocations, not DLTREL relocations.
 
