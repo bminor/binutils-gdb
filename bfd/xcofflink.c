@@ -1778,12 +1778,19 @@ xcoff_link_add_symbols (abfd, info)
  	  if (info->hash->creator == abfd->xvec)
 	    {
 	      if (! bfd_is_und_section (section))
-		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
-						    name, true, copy, false);
+		{
+		  *sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
+						      name, true, copy, false);
+		}
 	      else
-		*sym_hash = ((struct xcoff_link_hash_entry *)
-			     bfd_wrapped_link_hash_lookup (abfd, info, name,
-							   true, copy, false));
+		{
+		  /* Make a copy of the symbol name to prevent problems with
+		     merging symbols.  */
+		  *sym_hash = ((struct xcoff_link_hash_entry *)
+			       bfd_wrapped_link_hash_lookup (abfd, info, name,
+							     true, true, 
+							     false));
+		}
 	      if (*sym_hash == NULL)
 		goto error_return;
 	      if (((*sym_hash)->root.type == bfd_link_hash_defined

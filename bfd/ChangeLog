@@ -1,3 +1,8 @@
+2002-04-30  Tom Rix  <trix@redhat.com>
+
+	* xcofflink.c (xcoff_link_add_symbols): Always copy undef C_EXT
+	symbol names into the hash table.
+
 2002-04-28  Tom Rix  <trix@redhat.com>
 
 	* coff-rs6000.c (xcoff_calculate_relocation) : Function table for
