@@ -1,3 +1,8 @@
+2003-09-19  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf2.c (decode_line_info): Cope with an initially empty
+	filename table.
+
 2003-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* acinclude.m4: Include ../config/accross.m4.

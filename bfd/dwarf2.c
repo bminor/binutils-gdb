@@ -1168,7 +1168,7 @@ decode_line_info (unit, stash)
     {
       /* State machine registers.  */
       bfd_vma address = 0;
-      char * filename = concat_filename (table, 1);
+      char * filename = table->num_files ? concat_filename (table, 1) : NULL;
       unsigned int line = 1;
       unsigned int column = 0;
       int is_stmt = lh.default_is_stmt;
