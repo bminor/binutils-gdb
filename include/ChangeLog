@@ -1,7 +1,11 @@
+Wed Nov  4 07:28:05 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* bout.h (N_CALLNAME, N_BALNAME): Define as char-type values, so
+	widening works consistently.
+
 Fri Oct 16 03:17:08 1992  John Gilmore  (gnu@cygnus.com)
 
-	* getopt.h (struct option):  RMS decided we should do it the
-	other way.
+	* getopt.h:  Update to Revised Standard FSF Version.
 
 Thu Oct 15 21:43:22 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
