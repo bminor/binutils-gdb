@@ -7203,8 +7203,8 @@ mips_ip (str, ip)
 		as_bad ("expected vi19");
 	      continue;
 
-	    case '%':		/* escape character */
-	      /* '%' specifies that we've got an optional suffix to this
+	    case '#':		/* escape character */
+	      /* '#' specifies that we've got an optional suffix to this
 		 operand that must match exactly (if it exists).  */
 	      if (*s != '\0' && *s != ','
 		  && *s != ' ' && *s != '\t' && *s != '\n')
