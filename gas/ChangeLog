@@ -1,3 +1,9 @@
+Thu Apr 14 15:12:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* expr.c (operand): Try to parse "0f" and "0b" sequences as
+	floating point and binary numbers respectively; if it doesn't
+	work, treat them as local labels.
+
 Thu Apr 14 13:34:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (de-stage1, de-stage2, de-stage3): Use rm -f.
