@@ -303,10 +303,15 @@ udi_close (quitting)	/*FIXME: how is quitting used */
     return;
 
   /* We should never get here if there isn't something valid in
-     udi_session_id. */
+     udi_session_id.  */
 
   if (UDIDisconnect (udi_session_id, UDITerminateSession))
-    error ("UDIDisconnect() failed in udi_close");
+    {
+      if (quitting)
+	warning ("UDIDisconnect() failed in udi_close");
+      else
+	error ("UDIDisconnect() failed in udi_close");
+    }
 
   /* Do not try to close udi_session_id again, later in the program.  */
   udi_session_id = -1;
