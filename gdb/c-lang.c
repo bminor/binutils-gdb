@@ -42,7 +42,7 @@ static void c_emit_char (int c, struct ui_file * stream, int quoter);
    characters and strings is language specific. */
 
 static void
-c_emit_char (register int c, struct ui_file *stream, int quoter)
+c_emit_char (int c, struct ui_file *stream, int quoter)
 {
   const char *escape;
   int host_char;
@@ -88,7 +88,7 @@ void
 c_printstr (struct ui_file *stream, char *string, unsigned int length,
 	    int width, int force_ellipses)
 {
-  register unsigned int i;
+  unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
@@ -207,7 +207,7 @@ c_printstr (struct ui_file *stream, char *string, unsigned int length,
 struct type *
 c_create_fundamental_type (struct objfile *objfile, int typeid)
 {
-  register struct type *type = NULL;
+  struct type *type = NULL;
 
   switch (typeid)
     {

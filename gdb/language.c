@@ -1192,13 +1192,13 @@ unk_lang_error (char *msg)
 }
 
 static void
-unk_lang_emit_char (register int c, struct ui_file *stream, int quoter)
+unk_lang_emit_char (int c, struct ui_file *stream, int quoter)
 {
   error ("internal error - unimplemented function unk_lang_emit_char called.");
 }
 
 static void
-unk_lang_printchar (register int c, struct ui_file *stream)
+unk_lang_printchar (int c, struct ui_file *stream)
 {
   error ("internal error - unimplemented function unk_lang_printchar called.");
 }

@@ -1,3 +1,16 @@
+2003-09-09  Paul N. Hilfinger  <hilfingr@gnat.com>
+
+	* p-lang.c: Eliminate "register".
+	* c-lang.c: Ditto.
+	* expprint.c: Ditto.
+	* f-lang.c: Ditto.
+	* jv-lang.c: Ditto.
+	* language.c: Ditto.
+	* m2-lang.c: Ditto.
+	* parse.c: Ditto.
+	* scm-lang.c: Ditto.
+	* objc-lang.c: Ditto.
+
 2003-09-09  Nick Clifton  <nickc@redhat.com>
 
 	* v850-tdep.c (v850_processor_type_table): Add bfd_mach_v850e1.
@@ -408,6 +421,7 @@
 	frame_unwind_register_unsigned instead of
 	frame_unwind_unsigned_register.
 
+>>>>>>> current-public.22/gdb/ChangeLog Mon, 08 Sep 2003 21:54:22 -0700 hilfingr (GdbPub/g/3_ChangeLog 1.15.1.2.1.1 644)
 2003-08-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Search for gethostbyname in libnsl.
