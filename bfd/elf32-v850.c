@@ -945,6 +945,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_ZDA_16_16_OFFSET:
+      if (sym_sec == NULL)
+	return bfd_reloc_undefined;
+	  
       value -= sym_sec->output_section->vma;
       value += (short) bfd_get_16 (input_bfd, hit_data);
 
@@ -955,6 +958,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_ZDA_15_16_OFFSET:	
+      if (sym_sec == NULL)
+	return bfd_reloc_undefined;
+	  
       insn = bfd_get_16 (input_bfd, hit_data);
 
       value -= sym_sec->output_section->vma;
@@ -984,6 +990,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_V850_SDA_16_16_OFFSET:
+      if (sym_sec == NULL)
+	return bfd_reloc_undefined;
+	  
       {
 	unsigned long                gp;
 	struct bfd_link_hash_entry * h;
@@ -1010,6 +1019,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       }
 
     case R_V850_SDA_15_16_OFFSET:
+      if (sym_sec == NULL)
+	return bfd_reloc_undefined;
+	  
       {
 	unsigned long                gp;
 	struct bfd_link_hash_entry * h;
@@ -1218,6 +1230,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       }
     
     case R_V850_SDA_16_16_SPLIT_OFFSET:
+      if (sym_sec == NULL)
+	return bfd_reloc_undefined;
+	  
       {
 	unsigned long                gp;
 	struct bfd_link_hash_entry * h;
@@ -1252,6 +1267,9 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       }
 
     case R_V850_ZDA_16_16_SPLIT_OFFSET:
+      if (sym_sec == NULL)
+	return bfd_reloc_undefined;
+	  
       insn = bfd_get_32 (input_bfd, hit_data);
 	
       value -= sym_sec->output_section->vma;

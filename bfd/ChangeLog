@@ -1,3 +1,8 @@
+Wed Sep 17 09:54:51 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_final_link_relocate): Add checks to catch
+	relocations against non-existant symbols.
+
 Tue Sep 16 14:20:27 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* reloc.c: Add BFR_RELOC_V850_TDA_16_16_OFFSET.
