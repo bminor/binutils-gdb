@@ -2534,25 +2534,31 @@ crack_operand (str, opP)
   register int parens;
   register int c;
   register char *beg_str;
+  int inquote = 0;
 
   if (!str)
     {
       return str;
     }
   beg_str = str;
-  for (parens = 0; *str && (parens > 0 || notend (str)); str++)
+  for (parens = 0; *str && (parens > 0 || inquote || notend (str)); str++)
     {
-      if (*str == '(')
-	parens++;
-      else if (*str == ')')
+      if (! inquote)
 	{
-	  if (!parens)
-	    {			/* ERROR */
-	      opP->error = "Extra )";
-	      return str;
+	  if (*str == '(')
+	    parens++;
+	  else if (*str == ')')
+	    {
+	      if (!parens)
+		{			/* ERROR */
+		  opP->error = "Extra )";
+		  return str;
+		}
+	      --parens;
 	    }
-	  --parens;
 	}
+      if (flag_mri && *str == '\'')
+	inquote = ! inquote;
     }
   if (!*str && parens)
     {				/* ERROR */
@@ -2780,6 +2786,41 @@ md_assemble (str)
   char *to_beg_P;
   int shorts_this_frag;
   fixS *fixP;
+
+  /* In MRI mode, the instruction and operands are separated by a
+     space.  Anything following the operands is a comment.  The label
+     has already been removed.  */
+  if (flag_mri)
+    {
+      char *s;
+      int fields = 0;
+      int infield = 0;
+      int inquote = 0;
+
+      for (s = str; *s != '\0'; s++)
+	{
+	  if ((*s == ' ' || *s == '\t') && ! inquote)
+	    {
+	      if (infield)
+		{
+		  ++fields;
+		  if (fields >= 2)
+		    {
+		      *s = '\0';
+		      break;
+		    }
+		  infield = 0;
+		}
+	    }
+	  else
+	    {
+	      if (! infield)
+		infield = 1;
+	      if (*s == '\'')
+		inquote = ! inquote;
+	    }
+	}
+    }
 
   memset ((char *) (&the_ins), '\0', sizeof (the_ins));
   m68k_ip (str);
@@ -4778,6 +4819,9 @@ parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
 
   *leftstart = input_line_pointer;
   *leftstop = s;
+  if (*leftstop > *leftstart
+      && ((*leftstop)[-1] == ' ' || (*leftstop)[-1] == '\t'))
+    --*leftstop;
 
   input_line_pointer = s;
   if (! parse_mri_condition (pcc))
@@ -4795,6 +4839,9 @@ parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
 
   *rightstart = input_line_pointer;
   *rightstop = s;
+  if (*rightstop > *rightstart
+      && ((*rightstop)[-1] == ' ' || (*rightstop)[-1] == '\t'))
+    --*rightstop;
 
   input_line_pointer = s;
 
@@ -5283,6 +5330,7 @@ s_mri_for (qual)
        FOR.q var = init { TO | DOWNTO } end [ BY by ] DO.e
      */
 
+  SKIP_WHITESPACE ();
   varstart = input_line_pointer;
 
   /* Look for the '='.  */
@@ -5297,6 +5345,9 @@ s_mri_for (qual)
     }
 
   varstop = input_line_pointer;
+  if (varstop > varstart
+      && (varstop[-1] == ' ' || varstop[-1] == '\t'))
+    --varstop;
 
   ++input_line_pointer;
 
@@ -5330,7 +5381,11 @@ s_mri_for (qual)
       ignore_rest_of_line ();
       return;
     }
+  if (initstop > initstart
+      && (initstop[-1] == ' ' || initstop[-1] == '\t'))
+    --initstop;
 
+  SKIP_WHITESPACE ();
   endstart = input_line_pointer;
 
   /* Look for BY or DO.  */
@@ -5362,6 +5417,9 @@ s_mri_for (qual)
       ignore_rest_of_line ();
       return;
     }
+  if (endstop > endstart
+      && (endstop[-1] == ' ' || endstop[-1] == '\t'))
+    --endstop;
 
   if (! by)
     {
@@ -5370,6 +5428,7 @@ s_mri_for (qual)
     }
   else
     {
+      SKIP_WHITESPACE ();
       bystart = input_line_pointer;
 
       /* Look for DO.  */
@@ -5392,6 +5451,9 @@ s_mri_for (qual)
 	  ignore_rest_of_line ();
 	  return;
 	}
+      if (bystop > bystart
+	  && (bystop[-1] == ' ' || bystop[-1] == '\t'))
+	--bystop;
     }
 
   if (*input_line_pointer != '.')

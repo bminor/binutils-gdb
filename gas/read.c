@@ -683,6 +683,8 @@ read_a_source_file (name)
 		    }
 		  else
 		    {		/* machine instruction */
+		      int inquote = 0;
+
 		      if (mri_pending_align)
 			{
 			  do_align (1, (char *) NULL);
@@ -693,11 +695,14 @@ read_a_source_file (name)
 		      /* Also: input_line_pointer->`\0` where c was. */
 		      *input_line_pointer = c;
 		      while (!is_end_of_line[(unsigned char) *input_line_pointer]
+			     || inquote
 #ifdef TC_EOL_IN_INSN
 			     || TC_EOL_IN_INSN (input_line_pointer)
 #endif
 			     )
 			{
+			  if (flag_mri && *input_line_pointer == '\'')
+			    inquote = ! inquote;
 			  input_line_pointer++;
 			}
 
@@ -2017,8 +2022,9 @@ s_space (mult)
 	repeat *= mult;
       if (repeat <= 0)
 	{
-	  as_warn (".space repeat count is %s, ignored",
-		   repeat ? "negative" : "zero");
+	  if (! flag_mri || repeat < 0)
+	    as_warn (".space repeat count is %s, ignored",
+		     repeat ? "negative" : "zero");
 	  ignore_rest_of_line ();
 	  return;
 	}
