@@ -1,5 +1,11 @@
 2004-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_branch_reloc): New function.
+	(ppc64_elf_howto_raw): Use ppc64_elf_branch_reloc.
+	(ppc64_elf_brtaken_reloc): Here too.
+
+2004-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (add_symbol_adjust): Correct mismatched function
 	symbol visibility.
 	(ppc64_elf_check_directives): Check that we have the right hash

@@ -35,6 +35,8 @@
 
 static bfd_reloc_status_type ppc64_elf_ha_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
+static bfd_reloc_status_type ppc64_elf_branch_reloc
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type ppc64_elf_brtaken_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type ppc64_elf_sectoff_reloc
@@ -49,7 +51,8 @@ static bfd_reloc_status_type ppc64_elf_toc64_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
-
+static bfd_vma opd_entry_value
+  (asection *, bfd_vma, asection **, bfd_vma *);
 
 #define TARGET_LITTLE_SYM	bfd_elf64_powerpcle_vec
 #define TARGET_LITTLE_NAME	"elf64-powerpcle"
@@ -305,7 +308,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 ppc64_elf_branch_reloc, /* special_function */
 	 "R_PPC64_ADDR14",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -354,7 +357,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 ppc64_elf_branch_reloc, /* special_function */
 	 "R_PPC64_REL24",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -369,7 +372,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 ppc64_elf_branch_reloc, /* special_function */
 	 "R_PPC64_REL14",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -2133,6 +2136,28 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 }
 
 static bfd_reloc_status_type
+ppc64_elf_branch_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			void *data, asection *input_section,
+			bfd *output_bfd, char **error_message)
+{
+  if (output_bfd != NULL)
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
+				  input_section, output_bfd, error_message);
+
+  if (strcmp (symbol->section->name, ".opd") == 0)
+    {
+      bfd_vma dest = opd_entry_value (symbol->section,
+				      symbol->value + reloc_entry->addend,
+				      NULL, NULL);
+      if (dest != (bfd_vma) -1)
+	reloc_entry->addend = dest - (symbol->value
+				      + symbol->section->output_section->vma
+				      + symbol->section->output_offset);
+    }
+  return bfd_reloc_continue;
+}
+
+static bfd_reloc_status_type
 ppc64_elf_brtaken_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			 void *data, asection *input_section,
 			 bfd *output_bfd, char **error_message)
@@ -2168,7 +2193,7 @@ ppc64_elf_brtaken_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
       else if ((insn & (0x14 << 21)) == (0x10 << 21))
 	insn |= 0x08 << 21;
       else
-	return bfd_reloc_continue;
+	goto out;
     }
   else
     {
@@ -2190,7 +2215,9 @@ ppc64_elf_brtaken_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 	insn ^= 0x01 << 21;
     }
   bfd_put_32 (abfd, insn, (bfd_byte *) data + octets);
-  return bfd_reloc_continue;
+ out:
+  return ppc64_elf_branch_reloc (abfd, reloc_entry, symbol, data,
+				 input_section, output_bfd, error_message);
 }
 
 static bfd_reloc_status_type
