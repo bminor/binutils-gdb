@@ -398,7 +398,7 @@ bsr (p, a)
   printf ("reg[7]-=2;\n");
   printf ("tmp = reg[7];\n");
   printf ("SET_WORD_MEM(tmp, (npc-saved_state.mem)*2);\n");
-  printf ("npc += (((char *)pc)[1])>>1;\n");
+  printf ("npc += ((char)b1)>>1;\n");
 }
 
 static void
