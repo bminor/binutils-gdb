@@ -410,13 +410,13 @@ first_writes_to_seconds_operands (a, b, check_outputs)
      const int   check_outputs;
 {
   const CGEN_OPERAND_INSTANCE * a_operands = CGEN_INSN_OPERANDS (a->insn);
-  const CGEN_OPERAND_INSTANCE * b_operands = CGEN_INSN_OPERANDS (b->insn);
+  const CGEN_OPERAND_INSTANCE * b_ops = CGEN_INSN_OPERANDS (b->insn);
   int                           a_index;
 
   /* If at least one of the instructions takes no operands, then there is
      nothing to check.  There really are instructions without operands,
      eg 'nop'.  */
-  if (a_operands == NULL || b_operands == NULL)
+  if (a_operands == NULL || b_ops == NULL)
     return 0;
       
   /* Scan the operand list of 'a' looking for an output operand.  */
@@ -427,6 +427,7 @@ first_writes_to_seconds_operands (a, b, check_outputs)
       if (CGEN_OPERAND_INSTANCE_TYPE (a_operands) == CGEN_OPERAND_INSTANCE_OUTPUT)
 	{
 	  int b_index;
+	  const CGEN_OPERAND_INSTANCE * b_operands = b_ops;
 
 	  /* Special Case:
 	     The Condition bit 'C' is a shadow of the CBR register (control

@@ -1,3 +1,9 @@
+start-sanitize-m32rx
+Tue Feb 24 18:03:25 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (first_writes_to_seconds_operands):
+	Reinitialise b_operands for each pass of the inner loop.
+end-sanitize-m32rx
 start-sanitize-sky
 Tue Feb 24 11:01:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
