@@ -1,5 +1,12 @@
 2003-09-04  Andrew Cagney  <cagney@redhat.com>
 
+	* thread-db.c (verbose_dlsym): New function.
+	(thread_db_load): Use verbose_dlsym
+	(thread_db_new_objfile): Print that libthread_db was loaded, and
+	that thread debugging was enabled.
+
+2003-09-04  Andrew Cagney  <cagney@redhat.com>
+
 	* configure.tgt: Add "mips64*-*-*" target.  Delete
 	mips64*el-*-ecoff*, mips64*el-*-elf*, mips*el-*-ecoff*,
 	mips*el-*-elf*, mips*-*-lnews*, mips*-*-sysv*, mips*-*-riscos*,
