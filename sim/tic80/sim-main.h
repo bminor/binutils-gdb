@@ -51,16 +51,6 @@ static const sim_cia null_cia = {0}; /* Dummy */
 
 struct sim_state {
 
-  /* escape route for inner functions */
-  int halt_ok;
-  jmp_buf path_to_halt;
-  int restart_ok;
-  jmp_buf path_to_restart;
-
-  /* status from last halt */
-  enum sim_stop reason;
-  int siggnal;
-
   /* the processors proper */
   sim_cpu cpu;
 #define STATE_CPU(sd, n) (&(sd)->cpu)

@@ -151,6 +151,8 @@ struct _sim_cpu {
   sim_cpu_base base;
 };
 
+#define CPU_CIA(CPU) ((CPU)->cia)
+
 #define GPR(N) ((CPU)->reg[N])
 #define GPR_SET(N, VAL) ((CPU)->reg[N] = (VAL))
 #define ACC(N) ((CPU)->acc[N])

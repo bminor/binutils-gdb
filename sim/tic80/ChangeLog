@@ -1,3 +1,11 @@
+Mon Sep  8 20:10:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (CPU_CIA): Define.
+
+	* sim-main.h (struct sim_state): Delete halt_ok, path_to_halt,
+ 	restart_ok, path_to_restart members.
+	(struct sim_state): Delete reason, siggnal members.
+	
 Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
