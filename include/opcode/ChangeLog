@@ -1,3 +1,7 @@
+Thu Jul 11 12:09:15 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (band, bclr): Force high bit of immediate nibble to zero.
+
 Wed Jul  3 14:30:12 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
  	* m68k.h (mcf5200): New macro.
