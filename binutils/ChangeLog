@@ -1,3 +1,8 @@
+2002-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_file): Report ambiguous bfd_object matches, and
+	other object errors in preference to bfd_core errors.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

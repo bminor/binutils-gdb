@@ -1418,7 +1418,8 @@ copy_file (input_filename, output_filename, input_target, output_target)
      const char *output_target;
 {
   bfd *ibfd;
-  char **matching;
+  char **obj_matching;
+  char **core_matching;
 
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
@@ -1441,11 +1442,10 @@ copy_file (input_filename, output_filename, input_target, output_target)
 
       copy_archive (ibfd, obfd, output_target);
     }
-  else if (bfd_check_format_matches (ibfd, bfd_object, &matching)
-	   || bfd_check_format_matches (ibfd, bfd_core, &matching))
+  else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
     {
       bfd *obfd;
-
+    do_copy:
       /* bfd_get_target does not return the correct value until
          bfd_check_format succeeds.  */
       if (output_target == NULL)
@@ -1465,12 +1465,33 @@ copy_file (input_filename, output_filename, input_target, output_target)
     }
   else
     {
+      bfd_error_type obj_error = bfd_get_error ();
+      bfd_error_type core_error;
+      
+      if (bfd_check_format_matches (ibfd, bfd_core, &core_matching))
+	{
+	  /* This probably can't happen..  */
+	  if (obj_error == bfd_error_file_ambiguously_recognized)
+	    free (obj_matching);
+	  goto do_copy;
+	}
+
+      core_error = bfd_get_error ();
+      /* Report the object error in preference to the core error.  */
+      if (obj_error != core_error)
+	bfd_set_error (obj_error);
+
       bfd_nonfatal (input_filename);
 
-      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
+      if (obj_error == bfd_error_file_ambiguously_recognized)
 	{
-	  list_matching_formats (matching);
-	  free (matching);
+	  list_matching_formats (obj_matching);
+	  free (obj_matching);
+	}
+      if (core_error == bfd_error_file_ambiguously_recognized)
+	{
+	  list_matching_formats (core_matching);
+	  free (core_matching);
 	}
 
       status = 1;
