@@ -3131,7 +3131,55 @@ Sun Feb  2 00:55:14 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 Sat Feb  1 23:51:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
-	* gdb.*/*.exp: Replace $prompt with $gdb_prompt.
+	* lib/gdb.exp: Replace $prompt with $gdb_prompt.
+	* config/gdbserver.exp: Ditto.
+	* config/m32r-stub.exp: Ditto.
+	* config/monitor.exp: Ditto.
+	* config/netware.exp: Ditto.
+	* config/nind.exp: Ditto.
+	* config/sim.exp: Ditto.
+	* config/slite.exp: Ditto.
+	* config/sparclet.exp: Ditto.
+	* config/udi.exp: Ditto.
+	* config/vx.exp: Ditto.
+	* gdb.base/a2-run.exp: Ditto.
+	* gdb.base/bitfields.exp: Ditto.
+	* gdb.base/break.exp: Ditto.
+	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/commands.exp: Ditto.
+	* gdb.base/corefile.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/gdbvars.exp: Ditto.
+	* gdb.base/help.exp: Ditto.
+	* gdb.base/interrupt.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/printcmds.exp: Ditto.
+	* gdb.base/ptype.exp: Ditto.
+	* gdb.base/return.exp: Ditto.
+	* gdb.base/scope.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/setvar.exp: Ditto.
+	* gdb.base/sigall.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+	* gdb.base/structs.exp: Ditto.
+	* gdb.base/term.exp: Ditto.
+	* gdb.base/watchpoint.exp: Ditto.
+	* gdb.c++/classes.exp: Ditto.
+	* gdb.c++/cplusfuncs.exp: Ditto.
+	* gdb.c++/demangle.exp: Ditto.
+	* gdb.c++/inherit.exp: Ditto.
+	* gdb.c++/misc.exp: Ditto.
+	* gdb.c++/templates.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Ditto.
+	* gdb.disasm/hppa.exp: Ditto.
+	* gdb.disasm/sh3.exp: Ditto.
+	* gdb.fortran/exprs.exp: Ditto.
+	* gdb.fortran/types.exp: Ditto.
+	* gdb.stabs/weird.exp: Ditto.
+	* gdb.threads/pthreads.exp: Ditto.
+	* gdb.threads/step.exp: Ditto.
+	* gdb.threads/step2.exp: Ditto.
 	
 	* gdb.base/scope.exp: Use gdb_test.
 	* gdb.c++/classes.exp: Ditto.
