@@ -2,7 +2,7 @@
 
 # The MetaWare compiler will generate a copyright message unless you
 # turn it off by adding the -Hnocopyr flag.
-CFLAGS = -g
+CC = cc -Hnocopyr
 
 # Define SYSV as -DSYSV if you are using a System V operating system.
 SYSV = -DSYSV -DSVR4
