@@ -539,14 +539,14 @@ val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
 		fputs_filtered ("\"( ptr \"", stream);
 	      else
 		fputs_filtered ("\"( nodef \"", stream);
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
 	      fputs_filtered ("\" \"", stream);
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
 	      fputs_filtered ("\") \"", stream);
 	    }
 	  else
 	    {
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
 	      fputs_filtered (" = ", stream);
 	    }
 	  if (TYPE_FIELD_PACKED (type, i))

@@ -24,6 +24,8 @@ Tue Jun 23 21:46:26 1992  Fred Fish  (fnf@cygnus.com)
 	ptrace().
 	* cadillac.c (kernel_dispatch):  Make return type void.
 	* cadillac.c (iosig):  Signal handlers take one int arg.
+	* valprint.c (val_print_fields):  Call fprint_symbol to get
+	automatic C++ demangling for mangled field names.
 
 Mon Jun 22 20:18:06 1992  Fred Fish  (fnf@cygnus.com)
 
