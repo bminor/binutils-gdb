@@ -1,3 +1,17 @@
+Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (build_alias): Define.
+	(arch): Define.
+	(RUNTEST_FOR_TARGET): Delete.
+	(RUNTEST): Fix.
+	(SCHEME,SCHEMEFLAGS,CGENDIR,CGENFLAGS,CGENFILES): Define.
+	(check): Depend on site.exp.  Run dejagnu.
+	(site.exp): New target.
+	(cgen): New target.
+	* configure.in: Call AC_CHECK_PROG(SCHEME) if using cgen.
+	(arch): Define from target_cpu.
+	* configure: Regenerate.
+
 Wed Sep 17 10:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* common/bits-gen.c (gen_bit): Pass in the full name of the macro.
@@ -21,11 +35,11 @@ Mon Sep  1 16:43:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.in (configdirs): Test for the target directory instead
  	of matching on a target.
 
-end-sanitize-r5900
+start-sanitize-r5900
 Tue Jul 15 13:43:20 1997  Andrew Cagney  <cagney@sendai.cygnus.com>
 
-	* configure.in (configdirs): Configure mipsr5900rv5900el
+	* configure.in (configdirs): Configure mips64vr5900el
  	directory.
 	* configure: Regenerate.
 
-start-sanitize-r5900
+end-sanitize-r5900

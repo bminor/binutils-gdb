@@ -21,6 +21,22 @@ if test -r ${srcdir}/${testdir}/configure ; then
   configdirs="${configdirs} $testdir"
 fi
 
+case $target in
+  m32r-*-*) use_cgen=yes ;;
+  *) use_cgen=no ;;
+esac
+if test $use_cgen = yes ; then
+    AC_CHECK_PROG(SCHEME, guile, guile, guile)
+fi
+
+# Compute the target architecture.
+# FIXME: Will need to canonicalize some values.
+# FIXME: Should be in generally accessable place.
+case $target in
+  *) arch=${target_cpu} ;;
+esac
+AC_SUBST(arch)
+
 # configure the subdirectories too
 AC_CONFIG_SUBDIRS($configdirs)
 
