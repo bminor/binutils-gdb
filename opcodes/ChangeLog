@@ -1,3 +1,11 @@
+Tue Jan 30 14:06:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dis-buf.c: Include "sysdep.h" before "dis-asm.h".
+
+Thu Jan 25 20:24:07 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-opc.c (sparc_opcode_archs): Mark v8/sparclite as conflicting.
+
 Thu Jan 25 11:56:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386-dis.c (print_insn_i386): Only fetch the mod/reg/rm byte
