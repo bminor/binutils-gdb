@@ -199,7 +199,8 @@ MY_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *obfd;
      asection *osec;
 {
-  obj_aout_subformat (obfd) = obj_aout_subformat (ibfd);
+  if (bfd_get_flavour (obfd) == bfd_target_aout_flavour)
+    obj_aout_subformat (obfd) = obj_aout_subformat (ibfd);
   return true;
 }
 
@@ -359,6 +360,9 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef	MY_truncate_arname
 #define	MY_truncate_arname		bfd_bsd_truncate_arname
+#endif
+#ifndef MY_update_armap_timestamp
+#define MY_update_armap_timestamp _bfd_archive_bsd_update_armap_timestamp
 #endif
 
 /* No core file defined here -- configure in trad-core.c separately.  */
