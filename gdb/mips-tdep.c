@@ -5375,10 +5375,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: TRACE_SET # %s\n",
 		      XSTRING (TRACE_SET (X, STATE)));
 #endif
-#ifdef UNUSED_REGNUM
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: UNUSED_REGNUM = %d\n", UNUSED_REGNUM);
-#endif
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: VM_MIN_ADDRESS = %ld\n",
 		      (long) VM_MIN_ADDRESS);

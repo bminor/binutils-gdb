@@ -1,5 +1,12 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.h: Add comments on registers.
+	(MIPS_UNUSED_REGNUM): Define.
+	* config/mips/tm-mips.h (ZERO_REGNUM, UNUSED_REGNUM)
+	(T9_REGNUM, V0_REGNUM, A0_REGNUM): Delete.
+	* irix5-nat.c, mipsv4-nat.c, mips-linux-tdep.c: Update.
+	* mips-linux-nat.c, remote-mips.c: Update.
+
 	* config/mips/tm-mips.h (t_insn): Delete.
 	* mips-tdep.c (mips_fetch_instruction, mips_skip_trampoline_code):
 	Replace t_insn with ULONGEST.

@@ -76,7 +76,7 @@ mips_linux_get_longjmp_target (CORE_ADDR *pc)
   CORE_ADDR jb_addr;
   char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
 
-  jb_addr = read_register (A0_REGNUM);
+  jb_addr = read_register (MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr
 			  + MIPS_LINUX_JB_PC * MIPS_LINUX_JB_ELEMENT_SIZE,
@@ -129,7 +129,7 @@ supply_gregset (elf_gregset_t *gregsetp)
 		    (char *)(regp + EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
-  regcache_raw_supply (current_regcache, UNUSED_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }
@@ -367,7 +367,7 @@ mips64_linux_get_longjmp_target (CORE_ADDR *pc)
   void *buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   int element_size = TARGET_PTR_BIT == 32 ? 4 : 8;
 
-  jb_addr = read_register (A0_REGNUM);
+  jb_addr = read_register (MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr + MIPS64_LINUX_JB_PC * element_size,
 			  buf, TARGET_PTR_BIT / TARGET_CHAR_BIT))
@@ -408,7 +408,7 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
 		       (char *)(regp + MIPS64_EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
-  regcache_raw_supply (current_regcache, UNUSED_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }

@@ -68,7 +68,7 @@ supply_gregset (gregset_t *gregsetp)
 		       mips_regnum (current_gdbarch)->badvaddr,
 		       zerobuf);
   regcache_raw_supply (current_regcache, DEPRECATED_FP_REGNUM, zerobuf);
-  regcache_raw_supply (current_regcache, UNUSED_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, MIPS_UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi <= LAST_EMBED_REGNUM; regi++)
     regcache_raw_supply (current_regcache, regi, zerobuf);
 }
@@ -161,7 +161,7 @@ get_longjmp_target (CORE_ADDR *pc)
   CORE_ADDR jb_addr;
 
   buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
-  jb_addr = read_register (A0_REGNUM);
+  jb_addr = read_register (MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr + _JB_PC * JB_ELEMENT_SIZE, buf,
 			  TARGET_PTR_BIT / TARGET_CHAR_BIT))

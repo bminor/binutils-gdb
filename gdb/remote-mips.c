@@ -1905,7 +1905,7 @@ mips_fetch_registers (int regno)
       return;
     }
 
-  if (regno == DEPRECATED_FP_REGNUM || regno == ZERO_REGNUM)
+  if (regno == DEPRECATED_FP_REGNUM || regno == MIPS_ZERO_REGNUM)
     /* DEPRECATED_FP_REGNUM on the mips is a hack which is just
        supposed to read zero (see also mips-nat.c).  */
     val = 0;
