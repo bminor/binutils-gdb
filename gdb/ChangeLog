@@ -1,5 +1,10 @@
 2003-06-27  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): New
+	function.
+	(ppc_linux_init_abi): Register it as the
+	CONVERT_FROM_FUNC_PTR_ADDR method under the PPC64 Linux ABI.
+
 	* ppc-linux-tdep.c (ppc64_call_dummy_address): New function.
 	(ppc_linux_init_abi): Set it as the gdbarch's call_dummy_address
 	method.
