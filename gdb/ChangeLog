@@ -1,5 +1,23 @@
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* thread-db.c (attach_thread): Prototype.
+	(struct private_thread_info): Remove lwpid.  Add thread handle (th),
+	thread information (ti), and valid flags (th_valid, ti_valid).
+	(attach_thread): Move target_pid_to_str call to after the thread
+	is added to GDB's list.  Initialize the cache.
+	(thread_get_info_callback, thread_db_map_id2thr)
+	(thread_db_get_info): New functions.
+	(thread_from_lwp, lwp_from_thread, thread_db_fetch_registers)
+	(thread_db_store_registers, thread_db_thread_alive)
+	(thread_db_get_thread_local_address): Use them.
+	(thread_db_pid_to_str): Likewise.  Return "Missing" instead
+	of calling error() for threads in unknown state.
+
+	(clear_lwpid_callback): New function.
+	(thread_db_resume): Use it to clear the cache.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* lin-lwp.c (struct private_thread_info, find_lwp_callback): Remove.
 	(resume_callback): Remove dead code.
 
