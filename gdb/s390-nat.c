@@ -138,7 +138,7 @@ int
 s390_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
 {
   CORE_ADDR hi_addr = addr + len - 1;
-  watch_area *newarea = (watch_area *) malloc (sizeof (watch_area));
+  watch_area *newarea = (watch_area *) xmalloc (sizeof (watch_area));
 
 
   if (newarea)
@@ -205,7 +205,7 @@ s390_remove_watchpoint (int pid, CORE_ADDR addr, int len)
     }
   if (matchCurr)
     {
-      free (matchCurr);
+      xfree (matchCurr);
       watch_area_cnt--;
       if (watch_area_cnt)
 	{

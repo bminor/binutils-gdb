@@ -1,5 +1,10 @@
 2001-10-31  Andrew Cagney  <ac131313@redhat.com>
 
+	* s390-nat.c (s390_remove_watchpoint): Use xfree.
+	(s390_insert_watchpoint): Use xmalloc.
+
+2001-10-31  Andrew Cagney  <ac131313@redhat.com>
+
 	* varobj.c: Replace value_ptr with ``struct value *''.
 
 2001-10-31  Andrew Cagney  <ac131313@redhat.com>
