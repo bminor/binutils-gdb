@@ -1,3 +1,11 @@
+Wed Nov 26 15:02:43 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+    	* gdbtk.c (gdb_loc): symtab_to_filename can return NULL
+	(breakpoint_notify): symtab_to_filename can return NULL
+	(gdb_get_breakpoint_info): symtab_to_filename can return NULL
+
+	* tracepoint.c (set_raw_tracepoint): fix typo
+
 Wed Nov 26 11:33:09 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* tracepoint.c (set_raw_tracepoint): make sure there's a trailing slash on

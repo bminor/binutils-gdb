@@ -41,6 +41,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 extern int info_verbose;
+extern void (*readline_begin_hook) PARAMS ((char *, ...));
+extern char * (*readline_hook) PARAMS ((char *));
+extern void (*readline_end_hook) PARAMS ((void));
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
@@ -299,8 +302,9 @@ set_raw_tracepoint (sal)
 
       strcpy (t->source_file, sal.symtab->dirname);
       p = t->source_file;
-      while (*p++) ;
-      if (*p != '/')            /* Will this work on Windows? */
+      while (*p)
+        p++;
+      if (*(--p) != '/')            /* Will this work on Windows? */
         strcat (t->source_file, "/");
       strcat (t->source_file, sal.symtab->filename);
     }
@@ -710,14 +714,25 @@ trace_actions_command (args, from_tty)
 {
   struct tracepoint *t;
   char *actions;
+  char tmpbuf[128];
+  char *end_msg = "End with a line saying just \"end\".";
 
   if (t = get_tracepoint_by_number (&args))
     {
-      if (from_tty)
-	printf_filtered ("Enter actions for tracepoint %d, one per line.\n", 
-			 t->number);
+      sprintf (tmpbuf, "Enter actions for tracepoint %d, one per line.",
+	       t->number);
+
+      if (readline_begin_hook)
+	(*readline_begin_hook) ("%s  %s\n", tmpbuf, end_msg);
+      else if (from_tty && input_from_terminal_p ())
+	printf_filtered ("%s\n%s\n", tmpbuf, end_msg);
+
       free_actions (t);
       read_actions (t);
+
+      if (readline_end_hook)
+	(*readline_end_hook) ();
+
       /* tracepoints_changed () */
     }
   /* else error, just return; */
@@ -758,7 +773,10 @@ read_actions (t)
       wrap_here ("");
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
-      if (instream == stdin && ISATTY (instream))
+
+      if (readline_hook && instream == NULL)
+	line = (*readline_hook) (prompt);
+      else if (instream == stdin && ISATTY (instream))
 	line = readline (prompt);
       else
 	line = gdb_readline (0);

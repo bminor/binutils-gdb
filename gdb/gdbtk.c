@@ -464,8 +464,8 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
   int bpnum;
   struct breakpoint *b;
   extern struct breakpoint *breakpoint_chain;
-  char *funcname;
-
+  char *funcname, *filename;
+  
   if (argc != 2)
     error ("wrong # args");
 
@@ -480,7 +480,10 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
 
   sal = find_pc_line (b->address, 0);
 
-  Tcl_DStringAppendElement (result_ptr, symtab_to_filename (sal.symtab));
+  filename = symtab_to_filename (sal.symtab);
+  if (filename == NULL)
+    filename = "N/A";
+  Tcl_DStringAppendElement (result_ptr, );
   find_pc_partial_function (b->address, &funcname, NULL, NULL);
   Tcl_DStringAppendElement (result_ptr, funcname);
   dsprintf_append_element (result_ptr, "%d", sal.line);
@@ -511,6 +514,7 @@ breakpoint_notify(b, action)
   char buf[256];
   int v;
   struct symtab_and_line sal;
+  char *filename;
 
   if (b->type != bp_breakpoint)
     return;
@@ -518,8 +522,11 @@ breakpoint_notify(b, action)
   /* We ensure that ACTION contains no special Tcl characters, so we
      can do this.  */
   sal = find_pc_line (b->address, 0);
+  filename = symtab_to_filename (sal.symtab);
+  if (filename == NULL)
+    filename = "N/A";
   sprintf (buf, "gdbtk_tcl_breakpoint %s %d 0x%lx %d {%s}", action, b->number, 
-	   (long)b->address, sal.line, symtab_to_filename (sal.symtab));
+	   (long)b->address, sal.line, filename);
 
   v = Tcl_Eval (interp, buf);
 
@@ -605,6 +612,8 @@ gdb_loc (clientData, interp, argc, argv)
   Tcl_DStringAppendElement (result_ptr, funcname);
 
   filename = symtab_to_filename (sal.symtab);
+  if (filename == NULL)
+    filename = "N/A";
   Tcl_DStringAppendElement (result_ptr, filename);
 
   dsprintf_append_element (result_ptr, "%d", sal.line); /* line number */
