@@ -1,0 +1,108 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; gdb code changes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+/*
+ * Core Problem:  when gdb says something like (../src/file.c 1234), the
+ * real file might be in any of the active dirs in use by gdb and thus
+ * emacs can not always find the file at "../src".  Emacs cannot just
+ * scan for GDB dir commands because these might be given in the .gdbinit
+ * file or other scripts.  The only solution is to have gdb be a bit more
+ * specific when it prints file names.
+ * 
+ * Remaining defects:
+ * 
+ * 1. Do I really have to open the file to find out if it exists?
+ *    There should be a faster way.
+ * 
+ * 2. Should there be a bdb command to toggle between short and absolute
+ * forms of the file name?
+ */
+
+
+/* Add this to ~emacs/gdb/source.c after the openp function */
+
+char *
+get_absolute_filename(table)
+/* Added by Lynn Slater, Silvar-Lisco 10/6/87
+   returns the address of the best possible name to use for the file
+   in the passed symtab.  Returns the filename if the path cannot be
+   resolved.
+   Please remember to free the absolute name after use.*/
+struct symtab *table;
+{
+  register int desc;
+  char *absolute_name;
+
+  desc = openp (source_path, 0, table->filename, O_RDONLY, 0, &absolute_name);
+  if (desc < 0)
+    return( savestring(table->filename, strlen(table->filename)));
+
+  close (desc);
+  return(absolute_name);
+}
+
+/* Replace this fcn in ~emacs/gdb/stack.c */
+void
+print_frame_info (fi, level, source, args)
+     struct frame_info *fi;
+     register int level;
+     int source;
+     int args;
+{
+  register FRAME frame = fi->frame;
+  struct symtab_and_line sal;
+  struct symbol *func;
+  register char *funname = 0;
+  int numargs;
+
+  sal = find_pc_line (fi->pc, fi->next_frame);
+  func = get_frame_function (frame);
+  if (func)
+    funname = SYMBOL_NAME (func);
+  else
+    {
+      register int misc_index = find_pc_misc_function (fi->pc);
+      if (misc_index >= 0)
+	funname = misc_function_vector[misc_index].name;
+    }
+
+  if (source >= 0 || !sal.symtab)
+    {
+      /* This avoids a bug in cc on the sun.  */
+      struct frame_info tem;
+      tem = *fi;
+
+      if (level >= 0)
+	printf ("#%-2d ", level);
+      if (fi->pc != sal.pc || !sal.symtab)
+	printf ("0x%x in ", fi->pc);
+      printf ("%s (", funname ? funname : "??");
+      if (args)
+        {
+	  FRAME_NUM_ARGS (numargs, tem);
+	  print_frame_args (func, FRAME_ARGS_ADDRESS (tem), numargs, stdout);
+	}
+      printf (")");
+      if (sal.symtab)
+        {
+	  char * absolute_filename;
+	  absolute_filename = (char *) get_absolute_filename(sal.symtab);
+	  printf (" (%s line %d)", absolute_filename, sal.line);
+	  free(absolute_filename);
+	}
+      printf ("\n");
+    }
+
+  if (source != 0 && sal.symtab)
+    {
+      if (source < 0 && fi->pc != sal.pc)
+	printf ("0x%x\t", fi->pc);
+      print_source_lines (sal.symtab, sal.line, sal.line + 1);
+      current_source_line = max (sal.line - 5, 1);
+    }
+  if (source != 0)
+    set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
+
+  fflush (stdout);
+}
+

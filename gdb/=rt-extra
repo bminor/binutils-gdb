@@ -1,0 +1,84 @@
+BABYL OPTIONS:
+Version: 5
+Labels:
+Note:   This is the header of an rmail file.
+Note:   If you are seeing it in rmail,
+Note:    it means the file has no messages in it.
+
+1,,
+Received: by PREP.AI.MIT.EDU; Mon, 25 May 87 04:03:20 EDT
+Message-Id: <8705250803.AA14993@prep.ai.mit.edu>
+Received: by po2.andrew.cmu.edu (5.54/3.15) id <AA00199> for rms@prep.ai.mit.edu; Mon, 25 May 87 04:02:41 EDT
+Received: via switchmail; Mon, 25 May 87 04:02:29 edt
+Received: FROM z.itc.cmu.edu VIA qmail
+          ID </cmu/common/mailqs/q004/QF.z.itc.cmu.edu.20b7fa53.6bb39>;
+          Mon, 25 May 87 04:01:27 edt
+Received: FROM z.itc.cmu.edu VIA qmail
+          ID </cmu/itc/zs01/.Outgoing/QF.z.itc.cmu.edu.20b7fa49.a49502>;
+          Mon, 25 May 87 04:01:15 edt
+From: zs01#@andrew.cmu.edu (Zalman Stern)
+Date: Mon, 25 May 87 04:01:13 edt
+To: rms@prep.ai.mit.edu
+Subject: Small diff to yesterdays gdb diffs.
+
+*** EOOH ***
+From: zs01#@andrew.cmu.edu (Zalman Stern)
+Date: Mon, 25 May 87 04:01:13 edt
+To: rms@prep.ai.mit.edu
+Subject: Small diff to yesterdays gdb diffs.
+
+Richard,
+
+Here is another minor diff to the diassembler to get certain conditional
+branches instructions correct...
+
+Also, I noticed that gcc.tar.Z is out of date with respect to gcc.tar .
+When I go to get these files, should I go ahead and replace the compressed
+version with a newer one or should I leave it alone? Likewise, should I try and
+make a split version on prep?
+
+-Z-
+
+*** ibm032-pinsn.c.old	Mon May 25 03:31:04 1987
+--- ibm032-pinsn.c	Mon May 25 03:47:12 1987
+***************
+*** 101,112 ****
+      }
+    }
+    else { /* Conditional branches are hacked. */
+!     switch (type & 0x0f) {
+  
+        int displacement;
+  
+        case ibm032_JI:
+!         fprintf(stream, ibm032_opcodes[opcodeIndex].mnemonic, mapCondition(type & ibm032_negative, buffer[0] & LOW4));
+        putc('\t', stream);
+        print_address((buffer[1] << 1) + memaddr, stream);
+        return 2;
+--- 101,112 ----
+      }
+    }
+    else { /* Conditional branches are hacked. */
+!     switch (type & LOW4) {
+  
+        int displacement;
+  
+        case ibm032_JI:
+!         fprintf(stream, ibm032_opcodes[opcodeIndex].mnemonic, mapCondition(type & ibm032_negative, (buffer[0] & LOW3) + 8));
+        putc('\t', stream);
+        print_address((buffer[1] << 1) + memaddr, stream);
+        return 2;
+*** ibm032-opcode.h.old	Mon May 25 03:33:19 1987
+--- ibm032-opcode.h	Mon May 25 03:33:24 1987
+***************
+*** 11,16 ****
+--- 11,17 ----
+  
+  /* Various useful bit masks. */
+  #define ibm032_typeMask		0x0f /* Mask to get actual type info out of instruction type. */
++ #define LOW3			0x07
+  #define LOW4			0x0f
+  #define HIGH4			0xf0
+  #define LOW16			0x0000ffff
+
+

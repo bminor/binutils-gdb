@@ -1,0 +1,51 @@
+Symtab for file libg.s
+
+Line table:
+
+ line 2 at 20e4
+
+Blockvector:
+
+block #000 (object 0x56f90) [0x20e4..0x20e4]
+  block #001 (object 0x56f7c) [0x20e4..0x20e4] (under 0x56f90)
+
+
+Symtab for file bar.c
+
+Line table:
+
+ line 1 at 20a0
+ line 1 at 20ae
+ line 4 at 20ae
+ line 5 at 20b8
+ line 4 at 20be
+ line 6 at 20c4
+ line 9 at 20c8
+ line 9 at 20d6
+ line 12 at 20d6
+ line 13 at 20de
+
+Blockvector:
+
+block #000 (object 0x56f4c) [0x20a0..0x20e4]
+ int bar; block (object 0x56ef0) starting at 0x20c8,
+ int main; block (object 0x56ea8) starting at 0x20a0,
+  block #001 (object 0x56f08) [0x20a0..0x20e4] (under 0x56f4c)
+   typedef int ???; 
+   typedef char char; 
+   typedef double double; 
+   typedef float float; 
+   typedef int int; 
+   typedef int long; 
+   typedef short short; 
+   typedef unsigned char unsigned char; 
+   typedef unsigned int unsigned int; 
+   typedef unsigned int unsigned long; 
+   typedef unsigned short unsigned short; 
+   typedef void void; 
+    block #002 (object 0x56ea8) [0x20a0..0x20c8] (under 0x56f08) main
+     int i; local at 0xfffffffc,
+    block #003 (object 0x56ef0) [0x20c8..0x20e4] (under 0x56f08) bar
+     int i; local at 0xfffffffc,
+
+

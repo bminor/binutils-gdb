@@ -1,0 +1,114 @@
+Symtab for file _globals_
+
+Line table:
+
+
+Blockvector:
+
+block #000 (object 0x41a5cc) [0x0..0x0]
+ char _ac_s[0]; static at 0x4001d0,
+ int _dbargs; static at 0x4002c8,
+ int environ; static at 0x4001c4,
+ int splimit%; static at 0x4001c0,
+  block #001 (object 0x41a5a8) [0x0..0x0] (under 0x41a5cc)
+
+
+Symtab for file copyright.c
+
+Line table:
+
+
+Blockvector:
+
+block #000 (object 0x41a460) [0x0..0x0]
+  block #001 (object 0x41a444) [0x0..0x0] (under 0x41a460)
+   char *_ac_r; static at 0x4001cc,
+
+
+Symtab for file fakcu.c
+
+Line table:
+
+ line 23 at 194
+ line 24 at 1aa
+
+Blockvector:
+
+block #000 (object 0x41a3f0) [0x0..0x0]
+ void _cleanup; block (object 0x41a380) starting at 0x194,
+  block #001 (object 0x41a3d4) [0x0..0x0] (under 0x41a3f0)
+   char *_ac_r; static at 0x4001c8,
+    block #002 (object 0x41a380) [0x194..0x1b0] (under 0x41a3d4) _cleanup
+
+
+Symtab for file cuexit.s
+
+Line table:
+
+
+Blockvector:
+
+block #000 (object 0x41f210) [0x0..0x0]
+  block #001 (object 0x41f1ec) [0x0..0x0] (under 0x41f210)
+
+
+Symtab for file initfpu.s
+
+Line table:
+
+
+Blockvector:
+
+block #000 (object 0x41e1c4) [0x0..0x0]
+  block #001 (object 0x41e1a0) [0x0..0x0] (under 0x41e1c4)
+
+
+Symtab for file dbxxx.s
+
+Line table:
+
+
+Blockvector:
+
+block #000 (object 0x41d178) [0x0..0x0]
+  block #001 (object 0x41d154) [0x0..0x0] (under 0x41d178)
+
+
+Symtab for file foo.c
+
+Line table:
+
+ line 1 at e4
+ line 2 at fa
+ line 4 at fa
+ line 5 at 106
+ line 6 at 112
+ line 7 at 126
+ line 9 at 126
+ line 10 at 13c
+ line 12 at 13c
+ line 13 at 144
+
+Blockvector:
+
+block #000 (object 0x41a2d8) [0x0..0x0]
+ int bar; block (object 0x41a2b0) starting at 0x126,
+ int main; block (object 0x41a220) starting at 0xe4,
+  block #001 (object 0x41a23c) [0x0..0x0] (under 0x41a2d8)
+    block #002 (object 0x41a220) [0xe4..0x120] (under 0x41a23c) main
+     int i; local at 0xfffffffc,
+    block #003 (object 0x41a2b0) [0x126..0x150] (under 0x41a23c) bar
+     int i; local at 0xfffffffc,
+
+
+Symtab for file crt0.s
+
+Line table:
+
+
+Blockvector:
+
+block #000 (object 0x41b178) [0x0..0x0]
+  block #001 (object 0x41b154) [0x0..0x0] (under 0x41b178)
+
+
