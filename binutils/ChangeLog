@@ -1,5 +1,9 @@
 2001-01-24  Mark Elbrecht  <snowball3@bigfoot.com>
 
+	* ieee.c: Update copyright.
+	(ieee_start_compilation_unit): Don't check for backslashes
+	unless HAVE_DOS_BASED_FILE_SYSTEM is defined.
+
 	* stabs.c: Update copyright. Include "filenames.h".
 	(parse_stab): Use IS_ABSOLUTE_PATH. Ignore N_WARNING stabs.
 
@@ -16,7 +20,7 @@
 	endianness of the input object file.
 
 	* binutils.texi: Explain that objcopy cannot convert endianness.
-	
+
 2001-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (string_table_length): New variable.
@@ -199,7 +203,7 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* binutils.texi: Document new command line switches.
 	* objcopy.1: Docuemnt the new command line switches.
 	* NEWS: Announce the existence of the new command line switches.
-	
+
 2000-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Jim Wilson as the maintainer for the IA64
@@ -214,7 +218,7 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* readelf.c (get_machine_flags): Also print EF_MIPS_MACH field.
 
 	* NEWS: Mention support for MIPS32.
-	
+
 2000-09-08  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Stephane Carrez as maintainer for 68HC[11|12].
@@ -245,7 +249,7 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* aclocal.m4: Regenerate.
 	* config.in: Regenerate.
 	* po/binutils.pot: Regenerate.
-	
+
 2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
 
 	* acinclude.m4: Include libtool and gettext macros from the
@@ -324,10 +328,10 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
-        * binutils/nm.c: Add optional style to demangle switch.
-        * binutils/objdump.c: Add optional style to demangle switch.
-        * binutils/addr2line.c: Add optional style to demangle switch.
-        * binutils/binutils.texi: Document optional style to demangle
+	* binutils/nm.c: Add optional style to demangle switch.
+	* binutils/objdump.c: Add optional style to demangle switch.
+	* binutils/addr2line.c: Add optional style to demangle switch.
+	* binutils/binutils.texi: Document optional style to demangle
 	switch.
 
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
@@ -625,7 +629,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	* Makefile.in: Rebuild.
 	* readelf.c: Include elf/ia64.h.
 	(guess_is_rela, dump_relocations): Handle EM_IA_64.
-	
+
 2000-04-17  Timothy Wall  <twall@cygnus.com>
 
 	* objdump.c (disassemble_data): Set octets per byte *after*
@@ -636,7 +640,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	* arlex.l: Add directives to increase lex buffer size.
 
 	* objdump.c, readelf.c: Don't include strarg.h or varargs.h. They are
-        already included by bucomm.h.
+	already included by bucomm.h.
 
 2000-04-10  Philippe De Muyter  <phdm@macqel.be>
 
@@ -645,9 +649,9 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	(process_mips_specific): Ditto.
 
 Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
- 
+
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
- 	--enable-build-warnings option.
+	--enable-build-warnings option.
 	* Makefile.am (AM_CFLAGS, WARN_CFLAGS): Add definitions.
 	* Makefile.in, configure: Re-generate.
 
@@ -765,7 +769,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* readelf.c (decode_ARM_machine_flags): New function.
 	(get_machine_flags): Call decode_ARM_machine_flags for ARM
 	targets.
-	
+
 	(get_machine_name): Catch EM_AVR
 
 2000-04-05  Alan Modra  <alan@linuxcare.com.au>
@@ -941,15 +945,15 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* binutils/objdump.c (dump_section_header, find_symbol_for_address,
 	show_line, disassemble_bytes, disassemble_data, dump_data):
 	distinguish between octets and bytes.
-	
+
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
-        * nm.c (print_symbol_info_bsd): Use bfd_is_undefined_symclass to
+	* nm.c (print_symbol_info_bsd): Use bfd_is_undefined_symclass to
 	check to unresolved symbols.
-        (print_symbol_info_sysv):  Ditto.
-        (print_symbol_info_posix):  Ditto.
+	(print_symbol_info_sysv):  Ditto.
+	(print_symbol_info_posix):  Ditto.
 
-        * binutils.texi: Document new 'V' symclass flag for nm.
+	* binutils.texi: Document new 'V' symclass flag for nm.
 
 2000-01-27  Nick Clifton  <nickc@redhat.com>
 
@@ -995,28 +999,28 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-01-07  Mumit Khan  <khan@xraylith.wisc.edu>
 
-	* windres.c (long_options): Add --use-temp-file and 
+	* windres.c (long_options): Add --use-temp-file and
 	--no-use-temp-file options.
 	(usage): Document.
 	(main): Handle.
-	
+
 	* windres.h: Update read_rc_file prototype.
-	
+
 	* resrc.c (cpp_temp_file): New static variable.
 	(istream_type): New static variable.
 	(close_pipe): Delete function.
 	(run_cmd): New static function.
 	(open_input_stream): New static function.
 	(close_input_stream): New static function.
-	(look_for_default): Handle DOS directory separator. Use 
+	(look_for_default): Handle DOS directory separator. Use
 	open_input_stream instead of popen.
 	(read_rc_file): Likewise.
-	
+
 	* binutils.texi: Document --use-temp-file, --no-use-temp-file
-	options. 
+	options.
 
 2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
- 
+
 	* dlltool.c (create_compat_implib): New variable.
 	(gen_exp_file): Use.
 	(make_one_lib_file): Use.
@@ -1030,7 +1034,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-01-03  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils.texi: Document new, ARM specific disassembler
-          command line switch "-M force-thumb".For older changes see ChangeLog-9697
+	command line switch "-M force-thumb".
 
 For older changes see ChangeLog-9899
 
