@@ -280,7 +280,7 @@ extern value_ptr value_neg PARAMS ((value_ptr arg1));
 
 extern value_ptr value_complement PARAMS ((value_ptr arg1));
 
-extern value_ptr value_struct_elt PARAMS ((value_ptr *argp, value *args,
+extern value_ptr value_struct_elt PARAMS ((value_ptr *argp, value_ptr *args,
 					   char *name,
 					   int *static_memfuncp, char *err));
 
@@ -432,6 +432,9 @@ print_floating PARAMS ((char *valaddr, struct type *type, GDB_FILE *stream));
 
 extern int value_print PARAMS ((value_ptr val, GDB_FILE *stream, int format,
 				enum val_prettyprint pretty));
+
+extern value_ptr
+value_release_to_mark PARAMS ((value_ptr mark));
 
 extern int
 val_print PARAMS ((struct type *type, char *valaddr, CORE_ADDR address,

@@ -624,8 +624,9 @@ switch_thread:
 	single_step (0);	/* This actually cleans up the ss */
 #endif /* NO_SINGLE_STEP */
       
-/* If PC is pointing at a nullified instruction, then step beyond it so that
-   the user won't be confused when GDB appears to be ready to execute it. */
+      /* If PC is pointing at a nullified instruction, then step beyond
+	 it so that the user won't be confused when GDB appears to be ready
+	 to execute it. */
 
       if (INSTRUCTION_NULLIFIED)
 	{
@@ -633,7 +634,33 @@ switch_thread:
 	  continue;
 	}
 
-      set_current_frame ( create_new_frame (read_fp (), stop_pc));
+      set_current_frame (create_new_frame (read_fp (), stop_pc));
+      select_frame (get_current_frame (), 0);
+
+#ifdef HAVE_STEPPABLE_WATCHPOINT
+      /* It may not be necessary to disable the watchpoint to stop over
+	 it.  For example, the PA can (with some kernel cooperation) 
+	 single step over a watchpoint without disabling the watchpoint.  */
+      if (STOPPED_BY_WATCHPOINT (w))
+	{
+	  resume (1, 0);
+	  continue;
+	}
+#endif
+
+#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
+      /* It is far more common to need to disable a watchpoint
+	 to step the inferior over it.  FIXME.  What else might
+	 a debug register or page protection watchpoint scheme need
+	 here?  */
+      if (STOPPED_BY_WATCHPOINT (w))
+	{
+	  remove_breakpoints ();
+	  resume (1, 0);
+	  insert_breakpoints ();
+	  continue;
+	}
+#endif
 
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_sp ();
@@ -1404,8 +1431,6 @@ Further execution is probably impossible.\n");
      if we have one.  */
   if (!stop_stack_dummy)
     {
-      select_frame (get_current_frame (), 0);
-
       if (stop_print_frame)
 	{
 	  int source_only;

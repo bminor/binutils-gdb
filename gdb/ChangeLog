@@ -1,3 +1,66 @@
+Wed Apr 13 14:52:46 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* breakpoint.h (enum bptype): Add bp_hardware_watchpoint and
+	bp_watchpoint_scope breakpoints.
+	(struct breakpoint): Add val_chain and related_breakpoint fields
+	for use by watchpoints.
+
+	* breakpoint.c (within_scope): Delete.  No longer used.
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT): Provide default definition.
+	(target_{remove,insert}_watchpoint): Likewise.
+	(can_use_hardware_watchpoint): New function.
+	(remove_breakpoint): New function to remove a single breakpoint
+	or hardware watchpoint.
+	(insert_breakpoints): Handle insertion of hardware watchpoints.
+	Store a copy of the value chain derived from the watchpoint
+	expression.
+	(remove_breakpoints): Simplify by using remove_breakpoint.
+	(delete_breakpoint): Likewise.
+	(watchpoint_check): Delete the watchpoint and watchpoint scope
+	breakpoints when the watchpoint goes out of scope.  Save & restore
+	the current frame after checking watchpoints.
+	(breakpoint_init_inferior): Likewise (restarting the program
+	makes all local watchpoints go out of scope).
+	(bpstat_stop_status): Handle hardware watchpoints much like normal
+	watchpoints. Delete the watchpoint and watchpoint scope breakpoint
+	when the watchpoint goes out of scope.  Remove and reinsert all
+	breakpoints before returning if we stopped when a hardware watchpoint
+	fired.
+	(watch_command): Use a hardware watchpoint when possible.  If
+	watching a local expression, build a scope breakpoint too.
+	(map_breakpoint_numbers): Also call given function for any
+	related breakpoints.
+	(disable_breakpoint): Never disable a scope breakpoint.
+	(enable_breakpoint): Handle hardware breakpoints much like normal
+	breakpoints, but recompute the watchpoint_scope breakpoint's
+	frame and address  (if we have an associated scope breakpoint).
+	(read_memory_nobpt): Handle hardware watchpoints like normal 
+	watchpoints.  When necessary handle watchpoint_scope breakpoints.
+	(print_it_normal, bpstat_what, breakpoint_1, mention): Likewise.
+	(clear_command, breakpoint_re_set_one, enable_command): Likewise.
+	(disable_command): Likewise.
+
+	* blockframe.c (find_frame_addr_in_frame_chain): New function.
+	Extern prototype added to frame.h
+
+	* infrun.c (wait_for_inferior): Set current_frame and select
+	a frame before checking if we stopped due to a hardare watchpoint
+	firing.  Handle stepping over hardware watchpoints.
+	(normal_stop): Remove unnecessary call to select_frame.
+
+	* value.h (value_release_to_mark): Declare.
+	* values.c (value_release_to_mark): New function.
+
+	* procfs.c (procfs_wait): Add cases for hardware watchpoints.
+	(procfs_set_watchpoint, procfs_stopped_by_watchpoint): New functions.
+
+	* hppab-nat.c (hppa_set_watchpoint): New function.
+
+	* config/pa/nm-hppab.h (STOPPED_BY_WATCHPOINT): Define.
+	(HAVE_STEPPABLE_WATCHPOINT): Define.
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT): Define.
+	(target_{insert,delete}_watchpoint): Define.
+
 Mon Apr 11 19:21:27 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* xcoffread.c (read_xcoff_symtab):  Ignore symbols of class C_EXT,

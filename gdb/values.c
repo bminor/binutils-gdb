@@ -189,6 +189,24 @@ release_value (val)
     }
 }
 
+/* Release all values up to mark  */
+value_ptr
+value_release_to_mark (mark)
+     value_ptr mark;
+{
+  value_ptr val, next;
+
+  for (val = next = all_values; next; next = VALUE_NEXT (next))
+    if (VALUE_NEXT (next) == mark)
+      {
+	all_values = VALUE_NEXT (next);
+	VALUE_NEXT (next) = 0;
+	return val;
+      }
+  all_values = 0;
+  return val;
+}
+
 /* Return a copy of the value ARG.
    It contains the same contents, for same memory address,
    but it's a different block of storage.  */

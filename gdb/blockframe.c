@@ -805,6 +805,29 @@ block_innermost_frame (block)
     }
 }
 
+/* Return the full FRAME which corresponds to the given FRAME_ADDR
+   or NULL if no FRAME on the chain corresponds to FRAME_ADDR.  */
+
+FRAME
+find_frame_addr_in_frame_chain (frame_addr)
+     FRAME_ADDR frame_addr;
+{
+  FRAME frame = NULL;
+
+  if (frame_addr == NULL)
+    return NULL;
+
+  while (1)
+    {
+      frame = get_prev_frame (frame);
+      if (frame == NULL)
+	return NULL;
+
+      if (FRAME_FP (frame) == frame_addr)
+	return frame;
+    }
+}
+
 #ifdef SIGCONTEXT_PC_OFFSET
 /* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
 

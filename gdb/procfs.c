@@ -2322,6 +2322,10 @@ wait_again:
 	    case FLTBPT:
 	    case FLTTRACE:
 	      statval = (SIGTRAP << 8) | 0177;
+	      break;	      
+	    case FLTWATCH:
+	    case FLTKWATCH:
+	      statval = (SIGTRAP << 8) | 0177;
 	      break;
 	    case FLTSTACK:
 	    case FLTACCESS:
@@ -3528,6 +3532,56 @@ procfs_can_run ()
 {
   return(1);
 }
+
+/* Insert a watchpoint */
+int
+procfs_set_watchpoint(pid, addr, len, rw)
+     int		pid;
+     CORE_ADDR		addr;
+     int		len;
+     int		rw;
+{
+  struct procinfo	*pi;
+  prwatch_t		wpt;
+
+  pi = find_procinfo (pid == -1 ? inferior_pid : pid, 0);
+  wpt.pr_vaddr = (caddr_t)addr;
+  wpt.pr_size = len;
+  wpt.pr_wflags = ((rw & 1) ? MA_READ : 0) | ((rw & 2) ? MA_WRITE : 0);
+  if (ioctl (pi->fd, PIOCSWATCH, &wpt) < 0)
+    {
+      if (errno == E2BIG)
+	return -1;
+      /* Currently it sometimes happens that the same watchpoint gets
+	 deleted twice - don't die in this case (FIXME please) */
+      if (errno == ESRCH && len == 0)
+	return 0;
+      print_sys_errmsg (pi->pathname, errno);
+      error ("PIOCSWATCH failed");
+    }
+  return 0;
+}
+
+int
+procfs_stopped_by_watchpoint(pid)
+    int			pid;
+{
+  struct procinfo	*pi;
+  short 		what;
+  short 		why;
+
+  pi = find_procinfo (pid == -1 ? inferior_pid : pid, 0);
+  if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
+    {
+      why = pi->prstatus.pr_why;
+      what = pi->prstatus.pr_what;
+      if (why == PR_FAULTED 
+	  && (what == FLTWATCH) || (what == FLTKWATCH))
+	return what;
+    }
+  return 0;
+}
+
 
 struct target_ops procfs_ops = {
   "procfs",			/* to_shortname */
