@@ -1,3 +1,10 @@
+start-sanitize-carp start-sanitize-vr4xxx
+Wed Jan 27 15:09:22 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Trace e_flags from BFD
+ 	elf_info.
+
+end-sanitize-carp end-sanitize-vr4xxx
 Tue Jan 26 16:02:47 1999  Mark Alexander  <marka@cygnus.com>
 
 	* v850-tdep.c (v850_generic_reg_names, v850e_reg_names,
