@@ -18,25 +18,6 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define GAS 1
-#include <ansidecl.h>
-#include "host.h"
-#include "flonum.h"
-
-#ifndef __STDC__
-#define	volatile		/**/
-#ifndef const
-#define	const			/**/
-#endif /* const */
-#endif /* __STDC__ */
-
-#ifndef __LINE__
-#define __LINE__ "unknown"
-#endif /* __LINE__ */
-
-#ifndef __FILE__
-#define __FILE__ "unknown"
-#endif /* __FILE__ */
-
 /*
  * I think this stuff is largely out of date.  xoxorich.
  *
@@ -47,7 +28,7 @@
  * "lowercaseS" is typedef struct ... lowercaseS.
  *
  * #define DEBUG to enable all the "know" assertion tests.
- * #define SUSPECT when debugging.
+ * #define SUSPECT when debugging hash code.
  * #define COMMON as "extern" for all modules except one, where you #define
  *	COMMON as "".
  * If TEST is #defined, then we are testing a module: #define COMMON as "".
@@ -55,11 +36,29 @@
 
 /* These #defines are for parameters of entire assembler. */
 
-/* #define SUSPECT JF remove for speed testing */
+#define DEBUG			/* temporary */
 /* These #includes are for type definitions etc. */
 
 #include <stdio.h>
+#ifdef DEBUG
+#undef NDEBUG
+#endif
 #include <assert.h>
+
+#include <ansidecl.h>
+#ifdef BFD_ASSEMBLER
+#include <bfd.h>
+#endif
+#include "host.h"
+#include "flonum.h"
+
+#ifndef __LINE__
+#define __LINE__ "unknown"
+#endif /* __LINE__ */
+
+#ifndef __FILE__
+#define __FILE__ "unknown"
+#endif /* __FILE__ */
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
@@ -75,6 +74,9 @@
 
 /* These are assembler-wide concepts */
 
+#ifdef BFD_ASSEMBLER
+extern bfd *stdoutput;
+#endif
 
 #ifndef COMMON
 #ifdef TEST
@@ -84,24 +86,22 @@
 #endif
 #endif
 /* COMMON now defined */
-#define DEBUG			/* temporary */
-
-#ifdef BROKEN_ASSERT
-/* Turn off all assertion checks, on machines where the assert macro
-   is buggy.  (For example, on the RS/6000, Reiser-cpp substitution is
-   done to put the condition into a string, so if the condition contains
-   a string, parse errors result.)  */
-#undef DEBUG
-#define NDEBUG
-#endif
 
 #ifdef DEBUG
-#undef NDEBUG
 #ifndef know
 #define know(p) assert(p)	/* Verify our assumptions! */
 #endif /* not yet defined */
 #else
 #define know(p)			/* know() checks are no-op.ed */
+#endif
+
+#if defined (BROKEN_ASSERT) && !defined (NDEBUG)
+/* Used on machines where the "assert" macro is buggy.  (For example, on the
+   RS/6000, Reiser-cpp substitution is done to put the condition into a
+   string, so if the condition contains a string, parse errors result.)  If
+   the condition fails, just drop core file.  */
+#undef assert
+#define assert(p) ((p) ? 0 : (abort (), 0))
 #endif
 
 /* input_scrub.c */
@@ -114,6 +114,7 @@
 
 /* subsegs.c     Sub-segments. Also, segment(=expression type)s.*/
 
+#ifndef BFD_ASSEMBLER
 /*
  * This table describes the use of segments as EXPRESSION types.
  *
@@ -149,8 +150,8 @@
 #define N_SEGMENTS 10
 #define SEG_NORMAL(x) ((x) >= SEG_E0 && (x) <= SEG_E9)
 #define SEG_LIST SEG_E0,SEG_E1,SEG_E2,SEG_E3,SEG_E4,SEG_E5,SEG_E6,SEG_E7,SEG_E8,SEG_E9
-#define SEG_DATA SEG_E1
 #define SEG_TEXT SEG_E0
+#define SEG_DATA SEG_E1
 #define SEG_BSS SEG_E2
 #else
 #define N_SEGMENTS 3
@@ -177,19 +178,54 @@ typedef enum _segT
   } segT;
 
 #define SEG_MAXIMUM_ORDINAL (SEG_REGISTER)
-
+#else
+typedef asection *segT;
+#define SEG_NORMAL(SEG)		((SEG) != absolute_section	\
+				 && (SEG) != undefined_section	\
+				 && (SEG) != big_section	\
+				 && (SEG) != reg_section	\
+				 && (SEG) != pass1_section	\
+				 && (SEG) != diff_section	\
+				 && (SEG) != absent_section)
+#endif
 typedef int subsegT;
 
 /* What subseg we are accreting now? */
 COMMON subsegT now_subseg;
 
 /* Segment our instructions emit to. */
-/* Only OK values are SEG_TEXT or SEG_DATA. */
 COMMON segT now_seg;
 
-extern char *const seg_name[];
-extern int section_alignment[];
+#ifdef BFD_ASSEMBLER
+#define segment_name(SEG)	bfd_get_section_name (stdoutput, SEG)
+#else
+extern char *CONST seg_name[];
+#define segment_name(SEG)	seg_name[(int) (SEG)]
+#endif
 
+#ifndef BFD_ASSEMBLER
+extern int section_alignment[];
+#endif
+
+#ifdef BFD_ASSEMBLER
+extern segT big_section, reg_section, pass1_section;
+extern segT diff_section, absent_section;
+/* Shouldn't these be eliminated someday?  */
+extern segT text_section, data_section, bss_section;
+#define absolute_section	(&bfd_abs_section)
+#define undefined_section	(&bfd_und_section)
+#else
+#define big_section		SEG_BIG
+#define reg_section		SEG_REGISTER
+#define pass1_section		SEG_PASS1
+#define diff_section		SEG_DIFFERENCE
+#define absent_section		SEG_ABSENT
+#define text_section		SEG_TEXT
+#define data_section		SEG_DATA
+#define bss_section		SEG_BSS
+#define absolute_section	SEG_ABSOLUTE
+#define undefined_section	SEG_UNKNOWN
+#endif
 
 /* relax() */
 
@@ -242,26 +278,28 @@ typedef unsigned long relax_addressT;
  BUG: it may be smarter to have a single pointer off to various different
  notes for different frag kinds. See how code pans
  */
-struct frag			/* a code fragment */
+struct frag
 {
   /* Object file address. */
   unsigned long fr_address;
-  /* Chain forward; ascending address order. */
-  /* Rooted in frch_root. */
+  /* Chain forward; ascending address order.  Rooted in frch_root. */
   struct frag *fr_next;
 
-  /* (Fixed) number of chars we know we have. */
-  /* May be 0. */
+  /* (Fixed) number of chars we know we have.  May be 0. */
   long fr_fix;
-  /* (Variable) number of chars after above. */
-  /* May be 0. */
+  /* (Variable) number of chars after above.  May be 0. */
   long fr_var;
   /* For variable-length tail. */
   struct symbol *fr_symbol;
   /* For variable-length tail. */
   long fr_offset;
-  /*->opcode low addr byte,for relax()ation*/
+  /* Points to opcode low addr byte, for relaxation.  */
   char *fr_opcode;
+
+#ifndef NO_LISTING
+  struct list_info_struct *line;
+#endif
+
   /* What state is my tail in? */
   relax_stateT fr_type;
   relax_substateT fr_subtype;
@@ -269,9 +307,7 @@ struct frag			/* a code fragment */
   /* These are needed only on the NS32K machines */
   char fr_pcrel_adjust;
   char fr_bsr;
-#ifndef NO_LISTING
-  struct list_info_struct *line;
-#endif
+
   /* Chars begin here.
      One day we will compile fr_literal[0]. */
   char fr_literal[1];
@@ -287,6 +323,7 @@ typedef struct frag fragS;
    included in frchain_now.  The fr_fix field is bogus; instead, use:
    obstack_next_free(&frags)-frag_now->fr_literal.  */
 COMMON fragS *frag_now;
+#define frag_now_fix() (obstack_next_free (&frags) - frag_now->fr_literal)
 
 /* For foreign-segment symbol fixups. */
 COMMON fragS zero_address_frag;
@@ -323,25 +360,36 @@ struct _pseudo_type
 
 typedef struct _pseudo_type pseudo_typeS;
 
-#ifndef NO_STDARG
+#ifdef BFD_ASSEMBLER_xxx
+struct lineno_struct
+  {
+    alent line;
+    fragS *frag;
+    struct lineno_struct *next;
+  };
+typedef struct lineno_struct lineno;
+#endif
+
+#if defined (__STDC__) && !defined(NO_STDARG)
+
+#if __GNUC__ >= 2
+/* for use with -Wformat */
+#define PRINTF_LIKE(FCN)	void FCN (const char *Format, ...) \
+					__attribute__ ((format (printf, 1, 2)))
+#else /* ANSI C with stdarg, but not GNU C */
+#define PRINTF_LIKE(FCN)	void FCN (const char *Format, ...)
+#endif
+#else /* not ANSI C, or not stdarg */
+#define PRINTF_LIKE(FCN)	void FCN ()
+#endif
+
+PRINTF_LIKE (as_bad);
+PRINTF_LIKE (as_fatal);
+PRINTF_LIKE (as_tsktsk);
+PRINTF_LIKE (as_warn);
 
 int had_errors PARAMS ((void));
 int had_warnings PARAMS ((void));
-void as_bad PARAMS ((const char *Format,...));
-void as_fatal PARAMS ((const char *Format,...));
-void as_tsktsk PARAMS ((const char *Format,...));
-void as_warn PARAMS ((const char *Format,...));
-
-#else
-
-int had_errors ();
-int had_warnings ();
-void as_bad ();
-void as_fatal ();
-void as_tsktsk ();
-void as_warn ();
-
-#endif /* __STDC__ & !NO_STDARG */
 
 char *app_push PARAMS ((void));
 char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
@@ -375,9 +423,14 @@ void int_to_gen PARAMS ((long x));
 void new_logical_line PARAMS ((char *fname, int line_number));
 void scrub_to_file PARAMS ((int ch));
 void scrub_to_string PARAMS ((int ch));
-void subseg_change PARAMS ((segT seg, int subseg));
-void subseg_new PARAMS ((segT seg, subsegT subseg));
 void subsegs_begin PARAMS ((void));
+void subseg_change PARAMS ((segT seg, int subseg));
+#ifdef BFD_ASSEMBLER
+segT subseg_new PARAMS ((char *name, subsegT subseg));
+void subseg_set PARAMS ((segT seg, subsegT subseg));
+#else
+void subseg_new PARAMS ((segT seg, subsegT subseg));
+#endif
 
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
