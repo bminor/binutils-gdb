@@ -627,6 +627,7 @@ handle_exception (frame)
 {
   int addr, length;
   char *ptr;
+  static int killed = 0;
   static struct DBG_LoadDefinitionStructure *ldinfo = 0;
   static unsigned char first_insn[BREAKPOINT_SIZE]; /* The first instruction in the program.  */
 
@@ -658,6 +659,17 @@ handle_exception (frame)
       memcpy (ldinfo->LDInitializationProcedure, breakpoint_insn,
 	      BREAKPOINT_SIZE);
       flush_i_cache ();
+      return RETURN_TO_PROGRAM;
+
+    case TERMINATE_NLM_EVENT:
+      if (!killed) 
+	{
+	  /* NetWare processes don't have an exit status so we
+             generate our own  */
+	  sprintf (remcomOutBuffer, "W%02x", 0);
+	  putpacket(remcomOutBuffer);
+	}
+      ResumeThread (mainthread);
       return RETURN_TO_PROGRAM;
 
     case ENTER_DEBUGGER_EVENT:
@@ -717,11 +729,6 @@ handle_exception (frame)
       /* Random mem fault, report it */
       do_status (remcomOutBuffer, frame);
       break;
-
-    case TERMINATE_NLM_EVENT:
-      /* There is no way to get the exit status.  */
-      sprintf (remcomOutBuffer, "W%02x", 0);
-      break;			/* We generate our own status */
     }
 
   /* FIXME: How do we know that this exception has anything to do with
@@ -733,12 +740,6 @@ handle_exception (frame)
 
   if (! putpacket(remcomOutBuffer))
     return RETURN_TO_NEXT_DEBUGGER;
-
-  if (frame->ExceptionNumber == TERMINATE_NLM_EVENT)
-    {
-      ResumeThread (mainthread);
-      return RETURN_TO_PROGRAM;
-    }
 
   while (1)
     {
@@ -829,7 +830,7 @@ handle_exception (frame)
 	  if (hexToInt(&ptr,&addr))
 	    {
 /*	      registers[PC_REGNUM].lo = addr;*/
-	      fprintf (stderr, "Setting PC to 0x%x\n", addr);
+	      ConsolePrintf("Setting PC to 0x%x\n", addr);
 	      while (1);
 	    }
 
@@ -840,9 +841,17 @@ handle_exception (frame)
 	  return RETURN_TO_PROGRAM;
 
 	case 'k':
-	  /* kill the program */
-	  KillMe (ldinfo);
-	  ResumeThread (mainthread);
+	  /* The undocumented netware call KillMe() is supposed to
+	     schedule the NLM to be killed when it next blocks.  What
+	     really happens is that the server hangs as it tries to
+	     unload the NLM.
+           
+             So, since netware won't cooperate, we just point the PC
+             at the start of _exit() and continue, while noting that
+             we've killed the process.  */
+
+	  killed = 1;
+	  frame->ExceptionPC = &_exit;
 	  return RETURN_TO_PROGRAM;
 
 	case 'q':		/* Query message */

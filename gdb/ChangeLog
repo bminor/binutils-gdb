@@ -1,3 +1,9 @@
+Fri Aug  5 09:08:34 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* i386-nlmstub.c (handle_exception): Point the PC at _exit() to
+	  kill the program being debugged.  KillMe(), the undocumented
+	  call intended for this purpose, causes the server to hang.
+
 Thu Aug  4 16:26:06 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* remote.c (read_frame): Calculate run length encoded checksum correctly.
