@@ -2,10 +2,6 @@ Tue Apr  8 16:38:46 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/mn10300.exp: Fix buglets in "other" tests.
 
-Mon Apr  7 17:46:23 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
-
-	* .Sanitize: remove sanitization for M32R target.
-
 Thu Apr  3 15:21:26 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/help.exp: update help msg for INFO ADDR; add help test
