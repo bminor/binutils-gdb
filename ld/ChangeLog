@@ -1,3 +1,8 @@
+2002-01-06  John Marshall  <jmarshall@acm.org>
+
+	* ld.texinfo: Note that --emit-relocs is currently only
+	implemented for ELF.
+
 2002-01-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Make use
