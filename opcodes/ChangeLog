@@ -1,5 +1,8 @@
 Tue Nov 19 13:33:01 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-dis.c: Start working on disassembler support.
+	* mn10300-opc.c (mn10300_opcodes): Fix masks on several insns.
+
 	* mn10300-opc.c (mn10300_operands): Add "REGS" for a register
 	list.
 	(mn10300_opcodes): Use REGS for register list in "movm" instructions.
