@@ -215,6 +215,12 @@ typedef enum bfd_format {
 /* BFD is relaxable (this means that bfd_relax_section may be able to
    do something).  */
 #define BFD_IS_RELAXABLE 0x200
+
+/* This may be set before writing out a BFD to request using a
+   traditional format.  For example, this is used to request that when
+   writing out an a.out object the symbols not be hashed to eliminate
+   duplicates.  */
+#define BFD_TRADITIONAL_FORMAT 0x400
 
 /* symbols and relocation */
 
@@ -529,6 +535,14 @@ extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf64_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+
+/* SunOS shared library support routines for the linker.  */
+
+extern boolean bfd_sunos_record_link_assignment
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+extern boolean bfd_sunos_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec **, struct sec **,
+	   struct sec **));
 
 /* And more from the source.  */
 void 
