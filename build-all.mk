@@ -276,8 +276,7 @@ all-cygnus:
 #       to help developers test, but should be commented out for final
 #       progressive build.
 #
-#       -rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progres
-sive-beta
+#       -rm -f $(ROOTING)/progressive-beta && ln -s $(RELEASE_TAG) $(ROOTING)/progresssive
 	@for i in $(TARGETS) ; do \
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-stamp-3stage-done ] ; then \
