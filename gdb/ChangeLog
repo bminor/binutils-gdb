@@ -1,3 +1,7 @@
+Fri Jun 17 20:58:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c: Include string.h.
+
 Thu Jun 16 14:41:37 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* fork-child.c (startup_inferior) [STARTUP_INFERIOR]: If defined,
