@@ -579,42 +579,43 @@ static char alt_notend_table[256];
  * advance the pointer.
  */
 
-enum _register
-m68k_reg_parse(ccp)
-     register char **ccp;
+enum _register m68k_reg_parse(ccp)
+register char **ccp;
 {
   char *start = *ccp;
+  char c;
+  char *p;
+  symbolS *symbolP;
 
 #ifdef REGISTER_PREFIX
-  if (*start == REGISTER_PREFIX)
-    ++start;
+  if (*start != REGISTER_PREFIX)
+    return FAIL;
+  p = start + 1;
+#else
+  p = start;
+  if (*p == OPTIONAL_REGISTER_PREFIX)
+    p++, start++;
 #endif
+  if (!isalpha (*p) || !is_name_beginner (*p))
+    return FAIL;
 
-  if (isalpha(*start) &&  is_name_beginner(*start))
-  {
-    char c;
-    char *p = start;
-    symbolS *symbolP;
+  c = *p++;
+  while (isalpha(c) || isdigit(c) || c == '_')
+    {
+      c = *p++;
+    }
 
-    c = *p++;
-    while (isalpha(c) || isdigit(c) || c == '_')
-      {
-	c = *p++;
-      }
+  * -- p = 0;
+  symbolP = symbol_find(start);
+  *p  = c;
 
-    * -- p = 0;
-    symbolP = symbol_find(start);
-    *p  = c;
-
-    if (symbolP && S_GET_SEGMENT(symbolP) == SEG_REGISTER)
+  if (symbolP && S_GET_SEGMENT(symbolP) == SEG_REGISTER)
     {
       *ccp = p;
       return  S_GET_VALUE(symbolP);
     }
-  }
+
   return FAIL;
-
-
 }
 
 #define SKIP_WHITE()	{ str++; if(*str==' ') str++;}
@@ -3372,6 +3373,9 @@ void
 	alt_notend_table['F'] = 1;
 #ifdef REGISTER_PREFIX
 	alt_notend_table[REGISTER_PREFIX] = 1;
+#endif
+#ifdef OPTIONAL_REGISTER_PREFIX
+	alt_notend_table[OPTIONAL_REGISTER_PREFIX] = 1;
 #endif
 
 #ifndef MIT_SYNTAX_ONLY
