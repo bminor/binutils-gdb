@@ -1,3 +1,7 @@
+2000-09-07  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-mips.c: Fix formatting.
+
 2000-09-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.h (TARGET_FORMAT): Use sh-linux targets.

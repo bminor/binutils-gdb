@@ -203,40 +203,40 @@ static int file_mips_isa;
 /* The CPU type as a number: 2000, 3000, 4000, 4400, etc.  */
 static int mips_cpu = -1;
 
-/* The argument of the -mabi= flag. */
+/* The argument of the -mabi= flag.  */
 static char* mips_abi_string = 0;
 
-/* Wether we should mark the file EABI64 or EABI32. */
+/* Wether we should mark the file EABI64 or EABI32.  */
 static int mips_eabi64 = 0;
 
 /* If they asked for mips1 or mips2 and a cpu that is
-   mips3 or greater, then mark the object file 32BITMODE. */
+   mips3 or greater, then mark the object file 32BITMODE.  */
 static int mips_32bitmode = 0;
 
-/* True if -mgp32 was passed. */
+/* True if -mgp32 was passed.  */
 static int mips_gp32 = 0;
 
 /* Some ISA's have delay slots for instructions which read or write
    from a coprocessor (eg. mips1-mips3); some don't (eg mips4).
-   Return true if instructions marked INSN_LOAD_COPROC_DELAY, 
+   Return true if instructions marked INSN_LOAD_COPROC_DELAY,
    INSN_COPROC_MOVE_DELAY, or INSN_WRITE_COND_CODE actually have a
    delay slot in this ISA.  The uses of this macro assume that any
    ISA that has delay slots for one of these, has them for all.  They
    also assume that ISAs which don't have delays for these insns, don't
-   have delays for the INSN_LOAD_MEMORY_DELAY instructions either. */
+   have delays for the INSN_LOAD_MEMORY_DELAY instructions either.  */
 #define ISA_HAS_COPROC_DELAYS(ISA) (        \
    (ISA) == 1                               \
    || (ISA) == 2                            \
    || (ISA) == 3                            \
    )
 
-/*  Return true if ISA supports 64 bit gp register instructions. */
+/*  Return true if ISA supports 64 bit gp register instructions.  */
 #define ISA_HAS_64BIT_REGS(ISA) (    \
    (ISA) == 3                        \
    || (ISA) == 4                     \
    )
 
-/* Whether the processor uses hardware interlocks to protect 
+/* Whether the processor uses hardware interlocks to protect
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.
 
@@ -274,7 +274,7 @@ static int mips_gp32 = 0;
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
-/* Itbl support may require additional care here. */
+/* Itbl support may require additional care here.  */
 #define cop_interlocks (mips_cpu == 4300                            \
 			)
 
@@ -366,11 +366,11 @@ const char comment_chars[] = "#";
    .line and .file directives will appear in the pre-processed output */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
+   #NO_APP at the beginning of its output.  */
 /* Also note that C style comments are always supported.  */
 const char line_comment_chars[] = "#";
 
-/* This array holds machine specific line separator characters. */
+/* This array holds machine specific line separator characters.  */
 const char line_separator_chars[] = ";";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
@@ -462,7 +462,7 @@ static fragS *prev_nop_frag;
 static int prev_nop_frag_holds;
 
 /* The number of nop instructions that we know we need in
-   prev_nop_frag. */
+   prev_nop_frag.  */
 static int prev_nop_frag_required;
 
 /* The number of instructions we've seen since prev_nop_frag.  */
@@ -477,7 +477,7 @@ static int prev_nop_frag_since;
 
    In order to implement this, we keep track of each unmatched HI
    relocation.  We then sort them so that they immediately precede the
-   corresponding LO relocation. */
+   corresponding LO relocation.  */
 
 struct mips_hi_fixup
 {
@@ -706,7 +706,6 @@ static void s_mips_weakext PARAMS ((int));
 static void s_file PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
 
-
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 
 /* Pseudo-op table.
@@ -888,12 +887,12 @@ md_begin ()
     {
       /* Set mips_cpu based on TARGET_CPU, unless TARGET_CPU is
          just the generic 'mips', in which case set mips_cpu based
-         on the given ISA, if any. */
+         on the given ISA, if any.  */
 
       if (strcmp (cpu, "mips") == 0)
         {
 	  if (mips_opts.isa < 0)
-	    mips_cpu = 3000;   
+	    mips_cpu = 3000;
 
 	  else if (mips_opts.isa == 2)
             mips_cpu = 6000;
@@ -904,10 +903,10 @@ md_begin ()
           else if (mips_opts.isa == 4)
             mips_cpu = 8000;
 
-          else 
+          else
             mips_cpu = 3000;
         }
-      
+
       else if (strcmp (cpu, "r3900") == 0
                || strcmp (cpu, "mipstx39") == 0
                )
@@ -944,17 +943,14 @@ md_begin ()
       else if (strcmp (cpu, "r4010") == 0)
         mips_cpu = 4010;
 
-
       else if (strcmp (cpu, "r5000") == 0
 	       || strcmp (cpu, "mips64vr5000") == 0)
         mips_cpu = 5000;
 
-
-
       else if (strcmp (cpu, "r8000") == 0
 	       || strcmp (cpu, "mips4") == 0)
         mips_cpu = 8000;
-      
+
       else if (strcmp (cpu, "r10000") == 0)
         mips_cpu = 10000;
 
@@ -1007,7 +1003,7 @@ md_begin ()
     }
 
   /* End of TARGET_CPU processing, get rid of malloced memory
-     if necessary. */
+     if necessary.  */
   cpu = NULL;
   if (a != NULL)
     {
@@ -1020,7 +1016,7 @@ md_begin ()
 
   /* Set the EABI kind based on the ISA before the user gets
      to change the ISA with directives.  This isn't really
-     the best, but then neither is basing the abi on the isa. */     
+     the best, but then neither is basing the abi on the isa.  */
   if (ISA_HAS_64BIT_REGS (mips_opts.isa)
       && mips_abi_string
       && 0 == strcmp (mips_abi_string,"eabi"))
@@ -1029,11 +1025,11 @@ md_begin ()
   if (mips_cpu != 0 && mips_cpu != -1)
     {
       ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_cpu);
-      
+
       /* If they asked for mips1 or mips2 and a cpu that is
-	 mips3 or greater, then mark the object file 32BITMODE. */
+	 mips3 or greater, then mark the object file 32BITMODE.  */
       if (mips_isa_from_cpu != -1
-	  && ! ISA_HAS_64BIT_REGS (mips_opts.isa) 
+	  && ! ISA_HAS_64BIT_REGS (mips_opts.isa)
 	  && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
 	mips_32bitmode = 1;
     }
@@ -1190,10 +1186,9 @@ md_begin ()
 	  {
 	    sec = subseg_new (".reginfo", (subsegT) 0);
 
-
 	    (void) bfd_set_section_flags (stdoutput, sec, flags);
 	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
-	
+
 #ifdef OBJ_ELF
 	    mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
 #endif
@@ -1273,7 +1268,7 @@ md_assemble (str)
   else
     {
       mips_ip (str, &insn);
-      DBG((_("returned from mips_ip(%s) insn_opcode = 0x%x\n"), 
+      DBG((_("returned from mips_ip(%s) insn_opcode = 0x%x\n"),
 		str, insn.insn_opcode));
     }
 
@@ -1402,7 +1397,7 @@ reg_needs_delay (reg)
 	 delays delay the use of general register rt for one
 	 instruction on the r3000.  The r6000 and r4000 use
 	 interlocks.  */
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       know (prev_pinfo & INSN_WRITE_GPR_T);
       if (reg == ((prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT))
 	return 1;
@@ -1506,7 +1501,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     delays delay the use of general register rt for one
 	     instruction on the r3000.  The r6000 and r4000 use
 	     interlocks.  */
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  know (prev_pinfo & INSN_WRITE_GPR_T);
 	  if (mips_optimize == 0
 	      || insn_uses_reg (ip,
@@ -1537,7 +1532,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     than the floating point unit are not distinguished at
 	     all.  */
           /* Itbl support may require additional care here. FIXME!
-             Need to modify this to include knowledge about 
+             Need to modify this to include knowledge about
              user specified delays!  */
 	  if (prev_pinfo & INSN_WRITE_FPR_T)
 	    {
@@ -1565,7 +1560,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 instruction may set the condition codes, and the
 		 current instruction uses them, we must insert two
 		 NOPS.  */
-              /* Itbl support may require additional care here. */
+              /* Itbl support may require additional care here.  */
 	      if (mips_optimize == 0
 		  || ((prev_pinfo & INSN_WRITE_COND_CODE)
 		      && (pinfo & INSN_READ_COND_CODE)))
@@ -1584,7 +1579,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     (this means it is a floating point comparison
 	     instruction).  If this instruction uses the condition
 	     codes, we need to insert a single NOP.  */
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  if (mips_optimize == 0
 	      || (pinfo & INSN_READ_COND_CODE))
 	    ++nops;
@@ -1615,20 +1610,20 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	       && insn_uses_reg (ip, ((prev_prev_insn.insn_opcode >> OP_SH_RD)
                                        & OP_MASK_RD),
                                     MIPS_GR_REG))
-     
+
 	{
 	  nops += 1;
 	}
- 
+
       else if (prev_pinfo & INSN_READ_LO)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
-	     insert two NOPS.  Some newer processors have interlocks. 
-	     Also the tx39's multiply instructions can be exectuted 
+	     insert two NOPS.  Some newer processors have interlocks.
+	     Also the tx39's multiply instructions can be exectuted
              immediatly after a read from HI/LO (without the delay),
-             though the tx39's divide insns still do require the 
-	     delay. */
+             though the tx39's divide insns still do require the
+	     delay.  */
 	  if (! (hilo_interlocks
 		 || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
@@ -1639,7 +1634,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     to a write to LO we have a read followed by a write
 	     less than 2 insns away.  We assume the target of
 	     a branch might be a write to LO, and insert a nop
-	     between a read and an immediately following branch. */
+	     between a read and an immediately following branch.  */
 	  else if (mips_opts.mips16
 		   && (mips_optimize == 0
 		       || (pinfo & MIPS16_INSN_BRANCH)))
@@ -1650,7 +1645,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
 	     insert a NOP.  Some newer processors have interlocks.
-	     Also the note tx39's multiply above. */
+	     Also the note tx39's multiply above.  */
 	  if (! (hilo_interlocks
 		 || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
@@ -1661,7 +1656,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     to a write to HI we have a read followed by a write
 	     less than 2 insns away.  We assume the target of
 	     a branch might be a write to HI, and insert a nop
-	     between a read and an immediately following branch. */
+	     between a read and an immediately following branch.  */
 	  else if (mips_opts.mips16
 		   && (mips_optimize == 0
 		       || (pinfo & MIPS16_INSN_BRANCH)))
@@ -1670,7 +1665,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 
       /* If the previous instruction was in a noreorder section, then
          we don't want to insert the nop after all.  */
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       if (prev_insn_unreordered)
 	nops = 0;
 
@@ -1763,7 +1758,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  /* We have a frag holding nops we may be able to remove.  If
              we don't need any nops, we can decrease the size of
              prev_nop_frag by the size of one instruction.  If we do
-             need some nops, we count them in prev_nops_required. */
+             need some nops, we count them in prev_nops_required.  */
 	  if (prev_nop_frag_since == 0)
 	    {
 	      if (nops == 0)
@@ -1864,7 +1859,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 | ((address_expr->X_add_number & 0x3fffc) >> 2));
 	      break;
 
-
 	    case BFD_RELOC_16_PCREL_S2:
 	      goto need_reloc;
 
@@ -1937,10 +1931,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FR) & OP_MASK_FR);
       if (pinfo & INSN_COP)
 	{
-	  /* We don't keep enough information to sort these cases out. 
-	     The itbl support does keep this information however, although 
-	     we currently don't support itbl fprmats as part of the cop 
-	     instruction.  May want to add this support in the future. */
+	  /* We don't keep enough information to sort these cases out.
+	     The itbl support does keep this information however, although
+	     we currently don't support itbl fprmats as part of the cop
+	     instruction.  May want to add this support in the future.  */
 	}
       /* Never set the bit for $0, which is always zero.  */
       mips_gprmask &=~ 1 << 0;
@@ -1990,7 +1984,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 already know we can not swap.  */
 	      || nops != 0
 	      /* If we don't even know the previous insn, we can not
-		 swap. */
+		 swap.  */
 	      || ! prev_insn_valid
 	      /* If the previous insn is already in a branch delay
 		 slot, then we can not swap.  */
@@ -2041,7 +2035,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      || (! mips_opts.mips16
 		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 		  && (prev_pinfo
-              /* Itbl support may require additional care here. */
+              /* Itbl support may require additional care here.  */
 		      & (INSN_LOAD_COPROC_DELAY
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
@@ -2055,7 +2049,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))
 	      || (! mips_opts.mips16
 		  && mips_opts.isa == 1
-                  /* Itbl support may require additional care here. */
+                  /* Itbl support may require additional care here.  */
 		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))
 	      /* We can not swap with a branch instruction.  */
 	      || (prev_pinfo
@@ -2160,7 +2154,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 can not swap.  */
 	      || (! mips_opts.mips16
 		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-              /* Itbl support may require additional care here. */
+              /* Itbl support may require additional care here.  */
 		  && ((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
 		      || (! gpr_interlocks
 			  && (prev_prev_insn.insn_mo->pinfo
@@ -2186,8 +2180,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
                  mode, we can not swap.  This normally means that the
                  previous instruction was a 4 byte branch anyhow.  */
 	      || (mips_opts.mips16 && prev_insn_fixp)
-	      /* If the previous instruction is a sync, sync.l, or 
-		 sync.p, we can not swap. */
+	      /* If the previous instruction is a sync, sync.l, or
+		 sync.p, we can not swap.  */
 	      || (prev_pinfo & INSN_SYNC))
 	    {
 	      /* We could do even better for unconditional branches to
@@ -2335,7 +2329,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 
 /* This function forgets that there was any previous instruction or
    label.  If PRESERVE is non-zero, it remembers enough information to
-   know whether nops are needed before a noreorder section. */
+   know whether nops are needed before a noreorder section.  */
 
 static void
 mips_no_prev_insn (preserve)
@@ -2363,7 +2357,7 @@ mips_no_prev_insn (preserve)
    something other than instructions.  It inserts any NOPS which might
    be needed by the previous instruction, and clears the information
    kept for the previous instructions.  The INSNS parameter is true if
-   instructions are to follow. */
+   instructions are to follow.  */
 
 static void
 mips_emit_delays (insns)
@@ -2387,14 +2381,14 @@ mips_emit_delays (insns)
 		     | INSN_READ_HI)))
 	  || (! mips_opts.mips16
 	      && ! gpr_interlocks
-	      && (prev_insn.insn_mo->pinfo 
+	      && (prev_insn.insn_mo->pinfo
                   & INSN_LOAD_MEMORY_DELAY))
 	  || (! mips_opts.mips16
 	      && mips_opts.isa == 1
 	      && (prev_insn.insn_mo->pinfo
 		  & INSN_COPROC_MEMORY_DELAY)))
 	{
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  ++nops;
 	  if ((! mips_opts.mips16
 	       && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
@@ -2416,7 +2410,7 @@ mips_emit_delays (insns)
 		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	{
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  if (! prev_prev_insn_unreordered)
 	    ++nops;
 	}
@@ -2442,7 +2436,7 @@ mips_emit_delays (insns)
 	  if (insns)
 	    {
 	      /* Move on to a new frag, so that it is safe to simply
-                 decrease the size of prev_nop_frag. */
+                 decrease the size of prev_nop_frag.  */
 	      frag_wane (frag_now);
 	      frag_new (0);
 	    }
@@ -2528,7 +2522,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
     {
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu, 
+	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu,
 			       mips_gp32)
 	  && (mips_cpu != 4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
@@ -4658,7 +4652,7 @@ macro (ip)
 	{
 	  if (sreg != PIC_CALL_REG)
 	    as_warn (_("MIPS PIC call to register other than $25"));
-      
+
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr",
 		       "d,s", dreg, sreg);
 	  if (mips_cprestore_offset < 0)
@@ -4764,7 +4758,7 @@ macro (ip)
 	      p += 4;
 	      macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	      p += 4;
-	    }			   
+	    }
 	  macro_build (p, &icnt, &offset_expr,
 		       ((bfd_arch_bits_per_address (stdoutput) == 32
 			 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
@@ -4818,22 +4812,22 @@ macro (ip)
       goto ld;
     case M_LWC0_AB:
       s = "lwc0";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LWC1_AB:
       s = "lwc1";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LWC2_AB:
       s = "lwc2";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LWC3_AB:
       s = "lwc3";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LWL_AB:
@@ -4851,17 +4845,17 @@ macro (ip)
 	  return;
 	}
       s = "ldc1";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LDC2_AB:
       s = "ldc2";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LDC3_AB:
       s = "ldc3";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld;
     case M_LDL_AB:
@@ -4903,22 +4897,22 @@ macro (ip)
       goto st;
     case M_SWC0_AB:
       s = "swc0";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto st;
     case M_SWC1_AB:
       s = "swc1";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto st;
     case M_SWC2_AB:
       s = "swc2";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto st;
     case M_SWC3_AB:
       s = "swc3";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto st;
     case M_SWL_AB:
@@ -4941,16 +4935,16 @@ macro (ip)
 	}
       s = "sdc1";
       coproc = 1;
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       goto st;
     case M_SDC2_AB:
       s = "sdc2";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto st;
     case M_SDC3_AB:
       s = "sdc3";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto st;
     case M_SDL_AB:
@@ -4962,7 +4956,7 @@ macro (ip)
       tempreg = AT;
       used_at = 1;
     ld_st:
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       if (mask == M_LWC1_AB
 	  || mask == M_SWC1_AB
 	  || mask == M_LDC1_AB
@@ -5094,7 +5088,7 @@ macro (ip)
 		        ? "lw" : "ld"),
 		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "nop", "");
-	  p = frag_var (rs_machine_dependent, 4, 0, 
+	  p = frag_var (rs_machine_dependent, 4, 0,
 			RELAX_ENCODE (0, 4, -8, 0, 0, 0),
 			offset_expr.X_add_symbol, (offsetT) 0,
 			(char *) NULL);
@@ -5319,7 +5313,7 @@ macro (ip)
 	}
       else
 	abort ();
-	
+
       /* Now we load the register(s).  */
       if (ISA_HAS_64BIT_REGS (mips_opts.isa))
 	macro_build ((char *) NULL, &icnt, &offset_expr, "ld", "t,o(b)",
@@ -5403,7 +5397,7 @@ macro (ip)
 	      /* FIXME: This won't work for a 64 bit address.  */
 	      macro_build_lui ((char *) NULL, &icnt, &offset_expr, AT);
 	    }
-	      
+
 	  if (mips_opts.isa != 1)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
@@ -5468,7 +5462,7 @@ macro (ip)
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
 	}
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       if (mips_opts.isa != 1)
 	{
@@ -5495,7 +5489,7 @@ macro (ip)
 
       s = "swc1";
       fmt = "T,o(b)";
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ldd_std;
 
@@ -5531,7 +5525,7 @@ macro (ip)
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  We set coproc if we must
 	 load $fn+1 first.  */
-      /* Itbl support may require additional care here. */
+      /* Itbl support may require additional care here.  */
       if (! target_big_endian)
 	coproc = 0;
 
@@ -5582,7 +5576,7 @@ macro (ip)
 		  used_at = 1;
 		}
 
-              /* Itbl support may require additional care here. */
+              /* Itbl support may require additional care here.  */
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   coproc ? treg + 1 : treg,
 			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
@@ -5592,7 +5586,7 @@ macro (ip)
                  undesired nop.  */
 	      hold_mips_optimize = mips_optimize;
 	      mips_optimize = 2;
-              /* Itbl support may require additional care here. */
+              /* Itbl support may require additional care here.  */
 	      macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 			   coproc ? treg : treg + 1,
 			   (int) BFD_RELOC_MIPS_GPREL, tempreg);
@@ -5638,7 +5632,7 @@ macro (ip)
 	      if (p != NULL)
 		p += 4;
 	    }
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build (p, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg + 1 : treg,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5646,11 +5640,11 @@ macro (ip)
 	    p += 4;
 	  /* FIXME: How do we handle overflow here?  */
 	  offset_expr.X_add_number += 4;
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build (p, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_LO16, AT);
-	}	  
+	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
 	  int off;
@@ -5691,7 +5685,7 @@ macro (ip)
 			   || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 			  ? "addu" : "daddu"),
 			 "d,v,t", AT, breg, AT);
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
 		       coproc ? treg + 1 : treg,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5701,7 +5695,7 @@ macro (ip)
              nop.  */
 	  hold_mips_optimize = mips_optimize;
 	  mips_optimize = 2;
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5765,7 +5759,7 @@ macro (ip)
 			   || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 			  ? "addu" : "daddu"),
 			 "d,v,t", AT, breg, AT);
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
 		       coproc ? treg + 1 : treg,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5775,7 +5769,7 @@ macro (ip)
              nop.  */
 	  hold_mips_optimize = mips_optimize;
 	  mips_optimize = 2;
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &expr1, s, fmt,
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5809,7 +5803,7 @@ macro (ip)
 			   "d,v,t", AT, breg, AT);
 	      p += 4;
 	    }
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build (p, &icnt, &expr1, s, fmt,
 		       coproc ? treg + 1 : treg,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5820,7 +5814,7 @@ macro (ip)
              nop.  */
 	  hold_mips_optimize = mips_optimize;
 	  mips_optimize = 2;
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build (p, &icnt, &expr1, s, fmt,
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_LO16, AT);
@@ -5852,12 +5846,12 @@ macro (ip)
 	      used_at = 1;
 	    }
 
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg + 1 : treg,
 		       (int) BFD_RELOC_MIPS_GPREL, tempreg);
 	  offset_expr.X_add_number += 4;
-          /* Itbl support may require additional care here. */
+          /* Itbl support may require additional care here.  */
 	  macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt,
 		       coproc ? treg : treg + 1,
 		       (int) BFD_RELOC_MIPS_GPREL, tempreg);
@@ -5876,7 +5870,7 @@ macro (ip)
     case M_SD_OB:
       s = "sw";
     sd_ob:
-      assert (bfd_arch_bits_per_address (stdoutput) == 32 
+      assert (bfd_arch_bits_per_address (stdoutput) == 32
 	      || ! ISA_HAS_64BIT_REGS (mips_opts.isa));
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
@@ -5897,10 +5891,10 @@ macro (ip)
       What are the side-effects of the cop instruction?
       What cache support might we have and what are its effects?
       Both coprocessor & memory require delays. how long???
-      What registers are read/set/modified? 
+      What registers are read/set/modified?
 
       If an itbl is provided to interpret cop instructions,
-      this knowledge can be encoded in the itbl spec. */
+      this knowledge can be encoded in the itbl spec.  */
 
     case M_COP0:
       s = "c0";
@@ -5926,11 +5920,11 @@ macro (ip)
          This code builds table entries out of the macros in mip_opcodes.
          FIXME: For now we just assemble the expression and pass it's
          value along as a 32-bit immediate.
-         We may want to have the assembler assemble this value, 
+         We may want to have the assembler assemble this value,
          so that we gain the assembler's knowledge of delay slots,
          symbols, etc.
          Would it be more efficient to use mask (id) here? */
-      if (itbl_have_entries 
+      if (itbl_have_entries
 	  && (immed_expr = itbl_assemble (ip->insn_mo->name, "")))
         {
 	  s = ip->insn_mo->name;
@@ -5945,7 +5939,7 @@ macro (ip)
   if (mips_opts.noat)
     as_warn (_("Macro used $at after \".set noat\""));
 }
-          
+
 static void
 macro2 (ip)
      struct mips_cl_insn *ip;
@@ -5968,17 +5962,17 @@ macro2 (ip)
   offsetT maxnum;
   bfd_reloc_code_real_type r;
   char *p;
-          
+
   treg = (ip->insn_opcode >> 16) & 0x1f;
   dreg = (ip->insn_opcode >> 11) & 0x1f;
   sreg = breg = (ip->insn_opcode >> 21) & 0x1f;
   mask = ip->insn_mo->mask;
-          
+
   expr1.X_op = O_constant;
   expr1.X_op_symbol = NULL;
   expr1.X_add_symbol = NULL;
   expr1.X_add_number = 1;
-          
+
   switch (mask)
     {
 #endif /* LOSING_COMPILER */
@@ -6662,7 +6656,7 @@ macro2 (ip)
 
     default:
       /* FIXME: Check if this is one of the itbl macros, since they
-	 are added dynamically. */
+	 are added dynamically.  */
       as_bad (_("Macro %s not implemented yet"), ip->insn_mo->name);
       break;
     }
@@ -6722,7 +6716,7 @@ mips16_macro (ip)
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
 	macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
-      
+
       /* FIXME: The normal code checks for of -1 / -0x80000000 here,
          since that causes an overflow.  We should do that as well,
          but I don't see how to do the comparisons without a temporary
@@ -7036,7 +7030,7 @@ mips_ip (str, ip)
       save_c = *s;
       *s++ = '\0';
     }
-	
+
   insn = (struct mips_opcode *) hash_find (op_hash, str);
 
   /* If we didn't find the instruction in the opcode table, try again, but
@@ -7044,7 +7038,7 @@ mips_ip (str, ip)
      first '.'.  */
   if (insn == NULL)
     {
-      /* Restore the character we overwrite above (if any).  */ 
+      /* Restore the character we overwrite above (if any).  */
       if (save_c)
 	*(--s) = save_c;
 
@@ -7079,9 +7073,9 @@ mips_ip (str, ip)
 
       if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_cpu, mips_gp32))
 	ok = true;
-      else 
+      else
 	ok = false;
-      
+
       if (insn->pinfo != INSN_MACRO)
 	{
 	  if (mips_cpu == 4650 && (insn->pinfo & FP_D) != 0)
@@ -7099,10 +7093,10 @@ mips_ip (str, ip)
 	  else
   	    {
 	      static char buf[100];
-	      sprintf (buf, 
+	      sprintf (buf,
 		       _("opcode not supported on this processor: %d (MIPS%d)"),
 		       mips_cpu, mips_opts.isa);
-		       
+
 	      insn_error = buf;
 	      return;
 	    }
@@ -7146,7 +7140,7 @@ mips_ip (str, ip)
 	    case '(':
 	      /* Handle optional base register.
 		 Either the base register is omitted or
-		 we must have a left paren. */
+		 we must have a left paren.  */
 	      /* This is dependent on the next operand specifier
 		 is a base register specification.  */
 	      assert (args[1] == 'b' || args[1] == '5'
@@ -7189,7 +7183,6 @@ mips_ip (str, ip)
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
-
 
 	    case 'k':		/* cache code */
 	    case 'h':		/* prefx code */
@@ -7355,9 +7348,9 @@ mips_ip (str, ip)
 			      /* Get_field advances to the start of
 				 the next field, so we need to back
 				 rack to the end of the last field.  */
-			      if (p) 
+			      if (p)
 				s = p - 1;
-			      else 
+			      else
 				s = strchr (s, '\0');
 			      regno = r;
 			    }
@@ -7388,8 +7381,8 @@ mips_ip (str, ip)
 		  if (c == 'z' && regno != 0)
 		    break;
 
-	/* Now that we have assembled one operand, we use the args string 
-	 * to figure out where it goes in the instruction. */
+	/* Now that we have assembled one operand, we use the args string
+	 * to figure out where it goes in the instruction.  */
 		  switch (c)
 		    {
 		    case 'r':
@@ -7509,7 +7502,6 @@ mips_ip (str, ip)
 		  lastregno = regno;
 		  continue;
 		}
-
 
 	      switch (*args++)
 		{
@@ -8803,7 +8795,7 @@ md_atof (type, litP, sizeP)
 	  litP += 2;
 	}
     }
-     
+
   return NULL;
 }
 
@@ -8865,7 +8857,7 @@ struct option md_longopts[] = {
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
 #define OPTION_32 (OPTION_MD_BASE + 20)
 #define OPTION_64 (OPTION_MD_BASE + 21)
-  
+
 #define OPTION_MIPS16 (OPTION_MD_BASE + 22)
   {"mips16", no_argument, NULL, OPTION_MIPS16},
 #define OPTION_NO_MIPS16 (OPTION_MD_BASE + 23)
@@ -8918,11 +8910,11 @@ md_parse_option (c, arg)
     case OPTION_CONSTRUCT_FLOATS:
       mips_disable_float_construction = 0;
       break;
-      
+
     case OPTION_NO_CONSTRUCT_FLOATS:
       mips_disable_float_construction = 1;
       break;
-      
+
     case OPTION_TRAP:
       mips_trap = 1;
       break;
@@ -9087,7 +9079,7 @@ md_parse_option (c, arg)
 		    break;
 		  }
 	      }
-	    
+
 	    if (sv
 		&& (mips_cpu != 4300
 		    && mips_cpu != 4100
@@ -9128,11 +9120,10 @@ md_parse_option (c, arg)
     case OPTION_NO_M4100:
       break;
 
-
     case OPTION_M3900:
       mips_cpu = 3900;
       break;
-      
+
     case OPTION_NO_M3900:
       break;
 
@@ -9235,11 +9226,11 @@ md_parse_option (c, arg)
       /* We deliberately don't allow "-gp32" to set the MIPS_32BITMODE
 	 flag in object files because to do so would make it
 	 impossible to link with libraries compiled without "-gp32".
-	 This is unnecessarily restrictive.  
+	 This is unnecessarily restrictive.
 
 	 We could solve this problem by adding "-gp32" multilibs to
 	 gcc, but to set this flag before gcc is built with such
-	 multilibs will break too many systems. */
+	 multilibs will break too many systems.  */
 
 /*    mips_32bitmode = 1; */
       break;
@@ -9274,7 +9265,6 @@ md_parse_option (c, arg)
   return 1;
 }
 
-
 static void
 show (stream, string, col_p, first_p)
      FILE *stream;
@@ -9304,7 +9294,6 @@ show (stream, string, col_p, first_p)
 
   *first_p = 0;
 }
-
 
 void
 md_show_usage (stream)
@@ -9591,7 +9580,7 @@ md_apply_fix (fixP, valueP)
 #ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-    if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16 
+    if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16
         || S_IS_WEAK (fixP->fx_addsy)
         || (symbol_used_in_reloc_p (fixP->fx_addsy)
             && (((bfd_get_section_flags (stdoutput,
@@ -9607,7 +9596,7 @@ md_apply_fix (fixP, valueP)
           {
             /* In this case, the bfd_install_relocation routine will
                incorrectly add the symbol value back in.  We just want
-               the addend to appear in the object file.  
+               the addend to appear in the object file.
 	       FIXME: If this makes VALUE zero, we're toast.  */
             value -= S_GET_VALUE (fixP->fx_addsy);
           }
@@ -9667,7 +9656,7 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_PCREL_HI16_S:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour 
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 	  && !fixP->fx_done
 	  && value != 0)
 	break;
@@ -9692,7 +9681,7 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_PCREL_LO16:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour 
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 	  && !fixP->fx_done
 	  && value != 0)
 	break;
@@ -9788,7 +9777,7 @@ md_apply_fix (fixP, valueP)
 	 a bug somewhere.  */
       if (!fixP->fx_done)
 	value -= fixP->fx_frag->fr_address + fixP->fx_where;
-      
+
       value >>= 2;
 
       /* update old instruction data */
@@ -10289,7 +10278,7 @@ s_mipsset (x)
 	{
 	  /* If we still have pending nops, we can discard them.  The
 	     usual nop handling will insert any that are still
-	     needed. */
+	     needed.  */
 	  prev_nop_frag->fr_fix -= (prev_nop_frag_holds
 				    * (mips_opts.mips16 ? 2 : 4));
 	  prev_nop_frag = NULL;
@@ -10568,7 +10557,7 @@ s_cpadd (ignore)
 		? "addu" : "daddu"),
 	       "d,v,t", reg, reg, GP);
 
-  demand_empty_rest_of_line ();  
+  demand_empty_rest_of_line ();
 }
 
 /* Handle the .insn pseudo-op.  This marks instruction labels in
@@ -10635,13 +10624,13 @@ s_mips_weakext (ignore)
 	  ignore_rest_of_line ();
 	  return;
 	}
-      
+
       if (*input_line_pointer == ',')
 	{
 	  ++input_line_pointer;
 	  SKIP_WHITESPACE ();
 	}
-      
+
       expression (&exp);
       if (exp.X_op != O_symbol)
 	{
@@ -10946,7 +10935,7 @@ mips16_extended_frag (fragp, sec, stretch)
 
 	  /* If we are currently assuming that this frag should be
 	     extended, then, the current address is two bytes
-	     higher. */
+	     higher.  */
 	  if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
 	    addr += 2;
 
@@ -11602,7 +11591,7 @@ mips_elf_final_processing ()
   if (mips_pic != NO_PIC)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 
-  /* Set the MIPS ELF ABI flags. */
+  /* Set the MIPS ELF ABI flags.  */
   if (mips_abi_string == 0)
     ;
   else if (strcmp (mips_abi_string,"32") == 0)
@@ -11661,9 +11650,9 @@ mips_do_align (n, fill, len, max)
       frag_align (1, 0, 0);
 
       if (target_big_endian)
-      	frag_align_pattern (n, be_nop, 2, max);      
+      	frag_align_pattern (n, be_nop, 2, max);
       else
-      	frag_align_pattern (n, le_nop, 2, max);      
+      	frag_align_pattern (n, le_nop, 2, max);
       return 1;
     }
 
@@ -11746,7 +11735,6 @@ s_file (x)
   line = get_number ();
   s_app_file (0);
 }
-
 
 /* The .end directive.  */
 
@@ -11890,9 +11878,9 @@ s_mips_ent (aent)
 }
 
 /* The .frame directive. If the mdebug section is present (IRIX 5 native)
-   then ecoff.c (ecoff_directive_frame) is used. For embedded targets, 
+   then ecoff.c (ecoff_directive_frame) is used. For embedded targets,
    s_mips_frame is used so that we can set the PDR information correctly.
-   We can't use the ecoff routines because they make reference to the ecoff 
+   We can't use the ecoff routines because they make reference to the ecoff
    symbol table (in the mdebug section).  */
 
 static void
@@ -11931,10 +11919,10 @@ s_mips_frame (ignore)
 #endif /* MIPS_STABS_ELF */
 }
 
-/* The .fmask and .mask directives. If the mdebug section is present 
-   (IRIX 5 native) then ecoff.c (ecoff_directive_mask) is used. For 
+/* The .fmask and .mask directives. If the mdebug section is present
+   (IRIX 5 native) then ecoff.c (ecoff_directive_mask) is used. For
    embedded targets, s_mips_mask is used so that we can set the PDR
-   information correctly. We can't use the ecoff routines because they 
+   information correctly. We can't use the ecoff routines because they
    make reference to the ecoff symbol table (in the mdebug section).  */
 
 static void
@@ -11943,7 +11931,7 @@ s_mips_mask (reg_type)
 {
 #ifdef MIPS_STABS_ELF
   long mask, off;
-  
+
   if (cur_proc_ptr == (procS *) NULL)
     {
       as_warn (_(".mask/.fmask outside of .ent"));
