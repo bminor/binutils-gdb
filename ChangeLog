@@ -1,4 +1,11 @@
+Tue Apr  6 10:36:53 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (gdb.tar.Z):  Fix for building gzip'd distribution.
+	* Makefile.in (COMPRESS):  New macro, like GZIP.
+
 Fri Apr  2 09:02:31 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* test-build.mk: Use -with-gnu-as for mips-sgi-irix4 as well.
 
 	* build-all.mk: Set GCC to gcc -O -G 8 for MIPS targets, since gcc
 	with gas currently defaults to -G 0.
