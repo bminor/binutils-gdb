@@ -153,6 +153,11 @@ hppaelf_finish()
       /* they are no longer valid */
       hppaelf_search_for_padding_statements(stat_ptr->head,&(stat_ptr->head));
     }
+  /* Size up the sections again.  */
+  lang_size_sections (stat_ptr->head,
+		      abs_output_section,
+		      &(stat_ptr->head), 0, (bfd_vma) 0, false);
+
 }
 
 static void

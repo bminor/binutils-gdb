@@ -127,11 +127,6 @@ static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **this_ptr,
 	   lang_output_section_statement_type *output_section_statement,
 	   fill_type fill, bfd_vma dot, boolean relax));
-static bfd_vma lang_size_sections
-  PARAMS ((lang_statement_union_type *s,
-	   lang_output_section_statement_type *output_section_statement,
-	   lang_statement_union_type **prev, fill_type fill,
-	   bfd_vma dot, boolean relax));
 static bfd_vma lang_do_assignments
   PARAMS ((lang_statement_union_type * s,
 	   lang_output_section_statement_type *output_section_statement,
@@ -1588,7 +1583,7 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
    */
 static boolean had_relax;
 
-static bfd_vma
+bfd_vma
 lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type * s;
      lang_output_section_statement_type * output_section_statement;
@@ -1649,8 +1644,9 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	 /* The section starts here */
 	 /* First, align to what the section needs */
 
+	 if (os->section_alignment != -1)
+	   dot = align_power (dot, os->section_alignment);
 
-	 dot = align_power (dot, os->bfd_section->alignment_power);
 	 bfd_set_section_vma (0, os->bfd_section, dot);
 	 
 	 if (os->load_base) {
@@ -2537,17 +2533,6 @@ lang_process ()
   /* Final stuffs */
 
   ldemul_finish ();
-
-#if 0
-  /* DO NOT REENABLE THIS CALL.  IF THIS CALL IS MADE, THE SUN4 LINKER
-     CAN NOT BOOTSTRAP!!  No, I don't know why, but don't change it
-     unless you fix it.  */
-  /* Size up the sections.  */
-  lang_size_sections (statement_list.head,
-		      abs_output_section,
-		      &(statement_list.head), 0, (bfd_vma) 0, false);
-#endif
-
   lang_finish ();
 }
 

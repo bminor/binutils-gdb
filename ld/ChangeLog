@@ -1,3 +1,12 @@
+Fri Feb 25 10:47:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* ldlang.c (lang_size_sections): No longer static (PA ELF calls
+	it via hppaelf_finish).  Prototype moved into ldlang.h.
+	(lang_process): Move problematic extra call to lang_size_sections
+	into the PA ELF specific code.
+	* emultempl/hppaelf.em (hppaelf_finish): Extra call to
+	lang_size_sections moved here.
+
 Thu Feb 24 16:47:33 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (powerpc-*-elf*): New target; use ppc-elf32.
