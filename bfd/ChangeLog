@@ -1,3 +1,7 @@
+Mon Nov  1 09:12:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.bfd: Use m68k-elf for m68*-*-sysv4*.
+
 Sun Oct 31 09:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* targets.c: Move enum target_flavour outside of struct and change
