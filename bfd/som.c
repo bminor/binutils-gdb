@@ -170,6 +170,8 @@ static boolean som_new_section_hook PARAMS ((bfd *, asection *));
 static boolean som_bfd_copy_private_section_data PARAMS ((bfd *, asection *,
 							  bfd *, asection *));
 static boolean som_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+#define som_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
+#define som_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
 static boolean som_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						 file_ptr, bfd_size_type));
@@ -3960,7 +3962,7 @@ som_slurp_symbol_table (abfd)
 	 Note $START$ is a magic code symbol, NOT a section symbol.  */
       if (sym->symbol.name[0] == '$'
 	  && sym->symbol.name[strlen (sym->symbol.name) - 1] == '$'
-	  && strcmp (sym->symbol.name, "$START$"))
+	  && !strcmp (sym->symbol.name, sym->symbol.section->name))
 	sym->symbol.flags |= BSF_SECTION_SYM;
       else if (!strncmp (sym->symbol.name, "L$0\002", 4))
 	{
@@ -4585,7 +4587,7 @@ som_bfd_copy_private_section_data (ibfd, isection, obfd, osection)
   if (ibfd->xvec->flavour != bfd_target_som_flavour
       || obfd->xvec->flavour != bfd_target_som_flavour
       || (!som_is_space (isection) && !som_is_subspace (isection)))
-    return false;
+    return true;
 
   som_section_data (osection)->copy_data
     = (struct som_copyable_section_data_struct *)
@@ -4618,7 +4620,7 @@ som_bfd_copy_private_bfd_data (ibfd, obfd)
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_som_flavour
       || obfd->xvec->flavour != bfd_target_som_flavour)
-    return false;
+    return true;
 
   /* Allocate some memory to hold the data we need.  */
   obj_som_exec_data (obfd) = (struct som_exec_data *)
