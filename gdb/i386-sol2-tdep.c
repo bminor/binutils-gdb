@@ -24,6 +24,7 @@
 #include "osabi.h"
 
 #include "i386-tdep.h"
+#include "solib-svr4.h"
 
 /* From <ia32/sys/reg.h>.  */
 static int i386_sol2_gregset_reg_offset[] =
@@ -93,6 +94,9 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_addr = i386_sol2_mcontext_addr;
   tdep->sc_reg_offset = tdep->gregset_reg_offset;
   tdep->sc_num_regs = tdep->gregset_num_regs;
+
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 

@@ -22,6 +22,8 @@
 #ifndef TM_I386SOL2_H
 #define TM_I386SOL2_H 1
 
+#include "solib.h"
+
 /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
    and for SunPRO 3.0, N_FUN symbols too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
@@ -30,4 +32,4 @@ extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '.')
 
-#endif /* ifndef TM_I386SOL2_H */
+#endif /* tm-i386sol2.h */

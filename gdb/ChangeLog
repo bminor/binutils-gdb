@@ -1,3 +1,14 @@
+2004-04-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-sol2-tdep.c: Include "solib-svr4.h".
+	(i386_sol2_init_abi): Set solib_svr4_fetch_link_map_offsets.
+	* Makefile.in (i386-sol2-tdep.o): Update dependencies.
+	* config/i386/tm-i386sol2.h: Include :solib.h".
+	* config/i386/i386sol2.mh (NATDEPFILES): Remove solib.o,
+	solib-svr4.o and solib-legacy.o.
+	* config/i386/i386sol2.mt (TDEPFILES): Add solib.o and
+	solib-svr4.o.
+
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-linux-nat.c (fetch_inferior_registers): Correctly check
