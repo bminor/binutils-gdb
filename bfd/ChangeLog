@@ -1,3 +1,8 @@
+Fri Jun 18 19:57:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* reloc.c (bfd_perform_relocation): Check for overflow on
+	pc-relative relocations if the howto asked for it.
+
 Fri Jun 18 16:00:20 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in (stmp-bfd.h): Ignore nonzero exit status from grep.
