@@ -24,7 +24,7 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk tclX"
+host_libs="mmalloc libiberty opcodes bfd readline glob gash tcl tk tclX"
 
 # these tools are built for the host environment
 #
@@ -64,7 +64,7 @@ target_tools="groff"
 # directories to be built in the native environment only
 #
 native_only="autoconf cvs emacs fileutils find grep groff gzip hello indent
-             ispell m4 rcs recode sed shellutils tar textutils tk uudecode wdiff 
+             ispell m4 rcs recode sed shellutils tar textutils gash tk uudecode wdiff 
 	     gprof"
 
 # directories to be built in a cross environment only
@@ -120,7 +120,7 @@ case ${with_x} in
   yes | "")  # the default value for this tree is that X11 is available
 	;;
   no)
-    	configdirs=`echo ${configdirs} | sed -e 's/tk//'`
+    	configdirs=`echo ${configdirs} | sed -e 's/tk//;/gash//'`
 	;;
   *)
     	echo "*** bad value \"${with_x}\" for -with-x flag; ignored" 1>&2
