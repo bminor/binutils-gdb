@@ -1,3 +1,10 @@
+2000-10-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* write.c (write_relocs): Fix a comment.
+
+	* config/obj-elf.c (elf_frob_symbol): Make section syms global on
+	link-once sections.
+
 2000-10-05  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-ia64.c (resources_match): Handle IA64_RS_PRr.

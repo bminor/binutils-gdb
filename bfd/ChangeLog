@@ -1,3 +1,7 @@
+2000-10-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf.c (swap_out_syms): Handle global section symbols.
+
 2000-10-05  DJ Delorie  <dj@redhat.com>
 
 	* peigen.c (_bfd_pei_swap_scnhdr_out): note extended relocs

@@ -1008,7 +1008,7 @@ write_relocs (abfd, sec, xxx)
 	}
 
       /* If this is an undefined symbol which was equated to another
-         symbol, then use generate the reloc against the latter symbol
+         symbol, then generate the reloc against the latter symbol
          rather than the former.  */
       sym = fixp->fx_addsy;
       while (symbol_equated_p (sym)
