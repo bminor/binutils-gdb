@@ -36,14 +36,14 @@ UNAME_VERSION=`(uname -v) 2>/dev/null` || UNAME_VERSION=unknown
 # Note: order is significant - the case branches are not exclusive.
 
 case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
-    alpha:OSF1:1.*:*)
+    alpha:OSF1:V*:*)
+	# After 1.2, OSF1 uses "V1.3" for uname -r.
+	echo alpha-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^V//'`
+	exit 0 ;;
+    alpha:OSF1:*:*)
 	# 1.2 uses "1.2" for uname -r.
 	echo alpha-dec-osf${UNAME_RELEASE}
         exit 0 ;;
-    alpha:OSF1:V1.*:*)
-	# 1.3 uses "V1.3" for uname -r.
-	echo alpha-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^V//'`
-	exit 0 ;;
     arm:RISC*:1.[012]*:*|arm:riscix:1.[012]*:*)
 	echo arm-acorn-riscix${UNAME_RELEASE}
 	exit 0;;
@@ -62,6 +62,9 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
     sun3*:SunOS:*:*)
 	echo m68k-sun-sunos${UNAME_RELEASE}
 	exit 0 ;;
+    mc68030:UNIX_System_V:4.*:*)
+	echo m68k-atari-sysv4
+	exit 0 ;;
     RISC*:ULTRIX:*:*)
 	echo mips-dec-ultrix${UNAME_RELEASE}
 	exit 0 ;;
@@ -70,6 +73,9 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	exit 0 ;;
     mips:*:5*:RISCos)
 	echo mips-mips-riscos${UNAME_RELEASE}
+	exit 0 ;;
+    m88k:CX/UX:7*:*)
+	echo m88k-harris-cxux7
 	exit 0 ;;
     m88k:*:4*:R4*)
 	echo m88k-motorola-sysv4
@@ -210,6 +216,9 @@ EOF
 		UNAME_REL=`(/bin/uname -X|egrep Release|sed -e 's/.*= //')`
 		(/bin/uname -X|egrep i80486 >/dev/null) && UNAME_MACHINE=i486
 		echo ${UNAME_MACHINE}-unknown-sco$UNAME_REL
+	elif test -f /usr/options/cb.name; then
+		UNAME_REL=`sed -n 's/.*Version //p' </usr/options/cb.name`
+		echo ${UNAME_MACHINE}-unknown-isc$UNAME_REL
 	else
 		echo ${UNAME_MACHINE}-unknown-sysv32
 	fi
@@ -218,6 +227,9 @@ EOF
 # are messed up and put the nodename in both sysname and nodename.
     i[34]86:DYNIX/ptx:4*:*)
 	echo i386-sequent-sysv4
+	exit 0 ;;
+    Intel:Mach:3*:*)
+	echo i386-unknown-mach3
 	exit 0 ;;
     mini*:CTIX:SYS*5:*)
 	# "miniframe"

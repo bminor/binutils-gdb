@@ -1,3 +1,7 @@
+Sat Jul 23 12:19:46 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess:  Recognize ISC.  Patch from kwzh@gnu.ai.mit.edu.
+
 Fri Jul 22 17:53:59 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* configure:  Search current dir first in .gdbinit.
