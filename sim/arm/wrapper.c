@@ -181,10 +181,65 @@ sim_create_inferior (sd, abfd, argv, env)
      char **argv;
      char **env;
 {
-  if (abfd != NULL)
-    ARMul_SetPC (state, bfd_get_start_address (abfd));
-  else
-    ARMul_SetPC (state, 0); /* ??? */
+  int argvlen=0;
+  char **arg;
+
+#if 1 /* JGS */
+  /* We explicitly select a processor capable of supporting the ARM
+     32bit mode, and then we force the simulated CPU into the 32bit
+     User mode: */
+  ARMul_SelectProcessor(state, ARM600);
+  ARMul_SetCPSR(state, USER32MODE);
+#endif
+
+  if (argv != NULL)
+    {
+      /*
+      ** Set up the command line (by laboriously stringing together the
+      ** environment carefully picked apart by our caller...)
+      */
+      /* Free any old stuff */
+      if (state->CommandLine != NULL)
+	{
+	  free(state->CommandLine);
+	  state->CommandLine = NULL;
+	}
+      
+      /* See how much we need */
+      for (arg = argv; *arg != NULL; arg++)
+	argvlen += strlen(*arg)+1;
+      
+      /* allocate it... */
+      state->CommandLine = malloc(argvlen+1);
+      if (state->CommandLine != NULL)
+	{
+	  arg = argv;
+	  state->CommandLine[0]='\0';
+	  for (arg = argv; *arg != NULL; arg++)
+	    {
+	      strcat(state->CommandLine, *arg);
+	      strcat(state->CommandLine, " ");
+	    }
+	}
+    }
+
+  if (env != NULL)
+    {
+      /* Now see if there's a MEMSIZE spec in the environment */
+      while (*env)
+	{
+	  if (strncmp(*env, "MEMSIZE=", sizeof("MEMSIZE=")-1)==0)
+	    {
+	      unsigned long top_of_memory;
+	      char *end_of_num;
+	      
+	      /* Set up memory limit */
+	      state->MemSize = strtoul(*env + sizeof("MEMSIZE=")-1, &end_of_num, 0);
+	    }
+	  env++;
+	}
+    }
+
   return SIM_RC_OK;
 }
 
