@@ -1041,11 +1041,11 @@
 	LO = EXTEND32 (0x80000000);
 	HI = EXTEND32 (0);
       }
-   else
-     {
-       LO = EXTEND32 (n / d);
-       HI = EXTEND32 (n % d);
-     }
+    else
+      {
+	LO = EXTEND32 (n / d);
+	HI = EXTEND32 (n % d);
+      }
   }
   TRACE_ALU_RESULT2 (HI, LO);
 }
@@ -1185,15 +1185,6 @@
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
-:function:::void:do_dsllv:int rs, int rt, int rd
-{
-  int s = MASKED64 (GPR[rs], 5, 0);
-  TRACE_ALU_INPUT2 (GPR[rt], s);
-  GPR[rd] = GPR[rt] << s;
-  TRACE_ALU_RESULT (GPR[rd]);
-}
-
-
 000000,00000,5.RT,5.RD,5.SHIFT,111000:SPECIAL:64::DSLL
 "dsll r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
@@ -1220,6 +1211,14 @@
   TRACE_ALU_INPUT2 (GPR[RT], s);
   GPR[RD] = GPR[RT] << s;
   TRACE_ALU_RESULT (GPR[RD]);
+}
+
+:function:::void:do_dsllv:int rs, int rt, int rd
+{
+  int s = MASKED64 (GPR[rs], 5, 0);
+  TRACE_ALU_INPUT2 (GPR[rt], s);
+  GPR[rd] = GPR[rt] << s;
+  TRACE_ALU_RESULT (GPR[rd]);
 }
 
 000000,5.RS,5.RT,5.RD,00000,010100:SPECIAL:64::DSLLV
