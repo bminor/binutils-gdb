@@ -224,7 +224,7 @@
 
 2003-02-14  Christopher Faylor  <cgf@redhat.com>
 
-	* win32-nat.cc (register_loaded_dll): Correctly set address range for
+	* win32-nat.c (register_loaded_dll): Correctly set address range for
 	just-loaded dll.
 
 2003-02-12  Jason Molenda  (jmolenda@apple.com)
