@@ -143,7 +143,7 @@ case "${target}" in
 			sim_m16_filter="16"
 			;;
 # end-sanitize-tx19
-  mipst*tx39*)		sim_default_gen=IGEN
+  mips*tx39*)		sim_default_gen=IGEN
 			sim_use_gen=IGEN
 			sim_igen_filter="32,f"
 			sim_igen_machine="-M r3900"

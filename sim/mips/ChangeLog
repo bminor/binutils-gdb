@@ -1,3 +1,17 @@
+Fri May 29 11:40:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (sim_igen_filter): Match mips*tx39 not mipst*tx39.
+
+start-sanitize-tx3904
+Mon May 25 20:47:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-tx3904cpu.c, dv-tx3904irc.c: Rename *_callback to *_method.
+
+	* dv-tx3904cpu.c, dv-tx3904irc.c: Include hw-main.h and
+ 	sim-main.h. Declare a struct hw_descriptor instead of struct
+ 	hw_device_descriptor.
+
+end-sanitize-tx3904
 Mon May 25 12:41:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (do_store_left, do_load_left): Compute nr of left and
