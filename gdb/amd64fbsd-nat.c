@@ -44,7 +44,7 @@ typedef struct fpreg fpregset_t;
 #endif
 
 #include "gregset.h"
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 #include "amd64-nat.h"
 
 

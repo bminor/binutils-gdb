@@ -1,6 +1,6 @@
 /* Native-dependent code for AMD64 BSD's.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,7 +31,7 @@
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 #include "amd64-nat.h"
 
 

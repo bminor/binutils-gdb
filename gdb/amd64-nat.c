@@ -26,7 +26,7 @@
 #include "gdb_assert.h"
 
 #include "i386-tdep.h"
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 
 /* The following bits of code help with implementing debugging 32-bit
    code natively on AMD64.  The idea is to define two mappings between

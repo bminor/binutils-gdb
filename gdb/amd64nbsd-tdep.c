@@ -27,7 +27,7 @@
 
 #include "gdb_assert.h"
 
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 #include "nbsd-tdep.h"
 #include "solib-svr4.h"
 
