@@ -1,5 +1,11 @@
 2002-06-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-svr4.c (init_fetch_link_map_offsets): Simply return
+	legacy_fetch_link_map_offsets.  Adjust comment to reflect reality
+	after Andrew's 2002-06-08 gdbarch change.
+
+2002-06-09  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-linux-nat.c (suppy_gregset): Don't supply
 	I386_LINUX_ORIG_EAX_REGNUM if there isn't room for it in GDB's
 	register cache.
