@@ -1,3 +1,11 @@
+start-sanitize-arc
+Mon May 15 13:39:45 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.c (md_longopts): -EB/-EL renamed to
+	-mbig-endian/-mlittle-endian.
+	(md_show_usage): Likewise.
+end-sanitize-arc
+
 Fri May 12 14:17:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	Initial support for PE object files.
