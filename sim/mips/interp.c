@@ -698,14 +698,10 @@ sim_open (kind, cb, abfd, argv)
       sim_write (sd, 0x80000000, (char *) halt, sizeof (halt));
       sim_write (sd, 0x80000180, (char *) halt, sizeof (halt));
       sim_write (sd, 0x80000200, (char *) halt, sizeof (halt));
-#if 0
-      /* This is wrong.  We're not supposed to write code to the
-	 vector tables, but rather pointers to code.  */
       /* XXX: Write here unconditionally? */
       sim_write (sd, 0xBFC00200, (char *) halt, sizeof (halt));
       sim_write (sd, 0xBFC00380, (char *) halt, sizeof (halt));
       sim_write (sd, 0xBFC00400, (char *) halt, sizeof (halt));
-#endif
     }
   }
 
