@@ -672,7 +672,8 @@ gdb_os_poll_quit (p)
    just as `wait' would. */
 
 static void
-gdbsim_cntrl_c (int signo)
+gdbsim_cntrl_c (signo)
+     int signo;
 {
   gdbsim_stop ();
 }
