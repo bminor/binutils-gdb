@@ -1,5 +1,8 @@
 Fri Oct 18 14:06:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_ip): Accept an odd floating point
+	register with l.s or s.s.
+
 	* config/obj-aout.c (obj_pseudo_table): Use obj_aout_type for
 	.type pseudo-op.
 	(obj_aout_type): New static function.

@@ -5540,10 +5540,12 @@ mips_ip (str, ip)
 
 		  if ((regno & 1) != 0
 		      && mips_isa < 3
-		      && ! (strcmp (str, "mtc1") == 0 ||
-			    strcmp (str, "mfc1") == 0 ||
-			    strcmp (str, "lwc1") == 0 ||
-			    strcmp (str, "swc1") == 0))
+		      && ! (strcmp (str, "mtc1") == 0
+			    || strcmp (str, "mfc1") == 0
+			    || strcmp (str, "lwc1") == 0
+			    || strcmp (str, "swc1") == 0
+			    || strcmp (str, "l.s") == 0
+			    || strcmp (str, "s.s") == 0))
 		    as_warn ("Float register should be even, was %d",
 			     regno);
 
