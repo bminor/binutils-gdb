@@ -1251,7 +1251,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(BFD_SRC)/elf-bfd.h $(INCLUDE_DIR)/coff/internal.h \
 	$(INCLUDE_DIR)/elf/arm.h 
 
-armnbsd-nat.o: armnbsd-nat.c $(defs_h) arm-tdep.h $(inferior_h) $(regcache_h)
+armnbsd-nat.o: armnbsd-nat.c $(defs_h) arm-tdep.h $(inferior_h) $(regcache_h) \
+	$(gdbcore_h)
 
 armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) arm-tdep.h
 

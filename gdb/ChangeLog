@@ -1,5 +1,17 @@
 2002-02-21  Richard Earnshaw  <rearnsha@arm.com>
 
+	* Makefile.in (armnbsd-nat.o): Update dependencies.
+	* armnbsd-nat.c (supply_gregset): New function.  Common code to
+	supply the integer register set.
+	(supply_fparegset): New function.  Similar for FPA registers.
+	(fetch_regs, fetch_fp_regs): Use them.
+	(fetch_core_registers): Likewise.
+	(fetch_elfcore_registers): New function.
+	(arm_netbsd_elfcore_fns): New core-file type specification.
+	(_initialize_arm_netbsd_nat): Register it.
+
+2002-02-21  Richard Earnshaw  <rearnsha@arm.com>
+
 	* armnbsd-nat.c: Include gdbcore.h.
 	(FETCH_INFERIOR_REGISTERS): Just error if this isn't defined.
 	(fetch_regs, fetch_fp_regs, store_regs, store_fp_regs): Add explicit

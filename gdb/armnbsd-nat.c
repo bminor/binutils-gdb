@@ -38,6 +38,40 @@
 extern int arm_apcs_32;
 
 static void
+supply_gregset (struct reg *gregset)
+{
+  int regno;
+  CORE_ADDR r_pc;
+
+  /* Integer registers.  */
+  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
+    supply_register (regno, (char *) &gregset->r[regno]);
+
+  supply_register (ARM_SP_REGNUM, (char *) &gregset->r_sp);
+  supply_register (ARM_LR_REGNUM, (char *) &gregset->r_lr);
+  /* This is ok: we're running native...  */
+  r_pc = ADDR_BITS_REMOVE (gregset->r_pc);
+  supply_register (ARM_PC_REGNUM, (char *) &r_pc);
+
+  if (arm_apcs_32)
+    supply_register (ARM_PS_REGNUM, (char *) &gregset->r_cpsr);
+  else
+    supply_register (ARM_PS_REGNUM, (char *) &gregset->r_pc);
+}
+
+static void
+supply_fparegset (struct fpreg *fparegset)
+{
+  int regno;
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    supply_register
+      (regno, (char *) &fparegset->fpr[regno - ARM_F0_REGNUM]);
+
+  supply_register (ARM_FPS_REGNUM, (char *) &fparegset->fpr_fpsr);
+}
+
+static void
 fetch_register (int regno)
 {
   struct reg inferior_registers;
@@ -97,19 +131,7 @@ fetch_regs (void)
       return;
     }
 
-  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
-    supply_register (regno, (char *) &inferior_registers.r[regno]);
-
-  supply_register (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
-  supply_register (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
-  /* This is ok: we're running native... */
-  inferior_registers.r_pc = ADDR_BITS_REMOVE (inferior_registers.r_pc);
-  supply_register (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
-
-  if (arm_apcs_32)
-    supply_register (ARM_PS_REGNUM, (char *) &inferior_registers.r_cpsr);
-  else
-    supply_register (ARM_PS_REGNUM, (char *) &inferior_registers.r_pc);
+  supply_gregset (&inferior_registers);
 }
 
 static void
@@ -157,11 +179,7 @@ fetch_fp_regs (void)
       return;
     }
 
-  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
-    supply_register
-      (regno, (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
-
-  supply_register (ARM_FPS_REGNUM, (char *) &inferior_fp_registers.fpr_fpsr);
+  supply_fparegset (&inferior_fp_registers);
 }
 
 void
@@ -376,28 +394,48 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
   int regno;
   CORE_ADDR r_pc;
-  
-  /* Integer registers.  */
-  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
-    supply_register (regno, (char *) &core_reg->intreg.r[regno]);
 
-  supply_register (ARM_SP_REGNUM, (char *) &core_reg->intreg.r_sp);
-  supply_register (ARM_LR_REGNUM, (char *) &core_reg->intreg.r_lr);
-  /* This is ok: we're running native...  */
-  r_pc = ADDR_BITS_REMOVE (core_reg->intreg.r_pc);
-  supply_register (ARM_PC_REGNUM, (char *) &r_pc);
+  supply_gregset (&core_reg->intreg);
+  supply_fparegset (&core_reg->freg);
+}
 
-  if (arm_apcs_32)
-    supply_register (ARM_PS_REGNUM, (char *) &core_reg->intreg.r_cpsr);
-  else
-    supply_register (ARM_PS_REGNUM, (char *) &core_reg->intreg.r_pc);
+static void
+fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
+			 int which, CORE_ADDR ignore)
+{
+  struct reg gregset;
+  struct fpreg fparegset;
 
-  /* Floating-point registers.  */
-  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
-    supply_register
-      (regno, (char *) &core_reg->freg.fpr[regno - ARM_F0_REGNUM]);
+  switch (which)
+    {
+    case 0:	/* Integer registers.  */
+      if (core_reg_size != sizeof (struct reg))
+	warning ("wrong size of register set in core file");
+      else
+	{
+	  /* The memcpy may be unnecessary, but we can't really be sure
+	     of the alignment of the data in the core file.  */
+	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
+	  supply_gregset (&gregset);
+	}
+      break;
 
-  supply_register (ARM_FPS_REGNUM, (char *) &core_reg->freg.fpr_fpsr);
+    case 2:
+      if (core_reg_size != sizeof (struct fpreg))
+	warning ("wrong size of FPA register set in core file");
+      else
+	{
+	  /* The memcpy may be unnecessary, but we can't really be sure
+	     of the alignment of the data in the core file.  */
+	  memcpy (&fparegset, core_reg_sect, sizeof (fparegset));
+	  supply_fparegset (&fparegset);
+	}
+      break;
+
+    default:
+      /* Don't know what kind of register request this is; just ignore it.  */
+      break;
+    }
 }
 
 static struct core_fns arm_netbsd_core_fns =
@@ -409,8 +447,18 @@ static struct core_fns arm_netbsd_core_fns =
   NULL
 };
 
+static struct core_fns arm_netbsd_elfcore_fns =
+{
+  bfd_target_elf_flavour,		/* core_flovour.  */
+  default_check_format,			/* check_format.  */
+  default_core_sniffer,			/* core_sniffer.  */
+  fetch_elfcore_registers,		/* core_read_registers.  */
+  NULL
+};
+
 void
 _initialize_arm_netbsd_nat (void)
 {
   add_core_fns (&arm_netbsd_core_fns);
+  add_core_fns (&arm_netbsd_elfcore_fns);
 }
