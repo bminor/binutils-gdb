@@ -1,3 +1,15 @@
+Wed Mar  4 11:56:42 1992  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h, utils.c:  xrealloc takes PTR as first arg.
+	* defs.h:  Reword confusing comment about ANSI prototypes.
+	* defs.h:  Some minor whitespace changes.
+	* infrun.c (wait_for_inferior):  Compare int tmp to int 0,
+	not NULL, which can be (void *).
+	* tm-amix.h, tm-i386v4.h:  Add defines for setjmp/longjmp handling.
+	* tm-i386v.h (SP_ARG0):  Define
+	* xm-sysv4.h:  Back out of change for missing prototypes.
+	* i386-tdep.c (get_longjmp_target):  Add function.
+
 Tue Mar  3 15:11:52 1992  Michael Tiemann  (tiemann@cygnus.com)
 
 	* All GDB files that #include defs.h: Removed stdio.h.

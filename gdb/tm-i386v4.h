@@ -41,3 +41,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #undef FRAME_NUM_ARGS
 #define FRAME_NUM_ARGS(val,fi) (val = -1)
+
+/* Offsets (in target ints) into jmp_buf.  Not defined in any system header
+   file, so we have to step through setjmp/longjmp with a debugger and figure
+   them out.  Note that <setjmp> defines _JBLEN as 10, which is the default
+   if no specific machine is selected, even though we only use 6 slots. */
+
+#define JB_ELEMENT_SIZE sizeof(int)	/* jmp_buf[_JBLEN] is array of ints */
+
+#define JB_EBX	0
+#define JB_ESI	1
+#define JB_EDI	2
+#define JB_EBP	3
+#define JB_ESP	4
+#define JB_EDX	5
+
+#define JB_PC	JB_EDX	/* Setjmp()'s return PC saved in EDX */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

@@ -45,3 +45,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tm-sysv4.h"
 #include "tm-68k.h"
+
+/* Offsets (in target ints) into jmp_buf.  Not defined in any system header
+   file, so we have to step through setjmp/longjmp with a debugger and figure
+   them out.  As a double check, note that <setjmp> defines _JBLEN as 13,
+   which matches the number of elements we see saved by setjmp(). */
+
+#define JB_ELEMENT_SIZE sizeof(int)	/* jmp_buf[_JBLEN] is array of ints */
+
+#define JB_D2	0
+#define JB_D3	1
+#define JB_D4	2
+#define JB_D5	3
+#define JB_D6	4
+#define JB_D7	5
+#define JB_A1	6
+#define JB_A2	7
+#define JB_A3	8
+#define JB_A4	9
+#define JB_A5	10
+#define JB_A6	11
+#define JB_A7	12
+
+#define JB_PC	JB_A1	/* Setjmp()'s return PC saved in A1 */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

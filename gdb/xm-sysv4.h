@@ -65,18 +65,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Use setpgid(0,0) to run inferior in a separate process group */
 
 #define NEED_POSIX_SETPGID
-
-/* Declare the return types (or supply prototypes for) functions which
-   do not end up being defined by any of the currently included system
-   header files, and which cannot be defined in any common file since a
-   single definition is known to cause portability problems due to 
-   conflicts with definitions on other systems.
-   FIXME:  This may only be a temporary solution (fnf) */
-
-#ifdef __STDC__
-extern void *malloc(size_t);
-extern void *realloc(void *, size_t);
-#else
-extern char *malloc();
-extern char *realloc();
-#endif

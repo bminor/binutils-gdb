@@ -332,4 +332,8 @@ print_387_control_word PARAMS ((unsigned int));
 extern void
 print_387_status_word PARAMS ((unsigned int));
 
+/* Offset from SP to first arg on stack at first instruction of a function */
+
+#define SP_ARG0 (1 * 4)
+
 #endif	/* !defined (TM_I386V_H) */
