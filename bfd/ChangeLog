@@ -12,6 +12,8 @@ Wed Apr 17 12:08:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Wed Apr 17 13:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_input_bfd): Check for TOC overflow.
+
 	* linker.c (_bfd_generic_link_add_one_symbol): When calling the
 	callback routines, pass h->root.string rather than name, in case
 	copy is true and name is transient.

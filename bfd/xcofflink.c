@@ -3989,11 +3989,20 @@ xcoff_link_input_bfd (finfo, input_bfd)
                  of the TOC using a 16 bit offset from tocval.  This
                  test assumes that the TOC comes at the end of the
                  output section, as it does in the default linker
-                 script.  If the TOC anchor is too far into the .toc
-                 section, the relocation routine will report
-                 overflows.  */
+                 script.  */
+
 	      tocend = ((*csectpp)->output_section->vma
 			+ (*csectpp)->output_section->_raw_size);
+
+	      if (tocval + 0x10000 < tocend)
+		{
+		  (*_bfd_error_handler)
+		    ("TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling",
+		     (unsigned long) (tocend - tocval));
+		  bfd_set_error (bfd_error_file_too_big);
+		  return false;
+		}
+
 	      if (tocval + 0x8000 < tocend)
 		{
 		  bfd_vma tocadd;
