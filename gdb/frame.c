@@ -1933,25 +1933,21 @@ get_prev_frame (struct frame_info *this_frame)
     }
 
   /* Check that this frame's ID isn't inner to (younger, below, next)
-     the next frame.  This happens when frame unwind goes backwards.
-     Since the sentinel frame isn't valid, don't apply this if this
-     frame is entier the inner-most or sentinel frame.  */
+     the next frame.  This happens when a frame unwind goes backwards.
+     Since the sentinel frame doesn't really exist, don't compare the
+     inner-most against that sentinel.  */
   if (this_frame->level > 0
       && frame_id_inner (get_frame_id (this_frame),
 			 get_frame_id (this_frame->next)))
-    error ("This frame inner-to next frame (corrupt stack?)");
+    error ("Previous frame inner to this frame (corrupt stack?)");
 
-  /* Check that this and the next frame are different.  If they are
-     not, there is most likely a stack cycle.  As with the inner-than
-     test, avoid the inner-most and sentinel frames.  */
-  /* FIXME: cagney/2003-03-17: Can't yet enable this this check. The
-     frame_id_eq() method doesn't yet use function addresses when
-     comparing frame IDs.  */
-  if (0
-      && this_frame->level > 0
+  /* Check that this and the next frame are not identical.  If they
+     are, there is most likely a stack cycle.  As with the inner-than
+     test above, avoid comparing the inner-most and sentinel frames.  */
+  if (this_frame->level > 0
       && frame_id_eq (get_frame_id (this_frame),
 		      get_frame_id (this_frame->next)))
-    error ("This frame identical to next frame (corrupt stack?)");
+    error ("Previous frame identical to this frame (corrupt stack?)");
 
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
