@@ -1,3 +1,197 @@
+Fri Oct 27 19:26:27 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* bits.h (ROTL32, ROTL64): Were functions, made them macros, now
+ 	make them functions again.  Appears 2.6.3 is confused by just a
+ 	macro.
+
+Thu Oct 26 18:31:58 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* ppc-endian.c (SWAP_8): Fix 8 byte swap!
+
+	* psim.c (psim_create): Not correctly checking that runtime
+ 	configuration of things like ENDIAN, ENVIRONMENT and ALIGNMENT
+ 	matched the compiled in ones.
+
+	* debug.h (ITRACE), igen.c: Tidy up more tracing flags -
+ 	trace_semantics is now different to trace_idecode, the former
+ 	checks the cache.
+	
+Tue Oct 24 21:54:13 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* ppc-instructions (mtsrin): Missing instruction
+	* ppc-instructions (mfsrin): Missing instruction
+	* ppc-instructions (eieio): Missing instruction
+
+Tue Oct 24 20:55:29 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* build-psim: New shell script - see internals for usage,
+ 	simplifies the process of building custom simulators.
+
+Mon Oct 23 23:48:59 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* std-config.h (SEMANTICS_INLINE): Tidy up notes on each of the
+        INLINE macros.  Make SEMANTICS_INLINE == 1 if DEFAULT_INLINE == 2.
+        Don't use DEFAULT_INLINE to define REGISTERS_INLINE DEVICES_INLINE
+        DEVICE_TREE_INLINE or INTERRUPTS_INLINE as none of these are on
+        the instruction or data critical paths.
+  	
+	* FIXME: need to set up OS_EMUL_INLINE/EMUL_GENERIC_INLINE but
+ 	not on critical path.
+
+	* FIXME: devices.c/emul_netbsd.c would benefit (slightly) from
+ 	the inclusion of device_tree.c/emul_generic.c.
+
+Mon Oct 23 00:31:50 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* os_emul.[hc], emul_generic.[hc], emul_netbsd.[hc]: replace
+        system.[hc].  Start of suport for multiple emulations and
+        emulation state (os_emul object).
+
+	* emul_generic.[hc]: Start of code to implement proper system call
+	tracing (from spy).
+
+Sun Oct 22 21:33:51 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* cpu.h, cpu.c (cpu_init): New function, zero the registers before
+        the processor is started. Fixes problem of registers being
+        undefined when restarting from within gdb.
+
+	* cpu.h, cpu.c (cpu_flush_icache): New function, flushes the
+        instruction cache (if present).  Fixes problem of cpu caching gdb
+        breakpoint instructions.
+
+	FIXME: PSIM sometimes aborts calling error(), it should instead
+ 	call sim_error() say which takes care of housekeeping such as
+ 	saving the CIA before calling error.
+	
+	* NOTE: cpu_flush_cache() instead of cpu_synchronize_context() is
+ 	used when restarting a simulation because the latter has the
+ 	unwanted side effect (well I as a kernel hacker think it is) of
+ 	performing an isync when the instruction stream doesn't contain
+ 	one.
+
+Sun Oct 22 19:27:48 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* mon.h (new), mon.c (new), std-config.h (WITH_MON): Performance
+        monitoring module. Counts both instructions issued and
+        load/stores.
+
+	* NOTE: mon does not contain to count instruction loads as this
+ 	information is already available from the mon_issue() hook.
+
+	* FIXME: mon doesn't have access to register usage information.
+  	This is needed if the user wants to monitor things like register
+ 	stalls.
+
+	* igen.c (lf_print_c_semantic), vm_n.h: Add counting code.
+
+	* psim.h, psim.c (psim_create), cpu.h, cpu.c (cpu_create): Attach
+        a common monitor to each of the cpus. Delete
+        cpu_increment_number_of_insns() and cpu_get_number_of_insns()
+        replaced by copied code in mon.[hc].
+
+Sun Oct 22 18:42:45 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* sim_calls.c, main.c, psim.c (psim_create): always create
+        `WITH_SMP' cpus.  The actual number of CPU's active in a
+        simulation run is taken from the device node: /init/smp (an
+        integer). WITH_SMP changed to 2 (remember to put it back to 0).
+
+Fri Oct 20 17:26:54 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* system.c: More system call emulation.  If code appears NetBSD
+ 	specific, make conditional to being compiled on a NetBSD system
+ 	(sigh).
+
+Wed Oct 18 23:02:20 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+	
+	* Makefile.in, gen.c(delete), igen.c(new), dgen.c(new),
+ 	lf.[ch](new), table.[ch](new): Split into two generators - igen
+ 	that outputs the instruction tables and dgen that outputs the spr
+ 	tables.  Add -f (filter out) flag to igen to filter out certain
+ 	instructions (ex 64 bit ones) from the created tables.  Include
+ 	$(LIBIBERTY_LIB) in link options in case host lacks some libc
+ 	functions.
+
+	* NOTE: igen, since it was originally written for the
+ 	PowerPC/RS6000, things the MSB is 0 and the LSB is 63{31}.
+	
+	* Makefile.in, std-config.h, ppc-cache-rules(new),
+ 	ppc-opcode-complex(new), ppc-opcode-simple(new): (for igen) Create
+ 	cache-rule and opcode-rule tables from macros found std-config.h.
+ 	Delete corresponding macro's from std-config.h.
+  	
+	* FIXME: under this new igen scheme, when playing around with igen
+ 	options, you'll find that depenencies don't work very well.
+
+	* igen.c (gen_itable_c, gen_itable_h), Makefile.in: code to output
+ 	an table of all the instructions.  Code to output a type
+ 	enumerating all the instructin names.
+
+	* igen.c(lf_print_c_semantic): Move call to increment instruction
+ 	counter so that it occures _after_ the instruction has been fully
+ 	validated, was double counting illegal/invalid instructions.  Add
+ 	conditional so only compiled in when WITH_PROFILE enabled (enabled
+ 	by default).
+	
+	* igen.c, cpu.h, cpu.c(cpu_increment_number_of_insns): Include
+ 	itable.h, count individual instruction types not just total,
+ 	adjust reporting functions to output this.
+	
+	* ppc-instructions (64 bit Load Doubleword with Update Indexed):
+ 	Had 32./ instead of 31./
+
+	* ppc-instructions (64 bit Store Double Word Conditional Indexed):
+ 	bitrot - updated to use newer CR register operators.
+
+	* ppc-instructions (64bit Floating Convert from Integer
+ 	Doubleword): Correct call to Round_Float().
+
+Mon Oct 16 00:31:20 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* basics.h: #include "sim_callbacks.h" earlier so that its
+ 	prototypes are declared in all other header files.
+
+	* bits.h, bits.c, idecode_expression.h (ROTL32, ROTL64): Update
+ 	doc in bits.h, remove dead code in bits.c, move ROTL32/ROTL64 into
+ 	bits.h.
+
+	* FIXME: the bits.h/bits.c macro's should be replaced with
+ 	(inline) c functions.
+
+	* cpu.c(cpu_add_commas), device_tree.h, device_tree.c(scand_*):
+ 	Add size of buffer argument to functions writing a string into a
+ 	buffer.  Check for buffer overflow.
+	
+Sun Oct 15 22:16:11 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+	* devices.h, devices.c, debug.h, debug.c: add macro's for tracing
+        of each device.  Make parameter names consistent so macros work.
+        Use macro's in device functions.
+
+	* device_tree.c, devices.h, devices.c: include path to device in a
+        devices node when creating it.
+
+	* device_tree.c, debug.h, debug.c: Add tracing of `device-tree'.
+
+	* core.c: add tracing of core-device, adjust parameter names in
+ 	core functions to be consistent with those in devices*.
+
+Sun Oct 15 20:33:20 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
+
+        * debug.h, debug.c (trace_option): New function. Parses the trace
+        option, updating the trace array.
+
+	* debug.h, debug.c (trace_usage): New function. Outputs the list
+        of all possible trace options.
+
+	* sim_calls.c (sim_open), main.c (main): Use new trace_option() to
+ 	parse trace options specified with the simpler -t flag.  Adjust
+ 	usage.
+
+	* FIXME: basic parsing of command line options is still duplicated
+ 	by main.c and sim_calls.c
+
 Thu Oct 26 10:42:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (clean): Delete *.i and *.out files.
@@ -93,7 +287,7 @@ Thu Oct 12 11:35:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	({CORE,VM,CPU,EVENTS,REGISTERS,INTERRUPTS}_INLINE): Ditto.
 	({SPREG,IDECODE}_INLINE): Ditto.	
 	
-Wed Oct 11 17:13:15 1995  Andrew Cagney  <cagney@kremvax>
+Wed Oct 11 17:13:15 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
         * ppc-instructions: Initial cut of floating point suport added.
   	Of note include - use of host IEEE floating point instructions,
@@ -110,7 +304,7 @@ Wed Oct 11 17:13:15 1995  Andrew Cagney  <cagney@kremvax>
 	* Makefile.in et.al (sorry): tweek to use new core, core_map and
  	core.h.
 	
-Wed Oct 11 12:10:26 1995  Andrew Cagney  <cagney@kremvax>
+Wed Oct 11 12:10:26 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* sim_calls.c, main.c: Add -g (trace_gdb) option, add tracing to
  	most of the other functions in sim_calls.c.
@@ -121,7 +315,7 @@ Wed Oct 11 12:10:26 1995  Andrew Cagney  <cagney@kremvax>
 
 	* vm.c, vm_n.h, Makefile.in: ditto
 	
-Tue Oct 10 15:42:59 1995  Andrew Cagney  <cagney@kremvax>
+Tue Oct 10 15:42:59 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* devices.h, devices.c, memory_map.h, memory_map.c: Changed
  	callback interface so that there is a read/write buffer but no
@@ -133,12 +327,12 @@ Tue Oct 10 15:42:59 1995  Andrew Cagney  <cagney@kremvax>
  	eliminate transfer_mode (raw or cooked) parameter from read/write
  	buffer.
 	
-Fri Oct  6 20:23:56 1995  Andrew Cagney  <cagney@kremvax>
+Fri Oct  6 20:23:56 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* ppc-instructions (fmul, fmuls): correct instruction format - had
  	FRB instead of FRC.
 
-Wed Oct  4 17:31:12 1995  Andrew Cagney  <cagney@kremvax>
+Wed Oct  4 17:31:12 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* psim.c, device_tree.h, device_tree.c, devices.c (printd_*,
  	scand_*): new functions to parse/print fields in device names
@@ -152,7 +346,7 @@ Wed Oct  4 17:31:12 1995  Andrew Cagney  <cagney@kremvax>
  	variable number of arguments.  This gives greater flexability and
  	greater chance of bugs.
 
-Tue Oct  3 22:01:56 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+Tue Oct  3 22:01:56 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* main.c (printf_filtered, error): Missing va_end() to close off
         variable argument use.
@@ -275,7 +469,7 @@ Fri Sep  8 09:51:03 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* basics.h (sysdep.h): Don't include it.
 	* Makefile.in (BASICS_H): Remove sysdep.h.
 
-Wed Sep  6 13:25:42 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+Wed Sep  6 13:25:42 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
  
  	* core.c (core_add_data): First growth of bss was being put at
         wrong address (0) instead of &end.
@@ -283,7 +477,7 @@ Wed Sep  6 13:25:42 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
  	* core.c (core_add_stack, core_add_data): Was not handling case
         where bss/stack is grown across the current end-of-{bss,stack}.
 
-Wed Sep  6 00:46:10 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+Wed Sep  6 00:46:10 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* system.c (system_call): Fix SYS_break - was aligning bss to a
         page boundary instead of just an 8 byte one; On first call sbrk(0)
@@ -329,7 +523,7 @@ Tue Aug 22 09:31:18 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* configure.in: Clone from other simulator targets.
 	* configure: Generate via autoconf from configure.in.
 
-Sat Aug 19 09:05:32 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+Sat Aug 19 09:05:32 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* ppc-instructions: fix srawi (was geting XER[CA] real wrong).
 
@@ -340,14 +534,14 @@ Sat Aug 19 09:05:32 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
 
 	* main.c (main): really stupid. Wasn't exiting with correct status
 
-Fri Aug 18 00:38:01 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+Fri Aug 18 00:38:01 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* system.c (system_call): add system calls kill(2) and getpid(2).
 
 	* main.c (main): Check/return exit status when simulation
         finishes.
 
-Thu Aug 17 14:29:18 1995  Andrew Cagney  <cagney@kremvax>
+Thu Aug 17 14:29:18 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* device_tree.c (create_option_device_node): Alignment rules (at
  	least for the moment) now are for strict alignment only for LE OEA
@@ -355,7 +549,7 @@ Thu Aug 17 14:29:18 1995  Andrew Cagney  <cagney@kremvax>
 
 	* system.c (system_call) SYS_exit: Wasn't exiting with correct status.
 
-Thu Aug 17 01:16:38 1995  Andrew Cagney - aka Noid  <cagney@kremvax>
+Thu Aug 17 01:16:38 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* vm.c (DEFINE_VM_DATA_MAP_WRITE_N): For miss aligned transfer
         forgot to return.

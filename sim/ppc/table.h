@@ -19,15 +19,31 @@
     */
 
 
-#ifndef _SYSTEM_H_
-#define _SYSTEM_H_
+/* load a table into memory */
 
-#ifndef INLINE_SYSTEM
-#define INLINE_SYSTEM
-#endif
+typedef struct _table table;
 
-INLINE_SYSTEM void system_call
-(cpu *processor,
- unsigned_word cia);
+typedef struct _table_entry table_entry;
+struct _table_entry {
+  int line_nr;
+  int nr_fields;
+  char *file_name;
+  char *annex;
+  char *fields[0]; /* User defined */
+};
 
-#endif
+
+extern table *table_open
+(char *file_name,
+ int max_nr_fields);
+
+extern table_entry *table_entry_read
+(table *file);
+
+extern void dump_table_entry
+(table_entry *entry,
+ int indent);
+
+extern void table_entry_lf_c_line_nr
+(lf *file,
+ table_entry *entry);

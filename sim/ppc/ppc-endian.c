@@ -33,7 +33,7 @@
 #include "ppc-endian.h"
 #include "sim_callbacks.h"
 
-#if (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && WITH_NTOH
+#if !defined(SWAP_2) && (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) && WITH_NTOH
 #define SWAP_2(SET,RAW) SET htons (RAW)
 #endif
 
@@ -67,7 +67,7 @@ endian_##NAME##_##BYTE_SIZE(unsigned_##BYTE_SIZE raw_in) \
     return raw_in; \
   } \
   else { \
-    SWAP_##BYTE_SIZE(return, raw_in); \
+    SWAP_##BYTE_SIZE(return,raw_in); \
   } \
 }
 #endif

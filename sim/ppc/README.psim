@@ -3,231 +3,250 @@
 
 Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
 
-This directory contains the program PSIM that models the PowerPC
-architecture.  It can either be run stand alone (psim or run) or used
-as part of GDB.
-
-
-SOURCE:
-
-	PSIM is now part of the Cygnus GDB source tree (hopefully it
-	will in turn become part of the next FSF release of GDB).
-
-	If you're looking for a more `cutting' edge version of this
-	program then it can be found in:
-
-		ftp.ci.com.au:pub/clayton/psim-sim-*.tar.gz
-
-	This contains a replacement for the directory sim/ppc.  As
-	these releases prove stable they are merged back into the GDB
-	source tree.
-
-	If you find bugs or experience problems, please e-mail them to
-	the alias:
-
-		powerpc-psim@ci.com.au
-
-	It's a majordomo mailing list.
-
-
-BUILDING:
-
-	o At present PSIM can only be built using the compiler GCC
-	  (yes that is bug).  This is because, among other things the
-	  code exploits GCC's suport of long ongs.
-
-	o I also suggest that you install: flex, bision, gnu-make and
-	  byacc.  Doing this just makes builds easier.
-
-	o Configure almost as per normal, specifing the special target
-	  eabisim vis:
-
-		$ CC=gcc ./configure --target=powerpcle-unknown-eabisim
-
-	  by default (because of its dependency on GCC).
-
-	o Build your entire gdb tree as per normal.  Something along the
-	  lines of:
-
-		$ cd gdb-4.15
-		$ make CC=gcc
-		.
-		.
-		.
-
-
-
-	o Install it it all as per normal.  Something along the lines of:
-
-		$ cd gdb-4.15
-		$ make CC=gcc install
-
-
-RUNNING:
-
-	PSIM can either be run as a stand alone program or as part
-	of gdb.  The psim-test archive (found in:
-
-		ftp.ci.com.au:pub/clayton
-
-	contains pre-compiled and linked programs that can be run on
-	PSIM.  The notes below assume that you have unpacked that tar
-	archive.
-
-	To rebuild the archive you will need to obtain a working
-	version of an ELF compiler/linker for the PowerPC.
-	
-	Example of running PSIM:
-
-		Print out the users environment:
-
-			$ sim/ppc/psim sim/ppc/test/envp
-
-		Print out the arguments:
-
-			$ sim/ppc/psim sim/ppc/test/argv a b c
-
-		Check the OEA model:
-
-			$ sim/ppc/psim sim/ppc/test/interrupt
-
-		Check that sbrk works
-
-			$ sim/ppc/psim sim/ppc/test/break
-
-		Try for speed.  The program count contains a loop
-		of two instructions which is looped <arg> times.
-		See later for how to make PSIM run 10-100 times
-		faster.
-
-			$ time sim/ppc/sim sim/ppc/test/count 5000000
-			$ expr 10 \* 1000 \* 1000 / <seconds>
-
-
-	Example of running GDB:	
-
-		The most important thing to be aware of is the fact
-		that before the simulator is used, the user must attach
-		to it (target sim) and than load the executable (load count).
-
-			$ cd sim/ppc/test
-			$ powerpc-unknown-eabi-gdb count
-			(gdb) target sim
-			(gdb) load count
-			(gdb) break main
-			(gdb) run
-			.
-			.
-			.
-
-
-CONFIGURATION:
-
-	Making it go faster
-
-	See the file sim/ppc/config.h (which is copied from
-	sim/ppc/std-config.h) for further information.
+This directory contains the program PSIM that models the PowerPC(tm -
+IBM) architecture.  It can either be run stand alone (psim or run) or
+used as part of GDB.
 
 
 KNOWN FEATURES
 
-	SMP: A Symetric Multi-Processor configuration is suported.
-	This includes a model of the PowerPC load word and reserve
-	et.al. instructions (if intending to use this feature you are
-	well advised to read the the source code for the reservation
-	instructions so that you are aware of any potential
-	limitations in the model).
 
-	DUAL-ENDIAN: Both little and big endian modes are suported.
-	Switching between the two modes at run time, however, is not.
+SMP: A Symetric Multi-Processor configuration is suported.  This
+includes modeling of the PowerPC load word and reserve instructions
+(if intending to use this feature you are well advised to read the the
+source code for the reservation instructions so that you are aware of
+any potential limitations in the model).  The number of processors is
+selected during startup.
 
-	UIEA, VEA and OEA: The PowerPC architecture defines three
-	levels of the PowerPC architecture.  This simulator, to a
-	reasonable degree, is capable of modeling all three of them.
-	That is the User Instruction Set Architecture, the Virtual
-	Environment Architecture and finally the Operating Environment
-	Architecture.
+DUAL-ENDIAN: Both little and big endian models are suported.  The
+execution of instruction sequences that switch between the two modes,
+however, is not.  The endianess is selected during startup.
 
-	HARDWARE DEVICES: The OEA model includes facilities that allow
-	a programmer to (I won't say easily) extend this simulator so
-	that a program can interact with models of real devices.
-	Illustrating this is the phony machine clayton that includes
-	console, interrupt control unit and reset register devices.
+UIEA, VEA and OEA: The PowerPC architecture defines three levels of
+the PowerPC architecture.  This simulator, to a reasonable degree, is
+capable of modeling all three.  That is the User Instruction Set
+Architecture, the Virtual Environment Architecture and finally the
+Operating Environment Architecture.  The environment is selected
+during startup.  The OEA model is still under development.
 
-	PEDANTIC VEA MEMORY MODEL: User programs can not assume that
-	they can stray off the end of valid memory areas.  This model
-	defines valid memory addresses in strict accordance to the
-	executable and does not page allign their values.  At first
-	this was a bug but since then has turned up several bugs in
-	peoples code so I've renamed it `a feature' :-)
+HARDWARE DEVICE TREE: In the OEA, the model of the target machines
+hardware is built from a tree of devices (bit like Open Boot).
+Included in this is the ability to model bus hierachies and
+runtime-configurable devices (eg PCI).  The device tree used to create
+the hardware model is created during startup.  This device tree is
+still under development.
 
-	RUNTIME CONFIG OF HARDWARE: In addition to the three builtin
-	models of hardware - VEA, OEA/Hardware and (the start of) OpenBoot,
-	it is possible to load a file containing a specification of a
-	custom device tree.
+VEA SYSTEM CALLS: In user mode, basic system calls (read, write, open,
+close ...) are emulated.  Under NetBSD (simply because that is what my
+machine at home runs) the list is more extensive.
+
+PEDANTIC VEA MEMORY MODEL: This model implements the break (brk, sbrk)
+system calls.  Further, the user model has very strict memory access
+controls.  User programs can not assume that they can stray off the
+end of valid memory areas.  This model defines valid memory addresses
+in strict accordance to the executable and does not page allign their
+values.  At first this was a bug but since then has turned up several
+problems in user code so it is now described as a feature.
+
+PROFILING: The simulation is able to count the number and type of
+instructions issued and the number of loads and stores.  This feature
+is still under development.
+
+PERFORMANCE: In its default configuration PSIM is constructed so that
+it will compile fast and run slow.  Through the enabling of more
+agressive compile options (and the disabling of unwanted features) the
+build can be changed to compile slow and run fast.
+
+FLOATING POINT: Preliminary suport for floating point is included.
+Real kernels don't need floating point.
+
+
+BUILDING PSIM:
+
+To build PSIM you will need the following:
+
+	gdb-4.15.tar.gz		From your favorite GNU ftp site
+
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.diff.gz
+
+				This contains a few minor patches to
+				gdb-4.15 so that will include psim
+				when it is built.
+
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.tar.gz
+
+				This contains the psim files propper.
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-test-951016.tar.gz
+
+				(Optional) A scattering of pre-compiled
+				programs that run under the simulator.
+
+	gcc			Again available from your favorite
+				GNU ftp site.
+
+	patch			Sun's patch behaves a little wierd
+				and doesn't appear to like creating
+				empty files.
+
+
+In the directory ftp.ci.com.au:pub/clayton you will also notice files
+named psim-NNNNNN.tar.gz.  Those, more recent snapshots, may or may
+not work with gdb.
+
+
+0.	A starting point
+
+		$ ls -1
+		gdb-4.15+psim-951016.diff.gz
+		gdb-4.15+psim-951016.tar.gz
+		gdb-4.15.tar.gz
+		psim-test-951016.tar.gz
+
+
+1.	Unpack gdb
+
+		$ gunzip < gdb-4.15.tar.gz | tar xf -
+
+
+2.	Change to the gdb directory, apply the psim patches and unpack
+	the psim files.
+
+		$ cd gdb-4.15
+
+		$ gunzip < ../gdb-4.15+psim-951016.diff.gz | more
+		$ gunzip < ../gdb-4.15+psim-951016.diff.gz | patch -p1
+
+		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar tvf -
+		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar xvf -
+
+
+3.	Configure gdb
+
+		$ more gdb/README
+
+	then something like (I assume SH):
+
+		$ CC=gcc ./configure --target=powerpc-unknown-eabisim
+
+	eabisim is needed as by default (because PSIM needs GCC) the
+	simulator is not built.
+
+
+4.	Build
+
+		$ make CC=gcc
+
+	alternativly, if you are short on disk space or just want the
+	simulator built:
+
+		$ ( cd libiberty && make CC=gcc )
+		$ ( cd bfd && make CC=gcc )
+		$ ( cd sim/ppc && make CC=gcc )
+
+
+5.	Install
+
+		$ make CC=gcc install
+	or just
+		$ cp gdb/gdb ~/bin/powerpc-unknown-eabisim-gdb
+		$ cp sim/ppc/run ~/bin/powerpc-unknown-eabisim-run
+
+
+USING THE SIMULATOR:
+
+(I assume that you've unpacked the psim-test archive).
+
+1.	As a standalone program
+
+	Print out the users environment:
+
+		$ powerpc-unknown-eabisim-run envp
+
+	Print out the arguments:
+
+		$ powerpc-unknown-eabisim-run argv a b c
+
+	Check that sbrk works:
+
+		$ powerpc-unknown-eabisim-run break
+
+
+2.	Example of running GDB:	
+
+	The main thing to note is that before you can run the simulator
+	you must enable it.  The example below illustrates this:
+
+		$ powerpc-unknown-eabisim-gdb envp
+		(gdb) target sim
+		(gdb) load
+		(gdb) break main
+		(gdb) run
+		.
+		.
+		.
+
+
+BUGS AND PROBLEMS:
+
+There is a mailing list (subscribe through majordomo@ci.com.au) (that
+is almost never used) at:
+
+	powerpc-psim@ci.com.au
+
+If I get the ftp archive updated I post a note to that news group.  In
+addition your welcome to send bugs or problems either to me or to that
+e-mail list.
 
 
 KNOWN PROBLEMS:
 
-	FLOATING POINT: Need to add suport for non IEEE float
-	machines.  Need to more fully handle exceptions (eg things
-	like divide by zero).
+See the ChangeLog file looking for lines taged with the word FIXME.
 
-	DEVICE TREE DOC: How to create and use the device tree is not
-	documented at all.
+CORE.C: The implementation of core.c (defined by core.h) isn't the
+best.  It is intended to be functionaly correct rather than fast.
 
-	INITIALIZATION: When running from gdb, things are not
-	re-initialzied very well e.g. registers are not rezeroed.
+HTAB (page) code for OEA model untested.  Some of the vm code
+instructions unimplemented.
 
-	HTAB (page) code for OEA model untested.  Some of the vm code
-	instructions unimplemented.
+Flush instruction cache instructions do nothing.  Perhaphs they should
+(if there is an instruction cache) flush it.
 
-	Flush instruction cache instructions do nothing.  Perhaphs they
-	should (if there is an instruction cache) flush it.
+Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.  The
+PowerOpen worked until I added the ELF one.
 
-	Lacks PowerOpen (a.k.a. XCOFF a.k.a. AIX) and NT startups.
-	The PowerOpen worked until I added the ELF one.
+OpenBoot and PR*P interfaces missing.  Open boot could be implemented
+by putting special instructions at the address of the OpenBoot
+callback functions.  Those instructions could than emulate OpenBoot
+behavour.
 
-	OpenBoot and PR*P interfaces missing.  Open boot could be
-	implemented by putting special instructions at the address
-	of the OpenBoot callback functions.  Those instructions
-	could than emulate OpenBoot behavour.
+Missing VEA system calls.
 
-	Missing VEA system calls.
+Missing or commented out instructions.
 
-	Missing or commented out instructions.
+64bit target untested.
 
-	Only basic (hackish) floating point implemented, I would not
-	trust it and it is going to change.
+64bit host broken.  For instance use of scanf "%x", &long long.
 
-	64bit target untested.
+Event code for pending events from within signal handlers not
+finished/tested.
 
-	64bit host broken.  For instance use of scanf "%x", &long long.
+Better and more devices.
 
-	Event code for pending events from within signal handlers not
-	finished/tested.
+PORTABILITY (Notes taken from Michael Meissner): Heavy use of the ##
+operator - fix using the clasic X/**/Y hack; Use of the signed
+keyword.  In particular, signed char has no analogue in classic C
+(though most implementations of classic C use signed chars); Use of
+long long which restricts the target compiler to be GCC.
 
-	Better and more devices.
-
-	PORTABILITY (Notes taken from Michael Meissner): Heavy use of
-	the ## operator - fix using the clasic X/**/Y hack; Use of the
-	signed keyword.  In particular, signed char has no analogue in
-	classic C (though most implementations of classic C use signed
-	chars); Use of long long which restricts the target compiler
-	to be GCC.
-
-	OPTIONS/FLAGS: Need a function that can parse command line
-	options so that both psim and sim_{load,open,command} can all
-	call it.  Options should be extended to allow the setting of
-	things like floating point support.
 
 THANKS:
 
-	Thanks go to the following who each helped in some way.
+Thanks go to the following who each helped in some way.
 
-		Allen Briggs, Bett Koch, David Edelsohn,
-		Michael Meissner, Bob Mercier, Richard Perini,
-		Richard Stallman, Mitchele Walker
+	Allen Briggs, Bett Koch, David Edelsohn, Gordon Irlam,
+	Michael Meissner, Bob Mercier, Richard Perini,
+	Richard Stallman, Mitchele Walker
 
 
 ----------------------------------------------------------------
@@ -274,7 +293,3 @@ i486DX2/66
 	1/270/316 - switch=2/2,expand=0,inline=1,nia=0
 	1/271/281 - switch=1/1,expand=0,inline=1,nia=1
 	1/267/274 - switch=2/1,expand=0,inline=1,nia=1
-
-----
-
-CFLAGS = -g -Wall -Wno-unused -Wmissing-prototypes -Werror

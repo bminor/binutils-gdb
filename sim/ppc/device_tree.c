@@ -41,6 +41,14 @@ typedef enum {
   node_string
 } node_type;
 
+static char *node_type_names[] = {
+  "any",
+  "device",
+  "integer",
+  "boolean",
+  "string",
+  NULL,
+};
 
 struct _device_tree {
   /* where i am */
@@ -89,6 +97,7 @@ typedef enum {
 STATIC_INLINE_DEVICE_TREE device_tree *
 device_tree_find_node(device_tree *root,
 		      const char *path,
+		      const char *full_path,
 		      node_type type,
 		      device_tree_action action)
 {
@@ -139,13 +148,13 @@ device_tree_find_node(device_tree *root,
 	if (path[name_len] == '\0') {
 	  if (action == device_tree_grow)
 	    error("device_tree_find_node() node %s already present\n",
-		  path);
+		  full_path);
 	  if (type != node_any && child->type != type) {
 	    if (action == device_tree_return_null)
 	      return NULL;
 	    else
-	      error("device_tree_find_node() node %s does not match type %d\n",
-		    path, type);
+	      error("device_tree_find_node() node %s is not of type %s\n",
+		    full_path, node_type_names[type]);
 	  }
 	  else
 	    return child;
@@ -153,6 +162,7 @@ device_tree_find_node(device_tree *root,
 	else
 	  return device_tree_find_node(child,
 				       path + name_len + 1,
+				       full_path,
 				       type,
 				       action);
       }
@@ -163,9 +173,14 @@ device_tree_find_node(device_tree *root,
   switch (action) {
   case device_tree_grow:
     if (path[name_len] != '\0')
-      error("device_tree_find_node() not a leaf %s\n", path);
+      error("device_tree_find_node() a parent of %s missing\n",
+	    full_path);
     return new_device_tree(root, path, type);
   case device_tree_return_null:
+    return NULL;
+  case device_tree_abort:
+    error("device_tree_find_node() could not find %s in tree\n",
+	  full_path);
     return NULL;
   default:
     error("device_tree_find_node() invalid default action %d\n", action);
@@ -180,14 +195,22 @@ INLINE_DEVICE_TREE device_tree *
 device_tree_add_passthrough(device_tree *root,
 			    const char *path)
 {
-  device_tree *new_node = device_tree_find_node(root,
-						path,
-						node_device,
-						device_tree_grow);
+  device_tree *new_node;
+  TRACE(trace_device_tree,
+	("device_tree_add_passthrough(root=0x%x, path=%s)\n", root, path));
+  new_node = device_tree_find_node(root,
+				   path,
+				   path, /*full_path*/
+				   node_device,
+				   device_tree_grow);
   new_node->device = device_create_from(new_node->name,
+					path,
 					NULL,
 					passthrough_device_callbacks(),
 					new_node->parent->device);
+  
+  TRACE(trace_device_tree,
+	("device_tree_add_passthrough() = 0x%x\n", new_node));
   return new_node;
 }
 
@@ -197,11 +220,18 @@ device_tree_add_device(device_tree *root,
 		       const char *path,
 		       const device *dev)
 {
-  device_tree *new_node = device_tree_find_node(root,
-						path,
-						node_device,
-						device_tree_grow);
+  device_tree *new_node;
+  TRACE(trace_device_tree,
+	("device_tree_add_device(root=0x%x, path=%s, dev=0x%x)\n",
+	 root, path, dev));
+  new_node = device_tree_find_node(root,
+				   path,
+				   path, /* full-path */
+				   node_device,
+				   device_tree_grow);
   new_node->device = dev;
+  TRACE(trace_device_tree,
+	("device_tree_add_device() = 0x%x\n", new_node));
   return new_node;
 }
 
@@ -210,11 +240,18 @@ device_tree_add_integer(device_tree *root,
 			const char *path,
 			signed_word integer)
 {
-  device_tree *new_node = device_tree_find_node(root,
-						path,
-						node_integer,
-						device_tree_grow);
+  device_tree *new_node;
+  TRACE(trace_device_tree,
+	("device_tree_add_integer(root=0x%x, path=%s, integer=%d)\n",
+	 root, path, integer));
+  new_node = device_tree_find_node(root,
+				   path,
+				   path, /* full-name */
+				   node_integer,
+				   device_tree_grow);
   new_node->integer = integer;
+  TRACE(trace_device_tree,
+	("device_tree_add_integer() = 0x%x\n", new_node));
   return new_node;
 }
 
@@ -223,11 +260,18 @@ device_tree_add_string(device_tree *root,
 		       const char *path,
 		       const char *string)
 {
-  device_tree *new_node = device_tree_find_node(root,
-						path,
-						node_string,
-						device_tree_grow);
+  device_tree *new_node;
+  TRACE(trace_device_tree,
+	("device_tree_add_device(root=0x%x, path=%s, string=%s)\n",
+	 root, path, string));
+  new_node = device_tree_find_node(root,
+				   path,
+				   path, /* full-name */
+				   node_string,
+				   device_tree_grow);
   new_node->string = string;
+  TRACE(trace_device_tree,
+	("device_tree_add_string() = 0x%x\n", new_node));
   return new_node;
 }
 
@@ -236,11 +280,18 @@ device_tree_add_boolean(device_tree *root,
 			const char *path,
 			int boolean)
 {
-  device_tree *new_node = device_tree_find_node(root,
-						path,
-						node_boolean,
-						device_tree_grow);
+  device_tree *new_node;
+  TRACE(trace_device_tree,
+	("device_tree_add_boolean(root=0x%x, path=%s, boolean=%d)\n",
+	 root, path, boolean));
+  new_node = device_tree_find_node(root,
+				   path,
+				   path, /* full-name */
+				   node_boolean,
+				   device_tree_grow);
   new_node->boolean = boolean;
+  TRACE(trace_device_tree,
+	("device_tree_add_boolean() = 0x%x\n", new_node));
   return new_node;
 }
 
@@ -248,9 +299,16 @@ INLINE_DEVICE_TREE device_tree *
 device_tree_add_found_device(device_tree *root,
 			     const char *path)
 {
-  device_tree *new_node = device_tree_add_device(root, path, NULL);
+  device_tree *new_node;
+  TRACE(trace_device_tree,
+	("device_tree_add_found_device(root=0x%x, path=%s)\n",
+	 root, path));
+  new_node = device_tree_add_device(root, path, NULL);
   new_node->device = device_create(new_node->name,
+				   path,
 				   new_node->parent->device);
+  TRACE(trace_device_tree,
+	("device_tree_add_found_device() = 0x%x\n", new_node));
   return new_node;
 }
 
@@ -261,10 +319,16 @@ INLINE_DEVICE_TREE const device *
 device_tree_find_device(device_tree *root,
 			const char *path)
 {
-  device_tree *node = device_tree_find_node(root,
-					    path,
-					    node_device,
-					    device_tree_abort);
+  device_tree *node;
+  TRACE(trace_device_tree,
+	("device_tree_find_device(root=0x%x, path=%s)\n", root, path));
+  node = device_tree_find_node(root,
+			       path,
+			       path, /* full-name */
+			       node_device,
+			       device_tree_abort);
+  TRACE(trace_device_tree,
+	("device_tree_find_device() = 0x%x\n", node->device));
   return node->device;
 }
 
@@ -272,10 +336,16 @@ INLINE_DEVICE_TREE signed_word
 device_tree_find_integer(device_tree *root,
 			 const char *path)
 {
-  device_tree *node = device_tree_find_node(root,
-					    path,
-					    node_integer,
-					    device_tree_abort);
+  device_tree *node;
+  TRACE(trace_device_tree,
+	("device_tree_find_integer(root=0x%x, path=%s)\n", root, path));
+  node = device_tree_find_node(root,
+			       path,
+			       path, /* full-name */
+			       node_integer,
+			       device_tree_abort);
+  TRACE(trace_device_tree,
+	("device_tree_find_integer() = %d\n", node->integer));
   return node->integer;
 }
 
@@ -283,10 +353,16 @@ INLINE_DEVICE_TREE const char *
 device_tree_find_string(device_tree *root,
 			const char *path)
 {
-  device_tree *node = device_tree_find_node(root,
-					    path,
-					    node_string,
-					    device_tree_abort);
+  device_tree *node;
+  TRACE(trace_device_tree,
+	("device_tree_find_string(root=0x%x, path=%s)\n", root, path));
+  node = device_tree_find_node(root,
+			       path,
+			       path, /* full-name */
+			       node_string,
+			       device_tree_abort);
+  TRACE(trace_device_tree,
+	("device_tree_find_string() = 0x%x\n", node->string));
   return node->string;
 }
 
@@ -294,10 +370,16 @@ INLINE_DEVICE_TREE int
 device_tree_find_boolean(device_tree *root,
 			 const char *path)
 {
-  device_tree *node = device_tree_find_node(root,
-					    path,
-					    node_boolean,
-					    device_tree_abort);
+  device_tree *node;
+  TRACE(trace_device_tree,
+	("device_tree_find_boolean(root=0x%x, path=%s)\n", root, path));
+  node = device_tree_find_node(root,
+			       path,
+			       path, /* full-name */
+			       node_boolean,
+			       device_tree_abort);
+  TRACE(trace_device_tree,
+	("device_tree_find_boolean() = %d\n", node->boolean));
   return node->boolean;
 }
 
@@ -308,9 +390,14 @@ STATIC_INLINE_DEVICE_TREE void
 device_tree_init_device(device_tree *root,
 			void *data)
 {
-  psim *system = (psim*)data;
-  if (root->type == node_device)
+  psim *system;
+  system = (psim*)data;
+  if (root->type == node_device) {
+    TRACE(trace_device_tree,
+	  ("device_tree_init() initializing device=0x%x:%s\n",
+	   root->device, root->device->full_name));
     root->device->callback->init(root->device, system);
+  }
 }
 
 
@@ -318,7 +405,11 @@ INLINE_DEVICE_TREE void
 device_tree_init(device_tree *root,
 		 psim *system)
 {
+  TRACE(trace_device_tree,
+	("device_tree_init(root=0x%x, system=0x%x)\n", root, system));
   device_tree_traverse(root, device_tree_init_device, NULL, system);
+  TRACE(trace_device_tree,
+	("device_tree_init() = void\n"));
 }
 
 
@@ -363,10 +454,6 @@ device_tree_dump(device_tree *device,
 
 /* Parse a device name, various formats */
 
-#ifndef __NetBSD__
-#define strtouq strtoul
-#endif
-
 #define SCAN_INIT(START, END, COUNT, NAME) \
   char *START = NULL; \
   char *END = strchr(NAME, '@'); \
@@ -377,7 +464,7 @@ device_tree_dump(device_tree *device,
 
 #define SCAN_U(START, END, COUNT, U) \
 do { \
-  *U = strtouq(START, &END, 0); \
+  *U = strtoul(START, &END, 0); \
   if (START == END) \
     return COUNT; \
   COUNT++; \
@@ -397,7 +484,7 @@ do { \
   START = END + 1; \
 } while (0)
 
-#define SCAN_C(START, END, COUNT, C) \
+#define SCAN_C(START, END, COUNT, C, SIZE) \
 do { \
   char *chp = C; \
   END = START; \
@@ -407,6 +494,8 @@ do { \
     *chp = *END; \
     chp += 1; \
     END += 1; \
+    if ((SIZE) <= ((END) - (START))) \
+      return COUNT; /* overflow */ \
   } \
   *chp = '\0'; \
   if (START == END) \
@@ -465,21 +554,21 @@ scand_uw_uw_u(const char *name,
 
 INLINE_DEVICE_TREE int
 scand_c(const char *name,
-	char *c1)
+	char *c1, int c1size)
 {
   SCAN_INIT(start, end, count, name);
-  SCAN_C(start, end, count, c1);
+  SCAN_C(start, end, count, c1, c1size);
   return count;
 }
 
 INLINE_DEVICE_TREE int
 scand_c_uw_u(const char *name,
-	     char *c1,
+	     char *c1, int c1size,
 	     unsigned_word *uw2,
 	     unsigned *u3)
 {
   SCAN_INIT(start, end, count, name);
-  SCAN_C(start, end, count, c1);
+  SCAN_C(start, end, count, c1, c1size);
   SCAN_U(start, end, count, uw2);
   SCAN_U(start, end, count, u3);
   return count;

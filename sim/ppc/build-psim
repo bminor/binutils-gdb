@@ -1,0 +1,155 @@
+#!/bin/sh
+
+case "`uname -s`-`uname -r`" in
+  NetBSD* )
+    cflags="-Wall -Wno-unused -Wmissing-prototypes -Werror"
+    ;;
+  SunOS-5* )
+    cflags="-gstabs+"
+    ;;
+  SunOS-4* )
+    cflags="-Werror"
+    ;;
+esac
+
+for target in "$@"
+do
+
+  echo ""
+  echo "$target"
+  echo ""
+
+  if [ $# -gt 1 ]
+  then
+    make clean
+  fi
+
+  case $target in
+    *unsafe* )
+      with_trace="-DWITH_TRACE=0"
+      with_assert="-DWITH_ASSERT=0"
+      unsafe_flags="-g0 -fomit-frame-pointer -fno-strength-reduce"
+      ;;
+    *safe* )
+      with_trace=
+      with_assert=
+      unsafe_flags="-g0"
+      ;;
+    * )
+      with_trace=
+      with_assert=
+      unsafe_flags=
+      ;;
+  esac
+
+  case $target in
+    *little* )
+      with_target_byte_order="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN"
+      ;;
+    *big* )
+      with_target_byte_order="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN"
+      ;;
+    * )
+      with_target_byte_order=
+      ;;
+  esac
+
+  case $target in
+    *vea* )
+      with_environment="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT"
+      with_smp="-DWITH_SMP=0"
+      ;;
+    *oea* )
+      with_environment="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT"
+      with_smp="-DWITH_SMP=2"
+      ;;
+    * )
+      with_environment=
+      with_smp=
+      ;;
+  esac
+
+  case $target in
+    *complex* )
+      igen_opcode_rules="IGEN_OPCODE_RULES=ppc-opcode-complex"
+      igen_flags="-e -r 1024"
+      opt_flags="-O2"
+      ;;
+    *simple* )
+      igen_opcode_rules="IGEN_OPCODE_RULES=ppc-opcode-simple"
+      igen_flags="-e"
+      opt_flags="-O2"
+      ;;
+    * )
+      igen_opcode_rules=
+      igen_flags=
+      opt_flags=
+      ;;
+  esac
+
+  case $target in
+    *64* )
+      with_target_word_bitsize="-DWITH_TARGET_WORD_BITSIZE=64"
+      igen_flags="$igen_flags -f 32"
+      ;;
+    *32* )
+      with_target_word_bitsize="-DWITH_TARGET_WORD_BITSIZE=32"
+      igen_flags="$igen_flags -f 64"
+      ;;
+    * )
+      with_target_word_bitsize=
+      igen_flags="$igen_flags -f 64"
+      ;;
+  esac
+
+  case $target in
+    *inline* )
+      default_inline="-DDEFAULT_INLINE=2"
+      ;;
+    * )
+      default_inline=
+      ;;
+  esac
+
+  case $target in
+    *nomon* )
+      with_mon="-DWITH_MON=0"
+      ;;
+    * )
+      with_mon=
+      ;;
+  esac
+
+  case $target in
+    *bswap* )
+      with_bswap="-DWITH_BSWAP=1"
+      ;;
+    * )
+      with_bswap=
+      ;;
+  esac
+
+  if ( set -x ; make \
+		$igen_opcode_rules \
+		IGEN_FLAGS="$igen_flags" \
+		INLINE_CFLAGS=" \
+			$cflags \
+			$unsafe_flags \
+			$opt_flags \
+			$with_bswap \
+			$with_target_byte_order \
+			$with_environment \
+			$with_smp \
+			$default_inline \
+			$with_target_word_bitsize \
+			$with_trace \
+			$with_assert \
+			$with_mon \
+			" )
+  then
+    rm -f psim-${target}-failed
+    ( set -x ; cp psim psim-$target )
+  else
+    ( set -x ; touch psim-${target}-failed )
+  fi
+done

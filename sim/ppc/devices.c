@@ -59,7 +59,7 @@ generic_init_callback(const device *me,
   me->parent->callback->attach_address(me->parent,
 				       me->name,
 				       attach_callback,
-				       0 /*address_space*/,
+				       0 /*space*/,
 				       addr,
 				       nr_bytes,
 				       access_read_write,
@@ -81,7 +81,7 @@ INLINE_DEVICES void
 unimp_device_attach_address(const device *me,
 			    const char *name,
 			    attach_type type,
-			    int address_space,
+			    int space,
 			    unsigned_word addr,
 			    unsigned nr_bytes,
 			    access_type access,
@@ -94,7 +94,7 @@ INLINE_DEVICES void
 unimp_device_detach_address(const device *me,
 			    const char *name,
 			    attach_type type,
-			    int address_space,
+			    int space,
 			    unsigned_word addr,
 			    unsigned nr_bytes,
 			    access_type access,
@@ -106,7 +106,7 @@ unimp_device_detach_address(const device *me,
 INLINE_DEVICES unsigned
 unimp_device_io_read_buffer(const device *me,
 			    void *dest,
-			    int address_space,
+			    int space,
 			    unsigned_word addr,
 			    unsigned nr_bytes,
 			    cpu *processor,
@@ -119,7 +119,7 @@ unimp_device_io_read_buffer(const device *me,
 INLINE_DEVICES unsigned
 unimp_device_io_write_buffer(const device *me,
 			     const void *source,
-			     int address_space,
+			     int space,
 			     unsigned_word addr,
 			     unsigned nr_bytes,
 			     cpu *processor,
@@ -132,7 +132,7 @@ unimp_device_io_write_buffer(const device *me,
 INLINE_DEVICES unsigned
 unimp_device_dma_read_buffer(const device *me,
 			     void *target,
-			     int address_space,
+			     int space,
 			     unsigned_word addr,
 			     unsigned nr_bytes)
 {
@@ -143,7 +143,7 @@ unimp_device_dma_read_buffer(const device *me,
 INLINE_DEVICES unsigned
 unimp_device_dma_write_buffer(const device *me,
 			      const void *source,
-			      int address_space,
+			      int space,
 			      unsigned_word addr,
 			      unsigned nr_bytes,
 			      int violate_read_only_section)
@@ -213,15 +213,16 @@ ignore_device_init(const device *me,
 INLINE_DEVICES void
 pass_device_attach_address(const device *me,
 			   const char *name,
-			   attach_type type,
-			   int address_space,
+			   attach_type attach,
+			   int space,
 			   unsigned_word addr,
 			   unsigned nr_bytes,
 			   access_type access,
 			   const device *who) /*callback/default*/
 {
-  me->parent->callback->attach_address(me->parent, name, type,
-				       address_space, addr, nr_bytes,
+  DTRACE_ATTACH_ADDRESS(pass);
+  me->parent->callback->attach_address(me->parent, name, attach,
+				       space, addr, nr_bytes,
 				       access,
 				       who);
 }
@@ -229,39 +230,42 @@ pass_device_attach_address(const device *me,
 INLINE_DEVICES void
 pass_device_detach_address(const device *me,
 			   const char *name,
-			   attach_type type,
-			   int address_space,
+			   attach_type attach,
+			   int space,
 			   unsigned_word addr,
 			   unsigned nr_bytes,
 			   access_type access,
 			   const device *who) /*callback/default*/
 {
-  me->parent->callback->detach_address(me->parent, name, type,
-				       address_space, addr, nr_bytes, access,
+  DTRACE_DETACH_ADDRESS(pass);
+  me->parent->callback->detach_address(me->parent, name, attach,
+				       space, addr, nr_bytes, access,
 				       who);
 }
 
 INLINE_DEVICES unsigned
 pass_device_dma_read_buffer(const device *me,
-			    void *target,
-			    int address_space,
+			    void *dest,
+			    int space,
 			    unsigned_word addr,
 			    unsigned nr_bytes)
 {
-  return me->parent->callback->dma_read_buffer(me->parent, target,
-					       address_space, addr, nr_bytes);
+  DTRACE_DMA_READ_BUFFER(pass);
+  return me->parent->callback->dma_read_buffer(me->parent, dest,
+					       space, addr, nr_bytes);
 }
 
 INLINE_DEVICES unsigned
 pass_device_dma_write_buffer(const device *me,
 			     const void *source,
-			     int address_space,
+			     int space,
 			     unsigned_word addr,
 			     unsigned nr_bytes,
 			     int violate_read_only_section)
 {
+  DTRACE_DMA_WRITE_BUFFER(pass);
   return me->parent->callback->dma_write_buffer(me->parent, source,
-						address_space, addr,
+						space, addr,
 						nr_bytes,
 						violate_read_only_section);
 }
@@ -341,7 +345,7 @@ typedef enum {
 STATIC_INLINE_DEVICES unsigned
 console_io_read_buffer_callback(const device *me,
 				void *dest,
-				int address_space,
+				int space,
 				unsigned_word addr,
 				unsigned nr_bytes,
 				cpu *processor,
@@ -349,9 +353,7 @@ console_io_read_buffer_callback(const device *me,
 {
   console_device *console = (console_device*)me->data;
   unsigned_1 val;
-  TRACE(trace_console_device,
-	("device=0x%x, addr=0x%x, nr_bytes=%d\n",
-	 me, addr, nr_bytes));
+  DTRACE_IO_READ_BUFFER(console);
 
   /* determine what was read */
 
@@ -416,7 +418,7 @@ console_io_read_buffer_callback(const device *me,
 STATIC_INLINE_DEVICES unsigned
 console_io_write_buffer_callback(const device *me,
 				 const void *source,
-				 int address_space,
+				 int space,
 				 unsigned_word addr,
 				 unsigned nr_bytes,
 				 cpu *processor,
@@ -424,10 +426,7 @@ console_io_write_buffer_callback(const device *me,
 {
   console_device *console = (console_device*)me->data;
   unsigned_1 val = *(unsigned8*)source;
-
-  TRACE(trace_console_device,
-	("device=0x%x, addr=0x%x, nr_bytes=%d, val=%d\n",
-	 me, addr, nr_bytes, val));
+  DTRACE_IO_WRITE_BUFFER(console);
 
   switch (addr) {
   case console_read_buffer:
@@ -437,8 +436,7 @@ console_io_write_buffer_callback(const device *me,
     console->input.status = val;
     break;
   case console_write_buffer:
-    TRACE(trace_console_device,
-	  ("<%c:%d>", val, val));
+    DTRACE(console, ("<%c:%d>", val, val));
     printf_filtered("%c",val) ;
     console->output.buffer = val;
     console->output.status = 1;
@@ -472,6 +470,7 @@ static device_callbacks const console_callbacks = {
 
 STATIC_INLINE_DEVICES const device *
 console_create(const char *name,
+	       const char *full_name,
 	       const device *parent)
 {
   /* create the descriptor */
@@ -485,6 +484,7 @@ console_create(const char *name,
 
   /* insert into the device tree along with its address info */
   return device_create_from(name,
+			    full_name,
 			    console, /* data */
 			    &console_callbacks,
 			    parent);
@@ -507,16 +507,14 @@ console_create(const char *name,
 STATIC_INLINE_DEVICES unsigned
 icu_io_read_buffer_callback(const device *me,
 			    void *dest,
-			    int address_space,
-			    unsigned_word base,
+			    int space,
+			    unsigned_word addr,
 			    unsigned nr_bytes,
 			    cpu *processor,
 			    unsigned_word cia)
 {
   unsigned_1 val;
-  TRACE(trace_icu_device,
-	("device=0x%x, base=0x%x, nr_bytes=%d\n",
-	 me, base, nr_bytes));
+  DTRACE_IO_READ_BUFFER(icu);
   val = cpu_nr(processor);
   bzero(dest, nr_bytes);
   *(unsigned_1*)dest = val;
@@ -527,17 +525,15 @@ icu_io_read_buffer_callback(const device *me,
 STATIC_INLINE_DEVICES unsigned
 icu_io_write_buffer_callback(const device *me,
 			     const void *source,
-			     int address_space,
-			     unsigned_word base,
+			     int space,
+			     unsigned_word addr,
 			     unsigned nr_bytes,
 			     cpu *processor,
 			     unsigned_word cia)
 {
   psim *system = cpu_system(processor);
   unsigned_1 val = H2T_1(*(unsigned_1*)source);
-  TRACE(trace_icu_device,
-	("device=0x%x, base=0x%x, nr_bytes=%d, val=0x%x\n",
-	 me, base, nr_bytes, val));
+  DTRACE_IO_WRITE_BUFFER(icu);
   /* tell the parent device that the interrupt lines have changed.
      For this fake ICU.  The interrupt lines just indicate the cpu to
      interrupt next */
@@ -575,12 +571,13 @@ static device_callbacks const icu_callbacks = {
 STATIC_INLINE_DEVICES unsigned
 halt_io_read_buffer_callback(const device *me,
 			     void *dest,
-			     int address_space,
-			     unsigned_word base,
+			     int space,
+			     unsigned_word addr,
 			     unsigned nr_bytes,
 			     cpu *processor,
 			     unsigned_word cia)
 {
+  DTRACE_IO_READ_BUFFER(halt);
   cpu_halt(processor, cia, was_exited, 0);
   return 0;
 }
@@ -589,12 +586,13 @@ halt_io_read_buffer_callback(const device *me,
 STATIC_INLINE_DEVICES unsigned
 halt_io_write_buffer_callback(const device *me,
 			      const void *source,
-			      int address_space,
+			      int space,
 			      unsigned_word addr,
 			      unsigned nr_bytes,
 			      cpu *processor,
 			      unsigned_word cia)
 {
+  DTRACE_IO_WRITE_BUFFER(halt);
   cpu_halt(processor, cia, was_exited, 0);
   return 0;
 }
@@ -630,7 +628,8 @@ register_init_callback(const device *me,
   unsigned_word value;
   unsigned which_cpu;
   int status;
-  status = scand_c_uw_u(me->name, name, &value, &which_cpu);
+  DTRACE_INIT(register);
+  status = scand_c_uw_u(me->name, name, sizeof(name), &value, &which_cpu);
   switch (status) {
   case 2: /* register@<name>,<value> */
     psim_write_register(system, -1, &value, name, cooked_transfer);
@@ -702,6 +701,7 @@ vm_init_callback(const device *me,
 		 psim *system)
 {
   vm_device *vm = (vm_device*)me->data;
+  DTRACE_INIT(vm);
 
   /* revert the stack/heap variables to their defaults */
   vm->stack_lower_limit = vm->stack_bound;
@@ -724,14 +724,15 @@ vm_init_callback(const device *me,
 STATIC_INLINE_DEVICES void
 vm_attach_address(const device *me,
 		  const char *name,
-		  attach_type type,
-		  int address_space,
+		  attach_type attach,
+		  int space,
 		  unsigned_word addr,
 		  unsigned nr_bytes,
 		  access_type access,
 		  const device *who) /*callback/default*/
 {
   vm_device *vm = (vm_device*)me->data;
+  DTRACE_ATTACH_ADDRESS(vm);
   /* update end of bss if necessary */
   if (vm->heap_base < addr + nr_bytes) {
     vm->heap_base = addr + nr_bytes;
@@ -799,12 +800,13 @@ add_vm_space(const device *me,
 STATIC_INLINE_DEVICES unsigned
 vm_io_read_buffer_callback(const device *me,
 			   void *dest,
-			   int address_space,
+			   int space,
 			   unsigned_word addr,
 			   unsigned nr_bytes,
 			   cpu *processor,
 			   unsigned_word cia)
 {
+  DTRACE_IO_READ_BUFFER(vm);
   if (add_vm_space(me, addr, nr_bytes, processor, cia) >= nr_bytes) {
     bzero(dest, nr_bytes); /* always initialized to zero */
     return nr_bytes;
@@ -817,15 +819,16 @@ vm_io_read_buffer_callback(const device *me,
 STATIC_INLINE_DEVICES unsigned
 vm_io_write_buffer_callback(const device *me,
 			    const void *source,
-			    int address_space,
+			    int space,
 			    unsigned_word addr,
 			    unsigned nr_bytes,
 			    cpu *processor,
 			    unsigned_word cia)
 {
+  DTRACE_IO_WRITE_BUFFER(vm);
   if (add_vm_space(me, addr, nr_bytes, processor, cia) >= nr_bytes) {
     return me->parent->callback->dma_write_buffer(me->parent, source,
-						  address_space, addr,
+						  space, addr,
 						  nr_bytes,
 						  0/*violate_read_only*/);
   }
@@ -873,7 +876,8 @@ static device_callbacks const vm_callbacks = {
 
 STATIC_INLINE_DEVICES const device *
 vea_vm_create(const char *name,
-	     const device *parent)
+	      const char *full_name,
+	      const device *parent)
 {
   vm_device *vm = ZALLOC(vm_device);
   unsigned_word addr;
@@ -887,6 +891,7 @@ vea_vm_create(const char *name,
 
   /* insert in the tree including the buffer */
   return device_create_from(name,
+			    full_name,
 			    vm, /* data */
 			    &vm_callbacks,
 			    parent);
@@ -905,9 +910,20 @@ memory_init_callback(const device *me,
   unsigned_word addr;
   unsigned nr_bytes;
   unsigned access;
+  int nr_args;
+  DTRACE_INIT(memory);
 
-  if (scand_uw_u_u(me->name, &addr, &nr_bytes, &access) != 3)
+  nr_args = scand_uw_u_u(me->name, &addr, &nr_bytes, &access);
+  switch (nr_args) {
+  case 2:
+    access = access_read_write_exec;
+    break;
+  case 3:
+    break;
+  default:
     error("memory_init_callback() invalid memory device %s\n", me->name);
+    break;
+  }
 
   me->parent->callback->attach_address(me->parent,
 				       me->name,
@@ -936,24 +952,6 @@ static device_callbacks const memory_callbacks = {
 };
 
 
-STATIC_INLINE_DEVICES const device *
-memory_create(const char *name,
-	      const device *parent)
-{
-  void *buffer;
-  unsigned_word addr;
-  unsigned nr_bytes;
-  if (scand_uw_u(name, &addr, &nr_bytes) != 2)
-    error("memory_create() invalid memory device %s\n");
-
-  /* insert in the tree including the buffer */
-  return device_create_from(name,
-			    buffer, /* data */
-			    &memory_callbacks,
-			    parent);
-}
-
-
 
 /* IOBUS device: iobus@<address>
 
@@ -963,7 +961,7 @@ STATIC_INLINE_DEVICES void
 iobus_attach_address_callback(const device *me,
 			      const char *name,
 			      attach_type type,
-			      int address_space,
+			      int space,
 			      unsigned_word addr,
 			      unsigned nr_bytes,
 			      access_type access,
@@ -974,8 +972,8 @@ iobus_attach_address_callback(const device *me,
   if (type == attach_default)
     error("iobus_attach_address_callback() no default for %s/%s\n",
 	  me->name, name);
-  if (address_space != 0)
-    error("iobus_attach_address_callback() no address_space for %s/%s\n",
+  if (space != 0)
+    error("iobus_attach_address_callback() no space for %s/%s\n",
 	  me->name, name);
   /* get the bus address */
   if (scand_uw(me->name, &iobus_addr) != 1)
@@ -984,7 +982,7 @@ iobus_attach_address_callback(const device *me,
   me->parent->callback->attach_address(me->parent,
 				       me->name,
 				       type,
-				       0 /*address_space*/,
+				       0 /*space*/,
 				       iobus_addr + addr,
 				       nr_bytes,
 				       access,
@@ -1052,9 +1050,11 @@ file_init_callback(const device *me,
 		   psim *system)
 {
   unsigned_word addr;
+  unsigned count;
   char *file_name;
   char buf;
   FILE *image;
+  DTRACE_INIT(file);
 
   if ((file_name = strchr(me->name, ',')) == NULL
       || scand_uw(me->name, &addr) != 1)
@@ -1067,14 +1067,17 @@ file_init_callback(const device *me,
     error("file_init_callback() file open failed for %s\n", me->name);
 
   /* read it in slowly */
+  count = 0;
   while (fread(&buf, 1, 1, image) > 0) {
-    me->parent->callback->dma_write_buffer(me->parent,
-					   &buf,
-					   0 /*address-space*/,
-					   addr,
-					   1 /*nr-bytes*/,
-					   1 /*violate ro*/);
-    addr++;
+    if (me->parent->callback->dma_write_buffer(me->parent,
+					       &buf,
+					       0 /*address-space*/,
+					       addr+count,
+					       1 /*nr-bytes*/,
+					       1 /*violate ro*/) != 1)
+      error("file_init_callback() failed to write to address 0x%x, offset %d\n",
+	    addr+count, count);
+    count++;
   }
 
   /* close down again */
@@ -1115,6 +1118,7 @@ STATIC_INLINE_DEVICES void
 htab_init_callback(const device *me,
 		   psim *system)
 {
+  DTRACE_INIT(htab);
   /* only the pte does work */
   if (strncmp(me->name, "pte@", strlen("pte@")) == 0) {
     unsigned_word htab_ra;
@@ -1184,12 +1188,10 @@ static device_callbacks const sim_callbacks = {
    this device loads or maps the relevant text/data segments into
    memory using dma. */
 
-/* create a device tree from the image */
-
 STATIC_INLINE_DEVICES void
-update_device_tree_for_section(bfd *abfd,
-			       asection *the_section,
-			       PTR obj)
+update_for_binary_section(bfd *abfd,
+			  asection *the_section,
+			  PTR obj)
 {
   unsigned_word section_vma;
   unsigned_word section_size;
@@ -1208,17 +1210,17 @@ update_device_tree_for_section(bfd *abfd,
   /* find where it is to go */
   section_vma = bfd_get_section_vma(abfd, the_section);
 
-  TRACE(trace_device_tree,
-	("name=%-7s, vma=0x%.8x, size=%6d, flags=%3x(%s%s%s%s )\n",
-	 bfd_get_section_name(abfd, the_section),
-	 section_vma, section_size,
-	 bfd_get_section_flags(abfd, the_section),
-	 bfd_get_section_flags(abfd, the_section) & SEC_LOAD ? " LOAD" : "",
-	 bfd_get_section_flags(abfd, the_section) & SEC_CODE ? " CODE" : "",
-	 bfd_get_section_flags(abfd, the_section) & SEC_DATA ? " DATA" : "",
-	 bfd_get_section_flags(abfd, the_section) & SEC_ALLOC ? " ALLOC" : "",
-	 bfd_get_section_flags(abfd, the_section) & SEC_READONLY ? " READONLY" : ""
-	));
+  DTRACE(binary,
+	 ("name=%-7s, vma=0x%.8x, size=%6d, flags=%3x(%s%s%s%s )\n",
+	  bfd_get_section_name(abfd, the_section),
+	  section_vma, section_size,
+	  bfd_get_section_flags(abfd, the_section),
+	  bfd_get_section_flags(abfd, the_section) & SEC_LOAD ? " LOAD" : "",
+	  bfd_get_section_flags(abfd, the_section) & SEC_CODE ? " CODE" : "",
+	  bfd_get_section_flags(abfd, the_section) & SEC_DATA ? " DATA" : "",
+	  bfd_get_section_flags(abfd, the_section) & SEC_ALLOC ? " ALLOC" : "",
+	  bfd_get_section_flags(abfd, the_section) & SEC_READONLY ? " READONLY" : ""
+	  ));
 
   /* determine the devices access */
   access = access_read;
@@ -1251,7 +1253,7 @@ update_device_tree_for_section(bfd *abfd,
     }
     if (me->parent->callback->dma_write_buffer(me->parent,
 					       section_init,
-					       0 /*address_space*/,
+					       0 /*space*/,
 					       section_vma,
 					       section_size,
 					       1 /*violate_read_only*/)
@@ -1268,9 +1270,10 @@ binary_init_callback(const device *me,
 {
   char file_name[100];
   bfd *image;
+  DTRACE_INIT(binary);
 
   /* get a file name */
-  if (scand_c(me->name, file_name) != 1)
+  if (scand_c(me->name, file_name, sizeof(file_name)) != 1)
     error("load_binary_init_callback() invalid load-binary device %s\n",
 	  me->name);
 
@@ -1291,7 +1294,7 @@ binary_init_callback(const device *me,
 
   /* and the data sections */
   bfd_map_over_sections(image,
-			update_device_tree_for_section,
+			update_for_binary_section,
 			(PTR)me);
 
   bfd_close(image);
@@ -1371,18 +1374,17 @@ write_stack_arguments(psim *system,
 		      unsigned_word start_arg,
 		      unsigned_word end_arg)
 {
-  TRACE(trace_create_stack,
-	("write_stack_arguments() - %s=0x%x %s=0x%x %s=0x%x %s=0x%x\n",
-	 "system", system, "arg", arg,
-	 "start_block", start_block, "start_arg", start_arg));
+  DTRACE(stack,
+	("write_stack_arguments(system=0x%x, arg=0x%x, start_block=0x%x, end_block=0x%x, start_arg=0x%x, end_arg=0x%x)\n",
+	 system, arg, start_block, end_block, start_arg, end_arg));
   if (arg == NULL)
     error("write_arguments: character array NULL\n");
   /* only copy in arguments, memory is already zero */
   for (; *arg != NULL; arg++) {
     int len = strlen(*arg)+1;
     unsigned_word target_start_block;
-    TRACE(trace_create_stack,
-	  ("write_stack_arguments - write %s=%s at %s=0x%x %s=0x%x %s=0x%x\n",
+    DTRACE(stack,
+	  ("write_stack_arguments() write %s=%s at %s=0x%x %s=0x%x %s=0x%x\n",
 	   "**arg", *arg, "start_block", start_block,
 	   "len", len, "start_arg", start_arg));
     if (psim_write_memory(system, 0, *arg,
@@ -1402,6 +1404,8 @@ write_stack_arguments(psim *system,
   if (start_block != end_block
       || ALIGN_8(start_arg) != end_arg)
     error("write_stack_arguments - possible corruption\n");
+  DTRACE(stack,
+	 ("write_stack_arguments() = void\n"));
 }
 
 STATIC_INLINE_DEVICES void
@@ -1500,10 +1504,16 @@ stack_ioctl_callback(const device *me,
   stack_pointer = va_arg(ap, unsigned_word);
   argv = va_arg(ap, char **);
   envp = va_arg(ap, char **);
+  va_end(ap);
+  DTRACE(stack,
+	 ("stack_ioctl_callback(me=0x%x:%s, system=0x%x, processor=0x%x, cia=0x%x, argv=0x%x, envp=0x%x)\n",
+	  me, me->full_name, system, processor, cia, argv, envp));
   if (strcmp(me->name, "stack@elf") == 0)
     create_elf_stack_frame(system, stack_pointer, argv, envp);
   else if (strcmp(me->name, "stack@xcoff") == 0)
     create_aix_stack_frame(system, stack_pointer, argv, envp);
+  DTRACE(stack, 
+	 ("stack_ioctl_callback() = void\n"));
 }
 
 
@@ -1529,6 +1539,7 @@ static device_callbacks const stack_callbacks = {
 
 typedef const device *(device_creator)
      (const char *name,
+      const char *full_name,
       const device *parent);
 
 typedef struct _device_descriptor device_descriptor;
@@ -1540,7 +1551,7 @@ struct _device_descriptor {
 
 static device_descriptor devices[] = {
   { "console", console_create, NULL },
-  { "memory", memory_create, NULL },
+  { "memory", NULL, &memory_callbacks },
   { "vm", vea_vm_create, NULL },
   { "halt", NULL, &halt_callbacks },
   { "icu", NULL, &icu_callbacks },
@@ -1559,6 +1570,7 @@ static device_descriptor devices[] = {
 
 INLINE_DEVICES const device *
 device_create(const char *name,
+	      const char *full_name,
 	      const device *parent)
 {
   device_descriptor *device;
@@ -1571,9 +1583,10 @@ device_create(const char *name,
 	&& (device->name[name_len] == '\0'
 	    || device->name[name_len] == '@'))
       if (device->creator != NULL)
-	return device->creator(name, parent);
+	return device->creator(name, full_name, parent);
       else
 	return device_create_from(name,
+				  full_name,
 				  NULL /* data */,
 				  device->callbacks,
 				  parent);
@@ -1585,12 +1598,14 @@ device_create(const char *name,
 
 INLINE_DEVICES const device *
 device_create_from(const char *name,
+		   const char *full_name,
 		   void *data,
 		   const device_callbacks *callback,
 		   const device *parent)
 {
   device *me = ZALLOC(device);
   me->name = strdup(name);
+  me->full_name = strdup(full_name);
   me->data = data;
   me->callback = callback;
   me->parent = parent;

@@ -110,7 +110,11 @@ INLINE_DEVICE_TREE void device_tree_dump
  void *ignore_data_argument);
 
 
-/* Parse a device name, various formats */
+/* Parse a device name, various formats:
+
+   uw: unsigned_word
+   u: unsigned
+   c: string */
 
 INLINE_DEVICE_TREE int scand_uw
 (const char *name,
@@ -135,11 +139,11 @@ INLINE_DEVICE_TREE int scand_uw_uw_u
  
 INLINE_DEVICE_TREE int scand_c
 (const char *name,
- char *c1);
+ char *c1, int c1size);
 
 INLINE_DEVICE_TREE int scand_c_uw_u
 (const char *name,
- char *c1,
+ char *c1, int c1size,
  unsigned_word *uw2,
  unsigned *u3);
 

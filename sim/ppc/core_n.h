@@ -47,7 +47,7 @@ XCONCAT2(core_map_read_,N)(core_map *map,
     unsigned_N data;
     if (mapping->reader(mapping->device,
 			&data,
-                        mapping->address_space,
+                        mapping->space,
                         addr - mapping->base,
                         sizeof(unsigned_N), /* nr_bytes */
                         processor,
@@ -78,7 +78,7 @@ XCONCAT2(core_map_write_,N)(core_map *map,
     unsigned_N data = H2T_N(val);
     if (mapping->writer(mapping->device,
 		        &data,
-                        mapping->address_space,
+                        mapping->space,
 		        addr - mapping->base,
 		        sizeof(unsigned_N), /* nr_bytes */
 		        processor,

@@ -79,6 +79,10 @@ typedef void (device_init_callback)
      (const device *me,
       psim *system);
 
+#define DTRACE_INIT(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_init(me=0x%x:%s system=0x%x)\n", \
+	     me, me->full_name, system))
 
 /* Data transfers:
 
@@ -160,17 +164,27 @@ typedef void (device_init_callback)
 typedef void (device_config_address_callback)
      (const device *me,
       const char *name,
-      attach_type type,
-      int address_space,
+      attach_type attach,
+      int space,
       unsigned_word addr,
       unsigned nr_bytes,
       access_type access,
       const device *who); /*callback/default*/
 
+#define DTRACE_ATTACH_ADDRESS(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_attach_address(me=0x%x:%s, name=%s, attach=%d, space=%d, addr=0x%x, nr_bytes=%d, access=%d, who=0x%x)\n", \
+	     me, me->full_name, name, attach, space, addr, nr_bytes, access, who))
+#define DTRACE_DETACH_ADDRESS(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_detach_address(me=0x%x:%s, name=%s, attach=%d, space=%d, addr=0x%x, nr_bytes=%d, access=%d, who=0x%x)\n", \
+	     me, me->full_name, name, attach, space, addr, nr_bytes, access, who))
+
+
 typedef unsigned (device_io_read_buffer_callback)
      (const device *me,
       void *dest,
-      int address_space,
+      int space,
       unsigned_word addr,
       unsigned nr_bytes,
       cpu *processor,
@@ -179,26 +193,45 @@ typedef unsigned (device_io_read_buffer_callback)
 typedef unsigned (device_io_write_buffer_callback)
      (const device *me,
       const void *source,
-      int address_space,
+      int space,
       unsigned_word addr,
       unsigned nr_bytes,
       cpu *processor,
       unsigned_word cia);
 
+#define DTRACE_IO_READ_BUFFER(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_io_read_buffer(me=0x%x:%s dest=0x%x space=%d addr=0x%x nr_bytes=%d processor=0x%x cia=0x%x)\n", \
+	     me, me->full_name, dest, space, addr, nr_bytes, processor, cia))
+#define DTRACE_IO_WRITE_BUFFER(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_io_write_buffer(me=0x%x:%s source=0x%x space=%d addr=0x%x nr_bytes=%d processor=0x%x cia=0x%x)\n", \
+	     me, me->full_name, source, space, addr, nr_bytes, processor, cia))
+
+
 typedef unsigned (device_dma_read_buffer_callback)
      (const device *me,
       void *dest,
-      int address_space,
+      int space,
       unsigned_word addr,
       unsigned nr_bytes);
 
 typedef unsigned (device_dma_write_buffer_callback)
      (const device *me,
       const void *source,
-      int address_space,
+      int space,
       unsigned_word addr,
       unsigned nr_bytes,
       int violate_read_only_section);
+
+#define DTRACE_DMA_READ_BUFFER(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_dma_read_buffer(me=0x%x:%s dest=0x%x space=%d addr=0x%x nr_bytes=%d)\n", \
+	     me, me->full_name, dest, space, addr, nr_bytes))
+#define DTRACE_DMA_WRITE_BUFFER(OBJECT) \
+     DTRACE(OBJECT, \
+	    (#OBJECT "_dma_write_buffer(me=0x%x:%s source=0x%x space=%d addr=0x%x nr_bytes=%d)\n", \
+	     me, me->full_name, source, space, addr, nr_bytes))
 
 
 /* Interrupts:
@@ -282,7 +315,8 @@ typedef struct _device_callbacks {
 
 /* A device */
 struct _device {
-  const char *name; /* eg rom@0x1234, 0x400 */
+  const char *name; /* eg rom@0x1234,0x400 */
+  const char *full_name; /* eg /isa/rom@0x1234,0x400 */
   void *data; /* device specific data */
   const device_callbacks *callback;
   const device *parent;
@@ -293,12 +327,14 @@ struct _device {
 
 INLINE_DEVICES const device *device_create
 (const char *name,
+ const char *full_name,
  const device *parent);
 
 /* create a new device using the parameterized data */
 
 INLINE_DEVICES const device *device_create_from
 (const char *name,
+ const char *full_name,
  void *data,
  const device_callbacks *callback,
  const device *parent);

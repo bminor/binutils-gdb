@@ -42,7 +42,7 @@ struct _core_mapping {
   device_io_read_buffer_callback *reader;
   device_io_write_buffer_callback *writer;
   /* common */
-  int address_space;
+  int space;
   unsigned_word base;
   unsigned_word bound;
   unsigned nr_bytes;
@@ -130,12 +130,12 @@ core_executable(core *memory)
 
 STATIC_INLINE_CORE core_mapping *
 new_core_mapping(attach_type attach,
-		   int address_space,
-		   unsigned_word addr,
-		   unsigned nr_bytes,
-		   const device *device,
-		   void *buffer,
-		   int free_buffer)
+		 int space,
+		 unsigned_word addr,
+		 unsigned nr_bytes,
+		 const device *device,
+		 void *buffer,
+		 int free_buffer)
 {
   core_mapping *new_mapping = ZALLOC(core_mapping);
   switch (attach) {
@@ -154,7 +154,7 @@ new_core_mapping(attach_type attach,
 	  attach);
   }
   /* common */
-  new_mapping->address_space = address_space;
+  new_mapping->space = space;
   new_mapping->base = addr;
   new_mapping->nr_bytes = nr_bytes;
   new_mapping->bound = addr + (nr_bytes - 1);
@@ -164,21 +164,21 @@ new_core_mapping(attach_type attach,
 
 STATIC_INLINE_CORE void
 core_map_attach(core_map *access_map,
-			 attach_type attach,
-			 int address_space,
-			 unsigned_word addr,
-			 unsigned nr_bytes, /* host limited */
-			 const device *device, /*callback/default*/
-			 void *buffer, /*raw_memory*/
-			 int free_buffer) /*raw_memory*/
+		attach_type attach,
+		int space,
+		unsigned_word addr,
+		unsigned nr_bytes, /* host limited */
+		const device *device, /*callback/default*/
+		void *buffer, /*raw_memory*/
+		int free_buffer) /*raw_memory*/
 {
   if (attach == attach_default) {
     if (access_map->default_map != NULL)
       error("core_map_attach() default mapping already in place\n");
     ASSERT(buffer == NULL);
     access_map->default_map = new_core_mapping(attach, 
-						 address_space, addr, nr_bytes,
-						 device, buffer, free_buffer);
+					       space, addr, nr_bytes,
+					       device, buffer, free_buffer);
   }
   else {
     /* find the insertion point for this additional mapping and insert */
@@ -206,8 +206,8 @@ core_map_attach(core_map *access_map,
 
     /* create/insert the new mapping */
     *last_mapping = new_core_mapping(attach,
-				       address_space, addr, nr_bytes,
-				       device, buffer, free_buffer);
+				     space, addr, nr_bytes,
+				     device, buffer, free_buffer);
     (*last_mapping)->next = next_mapping;
   }
 }
@@ -216,7 +216,7 @@ core_map_attach(core_map *access_map,
 INLINE_CORE void
 core_attach(core *memory,
 	    attach_type attach,
-	    int address_space,
+	    int space,
 	    access_type access,
 	    unsigned_word addr,
 	    unsigned nr_bytes, /* host limited */
@@ -236,7 +236,7 @@ core_attach(core *memory,
       if (access & access_read)
 	core_map_attach(memory->map + access_map,
 			attach,
-			address_space, addr, nr_bytes,
+			space, addr, nr_bytes,
 			device, buffer, !free_buffer);
       free_buffer ++;
       break;
@@ -244,7 +244,7 @@ core_attach(core *memory,
       if (access & access_write)
 	core_map_attach(memory->map + access_map,
 			attach,
-			address_space, addr, nr_bytes,
+			space, addr, nr_bytes,
 			device, buffer, !free_buffer);
       free_buffer ++;
       break;
@@ -252,7 +252,7 @@ core_attach(core *memory,
       if (access & access_exec)
 	core_map_attach(memory->map + access_map,
 			attach,
-			address_space, addr, nr_bytes,
+			space, addr, nr_bytes,
 			device, buffer, !free_buffer);
       free_buffer ++;
       break;
@@ -320,7 +320,7 @@ core_map_read_buffer(core_map *map,
     if (mapping->reader != NULL) {
       if (mapping->reader(mapping->device,
 			  &byte,
-			  mapping->address_space,
+			  mapping->space,
 			  raddr - mapping->base,
 			  1, /* nr_bytes */
 			  0, /*processor*/
@@ -357,7 +357,7 @@ core_map_write_buffer(core_map *map,
     if (mapping->writer != NULL) {
       if (mapping->writer(mapping->device,
 			  &byte,
-			  mapping->address_space,
+			  mapping->space,
 			  raddr - mapping->base,
 			  1, /*nr_bytes*/
 			  0, /*processor*/
@@ -382,6 +382,7 @@ core_init_callback(const device *me,
 		   psim *system)
 {
   core *memory = (core*)me->data;
+  DTRACE_INIT(core);
   core_init(memory);
 }
 
@@ -390,7 +391,7 @@ STATIC_INLINE_CORE void
 core_attach_address_callback(const device *me,
 			     const char *name,
 			     attach_type attach,
-			     int address_space,
+			     int space,
 			     unsigned_word addr,
 			     unsigned nr_bytes,
 			     access_type access,
@@ -398,11 +399,12 @@ core_attach_address_callback(const device *me,
 {
   core *memory = (core*)me->data;
   unsigned_word device_address;
-  if (address_space != 0)
+  DTRACE_ATTACH_ADDRESS(core);
+  if (space != 0)
     error("core_attach_address_callback() invalid address space\n");
   core_attach(memory,
 	      attach,
-	      address_space,
+	      space,
 	      access,
 	      addr,
 	      nr_bytes,
@@ -412,15 +414,16 @@ core_attach_address_callback(const device *me,
 
 STATIC_INLINE_CORE unsigned
 core_dma_read_buffer_callback(const device *me,
-			      void *target,
-			      int address_space,
-			      unsigned_word offset,
+			      void *dest,
+			      int space,
+			      unsigned_word addr,
 			      unsigned nr_bytes)
 {
   core *memory = (core*)me->data;
+  DTRACE_DMA_READ_BUFFER(core);
   return core_map_read_buffer(core_readable(memory),
-			      target,
-			      offset,
+			      dest,
+			      addr,
 			      nr_bytes);
 }
 
@@ -428,8 +431,8 @@ core_dma_read_buffer_callback(const device *me,
 STATIC_INLINE_CORE unsigned
 core_dma_write_buffer_callback(const device *me,
 			       const void *source,
-			       int address_space,
-			       unsigned_word offset,
+			       int space,
+			       unsigned_word addr,
 			       unsigned nr_bytes,
 			       int violate_read_only_section)
 {
@@ -437,9 +440,10 @@ core_dma_write_buffer_callback(const device *me,
   core_map *map = (violate_read_only_section
 		   ? core_readable(memory)
 		   : core_writeable(memory));
+  DTRACE_DMA_WRITE_BUFFER(core);
   return core_map_write_buffer(map,
 			       source,
-			       offset,
+			       addr,
 			       nr_bytes);
 }
 
@@ -463,7 +467,7 @@ static device_callbacks const core_callbacks = {
 INLINE_CORE const device *
 core_device_create(core *memory)
 {
-  return device_create_from("core", memory, &core_callbacks, NULL);
+  return device_create_from("core", "/", memory, &core_callbacks, NULL);
 }
 
 
