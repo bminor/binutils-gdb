@@ -169,12 +169,12 @@ ld [-o @var{output} ] @var{objfile}@dots{}
   [ -defsym @var{symbol}=@var{expression} ]
   [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
   [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -i ]
-  [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M ]  [ -m @var{emulation} ]
-  [ -N | -n ]  [ -noinhibit-exec ]  [ -R @var{filename} ]
-  [ -relax ]  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]  
-  [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]  [ -Tbss @var{bssorg} ]
-  [ -t ]  [ -u @var{sym}]  [-V]  [-v]  [ -X ]  [ -x ]  [ -y@var{symbol} ]
-  [ @{ @var{script} @} ] 
+  [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
+  [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
+  [ -R @var{filename} ]  [ -relax ]  [ -r | -Ur ]  [ -S ]  [ -s ]
+  [ -T @var{commandfile} ]  [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]
+  [ -Tbss @var{bssorg} ]  [ -t ]  [ -u @var{sym}]  [-V]  [-v]  [ -X ]  [-x ]
+  [ -y@var{symbol} ]  [ @{ @var{script} @} ] 
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -388,6 +388,13 @@ The paths can also be specified in a link script with the
 @kindex -M
 @item -M 
 Print (to the standard output) a link map---diagnostic information
+about where symbols are mapped by @code{ld}, and information on global
+common storage allocation.
+
+@cindex link map
+@kindex -Map
+@item -Map @var{mapfile}
+Print to the file @var{mapfile} a link map---diagnostic information
 about where symbols are mapped by @code{ld}, and information on global
 common storage allocation.
 

@@ -61,6 +61,9 @@ ld \- the GNU linker
 .I searchdir\c
 \&\|] 
 .RB "[\|" \-M "\|]" 
+.RB "[\|" \-Map\c
+.I mapfile\c
+\&\|] 
 .RB "[\|" \-m\c
 .I emulation\c
 \&\|] 
@@ -511,6 +514,16 @@ command.
 .TP
 .B \-M 
 Print (to the standard output file) a link map\(em\&diagnostic information
+about where symbols are mapped by \c
+.B ld\c
+\&, and information on global
+common storage allocation.
+
+.TP
+.BI "\-Map " "mapfile"\c
+Print to the file
+.I mapfile
+a link map\(em\&diagnostic information
 about where symbols are mapped by \c
 .B ld\c
 \&, and information on global
