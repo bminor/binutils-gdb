@@ -1,3 +1,7 @@
+2000-07-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* valarith.c (value_sub): Call check_typedef.
+
 2000-07-19  Nicholas Duffek  <nsd@redhat.com>
 
 	* thread.c (free_thread): New function.

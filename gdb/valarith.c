@@ -110,8 +110,8 @@ value_sub (arg1, arg2)
 				      - (sz * value_as_long (arg2))));
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_PTR
-	       && TYPE_LENGTH (TYPE_TARGET_TYPE (type1))
-	       == TYPE_LENGTH (TYPE_TARGET_TYPE (type2)))
+	       && TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)))
+	       == TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type2))))
 	{
 	  /* pointer to <type x> - pointer to <type x>.  */
 	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
