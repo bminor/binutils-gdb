@@ -757,7 +757,7 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
 
   /* First handle long doubles.  */
-  if (TYPE_CODE_FLT == TYPE_CODE (type)  && len == 16)
+  if (TYPE_CODE_FLT == TYPE_CODE (type) && len == 16)
     {
       ULONGEST fstat;
       char buf[FPU_REG_RAW_SIZE];

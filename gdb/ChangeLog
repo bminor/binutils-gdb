@@ -1,5 +1,8 @@
 2003-09-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (x86_64_store_return_value): Remove spurious
+	whitespace.
+
 	* i386-tdep.c (i386_num_register_names, i386_num_mmx_regs):
 	Initialize using ARRAY_SIZE.
 
