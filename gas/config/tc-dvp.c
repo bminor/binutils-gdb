@@ -495,8 +495,8 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	      /* Pick the suffix out and parse it.  */
 	      /* ??? Hmmm ... there may not be any need to nul-terminate the
 		 string, and it may in fact complicate things.  */
-	      for (t = (*s == '.' || *s == '/') ? s + 1 : s;
-		   *t && (isalnum (*t) || *t == '[' || *t == ']');
+	      for (t = (*s == '.' || *s == '/' || *s == '[') ? s + 1 : s;
+		   *t && (isalnum (*t) || *t == ']');
 		   ++t)
 		continue;
 	      c = *t;
@@ -520,6 +520,9 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	      else
 		*insn_buf |= suf_value << operand->shift;
 
+	      /* FIXME: For suffixes that have a null "" value,
+		 this next line is wrong as we will skip over something
+		 we're not supposed to.  */
 	      str = t;
 	      ++syn;
 	    }
