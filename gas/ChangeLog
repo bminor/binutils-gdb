@@ -1,5 +1,8 @@
 Mon Mar 24 12:11:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-i386.h (iclrKludge): Define.
+	* config/tc-i386.c (md_assemble): Handle iclrKludge.
+
 	* config/tc-alpha.h (tc_frob_file_before_adjust): Define if
 	OBJ_ECOFF.
 	(alpha_frob_file_before_adjust): Declare if OBJ_ECOFF.

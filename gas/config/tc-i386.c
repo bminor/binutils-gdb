@@ -1345,6 +1345,13 @@ md_assemble (line)
 	    i.reg_operands = 2;
 	  }
 
+	/* The clr %reg instruction is converted into xor %reg, %reg.  */
+	if (t->opcode_modifier & iclrKludge)
+	  {
+	    i.regs[1] = i.regs[0];
+	    i.reg_operands = 2;
+	  }
+
 	/* Certain instructions expect the destination to be in the i.rm.reg
 	   field.  This is by far the exceptional case.  For these
 	   instructions, if the source operand is a register, we must reverse
