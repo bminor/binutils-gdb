@@ -5576,7 +5576,7 @@ until_break_command_continuation (struct continuation_arg *arg)
 
 /* ARGSUSED */
 void
-until_break_command (char *arg, int from_tty)
+until_break_command (char *arg, int from_tty, int anywhere)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -5609,9 +5609,16 @@ until_break_command (char *arg, int from_tty)
 
   resolve_sal_pc (&sal);
 
-  breakpoint = 
-    set_momentary_breakpoint (sal,get_frame_id (deprecated_selected_frame),
-			      bp_until);
+  if (anywhere)
+    /* If the user told us to continue until a specified location,
+       we don't specify a frame at which we need to stop.  */
+    breakpoint = set_momentary_breakpoint (sal, null_frame_id, bp_until);
+  else
+    /* Otherwise, specify the current frame, because we want to stop only
+       at the very same frame.  */
+    breakpoint = set_momentary_breakpoint (sal,
+					   get_frame_id (deprecated_selected_frame),
+					   bp_until);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -5639,8 +5646,8 @@ until_break_command (char *arg, int from_tty)
       add_continuation (until_break_command_continuation, arg1);
     }
 
-  /* Keep within the current frame */
-
+  /* Keep within the current frame, or in frames called by the current
+     one.  */
   if (prev_frame)
     {
       sal = find_pc_line (get_frame_pc (prev_frame), 0);
@@ -5659,7 +5666,7 @@ until_break_command (char *arg, int from_tty)
   if (!event_loop_p || !target_can_async_p ())
     do_cleanups (old_chain);
 }
-
+
 #if 0
 /* These aren't used; I don't konw what they were for.  */
 /* Set a breakpoint at the catch clause for NAME.  */

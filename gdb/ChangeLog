@@ -1,3 +1,14 @@
+2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* breakpoint.c (until_break_command): Add new argument.  Use it to
+	decide whether to stop only at the current frame or not.
+	* breakpoint.h (until_break_command): Update prototype.
+ 	* infcmd.c (until_command): Add new argument to until_break_command
+	call.
+	(advance_command): New function.
+	(_initialize_infcmd): Update help string for 'until' command.
+	Add new 'advance' command.
+
 2003-01-14  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (decode_line_1): Normalize comments.
