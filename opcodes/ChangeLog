@@ -1,3 +1,8 @@
+Tue Jun 16 13:10:51 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (index16): Add '%' to register names.  Use ','
+	instead of '+'.
+
 Sat Jun 13 11:33:55 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c: Don't print opcode suffix when we can figure out the
