@@ -53,6 +53,7 @@ into another language, under the above conditions for modified versions.
 @node Top, ar, (dir), (dir)
 @chapter Introduction
 
+@cindex version
 This brief manual contains preliminary documentation for the GNU binary
 utilities (collectively version 1.90): 
 @table @code
@@ -100,18 +101,22 @@ into another language, under the above conditions for modified versions.
 @end ifinfo
 
 @menu
-* ar::                          ar
-* ld::                          ld
-* nm::                          nm
-* objdump::                     objdump
-* ranlib::                      ranlib
-* size::                        size
-* strip::                       strip
+* ar::                          Create, modify, and extract from archives
+* ld::                          See ld.info
+* nm::                          List symbols from object files
+* objdump::                     Display information from object files
+* ranlib::                      Generate index to archive contents
+* size::                        List section sizes and total size
+* strip::                       Discard symbols
+* Index::
 @end menu
 
 @node ar, ld, Top, Top
 @chapter ar
 
+@kindex ar
+@cindex archives
+@cindex collections of files
 @smallexample
   ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
 @end smallexample
@@ -125,6 +130,7 @@ The original files' contents, mode (permissions), timestamp, owner, and
 group are preserved in the archive, and may be reconstituted on
 extraction.  
 
+@cindex name length
 GNU @code{ar} can maintain archives whose members have names of any
 length; however, depending on how @code{ar} is configured on your
 system, a limit on member-name length may be imposed (for compatibility
@@ -132,10 +138,12 @@ with archive formats maintained with other tools).  If it exists, the
 limit is often 15 characters (typical of formats related to a.out) or 16
 characters (typical of formats related to coff).
 
+@cindex libraries
 @code{ar} is considered a binary utility because archives of this sort
 are most often used as @dfn{libraries} holding commonly needed
 subroutines.
 
+@cindex symbol index
 @code{ar} will create an index to the symbols defined in relocatable
 object modules in the archive when you specify the modifier @samp{s}.
 Once created, this index is updated in the archive whenever @code{ar}
@@ -161,11 +169,13 @@ flags @var{mod} in any order, within the first command-line argument.
 If you wish, you may begin the first command-line argument with a
 dash.
 
+@cindex operations on archive
 The @var{p} keyletter specifies what operation to execute; it may be
 any of the following, but you must specify only one of them:
 
 @table @code
 @item d
+@cindex deleting from archive
 @emph{Delete} modules from the archive.  Specify the names of modules to
 be deleted as @var{files}; the archive is untouched if you
 specify no files to delete.
@@ -174,6 +184,7 @@ If you specify the @samp{v} modifier, @code{ar} will list each module
 as it is deleted.
 
 @item m
+@cindex moving in archive
 Use this operation to @emph{move} members in an archive.
 
 The ordering of members in an archive can make a difference in how
@@ -186,6 +197,7 @@ you can use the @samp{a}, @samp{b}, or @samp{i} modifiers to move them to a
 specified place instead.
 
 @item p
+@cindex printing from archive
 @emph{Print} the specified members of the archive, to the standard
 output file.  If the @samp{v} modifier is specified, show the member
 name before copying its contents to standard output.
@@ -193,6 +205,7 @@ name before copying its contents to standard output.
 If you specify no @var{files}, all the files in the archive are printed.
 
 @item q
+@cindex quick append to archive
 @emph{Quick append}; add @var{files} to the end of @var{archive},
 without checking for replacement.  
 
@@ -206,6 +219,7 @@ index is not updated, even if it already existed; you can use @samp{ar s} or
 @code{ranlib} explicitly to update the symbol table index.
 
 @item r
+@cindex replacement in archive
 Insert @var{files} into @var{archive} (with @emph{replacement}). This
 operation differs from @samp{q} in that any previously existing members
 are deleted if their names match those being added.
@@ -224,6 +238,7 @@ output for each file inserted, along with one of the letters @samp{a} or
 deleted) or replaced.
 
 @item t
+@cindex contents of archive
 Display a @emph{table} listing the contents of @var{archive}, or those
 of the files listed in @var{files} that are present in the
 archive.  Normally only the member name is shown; if you also want to
@@ -233,6 +248,8 @@ request that by also specifying the @samp{v} modifier.
 If you do not specify any @var{files}, all files in the archive
 are listed.
 
+@cindex repeated names in archive
+@cindex name duplication in archive
 If there is more than one file with the same name (say, @samp{fie}) in
 an archive (say @samp{b.a}), @samp{ar t b.a fie} will list only the
 first instance; to see them all, you must ask for a complete
@@ -241,6 +258,7 @@ listing---in our example, @samp{ar t b.a}.
 @c recent case in fact works the other way.
 
 @item x
+@cindex extract from archive
 @emph{Extract} members (named @var{files}) from the archive.  You can
 use the @samp{v} modifier with this operation, to request that
 @code{ar} list each name as it extracts it.
@@ -255,6 +273,7 @@ keyletter, to specify variations on an operation's behavior:
 
 @table @code
 @item a
+@cindex relative placement in archive
 Add new files @emph{after} an existing member of the
 archive.  If you use the modifier @code{a}, the name of an existing archive
 member must be present as the @var{membername} argument, before the
@@ -267,6 +286,7 @@ member must be present as the @var{membername} argument, before the
 @var{archive} specification.  (same as @samp{i}).
 
 @item c
+@cindex creating archives
 @emph{Create} the archive.  The specified @var{archive} is always
 created if it didn't exist, when you request an update.  But a warning is
 issued unless you specify in advance that you expect to create it, by
@@ -284,17 +304,20 @@ This modifier is accepted but not used.
 @c what???---pesch@@cygnus.com, 25jan91 
 
 @item o
+@cindex dates in archive
 Preserve the @emph{original} dates of members when extracting them.  If
 you do not specify this modifier, files extracted from the archive
 will be stamped with the time of extraction.
 
 @item s
+@cindex writing archive index
 Write an object-file index into the archive, or update an existing one,
 even if no other change is made to the archive.  You may use this modifier
 flag either with any operation, or alone.  Running @samp{ar s} on an
 archive is equivalent to running @samp{ranlib} on it.
 
 @item u
+@cindex updating an archive
 Normally, @code{ar r}@dots{} inserts all files
 listed into the archive.  If you would like to insert @emph{only} those
 of the files you list that are newer than existing members of the same
@@ -312,11 +335,15 @@ when the modifier @samp{v} is appended.
 
 @node ld, nm, ar, Top
 @chapter ld
+@cindex linker
+@kindex ld
 The GNU linker @code{ld} is now described in a separate manual.
 @xref{Top,, Overview,, GLD: the GNU linker}.
 
 @node nm, objdump, ld, Top
 @chapter nm
+@cindex symbols
+@kindex nm
 
 @smallexample
   nm [ -a | +debug-syms ]  [ -g | +extern-only ]
@@ -334,19 +361,23 @@ equivalent.
 
 @table @code
 @item @var{objfiles}@dots{}
+@kindex a.out
 Object files whose symbols are to be listed.  If no object files are
 listed as arguments, @code{nm} assumes @samp{a.out}.
 
 @item -a
 @itemx +debug-syms 
+@cindex debugging symbols
 Display debugger-only symbols; normally these are not listed.
 
 @item -g
 @itemx +extern-only 
+@cindex external symbols
 Display only external symbols.
 
 @item -p
 @itemx +no-sort 
+@cindex sorting symbols
 Don't bother to sort the symbols in any order; just print them in the
 order encountered.
 
@@ -357,12 +388,16 @@ names.
 
 @item -s
 @itemx +print-armap
-When listing symbols from archives, list the index: a mapping (stored in
-the archive by @code{ar} or @code{ranlib}) of what modules contain
-definitions for what names.
+@cindex symbol index, listing
+When listing symbols from archive members, include the index: a mapping
+(stored in the archive by @code{ar} or @code{ranlib}) of what modules
+contain definitions for what names.
 
 @item -o
 @itemx +print-file-name 
+@cindex input file name
+@cindex file name
+@cindex source file name
 Precede each symbol by the name of the input file where it was found,
 rather than identifying the input file once only before all of its
 symbols. 
@@ -374,18 +409,24 @@ last come first.
 
 @item +target @var{bfdname}
 @c @item +target
+@cindex object code format
 Specify an object code format other than your system's default format.
 @xref{objdump}, for information on listing available formats.
 @c FIXME what *does* +target/no arg do?
 
 @item -u
 @itemx +undefined-only 
+@cindex external symbols
+@cindex undefined symbols
 Display only undefined symbols (those external to each object file).
 
 @end table
 
 @node objdump, ranlib, nm, Top
 @chapter objdump
+
+@cindex object file information
+@kindex objdump
 
 @smallexample
   objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
@@ -406,15 +447,20 @@ equivalent.
 
 @table @code
 @item @var{objfiles}@dots{}
-The object files to be examined.
+The object files to be examined.  When you specify archives,
+@code{objdump} shows information on each of the member object files.
 
 @item -a
 @c print_arelt_descr
+@cindex archive headers
 If any files from @var{objfiles} are archives, display the archive
-header information (in a format similar to @samp{ls -l}).
+header information (in a format similar to @samp{ls -l}).  Besides the
+information you could list with @samp{ar tv}, @samp{objdump -a} shows
+the object file format of each archive member.
 
 @c suggest longname +target or +format or +bfd
 @item -b @var{bfdname}
+@cindex object code format
 You can specify a particular object-code format for your object files as
 @var{bfdname}.  This may not be necessary; @var{objdump} can
 automatically recognize many formats.  For example,
@@ -428,58 +474,77 @@ file in the format produced by Oasys compilers.  You can list the
 formats available with the @samp{-i} option.
 
 @item -d
+@cindex disassembling object code
+@cindex machine instructions
 Disassemble.  Display the assembler mnemonics for the machine
 instructions from @var{objfiles}.
 
 @item -f
+@cindex object file header
 File header.  Display summary information from the overall header of
 each file in @var{objfiles}.
 
 @item -h
 @itemx +header
+@cindex section headers
 Header.  Display summary information from the section headers of the
 object file.
 
 @item -i
+@cindex architectures available
+@cindex object formats available
 Display a list showing all architectures and object formats available
 for specification with @code{-b} or @code{-m}.
 
 @c suggest longname +section
 @item -j @var{name}
+@cindex section information
 Display information only for section @var{name}
 
 @c suggest longname +label or +linespec
 @item -l
+@cindex source filenames for object files
 Label the display (using debugging information) with the source filename
 and line numbers corresponding to the object code shown.
 
 @c suggest longname +architecture
 @item -m @var{machine}
+@cindex architecture
 Specify the object files @var{objfiles} are for architecture
 @var{machine}.  You can list available architectures using the @samp{-i}
 option. 
 
 @item -r
 @itemx +reloc
+@cindex relocation entries, in object file
 Relocation.  Print the relocation entries of the file.
 
 @item -s
+@cindex sections, full contents
+@cindex object file sections
 Display the full contents of any sections requested.
 
 @item -t
 @itemx +syms
+@cindex symbol table entries, printing
 Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
 
 @item -x
+@cindex all header information, object file
+@cindex header information, all
 Display all available header information, including the symbol table and
 relocation entries.  Using @samp{-x} is equivalent to specifying all of
-@samp{-f -a -h -r -t}.
+@samp{-a -f -h -r -t}.
 
 @end table
 
 @node ranlib, size, objdump, Top
 @chapter ranlib
+
+@kindex ranlib
+@cindex archive contents
+@cindex symbol index
 
 @smallexample
   ranlib @var{archive}
@@ -499,34 +564,11 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @code{ranlib} is completely equivalent to executing @samp{ar -s}.
 @xref{ar}.
 
-@ignore
-@c FIXME vintage ranlib had options [ -t | +touch ]  [ -v | +verbose ] 
-@c which are gone here.  Good or evil?
-
-@code{ranlib}'s options make it report on what it's doing and fake an
-update of a particular archive's index.
-
-Any command-line options must precede the archive name.
-
-The long and short forms of options, shown here as alternatives, are
-equivalent.
-
-@table @code
-
-@item -t | +touch 
-You can use the ``touch'' option to fake an update of the index
-table in archives; @code{ranlib} will first set the current date for the
-index object module in the archive (to make it appear to have changed).
-
-@item -v | +verbose 
-Use this option if you'd like informational messages about what
-@code{ranlib} is up to, while it loops through the specified archives.
-
-@end table
-@end ignore
-
 @node size, strip, ranlib, Top
 @chapter size
+
+@kindex size
+@cindex section sizes
 
 @smallexample
   size [ -A | -B | +format @var{compatibility} ]
@@ -548,6 +590,7 @@ The object files to be examined.
 @item -A
 @itemx -B
 @itemx +format @var{compatibility}
+@cindex size display format
 Using one of these options, you can choose whether the output from GNU
 @code{size} resembles output from System V @code{size} (using @samp{-A},
 or @samp{+format sysv}, or Berkeley @code{size} (using @samp{-B}, or
@@ -594,6 +637,8 @@ Show a summary of acceptable arguments and options.
 @itemx -o
 @itemx -x
 @itemx +radix @var{number}
+@cindex size number format
+@cindex radix for section sizes
 Using one of these options, you can control whether the size of each
 section is given in decimal (@samp{-d}, or @samp{+radix 10}); octal
 (@samp{-o}, or @samp{+radix 8}); or hexadecimal (@samp{-x}, or
@@ -603,6 +648,7 @@ radices; decimal and hexadecimal for @samp{-d} or @samp{-x} output, or
 octal and hexadecimal if you're using @samp{-o}.
 
 @item +target @var{bfdname}
+@cindex object code format
 You can specify a particular object-code format for @var{objfiles} as
 @var{bfdname}.  This may not be necessary; @var{size} can
 automatically recognize many formats.  @xref{objdump}, for information
@@ -614,8 +660,12 @@ Display version number information on @code{size} itself.
 
 @end table
 
-@node strip,  , size, Top
+@node strip, Index, size, Top
 @chapter strip
+
+@kindex strip
+@cindex removing symbols
+@cindex discarding symbols
 
 @smallexample
   strip [ -s | +strip-all ]  [ -g | -S | +strip-debug ]
@@ -641,15 +691,18 @@ equivalent.
 @table @code
 @item -s
 @itemx +strip-all 
+@cindex all symbols, discarding
 This is the default case: strip all symbol entries from @var{objfiles}.
 
 @item -g
 @itemx -S
 @itemx +strip-debug 
+@cindex debugging symbols, discarding
 Discard only debugging symbol information from @var{objfiles}.
 
 @item -x
 @itemx +discard-all 
+@cindex local symbols, discarding
 Discard all symbols local to each file in @var{objfiles}.
 @emph{WARNING:} Note that @code{+discard-all} discards only @emph{local}
 symbols, in spite of its name.
@@ -661,11 +714,17 @@ Discard local symbols starting with @samp{L} from each file in
 begin with @samp{L}.)
 
 @item -T @var{bfdname}
+@cindex object code format
 You can specify a particular object-code format @var{bfdname} for
 @var{objfiles}.  This may not be necessary; @var{strip} can automatically
 recognize many formats.  @xref{objdump}, for information on listing
 available formats.
 @end table
+
+@node Index, , strip, Top
+@unnumbered Index
+
+@printindex cp
 
 @contents
 @bye
