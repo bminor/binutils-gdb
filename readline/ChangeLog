@@ -1,3 +1,9 @@
+Tue Dec 15 12:38:16 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (i[34]86-*-sco3.2v4*): use mh-sco4.
+	* config/mh-sco4: New file, like mh-sco but without defining
+	_POSIX_SOURCE.
+
 Wed Nov 11 21:20:14 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in:  Reformat to one-case-per-line.
