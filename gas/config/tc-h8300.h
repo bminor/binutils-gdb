@@ -24,6 +24,12 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 
+#define TARGET_ARCH bfd_arch_h8300
+
+#ifdef OBJ_ELF
+#define TARGET_FORMAT "elf32-h8300"
+#endif
+
 #if ANSI_PROTOTYPES
 struct internal_reloc;
 #endif

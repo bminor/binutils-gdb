@@ -1,5 +1,5 @@
 /* tc-h8300.c -- Assemble code for the Hitachi H8/300
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -29,6 +29,22 @@
 #define h8_opcodes ops
 #include "opcode/h8300.h"
 #include <ctype.h>
+
+#ifdef OBJ_ELF
+#include "elf/h8.h"
+
+#define R_MOV24B1 BFD_RELOC_H8_DIR24A8
+#define R_MOVL1 BFD_RELOC_H8_DIR32A16
+#define R_MOV24B1 BFD_RELOC_H8_DIR24A8
+#define R_MOVL1 BFD_RELOC_H8_DIR32A16
+#define R_RELLONG BFD_RELOC_32
+#define R_MOV16B1 BFD_RELOC_H8_DIR16A8
+#define R_RELWORD BFD_RELOC_16
+#define R_RELBYTE BFD_RELOC_8
+#define R_PCRWORD BFD_RELOC_16_PCREL
+#define R_PCRBYTE BFD_RELOC_8_PCREL
+#define R_JMPL1 BFD_RELOC_H8_DIR24R8
+#endif
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";

@@ -12,6 +12,10 @@ Wed Aug 29 12:49:58 2001  Jeffrey A Law  (law@cygnus.com)
 
 Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
+	* tc-h8300.c: If OBJ_ELF, include elf/h8.h, and define
+	assorted coff relocations to the corresponding elf relocations.
+	* tc-h8300.h (TARGET_ARCH, TARGET_FORMAT): Define appropriately.
+
 	* configure.in: Add case for h8300-*-elf.
 	* configure: Regenerate.
 
