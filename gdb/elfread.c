@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "defs.h"
 #include "bfd.h"
 #include "gdb_string.h"
-#include "libelf.h"
+#include "elf-bfd.h"
 #include "elf/mips.h"
 #include "symtab.h"
 #include "symfile.h"

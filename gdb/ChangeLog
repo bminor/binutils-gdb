@@ -1,3 +1,7 @@
+Tue Oct 31 13:01:15 1995  Fred Fish  <fnf@cygnus.com>
+
+	* elfread.c: Include elf-bfd.h rather than libelf.h.
+
 Tue Oct 31 10:42:42 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* win32-nat.c (xlate_exception): Treat a stack overflow like a SEGV.
