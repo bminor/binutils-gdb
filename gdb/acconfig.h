@@ -31,6 +31,15 @@
 /* Define if <sys/procfs.h> has psaddr_t. */
 #undef HAVE_PSADDR_T
 
+/* Define if <sys/procfs.h> has prgregset32_t. */
+#undef HAVE_PRGREGSET32_T
+
+/* Define if <sys/procfs.h> has prfpregset32_t. */
+#undef HAVE_PRFPREGSET32_T
+
+/* Define if <sys/link.h> has struct link_map32 */
+#undef HAVE_STRUCT_LINK_MAP32
+
 /* Define if the prfpregset_t type is broken. */
 #undef PRFPREGSET_T_BROKEN
 

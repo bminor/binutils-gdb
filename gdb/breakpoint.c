@@ -1,5 +1,5 @@
 /* Everything about breakpoints, for GDB.
-   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.

@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-
+#define _SYSCALL32	/* for Sparc64 cross Sparc32 */
 #include "defs.h"
 
 /* This file is only compilable if link.h is available. */
@@ -107,24 +107,33 @@ static char *main_name_list[] =
   NULL
 };
 
-/* local data declarations */
-
-/* Macro to extract an address from a solib structure.
+/* Function to extract an address from a solib structure.
    When GDB is configured for some 32-bit targets (e.g. Solaris 2.7
    sparc), BFD is configured to handle 64-bit targets, so CORE_ADDR is
    64 bits.  We have to extract only the significant bits of addresses
-   to get the right address when accessing the core file BFD.  */
+   to get the right address when accessing the core file BFD.  
 
-#define SOLIB_EXTRACT_ADDRESS(member) \
-  extract_address (&member, sizeof (member))
+   We'll use the BFD itself to determine the number of significant bits.  
+   MVS, June 2000  */
+
+static CORE_ADDR
+solib_extract_address (void *memberp)
+{
+  return extract_address (memberp, 
+			  bfd_elf_get_arch_size (exec_bfd) / 8);
+}
+
+#define SOLIB_EXTRACT_ADDRESS(MEMBER) \
+        solib_extract_address (&MEMBER)
+
+/* local data declarations */
 
 #ifndef SVR4_SHARED_LIBS
 
-#define LM_ADDR(so) (SOLIB_EXTRACT_ADDRESS ((so) -> lm.lm_addr))
-#define LM_NEXT(so) (SOLIB_EXTRACT_ADDRESS ((so) -> lm.lm_next))
-#define LM_NAME(so) (SOLIB_EXTRACT_ADDRESS ((so) -> lm.lm_name))
-/* Test for first link map entry; first entry is a shared library. */
-#define IGNORE_FIRST_LINK_MAP_ENTRY(so) (0)
+/* NOTE: converted the macros LM_ADDR, LM_NEXT, LM_NAME and
+   IGNORE_FIRST_LINK_MAP_ENTRY into functions (see below).
+   MVS, June 2000  */
+
 static struct link_dynamic dynamic_copy;
 static struct link_dynamic_2 ld_2_copy;
 static struct ld_debug debug_copy;
@@ -133,13 +142,11 @@ static CORE_ADDR flag_addr;
 
 #else /* SVR4_SHARED_LIBS */
 
-#define LM_ADDR(so) (SOLIB_EXTRACT_ADDRESS ((so) -> lm.l_addr))
-#define LM_NEXT(so) (SOLIB_EXTRACT_ADDRESS ((so) -> lm.l_next))
-#define LM_NAME(so) (SOLIB_EXTRACT_ADDRESS ((so) -> lm.l_name))
-/* Test for first link map entry; first entry is the exec-file. */
-#define IGNORE_FIRST_LINK_MAP_ENTRY(so) \
-  (SOLIB_EXTRACT_ADDRESS ((so) -> lm.l_prev) == 0)
 static struct r_debug debug_copy;
+#if defined (HAVE_STRUCT_LINK_MAP32)
+static struct r_debug32 debug32_copy;	/* Sparc64 cross Sparc32 */
+#endif
+
 char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
 
 #endif /* !SVR4_SHARED_LIBS */
@@ -152,6 +159,9 @@ struct so_list
 
     struct so_list *next;	/* next structure in linked list */
     struct link_map lm;		/* copy of link map from inferior */
+#if defined (HAVE_STRUCT_LINK_MAP32)
+    struct link_map32 lm32;	/* copy of link map from 32-bit inferior */
+#endif
     CORE_ADDR lmaddr;		/* addr in inferior lm was read from */
 
     /* Shared object file name, exactly as it appears in the
@@ -179,6 +189,107 @@ struct so_list
   };
 
 static struct so_list *so_list_head;	/* List of known shared objects */
+
+/* link map access functions */
+
+#ifndef SVR4_SHARED_LIBS
+
+static CORE_ADDR
+LM_ADDR (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return extract_address (&so->lm32.lm_addr, sizeof (so->lm32.lm_addr));
+  else
+#endif
+    return extract_address (&so->lm.lm_addr, sizeof (so->lm.lm_addr));
+}
+
+static CORE_ADDR
+LM_NEXT (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return extract_address (&so->lm32.lm_next, sizeof (so->lm32.lm_next));
+  else
+#endif
+    return extract_address (&so->lm.lm_next, sizeof (so->lm.lm_next));
+}
+
+static CORE_ADDR
+LM_NAME (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return extract_address (&so->lm32.lm_name, sizeof (so->lm32.lm_name));
+  else
+#endif
+    return extract_address (&so->lm.lm_name, sizeof (so->lm.lm_name));
+}
+
+static int 
+IGNORE_FIRST_LINK_MAP_ENTRY (so)
+     struct so_list *so;
+{
+  return 0;
+}
+
+#else /* SVR4_SHARED_LIBS */
+
+static CORE_ADDR
+LM_ADDR (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return extract_address (&so->lm32.l_addr, sizeof (so->lm32.l_addr));
+  else
+#endif
+    return extract_address (&so->lm.l_addr, sizeof (so->lm.l_addr));
+}
+
+static CORE_ADDR
+LM_NEXT (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return extract_address (&so->lm32.l_next, sizeof (so->lm32.l_next));
+  else
+#endif
+    return extract_address (&so->lm.l_next, sizeof (so->lm.l_next));
+}
+
+static CORE_ADDR
+LM_NAME (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return extract_address (&so->lm32.l_name, sizeof (so->lm32.l_name));
+  else
+#endif
+    return extract_address (&so->lm.l_name, sizeof (so->lm.l_name));
+}
+
+static int
+IGNORE_FIRST_LINK_MAP_ENTRY (so)
+     struct so_list *so;
+{
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    return (solib_extract_address (&(so) -> lm32.l_prev) == 0);
+  else
+#endif
+    return (solib_extract_address (&(so) -> lm.l_prev) == 0);
+}
+
+#endif /* !SVR4_SHARED_LIBS */
+
+
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
 static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
@@ -925,12 +1036,23 @@ first_link_map_member (void)
     }
 
 #else /* SVR4_SHARED_LIBS */
-
-  read_memory (debug_base, (char *) &debug_copy, sizeof (struct r_debug));
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    {
+      read_memory (debug_base, (char *) &debug32_copy, 
+		   sizeof (struct r_debug32));
+      lm = SOLIB_EXTRACT_ADDRESS (debug32_copy.r_map);
+    }
+  else
+#endif
+    {
+      read_memory (debug_base, (char *) &debug_copy, 
+		   sizeof (struct r_debug));
+      lm = SOLIB_EXTRACT_ADDRESS (debug_copy.r_map);
+    }
   /* FIXME:  Perhaps we should validate the info somehow, perhaps by
      checking r_version for a known version number, or r_state for
      RT_CONSISTENT. */
-  lm = SOLIB_EXTRACT_ADDRESS (debug_copy.r_map);
 
 #endif /* !SVR4_SHARED_LIBS */
 
@@ -962,7 +1084,6 @@ open_symbol_file_object (from_ttyp)
      int *from_ttyp;	/* sneak past catch_errors */
 {
   CORE_ADDR lm;
-  struct link_map lmcopy;
   char *filename;
   int errcode;
 
@@ -977,15 +1098,35 @@ open_symbol_file_object (from_ttyp)
   if ((lm = first_link_map_member ()) == 0)
     return 0;	/* failed somehow... */
 
-  /* Read from target memory to GDB.  */
-  read_memory (lm, (void *) &lmcopy, sizeof (lmcopy));
+#if defined (HAVE_STRUCT_LINK_MAP32)
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    {
+      struct link_map32 lmcopy;
+      /* Read from target memory to GDB.  */
+      read_memory (lm, (void *) &lmcopy, sizeof (lmcopy));
 
-  if (lmcopy.l_name == 0)
-    return 0;	/* no filename.  */
+      if (lmcopy.l_name == 0)
+	return 0;	/* no filename.  */
 
-  /* Now fetch the filename from target memory.  */
-  target_read_string (SOLIB_EXTRACT_ADDRESS (lmcopy.l_name), &filename, 
-		      MAX_PATH_SIZE - 1, &errcode);
+      /* Now fetch the filename from target memory.  */
+      target_read_string (SOLIB_EXTRACT_ADDRESS (lmcopy.l_name), 
+			  &filename, MAX_PATH_SIZE - 1, &errcode);
+    }
+  else
+#endif /* HAVE_STRUCT_LINK_MAP32 */
+    {
+      struct link_map lmcopy;
+      /* Read from target memory to GDB.  */
+      read_memory (lm, (void *) &lmcopy, sizeof (lmcopy));
+
+      if (lmcopy.l_name == 0)
+	return 0;	/* no filename.  */
+
+      /* Now fetch the filename from target memory.  */
+      target_read_string (SOLIB_EXTRACT_ADDRESS (lmcopy.l_name), &filename, 
+			  MAX_PATH_SIZE - 1, &errcode);
+    }
+
   if (errcode)
     {
       warning ("failed to read exec filename from attached file: %s",
@@ -1114,7 +1255,13 @@ current_sos (void)
       memset (new, 0, sizeof (*new));
 
       new->lmaddr = lm;
-      read_memory (lm, (char *) &(new->lm), sizeof (struct link_map));
+
+#if defined (HAVE_STRUCT_LINK_MAP32)
+      if (bfd_elf_get_arch_size (exec_bfd) == 32)
+	read_memory (lm, (char *) &(new->lm32), sizeof (struct link_map32));
+      else
+#endif
+	read_memory (lm, (char *) &(new->lm), sizeof (struct link_map));
 
       lm = LM_NEXT (new);
 

@@ -246,6 +246,9 @@
 /* Define if you have the <link.h> header file.  */
 #undef HAVE_LINK_H
 
+/* Define if <link.h> defines struct link_map32.  */
+#undef HAVE_STRUCT_LINK_MAP32
+
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
 
@@ -416,6 +419,12 @@
 
 /* Define if <sys/procfs.h> has prfpregset_t. */
 #undef HAVE_PRFPREGSET_T
+
+/* Define if <sys/procfs.h> has prgregset32_t. */
+#undef HAVE_PRGREGSET32_T
+
+/* Define if <sys/procfs.h> has prfpregset32_t. */
+#undef HAVE_PRFPREGSET32_T
 
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T

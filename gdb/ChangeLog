@@ -1,3 +1,25 @@
+2000-08-29  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* valops.c (value_cast): Indentation fix-up.
+	* acconfig.h (HAVE_PRGREGSET32_T, HAVE_PRFPREGSET32_T, 
+	HAVE_STRUCT_LINK_MAP32): New configure macros.
+	* config.in: Ditto.
+	* configure.in: Test for the above new macros.
+	* breakpoint.c: Update copyright date.
+	* core-sol2.c: Include v9/sys/privregs.h directly to 
+	work around a bug in Sun's Solaris 8 header files.
+	(fetch_core_registers): Use the above new configure macros to
+	handle cross-debugging of 32-bit core files on a 64-bit host.
+	* sol-thread.c (ps_pdmodel) New function.
+	(rw_common): For debugging of 32-bit apps on a 64-bit host, 
+	truncate addresses to 32 bits.
+	* solib.c (solib_extract_address): Functionize.  Make 32/64 aware.
+	(LM_ADDR, LM_NEXT, LM_NAME): Ditto.
+	(IGNORE_FIRST_LINK_MAP): Ditto.
+	(first_link_map_member): Make 32/64 aware.
+	(open_symbol_file_object): Ditto.
+	(current_sos): Ditto.
+
 2000-08-29  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* i386-linux-nat.c (i386_linux_skip_solib_resolver, 

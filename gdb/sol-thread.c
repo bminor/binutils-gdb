@@ -1,5 +1,5 @@
 /* Low level interface for debugging Solaris threads for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,6 +57,7 @@
 #include <sys/stat.h>
 #include <dlfcn.h>
 #include "gdbcmd.h"
+#include "gdbcore.h"
 
 extern struct target_ops sol_thread_ops;	/* Forward declaration */
 extern struct target_ops sol_core_ops;	/* Forward declaration */
@@ -1044,6 +1045,13 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
     inferior_pid = procfs_first_available ();	/* Find any live lwp.  */
   /* Note: don't need to call switch_to_thread; we're just reading memory.  */
 
+#if defined (__sparcv9)
+  /* For Sparc64 cross Sparc32, make sure the address has not been
+     accidentally sign-extended (or whatever) to beyond 32 bits.  */
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    addr &= 0xffffffff;
+#endif
+
   while (size > 0)
     {
       int cc;
@@ -1297,6 +1305,25 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     orig_core_ops.to_store_registers (-1);
 
   do_cleanups (old_chain);
+
+  return PS_OK;
+}
+
+/* Identify process as 32-bit or 64-bit.
+   At the moment I'm using bfd to do this.
+   There might be a more solaris-specific (eg. procfs) method,
+   but this ought to work.  */
+
+ps_err_e
+ps_pdmodel (gdb_ps_prochandle_t ph, int *data_model)
+{
+  if (exec_bfd == 0)
+    return PS_ERR;
+
+  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+    *data_model = PR_MODEL_ILP32;
+  else
+    *data_model = PR_MODEL_LP64;
 
   return PS_OK;
 }

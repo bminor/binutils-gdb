@@ -286,8 +286,8 @@ value_cast (struct type *type, register value_ptr arg2)
 				 (LONGEST) (longest ? 1 : 0) : longest);
     }
   else if (code1 == TYPE_CODE_PTR && (code2 == TYPE_CODE_INT  ||
-                                    code2 == TYPE_CODE_ENUM ||
-                                    code2 == TYPE_CODE_RANGE))
+				      code2 == TYPE_CODE_ENUM ||
+				      code2 == TYPE_CODE_RANGE))
     {
       int ptr_bit = HOST_CHAR_BIT * TYPE_LENGTH (type);
       LONGEST longest = value_as_long (arg2);

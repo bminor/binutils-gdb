@@ -1,5 +1,5 @@
 /* Machine independent support for Solaris 2 core files for GDB.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +26,15 @@
    This file combines the core register fetching from core-regset.c
    and sparc-nat.c to be able to read both flavours.  */
 
+/* for Sparc64 cross Sparc32 */
+#define _SYSCALL32
 #include "defs.h"
+
+#if defined (__sparcv9)
+/* Fails to get included by the Solaris system header files.  */
+# include <v9/sys/privregs.h>
+#endif
+
 #include <time.h>
 #include <sys/types.h>
 #include <sys/regset.h>
@@ -55,19 +63,36 @@ static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 		      CORE_ADDR reg_addr)
 {
-  prgregset_t prgregset;
-  prfpregset_t prfpregset;
+  int i;
 
   if (which == 0)
     {
-      if (core_reg_size == sizeof (prgregset))
+      prgregset_t prgregset;
+
+      if (core_reg_size == sizeof (prgregset_t))
 	{
 	  memcpy ((char *) &prgregset, core_reg_sect, sizeof (prgregset));
 	  supply_gregset (&prgregset);
 	}
+#if defined (HAVE_PRGREGSET32_T)
+      /* 32-bit corefile, 64-bit debugger.  */
+      else if (core_reg_size == sizeof (prgregset32_t))
+	{
+	  prgreg32_t *core_gregs;
+
+	  /* Can't use memcpy here, because the core file contains
+	     32-bit regs; supply_register expects 64-bit regs.  */
+	  core_gregs = (prgreg32_t *) core_reg_sect;
+	  for (i = 0; i < NPRGREG; i++)
+	    prgregset[i] = core_gregs[i];
+
+	  supply_gregset (&prgregset);
+	}
+#endif /* HAVE_PRGREGSET32_T */
       else if (core_reg_size == sizeof (struct regs))
 	{
-#define gregs ((struct regs *)core_reg_sect)
+	  struct regs *gregs = (struct regs *) core_reg_sect;
+
 	  /* G0 *always* holds 0.  */
 	  *(int *) &registers[REGISTER_BYTE (0)] = 0;
 
@@ -103,14 +128,41 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
     }
   else if (which == 2)
     {
-      if (core_reg_size == sizeof (prfpregset))
+      prfpregset_t prfpregset;
+
+      if (core_reg_size == sizeof (prfpregset_t))
 	{
 	  memcpy ((char *) &prfpregset, core_reg_sect, sizeof (prfpregset));
 	  supply_fpregset (&prfpregset);
 	}
+#if defined (HAVE_PRFPREGSET32_T)
+      /* 32-bit corefile, 64-bit debugger.  */
+      else if (core_reg_size == sizeof (prfpregset32_t))
+	{
+	  prfpregset32_t *core_fpregset;
+
+	  /* Can't use memcpy here, because the core file contains
+	     32-bit regs; supply_fpregset expects 64-bit regs.  */
+
+	  core_fpregset = (prfpregset32_t *) core_reg_sect;
+	  for (i = 0; i < 16; i++)
+	    prfpregset.pr_fr.pr_dregs[i] = core_fpregset->pr_fr.pr_dregs[i];
+	  while (i < 32)
+	    prfpregset.pr_fr.pr_dregs[i++] = 0;
+
+	  prfpregset.pr_fsr         = core_fpregset->pr_fsr;
+	  prfpregset.pr_qcnt        = core_fpregset->pr_qcnt;
+	  prfpregset.pr_q_entrysize = core_fpregset->pr_q_entrysize;
+	  prfpregset.pr_en          = core_fpregset->pr_en;
+	  /* We will not use the pr_q array.  */
+
+	  supply_fpregset (&prfpregset);
+	}
+#endif /* HAVE_PRFPREGSET32_T */
       else if (core_reg_size >= sizeof (struct fpu))
 	{
-#define fpuregs  ((struct fpu *) core_reg_sect)
+	  struct fpu *fpuregs = (struct fpu *) core_reg_sect;
+
 	  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &fpuregs->fpu_fr,
 		  sizeof (fpuregs->fpu_fr));
 	  memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)], &fpuregs->fpu_fsr,

@@ -229,8 +229,31 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(prgregset32_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset32_t)
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
+
+  dnl Check for struct link_map32 type, which allows a 64-bit Solaris
+  dnl debugger to debug a 32-bit Solaris app with 32-bit shared libraries.
+
+  AC_MSG_CHECKING(for struct link_map32 in sys/link.h)
+  AC_CACHE_VAL(gdb_cv_have_struct_link_map32, 
+    [AC_TRY_RUN([#define _SYSCALL32
+     #include <sys/link.h>
+     int main()
+     {
+       if (sizeof (struct link_map32) > 0)
+	 return 1;
+       return 0;
+     }],
+     gdb_cv_have_struct_link_map32=no,
+     gdb_cv_have_struct_link_map32=yes,
+     gdb_cv_have_struct_link_map32=yes)])
+  AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
+  if test $gdb_cv_have_struct_link_map32 = yes; then
+    AC_DEFINE(HAVE_STRUCT_LINK_MAP32)
+  fi
 
   dnl Check for broken prfpregset_t type
 
