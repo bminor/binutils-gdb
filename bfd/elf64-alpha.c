@@ -2581,9 +2581,10 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	      else
 		rent->count++;
 	    }
-	  else if (info->shared)
+	  else if (info->shared && (sec->flags & SEC_ALLOC))
 	    {
-	      /* If this is a shared library, we need a RELATIVE reloc.  */
+	      /* If this is a shared library, and the section is to be
+		 loaded into memory, we need a RELATIVE reloc.  */
 	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
 	    }
 	  break;
@@ -3623,7 +3624,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		outrel.r_addend = addend;
 		addend = 0, relocation = 0;
 	      }
-	    else if (info->shared)
+	    else if (info->shared && (input_section->flags & SEC_ALLOC))
 	      {
 		outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
 		outrel.r_addend = 0;

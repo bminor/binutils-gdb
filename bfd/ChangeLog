@@ -1,3 +1,9 @@
+2000-04-01  Ken Block USG  <block@zk3.dec.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Don't emit
+	relative relocations for non-loaded sections in shared objects.
+	(elf64_alpha_check_relocs): Similarly.
+
 Mon Apr  3 13:37:15 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* aoutx.h (NAME(aout,reloc_type_lookup)): Add BFD_RELOC_8 and
@@ -31,7 +37,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	The new logic in m32r_elf_lo16_reloc() has been removed, and
 	it instead calls the new routine to obtain that functionality.
 
-2000-03-27  Alan Modra  <alan@linuxcare.com>
+2000-03-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-avr.c (elf32_avr_gc_mark_hook, elf32_avr_gc_sweep_hook,
 	elf32_avr_check_relocs, avr_final_link_relocate,
@@ -84,7 +90,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	* coff-h8300.c (h8300_reloc16_extra_cases): Fix the sanity
 	check for R_MOVL2.
 
-2000-03-11  Alan Modra  <alan@spri.levels.unisa.edu.au>
+2000-03-11  Alan Modra  <alan@linuxcare.com.au>
 
 	* ieee.c (ieee_archive_p): Return bfd_error_wrong_format on 
 	a format mismatch rather than an "error" from bfd_read such as
@@ -114,7 +120,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	are paired.  The addend for R_MIPS_GNU_REL16_S2
 	is shifted right two bits.
 
-2000-03-10  Alan Modra  <alan@spri.levels.unisa.edu.au>
+2000-03-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* reloc.c (bfd_perform_relocation): Undo emacs formatting of
 	comment, and ensure it doesn't happen again.
