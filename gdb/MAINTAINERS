@@ -61,6 +61,9 @@ maintainer works with the native maintainer when resolving API issues.
 			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
 
+	cris		--target=cris-elf ,-Werror
+			Orjan Friberg		orjanf@axis.com
+
 	d10v		--target=d10v-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 

@@ -1,5 +1,9 @@
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Add Orjan Friberg as cris target maintainer.
+
+2001-07-28  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2001-07-23 Andreas Schwab <schwab@suse.de>:
 	* config/m68k/tm-m68k.h (TARGET_LONG_DOUBLE_FORMAT): Define.
 	(TARGET_LONG_DOUBLE_BIT): Define.
