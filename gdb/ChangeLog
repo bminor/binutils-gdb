@@ -1,3 +1,20 @@
+Tue Aug 16 16:45:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* coffread.c: General cleanup, and support for section offsets.
+	(time.h, sys/types.h, libbfd.h): Don't include.
+	(cur_src_start_addr, cur_src_end_addr): Rename to
+	current_source_start_addr, current_source_end_addr.
+	(nlist_stream_global): Remove.
+	(nlist_bfd_global): New global variable.
+	(coff_symfile_read): Remove code that gets and uses fileno()
+	directly.
+	(read_coff_symtab, enter_linenos, process_coff_symbol): Add
+	section_offsets parameter, add text/data section offset to
+	appropriate symbols' values.
+	(read_one_sym): Use bfd_read instead of fread.
+	(init_stringtab, init_lineno): Change first parameter to a bfd,
+	use bfd routines instead of raw I/O.
+
 Tue Aug 16 15:24:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c (decode_line_1): If funfirstline and we get a
@@ -19,7 +36,7 @@ Sat Aug 13 08:22:50 1994  Fred Fish  (fnf@cygnus.com)
 
 	Harris CX/UX support, from Bob Rusk (rrusk@mail.csd.harris.com).
 	* cxux-nat.c:  Remove dangling #else block.
-	((m88k_harris_core_register_addr):  New function.
+	(m88k_harris_core_register_addr):  New function.
 
 	* environ.c (init_environ):  If no environment, do nothing.
 
