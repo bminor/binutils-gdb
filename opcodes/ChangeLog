@@ -1,3 +1,9 @@
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+	and Bernd Schmidt   <bernds@redhat.com>
+	and Alexandre Oliva <aoliva@redhat.com>
+	* disassemble.c (disassembler): Add support for h8300sx.
+	* h8300-dis.c: Ditto.
+
 2003-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* frv-desc.c: Regenerate.
