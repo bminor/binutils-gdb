@@ -1425,11 +1425,39 @@ void
 s_space (mult)
      int mult;
 {
-  long temp_repeat;
-  register long temp_fill;
-  register char *p;
+  expressionS exp;
+  long temp_repeat, temp_fill;
+  char *p = 0;
 
   /* Just like .fill, but temp_size = 1 */
+  expression (&exp);
+  if (exp.X_op == O_constant
+      /* for testing purposes */
+      && 0)
+    {
+      long repeat;
+
+      repeat = exp.X_add_number;
+      if (mult)
+	repeat *= mult;
+      if (repeat <= 0)
+	{
+	  as_warn (".space repeat count is %s, ignored",
+		   repeat ? "negative" : "zero");
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      if (!need_pass_2)
+	p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
+		      temp_repeat, (char *) 0);
+    }
+  else
+    {
+      if (!need_pass_2)
+	p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
+		      make_expr_symbol (&exp), 0L, (char *) 0);
+    }
   if (get_absolute_expression_and_terminator (&temp_repeat) == ',')
     {
       temp_fill = get_absolute_expression ();
@@ -1439,24 +1467,12 @@ s_space (mult)
       input_line_pointer--;	/* Backup over what was not a ','. */
       temp_fill = 0;
     }
-  if (mult)
+  if (p)
     {
-      temp_repeat *= mult;
-    }
-  if (temp_repeat <= 0)
-    {
-      as_warn ("Repeat < 0, .space ignored");
-      ignore_rest_of_line ();
-      return;
-    }
-  if (!need_pass_2)
-    {
-      p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
-		    temp_repeat, (char *) 0);
       *p = temp_fill;
     }
   demand_empty_rest_of_line ();
-}				/* s_space() */
+}
 
 void
 s_text (ignore)
@@ -1969,7 +1985,7 @@ parse_bitfield_cons (exp, nbytes)
 	     widths, positions, and masks which most
 	     of our current object formats don't
 	     support.
-	     
+
 	     In the specific case where a symbol
 	     *is* defined in this assembly, we
 	     *could* build fixups and track it, but
@@ -2481,7 +2497,7 @@ get_absolute_expression ()
   if (exp.X_op != O_constant)
     {
       if (exp.X_op != O_absent)
-	as_bad ("bad absolute expression; zero assumed");
+	as_bad ("bad or irreducible absolute expression; zero assumed");
       exp.X_add_number = 0;
     }
   return exp.X_add_number;

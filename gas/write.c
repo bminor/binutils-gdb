@@ -419,15 +419,18 @@ cvt_frag_to_fill (headers, fragP)
   switch (fragP->fr_type)
     {
     case rs_align:
+    case rs_align_code:
     case rs_org:
+    case rs_space:
 #ifdef HANDLE_ALIGN
       HANDLE_ALIGN (fragP);
 #endif
-      fragP->fr_type = rs_fill;
       know (fragP->fr_next != NULL);
       fragP->fr_offset = (fragP->fr_next->fr_address
 			  - fragP->fr_address
 			  - fragP->fr_fix) / fragP->fr_var;
+      assert (fragP->fr_offset >= 0);
+      fragP->fr_type = rs_fill;
       break;
 
     case rs_fill:
@@ -625,8 +628,8 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   md_estimate_size_before_relax in tc-mips.c uses this test
 	   as well, so if you change this code you should look at that
 	   code.  */
-	if (symsec == &bfd_und_section
-	    || symsec == &bfd_abs_section
+	if (bfd_is_und_section (symsec)
+	    || bfd_is_abs_section (symsec)
 	    || bfd_is_com_section (symsec))
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
@@ -1731,6 +1734,7 @@ relax_segment (segment_frag_root, segment)
 	  break;
 
 	case rs_align:
+	case rs_align_code:
 	  {
 	    int offset = relax_align (address, (int) fragP->fr_offset);
 	    if (offset % fragP->fr_var != 0)
@@ -1744,6 +1748,7 @@ relax_segment (segment_frag_root, segment)
 	  break;
 
 	case rs_org:
+	case rs_space:
 	  /* Assume .org is nugatory. It will grow with 1st relax.  */
 	  break;
 
@@ -1859,6 +1864,7 @@ relax_segment (segment_frag_root, segment)
 		}		/* case rs_broken_word */
 #endif
 	      case rs_align:
+	      case rs_align_code:
 		growth = (relax_align ((relax_addressT) (address
 							 + fragP->fr_fix),
 				       (int) offset)
@@ -1893,6 +1899,23 @@ relax_segment (segment_frag_root, segment)
 		   .org backwards. */
 
 		growth -= stretch;	/* This is an absolute growth factor */
+		break;
+
+	      case rs_space:
+		if (symbolP)
+		  {
+		    growth = S_GET_VALUE (symbolP);
+		    if (symbolP->sy_frag != &zero_address_frag)
+		      as_bad (".space specifies non-absolute value");
+		    fragP->fr_symbol = 0;
+		    if (growth < 0)
+		      {
+			as_warn (".space or .fill with negative value, ignored");
+			growth = 0;
+		      }
+		  }
+		else
+		  growth = 0;
 		break;
 
 	      case rs_machine_dependent:

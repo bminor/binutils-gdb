@@ -9,6 +9,28 @@ Fri Dec 30 18:21:41 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	everything it includes.  Delete those files from per-file
 	dependencies.
 
+	* as.h (relax_substateT): Now defined to be unsigned int.
+	(relax_stateT): Separate typedef from enum definition.
+	(enum _relax_state): Reordered for better punctuation.  Added new
+	values rs_align_code and rs_space.
+	(lineno, struct lineno_struct): Unused, deleted.
+
+	* as.h: No longer include assert.h.
+	(as_assert): Declare.
+	(assert): New definition, calls as_assert longer needed.
+	(__PRETTY_FUNCTION__): Provide default for older versions of gcc.
+	* messages.c (as_assert): New function.
+	* gdbinit.in: Put a breakpoint there.
+
+	* read.c (s_space): Rewrite to handle general expressions.
+	Generate rs_space frags for non-constant values.
+	* write.c (cvt_frag_to_fill): Treat rs_align_code and rs_space
+	like rs_align and rs_org.  Verify that fr_offset is non-negative,
+	and force frag type to rs_fill only after assertion checks.
+	(relax_segment): Treat rs_align_code like rs_align.  Treat
+	rs_space like rs_org in the first switch; in the second, force the
+	operand to a constant, and use it for the growth size.
+
 Wed Dec 28 20:57:37 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_subspace): For sections with the ZERO
