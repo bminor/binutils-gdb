@@ -1,3 +1,8 @@
+Fri Jan 28 08:45:02 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* mdebugread.c (psymtab_to_symtab_1): Don't complain on stLabel with
+	index indexNil.
+
 Fri Jan 28 10:40:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/pa/tm-hppa.h: Define macro SMASH_TEXT_ADDRESS.
