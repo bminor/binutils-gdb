@@ -8346,8 +8346,8 @@ md_apply_fix (fixP, valueP)
        * the current segment).
        */
       if ((value & 0x3) != 0)
-	as_warn_where (fixP->fx_file, fixP->fx_line,
-		       "Branch to odd address (%lx)", value);
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      "Branch to odd address (%lx)", value);
       value >>= 2;
 
       /* update old instruction data */
