@@ -1,3 +1,8 @@
+Mon Jan  5 20:38:54 1998  Mark Alexander  <marka@cygnus.com>
+
+	* interp.c (sim_monitor): Handle Densan monitor outbyte
+	and inbyte functions.
+
 1997-12-29  Felix Lee  <flee@cygnus.com>
 
 	* interp.c (sim_engine_run): msvc cpp barfs on #if (a==b!=c).

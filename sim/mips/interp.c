@@ -765,6 +765,13 @@ sim_monitor(sd,cia,reason)
 	break;
       }
 
+    case 2:  /* Densan monitor: char inbyte(int waitflag) */
+      {
+	if (A0 == 0)	/* waitflag == NOWAIT */
+	  V0 = (ut_reg)-1;
+      }
+     /* Drop through to case 11 */
+
     case 11: /* char inbyte(void) */
       {
         char tmp;
@@ -778,6 +785,7 @@ sim_monitor(sd,cia,reason)
 	break;
       }
 
+    case 3:  /* Densan monitor: void co(char chr) */
     case 12: /* void outbyte(char chr) : write a byte to "stdout" */
       {
         char tmp = (char)(A0 & 0xFF);
