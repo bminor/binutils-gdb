@@ -1,3 +1,8 @@
+Thu Jan 22 15:14:01 1998  Fred Fish  <fnf@cygnus.com>
+
+	* .cvsignore: Remove *-info and *-install since they match
+	release-info and mpw-install, which we don't want to just ignore.
+
 Sat Jan 17 21:28:08 1998  Pieter Nagel <pnagel@epiuse.co.za>
 
 	* Makefile.in (FLAGS_TO_PASS): Pass down gcc_include_dir and
