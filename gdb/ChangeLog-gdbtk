@@ -1,3 +1,12 @@
+1998-10-02  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-hooks.c (gdbtk_exec_file_changed): New function which handles
+	exec_file changes.
+	(gdbtk_add_hooks): Define exec_file_display_hook (to gdbtk_exec_file_changed)
+
+	* gdbtk-cmds.c (gdb_stop): target_stop is ALWAYS defined, so
+	compare against something a little more meaningful (target_ignore).
+
 1998-09-24  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk.c (gdbtk_wait): Don't run the timer for ice targets.

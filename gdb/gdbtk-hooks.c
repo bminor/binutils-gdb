@@ -77,7 +77,6 @@ extern int  (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 extern void (*pre_add_symbol_hook) PARAMS ((char *));
 extern void (*post_add_symbol_hook) PARAMS ((void));
 extern void (*selected_frame_level_changed_hook) PARAMS ((int));
-
 #ifdef __CYGWIN32__
 extern void (*ui_loop_hook) PARAMS ((int));
 #endif
@@ -88,6 +87,7 @@ static void   gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_create_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
+static void   gdbtk_exec_file_changed PARAMS ((char *));
 static void   tk_command_loop PARAMS ((void));
 static void   gdbtk_call_command PARAMS ((struct cmd_list_element *, char *, int));
 static int    gdbtk_wait PARAMS ((int, struct target_waitstatus *));
@@ -144,18 +144,21 @@ gdbtk_add_hooks(void)
   delete_breakpoint_hook = gdbtk_delete_breakpoint;
   modify_breakpoint_hook = gdbtk_modify_breakpoint;
 
-  interactive_hook = gdbtk_interactive;
-  target_wait_hook = gdbtk_wait;
-  ui_load_progress_hook = gdbtk_load_hash;
+  interactive_hook       = gdbtk_interactive;
+  target_wait_hook       = gdbtk_wait;
+  ui_load_progress_hook  = gdbtk_load_hash;
+
 #ifdef __CYGWIN32__
   ui_loop_hook = x_event;
 #endif
-  pre_add_symbol_hook   = gdbtk_pre_add_symbol;
-  post_add_symbol_hook  = gdbtk_post_add_symbol;
+  pre_add_symbol_hook    = gdbtk_pre_add_symbol;
+  post_add_symbol_hook   = gdbtk_post_add_symbol;
+  exec_file_display_hook = gdbtk_exec_file_changed;
 
   create_tracepoint_hook = gdbtk_create_tracepoint;
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
+
   pc_changed_hook = pc_changed;
   selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
   context_hook = gdbtk_context_change;
@@ -701,4 +704,12 @@ gdbtk_context_change (num)
      int num;
 {
   gdb_context = num;
+}
+
+/* Called from exec_file_command */
+static void
+gdbtk_exec_file_changed (filename)
+     char *filename;
+{
+  gdbtk_two_elem_cmd ("gdbtk_tcl_exec_file_changed", filename);
 }

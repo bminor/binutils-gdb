@@ -565,10 +565,8 @@ gdb_stop (clientData, interp, objc, objv)
      int objc;
      Tcl_Obj *CONST objv[];
 {
-  if (target_stop)
-    {
+  if (target_stop != target_ignore)
       target_stop ();
-    }
   else
     quit_flag = 1; /* hope something sees this */
 
