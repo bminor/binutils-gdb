@@ -21,11 +21,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "sysdep.h"
 #include <stdio.h>
 #include "ansidecl.h"
 #include "dis-asm.h"
-#include "m32r-opc.h"
 #include "bfd.h"
+#include "m32r-opc.h"
 
 /* ??? The layout of this stuff is still work in progress.
    For speed in assembly/disassembly, we use inline functions.  That of course
@@ -45,9 +46,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static int print_insn PARAMS ((bfd_vma, disassemble_info *, char *, int));
 
 static int extract_insn_normal
-     PARAMS ((const struct cgen_insn *, void *, cgen_insn_t, struct cgen_fields *));
+     PARAMS ((const CGEN_INSN *, void *, cgen_insn_t, CGEN_FIELDS *));
 static void print_insn_normal
-     PARAMS ((void *, const struct cgen_insn *, struct cgen_fields *, bfd_vma, int));
+     PARAMS ((void *, const CGEN_INSN *, CGEN_FIELDS *, bfd_vma, int));
+
+CGEN_INLINE void
+m32r_cgen_print_operand
+     PARAMS ((int opindex, disassemble_info * info, CGEN_FIELDS * fields, void const * attrs, bfd_vma pc, int length));
+
 
 /* Default extraction routine.
 
@@ -56,11 +62,14 @@ static void print_insn_normal
 
 static int
 extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length, valuep)
-     void *buf_ctrl;
-     cgen_insn_t insn_value;
+     void *       buf_ctrl;
+     cgen_insn_t  insn_value;
      unsigned int attrs;
-     int start, length, shift, total_length;
-     long *valuep;
+     int          start;
+     int          length;
+     int          shift;
+     int          total_length;
+     long *       valuep;
 {
   long value;
 
@@ -85,7 +94,7 @@ extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length,
   else
     value <<= shift;
 
-  *valuep = value;
+  * valuep = value;
   return 1;
 }
 
@@ -93,13 +102,13 @@ extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length,
 
 static void
 print_normal (dis_info, value, attrs, pc, length)
-     void *dis_info;
-     long value;
-     unsigned int attrs;
+     void *        dis_info;
+     long          value;
+     unsigned int  attrs;
      unsigned long pc; /* FIXME: should be bfd_vma */
-     int length;
+     int           length;
 {
-  disassemble_info *info = dis_info;
+  disassemble_info * info = dis_info;
 
   /* Print the operand as directed by the attributes.  */
   if (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_FAKE))
@@ -120,264 +129,19 @@ print_normal (dis_info, value, attrs, pc, length)
 
 static void
 print_keyword (dis_info, keyword_table, value, attrs)
-     void *dis_info;
-     struct cgen_keyword *keyword_table;
-     long value;
-     CGEN_ATTR *attrs;
+     void *         dis_info;
+     CGEN_KEYWORD * keyword_table;
+     long           value;
+     CGEN_ATTR *    attrs;
 {
-  disassemble_info *info = dis_info;
-  const struct cgen_keyword_entry *ke;
+  disassemble_info * info = dis_info;
+  const CGEN_KEYWORD_ENTRY * ke;
 
   ke = cgen_keyword_lookup_value (keyword_table, value);
-  if (ke != NULL)
-    (*info->fprintf_func) (info->stream, "%s", ke->name);
-  else
-    (*info->fprintf_func) (info->stream, "???");
+  info->fprintf_func (info->stream, "%s", ke == NULL ? "???" : ke->name);
 }
 
 /* -- disassembler routines inserted here */
-/* -- dis.c */
-
-#undef CGEN_PRINT_INSN
-#define CGEN_PRINT_INSN my_print_insn
-
-static int
-my_print_insn (pc, info, buf, buflen)
-     bfd_vma pc;
-     disassemble_info *info;
-     char *buf;
-     int buflen;
-{
-  unsigned long insn_value;
-
-  /* 32 bit insn?  */
-  if ((pc & 3) == 0 && (buf[0] & 0x80) != 0)
-    return print_insn (pc, info, buf, buflen);
-
-  /* Print the first insn.  */
-  if ((pc & 3) == 0)
-    {
-      if (print_insn (pc, info, buf, 16) == 0)
-	(*info->fprintf_func) (info->stream, UNKNOWN_INSN_MSG);
-      buf += 2;
-    }
-
-  if (buf[0] & 0x80)
-    {
-      /* Parallel.  */
-      (*info->fprintf_func) (info->stream, " || ");
-      buf[0] &= 0x7f;
-    }
-  else
-    (*info->fprintf_func) (info->stream, " -> ");
-
-  /* The "& 3" is to ensure the branch address is computed correctly
-     [if it is a branch].  */
-  if (print_insn (pc & ~ (bfd_vma) 3, info, buf, 16) == 0)
-    (*info->fprintf_func) (info->stream, UNKNOWN_INSN_MSG);
-
-  return (pc & 3) ? 2 : 4;
-}
-
-/* -- */
-
-/* Main entry point for operand extraction.
-
-   This function is basically just a big switch statement.  Earlier versions
-   used tables to look up the function to use, but
-   - if the table contains both assembler and disassembler functions then
-     the disassembler contains much of the assembler and vice-versa,
-   - there's a lot of inlining possibilities as things grow,
-   - using a switch statement avoids the function call overhead.
-
-   This function could be moved into `print_insn_normal', but keeping it
-   separate makes clear the interface between `print_insn_normal' and each of
-   the handlers.
-*/
-
-CGEN_INLINE int
-m32r_cgen_extract_operand (opindex, buf_ctrl, insn_value, fields)
-     int opindex;
-     void *buf_ctrl;
-     cgen_insn_t insn_value;
-     struct cgen_fields *fields;
-{
-  int length;
-
-  switch (opindex)
-    {
-    case 0 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_r2);
-      break;
-    case 1 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_r1);
-      break;
-    case 2 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_r1);
-      break;
-    case 3 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_r2);
-      break;
-    case 4 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_r2);
-      break;
-    case 5 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_r1);
-      break;
-    case 6 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 8, 8, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_simm8);
-      break;
-    case 7 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_simm16);
-      break;
-    case 8 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_uimm4);
-      break;
-    case 9 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 11, 5, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_uimm5);
-      break;
-    case 10 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_uimm16);
-      break;
-    case 11 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_hi16);
-      break;
-    case 12 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0, 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_simm16);
-      break;
-    case 13 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 16, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_uimm16);
-      break;
-    case 14 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), 8, 24, 0, CGEN_FIELDS_BITSIZE (fields), &fields->f_uimm24);
-      break;
-    case 15 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 8, 2, CGEN_FIELDS_BITSIZE (fields), &fields->f_disp8);
-      break;
-    case 16 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 16, 16, 2, CGEN_FIELDS_BITSIZE (fields), &fields->f_disp16);
-      break;
-    case 17 :
-      length = extract_normal (NULL /*FIXME*/, insn_value, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 8, 24, 2, CGEN_FIELDS_BITSIZE (fields), &fields->f_disp24);
-      break;
-
-    default :
-      fprintf (stderr, "Unrecognized field %d while decoding insn.\n",
-	       opindex);
-      abort ();
-    }
-
-  return length;
-}
-
-/* Main entry point for printing operands.
-
-   This function is basically just a big switch statement.  Earlier versions
-   used tables to look up the function to use, but
-   - if the table contains both assembler and disassembler functions then
-     the disassembler contains much of the assembler and vice-versa,
-   - there's a lot of inlining possibilities as things grow,
-   - using a switch statement avoids the function call overhead.
-
-   This function could be moved into `print_insn_normal', but keeping it
-   separate makes clear the interface between `print_insn_normal' and each of
-   the handlers.
-*/
-
-CGEN_INLINE void
-m32r_cgen_print_operand (opindex, info, fields, attrs, pc, length)
-     int opindex;
-     disassemble_info *info;
-     struct cgen_fields *fields;
-     int attrs;
-     bfd_vma pc;
-     int length;
-{
-  switch (opindex)
-    {
-    case 0 :
-      print_keyword (info, & m32r_cgen_opval_h_gr, fields->f_r2, 0|(1<<CGEN_OPERAND_UNSIGNED));
-      break;
-    case 1 :
-      print_keyword (info, & m32r_cgen_opval_h_gr, fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED));
-      break;
-    case 2 :
-      print_keyword (info, & m32r_cgen_opval_h_gr, fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED));
-      break;
-    case 3 :
-      print_keyword (info, & m32r_cgen_opval_h_gr, fields->f_r2, 0|(1<<CGEN_OPERAND_UNSIGNED));
-      break;
-    case 4 :
-      print_keyword (info, & m32r_cgen_opval_h_cr, fields->f_r2, 0|(1<<CGEN_OPERAND_UNSIGNED));
-      break;
-    case 5 :
-      print_keyword (info, & m32r_cgen_opval_h_cr, fields->f_r1, 0|(1<<CGEN_OPERAND_UNSIGNED));
-      break;
-    case 6 :
-      print_normal (info, fields->f_simm8, 0, pc, length);
-      break;
-    case 7 :
-      print_normal (info, fields->f_simm16, 0, pc, length);
-      break;
-    case 8 :
-      print_normal (info, fields->f_uimm4, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
-      break;
-    case 9 :
-      print_normal (info, fields->f_uimm5, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
-      break;
-    case 10 :
-      print_normal (info, fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
-      break;
-    case 11 :
-      print_normal (info, fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
-      break;
-    case 12 :
-      print_normal (info, fields->f_simm16, 0, pc, length);
-      break;
-    case 13 :
-      print_normal (info, fields->f_uimm16, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
-      break;
-    case 14 :
-      print_normal (info, fields->f_uimm24, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
-      break;
-    case 15 :
-      print_normal (info, fields->f_disp8, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
-      break;
-    case 16 :
-      print_normal (info, fields->f_disp16, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
-      break;
-    case 17 :
-      print_normal (info, fields->f_disp24, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
-      break;
-
-    default :
-      fprintf (stderr, "Unrecognized field %d while printing insn.\n",
-	       opindex);
-    abort ();
-  }
-}
-
-cgen_extract_fn *m32r_cgen_extract_handlers[] = {
-  0, /* default */
-  extract_insn_normal,
-};
-
-cgen_print_fn *m32r_cgen_print_handlers[] = {
-  0, /* default */
-  print_insn_normal,
-};
-
-
-void
-m32r_cgen_init_dis (mach, endian)
-     int mach;
-     enum cgen_endian endian;
-{
-  m32r_cgen_init_tables (mach);
-  cgen_set_cpu (& m32r_cgen_opcode_data, mach, endian);
-  cgen_dis_init ();
-}
-
 
 /* Default insn extractor.
 
@@ -387,42 +151,33 @@ m32r_cgen_init_dis (mach, endian)
 
 static int
 extract_insn_normal (insn, buf_ctrl, insn_value, fields)
-     const struct cgen_insn *insn;
-     void *buf_ctrl;
-     cgen_insn_t insn_value;
-     struct cgen_fields *fields;
+     const CGEN_INSN *  insn;
+     void *             buf_ctrl;
+     cgen_insn_t        insn_value;
+     CGEN_FIELDS *      fields;
 {
-  const struct cgen_syntax *syntax = CGEN_INSN_SYNTAX (insn);
-  const unsigned char *syn;
+  const CGEN_SYNTAX *   syntax = CGEN_INSN_SYNTAX (insn);
+  const unsigned char * syn;
 
-  /* ??? Some of the operand extract routines need to know the insn length,
-     which might be computed as we go.  Set a default value and it'll be
-     modified as necessary.  */
   CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
   CGEN_INIT_EXTRACT ();
 
-  for (syn = syntax->syntax; *syn; ++syn)
+  for (syn = CGEN_SYNTAX_STRING (syntax); * syn; ++ syn)
     {
       int length;
 
-      if (CGEN_SYNTAX_CHAR_P (*syn))
+      if (CGEN_SYNTAX_CHAR_P (* syn))
 	continue;
 
-      length = m32r_cgen_extract_operand (CGEN_SYNTAX_FIELD (*syn),
+      length = m32r_cgen_extract_operand (CGEN_SYNTAX_FIELD (* syn),
 					   buf_ctrl, insn_value, fields);
       if (length == 0)
 	return 0;
     }
 
-  /* We recognized and successfully extracted this insn.
-     If a length is recorded with this insn, it has a fixed length.
-     Otherwise we require the syntax string to have a fake operand which
-     sets the `length' field in `flds'.  */
-  /* FIXME: wip */
-  if (syntax->length > 0)
-    return syntax->length;
-  return fields->length;
+  /* We recognized and successfully extracted this insn.  */
+  return CGEN_INSN_BITSIZE (insn);
 }
 
 /* Default insn printer.
@@ -433,28 +188,33 @@ extract_insn_normal (insn, buf_ctrl, insn_value, fields)
 
 static void
 print_insn_normal (dis_info, insn, fields, pc, length)
-     void *dis_info;
-     const struct cgen_insn *insn;
-     struct cgen_fields *fields;
-     bfd_vma pc;
-     int length;
+     void *             dis_info;
+     const CGEN_INSN *  insn;
+     CGEN_FIELDS *      fields;
+     bfd_vma            pc;
+     int                length;
 {
-  const struct cgen_syntax *syntax = CGEN_INSN_SYNTAX (insn);
-  disassemble_info *info = dis_info;
-  const unsigned char *syn;
+  const CGEN_SYNTAX *   syntax = CGEN_INSN_SYNTAX (insn);
+  disassemble_info *    info = dis_info;
+  const unsigned char * syn;
 
   CGEN_INIT_PRINT ();
 
-  for (syn = syntax->syntax; *syn; ++syn)
+  for (syn = CGEN_SYNTAX_STRING (syntax); * syn; ++ syn)
     {
-      if (CGEN_SYNTAX_CHAR_P (*syn))
+      if (CGEN_SYNTAX_MNEMONIC_P (* syn))
 	{
-	  (*info->fprintf_func) (info->stream, "%c", CGEN_SYNTAX_CHAR (*syn));
+	  info->fprintf_func (info->stream, "%s", CGEN_INSN_MNEMONIC (insn));
+	  continue;
+	}
+      if (CGEN_SYNTAX_CHAR_P (* syn))
+	{
+	  info->fprintf_func (info->stream, "%c", CGEN_SYNTAX_CHAR (* syn));
 	  continue;
 	}
 
       /* We have an operand.  */
-      m32r_cgen_print_operand (CGEN_SYNTAX_FIELD (*syn), info,
+      m32r_cgen_print_operand (CGEN_SYNTAX_FIELD (* syn), info,
 				fields, CGEN_INSN_ATTRS (insn), pc, length);
     }
 }
@@ -471,15 +231,16 @@ print_insn_normal (dis_info, insn, fields, pc, length)
 
 static int
 print_insn (pc, info, buf, buflen)
-     bfd_vma pc;
-     disassemble_info *info;
-     char *buf;
-     int buflen;
+     bfd_vma            pc;
+     disassemble_info * info;
+     char *             buf;
+     int                buflen;
 {
-  int i;
-  unsigned long insn_value;
-  const CGEN_INSN_LIST *insn_list;
-
+  int                    i;
+  unsigned long          insn_value;
+  const CGEN_INSN_LIST * insn_list;
+  int                    extra_bytes;
+  
   switch (buflen)
     {
     case 8:
@@ -495,16 +256,52 @@ print_insn (pc, info, buf, buflen)
       abort ();
     }
 
+  /* Special case - a 32 bit instruction which is actually two 16 bit instructions
+     being executed in parallel.  */
+  if (buflen == 32
+      && ((insn_value & 0x80008000) == 0x00008000))
+    {
+      if (info->endian == BFD_ENDIAN_BIG)
+	{
+	  static char buf2 [4];
+	  
+	  print_insn (pc, info, buf, 16);
+
+	  info->fprintf_func (info->stream, " || ");
+
+	  buf2 [0] = buf [2] & ~ 0x80;
+	  buf2 [1] = buf [3];
+	  buf2 [2] = 0;
+	  buf2 [3] = 0;
+	  buf = buf2;
+	  
+	  insn_value <<= 17;
+	  insn_value >>= 1;
+	}
+      else
+	{
+	  print_insn (pc, info, buf + 2, 16);
+
+	  info->fprintf_func (info->stream, " || ");
+
+	  insn_value &= 0x7fff;
+	}
+
+      pc += 2;
+      extra_bytes = 2;
+    }
+  else
+    extra_bytes = 0;
+  
   /* The instructions are stored in hash lists.
      Pick the first one and keep trying until we find the right one.  */
 
   insn_list = CGEN_DIS_LOOKUP_INSN (buf, insn_value);
+
   while (insn_list != NULL)
     {
-      const CGEN_INSN *insn = insn_list->insn;
-      const struct cgen_syntax *syntax = CGEN_INSN_SYNTAX (insn);
-      struct cgen_fields fields;
-      int length;
+      const CGEN_INSN *   insn = insn_list->insn;
+      unsigned long       value;
 
 #if 0 /* not needed as insn shouldn't be in hash lists if not supported */
       /* Supported by this cpu?  */
@@ -512,28 +309,43 @@ print_insn (pc, info, buf, buflen)
 	continue;
 #endif
 
+      /* If we are looking at a 16 bit insn we may have to adjust the value being examined.  */
+      value = insn_value;
+      if (CGEN_INSN_BITSIZE (insn) == 16)
+	{
+	/* If this is a big endian target,
+	   and we have read 32 bits for the instruction value,
+	   then we must examine the top 16 bits, not the bottom.  */
+	  if (buflen == 32 && info->endian == BFD_ENDIAN_BIG)
+	    value >>= 16;
+	}
+      
       /* Basic bit mask must be correct.  */
       /* ??? May wish to allow target to defer this check until the extract
 	 handler.  */
-      if ((insn_value & syntax->mask) == syntax->value)
+      if ((value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 	{
+	  CGEN_FIELDS fields;
+	  int         length;
+	  
 	  /* Printing is handled in two passes.  The first pass parses the
 	     machine insn and extracts the fields.  The second pass prints
 	     them.  */
 
-	  length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, &fields);
+	  length = CGEN_EXTRACT_FN (insn) (insn, NULL, value, & fields);
 	  if (length > 0)
 	    {
-	      (*CGEN_PRINT_FN (insn)) (info, insn, &fields, pc, length);
+	      CGEN_PRINT_FN (insn) (info, insn, & fields, pc, length);
+	      
 	      /* length is in bits, result is in bytes */
-	      return length / 8;
+	      return (length / 8) + extra_bytes;
 	    }
 	}
-
+      
       insn_list = CGEN_DIS_NEXT_INSN (insn_list);
     }
 
-  return 0;
+  return extra_bytes;
 }
 
 /* Main entry point.
@@ -542,44 +354,58 @@ print_insn (pc, info, buf, buflen)
 
 int
 print_insn_m32r (pc, info)
-     bfd_vma pc;
-     disassemble_info *info;
+     bfd_vma            pc;
+     disassemble_info * info;
 {
-  char buffer[CGEN_MAX_INSN_SIZE];
-  int status, length;
-  static int initialized = 0;
-  static int current_mach = 0;
-  static int current_big_p = 0;
-  int mach = info->mach;
-  int big_p = info->endian == BFD_ENDIAN_BIG;
+  char       buffer [CGEN_MAX_INSN_SIZE];
+  int        status;
+  int        length;
+  static int initialized    = 0;
+  static int current_mach   = 0;
+  static int current_bigend = 0;
+  int        mach           = info->mach;
+  int        bigend         = info->endian == BFD_ENDIAN_BIG;
 
   /* If we haven't initialized yet, or if we've switched cpu's, initialize.  */
-  if (!initialized || mach != current_mach || big_p != current_big_p)
+  if (!initialized || mach != current_mach || bigend != current_bigend)
     {
-      initialized = 1;
-      current_mach = mach;
-      current_big_p = big_p;
-      m32r_cgen_init_dis (mach, big_p ? CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE);
+      initialized    = 1;
+      current_mach   = mach;
+      current_bigend = bigend;
+      
+      m32r_cgen_init_dis (mach, bigend ? CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE);
     }
 
   /* Read enough of the insn so we can look it up in the hash lists.  */
 
-  status = (*info->read_memory_func) (pc, buffer, CGEN_BASE_INSN_SIZE, info);
+  status = info->read_memory_func (pc, buffer, CGEN_BASE_INSN_SIZE, info);
   if (status != 0)
     {
-      (*info->memory_error_func) (status, pc, info);
+      /* Try reading a 16 bit instruction.  */
+      info->bytes_per_chunk = 2;
+      status = info->read_memory_func (pc, buffer, CGEN_BASE_INSN_SIZE / 2, info);
+      buffer [2] = buffer [3] = 0;
+    }
+  if (status != 0)
+    {
+      info->memory_error_func (status, pc, info);
       return -1;
     }
 
   /* We try to have as much common code as possible.
      But at this point some targets need to take over.  */
   /* ??? Some targets may need a hook elsewhere.  Try to avoid this,
-     but if not possible, try to move this hook elsewhere rather than
+     but if not possible try to move this hook elsewhere rather than
      have two hooks.  */
   length = CGEN_PRINT_INSN (pc, info, buffer, CGEN_BASE_INSN_BITSIZE);
+  
   if (length)
     return length;
 
-  (*info->fprintf_func) (info->stream, UNKNOWN_INSN_MSG);
+  info->fprintf_func (info->stream, UNKNOWN_INSN_MSG);
+  
   return CGEN_DEFAULT_INSN_SIZE;
 }
+
+/* Get the generate machine specific code.  */
+#include "m32r-dis.in"
