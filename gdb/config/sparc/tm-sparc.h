@@ -28,10 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    not the structure itself.  It (under SunOS4) creates two symbols,
    which we need to combine to a LOC_REGPARM.  Gcc version two (as of
    1.92) behaves like sun cc.  REG_STRUCT_HAS_ADDR is smart enough to
-   distinguish between Sun cc, gcc version 1 and gcc version 2.
+   distinguish between Sun cc, gcc version 1 and gcc version 2.  */
 
-   This still doesn't work if the argument is not one passed in a
-   register (i.e. it's the 7th or later argument).  */
 #define REG_STRUCT_HAS_ADDR(gcc_p) (gcc_p != 1)
 
 /* Sun /bin/cc gets this right as of SunOS 4.1.x.  We need to define

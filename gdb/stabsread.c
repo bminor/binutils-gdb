@@ -989,7 +989,7 @@ define_symbol (valu, string, desc, type, objfile)
 	    {
 	      struct symbol *prev_sym;
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
-	      if (SYMBOL_CLASS (prev_sym) == LOC_ARG
+	      if (SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
 		  && STREQ (SYMBOL_NAME (prev_sym), SYMBOL_NAME(sym)))
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
@@ -1180,6 +1180,14 @@ define_symbol (valu, string, desc, type, objfile)
       && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
     SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+
+  /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th and
+     subsequent arguments on the sparc, for example).  */
+  if (SYMBOL_CLASS (sym) == LOC_ARG
+      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation)
+      && ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
+	  || (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)))
+    SYMBOL_CLASS (sym) = LOC_REF_ARG;
 
   return sym;
 }
