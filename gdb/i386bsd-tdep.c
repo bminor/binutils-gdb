@@ -87,7 +87,7 @@ i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 /* Traditional BSD (4.3 BSD, still used for BSDI and 386BSD).  */
 
 /* From <machine/signal.h>.  */
-int i386bsd_sc_reg_offset[I386_NUM_GREGS] =
+int i386bsd_sc_reg_offset[] =
 {
   -1,				/* %eax */
   -1,				/* %ecx */
@@ -128,7 +128,7 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_end = 0xfdbfe000;
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_reg_offset = i386bsd_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (i386bsd_sc_reg_offset);
 }
 
 

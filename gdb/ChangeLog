@@ -1,5 +1,8 @@
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (i386bsd_init_abi): Use ARRAY_SIZE to initialize
+	TDEP->sc_num_regs.
+
 	* i386fbsd-tdep.c: New file.
 	(i386fbsd_sigtramp_start, i386fbsd_sigtramp_end,
 	i386fbsd_sc_reg_offset, i386fbsdaout_init_abi, i386fbsd_init_abi,
