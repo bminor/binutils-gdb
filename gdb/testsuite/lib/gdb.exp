@@ -430,6 +430,20 @@ proc gdb_internal_error_resync {} {
 #    0 if only user-supplied patterns matched
 #   -1 if there was an internal error.
 #  
+# You can use this function thus:
+#
+# gdb_test_multiple "print foo" "test foo" {
+#    -re "expected output 1" {
+#        pass "print foo"
+#    }
+#    -re "expected output 2" {
+#        fail "print foo"
+#    }
+# }
+#
+# The standard patterns, such as "Program exited..." and "A problem
+# ...", all being implicitly appended to that list.
+#
 proc gdb_test_multiple { command message user_code } {
     global verbose
     global gdb_prompt

@@ -294,10 +294,9 @@ proc test_struct_returns { n } {
     # "return_value_unknown", if non-empty, records why GDB realised
     # that it didn't know where the return value was.
 
-    send_gdb "return foo${n}\n"
     set test "return foo<n>; ${tests}"
     set return_value_unknown 0
-    gdb_expect {
+    gdb_test_multiple "return foo${n}" "${test}" {
 	-re "The location" {
 	    # Ulgh, a struct return, remember this (still need prompt).
 	    set return_value_unknown 1
@@ -312,8 +311,7 @@ proc test_struct_returns { n } {
 	    exp_continue
 	}
 	-re "Make fun${n} return now.*y or n. $" {
-	    send_gdb "y\n"
-	    gdb_expect {
+	    gdb_test_multiple "y" "${test}" {
 		-re "L${n} *= fun${n}.*${gdb_prompt} $" {
 		    # Need to step off the function call
 		    gdb_test "next" "L.* *= fun.*" "${test}"
@@ -321,27 +319,7 @@ proc test_struct_returns { n } {
 		-re "L[expr ${n} + 1] *= fun[expr ${n} + 1].*${gdb_prompt} $" {
 		    pass "${test}"
 		}
-		-re "A problem internal to GDB has been detected" {
-		    fail "${test} (GDB internal error 2)"
-		    gdb_internal_error_resync
-		}
-		-re "${gdb_prompt} $" {
-		    fail "${test} (wrong line info)"
-		}
-		timeout {
-		    fail "${test} (timeout 2)"
-		}
 	    }
-	}
-	-re "A problem internal to GDB has been detected" {
-	    fail "${test} (GDB internal error 1)"
-	    gdb_internal_error_resync
-	}
-	-re "${gdb_prompt} $" {
-	    fail "${test} (no query)"
-	}
-	timeout {
-	    fail "${test} (timeout 1)"
 	}
     }
 
@@ -349,10 +327,9 @@ proc test_struct_returns { n } {
     # just checking that GDB has returned a value consistent with
     # "return_value_unknown" set above.
 
-    send_gdb "p/c L${n}\n"
     set test "value foo<n> returned; ${tests}"
     setup_kfails structs-*tld* i686-*-* gdb/1447
-    gdb_expect {
+    gdb_test_multiple "p/c L${n}" "${test}" {
 	-re " = [foo ${n}].*${gdb_prompt} $" {
 	    if $return_value_unknown {
 		# This contradicts the above claim that GDB didn't
@@ -374,17 +351,6 @@ proc test_struct_returns { n } {
 		# the location of the return-value.
 		fail "${test}"
 	    }
-	}
-	-re "A problem internal to GDB has been detected" {
-	    fail "${test} (GDB internal error)"
-	    gdb_internal_error_resync
-	}
-	-re "${gdb_prompt} $" {
-	    # Garbage returned, garbage printed
-	    fail "${test}"
-	}
-	timeout {
-	    fail "${test} (timeout)"
 	}
     }	
     
@@ -409,10 +375,9 @@ proc test_struct_returns { n } {
 
     # Finish the function, set 'finish_value_unknown" to non-empty if the
     # return-value was not found.
-    send_gdb "finish\n"
     set test "finish foo<n>; ${tests}"
     set finish_value_unknown 0
-    gdb_expect {
+    gdb_test_multiple "finish" "${test}" {
 	-re "Value returned is .*${gdb_prompt} $" {
 	    pass "${test}"
 	}
@@ -421,26 +386,14 @@ proc test_struct_returns { n } {
 	    set finish_value_unknown 1
 	    pass "${test}"
 	}
-	-re "A problem internal to GDB has been detected" {
-	    fail "${test} (GDB internal error)"
-	    gdb_internal_error_resync
-	}
-	-re ".*${gdb_prompt} $" {
-	    # Garbage returned
-	    fail "${test}"
-	}
-	timeout {
-	    fail "${test} (timeout)"
-	}
     }
 
     # Re-print the last (return-value) using the more robust
     # "p/c".  If no return value was found, the 'Z' from the previous
     # check that the variable was cleared, is printed.
-    send_gdb "p/c\n"
     set test "value foo<n> finished; ${tests}"
     setup_kfails structs-*tld* i686-*-* gdb/1447
-    gdb_expect {
+    gdb_test_multiple "p/c" "${test}" {
 	-re "[foo ${n}]\[\r\n\]+${gdb_prompt} $" {
 	    if $finish_value_unknown {
 		# This contradicts the above claim that GDB didn't
@@ -459,17 +412,6 @@ proc test_struct_returns { n } {
 		# know the location of the return-value.
 		fail "${test}"
 	    }
-	}
-	-re "A problem internal to GDB has been detected" {
-	    fail "${test} (GDB internal error)"
-	    gdb_internal_error_resync
-	}
-	-re ".*${gdb_prompt} $" {
-	    # Garbage returned
-	    fail "${test}"
-	}
-	timeout {
-	    fail "${test} (timeout)"
 	}
     }
 
