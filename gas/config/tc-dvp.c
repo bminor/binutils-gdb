@@ -103,8 +103,9 @@ const char FLT_CHARS[] = "dD";
    Allowed state transitions:
    ASM_INIT <--> ASM_MPG
                  ASM_DIRECT <--> ASM_GIF
-                 ASM_UNPACK
+                 ASM_UNPACK <--> ASM_GIF
                  ASM_VU
+		 ASM_GIF
 
    FIXME: Make the ASM_INIT -> ASM_VU a one way transition.
    ".vu" must be seen at the top of the file,
@@ -112,7 +113,7 @@ const char FLT_CHARS[] = "dD";
 */
 
 typedef enum {
-  ASM_INIT, ASM_DIRECT, ASM_MPG, ASM_UNPACK, ASM_VU, ASM_GIF
+  ASM_INIT, ASM_DIRECT, ASM_MPG, ASM_UNPACK, ASM_VU, ASM_GIF, ASM_MAX
 } asm_state;
 
 /* We need to maintain a stack of the current and previous status to handle
@@ -120,14 +121,14 @@ typedef enum {
 #define MAX_STATE_DEPTH 2
 static asm_state asm_state_stack[MAX_STATE_DEPTH];
 /* Current state's index in the stack.  */
-static int cur_state_index;
+static int cur_state_level;
 /* Macro to fetch the current state.  */
-#define CUR_ASM_STATE (asm_state_stack[cur_state_index])
+#define CUR_ASM_STATE (asm_state_stack[cur_state_level])
 
 /* Functions to push/pop the state stack.  */
 static void push_asm_state PARAMS ((asm_state));
 static void pop_asm_state PARAMS ((int));
-static void set_asm_state PARAMS ((asm_state));
+static void set_asm_state PARAMS ((asm_state, const char *));
 
 /* Set to non-zero if any non-vu insn seen.
    Used to control type of relocations emitted.  */
@@ -275,7 +276,7 @@ static void s_enddirect PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
 static void s_endgif PARAMS ((int));
-static void s_state PARAMS ((int));
+static void s_vu PARAMS ((int));
 static void s_dvp_func PARAMS ((int));
 
 /* The target specific pseudo-ops which we support.  */
@@ -290,7 +291,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "endmpg", s_endmpg, ENDMPG_USER },
   { "endunpack", s_endunpack, 0 },
   { "endgif", s_endgif, 0 },
-  { "vu", s_state, ASM_VU },
+  { "vu", s_vu, 0 },
   /* We need to intercept .func/.endfunc so that we can prepend _$.
      ??? Not sure this is right though as _$foo is the lma version.  */
   { "func", s_dvp_func, 0 },
@@ -309,8 +310,7 @@ md_begin ()
   force_mach_label ();
 
   /* Initialize the parsing state.  */
-  cur_state_index = 0;
-  set_asm_state (ASM_INIT);
+  set_asm_state (ASM_INIT, NULL);
 
   /* Pack vif insns in dma tags by default.  */
   dma_pack_vif_p = 1;
@@ -402,21 +402,8 @@ md_assemble (str)
     {
       as_bad ("missing .endgif");
       pop_asm_state (1);
+      /* We still parse the instruction.  */
     }
-  /* Ditto for unpack.  */
-  if (CUR_ASM_STATE == ASM_UNPACK)
-    {
-      as_bad ("missing .endunpack");
-      pop_asm_state (1);
-    }
-#if 0 /* this doesn't work of course as gif insns may follow */
-  /* Ditto for direct.  */
-  if (CUR_ASM_STATE == ASM_DIRECT)
-    {
-      as_bad ("missing .enddirect");
-      pop_asm_state (1);
-    }
-#endif
 
   if (CUR_ASM_STATE == ASM_INIT)
     {
@@ -428,7 +415,8 @@ md_assemble (str)
 	assemble_vif (str);
       non_vu_insn_seen_p = 1;
     }
-  else if (CUR_ASM_STATE == ASM_DIRECT)
+  else if (CUR_ASM_STATE == ASM_DIRECT
+	   || CUR_ASM_STATE == ASM_UNPACK)
     {
       assemble_gif (str);
       non_vu_insn_seen_p = 1;
@@ -823,21 +811,21 @@ assemble_vif (str)
 	  if (opcode->flags & VIF_OPCODE_MPG)
 	    {
 	      record_mach (DVP_VUUP, 1);
-	      set_asm_state (ASM_MPG);
+	      set_asm_state (ASM_MPG, "mpg");
 	      byte_len = insert_file (file, insert_mpg_marker, 0, 256 * 8);
 	      s_endmpg (ENDMPG_INTERNAL);
 	    }
 	  else if (opcode->flags & VIF_OPCODE_DIRECT)
 	    {
 	      record_mach (DVP_GIF, 1);
-	      set_asm_state (ASM_DIRECT);
+	      set_asm_state (ASM_DIRECT, "direct");
 	      byte_len = insert_file (file, NULL, 0, 0);
 	      s_enddirect (1);
 	    }
 	  else if (opcode->flags & VIF_OPCODE_UNPACK)
 	    {
 	      int max_len = 0; /*unpack_max_byte_len (insn_buf[0]);*/
-	      set_asm_state (ASM_UNPACK);
+	      set_asm_state (ASM_UNPACK, "unpack");
 	      byte_len = insert_file (file, NULL /*insert_unpack_marker*/,
 				      insn_buf[0], max_len);
 	      s_endunpack (1);
@@ -857,19 +845,20 @@ assemble_vif (str)
 
 	  if (opcode->flags & VIF_OPCODE_MPG)
 	    {
-	      set_asm_state (ASM_MPG);
+	      set_asm_state (ASM_MPG, "mpg");
 	      /* Enable automatic mpg insertion every 256 insns.  */
 	      vu_count = 0;
 	    }
 	  else if (opcode->flags & VIF_OPCODE_DIRECT)
-	    set_asm_state (ASM_DIRECT);
+	    set_asm_state (ASM_DIRECT, "direct");
 	  else if (opcode->flags & VIF_OPCODE_UNPACK)
-	    set_asm_state (ASM_UNPACK);
+	    set_asm_state (ASM_UNPACK, "unpack");
 	}
     }
 }
 
-/* Subroutine of md_assemble to assemble GIF instructions.  */
+/* Subroutine of md_assemble to assemble GIF instructions.
+   We assume CUR_ASM_STATE is one of ASM_{INIT,DIRECT,UNPACK}.  */
 
 static void
 assemble_gif (str)
@@ -1427,41 +1416,50 @@ force_mach_label ()
   return 1;
 }
 
-/* Push/pop the current parsing state.  */
+/* Push the current parsing state to NEW_STATE.  */
 
 static void
 push_asm_state (new_state)
      asm_state new_state;
 {
-  ++cur_state_index;
-  if (cur_state_index == MAX_STATE_DEPTH)
+  asm_state cur_state = CUR_ASM_STATE;
+
+  ++cur_state_level;
+  if (cur_state_level == MAX_STATE_DEPTH)
     as_fatal ("internal error: unexpected state push");
-  asm_state_stack[cur_state_index] = new_state;
+  asm_state_stack[cur_state_level] = new_state;
 }
 
 /* TOP_OK_P is non-zero if it's ok that we're at the top of the stack.
-   This happens if there are errors in the assembler code.
-   We just reset the stack to its "init" state.  */
+   If so we reset the state to ASM_INIT.  */
 
 static void
 pop_asm_state (top_ok_p)
      int top_ok_p;
 {
-  if (cur_state_index == 0)
+  if (cur_state_level == 0)
     {
-      if (top_ok_p)
-	asm_state_stack[cur_state_index] = ASM_INIT;
-      else
+      if (! top_ok_p)
 	as_fatal ("internal error: unexpected state pop");
+      CUR_ASM_STATE = ASM_INIT;
     }
   else
-    --cur_state_index;
+    --cur_state_level;
 }
 
+/* Set the top level assembler state.  */
+
 static void
-set_asm_state (state)
+set_asm_state (state, insn_name)
      asm_state state;
+     const char *insn_name;
 {
+  if (insn_name)
+    {
+      if (CUR_ASM_STATE != ASM_INIT)
+	as_bad ("illegal place for `%s' instruction", insn_name);
+    }
+  cur_state_level = 0;
   CUR_ASM_STATE = state;
 }
 
@@ -1481,6 +1479,7 @@ md_operand (expressionP)
 
       /* Advance over the '*'.  */
       ++input_line_pointer;
+      return;
     }
 }
 
@@ -1917,6 +1916,13 @@ md_apply_fix3 (fixP, valueP, seg)
 	    }
 	}
 
+      /* ??? It might be cleaner to not do this at all here (when ! fx_done)
+	 and leave it to bfd_install_relocation.  */
+      if ((operand->flags & DVP_OPERAND_RELOC_U15_S3) != 0)
+	value >>= 3;
+      else if ((operand->flags & DVP_OPERAND_RELOC_11_S4) != 0)
+	value >>= 4;
+
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  The fixup is recorded
 	 at the appropriate word so pass DVP_MOD_THIS_WORD so any offset
@@ -1977,6 +1983,26 @@ md_apply_fix3 (fixP, valueP, seg)
 	  assert (operand->bits == 27
 		  && operand->shift == 4);
 	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_27_S4;
+	}
+      else if ((operand->flags & DVP_OPERAND_RELOC_11_S4) != 0)
+	{
+	  assert (operand->bits == 11
+		  && operand->shift == 0);
+	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_11_S4;
+	  /* ??? bfd_install_relocation will duplicate what we've done to
+	     install the addend, so tell it not to.  This is an instance
+	     where setting partial_inplace to true has some use.  */
+	  value = 0;
+	}
+      else if ((operand->flags & DVP_OPERAND_RELOC_U15_S3) != 0)
+	{
+	  assert (operand->bits == 15
+		  && operand->shift == 0);
+	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_U15_S3;
+	  /* ??? bfd_install_relocation will duplicate what we've done to
+	     install the addend, so tell it not to.  This is an instance
+	     where setting partial_inplace to true has some use.  */
+	  value = 0;
 	}
       else
 	{
@@ -2142,12 +2168,20 @@ parse_float (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  char *p;
-
-  p = atof_ieee (*pstr, 'f', words);
-  *pstr = p;
-  return (words[0] << 16) | words[1];
+  if ((*pstr)[0] == '0'
+      && ((*pstr)[1] == 'x' || (*pstr)[1] == 'X'))
+    {
+      long value;
+      (*pstr) += 2;
+      value = strtol (*pstr, pstr, 16);
+      return value;
+    }
+  else
+    {
+      LITTLENUM_TYPE words[MAX_LITTLENUMS];
+      *pstr = atof_ieee (*pstr, 'f', words);
+      return (words[0] << 16) | words[1];
+    }
 }
 
 /* Scan a symbol and return a pointer to one past the end.  */
@@ -3006,7 +3040,7 @@ s_enddirect (internal_p)
   vif_data_end->sy_frag = frag_now;
   S_SET_VALUE (vif_data_end, (valueT) frag_now_fix ());
 
-  set_asm_state (ASM_INIT);
+  pop_asm_state (1);
 
   /* Needn't be reset, but to catch bugs it is.  */
   vif_data_end = NULL;
@@ -3044,7 +3078,7 @@ s_endmpg (caller)
      double words in this chunk.  */
   mpgloc_sym = compute_mpgloc (mpgloc_sym, vif_data_start, vif_data_end);
 
-  set_asm_state (ASM_INIT);
+  pop_asm_state (1);
 
   /* Needn't be reset, but to catch bugs it is.  */
   vif_data_end = NULL;
@@ -3081,7 +3115,7 @@ s_endunpack (internal_p)
   /* Round up to next word boundary.  */
   frag_align (2, 0, 0);
 
-  set_asm_state (ASM_INIT);
+  pop_asm_state (1);
 
   /* Needn't be reset, but to catch bugs it is.  */
   vif_data_end = NULL;
@@ -3108,7 +3142,7 @@ s_endgif (ignore)
       as_bad (".endgif doesn't follow a gif tag");
       return;
     }
-  pop_asm_state (0);
+  pop_asm_state (1);
 
   /* Fill out to proper boundary.
      ??? This may cause eval_expr to always queue a fixup.  So be it.  */
@@ -3189,33 +3223,29 @@ s_endgif (ignore)
 }
 
 static void
-s_state (state)
-     int state;
+s_vu (ignore)
+     int ignore;
 {
   /* If in MPG state and the user requests to change to VU state,
      leave the state as MPG.  This happens when we see an mpg followed
      by a .include that has .vu.  Note that no attempt is made to support
      an include depth > 1 for this case.  */
-  if (CUR_ASM_STATE == ASM_MPG && state == ASM_VU)
+  if (CUR_ASM_STATE == ASM_MPG)
     return;
 
-  /* If changing to the VU state, we need to set up things for $.mpgloc
-     calculations.  */
-  if (state == ASM_VU)
-    {
-      /* FIXME: May need to check that we're not clobbering currently
-	 in use versions of these.  Also need to worry about which section
-	 the .vu is issued in.  On the other hand, ".vu" isn't intended
-	 to be supported everywhere.  */
-      vif_data_start = expr_build_dot ();
-      mpgloc_sym = expr_build_uconstant (0);
+  /* We need to set up things for $.mpgloc calculations.  */
+  /* FIXME: May need to check that we're not clobbering currently
+     in use versions of these.  Also need to worry about which section
+     the .vu is issued in.  On the other hand, ".vu" isn't intended
+     to be supported everywhere.  */
+  vif_data_start = expr_build_dot ();
+  mpgloc_sym = expr_build_uconstant (0);
 #if 0 /* ??? wip */
-      create_vuoverlay_section (vuoverlay_section_name (NULL), mpgloc_sym,
-				NULL, NULL);
+  create_vuoverlay_section (vuoverlay_section_name (NULL), mpgloc_sym,
+			    NULL, NULL);
 #endif
-    }
 
-  set_asm_state (state);
+  set_asm_state (ASM_VU, ".vu");
 
   demand_empty_rest_of_line ();
 }
