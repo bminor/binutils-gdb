@@ -145,21 +145,21 @@ proc stepi_out { name args } {
     # inferior.  Stops a SIGSEGV infinite loop when a broke system
     # keeps re-executing the faulting instruction.
     rerun_to_main
-    gdb_test "handle SIGSEGV nostop print pass" "" "pass SIGSEGV; $name"
-    gdb_test "continue" "keeper.*" "continue to keeper; $name"
-    gdb_test "handle SIGSEGV stop print nopass" "" "nopass SIGSEGV; $name"
+    gdb_test "handle SIGSEGV nostop print pass" "" "${name}; pass SIGSEGV"
+    gdb_test "continue" "keeper.*" "${name}; continue to keeper"
+    gdb_test "handle SIGSEGV stop print nopass" "" "${name}; nopass SIGSEGV"
 
     # Insert all the breakpoints.  To avoid the need to step over
     # these instructions, this is delayed until after the keeper has
     # been reached.
     for {set i 0} {$i < [llength $args]} {incr i} {
 	gdb_test "break [lindex $args $i]" "Breakpoint.*" \
-	    "set breakpoint $i of [llength $args]; $name"
+	    "${name}; set breakpoint $i of [llength $args]"
     }
 
     # Single step our way out of the keeper, through the signal
     # trampoline, and back to the instruction that faulted.
-    set test "stepi out of handler; $name"
+    set test "${name}; stepi out of handler"
     gdb_test_multiple "stepi" "$test" {
 	-re "keeper.*$gdb_prompt $" {
 	    send_gdb "stepi\n"
@@ -192,7 +192,7 @@ proc stepi_out { name args } {
     # Clear any breakpoints
     for {set i 0} {$i < [llength $args]} {incr i} {
 	gdb_test "clear [lindex $args $i]" "Deleted .*" \
-	    "clear breakpoint $i of [llength $args]; $name"
+	    "${name}; clear breakpoint $i of [llength $args]"
     }
 }
 
@@ -210,9 +210,9 @@ proc cont_out { name args } {
     # inferior.  Stops a SIGSEGV infinite loop when a broke system
     # keeps re-executing the faulting instruction.
     rerun_to_main
-    gdb_test "handle SIGSEGV nostop print pass" "" "pass SIGSEGV; $name"
-    gdb_test "continue" "keeper.*" "continue to keeper; $name"
-    gdb_test "handle SIGSEGV stop print nopass" "" "nopass SIGSEGV; $name"
+    gdb_test "handle SIGSEGV nostop print pass" "" "${name}; pass SIGSEGV"
+    gdb_test "continue" "keeper.*" "${name}; continue to keeper"
+    gdb_test "handle SIGSEGV stop print nopass" "" "${name}; nopass SIGSEGV"
 
     # Insert all the breakpoints.  To avoid the need to step over
     # these instructions, this is delayed until after the keeper has
@@ -221,7 +221,7 @@ proc cont_out { name args } {
     set args [concat $args "*[at_segv]"]
     for {set i 0} {$i < [llength $args]} {incr i} {
 	gdb_test "break [lindex $args $i]" "Breakpoint.*" \
-	    "set breakpoint $i  of [llength $args]; $name"
+	    "${name}; set breakpoint $i  of [llength $args]"
     }
 
     # Let the handler return, it should "appear to hit" the breakpoint
@@ -229,17 +229,17 @@ proc cont_out { name args } {
     # instruction wasn't executed, rather the inferior was SIGTRAPed
     # with the PC at the breakpoint.
     gdb_test "continue" "Breakpoint.*pc *[at_segv] .*" \
-	"continue to breakpoint at fault; $name"
+	"${name}; continue to breakpoint at fault"
 
     # Now single step the faulted instrction at that breakpoint.
     gdb_test "stepi" \
 	"Program received signal SIGSEGV.*pc *[at_segv] .*" \
-	"stepi fault; $name"    
+	"${name}; stepi fault"    
 
     # Clear any breakpoints
     for {set i 0} {$i < [llength $args]} {incr i} {
 	gdb_test "clear [lindex $args $i]" "Deleted .*" \
-	    "clear breakpoint $i of [llength $args]; $name"
+	    "${name}; clear breakpoint $i of [llength $args]"
     }
 
 }

@@ -1,3 +1,8 @@
+2004-07-08  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/sigbpt.exp: Make the common part of each test name a
+	prefix instead of suffix.
+
 2004-07-07  Bob Rossi  <bob_rossi@cox.net>
 
 	* gdb.mi/mi2-file.exp: Revert to version 1.1, except changed name of
