@@ -18,3 +18,15 @@ can be specified as part of the configuration vis:
     $  'CC=cc -Ae' ./configure
 
 
+s390*-*-*
+---------
+
+gdb/513: GDB does not build on s390 GNU/Linux.  The problem should be
+fixed in more recent sources.
+
+
+i386-*-freebsd4.4*
+------------------
+
+gdb/455: GDB doesn't build on a FreeBSD 4.4-STABLE system.  The
+problem is still being investigated.

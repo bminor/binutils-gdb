@@ -1,3 +1,7 @@
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* PROBLEMS: Mention s390 and FreeBSD 4.4 build problems.
+
 2002-05-22  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c (frame_state_for): Added safety check for a valid
@@ -13,14 +17,12 @@
 	Merge from mainline:
 
 	2002-05-14  Michal Ludvig  <mludvig@suse.cz>
-
-		* dwarf2cfi.c (context_cpy): Copy registers correctly.
-		(update_context): Use __func__ in warnings.
+	* dwarf2cfi.c (context_cpy): Copy registers correctly.
+	(update_context): Use __func__ in warnings.
 	
 	2002-05-07  Michal Ludvig  <mludvig@suse.cz>
-
-		* dwarf2cfi.c: Code cleanup, removed unused variables,
-		added default labels to switch {} statements.
+	* dwarf2cfi.c: Code cleanup, removed unused variables,
+	added default labels to switch {} statements.
 
 2002-05-01  Andreas Schwab  <schwab@suse.de>
 
