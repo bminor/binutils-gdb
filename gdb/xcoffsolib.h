@@ -40,10 +40,8 @@ struct vmap {
 	/* This is NULL for the exec-file.  */
 	struct objfile *objfile;
 
-	CORE_ADDR ostart;	/* objext start ???			*/
 	unsigned  loaded:1;	/* True if symbols are loaded		*/
-	unsigned  reloced:1;	/* True, if symbols relocated		*/
-	unsigned  padding:14;
+	unsigned  padding:15;
 };
 
 

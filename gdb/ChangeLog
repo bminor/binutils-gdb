@@ -1,3 +1,26 @@
+Wed Mar 24 08:48:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Clean up xcoff relocation.
+	objfiles.h (struct objfiles): Add section_offsets, num_sections.
+	symfile.c (syms_from_objfile), xcoffread.c (xcoff_symfile_offsets):
+	Set them.
+	symtab.h (struct general_symbol_info): Add section field.
+	minsyms.c (prim_record_minimal_symbol{,_and_info}): Set it.
+	xcoffread.c: Set section for symbols and msymbols.
+	(struct symtab): Add block_line_section field.
+	buildsym.c (end_symtab): Set it.
+	(end_symtab and callers): Add section parameter.
+	objfiles.c (objfile_relocate): New funciton.
+	xcoffexec.c (vmap_symtab): Use it.
+	xcoffsolib.h (struct vmap): Remove unused fields.
+	config/rs6000/tm-rs6000.h, stack.c, xcoffexec.c: Remove
+	CORE_NEEDS_RELOCATION, symtab_relocated.
+	config/rs6000/tm-rs6000.h: Remove use of loadinfotext.
+	rs6000-tdep.c: Make loadinfotext static.
+	breakpoint.c (fixup_breakpoints): Doc fix.
+	symtab.h (struct symtab), config/rs6000/tm-rs6000.h, buildsym.c
+	(end_symtab): primary field replaces nonreloc.
+
 Thu Mar 25 12:26:50 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* findvar.c (read_register, write_register):  Make these capable

@@ -301,21 +301,19 @@ map_vmap (bfd *bf, bfd *arch)
 }
 
 
-/* true, if symbol table and minimal symbol table are relocated. */
-
-int symtab_relocated = 0;
-
-
 /*  vmap_symtab -	handle symbol translation on vmapping */
 
-vmap_symtab(vp, old_start, vip)
-register struct vmap *vp;
-CORE_ADDR old_start;
-struct stat *vip; 
+static void
+vmap_symtab (vp)
+     register struct vmap *vp;
 {
-  register struct symtab *s;
   register struct objfile *objfile;
-  register struct minimal_symbol *msymbol;
+  asection *textsec;
+  asection *datasec;
+  asection *bsssec;
+  CORE_ADDR old_text_offset;
+  struct section_offsets *new_offsets;
+  int i;
   
   objfile = vp->objfile;
   if (objfile == NULL)
@@ -328,140 +326,26 @@ struct stat *vip;
       objfile = symfile_objfile;
     }
 
-  s = objfile->symtabs;
+  new_offsets = alloca
+    (sizeof (struct section_offsets)
+     + sizeof (new_offsets->offsets) * objfile->num_sections);
 
-	if (vp->tstart != old_start) {
-
-	  /* Once we find a relocation base address for one of the symtabs
-	     in this objfile, it will be the same for all symtabs in this
-	     objfile. Clean this algorithm. FIXME. */
-
-	  for (; s; s = s->next)
-	    if (!s->nonreloc || LINETABLE(s))
-		vmap_symtab_1(s, vp, old_start);
-
-#if 1
-	  /* I believe trampoline entries now have a name like
-	     <trampoline>.  In any event, if something needs to be changed,
-	     it should be changed in ALL_MSYMBOLS, so it works everywhere.  */
-	  /*
-	  Himm.., recently we nullified trampoline entry names in order not
-	  to confuse them with real symbols.  Appearently this turned into a
-	  problem, and msymbol vector did not get relocated properly.  If
-	  msymbols have to have non-null names, then we should name
-	  trampoline entries with empty strings. */
-
-	  ALL_MSYMBOLS (objfile, msymbol)
-#else
-	  for (msymbol = objfile->msymbols;
-	       SYMBOL_NAME (msymbol) || SYMBOL_VALUE_ADDRESS (msymbol);
-	       (msymbol)++)
-#endif
-	      if (SYMBOL_VALUE_ADDRESS (msymbol) < TEXT_SEGMENT_BASE)
-		SYMBOL_VALUE_ADDRESS (msymbol) += vp->tstart - old_start;
-
-	}
-
-  if (vp->tstart != old_start) {
-    /* breakpoints need to be relocated as well. */
-    fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_start);
-  }
+  for (i = 0; i < objfile->num_sections; ++i)
+    ANOFFSET (new_offsets, i) = ANOFFSET (objfile->section_offsets, i);
   
-  symtab_relocated = 1;
-}
+  textsec = bfd_get_section_by_name (vp->bfd, ".text");
+  old_text_offset = ANOFFSET (objfile->section_offsets, textsec->target_index);
+  ANOFFSET (new_offsets, textsec->target_index) = vp->tstart;
+  datasec = bfd_get_section_by_name (vp->bfd, ".data");
+  ANOFFSET (new_offsets, datasec->target_index) = vp->dstart;
+  bsssec = bfd_get_section_by_name (vp->bfd, ".bss");
+  ANOFFSET (new_offsets, bsssec->target_index) = vp->dstart;
 
-
-vmap_symtab_1(s, vp, old_start)
-register struct symtab *s;
-register struct vmap *vp;
-CORE_ADDR old_start; 
-{
-    register int i, j;
-    int len, blen;
-    register struct linetable *l;
-    struct blockvector *bv;
-    register struct block *b;
-    int depth;
-    register ulong reloc, dreloc;
-    
-    if ((reloc = vp->tstart - old_start) == 0)
-	return;
-
-    dreloc = vp->dstart;			/* data relocation */
-
-    /*
-     * The line table must be relocated.  This is only present for
-     * .text sections, so only vp->text type maps need be considered.
-     */
-    l = LINETABLE (s);
-    if (l) {
-      len = l->nitems;
-      for (i = 0; i < len; i++)
-	l->item[i].pc += reloc;
-    }
-
-    /* if this symbol table is not relocatable, only line table should
-       be relocated and the rest ignored. */
-    if (s->nonreloc)
-      return;
-    
-    bv  = BLOCKVECTOR(s);
-    len = BLOCKVECTOR_NBLOCKS(bv);
-    
-    for (i = 0; i < len; i++) {
-	b = BLOCKVECTOR_BLOCK(bv, i);
-	
-	BLOCK_START(b) += reloc;
-	BLOCK_END(b)   += reloc;
-	
-	blen = BLOCK_NSYMS(b);
-	for (j = 0; j < blen; j++) {
-	    register struct symbol *sym;
-	    
-	    sym = BLOCK_SYM(b, j);
-	    switch (SYMBOL_NAMESPACE(sym)) {
-	      case STRUCT_NAMESPACE:
-	      case UNDEF_NAMESPACE:
-		continue;
-		
-	      case LABEL_NAMESPACE:
-	      case VAR_NAMESPACE:
-		break;
-	    }
-	    
-	    switch (SYMBOL_CLASS(sym)) {
-	      case LOC_CONST:
-	      case LOC_CONST_BYTES:
-	      case LOC_LOCAL:
-	      case LOC_REGISTER:
-	      case LOC_ARG:
-	      case LOC_LOCAL_ARG:
-	      case LOC_REF_ARG:
-	      case LOC_REGPARM:
-	      case LOC_TYPEDEF:
-		continue;
-		
-#ifdef FIXME
-	      case LOC_EXTERNAL:
-#endif
-	      case LOC_LABEL:
-		SYMBOL_VALUE_ADDRESS(sym) += reloc;
-		break;
-
-	      case LOC_STATIC:
-		SYMBOL_VALUE_ADDRESS(sym) += dreloc;
-		break;
-
-	      case LOC_BLOCK:
-		break;
-		
-	      default:
-		fatal("botched symbol class %x"
-		      , SYMBOL_CLASS(sym));
-		break;
-	    }
-	}
-    }
+  objfile_relocate (objfile, new_offsets);
+  
+  if (old_text_offset != ANOFFSET (new_offsets, textsec->target_index))
+    /* breakpoints need to be relocated as well. */
+    fixup_breakpoints (0, TEXT_SEGMENT_BASE, vp->tstart - old_text_offset);
 }
 
 /* Add symbols for an objfile.  */
@@ -554,7 +438,7 @@ add_vmap(ldi)
 			  "Error while reading shared library symbols:\n"))
 	  {
 	    /* Note this is only done if symbol reading was successful.  */
-	    vmap_symtab (vp, 0, 0);
+	    vmap_symtab (vp);
 	    vp->loaded = 1;
 	  }
 #endif
@@ -698,7 +582,7 @@ retry:
 	  }
 
 	  /* relocate symbol table(s). */
-	  vmap_symtab(vp, ostart, &vi);
+	  vmap_symtab (vp);
 
 	  /* there may be more, so we don't break out of the loop. */
 	}
@@ -1079,7 +963,7 @@ bfd_err:
 	  stp->endaddr = bfd_section_vma (stp->bfd, stp->sec_ptr) + vp->dend;
 	}
 
-      vmap_symtab (vp, 0, 0);
+      vmap_symtab (vp);
 
       add_text_to_loadinfo (ldip->ldinfo_textorg, ldip->ldinfo_dataorg);
     } while (ldip->ldinfo_next != 0);

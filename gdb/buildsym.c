@@ -588,6 +588,8 @@ start_symtab (name, dirname, start_addr)
    for that file and put it in the list of all such.
 
    END_ADDR is the address of the end of the file's text.
+   SECTION is the section number (in objfile->section_offsets) of
+   the blockvector and linetable.
 
    Note that it is possible for end_symtab() to return NULL.  In particular,
    for the DWARF case at least, it will return NULL when it finds a
@@ -597,11 +599,12 @@ start_symtab (name, dirname, start_addr)
    because then gdb will never know about this empty file (FIXME). */
 
 struct symtab *
-end_symtab (end_addr, sort_pending, sort_linevec, objfile)
+end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
      CORE_ADDR end_addr;
      int sort_pending;
      int sort_linevec;
      struct objfile *objfile;
+     int section;
 {
   register struct symtab *symtab;
   register struct blockvector *blockvector;
@@ -731,6 +734,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	    {
 	      symtab->linetable = NULL;
 	    }
+	  symtab->block_line_section = section;
 	  if (subfile->dirname)
 	    {
 	      /* Reallocate the dirname on the symbol obstack */
@@ -753,14 +757,11 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	     language it is from things we found in the symbols. */
 	  symtab->language = subfile->language;
 
-#ifdef IBM6000_TARGET
-	  /* In case we need to duplicate symbol tables (to represent include
-	     files), and in case our system needs relocation, we want to
-	     relocate the main symbol table node only (for the main file,
-	     not for the include files). */
+	  /* All symtabs for the main file and the subfiles share a
+	     blockvector, so we need to clear primary for everything but
+	     the main file.  */
 
-	  symtab->nonreloc = TRUE;
-#endif
+	  symtab->primary = 0;
 	}
       if (subfile->name != NULL)
 	{
@@ -779,14 +780,11 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
       free ((PTR)subfile);
     }
 
-#ifdef IBM6000_TARGET
-  /* all include symbol tables are non-relocatable, except the main source
-     file's. */
+  /* Set this for the main source file.  */
   if (symtab)
     {
-      symtab->nonreloc = FALSE;
+      symtab->primary = 1;
     }
-#endif
 
   last_source_file = NULL;
   current_subfile = NULL;

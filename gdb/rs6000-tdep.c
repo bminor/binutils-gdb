@@ -1129,13 +1129,10 @@ struct loadinfo {
 
 #define	LOADINFOLEN	10
 
-/* FIXME Warning -- loadinfotextindex is used for a nefarious purpose by
-   tm-rs6000.h.  */
-
 static	struct loadinfo *loadinfo = NULL;
 static	int	loadinfolen = 0;
 static	int	loadinfotocindex = 0;
-int	loadinfotextindex = 0;
+static	int	loadinfotextindex = 0;
 
 
 void

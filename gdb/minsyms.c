@@ -266,6 +266,7 @@ prim_record_minimal_symbol (name, address, ms_type)
   SYMBOL_NAME (msymbol) = (char *) name;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
+  SYMBOL_SECTION (msymbol) = -1;
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
   MSYMBOL_INFO (msymbol) = NULL; /* FIXME! */
@@ -277,11 +278,12 @@ prim_record_minimal_symbol (name, address, ms_type)
    and pass it a NULL info pointer value if info is not needed? */
 
 void
-prim_record_minimal_symbol_and_info (name, address, ms_type, info)
+prim_record_minimal_symbol_and_info (name, address, ms_type, info, section)
      const char *name;
      CORE_ADDR address;
      enum minimal_symbol_type ms_type;
      char *info;
+     int section;
 {
   register struct msym_bunch *new;
   register struct minimal_symbol *msymbol;
@@ -297,6 +299,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info)
   SYMBOL_NAME (msymbol) = (char *) name;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
+  SYMBOL_SECTION (msymbol) = section;
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
   MSYMBOL_INFO (msymbol) = info; /* FIXME! */

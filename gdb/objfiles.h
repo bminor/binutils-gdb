@@ -245,6 +245,18 @@ struct objfile
      gets freed automatically when reading a new object file. */
 
   PTR obj_private;
+
+  /* Set of relocation offsets to apply to each section.
+     Currently on the psymbol_obstack (which makes no sense, but I'm
+     not sure it's harming anything).
+
+     These offsets indicate that all symbols (including partial and
+     minimal symbols) which have been read have been relocated by this
+     much.  Symbols which are yet to be read need to be relocated by
+     it.  */
+
+  struct section_offsets *section_offsets;
+  int num_sections;
 };
 
 /* Defines for the objfile flag word. */
@@ -305,6 +317,9 @@ free_objfile PARAMS ((struct objfile *));
 
 extern void
 free_all_objfiles PARAMS ((void));
+
+extern void
+objfile_relocate PARAMS ((struct objfile *, struct section_offsets *));
 
 extern int
 have_partial_symbols PARAMS ((void));

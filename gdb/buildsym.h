@@ -227,7 +227,7 @@ extern char *
 pop_subfile PARAMS ((void));
 
 extern struct symtab *
-end_symtab PARAMS ((CORE_ADDR, int, int, struct objfile *));
+end_symtab PARAMS ((CORE_ADDR, int, int, struct objfile *, int));
 
 extern void
 scan_file_globals PARAMS ((struct objfile *));

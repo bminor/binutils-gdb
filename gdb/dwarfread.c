@@ -336,7 +336,8 @@ static int isreg;	/* Kludge to identify register variables */
 static int offreg;	/* Kludge to identify basereg references */
 
 /* This value is added to each symbol value.  FIXME:  Generalize to 
-   the section_offsets structure used by dbxread.  */
+   the section_offsets structure used by dbxread (once this is done,
+   pass the appropriate section number to end_symtab).  */
 static CORE_ADDR baseaddr;	/* Add to each symbol value */
 
 /* The section offsets used in the current psymtab or symtab.  FIXME,
@@ -1977,7 +1978,8 @@ read_file_scope (dip, thisdie, enddie, objfile)
   start_symtab (dip -> at_name, dip -> at_comp_dir, dip -> at_low_pc);
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
-  symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile);
+
+  symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile, 0);
   if (symtab != NULL)
     {
       symtab -> language = cu_language;

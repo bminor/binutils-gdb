@@ -50,7 +50,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "buildsym.h"
 #include "stabsread.h"
-#include "gdb-stabs.h"
 #include "complaints.h"
 
 #include "coff/internal.h"	/* FIXME, internal data from BFD */
@@ -200,6 +199,9 @@ init_lineno PARAMS ((bfd *, file_ptr, int));
 
 static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
+
+static void
+read_symbol PARAMS ((struct internal_syment *, int));
 
 static int
 read_symbol_lineno PARAMS ((int));
@@ -972,7 +974,7 @@ retrieve_traceback (abfd, textsec, cs, size)
 /* Reading symbol table has to be fast! Keep the followings as macros, rather
    than functions. */
 
-#define	RECORD_MINIMAL_SYMBOL(NAME, ADDR, TYPE, ALLOCED)	\
+#define	RECORD_MINIMAL_SYMBOL(NAME, ADDR, TYPE, ALLOCED, SECTION)	\
 {						\
   char *namestr;				\
   if (ALLOCED) 					\
@@ -982,7 +984,8 @@ retrieve_traceback (abfd, textsec, cs, size)
     obstack_copy0 (&objfile->symbol_obstack, (NAME) + 1, strlen ((NAME)+1)); \
     (ALLOCED) = 1;						\
   }								\
-  prim_record_minimal_symbol (namestr, (ADDR), (TYPE));		\
+  prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE), \
+				       (char *)NULL, (SECTION));	\
   misc_func_recorded = 1;					\
 }
 
@@ -1011,6 +1014,10 @@ static struct symbol parmsym;
    This is the base address of current static block, zero if non exists. */
    
 static int static_block_base = 0;
+
+/* Section number for the current static block.  */
+
+static int static_block_section = -1;
 
 /* true if space for symbol name has been allocated. */
 
@@ -1056,6 +1063,7 @@ read_xcoff_symtab (objfile, nsyms)
 
   char *last_csect_name;		/* last seen csect's name and value */
   CORE_ADDR last_csect_val;
+  int last_csect_sec;
   int  misc_func_recorded;		/* true if any misc. function */
 
   current_objfile = objfile;
@@ -1154,7 +1162,7 @@ read_xcoff_symtab (objfile, nsyms)
     if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE) {
       if (last_source_file)
 	{
-	  end_symtab (cur_src_end_addr, 1, 0, objfile);
+	  end_symtab (cur_src_end_addr, 1, 0, objfile, textsec->target_index);
 	  end_stabs ();
 	}
 
@@ -1215,13 +1223,14 @@ read_xcoff_symtab (objfile, nsyms)
 		  if (!misc_func_recorded) {
 		     int alloced = 0;
 		     RECORD_MINIMAL_SYMBOL (last_csect_name, last_csect_val,
-					    mst_text, alloced);
+					    mst_text, alloced, last_csect_sec);
 		  }
 		    
 
 		  complete_symtab (filestring, file_start_addr);
 		  cur_src_end_addr = file_end_addr;
-		  end_symtab (file_end_addr, 1, 0, objfile);
+		  end_symtab (file_end_addr, 1, 0, objfile,
+			      textsec->target_index);
 		  end_stabs ();
 		  start_stabs ();
 		  start_symtab ((char *)NULL, (char *)NULL, (CORE_ADDR)0);
@@ -1239,6 +1248,7 @@ read_xcoff_symtab (objfile, nsyms)
 		if (cs->c_name && cs->c_name[0] == '.') {
 		  last_csect_name = cs->c_name;
 		  last_csect_val = cs->c_value;
+		  last_csect_sec = cs->c_secnum;
 		}
 	      }
 	      misc_func_recorded = 0;
@@ -1270,7 +1280,7 @@ read_xcoff_symtab (objfile, nsyms)
 
 function_entry_point:
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
-				   symname_alloced);
+				   symname_alloced, cs->c_secnum);
 
 	    fcn_line_offset = main_aux->x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	    fcn_start_addr = cs->c_value;
@@ -1357,8 +1367,9 @@ function_entry_point:
 	    /* Recording this entry is necessary. Single stepping relies on
 	       this vector to get an idea about function address boundaries. */
 
-	    prim_record_minimal_symbol ("<trampoline>", cs->c_value,
-					mst_unknown);
+	    prim_record_minimal_symbol_and_info
+	      ("<trampoline>", cs->c_value, mst_unknown,
+	       (char *)NULL, cs->c_secnum);
 #else
 
 	    /* record trampoline code entries as mst_unknown symbol. When we
@@ -1389,7 +1400,7 @@ function_entry_point:
 
 	  int alloced = 0;
 	  RECORD_MINIMAL_SYMBOL (last_csect_name, last_csect_val,
-				mst_text, alloced);
+				mst_text, alloced, last_csect_sec);
       }
 
       /* c_value field contains symnum of next .file entry in table
@@ -1406,7 +1417,7 @@ function_entry_point:
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      end_symtab (file_end_addr, 1, 0, objfile);
+      end_symtab (file_end_addr, 1, 0, objfile, textsec->target_index);
       end_stabs ();
       start_stabs ();
       start_symtab (cs->c_name, (char *)NULL, (CORE_ADDR)0);
@@ -1526,6 +1537,8 @@ function_entry_point:
 #else
 	new->name = define_symbol 
 		(fcn_cs_saved.c_value, fcn_stab_saved.c_name, 0, 0, objfile);
+	if (new->name != NULL)
+	  SYMBOL_SECTION (new->name) = cs->c_secnum;
 #endif
       }
       else if (STREQ (cs->c_name, ".ef")) {
@@ -1553,11 +1566,18 @@ function_entry_point:
       break;
 
     case C_BSTAT	:		/* begin static block	*/
-      static_block_base = read_symbol_nvalue (cs->c_value);
+      {
+	struct internal_syment symbol;
+	
+	read_symbol (&symbol, cs->c_value);
+	static_block_base = symbol.n_value;
+	static_block_section = symbol.n_scnum;
+      }
       break;
 
     case C_ESTAT	:		/* end of static block	*/
       static_block_base = 0;
+      static_block_section = -1;
       break;
 
     case C_ARG		:		/* These are not implemented. */
@@ -1619,7 +1639,7 @@ function_entry_point:
 
   if (last_source_file)
     {
-      end_symtab (cur_src_end_addr, 1, 0, objfile);
+      end_symtab (cur_src_end_addr, 1, 0, objfile, textsec->target_index);
       end_stabs ();
     }
 
@@ -1669,6 +1689,7 @@ process_xcoff_symbol (cs, objfile)
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
   SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+  SYMBOL_SECTION (sym) = cs->c_secnum;
 
   if (ISFCN (cs->c_type)) {
 
@@ -1814,7 +1835,10 @@ process_xcoff_symbol (cs, objfile)
 	break;
 
 #else /* !NO_DEFINE_SYMBOL */
- 	return define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+      sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+      if (sym != NULL)
+	SYMBOL_SECTION (sym) = cs->c_secnum;
+      return sym;
 #endif
 
     case C_GSYM:
@@ -1835,9 +1859,14 @@ process_xcoff_symbol (cs, objfile)
 	add_symbol_to_list (sym2, &local_symbols);
 	break;
 #else
-	sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
-	SYMBOL_CLASS (sym) = (cs->c_sclass == C_PSYM) ? LOC_ARG : LOC_REGPARM;
-	return sym;
+      sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+      if (sym != NULL)
+	{
+	  SYMBOL_CLASS (sym) =
+	    (cs->c_sclass == C_PSYM) ? LOC_ARG : LOC_REGPARM;
+	  SYMBOL_SECTION (sym) = cs->c_secnum;
+	}
+      return sym;
 #endif
 
     case C_STSYM:
@@ -1865,7 +1894,11 @@ process_xcoff_symbol (cs, objfile)
 	++pp;
 	if (*pp == 'V') *pp = 'S';
 	sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
-	SYMBOL_VALUE (sym) += static_block_base;
+        if (sym != NULL)
+	  {
+	    SYMBOL_VALUE (sym) += static_block_base;
+	    SYMBOL_SECTION (sym) = static_block_section;
+	  }
 	return sym;
 #endif
 
@@ -1876,6 +1909,7 @@ process_xcoff_symbol (cs, objfile)
 	SYMBOL_CLASS (sym) = LOC_LOCAL;
 	pp += 1;
 	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
+        SYMBOL_SECTION (sym) = cs->c_secnum;
 	SYMBOL_DUP (sym, sym2);
 	add_symbol_to_list (sym2, &local_symbols);
 	break;
@@ -1883,6 +1917,7 @@ process_xcoff_symbol (cs, objfile)
     case C_AUTO:
       SYMBOL_CLASS (sym) = LOC_LOCAL;
       SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
+      SYMBOL_SECTION (sym) = cs->c_secnum;
       SYMBOL_DUP (sym, sym2);
       add_symbol_to_list (sym2, &local_symbols);
       break;
@@ -1890,6 +1925,7 @@ process_xcoff_symbol (cs, objfile)
     case C_EXT:
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
+      SYMBOL_SECTION (sym) = cs->c_secnum;
       SYMBOL_DUP (sym, sym2);
       add_symbol_to_list (sym2, &global_symbols);
       break;
@@ -1897,6 +1933,7 @@ process_xcoff_symbol (cs, objfile)
     case C_STAT:
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
+      SYMBOL_SECTION (sym) = cs->c_secnum;
       SYMBOL_DUP (sym, sym2);
       add_symbol_to_list 
 	   (sym2, within_function ? &local_symbols : &file_symbols);
@@ -1906,6 +1943,7 @@ process_xcoff_symbol (cs, objfile)
       printf ("ERROR! C_REG is not fully implemented!\n");
       SYMBOL_CLASS (sym) = LOC_REGISTER;
       SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
+      SYMBOL_SECTION (sym) = cs->c_secnum;
       SYMBOL_DUP (sym, sym2);
       add_symbol_to_list (sym2, &local_symbols);
       break;
@@ -1935,6 +1973,8 @@ process_xcoff_symbol (cs, objfile)
 #else
 	if (pp) {
 	  sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
+	  if (sym != NULL)
+	    SYMBOL_SECTION (sym) = cs->c_secnum;
 	  return sym;
 	}
 	else {
@@ -1951,6 +1991,24 @@ process_xcoff_symbol (cs, objfile)
   return sym2;
 }
 
+/* Set *SYMBOL to symbol number symno in symtbl.  */
+static void
+read_symbol (symbol, symno)
+     struct internal_syment *symbol;
+     int symno;
+{
+  if (symno < 0 || symno >= symtbl_num_syms)
+    {
+      struct complaint msg =
+	{"Invalid symbol offset", 0, 0};
+      complain (&msg);
+      symbol->n_value = 0;
+      symbol->n_scnum = -1;
+      return;
+    }
+  bfd_coff_swap_sym_in (symfile_bfd, symtbl + (symno*local_symesz), symbol);
+}
+  
 /* Get value corresponding to symbol number symno in symtbl.  */
 
 static int
@@ -1959,14 +2017,7 @@ read_symbol_nvalue (symno)
 {
   struct internal_syment symbol[1];
 
-  if (symno < 0 || symno >= symtbl_num_syms)
-    {
-      struct complaint msg =
-	{"Invalid symbol offset", 0, 0};
-      complain (&msg);
-      return 0;
-    }
-  bfd_coff_swap_sym_in (symfile_bfd, symtbl + (symno*local_symesz), symbol);
+  read_symbol (symbol, symno);
   return symbol->n_value;  
 }
 
@@ -2313,8 +2364,19 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   select_source_symtab (0);
 }
 
-/* XCOFF-specific parsing routine for section offsets.
-   Plain and simple for now.  */
+/* XCOFF-specific parsing routine for section offsets.  */
+
+static int largest_section;
+
+static void
+note_one_section (abfd, asect, ptr)
+     bfd *abfd;
+     asection *asect;
+     PTR ptr;
+{
+  if (asect->target_index > largest_section)
+    largest_section = asect->target_index;
+}
 
 static
 struct section_offsets *
@@ -2324,13 +2386,17 @@ xcoff_symfile_offsets (objfile, addr)
 {
   struct section_offsets *section_offsets;
   int i;
- 
-  section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct section_offsets) +
-		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
 
-  for (i = 0; i < SECT_OFF_MAX; i++)
+  largest_section = 0;
+  bfd_map_over_sections (objfile->obfd, note_one_section, NULL);
+  objfile->num_sections = largest_section + 1;
+  section_offsets = (struct section_offsets *)
+    obstack_alloc
+      (&objfile -> psymbol_obstack,
+       sizeof (struct section_offsets)
+       + sizeof (section_offsets->offsets) * (objfile->num_sections));
+
+  for (i = 0; i < objfile->num_sections; i++)
     ANOFFSET (section_offsets, i) = addr;
   
   return section_offsets;
