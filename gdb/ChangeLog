@@ -1,3 +1,11 @@
+Fri Apr  8 17:14:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config/m68k/es1800.mt: Change comments.
+
+Fri Apr  8 17:14:37 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* config/m68k/monitor.mt (TDEPFILES): Don't include remote-es.o.
+
 Fri Apr  8 15:35:30 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* lynx-nat.c:  Restore regmap structure for SPARC.  It's needed
