@@ -484,40 +484,49 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
   return NULL;
 }
 
-/* Set both the mangled and demangled (if any) names for GSYMBOL based on
-   NAME and LEN.  The hash table corresponding to OBJFILE is used, and the
-   memory comes from that objfile's symbol_obstack.  NAME is copied, so the
-   pointer can be discarded after calling this function.  */
+/* Set both the mangled and demangled (if any) names for GSYMBOL based
+   on LINKAGE_NAME and LEN.  The hash table corresponding to OBJFILE
+   is used, and the memory comes from that objfile's symbol_obstack.
+   LINKAGE_NAME is copied, so the pointer can be discarded after
+   calling this function.  */
 
 void
 symbol_set_names (struct general_symbol_info *gsymbol,
-		  const char *name, int len, struct objfile *objfile)
+		  const char *linkage_name, int len, struct objfile *objfile)
 {
   char **slot;
-  const char *tmpname;
+  /* A 0-terminated copy of the linkage name.  */
+  const char *linkage_name_copy;
 
   if (objfile->demangled_names_hash == NULL)
     create_demangled_names_hash (objfile);
 
-  /* The stabs reader generally provides names that are not NULL-terminated;
-     most of the other readers don't do this, so we can just use the given
-     copy.  */
-  if (name[len] != 0)
+  /* The stabs reader generally provides names that are not
+     NUL-terminated; most of the other readers don't do this, so we
+     can just use the given copy.  */
+  if (linkage_name[len] != '\0')
     {
-      char *alloc_name = alloca (len + 1);
-      memcpy (alloc_name, name, len);
-      alloc_name[len] = 0;
-      tmpname = alloc_name;
+      char *alloc_name;
+
+      alloc_name = alloca (len + 1);
+      memcpy (alloc_name, linkage_name, len);
+      alloc_name[len] = '\0';
+
+      linkage_name_copy = alloc_name;
     }
   else
-    tmpname = name;
+    {
+      linkage_name_copy = linkage_name;
+    }
 
-  slot = (char **) htab_find_slot (objfile->demangled_names_hash, tmpname, INSERT);
+  slot = (char **) htab_find_slot (objfile->demangled_names_hash,
+				   linkage_name_copy, INSERT);
 
   /* If this name is not in the hash table, add it.  */
   if (*slot == NULL)
     {
-      char *demangled_name = symbol_find_demangled_name (gsymbol, tmpname);
+      char *demangled_name = symbol_find_demangled_name (gsymbol,
+							 linkage_name_copy);
       int demangled_len = demangled_name ? strlen (demangled_name) : 0;
 
       /* If there is a demangled name, place it right after the mangled name.
@@ -525,18 +534,18 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 name.  */
       *slot = obstack_alloc (&objfile->symbol_obstack,
 			     len + demangled_len + 2);
-      memcpy (*slot, tmpname, len + 1);
-      if (demangled_name)
+      memcpy (*slot, linkage_name_copy, len + 1);
+      if (demangled_name != NULL)
 	{
 	  memcpy (*slot + len + 1, demangled_name, demangled_len + 1);
 	  xfree (demangled_name);
 	}
       else
-	(*slot)[len + 1] = 0;
+	(*slot)[len + 1] = '\0';
     }
 
   gsymbol->name = *slot;
-  if ((*slot)[len + 1])
+  if ((*slot)[len + 1] != '\0')
     gsymbol->language_specific.cplus_specific.demangled_name
       = &(*slot)[len + 1];
   else

@@ -1,3 +1,11 @@
+2003-04-14  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (symbol_set_names): Rename 'name' arg to
+	'linkage_name', and 'tmpname' variable to 'linkage_name_copy'.
+	* symtab.h: Change 'name' argument in declaration of
+	symbol_set_names to 'linkage_name'.
+	(SYMBOL_SET_NAMES): Change 'name' argument to 'linkage_name'.
+
 2003-04-14  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_read_sp): Do not apply ADDR_BITS_REMOVE,
