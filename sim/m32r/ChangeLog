@@ -1,3 +1,10 @@
+2004-10-07  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	Committed by Andrew Cagney.
+	* traps-linux.c: Don't include linux/module.h.
+	(m32r_trap): Remove dummy systemcall's entry of __NR_ustat and
+	__NR_get_kernel_syms.
+
 2004-05-18  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.in (stamp-xmloop, stamp-2mloop): Use -outfile-suffix.
