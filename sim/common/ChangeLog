@@ -1,3 +1,10 @@
+2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* aclocal.m4 (SIM_AC_OUTPUT): Substitute @cgen_breaks@ for "break
+	cgen_rtx_error" in a CGEN-generated simulator.
+	* gdbinit.in: Break on sim_core_signal too.  Have autoconf
+	replacement for CGEN-related breakpoints.
+
 2004-12-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* Make-common.in (sim-basics_h): Add $(callback_h).

@@ -861,6 +861,12 @@ dnl the target's fragment at the appropriate points.
 AC_DEFUN(SIM_AC_OUTPUT,
 [
 AC_LINK_FILES($sim_link_files, $sim_link_links)
+dnl Make @cgen_breaks@ non-null only if the sim uses CGEN.
+cgen_breaks=""
+if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
+cgen_breaks="break cgen_rtx_error";
+fi
+AC_SUBST(cgen_breaks)
 AC_OUTPUT(Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in .gdbinit:../common/gdbinit.in,
 [case "x$CONFIG_FILES" in
  xMakefile*)
