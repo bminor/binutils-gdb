@@ -1,6 +1,7 @@
 /* Handle lists of commands, their decoding and documentation, for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1989, 1990, 1991, 1998, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,9 +23,7 @@
 #include <ctype.h>
 #include "gdb_regex.h"
 
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
@@ -654,11 +653,7 @@ print_doc_line (struct ui_file *stream, char *str)
   line_buffer[p - str] = '\0';
   if (islower (line_buffer[0]))
     line_buffer[0] = toupper (line_buffer[0]);
-#ifdef UI_OUT
   ui_out_text (uiout, line_buffer);
-#else
-  fputs_filtered (line_buffer, stream);
-#endif
 }
 
 /*

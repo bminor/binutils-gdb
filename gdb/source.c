@@ -43,9 +43,7 @@
 #include "linespec.h"
 #include "filenames.h"		/* for DOSish file names */
 #include "completer.h"
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 #ifdef CRLF_SOURCE_FILES
 
@@ -970,11 +968,9 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
   current_source_line = line;
   first_line_listed = line;
 
-#ifdef UI_OUT
   /* If printing of source lines is disabled, just print file and line number */
   if (ui_out_test_flags (uiout, ui_source_list))
     {
-#endif
       /* Only prints "No such file or directory" once */
       if ((s != last_source_visited) || (!last_source_error))
 	{
@@ -986,14 +982,12 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	  desc = last_source_error;
 	  noerror = 1;
 	}
-#ifdef UI_OUT
     }
   else
     {
       desc = -1;
       noerror = 1;
     }
-#endif
 
   if (desc < 0)
     {
@@ -1006,14 +1000,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	  print_sys_errmsg (name, errno);
 	}
       else
-#ifdef UI_OUT
 	ui_out_field_int (uiout, "line", line);
       ui_out_text (uiout, "\tin ");
       ui_out_field_string (uiout, "file", s->filename);
       ui_out_text (uiout, "\n");
-#else
-	printf_filtered ("%d\tin %s\n", line, s->filename);
-#endif
 
       return;
     }
@@ -1041,7 +1031,6 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 
   while (nlines-- > 0)
     {
-#ifdef UI_OUT
       char buf[20];
 
       c = fgetc (stream);
@@ -1078,29 +1067,6 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	    }
 	}
       while (c != '\n' && (c = fgetc (stream)) >= 0);
-#else
-      c = fgetc (stream);
-      if (c == EOF)
-	break;
-      last_line_listed = current_source_line;
-      printf_filtered ("%d\t", current_source_line++);
-      do
-	{
-	  if (c < 040 && c != '\t' && c != '\n' && c != '\r')
-	    printf_filtered ("^%c", c + 0100);
-	  else if (c == 0177)
-	    printf_filtered ("^?");
-#ifdef CRLF_SOURCE_FILES
-	  else if (c == '\r')
-	    {
-	      /* Just skip \r characters.  */
-	    }
-#endif
-	  else
-	    printf_filtered ("%c", c);
-	}
-      while (c != '\n' && (c = fgetc (stream)) >= 0);
-#endif
     }
 
   fclose (stream);

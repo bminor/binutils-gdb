@@ -1,7 +1,8 @@
 /* Print values for GNU debugger GDB.
 
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,9 +39,7 @@
 #include "symfile.h"		/* for overlay functions */
 #include "objfiles.h"		/* ditto */
 #include "completer.h"		/* for completion functions */
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -1796,13 +1795,11 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   int arg_size;
   /* Number of ints of arguments that we have printed so far.  */
   int args_printed = 0;
-#ifdef UI_OUT
   struct cleanup *old_chain, *list_chain;
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif /* UI_OUT */
 
   if (func)
     {
@@ -1903,7 +1900,6 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 		sym = nsym;
 	    }
 
-#ifdef UI_OUT
 	  /* Print the current arg.  */
 	  if (!first)
 	    ui_out_text (uiout, ", ");
@@ -1917,19 +1913,6 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	  ui_out_field_stream (uiout, "name", stb);
 	  annotate_arg_name_end ();
 	  ui_out_text (uiout, "=");
-#else
-	  /* Print the current arg.  */
-	  if (!first)
-	    fprintf_filtered (stream, ", ");
-	  wrap_here ("    ");
-
-	  annotate_arg_begin ();
-
-	  fprintf_symbol_filtered (stream, SYMBOL_SOURCE_NAME (sym),
-				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
-	  annotate_arg_name_end ();
-	  fputs_filtered ("=", stream);
-#endif
 
 	  /* Avoid value_print because it will deref ref parameters.  We just
 	     want to print their addresses.  Print ??? for args whose address
@@ -1942,7 +1925,6 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 
 	  if (val)
 	    {
-#ifdef UI_OUT
 	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 			 VALUE_ADDRESS (val),
 			 stb->stream, 0, 0, 2, Val_no_prettyprint);
@@ -1953,14 +1935,6 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 
 	  /* Invoke ui_out_tuple_end.  */
 	  do_cleanups (list_chain);
-#else
-	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
-			 VALUE_ADDRESS (val),
-			 stream, 0, 0, 2, Val_no_prettyprint);
-	    }
-	  else
-	    fputs_filtered ("???", stream);
-#endif
 
 	  annotate_arg_end ();
 
@@ -1982,9 +1956,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
       print_frame_nameless_args (fi, start, num - args_printed,
 				 first, stream);
     }
-#ifdef UI_OUT
   do_cleanups (old_chain);
-#endif /* no UI_OUT */
 }
 
 /* Print nameless args on STREAM.

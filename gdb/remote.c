@@ -1,6 +1,7 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1001,14 +1002,9 @@ record_currthread (int currthread)
   if (!in_thread_list (pid_to_ptid (currthread)))
     {
       add_thread (pid_to_ptid (currthread));
-#ifdef UI_OUT
       ui_out_text (uiout, "[New ");
       ui_out_text (uiout, target_pid_to_str (pid_to_ptid (currthread)));
       ui_out_text (uiout, "]\n");
-#else
-      printf_filtered ("[New %s]\n",
-                       target_pid_to_str (pid_to_ptid (currthread)));
-#endif
     }
 }
 

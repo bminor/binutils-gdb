@@ -1,5 +1,5 @@
 /* MI Command Set - breakpoint and watchpoint commands.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -230,19 +230,13 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
   switch (type)
     {
     case REG_WP:
-#ifdef UI_OUT
       watch_command_wrapper (expr, FROM_TTY);
-#endif
       break;
     case READ_WP:
-#ifdef UI_OUT
       rwatch_command_wrapper (expr, FROM_TTY);
-#endif
       break;
     case ACCESS_WP:
-#ifdef UI_OUT
       awatch_command_wrapper (expr, FROM_TTY);
-#endif
       break;
     default:
       error ("mi_cmd_break_watch: Unknown watchpoint type.");

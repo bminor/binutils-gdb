@@ -250,12 +250,10 @@ display_gdb_prompt (char *new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
 
-#ifdef UI_OUT
   /* When an alternative interpreter has been installed, do not
      display the comand prompt. */
   if (interpreter_p)
     return;
-#endif
 
   if (target_executing && sync_execution)
     {

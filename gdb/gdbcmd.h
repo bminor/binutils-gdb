@@ -6,8 +6,8 @@
    fnasser@redhat.com    */
 
 /* Header file for GDB-specific command-line stuff.
-   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999,
+   2000, 2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,9 +28,7 @@
 #define GDBCMD_H 1
 
 #include "command.h"
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 /* Chain containing all defined commands.  */
 
@@ -118,9 +116,7 @@ enum command_control_type execute_control_command (struct command_line *);
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
-#ifdef UI_OUT
 extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
-#endif
 
 #endif /* !defined (GDBCMD_H) */

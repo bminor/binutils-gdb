@@ -1,5 +1,5 @@
 /* MI Command Set.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -81,13 +81,11 @@ static void mi_load_progress (const char *section_name,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
 
-#ifdef UI_OUT
 /* FIXME: these should go in some .h file, but infcmd.c doesn't have a
    corresponding .h file. These wrappers will be obsolete anyway, once
    we pull the plug on the sanitization. */
 extern void interrupt_target_command_wrapper (char *, int);
 extern void return_command_wrapper (char *, int);
-#endif
 
 /* Command implementations. FIXME: Is this libgdb? No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -158,7 +156,6 @@ mi_cmd_exec_until (char *args, int from_tty)
 enum mi_cmd_result
 mi_cmd_exec_return (char *args, int from_tty)
 {
-#ifdef UI_OUT
   /* This command doesn't really execute the target, it just pops the
      specified number of frames. */
   if (*args)
@@ -175,7 +172,6 @@ mi_cmd_exec_return (char *args, int from_tty)
   show_and_print_stack_frame (selected_frame,
 			      selected_frame_level,
 			      LOC_AND_ADDRESS);
-#endif
 
   return MI_CMD_DONE;
 }
@@ -195,7 +191,6 @@ mi_cmd_exec_continue (char *args, int from_tty)
 enum mi_cmd_result
 mi_cmd_exec_interrupt (char *args, int from_tty)
 {
-#ifdef UI_OUT
   if (!target_executing)
     {
       xasprintf (&mi_error_message,
@@ -214,7 +209,6 @@ mi_cmd_exec_interrupt (char *args, int from_tty)
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
   fputs_unfiltered ("\n", raw_stdout);
-#endif
   return MI_CMD_QUIET;
 }
 
@@ -250,9 +244,7 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
   else
-#ifdef UI_OUT
     rc = gdb_list_thread_ids (uiout);
-#endif
 
   if (rc == GDB_RC_FAIL)
     return MI_CMD_CAUGHT_ERROR;

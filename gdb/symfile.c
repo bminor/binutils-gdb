@@ -1,6 +1,8 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -1222,14 +1224,8 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 
 	  /* Is this really necessary?  I guess it gives the user something
 	     to look at during a long download.  */
-#ifdef UI_OUT
 	  ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
 			  sect_name, paddr_nz (size), paddr_nz (lma));
-#else
-	  fprintf_unfiltered (gdb_stdout,
-			      "Loading section %s, size 0x%s lma 0x%s\n",
-			      sect_name, paddr_nz (size), paddr_nz (lma));
-#endif
 
 	  bfd_get_section_contents (abfd, asec, buffer, 0, size);
 
@@ -1355,17 +1351,11 @@ generic_load (char *args, int from_tty)
   end_time = time (NULL);
 
   entry = bfd_get_start_address (loadfile_bfd);
-#ifdef UI_OUT
   ui_out_text (uiout, "Start address ");
   ui_out_field_fmt (uiout, "address", "0x%s", paddr_nz (entry));
   ui_out_text (uiout, ", load size ");
   ui_out_field_fmt (uiout, "load-size", "%lu", cbdata.data_count);
   ui_out_text (uiout, "\n");
-#else
-  fprintf_unfiltered (gdb_stdout,
-		      "Start address 0x%s, load size %lu\n",
-		      paddr_nz (entry), cbdata.data_count);
-#endif
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
   write_pc (entry);
@@ -1402,7 +1392,6 @@ print_transfer_performance (struct ui_file *stream,
 			    unsigned long write_count,
 			    unsigned long time_count)
 {
-#ifdef UI_OUT
   ui_out_text (uiout, "Transfer rate: ");
   if (time_count > 0)
     {
@@ -1422,16 +1411,6 @@ print_transfer_performance (struct ui_file *stream,
       ui_out_text (uiout, " bytes/write");
     }
   ui_out_text (uiout, ".\n");
-#else
-  fprintf_unfiltered (stream, "Transfer rate: ");
-  if (time_count > 0)
-    fprintf_unfiltered (stream, "%lu bits/sec", (data_count * 8) / time_count);
-  else
-    fprintf_unfiltered (stream, "%lu bits in <1 sec", (data_count * 8));
-  if (write_count > 0)
-    fprintf_unfiltered (stream, ", %lu bytes/write", data_count / write_count);
-  fprintf_unfiltered (stream, ".\n");
-#endif
 }
 
 /* This function allows the addition of incrementally linked object files.

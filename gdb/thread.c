@@ -1,9 +1,9 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
-   
 
    This file is part of GDB.
 
@@ -38,9 +38,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <signal.h>
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 /*#include "lynxos-core.h" */
 
@@ -253,7 +251,7 @@ in_thread_list (ptid_t ptid)
 
   return 0;			/* Never heard of 'im */
 }
-#ifdef UI_OUT
+
 /* Print a list of thread ids currently known, and the total number of
    threads. To be used from within catch_errors. */
 static int 
@@ -284,7 +282,6 @@ gdb_list_thread_ids (struct ui_out *uiout)
   return catch_exceptions (uiout, do_captured_list_thread_ids, NULL,
 			   NULL, RETURN_MASK_ALL);
 }
-#endif
 
 /* Load infrun state for the thread PID.  */
 
@@ -698,21 +695,14 @@ do_captured_thread_select (struct ui_out *uiout,
 
   tp = find_thread_id (num);
 
-#ifdef UI_OUT
   if (!tp)
     error ("Thread ID %d not known.", num);
-#else
-  if (!tp)
-    error ("Thread ID %d not known.  Use the \"info threads\" command to\n\
-see the IDs of currently known threads.", num);
-#endif
 
   if (!thread_alive (tp))
     error ("Thread ID %d has terminated.\n", num);
 
   switch_to_thread (tp->ptid);
 
-#ifdef UI_OUT
   ui_out_text (uiout, "[Switching to thread ");
   ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
   ui_out_text (uiout, " (");
@@ -722,16 +712,6 @@ see the IDs of currently known threads.", num);
   ui_out_text (uiout, target_pid_to_str (inferior_ptid));
 #endif
   ui_out_text (uiout, ")]");
-#else /* UI_OUT */
-  printf_filtered ("[Switching to thread %d (%s)]\n",
-		   pid_to_thread_id (inferior_ptid),
-#if defined(HPUXHPPA)
-		   target_tid_to_str (inferior_ptid)
-#else
-		   target_pid_to_str (inferior_ptid)
-#endif
-    );
-#endif /* UI_OUT */
 
   print_stack_frame (selected_frame, selected_frame_level, 1);
   return GDB_RC_OK;

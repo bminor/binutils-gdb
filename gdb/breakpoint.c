@@ -1,6 +1,8 @@
 /* Everything about breakpoints, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,9 +44,7 @@
 #include "linespec.h"
 #include "completer.h"
 #include "gdb.h"
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 #include "gdb-events.h"
 
@@ -1873,12 +1873,10 @@ top:
 static enum print_stop_action
 print_it_typical (bpstat bs)
 {
-#ifdef UI_OUT
   struct cleanup *old_chain;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif /* UI_OUT */
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
      which has since been deleted.  */
   if (bs->breakpoint_at == NULL)
@@ -1888,7 +1886,6 @@ print_it_typical (bpstat bs)
     {
     case bp_breakpoint:
     case bp_hardware_breakpoint:
-#ifdef UI_OUT
       annotate_breakpoint (bs->breakpoint_at->number);
       ui_out_text (uiout, "\nBreakpoint ");
       if (ui_out_is_mi_like_p (uiout))
@@ -1896,13 +1893,6 @@ print_it_typical (bpstat bs)
       ui_out_field_int (uiout, "bkptno", bs->breakpoint_at->number);
       ui_out_text (uiout, ", ");
       return PRINT_SRC_AND_LOC;
-#else
-      /* I think the user probably only wants to see one breakpoint
-         number, not all of them.  */
-      annotate_breakpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nBreakpoint %d, ", bs->breakpoint_at->number);
-      return PRINT_SRC_AND_LOC;
-#endif
       break;
 
     case bp_shlib_event:
@@ -2035,7 +2025,6 @@ print_it_typical (bpstat bs)
       if (bs->old_val != NULL)
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
-#ifdef UI_OUT
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
@@ -2048,15 +2037,6 @@ print_it_typical (bpstat bs)
 	  ui_out_field_stream (uiout, "new", stb);
 	  ui_out_tuple_end (uiout);
 	  ui_out_text (uiout, "\n");
-#else
-	  mention (bs->breakpoint_at);
-	  printf_filtered ("\nOld value = ");
-	  value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
-	  printf_filtered ("\nNew value = ");
-	  value_print (bs->breakpoint_at->val, gdb_stdout, 0,
-		       Val_pretty_default);
-	  printf_filtered ("\n");
-#endif
 	  value_free (bs->old_val);
 	  bs->old_val = NULL;
 	}
@@ -2065,7 +2045,6 @@ print_it_typical (bpstat bs)
       break;
 
     case bp_read_watchpoint:
-#ifdef UI_OUT
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
@@ -2075,18 +2054,10 @@ print_it_typical (bpstat bs)
       ui_out_field_stream (uiout, "value", stb);
       ui_out_tuple_end (uiout);
       ui_out_text (uiout, "\n");
-#else
-      mention (bs->breakpoint_at);
-      printf_filtered ("\nValue = ");
-      value_print (bs->breakpoint_at->val, gdb_stdout, 0,
-		   Val_pretty_default);
-      printf_filtered ("\n");
-#endif
       return PRINT_UNKNOWN;
       break;
 
     case bp_access_watchpoint:
-#ifdef UI_OUT
       if (bs->old_val != NULL)     
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
@@ -2113,26 +2084,6 @@ print_it_typical (bpstat bs)
       ui_out_field_stream (uiout, "new", stb);
       ui_out_tuple_end (uiout);
       ui_out_text (uiout, "\n");
-#else
-      if (bs->old_val != NULL)     
-	{
-	  annotate_watchpoint (bs->breakpoint_at->number);
-	  mention (bs->breakpoint_at);
-	  printf_filtered ("\nOld value = ");
-	  value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
-	  value_free (bs->old_val);
-	  bs->old_val = NULL;
-	  printf_filtered ("\nNew value = ");
-	}
-      else 
-	{
-	  mention (bs->breakpoint_at);
-	  printf_filtered ("\nValue = ");
-	}
-      value_print (bs->breakpoint_at->val, gdb_stdout, 0,
-		   Val_pretty_default);
-      printf_filtered ("\n");
-#endif
       return PRINT_UNKNOWN;
       break;
 
@@ -2140,18 +2091,14 @@ print_it_typical (bpstat bs)
        here. */
 
     case bp_finish:
-#ifdef UI_OUT
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "function-finished");
-#endif
       return PRINT_UNKNOWN;
       break;
 
     case bp_until:
-#ifdef UI_OUT
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "location-reached");
-#endif
       return PRINT_UNKNOWN;
       break;
 
@@ -2363,18 +2310,12 @@ watchpoint_check (PTR p)
 	 in this case, by the time we call print_it_typical() this bp
 	 will be deleted already. So we have no choice but print the
 	 information here. */
-#ifdef UI_OUT
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "watchpoint-scope");
       ui_out_text (uiout, "\nWatchpoint ");
       ui_out_field_int (uiout, "wpnum", bs->breakpoint_at->number);
       ui_out_text (uiout, " deleted because the program has left the block in\n\
 which its expression is valid.\n");     
-#else
-      printf_filtered ("\
-Watchpoint %d deleted because the program has left the block in\n\
-which its expression is valid.\n", bs->breakpoint_at->number);
-#endif 
 
       if (b->related_breakpoint)
 	b->related_breakpoint->disposition = disp_del_at_next_stop;
@@ -3141,23 +3082,15 @@ print_one_breakpoint (struct breakpoint *b,
   {"del", "dstp", "dis", "keep"};
   static char bpenables[] = "nynny";
   char wrap_indent[80];
-#ifdef UI_OUT
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif
 
   annotate_record ();
-#ifdef UI_OUT
   ui_out_tuple_begin (uiout, "bkpt");
-#endif
 
   /* 1 */
   annotate_field (0);
-#ifdef UI_OUT
   ui_out_field_int (uiout, "number", b->number);
-#else
-  printf_filtered ("%-3d ", b->number);
-#endif
 
   /* 2 */
   annotate_field (1);
@@ -3166,28 +3099,16 @@ print_one_breakpoint (struct breakpoint *b,
     internal_error (__FILE__, __LINE__,
 		    "bptypes table does not describe type #%d.",
 		    (int) b->type);
-#ifdef UI_OUT
   ui_out_field_string (uiout, "type", bptypes[(int) b->type].description);
-#else
-  printf_filtered ("%-14s ", bptypes[(int) b->type].description);
-#endif
 
   /* 3 */
   annotate_field (2);
-#ifdef UI_OUT
   ui_out_field_string (uiout, "disp", bpdisps[(int) b->disposition]);
-#else
-  printf_filtered ("%-4s ", bpdisps[(int) b->disposition]);
-#endif
 
   /* 4 */
   annotate_field (3);
-#ifdef UI_OUT
   ui_out_field_fmt (uiout, "enabled", "%c", bpenables[(int) b->enable_state]);
   ui_out_spaces (uiout, 2);
-#else
-  printf_filtered ("%-3c ", bpenables[(int) b->enable_state]);
-#endif
   
   /* 5 and 6 */
   strcpy (wrap_indent, "                           ");
@@ -3212,16 +3133,11 @@ print_one_breakpoint (struct breakpoint *b,
       /* Field 4, the address, is omitted (which makes the columns
 	 not line up too nicely with the headers, but the effect
 	 is relatively readable).  */
-#ifdef UI_OUT
       if (addressprint)
 	ui_out_field_skip (uiout, "addr");
       annotate_field (5);
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "what", stb);
-#else
-      annotate_field (5);
-      print_expression (b->exp, gdb_stdout);
-#endif
       break;
       
     case bp_catch_load:
@@ -3229,7 +3145,6 @@ print_one_breakpoint (struct breakpoint *b,
       /* Field 4, the address, is omitted (which makes the columns
 	 not line up too nicely with the headers, but the effect
 	 is relatively readable).  */
-#ifdef UI_OUT
       if (addressprint)
 	ui_out_field_skip (uiout, "addr");
       annotate_field (5);
@@ -3244,13 +3159,6 @@ print_one_breakpoint (struct breakpoint *b,
 	  ui_out_field_string (uiout, "what", b->dll_pathname);
 	  ui_out_text (uiout, "\" ");
 	}
-#else
-      annotate_field (5);
-      if (b->dll_pathname == NULL)
-	printf_filtered ("<any library> ");
-      else
-	printf_filtered ("library \"%s\" ", b->dll_pathname);
-#endif
       break;
       
     case bp_catch_fork:
@@ -3258,7 +3166,6 @@ print_one_breakpoint (struct breakpoint *b,
       /* Field 4, the address, is omitted (which makes the columns
 	 not line up too nicely with the headers, but the effect
 	 is relatively readable).  */
-#ifdef UI_OUT
       if (addressprint)
 	ui_out_field_skip (uiout, "addr");
       annotate_field (5);
@@ -3268,18 +3175,11 @@ print_one_breakpoint (struct breakpoint *b,
 	  ui_out_field_int (uiout, "what", b->forked_inferior_pid);
 	  ui_out_spaces (uiout, 1);
 	}
-#else
-      annotate_field (5);
-      if (b->forked_inferior_pid != 0)
-	printf_filtered ("process %d ", b->forked_inferior_pid);
-      break;
-#endif
       
     case bp_catch_exec:
       /* Field 4, the address, is omitted (which makes the columns
 	 not line up too nicely with the headers, but the effect
 	 is relatively readable).  */
-#ifdef UI_OUT
       if (addressprint)
 	ui_out_field_skip (uiout, "addr");
       annotate_field (5);
@@ -3289,43 +3189,28 @@ print_one_breakpoint (struct breakpoint *b,
 	  ui_out_field_string (uiout, "what", b->exec_pathname);
 	  ui_out_text (uiout, "\" ");
 	}
-#else
-      annotate_field (5);
-      if (b->exec_pathname != NULL)
-	printf_filtered ("program \"%s\" ", b->exec_pathname);
-#endif
       break;
 
     case bp_catch_catch:
       /* Field 4, the address, is omitted (which makes the columns
 	 not line up too nicely with the headers, but the effect
 	 is relatively readable).  */
-#ifdef UI_OUT
       if (addressprint)
 	ui_out_field_skip (uiout, "addr");
       annotate_field (5);
       ui_out_field_string (uiout, "what", "exception catch");
       ui_out_spaces (uiout, 1);
-#else
-      annotate_field (5);
-      printf_filtered ("exception catch ");
-#endif
       break;
 
     case bp_catch_throw:
       /* Field 4, the address, is omitted (which makes the columns
 	 not line up too nicely with the headers, but the effect
 	 is relatively readable).  */
-#ifdef UI_OUT
       if (addressprint)
 	ui_out_field_skip (uiout, "addr");
       annotate_field (5);
       ui_out_field_string (uiout, "what", "exception throw");
       ui_out_spaces (uiout, 1);
-#else
-      annotate_field (5);
-      printf_filtered ("exception throw ");
-#endif
       break;
       
     case bp_breakpoint:
@@ -3340,7 +3225,6 @@ print_one_breakpoint (struct breakpoint *b,
     case bp_call_dummy:
     case bp_shlib_event:
     case bp_thread_event:
-#ifdef UI_OUT
       if (addressprint)
 	{
 	  annotate_field (4);
@@ -3368,106 +3252,47 @@ print_one_breakpoint (struct breakpoint *b,
 	  print_address_symbolic (b->address, stb->stream, demangle, "");
 	  ui_out_field_stream (uiout, "at", stb);
 	}
-#else
-      if (addressprint)
-	{
-	  char *tmp;
-
-	  annotate_field (4);
-
-	  if (TARGET_ADDR_BIT <= 32)
-	    tmp = longest_local_hex_string_custom (b->address
-						   & (CORE_ADDR) 0xffffffff, 
-						   "08l");
-	  else
-	    tmp = longest_local_hex_string_custom (b->address, "016l");
-
-	  printf_filtered ("%s ", tmp);
-	}
-      annotate_field (5);
-      *last_addr = b->address;
-      if (b->source_file)
-	{
-	  sym = find_pc_sect_function (b->address, b->section);
-	  if (sym)
-	    {
-	      fputs_filtered ("in ", gdb_stdout);
-	      fputs_filtered (SYMBOL_SOURCE_NAME (sym), gdb_stdout);
-	      wrap_here (wrap_indent);
-	      fputs_filtered (" at ", gdb_stdout);
-	    }
-	  fputs_filtered (b->source_file, gdb_stdout);
-	  printf_filtered (":%d", b->line_number);
-	}
-      else
-	print_address_symbolic (b->address, gdb_stdout, demangle, " ");
-#endif
       break;
     }
   
   if (b->thread != -1)
     {
-#ifdef UI_OUT
       /* FIXME: This seems to be redundant and lost here; see the
 	 "stop only in" line a little further down. */
       ui_out_text (uiout, " thread ");
       ui_out_field_int (uiout, "thread", b->thread);
-#else
-      printf_filtered (" thread %d", b->thread);
-#endif
     }
   
-#ifdef UI_OUT
   ui_out_text (uiout, "\n");
-#else
-  printf_filtered ("\n");
-#endif
   
   if (b->frame)
     {
       annotate_field (6);
-#ifdef UI_OUT
       ui_out_text (uiout, "\tstop only in stack frame at ");
       ui_out_field_core_addr (uiout, "frame", b->frame);
       ui_out_text (uiout, "\n");
-#else
-      printf_filtered ("\tstop only in stack frame at ");
-      print_address_numeric (b->frame, 1, gdb_stdout);
-      printf_filtered ("\n");
-#endif
     }
   
   if (b->cond)
     {
       annotate_field (7);
-#ifdef UI_OUT
       ui_out_text (uiout, "\tstop only if ");
       print_expression (b->cond, stb->stream);
       ui_out_field_stream (uiout, "cond", stb);
       ui_out_text (uiout, "\n");
-#else
-      printf_filtered ("\tstop only if ");
-      print_expression (b->cond, gdb_stdout);
-      printf_filtered ("\n");
-#endif
     }
   
   if (b->thread != -1)
     {
       /* FIXME should make an annotation for this */
-#ifdef UI_OUT
       ui_out_text (uiout, "\tstop only in thread ");
       ui_out_field_int (uiout, "thread", b->thread);
       ui_out_text (uiout, "\n");
-#else
-      printf_filtered ("\tstop only in thread %d\n", b->thread);
-#endif
     }
   
   if (show_breakpoint_hit_counts && b->hit_count)
     {
       /* FIXME should make an annotation for this */
-#ifdef UI_OUT
       if (ep_is_catchpoint (b))
 	ui_out_text (uiout, "\tcatchpoint");
       else
@@ -3478,55 +3303,31 @@ print_one_breakpoint (struct breakpoint *b,
 	ui_out_text (uiout, " time\n");
       else
 	ui_out_text (uiout, " times\n");
-#else
-      if (ep_is_catchpoint (b))
-	printf_filtered ("\tcatchpoint");
-      else
-	printf_filtered ("\tbreakpoint");
-      printf_filtered (" already hit %d time%s\n",
-		       b->hit_count, (b->hit_count == 1 ? "" : "s"));
-#endif
     }
   
-#ifdef UI_OUT
   /* Output the count also if it is zero, but only if this is
      mi. FIXME: Should have a better test for this. */
   if (ui_out_is_mi_like_p (uiout))
     if (show_breakpoint_hit_counts && b->hit_count == 0)
       ui_out_field_int (uiout, "times", b->hit_count);
-#endif
 
   if (b->ignore_count)
     {
       annotate_field (8);
-#ifdef UI_OUT
       ui_out_text (uiout, "\tignore next ");
       ui_out_field_int (uiout, "ignore", b->ignore_count);
       ui_out_text (uiout, " hits\n");
-#else
-      printf_filtered ("\tignore next %d hits\n", b->ignore_count);
-#endif
     }
   
   if ((l = b->commands))
     {
       annotate_field (9);
-#ifdef UI_OUT
       ui_out_tuple_begin (uiout, "script");
       print_command_lines (uiout, l, 4);
       ui_out_tuple_end (uiout);
-#else
-      while (l)
-	{
-	  print_command_line (l, 4, gdb_stdout);
-	  l = l->next;
-	}
-#endif
     }
-#ifdef UI_OUT
   ui_out_tuple_end (uiout);
   do_cleanups (old_chain);
-#endif
 }
 
 struct captured_breakpoint_query_args
@@ -3604,14 +3405,11 @@ breakpoint_1 (int bnum, int allflag)
 	  nr_printable_breakpoints++;
       }
 
-#ifdef UI_OUT
   if (addressprint)
     ui_out_table_begin (uiout, 6, nr_printable_breakpoints, "BreakpointTable");
   else
     ui_out_table_begin (uiout, 5, nr_printable_breakpoints, "BreakpointTable");
-#endif /* UI_OUT */
 
-#ifdef UI_OUT
   if (nr_printable_breakpoints > 0)
     annotate_breakpoints_headers ();
   if (nr_printable_breakpoints > 0)
@@ -3641,31 +3439,6 @@ breakpoint_1 (int bnum, int allflag)
   ui_out_table_body (uiout);
   if (nr_printable_breakpoints > 0)
     annotate_breakpoints_table ();
-#else
-  if (nr_printable_breakpoints > 0)
-    {
-      annotate_breakpoints_headers ();
-      annotate_field (0);
-      printf_filtered ("Num ");
-      annotate_field (1);
-      printf_filtered ("Type           ");
-      annotate_field (2);
-      printf_filtered ("Disp ");
-      annotate_field (3);
-      printf_filtered ("Enb ");
-      if (addressprint)
-	{
-	  annotate_field (4);
-	  if (TARGET_ADDR_BIT <= 32)
-	    printf_filtered ("Address    ");
-	  else
-	    printf_filtered ("Address            ");
-	}
-      annotate_field (5);
-      printf_filtered ("What\n");
-      annotate_breakpoints_table ();
-    }
-#endif /* UI_OUT */
 
   ALL_BREAKPOINTS (b)
     if (bnum == -1
@@ -3677,25 +3450,15 @@ breakpoint_1 (int bnum, int allflag)
 	  print_one_breakpoint (b, &last_addr);
       }
   
-
-#ifdef UI_OUT
   ui_out_table_end (uiout);
-#endif /* UI_OUT */
 
   if (nr_printable_breakpoints == 0)
     {
-#ifdef UI_OUT
       if (bnum == -1)
 	ui_out_message (uiout, 0, "No breakpoints or watchpoints.\n");
       else
 	ui_out_message (uiout, 0, "No breakpoint or watchpoint number %d.\n",
 			bnum);
-#else
-      if (bnum == -1)
-	printf_filtered ("No breakpoints or watchpoints.\n");
-      else
-	printf_filtered ("No breakpoint or watchpoint number %d.\n", bnum);
-#endif /* UI_OUT */
     }
   else
     {
@@ -4436,13 +4199,11 @@ static void
 mention (struct breakpoint *b)
 {
   int say_where = 0;
-#ifdef UI_OUT
   struct cleanup *old_chain;
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif /* UI_OUT */
 
   /* FIXME: This is misplaced; mention() is called by things (like hitting a
      watchpoint) other than breakpoint creation.  It should be possible to
@@ -4458,7 +4219,6 @@ mention (struct breakpoint *b)
     case bp_none:
       printf_filtered ("(apparently deleted?) Eventpoint %d: ", b->number);
       break;
-#ifdef UI_OUT
     case bp_watchpoint:
       ui_out_text (uiout, "Watchpoint ");
       ui_out_tuple_begin (uiout, "wpt");
@@ -4477,17 +4237,6 @@ mention (struct breakpoint *b)
       ui_out_field_stream (uiout, "exp", stb);
       ui_out_tuple_end (uiout);
       break;
-#else
-    case bp_watchpoint:
-      printf_filtered ("Watchpoint %d: ", b->number);
-      print_expression (b->exp, gdb_stdout);
-      break;
-    case bp_hardware_watchpoint:
-      printf_filtered ("Hardware watchpoint %d: ", b->number);
-      print_expression (b->exp, gdb_stdout);
-      break;
-#endif
-#ifdef UI_OUT
     case bp_read_watchpoint:
       ui_out_text (uiout, "Hardware read watchpoint ");
       ui_out_tuple_begin (uiout, "hw-rwpt");
@@ -4506,36 +4255,21 @@ mention (struct breakpoint *b)
       ui_out_field_stream (uiout, "exp", stb);
       ui_out_tuple_end (uiout);
       break;
-#else
-    case bp_read_watchpoint:
-      printf_filtered ("Hardware read watchpoint %d: ", b->number);
-      print_expression (b->exp, gdb_stdout);
-      break;
-    case bp_access_watchpoint:
-      printf_filtered ("Hardware access (read/write) watchpoint %d: ", 
-		       b->number);
-      print_expression (b->exp, gdb_stdout);
-      break;
-#endif
     case bp_breakpoint:
-#ifdef UI_OUT
       if (ui_out_is_mi_like_p (uiout))
 	{
 	  say_where = 0;
 	  break;
 	}
-#endif
       printf_filtered ("Breakpoint %d", b->number);
       say_where = 1;
       break;
     case bp_hardware_breakpoint:
-#ifdef UI_OUT
       if (ui_out_is_mi_like_p (uiout))
 	{
 	  say_where = 0;
 	  break;
 	}
-#endif
       printf_filtered ("Hardware assisted breakpoint %d", b->number);
       say_where = 1;
       break;
@@ -4587,13 +4321,9 @@ mention (struct breakpoint *b)
 	printf_filtered (": file %s, line %d.",
 			 b->source_file, b->line_number);
     }
-#ifdef UI_OUT
   do_cleanups (old_chain);
-#endif
-#ifdef UI_OUT
   if (ui_out_is_mi_like_p (uiout))
     return;
-#endif
   printf_filtered ("\n");
 }
 
@@ -5593,39 +5323,36 @@ can_use_hardware_watchpoint (struct value *v)
   return found_memory_cnt;
 }
 
-#ifdef UI_OUT
 void
 watch_command_wrapper (char *arg, int from_tty)
 {
   watch_command (arg, from_tty);
 }
-#endif
+
 static void
 watch_command (char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_write, from_tty);
 }
 
-#ifdef UI_OUT
 void
 rwatch_command_wrapper (char *arg, int from_tty)
 {
   rwatch_command (arg, from_tty);
 }
-#endif
+
 static void
 rwatch_command (char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_read, from_tty);
 }
 
-#ifdef UI_OUT
 void
 awatch_command_wrapper (char *arg, int from_tty)
 {
   awatch_command (arg, from_tty);
 }
-#endif
+
 static void
 awatch_command (char *arg, int from_tty)
 {

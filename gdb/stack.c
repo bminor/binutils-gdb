@@ -1,6 +1,8 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,9 +37,7 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "annotate.h"
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 /* Prototypes for exported functions. */
 
@@ -413,13 +413,8 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 		 ability to decide for themselves if it is desired. */
 	      if (addressprint && mid_statement)
 		{
-#ifdef UI_OUT
 		  ui_out_field_core_addr (uiout, "addr", fi->pc);
 		  ui_out_text (uiout, "\t");
-#else
-		  print_address_numeric (fi->pc, 1, gdb_stdout);
-		  printf_filtered ("\t");
-#endif
 		}
 
 	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
@@ -446,14 +441,12 @@ print_frame (struct frame_info *fi,
   struct symbol *func;
   register char *funname = 0;
   enum language funlang = language_unknown;
-#ifdef UI_OUT
   struct ui_stream *stb;
   struct cleanup *old_chain;
   struct cleanup *list_chain;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif /* UI_OUT */
 
   func = find_pc_function (fi->pc);
   if (func)
@@ -532,82 +525,49 @@ print_frame (struct frame_info *fi,
 
   annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
 
-#ifdef UI_OUT
   list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
-#endif
 
   if (level >= 0)
     {
-#ifdef UI_OUT
       ui_out_text (uiout, "#");
       ui_out_field_fmt (uiout, "level", "%-2d", level);
       ui_out_spaces (uiout, 1);
-#else
-      printf_filtered ("#%-2d ", level);
-#endif
     }
   if (addressprint)
     if (fi->pc != sal.pc || !sal.symtab || source == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
-#ifdef UI_OUT
 	ui_out_field_core_addr (uiout, "addr", fi->pc);
 	annotate_frame_address_end ();
 	ui_out_text (uiout, " in ");
-#else
-	print_address_numeric (fi->pc, 1, gdb_stdout);
-	annotate_frame_address_end ();
-	printf_filtered (" in ");
-#endif
       }
   annotate_frame_function_name ();
-#ifdef UI_OUT
   fprintf_symbol_filtered (stb->stream, funname ? funname : "??", funlang,
 			   DMGL_ANSI);
   ui_out_field_stream (uiout, "func", stb);
   ui_out_wrap_hint (uiout, "   ");
-#else
-  fprintf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
-			   DMGL_ANSI);
-  wrap_here ("   ");
-#endif
   annotate_frame_args ();
       
-#ifdef UI_OUT
   ui_out_text (uiout, " (");
-#else
-  fputs_filtered (" (", gdb_stdout);
-#endif
   if (args)
     {
       struct print_args_args args;
-#ifdef UI_OUT
       struct cleanup *args_list_chain;
-#endif
       args.fi = fi;
       args.func = func;
       args.stream = gdb_stdout;
-#ifdef UI_OUT
       args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
       /* FIXME: args must be a list. If one argument is a string it will
 		 have " that will not be properly escaped.  */
       /* Invoke ui_out_tuple_end.  */
       do_cleanups (args_list_chain);
-#else
-      catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
-#endif
       QUIT;
     }
-#ifdef UI_OUT
   ui_out_text (uiout, ")");
-#else
-  printf_filtered (")");
-#endif
   if (sal.symtab && sal.symtab->filename)
     {
       annotate_frame_source_begin ();
-#ifdef UI_OUT
       ui_out_wrap_hint (uiout, "   ");
       ui_out_text (uiout, " at ");
       annotate_frame_source_file ();
@@ -616,16 +576,6 @@ print_frame (struct frame_info *fi,
       ui_out_text (uiout, ":");
       annotate_frame_source_line ();
       ui_out_field_int (uiout, "line", sal.line);
-#else
-      wrap_here ("   ");
-      printf_filtered (" at ");
-      annotate_frame_source_file ();
-      printf_filtered ("%s", sal.symtab->filename);
-      annotate_frame_source_file_end ();
-      printf_filtered (":");
-      annotate_frame_source_line ();
-      printf_filtered ("%d", sal.line);
-#endif
       annotate_frame_source_end ();
     }
 
@@ -636,26 +586,17 @@ print_frame (struct frame_info *fi,
       if (lib)
 	{
 	  annotate_frame_where ();
-#ifdef UI_OUT
 	  ui_out_wrap_hint (uiout, "  ");
 	  ui_out_text (uiout, " from ");
 	  ui_out_field_string (uiout, "from", lib);
-#else
-	  wrap_here ("  ");
-	  printf_filtered (" from %s", lib);
-#endif
 	}
     }
 #endif /* PC_SOLIB */
 
-#ifdef UI_OUT
   /* do_cleanups will call ui_out_tuple_end() for us.  */
   do_cleanups (list_chain);
   ui_out_text (uiout, "\n");
   do_cleanups (old_chain);
-#else
-  printf_filtered ("\n");
-#endif
 }
 
 
@@ -1618,13 +1559,12 @@ find_relative_frame (register struct frame_info *frame,
    frame expressions. */
 
 /* ARGSUSED */
-#ifdef UI_OUT
 void
 select_frame_command_wrapper (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
 }
-#endif
+
 static void
 select_frame_command (char *level_exp, int from_tty)
 {
@@ -1754,13 +1694,12 @@ down_command (char *count_exp, int from_tty)
   show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
-#ifdef UI_OUT
 void
 return_command_wrapper (char *retval_exp, int from_tty)
 {
   return_command (retval_exp, from_tty);
 }
-#endif
+
 static void
 return_command (char *retval_exp, int from_tty)
 {

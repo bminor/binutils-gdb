@@ -60,10 +60,8 @@
 #include "gdb_string.h"
 #include "gdb_stat.h"
 #include <ctype.h>
-#ifdef UI_OUT
 #include "ui-out.h"
 #include "cli-out.h"
-#endif
 
 /* Default command line prompt.  This is overriden in some configs. */
 
@@ -2089,7 +2087,6 @@ gdb_init (char *argv0)
   if (init_ui_hook)
     init_ui_hook (argv0);
 
-#ifdef UI_OUT
   /* Install the default UI */
   if (!init_ui_hook)
     {
@@ -2104,5 +2101,4 @@ gdb_init (char *argv0)
 	  exit (1);
 	}
     }
-#endif
 }

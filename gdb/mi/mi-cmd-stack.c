@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -27,12 +27,10 @@
 #include "ui-out.h"
 #include "symtab.h"
 
-#ifdef UI_OUT
 /* FIXME: these should go in some .h file but stack.c doesn't have a
    corresponding .h file. These wrappers will be obsolete anyway, once
    we pull the plug on the sanitization. */
 extern void select_frame_command_wrapper (char *, int);
-#endif
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -295,7 +293,6 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 enum mi_cmd_result
 mi_cmd_stack_select_frame (char *command, char **argv, int argc)
 {
-#ifdef UI_OUT
   if (!target_has_stack)
     error ("mi_cmd_stack_select_frame: No stack.");
 
@@ -307,6 +304,5 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
     select_frame_command_wrapper (0, 1 /* not used */ );
   else
     select_frame_command_wrapper (argv[0], 1 /* not used */ );
-#endif
   return MI_CMD_DONE;
 }

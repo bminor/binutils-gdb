@@ -1,3 +1,17 @@
+2002-01-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.c: Update assuming #if UI_OUT is always true.  Update
+	copyright.
+	* defs.h, event-top.c, gdbcmd.h: Ditto.
+	* infcmd.c, infrun.c, main.c, printcmd.c, remote.c: Ditto.
+	* source.c, stack.c, symfile.c, symtab.c, thread.c: Ditto.
+	* top.c, cli/cli-cmds.c, cli/cli-decode.c: Ditto.
+	* cli/cli-script.c, cli/cli-script.h, cli/cli-setshow.c: Ditto.
+	* mi/ChangeLog, mi/mi-cmd-break.c, mi/mi-cmd-stack.c: Ditto.
+	* mi/mi-main.c:Ditto.
+
+	* stack.c, symfile.c: Update copyright.
+
 2002-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/low-hppabsd.c, gdbserver/low-lynx.c,

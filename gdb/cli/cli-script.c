@@ -1,6 +1,8 @@
 /* GDB CLI command scripting.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,9 +26,7 @@
 #include "language.h"		/* For value_true */
 #include <ctype.h>
 
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 #include "top.h"
 #include "cli/cli-cmds.h"
@@ -126,7 +126,7 @@ get_command_line (enum command_control_type type, char *arg)
 }
 
 /* Recursively print a command (including full control structures).  */
-#ifdef UI_OUT
+
 void
 print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 		     unsigned int depth)
@@ -212,86 +212,6 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
       list = list->next;
     }				/* while (list) */
 }
-#else
-void
-print_command_line (struct command_line *cmd, unsigned int depth,
-		    struct ui_file *stream)
-{
-  unsigned int i;
-
-  if (depth)
-    {
-      for (i = 0; i < depth; i++)
-	fputs_filtered ("  ", stream);
-    }
-
-  /* A simple command, print it and return.  */
-  if (cmd->control_type == simple_control)
-    {
-      fputs_filtered (cmd->line, stream);
-      fputs_filtered ("\n", stream);
-      return;
-    }
-
-  /* loop_continue to jump to the start of a while loop, print it
-     and return. */
-  if (cmd->control_type == continue_control)
-    {
-      fputs_filtered ("loop_continue\n", stream);
-      return;
-    }
-
-  /* loop_break to break out of a while loop, print it and return.  */
-  if (cmd->control_type == break_control)
-    {
-      fputs_filtered ("loop_break\n", stream);
-      return;
-    }
-
-  /* A while command.  Recursively print its subcommands before returning.  */
-  if (cmd->control_type == while_control)
-    {
-      struct command_line *list;
-      fputs_filtered ("while ", stream);
-      fputs_filtered (cmd->line, stream);
-      fputs_filtered ("\n", stream);
-      list = *cmd->body_list;
-      while (list)
-	{
-	  print_command_line (list, depth + 1, stream);
-	  list = list->next;
-	}
-    }
-
-  /* An if command.  Recursively print both arms before returning.  */
-  if (cmd->control_type == if_control)
-    {
-      fputs_filtered ("if ", stream);
-      fputs_filtered (cmd->line, stream);
-      fputs_filtered ("\n", stream);
-      /* The true arm. */
-      print_command_line (cmd->body_list[0], depth + 1, stream);
-
-      /* Show the false arm if it exists.  */
-      if (cmd->body_count == 2)
-	{
-	  if (depth)
-	    {
-	      for (i = 0; i < depth; i++)
-		fputs_filtered ("  ", stream);
-	    }
-	  fputs_filtered ("else\n", stream);
-	  print_command_line (cmd->body_list[1], depth + 1, stream);
-	}
-      if (depth)
-	{
-	  for (i = 0; i < depth; i++)
-	    fputs_filtered ("  ", stream);
-	}
-      fputs_filtered ("end\n", stream);
-    }
-}
-#endif
 
 /* Execute the command in CMD.  */
 
@@ -1302,16 +1222,7 @@ show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
   fputs_filtered (c->name, stream);
   fputs_filtered (":\n", stream);
 
-#ifdef UI_OUT
   print_command_lines (uiout, cmdlines, 1);
   fputs_filtered ("\n", stream);
-#else
-  while (cmdlines)
-    {
-      print_command_line (cmdlines, 4, stream);
-      cmdlines = cmdlines->next;
-    }
-  fputs_filtered ("\n", stream);
-#endif
 }
 

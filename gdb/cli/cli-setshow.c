@@ -1,5 +1,6 @@
 /* Handle set and show GDB commands.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,9 +24,7 @@
 #include "gdb_string.h"
 #endif
 
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 #include "cli/cli-decode.h"
 #include "cli/cli-cmds.h"
@@ -258,14 +257,12 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
     }
   else if (c->type == show_cmd)
     {
-#ifdef UI_OUT
       struct cleanup *old_chain;
       struct ui_stream *stb;
       int quote;
 
       stb = ui_out_stream_new (uiout);
       old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif /* UI_OUT */
 
       /* Possibly call the pre hook.  */
       if (c->pre_show_hook)
@@ -274,7 +271,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       /* Print doc minus "show" at start.  */
       print_doc_line (gdb_stdout, c->doc + 5);
 
-#ifdef UI_OUT
       ui_out_text (uiout, " is ");
       ui_out_wrap_hint (uiout, "    ");
       quote = 0;
@@ -346,72 +342,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	ui_out_text (uiout, "\"");
       ui_out_text (uiout, ".\n");
       do_cleanups (old_chain);
-#else
-      fputs_filtered (" is ", gdb_stdout);
-      wrap_here ("    ");
-      switch (c->var_type)
-	{
-	case var_string:
-	  {
-	    fputs_filtered ("\"", gdb_stdout);
-	    if (*(unsigned char **) c->var)
-	      fputstr_filtered (*(unsigned char **) c->var, '"', gdb_stdout);
-	    fputs_filtered ("\"", gdb_stdout);
-	  }
-	  break;
-	case var_string_noescape:
-	case var_filename:
-	case var_enum:
-	  fputs_filtered ("\"", gdb_stdout);
-	  if (*(char **) c->var)
-	    fputs_filtered (*(char **) c->var, gdb_stdout);
-	  fputs_filtered ("\"", gdb_stdout);
-	  break;
-	case var_boolean:
-	  fputs_filtered (*(int *) c->var ? "on" : "off", gdb_stdout);
-	  break;
-	case var_auto_boolean:
-	  switch (*(enum cmd_auto_boolean*) c->var)
-	    {
-	    case CMD_AUTO_BOOLEAN_TRUE:
-	      fputs_filtered ("on", gdb_stdout);
-	      break;
-	    case CMD_AUTO_BOOLEAN_FALSE:
-	      fputs_filtered ("off", gdb_stdout);
-	      break;
-	    case CMD_AUTO_BOOLEAN_AUTO:
-	      fputs_filtered ("auto", gdb_stdout);
-	      break;
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "do_setshow_command: invalid var_auto_boolean");
-	      break;
-	    }
-	  break;
-	case var_uinteger:
-	  if (*(unsigned int *) c->var == UINT_MAX)
-	    {
-	      fputs_filtered ("unlimited", gdb_stdout);
-	      break;
-	    }
-	  /* else fall through */
-	case var_zinteger:
-	  fprintf_filtered (gdb_stdout, "%u", *(unsigned int *) c->var);
-	  break;
-	case var_integer:
-	  if (*(int *) c->var == INT_MAX)
-	    {
-	      fputs_filtered ("unlimited", gdb_stdout);
-	    }
-	  else
-	    fprintf_filtered (gdb_stdout, "%d", *(int *) c->var);
-	  break;
-
-	default:
-	  error ("gdb internal error: bad var_type in do_setshow_command");
-	}
-      fputs_filtered (".\n", gdb_stdout);
-#endif
     }
   else
     error ("gdb internal error: bad cmd_type in do_setshow_command");
@@ -425,14 +355,11 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 void
 cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 {
-#ifdef UI_OUT
   ui_out_tuple_begin (uiout, "showlist");
-#endif
   for (; list != NULL; list = list->next)
     {
       /* If we find a prefix, run its list, prefixing our output by its
          prefix (with "show " skipped).  */
-#ifdef UI_OUT
       if (list->prefixlist && !list->abbrev_flag)
 	{
 	  ui_out_tuple_begin (uiout, "optionlist");
@@ -449,20 +376,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 	  do_setshow_command ((char *) NULL, from_tty, list);
 	  ui_out_tuple_end (uiout);
 	}
-#else
-      if (list->prefixlist && !list->abbrev_flag)
-	cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
-      if (list->type == show_cmd)
-	{
-	  fputs_filtered (prefix, gdb_stdout);
-	  fputs_filtered (list->name, gdb_stdout);
-	  fputs_filtered (":  ", gdb_stdout);
-	  do_setshow_command ((char *) NULL, from_tty, list);
-	}
-#endif
     }
-#ifdef UI_OUT
   ui_out_tuple_end (uiout);
-#endif
 }
 

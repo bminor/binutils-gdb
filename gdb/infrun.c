@@ -1,6 +1,8 @@
 /* Target-struct-independent code to start (run) and stop an inferior process.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1469,13 +1471,9 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	add_thread (ecs->ptid);
 
-#ifdef UI_OUT
 	ui_out_text (uiout, "[New ");
 	ui_out_text (uiout, target_pid_or_tid_to_str (ecs->ptid));
 	ui_out_text (uiout, "]\n");
-#else
-	printf_filtered ("[New %s]\n", target_pid_or_tid_to_str (ecs->ptid));
-#endif
 
 #if 0
 	/* NOTE: This block is ONLY meant to be invoked in case of a
@@ -3284,13 +3282,11 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
     case END_STEPPING_RANGE:
       /* We are done with a step/next/si/ni command. */
       /* For now print nothing. */
-#ifdef UI_OUT
       /* Print a message only if not in the middle of doing a "step n"
 	 operation for n > 1 */
       if (!step_multi || !stop_step)
 	if (ui_out_is_mi_like_p (uiout))
 	  ui_out_field_string (uiout, "reason", "end-stepping-range");
-#endif
       break;
     case BREAKPOINT_HIT:
       /* We found a breakpoint. */
@@ -3298,7 +3294,6 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       break;
     case SIGNAL_EXITED:
       /* The inferior was terminated by a signal. */
-#ifdef UI_OUT
       annotate_signalled ();
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "exited-signalled");
@@ -3312,25 +3307,9 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       annotate_signal_string_end ();
       ui_out_text (uiout, ".\n");
       ui_out_text (uiout, "The program no longer exists.\n");
-#else
-      annotate_signalled ();
-      printf_filtered ("\nProgram terminated with signal ");
-      annotate_signal_name ();
-      printf_filtered ("%s", target_signal_to_name (stop_info));
-      annotate_signal_name_end ();
-      printf_filtered (", ");
-      annotate_signal_string ();
-      printf_filtered ("%s", target_signal_to_string (stop_info));
-      annotate_signal_string_end ();
-      printf_filtered (".\n");
-
-      printf_filtered ("The program no longer exists.\n");
-      gdb_flush (gdb_stdout);
-#endif
       break;
     case EXITED:
       /* The inferior program is finished. */
-#ifdef UI_OUT
       annotate_exited (stop_info);
       if (stop_info)
 	{
@@ -3346,19 +3325,10 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 	    ui_out_field_string (uiout, "reason", "exited-normally");
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
-#else
-      annotate_exited (stop_info);
-      if (stop_info)
-	printf_filtered ("\nProgram exited with code 0%o.\n",
-			 (unsigned int) stop_info);
-      else
-	printf_filtered ("\nProgram exited normally.\n");
-#endif
       break;
     case SIGNAL_RECEIVED:
       /* Signal received. The signal table tells us to print about
          it. */
-#ifdef UI_OUT
       annotate_signal ();
       ui_out_text (uiout, "\nProgram received signal ");
       annotate_signal_name ();
@@ -3371,19 +3341,6 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       ui_out_field_string (uiout, "signal-meaning", target_signal_to_string (stop_info));
       annotate_signal_string_end ();
       ui_out_text (uiout, ".\n");
-#else
-      annotate_signal ();
-      printf_filtered ("\nProgram received signal ");
-      annotate_signal_name ();
-      printf_filtered ("%s", target_signal_to_name (stop_info));
-      annotate_signal_name_end ();
-      printf_filtered (", ");
-      annotate_signal_string ();
-      printf_filtered ("%s", target_signal_to_string (stop_info));
-      annotate_signal_string_end ();
-      printf_filtered (".\n");
-      gdb_flush (gdb_stdout);      
-#endif
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -3527,18 +3484,14 @@ and/or watchpoints.\n");
 	      internal_error (__FILE__, __LINE__,
 			      "Unknown value.");
 	    }
-#ifdef UI_OUT
 	  /* For mi, have the same behavior every time we stop:
              print everything but the source line. */
 	  if (ui_out_is_mi_like_p (uiout))
 	    source_flag = LOC_AND_ADDRESS;
-#endif
 
-#ifdef UI_OUT
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_int (uiout, "thread-id",
 	                      pid_to_thread_id (inferior_ptid));
-#endif
 	  /* The behavior of this routine with respect to the source
 	     flag is:
 	     SRC_LINE: Print only source line

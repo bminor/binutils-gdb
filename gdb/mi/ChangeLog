@@ -1,3 +1,11 @@
+2002-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-stack.c: 
+
+	* mi-cmd-break.c: 
+
+	* mi-main.c: 
+
 2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbmi.texinfo: Fix the application of GFDL in the Copyright notice.

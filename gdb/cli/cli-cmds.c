@@ -1,5 +1,6 @@
 /* GDB CLI commands.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,9 +26,7 @@
 #include "gdb_regex.h"		/* Used by apropos_command */
 #include "filenames.h"		/* for DOSish file names */
 
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 #include "top.h"
 #include "cli/cli-decode.h"

@@ -1,5 +1,5 @@
 /* Header file for GDB CLI command implementation library.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,10 +38,8 @@ extern void show_user_1 (struct cmd_list_element *c, struct ui_file *stream);
 extern enum command_control_type
 	execute_control_command (struct command_line *cmd);
 
-#ifdef UI_OUT
 extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
-#endif
 
 /* Exported to gdb/infrun.c */
 
