@@ -1,3 +1,15 @@
+Tue Oct 20 13:02:25 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Support for i386-sysv.
+	obj-coffbfd.c (do_relocs_for, write_object_file): set segment
+	addresses to reasonable sizes.  New define ZERO_BASED_SEGMENTS can
+	be used to set them all to zero as was done before.
+	(fill_section): segment addresses now set in write_object_file.
+	(fill_section): Don't set STYP_NOLOAD for .bss section.
+	(fixup_segment): 386 uses strange common symbol format.
+	tc-i386.c (tc_coff_fix2rtype): use R_DIR32, not R_RELLONG, for
+	compatibility with SVR3.2 linker.
+
 Mon Oct  5 09:28:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	 fix i960+non-bfd coff bit rot. 

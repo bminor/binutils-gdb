@@ -436,12 +436,14 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
       *file_cursor += external_reloc_size;
       free( external_reloc_vec);
     }
-#if OLDWAY
-    This should work, but causes problems with addends in relocs.
-    Disable it for the moment
+#ifndef ZERO_BASED_SEGMENTS
+    /* Supposedly setting segment addresses non-zero causes problems
+       for some platforms, although it shouldn't.  If you define
+       ZERO_BASED_SEGMENTS, all the segments will be based at 0.
+       Please don't make this the default, since some systems (e.g.,
+       SVR3.2) require the segments to be non-zero based.  Ian Taylor
+       <ian@cygnus.com>.  */
     addr += segment_info[idx].scnhdr.s_size;
-#else
-    addr = 0;
 #endif
   }
 }
@@ -457,7 +459,6 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 {
 
   unsigned int i;
-  unsigned int paddr = 0;
   
   for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
   {  
@@ -470,20 +471,9 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
       fragS *frag = segment_info[i].frchainP->frch_root;
       char *buffer =  malloc(s->s_size);
       if (s->s_size != 0) 
-      {
 	s->s_scnptr = *file_cursor;
-	s->s_paddr =  paddr;
-	s->s_vaddr =  paddr;
-
-      }
       else 
-      {
 	s->s_scnptr = 0;
-	s->s_paddr =  0;
-	s->s_vaddr =  0;
-
-      }
-	    
 
       s->s_flags = STYP_REG;
       if (strcmp(s->s_name,".text")==0)
@@ -491,7 +481,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
       else if (strcmp(s->s_name,".data")==0)
        s->s_flags |= STYP_DATA;
       else if (strcmp(s->s_name,".bss")==0)
-       s->s_flags |= STYP_BSS | STYP_NOLOAD;
+       s->s_flags |= STYP_BSS;
       else if (strcmp(s->s_name,".lit")==0)
        s->s_flags = STYP_LIT | STYP_TEXT;
 
@@ -551,14 +541,6 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 	  
       *file_cursor += s->s_size;
 
-#if 0
-    This should work, but causes problems with addends in relocs.
-    Disable it for the moment
-
-      paddr += s->s_size;
-#else
-      paddr = 0;
-#endif
     }      
   }
 
@@ -1670,7 +1652,7 @@ extern void DEFUN_VOID(write_object_file)
     struct internal_aouthdr aouthdr;
     unsigned long file_cursor;  
     bfd *abfd;
-      unsigned int addr = 0;  
+    unsigned int addr;
     abfd = bfd_openw(out_file_name, TARGET_FORMAT);
 
 
@@ -1709,31 +1691,34 @@ extern void DEFUN_VOID(write_object_file)
     {
 	relax_segment(segment_info[i].frchainP->frch_root, i);
     }
-  
-
-
-
 
       filehdr.f_nscns = 0;
   
-      /* Find out how big the sections are */
+      /* Find out how big the sections are, and set the addresses.  */
+      addr = 0;
       for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
       {
+	segment_info[i].scnhdr.s_paddr = addr;
+	segment_info[i].scnhdr.s_vaddr = addr;
 
 	if (segment_info[i].scnhdr.s_name[0]) 
 	{
 	  filehdr.f_nscns++;
 	}
 	  
+#ifndef ZERO_BASED_SEGMENTS
+	/* See the comment at the previous ZERO_BASED_SEGMENTS check.  */
 	if (i == SEG_E2) 
 	{
-	  /* THis is a special case, we leave the size alone, which will have */
-	  /* been made up from all and any lcomms seen */
+	  /* This is a special case, we leave the size alone, which
+	     will have been made up from all and any lcomms seen.  */
+	  addr += segment_info[i].scnhdr.s_size;
 	}
 	else 
 	{
 	  addr += size_section(abfd, i);
 	}
+#endif
       }
 
 
@@ -2261,9 +2246,14 @@ segT		this_segment_type)
 				    continue;
 				} /* COBR */
 #endif				/* TC_I960 */
-		
-
-
+#ifdef TC_I386
+			    /* 386 COFF uses a peculiar format in
+			       which the value of a common symbol is
+			       stored in the .text segment (I've
+			       checked this on SVR3.2 and SCO 3.2.2)
+			       Ian Taylor <ian@cygnus.com>.  */
+			    add_number += S_GET_VALUE(add_symbolP);
+#endif
 			    break;
 					
 
