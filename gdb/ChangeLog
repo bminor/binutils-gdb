@@ -1,3 +1,8 @@
+2004-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* blockframe.c: Update copyright year.
+	(inside_entry_func): Don't treat a zero PC specially.
+
 2004-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gcore.c (gcore_copy_callback): Use paddr_d to print size

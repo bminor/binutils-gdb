@@ -2,8 +2,8 @@
    functions and pc values.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -157,15 +157,11 @@ inside_main_func (CORE_ADDR pc)
 }
 
 /* Test whether PC is inside the range of addresses that corresponds
-   to the process entry point function.
-
-   A PC of zero is always considered to be the bottom of the stack.  */
+   to the process entry point function.  */
 
 int
 inside_entry_func (CORE_ADDR pc)
 {
-  if (pc == 0)
-    return 1;
   if (symfile_objfile == 0)
     return 0;
 
