@@ -20,6 +20,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef CALLBACK_H
 #define CALLBACK_H
 
+#ifndef va_start
+#include <ansidecl.h>
+#ifdef ANSI_PROTOTYPES
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
+#endif
+
 typedef struct host_callback_struct host_callback;
 
 #define MAX_CALLBACK_FDS 10
@@ -53,10 +62,10 @@ struct host_callback_struct
 
   /* Talk to the user on a console.
      The `void *' is actually `va_list *'.  */
-  void (*vprintf_filtered) PARAMS ((host_callback *, const char *, void *));
+  void (*vprintf_filtered) PARAMS ((host_callback *, const char *, va_list));
 
   /* Same as vprintf_filtered but to stderr.  */
-  void (*evprintf_filtered) PARAMS ((host_callback *, const char *, void *));
+  void (*evprintf_filtered) PARAMS ((host_callback *, const char *, va_list));
 
   /* Print an error message and "exit".
      In the case of gdb "exiting" means doing a longjmp back to the main

@@ -55,9 +55,9 @@ static void gdb_os_flush_stderr PARAMS ((host_callback *));
 /* printf_filtered is depreciated */
 static void gdb_os_printf_filtered PARAMS ((host_callback *, const char *, ...));
 
-static void gdb_os_vprintf_filtered PARAMS ((host_callback *, const char *, void *));
+static void gdb_os_vprintf_filtered PARAMS ((host_callback *, const char *, va_list));
 
-static void gdb_os_evprintf_filtered PARAMS ((host_callback *, const char *, void *));
+static void gdb_os_evprintf_filtered PARAMS ((host_callback *, const char *, va_list));
 
 static void gdb_os_error PARAMS ((host_callback *, const char *, ...));
 
@@ -268,15 +268,15 @@ gdb_os_printf_filtered (p, va_alist)
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
-gdb_os_vprintf_filtered (host_callback *p, const char *format, void *ap)
+gdb_os_vprintf_filtered (host_callback *p, const char *format, va_list ap)
 #else
 gdb_os_vprintf_filtered (p, format, ap)
      host_callback *p;
      char *format;
-     void *ap;
+     va_list ap;
 #endif
 {
-  vfprintf_filtered (gdb_stdout, format, (va_list)ap);
+  vfprintf_filtered (gdb_stdout, format, ap);
 }
 
 /* GDB version of error evprintf_filtered.  */
@@ -284,15 +284,15 @@ gdb_os_vprintf_filtered (p, format, ap)
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
-gdb_os_evprintf_filtered (host_callback *p, const char *format, void *ap)
+gdb_os_evprintf_filtered (host_callback *p, const char *format, va_list ap)
 #else
 gdb_os_evprintf_filtered (p, format, ap)
      host_callback *p;
      char *format;
-     void *ap;
+     va_list ap;
 #endif
 {
-  vfprintf_filtered (gdb_stderr, format, (va_list)ap);
+  vfprintf_filtered (gdb_stderr, format, ap);
 }
 
 /* GDB version of error callback.  */
