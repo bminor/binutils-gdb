@@ -1,5 +1,10 @@
 2001-11-14  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_pop_frame_regular): On the S/390, the frame
+ 	pointer and the SP are often the same, so we can't pop the frame
+ 	by setting the SP to the FP; we need to get the old SP from
+	saved_regs.
+
 	* s390-tdep.c (s390_extract_return_value): Returned `float' values
  	can simply be copied bitwise from the registers into the value
  	object's buffer.

@@ -1169,8 +1169,10 @@ s390_pop_frame_regular (struct frame_info *frame)
         write_register (regnum, value);
       }
 
-  /* Actually cut back the stack.  */
-  write_register (S390_SP_REGNUM, FRAME_FP (frame));
+  /* Actually cut back the stack.  Remember that the SP's element of
+     saved_regs is the old SP itself, not the address at which it is
+     saved.  */
+  write_register (S390_SP_REGNUM, frame->saved_regs[S390_SP_REGNUM]);
 
   /* Throw away any cached frame information.  */
   flush_cached_frames ();
