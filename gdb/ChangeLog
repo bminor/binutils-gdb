@@ -1,3 +1,13 @@
+2002-05-28  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ppcnbsd-nat.c: Rewrite.
+	* ppcnbsd-tdep.c: New file.
+	* ppcnbsd-tdep.h: New file.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Remove corelow.o,
+	solib.o, and solib-svr4.o.
+	* config/powerpc/nbsd.mt (TDEPFILES): Add ppcnbsd-tdep.o,
+	nbsd-tdep.o, and corelow.o.
+
 2002-05-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (--enable-gdb-build-warnings): Rewrite script to use
