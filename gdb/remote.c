@@ -749,6 +749,23 @@ packet_ok (const char *buf, struct packet_config *config)
     }
 }
 
+/* Should we try the 'vCont' (descriptive resume) request? */
+static struct packet_config remote_protocol_vcont;
+
+static void
+set_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
+				      struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_vcont);
+}
+
+static void
+show_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
+				       struct cmd_list_element *c)
+{
+  show_packet_config_cmd (&remote_protocol_vcont);
+}
+
 /* Should we try the 'qSymbol' (target symbol lookup service) request? */
 static struct packet_config remote_protocol_qSymbol;
 
@@ -2190,6 +2207,7 @@ init_all_packet_configs (void)
   update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
   update_packet_config (&remote_protocol_qSymbol);
+  update_packet_config (&remote_protocol_vcont);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     update_packet_config (&remote_protocol_Z[i]);
   /* Force remote_write_bytes to check whether target supports binary
@@ -2503,6 +2521,130 @@ bin2hex (const char *bin, char *hex, int count)
   return i;
 }
 
+/* Check for the availability of vCont.  This function should also check
+   the response.  */
+
+static void
+remote_vcont_probe (struct remote_state *rs, char *buf)
+{
+  strcpy (buf, "vCont?");
+  putpkt (buf);
+  getpkt (buf, rs->remote_packet_size, 0);
+
+  /* Make sure that the features we assume are supported.  */
+  if (strncmp (buf, "vCont", 5) == 0)
+    {
+      char *p = &buf[5];
+      int support_s, support_S, support_c, support_C;
+
+      support_s = 0;
+      support_S = 0;
+      support_c = 0;
+      support_C = 0;
+      while (p && *p == ';')
+	{
+	  p++;
+	  if (*p == 's' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_s = 1;
+	  else if (*p == 'S' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_S = 1;
+	  else if (*p == 'c' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_c = 1;
+	  else if (*p == 'C' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_C = 1;
+
+	  p = strchr (p, ';');
+	}
+
+      /* If s, S, c, and C are not all supported, we can't use vCont.  Clearing
+         BUF will make packet_ok disable the packet.  */
+      if (!support_s || !support_S || !support_c || !support_C)
+	buf[0] = 0;
+    }
+
+  packet_ok (buf, &remote_protocol_vcont);
+}
+
+/* Resume the remote inferior by using a "vCont" packet.  The thread
+   to be resumed is PTID; STEP and SIGGNAL indicate whether the
+   resumed thread should be single-stepped and/or signalled.  If PTID's
+   PID is -1, then all threads are resumed; the thread to be stepped and/or
+   signalled is given in the global INFERIOR_PTID.  This function returns
+   non-zero iff it resumes the inferior.
+
+   This function issues a strict subset of all possible vCont commands at the
+   moment.  */
+
+static int
+remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
+{
+  struct remote_state *rs = get_remote_state ();
+  int pid = PIDGET (ptid);
+  char *buf = NULL;
+  struct cleanup *old_cleanup;
+
+  buf = xmalloc (rs->remote_packet_size);
+  old_cleanup = make_cleanup (xfree, buf);
+
+  if (remote_protocol_vcont.support == PACKET_SUPPORT_UNKNOWN)
+    remote_vcont_probe (rs, buf);
+
+  if (remote_protocol_vcont.support == PACKET_DISABLE)
+    {
+      do_cleanups (old_cleanup);
+      return 0;
+    }
+
+  /* If we could generate a wider range of packets, we'd have to worry
+     about overflowing BUF.  Should there be a generic
+     "multi-part-packet" packet?  */
+
+  if (PIDGET (inferior_ptid) == MAGIC_NULL_PID)
+    {
+      /* MAGIC_NULL_PTID means that we don't have any active threads, so we
+	 don't have any PID numbers the inferior will understand.  Make sure
+	 to only send forms that do not specify a PID.  */
+      if (step && siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;S%02x", siggnal);
+      else if (step)
+	sprintf (buf, "vCont;s");
+      else if (siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;C%02x", siggnal);
+      else
+	sprintf (buf, "vCont;c");
+    }
+  else if (pid == -1)
+    {
+      /* Resume all threads, with preference for INFERIOR_PTID.  */
+      if (step && siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;S%02x:%x;c", siggnal, PIDGET (inferior_ptid));
+      else if (step)
+	sprintf (buf, "vCont;s:%x;c", PIDGET (inferior_ptid));
+      else if (siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;C%02x:%x;c", siggnal, PIDGET (inferior_ptid));
+      else
+	sprintf (buf, "vCont;c");
+    }
+  else
+    {
+      /* Scheduler locking; resume only PTID.  */
+      if (step && siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;S%02x:%x", siggnal, pid);
+      else if (step)
+	sprintf (buf, "vCont;s:%x", pid);
+      else if (siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;C%02x:%x", siggnal, pid);
+      else
+	sprintf (buf, "vCont;c:%x", pid);
+    }
+
+  putpkt (buf);
+
+  do_cleanups (old_cleanup);
+
+  return 1;
+}
+
 /* Tell the remote machine to resume.  */
 
 static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
@@ -2517,11 +2659,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   int pid = PIDGET (ptid);
   char *p;
 
-  if (pid == -1)
-    set_thread (0, 0);		/* run any thread */
-  else
-    set_thread (pid, 0);	/* run this thread */
-
   last_sent_signal = siggnal;
   last_sent_step = step;
 
@@ -2530,6 +2667,15 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   if (target_resume_hook)
     (*target_resume_hook) ();
 
+  /* The vCont packet doesn't need to specify threads via Hc.  */
+  if (remote_vcont_resume (ptid, step, siggnal))
+    return;
+
+  /* All other supported resume packets do use Hc, so call set_thread.  */
+  if (pid == -1)
+    set_thread (0, 0);		/* run any thread */
+  else
+    set_thread (pid, 0);	/* run this thread */
 
   /* The s/S/c/C packets do not return status.  So if the target does
      not support the S or C packets, the debug agent returns an empty
@@ -2602,91 +2748,8 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 static void
 remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
-  struct remote_state *rs = get_remote_state ();
-  char *buf = alloca (rs->remote_packet_size);
-  int pid = PIDGET (ptid);
-  char *p;
+  remote_resume (ptid, step, siggnal);
 
-  if (pid == -1)
-    set_thread (0, 0);		/* run any thread */
-  else
-    set_thread (pid, 0);	/* run this thread */
-
-  last_sent_signal = siggnal;
-  last_sent_step = step;
-
-  /* A hook for when we need to do something at the last moment before
-     resumption.  */
-  if (target_resume_hook)
-    (*target_resume_hook) ();
-
-  /* The s/S/c/C packets do not return status.  So if the target does
-     not support the S or C packets, the debug agent returns an empty
-     string which is detected in remote_wait().  This protocol defect
-     is fixed in the e/E packets. */
-
-  if (step && step_range_end)
-    {
-      /* If the target does not support the 'E' packet, we try the 'S'
-	 packet.  Ideally we would fall back to the 'e' packet if that
-	 too is not supported.  But that would require another copy of
-	 the code to issue the 'e' packet (and fall back to 's' if not
-	 supported) in remote_wait().  */
-      
-      if (siggnal != TARGET_SIGNAL_0)
-	{
-	  if (remote_protocol_E.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'E';
-	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
-	      *p++ = tohex (((int) siggnal) & 0xf);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
-		goto register_event_loop;
-	    }
-	}
-      else
-	{
-	  if (remote_protocol_e.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'e';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
-		goto register_event_loop;
-	    }
-	}
-    }
-
-  if (siggnal != TARGET_SIGNAL_0)
-    {
-      buf[0] = step ? 'S' : 'C';
-      buf[1] = tohex (((int) siggnal >> 4) & 0xf);
-      buf[2] = tohex ((int) siggnal & 0xf);
-      buf[3] = '\0';
-    }
-  else
-    strcpy (buf, step ? "s" : "c");
-  
-  putpkt (buf);
-
-register_event_loop:
   /* We are about to start executing the inferior, let's register it
      with the event loop. NOTE: this is the one place where all the
      execution commands end up. We could alternatively do this in each
@@ -5952,6 +6015,7 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_E_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_binary_download_cmd (args, from_tty, NULL);
 }
 
@@ -6124,6 +6188,13 @@ in a memory packet.\n",
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
+
+  add_packet_config_cmd (&remote_protocol_vcont,
+			 "vCont", "verbose-resume",
+			 set_remote_protocol_vcont_packet_cmd,
+			 show_remote_protocol_vcont_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
 
   add_packet_config_cmd (&remote_protocol_qSymbol,
 			 "qSymbol", "symbol-lookup",

@@ -1,3 +1,15 @@
+2003-10-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote.c (remote_protocol_vcont): New variable.
+	(set_remote_protocol_vcont_packet_cmd): New function.
+	(show_remote_protocol_vcont_packet_cmd): New function.
+	(init_all_packet_configs): Handle remote_protocol_vcont.
+	(remote_vcont_probe): New function.
+	(remote_vcont_resume): New function.
+	(remote_resume): Use it.
+	(remote_async_resume): Call remote_resume.
+	(_initialize_remote): Add verbose-resume packet commands.
+
 2003-10-16  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (handle_inferior_event): Add comment about
