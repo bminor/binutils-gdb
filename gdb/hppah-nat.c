@@ -266,6 +266,7 @@ fetch_register (int regno)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct mem_attrib *mem,
 		   struct target_ops *target)
 {
   register int i;
