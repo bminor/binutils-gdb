@@ -1,3 +1,13 @@
+2000-10-02  DJ Delorie  <dj@redhat.com>
+
+	* emultempl/pe.em (gld_*_after_open): detect case where there two
+	import libraries for same dll; rename one to ensure proper link
+	order.
+
+	* pe-dll.c (process_def_file): compare ordinals to -1, not 0; fix
+	typo
+	(generate_edata): fix typo
+
 2000-09-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* scripttempl/crisaout.sc (ENTRY): Now __start.

@@ -378,7 +378,7 @@ process_def_file (abfd, info)
 	    {
 	      if (pe_dll_warn_dup_exports)
 		/* xgettext:c-format */
-		einfo (_("%XError, duplicate EXPORT with oridinals: %s (%d vs %d)\n"),
+		einfo (_("%XError, duplicate EXPORT with ordinals: %s (%d vs %d)\n"),
 		       e[j - 1].name, e[j - 1].ordinal, e[i].ordinal);
 	    }
 	  else
@@ -388,7 +388,7 @@ process_def_file (abfd, info)
 		einfo (_("Warning, duplicate EXPORT: %s\n"),
 		       e[j - 1].name);
 	    }
-	  if (e[i].ordinal)
+	  if (e[i].ordinal != -1)
 	    e[j - 1].ordinal = e[i].ordinal;
 	  e[j - 1].flag_private |= e[i].flag_private;
 	  e[j - 1].flag_constant |= e[i].flag_constant;
@@ -585,7 +585,7 @@ generate_edata (abfd, info)
 	      if (pi != -1)
 		{
 		  /* xgettext:c-format */
-		  einfo (_("%XError, oridinal used twice: %d (%s vs %s)\n"),
+		  einfo (_("%XError, ordinal used twice: %d (%s vs %s)\n"),
 			 pe_def_file->exports[i].ordinal,
 			 pe_def_file->exports[i].name,
 			 pe_def_file->exports[pi].name);

@@ -814,6 +814,82 @@ gld_${EMULATION_NAME}_after_open ()
 #endif
 
   {
+    lang_input_statement_type *is2;
+
+    /* This next chunk of code tries to detect the case where you have
+       two import libraries for the same DLL (specifically,
+       symbolically linking libm.a and libc.a in cygwin to
+       libcygwin.a).  In those cases, it's possible for function
+       thunks from the second implib to be used but without the
+       head/tail objects, causing an improper import table.  We detect
+       those cases and rename the "other" import libraries to match
+       the one the head/tail come from, so that the linker will sort
+       things nicely and produce a valid import table. */
+
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (is->the_bfd->my_archive)
+	  {
+	    int idata2 = 0, reloc_count=0, is_imp = 0;
+	    asection *sec;
+	    /* See if this is an import library thunk */
+	    for (sec = is->the_bfd->sections; sec; sec = sec->next)
+	      {
+		if (strcmp (sec->name, ".idata\$2") == 0)
+		  idata2 = 1;
+		if (strncmp (sec->name, ".idata\$", 7) == 0)
+		  is_imp = 1;
+		reloc_count += sec->reloc_count;
+	      }
+	    if (is_imp && !idata2 && reloc_count)
+	      {
+		/* it is, look for the reference to head and see if it's
+		   from our own library */
+		for (sec = is->the_bfd->sections; sec; sec = sec->next)
+		  {
+		    int i;
+		    int symsize = bfd_get_symtab_upper_bound (is->the_bfd);
+		    asymbol **symbols = (asymbol **) xmalloc (symsize);
+		    int nsyms = bfd_canonicalize_symtab (is->the_bfd, symbols);
+
+		    int relsize = bfd_get_reloc_upper_bound (is->the_bfd, sec);
+		    arelent **relocs = (arelent **) xmalloc ((size_t) relsize);
+		    int nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
+							  relocs, symbols);
+		    for (i=0; i<nrelocs; i++)
+		      {
+			struct symbol_cache_entry *s;
+			s = (relocs[i]->sym_ptr_ptr)[0];
+			if (!s->flags & BSF_LOCAL)
+			  {
+			    /* thunk section with reloc to another bfd... */
+			    struct bfd_link_hash_entry *blhe;
+			    blhe = bfd_link_hash_lookup (link_info.hash,
+							 s->name,
+							 false, false, true);
+			    if (blhe && blhe->type == bfd_link_hash_defined)
+			      {
+				bfd *other_bfd = blhe->u.def.section->owner;
+				if (strcmp (is->the_bfd->my_archive->filename,
+					    other_bfd->my_archive->filename))
+				  {
+				    /* Rename this implib to match the other */
+				    char *n = (char *) xmalloc (strlen (other_bfd->my_archive->filename) + 1);
+				    strcpy (n, other_bfd->my_archive->filename);
+				    is->the_bfd->my_archive->filename = n;
+				  }
+			      }
+			  }
+		      }
+
+		    free (relocs);
+		  }
+	      }
+	  }
+      }
+  }
+
+  {
     int is_ms_arch = 0;
     bfd *cur_arch = 0;
     lang_input_statement_type *is2;
