@@ -1,3 +1,7 @@
+Fri Oct 11 12:51:33 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* binutils.texinfo: minor restructuring for texi2roff comfort.
+
 Fri Oct 11 04:12:28 1991  John Gilmore  (gnu at cygnus.com)
 
 	Restructure configuration scheme for bfd, binutils, ld.
