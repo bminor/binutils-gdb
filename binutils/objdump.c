@@ -255,7 +255,9 @@ usage (stream, status)
   -EL --endian=little            Assume little endian format when disassembling\n\
       --file-start-context       Include context from start of file (with -S)\n\
   -l, --line-numbers             Include line numbers and filenames in output\n\
-  -C, --demangle                 Decode mangled/processed symbol names\n\
+  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
+                                  The STYLE, if specified, can be `auto', 'gnu',\n\
+                                  'lucid', 'arm', 'hp', 'edg', or 'gnu-new-abi'\n\
   -w, --wide                     Format output for more than 80 columns\n\
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
       --start-address=ADDR       Only process data whoes address is >= ADDR\n\
@@ -288,7 +290,7 @@ static struct option long_options[]=
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"debugging", no_argument, NULL, 'g'},
-  {"demangle", no_argument, NULL, 'C'},
+  {"demangle", optional_argument, NULL, 'C'},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
   {"disassembler-options", required_argument, NULL, 'M'},
@@ -2833,6 +2835,17 @@ main (argc, argv)
 	  break;
 	case 'C':
 	  do_demangle = true;
+	  if (optarg != NULL)
+	    {
+	      enum demangling_styles style;
+	      
+	      style = cplus_demangle_name_to_style (optarg);
+	      if (style == unknown_demangling) 
+		fatal (_("unknown demangling style `%s'"),
+		       optarg);
+	      
+	      cplus_demangle_set_style (style);
+           }
 	  break;
 	case 'w':
 	  wide_output = true;

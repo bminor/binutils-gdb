@@ -260,7 +260,7 @@ static bfd *lineno_cache_rel_bfd;
 static struct option long_options[] =
 {
   {"debug-syms", no_argument, &print_debug_syms, 1},
-  {"demangle", no_argument, &do_demangle, 1},
+  {"demangle", optional_argument, 0, 'C'},
   {"dynamic", no_argument, &dynamic, 1},
   {"extern-only", no_argument, &external_only, 1},
   {"format", required_argument, 0, 'f'},
@@ -297,7 +297,9 @@ usage (stream, status)
   -a, --debug-syms       Display debugger-only symbols\n\
   -A, --print-file-name  Print name of the input file before every symbol\n\
   -B                     Same as --format=bsd\n\
-  -C, --demangle         Decode low-level symbol names into user-level names\n\
+  -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n\
+                          The STYLE, if specified, can be `auto' (the default),\n\
+                          `gnu', 'lucid', 'arm', 'hp', 'edg' or 'gnu-new-abi'\n\
       --no-demangle      Do not demangle low-level symbol names\n\
   -D, --dynamic          Display dynamic symbols instead of normal symbols\n\
       --defined-only     Display only defined symbols\n\
@@ -407,7 +409,8 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:glnopPrst:uvV", long_options, (int *) 0)) != EOF)
+  while ((c = getopt_long (argc, argv, "aABCDef:glnopPrst:uvV",
+			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
 	{
@@ -423,6 +426,17 @@ main (argc, argv)
 	  break;
 	case 'C':
 	  do_demangle = 1;
+	  if (optarg != NULL)
+	    {
+	      enum demangling_styles style;
+	      
+	      style = cplus_demangle_name_to_style (optarg);
+	      if (style == unknown_demangling) 
+		fatal (_("unknown demangling style `%s'"),
+		       optarg);
+	      
+	      cplus_demangle_set_style (style);
+           }
 	  break;
 	case 'D':
 	  dynamic = 1;

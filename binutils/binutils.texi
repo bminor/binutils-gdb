@@ -630,7 +630,7 @@ The @sc{gnu} linker @code{ld} is now described in a separate manual.
 
 @smallexample
 nm [ -a | --debug-syms ]  [ -g | --extern-only ]
-   [ -B ]  [ -C | --demangle ] [ -D | --dynamic ]
+   [ -B ]  [ -C | --demangle[=@var{style}] ] [ -D | --dynamic ]
    [ -s | --print-armap ]  [ -A | -o | --print-file-name ]
    [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
    [ -r | --reverse-sort ]  [ --size-sort ] [ -u | --undefined-only ]
@@ -754,12 +754,14 @@ listed.
 The same as @samp{--format=bsd} (for compatibility with the MIPS @code{nm}).
 
 @item -C
-@itemx --demangle
+@itemx --demangle[=@var{style}]
 @cindex demangling in nm
 Decode (@dfn{demangle}) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
-makes C++ function names readable.  @xref{c++filt}, for more information
-on demangling.
+makes C++ function names readable. Different compilers have different
+mangling styles. The optional demangling style argument can be used to 
+choose an appropriate demangling style for your compiler. @xref{c++filt}, 
+for more information on demangling.
 
 @item --no-demangle
 Do not demangle low-level symbol names.  This is the default.
@@ -1173,7 +1175,7 @@ Show a summary of the options to @code{objcopy}.
 @smallexample
 objdump [ -a | --archive-headers ] 
         [ -b @var{bfdname} | --target=@var{bfdname} ] 
-        [ -C | --demangle ]
+        [ -C | --demangle[=@var{style}] ]
         [ -d | --disassemble ]
         [ -D | --disassemble-all ]
         [ -z | --disassemble-zeroes ]
@@ -1258,12 +1260,14 @@ formats available with the @samp{-i} option.
 @xref{Target Selection}, for more information.
 
 @item -C
-@itemx --demangle
+@itemx --demangle[=@var{style}]
 @cindex demangling in objdump
 Decode (@dfn{demangle}) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
-makes C++ function names readable.  @xref{c++filt}, for more information
-on demangling.
+makes C++ function names readable.  Different compilers have different
+mangling styles. The optional demangling style argument can be used to 
+choose an appropriate demangling style for your compiler. @xref{c++filt}, 
+for more information on demangling.
 
 @item -G
 @item --debugging
@@ -1859,6 +1863,8 @@ the one specified by the C++ Annotated Reference Manual
 the one used by the HP compiler
 @item edg
 the one used by the EDG compiler
+@item gnu-new-abi
+the one used by the @sc{gnu} compiler with the new ABI.
 @end table
 
 @item --help
@@ -1894,7 +1900,7 @@ c++filt @var{option} @var{symbol}
 
 @smallexample
 addr2line [ -b @var{bfdname} | --target=@var{bfdname} ]
-          [ -C | --demangle ]
+          [ -C | --demangle[=@var{style} ]
           [ -e @var{filename} | --exe=@var{filename} ]
           [ -f | --functions ] [ -s | --basename ]
           [ -H | --help ] [ -V | --version ]
@@ -1941,12 +1947,14 @@ Specify that the object-code format for the object files is
 @var{bfdname}.
 
 @item -C
-@itemx --demangle
+@itemx --demangle[=@var{style}]
 @cindex demangling in objdump
 Decode (@dfn{demangle}) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
-makes C++ function names readable.  @xref{c++filt}, for more information
-on demangling.
+makes C++ function names readable.  Different compilers have different
+mangling styles. The optional demangling style argument can be used to 
+choose an appropriate demangling style for your compiler. @xref{c++filt}, 
+for more information on demangling.
 
 @item -e @var{filename}
 @itemx --exe=@var{filename}
@@ -1960,7 +1968,6 @@ Display function names as well as file and line number information.
 @item -s
 @itemx --basenames
 Display only the base of each file name.
-@end table
 
 @node nlmconv
 @chapter nlmconv

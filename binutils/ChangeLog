@@ -1,3 +1,11 @@
+2000-07-05  Kenneth Block  <krblock@computer.org>
+
+        * binutils/nm.c: Add optional style to demangle switch.
+        * binutils/objdump.c: Add optional style to demangle switch.
+        * binutils/addr2line.c: Add optional style to demangle switch.
+        * binutils/binutils.texi: Document optional style to demangle
+	switch.
+
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* MAINTAINERS: Add self as CRIS port maintainer.

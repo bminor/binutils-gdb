@@ -51,7 +51,7 @@ static asymbol **syms;		/* Symbol table.  */
 static struct option long_options[] =
 {
   {"basenames", no_argument, NULL, 's'},
-  {"demangle", no_argument, NULL, 'C'},
+  {"demangle", optional_argument, NULL, 'C'},
   {"exe", required_argument, NULL, 'e'},
   {"functions", no_argument, NULL, 'f'},
   {"target", required_argument, NULL, 'b'},
@@ -75,7 +75,7 @@ usage (stream, status)
 {
   fprintf (stream, _("\
 Usage: %s [-CfsHV] [-b bfdname] [--target=bfdname]\n\
-       [-e executable] [--exe=executable] [--demangle]\n\
+       [-e executable] [--exe=executable] [--demangle[=style]]\n\
        [--basenames] [--functions] [addr addr ...]\n"),
 	   program_name);
   list_supported_targets (program_name, stream);
@@ -301,6 +301,17 @@ main (argc, argv)
 	  break;
 	case 'C':
 	  do_demangle = true;
+	  if (optarg != NULL)
+	    {
+	      enum demangling_styles style;
+	      
+	      style = cplus_demangle_name_to_style (optarg);
+	      if (style == unknown_demangling) 
+		fatal (_("unknown demangling style `%s'"),
+		       optarg);
+	      
+	      cplus_demangle_set_style (style);
+           }
 	  break;
 	case 'e':
 	  filename = optarg;

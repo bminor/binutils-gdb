@@ -37,6 +37,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldfile.h"
 #include "ldver.h"
 #include "ldemul.h"
+#include "demangle.h"
 
 #ifndef PATH_SEPARATOR
 #if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN32__))
@@ -272,8 +273,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Output cross reference table"), TWO_DASHES },
   { {"defsym", required_argument, NULL, OPTION_DEFSYM},
       '\0', N_("SYMBOL=EXPRESSION"), N_("Define a symbol"), TWO_DASHES },
-  { {"demangle", no_argument, NULL, OPTION_DEMANGLE},
-      '\0', NULL, N_("Demangle symbol names"), TWO_DASHES },
+  { {"demangle", optional_argument, NULL, OPTION_DEMANGLE},
+      '\0', N_("[=STYLE]"), N_("Demangle symbol names [using STYLE]"), TWO_DASHES },
   { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
       '\0', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
@@ -594,6 +595,17 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_DEMANGLE:
 	  demangling = true;
+	  if (optarg != NULL)
+	    {
+	      enum demangling_styles style;
+	      
+	      style = cplus_demangle_name_to_style (optarg);
+	      if (style == unknown_demangling) 
+		einfo (_("%F%P: unknown demangling style `%s'"),
+		       optarg);
+	      
+	      cplus_demangle_set_style (style);
+           }
 	  break;
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;

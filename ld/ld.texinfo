@@ -852,17 +852,19 @@ space between @var{symbol}, the equals sign (``@key{=}''), and
 @var{expression}.
 
 @cindex demangling, from command line
-@kindex --demangle
+@kindex --demangle[=@var{style}]
 @kindex --no-demangle
-@item --demangle
+@item --demangle[=@var{style}]
 @itemx --no-demangle
 These options control whether to demangle symbol names in error messages
 and other output.  When the linker is told to demangle, it tries to
 present symbol names in a readable fashion: it strips leading
 underscores if they are used by the object file format, and converts C++
-mangled symbol names into user readable names.  The linker will demangle
-by default unless the environment variable @samp{COLLECT_NO_DEMANGLE} is
-set.  These options may be used to override the default.
+mangled symbol names into user readable names.  Different compilers have 
+different mangling styles.  The optional demangling style argument can be used 
+to choose an appropriate demangling style for your compiler.  The linker will 
+demangle by default unless the environment variable @samp{COLLECT_NO_DEMANGLE}
+is set.  These options may be used to override the default.
 
 @cindex dynamic linker, from command line
 @kindex --dynamic-linker @var{file}
@@ -1071,6 +1073,11 @@ specifies the first set of directories to search.  The
 @code{-rpath-link} option may specify a sequence of directory names
 either by specifying a list of names separated by colons, or by
 appearing multiple times.
+
+This option should be used with caution as it overrides the search path
+that may have been hard compiled into a shared library. In such a case it
+is possible to use unintentionally a different search path than the
+runtime linker would do.
 
 The linker uses the following search paths to locate required shared
 libraries.
