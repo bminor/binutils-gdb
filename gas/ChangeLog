@@ -1,3 +1,12 @@
+Mon May  8 21:44:13 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* subsegs.h (seg_info): Provide dummy version for
+	non-BFD_ASSEMBLER, non-MANY_SEGMENTS configuration.  It should
+	never get invoked, but this is easier than conditionalizing some
+	of the uses.
+	(struct seg_info_trash): Dummy type used by above to make code
+	compile.
+
 Fri May  5 14:47:13 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/obj-coff.h (SEPARATE_STAB_SECTIONS): Define to 1, not
