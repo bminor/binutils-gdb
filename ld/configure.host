@@ -189,12 +189,12 @@ powerpc*-*-linux-gnu*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` /usr/lib/crtn.o'
   ;;
 
-s390x-*-linux)
-  HOSTING_CRT0='-dynamic-linker /lib/ld.so.1 /usr/lib/crt1.o /usr/lib/crti.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; elif [ -f /usr/lib/crtbegin.o ]; then echo /usr/lib/crtbegin.o; else gcc --print-file-name=crtbegin.o; fi`'
+s390x-*-linux-gnu*)
+  HOSTING_CRT0='-dynamic-linker /lib/ld64.so.1 /usr/lib/crt1.o /usr/lib/crti.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; elif [ -f /usr/lib/crtbegin.o ]; then echo /usr/lib/crtbegin.o; else gcc --print-file-name=crtbegin.o; fi`'
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; elif [ -f /usr/lib/crtend.o ]; then echo /usr/lib/crtend.o; else gcc --print-file-name=crtend.o; fi` /usr/lib/crtn.o'
   ;;
 
-s390-*-linux)
+s390-*-linux-gnu*)
   HOSTING_CRT0='-dynamic-linker /lib/ld.so.1 /usr/lib/crt1.o /usr/lib/crti.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; elif [ -f /usr/lib/crtbegin.o ]; then echo /usr/lib/crtbegin.o; else gcc --print-file-name=crtbegin.o; fi`'
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; elif [ -f /usr/lib/crtend.o ]; then echo /usr/lib/crtend.o; else gcc --print-file-name=crtend.o; fi` /usr/lib/crtn.o'
   ;;
