@@ -20,8 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 /*doc*
@@ -298,6 +298,7 @@ extern bfd_target oasys_vec;
 extern bfd_target m88k_bcs_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
+extern bfd_target i386aout_vec;
 extern bfd_target a29kcoff_big_vec;
 
 #ifdef SELECT_VECS
@@ -343,6 +344,7 @@ extern bfd_target DEFAULT_VECTOR;
 #define SREC_VEC                srec_vec
 #define M68KCOFF_VEC            m68kcoff_vec
 #define I386COFF_VEC            i386coff_vec
+#define	I386AOUT_VEC		i386aout_vec
 #define A29KCOFF_BIG_VEC	a29kcoff_big_vec
 #endif
 
@@ -354,6 +356,10 @@ bfd_target *target_vector[] = {
 
 #ifdef  I386COFF_VEC
         &I386COFF_VEC,
+#endif
+
+#ifdef	I386AOUT_VEC
+	&I386AOUT_VEC,
 #endif
 
 #ifdef ECOFF_LITTLE_VEC

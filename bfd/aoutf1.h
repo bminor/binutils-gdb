@@ -18,12 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <ansidecl.h>
-#include <sysdep.h>
-#include <a.out.sun4.h>
 #include "bfd.h"
-#include "libaout.h"           
+#include "sysdep.h"
 #include "libbfd.h"
+
+#include <a.out.sun4.h>
+#include "libaout.h"           
 
 #include "aout64.h"
 #include "stab.gnu.h"
@@ -62,19 +62,22 @@ bfd_target *
 DEFUN(NAME(sunos,object_p), (abfd),
      bfd *abfd)
 {
-  unsigned char magicbuf[4];	/* Raw bytes of magic number from file */
-  unsigned long magic;		/* Swapped magic number */
+  struct external_exec exec_bytes;	/* Raw exec header from file */
+  struct internal_exec exec;		/* Cleaned-up exec header */
 
-  bfd_error = system_call_error;
-
-  if (bfd_read ((PTR)magicbuf, 1 , 4, abfd) !=
-      sizeof (magicbuf))
+  if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
+      != EXEC_BYTES_SIZE) {
+    bfd_error = wrong_format;
     return 0;
-  magic = bfd_h_get_32 (abfd, magicbuf);
+  }
 
-  if (N_BADMAG (*((struct internal_exec *) &magic))) return 0;
+  exec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
 
-  return NAME(aout,some_aout_object_p) (abfd, sunos4_callback);
+  if (N_BADMAG (exec)) return 0;
+
+  NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);
+
+  return NAME(aout,some_aout_object_p) (abfd, &exec, sunos4_callback);
 }
 
   /* Determine the size of a relocation entry, based on the architecture */

@@ -22,9 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define A29K 1
 
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
 #include "amdcoff.h"

@@ -1,5 +1,5 @@
-#include <sysdep.h>
-#include <bfd.h>
+#include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 static bfd_arch_info_type arch_info_struct = 

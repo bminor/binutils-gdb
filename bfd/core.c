@@ -23,8 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 Buff output this facinating topic
 */
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 /** Some core file info commands */

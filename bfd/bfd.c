@@ -130,13 +130,9 @@ Symbol table for output BFD
 
 $  struct symbol_cache_entry  **outsymbols;             
 
-Architecture of object machine, eg m68k 
+Pointer to structure which contains architecture information
 
-$  enum bfd_architecture obj_arch;
-
-Particular machine within arch, e.g. 68010
-
-$  unsigned long obj_machine;
+$  struct bfd_arch_info *arch_info;
 
 Stuff only useful for archives:
 
@@ -162,9 +158,11 @@ $};
 *---
 
 */
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
+
+extern char *strerror();
 
 
 short _bfd_host_big_endian = 0x0100;
@@ -218,20 +216,6 @@ bfd_error_vector_type bfd_error_vector =
   {
   bfd_nonrepresentable_section 
   };
-
-#if  !defined(ANSI_LIBRARIES) && !defined(__STDC__) || HOST_SYS==SUN4_SYS
-char *
-strerror (code)
-     int code;
-{
-  extern int sys_nerr;
-  extern char *sys_errlist[];
-
-  return (((code < 0) || (code >= sys_nerr)) ? "(unknown error)" :
-          sys_errlist [code]);
-}
-#endif /* not ANSI_LIBRARIES */
-
 
 char *
 bfd_errmsg (error_tag)
@@ -430,6 +414,10 @@ bfd_get_mtime (abfd)
 
 #define bfd_coff_swap_lineno_in(a,e,i) \
         BFD_SEND ( a, _bfd_coff_swap_lineno_in, (a,e,i))
+
+#define bfd_set_arch_mach(abfd, arch, mach)\
+        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+
 *-
 
 */

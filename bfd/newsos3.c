@@ -23,9 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ARCH 32
 #define BYTES_IN_WORD 4
 
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "aout64.h"
 

@@ -18,9 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 #include <a.out.h>
@@ -129,18 +128,21 @@ DEFUN(NAME(host_aout,object_p), (abfd),
      bfd *abfd)
 {
   unsigned char magicbuf[4];	/* Raw bytes of magic number from file */
-  unsigned long magic;		/* Swapped magic number */
+  struct external_exec exec_bytes;
+  struct internal_exec exec;
 
-  bfd_error = system_call_error;
-
-  if (bfd_read ((PTR)magicbuf, 1, sizeof (magicbuf), abfd) !=
-      sizeof (magicbuf))
+  if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
+      != EXEC_BYTES_SIZE) {
+    bfd_error = wrong_format;
     return 0;
-  magic = bfd_h_get_32 (abfd, magicbuf);
+  }
 
-  if (N_BADMAG (*((struct exec *) &magic))) return 0;
+  exec.a_magic = bfd_h_get_32 (abfd, exec_bytes.a_magic);
 
-  return NAME(aout,some_aout_object_p) (abfd, NAME(host_aout,callback));
+  if (N_BADMAG (exec)) return 0;
+
+  NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);
+  return NAME(aout,some_aout_object_p) (abfd, &exec, NAME(host_aout,callback));
 }
 
 /* Set parameters about this a.out file that are machine-dependent.
@@ -177,11 +179,15 @@ DEFUN(NAME(host_aout,callback), (abfd),
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
 
 #ifdef HOST_MACHINE_ARCH
-  abfd->obj_arch = HOST_MACHINE_ARCH;
-#endif
+  bfd_default_set_arch_mach(abfd,
+			    HOST_MACHINE_ARCH, 
 #ifdef HOST_MACHINE_MACHINE
-  abfd->obj_machine = HOST_MACHINE_MACHINE;
-#endif
+  			    HOST_MACHINE_MACHINE
+#else  /* not HOST_MACHINE_MACHINE */
+			    0
+#endif /* not HOST_MACHINE_MACHINE */
+			     );
+#endif /* HOST_MACHINE_ARCH */
 
   obj_reloc_entry_size (abfd) = sizeof (struct relocation_info);
   return abfd->xvec;
@@ -236,7 +242,7 @@ DEFUN(NAME(host_aout,write_object_contents), (abfd),
 {
 /* This works because we are on the host system */
 #define	EXEC_BYTES_SIZE		(sizeof (struct exec))
-#define	EXTERNAL_LIST_SIZE	(sizeof (struct nlist))
+#define	EXTERNAL_NLIST_SIZE	(sizeof (struct nlist))
   size_t data_pad = 0;
   unsigned char exec_bytes[EXEC_BYTES_SIZE];
   struct exec *execp = (struct exec *)exec_hdr (abfd);

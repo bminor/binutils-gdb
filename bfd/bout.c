@@ -20,8 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
 #include "bout.h"
@@ -35,56 +35,101 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
 
 
-#define	EXEC_BYTES_SIZE		(sizeof (struct exec))
 PROTO (static boolean, b_out_squirt_out_relocs,(bfd *abfd, asection *section));
 PROTO (static bfd_target *, b_out_callback, (bfd *));
 
 PROTO (boolean, aout_32_slurp_symbol_table, (bfd *abfd));
 PROTO (void , aout_32_write_syms, ());
 
-PROTO (static void, swap_exec_header, (bfd *abfd, struct internal_exec *execp));
+/* Swaps the information in an executable header taken from a raw byte
+   stream memory image, into the internal exec_header structure.  */
+
+PROTO(void, bout_swap_exec_header_in,
+      (bfd *abfd,
+      struct external_exec *raw_bytes,
+      struct internal_exec *execp));
+	 
+void
+DEFUN(bout_swap_exec_header_in,(abfd, raw_bytes, execp),
+      bfd *abfd AND
+      struct external_exec *raw_bytes AND
+      struct internal_exec *execp)
+{
+  struct external_exec *bytes = (struct external_exec *)raw_bytes;
+
+  /* Now fill in fields in the execp, from the bytes in the raw data.  */
+  execp->a_info   = bfd_h_get_32 (abfd, bytes->e_info);
+  execp->a_text   = GET_WORD (abfd, bytes->e_text);
+  execp->a_data   = GET_WORD (abfd, bytes->e_data);
+  execp->a_bss    = GET_WORD (abfd, bytes->e_bss);
+  execp->a_syms   = GET_WORD (abfd, bytes->e_syms);
+  execp->a_entry  = GET_WORD (abfd, bytes->e_entry);
+  execp->a_trsize = GET_WORD (abfd, bytes->e_trsize);
+  execp->a_drsize = GET_WORD (abfd, bytes->e_drsize);
+  execp->a_tload  = GET_WORD (abfd, bytes->e_tload);
+  execp->a_dload  = GET_WORD (abfd, bytes->e_dload);
+  execp->a_talign = bytes->e_talign[0];
+  execp->a_dalign = bytes->e_dalign[0];
+  execp->a_balign = bytes->e_balign[0];
+}
+
+/* Swaps the information in an internal exec header structure into the
+   supplied buffer ready for writing to disk.  */
+
+PROTO(void, bout_swap_exec_header_out,
+	  (bfd *abfd,
+	   struct internal_exec *execp,
+	   struct external_exec *raw_bytes));
+void
+DEFUN(bout_swap_exec_header_out,(abfd, execp, raw_bytes),
+     bfd *abfd AND
+     struct internal_exec *execp AND 
+     struct external_exec *raw_bytes)
+{
+  struct external_exec *bytes = (struct external_exec *)raw_bytes;
+
+  /* Now fill in fields in the raw data, from the fields in the exec struct. */
+  bfd_h_put_32 (abfd, execp->a_info  , bytes->e_info);
+  PUT_WORD (abfd, execp->a_text  , bytes->e_text);
+  PUT_WORD (abfd, execp->a_data  , bytes->e_data);
+  PUT_WORD (abfd, execp->a_bss   , bytes->e_bss);
+  PUT_WORD (abfd, execp->a_syms  , bytes->e_syms);
+  PUT_WORD (abfd, execp->a_entry , bytes->e_entry);
+  PUT_WORD (abfd, execp->a_trsize, bytes->e_trsize);
+  PUT_WORD (abfd, execp->a_drsize, bytes->e_drsize);
+  PUT_WORD (abfd, execp->a_tload , bytes->e_tload);
+  PUT_WORD (abfd, execp->a_dload , bytes->e_dload);
+  bytes->e_talign[0] = execp->a_talign;
+  bytes->e_dalign[0] = execp->a_dalign;
+  bytes->e_balign[0] = execp->a_balign;
+  bytes->e_unused[0] = 0;		/* Clean structs are godly structs */
+}
 
 
 static bfd_target *
-b_out_little_object_p (abfd)
+b_out_object_p (abfd)
      bfd *abfd;
 {
-  unsigned char magicbytes[LONG_SIZE];
   struct internal_exec anexec;
-  
-  if (bfd_read ((PTR)magicbytes, 1, LONG_SIZE, abfd) != LONG_SIZE) {
-    bfd_error = system_call_error;
+  struct external_exec exec_bytes;
+
+  if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
+      != EXEC_BYTES_SIZE) {
+    bfd_error = wrong_format;
     return 0;
   }
-  anexec.a_magic = _do_getl32 (magicbytes);
+
+  anexec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
 
   if (N_BADMAG (anexec)) {
     bfd_error = wrong_format;
     return 0;
   }
-  return aout_32_some_aout_object_p (abfd, b_out_callback);
+
+  bout_swap_exec_header_in (abfd, &exec_bytes, &anexec);
+  return aout_32_some_aout_object_p (abfd, &anexec, b_out_callback);
 }
 
-static bfd_target *
-b_out_big_object_p (abfd)
-     bfd *abfd;
-{
-  unsigned char magicbytes[LONG_SIZE];
-  struct internal_exec anexec;
-
-  if (bfd_read ((PTR)magicbytes, 1, LONG_SIZE, abfd) != LONG_SIZE) {
-    bfd_error = system_call_error;
-    return 0;
-  }
-
-  anexec.a_magic = _do_getb32 (magicbytes);
-
-  if (N_BADMAG (anexec)) {
-    bfd_error = wrong_format;
-    return 0;
-  }
-  return aout_32_some_aout_object_p (abfd, b_out_callback);
-}
 
 /* Finish up the opening of a b.out file for reading.  Fill in all the
    fields that are not handled by common code.  */
@@ -93,26 +138,8 @@ static bfd_target *
 b_out_callback (abfd)
      bfd *abfd;
 {
-  struct internal_exec anexec;
-  struct internal_exec *execp = &anexec;
+  struct internal_exec *execp = exec_hdr (abfd);
   unsigned long bss_start;
-
-  /* Reread the exec header, because the common code didn't get all of
-     our extended header.  */
-
-  if (bfd_seek (abfd, 0L, SEEK_SET) < 0) {
-    bfd_error = system_call_error;
-    return 0;
-  }
-
-  /* FIXME, needs to be hacked for character array read-in ala sunos.c.  */
-  if (bfd_read ((PTR) execp, 1, sizeof (struct internal_exec), abfd)
-      != sizeof (struct internal_exec)) {
-    bfd_error = wrong_format;
-    return 0;
-  }
-
-  swap_exec_header (abfd, execp);
 
   /* Architecture and machine type */
   bfd_set_arch_mach(abfd, 
@@ -121,8 +148,8 @@ b_out_callback (abfd)
 		    );
 
   /* The positions of the string table and symbol table.  */
-  obj_str_filepos (abfd) = N_STROFF (anexec);
-  obj_sym_filepos (abfd) = N_SYMOFF (anexec);
+  obj_str_filepos (abfd) = N_STROFF (*execp);
+  obj_sym_filepos (abfd) = N_SYMOFF (*execp);
 
   /* The alignments of the sections */
   obj_textsec (abfd)->alignment_power = execp->a_talign;
@@ -130,41 +157,41 @@ b_out_callback (abfd)
   obj_bsssec  (abfd)->alignment_power = execp->a_balign;
 
   /* The starting addresses of the sections.  */
-  obj_textsec (abfd)->vma = anexec.a_tload;
-  obj_datasec (abfd)->vma = anexec.a_dload;
-  bss_start = anexec.a_dload + anexec.a_data; /* BSS = end of data section */
-  obj_bsssec (abfd)->vma = i960_align (bss_start, anexec.a_balign);
+  obj_textsec (abfd)->vma = execp->a_tload;
+  obj_datasec (abfd)->vma = execp->a_dload;
+  bss_start = execp->a_dload + execp->a_data; /* BSS = end of data section */
+  obj_bsssec (abfd)->vma = i960_align (bss_start, execp->a_balign);
 
   /* The file positions of the sections */
-  obj_textsec (abfd)->filepos = N_TXTOFF(anexec);
-  obj_datasec (abfd)->filepos = N_DATOFF(anexec);
+  obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
+  obj_datasec (abfd)->filepos = N_DATOFF(*execp);
 
   /* The file positions of the relocation info */
-  obj_textsec (abfd)->rel_filepos = N_TROFF(anexec);
-  obj_datasec (abfd)->rel_filepos =  N_DROFF(anexec);
+  obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
+  obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);
 
   return abfd->xvec;
 }
 
+struct container {
+    struct aoutdata a;
+    struct internal_exec e;
+};
 
 static boolean
 b_out_mkobject (abfd)
      bfd *abfd;
 {
-  PTR  rawptr;
+  struct container *rawptr;
 
-  bfd_error = system_call_error;
-
-  /* Use an intermediate variable for clarity */
-  rawptr = (PTR) zalloc (sizeof (struct aoutdata) + sizeof (struct internal_exec));
-
-  if (rawptr == (PTR)NULL) {
+  rawptr = (struct container *) bfd_zalloc (abfd, sizeof (struct container));
+  if (rawptr == NULL) {
     bfd_error = no_memory;
     return false;
   }
 
-  set_tdata(abfd, (struct aoutdata *) rawptr);
-  exec_hdr (abfd) = (struct internal_exec *) ( (char*)rawptr + sizeof (struct aoutdata));
+  set_tdata (abfd, &rawptr->a);
+  exec_hdr (abfd) = &rawptr->e;
 
   /* For simplicity's sake we just make all the sections right here. */
   obj_textsec (abfd) = (asection *)NULL;
@@ -182,9 +209,9 @@ static boolean
 b_out_write_object_contents (abfd)
      bfd *abfd;
 {
-  struct internal_exec swapped_hdr;
+  struct external_exec swapped_hdr;
 
-  exec_hdr (abfd)->a_magic = BMAGIC;
+  exec_hdr (abfd)->a_info = BMAGIC;
 
   exec_hdr (abfd)->a_text = obj_textsec (abfd)->size;
   exec_hdr (abfd)->a_data = obj_datasec (abfd)->size;
@@ -203,13 +230,10 @@ b_out_write_object_contents (abfd)
   exec_hdr (abfd)->a_tload = obj_textsec (abfd)->vma;
   exec_hdr (abfd)->a_dload = obj_datasec (abfd)->vma;
 
-  /* FIXME, turn the header into bytes here, to avoid problems with
-     sizes and alignments of its fields.  */
-  swapped_hdr = *exec_hdr(abfd);
-  swap_exec_header (abfd, &swapped_hdr);
+  bout_swap_exec_header_out (abfd, exec_hdr (abfd), &swapped_hdr);
 
   bfd_seek (abfd, 0L, SEEK_SET);
-  bfd_write ((PTR) &swapped_hdr, 1, sizeof (struct internal_exec), abfd);
+  bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd);
 
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0) 
@@ -227,26 +251,6 @@ b_out_write_object_contents (abfd)
       if (!b_out_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
     }
   return true;
-}
-
-static void
-swap_exec_header (abfd, execp)
-     bfd *abfd;
-     struct internal_exec *execp;
-{
-#define swapme(field)	field = bfd_h_get_32 (abfd, (unsigned char *)&field);
-  swapme (execp->a_magic);
-  swapme (execp->a_text);
-  swapme (execp->a_data);
-  swapme (execp->a_bss);
-  swapme (execp->a_syms);
-  swapme (execp->a_entry);
-  swapme (execp->a_trsize);
-  swapme (execp->a_drsize);
-  swapme (execp->a_tload);
-  swapme (execp->a_dload);
-  /* talign, dalign, and balign are one-byte fields and don't swap.  */
-#undef swapme
 }
 
 /** Some reloc hackery */
@@ -716,7 +720,7 @@ bfd_target b_out_vec_big_host =
 
 _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
-    {_bfd_dummy_target, b_out_big_object_p, /* bfd_check_format */
+    {_bfd_dummy_target, b_out_object_p, /* bfd_check_format */
        bfd_generic_archive_p, _bfd_dummy_target},
     {bfd_false, b_out_mkobject,	/* bfd_set_format */
        _bfd_generic_mkarchive, bfd_false},
@@ -743,7 +747,7 @@ bfd_target b_out_vec_little_host =
 _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
 _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 	 
-    {_bfd_dummy_target, b_out_little_object_p, /* bfd_check_format */
+    {_bfd_dummy_target, b_out_object_p, /* bfd_check_format */
        bfd_generic_archive_p, _bfd_dummy_target},
     {bfd_false, b_out_mkobject,	/* bfd_set_format */
        _bfd_generic_mkarchive, bfd_false},
@@ -751,4 +755,3 @@ _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs 
        _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(aout_32)
 };
-
