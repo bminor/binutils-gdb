@@ -347,7 +347,7 @@ ALLDEPFILES = "{s}"29k-share:udi:udip2soc.c "{s}"29k-share:udi:udr.c \Option-d
 	"{s}"nindy-share:Onindy.c "{s}"nindy-share:nindy.c \Option-d
 	"{s}"nindy-share:ttyflush.c "{s}"nindy-tdep.c \Option-d
 	"{s}"ns32k-pinsn.c "{s}"ns32km3-nat.c "{s}"osfsolib.c \Option-d
-	"{s}"paread.c "{s}"procfs.c "{s}"pyr-pinsn.c "{s}"pyr-tdep.c "{s}"pyr-xdep.c \Option-d
+	"{s}"somread.c "{s}"procfs.c "{s}"pyr-pinsn.c "{s}"pyr-tdep.c "{s}"pyr-xdep.c \Option-d
 	"{s}"remote-adapt.c "{s}"remote-bug.c "{s}"remote-e7000.c "{s}"remote-eb.c "{s}"remote-es.c \Option-d
 	"{s}"remote-hms.c "{s}"remote-mips.c \Option-d
 	"{s}"remote-mm.c "{s}"remote-mon.c "{s}"remote-nindy.c "{s}"remote-sim.c \Option-d
@@ -1349,7 +1349,7 @@ MAKEOVERRIDES=
 "{o}"osfsolib.c.o \Option-f  "{s}"osfsolib.c {command_h} {defs_h} {gdbcore_h} {inferior_h} \Option-d
 	"{s}"objfiles.h "{s}"regex.h "{s}"symfile.h "{s}"target.h "{s}"language.h
 
-"{o}"paread.c.o \Option-f  "{s}"paread.c {bfd_h} "{s}"buildsym.h "{s}"complaints.h {defs_h} \Option-d
+"{o}"somread.c.o \Option-f  "{s}"somread.c {bfd_h} "{s}"buildsym.h "{s}"complaints.h {defs_h} \Option-d
 	"{s}"gdb-stabs.h "{s}"objfiles.h "{s}"symfile.h {symtab_h}
 
 "{o}"parse.c.o \Option-f  "{s}"parse.c {command_h} {defs_h} {expression_h} {frame_h} \Option-d

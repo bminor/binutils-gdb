@@ -144,6 +144,11 @@ static unsigned int next_file_string_table_offset;
    text addresses at location 0. */
 
 static int symfile_relocatable = 0;
+
+  /* If this is nonzero, N_LBRAC, N_RBRAC, and N_SLINE entries are relative
+     to the function start address.  */
+
+static int block_address_function_relative = 0;
 
 /* This is the lowest text address we have yet encountered.  */
 static CORE_ADDR lowest_text_address;
@@ -483,7 +488,7 @@ record_minimal_symbol (name, address, type, objfile)
       break;
   }
 
-  if (ms_type == mst_file_text || ms_type == mst_text
+  if ((ms_type == mst_file_text || ms_type == mst_text)
       && address < lowest_text_address)
     lowest_text_address = address;
 
@@ -527,6 +532,16 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   if (strcmp (&objfile->name[val-2], ".o") == 0
       || strcmp (&objfile->name[val-4], ".nlm") == 0)
     symfile_relocatable = 1;
+
+  /* This is true for Solaris (and all other systems which put stabs
+     in sections, hopefully, since it would be silly to do things
+     differently from Solaris), and false for SunOS4 and other a.out
+     file formats.  */
+  block_address_function_relative =
+    ((0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "nlm", 3)));
 
   sym_bfd = objfile->obfd;
   val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
@@ -1222,7 +1237,6 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      int number_dependencies;
 {
   int i;
-  struct partial_symtab *p1;
   struct objfile *objfile = pst -> objfile;
 
   if (capping_symbol_offset != -1)
@@ -1307,6 +1321,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      own ending address to our starting address, nor to set addresses on
      `dependency' files that have both textlow and texthigh zero.  */
   if (pst->textlow) {
+    struct partial_symtab *p1;
+
     ALL_OBJFILE_PSYMTABS (objfile, p1) {
       if (p1->texthigh == 0  && p1->textlow != 0 && p1 != pst) {
 	p1->texthigh = pst->textlow;
@@ -1712,10 +1728,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      used to relocate these symbol types rather than SECTION_OFFSETS.  */
   static CORE_ADDR function_start_offset;
 
-  /* If this is nonzero, N_LBRAC, N_RBRAC, and N_SLINE entries are relative
-     to the function start address.  */
-  int block_address_function_relative;
-
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
      file.  Used to detect the SunPRO solaris compiler.  */
   static int n_opt_found;
@@ -1723,16 +1735,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   /* The stab type used for the definition of the last function.
      N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
   static int function_stab_type = 0;
-
-  /* This is true for Solaris (and all other systems which put stabs
-     in sections, hopefully, since it would be silly to do things
-     differently from Solaris), and false for SunOS4 and other a.out
-     file formats.  */
-  block_address_function_relative =
-    ((0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "nlm", 3)));
 
   if (!block_address_function_relative)
     /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
@@ -2379,7 +2381,7 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
     error ("stabsect_build_psymtabs:  Found stabs (%s), but not string section (%s)",
 	   stab_name, stabstr_name);
 
-  DBX_SYMFILE_INFO (objfile) = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
+  objfile->sym_stab_info = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
   memset (DBX_SYMFILE_INFO (objfile), 0, sizeof (struct dbx_symfile_info));
 
   DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
@@ -2420,8 +2422,8 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
   dbx_symfile_read (objfile, section_offsets, 0);
 }
 
-/* Scan and build partial symbols for a PA symbol file.
-   This PA file has already been processed to get its minimal symbols.
+/* Scan and build partial symbols for a SOM symbol file.
+   This SOM file has already been processed to get its minimal symbols.
 
    OBJFILE is the object file we are reading symbols from.
    ADDR is the address relative to which the symbols are (e.g.
@@ -2432,7 +2434,7 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
    */
 
 void
-pastab_build_psymtabs (objfile, section_offsets, mainline)
+somstab_build_psymtabs (objfile, section_offsets, mainline)
      struct objfile *objfile;
      struct section_offsets *section_offsets;
      int mainline;
@@ -2443,8 +2445,8 @@ pastab_build_psymtabs (objfile, section_offsets, mainline)
   /* This is needed to debug objects assembled with gas2.  */
   processing_acc_compilation = 1;
 
-  /* In a PA file, we've already installed the minimal symbols that came
-     from the PA (non-stab) symbol table, so always act like an
+  /* In a SOM file, we've already installed the minimal symbols that came
+     from the SOM (non-stab) symbol table, so always act like an
      incremental load here. */
 
   dbx_symfile_read (objfile, section_offsets, mainline);

@@ -215,7 +215,6 @@ objfiles.c
 objfiles.h
 os9kread.c
 osfsolib.c
-paread.c
 parse.c
 parser-defs.h
 partial-stab.h
@@ -261,6 +260,7 @@ sh-tdep.c
 signals.h
 solib.c
 solib.h
+somread.c
 source.c
 sp64-tdep.c
 sparc-nat.c

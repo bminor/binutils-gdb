@@ -1,3 +1,13 @@
+Sun Jun 26 23:54:08 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somread.c: Renamed from paread.c.  Changed function names and
+	comments to reflect that this file deals with SOM (an object file
+	format), rather than the PA (a cpu).
+	(Makefile.in): Chaned appropriately.
+	(config/pa/hppabsd.mh, config/pa/hppahpux.mh): Likewise.
+	* dbxread.c (somstab_build_psymtabs): Renamed from
+	pastab_build_psymtabs.
+
 Fri Jun 24 08:15:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* core-sol2.c:  New file to handle ELF and BCP core file flavours.
