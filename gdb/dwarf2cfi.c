@@ -860,7 +860,7 @@ frame_state_for (struct context *context, struct frame_state *fs)
     }
   else
     internal_error (__FILE__, __LINE__,
-		    "%s(): Internal error: fde->cie_ptr==NULL !", __func__);
+		    "%s(): Internal error: fde->cie_ptr==NULL !", "?func?");
 }
 
 static void
@@ -1361,7 +1361,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	      orig_context->reg[fs->regs.reg[i].loc.reg].loc.addr;
 	  default:
 	    internal_error (__FILE__, __LINE__,
-			    "%s: unknown register rule", __func__);
+			    "%s: unknown register rule", "?func?");
 	  }
 	break;
       case REG_SAVED_EXP:
@@ -1379,7 +1379,7 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	break;
       default:
 	internal_error (__FILE__, __LINE__,
-			"%s: unknown register rule", __func__);
+			"%s: unknown register rule", "?func?");
       }
   get_reg ((char *) &context->ra, context, fs->retaddr_column);
   unwind_tmp_obstack_free ();
