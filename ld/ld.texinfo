@@ -69,7 +69,7 @@ under the terms of the GNU Free Documentation License, Version 1.1
 or any later version published by the Free Software Foundation;
 with no Invariant Sections, with no Front-Cover Texts, and with no
 Back-Cover Texts.  A copy of the license is included in the
-section entitled "GNU Free Documentation License".
+section entitled ``GNU Free Documentation License''.
 
 Permission is granted to process this file through Tex and print the
 results, provided the printed document carries copying permission
@@ -112,7 +112,7 @@ under the terms of the GNU Free Documentation License, Version 1.1
 or any later version published by the Free Software Foundation;
 with no Invariant Sections, with no Front-Cover Texts, and with no
 Back-Cover Texts.  A copy of the license is included in the
-section entitled "GNU Free Documentation License".
+section entitled ``GNU Free Documentation License''.
 @c man end
 
 @end titlepage
@@ -126,7 +126,7 @@ This file documents the @sc{gnu} linker ld version @value{VERSION}.
 
 This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the
-section entitled "GNU Free Documentation License".
+section entitled ``GNU Free Documentation License''.
 
 @menu
 * Overview::                    Overview
@@ -144,6 +144,12 @@ section entitled "GNU Free Documentation License".
 @end ifset
 @ifset I960
 * i960::                        ld and the Intel 960 family
+@end ifset
+@ifset ARM
+* ARM::				ld and the ARM family
+@end ifset
+@ifset HPPA
+* HPPA ELF32::                  ld and HPPA 32-bit ELF
 @end ifset
 @ifset TICOFF
 * TI COFF::                     ld and the TI COFF
@@ -280,7 +286,7 @@ and the script command language.  If @emph{no} binary input files at all
 are specified, the linker does not produce any output, and issues the
 message @samp{No input files}.
 
-If the linker can not recognize the format of an object file, it will
+If the linker cannot recognize the format of an object file, it will
 assume that it is a linker script.  A script specified in this way
 augments the main linker script used for the link (either the default
 linker script or the one specified by using @samp{-T}).  This feature
@@ -298,7 +304,7 @@ option that requires them.
 
 For options whose names are multiple letters, either one dash or two can
 precede the option name; for example, @samp{-trace-symbol} and
-@samp{--trace-symbol} are equivalent.  Note - there is one exception to
+@samp{--trace-symbol} are equivalent.  Note---there is one exception to
 this rule.  Multiple letter options that start with a lower case 'o' can
 only be preceeded by two dashes.  This is to reduce confusion with the
 @samp{-o} option.  So for example @samp{-omagic} sets the output file
@@ -312,8 +318,8 @@ immediately following the option that requires them.  For example,
 Unique abbreviations of the names of multiple-letter options are
 accepted.
 
-Note - if the linker is being invoked indirectly, via a compiler driver
-(eg @samp{gcc}) then all the linker command line options should be
+Note---if the linker is being invoked indirectly, via a compiler driver
+(e.g. @samp{gcc}) then all the linker command line options should be
 prefixed by @samp{-Wl,} (or whatever is appropriate for the particular
 compiler driver) like this:
 
@@ -458,6 +464,7 @@ You can also use the version script to control what symbols should
 be added to the dynamic symbol table if the output format supports it.
 See the description of @samp{--version-script} in @ref{VERSION}.
 
+@ifclear SingleFormat
 @cindex big-endian objects
 @cindex endianness
 @kindex -EB
@@ -468,6 +475,7 @@ Link big-endian objects.  This affects the default output format.
 @kindex -EL
 @item -EL
 Link little-endian objects.  This affects the default output format.
+@end ifclear
 
 @kindex -f
 @kindex --auxiliary
@@ -510,11 +518,15 @@ used to select a subset of the symbols provided by the object
 
 Some older linkers used the @option{-F} option throughout a compilation
 toolchain for specifying object-file format for both input and output
-object files.  The @sc{gnu} linker uses other mechanisms for this
-purpose: the @option{-b}, @option{--format}, @option{--oformat} options, the
+object files.
+@ifclear SingleFormat
+The @sc{gnu} linker uses other mechanisms for this purpose: the
+@option{-b}, @option{--format}, @option{--oformat} options, the 
 @code{TARGET} command in linker scripts, and the @code{GNUTARGET}
-environment variable.  The @sc{gnu} linker will ignore the @option{-F}
-option when not creating an ELF shared object.
+environment variable.
+@end ifclear
+The @sc{gnu} linker will ignore the @option{-F} option when not
+creating an ELF shared object.
 
 @cindex finalization function
 @kindex -fini
@@ -1434,7 +1446,7 @@ the linker script being used by the linker.
 @itemx --version-script=@var{version-scriptfile}
 Specify the name of a version script to the linker.  This is typically
 used when creating shared libraries to specify additional information
-about the version heirarchy for the library being created.  This option
+about the version hierarchy for the library being created.  This option
 is only meaningful on ELF platforms which support shared libraries.
 @xref{VERSION}.
 
@@ -1625,7 +1637,7 @@ those options are only available for ELF systems.
 
 @c man end
 
-@subsection Options specific to i386 PE targets
+@subsection Options Specific to i386 PE Targets
 
 @c man begin OPTIONS
 
@@ -1667,7 +1679,7 @@ file.
 @item --enable-stdcall-fixup
 @itemx --disable-stdcall-fixup
 If the link finds a symbol that it cannot resolve, it will attempt to
-do "fuzzy linking" by looking for another defined symbol that differs
+do ``fuzzy linking'' by looking for another defined symbol that differs
 only in the format of the symbol name (cdecl vs stdcall) and will
 resolve that symbol by linking to the match.  For example, the
 undefined symbol @code{_foo} might be linked to the function
@@ -1750,27 +1762,27 @@ symbols before they are exported.
 
 @kindex --major-image-version
 @item --major-image-version @var{value}
-Sets the major number of the "image version".  Defaults to 1.
+Sets the major number of the ``image version''.  Defaults to 1.
 
 @kindex --major-os-version
 @item --major-os-version @var{value}
-Sets the major number of the "os version".  Defaults to 4.
+Sets the major number of the ``os version''.  Defaults to 4.
 
 @kindex --major-subsystem-version
 @item --major-subsystem-version @var{value}
-Sets the major number of the "subsystem version".  Defaults to 4.
+Sets the major number of the ``subsystem version''.  Defaults to 4.
 
 @kindex --minor-image-version
 @item --minor-image-version @var{value}
-Sets the minor number of the "image version".  Defaults to 0.
+Sets the minor number of the ``image version''.  Defaults to 0.
 
 @kindex --minor-os-version
 @item --minor-os-version @var{value}
-Sets the minor number of the "os version".  Defaults to 0.
+Sets the minor number of the ``os version''.  Defaults to 0.
 
 @kindex --minor-subsystem-version
 @item --minor-subsystem-version @var{value}
-Sets the minor number of the "subsystem version".  Defaults to 0.
+Sets the minor number of the ``subsystem version''.  Defaults to 0.
 
 @cindex DEF files, creating
 @cindex DLLs, creating
@@ -1989,8 +2001,12 @@ subsystem version also.
 @c man begin ENVIRONMENT
 
 You can change the behavior of @command{ld} with the environment variables
-@code{GNUTARGET}, @code{LDEMULATION}, and @code{COLLECT_NO_DEMANGLE}.
+@ifclear SingleFormat
+@code{GNUTARGET},
+@end ifclear
+@code{LDEMULATION} and @code{COLLECT_NO_DEMANGLE}.
 
+@ifclear SingleFormat
 @kindex GNUTARGET
 @cindex default input format
 @code{GNUTARGET} determines the input-file object format if you don't
@@ -2004,6 +2020,7 @@ there is no method of ensuring that the magic number used to specify
 object-file formats is unique.  However, the configuration procedure for
 BFD on each system places the conventional format for that system first
 in the search-list, so ambiguities are resolved in favor of convention.
+@end ifclear
 
 @kindex LDEMULATION
 @cindex default emulation
@@ -2230,7 +2247,7 @@ In this section we describe the simple linker script commands.
 @end menu
 
 @node Entry Point
-@subsection Setting the entry point
+@subsection Setting the Entry Point
 @kindex ENTRY(@var{symbol})
 @cindex start of execution
 @cindex first instruction
@@ -2259,7 +2276,7 @@ The address @code{0}.
 @end itemize
 
 @node File Commands
-@subsection Commands dealing with files
+@subsection Commands Dealing with Files
 @cindex linker script file commands
 Several linker script commands deal with files.
 
@@ -2346,7 +2363,7 @@ first file.
 
 @ifclear SingleFormat
 @node Format Commands
-@subsection Commands dealing with object file formats
+@subsection Commands Dealing with Object File Formats
 A couple of linker script commands deal with object file formats.
 
 @table @code
@@ -2393,7 +2410,7 @@ command is also used to set the format for the output file.  @xref{BFD}.
 @end ifclear
 
 @node Miscellaneous Commands
-@subsection Other linker script commands
+@subsection Other Linker Script Commands
 There are a few other linker scripts commands.
 
 @table @code
@@ -2560,7 +2577,7 @@ If the program references @samp{etext} but does not define it, the
 linker will use the definition in the linker script.
 
 @node SECTIONS
-@section SECTIONS command
+@section SECTIONS Command
 @kindex SECTIONS
 The @code{SECTIONS} command tells the linker how to map input sections
 into output sections, and how to place the output sections in memory.
@@ -2617,7 +2634,7 @@ in the first input file.  The first section will be at address zero.
 @end menu
 
 @node Output Section Description
-@subsection Output section description
+@subsection Output Section Description
 The full description of an output section looks like this:
 @smallexample
 @group
@@ -2650,7 +2667,7 @@ a special output section keyword (@pxref{Output Section Keywords})
 @end itemize
 
 @node Output Section Name
-@subsection Output section name
+@subsection Output Section Name
 @cindex name, section
 @cindex section name
 The name of the output section is @var{section}.  @var{section} must
@@ -2668,7 +2685,7 @@ The output section name @samp{/DISCARD/} is special; @ref{Output Section
 Discarding}.
 
 @node Output Section Address
-@subsection Output section address
+@subsection Output Section Description
 @cindex address, section
 @cindex section address
 The @var{address} is an expression for the VMA (the virtual memory
@@ -2715,7 +2732,7 @@ Specifying @var{address} for a section will change the value of the
 location counter.
 
 @node Input Section
-@subsection Input section description
+@subsection Input Section Description
 @cindex input sections
 @cindex mapping input sections to output sections
 The most common output section command is an input section description.
@@ -2734,7 +2751,7 @@ map the input files into your memory layout.
 @end menu
 
 @node Input Section Basics
-@subsubsection Input section basics
+@subsubsection Input Section Basics
 @cindex input section basics
 An input section description consists of a file name optionally followed
 by a list of section names in parentheses.
@@ -2795,7 +2812,7 @@ though it appeared on the command line.  Note that this differs from an
 the archive search path.
 
 @node Input Section Wildcards
-@subsubsection Input section wildcard patterns
+@subsubsection Input Section Wildcard Patterns
 @cindex input section wildcards
 @cindex wildcard file name patterns
 @cindex file name wildcard patterns
@@ -2872,7 +2889,7 @@ SECTIONS @{
 @end smallexample
 
 @node Input Section Common
-@subsubsection Input section for common symbols
+@subsubsection Input Section for Common Symbols
 @cindex common symbol placement
 @cindex uninitialized data placement
 A special notation is needed for common symbols, because in many object
@@ -2908,7 +2925,7 @@ notation is now considered obsolete.  It is equivalent to
 @samp{*(COMMON)}.
 
 @node Input Section Keep
-@subsubsection Input section and garbage collection
+@subsubsection Input Section and Garbage Collection
 @cindex KEEP
 @cindex garbage collection
 When link-time garbage collection is in use (@samp{--gc-sections}),
@@ -2918,7 +2935,7 @@ with @code{KEEP()}, as in @code{KEEP(*(.init))} or
 @code{KEEP(SORT(*)(.ctors))}.
 
 @node Input Section Example
-@subsubsection Input section example
+@subsubsection Input Section Example
 The following example is a complete linker script.  It tells the linker
 to read all of the sections from file @file{all.o} and place them at the
 start of output section @samp{outputa} which starts at location
@@ -2937,11 +2954,15 @@ SECTIONS @{
     all.o
     foo.o (.input1)
     @}
+@end group
+@group
   outputb :
     @{
     foo.o (.input2)
     foo1.o (.input1)
     @}
+@end group
+@group
   outputc :
     @{
     *(.input1)
@@ -2952,7 +2973,7 @@ SECTIONS @{
 @end smallexample
 
 @node Output Section Data
-@subsection Output section data
+@subsection Output Section Data
 @cindex data
 @cindex section data
 @cindex output section data
@@ -2992,7 +3013,7 @@ When the object file format does not have an explicit endianness, as is
 true of, for example, S-records, the value will be stored in the
 endianness of the first input object file.
 
-Note - these commands only work inside a section description and not
+Note---these commands only work inside a section description and not
 between them, so the following will produce an error from the linker:
 @smallexample
 SECTIONS @{@ .text : @{@ *(.text) @}@ LONG(1) .data : @{@ *(.data) @}@ @}@
@@ -3029,7 +3050,7 @@ precedence.  @xref{Output Section Fill}, for details on the fill
 expression.
 
 @node Output Section Keywords
-@subsection Output section keywords
+@subsection Output Section Keywords
 There are a couple of keywords which can appear as output section
 commands.
 
@@ -3108,7 +3129,7 @@ scripts.
 @end table
 
 @node Output Section Discarding
-@subsection Output section discarding
+@subsection Output Section Discarding
 @cindex discarding sections
 @cindex sections, discarding
 @cindex removing sections
@@ -3132,7 +3153,7 @@ input sections.  Any input sections which are assigned to an output
 section named @samp{/DISCARD/} are not included in the output file.
 
 @node Output Section Attributes
-@subsection Output section attributes
+@subsection Output Section Attributes
 @cindex output section attributes
 We showed above that the full description of an output section looked
 like this:
@@ -3159,7 +3180,7 @@ remaining section attributes.
 @end menu
 
 @node Output Section Type
-@subsubsection Output section type
+@subsubsection Output Section Type
 Each output section may have a type.  The type is a keyword in
 parentheses.  The following types are defined:
 
@@ -3196,7 +3217,7 @@ SECTIONS @{
 @end smallexample
 
 @node Output Section LMA
-@subsubsection Output section LMA
+@subsubsection Output Section LMA
 @kindex AT>@var{lma_region}
 @kindex AT(@var{lma})
 @cindex load address
@@ -3261,7 +3282,7 @@ for (dst = &_bstart; dst< &_bend; dst++)
 @end smallexample
 
 @node Output Section Region
-@subsubsection Output section region
+@subsubsection Output Section Region
 @kindex >@var{region}
 @cindex section, assigning to memory region
 @cindex memory regions and sections
@@ -3277,7 +3298,7 @@ SECTIONS @{ ROM : @{ *(.text) @} >rom @}
 @end smallexample
 
 @node Output Section Phdr
-@subsubsection Output section phdr
+@subsubsection Output Section Phdr
 @kindex :@var{phdr}
 @cindex section, assigning to program header
 @cindex program headers and sections
@@ -3297,7 +3318,7 @@ SECTIONS @{ .text : @{ *(.text) @} :text @}
 @end smallexample
 
 @node Output Section Fill
-@subsubsection Output section fill
+@subsubsection Output Section Fill
 @kindex =@var{fillexp}
 @cindex section fill pattern
 @cindex fill pattern, entire section
@@ -3325,7 +3346,7 @@ SECTIONS @{ .text : @{ *(.text) @} =0x90909090 @}
 @end smallexample
 
 @node Overlay Description
-@subsection Overlay description
+@subsection Overlay Description
 @kindex OVERLAY
 @cindex overlays
 An overlay description provides an easy way to describe sections which
@@ -3439,7 +3460,7 @@ example could have been written identically as follows.
 @end smallexample
 
 @node MEMORY
-@section MEMORY command
+@section MEMORY Command
 @kindex MEMORY
 @cindex memory regions
 @cindex regions of memory
@@ -3857,7 +3878,7 @@ you would effectively have multiple definitions of the same symbol.
 
 If you wish to bind a reference to a specific version of the symbol
 within the shared library, you can use the aliases of convenience
-(i.e. @samp{old_foo}), or you can use the @samp{.symver} directive to
+(i.e., @samp{old_foo}), or you can use the @samp{.symver} directive to
 specifically bind to an external version of the function in question.
 
 You can also specify the language in the version script:
@@ -3913,20 +3934,20 @@ hexadecimal.  The linker considers other integers to be decimal.
 In addition, you can use the suffixes @code{K} and @code{M} to scale a
 constant by
 @c TEXI2ROFF-KILL
-@ifinfo
+@ifnottex
 @c END TEXI2ROFF-KILL
 @code{1024} or @code{1024*1024}
 @c TEXI2ROFF-KILL
-@end ifinfo
+@end ifnottex
 @tex
 ${\rm 1024}$ or ${\rm 1024}^2$
 @end tex
 @c END TEXI2ROFF-KILL
 respectively. For example, the following all refer to the same quantity:
 @smallexample
-  _fourk_1 = 4K;
-  _fourk_2 = 4096;
-  _fourk_3 = 0x1000;
+_fourk_1 = 4K;
+_fourk_2 = 4096;
+_fourk_3 = 0x1000;
 @end smallexample
 
 @node Symbols
@@ -3941,8 +3962,8 @@ Unquoted symbol names must not conflict with any keywords.  You can
 specify a symbol which contains odd characters or has the same name as a
 keyword by surrounding the symbol name in double quotes:
 @smallexample
-  "SECTION" = 9;
-  "with a space" = "also with a space" + 10;
+"SECTION" = 9;
+"with a space" = "also with a space" + 10;
 @end smallexample
 
 Since symbols can contain many non-alphabetic characters, it is safest
@@ -4029,7 +4050,7 @@ the @samp{.data} output section itself.
 The linker recognizes the standard C set of arithmetic operators, with
 the standard bindings and precedence levels:
 @c TEXI2ROFF-KILL
-@ifinfo
+@ifnottex
 @c END TEXI2ROFF-KILL
 @smallexample
 precedence      associativity   Operators                Notes
@@ -4051,7 +4072,7 @@ Notes:
 (1) Prefix operators
 (2) @xref{Assignments}.
 @c TEXI2ROFF-KILL
-@end ifinfo
+@end ifnottex
 @tex
 \vskip \baselineskip
 %"lispnarrowing" is the extra indent used generally for smallexample
@@ -4401,15 +4422,23 @@ sections describe them.  Machines where @command{ld} has no additional
 functionality are not listed.
 
 @menu
-* H8/300::                      @code{ld} and the H8/300
-* i960::                        @code{ld} and the Intel 960 family
-* ARM::				@code{ld} and the ARM family
-* HPPA ELF32::                  @code{ld} and HPPA 32-bit ELF
+@ifset H8300
+* H8/300::                      @command{ld} and the H8/300
+@end ifset
+@ifset I960
+* i960::                        @command{ld} and the Intel 960 family
+@end ifset
+@ifset ARM
+* ARM::				@command{ld} and the ARM family
+@end ifset
+@ifset HPPA
+* HPPA ELF32::                  @command{ld} and HPPA 32-bit ELF
+@end ifset
 @ifset MMIX
-* MMIX::			@code{ld} and MMIX
+* MMIX::			@command{ld} and MMIX
 @end ifset
 @ifset MSP430
-* MSP430::			@code{ld} and MSP430
+* MSP430::			@command{ld} and MSP430
 @end ifset
 @ifset TICOFF
 * TI COFF::                     @command{ld} and TI COFF
@@ -4420,8 +4449,6 @@ functionality are not listed.
 @end menu
 @end ifset
 
-@c FIXME!  This could use @raisesections/@lowersections, but there seems to be a conflict
-@c         between those and node-defaulting.
 @ifset H8300
 @ifclear GENERIC
 @raisesections
@@ -4452,6 +4479,248 @@ page of memory, and changes them to use the eight-bit address form.
 @samp{mov.b @code{@@}@var{aa}:8} whenever the address @var{aa} is in the
 top page of memory).
 @end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifclear GENERIC
+@ifset Hitachi
+@c This stuff is pointless to say unless you're especially concerned
+@c with Hitachi chips; don't enable it for generic case, please.
+@node Hitachi
+@chapter @command{ld} and Other Hitachi Chips
+
+@command{ld} also supports the H8/300H, the H8/500, and the Hitachi SH.  No
+special features, commands, or command-line options are required for
+these chips.
+@end ifset
+@end ifclear
+
+@ifset I960
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node i960
+@section @command{ld} and the Intel 960 Family
+
+@cindex i960 support
+
+You can use the @samp{-A@var{architecture}} command line option to
+specify one of the two-letter names identifying members of the 960
+family; the option specifies the desired output target, and warns of any
+incompatible instructions in the input files.  It also modifies the
+linker's search strategy for archive libraries, to support the use of
+libraries specific to each particular architecture, by including in the
+search loop names suffixed with the string identifying the architecture.
+
+For example, if your @command{ld} command line included @w{@samp{-ACA}} as
+well as @w{@samp{-ltry}}, the linker would look (in its built-in search
+paths, and in any paths you specify with @samp{-L}) for a library with
+the names
+
+@smallexample
+@group
+try
+libtry.a
+tryca
+libtryca.a
+@end group
+@end smallexample
+
+@noindent
+The first two possibilities would be considered in any event; the last
+two are due to the use of @w{@samp{-ACA}}.
+
+You can meaningfully use @samp{-A} more than once on a command line, since
+the 960 architecture family allows combination of target architectures; each
+use will add another pair of name variants to search for when @w{@samp{-l}}
+specifies a library.
+
+@cindex @option{--relax} on i960
+@cindex relaxing on i960
+@command{ld} supports the @samp{--relax} option for the i960 family.  If
+you specify @samp{--relax}, @command{ld} finds all @code{balx} and
+@code{calx} instructions whose targets are within 24 bits, and turns
+them into 24-bit program-counter relative @code{bal} and @code{cal}
+instructions, respectively.  @command{ld} also turns @code{cal}
+instructions into @code{bal} instructions when it determines that the
+target subroutine is a leaf routine (that is, the target subroutine does
+not itself call any subroutines).
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset ARM
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node ARM
+@section @command{ld}'s Support for Interworking Between ARM and Thumb Code
+
+@cindex ARM interworking support
+@kindex --support-old-code
+For the ARM, @command{ld} will generate code stubs to allow functions calls
+betweem ARM and Thumb code.  These stubs only work with code that has
+been compiled and assembled with the @samp{-mthumb-interwork} command
+line option.  If it is necessary to link with old ARM object files or
+libraries, which have not been compiled with the -mthumb-interwork
+option then the @samp{--support-old-code} command line switch should be
+given to the linker.  This will make it generate larger stub functions
+which will work with non-interworking aware ARM code.  Note, however,
+the linker does not support generating stubs for function calls to
+non-interworking aware Thumb code.
+
+@cindex thumb entry point
+@cindex entry point, thumb
+@kindex --thumb-entry=@var{entry}
+The @samp{--thumb-entry} switch is a duplicate of the generic
+@samp{--entry} switch, in that it sets the program's starting address.
+But it also sets the bottom bit of the address, so that it can be
+branched to using a BX instruction, and the program will start
+executing in Thumb mode straight away.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset HPPA
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node HPPA ELF32
+@section @command{ld} and HPPA 32-bit ELF Support
+@cindex HPPA multiple sub-space stubs
+@kindex --multi-subspace
+When generating a shared library, @command{ld} will by default generate
+import stubs suitable for use with a single sub-space application.
+The @samp{--multi-subspace} switch causes @command{ld} to generate export
+stubs, and different (larger) import stubs suitable for use with
+multiple sub-spaces.
+
+@cindex HPPA stub grouping
+@kindex --stub-group-size=@var{N}
+Long branch stubs and import/export stubs are placed by @command{ld} in
+stub sections located between groups of input sections.
+@samp{--stub-group-size} specifies the maximum size of a group of input
+sections handled by one stub section.  Since branch offsets are signed,
+a stub section may serve two groups of input sections, one group before
+the stub section, and one group after it.  However, when using
+conditional branches that require stubs, it may be better (for branch
+prediction) that stub sections only serve one group of input sections.
+A negative value for @samp{N} chooses this scheme, ensuring that
+branches to stubs always use a negative offset.  Two special values of
+@samp{N} are recognized, @samp{1} and @samp{-1}.  These both instruct
+@command{ld} to automatically size input section groups for the branch types
+detected, with the same behaviour regarding stub placement as other
+positive or negative values of @samp{N} respectively.
+
+Note that @samp{--stub-group-size} does not split input sections.  A
+single input section larger than the group size specified will of course
+create a larger group (of one section).  If input sections are too
+large, it may not be possible for a branch to reach its stub.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset MMIX
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node MMIX
+@section @code{ld} and MMIX
+For MMIX, there is a choice of generating @code{ELF} object files or
+@code{mmo} object files when linking.  The simulator @code{mmix}
+understands the @code{mmo} format.  The binutils @code{objcopy} utility
+can translate between the two formats.
+
+There is one special section, the @samp{.MMIX.reg_contents} section.
+Contents in this section is assumed to correspond to that of global
+registers, and symbols referring to it are translated to special symbols,
+equal to registers.  In a final link, the start address of the
+@samp{.MMIX.reg_contents} section corresponds to the first allocated
+global register multiplied by 8.  Register @code{$255} is not included in
+this section; it is always set to the program entry, which is at the
+symbol @code{Main} for @code{mmo} files.
+
+Symbols with the prefix @code{__.MMIX.start.}, for example
+@code{__.MMIX.start..text} and @code{__.MMIX.start..data} are special;
+there must be only one each, even if they are local.  The default linker
+script uses these to set the default start address of a section.
+
+Initial and trailing multiples of zero-valued 32-bit words in a section,
+are left out from an mmo file.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset MSP430
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node  MSP430
+@section @code{ld} and MSP430
+For the MSP430 it is possible to select the MPU architecture.  The flag @samp{-m [mpu type]}
+will select an appropriate linker script for selected MPU type.  (To get a list of known MPUs
+just pass @samp{-m help} option to the linker).
+
+@cindex MSP430 extra sections
+The linker will recognize some extra sections which are MSP430 specific:
+
+@table @code
+@item @samp{.vectors}
+Defines a portion of ROM where interrupt vectors located.
+
+@item @samp{.bootloader}
+Defines the bootloader portion of the ROM (if applicable).  Any code
+in this section will be uploaded to the MPU.
+
+@item @samp{.infomem}
+Defines an information memory section (if applicable).  Any code in
+this section will be uploaded to the MPU.
+
+@item @samp{.infomemnobits} 
+This is the same as the @samp{.infomem} section except that any code
+in this section will not be uploaded to the MPU.
+
+@item @samp{.noinit}
+Denotes a portion of RAM located above @samp{.bss} section.
+
+The last two sections are used by gcc. 
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset TICOFF
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node TI COFF
+@section @command{ld}'s Support for Various TI COFF Versions
+@cindex TI COFF versions
+@kindex --format=@var{version}
+The @samp{--format} switch allows selection of one of the various
+TI COFF versions.  The latest of this writing is 2; versions 0 and 1 are
+also supported.  The TI COFF versions also vary in header byte-order
+format; @command{ld} will read any version or byte order, but the output
+header format depends on the default specified by the specific target.
 
 @ifclear GENERIC
 @lowersections
@@ -4808,212 +5077,6 @@ which is probably not what you wanted.
 @end ifclear
 @end ifset
 
-@ifclear GENERIC
-@ifset Hitachi
-@c This stuff is pointless to say unless you're especially concerned
-@c with Hitachi chips; don't enable it for generic case, please.
-@node Hitachi
-@chapter @command{ld} and other Hitachi chips
-
-@command{ld} also supports the H8/300H, the H8/500, and the Hitachi SH.  No
-special features, commands, or command-line options are required for
-these chips.
-@end ifset
-@end ifclear
-
-@ifset I960
-@ifclear GENERIC
-@raisesections
-@end ifclear
-
-@node i960
-@section @command{ld} and the Intel 960 family
-
-@cindex i960 support
-
-You can use the @samp{-A@var{architecture}} command line option to
-specify one of the two-letter names identifying members of the 960
-family; the option specifies the desired output target, and warns of any
-incompatible instructions in the input files.  It also modifies the
-linker's search strategy for archive libraries, to support the use of
-libraries specific to each particular architecture, by including in the
-search loop names suffixed with the string identifying the architecture.
-
-For example, if your @command{ld} command line included @w{@samp{-ACA}} as
-well as @w{@samp{-ltry}}, the linker would look (in its built-in search
-paths, and in any paths you specify with @samp{-L}) for a library with
-the names
-
-@smallexample
-@group
-try
-libtry.a
-tryca
-libtryca.a
-@end group
-@end smallexample
-
-@noindent
-The first two possibilities would be considered in any event; the last
-two are due to the use of @w{@samp{-ACA}}.
-
-You can meaningfully use @samp{-A} more than once on a command line, since
-the 960 architecture family allows combination of target architectures; each
-use will add another pair of name variants to search for when @w{@samp{-l}}
-specifies a library.
-
-@cindex @option{--relax} on i960
-@cindex relaxing on i960
-@command{ld} supports the @samp{--relax} option for the i960 family.  If
-you specify @samp{--relax}, @command{ld} finds all @code{balx} and
-@code{calx} instructions whose targets are within 24 bits, and turns
-them into 24-bit program-counter relative @code{bal} and @code{cal}
-instructions, respectively.  @command{ld} also turns @code{cal}
-instructions into @code{bal} instructions when it determines that the
-target subroutine is a leaf routine (that is, the target subroutine does
-not itself call any subroutines).
-
-@ifclear GENERIC
-@lowersections
-@end ifclear
-@end ifset
-
-@ifclear GENERIC
-@raisesections
-@end ifclear
-
-@node ARM
-@section @command{ld}'s support for interworking between ARM and Thumb code
-
-@cindex ARM interworking support
-@kindex --support-old-code
-For the ARM, @command{ld} will generate code stubs to allow functions calls
-betweem ARM and Thumb code.  These stubs only work with code that has
-been compiled and assembled with the @samp{-mthumb-interwork} command
-line option.  If it is necessary to link with old ARM object files or
-libraries, which have not been compiled with the -mthumb-interwork
-option then the @samp{--support-old-code} command line switch should be
-given to the linker.  This will make it generate larger stub functions
-which will work with non-interworking aware ARM code.  Note, however,
-the linker does not support generating stubs for function calls to
-non-interworking aware Thumb code.
-
-@cindex thumb entry point
-@cindex entry point, thumb
-@kindex --thumb-entry=@var{entry}
-The @samp{--thumb-entry} switch is a duplicate of the generic
-@samp{--entry} switch, in that it sets the program's starting address.
-But it also sets the bottom bit of the address, so that it can be
-branched to using a BX instruction, and the program will start
-executing in Thumb mode straight away.
-
-@node HPPA ELF32
-@section @command{ld} and HPPA 32-bit ELF support
-@cindex HPPA multiple sub-space stubs
-@kindex --multi-subspace
-When generating a shared library, @command{ld} will by default generate
-import stubs suitable for use with a single sub-space application.
-The @samp{--multi-subspace} switch causes @command{ld} to generate export
-stubs, and different (larger) import stubs suitable for use with
-multiple sub-spaces.
-
-@cindex HPPA stub grouping
-@kindex --stub-group-size=@var{N}
-Long branch stubs and import/export stubs are placed by @command{ld} in
-stub sections located between groups of input sections.
-@samp{--stub-group-size} specifies the maximum size of a group of input
-sections handled by one stub section.  Since branch offsets are signed,
-a stub section may serve two groups of input sections, one group before
-the stub section, and one group after it.  However, when using
-conditional branches that require stubs, it may be better (for branch
-prediction) that stub sections only serve one group of input sections.
-A negative value for @samp{N} chooses this scheme, ensuring that
-branches to stubs always use a negative offset.  Two special values of
-@samp{N} are recognized, @samp{1} and @samp{-1}.  These both instruct
-@command{ld} to automatically size input section groups for the branch types
-detected, with the same behaviour regarding stub placement as other
-positive or negative values of @samp{N} respectively.
-
-Note that @samp{--stub-group-size} does not split input sections.  A
-single input section larger than the group size specified will of course
-create a larger group (of one section).  If input sections are too
-large, it may not be possible for a branch to reach its stub.
-
-@ifset MMIX
-@node MMIX
-@section @code{ld} and MMIX
-For MMIX, there is choice of generating @code{ELF} object files or
-@code{mmo} object files when linking.  The simulator @code{mmix}
-understands the @code{mmo} format.  The binutils @code{objcopy} utility
-can translate between the two formats.
-
-There is one special section, the @samp{.MMIX.reg_contents} section.
-Contents in this section is assumed to correspond to that of global
-registers, and symbols referring to it are translated to special symbols,
-equal to registers.  In a final link, the start address of the
-@samp{.MMIX.reg_contents} section corresponds to the first allocated
-global register multiplied by 8.  Register @code{$255} is not included in
-this section; it is always set to the program entry, which is at the
-symbol @code{Main} for @code{mmo} files.
-
-Symbols with the prefix @code{__.MMIX.start.}, for example
-@code{__.MMIX.start..text} and @code{__.MMIX.start..data} are special;
-there must be only one each, even if they are local.  The default linker
-script uses these to set the default start address of a section.
-
-Initial and trailing multiples of zero-valued 32-bit words in a section,
-are left out from an mmo file.
-@end ifset
-
-@ifset MSP430
-@node  MSP430
-@section @code{ld} and MSP430
-For the MSP430 it is possible to select the MPU architecture.  The flag @samp{-m [mpu type]}
-will select an appropriate linker script for selected MPU type.  (To get a list of known MPUs
-just pass @samp{-m help} option to the linker).
-
-@cindex MSP430 extra sections
-The linker will recognize some extra sections which are MSP430 specific:
-
-@table @code
-@item @samp{.vectors}
-Defines a portion of ROM where interrupt vectors located.
-
-@item @samp{.bootloader}
-Defines the bootloader portion of the ROM (if applicable).  Any code
-in this section will be uploaded to the MPU.
-
-@item @samp{.infomem}
-Defines an information memory section (if applicable).  Any code in
-this section will be uploaded to the MPU.
-
-@item @samp{.infomemnobits} 
-This is the same as the @samp{.infomem} section except that any code
-in this section will not be uploaded to the MPU.
-
-@item @samp{.noinit}
-Denotes a portion of RAM located above @samp{.bss} section.
-
-The last two sections are used by gcc. 
-@end table
-@end ifset
-
-@ifset TICOFF
-@node TI COFF
-@section @command{ld}'s support for various TI COFF versions
-@cindex TI COFF versions
-@kindex --format=@var{version}
-The @samp{--format} switch allows selection of one of the various
-TI COFF versions.  The latest of this writing is 2; versions 0 and 1 are
-also supported.  The TI COFF versions also vary in header byte-order
-format; @command{ld} will read any version or byte order, but the output
-header format depends on the default specified by the specific target.
-@end ifset
-
-@ifclear GENERIC
-@lowersections
-@end ifclear
-
 @ifclear SingleFormat
 @node BFD
 @chapter BFD
@@ -5052,7 +5115,7 @@ conversion and during output. @xref{BFD information loss}.
 @end menu
 
 @node BFD outline
-@section How it works: an outline of BFD
+@section How It Works: An Outline of BFD
 @cindex opening object files
 @include bfdsumm.texi
 @end ifclear
@@ -5079,7 +5142,7 @@ information that enables us to fix the bug.
 @end menu
 
 @node Bug Criteria
-@section Have you found a bug?
+@section Have You Found a Bug?
 @cindex bug criteria
 
 If you are not sure whether you have found a bug, here are some guidelines:
@@ -5108,7 +5171,7 @@ improvement of @command{ld} are welcome in any case.
 @end itemize
 
 @node Bug Reporting
-@section How to report bugs
+@section How to Report Bugs
 @cindex bug reports
 @cindex @command{ld} bugs, reporting
 
@@ -5143,9 +5206,9 @@ the bug if it is new to us.  Therefore, always write your bug reports
 on the assumption that the bug has not been reported previously.
 
 Sometimes people give a few sketchy facts and ask, ``Does this ring a
-bell?''  Those bug reports are useless, and we urge everyone to
-@emph{refuse to respond to them} except to chide the sender to report
-bugs properly.
+bell?''  This cannot help us fix a bug, so it is basically useless.  We
+respond by asking for enough details to enable us to investigate.
+You might as well expedite matters by sending them to begin with.
 
 To enable us to fix the bug, you should include all these things:
 
@@ -5404,369 +5467,7 @@ If you have more than one @code{SECT} statement for the same
 @var{secname}, only the @emph{first} sets the start address.
 @end table
 
-@node GNU Free Documentation License
-@appendix GNU Free Documentation License
-@cindex GNU Free Documentation License
-
-                GNU Free Documentation License
-
-                   Version 1.1, March 2000
-
- Copyright (C) 2000  Free Software Foundation, Inc.
-  59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-
-
-0. PREAMBLE
-
-The purpose of this License is to make a manual, textbook, or other
-written document "free" in the sense of freedom: to assure everyone
-the effective freedom to copy and redistribute it, with or without
-modifying it, either commercially or noncommercially.  Secondarily,
-this License preserves for the author and publisher a way to get
-credit for their work, while not being considered responsible for
-modifications made by others.
-
-This License is a kind of "copyleft", which means that derivative
-works of the document must themselves be free in the same sense.  It
-complements the GNU General Public License, which is a copyleft
-license designed for free software.
-
-We have designed this License in order to use it for manuals for free
-software, because free software needs free documentation: a free
-program should come with manuals providing the same freedoms that the
-software does.  But this License is not limited to software manuals;
-it can be used for any textual work, regardless of subject matter or
-whether it is published as a printed book.  We recommend this License
-principally for works whose purpose is instruction or reference.
-
-
-1. APPLICABILITY AND DEFINITIONS
-
-This License applies to any manual or other work that contains a
-notice placed by the copyright holder saying it can be distributed
-under the terms of this License.  The "Document", below, refers to any
-such manual or work.  Any member of the public is a licensee, and is
-addressed as "you".
-
-A "Modified Version" of the Document means any work containing the
-Document or a portion of it, either copied verbatim, or with
-modifications and/or translated into another language.
-
-A "Secondary Section" is a named appendix or a front-matter section of
-the Document that deals exclusively with the relationship of the
-publishers or authors of the Document to the Document's overall subject
-(or to related matters) and contains nothing that could fall directly
-within that overall subject.  (For example, if the Document is in part a
-textbook of mathematics, a Secondary Section may not explain any
-mathematics.)  The relationship could be a matter of historical
-connection with the subject or with related matters, or of legal,
-commercial, philosophical, ethical or political position regarding
-them.
-
-The "Invariant Sections" are certain Secondary Sections whose titles
-are designated, as being those of Invariant Sections, in the notice
-that says that the Document is released under this License.
-
-The "Cover Texts" are certain short passages of text that are listed,
-as Front-Cover Texts or Back-Cover Texts, in the notice that says that
-the Document is released under this License.
-
-A "Transparent" copy of the Document means a machine-readable copy,
-represented in a format whose specification is available to the
-general public, whose contents can be viewed and edited directly and
-straightforwardly with generic text editors or (for images composed of
-pixels) generic paint programs or (for drawings) some widely available
-drawing editor, and that is suitable for input to text formatters or
-for automatic translation to a variety of formats suitable for input
-to text formatters.  A copy made in an otherwise Transparent file
-format whose markup has been designed to thwart or discourage
-subsequent modification by readers is not Transparent.  A copy that is
-not "Transparent" is called "Opaque".
-
-Examples of suitable formats for Transparent copies include plain
-ASCII without markup, Texinfo input format, LaTeX input format, SGML
-or XML using a publicly available DTD, and standard-conforming simple
-HTML designed for human modification.  Opaque formats include
-PostScript, PDF, proprietary formats that can be read and edited only
-by proprietary word processors, SGML or XML for which the DTD and/or
-processing tools are not generally available, and the
-machine-generated HTML produced by some word processors for output
-purposes only.
-
-The "Title Page" means, for a printed book, the title page itself,
-plus such following pages as are needed to hold, legibly, the material
-this License requires to appear in the title page.  For works in
-formats which do not have any title page as such, "Title Page" means
-the text near the most prominent appearance of the work's title,
-preceding the beginning of the body of the text.
-
-
-2. VERBATIM COPYING
-
-You may copy and distribute the Document in any medium, either
-commercially or noncommercially, provided that this License, the
-copyright notices, and the license notice saying this License applies
-to the Document are reproduced in all copies, and that you add no other
-conditions whatsoever to those of this License.  You may not use
-technical measures to obstruct or control the reading or further
-copying of the copies you make or distribute.  However, you may accept
-compensation in exchange for copies.  If you distribute a large enough
-number of copies you must also follow the conditions in section 3.
-
-You may also lend copies, under the same conditions stated above, and
-you may publicly display copies.
-
-
-3. COPYING IN QUANTITY
-
-If you publish printed copies of the Document numbering more than 100,
-and the Document's license notice requires Cover Texts, you must enclose
-the copies in covers that carry, clearly and legibly, all these Cover
-Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
-the back cover.  Both covers must also clearly and legibly identify
-you as the publisher of these copies.  The front cover must present
-the full title with all words of the title equally prominent and
-visible.  You may add other material on the covers in addition.
-Copying with changes limited to the covers, as long as they preserve
-the title of the Document and satisfy these conditions, can be treated
-as verbatim copying in other respects.
-
-If the required texts for either cover are too voluminous to fit
-legibly, you should put the first ones listed (as many as fit
-reasonably) on the actual cover, and continue the rest onto adjacent
-pages.
-
-If you publish or distribute Opaque copies of the Document numbering
-more than 100, you must either include a machine-readable Transparent
-copy along with each Opaque copy, or state in or with each Opaque copy
-a publicly-accessible computer-network location containing a complete
-Transparent copy of the Document, free of added material, which the
-general network-using public has access to download anonymously at no
-charge using public-standard network protocols.  If you use the latter
-option, you must take reasonably prudent steps, when you begin
-distribution of Opaque copies in quantity, to ensure that this
-Transparent copy will remain thus accessible at the stated location
-until at least one year after the last time you distribute an Opaque
-copy (directly or through your agents or retailers) of that edition to
-the public.
-
-It is requested, but not required, that you contact the authors of the
-Document well before redistributing any large number of copies, to give
-them a chance to provide you with an updated version of the Document.
-
-
-4. MODIFICATIONS
-
-You may copy and distribute a Modified Version of the Document under
-the conditions of sections 2 and 3 above, provided that you release
-the Modified Version under precisely this License, with the Modified
-Version filling the role of the Document, thus licensing distribution
-and modification of the Modified Version to whoever possesses a copy
-of it.  In addition, you must do these things in the Modified Version:
-
-A. Use in the Title Page (and on the covers, if any) a title distinct
-   from that of the Document, and from those of previous versions
-   (which should, if there were any, be listed in the History section
-   of the Document).  You may use the same title as a previous version
-   if the original publisher of that version gives permission.
-B. List on the Title Page, as authors, one or more persons or entities
-   responsible for authorship of the modifications in the Modified
-   Version, together with at least five of the principal authors of the
-   Document (all of its principal authors, if it has less than five).
-C. State on the Title page the name of the publisher of the
-   Modified Version, as the publisher.
-D. Preserve all the copyright notices of the Document.
-E. Add an appropriate copyright notice for your modifications
-   adjacent to the other copyright notices.
-F. Include, immediately after the copyright notices, a license notice
-   giving the public permission to use the Modified Version under the
-   terms of this License, in the form shown in the Addendum below.
-G. Preserve in that license notice the full lists of Invariant Sections
-   and required Cover Texts given in the Document's license notice.
-H. Include an unaltered copy of this License.
-I. Preserve the section entitled "History", and its title, and add to
-   it an item stating at least the title, year, new authors, and
-   publisher of the Modified Version as given on the Title Page.  If
-   there is no section entitled "History" in the Document, create one
-   stating the title, year, authors, and publisher of the Document as
-   given on its Title Page, then add an item describing the Modified
-   Version as stated in the previous sentence.
-J. Preserve the network location, if any, given in the Document for
-   public access to a Transparent copy of the Document, and likewise
-   the network locations given in the Document for previous versions
-   it was based on.  These may be placed in the "History" section.
-   You may omit a network location for a work that was published at
-   least four years before the Document itself, or if the original
-   publisher of the version it refers to gives permission.
-K. In any section entitled "Acknowledgements" or "Dedications",
-   preserve the section's title, and preserve in the section all the
-   substance and tone of each of the contributor acknowledgements
-   and/or dedications given therein.
-L. Preserve all the Invariant Sections of the Document,
-   unaltered in their text and in their titles.  Section numbers
-   or the equivalent are not considered part of the section titles.
-M. Delete any section entitled "Endorsements".  Such a section
-   may not be included in the Modified Version.
-N. Do not retitle any existing section as "Endorsements"
-   or to conflict in title with any Invariant Section.
-
-If the Modified Version includes new front-matter sections or
-appendices that qualify as Secondary Sections and contain no material
-copied from the Document, you may at your option designate some or all
-of these sections as invariant.  To do this, add their titles to the
-list of Invariant Sections in the Modified Version's license notice.
-These titles must be distinct from any other section titles.
-
-You may add a section entitled "Endorsements", provided it contains
-nothing but endorsements of your Modified Version by various
-parties--for example, statements of peer review or that the text has
-been approved by an organization as the authoritative definition of a
-standard.
-
-You may add a passage of up to five words as a Front-Cover Text, and a
-passage of up to 25 words as a Back-Cover Text, to the end of the list
-of Cover Texts in the Modified Version.  Only one passage of
-Front-Cover Text and one of Back-Cover Text may be added by (or
-through arrangements made by) any one entity.  If the Document already
-includes a cover text for the same cover, previously added by you or
-by arrangement made by the same entity you are acting on behalf of,
-you may not add another; but you may replace the old one, on explicit
-permission from the previous publisher that added the old one.
-
-The author(s) and publisher(s) of the Document do not by this License
-give permission to use their names for publicity for or to assert or
-imply endorsement of any Modified Version.
-
-
-5. COMBINING DOCUMENTS
-
-You may combine the Document with other documents released under this
-License, under the terms defined in section 4 above for modified
-versions, provided that you include in the combination all of the
-Invariant Sections of all of the original documents, unmodified, and
-list them all as Invariant Sections of your combined work in its
-license notice.
-
-The combined work need only contain one copy of this License, and
-multiple identical Invariant Sections may be replaced with a single
-copy.  If there are multiple Invariant Sections with the same name but
-different contents, make the title of each such section unique by
-adding at the end of it, in parentheses, the name of the original
-author or publisher of that section if known, or else a unique number.
-Make the same adjustment to the section titles in the list of
-Invariant Sections in the license notice of the combined work.
-
-In the combination, you must combine any sections entitled "History"
-in the various original documents, forming one section entitled
-"History"; likewise combine any sections entitled "Acknowledgements",
-and any sections entitled "Dedications".  You must delete all sections
-entitled "Endorsements."
-
-
-6. COLLECTIONS OF DOCUMENTS
-
-You may make a collection consisting of the Document and other documents
-released under this License, and replace the individual copies of this
-License in the various documents with a single copy that is included in
-the collection, provided that you follow the rules of this License for
-verbatim copying of each of the documents in all other respects.
-
-You may extract a single document from such a collection, and distribute
-it individually under this License, provided you insert a copy of this
-License into the extracted document, and follow this License in all
-other respects regarding verbatim copying of that document.
-
-
-7. AGGREGATION WITH INDEPENDENT WORKS
-
-A compilation of the Document or its derivatives with other separate
-and independent documents or works, in or on a volume of a storage or
-distribution medium, does not as a whole count as a Modified Version
-of the Document, provided no compilation copyright is claimed for the
-compilation.  Such a compilation is called an "aggregate", and this
-License does not apply to the other self-contained works thus compiled
-with the Document, on account of their being thus compiled, if they
-are not themselves derivative works of the Document.
-
-If the Cover Text requirement of section 3 is applicable to these
-copies of the Document, then if the Document is less than one quarter
-of the entire aggregate, the Document's Cover Texts may be placed on
-covers that surround only the Document within the aggregate.
-Otherwise they must appear on covers around the whole aggregate.
-
-
-8. TRANSLATION
-
-Translation is considered a kind of modification, so you may
-distribute translations of the Document under the terms of section 4.
-Replacing Invariant Sections with translations requires special
-permission from their copyright holders, but you may include
-translations of some or all Invariant Sections in addition to the
-original versions of these Invariant Sections.  You may include a
-translation of this License provided that you also include the
-original English version of this License.  In case of a disagreement
-between the translation and the original English version of this
-License, the original English version will prevail.
-
-
-9. TERMINATION
-
-You may not copy, modify, sublicense, or distribute the Document except
-as expressly provided for under this License.  Any other attempt to
-copy, modify, sublicense or distribute the Document is void, and will
-automatically terminate your rights under this License.  However,
-parties who have received copies, or rights, from you under this
-License will not have their licenses terminated so long as such
-parties remain in full compliance.
-
-
-10. FUTURE REVISIONS OF THIS LICENSE
-
-The Free Software Foundation may publish new, revised versions
-of the GNU Free Documentation License from time to time.  Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.  See
-http://www.gnu.org/copyleft/.
-
-Each version of the License is given a distinguishing version number.
-If the Document specifies that a particular numbered version of this
-License "or any later version" applies to it, you have the option of
-following the terms and conditions either of that specified version or
-of any later version that has been published (not as a draft) by the
-Free Software Foundation.  If the Document does not specify a version
-number of this License, you may choose any version ever published (not
-as a draft) by the Free Software Foundation.
-
-
-ADDENDUM: How to use this License for your documents
-
-To use this License in a document you have written, include a copy of
-the License in the document and put the following copyright and
-license notices just after the title page:
-
-@smallexample
-    Copyright (c)  YEAR  YOUR NAME.
-    Permission is granted to copy, distribute and/or modify this document
-    under the terms of the GNU Free Documentation License, Version 1.1
-    or any later version published by the Free Software Foundation;
-    with the Invariant Sections being LIST THEIR TITLES, with the
-    Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
-    A copy of the license is included in the section entitled "GNU
-    Free Documentation License".
-@end smallexample
-
-If you have no Invariant Sections, write "with no Invariant Sections"
-instead of saying which ones are invariant.  If you have no
-Front-Cover Texts, write "no Front-Cover Texts" instead of
-"Front-Cover Texts being LIST"; likewise for Back-Cover Texts.
-
-If your document contains nontrivial examples of program code, we
-recommend releasing these examples in parallel under your choice of
-free software license, such as the GNU General Public License,
-to permit their use in free software.
+@include fdl.texi
 
 @node Index
 @unnumbered Index

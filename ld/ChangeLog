@@ -1,3 +1,19 @@
+2003-02-21  Bob Wilson  <bob.wilson@acm.org>
+
+	* gen-doc.texi: Set ARM and HPPA variables.
+	* ld.texinfo: Fix typos and obvious texinfo mistakes.  Make section
+	title capitalization more consistent.  Add missing menu entries for
+	machine-specific sections and conditionalize them consistently. 
+	Conditionalize text that is irrelevant when SingleFormat is set.
+	Add @group divisions to improve page breaks in long examples.
+	Use @iftex/@ifnottex instead of @iftex/@ifinfo so that HTML output
+	is correct.  Remove "FIXME" comment about not using
+	@raisesections/@lowersections.  Use @raisesections/@lowersections
+	consistently for machine-specific sections.  Change to be more polite
+	about poor bug reports.  Replace FDL appendix with include of fdl.texi.
+	Move WIN32 node to match its order in the menus.
+	* fdl.texi: New file.
+
 2003-02-20  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure.in (TARGET_SYSTEM_ROOT): Set default to
