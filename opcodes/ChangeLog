@@ -1,3 +1,9 @@
+Tue Feb 11 15:26:47 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (_print_insn_mips): Set bytes_per_chunk and
+	display_endian.
+	(print_insn_mips16): Likewise.
+
 start-sanitize-r5900
 Fri Feb  7 11:12:44 1997  Gavin Koch  <gavin@cygnus.com>
         

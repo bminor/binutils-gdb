@@ -255,6 +255,9 @@ _print_insn_mips (memaddr, word, info)
       init = 1;
     }
 
+  info->bytes_per_chunk = 4;
+  info->display_endian = info->endian;
+
   op = mips_hash[(word >> OP_SH_OP) & OP_MASK_OP];
   if (op != NULL)
     {
@@ -350,6 +353,9 @@ print_insn_mips16 (memaddr, info)
   boolean use_extend;
   int extend;
   const struct mips_opcode *op, *opend;
+
+  info->bytes_per_chunk = 2;
+  info->display_endian = info->endian;
 
   info->insn_info_valid = 1;
   info->branch_delay_insns = 0;
