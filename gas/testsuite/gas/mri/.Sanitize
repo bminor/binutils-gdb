@@ -46,6 +46,8 @@ if.s
 immconst.d
 label.d
 label.s
+moveml.d
+moveml.s
 mri.exp
 repeat.d
 repeat.s

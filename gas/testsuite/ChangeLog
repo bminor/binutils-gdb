@@ -1,3 +1,9 @@
+Thu Jan 29 09:43:50 1998  Richard Henderson  <rth@cygnus.com>
+
+	* gas/m68k/mri_moveml.[sd]: Moved to ...
+	* gas/mri/moveml.[sd]: ... here.
+	* gas/mri/mri.exp: Run it.
+
 start-sanitize-sky
 Wed Jan 28 10:18:21 1998  Doug Evans  <devans@canuck.cygnus.com>
 
