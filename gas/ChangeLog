@@ -1,3 +1,8 @@
+Mon Mar 15 12:17:28 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-coffbfd.c (obj_coff_endef): Correct test for .bf
+	symbol.
+
 Fri Mar 12 18:33:36 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: recognize sparc-sun-solaris2* instead of -solaris2

@@ -913,8 +913,7 @@ DEFUN_VOID (obj_coff_endef)
     case C_FCN:
       S_SET_SEGMENT (def_symbol_in_progress, SEG_E0);
 
-      if (strcmp (def_symbol_in_progress->sy_symbol.ost_entry._n._n_nptr,
-		  ".bf") == 0)
+      if (strcmp (S_GET_NAME (def_symbol_in_progress), ".bf") == 0)
 	{			/* .bf */
 	  if (function_lineoff < 0)
 	    {
