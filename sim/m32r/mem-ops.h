@@ -389,7 +389,7 @@ SETMEMQI (SIM_CPU *cpu, ADDR a, QI val)
   if (! MEM_CHECK_ALIGNMENT (a, QI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_QI);
-  sim_core_write_aligned_1 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_1 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMQI (SIM_CPU *, ADDR, QI);
@@ -404,7 +404,7 @@ SETMEMHI (SIM_CPU *cpu, ADDR a, HI val)
   if (! MEM_CHECK_ALIGNMENT (a, HI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_HI);
-  sim_core_write_aligned_2 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_2 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMHI (SIM_CPU *, ADDR, HI);
@@ -419,7 +419,7 @@ SETMEMSI (SIM_CPU *cpu, ADDR a, SI val)
   if (! MEM_CHECK_ALIGNMENT (a, SI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_SI);
-  sim_core_write_aligned_4 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_4 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMSI (SIM_CPU *, ADDR, SI);
@@ -434,7 +434,7 @@ SETMEMDI (SIM_CPU *cpu, ADDR a, DI val)
   if (! MEM_CHECK_ALIGNMENT (a, DI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_DI);
-  sim_core_write_aligned_8 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_8 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMDI (SIM_CPU *, ADDR, DI);
@@ -449,7 +449,7 @@ SETMEMUQI (SIM_CPU *cpu, ADDR a, UQI val)
   if (! MEM_CHECK_ALIGNMENT (a, UQI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_UQI);
-  sim_core_write_aligned_1 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_1 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMUQI (SIM_CPU *, ADDR, UQI);
@@ -464,7 +464,7 @@ SETMEMUHI (SIM_CPU *cpu, ADDR a, UHI val)
   if (! MEM_CHECK_ALIGNMENT (a, UHI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_UHI);
-  sim_core_write_aligned_2 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_2 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMUHI (SIM_CPU *, ADDR, UHI);
@@ -479,7 +479,7 @@ SETMEMUSI (SIM_CPU *cpu, ADDR a, USI val)
   if (! MEM_CHECK_ALIGNMENT (a, USI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_USI);
-  sim_core_write_aligned_4 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_4 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMUSI (SIM_CPU *, ADDR, USI);
@@ -494,7 +494,7 @@ SETMEMUDI (SIM_CPU *cpu, ADDR a, UDI val)
   if (! MEM_CHECK_ALIGNMENT (a, UDI))
     { engine_signal (cpu, SIM_SIGBUS); return; }
   PROFILE_COUNT_WRITE (cpu, a, MODE_UDI);
-  sim_core_write_aligned_8 (cpu, NULL_CIA, sim_core_read_map, a, val);
+  sim_core_write_aligned_8 (cpu, NULL_CIA, sim_core_write_map, a, val);
 }
 #else
 extern void SETMEMUDI (SIM_CPU *, ADDR, UDI);
