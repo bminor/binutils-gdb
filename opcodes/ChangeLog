@@ -1,3 +1,7 @@
+2001-09-14  David Schleef <ds@schleef.org>
+
+	* ppc-opc.c (VXA, VXA_MASK): Fix mask bits.
+
 2001-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (grps): Don't print the implicit al/ax/eax register

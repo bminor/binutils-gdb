@@ -1153,10 +1153,10 @@ extract_tbr (insn, invalid)
 #define VX_MASK	VX(0x3f, 0x7ff)
 
 /* An VA form instruction. */
-#define VXA(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x07f))
+#define VXA(op, xop) (OP (op) | (((unsigned long)(xop)) & 0x03f))
 
 /* The mask for an VA form instruction. */
-#define VXA_MASK VXA(0x3f, 0x7f)
+#define VXA_MASK VXA(0x3f, 0x3f)
 
 /* An VXR form instruction. */
 #define VXR(op, xop, rc) (OP (op) | (((rc) & 1) << 10) | (((unsigned long)(xop)) & 0x3ff))
