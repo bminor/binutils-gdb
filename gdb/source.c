@@ -46,15 +46,15 @@
 #include "ui-out.h"
 #include "readline/readline.h"
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #ifdef CRLF_SOURCE_FILES
 
 /* Define CRLF_SOURCE_FILES in an xm-*.h file if source files on the
    host use \r\n rather than just \n.  Defining CRLF_SOURCE_FILES is
    much faster than defining LSEEK_NOT_LINEAR.  */
-
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -674,9 +674,7 @@ openp (const char *path, int opts, const char *string,
   if (!path)
     path = ".";
 
-#if defined(_WIN32) || defined(__CYGWIN__)
   mode |= O_BINARY;
-#endif
 
   if ((opts & OPF_TRY_CWD_FIRST) || IS_ABSOLUTE_PATH (string))
     {

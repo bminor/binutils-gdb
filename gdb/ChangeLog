@@ -1,5 +1,8 @@
 2004-10-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* source.c: Always define O_BINARY to 0 if not defined already.
+	(openp): Unconditionally use O_BINARY.
+
 	* top.c (gdb_readline): Always accept "\r\n" as a line-ending.
 	* event-top.c (gdb_readline2): Likewise.
 
