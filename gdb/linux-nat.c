@@ -83,8 +83,6 @@
 
 static int debug_linux_nat;
 
-extern struct target_ops child_ops;
-
 static int linux_parent_pid;
 
 struct simple_pid_list
@@ -598,9 +596,6 @@ ptid_t trap_ptid;
 
 /* This module's target-specific operations.  */
 static struct target_ops linux_nat_ops;
-
-/* The standard child operations.  */
-extern struct target_ops child_ops;
 
 /* Since we cannot wait (in linux_nat_wait) for the initial process and
    any cloned processes with a single call to waitpid, we have to use

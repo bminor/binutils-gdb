@@ -45,7 +45,6 @@
 #include "gdbcore.h"
 
 extern int child_suppress_run;
-extern struct target_ops child_ops;	/* target vector for inftarg.c */
 
 extern void _initialize_hpux_thread (void);
 

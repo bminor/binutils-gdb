@@ -126,9 +126,6 @@ upload_options[3] =
 static char *remote_upload = NULL;	/* Set by set remoteupload */
 static int remote_add_host = 0;
 
-/* Forward declaration */
-extern struct target_ops child_ops;
-
 static int win32_child_thread_alive (ptid_t);
 void child_kill_inferior (void);
 

@@ -1,3 +1,13 @@
+2004-09-29  Andrew Cagney  <cagney@gnu.org>
+
+	* target.h (child_ops): Declare.
+	* inftarg.c (child_ops): Move from here ...
+	* target.c (child_ops): ... to here.
+	* wince.c (child_ops): Delete extern declaration.
+	* win32-nat.c (child_ops): Delete extern declaration.
+	* linux-nat.c (child_ops): Delete extern declaration.
+	* hpux-thread.c (child_ops): Delete extern declaration.
+
 2004-09-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt: Set default OS/ABI for OpenBSD ELF targets.

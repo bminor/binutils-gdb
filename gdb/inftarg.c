@@ -89,8 +89,6 @@ static void init_child_ops (void);
 
 extern char **environ;
 
-struct target_ops child_ops;
-
 int child_suppress_run = 0;	/* Non-zero if inftarg should pretend not to
 				   be a runnable target.  Used by targets
 				   that can sit atop inftarg, such as HPUX

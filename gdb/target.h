@@ -1237,4 +1237,6 @@ extern void push_remote_target (char *name, int from_tty);
 /* Blank target vector entries are initialized to target_ignore. */
 void target_ignore (void);
 
+extern struct target_ops child_ops;
+
 #endif /* !defined (TARGET_H) */

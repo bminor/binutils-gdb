@@ -86,9 +86,6 @@ static int debug_registers_used;
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-/* Forward declaration */
-extern struct target_ops child_ops;
-
 static void child_stop (void);
 static int win32_child_thread_alive (ptid_t);
 void child_kill_inferior (void);
