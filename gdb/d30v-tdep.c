@@ -133,6 +133,8 @@ d30v_skip_prologue (pc)
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
 
+  /* XXX -- these need to be updated, the instruction patterns are actually
+     for the d10v, not the d30v.  */
   /* If we have line debugging information, then the end of the */
   /* prologue should the first assembly instruction of  the first source line */
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
@@ -228,6 +230,8 @@ prologue_find_regs (op, fsr, addr)
 {
   int n;
 
+  /* XXX -- these need to be updated, the instruction patterns are actually
+     for the d10v, not the d30v.  */
   /* st  rn, @-sp */
   if ((op & 0x7E1F) == 0x6C1F)
     {
@@ -293,6 +297,8 @@ prologue_find_regs (op, fsr, addr)
    This includes special registers such as pc and fp saved in special
    ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame. */
+/* XXX -- these need to be updated, the instruction patterns are actually
+   for the d10v, not the d30v.  */
 void
 d30v_frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
