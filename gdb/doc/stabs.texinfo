@@ -533,7 +533,7 @@ one has complained).
 
 A function is represented by an @samp{F} symbol descriptor for a global
 (extern) function, and @samp{f} for a static (local) function.  The
-value is the address of the start of the function.  For @code{a.out}, it
+value is the address of the start of the function.  For a.out, it
 is already relocated.  For stabs in ELF, the SunPRO compiler version
 2.0.1 and GCC put out an address which gets relocated by the linker.  In
 a future release SunPRO is planning to put out zero, in which case the
@@ -3028,7 +3028,7 @@ description in the class stab shows this ordering.
 @appendix Table of Stab Types
 
 The following are all the possible values for the stab type field, for
-@code{a.out} files, in numeric order.  This does not apply to XCOFF, but
+a.out files, in numeric order.  This does not apply to XCOFF, but
 it does apply to stabs in sections (@pxref{Stab Sections}).  Stabs in
 ECOFF use these values but add 0x8f300 to distinguish them from non-stab
 symbols.
@@ -3916,7 +3916,11 @@ byte order of the stabs binary data depends on the object file format.
 For ELF, it matches the byte order of the ELF file itself, as determined
 from the @code{EI_DATA} field in the @code{e_ident} member of the ELF
 header.  For SOM, it is always big-endian (is this true??? FIXME).  For
-COFF, it matches the byte order of the COFF headers.
+COFF, it matches the byte order of the COFF headers.  The meaning of the
+fields is the same as for a.out (@pxref{Symbol Table Format}), except
+that the @code{n_strx} field is relative to the strings for the current
+compilation unit (which can be found using the synthetic N_UNDF stab
+described below), rather than the entire string table.
 
 The first stab in the @code{.stab} section for each compilation unit is
 synthetic, generated entirely by the assembler, with no corresponding

@@ -1,3 +1,10 @@
+Wed Apr 20 11:22:48 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Stab Section Basics): Say what is in .stab
+	section, and say n_strx field is compilation unit relative.
+	* stabs.texinfo: Don't use @code for a.out when it is the name of
+	an object file format.
+
 Wed Apr 13 20:29:54 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.texinfo: Refer to file names, not path names, per rms
