@@ -54,6 +54,7 @@ arm*)		 targ_archs=bfd_arm_arch ;;
 c30*)		 targ_archs=bfd_tic30_arch ;;
 c4x*)		 targ_archs=bfd_tic4x_arch ;;
 c54x*)		 targ_archs=bfd_tic54x_arch ;;
+crisv32)	 targ_archs=bfd_cris_arch ;;
 crx*)		 targ_archs=bfd_crx_arch ;;
 dlx*)		 targ_archs=bfd_dlx_arch ;;
 hppa*)		 targ_archs=bfd_hppa_arch ;;
@@ -326,7 +327,7 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  cris-*-*)
+  cris-*-* | crisv32-*-*)
     targ_defvec=cris_aout_vec
     targ_selvecs="bfd_elf32_us_cris_vec bfd_elf32_cris_vec ieee_vec"
     targ_underscore=yes # Note: not true for bfd_elf32_cris_vec.

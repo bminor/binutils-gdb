@@ -1,3 +1,54 @@
+2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config.bfd: Support crisv32-*-* like cris-*-*.
+	* archures.c (bfd_mach_cris_v0_v10, bfd_mach_cris_v32)
+	(bfd_mach_cris_v10_v32): New macros.
+	* cpu-cris.c: Tweak formatting.
+	(get_compatible): New function.
+	(N): New macro.
+	(bfd_cris_arch_compat_v10_v32, bfd_cris_arch_v32): New
+	bfd_arch_info_type:s.
+	(bfd_cris_arch): Use bfd_mach_cris_v0_v10 for member mach,
+	get_compatible for member compatible and link bfd_cris_arch_v32 as
+	next.
+	* elf32-cris.c (cris_elf_pcrel_reloc)
+	(cris_elf_set_mach_from_flags): New functions.
+	(cris_elf_howto_table) <R_CRIS_8_PCREL, R_CRIS_16_PCREL>
+	<R_CRIS_32_PCREL>: Use cris_elf_pcrel_reloc.
+	(cris_elf_grok_prstatus, cris_elf_grok_psinfo): Give correct
+	numbers for bfd_mach_cris_v32.
+	(PLT_ENTRY_SIZE_V32): New macro.
+	(elf_cris_plt0_entry): Drop last comma in initializer.
+	(elf_cris_plt0_entry_v32, elf_cris_plt_entry_v32)
+	(elf_cris_pic_plt0_entry_v32, elf_cris_pic_plt_entry_v32): New
+	PLT initializers.
+	(cris_elf_relocate_section): Change all "%B(%A)" messages to
+	"%B, section %A".
+	(elf_cris_finish_dynamic_symbol): Do V32-specific PLT entries.
+	(elf_cris_finish_dynamic_sections): Similar.
+	(elf_cris_adjust_dynamic_symbol): Similar.
+	(cris_elf_check_relocs): Change all "%B(%A)" messages to "%B,
+	section %A".
+	<switch with PIC relocs>: Emit error and return FALSE for
+	bfd_mach_cris_v10_v32.
+	<case R_CRIS_8_PCREL, case R_CRIS_16_PCREL, case R_CRIS_32_PCREL>:
+	Emit warning when generating textrel reloc.
+	(cris_elf_object_p): Call cris_elf_set_mach_from_flags.
+	(cris_elf_final_write_processing): Set flags according to mach.
+	(cris_elf_print_private_bfd_data): Display
+	EF_CRIS_VARIANT_COMMON_V10_V32 and EF_CRIS_VARIANT_V32.
+	(cris_elf_merge_private_bfd_data): Drop variables old_flags,
+	new_flags.  Don't call cris_elf_final_write_processing.  Don't
+	look at the actual elf header flags at all; use
+	bfd_get_symbol_leading_char to check ibfd, obfd.  Trap difference
+	in bfd_get_mach for ibfd and obfd and handle merging of compatible
+	objects.
+	(bfd_elf32_bfd_copy_private_bfd_data): Define.
+	* reloc.c (BFD_RELOC_CRIS_SIGNED_8, BFD_RELOC_CRIS_UNSIGNED_8)
+	(BFD_RELOC_CRIS_SIGNED_16, BFD_RELOC_CRIS_UNSIGNED_16)
+	(BFD_RELOC_CRIS_LAPCQ_OFFSET): New relocs.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2004-11-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.h (ppc64_elf_edit_toc): Declare.

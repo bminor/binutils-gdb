@@ -1774,6 +1774,9 @@ enum bfd_architecture
   bfd_arch_crx,       /*  National Semiconductor CRX.  */
 #define bfd_mach_crx           1
   bfd_arch_cris,      /* Axis CRIS */
+#define bfd_mach_cris_v0_v10   255
+#define bfd_mach_cris_v32      32
+#define bfd_mach_cris_v10_v32  1032
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
 #define bfd_mach_s390_64       64
@@ -3508,6 +3511,11 @@ This is the 5 bits of a value.  */
   BFD_RELOC_CRIS_UNSIGNED_5,
   BFD_RELOC_CRIS_SIGNED_6,
   BFD_RELOC_CRIS_UNSIGNED_6,
+  BFD_RELOC_CRIS_SIGNED_8,
+  BFD_RELOC_CRIS_UNSIGNED_8,
+  BFD_RELOC_CRIS_SIGNED_16,
+  BFD_RELOC_CRIS_UNSIGNED_16,
+  BFD_RELOC_CRIS_LAPCQ_OFFSET,
   BFD_RELOC_CRIS_UNSIGNED_4,
 
 /* Relocs used in ELF shared libraries for CRIS.  */
