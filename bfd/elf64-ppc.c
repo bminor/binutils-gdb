@@ -6227,30 +6227,32 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 	      continue;
 
 	    case DT_PPC64_GLINK:
-	      dyn.d_un.d_ptr = (htab->sglink->output_section->vma
-				+ htab->sglink->output_offset);
+	      s = htab->sglink;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_PPC64_OPD:
 	      s = bfd_get_section_by_name (output_bfd, ".opd");
-	      if (s != NULL)
-		dyn.d_un.d_ptr = s->vma;
+	      if (s == NULL)
+		continue;
+	      dyn.d_un.d_ptr = s->vma;
 	      break;
 
 	    case DT_PPC64_OPDSZ:
 	      s = bfd_get_section_by_name (output_bfd, ".opd");
-	      if (s != NULL)
-		dyn.d_un.d_val = s->_raw_size;
+	      if (s == NULL)
+		continue;
+	      dyn.d_un.d_val = s->_raw_size;
 	      break;
 
 	    case DT_PLTGOT:
-	      dyn.d_un.d_ptr = (htab->splt->output_section->vma
-				+ htab->splt->output_offset);
+	      s = htab->splt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_JMPREL:
-	      dyn.d_un.d_ptr = (htab->srelplt->output_section->vma
-				+ htab->srelplt->output_offset);
+	      s = htab->srelplt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_PLTRELSZ:
@@ -6260,8 +6262,22 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 	    case DT_RELASZ:
 	      /* Don't count procedure linkage table relocs in the
 		 overall reloc count.  */
-	      if (htab->srelplt != NULL)
-		dyn.d_un.d_val -= htab->srelplt->_raw_size;
+	      s = htab->srelplt;
+	      if (s == NULL)
+		continue;
+	      dyn.d_un.d_val -= s->_raw_size;
+	      break;
+
+	    case DT_RELA:
+	      /* We may not be using the standard ELF linker script.
+		 If .rela.plt is the first .rela section, we adjust
+		 DT_RELA to not include it.  */
+	      s = htab->srelplt;
+	      if (s == NULL)
+		continue;
+	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
+		continue;
+	      dyn.d_un.d_ptr += s->_raw_size;
 	      break;
 	    }
 

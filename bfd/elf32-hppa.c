@@ -4314,23 +4314,28 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_PLTRELSZ:
 	      s = htab->srelplt;
-	      if (s->_cooked_size != 0)
-		dyn.d_un.d_val = s->_cooked_size;
-	      else
-		dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->_raw_size;
 	      break;
 
 	    case DT_RELASZ:
 	      /* Don't count procedure linkage table relocs in the
 		 overall reloc count.  */
-	      if (htab->srelplt != NULL)
-		{
-		  s = htab->srelplt->output_section;
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val -= s->_cooked_size;
-		  else
-		    dyn.d_un.d_val -= s->_raw_size;
-		}
+	      s = htab->srelplt;
+	      if (s == NULL)
+		continue;
+	      dyn.d_un.d_val -= s->_raw_size;
+	      break;
+
+	    case DT_RELA:
+	      /* We may not be using the standard ELF linker script.
+		 If .rela.plt is the first .rela section, we adjust
+		 DT_RELA to not include it.  */
+	      s = htab->srelplt;
+	      if (s == NULL)
+		continue;
+	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
+		continue;
+	      dyn.d_un.d_ptr += s->_raw_size;
 	      break;
 	    }
 

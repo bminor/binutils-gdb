@@ -3265,15 +3265,13 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 	      break;
 
 	    case DT_JMPREL:
-	      dyn.d_un.d_ptr = htab->srelplt->output_section->vma;
+	      s = htab->srelplt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = htab->srelplt->output_section;
-	      if (s->_cooked_size != 0)
-		dyn.d_un.d_val = s->_cooked_size;
-	      else
-		dyn.d_un.d_val = s->_raw_size;
+	      s = htab->srelplt;
+	      dyn.d_un.d_val = s->_raw_size;
 	      break;
 
 	    case DT_RELSZ:
@@ -3282,18 +3280,23 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 		 included in the overall relocs (DT_REL).  This is
 		 what Solaris does.  However, UnixWare can not handle
 		 that case.  Therefore, we override the DT_RELSZ entry
-		 here to make it not include the JMPREL relocs.  Since
-		 the linker script arranges for .rel.plt to follow all
-		 other relocation sections, we don't have to worry
-		 about changing the DT_REL entry.  */
-	      if (htab->srelplt != NULL)
-		{
-		  s = htab->srelplt->output_section;
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val -= s->_cooked_size;
-		  else
-		    dyn.d_un.d_val -= s->_raw_size;
-		}
+		 here to make it not include the JMPREL relocs.  */
+	      s = htab->srelplt;
+	      if (s == NULL)
+		continue;
+	      dyn.d_un.d_val -= s->_raw_size;
+	      break;
+
+	    case DT_REL:
+	      /* We may not be using the standard ELF linker script.
+		 If .rel.plt is the first .rel section, we adjust
+		 DT_REL to not include it.  */
+	      s = htab->srelplt;
+	      if (s == NULL)
+		continue;
+	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
+		continue;
+	      dyn.d_un.d_ptr += s->_raw_size;
 	      break;
 	    }
 

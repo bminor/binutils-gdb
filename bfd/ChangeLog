@@ -1,3 +1,16 @@
+2002-12-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Add output_offset
+	to DT_JMPREL.  Use srelplt input section size for DT_PLTRELSZ and
+	DT_RELSZ adjustment, not output section.  Avoid writing tags when
+	unchanged.  Don't assume linker script is sane, adjust DT_REL too.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Just use raw
+	size of srelplt for DT_PLTRELSZ.  Use srelplt input section size for
+	DT_RELASZ adjustment, not output section.  Avoid writing tags when
+	unchanged.  Adjust DT_RELA.
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Tweaks for better
+	formatting.  Avoid writing tags when unchanged.  Adjust DT_RELA.
+
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Don't divide
