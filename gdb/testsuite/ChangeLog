@@ -1,8 +1,8 @@
 Mon May 24 00:24:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* gdb.t00/teststrategy.exp: For p "foo", remove sun4 XFAIL (the bug
-	still exists but isn't reproduced by this test anymroe), and remove
-	rs6000 XFAIL (the bug is fixed).
+	* gdb.t00/teststrategy.exp: For p "foo", remove sun4 XFAIL (see
+	PRMS 1823; the bug still exists but isn't reproduced by this test
+	anymore), and remove rs6000 XFAIL (the bug is fixed).
 
 	* gdb.t03/ptype.exp: Comment out a lot of tests which are basically
 	duplicated from whatis.exp.  For those that are left, accept
