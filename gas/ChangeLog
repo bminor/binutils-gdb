@@ -1,3 +1,8 @@
+Sun Apr 24 00:13:08 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_ip): 13 bit immediate constant (for break
+	instruction) is unsigned.
+
 Fri Apr 22 17:58:22 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-ecoff.c (ecoff_frob_file): Use bfd_ecoff_set_gp_value
