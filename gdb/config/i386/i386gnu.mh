@@ -12,7 +12,6 @@ XM_CLIBS = -lshouldbeinlibc
 msg-MIGUFLAGS = -D'MSG_IMPORTS=waittime 1000;'
 
 # ick
-MIG = mig
 MIGCOM = $(MIG) -cc cat - /dev/null
 
 # Reply servers need special massaging of the code mig generates, to make

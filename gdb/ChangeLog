@@ -1,3 +1,12 @@
+2000-02-26  Mark Kettenis  <kettenis@gnu.org>
+
+	Make cross-compilation for the Hurd more friendly.
+	From Jeff Bailey <jbailey@gnu.org>:
+	* configure.in: Use AC_CHECK_TOOL to find MiG.
+	* Makefile.in (MIG): New variable.
+	* config/i386/i386gnu.mh (MIG): Remove.
+	* configure: Regenerated.
+
 2000-02-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Add
