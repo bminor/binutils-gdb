@@ -34,10 +34,6 @@ typedef unsigned_4 quadword[4];
 #define PKE1_FIFO_ADDR             0x10005000
 
 
-/* and now a few definitions that rightfully belong elsewhere */ 
-#ifdef PKE_DEBUG
-
-
 /* VU source-addr tracking tables */ /* changed from 1998-01-22 e-mail plans */
 #define VU0_MEM0_SRCADDR_START 0x21000000
 #define VU0_MEM1_SRCADDR_START 0x21004000
@@ -54,8 +50,6 @@ typedef unsigned_4 quadword[4];
 #define COP2_REG_STAT_VBS1_B 8
 #define COP2_REG_STAT_VBS0_E 0
 #define COP2_REG_STAT_VBS0_B 0
-
-#endif /* PKE_DEBUG */
 
 
 /* Quadword indices of PKE registers.  Actual registers sit at bottom
@@ -366,6 +360,19 @@ struct fifo_quadword
 };
 
 
+/* quadword FIFO structure for PKE */ 
+struct pke_fifo
+{
+  struct fifo_quadword** quadwords; /* pointer to fifo quadwords */
+  unsigned_4 origin; /* quadword serial number of quadwords[0] */
+  unsigned_4 length; /* length of quadword pointer array: 0..N */
+  unsigned_4 next;   /* relative index of first unfilled quadword: 0..length-1 */
+};
+
+#define PKE_FIFO_GROW_SIZE 1000 /* number of quadword pointers to allocate */
+#define PKE_FIFO_ARCHEOLOGY 1000 /* number of old quadwords to keep as history */
+
+
 /* PKE internal state: FIFOs, registers, handle to VU friend */
 struct pke_device
 {
@@ -383,11 +390,9 @@ struct pke_device
   quadword fifo_qw_in_progress;
   int fifo_qw_done; /* bitfield */
 
-  /* FIFO */
-  struct fifo_quadword* fifo;
-  int fifo_num_elements; /* no. of quadwords occupied in FIFO */
-  int fifo_buffer_size;  /* no. of quadwords of space in FIFO */
-  FILE* fifo_trace_file; /* or 0 for no trace */
+  /* FIFO - private: use only pke_fifo_* routines to access */
+  struct pke_fifo fifo;  /* array of FIFO quadword pointers */
+  FILE* fifo_trace_file; /* stdio stream open in append mode, or 0 for no trace */
 
   /* PC */
   int fifo_pc;  /* 0 .. (fifo_num_elements-1): quadword index of next instruction */
