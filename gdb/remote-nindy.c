@@ -211,7 +211,13 @@ nindy_open (name, from_tty)
 
   savename = savestring (name, strlen (name));
   push_target (&nindy_ops);
+
   target_fetch_registers(-1);
+
+  init_thread_list ();
+  init_wait_for_inferior ();
+  clear_proceed_status ();
+  normal_stop ();
 }
 
 /* User-initiated quit of nindy operations.  */
@@ -437,8 +443,7 @@ nindy_fetch_registers(regno)
      int regno;
 {
   struct nindy_regs nindy_regs;
-  int regnum, inv;
-  double dub;
+  int regnum;
 
   immediate_quit++;
   ninRegsGet( (char *) &nindy_regs );
@@ -449,14 +454,7 @@ nindy_fetch_registers(regno)
   memcpy (&registers[REGISTER_BYTE (PCW_REGNUM)], nindy_regs.pcw_acw, 2*4);
   memcpy (&registers[REGISTER_BYTE (IP_REGNUM)], nindy_regs.ip, 1*4);
   memcpy (&registers[REGISTER_BYTE (TCW_REGNUM)], nindy_regs.tcw, 1*4);
-  for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++) {
-    dub = unpack_double (builtin_type_double,
-			 &nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
-			 &inv);
-    /* dub now in host byte order */
-    FLOATFORMAT_FROM_DOUBLEST (&floatformat_i960_ext, &dub,
-			       &registers[REGISTER_BYTE (regnum)]);
-  }
+  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], nindy_regs.fp_as_double, 4 * 8);
 
   registers_fetched ();
 }
@@ -474,21 +472,13 @@ nindy_store_registers(regno)
 {
   struct nindy_regs nindy_regs;
   int regnum;
-  double dub;
 
   memcpy (nindy_regs.local_regs, &registers[REGISTER_BYTE (R0_REGNUM)], 16*4);
   memcpy (nindy_regs.global_regs, &registers[REGISTER_BYTE (G0_REGNUM)], 16*4);
   memcpy (nindy_regs.pcw_acw, &registers[REGISTER_BYTE (PCW_REGNUM)], 2*4);
   memcpy (nindy_regs.ip, &registers[REGISTER_BYTE (IP_REGNUM)], 1*4);
   memcpy (nindy_regs.tcw, &registers[REGISTER_BYTE (TCW_REGNUM)], 1*4);
-  for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++)
-    {
-      FLOATFORMAT_TO_DOUBLEST (&floatformat_i960_ext,
-			       &registers[REGISTER_BYTE (regnum)], &dub);
-      store_floating (&nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
-		      REGISTER_VIRTUAL_SIZE (regnum),
-		      dub);
-    }
+  memcpy (nindy_regs.fp_as_double, &registers[REGISTER_BYTE (FP0_REGNUM)], 8*4);
 
   immediate_quit++;
   ninRegsPut( (char *) &nindy_regs );

@@ -1,3 +1,20 @@
+Sat Apr 13 14:21:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* remote-nindy.c (nindy_open):  Acquire more target state so that
+	user can attach to a previously running program.
+	* (nindy_fetch_registers nindy_store_registers):  Get rid of fp
+	conversion code.  That's all handled in {extract store}_floating
+	now.
+	* utils.c (floatformat_to_double):  Don't bias exponent when
+	handling zero's, denorms or NaNs.
+	* config/i960/tm-i960.h (REGISTER_CONVERT_TO_VIRTUAL
+	REGISTER_CONVERT_TO_RAW):  Change to using DOUBLST and
+	FLOATFORMAT_TO/FROM_DOUBLEST macros.
+	* config/i960/tm-nindy960.h:  Undefine
+	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW, and
+	REGISTER_CONVERTIBLE.  These are no longer necessary now that all
+	the magic happens in extract/store_floating.
+
 Sat Apr 13 02:58:02 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* eval.c (evaluate_subexp_standard):  Report error when attempting to

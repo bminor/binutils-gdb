@@ -2035,6 +2035,7 @@ floatformat_to_long_double (fmt, from, to)
   unsigned long mant;
   unsigned int mant_bits, mant_off;
   int mant_bits_left;
+  int special_exponent;		/* It's a NaN, denorm or zero */
 
   exponent = get_field (ufrom, fmt->byteorder, fmt->totalsize,
 			fmt->exp_start, fmt->exp_len);
@@ -2045,7 +2046,12 @@ floatformat_to_long_double (fmt, from, to)
   mant_bits_left = fmt->man_len;
   mant_off = fmt->man_start;
   dto = 0.0;
-  exponent -= fmt->exp_bias;
+
+  special_exponent = exponent == 0 || exponent == fmt->exp_nan;
+
+/* Don't bias zero's, denorms or NaNs.  */
+  if (!special_exponent)
+    exponent -= fmt->exp_bias;
 
   /* Build the result algebraically.  Might go infinite, underflow, etc;
      who cares. */
@@ -2053,10 +2059,11 @@ floatformat_to_long_double (fmt, from, to)
 /* If this format uses a hidden bit, explicitly add it in now.  Otherwise,
    increment the exponent by one to account for the integer bit.  */
 
-  if (fmt->intbit == floatformat_intbit_no)
-    dto = ldexp (1.0, exponent);
-  else
-    exponent++;
+  if (!special_exponent)
+    if (fmt->intbit == floatformat_intbit_no)
+      dto = ldexp (1.0, exponent);
+    else
+      exponent++;
 
   while (mant_bits_left > 0)
     {
@@ -2074,7 +2081,7 @@ floatformat_to_long_double (fmt, from, to)
   /* Negate it if negative.  */
   if (get_field (ufrom, fmt->byteorder, fmt->totalsize, fmt->sign_start, 1))
     dto = -dto;
-  memcpy (to, &dto, sizeof (dto));
+  *to = dto;
 }
 
 static void put_field PARAMS ((unsigned char *, enum floatformat_byteorders,
