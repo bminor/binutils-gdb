@@ -1,3 +1,9 @@
+2004-06-04  Roland McGrath  <roland@redhat.com>
+
+	Fix PR gdb/1647.
+	* gdb.base/auxv.exp (fetch_auxv): Revert last change and fix it
+	differently to be robust to output buffering differences.
+
 2004-06-04  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.threads/pthreads.exp: Update copyright years.
