@@ -819,6 +819,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	      tsec = ia64_info->plt_sec;
 	      toff = dyn_i->plt2_offset;
+	      BFD_ASSERT (irel->r_addend == 0);
 	    }
 
 	  /* Can't do anything else with dynamic symbols.  */
@@ -837,10 +838,15 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    }
 	}
 
-      symaddr = (tsec->output_section->vma
-		 + tsec->output_offset
-		 + toff
-		 + irel->r_addend);
+      if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	toff = _bfd_merged_section_offset (abfd, &tsec,
+					   elf_section_data (tsec)->sec_info,
+					   toff + irel->r_addend,
+					   (bfd_vma) 0);
+      else
+	toff += irel->r_addend;
+
+      symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
       roff = irel->r_offset;
 

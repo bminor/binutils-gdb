@@ -1,3 +1,9 @@
+2003-03-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle relaxation
+	againt mergeable sections.  Take r_addend into account when caching
+	trampolines.
+
 2003-03-18  Richard Henderson  <rth@redhat.com>
 
         * elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
