@@ -54,7 +54,6 @@ void frame_find_saved_regs ();
 CORE_ADDR 
 h8300_skip_prologue (start_pc)
      CORE_ADDR start_pc;
-
 {
   short int w;
 
@@ -92,7 +91,6 @@ h8300_skip_prologue (start_pc)
     }
 
   return start_pc;
-
 }
 
 int
@@ -102,7 +100,10 @@ print_insn (memaddr, stream)
 {
   disassemble_info info;
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
-  return print_insn_h8300 (memaddr, &info);
+  if (HMODE)
+    return print_insn_h8300h (memaddr, &info);
+  else
+    return print_insn_h8300 (memaddr, &info);
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
@@ -116,7 +117,6 @@ FRAME_ADDR
 FRAME_CHAIN (thisframe)
      FRAME thisframe;
 {
-
   frame_find_saved_regs (thisframe, (struct frame_saved_regs *) 0);
   return thisframe->fsr->regs[SP_REGNUM];
 }
@@ -211,14 +211,13 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   int r;
   int i;
   int have_fp = 0;
-
   register int src;
   register struct pic_prologue_code *pcode;
   INSN_WORD insn_word;
   int size, offset;
-  unsigned int reg_save_depth = 2; /* Number of things pushed onto
-				      stack, starts at 2, 'cause the
-				      PC is already there */
+  /* Number of things pushed onto stack, starts at 2/4, 'cause the
+     PC is already there */
+  unsigned int reg_save_depth = HMODE ? 4 : 2;
 
   unsigned int auto_depth = 0;	/* Number of bytes of autos */
 
@@ -233,7 +232,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
     {
       after_prolog_fp = read_register (SP_REGNUM);
     }
-  if (ip == 0 || ip & ~0xffff)
+  if (ip == 0 || ip & (HMODE ? ~0xffff : ~0xffff))
     return 0;
 
   next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
@@ -279,7 +278,6 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 
 	  next_ip = NEXT_PROLOGUE_INSN (next_ip, limit, &insn_word);
 	  auto_depth += insn_word;
-
 	}
     }
   /* Work out which regs are stored where */
@@ -319,7 +317,6 @@ init_extra_frame_info (fromleaf, fi)
   fi->args_pointer = 0;		/* Unknown */
   fi->locals_pointer = 0;	/* Unknown */
   fi->from_pc = 0;
-
 }
 
 /* Return the saved PC from this frame.
@@ -330,7 +327,6 @@ init_extra_frame_info (fromleaf, fi)
 CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
-
 {
   return frame->from_pc;
 }
@@ -389,9 +385,7 @@ h8300_pop_frame ()
       flush_cached_frames ();
       set_current_frame (create_new_frame (read_register (FP_REGNUM),
 					   read_pc ()));
-
     }
-
 }
 
 void

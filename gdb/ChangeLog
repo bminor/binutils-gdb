@@ -1,5 +1,8 @@
 Thu Jul  8 08:22:05 1993  Doug Evans  (dje@canuck.cygnus.com)
 
+	* h8300-tdep.c (print_insn): Call print_insn_h8300h if h8/300h.
+	(examine_prologue): reg_save_depth is 4 if h8/300h.
+
 	* findvar.c (read_register): Provide some support for 64 bit regs.
 	(write_register): Ditto.
 
