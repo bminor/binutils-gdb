@@ -94,9 +94,7 @@ maintainer works with the native maintainer when resolving API issues.
 			(--target=ia64-elf broken)
 			Kevin Buettner		kevinb@redhat.com
 
-	m32r		(--target=m32r-elf broken)
-			Michael Snyder		msnyder@redhat.com
-			OBSOLETE candidate, not multi-arch
+	m32r		(--target=m32r-elf OBSOLETE)
 
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 			Stephane Carrez		stcarrez@nerim.fr

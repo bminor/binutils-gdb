@@ -1,5 +1,17 @@
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Note that the m32r-*-elf* is obsolete. 
+	* monitor.c (monitor_expect): Obsolete reference to m32r.
+	* configure.tgt: Mark m32r-*-elf* as obsolete.
+	* MAINTAINERS: Mark m32k as obsolete.
+	* m32r-rom.c: Obsolete file.
+	* config/m32r/m32r.mt: Obsolete file.
+	* config/m32r/tm-m32r.h: Obsolete file.
+	* m32r-stub.c: Obsolete file.
+	* m32r-tdep.c: Obsolete file.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* NEWS: Mention that the z8k-zilog-none is obsolete.
 	* MAINTAINERS: Mark z8k as obsolete.
 	* configure.tgt: Obsolete the z8k-*-coff* target.
