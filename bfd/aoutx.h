@@ -595,9 +595,20 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
     if (machine == 0)	arch_flags = M_29K;
     break;
       
+  case bfd_arch_mips:
+    switch (machine) {
+    case 0:
+    case 2000:
+    case 3000:          arch_flags = M_MIPS1; break;
+    case 4000:
+    case 4400:
+    case 6000:          arch_flags = M_MIPS2; break;
+    default:            arch_flags = M_UNKNOWN; break;
+    }
+    break;
+
   default:
     arch_flags = M_UNKNOWN;
-    break;
   }
   return arch_flags;
 }
@@ -634,6 +645,7 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
   switch (arch) {
   case bfd_arch_sparc:
   case bfd_arch_a29k:
+  case bfd_arch_mips:
     obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
     break;
   default:
