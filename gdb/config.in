@@ -354,3 +354,14 @@
 /* Define if <sys/procfs.h> has fpregset_t. */
 #undef HAVE_FPREGSET_T
 
+/* Define if <sys/procfs.h> has prgregset_t.  */
+#undef HAVE_PRGREGSET_T
+
+/* Define if <sys/procfs.h> has prfpregset_t.  */
+#undef HAVE_PRFPREGSET_T
+
+/* Define if <sys/procfs.h> has lwpid_t.  */
+#undef HAVE_LWPID_T
+
+/* Define if <sys/procfs.h> has psaddr_t.  */
+#undef HAVE_PSADDR_T
