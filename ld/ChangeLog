@@ -1,3 +1,7 @@
+2001-07-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldmain.c (main): Disallow -F and -f without -shared.
+
 2001-07-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* emultempl/pe.em (after_open): Check for the output_bfd not

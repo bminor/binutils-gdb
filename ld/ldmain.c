@@ -273,6 +273,14 @@ main (argc, argv)
 	einfo (_("%P%F: -r and -shared may not be used together\n"));
     }
 
+  if (! link_info.shared)
+    {
+      if (command_line.filter_shlib)
+	einfo ("%P%F: -F may not be used without -shared\n"));
+      if (command_line.auxiliary_filters)
+	einfo ("%P%F: -f may not be used without -shared\n"));
+    }
+
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
      don't see how else this can be handled, since in this case we
      must preserve all externally visible symbols.  */
