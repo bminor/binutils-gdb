@@ -1,3 +1,8 @@
+Fri Aug 12 15:52:37 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* remote.c (remote_wait):  Return inferior_pid instead of 0 for
+	`W` message.
+
 Fri Aug 12 11:47:10 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* sparclite/aload.c (sys_error, error): Use vfprintf to variable

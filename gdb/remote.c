@@ -411,13 +411,6 @@ device is attached to the remote system (e.g. /dev/ttya).");
      stub to another, we can (if the target is closed and reopened) cope.  */
   stub_supports_P = 1;
 
-  /* Start the remote connection; if error (0), discard this target.
-     In particular, if the user quits, be sure to discard it
-     (we'd be in an inconsistent state otherwise).  */
-  if (!catch_errors (remote_start_remote, (char *)0, 
-	"Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
-    pop_target();
-
   /* Without this, some commands which require an active target (such as kill)
      won't work.  This variable serves (at least) double duty as both the pid
      of the target process (if it has such), and as a flag indicating that a
@@ -425,7 +418,14 @@ device is attached to the remote system (e.g. /dev/ttya).");
      variables, especially since GDB will someday have a notion of debugging
      several processes.  */
 
-  inferior_pid = -1;
+  inferior_pid = 42000;
+
+  /* Start the remote connection; if error (0), discard this target.
+     In particular, if the user quits, be sure to discard it
+     (we'd be in an inconsistent state otherwise).  */
+  if (!catch_errors (remote_start_remote, (char *)0, 
+	"Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
+    pop_target();
 }
 
 /* remote_detach()
@@ -630,13 +630,13 @@ remote_wait (pid, status)
 	  status->value.sig = (enum target_signal)
 	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
 
-	  return 0;
+	  return inferior_pid;
 	case 'W':		/* Target exited */
 	  {
 	    /* The remote process exited.  */
 	    status->kind = TARGET_WAITKIND_EXITED;
 	    status->value.integer = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
-	    return 0;
+	    return inferior_pid;
 	  }
 	case 'O':		/* Console output */
 	  fputs_filtered (buf + 1, gdb_stdout);
