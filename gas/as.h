@@ -17,6 +17,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef GAS
 #define GAS 1
 /*
  * I think this stuff is largely out of date.  xoxorich.
@@ -36,8 +37,9 @@
 
 /* These #defines are for parameters of entire assembler. */
 
-#define DEBUG			/* temporary */
 /* These #includes are for type definitions etc. */
+
+#include "config.h"
 
 #include <stdio.h>
 #ifdef DEBUG
@@ -76,6 +78,10 @@
 #define volatile
 #endif
 #endif /* ! __STDC__ */
+
+#ifndef FOPEN_WB
+#include "fopen-same.h"
+#endif
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
@@ -334,6 +340,9 @@ COMMON int need_pass_2;
    leave lots of padding.  */
 COMMON int linkrelax;
 
+/* TRUE if we should produce a listing.  */
+extern int listing;
+
 struct _pseudo_type
   {
     /* assembler mnemonic, lower case, no '.' */
@@ -360,10 +369,10 @@ typedef struct lineno_struct lineno;
 
 #if __GNUC__ >= 2
 /* for use with -Wformat */
-#define PRINTF_LIKE(FCN)	void FCN (const char *Format, ...) \
+#define PRINTF_LIKE(FCN)	void FCN (const char *format, ...) \
 					__attribute__ ((format (printf, 1, 2)))
 #else /* ANSI C with stdarg, but not GNU C */
-#define PRINTF_LIKE(FCN)	void FCN (const char *Format, ...)
+#define PRINTF_LIKE(FCN)	void FCN (const char *format, ...)
 #endif
 #else /* not ANSI C, or not stdarg */
 #define PRINTF_LIKE(FCN)	void FCN ()
@@ -373,6 +382,18 @@ PRINTF_LIKE (as_bad);
 PRINTF_LIKE (as_fatal);
 PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
+
+#if defined (__STDC__) && !defined (NO_STDARG)
+#if __GNUC__ >= 2
+void as_bad_where (char *file, unsigned int line, const char *format, ...)
+     __attribute__ ((format (printf, 3, 4)));
+#else /* ANSI C with stdarg, but not GNU C */
+void as_bad_where (char *file, unsigned int line, const char *format, ...);
+#endif
+#else /* not ANSI C, or not stdarg */
+void as_bad_where ();
+#endif
+
 void fprint_value PARAMS ((FILE *file, addressT value));
 void sprint_value PARAMS ((char *buf, addressT value));
 
@@ -401,13 +422,12 @@ int seen_at_least_1_file PARAMS ((void));
 void app_pop PARAMS ((char *arg));
 void as_howmuch PARAMS ((FILE * stream));
 void as_perror PARAMS ((char *gripe, char *filename));
-void as_where PARAMS ((void));
+void as_where PARAMS ((char **namep, unsigned int *linep));
 void bump_line_counters PARAMS ((void));
 void do_scrub_begin PARAMS ((void));
 void input_scrub_begin PARAMS ((void));
 void input_scrub_close PARAMS ((void));
 void input_scrub_end PARAMS ((void));
-void int_to_gen PARAMS ((long x));
 void new_logical_line PARAMS ((char *fname, int line_number));
 void scrub_to_file PARAMS ((int ch));
 void scrub_to_string PARAMS ((int ch));
@@ -415,6 +435,15 @@ void subsegs_begin PARAMS ((void));
 void subseg_change PARAMS ((segT seg, int subseg));
 segT subseg_new PARAMS ((const char *name, subsegT subseg));
 void subseg_set PARAMS ((segT seg, subsegT subseg));
+
+struct expressionS;
+struct fix;
+struct symbol;
+
+#ifdef BFD_ASSEMBLER
+/* literal.c */
+valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
+#endif
 
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
@@ -447,5 +476,7 @@ void subseg_set PARAMS ((segT seg, subsegT subseg));
 #define OUTPUT_FLAVOR bfd_target_elf_flavour
 #endif
 #endif /* BFD_ASSEMBLER */
+
+#endif /* GAS */
 
 /* end of as.h */
