@@ -21,7 +21,7 @@
 
 proc gas_version {} {
     global AS
-    set tmp [exec $AS -version < /dev/null]
+    catch "exec $AS -version < /dev/null" tmp
     # Should find a way to discard constant parts, keep whatever's
     # left, so the version string could be almost anything at all...
     regexp " \[0-9\]\[0-9\.a-zA-Z-\]+" $tmp version
@@ -32,38 +32,176 @@ proc gas_version {} {
     unset version
 }
 
-proc gas_start { prog } {
-    global verbose
+proc gas_run { prog as_opts redir } {
     global AS
     global ASFLAGS
     global comp_output
+    global srcdir
+    global subdir
 
-    if $verbose>1 then {
-	send_user "Executing $AS $ASFLAGS $prog\n"
+    verbose "Executing $AS $ASFLAGS $as_opts $prog $redir"
+    catch "exec $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog $redir" comp_output
+}
+
+proc all_ones { args } {
+    foreach x $args { if [expr $x!=1] { return 0 } }
+    return 1
+}
+
+proc gas_start { prog as_opts } {
+    global AS
+    global ASFLAGS
+    global srcdir
+    global subdir
+    global spawn_id
+
+    verbose "Starting $AS $ASFLAGS $as_opts $prog" 2
+    catch {
+	spawn -noecho -nottyinit $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog
+    } foo
+    if ![regexp {^[0-9]+} $foo] then {
+	error "Can't run $subdir/$prog: $foo"
     }
-    catch "exec $AS $ASFLAGS $prog" comp_output
+}
+
+proc gas_finish { } {
+    global spawn_id
+
+# Don't need to do anything?
+}
+
+proc want_no_output { testname } {
+    global comp_output
+
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
-	if $verbose>1 then {
-	    send_user "$comp_output\n"
+	verbose "$comp_output" 3
+    }
+    if [string match "" $comp_output] then {
+	pass "$testname"
+	return 1
+    } else {
+	fail "$testname"
+	return 0
+    }
+}
+
+proc gas_test_old { file as_opts testname } {
+    gas_run $file $as_opts ""
+    return [want_no_output $testname]
+}
+
+proc gas_test { file as_opts var_opts testname } {
+    global comp_output
+
+    set i 0
+    foreach word $var_opts {
+	set ignore_stdout($i) [string match "*>" $word]
+	set opt($i) [string trim $word {>}]
+	incr i
+    }
+    set max [expr 1<<$i]
+    for {set i 0} {[expr $i<$max]} {incr i} {
+	set maybe_ignore_stdout ""
+	set extra_opts ""
+	for {set bit 0} {(1<<$bit)<$max} {incr bit} {
+	    set num [expr 1<<$bit]
+	    if [expr $i&$num] then {
+		set extra_opts "$extra_opts $opt($bit)"
+		if $ignore_stdout($bit) then {
+		    set maybe_ignore_stdout "1>/dev/null"
+		}
+	    }
+	}
+	set extra_opts [string trim $extra_opts]
+	gas_run $file "$as_opts $extra_opts" $maybe_ignore_stdout
+
+	# Should I be able to use a conditional expression here?
+	if [string match "" $extra_opts] then {
+	    want_no_output $testname
+	} else {
+	    want_no_output "$testname ($extra_opts)"
 	}
     }
 }
 
-proc gas_test { arg testname } {
-    global verbose
+proc gas_test_ignore_stdout { file as_opts testname } {
     global comp_output
 
-    gas_start $arg
+    gas_run $file $as_opts "2>&1 1>/dev/null"
+    want_no_output $testname
+}
+
+proc gas_test_error { file as_opts testname } {
+    global comp_output
+
+    gas_run $file $as_opts "2>&1 1>/dev/null"
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
-	if $verbose>3 then {
-	    send_user "|$comp_output|\n"
-	}
+	verbose "$comp_output" 3
     }
     if [string match "" $comp_output] then {
-	pass "$testname"
-    } else {
 	fail "$testname"
+    } else {
+	pass "$testname"
     }
+}
+
+proc gas_exit {} {}
+
+proc gas_init {} {
+    global target_cpu
+    global target_cpu_family
+    global target_family
+    global target_vendor
+    global target_os
+    global stdoptlist
+
+    case "$target_cpu" in {
+	"m68???"		{ set target_cpu_family m68k }
+	"i[34]86"		{ set target_cpu_family i386 }
+	default			{ set target_cpu_family $target_cpu }
+    }
+
+    set target_family "$target_cpu_family-$target_vendor-$target_os"
+    set stdoptlist "-a>"
+    # Need to return an empty string.
+    return
+}
+
+proc objdump_start_common { prog objdump_opts prefix } {
+    global OBJDUMP
+    global srcdir
+    global spawn_id
+
+    verbose "Starting $OBJDUMP $objdump_opts $prog" 2
+    catch {
+	spawn -noecho -nottyinit $srcdir/lib/run $OBJDUMP $objdump_opts $prefix$prog
+    } foo
+    if ![regexp {^[0-9]+} $foo] then {
+	error "Can't run $prog: $foo"
+    }
+}
+
+proc objdump_start { prog opts } {
+	global subdir
+	global objdir
+	objdump_start_common $prog $opts "$objdir/$subdir/"
+}
+
+proc objdump_start_no_subdir { prog opts } {
+	objdump_start_common $prog $opts ""
+}
+
+proc objdump_finish { } {
+    global spawn_id
+
+# Don't need to do anything?
+}
+
+expect_after {
+    timeout			{ error "timeout" }
+    "virtual memory exhausted"	{ error "virtual memory exhausted" }
+    buffer_full			{ error "buffer full" }
+    eof				{ error "eof" }
 }
