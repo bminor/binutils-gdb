@@ -1,3 +1,7 @@
+Mon Jun 16 12:49:36 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* ldemul.c (ldemul_choose_mode): Remove unused einfo argument.
+
 Fri Jun  6 23:47:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/pe.sc: Add zeroes after .idata$3 to mark the end of
