@@ -2579,11 +2579,11 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
   if (stub_group_size == 1)
     {
       /* Default values.  */
-      stub_group_size = 8000000;
+      stub_group_size = 7680000;
       if (htab->has_17bit_branch || htab->multi_subspace)
-	stub_group_size = 250000;
+	stub_group_size = 240000;
       if (htab->has_12bit_branch)
-	stub_group_size = 7812;
+	stub_group_size = 7500;
     }
 
   /* Count the number of input BFDs and find the top input section id.  */
@@ -2696,16 +2696,18 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	    curr = prev;
 
 	  /* OK, the size from the start of CURR to the end is less
-	     than 250000 bytes and thus can be handled by one stub
+	     than 240000 bytes and thus can be handled by one stub
 	     section.  (or the tail section is itself larger than
-	     250000 bytes, in which case we may be toast.)
+	     240000 bytes, in which case we may be toast.)
 	     We should really be keeping track of the total size of
 	     stubs added here, as stubs contribute to the final output
 	     section size.  That's a little tricky, and this way will
-	     only break if stubs added total more than 12144 bytes, or
-	     1518 long branch stubs.  It seems unlikely for more than
-	     1518 different functions to be called, especially from
-	     code only 250000 bytes long.  */
+	     only break if stubs added total more than 22144 bytes, or
+	     2768 long branch stubs.  It seems unlikely for more than
+	     2768 different functions to be called, especially from
+	     code only 240000 bytes long.  This limit used to be
+	     250000, but c++ code tends to generate lots of little
+	     functions, and sometimes violated the assumption.  */
 	  do
 	    {
 	      prev = PREV_SEC (tail);
@@ -2714,7 +2716,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	    }
 	  while (tail != curr && (tail = prev) != NULL);
 
-	  /* But wait, there's more!  Input sections up to 250000
+	  /* But wait, there's more!  Input sections up to 240000
 	     bytes before the stub section can be handled by it too.  */
 	  if (!stubs_always_before_branch)
 	    {

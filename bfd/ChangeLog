@@ -1,3 +1,8 @@
+2001-11-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (elf32_hppa_size_stubs): Decrease default stub
+	group sizes to accomodate c++.
+
 2001-11-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Don't clear
