@@ -282,6 +282,15 @@ Do not forget to merge the patch back into the trunk.
 
 --
 
+Re: [RFC] Change configure.in so -W arnings match reality
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00350.html
+
+Some GCC compilers do not like -Wreturn-type.  (Going forward there
+may be more problems like that).  Need to check which of the warning
+options are valid.  Need to probably disable warnings by default.
+
+--
+
 General Wish List
 =================
 
