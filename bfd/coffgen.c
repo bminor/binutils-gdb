@@ -2097,7 +2097,7 @@ _bfd_coff_is_local_label_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  return ((name[0] == '.' && name[1] == 'L') ? true : false);
+  return name[0] == '.' && name[1] == 'L';
 }
 
 /* Provided a BFD, a section and an offset into the section, calculate
