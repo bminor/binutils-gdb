@@ -119,4 +119,8 @@ extern void cons_fix_new_hppa ();
 #define TC_EOL_IN_INSN(PTR)	(is_end_of_line[*(PTR)] && (PTR)[-1] == ',')
 
 #define tc_fix_adjustable hppa_fix_adjustable
+
+/* Disable -R on all PA targets.  It fails miserably.  FIXME!*/
+#define NO_FOLD_DATA_AND_TEXT
+
 #endif /* _TC_HPPA_H */
