@@ -101,7 +101,8 @@ printf_monitor (char *pattern,...)
   va_end (args);
 
   if (serial_write (monitor_desc, buf, strlen (buf)))
-    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "serial_write failed: %s\n",
+			safe_strerror (errno));
 }
 
 /* Read a character from the remote system, doing all the fancy timeout stuff */
@@ -380,9 +381,9 @@ rombug_close (int quitting)
   if (log_file)
     {
       if (ferror (log_file))
-	fprintf (stderr, "Error writing log file.\n");
+	fprintf_unfiltered (gdb_stderr, "Error writing log file.\n");
       if (fclose (log_file) != 0)
-	fprintf (stderr, "Error closing log file.\n");
+	fprintf_unfiltered (gdb_stderr, "Error closing log file.\n");
       log_file = 0;
     }
 }
@@ -883,7 +884,7 @@ rombug_insert_breakpoint (CORE_ADDR addr, char *shadow)
 	return 0;
       }
 
-  fprintf (stderr, "Too many breakpoints (> 16) for monitor\n");
+  fprintf_unfiltered (gdb_stderr, "Too many breakpoints (> 16) for monitor\n");
   return 1;
 }
 
@@ -908,7 +909,8 @@ rombug_remove_breakpoint (CORE_ADDR addr, char *shadow)
 	return 0;
       }
 
-  fprintf (stderr, "Can't find breakpoint associated with 0x%x\n", addr);
+  fprintf_unfiltered (gdb_stderr,
+		      "Can't find breakpoint associated with 0x%x\n", addr);
   return 1;
 }
 
@@ -949,7 +951,9 @@ rombug_load (char *arg)
 
       if (serial_write (monitor_desc, buf, bytes_read))
 	{
-	  fprintf (stderr, "serial_write failed: (while downloading) %s\n", safe_strerror (errno));
+	  fprintf_unfiltered (gdb_stderr,
+			      "serial_write failed: (while downloading) %s\n",
+			      safe_strerror (errno));
 	  break;
 	}
       i = 0;

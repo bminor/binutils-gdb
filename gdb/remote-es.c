@@ -1616,7 +1616,7 @@ send (char *string)
 {
   if (kiodebug)
     {
-      fprintf (stderr, "Sending: %s\n", string);
+      fprintf_unfiltered (gdb_stderr, "Sending: %s\n", string);
     }
   serial_write (es1800_desc, string, strlen (string));
 }
@@ -1663,7 +1663,7 @@ getmessage (char *buf, int len)
 
   if (kiodebug)
     {
-      fprintf (stderr, "message received :%s\n", buf);
+      fprintf_unfiltered (gdb_stderr, "message received :%s\n", buf);
     }
 }
 

@@ -79,7 +79,8 @@ printf_stdebug (char *pattern,...)
   va_end (args);
 
   if (serial_write (st2000_desc, buf, strlen (buf)))
-    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "serial_write failed: %s\n",
+			safe_strerror (errno));
 }
 
 /* Read a character from the remote system, doing all the fancy timeout
@@ -324,9 +325,9 @@ st2000_close (int quitting)
   if (log_file)
     {
       if (ferror (log_file))
-	fprintf (stderr, "Error writing log file.\n");
+	fprintf_unfiltered (gdb_stderr, "Error writing log file.\n");
       if (fclose (log_file) != 0)
-	fprintf (stderr, "Error closing log file.\n");
+	fprintf_unfiltered (gdb_stderr, "Error closing log file.\n");
     }
 #endif
 }
@@ -616,7 +617,7 @@ st2000_insert_breakpoint (CORE_ADDR addr, char *shadow)
 	return 0;
       }
 
-  fprintf (stderr, "Too many breakpoints (> 16) for STDBUG\n");
+  fprintf_unfiltered (gdb_stderr, "Too many breakpoints (> 16) for STDBUG\n");
   return 1;
 }
 
@@ -635,7 +636,8 @@ st2000_remove_breakpoint (CORE_ADDR addr, char *shadow)
 	return 0;
       }
 
-  fprintf (stderr, "Can't find breakpoint associated with 0x%x\n", addr);
+  fprintf_unfiltered (gdb_stderr,
+		      "Can't find breakpoint associated with 0x%x\n", addr);
   return 1;
 }
 

@@ -1,3 +1,13 @@
+2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
+
+	* remote-array.c (printf_monitor, write_monitor,
+	array_insert_breakpoint, array_remove_breakpoint ): 
+	Replace fprintf (stderr,...
+	with fprintf_unfiltered (gdb_stderr,....
+	* remote-es.c: Likewise.
+	* remote-os9k.c: Likewise.
+	* remote-st.c: Likewise.
+
 2002-04-28  Andreas Schwab  <schwab@suse.de>
 
 	* config/s390/s390.mh (NATDEPFILES): Remove solib.o, add

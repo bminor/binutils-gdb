@@ -193,7 +193,8 @@ printf_monitor (char *pattern,...)
   if (strlen (buf) > PBUFSIZ)
     error ("printf_monitor(): string too long");
   if (serial_write (array_desc, buf, strlen (buf)))
-    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "serial_write failed: %s\n", 
+			safe_strerror (errno));
 }
 /*
  * write_monitor -- send raw data to monitor.
@@ -202,7 +203,8 @@ static void
 write_monitor (char data[], int len)
 {
   if (serial_write (array_desc, data, len))
-    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "serial_write failed: %s\n",
+			safe_strerror (errno));
 
   *(data + len + 1) = '\0';
   debuglogs (1, "write_monitor(), Sending: \"%s\".", data);
@@ -1053,7 +1055,7 @@ array_insert_breakpoint (CORE_ADDR addr, char *shadow)
 	}
     }
 
-  fprintf (stderr, "Too many breakpoints (> 16) for monitor\n");
+  fprintf_unfiltered (gdb_stderr, "Too many breakpoints (> 16) for monitor\n");
   return 1;
 }
 
@@ -1078,8 +1080,9 @@ array_remove_breakpoint (CORE_ADDR addr, char *shadow)
 	  return 0;
 	}
     }
-  fprintf (stderr, "Can't find breakpoint associated with 0x%s\n",
-	   paddr_nz (addr));
+  fprintf_unfiltered (gdb_stderr,
+		      "Can't find breakpoint associated with 0x%s\n",
+		      paddr_nz (addr));
   return 1;
 }
 
