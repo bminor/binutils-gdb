@@ -1,3 +1,11 @@
+Fri May 23 13:51:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (init_cmd_lists): Always initialize endianlist.
+	(init_main): Always define endian commands.
+	(set_endian_big): Issue warning if endian not selectable.
+	(set_endian_little): Ditto.
+	(set_endian_auto): Ditto.
+
 Thu May 22 11:53:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (simulator_command): Restrict access to the

@@ -108,8 +108,6 @@ static void init_signals PARAMS ((void));
 
 static void set_verbose PARAMS ((char *, int, struct cmd_list_element *));
 
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-
 static void set_endian PARAMS ((char *, int));
 
 static void set_endian_big PARAMS ((char *, int));
@@ -119,8 +117,6 @@ static void set_endian_little PARAMS ((char *, int));
 static void set_endian_auto PARAMS ((char *, int));
 
 static void show_endian PARAMS ((char *, int));
-
-#endif
 
 static void show_history PARAMS ((char *, int));
 
@@ -237,11 +233,9 @@ struct cmd_list_element *unsetlist;
 
 struct cmd_list_element *showlist;
 
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
 /* Chain containing the \"set endian\" commands.  */
 
 struct cmd_list_element *endianlist;
-#endif
 
 /* Chain containing all defined \"set history\".  */
 
@@ -3120,17 +3114,17 @@ dont_repeat_command (ignored, from_tty)
 			   necessarily reading from stdin.  */
 }
 
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-
 /* Functions to manipulate the endianness of the target.  */
 
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
 #ifndef TARGET_BYTE_ORDER_DEFAULT
 #define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
 #endif
-
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
-
 static int target_byte_order_auto = 1;
+#else
+static int target_byte_order_auto = 0;
+#endif
 
 /* Called if the user enters ``set endian'' without an argument.  */
 static void
@@ -3148,8 +3142,13 @@ set_endian_big (args, from_tty)
      char *args;
      int from_tty;
 {
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
   target_byte_order = BIG_ENDIAN;
   target_byte_order_auto = 0;
+#else
+  printf_unfiltered ("Byte order is not selectable.");
+  show_endian (args, from_tty);
+#endif
 }
 
 /* Called by ``set endian little''.  */
@@ -3158,8 +3157,13 @@ set_endian_little (args, from_tty)
      char *args;
      int from_tty;
 {
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
   target_byte_order = LITTLE_ENDIAN;
   target_byte_order_auto = 0;
+#else
+  printf_unfiltered ("Byte order is not selectable.");
+  show_endian (args, from_tty);
+#endif
 }
 
 /* Called by ``set endian auto''.  */
@@ -3168,7 +3172,12 @@ set_endian_auto (args, from_tty)
      char *args;
      int from_tty;
 {
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
   target_byte_order_auto = 1;
+#else
+  printf_unfiltered ("Byte order is not selectable.");
+  show_endian (args, from_tty);
+#endif
 }
 
 /* Called by ``show endian''.  */
@@ -3183,8 +3192,6 @@ show_endian (args, from_tty)
      : "The target is assumed to be %s endian\n");
   printf_unfiltered ((char *) msg, TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
 }
-
-#endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
 
 /* Set the endianness from a BFD.  */
 void
@@ -3386,9 +3393,7 @@ init_cmd_lists ()
   setlist = NULL;
   unsetlist = NULL;
   showlist = NULL;
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
   endianlist = NULL;
-#endif
   sethistlist = NULL;
   showhistlist = NULL;
   unsethistlist = NULL;
@@ -3439,8 +3444,6 @@ init_main ()
 {
   struct cmd_list_element *c;
 
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-
   add_prefix_cmd ("endian", class_support, set_endian,
 		  "Set endianness of target.",
 		  &endianlist, "set endian ", 0, &setlist);
@@ -3452,8 +3455,6 @@ init_main ()
 	   "Select target endianness automatically.", &endianlist);
   add_cmd ("endian", class_support, show_endian,
 	   "Show endianness of target.", &showlist);
-
-#endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
 
 #ifdef DEFAULT_PROMPT
   prompt = savestring (DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
