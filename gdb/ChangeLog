@@ -1,5 +1,22 @@
 2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* config/i386/xm-go32.h (HOST_LONG_DOUBLE_FORMAT): Define.
+
+	* config/i386/tm-go32.h (TARGET_LONG_DOUBLE_BIT): Remove
+	definition (and use the common one in tm-i386.h).
+	(REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW): Likewise.
+	(I386_DJGPP_TARGET): Don't define, it's no longer required.
+	(LOW_RETURN_REGNUM, HIGH_RETURN_REGNUM): Remove definition,
+	i386-tdep.c defines it for all x86 targets.
+	(LD_I387, HEX_LONG_DOUBLE_INPUT): Remove.
+
+	* config/djgpp/fnchange.lst: Add i386-linux-tdep.c.
+
+	* config/djgpp/djcheck.sh: Edit the copyright year out of the test
+	results.  Fix editing of `main' arguments for non-GNU Sed.
+
+2000-04-03  Eli Zaretskii  <eliz@is.elta.co.il>
+
 	* symfile.c (map_overlay_command, unmap_overlay_command): Fix
 	error message: there's no "overlay on" command.
 

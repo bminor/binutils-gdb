@@ -36,3 +36,5 @@
 #define DIRNAME_SEPARATOR ';'
 
 #define HOST_I386
+
+#define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
