@@ -7,7 +7,7 @@ srctrigger="Makefile.in"
 srcname="GDB Test Suite"
 
 # Directories to use in all configurations.
-configdirs="gdb.base gdb.c++ gdb.chill gdb.disasm"
+configdirs="gdb.base gdb.c++ gdb.disasm"
 
 # Directories to use for a configuration which supports signals.
 # This usually excludes cross targets.
@@ -50,6 +50,11 @@ case "${target}" in
 				fi
 				;;
 esac
+
+# Chill currently doesn't link cross targets, so only config and test natives
+if [ "${host}" = "${target}" ] ; then
+	configdirs="$configdirs} gdb.chill"
+fi
 
 # link in the lib directory if needed
 #if [ ! -d lib ] ; then

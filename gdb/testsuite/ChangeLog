@@ -1,5 +1,8 @@
 Wed Jul 12 10:20:08 1995  Fred Fish  (fnf@rtl.cygnus.com)
 
+	* configure.in (configdirs):  Remove gdb.chill from default list
+	of subdirs and then add it back in only if doing a native build.
+	The current chill compiler does not yet work in any cross build.
 	* Revert all signal changes from Jul 6.
 	* gdb.base/{sigall.c signals.c}:  Define away signal() and alarm()
 	for sh-hms targets, allowing these tests to link, with no other
