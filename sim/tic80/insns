@@ -22,12 +22,12 @@
 // The following is called when ever an illegal instruction is encountered.
 :internal::::illegal:
 	sim_io_eprintf (SD, "0x%lx: illegal instruction\n", (unsigned long) cia.ip);
-	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
+	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIM_SIGILL);
 
 // The following is called when ever an FP op is attempted with FPU disabled.
 :internal::::fp_unavailable:
 	sim_io_eprintf (SD, "0x%lx: floating-point unavailable\n", (unsigned long) cia.ip);
-	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGFPE);
+	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIM_SIGFPE);
 
 // Handle a branch instruction
 :function:::instruction_address:do_branch:int annul, address_word target, int rLink_p, unsigned32 *rLink
@@ -1229,7 +1229,7 @@ void::function::do_trap:unsigned32 trap_number
 	      }
 	    break;
 	  case 73:
-	    sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIGTRAP);
+	    sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
 
 	  /* Add a few traps for now to print the register state */
 	  case 74:

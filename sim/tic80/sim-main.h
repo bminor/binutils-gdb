@@ -25,8 +25,10 @@
 
 
 #include "sim-basics.h"
+#include "sim-signal.h"
 
-#include <signal.h>
+#include <signal.h> /* For kill() in insns:do_trap */
+
 #include <errno.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -76,8 +78,4 @@ extern void engine_init
 #ifndef HAVE_KILL
 #define kill(sig, pid) (errno = EINVAL, -1)
 #endif
-#endif
-
-#ifndef SIGTRAP
-# define SIGTRAP 5
 #endif

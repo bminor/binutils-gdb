@@ -223,8 +223,11 @@ int sim_stop PARAMS ((SIM_DESC sd));
    undefined memory region (SIGSEGV); Mis-aligned memory access
    (SIGBUS).
 
-   SIM_SIGNALLED: The simulator encountered target code that requires
-   the signal SIGRC to be delivered to the simulated program.
+   SIM_SIGNALLED: The program has stopped. The simulator has
+   encountered target code that requires the (HOST) signal SIGRC to be
+   delivered to the simulated program.  Ex: `kill (getpid (),
+   TARGET_SIGxxx)'.  Where TARGET_SIGxxx has been translated into a
+   host signal.  FIXME: This is not always possible..
 
    SIM_RUNNING, SIM_POLLING: The return of one of these values
    indicates a problem internal to the simulator. */

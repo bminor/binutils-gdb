@@ -254,6 +254,7 @@ sim_main_headers = \
 	$(srccom)/sim-config.h \
 	$(srccom)/sim-base.h \
 	$(srccom)/sim-basics.h \
+	$(srccom)/sim-signal.h \
 	$(srccom)/sim-memopt.h \
 	$(srccom)/sim-model.h \
 	$(srccom)/sim-module.h \

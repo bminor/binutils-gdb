@@ -1,3 +1,15 @@
+Sat Nov 22 19:16:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-reason.c (sim_stop_reason): For sim_signalled, terurn the
+ 	signal untranslated, document problem with this.
+
+	* nrun.c (main): Check for a prog name of `*step'.  If present,
+ 	step the simulator instead of allowing it to run free.
+
+	* sim-signal.c (SIGQUIT): Define on _MSC_VER hosts.
+
+	* Make-common.in (sim_main_headers): Add sim-signal.h.
+
 Fri Nov 21 09:32:32 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-signal.c (sim_signal_to_host): Return 0 for SIM_SIGNONE.

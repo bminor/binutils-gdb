@@ -26,8 +26,6 @@
 #include "idecode.h"
 #include "itable.h"
 
-#include <signal.h>
-
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -103,7 +101,7 @@ engine_run_until_stop (SIM_DESC sd,
 	  cia = idecode_issue (sd, insn, cia);
 	}
       while (*keep_running);
-      engine_halt (sd, cpu, cia, sim_stopped, SIGINT);
+      engine_halt (sd, cpu, cia, sim_stopped, SIM_SIGINT);
     }
 }
 
@@ -122,9 +120,8 @@ engine_step (SIM_DESC sd)
       cia = cpu->cia;
       insn = IMEM (cia);
       cia = idecode_issue (sd, insn, cia);
-      engine_halt (sd, cpu, cia, sim_stopped, SIGTRAP);
+      engine_halt (sd, cpu, cia, sim_stopped, SIM_SIGTRAP);
     }
 }
 
 #endif
-

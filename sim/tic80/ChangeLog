@@ -1,3 +1,17 @@
+Sat Nov 22 21:42:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (engine_step): Replace SIGTRAP with SIM_SIGTRAP.
+	(engine_run_until_stop): Replace SIGINT with SIM_SIGINT.
+
+	* sim-main.h: Include sim-signal.h.
+	(SIGTRAP): Delete definition.
+
+	* interp.c, sim-calls.c: Do not include signal.h.
+
+	* insns (illegal): SIGILL -> SIM_SIGILL.
+ 	(fp_unavailable): SIGFPE -> SIM_SIGFPE.
+	(do_trap): SIGTRAP -> SIM_SIGTRAP.
+	
 Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-main.h (CIA_ADDR): Define.
