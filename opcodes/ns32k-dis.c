@@ -405,8 +405,8 @@ print_insn_ns32k (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;
 {
-  register unsigned int i;
-  register char *d;
+  unsigned int i;
+  const char *d;
   unsigned short first_word;
   int ioffset;		/* bits into instruction */
   int aoffset;		/* bits into arguments */

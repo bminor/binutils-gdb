@@ -1,3 +1,8 @@
+2002-12-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ns32k-dis.c (print_insn_ns32k): Constify "d", remove register
+	keyword.
+
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* h8500-opc.h (h8500_table): Add missing initializers to quiet
