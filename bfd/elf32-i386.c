@@ -1500,10 +1500,12 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else
+	      else if (p->count != 0)
 		{
 		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->_raw_size += p->count * sizeof (Elf32_External_Rel);
+		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
+		    info->flags |= DF_TEXTREL;
 		}
 	    }
 	}
@@ -1625,7 +1627,9 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
-	  elf_link_hash_traverse (&htab->elf, readonly_dynrelocs, (PTR) info);
+	  if ((info->flags & DF_TEXTREL) == 0)
+	    elf_link_hash_traverse (&htab->elf, readonly_dynrelocs,
+				    (PTR) info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
