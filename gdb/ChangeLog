@@ -1,3 +1,8 @@
+2003-10-31  Jim Blandy  <jimb@redhat.com>
+
+	* elfread.c (elf_symtab_read): Allocate correct number of tail
+	elements to sectinfo structure.  (Fix from Woody LaRue.)
+
 2003-10-31  Andrew Cagney  <cagney@redhat.com>
 
 	* stack.c (return_command): Use get_frame_type, instead of
