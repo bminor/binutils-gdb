@@ -1,3 +1,4 @@
+/\/\*:init.c\*\//r init.p
 /\/\*:archive.c\*\//r archive.p
 /\/\*:archures.c\*\//r archures.p
 /\/\*:bfd.c\*\//r bfd.p
@@ -9,3 +10,5 @@
 /\/\*:section.c\*\//r section.p
 /\/\*:syms.c\*\//r syms.p
 /\/\*:targets.c\*\//r targets.p
+/\/\*:howto.c\*\//r howto.p
+

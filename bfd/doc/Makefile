@@ -20,14 +20,16 @@ DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfd.texi  cache.texi coffcode.texi \
 	core.texi  format.texi  libbfd.texi  \
 	opncls.texi  reloc.texi  section.texi  \
-	syms.texi  targets.texi 
+	syms.texi  targets.texi init.texi
+	
 
 PROTOS = archive.p archures.p bfd.p \
 	coffcode.p core.p format.p \
 	libbfd.p opncls.p reloc.p \
-	section.p syms.p targets.p 
+	section.p syms.p targets.p  \
+	format.p coffcode.p core.p howto.p machines.p init.p
 
-IPROTOS = cache.ip libbfd.ip reloc.ip
+IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip
 
 # SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction 
 # between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
@@ -36,14 +38,14 @@ SRCDOC = aoutx.h  archive.c archures.c \
 	bfd.c  cache.c coffcode.h \
 	core.c  format.c  libbfd.c  \
 	opncls.c  reloc.c  section.c  \
-	syms.c  targets.c 
+	syms.c  targets.c init.c
 
 SRCPROT = archive.c archures.c bfd.c \
 	coffcode.h core.c format.c \
 	libbfd.c opncls.c reloc.c \
-	section.c syms.c targets.c 
+	section.c syms.c targets.c init.c
 
-SRCIPROT = cache.c libbfd.c reloc.c
+SRCIPROT = cache.c libbfd.c reloc.c howto.c cpu-h8300.c  cpu-i960.c archures.c init.c
 
 
 docs: protos bfd.info bfd.dvi bfd.ps
