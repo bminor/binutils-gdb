@@ -1,5 +1,8 @@
 2002-03-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* kod.c (kod_set_os): Remove unnecessary check that
+	``command->type'' is set_cmd.
+
 	* valprint.c (set_input_radix): Use input_radix.
 	(set_output_radix): Use output_radix.
 	(set_input_radix_1, set_output_radix_1): Add FIXME - bad radix

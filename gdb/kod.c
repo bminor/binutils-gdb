@@ -132,9 +132,6 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
 {
   char *p;
 
-  if (command->type != set_cmd)
-    return;
-
   /* If we had already had an open OS, close it.  */
   if (gdb_kod_close)
     (*gdb_kod_close) ();
