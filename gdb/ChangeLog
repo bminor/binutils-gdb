@@ -1,5 +1,8 @@
 2004-09-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* fbsd-proc.c: Remove file.
+	* Makefile.in (fbsd-proc.o): Remove dependency.
+
 	* i386fbsd-nat.c (_initialize_i386fbsd_nat): Group target related
 	code together.
 
