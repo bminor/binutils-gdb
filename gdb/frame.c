@@ -1209,6 +1209,14 @@ get_frame_extra_info (struct frame_info *fi)
   return fi->extra_info;
 }
 
+struct frame_extra_info *
+frame_extra_info_zalloc (struct frame_info *fi, long size)
+{
+  fi->extra_info = frame_obstack_alloc (size);
+  memset (fi->extra_info, 0, size);
+  return fi->extra_info;
+}
+
 void
 _initialize_frame (void)
 {

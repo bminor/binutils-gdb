@@ -644,11 +644,12 @@ extern void set_current_frame (struct frame_info *);
 extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 
 
-/* NOTE: cagney/2002-12-10:
+/* Create/access the frame's `extra info'.  The extra info is used by
+   older code to store information such as the analyzed prologue.  The
+   zalloc() should only be called by the INIT_EXTRA_INFO method.  */
 
-   Let older code access the member `extra_info'.  This member is
-   always initialized during frame creation so is always non-null.  */
-
+extern struct frame_extra_info *frame_extra_info_zalloc (struct frame_info *fi,
+							 long size);
 extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
 
 #endif /* !defined (FRAME_H)  */

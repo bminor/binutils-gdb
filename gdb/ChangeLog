@@ -1,3 +1,8 @@
+2002-12-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (frame_extra_info_zalloc): New function.
+	* frame.h (frame_extra_info_zalloc): Declare.
+
 2002-12-13  Joel Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (hppa_pop_frame): Fix a compilation error introduced
