@@ -25,7 +25,14 @@ extern PROTO(void, bcopy,(char*,char*,int));
 extern PROTO(int, bcmp,(char *, char *, int));
 extern PROTO(void, bzero,(char *, int));
 extern PROTO(PTR,memset,(PTR, int,unsigned int));
+#ifndef __GNUC__
 PROTO(PTR, memcpy,(PTR,CONST PTR,unsigned int));
+#else
+PROTO(char *, memcpy,(char *,CONST char *,unsigned int));
+#endif
+
+extern PROTO(int,getuid,());
+extern PROTO(int,getgid,());
 extern char * strchr();
 extern PROTO(void, perror,(char *));
 extern char *getenv();
