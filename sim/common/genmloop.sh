@@ -75,6 +75,10 @@
 # -parallel: cpu can execute multiple instructions parallely
 #
 #	This option is specified in addition to -simple, -scache, -pbb.
+#	Note that while the code can determine if the cpu supports parallel
+#	execution with HAVE_PARALLEL_INSNS [and thus this option is
+#	technically unnecessary], having this option cuts down on the clutter
+#	in the result.
 #
 # -switch file: specify file containing semantics implemented as a switch()
 #
@@ -171,11 +175,11 @@ else
 fi
 
 echo ""
-echo "/* HAVE_PARALLEL_EXEC: defined if cpu can parallelly execute > 1 insn.  */"
+echo "/* HAVE_PARALLEL_INSNS: non-zero if cpu can parallelly execute > 1 insn.  */"
 if [ x$parallel = xyes ] ; then
-	echo "#define HAVE_PARALLEL_EXEC"
+	echo "#define HAVE_PARALLEL_INSNS 1"
 else
-	echo "#undef HAVE_PARALLEL_EXEC"
+	echo "#define HAVE_PARALLEL_INSNS 0"
 fi
 
 if [ "x$switch" != x ] ; then
@@ -196,6 +200,21 @@ if [ "x$switch" != x ] ; then
 		echo "#define WITH_SEM_SWITCH_FAST 0"
 	fi
 fi
+
+# Decls of functions we define.
+
+echo ""
+echo "/* Functions defined in the generated mainloop.c file"
+echo "   (which doesn't necessarily have that file name).  */"
+echo ""
+echo "extern ENGINE_FN ${cpu}_engine_run_full;"
+echo "extern ENGINE_FN ${cpu}_engine_run_fast;"
+echo ""
+echo "extern SEM_PC ${cpu}_pbb_begin (SIM_CPU *, int);"
+echo "extern SEM_PC ${cpu}_pbb_chain (SIM_CPU *, SEM_ARG);"
+echo "extern SEM_PC ${cpu}_pbb_cti_chain (SIM_CPU *, SEM_ARG, SEM_PC *, PCADDR);"
+echo "extern void ${cpu}_pbb_before (SIM_CPU *, SCACHE *);"
+echo "extern void ${cpu}_pbb_after (SIM_CPU *, SCACHE *);"
 
 ##########################################################################
 

@@ -1,3 +1,10 @@
+Wed Nov  4 23:51:19 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* genmloop.sh (eng.hin): Rename HAVE_PARALLEL_EXEC to
+	HAVE_PARALLEL_INSNS, define as 0 or 1.  Emit decls of fns in mloop.cin.
+	* cgen-engine.h: Typedefs of IADDR,CIA,SEM_ARG,SEM_PC moved ...
+	* cgen-sim.h: ... to here.
+
 Wed Oct 28 12:00:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* aclocal.m4 (enable-build-warnings): Replace

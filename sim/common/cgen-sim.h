@@ -21,8 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_SIM_H
 #define CGEN_SIM_H
 
-#define PC CPU (h_pc)
-
 /* Instruction field support macros.  */
 
 #define EXTRACT_SIGNED(val, total, start, length) \
@@ -37,24 +35,54 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define HOST_LONGS_FOR_BITS(n) \
   (((n) + sizeof (long) * 8 - 1) / sizeof (long) * 8)
 
-/* Execution support.  */
-
 /* Forward decls.  Defined in the machine generated files.  */
+
+/* This holds the contents of the extracted insn.
+   There are a few common entries (e.g. pc address), and then one big
+   union with an entry for each of the instruction formats.  */
 typedef struct argbuf ARGBUF;
+
+/* This is one ARGBUF plus whatever else is needed for WITH_SCACHE support.
+   At present there is nothing else, but it also provides a level of
+   abstraction.  */
 typedef struct scache SCACHE;
+
+/* This is a union with one entry for each instruction format.
+   Each entry contains all of the non-constant inputs of the instruction.  */
 typedef struct parexec PAREXEC;
+
+/* An "Instruction DESCriptor".
+   This is the main handle on an instruction for the simulator.  */
 typedef struct idesc IDESC;
+
+/* Engine support.
+   ??? This is here because it's needed before eng.h (built by genmloop.sh)
+   which is needed before cgen-engine.h and cpu.h.
+   ??? This depends on a cpu family specific type, PCADDR, but no machine
+   generated headers will have been included yet.  sim/common currently
+   requires the typedef of sim_cia in sim-main.h between the inclusion of
+   sim-basics.h and sim-base.h so this is no different.  */
 
-#ifdef SCACHE_P
+#if WITH_SCACHE
 
-/* instruction address */
+/* instruction address
+   ??? This was intended to be a struct of two elements in the WITH_SCACHE_PBB
+   case.  The first element is the PCADDR, the second element is the SCACHE *.
+   Haven't found the time yet to make this work, but it is a nicer approach
+   than the current br_cache stuff.  */
 typedef PCADDR IADDR;
 /* current instruction address */
 typedef PCADDR CIA;
 /* argument to semantic functions */
 typedef SCACHE *SEM_ARG;
+/* semantic code's version of pc */
+#if WITH_SCACHE_PBB
+typedef SCACHE *SEM_PC;
+#else
+typedef PCADDR SEM_PC;
+#endif
 
-#else /* ! SCACHE_P */
+#else /* ! WITH_SCACHE */
 
 /* instruction address */
 typedef PCADDR IADDR;
@@ -62,148 +90,34 @@ typedef PCADDR IADDR;
 typedef PCADDR CIA;
 /* argument to semantic functions */
 typedef ARGBUF *SEM_ARG;
+/* semantic code's version of pc */
+typedef PCADDR SEM_PC;
 
-#endif /* ! SCACHE_P */
-
-/* Semantic functions come in two versions on two axes:
-   fast and full (featured), and using or not using scache.
-   A full featured simulator is always provided.  --enable-sim-fast includes
-   support for fast execution by duplicating the semantic code but leaving
-   out all features like tracing and profiling.
-   Using the scache is selected with --enable-sim-scache.  */
-/* FIXME: --enable-sim-fast not implemented yet.  */
-
-/* Types of the machine generated extract and semantic fns.  */
-/* FIXME: Eventually conditionalize EXTRACT_FN on WITH_SCACHE.  */
-typedef void (EXTRACT_FN) (SIM_CPU *, PCADDR, insn_t, ARGBUF *);
-#if WITH_SCACHE
-#ifdef HAVE_PARALLEL_EXEC
-typedef CIA (SEMANTIC_FN) (SIM_CPU *, SCACHE *, PAREXEC *);
-#else
-typedef CIA (SEMANTIC_FN) (SIM_CPU *, SCACHE *);
-#endif
-#else /* ! WITH_SCACHE */
-#ifdef HAVE_PARALLEL_EXEC
-typedef CIA (SEMANTIC_FN) (SIM_CPU *, ARGBUF *, PAREXEC *);
-#else
-typedef CIA (SEMANTIC_FN) (SIM_CPU *, ARGBUF *);
-#endif
-#endif
-
-/* Scache data for each cpu.  */
-
-typedef struct cpu_scache {
-  /* Simulator cache size.  */
-  int size;
-#define CPU_SCACHE_SIZE(cpu) ((cpu) -> cgen_cpu.scache.size)
-  /* Cache.  */
-  SCACHE *cache;
-#define CPU_SCACHE_CACHE(cpu) ((cpu) -> cgen_cpu.scache.cache)
-#if 0 /* FIXME: wip */
-  /* Free list.  */
-  SCACHE *free;
-#define CPU_SCACHE_FREE(cpu) ((cpu) -> cgen_cpu.scache.free)
-  /* Hash table.  */
-  SCACHE **hash_table;
-#define CPU_SCACHE_HASH_TABLE(cpu) ((cpu) -> cgen_cpu.scache.hash_table)
-#endif
-
-#if WITH_PROFILE_SCACHE_P
-  /* Cache hits, misses.  */
-  unsigned long hits, misses;
-#define CPU_SCACHE_HITS(cpu) ((cpu) -> cgen_cpu.scache.hits)
-#define CPU_SCACHE_MISSES(cpu) ((cpu) -> cgen_cpu.scache.misses)
-#endif
-} CPU_SCACHE;
-
-/* Default number of cached blocks.  */
-#ifdef CONFIG_SIM_CACHE_SIZE
-#define SCACHE_DEFAULT_CACHE_SIZE CONFIG_SIM_CACHE_SIZE
-#else
-#define SCACHE_DEFAULT_CACHE_SIZE 1024
-#endif
-
-/* Hash a PC value.  */
-/* FIXME: cpu specific */
-#define SCACHE_HASH_PC(state, pc) \
-(((pc) >> 1) & (STATE_SCACHE_SIZE (sd) - 1))
-
-/* Non-zero if cache is in use.  */
-#define USING_SCACHE_P(sd) (STATE_SCACHE_SIZE (sd) > 0)
-
-/* Install the simulator cache into the simulator.  */
-MODULE_INSTALL_FN scache_install;
-
-/* Flush all cpu's caches.  */
-void scache_flush (SIM_DESC);
+#endif /* ! WITH_SCACHE */
 
-/* Scache profiling support.  */
+/* Additional opcode table support.  */
 
-/* Print summary scache usage information.  */
-void scache_print_profile (SIM_CPU *cpu, int verbose);
+/* Opcode table for virtual insns (only used by the simulator).  */
+extern const struct cgen_insn cgen_virtual_opcode_table[];
 
-#if WITH_PROFILE_SCACHE_P
-#define PROFILE_COUNT_SCACHE_HIT(cpu) \
-do { \
-  if (CPU_PROFILE_FLAGS (cpu) [PROFILE_SCACHE_IDX]) \
-    ++ CPU_SCACHE_HITS (cpu); \
-} while (0)
-#define PROFILE_COUNT_SCACHE_MISS(cpu) \
-do { \
-  if (CPU_PROFILE_FLAGS (cpu) [PROFILE_SCACHE_IDX]) \
-    ++ CPU_SCACHE_MISSES (cpu); \
-} while (0)
-#else
-#define PROFILE_COUNT_SCACHE_HIT(cpu)
-#define PROFILE_COUNT_SCACHE_MISS(cpu)
-#endif
+/* -ve of indices of virtual insns in cgen_virtual_opcode_table.  */
+typedef enum {
+  VIRTUAL_INSN_X_INVALID = 0,
+  VIRTUAL_INSN_X_BEFORE = -1, VIRTUAL_INSN_X_AFTER = -2,
+  VIRTUAL_INSN_X_BEGIN = -3,
+  VIRTUAL_INSN_X_CHAIN= -4, VIRTUAL_INSN_X_CTI_CHAIN = -5
+} CGEN_INSN_VIRTUAL_TYPE;
+
+/* Return non-zero if OPCODE is a virtual insn.  */
+#define CGEN_INSN_VIRTUAL_P(opcode) \
+  CGEN_INSN_ATTR ((opcode), CGEN_INSN_VIRTUAL)
 
-/* Engine support.  */
-
-/* Values to denote parallel/sequential execution.  */
-#define EXEC_SEQUENCE 0
-#define EXEC_PARALLEL 1
-
-/* These are used so that we can compile two copies of the semantic code,
-   one with full feature support and one without.  */
-/* FIXME: Eventually delete extraction if not using scache.  */
-#define EX_FN_NAME(cpu,fn) XCONCAT3 (cpu,_ex_,fn)
-#define SEM_FN_NAME(cpu,fn) XCONCAT3 (cpu,_sem_,fn)
-
-#ifdef SCACHE_P
-
-#define CIA_ADDR(cia) (cia)
-
-/* semantics.c support */
-#define SEM_ARGBUF(sem_arg) (&(sem_arg) -> argbuf)
-#define SEM_INSN(sem_arg) shouldnt_be_used
-#define SEM_NEXT_PC(sc, len) ((sc) -> next)
-#define SEM_BRANCH_VIA_CACHE(sc, newval) (newval)
-#define SEM_BRANCH_VIA_ADDR(sc, newval) (newval)
-/* Return address a branch insn will branch to.
-   This is only used during tracing.  */
-#define SEM_NEW_PC_ADDR(new_pc) (new_pc)
-
-#else /* ! SCACHE_P */
-
-#define CIA_ADDR(cia) (cia)
-
-/* semantics.c support */
-#define SEM_ARGBUF(sem_arg) (sem_arg)
-#define SEM_INSN(sem_arg) (SEM_ARGBUF (sem_arg) -> insn)
-/* FIXME:wip */
-#define SEM_NEXT_PC(abuf, len) (abuf -> addr + abuf -> length)
-#define SEM_BRANCH_VIA_CACHE(abuf, newval) (newval)
-#define SEM_BRANCH_VIA_ADDR(abuf, newval) (newval)
-#define SEM_NEW_PC_ADDR(new_pc) (new_pc)
-
-#endif /* ! SCACHE_P */
-
 /* GNU C's "computed goto" facility is used to speed things up where
    possible.  These macros provide a portable way to use them.
    Nesting of these switch statements is done by providing an extra argument
    that distinguishes them.  `N' can be a number or symbol.
    Variable `labels_##N' must be initialized with the labels of each case.  */
+
 #ifdef __GNUC__
 #define SWITCH(N, X) goto *X;
 #define CASE(N, X) case_##N##_##X
@@ -217,11 +131,6 @@ do { \
 #define DEFAULT(N) default
 #define ENDSWITCH(N)
 #endif
-
-/* Engine control (FIXME).  */
-int engine_stop (SIM_DESC);
-void engine_run (SIM_DESC, int, int);
-/*void engine_resume (SIM_DESC, int, int);*/
 
 /* Simulator state.  */
 
@@ -246,50 +155,30 @@ typedef struct cgen_state {
   /* Non-zero if no tracing or profiling is selected.  */
   int run_fast_p;
 #define STATE_RUN_FAST_P(sd) ((sd) -> cgen_state.run_fast_p)
+
+  /* Opcode table.  */
+  CGEN_OPCODE_DESC opcode_table;
+#define STATE_OPCODE_TABLE(sd) ((sd) -> cgen_state.opcode_table)
 } CGEN_STATE;
-
-/* Additional non-machine generated per-cpu data to go in SIM_CPU.
-   The member's name must be `cgen_cpu'.  */
-
-typedef struct {
-  /* Simulator's execution cache.
-     Allocate space for this even if not used as some simulators may have
-     one machine variant that uses the scache and another that doesn't and
-     we don't want members in this struct to move about.  */
-  CPU_SCACHE scache;
-
-  /* Instruction descriptor table.  */
-  IDESC *idesc;
-#define CPU_IDESC(cpu) ((cpu)->cgen_cpu.idesc)
-
-  /* Whether the read,semantic entries have been initialized or not.
-     These are computed goto labels.  */
-  int idesc_read_init_p;
-#define CPU_IDESC_READ_INIT_P(cpu) ((cpu)->cgen_cpu.idesc_read_init_p)
-  int idesc_sem_init_p;
-#define CPU_IDESC_SEM_INIT_P(cpu) ((cpu)->cgen_cpu.idesc_sem_init_p)
-
-  /* Function to fetch the opcode table entry in the IDESC.  */
-  const CGEN_INSN * (*opcode) (SIM_CPU *, int);
-#define CPU_OPCODE(cpu) ((cpu)->cgen_cpu.opcode)
-  /* Return name of instruction numbered INUM.  */
-#define INSN_NAME(cpu, inum) CGEN_INSN_NAME ((* CPU_OPCODE (cpu)) ((cpu), (inum)))
-
-  /* Allow slop in size calcs for case where multiple cpu types are supported
-     and space for the specified cpu is malloc'd at run time.  */
-  double slop;
-} CGEN_CPU;
 
 /* Various utilities.  */
 
 /* Called after sim_post_argv_init to do any cgen initialization.  */
 extern void cgen_init (SIM_DESC);
 
+/* Return the name of an insn.  */
+extern CPU_INSN_NAME_FN cgen_insn_name;
+
 /* Return the maximum number of extra bytes required for a sim_cpu struct.  */
+/* ??? Ok, yes, this is less pretty than it should be.  Give me a better
+   language [or suggest a better way].  */
 extern int cgen_cpu_max_extra_bytes (void);
 
 extern void
 sim_disassemble_insn (SIM_CPU *, const CGEN_INSN *,
 		      const struct argbuf *, PCADDR, char *);
+
+/* Called to process an invalid instruction.  */
+extern void sim_engine_invalid_insn (SIM_CPU *, PCADDR);
 
 #endif /* CGEN_SIM_H */

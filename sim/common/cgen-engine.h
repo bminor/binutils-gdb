@@ -18,45 +18,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* This file must be included after eng.h has been included
-   as it specifies the configuration of the engine.  */
+/* This file must be included after eng.h and ${cpu}.h have been included.  */
 
 #ifndef CGEN_ENGINE_H
 #define CGEN_ENGINE_H
-
-/* Execution support.  */
-
-#if WITH_SCACHE
-
-/* instruction address
-   ??? This was intended to be a struct of two elements in the WITH_SCACHE_PBB
-   case.  The first element is the PCADDR, the second element is the SCACHE *.
-   Haven't found the time yet to make this work, but it is a nicer approach
-   than the current br_cache stuff.  */
-typedef PCADDR IADDR;
-/* current instruction address */
-typedef PCADDR CIA;
-/* argument to semantic functions */
-typedef SCACHE *SEM_ARG;
-/* semantic code's version of pc */
-#if WITH_SCACHE_PBB
-typedef SCACHE *SEM_PC;
-#else
-typedef PCADDR SEM_PC;
-#endif
-
-#else /* ! WITH_SCACHE */
-
-/* instruction address */
-typedef PCADDR IADDR;
-/* current instruction address */
-typedef PCADDR CIA;
-/* argument to semantic functions */
-typedef ARGBUF *SEM_ARG;
-/* semantic code's version of pc */
-typedef PCADDR SEM_PC;
-
-#endif /* ! WITH_SCACHE */
 
 /* Semantic functions come in six versions on two axes:
    fast/full-featured, and using one of the simple/scache/compilation engines.
@@ -69,7 +34,7 @@ typedef PCADDR SEM_PC;
 
 /* Types of the machine generated extract and semantic fns.  */
 typedef void (EXTRACT_FN) (SIM_CPU *, PCADDR, insn_t, ARGBUF *);
-#ifdef HAVE_PARALLEL_EXEC
+#if HAVE_PARALLEL_INSNS
 typedef SEM_PC (SEMANTIC_FN) (SIM_CPU *, SEM_ARG, PAREXEC *);
 #else
 typedef SEM_PC (SEMANTIC_FN) (SIM_CPU *, SEM_ARG);
@@ -136,8 +101,6 @@ do { \
      ((CGEN_ATTR_BOOLS (CGEN_INSN_ATTRS ((idesc)->opcode)) \
        & CGEN_ATTR_MASK (CGEN_INSN_SKIP_CTI)) \
       != 0)
-
-/* Engine support.  */
 
 /* These are used so that we can compile two copies of the semantic code,
    one with full feature support and one without that runs fast(er).  */
