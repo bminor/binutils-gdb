@@ -76,11 +76,12 @@ link.cmd
 listing.c
 listing.h
 literal.c
+mac-as.r
 macro.c
 macro.h
 messages.c
 mpw-config.in
-mpw-make.in
+mpw-make.sed
 obj.h
 output-file.c
 output-file.h
