@@ -1,3 +1,8 @@
+2004-12-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Use ULONGEST as
+	type of `gp' variable.
+
 2004-12-03  Richard Sandiford  <rsandifo@redhat.com>
 
 	* README: Remove config.if from directory listing.

@@ -1390,7 +1390,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
     }
   else
     {
-      unsigned int gp;
+      ULONGEST gp;
 
       /* Use __d_plt_call as a fallback; __d_plt_call expects to be called 
          with a plabel, so we need to build one.  */
