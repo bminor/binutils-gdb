@@ -1,3 +1,23 @@
+Thu May  2 12:31:56 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/mips_pro.exp: Expect failure for hppa*-*-* in backtrace
+	test.
+
+Wed Mar 20 08:48:03 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/list.exp (test_list_function): Remove setup_xfail for
+	"rs6000-*-*" for "list function in include file" when gcc compiled.
+	* gdb.base/printcmds.exp: Remove setup_xfail for "rs6000-*-aix*"
+	for "p ctable1[120]".
+	* gdb.base/scope.exp: Remove setup_xfail for "rs6000-*-*" for
+	"print 'scope0.c'::filelocal_bss before run" when gcc compiled.
+	Remove setup_xfail for "rs6000-*-*" for
+	"print 'scope0.c'::filelocal before run".
+	* gdb.base/{langs.exp, lists.exp, opaque.exp, scope.exp},
+	gdb.stabs/weird.exp: Remove use of compiler options "-c -o ..."
+	since some compilers don't allow both options to be given
+	on the same command line.  Create object file and move it.
+	
 Tue Mar 19 23:49:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp: Always regenerate the core file, since
