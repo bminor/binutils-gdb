@@ -2348,7 +2348,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
   struct symbol_search *tail;
   struct cleanup *old_chain = NULL;
 
-  if (kind < LABEL_NAMESPACE)
+  if (kind < VARIABLES_NAMESPACE)
     error ("must search on specific namespace");
 
   ourtype = types[(int) (kind - VARIABLES_NAMESPACE)];

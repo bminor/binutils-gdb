@@ -1,3 +1,8 @@
+Tue Feb 27 16:56:13 2001  David Taylor  <taylor@redhat.com>
+
+	* symtab.c (search_symbols): Fix off by one error in test for
+	error.
+
 2001-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/sparc/sp64linux.mt: New file.
@@ -538,6 +543,7 @@ Wed Feb  7 19:41:21 2001  Andrew Cagney  <cagney@redhat.com>
 	(fill_fpregset): Likewise.
 	(supply_fpregset): Likewise.
 
+>>>>>>> 1.973
 Tue Feb  6 11:58:57 2001  David Taylor  <taylor@redhat.com>
 
 	* valops.c (value_cast): If casting a scalar to a pointer, do not
