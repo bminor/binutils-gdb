@@ -3723,7 +3723,7 @@ elf_bfd_final_link (abfd, info)
      we could write the relocs out and then read them again; I don't
      know how bad the memory loss will be.  */
 
-  for (sub = info->input_bfds; sub != NULL; sub = sub->next)
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     sub->output_has_begun = false;
   for (o = abfd->sections; o != NULL; o = o->next)
     {

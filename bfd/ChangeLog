@@ -1,3 +1,14 @@
+Wed Jun 24 17:17:57 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_bfd_final_link): Loop over input_bfds using the
+	link_next field, not the next field.
+
+Sun Jun 21 19:38:39 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (map_sections_to_segments): Check the section address
+	against the phdr size both with and without a modulo of
+	maxpagesize.
+
 Fri Jun 19 17:08:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_size_dynamic_sections): Only strip a
