@@ -1,3 +1,10 @@
+1998-12-11  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/tc-h8300.c (build_bytes): Change message given if the
+	instruction requires H8/300H mode and we're not in Hmode, to
+	suggest that it may be the operand modes that are the problem, not
+	necessarily the opcode.
+
 start-sanitize-fr30
 1998-12-10  Nick Clifton  <nickc@cygnus.com>
 
