@@ -1,3 +1,8 @@
+start-sanitize-d30v
+Sun Jun 21 12:44:43 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/d30v/reloc.d: Updated to match latest assembler output.
+end-sanitize-d30v
 start-sanitize-am33
 Fri Jun 19 16:48:14 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -31,6 +36,7 @@ Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	original `ld.d' had.  Find `ld.s'.
 	* gas/mips/mul-ilocks.d: Nearly ditto.
 	
+start-sanitize-d30v
 Thu Jun 11 16:50:46 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/inst.d: Expect repeati instrucitons to be combined.
@@ -43,7 +49,7 @@ Mon Jun  8 18:47:11 1998  Nick Clifton  <nickc@cygnus.com>
 	* gas/d30v/array.d: Updated to match latest assembler results.
 	* gas/d30v/reloc.d: Partially updated to match latest assembler
 	results. 
-
+end-sanitize-d30v
 start-sanitize-sky
 Mon Jun  8 15:40:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 
