@@ -82,7 +82,27 @@ enum type_code
   {
     TYPE_CODE_UNDEF,		/* Not used; catches errors */
     TYPE_CODE_PTR,		/* Pointer type */
-    TYPE_CODE_ARRAY,		/* Array type with lower & upper bounds. */
+
+    /* Array type with lower & upper bounds.
+
+       Regardless of the language, GDB represents multidimensional
+       array types the way C does: as arrays of arrays.  So an
+       instance of a GDB array type T can always be seen as a series
+       of instances of TYPE_TARGET_TYPE (T) laid out sequentially in
+       memory.
+
+       Row-major languages like C lay out multi-dimensional arrays so
+       that incrementing the rightmost index in a subscripting
+       expression results in the smallest change in the address of the
+       element referred to.  Column-major languages like Fortran lay
+       them out so that incrementing the leftmost index results in the
+       smallest change.
+
+       This means that, in column-major languages, working our way
+       from type to target type corresponds to working through indices
+       from right to left, not left to right.  */
+    TYPE_CODE_ARRAY,
+
     TYPE_CODE_STRUCT,		/* C struct or Pascal record */
     TYPE_CODE_UNION,		/* C union or Pascal variant part */
     TYPE_CODE_ENUM,		/* Enumeration type */
