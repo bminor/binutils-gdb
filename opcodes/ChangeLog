@@ -1,3 +1,14 @@
+2000-07-09  Alan Modra  <alan@linuxcare.com.au>
+
+	* hppa-dis.c (fput_reg, fput_fp_reg, fput_fp_reg_r, fput_creg,
+	fput_const, extract_3, extract_5_load, extract_5_store,
+	extract_5r_store, extract_5R_store, extract_10U_store,
+	extract_5Q_store, extract_11, extract_14, extract_16, extract_21,
+	extract_12, extract_17, extract_22): Prototype.
+	(print_insn_hppa): Rename inner block opcode -> opc to avoid
+	shadowing outer block.
+	(GET_BIT): Define.
+
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new

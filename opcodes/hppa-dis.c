@@ -1,5 +1,6 @@
 /* Disassembler for the PA-RISC. Somewhat derived from sparc-pinsn.c.
-   Copyright 1989, 1990, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1989, 90, 92, 93, 94, 95, 98, 99, 2000
+   Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -51,10 +52,13 @@ typedef unsigned int CORE_ADDR;
 #define MASK_16 0xffff
 #define MASK_21 0x1fffff
 
-/* This macro gets bit fields using HP's numbering (MSB = 0) */
+/* These macros get bit fields using HP's numbering (MSB = 0) */
 
 #define GET_FIELD(X, FROM, TO) \
   ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
+
+#define GET_BIT(X, WHICH) \
+  GET_FIELD (X, WHICH, WHICH)
 
 /* Some of these have been converted to 2-d arrays because they
    consume less storage this way.  If the maintenance becomes a
@@ -139,6 +143,26 @@ static const char *const add_compl_names[] = { 0, "", ",l", ",tsv" };
 
 #define GET_COND(insn) (GET_FIELD ((insn), 16, 18) + \
 			(GET_FIELD ((insn), 19, 19) ? 8 : 0))
+
+static void fput_reg PARAMS ((unsigned int, disassemble_info *));
+static void fput_fp_reg PARAMS ((unsigned int, disassemble_info *));
+static void fput_fp_reg_r PARAMS ((unsigned int, disassemble_info *));
+static void fput_creg PARAMS ((unsigned int, disassemble_info *));
+static void fput_const PARAMS ((unsigned int, disassemble_info *));
+static int extract_3 PARAMS ((unsigned int));
+static int extract_5_load PARAMS ((unsigned int));
+static int extract_5_store PARAMS ((unsigned int));
+static unsigned extract_5r_store PARAMS ((unsigned int));
+static unsigned extract_5R_store PARAMS ((unsigned int));
+static unsigned extract_10U_store PARAMS ((unsigned int));
+static unsigned extract_5Q_store PARAMS ((unsigned int));
+static int extract_11 PARAMS ((unsigned int));
+static int extract_14 PARAMS ((unsigned int));
+static int extract_16 PARAMS ((unsigned int));
+static int extract_21 PARAMS ((unsigned int));
+static int extract_12 PARAMS ((unsigned int));
+static int extract_17 PARAMS ((unsigned int));
+static int extract_22 PARAMS ((unsigned int));
 
 /* Utility function to print registers.  Put these first, so gcc's function
    inlining can do its stuff.  */
@@ -690,9 +714,9 @@ print_insn_hppa (memaddr, info)
 
 		    case 'J':
 		      {
-			int opcode = GET_FIELD (insn, 0, 5);
+			int opc = GET_FIELD (insn, 0, 5);
 
-			if (opcode == 0x16 || opcode == 0x1e)
+			if (opc == 0x16 || opc == 0x1e)
 			  {
 			    if (GET_FIELD (insn, 29, 29) == 0)
 			      fputs_filtered (",ma ", info);
@@ -706,16 +730,16 @@ print_insn_hppa (memaddr, info)
 
 		    case 'e':
 		      {
-			int opcode = GET_FIELD (insn, 0, 5);
+			int opc = GET_FIELD (insn, 0, 5);
 
-			if (opcode == 0x13 || opcode == 0x1b)
+			if (opc == 0x13 || opc == 0x1b)
 			  {
 			    if (GET_FIELD (insn, 18, 18) == 1)
 			      fputs_filtered (",mb ", info);
 			    else
 			      fputs_filtered (",ma ", info);
 			  }
-			else if (opcode == 0x17 || opcode == 0x1f)
+			else if (opc == 0x17 || opc == 0x1f)
 			  {
 			    if (GET_FIELD (insn, 31, 31) == 1)
 			      fputs_filtered (",ma ", info);
