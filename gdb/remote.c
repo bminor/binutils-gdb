@@ -113,61 +113,68 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static void
-remote_write_bytes PARAMS ((CORE_ADDR, char *, int));
+remote_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 static void
-remote_read_bytes PARAMS ((CORE_ADDR, char *, int));
+remote_read_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 static void
-remote_files_info PARAMS ((struct target_ops *));
+remote_files_info PARAMS ((struct target_ops *ignore));
 
 static int
-remote_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+remote_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
+			    int should_write, struct target_ops *target));
 
 static void 
 remote_prepare_to_store PARAMS ((void));
 
 static void
-remote_fetch_registers PARAMS ((int));
+remote_fetch_registers PARAMS ((int regno));
 
 static void
-remote_resume PARAMS ((int, int));
+remote_resume PARAMS ((int step, int siggnal));
 
 static int
-remote_start_remote PARAMS ((char *));
+remote_start_remote PARAMS ((char *dummy));
 
 static void
-remote_open PARAMS ((char *, int));
+remote_open PARAMS ((char *name, int from_tty));
 
 static void
-remote_close PARAMS ((int));
+remote_close PARAMS ((int quitting));
 
 static void
-remote_store_registers PARAMS ((int));
+remote_store_registers PARAMS ((int regno));
 
 static void
-getpkt PARAMS ((char *, int));
+getpkt PARAMS ((char *buf, int forever));
 
 static void
-putpkt PARAMS ((char *));
+putpkt PARAMS ((char *buf));
 
 static void
-remote_send PARAMS ((char *));
+remote_send PARAMS ((char *buf));
 
 static int
 readchar PARAMS ((void));
 
 static int
-remote_wait PARAMS ((WAITTYPE *));
+remote_wait PARAMS ((WAITTYPE *status));
 
 static int
-tohex PARAMS ((int));
+tohex PARAMS ((int nib));
 
 static int
-fromhex PARAMS ((int));
+fromhex PARAMS ((int a));
 
 static void
-remote_detach PARAMS ((char *, int));
+remote_detach PARAMS ((char *args, int from_tty));
+
+static void
+remote_interrupt PARAMS ((int signo));
+
+static void
+remote_interrupt_twice PARAMS ((int signo));
 
 extern struct target_ops remote_ops;	/* Forward decl */
 
@@ -360,13 +367,11 @@ remote_resume (step, siggnal)
   putpkt (buf);
 }
 
-static void remote_interrupt_twice PARAMS ((int));
-static void (*ofunc)();
-
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
 
-void remote_interrupt(signo)
+static void
+remote_interrupt (signo)
      int signo;
 {
   /* If this doesn't work, try more severe steps.  */
@@ -377,6 +382,8 @@ void remote_interrupt(signo)
 
   SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
 }
+
+static void (*ofunc)();
 
 /* The user typed ^C twice.  */
 static void
@@ -435,11 +442,23 @@ remote_wait (status)
 
       while (*p)
 	{
-	  regno = strtol (p, &p, 16); /* Read the register number */
+	  unsigned char *p1;
 
-	  if (*p++ != ':'
-	      || regno >= NUM_REGS)
-	    error ("Remote sent bad register number %s", buf);
+	  regno = strtol (p, &p1, 16); /* Read the register number */
+
+	  if (p1 == p)
+	    error ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
+		   p1, buf);
+
+	  p = p1;
+
+	  if (*p++ != ':')
+	    error ("Malformed packet (missing colon): %s\nPacket: '%s'\n",
+		   p, buf);
+
+	  if (regno >= NUM_REGS)
+	    error ("Remote sent bad register number %d: %s\nPacket: '%s'\n",
+		   regno, p, buf);
 
 	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
 	    {
@@ -671,7 +690,7 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
 
 static void
 remote_files_info (ignore)
-struct target_ops *ignore;
+     struct target_ops *ignore;
 {
   puts_filtered ("Debugging a target over a serial line.\n");
 }
@@ -1055,6 +1074,54 @@ remote_mourn ()
   generic_mourn_inferior ();
 }
 
+#ifdef REMOTE_BREAKPOINT
+
+/* On some machines, e.g. 68k, we may use a different breakpoint instruction
+   than other targets.  */
+static unsigned char break_insn[] = REMOTE_BREAKPOINT;
+
+/* Check that it fits in BREAKPOINT_MAX bytes.  */
+static unsigned char check_break_insn_size[BREAKPOINT_MAX] = REMOTE_BREAKPOINT;
+
+#else /* No REMOTE_BREAKPOINT.  */
+
+/* Same old breakpoint instruction.  This code does nothing different
+   than mem-break.c.  */
+static unsigned char break_insn[] = BREAKPOINT;
+
+#endif /* No REMOTE_BREAKPOINT.  */
+
+/* Insert a breakpoint on targets that don't have any better breakpoint
+   support.  We read the contents of the target location and stash it,
+   then overwrite it with a breakpoint instruction.  ADDR is the target
+   location in the target machine.  CONTENTS_CACHE is a pointer to 
+   memory allocated for saving the target contents.  It is guaranteed
+   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
+   is accomplished via BREAKPOINT_MAX).  */
+
+int
+remote_insert_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  int val;
+
+  val = target_read_memory (addr, contents_cache, sizeof break_insn);
+
+  if (val == 0)
+    val = target_write_memory (addr, (char *)break_insn, sizeof break_insn);
+
+  return val;
+}
+
+int
+remote_remove_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  return target_write_memory (addr, contents_cache, sizeof break_insn);
+}
+
 /* Define the target subroutine names */
 
 struct target_ops remote_ops = {
@@ -1073,8 +1140,10 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   remote_prepare_to_store,	/* to_prepare_to_store */
   remote_xfer_memory,		/* to_xfer_memory */
   remote_files_info,		/* to_files_info */
-  NULL,				/* to_insert_breakpoint */
-  NULL,				/* to_remove_breakpoint */
+
+  remote_insert_breakpoint,	/* to_insert_breakpoint */
+  remote_remove_breakpoint,	/* to_remove_breakpoint */
+
   NULL,				/* to_terminal_init */
   NULL,				/* to_terminal_inferior */
   NULL,				/* to_terminal_ours_for_output */

@@ -1,3 +1,17 @@
+Tue Jul 13 14:03:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (define_symbol): Make the caddr_t hack apply to `function
+	returning foo' as well as `pointer to foo'.
+
+	* remote.c [REMOTE_BREAKPOINT]: Use for breakpoint insn if defined.
+	* config/m68k/tm-m68k.h: Define it.
+	* mem-break.c, breakpoint.c: Improve comments.
+
+Tue Jul 13 13:35:31 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
+
+	* config/m68k/tm-dpx2.h: Replace "tm-68k.h" with "m68k/tm-m68k.h".
+	* config/m68k/xm-dpx2.h: Define HAVE_TERMIOS not HAVE_TERMIO.
+
 Tue Jul 13 11:50:38 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* gdbcore.h (read_memory_integer, read_memory_unsigned_integer):

@@ -1037,25 +1037,27 @@ define_symbol (valu, string, desc, type, objfile)
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
 	{
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR)
+	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
 	    {
-	      /* If we are giving a name to a type such as "pointer
-		 to foo", we better not set the TYPE_NAME.  If the
-		 program contains "typedef char *caddr_t;", we don't
-		 want all variables of type char * to print as
-		 caddr_t.  This is not just a consequence of GDB's
-		 type management; PCC and GCC (at least through
-		 version 2.4) both output variables of either type
-		 char * or caddr_t with the type number defined in
-		 the 't' symbol for caddr_t.  If a future compiler
-		 cleans this up it GDB is not ready for it yet, but
-		 if it becomes ready we somehow need to disable this
-		 check (without breaking the PCC/GCC2.4 case).
+	      /* If we are giving a name to a type such as "pointer to
+		 foo" or "function returning foo", we better not set
+		 the TYPE_NAME.  If the program contains "typedef char
+		 *caddr_t;", we don't want all variables of type char
+		 * to print as caddr_t.  This is not just a
+		 consequence of GDB's type management; PCC and GCC (at
+		 least through version 2.4) both output variables of
+		 either type char * or caddr_t with the type number
+		 defined in the 't' symbol for caddr_t.  If a future
+		 compiler cleans this up it GDB is not ready for it
+		 yet, but if it becomes ready we somehow need to
+		 disable this check (without breaking the PCC/GCC2.4
+		 case).
 
 		 Sigh.
 
 		 Fortunately, this check seems not to be necessary
-		 for anything except pointers.  */
+		 for anything except pointers or functions.  */
 	    }
 	  else
 	    TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NAME (sym);

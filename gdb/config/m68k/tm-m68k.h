@@ -65,6 +65,11 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 #define BREAKPOINT {0x4e, (0x40 | BPT_VECTOR)}
 #endif
 
+/* We always use vector 1 for the "remote" target.  This is hardcoded in
+   m68k-stub.c.  */
+#define REMOTE_BPT_VECTOR 1
+#define REMOTE_BREAKPOINT {0x4e, (0x40 | REMOTE_BPT_VECTOR)}
+
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
 

@@ -1,3 +1,8 @@
+Wed Jul 14 09:36:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmds.exp: Change printf "%f\n" to printf "%f is fun" so
+	pattern does not match the command itself.
+
 Mon Jul 12 11:22:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t15/{gdbme.c,funcargs.exp}: Test for alloca-influenced frames.

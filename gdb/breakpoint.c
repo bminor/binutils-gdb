@@ -347,7 +347,11 @@ read_memory_nobpt (memaddr, myaddr, len)
   struct breakpoint *b;
 
   if (memory_breakpoint_size < 0)
-    /* No breakpoints on this machine.  */
+    /* No breakpoints on this machine.  FIXME: This should be
+       dependent on the debugging target.  Probably want
+       target_insert_breakpoint to return a size, saying how many
+       bytes of the shadow contents are used, or perhaps have
+       something like target_xfer_shadow.  */
     return target_read_memory (memaddr, myaddr, len);
   
   ALL_BREAKPOINTS (b)
