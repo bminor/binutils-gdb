@@ -129,7 +129,7 @@ static char *get_cr PARAMS ((char *param, unsigned *regnop));
 static char *get_fcr PARAMS ((char *param, unsigned *regnop));
 static char *get_imm16 PARAMS ((char *param, struct m88k_insn *insn));
 static char *get_o6 PARAMS ((char *param, unsigned *valp));
-static char *get_reg PARAMS ((char *param, unsigned *regnop, char reg_prefix));
+static char *get_reg PARAMS ((char *param, unsigned *regnop, int reg_prefix));
 static char *get_vec9 PARAMS ((char *param, unsigned *valp));
 static char *getval PARAMS ((char *param, unsigned int *valp));
 
@@ -334,7 +334,7 @@ calcop (format, param, insn)
   int f;
   unsigned val;
   unsigned opcode;
-  char reg_prefix = 'r';
+  int reg_prefix = 'r';
 
   insn->opcode = format->opcode;
   opcode = 0;
@@ -466,9 +466,9 @@ static char *
 get_reg (param, regnop, reg_prefix)
      char *param;
      unsigned *regnop;
-     char reg_prefix;
+     int reg_prefix;
 {
-  char c;
+  unsigned c;
   unsigned regno;
 
   c = *param++;
@@ -899,7 +899,7 @@ getval (param, valp)
      unsigned int *valp;
 {
   unsigned int val = 0;
-  char c;
+  unsigned int c;
 
   c = *param++;
   if (c == '0')

@@ -1,3 +1,8 @@
+2001-07-01  Ben Elliston  <bje@redhat.com>
+
+	* config/tc-m88k.c: Back out warning fixes from 2001-06-24, as
+	they cause some subtle breakage.  Will fix them again later.
+
 2001-06-28  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/obj-coff.c (obj_coff_ln): Treat a .ln directive
