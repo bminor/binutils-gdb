@@ -64,6 +64,7 @@
 #include "elf/mn10200.h"
 #include "elf/mn10300.h"
 #include "elf/hppa.h"
+#include "elf/h8.h"
 #include "elf/arc.h"
 #include "elf/fr30.h"
 #include "elf/mcore.h"
@@ -589,6 +590,9 @@ guess_is_rela (e_machine)
 
       /* Targets that use RELA relocations.  */
     case EM_68K:
+    case EM_H8_300:
+    case EM_H8_300H:
+    case EM_H8S:
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
@@ -979,6 +983,12 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_PARISC:
 	  rtype = elf_hppa_reloc_type (type);
+	  break;
+
+	case EM_H8_300:
+	case EM_H8_300H:
+	case EM_H8S:
+	  rtype = elf_h8_reloc_type (type);
 	  break;
 
 	case EM_PJ:

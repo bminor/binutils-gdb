@@ -1,3 +1,9 @@
+Tue Sep  4 20:26:08 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* readelf.c: Include elf/h8 for H8 series definitions.
+	(guess_is_rela): H8 series if RELA.
+	(dump_relocations): Handle H8 series relocations.
+
 2001-08-31  Eric Christopher  <echristo@redhat.com>
 
 	* readelf.c (get_machine_flags): Remove E_MIPS_MACH_MIPS32_4K.
