@@ -102,7 +102,8 @@ static void write_long PARAMS ((struct d30v_insn *opcode, long long insn, Fixups
 static void write_1_short PARAMS ((struct d30v_insn *opcode, long long insn, Fixups *fx));
 static int write_2_short PARAMS ((struct d30v_insn *opcode1, long long insn1, 
 		   struct d30v_insn *opcode2, long long insn2, exec_type_enum exec_type, Fixups *fx));
-static long long do_assemble PARAMS ((char *str, struct d30v_insn *opcode));
+static long long do_assemble PARAMS ((char *str, struct d30v_insn *opcode,
+				      int shortp));
 static int parallel_ok PARAMS ((struct d30v_insn *opcode1, unsigned long insn1, 
 				struct d30v_insn *opcode2, unsigned long insn2,
 				exec_type_enum exec_type));
@@ -224,10 +225,10 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, (_"\nD30V options:\n\
+  fprintf(stream, (_("\nD30V options:\n\
 -O                      Make adjacent short instructions parallel if possible.\n\
 -n                      Warn about all NOPs inserted by the assembler.\n\
--N			Warn about NOPs inserted after word multiplies.\n"));
+-N			Warn about NOPs inserted after word multiplies.\n")));
 } 
 
 int
@@ -1089,7 +1090,7 @@ md_assemble (str)
 	  d30v_cleanup();
 	  
 	  /* assemble first instruction and save it */
-	  prev_insn = do_assemble (str, &prev_opcode);
+	  prev_insn = do_assemble (str, &prev_opcode, 1);
 	  if (prev_insn == -1)
 	    as_fatal (_("cannot assemble instruction "));
 	  if (prev_opcode.form->form >= LONG)
@@ -1099,10 +1100,11 @@ md_assemble (str)
 	}
     }
 
-  insn = do_assemble (str, &opcode);
+  insn = do_assemble (str, &opcode,
+		      (extype != EXEC_UNKNOWN || etype != EXEC_UNKNOWN));
   if (insn == -1)
     {
-      if (extype)
+      if (extype != EXEC_UNKNOWN)
 	{
 	  etype = extype;
 	  return;
@@ -1110,10 +1112,10 @@ md_assemble (str)
       as_fatal (_("cannot assemble instruction "));
     }
 
-  if (etype)
+  if (etype != EXEC_UNKNOWN)
     {
       extype = etype;
-      etype = 0;
+      etype = EXEC_UNKNOWN;
     }
 
   /* Word multiply instructions must not be followed by either a load or a
@@ -1191,14 +1193,15 @@ md_assemble (str)
 /* it returns -1 (an invalid opcode) on error */
 
 static long long
-do_assemble (str, opcode) 
+do_assemble (str, opcode, shortp) 
      char *str;
      struct d30v_insn *opcode;
+     int shortp;
 {
   unsigned char *op_start, *save;
   unsigned char *op_end;
   char name[20];
-  int cmp_hack, nlen = 0, fsize = 0;
+  int cmp_hack, nlen = 0, fsize = (shortp ? FORCE_SHORT : 0);
   expressionS myops[6];
   long long insn;
 
