@@ -1,5 +1,11 @@
 2004-11-14  Daniel Jacobowitz  <dan@debian.org>
 
+	* Makefile.in (mips-linux-tdep.o): Update dependencies.
+	* mips-linux-tdep.c: Include "regcache.h".
+	(fill_fpregset, mips64_fill_fpregset): Use regcache_raw_collect.
+
+2004-11-14  Daniel Jacobowitz  <dan@debian.org>
+
 	* Makefile.in (linux-thread-db.o): Fix typo in last change.
 
 2004-11-14  Daniel Jacobowitz  <dan@debian.org>

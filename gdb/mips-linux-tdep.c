@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include "frame.h"
+#include "regcache.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
@@ -221,15 +222,13 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 
   if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
     {
-      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
-      memcpy (to, from, register_size (current_gdbarch, regno - FP0_REGNUM));
+      regcache_raw_collect (current_regcache, regno, to);
     }
   else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
     {
-      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
-      memcpy (to, from, register_size (current_gdbarch, regno));
+      regcache_raw_collect (current_regcache, regno, to);
     }
   else if (regno == -1)
     {
@@ -500,15 +499,13 @@ mips64_fill_fpregset (mips64_elf_fpregset_t *fpregsetp, int regno)
 
   if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
     {
-      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
-      memcpy (to, from, register_size (current_gdbarch, regno - FP0_REGNUM));
+      regcache_raw_collect (current_regcache, regno, to);
     }
   else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
     {
-      from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
-      memcpy (to, from, register_size (current_gdbarch, regno));
+      regcache_raw_collect (current_regcache, regno, to);
     }
   else if (regno == -1)
     {
