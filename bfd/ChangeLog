@@ -1,3 +1,11 @@
+Thu Mar 28 17:44:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libhppa.h: If gcc 2.7 or higher, declare all the functions with
+	__attribute__ ((__unused__)) so that -Wall doesn't warn about
+	them.
+	(hppa_rebuild_insn): Pass pointer to correct type to
+	low_sign_unext and dis_assemble_21.
+
 Thu Mar 28 11:00:36 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config.bfd (sparc64-{sysv4*,solaris2*}): Delete.
