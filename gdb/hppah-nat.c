@@ -114,8 +114,9 @@ store_inferior_registers (int regno)
 
       /* Floating-point registers come from the ss_fpblock area.  */
       else if (regno >= HPPA_FP0_REGNUM)
-	addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
-		+ (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (HPPA_FP0_REGNUM)));
+	addr = HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
+	       + ((regno - HPPA_FP0_REGNUM) 
+	          * register_size (current_gdbarch, regno));
 
       /* Wide registers come from the ss_wide area.
 	 I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
@@ -123,14 +124,14 @@ store_inferior_registers (int regno)
 	 But checking ss_flags would require an extra ptrace call for
 	 every register reference.  Bleah.  */
       else if (len == 8)
-	addr = (HPPAH_OFFSETOF (save_state_t, ss_wide) 
-		+ DEPRECATED_REGISTER_BYTE (regno));
+	addr = HPPAH_OFFSETOF (save_state_t, ss_wide) 
+	       + regno * 8;
 
       /* Narrow registers come from the ss_narrow area.  Note that
 	 ss_narrow starts with gr1, not gr0.  */
       else if (len == 4)
-	addr = (HPPAH_OFFSETOF (save_state_t, ss_narrow)
-		+ (DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (1)));
+	addr = HPPAH_OFFSETOF (save_state_t, ss_narrow)
+	       + (regno - 1) * 4;
       else
 	internal_error (__FILE__, __LINE__,
 			"hppah-nat.c (write_register): unexpected register size");

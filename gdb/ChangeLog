@@ -1,5 +1,10 @@
 2004-12-05  Randolph Chung  <tausq@debian.org>
 
+	* hppah-nat.c (store_inferior_registers): Rewrite logic to not use
+	DEPRECATED_REGISTER_BYTE.
+
+2004-12-05  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (unwind_command): Print the stub type for stub unwind
 	records.
 
