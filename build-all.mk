@@ -37,7 +37,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /galt
+TEST_INSTALL_DISK = /abc
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -179,8 +179,8 @@ endif
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS = \
 	$(NATIVE) \
-	i960-vxworks \
-	m68k-aout	m68k-vxworks
+	i960-vxworks	m68k-aout \
+	m68k-coff 	m68k-vxworks
 CC = cc -Wp,-H256000
 #CFLAGS = +Obb2000
 CFLAGS = -g
