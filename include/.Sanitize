@@ -28,6 +28,7 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 COPYING
+ChangeLog
 a.out.encap.h
 a.out.gnu.h
 a.out.host.h
@@ -109,7 +110,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/07/31 17:36:04  gnu
+# Revision 1.9  1991/08/22 08:00:35  gnu
+# Add ChangeLog for Include.
+#
+# Revision 1.8  1991/07/31  17:36:04  gnu
 # Remove amdcoff.h by default because its copyright is not assigned to FSF.
 # "Sanitize -keep-29k" will keep it.
 #
