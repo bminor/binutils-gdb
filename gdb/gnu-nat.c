@@ -264,7 +264,7 @@ proc_update_sc (struct proc *proc)
       assert (proc_is_thread (proc));
       proc_debug (proc, "storing back changed thread state");
       err = thread_set_state (proc->port, THREAD_STATE_FLAVOR,
-			 (thread_state_t) & proc->state, THREAD_STATE_SIZE);
+			 (thread_state_t) &proc->state, THREAD_STATE_SIZE);
       if (!err)
 	proc->state_changed = 0;
     }
@@ -370,7 +370,7 @@ proc_get_state (struct proc *proc, int will_modify)
       mach_msg_type_number_t state_size = THREAD_STATE_SIZE;
       error_t err =
       thread_get_state (proc->port, THREAD_STATE_FLAVOR,
-			(thread_state_t) & proc->state, &state_size);
+			(thread_state_t) &proc->state, &state_size);
       proc_debug (proc, "getting thread state");
       proc->state_valid = !err;
     }
@@ -379,7 +379,7 @@ proc_get_state (struct proc *proc, int will_modify)
     {
       if (will_modify)
 	proc->state_changed = 1;
-      return (thread_state_t) & proc->state;
+      return (thread_state_t) &proc->state;
     }
   else
     return 0;
@@ -796,7 +796,7 @@ inf_validate_procinfo (struct inf *inf)
   int info_flags = 0;
   error_t err =
   proc_getprocinfo (proc_server, inf->pid, &info_flags,
-		    (procinfo_t *) & pi, &pi_len, &noise, &noise_len);
+		    (procinfo_t *) &pi, &pi_len, &noise, &noise_len);
 
   if (!err)
     {
@@ -2119,7 +2119,7 @@ gnu_attach (args, from_tty)
   struct inf *inf = cur_inf ();
 
   if (!args)
-    error_no_arg ("PID to attach");
+    error_no_arg ("process-id to attach");
 
   pid = atoi (args);
 

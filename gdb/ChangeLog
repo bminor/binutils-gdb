@@ -1,5 +1,13 @@
 2000-03-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* gnu-nat.c: Fix the formatting where indent misinterpreted `&' as
+	a binary operator.
+	(gnu_attach): Change error message for missing
+	argument to be identical to the corresponding message in
+	`inftarg.c'.  This makes the testsuite happy.
+
+2000-03-11  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386gnu-nat.c (gnu_store_registers): Make sure the T bit in the
 	%eflags isn't modified.  This fixes a bug where every call to a
 	function in the program beyond the first call would fail.
