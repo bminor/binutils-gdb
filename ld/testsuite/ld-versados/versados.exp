@@ -50,8 +50,8 @@ proc inspect { whichone } {
 	return
     }
 
-    send_log "$objdump -s $srcdir$subdir/$whichone.outok >tmpdir/$whichone.dumpok\n"
-    catch "exec $objdump -s $srcdir$subdir/$whichone.outok | grep -v srec >tmpdir/$whichone.dumpok" exec_output
+    send_log "$objdump -s $srcdir$subdir/$whichone.ook >tmpdir/$whichone.dok\n"
+    catch "exec $objdump -s $srcdir$subdir/$whichone.ook | grep -v srec >tmpdir/$whichone.dok" exec_output
 
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
@@ -61,7 +61,7 @@ proc inspect { whichone } {
     }
 
     # compare it with the correct output
-    catch "exec diff tmpdir/$whichone.dump tmpdir/$whichone.dumpok" exec_output
+    catch "exec diff tmpdir/$whichone.dump tmpdir/$whichone.dok" exec_output
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose $exec_output
