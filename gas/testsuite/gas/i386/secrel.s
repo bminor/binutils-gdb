@@ -75,3 +75,5 @@ nex16:	.ascii "<<"
 	.ascii ">>>>>>>"
 nex1f:	.ascii "<"
 	.ascii ">>>>"
+
+	.p2align 4,0

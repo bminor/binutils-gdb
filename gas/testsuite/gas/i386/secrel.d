@@ -40,4 +40,4 @@ Contents of section \.data:
 Contents of section \.rdata:
  0000 3e3e3e3e 3c3c3c3c 3e3e3e3e 3e3c3c3c  >>>><<<<>>>>><<<
  0010 3e3e3e3e 3e3e3c3c 3e3e3e3e 3e3e3e3c  >>>>>><<>>>>>>><
- 0020 3e3e3e3e                             >>>>            
+ 0020 3e3e3e3e 00000000 00000000 00000000  >>>>............

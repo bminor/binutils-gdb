@@ -1,3 +1,8 @@
+2004-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-pe/secrel1.s: Pad .rdata out to 16 byte boundary.
+	* ld-pe/secrel.d: Adjust to suit.
+
 2004-09-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elfvsb/elfvsb.exp: Remove file name from "undefined ref" string.
