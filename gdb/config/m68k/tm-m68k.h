@@ -25,6 +25,53 @@
 
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
+struct frame_info;
+
+/* Sequence of bytes for breakpoint instruction.
+   This is a TRAP instruction.  The last 4 bits (0xf below) is the
+   vector.  Systems which don't use 0xf should define BPT_VECTOR
+   themselves before including this file.  */
+
+#if !defined (BPT_VECTOR)
+#define BPT_VECTOR 0xf
+#endif
+
+#if !defined (BREAKPOINT)
+#define BREAKPOINT {0x4e, (0x40 | BPT_VECTOR)}
+#endif
+
+/* We default to vector 1 for the "remote" target, but allow targets
+   to override.  */
+#if !defined (REMOTE_BPT_VECTOR)
+#define REMOTE_BPT_VECTOR 1
+#endif
+
+#if !defined (REMOTE_BREAKPOINT)
+#define REMOTE_BREAKPOINT {0x4e, (0x40 | REMOTE_BPT_VECTOR)}
+#endif
+
+#define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
+#define REGISTER_BYTES_NOFP (16*4 + 8)
+
+
+#define NUM_FREGS (NUM_REGS-24)
+
+/* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
+   it corresponds to some offset in /usr/include/sys/user.h or
+   something like that.  Using some system include file would
+   have the advantage of probably being more robust in the face
+   of OS upgrades, but the disadvantage of being wrong for
+   cross-debugging.  */
+
+#define SIG_PC_FP_OFFSET 530
+
+/* Offset from SP to first arg on stack at first instruction of a function */
+
+#define SP_ARG0 (1 * 4)
+
+#define TARGET_M68K
+
+
 #if !GDB_MULTI_ARCH
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 
@@ -50,8 +97,6 @@ extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
    the new frame is not set up until the new function executes
    some instructions.  */
 
-struct frame_info;
-
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 
@@ -69,35 +114,18 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #define STACK_ALIGN(ADDR) (((ADDR) + 1) & ~1)
 #endif
 
-/* Sequence of bytes for breakpoint instruction.
-   This is a TRAP instruction.  The last 4 bits (0xf below) is the
-   vector.  Systems which don't use 0xf should define BPT_VECTOR
-   themselves before including this file.  */
-
-#if !defined (BPT_VECTOR)
-#define BPT_VECTOR 0xf
-#endif
-
-#if !defined (BREAKPOINT)
-#define BREAKPOINT {0x4e, (0x40 | BPT_VECTOR)}
-#endif
-
-/* We default to vector 1 for the "remote" target, but allow targets
-   to override.  */
-#if !defined (REMOTE_BPT_VECTOR)
-#define REMOTE_BPT_VECTOR 1
-#endif
-
-#if !defined (REMOTE_BREAKPOINT)
-#define REMOTE_BREAKPOINT {0x4e, (0x40 | REMOTE_BPT_VECTOR)}
-#endif
-
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
 
 #if !GDB_MULTI_ARCH
 #if !defined (DECR_PC_AFTER_BREAK)
 #define DECR_PC_AFTER_BREAK 2
+#endif
+#endif
+
+#if !GDB_MULTI_ARCH
+#ifndef NUM_REGS
+#define NUM_REGS 29
 #endif
 #endif
 
@@ -108,17 +136,6 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #if !GDB_MULTI_ARCH
 #define REGISTER_SIZE 4
 #endif
-
-#define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
-#define REGISTER_BYTES_NOFP (16*4 + 8)
-
-
-#ifndef NUM_REGS
-#define NUM_REGS 29
-#endif
-
-
-#define NUM_FREGS (NUM_REGS-24)
 
 #if !GDB_MULTI_ARCH
 #ifndef REGISTER_BYTES_OK
@@ -197,14 +214,17 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+
 #define D0_REGNUM 0
 #define A0_REGNUM 8
 #define A1_REGNUM 9
+#if !GDB_MULTI_ARCH
 #define FP_REGNUM 14		/* Contains address of executing stack frame */
 #define SP_REGNUM 15		/* Contains address of top of stack */
 #define PS_REGNUM 16		/* Contains processor status */
 #define PC_REGNUM 17		/* Contains program counter */
 #define FP0_REGNUM 18		/* Floating point register 0 */
+#endif
 #define FPC_REGNUM 26		/* 68881 control register */
 #define FPS_REGNUM 27		/* 68881 status register */
 #define FPI_REGNUM 28		/* 68881 iaddr register */
@@ -277,14 +297,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
      (((FI)->signal_handler_caller) ? 0 : frameless_look_for_prologue(FI))
 #endif
 
-/* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
-   it corresponds to some offset in /usr/include/sys/user.h or
-   something like that.  Using some system include file would
-   have the advantage of probably being more robust in the face
-   of OS upgrades, but the disadvantage of being wrong for
-   cross-debugging.  */
 
-#define SIG_PC_FP_OFFSET 530
 
 #if !GDB_MULTI_ARCH
 #define FRAME_SAVED_PC(FRAME) \
@@ -298,22 +311,27 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    )
 #endif
 
+#if !GDB_MULTI_ARCH
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#endif
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
 
 /* We can't tell how many args there are
    now that the C compiler delays popping them.  */
+#if !GDB_MULTI_ARCH
 #if !defined (FRAME_NUM_ARGS)
 #define FRAME_NUM_ARGS(fi) (-1)
 #endif
 
+
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 8
+#endif
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -385,12 +403,7 @@ extern void m68k_pop_frame (void);
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME		{ m68k_pop_frame (); }
-#endif
-/* Offset from SP to first arg on stack at first instruction of a function */
 
-#define SP_ARG0 (1 * 4)
-
-#define TARGET_M68K
 
 /* Figure out where the longjmp will land.  Slurp the args out of the stack.
    We expect the first arg to be a pointer to the jmp_buf structure from which
@@ -398,3 +411,4 @@ extern void m68k_pop_frame (void);
    This routine returns true on success */
 
 extern int m68k_get_longjmp_target (CORE_ADDR *);
+#endif

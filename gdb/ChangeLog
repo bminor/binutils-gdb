@@ -24,6 +24,20 @@
 
 2002-06-26  Grace Sainsbury  <graces@redhat.com>
 
+	* config/m68k/tm-m68k.h: Rearrange code so macros not in the
+	gdbarch vector are at the top.
+	(NUM_REGS): Remove.
+	(FP_REGNUM, SP_REGNUM, PS_REGNUM, PC_REGNUM, FP0_REGNUM): Remove.
+	(FRAME_ARGS_ADDRESS): Remove.
+	(FRAME_LOCALS_ADDRESS): Remove.
+	(FRAME_NUM_ARGS): Remove.
+	(FRAME_ARGS_SKIP): Remove.  
+	* m68k-tdep.c (enum): Add eumeration of special register numbers.
+	(m68k_gdbarch_init): Add gdbarch initializations for macros
+	undefined in tm-m68k.h
+
+2002-06-26  Grace Sainsbury  <graces@redhat.com>
+
 	* monitor.h: Add the function regname to monitor_ops
 	structure. This way NUM_REGS does not have to be a constant.
 	* monitor.c (monitor_fetch_register): Added support for regname
