@@ -1,3 +1,26 @@
+2002-10-14  Stephen Clarke <stephen.clarke@superh.com>
+
+	* elf32-sh.c (elf_sh_link_hash_entry): Replace
+	datalabel_got_offset with union of datalabel_got
+	offset and refcount.
+	(sh_elf_link_hash_newfunc): Initialize datalabel_got.refcount.
+	(allocate_dynrelocs): Delete unnecessary code for
+	STT_DATALABEL type.  Create entry in got for
+	datalabel version of symbol if datalabel_got.refcount > 0.
+	(sh_elf_relocate_section): Use datalabel_got union.
+	(sh_elf_gc_sweep_hook): Pull common code to initialize
+	h and eh out of switch statement.  Declare seen_stt_datalabel.
+	Initialize it.  Decrement datalabel_got.refcount for
+	got relocs when seen_stt_datalabel is true.
+	Decrement local_got_refcounts entry for datalabel got relocs
+	of local symbols.
+	(sh_elf_copy_indirect_symbol): Copy datalabel_got field over.
+	(sh_elf_check_relocs): Declare seen_stt_datalabel.
+	Initialize it.  When seen_stt_datalabel is true, increment
+	datalabel_got refcount rather than got.refcount.
+	(sh_elf_finish_dynamic_symbol): Create relocs to
+	initialize got entry for datalabel version of symbol.
+
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
