@@ -33,4 +33,14 @@ extern int pid_to_thread_id PARAMS ((int pid));
 
 extern int valid_thread_id PARAMS ((int thread));
 
+extern void load_infrun_state PARAMS ((int, CORE_ADDR *, CORE_ADDR *, char **,
+				       int *, struct breakpoint **,
+				       struct breakpoint **, CORE_ADDR *,
+				       CORE_ADDR *, CORE_ADDR *, int *, int *));
+
+extern void save_infrun_state PARAMS ((int, CORE_ADDR, CORE_ADDR, char *,
+				       int, struct breakpoint *,
+				       struct breakpoint *, CORE_ADDR,
+				       CORE_ADDR, CORE_ADDR, int, int));
+
 #endif	/* THREAD_H */

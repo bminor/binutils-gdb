@@ -1,5 +1,16 @@
 Tue Jul  4 10:30:22 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
+	* infrun.c (wait_for_inferior): When switching from one thread to
+	another, save infrun's state for the old thread and load infrun's
+	previous state for the new thread.
+	* thread.c (struct thread_info): Add new fields for thread specific
+	state saved/restored in infrun.c.
+	(add_thread): Initialize new fields.
+	(load_infrun_state): New function.
+	(save_infrun_state): New function.
+	* thread.h (load_infrun_state): Provide external decl.
+	(save_infrun_state): Likewise.
+
 	* infrun.c (wait_for_inferior): When we hit a breakpoint for the
 	wrong thread, make sure to write the fixed PC value into the thread
 	that stopped.  Restart all threads after single stepping over a

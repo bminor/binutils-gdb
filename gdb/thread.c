@@ -42,6 +42,17 @@ struct thread_info
   struct thread_info *next;
   int pid;			/* Actual process id */
   int num;			/* Convenient handle */
+  CORE_ADDR prev_pc;		/* State from wait_for_inferior */
+  CORE_ADDR prev_func_start;
+  char *prev_func_name;
+  struct breakpoint *step_resume_breakpoint;
+  struct breakpoint *through_sigtramp_breakpoint;
+  CORE_ADDR step_range_start;
+  CORE_ADDR step_range_end;
+  CORE_ADDR step_frame_address;
+  int trap_expected;
+  int handling_longjmp;
+  int another_trap;
 };
 
 static struct thread_info *thread_list = NULL;
@@ -83,6 +94,17 @@ add_thread (pid)
 
   tp->pid = pid;
   tp->num = ++highest_thread_num;
+  tp->prev_pc = 0;
+  tp->prev_func_start = 0;
+  tp->prev_func_name = NULL;
+  tp->step_range_start = 0;
+  tp->step_range_end = 0;
+  tp->step_frame_address =0;
+  tp->step_resume_breakpoint = 0;
+  tp->through_sigtramp_breakpoint = 0;
+  tp->handling_longjmp = 0;
+  tp->trap_expected = 0;
+  tp->another_trap = 0;
   tp->next = thread_list;
   thread_list = tp;
 }
@@ -137,6 +159,88 @@ in_thread_list (pid)
       return 1;
 
   return 0;			/* Never heard of 'im */
+}
+
+/* Load infrun state for the thread PID.  */
+
+void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
+			trap_expected, step_resume_breakpoint,
+			through_sigtramp_breakpoint, step_range_start,
+			step_range_end, step_frame_address,
+			handling_longjmp, another_trap)
+     int pid;
+     CORE_ADDR *prev_pc;
+     CORE_ADDR *prev_func_start;
+     char **prev_func_name;
+     int *trap_expected;
+     struct breakpoint **step_resume_breakpoint;
+     struct breakpoint **through_sigtramp_breakpoint;
+     CORE_ADDR *step_range_start;
+     CORE_ADDR *step_range_end;
+     CORE_ADDR *step_frame_address;
+     int *handling_longjmp;
+     int *another_trap;
+{
+  struct thread_info *tp;
+
+  /* If we can't find the thread, then we're debugging a single threaded
+     process.  No need to do anything in that case.  */
+  tp = find_thread_id (pid_to_thread_id (pid));
+  if (tp == NULL)
+    return;
+
+  *prev_pc = tp->prev_pc;
+  *prev_func_start = tp->prev_func_start;
+  *prev_func_name = tp->prev_func_name;
+  *step_resume_breakpoint = tp->step_resume_breakpoint;
+  *step_range_start = tp->step_range_start;
+  *step_range_end = tp->step_range_end;
+  *step_frame_address = tp->step_frame_address;
+  *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
+  *handling_longjmp = tp->handling_longjmp;
+  *trap_expected = tp->trap_expected;
+  *another_trap = tp->another_trap;
+}
+
+/* Save infrun state for the thread PID.  */
+
+void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
+			trap_expected, step_resume_breakpoint,
+			through_sigtramp_breakpoint, step_range_start,
+			step_range_end, step_frame_address,
+			handling_longjmp, another_trap)
+     int pid;
+     CORE_ADDR prev_pc;
+     CORE_ADDR prev_func_start;
+     char *prev_func_name;
+     int trap_expected;
+     struct breakpoint *step_resume_breakpoint;
+     struct breakpoint *through_sigtramp_breakpoint;
+     CORE_ADDR step_range_start;
+     CORE_ADDR step_range_end;
+     CORE_ADDR step_frame_address;
+     int handling_longjmp;
+     int another_trap;
+{
+  struct thread_info *tp;
+
+  /* If we can't find the thread, then we're debugging a single-threaded
+     process.  Nothing to do in that case.  */
+  tp = find_thread_id (pid_to_thread_id (pid));
+  if (tp == NULL)
+    return;
+
+  tp->prev_pc = prev_pc;
+  tp->prev_func_start = prev_func_start;
+  tp->prev_func_name = prev_func_name;
+  tp->step_resume_breakpoint = step_resume_breakpoint;
+  tp->step_range_start = step_range_start;
+  tp->step_range_end = step_range_end;
+  tp->step_frame_address = step_frame_address;
+  tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;
+  tp->handling_longjmp = handling_longjmp;
+  tp->trap_expected = trap_expected;
+  tp->another_trap = another_trap;
 }
 
 static void
