@@ -365,7 +365,7 @@ flonum_gen2tahoe (format_letter, f, words)
  *	Address of where to return size of literal (in chars).
  *
  * Out:	Input_line_pointer -> of next char after floating number.
- *	Error message, or "".
+ *	Error message, or 0.
  *	Floating point literal.
  *	Number of chars we used for the literal.
  */
@@ -425,7 +425,7 @@ md_atof (what_statement_type, literalP, sizeP)
     };
 
   *sizeP = number_of_chars;
-  return (kind_of_float ? "" : "Bad call to md_atof()");
-}				/* md_atof() */
+  return kind_of_float ? 0 : "Bad call to md_atof()";
+}
 
 /* atof_tahoe.c */

@@ -1319,7 +1319,7 @@ tag_insert (name, symbolP)
 {
   register const char *error_string;
 
-  if (*(error_string = hash_jam (tag_hash, name, (char *) symbolP)))
+  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
     {
       as_fatal ("Inserting \"%s\" into structure table failed: %s",
 		name, error_string);

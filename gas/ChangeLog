@@ -1,3 +1,18 @@
+Mon Sep 27 15:21:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/atof-vax.c (md_atof): Return null on success instead of
+	empty string.
+	* config/atof-tahoe.c (md_atof): Ditto.
+	* read.c (float_cons): Expect a null pointer for success, not an
+	empty string.
+
+	* hash.c (hash_insert, hash_jam, hash_grow): Return null pointer
+	on success, instead of empty string.  All callers changed.
+
+	* config/tc-vax.c: Use PARAMS in declarations.
+	(vip_op): Use NULL instead of empty string for success in error
+	and warning fields.
+
 Sun Sep 26 23:45:29 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* expr.c (expr) [DIFF_EXPR_OK]: Permit subtraction of two symbols

@@ -346,16 +346,16 @@ const relax_typeS
 #undef WB
 /* End relax stuff */
 
-static struct hash_control *op_hash = NULL;	/* handle of the OPCODE hash table
-						   NULL means any use before md_begin() will
-						   crash */
+/* Handle of the OPCODE hash table.  NULL means any use before
+   md_begin() will crash.  */
+static struct hash_control *op_hash;
 
 /* Init function. Build the hash table. */
 void
 md_begin ()
 {
   struct tot *tP;
-  char *errorval = "";
+  char *errorval = 0;
   int synthetic_too = 1;	/* If 0, just use real opcodes. */
 
   if ((op_hash = hash_new ()))
@@ -376,9 +376,9 @@ md_begin ()
     {
       errorval = "Virtual memory exceeded";
     }
-  if (*errorval)
+  if (errorval)
     as_fatal (errorval);
-}				/* md_begin */
+}
 
 void
 md_end ()

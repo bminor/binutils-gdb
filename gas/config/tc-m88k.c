@@ -201,7 +201,7 @@ md_begin ()
 
       retval = hash_insert (op_hash, name, &m88k_opcodes[i]);
 
-      if (retval != NULL && *retval != '\0')
+      if (retval != NULL)
 	as_fatal ("Can't hash instruction '%s':%s",
 		  m88k_opcodes[i].name, retval);
 

@@ -332,7 +332,7 @@ md_begin ()
 	}
 
       retval = hash_insert (op_hash, name, (PTR) &machine_opcodes[i]);
-      if (retval != NULL && *retval != '\0')
+      if (retval != NULL)
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
 		   machine_opcodes[i].name, retval);
