@@ -1,3 +1,19 @@
+Fri Oct 29 13:17:21 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfd-in.h: Added commands for object file flag values.
+	* bfd-in2.h: Rebuilt.
+	* elfcode.h (elf_object_p): If type is ET_DYN, set DYNAMIC flag,
+	not EXEC_P.
+	* bout.c, coff-h8300.c, coff-sh.c: Add BFD_IS_RELAXABLE to
+	object_flags field for target vector.
+	* aix386-core.c, aout-adobe.c, aout-target.h, bout.c, coff-a29k.c,
+	coff-alpha.c, coff-apollo.c, coff-h8300.c, coff-h8500.c,
+	coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c, coff-mips.c,
+	coff-rs6000.c, coff-sh.c, coff-we32k.c, coff-z8k.c, hpux-core.c,
+	ieee.c, mipsbsd.c, nlm-target.h, oasys.c, osf-core.c, som.c,
+	srec.c, tekhex.c, trad-core.c:	Remove DYNAMIC from object_flags
+	field for target vector.
+
 Thu Oct 28 20:02:31 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* hosts/std-host.h: Don't declare time; causes error on mach3.

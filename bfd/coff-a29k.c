@@ -294,7 +294,7 @@ bfd_target a29kcoff_big_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC /* section flags */
    | SEC_LOAD | SEC_RELOC  
