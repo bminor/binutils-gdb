@@ -70,10 +70,19 @@ if {![file isdirectory tmpdir/ld]} then {
 set gcc_ld_flag "-B[pwd]/tmpdir/ld/"
 
 # load the linker path
-load_lib tmpdir/libpath.exp
+if {[file exists tmpdir/libpath.exp]} {
+    load_lib tmpdir/libpath.exp
 
-foreach dir $libpath {
-    set gcc_ld_flag "$gcc_ld_flag -L$dir"
+    foreach dir $libpath {
+	set gcc_ld_flag "$gcc_ld_flag -L$dir"
+    }
+}
+
+# The "make check" target in the Makefile passes in
+# "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly
+# (as when testing an installed linker), CC may not be set.  
+if {![info exists CC]} {
+    set CC [transform gcc]
 }
 
 # The mips64-*-linux-gnu compiler defaults to the N32 ABI after
