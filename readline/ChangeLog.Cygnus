@@ -1,3 +1,40 @@
+2000-03-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* support/shobj-conf: Shared libs are unsupported on MSDOS.
+
+	* bind.c (_rl_read_file): Open files in binary mode.  Strip CR
+	characters after reading the file.
+	(rl_re_read_init_file, rl_read_init_file): Allow for _inputrc on
+	DOS.
+
+	* complete.c (username_completion_function): Don't bypass getpw*
+	function calls for DJGPP.
+	(Filename_completion_function): Handle d:foo/bar file names.
+
+	* display.c (_rl_move_vert) [__GO32__]: fflush the stream, to make
+	sure cursor position is up to date.
+	(_rl_clear_screen) [__GO32__]: Clear screen and home the cursor.
+	(insert_some_characters, delete_characters) [__DJGPP__]: Don't use
+	memcpy.
+
+	* histfile.c (read_history_range, history_truncate_file)
+	(history_do_write) [__MSDOS__]: Allow for underscore instead of
+	the leading dot in file names.
+
+	* input.c: Don't use GO32-specific workarounds if HAVE_SELECT or
+	HAVE_TERMIOS_H are defined.
+
+	* readline.c: Don't disable signals if __DJGPP__ is defined.
+
+	* rltty.c: Don't disable signals and don't bypass termios code for
+	DJGPP (if HAVE_TERMIOS_H is defined).
+
+	* signals.c: Don't disable signals for DJGPP.
+
+	* terminal.c (_rl_get_screen_size) [__DJGPP__]: Initialize screen
+	dimensions.
+	(ding) [__DJGPP__]: Support visual bell.
+
 1999-08-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From Philippe De Muyter  <phdm@macqel.be>
