@@ -1,3 +1,9 @@
+2004-06-25  J"orn Rennecke <joern.rennecke@superh.com>
+
+	[ include/gdb: * callback.h (host_callback_struct): Replace
+		       members fdopen and alwaysopen with fd_buddy.  ]
+        * callback.c: Changed all users.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* sim-load.c (sim_load_file): Use bfd_get_section_size
