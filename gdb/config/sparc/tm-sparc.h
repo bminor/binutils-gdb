@@ -329,6 +329,7 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 
 #define EXTRA_FRAME_INFO  \
   CORE_ADDR bottom;  \
+  int in_prologue; \
   int flat;  \
   /* Following fields only relevant for flat frames.  */ \
   CORE_ADDR pc_addr;  \

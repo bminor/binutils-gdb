@@ -1,3 +1,10 @@
+Thu Jul 23 15:07:40 1998  Dawn Perchik  <dawn@cygnus.com>
+
+	* sparc-tdep.c (sparc_init_extra_frame_info): Recognize when we're
+	in a function prologue before the SAVE instruction.
+	(sparc_frame_saved_pc): Ditto.
+	* config/sparc/tm-sparc.h (EXTRA_FRAME_INFO): Add in_prologue flag.
+
 Thu Jul 23 14:58:09 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* i386-tdep.c (i386_get_frame_setup): Recognize function
