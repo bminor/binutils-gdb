@@ -1,3 +1,10 @@
+2004-03-15  Mark Kettenis  <m.kettenis@osp.nl>
+
+	* i387-tdep.h (i387_collect_fsave): New prototype.
+	* i387-tdep.c (i387_collect_fsave): New function containing most
+	of the code from i387_fill_fsave.
+	(i387_fill_fsave): Call i387_fill_fsave.
+
 2004-03-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c: Update copyright year.
