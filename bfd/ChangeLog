@@ -1,3 +1,26 @@
+Wed Sep 28 13:35:05 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* reloc.c (bfd_install_relocation): Cast data_start to bfd_byte *
+	before trying to add values to it.
+
+Tue Sep 27 16:47:58 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* elf32-hppa.c (elf32_hppa_backend_final_write_processing): Cast
+	return value from elf_sym_extra.
+	(elf32_hppa_build_stubs): Cast return value from bfd_zalloc.
+	(elf32_hppa_size_stubs): Csat return value from malloc.
+
+	* gen-aout.c (main): Declare and initialize "arch".
+
+	* cofflink.c (coff_link_add_symbols): Cast return value of
+	bfd_hash_allocate.
+
+	* riscix.c (riscix_callback): Use PARAMS macro in prototype.
+
+	* reloc.c (bfd_install_relocation): New function, mostly copied
+	from bfd_perform_relocation, adjusted for the assembler's needs.
+	* bfd-in2.h: Regenerated.
+
 Mon Sep 26 11:00:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* elfcode.h (assign_file_positions_except_relocs): Align the
