@@ -1,3 +1,8 @@
+Mon Apr 13 16:51:04 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (do_msr): Support undocumented 'msr cpsr_flg,
+	#<n>' instruction.
+
 start-sanitize-sky
 Mon Apr 13 12:18:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 
