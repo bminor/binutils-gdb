@@ -1,3 +1,8 @@
+2002-03-14  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.c (md_estimate_size_before_relax): Don't consider
+	a weak symbol in same section to be within reach.
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* doc/as.texinfo: Wrap @menu in @ifnottex, not @ifinfo.
