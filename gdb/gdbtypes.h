@@ -148,21 +148,21 @@ enum type_code
    type is signed (unless TYPE_FLAG_NOSIGN (below) is set). */
 
 #define TYPE_FLAG_UNSIGNED	(1 << 0)
-#define TYPE_UNSIGNED(t)	((t)->flags & TYPE_FLAG_UNSIGNED)
+#define TYPE_UNSIGNED(t)	(TYPE_FLAGS (t) & TYPE_FLAG_UNSIGNED)
 
 /* No sign for this type.  In C++, "char", "signed char", and "unsigned
    char" are distinct types; so we need an extra flag to indicate the
    absence of a sign! */
 
 #define TYPE_FLAG_NOSIGN	(1 << 1)
-#define TYPE_NOSIGN(t)		((t)->flags & TYPE_FLAG_NOSIGN)
+#define TYPE_NOSIGN(t)		(TYPE_FLAGS (t) & TYPE_FLAG_NOSIGN)
 
 /* This appears in a type's flags word if it is a stub type (e.g., if
    someone referenced a type that wasn't defined in a source file
    via (struct sir_not_appearing_in_this_film *)).  */
 
 #define TYPE_FLAG_STUB		(1 << 2)
-#define TYPE_STUB(t)		((t)->flags & TYPE_FLAG_STUB)
+#define TYPE_STUB(t)		(TYPE_FLAGS (t) & TYPE_FLAG_STUB)
 
 /* The target type of this type is a stub type, and this type needs to
    be updated if it gets un-stubbed in check_typedef.
@@ -171,7 +171,7 @@ enum type_code
    Also, set for TYPE_CODE_TYPEDEF. */
 
 #define TYPE_FLAG_TARGET_STUB	(1 << 3)
-#define TYPE_TARGET_STUB(t)	((t)->flags & TYPE_FLAG_TARGET_STUB)
+#define TYPE_TARGET_STUB(t)	(TYPE_FLAGS (t) & TYPE_FLAG_TARGET_STUB)
 
 /* Static type.  If this is set, the corresponding type had 
  * a static modifier.
@@ -180,21 +180,21 @@ enum type_code
  */
 
 #define TYPE_FLAG_STATIC	(1 << 4)
-#define TYPE_STATIC(t)		((t)->flags & TYPE_FLAG_STATIC)
+#define TYPE_STATIC(t)		(TYPE_FLAGS (t) & TYPE_FLAG_STATIC)
 
 /* Constant type.  If this is set, the corresponding type has a
  * const modifier.
  */
 
 #define TYPE_FLAG_CONST		(1 << 5)
-#define TYPE_CONST(t)		((t)->flags & TYPE_FLAG_CONST)
+#define TYPE_CONST(t)		(TYPE_FLAGS (t) & TYPE_FLAG_CONST)
 
 /* Volatile type.  If this is set, the corresponding type has a
  * volatile modifier.
  */
 
 #define TYPE_FLAG_VOLATILE	(1 << 6)
-#define TYPE_VOLATILE(t)	((t)->flags & TYPE_FLAG_VOLATILE)
+#define TYPE_VOLATILE(t)	(TYPE_FLAGS (t) & TYPE_FLAG_VOLATILE)
 
 
 /* This is a function type which appears to have a prototype.  We need this
@@ -202,7 +202,7 @@ enum type_code
    or to just do the standard conversions.  This is used with a short field. */
 
 #define TYPE_FLAG_PROTOTYPED	(1 << 7)
-#define TYPE_PROTOTYPED(t)	((t)->flags & TYPE_FLAG_PROTOTYPED)
+#define TYPE_PROTOTYPED(t)	(TYPE_FLAGS (t) & TYPE_FLAG_PROTOTYPED)
 
 /* This flag is used to indicate that processing for this type
    is incomplete.
@@ -213,7 +213,7 @@ enum type_code
    the method can be assigned correct types.) */
 
 #define TYPE_FLAG_INCOMPLETE	(1 << 8)
-#define TYPE_INCOMPLETE(t)	((t)->flags & TYPE_FLAG_INCOMPLETE)
+#define TYPE_INCOMPLETE(t)	(TYPE_FLAGS (t) & TYPE_FLAG_INCOMPLETE)
 
 /* Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -235,10 +235,10 @@ enum type_code
    is instruction space, and for data objects is data memory.  */
 
 #define TYPE_FLAG_CODE_SPACE	(1 << 9)
-#define TYPE_CODE_SPACE(t)	((t)->flags & TYPE_FLAG_CODE_SPACE)
+#define TYPE_CODE_SPACE(t)	(TYPE_FLAGS (t) & TYPE_FLAG_CODE_SPACE)
 
 #define TYPE_FLAG_DATA_SPACE	(1 << 10)
-#define TYPE_DATA_SPACE(t)	((t)->flags & TYPE_FLAG_DATA_SPACE)
+#define TYPE_DATA_SPACE(t)	(TYPE_FLAGS (t) & TYPE_FLAG_DATA_SPACE)
 
 /* FIXME: Kludge to mark a varargs function type for C++ member
    function argument processing.  Currently only used in dwarf2read.c,
@@ -246,13 +246,13 @@ enum type_code
    another flag.  */
 
 #define TYPE_FLAG_VARARGS	(1 << 11)
-#define TYPE_VARARGS(t)		((t)->flags & TYPE_FLAG_VARARGS)
+#define TYPE_VARARGS(t)		(TYPE_FLAGS (t) & TYPE_FLAG_VARARGS)
 
 /* Identify a vector type.  Gcc is handling this by adding an extra
    attribute to the array type.  We slurp that in as a new flag of a
    type.  This is used only in dwarf2read.c.  */
 #define TYPE_FLAG_VECTOR	(1 << 12)
-#define TYPE_VECTOR(t)		((t)->flags & TYPE_FLAG_VECTOR)
+#define TYPE_VECTOR(t)		(TYPE_FLAGS (t) & TYPE_FLAG_VECTOR)
 
 
 struct type
