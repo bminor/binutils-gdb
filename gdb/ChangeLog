@@ -1,5 +1,15 @@
 2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* i386nbsd-tdep.c (i386nbsd_sigtramp_offset): New function. 
+	(i386nbsd_pc_in_sigtramp): Rewrite to use i386nbsd_sigtramp_offset. 
+	(i386nbsd_init_abi): Don't initialize tdep->sigtramp_start or
+	tdep->sigtramp_end.
+	(i386nbsd_sigtramp_start, i386nbsd_sigtramp_end): Remove. 
+	* config/i386/tm-nbsd.h (SIGTRAMP_START, SIGTRAMP_END)
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): Remove.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (i386nbsd-tdep.o): Add $(arch_utils_h),
 	$(i386_tdep_h), and $(nbsd_tdep_h) to dependency list.
 	* i386-tdep.h (i386bsd_init_abi): New prototype.

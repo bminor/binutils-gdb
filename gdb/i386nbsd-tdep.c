@@ -140,23 +140,101 @@ static struct core_fns i386nbsd_elfcore_fns =
   NULL					/* next */
 };
 
+/* Under NetBSD/i386, signal handler invocations can be identified by the
+   designated code sequence that is used to return from a signal handler.
+   In particular, the return address of a signal handler points to the
+   following code sequence:
+
+	leal	0x10(%esp), %eax
+	pushl	%eax
+	pushl	%eax
+	movl	$0x127, %eax		# __sigreturn14
+	int	$0x80
+
+   Each instruction has a unique encoding, so we simply attempt to match
+   the instruction the PC is pointing to with any of the above instructions.
+   If there is a hit, we know the offset to the start of the designated
+   sequence and can then check whether we really are executing in the
+   signal trampoline.  If not, -1 is returned, otherwise the offset from the
+   start of the return sequence is returned.  */
+#define RETCODE_INSN1		0x8d
+#define RETCODE_INSN2		0x50
+#define RETCODE_INSN3		0x50
+#define RETCODE_INSN4		0xb8
+#define RETCODE_INSN5		0xcd
+
+#define RETCODE_INSN2_OFF	4
+#define RETCODE_INSN3_OFF	5
+#define RETCODE_INSN4_OFF	6
+#define RETCODE_INSN5_OFF	11
+
+static const unsigned char sigtramp_retcode[] =
+{
+  RETCODE_INSN1, 0x44, 0x24, 0x10,
+  RETCODE_INSN2,
+  RETCODE_INSN3,
+  RETCODE_INSN4, 0x27, 0x01, 0x00, 0x00,
+  RETCODE_INSN5, 0x80,
+};
+
+static LONGEST
+i386nbsd_sigtramp_offset (CORE_ADDR pc)
+{
+  unsigned char ret[sizeof(sigtramp_retcode)], insn;
+  LONGEST off;
+  int i;
+
+  if (read_memory_nobpt (pc, &insn, 1) != 0)
+    return -1;
+
+  switch (insn)
+    {
+    case RETCODE_INSN1:
+      off = 0;
+      break;
+
+    case RETCODE_INSN2:
+      /* INSN2 and INSN3 are the same.  Read at the location of PC+1
+	 to determine if we're actually looking at INSN2 or INSN3.  */
+      if (read_memory_nobpt (pc + 1, &insn, 1) != 0)
+	return -1;
+
+      if (insn == RETCODE_INSN3)
+	off = RETCODE_INSN2_OFF;
+      else
+	off = RETCODE_INSN3_OFF;
+      break;
+
+    case RETCODE_INSN4:
+      off = RETCODE_INSN4_OFF;
+      break;
+
+    case RETCODE_INSN5:
+      off = RETCODE_INSN5_OFF;
+      break;
+
+    default:
+      return -1;
+    }
+
+  pc -= off;
+
+  if (read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
+    return -1;
+
+  if (memcmp (ret, sigtramp_retcode, sizeof (ret)) == 0)
+    return off;
+
+  return -1;
+}
+
 static int
 i386nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  /* Check for libc-provided signal trampoline.  */
-  if (nbsd_pc_in_sigtramp (pc, name))
-    return 1;
-
-  /* FIXME: sigtramp_start/sigtramp_end need to go away; we should
-     not be assuming the location of the kernel-provided trampoline!  */
-
-  return (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end);
+  return (nbsd_pc_in_sigtramp (pc, name)
+	  || i386nbsd_sigtramp_offset (pc) >= 0);
 }
-
-CORE_ADDR i386nbsd_sigtramp_start = 0xbfbfdf20;
-CORE_ADDR i386nbsd_sigtramp_end = 0xbfbfdff0;
 
 /* From <machine/signal.h>.  */
 int i386nbsd_sc_pc_offset = 44;
@@ -175,10 +253,6 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* NetBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
-
-  /* NetBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386nbsd_sigtramp_start;
-  tdep->sigtramp_end = i386nbsd_sigtramp_end;
 
   /* NetBSD has a `struct sigcontext' that's different from the
      origional 4.3 BSD.  */
