@@ -1,3 +1,8 @@
+Tue Oct 29 18:36:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/tm-ppc-eabi.h (TARGET_BYTE_ORDER_SELECTABLE):
+	Define.
+
 Tue Oct 29 14:59:20 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* TODO: Add item suggesting an "info bfd" command.
