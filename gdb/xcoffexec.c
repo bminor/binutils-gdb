@@ -76,7 +76,7 @@ extern struct target_ops exec_ops;
 
 static void
 exec_close (quitting)
-int quitting;
+     int quitting;
 {
   register struct vmap *vp, *nxt;
   int need_symtab_cleanup = 0;
@@ -116,7 +116,9 @@ int quitting;
       exec_ops.to_sections_end = NULL;
     }
 
-  if (need_symtab_cleanup)
+  /* If we are quitting, we don't want to call breakpoint_re_set which may
+     output messages which would just be confusing in this context.  */
+  if (!quitting && need_symtab_cleanup)
     clear_symtab_users ();
 }
 
