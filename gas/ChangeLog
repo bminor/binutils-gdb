@@ -1,3 +1,21 @@
+Wed Jan  8 11:26:40 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+        Added support for listings
+	* Makefile.in: include listing.[co]
+	* as.c: parse -l
+	* as.h: include listing.h, include listing hook into frag
+	* frags.c (frag_new): hook for creating line number info
+	* messages.c (as_warn, as_bad): remember message for listing
+	* read.c: add new pseudos to the table
+	* write.c: (relax_segment): need to cope with branches with 0
+	offsets, so create M68K_AIM_KLUDGE- this came to light because
+	listings make lots of zero length frags.
+	* listing.c, listing.h: new files
+
+Mon Jan  6 06:13:23 1992  John Gilmore  (gnu at cygnus.com)
+
+	* config/tc-m68k.c (md_parse_option):  Default to allowing
+	floating point opcodes with processors that support them.
+
 Sat Jan  4 16:34:16 1992  John Gilmore  (gnu at cygnus.com)
 
 	* as.h:  Move redefine of xfree.
