@@ -1,3 +1,9 @@
+2000-06-12  Kazu Hirata  <kazu@hxi.com>
+
+	* h8300-dis.c: Fix formatting.
+	(bfd_h8_disassemble): Distinguish adds/subs, inc/dec.[wl]
+	correctly.
+
 Fri Jun  9 21:49:02 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* avr-dis.c (avr_operand): Bugfix for jmp/call address.

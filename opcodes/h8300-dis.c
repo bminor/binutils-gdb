@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #include "opintl.h"
 
-
 /* Run through the opcodes and sort them into order to make them easy
    to disassemble.  */
 static void
@@ -41,7 +40,7 @@ bfd_h8_disassemble_init ()
 	n1 = (int) p->data.nib[0];
       else
 	n1 = 0;
-      
+
       if ((int) p->data.nib[1] < 16)
 	n2 = (int) p->data.nib[1];
       else
@@ -50,15 +49,14 @@ bfd_h8_disassemble_init ()
       /* Just make sure there are an even number of nibbles in it, and
 	 that the count is the same as the length.  */
       for (i = 0; p->data.nib[i] != E; i++)
-	/*EMPTY*/;
-      
+	;
+
       if (i & 1)
 	abort ();
-      
+
       p->length = i / 2;
     }
 }
-
 
 unsigned int
 bfd_h8_disassemble (addr, info, mode)
@@ -109,9 +107,9 @@ bfd_h8_disassemble (addr, info, mode)
       info->memory_error_func (status, addr, info);
       return -1;
     }
-  
+
   for (l = 2; status == 0 && l < 10; l += 2)
-    status = info->read_memory_func (addr + l, data+l, 2, info);
+    status = info->read_memory_func (addr + l, data + l, 2, info);
 
   /* Find the exact opcode/arg combo.  */
   while (q->name)
@@ -120,14 +118,14 @@ bfd_h8_disassemble (addr, info, mode)
       unsigned int len = 0;
 
       nib = q->data.nib;
-      
+
       while (1)
 	{
 	  op_type looking_for = *nib;
 	  int thisnib = data[len >> 1];
-	  
+
 	  thisnib = (len & 1) ? (thisnib & 0xf) : ((thisnib >> 4) & 0xf);
-	  
+
 	  if (looking_for < 16 && looking_for >= 0)
 	    {
 	      if (looking_for != thisnib)
@@ -137,25 +135,28 @@ bfd_h8_disassemble (addr, info, mode)
 	    {
 	      if ((int) looking_for & (int) B31)
 		{
-		  if (! (((int) thisnib & 0x8) != 0))
+		  if (!(((int) thisnib & 0x8) != 0))
 		    goto fail;
-		  
+
 		  looking_for = (op_type) ((int) looking_for & ~(int) B31);
 		}
-	      
+
 	      if ((int) looking_for & (int) B30)
 		{
 		  if (!(((int) thisnib & 0x8) == 0))
 		    goto fail;
-		  
+
 		  looking_for = (op_type) ((int) looking_for & ~(int) B30);
 		}
 
 	      if (looking_for & DBIT)
 		{
-		  if ((looking_for & 2) != (thisnib & 2))
+		  /* Exclude adds/subs by looking at bit 0 and 2, and
+                     make sure the operand size, either w or l,
+                     matches by looking at bit 1.  */
+		  if ((looking_for & 7) != (thisnib & 7))
 		    goto fail;
-		  
+
 		  abs = (thisnib & 0x8) ? 2 : 1;
 		}
 	      else if (looking_for & (REG | IND | INC | DEC))
@@ -181,18 +182,18 @@ bfd_h8_disassemble (addr, info, mode)
 	      else if (looking_for & L_32)
 		{
 		  int i = len >> 1;
-		  
+
 		  abs = (data[i] << 24)
 		    | (data[i + 1] << 16)
 		    | (data[i + 2] << 8)
-		    | (data[i+ 3]);
+		    | (data[i + 3]);
 
 		  plen = 32;
 		}
 	      else if (looking_for & L_24)
 		{
 		  int i = len >> 1;
-		  
+
 		  abs = (data[i] << 16) | (data[i + 1] << 8) | (data[i + 2]);
 		  plen = 24;
 		}
@@ -245,10 +246,10 @@ bfd_h8_disassemble (addr, info, mode)
 
 		  for (i = 0; i < q->length; i++)
 		    fprintf (stream, "%02x ", data[i]);
-		  
+
 		  for (; i < 6; i++)
 		    fprintf (stream, "   ");
-		  
+
 		  fprintf (stream, "%s\t", q->name);
 
 		  /* Gross.  Disgusting.  */
@@ -282,7 +283,7 @@ bfd_h8_disassemble (addr, info, mode)
 		    while (*args != E)
 		      {
 			int x = *args;
-			
+
 			if (hadone)
 			  fprintf (stream, ",");
 
@@ -301,7 +302,7 @@ bfd_h8_disassemble (addr, info, mode)
 			else if (x & REG)
 			  {
 			    int rn = (x & DST) ? rd : rs;
-			    
+
 			    switch (x & SIZE)
 			      {
 			      case L_8:
@@ -351,20 +352,22 @@ bfd_h8_disassemble (addr, info, mode)
 			      {
 				abs += 2;
 				fprintf (stream,
-					 ".%s%d (%x)", (short) abs > 0 ? "+" : "",
+					 ".%s%d (%x)",
+					 (short) abs > 0 ? "+" : "",
 					 (short) abs, addr + (short) abs + 2);
 			      }
 			    else
 			      {
 				fprintf (stream,
-					 ".%s%d (%x)", (char) abs > 0 ? "+" : "",
+					 ".%s%d (%x)",
+					 (char) abs > 0 ? "+" : "",
 					 (char) abs, addr + (char) abs + 2);
 			      }
 			  }
 			else if (x & DISP)
 			  {
 			    fprintf (stream, "@(0x%x:%d,%s)",
-				     abs,plen, pregnames[rdisp]);
+				     abs, plen, pregnames[rdisp]);
 			  }
 			else if (x & CCR)
 			  {
@@ -377,23 +380,23 @@ bfd_h8_disassemble (addr, info, mode)
 			else
 			  /* xgettext:c-format */
 			  fprintf (stream, _("Hmmmm %x"), x);
-			
+
 			hadone = 1;
 			args++;
 		      }
 		  }
-		  
+
 		  return q->length;
 		}
 	      else
 		/* xgettext:c-format */
 		fprintf (stream, _("Don't understand %x \n"), looking_for);
 	    }
-	  
+
 	  len++;
 	  nib++;
 	}
-      
+
     fail:
       q++;
     }
@@ -402,7 +405,6 @@ bfd_h8_disassemble (addr, info, mode)
   fprintf (stream, "%02x %02x        .word\tH'%x,H'%x",
 	   data[0], data[1],
 	   data[0], data[1]);
-  
   return 2;
 }
 
