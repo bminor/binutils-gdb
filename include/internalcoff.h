@@ -146,13 +146,8 @@ struct internal_scnhdr {
 	long		s_scnptr;	/* file ptr to raw data for section */
 	long		s_relptr;	/* file ptr to relocation	*/
 	long		s_lnnoptr;	/* file ptr to line numbers	*/
-#ifdef M88
-	unsigned long 	s_nreloc;
-	unsigned long   s_nlnno;
-#else
-	unsigned short	s_nreloc;	/* number of relocation entries	*/
-	unsigned short	s_nlnno;	/* number of line number entries*/
-#endif
+	unsigned long 	s_nreloc;	/* number of relocation entries	*/
+	unsigned long   s_nlnno;	/* number of line number entries*/
 	long		s_flags;	/* flags			*/
 #ifdef I960
 	long		s_align;	
@@ -397,7 +392,8 @@ union internal_auxent
 
 /********************** RELOCATION DIRECTIVES **********************/
 
-struct internal_reloc {
+struct internal_reloc 
+{
 	long r_vaddr;		/* Virtual address of reference */
 	long r_symndx;		/* Index into symbol table	*/
 	unsigned short r_type;	/* Relocation type		*/
@@ -406,9 +402,8 @@ struct internal_reloc {
 	unsigned char  r_size;
 #endif
 
-#if M88
 	unsigned short r_offset;
-#endif
+
 };
 
 #define R_RELBYTE	017
