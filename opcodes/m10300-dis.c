@@ -26,6 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static void disassemble PARAMS ((bfd_vma, struct disassemble_info *,
 				 unsigned long insn, unsigned int));
 
+#define HAVE_AM33 (info->mach == AM33)
+#define HAVE_AM30 (info->mach == AM30)
+
 int 
 print_insn_mn10300 (memaddr, info)
      bfd_vma memaddr;
@@ -250,7 +253,8 @@ disassemble (memaddr, info, insn, size)
       if ((op->mask & insn) == op->opcode
 	  && size == (unsigned int) mysize
 	  && (op->machine == 0
-	      || op->machine == info->mach))
+	      || (op->machine == AM33 && HAVE_AM33)
+	      || (op->machine == AM30 && HAVE_AM30)))
 	{
 	  const unsigned char *opindex_ptr;
 	  unsigned int nocomma;
