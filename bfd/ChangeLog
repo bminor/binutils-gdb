@@ -1,3 +1,13 @@
+Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Rebuild dependencies.
+	(BFD32_BACKENDS): Add versados.o.
+	(CFILES): Add pe-i386.c, pei-i386.c, and versados.c.
+start-sanitize-arc
+	(elf32-arc.o): New target.  This should be removed when
+	elf32-arc.c can be added to CFILES.
+end-sanitize-arc
+
 Sun Jul  2 17:49:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Cast base_file
