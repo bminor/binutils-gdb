@@ -64,6 +64,7 @@ mmalloc
 move-if-change
 newlib
 patch
+prms
 rcs
 readline
 send_pr
