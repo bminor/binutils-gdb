@@ -244,7 +244,7 @@ SECTIONS
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
-  .eh_frame : { *(.eh_frame) }
+  .eh_frame : { KEEP (*(.eh_frame)) }
   .gcc_except_table : { *(.gcc_except_table) }
   ${WRITABLE_RODATA+${RODATA}}
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
