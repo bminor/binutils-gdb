@@ -1,3 +1,9 @@
+Thu Sep 17 06:40:46 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* bout.c (b_out_slurp_reloc_table): Clear howto field before
+	filling in reloc, in case immediately following code doesn't set
+	it.
+
 Fri Sep 11 15:37:06 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffcode.h (coff_renumber_symbols): set the last renumbered
