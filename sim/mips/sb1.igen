@@ -22,6 +22,20 @@
 // 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
+// Helper:
+//
+// Check that the SB-1 extension instruction can currently be used, and
+// signal a ReservedInstruction exception if not.
+//
+
+:function:::void:check_sbx:instruction_word insn
+*sb1:
+{
+  if ((SR & status_SBX) == 0)
+    SignalException(ReservedInstruction, insn);
+}
+
+
 //  MDMX ASE Instructions
 //  ---------------------
 //
@@ -152,13 +166,9 @@
 *sb1:
 {
   check_mdmx (SD_, instruction_0);
-  if (SR & status_SBX)
-    {
-      check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
-      StoreFPR(VD,fmt_mdmx,MX_AbsDiff(ValueFPR(VS,fmt_mdmx),VT,FMTSEL));
-    }
-  else
-    SignalException(ReservedInstruction, instruction_0);
+  check_sbx (SD_, instruction_0);
+  check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
+  StoreFPR(VD,fmt_mdmx,MX_AbsDiff(ValueFPR(VS,fmt_mdmx),VT,FMTSEL));
 }
 
 
@@ -167,13 +177,9 @@
 *sb1:
 {
   check_mdmx (SD_, instruction_0);
-  if (SR & status_SBX)
-    {
-      check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
-      MX_AbsDiffC(ValueFPR(VS,fmt_mdmx),VT,FMTSEL);
-    }
-  else
-    SignalException(ReservedInstruction, instruction_0);
+  check_sbx (SD_, instruction_0);
+  check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
+  MX_AbsDiffC(ValueFPR(VS,fmt_mdmx),VT,FMTSEL);
 }
 
 
@@ -182,11 +188,7 @@
 *sb1:
 {
   check_mdmx (SD_, instruction_0);
-  if (SR & status_SBX)
-    {
-      check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
-      StoreFPR(VD,fmt_mdmx,MX_Avg(ValueFPR(VS,fmt_mdmx),VT,FMTSEL));
-    }
-  else
-    SignalException(ReservedInstruction, instruction_0);
+  check_sbx (SD_, instruction_0);
+  check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
+  StoreFPR(VD,fmt_mdmx,MX_Avg(ValueFPR(VS,fmt_mdmx),VT,FMTSEL));
 }
