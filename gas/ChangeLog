@@ -1,3 +1,16 @@
+Fri Nov  7 21:29:32 1997  Ken Raeburn  <raeburn@cygnus.com>
+start-sanitize-vr5400
+
+	* config/tc-mips.c (mips_ip): Added cases for "e", "%", and "P"
+	operand types.
+	(hilo_interlocks): VR5400 has interlocks.
+	(md_begin): Expect mips64vr5400, not mips64r5400.
+end-sanitize-vr5400
+
+	* config/tc-mips.c (mips_ip): In default case, call as_bad
+	instead of fprintf, to get "assembler messages:" message output
+	before instead of after.
+
 Fri Nov  7 10:36:22 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* frags.h: Handle multiple inclusion.

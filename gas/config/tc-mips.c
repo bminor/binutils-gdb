@@ -229,6 +229,9 @@ static int mips_3900 = -1;
                          /* start-sanitize-tx49 */                  \
                          || mips_cpu == 4900                        \
                          /* end-sanitize-tx49 */                    \
+			 /* start-sanitize-vr5400 */		    \
+			 || mips_cpu == 5400			    \
+			 /* end-sanitize-vr5400 */		    \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
@@ -880,8 +883,8 @@ md_begin ()
 
       /* start-sanitize-vr5400 */
       else if (strcmp (cpu, "r5400") == 0
-	       || strcmp (cpu, "mips64r5400") == 0)
-        mips_cpu = 5400;
+	       || strcmp (cpu, "mips64vr5400") == 0)
+	mips_cpu = 5400;
       /* end-sanitize-vr5400 */
 
       /* start-sanitize-r5900 */
@@ -6945,6 +6948,9 @@ mips_ip (str, ip)
 	    case 'G':		/* coprocessor destination register */
 	    case 'x':		/* ignore register name */
 	    case 'z':		/* must be zero register */
+	      /* start-sanitize-vr5400 */
+	    case 'P':		/* performance register */
+	      /* end-sanitize-vr5400 */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -7552,8 +7558,38 @@ mips_ip (str, ip)
 		ip->insn_opcode |= regno << OP_SH_CCC;
               continue;
 
+	      /* start-sanitize-vr5400 */
+	    case 'e':		/* must be at least one digit */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned long) imm_expr.X_add_number > (unsigned long) OP_MASK_VECBYTE)
+		{
+		  as_bad ("bad byte vector index (%ld)",
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number = imm_expr.X_add_number;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_VECBYTE;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '%':
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned long) imm_expr.X_add_number > (unsigned long) OP_MASK_VECALIGN)
+		{
+		  as_bad ("bad byte vector index (%ld)",
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number = imm_expr.X_add_number;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_VECALIGN;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	      /* end-sanitize-vr5400 */
 	    default:
-	      fprintf (stderr, "bad char = '%c'\n", *args);
+	      as_bad ("bad char = '%c'\n", *args);
 	      internalError ();
 	    }
 	  break;
@@ -8722,7 +8758,13 @@ md_parse_option (c, arg)
 		break;
 	      }
 
-	    if (sv && mips_cpu != 4300 && mips_cpu != 4100 && mips_cpu != 5000)
+	    if (sv
+		&& (mips_cpu != 4300
+		    && mips_cpu != 4100
+		    /* start-sanitize-vr5400 */
+		    && mips_cpu != 5400
+		    /* end-sanitize-vr5400 */
+		    && mips_cpu != 5000))
 	      {
 		as_bad ("ignoring invalid leading 'v' in -mcpu=%s switch", arg);
 		return 0;
