@@ -185,7 +185,7 @@ static int
 readchar()
 {
   /* FIXME: Do we really want to be reading without a timeout?  */
-  return SERIAL_READCHAR (nindy_serial, -1);
+  return serial_readchar (nindy_serial, -1);
 }
 
 /******************************************************************************
@@ -222,10 +222,10 @@ getpkt (buf)
 		fprintf(stderr,
 			"Bad checksum (recv=0x%02x; calc=0x%02x); retrying\r\n",
 								recv, csum );
-		SERIAL_WRITE (nindy_serial, "-", 1);
+		serial_write (nindy_serial, "-", 1);
 	}
 
-	SERIAL_WRITE (nindy_serial, "+", 1);
+	serial_write (nindy_serial, "+", 1);
 }
 
 
@@ -257,12 +257,12 @@ putpkt( cmd )
 	resend = 1;
 	do {
 		if ( resend ) {
-		  SERIAL_WRITE ( nindy_serial, "\020", 1 );
-		  SERIAL_WRITE( nindy_serial, cmd, strlen(cmd) );
-		  SERIAL_WRITE( nindy_serial, checksum, strlen(checksum) );
+		  serial_write ( nindy_serial, "\020", 1 );
+		  serial_write( nindy_serial, cmd, strlen(cmd) );
+		  serial_write( nindy_serial, checksum, strlen(checksum) );
 		}
 		/* FIXME: do we really want to be reading without timeout?  */
-		ack = SERIAL_READCHAR (nindy_serial, -1);
+		ack = serial_readchar (nindy_serial, -1);
 		if (ack < 0)
 		  {
 		    fprintf (stderr, "error reading from serial port\n");

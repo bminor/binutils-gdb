@@ -1,5 +1,57 @@
 2001-07-14  Andrew Cagney  <ac131313@redhat.com>
 
+	* serial.h (SERIAL_ASYNC): Delete.
+	(DEPRECATED_SERIAL_FD): Delete.
+	(SERIAL_DEBUG): Delete.
+	(SERIAL_DEBUG_P): Delete.
+	(SERIAL_DRAIN_OUTPUT): Delete.
+	(SERIAL_FLUSH_OUTPUT): Delete.
+	(SERIAL_FLUSH_INPUT): Delete.
+	(SERIAL_SEND_BREAK): Delete.
+	(SERIAL_RAW): Delete.
+	(SERIAL_GET_TTY_STATE): Delete.
+	(SERIAL_SET_TTY_STATE): Delete.
+	(SERIAL_PRINT_TTY_STATE): Delete.
+	(SERIAL_NOFLUSH_SET_TTY_STATE): Delete.
+	(SERIAL_SETBAUDRATE): Delete.
+	(SERIAL_SETSTOPBITS): Delete.
+	(SERIAL_CAN_ASYNC_P): Delete.
+	(SERIAL_IS_ASYNC_P): Delete.
+	(SERIAL_UN_FDOPEN): Delete.
+	(SERIAL_READCHAR): Delete.
+	(SERIAL_CLOSE): Delete.
+	(SERIAL_FDOPEN): Delete.
+	(SERIAL_OPEN): Delete.
+	* ser-unix.c: Update.
+	* sparclet-rom.c: Update.
+	* remote-bug.c: Update.
+	* dsrec.c: Update.
+	* xmodem.c: Update.
+	* nindy-share/ttyflush.c: Update.
+	* nindy-share/Onindy.c: Update.
+	* utils.c: Update.
+	* serial.c: Update.
+	* remote-nindy.c: Update.
+	* inflow.c: Update.
+	* sparcl-tdep.c: Update.
+	* sh3-rom.c: Update.
+	* remote.c: Update.
+	* remote-utils.c: Update.
+	* remote-st.c: Update.
+	* remote-sds.c: Update.
+	* remote-rdp.c: Update.
+	* remote-os9k.c: Update.
+	* remote-nrom.c: Update.
+	* remote-mips.c: Update.
+	* remote-es.c: Update.
+	* remote-e7000.c: Update.
+	* remote-array.c: Update.
+	* ocd.c: Update.
+	* nindy-share/nindy.c: Update.
+	* monitor.c: Update.
+	
+2001-07-14  Andrew Cagney  <ac131313@redhat.com>
+
 	* mn10200-tdep.c: Replace value_ptr with ``struct value *''.
 	* mcore-tdep.c: Ditto.
 	* sparc-tdep.c: Ditto.

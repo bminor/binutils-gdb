@@ -311,41 +311,41 @@ es1800_open (char *name, int from_tty)
 
 #ifndef DEBUG_STDIN
 
-  es1800_desc = SERIAL_OPEN (name);
+  es1800_desc = serial_open (name);
   if (es1800_desc == NULL)
     {
       perror_with_name (name);
     }
   savename = savestring (name, strlen (name));
 
-  es1800_saved_ttystate = SERIAL_GET_TTY_STATE (es1800_desc);
+  es1800_saved_ttystate = serial_get_tty_state (es1800_desc);
 
-  if ((fcflag = fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_GETFL, 0)) == -1)
+  if ((fcflag = fcntl (deprecated_serial_fd (es1800_desc), F_GETFL, 0)) == -1)
     {
       perror_with_name ("fcntl serial");
     }
   es1800_fc_save = fcflag;
 
   fcflag = (fcflag & (FREAD | FWRITE));		/* mask out any funny stuff */
-  if (fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, fcflag) == -1)
+  if (fcntl (deprecated_serial_fd (es1800_desc), F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
     }
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (es1800_desc, baud_rate))
+      if (serial_setbaudrate (es1800_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (es1800_desc);
+	  serial_close (es1800_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (es1800_desc);
+  serial_raw (es1800_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (es1800_desc);
+  serial_flush_input (es1800_desc);
 
 #endif /* DEBUG_STDIN */
 
@@ -427,10 +427,10 @@ es1800_close (int quitting)
   if (es1800_desc != NULL)
     {
       printf ("\nClosing connection to emulator...\n");
-      if (SERIAL_SET_TTY_STATE (es1800_desc, es1800_saved_ttystate) < 0)
+      if (serial_set_tty_state (es1800_desc, es1800_saved_ttystate) < 0)
 	print_sys_errmsg ("warning: unable to restore tty state", errno);
-      fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, es1800_fc_save);
-      SERIAL_CLOSE (es1800_desc);
+      fcntl (deprecated_serial_fd (es1800_desc), F_SETFL, es1800_fc_save);
+      serial_close (es1800_desc);
       es1800_desc = NULL;
     }
   if (savename != NULL)
@@ -1549,7 +1549,7 @@ readchar (void)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (es1800_desc, timeout);
+  ch = serial_readchar (es1800_desc, timeout);
 
   /* FIXME: doing an error() here will probably cause trouble, at least if from
      es1800_wait.  */
@@ -1579,7 +1579,7 @@ static void
 send_with_reply (char *string, char *buf, int len)
 {
   send (string);
-  SERIAL_WRITE (es1800_desc, "\r", 1);
+  serial_write (es1800_desc, "\r", 1);
 
 #ifndef DEBUG_STDIN
   expect (string, 1);
@@ -1598,7 +1598,7 @@ static void
 send_command (char *string)
 {
   send (string);
-  SERIAL_WRITE (es1800_desc, "\r", 1);
+  serial_write (es1800_desc, "\r", 1);
 
 #ifndef DEBUG_STDIN
   expect (string, 0);
@@ -1617,7 +1617,7 @@ send (char *string)
     {
       fprintf (stderr, "Sending: %s\n", string);
     }
-  SERIAL_WRITE (es1800_desc, string, strlen (string));
+  serial_write (es1800_desc, string, strlen (string));
 }
 
 
@@ -1785,7 +1785,7 @@ es1800_transparent (char *args, int from_tty)
       perror_with_name ("ioctl console");
     }
 
-  if ((fcflag = fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_GETFL, 0)) == -1)
+  if ((fcflag = fcntl (deprecated_serial_fd (es1800_desc), F_GETFL, 0)) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -1793,7 +1793,7 @@ es1800_transparent (char *args, int from_tty)
   es1800_fc_save = fcflag;
   fcflag = fcflag | FNDELAY;
 
-  if (fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, fcflag) == -1)
+  if (fcntl (deprecated_serial_fd (es1800_desc), F_SETFL, fcflag) == -1)
     {
       perror_with_name ("fcntl serial");
     }
@@ -1811,7 +1811,7 @@ es1800_transparent (char *args, int from_tty)
 	    {
 	      es1800_buf[es1800_cnt++] = inputbuf[i++];
 	    }
-	  if ((cc = SERIAL_WRITE (es1800_desc, es1800_buf, es1800_cnt)) == -1)
+	  if ((cc = serial_write (es1800_desc, es1800_buf, es1800_cnt)) == -1)
 	    {
 	      perror_with_name ("FEL! write:");
 	    }
@@ -1829,7 +1829,7 @@ es1800_transparent (char *args, int from_tty)
 	  perror_with_name ("FEL! read:");
 	}
 
-      cc = read (DEPRECATED_SERIAL_FD (es1800_desc), inputbuf, inputcnt);
+      cc = read (deprecated_serial_fd (es1800_desc), inputbuf, inputcnt);
       if (cc != -1)
 	{
 	  for (i = 0; i < cc;)
@@ -1868,7 +1868,7 @@ es1800_transparent (char *args, int from_tty)
 
   close (console);
 
-  if (fcntl (DEPRECATED_SERIAL_FD (es1800_desc), F_SETFL, es1800_fc_save) == -1)
+  if (fcntl (deprecated_serial_fd (es1800_desc), F_SETFL, es1800_fc_save) == -1)
     {
       perror_with_name ("FEL! fcntl");
     }

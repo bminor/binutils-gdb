@@ -455,11 +455,11 @@ static void
 close_ports (void)
 {
   mips_is_open = 0;
-  SERIAL_CLOSE (mips_desc);
+  serial_close (mips_desc);
 
   if (udp_in_use)
     {
-      SERIAL_CLOSE (udp_desc);
+      serial_close (udp_desc);
       udp_in_use = 0;
     }
   tftp_in_use = 0;
@@ -551,10 +551,10 @@ mips_expect_timeout (const char *string, int timeout)
     {
       int c;
 
-/* Must use SERIAL_READCHAR here cuz mips_readchar would get confused if we
-   were waiting for the mips_monitor_prompt... */
+      /* Must use serial_readchar() here cuz mips_readchar would get
+	 confused if we were waiting for the mips_monitor_prompt... */
 
-      c = SERIAL_READCHAR (mips_desc, timeout);
+      c = serial_readchar (mips_desc, timeout);
 
       if (c == SERIAL_TIMEOUT)
 	{
@@ -607,7 +607,7 @@ mips_getstring (char *string, int n)
   immediate_quit++;
   while (n > 0)
     {
-      c = SERIAL_READCHAR (mips_desc, remote_timeout);
+      c = serial_readchar (mips_desc, remote_timeout);
 
       if (c == SERIAL_TIMEOUT)
 	{
@@ -626,13 +626,13 @@ mips_getstring (char *string, int n)
 }
 
 /* Read a character from the remote, aborting on error.  Returns
-   SERIAL_TIMEOUT on timeout (since that's what SERIAL_READCHAR
-   returns).  FIXME: If we see the string mips_monitor_prompt from
-   the board, then we are debugging on the main console port, and we
-   have somehow dropped out of remote debugging mode.  In this case,
-   we automatically go back in to remote debugging mode.  This is a
-   hack, put in because I can't find any way for a program running on
-   the remote board to terminate without also ending remote debugging
+   SERIAL_TIMEOUT on timeout (since that's what serial_readchar()
+   returns).  FIXME: If we see the string mips_monitor_prompt from the
+   board, then we are debugging on the main console port, and we have
+   somehow dropped out of remote debugging mode.  In this case, we
+   automatically go back in to remote debugging mode.  This is a hack,
+   put in because I can't find any way for a program running on the
+   remote board to terminate without also ending remote debugging
    mode.  I assume users won't have any trouble with this; for one
    thing, the IDT documentation generally assumes that the remote
    debugging port is not the console port.  This is, however, very
@@ -656,7 +656,7 @@ mips_readchar (int timeout)
 
   if (state == mips_monitor_prompt_len)
     timeout = 1;
-  ch = SERIAL_READCHAR (mips_desc, timeout);
+  ch = serial_readchar (mips_desc, timeout);
 
   if (ch == SERIAL_TIMEOUT && timeout == -1)	/* Watchdog went off */
     {
@@ -882,7 +882,7 @@ mips_send_packet (const char *s, int get_ack)
 	  fprintf_unfiltered (gdb_stdlog, "Writing \"%s\"\n", packet + 1);
 	}
 
-      if (SERIAL_WRITE (mips_desc, packet,
+      if (serial_write (mips_desc, packet,
 			HDR_LENGTH + len + TRLR_LENGTH) != 0)
 	mips_error ("write to target failed: %s", safe_strerror (errno));
 
@@ -1142,7 +1142,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
 			     ack + 1);
 	}
 
-      if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
+      if (serial_write (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
 	{
 	  if (throw_error)
 	    mips_error ("write to target failed: %s", safe_strerror (errno));
@@ -1182,7 +1182,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
 			 ack + 1);
     }
 
-  if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
+  if (serial_write (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
     {
       if (throw_error)
 	mips_error ("write to target failed: %s", safe_strerror (errno));
@@ -1295,7 +1295,7 @@ mips_exit_cleanups (PTR arg)
 static void
 mips_send_command (const char *cmd, int prompt)
 {
-  SERIAL_WRITE (mips_desc, cmd, strlen (cmd));
+  serial_write (mips_desc, cmd, strlen (cmd));
   mips_expect (cmd);
   mips_expect ("\n");
   if (prompt)
@@ -1316,7 +1316,7 @@ mips_enter_debug (void)
     mips_send_command ("db tty0\r", 0);
 
   sleep (1);
-  SERIAL_WRITE (mips_desc, "\r", sizeof "\r" - 1);
+  serial_write (mips_desc, "\r", sizeof "\r" - 1);
 
   /* We don't need to absorb any spurious characters here, since the
      mips_receive_header will eat up a reasonable number of characters
@@ -1398,14 +1398,14 @@ mips_initialize (void)
       switch (j)
 	{
 	case 0:		/* First, try sending a CR */
-	  SERIAL_FLUSH_INPUT (mips_desc);
-	  SERIAL_WRITE (mips_desc, "\r", 1);
+	  serial_flush_input (mips_desc);
+	  serial_write (mips_desc, "\r", 1);
 	  break;
 	case 1:		/* First, try sending a break */
-	  SERIAL_SEND_BREAK (mips_desc);
+	  serial_send_break (mips_desc);
 	  break;
 	case 2:		/* Then, try a ^C */
-	  SERIAL_WRITE (mips_desc, "\003", 1);
+	  serial_write (mips_desc, "\003", 1);
 	  break;
 	case 3:		/* Then, try escaping from download */
 	  {
@@ -1419,9 +1419,9 @@ mips_initialize (void)
 		   packets. In-case we were downloading a large packet
 		   we flush the output buffer before inserting a
 		   termination sequence. */
-		SERIAL_FLUSH_OUTPUT (mips_desc);
+		serial_flush_output (mips_desc);
 		sprintf (tbuff, "\r/E/E\r");
-		SERIAL_WRITE (mips_desc, tbuff, 6);
+		serial_write (mips_desc, tbuff, 6);
 	      }
 	    else
 	      {
@@ -1441,9 +1441,9 @@ mips_initialize (void)
 
 		for (i = 1; i <= 33; i++)
 		  {
-		    SERIAL_WRITE (mips_desc, srec, 8);
+		    serial_write (mips_desc, srec, 8);
 
-		    if (SERIAL_READCHAR (mips_desc, 0) >= 0)
+		    if (serial_readchar (mips_desc, 0) >= 0)
 		      break;	/* Break immediatly if we get something from
 				   the board. */
 		  }
@@ -1539,20 +1539,20 @@ device is attached to the target board (e.g., /dev/ttya).\n"
     unpush_target (current_ops);
 
   /* Open and initialize the serial port.  */
-  mips_desc = SERIAL_OPEN (serial_port_name);
+  mips_desc = serial_open (serial_port_name);
   if (mips_desc == NULL)
     perror_with_name (serial_port_name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (mips_desc, baud_rate))
+      if (serial_setbaudrate (mips_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (mips_desc);
+	  serial_close (mips_desc);
 	  perror_with_name (serial_port_name);
 	}
     }
 
-  SERIAL_RAW (mips_desc);
+  serial_raw (mips_desc);
 
   /* Open and initialize the optional download port.  If it is in the form
      hostname#portnumber, it's a UDP socket.  If it is in the form
@@ -1562,7 +1562,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
     {
       if (strchr (remote_name, '#'))
 	{
-	  udp_desc = SERIAL_OPEN (remote_name);
+	  udp_desc = serial_open (remote_name);
 	  if (!udp_desc)
 	    perror_with_name ("Unable to open UDP port");
 	  udp_in_use = 1;
@@ -2194,7 +2194,7 @@ Give up (and stop debugging it)? "))
   if (remote_debug > 0)
     printf_unfiltered ("Sending break\n");
 
-  SERIAL_SEND_BREAK (mips_desc);
+  serial_send_break (mips_desc);
 
 #if 0
   if (mips_is_open)
@@ -2203,7 +2203,7 @@ Give up (and stop debugging it)? "))
 
       /* Send a ^C.  */
       cc = '\003';
-      SERIAL_WRITE (mips_desc, &cc, 1);
+      serial_write (mips_desc, &cc, 1);
       sleep (1);
       target_mourn_inferior ();
     }
@@ -2773,7 +2773,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
     {
       int ch;
 
-      SERIAL_WRITE (mips_desc, srec, len);
+      serial_write (mips_desc, srec, len);
 
       ch = mips_readchar (remote_timeout);
 
@@ -2866,7 +2866,7 @@ mips_load_srec (char *args)
 
   send_srec (srec, reclen, abfd->start_address);
 
-  SERIAL_FLUSH_INPUT (mips_desc);
+  serial_flush_input (mips_desc);
 }
 
 /*
@@ -3132,7 +3132,7 @@ pmon_check_ack (char *mesg)
 
   if (!tftp_in_use)
     {
-      c = SERIAL_READCHAR (udp_in_use ? udp_desc : mips_desc,
+      c = serial_readchar (udp_in_use ? udp_desc : mips_desc,
 			   remote_timeout);
       if ((c == SERIAL_TIMEOUT) || (c != 0x06))
 	{
@@ -3266,7 +3266,7 @@ pmon_download (char *buffer, int length)
   if (tftp_in_use)
     fwrite (buffer, 1, length, tftp_file);
   else
-    SERIAL_WRITE (udp_in_use ? udp_desc : mips_desc, buffer, length);
+    serial_write (udp_in_use ? udp_desc : mips_desc, buffer, length);
 }
 
 static void
@@ -3404,7 +3404,7 @@ pmon_load_fast (char *file)
 
   if (finished)
     {				/* Ignore the termination message: */
-      SERIAL_FLUSH_INPUT (udp_in_use ? udp_desc : mips_desc);
+      serial_flush_input (udp_in_use ? udp_desc : mips_desc);
     }
   else
     {				/* Deal with termination message: */

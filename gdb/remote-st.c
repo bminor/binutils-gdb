@@ -76,8 +76,8 @@ printf_stdebug (char *pattern,...)
   vsprintf (buf, pattern, args);
   va_end (args);
 
-  if (SERIAL_WRITE (st2000_desc, buf, strlen (buf)))
-    fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  if (serial_write (st2000_desc, buf, strlen (buf)))
+    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
 }
 
 /* Read a character from the remote system, doing all the fancy timeout
@@ -88,7 +88,7 @@ readchar (int timeout)
 {
   int c;
 
-  c = SERIAL_READCHAR (st2000_desc, timeout);
+  c = serial_readchar (st2000_desc, timeout);
 
 #ifdef LOG_FILE
   putc (c & 0x7f, log_file);
@@ -280,18 +280,18 @@ or target st2000 <host> <port>\n");
 
   st2000_close (0);
 
-  st2000_desc = SERIAL_OPEN (dev_name);
+  st2000_desc = serial_open (dev_name);
 
   if (!st2000_desc)
     perror_with_name (dev_name);
 
-  if (SERIAL_SETBAUDRATE (st2000_desc, baudrate))
+  if (serial_setbaudrate (st2000_desc, baudrate))
     {
-      SERIAL_CLOSE (dev_name);
+      serial_close (dev_name);
       perror_with_name (dev_name);
     }
 
-  SERIAL_RAW (st2000_desc);
+  serial_raw (st2000_desc);
 
   push_target (&st2000_ops);
 
@@ -316,7 +316,7 @@ or target st2000 <host> <port>\n");
 static void
 st2000_close (int quitting)
 {
-  SERIAL_CLOSE (st2000_desc);
+  serial_close (st2000_desc);
 
 #if defined (LOG_FILE)
   if (log_file)
@@ -664,7 +664,7 @@ static void
 cleanup_tty (void)
 {
   printf ("\r\n[Exiting connect mode]\r\n");
-/*  SERIAL_RESTORE(0, &ttystate); */
+/*  serial_restore(0, &ttystate); */
 }
 
 #if 0
@@ -699,7 +699,7 @@ connect_command (char *args, int fromtty)
       do
 	{
 	  FD_SET (0, &readfds);
-	  FD_SET (DEPRECATED_SERIAL_FD (st2000_desc), &readfds);
+	  FD_SET (deprecated_serial_fd (st2000_desc), &readfds);
 	  numfds = select (sizeof (readfds) * 8, &readfds, 0, 0, 0);
 	}
       while (numfds == 0);
@@ -734,7 +734,7 @@ connect_command (char *args, int fromtty)
 	    }
 	}
 
-      if (FD_ISSET (DEPRECATED_SERIAL_FD (st2000_desc), &readfds))
+      if (FD_ISSET (deprecated_serial_fd (st2000_desc), &readfds))
 	{
 	  while (1)
 	    {

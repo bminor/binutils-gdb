@@ -842,8 +842,8 @@ quit (void)
   gdb_flush (gdb_stderr);
 
   /* 3.  The system-level buffer.  */
-  SERIAL_DRAIN_OUTPUT (gdb_stdout_serial);
-  SERIAL_UN_FDOPEN (gdb_stdout_serial);
+  serial_drain_output (gdb_stdout_serial);
+  serial_un_fdopen (gdb_stdout_serial);
 
   annotate_error_begin ();
 

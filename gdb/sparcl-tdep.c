@@ -264,22 +264,22 @@ open_tty (char *name)
 {
   struct serial *desc;
 
-  desc = SERIAL_OPEN (name);
+  desc = serial_open (name);
   if (!desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (desc, baud_rate))
+      if (serial_setbaudrate (desc, baud_rate))
 	{
-	  SERIAL_CLOSE (desc);
+	  serial_close (desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (desc);
+  serial_raw (desc);
 
-  SERIAL_FLUSH_INPUT (desc);
+  serial_flush_input (desc);
 
   return desc;
 }
@@ -292,7 +292,7 @@ readchar (struct serial *desc, int timeout)
   int ch;
   char s[10];
 
-  ch = SERIAL_READCHAR (desc, timeout);
+  ch = serial_readchar (desc, timeout);
 
   switch (ch)
     {
@@ -317,7 +317,7 @@ debug_serial_write (struct serial *desc, char *buf, int len)
 {
   char s[10];
 
-  SERIAL_WRITE (desc, buf, len);
+  serial_write (desc, buf, len);
   if (remote_debug > 0)
     {
       while (len-- > 0)
@@ -343,7 +343,7 @@ close_tty (void *ignore)
   if (!remote_desc)
     return;
 
-  SERIAL_CLOSE (remote_desc);
+  serial_close (remote_desc);
 
   remote_desc = NULL;
 }

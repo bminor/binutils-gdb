@@ -163,7 +163,7 @@ void
 ocd_close (int quitting)
 {
   if (ocd_desc)
-    SERIAL_CLOSE (ocd_desc);
+    serial_close (ocd_desc);
   ocd_desc = NULL;
 }
 
@@ -183,7 +183,7 @@ ocd_start_remote (PTR dummy)
 
   immediate_quit++;		/* Allow user to interrupt it */
 
-  SERIAL_SEND_BREAK (ocd_desc);	/* Wake up the wiggler */
+  serial_send_break (ocd_desc);	/* Wake up the wiggler */
 
   speed = 80;			/* Divide clock by 4000 */
 
@@ -292,7 +292,7 @@ device the OCD device is attached to (e.g. /dev/ttya).");
 
   if (strncmp (name, "wiggler", 7) == 0)
     {
-      ocd_desc = SERIAL_OPEN ("ocd");
+      ocd_desc = serial_open ("ocd");
       if (!ocd_desc)
 	perror_with_name (name);
 
@@ -309,25 +309,25 @@ device the OCD device is attached to (e.g. /dev/ttya).");
   else
     /* not using Wigglers.dll */
     {
-      ocd_desc = SERIAL_OPEN (name);
+      ocd_desc = serial_open (name);
       if (!ocd_desc)
 	perror_with_name (name);
     }
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (ocd_desc, baud_rate))
+      if (serial_setbaudrate (ocd_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (ocd_desc);
+	  serial_close (ocd_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (ocd_desc);
+  serial_raw (ocd_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (ocd_desc);
+  serial_flush_input (ocd_desc);
 
   if (from_tty)
     {
@@ -789,7 +789,7 @@ readchar (int timeout)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (ocd_desc, timeout);
+  ch = serial_readchar (ocd_desc, timeout);
 
   switch (ch)
     {
@@ -843,7 +843,7 @@ reset_packet (void)
 static void
 output_packet (void)
 {
-  if (SERIAL_WRITE (ocd_desc, pkt, pktp - pkt))
+  if (serial_write (ocd_desc, pkt, pktp - pkt))
     perror_with_name ("output_packet: write failed");
 
   reset_packet ();
@@ -941,7 +941,7 @@ ocd_put_packet (unsigned char *buf, int len)
     }
 
   *packet_ptr++ = -checksum;
-  if (SERIAL_WRITE (ocd_desc, packet, packet_ptr - packet))
+  if (serial_write (ocd_desc, packet, packet_ptr - packet))
     perror_with_name ("output_packet: write failed");
 }
 #endif

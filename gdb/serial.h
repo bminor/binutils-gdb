@@ -35,22 +35,18 @@ struct serial;
    on failure. */
 
 extern struct serial *serial_open (const char *name);
-#define SERIAL_OPEN(NAME) serial_open(NAME)
 
 /* Open a new serial stream using a file handle.  */
 
 extern struct serial *serial_fdopen (const int fd);
-#define SERIAL_FDOPEN(FD) serial_fdopen(FD)
 
 /* Push out all buffers, close the device and destroy SCB. */
 
 extern void serial_close (struct serial *scb);
-#define SERIAL_CLOSE(SERIAL_T) serial_close ((SERIAL_T))
 
 /* Push out all buffers and destroy SCB without closing the device.  */
 
 extern void serial_un_fdopen (struct serial *scb);
-#define SERIAL_UN_FDOPEN(SERIAL_T) serial_un_fdopen ((SERIAL_T))
 
 /* Read one char from the serial device with TIMEOUT seconds to wait
    or -1 to wait forever.  Use timeout of 0 to effect a poll.
@@ -69,13 +65,11 @@ enum serial_rc {
 };
 
 extern int serial_readchar (struct serial *scb, int timeout);
-#define SERIAL_READCHAR(SERIAL_T, TIMEOUT) serial_readchar ((SERIAL_T), (TIMEOUT))
 
 /* Write LEN chars from STRING to the port SCB.  Returns 0 for
    success, non-zero for failure.  */
 
 extern int serial_write (struct serial *scb, const char *str, int len);
-#define SERIAL_WRITE(SERIAL_T, STRING,LEN)  serial_write (SERIAL_T, STRING, LEN)
 
 /* Write a printf style string onto the serial port. */
 
@@ -84,35 +78,29 @@ extern void serial_printf (struct serial *desc, const char *,...) ATTR_FORMAT (p
 /* Allow pending output to drain. */
 
 extern int serial_drain_output (struct serial *);
-#define SERIAL_DRAIN_OUTPUT(SERIAL_T) serial_drain_output ((SERIAL_T))
 
 /* Flush (discard) pending output.  Might also flush input (if this
    system can't flush only output).  */
 
 extern int serial_flush_output (struct serial *);
-#define SERIAL_FLUSH_OUTPUT(SERIAL_T) serial_flush_output ((SERIAL_T))
 
 /* Flush pending input.  Might also flush output (if this system can't
    flush only input).  */
 
 extern int serial_flush_input (struct serial *);
-#define SERIAL_FLUSH_INPUT(SERIAL_T) serial_flush_input ((SERIAL_T))
 
 /* Send a break between 0.25 and 0.5 seconds long.  */
 
 extern int serial_send_break (struct serial *scb);
-#define SERIAL_SEND_BREAK(SERIAL_T) serial_send_break (SERIAL_T)
 
 /* Turn the port into raw mode. */
 
 extern void serial_raw (struct serial *scb);
-#define SERIAL_RAW(SERIAL_T) serial_raw ((SERIAL_T))
 
 /* Return a pointer to a newly malloc'd ttystate containing the state
    of the tty.  */
 
 extern serial_ttystate serial_get_tty_state (struct serial *scb);
-#define SERIAL_GET_TTY_STATE(SERIAL_T) serial_get_tty_state ((SERIAL_T))
 
 /* Set the state of the tty to TTYSTATE.  The change is immediate.
    When changing to or from raw mode, input might be discarded.
@@ -120,30 +108,25 @@ extern serial_ttystate serial_get_tty_state (struct serial *scb);
    errno contains the error).  */
 
 extern int serial_set_tty_state (struct serial *scb, serial_ttystate ttystate);
-#define SERIAL_SET_TTY_STATE(SERIAL_T, TTYSTATE) serial_set_tty_state ((SERIAL_T), (TTYSTATE))
 
 /* printf_filtered a user-comprehensible description of ttystate on
    the specified STREAM. FIXME: At present this sends output to the
    default stream - GDB_STDOUT. */
 
 extern void serial_print_tty_state (struct serial *scb, serial_ttystate ttystate, struct ui_file *);
-#define SERIAL_PRINT_TTY_STATE(SERIAL_T, TTYSTATE, STREAM) serial_print_tty_state ((SERIAL_T), (TTYSTATE), (STREAM))
 
 /* Set the tty state to NEW_TTYSTATE, where OLD_TTYSTATE is the
    current state (generally obtained from a recent call to
-   SERIAL_GET_TTY_STATE), but be careful not to discard any input.
+   serial_get_tty_state()), but be careful not to discard any input.
    This means that we never switch in or out of raw mode, even if
    NEW_TTYSTATE specifies a switch.  */
 
 extern int serial_noflush_set_tty_state (struct serial *scb, serial_ttystate new_ttystate, serial_ttystate old_ttystate);
-#define SERIAL_NOFLUSH_SET_TTY_STATE(SERIAL_T, NEW_TTYSTATE, OLD_TTYSTATE) \
-serial_noflush_set_tty_state ((SERIAL_T), (NEW_TTYSTATE), (OLD_TTYSTATE))
 
 /* Set the baudrate to the decimal value supplied.  Returns 0 for
    success, -1 for failure.  */
 
 extern int serial_setbaudrate (struct serial *scb, int rate);
-#define SERIAL_SETBAUDRATE(SERIAL_T, RATE) serial_setbaudrate ((SERIAL_T), (RATE))
 
 /* Set the number of stop bits to the value specified.  Returns 0 for
    success, -1 for failure.  */
@@ -153,19 +136,16 @@ extern int serial_setbaudrate (struct serial *scb, int rate);
 #define SERIAL_2_STOPBITS 3
 
 extern int serial_setstopbits (struct serial *scb, int num);
-#define SERIAL_SETSTOPBITS(SERIAL_T, NUM) serial_setstopbits ((SERIAL_T), (NUM))
 
 /* Asynchronous serial interface: */
 
 /* Can the serial device support asynchronous mode? */
 
 extern int serial_can_async_p (struct serial *scb);
-#define SERIAL_CAN_ASYNC_P(SERIAL_T) serial_can_async_p ((SERIAL_T))
 
 /* Has the serial device been put in asynchronous mode? */
 
 extern int serial_is_async_p (struct serial *scb);
-#define SERIAL_IS_ASYNC_P(SERIAL_T) serial_is_async_p ((SERIAL_T))
 
 /* For ASYNC enabled devices, register a callback and enable
    asynchronous mode.  To disable asynchronous mode, register a NULL
@@ -173,7 +153,6 @@ extern int serial_is_async_p (struct serial *scb);
 
 typedef void (serial_event_ftype) (struct serial *scb, void *context);
 extern void serial_async (struct serial *scb, serial_event_ftype *handler, void *context);
-#define SERIAL_ASYNC(SERIAL_T, HANDLER, CONTEXT) serial_async ((SERIAL_T), (HANDLER), (CONTEXT)) 
 
 /* Provide direct access to the underlying FD (if any) used to
    implement the serial device.  This interface is clearly
@@ -181,18 +160,15 @@ extern void serial_async (struct serial *scb, serial_event_ftype *handler, void 
    applicable to the current serial device. */
 
 extern int deprecated_serial_fd (struct serial *scb);
-#define DEPRECATED_SERIAL_FD(SERIAL_T) deprecated_serial_fd ((SERIAL_T))
 
 /* Trace/debug mechanism.
 
-   SERIAL_DEBUG() enables/disables internal debugging.
-   SERIAL_DEBUG_P() indicates the current debug state. */
+   serial_debug() enables/disables internal debugging.
+   serial_debug_p() indicates the current debug state. */
 
 extern void serial_debug (struct serial *scb, int debug_p);
-#define SERIAL_DEBUG(SERIAL_T, DEBUG_P) serial_debug ((SERIAL_T), (DEBUG_P))
 
 extern int serial_debug_p (struct serial *scb);
-#define SERIAL_DEBUG_P(SERIAL_T) serial_debug_p ((SERIAL_T))
 
 
 /* Details of an instance of a serial object */

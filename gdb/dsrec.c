@@ -84,7 +84,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
       srec[reclen] = '\0';
       puts_debug ("sent -->", srec, "<--");
     }
-  SERIAL_WRITE (desc, srec, reclen);
+  serial_write (desc, srec, reclen);
 
   for (s = abfd->sections; s; s = s->next)
     if (s->flags & SEC_LOAD)
@@ -121,7 +121,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 	       acknowledgement is sent back.  */
 	    do
 	      {
-		SERIAL_WRITE (desc, srec, reclen);
+		serial_write (desc, srec, reclen);
 		if (ui_load_progress_hook)
 		  if (ui_load_progress_hook (section_name, (unsigned long) i))
 		    error ("Canceled the download");
@@ -157,14 +157,14 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
       puts_debug ("sent -->", srec, "<--");
     }
 
-  SERIAL_WRITE (desc, srec, reclen);
+  serial_write (desc, srec, reclen);
 
   /* Some monitors need these to wake up properly.  (Which ones? -sts)  */
-  SERIAL_WRITE (desc, "\r\r", 2);
+  serial_write (desc, "\r\r", 2);
   if (remote_debug)
     puts_debug ("sent -->", "\r\r", "<---");
 
-  SERIAL_FLUSH_INPUT (desc);
+  serial_flush_input (desc);
 
   report_transfer_performance (data_count, start_time, end_time);
 }

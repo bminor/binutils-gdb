@@ -40,7 +40,7 @@ readchar (struct serial *desc, int timeout)
 {
   int c;
 
-  c = SERIAL_READCHAR (desc, timeout);
+  c = serial_readchar (desc, timeout);
 
   if (remote_debug > 0)
     fputc_unfiltered (c, gdb_stdlog);
@@ -217,7 +217,7 @@ xmodem_send_packet (struct serial *desc, unsigned char *packet, int len, int has
     {
       int c;
 
-      SERIAL_WRITE (desc, packet, pktlen);
+      serial_write (desc, packet, pktlen);
 
       c = readchar (desc, 3);
       switch (c)
@@ -238,7 +238,7 @@ xmodem_send_packet (struct serial *desc, unsigned char *packet, int len, int has
 	}
     }
 
-  SERIAL_WRITE (desc, "\004", 1);	/* Send an EOT */
+  serial_write (desc, "\004", 1);	/* Send an EOT */
 
   error ("xmodem_send_packet:  Excessive retries.");
 }
@@ -254,7 +254,7 @@ xmodem_finish_xfer (struct serial *desc)
     {
       int c;
 
-      SERIAL_WRITE (desc, "\004", 1);	/* Send an EOT */
+      serial_write (desc, "\004", 1);	/* Send an EOT */
 
       c = readchar (desc, 3);
       switch (c)

@@ -129,19 +129,20 @@ gdb_has_a_terminal (void)
     case no:
       return 0;
     case have_not_checked:
-      /* Get all the current tty settings (including whether we have a tty at
-         all!).  Can't do this in _initialize_inflow because SERIAL_FDOPEN
-         won't work until the serial_ops_list is initialized.  */
+      /* Get all the current tty settings (including whether we have a
+         tty at all!).  Can't do this in _initialize_inflow because
+         serial_fdopen() won't work until the serial_ops_list is
+         initialized.  */
 
 #ifdef F_GETFL
       tflags_ours = fcntl (0, F_GETFL, 0);
 #endif
 
       gdb_has_a_terminal_flag = no;
-      stdin_serial = SERIAL_FDOPEN (0);
+      stdin_serial = serial_fdopen (0);
       if (stdin_serial != NULL)
 	{
-	  our_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+	  our_ttystate = serial_get_tty_state (stdin_serial);
 
 	  if (our_ttystate != NULL)
 	    {
@@ -182,11 +183,11 @@ terminal_init_inferior_with_pgrp (int pgrp)
 {
   if (gdb_has_a_terminal ())
     {
-      /* We could just as well copy our_ttystate (if we felt like adding
-         a new function SERIAL_COPY_TTY_STATE).  */
+      /* We could just as well copy our_ttystate (if we felt like
+         adding a new function serial_copy_tty_state()).  */
       if (inferior_ttystate)
 	xfree (inferior_ttystate);
-      inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+      inferior_ttystate = serial_get_tty_state (stdin_serial);
 
 #ifdef PROCESS_GROUP_TYPE
       inferior_process_group = pgrp;
@@ -236,7 +237,7 @@ terminal_inferior (void)
       /* Because we were careful to not change in or out of raw mode in
          terminal_ours, we will not change in our out of raw mode with
          this call, so we don't flush any input.  */
-      result = SERIAL_SET_TTY_STATE (stdin_serial, inferior_ttystate);
+      result = serial_set_tty_state (stdin_serial, inferior_ttystate);
       OOPSY ("setting tty state");
 
       if (!job_control)
@@ -334,7 +335,7 @@ terminal_ours_1 (int output_only)
 
       if (inferior_ttystate)
 	xfree (inferior_ttystate);
-      inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+      inferior_ttystate = serial_get_tty_state (stdin_serial);
 #ifdef HAVE_TERMIOS
       inferior_process_group = tcgetpgrp (0);
 #endif
@@ -359,7 +360,7 @@ terminal_ours_1 (int output_only)
          though, since readline will deal with raw mode when/if it needs to.
        */
 
-      SERIAL_NOFLUSH_SET_TTY_STATE (stdin_serial, our_ttystate,
+      serial_noflush_set_tty_state (stdin_serial, our_ttystate,
 				    inferior_ttystate);
 
       if (job_control)
@@ -489,7 +490,7 @@ child_terminal_info (char *args, int from_tty)
 		   (int) inferior_process_group);
 #endif
 
-  SERIAL_PRINT_TTY_STATE (stdin_serial, inferior_ttystate, gdb_stdout);
+  serial_print_tty_state (stdin_serial, inferior_ttystate, gdb_stdout);
 }
 
 /* NEW_TTY_PREFORK is called before forking a new child process,

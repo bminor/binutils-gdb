@@ -398,7 +398,7 @@ bug_srec_write_cr (char *s)
 	  printf ("%c", *p);
 
 	do
-	  SERIAL_WRITE (sr_get_desc (), p, 1);
+	  serial_write (sr_get_desc (), p, 1);
 	while (sr_pollchar () != *p);
       }
   else

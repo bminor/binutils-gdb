@@ -1184,7 +1184,7 @@ enum {
 static void
 reschedule (struct serial *scb)
 {
-  if (SERIAL_IS_ASYNC_P (scb))
+  if (serial_is_async_p (scb))
     {
       int next_state;
       switch (scb->async_state)
@@ -1220,7 +1220,7 @@ reschedule (struct serial *scb)
 	    next_state = scb->async_state;
 	  break;
 	}
-      if (SERIAL_DEBUG_P (scb))
+      if (serial_debug_p (scb))
 	{
 	  switch (next_state)
 	    {
@@ -1308,14 +1308,14 @@ ser_unix_async (struct serial *scb,
     {
       /* Force a re-schedule. */
       scb->async_state = NOTHING_SCHEDULED;
-      if (SERIAL_DEBUG_P (scb))
+      if (serial_debug_p (scb))
 	fprintf_unfiltered (gdb_stdlog, "[fd%d->asynchronous]\n",
 			    scb->fd);
       reschedule (scb);
     }
   else
     {
-      if (SERIAL_DEBUG_P (scb))
+      if (serial_debug_p (scb))
 	fprintf_unfiltered (gdb_stdlog, "[fd%d->synchronous]\n",
 			    scb->fd);
       /* De-schedule whatever tasks are currently scheduled. */

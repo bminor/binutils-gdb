@@ -173,7 +173,7 @@ sparclet_load (struct serial *desc, char *file, int hashmark)
 
 	    bfd_get_section_contents (abfd, s, buf, i, numbytes);
 
-	    SERIAL_WRITE (desc, buf, numbytes);
+	    serial_write (desc, buf, numbytes);
 
 	    if (hashmark)
 	      {

@@ -172,24 +172,24 @@ gr_open (char *args, int from_tty, struct gr_settings *gr)
   if (sr_get_device () == NULL)
     usage (gr->ops->to_shortname, NULL);
 
-  sr_set_desc (SERIAL_OPEN (sr_get_device ()));
+  sr_set_desc (serial_open (sr_get_device ()));
   if (!sr_get_desc ())
     perror_with_name ((char *) sr_get_device ());
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (sr_get_desc (), baud_rate) != 0)
+      if (serial_setbaudrate (sr_get_desc (), baud_rate) != 0)
 	{
-	  SERIAL_CLOSE (sr_get_desc ());
+	  serial_close (sr_get_desc ());
 	  perror_with_name (sr_get_device ());
 	}
     }
 
-  SERIAL_RAW (sr_get_desc ());
+  serial_raw (sr_get_desc ());
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (sr_get_desc ());
+  serial_flush_input (sr_get_desc ());
 
   /* default retries */
   if (sr_get_retries () == 0)
@@ -222,7 +222,7 @@ sr_readchar (void)
 {
   int buf;
 
-  buf = SERIAL_READCHAR (sr_get_desc (), sr_get_timeout ());
+  buf = serial_readchar (sr_get_desc (), sr_get_timeout ());
 
   if (buf == SERIAL_TIMEOUT)
     error ("Timeout reading from remote system.");
@@ -238,7 +238,7 @@ sr_pollchar (void)
 {
   int buf;
 
-  buf = SERIAL_READCHAR (sr_get_desc (), 0);
+  buf = serial_readchar (sr_get_desc (), 0);
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
   if (sr_get_debug () > 0)
@@ -281,7 +281,7 @@ sr_write (char *a, int l)
 {
   int i;
 
-  if (SERIAL_WRITE (sr_get_desc (), a, l) != 0)
+  if (serial_write (sr_get_desc (), a, l) != 0)
     perror_with_name ("sr_write: Error writing to remote");
 
   if (sr_get_debug () > 0)
@@ -398,7 +398,7 @@ gr_close (int quitting)
 
   if (sr_is_open ())
     {
-      SERIAL_CLOSE (sr_get_desc ());
+      serial_close (sr_get_desc ());
       sr_set_desc (NULL);
     }
 

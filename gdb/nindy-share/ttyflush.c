@@ -31,10 +31,10 @@ tty_flush (serial)
 {
   while (1)
     {
-      SERIAL_FLUSH_INPUT (serial);
-      SERIAL_FLUSH_OUTPUT (serial);
+      serial_flush_input (serial);
+      serial_flush_output (serial);
       sleep(1);
-      switch (SERIAL_READCHAR (serial, 0))
+      switch (serial_readchar (serial, 0))
 	{
 	case SERIAL_TIMEOUT:
 	case SERIAL_ERROR:

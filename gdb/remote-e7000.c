@@ -154,8 +154,8 @@ puts_e7000debug (char *buf)
   if (remote_debug)
     printf_unfiltered ("Sending %s\n", buf);
 
-  if (SERIAL_WRITE (e7000_desc, buf, strlen (buf)))
-    fprintf_unfiltered (gdb_stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  if (serial_write (e7000_desc, buf, strlen (buf)))
+    fprintf_unfiltered (gdb_stderr, "serial_write failed: %s\n", safe_strerror (errno));
 
   /* And expect to see it echoed, unless using the pc interface */
 #if 0
@@ -170,13 +170,13 @@ putchar_e7000 (int x)
   char b[1];
 
   b[0] = x;
-  SERIAL_WRITE (e7000_desc, b, 1);
+  serial_write (e7000_desc, b, 1);
 }
 
 static void
 write_e7000 (char *s)
 {
-  SERIAL_WRITE (e7000_desc, s, strlen (s));
+  serial_write (e7000_desc, s, strlen (s));
 }
 
 static int
@@ -198,7 +198,7 @@ readchar (int timeout)
 
   do
     {
-      c = SERIAL_READCHAR (e7000_desc, timeout);
+      c = serial_readchar (e7000_desc, timeout);
     }
   while (c > 127);
 
@@ -645,17 +645,17 @@ e7000_open (char *args, int from_tty)
 
   push_target (&e7000_ops);
 
-  e7000_desc = SERIAL_OPEN (dev_name);
+  e7000_desc = serial_open (dev_name);
 
   if (!e7000_desc)
     perror_with_name (dev_name);
 
-  if (SERIAL_SETBAUDRATE (e7000_desc, baudrate))
+  if (serial_setbaudrate (e7000_desc, baudrate))
     {
-      SERIAL_CLOSE (e7000_desc);
+      serial_close (e7000_desc);
       perror_with_name (dev_name);
     }
-  SERIAL_RAW (e7000_desc);
+  serial_raw (e7000_desc);
 
 #ifdef GDB_TARGET_IS_H8300
   h8300hmode = 1;
@@ -678,7 +678,7 @@ e7000_close (int quitting)
 {
   if (e7000_desc)
     {
-      SERIAL_CLOSE (e7000_desc);
+      serial_close (e7000_desc);
       e7000_desc = 0;
     }
 }
@@ -1170,7 +1170,7 @@ write_large (CORE_ADDR memaddr, unsigned char *myaddr, int len)
       compose[where++] = '\n';
       compose[where++] = 0;
 
-      SERIAL_WRITE (e7000_desc, compose, where);
+      serial_write (e7000_desc, compose, where);
       j = readchar (0);
       if (j == -1)
 	{
@@ -1604,9 +1604,9 @@ e7000_load (char *args, int from_tty)
 
 	      bfd_get_section_contents (pbfd, section, buf + 10, fptr, count);
 
-	      if (SERIAL_WRITE (e7000_desc, buf, count + 10))
+	      if (serial_write (e7000_desc, buf, count + 10))
 		fprintf_unfiltered (gdb_stderr,
-				    "e7000_load: SERIAL_WRITE failed: %s\n",
+				    "e7000_load: serial_write failed: %s\n",
 				    safe_strerror (errno));
 
 	      expect ("OK");

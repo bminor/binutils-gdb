@@ -396,8 +396,8 @@ monitor_printf (char *pattern,...)
 void
 monitor_write (char *buf, int buflen)
 {
-  if (SERIAL_WRITE (monitor_desc, buf, buflen))
-    fprintf_unfiltered (gdb_stderr, "SERIAL_WRITE failed: %s\n",
+  if (serial_write (monitor_desc, buf, buflen))
+    fprintf_unfiltered (gdb_stderr, "serial_write failed: %s\n",
 			safe_strerror (errno));
 }
 
@@ -415,7 +415,7 @@ monitor_readchar (void)
   do
     {
       looping = 0;
-      c = SERIAL_READCHAR (monitor_desc, timeout);
+      c = serial_readchar (monitor_desc, timeout);
 
       if (c >= 0)
 	c &= 0xff;		/* don't lose bit 7 */
@@ -449,7 +449,7 @@ readchar (int timeout)
   do
     {
       looping = 0;
-      c = SERIAL_READCHAR (monitor_desc, timeout);
+      c = serial_readchar (monitor_desc, timeout);
 
       if (c >= 0)
 	{
@@ -772,27 +772,27 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
     xfree (dev_name);
   dev_name = xstrdup (args);
 
-  monitor_desc = SERIAL_OPEN (dev_name);
+  monitor_desc = serial_open (dev_name);
 
   if (!monitor_desc)
     perror_with_name (dev_name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (monitor_desc, baud_rate))
+      if (serial_setbaudrate (monitor_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (monitor_desc);
+	  serial_close (monitor_desc);
 	  perror_with_name (dev_name);
 	}
     }
 
-  SERIAL_RAW (monitor_desc);
+  serial_raw (monitor_desc);
 
-  SERIAL_FLUSH_INPUT (monitor_desc);
+  serial_flush_input (monitor_desc);
 
   /* some systems only work with 2 stop bits */
 
-  SERIAL_SETSTOPBITS (monitor_desc, mon_ops->stopbits);
+  serial_setstopbits (monitor_desc, mon_ops->stopbits);
 
   current_monitor = mon_ops;
 
@@ -822,7 +822,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
       monitor_expect_prompt (NULL, 0);
     }
 
-  SERIAL_FLUSH_INPUT (monitor_desc);
+  serial_flush_input (monitor_desc);
 
   /* Alloc breakpoints */
   if (mon_ops->set_break != NULL)
@@ -863,7 +863,7 @@ void
 monitor_close (int quitting)
 {
   if (monitor_desc)
-    SERIAL_CLOSE (monitor_desc);
+    serial_close (monitor_desc);
 
   /* Free breakpoint memory */
   if (breakaddr != NULL)
@@ -1903,7 +1903,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
       if (current_monitor->getmem.term_cmd)
 	{
-	  SERIAL_WRITE (monitor_desc, current_monitor->getmem.term_cmd,
+	  serial_write (monitor_desc, current_monitor->getmem.term_cmd,
 			strlen (current_monitor->getmem.term_cmd));
 	  monitor_expect_prompt (NULL, 0);
 	}
@@ -2223,7 +2223,7 @@ monitor_stop (void)
 {
   monitor_debug ("MON stop\n");
   if ((current_monitor->flags & MO_SEND_BREAK_ON_STOP) != 0)
-    SERIAL_SEND_BREAK (monitor_desc);
+    serial_send_break (monitor_desc);
   if (current_monitor->stop)
     monitor_printf_noecho (current_monitor->stop);
 }

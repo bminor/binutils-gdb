@@ -132,13 +132,13 @@ sh3_load (struct serial *desc, char *file, int hashmark)
     {
       monitor_printf ("il;s:x\r");
       monitor_expect ("\005", NULL, 0);		/* Look for ENQ */
-      SERIAL_WRITE (desc, "\006", 1);	/* Send ACK */
+      serial_write (desc, "\006", 1);	/* Send ACK */
       monitor_expect ("LO x\r", NULL, 0);	/* Look for filename */
 
       load_srec (desc, file, 0, 80, SREC_ALL, hashmark, NULL);
 
       monitor_expect ("\005", NULL, 0);		/* Look for ENQ */
-      SERIAL_WRITE (desc, "\006", 1);	/* Send ACK */
+      serial_write (desc, "\006", 1);	/* Send ACK */
       monitor_expect_prompt (NULL, 0);
     }
 }
@@ -270,7 +270,7 @@ sh3_open (char *args, int from_tty)
 
   if (parallel_port_name)
     {
-      parallel = SERIAL_OPEN (parallel_port_name);
+      parallel = serial_open (parallel_port_name);
 
       if (!parallel)
 	perror_with_name ("Unable to open parallel port.");
@@ -317,7 +317,7 @@ sh3e_open (char *args, int from_tty)
 
   if (parallel_port_name)
     {
-      parallel = SERIAL_OPEN (parallel_port_name);
+      parallel = serial_open (parallel_port_name);
 
       if (!parallel)
 	perror_with_name ("Unable to open parallel port.");
@@ -335,7 +335,7 @@ sh3_close (int quitting)
   monitor_close (quitting);
   if (parallel_in_use)
     {
-      SERIAL_CLOSE (parallel);
+      serial_close (parallel);
       parallel_in_use = 0;
     }
 }

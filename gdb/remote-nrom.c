@@ -71,7 +71,7 @@ expect (char *string)
 
   while (1)
     {
-      c = SERIAL_READCHAR (ctrl_desc, 5);
+      c = serial_readchar (ctrl_desc, 5);
 
       if (c == *p++)
 	{
@@ -104,7 +104,7 @@ open_socket (char *name, int port)
   struct serial *desc;
 
   sprintf (sockname, "%s:%d", name, port);
-  desc = SERIAL_OPEN (sockname);
+  desc = serial_open (sockname);
   if (!desc)
     perror_with_name (sockname);
 
@@ -114,7 +114,7 @@ open_socket (char *name, int port)
 static void
 load_cleanup (void)
 {
-  SERIAL_CLOSE (load_desc);
+  serial_close (load_desc);
   load_desc = NULL;
 }
 
@@ -130,7 +130,7 @@ nrom_load (char *args, int fromtty)
   struct cleanup *old_chain;
 
   /* Tell the netrom to get ready to download. */
-  if (SERIAL_WRITE (ctrl_desc, downloadstring, strlen (downloadstring)))
+  if (serial_write (ctrl_desc, downloadstring, strlen (downloadstring)))
     error ("nrom_load: control_send() of `%s' failed", downloadstring);
 
   expect ("Waiting for a connection...\n");
@@ -181,7 +181,7 @@ nrom_load (char *args, int fromtty)
 		      bfd_get_section_contents (pbfd, section, buffer, fptr,
 						count);
 
-		      SERIAL_WRITE (load_desc, buffer, count);
+		      serial_write (load_desc, buffer, count);
 		      section_address += count;
 		      fptr += count;
 		      section_size -= count;
@@ -234,9 +234,9 @@ static void
 nrom_close (int quitting)
 {
   if (load_desc)
-    SERIAL_CLOSE (load_desc);
+    serial_close (load_desc);
   if (ctrl_desc)
-    SERIAL_CLOSE (ctrl_desc);
+    serial_close (ctrl_desc);
 }
 
 /* Pass arguments directly to the NetROM. */
@@ -247,7 +247,7 @@ nrom_passthru (char *args, int fromtty)
   char buf[1024];
 
   sprintf (buf, "%s\n", args);
-  if (SERIAL_WRITE (ctrl_desc, buf, strlen (buf)))
+  if (serial_write (ctrl_desc, buf, strlen (buf)))
     error ("nrom_reset: control_send() of `%s'failed", args);
 }
 

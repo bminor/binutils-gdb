@@ -180,7 +180,7 @@ remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
 static unsigned char
 get_byte (void)
 {
-  int c = SERIAL_READCHAR (io, timeout);
+  int c = serial_readchar (io, timeout);
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "[%02x]\n", c);
@@ -217,7 +217,7 @@ put_byte (char val)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "(%02x)\n", val);
-  SERIAL_WRITE (io, &val, 1);
+  serial_write (io, &val, 1);
 }
 
 static void
@@ -233,7 +233,7 @@ put_word (int val)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "(%04x)", val);
 
-  SERIAL_WRITE (io, b, 4);
+  serial_write (io, b, 4);
 }
 
 
@@ -264,8 +264,8 @@ rdp_init (int cold, int tty)
       int restype;
       QUIT;
 
-      SERIAL_FLUSH_INPUT (io);
-      SERIAL_FLUSH_OUTPUT (io);
+      serial_flush_input (io);
+      serial_flush_output (io);
 
       if (tty)
 	printf_unfiltered ("Trying to connect at %d baud.\n", baudtry);
@@ -277,7 +277,7 @@ rdp_init (int cold, int tty)
       if (cold)
 	{
 	  put_byte (RDP_RESET);
-	  while ((restype = SERIAL_READCHAR (io, 1)) > 0)
+	  while ((restype = serial_readchar (io, 1)) > 0)
 	    {
 	      switch (restype)
 		{
@@ -304,7 +304,7 @@ rdp_init (int cold, int tty)
       put_byte (type | RDP_OPEN_TYPE_RETURN_SEX);
       put_word (0);
 
-      while (!sync && (restype = SERIAL_READCHAR (io, 1)) > 0)
+      while (!sync && (restype = serial_readchar (io, 1)) > 0)
 	{
 	  if (remote_debug)
 	    fprintf_unfiltered (gdb_stdlog, "[%02x]\n", restype);
@@ -315,13 +315,13 @@ rdp_init (int cold, int tty)
 	      break;
 
 	    case RDP_RESET:
-	      while ((restype = SERIAL_READCHAR (io, 1)) == RDP_RESET)
+	      while ((restype = serial_readchar (io, 1)) == RDP_RESET)
 		;
 	      do
 		{
 		  printf_unfiltered ("%c", isgraph (restype) ? restype : ' ');
 		}
-	      while ((restype = SERIAL_READCHAR (io, 1)) > 0);
+	      while ((restype = serial_readchar (io, 1)) > 0);
 
 	      if (tty)
 		{
@@ -339,7 +339,7 @@ rdp_init (int cold, int tty)
 
 	    case RDP_RES_VALUE:
 	      {
-		int resval = SERIAL_READCHAR (io, 1);
+		int resval = serial_readchar (io, 1);
 
 		if (remote_debug)
 		  fprintf_unfiltered (gdb_stdlog, "[%02x]\n", resval);
@@ -459,13 +459,13 @@ send_rdp (char *template,...)
 	  pc = va_arg (alist, char *);
 	  val = va_arg (alist, int);
 	  dst = buf;
-	  SERIAL_WRITE (io, pc, val);
+	  serial_write (io, pc, val);
 	  break;
 	case '-':
 	  /* Send whats in the queue */
 	  if (dst != buf)
 	    {
-	      SERIAL_WRITE (io, buf, dst - buf);
+	      serial_write (io, buf, dst - buf);
 	      dst = buf;
 	    }
 	  break;
@@ -995,12 +995,12 @@ rdp_execute_finish (void)
   while (running)
     {
       int res;
-      res = SERIAL_READCHAR (io, 1);
+      res = serial_readchar (io, 1);
       while (res == SERIAL_TIMEOUT)
 	{
 	  QUIT;
 	  printf_filtered ("Waiting for target..\n");
-	  res = SERIAL_READCHAR (io, 1);
+	  res = serial_readchar (io, 1);
 	}
 
       switch (res)
@@ -1111,12 +1111,12 @@ remote_rdp_open (char *args, int from_tty)
 
   target_preopen (from_tty);
 
-  io = SERIAL_OPEN (args);
+  io = serial_open (args);
 
   if (!io)
     perror_with_name (args);
 
-  SERIAL_RAW (io);
+  serial_raw (io);
 
   rdp_init (1, from_tty);
 
@@ -1174,7 +1174,7 @@ remote_rdp_close (int quitting)
 {
   callback->shutdown (callback);
   if (io)
-    SERIAL_CLOSE (io);
+    serial_close (io);
   io = 0;
 }
 

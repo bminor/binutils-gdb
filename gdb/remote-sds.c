@@ -151,7 +151,7 @@ static void
 sds_close (int quitting)
 {
   if (sds_desc)
-    SERIAL_CLOSE (sds_desc);
+    serial_close (sds_desc);
   sds_desc = NULL;
 }
 
@@ -166,8 +166,8 @@ sds_start_remote (PTR dummy)
   immediate_quit++;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
-  SERIAL_WRITE (sds_desc, "{#*\r\n", 5);
-  SERIAL_WRITE (sds_desc, "{#}\r\n", 5);
+  serial_write (sds_desc, "{#*\r\n", 5);
+  serial_write (sds_desc, "{#}\r\n", 5);
 
   while ((c = readchar (1)) >= 0)
     printf_unfiltered ("%c", c);
@@ -201,25 +201,25 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   unpush_target (&sds_ops);
 
-  sds_desc = SERIAL_OPEN (name);
+  sds_desc = serial_open (name);
   if (!sds_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (sds_desc, baud_rate))
+      if (serial_setbaudrate (sds_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (sds_desc);
+	  serial_close (sds_desc);
 	  perror_with_name (name);
 	}
     }
 
 
-  SERIAL_RAW (sds_desc);
+  serial_raw (sds_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (sds_desc);
+  serial_flush_input (sds_desc);
 
   if (from_tty)
     {
@@ -688,7 +688,7 @@ readchar (int timeout)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (sds_desc, timeout);
+  ch = serial_readchar (sds_desc, timeout);
 
   if (remote_debug > 1 && ch >= 0)
     fprintf_unfiltered (gdb_stdlog, "%c(%x)", ch, ch);
@@ -799,7 +799,7 @@ putmessage (unsigned char *buf, int len)
 			      header[0], header[1], header[2]);
 	  gdb_flush (gdb_stdlog);
 	}
-      if (SERIAL_WRITE (sds_desc, buf2, p - buf2))
+      if (serial_write (sds_desc, buf2, p - buf2))
 	perror_with_name ("putmessage: write failed");
 
       return 1;

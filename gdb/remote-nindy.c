@@ -158,7 +158,7 @@ static void
 nindy_close (int quitting)
 {
   if (nindy_serial != NULL)
-    SERIAL_CLOSE (nindy_serial);
+    serial_close (nindy_serial);
   nindy_serial = NULL;
 
   if (savename)
@@ -285,7 +285,7 @@ static void
 clean_up_tty (PTR ptrarg)
 {
   struct clean_up_tty_args *args = (struct clean_up_tty_args *) ptrarg;
-  SERIAL_SET_TTY_STATE (args->serial, args->state);
+  serial_set_tty_state (args->serial, args->state);
   xfree (args->state);
   warning ("\n\nYou may need to reset the 80960 and/or reload your program.\n");
 }
@@ -299,7 +299,7 @@ static void (*old_ctrlz) ();
 static void
 clean_up_int (void)
 {
-  SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
+  serial_set_tty_state (tty_args.serial, tty_args.state);
   xfree (tty_args.state);
 
   signal (SIGINT, old_ctrlc);
@@ -334,8 +334,8 @@ nindy_wait (ptid_t ptid, struct target_waitstatus *status)
   /* OPERATE IN PASSTHROUGH MODE UNTIL NINDY SENDS A DLE CHARACTER */
 
   /* Save current tty attributes, and restore them when done.  */
-  tty_args.serial = SERIAL_FDOPEN (0);
-  tty_args.state = SERIAL_GET_TTY_STATE (tty_args.serial);
+  tty_args.serial = serial_fdopen (0);
+  tty_args.state = serial_get_tty_state (tty_args.serial);
   old_ctrlc = signal (SIGINT, clean_up_int);
 #ifdef SIGTSTP
   old_ctrlz = signal (SIGTSTP, clean_up_int);
@@ -347,19 +347,19 @@ nindy_wait (ptid_t ptid, struct target_waitstatus *status)
      <CR> and perform echo.  */
   /* This used to set CBREAK and clear ECHO and CRMOD.  I hope this is close
      enough.  */
-  SERIAL_RAW (tty_args.serial);
+  serial_raw (tty_args.serial);
 
   while (1)
     {
       /* Input on remote */
-      c = SERIAL_READCHAR (nindy_serial, -1);
+      c = serial_readchar (nindy_serial, -1);
       if (c == SERIAL_ERROR)
 	{
 	  error ("Cannot read from serial line");
 	}
       else if (c == 0x1b)	/* ESC */
 	{
-	  c = SERIAL_READCHAR (nindy_serial, -1);
+	  c = serial_readchar (nindy_serial, -1);
 	  c &= ~0x40;
 	}
       else if (c != 0x10)	/* DLE */
@@ -392,7 +392,7 @@ nindy_wait (ptid_t ptid, struct target_waitstatus *status)
 	}
     }
 
-  SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
+  serial_set_tty_state (tty_args.serial, tty_args.state);
   xfree (tty_args.state);
   discard_cleanups (old_cleanups);
 
@@ -541,7 +541,7 @@ reset_command (char *args, int from_tty)
     }
   if (query ("Really reset the target system?", 0, 0))
     {
-      SERIAL_SEND_BREAK (nindy_serial);
+      serial_send_break (nindy_serial);
       tty_flush (nindy_serial);
     }
 }

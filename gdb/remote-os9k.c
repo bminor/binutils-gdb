@@ -99,8 +99,8 @@ printf_monitor (char *pattern,...)
   vsprintf (buf, pattern, args);
   va_end (args);
 
-  if (SERIAL_WRITE (monitor_desc, buf, strlen (buf)))
-    fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  if (serial_write (monitor_desc, buf, strlen (buf)))
+    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
 }
 
 /* Read a character from the remote system, doing all the fancy timeout stuff */
@@ -109,7 +109,7 @@ readchar (int timeout)
 {
   int c;
 
-  c = SERIAL_READCHAR (monitor_desc, timeout);
+  c = serial_readchar (monitor_desc, timeout);
 
   if (sr_get_debug ())
     putchar (c & 0x7f);
@@ -311,17 +311,17 @@ rombug_open (char *args, int from_tty)
     unpush_target (&rombug_ops);
 
   strcpy (dev_name, args);
-  monitor_desc = SERIAL_OPEN (dev_name);
+  monitor_desc = serial_open (dev_name);
   if (monitor_desc == NULL)
     perror_with_name (dev_name);
 
   /* if baud rate is set by 'set remotebaud' */
-  if (SERIAL_SETBAUDRATE (monitor_desc, sr_get_baud_rate ()))
+  if (serial_setbaudrate (monitor_desc, sr_get_baud_rate ()))
     {
-      SERIAL_CLOSE (monitor_desc);
+      serial_close (monitor_desc);
       perror_with_name ("RomBug");
     }
-  SERIAL_RAW (monitor_desc);
+  serial_raw (monitor_desc);
   if (tty_xon || tty_xoff)
     {
       struct hardware_ttystate
@@ -330,12 +330,12 @@ rombug_open (char *args, int from_tty)
 	}
        *tty_s;
 
-      tty_s = (struct hardware_ttystate *) SERIAL_GET_TTY_STATE (monitor_desc);
+      tty_s = (struct hardware_ttystate *) serial_get_tty_state (monitor_desc);
       if (tty_xon)
 	tty_s->t.c_iflag |= IXON;
       if (tty_xoff)
 	tty_s->t.c_iflag |= IXOFF;
-      SERIAL_SET_TTY_STATE (monitor_desc, (serial_ttystate) tty_s);
+      serial_set_tty_state (monitor_desc, (serial_ttystate) tty_s);
     }
 
   rombug_is_open = 1;
@@ -371,7 +371,7 @@ rombug_close (int quitting)
 {
   if (rombug_is_open)
     {
-      SERIAL_CLOSE (monitor_desc);
+      serial_close (monitor_desc);
       monitor_desc = NULL;
       rombug_is_open = 0;
     }
@@ -947,9 +947,9 @@ rombug_load (char *arg)
 	  fflush (stdout);
 	}
 
-      if (SERIAL_WRITE (monitor_desc, buf, bytes_read))
+      if (serial_write (monitor_desc, buf, bytes_read))
 	{
-	  fprintf (stderr, "SERIAL_WRITE failed: (while downloading) %s\n", safe_strerror (errno));
+	  fprintf (stderr, "serial_write failed: (while downloading) %s\n", safe_strerror (errno));
 	  break;
 	}
       i = 0;
@@ -1004,7 +1004,7 @@ static void
 cleanup_tty (void)
 {
   printf ("\r\n[Exiting connect mode]\r\n");
-  /*SERIAL_RESTORE(0, &ttystate); */
+  /*serial_restore(0, &ttystate); */
 }
 
 static void
@@ -1036,7 +1036,7 @@ connect_command (char *args, int fromtty)
       do
 	{
 	  FD_SET (0, &readfds);
-	  FD_SET (DEPRECATED_SERIAL_FD (monitor_desc), &readfds);
+	  FD_SET (deprecated_serial_fd (monitor_desc), &readfds);
 	  numfds = select (sizeof (readfds) * 8, &readfds, 0, 0, 0);
 	}
       while (numfds == 0);
@@ -1071,7 +1071,7 @@ connect_command (char *args, int fromtty)
 	    }
 	}
 
-      if (FD_ISSET (DEPRECATED_SERIAL_FD (monitor_desc), &readfds))
+      if (FD_ISSET (deprecated_serial_fd (monitor_desc), &readfds))
 	{
 	  while (1)
 	    {

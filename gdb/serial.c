@@ -350,7 +350,7 @@ serial_readchar (struct serial *scb, int timeout)
 
   /* FIXME: cagney/1999-10-11: Don't enable this check until the ASYNC
      code is finished. */
-  if (0 && SERIAL_IS_ASYNC_P (scb) && timeout < 0)
+  if (0 && serial_is_async_p (scb) && timeout < 0)
     internal_error (__FILE__, __LINE__,
 		    "serial_readchar: blocking read in async mode");
 
@@ -363,7 +363,7 @@ serial_readchar (struct serial *scb, int timeout)
          in case we are getting ready to dump core or something. */
       gdb_flush (serial_logfp);
     }
-  if (SERIAL_DEBUG_P (scb))
+  if (serial_debug_p (scb))
     {
       fprintf_unfiltered (gdb_stdlog, "[");
       serial_logchar (gdb_stdlog, 'r', ch, timeout);
@@ -400,7 +400,7 @@ serial_printf (struct serial *desc, const char *format,...)
   va_start (args, format);
 
   xvasprintf (&buf, format, args);
-  SERIAL_WRITE (desc, buf, strlen (buf));
+  serial_write (desc, buf, strlen (buf));
 
   xfree (buf);
   va_end (args);
@@ -554,9 +554,9 @@ static void
 cleanup_tty (serial_ttystate ttystate)
 {
   printf_unfiltered ("\r\n[Exiting connect mode]\r\n");
-  SERIAL_SET_TTY_STATE (tty_desc, ttystate);
+  serial_set_tty_state (tty_desc, ttystate);
   xfree (ttystate);
-  SERIAL_CLOSE (tty_desc);
+  serial_close (tty_desc);
 }
 
 static void
@@ -574,13 +574,13 @@ connect_command (char *args, int fromtty)
 
   printf_unfiltered ("[Entering connect mode.  Use ~. or ~^D to escape]\n");
 
-  tty_desc = SERIAL_FDOPEN (0);
+  tty_desc = serial_fdopen (0);
   port_desc = last_serial_opened;
 
-  ttystate = SERIAL_GET_TTY_STATE (tty_desc);
+  ttystate = serial_get_tty_state (tty_desc);
 
-  SERIAL_RAW (tty_desc);
-  SERIAL_RAW (port_desc);
+  serial_raw (tty_desc);
+  serial_raw (port_desc);
 
   make_cleanup (cleanup_tty, ttystate);
 
@@ -588,7 +588,7 @@ connect_command (char *args, int fromtty)
     {
       int mask;
 
-      mask = SERIAL_WAIT_2 (tty_desc, port_desc, -1);
+      mask = serial_wait_2 (tty_desc, port_desc, -1);
 
       if (mask & 2)
 	{			/* tty input */
@@ -596,7 +596,7 @@ connect_command (char *args, int fromtty)
 
 	  while (1)
 	    {
-	      c = SERIAL_READCHAR (tty_desc, 0);
+	      c = serial_readchar (tty_desc, 0);
 
 	      if (c == SERIAL_TIMEOUT)
 		break;
@@ -605,7 +605,7 @@ connect_command (char *args, int fromtty)
 		perror_with_name ("connect");
 
 	      cx = c;
-	      SERIAL_WRITE (port_desc, &cx, 1);
+	      serial_write (port_desc, &cx, 1);
 
 	      switch (cur_esc)
 		{
@@ -634,7 +634,7 @@ connect_command (char *args, int fromtty)
 
 	  while (1)
 	    {
-	      c = SERIAL_READCHAR (port_desc, 0);
+	      c = serial_readchar (port_desc, 0);
 
 	      if (c == SERIAL_TIMEOUT)
 		break;
@@ -644,7 +644,7 @@ connect_command (char *args, int fromtty)
 
 	      cx = c;
 
-	      SERIAL_WRITE (tty_desc, &cx, 1);
+	      serial_write (tty_desc, &cx, 1);
 	    }
 	}
     }

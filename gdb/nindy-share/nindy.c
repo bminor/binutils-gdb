@@ -235,7 +235,7 @@ rdnin (buf,n,timeout)
   escape_seen = 0;
   while (n)
     {
-      c = SERIAL_READCHAR (nindy_serial, timeout);
+      c = serial_readchar (nindy_serial, timeout);
       switch (c)
 	{
 	case SERIAL_ERROR:
@@ -308,14 +308,14 @@ getpkt(buf)
 			cs_calc += buf[i];
 		}
 		if ( cs_calc == cs_recv ){
-			SERIAL_WRITE (nindy_serial, "+", 1);
+			serial_write (nindy_serial, "+", 1);
 			return hdr[2];
 		}
 	
 		/* Bad checksum: report, send NAK, and re-receive
 		 */
 		fprintf(stderr, errfmt, cs_recv, cs_calc );
-		SERIAL_WRITE (nindy_serial, "-", 1);
+		serial_write (nindy_serial, "-", 1);
 	}
 }
 
@@ -367,7 +367,7 @@ putpkt( msg, len )
 
 	/* Attention, NINDY!
 	 */
-	SERIAL_WRITE (nindy_serial, "\020", 1);
+	serial_write (nindy_serial, "\020", 1);
 
 
 	lenlo = len & 0xff;
@@ -387,19 +387,19 @@ putpkt( msg, len )
 
 	/* Send checksummed message over and over until we get a positive ack
 	 */
-	SERIAL_WRITE (nindy_serial, buf, p - buf);
+	serial_write (nindy_serial, buf, p - buf);
 	while (1){
 		if ( !rdnin(&ack,1,5) ){
 			/* timed out */
 			fprintf(stderr,"ACK timed out; resending\r\n");
 			/* Attention, NINDY! */
-			SERIAL_WRITE (nindy_serial, "\020", 1);
-			SERIAL_WRITE (nindy_serial, buf, p - buf);
+			serial_write (nindy_serial, "\020", 1);
+			serial_write (nindy_serial, buf, p - buf);
 		} else if ( ack == '+' ){
 			return;
 		} else if ( ack == '-' ){
 			fprintf( stderr, "Remote NAK; resending\r\n" );
-			SERIAL_WRITE (nindy_serial, buf, p - buf);
+			serial_write (nindy_serial, buf, p - buf);
 		} else {
 			fprintf( stderr, "Bad ACK, ignored: <%c>\r\n", ack );
 		}
@@ -520,15 +520,15 @@ try_baudrate (serial, brp)
   unsigned char c;
 
   /* Set specified baud rate and flush all pending input */
-  SERIAL_SETBAUDRATE (serial, brp->rate);
+  serial_setbaudrate (serial, brp->rate);
   tty_flush (serial);
 
   /* Send empty command with bad checksum, hope for NAK ('-') response */
-  SERIAL_WRITE (serial, "\020\0\0\001", 4);
+  serial_write (serial, "\020\0\0\001", 4);
 
   /* Anything but a quick '-', including error, eof, or timeout, means that
      this baudrate doesn't work.  */
-  return SERIAL_READCHAR (serial, 1) == '-';
+  return serial_readchar (serial, 1) == '-';
 }
 
 /******************************************************************************
@@ -576,7 +576,7 @@ autobaud( serial, brp )
   ninBaud (brp->string);
 
   /* Change our baud rate back to rate to which we just set NINDY.  */
-  SERIAL_SETBAUDRATE (serial, brp->rate);
+  serial_setbaudrate (serial, brp->rate);
 }
 
 		/**********************************
@@ -615,7 +615,7 @@ ninBaud( baudrate )
 	  csum += *p;
 	}
       sprintf (msg, "\020z%s#%02x", baudrate, csum);
-      SERIAL_WRITE (nindy_serial, msg, strlen (msg));
+      serial_write (nindy_serial, msg, strlen (msg));
     }
   else
     {
@@ -714,17 +714,17 @@ ninConnect( name, baudrate, brk, silent, old_protocol )
 		p = xmalloc(strlen(prefix[i]) + strlen(name) + 1 );
 		strcpy( p, prefix[i] );
 		strcat( p, name );
-		nindy_serial = SERIAL_OPEN (p);
+		nindy_serial = serial_open (p);
 		if (nindy_serial != NULL) {
 #ifdef TIOCEXCL
 			/* Exclusive use mode (hp9000 does not support it) */
 			ioctl(nindy_serial->fd,TIOCEXCL,NULL);
 #endif
-			SERIAL_RAW (nindy_serial);
+			serial_raw (nindy_serial);
 
 			if (brk)
 			  {
-			    SERIAL_SEND_BREAK (nindy_serial);
+			    serial_send_break (nindy_serial);
 			  }
 
 			brp = parse_baudrate( baudrate );

@@ -1815,7 +1815,7 @@ static void
 remote_close (int quitting)
 {
   if (remote_desc)
-    SERIAL_CLOSE (remote_desc);
+    serial_close (remote_desc);
   remote_desc = NULL;
 }
 
@@ -2030,7 +2030,7 @@ remote_start_remote (PTR dummy)
   immediate_quit++;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
-  SERIAL_WRITE (remote_desc, "+", 1);
+  serial_write (remote_desc, "+", 1);
 
   /* Let the stub know that we want it to return the thread.  */
   set_thread (-1, 0);
@@ -2148,24 +2148,24 @@ serial device is attached to the remote system\n\
 
   unpush_target (target);
 
-  remote_desc = SERIAL_OPEN (name);
+  remote_desc = serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (remote_desc, baud_rate))
+      if (serial_setbaudrate (remote_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (remote_desc);
+	  serial_close (remote_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (remote_desc);
+  serial_raw (remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (remote_desc);
+  serial_flush_input (remote_desc);
 
   if (from_tty)
     {
@@ -2245,24 +2245,24 @@ serial device is attached to the remote system\n\
 
   unpush_target (target);
 
-  remote_desc = SERIAL_OPEN (name);
+  remote_desc = serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (remote_desc, baud_rate))
+      if (serial_setbaudrate (remote_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (remote_desc);
+	  serial_close (remote_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (remote_desc);
+  serial_raw (remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (remote_desc);
+  serial_flush_input (remote_desc);
 
   if (from_tty)
     {
@@ -2382,7 +2382,7 @@ remote_async_detach (char *args, int from_tty)
 
   /* Unregister the file descriptor from the event loop. */
   if (target_is_async_p ())
-    SERIAL_ASYNC (remote_desc, NULL, 0);
+    serial_async (remote_desc, NULL, 0);
 
   target_mourn_inferior ();
   if (from_tty)
@@ -2765,9 +2765,9 @@ remote_stop (void)
     fprintf_unfiltered (gdb_stdlog, "remote_stop called\n");
 
   if (remote_break)
-    SERIAL_SEND_BREAK (remote_desc);
+    serial_send_break (remote_desc);
   else
-    SERIAL_WRITE (remote_desc, "\003", 1);
+    serial_write (remote_desc, "\003", 1);
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -3908,7 +3908,7 @@ readchar (int timeout)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (remote_desc, timeout);
+  ch = serial_readchar (remote_desc, timeout);
 
   if (ch >= 0)
     return (ch & 0x7f);
@@ -4006,7 +4006,7 @@ putpkt_binary (char *buf, int cnt)
 	  fprintf_unfiltered (gdb_stdlog, "...");
 	  gdb_flush (gdb_stdlog);
 	}
-      if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
+      if (serial_write (remote_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
 
       /* read until either a timeout occurs (-2) or '+' is read */
@@ -4308,19 +4308,19 @@ getpkt_sane (char *buf,
 	      fputstr_unfiltered (buf, 0, gdb_stdlog);
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
-	  SERIAL_WRITE (remote_desc, "+", 1);
+	  serial_write (remote_desc, "+", 1);
 	  return 0;
 	}
 
       /* Try the whole thing again.  */
     retry:
-      SERIAL_WRITE (remote_desc, "-", 1);
+      serial_write (remote_desc, "-", 1);
     }
 
   /* We have tried hard enough, and just can't receive the packet.  Give up. */
 
   printf_unfiltered ("Ignoring packet error, continuing...\n");
-  SERIAL_WRITE (remote_desc, "+", 1);
+  serial_write (remote_desc, "+", 1);
   return 1;
 }
 
@@ -4351,7 +4351,7 @@ remote_async_kill (void)
 {
   /* Unregister the file descriptor from the event loop. */
   if (target_is_async_p ())
-    SERIAL_ASYNC (remote_desc, NULL, 0);
+    serial_async (remote_desc, NULL, 0);
 
   /* For some mysterious reason, wait_for_inferior calls kill instead of
      mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
@@ -5319,7 +5319,7 @@ device is attached to the remote system (e.g. host:port).");
 
   unpush_target (&remote_cisco_ops);
 
-  remote_desc = SERIAL_OPEN (name);
+  remote_desc = serial_open (name);
   if (!remote_desc)
     perror_with_name (name);
 
@@ -5330,17 +5330,17 @@ device is attached to the remote system (e.g. host:port).");
    */
 
   baud_rate = (baud_rate > 0) ? baud_rate : 9600;
-  if (SERIAL_SETBAUDRATE (remote_desc, baud_rate))
+  if (serial_setbaudrate (remote_desc, baud_rate))
     {
-      SERIAL_CLOSE (remote_desc);
+      serial_close (remote_desc);
       perror_with_name (name);
     }
 
-  SERIAL_RAW (remote_desc);
+  serial_raw (remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (remote_desc);
+  serial_flush_input (remote_desc);
 
   if (from_tty)
     {
@@ -5508,7 +5508,7 @@ readtty (void)
 
   /* Make this a zero terminated string and write it out */
   tty_input[tty_bytecount] = 0;
-  if (SERIAL_WRITE (remote_desc, tty_input, tty_bytecount))
+  if (serial_write (remote_desc, tty_input, tty_bytecount))
     {
       perror_with_name ("readtty: write failed");
       return FATAL_ERROR;
@@ -5554,7 +5554,7 @@ minitelnet (void)
 
       FD_ZERO (&input);
       FD_SET (fileno (stdin), &input);
-      FD_SET (DEPRECATED_SERIAL_FD (remote_desc), &input);
+      FD_SET (deprecated_serial_fd (remote_desc), &input);
 
       status = select (tablesize, &input, 0, 0, 0);
       if ((status == -1) && (errno != EINTR))
@@ -5578,9 +5578,9 @@ minitelnet (void)
 	  quit_flag = 0;
 
 	  if (remote_break)
-	    SERIAL_SEND_BREAK (remote_desc);
+	    serial_send_break (remote_desc);
 	  else
-	    SERIAL_WRITE (remote_desc, "\003", 1);
+	    serial_write (remote_desc, "\003", 1);
 
 	  continue;
 	}
@@ -5650,14 +5650,14 @@ static int
 remote_can_async_p (void)
 {
   /* We're async whenever the serial device is. */
-  return (current_target.to_async_mask_value) && SERIAL_CAN_ASYNC_P (remote_desc);
+  return (current_target.to_async_mask_value) && serial_can_async_p (remote_desc);
 }
 
 static int
 remote_is_async_p (void)
 {
   /* We're async whenever the serial device is. */
-  return (current_target.to_async_mask_value) && SERIAL_IS_ASYNC_P (remote_desc);
+  return (current_target.to_async_mask_value) && serial_is_async_p (remote_desc);
 }
 
 /* Pass the SERIAL event on and up to the client.  One day this code
@@ -5685,12 +5685,12 @@ remote_async (void (*callback) (enum inferior_event_type event_type, void *conte
 
   if (callback != NULL)
     {
-      SERIAL_ASYNC (remote_desc, remote_async_serial_handler, NULL);
+      serial_async (remote_desc, remote_async_serial_handler, NULL);
       async_client_callback = callback;
       async_client_context = context;
     }
   else
-    SERIAL_ASYNC (remote_desc, NULL, NULL);
+    serial_async (remote_desc, NULL, NULL);
 }
 
 /* Target async and target extended-async.

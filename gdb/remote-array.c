@@ -191,8 +191,8 @@ printf_monitor (char *pattern,...)
 
   if (strlen (buf) > PBUFSIZ)
     error ("printf_monitor(): string too long");
-  if (SERIAL_WRITE (array_desc, buf, strlen (buf)))
-    fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  if (serial_write (array_desc, buf, strlen (buf)))
+    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
 }
 /*
  * write_monitor -- send raw data to monitor.
@@ -200,8 +200,8 @@ printf_monitor (char *pattern,...)
 static void
 write_monitor (char data[], int len)
 {
-  if (SERIAL_WRITE (array_desc, data, len))
-    fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  if (serial_write (array_desc, data, len))
+    fprintf (stderr, "serial_write failed: %s\n", safe_strerror (errno));
 
   *(data + len + 1) = '\0';
   debuglogs (1, "write_monitor(), Sending: \"%s\".", data);
@@ -301,7 +301,7 @@ readchar (int timeout)
 {
   int c;
 
-  c = SERIAL_READCHAR (array_desc, abs (timeout));
+  c = serial_readchar (array_desc, abs (timeout));
 
   if (sr_get_debug () > 5)
     {
@@ -560,21 +560,21 @@ array_open (char *args, char *name, int from_tty)
   mips_set_processor_type_command ("lsi33k", 0);
 
   strcpy (dev_name, args);
-  array_desc = SERIAL_OPEN (dev_name);
+  array_desc = serial_open (dev_name);
 
   if (array_desc == NULL)
     perror_with_name (dev_name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (array_desc, baud_rate))
+      if (serial_setbaudrate (array_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (array_desc);
+	  serial_close (array_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (array_desc);
+  serial_raw (array_desc);
 
 #if defined (LOG_FILE)
   log_file = fopen (LOG_FILE, "w");
@@ -616,7 +616,7 @@ array_open (char *args, char *name, int from_tty)
 static void
 array_close (int quitting)
 {
-  SERIAL_CLOSE (array_desc);
+  serial_close (array_desc);
   array_desc = NULL;
 
   debuglogs (1, "array_close (quitting=%d)", quitting);
@@ -705,9 +705,9 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
   timeout = 0;			/* Don't time out -- user program is running. */
 
 #if !defined(__GO32__) && !defined(__MSDOS__) && !defined(_WIN32)
-  tty_desc = SERIAL_FDOPEN (0);
-  ttystate = SERIAL_GET_TTY_STATE (tty_desc);
-  SERIAL_RAW (tty_desc);
+  tty_desc = serial_fdopen (0);
+  ttystate = serial_get_tty_state (tty_desc);
+  serial_raw (tty_desc);
 
   i = 0;
   /* poll on the serial port and the keyboard. */
@@ -731,10 +731,10 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
 	  fputc_unfiltered (c, gdb_stdout);
 	  gdb_flush (gdb_stdout);
 	}
-      c = SERIAL_READCHAR (tty_desc, timeout);
+      c = serial_readchar (tty_desc, timeout);
       if (c > 0)
 	{
-	  SERIAL_WRITE (array_desc, &c, 1);
+	  serial_write (array_desc, &c, 1);
 	  /* do this so it looks like there's keyboard echo */
 	  if (c == 3)		/* exit on Control-C */
 	    break;
@@ -744,7 +744,7 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
 #endif
 	}
     }
-  SERIAL_SET_TTY_STATE (tty_desc, ttystate);
+  serial_set_tty_state (tty_desc, ttystate);
 #else
   expect_prompt (1);
   debuglogs (4, "array_wait(), got the expect_prompt.");
