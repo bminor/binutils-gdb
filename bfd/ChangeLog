@@ -1,3 +1,9 @@
+1999-06-02  Nick Clifton  <nickc@cygnus.com>
+
+	* pe-arm.c: Rename global arm interworking functions to avoid name
+	collision when all targets BFD is built.
+	* pei-arm.c: Ditto.
+
 1999-05-31  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf-bfd.h (elf_backend_data): Remove use_rela_p.  Add
