@@ -1,3 +1,15 @@
+Wed Oct  1 16:41:00 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/v850.sh (ROZDATA_START_ADDR, ROSDATA_START_ADDR): New
+	Variables. 
+
+	* scripttempl/v850.sc: Move read only areas out of zero and small
+	data sections and into their own sections.
+
+Wed Sep 24 16:59:15 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * configure.tgt (sh*-*-rtems*): New target, like sh-*-elf*.
+
 Wed Sep 24 11:33:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo (Section Options): Improve documentation of NOLOAD
