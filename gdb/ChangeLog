@@ -3,8 +3,7 @@ Wed Sep 22 10:28:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* breakpoint.c (bpstat_what): Initialize retval.call_dummy and
 	retval.step_resume.
 
-	* mips-tdep.c (mips_frame_chain): If PROC_FRAME_OFFSET is zero,
-	then return zero.
+	* mips-tdep.c (mips_frame_chain): If frame size zero, return zero.
 
 	* remote-nindy.c: Declare ninMemGet and ninMemPut.
 

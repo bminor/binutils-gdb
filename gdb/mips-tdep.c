@@ -341,9 +341,12 @@ mips_frame_chain(frame)
       return 0;
 
     cached_proc_desc = proc_desc;
-    /* If frame size is zero, we must be at end of stack (or otherwise hosed).
-       If we don't check frame size, we loop forever if we see it == 0.  */
-    if (PROC_FRAME_OFFSET (proc_desc) == 0)
+
+    /* If no frame pointer and frame size is zero, we must be at end
+       of stack (or otherwise hosed).  If we don't check frame size,
+       we loop forever if we see a zero size frame.  */
+    if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
+	&& PROC_FRAME_OFFSET (proc_desc) == 0)
       return 0;
     else
       return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
