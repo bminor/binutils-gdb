@@ -1,3 +1,8 @@
+Wed Jan 10 15:14:54 MET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* i386.exp: Add ssemmx2 and sse2 tests.
+	(sse2.d, sse2.s, ssemmx2.d, ssemmx2.s): New tests.
+
 2001-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/pic.d: Fix patterns to match new behaviour of
