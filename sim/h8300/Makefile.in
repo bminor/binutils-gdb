@@ -57,8 +57,9 @@ INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(srcdir)/../bfd
 DEP = mkdep
 
+#### host, target, and site specific Makefile frags come in here.
 
-TARGETLIB = libsim.a
+all:	run 
 
 run:	code.o run.o
 	$(CC) -o run code.o run.o ../bfd/libbfd.a ../libiberty/libiberty.a
@@ -72,7 +73,7 @@ p2.c:writecode
 
 
 writecode:writecode.c
-	$(CC_FOR_BUILD) -o writecode -g $(CSEARCH) -c $(srcdir)/writecode.c 
+	$(CC_FOR_BUILD) -o writecode -g $(CSEARCH)  $(srcdir)/writecode.c 
 
 
 
@@ -98,13 +99,6 @@ FLAGS_TO_PASS = \
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
 
 
-# C source files that correspond to .o's.
-CFILES = z8k-dis.c
-
-STAGESTUFF = $(TARGETLIB) $(OFILES)
-
-all: $(TARGETLIB) 
-
 
 .NOEXPORT:
 
@@ -117,13 +111,6 @@ install-info:
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 
 
-$(TARGETLIB): $(OFILES)
-	 rm -f $(TARGETLIB)
-	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
-	 $(RANLIB) $(TARGETLIB)
-
-# Circumvent Sun Make bug with VPATH.
-sparc-opc.o: sparc-opc.c
 
 tags etags: TAGS
 

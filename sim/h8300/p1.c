@@ -58,32 +58,6 @@ int exception;
 
 static unsigned char *mem;
 
-void
-control_c (sig, code, scp, addr)
-     int sig;
-     int code;
-     char *scp;
-     char *addr;
-{
-  exception = SIGINT;
-}
-
-void
-sim_store_register (reg, val)
-int reg;
-int val;
-{
-  saved_state.reg[reg] = val;
-}
-
-void
-sim_fetch_register (reg, buf)
-int reg;
-char *buf;
-{
-  buf[0] = saved_state.reg[reg] >> 8;
-  buf[1] = saved_state.reg[reg];
-}
 
 static union
 {
@@ -108,7 +82,6 @@ meminit ()
 
       mem = calloc (1024, 64);
       littleendian.i = 1;
-
       /* initialze the array of pointers to byte registers */
       for (tmp = 0; tmp < 8; tmp++)
 	{
@@ -141,6 +114,35 @@ meminit ()
 	}
 
     }
+}
+
+
+void
+control_c (sig, code, scp, addr)
+     int sig;
+     int code;
+     char *scp;
+     char *addr;
+{
+  exception = SIGINT;
+}
+
+void
+sim_store_register (reg, val)
+int reg;
+int val;
+{
+  saved_state.reg[reg] = val;
+}
+
+void
+sim_fetch_register (reg, buf)
+int reg;
+char *buf;
+{
+  meminit();
+  buf[0] = saved_state.reg[reg] >> 8;
+  buf[1] = saved_state.reg[reg];
 }
 
 void
@@ -221,7 +223,6 @@ int sig;
     }
   do
     {
-      dst = 0xfeedface;
       b0 = pc[0];
       b1 = pc[1];
 
