@@ -226,6 +226,8 @@ gdb.gdb
 gdb_stat.h
 gdb_string.h
 gdba.el
+gdbarch.c
+gdbarch.h
 gdbcmd.h
 gdbcore.h
 gdbinit.in

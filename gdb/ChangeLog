@@ -1,3 +1,13 @@
+Mon Dec 14 11:01:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c: Consolidate the semi-dynamic target system
+ 	dependant GDB parameters.
+	(set_gdbarch_from_file): Combine set_architecture_from_file and
+ 	set_byte_order_from_file.
+	* top.c, defs.h, printcmd.c: Delete them from here.
+	* Makefile.in: Add gdbarch.[ch].
+	* exec.c (exec_file_command): Call set_gdbarch_from_file.
+
 Sun Dec 13 09:52:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (TARGET_PRINT_INSN_INFO, TARGET_PRINT_INSN): Define.

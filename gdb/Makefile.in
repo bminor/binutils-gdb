@@ -398,7 +398,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	command.c complaints.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
+	findvar.c gdbarch.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
 	$(start-sanitize-java) \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	$(end-sanitize-java) \
@@ -455,7 +455,7 @@ breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
 
-defs_h =	defs.h xm.h tm.h nm.h config.status config.h
+defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h
 
 inferior_h =	inferior.h $(breakpoint_h)
 tracepoint_h =	tracepoint.h
@@ -520,7 +520,7 @@ TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
-	expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
+	expprint.o environ.o gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
@@ -1201,6 +1201,8 @@ v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/v850ice.c
+
+gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
