@@ -163,7 +163,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.7.4
+VERSION = 4.7.5
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -664,7 +664,7 @@ gdb.dvi:
 
 # GDB MANUAL: info file
 gdb.info:
-	( cd ./doc; $(MAKE) gdb.info $(FLAGS_TO_PASS) )
+	-( cd ./doc; $(MAKE) gdb.info $(FLAGS_TO_PASS) )
 	mv ./doc/gdb.info* .
 
 # Make copying.c from COPYING
