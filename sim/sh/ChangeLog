@@ -1,6 +1,23 @@
-Thu Jan 19 05:50:50 1995  Torbjorn Granlund  <tege@rtl.cygnus.com>
+Sun Jan 22 13:55:36 1995  Torbjorn Granlund  <tege@rtl.cygnus.com>
 
-	* gecode.c (op_tab): Replace code for ADDC and SUBC.
+	* gencode.c (op_tab): Make MAC.W call macw, not abort.
+	* interp.c (macw): New function.
+	(S): New #define.
+
+Sat Jan 21 15:52:30 1995  Torbjorn Granlund  <tege@rtl.cygnus.com>
+
+	* gencode.c (op_tab): New code for ADDV and SUBV.
+	Make MAC.L abort sicne it is not implemented.
+
+	* interp.c (dmul): Handle the signed case by adjusting after unsigned multiply.
+	Get rid of __GNUC__ conditional.
+
+aThu Jan 19 05:50:50 1995  Torbjorn Granlund  <tege@rtl.cygnus.com>
+
+	* gencode.c (op_tab): Also replace NEGC, and try again with SUBC.
+	Change ADDC for symmetry.
+
+	* gencode.c (op_tab): Replace code for ADDC and SUBC.
 
 Mon Jan  9 15:43:53 1995  Stu Grossman  (grossman@cygnus.com)
 

@@ -44,6 +44,7 @@
 #define MACL 	saved_state.asregs.macl
 #define M 	saved_state.asregs.sr.bits.m
 #define Q 	saved_state.asregs.sr.bits.q
+#define S 	saved_state.asregs.sr.bits.s
 
 #define GET_SR() (saved_state.asregs.sr.bits.t = T, saved_state.asregs.sr.word)
 #define SET_SR(x) {saved_state.asregs.sr.word = (x); T =saved_state.asregs.sr.bits.t;}
@@ -80,11 +81,7 @@ int valid[16];
 #define UNDEF(x)
 #endif
 
-#ifdef __GNUC__
-#define INLINE inline
-#else
-#define INLINE
-#endif
+static int IOMEM PARAMS ((int addr, int write, int value));
 
 /* These variables are at file scope so that functions other than
    sim_resume can use the fetch/store macros */
@@ -703,48 +700,69 @@ dmul (sign, rm, rn)
   unsigned long temp0, temp1, temp2, temp3;
   unsigned long Res2, Res1, Res0;
 
-
-  if (!sign)
+  RnL = rn & 0xffff;
+  RnH = (rn >> 16) & 0xffff;
+  RmL = rm & 0xffff;
+  RmH = (rm >> 16) & 0xffff;
+  temp0 = RmL * RnL;
+  temp1 = RmH * RnL;
+  temp2 = RmL * RnH;
+  temp3 = RmH * RnH;
+  Res2 = 0;
+  Res1 = temp1 + temp2;
+  if (Res1 < temp1)
+    Res2 += 0x00010000;
+  temp1 = (Res1 << 16) & 0xffff0000;
+  Res0 = temp0 + temp1;
+  if (Res0 < temp0)
+    Res2 += 1;
+  Res2 += ((Res1 >> 16) & 0xffff) + temp3;
+  
+  if (sign)
     {
-
-      RnL = rn & 0xffff;
-      RnH = (rn >> 16) & 0xffff;
-      RmL = rm & 0xffff;
-      RmH = (rm >> 16) & 0xffff;
-      temp0 = RmL * RnL;
-      temp1 = RmH * RnL;
-      temp2 = RmL * RnH;
-      temp3 = RmH * RnH;
-      Res2 = 0;
-      Res1 = temp1 + temp2;
-      if (Res1 < temp1)
-	Res2 += 0x00010000;
-      temp1 = (Res1 << 16) & 0xffff0000;
-      Res0 = temp0 + temp1;
-      if (Res0 < temp0)
-	Res2 += 1;
-      Res2 += ((Res1 >> 16) & 0xffff) + temp3;
-      MACH = Res2;
-      MACL = Res0;
-
+      if (rn & 0x80000000)
+	Res2 -= rm;
+      if (rm & 0x80000000)
+	Res2 -= rn;
     }
 
-  else
-    {
-#ifdef __GNUC__
-      long long res;
-      long long a = rn;
-      long long b = rm;
-      res = a * b;
-      MACH = res >> 32;
-      MACL = res & 0xffffffff;
-#else
-      abort ();
-#endif
-    }
-
+  MACH = Res2;
+  MACL = Res0;
 }
 
+static void
+macw (regs, memory, n, m)
+     int *regs;
+     unsigned char *memory;
+     int m, n;
+{
+  long tempm, tempn;
+  long prod, macl, sum;
+
+  tempm=RSWAT(regs[m]); regs[m]+=2;
+  tempn=RSWAT(regs[n]); regs[n]+=2;
+
+  macl = MACL;
+  prod = (long)(short) tempm * (long)(short) tempn;
+  sum = prod + macl;
+  if (S)
+    {
+      if ((~(prod ^ macl) & (sum ^ prod)) < 0)
+	{
+	  /* MACH's lsb is a sticky overflow bit.  */
+	  MACH |= 1;
+	  /* Store the smallest negative number in MACL if prod is
+	     negative, and the largest positive number otherwise.  */
+	  sum = 0x7fffffff + (prod < 0);
+	}
+    }
+  else
+    {
+      /* Add to MACH the sign extended product, and carry from low sum.  */
+      MACH += (-(prod < 0)) + ((unsigned long) sum < prod);
+    }
+  MACL = sum;
+}
 
 /* Set the memory size to the power of two provided. */
 
