@@ -1,3 +1,8 @@
+Tue Dec 16 09:20:43 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c: Prevent use of interworking support for
+	non-COFF targets.
+
 Mon Dec 15 15:20:32 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/all.texi: Add M32R cpu.
