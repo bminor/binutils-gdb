@@ -84,6 +84,7 @@ srcname="gnu development package"
 
 case "${host}" in
   alpha-dec-osf*)         host_makefile_frag=config/mh-alphaosf ;;
+  m68k-hp-hpux)		  host_makefile_frag=config/mh-hp300 ;;
   m68k-apollo-sysv*)      host_makefile_frag=config/mh-apollo68 ;;
   m68k-apollo-bsd*)       host_makefile_frag=config/mh-a68bsd ;;
   m88k-motorola-sysv*)    host_makefile_frag=config/mh-delta88;;
