@@ -1,3 +1,13 @@
+1999-08-12  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-arm.h (elf32_arm_to_thumb_stub):  Make 'offset' parameter
+	into a bfd_vma and 'addend' parameter a 'bfd_signed_vma'.
+	(elf32_thumb_to_arm_stub):  Make 'offset' parameter into a bfd_vma
+	and 'addend' parameter a 'bfd_signed_vma'.
+	(elf32_arm_final_link_relocate): Do not involve stubs in
+	R_ARM_THM_PC22 relocs relative to section symbols, they are long
+	jumps, not function calls.
+
 1999-08-11  Robin Farine <advanc@dial.eunet.ch>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Check for overflow

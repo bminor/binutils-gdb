@@ -50,6 +50,12 @@ static void record_thumb_to_arm_glue
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void elf32_arm_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
+static int elf32_arm_to_thumb_stub
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, bfd *, asection *,
+	   bfd_byte *, asection *, bfd_vma, bfd_signed_vma, bfd_vma));
+static int elf32_thumb_to_arm_stub
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, bfd *, asection *,
+	   bfd_byte *, asection *, bfd_vma, bfd_signed_vma, bfd_vma));
 
 /* The linker script knows the section names for placement.
    The entry_names are used to do simple name mangling on the stubs.
@@ -709,7 +715,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 	    case R_ARM_THM_PC22:
 	      /* This one is a call from thumb code.  We look
 	         up the target of the call. If it is not a thumb
-                 target, we insert glue. */
+                 target, we insert glue.  */
 
 	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC)
 		record_thumb_to_arm_glue (link_info, h);
@@ -795,23 +801,23 @@ insert_thumb_branch (br_insn, rel_off)
 static int
 elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 			 hit_data, sym_sec, offset, addend, val)
-     struct bfd_link_info *info;
-     char *name;
-     bfd *input_bfd;
-     bfd *output_bfd;
-     asection *input_section;
-     bfd_byte *hit_data;
-     asection *sym_sec;
-     int offset;
-     int addend;
-     bfd_vma val;
+     struct bfd_link_info * info;
+     const char *           name;
+     bfd *                  input_bfd;
+     bfd *                  output_bfd;
+     asection *             input_section;
+     bfd_byte *             hit_data;
+     asection *             sym_sec;
+     bfd_vma                offset;
+     bfd_signed_vma         addend;
+     bfd_vma                val;
 {
-  asection *s = 0;
+  asection * s = 0;
   long int my_offset;
   unsigned long int tmp;
   long int ret_offset;
-  struct elf_link_hash_entry *myh;
-  struct elf32_arm_link_hash_table *globals;
+  struct elf_link_hash_entry * myh;
+  struct elf32_arm_link_hash_table * globals;
 
   myh = find_thumb_glue (info, name, input_bfd);
   if (myh == NULL)
@@ -895,24 +901,23 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 static int
 elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 			 hit_data, sym_sec, offset, addend, val)
-
-     struct bfd_link_info *info;
-     char *name;
-     bfd *input_bfd;
-     bfd *output_bfd;
-     asection *input_section;
-     bfd_byte *hit_data;
-     asection *sym_sec;
-     int offset;
-     int addend;
-     bfd_vma val;
+     struct bfd_link_info * info;
+     const char *           name;
+     bfd *                  input_bfd;
+     bfd *                  output_bfd;
+     asection *             input_section;
+     bfd_byte *             hit_data;
+     asection *             sym_sec;
+     bfd_vma                offset;
+     bfd_signed_vma         addend;
+     bfd_vma                val;
 {
   unsigned long int tmp;
   long int my_offset;
-  asection *s;
+  asection * s;
   long int ret_offset;
-  struct elf_link_hash_entry *myh;
-  struct elf32_arm_link_hash_table *globals;
+  struct elf_link_hash_entry * myh;
+  struct elf32_arm_link_hash_table * globals;
 
   myh = find_arm_glue (info, name, input_bfd);
   if (myh == NULL)
@@ -970,12 +975,11 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
        + input_section->output_section->vma
        + offset + addend)
     - 8;
-
+  
   tmp = tmp | ((ret_offset >> 2) & 0x00FFFFFF);
 
   bfd_put_32 (output_bfd, tmp, hit_data
 	      - input_section->vma);
-
 
   return true;
 }
@@ -1164,7 +1168,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	  if (sym_flags == STT_ARM_TFUNC)
 	    {
 	      elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
-				       input_section, hit_data, sym_sec, rel->r_offset, addend, value);
+				       input_section, hit_data, sym_sec, rel->r_offset,
+				       signed_addend, value);
 	      return bfd_reloc_ok;
 	    }
 
@@ -1323,12 +1328,14 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	}
 #endif
 
-        /* If it's not a call to thumb, assume call to arm */
-	if (sym_flags != STT_ARM_TFUNC)
+        /* If it is not a call to thumb, assume call to arm.
+	   If it is a call relative to a section name, then it is not a
+	   function call at all, but rather a long jump.  */
+	if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION)
 	  {
 	    if (elf32_thumb_to_arm_stub
 		(info, sym_name, input_bfd, output_bfd, input_section,
-		 hit_data, sym_sec, rel->r_offset, addend, value))
+		 hit_data, sym_sec, rel->r_offset, signed_addend, value))
 	      return bfd_reloc_ok;
 	    else
 	      return bfd_reloc_dangerous;
