@@ -59,6 +59,8 @@ typedef elf_symbol_type obj_symbol_type;
    to store a copyright string.  */
 #define obj_version obj_elf_version
 #define obj_copyright obj_elf_version
+
+#define UNWIND_SECTION_NAME ".PARISC.unwind"
 #endif
 
 #ifdef OBJ_SOM
@@ -4512,17 +4514,21 @@ static void
 pa_build_unwind_subspace (call_info)
      struct call_info *call_info;
 {
-#if 0
   char *unwind;
   asection *seg, *save_seg;
+  asymbol *sym;
   subsegT subseg, save_subseg;
-  int i;
+  int i, reloc;
   char c, *p;
 
+  if (bfd_get_arch_info (abfd)->bits_per_address == 32)
+    reloc = R_PARISC_DIR32
+  else
+    reloc = R_PARISC_SEGREL32
+    
   /* Get into the right seg/subseg.  This may involve creating
      the seg the first time through.  Make sure to have the
      old seg/subseg so that we can reset things when we are done.  */
-  subseg = SUBSEG_UNWIND;
   seg = bfd_get_section_by_name (stdoutput, UNWIND_SECTION_NAME);
   if (seg == ASEC_NULL)
     {
@@ -4534,7 +4540,7 @@ pa_build_unwind_subspace (call_info)
 
   save_seg = now_seg;
   save_subseg = now_subseg;
-  subseg_set (seg, subseg);
+  subseg_set (seg, 0);
 
 
   /* Get some space to hold relocation information for the unwind
@@ -4545,7 +4551,8 @@ pa_build_unwind_subspace (call_info)
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
+		(expressionS *) NULL, 0, reloc,
+		e_fsel, 32, 0, NULL);
 
   p = frag_more (4);
   md_number_to_chars (p, 0, 4);
@@ -4560,7 +4567,8 @@ pa_build_unwind_subspace (call_info)
 
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
+		(expressionS *) NULL, 0, reloc,
+		e_fsel, 32, 0, NULL);
 
   /* Dump it. */
   unwind = (char *) &call_info->ci_unwind;
@@ -4574,7 +4582,6 @@ pa_build_unwind_subspace (call_info)
 
   /* Return back to the original segment/subsegment.  */
   subseg_set (save_seg, save_subseg);
-#endif
 }
 #endif
 
@@ -5253,6 +5260,12 @@ pa_level (unused)
     {
       input_line_pointer += 3;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 11))
+	as_warn (_("could not set architecture and machine"));
+    }
+  else if (strncmp (level, "2.0w", 4) == 0)
+    {
+      input_line_pointer += 4;
+      if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 25))
 	as_warn (_("could not set architecture and machine"));
     }
   else if (strncmp (level, "2.0", 3) == 0)
