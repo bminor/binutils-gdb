@@ -580,7 +580,7 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -r | --reverse-sort ]  [ --size-sort ] [ -u | --undefined-only ]
    [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
-   [ --defined-only ]
+   [ --defined-only ] [-l | --line-numbers ]
    [ --no-demangle ] [ -V | --version ]  [ --help ]  [ @var{objfile}@dots{} ]
 @end smallexample
 
@@ -721,6 +721,15 @@ either upper or lower case.
 @itemx --extern-only 
 @cindex external symbols
 Display only external symbols.
+
+@item -l
+@itemx --line-numbers
+@cindex symbol line numbers
+For each symbol, use debugging information to try to find a filename and
+line number.  For a defined symbol, look for the line number of the
+address of the symbol.  For an undefined symbol, look for the line
+number of a relocation entry which refers to the symbol.  If line number
+information can be found, print it after the other symbol information.
 
 @item -n
 @itemx -v
