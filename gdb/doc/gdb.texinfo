@@ -1616,6 +1616,13 @@ program.  This is different from @samp{set env @var{varname} =};
 rather than assigning it an empty value.
 @end table
 
+One thing to be aware of is that your program is run via the shell
+indicated by your @code{SHELL} environment variable if it exists; or
+@code{/bin/sh} if not.  This means that if you change any environment
+variables in a @file{.cshrc} or @file{.bashrc} file, the changes will
+affect your program.  You may wish to move setting of environment
+variables to @file{.login} or @file{.profile}.
+
 @node Working Directory
 @section Your program's working directory
 
