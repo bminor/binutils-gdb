@@ -365,6 +365,26 @@ changequote([,])dnl
 	*) extra_objects="$extra_objects m68k-parse.o" ;;
 	esac
 	;;
+
+      mips)
+	`echo ${extra_objects}` | grep -s "itbl-parse.o" 
+	if test $? -ne 0 ; then
+	extra_objects="$extra_objects itbl-parse.o"
+	fi
+
+	`echo ${extra_objects}` | grep -s "itbl-lex.o" 
+	if test $? -ne 0 ; then
+	extra_objects="$extra_objects itbl-lex.o"
+	fi
+
+	`echo ${extra_objects}` | grep -s "itbl-ops.o" 
+	if test $? -ne 0 ; then
+	extra_objects="$extra_objects itbl-ops.o"
+	fi
+	;;
+
+      *)
+	;;
     esac
 
 # See if we really can support this configuration with the emulation code.
@@ -527,8 +547,10 @@ AC_DEFINE_UNQUOTED(DEFAULT_EMULATION, "$DEFAULT_EMULATION")
 files="config/tc-${target_cpu_type}.c config/tc-${target_cpu_type}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/te-${te_file}.h config/atof-${atof}.c \
+	config/itbl-${target_cpu_type}.h \
 	$extra_files"
 links="targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c \
+	itbl-cpu.h \
 	$extra_links"
 
 case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in

@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -35,7 +35,6 @@
  */
 
 #include "ansidecl.h"
-#include "libiberty.h"
 
 #define COMMON
 
@@ -85,6 +84,16 @@ struct defsym_list
 };
 
 static struct defsym_list *defsyms;
+
+/* Keep a record of the itbl files we read in. */
+
+struct itbl_file_list
+{
+  struct itbl_file_list *next;
+  char *name;
+};
+
+static struct itbl_file_list *itbl_files;
 
 void
 print_version_id ()
@@ -134,6 +143,8 @@ Options:\n\
 --statistics		print various measured statistics from execution\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
+-t,--itbl INSTTBL	extend instruction set to include instrictions\n\
+			matching the specifications defined in file INSTTBL\n\
 -w			ignored\n\
 -X			ignored\n\
 -Z			generate object file even after errors\n");
@@ -267,6 +278,8 @@ parse_args (pargc, pargv)
       'v',
 #endif
       'w', 'X',
+	  /* New option for extending instruction set (see also --itbl below) */
+	  't',
       '\0'
     };
   struct option *longopts;
@@ -289,7 +302,15 @@ parse_args (pargc, pargv)
 #define OPTION_EMULATION (OPTION_STD_BASE + 6)
     {"emulation", required_argument, NULL, OPTION_EMULATION},
 #define OPTION_DEFSYM (OPTION_STD_BASE + 7)
-    {"defsym", required_argument, NULL, OPTION_DEFSYM}
+    {"defsym", required_argument, NULL, OPTION_DEFSYM},
+#define OPTION_INSTTBL (OPTION_STD_BASE + 8)
+    /* New option for extending instruction set (see also -t above).
+     * The "-t file" or "--itbl file" option extends the basic set
+     * of valid instructions by reading "file", a text file containing
+     * a list of instruction formats.  The additional opcodes and their 
+     * formats are added to the built-in set of instructions, and
+     * mnemonics for new registers may also be defined.  */
+    {"itbl", required_argument, NULL, OPTION_INSTTBL}
   };
 
   /* Construct the option lists from the standard list and the
@@ -422,6 +443,32 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 	  }
 	  break;
 
+	case OPTION_INSTTBL:
+	case 't':
+	  {
+	    /* optarg is the name of the file containing the instruction 
+	       formats, opcodes, register names, etc. */
+	    struct itbl_file_list *n;
+
+	    n = (struct itbl_file_list *) xmalloc (sizeof *n);
+	    n->next = itbl_files;
+	    n->name = optarg;
+	    itbl_files = n;
+
+	    /* Parse the file and add the new instructions to our internal
+	       table.  If multiple instruction tables are specified, the 
+	       information from this table gets appended onto the existing 
+	       internal table. */
+	    itbl_files->name = xstrdup (optarg);
+	    if (itbl_parse(itbl_files->name) != 0)
+	    {
+	      fprintf (stderr, "Failed to read instruction table %s\n", 
+			itbl_files->name);
+	      exit (EXIT_SUCCESS);
+	    }
+	  }
+	  break;
+
 	case 'J':
 	  flag_signed_overflow_ok = 1;
 	  break;
@@ -543,6 +590,7 @@ main (argc, argv)
 
   start_time = get_run_time ();
 
+
   if (debug_memory)
     {
 #ifdef BFD_ASSEMBLER
@@ -581,7 +629,7 @@ main (argc, argv)
   symbol_begin ();
   frag_init ();
   subsegs_begin ();
-  parse_args (&argc, &argv);
+  parse_args (&argc, &argv); 
   read_begin ();
   input_scrub_begin ();
   expr_begin ();
@@ -614,6 +662,8 @@ main (argc, argv)
   tc_init_after_args ();
 #endif
 
+  itbl_init ();
+
   /* Now that we have fully initialized, and have created the output
      file, define any symbols requested by --defsym command line
      arguments.  */
@@ -639,8 +689,7 @@ main (argc, argv)
 #endif
 
   if (seen_at_least_1_file ()
-      && !((had_warnings () && flag_always_generate_output)
-	   || had_errors () > 0))
+      && (flag_always_generate_output || had_errors () == 0))
     keep_it = 1;
   else
     keep_it = 0;
@@ -659,6 +708,9 @@ main (argc, argv)
     output_file_close (out_file_name);
 #endif
 
+  if (had_errors () > 0 && ! flag_always_generate_output)
+    keep_it = 0;
+
   if (!keep_it)
     unlink (out_file_name);
 
@@ -668,8 +720,7 @@ main (argc, argv)
 
   /* Use xexit instead of return, because under VMS environments they
      may not place the same interpretation on the value given.  */
-  if ((had_warnings () && flag_always_generate_output)
-      || had_errors () > 0)
+  if (had_errors () > 0)
     xexit (EXIT_FAILURE);
   xexit (EXIT_SUCCESS);
 }

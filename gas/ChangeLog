@@ -1,3 +1,27 @@
+Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* itbl-parse.y: Fix indentation mistakes from indent program.
+	* itbl-lex.l: Fix indentation mistakes from indent program.
+	* itbl-ops.h: Add include for ansidecl.h.
+	Add PARAMS around function arguments.
+	Add declaration for itbl_have_entries.
+	* itbl-ops.c: Add PARAMS around function arguments.
+	* Makefile.in: Add itbl build rules.
+	Add dependancies for itbl files to mips target.
+	* as.c: Add itbl support.
+	Add new option "--insttbl" for dynamically extending instruction set.
+	* as.h: Declare insttbl_file_name;
+	the name of file defining extensions to the basic instruction set 
+	* configure.in, configure: Add itbl-parse.o, itbl-lex.o, and 
+	itbl-ops.o to extra_objects for mips configuration.
+	Add include file link from itbl-cpu.h to 
+	config/itbl-${target_cpu_type}.h.
+	* config/tc-mips.c: Allow copz instructions.
+	Add notes for future additions to the itbl support.
+	Add debug macros.
+	(macro): Call itbl_assemble to assemble itbl instructions.
+	See if an unknown register is specified in an itbl entry.
+
 Sat Feb 22 20:53:01 1997  Fred Fish  <fnf@cygnus.com>
 	* doc/internals.texi (CPU backend): Fix typo in md_section_align
 	description.

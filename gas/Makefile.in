@@ -62,7 +62,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
-DISTSTUFF= make-gas.com m68k-parse.c
+DISTSTUFF= make-gas.com m68k-parse.c itbl-parse.y itbl-lex.l itbl-ops.c
 
 AR = ar
 AR_FLAGS = qv
@@ -72,11 +72,11 @@ MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
 CC = @CC@
-CFLAGS = -g
-LDFLAGS =
 HLDFLAGS = @HLDFLAGS@
 HLDENV = @HLDENV@
 RPATH_ENVVAR = @RPATH_ENVVAR@
+CFLAGS = -g
+LDFLAGS =
 
 MAKEOVERRIDES=
 
@@ -107,6 +107,12 @@ RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
 	   fi`
 RUNTESTFLAGS=
 
+# use @target_cpu_type@ for refering to configured target name
+IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h itbl-cpu.h 
+IT_SRCS=itbl-parse.c itbl-lex.c $(srcdir)/itbl-ops.c
+IT_DEPS=$(srcdir)/itbl-parse.y $(srcdir)/itbl-lex.l $(srcdir)/config/itbl-@target_cpu_type@.h
+IT_OBJS=itbl-parse.o itbl-lex.o itbl-ops.o
+
 # Lists of files for various purposes.
 
 REAL_SOURCES = \
@@ -123,6 +129,7 @@ REAL_SOURCES = \
 	$(srcdir)/hash.c \
 	$(srcdir)/input-file.c \
 	$(srcdir)/input-scrub.c \
+	$(srcdir)/itbl-ops.c \
 	$(srcdir)/literal.c \
 	$(srcdir)/messages.c \
 	$(srcdir)/output-file.c \
@@ -150,6 +157,7 @@ REAL_HEADERS = \
 	$(srcdir)/frags.h \
 	$(srcdir)/hash.h \
 	$(srcdir)/input-file.h \
+	$(srcdir)/itbl-ops.h \
 	$(srcdir)/listing.h \
 	$(srcdir)/tc.h \
 	$(srcdir)/obj.h \
@@ -164,7 +172,8 @@ LINKED_HEADERS = \
 	targ-env.h \
 	targ-cpu.h \
 	obj-format.h \
-	atof-targ.h
+	atof-targ.h \
+	itbl-cpu.h
 
 HEADERS = $(LINKED_HEADERS) $(REAL_HEADERS)
 
@@ -259,7 +268,7 @@ as.new: $(OBJS) $(LIBDEPS)
 
 $(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
 	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
-	listing.h bignum.h $(srcdir)/../include/libiberty.h
+	listing.h bignum.h $(IT_HDRS) $(srcdir)/../include/libiberty.h
 
 gasp.new: $(GASPOBJS) ../libiberty/libiberty.a
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) ../libiberty/libiberty.a $(LOADLIBES)
@@ -345,7 +354,8 @@ TARG_CPU_DEP_i960    =
 TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h \
 			$(srcdir)/config/m68k-parse.h subsegs.h
 TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h subsegs.h
-TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h subsegs.h
+TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h subsegs.h  \
+			$(srcdir)/config/itbl-mips.h 
 TARG_CPU_DEP_ns32k   =
 TARG_CPU_DEP_ppc     = subsegs.h
 TARG_CPU_DEP_sh      = $(srcdir)/../opcodes/sh-opc.h subsegs.h
@@ -388,7 +398,7 @@ ecoff.o : ecoff.c ecoff.h \
 stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h
 atof-targ.o : atof-targ.c
 obj-format.o : obj-format.c
-targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@target_cpu_type@)
+targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@target_cpu_type@) $(IT_HDRS)
 
 obj-elf.o : $(srcdir)/config/obj-elf.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-elf.c
@@ -406,6 +416,51 @@ m68k-parse.c: $(srcdir)/config/m68k-parse.y
 	$(BISON) $(BISONFLAGS) $(srcdir)/config/m68k-parse.y
 	mv -f y.tab.c m68k-parse.c
 m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
+
+
+# The instruction table specification lexical analyzer and parser.
+
+itbl-cpu.h : $(srcdir)/config/itbl-@target_cpu_type@.h
+itbl-parse.h : $(srcdir)/itbl-parse.y
+itbl-parse.c : $(srcdir)/itbl-parse.y
+itbl-lex.c : $(srcdir)/itbl-lex.l
+
+itbl-lex.c: $(srcdir)/itbl-lex.l
+	$(LEX) $(LEXFLAGS) $(srcdir)/itbl-lex.l
+	mv -f lex.yy.c itbl-lex.c
+
+itbl-lex.o: itbl-lex.c 
+	$(CC) -Wall -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-lex.c
+
+itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
+	$(YACC) -d $(YACCFLAGS) $(srcdir)/itbl-parse.y
+	mv -f y.tab.c itbl-parse.c
+	mv -f y.tab.h itbl-parse.h
+
+itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h itbl-cpu.h
+	$(CC) -Wall -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-parse.c
+
+itbl-ops.o: $(srcdir)/itbl-ops.c \
+	$(srcdir)/itbl-ops.h itbl-cpu.h itbl-parse.h
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
+
+# stand-alone assembler & disassembler
+itbl-test-ops.o: $(srcdir)/itbl-ops.c \
+	$(srcdir)/itbl-ops.h itbl-cpu.h itbl-parse.h
+	$(CC) -o itbl-test-ops.o -DSTAND_ALONE -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
+
+itbl-test.o: $(srcdir)/itbl-test.c $(srcdir)/itbl-ops.h itbl-cpu.h
+	$(CC) -c -DSTAND_ALONE $(ALL_CFLAGS) $(INCLUDES) $(srcdir)/itbl-test.c
+
+IT_TEST_OBJS= itbl-parse.o itbl-lex.o itbl-test-ops.o
+itbl-test: $(IT_TEST_OBJS) itbl-test.o $(LIBDEPS)
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o itbl-test itbl-test.o $(IT_TEST_OBJS) $(LIBS)
+
+# target itbl definitions for configuring coprocessor itbl support.
+# configure should have taken care of this for us...
+itbl-cpu.h: $(srcdir)/config/itbl-@target_cpu_type@.h
+	ln -s $(srcdir)/config/itbl-@target_cpu_type@.h itbl-cpu.h
+
 
 # Remake the info files.
 
@@ -428,6 +483,7 @@ clean mostlyclean: clean-here
 
 DISTCLEAN_HERE = config.status Makefile targ-env.h targ-cpu.h \
 	targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
+	atof-targ.h itbl-cpu.h \
 	config-stamp config.h conf config.log config.cache .gdbinit \
 	testsuite/Makefile testsuite/config.status
 
