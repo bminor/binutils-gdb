@@ -24,6 +24,7 @@ CXXFLAGS = -g -O
 MAKEINFOFLAGS =
 
 log	= 1>$(canonhost)-build-log 2>&1
+clog	= 1>$(canonhost)-check-log 2>&1
 cyglog    = 1> $(canonhost)-x-$$i-cygnus-build-log 2>&1
 latestlog = 1> $(canonhost)-x-$$i-latest-build-log 2>&1
 natlog    = 1> $(canonhost)-x-$$i-native-build-log 2>&1
@@ -260,6 +261,13 @@ all-cygnus:
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
+	@if [ ! -f $(canonhost)-stamp-3stage-checked ] ; then \
+	  echo checking $(canonhost) native ; \
+	  $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-check-3stage $(clog) ; \
+	  touch $(canonhost)-stamp-3stage-checked ; \
+	else \
+	  true ; \
+	fi
 	@echo done at `date`
 
 native:
