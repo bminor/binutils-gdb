@@ -225,6 +225,10 @@ struct elf32_hppa_link_hash_entry {
 #endif
 
   /* Set during a static link if we detect a function is PIC.  */
+  unsigned int maybe_pic_call:1;
+
+  /* Set if the only reason we need a .plt entry is for a non-PIC to
+     PIC function call.  */
   unsigned int pic_call:1;
 
   /* Set if this symbol is used by a plabel reloc.  */
@@ -490,6 +494,7 @@ hppa_link_hash_newfunc (entry, table, string)
 #if ! LONG_BRANCH_PIC_IN_SHLIB || RELATIVE_DYNAMIC_RELOCS
       ret->reloc_entries = NULL;
 #endif
+      ret->maybe_pic_call = 0;
       ret->pic_call = 0;
       ret->plabel = 0;
       ret->plt_abs = 0;
@@ -721,7 +726,7 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
 	      && hash->elf.plt.offset != (bfd_vma) -1)
 	  || hash->elf.root.type == bfd_link_hash_undefweak
 	  || hash->elf.root.type == bfd_link_hash_undefined
-	  || hash->pic_call))
+	  || (hash->maybe_pic_call && !(input_sec->flags & SEC_HAS_GOT_REF))))
     {
       /* If output_section is NULL, then it's a symbol defined in a
 	 shared library.  We will need an import stub.  Decide between
@@ -1890,6 +1895,14 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
+      if (!info->shared
+	  && h->plt.refcount > 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	  && (h->root.u.def.section->flags & SEC_HAS_GOT_REF) != 0)
+	{
+	  ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
+	}
+
       if (h->plt.refcount <= 0
 	  || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
 	      && h->root.type != bfd_link_hash_defweak
@@ -1906,14 +1919,8 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 
 	  /* As a special sop to the hppa ABI, we keep a .plt entry
 	     for functions in sections containing PIC code.  */
-	  if (!info->shared
-	      && h->plt.refcount > 0
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-	      && (h->root.u.def.section->flags & SEC_HAS_GOT_REF) != 0)
-	    {
-	      ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
-	    }
+	  if (((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call)
+	    ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 	  else
 	    {
 	      h->plt.offset = (bfd_vma) -1;
@@ -2059,6 +2066,7 @@ hppa_handle_PIC_calls (h, inf)
     }
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+  ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
   ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 
   info = (struct bfd_link_info *) inf;
@@ -3244,11 +3252,12 @@ final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
 	 find the import stub in the stub hash.  */
       if (sym_sec == NULL
 	  || sym_sec->output_section == NULL
-	  || (h != NULL &&
-	      (h->pic_call
-	       || (h->elf.root.type == bfd_link_hash_defweak
-		   && h->elf.dynindx != -1
-		   && h->elf.plt.offset != (bfd_vma) -1))))
+	  || (h != NULL
+	      && ((h->maybe_pic_call
+		   && !(input_section->flags & SEC_HAS_GOT_REF))
+		  || (h->elf.root.type == bfd_link_hash_defweak
+		      && h->elf.dynindx != -1
+		      && h->elf.plt.offset != (bfd_vma) -1))))
 	{
 	  stub_entry = hppa_get_stub_entry (input_section, sym_sec,
 					    h, rel, hplink);
