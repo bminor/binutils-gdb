@@ -1,3 +1,8 @@
+Thu Feb 27 12:00:03 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* config/obj-coff.c (obj_coff_section): Add 'r' section attribute
+	to denote read-only data sections.
+
 Thu Feb 27 00:26:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-elf.c (obj_elf_common): Set BSF_OBJECT in flags.
