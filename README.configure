@@ -1,0 +1,115 @@
+
+
+			    Configuration
+
+	 Last Mod Fri Apr 12 13:32:56 PDT 1991, by rich@sendai
+
+
+"Theory":
+
+In this document, the word "host" refers to the environment in which
+this source will be compiled.  "host" and "host name" have nothing to
+do with the proper name of your host, like "ucbvax", "prep.ai.mit.edu"
+or "att.com".  Instead they refer to things like "sun4" and "dec3100".
+
+Forget for a moment that this particular directory of source is the
+source for a development environment.  Instead, pretend that it is the
+source for a simpler, more mundane, application, say, a desk
+calculator.
+
+Source that can be compiled in more than one environment, generally
+needs to be set up for each environment explicitly. 
+
+The word "target" refers to the environment produced by compiling this
+source and installing the resulting binaries.
+
+For example, if configured for host sun4 and target sun4, this implies
+that we will compile on a sun4 to create a sun4 compilation
+environment.  If configured for host sun3 and target a29k, this
+implies that we will compile on a sun3 to create an a29k compilation
+environment.
+
+Host sun3 only implies that the source will be compiled on a sun3.  In
+fact, it need not be actually compiled on a sun3.  If the appropriate
+native development tools, header files, libraries, and operating
+system support were available on a foobox, then source configured for
+a sun3 could be compiled on a foobox, resulting in a development
+environment for, using the previous example host+target pair, "a29k"
+on the foobox.  Similarly, if the appropriate cross development tools,
+header files, and libraries were available on a dec3100, then source
+configured for host sun3 could be cross compiled to create an a29k 
+development environment intended to be run on a sun3.
+
+
+Usage:
+
+Gdb's config has features not yet present in the uniform configuration
+scheme described here.  For this reason, configuration of gdb must
+currently be done separately from that of the rest of this package.
+This will be corrected soon.  For more information on the
+configuration of gdb, please refer to the documents in gdb.{your
+target} if it exists, otherwise gdb.
+
+By "configures", I mean that links, Makefile, .gdbinit, and
+config.status are built.  Configuration is always done from the source
+directory.
+
+* "./configure name" configures this directory, perhaps
+  recursively, for a single host+target pair where the host and target
+  are both "name".  If a previous configuration existed, it will be
+  overwritten.
+
+* "./configure +host=hostname targetname" configures this
+  directory, perhaps recursively, for a single host+target pair where
+  the host is hostname and target is targetname.  If a previous
+  configuration existed, it will be overwritten.
+
+* "./configure +forcesubdirs +host=hostname targetname" creates
+  a subdirectories Host-hostname and
+  Host-hostname/Target-targetname and configures
+  Host-hostname/Target-targetname.  For now, makes should be
+  done from Host-hostname/Target-targetname.  "./configure +f
+  name" works as expected.  That is, it creates Host-name and
+  Host-name/Target-name and configures the latter.
+
+
+Hacking configurations:
+
+The configure scripts essentially do three things, create
+subdirectories if appropriate, build a Makefile, and create links to
+files, all based on and tailored to, a specific host+target pair.  The
+scripts also create a .gdbinit if appropriate but this is not
+tailored.
+
+The Makefile is created by prepending some variable definitions to a
+Makefile template called Makefile.in and then inserting host and
+target specific Makefile fragments.  The variables are set based on
+the chosen host+target pair and build style, that is, if you use
+subdirectories or not.  The host and target specific Makefile
+may or may not exist.  If fragments 
+
+* Makefiles can be editted directly, but those changes will eventually
+  be lost.  Changes intended to be permanent for a specific host
+  should be made to the host specific Makefile fragment.  This should
+  be in ./config/hmake-host if it exists.  Changes intended to be
+  permanent for a specific target should be made to the target
+  specific Makefile fragment.  This should be in ./config/tmake-target
+  if it exists.  Changes intended to be permanent for the directory
+  should be made in Makefile.in.  To propogate changes to any of
+  these, either use "make Makefile" or re-configure from the source
+  directory.
+
+* configure can be editted directly, but those changes will eventually
+  be lost.  Changes intended to be permanent for a specific directory
+  should be made to configure.in.  Changes intended to be permanent
+  for all configure scripts should be made to configure.template.
+  Propogating changes to configure.in requires the presence of
+  configure.template which normally resides in the uppermost directory
+  you received.  To propogate changes to either configure.template or
+  a configure.in, use "configure +template=absolutepathtothetemplate".
+  This will configure the configure scripts themselves, recursively if
+  appropriate.
+
+* "configure -srcdir=foo" is not supported yet.  At the moment, things
+  will probably be configured correctly only for leaf directories, and
+  even they will not have paths to libraries set properly.

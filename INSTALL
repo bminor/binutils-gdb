@@ -1,0 +1,7 @@
+* configure
+**	defaults
+***		name encoding (bolted)
+***		destdir (can be set at config time with +destdir=/foo)
+* make (optional)
+* make install
+* make clean (optional)
