@@ -1953,8 +1953,7 @@ mips_extract_return_value (valtype, regbuf, valbuf)
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     { /* "un-left-justify" the value from the register */
-      if (len < REGISTER_RAW_SIZE (regnum)     &&
-	  TYPE_CODE (valtype) != TYPE_CODE_FLT)
+      if (len < REGISTER_RAW_SIZE (regnum))
 	offset = REGISTER_RAW_SIZE (regnum) - len;
       if (len > REGISTER_RAW_SIZE (regnum)     &&	/* odd-size structs */
 	  len < REGISTER_RAW_SIZE (regnum) * 2 &&

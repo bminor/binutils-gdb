@@ -1,3 +1,8 @@
+Thu Jul  3 17:41:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* mips-tdep.c (mips_extract_return_value): align 4-byte float
+	return values within the 8-byte FP register.
+
 Thu Jul  3 13:48:11 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* mips-tdep.c (mips_push_arguments): don't left-adjust 32-bit
