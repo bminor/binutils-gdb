@@ -81,6 +81,7 @@ struct elf_backend_data
 				     Elf_Internal_Rela *));
   void (*elf_info_to_howto_rel) PARAMS ((bfd *, arelent *,
 					 Elf_Internal_Rel *));
+  bfd_vma maxpagesize;
   void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
 
   /* @@ I really don't think this should be here.  I don't know what
@@ -130,6 +131,7 @@ struct elf_obj_tdata
 {
   Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
   Elf_Internal_Shdr **elf_sect_ptr;
+  Elf_Internal_Phdr *phdr;
   struct strtab *strtab_ptr;
   int num_locals;
   int num_globals;
