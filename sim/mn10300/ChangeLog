@@ -1,3 +1,28 @@
+start-sanitize-am30
+Thu May 14 19:30:11 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-mn103cpu.c: Use struct hw_event.
+	* dv-mn103cpu.c, dv-mn103int.c: Don't include hw-base.h, include
+ 	hw-main.h
+	* dv-mn103cpu.c, dv-mn103int.c: Rename *_callback to *_method.
+
+Wed May  6 13:29:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Create a polling PAL device.
+
+end-sanitize-am30
+Fri May  1 16:39:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-mn103int.c (mn103int_port_event): 
+	(mn103int_port_event): 
+	(mn103int_io_read_buffer): 
+	(mn103int_io_write_buffer): 
+
+	* dv-mn103cpu.c (deliver_mn103cpu_interrupt): Drop CPU/CIA args.
+	(mn103cpu_port_event): Ditto.
+	(mn103cpu_io_read_buffer): Ditto.
+	(mn103cpu_io_write_buffer): Ditto.
+
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.

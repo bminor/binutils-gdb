@@ -20,8 +20,7 @@
     */
 
 
-#include "sim-main.h"
-#include "hw-base.h"
+#include "hw-main.h"
 
 /* DEVICE
 
@@ -303,9 +302,9 @@ static const struct hw_port_descriptor mn103int_ports[] = {
 /* Finish off the partially created hw device.  Attach our local
    callbacks.  Wire up our port names etc */
 
-static hw_io_read_buffer_callback mn103int_io_read_buffer;
-static hw_io_write_buffer_callback mn103int_io_write_buffer;
-static hw_port_event_callback mn103int_port_event;
+static hw_io_read_buffer_method mn103int_io_read_buffer;
+static hw_io_write_buffer_method mn103int_io_write_buffer;
+static hw_port_event_method mn103int_port_event;
 
 static void
 attach_mn103int_regs (struct hw *me,
@@ -388,7 +387,7 @@ find_highest_interrupt_group (struct hw *me,
   int selected;
 
   /* FIRST_NMI_GROUP (group zero) is used as a special default value
-     when searching for an interrupt group */
+     when searching for an interrupt group.*/
   selected = FIRST_NMI_GROUP; 
   controller->group[FIRST_NMI_GROUP].level = 7;
   
@@ -397,7 +396,8 @@ find_highest_interrupt_group (struct hw *me,
       struct mn103int_group *group = &controller->group[gid];
       if ((group->request & group->enable) != 0)
 	{
-	  if (group->level > controller->group[selected].level)
+	  /* Remember, lower level, higher priority.  */
+	  if (group->level < controller->group[selected].level)
 	    {
 	      selected = gid;
 	    }
@@ -416,7 +416,7 @@ push_interrupt_level (struct hw *me,
   int selected = find_highest_interrupt_group (me, controller);
   int level = controller->group[selected].level;
   HW_TRACE ((me, "port-out - selected=%d level=%d", selected, level));
-  hw_port_event (me, LEVEL_PORT, level, NULL, NULL_CIA);
+  hw_port_event (me, LEVEL_PORT, level);
 }
 
 
@@ -427,9 +427,7 @@ mn103int_port_event (struct hw *me,
 		     int my_port,
 		     struct hw *source,
 		     int source_port,
-		     int level,
-		     sim_cpu *processor,
-		     sim_cia cia)
+		     int level)
 {
   struct mn103int *controller = hw_data (me);
 
@@ -493,7 +491,7 @@ mn103int_port_event (struct hw *me,
 	      if ((group->request & group->enable) != 0)
 		{
 		  HW_TRACE ((me, "port-out NMI"));
-		  hw_port_event (me, NMI_PORT, 1, NULL, NULL_CIA);
+		  hw_port_event (me, NMI_PORT, 1);
 		}
 	      break;
 	    }
@@ -521,8 +519,8 @@ decode_group (struct hw *me,
 	      unsigned_word base,
 	      unsigned_word *offset)
 {
-  int gid = (base / 8) % NR_GROUPS;
-  *offset = (base % 8);
+  int gid = (base / 4) % NR_GROUPS;
+  *offset = (base % 4);
   return &controller->group[gid];
 }
 
@@ -542,7 +540,7 @@ read_icr (struct hw *me,
 	{
 	case 0:
 	  val = INSERT_ID (group->request);
-	  HW_TRACE ((me, "read-icr group=%d nmi 0x%02x",
+	  HW_TRACE ((me, "read-icr group=%d:0 nmi 0x%02x",
 		     group->gid, val));
 	  break;
 	default:
@@ -556,13 +554,13 @@ read_icr (struct hw *me,
 	case 0:
 	  val = (INSERT_IR (group->request)
 		 | INSERT_ID (group->request & group->enable));
-	  HW_TRACE ((me, "read-icr group=%d level 0 0x%02x",
+	  HW_TRACE ((me, "read-icr group=%d:0 level 0x%02x",
 		     group->gid, val));
 	  break;
 	case 1:
 	  val = (INSERT_LV (group->level)
 		 | INSERT_IE (group->enable));
-	  HW_TRACE ((me, "read-icr level-%d level 1 0x%02x",
+	  HW_TRACE ((me, "read-icr level-%d:1 level 0x%02x",
 		     group->gid, val));
 	  break;
 	}
@@ -591,7 +589,7 @@ write_icr (struct hw *me,
       switch (offset)
 	{
 	case 0:
-	  HW_TRACE ((me, "write-icr group=%d nmi 0x%02x",
+	  HW_TRACE ((me, "write-icr group=%d:0 nmi 0x%02x",
 		     group->gid, val));
 	  group->request &= ~EXTRACT_ID (val);
 	  break;
@@ -605,13 +603,16 @@ write_icr (struct hw *me,
 	{
 	case 0: /* request/detect */
 	  /* Clear any ID bits and then set them according to IR */
-	  HW_TRACE ((me, "write-icr group=%d level 0 0x%02x",
-		     group->gid, val));
-	  group->request &= EXTRACT_ID (val);
-	  group->request |= EXTRACT_IR (val) & EXTRACT_ID (val);
+	  HW_TRACE ((me, "write-icr group=%d:0 level 0x%02x %x:%x:%x",
+		     group->gid, val,
+		     group->request, EXTRACT_IR (val), EXTRACT_ID (val)));
+	  group->request =
+	    ((EXTRACT_IR (val) & EXTRACT_ID (val))
+	     | (EXTRACT_IR (val) & group->request)
+	     | (~EXTRACT_IR (val) & ~EXTRACT_ID (val) & group->request));
 	  break;
 	case 1: /* level/enable */
-	  HW_TRACE ((me, "write-icr group=%d level 1 0x%02x",
+	  HW_TRACE ((me, "write-icr group=%d:1 level 0x%02x",
 		     group->gid, val));
 	  group->level = EXTRACT_LV (val);
 	  group->enable = EXTRACT_IE (val);
@@ -642,14 +643,24 @@ read_iagr (struct hw *me,
     {
     case 0:
       {
-	val = (controller->interrupt_accepted_group << 2);
-	if (!(controller->group[val].request
-	      & controller->group[val].enable))
-	  /* oops, lost the request */
-	  val = 0;
-	HW_TRACE ((me, "read-iagr %d", (int) val));
+	if (!(controller->group[controller->interrupt_accepted_group].request
+	      & controller->group[controller->interrupt_accepted_group].enable))
+	  {
+	    /* oops, lost the request */
+	    val = 0;
+	    HW_TRACE ((me, "read-iagr:0 lost-0"));
+	  }
+	else
+	  {
+	    val = (controller->interrupt_accepted_group << 2);
+	    HW_TRACE ((me, "read-iagr:0 %d", (int) val));
+	  }
 	break;
       }
+    case 1:
+      val = 0;
+      HW_TRACE ((me, "read-iagr:1 %d", (int) val));
+      break;
     default:
       val = 0;
       HW_TRACE ((me, "read-iagr 0x%08lx bad offset", (long) offset));
@@ -743,14 +754,12 @@ mn103int_io_read_buffer (struct hw *me,
 			 void *dest,
 			 int space,
 			 unsigned_word base,
-			 unsigned nr_bytes,
-			 sim_cpu *processor,
-			 sim_cia cia)
+			 unsigned nr_bytes)
 {
   struct mn103int *controller = hw_data (me);
   unsigned8 *buf = dest;
   unsigned byte;
-  HW_TRACE ((me, "read 0x%08lx %d", (long) base, (int) nr_bytes));
+  /* HW_TRACE ((me, "read 0x%08lx %d", (long) base, (int) nr_bytes)); */
   for (byte = 0; byte < nr_bytes; byte++)
     {
       unsigned_word address = base + byte;
@@ -778,14 +787,12 @@ mn103int_io_write_buffer (struct hw *me,
 			  const void *source,
 			  int space,
 			  unsigned_word base,
-			  unsigned nr_bytes,
-			  sim_cpu *cpu,
-			  sim_cia cia)
+			  unsigned nr_bytes)
 {
   struct mn103int *controller = hw_data (me);
   const unsigned8 *buf = source;
   unsigned byte;
-  HW_TRACE ((me, "write 0x%08lx %d", (long) base, (int) nr_bytes));
+  /* HW_TRACE ((me, "write 0x%08lx %d", (long) base, (int) nr_bytes)); */
   for (byte = 0; byte < nr_bytes; byte++)
     {
       unsigned_word address = base + byte;
@@ -809,7 +816,7 @@ mn103int_io_write_buffer (struct hw *me,
 }     
 
 
-const struct hw_device_descriptor dv_mn103int_descriptor[] = {
+const struct hw_descriptor dv_mn103int_descriptor[] = {
   { "mn103int", mn103int_finish, },
   { NULL },
 };

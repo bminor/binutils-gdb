@@ -272,9 +272,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU32_BEGIN (GPR[RS]);
-  ALU32_ADD (GPR[RT]);
-  ALU32_END (GPR[RD]);
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  {
+    ALU32_BEGIN (GPR[RS]);
+    ALU32_ADD (GPR[RT]);
+    ALU32_END (GPR[RD]);
+  }
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 
@@ -297,9 +301,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU32_BEGIN (GPR[RS]);
-  ALU32_ADD (EXTEND16 (IMMEDIATE));
-  ALU32_END (GPR[RT]);
+  TRACE_ALU_INPUT2 (GPR[RS], EXTEND16 (IMMEDIATE));
+  {
+    ALU32_BEGIN (GPR[RS]);
+    ALU32_ADD (EXTEND16 (IMMEDIATE));
+    ALU32_END (GPR[RT]);
+  }
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 
@@ -923,9 +931,13 @@
 // end-sanitize-tx19
 {
   /* this check's for overflow */
-  ALU64_BEGIN (GPR[RS]);
-  ALU64_ADD (GPR[RT]);
-  ALU64_END (GPR[RD]);
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  {
+    ALU64_BEGIN (GPR[RS]);
+    ALU64_ADD (GPR[RT]);
+    ALU64_END (GPR[RD]);
+  }
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 
@@ -948,9 +960,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU64_BEGIN (GPR[RS]);
-  ALU64_ADD (EXTEND16 (IMMEDIATE));
-  ALU64_END (GPR[RT]);
+  TRACE_ALU_INPUT2 (GPR[RS], EXTEND16 (IMMEDIATE));
+  {
+    ALU64_BEGIN (GPR[RS]);
+    ALU64_ADD (EXTEND16 (IMMEDIATE));
+    ALU64_END (GPR[RT]);
+  }
+  TRACE_ALU_RESULT (GPR[RT]);
 }
 
 
@@ -1554,9 +1570,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU64_BEGIN (GPR[RS]);
-  ALU64_SUB (GPR[RT]);
-  ALU64_END (GPR[RD]);
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  {
+    ALU64_BEGIN (GPR[RS]);
+    ALU64_SUB (GPR[RT]);
+    ALU64_END (GPR[RD]);
+  }
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 
@@ -3105,9 +3125,13 @@
 *tx19:
 // end-sanitize-tx19
 {
-  ALU32_BEGIN (GPR[RS]);
-  ALU32_SUB (GPR[RT]);
-  ALU32_END (GPR[RD]);
+  TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
+  {
+    ALU32_BEGIN (GPR[RS]);
+    ALU32_SUB (GPR[RT]);
+    ALU32_END (GPR[RD]);
+  }
+  TRACE_ALU_RESULT (GPR[RD]);
 }
 
 

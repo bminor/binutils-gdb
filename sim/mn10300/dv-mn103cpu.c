@@ -21,7 +21,7 @@
 
 
 #include "sim-main.h"
-#include "hw-base.h"
+#include "hw-main.h"
 
 /* DEVICE
 
@@ -107,7 +107,7 @@ struct mn103cpu_block {
 
 struct mn103cpu {
   struct mn103cpu_block block;
-  hw_event *pending_handler;
+  struct hw_event *pending_handler;
   int pending_level;
   int pending_nmi;
   int pending_reset;
@@ -151,9 +151,9 @@ static const struct hw_port_descriptor mn103cpu_ports[] = {
 /* Finish off the partially created hw device.  Attach our local
    callbacks.  Wire up our port names etc */
 
-static hw_io_read_buffer_callback mn103cpu_io_read_buffer;
-static hw_io_write_buffer_callback mn103cpu_io_write_buffer;
-static hw_port_event_callback mn103cpu_port_event;
+static hw_io_read_buffer_method mn103cpu_io_read_buffer;
+static hw_io_write_buffer_method mn103cpu_io_write_buffer;
+static hw_port_event_method mn103cpu_port_event;
 
 static void
 attach_mn103cpu_regs (struct hw *me,
@@ -228,7 +228,7 @@ deliver_mn103cpu_interrupt (struct hw *me,
   else if (controller->pending_nmi)
     {
       controller->pending_nmi = 0;
-      store_half (SP - 4, CIA_GET (cpu));
+      store_word (SP - 4, CIA_GET (cpu));
       store_half (SP - 8, PSW);
       PSW &= ~PSW_IE;
       SP = SP - 8;
@@ -241,7 +241,7 @@ deliver_mn103cpu_interrupt (struct hw *me,
     {
       /* Don't clear pending level.  Request continues to be pending
          until the interrupt controller clears/changes it */
-      store_half (SP - 4, CIA_GET (cpu));
+      store_word (SP - 4, CIA_GET (cpu));
       store_half (SP - 8, PSW);
       PSW &= ~PSW_IE;
       PSW &= ~PSW_LM;
@@ -249,7 +249,7 @@ deliver_mn103cpu_interrupt (struct hw *me,
       SP = SP - 8;
       CIA_SET (cpu, 0x40000000 + controller->interrupt_vector[controller->pending_level]);
       HW_TRACE ((me, "port-out ack %d", controller->pending_level));
-      hw_port_event (me, ACK_PORT, controller->pending_level, NULL, NULL_CIA);
+      hw_port_event (me, ACK_PORT, controller->pending_level);
       HW_TRACE ((me, "int level=%d pc=0x%08lx psw=0x%04x sp=0x%08lx",
 		 controller->pending_level,
 		 (long) CIA_GET (cpu), (unsigned) PSW, (long) SP));
@@ -278,9 +278,7 @@ mn103cpu_port_event (struct hw *me,
 		     int my_port,
 		     struct hw *source,
 		     int source_port,
-		     int level,
-		     sim_cpu *processor,
-		     sim_cia cia)
+		     int level)
 {
   struct mn103cpu *controller = hw_data (me);
 
@@ -355,9 +353,7 @@ mn103cpu_io_read_buffer (struct hw *me,
 			 void *dest,
 			 int space,
 			 unsigned_word base,
-			 unsigned nr_bytes,
-			 sim_cpu *processor,
-			 sim_cia cia)
+			 unsigned nr_bytes)
 {
   struct mn103cpu *controller = hw_data (me);
   unsigned16 val = 0;
@@ -396,9 +392,7 @@ mn103cpu_io_write_buffer (struct hw *me,
 			  const void *source,
 			  int space,
 			  unsigned_word base,
-			  unsigned nr_bytes,
-			  sim_cpu *cpu,
-			  sim_cia cia)
+			  unsigned nr_bytes)
 {
   struct mn103cpu *controller = hw_data (me);
   unsigned16 val;
@@ -431,7 +425,7 @@ mn103cpu_io_write_buffer (struct hw *me,
 }     
 
 
-const struct hw_device_descriptor dv_mn103cpu_descriptor[] = {
+const struct hw_descriptor dv_mn103cpu_descriptor[] = {
   { "mn103cpu", mn103cpu_finish, },
   { NULL },
 };

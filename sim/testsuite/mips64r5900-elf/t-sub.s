@@ -1,0 +1,26 @@
+.include "t-macros.i"
+
+	start
+
+test_sub:
+
+	load $7 0x0000000000000000 0xffffffff80000001
+	load $8 0x0000000000000000 0xffffffffffffffff
+        sub $10, $7, $8
+	check10 0x0000000000000000 0xffffffff80000002
+
+test_sub2:
+	load $7 0x0000000000000000 0xffffffff80000001
+	load $8 0x0000000000000000 0x0000000000000001
+        sub $10, $7, $8
+	check10 0x0000000000000000 0xffffffff80000000
+
+
+test_sub3:
+	load $7 0x0000000000000000 0x0000000000000001
+	load $8 0x0000000000000000 0x0000000000000002
+        sub $10, $7, $8
+	check10 0x0000000000000000 0xffffffffffffffff
+
+	
+		exit0

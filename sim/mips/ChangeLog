@@ -1,3 +1,8 @@
+Thu May 21 18:57:19 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (ALU32_END): Sign extend 32 bit results.
+	* mips.igen (ADD, SUB, ADDI, DADD, DSUB): Trace.
+	
 start-sanitize-r5900
 Thu May 21 17:15:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

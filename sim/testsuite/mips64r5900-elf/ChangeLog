@@ -1,6 +1,50 @@
+Thu May 21 19:04:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (TESTS): Add t-sub.ok.
+	(t-sub.s): New file.
+
+Thu May 14 14:43:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-div.s, t-ddiv.s, t-div1.s: Check DIV for x/0 and MIN_INT/-1.
+	* t-divu1.s, t-divu.s: Check x/0 and x/MAX_INT.
+	* t-dadd: Test.
+	* trap.s: Test trap instruction.
+	* Makefile.in (TESTS): Update
+	
+	* f-add.s, f-adda.s, f-madd.s, f-madda.s, f-msub.s, f-msuba.s: Add
+ 	more test cases.
+	
+Thu Apr 30 18:57:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* f-adda.s: Handle to-the-max accumulator values in madd.s.
+
+	* t-macros.i: Use msub.s instead of madd.s to get a value from the
+ 	accumulator.  Use suba.s instead of adda.s to get a value into the
+ 	accumulator.
+
+Thu Apr 16 17:44:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* f-mul.s, f-mula.s: More overflow/underflow tests.
+
+	* f-cvt.s: Swap cvt.w.s and cvt.s.w was testing backwards.
+
+	* t-macros.i (loadfpx, checkfpx, checkaccx): Define, accept hex
+ 	values.
+	(checkfp): Force FP-SCR register bit zero to 1 when checking.
+	
+Wed Feb 25 20:26:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* f-*.s: New files.
+
+	* Makefile.in (TESTS): Add floating point f-* tests.
+
+	* t-macros.i: Add lots of floating point macros.
+	
 Mon Feb  2 16:50:21 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* t-sdl.s: New test.
+	(dest): 8 byte align sdl destination.
+
 	* Makefile.in: Update.
 
 Wed Sep  3 14:32:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
