@@ -18,11 +18,14 @@
  */
 
 #include <signal.h>
+#ifndef WIN32
 #include <sys/times.h>
+#endif
 #include <sys/param.h>
 #include "ansidecl.h"
 #include "sysdep.h"
 #include "remote-sim.h"
+#include "bfd.h"
 
 int debug;
 
@@ -80,13 +83,12 @@ int h8300hmode = 0;
 static int
 get_now ()
 {
+#ifndef WIN32
   struct tms b;
 
   return time (0);
-#if 0
-  times (&b);
-  return b.tms_utime + b.tms_stime;
 #endif
+  return 0;
 }
 
 static int
@@ -665,8 +667,8 @@ init_pointers ()
 
       cpu.memory = (unsigned char *) calloc (sizeof (char), MSIZE);
       cpu.cache_idx = (unsigned short *) calloc (sizeof (short), MSIZE);
-      cpu.mask = (1 << MPOWER) - 1;
 
+      cpu.mask = (1 << MPOWER) - 1;
       for (i = 0; i < 9; i++)
 	{
 	  cpu.regs[i] = 0;
@@ -815,7 +817,7 @@ case  O(name, SB):				\
   if(s) store (&code->dst,ea); goto next;	\
 }
 
-int
+void
 sim_resume (step, siggnal)
 {
   static int init1;
@@ -831,7 +833,7 @@ sim_resume (step, siggnal)
   int bit;
   int pc;
   int c, nz, v, n;
-
+  int oldmask;
   init_pointers ();
 
   prev = signal (SIGINT, control_c);
@@ -848,7 +850,9 @@ sim_resume (step, siggnal)
   pc = cpu.pc;
 
   GETSR ();
-
+  oldmask = cpu.mask;
+  if (!h8300hmode)
+    cpu.mask = 0xffff;
   do
     {
       int cidx;
@@ -1164,7 +1168,7 @@ sim_resume (step, siggnal)
 		   c = rd & 1;
 		   rd >>= 1;
 		   rd |= t;
-	    );
+		   );
 	  OSHIFTS (O_ROTL, c = rd & hm;
 		   rd <<= 1;
 		   rd |= C);
@@ -1175,7 +1179,7 @@ sim_resume (step, siggnal)
 		   rd <<= 1;
 		   rd |= C;
 		   c = t;
-	    );
+		   );
 	  OSHIFTS (O_ROTXR, t = rd & 1;
 		   rd = (unsigned int) rd >> 1;
 		   if (C) rd |= hm; c = t;);
@@ -1339,7 +1343,7 @@ sim_resume (step, siggnal)
 	    goto next;
 	  }
 	case O (O_EXTS, SW):
-	  rd = GET_B_REG (code->src.reg + 8) & 0xff;	/* Yes, src, not dst.  */
+	  rd = GET_B_REG (code->src.reg + 8) & 0xff; /* Yes, src, not dst.  */
 	  ea = rd & 0x80 ? -256 : 0;
 	  res = rd + ea;
 	  goto log16;
@@ -1363,7 +1367,7 @@ sim_resume (step, siggnal)
 	  goto next;
 
 	default:
-	  cpu.exception = 123;
+	  cpu.exception = SIGILL;
 	  goto end;
 
 	}
@@ -1506,7 +1510,18 @@ sim_resume (step, siggnal)
       ;
       /*      if (cpu.regs[8] ) abort(); */
 
-#ifdef __GO32__
+#if defined (WIN32)
+      /* Poll after every 100th insn, */
+      if (poll_count++ > 100)
+	{
+	  poll_count = 0;
+	  if (win32pollquit())
+	    {
+	      control_c();
+	    }
+	}
+#endif
+#if defined(__GO32__)
       /* Poll after every 100th insn, */
       if (poll_count++ > 100)
 	{
@@ -1524,10 +1539,10 @@ sim_resume (step, siggnal)
   cpu.ticks += get_now () - tick_start;
   cpu.cycles += cycles;
   cpu.insts += insts;
-
+  
   cpu.pc = pc;
   BUILDSR ();
-
+  cpu.mask = oldmask;
   signal (SIGINT, prev);
 }
 
@@ -1586,7 +1601,7 @@ sim_read (addr, buffer, size)
 #define TICK_REGNUM     12
 
 
-int
+void
 sim_store_register (rn, value)
      int rn;
      unsigned char *value;
@@ -1631,10 +1646,9 @@ sim_store_register (rn, value)
       cpu.ticks = longval;
       break;
     }
-  return 0;
 }
 
-int
+void
 sim_fetch_register (rn, buf)
      int rn;
      unsigned char *buf;
@@ -1689,33 +1703,16 @@ sim_fetch_register (rn, buf)
       buf[0] = v >> 8;
       buf[1] = v;
     }
-  return 0;
 }
 
-int
-sim_trace ()
-{
-  return 0;
-}
-
-int
+void
 sim_stop_reason (reason, sigrc)
      enum sim_stop *reason;
      int *sigrc;
 {
   *reason = sim_stopped;
   *sigrc = cpu.exception;
-  return 0;
 }
-
-int
-sim_set_pc (n)
-     SIM_ADDR n;
-{
-  cpu.pc = n;
-  return 0;
-}
-
 
 sim_csize (n)
 {
@@ -1729,24 +1726,21 @@ sim_csize (n)
 }
 
 
-int
-sim_info (printf_fn, verbose)
-     void (*printf_fn) ();
+void
+sim_info (verbose)
      int verbose;
-
 {
   double timetaken = (double) cpu.ticks / (double) now_persec ();
   double virttime = cpu.cycles / 10.0e6;
 
-  printf ("\n\n#instructions executed  %10d\n", cpu.insts);
-  printf ("#cycles (v approximate) %10d\n", cpu.cycles);
-  printf ("#real time taken        %10.4f\n", timetaken);
-  printf ("#virtual time taked     %10.4f\n", virttime);
+  printf_filtered ("\n\n#instructions executed  %10d\n", cpu.insts);
+  printf_filtered ("#cycles (v approximate) %10d\n", cpu.cycles);
+  printf_filtered ("#real time taken        %10.4f\n", timetaken);
+  printf_filtered ("#virtual time taked     %10.4f\n", virttime);
   if (timetaken != 0.0)
-    printf ("#simulation ratio       %10.4f\n", virttime / timetaken);
-  printf ("#compiles               %10d\n", cpu.compiles);
-  printf ("#cache size             %10d\n", cpu.csize);
-
+    printf_filtered ("#simulation ratio       %10.4f\n", virttime / timetaken);
+  printf_filtered ("#compiles               %10d\n", cpu.compiles);
+  printf_filtered ("#cache size             %10d\n", cpu.csize);
 
 #ifdef ADEBUG
   if (verbose)
@@ -1755,35 +1749,70 @@ sim_info (printf_fn, verbose)
       for (i = 0; i < O_LAST; i++)
 	{
 	  if (cpu.stats[i])
-	    printf ("%d: %d\n", i, cpu.stats[i]);
+	    printf_filtered ("%d: %d\n", i, cpu.stats[i]);
 	}
     }
 #endif
+}
 
-  return 0;
+/* Indicate whether the cpu is an h8/300 or h8/300h.
+   FLAG is non-zero for the h8/300h.  */
+
+void
+set_h8300h (flag)
+     int flag;
+{
+  h8300hmode = flag;
 }
 
 void
-set_h8300h ()
-{
-  h8300hmode = 1;
-}
-
-int
 sim_kill ()
 {
-  return 0;
+  /* nothing to do */
 }
 
-sim_open (name)
-     char *name;
+void
+sim_open (args)
+     char *args;
 {
-  return 0;
+  /* nothing to do */
 }
 
-sim_set_args (argv, env)
+void
+sim_close (quitting)
+     int quitting;
+{
+  /* nothing to do */
+}
+
+/* Called by gdb to load a program into memory.  */
+
+int
+sim_load (prog, from_tty)
+     char *prog;
+     int from_tty;
+{
+  bfd *abfd;
+
+  /* See if the file is for the h8/300 or h8/300h.  */
+  /* ??? This may not be the most efficient way.  The z8k simulator
+     does this via a different mechanism (INIT_EXTRA_SYMTAB_INFO).  */
+  if ((abfd = bfd_openr (prog, "coff-h8300")) != 0)
+    {
+      if (bfd_check_format (abfd, bfd_object)) 
+	set_h8300h (abfd->arch_info->mach == bfd_mach_h8300h);
+      bfd_close (abfd);
+    }
+
+  /* Return non-zero so gdb will handle it.  */
+  return 1;
+}
+
+void
+sim_create_inferior (start_address, argv, env)
+     SIM_ADDR start_address;
      char **argv;
      char **env;
 {
-  return 0;
+  cpu.pc = start_address;
 }

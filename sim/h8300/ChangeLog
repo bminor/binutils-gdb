@@ -1,3 +1,45 @@
+Tue Jun 20 16:18:13 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* compile.c (get_now): Don't do if win32.
+	(sim_resume): Poll in win32 too.
+
+Wed May 24 16:31:38 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* configure.in: Fix typo in last change.
+
+Mon Mar 27 10:32:34 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* run.c: parse arguments with getopt().
+
+Tue Feb 28 17:30:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use ../../bfd/hosts/std-host.h if specific
+	host unavailable.
+
+Sun Jan 22 12:35:43 1995  Steve Chamberlain  <sac@splat>
+
+	* compile.c (sim_resume): Initialize cpu.mask.
+
+Thu Sep  8 16:53:00 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* inst.h (MPOWER): Bump simulated memory size to 2^18 bytes.
+
+Wed May 18 13:47:58 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* compile.c: #include "bfd.h".
+	(sim_*): Set result type to void where there isn't one.
+	(sim_resume, default case): Set cpu.exception to SIGILL.
+	(sim_trace): Delete.
+	(sim_set_pc): Delete.
+	(sim_info): Delete printf_fn arg, all callers changed.
+	Call printf_filtered.
+	(set_h8300h): New arg `flag', all callers changed.
+	(sim_close): New function.
+	(sim_load): New function.
+	(sim_create_inferior): Renamed from sim_set_args, all callers changed.
+	* run.c: #include <varargs.h>, "remote-sim.h".
+	(printf_filtered): New function.
+
 Fri May 13 18:32:27 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* compile.c (decode): Fix typo (16 bit branches).
