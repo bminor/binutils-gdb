@@ -304,7 +304,9 @@ CODE_FRAGMENT
 
 
 static bfd_vma
-pe_value(bfd_link_pe_info_dval *ptr, bfd_vma def)
+pe_value(ptr, def)
+     bfd_link_pe_info_dval *ptr;
+     bfd_vma def;
 {
   if (ptr && ptr->defined)
     return ptr->value;
@@ -377,6 +379,12 @@ sec_to_styp_flags (sec_name, sec_flags)
     {
       styp_flags = STYP_INFO;
     }
+#ifdef COFF_WITH_PE
+  else if (!strcmp (sec_name, ".edata"))
+    {
+      styp_flags = STYP_DATA;
+    }
+#endif
   /* Try and figure out what it should be */
   else if (sec_flags & SEC_CODE)
     {
@@ -1499,10 +1507,18 @@ coff_compute_section_file_positions (abfd)
   asection *current;
   asection *previous = (asection *) NULL;
   file_ptr sofar = FILHSZ;
+  int page_size;
 #ifndef I960
   file_ptr old_sofar;
 #endif
   unsigned int count;
+
+#ifdef COFF_IMAGE_WITH_PE
+  page_size = pe_value (&(coff_data (abfd)->link_info->pe_info->file_alignment),
+			PE_DEF_FILE_ALIGNMENT);
+#else
+  page_size = COFF_PAGE_SIZE;
+#endif
 
   if (bfd_get_start_address (abfd))
     {
@@ -1554,13 +1570,11 @@ coff_compute_section_file_positions (abfd)
 
 #endif
 
-#ifdef COFF_PAGE_SIZE
       /* In demand paged files the low order bits of the file offset
 	 must match the low order bits of the virtual address.  */
       if ((abfd->flags & D_PAGED) != 0
 	  && (current->flags & SEC_ALLOC) != 0)
-	sofar += (current->vma - sofar) % COFF_PAGE_SIZE;
-#endif
+	sofar += (current->vma - sofar) % page_size;
 
       current->filepos = sofar;
 
@@ -1582,12 +1596,14 @@ coff_compute_section_file_positions (abfd)
 
       previous = current;
     }
-#ifdef COFF_WITH_PE
+#ifdef COFF_IMAGE_WITH_PE
   /* Normally, the starting location for the symbol table will be at the end
      of the last section.  However, when dealing with NT, the last section
      must be as long as its size rounded up to the next page (0x1000). */
-  sofar = ((sofar + NT_FILE_ALIGNMENT - 1) /
-                           NT_FILE_ALIGNMENT) * NT_FILE_ALIGNMENT; 
+  sofar = (sofar + page_size - 1) & -page_size;
+
+  if (previous)
+    previous->_raw_size = (previous->_raw_size + page_size -1) & -page_size;
 #endif
 
   obj_relocbase (abfd) = sofar;
@@ -1685,19 +1701,22 @@ static void add_data_entry (abfd, aout, idx, name, base)
     {
       aout->pe->DataDirectory[idx].VirtualAddress = sec->lma - base;
       aout->pe->DataDirectory[idx].Size = sec->_raw_size;
+      sec->flags |= SEC_DATA;
     }
 }
 
 
 static void 
-fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
+fill_pe_header_info (abfd, internal_f, internal_a)
      bfd *abfd;
      struct internal_filehdr *internal_f;
      struct internal_aouthdr *internal_a;
-     bfd_vma end_of_image;
 {
   /* assign other filehdr fields for DOS header and NT signature */
 
+  int sa;
+  int fa;
+  bfd_vma ib;
   bfd_link_pe_info *pe_info = coff_data (abfd)->link_info->pe_info;
 
   internal_f->f_timdat = time (0);
@@ -1714,15 +1733,28 @@ fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
   memset (internal_a->pe, 0, sizeof (struct internal_extra_pe_aouthdr));
 
 
-  internal_a->pe->ImageBase =  pe_value (&pe_info->image_base, IMAGE_BASE);
+  ib =  internal_a->pe->ImageBase =  pe_value (&pe_info->image_base, NT_EXE_IMAGE_BASE);
 
   if (internal_a->tsize) 
-    internal_a->text_start -= internal_a->pe->ImageBase;
+    internal_a->text_start -= ib;
   if (internal_a->dsize) 
-    internal_a->data_start -= internal_a->pe->ImageBase;
+    internal_a->data_start -= ib;
   if (internal_a->entry) 
-    internal_a->entry -= internal_a->pe->ImageBase;
+    internal_a->entry -= ib;
 
+
+  sa =   internal_a->pe->SectionAlignment = pe_value (&pe_info->section_alignment,
+						      NT_SECTION_ALIGNMENT);
+
+  fa =   internal_a->pe->FileAlignment = pe_value (&pe_info->file_alignment, 
+						   NT_FILE_ALIGNMENT);
+
+#define FA(x)  (((x) + fa -1 ) & (- fa))
+#define SA(x)  (((x) + sa -1 ) & (- sa))
+
+  /* We like to have the sizes aligned */
+
+  internal_a->bsize = FA (internal_a->bsize);
 
   internal_f->pe->e_magic    = DOSMAGIC;
   internal_f->pe->e_cblp     = 0x90;
@@ -1775,14 +1807,6 @@ fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
 
   /* write all of the other optional header data */
 
-
-
-  internal_a->pe->SectionAlignment = pe_value (&pe_info->section_alignment,
-					       NT_SECTION_ALIGNMENT);
-
-  internal_a->pe->FileAlignment = pe_value (&pe_info->file_alignment, 
-					    NT_FILE_ALIGNMENT);
-
   internal_a->pe->MajorOperatingSystemVersion =
     pe_value (&pe_info->major_os_version, 1);
 
@@ -1803,13 +1827,8 @@ fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
   internal_a->pe->MinorSubsystemVersion =
     pe_value (&pe_info->minor_subsystem_version, 10);
 
-
-
   internal_a->pe->Subsystem =
     pe_value (&pe_info->subsystem, BFD_PE_CONSOLE);
-
-
-
 
   /* Virtual start address, take virtual start address of last section, 
      add its physical size and round up the next page (NT_SECTION_ALIGNMENT).
@@ -1817,14 +1836,11 @@ fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
      structure are in order and that I have successfully saved the last
      section's address and size. */
 
-  internal_a->pe->SizeOfImage = 
-    (end_of_image - internal_a->pe->ImageBase
-     + internal_a->pe->SectionAlignment - 1)
-      & ~ (internal_a->pe->SectionAlignment-1);
 
-  /* Start of .text section will do here since it is the first section after
-     the headers.  Note that NT_IMAGE_BASE has already been removed above */
-  internal_a->pe->SizeOfHeaders = internal_a->text_start; 
+
+  /* The headers go up to where the first section starts. */
+
+  internal_a->pe->SizeOfHeaders = abfd->sections->filepos;
   internal_a->pe->CheckSum = 0;
   internal_a->pe->DllCharacteristics = 0;
 
@@ -1844,12 +1860,30 @@ fill_pe_header_info (abfd, internal_f, internal_a, end_of_image)
   /* first null out all data directory entries .. */
   memset (internal_a->pe->DataDirectory, sizeof (internal_a->pe->DataDirectory), 0);
 
-  add_data_entry (abfd, internal_a, 0, ".edata", internal_a->pe->ImageBase);
-  add_data_entry (abfd, internal_a, 1, ".idata", internal_a->pe->ImageBase);
-  add_data_entry (abfd, internal_a, 2, ".rsrc" ,internal_a->pe->ImageBase);
-  add_data_entry (abfd, internal_a, 5, ".reloc", internal_a->pe->ImageBase);
+  add_data_entry (abfd, internal_a, 0, ".edata", ib);
+  add_data_entry (abfd, internal_a, 1, ".idata", ib);
+  add_data_entry (abfd, internal_a, 2, ".rsrc" ,ib);
+  add_data_entry (abfd, internal_a, 5, ".reloc", ib);
+  {
+    asection *sec;
+    bfd_vma dsize= 0;
+    bfd_vma isize = SA(abfd->sections->filepos);
+    bfd_vma tsize= 0;
+    bfd_vma dstart = 0;
+    for (sec = abfd->sections; sec; sec = sec->next)
+      {
+	int rounded = FA(sec->_raw_size);
+	if (sec->flags & SEC_DATA) 
+	  dsize += rounded;
+	if (sec->flags & SEC_CODE)
+	  tsize += rounded;
+	isize += SA(rounded);
+      }
 
-
+    internal_a->dsize = dsize;
+    internal_a->tsize = tsize;
+    internal_a->pe->SizeOfImage = isize;
+  }
 
 }
 #endif
@@ -1871,7 +1905,6 @@ coff_write_object_contents (abfd)
   asection *text_sec = NULL;
   asection *data_sec = NULL;
   asection *bss_sec = NULL;
-  bfd_vma end_of_image = 0;
 
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
@@ -1891,7 +1924,7 @@ coff_write_object_contents (abfd)
       coff_data (abfd)->link_info = info = &dummy_info;
       info->pe_info = 0;
     }
-  pe_info = info->pe_info;
+  pe_info = (struct bfd_link_pe_info *)(info->pe_info);
 
   if (!pe_info)
     {
@@ -1991,14 +2024,9 @@ coff_write_object_contents (abfd)
 	  section.s_vaddr = 0;
 	else
 #endif
-	  section.s_vaddr = current->lma;
+	section.s_vaddr = current->lma;
 	section.s_paddr = current->lma;
 	section.s_size = current->_raw_size;
-
-        /* Remember the address of the end of the last section */
-
-	if (current->lma + current->_raw_size > end_of_image)
-	  end_of_image = current->lma + current->_raw_size ;
 
 	/*
 	   If this section has no size or is unloadable then the scnptr
@@ -2052,24 +2080,27 @@ coff_write_object_contents (abfd)
 	{
 	  SCNHDR buff;
 
-#ifdef WINDOWS_NT
-	  /* suppress output of the sections if they are null.  ld includes
-	     the bss and data sections even if there is no size assigned
-	     to them.  NT loader doesn't like it if these section headers are
-	     included if the sections themselves are not needed */
-	  if (section.s_size == 0)
- 	    internal_f.f_nscns--;
-	  else
-	    { 
-	      coff_swap_scnhdr_out (abfd, &section, &buff);
-	      if (bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
-		return false;
-            }
-#else
-	  if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
-	      || bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
-	    return false;
-#endif
+	  if (obj_pe (abfd)) 
+	    {
+	    /* suppress output of the sections if they are null.  ld includes
+	       the bss and data sections even if there is no size assigned
+	       to them.  NT loader doesn't like it if these section headers are
+	       included if the sections themselves are not needed */
+	    if (section.s_size == 0)
+	      internal_f.f_nscns--;
+	    else
+	      { 
+		coff_swap_scnhdr_out (abfd, &section, &buff);
+		if (bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+		  return false;
+	      }
+	  }
+	  else 
+	    {
+	    if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
+		|| bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+	      return false;
+	  }
 
 	}
       }
@@ -2247,7 +2278,7 @@ coff_write_object_contents (abfd)
   internal_f.pe = & extra_f;
   internal_a.pe = & extra_a;
 
-  fill_pe_header_info (abfd, &internal_f, &internal_a, end_of_image);
+  fill_pe_header_info (abfd, &internal_f, &internal_a);
 #endif
 
   /* now write them */

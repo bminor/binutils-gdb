@@ -1622,7 +1622,17 @@ coff_link_input_bfd (finfo, input_bfd)
 	  bfd_byte *eline;
 	  bfd_byte *elineend;
 
-	  if (o->lineno_count == 0)
+	  /* FIXME: If SEC_HAS_CONTENTS is not for the section, then
+	     build_link_order in ldwrite.c will not have created a
+	     link order, which means that we will not have seen this
+	     input section in _bfd_coff_final_link, which means that
+	     we will not have allocated space for the line numbers of
+	     this section.  I don't think line numbers can be
+	     meaningful for a section which does not have
+	     SEC_HAS_CONTENTS set, but, if they do, this must be
+	     changed.  */
+	  if (o->lineno_count == 0
+	      || (o->output_section->flags & SEC_HAS_CONTENTS) == 0)
 	    continue;
 
 	  if (bfd_seek (input_bfd, o->line_filepos, SEEK_SET) != 0
@@ -2224,15 +2234,6 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 				       sym, &addend);
       if (howto == NULL)
 	return false;
-
-      /* WINDOWS_NT; in this next section, the value of 'val' will be computed.
-         With respect to the .idata and .rsrc sections, the NT_IMAGE_BASE
-         must be removed from the value that is to be relocated (NT_IMAGE_BASE
-         is currently defined in internal.h and has value 400000).  Now this
-         value should only be removed from addresses being relocated in the
-         .idata and .rsrc sections, not the .text section which should have
-         the 'real' address.  In addition, the .rsrc val's must also be
-         adjusted by the input_section->vma.  */
 
       val = 0;
 

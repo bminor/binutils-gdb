@@ -128,6 +128,10 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   return bfd_reloc_continue;
 }
 
+#ifndef PCRELOFFSET
+#define PCRELOFFSET true
+#endif
+
 static reloc_howto_type aoutarm_std_reloc_howto[] = 
 {
   /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone */
@@ -172,7 +176,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	PCRELOFFSET),
   HOWTO( 3,
 	2,
-	3, 
+	2,
 	26,
 	true,
 	0,
@@ -224,7 +228,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	true),
   HOWTO( 7,  
 	2, 
-	3,   
+	2,
 	26,
 	false,
 	0,
@@ -261,7 +265,20 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
         true,
 	0xffffffff,
 	0xffffffff,
-	false)
+	false),
+  HOWTO( 11, 
+	0,
+	2, 
+	32,
+	false,
+	0,
+	complain_overflow_bitfield,
+	coff_arm_reloc,
+	"rva32",
+        true,
+	0xffffffff,
+	0xffffffff,
+	PCRELOFFSET),
 };
 
 
@@ -366,6 +383,7 @@ arm_reloc_type_lookup(abfd,code)
       ASTD (BFD_RELOC_8_PCREL, 4);
       ASTD (BFD_RELOC_16_PCREL, 5);
       ASTD (BFD_RELOC_32_PCREL, 6);
+      ASTD (BFD_RELOC_RVA, 11);
     default: return (CONST struct reloc_howto_struct *) 0;
     }
 }
@@ -505,18 +523,10 @@ i3coff_object_p(a)
   return coff_object_p(a);
 }
 
-const bfd_target
-#ifdef TARGET_SYM
-  TARGET_SYM =
-#else
-  armcoff_vec =
-#endif
+#ifdef TARGET_LITTLE_SYM
+const bfd_target TARGET_LITTLE_SYM =
 {
-#ifdef TARGET_NAME
-  TARGET_NAME,
-#else
-  "coff-arm",			/* name */
-#endif
+  TARGET_LITTLE_NAME,		/* name or coff-arm-little */
   bfd_target_coff_flavour,
   false,			/* data byte order is little */
   false,			/* header byte order is little */
@@ -562,3 +572,55 @@ const bfd_target
 
   COFF_SWAP_TABLE,
 };
+#endif
+
+#ifdef TARGET_BIG_SYM
+const bfd_target TARGET_BIG_SYM =
+{
+  TARGET_BIG_NAME,		/* name or coff-arm-big */
+  bfd_target_coff_flavour,
+  true,				/* data byte order is big */
+  true,				/* header byte order is big */
+
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+#ifdef TARGET_UNDERSCORE
+  TARGET_UNDERSCORE,		/* leading underscore */
+#else
+  0,				/* leading underscore */
+#endif
+  '/',				/* ar_pad_char */
+  15,				/* ar_max_namelen */
+
+  2,				/* minimum alignment power */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
+
+/* Note that we allow an object file to be treated as a core file as well. */
+    {_bfd_dummy_target, i3coff_object_p, /* bfd_check_format */
+       bfd_generic_archive_p, i3coff_object_p},
+    {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
+       bfd_false},
+    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
+       _bfd_write_archive_contents, bfd_false},
+
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+
+  COFF_SWAP_TABLE,
+};
+#endif

@@ -1,3 +1,12 @@
+Tue Aug 29 13:50:21 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* bfd-in2.h: regenerated.
+
+Thu Aug 24 17:49:59 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* cofflink.c (coff_link_input_bfd): Don't include line numbers for
+	a section if its output section has no contents.
+
 Wed Aug 23 16:48:52 1995  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ecoff.c (_bfd_ecoff_slurp_symbolic_info): Add parentheses to FIX
