@@ -21,17 +21,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "gdb_string.h"
-#include "gdb_assert.h"
 #include "defs.h"
 #include "frame.h"
-#include "target.h"
-#include "regcache.h"
-#include "solib-svr4.h"
-#include "i386-tdep.h"
-#include "nto-tdep.h"
 #include "osabi.h"
+#include "regcache.h"
+#include "target.h"
+
+#include "gdb_assert.h"
+#include "gdb_string.h"
+
+#include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "nto-tdep.h"
+#include "solib-svr4.h"
 
 #ifndef X86_CPU_FXSR
 #define X86_CPU_FXSR (1L << 12)
@@ -194,39 +196,6 @@ i386nto_regset_fill (int regset, char *data)
   return 0;
 }
 
-static struct link_map_offsets *
-i386nto_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
-				   only 8 bytes are used.  */
-      lmo.r_map_offset = 4;
-      lmo.r_map_size = 4;
-
-      lmo.link_map_size = 20;	/* The actual size is 552 bytes, but
-				   only 20 bytes are used.  */
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size = 4;
-    }
-
-  return lmp;
-}
-
 /* Return whether the frame preceding NEXT_FRAME corresponds to a QNX
    Neutrino sigtramp routine.  */
 
@@ -268,7 +237,7 @@ init_i386nto_ops (void)
   i386_nto_target.register_area = i386nto_register_area;
   i386_nto_target.regset_fill = i386nto_regset_fill;
   i386_nto_target.fetch_link_map_offsets =
-    i386nto_svr4_fetch_link_map_offsets;
+    svr4_ilp32_fetch_link_map_offsets;
 }
 
 static void
@@ -297,8 +266,8 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Setjmp()'s return PC saved in EDX (5).  */
   tdep->jb_pc_offset = 20;	/* 5x32 bit ints in.  */
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 i386nto_svr4_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
   /* Our loader handles solib relocations slightly differently than svr4.  */
   TARGET_SO_RELOCATE_SECTION_ADDRESSES = nto_relocate_section_addresses;
