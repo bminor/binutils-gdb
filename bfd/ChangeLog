@@ -1,3 +1,8 @@
+2001-01-23  H.J. Lu  <hjl@gnu.org>
+
+	* vms-misc.c (_bfd_vms_next_record): Return -1 if PRIV(vms_buf)
+	is NULL or PRIV(vms_rec) is outside of the buffer.
+
 2001-01-23  Kazu Hirata  <kazu@hxi.com>
 
 	* coff64-rs6000.c: Fix formatting.

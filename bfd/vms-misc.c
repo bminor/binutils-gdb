@@ -455,7 +455,8 @@ _bfd_vms_next_record (abfd)
 	return -1;
     }
 
-  if (!PRIV(vms_rec))
+  if (!PRIV(vms_rec) || !PRIV(vms_buf)
+      || PRIV(vms_rec) >= (PRIV(vms_buf) + PRIV(buf_size)))
     return -1;
 
   if (PRIV(is_vax))
