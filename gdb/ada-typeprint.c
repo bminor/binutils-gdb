@@ -64,8 +64,7 @@ static int name_buffer_len;
    next call. */
 
 static char*
-demangled_type_name (type)
-     struct type *type;
+demangled_type_name (struct type *type)
 {
   if (ada_type_name (type) == NULL)
     return NULL;
@@ -117,10 +116,7 @@ demangled_type_name (type)
    NEW is the new name for a type TYPE. */
 
 void
-ada_typedef_print (type, new, stream)
-   struct type *type;
-   struct symbol *new;
-   struct ui_file *stream;
+ada_typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
 {
   fprintf_filtered (stream, "type %.*s is ", 
 		    ada_name_prefix_len (SYMBOL_SOURCE_NAME(new)), 
@@ -131,9 +127,7 @@ ada_typedef_print (type, new, stream)
 /* Print range type TYPE on STREAM. */
 
 static void
-print_range (type, stream)
-     struct type* type;
-     struct ui_file* stream;
+print_range (struct type* type, struct ui_file* stream)
 {
   struct type* target_type;
   target_type = TYPE_TARGET_TYPE (type);
@@ -183,11 +177,7 @@ print_range (type, stream)
    set *N past the bound and its delimiter, if any. */
 
 static void
-print_range_bound (type, bounds, n, stream)
-     struct type* type;
-     char* bounds;
-     int* n;
-     struct ui_file* stream;
+print_range_bound (struct type* type, char* bounds, int* n, struct ui_file* stream)
 {
   LONGEST B;
   if (ada_scan_number (bounds, *n, &B, n))
@@ -219,12 +209,7 @@ print_range_bound (type, bounds, n, stream)
    "___U") according to the ___XD conventions. */
 
 static void
-print_dynamic_range_bound (type, name, name_len, suffix, stream)
-     struct type* type;
-     const char* name;
-     int name_len;
-     const char* suffix;
-     struct ui_file* stream;
+print_dynamic_range_bound (struct type* type, const char* name, int name_len, const char* suffix, struct ui_file* stream)
 {
   static char *name_buf = NULL;
   static size_t name_buf_len = 0;
@@ -245,9 +230,7 @@ print_dynamic_range_bound (type, name, name_len, suffix, stream)
 /* Print the range type named NAME. */
 
 static void
-print_range_type_named (name, stream)
-     char* name;
-     struct ui_file* stream;
+print_range_type_named (char* name, struct ui_file* stream)
 {
   struct type *raw_type = ada_find_any_type (name);
   struct type *base_type;
@@ -296,9 +279,7 @@ print_range_type_named (name, stream)
 /* Print enumerated type TYPE on STREAM. */
 
 static void
-print_enum_type (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+print_enum_type (struct type *type, struct ui_file *stream)
 {
   int len = TYPE_NFIELDS (type);
   int i, lastval;
@@ -326,9 +307,7 @@ print_enum_type (type, stream)
 /* Print representation of Ada fixed-point type TYPE on STREAM. */
 
 static void
-print_fixed_point_type (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+print_fixed_point_type (struct type *type, struct ui_file *stream)
 {
   DOUBLEST delta = ada_delta (type);
   DOUBLEST small = ada_fixed_to_float (type, 1.0);
@@ -346,9 +325,7 @@ print_fixed_point_type (type, stream)
 /* Print representation of special VAX floating-point type TYPE on STREAM. */
 
 static void
-print_vax_floating_point_type (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+print_vax_floating_point_type (struct type *type, struct ui_file *stream)
 {
   fprintf_filtered (stream, "<float format %c>",
 		    ada_vax_float_type_suffix (type));
@@ -360,11 +337,7 @@ print_vax_floating_point_type (type, stream)
    structure to show (see ada_print_type). */
 
 static void
-print_array_type (type, stream, show, level)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int level;
+print_array_type (struct type *type, struct ui_file *stream, int show, int level)
 {
   int bitsize;
   int n_indices;
@@ -435,11 +408,7 @@ print_array_type (type, stream, show, level)
    STREAM, assuming the VAL_TYPE is the type of the values. */
 
 static void
-print_choices (type, field_num, stream, val_type)
-     struct type *type;
-     int field_num;
-     struct ui_file *stream;
-     struct type *val_type;
+print_choices (struct type *type, int field_num, struct ui_file *stream, struct type *val_type)
 {
   int have_output;
   int p;
@@ -515,13 +484,9 @@ Huh:
    immediately outside the variant part. */
 
 static void
-print_variant_clauses (type, field_num, outer_type, stream, show, level)
-     struct type *type;
-     int field_num;
-     struct type *outer_type;
-     struct ui_file *stream;
-     int show;
-     int level;
+print_variant_clauses (struct type *type, int field_num,
+		       struct type *outer_type, struct ui_file *stream,
+		       int show, int level)
 {
   int i;
   struct type *var_type;
@@ -561,13 +526,8 @@ print_variant_clauses (type, field_num, outer_type, stream, show, level)
    level as the fields immediately outside the variant part. */
 
 static void
-print_variant_part (type, field_num, outer_type, stream, show, level)
-     struct type *type;
-     int field_num;
-     struct type *outer_type;
-     struct ui_file *stream;
-     int show;
-     int level;
+print_variant_part (struct type *type, int field_num, struct type *outer_type,
+		    struct ui_file *stream, int show, int level)
 {
   fprintf_filtered (stream, "\n%*scase %s is", level + 4, "",
 		    ada_variant_discrim_name 
@@ -586,12 +546,8 @@ print_variant_part (type, field_num, outer_type, stream, show, level)
    end. */
 
 static int
-print_record_field_types (type, outer_type, stream, show, level)
-     struct type *type;
-     struct type *outer_type;
-     struct ui_file *stream;
-     int show;
-     int level;
+print_record_field_types (struct type *type, struct type *outer_type,
+			  struct ui_file *stream, int show, int level)
 {
   int len, i, flds;
 
@@ -635,11 +591,7 @@ print_record_field_types (type, outer_type, stream, show, level)
    the number of levels of internal structure to show (see ada_print_type). */
 
 static void
-print_record_type (type0, stream, show, level)
-     struct type* type0;
-     struct ui_file* stream;
-     int show;
-     int level;
+print_record_type (struct type* type0, struct ui_file* stream, int show, int level)
 {
   struct type* parent_type;
   struct type* type;
@@ -724,10 +676,7 @@ print_unchecked_union_type (struct type* type, struct ui_file* stream,
    for function or procedure NAME if NAME is not null. */
 
 static void
-print_func_type (type, stream, name)
-     struct type *type;
-     struct ui_file *stream;
-     char* name;
+print_func_type (struct type *type, struct ui_file *stream, char* name)
 {
   int i, len = TYPE_NFIELDS (type);
 
@@ -777,12 +726,8 @@ print_func_type (type, stream, name)
    LEVEL indicates level of recursion (for nested definitions). */
 
 void
-ada_print_type (type0, varstring, stream, show, level)
-     struct type* type0;
-     char* varstring;
-     struct ui_file* stream;
-     int show;
-     int level;
+ada_print_type (struct type* type0, char* varstring, struct ui_file* stream,
+		int show, int level)
 {
   enum type_code code;
   int demangled_args;

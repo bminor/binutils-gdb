@@ -1,3 +1,12 @@
+2002-07-24  Aidan Skinner <aidan@velvet.net>
+
+	* ada-lang.c: Change k&r style function definitions to prototyped
+	form.
+	* ada-typeprint.c: Change k&r style function definitions to prototyped
+	form.
+	* ada-valprint.c: Change k&r style function definitions to prototyped
+	form.
+	
 2002-07-24  Andrew Cagney  <cagney@redhat.com>
 
 	* README: Remove reference to remote-bug.
@@ -55,6 +64,7 @@
 	(regcache_raw_read): Update declaration.
 	(supply_register): Update declaration.
 
+>>>>>>> 1.2946
 2002-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* defs.h (gdb_readline_wrapper): Declare.
