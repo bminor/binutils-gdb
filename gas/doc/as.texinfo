@@ -2,7 +2,30 @@
 @c @tex
 @c \special{twoside}
 @c @end tex
-@setfilename as
+_if__(_ALL_ARCH__)
+@setfilename as.info
+_fi__(_ALL_ARCH__)
+_if__(_M680X0__ && !_ALL_ARCH__)
+@setfilename as-m680x0.info
+_fi__(_M680X0__ && !_ALL_ARCH__)
+_if__(_AMD29K__ && !_ALL_ARCH__)
+@setfilename as-29k.info
+_fi__(_AMD29K__ && !_ALL_ARCH__)
+@c
+@c NOTE: this manual is marked up for preprocessing with a collection
+@c of m4 macros called "pretex.m4".  If you see <_if__> and <_fi__>
+@c scattered around the source, you have the full source before
+@c preprocessing; if you don't, you have the source configured for some
+@c particular architecture (and you can of course get the full source,
+@c with all configurations, from wherever you got this).  The full
+@c source needs to be run through m4 before either tex- or info-
+@c formatting: for example,
+@c    m4 pretex.m4 none.m4 m680x0.m4 as.texinfo >as-680x0.texinfo
+@c will produce (assuming your path finds either GNU or SysV m4;
+@c Berkeley won't do) a file suitable for formatting.
+@c See the text in "pretex.m4" for a fuller explanation (and the macro
+@c definitions). 
+@c
 @synindex ky cp
 @ifinfo
 This file documents the GNU Assembler "as".
@@ -38,21 +61,21 @@ original English.
 @end tex
 @smallbook
 @setchapternewpage odd
-@c if m680x0
-@c @settitle Using GNU as (680x0)
-@c fi m680x0
-@c if am29k
+_if__(_M680X0__)
+@settitle Using GNU as (680x0)
+_fi__(_M680X0__)
+_if__(_AMD29K__)
 @settitle Using GNU as (AMD 29K)
-@c fi am29k
+_fi__(_AMD29K__)
 @titlepage
 @title{Using GNU as}
 @subtitle{The GNU Assembler}
-@c if m680x0
-@c @subtitle{for Motorola 680x0}
-@c fi m680x0
-@c if am29k
+_if__(_M680X0__)
+@subtitle{for Motorola 680x0}
+_fi__(_M680X0__)
+_if__(_AMD29K__)
 @subtitle{for the AMD 29K family}
-@c fi am29k
+_fi__(_AMD29K__)
 @sp 1
 @subtitle February 1991
 @sp 13
@@ -239,9 +262,7 @@ Assembler Directives
 * Single::			@code{.single @var{flonums}}
 * Stab::			Store debugging information
 * Text::			Change to the text segment
-@c if am29k or sparc
 * Word::			Fill memory with 32-bit integers
-@c else (not am29k or sparc)
 * Deprecated::			Deprecated Directives
 * Machine Options::		Options
 * Machine Syntax::		Syntax
@@ -265,16 +286,14 @@ Machine Directives
 @chapter Overview
 
 This manual is a user guide to the GNU assembler @code{as}.  
-@c pesch@cygnus.com: 
-@c                   The following should be conditional on machine config
-@c if 680x0
-@c This version of the manual describes @code{as} configured to generate
-@c code for Motorola 680x0 architectures.  
-@c fi 680x0
-@c if am29k
+_if__(_M680X0__)
+This version of the manual describes @code{as} configured to generate
+code for Motorola 680x0 architectures.  
+_fi__(_M680X0__)
+_if__(_AMD29K__)
 This version of the manual describes @code{as} configured to generate
 code for Advanced Micro Devices' 29K architectures.
-@c fi am29k
+_fi__(_AMD29K__)
 
 @menu
 * Invoking::			Invoking @code{as}
@@ -297,12 +316,12 @@ Here is a brief summary of how to invoke GNU @code{as}.  For details,
 @c to be limited to one line for the header.
 @example
   as [ -D ] [ -f ] [ -I @var{path} ] [ -k ] [ -L ] [ -o @var{objfile} ] [ -R ] [ -v ] [ -w ]
-@c if 680x0
-@c    [ -l ] [ -mc68000 | -mc68010 | -mc68020 ]
-@c fi 680x0
-@c if am29k
-@c@c am29k has no machine-dependent assembler options
-@c fi am29k
+_if__(_M680X0__)
+   [ -l ] [ -mc68000 | -mc68010 | -mc68020 ]
+_fi__(_M680X0__)
+_if__(_AMD29K__)
+@c am29k has no machine-dependent assembler options
+_fi__(_AMD29K__)
    [ -- | @var{files} @dots{} ]
 @end example
 
@@ -319,12 +338,12 @@ other assemblers; it has no effect on GNU @code{as}.
 Add @var{path} to the search list for @code{.include} directives
 
 @item -k
-@c if am29k
+_if__(_AMD29K__)
 This option is accepted but has no effect on the 29K family.
-@c fi am29k
-@c if not am29k
-@c Issue warnings when difference tables altered for long displacements
-@c fi not am29k
+_fi__(_AMD29K__)
+_if__(!_AMD29K__)
+Issue warnings when difference tables altered for long displacements
+_fi__(!_AMD29K__)
 
 @item -L
 Keep (in symbol table) local symbols, starting with @samp{L}
@@ -338,13 +357,13 @@ Fold data segment into text segment
 @item -W
 Suppress warning messages
 
-@c if 680x0
-@c @item -l
-@c Shorten references to undefined symbols, to one word instead of two
-@c 
-@c @item -mc68000 | -mc68010 | -mc68020 
-@c Specify what processor in the 68000 family is the target (default 68020)
-@c fi 680x0
+_if__(_M680X0__)
+@item -l
+Shorten references to undefined symbols, to one word instead of two
+
+@item -mc68000 | -mc68010 | -mc68020 
+Specify what processor in the 68000 family is the target (default 68020)
+_fi__(_M680X0__)
 
 @item -- | @var{files} @dots{}
 Source files to assemble, or standard input
@@ -357,22 +376,24 @@ This document is intended to describe what you need to know to use GNU
 notation for symbols, constants, and expressions; the directives that
 @code{as} understands; and of course how to invoke @code{as}.
 
-@c if 680x0
-@c We also cover special features in the 68000 configuration of @code{as},
-@c including pseudo-operations.
-@c fi 680x0
-@c if am29k
+_if__(_M680X0__ && !_ALL_ARCH__)
+We also cover special features in the 68000 configuration of @code{as},
+including pseudo-operations.
+_fi__(_M680X0__ && !_ALL_ARCH__)
+_if__(_AMD29K__ && !_ALL_ARCH__)
 We also cover special features in the AMD 29K configuration of @code{as},
 including assembler directives.
-@c fi am29k
+_fi__(_AMD29K__ && !_ALL_ARCH__)
 
-@ignore
-  This document also describes some of the
-machine-dependent features of various flavors of the assembler.
+_if__(_ALL_ARCH__)
+This document also describes some of the machine-dependent features of
+various flavors of the assembler.
+_fi__(_ALL_ARCH__)
+_if__(_INTERNALS__)
 This document also describes how the assembler works internally, and
 provides some information that may be useful to people attempting to
 port the assembler to another machine.
-@end ignore
+_fi__(_INTERNALS__)
 
 On the other hand, this manual is @emph{not} intended as an introduction
 to programming in assembly language---let alone programming in general!
@@ -395,10 +416,7 @@ qualification.
 @code{as} is part of a team of programs that turn a high-level
 human-readable series of instructions into a low-level
 computer-readable series of instructions.  Different versions of
-@code{as} are used for different kinds of computer.  In particular,
-at the moment, @code{as} only works for the DEC Vax, the Motorola
-680x0, the Intel 80386, the Sparc, and the National Semiconductor
-32032/32532.
+@code{as} are used for different kinds of computer.
 @end ignore
 
 @c There used to be a section "Terminology" here, which defined
@@ -416,11 +434,9 @@ at the moment, @code{as} only works for the DEC Vax, the Motorola
 compiler @code{gcc} for use by the linker @code{ld}.  Nevertheless,
 we've tried to make @code{as} assemble correctly everything that the native
 assembler would.
-@c if not am29k
-@ignore
+_if__(_VAX__)
 Any exceptions are documented explicitly (@pxref{Machine Dependent}).
-@end ignore
-@c fi not am29k
+_fi__(_VAX__)
 This doesn't mean @code{as} always uses the same syntax as another
 assembler for the same architecture; for example, we know of several
 incompatible versions of 680x0 assembly language syntax.
@@ -551,12 +567,12 @@ file_name:@b{NNN}:Warning Message Text
 been given (@pxref{App-File}) it is used for the filename, otherwise the
 name of the current input file is used.  If a logical line number was
 given 
-@c if not am29k
-@c (@pxref{Line}) 
-@c fi not am29k
-@c if am29k
+_if__(!_AMD29K__)
+(@pxref{Line}) 
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 (@pxref{Ln})
-@c fi am29k
+_fi__(_AMD29K__)
 then it is used to calculate the number printed,
 otherwise the actual line in the current source file is printed.  The
 message text is intended to be self explanatory (in the grand Unix
@@ -599,23 +615,21 @@ in the same order as they were specified (left to right) on the command
 line. 
 
 @subsection Warn if difference tables altered: @code{-k}
-@c if am29k 
+_if__(_AMD29K__) 
 On the AMD 29K family, this option is allowed, but has no effect.  It is
 permitted for compatibility with GNU @code{as} on other platforms,
 where it can be used to warn when @code{as} alters the machine code
 generated for @samp{.word} directives in difference tables.  The AMD 29K
 family does not have the addressing limitations that sometimes lead to this
 alteration on other platforms.
-@c fi am29k
+_fi__(_AMD29K__)
 
-@c if not am29k
-@ignore
+_if__(!_AMD29K__)
 @code{as} sometimes alters the code emitted for directives of the form
 @samp{.word @var{sym1}-@var{sym2}}; @pxref{Word}.  
 You can use the @samp{-k} option if you want a warning issued when this
 is done. 
-@end ignore
-@c fi not am29k
+_fi__(!_AMD29K__)
 
 @subsection Include Local Labels: @code{-L}
 Labels beginning with @samp{L} (upper case only) are called @dfn{local
@@ -665,13 +679,12 @@ still reported.
 This chapter describes the machine-independent syntax allowed in a
 source file.  @code{as} syntax is similar to what many other assemblers
 use; it is inspired in BSD 4.2 
-@c if not vax
+_if__(!_VAX__)
 assembler. @refill
-@c fi not vax
-@c if vax
-@c assembler, except that @code{as} does not
-@c assemble Vax bit-fields. 
-@c fi vax
+_fi__(!_VAX__)
+_if__(_VAX__)
+assembler, except that @code{as} does not assemble Vax bit-fields. 
+_fi__(_VAX__)
 
 @menu
 * Pre-processing::		Pre-processing
@@ -739,22 +752,22 @@ This means you may not nest these comments.
 
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
-@c if vax
-@c @samp{#} on the Vax. @xref{Machine Dependent}. @refill
-@c @fi vax 
-@c if 680x0
-@c @samp{|} on the 680x0. @xref{Machine Dependent}.  @refill
-@c fi 680x0
-@c if am29k
-@samp{;} for the AMD 29K family. @xref{Machine Dependent}.  @refill
-@c fi am29k
-@ignore
-@if all-arch
+_if__(_VAX__)
+@samp{#} on the Vax; 
+_fi__(_VAX__) 
+_if__(_M680X0__)
+@samp{|} on the 680x0; 
+_fi__(_M680X0__)
+_if__(_AMD29K__)
+@samp{;} for the AMD 29K family; 
+_fi__(_AMD29K__)
+@pxref{Machine Dependent}.  @refill
+
+_if__(_ALL_ARCH__)
 On some machines there are two different line comment characters.  One
 will only begin a comment if it is the first non-whitespace character on
 a line, while the other will always begin a comment.
-@fi all-arch
-@end ignore
+_fi__(_ALL_ARCH__)
 
 To be compatible with past assemblers a special interpretation is
 given to lines that begin with @samp{#}.  Following the @samp{#} an
@@ -786,20 +799,20 @@ not a possible symbol delimiter).  @xref{Symbols}.
 @node Statements, Constants, Symbol Intro, Syntax
 @section Statements
 A @dfn{statement} ends at a newline character (@samp{\n})
-@c @if m680x0 (or is this if !am29k?)
-@c or at a semicolon (@samp{;}).  The newline or semicolon
-@c fi m680x0 (or !am29k)
-@c if am29k
+_if__(!_AMD29K__)
+or at a semicolon (@samp{;}).  The newline or semicolon
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 or an ``at'' sign (@samp{@@}).  The newline or at sign
-@c fi am29k
+_fi__(_AMD29K__)
 is considered part
 of the preceding statement.  Newlines
-@c if m680x0 (or !am29k)
-@c and semicolons 
-@c fi m680x0 (or !am29k)
-@c if am29k
+_if__(!_AMD29K__)
+and semicolons 
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 and at signs
-@c fi am29k
+_fi__(_AMD29K__)
 within
 character constants are an exception:  they don't end statements.
 It is an error to end any statement with end-of-file:  the last
@@ -940,12 +953,12 @@ to strings.  So if you want to write the character backslash, you
 must write @kbd{'\\} where the first @code{\} escapes the second
 @code{\}.  As you can see, the quote is an acute accent, not a
 grave accent.  A newline 
-@c if 680x0 (or !am29k)
-@c (or semicolon @samp{;})
-@c fi 680x0 (or !am29k)
-@c if am29k
+_if__(!_AMD29K__)
+(or semicolon @samp{;})
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 (or at sign @samp{@@})
-@c fi am29k
+_fi__(_AMD29K__)
 immediately
 following an acute accent is taken as a literal character and does
 not count as the end of a statement.  The value of a character
@@ -997,18 +1010,16 @@ A flonum is written by writing (in order)
 @item
 The digit @samp{0}.
 @item
-@c if am29k
+_if__(_AMD29K__)
 One of the letters @samp{DFPRSX} (in upper or lower case), to tell
 @code{as} the rest of the number is a flonum.
-@c fi am29k
-@c if not am29k
-@ignore
+_fi__(_AMD29K__)
+_if__(!_AMD29K__)
 A letter, to tell @code{as} the rest of the number is a flonum.  @kbd{e}
 is recommended.  Case is not important.  (Any otherwise illegal letter
 will work here, but that might be changed.  Vax BSD 4.2 assembler seems
 to allow any of @samp{defghDEFGH}.)
-@end ignore
-@c fi not am29k
+_fi__(!_AMD29K__)
 @item
 An optional sign: either @samp{+} or @samp{-}.
 @item
@@ -1020,15 +1031,13 @@ or more decimal digits.
 An optional exponent, consisting of:
 @itemize @bullet
 @item
-@c if am29k
+_if__(_AMD29K__)
 An @samp{E} or @samp{e}.
-@c if not am29k
-@ignore
+_if__(!_AMD29K__)
 A letter; the exact significance varies according to
 the computer that executes the program.  @code{as}
 accepts any letter for now.  Case is not important.
-@end ignore
-@c fi not am29k
+_fi__(!_AMD29K__)
 @item
 Optional sign: either @samp{+} or @samp{-}.
 @item
@@ -1303,15 +1312,15 @@ output.
 Subsegments are optional.  If you don't use subsegments, everything
 will be stored in subsegment number zero.
 
-@c @if not am29k
-@c Each subsegment is zero-padded up to a multiple of four bytes.
-@c (Subsegments may be padded a different amount on different flavors
-@c of @code{as}.)  
-@c fi not am29k
-@c if am29k
+_if__(!_AMD29K__)
+Each subsegment is zero-padded up to a multiple of four bytes.
+(Subsegments may be padded a different amount on different flavors
+of @code{as}.)  
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 On the AMD 29K family, no particular padding is added to segment sizes;
 GNU as forces no alignment on this platform.
-@c fi am29k
+_fi__(_AMD29K__)
 Subsegments appear in your object file in numeric order, lowest numbered
 to highest.  (All this to be compatible with other people's assemblers.)
 The object file contains no representation of subsegments; @code{ld} and
@@ -1402,10 +1411,10 @@ character may be followed by any string of digits, letters,
 underscores and dollar signs.  Case of letters is significant:
 @code{foo} is a different symbol name than @code{Foo}.
 
-@c if am29k
+_if__(_AMD29K__)
 For the AMD 29K family, @samp{?} is also allowed in the
 body of a symbol name, though not at its beginning.
-@c fi am29k
+_fi__(_AMD29K__)
 
 Each symbol has exactly one name. Each name in an assembly language
 program refers to exactly one symbol. You may use that symbol name any
@@ -1478,19 +1487,19 @@ The special symbol @samp{.} refers to the current address that
 .long .} will cause @code{melvin} to contain its own address.
 Assigning a value to @code{.} is treated the same as a @code{.org}
 directive.  Thus, the expression @samp{.=.+4} is the same as saying
-@c if not am29k
-@c @samp{.space 4}.
-@c fi not am29k
-@c if am29k
+_if__(!_AMD29K__)
+@samp{.space 4}.
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 @samp{.block 4}.
-@c fi am29k
+_fi__(_AMD29K__)
 
 @node Symbol Attributes,  , Dot, Symbols
 @section Symbol Attributes
 Every symbol has these attributes: Value, Type, Descriptor, and ``Other''.
-@c if internals
-@c The detailed definitions are in <a.out.h>.
-@c fi internals
+_if__(_INTERNALS__)
+The detailed definitions are in _0__<a.out.h>_1__.
+_fi__(_INTERNALS__)
 
 If you use a symbol without defining it, @code{as} assumes zero for
 all these attributes, and probably won't warn you.  This makes the
@@ -1675,12 +1684,12 @@ Highest Precedence
 @dfn{Division}.  Truncation is the same as the C operator @samp{/}
 @item %
 @dfn{Remainder}.
-@item <
-@itemx <<
-@dfn{Shift Left}.  Same as the C operator @samp{<<}
-@item >
-@itemx >>
-@dfn{Shift Right}.  Same as the C operator @samp{>>}
+@item _0__<_1__
+@itemx _0__<<_1__
+@dfn{Shift Left}.  Same as the C operator @samp{_0__<<_1__}
+@item _0__>_1__
+@itemx _0__>>_1__
+@dfn{Shift Right}.  Same as the C operator @samp{_0__>>_1__}
 @end table
 
 @item
@@ -1761,9 +1770,7 @@ Similarly, you can't subtract quantities from two different segments.
 * Single::			@code{.single @var{flonums}}
 * Stab::			Store debugging information
 * Text::			Change to the text segment
-@c if am29k or sparc
 * Word::			Fill memory with 32-bit integers
-@c else (not am29k or sparc)
 * Deprecated::			Deprecated Directives
 * Machine Options::		Options
 * Machine Syntax::		Syntax
@@ -1852,14 +1859,13 @@ to the low 16 bits of an absolute expression.
 @section @code{.double @var{flonums}}
 @code{.double} expects zero or more flonums, separated by commas.  It assembles
 floating point numbers.  
-@c if all-arch
-@c The exact kind of floating point numbers
-@c emitted depends on how @code{as} is configured.  @xref{Machine
-@c Dependent}.
-@c fi all-arch
-@c if am29k
+_if__(_ALL_ARCH__)
+The exact kind of floating point numbers emitted depends on how
+@code{as} is configured.  @xref{Machine Dependent}.
+_fi__(_ALL_ARCH__)
+_if__(_AMD29K__)
 On the AMD 29K family the floating point format used is IEEE.
-@c fi am29k
+_fi__(_AMD29K__)
 
 @node Else, End, Double, Pseudo Ops
 @section @code{.else}
@@ -1916,14 +1922,14 @@ assumed zero.  If the first comma and following tokens are absent,
 @section @code{.float @var{flonums}}
 This directive assembles zero or more flonums, separated by commas.  It
 has the same effect as @code{.single}. 
-@c if all-arch
-@c The exact kind of floating point numbers emitted depends on how
-@c @code{as} is configured.  
-@c @xref{Machine Dependent}.
-@c fi all-arch
-@c if am29k
+_if__(_ALL_ARCH__)
+The exact kind of floating point numbers emitted depends on how
+@code{as} is configured.  
+@xref{Machine Dependent}.
+_fi__(_ALL_ARCH__)
+_if__(_AMD29K__)
 The floating point format used for the AMD 29K family is IEEE.
-@c fi am29k
+_fi__(_AMD29K__)
 
 @node Global, Ident, Float, Pseudo Ops
 @section @code{.global @var{symbol}}, @code{.globl @var{symbol}}
@@ -2002,28 +2008,26 @@ bss segment, so at run-time the bytes will start off zeroed.
 @var{Symbol} is not declared global (@pxref{Global}), so is normally
 not visible to @code{ld}.
 
-@c if not am29k
-@ignore
+_if__(!_AMD29K__)
 @node Line, Ln, Lcomm, Pseudo Ops
 @section @code{.line @var{line-number}}, @code{.ln @var{line-number}}
 @code{.line}, and its alternate spelling @code{.ln}, tell 
-@end ignore
-@c fi not am29k
-@c if am29k
+_fi__(!_AMD29K__)
+_if__(_AMD29K__)
 @node Ln, List, Line, Pseudo Ops
 @section @code{.ln @var{line-number}}
 Tell 
-@c fi am29k
+_fi__(_AMD29K__)
 @code{as} to change the logical line number.  @var{line-number} must be
 an absolute expression.  The next line will have that logical line
 number.  So any other statements on the current line (after a statement
 separator character
-@c if am29k
+_if__(_AMD29K__)
 @samp{@@})
-@c fi am29k
-@c if not am29k
-@c @code{;}) 
-@c fi not am29k
+_fi__(_AMD29K__)
+_if__(!_AMD29K__)
+@code{;}) 
+_fi__(!_AMD29K__)
 will be reported as on logical line number 
 @var{logical line number} @minus{} 1.  
 One day this directive will be unsupported: it is used only
@@ -2121,38 +2125,36 @@ file is the last value stored into it.
 
 @node Short, Single, Set, Pseudo Ops
 @section @code{.short @var{expressions}}
-@c if not (sparc or amd29k)
-@c @code{.short} is the same as @samp{.word}.  @xref{Word}.
-@c fi not (sparc or amd29k)
-@c if (sparc or amd29k)
+_if__(! (_SPARC__ || _AMD29K__) )
+@code{.short} is the same as @samp{.word}.  @xref{Word}.
+_fi__(! (_SPARC__ || _AMD29K__) )
+_if__(_SPARC__ || _AMD29K__)
 This expects zero or more @var{expressions}, and emits
 a 16 bit number for each.
-@c fi (sparc or amd29k)
+_fi__(_SPARC__ || _AMD29K__)
 
 @node Single, Space, Short, Pseudo Ops
 @section @code{.single @var{flonums}}
 This directive assembles zero or more flonums, separated by commas.  It
 has the same effect as @code{.float}.  
-@c if all-arch
-@c The exact kind of floating point numbers emitted depends on how
-@c @code{as} is configured.  @xref{Machine Dependent}.
-@c fi all-arch
-@c if am29k
+_if__(_ALL_ARCH__)
+The exact kind of floating point numbers emitted depends on how
+@code{as} is configured.  @xref{Machine Dependent}.
+_fi__(_ALL_ARCH__)
+_if__(_AMD29K__)
 The floating point format used for the AMD 29K family is IEEE.
-@c fi am29k
+_fi__(_AMD29K__)
 
 
 @node Space, Space, Single, Pseudo Ops
-@c if not am29k
-@ignore
+_if__(!_AMD29K__)
 @section @code{.space @var{size} , @var{fill}}
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
-@end ignore
-@c fi not am29k
+_fi__(!_AMD29K__)
 
-@c if am29k
+_if__(_AMD29K__)
 @section @code{.space}
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
@@ -2161,7 +2163,7 @@ AMD 29K assemblers.
 @emph{Warning:} In other versions of GNU @code{as}, the directive
 @code{.space} has the effect of @code{.block}  @xref{Machine Directives}.
 @end quotation
-@c fi am29k
+_fi__(_AMD29K__)
 
 @node Stab, Text, Space, Pseudo Ops
 @section @code{.stabd, .stabn, .stabs}
@@ -2228,24 +2230,21 @@ is used.
 @section @code{.word @var{expressions}}
 This directive expects zero or more @var{expressions}, of any segment,
 separated by commas.
-@c if sparc or amd29k
+_if__(_SPARC__ || _AMD29K__)
 For each expression, @code{as} emits a 32-bit number.
-@c fi sparc or amd29k
-@c if not (sparc or amd29k)
-@c For each expression, @code{as} emits a 16-bit number.
-@c fi not (sparc or amd29k)
-@ignore
-@c if all-arch
-The byte order
-of the expression depends on what kind of computer will run the
-program.
-@c fi all-arch
-@end ignore
+_fi__(_SPARC__ || _AMD29K__)
+_if__(! (_SPARC__ || _AMD29K__) )
+For each expression, @code{as} emits a 16-bit number.
+_fi__(! (_SPARC__ || _AMD29K__) )
 
-@ignore
-@c on the 29k this doesn't happen---32-bit addressability, period; no
-@c long/short jumps.
-@c if not am29k
+_if__(_ALL_ARCH__)
+The byte order of the expression depends on what kind of computer will
+run the program.
+_fi__(_ALL_ARCH__)
+
+@c on the 29k the "special treatment to support compilers" doesn't
+@c happen---32-bit addressability, period; no long/short jumps.
+_if__(!_AMD29K__)
 @subsection Special Treatment to support Compilers
 
 In order to assemble compiler output into something that will work,
@@ -2269,15 +2268,13 @@ long-jump to @code{sym4} will be included in the secondary jump table,
 and the @code{.word} directives will be adjusted to contain @code{sym3}
 minus the address of the long-jump to @code{sym4}; and so on, for as many
 entries in the original jump table as necessary. 
-@end ignore
-@ignore
-@c if internals
+
+_if__(_INTERNALS__)
 @emph{This feature may be disabled by compiling @code{as} with the
 @samp{-DWORKING_DOT_WORD} option.} This feature is likely to confuse
 assembly language programmers.
-@c fi internals
-@end ignore
-
+_fi__(_INTERNALS__)
+_fi__(!_AMD29K__)
 
 @node Deprecated, Machine Dependent, Word, Pseudo Ops
 @section Deprecated Directives
@@ -2290,24 +2287,17 @@ They are included for compatibility with older assemblers.
 @end table
 
 @node Machine Dependent, Machine Dependent, Pseudo Ops, Top
-@c if all-arch
-@c chapter Machine Dependent Features
-@c fi all-arch
-@c if 680x0
-@c chapter Machine Dependent Features: Motorola 680x0
-@c fi 680x0
-@c if amd29k
-@chapter Machine Dependent Features: AMD 29K
-@c fi amd29k
-@c pesch@cygnus.com: This version of the manual is specifically hacked
-@c                   for gas on a particular machine.  
-@c                   We should have a config method of
-@c                   automating this; in the meantime, use ignore
-@c                   for the other architectures (or for their stubs)
-@ignore
-@c if all-arch
+_if__(_ALL_ARCH__)
+@chapter Machine Dependent Features
+_fi__(_ALL_ARCH__)
+
+_if__(_VAX__ && !_ALL_ARCH__)
+@chapter Machine Dependent Features: VAX
+_fi__(_VAX__ && !_ALL_ARCH__)
+_if__(_ALL_ARCH__)
 @section Vax
-@c fi all-arch
+_fi__(_ALL_ARCH__)
+_if__(_VAX__)
 @subsection Options
 
 The Vax version of @code{as} accepts any of the following options,
@@ -2516,9 +2506,12 @@ separated.
 @subsection Not Supported
 Vax bit fields can not be assembled with @code{as}.  Someone
 can add the required code if they really need it.
-@end ignore
+_fi__(_VAX__)
 
-@c if am29k
+_if__(_AMD29K__ && !_ALL_ARCH__)
+@chapter Machine Dependent Features: AMD 29K
+_fi__(_AMD29K__ && !_ALL_ARCH__)
+_if__(_AMD29K__)
 @node Machine Options, Machine Syntax, Machine Dependent, Machine Dependent
 @section Options
 GNU @code{as} has no additional command-line options for the AMD
@@ -2652,9 +2645,11 @@ For information on the 29K machine instruction set, see @cite{Am29000
 User's Manual}, Advanced Micro Devices, Inc.
 
 
-@c fi am29k
-@ignore
-@c if 680x0
+_fi__(_AMD29K__)
+_if__(_M680X0__ && !_ALL_ARCH__)
+@chapter Machine Dependent Features: Motorola 680x0
+_fi__(_M680X0__ && !_ALL_ARCH__)
+_if__(_M680X0__)
 @section Options
 The 680x0 version of @code{as} has two machine dependent options.
 One shortens undefined references from 32 to 16 bits, while the
@@ -2687,12 +2682,10 @@ Size modifiers are appended directly to the end of the opcode without an
 intervening period.  For example, write @samp{movl} rather than
 @samp{move.l}. 
 
-@c pesch@cygnus.com: Vintage Release c1.37 isn't compiled with 
-@c SUN_ASM_SYNTAX.  
-@c ignore 
+_if__(_INTERNALS__)
 If @code{as} is compiled with SUN_ASM_SYNTAX defined, it will also allow
 Sun-style local labels of the form @samp{1$} through @samp{$9}. 
-@c end ignore
+_fi__(_INTERNALS__)
 
 In the following table @dfn{apc} stands for any of the address
 registers (@samp{a0} through @samp{a7}), nothing, (@samp{}), the
@@ -2739,12 +2732,12 @@ or @samp{@var{apc}@@(@var{register}:@var{size}:@var{scale})@@(@var{digits})}
 
 @item Absolute
 @samp{@var{symbol}}, or @samp{@var{digits}}
-@c ignore
+@ignore
 @c pesch@cygnus.com: gnu, rich concur the following needs careful
 @c                             research before documenting.
                                            , or either of the above followed
 by @samp{:b}, @samp{:w}, or @samp{:l}.
-@c end ignore
+@end ignore
 @end table
 
 @section Floating Point
@@ -2787,11 +2780,11 @@ This directive is identical to a @code{.space} directive.
 @c pesch@cygnus.com: I don't see any point in the following
 @c                   paragraph.  Bugs are bugs; how does saying this
 @c                   help anyone?
-@c ignore
+@ignore
 Danger:  Several bugs have been found in the opcode table (and
 fixed).  More bugs may exist.  Be careful when using obscure
 instructions.
-@c end ignore
+@end ignore
 
 @subsection Branch Improvement
 
@@ -2892,10 +2885,9 @@ The immediate character is @samp{#} for Sun compatibility.  The
 line-comment character is @samp{|}.  If a @samp{#} appears at the
 beginning of a line, it is treated as a comment unless it looks like
 @samp{# line file}, in which case it is treated normally.
-@c fi 680x0
-@end ignore
+_fi__(_M680X0__)
 
-@c pesch@cygnus.com: see remarks at ignore for vax.
+@c pesch@cygnus.com: conditionalize, rather than ignore, when filled in.
 @ignore
 @section 32x32
 @section Options
@@ -2917,7 +2909,13 @@ understands extended precision numbers.
 
 @subsection Machine Directives
 The 32x32 has no machine dependent directives.
+@end ignore
 
+@c pesch@cygnus.com: stop ignoring this when "syntax" section filled in
+@ignore
+_if__(_SPARC__ && !_ALL_ARCH__)
+@chapter Machine Dependent Features: SPARC
+_fi__(_SPARC__ && !_ALL_ARCH__)
 @section Sparc
 @subsection Options
 The sparc has no machine dependent options.
@@ -2967,7 +2965,12 @@ On the Sparc, the .word directive produces 32 bit values,
 instead of the 16 bit values it produces on every other machine.
 
 @end table
+@end ignore
 
+_if__(_I80386__ && !_ALL_ARCH__)
+@chapter Machine Dependent Features: SPARC
+_fi__(_I80386__ && !_ALL_ARCH__)
+_if__(_I80386__)
 @section Intel 80386
 @subsection Options
 The 80386 has no machine dependent options.
@@ -3273,10 +3276,11 @@ is an immediate mode expression and the second operand is a register.
 This is just a shorthand, so that, multiplying @samp{%eax} by 69, for
 example, can be done with @samp{imul $69, %eax} rather than @samp{imul
 $69, %eax, %eax}.
-@end ignore
-@c pesch@cygnus.com: we also ignore the following chapters, but for
-@c                   a different reason---internals are changing
-@c                   rapidly.  These may need to be moved to another
+_fi__(_I80386__)
+
+
+@c pesch@cygnus.com: we ignore the following chapters, since internals are
+@c                   changing rapidly.  These may need to be moved to another
 @c                   book anyhow, if we adopt the model of user/modifier
 @c                   books. 
 @ignore
@@ -3633,8 +3637,8 @@ inside the object file.  Perhaps we should use the one in
 @file{/usr/include}?
 
 @item as.h
-This defines all the globally useful things, and pulls in <stdio.h>
-and <assert.h>.
+This defines all the globally useful things, and pulls in _0__<stdio.h>_1__
+and _0__<assert.h>_1__.
 
 @item bignum.h
 This defines macros useful for dealing with bignums.
@@ -4028,7 +4032,7 @@ This function stores a relocation fixup to be acted on later.
 @var{size} is the size of the relocation, and is usually 1 (a single byte),
   2 (sixteen bits), or 4 (a longword).
 The value @var{add_symbol} @minus{} @var{sub_symbol} + @var{offset}, is added to the byte(s)
-at @var{frag->literal[where]}.  If @var{pcrel} is non-zero, the address of the
+at _0__@var{frag->literal[where]}_1__.  If @var{pcrel} is non-zero, the address of the
 location is subtracted from the result.  A relocation entry is also added
 to the @file{a.out} file.  @var{add_symbol}, @var{sub_symbol}, and/or
 @var{offset} may be NULL.@refill
