@@ -77,7 +77,7 @@ AC_DEFUN(CY_AC_PATH_TCLH, [
 
 no_tcl=true
 AC_MSG_CHECKING(for Tcl private headers. dir=${configdir})
-AC_ARG_WITH(tclinclude, [  --with-tclinclude       directory where tcl private headers are], with_tclinclude=${withval})
+AC_ARG_WITH(tclinclude, [  --with-tclinclude=DIR   Directory where tcl private headers are], with_tclinclude=${withval})
 AC_CACHE_VAL(ac_cv_c_tclh,[
 # first check to see if --with-tclinclude was specified
 if test x"${with_tclinclude}" != x ; then
@@ -165,7 +165,7 @@ AC_DEFUN(CY_AC_PATH_TCLCONFIG, [
 if test x"${no_tcl}" = x ; then
   # we reset no_tcl in case something fails here
   no_tcl=true
-  AC_ARG_WITH(tclconfig, [  --with-tclconfig           directory containing tcl configuration (tclConfig.sh)],
+  AC_ARG_WITH(tclconfig, [  --with-tclconfig=DIR    Directory containing tcl configuration (tclConfig.sh)],
          with_tclconfig=${withval})
   AC_MSG_CHECKING([for Tcl configuration])
   AC_CACHE_VAL(ac_cv_c_tclconfig,[
@@ -299,7 +299,7 @@ AC_DEFUN(CY_AC_PATH_TKH, [
 #
 no_tk=true
 AC_MSG_CHECKING(for Tk private headers)
-AC_ARG_WITH(tkinclude, [  --with-tkinclude       directory where tk private headers are], with_tkinclude=${withval})
+AC_ARG_WITH(tkinclude, [  --with-tkinclude=DIR    Directory where tk private headers are], with_tkinclude=${withval})
 AC_CACHE_VAL(ac_cv_c_tkh,[
 # first check to see if --with-tkinclude was specified
 if test x"${with_tkinclude}" != x ; then
@@ -387,7 +387,7 @@ AC_DEFUN(CY_AC_PATH_TKCONFIG, [
 if test x"${no_tk}" = x ; then
   # we reset no_tk in case something fails here
   no_tk=true
-  AC_ARG_WITH(tkconfig, [  --with-tkconfig           directory containing tk configuration (tkConfig.sh)],
+  AC_ARG_WITH(tkconfig, [  --with-tkconfig=DIR     Directory containing tk configuration (tkConfig.sh)],
          with_tkconfig=${withval})
   AC_MSG_CHECKING([for Tk configuration])
   AC_CACHE_VAL(ac_cv_c_tkconfig,[
