@@ -24,8 +24,8 @@ Do-first:
 Things-to-keep:
 
 txvu.exp
-basic.d
-basic.s
+basic-1.d
+basic-1.s
 
 Things-to-lose:
 
