@@ -84,7 +84,8 @@ typedef struct {
   int pe_arch;
   int bfd_arch;
   int underscored;
-} pe_details_type;
+}
+pe_details_type;
 
 #define PE_ARCH_i386	1
 #define PE_ARCH_sh	2
@@ -158,7 +159,8 @@ typedef struct {
   bfd_vma vma;
   char type;
   short extra;
-} reloc_data_type;
+}
+reloc_data_type;
 
 static int
 reloc_sort (va, vb)
@@ -199,12 +201,12 @@ static const char *dll_name;
 static int min_ordinal, max_ordinal;
 static int *exported_symbols;
 
-typedef struct exclude_list_struct
-  {
-    char *string;
-    struct exclude_list_struct *next;
-  }
+typedef struct exclude_list_struct {
+  char *string;
+  struct exclude_list_struct *next;
+}
 exclude_list_struct;
+
 static struct exclude_list_struct *excludes = 0;
 
 void
@@ -272,7 +274,7 @@ process_def_file (abfd, info)
     pe_def_file = def_file_empty ();
 
   /* First, run around to all the objects looking for the .drectve
-     sections, and push those into the def file too */
+     sections, and push those into the def file too.  */
 
   for (b = info->input_bfds; b; b = b->link_next)
     {
@@ -287,7 +289,7 @@ process_def_file (abfd, info)
 	}
     }
 
-  /* Now, maybe export everything else the default way */
+  /* Now, maybe export everything else the default way.  */
 
   if (pe_dll_export_everything || pe_def_file->num_exports == 0)
     {
@@ -303,7 +305,7 @@ process_def_file (abfd, info)
 	  for (j = 0; j < nsyms; j++)
 	    {
 	      /* We should export symbols which are either global or not
-	         anything at all (.bss data is the latter)  */
+	         anything at all.  (.bss data is the latter)  */
 	      if ((symbols[j]->flags & BSF_GLOBAL)
 		  || (symbols[j]->flags == BSF_NO_FLAGS))
 		{
@@ -320,7 +322,7 @@ process_def_file (abfd, info)
 #undef NE
 #define NE pe_def_file->num_exports
 
-  /* Canonicalize the export list */
+  /* Canonicalize the export list.  */
 
   if (pe_dll_kill_ats)
     {
@@ -328,8 +330,9 @@ process_def_file (abfd, info)
 	{
 	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
-	      /* This will preserve internal_name, which may have been pointing
-	         to the same memory as name, or might not have */
+	      /* This will preserve internal_name, which may have been
+	         pointing to the same memory as name, or might not
+	         have.  */
 	      char *tmp = xstrdup (pe_def_file->exports[i].name);
 	      *(strchr (tmp, '@')) = 0;
 	      pe_def_file->exports[i].name = tmp;
@@ -354,7 +357,8 @@ process_def_file (abfd, info)
 	}
     }
 
-  e = pe_def_file->exports; /* convenience, but watch out for it changing */
+  /* Convenience, but watch out for it changing.  */
+  e = pe_def_file->exports;
 
   exported_symbol_offsets = (bfd_vma *) xmalloc (NE * sizeof (bfd_vma));
   exported_symbol_sections = (struct sec **) xmalloc (NE * sizeof (struct sec *));
@@ -573,7 +577,7 @@ generate_edata (abfd, info)
   for (i = 0; i < export_table_size; i++)
     exported_symbols[i] = -1;
 
-  /* Now we need to assign ordinals to those that don't have them */
+  /* Now we need to assign ordinals to those that don't have them.  */
   for (i = 0; i < NE; i++)
     {
       if (exported_symbol_sections[i])
@@ -607,7 +611,7 @@ generate_edata (abfd, info)
 	  pe_def_file->exports[i].ordinal = next_ordinal;
 	}
 
-  /* OK, now we can allocate some memory */
+  /* OK, now we can allocate some memory.  */
 
   edata_sz = (40		/* directory */
 	      + 4 * export_table_size	/* addresses */
@@ -667,7 +671,7 @@ fill_edata (abfd, info)
 
   edata_d = (unsigned char *) xmalloc (edata_sz);
 
-  /* Note use of array pointer math here */
+  /* Note use of array pointer math here.  */
   edirectory = edata_d;
   eaddresses = (unsigned long *) (edata_d + 40);
   enameptrs = eaddresses + export_table_size;
@@ -695,7 +699,7 @@ fill_edata (abfd, info)
 
   fill_exported_offsets (abfd, info);
 
-  /* Ok, now for the filling in part */
+  /* Ok, now for the filling in part.  */
   hint = 0;
   for (i = 0; i < export_table_size; i++)
     {
@@ -737,7 +741,7 @@ generate_reloc (abfd, info)
      struct bfd_link_info *info;
 {
 
-  /* for .reloc stuff */
+  /* For .reloc stuff.  */
   reloc_data_type *reloc_data;
   int total_relocs = 0;
   int i;
@@ -767,18 +771,18 @@ generate_reloc (abfd, info)
 	  asymbol **symbols;
 	  int nsyms, symsize;
 
-	  /* if it's not loaded, we don't need to relocate it this way */
+	  /* If it's not loaded, we don't need to relocate it this way.  */
 	  if (!(s->output_section->flags & SEC_LOAD))
 	    continue;
 
 	  /* I don't know why there would be a reloc for these, but I've
-	     seen it happen - DJ */
+	     seen it happen - DJ  */
 	  if (s->output_section == &bfd_abs_section)
 	    continue;
 
 	  if (s->output_section->vma == 0)
 	    {
-	      /* Huh?  Shouldn't happen, but punt if it does */
+	      /* Huh?  Shouldn't happen, but punt if it does.  */
 	      einfo ("DJ: zero vma section reloc detected: `%s' #%d f=%d\n",
 		     s->output_section->name, s->output_section->index,
 		     s->output_section->flags);
@@ -822,9 +826,10 @@ generate_reloc (abfd, info)
 		      break;
 		    case BITS_AND_SHIFT (16, 16):
 		      reloc_data[total_relocs].type = 4;
-		      /* FIXME: we can't know the symbol's right value yet,
-			 but we probably can safely assume that CE will relocate
-			 us in 64k blocks, so leaving it zero is safe.  */
+		      /* FIXME: we can't know the symbol's right value
+			 yet, but we probably can safely assume that
+			 CE will relocate us in 64k blocks, so leaving
+			 it zero is safe.  */
 		      reloc_data[total_relocs].extra = 0;
 		      total_relocs++;
 		      break;
@@ -841,9 +846,8 @@ generate_reloc (abfd, info)
 		}
 	    }
 	  free (relocs);
-	  /* Warning: the allocated symbols are remembered in BFD and reused
-	     later, so don't free them! */
-	  /* free (symbols); */
+	  /* Warning: the allocated symbols are remembered in BFD and
+	     reused later, so don't free them!  */
 	}
     }
 
@@ -1114,13 +1118,9 @@ quick_section (abfd, name, flags, align)
   asymbol *sym;
 
   sec = bfd_make_section_old_way (abfd, name);
-  bfd_set_section_flags (abfd, sec, flags
-				  | SEC_ALLOC
-				  | SEC_LOAD
-				  | SEC_KEEP
-			 );
+  bfd_set_section_flags (abfd, sec, flags | SEC_ALLOC | SEC_LOAD | SEC_KEEP);
   bfd_set_section_alignment (abfd, sec, align);
-  /* remember to undo this before trying to link internally! */
+  /* Remember to undo this before trying to link internally!  */
   sec->output_section = sec;
 
   sym = bfd_make_empty_symbol (abfd);
@@ -1585,7 +1585,7 @@ pe_dll_generate_implib (def, impfilename)
 
   for (i = 0; i < def->num_exports; i++)
     {
-      /* The import library doesn't know about the internal name */
+      /* The import library doesn't know about the internal name.  */
       char *internal = def->exports[i].internal_name;
       bfd *n;
       def->exports[i].internal_name = def->exports[i].name;
@@ -1600,7 +1600,7 @@ pe_dll_generate_implib (def, impfilename)
   if (ar_head == NULL || ar_tail == NULL)
     return;
 
-  /* Now stick them all into the archive */
+  /* Now stick them all into the archive.  */
 
   ar_head->next = head;
   ar_tail->next = ar_head;
@@ -1665,7 +1665,7 @@ pe_process_import_defs (output_bfd, link_info)
 	    def_file_export exp;
 	    struct bfd_link_hash_entry *blhe;
 
-	    /* see if we need this import */
+	    /* See if we need this import.  */
 	    char *name = (char *) xmalloc (strlen (pe_def_file->imports[i].internal_name) + 2 + 6);
 	    sprintf (name, "%s%s", U (""), pe_def_file->imports[i].internal_name);
 	    blhe = bfd_link_hash_lookup (link_info->hash, name,
@@ -1681,7 +1681,7 @@ pe_process_import_defs (output_bfd, link_info)
 	    if (blhe && blhe->type == bfd_link_hash_undefined)
 	      {
 		bfd *one;
-		/* we do */
+		/* We do.  */
 		if (!do_this_dll)
 		  {
 		    bfd *ar_head = make_head (output_bfd);
@@ -1780,7 +1780,7 @@ pe_implied_import_dll (filename)
       einfo ("%Xopen %s: %s\n", filename, bfd_errmsg (bfd_get_error ()));
       return false;
     }
-  /* PEI dlls seem to be bfd_objects */
+  /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {
       einfo ("%X%s: this doesn't appear to be a DLL\n", filename);
