@@ -12,13 +12,13 @@ ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
+  --enable-sim-bswap			Use Host specific BSWAP instruction."
+ac_help="$ac_help
   --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator"
 ac_help="$ac_help
   --enable-sim-debug=opts		Enable debugging flags"
 ac_help="$ac_help
   --enable-sim-trace=opts		Enable tracing flags"
-ac_help="$ac_help
-  --enable-sim-bswap			Use Host specific BSWAP instruction."
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -888,96 +888,6 @@ test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
-echo $ac_n "checking whether byte ordering is bigendian""... $ac_c" 1>&6
-echo "configure:893: checking whether byte ordering is bigendian" >&5
-if eval "test \"`echo '$''{'ac_cv_c_bigendian'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_cv_c_bigendian=unknown
-# See if sys/param.h defines the BYTE_ORDER macro.
-cat > conftest.$ac_ext <<EOF
-#line 900 "configure"
-#include "confdefs.h"
-#include <sys/types.h>
-#include <sys/param.h>
-int main() {
-
-#if !BYTE_ORDER || !BIG_ENDIAN || !LITTLE_ENDIAN
- bogus endian macros
-#endif
-; return 0; }
-EOF
-if { (eval echo configure:911: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
-  rm -rf conftest*
-  # It does; now see whether it defined to BIG_ENDIAN or not.
-cat > conftest.$ac_ext <<EOF
-#line 915 "configure"
-#include "confdefs.h"
-#include <sys/types.h>
-#include <sys/param.h>
-int main() {
-
-#if BYTE_ORDER != BIG_ENDIAN
- not big endian
-#endif
-; return 0; }
-EOF
-if { (eval echo configure:926: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
-  rm -rf conftest*
-  ac_cv_c_bigendian=yes
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  ac_cv_c_bigendian=no
-fi
-rm -f conftest*
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-fi
-rm -f conftest*
-if test $ac_cv_c_bigendian = unknown; then
-if test "$cross_compiling" = yes; then
-    { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
-else
-  cat > conftest.$ac_ext <<EOF
-#line 946 "configure"
-#include "confdefs.h"
-main () {
-  /* Are we little or big endian?  From Harbison&Steele.  */
-  union
-  {
-    long l;
-    char c[sizeof (long)];
-  } u;
-  u.l = 1;
-  exit (u.c[sizeof (long) - 1] == 1);
-}
-EOF
-if { (eval echo configure:959: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
-then
-  ac_cv_c_bigendian=no
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -fr conftest*
-  ac_cv_c_bigendian=yes
-fi
-rm -fr conftest*
-fi
-
-fi
-fi
-
-echo "$ac_t""$ac_cv_c_bigendian" 1>&6
-if test $ac_cv_c_bigendian = yes; then
-  cat >> confdefs.h <<\EOF
-#define WORDS_BIGENDIAN 1
-EOF
-
-fi
-
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
 
@@ -995,7 +905,7 @@ AR=${AR-ar}
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:999: checking for $ac_word" >&5
+echo "configure:909: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1025,6 +935,24 @@ fi
 . ${srcdir}/../../bfd/configure.host
 
 
+
+# Check whether --enable-sim-bswap or --disable-sim-bswap was given.
+if test "${enable_sim_bswap+set}" = set; then
+  enableval="$enable_sim_bswap"
+  case "${enableval}" in
+  yes)	sim_bswap="-DWITH_BSWAP=1 -DUSE_BSWAP";;
+  no)	sim_bswap="-DWITH_BSWAP=0";;
+  *)	{ echo "configure: error: "--enable-sim-bswap does not take a value"" 1>&2; exit 1; }; sim_bswap="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
+  echo "Setting bswap flags = $sim_bswap" 6>&1
+fi
+else
+  sim_bswap=""
+fi
+
+
+
 # Check whether --enable-sim-cflags or --disable-sim-cflags was given.
 if test "${enable_sim_cflags+set}" = set; then
   enableval="$enable_sim_cflags"
@@ -1040,6 +968,7 @@ fi
 else
   sim_cflags=""
 fi
+
 
 
 # Check whether --enable-sim-debug or --disable-sim-debug was given.
@@ -1058,6 +987,7 @@ else
 fi
 
 
+
 # Check whether --enable-sim-trace or --disable-sim-trace was given.
 if test "${enable_sim_trace+set}" = set; then
   enableval="$enable_sim_trace"
@@ -1074,21 +1004,6 @@ else
 fi
 
 
-# Check whether --enable-sim-bswap or --disable-sim-bswap was given.
-if test "${enable_sim_bswap+set}" = set; then
-  enableval="$enable_sim_bswap"
-  case "${enableval}" in
-  yes)	sim_bswap="-DUSE_BSWAP";;
-  no)	sim_bswap="";;
-  *)	{ echo "configure: error: "--enable-sim-bswap does not take a value"" 1>&2; exit 1; }; sim_bswap="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bswap" != x""; then
-  echo "Setting bswap flags = $sim_bswap" 6>&1
-fi
-else
-  sim_bswap=""
-fi
-
 
 sim_link_files=
 sim_link_links=
@@ -1101,188 +1016,17 @@ else
   sim_link_files=../common/tconfig.in
 fi
 
+# targ-vals.def points to the libc macro description file.
 case "${target}" in
-*-*-*)
-	sim_link_files="${sim_link_files} ../common/nltvals.def"
-	sim_link_links="${sim_link_links} targ-vals.def"
-	;;
+*-*-*) TARG_VALS_DEF=../common/nltvals.def ;;
 esac
-
-
-COMMON_MAKEFILE_FRAG=makefile-temp-$$
-cat > $COMMON_MAKEFILE_FRAG <<EOF
-VPATH = ${srcdir}
-srcdir = ${srcdir}
-srcroot = \$(srcdir)/../..
-
-prefix = ${prefix}
-exec_prefix = ${exec_prefix}
-
-host_alias = ${host_alias}
-target_alias = ${target_alias}
-program_transform_name = ${program_transform_name}
-bindir = ${bindir}
-
-libdir = ${libdir}
-tooldir = \$(libdir)/\$(target_alias)
-
-datadir = ${datadir}
-mandir = ${mandir}
-man1dir = \$(mandir)/man1
-infodir = ${infodir}
-includedir = ${includedir}
-
-SHELL = /bin/sh
-
-INSTALL = \$(srcroot)/install.sh -c
-INSTALL_PROGRAM = ${INSTALL_PROGRAM}
-INSTALL_DATA = ${INSTALL_DATA}
-INSTALL_XFORM = \$(INSTALL) -t='\$(program_transform_name)'
-INSTALL_XFORM1= \$(INSTALL_XFORM) -b=.1
-
-CC = ${CC}
-CC_FOR_BUILD = ${CC_FOR_BUILD}
-CFLAGS = ${CFLAGS}
-SIM_CFLAGS = ${sim_cflags}
-SIM_DEBUG = ${sim_debug}
-SIM_TRACE = ${sim_trace}
-SIM_BSWAP = ${sim_bswap}
-
-HDEFINES = ${HDEFINES}
-TDEFINES =
-
-AR = ${AR}
-AR_FLAGS = rc
-RANLIB = ${RANLIB}
-MAKEINFO = makeinfo
-
-# Each simulator's Makefile.in defines one or more of these variables
-# as necessary.  The SIM_AC_OUTPUT macro then inserts those values
-# at '## Config'.
-
-# List of object files, less common parts.
-#SIM_OBJS =
-# List of flags to always pass to \$(CC).
-#SIM_EXTRA_CFLAGS =
-# List of extra libraries to link with.
-#SIM_EXTRA_LIBS =
-# List of extra program dependencies.
-#SIM_EXTRA_LIBDEPS =
-# Dependency of 'all' to build any extra files.
-#SIM_EXTRA_ALL =
-# Dependency of 'install' to install any extra files.
-#SIM_EXTRA_INSTALL =
-# Dependency of 'clean' to clean any extra files.
-#SIM_EXTRA_CLEAN =
-
-CONFIG_CFLAGS = ${DEFS} \$(SIM_CFLAGS) \$(SIM_DEBUG) \$(SIM_TRACE) \$(SIM_BSWAP) \
-  \$(SIM_EXTRA_CFLAGS) \$(HDEFINES) \$(TDEFINES)
-CSEARCH = -I. -I\$(srcdir) -I../common -I\$(srcdir)/../common \
-  -I../../include -I\$(srcroot)/include \
-  -I../../bfd -I\$(srcroot)/bfd -I\$(srcroot)/gdb \
-  -I../../opcodes -I\$(srcroot)/opcodes
-ALL_CFLAGS = \$(CONFIG_CFLAGS) \$(CSEARCH) \$(CFLAGS)
-BUILD_CFLAGS = -g -O \$(CSEARCH)
-
-.NOEXPORT:
-MAKEOVERRIDES=
-
-LIBIBERTY_LIB = ../../libiberty/libiberty.a
-BFD_LIB = ../../bfd/libbfd.a
-OPCODES_LIB = ../../opcodes/libopcodes.a
-CONFIG_LIBS = ${LIBS}
-LIBDEPS = \$(BFD_LIB) \$(OPCODES_LIB) \$(LIBIBERTY_LIB) \
-	\$(SIM_EXTRA_LIBDEPS)
-EXTRA_LIBS = \$(BFD_LIB) \$(OPCODES_LIB) \$(LIBIBERTY_LIB) \
-	\$(CONFIG_LIBS) \$(SIM_EXTRA_LIBS)
-
-LIB_OBJS = callback.o targ-map.o \$(SIM_OBJS)
-
-all: run libsim.a \$(SIM_EXTRA_ALL)
-
-libsim.a: \$(LIB_OBJS)
-	rm -f libsim.a
-	\$(AR) \$(ARFLAGS) libsim.a \$(LIB_OBJS)
-	\$(RANLIB) libsim.a
-
-run: run.o libsim.a \$(LIBDEPS)
-	\$(CC) \$(ALL_CFLAGS) -o run \
-	  run.o libsim.a \$(EXTRA_LIBS)
-
-run.o: \$(srcdir)/../common/run.c config.h tconfig.h \
-	  \$(srcroot)/include/callback.h
-	\$(CC) -c \$(srcdir)/../common/run.c \$(ALL_CFLAGS)
-
-callback.o: \$(srcdir)/../common/callback.c config.h tconfig.h \
-	  \$(srcroot)/include/callback.h targ-vals.h
-	\$(CC) -c \$(srcdir)/../common/callback.c \$(ALL_CFLAGS)
-
-gentmap: \$(srcdir)/../common/gentmap.c targ-vals.def
-	\$(CC_FOR_BUILD) \$(srcdir)/../common/gentmap.c -o gentmap \$(BUILD_CFLAGS) -I\$(srcdir)/../common
-
-targ-vals.h: gentmap
-	rm -f targ-vals.h
-	./gentmap -h >targ-vals.h
-
-targ-map.c: gentmap
-	rm -f targ-map.c
-	./gentmap -c >targ-map.c
-
-install: install-common \$(SIM_EXTRA_INSTALL)
-
-install-common:
-	\$(INSTALL_XFORM) run \$(bindir)/run
-
-check:
-
-info:
-clean-info:
-install-info:
-
-tags etags: TAGS
-
-TAGS: force
-	etags *.c *.h
-
-clean: \$(SIM_EXTRA_CLEAN)
-	rm -f *.[oa] *~ core gentmap targ-map.c targ-vals.h 
-	rm -f run libsim.a
-
-distclean mostlyclean maintainer-clean realclean: clean
-	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status
-	rm -f tconfig.h config.h stamp-h targ-vals.def
-
-.c.o:
-	\$(CC) -c \$(ALL_CFLAGS) \$<
-
-# Dummy target to force execution of dependent targets.
-force:
-
-Makefile: Makefile.in config.status
-	CONFIG_HEADERS= \$(SHELL) ./config.status
-
-config.status: configure
-	\$(SHELL) ./config.status --recheck
-
-config.h: stamp-h ; @true
-stamp-h: config.in config.status
-	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \$(SHELL) ./config.status
-
-# We can't add dependencies to configure because it causes too much trouble
-# to end users if configure's timestamp is out of sync.
-.PHONY: run-autoconf
-run-autoconf:
-	cd \$(srcdir) && autoconf -l ../common
-EOF
-
-
-
+sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
+sim_link_links="${sim_link_links} targ-vals.def"
 
 
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
-echo "configure:1286: checking how to run the C preprocessor" >&5
+echo "configure:1030: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
   CPP=
@@ -1297,13 +1041,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1301 "configure"
+#line 1045 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1307: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1051: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1314,13 +1058,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1318 "configure"
+#line 1062 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1324: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1068: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -1346,17 +1090,17 @@ for ac_hdr in stdlib.h time.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1350: checking for $ac_hdr" >&5
+echo "configure:1094: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1355 "configure"
+#line 1099 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1360: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1104: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1385,7 +1129,11 @@ done
 
 
 
- trap '' 1 2 15
+
+
+
+
+trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -1486,7 +1234,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile config.h:config.in" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in config.h:config.in" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -1538,13 +1286,15 @@ s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@HDEFINES@%$HDEFINES%g
 s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
+s%@sim_bswap@%$sim_bswap%g
 s%@sim_cflags@%$sim_cflags%g
 s%@sim_debug@%$sim_debug%g
 s%@sim_trace@%$sim_trace%g
-s%@sim_bswap@%$sim_bswap%g
-/@COMMON_MAKEFILE_FRAG@/r $COMMON_MAKEFILE_FRAG
-s%@COMMON_MAKEFILE_FRAG@%%g
 s%@CPP@%$CPP%g
+s%@sim_endian@%$sim_endian%g
+s%@sim_hostendian@%$sim_hostendian%g
+s%@sim_inline@%$sim_inline%g
+s%@sim_warnings@%$sim_warnings%g
 
 CEOF
 EOF
@@ -1586,7 +1336,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -1802,16 +1552,23 @@ cat >> $CONFIG_STATUS <<EOF
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
-
+case "x$CONFIG_FILES" in xMakefile*)
+   echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
+   rm -f Makesim1.tmp Makesim2.tmp Makefile
+   sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
+   sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
+   sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r Makesim2.tmp' \
+	<Makefile.sim >Makefile
+   rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
+   ;;
+ esac
  case "x$CONFIG_HEADERS" in xconfig.h:config.in) echo > stamp-h ;; esac
- 
+
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-
-rm $COMMON_MAKEFILE_FRAG
 
 
