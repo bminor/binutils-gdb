@@ -1,3 +1,12 @@
+Sat Aug 29 22:24:09 1998  Richard Henderson  <rth@cygnus.com>
+
+	* alpha-dis.c (print_insn_alpha): Use the machine type to
+	decide which PALcode set to include.
+
+Sun Aug 23 02:16:18 1998  Richard Henderson  <rth@cygnus.com>
+
+	* sparc-opc.c (FBRX): Fix typo in ",a,pn %fcc3" case.
+
 Fri Aug 21 16:07:52 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_table): Add FLAG_MUL32 to MAC, MACS,
