@@ -1,3 +1,15 @@
+2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.in: Add specific case for cris-*-linux-gnu* with
+	em=linux.
+	* configure: Regenerate.
+	* config/tc-cris.c (DEFAULT_CRIS_AXIS_LINUX_GNU): New macro, TRUE
+	if TE_LINUX defined, else FALSE.
+	(bfd_boolean demand_register_prefix): Set default from
+	DEFAULT_CRIS_AXIS_LINUX_GNU.
+	(symbols_have_leading_underscore): Similar.
+	* config/tc-cris.h (LOCAL_LABELS_DOLLAR): Define to 1.
+
 2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c (FPU_DEFAULT, case TE_LINUX): Default to FPU_ARCH_FPA.

@@ -157,11 +157,21 @@ static char *cris_insn_first_word_frag PARAMS ((void));
 /* Handle to the opcode hash table.  */
 static struct hash_control *op_hash = NULL;
 
+/* If we target cris-axis-linux-gnu (as opposed to generic cris-axis-elf),
+   we default to no underscore and required register-prefixes.  The
+   difference is in the default values.  */
+#ifdef TE_LINUX
+#define DEFAULT_CRIS_AXIS_LINUX_GNU TRUE
+#else
+#define DEFAULT_CRIS_AXIS_LINUX_GNU FALSE
+#endif
+
 /* Whether we demand that registers have a `$' prefix.  Default here.  */
-static bfd_boolean demand_register_prefix = FALSE;
+static bfd_boolean demand_register_prefix = DEFAULT_CRIS_AXIS_LINUX_GNU;
 
 /* Whether global user symbols have a leading underscore.  Default here.  */
-static bfd_boolean symbols_have_leading_underscore = TRUE;
+static bfd_boolean symbols_have_leading_underscore
+  = !DEFAULT_CRIS_AXIS_LINUX_GNU;
 
 /* Whether or not we allow PIC, and expand to PIC-friendly constructs.  */
 static bfd_boolean pic = FALSE;

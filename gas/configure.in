@@ -208,6 +208,7 @@ changequote([,])dnl
 
       avr-*-*)				fmt=elf ;;
 
+      cris-*-linux-gnu*)		fmt=multi bfd_gas=yes em=linux ;;
       cris-*-*)				fmt=multi bfd_gas=yes ;;
 
       d10v-*-*)				fmt=elf ;;
