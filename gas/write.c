@@ -1,3 +1,4 @@
+
 /* write.c - emit .o file
    Copyright (C) 1986, 1987, 1990, 1991 Free Software Foundation, Inc.
 
@@ -31,33 +32,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 #include "as.h"
-
 #include "subsegs.h"
 #include "obstack.h"
 #include "output-file.h"
 
-/* Hook for machine dependent relocation information output routine.
-   If not defined, the variable is allocated in BSS (Fortran common model).
-   If some other module defines it, we will see their value.  */
-
-void (*md_emit_relocations)();
-
-/*
- * In: length of relocation (or of address) in chars: 1, 2 or 4.
- * Out: GNU LD relocation length code: 0, 1, or 2.
- */
-
-unsigned char
-nbytes_r_length [] = {
-  42, 0, 1, 42, 2
-  };
-
-
+#ifndef MANY_SEGMENTS
 static struct frag *text_frag_root;
 static struct frag *data_frag_root;
 
 static struct frag *text_last_frag;	/* Last frag in segment. */
 static struct frag *data_last_frag;	/* Last frag in segment. */
+#endif
 
 static object_headers headers;
 
@@ -77,14 +62,14 @@ int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
 static int is_dnrange(struct frag *f1, struct frag *f2);
 static long fixup_segment(fixS *fixP, segT this_segment_type);
 static relax_addressT relax_align(relax_addressT address, long alignment);
-static void relax_segment(struct frag *segment_frag_root, segT segment_type);
+ void relax_segment(struct frag *segment_frag_root, segT segment_type);
 
 #else
 
 static int is_dnrange();
 static long fixup_segment();
 static relax_addressT relax_align();
-static void relax_segment();
+ void relax_segment();
 
 #endif /* __STDC__ */
 
@@ -147,8 +132,9 @@ enum reloc_type	r_type;	/* Relocation type */
   fixP->fx_callj = 0;
   return fixP;
 }
-
-void write_object_file() {
+#ifndef BFD
+void write_object_file() 
+{
   register struct frchain *	frchainP; /* Track along all frchains. */
   register fragS *		fragP;	/* Track along all frags. */
   register struct frchain *	next_frchainP;
@@ -269,8 +255,7 @@ void write_object_file() {
   if (data_frag_root) {
 	  register relax_addressT slide;
 	  
-	  know((text_last_frag->fr_type == rs_fill)
-	       && (text_last_frag->fr_offset == 0));
+	  know((text_last_frag->fr_type == rs_fill) && (text_last_frag->fr_offset == 0));
 
 	  H_SET_DATA_SIZE(&headers, data_last_frag->fr_address);
 	  data_last_frag->fr_address = H_GET_DATA_SIZE(&headers);
@@ -350,6 +335,9 @@ void write_object_file() {
 		  
 	  case rs_machine_dependent:
 		  md_convert_frag(&headers, fragP);
+
+		  know((fragP->fr_next == NULL) || ((fragP->fr_next->fr_address - fragP->fr_address) == fragP->fr_fix));
+
 		  /*
 		   * After md_convert_frag, we make the frag into a ".space 0".
 		   * Md_convert_frag() should set up any fixSs and constants
@@ -379,6 +367,8 @@ void write_object_file() {
 		  BAD_CASE( fragP->fr_type );
 		  break;
 	  } /* switch (fr_type) */
+
+	  know((fragP->fr_next == NULL) || ((fragP->fr_next->fr_address - fragP->fr_address) == (fragP->fr_fix + (fragP->fr_offset * fragP->fr_var))));
   } /* for each frag. */
 
 #ifndef WORKING_DOT_WORD
@@ -473,23 +463,17 @@ void write_object_file() {
 	   * Scan every FixS performing fixups. We had to wait until now to do
 	   * this because md_convert_frag() may have made some fixSs.
 	   */
+
 	  H_SET_RELOCATION_SIZE(&headers,
 				md_reloc_size * fixup_segment(text_fix_root, SEG_TEXT),
 				md_reloc_size * fixup_segment(data_fix_root, SEG_DATA));
-	  
+
+
  /* FIXME move this stuff into the pre-write-hook */
 	  H_SET_MAGIC_NUMBER(&headers, magic_number_for_object_file);
 	  H_SET_ENTRY_POINT(&headers, 0);
-	  
-#ifdef EXEC_MACHINE_TYPE
-	  H_SET_MACHINE_TYPE(&headers, EXEC_MACHINE_TYPE);
-#endif
-#ifdef EXEC_VERSION
-	  H_SET_VERSION(&headers, EXEC_VERSION);
-#endif
-	  
+
 	  obj_pre_write_hook(&headers); /* extra coff stuff */
-	  
 	  if ((had_warnings() && flagseen['Z'])
 	      || had_errors() > 0) {
 		  if (flagseen['Z']) {
@@ -505,10 +489,11 @@ void write_object_file() {
 
 	  object_file_size = H_GET_FILE_SIZE(&headers);
 	  next_object_file_charP = the_object_file = xmalloc(object_file_size);
-	  
+
 	  output_file_create(out_file_name);
-	  
+
 	  obj_header_append(&next_object_file_charP, &headers);
+
 	  know((next_object_file_charP - the_object_file) == H_GET_HEADER_SIZE(&headers));
 
 	  /*
@@ -531,20 +516,13 @@ void write_object_file() {
 
 	  } /* for each code frag. */
 
-	  know((next_object_file_charP - the_object_file)
-	       == (H_GET_HEADER_SIZE(&headers)
-		   + H_GET_TEXT_SIZE(&headers)
-		   + H_GET_DATA_SIZE(&headers)));
+	  know((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE(&headers) + H_GET_TEXT_SIZE(&headers) + H_GET_DATA_SIZE(&headers)));
 	  
 	  /*
 	   * Emit relocations.
 	   */
 	  obj_emit_relocations(&next_object_file_charP, text_fix_root, (relax_addressT)0);
-	  know((next_object_file_charP - the_object_file)
-	       == (H_GET_HEADER_SIZE(&headers)
-		   + H_GET_TEXT_SIZE(&headers)
-		   + H_GET_DATA_SIZE(&headers)
-		   + H_GET_TEXT_RELOCATION_SIZE(&headers)));
+	  know((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE(&headers) + H_GET_TEXT_SIZE(&headers) + H_GET_DATA_SIZE(&headers) + H_GET_TEXT_RELOCATION_SIZE(&headers)));
 #ifdef TC_I960
 	  /* Make addresses in data relocation directives relative to beginning of
 	   * first data fragment, not end of last text fragment:  alignment of the
@@ -555,37 +533,19 @@ void write_object_file() {
 	  obj_emit_relocations(&next_object_file_charP, data_fix_root, text_last_frag->fr_address);
 #endif /* TC_I960 */
 	  
-	  know((next_object_file_charP - the_object_file)
-	       == (H_GET_HEADER_SIZE(&headers)
-		   + H_GET_TEXT_SIZE(&headers)
-		   + H_GET_DATA_SIZE(&headers)
-		   + H_GET_TEXT_RELOCATION_SIZE(&headers)
-		   + H_GET_DATA_RELOCATION_SIZE(&headers)));
+	  know((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE(&headers) + H_GET_TEXT_SIZE(&headers) + H_GET_DATA_SIZE(&headers) + H_GET_TEXT_RELOCATION_SIZE(&headers) + H_GET_DATA_RELOCATION_SIZE(&headers)));
 
 	  /*
 	   * Emit line number entries.
 	   */
 	  OBJ_EMIT_LINENO(&next_object_file_charP, lineno_rootP, the_object_file);
-	  know((next_object_file_charP - the_object_file)
-	       == (H_GET_HEADER_SIZE(&headers)
-		   + H_GET_TEXT_SIZE(&headers)
-		   + H_GET_DATA_SIZE(&headers)
-		   + H_GET_TEXT_RELOCATION_SIZE(&headers)
-		   + H_GET_DATA_RELOCATION_SIZE(&headers)
-		   + H_GET_LINENO_SIZE(&headers)));
+	  know((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE(&headers) + H_GET_TEXT_SIZE(&headers) + H_GET_DATA_SIZE(&headers) + H_GET_TEXT_RELOCATION_SIZE(&headers) + H_GET_DATA_RELOCATION_SIZE(&headers) + H_GET_LINENO_SIZE(&headers)));
 	  
 	  /*
 	   * Emit symbols.
 	   */
 	  obj_emit_symbols(&next_object_file_charP, symbol_rootP);
-	  know((next_object_file_charP - the_object_file)
-	       == (H_GET_HEADER_SIZE(&headers)
-		   + H_GET_TEXT_SIZE(&headers)
-		   + H_GET_DATA_SIZE(&headers)
-		   + H_GET_TEXT_RELOCATION_SIZE(&headers)
-		   + H_GET_DATA_RELOCATION_SIZE(&headers)
-		   + H_GET_LINENO_SIZE(&headers)
-		   + H_GET_SYMBOL_TABLE_SIZE(&headers)));
+	  know((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE(&headers) + H_GET_TEXT_SIZE(&headers) + H_GET_DATA_SIZE(&headers) + H_GET_TEXT_RELOCATION_SIZE(&headers) + H_GET_DATA_RELOCATION_SIZE(&headers) + H_GET_LINENO_SIZE(&headers) + H_GET_SYMBOL_TABLE_SIZE(&headers)));
 
 	  /*
 	   * Emit strings.
@@ -595,19 +555,18 @@ void write_object_file() {
 		  obj_emit_strings(&next_object_file_charP);
 	  } /* only if we have a string table */
 	  
-	  know((next_object_file_charP - the_object_file)
-	       == (H_GET_HEADER_SIZE(&headers)
-		   + H_GET_TEXT_SIZE(&headers)
-		   + H_GET_DATA_SIZE(&headers)
-		   + H_GET_TEXT_RELOCATION_SIZE(&headers)
-		   + H_GET_DATA_RELOCATION_SIZE(&headers)
-		   + H_GET_LINENO_SIZE(&headers)
-		   + H_GET_SYMBOL_TABLE_SIZE(&headers)
-		   + H_GET_STRING_SIZE(&headers)));
+/*	  know((next_object_file_charP - the_object_file) == (H_GET_HEADER_SIZE(&headers) + H_GET_TEXT_SIZE(&headers) + H_GET_DATA_SIZE(&headers) + H_GET_TEXT_RELOCATION_SIZE(&headers) + H_GET_DATA_RELOCATION_SIZE(&headers) + H_GET_LINENO_SIZE(&headers) + H_GET_SYMBOL_TABLE_SIZE(&headers) + H_GET_STRING_SIZE(&headers)));
+*/
+/*	  know(next_object_file_charP == the_object_file + object_file_size);*/
+	  
+#ifdef BFD_HEADERS
+	  bfd_seek(stdoutput, 0, 0);
+	  bfd_write(the_object_file, 1, object_file_size,  stdoutput);
+#else
 
-	  know(next_object_file_charP == the_object_file + object_file_size);
 	  /* Write the data to the file */
 	  output_file_append(the_object_file,object_file_size,out_file_name);
+#endif
 	  
 #ifdef DONTDEF
 	  if (flagseen['G'])		/* GDB symbol file to be appended? */
@@ -626,6 +585,8 @@ void write_object_file() {
   VMS_write_object_file(text_siz, data_siz, text_frag_root, data_frag_root);
 #endif	/* VMS */
 } /* write_object_file() */
+#else
+#endif
 
 /*
  *			relax_segment()
@@ -639,9 +600,9 @@ void write_object_file() {
  * within the segment. Since segments live in different file addresses,
  * these frag addresses may not be the same as final object-file addresses.
  */
-#ifndef	VMS
-static
-#endif	/* not VMS */
+
+
+
 void relax_segment(segment_frag_root, segment)
      struct frag *	segment_frag_root;
      segT		segment; /* SEG_DATA or SEG_TEXT */
@@ -650,9 +611,9 @@ void relax_segment(segment_frag_root, segment)
 	register relax_addressT	address;
 	/* register relax_addressT	old_address; JF unused */
 	/* register relax_addressT	new_address; JF unused */
-	
+#ifndef MANY_SEGMENTS	
 	know( segment == SEG_DATA || segment == SEG_TEXT );
-	
+#endif
 	/* In case md_estimate_size_before_relax() wants to make fixSs. */
 	subseg_change(segment, 0);
 	
@@ -666,7 +627,7 @@ void relax_segment(segment_frag_root, segment)
 		
 		switch (fragP->fr_type) {
 		case rs_fill:
-			address += fragP->fr_offset * fragP->fr_var;
+			address += fragP->fr_offset * fragP->fr_var ;
 			break;
 			
 		case rs_align:
@@ -790,12 +751,12 @@ void relax_segment(segment_frag_root, segment)
 					target = offset;
 
 					if (symbolP) {
-						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE)
-						     || (S_GET_SEGMENT(symbolP) == SEG_DATA)
-						     || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
+#ifdef MANY_SEGMENTS
+#else
+						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
 						know(symbolP->sy_frag);
-						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE)
-						     || (symbolP->sy_frag == &zero_address_frag));
+						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (symbolP->sy_frag == &zero_address_frag));
+#endif
 						target += S_GET_VALUE(symbolP)
 						    + symbolP->sy_frag->fr_address;
 					} /* if we have a symbol */
@@ -820,12 +781,11 @@ void relax_segment(segment_frag_root, segment)
 					target = offset;
 
 					if (symbolP) {
-						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) ||
-						     (S_GET_SEGMENT(symbolP) == SEG_DATA) ||
-						     (S_GET_SEGMENT(symbolP) == SEG_TEXT));
+#ifndef MANY_SEGMENTS
+						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT))
+#endif
 						know(symbolP->sy_frag);
-						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || 
-						     symbolP->sy_frag==&zero_address_frag );
+						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || symbolP->sy_frag==&zero_address_frag );
 						target +=
 						    S_GET_VALUE(symbolP)
 							+ symbolP->sy_frag->fr_address;
@@ -977,7 +937,7 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 	register fragS *fragP;
 	register segT add_symbol_segment = SEG_ABSOLUTE;
 	
-	
+/* FIXME: remove this line */ /*	fixS *orig = fixP; */
 	seg_reloc_count = 0;
 	
 	for ( ;  fixP;  fixP = fixP->fx_next) {
@@ -1021,9 +981,7 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 				/* if sub_symbol is in the same segment that add_symbol
 				   and add_symbol is either in DATA, TEXT, BSS or ABSOLUTE */
 			} else if ((S_GET_SEGMENT(sub_symbolP) == add_symbol_segment)
-				 && ((add_symbol_segment == SEG_DATA)
-				     || (add_symbol_segment == SEG_TEXT)
-				     || (add_symbol_segment == SEG_BSS)
+				 && (SEG_NORMAL(add_symbol_segment)
 				     || (add_symbol_segment == SEG_ABSOLUTE))) {
 				/* Difference of 2 symbols from same segment. */
 				/* Can't make difference of 2 undefineds: 'value' means */
@@ -1085,10 +1043,7 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 					fixP->fx_addsy = NULL;
 					add_symbolP = NULL;
 					break;
-					
-				case SEG_BSS:
-				case SEG_DATA:
-				case SEG_TEXT:
+ 			        default:
 					seg_reloc_count ++;
 					add_number += S_GET_VALUE(add_symbolP);
 					break;
@@ -1115,11 +1070,10 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 #endif /* comment */
 		
 					++seg_reloc_count;
+
 					break;
 					
-				default:
-					BAD_CASE(add_symbol_segment);
-					break;
+
 				} /* switch on symbol seg */
 			} /* if not in local seg */
 		} /* if there was a + symbol */
@@ -1158,6 +1112,7 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 		} /* for each fix */
 	}
 #endif /* TC_I960 */
+
 #endif /* OBJ_COFF */
 	return(seg_reloc_count);
 } /* fixup_segment() */
