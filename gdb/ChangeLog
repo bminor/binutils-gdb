@@ -1,3 +1,16 @@
+Mon Sep 29 23:03:03 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (set_reg_offset): New function.
+	(mips16_heuristic_proc_desc): Calculate offsets of registers
+	saved by entry pseudo-op after rest of prologue has been read.
+	Use set_reg_offset to ignore all but the first save of a given
+	register.
+	(mips32_heuristic_proc_desc): Initialize frame adjustment value.
+	* remote-sim.c (gdbsim_store_register): Don't update registers
+	that have a null or empty name.
+	* findvar.c (read_register_bytes): Don't fetch registers
+	that have a null or empty name.
+
 Tue Sep 30 13:35:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-r5900

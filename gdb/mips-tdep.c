@@ -621,6 +621,21 @@ mips_frame_saved_pc(frame)
 static struct mips_extra_func_info temp_proc_desc;
 static struct frame_saved_regs temp_saved_regs;
 
+/* Set a register's saved stack address in temp_saved_regs.  If an address
+   has already been set for this register, do nothing; this way we will
+   only recognize the first save of a given register in a function prologue.
+   This is a helper function for mips{16,32}_heuristic_proc_desc.  */
+
+static void
+set_reg_offset (regno, offset)
+     int regno;
+     CORE_ADDR offset;
+{
+  if (temp_saved_regs.regs[regno] == 0)
+    temp_saved_regs.regs[regno] = offset;
+}
+
+
 /* This fencepost looks highly suspicious to me.  Removing it also
    seems suspicious as it could affect remote debugging across serial
    lines.  */
@@ -763,14 +778,14 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
   CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
   unsigned short prev_inst = 0;	/* saved copy of previous instruction */
   unsigned inst = 0;		/* current instruction */
+  unsigned entry_inst = 0;	/* the entry instruction */
+  int reg, offset;
 
   PROC_FRAME_OFFSET(&temp_proc_desc) = 0;	/* size of stack frame */
   PROC_FRAME_ADJUST(&temp_proc_desc) = 0;	/* offset of FP from SP */
 
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
     {
-      int reg, offset;
-
       /* Save the previous instruction.  If it's an EXTEND, we'll extract
          the immediate offset extension from it in mips16_get_imm.  */
       prev_inst = inst;
@@ -794,30 +809,30 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  reg = mips16_to_32_reg[(inst & 0x700) >> 8];
 	  PROC_REG_MASK(&temp_proc_desc) |= (1 << reg);
-	  temp_saved_regs.regs[reg] = sp + offset;
+	  set_reg_offset (reg, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xf900)	/* sd reg,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK(&temp_proc_desc) |= (1 << reg);
-	  temp_saved_regs.regs[reg] = sp + offset;
+	  set_reg_offset (reg, sp + offset);
 	}
       else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  PROC_REG_MASK(&temp_proc_desc) |= (1 << RA_REGNUM);
-	  temp_saved_regs.regs[RA_REGNUM] = sp + offset;
+	  set_reg_offset (RA_REGNUM, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
 	  PROC_REG_MASK(&temp_proc_desc) |= (1 << RA_REGNUM);
-	  temp_saved_regs.regs[RA_REGNUM] = sp + offset;
+	  set_reg_offset (RA_REGNUM, sp + offset);
 	}
       else if (inst == 0x673d)			/* move $s1, $sp */
 	{
-	  frame_addr = read_next_frame_reg(next_frame, 30);
+	  frame_addr = sp;
 	  PROC_FRAME_REG (&temp_proc_desc) = 17;
 	}
       else if ((inst & 0xff00) == 0x0100)	/* addiu $s1,sp,n */
@@ -832,51 +847,64 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	  temp_saved_regs.regs[reg] = frame_addr + offset;
+	  set_reg_offset (reg, frame_addr + offset);
 	}
       else if ((inst & 0xFF00) == 0x7900)	/* sd reg,offset($s1) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	  temp_saved_regs.regs[reg] = frame_addr + offset;
+	  set_reg_offset (reg, frame_addr + offset);
 	}
       else if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
-	{
-	  int areg_count = (inst >> 8) & 7;
-	  int sreg_count = (inst >> 6) & 3;
-
-	  /* The entry instruction always subtracts 32 from the SP.  */
-	  PROC_FRAME_OFFSET(&temp_proc_desc) += 32;
-
-	  /* Check if a0-a3 were saved in the caller's argument save area.  */
-	  for (reg = 4, offset = 32; reg < areg_count+4; reg++)
-	    {
-	      PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	      temp_saved_regs.regs[reg] = sp + offset;
-	      offset -= MIPS_REGSIZE;
-	    }
-
-	  /* Check if the ra register was pushed on the stack.  */
-	  offset = 28;
-	  if (inst & 0x20)
-	    {
-	      PROC_REG_MASK(&temp_proc_desc) |= 1 << RA_REGNUM;
-	      temp_saved_regs.regs[RA_REGNUM] = sp + offset;
-	      offset -= MIPS_REGSIZE;
-	    }
-
-	  /* Check if the s0 and s1 registers were pushed on the stack.  */
-	  for (reg = 16; reg < sreg_count+16; reg++)
-	    {
-	      PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	      temp_saved_regs.regs[reg] = sp + offset;
-	      offset -= MIPS_REGSIZE;
-	    }
-	}
+	entry_inst = inst;			/* save for later processing */
       else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
 	cur_pc += MIPS16_INSTLEN;		/* 32-bit instruction */
     }
+
+    /* The entry instruction is typically the first instruction in a function,
+       and it stores registers at offsets relative to the value of the old SP
+       (before the prologue).  But the value of the sp parameter to this
+       function is the new SP (after the prologue has been executed).  So we
+       can't calculate those offsets until we've seen the entire prologue,
+       and can calculate what the old SP must have been. */
+    if (entry_inst != 0)
+      {
+	int areg_count = (entry_inst >> 8) & 7;
+	int sreg_count = (entry_inst >> 6) & 3;
+
+	/* The entry instruction always subtracts 32 from the SP.  */
+	PROC_FRAME_OFFSET(&temp_proc_desc) += 32;
+
+	/* Now we can calculate what the SP must have been at the
+	   start of the function prologue.  */
+	sp += PROC_FRAME_OFFSET(&temp_proc_desc);
+
+	/* Check if a0-a3 were saved in the caller's argument save area.  */
+	for (reg = 4, offset = 0; reg < areg_count+4; reg++)
+	  {
+	    PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	    set_reg_offset (reg, sp + offset);
+	    offset += MIPS_REGSIZE;
+	  }
+
+	/* Check if the ra register was pushed on the stack.  */
+	offset = -4;
+	if (entry_inst & 0x20)
+	  {
+	    PROC_REG_MASK(&temp_proc_desc) |= 1 << RA_REGNUM;
+	    set_reg_offset (RA_REGNUM, sp + offset);
+	    offset -= MIPS_REGSIZE;
+	  }
+
+	/* Check if the s0 and s1 registers were pushed on the stack.  */
+	for (reg = 16; reg < sreg_count+16; reg++)
+	  {
+	    PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	    set_reg_offset (reg, sp + offset);
+	    offset -= MIPS_REGSIZE;
+	  }
+      }
 }
 
 static void
@@ -889,6 +917,7 @@ mips32_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
   CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
 restart:
   PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
+  PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
     {
       unsigned long inst, high_word, low_word;
@@ -917,7 +946,7 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
 	{
 	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	  temp_saved_regs.regs[reg] = sp + low_word;
+	  set_reg_offset (reg, sp + low_word);
 	}
       else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
 	{
@@ -925,7 +954,7 @@ restart:
 	     but the register size used is only 32 bits. Make the address
 	     for the saved register point to the lower 32 bits.  */
 	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	  temp_saved_regs.regs[reg] = sp + low_word + 8 - MIPS_REGSIZE;
+	  set_reg_offset (reg, sp + low_word + 8 - MIPS_REGSIZE);
 	}
       else if (high_word == 0x27be)			/* addiu $30,$sp,size */
 	{
@@ -975,7 +1004,7 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafc0)		/* sw reg,offset($30) */
 	{
 	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
-	  temp_saved_regs.regs[reg] = frame_addr + low_word;
+	  set_reg_offset (reg, frame_addr + low_word);
 	}
     }
 }
@@ -1513,6 +1542,7 @@ mips_push_dummy_frame()
   /* Save special registers (PC, MMHI, MMLO, FPC_CSR) */
   PROC_FRAME_REG(proc_desc) = PUSH_FP_REGNUM;
   PROC_FRAME_OFFSET(proc_desc) = 0;
+  PROC_FRAME_ADJUST(proc_desc) = 0;
   mips_push_register (&sp, PC_REGNUM);
   mips_push_register (&sp, HI_REGNUM);
   mips_push_register (&sp, LO_REGNUM);

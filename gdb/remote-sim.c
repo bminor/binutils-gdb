@@ -369,7 +369,7 @@ int regno;
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_store_register (regno);
     }
-  else
+  else if (reg_names[regno] != NULL && *reg_names[regno] != '\0')
     {
       /* FIXME: Until read_register() returns LONGEST, we have this.  */
       char tmp[MAX_REGISTER_RAW_SIZE];
