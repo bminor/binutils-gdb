@@ -1,3 +1,20 @@
+Mon Nov 25 17:26:22 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* as.c: (perform_an_assembly_pass): moved declaration of i to
+	avoid a syntax error. Now always create the three default
+	sections when in MANY_SEGMENTS mode.
+	* as.h: New improved way of specifying MANY_SEGMENTS
+	* configure.in: hds object format is now coff-bfd
+	* subsegs.h: add line numbers and section stuff to the
+	segment_info structure. (But go back later and fix.. this is
+	COFF specific)
+	
+
+Thu Oct 24 17:25:59 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
+
+	* config/obj-coff.c (obj_coff_dim): Allows newline to end a
+	.dim statement.
+
 Mon Oct 21 09:25:33 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
 
 	* configure.in: added ebmon entry.

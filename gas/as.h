@@ -93,7 +93,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef DEBUG
 #undef NDEBUG
+#ifndef know
 #define know(p) assert(p)	/* Verify our assumptions! */
+#endif /* not yet defined */
 #else
 #define know(p)			/* know() checks are no-op.ed */
 #endif
@@ -140,22 +142,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * X_add_symbol != X_sub_symbol (then we just cancel them, => SEG_ABSOLUTE).
  */
 
+
 #ifdef MANY_SEGMENTS
+#define N_SEGMENTS 10
 #define SEG_NORMAL(x) ((x) >= SEG_E0 && (x) <= SEG_E9)
+#define SEG_LIST SEG_E0,SEG_E1,SEG_E2,SEG_E3,SEG_E4,SEG_E5,SEG_E6,SEG_E7,SEG_E8,SEG_E9
 #else
+#define N_SEGMENTS 3
 #define SEG_NORMAL(x) ((x) == SEG_TEXT || (x) == SEG_DATA || (x) == SEG_BSS)
+#define SEG_LIST SEG_TEXT,SEG_DATA,SEG_BSS
 #endif
 
 typedef enum _segT {
 	SEG_ABSOLUTE = 0,
-#ifdef MANY_SEGMENTS
-	/* For the moment, we allow only 10 extra segments to be specified by the user */
-	SEG_E0,	SEG_E1,SEG_E2,SEG_E3,SEG_E4,SEG_E5,SEG_E6,SEG_E7,SEG_E8,SEG_E9,
-#else
-	SEG_TEXT,
-	SEG_DATA,
-	SEG_BSS,
-#endif
+	SEG_LIST,
 	SEG_UNKNOWN,
 	SEG_ABSENT,		/* Mythical Segment (absent): NO expression seen. */
 	SEG_PASS1,		/* Mythical Segment: Need another pass. */

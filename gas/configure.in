@@ -57,17 +57,35 @@ ebmon)
 generic) obj_format=generic ;;
 
 hds)
-	obj_format=ieee
+	obj_format=coff-bfd
 	need_bfd="$(unsubdir)/../bfd$(subdir)/libbfd.a"
 	;;
 
-coff* | sysv*) obj_format=coff ;;
+sysv32)
+	obj_format=coff
+	emulation=sysv32
+	;;
 
+coff* | sysv*)
+	obj_format=coff
+
+	case ${target_vendor} in
+	bull)	emulation=dpx2 ;;
+	sco)	emulation=sco386 ;;
+	sun)	emulation=sun3 ;;
+	*)
+	esac
+	;;
 *)
 	case ${target_vendor} in
 	aout) obj_format=aout ;;
 	bout) obj_format=bout ;;
-	coff) obj_format=coff ;;
+	coff)
+		obj_format=coff
+		case ${target_cpu} in
+		i960) emulation=ic960 ;;
+		esac
+		;;
 	*) obj_format=aout ;;
 	esac
 	;;

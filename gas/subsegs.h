@@ -5,7 +5,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -56,10 +56,32 @@ extern frchainS * frchain_now;
 				/* chain, even if it contains no (complete) */
 				/* frags. */
 
+
+#ifdef MANY_SEGMENTS
+typedef struct 
+{
+  frchainS *frchainP;
+  int hadone;
+  int user_stuff;
+  struct frag *frag_root;
+  struct frag *last_frag;
+  fixS *fix_root;
+  fixS *fix_tail;
+  struct internal_scnhdr scnhdr;
+  symbolS *dot;
+
+  struct lineno_list *lineno_list_head;	
+  struct lineno_list *lineno_list_tail;	
+  
+} segment_info_type;
+segment_info_type segment_info[];
+#else
 extern frchainS * data0_frchainP;
 				/* Sentinel for frchain crawling. */
 				/* Points to the 1st data-segment frchain. */
 				/* (Which is pointed to by the last text- */
 				/* segment frchain.) */
+
+#endif
 
 /* end: subsegs.h */
