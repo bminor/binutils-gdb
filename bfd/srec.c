@@ -707,7 +707,7 @@ DEFUN(srec_write_terminator,(abfd, tdata),
       
 static void
 srec_write_symbols(abfd)
-bfd *abfd;
+     bfd *abfd;
 {
   char buffer[MAXCHUNK];
   /* Dump out the symbols of a bfd */
@@ -747,7 +747,15 @@ bfd *abfd;
 	/* Just dump out non debug symbols */
 
 	int l;
-	sprintf(buffer,"  %s $%x\n\r", s->name, s->value + s->section->lma);
+	char buf2[40], *p;
+
+	sprintf (buffer,"  %s $", s->name);
+	sprintf_vma (buf2, s->value + s->section->lma);
+	p = buf2;
+	while (p[0] == '0' && p[1] != 0)
+	  p++;
+	strcat (buffer, p);
+	strcat (buffer, "\n\r");
 	l = strlen(buffer);
 	bfd_write(buffer, l, 1,abfd);
       }
@@ -841,6 +849,15 @@ DEFUN(srec_get_symtab, (abfd, alocation),
 }
 
 void 
+DEFUN(srec_get_symbol_info,(ignore_abfd, symbol, ret),
+      bfd *ignore_abfd AND
+      asymbol *symbol AND
+      symbol_info *ret)
+{
+  bfd_symbol_info (symbol, ret);
+}
+
+void 
 DEFUN(srec_print_symbol,(ignore_abfd, afile, symbol, how),
       bfd *ignore_abfd AND
       PTR afile AND
@@ -854,7 +871,6 @@ DEFUN(srec_print_symbol,(ignore_abfd, afile, symbol, how),
     fprintf (file, "%s", symbol->name);
     break;
    default:
-   case bfd_print_symbol_nm:
     bfd_print_symbol_vandf ((PTR) file, symbol);
     fprintf (file, " %-5s %s",
 	     symbol->section->name,
@@ -911,10 +927,12 @@ bfd_target srec_vec =
     ' ',			/* ar_pad_char */
     16,				/* ar_max_namelen */
     1,				/* minimum alignment */
-    _do_getb64, _do_putb64,  _do_getb32,
-    _do_putb32, _do_getb16, _do_putb16, /* data */
-    _do_getb64, _do_putb64,  _do_getb32,
-    _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+    _do_getb64, _do_getb_signed_64, _do_putb64,
+      _do_getb32, _do_getb_signed_32,     _do_putb32,
+      _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
+    _do_getb64, _do_getb_signed_64, _do_putb64,
+      _do_getb32, _do_getb_signed_32,     _do_putb32,
+      _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
 
   {
       _bfd_dummy_target,
@@ -954,10 +972,12 @@ bfd_target symbolsrec_vec =
     ' ',			/* ar_pad_char */
     16,				/* ar_max_namelen */
     1,				/* minimum alignment */
-    _do_getb64, _do_putb64,  _do_getb32,
-    _do_putb32, _do_getb16, _do_putb16, /* data */
-    _do_getb64, _do_putb64,  _do_getb32,
-    _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+    _do_getb64, _do_getb_signed_64, _do_putb64,
+      _do_getb32, _do_getb_signed_32,     _do_putb32,
+      _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
+    _do_getb64, _do_getb_signed_64, _do_putb64,
+      _do_getb32, _do_getb_signed_32,     _do_putb32,
+      _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
 
   {
       _bfd_dummy_target,
