@@ -1,5 +1,12 @@
 1999-05-29  Nick Clifton  <nickc@cygnus.com>
 
+	* readelf.c (get_elf_class): Display unknown class number.
+	(get_data_encoding): Display unknown encoding number.
+	(get_osabi_name): Display unknown ABI number.
+	(process_file_header): Display unknown version number.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
 	* readelf.c (dump_relocations): Fix typo.
 
 1999-05-28  Nick Clifton  <nickc@cygnus.com>

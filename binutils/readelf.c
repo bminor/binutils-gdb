@@ -1353,12 +1353,16 @@ static const char *
 get_elf_class (elf_class)
      unsigned char elf_class;
 {
+  static char buff [32];
+  
   switch (elf_class)
     {
     case ELFCLASSNONE: return _("none");
     case ELFCLASS32:   return _("ELF32");
     case ELFCLASS64:   return _("ELF64");
-    default:           return _("<unknown>");
+    default:
+      sprintf (buff, _("<unknown: %lx>"), elf_class);
+      return buff;
     }
 }
 
@@ -1366,12 +1370,16 @@ static const char *
 get_data_encoding (encoding)
      unsigned char encoding;
 {
+  static char buff [32];
+  
   switch (encoding)
     {
     case ELFDATANONE: return _("none");
     case ELFDATA2LSB: return _("2's complement, little endian");
     case ELFDATA2MSB: return _("2's complement, big endian");
-    default:          return _("<unknown>");
+    default:          
+      sprintf (buff, _("<unknown: %lx>"), encoding);
+      return buff;
     }
 }
 
@@ -1379,12 +1387,16 @@ static const char *
 get_osabi_name (osabi)
      unsigned char osabi;
 {
+  static char buff [32];
+  
   switch (osabi)
     {
     case ELFOSABI_SYSV:       return _("UNIX - System V");
     case ELFOSABI_HPUX:       return _("UNIX - HP-UX");
     case ELFOSABI_STANDALONE: return _("Standalone App");
-    default:                  return _("<unknown>");
+    default:
+      sprintf (buff, _("<unknown: %lx>"), osabi);
+      return buff;
     }
 }
 
@@ -1418,7 +1430,8 @@ process_file_header ()
       printf (_("  Version:                           %d %s\n"),
 	      elf_header.e_ident [EI_VERSION],
 	      elf_header.e_ident [EI_VERSION] == EV_CURRENT ? "(current)" :
-	      elf_header.e_ident [EI_VERSION] != EV_NONE ? "<unknown>" : "");
+	      elf_header.e_ident [EI_VERSION] != EV_NONE ? "<unknown: %lx>" : "",
+	      elf_header.e_ident [EI_VERSION]);
       printf (_("  OS/ABI:                            %s\n"),
 	      get_osabi_name (elf_header.e_ident [EI_OSABI]));
       printf (_("  ABI Version:                       %d\n"),
