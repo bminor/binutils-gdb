@@ -292,45 +292,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   return result;
 }
 
-enum mi_cmd_result
-mi_cmd_interpreter_set (char *command, char **argv, int argc)
-{
-  struct gdb_interpreter *interp;
-  int result;
-
-  if (argc != 1)
-    {
-      xasprintf (&mi_error_message,
-		 "mi_cmd_interpreter_set: wrong #of args, should be 1 ");
-      return MI_CMD_ERROR;
-    }
-  interp = gdb_lookup_interpreter (argv[0]);
-  if (interp == NULL)
-    {
-      xasprintf (&mi_error_message,
-		 "mi_cmd_interpreter_set: could not find interpreter %s",
-		 argv[0]);
-      return MI_CMD_ERROR;
-    }
-
-  if (interp != gdb_current_interpreter ())
-    {
-      result = gdb_set_interpreter (interp);
-      if (result != 1)
-	{
-	  xasprintf (&mi_error_message,
-		     "mi_cmd_interpreter_set: error setting interpreter %s",
-		     argv[0]);
-	  return MI_CMD_ERROR;
-	}
-    }
-
-  /* We don't want to put up the "done" and whatnot here, since we
-   * are going over to another interpreter.
-   */
-  return MI_CMD_QUIET;
-}
-
 /*
  * mi_insert_notify_hooks - This inserts a number of hooks that are meant to produce
  * async-notify ("=") MI messages while running commands in another interpreter
