@@ -414,6 +414,9 @@ case "${target}" in
   arm-*-pe*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+  arm-*-coff*)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    ;;
   arm-*-riscix*)
     noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;

@@ -1,3 +1,35 @@
+Tue Oct  1 01:28:41 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* configure.in (noconfigdirs): Don't build libgloss for arm-coff
+ 	targets.
+
+Mon Sep 30 14:24:01 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-README: Add much more detail for native PowerMac.
+	* mpw-install: New file.
+	* mpw-configure: Add --norecursion and --help options.
+	* mpw-config.in: Translate readme and install files when
+	copying to objdir.
+	* mpw-build.in: Don't always depend on byacc and flex.
+	(install-only-top): New action.
+
+start-sanitize-v850
+Fri Sep 27 17:39:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure.in:  You can now configure GDB for the v850.
+
+end-sanitize-v850
+start-sanitize-d10v
+Tue Sep 24 19:05:12 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (noconfigdirs): Don't configure any C++ dirs
+	if targeting D10V.
+
+end-sanitize-d10v
+Tue Sep 17 12:15:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Recognize mips64vr5000.
+
 Mon Sep 16 17:00:52 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Use a single line for host_tools and native_only.
