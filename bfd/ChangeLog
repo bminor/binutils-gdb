@@ -1,3 +1,10 @@
+2001-12-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-strtab.c (struct elf_strtab_hash_entry): Add u.next.
+	(last_eq): Remove.
+	(_bfd_elf_strtab_finalize): Don't use a hash table for last
+	character chains, instead use an array.
+
 2001-12-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* elf.c (elfcore_netbsd_get_lwpid): New function.

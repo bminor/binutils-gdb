@@ -37,6 +37,7 @@ struct elf_strtab_hash_entry
     bfd_size_type index;
     /* Entry this is a suffix of (if len is 0).  */
     struct elf_strtab_hash_entry *suffix;
+    struct elf_strtab_hash_entry *next;
   } u;
 };
 
@@ -59,7 +60,6 @@ static struct bfd_hash_entry *elf_strtab_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static int cmplengthentry PARAMS ((const PTR, const PTR));
 static int last4_eq PARAMS ((const PTR, const PTR));
-static int last_eq PARAMS ((const PTR, const PTR));
 
 /* Routine to create an entry in a section merge hashtab.  */
 
@@ -313,33 +313,6 @@ last4_eq (a, b)
 		 B->root.string, B->len - 5) == 0;
 }
 
-static int
-last_eq (a, b)
-     const PTR a;
-     const PTR b;
-{
-  struct elf_strtab_hash_entry * A = (struct elf_strtab_hash_entry *) a;
-  struct elf_strtab_hash_entry * B = (struct elf_strtab_hash_entry *) b;
-
-  if (B->len >= 5)
-    /* Longer strings are just pushed into the hash table,
-       they'll be used when looking up for very short strings.  */
-    return 0;
-
-  if (memcmp (A->root.string + A->len - 2, B->root.string + B->len - 2, 1)
-      != 0)
-    /* This was a hashtable collision.  */
-    return 0;
-
-  if (A->len <= B->len)
-    /* B cannot be a suffix of A unless A is equal to B, which is guaranteed
-       not to be equal by the hash table.  */
-    return 0;
-
-  return memcmp (A->root.string + (A->len - B->len),
-		 B->root.string, B->len - 2) == 0;
-}
-
 /* This function assigns final string table offsets for used strings,
    merging strings matching suffixes of longer strings if possible.  */
 
@@ -348,8 +321,9 @@ _bfd_elf_strtab_finalize (tab)
      struct elf_strtab_hash *tab;
 {
   struct elf_strtab_hash_entry **array, **a, **end, *e;
-  htab_t lasttab = NULL, last4tab = NULL;
+  htab_t last4tab = NULL;
   bfd_size_type size, amt;
+  struct elf_strtab_hash_entry *last[256], **last_ptr[256];
 
   /* GCC 2.91.66 (egcs-1.1.2) on i386 miscompiles this function when i is
      a 64-bit bfd_size_type: a 64-bit target or --enable-64-bit-bfd.
@@ -364,6 +338,9 @@ _bfd_elf_strtab_finalize (tab)
   if (array == NULL)
     goto alloc_failure;
 
+  memset (last, 0, sizeof (last));
+  for (i = 0; i < 256; ++i)
+    last_ptr[i] = &last[i];
   for (i = 1, a = array; i < tab->size; ++i)
     if (tab->array[i]->refcount)
       *a++ = tab->array[i];
@@ -375,8 +352,7 @@ _bfd_elf_strtab_finalize (tab)
   qsort (array, size, sizeof (struct elf_strtab_hash_entry *), cmplengthentry);
 
   last4tab = htab_create (size * 4, NULL, last4_eq, NULL);
-  lasttab = htab_create (size * 4, NULL, last_eq, NULL);
-  if (lasttab == NULL || last4tab == NULL)
+  if (last4tab == NULL)
     goto alloc_failure;
 
   /* Now insert the strings into hash tables (strings with last 4 characters
@@ -416,27 +392,35 @@ _bfd_elf_strtab_finalize (tab)
 	  else
 	    *p = (PTR) e;
 	}
-      c = (unsigned char) e->root.string[e->len - 1];
-      p = htab_find_slot_with_hash (lasttab, e, c, INSERT);
-      if (p == NULL)
-	goto alloc_failure;
-      if (*p)
-	{
-	  struct elf_strtab_hash_entry *ent;
-
-	  ent = (struct elf_strtab_hash_entry *) *p;
-	  e->u.suffix = ent;
-	  e->len = 0;
-	}
       else
-	*p = (PTR) e;
+	{
+	  struct elf_strtab_hash_entry *tem;
+
+	  c = e->root.string[e->len - 2] & 0xff;
+
+	  for (tem = last[c]; tem; tem = tem->u.next)
+	    if (tem->len > e->len
+		&& memcmp (tem->root.string + (tem->len - e->len),
+			   e->root.string, e->len - 1) == 0)
+	      break;
+	  if (tem)
+	    {
+	      e->u.suffix = tem;
+	      e->len = 0;
+	      continue;
+	    }
+	}
+
+      c = e->root.string[e->len - 2] & 0xff;
+      /* Put longest strings first.  */
+      *last_ptr[c] = e;
+      last_ptr[c] = &e->u.next;
+      e->u.next = NULL;
     }
 
 alloc_failure:
   if (array)
     free (array);
-  if (lasttab)
-    htab_delete (lasttab);
   if (last4tab)
     htab_delete (last4tab);
 
