@@ -1,3 +1,7 @@
+2004-02-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Mode Options): Note that "mi1" is deprecated.
+
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Deprecate
