@@ -1,3 +1,20 @@
+Mon Oct 25 10:37:08 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* Makefile.in (install-info): Rewrite to take advantage of VPATH,
+	so FSF distributions (with info files in $(srcdir)) install
+	properly.
+	(DISTSTUFF): Build nlmheader.c too.
+
+Fri Oct 22 11:43:23 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* ar.c (program_name): Don't define here.
+	* objdump.c: Include "bucomm.h".
+	(xmalloc): Don't declare here.
+	(program_name): Don't define here.
+	(program_version): Fixed type in declaration.
+	* size.c: Include "bucomm.h".
+	(program_name): Don't declare here.
+
 Fri Oct 22 14:10:41 1993  Mark Eichin  (eichin@cygnus.com)
 
 	* objdump.c (fprintf): hide declaration in FPRINTF_ALREADY_DECLARED
