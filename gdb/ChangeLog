@@ -1,3 +1,9 @@
+Mon May 18 13:34:27 1998  Keith Seitz  <keiths@cygnus.com>
+
+        * dbxread.c (process_one_symbol): If block addresses are relative to
+        function start addresses, reset function_start_address whenever a new
+        source file is seen.
+
 start-sanitize-d30v
 Sat May 16 22:21:48 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
