@@ -32,6 +32,14 @@
 	DT_PPC64_OPD and DT_PPC64_OPDSZ tags.
 	(ppc64_elf_finish_dynamic_sections): Set values for them.
 
+2002-02-11  Michael Snyder  <msnyder@redhat.com>
+
+	* elf-bfd.h (elfcore_write_lwpstatus): Add prototype.
+	* elf.c (elfcore_grok_pstatus): Add prototype.
+	(elfcore_grok_lwpstatus): Add prototype.
+	(elfcore_write_lwpstatus): New function.
+	(elfcore_write_pstatus): Fix typo, eliminate unnecessary memcpy.
+
 2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c: Added missing prototypes.

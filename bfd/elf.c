@@ -6153,6 +6153,8 @@ elfcore_grok_psinfo (abfd, note)
 #endif /* defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T) */
 
 #if defined (HAVE_PSTATUS_T)
+static boolean elfcore_grok_pstatus PARAMS ((bfd *, Elf_Internal_Note *));
+
 static boolean
 elfcore_grok_pstatus (abfd, note)
      bfd *abfd;
@@ -6190,6 +6192,8 @@ elfcore_grok_pstatus (abfd, note)
 #endif /* defined (HAVE_PSTATUS_T) */
 
 #if defined (HAVE_LWPSTATUS_T)
+static boolean elfcore_grok_lwpstatus PARAMS ((bfd *, Elf_Internal_Note *));
+
 static boolean
 elfcore_grok_lwpstatus (abfd, note)
      bfd *abfd;
@@ -6603,6 +6607,38 @@ elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
 }
 #endif /* HAVE_PRSTATUS_T */
 
+#if defined (HAVE_LWPSTATUS_T)
+char *
+elfcore_write_lwpstatus (abfd, buf, bufsiz, pid, cursig, gregs)
+     bfd *abfd;
+     char *buf;
+     int *bufsiz;
+     long pid;
+     int cursig;
+     void *gregs;
+{
+  lwpstatus_t lwpstat;
+  char *note_name = "CORE";
+
+  memset (&lwpstat, 0, sizeof (lwpstat));
+  lwpstat.pr_lwpid  = pid >> 16;
+  lwpstat.pr_cursig = cursig;
+#if defined (HAVE_LWPSTATUS_T_PR_REG)
+  memcpy (lwpstat.pr_reg, gregs, sizeof (lwpstat.pr_reg));
+#elif defined (HAVE_LWPSTATUS_T_PR_CONTEXT)
+#if !defined(gregs)
+  memcpy (lwpstat.pr_context.uc_mcontext.gregs,
+	  gregs, sizeof (lwpstat.pr_context.uc_mcontext.gregs));
+#else
+  memcpy (lwpstat.pr_context.uc_mcontext.__gregs,
+	  gregs, sizeof (lwpstat.pr_context.uc_mcontext.__gregs));
+#endif
+#endif
+  return elfcore_write_note (abfd, buf, bufsiz, note_name, 
+			     NT_LWPSTATUS, &lwpstat, sizeof (lwpstat));
+}
+#endif /* HAVE_LWPSTATUS_T */
+
 #if defined (HAVE_PSTATUS_T)
 char *
 elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
@@ -6616,11 +6652,11 @@ elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
   pstatus_t pstat;
   char *note_name = "CORE";
 
-  memset (&pstat, 0, sizeof (prstat));
-  pstat.pr_pid = pid;
-  memcpy (pstat.pr_reg, gregs, sizeof (pstat.pr_reg));
-  return elfcore_write_note (abfd, buf, bufsiz, 
-			     note_name, NT_PSTATUS, &pstat, sizeof (pstat));
+  memset (&pstat, 0, sizeof (pstat));
+  pstat.pr_pid = pid & 0xffff;
+  buf = elfcore_write_note (abfd, buf, bufsiz, note_name, 
+			    NT_PSTATUS, &pstat, sizeof (pstat));
+  return buf;
 }
 #endif /* HAVE_PSTATUS_T */
 
