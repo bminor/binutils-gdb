@@ -1,3 +1,8 @@
+2004-02-20  Andrew Cagney  <cagney@redhat.com>
+
+	* sh.cpu, sh.opc, sh64-compact.cpu, sh64-media.cpu: New files, all
+	written by Ben Elliston.
+
 2004-01-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* frv.cpu (UNIT): Add IACC.
