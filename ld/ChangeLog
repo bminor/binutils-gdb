@@ -1,3 +1,7 @@
+2000-07-08  Alan Modra  <alan@linuxcare.com.au>
+
+	* lexsup.c (parse_args): Copy section name.
+
 2000-07-07  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld/emultempl/pe.em: institute the following search order for

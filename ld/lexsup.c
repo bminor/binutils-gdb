@@ -847,6 +847,8 @@ parse_args (argc, argv)
 	case OPTION_SECTION_START:
 	  {
 	    char *optarg2;
+	    char *sec_name;
+	    int len;
 
 	    /* Check for <something>=<somthing>...  */
 	    optarg2 = strchr (optarg, '=');
@@ -869,12 +871,15 @@ parse_args (argc, argv)
 		xexit (1);
 	      }
 
-	    optarg2[-1] = '\0';
+	    /* We must copy the section name as set_section_start
+	       doesn't do it for us.  */
+	    len = optarg2 - optarg;
+	    sec_name = xmalloc (len);
+	    memcpy (sec_name, optarg, len - 1);
+	    sec_name[len - 1] = 0;
 
 	    /* Then set it...  */
-	    set_section_start (optarg, optarg2);
-	    
-	    optarg2[-1] = '=';
+	    set_section_start (sec_name, optarg2);
 	  }
 	  break;
 	case OPTION_TBSS:
