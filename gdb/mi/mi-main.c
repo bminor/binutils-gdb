@@ -1475,9 +1475,8 @@ mi_load_progress (const char *section_name,
 void
 mi_setup_architecture_data (void)
 {
-  /* don't trust DEPRECATED_REGISTER_BYTES to be zero. */
-  old_regs = xmalloc (DEPRECATED_REGISTER_BYTES + 1);
-  memset (old_regs, 0, DEPRECATED_REGISTER_BYTES + 1);
+  old_regs = xmalloc ((NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
+  memset (old_regs, 0, (NUM_REGS + NUM_PSEUDO_REGS) * MAX_REGISTER_SIZE + 1);
 }
 
 void
