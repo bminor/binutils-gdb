@@ -1,5 +1,13 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (INSERT_BITS, EXTRACT_BITS, INSERT_OPERAND)
+	(EXTRACT_OPERAND, MIPS16_INSERT_OPERAND, MIPS16_EXTRACT_OPERAND): New.
+	(insn_uses_reg, reg_needs_delay, append_insn, macro_build)
+	(mips16_macro_build, macro_build_lui, mips16_macro, mips_ip)
+	(mips16_ip): Use the new macros instead of explicit masks and shifts.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (mips_cl_insn): Replace the valid_p, delay_slot_p
 	and extended_p fields with a single fixed_p field.
 	(append_insn, mips_no_prev_insn): Adjust accordingly.

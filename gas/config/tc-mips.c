@@ -824,6 +824,36 @@ static int mips_relax_branch;
   (((x) &~ (offsetT) 0x7fff) == 0					\
    || (((x) &~ (offsetT) 0x7fff) == ~ (offsetT) 0x7fff))
 
+/* Replace bits MASK << SHIFT of STRUCT with the equivalent bits in
+   VALUE << SHIFT.  VALUE is evaluated exactly once.  */
+#define INSERT_BITS(STRUCT, VALUE, MASK, SHIFT) \
+  (STRUCT) = (((STRUCT) & ~((MASK) << (SHIFT))) \
+	      | (((VALUE) & (MASK)) << (SHIFT)))
+
+/* Extract bits MASK << SHIFT from STRUCT and shift them right
+   SHIFT places.  */
+#define EXTRACT_BITS(STRUCT, MASK, SHIFT) \
+  (((STRUCT) >> (SHIFT)) & (MASK))
+
+/* Change INSN's opcode so that the operand given by FIELD has value VALUE.
+   INSN is a mips_cl_insn structure and VALUE is evaluated exactly once.
+
+   include/opcode/mips.h specifies operand fields using the macros
+   OP_MASK_<FIELD> and OP_SH_<FIELD>.  The MIPS16 equivalents start
+   with "MIPS16OP" instead of "OP".  */
+#define INSERT_OPERAND(FIELD, INSN, VALUE) \
+  INSERT_BITS ((INSN).insn_opcode, VALUE, OP_MASK_##FIELD, OP_SH_##FIELD)
+#define MIPS16_INSERT_OPERAND(FIELD, INSN, VALUE) \
+  INSERT_BITS ((INSN).insn_opcode, VALUE, \
+		MIPS16OP_MASK_##FIELD, MIPS16OP_SH_##FIELD)
+
+/* Extract the operand given by FIELD from mips_cl_insn INSN.  */
+#define EXTRACT_OPERAND(FIELD, INSN) \
+  EXTRACT_BITS ((INSN).insn_opcode, OP_MASK_##FIELD, OP_SH_##FIELD)
+#define MIPS16_EXTRACT_OPERAND(FIELD, INSN) \
+  EXTRACT_BITS ((INSN).insn_opcode, \
+		MIPS16OP_MASK_##FIELD, \
+		MIPS16OP_SH_##FIELD)
 
 /* Global variables used when generating relaxable macros.  See the
    comment above RELAX_ENCODE for more details about how relaxation
@@ -1463,38 +1493,33 @@ insn_uses_reg (struct mips_cl_insn *ip, unsigned int reg,
 	 because there is no instruction that sets both $f0 and $f1
 	 and requires a delay.  */
       if ((ip->insn_mo->pinfo & INSN_READ_FPR_S)
-	  && ((((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS) &~(unsigned)1)
+	  && ((EXTRACT_OPERAND (FS, *ip) & ~(unsigned) 1)
 	      == (reg &~ (unsigned) 1)))
 	return 1;
       if ((ip->insn_mo->pinfo & INSN_READ_FPR_T)
-	  && ((((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT) &~(unsigned)1)
+	  && ((EXTRACT_OPERAND (FT, *ip) & ~(unsigned) 1)
 	      == (reg &~ (unsigned) 1)))
 	return 1;
     }
   else if (! mips_opts.mips16)
     {
       if ((ip->insn_mo->pinfo & INSN_READ_GPR_S)
-	  && ((ip->insn_opcode >> OP_SH_RS) & OP_MASK_RS) == reg)
+	  && EXTRACT_OPERAND (RS, *ip) == reg)
 	return 1;
       if ((ip->insn_mo->pinfo & INSN_READ_GPR_T)
-	  && ((ip->insn_opcode >> OP_SH_RT) & OP_MASK_RT) == reg)
+	  && EXTRACT_OPERAND (RT, *ip) == reg)
 	return 1;
     }
   else
     {
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_X)
-	  && (mips16_to_32_reg_map[((ip->insn_opcode >> MIPS16OP_SH_RX)
-				    & MIPS16OP_MASK_RX)]
-	      == reg))
+	  && mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, *ip)] == reg)
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_Y)
-	  && (mips16_to_32_reg_map[((ip->insn_opcode >> MIPS16OP_SH_RY)
-				    & MIPS16OP_MASK_RY)]
-	      == reg))
+	  && mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RY, *ip)] == reg)
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_Z)
-	  && (mips16_to_32_reg_map[((ip->insn_opcode >> MIPS16OP_SH_MOVE32Z)
-				    & MIPS16OP_MASK_MOVE32Z)]
+	  && (mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip)]
 	      == reg))
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_T) && reg == TREG)
@@ -1504,8 +1529,7 @@ insn_uses_reg (struct mips_cl_insn *ip, unsigned int reg,
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_31) && reg == RA)
 	return 1;
       if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_GPR_X)
-	  && ((ip->insn_opcode >> MIPS16OP_SH_REGR32)
-	      & MIPS16OP_MASK_REGR32) == reg)
+	  && MIPS16_EXTRACT_OPERAND (REGR32, *ip) == reg)
 	return 1;
     }
 
@@ -1531,7 +1555,7 @@ reg_needs_delay (unsigned int reg)
 	 delay the use of general register rt for one instruction.  */
       /* Itbl support may require additional care here.  */
       know (prev_pinfo & INSN_WRITE_GPR_T);
-      if (reg == ((history[0].insn_opcode >> OP_SH_RT) & OP_MASK_RT))
+      if (reg == EXTRACT_OPERAND (RT, history[0]))
 	return 1;
     }
 
@@ -1680,9 +1704,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  /* Itbl support may require additional care here.  */
 	  know (prev_pinfo & INSN_WRITE_GPR_T);
 	  if (mips_optimize == 0
-	      || insn_uses_reg (ip,
-				((history[0].insn_opcode >> OP_SH_RT)
-				 & OP_MASK_RT),
+	      || insn_uses_reg (ip, EXTRACT_OPERAND (RT, history[0]),
 				MIPS_GR_REG))
 	    ++nops;
 	}
@@ -1709,18 +1731,14 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  if (prev_pinfo & INSN_WRITE_FPR_T)
 	    {
 	      if (mips_optimize == 0
-		  || insn_uses_reg (ip,
-				    ((history[0].insn_opcode >> OP_SH_FT)
-				     & OP_MASK_FT),
+		  || insn_uses_reg (ip, EXTRACT_OPERAND (FT, history[0]),
 				    MIPS_FP_REG))
 		++nops;
 	    }
 	  else if (prev_pinfo & INSN_WRITE_FPR_S)
 	    {
 	      if (mips_optimize == 0
-		  || insn_uses_reg (ip,
-				    ((history[0].insn_opcode >> OP_SH_FS)
-				     & OP_MASK_FS),
+		  || insn_uses_reg (ip, EXTRACT_OPERAND (FS, history[0]),
 				    MIPS_FP_REG))
 		++nops;
 	    }
@@ -1763,8 +1781,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
       else if (mips_7000_hilo_fix
 	       && MF_HILO_INSN (prev_pinfo)
-	       && insn_uses_reg (ip, ((history[0].insn_opcode >> OP_SH_RD)
-				      & OP_MASK_RD),
+	       && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[0]),
 				 MIPS_GR_REG))
 	{
 	  nops += 2;
@@ -1777,9 +1794,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
       else if (mips_7000_hilo_fix
 	       && MF_HILO_INSN (history[1].insn_opcode)
-	       && insn_uses_reg (ip, ((history[1].insn_opcode >> OP_SH_RD)
-                                       & OP_MASK_RD),
-                                    MIPS_GR_REG))
+	       && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[1]),
+				 MIPS_GR_REG))
 
 	{
 	  ++nops;
@@ -2281,21 +2297,21 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   if (! mips_opts.mips16)
     {
       if (pinfo & INSN_WRITE_GPR_D)
-	mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD);
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RD, *ip);
       if ((pinfo & (INSN_WRITE_GPR_T | INSN_READ_GPR_T)) != 0)
-	mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RT) & OP_MASK_RT);
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RT, *ip);
       if (pinfo & INSN_READ_GPR_S)
-	mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RS) & OP_MASK_RS);
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RS, *ip);
       if (pinfo & INSN_WRITE_GPR_31)
 	mips_gprmask |= 1 << RA;
       if (pinfo & INSN_WRITE_FPR_D)
-	mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FD) & OP_MASK_FD);
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FD, *ip);
       if ((pinfo & (INSN_WRITE_FPR_S | INSN_READ_FPR_S)) != 0)
-	mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS);
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FS, *ip);
       if ((pinfo & (INSN_WRITE_FPR_T | INSN_READ_FPR_T)) != 0)
-	mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT);
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FT, *ip);
       if ((pinfo & INSN_READ_FPR_R) != 0)
-	mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FR) & OP_MASK_FR);
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FR, *ip);
       if (pinfo & INSN_COP)
 	{
 	  /* We don't keep enough information to sort these cases out.
@@ -2309,14 +2325,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   else
     {
       if (pinfo & (MIPS16_INSN_WRITE_X | MIPS16_INSN_READ_X))
-	mips_gprmask |= 1 << ((ip->insn_opcode >> MIPS16OP_SH_RX)
-			      & MIPS16OP_MASK_RX);
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (RX, *ip);
       if (pinfo & (MIPS16_INSN_WRITE_Y | MIPS16_INSN_READ_Y))
-	mips_gprmask |= 1 << ((ip->insn_opcode >> MIPS16OP_SH_RY)
-			      & MIPS16OP_MASK_RY);
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (RY, *ip);
       if (pinfo & MIPS16_INSN_WRITE_Z)
-	mips_gprmask |= 1 << ((ip->insn_opcode >> MIPS16OP_SH_RZ)
-			      & MIPS16OP_MASK_RZ);
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (RZ, *ip);
       if (pinfo & (MIPS16_INSN_WRITE_T | MIPS16_INSN_READ_T))
 	mips_gprmask |= 1 << TREG;
       if (pinfo & (MIPS16_INSN_WRITE_SP | MIPS16_INSN_READ_SP))
@@ -2326,11 +2339,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       if (pinfo & MIPS16_INSN_WRITE_GPR_Y)
 	mips_gprmask |= 1 << MIPS16OP_EXTRACT_REG32R (ip->insn_opcode);
       if (pinfo & MIPS16_INSN_READ_Z)
-	mips_gprmask |= 1 << ((ip->insn_opcode >> MIPS16OP_SH_MOVE32Z)
-			      & MIPS16OP_MASK_MOVE32Z);
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip);
       if (pinfo & MIPS16_INSN_READ_GPR_X)
-	mips_gprmask |= 1 << ((ip->insn_opcode >> MIPS16OP_SH_REGR32)
-			      & MIPS16OP_MASK_REGR32);
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (REGR32, *ip);
     }
 
   if (mips_relax.sequence != 2 && !mips_opts.noreorder)
@@ -2424,35 +2435,25 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		 instruction sets, we can not swap.  */
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_T)
-		  && insn_uses_reg (ip,
-				    ((history[0].insn_opcode >> OP_SH_RT)
-				     & OP_MASK_RT),
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RT, history[0]),
 				    MIPS_GR_REG))
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_D)
-		  && insn_uses_reg (ip,
-				    ((history[0].insn_opcode >> OP_SH_RD)
-				     & OP_MASK_RD),
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[0]),
 				    MIPS_GR_REG))
 	      || (mips_opts.mips16
 		  && (((prev_pinfo & MIPS16_INSN_WRITE_X)
-		       && insn_uses_reg (ip,
-					 ((history[0].insn_opcode
-					   >> MIPS16OP_SH_RX)
-					  & MIPS16OP_MASK_RX),
-					 MIPS16_REG))
+		       && (insn_uses_reg
+			   (ip, MIPS16_EXTRACT_OPERAND (RX, history[0]),
+			    MIPS16_REG)))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_Y)
-			  && insn_uses_reg (ip,
-					    ((history[0].insn_opcode
-					      >> MIPS16OP_SH_RY)
-					     & MIPS16OP_MASK_RY),
-					    MIPS16_REG))
+			  && (insn_uses_reg
+			      (ip, MIPS16_EXTRACT_OPERAND (RY, history[0]),
+			       MIPS16_REG)))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_Z)
-			  && insn_uses_reg (ip,
-					    ((history[0].insn_opcode
-					      >> MIPS16OP_SH_RZ)
-					     & MIPS16OP_MASK_RZ),
-					    MIPS16_REG))
+			  && (insn_uses_reg
+			      (ip, MIPS16_EXTRACT_OPERAND (RZ, history[0]),
+			       MIPS16_REG)))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_T)
 			  && insn_uses_reg (ip, TREG, MIPS_GR_REG))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_31)
@@ -2468,21 +2469,17 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_T)
 		  && (((pinfo & INSN_WRITE_GPR_D)
-		       && (((history[0].insn_opcode >> OP_SH_RT) & OP_MASK_RT)
-			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
+		       && (EXTRACT_OPERAND (RT, history[0])
+			   == EXTRACT_OPERAND (RD, *ip)))
 		      || ((pinfo & INSN_WRITE_GPR_31)
-			  && (((history[0].insn_opcode >> OP_SH_RT)
-			       & OP_MASK_RT)
-			      == RA))))
+			  && EXTRACT_OPERAND (RT, history[0]) == RA)))
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_D)
 		  && (((pinfo & INSN_WRITE_GPR_D)
-		       && (((history[0].insn_opcode >> OP_SH_RD) & OP_MASK_RD)
-			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
+		       && (EXTRACT_OPERAND (RD, history[0])
+			   == EXTRACT_OPERAND (RD, *ip)))
 		      || ((pinfo & INSN_WRITE_GPR_31)
-			  && (((history[0].insn_opcode >> OP_SH_RD)
-			       & OP_MASK_RD)
-			      == RA))))
+			  && EXTRACT_OPERAND (RD, history[0]) == RA)))
 	      || (mips_opts.mips16
 		  && (pinfo & MIPS16_INSN_WRITE_31)
 		  && ((prev_pinfo & MIPS16_INSN_WRITE_31)
@@ -2495,8 +2492,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (! mips_opts.mips16
 		  && (pinfo & INSN_WRITE_GPR_D)
 		  && insn_uses_reg (&history[0],
-				    ((ip->insn_opcode >> OP_SH_RD)
-				     & OP_MASK_RD),
+				    EXTRACT_OPERAND (RD, *ip),
 				    MIPS_GR_REG))
 	      || (! mips_opts.mips16
 		  && (pinfo & INSN_WRITE_GPR_31)
@@ -2514,9 +2510,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		      || ((history[1].insn_mo->pinfo
 			   & INSN_LOAD_MEMORY_DELAY)
 			  && ! gpr_interlocks))
-		  && insn_uses_reg (ip,
-				    ((history[1].insn_opcode >> OP_SH_RT)
-				     & OP_MASK_RT),
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RT, history[1]),
 				    MIPS_GR_REG))
 	      /* If one instruction sets a condition code and the
                  other one uses a condition code, we can not swap.  */
@@ -3060,8 +3054,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	    {
 	    case 'A':
 	    case 'E':
-	      insn.insn_opcode |= (va_arg (args, int)
-				   & OP_MASK_SHAMT) << OP_SH_SHAMT;
+	      INSERT_OPERAND (SHAMT, insn, va_arg (args, int));
 	      continue;
 
 	    case 'B':
@@ -3070,8 +3063,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 		 in MSB form.  (When handling the instruction in the
 		 non-macro case, these arguments are sizes from which
 		 MSB values must be calculated.)  */
-	      insn.insn_opcode |= (va_arg (args, int)
-				   & OP_MASK_INSMSB) << OP_SH_INSMSB;
+	      INSERT_OPERAND (INSMSB, insn, va_arg (args, int));
 	      continue;
 
 	    case 'C':
@@ -3081,8 +3073,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 		 in MSBD form.  (When handling the instruction in the
 		 non-macro case, these arguments are sizes from which
 		 MSBD values must be calculated.)  */
-	      insn.insn_opcode |= (va_arg (args, int)
-				   & OP_MASK_EXTMSBD) << OP_SH_EXTMSBD;
+	      INSERT_OPERAND (EXTMSBD, insn, va_arg (args, int));
 	      continue;
 
 	    default:
@@ -3093,66 +3084,66 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	case 't':
 	case 'w':
 	case 'E':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RT;
+	  INSERT_OPERAND (RT, insn, va_arg (args, int));
 	  continue;
 
 	case 'c':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE;
+	  INSERT_OPERAND (CODE, insn, va_arg (args, int));
 	  continue;
 
 	case 'T':
 	case 'W':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_FT;
+	  INSERT_OPERAND (FT, insn, va_arg (args, int));
 	  continue;
 
 	case 'd':
 	case 'G':
 	case 'K':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RD;
+	  INSERT_OPERAND (RD, insn, va_arg (args, int));
 	  continue;
 
 	case 'U':
 	  {
 	    int tmp = va_arg (args, int);
 
-	    insn.insn_opcode |= tmp << OP_SH_RT;
-	    insn.insn_opcode |= tmp << OP_SH_RD;
+	    INSERT_OPERAND (RT, insn, tmp);
+	    INSERT_OPERAND (RD, insn, tmp);
 	    continue;
 	  }
 
 	case 'V':
 	case 'S':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_FS;
+	  INSERT_OPERAND (FS, insn, va_arg (args, int));
 	  continue;
 
 	case 'z':
 	  continue;
 
 	case '<':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_SHAMT;
+	  INSERT_OPERAND (SHAMT, insn, va_arg (args, int));
 	  continue;
 
 	case 'D':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_FD;
+	  INSERT_OPERAND (FD, insn, va_arg (args, int));
 	  continue;
 
 	case 'B':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE20;
+	  INSERT_OPERAND (CODE20, insn, va_arg (args, int));
 	  continue;
 
 	case 'J':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE19;
+	  INSERT_OPERAND (CODE19, insn, va_arg (args, int));
 	  continue;
 
 	case 'q':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_CODE2;
+	  INSERT_OPERAND (CODE2, insn, va_arg (args, int));
 	  continue;
 
 	case 'b':
 	case 's':
 	case 'r':
 	case 'v':
-	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RS;
+	  INSERT_OPERAND (RS, insn, va_arg (args, int));
 	  continue;
 
 	case 'i':
@@ -3264,20 +3255,20 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 
 	case 'y':
 	case 'w':
-	  insn.insn_opcode |= va_arg (args, int) << MIPS16OP_SH_RY;
+	  MIPS16_INSERT_OPERAND (RY, insn, va_arg (args, int));
 	  continue;
 
 	case 'x':
 	case 'v':
-	  insn.insn_opcode |= va_arg (args, int) << MIPS16OP_SH_RX;
+	  MIPS16_INSERT_OPERAND (RX, insn, va_arg (args, int));
 	  continue;
 
 	case 'z':
-	  insn.insn_opcode |= va_arg (args, int) << MIPS16OP_SH_RZ;
+	  MIPS16_INSERT_OPERAND (RZ, insn, va_arg (args, int));
 	  continue;
 
 	case 'Z':
-	  insn.insn_opcode |= va_arg (args, int) << MIPS16OP_SH_MOVE32Z;
+	  MIPS16_INSERT_OPERAND (MOVE32Z, insn, va_arg (args, int));
 	  continue;
 
 	case '0':
@@ -3287,7 +3278,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  continue;
 
 	case 'X':
-	  insn.insn_opcode |= va_arg (args, int) << MIPS16OP_SH_REGR32;
+	  MIPS16_INSERT_OPERAND (REGR32, insn, va_arg (args, int));
 	  continue;
 
 	case 'Y':
@@ -3333,7 +3324,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  continue;
 
 	case '6':
-	  insn.insn_opcode |= va_arg (args, int) << MIPS16OP_SH_IMM6;
+	  MIPS16_INSERT_OPERAND (IMM6, insn, va_arg (args, int));
 	  continue;
 	}
 
@@ -3408,7 +3399,8 @@ macro_build_lui (expressionS *ep, int regnum)
   assert (strcmp (name, insn.insn_mo->name) == 0);
   assert (strcmp (fmt, insn.insn_mo->args) == 0);
 
-  insn.insn_opcode = insn.insn_mo->match | (regnum << OP_SH_RT);
+  insn.insn_opcode = insn.insn_mo->match;
+  INSERT_OPERAND (RT, insn, regnum);
   if (*r == BFD_RELOC_UNUSED)
     {
       insn.insn_opcode |= high_expr.X_add_number;
@@ -7574,9 +7566,9 @@ mips16_macro (struct mips_cl_insn *ip)
 
   mask = ip->insn_mo->mask;
 
-  xreg = (ip->insn_opcode >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX;
-  yreg = (ip->insn_opcode >> MIPS16OP_SH_RY) & MIPS16OP_MASK_RY;
-  zreg = (ip->insn_opcode >> MIPS16OP_SH_RZ) & MIPS16OP_MASK_RZ;
+  xreg = MIPS16_EXTRACT_OPERAND (RX, *ip);
+  yreg = MIPS16_EXTRACT_OPERAND (RY, *ip);
+  zreg = MIPS16_EXTRACT_OPERAND (RZ, *ip);
 
   expr1.X_op = O_constant;
   expr1.X_op_symbol = NULL;
@@ -8050,19 +8042,19 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		{
 		case 'r':
 		case 'v':
-		  ip->insn_opcode |= lastregno << OP_SH_RS;
+		  INSERT_OPERAND (RS, *ip, lastregno);
 		  continue;
 
 		case 'w':
-		  ip->insn_opcode |= lastregno << OP_SH_RT;
+		  INSERT_OPERAND (RT, *ip, lastregno);
 		  continue;
 
 		case 'W':
-		  ip->insn_opcode |= lastregno << OP_SH_FT;
+		  INSERT_OPERAND (FT, *ip, lastregno);
 		  continue;
 
 		case 'V':
-		  ip->insn_opcode |= lastregno << OP_SH_FS;
+		  INSERT_OPERAND (FS, *ip, lastregno);
 		  continue;
 		}
 	      break;
@@ -8107,8 +8099,7 @@ do_lsb:
 		      imm_expr.X_add_number = limlo;
 		    }
 		  lastpos = imm_expr.X_add_number;
-		  ip->insn_opcode |= (imm_expr.X_add_number
-				      & OP_MASK_SHAMT) << OP_SH_SHAMT;
+		  INSERT_OPERAND (SHAMT, *ip, imm_expr.X_add_number);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
 		  continue;
@@ -8139,8 +8130,8 @@ do_msb:
 			      (unsigned long) lastpos);
 		      imm_expr.X_add_number = limlo - lastpos;
 		    }
-		  ip->insn_opcode |= ((lastpos + imm_expr.X_add_number - 1)
-				      & OP_MASK_INSMSB) << OP_SH_INSMSB;
+		  INSERT_OPERAND (INSMSB, *ip,
+				 lastpos + imm_expr.X_add_number - 1);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
 		  continue;
@@ -8175,8 +8166,7 @@ do_msbd:
 			      (unsigned long) lastpos);
 		      imm_expr.X_add_number = limlo - lastpos;
 		    }
-		  ip->insn_opcode |= ((imm_expr.X_add_number - 1)
-				      & OP_MASK_EXTMSBD) << OP_SH_EXTMSBD;
+		  INSERT_OPERAND (EXTMSBD, *ip, imm_expr.X_add_number - 1);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
 		  continue;
@@ -8213,12 +8203,9 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 31)
-		{
-		  as_warn (_("Improper shift amount (%lu)"),
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_SHAMT;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SHAMT;
+		as_warn (_("Improper shift amount (%lu)"),
+			 (unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (SHAMT, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8229,7 +8216,7 @@ do_msbd:
 	      if ((unsigned long) imm_expr.X_add_number < 32
 		  || (unsigned long) imm_expr.X_add_number > 63)
 		break;
-	      ip->insn_opcode |= (imm_expr.X_add_number - 32) << OP_SH_SHAMT;
+	      INSERT_OPERAND (SHAMT, *ip, imm_expr.X_add_number - 32);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8239,16 +8226,13 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 31)
-		{
-		  as_warn (_("Invalid value for `%s' (%lu)"),
-			   ip->insn_mo->name,
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 0x1f;
-		}
+		as_warn (_("Invalid value for `%s' (%lu)"),
+			 ip->insn_mo->name,
+			 (unsigned long) imm_expr.X_add_number);
 	      if (*args == 'k')
-		ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CACHE;
+		INSERT_OPERAND (CACHE, *ip, imm_expr.X_add_number);
 	      else
-		ip->insn_opcode |= imm_expr.X_add_number << OP_SH_PREFX;
+		INSERT_OPERAND (PREFX, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8257,12 +8241,9 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 1023)
-		{
-		  as_warn (_("Illegal break code (%lu)"),
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_CODE;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE;
+		as_warn (_("Illegal break code (%lu)"),
+			 (unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (CODE, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8271,12 +8252,9 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 1023)
-		{
-		  as_warn (_("Illegal lower break code (%lu)"),
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_CODE2;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE2;
+		as_warn (_("Illegal lower break code (%lu)"),
+			 (unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (CODE2, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8287,7 +8265,7 @@ do_msbd:
 	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE20)
 		as_warn (_("Illegal 20-bit code (%lu)"),
 			 (unsigned long) imm_expr.X_add_number);
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE20;
+	      INSERT_OPERAND (CODE20, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8312,7 +8290,7 @@ do_msbd:
 	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE19)
 		as_warn (_("Illegal 19-bit code (%lu)"),
 			 (unsigned long) imm_expr.X_add_number);
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE19;
+	      INSERT_OPERAND (CODE19, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8321,12 +8299,9 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number != 0 && imm_expr.X_add_number != 1)
-		{
-		  as_warn (_("Invalid performance register (%lu)"),
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_PERFREG;
-		}
-	      ip->insn_opcode |= (imm_expr.X_add_number << OP_SH_PERFREG);
+		as_warn (_("Invalid performance register (%lu)"),
+			 (unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (PERFREG, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8463,21 +8438,21 @@ do_msbd:
 		    case 's':
 		    case 'v':
 		    case 'b':
-		      ip->insn_opcode |= regno << OP_SH_RS;
+		      INSERT_OPERAND (RS, *ip, regno);
 		      break;
 		    case 'd':
 		    case 'G':
 		    case 'K':
-		      ip->insn_opcode |= regno << OP_SH_RD;
+		      INSERT_OPERAND (RD, *ip, regno);
 		      break;
 		    case 'U':
-		      ip->insn_opcode |= regno << OP_SH_RD;
-		      ip->insn_opcode |= regno << OP_SH_RT;
+		      INSERT_OPERAND (RD, *ip, regno);
+		      INSERT_OPERAND (RT, *ip, regno);
 		      break;
 		    case 'w':
 		    case 't':
 		    case 'E':
-		      ip->insn_opcode |= regno << OP_SH_RT;
+		      INSERT_OPERAND (RT, *ip, regno);
 		      break;
 		    case 'x':
 		      /* This case exists because on the r3000 trunc
@@ -8508,10 +8483,10 @@ do_msbd:
 		{
 		case 'r':
 		case 'v':
-		  ip->insn_opcode |= lastregno << OP_SH_RS;
+		  INSERT_OPERAND (RS, *ip, lastregno);
 		  continue;
 		case 'w':
-		  ip->insn_opcode |= lastregno << OP_SH_RT;
+		  INSERT_OPERAND (RT, *ip, lastregno);
 		  continue;
 		}
 	      break;
@@ -8520,12 +8495,9 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_ALN)
-		{
-		  as_warn ("Improper align amount (%ld), using low bits",
-			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= OP_MASK_ALN;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_ALN;
+		as_warn ("Improper align amount (%ld), using low bits",
+			 (long) imm_expr.X_add_number);
+	      INSERT_OPERAND (ALN, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -8537,17 +8509,13 @@ do_msbd:
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
 		  if ((unsigned long) imm_expr.X_add_number > OP_MASK_FT)
-		    {
-		      as_warn (_("Invalid MDMX Immediate (%ld)"),
-			       (long) imm_expr.X_add_number);
-		      imm_expr.X_add_number &= OP_MASK_FT;
-		    }
-		  imm_expr.X_add_number &= OP_MASK_FT;
+		    as_warn (_("Invalid MDMX Immediate (%ld)"),
+			     (long) imm_expr.X_add_number);
+		  INSERT_OPERAND (FT, *ip, imm_expr.X_add_number);
 		  if (ip->insn_opcode & (OP_MASK_VSEL << OP_SH_VSEL))
 		    ip->insn_opcode |= MDMX_FMTSEL_IMM_QH << OP_SH_VSEL;
 		  else
 		    ip->insn_opcode |= MDMX_FMTSEL_IMM_OB << OP_SH_VSEL;
-		  ip->insn_opcode |= imm_expr.X_add_number << OP_SH_FT;
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
 		  continue;
@@ -8610,12 +8578,12 @@ do_msbd:
 		    {
 		    case 'D':
 		    case 'X':
-		      ip->insn_opcode |= regno << OP_SH_FD;
+		      INSERT_OPERAND (FD, *ip, regno);
 		      break;
 		    case 'V':
 		    case 'S':
 		    case 'Y':
-		      ip->insn_opcode |= regno << OP_SH_FS;
+		      INSERT_OPERAND (FS, *ip, regno);
 		      break;
 		    case 'Q':
 		      /* This is like 'Z', but also needs to fix the MDMX
@@ -8655,10 +8623,10 @@ do_msbd:
 		    case 'W':
 		    case 'T':
 		    case 'Z':
-		      ip->insn_opcode |= regno << OP_SH_FT;
+		      INSERT_OPERAND (FT, *ip, regno);
 		      break;
 		    case 'R':
-		      ip->insn_opcode |= regno << OP_SH_FR;
+		      INSERT_OPERAND (FR, *ip, regno);
 		      break;
 		    }
 		  lastregno = regno;
@@ -8668,10 +8636,10 @@ do_msbd:
 	      switch (*args++)
 		{
 		case 'V':
-		  ip->insn_opcode |= lastregno << OP_SH_FS;
+		  INSERT_OPERAND (FS, *ip, lastregno);
 		  continue;
 		case 'W':
-		  ip->insn_opcode |= lastregno << OP_SH_FT;
+		  INSERT_OPERAND (FT, *ip, lastregno);
 		  continue;
 		}
 	      break;
@@ -9001,9 +8969,9 @@ do_msbd:
 		as_warn(_("Condition code register should be 0 or 4 for %s, was %d"),
 			str, regno);
 	      if (*args == 'N')
-		ip->insn_opcode |= regno << OP_SH_BCC;
+		INSERT_OPERAND (BCC, *ip, regno);
 	      else
-		ip->insn_opcode |= regno << OP_SH_CCC;
+		INSERT_OPERAND (CCC, *ip, regno);
 	      continue;
 
 	    case 'H':
@@ -9041,7 +9009,7 @@ do_msbd:
 		  imm_expr.X_add_number = 0;
 		}
 
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_VECBYTE;
+	      INSERT_OPERAND (VECBYTE, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -9058,7 +9026,7 @@ do_msbd:
 		  imm_expr.X_add_number = 0;
 		}
 
-	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_VECALIGN;
+	      INSERT_OPERAND (VECALIGN, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
@@ -9234,10 +9202,10 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      switch (*++args)
 		{
 		case 'v':
-		  ip->insn_opcode |= lastregno << MIPS16OP_SH_RX;
+		  MIPS16_INSERT_OPERAND (RX, *ip, lastregno);
 		  continue;
 		case 'w':
-		  ip->insn_opcode |= lastregno << MIPS16OP_SH_RY;
+		  MIPS16_INSERT_OPERAND (RY, *ip, lastregno);
 		  continue;
 		}
 	      break;
@@ -9253,9 +9221,9 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      if (s[0] != '$')
 		{
 		  if (c == 'v')
-		    ip->insn_opcode |= lastregno << MIPS16OP_SH_RX;
+		    MIPS16_INSERT_OPERAND (RX, *ip, lastregno);
 		  else
-		    ip->insn_opcode |= lastregno << MIPS16OP_SH_RY;
+		    MIPS16_INSERT_OPERAND (RY, *ip, lastregno);
 		  ++args;
 		  continue;
 		}
@@ -9390,27 +9358,27 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		{
 		case 'x':
 		case 'v':
-		  ip->insn_opcode |= regno << MIPS16OP_SH_RX;
+		  MIPS16_INSERT_OPERAND (RX, *ip, regno);
 		  break;
 		case 'y':
 		case 'w':
-		  ip->insn_opcode |= regno << MIPS16OP_SH_RY;
+		  MIPS16_INSERT_OPERAND (RY, *ip, regno);
 		  break;
 		case 'z':
-		  ip->insn_opcode |= regno << MIPS16OP_SH_RZ;
+		  MIPS16_INSERT_OPERAND (RZ, *ip, regno);
 		  break;
 		case 'Z':
-		  ip->insn_opcode |= regno << MIPS16OP_SH_MOVE32Z;
+		  MIPS16_INSERT_OPERAND (MOVE32Z, *ip, regno);
 		case '0':
 		case 'S':
 		case 'R':
 		  break;
 		case 'X':
-		  ip->insn_opcode |= regno << MIPS16OP_SH_REGR32;
+		  MIPS16_INSERT_OPERAND (REGR32, *ip, regno);
 		  break;
 		case 'Y':
 		  regno = ((regno & 7) << 2) | ((regno & 0x18) >> 3);
-		  ip->insn_opcode |= regno << MIPS16OP_SH_REG32R;
+		  MIPS16_INSERT_OPERAND (REG32R, *ip, regno);
 		  break;
 		default:
 		  internalError ();
@@ -9512,13 +9480,10 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 63)
-		{
-		  as_warn (_("Invalid value for `%s' (%lu)"),
-			   ip->insn_mo->name,
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 0x3f;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number << MIPS16OP_SH_IMM6;
+		as_warn (_("Invalid value for `%s' (%lu)"),
+			 ip->insn_mo->name,
+			 (unsigned long) imm_expr.X_add_number);
+	      MIPS16_INSERT_OPERAND (IMM6, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
