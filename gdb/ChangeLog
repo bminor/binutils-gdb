@@ -1,3 +1,9 @@
+Fri Apr 30 15:54:13 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* configure.in: Match z8k-*-sim for z8000.
+	* config/h8500/tm-h8500.h, h8500-tdep.c: Lint.
+	* remote-hms.c: Update to use new serial protocol.
+
 Fri Apr 30 16:50:38 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* mips-tdep.c: remove include of sys/dir.h.  Doesn't seem
