@@ -225,8 +225,6 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 #define	FRAME_SAVED_L0	0
 #define	FRAME_SAVED_I0	(8 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM))
 
-#define FRAME_STRUCT_ARGS_ADDRESS(FI) (get_frame_base (FI))
-
 /* Things needed for making the inferior call functions.  */
 /*
  * First of all, let me give my opinion of what the DUMMY_FRAME

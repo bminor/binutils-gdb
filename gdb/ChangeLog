@@ -1,5 +1,17 @@
 2003-11-05  Andrew Cagney  <cagney@redhat.com>
 
+	* config/sparc/tm-sparc.h (FRAME_STRUCT_ARGS_ADDRESS): Delete
+	macro.
+	* config/m68k/tm-sun3.h (SIG_PC_FP_OFFSET): Delete macro.
+	* config/i386/tm-cygwin.h
+	(LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES): Delete macro.
+	* config/powerpc/tm-linux.h
+	(AT_SUBROUTINE_CALL_INSTRUCTION_TARGET): Delete macro.
+	(at_subroutine_call_instruction_target): Delete declaration.
+	* config/sparc/tm-sp64linux.h (GDB_PTRACE_REGS64): Delete macro.
+	* config/m68k/tm-sun3.h (SIG_SP_FP_OFFSET): Delete macro.
+	* config/ns32k/tm-ns32k.h (NUM_GENERAL_REGS): Delete macro.
+
 	* xcoffread.c (find_linenos): Replace "sec_ptr" and "bfd" with
 	"struct bfd_section" and "struct bfd".
 	* target.h (struct section_table): Ditto.

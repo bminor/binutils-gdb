@@ -34,10 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Make sure nexti gets the help it needs for debugging assembly code
    without symbols */
 
-#define AT_SUBROUTINE_CALL_INSTRUCTION_TARGET(prevpc,stoppc) \
-   at_subroutine_call_instruction_target(prevpc,stoppc)
-extern int at_subroutine_call_instruction_target();
-
 extern int ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc,func_name) ppc_linux_in_sigtramp (pc,func_name)
