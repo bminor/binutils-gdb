@@ -54,11 +54,27 @@ do_read ()
 	    comment="${comment}
 ${line}"
 	else
-	    OFS="${IFS}" ; IFS=":"
+
+	    # The semantics of IFS varies between different SH's.  Some
+	    # treat ``::' as three fields while some treat it as just too.
+	    # Work around this by eliminating ``::'' ....
+	    line="`echo "${line}" | sed -e 's/::/: :/g' -e 's/::/: :/g'`"
+
+	    OFS="${IFS}" ; IFS="[:]"
 	    eval read ${read} <<EOF
 ${line}
 EOF
 	    IFS="${OFS}"
+
+	    # .... and then going back through each field and strip out those
+	    # that ended up with just that space character.
+	    for r in ${read}
+	    do
+		if eval test \"\${${r}}\" = \"\ \"
+		then
+		    eval ${r}=""
+		fi
+	    done
 
 	    test "${staticdefault}" || staticdefault=0
 	    # NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
@@ -346,8 +362,8 @@ f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
 v:2:NUM_REGS:int:num_regs::::0:-1
 # This macro gives the number of pseudo-registers that live in the
 # register namespace but do not get fetched or stored on the target.
-# These pseudo-registers may be aliases for other registers, 
-# combinations of other registers, or they may be computed by GDB. 
+# These pseudo-registers may be aliases for other registers,
+# combinations of other registers, or they may be computed by GDB.
 v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 v:2:SP_REGNUM:int:sp_regnum::::0:-1
 v:2:FP_REGNUM:int:fp_regnum::::0:-1
@@ -468,18 +484,14 @@ do
     cat <<EOF
 ${class} ${macro}(${actual})
   ${returntype} ${function} ($formal)${attrib}
-    level=${level}
-    staticdefault=${staticdefault}
-    predefault=${predefault}
-    postdefault=${postdefault}
-    #fallbackdefault=${fallbackdefault}
-    invalid_p=${invalid_p}
-    #valid_p=${valid_p}
-    fmt=${fmt}
-    print=${print}
-    print_p=${print_p}
-    description=${description}
 EOF
+    for r in ${read}
+    do
+	eval echo \"\ \ \ \ ${r}=\${${r}}\"
+    done
+#    #fallbackdefault=${fallbackdefault}
+#    #valid_p=${valid_p}
+#EOF
     if class_is_predicate_p && fallback_default_p
     then
 	echo "Error: predicate function ${macro} can not have a non- multi-arch default" 1>&2
@@ -492,6 +504,7 @@ EOF
 	kill $$
 	exit 1
     fi
+    echo ""
 done
 
 exec 1>&2
@@ -572,28 +585,28 @@ extern struct gdbarch *current_gdbarch;
 EOF
 
 # function typedef's
-echo ""
-echo ""
-echo "/* The following are pre-initialized by GDBARCH. */"
+printf "\n"
+printf "\n"
+printf "/* The following are pre-initialized by GDBARCH. */\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
-	echo ""
-	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
-	echo "/* set_gdbarch_${function}() - not applicable - pre-initialized. */"
-	echo "#if GDB_MULTI_ARCH"
-	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})"
-	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
-	echo "#endif"
-	echo "#endif"
+	printf "\n"
+	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
+	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized. */\n"
+	printf "#if GDB_MULTI_ARCH\n"
+	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
+	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	printf "#endif\n"
+	printf "#endif\n"
     fi
 done
 
 # function typedef's
-echo ""
-echo ""
-echo "/* The following are initialized by the target dependent code. */"
+printf "\n"
+printf "\n"
+printf "/* The following are initialized by the target dependent code. */\n"
 function_list | while do_read
 do
     if [ "${comment}" ]
@@ -605,82 +618,82 @@ do
     fi
     if class_is_predicate_p
     then
-	echo ""
-	echo "#if defined (${macro})"
-	echo "/* Legacy for systems yet to multi-arch ${macro} */"
-#	echo "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})"
-	echo "#define ${macro}_P() (1)"
-	echo "#endif"
-	echo ""
-	echo "/* Default predicate for non- multi-arch targets. */"
-	echo "#if (!GDB_MULTI_ARCH) && !defined (${macro}_P)"
-	echo "#define ${macro}_P() (0)"
-	echo "#endif"
-	echo ""
-	echo "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);"
-	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)"
-	echo "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))"
-	echo "#endif"
+	printf "\n"
+	printf "#if defined (${macro})\n"
+	printf "/* Legacy for systems yet to multi-arch ${macro} */\n"
+#	printf "#if (GDB_MULTI_ARCH <= GDB_MULTI_ARCH_PARTIAL) && defined (${macro})\n"
+	printf "#define ${macro}_P() (1)\n"
+	printf "#endif\n"
+	printf "\n"
+	printf "/* Default predicate for non- multi-arch targets. */\n"
+	printf "#if (!GDB_MULTI_ARCH) && !defined (${macro}_P)\n"
+	printf "#define ${macro}_P() (0)\n"
+	printf "#endif\n"
+	printf "\n"
+	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
+	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro}_P)\n"
+	printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
+	printf "#endif\n"
     fi
     if class_is_variable_p
     then
 	if fallback_default_p || class_is_predicate_p
 	then
-	    echo ""
-	    echo "/* Default (value) for non- multi-arch platforms. */"
-	    echo "#if (!GDB_MULTI_ARCH) && !defined (${macro})"
+	    printf "\n"
+	    printf "/* Default (value) for non- multi-arch platforms. */\n"
+	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
 	    echo "#define ${macro} (${fallbackdefault})" \
 		| sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
-	    echo "#endif"
+	    printf "#endif\n"
 	fi
-	echo ""
-	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
-	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});"
-	echo "#if GDB_MULTI_ARCH"
-	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})"
-	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
-	echo "#endif"
-	echo "#endif"
+	printf "\n"
+	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
+	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
+	printf "#if GDB_MULTI_ARCH\n"
+	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
+	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	printf "#endif\n"
+	printf "#endif\n"
     fi
     if class_is_function_p
     then
 	if fallback_default_p || class_is_predicate_p
 	then
-	    echo ""
-	    echo "/* Default (function) for non- multi-arch platforms. */"
-	    echo "#if (!GDB_MULTI_ARCH) && !defined (${macro})"
+	    printf "\n"
+	    printf "/* Default (function) for non- multi-arch platforms. */\n"
+	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
 	    if [ "${fallbackdefault}" = "0" ]
 	    then
-		echo "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)"
+		printf "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)\n"
 	    else
 		# FIXME: Should be passing current_gdbarch through!
 		echo "#define ${macro}(${actual}) (${fallbackdefault} (${actual}))" \
 		    | sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
 	    fi
-	    echo "#endif"
+	    printf "#endif\n"
 	fi
-	echo ""
-	echo "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});"
+	printf "\n"
+	printf "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});\n"
 	if [ "${formal}" = "void" ]
 	then
-	  echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
+	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	else
-	  echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});"
+	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});\n"
 	fi
-	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});"
-	echo "#if GDB_MULTI_ARCH"
-	echo "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})"
+	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
+	printf "#if GDB_MULTI_ARCH\n"
+	printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
 	if [ "${actual}" = "" ]
 	then
-	  echo "#define ${macro}() (gdbarch_${function} (current_gdbarch))"
+	  printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
 	elif [ "${actual}" = "-" ]
 	then
-	  echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
+	  printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
 	else
-	  echo "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
+	  printf "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))\n"
 	fi
-	echo "#endif"
-	echo "#endif"
+	printf "#endif\n"
+	printf "#endif\n"
     fi
 done
 
@@ -1047,31 +1060,31 @@ int gdbarch_debug = GDBARCH_DEBUG;
 EOF
 
 # gdbarch open the gdbarch object
-echo ""
-echo "/* Maintain the struct gdbarch object */"
-echo ""
-echo "struct gdbarch"
-echo "{"
-echo "  /* basic architectural information */"
+printf "\n"
+printf "/* Maintain the struct gdbarch object */\n"
+printf "\n"
+printf "struct gdbarch\n"
+printf "{\n"
+printf "  /* basic architectural information */\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
-	echo "  ${returntype} ${function};"
+	printf "  ${returntype} ${function};\n"
     fi
 done
-echo ""
-echo "  /* target specific vector. */"
-echo "  struct gdbarch_tdep *tdep;"
-echo "  gdbarch_dump_tdep_ftype *dump_tdep;"
-echo ""
-echo "  /* per-architecture data-pointers */"
-echo "  int nr_data;"
-echo "  void **data;"
-echo ""
-echo "  /* per-architecture swap-regions */"
-echo "  struct gdbarch_swap *swap;"
-echo ""
+printf "\n"
+printf "  /* target specific vector. */\n"
+printf "  struct gdbarch_tdep *tdep;\n"
+printf "  gdbarch_dump_tdep_ftype *dump_tdep;\n"
+printf "\n"
+printf "  /* per-architecture data-pointers */\n"
+printf "  int nr_data;\n"
+printf "  void **data;\n"
+printf "\n"
+printf "  /* per-architecture swap-regions */\n"
+printf "  struct gdbarch_swap *swap;\n"
+printf "\n"
 cat <<EOF
   /* Multi-arch values.
 
@@ -1104,32 +1117,32 @@ function_list | while do_read
 do
     if class_is_variable_p
     then
-	echo "  ${returntype} ${function};"
+	printf "  ${returntype} ${function};\n"
     elif class_is_function_p
     then
-	echo "  gdbarch_${function}_ftype *${function}${attrib};"
+	printf "  gdbarch_${function}_ftype *${function}${attrib};\n"
     fi
 done
-echo "};"
+printf "};\n"
 
 # A pre-initialized vector
-echo ""
-echo ""
+printf "\n"
+printf "\n"
 cat <<EOF
 /* The default architecture uses host values (for want of a better
    choice). */
 EOF
-echo ""
-echo "extern const struct bfd_arch_info bfd_default_arch_struct;"
-echo ""
-echo "struct gdbarch startup_gdbarch ="
-echo "{"
-echo "  /* basic architecture information */"
+printf "\n"
+printf "extern const struct bfd_arch_info bfd_default_arch_struct;\n"
+printf "\n"
+printf "struct gdbarch startup_gdbarch =\n"
+printf "{\n"
+printf "  /* basic architecture information */\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
-	echo "  ${staticdefault},"
+	printf "  ${staticdefault},\n"
     fi
 done
 cat <<EOF
@@ -1143,7 +1156,7 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	echo "  ${staticdefault},"
+	printf "  ${staticdefault},\n"
     fi
 done
 cat <<EOF
@@ -1154,13 +1167,13 @@ struct gdbarch *current_gdbarch = &startup_gdbarch;
 EOF
 
 # Create a new gdbarch struct
-echo ""
-echo ""
+printf "\n"
+printf "\n"
 cat <<EOF
 /* Create a new \`\`struct gdbarch'' based on information provided by
    \`\`struct gdbarch_info''. */
 EOF
-echo ""
+printf "\n"
 cat <<EOF
 struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
@@ -1171,23 +1184,23 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   gdbarch->tdep = tdep;
 EOF
-echo ""
+printf "\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
-	echo "  gdbarch->${function} = info->${function};"
+	printf "  gdbarch->${function} = info->${function};\n"
     fi
 done
-echo ""
-echo "  /* Force the explicit initialization of these. */"
+printf "\n"
+printf "  /* Force the explicit initialization of these. */\n"
 function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
 	if [ "${predefault}" != "" -a "${predefault}" != "0" ]
 	then
-	  echo "  gdbarch->${function} = ${predefault};"
+	  printf "  gdbarch->${function} = ${predefault};\n"
 	fi
     fi
 done
@@ -1199,8 +1212,8 @@ cat <<EOF
 EOF
 
 # Free a gdbarch struct.
-echo ""
-echo ""
+printf "\n"
+printf "\n"
 cat <<EOF
 /* Free a gdbarch struct.  This should never happen in normal
    operation --- once you've created a gdbarch, you keep it around.
@@ -1217,10 +1230,10 @@ gdbarch_free (struct gdbarch *arch)
 EOF
 
 # verify a new architecture
-echo ""
-echo ""
-echo "/* Ensure that all values in a GDBARCH are reasonable. */"
-echo ""
+printf "\n"
+printf "\n"
+printf "/* Ensure that all values in a GDBARCH are reasonable. */\n"
+printf "\n"
 cat <<EOF
 static void
 verify_gdbarch (struct gdbarch *gdbarch)
@@ -1241,33 +1254,33 @@ do
     then
 	if [ "${invalid_p}" = "0" ]
 	then
-	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"
+	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
 	elif class_is_predicate_p
 	then
-	    echo "  /* Skip verify of ${function}, has predicate */"
+	    printf "  /* Skip verify of ${function}, has predicate */\n"
 	# FIXME: See do_read for potential simplification
  	elif [ "${invalid_p}" -a "${postdefault}" ]
 	then
-	    echo "  if (${invalid_p})"
-	    echo "    gdbarch->${function} = ${postdefault};"
+	    printf "  if (${invalid_p})\n"
+	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ "${predefault}" -a "${postdefault}" ]
 	then
-	    echo "  if (gdbarch->${function} == ${predefault})"
-	    echo "    gdbarch->${function} = ${postdefault};"
+	    printf "  if (gdbarch->${function} == ${predefault})\n"
+	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ "${postdefault}" ]
 	then
-	    echo "  if (gdbarch->${function} == 0)"
-	    echo "    gdbarch->${function} = ${postdefault};"
+	    printf "  if (gdbarch->${function} == 0)\n"
+	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ "${invalid_p}" ]
 	then
-	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
-	    echo "      && (${invalid_p}))"
-	    echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
+	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
+	    printf "      && (${invalid_p}))\n"
+	    printf "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");\n"
 	elif [ "${predefault}" ]
 	then
-	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
-	    echo "      && (gdbarch->${function} == ${predefault}))"
-	    echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
+	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
+	    printf "      && (gdbarch->${function} == ${predefault}))\n"
+	    printf "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");\n"
 	fi
     fi
 done
@@ -1276,8 +1289,8 @@ cat <<EOF
 EOF
 
 # dump the structure
-echo ""
-echo ""
+printf "\n"
+printf "\n"
 cat <<EOF
 /* Print out the details of the current architecture. */
 
@@ -1298,52 +1311,52 @@ function_list | while do_read
 do
     if [ "${returntype}" = "void" ]
     then
-	echo "#if defined (${macro}) && GDB_MULTI_ARCH"
-	echo "  /* Macro might contain \`[{}]' when not multi-arch */"
+	printf "#if defined (${macro}) && GDB_MULTI_ARCH\n"
+	printf "  /* Macro might contain \`[{}]' when not multi-arch */\n"
     else
-	echo "#ifdef ${macro}"
+	printf "#ifdef ${macro}\n"
     fi
     if class_is_function_p
     then
-	echo "  fprintf_unfiltered (file,"
-	echo "                      \"gdbarch_dump: %s # %s\\n\","
-	echo "                      \"${macro}(${actual})\","
-	echo "                      XSTRING (${macro} (${actual})));"
+	printf "  fprintf_unfiltered (file,\n"
+	printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
+	printf "                      \"${macro}(${actual})\",\n"
+	printf "                      XSTRING (${macro} (${actual})));\n"
     else
-	echo "  fprintf_unfiltered (file,"
-	echo "                      \"gdbarch_dump: ${macro} # %s\\n\","
-	echo "                      XSTRING (${macro}));"
+	printf "  fprintf_unfiltered (file,\n"
+	printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
+	printf "                      XSTRING (${macro}));\n"
     fi
-    echo "#endif"
+    printf "#endif\n"
 done
 function_list | while do_read
 do
-    echo "#ifdef ${macro}"
+    printf "#ifdef ${macro}\n"
     if [ "${print_p}" = "()" ]
     then
-	echo "  gdbarch_dump_${function} (current_gdbarch);"
+	printf "  gdbarch_dump_${function} (current_gdbarch);\n"
     elif [ "${print_p}" = "0" ]
     then
-	echo "  /* skip print of ${macro}, print_p == 0. */"
+	printf "  /* skip print of ${macro}, print_p == 0. */\n"
     elif [ "${print_p}" ]
     then
-	echo "  if (${print_p})"
-	echo "    fprintf_unfiltered (file,"
-	echo "                        \"gdbarch_dump: ${macro} = ${fmt}\\n\","
-	echo "                        ${print});"
+	printf "  if (${print_p})\n"
+	printf "    fprintf_unfiltered (file,\n"
+	printf "                        \"gdbarch_dump: ${macro} = %s\\\\n\",\n" "${fmt}"
+	printf "                        ${print});\n"
     elif class_is_function_p
     then
-	echo "  if (GDB_MULTI_ARCH)"
-	echo "    fprintf_unfiltered (file,"
-	echo "                        \"gdbarch_dump: ${macro} = 0x%08lx\\n\","
-	echo "                        (long) current_gdbarch->${function}"
-	echo "                        /*${macro} ()*/);"
+	printf "  if (GDB_MULTI_ARCH)\n"
+	printf "    fprintf_unfiltered (file,\n"
+	printf "                        \"gdbarch_dump: ${macro} = 0x%%08lx\\\\n\",\n"
+	printf "                        (long) current_gdbarch->${function}\n"
+	printf "                        /*${macro} ()*/);\n"
     else
-	echo "  fprintf_unfiltered (file,"
-	echo "                      \"gdbarch_dump: ${macro} = ${fmt}\\n\","
-	echo "                      ${print});"
+	printf "  fprintf_unfiltered (file,\n"
+	printf "                      \"gdbarch_dump: ${macro} = %s\\\\n\",\n" "${fmt}"
+	printf "                      ${print});\n"
     fi
-    echo "#endif"
+    printf "#endif\n"
 done
 cat <<EOF
   if (current_gdbarch->dump_tdep != NULL)
@@ -1353,102 +1366,102 @@ EOF
 
 
 # GET/SET
-echo ""
+printf "\n"
 cat <<EOF
 struct gdbarch_tdep *
 gdbarch_tdep (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\n");
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\\n");
   return gdbarch->tdep;
 }
 EOF
-echo ""
+printf "\n"
 function_list | while do_read
 do
     if class_is_predicate_p
     then
-	echo ""
-	echo "int"
-	echo "gdbarch_${function}_p (struct gdbarch *gdbarch)"
-	echo "{"
+	printf "\n"
+	printf "int\n"
+	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
+	printf "{\n"
 	if [ "${valid_p}" ]
 	then
-	    echo "  return ${valid_p};"
+	    printf "  return ${valid_p};\n"
 	else
-	    echo "#error \"gdbarch_${function}_p: not defined\""
+	    printf "#error \"gdbarch_${function}_p: not defined\"\n"
 	fi
-	echo "}"
+	printf "}\n"
     fi
     if class_is_function_p
     then
-	echo ""
-	echo "${returntype}"
+	printf "\n"
+	printf "${returntype}\n"
 	if [ "${formal}" = "void" ]
 	then
-	  echo "gdbarch_${function} (struct gdbarch *gdbarch)"
+	  printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	else
-	  echo "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})"
+	  printf "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})\n"
 	fi
-	echo "{"
-        echo "  if (gdbarch->${function} == 0)"
-        echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
-	echo "  if (gdbarch_debug >= 2)"
-	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
+	printf "{\n"
+        printf "  if (gdbarch->${function} == 0)\n"
+        printf "    internal_error (\"gdbarch: gdbarch_${function} invalid\");\n"
+	printf "  if (gdbarch_debug >= 2)\n"
+	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
         test "${actual}" = "-" && actual=""
        	if [ "${returntype}" = "void" ]
 	then
-	  echo "  gdbarch->${function} (${actual});"
+	  printf "  gdbarch->${function} (${actual});\n"
 	else
-	  echo "  return gdbarch->${function} (${actual});"
+	  printf "  return gdbarch->${function} (${actual});\n"
 	fi
-	echo "}"
-	echo ""
-	echo "void"
-	echo "set_gdbarch_${function} (struct gdbarch *gdbarch,"
-        echo "            `echo ${function} | sed -e 's/./ /g'`  gdbarch_${function}_ftype ${function})"
-	echo "{"
-	echo "  gdbarch->${function} = ${function};"
-	echo "}"
+	printf "}\n"
+	printf "\n"
+	printf "void\n"
+	printf "set_gdbarch_${function} (struct gdbarch *gdbarch,\n"
+        printf "            `echo ${function} | sed -e 's/./ /g'`  gdbarch_${function}_ftype ${function})\n"
+	printf "{\n"
+	printf "  gdbarch->${function} = ${function};\n"
+	printf "}\n"
     elif class_is_variable_p
     then
-	echo ""
-	echo "${returntype}"
-	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
-	echo "{"
+	printf "\n"
+	printf "${returntype}\n"
+	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
+	printf "{\n"
 	if [ "${invalid_p}" = "0" ]
 	then
-	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"
+	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
 	elif [ "${invalid_p}" ]
 	then
-	  echo "  if (${invalid_p})"
-	  echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
+	  printf "  if (${invalid_p})\n"
+	  printf "    internal_error (\"gdbarch: gdbarch_${function} invalid\");\n"
 	elif [ "${predefault}" ]
 	then
-	  echo "  if (gdbarch->${function} == ${predefault})"
-	  echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
+	  printf "  if (gdbarch->${function} == ${predefault})\n"
+	  printf "    internal_error (\"gdbarch: gdbarch_${function} invalid\");\n"
 	fi
-	echo "  if (gdbarch_debug >= 2)"
-	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
-	echo "  return gdbarch->${function};"
-	echo "}"
-	echo ""
-	echo "void"
-	echo "set_gdbarch_${function} (struct gdbarch *gdbarch,"
-        echo "            `echo ${function} | sed -e 's/./ /g'`  ${returntype} ${function})"
-	echo "{"
-	echo "  gdbarch->${function} = ${function};"
-	echo "}"
+	printf "  if (gdbarch_debug >= 2)\n"
+	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
+	printf "  return gdbarch->${function};\n"
+	printf "}\n"
+	printf "\n"
+	printf "void\n"
+	printf "set_gdbarch_${function} (struct gdbarch *gdbarch,\n"
+        printf "            `echo ${function} | sed -e 's/./ /g'`  ${returntype} ${function})\n"
+	printf "{\n"
+	printf "  gdbarch->${function} = ${function};\n"
+	printf "}\n"
     elif class_is_info_p
     then
-	echo ""
-	echo "${returntype}"
-	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
-	echo "{"
-	echo "  if (gdbarch_debug >= 2)"
-	echo "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\n\");"
-	echo "  return gdbarch->${function};"
-	echo "}"
+	printf "\n"
+	printf "${returntype}\n"
+	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
+	printf "{\n"
+	printf "  if (gdbarch_debug >= 2)\n"
+	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
+	printf "  return gdbarch->${function};\n"
+	printf "}\n"
     fi
 done
 
@@ -1794,32 +1807,32 @@ gdbarch_update_p (struct gdbarch_info info)
   if (rego == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: No matching architecture\n");
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: No matching architecture\\n");
       return 0;
     }
 
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.bfd_architecture %d (%s)\n",
+			  "gdbarch_update: info.bfd_architecture %d (%s)\\n",
 			  info.bfd_architecture,
 			  bfd_lookup_arch (info.bfd_architecture, 0)->printable_name);
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.bfd_arch_info %s\n",
+			  "gdbarch_update: info.bfd_arch_info %s\\n",
 			  (info.bfd_arch_info != NULL
 			   ? info.bfd_arch_info->printable_name
 			   : "(null)"));
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.byte_order %d (%s)\n",
+			  "gdbarch_update: info.byte_order %d (%s)\\n",
 			  info.byte_order,
 			  (info.byte_order == BIG_ENDIAN ? "big"
 			   : info.byte_order == LITTLE_ENDIAN ? "little"
 			   : "default"));
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.abfd 0x%lx\n",
+			  "gdbarch_update: info.abfd 0x%lx\\n",
 			  (long) info.abfd);
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: info.tdep_info 0x%lx\n",
+			  "gdbarch_update: info.tdep_info 0x%lx\\n",
 			  (long) info.tdep_info);
     }
 
@@ -1830,7 +1843,7 @@ gdbarch_update_p (struct gdbarch_info info)
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\n");
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\\n");
       return 0;
     }
 
@@ -1838,7 +1851,7 @@ gdbarch_update_p (struct gdbarch_info info)
   if (current_gdbarch == new_gdbarch)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\n",
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
       return 1;
@@ -1856,7 +1869,7 @@ gdbarch_update_p (struct gdbarch_info info)
 	{
 	  if (gdbarch_debug)
 	    fprintf_unfiltered (gdb_stdlog,
-                                "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
+                                "gdbarch_update: Previous architecture 0x%08lx (%s) selected\\n",
 				(long) new_gdbarch,
 				new_gdbarch->bfd_arch_info->printable_name);
 	  current_gdbarch = new_gdbarch;
@@ -1875,7 +1888,7 @@ gdbarch_update_p (struct gdbarch_info info)
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_update: New architecture 0x%08lx (%s) selected\n",
+			  "gdbarch_update: New architecture 0x%08lx (%s) selected\\n",
 			  (long) new_gdbarch,
 			  new_gdbarch->bfd_arch_info->printable_name);
     }
@@ -1926,14 +1939,14 @@ _initialize_gdbarch (void)
 				  class_maintenance,
 				  var_zinteger,
 				  (char *)&gdbarch_debug,
-				  "Set architecture debugging.\n\\
+				  "Set architecture debugging.\\n\\
 When non-zero, architecture debugging is enabled.", &setdebuglist),
 		     &showdebuglist);
   c = add_set_cmd ("archdebug",
 		   class_maintenance,
 		   var_zinteger,
 		   (char *)&gdbarch_debug,
-		   "Set architecture debugging.\n\\
+		   "Set architecture debugging.\\n\\
 When non-zero, architecture debugging is enabled.", &setlist);
 
   deprecate_cmd (c, "set debug arch");

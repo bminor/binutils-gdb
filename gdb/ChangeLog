@@ -1,3 +1,9 @@
+Mon Sep  4 16:21:31 2000  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* gdbarch.sh: Use printf instead of echo.
+ 	(do_read): During read, pad ``::'' with spaces and then strip out
+ 	those spaces.  Avoid problems with IFS=:.
+
 2000-09-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-linux.h: Include <signal.h>.
