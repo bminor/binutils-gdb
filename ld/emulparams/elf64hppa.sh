@@ -20,7 +20,7 @@ TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 # We really want multiple .stub sections, one for each input .text section,
 # but for now this is good enough.
-OTHER_READONLY_SECTIONS='.PARISC.unwind : { *(.PARISC.unwind) } .stubs : { *(.stubs) }'
+OTHER_READONLY_SECTIONS='.PARISC.unwind : { *(.PARISC.unwind) } '
 
 # The PA64 ELF port treats .plt sections differently than most.  We also have
 # to create a .opd section.  What most systems call the .got, we call the .dlt
