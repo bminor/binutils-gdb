@@ -5711,9 +5711,8 @@ mips16_macro (ip)
       macro_build ((char *) NULL, &icnt, NULL,
 		   dbl ? "ddiv" : "div",
 		   "0,x,y", xreg, yreg);
-      expr1.X_add_number = 4;
+      expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "");
       macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
       /* FIXME: The normal code checks for of -1 / -0x80000000 here,
          since that causes an overflow.  We should do that as well,
@@ -5743,9 +5742,8 @@ mips16_macro (ip)
       ++mips_noreorder;
       mips_any_noreorder = 1;
       macro_build ((char *) NULL, &icnt, NULL, s, "0,x,y", xreg, yreg);
-      expr1.X_add_number = 4;
+      expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-      macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
       macro_build ((char *) NULL, &icnt, NULL, "break", "6", 7);
       --mips_noreorder;
       macro_build ((char *) NULL, &icnt, NULL, s2, "x", zreg);

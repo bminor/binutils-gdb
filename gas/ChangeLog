@@ -1,5 +1,8 @@
 Fri Dec 13 13:00:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips16_macro): Remove nop instructions after
+	branch instructions.
+
 	* config/tc-mips.c (md_begin): If configured for an embedded ELF
 	system, don't set the section alignment to 2**4.
 	(s_change_sec): Likewise.
