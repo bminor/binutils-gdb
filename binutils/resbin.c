@@ -517,6 +517,8 @@ bin_to_res_dialog (data, length, big_endian)
 
   d->caption = get_unicode (data + off, length - off, big_endian, &sublen);
   off += sublen * 2 + 2;
+  if (sublen == 0) 
+    d->caption = NULL;
 
   if ((d->style & DS_SETFONT) == 0)
     {

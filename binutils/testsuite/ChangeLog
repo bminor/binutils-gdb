@@ -16,6 +16,10 @@
 	in strings.
 	* binutils-all/windres/escapex.rsd: Expected output
 
+	* binutils-all/windres/nocaption.rc: New test case dialogs without
+	captions.
+	* binutils-all/windres/nocaption.rsd: Expected output
+
 	* binutils-all/windres/quoteclass.rc: New test case for quoted
 	CLASS definitions in DIALOG resources.
 

@@ -11,6 +11,7 @@
 
 	* resrc.c (write_rc_dialog): Print style even if it is 0.
 	(write_rc_directory): Fix overlooked sublang shift bug.
+	(bin_to_res_dialog): Don't print empty dialog caption.
 
 	* resbin.c (bin_to_res_dialog): Use signature to identify
 	DIALOGEX.
