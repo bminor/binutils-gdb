@@ -1,3 +1,9 @@
+Thu Apr 23 18:37:55 1992  Fred Fish  (fnf@cygnus.com)
+
+	* aoutx.h (aout_<bits>_swap_exec_header_in):  Zero out the
+	internal_exec structure before initializing the fields that
+	are used, so that the unused fields are in a known state.
+
 Wed Apr 22 09:36:08 1992  Fred Fish  (fnf@cygnus.com)
 
 	* tekhex.c (struct data_struct):  Convert from typedef that

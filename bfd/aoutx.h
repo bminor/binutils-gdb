@@ -222,6 +222,11 @@ DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
+  /* The internal_exec structure has some fields that are unused in this
+     configuration (IE for i960), so ensure that all such uninitialized
+     fields are zero'd out.  There are places where two of these structs
+     are memcmp'd, and thus the contents do matter. */
+  memset (execp, 0, sizeof (struct internal_exec));
   /* Now fill in fields in the execp, from the bytes in the raw data.  */
   execp->a_info   = bfd_h_get_32 (abfd, bytes->e_info);
   execp->a_text   = GET_WORD (abfd, bytes->e_text);
@@ -677,7 +682,7 @@ boolean
 	      if (abfd->flags & (D_PAGED|WP_TEXT))
 		{
 		  bfd_size_type text_pad =
-		      BFD_ALIGN(text_size, adata(abfd).segment_size)
+		      BFD_ALIGN(text_size, adata(abfd).page_size)
 			 - text_size;
 	          text_end += text_pad;
 		  obj_textsec(abfd)->_raw_size += text_pad;
@@ -1687,7 +1692,8 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 
       if (section_code == 'U')
 	fprintf(file, "        ");
-      fprintf_vma(file, symbol->value+symbol->section->vma);
+      else
+	fprintf_vma(file, symbol->value+symbol->section->vma);
       if (section_code == '?')
 	{
 	  int type_code = aout_symbol(symbol)->type  & 0xff;
