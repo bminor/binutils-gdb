@@ -33,7 +33,6 @@
 
 #define TARGET_SYMBOL_FIELDS	int local:1; unsigned long sy_name_offset;
 
-#include "struc-symbol.h"
 #include "targ-cpu.h"
 
 #ifndef FALSE
@@ -42,11 +41,7 @@
 #endif
 
 /* should be conditional on address size! */
-#ifdef sparcv9
-#define elf_symbol(asymbol) ((elf64_symbol_type *)(&(asymbol)->the_bfd)) /*v9*/
-#else /* not v9 */
-#define elf_symbol(asymbol) ((elf32_symbol_type *)(&(asymbol)->the_bfd))
-#endif /* v9? */
+#define elf_symbol(asymbol) ((elf_symbol_type *)(&(asymbol)->the_bfd))
 
 #define S_SET_OTHER(S,V)                (elf_symbol((S)->bsym)->other = (V))
 #define S_SET_TYPE(S,T)                 (elf_symbol((S)->bsym)->type = (T))
@@ -59,14 +54,20 @@
 
 extern asection *gdb_section;
 
-#define tc_frob_symbol(S,PUNT)	if ( obj_elf_frob_symbol (S, &PUNT) ) { i++; continue; }
+#if 0 /* This should not reference i!!
+	 If it's really needed, fix it, and the call site if necessary.  */
+#define obj_frob_symbol(S,PUNT)	if ( obj_elf_frob_symbol (S, &PUNT) ) { i++; continue; }
+#endif
 
 #define obj_write_symbol(S)	obj_elf_write_symbol (S)
 
 #define obj_frob_file()	elf_frob_file()
 
-extern int obj_elf_frob_symbol PARAMS ((symbolS *, int *));
+extern int obj_elf_frob_symbol PARAMS ((struct symbol *, int *));
 extern void elf_frob_file PARAMS ((void));
 extern void elf_file_symbol PARAMS ((char *));
+
+extern void obj_elf_section PARAMS ((int));
+extern void obj_elf_previous PARAMS ((void));
 
 #endif /* _OBJ_ELF_H */
