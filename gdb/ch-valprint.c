@@ -157,7 +157,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       if (addressprint && format != 's')
 	{
-	  fprintf_filtered (stream, "0x%x", addr);
+	  fprintf_filtered (stream, "H'%x", addr);
 	}
       
       /* For a pointer to char or unsigned char, also print the string
@@ -185,7 +185,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       if (addressprint && format != 's')
 	{
-	  fprintf_filtered (stream, "0x%x ", addr);
+	  fprintf_filtered (stream, "H'%x ", addr);
 	}
       i = TYPE_LENGTH (type);
       LA_PRINT_STRING (stream, valaddr, i, 0);
@@ -199,20 +199,50 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 				0);
       break;
 
-    case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
-    case TYPE_CODE_UNION:
+      if (addressprint)
+        {
+	  fprintf_filtered (stream, "LOC(H'%lx)",
+	  		    unpack_long (builtin_type_int, valaddr));
+	  if (deref_ref)
+	    fputs_filtered (": ", stream);
+        }
+      /* De-reference the reference.  */
+      if (deref_ref)
+	{
+	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
+	    {
+	      value deref_val =
+		value_at
+		  (TYPE_TARGET_TYPE (type),
+		   unpack_pointer (lookup_pointer_type (builtin_type_void),
+				   valaddr));
+	      val_print (VALUE_TYPE (deref_val),
+			 VALUE_CONTENTS (deref_val),
+			 VALUE_ADDRESS (deref_val), stream, format,
+			 deref_ref, recurse + 1, pretty);
+	    }
+	  else
+	    fputs_filtered ("???", stream);
+	}
+      break;
+
     case TYPE_CODE_ENUM:
+      c_val_print (type, valaddr, address, stream, format,
+		   deref_ref, recurse, pretty);
+      break;
+
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_UNION:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_VOID:
     case TYPE_CODE_ERROR:
     case TYPE_CODE_RANGE:
-      error ("Unimplemented chill_val_print support for type %d",
-	     TYPE_CODE (type));
-      break;
-
     default:
-      error ("Invalid Chill type code %d in symbol table.", TYPE_CODE (type));
+      /* Let's derfer printing to the C printer, rather than
+	 print an error message.  FIXME! */
+      c_val_print (type, valaddr, address, stream, format,
+		   deref_ref, recurse, pretty);
     }
   fflush (stream);
   return (0);
@@ -243,7 +273,7 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 
   check_stub_type (type);
 
-  fprintf_filtered (stream, "(");
+  fprintf_filtered (stream, "[");
   len = TYPE_NFIELDS (type);
   if (len == 0)
     {
@@ -267,9 +297,10 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
+	  fputs_filtered (".", stream);
 	  fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				   language_chill, DMGL_NO_OPTS);
-	  fputs_filtered (" = ", stream);
+	  fputs_filtered (": ", stream);
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {
 	      value v;
@@ -295,6 +326,6 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	  print_spaces_filtered (2 * recurse, stream);
 	}
     }
-  fprintf_filtered (stream, ")");
+  fprintf_filtered (stream, "]");
 }
 

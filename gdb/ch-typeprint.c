@@ -46,44 +46,12 @@ chill_print_type (type, varstring, stream, show, level)
      int show;
      int level;
 {
-  struct type *index_type;
-  struct type *range_type;
-  LONGEST low_bound;
-  LONGEST high_bound;
-
   if (varstring != NULL && *varstring != '\0')
     {
       fputs_filtered (varstring, stream);
       fputs_filtered (" ", stream);
     }
-  switch (TYPE_CODE (type))
-    {
-      case TYPE_CODE_ARRAY:
-	range_type = TYPE_FIELD_TYPE (type, 0);
-	index_type = TYPE_TARGET_TYPE (range_type);
-	low_bound = TYPE_FIELD_BITPOS (range_type, 0);
-	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
-        fputs_filtered ("array (", stream);
-	print_type_scalar (index_type, low_bound, stream);
-	fputs_filtered (":", stream);
-	print_type_scalar (index_type, high_bound, stream);
-	fputs_filtered (") ", stream);
-	chill_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
-	break;
-
-      case TYPE_CODE_STRING:
-	range_type = TYPE_FIELD_TYPE (type, 0);
-	index_type = TYPE_TARGET_TYPE (range_type);
-	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
-        fputs_filtered ("CHAR (", stream);
-	print_type_scalar (index_type, high_bound + 1, stream);
-	fputs_filtered (")", stream);
-	break;
-
-      default:
-        chill_type_print_base (type, stream, show, level);
-	break;
-    }
+  chill_type_print_base (type, stream, show, level);
 }
 
 /* Print the name of the type (or the ultimate pointer target,
@@ -108,6 +76,10 @@ chill_type_print_base (type, stream, show, level)
   char *name;
   register int len;
   register int i;
+  struct type *index_type;
+  struct type *range_type;
+  LONGEST low_bound;
+  LONGEST high_bound;
 
   QUIT;
 
@@ -129,11 +101,48 @@ chill_type_print_base (type, stream, show, level)
 
   switch (TYPE_CODE (type))
     {
-      case TYPE_CODE_ARRAY:
       case TYPE_CODE_PTR:
+	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+	  {
+	    fprintf_filtered (stream, "PTR");
+	    break;
+	  }
+	fprintf_filtered (stream, "REF ");
+	chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	break;
+
+      case TYPE_CODE_ARRAY:
+	range_type = TYPE_FIELD_TYPE (type, 0);
+	index_type = TYPE_TARGET_TYPE (range_type);
+	low_bound = TYPE_FIELD_BITPOS (range_type, 0);
+	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+        fputs_filtered ("ARRAY (", stream);
+	print_type_scalar (index_type, low_bound, stream);
+	fputs_filtered (":", stream);
+	print_type_scalar (index_type, high_bound, stream);
+	fputs_filtered (") ", stream);
+	chill_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
+	break;
+
+      case TYPE_CODE_STRING:
+	range_type = TYPE_FIELD_TYPE (type, 0);
+	index_type = TYPE_TARGET_TYPE (range_type);
+	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+        fputs_filtered ("CHAR (", stream);
+	print_type_scalar (index_type, high_bound + 1, stream);
+	fputs_filtered (")", stream);
+	break;
+
       case TYPE_CODE_MEMBER:
+	fprintf_filtered (stream, "MEMBER ");
+        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	break;
       case TYPE_CODE_REF:
+	fprintf_filtered (stream, "/*LOC*/ ");
+        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	break;
       case TYPE_CODE_FUNC:
+	fprintf_filtered (stream, "PROC (?)");
         chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
 	break;
 

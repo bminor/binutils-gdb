@@ -181,6 +181,8 @@ yyerror PARAMS ((char *));
 %token <voidval>	EMPTINESS_LITERAL
 %token <sval>		CHARACTER_STRING_LITERAL
 %token <sval>		BIT_STRING_LITERAL
+%token <tsym>		TYPENAME
+%token <sval>		FIELD_NAME
 
 %token <voidval>	'.'
 %token <voidval>	';'
@@ -291,11 +293,9 @@ yyerror PARAMS ((char *));
 %type <voidval>		upper_element
 %type <voidval>		first_element
 %type <voidval>		structure_primitive_value
-%type <voidval>		field_name
 %type <voidval>		mode_argument
 %type <voidval>		upper_lower_argument
 %type <voidval>		length_argument
-%type <voidval>		mode_name
 %type <voidval>		array_mode_name
 %type <voidval>		string_mode_name
 %type <voidval>		variant_structure_mode_name
@@ -304,12 +304,19 @@ yyerror PARAMS ((char *));
 %type <voidval>		subexpression
 %type <voidval>		case_label_specification
 %type <voidval>		buffer_location
-
 %type <voidval>		single_assignment_action
+%type <tsym>		mode_name
 
 %%
 
 /* Z.200, 5.3.1 */
+
+start	:	value
+	|	mode_name
+			{ write_exp_elt_opcode(OP_TYPE);
+			  write_exp_elt_type($1.type);
+			  write_exp_elt_opcode(OP_TYPE);}
+	;
 
 value		:	expression
 			{
@@ -333,9 +340,9 @@ location	:	access_name
 			{
 			  $$ = 0;	/* FIXME */
 			}
-  		|	FIXME_02
+  		|	primitive_value POINTER
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (UNOP_IND);
 			}
 		;
 
@@ -588,9 +595,10 @@ value_array_slice:	array_primitive_value '(' lower_element ':' upper_element ')'
 
 /* Z.200, 5.2.10 */
 
-value_structure_field:	structure_primitive_value '.' field_name
-			{
-			  $$ = 0;	/* FIXME */
+value_structure_field:	primitive_value FIELD_NAME
+			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_exp_string ($2);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
 			}
 		;
 
@@ -598,7 +606,9 @@ value_structure_field:	structure_primitive_value '.' field_name
 
 expression_conversion:	mode_name parenthesised_expression
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_opcode (UNOP_CAST);
 			}
 		;
 
@@ -645,6 +655,10 @@ parenthesised_expression:	'(' expression ')'
 /* Z.200, 5.3.2 */
 
 expression	:	operand_0
+			{
+			  $$ = 0;	/* FIXME */
+			}
+		|	single_assignment_action
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -709,10 +723,6 @@ operand_0	:	operand_1
 		|	operand_0 LOGXOR operand_1
 			{
 			  write_exp_elt_opcode (BINOP_BITWISE_XOR);
-			}
-		|	single_assignment_action
-			{
-			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -814,8 +824,6 @@ operand_4	:	operand_5
 		;
 
 /* Z.200, 5.3.8 */
-/* Note that we accept any expression for BINOP_CONCAT, not just
-   integer literal expressions. (FIXME?) */
 
 operand_5	:	operand_6
 			{
@@ -829,7 +837,9 @@ operand_5	:	operand_6
 			{
 			  write_exp_elt_opcode (UNOP_LOGICAL_NOT);
 			}
-		|	parenthesised_expression operand_6
+		|	parenthesised_expression CHARACTER_STRING_LITERAL
+/* We require the string operand to be a literal, to avoid some
+   nasty parsing ambiguities. */
 			{
 			  write_exp_elt_opcode (BINOP_CONCAT);
 			}
@@ -839,7 +849,7 @@ operand_5	:	operand_6
 
 operand_6	:	POINTER location
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (UNOP_ADDR);
 			}
 		|	RECEIVE buffer_location
 			{
@@ -932,11 +942,10 @@ mode_argument :		mode_name
 			}
 		;
 
-upper_lower_argument :	location
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	expression
+mode_name :		TYPENAME
+		;
+
+upper_lower_argument :	expression
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -946,11 +955,7 @@ upper_lower_argument :	location
 			}
 		;
 
-length_argument :	location
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		|	expression
+length_argument :	expression
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -983,8 +988,6 @@ lower_element 		:	FIXME_20 { $$ = 0; }
 upper_element 		:	FIXME_21 { $$ = 0; }
 first_element 		:	FIXME_22 { $$ = 0; }
 structure_primitive_value:	FIXME_23 { $$ = 0; }
-field_name 		:	FIXME_24 { $$ = 0; }
-mode_name 		:	FIXME_25 { $$ = 0; }
 boolean_expression 	:	FIXME_26 { $$ = 0; }
 case_selector_list 	:	FIXME_27 { $$ = 0; }
 subexpression 		:	FIXME_28 { $$ = 0; }
@@ -1762,6 +1765,7 @@ static const struct token tokentab2[] =
 {
     { ":=", GDB_ASSIGNMENT },
     { "//", SLASH_SLASH },
+    { "->", POINTER },
     { "/=", NOTEQUAL },
     { "<=", LEQ },
     { ">=", GTR },
@@ -1797,7 +1801,6 @@ yylex ()
 	    case ';':
 	    case '!':
 	    case '+':
-	    case '-':
 	    case '*':
 	    case '(':
 	    case ')':
@@ -1896,6 +1899,7 @@ yylex ()
        would already have found it. */
     switch (*lexptr)
 	{
+	    case '-':
 	    case ':':
 	    case '/':
 	    case '<':
@@ -1976,8 +1980,10 @@ yylex ()
 	      case LOC_LABEL:
 		return (LOCATION_NAME);
 		break;
-	      case LOC_UNDEF:
 	      case LOC_TYPEDEF:
+		yylval.tsym.type = SYMBOL_TYPE (sym);
+		return TYPENAME;
+	      case LOC_UNDEF:
 	      case LOC_CONST_BYTES:
 	      case LOC_OPTIMIZED_OUT:
 		error ("Symbol \"%s\" names no location.", simplename);
@@ -2000,7 +2006,12 @@ yylex ()
     switch (*lexptr)
       {
 	case '.':			/* Not float for example. */
-	  return (*lexptr++);
+	  lexptr++;
+	  while (isspace (*lexptr)) lexptr++;
+	  simplename = match_simple_name_string ();
+	  if (!simplename)
+	    return '.';
+	  return FIELD_NAME;
       }
 
     return (ILLEGAL_TOKEN);

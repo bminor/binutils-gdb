@@ -2370,32 +2370,12 @@ read_struct_type (pp, type, objfile)
      member functions, attach them to the type, and then read any tilde
      field (baseclass specifier for the class holding the main vtable). */
 
-  if (!read_baseclasses (&fi, pp, type, objfile))
-    {
-      do_cleanups (back_to);
-      return (error_type (pp));
-    }
-  if (!read_struct_fields (&fi, pp, type, objfile))
-    {
-      do_cleanups (back_to);
-      return (error_type (pp));
-    }
-  if (!attach_fields_to_type (&fi, type, objfile))
-    {
-      do_cleanups (back_to);
-      return (error_type (pp));
-    }
-  if (!read_member_functions (&fi, pp, type, objfile))
-    {
-      do_cleanups (back_to);
-      return (error_type (pp));
-    }
-  if (!attach_fn_fields_to_type (&fi, type))
-    {
-      do_cleanups (back_to);
-      return (error_type (pp));
-    }
-  if (!read_tilde_fields (&fi, pp, type, objfile))
+  if (!read_baseclasses (&fi, pp, type, objfile)
+      || !read_struct_fields (&fi, pp, type, objfile)
+      || !attach_fields_to_type (&fi, type, objfile)
+      || !read_member_functions (&fi, pp, type, objfile)
+      || !attach_fn_fields_to_type (&fi, type)
+      || !read_tilde_fields (&fi, pp, type, objfile))
     {
       do_cleanups (back_to);
       return (error_type (pp));
