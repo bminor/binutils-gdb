@@ -1171,7 +1171,8 @@ add_to_solist (boolean from_tty, char *dll_path,
   pa64_solib_load_symbols (new_so, 
 			   dll_path,
 			   from_tty, 
-			   0);
+			   0,
+			   target);
   return;
 }
 
