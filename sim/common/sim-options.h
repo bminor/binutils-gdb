@@ -27,7 +27,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
    Options for the standalone simulator are parsed by sim_open since
    sim_open handles the large majority of them and it also parses the
-   options when invoked by gdb [or any external program].  */
+   options when invoked by gdb [or any external program].
+
+   Per getopt: arg#2 is the option index; arg#3 is the option's
+   argument, NULL if optional and missing. */
 
 typedef SIM_RC (OPTION_HANDLER) PARAMS ((SIM_DESC, int, char *));
 
@@ -68,14 +71,17 @@ typedef struct option_list {
    TABLE is an array of OPTIONS terminated by a NULL `opt.name' entry.  */
 SIM_RC sim_add_option_table PARAMS ((SIM_DESC sd, const OPTION *table));
 
-/* Initialize common parts before argument processing.
-   Called by sim_open.  */
-SIM_RC sim_pre_argv_init PARAMS ((SIM_DESC sd, const char *myname));
+/* Install handler for the standard options.  */
+MODULE_INSTALL_FN standard_install;
 
 /* Called by sim_open to parse the arguments.  */
 SIM_RC sim_parse_args PARAMS ((SIM_DESC sd, char **argv));
 
 /* Print help messages for the options.  */
 void sim_print_help PARAMS ((SIM_DESC sd));
+
+/* Try to parse the command as if it is an option, Only fail when
+   totally unsuccessful */
+SIM_RC sim_args_command PARAMS ((SIM_DESC sd, char *cmd));
 
 #endif /* SIM_OPTIONS_H */

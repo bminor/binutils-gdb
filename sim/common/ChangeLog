@@ -1,3 +1,15 @@
+Thu May  8 12:40:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-options.c (sim_print_help): For optional arguments, wrap
+ 	them in [].
+
+	* sim-trace.c (set_trace_options): New function, handle optional
+ 	argument and multiple assignment.
+	(trace_option_handler): Update.
+
+	* sim-trace.c (trace_option_handler): Trace branch and not fpu
+ 	when branch tracing selected.
+
 Wed May  7 15:19:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.c (trace_one_insn): Make a va-args function.

@@ -201,7 +201,7 @@ sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf)
   else if (regnr == NPC_REGNUM)
     STATE_CPU (sd, 0)->cia.dp = T2H_4 (*(unsigned32*)buf);
   else if (regnr == A0_REGNUM && regnr <= An_REGNUM)
-    STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM] = H2T_8 (*(unsigned64*)buf);
+    STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM] = T2H_8 (*(unsigned64*)buf);
   else
     sim_io_error (sd, "sim_fetch_register - unknown register nr %d", regnr);
   return;
@@ -258,7 +258,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 void
 sim_do_command (SIM_DESC sd, char *cmd)
 {
-  sim_io_error (sd, "sim_do_command - unimplemented");
+  if (sim_args_command (sd, cmd) != SIM_RC_OK)
+    sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
 }
 
 

@@ -78,6 +78,7 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
 
 #define OPTION_DEBUG_INSN	(OPTION_START + 0)
 #define OPTION_DEBUG_FILE	(OPTION_START + 1)
+#define OPTION_DO_COMMAND	(OPTION_START + 2)
 
 static const OPTION standard_options[] =
 {
@@ -113,6 +114,10 @@ static const OPTION standard_options[] =
       standard_option_handler },
 #endif
 
+  { {"do-command", required_argument, NULL, OPTION_DO_COMMAND},
+      '\0', "COMMAND", "Perform a builtin command",
+      standard_option_handler },
+
   { {"help", no_argument, NULL, 'H'},
       'H', NULL, "Print help information",
       standard_option_handler },
@@ -127,7 +132,6 @@ standard_option_handler (sd, opt, arg)
      char *arg;
 {
   int i,n;
-  unsigned long ul;
 
   switch (opt)
     {
@@ -209,16 +213,22 @@ standard_option_handler (sd, opt, arg)
 
 #ifdef SIM_HAVE_FLATMEM
     case 'm':
-      ul = strtol (arg, NULL, 0);
-      /* 16384: some minimal amount */
-      if (! isdigit (arg[0]) || ul < 16384)
-	{
-	  sim_io_eprintf (sd, "Invalid memory size `%s'", arg);
-	  return SIM_RC_FAIL;
-	}
-      STATE_MEM_SIZE (sd) = ul;
+      {
+	unsigned long ul = strtol (arg, NULL, 0);
+	/* 16384: some minimal amount */
+	if (! isdigit (arg[0]) || ul < 16384)
+	  {
+	    sim_io_eprintf (sd, "Invalid memory size `%s'", arg);
+	    return SIM_RC_FAIL;
+	  }
+	STATE_MEM_SIZE (sd) = ul;
+      }
       break;
 #endif
+
+    case OPTION_DO_COMMAND:
+      sim_do_command (sd, arg);
+      break;
 
     case 'H':
       sim_print_help (sd);
@@ -412,13 +422,16 @@ sim_print_help (sd)
 		len += (comma ? 2 : 0) + 2;
 		if (o->arg != NULL)
 		  {
-		    if (o->opt.has_arg != optional_argument)
+		    if (o->opt.has_arg == optional_argument)
 		      {
-			sim_io_printf (sd, " ");
-			++len;
+			sim_io_printf (sd, "[%s]", o->arg);
+			len += 1 + strlen (o->arg) + 1;
 		      }
-		    sim_io_printf (sd, "%s", o->arg);
-		    len += strlen (o->arg);
+		    else
+		      {
+			sim_io_printf (sd, " %s", o->arg);
+			len += 1 + strlen (o->arg);
+		      }
 		  }
 		comma = 1;
 	      }
@@ -439,8 +452,16 @@ sim_print_help (sd)
 			+ strlen (o->opt.name));
 		if (o->arg != NULL)
 		  {
-		    sim_io_printf (sd, " %s", o->arg);
-		    len += 1 + strlen (o->arg);
+		    if (o->opt.has_arg == optional_argument)
+		      {
+			sim_io_printf (sd, " [%s]", o->arg);
+			len += 2 + strlen (o->arg) + 1;
+		      }
+		    else
+		      {
+			sim_io_printf (sd, " %s", o->arg);
+			len += 1 + strlen (o->arg);
+		      }
 		  }
 		comma = 1;
 	      }
@@ -466,4 +487,68 @@ sim_print_help (sd)
       sim_io_printf (sd, "program args    Arguments to pass to simulated program.\n");
       sim_io_printf (sd, "                Note: Very few simulators support this.\n");
     }
+}
+
+
+
+
+SIM_RC
+sim_args_command (sd, cmd)
+     SIM_DESC sd;
+     char *cmd;
+{
+  /* something to do? */
+  if (cmd == NULL)
+    return SIM_RC_OK; /* FIXME - perhaphs help would be better */
+  
+  if (cmd [0] == '-')
+    {
+      /* user specified -<opt> ... form? */
+      char **argv = buildargv (cmd);
+      SIM_RC rc = sim_parse_args (sd, argv);
+      freeargv (argv);
+      return rc;
+    }
+  else
+    {
+      /* user specified <opt> form? */
+      const struct option_list *ol;
+      const OPTION *opt;
+      char **argv = buildargv (cmd);
+      for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
+	for (opt = ol->options; opt->opt.name != NULL; ++opt)
+	  {
+	    if (strcmp (argv[0], opt->opt.name) == 0)
+	      {
+		switch (opt->opt.has_arg)
+		  {
+		  case no_argument:
+		    if (argv[1] == NULL)
+		      opt->handler (sd, opt->opt.val, NULL);
+		    else
+		      sim_io_eprintf (sd, "Command `%s' takes no arguments\n", opt->opt.name);
+		    break;
+		  case optional_argument:
+		    if (argv[1] == NULL)
+		      opt->handler (sd, opt->opt.val, NULL);
+		    else if (argv[2] == NULL)
+		      opt->handler (sd, opt->opt.val, argv[1]);
+		    else
+		      sim_io_eprintf (sd, "Command `%s' requires no more than one argument\n", opt->opt.name);
+		    break;
+		  case required_argument:
+		    if (argv[1] == NULL)
+		      sim_io_eprintf (sd, "Command `%s' requires an argument\n", opt->opt.name);
+		    else if (argv[2] == NULL)
+		      opt->handler (sd, opt->opt.val, argv[1]);
+		    else
+		      sim_io_eprintf (sd, "Command `%s' requires only one argument\n", opt->opt.name);
+		  }
+		return SIM_RC_OK;
+	      }
+	  }
+    }
+
+  /* didn't find anything that matched */
+  return SIM_RC_FAIL;
 }

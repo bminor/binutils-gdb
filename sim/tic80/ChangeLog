@@ -1,3 +1,8 @@
+Thu May  8 14:07:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_do_command): Implement.
+	(sim_store_register): Fix typo T2H v H2T.
+
 Wed May  7 11:48:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* cpu.h (TRACE_FPU2, TRACE_FPU3, TRACE_FPU2I): Add.
