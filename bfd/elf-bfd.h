@@ -1754,8 +1754,7 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
 	}														\
       else if (h->root.type == bfd_link_hash_undefweak)									\
 	;														\
-      else if (!info->executable											\
-	       && info->unresolved_syms_in_objects == RM_IGNORE								\
+      else if (info->unresolved_syms_in_objects == RM_IGNORE								\
 	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)								\
 	;														\
       else														\
@@ -1763,8 +1762,7 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
 	  if (! info->callbacks->undefined_symbol									\
 	      (info, h->root.root.string, input_bfd,									\
 	       input_section, rel->r_offset,										\
-	       ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)				\
-		|| (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR)				\
+	       (info->unresolved_syms_in_objects == RM_GENERATE_ERROR							\
 		|| ELF_ST_VISIBILITY (h->other))									\
 	       ))													\
 	    return FALSE;												\

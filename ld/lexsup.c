@@ -640,27 +640,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_CALL_SHARED:
 	  config.dynamic_link = TRUE;
-	  /* When linking against shared libraries, the default behaviour is
-	     to report any unresolved references.  Although strictly speaking
-	     it is not a failure to encounter unresolved symbols at link time
-	     - the symbol *might* be available at load time - it is a strong
-	     indication that the resulting executable will not work.  Plus it
-	     is necessary for the correct execution of the autoconf package,
-	     which needs to be able to detect functions that are not provided
-	     by the host OS.  */
-	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
-	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_NON_SHARED:
 	  config.dynamic_link = FALSE;
-	  /* When linking against static libraries, the default
-	     behaviour is to report any unresolved references.  */
-	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
-	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_CREF:
 	  command_line.cref = TRUE;

@@ -2773,8 +2773,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      else if (h->root.type == bfd_link_hash_undefweak)
 		relocation = 0;
-              else if (info->shared
-                       && (!info->symbolic)
+              else if (info->unresolved_syms_in_objects == RM_IGNORE
                        && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
                 relocation = 0;
 	      else
@@ -2782,7 +2781,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd,
 			  input_section, offset,
-                          (!info->shared
+                          (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
                            || ELF_ST_VISIBILITY (h->other)))))
 		    return FALSE;
 		  relocation = 0;

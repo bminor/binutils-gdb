@@ -1,3 +1,8 @@
+2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (parse_args): Don't set unresolved_syms_in_objects
+	or unresolved_syms_in_shared_libs for -Bdynamic and -Bstatic.
+
 2004-03-20  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emulparams/elf32frvfd.sh (MAXPAGESIZE): Change to 16Kb.

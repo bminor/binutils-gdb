@@ -1,3 +1,36 @@
+2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Report error if
+	unresolved symbols in objects aren't allowed.
+
+	* elf-hppa.h (elf_hppa_relocate_section): Properly handle
+	unresolved symbols.
+	(elf_hppa_remark_useless_dynamic_symbols): Likewise.
+	(elf_hppa_unmark_useless_dynamic_symbols):
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+
+	* elf-m10200.c (mn10200_elf_relocate_section): Use
+	RELOC_FOR_GLOBAL_SYMBOL.
+	* elf32-avr.c (elf32_avr_relocate_section): Likewise.
+	* elf32-d10v.c (elf32_d10v_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_elf_relocate_section): Likewise.
+	* elf32-h8300.c (elf32_h8_relocate_section): Likewise.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-m68hc1x.c (m68hc11_get_relocation_value): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-msp430.c (elf32_msp430_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relocate_section): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
+	* elf64-mmix.c (mmix_elf_relocate_section): Likewise.
+
 2004-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf32-hppa.c (elf32_hppa_check_relocs): Handle R_PARISC_PCREL32.
