@@ -572,21 +572,9 @@ extern void print_frame_info (struct frame_info *, int print_level,
 
 extern struct frame_info *block_innermost_frame (struct block *);
 
-/* NOTE: cagney/2002-09-13: There is no need for this function.  */
-extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
-						 CORE_ADDR fp, int);
 extern void generic_push_dummy_frame (void);
-extern void deprecated_pop_dummy_frame (void);
 
 extern int deprecated_pc_in_call_dummy (CORE_ADDR pc);
-
-/* NOTE: cagney/2002-06-26: Targets should no longer use this
-   function.  Instead, the contents of a dummy frame register can be
-   obtained by applying: frame_register_unwind to the dummy frame; or
-   frame_register_unwind() to the next outer frame.  */
-
-extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
-
 
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 

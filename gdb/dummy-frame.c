@@ -49,8 +49,6 @@ struct dummy_frame
   /* These values belong to the caller (the previous frame, the frame
      that this unwinds back to).  */
   CORE_ADDR pc;
-  CORE_ADDR fp;
-  CORE_ADDR sp;
   CORE_ADDR top;
   struct frame_id id;
   struct regcache *regcache;
@@ -83,52 +81,16 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
       if (!(pc >= dummyframe->call_lo && pc < dummyframe->call_hi))
 	continue;
       /* Does the FP match?  */
-      if (dummyframe->top != 0)
-	{
-	  /* If the target architecture explicitly saved the
-	     top-of-stack before the inferior function call, assume
-	     that that same architecture will always pass in an FP
-	     (frame base) value that eactly matches that saved TOS.
-	     Don't check the saved SP and SP as they can lead to false
-	     hits.  */
-	  if (fp != dummyframe->top)
-	    continue;
-	}
-      else
-	{
-	  /* An older target that hasn't explicitly or implicitly
-             saved the dummy frame's top-of-stack.  Try matching the
-             FP against the saved SP and FP.  NOTE: If you're trying
-             to fix a problem with GDB not correctly finding a dummy
-             frame, check the comments that go with FRAME_ALIGN() and
-             UNWIND_DUMMY_ID().  */
-	  if (fp != dummyframe->fp && fp != dummyframe->sp)
-	    continue;
-	}
+      /* "infcall.c" explicitly saved the top-of-stack before the
+	 inferior function call, assume unwind_dummy_id() returns that
+	 same stack value.  */
+      if (fp != dummyframe->top)
+	continue;
       /* The FP matches this dummy frame.  */
       return dummyframe;
     }
 
   return NULL;
-}
-
-static struct regcache *
-deprecated_find_dummy_frame_regcache (CORE_ADDR pc, CORE_ADDR fp)
-{
-  struct dummy_frame *dummy = find_dummy_frame (pc, fp);
-  if (dummy != NULL)
-    return dummy->regcache;
-  else
-    return NULL;
-}
-
-char *
-deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
-{
-  struct regcache *regcache = deprecated_find_dummy_frame_regcache (pc, fp);
-  if (regcache == NULL)
-    return NULL;
-  return deprecated_grub_regcache_for_registers (regcache);
 }
 
 /* Function: pc_in_call_dummy (pc)
@@ -168,33 +130,6 @@ pc_in_dummy_frame (CORE_ADDR pc)
   return 0;
 }
 
-/* Function: read_register_dummy 
-   Find a saved register from before GDB calls a function in the inferior */
-
-CORE_ADDR
-deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
-{
-  struct regcache *dummy_regs = deprecated_find_dummy_frame_regcache (pc, fp);
-
-  if (dummy_regs)
-    {
-      /* NOTE: cagney/2002-08-12: Replaced a call to
-	 regcache_raw_read_as_address() with a call to
-	 regcache_cooked_read_unsigned().  The old, ...as_address
-	 function was eventually calling extract_unsigned_integer (nee
-	 extract_address) to unpack the registers value.  The below is
-	 doing an unsigned extract so that it is functionally
-	 equivalent.  The read needs to be cooked as, otherwise, it
-	 will never correctly return the value of a register in the
-	 [NUM_REGS .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
-      ULONGEST val;
-      regcache_cooked_read_unsigned (dummy_regs, regno, &val);
-      return val;
-    }
-  else
-    return 0;
-}
-
 /* Save all the registers on the dummy frame stack.  Most ports save the
    registers on the target stack.  This results in lots of unnecessary memory
    references, which are slow when debugging via a serial line.  Instead, we
@@ -214,7 +149,8 @@ generic_push_dummy_frame (void)
 
   dummy_frame = dummy_frame_stack;
   while (dummy_frame)
-    if (INNER_THAN (dummy_frame->fp, fp))	/* stale -- destroy! */
+    if (gdbarch_inner_than (current_gdbarch, dummy_frame->top, fp))
+      /* stale -- destroy! */
       {
 	dummy_frame_stack = dummy_frame->next;
 	regcache_xfree (dummy_frame->regcache);
@@ -228,9 +164,7 @@ generic_push_dummy_frame (void)
   dummy_frame->regcache = regcache_xmalloc (current_gdbarch);
 
   dummy_frame->pc = read_pc ();
-  dummy_frame->sp = read_sp ();
   dummy_frame->top = 0;
-  dummy_frame->fp = fp;
   dummy_frame->id = get_frame_id (get_current_frame ());
   regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
@@ -250,34 +184,6 @@ generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
 {
   dummy_frame_stack->call_lo = lo;
   dummy_frame_stack->call_hi = hi;
-}
-
-/* Discard the innermost dummy frame from the dummy frame stack
-   (passed in as a parameter).  */
-
-static void
-discard_innermost_dummy (struct dummy_frame **stack)
-{
-  struct dummy_frame *tbd = (*stack);
-  (*stack) = (*stack)->next;
-  regcache_xfree (tbd->regcache);
-  xfree (tbd);
-}
-
-void
-deprecated_pop_dummy_frame (void)
-{
-  struct dummy_frame *dummy_frame = dummy_frame_stack;
-
-  /* FIXME: what if the first frame isn't the right one, eg..
-     because one call-by-hand function has done a longjmp into another one? */
-
-  if (!dummy_frame)
-    error ("Can't pop dummy frame!");
-  regcache_cpy (current_regcache, dummy_frame->regcache);
-  flush_cached_frames ();
-
-  discard_innermost_dummy (&dummy_frame_stack);
 }
 
 /* Given a call-dummy dummy-frame, return the registers.  Here the
@@ -337,38 +243,16 @@ dummy_frame_this_id (struct frame_info *next_frame,
   /* When unwinding a normal frame, the stack structure is determined
      by analyzing the frame's function's code (be it using brute force
      prologue analysis, or the dwarf2 CFI).  In the case of a dummy
-     frame, that simply isn't possible.  The The PC is either the
-     program entry point, or some random address on the stack.  Trying
-     to use that PC to apply standard frame ID unwind techniques is
-     just asking for trouble.  */
-  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
-    {
-      /* Use an architecture specific method to extract the prev's
-	 dummy ID from the next frame.  Note that this method uses
-	 frame_register_unwind to obtain the register values needed to
-	 determine the dummy frame's ID.  */
-      (*this_id) = gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
-    }
-  else if (get_frame_type (next_frame) == SENTINEL_FRAME)
-    {
-      /* We're unwinding a sentinel frame, the PC of which is pointing
-	 at a stack dummy.  Fake up the dummy frame's ID using the
-	 same sequence as is found a traditional unwinder.  Once all
-	 architectures supply the unwind_dummy_id method, this code
-	 can go away.  */
-      (*this_id) = frame_id_build (deprecated_read_fp (), read_pc ());
-    }
-  else
-    {
-      /* Ouch!  We're not trying to find the innermost frame's ID yet
-	 we're trying to unwind to a dummy.  The architecture must
-	 provide the unwind_dummy_id() method.  Abandon the unwind
-	 process but only after first warning the user.  */
-      internal_warning (__FILE__, __LINE__,
-			"Missing unwind_dummy_id architecture method");
-      (*this_id) = null_frame_id;
-      return;
-    }
+     frame, that simply isn't possible.  The PC is either the program
+     entry point, or some random address on the stack.  Trying to use
+     that PC to apply standard frame ID unwind techniques is just
+     asking for trouble.  */
+  /* Use an architecture specific method to extract the prev's dummy
+     ID from the next frame.  Note that this method uses
+     frame_register_unwind to obtain the register values needed to
+     determine the dummy frame's ID.  */
+  gdb_assert (gdbarch_unwind_dummy_id_p (current_gdbarch));
+  (*this_id) = gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
   (*this_prologue_cache) = find_dummy_frame ((*this_id).code_addr,
 					     (*this_id).stack_addr);
 }
@@ -399,8 +283,6 @@ fprint_dummy_frames (struct ui_file *file)
       gdb_print_host_address (s, file);
       fprintf_unfiltered (file, ":");
       fprintf_unfiltered (file, " pc=0x%s", paddr (s->pc));
-      fprintf_unfiltered (file, " fp=0x%s", paddr (s->fp));
-      fprintf_unfiltered (file, " sp=0x%s", paddr (s->sp));
       fprintf_unfiltered (file, " top=0x%s", paddr (s->top));
       fprintf_unfiltered (file, " id=");
       fprint_frame_id (file, s->id);

@@ -1,3 +1,19 @@
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
+	* frame.h (deprecated_pop_dummy_frame)
+	(deprecated_read_register_dummy)
+	(deprecated_generic_find_dummy_frame): Delete.
+	* dummy-frame.c (deprecated_generic_find_dummy_frame)
+	(deprecated_read_register_dummy)
+	(deprecated_find_dummy_frame_regcache)
+	(discard_innermost_dummy)
+	(deprecated_pop_dummy_frame): Delete.
+	(dummy_frame_this_id): Simplify.
+	(struct dummy_frame): Delete "fp" and "sp".
+	(find_dummy_frame): Simplify.
+	(generic_push_dummy_frame): Do not set "fp" or "sp".
+	(fprint_dummy_frames): Do not print "fp" and "sp"
+
 2004-08-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (I386_MAX_INSN_LEN): New define.
