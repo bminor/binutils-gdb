@@ -253,7 +253,7 @@ testsuite		(Global Maintainers)
   lib                   Fernando Nasser         fnasser@redhat.com
                         Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  c++ (gdb.cp) 		Michael Chastain	mec@shout.net
+  c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
 			David Carlton		carlton@kealia.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
@@ -320,7 +320,7 @@ Kevin Buettner					kevinb@redhat.com
 Andrew Cagney					ac131313@redhat.com
 David Carlton					carlton@kealia.com
 Stephane Carrez					stcarrez@nerim.fr
-Michael Chastain				mec@shout.net
+Michael Chastain				mec.gnu@mindspring.com
 Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
 Brendan Conoboy					blc@redhat.com

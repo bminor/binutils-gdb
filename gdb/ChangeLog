@@ -1,3 +1,7 @@
+2003-11-10  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* MAINTAINERS: Change my e-mail address.
+
 2003-11-10  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (return_value): Replace "inval" and "outval" with
