@@ -1,3 +1,10 @@
+Sat Oct 16 20:47:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c: Add comment about signals.
+
+	* fork-child.c (fork_inferior): Remove CREATE_INFERIOR_HOOK again.
+	Stu reinstated it (accidently I assume).
+
 Sat Oct 16 15:27:10 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* procfs.c (procfs_wait):  Losing Unixware can't do poll on /proc
