@@ -1,3 +1,8 @@
+2004-11-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Files): Add cross-reference to description of
+	-readnow command-line switch.
+
 2004-11-10  Randolph Chung  <tausq@debian.org>
 
 	* gdb.texinfo: Document set/show backtrace past-entry commands.
