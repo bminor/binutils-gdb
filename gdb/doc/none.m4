@@ -19,6 +19,15 @@ _define__(<_ELF__>,<0>)
 
 _define__(<_LUCID__>,<0>)		A programming environment.
 
+_define__(<_BARE__>,<0>)                Turn on to indicate no OS facilities
+					(like shells, user prog args, program
+					environment, corefiles)
+
+_define__(<_DOSHOST__>,<0>)		Is this GDB DOS-hosted?
+
+_define__(<_CONLY__>,<0>)		Mention only C and C++ debugging if
+					turned on
+
 _define__(<_AMD29K__>,<0>)		Specific architectures.  Note none
 _define__(<_H8__>,<0>)
 _define__(<_I80386__>,<0>)		starts out on.

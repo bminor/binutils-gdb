@@ -12,7 +12,7 @@ _if__(!_GENERIC__)
 @settitle Debugging with _GDBN__ (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
-@c @smallbook
+@smallbook
 @c @cropmarks
 @c %**end of header
 
@@ -138,7 +138,7 @@ instead of in the original English.
 @page
 
 @ifinfo
-@node Top, Summary, (dir), (dir)
+@node Top
 @top Debugging with _GDBN__
 
 This file describes _GDBN__, the GNU symbolic debugger.
@@ -149,7 +149,9 @@ This is Edition 4.06, July 1992, for GDB Version _GDB_VN__.
 
 @menu
 * Summary::                     Summary of _GDBN__
+_if__(_GENERIC__ || !_H8__)
 * New Features::                New features since GDB version 3.5
+_fi__(_GENERIC__ || !_H8__)
 * Sample Session::              A sample _GDBN__ session
 * Invocation::                  Getting in and out of _GDBN__
 * Commands::                    _GDBN__ commands
@@ -158,218 +160,32 @@ This is Edition 4.06, July 1992, for GDB Version _GDB_VN__.
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
+_if__(!_CONLY__)
 * Languages::                   Using _GDBN__ with different languages
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+* C::                           C and C++
+_fi__(_CONLY__)
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
 * _GDBN__ Files::                   _GDBN__'s files
 * Targets::                     Specifying a debugging target
 * Controlling _GDBN__::             Controlling _GDBN__
 * Sequences::                   Canned sequences of commands
+_if__(!_DOSHOST__)
 * Emacs::                       Using _GDBN__ under GNU Emacs
+_fi__(!_DOSHOST__)
 * _GDBN__ Bugs::                    Reporting bugs in _GDBN__
+_if__(!_H8__)
 * Renamed Commands::
+_fi__(!_H8__)
 * Formatting Documentation::    How to format and print GDB documentation
 * Installing GDB::              Installing GDB
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 * Index::                       Index
-
- --- The Detailed Node Listing ---
-
-Summary of _GDBN__
-
-* Free Software::               Freely redistributable software
-* Contributors::                Contributors to _GDBN__
-
-Getting In and Out of _GDBN__
-
-* Invoking _GDBN__::                How to start _GDBN__
-* Leaving _GDBN__::                 How to quit _GDBN__
-* Shell Commands::              How to use shell commands inside _GDBN__
-
-Starting _GDBN__
-
-* File Options::                Choosing Files
-* Mode Options::                Choosing Modes
-
-_GDBN__ Commands
-
-* Command Syntax::              Command Syntax
-* Completion::                  Command Completion
-* Help::                        Getting Help
-
-Running Programs Under _GDBN__
-
-* Compilation::                 Compiling for Debugging
-* Starting::                    Starting your Program
-* Arguments::                   Your Program's Arguments
-* Environment::                 Your Program's Environment
-* Working Directory::           Your Program's Working Directory
-* Input/Output::                Your Program's Input and Output
-* Attach::                      Debugging an Already-Running Process
-* Kill Process::                Killing the Child Process
-* Process Information::         Additional Process Information
-
-Stopping and Continuing
-
-* Breakpoints::                 Breakpoints, Watchpoints, and Exceptions
-* Continuing and Stepping::     Resuming Execution
-* Signals::                     Signals
-
-Breakpoints, Watchpoints, and Exceptions
-
-* Set Breaks::                  Setting Breakpoints
-* Set Watchpoints::             Setting Watchpoints
-* Exception Handling::          Breakpoints and Exceptions
-* Delete Breaks::               Deleting Breakpoints
-* Disabling::                   Disabling Breakpoints
-* Conditions::                  Break Conditions
-* Break Commands::              Breakpoint Command Lists
-* Breakpoint Menus::            Breakpoint Menus
-* Error in Breakpoints::        ``Cannot insert breakpoints''
-
-Examining the Stack
-
-* Frames::                      Stack Frames
-* Backtrace::                   Backtraces
-* Selection::                   Selecting a Frame
-* Frame Info::                  Information on a Frame
-
-Examining Source Files
-
-* List::                        Printing Source Lines
-* Search::                      Searching Source Files
-* Source Path::                 Specifying Source Directories
-* Machine Code::                Source and Machine Code
-
-Examining Data
-
-* Expressions::                 Expressions
-* Variables::                   Program Variables
-* Arrays::                      Artificial Arrays
-* Output formats::              Output formats
-* Memory::                      Examining Memory
-* Auto Display::                Automatic Display
-* Print Settings::              Print Settings
-* Value History::               Value History
-* Convenience Vars::            Convenience Variables
-* Registers::                   Registers
-* Floating Point Hardware::     Floating Point Hardware
-
-Using GDB with Different Languages
-
-* Setting::                     Switching between source languages
-* Show::                        Displaying the language
-* Checks::                      Type and Range checks
-* Support::                     Supported languages
-
-Switching between source languages
-
-* Manually::                    Setting the working language manually
-* Automatically::               Having GDB infer the source language
-
-Type and range Checking
-
-* Type Checking::               An overview of type checking
-* Range Checking::              An overview of range checking
-
-Supported Languages
-
-* C::                           C and C++
-* Modula-2::                    Modula-2
-
-C and C++
-
-* C Operators::                 C and C++ Operators
-* C Constants::                 C and C++ Constants
-* Cplusplus expressions::       C++ Expressions
-* C Defaults::                  Default settings for C and C++
-* C Checks::                    C and C++ Type and Range Checks
-* Debugging C::                 _GDBN__ and C
-* Debugging C plus plus::       Special features for C++
-
-Modula-2
-
-* M2 Operators::                Built-in operators
-* Built-In Func/Proc::           Built-in Functions and Procedures
-* M2 Constants::                Modula-2 Constants
-* M2 Defaults::                 Default settings for Modula-2
-* Deviations::                  Deviations from standard Modula-2
-* M2 Checks::                   Modula-2 Type and Range Checks
-* M2 Scope::                    The scope operators @code{::} and @code{.}
-* GDB/M2::                      GDB and Modula-2
-
-Altering Execution
-
-* Assignment::                  Assignment to Variables
-* Jumping::                     Continuing at a Different Address
-* Signaling::                   Giving your program a Signal
-* Returning::                   Returning from a Function
-* Calling::                     Calling your Program's Functions
-* Patching::                    Patching your Program
-
-_GDBN__'s Files
-
-* Files::                       Commands to Specify Files
-* Symbol Errors::               Errors Reading Symbol Files
-
-Specifying a Debugging Target
-
-* Active Targets::              Active Targets
-* Target Commands::             Commands for Managing Targets
-* Remote::                      Remote Debugging
-
-Remote Debugging
-
-* i960-Nindy Remote::           _GDBN__ with a Remote i960 (Nindy)
-* EB29K Remote::                _GDBN__ with a Remote EB29K
-* VxWorks Remote::              _GDBN__ and VxWorks
-
-_GDBN__ with a Remote i960 (Nindy)
-
-* Nindy Startup::               Startup with Nindy
-* Nindy Options::               Options for Nindy
-* Nindy reset::                 Nindy Reset Command
-
-_GDBN__ with a Remote EB29K
-
-* Comms (EB29K)::               Communications Setup
-* gdb-EB29K::                   EB29K cross-debugging
-* Remote Log::                  Remote Log
-
-_GDBN__ and VxWorks
-
-* VxWorks connection::          Connecting to VxWorks
-* VxWorks download::            VxWorks Download
-* VxWorks attach::              Running Tasks
-
-Controlling _GDBN__
-
-* Prompt::                      Prompt
-* Editing::                     Command Editing
-* History::                     Command History
-* Screen Size::                 Screen Size
-* Numbers::                     Numbers
-* Messages/Warnings::           Optional Warnings and Messages
-
-Canned Sequences of Commands
-
-* Define::                      User-Defined Commands
-* Command Files::               Command Files
-* Output::                      Commands for Controlled Output
-
-Reporting Bugs in _GDBN__
-
-* Bug Criteria::                Have You Found a Bug?
-* Bug Reporting::               How to Report Bugs
-
-Installing GDB
-
-* Separate Objdir::             Compiling _GDBN__ in another directory
-* Config Names::                Specifying names for hosts and targets
-* configure Options::           Summary of options for configure
 @end menu
 
-@node Summary, New Features, Top, Top
+@node Summary
 @unnumbered Summary of _GDBN__
 
 The purpose of a debugger such as _GDBN__ is to allow you to see what is
@@ -402,7 +218,7 @@ Fortran support will be added when a GNU Fortran compiler is ready.
 * Contributors::                Contributors to GDB
 @end menu
 
-@node Free Software, Contributors, Summary, Summary
+@node Free Software
 @unnumberedsec Free Software
 
 _GDBN__ is @dfn{free software}, protected by the GNU General Public License
@@ -419,7 +235,7 @@ from anyone else.
 
 For full details, @pxref{Copying, ,GNU GENERAL PUBLIC LICENSE}.
 
-@node Contributors,  , Free Software, Summary
+@node Contributors
 @unnumberedsec Contributors to GDB
 
 Richard Stallman was the original author of GDB, and of many other GNU
@@ -495,7 +311,8 @@ manual.
 Fred Fish wrote most of the support for Unix System Vr4, and enhanced
 the command-completion support to cover C++ overloaded symbols.
 
-@node New Features, Sample Session, Summary, Top
+_if__(_GENERIC__ || !_H8__)
+@node New Features
 @unnumbered New Features since GDB version 3.5
 
 @table @emph
@@ -579,8 +396,9 @@ the Documentation}, for instructions to print it.
 Kernel debugging for BSD and Mach systems; Tahoe and HPPA architecture
 support.
 @end table
+_fi__(_GENERIC__ || !_H8__)
 
-@node Sample Session, Invocation, New Features, Top
+@node Sample Session
 @chapter A Sample _GDBN__ Session
 
 You can use this manual at your leisure to read all about _GDBN__.
@@ -849,7 +667,7 @@ session with the _GDBN__ @code{quit} command.
 (_GDBP__) @b{quit}
 _1__@end smallexample
 
-@node Invocation, Commands, Sample Session, Top
+@node Invocation
 @chapter Getting In and Out of _GDBN__
 
 This chapter discusses how to start _GDBN__, and how to get out of it.
@@ -859,13 +677,21 @@ or @kbd{C-d} to exit.)
 @menu
 * Invoking _GDBN__::                Starting _GDBN__
 * Leaving _GDBN__::                 Leaving _GDBN__
+_if__(!_BARE__)
 * Shell Commands::              Shell Commands
+_fi__(!_BARE__)
 @end menu
 
-@node Invoking _GDBN__, Leaving _GDBN__, Invocation, Invocation
+@node Invoking _GDBN__
 @section Starting _GDBN__
 
-Start _GDBN__ with the shell command @code{_GDBP__}.  Once it's running,
+_if__(_H8__) 
+For details on starting up _GDBP__ as a
+remote debugger attached to a Hitachi H8/300 board, see @ref{Hitachi
+H8/300 Remote,,_GDBN__ and the Hitachi H8/300}.
+_fi__(_H8__)
+
+Start _GDBN__ by running the program @code{_GDBP__}.  Once it's running,
 _GDBN__ reads commands from the terminal until you tell it to exit.
 
 You can also run @code{_GDBP__} with a variety of arguments and options,
@@ -875,19 +701,14 @@ The command-line options described here are designed
 to cover a variety of situations; in some environments, some of these
 options may effectively be unavailable.  
 
-_if__(_H8__) 
-For details on starting up _GDBP__ as a
-remote debugger attached to a Hitachi H8/300 board, see @ref{Hitachi
-H8/300 Remote,,_GDBN__ and the Hitachi H8/300}.
-_fi__(_H8__)
-
-The most usual way to start _GDBN__ is with one argument or two,
-specifying an executable program as the argument:
+The most usual way to start _GDBN__ is with one argument,
+specifying an executable program:
 
 @example
 _GDBP__ @var{program}
 @end example
 
+_if__(!_BARE__)
 @noindent
 You can also start with both an executable program and a core file
 specified:
@@ -911,6 +732,7 @@ Taking advantage of the second command-line argument requires a fairly
 complete operating system; when you use _GDBN__ as a remote debugger
 attached to a bare board, there may not be any notion of ``process'',
 and there is often no way to get a core dump.
+_fi__(!_BARE__)
 
 @noindent
 You can further control how _GDBN__ starts up by using command-line
@@ -932,16 +754,21 @@ in sequential order.  The order makes a difference when the
 @samp{-x} option is used.
 
 @menu
-* File Options::                Choosing Files
-* Mode Options::                Choosing Modes
 _if__(!_GENERIC__)
 _include__(gdbinv-m.m4)_dnl__
 _fi__(!_GENERIC__)
+* File Options::                Choosing Files
+* Mode Options::                Choosing Modes
 @end menu
 
-@node File Options, Mode Options, Invoking _GDBN__, Invoking _GDBN__
+_if__(!_GENERIC__)
+_include__(gdbinv-s.m4)
+_fi__(!_GENERIC__)
+
+@node File Options
 @subsection Choosing Files
 
+_if__(!_BARE__)
 When _GDBN__ starts, it reads any arguments other than options as
 specifying an executable file and core file (or process ID).  This is
 the same as if the arguments were specified by the @samp{-se} and
@@ -950,6 +777,12 @@ that does not have an associated option flag as equivalent to the
 @samp{-se} option followed by that argument; and the second argument
 that does not have an associated option flag, if any, as equivalent to
 the @samp{-c} option followed by that argument.)
+_fi__(!_BARE__)
+_if__(_BARE__)
+When _GDBN__ starts, it reads any argument other than options as
+specifying an executable file.  This is the same as if the argument was
+specified by the @samp{-se} option.
+_fi__(_BARE__)
 
 Many options have both long and short forms; both are shown in the
 following list.  _GDBN__ also recognizes the long forms if you truncate
@@ -972,9 +805,11 @@ dump.
 Read symbol table from file @var{file} and use it as the executable
 file.
 
+_if__(!_BARE__)
 @item -core=@var{file}
 @itemx -c @var{file}
 Use file @var{file} as a core dump to examine.
+_fi__(!_BARE__)
 
 @item -command=@var{file}
 @itemx -x @var{file}
@@ -984,6 +819,7 @@ Execute _GDBN__ commands from file @var{file}.  @xref{Command Files}.
 @itemx -d @var{directory}
 Add @var{directory} to the path to search for source files.
 
+_if__(!_BARE__)
 @item -m
 @itemx -mapped
 @emph{Warning: this option depends on operating system facilities that are not
@@ -1000,6 +836,7 @@ the symbol table from the executable program.
 The @file{.syms} file is specific to the host machine on which _GDBN__ is run.
 It holds an exact image of _GDBN__'s internal symbol table.  It cannot be
 shared across multiple host platforms.
+_fi__(!_BARE__)
 
 @item -r
 @itemx -readnow
@@ -1008,6 +845,7 @@ the default, which is to read it incrementally as it is needed.
 This makes startup slower, but makes future operations faster.
 @end table
 
+_if__(!_BARE__)
 The @code{-mapped} and @code{-readnow} options are typically combined in order to
 build a @file{.syms} file that contains complete symbol information.
 A simple GDB invocation to do nothing but build a @file{.syms} file for future
@@ -1016,13 +854,9 @@ use is:
 @example
 	gdb -batch -nx -mapped -readnow programname
 @end example
+_fi__(!_BARE__)
 
-_if__(!_GENERIC__)
-@node Mode Options, Mode Options, File Options, Invoking _GDBN__
-_fi__(!_GENERIC__)
-_if__(_GENERIC__)
-@node Mode Options,  , File Options, Invoking _GDBN__
-_fi__(_GENERIC__) 
+@node Mode Options
 @subsection Choosing Modes
 
 You can run _GDBN__ in various alternative modes---for example, in
@@ -1084,6 +918,7 @@ and character position separated by colons, and a newline.  The
 Emacs-to-_GDBN__ interface program uses the two @samp{\032} characters as
 a signal to display the source code for the frame.
 
+_if__(_GENERIC__ || !_H8__)
 @item -b @var{bps}
 Set the line speed (baud rate or bits per second) of any serial
 interface used by _GDBN__ for remote debugging.
@@ -1091,12 +926,10 @@ interface used by _GDBN__ for remote debugging.
 @item -tty=@var{device}
 Run using @var{device} for your program's standard input and output.
 @c FIXME: kingdon thinks there is more to -tty.  Investigate.
+_fi__(_GENERIC__ || !_H8__)
 @end table
 
-_if__(!_GENERIC__)
-_include__(gdbinv-s.m4)
-_fi__(!_GENERIC__)
-@node Leaving _GDBN__, Shell Commands, Invoking _GDBN__, Invocation
+@node Leaving _GDBN__
 @section Leaving _GDBN__
 @cindex exiting _GDBN__
 
@@ -1115,11 +948,14 @@ return to _GDBN__ command level.  It is safe to type the interrupt
 character at any time because _GDBN__ does not allow it to take effect
 until a time when it is safe.
 
+_if__(!_BARE__)
 If you have been using _GDBN__ to control an attached process or device, you
 can release it with the @code{detach} command; @pxref{Attach,
 ,Debugging an Already-Running Process}..
+_fi__(!_BARE__)
 
-@node Shell Commands,  , Leaving _GDBN__, Invocation
+_if__(!_BARE__)
+@node Shell Commands
 @section Shell Commands
 
 If you need to execute occasional shell commands during your
@@ -1146,8 +982,9 @@ You do not have to use the @code{shell} command for this purpose in _GDBN__:
 Causes _GDBN__ to execute an inferior @code{make} program with the specified
 arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @end table
+_fi__(!_BARE__)
 
-@node Commands, Running, Invocation, Top
+@node Commands
 @chapter _GDBN__ Commands
 
 You can abbreviate a _GDBN__ command to the first few letters of the command
@@ -1162,7 +999,7 @@ show you the alternatives available, if there's more than one possibility).
 * Help::                        Getting Help
 @end menu
 
-@node Command Syntax, Completion, Commands, Commands
+@node Command Syntax
 @section Command Syntax
 
 A _GDBN__ command is a single line of input.  There is no limit on how long
@@ -1204,7 +1041,7 @@ that generates this sort of display.
 A line of input starting with @kbd{#} is a comment; it does nothing.
 This is useful mainly in command files (@pxref{Command Files}).
 
-@node Completion, Help, Command Syntax, Commands
+@node Completion
 @section Command Completion
 
 @cindex completion
@@ -1317,7 +1154,7 @@ you have not yet started typing the argument list when you ask for
 completion on an overloaded symbol.
 
 
-@node Help,  , Completion, Commands
+@node Help
 @section Getting Help
 @cindex online documentation
 @kindex help
@@ -1440,7 +1277,7 @@ Display information about permission for copying _GDBN__.
 Display the GNU ``NO WARRANTY'' statement.
 @end table
 
-@node Running, Stopping, Commands, Top
+@node Running
 @chapter Running Programs Under _GDBN__
 
 To debug a program, you must run it under _GDBN__.
@@ -1448,6 +1285,7 @@ To debug a program, you must run it under _GDBN__.
 @menu
 * Compilation::                 Compiling for Debugging
 * Starting::                    Starting your Program
+_if__(!_BARE__)
 * Arguments::                   Your Program's Arguments
 * Environment::                 Your Program's Environment
 * Working Directory::           Your Program's Working Directory
@@ -1455,9 +1293,10 @@ To debug a program, you must run it under _GDBN__.
 * Attach::                      Debugging an Already-Running Process
 * Kill Process::                Killing the Child Process
 * Process Information::         Additional Process Information
+_fi__(!_BARE__)
 @end menu
 
-@node Compilation, Starting, Running, Running
+@node Compilation
 @section Compiling for Debugging
 
 In order to debug a program effectively, you need to generate
@@ -1513,7 +1352,7 @@ option or use shorter file names.  Alternatively, use a version of GNU
 @code{ar} dated more recently than August 1989.
 @end ignore
 
-@node Starting, Arguments, Compilation, Running
+@node Starting
 @section Starting your Program
 @cindex starting
 @cindex running
@@ -1534,6 +1373,7 @@ Specify Files}).
 
 @end table
 
+_if__(!_BARE__)
 If you are running your program in an execution environment that
 supports processes, @code{run} creates an inferior process and makes
 that process run your program.  (In environments without processes,
@@ -1580,22 +1420,21 @@ pipes to pass the output of the program you are debugging to another
 program; if you attempt this, _GDBN__ is likely to wind up debugging the
 wrong program.
 @end table
+_fi__(!_BARE__)
 
-@c FIXME: Rewrite following paragraph, especially its third sentence.
 When you issue the @code{run} command, your program begins to execute
-immediately.  @xref{Stopping, ,Stopping and Continuing}, for
-discussion of how to arrange for your program to stop.  Once your
-program has been started by the @code{run} command (and then stopped),
-you may evaluate expressions that involve calls to functions in your 
-program, using the @code{print} or @code{call} commands.  @xref{Data,
-,Examining Data}.
+immediately.  @xref{Stopping, ,Stopping and Continuing}, for discussion
+of how to arrange for your program to stop.  Once your program has
+stopped, you may calls functions in your program, using the @code{print}
+or @code{call} commands.  @xref{Data, ,Examining Data}.
 
 If the modification time of your symbol file has changed since the
 last time _GDBN__ read its symbols, _GDBN__ will discard its symbol table and
 re-read it.  When it does this, _GDBN__ tries to retain your current
 breakpoints.
 
-@node Arguments, Environment, Starting, Running
+_if__(!_BARE__)
+@node Arguments
 @section Your Program's Arguments
 
 @cindex arguments (to your program)
@@ -1622,7 +1461,7 @@ it again without arguments.
 Show the arguments to give your program when it is started.
 @end table
 
-@node Environment, Working Directory, Arguments, Running
+@node Environment
 @section Your Program's Environment
 
 @cindex environment (of your program)
@@ -1693,7 +1532,7 @@ program.  This is different from @samp{set env @var{varname} =};
 rather than assigning it an empty value.
 @end table
 
-@node Working Directory, Input/Output, Environment, Running
+@node Working Directory
 @section Your Program's Working Directory
 
 @cindex working directory (of your program)
@@ -1717,7 +1556,7 @@ Set _GDBN__'s working directory to @var{directory}.
 Print _GDBN__'s working directory.
 @end table
 
-@node Input/Output, Attach, Working Directory, Running
+@node Input/Output
 @section Your Program's Input and Output
 
 @cindex redirection
@@ -1771,7 +1610,7 @@ When you use the @code{tty} command or redirect input in the @code{run}
 command, only the input @emph{for your program} is affected.  The input
 for _GDBN__ still comes from your terminal.
 
-@node Attach, Kill Process, Input/Output, Running
+@node Attach
 @section Debugging an Already-Running Process
 @kindex attach
 @cindex attach
@@ -1824,7 +1663,7 @@ confirmation if you try to do either of these things; you can control
 whether or not you need to confirm by using the @code{set confirm} command
 (@pxref{Messages/Warnings, ,Optional Warnings and Messages}).
 
-@node Kill Process, Process Information, Attach, Running
+@node Kill Process
 @c @group
 @section Killing the Child Process
 
@@ -1851,7 +1690,7 @@ next type @code{run}, _GDBN__ will notice that the file has changed, and
 will re-read the symbol table (while trying to preserve your current
 breakpoint settings).
 
-@node Process Information, , Kill Process, Running
+@node Process Information
 @section Additional Process Information
 
 @kindex /proc
@@ -1891,8 +1730,9 @@ received.
 @item info proc all
 Show all the above information about the process.
 @end table
+_fi__(!_BARE__)
 
-@node Stopping, Stack, Running, Top
+@node Stopping
 @chapter Stopping and Continuing
 
 The principal purpose of using a debugger is so that you can stop your
@@ -1917,10 +1757,12 @@ running or not, what process it is, and why it stopped.
 @menu
 * Breakpoints::                 Breakpoints, Watchpoints, and Exceptions
 * Continuing and Stepping::     Resuming Execution
+_if__(_GENERIC__ || !_H8__)
 * Signals::                     Signals
+_fi__(_GENERIC__ || !_H8__)
 @end menu
 
-@node Breakpoints, Continuing and Stepping, Stopping, Stopping
+@node Breakpoints
 @section Breakpoints, Watchpoints, and Exceptions
 
 @cindex breakpoints
@@ -1966,7 +1808,7 @@ no effect on your program until you enable it again.
 * Error in Breakpoints::
 @end menu
 
-@node Set Breaks, Set Watchpoints, Breakpoints, Breakpoints
+@node Set Breaks
 @subsection Setting Breakpoints
 
 @c FIXME LMB what does GDB do if no code on line of breakpt?  
@@ -2150,7 +1992,7 @@ Temporary internal breakpoint used by the _GDBN__ @code{finish} command.
 @end table
 
 
-@node Set Watchpoints, Exception Handling, Set Breaks, Breakpoints
+@node Set Watchpoints
 @subsection Setting Watchpoints
 @cindex setting watchpoints
 
@@ -2175,7 +2017,7 @@ This command prints a list of watchpoints and breakpoints; it is the
 same as @code{info break}.
 @end table
 
-@node Exception Handling, Delete Breaks, Set Watchpoints, Breakpoints
+@node Exception Handling
 @subsection Breakpoints and Exceptions
 @cindex exception handlers
 
@@ -2242,7 +2084,7 @@ a specific exception is raised.  You can use multiple conditional
 breakpoints to stop your program when any of a number of exceptions are
 raised.
 
-@node Delete Breaks, Disabling, Exception Handling, Breakpoints
+@node Delete Breaks
 @subsection Deleting Breakpoints
 
 @cindex clearing breakpoints, watchpoints
@@ -2287,7 +2129,7 @@ asks confirmation, unless you have @code{set confirm off}).  You
 can abbreviate this command as @code{d}.
 @end table
 
-@node Disabling, Conditions, Delete Breaks, Breakpoints
+@node Disabling
 @subsection Disabling Breakpoints
 
 @cindex disabled breakpoints
@@ -2357,7 +2199,7 @@ use one of the commands above.  (The command @code{until} can set and
 delete a breakpoint of its own, but it will not change the state of
 your other breakpoints; see @ref{Continuing and Stepping, ,Continuing and Stepping}.)
 
-@node Conditions, Break Commands, Disabling, Breakpoints
+@node Conditions
 @subsection Break Conditions
 @cindex conditional breakpoints
 @cindex breakpoint conditions
@@ -2470,7 +2312,7 @@ as _0__@w{@samp{$foo-- <= 0}}_1__ using a debugger convenience variable that
 is decremented each time.  @xref{Convenience Vars, ,Convenience
 Variables}.
 
-@node Break Commands, Breakpoint Menus, Conditions, Breakpoints
+@node Break Commands
 @subsection Breakpoint Command Lists
 
 @cindex breakpoint commands
@@ -2573,7 +2415,7 @@ break conditions without changing the terminal modes.  When you want
 to have nontrivial conditions for performing the side effects, the
 operators @samp{&&}, @samp{||} and @samp{?@dots{}:} may be useful.
 
-@node Breakpoint Menus, Error in Breakpoints, Break Commands, Breakpoints
+@node Breakpoint Menus
 @subsection Breakpoint Menus
 @cindex overloading
 @cindex symbol overloading
@@ -2616,7 +2458,7 @@ Use the "delete" command to delete unwanted breakpoints.
 (_GDBP__)
 @end example
 
-@node Error in Breakpoints,  , Breakpoint Menus, Breakpoints
+@node Error in Breakpoints
 @subsection ``Cannot Insert Breakpoints''
 
 @c FIXME: "cannot insert breakpoints" error, v unclear.
@@ -2649,7 +2491,7 @@ linker option @samp{-N}.  The operating system limitation may not apply
 to nonsharable executables.
 @end enumerate
 
-@node Continuing and Stepping, Signals, Breakpoints, Stopping
+@node Continuing and Stepping
 @section Continuing and Stepping
 
 @cindex stepping
@@ -2660,9 +2502,15 @@ completes normally.  In contrast, @dfn{stepping} means executing just
 one more ``step'' of your program, where ``step'' may mean either one
 line of source code, or one machine instruction (depending on what
 particular command you use).  Either when continuing
-or when stepping, your program may stop even sooner, due to a breakpoint
-or to a signal.  (If due to a signal, you may want to use @code{handle},
-or use @samp{signal 0} to resume execution.  @xref{Signals, ,Signals}.)
+or when stepping, your program may stop even sooner, due to 
+_if__(_BARE__)
+a breakpoint.
+_fi__(_BARE__)
+_if__(!_BARE__)
+a breakpoint or to a signal.  (If due to a signal, you may want to use
+@code{handle}, or use @samp{signal 0} to resume execution.
+@xref{Signals, ,Signals}.)
+_fi__(!_BARE__)
 
 @table @code
 @item continue @r{[}@var{ignore-count}@r{]}
@@ -2806,7 +2654,8 @@ proceed until the function returns.
 An argument is a repeat count, as in @code{next}.
 @end table
 
-@node Signals,  , Continuing and Stepping, Stopping
+_if__(_GENERIC__ || !_H8__)
+@node Signals
 @section Signals
 @cindex signals
 
@@ -2897,8 +2746,9 @@ execution; but your program would probably terminate immediately as
 a result of the fatal signal once it saw the signal.  To prevent this,
 you can continue with @samp{signal 0}.  @xref{Signaling, ,Giving your
 Program a Signal}. 
+_fi__(_GENERIC__ || !_H8__)
 
-@node Stack, Source, Stopping, Top
+@node Stack
 @chapter Examining the Stack
 
 When your program has stopped, the first thing you need to know is where it
@@ -2933,7 +2783,7 @@ frame and describes it briefly as the @code{frame} command does
 * Frame Info::                  Information on a Frame
 @end menu
 
-@node Frames, Backtrace, Stack, Stack
+@node Frames
 @section Stack Frames
 
 @cindex frame
@@ -2983,7 +2833,7 @@ separate frame, which is numbered zero as usual, allowing correct
 tracing of the function call chain.  However, _GDBN__ has no provision
 for frameless functions elsewhere in the stack.
 
-@node Backtrace, Selection, Frames, Stack
+@node Backtrace
 @section Backtraces
 
 A backtrace is a summary of how your program got where it is.  It shows one
@@ -3043,7 +2893,7 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
-@node Selection, Frame Info, Backtrace, Stack
+@node Selection
 @section Selecting a Frame
 
 Most commands for examining the stack and other data in your program work on
@@ -3124,7 +2974,7 @@ in _GDBN__ command scripts, where the output might be unnecessary and
 distracting.
 @end table
 
-@node Frame Info,  , Selection, Stack
+@node Frame Info
 @section Information About a Frame
 
 There are several other commands to print information about the selected
@@ -3180,7 +3030,7 @@ exception handlers, visit the associated frame (using the @code{up},
 @xref{Exception Handling, ,Breakpoints and Exceptions}.
 @end table
 
-@node Source, Data, Stack, Top
+@node Source
 @chapter Examining Source Files
 
 _GDBN__ can print parts of your program's source, since the debugging
@@ -3191,9 +3041,11 @@ the line where it stopped.  Likewise, when you select a stack frame
 execution in that frame has stopped.  You can print other portions of
 source files by explicit command.
 
+_if__(!_DOSHOST__)
 If you use _GDBN__ through its GNU Emacs interface, you may prefer to use
 Emacs facilities to view source; @pxref{Emacs, ,Using _GDBN__ under GNU
 Emacs}.
+_fi__(!_DOSHOST__)
 
 @menu
 * List::                        Printing Source Lines
@@ -3202,7 +3054,7 @@ Emacs}.
 * Machine Code::                Source and Machine Code
 @end menu
 
-@node List, Search, Source, Source
+@node List
 @section Printing Source Lines
 
 @kindex list
@@ -3321,7 +3173,7 @@ Specifies the line containing the program address @var{address}.
 @var{address} may be any expression.
 @end table
 
-@node Search, Source Path, List, Source
+@node Search
 @section Searching Source Files
 @cindex searching
 @kindex reverse-search
@@ -3347,7 +3199,7 @@ for @var{regexp}.  It lists the line that is found.  You can abbreviate
 this command as @code{rev}.
 @end table
 
-@node Source Path, Machine Code, Search, Source
+@node Source Path
 @section Specifying Source Directories
 
 @cindex source path
@@ -3416,7 +3268,7 @@ directories you want in the source path.  You can add all the
 directories in one command.
 @end enumerate
 
-@node Machine Code,  , Source Path, Source
+@node Machine Code
 @section Source and Machine Code
 
 You can use the command @code{info line} to map source lines to program
@@ -3468,9 +3320,12 @@ will be dumped.  Two arguments specify a range of addresses (first
 inclusive, second exclusive) to dump.
 @end table
 
+_if__(_GENERIC__||!_H8__)
 We can use @code{disassemble} to inspect the object code
-range shown in the last @code{info line} example:
+range shown in the last @code{info line} example (the example
+shows SPARC machine instructions):
 
+_0__
 @smallexample
 (_GDBP__) disas 0x63e4 0x6404
 Dump of assembler code from 0x63e4 to 0x6404:
@@ -3484,8 +3339,33 @@ Dump of assembler code from 0x63e4 to 0x6404:
 0x6400 <builtin_init+5368>:     nop
 End of assembler dump.
 @end smallexample
+_1__
+_fi__(_GENERIC__||!_H8__)
 
-@node Data, Languages, Source, Top
+_if__(!_GENERIC__||_H8__)
+For example, here is the beginning of the output for the
+disassembly of a function @code{fact}:
+
+_0__
+@smallexample
+(_GDBP__) disas fact
+Dump of assembler code for function fact:
+to 0x808c:
+0x802c <fact>: 6d f2		mov.w r2,@@-r7
+0x802e <fact+2>:  6d f3		mov.w r3,@@-r7
+0x8030 <fact+4>:  6d f6		mov.w r6,@@-r7
+0x8032 <fact+6>:  0d 76		mov.w r7,r6
+0x8034 <fact+8>:  6f 70 00 08	mov.w @@(0x8,r7),r0
+0x8038 <fact+12>  19 11		sub.w	r1,r1
+ .
+ .
+ . 
+@end smallexample
+_1__
+_fi__(!_GENERIC__||_H8__)
+
+
+@node Data
 @chapter Examining Data
 
 @cindex printing data
@@ -3496,10 +3376,12 @@ End of assembler dump.
 @c document because it is nonstandard...  Under Epoch it displays in a
 @c different window or something like that.
 The usual way to examine data in your program is with the @code{print}
-command (abbreviated @code{p}), or its synonym @code{inspect}.  It
-evaluates and prints the value of an expression of the language your
+command (abbreviated @code{p}), or its synonym @code{inspect}.  
+_if__(!_CONLY__)
+It evaluates and prints the value of an expression of the language your
 program is written in (@pxref{Languages, ,Using _GDBN__ with Different
-Languages}).  
+Languages}).
+_fi__(!_CONLY__)
 
 @table @code
 @item print @var{exp}
@@ -3535,10 +3417,12 @@ command rather than @code{print}. @xref{Symbols, ,Examining the Symbol Table}.
 * Value History::               Value History
 * Convenience Vars::            Convenience Variables
 * Registers::                   Registers
+_if__(_GENERIC__ || !_H8__)
 * Floating Point Hardware::     Floating Point Hardware
+_fi__(_GENERIC__ || !_H8__)
 @end menu
 
-@node Expressions, Variables, Data, Data
+@node Expressions
 @section Expressions
 
 @cindex expressions
@@ -3549,6 +3433,7 @@ _GDBN__.  This includes conditional expressions, function calls, casts
 and string constants.  It unfortunately does not include symbols defined
 by preprocessor @code{#define} commands.
 
+_if__(!_CONLY__)
 Because C is so widespread, most of the expressions shown in examples in
 this manual are in C.  @xref{Languages, , Using _GDBN__ with Different
 Languages}, for information on how to use expressions in other
@@ -3561,6 +3446,7 @@ Casts are supported in all languages, not just in C, because it is so
 useful to cast a number into a pointer so as to examine a structure
 at that address in memory.
 @c FIXME: casts supported---Mod2 true?
+_fi__(!_CONLY__)
 
 _GDBN__ supports these operators in addition to those of programming
 languages:
@@ -3582,7 +3468,7 @@ a cast).  This construct is allowed regardless of what kind of data is
 normally supposed to reside at @var{addr}.
 @end table
 
-@node Variables, Arrays, Expressions, Data
+@node Variables
 @section Program Variables
 
 The most common kind of expression to use is the name of a variable
@@ -3662,7 +3548,7 @@ through that group of instructions, local variable definitions may be
 gone.
 @end quotation
 
-@node Arrays, Output formats, Variables, Data
+@node Arrays
 @section Artificial Arrays
 
 @cindex artificial array
@@ -3717,7 +3603,7 @@ p dtab[$i++]->fv
 @dots{}
 @end example
 
-@node Output formats, Memory, Arrays, Data
+@node Output formats
 @section Output formats
 
 @cindex formatted output
@@ -3782,7 +3668,7 @@ To reprint the last value in the value history with a different format,
 you can use the @code{print} command with just a format and no
 expression.  For example, @samp{p/x} reprints the last value in hex.
 
-@node Memory, Auto Display, Output formats, Data
+@node Memory
 @section Examining Memory
 
 You can use the command @code{x} (for ``examine'') to examine memory in
@@ -3886,7 +3772,7 @@ If the @code{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
 
-@node Auto Display, Print Settings, Memory, Data
+@node Auto Display
 @section Automatic Display
 @cindex automatic display
 @cindex display of expressions
@@ -3982,7 +3868,7 @@ there is no variable @code{last_char}---display is disabled.  The next time
 your program stops where @code{last_char} is meaningful, you can enable the
 display expression once again.
 
-@node Print Settings, Value History, Auto Display, Data
+@node Print Settings
 @section Print Settings
 
 @cindex format options
@@ -4206,7 +4092,7 @@ Do not pretty print C++ virtual function tables.
 Show whether C++ virtual function tables are pretty printed, or not.
 @end table
 
-@node Value History, Convenience Vars, Print Settings, Data
+@node Value History
 @section Value History
 
 @cindex value history
@@ -4281,7 +4167,7 @@ values are available, produces no display.
 Pressing @key{RET} to repeat @code{show values @var{n}} has exactly the
 same effect as @samp{show values +}.
 
-@node Convenience Vars, Registers, Value History, Data
+@node Convenience Vars
 @section Convenience Variables
 
 @cindex convenience variables
@@ -4355,7 +4241,7 @@ to the value found in the last address examined.  Its type is chosen
 to match the format in which the data was printed.
 @end table
 
-@node Registers, Floating Point Hardware, Convenience Vars, Data
+@node Registers
 @section Registers
 
 @cindex registers
@@ -4376,7 +4262,7 @@ registers (in the selected stack frame).
 Print the names and values of all registers, including floating-point
 registers.
 
-@item info registers @var{regname} @{dots}
+@item info registers @var{regname} @dots{}
 Print the relativized value of each specified register @var{regname}.  
 @var{regname} may be any register name valid on the machine you are using, with
 or without the initial @samp{$}.
@@ -4475,7 +4361,8 @@ processors.
 @end table
 _fi__(_AMD29K__)
 
-@node Floating Point Hardware,  , Registers, Data
+_if__(_GENERIC__ || !_H8__)
+@node Floating Point Hardware
 @section Floating Point Hardware
 @cindex floating point
 
@@ -4493,8 +4380,10 @@ floating point chip.
 @c FIXME...supported currently on arm's and 386's.  Mark properly with
 @c FIXME... m4 macros to isolate general statements from hardware-dep,
 @c FIXME... at that point.
+_fi__(_GENERIC__ || !_H8__)
 
-@node Languages, Symbols, Data, Top
+_if__(!_CONLY__)
+@node Languages
 @chapter Using _GDBN__ with Different Languages
 @cindex languages
 
@@ -4521,7 +4410,7 @@ automatically.
 * Support::                     Supported languages
 @end menu
 
-@node Setting, Show, Languages, Languages
+@node Setting
 @section Switching between source languages
 
 There are two ways to control the working language---either have _GDBN__
@@ -4534,7 +4423,7 @@ defaults to setting the language automatically.
 * Automatically::               Having _GDBN__ infer the source language
 @end menu
 
-@node Manually, Automatically, Setting, Setting
+@node Manually
 @subsection Setting the working language
 
 @kindex set language
@@ -4564,7 +4453,7 @@ If you allow _GDBN__ to set the language automatically, then
 you can count on expressions evaluating the same way in your debugging
 session and in your program.
 
-@node Automatically,  , Manually, Setting
+@node Automatically
 @subsection Having _GDBN__ infer the source language
 
 To have _GDBN__ set the working language automatically, use @samp{set
@@ -4598,7 +4487,7 @@ written in one source language can be used by a main program written in
 a different source language.  Using @samp{set language auto} in this
 case frees you from having to set the working language manually.
 
-@node Show, Checks, Setting, Languages
+@node Show
 @section Displaying the language
 
 The following commands will help you find out which language is the
@@ -4624,7 +4513,7 @@ Among the other information listed here (@pxref{Symbols, ,Examining the
 Symbol Table}) is the source language of this source file.
 @end table
 
-@node Checks, Support, Show, Languages
+@node Checks
 @section Type and range Checking
 
 @quotation
@@ -4657,7 +4546,7 @@ for the default settings of supported languages.
 
 @cindex type checking
 @cindex checks, type
-@node Type Checking, Range Checking, Checks, Checks
+@node Type Checking
 @subsection An overview of type checking
 
 Some languages, such as Modula-2, are strongly typed, meaning that the
@@ -4727,7 +4616,7 @@ setting it automatically.
 
 @cindex range checking
 @cindex checks, range
-@node Range Checking,  , Type Checking, Checks
+@node Range Checking
 @subsection An overview of Range Checking
 
 In some languages (such as Modula-2), it is an error to exceed the
@@ -4786,7 +4675,7 @@ Show the current setting of the range checker, and whether or not it is
 being set automatically by _GDBN__.
 @end table
 
-@node Support,  , Checks, Languages
+@node Support
 @section Supported Languages
 
 _GDBN__ 4 supports C, C++, and Modula-2.  Some _GDBN__
@@ -4808,8 +4697,13 @@ look to these for a language reference or tutorial.
 * Modula-2::                    Modula-2
 @end menu
 
-@node C, Modula-2, Support, Support
+@node C
 @subsection C and C++
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@node C
+@chapter C and C++
+_fi__(_CONLY__)
 @cindex C and C++
 
 @cindex expressions in C or C++
@@ -4829,15 +4723,22 @@ you must compile your C++ programs with the GNU C++ compiler,
 * C Operators::                 C and C++ Operators
 * C Constants::                 C and C++ Constants
 * Cplusplus expressions::       C++ Expressions
+_if__(!_CONLY__)
 * C Defaults::                  Default settings for C and C++
+_fi__(!_CONLY__)
 * C Checks::                    C and C++ Type and Range Checks
 * Debugging C::                 _GDBN__ and C
 * Debugging C plus plus::       Special features for C++
 @end menu
 
 @cindex C and C++ operators
-@node C Operators, C Constants, C, C
+@node C Operators
+_if__(!_CONLY__)
 @subsubsection C and C++ Operators
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section C and C++ Operators
+_fi__(_CONLY__)
 
 Operators must be defined on values of specific types.  For instance,
 @code{+} is defined on numbers, but not on structures.  Operators are
@@ -4979,8 +4880,13 @@ The _GDBN__ scope operator (@pxref{Expressions, ,Expressions}).  Same precedence
 @end table
 
 @cindex C and C++ constants
-@node C Constants, Cplusplus expressions, C Operators, C
+@node C Constants
+_if__(!_CONLY__)
 @subsubsection C and C++ Constants
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section C and C++ Constants
+_fi__(_CONLY__)
 
 _GDBN__ allows you to express the constants of C and C++ in the
 following ways:
@@ -5022,8 +4928,13 @@ by double quotes (@code{"}).
 Pointer constants are an integral value.
 @end itemize
 
-@node Cplusplus expressions, C Defaults, C Constants, C
+@node Cplusplus expressions
+_if__(!_CONLY__)
 @subsubsection C++ Expressions
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section C++ Expressions
+_fi__(_CONLY__)
 
 @cindex expressions in C++
 _GDBN__'s expression handling has a number of extensions to
@@ -5101,7 +5012,8 @@ resolving name scope by reference to source files, in both C and C++
 debugging (@pxref{Variables, ,Program Variables}).
 @end enumerate
 
-@node C Defaults, C Checks, Cplusplus expressions, C
+_if__(!_CONLY__)
+@node C Defaults
 @subsubsection C and C++ Defaults
 @cindex C and C++ defaults
 
@@ -5115,9 +5027,15 @@ working language to C or C++ on entering code compiled from a source file
 whose name ends with @file{.c}, @file{.C}, or @file{.cc}.
 @xref{Automatically, ,Having _GDBN__ infer the source language}, for
 further details.
+_fi__(!_CONLY__)
 
-@node C Checks, Debugging C, C Defaults, C
+@node C Checks
+_if__(!_CONLY__)
 @subsubsection C and C++ Type and Range Checks
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section C and C++ Type and Range Checks
+_fi__(_CONLY__)
 @cindex C and C++ checks
 
 @quotation
@@ -5153,8 +5071,13 @@ Range checking, if turned on, is done on mathematical operations.  Array
 indices are not checked, since they are often used to index a pointer
 that is not itself an array.
 
-@node Debugging C, Debugging C plus plus, C Checks, C
+@node Debugging C
+_if__(!_CONLY__)
 @subsubsection _GDBN__ and C
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section _GDBN__ and C
+_fi__(_CONLY__)
 
 The @code{set print union} and @code{show print union} commands apply to
 the @code{union} type.  When set to @samp{on}, any @code{union} that is
@@ -5164,8 +5087,13 @@ Otherwise, it will appear as @samp{@{...@}}.
 The @code{@@} operator aids in the debugging of dynamic arrays, formed
 with pointers and a memory allocation function.  (@pxref{Expressions, ,Expressions})
 
-@node Debugging C plus plus,  , Debugging C, C
+@node Debugging C plus plus
+_if__(!_CONLY__)
 @subsubsection _GDBN__ Features for C++
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section _GDBN__ Features for C++
+_fi__(_CONLY__)
 
 @cindex commands for C++
 Some _GDBN__ commands are particularly useful with C++, and some are
@@ -5225,7 +5153,8 @@ available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
 @end table
 
-@node Modula-2,  , C, Support
+_if__(!_CONLY__)
+@node Modula-2
 @subsection Modula-2
 @cindex Modula-2
 
@@ -5247,7 +5176,7 @@ as _GDBN__ reads in the executable's symbol table.
 * GDB/M2::                      _GDBN__ and Modula-2
 @end menu
 
-@node M2 Operators, Built-In Func/Proc, Modula-2, Modula-2
+@node M2 Operators
 @subsubsection Operators
 @cindex Modula-2 operators
 
@@ -5371,7 +5300,7 @@ will treat the use of the operator @code{IN}, or the use of operators
 @end quotation
 _1__
 @cindex Modula-2 built-ins
-@node Built-In Func/Proc, M2 Constants, M2 Operators, Modula-2
+@node Built-In Func/Proc
 @subsubsection Built-in Functions and Procedures
 
 Modula-2 also makes available several built-in procedures and functions.
@@ -5483,7 +5412,7 @@ an error.
 @end quotation
 
 @cindex Modula-2 constants
-@node M2 Constants, M2 Defaults, Built-In Func/Proc, Modula-2
+@node M2 Constants
 @subsubsection Constants
 
 _GDBN__ allows you to express the constants of Modula-2 in the following
@@ -5532,7 +5461,7 @@ Pointer constants consist of integral values only.
 Set constants are not yet supported.
 @end itemize
 
-@node M2 Defaults, Deviations, M2 Constants, Modula-2
+@node M2 Defaults
 @subsubsection Modula-2 Defaults
 @cindex Modula-2 defaults
 
@@ -5546,7 +5475,7 @@ code compiled from a file whose name ends with @file{.mod} will set the
 working language to Modula-2. @xref{Automatically, ,Having _GDBN__ set
 the language automatically}, for further details.
 
-@node Deviations, M2 Checks, M2 Defaults, Modula-2
+@node Deviations
 @subsubsection Deviations from Standard Modula-2
 @cindex Modula-2, deviations from
 
@@ -5576,7 +5505,7 @@ argument.
 All built-in procedures both modify @emph{and} return their argument.
 @end itemize
 
-@node M2 Checks, M2 Scope, Deviations, Modula-2
+@node M2 Checks
 @subsubsection Modula-2 Type and Range Checks
 @cindex Modula-2 checks
 
@@ -5604,7 +5533,7 @@ whose types are not equivalent is an error.
 Range checking is done on all mathematical operations, assignment, array
 index bounds, and all built-in functions and procedures.
 
-@node M2 Scope, GDB/M2, M2 Checks, Modula-2
+@node M2 Scope
 @subsubsection The scope operators @code{::} and @code{.}
 @cindex scope
 @kindex .
@@ -5644,7 +5573,7 @@ an error if the identifier @var{id} was not imported from definition
 module @var{module}, or if @var{id} is not an identifier in
 @var{module}.
 
-@node GDB/M2,  , M2 Scope, Modula-2
+@node GDB/M2
 @subsubsection _GDBN__ and Modula-2
 
 Some _GDBN__ commands have little use when debugging Modula-2 programs.
@@ -5665,7 +5594,9 @@ _0__
 In _GDBN__ scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
 _1__
-@node Symbols, Altering, Languages, Top
+_fi__(!_CONLY__)
+
+@node Symbols
 @chapter Examining the Symbol Table
 
 The commands described in this section allow you to inquire about the
@@ -5841,7 +5772,7 @@ symbols; both @code{info source} and @code{symbol-file} are described in
 @ref{Files, ,Commands to Specify Files}.
 @end table
 
-@node Altering, _GDBN__ Files, Symbols, Top
+@node Altering
 @chapter Altering Execution
 
 Once you think you have found an error in your program, you might want to
@@ -5857,13 +5788,15 @@ or even return prematurely from a function to its caller.
 @menu
 * Assignment::                  Assignment to Variables
 * Jumping::                     Continuing at a Different Address
+_if__(!_BARE__)
 * Signaling::                   Giving your program a Signal
+_fi__(!_BARE__)
 * Returning::                   Returning from a Function
 * Calling::                     Calling your Program's Functions
 * Patching::                    Patching your Program
 @end menu
 
-@node Assignment, Jumping, Altering, Altering
+@node Assignment
 @section Assignment to Variables
 
 @cindex assignment
@@ -5877,9 +5810,11 @@ print x=4
 
 @noindent
 stores the value 4 into the variable @code{x}, and then prints the
-value of the assignment expression (which is 4).  @xref{Languages,
-,Using _GDBN__ with Different Languages}, for more information on
-operators in supported languages.
+value of the assignment expression (which is 4).  
+_if__(!_CONLY__)
+@xref{Languages, ,Using _GDBN__ with Different Languages}, for more
+information on operators in supported languages.
+_fi__(!_CONLY__)
 
 @kindex set variable
 @cindex variables, setting
@@ -5934,7 +5869,7 @@ set @{int@}0x83040 = 4
 @noindent
 stores the value 4 into that memory location.
 
-@node Jumping, Signaling, Assignment, Altering
+@node Jumping
 @section Continuing at a Different Address
 
 Ordinarily, when you continue your program, you do so at the place where
@@ -5981,7 +5916,8 @@ The most common occasion to use the @code{jump} command is to back up,
 perhaps with more breakpoints set, over a portion of a program that has
 already executed, in order to examine its execution in more detail.
 
-@node Signaling, Returning, Jumping, Altering
+_if__(!_BARE__)
+@node Signaling
 @c @group
 @section Giving your program a Signal
 
@@ -6001,8 +5937,9 @@ signal.
 after executing the command.
 @end table
 @c @end group
+_fi__(!_BARE__)
 
-@node Returning, Calling, Signaling, Altering
+@node Returning
 @section Returning from a Function
 
 @table @code
@@ -6033,7 +5970,7 @@ returned.  In contrast, the @code{finish} command (@pxref{Continuing
 and Stepping, ,Continuing and Stepping}) resumes execution until the
 selected stack frame returns naturally.
 
-@node     Calling, Patching, Returning, Altering
+@node Calling
 @section Calling your Program's Functions
 
 @cindex calling functions
@@ -6049,7 +5986,7 @@ execute a function from your program, but without cluttering the output
 with @code{void} returned values.  The result is printed and saved in
 the value history, if it is not void.
 
-@node Patching,  , Calling, Altering
+@node Patching
 @section Patching your Program
 @cindex patching binaries
 @cindex writing into executables
@@ -6083,30 +6020,39 @@ Display whether executable files and core files will be opened for
 writing as well as reading.
 @end table
 
-@node _GDBN__ Files, Targets, Altering, Top
+@node _GDBN__ Files
 @chapter _GDBN__'s Files
 
 _GDBN__ needs to know the file name of the program to be debugged, both in
-order to read its symbol table and in order to start your program.  To
-debug a core dump of a previous run, _GDBN__ must be told the file name of
-the core dump.
+order to read its symbol table and in order to start your program.  
+_if__(!_BARE__)
+To debug a core dump of a previous run, _GDBN__ must be told the file
+name of the core dump.
+_fi__(!_BARE__)
 
 @menu
 * Files::                       Commands to Specify Files
 * Symbol Errors::               Errors Reading Symbol Files
 @end menu
 
-@node Files, Symbol Errors, _GDBN__ Files, _GDBN__ Files
+@node Files
 @section Commands to Specify Files
 @cindex core dump file
 @cindex symbol table
 
+_if__(!_BARE__)
 The usual way to specify executable and core dump file names is with
 the command arguments given when you start _GDBN__, (@pxref{Invocation,
 ,Getting In and Out of _GDBN__}.
+_fi__(!_BARE__)
+_if__(_BARE__)
+The usual way to specify an executable file name is with
+the command argument given when you start _GDBN__, (@pxref{Invocation,
+,Getting In and Out of _GDBN__}.
+_fi__(_BARE__)
 
 Occasionally it is necessary to change to a different file during a
-_GDBN__ session.  Or you may run _GDBN__ and forget to specify the files you
+_GDBN__ session.  Or you may run _GDBN__ and forget to specify a file you
 want to use.  In these situations the _GDBN__ commands to specify new files
 are useful.
 
@@ -6197,6 +6143,7 @@ tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure _GDBN__ has the
 entire symbol table available.  
 
+_if__(!_BARE__)
 If memory-mapped files are available on your system through the
 @code{mmap} system call, you can use another option, @samp{-mapped}, to
 cause _GDBN__ to write the symbols for your program into a reusable
@@ -6242,6 +6189,7 @@ under _GDBN__.  So, if you have been running your program and you wish to
 debug a core file instead, you must kill the subprocess in which the
 program is running.  To do this, use the @code{kill} command
 (@pxref{Kill Process, ,Killing the Child Process}).
+_fi__(!_BARE__)
 
 @item load @var{filename}
 @kindex load
@@ -6321,8 +6269,8 @@ All file-specifying commands allow both absolute and relative file names
 as arguments.  _GDBN__ always converts the file name to an absolute path
 name and remembers it that way.
 
+_if__(!_BARE__)
 @cindex shared libraries
-
 _GDBN__ supports SunOS, SVR4, and IBM RS/6000 shared libraries.
 _GDBN__ automatically loads symbol definitions from shared libraries
 when you use the @code{run} command, or when you examine a core file.
@@ -6350,8 +6298,9 @@ shared libraries required by your program for a core file or after
 typing @code{run}.  If @var{regex} is omitted all shared libraries
 required by your program are loaded.
 @end table
+_fi__(!_BARE__)
 
-@node Symbol Errors,  , Files, _GDBN__ Files
+@node Symbol Errors
 @section Errors Reading Symbol Files
 
 While reading a symbol file, _GDBN__ will occasionally encounter problems,
@@ -6438,7 +6387,7 @@ for it.
 _GDBN__ could not parse a type specification output by the compiler.
 @end table
 
-@node     Targets, Controlling _GDBN__, _GDBN__ Files, Top
+@node Targets
 @chapter Specifying a Debugging Target
 @cindex debugging target
 @kindex target
@@ -6459,7 +6408,7 @@ command to specify one of the target types configured for _GDBN__
 * Remote::                      Remote Debugging
 @end menu
 
-@node Active Targets, Target Commands, Targets, Targets
+@node Active Targets
 @section Active Targets
 @cindex stacking targets
 @cindex active targets
@@ -6487,13 +6436,20 @@ requesting memory addresses refer to that target; addresses in an active
 core file or executable file target are obscured while the process
 target is active.
 
+_if__(_BARE__)
+Use the @code{exec-file} command to select a
+new executable target (@pxref{Files, ,Commands to Specify
+Files}).
+_fi__(_BARE__)
+_if__(!_BARE__)
 Use the @code{core-file} and @code{exec-file} commands to select a
 new core file or executable target (@pxref{Files, ,Commands to Specify
 Files}).  To specify as a target a process that is already running, use
 the @code{attach} command (@pxref{Attach, ,Debugging an
 Already-Running Process}.).
+_fi__(!_BARE__)
 
-@node Target Commands, Remote, Active Targets, Targets
+@node Target Commands
 @section Commands for Managing Targets
 
 @table @code
@@ -6583,7 +6539,7 @@ Different targets are available on different configurations of _GDBN__; your
 configuration may have more or fewer targets.
 _fi__(_GENERIC__)
 
-@node Remote,  , Target Commands, Targets
+@node Remote
 @section Remote Debugging
 @cindex remote debugging
 
@@ -6653,7 +6609,7 @@ _include__(gdbinv-m.m4)<>_dnl__
 _include__(gdbinv-s.m4)
 _fi__(_GENERIC__)
 
-@node Controlling _GDBN__, Sequences, Targets, Top
+@node Controlling _GDBN__
 @chapter Controlling _GDBN__
 
 You can alter many aspects of _GDBN__'s interaction with you by using
@@ -6669,7 +6625,7 @@ data, @pxref{Print Settings, ,Print Settings}; other settings are described here
 * Messages/Warnings::           Optional Warnings and Messages
 @end menu
 
-@node Prompt, Editing, Controlling _GDBN__, Controlling _GDBN__
+@node Prompt
 @section Prompt
 @cindex prompt
 
@@ -6689,7 +6645,7 @@ Directs _GDBN__ to use @var{newprompt} as its prompt string henceforth.
 Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
 @end table
 
-@node Editing, History, Prompt, Controlling _GDBN__
+@node Editing
 @section Command Editing
 @cindex readline
 @cindex command line editing
@@ -6719,7 +6675,7 @@ Disable command line editing.
 Show whether command line editing is enabled.
 @end table
 
-@node History, Screen Size, Editing, Controlling _GDBN__
+@node History
 @section Command History
 
 @table @code
@@ -6809,7 +6765,7 @@ Print ten commands centered on command number @var{n}.
 Print ten commands just after the commands last printed.
 @end table
 
-@node Screen Size, Numbers, History, Controlling _GDBN__
+@node Screen Size
 @section Screen Size
 @cindex size of screen
 @cindex pauses in output
@@ -6846,7 +6802,7 @@ no matter how long the output is.  This is useful if output is to a file
 or to an editor buffer.
 @end table
 
-@node Numbers, Messages/Warnings, Screen Size, Controlling _GDBN__
+@node Numbers
 @section Numbers
 @cindex number representation
 @cindex entering numbers
@@ -6883,7 +6839,7 @@ will leave the radix unchanged no matter what it was.
 Display the current default base for numeric input and display.
 @end table
 
-@node Messages/Warnings,  , Numbers, Controlling _GDBN__
+@node Messages/Warnings
 @section Optional Warnings and Messages
 
 By default, _GDBN__ is silent about its inner workings.  If you are running
@@ -6983,7 +6939,7 @@ different directories or libraries) with the same name.
 Show the current @code{on} or @code{off} setting.
 @end table
 
-@node Sequences, Emacs, Controlling _GDBN__, Top
+@node Sequences
 @chapter Canned Sequences of Commands
 
 Aside from breakpoint commands (@pxref{Break Commands, ,Breakpoint
@@ -6996,7 +6952,7 @@ for execution as a unit: user-defined commands and command files.
 * Output::                      Commands for Controlled Output
 @end menu
 
-@node Define, Command Files, Sequences, Sequences
+@node Define
 @section User-Defined Commands
 
 @cindex user-defined command
@@ -7049,7 +7005,7 @@ without asking when used inside a user-defined command.  Many _GDBN__ commands
 that normally print messages to say what they are doing omit the messages
 when used in a user-defined command.
 
-@node Command Files, Output, Define, Sequences
+@node Command Files
 @section Command Files
 
 @cindex command files
@@ -7083,7 +7039,7 @@ without asking when used in a command file.  Many _GDBN__ commands that
 normally print messages to say what they are doing omit the messages
 when called from command files.
 
-@node Output,  , Command Files, Sequences
+@node Output
 @section Commands for Controlled Output
 
 During the execution of a command file or a user-defined command, normal
@@ -7158,12 +7114,8 @@ string are the simple ones that consist of backslash followed by a
 letter.
 @end table
 
-_if__(_LUCID__)
-@node Emacs, Energize, Sequences, Top
-_fi__(_LUCID__)
-_if__(!_LUCID__)
-@node Emacs, _GDBN__ Bugs, Sequences, Top
-_fi__(!_LUCID__)
+_if__(!_DOSHOST__)
+@node Emacs
 @chapter Using _GDBN__ under GNU Emacs
 
 @cindex emacs
@@ -7333,9 +7285,10 @@ environment.  Users of this environment can use a new command,
 @code{inspect} which performs identically to @code{print} except that
 each value is printed in its own window.
 @end ignore
+_fi__(!_DOSHOST__)
 
 _if__(_LUCID__)
-@node Energize, _GDBN__ Bugs, Emacs, Top
+@node Energize
 @chapter Using _GDBN__ with Energize
 
 @cindex Energize
@@ -7360,11 +7313,9 @@ See the user manual for the Energize Programming System for
 information on how to use the Energize graphical interface and the other
 development tools that Energize integrates with _GDBN__.
 
-@node _GDBN__ Bugs, Renamed Commands, Energize, Top
 _fi__(_LUCID__)
-_if__(!_LUCID__)
-@node _GDBN__ Bugs, Renamed Commands, Emacs, Top
-_fi__(!_LUCID__)
+
+@node _GDBN__ Bugs
 @chapter Reporting Bugs in _GDBN__
 @cindex Bugs in _GDBN__
 @cindex Reporting Bugs in _GDBN__
@@ -7384,7 +7335,7 @@ information that enables us to fix the bug.
 * Bug Reporting::               How to Report Bugs
 @end menu
 
-@node Bug Criteria, Bug Reporting, _GDBN__ Bugs, _GDBN__ Bugs
+@node Bug Criteria
 @section Have You Found a Bug?
 @cindex Bug Criteria
 
@@ -7413,7 +7364,7 @@ If you are an experienced user of debugging tools, your suggestions
 for improvement of _GDBN__ are welcome in any case.
 @end itemize
 
-@node Bug Reporting,  , Bug Criteria, _GDBN__ Bugs
+@node Bug Reporting
 @section How to Report Bugs
 @cindex Bug Reports
 @cindex _GDBN__ Bugs, Reporting
@@ -7597,7 +7548,8 @@ things without first using the debugger to find the facts.
 @include inc-hist.texi
 @end iftex
 
-@node Renamed Commands, Formatting Documentation, _GDBN__ Bugs, Top
+_if__(_GENERIC__||!_H8__)
+@node Renamed Commands
 @appendix Renamed Commands
 
 The following commands were renamed in GDB 4, in order to make the
@@ -7713,8 +7665,9 @@ unset                     &&\rm(No longer an alias for delete)\cr
 }
 @end tex
 @c END TEXI2ROFF-KILL
+_fi__(_GENERIC__||!_H8__)
 
-@node Formatting Documentation, Installing GDB, Renamed Commands, Top
+@node Formatting Documentation
 @appendix Formatting the Documentation
 
 @cindex GDB reference card
@@ -7797,7 +7750,7 @@ subdirectory of the main source directory (for example, to
 make gdb.dvi
 @end example
 
-@node Installing GDB, Copying, Formatting Documentation, Top
+@node Installing GDB
 @appendix Installing GDB
 @cindex configuring GDB
 @cindex installation
@@ -7916,7 +7869,7 @@ let GDB debug child processes whose programs are not readable.
 * configure Options::           Summary of options for configure
 @end menu
 
-@node Separate Objdir, Config Names, Installing GDB, Installing GDB
+@node Separate Objdir
 @section Compiling GDB in Another Directory
 
 If you want to run GDB versions for several host or target machines,
@@ -7976,7 +7929,7 @@ directories, you can run @code{make} on them in parallel (for example,
 if they are NFS-mounted on each of the hosts); they will not interfere
 with each other.
 
-@node Config Names, configure Options, Separate Objdir, Installing GDB
+@node Config Names
 @section Specifying Names for Hosts and Targets
 
 The specifications used for hosts and targets in the @code{configure}
@@ -8018,7 +7971,7 @@ Invalid configuration `i786v': machine `i786v' not recognized
 @code{config.sub} is also distributed in the GDB source
 directory (@file{gdb-_GDB_VN__}, for version _GDB_VN__).
 
-@node configure Options, , Config Names, Installing GDB
+@node configure Options
 @section @code{configure} Options
 
 Here is a summary of the @code{configure} options and arguments that
@@ -8093,7 +8046,7 @@ There is no convenient way to generate a list of all available hosts.
 configuring other GNU tools recursively; but these are the only
 options that affect GDB or its supporting libraries.
 
-@node Copying, Index, Installing GDB, Top
+@node Copying
 @unnumbered GNU GENERAL PUBLIC LICENSE
 @center Version 2, June 1991
 
@@ -8488,7 +8441,7 @@ consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.
 
-@node Index,  , Copying, Top
+@node Index
 @unnumbered Index
 
 @printindex cp

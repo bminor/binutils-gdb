@@ -1,3 +1,11 @@
+Mon Aug 17 18:07:59 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, none.m4, h8.m4, gdbinv-s.m4.in: improve H8/300
+	  conditionals; introduce a few generic switches that may be
+	  useful for other cross-dev or dos-hosted configs.
+
+	* gdb.texinfo: fix typo in "info reg" description
+
 Sun Aug 16 01:16:18 1992  John Gilmore  (gnu@cygnus.com)
 
 	* stabs.texinfo:  Minor updates from running TeX over it.
