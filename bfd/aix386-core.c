@@ -2,7 +2,7 @@
    This was based on trad-core.c, which was written by John Gilmore of
         Cygnus Support.
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1996, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
    Written by Minh Tran-Le <TRANLE@INTELLICORP.COM>.
    Converted to back end form by Ian Lance Taylor <ian@cygnus.com>.
@@ -108,95 +108,84 @@ aix386_core_file_p (abfd)
 	bfd_set_error (bfd_error_wrong_format);
     loser:
       bfd_release (abfd, (char *) mergem);
+      abfd->tdata.any = NULL;
+      bfd_section_list_clear (abfd);
       return 0;
     }
 
   set_tdata (abfd, &mergem->coredata);
   core_hdr (abfd) = core;
 
-  /* Create the sections.  This is raunchy, but bfd_close wants to
-     reclaim them.  */
-  amt = sizeof (asection);
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+  /* Create the sections.  */
+  core_regsec (abfd) = bfd_make_section_anyway (abfd, ".reg");
   if (core_regsec (abfd) == NULL)
     goto loser;
 
-  core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, amt);
-  if (core_reg2sec (abfd) == NULL)
-    /* bfd_release frees everything allocated after it's arg.  */
-    goto loser;
-
-  for (i = 0, n = 0; (i < MAX_CORE_SEGS) && (core->cd_segs[i].cs_type); i++)
-    {
-      if (core->cd_segs[i].cs_offset == 0)
-	continue;
-      core_section (abfd, n) = (asection *) bfd_zalloc (abfd, amt);
-      if (core_section (abfd, n) == NULL)
-	goto loser;
-
-      switch (core->cd_segs[i].cs_type)
-	{
-	case COR_TYPE_DATA:
-	  core_section (abfd, n)->name = ".data";
-	  core_section (abfd, n)->flags = (SEC_ALLOC + SEC_LOAD +
-					   SEC_HAS_CONTENTS);
-	  break;
-	case COR_TYPE_STACK:
-	  core_section (abfd, n)->name = ".stack";
-	  core_section (abfd, n)->flags = (SEC_ALLOC + SEC_LOAD +
-					   SEC_HAS_CONTENTS);
-	  break;
-	case COR_TYPE_LIBDATA:
-	  core_section (abfd, n)->name = ".libdata";
-	  core_section (abfd, n)->flags = (SEC_ALLOC + SEC_HAS_CONTENTS);
-	  break;
-	case COR_TYPE_WRITE:
-	  core_section (abfd, n)->name = ".writeable";
-	  core_section (abfd, n)->flags = (SEC_ALLOC + SEC_HAS_CONTENTS);
-	  break;
-	case COR_TYPE_MSC:
-	  core_section (abfd, n)->name = ".misc";
-	  core_section (abfd, n)->flags = (SEC_ALLOC + SEC_HAS_CONTENTS);
-	  break;
-	default:
-	  core_section (abfd, n)->name = ".unknown";
-	  core_section (abfd, n)->flags = (SEC_ALLOC + SEC_HAS_CONTENTS);
-	  break;
-	}
-      core_section (abfd, n)->_raw_size = core->cd_segs[i].cs_len;
-      core_section (abfd, n)->vma       = core->cd_segs[i].cs_address;
-      core_section (abfd, n)->filepos   = core->cd_segs[i].cs_offset;
-      core_section (abfd, n)->alignment_power = 2;
-      core_section (abfd, n)->next      = NULL;
-      if (n > 0)
-	core_section (abfd, (n - 1))->next = core_section (abfd, n);
-
-      abfd->section_count = ++n;
-    }
-
-  core_regsec (abfd)->name = ".reg";
-  core_reg2sec (abfd)->name = ".reg2";
-
   core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
-  core_reg2sec (abfd)->flags = SEC_HAS_CONTENTS;
-
   core_regsec (abfd)->_raw_size = sizeof (core->cd_regs);
-  core_reg2sec (abfd)->_raw_size = sizeof (core->cd_fpregs);
-
   core_regsec (abfd)->vma = (bfd_vma) -1;
-  core_reg2sec (abfd)->vma = (bfd_vma) -1;
 
   /* We'll access the regs afresh in the core file, like any section.  */
   core_regsec (abfd)->filepos =
     (file_ptr) offsetof (struct corehdr, cd_regs[0]);
+
+  core_reg2sec (abfd) = bfd_make_section_anyway (abfd, ".reg2");
+  if (core_reg2sec (abfd) == NULL)
+    /* bfd_release frees everything allocated after it's arg.  */
+    goto loser;
+
+  core_reg2sec (abfd)->flags = SEC_HAS_CONTENTS;
+  core_reg2sec (abfd)->_raw_size = sizeof (core->cd_fpregs);
+  core_reg2sec (abfd)->vma = (bfd_vma) -1;
   core_reg2sec (abfd)->filepos =
     (file_ptr) offsetof (struct corehdr, cd_fpregs);
 
-  /* Add the 2 reg fake sections to abfd.  */
-  abfd->section_count += 2;
-  abfd->sections = core_regsec (abfd);
-  core_regsec (abfd)->next = core_reg2sec (abfd);
-  core_reg2sec (abfd)->next = core_section (abfd, 0);
+  for (i = 0, n = 0; (i < MAX_CORE_SEGS) && (core->cd_segs[i].cs_type); i++)
+    {
+      const char *sname;
+      flagword flags;
+
+      if (core->cd_segs[i].cs_offset == 0)
+	continue;
+
+      switch (core->cd_segs[i].cs_type)
+	{
+	case COR_TYPE_DATA:
+	  sname = ".data";
+	  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+	  break;
+	case COR_TYPE_STACK:
+	  sname = ".stack";
+	  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+	  break;
+	case COR_TYPE_LIBDATA:
+	  sname = ".libdata";
+	  flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  break;
+	case COR_TYPE_WRITE:
+	  sname = ".writeable";
+	  flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  break;
+	case COR_TYPE_MSC:
+	  sname = ".misc";
+	  flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  break;
+	default:
+	  sname = ".unknown";
+	  flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  break;
+	}
+      core_section (abfd, n) = bfd_make_section_anyway (abfd, sname);
+      if (core_section (abfd, n) == NULL)
+	goto loser;
+
+      core_section (abfd, n)->flags = flags;
+      core_section (abfd, n)->_raw_size = core->cd_segs[i].cs_len;
+      core_section (abfd, n)->vma       = core->cd_segs[i].cs_address;
+      core_section (abfd, n)->filepos   = core->cd_segs[i].cs_offset;
+      core_section (abfd, n)->alignment_power = 2;
+      n++;
+    }
 
   return abfd->xvec;
 }

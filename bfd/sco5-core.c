@@ -1,5 +1,5 @@
 /* BFD back end for SCO5 core files (U-area and raw sections)
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Jouke Numan <jnuman@hiscom.nl>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -176,15 +176,15 @@ sco5_core_file_p (abfd)
     {
       /* Old version, no section heads, read info from user struct */
 
-      u = read_uarea(abfd, coffsets.u_user);
+      u = read_uarea (abfd, coffsets.u_user);
       if (! u)
-          return NULL;
+	goto fail;
 
       if (!make_bfd_asection (abfd, ".reg", SEC_HAS_CONTENTS,
                               (bfd_size_type) coffsets.u_usize,
                               0 - (bfd_vma) u->u_ar0,
                               (file_ptr) coffsets.u_user))
-        return NULL;
+	goto fail;
 
       if (!make_bfd_asection (abfd, ".data",
 			      SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
@@ -192,14 +192,14 @@ sco5_core_file_p (abfd)
 			       + u->u_exdata.ux_bsize),
                               (bfd_vma) u->u_exdata.ux_datorg,
                               (file_ptr) coffsets.u_data))
-        return NULL;
+	goto fail;
 
       if (!make_bfd_asection (abfd, ".stack",
 			      SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
                               (bfd_size_type) u->u_ssize * NBPC,
                               (bfd_vma) u->u_sub,
                               (file_ptr) coffsets.u_stack))
-        return NULL;
+	goto fail;
 
       return abfd->xvec;		/* Done for version 1 */
     }
@@ -223,7 +223,7 @@ sco5_core_file_p (abfd)
       || (chead.cs_x.csx_magic != COREMAGIC_NUMBER))
     {
       bfd_set_error (bfd_error_wrong_format);
-      return NULL;
+      goto fail;
     }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
@@ -237,7 +237,7 @@ sco5_core_file_p (abfd)
 	      != sizeof chead))
         {
           bfd_set_error (bfd_error_wrong_format);
-          return NULL;
+	  goto fail;
         }
 
       switch (chead.cs_stype)
@@ -246,15 +246,15 @@ sco5_core_file_p (abfd)
 	  if (chead.cs_x.csx_magic != COREMAGIC_NUMBER)
 	    {
 	      bfd_set_error (bfd_error_wrong_format);
-	      return NULL;
+	      goto fail;
 	    }
 	  secname = NULL;
 	  nsecs++;				/* MAGIC not in section cnt!*/
 	  break;
 	case CORES_UAREA:			/* U-area, read in tdata */
-	  u = read_uarea(abfd, chead.cs_sseek);
+	  u = read_uarea (abfd, chead.cs_sseek);
 	  if (! u)
-	    return NULL;
+	    goto fail;
 
           /* This is tricky.  As the "register section", we give them
 	     the entire upage and stack.  u.u_ar0 points to where
@@ -325,12 +325,20 @@ sco5_core_file_p (abfd)
 				 (bfd_size_type) chead.cs_vsize,
 				 (bfd_vma) chead.cs_vaddr,
 				 (file_ptr) chead.cs_sseek))
-        return NULL;
+	goto fail;
 
     }
 
   return abfd->xvec;
 
+ fail:
+  if (abfd->tdata.any)
+    {
+      bfd_release (abfd, abfd->tdata.any);
+      abfd->tdata.any = NULL;
+    }
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 char *

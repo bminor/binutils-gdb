@@ -1,5 +1,6 @@
 /* BFD back-end for Irix core files.
-   Copyright 1993, 1994, 1996, 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1999, 2001, 2002
+   Free Software Foundation, Inc.
    Written by Stu Grossman, Cygnus Support.
    Converted to back-end form by Ian Lance Taylor, Cygnus Support
 
@@ -109,7 +110,7 @@ irix_core_core_file_p (abfd)
   core_signal (abfd) = coreout.c_sigcause;
 
   if (bfd_seek (abfd, coreout.c_vmapoffset, SEEK_SET) != 0)
-    return NULL;
+    goto fail;
 
   for (i = 0; i < coreout.c_nvmap; i++)
     {
@@ -146,7 +147,7 @@ irix_core_core_file_p (abfd)
 			      vmap.v_len,
 			      vmap.v_vaddr,
 			      vmap.v_offset))
-	return NULL;
+	goto fail;
     }
 
   /* Make sure that the regs are contiguous within the core file. */
@@ -157,21 +158,28 @@ irix_core_core_file_p (abfd)
 
   if (idg->i_offset + idg->i_len != idf->i_offset
       || idf->i_offset + idf->i_len != ids->i_offset)
-    return 0;			/* Can't deal with non-contig regs */
+    goto fail;			/* Can't deal with non-contig regs */
 
   if (bfd_seek (abfd, idg->i_offset, SEEK_SET) != 0)
-    return NULL;
+    goto fail;
 
-  make_bfd_asection (abfd, ".reg",
-		     SEC_HAS_CONTENTS,
-		     idg->i_len + idf->i_len + ids->i_len,
-		     0,
-		     idg->i_offset);
+  if (!make_bfd_asection (abfd, ".reg",
+			  SEC_HAS_CONTENTS,
+			  idg->i_len + idf->i_len + ids->i_len,
+			  0,
+			  idg->i_offset))
+    goto fail;
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
   bfd_default_set_arch_mach (abfd, bfd_arch_mips, 0);
 
   return abfd->xvec;
+
+ fail:
+  bfd_release (abfd, core_hdr (abfd));
+  core_hdr (abfd) = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 static char *

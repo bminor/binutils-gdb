@@ -1,5 +1,6 @@
 /* BFD back-end for CISCO crash dumps.
-   Copyright 1994, 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1997, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -237,16 +238,35 @@ cisco_core_file_validate (abfd, crash_info_loc)
       break;
     }
 
-  abfd->sections = NULL;
-  abfd->section_count = 0;
+  /* Create a ".data" section that maps the entire file, which is
+     essentially a dump of the target system's RAM.  */
+
+  asect = bfd_make_section_anyway (abfd, ".data");
+  if (asect == NULL)
+    goto error_return;
+  asect->flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
+  /* The size of memory is the size of the core file itself.  */
+  asect->_raw_size = statbuf.st_size;
+  asect->vma = rambase;
+  asect->filepos = 0;
+
+  /* Create a ".crash" section to allow access to the saved
+     crash information.  */
+
+  asect = bfd_make_section_anyway (abfd, ".crash");
+  if (asect == NULL)
+    goto error_return;
+  asect->flags = SEC_HAS_CONTENTS;
+  asect->vma = 0;
+  asect->filepos = crashinfo_offset;
+  asect->_raw_size = sizeof (crashinfo);
 
   /* Create a ".reg" section to allow access to the saved
      registers.  */
 
-  asect = (asection *) bfd_zmalloc ((bfd_size_type) sizeof (asection));
+  asect = bfd_make_section_anyway (abfd, ".reg");
   if (asect == NULL)
     goto error_return;
-  asect->name = ".reg";
   asect->flags = SEC_HAS_CONTENTS;
   asect->vma = 0;
   asect->filepos = bfd_get_32 (abfd, crashinfo.registers) - rambase;
@@ -255,40 +275,6 @@ cisco_core_file_validate (abfd, crash_info_loc)
      of the file, or 1024, whichever is smaller.  */
   nread = statbuf.st_size - asect->filepos;
   asect->_raw_size = (nread < 1024) ? nread : 1024;
-  asect->next = abfd->sections;
-  abfd->sections = asect;
-  ++abfd->section_count;
-
-  /* Create a ".crash" section to allow access to the saved
-     crash information.  */
-
-  asect = (asection *) bfd_zmalloc ((bfd_size_type) sizeof (asection));
-  if (asect == NULL)
-    goto error_return;
-  asect->name = ".crash";
-  asect->flags = SEC_HAS_CONTENTS;
-  asect->vma = 0;
-  asect->filepos = crashinfo_offset;
-  asect->_raw_size = sizeof (crashinfo);
-  asect->next = abfd->sections;
-  abfd->sections = asect;
-  ++abfd->section_count;
-
-  /* Create a ".data" section that maps the entire file, which is
-     essentially a dump of the target system's RAM.  */
-
-  asect = (asection *) bfd_zmalloc ((bfd_size_type) sizeof (asection));
-  if (asect == NULL)
-    goto error_return;
-  asect->name = ".data";
-  asect->flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
-  /* The size of memory is the size of the core file itself.  */
-  asect->_raw_size = statbuf.st_size;
-  asect->vma = rambase;
-  asect->filepos = 0;
-  asect->next = abfd->sections;
-  abfd->sections = asect;
-  ++abfd->section_count;
 
   return abfd->xvec;
 
@@ -296,17 +282,10 @@ cisco_core_file_validate (abfd, crash_info_loc)
      and there is an error of some kind.  */
 
  error_return:
-  {
-    sec_ptr nextsect;
-    for (asect = abfd->sections; asect != NULL;)
-      {
-	nextsect = asect->next;
-	free (asect);
-	asect = nextsect;
-      }
-    free (abfd->tdata.cisco_core_data);
-    return NULL;
-  }
+  bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 static const bfd_target *

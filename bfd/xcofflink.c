@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
@@ -3656,15 +3656,14 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	{
 	  boolean saw_contents;
 	  int indx;
-	  asection **op, **prev;
+	  asection **op;
 	  file_ptr sofar;
 	  
 	  /* Insert .pad sections before every section which has
              contents and is loaded, if it is preceded by some other
              section which has contents and is loaded.  */
 	  saw_contents = true;
-	  for (op = &abfd->sections, prev = NULL; 
-	       *op != NULL; prev = op, op = &(*op)->next)
+	  for (op = &abfd->sections; *op != NULL; op = &(*op)->next)
 	    {
 	      if (strcmp ((*op)->name, ".pad") == 0)
 		saw_contents = false;
@@ -3675,34 +3674,22 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		    saw_contents = true;
 		  else
 		    {
-		      asection *n, *hold, **st;
+		      asection *n, **st;
 		      
 		      /* Create a pad section and place it before the section
 			 that needs padding.  This requires unlinking and 
-			 relinking the bfd's sections list. 
-			 
-			 sections = S1
-			 .          S1.next = S2
-			 .          S2.next = S3
-			 .          S3.next = NULL
-			 section_tail = &S3.next */
+			 relinking the bfd's section list.  */
 		      
-		      hold = *op;
 		      st = abfd->section_tail;
-		      
 		      n = bfd_make_section_anyway (abfd, ".pad");
 		      n->flags = SEC_HAS_CONTENTS;
 		      n->alignment_power = 0; 
-		      
-		      if (NULL == prev) 
-			abfd->sections = n;
-		      else
-			(*prev)->next = n;
-		      
-		      n->next = hold;
-		      *st = NULL;
-		      abfd->section_tail = st;
 
+		      BFD_ASSERT (*st == n);
+		      bfd_section_list_remove (abfd, st);
+		      bfd_section_list_insert (abfd, op, n);
+
+		      op = &n->next;
 		      saw_contents = false;
 		    }
 		}

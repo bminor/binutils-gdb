@@ -1,5 +1,6 @@
 /* BFD back end for NetBSD style core files
-   Copyright 1988, 1989, 1991, 1992, 1993, 1996, 1998, 1999, 2000, 2001
+   Copyright 1988, 1989, 1991, 1992, 1993, 1996, 1998, 1999, 2000, 2001,
+   2002
    Free Software Foundation, Inc.
    Written by Paul Kranenburg, EUR
 
@@ -78,10 +79,7 @@ netbsd_core_file_p (abfd)
   amt = sizeof (struct netbsd_core_struct);
   rawptr = (struct netbsd_core_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return 0;
-    }
+    return 0;
 
   rawptr->core = core;
   abfd->tdata.netbsd_core_data = rawptr;
@@ -89,6 +87,8 @@ netbsd_core_file_p (abfd)
   offset = core.c_hdrsize;
   for (i = 0; i < core.c_nseg; i++)
     {
+      const char *sname;
+      flagword flags;
 
       if (bfd_seek (abfd, offset, SEEK_SET) != 0)
 	goto punt;
@@ -107,78 +107,63 @@ netbsd_core_file_p (abfd)
 
       offset += core.c_seghdrsize;
 
-      amt = sizeof (asection);
-      asect = (asection *) bfd_zalloc (abfd, amt);
-      if (asect == NULL)
+      switch (CORE_GETFLAG (coreseg))
 	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto punt;
+	case CORE_CPU:
+	  sname = ".reg";
+	  flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  break;
+	case CORE_DATA:
+	  sname = ".data";
+	  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+	  break;
+	case CORE_STACK:
+	  sname = ".stack";
+	  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+	  break;
+	default:
+	  sname = ".unknown";
+	  flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  break;
 	}
+      asect = bfd_make_section_anyway (abfd, sname);
+      if (asect == NULL)
+	goto punt;
 
+      asect->flags = flags;
       asect->_raw_size = coreseg.c_size;
       asect->vma = coreseg.c_addr;
       asect->filepos = offset;
       asect->alignment_power = 2;
-      asect->next = abfd->sections;
-      abfd->sections = asect;
-      abfd->section_count++;
+
       offset += coreseg.c_size;
 
-      switch (CORE_GETFLAG(coreseg))
+#ifdef CORE_FPU_OFFSET
+      switch (CORE_GETFLAG (coreseg))
 	{
 	case CORE_CPU:
-	  asect->name = ".reg";
-	  asect->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
-#ifdef CORE_FPU_OFFSET
 	  /* Hackish...  */
 	  asect->_raw_size = CORE_FPU_OFFSET;
-	  amt = sizeof (asection);
-	  asect2 = (asection *) bfd_zalloc (abfd, amt);
+	  asect2 = bfd_make_section_anyway (abfd, ".reg2");
 	  if (asect2 == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto punt;
-	    }
+	    goto punt;
 	  asect2->_raw_size = coreseg.c_size - CORE_FPU_OFFSET;
 	  asect2->vma = 0;
 	  asect2->filepos = asect->filepos + CORE_FPU_OFFSET;
 	  asect2->alignment_power = 2;
-	  asect2->next = abfd->sections;
-	  asect2->name = ".reg2";
 	  asect2->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
-	  abfd->sections = asect2;
-	  abfd->section_count++;
-#endif
-
-	  break;
-	case CORE_DATA:
-	  asect->name = ".data";
-	  asect->flags = SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS;
-	  break;
-	case CORE_STACK:
-	  asect->name = ".stack";
-	  asect->flags = SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS;
 	  break;
 	}
+#endif
     }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
   return abfd->xvec;
 
  punt:
-  {
-    asection *anext;
-    for (asect = abfd->sections; asect; asect = anext)
-      {
-	anext = asect->next;
-	free ((void *) asect);
-      }
-  }
-
-  free ((void *) rawptr);
-  abfd->tdata.netbsd_core_data = NULL;
-  abfd->sections = NULL;
-  abfd->section_count = 0;
+  bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = NULL;
+  bfd_section_list_clear (abfd);
   return 0;
 }
 

@@ -1,5 +1,5 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
    Linker support added by Mark Mitchell, CodeSourcery, LLC.
@@ -6392,7 +6392,7 @@ mips_elf64_final_link (abfd, info)
 	    if (p->type == bfd_indirect_link_order)
 	      p->u.indirect.section->flags &=~ SEC_HAS_CONTENTS;
 	  (*secpp)->link_order_head = NULL;
-	  *secpp = (*secpp)->next;
+	  bfd_section_list_remove (abfd, secpp);
 	  --abfd->section_count;
 	    
 	  break;
@@ -6676,7 +6676,7 @@ mips_elf64_final_link (abfd, info)
 		   *secpp != o;
 		   secpp = &(*secpp)->next)
 		;
-	      *secpp = (*secpp)->next;
+	      bfd_section_list_remove (abfd, secpp);
 	      --abfd->section_count;
 
 	      continue;

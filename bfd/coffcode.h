@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1680,7 +1680,7 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     {
       if (*ps == section)
 	{
-	  *ps = (*ps)->next;
+	  bfd_section_list_remove (abfd, ps);
 	  --abfd->section_count;
 	  break;
 	}

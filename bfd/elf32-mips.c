@@ -5177,7 +5177,7 @@ _bfd_mips_elf_final_link (abfd, info)
 	      if (p->type == bfd_indirect_link_order)
 		p->u.indirect.section->flags &= ~SEC_HAS_CONTENTS;
 	    (*secpp)->link_order_head = NULL;
-	    *secpp = (*secpp)->next;
+	    bfd_section_list_remove (abfd, secpp);
 	    --abfd->section_count;
 
 	    break;
@@ -5547,7 +5547,7 @@ _bfd_mips_elf_final_link (abfd, info)
 		   *secpp != o;
 		   secpp = &(*secpp)->next)
 		;
-	      *secpp = (*secpp)->next;
+	      bfd_section_list_remove (abfd, secpp);
 	      --abfd->section_count;
 
 	      continue;

@@ -1,5 +1,5 @@
 /* BFD back-end for OSF/1 core files.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2001
+   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -158,12 +158,18 @@ osf_core_core_file_p (abfd)
 			      (bfd_size_type) core_scnhdr.size,
 			      (bfd_vma) core_scnhdr.vaddr,
 			      (file_ptr) core_scnhdr.scnptr))
-	return NULL;
+	goto fail;
     }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
 
   return abfd->xvec;
+
+ fail:
+  bfd_release (abfd, core_hdr (abfd));
+  core_hdr (abfd) = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 static char *

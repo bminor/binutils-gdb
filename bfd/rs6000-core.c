@@ -1,6 +1,6 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
@@ -462,13 +462,13 @@ rs6000coff_core_p (abfd)
   if (!make_bfd_asection (abfd, ".stack",
 			  SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS,
 			  c_size, c_stackend - c_size, c_stack))
-    return NULL;
+    goto fail;
 
   /* .reg section for all registers.  */
   if (!make_bfd_asection (abfd, ".reg",
 			  SEC_HAS_CONTENTS,
 			  c_regsize, (bfd_vma) 0, c_regoff))
-    return NULL;
+    goto fail;
 
   /* .ldinfo section.
      To actually find out how long this section is in this particular
@@ -477,7 +477,7 @@ rs6000coff_core_p (abfd)
   if (!make_bfd_asection (abfd, ".ldinfo",
 			  SEC_HAS_CONTENTS,
 			  c_lsize, (bfd_vma) 0, c_loader))
-    return NULL;
+    goto fail;
 
 #ifndef CORE_VERSION_1
   /* .data section if present.
@@ -494,7 +494,7 @@ rs6000coff_core_p (abfd)
 			      (bfd_vma)
 				CDATA_ADDR (core.old.c_u.u_dsize),
 			      c_stack + c_size))
-	return NULL;
+	goto fail;
     }
 #endif
 
@@ -536,7 +536,7 @@ rs6000coff_core_p (abfd)
 				c_datasize,
 				(bfd_vma) CDATA_ADDR (c_datasize),
 				c_data))
-	  return NULL;
+	  goto fail;
       }
 
     /* .data sections from loaded objects.  */
@@ -548,9 +548,9 @@ rs6000coff_core_p (abfd)
     while (1)
       {
 	if (bfd_seek (abfd, c_loader, SEEK_SET) != 0)
-	  return NULL;
+	  goto fail;
 	if (bfd_bread (&ldinfo, size, abfd) != size)
-	  return NULL;
+	  goto fail;
 
 	if (proc64)
 	  {
@@ -571,7 +571,7 @@ rs6000coff_core_p (abfd)
 	  if (!make_bfd_asection (abfd, ".data",
 				  SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS,
 				  ldi_datasize, ldi_dataorg, ldi_core))
-	    return NULL;
+	    goto fail;
 
 	if (ldi_next == 0)
 	  break;
@@ -584,7 +584,7 @@ rs6000coff_core_p (abfd)
 	bfd_size_type i;
 
 	if (bfd_seek (abfd, c_vmm, SEEK_SET) != 0)
-	  return NULL;
+	  goto fail;
 
 	for (i = 0; i < c_vmregions; i++)
 	  {
@@ -595,7 +595,7 @@ rs6000coff_core_p (abfd)
 
 	    size = CORE_NEW (core) ? sizeof (vminfo.new) : sizeof (vminfo.old);
 	    if (bfd_bread (&vminfo, size, abfd) != size)
-	      return NULL;
+	      goto fail;
 
 	    if (CORE_NEW (core))
 	      {
@@ -615,13 +615,19 @@ rs6000coff_core_p (abfd)
 				      SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS,
 				      vminfo_size, vminfo_addr,
 				      vminfo_offset))
-		return NULL;
+		goto fail;
 	  }
       }
   }
 #endif
 
   return abfd->xvec;		/* This is garbage for now.  */
+
+ fail:
+  bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 /* Return `true' if given core is from the given executable.  */

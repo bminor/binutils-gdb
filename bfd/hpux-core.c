@@ -1,5 +1,5 @@
 /* BFD back-end for HP/UX core files.
-   Copyright 1993, 1994, 1996, 1998, 1999, 2001
+   Copyright 1993, 1994, 1996, 1998, 1999, 2001, 2002
    Free Software Foundation, Inc.
    Written by Stu Grossman, Cygnus Support.
    Converted to back-end form by Ian Lance Taylor, Cygnus SUpport
@@ -246,7 +246,7 @@ hpux_core_core_file_p (abfd)
                                         core_header.len,
                                         (int) &proc_info - (int) & proc_info.hw_regs,
                                         2))
-                  return NULL;
+		  goto fail;
               }
             else
               {
@@ -259,7 +259,7 @@ hpux_core_core_file_p (abfd)
 					    core_header.len,
 					    (int) &proc_info - (int) & proc_info.hw_regs,
 					    2))
-		      return NULL;
+		      goto fail;
                   }
                 /* We always make one of these sections, for every thread. */
                 sprintf (secname, ".reg/%d", core_kernel_thread_id (abfd));
@@ -268,7 +268,7 @@ hpux_core_core_file_p (abfd)
                                         core_header.len,
                                         (int) &proc_info - (int) & proc_info.hw_regs,
                                         2))
-                  return NULL;
+		  goto fail;
               }
 	    core_signal (abfd) = proc_info.sig;
             if (bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR) != 0)
@@ -286,7 +286,7 @@ hpux_core_core_file_p (abfd)
 	  if (!make_bfd_asection (abfd, ".data",
 				  SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
 				  core_header.len, core_header.addr, 2))
-	    return NULL;
+	    goto fail;
 
 	  bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR);
           good_sections++;
@@ -302,7 +302,8 @@ hpux_core_core_file_p (abfd)
 	  unknown_sections++;
           break;
 
-         default: return 0; /*unrecognized core file type */
+         default:
+	   goto fail; /*unrecognized core file type */
 	}
     }
 
@@ -320,6 +321,12 @@ hpux_core_core_file_p (abfd)
        abfd->filename);
 
   return abfd->xvec;
+
+ fail:
+  bfd_release (abfd, core_hdr (abfd));
+  core_hdr (abfd) = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 static char *

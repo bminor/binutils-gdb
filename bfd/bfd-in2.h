@@ -1372,6 +1372,35 @@ extern const struct symbol_cache_entry * const bfd_ind_symbol;
 #define bfd_get_section_size_after_reloc(section) \
      ((section)->reloc_done ? (section)->_cooked_size \
                             : (abort (), (bfd_size_type) 1))
+
+/* Macros to handle insertion and deletion of a bfd's sections.  These
+   only handle the list pointers, ie. do not adjust section_count,
+   target_index etc.  */
+#define bfd_section_list_remove(ABFD, PS) \
+  do                                                   \
+    {                                                  \
+      asection **_ps = PS;                             \
+      asection *_s = *_ps;                             \
+      *_ps = _s->next;                                 \
+      if (_s->next == NULL)                            \
+        (ABFD)->section_tail = _ps;                    \
+    }                                                  \
+  while (0)
+#define bfd_section_list_insert(ABFD, PS, S) \
+  do                                                   \
+    {                                                  \
+      asection **_ps = PS;                             \
+      asection *_s = S;                                \
+      _s->next = *_ps;                                 \
+      *_ps = _s;                                       \
+      if (_s->next == NULL)                            \
+        (ABFD)->section_tail = &_s->next;              \
+    }                                                  \
+  while (0)
+
+void
+bfd_section_list_clear PARAMS ((bfd *));
+
 asection *
 bfd_get_section_by_name PARAMS ((bfd *abfd, const char *name));
 

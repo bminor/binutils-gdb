@@ -1,5 +1,6 @@
 /* BFD backend for SunOS binaries.
-   Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2001
+   Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2001,
+   2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -877,6 +878,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
   bfd *dynobj;
   struct sunos_dynamic_info *dinfo;
   unsigned long need;
+  asection **ps;
 
   /* Make sure we have all the required sections.  */
   if (info->hash->creator == abfd->xvec)
@@ -902,17 +904,12 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
      want, because that one still implies that the section takes up
      space in the output file.  If this is the first object we have
      seen, we must preserve the dynamic sections we just created.  */
-  if (abfd != dynobj)
-    abfd->sections = NULL;
-  else
+  for (ps = &abfd->sections; *ps != NULL; )
     {
-      asection *s;
-
-      for (s = abfd->sections;
-	   (s->flags & SEC_LINKER_CREATED) == 0;
-	   s = s->next)
-	;
-      abfd->sections = s;
+      if (abfd != dynobj || ((*ps)->flags & SEC_LINKER_CREATED) == 0)
+	bfd_section_list_remove (abfd, ps);
+      else
+	ps = &(*ps)->next;
     }
 
   /* The native linker seems to just ignore dynamic objects when -r is

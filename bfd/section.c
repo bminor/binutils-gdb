@@ -1,6 +1,6 @@
 /* Object file "section" support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -560,6 +560,32 @@ CODE_FRAGMENT
 .#define bfd_get_section_size_after_reloc(section) \
 .     ((section)->reloc_done ? (section)->_cooked_size \
 .                            : (abort (), (bfd_size_type) 1))
+.
+.{* Macros to handle insertion and deletion of a bfd's sections.  These
+.   only handle the list pointers, ie. do not adjust section_count,
+.   target_index etc.  *}
+.#define bfd_section_list_remove(ABFD, PS) \
+.  do							\
+.    {							\
+.      asection **_ps = PS;				\
+.      asection *_s = *_ps;				\
+.      *_ps = _s->next;					\
+.      if (_s->next == NULL)				\
+.        (ABFD)->section_tail = _ps;			\
+.    }							\
+.  while (0)
+.#define bfd_section_list_insert(ABFD, PS, S) \
+.  do							\
+.    {							\
+.      asection **_ps = PS;				\
+.      asection *_s = S;				\
+.      _s->next = *_ps;					\
+.      *_ps = _s;					\
+.      if (_s->next == NULL)				\
+.        (ABFD)->section_tail = &_s->next;		\
+.    }							\
+.  while (0)
+.
 */
 
 /* We use a macro to initialize the static asymbol structures because
@@ -680,16 +706,7 @@ bfd_section_init (abfd, newsect)
 
   newsect->id = section_id;
   newsect->index = abfd->section_count;
-  newsect->flags = SEC_NO_FLAGS;
-
-  newsect->userdata = NULL;
-  newsect->contents = NULL;
-  newsect->next = (asection *) NULL;
-  newsect->relocation = (arelent *) NULL;
-  newsect->reloc_count = 0;
-  newsect->line_filepos = 0;
   newsect->owner = abfd;
-  newsect->comdat = NULL;
 
   /* Create a symbol whose only job is to point to this section.  This
      is useful for things like relocs which are relative to the base
@@ -724,6 +741,29 @@ SUBSECTION
 
 These are the functions exported by the section handling part of BFD.
 */
+
+/*
+FUNCTION
+	bfd_section_list_clear
+
+SYNOPSIS
+	void bfd_section_list_clear (bfd *);
+
+DESCRIPTION
+	Clears the section list, and also resets the section count and
+	hash table entries.
+*/
+
+void
+bfd_section_list_clear (abfd)
+     bfd *abfd;
+{
+  abfd->sections = NULL;
+  abfd->section_tail = &abfd->sections;
+  abfd->section_count = 0;
+  memset ((PTR) abfd->section_htab.table, 0,
+	  abfd->section_htab.size * sizeof (struct bfd_hash_entry *));
+}
 
 /*
 FUNCTION
@@ -1357,9 +1397,7 @@ _bfd_strip_section_from_output (info, s)
       for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
 	if (*spp == os)
 	  {
-	    *spp = os->next;
-	    if (os->next == NULL)
-	      os->owner->section_tail = spp;
+	    bfd_section_list_remove (os->owner, spp);
 	    os->owner->section_count--;
 	    break;
 	  }

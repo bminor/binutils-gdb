@@ -1,5 +1,5 @@
 /* BFD back end for Lynx core files
-   Copyright 1993, 1994, 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 2001, 2002 Free Software Foundation, Inc.
    Written by Stu Grossman of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -129,19 +129,19 @@ lynx_core_file_p (abfd)
 
   threadp = (core_st_t *) bfd_alloc (abfd, tcontext_size);
   if (!threadp)
-    return NULL;
+    goto fail;
 
   /* Save thread contexts */
 
   if (bfd_seek (abfd, (file_ptr) pagesize, SEEK_SET) != 0)
-    return NULL;
+    goto fail;
 
   if (bfd_bread ((void *) threadp, tcontext_size, abfd) != tcontext_size)
     {
       /* Probably too small to be a core file */
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
-      return NULL;
+      goto fail;
     }
 
   core_signal (abfd) = threadp->currsig;
@@ -152,7 +152,7 @@ lynx_core_file_p (abfd)
 			       pss.slimit,
 			       pagesize + tcontext_size);
   if (!newsect)
-    return NULL;
+    goto fail;
 
   newsect = make_bfd_asection (abfd, ".data",
 			       SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
@@ -170,7 +170,7 @@ lynx_core_file_p (abfd)
 #endif
 			       );
   if (!newsect)
-    return NULL;
+    goto fail;
 
 /* And, now for the .reg/XXX pseudo sections.  Each thread has it's own
    .reg/XXX section, where XXX is the thread id (without leading zeros).  The
@@ -185,7 +185,7 @@ lynx_core_file_p (abfd)
 			       0,
 			       pagesize);
   if (!newsect)
-    return NULL;
+    goto fail;
 
   for (secnum = 0; secnum < pss.threadcnt; secnum++)
     {
@@ -198,10 +198,16 @@ lynx_core_file_p (abfd)
 				   0,
 				   pagesize + secnum * sizeof (core_st_t));
       if (!newsect)
-	return NULL;
+	goto fail;
     }
 
   return abfd->xvec;
+
+ fail:
+  bfd_release (abfd, core_hdr (abfd));
+  core_hdr (abfd) = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 char *

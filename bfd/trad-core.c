@@ -1,6 +1,6 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -159,25 +159,17 @@ trad_unix_core_file_p (abfd)
 
   rawptr->u = u; /*Copy the uarea into the tdata part of the bfd */
 
-  /* Create the sections.  This is raunchy, but bfd_close wants to free
-     them separately.  */
+  /* Create the sections.  */
 
-  amt = sizeof (asection);
-  core_stacksec(abfd) = (asection *) bfd_zalloc (abfd, amt);
+  core_stacksec(abfd) = bfd_make_section_anyway (abfd, ".stack");
   if (core_stacksec (abfd) == NULL)
-    return NULL;
-  amt = sizeof (asection);
-  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+    goto fail;
+  core_datasec (abfd) = bfd_make_section_anyway (abfd, ".data");
   if (core_datasec (abfd) == NULL)
-    return NULL;
-  amt = sizeof (asection);
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+    goto fail;
+  core_regsec (abfd) = bfd_make_section_anyway (abfd, ".reg");
   if (core_regsec (abfd) == NULL)
-    return NULL;
-
-  core_stacksec (abfd)->name = ".stack";
-  core_datasec (abfd)->name = ".data";
-  core_regsec (abfd)->name = ".reg";
+    goto fail;
 
   core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
@@ -234,12 +226,13 @@ trad_unix_core_file_p (abfd)
   core_datasec (abfd)->alignment_power = 2;
   core_regsec (abfd)->alignment_power = 2;
 
-  abfd->sections = core_stacksec (abfd);
-  core_stacksec (abfd)->next = core_datasec (abfd);
-  core_datasec (abfd)->next = core_regsec (abfd);
-  abfd->section_count = 3;
-
   return abfd->xvec;
+
+ fail:
+  bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 char *

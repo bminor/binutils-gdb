@@ -1,5 +1,5 @@
 /* BFD back-end for HPPA BSD core files.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2001
+   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -183,6 +183,8 @@ hppabsd_core_core_file_p (abfd)
 					   clicksz * u.u_ssize,
 					   NBPG * (USIZE + KSTAKSIZE)
 					     + clicksz * u.u_dsize, 2);
+  if (core_stacksec (abfd) == NULL)
+    goto fail;
   core_stacksec (abfd)->vma = USRSTACK;
 
   core_datasec (abfd) = make_bfd_asection (abfd, ".data",
@@ -190,17 +192,27 @@ hppabsd_core_core_file_p (abfd)
 					    + SEC_HAS_CONTENTS,
 					  clicksz * u.u_dsize,
 					  NBPG * (USIZE + KSTAKSIZE), 2);
+  if (core_datasec (abfd) == NULL)
+    goto fail;
   core_datasec (abfd)->vma = UDATASEG;
 
   core_regsec (abfd) = make_bfd_asection (abfd, ".reg",
 					 SEC_HAS_CONTENTS,
 					 KSTAKSIZE * NBPG,
 					 NBPG * USIZE, 2);
+  if (core_regsec (abfd) == NULL)
+    goto fail;
   core_regsec (abfd)->vma = 0;
 
   strncpy (core_command (abfd), u.u_comm, MAXCOMLEN + 1);
   core_signal (abfd) = u.u_code;
   return abfd->xvec;
+
+ fail:
+  bfd_release (abfd, abfd->tdata.any);
+  abfd->tdata.any = NULL;
+  bfd_section_list_clear (abfd);
+  return NULL;
 }
 
 static char *

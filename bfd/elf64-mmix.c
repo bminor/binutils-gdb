@@ -1,5 +1,5 @@
 /* MMIX-specific support for 64-bit ELF.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hans-Peter Nilsson <hp@bitrange.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1667,14 +1667,12 @@ mmix_elf_final_link (abfd, info)
       if (bfd_get_section_flags (abfd, reg_section) & SEC_HAS_CONTENTS)
 	_bfd_abort (__FILE__, __LINE__, _("Register section has contents\n"));
 
-      /* FIXME: This does not seem like the proper way to kill a section,
-	 but it's the way it's done elsewhere, like elf64-alpha.c.  */
       /* Really remove the section.  */
       for (secpp = &abfd->sections;
 	   *secpp != reg_section;
 	   secpp = &(*secpp)->next)
 	;
-      *secpp = (*secpp)->next;
+      bfd_section_list_remove (abfd, secpp);
       --abfd->section_count;
     }
 

@@ -1,5 +1,36 @@
 2002-01-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* section.c (bfd_section_init): Remove unnecessary initialisations.
+	(bfd_section_list_clear): New function.
+	(bfd_section_list_remove, bfd_section_list_insert): New macros.
+	(_bfd_strip_section_from_output): Use them.
+	* coffcode.h (coff_set_alignment_hook): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_final_link): Likewise.
+	* elf64-mips.c (mips_elf64_final_link): Likewise.
+	* elf64-mmix.c (mmix_elf_final_link): Likewise.
+	* sunos.c (sunos_add_dynamic_symbols): Likewise.
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Likewise.
+	* bfd-in2.h: Regenerate.
+
+	* netbsd-core.c (netbsd_core_file_p): Use bfd_make_section_anyway
+	rather than doing our own section handling.  Clean up after errors
+	with bfd_release and bfd_section_list_clear.  Handle unexpected
+	flags.
+	* aoutf1.h (sunos4_core_file_p): Likewise.
+	* aix386-core.c (aix386_core_file_p): Likewise.
+	* cisco-core.c (cisco_core_file_validate): Likewise.
+	* ptrace-core.c (ptrace_unix_core_file_p): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+
+	* hppabsd-core.c (hppabsd_core_core_file_p):  Clean up after errors
+	with bfd_release and bfd_section_list_clear.
+	* hpux-core.c (hpux_core_core_file_p): Likewise.
+	* irix-core.c (irix_core_core_file_p): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* rs6000-core.c (rs6000coff_core_p): Likewise.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+
 	* elf32-mips.c (_bfd_mips_elf_lo16_reloc): Simplify, and perform
 	sign extension adjustments without conditionals.
 

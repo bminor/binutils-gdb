@@ -1,6 +1,6 @@
 /* A.out "format 1" file handling code for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -641,6 +641,8 @@ sunos4_core_file_p (abfd)
     {
     loser:
       bfd_release (abfd, (char *) mergem);
+      abfd->tdata.any = NULL;
+      bfd_section_list_clear (abfd);
       return 0;
     }
 
@@ -667,30 +669,23 @@ sunos4_core_file_p (abfd)
   abfd->tdata.sun_core_data = &mergem->suncoredata;
   abfd->tdata.sun_core_data->hdr = core;
 
-  /* create the sections.  This is raunchy, but bfd_close wants to reclaim
-     them */
-  amt = sizeof (asection);
-  core_stacksec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+  /* Create the sections.  */
+  core_stacksec (abfd) = bfd_make_section_anyway (abfd, ".stack");
   if (core_stacksec (abfd) == NULL)
     /* bfd_release frees everything allocated after it's arg.  */
     goto loser;
 
-  core_datasec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+  core_datasec (abfd) = bfd_make_section_anyway (abfd, ".data");
   if (core_datasec (abfd) == NULL)
     goto loser;
 
-  core_regsec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+  core_regsec (abfd) = bfd_make_section_anyway (abfd, ".reg");
   if (core_regsec (abfd) == NULL)
     goto loser;
 
-  core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, amt);
+  core_reg2sec (abfd) = bfd_make_section_anyway (abfd, ".reg2");
   if (core_reg2sec (abfd) == NULL)
     goto loser;
-
-  core_stacksec (abfd)->name = ".stack";
-  core_datasec (abfd)->name = ".data";
-  core_regsec (abfd)->name = ".reg";
-  core_reg2sec (abfd)->name = ".reg2";
 
   core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
@@ -718,13 +713,6 @@ sunos4_core_file_p (abfd)
   core_datasec (abfd)->alignment_power = 2;
   core_regsec (abfd)->alignment_power = 2;
   core_reg2sec (abfd)->alignment_power = 2;
-
-  abfd->sections = core_stacksec (abfd);
-  core_stacksec (abfd)->next = core_datasec (abfd);
-  core_datasec (abfd)->next = core_regsec (abfd);
-  core_regsec (abfd)->next = core_reg2sec (abfd);
-
-  abfd->section_count = 4;
 
   return abfd->xvec;
 }
