@@ -1,6 +1,19 @@
+Thu Apr 30 08:56:20 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: pass INSTALL, INSTALL_DATA, INSTALL_PROGRAM on
+	  install.
+
 Fri Apr 24 15:51:51 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: don't print subdir_do or recursion lines.
+
+Fri Apr 24 15:22:04 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* standards.texi: added menu item.
+
+	* Makefile.in: build and install standards.info.
+
+	* standards.texi: new file.
 
 Wed Apr 22 18:06:55 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
