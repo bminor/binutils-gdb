@@ -157,7 +157,7 @@ struct elf_link_hash_entry
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
   char type;
 
-  /* Symbol st_other value.  */
+  /* Symbol st_other value, symbol visibility.  */
   unsigned char other;
 
   /* Hash value of the name computed using the ELF hash function.  */
