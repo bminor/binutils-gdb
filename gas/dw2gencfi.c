@@ -728,7 +728,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	{
 	  out_one (DW_CFA_def_cfa_sf);
 	  out_uleb128 (insn->u.ri.reg);
-	  out_uleb128 (offset);
+	  out_sleb128 (offset / DWARF2_CIE_DATA_ALIGNMENT);
 	}
       else
 	{
@@ -750,7 +750,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
       if (offset < 0)
 	{
 	  out_one (DW_CFA_def_cfa_offset_sf);
-	  out_sleb128 (offset);
+	  out_sleb128 (offset / DWARF2_CIE_DATA_ALIGNMENT);
 	}
       else
 	{

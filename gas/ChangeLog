@@ -1,3 +1,9 @@
+2004-12-15  Jan Beulich  <jbeulich@novell.com>
+
+	* dw2gencfi.c (output_cfi_insn): Adjust DW_CFA_def_cfa_sf generation
+	to emit a signed and factored offset. Adjust DW_CFA_def_cfa_offset_sf
+	generation to emit a factored offset.
+
 2004-12-10  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* config/tc-mips.c (macro) [M_LA_AB]: Give an error for a offset
