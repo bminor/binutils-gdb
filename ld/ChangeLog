@@ -1,3 +1,9 @@
+Thu Oct 10 17:57:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emulparams/elf32b4300.sh: Define _gp in OTHER_GOT_SYMBOLS, not
+	OTHER_READWRITE_SECTIONS.
+	* emulparams/elf32l4300.sh: Likewise.
+
 Wed Oct  9 14:36:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.h (ld_config_type): Add warn_section_align field.
