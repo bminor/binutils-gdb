@@ -1,3 +1,22 @@
+1999-07-17  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (get_target): New function: Return true iff the
+	given target is the target being sought.
+	(stricpy): New function:  Like strcpy but convert to lower
+	case as well.
+	(strcut): New function:  Like strstr but remove the located
+	substring as well.
+	(name_compare): New function: Compute a compatability rating
+	for two target names.
+	(winner): New variable: Best target found by
+	closest_target_match() so far.
+	(closest_target_match): New function: Find the target which is
+	the closest match to the original target.
+	(get_first_input_target): New function: Find the target format
+	of the first of the linker's input file.
+	(open_output): Be more clever about deciding the output target
+	format. 
+
 1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* emulparams/elf64_sparc.sh: Add 64-bit directories to native LIB_PATH.

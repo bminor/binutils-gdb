@@ -151,6 +151,13 @@ static void walk_wild_section
 static void walk_wild_file
   PARAMS ((lang_wild_statement_type *, const char *,
 	   lang_input_statement_type *, callback_t, void *));
+
+static int    get_target PARAMS ((const bfd_target *, void *));
+static void   stricpy PARAMS ((char *, char *));
+static void   strcut PARAMS ((char *, char *));
+static int    name_compare PARAMS ((char *, char *));
+static int    closest_target_match PARAMS ((const bfd_target *, void *));
+static char * get_first_input_target PARAMS ((void));
 					
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
@@ -294,23 +301,17 @@ walk_wild (s, section, file, callback, data)
      callback_t callback;
      void *data;
 {
-  lang_input_statement_type *f;
-
   if (file == (char *) NULL)
     {
       /* Perform the iteration over all files in the list.  */
-      for (f = (lang_input_statement_type *) file_chain.head;
-	   f != (lang_input_statement_type *) NULL;
-	   f = (lang_input_statement_type *) f->next)
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
 	  walk_wild_file (s, section, f, callback, data);
 	}
     }
   else if (wildcardp (file))
     {
-      for (f = (lang_input_statement_type *) file_chain.head;
-	   f != (lang_input_statement_type *) NULL;
-	   f = (lang_input_statement_type *) f->next)
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
 	  if (fnmatch (file, f->filename, FNM_FILE_NAME) == 0)
 	    walk_wild_file (s, section, f, callback, data);
@@ -318,6 +319,8 @@ walk_wild (s, section, file, callback, data)
     }
   else
     {
+      lang_input_statement_type *f;
+
       /* Perform the iteration over a single file.  */
       f = lookup_name (file);
       walk_wild_file (s, section, f, callback, data);
@@ -1449,29 +1452,234 @@ wild (s, section, file, target, output)
     }
 }
 
+/* Return true iff target is the sought target.  */
+static int
+get_target (target, data)
+     const bfd_target * target;
+     void * data;
+{
+  const char * sought = (const char *) data;
+  
+  return strcmp (target->name, sought) == 0;
+}
+
+/* Like strcpy() but convert to lower case as well.  */
+static void
+stricpy (dest, src)
+     char * dest;
+     char * src;
+{
+  char c;
+  
+  while ((c = * src ++) != 0)
+    {
+      if (isupper ((unsigned char) c))
+	c = tolower (c);
+
+      * dest ++ = c;
+    }
+
+  * dest = 0;
+}
+
+/* Remove the first occurance of needle (if any) in haystack
+   from haystack.  */
+static void
+strcut (haystack, needle)
+     char * haystack;
+     char * needle;
+{
+  haystack = strstr (haystack, needle);
+  
+  if (haystack)
+    {
+      char * src;
+
+      for (src = haystack + strlen (needle); * src;)
+	* haystack ++ = * src ++;
+      
+      * haystack = 0;
+    }
+}
+
+/* Compare two target format name strings.
+   Return a value indicating how "similar" they are.  */
+static int
+name_compare (first, second)
+     char * first;
+     char * second;
+{
+  char * copy1;
+  char * copy2;
+  int    result;
+  
+  copy1 = xmalloc (strlen (first) + 1);
+  copy2 = xmalloc (strlen (second) + 1);
+
+  /* Convert the names to lower case.  */
+  stricpy (copy1, first);
+  stricpy (copy2, second);
+
+  /* Remove and endian strings from the name.  */
+  strcut (copy1, "big");
+  strcut (copy1, "little");
+  strcut (copy2, "big");
+  strcut (copy2, "little");
+
+  /* Return a value based on how many characters match,
+     starting from the beginning.   If both strings are
+     the same then return 10 * their length.  */
+  for (result = 0; copy1 [result] == copy2 [result]; result ++)
+    if (copy1 [result] == 0)
+      {
+	result *= 10;
+	break;
+      }
+  
+  free (copy1);
+  free (copy2);
+
+  return result;
+}
+
+/* Set by closest_target_match() below.  */
+static const bfd_target * winner;
+
+/* Scan all the valid bfd targets looking for one that has the endianness
+   requirement that was specified on the command line, and is the nearest
+   match to the original output target.  */
+static int
+closest_target_match (target, data)
+     const bfd_target * target;
+     void * data;
+{
+  const bfd_target * original = (const bfd_target *) data;
+  
+  if (command_line.endian == ENDIAN_BIG && target->byteorder != BFD_ENDIAN_BIG)
+    return 0;
+  
+  if (command_line.endian == ENDIAN_LITTLE && target->byteorder != BFD_ENDIAN_LITTLE)
+    return 0;
+
+  /* Must be the same flavour.  */
+  if (target->flavour != original->flavour)
+    return 0;
+
+  /* If we have not found a potential winner yet, then record this one.  */
+  if (winner == NULL)
+    {
+      winner = target;
+      return 0;
+    }
+
+  /* Oh dear, we now have two potential candidates for a successful match.
+     Compare their names and choose the better one. */
+  if (name_compare (target->name, original->name) > name_compare (winner->name, original->name))
+    winner = target;
+
+  /* Keep on searching until wqe have checked them all.  */
+  return 0;
+}
+
+/* Return the BFD target format of the first input file.  */
+static char *
+get_first_input_target ()
+{
+  char * target = NULL;
+
+  LANG_FOR_EACH_INPUT_STATEMENT (s)
+    {
+      if (s->header.type == lang_input_statement_enum
+	  && s->real)
+	{
+	  ldfile_open_file (s);
+	  
+	  if (s->the_bfd != NULL
+	      && bfd_check_format (s->the_bfd, bfd_object))
+	    {
+	      target = bfd_get_target (s->the_bfd);
+	  
+	      if (target != NULL)
+		break;
+	    }
+	}
+    }
+  
+  return target;
+}
+
 /* Open the output file.  */
 
 static bfd *
 open_output (name)
-     const char *name;
+     const char * name;
 {
-  bfd *output;
+  bfd * output;
 
+  /* Has the user told us which output format to use ?  */
   if (output_target == (char *) NULL)
     {
-      if (current_target != (char *) NULL)
+      /* No - has the current target been set to something other than the default ?  */
+      if (current_target != default_target)
 	output_target = current_target;
+
+      /* No - can we determine the format of the first input file ? */
       else
-	output_target = default_target;
+	{
+	  output_target = get_first_input_target ();
+
+	  /* Failed - use the default output target.  */
+	  if (output_target == NULL)
+	    output_target = default_target;
+	}
     }
+  
+  /* Has the user requested a particular endianness on the command line ?  */
+  if (command_line.endian != ENDIAN_UNSET)
+    {
+      const bfd_target * target;
+      int desired_endian;
+
+      /* Get the chosen target.  */
+      target = bfd_search_for_target (get_target, (void *) output_target);
+
+      if (command_line.endian == ENDIAN_BIG)
+	desired_endian = BFD_ENDIAN_BIG;
+      else
+	desired_endian = BFD_ENDIAN_LITTLE;
+      
+      /* See if the target has the wrong endianness.  This should not happen
+	 if the linker script has provided big and little endian alternatives,
+	 but some scrips don't do this.  */
+      if (target->byteorder != desired_endian)
+	{
+	  /* If it does, then see if the target provides
+	     an alternative with the correct endianness.  */
+	  if (target->alternative_target != NULL
+	      && (target->alternative_target->byteorder == desired_endian))
+	    output_target = target->alternative_target->name;
+	  else
+	    {
+	      /* Try to find a target as similar as possible to the default
+		 target, but which has the desired endian characteristic.  */
+	      (void) bfd_search_for_target (closest_target_match, (void *) target);
+	      
+	      /* Oh dear - we could not find any targets that satisfy our requirements.  */
+	      if (winner == NULL)
+		einfo (_("%P: warning: could not find any targets that match endianness requirement\n"));
+	      else
+		output_target = winner->name;
+	    }
+	}
+    }
+      
   output = bfd_openw (name, output_target);
 
   if (output == (bfd *) NULL)
     {
       if (bfd_get_error () == bfd_error_invalid_target)
-	{
-	  einfo (_("%P%F: target %s not found\n"), output_target);
-	}
+	einfo (_("%P%F: target %s not found\n"), output_target);
+
       einfo (_("%P%F: cannot open output file %s: %E\n"), name);
     }
 
@@ -1493,9 +1701,6 @@ open_output (name)
   bfd_set_gp_size (output, g_switch_value);
   return output;
 }
-
-
-
 
 static void
 ldlang_open_output (statement)
@@ -1573,7 +1778,7 @@ open_input_bfds (s, force)
 	  current_target = s->target_statement.target;
 	  break;
 	case lang_input_statement_enum:
-	  if (s->input_statement.real == true)
+	  if (s->input_statement.real)
 	    {
 	      lang_statement_list_type add;
 
@@ -3211,11 +3416,7 @@ into the statement tree.
 static void
 lang_place_orphans ()
 {
-  lang_input_statement_type *file;
-
-  for (file = (lang_input_statement_type *) file_chain.head;
-       file != (lang_input_statement_type *) NULL;
-       file = (lang_input_statement_type *) file->next)
+  LANG_FOR_EACH_INPUT_STATEMENT (file)
     {
       asection *s;
 
@@ -3340,11 +3541,7 @@ void
 lang_for_each_file (func)
      void (*func) PARAMS ((lang_input_statement_type *));
 {
-  lang_input_statement_type *f;
-
-  for (f = (lang_input_statement_type *) file_chain.head;
-       f != (lang_input_statement_type *) NULL;
-       f = (lang_input_statement_type *) f->next)
+  LANG_FOR_EACH_INPUT_STATEMENT (f)
     {
       func (f);
     }
@@ -3358,13 +3555,9 @@ void
 lang_for_each_input_section (func)
      void (*func) PARAMS ((bfd * ab, asection * as));
 {
-  lang_input_statement_type *f;
-
-  for (f = (lang_input_statement_type *) file_chain.head;
-       f != (lang_input_statement_type *) NULL;
-       f = (lang_input_statement_type *) f->next)
+  LANG_FOR_EACH_INPUT_STATEMENT (f)
     {
-      asection *s;
+      asection * s;
 
       for (s = f->the_bfd->sections;
 	   s != (asection *) NULL;
