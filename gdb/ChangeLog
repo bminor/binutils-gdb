@@ -1,3 +1,31 @@
+2004-04-28  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (print_stack_frame_stub): Delete declaration.
+	(struct print_stack_frame_args, print_stack_frame)
+	(print_frame_info, print_frame): Replace "source" with print what.
+	Replace "print" with "print_level".  Replace "args" with
+	"print_args".
+	* frame.h (show_and_print_stack_frame, print_stack_frame)
+	(print_frame_info): Update declarations.
+	* stack.c (select_and_print_frame, frame_command)
+	(current_frame_command, up_command, down_command): Update calls -
+	use get_selected_frame, pass "enum print_what" for source, do not
+	call frame_relative_level.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Ditto.
+	* remote-rdp.c (remote_rdp_open): Ditto.
+	* remote-mips.c (common_open): Ditto.
+	* remote-e7000.c (e7000_start_remote): Ditto.
+	* ocd.c (ocd_start_remote): Ditto.
+	* mi/mi-main.c (mi_cmd_exec_return): Ditto.
+	* infrun.c (normal_stop): Ditto.
+	* inflow.c (kill_command): Ditto.
+	* infcmd.c (finish_command): Ditto.
+	* corelow.c (core_open): Ditto.
+	* tracepoint.c (finish_tfind_command): Ditto.
+	* thread.c (info_threads_command, info_threads_command) 
+	(restore_current_thread, do_captured_thread_select): Ditto.
+	* ada-tasks.c (task_command): Ditto.
+
 2004-04-26  Orjan Friberg <orjanf@axis.com>
 
 	* frame.c: Include "observer.h".

@@ -629,7 +629,7 @@ e7000_start_remote (void *dummy)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (), 0, SRC_AND_LOC);
 
   return 1;
 }

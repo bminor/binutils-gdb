@@ -794,10 +794,8 @@ task_command (char *tidstr, int from_tty)
     {
       /* FIXME: find_printable_frame should be defined in frame.h, and
          implemented in ada-lang.c */
-      /*      find_printable_frame (deprecated_selected_frame, frame_relative_level (deprecated_selected_frame)); */
       printf_filtered ("[Switching to task %d]\n", num);
-      print_stack_frame (deprecated_selected_frame,
-			 frame_relative_level (deprecated_selected_frame), 1);
+      print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
     }
   else
     printf_filtered ("Unable to switch to task %d\n", num);

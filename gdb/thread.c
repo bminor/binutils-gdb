@@ -448,7 +448,7 @@ info_threads_command (char *arg, int from_tty)
       puts_filtered ("  ");
 
       switch_to_thread (tp->ptid);
-      print_stack_frame (get_selected_frame (), -1, 0);
+      print_stack_frame (get_selected_frame (), 0, LOCATION);
     }
 
   switch_to_thread (current_ptid);
@@ -465,7 +465,7 @@ info_threads_command (char *arg, int from_tty)
     {
       /* Ooops, can't restore, tell user where we are. */
       warning ("Couldn't restore frame in current thread, at frame 0");
-      print_stack_frame (get_selected_frame (), -1, 0);
+      print_stack_frame (get_selected_frame (), 0, LOCATION);
     }
   else
     {
@@ -497,7 +497,7 @@ restore_current_thread (ptid_t ptid)
   if (!ptid_equal (ptid, inferior_ptid))
     {
       switch_to_thread (ptid);
-      print_stack_frame (get_current_frame (), 0, -1);
+      print_stack_frame (get_current_frame (), 1, SRC_LINE);
     }
 }
 
@@ -704,8 +704,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
 #endif
   ui_out_text (uiout, ")]");
 
-  print_stack_frame (deprecated_selected_frame,
-		     frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
   return GDB_RC_OK;
 }
 

@@ -554,14 +554,16 @@ extern int legacy_frameless_look_for_prologue (struct frame_info *);
 
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
-extern void show_and_print_stack_frame (struct frame_info *fi, int level,
-					int source);
+extern void show_and_print_stack_frame (struct frame_info *fi, int print_level,
+					enum print_what print_what);
 
-extern void print_stack_frame (struct frame_info *, int, int);
+extern void print_stack_frame (struct frame_info *, int print_level,
+			       enum print_what print_what);
 
 extern void show_stack_frame (struct frame_info *);
 
-extern void print_frame_info (struct frame_info *, int, int, int);
+extern void print_frame_info (struct frame_info *, int print_level,
+			      enum print_what print_what, int args);
 
 extern struct frame_info *block_innermost_frame (struct block *);
 

@@ -1234,8 +1234,7 @@ finish_command (char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered ("Run till exit from ");
-      print_stack_frame (deprecated_selected_frame,
-			 frame_relative_level (deprecated_selected_frame), 0);
+      print_stack_frame (get_selected_frame (), 1, LOCATION);
     }
 
   /* If running asynchronously and the target support asynchronous

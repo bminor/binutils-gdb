@@ -1935,7 +1935,7 @@ finish_tfind_command (char *msg,
 
   if (from_tty)
     {
-      int source_only;
+      enum print_what print_what;
 
       /* NOTE: in immitation of the step command, try to determine
          whether we have made a transition from one function to another.
@@ -1951,13 +1951,11 @@ finish_tfind_command (char *msg,
 	  (old_frame_addr == 0 ||
 	   get_frame_base (get_current_frame ()) == 0 ||
 	   old_frame_addr == get_frame_base (get_current_frame ())))
-	source_only = -1;
+	print_what = SRC_LINE;
       else
-	source_only = 1;
+	print_what = SRC_AND_LOC;
 
-      print_stack_frame (deprecated_selected_frame,
-			 frame_relative_level (deprecated_selected_frame),
-			 source_only);
+      print_stack_frame (get_selected_frame (), 1, print_what);
       do_displays ();
     }
 }

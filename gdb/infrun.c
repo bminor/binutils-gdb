@@ -3248,7 +3248,7 @@ normal_stop (void)
 	     LOCATION: Print only location
 	     SRC_AND_LOC: Print location and source line */
 	  if (do_frame_printing)
-	    print_stack_frame (deprecated_selected_frame, -1, source_flag);
+	    print_stack_frame (get_selected_frame (), 0, source_flag);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();

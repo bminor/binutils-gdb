@@ -95,9 +95,9 @@ static int print_block_frame_locals (struct block *,
 				     struct ui_file *);
 
 static void print_frame (struct frame_info *fi, 
-			 int level, 
-			 int source, 
-			 int args, 
+			 int print_level, 
+			 enum print_what print_what, 
+			 int print_args, 
 			 struct symtab_and_line sal);
 
 static void backtrace_command (char *, int);
@@ -120,42 +120,38 @@ int annotation_level = 0;
 struct print_stack_frame_args
   {
     struct frame_info *fi;
-    int level;
-    int source;
-    int args;
+    int print_level;
+    enum print_what print_what;
+    int print_args;
   };
 
 /* Show or print the frame arguments.
    Pass the args the way catch_errors wants them.  */
-static int print_stack_frame_stub (void *args);
 static int
 print_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
-  print_frame_info (p->fi, p->level, p->source, p->args);
+  print_frame_info (p->fi, p->print_level, p->print_what, p->print_args);
   return 0;
 }
 
-/* Show or print a stack frame briefly.  FRAME_INFI should be the frame info
-   and LEVEL should be its level in the stack (or -1 for level not defined).
-   This prints the level, the function executing, the arguments,
-   and the file name and line number.
-   If the pc is not at the beginning of the source line,
-   the actual pc is printed at the beginning.
-
-   If SOURCE is 1, print the source line as well.
-   If SOURCE is -1, print ONLY the source line.  */
+/* Show or print a stack frame briefly.  FRAME_INFI should be the
+   frame info.  This prints the level, the function executing, the
+   arguments, and the file name and line number.  If the pc is not at
+   the beginning of the source line, the actual pc is printed at the
+   beginning.  */
 
 void
-print_stack_frame (struct frame_info *fi, int level, int source)
+print_stack_frame (struct frame_info *fi, int print_level,
+		   enum print_what print_what)
 {
   struct print_stack_frame_args args;
 
   args.fi = fi;
-  args.level = level;
-  args.source = source;
-  args.args = 1;
+  args.print_level = print_level;
+  args.print_what = print_what;
+  args.print_args = 1;
 
   catch_errors (print_stack_frame_stub, (char *) &args, "", RETURN_MASK_ALL);
 }  
@@ -418,7 +414,8 @@ print_args_stub (void *args)
    LOC_AND_SRC: Print location and source line.  */
 
 void
-print_frame_info (struct frame_info *fi, int level, int source, int args)
+print_frame_info (struct frame_info *fi, int print_level,
+		  enum print_what print_what, int print_args)
 {
   struct symtab_and_line sal;
   int source_print;
@@ -430,14 +427,16 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
       struct cleanup *uiout_cleanup
 	= make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
-      annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
+      annotate_frame_begin (print_level ? frame_relative_level (fi) : 0,
+			    get_frame_pc (fi));
 
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
-      if (level >= 0)
+      if (print_level)
         {
           ui_out_text (uiout, "#");
-          ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
+          ui_out_field_fmt_int (uiout, 2, ui_left, "level",
+				frame_relative_level (fi));
         }
       if (ui_out_is_mi_like_p (uiout))
         {
@@ -471,14 +470,14 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
      line containing fi->pc.  */
   find_frame_sal (fi, &sal);
 
-  location_print = (source == LOCATION 
-		    || source == LOC_AND_ADDRESS
-		    || source == SRC_AND_LOC);
+  location_print = (print_what == LOCATION 
+		    || print_what == LOC_AND_ADDRESS
+		    || print_what == SRC_AND_LOC);
 
   if (location_print || !sal.symtab)
-    print_frame (fi, level, source, args, sal);
+    print_frame (fi, print_level, print_what, print_args, sal);
 
-  source_print = (source == SRC_LINE || source == SRC_AND_LOC);
+  source_print = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
 
   if (sal.symtab)
     set_current_source_symtab_and_line (&sal);
@@ -487,7 +486,8 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
     {
       struct symtab_and_line cursal;
       int done = 0;
-      int mid_statement = (source == SRC_LINE) && (get_frame_pc (fi) != sal.pc);
+      int mid_statement = ((print_what == SRC_LINE)
+			   && (get_frame_pc (fi) != sal.pc));
 
       if (annotation_level)
 	done = identify_source_line (sal.symtab, sal.line, mid_statement,
@@ -522,7 +522,7 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
       set_current_source_symtab_and_line (&cursal);
     }
 
-  if (source != 0)
+  if (print_what != LOCATION)
     set_default_breakpoint (1, get_frame_pc (fi), sal.symtab, sal.line);
 
   annotate_frame_end ();
@@ -532,9 +532,9 @@ print_frame_info (struct frame_info *fi, int level, int source, int args)
 
 static void
 print_frame (struct frame_info *fi, 
-	     int level, 
-	     int source, 
-	     int args, 
+	     int print_level, 
+	     enum print_what print_what, 
+	     int print_args, 
 	     struct symtab_and_line sal)
 {
   struct symbol *func;
@@ -622,19 +622,21 @@ print_frame (struct frame_info *fi,
 	}
     }
 
-  annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
+  annotate_frame_begin (print_level ? frame_relative_level (fi) : 0,
+			get_frame_pc (fi));
 
   list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
-  if (level >= 0)
+  if (print_level)
     {
       ui_out_text (uiout, "#");
-      ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
+      ui_out_field_fmt_int (uiout, 2, ui_left, "level",
+			    frame_relative_level (fi));
     }
   if (addressprint)
     if (get_frame_pc (fi) != sal.pc
 	|| !sal.symtab
-	|| source == LOC_AND_ADDRESS)
+	|| print_what == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
 	ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
@@ -649,7 +651,7 @@ print_frame (struct frame_info *fi,
   annotate_frame_args ();
       
   ui_out_text (uiout, " (");
-  if (args)
+  if (print_args)
     {
       struct print_args_args args;
       struct cleanup *args_list_chain;
@@ -1220,7 +1222,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
          means further attempts to backtrace would fail (on the other
          hand, perhaps the code does or could be fixed to make sure
          the frame->prev field gets set to NULL in that case).  */
-      print_frame_info (fi, trailing_level + i, 0, 1);
+      print_frame_info (fi, 1, LOCATION, 1);
       if (show_locals)
 	print_frame_local_vars (fi, 1, gdb_stdout);
     }
@@ -1606,9 +1608,7 @@ select_and_print_frame (struct frame_info *fi)
 {
   select_frame (fi);
   if (fi)
-    {
-      print_stack_frame (fi, frame_relative_level (fi), 1);
-    }
+    print_stack_frame (fi, 1, SRC_AND_LOC);
 }
 
 /* Return the symbol-block in which the selected frame is executing.
@@ -1715,8 +1715,7 @@ void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  print_stack_frame (deprecated_selected_frame,
-		     frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1726,8 +1725,7 @@ current_frame_command (char *level_exp, int from_tty)
 {
   if (target_has_stack == 0 || deprecated_selected_frame == 0)
     error ("No stack.");
-  print_stack_frame (deprecated_selected_frame,
-			  frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
 }
 
 /* Select the frame up one or COUNT stack levels
@@ -1762,8 +1760,7 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  print_stack_frame (deprecated_selected_frame,
-		     frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1807,8 +1804,7 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  print_stack_frame (deprecated_selected_frame,
-		     frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
 }
 
 void
