@@ -2119,7 +2119,7 @@ define_symbol (valu, string, desc, type, objfile)
     }
 
   /* Is there more to parse?  For example LRS/alias information?  */
-  while (*p && (*p == ';' || *p == ','))
+  while (*p && *p == ';')
     {
       p++;
       if (*p && *p == 'l')

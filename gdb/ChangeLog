@@ -1,3 +1,8 @@
+Wed Mar 18 12:50:17 1998  Jeff Law  (law@cygnus.com)
+
+	* stabsread.c (define_symbol): Don't look for ',' as a LRS
+	indicator.
+
 Wed Mar 18 10:34:51 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* rdi-share/etherdrv.c: Set sys_errlist[] as char * not const char *.
