@@ -1,6 +1,6 @@
 # Test gasp.
 
-# GASP is now deprecared (and not built by default)
+# GASP is now deprecated (and not built by default)
 # so if it does not exit, do not test it.
 global GASP
 if {![info exists GASP] || ! [file exists $GASP] } then {
