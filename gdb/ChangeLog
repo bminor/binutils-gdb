@@ -1,6 +1,6 @@
 2001-01-02  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	* sparc-tdep.c (sparc-frame-chain): Fix typo in comment.
+	* sparc-tdep.c (sparc_frame_chain): Fix typo in comment.
 
 2000-12-20  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
