@@ -158,8 +158,10 @@ extern int i386_skip_prologue PARAMS ((int));
    subroutine will return.  This is called from call_function. */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
-  { (SP) -= sizeof (ADDR);		\
-    write_memory ((SP), (char *) &(ADDR), sizeof (ADDR)); }
+  { char buf[REGISTER_SIZE];	\
+    (SP) -= sizeof (ADDR);	\
+    store_address (buf, sizeof (ADDR), ADDR);	\
+    write_memory ((SP), buf, sizeof (ADDR)); }
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

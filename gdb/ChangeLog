@@ -1,3 +1,8 @@
+Fri Jul 24 13:32:46 1998  Mark Alexander  <marka@cygnus.com>
+
+	* config/i386/tm-i386.h (STORE_STRUCT_RETURN): Make it
+	work on hosts of any endianness.
+
 Fri Jul 24 07:41:12 1998  Mark Alexander  <marka@cygnus.com>
 
 	* mn10300-tdep.c (set_movm_offsets): New helper function
