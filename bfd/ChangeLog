@@ -1,3 +1,11 @@
+2005-02-24  Ben Elliston  <bje@au.ibm.com>
+
+	* coffcode.h (coff_sym_filepos): Remove GNU960 conditional code.
+	* format.c (bfd_check_format_matches): Likewise.
+	* archive.c (BFD_GNU960_ARMAG): Likewise.
+	(bfd_generic_archive_p): Likewise.
+	(_bfd_write_archive_contents): Likewise.
+
 2005-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in: (AM_INIT_AUTOMAKE): Set version to 2.15.95.

@@ -5130,15 +5130,6 @@ coff_canonicalize_reloc (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-#ifdef GNU960
-file_ptr
-coff_sym_filepos (abfd)
-     bfd *abfd;
-{
-  return obj_sym_filepos (abfd);
-}
-#endif
-
 #ifndef coff_reloc16_estimate
 #define coff_reloc16_estimate dummy_reloc16_estimate
 

@@ -245,16 +245,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	    matching_vector[match_count] = temp;
 
 	  match_count++;
-
-#ifdef GNU960
-	  /* Big- and little-endian b.out archives look the same, but it
-	     doesn't matter: there is no difference in their headers, and
-	     member file byte orders will (I hope) be handled appropriately
-	     by bfd.  Ditto for big and little coff archives.  And the 4
-	     coff/b.out object formats are unambiguous.  So accept the
-	     first match we find.  */
-	  break;
-#endif
 	}
       else if ((err = bfd_get_error ()) == bfd_error_wrong_object_format
 	       || err == bfd_error_file_ambiguously_recognized)

@@ -138,10 +138,6 @@ DESCRIPTION
 extern int errno;
 #endif
 
-#ifdef GNU960
-#define BFD_GNU960_ARMAG(abfd)	(BFD_COFF_FILE_P((abfd)) ? ARMAG : ARMAGB)
-#endif
-
 /* We keep a cache of archive filepointers to archive elements to
    speed up searching the archive by filepos.  We only add an entry to
    the cache when we actually read one.  We also don't sort the cache;
@@ -581,14 +577,9 @@ bfd_generic_archive_p (bfd *abfd)
       return NULL;
     }
 
-#ifdef GNU960
-  if (strncmp (armag, BFD_GNU960_ARMAG (abfd), SARMAG) != 0)
-    return 0;
-#else
   if (strncmp (armag, ARMAG, SARMAG) != 0 &&
       strncmp (armag, ARMAGB, SARMAG) != 0)
     return 0;
-#endif
 
   tdata_hold = bfd_ardata (abfd);
 
@@ -1652,11 +1643,7 @@ _bfd_write_archive_contents (bfd *arch)
 
   if (bfd_seek (arch, (file_ptr) 0, SEEK_SET) != 0)
     return FALSE;
-#ifdef GNU960
-  wrote = bfd_bwrite (BFD_GNU960_ARMAG (arch), SARMAG, arch);
-#else
   wrote = bfd_bwrite (ARMAG, SARMAG, arch);
-#endif
   if (wrote != SARMAG)
     return FALSE;
 
