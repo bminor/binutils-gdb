@@ -1,3 +1,16 @@
+Tue Aug 27 10:17:34 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure: Regenerate again.
+
+Tue Aug 27 04:25:08 1996  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: work around host_alias configure bug.
+        AC_CANONICAL_HOST is called twice (first by AC_CHECK_TOOL
+        and second by AC_CANONICAL_SYSTEM).  The second clobbers the
+        previous setting.  Circumventing by moving the second check
+        to before the first.
+	* configure: regenerated
+
 start-sanitize-d10v
 Mon Aug 26 18:36:54 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
