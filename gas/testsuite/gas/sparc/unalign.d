@@ -12,4 +12,8 @@ Disassembly of section .data:
 			1: R_SPARC_UA32	fred
    4:	00 02 00 00 	(unimp|illtrap)  0x20000
 			6: R_SPARC_UA16	jim
-   8:	03 04 05 06 	sethi  %hi\(0x10141800\), %g1
+   8:	03 04 05 00 	sethi  %hi\(0x10140000\), %g1
+			b: R_SPARC_UA32	baz
+   c:	00 00 00 00 	unimp  0
+			f: R_SPARC_UA32	bar
+  10:	00 00 00 06 	unimp  0x6

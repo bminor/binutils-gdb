@@ -1,3 +1,10 @@
+2001-08-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/sparc/unalign.s: Extend test to check .uaword with multiple
+	arguments.
+	* gas/sparc/unalign.d: Extend to expect unaligned relocs for both
+	arguments to .uaword.
+
 2001-08-10  H.J. Lu  <hjl@gnu.org>
 
 	* gas/mips/e32-rel2.d: Updated for the objdump output change.
