@@ -1327,6 +1327,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n"));
   fprintf (file, _("\t\t\t  at runtime\n"));
+  fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));
 EOF
 fi
 
