@@ -60,12 +60,19 @@ struct v850_operand
 
   /* How far the operand is left shifted in the instruction.  */
   int shift;
+
+  int flags;
 };
 
 /* Elements in the table are retrieved by indexing with values from
    the operands field of the v850_opcodes table.  */
 
 extern const struct v850_operand v850_operands[];
+
+/* Values defined for the flags field of a struct v850_operand.  */
+#define OPERAND_NUM	1	/* number or symbol */
+#define OPERAND_REG	2	/* register */
+
 
 
 #endif /* V850_H */

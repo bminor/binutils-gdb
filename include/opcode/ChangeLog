@@ -1,4 +1,9 @@
 start-sanitize-v850
+Wed Aug 21 17:45:10 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* v850.h (v850_operands): Add flags field.
+	(OPERAND_REG, OPERAND_NUM): Defined.
+
 Tue Aug 20 14:52:02 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* v850.h: New file.
