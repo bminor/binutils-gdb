@@ -1,3 +1,8 @@
+Fri Jul 16 18:57:50 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, all-cfg.texi, h8-cfg.texi: introduce MOD2 switch
+	to select Modula-2 material.
+
 Thu Jul 15 13:15:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Cleanups regarding statics.
