@@ -160,13 +160,20 @@ extern int i386_fpc_regnum_p (int regnum);
 
 /* Register numbers of various important registers.  */
 
-#define I386_EAX_REGNUM		0 /* %eax */
-#define I386_EDX_REGNUM		2 /* %edx */
-#define I386_ESP_REGNUM		4 /* %esp */
-#define I386_EBP_REGNUM		5 /* %ebp */
-#define I386_EIP_REGNUM		8 /* %eip */
-#define I386_EFLAGS_REGNUM	9 /* %eflags */
-#define I386_ST0_REGNUM		16 /* %st(0) */
+enum i386_regnum
+{
+  I386_EAX_REGNUM,		/* %eax */
+  I386_ECX_REGNUM,		/* %ecx */
+  I386_EDX_REGNUM,		/* %edx */
+  I386_EBX_REGNUM,		/* %ebx */
+  I386_ESP_REGNUM,		/* %esp */
+  I386_EBP_REGNUM,		/* %ebp */
+  I386_ESI_REGNUM,		/* %esi */
+  I386_EDI_REGNUM,		/* %edi */
+  I386_EIP_REGNUM,		/* %eip */
+  I386_EFLAGS_REGNUM,		/* %eflags */
+  I386_ST0_REGNUM = 16,		/* %st(0) */
+};
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_FREGS	16

@@ -1418,14 +1418,6 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 
-/* These registers don't have pervasive standard uses.  Move them to
-   i386-tdep.h if necessary.  */
-
-#define I386_EBX_REGNUM		3 /* %ebx */
-#define I386_ECX_REGNUM		1 /* %ecx */
-#define I386_ESI_REGNUM		6 /* %esi */
-#define I386_EDI_REGNUM		7 /* %edi */
-
 /* Return the register number of the register allocated by GCC after
    REGNUM, or -1 if there is no such register.  */
 

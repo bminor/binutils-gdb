@@ -1,3 +1,13 @@
+2003-10-26  Mark Kettenis  <kettenis@gnu.org>
+
+	Change register numbers to enumartion values.
+	* i386-tdep.h (enum i386_regnum): New.
+	(I386_EAX_REGNUM, I386_EDX_REGNUM, I386_ESP_REGNUM,
+	I386_EBP_REGNUM, I386_IP_REGNUM, I386_EFLAGS_REGNUM,
+	I386_ST0_REGNUM): Remove defines.
+	* i386-tdep.c (I386_EBX_REGNUM, I386_ECX_REGNUM, I386_ESI_REGNUM,
+	I386_EDI_REGNUM): Remove defines.
+
 2003-10-24  Andrew Cagney  <cagney@redhat.com>
 
 	* target.c: Include "gdbcore.h".
