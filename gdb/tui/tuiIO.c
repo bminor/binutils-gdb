@@ -602,7 +602,7 @@ tuiTermSetup (turn_off_echo)
     {
 
       /* Un-do the effect of the memory lock in terminal_inferior() */
-      tputs (term_memory_unlock, 1, (int (*)PARAMS ((int))) putchar);
+      tputs (term_memory_unlock, 1, (int (*) (int)) putchar);
       fflush (stdout);
 
     }
@@ -618,7 +618,7 @@ tuiTermSetup (turn_off_echo)
 
       /* Set scroll region to be 0..end */
       buffer = (char *) tgoto (term_scroll_region, end, 0);
-      tputs (buffer, 1, (int (*)PARAMS ((int))) putchar);
+      tputs (buffer, 1, (int (*) (int)) putchar);
 
     }				/* else we're out of luck */
 
@@ -708,8 +708,8 @@ tuiTermUnsetup (turn_on_echo, to_column)
        * So first position the cursor, then call memory lock.
        */
       buffer = tgoto (term_cursor_move, 0, start);
-      tputs (buffer, 1, (int (*)PARAMS ((int))) putchar);
-      tputs (term_memory_lock, 1, (int (*)PARAMS ((int))) putchar);
+      tputs (buffer, 1, (int (*) (int)) putchar);
+      tputs (term_memory_lock, 1, (int (*) (int)) putchar);
 
     }
   else if (term_scroll_region)
@@ -717,17 +717,17 @@ tuiTermUnsetup (turn_on_echo, to_column)
 
       /* Set the scroll region to the command window */
       buffer = tgoto (term_scroll_region, end, start);
-      tputs (buffer, 1, (int (*)PARAMS ((int))) putchar);
+      tputs (buffer, 1, (int (*) (int)) putchar);
 
     }				/* else we can't do anything about target I/O */
 
   /* Also turn off standout mode, in case it is on */
   if (term_se != NULL)
-    tputs (term_se, 1, (int (*)PARAMS ((int))) putchar);
+    tputs (term_se, 1, (int (*) (int)) putchar);
 
   /* Now go to the appropriate spot on the end line */
   buffer = tgoto (term_cursor_move, to_column, end);
-  tputs (buffer, 1, (int (*)PARAMS ((int))) putchar);
+  tputs (buffer, 1, (int (*) (int)) putchar);
   fflush (stdout);
 
   tui_owns_terminal = 0;
