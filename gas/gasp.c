@@ -1276,7 +1276,7 @@ include_print_where_line (file)
 
   while (p <= sp)
     {
-      fprintf (file, "%s:%d ", sb_name (&p->name), p->linecount - ((p == sp) ? 1 : 0));
+      fprintf (file, "%s:%d ", sb_name (&p->name), p->linecount - 1);
       p++;
     }
 }
@@ -2177,6 +2177,13 @@ process_file ()
 	  if (condass_on ())
 	    fprintf (outfile, "\n");
 	}
+      else if (mri
+	       && (line.ptr[0] == '*'
+		   || line.ptr[0] == '!'))
+	{
+	  /* MRI line comment.  */
+	  fprintf (outfile, sb_name (&line));
+	}
       else
 	{
 	  l = grab_label (&line, &label_in);
@@ -2325,9 +2332,15 @@ do_reg (idx, in)
 {
   /* remove reg stuff from inside parens */
   sb what;
-  idx = skip_openp (idx, in);
+  if (!mri)
+    idx = skip_openp (idx, in);
+  else
+    idx = sb_skip_white (idx, in);
   sb_new (&what);
-  while (idx < in->len && in->ptr[idx] != ')')
+  while (idx < in->len
+	 && (mri
+	     ? ! eol (idx, in)
+	     : in->ptr[idx] != ')'))
     {
       sb_add_char (&what, in->ptr[idx]);
       idx++;
@@ -3836,12 +3849,22 @@ do_include (idx, in)
 {
   sb t;
   sb cat;
-  char *text;
   include_path *includes;
+
   sb_new (&t);
   sb_new (&cat);
 
-  idx = getstring (idx, in, &t);
+  if (! mri)
+    idx = getstring (idx, in, &t);
+  else
+    {
+      idx = sb_skip_white (idx, in);
+      while (idx < in->len && ! ISWHITE (in->ptr[idx]))
+	{
+	  sb_add_char (&t, in->ptr[idx]);
+	  ++idx;
+	}
+    }
 
   for (includes = paths_head; includes; includes = includes->next)
     {
@@ -3856,7 +3879,8 @@ do_include (idx, in)
     }
   if (!includes)
     {
-      FATAL ((stderr, "Can't open include file `%s'.\n", text));
+      if (! new_file (sb_name (&t)))
+	FATAL ((stderr, "Can't open include file `%s'.\n", sb_name (&t)));
     }
   sb_kill (&cat);
   sb_kill (&t);
@@ -3944,6 +3968,9 @@ chartype_init ()
   for (x = 0; x < 256; x++)
     {
       if (isalpha (x) || x == '_' || x == '$')
+	chartype[x] |= FIRSTBIT;
+
+      if (mri && x == '.')
 	chartype[x] |= FIRSTBIT;
 
       if (isdigit (x) || isalpha (x) || x == '_' || x == '$')
@@ -4567,6 +4594,7 @@ main (argc, argv)
 	  break;
 	case 'M':
 	  mri = 1;
+	  comment_char = ';';
 	  break;
 	case 'h':
 	  show_help ();

@@ -1,5 +1,16 @@
 Fri Aug 18 10:58:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gasp.c (include_print_where_line): Always subtract 1 from
+	linecount before printing it.
+	(process_file): In MRI mode, lines beginning with '*' or '!' are
+	comments.
+	(do_reg): In MRI mode, don't require parentheses.
+	(do_include): In MRI mode, don't requires quotes.  If the file can
+	not be found in the include path, try opening it in the current
+	directory.  Print the file name correctly in the error message.
+	(chartype_init): In MRI mode, set FIRSTBIT for '.'.
+	(main): Set comment_char to ';' when entering MRI mode.
+
 	* config/tc-m68k.c: Include subsegs.h.
 	(m68k_ip): Pass 64 rather than -1 to add_Fix in 'B' 'B' case.
 	(md_pcrel_from): If fx_pcrel_adjust is 64, use -1 instead.
