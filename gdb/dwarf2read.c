@@ -727,7 +727,8 @@ static void read_tag_string_type (struct die_info *, struct objfile *);
 static void read_subroutine_type (struct die_info *, struct objfile *,
 				  const struct comp_unit_head *);
 
-struct die_info *read_comp_unit (char *, bfd *, const struct comp_unit_head *);
+static struct die_info *read_comp_unit (char *, bfd *,
+                                        const struct comp_unit_head *);
 
 static void free_die_list (struct die_info *);
 
@@ -756,19 +757,19 @@ static char *dwarf_cfi_name (unsigned int);
 struct die_info *copy_die (struct die_info *);
 #endif
 
-struct die_info *sibling_die (struct die_info *);
+static struct die_info *sibling_die (struct die_info *);
 
-void dump_die (struct die_info *);
+static void dump_die (struct die_info *);
 
-void dump_die_list (struct die_info *);
+static void dump_die_list (struct die_info *);
 
-void store_in_ref_table (unsigned int, struct die_info *);
+static void store_in_ref_table (unsigned int, struct die_info *);
 
 static void dwarf2_empty_hash_tables (void);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
 
-struct die_info *follow_die_ref (unsigned int);
+static struct die_info *follow_die_ref (unsigned int);
 
 static struct type *dwarf2_fundamental_type (struct objfile *, int);
 
@@ -2899,7 +2900,7 @@ read_base_type (struct die_info *die, struct objfile *objfile)
 
 /* Read a whole compilation unit into a linked list of dies.  */
 
-struct die_info *
+static struct die_info *
 read_comp_unit (char *info_ptr, bfd *abfd,
 		const struct comp_unit_head *cu_header)
 {
@@ -4716,7 +4717,7 @@ copy_die (struct die_info *old_die)
 
 /* Return sibling of die, NULL if no sibling.  */
 
-struct die_info *
+static struct die_info *
 sibling_die (struct die_info *die)
 {
   int nesting_level = 0;
@@ -5502,7 +5503,7 @@ dwarf_cfi_name (register unsigned cfi_opc)
 }
 #endif
 
-void
+static void
 dump_die (struct die_info *die)
 {
   unsigned int i;
@@ -5564,7 +5565,7 @@ dump_die (struct die_info *die)
     }
 }
 
-void
+static void
 dump_die_list (struct die_info *die)
 {
   while (die)
@@ -5574,7 +5575,7 @@ dump_die_list (struct die_info *die)
     }
 }
 
-void
+static void
 store_in_ref_table (unsigned int offset, struct die_info *die)
 {
   int h;
@@ -5616,7 +5617,7 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
   return result;
 }
 
-struct die_info *
+static struct die_info *
 follow_die_ref (unsigned int offset)
 {
   struct die_info *die;
