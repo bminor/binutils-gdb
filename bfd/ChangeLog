@@ -1,3 +1,8 @@
+2003-02-20  jmc  <jmc@prioris.mini.pw.edu.pl>
+
+	* coff-h8300.c: Fix typo: intial -> initial.
+	* coff-ppc.c: Likewise.
+
 2003-02-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c: Formatting.

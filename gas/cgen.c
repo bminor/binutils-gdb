@@ -1,22 +1,22 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
-This file is part of GAS, the GNU Assembler.
+   This file is part of GAS, the GNU Assembler.
 
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to the Free Software
-Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to the Free Software
+   Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <setjmp.h>
 #include "ansidecl.h"
@@ -61,7 +61,8 @@ cgen_asm_record_register (name, number)
    OPINDEX is the index in the operand table.
    OPINFO is something the caller chooses to help in reloc determination.  */
 
-struct fixup {
+struct fixup
+{
   int opindex;
   int opinfo;
   expressionS exp;
@@ -112,7 +113,7 @@ queue_fixup (opindex, opinfo, expP)
    gas_cgen_initialize_saved_fixups_array():
       Sets num_fixups_in_chain to 0 for each element. Call this from
       md_begin() if you plan to use these functions and you want the
-      fixup count in each element to be set to 0 intially.  This is
+      fixup count in each element to be set to 0 initially.  This is
       not necessary, but it's included just in case.  It performs
       the same function for each element in the array of fixup chains
       that gas_init_parse() performs for the current fixups.
@@ -130,7 +131,8 @@ queue_fixup (opindex, opinfo, expP)
        element - swap the current fixups with those in this element number.
 */
 
-struct saved_fixups {
+struct saved_fixups
+{
   struct fixup fixup_chain[GAS_CGEN_MAX_FIXUPS];
   int num_fixups_in_chain;
 };
@@ -240,7 +242,6 @@ gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offse
 
   /* It may seem strange to use operand->attrs and not insn->attrs here,
      but it is the operand that has a pc relative relocation.  */
-
   fixP = fix_new (frag, where, length / 8, symbol, offset,
 		  CGEN_OPERAND_ATTR_VALUE (operand, CGEN_OPERAND_PCREL_ADDR),
 		  (bfd_reloc_code_real_type)
@@ -279,7 +280,6 @@ gas_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
 
   /* It may seem strange to use operand->attrs and not insn->attrs here,
      but it is the operand that has a pc relative relocation.  */
-
   fixP = fix_new_exp (frag, where, length / 8, exp,
 		      CGEN_OPERAND_ATTR_VALUE (operand, CGEN_OPERAND_PCREL_ADDR),
 		      (bfd_reloc_code_real_type)
