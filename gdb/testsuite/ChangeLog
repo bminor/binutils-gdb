@@ -1,5 +1,12 @@
 Wed Jun 15 12:10:10 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* config/mt-a29k-udi, config/mt-i960-nindy, config/mt-sparc-aout:
+	Remove all CC, etc definitions.
+	* config/mt-hpux: New file.
+	* config/mt-mips-ecoff (CFLAGS_FOR_TARGET): Remove:
+	(CFLAGS, LDFLAGS): Define.
+	* config/mt-slite (CFLAGS_FOR_TARGET): Change to LDFLAGS.
+
 	* Makefile.in (site.exp): Don't insert host_os, etc.
 	(just-check): Just use RUNTEST with RUNTESTFLAGS only.
 	(distclean): Check existence of subdir.

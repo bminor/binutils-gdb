@@ -1,0 +1,4 @@
+# Force static linking for nodebug case.
+
+NODEBUG_FLAGS = -Wl,-a,archive
+
