@@ -1834,6 +1834,8 @@ coff_header_append (abfd, h)
 	  bfd_coff_swap_scnhdr_out (abfd,
 				    &(segment_info[i].scnhdr),
 				    buffer);
+	  if (size == 0)
+	    as_bad ("bfd_coff_swap_scnhdr_out failed");
 	  bfd_write (buffer, size, 1, abfd);
 	}
     }

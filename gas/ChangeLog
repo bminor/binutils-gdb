@@ -1,3 +1,8 @@
+Thu Mar  9 18:01:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (coff_header_append): Check return value of
+	bfd_coff_swap_scnhdr_out.
+
 Thu Mar  9 13:51:30 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	Delete this patch, it breaks the h8300 assembler.
