@@ -51,11 +51,9 @@ typedef int op_type;
 #define DST             0x80
 
 #define REG		0x100
-/* start-sanitize-h8s */
 #define EXR		0x200
-#define SHIFT_2		0x400
 #define MACREG		0x800
-/* end-sanitize-h8s */
+#define SRC_IN_DST	0x400
 #define IMM		0x1000
 #define DISP		0x2000
 #define IND		0x4000
@@ -79,16 +77,9 @@ typedef int op_type;
 
 #define IMM3 		IMM|L_3
 #define IMM2 		IMM|L_2
-/* start-sanitize-h8s */
-#define SHIFT_IMM	IMM|SHIFT_2|L_2|SRC
-/* end-sanitize-h8s */
 
 #define SIZE		(L_2|L_3|L_8|L_16|L_32|L_P|L_24)
-#define MODE		(REG|IMM|DISP|IND|INC|DEC|CCR|ABS|MEMIND \
-/* start-sanitize-h8s */\
-			 |EXR|SHIFT_2 \
-/* end-sanitize-h8s  */\
-			 )
+#define MODE		(REG|IMM|DISP|IND|INC|DEC|CCR|ABS|MEMIND|EXR)
 
 #define RD8 		(DST|L_8|REG)
 #define RD16 		(DST|L_16|REG)
@@ -125,9 +116,7 @@ typedef int op_type;
 
 #define RDDEC 		(DST|DEC)
 #define RSINC 		(SRC|INC)
-/* start-sanitize-h8s */
 #define RDINC		(DST|INC)
-/* end-sanitize-h8s */
 
 #define RDIND 		(DST|IND)
 #define RSIND 		(SRC|IND)
@@ -172,10 +161,8 @@ struct h8_opcode
 { code, 1, 2, name,	{imm,RD8,E},	{op00, op01, imm, RD8, E, 0, 0, 0, 0}, 0, 0, 0, 0},\
 { code, 1, 6, name,	{imm,RDIND,E},	{op10, op11, B30|RDIND, 0, op00,op01, imm, 0, E}, 0, 0, 0, 0},\
 { code, 1, 6, name,	{imm,ABS8DST,E},{op20, op21, ABS8DST, IGNORE, op00,op01, imm, 0,E}, 0, 0, 0, 0}\
-/* start-sanitize-h8s */\
 ,{ code, 1, 6, name,	{imm,ABS16DST,E},{0x6,0xa,0x1,op30,ABS16DST,IGNORE,IGNORE,IGNORE, op00,op01, imm, 0,E}, 0, 0, 0, 0},\
-{ code, 1, 6, name,	{imm,ABS32DST,E},{0x6,0xa,0x3,op30,ABS32DST,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE, op00,op01, imm, 0,E}, 0, 0, 0, 0} \
-/* end-sanitize-h8s */ \
+{ code, 1, 6, name,	{imm,ABS32DST,E},{0x6,0xa,0x3,op30,ABS32DST,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE, op00,op01, imm, 0,E}, 0, 0, 0, 0}
 
 
 #define EBITOP(code, imm, name, op00, op01,op10,op11, op20,op21,op30)\
@@ -207,11 +194,9 @@ struct h8_opcode
 { O(code,SB), 1, 2, name, {OR8,  E, 0}, {op1, op2, op3+0, OR8,  E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
 { O(code,SW), 0, 2, name, {OR16, E, 0}, {op1, op2, op3+1, OR16, E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
 { O(code,SL), 0, 2, name, {OR32, E, 0}, {op1, op2, op3+3, OR32|B30, E, 0, 0, 0, 0}, 0, 0, 0, 0} \
-/* start-sanitize-h8s */\
-,{ O(code,SB), 1, 2, name, {SHIFT_IMM, RS8,  E}, {op1, op2, op3+4, RS8,  E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
-{ O(code,SW), 0, 2, name, {SHIFT_IMM, RS16, E}, {op1, op2, op3+5, RS16, E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
-{ O(code,SL), 0, 2, name, {SHIFT_IMM, RS32, E}, {op1, op2, op3+7, RS32|B30, E, 0, 0, 0, 0}, 0, 0, 0, 0} \
-/* end-sanitize-h8s */ \
+,{ O(code,SB), 1, 2, name, {IMM, OR8 | SRC_IN_DST,  E}, {op1, op2, op3+4, OR8 | SRC_IN_DST,  E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
+{ O(code,SW), 0, 2, name, {IMM, OR16 | SRC_IN_DST, E}, {op1, op2, op3+5, OR16 | SRC_IN_DST, E, 0, 0, 0, 0}, 0, 0, 0, 0}, \
+{ O(code,SL), 0, 2, name, {IMM, OR32 | SRC_IN_DST, E}, {op1, op2, op3+7, OR32 | SRC_IN_DST|B30 , E, 0, 0, 0, 0}, 0, 0, 0, 0}
 
 
 #define IMM32LIST IMM32,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE,IGNORE
@@ -310,14 +295,12 @@ struct h8_opcode
 #define O_ADDS 77
 #define O_SYSCALL 78
 #define O_MOV_TO_REG 79
-/* start-sanitize-h8s */
 #define O_TAS 80
 #define O_CLRMAC 82
 #define O_LDMAC 83
 #define O_MAC 84
 #define O_LDM 85
 #define O_STM 86
-/* end-sanitize-h8s */
 #define O_LAST 87
 #define SB 0
 #define SW 1
@@ -347,9 +330,7 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_AND,SL),0,2,"and.l") ,{RS32,RD32,E },{0x0,0x1,0xF,0x0,0x6,0x6,B30|RS32,B30|RD32,E} EOP,
 
   NEW_SOP(O(O_ANDC,SB),1,2,"andc"), {IMM8,CCR,E},{ 0x0,0x6,IMM8,IGNORE,E,0,0,0,0} EOP,
-/* start-sanitize-h8s */
   NEW_SOP(O(O_ANDC,SB),1,2,"andc"), {IMM8,EXR,E},{ 0x0,0x1,0x4,0x1,0x0,0x6,IMM8,IGNORE,E,0,0,0,0} EOP,
-/* end-sanitize-h8s */
 
   BITOP(O(O_BAND,SB), IMM3,"band",0x7,0x6,0x7,0xC,0x7,0xE,0x0),
   BRANCH(O(O_BRA,SB),"bra",0x0),
@@ -443,7 +424,6 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_LDC,SB),0,2,"ldc"),{RSINC,CCR,E},        {PREFIXLDC,0x6,0xD,B30|RSINC,0x0,E}EOP,
   NEW_SOP(O(O_LDC,SB),0,2,"ldc"),{RSIND,CCR,E},        {PREFIXLDC,0x6,0x9,B30|RDIND,0x0,E} EOP,
 
-/* start-sanitize-h8s */
   NEW_SOP(O(O_LDC,SB),1,2,"ldc"),{IMM8,EXR,E},         { 0x0,0x1,0x4,0x1,0x0,0x7,IMM8,IGNORE,E,0,0,0,0}EOP,
   NEW_SOP(O(O_LDC,SB),1,2,"ldc"),{OR8,EXR,E},          { 0x0,0x3,0x1,OR8,E,0,0,0,0}EOP,
   NEW_SOP(O(O_LDC,SB),0,2,"ldc"),{ABS16SRC,EXR,E},     { 0x0,0x1,0x4,0x1,0x6,0xb,0x0,0x0,ABS16SRC,IGNORE,IGNORE,IGNORE,E}EOP,
@@ -452,7 +432,6 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_LDC,SB),0,2,"ldc"),{DISP|SRC|L_32,EXR,E},{ 0x0,0x1,0x4,0x1,0x7,0x8,B30|DISPREG,0,0x6,0xB,0x2,0x0,SRC|DISP32LIST,E}EOP,
   NEW_SOP(O(O_LDC,SB),0,2,"ldc"),{RSINC,EXR,E},        { 0x0,0x1,0x4,0x1,0x6,0xd,B30|RSINC,0x0,E}EOP,
   NEW_SOP(O(O_LDC,SB),0,2,"ldc"),{RSIND,EXR,E},        { 0x0,0x1,0x4,0x1,0x6,0x9,B30|RDIND,0x0,E} EOP,
-/* end-sanitize-h8s */
 
   SOP(O(O_MOV_TO_REG,SB),4,"mov.b"),{ABS|SRC|L_16|MEMRELAX,RD8,E},  { 0x6,0xA,0x0,RD8,SRC|ABS|MEMRELAX|A16LIST,E}EOP,
   SOP(O(O_MOV_TO_REG,SB),6,"mov.b"),{ABS|SRC|L_32|MEMRELAX,RD8,E }, { 0x6,0xA,0x2,RD8,SRC|ABS|MEMRELAX|A32LIST,E }EOP,
@@ -538,9 +517,7 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_OR,SL),0,2,"or.l"),{RS32,RD32,E },{0x0,0x1,0xF,0x0,0x6,0x4,B30|RS32,B30|RD32,E} EOP,
 
   NEW_SOP(O(O_ORC,SB),1,2,"orc"),{IMM8,CCR,E},{ 0x0,0x4,IMM8,IGNORE,E,0,0,0,0}EOP,
-/* start-sanitize-h8s */
   NEW_SOP(O(O_ORC,SB),1,2,"orc"),{IMM8,EXR,E},{ 0x0,0x1,0x4,0x1,0x0,0x4,IMM8,IGNORE,E,0,0,0,0}EOP,
-/* end-sanitize-h8s */
 
   NEW_SOP(O(O_MOV_TO_REG,SW),1,6,"pop.w"),{OR16,E,0},{ 0x6,0xD,0x7,OR16,E,0,0,0,0}EOP,
   NEW_SOP(O(O_MOV_TO_REG,SL),0,6,"pop.l"),{OR32,E,0},{ PREFIX32,0x6,0xD,0x7,OR32|B30,E,0,0,0,0}EOP,
@@ -573,7 +550,6 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_STC,SB),0,2,"stc"),{CCR,ABS16SRC,E},     {PREFIXLDC,0x6,0xB,0x8,0x0,ABS16DST,IGNORE,IGNORE,IGNORE,E}EOP,
   NEW_SOP(O(O_STC,SB),0,2,"stc"),{CCR,ABS32SRC,E},     {PREFIXLDC,0x6,0xB,0xA,0x0,DST|ABS32LIST,E}EOP,
 
-/* start-sanitize-h8s */
   NEW_SOP(O(O_STC,SB), 1,2,"stc"),{EXR,RD8,E},{ 0x0,0x2,0x1,RD8,E,0,0,0,0} EOP,
 
   NEW_SOP(O(O_STC,SB),0,2,"stc"),{EXR,RSIND,E},        {0x0,0x1,0x4,0x1,0x6,0x9,B31|RDIND,0x0,E} EOP,
@@ -583,7 +559,6 @@ struct h8_opcode h8_opcodes[] =
 
   NEW_SOP(O(O_STC,SB),0,2,"stc"),{EXR,ABS16SRC,E},     {0x0,0x1,0x4,0x1,0x6,0xB,0x8,0x0,ABS16DST,IGNORE,IGNORE,IGNORE,E}EOP,
   NEW_SOP(O(O_STC,SB),0,2,"stc"),{EXR,ABS32SRC,E},     {0x0,0x1,0x4,0x1,0x6,0xB,0xA,0x0,DST|ABS32LIST,E}EOP,
-/* end-sanitize-h8s */
 
   SOP(O(O_SUB,SB),2,"sub.b"),{RS8,RD8,E},{ 0x1,0x8,RS8,RD8,E,0,0,0,0}EOP,
 
@@ -596,9 +571,7 @@ struct h8_opcode h8_opcodes[] =
   TWOOP(O(O_SUBX,SB),"subx",0xB,0x1,0xE),
 
   NEW_SOP(O(O_TRAPA,SB),0,2,"trapa"),{ IMM2,E},  {0x5,0x7,IMM2,IGNORE,E  }EOP,
-/* start-sanitize-h8s */
   NEW_SOP(O(O_TAS,SB),0,2,"tas"),{RSIND,E},  {0x0,0x1,0xe,0x0,0x7,0xb,B30|RSIND,0xc,E  }EOP,
-/* end-sanitize-h8s */
 
   TWOOP(O(O_XOR, SB),"xor",0xD,0x1,0x5),
 
@@ -609,7 +582,6 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_XOR,SL),0,2,"xor.l") ,{RS32,RD32,E },{0x0,0x1,0xF,0x0,0x6,0x5,B30|RS32,B30|RD32,E} EOP,
 
   SOP(O(O_XORC,SB),2,"xorc"),{IMM8,CCR,E},{ 0x0,0x5,IMM8,IGNORE,E,0,0,0,0}EOP,
-/* start-sanitize-h8s */
   SOP(O(O_XORC,SB),2,"xorc"),{IMM8,EXR,E},{ 0x0,0x1,0x4,0x1,0x0,0x5,IMM8,IGNORE,E,0,0,0,0}EOP,
 
   NEW_SOP(O(O_CLRMAC,SL),1,2,"clrmac"),{E, 0, 0},{0x0,0x1,0xa,0x0,E} EOP,
@@ -617,7 +589,6 @@ struct h8_opcode h8_opcodes[] =
   NEW_SOP(O(O_LDMAC,SL),1,2,"ldmac"),{RS32,MACREG,E},{0x0,0x3,MACREG,RS32,E} EOP,
   NEW_SOP(O(O_LDM,SL),0,6,"ldm.l"),{RSINC, RS32, E},{ 0x0,0x1,IGNORE,0x0,0x6,0xD,0x7,IGNORE,E}EOP,
   NEW_SOP(O(O_STM,SL),0,6,"stm.l"),{RS32, RDDEC, E},{0x0,0x1,IGNORE,0x0,0x6,0xD,0xF,IGNORE,E}EOP,
-/* end-sanitize-h8s */
   0
 };
 #else

@@ -1,3 +1,11 @@
+Wed Jul  3 16:02:39 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dis-asm.h (print_insn_sparclite):  Declare.
+
+Tue Jun 18 16:02:46 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* dis-asm.h (print_insn_h8300s): Declare.
+
 Tue Jun 18 15:11:33 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* fopen-vms.h: New file.

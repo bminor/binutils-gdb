@@ -56,13 +56,6 @@ typedef struct disassemble_info {
   unsigned long flags;
   PTR private_data;
 
-  /* Non-zero if an instruction is to be displayed in raw form (eg: hex)
-     (along with the symbolic form which is always printed).
-     ??? Not all targets support this yet and not all have the same default
-     (which they should).  */
-#define DISASM_RAW_INSN_FLAG	0x10000
-#define DISASM_RAW_INSN(INFO)	((INFO)->flags & DISASM_RAW_INSN_FLAG)
-
   /* Function used to get bytes to disassemble.  MEMADDR is the
      address of the stuff to be disassembled, MYADDR is the address to
      put the bytes in, and LENGTH is the number of bytes to read.
@@ -120,6 +113,7 @@ extern int print_insn_z8001		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_z8002		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8300h		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_h8300s		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_h8500		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_alpha		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-arc */
@@ -129,6 +123,7 @@ extern int print_insn_big_arm		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_arm	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_sparc64		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_sparclite		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_big_a29k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_a29k	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_i960		PARAMS ((bfd_vma, disassemble_info*));
@@ -165,6 +160,8 @@ extern void perror_memory PARAMS ((int, bfd_vma, struct disassemble_info *));
 extern void generic_print_address
   PARAMS ((bfd_vma, struct disassemble_info *));
 
+/* Macro to initialize a disassemble_info struct.  This should be called
+   by all applications creating such a struct.  */
 #define INIT_DISASSEMBLE_INFO(INFO, STREAM, FPRINTF_FUNC) \
   (INFO).fprintf_func = (FPRINTF_FUNC), \
   (INFO).stream = (STREAM), \
