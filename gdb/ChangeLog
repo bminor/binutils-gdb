@@ -1,3 +1,7 @@
+Sat Apr 18 15:21:04 1998  Stan Cox  <scox@cygnus.com>
+
+	* configure.tgt: Added sparc86x support.
+	
 Thu Apr 16 13:13:24 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* rdi-share/etherdrv.c (EthernetWrite): Use strerror to get

@@ -271,7 +271,8 @@ sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
 sparclet-*-*)		gdb_target=sparclet;;
-sparclite*-*-*)		gdb_target=sparclite ;;
+sparclite-*-*)		gdb_target=sparclite ;;
+sparc86x-*-*)		gdb_target=sparclite ;;
 # It's not clear what the right solution for "v8plus" systems is yet.
 # For now, stick with sparc-sun-solaris2 since that's what config.guess
 # should return.  Work is still needed to get gdb to print the 64 bit
