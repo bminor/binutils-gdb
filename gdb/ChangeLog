@@ -1,3 +1,15 @@
+2002-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386v.h: Add protection against
+	multiple-inclusion.
+	(i386_register_u_addr): Remove prototype.
+	(register_u_addr): New prototype.
+	(REGISTER_U_ADDR): Redefine accordingly.
+	* i386v-nat.c: Improve several comments.
+	(i386_register_u_addr): Change signature and rename to
+	register_u_addr.  Use FP_REGNUM_P.  Rewrite slightly to get rid of
+	ubase variable.
+
 2002-08-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/mips/tm-mips.h (STORE_RETURN_VALUE): Delete macro.

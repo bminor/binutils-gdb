@@ -1,5 +1,6 @@
-/* Native support for i386.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1998, 2000
+/* Native support for i386 running System V (pre-SVR4).
+
+   Copyright 1986, 1987, 1989, 1992, 1993, 1998, 2000, 2002
    Free Software Foundation, Inc.
    Changes for 80386 by Pace Willisson (pace@prep.ai.mit.edu), July 1988.
 
@@ -20,7 +21,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = i386_register_u_addr ((blockend),(regno));
+#ifndef NM_I386V_H
+#define NM_I386V_H
 
-extern int i386_register_u_addr (int, int);
+/* Support for the user struct.  */
+
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
+
+#define REGISTER_U_ADDR(addr, blockend, regnum) \
+  (addr) = register_u_addr ((blockend), (regnum))
+extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
+
+#endif /* nm-i386v.h */
