@@ -1,5 +1,7 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
 
@@ -175,9 +177,6 @@ cris_abi (void)
 {
   return (gdbarch_tdep (current_gdbarch)->cris_abi);
 }
-
-/* For saving call-clobbered contents in R9 when returning structs.  */
-static CORE_ADDR struct_return_address;
 
 struct frame_extra_info
 {
@@ -1075,29 +1074,6 @@ cris_abi_v2_extract_return_value (struct type *type, char *regbuf,
     memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (RET_REGNUM), len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_extract_return_value: type length too large");
-}
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  In the CRIS ABI, R9 is used in order to pass 
-   the address of the allocated area where a structure return value must 
-   be stored.  R9 is call-clobbered, which means we must save it here for
-   later use.  */
-
-static void
-cris_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  write_register (STR_REGNUM, addr);
-  struct_return_address = addr;
-}
-
-/* Extract from regbuf the address where a function should return a 
-   structure value.  It's not there in the CRIS ABI, so we must do it another
-   way.  */
-
-static CORE_ADDR
-cris_extract_struct_value_address (char *regbuf)
-{
-  return struct_return_address;
 }
 
 /* Returns 1 if the given type will be passed by pointer rather than 

@@ -1,5 +1,10 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* cris-tdep.c: Update copyright.
+	(cris_extract_struct_value_address): Delete function.
+	(struct_return_address): Delete variable.
+	(cris_store_struct_return): Do not set struct_return_address.
+
 	* mcore-tdep.c: Update copyright.
 	(mcore_extract_struct_value_address): Delete function.  Update
 	comments.
