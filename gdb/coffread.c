@@ -40,22 +40,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
 
 struct coff_symfile_info {
-  asection *text_sect;		/* Text section accessor */
-  int symcount;			/* How many symbols are there in the file */
-  char *stringtab;		/* The actual string table */
-  int stringtab_size;		/* Its size */
-  file_ptr symtab_offset;	/* Offset in file to symbol table */
-  int symbol_size;		/* Bytes in a single symbol */
-  struct stab_section_info *stab_section_info; 	/* section starting points
-				   of the original .o files before linking. */
+  file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
+  file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */
 
   asection *stabsect;		/* Section pointer for .stab section */
   asection *stabstrsect;		/* Section pointer for .stab section */
   asection *stabindexsect;	/* Section pointer for .stab.index section */
   char *stabstrdata;
-
-  file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
-  file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */
 };
 
 /* Translate an external name string into a user-visible name.  */
@@ -297,9 +288,9 @@ coff_locate_sections PARAMS ((bfd *, asection *, PTR));
    if so, stash away some access information for the section.
 
    FIXME: The section names should not be hardwired strings (what
-   should they be?  I don't think most debug formats have enough
-   special section flags to specify what kind of debug section it is
-   -kingdon). */
+   should they be?  I don't think most object file formats have enough
+   section flags to specify what kind of debug section it is
+   -kingdon).  */
 
 static void
 coff_locate_sections (ignore_abfd, sectp, csip)
@@ -525,6 +516,12 @@ coff_symfile_init (objfile)
   asection	*section, *strsection;
   bfd *abfd = objfile->obfd;
 
+  /* Allocate struct to keep track of stab reading. */
+  objfile->sym_stab_info = (PTR)
+    xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
+
+  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+
   /* Allocate struct to keep track of the symfile */
   objfile -> sym_private = xmmalloc (objfile -> md,
 				     sizeof (struct coff_symfile_info));
@@ -595,6 +592,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
      int mainline;
 {
   struct coff_symfile_info *info;
+  struct dbx_symfile_info *dbxinfo;
   bfd *abfd = objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
@@ -607,6 +605,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   int stabsize, stabstrsize;
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
+  dbxinfo = (struct dbx_symfile_info *) objfile->sym_stab_info;
   symfile_bfd = abfd;			/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
@@ -663,7 +662,10 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   /* Sort symbols alphabetically within each block.  */
 
-  sort_all_symtab_syms ();
+  for (s = objfile -> symtabs; s != NULL; s = s -> next)
+    {
+      sort_symtab_syms (s);
+    }
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */

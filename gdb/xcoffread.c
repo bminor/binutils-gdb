@@ -2079,7 +2079,10 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   free_debugsection ();
 
   /* Sort symbols alphabetically within each block.  */
-  sort_all_symtab_syms ();
+  for (s = objfile -> symtabs; s != NULL; s = s -> next)
+    {
+      sort_symtab_syms (s);
+    }
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */

@@ -1,5 +1,9 @@
 Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* xcoffread.c (xcoff_symfile_read), coffread.c (coff_symfile_read):
+	Sort symtabs for this objfile only, not for all objfiles.
+	* symfile.c, symfile.h (sort_all_symtab_syms): Remove; no longer used.
+
 	* mipsread.c (parse_symbol): In third-eye, a function has a block
 	within it which represents the whole function.  Create only one
 	GDB block for both.
