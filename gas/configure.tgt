@@ -423,7 +423,7 @@ case ${generic_target} in
   *-*-sim)				fmt=coff ;;
   *-*-elf | *-*-sysv4* | *-*-solaris*)	fmt=elf ;;
   *-*-aros*)				fmt=elf em=linux bfd_gas=yes ;;
-  *-*-vxworks | *-*-windiss)		fmt=elf ;;
+  *-*-vxworks | *-*-windiss)		fmt=elf em=vxworks ;;
   *-*-netware)				fmt=elf em=netware ;;
 esac
 

@@ -1,5 +1,10 @@
 2005-01-06  Paul Brook  <paul@codesourcery.com>
 
+	* configure.tgt: Set em=vxworks for *-*-vxworks.
+	* config/te-vxworks.h: New File.
+
+2005-01-06  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (arm_cpus): Correct arch field for arm1026ej-s.
 
 2005-01-04  Dmitry Diky  <diwil@spec.ru>
