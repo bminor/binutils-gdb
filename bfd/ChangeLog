@@ -1,5 +1,8 @@
 Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* peicode.h (pe_print_idata): Call malloc rather than xmalloc.
+	(pe_print_pdata): Likewise.
+
 	* opncls.c (bfd_alloc_by_size_t): Set bfd_error_no_memory if
 	obstack_alloc fails.
 	(bfd_alloc_finish): Set bfd_error_no_memory if obstack_finish
