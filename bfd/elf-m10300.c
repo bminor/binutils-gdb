@@ -2057,7 +2057,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if ((hash->root.root.type == bfd_link_hash_defined
 			   || hash->root.root.type == bfd_link_hash_defweak)
 			  && hash->root.root.u.def.section == section
-			  && ELF_ST_TYPE (isym->st_info) == STT_FUNC)
+			  && hash->root.type == STT_FUNC)
 			compute_function_info (input_bfd, hash,
 					       (hash)->root.root.u.def.value,
 					       contents);
