@@ -1,3 +1,8 @@
+2003-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (build_section_lists): Check return status
+	from ppc64_elf_next_input_section.
+
 2003-06-17  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ldlang.c (section_already_linked): Put back assignment of
@@ -6,7 +11,7 @@
 2003-06-17  Rainer Keuchel  <rkeuchel@allgeier.com>
 
 	* pe-dll.c (generate_reloc): Catch and ignore an ARM_26D
-	reloc.  
+	reloc.
 
 2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
 
@@ -77,7 +82,7 @@
 	* scripttempl/elf.sc: If not -r, discard .note.GNU-stack section.
 
 2003-06-03  Michael Snyder  <msnyder@redhat.com>
-        and Bernd Schmidt   <bernds@redhat.com>
+	and Bernd Schmidt   <bernds@redhat.com>
 	and Alexandre Oliva <aoliva@redhat.com>
 
 	* Makefile.am: Add new emulations for h8300sx.
@@ -401,7 +406,7 @@
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 
-	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+	Contribute support for Intel's iWMMXt chip - an ARM variant:
 
 	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Define.
 	* emulparams/armelf_linux.sh (OTHER_READONLY_SECTIONS): Define.
@@ -439,7 +444,7 @@
 
 2003-03-13  Danny Smith  <dannysmith@users.sourceforge.net>
 
-	* deffilep.y (def_import):  Use default extension of "dll"
+	* deffilep.y (def_import): Use default extension of "dll"
 	if no extension provided in parsed IMPORT definition.
 
 	* deffilep.y (def_lex): Revert 2003-03-12 change.
@@ -698,7 +703,7 @@
 	* deffilep.y (def_get_module): New function: locate an already
 	added module.
 	* deffile.h (def_get_module): New prototype.
-	* pe-dll.c (pe_implied_import_dll): Add code to	prevent importing
+	* pe-dll.c (pe_implied_import_dll): Add code to prevent importing
 	a dll multiple times.
 
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
@@ -931,7 +936,7 @@
 	def_file_export structure.
 	(pe_implied_import_dll): New variables exp_funcbase and
 	[data|bss]_[start|end].  Use DLL's internal name to set dll_name,
-	not filename (which may be a symlink).	Scan the sections and
+	not filename (which may be a symlink).  Scan the sections and
 	initialize [data|bss]_[start|end].  When scanning the export
 	table, skip _nm_ symbols, and mark any symbols whose rva indicates
 	that it is in the .bss or .data sections as data.
@@ -1361,7 +1366,7 @@
 
 2002-08-27  Nick Clifton  <nickc@redhat.com>
 
-	* emultempl/armelf.em:  Revert this patch, it is not needed.
+	* emultempl/armelf.em: Revert this patch, it is not needed.
 
 	2002-08-22  Adam Nemet  <anemet@lnxw.com>
 
@@ -1699,7 +1704,7 @@
 
 2002-06-17  Tom Rix  <trix@redhat.com>
 
-	* emultempl/elf32.em: gld*_get_script:  Check for
+	* emultempl/elf32.em: gld*_get_script: Check for
 	GENERATE_COMBRELOC_SCRIPT.
 	* scripttempl/elfd10v.sc : Fix STACK and INSN.
 	* emulparams/d10velf.sh : Fix TEXT_START_ADDR.
@@ -2412,12 +2417,12 @@
 
 2002-02-14  Phil Edwards  <pme@gcc.gnu.org>
 
-	* ld.texinfo (VERSION scripts):  Symbol names are globbing patterns.
-	* ldgram.y (lang_new_vers_regex):  Rename to lang_new_vers_pattern;
+	* ld.texinfo (VERSION scripts): Symbol names are globbing patterns.
+	* ldgram.y (lang_new_vers_regex): Rename to lang_new_vers_pattern;
 	the pattern in question is not a regexp.
-	* ldlang.c:  Likewise.
-	* ldlang.h:  Likewise.
-	* ldlex.l (V_IDENTIFIER):  Allow '[', ']', '-', '!', and '^' also.
+	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldlex.l (V_IDENTIFIER): Allow '[', ']', '-', '!', and '^' also.
 
 2002-02-12  Jakub Jelinek  <jakub@redhat.com>
 
@@ -2490,35 +2495,35 @@
 	2002-01-18  Alexandre Oliva  <aoliva@redhat.com>
 	* emulparams/shelf32.sh (STACK_ADDR): Define.
 	(OTHER_RELOCATABLE_SECTIONS): Renamed to...
-	(OTHER_SECTIONS): this.	 Removed stack settings.
+	(OTHER_SECTIONS): this.  Removed stack settings.
 	* emulparams/shelf64.sh (OTHER_RELOCATABLE_SECTIONS): Do not set.
 	(OTHER_SECTIONS): Reset after sourcing shelf32.sh.
-	2001-03-12  DJ Delorie	<dj@redhat.com>
+	2001-03-12  DJ Delorie  <dj@redhat.com>
 	* emultempl/sh64elf.em (sh64_elf_$_before_allocation): Disable
 	relaxing if any shmedia or mixed sections are found.
-	2001-03-07  DJ Delorie	<dj@redhat.com>
+	2001-03-07  DJ Delorie  <dj@redhat.com>
 	* emultempl/sh64elf.em (sh64_elf_before_allocation): Pass f to
-	einfo.	Gracefully decline to output to non-elf formats.
-	2001-03-06  Hans-Peter Nilsson	<hpn@redhat.com>
+	einfo.  Gracefully decline to output to non-elf formats.
+	2001-03-06  Hans-Peter Nilsson  <hpn@redhat.com>
 	* emulparams/shelf64.sh (OTHER_RELOCATING_SECTIONS) <.stack>:
 	Default to _end aligned to next multiple of 0x40000, plus 0x40000.
 	* emulparams/shelf32.sh: Ditto.
-	2001-01-14  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2001-01-14  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emulparams/shelf32.sh (OTHER_RELOCATING_SECTIONS): Tweak
 	comment.
 	2001-01-10  Ben Elliston  <bje@redhat.com>
 	* emulparams/shelf32.sh (OTHER_RELOCATING_SECTIONS): Avoid
 	non-portable shell constructs. From Hans-Peter Nilsson.
-	2001-01-09  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2001-01-09  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emulparams/shelf64.sh (EXTRA_EM_FILE): Define empty.
 	* Makefile.am (eshelf64.c, eshlelf64.c, eshlelf32.c): Adjust
 	dependencies to the shell script include chain.
 	* Makefile.in: Regenerate.
-	2001-01-06  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2001-01-06  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emultempl/sh64elf.em: Update and tweak comments.
 	(sh64_elf_${EMULATION_NAME}_after_allocation): Always allocate and
 	make a .cranges section SEC_IN_MEMORY.
-	2000-12-30  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-12-30  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emultempl/sh64elf.em
 	(sh64_elf_${EMULATION_NAME}_before_allocation): Don't stop when
 	.cranges section found to be necessary; continue and set stored
@@ -2529,20 +2534,20 @@
 	(sh64_elf_${EMULATION_NAME}_after_allocation): Only process
 	sections marked SHF_SH5_ISA32_MIXED.  Use sh64_elf_section_data to
 	access contents-type flags.  Assert that the associated container
-	is initialized.	 Use that container, not elf_gp_size, to hold size
+	is initialized.  Use that container, not elf_gp_size, to hold size
 	of linker-generated cranges contents.
-	2000-12-18  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emultempl/sh64elf.em
 	(sh64_elf_${EMULATION_NAME}_before_allocation): Exit early if
 	there's already a .cranges section.  When section flag difference
 	is found, don't NULL-check cranges a second time.  Tweak comments.
 	(sh64_elf_${EMULATION_NAME}_after_allocation): Use size after
 	merging, not max size, as size of ld-generated .cranges contents.
-	Don't set ELF section flags in output section.	When checking for
+	Don't set ELF section flags in output section.  When checking for
 	needed .cranges descriptors, don't use a variable; compare
 	incoming ELF section flags directly to SHF_SH5_ISA32_MIXED.  Tweak
 	comments.
-	2000-12-18  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emultempl/sh64elf.em: New file.
 	* Makefile.am (eshelf32.c, eshlelf32.c): Adjust dependencies.
 	* Makefile.in: Regenerate.
@@ -2550,13 +2555,13 @@
 	(OTHER_RELOCATING_SECTIONS): Ditto.
 	(EXTRA_EM_FILE): New, set to sh64elf if not set.
 	* emulparams/shlelf32.sh: Stub out all settings except
-	OUTPUT_FORMAT.	Source shelf32.sh.
+	OUTPUT_FORMAT.  Source shelf32.sh.
 	* emulparams/shelf64.sh: Similar, but also keep ELF_SIZE and
 	OTHER_RELOCATING_SECTIONS.
 	(OTHER_RELOCATING_SECTIONS): Remove .cranges.
 	* emulparams/shlelf64.sh: Stub out all settings except
-	OUTPUT_FORMAT.	Source shelf64.sh.
-	2000-12-15  Hans-Peter Nilsson	<hpn@cygnus.com>
+	OUTPUT_FORMAT.  Source shelf64.sh.
+	2000-12-15  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emulparams/shelf64.sh (OTHER_RELOCATING_SECTIONS): Include
 	.cranges section.
 	(DATA_START_SYMBOLS): Define, provide ___data.
@@ -2568,20 +2573,20 @@
 	* emulparams/shelf32.sh: Ditto.
 	(ALIGNMENT): Define to 8.
 	* emulparams/shelf32.sh: Ditto.
-	2000-12-12  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-12-12  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* configure.tgt (sh64-*-elf*): Assign targ_extra_libpath to get
 	built-in linker scripts.
-	2000-11-30  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-11-30  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emulparams/shlelf64.sh: New.
 	* emulparams/shelf64.sh: New.
 	* configure.tgt (sh64-*-elf*): Add shelf64 and shlelf64 to
 	targ_extra_emuls.
 	* Makefile.am: Add support for shlelf64 and shelf64.
 	* Makefile.in: Regenerate.
-	2000-11-29  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-11-29  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* configure.tgt (sh64-*-elf*): Add shelf as default.
 	Add shlelf to targ_extra_emuls.
-	2000-11-24  Hans-Peter Nilsson	<hpn@cygnus.com>
+	2000-11-24  Hans-Peter Nilsson  <hpn@cygnus.com>
 	* emulparams/shelf32.sh: New file.
 	* emulparams/shlelf32.sh: New file.
 	* Makefile.am: Add support for shlelf32 and shelf32.
@@ -2922,7 +2927,7 @@
 	* emultempl/aix.em (choose_target): Change default target to
 	OUTPUT_FORMAT for ppcmacos.  Add braces to remove compiler
 	warning.
-	(gld*_read_file):  Fix typo.
+	(gld*_read_file): Fix typo.
 	(change_symbol_mode): Add prototype.
 	(is_syscall): Same.
 
@@ -2951,8 +2956,8 @@
 	* Makefile.in : Remove eaixppc64.c
 	* ldemul.c (ldemul_choose_target): New parameters argc, argv.
 	(ldemul_default_target): Same.
-	* emultempl/gld960.em (gld960_choose_target):  Same.
-	* emultempl/gld960c.em (gld960_choose_target):  Same.
+	* emultempl/gld960.em (gld960_choose_target): Same.
+	* emultempl/gld960c.em (gld960_choose_target): Same.
 	* scripttempl/aix.sc: Remove OUTPUT_FORMAT.
 	* emultempl/aix.em (is_syscall): syscall_mask now a variable.
 	* emultempl/aix.em (gld*_read_file): symbol_mode_mask now a variable.
@@ -3251,7 +3256,7 @@
 
 2001-10-18  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
 
-	* pe-dll.c (autofilter_objectlist):  Add startup objects
+	* pe-dll.c (autofilter_objectlist): Add startup objects
 	for profiling.
 	(auto-export): Constify char * p.
 	Extract file basename and use strcmp rather than ststr
@@ -4184,7 +4189,7 @@
 
 2001-05-22  Nick Clifton  <nickc@redhat.com>
 
-	* lexsup.c (ld_options):  Allow -I to be an alias for
+	* lexsup.c (ld_options): Allow -I to be an alias for
 	--dynamic-linker.  This is for Solaris compatability.
 	* ld.texinfo: Document that -I can be used.
 	* ld.1: Regenerate.
@@ -5596,7 +5601,7 @@
 	* scripttempl/elfm68hc12.sc: New file.
 	* emulparams/m68hc12elfb: New emulation.
 	* emulparams/m68hc12elf: New emulation.
-	* emulparams/m68hc11elfb.sh: New file.	User configurable emulation
+	* emulparams/m68hc11elfb.sh: New file.  User configurable emulation
 	(includes a memory.x script to define the ROM and RAM banks).
 	* scripttempl/elfm68hc11.sc, emulparams/m68hc11elf.sh:
 	New configuration files for support of Motorola 68hc11
@@ -5658,7 +5663,7 @@
 2000-05-22  Thomas de Lellis  <tdel@windriver.com>
 
 	* ld.1: Add documentation for new command line option:
-		--section-start <sectionname>=<sectionorg>
+	--section-start <sectionname>=<sectionorg>
 	This is a generic version of -Ttext etc. which accepts
 	any section name as a parameter instead of just text/data/
 	bss.
@@ -6111,7 +6116,7 @@
 
 2000-01-05  Catherine Moore  <clm@cygnus.com>
 
-	* ld.h (wildcard_spec):  Change exclude_name to exclude_name_list.
+	* ld.h (wildcard_spec): Change exclude_name to exclude_name_list.
 	(name_list): New.
 	* ld.texinfo (EXCLUDE_FILE): Update documentation.
 	* ldgram.y (wildcard_spec): Support a list of excluded_files.

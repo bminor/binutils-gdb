@@ -323,8 +323,9 @@ build_section_lists (statement)
       && statement->input_section.section->output_section != NULL
       && statement->input_section.section->output_section->owner == output_bfd)
     {
-      ppc64_elf_next_input_section (&link_info,
-				    statement->input_section.section);
+      if (!ppc64_elf_next_input_section (&link_info,
+					 statement->input_section.section))
+	einfo ("%X%P: can not size stub section: %E\n");
     }
 }
 
