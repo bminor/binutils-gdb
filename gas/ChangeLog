@@ -1,3 +1,14 @@
+Wed Jun  3 14:11:59 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (md_estimate_size_before_relax): Add more calls
+	to relaxable_symbol to prevent references to external symbol from
+	being relaxed.
+
+Wed Jun  3 14:10:36 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (relaxable_symbol): If TARGET_OS is "elf", all
+	symbols are relaxable.
+
 start-sanitize-sky
 Wed Jun  3 10:26:04 1998  Doug Evans  <devans@canuck.cygnus.com>
 
