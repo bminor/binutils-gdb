@@ -72,7 +72,7 @@ This document describes the GNU stabs debugging format in a.out files.
 * Variables::
 * Aggregate types::
 * Symbol tables::               Symbol information in symbol tables
-* GNU C++ stabs::
+* GNU Cplusplus stabs::
 
 Appendixes:
 * Example2.c::                  Source code for extended example
@@ -1484,11 +1484,11 @@ entry now holds an absolute address.
 215 0000e008 D _g_foo
 @end example
 
-@node GNU C++ stabs
+@node GNU Cplusplus stabs
 @chapter GNU C++ stabs
 
 @menu
-* Basic C++ types::
+* Basic Cplusplus types::
 * Simple classes::
 * Class instance::
 * Methods:: Method definition
@@ -1518,7 +1518,7 @@ cross-reference
 @end table
 
 
-@node Basic C++ types
+@node Basic Cplusplus types
 @section Basic types for C++
 
 << the examples that follow are based on a01.C >>
