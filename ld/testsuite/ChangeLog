@@ -1,3 +1,9 @@
+2005-03-24  Eric Christopher  <echristo@redhat.com>
+
+	* ld-mips-elf/rel32-n32.d: Revert changes.
+	* ld-mips-elf/rel32-o32.d: Ditto.
+	* ld-mips-elf/rel64.d: Ditto.
+
 2005-03-23  Eric Christopher  <echristo@redhat.com>
 
 	* ld-mips-elf/textrel-1.s, ld-mips-elf/textrel-1.d: New

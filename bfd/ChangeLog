@@ -1,3 +1,7 @@
+2005-03-24  Eric Christopher  <echristo@redhat.com>
+
+	* elfxx-mips.c: Revert previous patch.
+
 2005-03-24  Nick Clifton  <nickc@redhat.com>
 
 	* targets.c (_bfd_target_vector): Only include the
