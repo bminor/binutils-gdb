@@ -1,3 +1,10 @@
+2003-05-10  H.J. Lu <hongjiu.lu@intel.com>
+
+	* Makefile.in (gdb-cfg.texi): Replace $$LN_S with $(LN_S).
+	(gdb.dvi): Likewise.
+	(gdb.pdf): Likewise.
+	(links2roff): Likewise.
+
 2003-05-08  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Dump/Restore Files): Update documentation for
