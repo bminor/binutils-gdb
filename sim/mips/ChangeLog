@@ -1,3 +1,10 @@
+2002-07-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (do_load_double, do_store_double): New functions.
+	(LDC1, SDC1): Rename to...
+	(LDC1b, SDC1b): respectively.
+	(LDC1a, SDC1a): New instructions for MIPS II and MIPS32 support.
+
 2002-07-29  Michael Snyder  <msnyder@redhat.com>
 
 	* cp1.c (fp_recip2): Modify initialization expression so that
