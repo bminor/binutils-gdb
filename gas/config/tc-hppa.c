@@ -1534,6 +1534,10 @@ pa_ip (str)
          sure that the operands match.  */
       for (args = insn->args;; ++args)
 	{
+	  /* Absorb white space in instruction.  */
+	  while (*s == ' ' || *s == '\t')
+	    s++;
+
 	  switch (*args)
 	    {
 
@@ -1645,6 +1649,13 @@ pa_ip (str)
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
+	    /* Handle an unsigned 10 bit immediate at 15.  */
+	    case 'U':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 1023, 0, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
+
 	    /* Handle a 2 bit space identifier at 17.  */
 	    case 's':
 	      num = pa_parse_number (&s, 0);
@@ -1747,6 +1758,47 @@ pa_ip (str)
 		    INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 		  }
 
+		/* Handle a local processor completer.  */
+		case 'L':
+		  if (strncasecmp (s, ",l", 2) != 0)
+		    break;
+		  s += 2;
+		  continue;
+
+		/* Handle a PROBE read/write completer.  */
+		case 'w':
+		  flag = 0;
+		  if (!strncasecmp (s, ",w", 2))
+		    {
+		      flag = 1;
+		      s += 2;
+		    }
+		  else if (!strncasecmp (s, ",r", 2))
+		    {
+		      flag = 0;
+		      s += 2;
+		    }
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 6);
+
+		/* Handle MFCTL wide completer.  */
+		case 'W':	
+		  if (strncasecmp (s, ",w", 2) != 0)
+		    break;
+		  s += 2;
+		  continue;
+
+		/* Handle an RFI restore completer.  */
+		case 'r':
+		  flag = 0;
+		  if (!strncasecmp (s, ",r", 2))
+		    {
+		      flag = 5;
+		      s += 2;
+		    }
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 5);
+
 		/* Handle a system control completer.  */
 		case 'Z':
 		  if (*s == ',' && (*(s + 1) == 'm' || *(s + 1) == 'M'))
@@ -1758,6 +1810,150 @@ pa_ip (str)
 		    flag = 0;
 
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 5);
+
+		/* Handle intermediate/final completer for DCOR.  */
+		case 'i':
+		  flag = 0;
+		  if (!strncasecmp (s, ",i", 2))
+		    {
+		      flag = 1;
+		      s += 2;
+		    }
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 6);
+
+		/* Handle add completer.  */
+		case 'a':
+		  flag = 1;
+		  if (!strncasecmp (s, ",l", 2))
+		    {
+		      flag = 2;
+		      s += 2;
+		    }
+		  else if (!strncasecmp (s, ",tsv", 4))
+		    {
+		      flag = 3;
+		      s += 4;
+		    }
+		  
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 10);
+
+		/* Handle 64 bit carry for ADD.  */
+		case 'Y':
+		  flag = 0;
+		  if (!strncasecmp (s, ",dc,tsv", 7) ||
+		      !strncasecmp (s, ",tsv,dc", 7))
+		    {
+		      flag = 1;
+		      s += 7;
+		    }
+		  else if (!strncasecmp (s, ",dc", 3))
+		    {
+		      flag = 0;
+		      s += 3;
+		    }
+		  else
+		    break;
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+		/* Handle 32 bit carry for ADD.  */
+		case 'y':
+		  flag = 0;
+		  if (!strncasecmp (s, ",c,tsv", 6) ||
+		      !strncasecmp (s, ",tsv,c", 6))
+		    {
+		      flag = 1;
+		      s += 6;
+		    }
+		  else if (!strncasecmp (s, ",c", 2))
+		    {
+		      flag = 0;
+		      s += 2;
+		    }
+		  else
+		    break;
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+		/* Handle trap on signed overflow.  */
+		case 'v':
+		  flag = 0;
+		  if (!strncasecmp (s, ",tsv", 4))
+		    {
+		      flag = 1;
+		      s += 4;
+		    }
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+		/* Handle trap on condition and overflow.  */
+		case 't':
+		  flag = 0;
+		  if (!strncasecmp (s, ",tc,tsv", 7) ||
+		      !strncasecmp (s, ",tsv,tc", 7))
+		    {
+		      flag = 1;
+		      s += 7;
+		    }
+		  else if (!strncasecmp (s, ",tc", 3))
+		    {
+		      flag = 0;
+		      s += 3;
+		    }
+		  else
+		    break;
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+		/* Handle 64 bit borrow for SUB.  */
+		case 'B':
+		  flag = 0;
+		  if (!strncasecmp (s, ",db,tsv", 7) ||
+		      !strncasecmp (s, ",tsv,db", 7))
+		    {
+		      flag = 1;
+		      s += 7;
+		    }
+		  else if (!strncasecmp (s, ",db", 3))
+		    {
+		      flag = 0;
+		      s += 3;
+		    }
+		  else
+		    break;
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+		/* Handle 32 bit borrow for SUB.  */
+		case 'b':
+		  flag = 0;
+		  if (!strncasecmp (s, ",b,tsv", 6) ||
+		      !strncasecmp (s, ",tsv,b", 6))
+		    {
+		      flag = 1;
+		      s += 6;
+		    }
+		  else if (!strncasecmp (s, ",b", 2))
+		    {
+		      flag = 0;
+		      s += 2;
+		    }
+		  else
+		    break;
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+		/* Handle trap condition completer for UADDCM.  */
+		case 'T':
+		  flag = 0;
+		  if (!strncasecmp (s, ",tc", 3))
+		    {
+		      flag = 1;
+		      s += 3;
+		    }
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 6);
 
 		/* Handle signed/unsigned at 21.  */
 		case 'S':
@@ -1885,6 +2081,7 @@ pa_ip (str)
 			  break;
 			name = s;
 
+			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -2049,6 +2246,7 @@ pa_ip (str)
 			  break;
 			name = s;
 			    
+			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -2186,6 +2384,7 @@ pa_ip (str)
 			  break;
 			name = s;
 			    
+			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
@@ -2254,6 +2453,7 @@ pa_ip (str)
 			  break;
 			name = s;
 			    
+			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
 			  s += 1;
 			c = *s;
