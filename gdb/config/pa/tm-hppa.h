@@ -149,17 +149,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define R0_REGNUM 0		/* Doesn't actually exist, used as base for
+				   other r registers.  */
 #define FLAGS_REGNUM 0		/* Various status flags */
 #define RP_REGNUM 2		/* return pointer */
 #define FP_REGNUM 3		/* Contains address of executing stack */
 				/* frame */
 #define SP_REGNUM 30		/* Contains address of top of stack */
-#define SAR_REGNUM 32		/* shift amount register */
-#define IPSW_REGNUM 41		/* processor status word. ? */
+#define SAR_REGNUM 32		/* Shift Amount Register */
+#define IPSW_REGNUM 41		/* Interrupt Processor Status Word */
 #define PCOQ_HEAD_REGNUM 33	/* instruction offset queue head */
 #define PCSQ_HEAD_REGNUM 34	/* instruction space queue head */
 #define PCOQ_TAIL_REGNUM 35	/* instruction offset queue tail */
 #define PCSQ_TAIL_REGNUM 36	/* instruction space queue tail */
+#define EIEM_REGNUM 37		/* External Interrupt Enable Mask */
+#define IIR_REGNUM 38		/* Interrupt Instruction Register */
+#define IOR_REGNUM 40		/* Interrupt Offset Register */
+#define SR4_REGNUM 43		/* space register 4 */
+#define RCR_REGNUM 51		/* Recover Counter (also known as cr0) */
+#define CCR_REGNUM 54		/* Coprocessor Configuration Register */
+#define TR0_REGNUM 57		/* Temporary Registers (cr24 -> cr31) */
 #define FP0_REGNUM 64		/* floating point reg. 0 */
 #define FP4_REGNUM 72
 
@@ -321,11 +330,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Push an empty stack frame, to record the current PC, etc. */
 
-#define PUSH_DUMMY_FRAME push_dummy_frame ()
+#define PUSH_DUMMY_FRAME push_dummy_frame (&inf_status)
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 #define POP_FRAME  hppa_pop_frame ()
+
+#define INSTRUCTION_SIZE 4
+
+#ifndef PA_LEVEL_0
+
+/* Non-level zero PA's have space registers (but they don't always have
+   floating-point, do they????  */
 
 /* This sequence of words is the instructions
 
@@ -343,11 +359,11 @@ call_dummy
 	fldds -4(0, r1), fr5
 	fldws -8(0, r1), fr6
 	fldds -12(0, r1), fr7
-	ldil 0, r22			; target will be placed here.
-	ldo 0(r22), r22
+	ldil 0, r22			; FUNC_LDIL_OFFSET must point here
+	ldo 0(r22), r22			; FUNC_LDO_OFFSET must point here
 	ldsid (0,r22), r4
-	ldil 0, r1			; _sr4export will be placed here.
-	ldo 0(r1), r1
+	ldil 0, r1			; SR4EXPORT_LDIL_OFFSET must point here
+	ldo 0(r1), r1			; SR4EXPORT_LDO_OFFSET must point here
 	ldsid (0,r1), r20
 	combt,=,n r4, r20, text_space	; If target is in data space, do a
 	ble 0(sr5, r22)			; "normal" procedure call
@@ -389,6 +405,14 @@ text_space				; Otherwise, go through _sr4export,
    avoid the kernel bug.  The second NOP is needed to keep the call
    dummy 8 byte aligned.  */
 
+/* Define offsets into the call dummy for the target function address */
+#define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 9)
+#define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 10)
+
+/* Define offsets into the call dummy for the _sr4export address */
+#define SR4EXPORT_LDIL_OFFSET (INSTRUCTION_SIZE * 12)
+#define SR4EXPORT_LDO_OFFSET (INSTRUCTION_SIZE * 13)
+
 #define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
                     0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
                     0x2C291007, 0x22C00000, 0x36D60000, 0x02C010A4,\
@@ -397,7 +421,39 @@ text_space				; Otherwise, go through _sr4export,
                     0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
                     0x00151820, 0xe6c00002, 0x08000240, 0x08000240}
 
-#define CALL_DUMMY_LENGTH 112
+#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
+
+#else /* defined PA_LEVEL_0 */
+
+/* This is the call dummy for a level 0 PA.  Level 0's don't have space
+   registers (or floating point??), so we skip all that inter-space call stuff,
+   and avoid touching the fp regs.
+
+call_dummy
+
+	ldw -36(%sp), %arg0
+	ldw -40(%sp), %arg1
+	ldw -44(%sp), %arg2
+	ldw -48(%sp), %arg3
+	ldil 0, %r31			; FUNC_LDIL_OFFSET must point here
+	ldo 0(%r31), %r31		; FUNC_LDO_OFFSET must point here
+	ble 0(0,%r31)
+	copy %r31, %r2
+	break 4, 8 
+*/
+
+/* Define offsets into the call dummy for the target function address */
+#define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 4)
+#define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 5)
+
+#define CALL_DUMMY {0x4bda3fb9, 0x4bd93fb1, 0x4bd83fa9, 0x4bd73fa1,\
+		    0x23e00000, 0x37ff0000, 0xe7e00000, 0x081f0242,\
+		    0x00010004}
+
+#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 9)
+
+#endif
+
 #define CALL_DUMMY_START_OFFSET 0
 
 /*
@@ -518,6 +574,7 @@ struct obj_unwind_info {
 
 extern CORE_ADDR target_read_pc PARAMS ((int));
 extern void target_write_pc PARAMS ((CORE_ADDR, int));
+extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
 
 #define TARGET_READ_PC(pid) target_read_pc (pid)
 #define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)

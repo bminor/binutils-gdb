@@ -251,6 +251,20 @@ extract_12 (word)
 		      (word & 0x1) << 11, 12) << 2;
 }
 
+/* Deposit a 17 bit constant in an instruction (like bl). */
+
+unsigned int
+deposit_17 (opnd, word)
+     unsigned opnd, word;
+{
+  word |= GET_FIELD (opnd, 15 + 0, 15 + 0); /* w */
+  word |= GET_FIELD (opnd, 15 + 1, 15 + 5) << 16; /* w1 */
+  word |= GET_FIELD (opnd, 15 + 6, 15 + 6) << 2; /* w2[10] */
+  word |= GET_FIELD (opnd, 15 + 7, 15 + 16) << 3; /* w2[0..9] */
+
+  return word;
+}
+
 /* extract a 17 bit constant from branch instructions, returning the
    19 bit signed value. */
 
@@ -767,6 +781,7 @@ frame_saved_pc (frame)
   if (pc_in_interrupt_handler (pc))
     return read_memory_integer (frame->frame + PC_REGNUM * 4, 4) & ~0x3;
 
+#ifdef FRAME_SAVED_PC_IN_SIGTRAMP
   /* Deal with signal handler caller frames too.  */
   if (frame->signal_handler_caller)
     {
@@ -774,6 +789,7 @@ frame_saved_pc (frame)
       FRAME_SAVED_PC_IN_SIGTRAMP (frame, &rp);
       return rp & ~0x3;
     }
+#endif
 
   if (frameless_function_invocation (frame))
     {
@@ -931,10 +947,12 @@ frame_chain (frame)
      code to dig a saved PC out of the save state structure.  */
   if (pc_in_interrupt_handler (frame->pc))
     frame_base = read_memory_integer (frame->frame + SP_REGNUM * 4, 4);
+#ifdef FRAME_BASE_BEFORE_SIGTRAMP
   else if (frame->signal_handler_caller)
     {
       FRAME_BASE_BEFORE_SIGTRAMP (frame, &frame_base);
     }
+#endif
   else
     frame_base = frame->frame;
 
@@ -1389,7 +1407,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      struct type *type;
      int gcc_p;
 {
-  CORE_ADDR dyncall_addr, sr4export_addr;
+  CORE_ADDR dyncall_addr;
   struct minimal_symbol *msymbol;
   int flags = read_register (FLAGS_REGNUM);
   struct unwind_table_entry *u;
@@ -1496,37 +1514,54 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
       fun = new_fun;
     }
 
-  /* We still need sr4export's address too.  */
-  msymbol = lookup_minimal_symbol ("_sr4export", NULL, NULL);
-  if (msymbol == NULL)
-    error ("Can't find an address for _sr4export trampoline");
-
-  sr4export_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+/* Store upper 21 bits of function address into ldil */
 
   store_unsigned_integer
-    (&dummy[9*REGISTER_SIZE],
-     REGISTER_SIZE,
+    (&dummy[FUNC_LDIL_OFFSET],
+     INSTRUCTION_SIZE,
      deposit_21 (fun >> 11,
-		 extract_unsigned_integer (&dummy[9*REGISTER_SIZE],
-					   REGISTER_SIZE)));
+		 extract_unsigned_integer (&dummy[FUNC_LDIL_OFFSET],
+					   INSTRUCTION_SIZE)));
+
+/* Store lower 11 bits of function address into ldo */
+
   store_unsigned_integer
-    (&dummy[10*REGISTER_SIZE],
-     REGISTER_SIZE,
+    (&dummy[FUNC_LDO_OFFSET],
+     INSTRUCTION_SIZE,
      deposit_14 (fun & MASK_11,
-		 extract_unsigned_integer (&dummy[10*REGISTER_SIZE],
-					   REGISTER_SIZE)));
-  store_unsigned_integer
-    (&dummy[12*REGISTER_SIZE],
-     REGISTER_SIZE,
-     deposit_21 (sr4export_addr >> 11,
-		 extract_unsigned_integer (&dummy[12*REGISTER_SIZE],
-					   REGISTER_SIZE)));
-  store_unsigned_integer
-    (&dummy[13*REGISTER_SIZE],
-     REGISTER_SIZE,
-     deposit_14 (sr4export_addr & MASK_11,
-		 extract_unsigned_integer (&dummy[13*REGISTER_SIZE],
-					   REGISTER_SIZE)));
+		 extract_unsigned_integer (&dummy[FUNC_LDO_OFFSET],
+					   INSTRUCTION_SIZE)));
+#ifdef SR4EXPORT_LDIL_OFFSET
+
+  {
+    CORE_ADDR sr4export_addr;
+
+    /* We still need sr4export's address too.  */
+
+    msymbol = lookup_minimal_symbol ("_sr4export", NULL, NULL);
+    if (msymbol == NULL)
+      error ("Can't find an address for _sr4export trampoline");
+
+    sr4export_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+
+/* Store upper 21 bits of sr4export's address into ldil */
+
+    store_unsigned_integer
+      (&dummy[SR4EXPORT_LDIL_OFFSET],
+       INSTRUCTION_SIZE,
+       deposit_21 (sr4export_addr >> 11,
+		   extract_unsigned_integer (&dummy[SR4EXPORT_LDIL_OFFSET],
+					     INSTRUCTION_SIZE)));
+/* Store lower 11 bits of sr4export's address into ldo */
+
+    store_unsigned_integer
+      (&dummy[SR4EXPORT_LDO_OFFSET],
+       INSTRUCTION_SIZE,
+       deposit_14 (sr4export_addr & MASK_11,
+		   extract_unsigned_integer (&dummy[SR4EXPORT_LDO_OFFSET],
+					     INSTRUCTION_SIZE)));
+  }
+#endif
 
   write_register (22, pc);
 
@@ -2411,12 +2446,14 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
       return;
     }
 
+#ifdef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
   /* Handle signal handler callers.  */
   if (frame_info->signal_handler_caller)
     {
       FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame_info, frame_saved_regs);
       return;
     }
+#endif
 
   /* Get the starting address of the function referred to by the PC
      saved in frame.  */

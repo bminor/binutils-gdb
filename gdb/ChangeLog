@@ -1,3 +1,28 @@
+Wed Apr 19 16:58:11 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* hppa-tdep.c (deposit_17):  New routine to deposit 17 bit
+	constants into PA instructions.
+	* Put #ifdefs around all signal handling code.  Not generally
+	needed for embedded boards.
+	* (hppa_fix_call_dummy):  Parameterize offsets into call dummy to
+	allow different dummys to be used by this code.  Use
+	INSTRUCTION_SIZE instead of REGISTER_SIZE for things.
+	Conditionalize setup of _sr4export fixup.  Improve comments.
+	* config/pa/tm-hppa.h:  Define INSTRUCTION_SIZE.  Use a different
+	call dummy if PA_LEVEL_0 is defined.  Better comments for call
+	dummys.  Define offsets for LDIL/LDO instructions which load
+	function addresses.
+	* config/pa/tm-pro.h:  Get rid of signal handling stuff.  Define
+	PA_LEVEL_0 to disable mucking with space regs and such.
+
+Mon Apr 17 15:37:08 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* cpu32bug-rom.c monitor.h op50-rom.c remote-est.c rom68k-rom.c
+	w89k-rom.c:  Remove loadtypes, loadprotos and baudrates.
+	* op50-rom.c:  Fix copyrights and add load routine to op50n_cmds.
+	* rom68k-rom.c (_initialize_rom68k):  Don't set baud rate.
+	* w89k-rom.c:  Fix copyrights.
+
 Sun Apr 16 14:00:55 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* monitor.c:  Move all xmodem stuff into xmodem.[ch].  Remove
