@@ -129,8 +129,6 @@ struct gdbarch_tdep
     int mips_default_stack_argsize;
     int gdb_target_is_mips64;
     int default_mask_address_p;
-
-    enum gdb_osabi osabi;
   };
 
 #define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI32 \
@@ -5607,7 +5605,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   struct gdbarch_tdep *tdep;
   int elf_flags;
   enum mips_abi mips_abi, found_abi, wanted_abi;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Reset the disassembly info, in case it was set to something
      non-default.  */
@@ -5622,10 +5619,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       /* First of all, extract the elf_flags, if available.  */
       if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
 	elf_flags = elf_elfheader (info.abfd)->e_flags;
-
-      /* Try to determine the OS ABI of the object we are loading.  If
-	 we end up with `unknown', just leave it that way.  */
-      osabi = gdbarch_lookup_osabi (info.abfd);
     }
 
   /* Check ELF_FLAGS to see if it specifies the ABI being used.  */
@@ -5722,15 +5715,13 @@ mips_gdbarch_init (struct gdbarch_info info,
 	continue;
       if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
 	continue;
-      if (gdbarch_tdep (arches->gdbarch)->osabi == osabi)
-        return arches->gdbarch;
+      return arches->gdbarch;
     }
 
   /* Need a new architecture.  Fill in a target specific vector.  */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
-  tdep->osabi = osabi;
 
   /* Initially set everything according to the default ABI/ISA.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -5747,7 +5738,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_elf_make_msymbol_special (gdbarch, 
 					mips_elf_make_msymbol_special);
 
-  if (osabi == GDB_OSABI_IRIX)
+  if (info.osabi == GDB_OSABI_IRIX)
     set_gdbarch_num_regs (gdbarch, 71);
   else
     set_gdbarch_num_regs (gdbarch, 90);
@@ -6027,7 +6018,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   set_gdbarch_store_struct_return (gdbarch, mips_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, 
@@ -6432,10 +6423,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: _PROC_MAGIC_ = %d\n",
 		      _PROC_MAGIC_);
-
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void

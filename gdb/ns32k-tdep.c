@@ -1,6 +1,6 @@
 /* Target dependent code for the NS32000, for GDB.
    Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,8 +26,8 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
-
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "ns32k-tdep.h"
 #include "gdb_string.h"
@@ -536,35 +536,18 @@ ns32k_gdbarch_init_32382 (struct gdbarch *gdbarch)
 static struct gdbarch *
 ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Try to determine the OS ABI of the object we are loading.  */
-  if (info.abfd != NULL)
-    {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-    }
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
-  /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the OS ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
-
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch = gdbarch_alloc (&info, NULL);
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
-  tdep->osabi = osabi;
 
   /* Register info */
   ns32k_gdbarch_init_32082 (gdbarch);
@@ -631,27 +614,15 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return (gdbarch);
-}
-
-static void
-ns32k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (tdep == NULL)
-    return;
-
-  fprintf_unfiltered (file, "ns32k_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void
 _initialize_ns32k_tdep (void)
 {
-  gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, ns32k_dump_tdep);
+  gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, NULL);
 
   tm_print_insn = print_insn_ns32k;
 }

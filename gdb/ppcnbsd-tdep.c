@@ -1,5 +1,5 @@
 /* Target-dependent code for PowerPC systems running NetBSD.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -25,6 +25,7 @@
 #include "target.h"
 #include "breakpoint.h"
 #include "value.h"
+#include "osabi.h"
 
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"

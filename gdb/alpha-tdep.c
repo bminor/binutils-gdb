@@ -34,6 +34,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "elf-bfd.h"
 
@@ -1769,36 +1770,22 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Try to determine the ABI of the object we are loading.  */
-
-  if (info.abfd != NULL)
+  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
     {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-      if (osabi == GDB_OSABI_UNKNOWN)
-	{
-	  /* If it's an ECOFF file, assume it's OSF/1.  */
-	  if (bfd_get_flavour (info.abfd) == bfd_target_ecoff_flavour)
-	    osabi = GDB_OSABI_OSF1;
-	}
+      /* If it's an ECOFF file, assume it's OSF/1.  */
+      if (bfd_get_flavour (info.abfd) == bfd_target_ecoff_flavour)
+	osabi = GDB_OSABI_OSF1;
     }
 
   /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-
-  tdep->osabi = osabi;
 
   /* Lowest text address.  This is used by heuristic_proc_start() to
      decide when to stop looking.  */
@@ -1909,7 +1896,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   /* Now that we have tuned the configuration, set a few final things
      based on what the OS ABI has told us.  */
@@ -1927,9 +1914,6 @@ alpha_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 
   if (tdep == NULL)
     return;
-
-  fprintf_unfiltered (file, "alpha_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 
   fprintf_unfiltered (file,
                       "alpha_dump_tdep: vm_min_address = 0x%lx\n",

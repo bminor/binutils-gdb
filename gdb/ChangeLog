@@ -1,5 +1,107 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* arch-utils.c (gdbarch_info_init): Set osabi to
+	GDB_OSABI_UNINITIALIZED.
+	* gdbarch.sh: Add osabi to struct gdbarch and to struct
+	gdbarch_info.  Include "osabi.h" in gdbarch.c.  Check osabi
+	in gdbarch_list_lookup_by_info and in gdbarch_update_p.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* osabi.c (gdbarch_lookup_osabi): Return GDB_OSABI_UNINITIALIZED if
+	there's no BFD.
+	(gdbarch_init_osabi): Remove osabi argument; use info.osabi.
+	* osabi.h (enum gdb_osabi): Move to defs.h.
+	(gdbarch_init_osabi): Update prototype.
+	* defs.h (enum gdb_osabi): Moved here.
+	* Makefile.in: Update dependencies.
+
+	* alpha-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove osabi member.
+	* alpha-tdep.c: Include "osabi.h".
+	(alpha_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	iterate over arches.  Update call to gdbarch_init_osabi.
+	(alpha_dump_tdep): Don't dump osabi.
+	* alpha-linux-tdep.c: Include "osabi.h".
+	* alpha-osf1-tdep.c: Include "osabi.h".
+	* alphafbsd-tdep.c: Include "osabi.h".
+	* alphanbsd-tdep.c: Include "osabi.h".
+
+	* arm-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove osabi member.
+	* arm-tdep.c: Include "osabi.h".
+	(arm_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	iterate over arches.  Update call to gdbarch_init_osabi.
+	(arm_dump_tdep): Don't dump osabi.
+	* arm-linux-tdep.c: Include "osabi.h".
+	* armnbsd-tdep.c: Include "osabi.h".
+
+	* hppa-tdep.c (hppa_gdbarch_init): Don't call gdbarch_lookup_osabi.
+	Update call to gdbarch_init_osabi.
+
+	* i386-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove osabi member.
+	* i386-tdep.c: Include "osabi.h".
+	(i386_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	iterate over arches.  Update call to gdbarch_init_osabi.
+	(i386_dump_tdep): Don't dump osabi.
+	* i386-linux-tdep.c: Include "osabi.h".
+	* i386-sol2-tdep.c: Include "osabi.h".
+	* i386bsd-tdep.c: Include "osabi.h".
+	* i386gnu-tdep.c: Include "osabi.h".
+	* i386ly-tdep.c: Include "osabi.h".
+	* i386nbsd-tdep.c: Include "osabi.h".
+	* i386obsd-tdep.c: Include "osabi.h".
+
+	* mips-tdep.c (struct gdbarch_tdep): Remove osabi member.
+	(mips_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	check osabi when iterating over arches.  Update call to
+	gdbarch_init_osabi.
+	(mips_dump_tdep): Don't dump osabi.
+
+	* ns32k-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Don't call
+	gdbarch_lookup_osabi.  Don't iterate over arches.  Don't
+	allocate tdep.  Update call to gdbarch_init_osabi.
+	(ns32k_dump_tdep): Remove.
+	(_initialize_ns32k_tdep): Update call to gdbarch_register.
+	* ns32knbsd-tdep.c: Include "osabi.h".
+
+	* ppc-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove osabi member.
+	* rs6000-tdep.c: Include "osabi.h".
+	(rs6000_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't check
+	osabi when iterating over arches.  Update call to
+	gdbarch_init_osabi.
+	(rs6000_dump_tdep): Don't dump osabi.
+	* ppc-linux-tdep.c: Include "osabi.h".
+	* ppcnbsd-tdep.c: Include "osabi.h".
+
+	* sh-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove osabi member.
+	* sh-tdep.c: Include "osabi.h".
+	(sh_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	iterate over arches.  Update call to gdbarch_init_osabi.
+	(sh_dump_tdep): Don't dump osabi.
+	* shnbsd-tdep.c: Include "osabi.h".
+
+	* sparc-tdep.c: Include "osabi.h".
+	(sparc_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	iterate over arches.  Update call to gdbarch_init_osabi.
+	(sparc_dump_tdep): Don't dump osabi.  Do dump the rest of the
+	tdep structure.
+
+	* vax-tdep.h: Don't include "osabi.h".
+	(struct gdbarch_tdep): Remove.
+	* vax-tdep.c: Include "osabi.h".
+	(vax_gdbarch_init): Don't call gdbarch_lookup_osabi.  Don't
+	iterate over arches.  Don't allocate tdep.  Update call
+	to gdbarch_init_osabi.
+	(vax_dump_tdep): Remove.
+	(_initialize_vax_tdep): Update call to gdbarch_register.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (insert_breakpoints): Skip disabled breakpoints
 	entirely.
 	(breakpoint_re_set_one): Don't fetch the value for a disabled

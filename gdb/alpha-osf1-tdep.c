@@ -1,5 +1,5 @@
 /* Target-dependent code for OSF/1 on Alpha.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "value.h"
+#include "osabi.h"
 
 #include "alpha-tdep.h"
 

@@ -1,5 +1,5 @@
 /* OS ABI variant handling for GDB.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -171,6 +171,9 @@ gdbarch_lookup_osabi (bfd *abfd)
   enum gdb_osabi osabi, match;
   int match_specific;
 
+  if (abfd == NULL)
+    return GDB_OSABI_UNINITIALIZED;
+
   match = GDB_OSABI_UNKNOWN;
   match_specific = 0;
 
@@ -234,14 +237,13 @@ gdbarch_lookup_osabi (bfd *abfd)
 }
 
 void
-gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
-                    enum gdb_osabi osabi)
+gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
   const struct bfd_arch_info *compatible;
   struct gdb_osabi_handler *handler;
 
-  if (osabi == GDB_OSABI_UNKNOWN)
+  if (info.osabi == GDB_OSABI_UNKNOWN)
     {
       /* Don't complain about an unknown OSABI.  Assume the user knows
          what they are doing.  */
@@ -251,7 +253,7 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
   for (handler = gdb_osabi_handler_list; handler != NULL;
        handler = handler->next)
     {
-      if (handler->osabi != osabi)
+      if (handler->osabi != info.osabi)
 	continue;
 
       /* Check whether the machine type and architecture of the
@@ -279,7 +281,7 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
        "A handler for the OS ABI \"%s\" is not built into this "
        "configuration of GDB.  "
        "Attempting to continue with the default %s settings",
-       gdbarch_osabi_name (osabi),
+       gdbarch_osabi_name (info.osabi),
        bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
 }
 

@@ -387,6 +387,8 @@ function_list ()
 i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
 #
 i:2:TARGET_BYTE_ORDER:int:byte_order::::BFD_ENDIAN_BIG
+#
+i:2:TARGET_OSABI:enum gdb_osabi:osabi::::GDB_OSABI_UNKNOWN
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
@@ -1043,6 +1045,9 @@ struct gdbarch_info
 
   /* Use default: NULL (ZERO). */
   struct gdbarch_tdep_info *tdep_info;
+
+  /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
+  enum gdb_osabi osabi;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1263,6 +1268,7 @@ cat <<EOF
 #include "gdb_string.h"
 #include "gdb-events.h"
 #include "reggroups.h"
+#include "osabi.h"
 
 /* Static function declarations */
 
@@ -2133,6 +2139,8 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->byte_order != arches->gdbarch->byte_order)
 	continue;
+      if (info->osabi != arches->gdbarch->osabi)
+	continue;
       return arches;
     }
   return NULL;
@@ -2178,6 +2186,12 @@ gdbarch_update_p (struct gdbarch_info info)
   if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     info.byte_order = TARGET_BYTE_ORDER;
 
+  /* \`\`(gdb) set osabi ...'' is handled by gdbarch_lookup_osabi.  */
+  if (info.osabi == GDB_OSABI_UNINITIALIZED)
+    info.osabi = gdbarch_lookup_osabi (info.abfd);
+  if (info.osabi == GDB_OSABI_UNINITIALIZED)
+    info.osabi = current_gdbarch->osabi;
+
   /* Must have found some sort of architecture. */
   gdb_assert (info.bfd_arch_info != NULL);
 
@@ -2194,6 +2208,9 @@ gdbarch_update_p (struct gdbarch_info info)
 			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
 			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.osabi %d (%s)\n",
+			  info.osabi, gdbarch_osabi_name (info.osabi));
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.abfd 0x%lx\n",
 			  (long) info.abfd);

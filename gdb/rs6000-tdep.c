@@ -34,6 +34,7 @@
 #include "doublest.h"
 #include "value.h"
 #include "parser-defs.h"
+#include "osabi.h"
 
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -2657,7 +2658,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   unsigned long mach;
   bfd abfd;
   int sysv_abi;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
   asection *sect;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
@@ -2667,9 +2667,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
 
   sysv_abi = info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
-
-  if (info.abfd)
-    osabi = gdbarch_lookup_osabi (info.abfd);
 
   /* Check word size.  If INFO is from a binary file, infer it from
      that, else choose a likely default.  */
@@ -2705,7 +2702,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
          separate word size check.  */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->wordsize == wordsize && tdep->osabi == osabi)
+      if (tdep && tdep->wordsize == wordsize)
 	return arches->gdbarch;
     }
 
@@ -2731,7 +2728,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;
-  tdep->osabi = osabi;
 
   /* For e500 executables, the apuinfo section is of help here.  Such
      section contains the identifier and revision number of each
@@ -2958,7 +2954,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }
@@ -2971,8 +2967,7 @@ rs6000_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, "rs6000_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
+  /* FIXME: Dump gdbarch_tdep.  */
 }
 
 static struct cmd_list_element *info_powerpc_cmdlist = NULL;

@@ -34,6 +34,7 @@
 #include "value.h"
 #include "arch-utils.h"
 #include "solib-svr4.h"
+#include "osabi.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -2814,44 +2815,33 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Try to deterimine the ABI of the object we are loading.  */
 
-  if (info.abfd != NULL)
+  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
     {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-      if (osabi == GDB_OSABI_UNKNOWN)
+      switch (bfd_get_flavour (info.abfd))
 	{
-	  switch (bfd_get_flavour (info.abfd))
-	    {
-	    case bfd_target_aout_flavour:
-	      /* Assume it's an old APCS-style ABI.  */
-	      osabi = GDB_OSABI_ARM_APCS;
-	      break;
+	case bfd_target_aout_flavour:
+	  /* Assume it's an old APCS-style ABI.  */
+	  info.osabi = GDB_OSABI_ARM_APCS;
+	  break;
 
-	    case bfd_target_coff_flavour:
-	      /* Assume it's an old APCS-style ABI.  */
-	      /* XXX WinCE?  */
-	      osabi = GDB_OSABI_ARM_APCS;
-	      break;
+	case bfd_target_coff_flavour:
+	  /* Assume it's an old APCS-style ABI.  */
+	  /* XXX WinCE?  */
+	  info.osabi = GDB_OSABI_ARM_APCS;
+	  break;
 
-	    default:
-	      /* Leave it as "unknown".  */
-	    }
+	default:
+	  /* Leave it as "unknown".  */
 	}
     }
 
-  /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -2859,8 +2849,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
-  tdep->osabi = osabi;
 
   /* This is the way it has always defaulted.  */
   tdep->fp_model = ARM_FLOAT_FPA;
@@ -2992,7 +2980,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					 arm_coff_make_msymbol_special);
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   /* Now we have tuned the configuration, set a few final things,
      based on what the OS ABI has told us.  */
@@ -3057,9 +3045,6 @@ arm_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 
   if (tdep == NULL)
     return;
-
-  fprintf_unfiltered (file, "arm_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 
   fprintf_unfiltered (file, "arm_dump_tdep: Lowest pc = 0x%lx",
 		      (unsigned long) tdep->lowest_pc);

@@ -65,6 +65,7 @@
 #include "gdb_string.h"
 #include "gdb-events.h"
 #include "reggroups.h"
+#include "osabi.h"
 
 /* Static function declarations */
 
@@ -93,6 +94,7 @@ struct gdbarch
   /* basic architectural information */
   const struct bfd_arch_info * bfd_arch_info;
   int byte_order;
+  enum gdb_osabi osabi;
 
   /* target specific vector. */
   struct gdbarch_tdep *tdep;
@@ -289,6 +291,7 @@ struct gdbarch startup_gdbarch =
   /* basic architecture information */
   &bfd_default_arch_struct,
   BFD_ENDIAN_BIG,
+  GDB_OSABI_UNKNOWN,
   /* target specific vector and its dump routine */
   NULL, NULL,
   /*per-architecture data-pointers and swap regions */
@@ -478,6 +481,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   current_gdbarch->bfd_arch_info = info->bfd_arch_info;
   current_gdbarch->byte_order = info->byte_order;
+  current_gdbarch->osabi = info->osabi;
 
   /* Force the explicit initialization of these. */
   current_gdbarch->short_bit = 2*TARGET_CHAR_BIT;
@@ -2380,6 +2384,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_LONG_LONG_BIT = %d\n",
                       TARGET_LONG_LONG_BIT);
 #endif
+#ifdef TARGET_OSABI
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_OSABI # %s\n",
+                      XSTRING (TARGET_OSABI));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_OSABI = %ld\n",
+                      (long) TARGET_OSABI);
+#endif
 #ifdef TARGET_PRINT_INSN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2536,6 +2548,15 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_byte_order called\n");
   return gdbarch->byte_order;
+}
+
+enum gdb_osabi
+gdbarch_osabi (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_osabi called\n");
+  return gdbarch->osabi;
 }
 
 int
@@ -5745,6 +5766,8 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->byte_order != arches->gdbarch->byte_order)
 	continue;
+      if (info->osabi != arches->gdbarch->osabi)
+	continue;
       return arches;
     }
   return NULL;
@@ -5790,6 +5813,12 @@ gdbarch_update_p (struct gdbarch_info info)
   if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     info.byte_order = TARGET_BYTE_ORDER;
 
+  /* ``(gdb) set osabi ...'' is handled by gdbarch_lookup_osabi.  */
+  if (info.osabi == GDB_OSABI_UNINITIALIZED)
+    info.osabi = gdbarch_lookup_osabi (info.abfd);
+  if (info.osabi == GDB_OSABI_UNINITIALIZED)
+    info.osabi = current_gdbarch->osabi;
+
   /* Must have found some sort of architecture. */
   gdb_assert (info.bfd_arch_info != NULL);
 
@@ -5806,6 +5835,9 @@ gdbarch_update_p (struct gdbarch_info info)
 			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
 			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.osabi %d (%s)\n",
+			  info.osabi, gdbarch_osabi_name (info.osabi));
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.abfd 0x%lx\n",
 			  (long) info.abfd);

@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 2000
+   Copyright 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,8 +21,6 @@
 
 #ifndef PPC_TDEP_H
 #define PPC_TDEP_H
-
-#include "osabi.h"
 
 struct frame_info;
 struct value;
@@ -56,7 +54,6 @@ int altivec_register_p (int regno);
 struct gdbarch_tdep
   {
     int wordsize;              /* size in bytes of fixed-point word */
-    enum gdb_osabi osabi;      /* OS / ABI from ELF header */
     int *regoff;               /* byte offsets in register arrays */
     const struct reg *regs;    /* from current variant */
     int ppc_gp0_regnum;		/* GPR register 0 */

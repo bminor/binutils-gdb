@@ -1,5 +1,5 @@
 /* Target-specific definition for a Hitachi Super-H.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,8 +21,6 @@
 
 #ifndef SH_TDEP_H
 #define SH_TDEP_H
-
-#include "osabi.h"
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
@@ -89,7 +87,6 @@ struct gdbarch_tdep
     int ARGLAST_REGNUM;
     int FLOAT_ARGLAST_REGNUM;
     int RETURN_REGNUM;
-    enum gdb_osabi osabi;	/* OS/ABI of the inferior */
     enum sh_abi sh_abi;
   };
 

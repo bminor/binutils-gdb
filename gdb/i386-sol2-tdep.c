@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "value.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 

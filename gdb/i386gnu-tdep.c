@@ -1,5 +1,5 @@
 /* Target-dependent code for the GNU Hurd.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 

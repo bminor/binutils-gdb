@@ -1,5 +1,5 @@
 /* Print VAX instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000, 2002
+   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -29,6 +29,7 @@
 #include "value.h"
 #include "arch-utils.h"
 #include "gdb_string.h"
+#include "osabi.h"
 
 #include "vax-tdep.h"
 
@@ -609,34 +610,18 @@ print_insn_arg (char *d, register char *p, CORE_ADDR addr,
 static struct gdbarch *
 vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Try to determine the ABI of the object we are loading.  */
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
-  if (info.abfd != NULL)
-    osabi = gdbarch_lookup_osabi (info.abfd);
-
-  /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
-
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch = gdbarch_alloc (&info, NULL);
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
-  tdep->osabi = osabi;
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);
@@ -707,27 +692,15 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return (gdbarch);
-}
-
-static void
-vax_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (tdep == NULL)
-    return;
-
-  fprintf_unfiltered (file, "vax_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void
 _initialize_vax_tdep (void)
 {
-  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, vax_dump_tdep);
+  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
 
   tm_print_insn = vax_print_insn;
 }

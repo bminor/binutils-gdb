@@ -39,6 +39,7 @@
 #include "floatformat.h"
 #include "regcache.h"
 #include "doublest.h"
+#include "osabi.h"
 
 #include "sh-tdep.h"
 
@@ -4210,26 +4211,11 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_register_name_ftype *sh_register_name;
   gdbarch_deprecated_store_return_value_ftype *sh_store_return_value;
   gdbarch_register_virtual_type_ftype *sh_register_virtual_type;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Try to determine the ABI of the object we are loading.  */
-
-  if (info.abfd != NULL)
-    {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-      /* If we get "unknown" back, just leave it that way.  */
-    }
-
-  /* Find a candidate among the list of pre-declared architectures. */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   /* None found, create a new architecture from the information
      provided. */
@@ -4239,8 +4225,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
-  tdep->osabi = osabi;
 
   /* Initialize the register numbers that are not common to all the
      variants to -1, if necessary thse will be overwritten in the case
@@ -4587,11 +4571,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  /* Hook in ABI-specific overrides, if they have been registered.
-
-     FIXME: if the ABI is unknown, this is probably an embedded target,
-     so we should not warn about this situation.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }
@@ -4604,8 +4585,7 @@ sh_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, "sh_dump_tdep: OS ABI = %s\n",
-                      gdbarch_osabi_name (tdep->osabi));
+  /* FIXME: dump the rest of gdbarch_tdep.  */
 }
 
 void

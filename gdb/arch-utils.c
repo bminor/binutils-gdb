@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    This file is part of GDB.
@@ -911,6 +911,7 @@ gdbarch_info_init (struct gdbarch_info *info)
 {
   memset (info, 0, sizeof (struct gdbarch_info));
   info->byte_order = BFD_ENDIAN_UNKNOWN;
+  info->osabi = GDB_OSABI_UNINITIALIZED;
 }
 
 /* */

@@ -95,6 +95,17 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 #endif
 #endif
 
+extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
+/* set_gdbarch_osabi() - not applicable - pre-initialized. */
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_OSABI)
+#error "Non multi-arch definition of TARGET_OSABI"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_OSABI)
+#define TARGET_OSABI (gdbarch_osabi (current_gdbarch))
+#endif
+#endif
+
 
 /* The following are initialized by the target dependent code. */
 
@@ -2841,6 +2852,9 @@ struct gdbarch_info
 
   /* Use default: NULL (ZERO). */
   struct gdbarch_tdep_info *tdep_info;
+
+  /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
+  enum gdb_osabi osabi;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);

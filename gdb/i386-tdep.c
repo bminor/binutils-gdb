@@ -1,7 +1,7 @@
 /* Intel 386 target-dependent stuff.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,6 +39,7 @@
 #include "gdb_assert.h"
 #include "reggroups.h"
 #include "dummy-frame.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -1499,22 +1500,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Try to determine the OS ABI of the object we're loading.  */
-  if (info.abfd != NULL)
-    osabi = gdbarch_lookup_osabi (info.abfd);
-
-  /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the OS ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-        return arches->gdbarch;
-    }
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
   tdep = XMALLOC (struct gdbarch_tdep);
@@ -1523,8 +1513,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
-  tdep->osabi = osabi;
 
   /* The i386 default settings don't include the SSE registers.
      FIXME: kettenis/20020614: They do include the FPU registers for
@@ -1652,7 +1640,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

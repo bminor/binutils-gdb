@@ -1,5 +1,5 @@
 /* Target-dependent code for NetBSD/i386, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -24,6 +24,7 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"

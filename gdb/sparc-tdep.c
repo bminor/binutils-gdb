@@ -111,8 +111,6 @@ struct gdbarch_tdep
     int reg_save_offset;
     int call_dummy_call_offset;
     int print_insn_mach;
-
-    enum gdb_osabi osabi;
   };
 
 /* Now make GDB_TARGET_IS_SPARC64 a runtime test.  */
@@ -3069,7 +3067,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   static LONGEST call_dummy_32[] = 
     { 0xbc100001, 0x9de38000, 0xbc100002, 0xbe100003,
@@ -3095,27 +3092,18 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Try to determine the OS ABI of the object we are loading.  */
 
-  if (info.abfd != NULL)
+  if (info.abfd != NULL
+      && info.osabi == GDB_OSABI_UNKNOWN)
     {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-      if (osabi == GDB_OSABI_UNKNOWN)
-	{
-	  /* If it's an ELF file, assume it's Solaris.  */
-	  if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-	    osabi = GDB_OSABI_SOLARIS;
-	}
+      /* If it's an ELF file, assume it's Solaris.  */
+      if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+	info.osabi = GDB_OSABI_SOLARIS;
     }
 
   /* First see if there is already a gdbarch that can satisfy the request.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   /* None found: is the request for a sparc architecture? */
   if (info.bfd_arch_info->arch != bfd_arch_sparc)
@@ -3124,8 +3112,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Yes: create a new gdbarch for the specified machine type.  */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-
-  tdep->osabi = osabi;
 
   /* First set settings that are common for all sparc architectures.  */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
@@ -3435,7 +3421,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }
@@ -3448,6 +3434,20 @@ sparc_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, "sparc_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
+  fprintf_unfiltered (file, "sparc_dump_tdep: has_fpu = %d\n",
+		      tdep->has_fpu);
+  fprintf_unfiltered (file, "sparc_dump_tdep: fp_register_bytes = %d\n",
+		      tdep->fp_register_bytes);
+  fprintf_unfiltered (file, "sparc_dump_tdep: y_regnum = %d\n",
+		      tdep->y_regnum);
+  fprintf_unfiltered (file, "sparc_dump_tdep: fp_max_regnum = %d\n",
+		      tdep->fp_max_regnum);
+  fprintf_unfiltered (file, "sparc_dump_tdep: intreg_size = %d\n",
+		      tdep->intreg_size);
+  fprintf_unfiltered (file, "sparc_dump_tdep: reg_save_offset = %d\n",
+		      tdep->reg_save_offset);
+  fprintf_unfiltered (file, "sparc_dump_tdep: call_dummy_call_offset = %d\n",
+		      tdep->call_dummy_call_offset);
+  fprintf_unfiltered (file, "sparc_dump_tdep: print_insn_match = %d\n",
+		      tdep->print_insn_match);
 }

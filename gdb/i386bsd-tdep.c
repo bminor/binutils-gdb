@@ -1,5 +1,5 @@
 /* Target-dependent code for i386 BSD's.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "frame.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "osabi.h"
 
 #include "gdb_string.h"
 

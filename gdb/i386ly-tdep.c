@@ -1,5 +1,5 @@
 /* Target-dependent code for Intel 386 running LynxOS.
-   Copyright 1993, 1996, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1993, 1996, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
+#include "osabi.h"
 
 #include "i386-tdep.h"
 

@@ -1,5 +1,5 @@
 /* Target-dependent code for NS32000 systems running NetBSD.
-   Copyright 2002 Free Software Foundation, Inc. 
+   Copyright 2002, 2003 Free Software Foundation, Inc. 
    Contributed by Wasabi Systems, Inc. 
  
    This file is part of GDB.
@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "osabi.h"
 
 #include "ns32k-tdep.h"
 #include "gdb_string.h"

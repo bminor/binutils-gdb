@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux running on i386's, for GDB.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,8 @@
 #include "objfiles.h"
 
 #include "solib-svr4.h"		/* For struct link_map_offsets.  */
+
+#include "osabi.h"
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"

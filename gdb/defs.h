@@ -977,6 +977,39 @@ extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void vwarning (const char *, va_list args);
 
+/* List of known OS ABIs.  If you change this, make sure to update the
+   table in osabi.c.  */
+enum gdb_osabi
+{
+  GDB_OSABI_UNINITIALIZED = -1, /* For struct gdbarch_info.  */
+
+  GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
+
+  GDB_OSABI_SVR4,
+  GDB_OSABI_HURD,
+  GDB_OSABI_SOLARIS,
+  GDB_OSABI_OSF1,
+  GDB_OSABI_LINUX,
+  GDB_OSABI_FREEBSD_AOUT,
+  GDB_OSABI_FREEBSD_ELF,
+  GDB_OSABI_NETBSD_AOUT,
+  GDB_OSABI_NETBSD_ELF,
+  GDB_OSABI_WINCE,
+  GDB_OSABI_GO32,
+  GDB_OSABI_NETWARE,
+  GDB_OSABI_IRIX,
+  GDB_OSABI_LYNXOS,
+  GDB_OSABI_INTERIX,
+  GDB_OSABI_HPUX_ELF,
+  GDB_OSABI_HPUX_SOM,
+
+  GDB_OSABI_ARM_EABI_V1,
+  GDB_OSABI_ARM_EABI_V2,
+  GDB_OSABI_ARM_APCS,
+
+  GDB_OSABI_INVALID		/* keep this last */
+};
+
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h
    above, instead.  */

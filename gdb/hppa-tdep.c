@@ -4945,19 +4945,13 @@ static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
   
   /* Try to determine the ABI of the object we are loading.  */
-
-  if (info.abfd != NULL)
+  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
     {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-      if (osabi == GDB_OSABI_UNKNOWN)
-	{
-	  /* If it's a SOM file, assume it's HP/UX SOM.  */
-	  if (bfd_get_flavour (info.abfd) == bfd_target_som_flavour)
-	    osabi = GDB_OSABI_HPUX_SOM;
-	}
+      /* If it's a SOM file, assume it's HP/UX SOM.  */
+      if (bfd_get_flavour (info.abfd) == bfd_target_som_flavour)
+	info.osabi = GDB_OSABI_HPUX_SOM;
     }
 
   /* find a candidate among the list of pre-declared architectures.  */
@@ -4969,7 +4963,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, NULL);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   set_gdbarch_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
   set_gdbarch_function_start_offset (gdbarch, 0);
