@@ -1,3 +1,48 @@
+Thu Mar 26 17:01:18 1992  Fred Fish  (fnf@cygnus.com)
+
+	* coffread.c (coff_symfile_init):  Update comment.
+	* dbxread.c (DBX_SYMFILE_INFO, DBX_TEXT_SECT, DBX_SYMCOUNT,
+	DBX_STRINGTAB, DBX_STRINGTAB_SIZE, DBX_SYMTAB_OFFSET):  Define
+	macros to access the dbx specific objfile information.
+	* dbxread.c (symfile_string_table, symfile_string_table_size):
+	Remove these local variables.
+	* dbxread.c (read_ofile_symtab, psymtab_to_symtab_1,
+	read_dbx_symtab):  Remove the stringtab and stringtab_size params
+	from the function prototypes, the function definition, and the
+	function calls.  These are now available via DBX_STRINGTAB and
+	DBX_STRINGTAB_SIZE using the objfile pointer.
+	* dbxread.c (dbx_symfile_read):  Relocate addr before using as
+	an arg to read_dbx_symtab.
+	* dbxread.c (dbx_symfile_read):  Remove code that free'd the
+	stringtab and the dbx specific per-objfile private info.
+	* dbxread.c (init_psymbol_list):  Remove symbol count from passed
+	args in prototype, function definition, and function calls.  It is
+	now available via the DBX_SYMCOUNT macro using the objfile
+	pointer.
+	* dbxread.c (dbx_symfile_read, dbx_symfile_init):  Remove the
+	local instance of struct dbx_symfile_info and replace with DBX_*
+	macros.
+	* dbxread.c (dbx_symfile_read):  Remove init's of now deleted
+	symfile_string_table and symfile_string_table_size.
+	* dbxread.c (dbx_symfile_finish):  Remove now obsolete free of
+	symfile_string_table.
+	* dbxread.c (init_psymbol_list):  Use DBX_SYMCOUNT.
+	* dbxread.c (dbx_psymtab_to_symtab):  Remove local stringtab and
+	stringtab size variables.  Remove all code that used to reread
+	the stringtab.
+	* objfiles.c (allocate_objfile):  Move calls to init_malloc()
+	to prior to any calls to mmalloc for the objfile specific heap.
+	* utils.c (init_malloc):  Document the requirement that for each
+	heap for which corruption checking is desired, that init_mmalloc
+	must be called prior to any mmalloc calls on the heap.
+
+Thu Mar 26 13:20:06 1992  Per Bothner  (bothner@cygnus.com)
+
+	* rs6000-pinsn.c:  Make dis-assembly output more like
+	other targets:  Don't print instruction in hex before
+	the assembly;  use print_address to print out jump
+	destinations.
+
 Wed Mar 25 16:52:35 1992  Per Bothner  (bothner@cygnus.com)
 
 	* c-exp.y, gdbtypes.h:  Add builtin_type_signed_char.

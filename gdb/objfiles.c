@@ -88,6 +88,8 @@ allocate_objfile (abfd, mapped)
 	}
       else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
 	{
+	  /* Update memory corruption handler function addresses. */
+	  init_malloc (md);
 	  objfile -> md = md;
 	  /* Update pointers to functions to *our* copies */
 	  obstack_chunkfun (&objfile -> psymbol_obstack, xmmalloc);
@@ -96,11 +98,12 @@ allocate_objfile (abfd, mapped)
 	  obstack_freefun (&objfile -> symbol_obstack, mfree);
 	  obstack_chunkfun (&objfile -> type_obstack, xmmalloc);
 	  obstack_freefun (&objfile -> type_obstack, mfree);
-	  /* Update memory corruption handler function addresses */
-	  init_malloc (objfile -> md);
 	}
       else
 	{
+	  /* Set up to detect internal memory corruption.  MUST be done before
+	     the first malloc.  See comments in init_malloc() and mmcheck(). */
+	  init_malloc (md);
 	  objfile = (struct objfile *) xmmalloc (md, sizeof (struct objfile));
 	  (void) memset (objfile, 0, sizeof (struct objfile));
 	  objfile -> md = md;
@@ -115,8 +118,6 @@ allocate_objfile (abfd, mapped)
 	  obstack_full_begin (&objfile -> type_obstack, 0, 0,
 			      xmmalloc, mfree, objfile -> md,
 			      OBSTACK_MMALLOC_LIKE);
-	  /* Set up to detect internal memory corruption */
-	  init_malloc (objfile -> md);
 	}
     }
 

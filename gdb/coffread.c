@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "bfd.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "buildsym.h"
 #include <obstack.h>
 
@@ -161,9 +162,6 @@ struct type *in_function_type;
 #endif
 
 struct pending_block *pending_blocks;
-
-extern CORE_ADDR startup_file_start;	/* From blockframe.c */
-extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 /* Complaints about various problems in the file being read  */
 
@@ -547,11 +545,11 @@ complete_symtab (name, start_addr, size)
   cur_src_start_addr = start_addr;
   cur_src_end_addr = start_addr + size;
 
-  if (entry_point < cur_src_end_addr
-      && entry_point >= cur_src_start_addr)
+  if (current_objfile -> ei.entry_point >= cur_src_start_addr &&
+      current_objfile -> ei.entry_point <  cur_src_end_addr)
     {
-      startup_file_start = cur_src_start_addr;
-      startup_file_end = cur_src_end_addr;
+      current_objfile -> ei.entry_file_lowpc = cur_src_start_addr;
+      current_objfile -> ei.entry_file_highpc = cur_src_end_addr;
     }
 }
 
@@ -639,7 +637,7 @@ record_minimal_symbol (name, address)
 
 /* coff_symfile_init ()
    is the coff-specific initialization routine for reading symbols.
-   It is passed a struct sym_fns which contains, among other things,
+   It is passed a struct objfile which contains, among other things,
    the BFD for the file whose symbols are being read, and a slot for
    a pointer to "private data" which we fill with cookies and other
    treats for coff_symfile_read ().
@@ -668,28 +666,13 @@ coff_symfile_init (objfile)
   objfile -> sym_private = xmmalloc (objfile -> md,
 				     sizeof (struct coff_symfile_info));
 
-  /* Save startup file's range of PC addresses to help blockframe.c
-     decide where the bottom of the stack is.  */
-  if (bfd_get_file_flags (abfd) & EXEC_P)
-    {
-      /* Executable file -- record its entry point so we'll recognize
-	 the startup file because it contains the entry point.  */
-      entry_point = bfd_get_start_address (abfd);
-    }
+  init_entry_point_info (objfile);
+
+  /* Save the section number for the text section */
+  if (section = bfd_get_section_by_name(abfd,".text"))
+    text_bfd_scnum = section->index;
   else
-    {
-      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      /* ~0 will not be in any file, we hope.  */
-      entry_point = ~0;
-      /* set the startup file to be an empty range.  */
-      startup_file_start = 0;
-      startup_file_end = 0;
-    }
-   /* Save the section number for the text section */
-   if (section = bfd_get_section_by_name(abfd,".text"))
-   	text_bfd_scnum = section->index;
-   else
-   	text_bfd_scnum = -1; 
+    text_bfd_scnum = -1; 
 }
 
 /* This function is called for every section; it finds the outer limits

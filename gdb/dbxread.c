@@ -55,6 +55,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"		/* for bfd stuff */
 #include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
 #include "symfile.h"
+#include "objfiles.h"
 #include "buildsym.h"
 
 #include "aout/aout64.h"
@@ -62,7 +63,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Information is passed among various dbxread routines for accessing
    symbol files.  A pointer to this structure is kept in the sym_private
-   field of the objfile struct passed in by symfile.h.  */
+   field of the objfile struct.  */
  
 struct dbx_symfile_info {
   asection *text_sect;		/* Text section accessor */
@@ -72,6 +73,12 @@ struct dbx_symfile_info {
   off_t symtab_offset;		/* Offset in file to symbol table */
 };
 
+#define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_private))
+#define DBX_TEXT_SECT(o)	(DBX_SYMFILE_INFO(o)->text_sect)
+#define DBX_SYMCOUNT(o)		(DBX_SYMFILE_INFO(o)->symcount)
+#define DBX_STRINGTAB(o)	(DBX_SYMFILE_INFO(o)->stringtab)
+#define DBX_STRINGTAB_SIZE(o)	(DBX_SYMFILE_INFO(o)->stringtab_size)
+#define DBX_SYMTAB_OFFSET(o)	(DBX_SYMFILE_INFO(o)->symtab_offset)
 
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
@@ -129,13 +136,6 @@ static bfd *symfile_bfd;
 
 static struct objfile *our_objfile;
 
-/* String table for the main symbol file.  It is kept in memory
-   permanently, to speed up symbol reading.  Other files' symbol tables
-   are read in on demand.  FIXME, this should be cleaner.  */
-
-static char *symfile_string_table;
-static int symfile_string_table_size;
-
 /* The size of each symbol in the symbol file (in external form).
    This is set by dbx_symfile_read when building psymtabs, and by
    dbx_psymtab_to_symtab when building symtabs.  */
@@ -191,18 +191,16 @@ static struct pending *
 copy_pending PARAMS ((struct pending *, int, struct pending *));
 
 static struct symtab *
-read_ofile_symtab PARAMS ((struct objfile *, char *, unsigned int, int, int,
-			   CORE_ADDR, int, int));
+read_ofile_symtab PARAMS ((struct objfile *, int, int, CORE_ADDR, int, int));
 
 static void
 dbx_psymtab_to_symtab PARAMS ((struct partial_symtab *));
 
 static void
-psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, char *, int, int));
+psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, int));
 
 static void
-read_dbx_symtab PARAMS ((CORE_ADDR, struct objfile *, char *, long, int,
-			 CORE_ADDR, int));
+read_dbx_symtab PARAMS ((CORE_ADDR, struct objfile *, CORE_ADDR, int));
 
 static void
 free_bincl_list PARAMS ((struct objfile *));
@@ -217,7 +215,7 @@ static void
 init_bincl_list PARAMS ((int, struct objfile *));
 
 static void
-init_psymbol_list PARAMS ((int, struct objfile *));
+init_psymbol_list PARAMS ((struct objfile *));
 
 static char *
 dbx_next_symbol_text PARAMS ((void));
@@ -417,8 +415,8 @@ record_minimal_symbol (name, address, type, objfile)
 
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to dbx_symfile_init, which 
-   put all the relevant info into a "struct dbx_symfile_info"
-   hung off the struct sym_fns SF.
+   put all the relevant info into a "struct dbx_symfile_info",
+   hung off the objfile structure.
 
    ADDR is the address relative to which the symbols in it are (e.g.
    the base address of the text segment).
@@ -431,26 +429,17 @@ dbx_symfile_read (objfile, addr, mainline)
      CORE_ADDR addr;
      int mainline;	/* FIXME comments above */
 {
-  struct dbx_symfile_info *info;
   bfd *sym_bfd;
   int val;
 
   sym_bfd = objfile->obfd;
-  info = (struct dbx_symfile_info *) (objfile -> sym_private);
-  val = bfd_seek (objfile->obfd, info->symtab_offset, L_SET);
+  val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), L_SET);
   if (val < 0)
     perror_with_name (objfile->name);
 
-  /* If mainline, set global string table pointers, and reinitialize global
-     partial symbol list.  */
-  if (mainline) {
-    symfile_string_table = info->stringtab;
-    symfile_string_table_size = info->stringtab_size;
-  }
-
   /* If we are reinitializing, or if we have never loaded syms yet, init */
   if (mainline || objfile->global_psymbols.size == 0 || objfile->static_psymbols.size == 0)
-    init_psymbol_list (info->symcount, objfile);
+    init_psymbol_list (objfile);
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
   symbol_size = obj_symbol_entry_size (sym_bfd);
@@ -464,25 +453,16 @@ dbx_symfile_read (objfile, addr, mainline)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  read_dbx_symtab (addr - bfd_section_vma (sym_bfd, info->text_sect), /*offset*/
-		   objfile, info->stringtab, info->stringtab_size,
-		   info->symcount,
-		   bfd_section_vma  (sym_bfd, info->text_sect),
-		   bfd_section_size (sym_bfd, info->text_sect));
+  addr -= bfd_section_vma (sym_bfd, DBX_TEXT_SECT (objfile)); /*offset*/
+  read_dbx_symtab (addr, objfile,
+		   bfd_section_vma  (sym_bfd, DBX_TEXT_SECT (objfile)),
+		   bfd_section_size (sym_bfd, DBX_TEXT_SECT (objfile)));
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
 
-  /* Free up any memory we allocated for ourselves.  */
-
-  if (!mainline) {
-    mfree (objfile->md, info->stringtab);	/* Stringtab is only saved for mainline */
-  }
-  mfree (objfile->md, info);
-  /* Zap pointer to our (now gone) info struct */
-  objfile -> sym_private = NULL;
   if (!have_partial_symbols ()) {
     wrap_here ("");
     printf_filtered ("(no debugging symbols found)...");
@@ -523,56 +503,64 @@ dbx_symfile_init (objfile)
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
-  struct dbx_symfile_info *info;
   unsigned char size_temp[4];
 
   /* Allocate struct to keep track of the symfile */
-  objfile-> sym_private = xmmalloc (objfile -> md, sizeof (*info));
-  info = (struct dbx_symfile_info *) objfile -> sym_private;
+  DBX_SYMFILE_INFO (objfile) = (struct dbx_symfile_info *)
+    xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 #define	STRING_TABLE_OFFSET	(sym_bfd->origin + obj_str_filepos (sym_bfd))
 #define	SYMBOL_TABLE_OFFSET	(sym_bfd->origin + obj_sym_filepos (sym_bfd))
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 
-  info->text_sect = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!info->text_sect)
+  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!DBX_TEXT_SECT (objfile))
     abort();
-  info->symcount = bfd_get_symcount (sym_bfd);
+  DBX_SYMCOUNT (objfile) = bfd_get_symcount (sym_bfd);
 
-  /* Read the string table size and check it for bogosity.  */
+  /* Read the string table and stash it away in the psymbol_obstack.  It is
+     only needed as long as we need to expand psymbols into full symbols,
+     so when we blow away the psymbol the string table goes away as well.
+     Note that gdb used to use the results of attempting to malloc the
+     string table, based on the size it read, as a form of sanity check
+     for botched byte swapping, on the theory that a byte swapped string
+     table size would be so totally bogus that the malloc would fail.  Now
+     that we put in on the psymbol_obstack, we can't do this since gdb gets
+     a fatal error (out of virtual memory) if the size is bogus.  We can
+     however at least check to see if the size is zero or some negative
+     value. */
+
   val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
   if (val < 0)
-      perror_with_name (name);
+    perror_with_name (name);
 
   val = bfd_read (size_temp, sizeof (long), 1, sym_bfd);
   if (val < 0)
-      perror_with_name (name);
-  info->stringtab_size = bfd_h_get_32 (sym_bfd, size_temp);
-  
-  if (info->stringtab_size >= 0)
-    {
-      /* Yes, this should be malloc, not xmalloc.  We check its result.  */
-      info->stringtab = (char *) mmalloc (objfile->md, info->stringtab_size);
-      /* Caller is responsible for freeing the string table.  No cleanup. */
-    }
-  else
-    info->stringtab = NULL;
-  if (info->stringtab == NULL && info->stringtab_size != 0)
-    error ("ridiculous string table size: %d bytes", info->stringtab_size);
+    perror_with_name (name);
+
+  DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
+  if (DBX_STRINGTAB_SIZE (objfile) <= 0)
+    error ("ridiculous string table size (%d bytes).",
+	   DBX_STRINGTAB_SIZE (objfile));
+
+  DBX_STRINGTAB (objfile) =
+    (char *) obstack_alloc (&objfile -> psymbol_obstack,
+			    DBX_STRINGTAB_SIZE (objfile));
 
   /* Now read in the string table in one big gulp.  */
 
   val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
   if (val < 0)
     perror_with_name (name);
-  val = bfd_read (info->stringtab, info->stringtab_size, 1, sym_bfd);
-  if (val != info->stringtab_size)
+  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
+		  sym_bfd);
+  if (val != DBX_STRINGTAB_SIZE (objfile))
     perror_with_name (name);
 
   /* Record the position of the symbol table for later use.  */
 
-  info->symtab_offset = SYMBOL_TABLE_OFFSET;
+  DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
 }
 
 /* Perform any local cleanups required when we are done with a particular
@@ -584,15 +572,9 @@ static void
 dbx_symfile_finish (objfile)
      struct objfile *objfile;
 {
-  if (objfile -> sym_private != NULL)
+  if (DBX_SYMFILE_INFO (objfile) != NULL)
     {
-      mfree (objfile -> md, objfile -> sym_private);
-    }
-  if (symfile_string_table)
-    {
-      free (symfile_string_table);
-      symfile_string_table = 0;
-      symfile_string_table_size = 0;
+      mfree (objfile -> md, DBX_SYMFILE_INFO (objfile));
     }
   free_header_files ();
 }
@@ -662,8 +644,7 @@ dbx_next_symbol_text ()
    created by read_dbx_symtab and subsidiaries.  */
 
 static void
-init_psymbol_list (total_symbols, objfile)
-     int total_symbols;
+init_psymbol_list (objfile)
      struct objfile *objfile;
 {
   /* Free any previously allocated psymbol lists.  */
@@ -675,8 +656,8 @@ init_psymbol_list (total_symbols, objfile)
   /* Current best guess is that there are approximately a twentieth
      of the total symbols (in a debugging file) are global or static
      oriented symbols */
-  objfile -> global_psymbols.size = total_symbols / 10;
-  objfile -> static_psymbols.size = total_symbols / 10;
+  objfile -> global_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
+  objfile -> static_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
   objfile -> global_psymbols.next = objfile -> global_psymbols.list = (struct partial_symbol *)
     xmmalloc (objfile -> md, objfile -> global_psymbols.size * sizeof (struct partial_symbol));
   objfile -> static_psymbols.next = objfile -> static_psymbols.list = (struct partial_symbol *)
@@ -749,20 +730,14 @@ free_bincl_list (objfile)
 
 /* Given pointers to an a.out symbol table in core containing dbx
    style data, setup partial_symtab's describing each source file for
-   which debugging information is available.  NLISTLEN is the number
-   of symbols in the symbol table.  All symbol names are given as
-   offsets relative to STRINGTAB.  STRINGTAB_SIZE is the size of
-   STRINGTAB.  SYMFILE_NAME is the name of the file we are reading from
+   which debugging information is available.
+   SYMFILE_NAME is the name of the file we are reading from
    and ADDR is its relocated address (if incremental) or 0 (if not).  */
 
 static void
-read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
-		 text_addr, text_size)
+read_dbx_symtab (addr, objfile, text_addr, text_size)
      CORE_ADDR addr;
      struct objfile *objfile;
-     register char *stringtab;
-     register long stringtab_size;
-     register int nlistlen;
      CORE_ADDR text_addr;
      int text_size;
 {
@@ -789,7 +764,7 @@ read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
   struct partial_symtab **dependency_list;
   int dependencies_used, dependencies_allocated;
 
-  stringtab_global = stringtab;
+  stringtab_global = DBX_STRINGTAB (objfile);
   
   pst = (struct partial_symtab *) 0;
 
@@ -823,7 +798,7 @@ read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
   symbuf_end = symbuf_idx = 0;
   next_symbol_text_func = dbx_next_symbol_text;
 
-  for (symnum = 0; symnum < nlistlen; symnum++)
+  for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
       /* Get the symbol for this run and pull out some info */
       QUIT;	/* allow this to be interruptable */
@@ -854,11 +829,11 @@ read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
    give a fake name, and print a single error message per symbol file read,
    rather than abort the symbol reading or flood the user with messages.  */
 #define SET_NAMESTRING()\
-  if (((unsigned)bufp->n_strx) >= stringtab_size) {	\
+  if (((unsigned)bufp->n_strx) >= DBX_STRINGTAB_SIZE (objfile)) {	\
     complain (&string_table_offset_complaint, (char *) symnum);		\
     namestring = "foo";							\
   } else								\
-    namestring = bufp->n_strx + stringtab
+    namestring = bufp->n_strx + DBX_STRINGTAB (objfile)
 
 #define CUR_SYMBOL_TYPE bufp->n_type
 #define CUR_SYMBOL_VALUE bufp->n_value
@@ -872,12 +847,12 @@ read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
     }
 
   /* If there's stuff to be cleaned up, clean it up.  */
-  if (nlistlen > 0				/* We have some syms */
-      && entry_point < bufp->n_value
-      && entry_point >= last_o_file_start)
+  if (DBX_SYMCOUNT (objfile) > 0			/* We have some syms */
+      && objfile -> ei.entry_point < bufp->n_value
+      && objfile -> ei.entry_point >= last_o_file_start)
     {
-      startup_file_start = last_o_file_start;
-      startup_file_end = bufp->n_value;
+      objfile -> ei.entry_file_lowpc = last_o_file_start;
+      objfile -> ei.entry_file_highpc = bufp->n_value;
     }
 
   if (pst)
@@ -1034,10 +1009,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 }
 
 static void
-psymtab_to_symtab_1 (pst, stringtab, stringtab_size, sym_offset)
+psymtab_to_symtab_1 (pst, sym_offset)
      struct partial_symtab *pst;
-     char *stringtab;
-     int stringtab_size;
      int sym_offset;
 {
   struct cleanup *old_chain;
@@ -1068,8 +1041,7 @@ psymtab_to_symtab_1 (pst, stringtab, stringtab_size, sym_offset)
 	    wrap_here ("");		/* Flush output */
 	    fflush (stdout);
 	  }
-	psymtab_to_symtab_1 (pst->dependencies[i],
-			     stringtab, stringtab_size, sym_offset);
+	psymtab_to_symtab_1 (pst->dependencies[i], sym_offset);
       }
 
   if (LDSYMLEN(pst))		/* Otherwise it's a dummy */
@@ -1081,10 +1053,9 @@ psymtab_to_symtab_1 (pst, stringtab, stringtab_size, sym_offset)
       /* Read in this files symbols */
       bfd_seek (pst->objfile->obfd, sym_offset, L_SET);
       pst->symtab =
-	read_ofile_symtab (pst->objfile, stringtab, stringtab_size,
-			   LDSYMOFF(pst),
-			   LDSYMLEN(pst), pst->textlow,
-			   pst->texthigh - pst->textlow, pst->addr);
+	read_ofile_symtab (pst->objfile, LDSYMOFF(pst), LDSYMLEN(pst),
+			   pst->textlow, pst->texthigh - pst->textlow,
+			   pst->addr);
       sort_symtab_syms (pst->symtab);
 
       do_cleanups (old_chain);
@@ -1101,8 +1072,7 @@ static void
 dbx_psymtab_to_symtab (pst)
      struct partial_symtab *pst;
 {
-  char *stringtab;
-  int stsize, val;
+  int val;
   bfd *sym_bfd;
   long st_temp;
 
@@ -1128,58 +1098,6 @@ dbx_psymtab_to_symtab (pst)
 
       sym_bfd = pst->objfile->obfd;
 
-      /* We keep the string table for the main symfile resident in memory, but
-	 not the string table for any other symbol files.  */
-      if (symfile_objfile != pst->objfile)
-	{
-	  /* Read in the string table */
-
-	  /* FIXME, this uses internal BFD variables.  See above in
-	     dbx_symbol_file_open where the macro is defined!  */
-	  bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
-
-	  val = bfd_read (&st_temp, sizeof st_temp, 1, sym_bfd);
-	  if (val < 0)
-	      perror_with_name (pst->objfile->name);
-	  stsize = bfd_h_get_32 (sym_bfd, (unsigned char *)&st_temp);
-#if 0
-	  /* BFD doesn't provide a way to know the total file size, sigh */
-          struct stat statbuf;
-	  if (fstat (desc, &statbuf) < 0)
-	    perror_with_name (pst->objfile->name);
-	  
-	  if (stsize >= 0 && stsize < statbuf.st_size)
-#else
-	  if (stsize >= 0)
-#endif
-	    {
-#ifdef BROKEN_LARGE_ALLOCA
-	      stringtab = (char *) xmalloc (stsize);
-	      make_cleanup (free, stringtab);
-#else
-	      stringtab = (char *) alloca (stsize);
-#endif
-	    }
-	  else
-	    stringtab = NULL;
-	  if (stringtab == NULL && stsize != 0)
-	    error ("ridiculous string table size: %d bytes", stsize);
-
-	  /* FIXME, this uses internal BFD variables.  See above in
-	     dbx_symbol_file_open where the macro is defined!  */
-	  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
-	  if (val < 0)
-	    perror_with_name (pst->objfile->name);
-	  val = bfd_read (stringtab, stsize, 1, sym_bfd);
-	  if (val < 0)
-	    perror_with_name (pst->objfile->name);
-	}
-      else
-	{
-	  stringtab = symfile_string_table;
-	  stsize = symfile_string_table_size;
-	}
-
       /* FIXME POKING INSIDE BFD DATA STRUCTURES */
       symbol_size = obj_symbol_entry_size (sym_bfd);
 
@@ -1187,8 +1105,7 @@ dbx_psymtab_to_symtab (pst)
 
       /* FIXME, this uses internal BFD variables.  See above in
 	 dbx_symbol_file_open where the macro is defined!  */
-      psymtab_to_symtab_1 (pst, stringtab, stsize,
-			   SYMBOL_TABLE_OFFSET);
+      psymtab_to_symtab_1 (pst, SYMBOL_TABLE_OFFSET);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
@@ -1205,22 +1122,18 @@ dbx_psymtab_to_symtab (pst)
  *
  * DESC is the file descriptor for the file, positioned at the
  * beginning of the symtab
- * STRINGTAB is a pointer to the files string
- * table, already read in
  * SYM_OFFSET is the offset within the file of
- * the beginning of the symbols we want to read, NUM_SUMBOLS is the
- * number of symbols to read
+ * the beginning of the symbols we want to read
+ * SYM_SIZE is the size of the symbol info to read in.
  * TEXT_OFFSET is the beginning of the text segment we are reading symbols for
  * TEXT_SIZE is the size of the text segment read in.
  * OFFSET is a relocation offset which gets added to each symbol
  */
 
 static struct symtab *
-read_ofile_symtab (objfile, stringtab, stringtab_size, sym_offset,
-		   sym_size, text_offset, text_size, offset)
+read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
+		   offset)
      struct objfile *objfile;
-     register char *stringtab;
-     unsigned int stringtab_size;
      int sym_offset;
      int sym_size;
      CORE_ADDR text_offset;
@@ -1236,7 +1149,7 @@ read_ofile_symtab (objfile, stringtab, stringtab_size, sym_offset,
   current_objfile = objfile;
   subfile_stack = 0;
 
-  stringtab_global = stringtab;
+  stringtab_global = DBX_STRINGTAB (objfile);
   last_source_file = 0;
 
   abfd = objfile->obfd;
