@@ -1,5 +1,9 @@
 Tue Dec 29 18:11:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* cross-build: new directory.
+	
+	* cross-build/cygwin.cache: new file. Used for Cygwin cross builds.
+
 	* configure.in: added tests for cross-build for Cygwin.
 
 1998-12-24  Jason Molenda  (jsm@bugshack.cygnus.com)
