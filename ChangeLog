@@ -1,3 +1,9 @@
+Thu Nov  5 10:38:46 1992  Michael Werner  (mtw@rtl.cygnus.com)
+
+	* ./deja-gnu/gdb.t21/.Sanitize & ./deja-gnu/gdb.t22/.Sanitize
+	  Changed .Sanitize files to reflect earlier change of
+	  in-gdbme.C filename to in-gdbme.cc .
+
 Wed Nov  4 17:57:47 1992  Michael Werner  (mtw@rtl.cygnus.com)
 
 	* Makefile.in:  Added stuff for building deja-gnu.
