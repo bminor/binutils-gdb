@@ -6,6 +6,9 @@ Fri Feb 20 18:02:20 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(state_gif_{nregs,regs,nloop}): New static locals.
 	(*_gif_*): Complete.
 	(dvp_opcode_init_{parse,print}): Init gif state locals.
+	(extract_vif_datalen,{insert,extract}_vif_imrbits): New functions.
+	(vif_insn_len): Handle `unpack'.
+	({insert,extract}_dma_flags): Complete.
 
 end-sanitize-sky
 start-sanitize-r5900
