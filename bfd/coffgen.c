@@ -2135,7 +2135,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 			next = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
 		      llnos = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		      fprintf (file,
-			       _("AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"),
+			       "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld",
 			       tagndx, auxp->u.auxent.x_sym.x_misc.x_fsize,
 			       llnos, next);
 		      break;
