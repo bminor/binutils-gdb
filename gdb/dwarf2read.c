@@ -44,6 +44,7 @@
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
 #include "cp-support.h"
+#include "cp-names.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -2779,9 +2780,15 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf_attr (die, DW_AT_name);
   if (attr && DW_STRING (attr))
     {
-      TYPE_TAG_NAME (type) = obsavestring (DW_STRING (attr),
-					   strlen (DW_STRING (attr)),
+      /* FIXME: This should be in a more general location.  */
+      char *name;
+      name = cp_canonicalize_string (DW_STRING (attr));
+      if (name == NULL)
+	name = DW_STRING (attr);
+      TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
 					   &objfile->type_obstack);
+      if (name != DW_STRING (attr))
+	free (name);
     }
 
   if (die->tag == DW_TAG_structure_type)

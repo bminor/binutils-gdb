@@ -1597,12 +1597,17 @@ yylex (void)
                  "character set `%s'.", tok, target_charset ());
         }
 
-      yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = d_builtin_type ('c' - 'a');
-
       c = *lexptr++;
       if (c != '\'')
 	error ("Invalid character constant.");
+
+      /* FIXME: We should refer to a canonical form of the character,
+	 presumably the same one that appears in manglings - the decimal
+	 representation.  But if that isn't in our input then we have to
+	 allocate memory for it somewhere.  */
+      yylval.comp = d_make_comp (di, D_COMP_LITERAL,
+				 d_builtin_type ('c' - 'a'),
+				 d_make_name (di, tokstart, lexptr - tokstart));
 
       return INT;
 
