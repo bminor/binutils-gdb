@@ -229,7 +229,8 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		else
 		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
 		
-		/* Destructor is handled by caller, dont add it to the list */
+		/* Destructor is handled by caller, don't add it to
+		   the list.  */
 		if (is_destructor_name (phys_name) != 0)
 		  continue;
 
@@ -255,9 +256,10 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		   && (class_name[name_len] == '\0'
 		       || class_name[name_len] == '<'))
 	    {
-	      /* For GCC 3.x and stabs, constructors and destructors have names
-		 like __base_ctor and __complete_dtor.  Check the physname for now
-		 if we're looking for a constructor.  */
+	      /* For GCC 3.x and stabs, constructors and destructors
+		 have names like __base_ctor and __complete_dtor.
+		 Check the physname for now if we're looking for a
+		 constructor.  */
 	      for (field_counter
 		     = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
 		   field_counter >= 0;
@@ -268,8 +270,8 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		  
 		  f = TYPE_FN_FIELDLIST1 (t, method_counter);
 
-		  /* GCC 3.x will never produce stabs stub methods, so we don't need
-		     to handle this case.  */
+		  /* GCC 3.x will never produce stabs stub methods, so
+		     we don't need to handle this case.  */
 		  if (TYPE_FN_FIELD_STUB (f, field_counter))
 		    continue;
 		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
@@ -358,7 +360,7 @@ find_toplevel_char (char *s, char c)
   int quoted = 0;		/* zero if we're not in quotes;
 				   '"' if we're in a double-quoted string;
 				   '\'' if we're in a single-quoted string.  */
-  int depth = 0;		/* number of unclosed parens we've seen */
+  int depth = 0;		/* Number of unclosed parens we've seen.  */
   char *scan;
 
   for (scan = s; *scan; scan++)
@@ -418,7 +420,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
   printf_unfiltered ("[0] cancel\n[1] all\n");
   while (i < nelts)
     {
-      init_sal (&return_values.sals[i]);	/* initialize to zeroes */
+      init_sal (&return_values.sals[i]);	/* Initialize to zeroes.  */
       init_sal (&values.sals[i]);
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
 	{
@@ -579,16 +581,15 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   initialize_defaults (&default_symtab, &default_line);
   
-  /* See if arg is *PC */
+  /* See if arg is *PC.  */
 
   if (**argptr == '*')
     return decode_indirect (argptr);
 
-  /* Set various flags.
-   * 'paren_pointer' is important for overload checking, where
-   * we allow things like: 
-   *     (gdb) break c::f(int)
-   */
+  /* Set various flags.  'paren_pointer' is important for overload
+     checking, where we allow things like:
+        (gdb) break c::f(int)
+  */
 
   set_flags (*argptr, &is_quoted, &paren_pointer);
 
@@ -655,7 +656,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* S is specified file's symtab, or 0 if no file specified.
      arg no longer contains the file name.  */
 
-  /* Check whether arg is all digits (and sign) */
+  /* Check whether arg is all digits (and sign).  */
 
   q = *argptr;
   if (*q == '-' || *q == '+')
@@ -671,8 +672,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
 
-  if (**argptr == '$')		/* May be a convenience variable */
-    p = skip_quoted (*argptr + (((*argptr)[1] == '$') ? 2 : 1));	/* One or two $ chars possible */
+  if (**argptr == '$')		/* May be a convenience variable.  */
+    /* One or two $ chars possible.  */
+    p = skip_quoted (*argptr + (((*argptr)[1] == '$') ? 2 : 1));
   else if (is_quoted)
     {
       p = skip_quoted (*argptr);
@@ -705,7 +707,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   /* If it starts with $: may be a legitimate variable or routine name
      (e.g. HP-UX millicode routines such as $$dyncall), or it may
-     be history value, or it may be a convenience variable */
+     be history value, or it may be a convenience variable.  */
 
   if (*copy == '$')
     return decode_dollar (copy, funfirstline, default_symtab,
@@ -769,8 +771,8 @@ set_flags (char *arg, int *is_quoted, char **paren_pointer)
   int has_if = 0;
 
   /* 'has_if' is for the syntax:
-   *     (gdb) break foo if (a==b)
-   */
+        (gdb) break foo if (a==b)
+  */
   if ((ii = strstr (arg, " if ")) != NULL ||
       (ii = strstr (arg, "\tif ")) != NULL ||
       (ii = strstr (arg, " if\t")) != NULL ||
@@ -778,10 +780,9 @@ set_flags (char *arg, int *is_quoted, char **paren_pointer)
       (ii = strstr (arg, " if(")) != NULL ||
       (ii = strstr (arg, "\tif( ")) != NULL)
     has_if = 1;
-  /* Temporarily zap out "if (condition)" to not
-   * confuse the parenthesis-checking code below.
-   * This is undone below. Do not change ii!!
-   */
+  /* Temporarily zap out "if (condition)" to not confuse the
+     parenthesis-checking code below.  This is undone below. Do not
+     change ii!!  */
   if (has_if)
     {
       *ii = '\0';
@@ -795,9 +796,8 @@ set_flags (char *arg, int *is_quoted, char **paren_pointer)
   if (*paren_pointer != NULL)
     *paren_pointer = strrchr (*paren_pointer, ')');
 
-  /* Now that we're safely past the paren_pointer check,
-   * put back " if (condition)" so outer layers can see it 
-   */
+  /* Now that we're safely past the paren_pointer check, put back " if
+     (condition)" so outer layers can see it.  */
   if (has_if)
     *ii = ' ';
 }
@@ -850,18 +850,16 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
   ii = find_toplevel_char (*argptr, ',');
   has_comma = (ii != 0);
 
-  /* Temporarily zap out second half to not
-   * confuse the code below.
-   * This is undone below. Do not change ii!!
-   */
+  /* Temporarily zap out second half to not confuse the code below.
+     This is undone below. Do not change ii!!  */
   if (has_comma)
     {
       *ii = '\0';
     }
 
-  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
-  /* May also be CLASS::MEMBER, or NAMESPACE::NAME */
-  /* Look for ':', but ignore inside of <> */
+  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION.  May also be
+     CLASS::MEMBER, or NAMESPACE::NAME.  Look for ':', but ignore
+     inside of <>.  */
 
   p = *argptr;
   if (p[0] == '"')
@@ -881,18 +879,20 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	    error ("malformed template specification in command");
 	  p = temp_end;
 	}
-      /* Check for the end of the first half of the linespec.  End of line,
-         a tab, a double colon or the last single colon, or a space.  But
-         if enclosed in double quotes we do not break on enclosed spaces */
+      /* Check for the end of the first half of the linespec.  End of
+         line, a tab, a double colon or the last single colon, or a
+         space.  But if enclosed in double quotes we do not break on
+         enclosed spaces.  */
       if (!*p
 	  || p[0] == '\t'
 	  || ((p[0] == ':')
 	      && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
 	  || ((p[0] == ' ') && !*is_quote_enclosed))
 	break;
-      if (p[0] == '.' && strchr (p, ':') == NULL)	/* Java qualified method. */
+      if (p[0] == '.' && strchr (p, ':') == NULL)
 	{
-	  /* Find the *last* '.', since the others are package qualifiers. */
+	  /* Java qualified method.  Find the *last* '.', since the
+	     others are package qualifiers.  */
 	  for (p1 = p; *p1; p1++)
 	    {
 	      if (*p1 == '.')
@@ -904,7 +904,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
   while (p[0] == ' ' || p[0] == '\t')
     p++;
 
-  /* if the closing double quote was left at the end, remove it */
+  /* If the closing double quote was left at the end, remove it.  */
   if (*is_quote_enclosed)
     {
       char *closing_quote = strchr (p - 1, '"');
@@ -912,9 +912,8 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	*closing_quote = '\0';
     }
 
-  /* Now that we've safely parsed the first half,
-   * put back ',' so outer layers can see it 
-   */
+  /* Now that we've safely parsed the first half, put back ',' so
+     outer layers can see it.  */
   if (has_comma)
     *ii = ',';
 
@@ -947,8 +946,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   struct type *t;
 
   /* First check for "global" namespace specification,
-     of the form "::foo". If found, skip over the colons
-     and jump to normal symbol processing */
+     of the form "::foo".  If found, skip over the colons
+     and jump to normal symbol processing.  */
   if (p[0] == ':' 
       && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
     saved_arg2 += 2;
@@ -971,9 +970,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
      Note that namespaces can nest only inside other
      namespaces, and not inside classes.  So we need only
      consider *prefixes* of the string; there is no need to look up
-     "B::C" separately as a symbol in the previous example. */
+     "B::C" separately as a symbol in the previous example.  */
 
-  p2 = p;		/* save for restart */
+  p2 = p;		/* Save for restart.  */
   while (1)
     {
       /* Extract the class name.  */
@@ -998,8 +997,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	   (TYPE_CODE (t) == TYPE_CODE_STRUCT
 	    || TYPE_CODE (t) == TYPE_CODE_UNION)))
 	{
-	  /* Arg token is not digits => try it as a function name
-	     Find the next token(everything up to end or next blank). */
+	  /* Arg token is not digits => try it as a function name.
+	     Find the next token (everything up to end or next
+	     blank).  */
 	  if (**argptr
 	      && strchr (get_gdb_completer_quote_characters (),
 			 **argptr) != NULL)
@@ -1043,13 +1043,13 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	      copy[p - *argptr - 1] = '\0';
 	  }
 
-	  /* no line number may be specified */
+	  /* No line number may be specified.  */
 	  while (*p == ' ' || *p == '\t')
 	    p++;
 	  *argptr = p;
 
 	  sym = 0;
-	  i1 = 0;	/*  counter for the symbol array */
+	  i1 = 0;	/*  Counter for the symbol array.  */
 	  sym_arr = (struct symbol **) alloca (total_number_of_methods (t)
 					       * sizeof (struct symbol *));
 
@@ -1120,9 +1120,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	    }
 	}
 
-      /* Move pointer up to next possible class/namespace token */
-      p = p2 + 1;	/* restart with old value +1 */
-      /* Move pointer ahead to next double-colon */
+      /* Move pointer up to next possible class/namespace token.  */
+      p = p2 + 1;	/* Restart with old value +1.  */
+      /* Move pointer ahead to next double-colon.  */
       while (*p && (p[0] != ' ') && (p[0] != '\t') && (p[0] != '\''))
 	{
 	  if (p[0] == '<')
@@ -1133,26 +1133,27 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	      p = temp_end;
 	    }
 	  else if ((p[0] == ':') && (p[1] == ':'))
-	    break;	/* found double-colon */
+	    break;	/* Found double-colon.  */
 	  else
 	    p++;
 	}
 
       if (*p != ':')
-	break;		/* out of the while (1) */
+	break;		/* Out of the while (1).  */
 
-      p2 = p;		/* save restart for next time around */
-      *argptr = saved_arg2;	/* restore argptr */
+      p2 = p;		/* Save restart for next time around.  */
+      *argptr = saved_arg2;	/* Restore argptr.  */
     }			/* while (1) */
 
-  /* Last chance attempt -- check entire name as a symbol */
-  /* Use "copy" in preparation for jumping out of this block,
-     to be consistent with usage following the jump target */
+  /* Last chance attempt -- check entire name as a symbol.  Use "copy"
+     in preparation for jumping out of this block, to be consistent
+     with usage following the jump target.  */
   copy = (char *) alloca (p - saved_arg2 + 1);
   memcpy (copy, saved_arg2, p - saved_arg2);
-  /* Note: if is_quoted should be true, we snuff out quote here anyway */
+  /* Note: if is_quoted should be true, we snuff out quote here
+     anyway.  */
   copy[p - saved_arg2] = '\000';
-  /* Set argptr to skip over the name */
+  /* Set argptr to skip over the name.  */
   *argptr = (*p == '\'') ? p + 1 : p;
   /* Look up entire name */
   sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
@@ -1160,8 +1161,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
     return symbol_found (funfirstline, canonical, copy, sym,
 			 NULL, sym_symtab);
 
-  /* Couldn't find any interpretation as classes/namespaces, so give up */
-  /* The quotes are important if copy is empty.  */
+  /* Couldn't find any interpretation as classes/namespaces, so give
+     up.  The quotes are important if copy is empty.  */
   cplusplus_error (saved_arg,
 		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
 		   copy);
@@ -1186,7 +1187,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
     --p;
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
-  /* It may have the ending quote right after the file name */
+  /* It may have the ending quote right after the file name.  */
   if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
     copy[p - *argptr - 1] = 0;
   else
@@ -1240,11 +1241,11 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
      We must guarantee that this section of code is never executed
      when we are called with just a function name, since
      set_default_source_symtab_and_line uses
-     select_source_symtab that calls us with such an argument  */
+     select_source_symtab that calls us with such an argument.  */
 
   if (file_symtab == 0 && default_symtab == 0)
     {
-      /* Make sure we have at least a default source file. */
+      /* Make sure we have at least a default source file.  */
       set_default_source_symtab_and_line ();
       initialize_defaults (&default_symtab, &default_line);
     }
@@ -1319,9 +1320,9 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
   p = (copy[1] == '$') ? copy + 2 : copy + 1;
   while (*p >= '0' && *p <= '9')
     p++;
-  if (!*p)			/* reached end of token without hitting non-digit */
+  if (!*p)		/* Reached end of token without hitting non-digit.  */
     {
-      /* We have a value history reference */
+      /* We have a value history reference.  */
       sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
       valx = access_value_history ((copy[1] == '$') ? -index : index);
       if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
@@ -1330,9 +1331,9 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
   else
     {
       /* Not all digits -- may be user variable/function or a
-	 convenience variable */
+	 convenience variable.  */
 
-      /* Look up entire name as a symbol first */
+      /* Look up entire name as a symbol first.  */
       sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
       file_symtab = (struct symtab *) 0;
       need_canonical = 1;
@@ -1341,13 +1342,13 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	return symbol_found (funfirstline, canonical, copy, sym,
 			     NULL, sym_symtab);
 
-      /* If symbol was not found, look in minimal symbol tables */
+      /* If symbol was not found, look in minimal symbol tables.  */
       msymbol = lookup_minimal_symbol (copy, NULL, NULL);
-      /* Min symbol was found --> jump to minsym processing. */
+      /* Min symbol was found --> jump to minsym processing.  */
       if (msymbol)
 	return minsym_found (funfirstline, msymbol);
 
-      /* Not a user variable or function -- must be convenience variable */
+      /* Not a user variable or function -- must be convenience variable.  */
       need_canonical = (file_symtab == 0) ? 1 : 0;
       valx = value_of_internalvar (lookup_internalvar (copy + 1));
       if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
@@ -1356,7 +1357,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
   init_sal (&val);
 
-  /* Either history value or convenience value from above, in valx */
+  /* Either history value or convenience value from above, in valx.  */
   val.symtab = file_symtab ? file_symtab : default_symtab;
   val.line = value_as_long (valx);
   val.pc = 0;

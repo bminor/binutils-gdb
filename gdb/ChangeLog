@@ -1,3 +1,15 @@
+2003-01-14  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (decode_line_1): Normalize comments.
+	(set_flags): Ditto.
+	(locate_first_half): Ditto.
+	(decode_compound): Ditto.
+	(symtab_from_filename): Ditto.
+	(decode_all_digits): Ditto.
+	(decode_dollar): Ditto.
+	(find_methods): Ditto.
+	(find_toplevel_char): Ditto.
+
 2003-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* ax-gdb.c, c-valprint.c, charset.c, corefile.c: Update copyright.
