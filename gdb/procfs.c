@@ -293,6 +293,8 @@ typedef prstatus_t gdb_lwpstatus_t;
 #ifndef PIDGET
 #define PIDGET(PID)		(PID)
 #define TIDGET(PID)		(PID)
+#endif
+#ifndef MERGEPID
 #define MERGEPID(PID, TID)	(PID)
 #endif
 
