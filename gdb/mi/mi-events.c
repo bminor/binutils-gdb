@@ -102,9 +102,9 @@ mi_architecture_changed (void)
 }
 
 void
-mi_register_update (int regno)
+mi_target_changed (void)
 {
-  event_notify ("register-update,number=\"%d\"", regno);
+  event_notify ("target-changed");
 }
 
 void

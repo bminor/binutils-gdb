@@ -1,3 +1,9 @@
+2002-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* mi-events.c (mi_target_changed): Renamed from mi_register_update.
+	* mi.h (mi_target_changed): Ditto.
+	* mi-interp.c (mi_event_handlers): Ditto.
+
 2002-08-19  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cmd-stack.c (mi_cmd_stack_select_frame): Revert 2002-07-25
