@@ -304,6 +304,7 @@ dwarf2_loc_desc_needs_frame (unsigned char *data, unsigned short size)
 {
   struct needs_frame_baton baton;
   struct dwarf_expr_context *ctx;
+  int in_reg;
 
   baton.needs_frame = 0;
 
@@ -316,9 +317,11 @@ dwarf2_loc_desc_needs_frame (unsigned char *data, unsigned short size)
 
   dwarf_expr_eval (ctx, data, size);
 
+  in_reg = ctx->in_reg;
+
   free_dwarf_expr_context (ctx);
 
-  return baton.needs_frame;
+  return baton.needs_frame || in_reg;
 }
 
 static void
