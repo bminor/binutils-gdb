@@ -3875,9 +3875,17 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
     }
 #endif
 
-  if (outrel[0].r_offset == (bfd_vma) -1
-      || outrel[0].r_offset == (bfd_vma) -2)
+  if (outrel[0].r_offset == (bfd_vma) -1)
+    /* The relocation field has been deleted.  */
     skip = TRUE;
+  else if (outrel[0].r_offset == (bfd_vma) -2)
+    {
+      /* The relocation field has been converted into a relative value of
+	 some sort.  Functions like _bfd_elf_write_section_eh_frame expect
+	 the field to be fully relocated, so add in the symbol's value.  */
+      skip = TRUE;
+      *addendp += symbol;
+    }
 
   /* If we've decided to skip this relocation, just output an empty
      record.  Note that R_MIPS_NONE == 0, so that this call to memset
