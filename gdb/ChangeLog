@@ -1,3 +1,9 @@
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/sparc/tm-sparc.h (sparc_skip_prologue): Restore
+	declaration
+	* arc-tdep.c (arc_prologue_frameless_p): Fix syntax error.
+
 2002-04-21  David S. Miller  <davem@redhat.com>
 
 	* arch-utils.c (generic_prologue_frameless_p): Kill

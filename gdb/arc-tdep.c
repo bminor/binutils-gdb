@@ -301,7 +301,7 @@ arc_skip_prologue (CORE_ADDR pc, int frameless_p)
 int
 arc_prologue_frameless_p (CORE_ADDR pc)
 {
-  return (pc == arc_skip_prologue (pc, 1);
+  return (pc == arc_skip_prologue (pc, 1));
 }
 
 /* Return the return address for a frame.
