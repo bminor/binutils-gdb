@@ -2208,6 +2208,7 @@ read_struct_type (pp, type, objfile)
 
 	  /* Make this baseclass visible for structure-printing purposes.  */
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  memset (new, 0, sizeof (struct nextfield));
 	  new->next = list;
 	  list = new;
 	  list->visibility = via_public;
@@ -2240,6 +2241,7 @@ read_struct_type (pp, type, objfile)
 
       /* Get space to record the next field's data.  */
       new = (struct nextfield *) alloca (sizeof (struct nextfield));
+      memset (new, 0, sizeof (struct nextfield));
       new->next = list;
       list = new;
 
@@ -2477,9 +2479,12 @@ read_struct_type (pp, type, objfile)
 	  struct next_fnfield *sublist = 0;
 	  struct type *look_ahead_type = NULL;
 	  int length = 0;
-	  struct next_fnfieldlist *new_mainlist =
-	    (struct next_fnfieldlist *)alloca (sizeof (struct next_fnfieldlist));
+	  struct next_fnfieldlist *new_mainlist;
 	  char *main_fn_name;
+
+	  new_mainlist = (struct next_fnfieldlist *)
+	      alloca (sizeof (struct next_fnfieldlist));
+	  memset (new_mainlist, 0, sizeof (struct next_fnfieldlist));
 
 	  p = *pp;
 
@@ -2520,7 +2525,8 @@ read_struct_type (pp, type, objfile)
 	  do
 	    {
 	      struct next_fnfield *new_sublist =
-		(struct next_fnfield *)alloca (sizeof (struct next_fnfield));
+		(struct next_fnfield *) alloca (sizeof (struct next_fnfield));
+	      memset (new_sublist, 0, sizeof (struct next_fnfield));
 
 	      /* Check for and handle cretinous dbx symbol name continuation!  */
 	      if (look_ahead_type == NULL) /* Normal case. */

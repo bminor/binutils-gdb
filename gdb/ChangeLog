@@ -1,3 +1,31 @@
+Mon Jul 20 21:09:53 1992  Fred Fish  (fnf@cygnus.com)
+
+	* buildsym.c (read_struct_type):  Initialize structs allocated
+	with alloca, to avoid using random values from stack later on.
+	* defs.h (fprintf_filtered):  Add prototype.
+	* gdbtypes.c (check_stub_method):  Fix misleading comments.
+	* gdbtypes.c (print_arg_types, dump_fn_fieldlists):  New maint
+	support functions.
+	* gdbtypes.c (print_cplus_stuff, recursive_dump_type):  Many
+	small changes to maint support functions.
+	* gdbtypes.h (cplus_struct_type):  Reorganize member ordering
+	for some fields and expand comments.
+	* objfiles.c (allocate_objfile):  Use new obstack_alloc_arg
+	macro and track change to obstack_full_begin macro.
+	* utils.c (fprintfi_filtered):  New function.
+	* valprint.c (type_print_base):  Fixup field printing to not
+	print extraneous lines and not print bogus "no data fields"
+	messages for C++ classes with no data members.  Also use new
+	fprintfi_filtered function.
+
+Sat Jul 18 15:48:58 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: echo error messages to stderr, not stdout
+
+Fri Jul 17 17:07:24 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: recognize hppa* instead of hppa
+
 Fri Jul 17 16:52:04 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* energize.c:  Second cut at DynamicLoad message handling.
