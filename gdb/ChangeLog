@@ -1,3 +1,9 @@
+2003-10-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (fetch_core_registers): Remove.
+	(linux_elf_core_fns): Remove.
+	(_initialize_i386_linux_nat): Remove.
+
 2003-10-31  Andrew Cagney  <cagney@redhat.com>
 
 	* solib-svr4.c: Update copyright.  Include "bfd-target.h" and
