@@ -220,11 +220,13 @@ get_operands (exp)
 	  if (*p == 'm') 
 	    {
 	      p++;
+	      /* This is a ":m" modifier */
 	      exp[numexp].X_add_number = TIC80_OPERAND_M_SI | TIC80_OPERAND_M_LI;
 	    }
 	  else if (*p == 's')
 	    {
 	      p++;
+	      /* This is a ":s" modifier */
 	      exp[numexp].X_add_number = TIC80_OPERAND_SCALED;
 	    }
 	  else
@@ -345,14 +347,17 @@ find_opcode (opcode, myops)
 
 	  X_op = myops[expi].X_op;
 	  num = myops[expi].X_add_number;
+
+	  /* The O_absent expressions apply to the same operand as the most
+	     recent non O_absent expression.  So only increment the operand
+	     index when the current expression is not one of these special
+	     expressions. */
+
 	  if (X_op != O_absent)
 	    {
-	      /* The O_absent expressions apply to the previously seen
-		 operand, so only increment the operand index when the
-		 current expression needs to be matched against the next
-		 operand. */
 	      opi++;
 	    }
+
 	  flags = tic80_operands[opc -> operands[opi]].flags;
 	  bits = tic80_operands[opc -> operands[opi]].bits;
 
@@ -402,8 +407,18 @@ find_opcode (opcode, myops)
 		  match = 0;
 		}
 	      break;
-	    case O_illegal:
 	    case O_absent:
+	      /* If this is an O_absent expression, then it may be an expression that
+		 supplies additional information about the operand, such as ":m" or
+		 ":s" modifiers. Check to see that the operand matches this requirement. */
+	      if (!((num & TIC80_OPERAND_M_SI) && (flags & TIC80_OPERAND_M_SI) ||
+		    (num & TIC80_OPERAND_M_LI) && (flags & TIC80_OPERAND_M_LI) ||
+		    (num & TIC80_OPERAND_SCALED) && (flags & TIC80_OPERAND_SCALED)))
+		{
+		  match = 0;
+		}
+	      break;
+	    case O_illegal:
 	    case O_symbol_rva:
 	    case O_big:
 	    case O_uminus:
@@ -557,34 +572,17 @@ build_insn (opcode, opers)
 
       X_op = opers[expi].X_op;
       num = opers[expi].X_add_number;
+
+      /* The O_absent expressions apply to the same operand as the most
+	 recent non O_absent expression.  So only increment the operand
+	 index when the current expression is not one of these special
+	 expressions. */
+
       if (X_op != O_absent)
 	{
-	  /* The O_absent expressions apply to the previously seen
-	     operand, so only increment the operand index when the
-	     current expression needs to be matched against the next
-	     operand. */
 	  opi++;
 	}
-      else
-	{
-	  /* Found a modifier that applies to the previously
-	     seen operand, so handle it. */
-	  switch (opers[expi].X_add_number)
-	    {
-	    case TIC80_OPERAND_M_SI | TIC80_OPERAND_M_LI:
-	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
-	      break;
-	    case TIC80_OPERAND_SCALED:
-	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
-	      break;
-	    case TIC80_OPERAND_PARENS:
-	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
-	      break;
-	    default:
-	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
-	      break;
-	    }
-	}
+
       flags = tic80_operands[opcode -> operands[opi]].flags;
       bits = tic80_operands[opcode -> operands[opi]].bits;
       shift = tic80_operands[opcode -> operands[opi]].shift;
@@ -643,8 +641,30 @@ build_insn (opcode, opers)
 	      internal_error ("symbol reloc that is not PC relative or 32 bits");
 	    }
 	  break;
-	case O_illegal:
 	case O_absent:
+	  /* Each O_absent expression can indicate exactly one possible modifier. */
+	  if ((num & TIC80_OPERAND_M_SI) && (flags & TIC80_OPERAND_M_SI))
+	    {
+	      insn[0] = insn[0] | (1 << 17);
+	    }
+	  else if ((num & TIC80_OPERAND_M_LI) && (flags & TIC80_OPERAND_M_LI))
+	    {
+	      insn[0] = insn[0] | (1 << 15);
+	    }
+	  else if ((num & TIC80_OPERAND_SCALED) && (flags & TIC80_OPERAND_SCALED))
+	    {
+	      insn[0] = insn[0] | (1 << 11);
+	    }
+	  else if ((num & TIC80_OPERAND_PARENS) && (flags & TIC80_OPERAND_PARENS))
+	    {
+	      /* No code to generate, just accept and discard this expression */
+	    }
+	  else
+	    {
+	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
+	    }
+	  break;
+	case O_illegal:
 	case O_symbol_rva:
 	case O_big:
 	case O_uminus:
