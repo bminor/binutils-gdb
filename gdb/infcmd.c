@@ -186,11 +186,6 @@ CORE_ADDR step_range_end;	/* Exclusive */
 
 struct frame_id step_frame_id;
 
-/* Our notion of the current stack pointer.  */
-/* NOTE: cagney/2004-05-09: This variable is not used and should be
-   garbage collected.  */
-CORE_ADDR step_sp;
-
 enum step_over_calls_kind step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
@@ -625,7 +620,6 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	  if (!frame)		/* Avoid coredump here.  Why tho? */
 	    error ("No current frame");
 	  step_frame_id = get_frame_id (frame);
-	  step_sp = read_sp ();
 
 	  if (!single_inst)
 	    {
@@ -725,7 +719,6 @@ step_once (int skip_subroutines, int single_inst, int count)
       if (!frame)		/* Avoid coredump here.  Why tho? */
 	error ("No current frame");
       step_frame_id = get_frame_id (frame);
-      step_sp = read_sp ();
 
       if (!single_inst)
 	{
@@ -978,7 +971,6 @@ until_next_command (int from_tty)
 
   step_over_calls = STEP_OVER_ALL;
   step_frame_id = get_frame_id (frame);
-  step_sp = read_sp ();
 
   step_multi = 0;		/* Only one call to proceed */
 

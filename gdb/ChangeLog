@@ -1,3 +1,12 @@
+2004-05-12  Andrew Cagney  <cagney@redhat.com>
+
+	* thread.c (load_infrun_state): Delete step_sp.
+	* infrun.c (context_switch): Ditto.
+	* inferior.h (step_sp): Ditto.
+	* infcmd.c (step_sp, step_1, step_once, until_next_command): Ditto.
+	* gdbthread.h (struct thread_info, save_infrun_state)
+	(restore_infrun_state): Ditto.
+
 2004-05-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* MAINTAINERS (write after approval): Add myself.

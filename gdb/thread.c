@@ -303,7 +303,7 @@ load_infrun_state (ptid_t ptid,
 		   bpstat *stepping_through_solib_catchpoints,
 		   int *stepping_through_sigtramp,
 		   int *current_line,
-		   struct symtab **current_symtab, CORE_ADDR *step_sp)
+		   struct symtab **current_symtab)
 {
   struct thread_info *tp;
 
@@ -328,7 +328,6 @@ load_infrun_state (ptid_t ptid,
   *stepping_through_sigtramp = tp->stepping_through_sigtramp;
   *current_line = tp->current_line;
   *current_symtab = tp->current_symtab;
-  *step_sp = tp->step_sp;
 }
 
 /* Save infrun state for the thread PID.  */
@@ -347,7 +346,7 @@ save_infrun_state (ptid_t ptid,
 		   bpstat stepping_through_solib_catchpoints,
 		   int stepping_through_sigtramp,
 		   int current_line,
-		   struct symtab *current_symtab, CORE_ADDR step_sp)
+		   struct symtab *current_symtab)
 {
   struct thread_info *tp;
 
@@ -370,7 +369,6 @@ save_infrun_state (ptid_t ptid,
   tp->stepping_through_sigtramp = stepping_through_sigtramp;
   tp->current_line = current_line;
   tp->current_symtab = current_symtab;
-  tp->step_sp = step_sp;
 }
 
 /* Return true if TP is an active thread. */

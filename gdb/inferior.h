@@ -364,10 +364,6 @@ extern CORE_ADDR step_range_end;	/* Exclusive */
 
 extern struct frame_id step_frame_id;
 
-/* Our notion of the current stack pointer.  */
-
-extern CORE_ADDR step_sp;
-
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
 
