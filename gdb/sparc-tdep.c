@@ -425,7 +425,7 @@ CORE_ADDR
 sparc_frame_chain (struct frame_info *frame)
 {
   /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
-     value.  If it realy is zero, we detect it later in
+     value.  If it really is zero, we detect it later in
      sparc_init_prev_frame.  */
   return (CORE_ADDR) 1;
 }

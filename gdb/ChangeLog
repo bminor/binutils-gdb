@@ -1,3 +1,7 @@
+2001-01-02  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sparc-tdep.c (sparc-frame-chain): Fix typo in comment.
+
 2000-12-20  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* arch-utils.c (default_frame_address): New function.  Default
