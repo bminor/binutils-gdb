@@ -1,8 +1,10 @@
 2005-03-10  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add Romanian lingua "ro".
-	* po/ro.po: New file.
 	* configure: Regenerate.
+	* po/ro.po: New file.
+
+	* po/ru.po: Updated file.
 
 2005-03-05  Alan Modra  <amodra@bigpond.net.au>
 
