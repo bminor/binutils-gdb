@@ -1639,6 +1639,7 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
      the BFD.  */
   obj_som_stringtab (abfd) = (char  *) NULL;
   obj_som_symtab (abfd) = (som_symbol_type *) NULL;
+  obj_som_sorted_syms (abfd) = NULL;
   obj_som_stringtab_size (abfd) = file_hdrp->symbol_strings_size;
   obj_som_sym_filepos (abfd) = file_hdrp->symbol_location;
   obj_som_str_filepos (abfd) = file_hdrp->symbol_strings_location;
@@ -1822,7 +1823,7 @@ setup_sections (abfd, file_hdr)
 	     be zero for a BSS like subspace.  */
 	  if (subspace.file_loc_init_value == 0
 	      && subspace.initialization_length == 0)
-	    subspace_asect->flags &= ~(SEC_DATA | SEC_LOAD);
+	    subspace_asect->flags &= ~(SEC_DATA | SEC_LOAD | SEC_HAS_CONTENTS);
 
 	  /* This subspace has relocations.
 	     The fixup_request_quantity is a byte count for the number of
@@ -2215,12 +2216,12 @@ compare_syms (arg1, arg2)
   /* Get relocation count for each symbol.  Note that the count
      is stored in the udata pointer for section symbols!  */
   if ((*sym1)->flags & BSF_SECTION_SYM)
-    count1 = (int)(*sym1)->udata;
+    count1 = (*sym1)->udata.i;
   else
     count1 = som_symbol_data (*sym1)->reloc_count;
 
   if ((*sym2)->flags & BSF_SECTION_SYM)
-    count2 = (int)(*sym2)->udata;
+    count2 = (*sym2)->udata.i;
   else
     count2 = som_symbol_data (*sym2)->reloc_count;
 
@@ -2242,6 +2243,7 @@ som_prep_for_fixups (abfd, syms, num_syms)
 {
   int i;
   asection *section;
+  asymbol **sorted_syms;
 
   /* Most SOM relocations involving a symbol have a length which is
      dependent on the index of the symbol.  So symbols which are
@@ -2250,14 +2252,14 @@ som_prep_for_fixups (abfd, syms, num_syms)
   /* First initialize the counters for each symbol.  */
   for (i = 0; i < num_syms; i++)
     {
-      /* Handle a section symbol; these have no pointers back to the 
-	 SOM symbol info.  So we just use the pointer field (udata)
-	 to hold the relocation count.  */
+      /* Handle a section symbol; these have no pointers back to the
+	 SOM symbol info.  So we just use the udata field to hold the
+	 relocation count.  */
       if (som_symbol_data (syms[i]) == NULL
 	  || syms[i]->flags & BSF_SECTION_SYM)
 	{
 	  syms[i]->flags |= BSF_SECTION_SYM;
-	  syms[i]->udata = (PTR) 0;
+	  syms[i]->udata.i = 0;
 	}
       else
 	som_symbol_data (syms[i])->reloc_count = 0;
@@ -2296,13 +2298,13 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	  else
 	    scale = 1;
 
-	  /* Handle section symbols by ramming the count in the udata
+	  /* Handle section symbols by storing the count in the udata
 	     field.  It will not be used and the count is very important
 	     for these symbols.  */
 	  if ((*reloc->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
 	    {
-	      (*reloc->sym_ptr_ptr)->udata =
-		(PTR) ((int) (*reloc->sym_ptr_ptr)->udata + scale);
+	      (*reloc->sym_ptr_ptr)->udata.i =
+		(*reloc->sym_ptr_ptr)->udata.i + scale;
 	      continue;
 	    }
 
@@ -2311,18 +2313,23 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	}
     }
 
-  qsort (syms, num_syms, sizeof (asymbol *), compare_syms);
+  /* Sort a copy of the symbol table, rather than the canonical
+     output symbol table.  */
+  sorted_syms = (asymbol **) bfd_zalloc (abfd, num_syms * sizeof (asymbol *));
+  memcpy (sorted_syms, syms, num_syms * sizeof (asymbol *));
+  qsort (sorted_syms, num_syms, sizeof (asymbol *), compare_syms);
+  obj_som_sorted_syms (abfd) = sorted_syms;
 
   /* Compute the symbol indexes, they will be needed by the relocation
      code.  */
   for (i = 0; i < num_syms; i++)
     {
       /* A section symbol.  Again, there is no pointer to backend symbol
-	 information, so we reuse (abuse) the udata field again.  */
-      if (syms[i]->flags & BSF_SECTION_SYM)
-	syms[i]->udata = (PTR) i;
+	 information, so we reuse the udata field again.  */
+      if (sorted_syms[i]->flags & BSF_SECTION_SYM)
+	sorted_syms[i]->udata.i = i;
       else
-        som_symbol_data (syms[i])->index = i;
+        som_symbol_data (sorted_syms[i])->index = i;
     }
 }
 
@@ -2412,7 +2419,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	      /* Get the symbol number.  Remember it's stored in a 
 		 special place for section symbols.  */
 	      if ((*bfd_reloc->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
-		sym_num = (int) (*bfd_reloc->sym_ptr_ptr)->udata;
+		sym_num = (*bfd_reloc->sym_ptr_ptr)->udata.i;
 	      else
 		sym_num = som_symbol_data (*bfd_reloc->sym_ptr_ptr)->index;
 	      
@@ -2538,7 +2545,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_ENTRY:
 		  {
 		    int tmp;
-		    arelent *tmp_reloc;
+		    arelent *tmp_reloc = NULL;
 		    bfd_put_8 (abfd, R_ENTRY, p);
 
 		    /* R_ENTRY relocations have 64 bits of associated
@@ -2795,7 +2802,7 @@ som_begin_writing (abfd)
   asection *section;
   asymbol **syms = bfd_get_outsymbols (abfd);
   unsigned int total_subspaces = 0;
-  struct som_exec_auxhdr *exec_header;
+  struct som_exec_auxhdr *exec_header = NULL;
 
   /* The file header will always be first in an object file, 
      everything else can be in random locations.  To keep things
@@ -2963,7 +2970,8 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->symbol_strings_location = current_offset;
 
   /* Scribble out the symbol strings.  */
-  if (som_write_symbol_strings (abfd, current_offset, syms, 
+  if (som_write_symbol_strings (abfd, current_offset,
+				obj_som_sorted_syms (abfd),
 				num_syms, &strings_size)
       == false)
     return false;
@@ -3524,7 +3532,7 @@ som_build_and_write_symbol_table (abfd)
 {
   unsigned int num_syms = bfd_get_symcount (abfd);
   file_ptr symtab_location = obj_som_file_hdr (abfd)->symbol_location;
-  asymbol **bfd_syms = bfd_get_outsymbols (abfd);
+  asymbol **bfd_syms = obj_som_sorted_syms (abfd);
   struct symbol_dictionary_record *som_symtab = NULL;
   int i, symtab_size;
 
@@ -5422,6 +5430,20 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
     free (strings);
 
   return false;
+}
+
+/* SOM almost uses the SVR4 style extended name support, but not
+   quite.  */
+
+static boolean
+som_construct_extended_name_table (abfd, tabloc, tablen, name)
+     bfd *abfd;
+     char **tabloc;
+     bfd_size_type *tablen;
+     const char **name;
+{
+  *name = "//";
+  return _bfd_construct_extended_name_table (abfd, false, tabloc, tablen);
 }
 
 /* Write out the LST for the archive.
