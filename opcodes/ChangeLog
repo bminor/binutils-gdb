@@ -1,3 +1,18 @@
+Mon Dec  1 11:56:50 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c: Add argument for lpstop.  From Olivier Carmona
+	<olivier.carmona@di.epfl.ch>.
+	* m68k-dis.c (print_insn_m68k): Handle special case of lpstop,
+	which has a two word opcode with a one word argument.
+
+start-sanitize-d30v
+Sun Nov 23 22:25:21 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v-opc.c (d30v_opcode_table, case cmpu): Immediate field is
+	unsigned, not signed.
+	(d30v_format_table): Add SHORT_CMPU cases for cmpu.
+
+end-sanitize-d30v
 start-sanitize-sh4
 Wed Nov 19 17:42:35 1997  Richard Henderson  <rth@cygnus.com>
 

@@ -1233,7 +1233,7 @@ const struct m68k_opcode m68k_opcodes[] =
 
 {"lea",		one(0040700),	one(0170700), "!sAd", m68000up | mcf5200 },
 
-{"lpstop",	two(0174000,0000700), two(0177777,0177777), "", cpu32|m68060 },
+{"lpstop",	two(0174000,0000700),two(0177777,0177777),"#w", cpu32|m68060 },
 
 {"linkw",	one(0047120),	one(0177770), "As#w", m68000up | mcf5200 },
 {"linkl",	one(0044010),	one(0177770), "As#l", m68020up | cpu32 },
@@ -1799,7 +1799,7 @@ const struct m68k_opcode m68k_opcodes[] =
 
 #define TBL1(name,signed,round,size)					\
   {name, two(0174000, (signed<<11)|(!round<<10)|(size<<6)|0000400),	\
-     two(0177700,0107777), "`sD1", cpu32 },				\
+     two(0177700,0107777), "!sD1", cpu32 },				\
   {name, two(0174000, (signed<<11)|(!round<<10)|(size<<6)),		\
      two(0177770,0107770), "DsD3D1", cpu32 }
 #define TBL(name1, name2, name3, s, r) \
