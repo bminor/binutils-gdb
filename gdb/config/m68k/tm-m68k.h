@@ -21,17 +21,24 @@
 
 #include "regcache.h"
 
-#define GDB_MULTI_ARCH 0
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
-struct frame_info;
+/* struct frame_info; */
+
+/* D0_REGNM and A0_REGNUM must be defined here because they are
+   used by the monitor.  */
+
+#define D0_REGNUM 0
+#define A0_REGNUM 8
 
 /* Sequence of bytes for breakpoint instruction.
    This is a TRAP instruction.  The last 4 bits (0xf below) is the
    vector.  Systems which don't use 0xf should define BPT_VECTOR
    themselves before including this file.  */
 
+#if !GDB_MULTI_ARCH
 #if !defined (BPT_VECTOR)
 #define BPT_VECTOR 0xf
 #endif
@@ -45,16 +52,21 @@ struct frame_info;
 #if !defined (REMOTE_BPT_VECTOR)
 #define REMOTE_BPT_VECTOR 1
 #endif
+#endif
 
+#if !GDB_MULTI_ARCH
 #if !defined (REMOTE_BREAKPOINT)
 #define REMOTE_BREAKPOINT {0x4e, (0x40 | REMOTE_BPT_VECTOR)}
 #endif
+#endif
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
 
 
 #define NUM_FREGS (NUM_REGS-24)
+
 
 /* This was determined by experimentation on hp300 BSD 4.3.  Perhaps
    it corresponds to some offset in /usr/include/sys/user.h or
@@ -70,7 +82,7 @@ struct frame_info;
 #define SP_ARG0 (1 * 4)
 
 #define TARGET_M68K
-
+#endif
 
 #if !GDB_MULTI_ARCH
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
@@ -147,7 +159,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #ifndef REGISTER_BYTES
 #define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
 #endif
-#endif //multi-arch
+#endif /* multi-arch */
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -180,7 +192,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 12
-#endif //multi-arch
+#endif /* multi-arch */
 
 /* Return the GDB type object for the "standard" data type of data 
    in register N.  This should be int for D0-D7, long double for FP0-FP7,
@@ -214,21 +226,18 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-
-#define D0_REGNUM 0
-#define A0_REGNUM 8
-#define A1_REGNUM 9
 #if !GDB_MULTI_ARCH
+
+#define A1_REGNUM 9
 #define FP_REGNUM 14		/* Contains address of executing stack frame */
 #define SP_REGNUM 15		/* Contains address of top of stack */
 #define PS_REGNUM 16		/* Contains processor status */
 #define PC_REGNUM 17		/* Contains program counter */
 #define FP0_REGNUM 18		/* Floating point register 0 */
-#endif
 #define FPC_REGNUM 26		/* 68881 control register */
 #define FPS_REGNUM 27		/* 68881 status register */
 #define FPI_REGNUM 28		/* 68881 iaddr register */
-
+#endif
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
@@ -248,7 +257,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 	         (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	\
 	  TYPE_LENGTH(TYPE))
 #endif
-#endif //multi-arch
+#endif /* multi-arch */
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  Assumes floats are passed
@@ -265,7 +274,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
-#endif //multi-arch
+#endif /* multi-arch */
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
