@@ -86,7 +86,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 {"vmadday", "&UK,2K,1#y",	0x4a0000bd, 0xfe0007ff,	0, 		T5},
 {"vmaddaz", "&UK,2K,1#z",	0x4a0000be, 0xfe0007ff,	0, 		T5},
 {"vmax",    "&3K,2K,1K",	0x4a00002b, 0xfe00003f,	0, 		T5},
-{"vmaxi",   "&3K,2K,J",	0x4a00001b, 0xfe1f003f,	0, 		T5},
+{"vmaxi",   "&3K,2K,J",	0x4a00001d, 0xfe1f003f,	0, 		T5},
 {"vmaxw",   "&3K,2K,1#w",	0x4a000013, 0xfe00003f,	0, 		T5},
 {"vmaxx",   "&3K,2K,1#x",	0x4a000010, 0xfe00003f,	0, 		T5},
 {"vmaxy",   "&3K,2K,1#y",	0x4a000011, 0xfe00003f,	0, 		T5},
