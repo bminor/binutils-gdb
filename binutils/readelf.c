@@ -73,6 +73,9 @@ unsigned int    	rela_size;
 char *          	dynamic_strings;
 char *			string_table;
 Elf_Internal_Sym * 	dynamic_symbols;
+Elf_Internal_Syminfo *	dynamic_syminfo;
+unsigned long int	dynamic_syminfo_offset;
+unsigned int		dynamic_syminfo_nent;
 char            	program_interpreter [64];
 int             	dynamic_info[DT_JMPREL + 1];
 int             	version_info[16];
@@ -1289,7 +1292,7 @@ process_program_headers (file)
       printf
 	(_("\nProgram Header%s:\n"), elf_header.e_phnum > 1 ? "s" : "");
       printf
-	(_("  Type        Offset  VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
+	(_("  Type        Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
     }
 
   loadaddr = -1;
@@ -1302,7 +1305,7 @@ process_program_headers (file)
       if (do_segments)
 	{
 	  printf ("  %-11.11s ", get_segment_type (segment->p_type));
-	  printf ("0x%5.5lx ", (unsigned long) segment->p_offset);
+	  printf ("0x%6.6lx ", (unsigned long) segment->p_offset);
 	  printf ("0x%8.8lx ", (unsigned long) segment->p_vaddr);
 	  printf ("0x%8.8lx ", (unsigned long) segment->p_paddr);
 	  printf ("0x%5.5lx ", (unsigned long) segment->p_filesz);
@@ -1521,6 +1524,7 @@ process_section_headers (file)
      and dynamic string table.  */
   dynamic_symbols = NULL;
   dynamic_strings = NULL;
+  dynamic_syminfo = NULL;
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
        i ++, section ++)
@@ -1697,26 +1701,70 @@ static void
 dynamic_segment_mips_val (entry)
      Elf_Internal_Dyn *entry;
 {
-  switch (entry->d_tag)
-    {
-    case DT_MIPS_LOCAL_GOTNO:
-    case DT_MIPS_CONFLICTNO:
-    case DT_MIPS_LIBLISTNO:
-    case DT_MIPS_SYMTABNO:
-    case DT_MIPS_UNREFEXTNO:
-    case DT_MIPS_HIPAGENO:
-    case DT_MIPS_DELTA_CLASS_NO:
-    case DT_MIPS_DELTA_INSTANCE_NO:
-    case DT_MIPS_DELTA_RELOC_NO:
-    case DT_MIPS_DELTA_SYM_NO:
-    case DT_MIPS_DELTA_CLASSSYM_NO:
-      if (do_dynamic)
+  if (do_dynamic)
+    switch (entry->d_tag)
+      {
+      case DT_MIPS_FLAGS:
+	if (entry->d_un.d_val == 0)
+	  printf ("NONE\n");
+	else
+	  {
+	    static const char *opts[] =
+	    {
+	      "QUICKSTART", "NOTPOT", "NO_LIBRARY_REPLACEMENT",
+	      "NO_MOVE", "SGI_ONLY", "GUARANTEE_INIT", "DELTA_C_PLUS_PLUS",
+	      "GUARANTEE_START_INIT", "PIXIE", "DEFAULT_DELAY_LOAD",
+	      "REQUICKSTART", "REQUICKSTARTED", "CORD", "NO_UNRES_UNDEF",
+	      "RLD_ORDER_SAFE"
+	    };
+	    unsigned int cnt;
+	    int first = 1;
+	    for (cnt = 0; cnt < sizeof (opts) / sizeof (opts[0]); ++cnt)
+	      if (entry->d_un.d_val & (1 << cnt))
+		{
+		  printf ("%s%s", first ? "" : " ", opts[cnt]);
+		  first = 0;
+		}
+	    puts ("");
+	  }
+	break;
+
+      case DT_MIPS_IVERSION:
+	if (dynamic_strings != NULL)
+	  printf ("Interface Version: %s\n",
+		  dynamic_strings + entry->d_un.d_val);
+	else
+	  printf ("%#ld\n", (long) entry->d_un.d_ptr);
+	break;
+
+      case DT_MIPS_TIME_STAMP:
+	{
+	  char timebuf[20];
+	  time_t time = entry->d_un.d_val;
+	  strftime (timebuf, 20, "%Y-%m-%dT%H:%M:%S", gmtime (&time));
+	  printf ("Time Stamp: %s\n", timebuf);
+	}
+	break;
+
+      case DT_MIPS_RLD_VERSION:
+      case DT_MIPS_LOCAL_GOTNO:
+      case DT_MIPS_CONFLICTNO:
+      case DT_MIPS_LIBLISTNO:
+      case DT_MIPS_SYMTABNO:
+      case DT_MIPS_UNREFEXTNO:
+      case DT_MIPS_HIPAGENO:
+      case DT_MIPS_DELTA_CLASS_NO:
+      case DT_MIPS_DELTA_INSTANCE_NO:
+      case DT_MIPS_DELTA_RELOC_NO:
+      case DT_MIPS_DELTA_SYM_NO:
+      case DT_MIPS_DELTA_CLASSSYM_NO:
+      case DT_MIPS_COMPACT_SIZE:
 	printf ("%#ld\n", (long) entry->d_un.d_ptr);
-      break;
-    default:
-      if (do_dynamic)
+	break;
+
+      default:
 	printf ("%#lx\n", (long) entry->d_un.d_ptr);
-    }
+      }
 }
 
 /* Parse the dynamic segment */
@@ -1839,6 +1887,51 @@ process_dynamic_segment (file)
 			  "dynamic string table");
 
 	  break;
+	}
+    }
+
+  /* And find the syminfo section if available.  */
+  if (dynamic_syminfo == NULL)
+    {
+      unsigned int syminsz = 0;
+
+      for (i = 0, entry = dynamic_segment;
+	   i < dynamic_size;
+	   ++i, ++ entry)
+	{
+	  if (entry->d_tag == DT_SYMINENT)
+	    assert (sizeof (Elf_External_Syminfo) == entry->d_un.d_val);
+	  else if (entry->d_tag == DT_SYMINSZ)
+	    syminsz = entry->d_un.d_val;
+	  else if (entry->d_tag == DT_SYMINFO)
+	    dynamic_syminfo_offset = entry->d_un.d_val - loadaddr;
+	}
+
+      if (dynamic_syminfo_offset != 0 && syminsz != 0)
+	{
+	  Elf_External_Syminfo *extsyminfo;
+	  Elf_Internal_Syminfo *syminfo;
+
+	  /* There is a syminfo section.  Read the data.  */
+	  GET_DATA_ALLOC (dynamic_syminfo_offset, syminsz, extsyminfo,
+			  Elf_External_Syminfo *, "symbol information");
+
+	  dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
+	  if (dynamic_syminfo == NULL)
+	    {
+	      error (_("Out of memory\n"));
+	      return 0;
+	    }
+
+	  dynamic_syminfo_nent = syminsz / sizeof (Elf_External_Syminfo);
+	  for (i = 0, syminfo = dynamic_syminfo; i < dynamic_syminfo_nent;
+	       ++i, ++syminfo)
+	    {
+	      syminfo->si_boundto = BYTE_GET (extsyminfo[i].si_boundto);
+	      syminfo->si_flags = BYTE_GET (extsyminfo[i].si_flags);
+	    }
+
+	  free (extsyminfo);
 	}
     }
 
@@ -2951,6 +3044,61 @@ process_symbol_table (file)
 }
 
 static int
+process_syminfo (file)
+     FILE * file;
+{
+  int i;
+
+  if (dynamic_syminfo == NULL
+      || !do_dynamic)
+    /* No syminfo, this is ok.  */
+    return 1;
+
+  /* There better should be a dynamic symbol section.  */
+  if (dynamic_symbols == NULL || dynamic_strings == NULL)
+    return 0;
+
+  if (dynamic_addr)
+    printf (_("\nDynamic info segment at offset 0x%x contains %d entries:\n"),
+	    dynamic_syminfo_offset, dynamic_syminfo_nent);
+
+  printf (_(" Num: Name                                BoundTo Flags\n"));
+  for (i = 0; i < dynamic_syminfo_nent; ++i)
+    {
+      unsigned short int flags = dynamic_syminfo[i].si_flags;
+
+      printf ("%4d: %-35s ", i,
+	      dynamic_strings + dynamic_symbols[i].st_name);
+
+      switch (dynamic_syminfo[i].si_boundto)
+	{
+	case SYMINFO_BT_SELF:
+	  fputs ("SELF    ", stdout);
+	  break;
+	case SYMINFO_BT_PARENT:
+	  fputs ("PARENT  ", stdout);
+	  break;
+	default:
+	  printf ("%-7d ", dynamic_syminfo[i].si_boundto);
+	  break;
+	}
+
+      if (flags & SYMINFO_FLG_DIRECT)
+	printf (" DIRECT");
+      if (flags & SYMINFO_FLG_PASSTHRU)
+	printf (" PASSTHRU");
+      if (flags & SYMINFO_FLG_COPY)
+	printf (" COPY");
+      if (flags & SYMINFO_FLG_LAZYLOAD)
+	printf (" LAZYLOAD");
+
+      puts ("");
+    }
+
+  return 1;
+}
+
+static int
 process_section_contents (file)
      FILE * file;
 {
@@ -3116,14 +3264,14 @@ process_mips_specific (file)
 		      elib, Elf32_External_Lib *, "liblist");
 
       printf ("\nSection '.liblist' contains %d entries:\n", liblistno);
-      fputs ("     Library              Time Stamp       Checksum   Version Flags\n",
+      fputs ("     Library              Time Stamp          Checksum   Version Flags\n",
 	     stdout);
 
       for (cnt = 0; cnt < liblistno; ++cnt)
 	{
 	  Elf32_Lib liblist;
 	  time_t time;
-	  char timebuf[17];
+	  char timebuf[20];
 
 	  liblist.l_name = BYTE_GET (elib[cnt].l_name);
 	  time = BYTE_GET (elib[cnt].l_time_stamp);
@@ -3131,7 +3279,7 @@ process_mips_specific (file)
 	  liblist.l_version = BYTE_GET (elib[cnt].l_version);
 	  liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
 
-	  strftime (timebuf, 17, "%Y-%m-%dT%H:%M", gmtime (&time));
+	  strftime (timebuf, 20, "%Y-%m-%dT%H:%M:%S", gmtime (&time));
 
 	  printf ("%3d: %-20s %s %#10lx %-7ld %#lx\n", cnt,
 		  dynamic_strings + liblist.l_name, timebuf,
@@ -3438,6 +3586,8 @@ process_file (file_name)
 
   process_symbol_table (file);
 
+  process_syminfo (file);
+
   process_version_sections (file);
 
   process_section_contents (file);
@@ -3468,6 +3618,12 @@ process_file (file_name)
     {
       free (dynamic_symbols);
       dynamic_symbols = NULL;
+    }
+
+  if (dynamic_syminfo)
+    {
+      free (dynamic_syminfo);
+      dynamic_syminfo = NULL;
     }
 }
 
