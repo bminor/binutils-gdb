@@ -153,7 +153,27 @@ static sigset_t blocked_mask;
 /* Prototypes for local functions.  */
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 
+/* Convert wait status STATUS to a string.  Used for printing debug
+   messages only.  */
 
+static char *
+status_to_str (int status)
+{
+  static char buf[64];
+
+  if (WIFSTOPPED (status))
+    snprintf (buf, sizeof (buf), "%s (stopped)",
+	      strsignal (WSTOPSIG (status)));
+  else if (WIFSIGNALED (status))
+    snprintf (buf, sizeof (buf), "%s (terminated)",
+	      strsignal (WSTOPSIG (status)));
+  else
+    snprintf (buf, sizeof (buf), "%d (exited)",
+	      WEXITSTATUS (status));
+
+  return buf;
+}
+
 /* Initialize the list of LWPs.  Note that this module, contrary to
    what GDB's generic threads layer does for its thread list,
    re-initializes the LWP lists whenever we mourn or detach (which
@@ -901,11 +921,9 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  lp->status = 0;
 
 	  if (debug_lin_lwp && status)
-	    fprintf_unfiltered (gdb_stdlog, 
-				"Using pending wait status %d for LWP %ld.\n",
-				WIFSTOPPED (status) ? WSTOPSIG (status) : 
-				WIFSIGNALED (status) ? WTERMSIG (status) :
-				WEXITSTATUS (status), GET_LWP (lp->ptid));
+	    fprintf_unfiltered (gdb_stdlog,
+				"Using pending wait status %s for LWP %ld.\n",
+				status_to_str (status), GET_LWP (lp->ptid));
 	}
 
       /* But if we don't fine one, we'll have to wait, and check both
@@ -927,11 +945,9 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       lp->status = 0;
 
       if (debug_lin_lwp && status)
-	fprintf_unfiltered (gdb_stdlog, 
-			    "Using pending wait status %d for LWP %ld.\n",
-			    WIFSTOPPED (status) ? WSTOPSIG (status) : 
-			    WIFSIGNALED (status) ? WTERMSIG (status) :
-			    WEXITSTATUS (status), GET_LWP (lp->ptid));
+	fprintf_unfiltered (gdb_stdlog,
+			    "Using pending wait status %s for LWP %ld.\n",
+			    status_to_str (status), GET_LWP (lp->ptid));
 
       /* If we have to wait, take into account whether PID is a cloned
          process or not.  And we have to convert it to something that
@@ -1103,9 +1119,8 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   lp->stopped = 1;
 
   if (debug_lin_lwp)
-    fprintf_unfiltered (gdb_stdlog, 
-			"LLW: Candidate event %d in %ld\n",
-			WSTOPSIG (status), GET_LWP (lp->ptid));
+    fprintf_unfiltered (gdb_stdlog, "Candidate event %s in LWP %ld.\n",
+			status_to_str (status), GET_LWP (lp->ptid));
 
   /* Now stop all other LWP's ...  */
   iterate_over_lwps (stop_callback, NULL);
