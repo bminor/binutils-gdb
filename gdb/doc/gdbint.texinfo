@@ -274,30 +274,6 @@ symbols, but GDB uses BFD's cached information to find the symbols,
 string table, etc.
 @end table
 
-When porting GDB to a new operating system, you will need to either
-write specific code for parsing your OS's core files, or customize
-bfd/trad-core.c.   First, use whatever #include files your machine uses
-to define the struct of registers that is accessible (possibly in the
-upage) in a core file (rather than <machine/reg.h>), and an include
-file that defines whatever header exists on a core file (e.g. the
-u-area or a "struct core").  Then modify @samp{trad_unix_core_file_p}
-to use these values to set up the section information for the data
-segment, stack segment, any other segments in the core file (perhaps
-shared library contents or control information), "registers" segment,
-and if there are two discontiguous sets of registers (e.g.  integer and
-float), the "reg2" segment.  This section information basically
-delimits areas in the core file in a standard way, which the
-section-reading routines in BFD know how to seek around in.
-
-Then back in GDB, you need a matching routine called fetch_core_registers.
-If you can use the generic one, it's in core-dep.c; if not, it's in
-your xm-foobar.c file.  It will be passed a char pointer
-to the entire "registers" segment, its length, and a zero; or a char
-pointer to the entire "regs2" segment, its length, and a 2.  The
-routine should suck out the supplied register values and install them into
-gdb's "registers" array.  (@xref{New Architectures}
-for more info about this.)
-
 The interface for symbol reading is described in @xref{Symbol Reading}.
 
 @node Host versus Target, Symbol Reading, BFD support for GDB, Top
@@ -332,8 +308,148 @@ code.
 @node New Host, New Target, Host versus Target, Host versus Target
 @section Adding a New Host
 
+There are two halves to making GDB work on a new machine.  First,
+you have to make it host on the new machine (compile there, handle
+that machine's terminals properly, etc).  If you will be cross-debugging
+to some other kind of system, you are done.
+
+(If you want to use GDB to debug programs that run on the new machine,
+you have to get it to understand the machine's object files, symbol
+files, and interfaces to processes.  @pxref{New Target}.)
+
+Most of the work in making GDB compile on a new machine is in specifying
+the configuration of the machine.  This is done in a dizzying variety
+of header files and configuration scripts, which we hope to make more
+sensible soon.  Let's say your new host is called an XXX (e.g. sun4),
+and its full three-part configuration name is XARCH-XVEND-XOS (e.g.
+sparc-sun-sunos4).  In particular:
+
+At the top level, edit @file{config.sub} and add XARCH, XVEND, and
+XOS to the lists of supported architectures, vendors, and operating systems
+near the bottom of the file.  Also, add XXX as an alias that maps to
+XARCH-XVEND-XOS.  You can test your changes by running
+
+	./config.sub XXX
+and	./config.sub XARCH-XVEND-XOS
+
+which should both respond with XARCH-XVEND-XOS and no error messages.  
+
+Then edit @file{include/sysdep.h}.  Add a new #define for XXX_SYS, with
+a numeric value not already in use.  Add a new section that says
+
+	#if HOST_SYS==XXX_SYS
+	#include <sys/h-XXX.h>
+	#endif
+
+Now create a new file @file{include/sys/h-XXX.h}.  Examine the other
+h-*.h files as templates, and create one that brings in the right include
+files for your system, and defines any host-specific macros needed by
+GDB.
+
+Now, go to the bfd directory and edit @file{bfd/configure.in}.  Add shell
+script code to recognize your XARCH-XVEND-XOS configuration, and set
+bfd_host to XXX when you recognize it.  Now create a file
+@file{bfd/config/hmake-XXX}, which includes the line:
+
+	HDEFINES=-DHOST_SYS=XXX_SYS
+
+(If you have the binutils in the same tree, you'll have to do the same
+thing to in the binutils directory as you've done in the bfd directory.)
+
+It's likely that the libiberty and readline directories won't need any
+changes for your configuration, but if they do, you can change the
+@file{configure.in} file there to recognize your system and map to an
+hmake-XXX file.  Then add @file{hmake-XXX} to the @file{config/} subdirectory,
+to set any makefile variables you need.  The only current options
+in there are things like -DSYSV.
+
+Aha!  Now to configure GDB itself!  Modify @file{gdb/configure.in} to
+recognize your system and set gdb_host to XXX.  Add a file 
+@file{gdb/xconfig/XXX} which specifies XDEPFILES=(whatever is needed),
+and XM_FILE= xm-XXX.h.  Create @file{gdb/xm-XXX.h} with the appropriate
+#define's for your system (crib from existing xm-*.h files).
+If your machine needs custom support routines, you can put them in
+a file @file{gdb/XXX-xdep.c}, and add XXX-xdep.o to the XDEPFILES=
+line.  If not, you can use the generic routines for ptrace support
+(infptrace.o) and core files (coredep.o).  These can be customized
+in various ways by macros defined in your @file{xm-XXX.h} file.
+
+Now, from the top level (above bfd, gdb, etc), run:
+
+	./configure -template=./configure
+
+This will rebuild all your configure scripts, using the new
+configure.in files that you modified.  (You can also run this command
+at any subdirectory level.)  You are now ready to try configuring
+GDB to compile for your system.  Do:
+
+	./configure XXX +target=vxworks960
+
+This will configure your system to cross-compile for VxWorks on
+the Intel 960, which is probably not what you really want, but it's
+a test case that works at this stage.  (You haven't set up to be
+able to debug programs that run @emph{on} XXX yet.)
+
+If this succeeds, you can try building it all with:
+
+	make
+
+Good luck!  Comments and suggestions about this section are particularly
+welcome; send them to bug-gdb@@prep.ai.mit.edu.
+
+When hosting GDB on a new operating system, to make it possible
+to debug core files, you will need to either
+write specific code for parsing your OS's core files, or customize
+bfd/trad-core.c.   First, use whatever #include files your machine uses
+to define the struct of registers that is accessible (possibly in the
+upage) in a core file (rather than <machine/reg.h>), and an include
+file that defines whatever header exists on a core file (e.g. the
+u-area or a "struct core").  Then modify @samp{trad_unix_core_file_p}
+to use these values to set up the section information for the data
+segment, stack segment, any other segments in the core file (perhaps
+shared library contents or control information), "registers" segment,
+and if there are two discontiguous sets of registers (e.g.  integer and
+float), the "reg2" segment.  This section information basically
+delimits areas in the core file in a standard way, which the
+section-reading routines in BFD know how to seek around in.
+
+Then back in GDB, you need a matching routine called fetch_core_registers.
+If you can use the generic one, it's in core-dep.c; if not, it's in
+your foobar-xdep.c file.  It will be passed a char pointer
+to the entire "registers" segment, its length, and a zero; or a char
+pointer to the entire "regs2" segment, its length, and a 2.  The
+routine should suck out the supplied register values and install them into
+gdb's "registers" array.  (@xref{New Architectures}
+for more info about this.)
+
 @node New Target, New Config, New Host, Host versus Target
 @section Adding a New Target
+
+When adding support for a new target machine, there are various areas
+of support that might need change, or might be OK.
+
+If you are using an existing object file format (a.out or COFF), 
+there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
+for more information on writing new a.out or COFF versions.
+
+If you need to add a new object file format, you are beyond the scope
+of this document right now.  Look at the structure of the a.out
+and COFF support, build a transfer vector (xvec) for your new format,
+and start populating it with routines.  Add it to the list in 
+@file{bfd/targets.c}.
+
+If you are adding a new existing CPU chip (e.g. m68k family), you'll
+need to define an XARCH-opcode.h file, a tm-XARCH.h file that gives
+the basic layout of the chip (registers, stack, etc), probably
+an XARCH-tdep.c file that has support routines for tm-XARCH.h, etc.
+
+If you are adding a new operating system for an existing CPU chip,
+add a tm-XOS.h file that describes the operating system facilities
+that are unusual (extra symbol table info; the breakpoint
+instruction needed; etc).  Then write a @file{tm-XARCH-XOS.h}
+that just #include's tm-XARCH.h and tm-XOS.h.  (Now that we have
+three-part configuration names, this will probably get revised to
+separate the OS configuration from the ARCH configuration.  FIXME.)
 
 @node New Config,  , New Target, Host versus Target
 @section Extending @code{configure}
