@@ -1,3 +1,8 @@
+2004-01-13  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Call
+	mips_elf64_rtype_to_howto instead of using howto_table.
+
 2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Check that we created

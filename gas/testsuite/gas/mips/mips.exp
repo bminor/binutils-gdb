@@ -543,6 +543,7 @@ if { [istarget mips*-*-*] } then {
     # supports the necessary mips16 reloc.
     if { $elf && !$no_mips16 } {
 	run_dump_test "mips16"
+	run_dump_test "mips16-64"
 	# Check jalx handling
 	run_dump_test "mips16-jalx"
 	run_dump_test "mips-jalx"
