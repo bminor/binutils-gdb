@@ -1,3 +1,9 @@
+2002-08-06  George France <france@handhelds.org>
+
+	* config/tc-alpha.c (cpu_types): Enabled ev67, ev68,  -m21264a
+	and m21264b processor names and cpu types.
+	* doc/c-alpha.texi: Documented new types.
+
 2002-08-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_apply_fix3): Adjust 16 bit XCOFF reloc offset.
