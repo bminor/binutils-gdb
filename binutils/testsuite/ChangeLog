@@ -1,3 +1,7 @@
+2004-02-27  Andreas Schwab  <schwab@suse.de>
+
+	* binutils-all/ar.exp (argument_parsing): New test.
+
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* binutils-all/objcopy.exp: Reorder arguments for POSIXLY_CORRECT
