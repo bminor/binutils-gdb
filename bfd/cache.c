@@ -336,6 +336,10 @@ bfd_cache_close (bfd *abfd)
   if (abfd->iovec != &cache_iovec)
     return TRUE;
 
+  if (abfd->iostream == NULL)
+    /* Previously closed.  */
+    return TRUE;
+
   return bfd_cache_delete (abfd);
 }
 

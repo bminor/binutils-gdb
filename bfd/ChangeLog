@@ -1,3 +1,7 @@
+2004-04-22  Andrew Cagney  <cagney@redhat.com>
+
+	* cache.c (bfd_cache_close): Check for a previously closed file.
+
 2004-04-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* bfd.c (bfd_get_synthetic_symtab): Define.
