@@ -1,3 +1,12 @@
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_TYPE): Delete.
+	(REGISTER_CONVERT_FROM_TYPE): Delete.
+	(mips_register_convert_to_type): Delete declaration.
+	(mips_register_convert_from_type): Delete declaration.
+	* linux-nat.h (struct target_ops): Declare opaque.  s/Linux/Linux
+	kernel/.
+
 2003-06-19  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-nat.h: New file.

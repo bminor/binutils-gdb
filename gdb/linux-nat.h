@@ -56,8 +56,11 @@ struct lwp_info
   struct lwp_info *next;
 };
 
-/* Read/write to target memory via Linux's "proc file system".  */
+/* Read/write to target memory via the Linux kernel's "proc file
+   system".  */
 struct mem_attrib;
+struct target_ops;
+
 extern int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len,
 				   int write, struct mem_attrib *attrib,
 				   struct target_ops *target);
