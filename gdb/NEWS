@@ -1,6 +1,12 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB 5.2:
+
+* New targets.
+
+Atmel AVR					avr*-*-*
+
 *** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".

@@ -1,3 +1,8 @@
+2002-05-28  Theodore A. Roth  <troth@verinet.com>
+
+	* MAINTAINERS: Add myself as AVR maintainer.
+	* NEWS: Note new avr target.
+
 2002-06-07  Michal Ludvig  <mludvig@suse.cz>
 
 	Merge from mainline:
