@@ -1,5 +1,9 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386v-nat.c: Remove copnditional inclusion of <asm/debugreg.h>,
+	and associated comment.  They no longer make any sense, since we
+	don't use this file anymore on Linux.
+
 	* config/i386/tm-i386.h (MAX_NUM_REGS): Removed.
 	* i386-tdep.c (i386_register_offset, i386_register_size): Use
 	I386_SSE_NUM_REGS instead of MAX_NUM_REGS for the number of
