@@ -17,7 +17,6 @@ Mon Aug 32 11:12:04 1998  Catherine Moore  <clm@cygnus.com>
         OTHER_BSS_END_SYMBOLS.
         * scripttempl/elfarm.sc:  Remove file.
 
-.Santizie ChangeLog Makefile.am Makefile.in configure.tgt
 Tue Aug 18 12:05:34 1998  Catherine Moore  <clm@cygnus.com>
 
         * emultempl/armelf.em (gld_armelf_before_allocation):
