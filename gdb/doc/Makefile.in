@@ -103,6 +103,7 @@ all-doc: info dvi ps
 diststuff: info
 
 install-info: info
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(infodir)
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
