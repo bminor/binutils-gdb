@@ -189,7 +189,7 @@ SER_HARDWIRE=ser-unix.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_O = remote.o dcache.o
+REMOTE_O = remote.o dcache.o remote-utils.o
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -322,6 +322,9 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 #wait_h =	$(INCLUDE_DIR)/wait.h
 #dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 
+dcache_h = dcache.h
+remote_utils_h = $(dcache_h) remote-utils.h
+
 readline_headers = \
 	$(READLINE_SRC)/chardefs.h \
 	$(READLINE_SRC)/history.h \
@@ -372,7 +375,8 @@ HFILES = buildsym.h call-cmds.h defs.h environ.h $(gdbcmd_h) \
 	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
-	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h $(dcache_h)
+	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h thread.h \
+	$(remote_utils_h)
 
 # GDB "info" files, which should be included in their entirety
 INFOFILES = gdb.info*
@@ -813,7 +817,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
-	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c remote-st.c \
+	remote-mm.c remote-mon.c remote-nindy.c remote-sim.c \
+	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-pinsn.c sparc-tdep.c sun3-nat.c sun386-nat.c symm-tdep.c \
@@ -854,8 +859,8 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m68k/tm-amix.h config/m68k/tm-delta68.h \
 	config/m68k/tm-dpx2.h config/m68k/tm-es1800.h \
 	config/m68k/tm-hp300bsd.h config/m68k/tm-hp300hpux.h \
-	config/m68k/tm-isi.h config/m68k/tm-m68k-fp.h \
-	config/m68k/tm-m68k-nofp.h config/m68k/tm-monitor.h \
+	config/m68k/tm-isi.h config/m68k/tm-m68k-em.h \
+	config/m68k/tm-monitor.h \
 	config/m68k/tm-news.h config/m68k/tm-os68k.h config/m68k/tm-st2000.h \
 	config/m68k/tm-sun2.h config/m68k/tm-sun2os4.h config/m68k/tm-sun3.h \
 	config/m68k/tm-sun3os4.h config/m68k/tm-vx68.h config/m68k/xm-3b1.h \
@@ -915,7 +920,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/m68k/es1800.mt config/m68k/hp300bsd.mh \
 	config/m68k/hp300bsd.mt config/m68k/hp300hpux.mh \
 	config/m68k/hp300hpux.mt config/m68k/isi.mh config/m68k/isi.mt \
-	config/m68k/m68k-fp.mt config/m68k/m68k-nofp.mt \
+	config/m68k/m68k-em.mt \
 	config/m68k/monitor.mt \
 	config/m68k/news.mh config/m68k/news.mt config/m68k/news1000.mh \
 	config/m68k/os68k.mt config/m68k/st2000.mt config/m68k/sun2os3.mh \
@@ -1020,6 +1025,8 @@ dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \
 	$(gdbtypes_h) language.h objfiles.h partial-stab.h stabsread.h \
 	symfile.h $(symtab_h) target.h
+
+dcache.o: dcache.c $(dcache_h)
 
 delta68-nat.o: delta68-nat.c $(defs_h)
 
@@ -1128,7 +1135,8 @@ m88k-pinsn.o: m88k-pinsn.c $(defs_h) $(symtab_h)
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 main.o: main.c $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
-	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h target.h
+	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
+	target.h $(remote_utils_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(READLINE_CFLAGS) $(srcdir)/main.c
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) 
@@ -1198,7 +1206,7 @@ remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
 
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h $(dcache_h)
+	$(inferior_h) target.h terminal.h $(remote_utils_h)
 
 remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h

@@ -1,3 +1,50 @@
+Mon Sep 13 14:14:35 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Collect some remote things into remote-utils.
+	* remote-utils.[ch]: new files of functions collected from several
+	  different remote targets.
+	* Makefile.in (REMOTE_O): add remote-utils.o.
+	  (dcache_h, remote_utils_h): new macros.
+	  (HFILES): add $(remote_utils_h).
+	  (ALLDEPFILES): add $(remote_utils_h).
+	  (dcache.o): new rule.
+	  (main.o, remote-bug.o): also depend on $(remote_utils_h).
+	* target.h (remote_debug): extern moved to remote-utils.h.
+	* target.c (find_default_run_target, find_core_target): initialize
+	  runable.
+	  (remote_debug): moved to remote-utils.c.
+	  (_initialize_targets): move declaration of user variable
+	  remotedebug to remote-utils.c.
+	* remote-bug.c: include remote-utils.h rather than dcache.h.
+	  (bug_close, bug_write, bug_write_cr, desc, bug_dcache, timeout,
+	  dev_name, check_open, is_open, readchar, readchar_nofail,
+	  pollchar, expect, expect_prompt, get_hex_digit, get_hex_byte,
+	  get_hex_word, bug_kill, bug_detach, bug_create_inferior,
+	  multi-scan, bug_prepare_to_store, bug_fetch_word,
+	  bug_store_word, bug_files_info, bug_mourn, bug_com, bug_device,
+	  bug_speed): removed and replaced with facilities from
+	  remote-utils.[ch].
+	  (bug_read_inferior_memory): renamed to bug_read_memory.
+	  (bug_write_inferior_memory): renamed to bug_write_memory.
+	  (bug_xfer_inferior_memory): renamed to bug_xfer_memory.
+	  (get_word): comment out this unused function for now.
+	  (bug_settings, cpu_check_strings): new statics.
+	  (bug_open): rewritten to use gr_open.
+	  (_initialize_remote_bug): remove declarations of commands bug,
+	  device, speed.
+	* main.c: include remote-utils.h.
+	  (baud_rate): removed to remote-utils.c.
+	  (main): handle baud rate settings using new facilities from
+	  remote-utils.
+	* defs.h (baud_rate): removed extern.
+
+	m88110 support via bug-197 monitor.
+	* remote-bug.c (get_reg_name, bug_fetch_register,
+	  bug_store_register): added m88110 extended register support.
+	  (wait_strings): added bug-197 prompt.
+	  (bug_wait): cope with bug-197 prompt.
+	  (start_load): cope with either bug-197 or bug-187 prompt.
+
 Mon Sep 13 12:53:09 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* inferior.h, infrun.c, thread.c, infcmd.c: Remove all uses of

@@ -353,9 +353,6 @@ extern char *current_directory;
 extern unsigned input_radix;
 extern unsigned output_radix;
 
-/* Baud rate specified for communication with serial target systems.  */
-extern char *baud_rate;
-
 /* Possibilities for prettyprint parameters to routines which print
    things.  Like enum language, this should be in value.h, but needs
    to be here for the same reason.  FIXME:  If we can eliminate this
