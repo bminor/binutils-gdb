@@ -1,3 +1,32 @@
+Mon Sep 14 09:00:05 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* tconfig.in: Define SIM_HAVE_BIENDIAN.
+
+Thu Aug 27 11:00:05 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (Multiply64): Test for Rm (rather than Rs) not being
+	the same as either RdHi or RdLo.
+
+Thu Jul  2 10:24:35 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI: AngelSWI_Reason_ReportException):
+	Set Reg[0] based on reason for for the exception.
+
+Thu Jun  4 15:22:03 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* armos.c (SWIwrite0): New function.
+	(WriteCommandLineTo): New function.
+	(SWIopen): New function.
+	(SWIread): New function.
+	(SWIwrite): New function.
+	(SWIflen): New function.
+	(ARMul_OSHandleSWI): Call new functions instead of handling	
+	these here.
+	(ARMul_OSHandleSWI): Handle Angel SWIs correctly.
+	(*): Reformat spacing to be a bit more GNUly.
+	Most code taken from a patch by Anthony Thompson 
+	(athompso@cambridge.arm.com)
+
 Tue Jun  2 15:22:22 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* armos.h: Add Angel SWI and its reason codes.
