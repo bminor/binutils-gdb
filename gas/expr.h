@@ -104,22 +104,9 @@ typedef enum
   O_logical_or,
   /* X_op_symbol [ X_add_symbol ] */
   O_index,
-  /* machine dependent #1 */
-  O_md1,
-  /* machine dependent #2 */
-  O_md2,
-  /* machine dependent #3 */
-  O_md3,
-  /* machine dependent #4 */
-  O_md4,
-  /* machine dependent #5 */
-  O_md5,
-  /* machine dependent #6 */
-  O_md6,
-  /* machine dependent #7 */
-  O_md7,
-  /* machine dependent #8 */
-  O_md8,
+  /* machine dependent operators */
+  O_md1,  O_md2,  O_md3,  O_md4,  O_md5,  O_md6,  O_md7,  O_md8,
+  O_md9,  O_md10, O_md11, O_md12, O_md13, O_md14, O_md15, O_md16,
   /* this must be the largest value */
   O_max
 } operatorT;

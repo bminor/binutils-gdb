@@ -1492,6 +1492,14 @@ static operator_rankT op_rank[] =
   0,	/* O_md6 */
   0,	/* O_md7 */
   0,	/* O_md8 */
+  0,	/* O_md9 */
+  0,	/* O_md10 */
+  0,	/* O_md11 */
+  0,	/* O_md12 */
+  0,	/* O_md13 */
+  0,	/* O_md14 */
+  0,	/* O_md15 */
+  0,	/* O_md16 */
 };
 
 /* Unfortunately, in MRI mode for the m68k, multiplication and
