@@ -151,3 +151,10 @@ o	If ``gdb/configure.in'' is modified then you don't
 
 	The maintainer will re-generate those files
 	using autoconf (2.13 as of 2000-02-29).
+
+
+o	If ``gdb/gdbarch.sh'' is modified, you don't
+	need to include patches to the generated files
+	``gdbarch.h'' and ``gdbarch.c''.
+
+	See ``gdb/configure.in'' above.
