@@ -1,5 +1,11 @@
 2001-10-20  H.J. Lu <hjl@gnu.org>
 
+	* configure.in (WIN32LIBADD): Include -L../libiberty/pic -liberty
+	if shared library is enabled.
+	* configure: Rebuild.
+
+2001-10-20  H.J. Lu <hjl@gnu.org>
+
 	* elf32-cris.c (cris_reloc_type_lookup): Allow index 0.
 
 2001-10-19  H.J. Lu <hjl@gnu.org>

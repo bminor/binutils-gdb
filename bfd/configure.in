@@ -410,6 +410,13 @@ case "${host}" in
     WIN32LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   fi
   ;;
+*)
+  # We borrow WIN32LIBADD so that the shared libbfd won't depend on
+  # libiberty.a.
+  if test "$enable_shared" = "yes"; then
+    WIN32LIBADD="-L../libiberty/pic -liberty"
+  fi
+  ;;
 esac
 AC_SUBST(WIN32LDFLAGS)
 AC_SUBST(WIN32LIBADD)
