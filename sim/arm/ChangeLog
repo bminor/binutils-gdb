@@ -1,3 +1,11 @@
+2000-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Detect double word load and
+	store instructions and call emulation routines.
+	(Handle_Load_Double): Emulate a double word load instruction.
+	(Handle_Store_Double): Emulate a double word store
+	instruction.
+
 2000-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* armos.c: Fix formatting.

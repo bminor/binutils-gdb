@@ -39,6 +39,8 @@ static unsigned StoreHalfWord (ARMul_State * state, ARMword instr,
 			       ARMword address);
 static unsigned StoreByte (ARMul_State * state, ARMword instr,
 			   ARMword address);
+static unsigned StoreDoubleWord (ARMul_State * state, ARMword instr,
+				 ARMword address);
 static void LoadMult (ARMul_State * state, ARMword address, ARMword instr,
 		      ARMword WBBase);
 static void StoreMult (ARMul_State * state, ARMword address, ARMword instr,
@@ -51,6 +53,8 @@ static unsigned Multiply64 (ARMul_State * state, ARMword instr,
 			    int signextend, int scc);
 static unsigned MultiplyAdd64 (ARMul_State * state, ARMword instr,
 			       int signextend, int scc);
+static void Handle_Load_Double (ARMul_State * state, ARMword instr);
+static void Handle_Store_Double (ARMul_State * state, ARMword instr);
 
 #define LUNSIGNED (0)		/* unsigned operation */
 #define LSIGNED   (1)		/* signed operation */
@@ -407,7 +411,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 	    }
 	  if (state->Debug)
 	    {
-	      fprintf (stderr, "At %08lx Instr %08lx Mode %02lx\n", pc, instr,
+	      fprintf (stderr, "sim: At %08lx Instr %08lx Mode %02lx\n", pc, instr,
 		       state->Mode);
 	      (void) fgetc (stdin);
 	    }
@@ -610,7 +614,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHDOWNWB ();
 		  break;
 		}
-	      /* TODO: CHECK: should 0xD and 0xF generate undefined intruction aborts? */
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      if (BITS (4, 7) == 9)
 		{		/* MUL */
@@ -769,6 +782,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHDOWNWB ();
 		  break;
 		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      rhs = DPRegRHS;
 	      dest = LHS - rhs;
@@ -845,6 +868,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		{
 		  /* STRH register offset, no write-back, up, post indexed */
 		  SHUPWB ();
+		  break;
+		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
 		  break;
 		}
 #endif
@@ -969,6 +1002,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		{
 		  /* STRH immediate offset, no write-back, up post indexed */
 		  SHUPWB ();
+		  break;
+		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
 		  break;
 		}
 #endif
@@ -1130,6 +1173,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHPREDOWN ();
 		  break;
 		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      if (BITS (4, 11) == 9)
 		{		/* SWP */
@@ -1272,6 +1325,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		{
 		  /* BX */
 		  WriteR15Branch (state, state->Reg[RHSReg]);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
 		  break;
 		}
 #endif
@@ -1428,6 +1491,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHPREDOWN ();
 		  break;
 		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      if (BITS (4, 11) == 9)
 		{		/* SWP */
@@ -1573,6 +1646,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHPREDOWNWB ();
 		  break;
 		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      if (DESTReg == 15)
 		{		/* MSR */
@@ -1635,6 +1718,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHPREUP ();
 		  break;
 		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      rhs = DPRegRHS;
 	      dest = LHS | rhs;
@@ -1663,6 +1756,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  SHPREUPWB ();
 		  break;
 		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
+		  break;
+		}
 #endif
 	      dest = DPRegRHS;
 	      WRITEDEST (dest);
@@ -1687,6 +1790,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		{
 		  /* STRH immediate offset, no write-back, up, pre indexed */
 		  SHPREUP ();
+		  break;
+		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      else if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
 		  break;
 		}
 #endif
@@ -1715,6 +1828,16 @@ ARMul_Emulate26 (register ARMul_State * state)
 		{
 		  /* STRH immediate offset, write-back, up, pre indexed */
 		  SHPREUPWB ();
+		  break;
+		}
+	      if (BITS (4, 7) == 0xD)
+		{
+		  Handle_Load_Double (state, instr);
+		  break;
+		}
+	      if (BITS (4, 7) == 0xE)
+		{
+		  Handle_Store_Double (state, instr);
 		  break;
 		}
 #endif
@@ -3831,6 +3954,220 @@ LoadByte (ARMul_State * state, ARMword instr, ARMword address, int signextend)
 }
 
 /***************************************************************************\
+* This function does the work of loading two words for a LDRD instruction. *
+\***************************************************************************/
+
+static void
+Handle_Load_Double (ARMul_State * state, ARMword instr)
+{
+  ARMword dest_reg;
+  ARMword addr_reg;
+  ARMword write_back  = BIT (21);
+  ARMword immediate   = BIT (22);
+  ARMword add_to_base = BIT (23);        
+  ARMword pre_indexed = BIT (24);
+  ARMword offset;
+  ARMword addr;
+  ARMword sum;
+  ARMword base;
+  ARMword value1;
+  ARMword value2;
+  
+  BUSUSEDINCPCS;
+
+  /* If the writeback bit is set, the pre-index bit must be clear.  */
+  if (write_back && ! pre_indexed)
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+  
+  /* Extract the base address register.  */
+  addr_reg = LHSReg;
+  
+  /* Extract the destination register and check it.  */
+  dest_reg = DESTReg;
+  
+  /* Destination register must be even.  */
+  if ((dest_reg & 1)
+    /* Destination register cannot be LR.  */
+      || (dest_reg == 14))
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+
+  /* Compute the base address.  */
+  base = state->Reg[addr_reg];
+
+  /* Compute the offset.  */
+  offset = immediate ? ((BITS (8, 11) << 4) | BITS (0, 3)) : state->Reg[RHSReg];
+
+  /* Compute the sum of the two.  */
+  if (add_to_base)
+    sum = base + offset;
+  else
+    sum = base - offset;
+  
+  /* If this is a pre-indexed mode use the sum.  */
+  if (pre_indexed)
+    addr = sum;
+  else
+    addr = base;
+
+  /* The address must be aligned on a 8 byte boundary.  */
+  if (addr & 0x7)
+    {
+#ifdef ABORTS
+      ARMul_DATAABORT (addr);
+#else
+      ARMul_UndefInstr (state, instr);
+#endif
+      return;
+    }
+
+  /* For pre indexed or post indexed addressing modes,
+     check that the destination registers do not overlap
+     the address registers.  */
+  if ((! pre_indexed || write_back)
+      && (   addr_reg == dest_reg
+	  || addr_reg == dest_reg + 1))
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+
+  /* Load the words.  */
+  value1 = ARMul_LoadWordN (state, addr);
+  value2 = ARMul_LoadWordN (state, addr + 4);
+
+  /* Check for data aborts.  */
+  if (state->Aborted)
+    {
+      TAKEABORT;
+      return;
+    }
+  
+  ARMul_Icycles (state, 2, 0L);
+
+  /* Store the values.  */
+  state->Reg[dest_reg] = value1;
+  state->Reg[dest_reg + 1] = value2;
+  
+  /* Do the post addressing and writeback.  */
+  if (! pre_indexed)
+    addr = sum;
+  
+  if (! pre_indexed || write_back)
+    state->Reg[addr_reg] = addr;
+}
+
+/***************************************************************************\
+* This function does the work of storing two words for a STRD instruction. *
+\***************************************************************************/
+
+static void
+Handle_Store_Double (ARMul_State * state, ARMword instr)
+{
+  ARMword src_reg;
+  ARMword addr_reg;
+  ARMword write_back  = BIT (21);
+  ARMword immediate   = BIT (22);
+  ARMword add_to_base = BIT (23);        
+  ARMword pre_indexed = BIT (24);
+  ARMword offset;
+  ARMword addr;
+  ARMword sum;
+  ARMword base;
+
+  BUSUSEDINCPCS;
+
+  /* If the writeback bit is set, the pre-index bit must be clear.  */
+  if (write_back && ! pre_indexed)
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+  
+  /* Extract the base address register.  */
+  addr_reg = LHSReg;
+  
+  /* Base register cannot be PC.  */
+  if (addr_reg == 15)
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+  
+  /* Extract the source register.  */
+  src_reg = DESTReg;
+  
+  /* Source register must be even.  */
+  if (src_reg & 1)
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+
+  /* Compute the base address.  */
+  base = state->Reg[addr_reg];
+
+  /* Compute the offset.  */
+  offset = immediate ? ((BITS (8, 11) << 4) | BITS (0, 3)) : state->Reg[RHSReg];
+
+  /* Compute the sum of the two.  */
+  if (add_to_base)
+    sum = base + offset;
+  else
+    sum = base - offset;
+  
+  /* If this is a pre-indexed mode use the sum.  */
+  if (pre_indexed)
+    addr = sum;
+  else
+    addr = base;
+
+  /* The address must be aligned on a 8 byte boundary.  */
+  if (addr & 0x7)
+    {
+#ifdef ABORTS
+      ARMul_DATAABORT (addr);
+#else
+      ARMul_UndefInstr (state, instr);
+#endif
+      return;
+    }
+
+  /* For pre indexed or post indexed addressing modes,
+     check that the destination registers do not overlap
+     the address registers.  */
+  if ((! pre_indexed || write_back)
+      && (   addr_reg == src_reg
+	  || addr_reg == src_reg + 1))
+    {
+      ARMul_UndefInstr (state, instr);
+      return;
+    }
+
+  /* Load the words.  */
+  ARMul_StoreWordN (state, addr, state->Reg[src_reg]);
+  ARMul_StoreWordN (state, addr + 4, state->Reg[src_reg + 1]);
+  
+  if (state->Aborted)
+    {
+      TAKEABORT;
+      return;
+    }
+  
+  /* Do the post addressing and writeback.  */
+  if (! pre_indexed)
+    addr = sum;
+  
+  if (! pre_indexed || write_back)
+    state->Reg[addr_reg] = addr;
+}
+
+/***************************************************************************\
 * This function does the work of storing a word from a STR instruction.     *
 \***************************************************************************/
 
@@ -4325,7 +4662,7 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
       state->Reg[nRdHi] = RdHi;
     }				/* else undefined result */
   else
-    fprintf (stderr, "MULTIPLY64 - INVALID ARGUMENTS\n");
+    fprintf (stderr, "sim: MULTIPLY64 - INVALID ARGUMENTS\n");
 
   if (scc)
     {
