@@ -1,3 +1,7 @@
+2000-08-30  Kazu Hirata  <kazu@hxi.com>
+
+	* tic80-dis.c: Fix formatting.
+
 2000-08-29  Kazu Hirata  <kazu@hxi.com>
 
 	* w65-dis.c: Fix formatting.
