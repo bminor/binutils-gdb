@@ -260,8 +260,8 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
   if ((len == n_baseclasses)
       || ((len - n_baseclasses == 1)
 	  && TYPE_HAS_VTABLE (type)
-	  && STREQN (TYPE_FIELD_NAME (type, n_baseclasses),
-		     hpacc_vtbl_ptr_name, 5))
+	  && strncmp (TYPE_FIELD_NAME (type, n_baseclasses),
+		      hpacc_vtbl_ptr_name, 5) == 0)
       || !len)
     fprintf_filtered (stream, "<No data fields>");
   else
@@ -285,7 +285,8 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
 
 	  /* If a vtable pointer appears, we'll print it out later */
 	  if (TYPE_HAS_VTABLE (type)
-	      && STREQN (TYPE_FIELD_NAME (type, i), hpacc_vtbl_ptr_name, 5))
+	      && strncmp (TYPE_FIELD_NAME (type, i), hpacc_vtbl_ptr_name,
+			  5) == 0)
 	    continue;
 
 	  if (fields_seen)
@@ -408,9 +409,8 @@ cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
     }				/* if there are data fields */
   /* Now print out the virtual table pointer if there is one */
   if (TYPE_HAS_VTABLE (type)
-      && STREQN (TYPE_FIELD_NAME (type, n_baseclasses),
-		 hpacc_vtbl_ptr_name, 
-		 5))
+      && strncmp (TYPE_FIELD_NAME (type, n_baseclasses),
+		  hpacc_vtbl_ptr_name, 5) == 0)
     {
       struct value *v;
       /* First get the virtual table pointer and print it out */

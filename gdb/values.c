@@ -406,7 +406,7 @@ lookup_internalvar (char *name)
   register struct internalvar *var;
 
   for (var = internalvars; var; var = var->next)
-    if (STREQ (var->name, name))
+    if (strcmp (var->name, name) == 0)
       return var;
 
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));

@@ -831,7 +831,8 @@ safe_strerror (int errnum)
   char *msg;
   static char buf[32];
 
-  if ((msg = strerror (errnum)) == NULL)
+  msg = strerror (errnum);
+  if (msg == NULL)
     {
       sprintf (buf, "(undocumented errno %d)", errnum);
       msg = buf;
@@ -1447,14 +1448,15 @@ parse_escape (char **string_ptr)
 	  register int count = 0;
 	  while (++count < 3)
 	    {
-	      if ((c = *(*string_ptr)++) >= '0' && c <= '7')
+	      c = (**string_ptr);
+	      if (c >= '0' && c <= '7')
 		{
+		  (*string_ptr)++;
 		  i *= 8;
 		  i += c - '0';
 		}
 	      else
 		{
-		  (*string_ptr)--;
 		  break;
 		}
 	    }

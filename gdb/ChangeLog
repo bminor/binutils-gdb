@@ -1,3 +1,18 @@
+2003-02-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* linux-proc.c: Include "gdb_stat.h" instead of <sys/stat.h>.
+	* cp-valprint.c (cp_print_value_fields): Eliminate STREQN.
+	* jv-typeprint.c (java_type_print_base): Ditto.
+	* typeprint.c (typedef_print): Eliminate STREQ.
+	* cli/cli-script.c (define_command, define_command): Ditto.
+	* main.c (captured_main): Ditto.
+	* values.c (lookup_internalvar): Ditto.
+	* utils.c (safe_strerror, parse_escape): Eliminate assignment
+	within `if' conditional.
+	* linespec.c (decode_line_2): Ditto.
+	* cli/cli-dump.c (bfd_openr_with_cleanup): Ditto.
+	(bfd_openw_with_cleanup): Ditto.
+
 2003-02-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (x86_64_init_abi): Set extract_return_value to

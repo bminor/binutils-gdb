@@ -1,3 +1,7 @@
+2003-02-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-env.c: Include "gdb_stat.h" instead of <sys/stat.h>.
+
 2003-02-04  Jim Ingham <jingham@apple.com>
 	    Keith Seitz  <keiths@redhat.com>
             Elena Zannoni  <ezannoni@redhat.com>

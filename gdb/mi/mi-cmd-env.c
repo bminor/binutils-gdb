@@ -35,7 +35,7 @@
 #include "top.h"
 
 #include "gdb_string.h"
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 static void env_cli_command (const char *cli, char *args);
 static void env_mod_path (char *dirname, char **which_path);

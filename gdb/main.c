@@ -638,7 +638,7 @@ extern int gdbtk_test (char *);
 
   if (execarg != NULL
       && symarg != NULL
-      && STREQ (execarg, symarg))
+      && strcmp (execarg, symarg) == 0)
     {
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.

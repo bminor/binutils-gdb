@@ -438,7 +438,8 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
       i++;
     }
 
-  if ((prompt = getenv ("PS2")) == NULL)
+  prompt = getenv ("PS2");
+  if (prompt == NULL)
     {
       prompt = "> ";
     }
