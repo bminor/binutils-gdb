@@ -1,3 +1,7 @@
+2002-02-27  Rodney Brown  <rbrown64@csc.com.au>
+
+      * utils.c (gdb_realpath): Add pathconf fallback for sco3.2v5.
+
 2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/acconfig.h: New file.

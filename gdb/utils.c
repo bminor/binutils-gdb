@@ -2533,6 +2533,8 @@ gdb_realpath (const char *filename)
   char buf[PATH_MAX];
 #elif defined (MAXPATHLEN)
   char buf[MAXPATHLEN];
+#elif defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
+  char *buf = alloca ((size_t)pathconf ("/", _PC_PATH_MAX));
 #else
 #error "Neither PATH_MAX nor MAXPATHLEN defined"
 #endif
