@@ -1,3 +1,9 @@
+Thu Jul 20 13:48:00 1995  Fred Fish  <fnf@cygnus.com>
+
+	* hosts/i386v4.h (getgid, getuid):  Change prototypes to be
+	compatible with Unixware 1.x and Unixware 2.x, and probably other
+	i386 svr4 versions as well.
+
 Thu Jul 20 13:41:21 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* targets.c (bfd_target_vector): Since armpe and armpei have been
