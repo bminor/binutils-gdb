@@ -236,6 +236,12 @@ struct elf32_hppa_link_hash_table {
     asection *stub_sec;
   } *stub_group;
 
+  /* Assorted information used by elf32_hppa_size_stubs.  */
+  unsigned int bfd_count;
+  int top_index;
+  asection **input_list;
+  Elf_Internal_Sym **all_local_syms;
+
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
   asection *srelgot;
@@ -358,6 +364,12 @@ static boolean clobber_millicode_symbols
 
 static boolean elf32_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+
+static void group_sections
+  PARAMS ((struct elf32_hppa_link_hash_table *, bfd_size_type, boolean));
+
+static int get_local_syms
+  PARAMS ((bfd *, bfd *, struct bfd_link_info *));
 
 static boolean elf32_hppa_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -2544,57 +2556,25 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
 /* External entry points for sizing and building linker stubs.  */
 
-/* Determine and set the size of the stub section for a final link.
+/* Set up various things so that we can make a list of input sections
+   for each output section included in the link.  Returns -1 on error,
+   0 when no stubs will be needed, and 1 on success. */
 
-   The basic idea here is to examine all the relocations looking for
-   PC-relative calls to a target that is unreachable with a "bl"
-   instruction.  */
-
-boolean
-elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
-		       add_stub_section, layout_sections_again)
+int
+elf32_hppa_setup_section_lists (output_bfd, info)
      bfd *output_bfd;
-     bfd *stub_bfd;
      struct bfd_link_info *info;
-     boolean multi_subspace;
-     bfd_signed_vma group_size;
-     asection * (*add_stub_section) PARAMS ((const char *, asection *));
-     void (*layout_sections_again) PARAMS ((void));
 {
   bfd *input_bfd;
+  unsigned int bfd_count;
+  int top_id, top_index;
   asection *section;
   asection **input_list, **list;
-  Elf_Internal_Sym *local_syms, **all_local_syms;
-  unsigned int bfd_indx, bfd_count;
-  int top_id, top_index;
-  struct elf32_hppa_link_hash_table *htab;
-  bfd_size_type stub_group_size;
-  boolean stubs_always_before_branch;
-  boolean stub_changed = 0;
-  boolean ret = 0;
   bfd_size_type amt;
+  struct elf32_hppa_link_hash_table *htab = hppa_link_hash_table (info);
 
-  htab = hppa_link_hash_table (info);
-
-  /* Stash our params away.  */
-  htab->stub_bfd = stub_bfd;
-  htab->multi_subspace = multi_subspace;
-  htab->add_stub_section = add_stub_section;
-  htab->layout_sections_again = layout_sections_again;
-  stubs_always_before_branch = group_size < 0;
-  if (group_size < 0)
-    stub_group_size = -group_size;
-  else
-    stub_group_size = group_size;
-  if (stub_group_size == 1)
-    {
-      /* Default values.  */
-      stub_group_size = 7680000;
-      if (htab->has_17bit_branch || htab->multi_subspace)
-	stub_group_size = 240000;
-      if (htab->has_12bit_branch)
-	stub_group_size = 7500;
-    }
+  if (htab->elf.root.creator->flavour != bfd_target_elf_flavour)
+    return 0;
 
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
@@ -2610,16 +2590,14 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	    top_id = section->id;
 	}
     }
+  htab->bfd_count = bfd_count;
 
   amt = sizeof (struct map_stub) * (top_id + 1);
   htab->stub_group = (struct map_stub *) bfd_zmalloc (amt);
   if (htab->stub_group == NULL)
-    return false;
+    return -1;
 
-  /* Make a list of input sections for each output section included in
-     the link.
-
-     We can't use output_bfd->section_count here to find the top output
+  /* We can't use output_bfd->section_count here to find the top output
      section index as some sections may have been removed, and
      _bfd_strip_section_from_output doesn't renumber the indices.  */
   for (section = output_bfd->sections, top_index = 0;
@@ -2630,10 +2608,12 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	top_index = section->index;
     }
 
+  htab->top_index = top_index;
   amt = sizeof (asection *) * (top_index + 1);
   input_list = (asection **) bfd_malloc (amt);
+  htab->input_list = input_list;
   if (input_list == NULL)
-    return false;
+    return -1;
 
   /* For sections we aren't interested in, mark their entries with a
      value we can check later.  */
@@ -2650,40 +2630,50 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	input_list[section->index] = NULL;
     }
 
-  /* Now actually build the lists.  */
-  for (input_bfd = info->input_bfds;
-       input_bfd != NULL;
-       input_bfd = input_bfd->link_next)
+  return 1;
+}
+
+/* The linker repeatedly calls this function for each input section,
+   in the order that input sections are linked into output sections.
+   Build lists of input sections to determine groupings between which
+   we may insert linker stubs.  */
+
+void
+elf32_hppa_next_input_section (info, isec)
+     struct bfd_link_info *info;
+     asection *isec;
+{
+  struct elf32_hppa_link_hash_table *htab = hppa_link_hash_table (info);
+
+  if (isec->output_section->index <= htab->top_index)
     {
-      for (section = input_bfd->sections;
-	   section != NULL;
-	   section = section->next)
+      asection **list = htab->input_list + isec->output_section->index;
+      if (*list != bfd_abs_section_ptr)
 	{
-	  if (section->output_section != NULL
-	      && section->output_section->owner == output_bfd
-	      && section->output_section->index <= top_index)
-	    {
-	      list = input_list + section->output_section->index;
-	      if (*list != bfd_abs_section_ptr)
-		{
-		  /* Steal the link_sec pointer for our list.  */
+	  /* Steal the link_sec pointer for our list.  */
 #define PREV_SEC(sec) (htab->stub_group[(sec)->id].link_sec)
-		  /* This happens to make the list in reverse order,
-		     which is what we want.  */
-		  PREV_SEC (section) = *list;
-		  *list = section;
-		}
-	    }
+	  /* This happens to make the list in reverse order,
+	     which is what we want.  */
+	  PREV_SEC (isec) = *list;
+	  *list = isec;
 	}
     }
+}
 
-  /* See whether we can group stub sections together.  Grouping stub
-     sections may result in fewer stubs.  More importantly, we need to
-     put all .init* and .fini* stubs at the beginning of the .init or
-     .fini output sections respectively, because glibc splits the
-     _init and _fini functions into multiple parts.  Putting a stub in
-     the middle of a function is not a good idea.  */
-  list = input_list + top_index;
+/* See whether we can group stub sections together.  Grouping stub
+   sections may result in fewer stubs.  More importantly, we need to
+   put all .init* and .fini* stubs at the beginning of the .init or
+   .fini output sections respectively, because glibc splits the
+   _init and _fini functions into multiple parts.  Putting a stub in
+   the middle of a function is not a good idea.  */
+
+static void
+group_sections (htab, stub_group_size, stubs_always_before_branch)
+     struct elf32_hppa_link_hash_table *htab;
+     bfd_size_type stub_group_size;
+     boolean stubs_always_before_branch;
+{
+  asection **list = htab->input_list + htab->top_index;
   do
     {
       asection *tail = *list;
@@ -2743,22 +2733,39 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	  tail = prev;
 	}
     }
-  while (list-- != input_list);
-  free (input_list);
+  while (list-- != htab->input_list);
+  free (htab->input_list);
 #undef PREV_SEC
+}
+
+/* Read in all local syms for all input bfds, and create hash entries
+   for export stubs if we are building a multi-subspace shared lib.
+   Returns -1 on error, 1 if export stubs created, 0 otherwise.  */
+
+static int
+get_local_syms (output_bfd, input_bfd, info)
+     bfd *output_bfd;
+     bfd *input_bfd;
+     struct bfd_link_info *info;
+{
+  unsigned int bfd_indx;
+  Elf_Internal_Sym *local_syms, **all_local_syms;
+  int stub_changed = 0;
+  struct elf32_hppa_link_hash_table *htab = hppa_link_hash_table (info);
 
   /* We want to read in symbol extension records only once.  To do this
      we need to read in the local symbols in parallel and save them for
      later use; so hold pointers to the local symbols in an array.  */
-  amt = sizeof (Elf_Internal_Sym *) * bfd_count;
+  bfd_size_type amt = sizeof (Elf_Internal_Sym *) * htab->bfd_count;
   all_local_syms = (Elf_Internal_Sym **) bfd_zmalloc (amt);
+  htab->all_local_syms = all_local_syms;
   if (all_local_syms == NULL)
-    return false;
+    return -1;
 
   /* Walk over all the input BFDs, swapping in local symbols.
      If we are creating a shared library, create hash entries for the
      export stubs.  */
-  for (input_bfd = info->input_bfds, bfd_indx = 0;
+  for (bfd_indx = 0;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next, bfd_indx++)
     {
@@ -2780,21 +2787,21 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
       sec_size *= sizeof (Elf_Internal_Sym);
       local_syms = (Elf_Internal_Sym *) bfd_malloc (sec_size);
       if (local_syms == NULL)
-	goto error_ret_free_local;
+	return -1;
 
       all_local_syms[bfd_indx] = local_syms;
       sec_size = symtab_hdr->sh_info;
       sec_size *= sizeof (Elf32_External_Sym);
       ext_syms = (Elf32_External_Sym *) bfd_malloc (sec_size);
       if (ext_syms == NULL)
-	goto error_ret_free_local;
+	return -1;
 
       if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
 	  || bfd_bread ((PTR) ext_syms, sec_size, input_bfd) != sec_size)
 	{
 	error_ret_free_ext_syms:
 	  free (ext_syms);
-	  goto error_ret_free_local;
+	  return -1;
 	}
 
       shndx_buf = NULL;
@@ -2877,7 +2884,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 		    {
 		      stub_entry = hppa_add_stub (stub_name, sec, htab);
 		      if (!stub_entry)
-			goto error_ret_free_local;
+			return -1;
 
 		      stub_entry->target_value = hash->elf.root.u.def.value;
 		      stub_entry->target_section = hash->elf.root.u.def.section;
@@ -2896,8 +2903,74 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	}
     }
 
+  return stub_changed;
+}
+
+/* Determine and set the size of the stub section for a final link.
+
+   The basic idea here is to examine all the relocations looking for
+   PC-relative calls to a target that is unreachable with a "bl"
+   instruction.  */
+
+boolean
+elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
+		       add_stub_section, layout_sections_again)
+     bfd *output_bfd;
+     bfd *stub_bfd;
+     struct bfd_link_info *info;
+     boolean multi_subspace;
+     bfd_signed_vma group_size;
+     asection * (*add_stub_section) PARAMS ((const char *, asection *));
+     void (*layout_sections_again) PARAMS ((void));
+{
+  bfd_size_type stub_group_size;
+  boolean stubs_always_before_branch;
+  boolean stub_changed;
+  boolean ret = 0;
+  struct elf32_hppa_link_hash_table *htab = hppa_link_hash_table (info);
+
+  /* Stash our params away.  */
+  htab->stub_bfd = stub_bfd;
+  htab->multi_subspace = multi_subspace;
+  htab->add_stub_section = add_stub_section;
+  htab->layout_sections_again = layout_sections_again;
+  stubs_always_before_branch = group_size < 0;
+  if (group_size < 0)
+    stub_group_size = -group_size;
+  else
+    stub_group_size = group_size;
+  if (stub_group_size == 1)
+    {
+      /* Default values.  */
+      stub_group_size = 7680000;
+      if (htab->has_17bit_branch || htab->multi_subspace)
+	stub_group_size = 240000;
+      if (htab->has_12bit_branch)
+	stub_group_size = 7500;
+    }
+
+  group_sections (htab, stub_group_size, stubs_always_before_branch);
+
+  switch (get_local_syms (output_bfd, info->input_bfds, info))
+    {
+    default:
+      if (htab->all_local_syms)
+	goto error_ret_free_local;
+      return false;
+
+    case 0:
+      stub_changed = false;
+      break;
+
+    case 1:
+      stub_changed = true;
+      break;
+    }
+
   while (1)
     {
+      bfd *input_bfd;
+      unsigned int bfd_indx;
       asection *stub_sec;
 
       for (input_bfd = info->input_bfds, bfd_indx = 0;
@@ -2905,13 +2978,15 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	   input_bfd = input_bfd->link_next, bfd_indx++)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
+	  asection *section;
+	  Elf_Internal_Sym *local_syms;
 
 	  /* We'll need the symbol table in a second.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 	  if (symtab_hdr->sh_info == 0)
 	    continue;
 
-	  local_syms = all_local_syms[bfd_indx];
+	  local_syms = htab->all_local_syms[bfd_indx];
 
 	  /* Walk over each section attached to the input bfd.  */
 	  for (section = input_bfd->sections;
@@ -2921,6 +2996,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 	      Elf_Internal_Shdr *input_rel_hdr;
 	      Elf32_External_Rela *external_relocs, *erelaend, *erela;
 	      Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
+	      bfd_size_type amt;
 
 	      /* If there aren't any relocs, then there's nothing more
 		 to do.  */
@@ -3052,19 +3128,9 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 					   + sym_sec->output_section->vma);
 			}
 		      else if (hash->elf.root.type == bfd_link_hash_undefweak)
-			{
-			  if (! info->shared)
-			    continue;
-			}
+			;
 		      else if (hash->elf.root.type == bfd_link_hash_undefined)
-			{
-			  if (! (info->shared
-				 && !info->no_undefined
-				 && (ELF_ST_VISIBILITY (hash->elf.other)
-				     == STV_DEFAULT)
-				 && hash->elf.type != STT_PARISC_MILLI))
-			    continue;
-			}
+			;
 		      else
 			{
 			  bfd_set_error (bfd_error_bad_value);
@@ -3114,7 +3180,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 			stub_entry->stub_type = hppa_stub_long_branch_shared;
 		    }
 		  stub_entry->h = hash;
-		  stub_changed = 1;
+		  stub_changed = true;
 		}
 
 	      /* We're done with the internal relocs, free them.  */
@@ -3139,16 +3205,16 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
 
       /* Ask the linker to do its stuff.  */
       (*htab->layout_sections_again) ();
-      stub_changed = 0;
+      stub_changed = false;
     }
 
-  ret = 1;
+  ret = true;
 
  error_ret_free_local:
-  while (bfd_count-- > 0)
-    if (all_local_syms[bfd_count])
-      free (all_local_syms[bfd_count]);
-  free (all_local_syms);
+  while (htab->bfd_count-- > 0)
+    if (htab->all_local_syms[htab->bfd_count])
+      free (htab->all_local_syms[htab->bfd_count]);
+  free (htab->all_local_syms);
 
   return ret;
 }
@@ -3161,23 +3227,39 @@ elf32_hppa_set_gp (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  struct bfd_link_hash_entry *h;
+  asection *sec = NULL;
+  bfd_vma gp_val = 0;
   struct elf32_hppa_link_hash_table *htab;
-  struct elf_link_hash_entry *h;
-  asection *sec;
-  bfd_vma gp_val;
 
   htab = hppa_link_hash_table (info);
-  h = elf_link_hash_lookup (&htab->elf, "$global$", false, false, false);
+  h = bfd_link_hash_lookup (&htab->elf.root, "$global$", false, false, false);
 
   if (h != NULL
-      && (h->root.type == bfd_link_hash_defined
-	  || h->root.type == bfd_link_hash_defweak))
+      && (h->type == bfd_link_hash_defined
+	  || h->type == bfd_link_hash_defweak))
     {
-      gp_val = h->root.u.def.value;
-      sec = h->root.u.def.section;
+      gp_val = h->u.def.value;
+      sec = h->u.def.section;
     }
   else
     {
+      asection *splt;
+      asection *sgot;
+
+      if (htab->elf.root.creator->flavour == bfd_target_elf_flavour)
+	{
+	  splt = htab->splt;
+	  sgot = htab->sgot;
+	}
+      else
+	{
+	  /* If we're not elf, look up the output sections in the
+	     hope we may actually find them.  */
+	  splt = bfd_get_section_by_name (abfd, ".plt");
+	  sgot = bfd_get_section_by_name (abfd, ".got");
+	}
+
       /* Choose to point our LTP at, in this order, one of .plt, .got,
 	 or .data, if these sections exist.  In the case of choosing
 	 .plt try to make the LTP ideal for addressing anywhere in the
@@ -3186,21 +3268,18 @@ elf32_hppa_set_gp (abfd, info)
 	 if either the .plt or .got is larger than 0x2000.  If both
 	 the .plt and .got are smaller than 0x2000, choose the end of
 	 the .plt section.  */
-
-      sec = htab->splt;
+      sec = splt;
       if (sec != NULL)
 	{
 	  gp_val = sec->_raw_size;
-	  if (gp_val > 0x2000
-	      || (htab->sgot && htab->sgot->_raw_size > 0x2000))
+	  if (gp_val > 0x2000 || (sgot && sgot->_raw_size > 0x2000))
 	    {
 	      gp_val = 0x2000;
 	    }
 	}
       else
 	{
-	  gp_val = 0;
-	  sec = htab->sgot;
+	  sec = sgot;
 	  if (sec != NULL)
 	    {
 	      /* We know we don't have a .plt.  If .got is large,
@@ -3217,12 +3296,12 @@ elf32_hppa_set_gp (abfd, info)
 
       if (h != NULL)
 	{
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.value = gp_val;
+	  h->type = bfd_link_hash_defined;
+	  h->u.def.value = gp_val;
 	  if (sec != NULL)
-	    h->root.u.def.section = sec;
+	    h->u.def.section = sec;
 	  else
-	    h->root.u.def.section = bfd_abs_section_ptr;
+	    h->u.def.section = bfd_abs_section_ptr;
 	}
     }
 

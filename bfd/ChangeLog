@@ -1,3 +1,19 @@
+2002-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (struct elf32_hppa_link_hash_table): Add
+	bfd_count top_index, input_list, all_local_syms.
+	(elf32_hppa_setup_section_lists): New function, split from
+	elf32_hppa_size_stubs.
+	(elf32_hppa_next_input_section): Likewise.
+	(group_sections): Likewise.
+	(get_local_syms): Likewise.
+	(elf32_hppa_size_stubs): Adjust for split out functions.  Look for
+	stubs on undefined syms too.
+	(elf32_hppa_set_gp): Use bfd_link_hash* instead of elf_link_hash*.
+	Only access htab elf fields when we have and elf hash table.
+	* elf32-hppa.h (elf32_hppa_setup_section_lists): Declare.
+	(elf32_hppa_next_input_section): Declare.
+
 2002-05-04  Bob Byrnes  <byrnes@curl.com>
 
 	* opncls.c (_bfd_new_bfd_contained_in): Check return value of
