@@ -1,3 +1,7 @@
+Mon Oct 26 11:09:47 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdb.texinfo:  Fix typo, reported by Karl Berry.
+
 Fri Oct 23 00:41:21 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdb.texinfo:  Add opcodes dir to GDB distribution description.

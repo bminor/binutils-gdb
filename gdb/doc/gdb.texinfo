@@ -7815,7 +7815,7 @@ If you want to typeset and print copies of this manual, you need
 @TeX{}, a printing program such as @code{lpr}, and @file{texinfo.tex},
 the Texinfo definitions file.
 
-@TeX{} is typesetting program; it does not print files directly, but
+@TeX{} is a typesetting program; it does not print files directly, but
 produces output files called @sc{dvi} files.  To print a typeset
 document, you need a program to print @sc{dvi} files.  If your system
 has @TeX{} installed, chances are it has such a program.  The precise
