@@ -36,7 +36,7 @@ struct frame_saved_regs;
 
 #define NAMES_HAVE_UNDERSCORE
 
-#define NUM_REGS 37
+#define NUM_REGS 38
 
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \

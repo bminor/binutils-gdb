@@ -1,4 +1,10 @@
 start-sanitize-tic80
+Wed May 14 12:04:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tm-tic80.h (NUM_REGS): 38 not 37.
+
+end-sanitize-tic80
+start-sanitize-tic80
 Mon May 12 11:35:04 1997  Mark Alexander  <marka@cygnus.com>
 
 	* tic80-tdep.c, config/tic80/tm-tic80.h: First cut at getting
