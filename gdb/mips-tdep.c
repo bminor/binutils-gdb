@@ -95,9 +95,11 @@ read_next_frame_reg(fi, regno)
      immediately below the frame and we get the saved registers from there.
      If the stack layout for sigtramp changes we might have to change these
      constants and the companion fixup_sigtramp in mipsread.c  */
+#ifndef SIGFRAME_BASE
 #define SIGFRAME_BASE		0x12c	/* sizeof(sigcontext) */
 #define SIGFRAME_PC_OFF		(-SIGFRAME_BASE + 2 * 4)
 #define SIGFRAME_REGSAVE_OFF	(-SIGFRAME_BASE + 3 * 4)
+#endif
   for (; fi; fi = fi->next)
       if (in_sigtramp(fi->pc, 0)) {
 	  int offset;
@@ -770,6 +772,8 @@ mips_skip_prologue(pc)
 						/* sx reg,n($s8) */
 	    continue;				/* reg != $zero */
 	else if (inst == 0x03A0F021)		/* move $s8,$sp */
+	    continue;
+	else if ((inst & 0xFF9F07FF) == 0x00800021) /* move reg,$a0-$a3 */
 	    continue;
 	else
 	    break;
