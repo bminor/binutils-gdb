@@ -1,3 +1,12 @@
+Tue Dec 30 12:45:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_check_relocs): If -Bsymbolic, don't
+	allocate space for a PC relative reloc against a symbol which is
+	defined in a regular file.
+	(elf32_sparc_relocate_section): If -Bsymbolic, don't copy a PC
+	relative reloc against a symbol which is defined in a regular
+	file.
+
 Mon Dec 29 18:02:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Jonathan Stone <jonathan@DSG.Stanford.EDU>:
