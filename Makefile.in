@@ -77,8 +77,8 @@ CHILL_LIB = -lchill
 CXX = gcc
 
 # Use -O2 to stress test the compiler.
-CXXFLAGS = -g -O2 -fno-implicit-templates
-LIBCXXFLAGS = $(CXXFLAGS)
+CXXFLAGS = -g -O2
+LIBCXXFLAGS = $(CXXFLAGS) -fno-implicit-templates
 CXXFLAGS_FOR_TARGET = $(CXXFLAGS)
 LIBCXXFLAGS_FOR_TARGET = $(CXXFLAGS_FOR_TARGET)
 
