@@ -1,3 +1,16 @@
+Wed Jan 19 15:09:44 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (wait_for_inferior): Don't set frame for
+	step_resume_breakpoint for IN_SIGTRAMP cases.
+
+	* infrun.c (wait_for_inferior), breakpoint.h (struct bpstat_what),
+	breakpoint.c (bpstat_what): Move step_resume from its own field of
+	the struct bpstat_what into the main_action.  Make it override
+	other breakpoints.  This is a conservative change in the sense
+	that before the step resume breakpoint was a breakpoint.c
+	breakpoint, hitting the step resume breakpoint overrode even
+	calling bpstat_stop_status.
+
 Wed Jan 19 12:40:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (normal_stop):  Set stop_pc after popping the dummy frame

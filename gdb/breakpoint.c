@@ -567,16 +567,23 @@ frame_in_dummy (frame)
 {
   struct breakpoint *b;
 
+#ifdef CALL_DUMMY
   ALL_BREAKPOINTS (b)
     {
-      /* We could also check whether fi->pc is within the call dummy, but
-	 that should not be necessary if we check the frame (note the
-	 call dummy is sizeof (dummy) / sizeof (LONGEST) * REGISTER_SIZE
-	 bytes not just sizeof (dummy) bytes).  */
+      static unsigned LONGEST dummy[] = CALL_DUMMY;
+
       if (b->type == bp_call_dummy
-	  && b->frame == frame->frame)
+	  && b->frame == frame->frame
+
+	  /* We need to check the PC as well as the frame on the sparc,
+	     for signals.exp in the testsuite.  */
+	  && (frame->pc
+	      >= (b->address
+		  - sizeof (dummy) / sizeof (LONGEST) * REGISTER_SIZE))
+	  && frame->pc <= b->address)
 	return 1;
     }
+#endif /* CALL_DUMMY */
   return 0;
 }
 
@@ -1269,6 +1276,9 @@ bpstat_what (bs)
     /* We hit the longjmp_resume breakpoint.  */
     long_resume,
 
+    /* We hit the step_resume breakpoint.  */
+    step_resume,
+
     /* This is just used to count how many enums there are.  */
     class_last
     };
@@ -1283,6 +1293,8 @@ bpstat_what (bs)
 #define setlr BPSTAT_WHAT_SET_LONGJMP_RESUME
 #define clrlr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
 #define clrlrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
+#define sr BPSTAT_WHAT_STEP_RESUME
+
 /* "Can't happen."  Might want to print an error message.
    abort() is not out of the question, but chances are GDB is just
    a bit confused, not unusable.  */
@@ -1295,20 +1307,26 @@ bpstat_what (bs)
      (BPSTAT_WHAT_SINGLE type stuff) is handled in proceed() without
      reference to how we stopped.  We retain separate wp_silent and bp_silent
      codes in case we want to change that someday.  */
+
+  /* step_resume entries: a step resume breakpoint overrides another
+     breakpoint of signal handling (see comment in wait_for_inferior
+     at first IN_SIGTRAMP where we set the step_resume breakpoint).  */
+
   static const enum bpstat_what_main_action
     table[(int)class_last][(int)BPSTAT_WHAT_LAST] =
       {
 	/*                              old action */
-	/*       keep_c  stop_s  stop_n  single  setlr   clrlr   clrlrs */
+	/*       keep_c  stop_s  stop_n  single  setlr   clrlr   clrlrs  sr */
 
-/*no_effect*/	{keep_c, stop_s, stop_n, single, setlr , clrlr , clrlrs},
-/*wp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s},
-/*wp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n},
-/*bp_nostop*/	{single, stop_s, stop_n, single, setlr , clrlrs, clrlrs},
-/*bp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s},
-/*bp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n},
-/*long_jump*/	{setlr , stop_s, stop_n, setlr , err   , err   , err   },
-/*long_resume*/	{clrlr , stop_s, stop_n, clrlrs, err   , err   , err   }
+/*no_effect*/	{keep_c, stop_s, stop_n, single, setlr , clrlr , clrlrs, sr},
+/*wp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s, sr},
+/*wp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, sr},
+/*bp_nostop*/	{single, stop_s, stop_n, single, setlr , clrlrs, clrlrs, sr},
+/*bp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s, sr},
+/*bp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, sr},
+/*long_jump*/	{setlr , stop_s, stop_n, setlr , err   , err   , err   , sr},
+/*long_resume*/	{clrlr , stop_s, stop_n, clrlrs, err   , err   , err   , sr},
+/*step_resume*/	{sr    , sr    , sr    , sr    , sr    , sr    , sr    , sr}
 	      };
 #undef keep_c
 #undef stop_s
@@ -1322,7 +1340,6 @@ bpstat_what (bs)
   struct bpstat_what retval;
 
   retval.call_dummy = 0;
-  retval.step_resume = 0;
   for (; bs != NULL; bs = bs->next)
     {
       enum class bs_class = no_effect;
@@ -1373,9 +1390,7 @@ bpstat_what (bs)
 	  if (bs->stop)
 	    {
 #endif
-	      retval.step_resume = 1;
-	      /* We don't handle this via the main_action.  */
-	      bs_class = no_effect;
+	      bs_class = step_resume;
 #if 0
 	    }
 	  else
@@ -2175,7 +2190,7 @@ until_break_command (arg, from_tty)
       make_cleanup(delete_breakpoint, breakpoint);
     }
   
-  proceed (-1, -1, 0);
+  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
   do_cleanups(old_chain);
 }
 
