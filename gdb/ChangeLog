@@ -1,3 +1,9 @@
+2001-05-25  Jim Blandy  <jimb@redhat.com>
+
+	* gnu-v2-abi.c (gnuv2_virtual_fn_field): There's no need to clear
+	VALUE_POINTED_TO_OFFSET here; if value_cast doesn't return a
+	useful value, then we should fix that instead.
+
 2001-05-24  Nick Duffek  <nsd@redhat.com>
 
 	* solist.h (struct so_list): Document the requirement that

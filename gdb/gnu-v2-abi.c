@@ -111,7 +111,6 @@ gnuv2_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
   if (TYPE_TARGET_TYPE (context) != type1)
     {
       value_ptr tmp = value_cast (context, value_addr (arg1));
-      VALUE_POINTED_TO_OFFSET (tmp) = 0;
       arg1 = value_ind (tmp);
       type1 = check_typedef (VALUE_TYPE (arg1));
     }
