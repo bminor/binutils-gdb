@@ -18,90 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Notes on the algorithm used in wait_for_inferior to determine if we
-   just did a subroutine call when stepping.  We have the following
-   information at that point:
-
-                  Current and previous (just before this step) pc.
-		  Current and previous sp.
-		  Current and previous start of current function.
-
-   If the starts of the functions don't match, then
-
-   	a) We did a subroutine call.
-
-   In this case, the pc will be at the beginning of a function.
-
-	b) We did a subroutine return.
-
-   Otherwise.
-
-	c) We did a longjmp.
-
-   If we did a longjump, we were doing "nexti", since a next would
-   have attempted to skip over the assembly language routine in which
-   the longjmp is coded and would have simply been the equivalent of a
-   continue.  I consider this ok behaivior.  We'd like one of two
-   things to happen if we are doing a nexti through the longjmp()
-   routine: 1) It behaves as a stepi, or 2) It acts like a continue as
-   above.  Given that this is a special case, and that anybody who
-   thinks that the concept of sub calls is meaningful in the context
-   of a longjmp, I'll take either one.  Let's see what happens.  
-
-   Acts like a subroutine return.  I can handle that with no problem
-   at all.
-
-   -->So: If the current and previous beginnings of the current
-   function don't match, *and* the pc is at the start of a function,
-   we've done a subroutine call.  If the pc is not at the start of a
-   function, we *didn't* do a subroutine call.  
-
-   -->If the beginnings of the current and previous function do match,
-   either: 
-
-   	a) We just did a recursive call.
-
-	   In this case, we would be at the very beginning of a
-	   function and 1) it will have a prologue (don't jump to
-	   before prologue, or 2) (we assume here that it doesn't have
-	   a prologue) there will have been a change in the stack
-	   pointer over the last instruction.  (Ie. it's got to put
-	   the saved pc somewhere.  The stack is the usual place.  In
-	   a recursive call a register is only an option if there's a
-	   prologue to do something with it.  This is even true on
-	   register window machines; the prologue sets up the new
-	   window.  It might not be true on a register window machine
-	   where the call instruction moved the register window
-	   itself.  Hmmm.  One would hope that the stack pointer would
-	   also change.  If it doesn't, somebody send me a note, and
-	   I'll work out a more general theory.
-	   bug-gdb@prep.ai.mit.edu).  This is true (albeit slipperly
-	   so) on all machines I'm aware of:
-
-	      m68k:	Call changes stack pointer.  Regular jumps don't.
-
-	      sparc:	Recursive calls must have frames and therefor,
-	                prologues.
-
-	      vax:	All calls have frames and hence change the
-	                stack pointer.
-
-	b) We did a return from a recursive call.  I don't see that we
-	   have either the ability or the need to distinguish this
-	   from an ordinary jump.  The stack frame will be printed
-	   when and if the frame pointer changes; if we are in a
-	   function without a frame pointer, it's the users own
-	   lookout.
-
-	c) We did a jump within a function.  We assume that this is
-	   true if we didn't do a recursive call.
-
-	d) We are in no-man's land ("I see no symbols here").  We
-	   don't worry about this; it will make calls look like simple
-	   jumps (and the stack frames will be printed when the frame
-	   pointer moves), which is a reasonably non-violent response.
-*/
-
 #include "defs.h"
 #include <string.h>
 #include <ctype.h>
@@ -1051,15 +967,48 @@ same_pid:
 	  SKIP_PROLOGUE (prologue_pc);
 	}
 
-      /* ==> See comments at top of file on this algorithm.  <==*/
+      if ((/* Might be a non-recursive call.  If the symbols are missing
+	      enough that stop_func_start == prev_func_start even though
+	      they are really two functions, we will treat some calls as
+	      jumps.  */
+	   stop_func_start != prev_func_start
 
-      if ((stop_pc < stop_func_start
-	   || stop_pc >= stop_func_end
-	   || stop_pc == stop_func_start
-	   || IN_SOLIB_TRAMPOLINE (stop_pc, stop_func_name))
-	  && (stop_func_start != prev_func_start
-	      || prologue_pc != stop_func_start
-	      || stop_sp != prev_sp))
+	   /* Might be a recursive call if either we have a prologue
+	      or the call instruction itself saves the PC on the stack.  */
+	   || prologue_pc != stop_func_start
+	   || stop_sp != prev_sp)
+	  && (/* I think this can only happen if stop_func_start is zero
+		 (e.g. stop_pc is in some objfile we don't know about).
+		 If the stop_pc does that (ends up someplace unknown), it
+		 must be some sort of subroutine call.  */
+	      stop_pc < stop_func_start
+	      || stop_pc >= stop_func_end
+
+	      /* If we do a call, we will be at the start of a function.  */
+	      || stop_pc == stop_func_start
+
+#if 0
+	      /* Not conservative enough for 4.11.  FIXME: enable this
+		 after 4.11.  */
+	      /* Except on the Alpha with -O (and perhaps other machines
+		 with similar calling conventions), in which we might
+		 call the address after the load of gp.  Since prologues
+		 don't contain calls, we can't return to within one, and
+		 we don't jump back into them, so this check is OK.  */
+	      || stop_pc < prologue_pc
+#endif
+
+	      /* If we end up in certain places, it means we did a subroutine
+		 call.  I'm not completely sure this is necessary now that we
+		 have the above checks with stop_func_start (and now that
+		 find_pc_partial_function is pickier.  */
+	      || IN_SOLIB_TRAMPOLINE (stop_pc, stop_func_name)
+
+	      /* If none of the above apply, it is a jump within a function,
+		 or a return from a subroutine.  The other case is longjmp,
+		 which can no longer happen here as long as the
+		 handling_longjmp stuff is working.  */
+	      ))
 	{
 	  /* It's a subroutine call.  */
 
