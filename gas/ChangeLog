@@ -1,3 +1,11 @@
+Mon Nov  3 13:30:17 1997  Gavin Koch  <gavin@cygnus.com>
+
+	   * tc-mips.c (md_begin): Reorganize setting of default values so
+	   that mips_cpu depends on TARGET_CPU, and mips_opts.isa depends on
+	   mips_cpu.
+	   (md_parse_option): Remove all code that sets defaults; md_begin
+	   handles all of this now.
+
 Sun Nov  2 14:46:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (STAGESTUFF): Change bin_PROGRAMS to

@@ -795,28 +795,43 @@ md_begin ()
   boolean ok = false;
   register const char *retval = NULL;
   register unsigned int i = 0;
+  const char *cpu;
+  char *a = NULL;
   int broken = 0;
 
-  if (mips_opts.isa == -1)
+  cpu = TARGET_CPU;
+  if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
     {
-      const char *cpu;
-      char *a = NULL;
+      a = xmalloc (sizeof TARGET_CPU);
+      strcpy (a, TARGET_CPU);
+      a[(sizeof TARGET_CPU) - 3] = '\0';
+      cpu = a;
+    }
 
-      cpu = TARGET_CPU;
-      if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
-	{
-	  a = xmalloc (sizeof TARGET_CPU);
-	  strcpy (a, TARGET_CPU);
-	  a[(sizeof TARGET_CPU) - 3] = '\0';
-	  cpu = a;
-	}
+  if (mips_cpu < 0)
+    {
+      /* Set mips_cpu based on TARGET_CPU, unless TARGET_CPU is
+         just the generic 'mips', in which case set mips_cpu based
+         on the given ISA, if any. */
 
       if (strcmp (cpu, "mips") == 0)
-	{
-	  mips_opts.isa = 1;
-	  if (mips_cpu == -1)
-	    mips_cpu = 3000;
-	}
+        {
+          if (mips_opts.isa < 0)
+            mips_cpu = 3000;   
+
+          else if (mips_opts.isa == 2)
+            mips_cpu = 6000;
+
+          else if (mips_opts.isa == 3)
+            mips_cpu = 4000;
+
+          else if (mips_opts.isa == 4)
+            mips_cpu = 8000;
+
+          else 
+            mips_cpu = 3000;
+        }
+      
       else if (strcmp (cpu, "r3900") == 0
                || strcmp (cpu, "mipstx39") == 0
                /* start-sanitize-tx19 */
@@ -824,138 +839,105 @@ md_begin ()
                || strcmp (cpu, "mipstx19") == 0
                /* end-sanitize-tx19 */
                )
-	{
-	  mips_opts.isa = 1;
-	  if (mips_cpu == -1)
-	    mips_cpu = 3900;
-          if (mips_3900 == -1)
-            mips_3900 = 1;
-	}
+        mips_cpu = 3900;
+
       else if (strcmp (cpu, "r6000") == 0
 	       || strcmp (cpu, "mips2") == 0)
-	{
-	  mips_opts.isa = 2;
-	  if (mips_cpu == -1)
-	    mips_cpu = 6000;
-	}
+        mips_cpu = 6000;
+
       else if (strcmp (cpu, "mips64") == 0
 	       || strcmp (cpu, "r4000") == 0
 	       || strcmp (cpu, "mips3") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4000;
-	}
+        mips_cpu = 4000;
+
       else if (strcmp (cpu, "r4400") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4400;
-	}
+        mips_cpu = 4400;
+
       else if (strcmp (cpu, "mips64orion") == 0
 	       || strcmp (cpu, "r4600") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4600;
-	}
+        mips_cpu = 4600;
+
       else if (strcmp (cpu, "r4650") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4650;
-	  if (mips_4650 == -1)
-	    mips_4650 = 1;
-	}
+        mips_cpu = 4650;
+
       else if (strcmp (cpu, "mips64vr4300") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4300;
-	}
+        mips_cpu = 4300;
+
       else if (strcmp (cpu, "mips64vr4100") == 0)
-        {
-          mips_opts.isa = 3;
-          if (mips_cpu == -1)
-            mips_cpu = 4100;
-          if (mips_4100 == -1)
-            mips_4100 = 1;
-        }
+        mips_cpu = 4100;
+
       else if (strcmp (cpu, "r4010") == 0)
-	{
-	  mips_opts.isa = 2;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4010;
-	  if (mips_4010 == -1)
-	    mips_4010 = 1;
-	}
+        mips_cpu = 4010;
+
       /* start-sanitize-tx49 */
       else if (strcmp (cpu, "mips64tx49") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 4900;
-	}
+        mips_cpu = 4900;
       /* end-sanitize-tx49 */
+
       else if (strcmp (cpu, "r5000") == 0
 	       || strcmp (cpu, "mips64vr5000") == 0)
-	{
-	  mips_opts.isa = 4;
-	  if (mips_cpu == -1)
-	    mips_cpu = 5000;
-	}
+        mips_cpu = 5000;
+
       /* start-sanitize-vr5400 */
       else if (strcmp (cpu, "r5400") == 0
-	       || strcmp (cpu, "mips64r5400") == 0
-               || strcmp (cpu, "mips64r5400el") == 0)
-	{
-	  mips_opts.isa = 4;
-	  if (mips_cpu == -1)
-	    mips_cpu = 5400;
-          if (mips_5400 == -1)
-            mips_5400 = 1;
-	}
+	       || strcmp (cpu, "mips64r5400") == 0)
+        mips_cpu = 5400;
       /* end-sanitize-vr5400 */
+
       /* start-sanitize-r5900 */
       else if (strcmp (cpu, "r5900") == 0
-	       || strcmp (cpu, "mips64r5900") == 0
-               || strcmp (cpu, "mips64r5900el") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 5900;
-          if (mips_5900 == -1)
-            mips_5900 = 1;
-	}
+	       || strcmp (cpu, "mips64r5900") == 0)
+        mips_cpu = 5900;
       /* end-sanitize-r5900 */
+
       else if (strcmp (cpu, "r8000") == 0
 	       || strcmp (cpu, "mips4") == 0)
-	{
-	  mips_opts.isa = 4;
-	  if (mips_cpu == -1)
-	    mips_cpu = 8000;
-	}
+        mips_cpu = 8000;
+      
       else if (strcmp (cpu, "r10000") == 0)
-	{
-	  mips_opts.isa = 4;
-	  if (mips_cpu == -1)
-	    mips_cpu = 10000;
-	}
-      else if (strcmp (cpu, "mips16") == 0)
-	{
-	  mips_opts.isa = 3;
-	  if (mips_cpu == -1)
-	    mips_cpu = 0; /* FIXME */
-	}
-      else
-	{
-	  mips_opts.isa = 1;
-	  if (mips_cpu == -1)
-	    mips_cpu = 3000;
-	}
+        mips_cpu = 10000;
 
-      if (a != NULL)
-	free (a);
+      else if (strcmp (cpu, "mips16") == 0)
+        mips_cpu = 0; /* FIXME */
+
+      else
+        mips_cpu = 3000;
+    }
+
+  if (mips_opts.isa == -1)
+    {
+      if (mips_cpu == 3000
+          || mips_cpu == 3900)
+        mips_opts.isa = 1;
+
+      else if (mips_cpu == 6000
+               || mips_cpu == 4010)
+        mips_opts.isa = 2;
+
+      else if (mips_cpu == 4000
+               || mips_cpu == 4100
+               || mips_cpu == 4400
+               || mips_cpu == 4300
+               || mips_cpu == 4600
+               /* start-sanitize-tx49 */
+               || mips_cpu == 4900
+               /* end-sanitize-tx49 */
+               /* start-sanitize-r5900 */
+               || mips_cpu == 5900
+               /* end-sanitize-r5900 */
+               || mips_cpu == 4650)
+        mips_opts.isa = 3;
+
+      else if (mips_cpu == 5000
+               /* start-sanitize-vr5400 */
+               || mips_cpu == 5400
+               /* end-sanitize-vr5400 */
+               || mips_cpu == 8000
+               || mips_cpu == 10000)
+        mips_opts.isa = 4;
+      
+      else
+        mips_opts.isa = 1;
     }
 
   if (mips_opts.mips16 < 0)
@@ -967,27 +949,38 @@ md_begin ()
     }
 
   if (mips_4650 < 0)
-    mips_4650 = 0;
+    mips_4650 = (mips_cpu == 4650);
 
   if (mips_4010 < 0)
-    mips_4010 = 0;
+    mips_4010 = (mips_cpu == 4010);
 
   if (mips_4100 < 0)
-    mips_4100 = 0;
+    mips_4100 = (mips_cpu == 4100);
 
   /* start-sanitize-vr5400 */
   if (mips_5400 < 0)
-    mips_5400 = 0;
-
+    mips_5400 = (mips_cpu == 5400);
   /* end-sanitize-vr5400 */
+
   /* start-sanitize-r5900 */
   if (mips_5900 < 0)
-    mips_5900 = 0;
-
+    mips_5900 = (mips_cpu == 5900);
   /* end-sanitize-r5900 */
+
   if (mips_3900 < 0)
-    mips_3900 = 0;
-  
+    mips_3900 = (mips_cpu == 3900);
+
+
+
+  /* End of TARGET_CPU processing, get rid of malloced memory
+     if necessary. */
+  cpu = NULL;
+  if (a != NULL)
+    {
+    free (a);
+    a = NULL;
+    }
+
   if (mips_opts.isa < 2 && mips_trap)
     as_bad ("trap exception not supported at ISA 1");
 
@@ -8603,26 +8596,18 @@ md_parse_option (c, arg)
 
     case OPTION_MIPS1:
       mips_opts.isa = 1;
-      if (mips_cpu == -1)
-	mips_cpu = 3000;
       break;
 
     case OPTION_MIPS2:
       mips_opts.isa = 2;
-      if (mips_cpu == -1)
-	mips_cpu = 6000;
       break;
 
     case OPTION_MIPS3:
       mips_opts.isa = 3;
-      if (mips_cpu == -1)
-	mips_cpu = 4000;
       break;
 
     case OPTION_MIPS4:
       mips_opts.isa = 4;
-      if (mips_cpu == -1)
-	mips_cpu = 8000;
       break;
 
     case OPTION_MCPU:
@@ -8685,11 +8670,7 @@ md_parse_option (c, arg)
 		    || strcmp (p, "4K") == 0)
 		  mips_cpu = 4000;
 		else if (strcmp (p, "4100") == 0)
-                  {
                     mips_cpu = 4100;
-                    if (mips_4100 < 0)
-                      mips_4100 = 1;
-                  }
 		else if (strcmp (p, "4300") == 0)
 		  mips_cpu = 4300;
 		else if (strcmp (p, "4400") == 0)
@@ -8697,21 +8678,13 @@ md_parse_option (c, arg)
 		else if (strcmp (p, "4600") == 0)
 		  mips_cpu = 4600;
 		else if (strcmp (p, "4650") == 0)
-		  {
 		    mips_cpu = 4650;
-		    if (mips_4650 < 0)
-		      mips_4650 = 1;
-		  }
                 /* start-sanitize-tx49 */
 		else if (strcmp (p, "4900") == 0)
 		  mips_cpu = 4900;
                 /* end-sanitize-tx49 */
 		else if (strcmp (p, "4010") == 0)
-		  {
-		    mips_cpu = 4010;
-		    if (mips_4010 < 0)
-		      mips_4010 = 1;
-		  }
+                  mips_cpu = 4010;
 		break;
 
 	      case '5':
