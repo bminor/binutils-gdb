@@ -263,7 +263,8 @@ extern void z8k_pop_frame PARAMS ((void));
 
 #define SP_ARG0 (1 * 4)
 
-#define ADDR_BITS_REMOVE(x) addr_bits_remove(x)
+extern CORE_ADDR z8k_addr_bits_remove PARAMS ((CORE_ADDR));
+#define ADDR_BITS_REMOVE(addr) z8k_addr_bits_remove (addr)
 int sim_z8001_mode;
 #define BIG (sim_z8001_mode)
 

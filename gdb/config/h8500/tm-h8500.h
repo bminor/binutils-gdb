@@ -251,7 +251,8 @@ extern void h8500_pop_frame PARAMS ((void));
 
 typedef unsigned short INSN_WORD;
 
-#define ADDR_BITS_REMOVE(addr) ((addr) & 0xffffff)
+extern CORE_ADDR h8500_addr_bits_remove PARAMS ((CORE_ADDR));
+#define ADDR_BITS_REMOVE(addr) h8500_addr_bits_remove (addr)
 
 #define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)
 

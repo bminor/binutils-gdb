@@ -42,10 +42,10 @@ w65_frame_saved_pc (frame)
 }
 
 CORE_ADDR
-addr_bits_remove (x)
-     CORE_ADDR x;
+w65_addr_bits_remove (addr)
+     CORE_ADDR addr;
 {
-  return x;
+  return ((addr) & 0xffffff);
 }
 
 read_memory_pointer (x)

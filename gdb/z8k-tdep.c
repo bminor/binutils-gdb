@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #include "gdbcore.h"
 
+
 /* Return the saved PC from this frame.
 
    If the frame has a memory copy of SRP_REGNUM, use that.  If not,
@@ -143,10 +144,10 @@ z8k_skip_prologue (start_pc)
 }
 
 CORE_ADDR
-addr_bits_remove (x)
-     CORE_ADDR x;
+z8k_addr_bits_remove (addr)
+     CORE_ADDR addr;
 {
-  return x & PTR_MASK;
+  return (addr & PTR_MASK);
 }
 
 int
@@ -293,7 +294,7 @@ frame_find_saved_regs (fip, fsrp)
 int
 saved_pc_after_call ()
 {
-  return addr_bits_remove 
+  return ADDR_BITS_REMOVE 
     (read_memory_integer (read_register (SP_REGNUM), PTR_SIZE));
 }
 

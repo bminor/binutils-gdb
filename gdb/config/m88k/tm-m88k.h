@@ -63,7 +63,8 @@ extern CORE_ADDR skip_prologue ();
    to realize that those two bits are not really a part of the address
    of an instruction.  Shrug.  */
 
-#define ADDR_BITS_REMOVE(addr) ((addr) & ~3)
+extern CORE_ADDR m88k_addr_bits_remove PARAMS ((CORE_ADDR));
+#define ADDR_BITS_REMOVE(addr) m88k_addr_bits_remove (addr)
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines

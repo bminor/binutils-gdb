@@ -36,6 +36,21 @@ void frame_find_saved_regs ();
 
 int target_is_m88110 = 0;
 
+/* The m88k kernel aligns all instructions on 4-byte boundaries.  The
+   kernel also uses the least significant two bits for its own hocus
+   pocus.  When gdb receives an address from the kernel, it needs to
+   preserve those right-most two bits, but gdb also needs to be careful
+   to realize that those two bits are not really a part of the address
+   of an instruction.  Shrug.  */
+
+CORE_ADDR
+m88k_addr_bits_remove (addr)
+     CORE_ADDR addr;
+{
+  return ((addr) & ~3);
+}
+
+
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.

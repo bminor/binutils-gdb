@@ -98,6 +98,13 @@ h8500_skip_prologue (start_pc)
   return start_pc;
 }
 
+CORE_ADDR
+h8500_addr_bits_remove (addr)
+     CORE_ADDR addr;
+{
+  return ((addr) & 0xffffff);
+}
+
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.

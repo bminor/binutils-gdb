@@ -1,3 +1,14 @@
+Sun Nov 29 11:18:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* z8k-tdep.c (z8k_addr_bits_remove), w65-tdep.c
+ 	(w65_addr_bits_remove), h8500-tdep.c (h8500_addr_bits_remove),
+ 	m88k-tdep.c (m88k_addr_bits_remove): Function to clean up an
+ 	address.
+	* config/z8k/tm-z8k.h, config/w65/tm-w65.h, config/m88k/tm-m88k.h,
+ 	config/h8500/tm-h8500.h: Define ADDR_BITS_REMOVE to call targets
+ 	corresponding function.
+	* z8k-tdep.c (saved_pc_after_call): Update.
+
 Sat Nov 28 12:24:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/z8k/tm-z8k.h, config/w65/tm-w65.h, config/vax/tm-vax.h,
