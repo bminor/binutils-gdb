@@ -4,7 +4,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-dis.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -164,7 +164,7 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
 {
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
   disassemble_info *info = (disassemble_info *) dis_info;
-  const unsigned char *syn;
+  const CGEN_SYNTAX_CHAR_TYPE *syn;
 
   CGEN_INIT_PRINT (cd);
 

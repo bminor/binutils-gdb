@@ -4,7 +4,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-asm.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -71,7 +71,7 @@ parse_insn_normal (cd, insn, strp, fields)
   const char *str = *strp;
   const char *errmsg;
   const char *p;
-  const unsigned char * syn;
+  const CGEN_SYNTAX_CHAR_TYPE * syn;
 #ifdef CGEN_MNEMONIC_OPERANDS
   /* FIXME: wip */
   int past_opcode_p;
@@ -121,7 +121,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	  if (tolower (*str) == tolower (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
-	      if (* syn == ' ')
+	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
 		past_opcode_p = 1;
 #endif
 	      ++ syn;
@@ -133,7 +133,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	      static char msg [80];
 	      /* xgettext:c-format */
 	      sprintf (msg, _("syntax error (expected char `%c', found `%c')"),
-		       *syn, *str);
+		       CGEN_SYNTAX_CHAR(*syn), *str);
 	      return msg;
 	    }
 	  else
@@ -142,7 +142,7 @@ parse_insn_normal (cd, insn, strp, fields)
 	      static char msg [80];
 	      /* xgettext:c-format */
 	      sprintf (msg, _("syntax error (expected char `%c', found end of instruction)"),
-		       *syn);
+		       CGEN_SYNTAX_CHAR(*syn));
 	      return msg;
 	    }
 	  continue;
@@ -159,7 +159,7 @@ parse_insn_normal (cd, insn, strp, fields)
     }
 
   /* If we're at the end of the syntax string, we're done.  */
-  if (* syn == '\0')
+  if (* syn == 0)
     {
       /* FIXME: For the moment we assume a valid `str' can only contain
 	 blanks now.  IE: We needn't try again with a longer version of

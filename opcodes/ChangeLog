@@ -1,3 +1,12 @@
+2001-01-09  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* cgen-asm.in (parse_insn_normal): Changed syn to be
+	CGEN_SYNTAX_CHAR_TYPE.  Changed all references to *syn
+	as character to use CGEN_SYNTAX_CHAR macro and all comparisons
+	to '\0' to use 0 instead.
+	* cgen-dis.in (print_insn_normal): Ditto.
+	* cgen-ibld.in (insert_insn_normal, extract_insn_normal): Ditto.
+
 Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c: Add x86_64 support.

@@ -3,7 +3,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
 - the resultant file is machine generated, cgen-ibld.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -218,7 +218,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 {
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
   unsigned long value;
-  const unsigned char * syn;
+  const CGEN_SYNTAX_CHAR_TYPE * syn;
 
   CGEN_INIT_INSERT (cd);
   value = CGEN_INSN_BASE_VALUE (insn);
@@ -244,7 +244,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
      e.g. storing a branch displacement that got resolved later.
      Needs more thought first.  */
 
-  for (syn = CGEN_SYNTAX_STRING (syntax); * syn != '\0'; ++ syn)
+  for (syn = CGEN_SYNTAX_STRING (syntax); * syn; ++ syn)
     {
       const char *errmsg;
 
@@ -488,7 +488,7 @@ extract_insn_normal (cd, insn, ex_info, insn_value, fields, pc)
      bfd_vma pc;
 {
   const CGEN_SYNTAX *syntax = CGEN_INSN_SYNTAX (insn);
-  const unsigned char *syn;
+  const CGEN_SYNTAX_CHAR_TYPE *syn;
 
   CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
