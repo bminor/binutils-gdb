@@ -1,5 +1,10 @@
 2002-04-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	Fix PR gdb/508.
+	* symfile.c (add_filename_language): Fix wrong xrealloc size argument.
+
+2002-04-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* p-exp.y: Also use new prev_lexptr variable
 	to improve error reporting. Based on Michael Snyder
 	2002-04-24 dated patch to c-exp.y.
