@@ -74,6 +74,8 @@ i386go32.sh
 i386linux.sh
 i386lynx.sh
 i386mach.sh
+i386moss.sh
+i386msdos.sh
 i386nbsd.sh
 i386nw.sh
 i386pe.sh

@@ -1,0 +1,2 @@
+EMUL=i386moss
+EMUL_EXTRA1=i386msdos

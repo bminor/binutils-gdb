@@ -71,6 +71,8 @@ i386-laout.mt
 i386-linux.mt
 i386-lynx.mt
 i386-mach.mt
+i386-moss.mt
+i386-msdos.mt
 i386-nbsd.mt
 i386-nw.mt
 i386-pe.mt
