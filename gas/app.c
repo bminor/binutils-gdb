@@ -191,6 +191,7 @@ static char out_buf[20];
 static int add_newlines;
 static char *saved_input;
 static int saved_input_len;
+static char input_buffer[32 * 1024];
 static const char *mri_state;
 static char mri_last_ch;
 
@@ -227,8 +228,14 @@ app_push ()
   saved->out_string = out_string;
   memcpy (saved->out_buf, out_buf, sizeof (out_buf));
   saved->add_newlines = add_newlines;
-  saved->saved_input = saved_input;
-  saved->saved_input_len = saved_input_len;
+  if (saved_input == NULL)
+    saved->saved_input = NULL;
+  else
+    {
+      saved->saved_input = xmalloc (saved_input_len);
+      memcpy (saved->saved_input, saved_input, saved_input_len);
+      saved->saved_input_len = saved_input_len;
+    }
   saved->scrub_m68k_mri = scrub_m68k_mri;
   saved->mri_state = mri_state;
   saved->mri_last_ch = mri_last_ch;
@@ -256,8 +263,16 @@ app_pop (arg)
   out_string = saved->out_string;
   memcpy (out_buf, saved->out_buf, sizeof (out_buf));
   add_newlines = saved->add_newlines;
-  saved_input = saved->saved_input;
-  saved_input_len = saved->saved_input_len;
+  if (saved->saved_input == NULL)
+    saved_input = NULL;
+  else
+    {
+      assert (saved->saved_input_len <= sizeof input_buffer);
+      memcpy (input_buffer, saved->saved_input, saved->saved_input_len);
+      saved_input = input_buffer;
+      saved_input_len = saved->saved_input_len;
+      free (saved->saved_input);
+    }
   scrub_m68k_mri = saved->scrub_m68k_mri;
   mri_state = saved->mri_state;
   mri_last_ch = saved->mri_last_ch;
@@ -308,7 +323,7 @@ process_escape (ch)
 
 int
 do_scrub_chars (get, tostart, tolen)
-     int (*get) PARAMS ((char **));
+     int (*get) PARAMS ((char *, int));
      char *tostart;
      int tolen;
 {
@@ -357,18 +372,15 @@ do_scrub_chars (get, tostart, tolen)
 
   /* This macro gets the next input character.  */
 
-#define GET()				\
-  (from < fromend			\
-   ? * (unsigned char *) (from++)	\
-   : ((saved_input != NULL		\
-       ? (free (saved_input),		\
-	  saved_input = NULL,		\
-	  0)				\
-       : 0),				\
-      fromlen = (*get) (&from),		\
-      fromend = from + fromlen,		\
-      (fromlen == 0			\
-       ? EOF				\
+#define GET()							\
+  (from < fromend						\
+   ? * (unsigned char *) (from++)				\
+   : (saved_input = NULL,					\
+      fromlen = (*get) (input_buffer, sizeof input_buffer),	\
+      from = input_buffer,					\
+      fromend = from + fromlen,					\
+      (fromlen == 0						\
+       ? EOF							\
        : * (unsigned char *) (from++))))
 
   /* This macro pushes a character back on the input stream.  */
@@ -400,9 +412,10 @@ do_scrub_chars (get, tostart, tolen)
     }
   else
     {
-      fromlen = (*get) (&from);
+      fromlen = (*get) (input_buffer, sizeof input_buffer);
       if (fromlen == 0)
 	return 0;
+      from = input_buffer;
       fromend = from + fromlen;
     }
 
@@ -1232,23 +1245,12 @@ do_scrub_chars (get, tostart, tolen)
      processed.  */
   if (fromend > from)
     {
-      char *save;
-
-      save = (char *) xmalloc (fromend - from);
-      memcpy (save, from, fromend - from);
-      if (saved_input != NULL)
-	free (saved_input);
-      saved_input = save;
+      saved_input = from;
       saved_input_len = fromend - from;
     }
   else
-    {
-      if (saved_input != NULL)
-	{
-	  free (saved_input);
-	  saved_input = NULL;
-	}
-    }
+    saved_input = NULL;
+
   return to - tostart;
 }
 

@@ -208,7 +208,7 @@ static int dwarf_file_string;
 #endif
 
 static void cons_worker PARAMS ((int, int));
-static int scrub_from_string PARAMS ((char **));
+static int scrub_from_string PARAMS ((char *, int));
 static void do_align PARAMS ((int, char *, int, int));
 static void s_align PARAMS ((int, int));
 static void s_lcomm_internal PARAMS ((int, int));
@@ -480,15 +480,18 @@ static char *scrub_string;
 static char *scrub_string_end;
 
 static int
-scrub_from_string (from)
-     char **from;
+scrub_from_string (buf, buflen)
+     char *buf;
+     int buflen;
 {
-  int size;
+  int copy;
 
-  *from = scrub_string;
-  size = scrub_string_end - scrub_string;
-  scrub_string = scrub_string_end;
-  return size;
+  copy = scrub_string_end - scrub_string;
+  if (copy > buflen)
+    copy = buflen;
+  memcpy (buf, scrub_string, copy);
+  scrub_string += copy;
+  return copy;
 }
 
 /*	read_a_source_file()
@@ -788,7 +791,7 @@ read_a_source_file (name)
 			  mri_pending_align = 0;
 			  if (line_label != NULL)
 			    {
-			      line_label->sy_frag = frag_now;
+			      symbol_set_frag (line_label, frag_now);
 			      S_SET_VALUE (line_label, frag_now_fix ());
 			    }
 			}
@@ -869,7 +872,7 @@ read_a_source_file (name)
 			  mri_pending_align = 0;
 			  if (line_label != NULL)
 			    {
-			      line_label->sy_frag = frag_now;
+			      symbol_set_frag (line_label, frag_now);
 			      S_SET_VALUE (line_label, frag_now_fix ());
 			    }
 			}
@@ -1489,10 +1492,12 @@ s_mri_common (small)
 
   if (line_label != NULL)
     {
-      line_label->sy_value.X_op = O_symbol;
-      line_label->sy_value.X_add_symbol = sym;
-      line_label->sy_value.X_add_number = S_GET_VALUE (sym);
-      line_label->sy_frag = &zero_address_frag;
+      expressionS exp;
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = sym;
+      exp.X_add_number = 0;
+      symbol_set_value_expression (line_label, &exp);
+      symbol_set_frag (line_label, &zero_address_frag);
       S_SET_SEGMENT (line_label, expr_section);
     }
 
@@ -2064,9 +2069,9 @@ s_lcomm_internal (needs_align, bytes_p)
 	frag_align (align, 0, 0);
 					/* detach from old frag	*/
       if (S_GET_SEGMENT (symbolP) == bss_seg)
-	symbolP->sy_frag->fr_symbol = NULL;
+	symbol_get_frag (symbolP)->fr_symbol = NULL;
 
-      symbolP->sy_frag = frag_now;
+      symbol_set_frag (symbolP, frag_now);
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
 			(offsetT) temp, (char *) 0);
       *pfrag = 0;
@@ -2261,7 +2266,7 @@ s_macro (ignore)
 	{
 	  S_SET_SEGMENT (line_label, undefined_section);
 	  S_SET_VALUE (line_label, 0);
-	  line_label->sy_frag = &zero_address_frag;
+	  symbol_set_frag (line_label, &zero_address_frag);
 	}
 
       if (((flag_m68k_mri
@@ -2783,9 +2788,12 @@ s_space (mult)
 	      S_SET_VALUE (mri_common_symbol, val + 1);
 	      if (line_label != NULL)
 		{
-		  know (line_label->sy_value.X_op == O_symbol);
-		  know (line_label->sy_value.X_add_symbol == mri_common_symbol);
-		  line_label->sy_value.X_add_number += 1;
+		  expressionS *symexp;
+
+		  symexp = symbol_get_value_expression (line_label);
+		  know (symexp->X_op == O_symbol);
+		  know (symexp->X_add_symbol == mri_common_symbol);
+		  symexp->X_add_number += 1;
 		}
 	    }
 	}
@@ -2794,7 +2802,7 @@ s_space (mult)
 	  do_align (1, (char *) NULL, 0, 0);
 	  if (line_label != NULL)
 	    {
-	      line_label->sy_frag = frag_now;
+	      symbol_set_frag (line_label, frag_now);
 	      S_SET_VALUE (line_label, frag_now_fix ());
 	    }
 	}
@@ -3114,7 +3122,8 @@ pseudo_set (symbolP)
 	   && (S_GET_SEGMENT (exp.X_add_symbol)
 	       == S_GET_SEGMENT (exp.X_op_symbol))
 	   && SEG_NORMAL (S_GET_SEGMENT (exp.X_add_symbol))
-	   && exp.X_add_symbol->sy_frag == exp.X_op_symbol->sy_frag)
+	   && (symbol_get_frag (exp.X_add_symbol)
+	       == symbol_get_frag (exp.X_op_symbol)))
     {
       exp.X_op = O_constant;
       exp.X_add_number = (S_GET_VALUE (exp.X_add_symbol)
@@ -3138,19 +3147,19 @@ pseudo_set (symbolP)
 #endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       if (exp.X_op != O_constant)
-        symbolP->sy_frag = &zero_address_frag;
+        symbol_set_frag (symbolP, &zero_address_frag);
       break;
 
     case O_register:
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
-      symbolP->sy_frag = &zero_address_frag;
+      symbol_set_frag (symbolP, &zero_address_frag);
       break;
 
     case O_symbol:
       if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section
 	  || exp.X_add_number != 0)
-	symbolP->sy_value = exp;
+	symbol_set_value_expression (symbolP, &exp);
       else
 	{
 	  symbolS *s = exp.X_add_symbol;
@@ -3164,7 +3173,7 @@ pseudo_set (symbolP)
 #endif /* OBJ_AOUT or OBJ_BOUT */
 	  S_SET_VALUE (symbolP,
 		       exp.X_add_number + S_GET_VALUE (s));
-	  symbolP->sy_frag = s->sy_frag;
+	  symbol_set_frag (symbolP, symbol_get_frag (s));
 	  copy_symbol_attributes (symbolP, s);
 	}
       break;
@@ -3172,7 +3181,7 @@ pseudo_set (symbolP)
     default:
       /* The value is some complex expression.
 	 FIXME: Should we set the segment to anything?  */
-      symbolP->sy_value = exp;
+      symbol_set_value_expression (symbolP, &exp);
       break;
     }
 }
@@ -3401,13 +3410,13 @@ emit_expr (exp, nbytes)
   /* Handle a negative bignum.  */
   if (op == O_uminus
       && exp->X_add_number == 0
-      && exp->X_add_symbol->sy_value.X_op == O_big
-      && exp->X_add_symbol->sy_value.X_add_number > 0)
+      && symbol_get_value_expression (exp->X_add_symbol)->X_op == O_big
+      && symbol_get_value_expression (exp->X_add_symbol)->X_add_number > 0)
     {
       int i;
       unsigned long carry;
 
-      exp = &exp->X_add_symbol->sy_value;
+      exp = symbol_get_value_expression (exp->X_add_symbol);
 
       /* Negate the bignum: one's complement each digit and add 1.  */
       carry = 1;
