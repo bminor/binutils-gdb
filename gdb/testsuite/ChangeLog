@@ -1,3 +1,8 @@
+Wed Feb  1 08:03:48 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/a1-selftest.exp (test_with_self): Don't invoke stty on
+	ultrix.
+
 Mon Jan 30 11:44:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/nodebug.c (inner): Use variables so AIX linker doesn't
