@@ -1,3 +1,8 @@
+Wed Apr 23 17:55:22 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* tconfig.in: New file.
+	* interp.c (sim_open): Handle missing arg to -E.
+
 Tue Apr 22 08:55:35 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in:  Add clean targets.

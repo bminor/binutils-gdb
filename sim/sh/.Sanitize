@@ -33,6 +33,7 @@ configure.in
 interp.c
 gencode.c
 syscall.h
+tconfig.in
 
 Things-to-lose:
 
