@@ -284,13 +284,6 @@ struct relocation_info
 #define H_SET_VERSION(h,v)		((h)->header.a_version = (v))
 #endif /* EXEC_VERSION */
 
-/*
- * Current means for getting the name of a segment.
- * This will change for infinite-segments support (e.g. COFF).
- */
-#define	segment_name(seg)  ( seg_name[(int)(seg)] )
-extern char *const seg_name[];
-
 typedef struct
   {
     struct exec header;		/* a.out header */
@@ -309,12 +302,5 @@ void tc_aout_fix_to_chars (char *where, struct fix *fixP, relax_addressT segment
 #else /* not __STDC__ */
 void tc_aout_fix_to_chars ();
 #endif /* not __STDC__ */
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of obj-bout.h */

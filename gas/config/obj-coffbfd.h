@@ -423,7 +423,6 @@ obj_symbol_type;
 #define H_SET_LINENO_SIZE(h,v)          ((h)->lineno_size = (v))
 
 /* Segment flipping */
-#define segment_name(v)	(seg_name[(int) (v)])
 
 typedef struct
   {
@@ -510,12 +509,5 @@ extern SCNHDR data_section_header;
 extern SCNHDR text_section_header;
 #endif
 #endif
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of obj-coffbfd.h */
