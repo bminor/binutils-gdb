@@ -1,3 +1,12 @@
+2001-08-20  H.J. Lu  <hjl@gnu.org>
+
+	* elf-bfd.h (elf_obj_tdata): Add num_section_syms.
+	(elf_num_section_syms): New for num_section_syms.
+
+	* elf.c (elf_map_symbols): Set num_section_syms.
+	(_bfd_elf_symbol_from_bfd_symbol): Check num_section_syms for
+	the section symbol index.
+
 2001-08-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elfxx-target.h (bfd_elfNN_bfd_link_hash_table_create): Never

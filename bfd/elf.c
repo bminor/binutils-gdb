@@ -2091,6 +2091,7 @@ elf_map_symbols (abfd)
   if (sect_syms == NULL)
     return false;
   elf_section_syms (abfd) = sect_syms;
+  elf_num_section_syms (abfd) = max_index;
 
   for (idx = 0; idx < symcount; idx++)
     {
@@ -3651,7 +3652,8 @@ _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
 	indx = asym_ptr->section->output_section->index;
       else
 	indx = asym_ptr->section->index;
-      if (elf_section_syms (abfd)[indx])
+      if (indx < elf_num_section_syms (abfd)
+	  && elf_section_syms (abfd)[indx] != NULL)
 	asym_ptr->udata.i = elf_section_syms (abfd)[indx]->udata.i;
     }
 

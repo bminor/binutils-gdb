@@ -813,6 +813,7 @@ struct elf_obj_tdata
   struct bfd_strtab_hash *strtab_ptr;
   int num_locals;
   int num_globals;
+  int num_section_syms;
   asymbol **section_syms;		/* STT_SECTION symbols for each section */
   Elf_Internal_Shdr symtab_hdr;
   Elf_Internal_Shdr shstrtab_hdr;
@@ -954,6 +955,7 @@ struct elf_obj_tdata
 #define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
 #define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
 #define elf_section_syms(bfd)	(elf_tdata(bfd) -> section_syms)
+#define elf_num_section_syms(bfd) (elf_tdata(bfd) -> num_section_syms)
 #define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
 #define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
 #define elf_gp(bfd)		(elf_tdata(bfd) -> gp)
