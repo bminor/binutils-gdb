@@ -3062,24 +3062,30 @@ process_syminfo (file)
     printf (_("\nDynamic info segment at offset 0x%x contains %d entries:\n"),
 	    dynamic_syminfo_offset, dynamic_syminfo_nent);
 
-  printf (_(" Num: Name                                BoundTo Flags\n"));
+  printf (_(" Num: Name                           BoundTo     Flags\n"));
   for (i = 0; i < dynamic_syminfo_nent; ++i)
     {
       unsigned short int flags = dynamic_syminfo[i].si_flags;
 
-      printf ("%4d: %-35s ", i,
+      printf ("%4d: %-30s ", i,
 	      dynamic_strings + dynamic_symbols[i].st_name);
 
       switch (dynamic_syminfo[i].si_boundto)
 	{
 	case SYMINFO_BT_SELF:
-	  fputs ("SELF    ", stdout);
+	  fputs ("SELF       ", stdout);
 	  break;
 	case SYMINFO_BT_PARENT:
-	  fputs ("PARENT  ", stdout);
+	  fputs ("PARENT     ", stdout);
 	  break;
 	default:
-	  printf ("%-7d ", dynamic_syminfo[i].si_boundto);
+	  if (dynamic_syminfo[i].si_boundto > 0
+	      && dynamic_syminfo[i].si_boundto < dynamic_size)
+	    printf ("%-10s ",
+		    dynamic_strings
+		    + dynamic_segment[dynamic_syminfo[i].si_boundto].d_un.d_val);
+	  else
+	    printf ("%-10d ", dynamic_syminfo[i].si_boundto);
 	  break;
 	}
 
