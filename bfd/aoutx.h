@@ -2050,7 +2050,11 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
     }
   else if ((sym->flags & BSF_SECTION_SYM) == 0)
     {
-      r_extern = 1;
+      if (bfd_is_und_section (bfd_get_section (sym))
+	  || (sym->flags & BSF_GLOBAL) != 0)
+	r_extern = 1;
+      else
+	r_extern = 0;
       r_index = (*(g->sym_ptr_ptr))->KEEPIT;
     }
   else
