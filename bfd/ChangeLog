@@ -1,3 +1,8 @@
+Thu Sep 23 21:04:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* ecoff.h (ecoff_set_arch_mach_hook): Accept MIPS_MAGIC_LITTLE2
+	and MIPS_MAGIC_BIG2.
+
 Thu Sep 23 11:06:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* gen-aout.c (main): Output newline after end of comment, not
