@@ -61,12 +61,15 @@ SUBSECTION
 	allocating storage, and the actual reading process. This is an
 	excerpt from an application which reads the symbol table:
 
-|	  unsigned int storage_needed;
+|	  long storage_needed;
 |	  asymbol **symbol_table;
-|	  unsigned int number_of_symbols;
-|	  unsigned int i;
+|	  long number_of_symbols;
+|	  long i;
 |
-|	  storage_needed = get_symtab_upper_bound (abfd);
+|	  storage_needed = bfd_get_symtab_upper_bound (abfd);
+|
+|         if (storage_needed < 0)
+|           FAIL
 |
 |	  if (storage_needed == 0) {
 |	     return ;
@@ -75,6 +78,9 @@ SUBSECTION
 |	    ...
 |	  number_of_symbols =
 |	     bfd_canonicalize_symtab (abfd, symbol_table);
+|
+|         if (number_of_symbols < 0)
+|           FAIL
 |
 |	  for (i = 0; i < number_of_symbols; i++) {
 |	     process_symbol (symbol_table[i]);
@@ -282,17 +288,31 @@ SUBSECTION
 
 /*
 FUNCTION
-	get_symtab_upper_bound
+	bfd_get_symtab_upper_bound
 
 DESCRIPTION
 	Return the number of bytes required to store a vector of pointers
 	to <<asymbols>> for all the symbols in the BFD @var{abfd},
 	including a terminal NULL pointer. If there are no symbols in
-	the BFD, then return 0.
+	the BFD, then return 0.  If an error occurs, return -1.
 
-.#define get_symtab_upper_bound(abfd) \
-.     BFD_SEND (abfd, _get_symtab_upper_bound, (abfd))
+.#define bfd_get_symtab_upper_bound(abfd) \
+.     BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
 
+*/
+
+/*
+FUNCTION
+	bfd_is_local_label
+
+SYNOPSIS
+        boolean bfd_is_local_label(bfd *abfd, asymbol *sym);
+
+DESCRIPTION
+	Return true if the given symbol @var{sym} in the BFD @var{abfd} is
+	a compiler generated local label, else return false.
+.#define bfd_is_local_label(abfd, sym) \
+.     BFD_SEND (abfd, _bfd_is_local_label,(abfd, sym))
 */
 
 /*
@@ -429,9 +449,11 @@ static CONST struct section_to_type stt[] =
   {"*DEBUG*", 'N'},
   {".bss", 'b'},
   {".data", 'd'},
-  {".sbss", 's'},		/* Small BSS (uninitialized data) */
-  {".scommon", 'c'},		/* Small common */
-  {".sdata", 'g'},		/* Small initialized data */
+  {".rdata", 'r'},		/* Read only data.  */
+  {".rodata", 'r'},		/* Read only data.  */
+  {".sbss", 's'},		/* Small BSS (uninitialized data).  */
+  {".scommon", 'c'},		/* Small common.  */
+  {".sdata", 'g'},		/* Small initialized data.  */
   {".text", 't'},
   {0, 0}
 };
@@ -477,14 +499,14 @@ bfd_decode_symclass (symbol)
 
   if (bfd_is_com_section (symbol->section))
     return 'C';
-  if (symbol->section == &bfd_und_section)
+  if (bfd_is_und_section (symbol->section))
     return 'U';
-  if (symbol->section == &bfd_ind_section)
+  if (bfd_is_ind_section (symbol->section))
     return 'I';
   if (!(symbol->flags & (BSF_GLOBAL | BSF_LOCAL)))
     return '?';
 
-  if (symbol->section == &bfd_abs_section)
+  if (bfd_is_abs_section (symbol->section))
     c = 'a';
   else if (symbol->section)
     c = coff_section_type (symbol->section->name);

@@ -1,3 +1,7 @@
+Thu Sep 29 12:29:01 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* syms.c (stt): Add .rdata and .rodata.
+
 Wed Sep 28 13:35:05 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* reloc.c (bfd_install_relocation): Cast data_start to bfd_byte *
