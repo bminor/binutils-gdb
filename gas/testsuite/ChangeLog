@@ -1,5 +1,7 @@
 start-sanitize-v850
 Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
+	
+	* gas/v850/basic.exp (bit_tests): Test instruction bit patterns.
 
 	* gas/v850/basic.exp (arith_tests): Test instruction bit patterns.	
 	* gas/v850/arith.s: Tweak constants for better testing.
