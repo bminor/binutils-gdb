@@ -50,6 +50,8 @@ static boolean elf_link_assign_sym_version
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_renumber_dynsyms
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_collect_hash_codes
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -2207,6 +2209,150 @@ static const size_t elf_buckets[] =
   16411, 32771, 0
 };
 
+/* Compute bucket count for hashing table.  We do not use a static set
+   of possible tables sizes anymore.  Instead we determine for all
+   possible reasonable sizes of the table the outcome (i.e., the
+   number of collisions etc) and choose the best solution.  The
+   weighting functions are not too simple to allow the table to grow
+   without bounds.  Instead one of the weighting factors is the size.
+   Therefore the result is always a good payoff between few collisions
+   (= short chain lengths) and table size.  */
+static size_t
+compute_bucket_count (info)
+     struct bfd_link_info *info;
+{
+  size_t dynsymcount = elf_hash_table (info)->dynsymcount;
+  size_t best_size;
+  unsigned long int *hashcodes;
+  unsigned long int *hashcodesp;
+  unsigned long int i;
+
+  /* Compute the hash values for all exported symbols.  At the same
+     time store the values in an array so that we could use them for
+     optimizations.  */
+  hashcodes = (unsigned long int *) bfd_malloc (dynsymcount
+						* sizeof (unsigned long int));
+  if (hashcodes == NULL)
+    return 0;
+  hashcodesp = hashcodes;
+
+  /* Put all hash values in HASHCODES.  */
+  elf_link_hash_traverse (elf_hash_table (info),
+			  elf_collect_hash_codes, &hashcodesp);
+
+/* We have a problem here.  The following code to optimize the table size
+   requires an integer type with more the 32 bits.  If BFD_HOST_U_64_BIT
+   is set or GCC 2 is used we know about such a type.  */
+#if defined BFD_HOST_U_64_BIT || __GNUC__ >= 2
+# ifndef BFD_HOST_U_64_BIT
+#  define BFD_HOST_U_64_BIT	unsigned long long int
+# endif
+  if (info->optimize == true)
+    {
+      unsigned long int nsyms = hashcodesp - hashcodes;
+      size_t minsize;
+      size_t maxsize;
+      BFD_HOST_U_64_BIT best_chlen = ~((BFD_HOST_U_64_BIT) 0);
+      unsigned long int *counts ;
+
+      /* Possible optimization parameters: if we have NSYMS symbols we say
+	 that the hashing table must at least have NSYMS/4 and at most
+	 2*NSYMS buckets.  */
+      minsize = nsyms / 4;
+      best_size = maxsize = nsyms * 2;
+
+      /* Create array where we count the collisions in.  We must use bfd_malloc
+	 since the size could be large.  */
+      counts = (unsigned long int *) bfd_malloc (maxsize
+						 * sizeof (unsigned long int));
+      if (counts == NULL)
+	{
+	  free (hashcodes);
+	  return 0;
+	}
+
+      /* Compute the "optimal" size for the hash table.  The criteria is a
+	 minimal chain length.  The minor criteria is (of course) the size
+	 of the table.  */
+      for (i = minsize; i < maxsize; ++i)
+	{
+	  /* Walk through the array of hashcodes and count the collisions.  */
+	  BFD_HOST_U_64_BIT max;
+	  unsigned long int j;
+	  unsigned long int fact;
+
+	  memset (counts, '\0', i * sizeof (unsigned long int));
+
+	  /* Determine how often each hash bucket is used.  */
+	  for (j = 0; j < nsyms; ++j)
+	    ++counts[hashcodes[j] % i];
+
+	  /* For the weight function we need some information about the
+	     pagesize on the target.  This is information need not be 100%
+	     accurate.  Since this information is not available (so far) we
+	     define it here to a reasonable default value.  If it is crucial
+	     to have a better value some day simply define this value.  */
+# ifndef BFD_TARGET_PAGESIZE
+#  define BFD_TARGET_PAGESIZE	(4096)
+# endif
+
+	  /* We in any case need 2 + NSYMS entries for the size values and
+	     the chains.  */
+	  max = (2 + nsyms) * (ARCH_SIZE / 8);
+
+# if 1
+	  /* Variant 1: optimize for short chains.  We add the squares
+	     of all the chain lengths (which favous many small chain
+	     over a few long chains).  */
+	  for (j = 0; j < i; ++j)
+	    max += counts[j] * counts[j];
+
+	  /* This adds penalties for the overall size of the table.  */
+	  fact = i / (BFD_TARGET_PAGESIZE / (ARCH_SIZE / 8)) + 1;
+	  max *= fact * fact;
+# else
+	  /* Variant 2: Optimize a lot more for small table.  Here we
+	     also add squares of the size but we also add penalties for
+	     empty slots (the +1 term).  */
+	  for (j = 0; j < i; ++j)
+	    max += (1 + counts[j]) * (1 + counts[j]);
+
+	  /* The overall size of the table is considered, but not as
+	     strong as in variant 1, where it is squared.  */
+	  fact = i / (BFD_TARGET_PAGESIZE / (ARCH_SIZE / 8)) + 1;
+	  max *= fact;
+# endif
+
+	  /* Compare with current best results.  */
+	  if (max < best_chlen)
+	    {
+	      best_chlen = max;
+	      best_size = i;
+	    }
+	}
+
+      free (counts);
+    }
+  else
+#endif
+    {
+      /* This is the fallback solution if no 64bit type is available or if we
+	 are not supposed to spend much time on optimizations.  We select the
+	 bucket count using a fixed set of numbers.  */
+      for (i = 0; elf_buckets[i] != 0; i++)
+	{
+	  best_size = elf_buckets[i];
+	  if (dynsymcount < elf_buckets[i + 1])
+	    break;
+	}
+    }
+
+  /* Free the arrays we needed.  */
+  free (hashcodes);
+
+  return best_size;
+}
+
 /* Set up the sizes and contents of the ELF dynamic sections.  This is
    called by the ELF linker emulation before_allocation routine.  We
    must set the sizes of the sections before the linker sets the
@@ -2769,12 +2915,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       elf_swap_symbol_out (output_bfd, &isym,
 			   (PTR) (Elf_External_Sym *) s->contents);
 
-      for (i = 0; elf_buckets[i] != 0; i++)
-	{
-	  bucketcount = elf_buckets[i];
-	  if (dynsymcount < elf_buckets[i + 1])
-	    break;
-	}
+      /* Compute the size of the hashing table.  As a side effect this
+	 computes the hash values for all the names we export.  */
+      bucketcount = compute_bucket_count (info);
 
       s = bfd_get_section_by_name (dynobj, ".hash");
       BFD_ASSERT (s != NULL);
@@ -4398,8 +4541,6 @@ elf_link_output_extsym (h, data)
   if (h->dynindx != -1
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
-      char *p, *copy;
-      const char *name;
       size_t bucketcount;
       size_t bucket;
       bfd_byte *bucketpos;
@@ -4412,22 +4553,8 @@ elf_link_output_extsym (h, data)
 				   finfo->dynsym_sec->contents)
 				  + h->dynindx));
 
-      /* We didn't include the version string in the dynamic string
-         table, so we must not consider it in the hash table.  */
-      name = h->root.root.string;
-      p = strchr (name, ELF_VER_CHR);
-      if (p == NULL)
-	copy = NULL;
-      else
-	{
-	  copy = bfd_alloc (finfo->output_bfd, p - name + 1);
-	  strncpy (copy, name, p - name);
-	  copy[p - name] = '\0';
-	  name = copy;
-	}
-
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
-      bucket = bfd_elf_hash ((const unsigned char *) name) % bucketcount;
+      bucket = h->elf_hash_value % bucketcount;
       bucketpos = ((bfd_byte *) finfo->hash_sec->contents
 		   + (bucket + 2) * (ARCH_SIZE / 8));
       chain = get_word (finfo->output_bfd, bucketpos);
@@ -4435,9 +4562,6 @@ elf_link_output_extsym (h, data)
       put_word (finfo->output_bfd, chain,
 		((bfd_byte *) finfo->hash_sec->contents
 		 + (bucketcount + 2 + h->dynindx) * (ARCH_SIZE / 8)));
-
-      if (copy != NULL)
-	bfd_release (finfo->output_bfd, copy);
 
       if (finfo->symver_sec != NULL && finfo->symver_sec->contents != NULL)
 	{
@@ -5334,7 +5458,7 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
 
 /* Garbage collect unused sections.  */
 
-static boolean elf_gc_mark 
+static boolean elf_gc_mark
   PARAMS ((struct bfd_link_info *info, asection *sec,
 	   asection * (*gc_mark_hook)
 	     PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
@@ -5370,7 +5494,7 @@ elf_gc_mark (info, sec, gc_mark_hook)
 		struct elf_link_hash_entry *, Elf_Internal_Sym *));
 {
   boolean ret = true;
-  
+
   sec->gc_mark = 1;
 
   /* Look through the section relocs.  */
@@ -5638,7 +5762,7 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
   if (h->vtable_parent == NULL)
     return true;
 
-  BFD_ASSERT (h->root.type == bfd_link_hash_defined 
+  BFD_ASSERT (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak);
 
   sec = h->root.u.def.section;
@@ -5804,7 +5928,7 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
   return true;
 }
 
-/* And an accompanying bit to work out final got entry offsets once 
+/* And an accompanying bit to work out final got entry offsets once
    we're done.  Should be called from final_link.  */
 
 boolean
@@ -5892,4 +6016,48 @@ elf_gc_common_final_link (abfd, info)
 
   /* Invoke the regular ELF backend linker to do all the work.  */
   return elf_bfd_final_link (abfd, info);
+}
+
+/* This function will be called though elf_link_hash_traverse to store
+   all hash value of the exported symbols in an array.  */
+
+static boolean
+elf_collect_hash_codes (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  unsigned long **valuep = (unsigned long **) data;
+  const char *name;
+  char *p;
+  unsigned long ha;
+  char *alc = NULL;
+
+  /* Ignore indirect symbols.  These are added by the versioning code.  */
+  if (h->dynindx == -1)
+    return true;
+
+  name = h->root.root.string;
+  p = strchr (name, ELF_VER_CHR);
+  if (p != NULL)
+    {
+      alc = bfd_malloc (p - name + 1);
+      memcpy (alc, name, p - name);
+      alc[p - name] = '\0';
+      name = alc;
+    }
+
+  /* Compute the hash value.  */
+  ha = bfd_elf_hash (name);
+
+  /* Store the found hash value in the array given as the argument.  */
+  *(*valuep)++ = ha;
+
+  /* And store it in the struct so that we can put it in the hash table
+     later.  */
+  h->elf_hash_value = ha;
+
+  if (alc != NULL)
+    free (alc);
+
+  return true;
 }
