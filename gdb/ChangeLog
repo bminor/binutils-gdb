@@ -1,3 +1,8 @@
+Sat Feb 17 08:57:50 1996  Fred Fish  <fnf@cygnus.com>
+
+	* symmisc.c (print_symbol_bcache_statistics): Update description for
+	printing byte cache statistics.
+
 Thu Feb 16 16:02:03 1996  Stu Grossman  (grossman@cygnus.com)
 
 	* Add native support for long double data type.
