@@ -1563,6 +1563,7 @@ HOST:PORT to access a board over a network",  /* to_doc */
   mips_mourn_inferior,		/* to_mourn_inferior */
   NULL,				/* to_can_run */
   NULL,				/* to_notice_signals */
+  0,				/* to_thread_alive */
   0,				/* to_stop */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */

@@ -191,10 +191,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static int remote_write_bytes PARAMS ((CORE_ADDR memaddr,
-				       unsigned char *myaddr, int len));
+				       char *myaddr, int len));
 
 static int remote_read_bytes PARAMS ((CORE_ADDR memaddr,
-				      unsigned char *myaddr, int len));
+				      char *myaddr, int len));
 
 static void remote_files_info PARAMS ((struct target_ops *ignore));
 
@@ -311,6 +311,24 @@ set_thread (th, gen)
     general_thread = th;
   else
     cont_thread = th;
+}
+
+/*   Return nonzero if the thread TH is still alive on the remote system.  */
+
+static int
+remote_thread_alive (th)
+     int th;
+{
+  char buf[PBUFSIZ];
+
+  buf[0] = 'T';
+  if (th < 0)
+    sprintf (&buf[1], "-%x", -th);
+  else
+    sprintf (&buf[1], "%x", th);
+  putpkt (buf);
+  getpkt (buf, 0);
+  return (buf[0] == 'O' && buf[1] == 'K');
 }
 
 /* Clean up connection to a remote debugger.  */
@@ -940,7 +958,7 @@ remote_store_word (addr, word)
 static int
 remote_write_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     unsigned char *myaddr;
+     char *myaddr;
      int len;
 {
   char buf[PBUFSIZ];
@@ -988,7 +1006,7 @@ remote_write_bytes (memaddr, myaddr, len)
 static int
 remote_read_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     unsigned char *myaddr;
+     char *myaddr;
      int len;
 {
   char buf[PBUFSIZ];
@@ -1570,6 +1588,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   remote_mourn,			/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
+  remote_thread_alive,		/* to_thread_alive */
   0,				/* to_stop */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */

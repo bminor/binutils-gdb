@@ -280,12 +280,7 @@ info_threads_command (arg, from_tty)
 
   for (tp = thread_list; tp; tp = tp->next)
     {
-      /* FIXME: need to figure out a way to do this for remote too,
-	 or else the print_stack_frame below will fail with a bogus
-	 thread ID.  */
-      if (!STREQ (current_target.to_shortname, "remote")
-	  && target_has_execution
-	  && kill (tp->pid, 0) == -1)
+      if (! target_thread_alive (tp->pid))
  	{
 	  tp->pid = -1;	/* Mark it as dead */
 	  continue;

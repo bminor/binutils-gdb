@@ -4554,6 +4554,7 @@ struct target_ops m3_ops = {
   m3_mourn_inferior,	/* to_mourn_inferior */
   m3_can_run,		/* to_can_run */
   0,				/* to_notice_signals */
+  0,				/* to_thread_alive */
   m3_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */

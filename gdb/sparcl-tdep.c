@@ -858,6 +858,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   0,				/* to_mourn_inferior */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
+  0,				/* to_thread_alive */
   0,				/* to_stop */
   download_stratum,		/* to_stratum */
   0,				/* to_next */

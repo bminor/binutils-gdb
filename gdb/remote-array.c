@@ -156,6 +156,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   array_mourn_inferior,		/* to_mourn_inferior */
   0,				/* to_can_run */
   0, 				/* to_notice_signals */
+  0,				/* to_thread_alive */
   0,                            /* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */

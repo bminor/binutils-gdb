@@ -1,3 +1,54 @@
+Thu Jul 13 13:42:38 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* inftarg.c (child_thread_alive): New function to see if a
+	particular thread is still running.
+	(child_ops): Add child_thread_alive entry.
+	* remote.c (remote_thread_alive): New function to see if a
+	particular thread is still alive.
+	(remote_ops): Add remote_thread_alive.
+	* target.c (dummy_target): Add dummy entry for thread_alive.
+	(cleanup_target): de_fault thread_alive too.
+	(update_current_target): INHERIT thread_alive too.
+	(debug_to_thread_alive): New function.
+	(setup_target_debug): Add debug_to_thread_alive.
+	* target.h (struct target_ops): Add to_thread_alive.
+	(target_thread_alive): Define.
+	* thread.c (info_threads_command): Don't call kill; use
+	target_thread_alive instead.
+	* config/nm-lynx.h (CHILD_THREAD_ALIVE): Define.
+	* gdbserver/low-lynx.c (mythread_alive): New function.
+	(mywait): Don't restart any threads after a new thread notification,
+	let the generic code handle it.
+	* gdbserver/low-sparc.c (mythread_alive): Dummy version.
+	* gdbserver/low-sun3.c (mythread_alive): Likewise.
+	* gdbserver/server.c (main): Handle thread_alive requests.
+	* gdbserver/server.h (mythread_alive): Declare.
+	* corelow.c (core_ops): Add dummy entry for thread_alive.
+	* exec.c (exec_ops): Likewise.
+	* m3-nat.c (m3_ops): Likewise.
+	* monitor.c (monitor_ops): Likewise.
+	* procfs.c (procfs_ops): Likewise.
+	* remote-arc.c (arc_ops): Likewise.
+	* remote-array.c (array_ops): Likewise.
+	* remote-e7000.c (e7000_ops): Likewise.
+	* remote-es.c (es1800_ops, es1800_child_ops): Likewise.
+	* remote-mips.c (mips_ops): Likewise.
+	* remote-pa.c (remote_hppro_ops): Likewise.
+	* remote-sim.c (gdbsim_ops): Likewise.
+	* sparcl-tdep.c (sparclite_ops): Likewise.
+
+
+Tue Jul 11 11:15:55 1995  Kung Hsu  <kung@rtl.cygnus.com>
+
+	* solib.c: Add _DYNAMIC__MGC base symbol for Mentor Graphics Inc.
+	* solib.c (match_main): New function for checking name of main.
+	* solib.c (solib_add): Not to add if solib match main.
+
+Fri Jul  7 14:41:56 1995  Kung Hsu  <kung@rtl.cygnus.com>
+
+	* elfread.c (elf_symtab_read): Fix a bug ignoring compiler
+	generated internal labels ($LM...).
+
 Wed Jul  5 11:38:36 1995  Kung Hsu  <kung@rtl.cygnus.com>
 
 	* defs.h: if __GO32__ or WIN32 the directory separating symbol should

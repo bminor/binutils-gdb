@@ -99,6 +99,24 @@ kill_inferior ()
   inferior_pid = 0;
 }
 
+/* Return nonzero if the given thread is still alive.  */
+int
+mythread_alive (pid)
+     int pid;
+{
+  /* Arggh.  Apparently pthread_kill only works for threads within
+     the process that calls pthread_kill.
+
+     We want to avoid the lynx signal extensions as they simply don't
+     map well to the generic gdb interface we want to keep.
+
+     All we want to do is determine if a particular thread is alive;
+     it appears as if we can just make a harmless thread specific
+     ptrace call to do that.  */
+  return (ptrace (PTRACE_THREADUSER,
+		  BUILDPID (PIDGET (inferior_pid), pid), 0, 0) != -1);
+}
+
 /* Wait for process, returns status */
 
 unsigned char
@@ -132,12 +150,13 @@ mywait (status)
 
 	  if (realsig == SIGNEWTHREAD)
 	    {
-	      /* Simply ignore new thread notification, as we can't do anything
-		 useful with such threads.  All ptrace calls at this point just
-		 fail for no apparent reason.  The thread will eventually get a
-		 real signal when it becomes real.  */
-	      myresume (0, 0);
-	      continue;
+	      /* It's a new thread notification.  Nothing to do here since
+		 the machine independent code in wait_for_inferior will
+		 add the thread to the thread list and restart the thread
+		 when pid != inferior_pid and pid is not in the thread list.
+		 We don't even want to muck with realsig -- the code in
+		 wait_for_inferior expects SIGTRAP.  */
+	      ;
 	    }
 	}
       break;

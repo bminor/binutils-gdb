@@ -95,6 +95,14 @@ kill_inferior ()
   /*************inferior_died ();****VK**************/
 }
 
+/* Return nonzero if the given thread is still alive.  */
+int
+mythread_alive (pid)
+     int pid;
+{
+  return 1;
+}
+
 /* Wait for process, returns status */
 
 unsigned char
