@@ -1,3 +1,9 @@
+2000-08-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elflink.c (_bfd_elf_create_got_section): Don't abort().
+	Formatting fixes.
+	(_bfd_elf_create_dynamic_sections): Likewise.
+
 2000-08-16  Andrew Macleod  <amacleod@cygnus.com>
 
 	* elf64-sparc.c (sparc64_elf_relocate_section): Set relocation address

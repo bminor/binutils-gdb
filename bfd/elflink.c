@@ -41,9 +41,17 @@ _bfd_elf_create_got_section (abfd, info)
 
   switch (bed->s->arch_size)
     {
-    case 32: ptralign = 2; break;
-    case 64: ptralign = 3; break;
-    default: abort();
+    case 32:
+      ptralign = 2;
+      break;
+
+    case 64:
+      ptralign = 3;
+      break;
+
+    default:
+      bfd_set_error (bfd_error_bad_value);
+      return false;
     }
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
@@ -104,9 +112,17 @@ _bfd_elf_create_dynamic_sections (abfd, info)
 
   switch (bed->s->arch_size)
     {
-    case 32: ptralign = 2; break;
-    case 64: ptralign = 3; break;
-    default: abort();
+    case 32:
+      ptralign = 2;
+      break;
+
+    case 64:
+      ptralign = 3;
+      break;
+
+    default:
+      bfd_set_error (bfd_error_bad_value);
+      return false;
     }
 
   /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
