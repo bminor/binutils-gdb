@@ -118,14 +118,19 @@ DEFUN(tr_reallochook, (ptr, size), PTR ptr AND size_t size)
   return hdr;
 }
 
+/* We enable tracing if either the environment variable MALLOC_TRACE
+   is set, or if the variable mallwatch has been patched to an address
+   that the debugging user wants us to stop on.  When patching mallwatch,
+   don't forget to set a breakpoint on tr_break!  */
+
 void
 mtrace()
 {
   char *mallfile;
 
   mallfile = getenv (mallenv);
-  if (mallfile) {
-    mallstream = fopen (mallfile, "w");
+  if (mallfile || mallwatch) {
+    mallstream = fopen (mallfile? mallfile: "/dev/null", "w");
     if (mallstream) {
       /* Be sure it doesn't malloc its buffer! */
       setbuf (mallstream, mallbuf);

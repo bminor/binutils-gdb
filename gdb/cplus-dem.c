@@ -105,7 +105,7 @@ static char **typevec = 0;
 static int ntypes = 0;
 static int typevec_size = 0;
 
-const static struct {
+const static struct optable {
   const char *in;
   const char *out;
 } optable[] = {
@@ -150,7 +150,7 @@ const static struct {
 
 /* Beware: these aren't '\0' terminated. */
 
-typedef struct {
+typedef struct string {
   char *b;			/* pointer to start of string */
   char *p;			/* pointer after last character */
   char *e;			/* pointer after end of allocated space */

@@ -242,120 +242,120 @@ frame_find_saved_regs (fi, fsr)
    fsr->regs[FP_REGNUM] = fi->frame;
    fsr->regs[PC_REGNUM] = fi->frame + 4;
 #endif
- }
+}
 
- static int
- pushed_size (prev_words, v)
-      int prev_words;
-      struct value *v;
- {
-   switch (TYPE_CODE (VALUE_TYPE (v)))
-     {
-       case TYPE_CODE_VOID:		/* Void type (values zero length) */
- 
-         return 0;	/* That was easy! */
- 
-       case TYPE_CODE_PTR:		/* Pointer type */
-       case TYPE_CODE_ENUM:		/* Enumeration type */
-       case TYPE_CODE_INT:		/* Integer type */
-       case TYPE_CODE_REF:		/* C++ Reference types */
-       case TYPE_CODE_ARRAY:		/* Array type, lower bound zero */
- 
-         return 1;
- 
-       case TYPE_CODE_FLT:		/* Floating type */
- 
-         if (TYPE_LENGTH (VALUE_TYPE (v)) == 4)
-           return 1;
-         else
-           /* Assume that it must be a double.  */
-           if (prev_words & 1)		/* at an odd-word boundary */
-             return 3;			/* round to 8-byte boundary */
-           else
-             return 2;
- 
-       case TYPE_CODE_STRUCT:		/* C struct or Pascal record */
-       case TYPE_CODE_UNION:		/* C union or Pascal variant part */
- 
-         return (((TYPE_LENGTH (VALUE_TYPE (v)) + 3) / 4) * 4);
- 
-       case TYPE_CODE_FUNC:		/* Function type */
-       case TYPE_CODE_SET:		/* Pascal sets */
-       case TYPE_CODE_RANGE:		/* Range (integers within bounds) */
-       case TYPE_CODE_PASCAL_ARRAY:	/* Array with explicit type of index */
-       case TYPE_CODE_MEMBER:		/* Member type */
-       case TYPE_CODE_METHOD:		/* Method type */
-         /* Don't know how to pass these yet.  */
- 
-       case TYPE_CODE_UNDEF:		/* Not used; catches errors */
-       default:
-         abort ();
-     }
- }
- 
- static void
- store_parm_word (address, val)
-      CORE_ADDR address;
-      int val;
- {
-   write_memory (address, &val, 4);
- }
- 
- static int
- store_parm (prev_words, left_parm_addr, v)
-      unsigned int prev_words;
-      CORE_ADDR left_parm_addr;
-      struct value *v;
- {
-   CORE_ADDR start = left_parm_addr + (prev_words * 4);
-   int *val_addr = (int *)VALUE_CONTENTS(v);
- 
-   switch (TYPE_CODE (VALUE_TYPE (v)))
-     {
-       case TYPE_CODE_VOID:		/* Void type (values zero length) */
- 
-         return 0;
- 
-       case TYPE_CODE_PTR:		/* Pointer type */
-       case TYPE_CODE_ENUM:		/* Enumeration type */
-       case TYPE_CODE_INT:		/* Integer type */
-       case TYPE_CODE_ARRAY:		/* Array type, lower bound zero */
-       case TYPE_CODE_REF:		/* C++ Reference types */
- 
-         store_parm_word (start, *val_addr);
-         return 1;
- 
-       case TYPE_CODE_FLT:		/* Floating type */
- 
-         if (TYPE_LENGTH (VALUE_TYPE (v)) == 4)
-           {
-             store_parm_word (start, *val_addr);
-             return 1;
-           }
-         else
-           {
-             store_parm_word (start + ((prev_words & 1) * 4), val_addr[0]);
-             store_parm_word (start + ((prev_words & 1) * 4) + 4, val_addr[1]);
-             return 2 + (prev_words & 1);
-           }
- 
-       case TYPE_CODE_STRUCT:		/* C struct or Pascal record */
-       case TYPE_CODE_UNION:		/* C union or Pascal variant part */
- 
-         {
-           unsigned int words = (((TYPE_LENGTH (VALUE_TYPE (v)) + 3) / 4) * 4);
-           unsigned int word;
- 
-           for (word = 0; word < words; word++)
-             store_parm_word (start + (word * 4), val_addr[word]);
-           return words;
-         }
- 
-       default:
-         abort ();
-     }
- }
- 
+static int
+pushed_size (prev_words, v)
+     int prev_words;
+     struct value *v;
+{
+  switch (TYPE_CODE (VALUE_TYPE (v)))
+    {
+      case TYPE_CODE_VOID:		/* Void type (values zero length) */
+
+	return 0;	/* That was easy! */
+
+      case TYPE_CODE_PTR:		/* Pointer type */
+      case TYPE_CODE_ENUM:		/* Enumeration type */
+      case TYPE_CODE_INT:		/* Integer type */
+      case TYPE_CODE_REF:		/* C++ Reference types */
+      case TYPE_CODE_ARRAY:		/* Array type, lower bound zero */
+
+	return 1;
+
+      case TYPE_CODE_FLT:		/* Floating type */
+
+	if (TYPE_LENGTH (VALUE_TYPE (v)) == 4)
+	  return 1;
+	else
+	  /* Assume that it must be a double.  */
+	  if (prev_words & 1)		/* at an odd-word boundary */
+	    return 3;			/* round to 8-byte boundary */
+	  else
+	    return 2;
+
+      case TYPE_CODE_STRUCT:		/* C struct or Pascal record */
+      case TYPE_CODE_UNION:		/* C union or Pascal variant part */
+
+	return (((TYPE_LENGTH (VALUE_TYPE (v)) + 3) / 4) * 4);
+
+      case TYPE_CODE_FUNC:		/* Function type */
+      case TYPE_CODE_SET:		/* Pascal sets */
+      case TYPE_CODE_RANGE:		/* Range (integers within bounds) */
+      case TYPE_CODE_PASCAL_ARRAY:	/* Array with explicit type of index */
+      case TYPE_CODE_MEMBER:		/* Member type */
+      case TYPE_CODE_METHOD:		/* Method type */
+	/* Don't know how to pass these yet.  */
+
+      case TYPE_CODE_UNDEF:		/* Not used; catches errors */
+      default:
+	abort ();
+    }
+}
+
+static void
+store_parm_word (address, val)
+     CORE_ADDR address;
+     int val;
+{
+  write_memory (address, &val, 4);
+}
+
+static int
+store_parm (prev_words, left_parm_addr, v)
+     unsigned int prev_words;
+     CORE_ADDR left_parm_addr;
+     struct value *v;
+{
+  CORE_ADDR start = left_parm_addr + (prev_words * 4);
+  int *val_addr = (int *)VALUE_CONTENTS(v);
+
+  switch (TYPE_CODE (VALUE_TYPE (v)))
+    {
+      case TYPE_CODE_VOID:		/* Void type (values zero length) */
+
+	return 0;
+
+      case TYPE_CODE_PTR:		/* Pointer type */
+      case TYPE_CODE_ENUM:		/* Enumeration type */
+      case TYPE_CODE_INT:		/* Integer type */
+      case TYPE_CODE_ARRAY:		/* Array type, lower bound zero */
+      case TYPE_CODE_REF:		/* C++ Reference types */
+
+	store_parm_word (start, *val_addr);
+	return 1;
+
+      case TYPE_CODE_FLT:		/* Floating type */
+
+	if (TYPE_LENGTH (VALUE_TYPE (v)) == 4)
+	  {
+	    store_parm_word (start, *val_addr);
+	    return 1;
+	  }
+	else
+	  {
+	    store_parm_word (start + ((prev_words & 1) * 4), val_addr[0]);
+	    store_parm_word (start + ((prev_words & 1) * 4) + 4, val_addr[1]);
+	    return 2 + (prev_words & 1);
+	  }
+
+      case TYPE_CODE_STRUCT:		/* C struct or Pascal record */
+      case TYPE_CODE_UNION:		/* C union or Pascal variant part */
+
+	{
+	  unsigned int words = (((TYPE_LENGTH (VALUE_TYPE (v)) + 3) / 4) * 4);
+	  unsigned int word;
+
+	  for (word = 0; word < words; word++)
+	    store_parm_word (start + (word * 4), val_addr[word]);
+	  return words;
+	}
+
+      default:
+	abort ();
+    }
+}
+
  /* This routine sets up all of the parameter values needed to make a pseudo
     call.  The name "push_parameters" is a misnomer on some archs,
     because (on the m88k) most parameters generally end up being passed in

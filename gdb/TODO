@@ -24,7 +24,8 @@ Speed up single stepping by not inserting and removing breakpoints
 each time the inferior starts and stops.
 
 Speed up watchpoints by not single-stepping them, but do something
-faster like single-line execution.
+faster like single-line execution.  Speed them up tremendously on
+machines that have watchpoint registers.
 
 Update gdb.texinfo to include doc on the directory structure and 
 the various tricks of building gdb.
@@ -32,8 +33,6 @@ the various tricks of building gdb.
 Do a tutorial in gdb.texinfo on how to do simple things in gdb.
 E.g. how to set a breakpoint that just prints something and continues.
 How to break on aborts.  Etc.
-
-Do a "new features" section for release 4.
 
 Provide "voodoo" debugging of core files.  This creates a zombie
 process as a child of the debugger, and loads it up with the data,
@@ -156,8 +155,6 @@ help completion, help history should work.
 Symbol completion doesn't handle e.g. W::f.  (symtab.c,
 make_symbol_completion_list).
 
-AMD version: ^C should do ^Ak to stop ebmon.
-
 Check that we can handle stack trace through varargs AND alloca in same
 function, on 29K.
 
@@ -253,8 +250,6 @@ Breakpoints should not be inserted and deleted all the time.  Only the
 one(s) there should be removed when we have to step over one.  Support
 breakpoints that don't have to be removed to step over them.
 
-Stop reading stop_registers!
-
 Generalize and Standardize the RPC interface to a target program,
 improve it beyond the "ptrace" interface, and see if it can become a standard
 for remote debugging.  Is WRS interested in donating their target-end
@@ -273,21 +268,12 @@ When quitting with a running program, if a core file was previously
 examined, you get "Couldn't read float regs from core file"...if 
 indeed it can't.  generic_mourn_inferior...
 
-...
-
 Check signal argument to remote proceed's and error if set.
-
-Handle floating point registers in core files under BFD.  Currently
-they are punted.
 
 Sort help and info output.
 
 Re-organize help categories into things that tend to fit on a screen
 and hang together.
-
-When trying to print source lines but you can't find the file,
-print the file name and line number, and leave it selected anyway
-so "i source" will show it.
 
 renote-nindy.c handles interrupts poorly; it error()s out of badly
 chosen places, e.g. leaving current_frame zero, which causes core dumps
@@ -327,6 +313,34 @@ ptype &malloc     ==> "char *(*)()"
 call printf ("%x\n", malloc)   ==> wierd value, should be same as
 call printf ("%x\n", &malloc)  ==> correct value
 
-Fix symbol reading in the presence of interrupts.  It currently leaves a
-cleanup to blow away the entire symbol table when a QUIT occurs.
+Fix dbxread.c symbol reading in the presence of interrupts.  It currently
+leaves a cleanup to blow away the entire symbol table when a QUIT occurs.
+
+Mipsread.c reads include files depth-first, because the dependencies
+in the psymtabs are way too inclusive (it seems to me).  Figure out what
+really depends on what, to avoid recursing 20 or 30 times while reading
+real symtabs.
+
+value_add() should be subtracting the lower bound of arrays, if known,
+and possibly checking against the upper bound for error reporting.
+
+mipsread.c symbol table allocation and deallocation should be checked.
+My suspicion is that it's full of memory leaks.
+
+SunOS should have a target_lookup_symbol() for common'd things allocated
+by the shared library linker ld.so.
+
+When listing source lines, check for a preceding \n, to verify that
+the file hasn't changed out from under us.
+
+When listing source lines, eat leading whitespace corresponding to the
+line-number prefix we print.  This avoids long lines wrapping.
+
+mipsread.c needs to check for old symtabs and psymtabs for the same
+files, the way it happens for dbxread.c and coffread.c, for VxWorks
+incremental symbol table reloading.
+
+When attached to a non-child process, ^C or other signals are not
+propagated to the child.  Do this in the GDB signal handler, using 
+target_kill().  AMD version: ^C should do ^Ak to stop ebmon.
 
