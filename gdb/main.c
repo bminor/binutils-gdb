@@ -1,5 +1,5 @@
 /* Top level `main' program for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -2186,7 +2186,7 @@ GDB %s (%s", version, host_canonical);
 
   fprintf_filtered (stream, "), ");
   wrap_here("");
-  fprintf_filtered (stream, "Copyright 1993 Free Software Foundation, Inc.");
+  fprintf_filtered (stream, "Copyright 1994 Free Software Foundation, Inc.");
 }
 
 /* ARGSUSED */
@@ -2475,7 +2475,7 @@ show_commands (args, from_tty)
      than the number of the last command).  Relative to history_base.  */
   int hist_len;
 
-  extern struct _hist_entry *history_get PARAMS ((int));
+  extern HIST_ENTRY *history_get PARAMS ((int));
   extern int history_base;
 
   /* Print out some of the commands from the command history.  */

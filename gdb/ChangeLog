@@ -1,3 +1,9 @@
+Sat Jan 15 18:27:34 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* main.c (show_commands):  Make return type of extern
+	history_get be HIST_ENTRY, rather than struct _hist_entry.
+	(The latter loses with the upcoming merged readline.)
+
 Sat Jan 15 10:20:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* minsyms.c (prim_record_minimal_symbol_and_info): Make tempstring
