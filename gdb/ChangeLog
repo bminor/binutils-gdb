@@ -1,3 +1,14 @@
+2003-12-04  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR c++/1465.
+	Fix for PR c++/1377.
+	* cp-support.h (cp_lookup_rtti_type): New function.
+	* cp-support.c (cp_lookup_rtti_type): New function.
+	* gnu-v2-abi.c: Update copyright years.
+	(gnuv2_rtti_type): Call cp_lookup_rtti_type.
+	* gnu-v3-abi.c: Update copyright years.
+	(gnuv3_rtti_type): Call cp_lookup_rtti_type.
+
 2003-12-04  J. Brobecker  <brobecker@gnat.com>
 
 	* stabsread.c (read_type): Save a reference to types that are defined

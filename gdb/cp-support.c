@@ -33,6 +33,7 @@
 #include "symtab.h"
 #include "block.h"
 #include "complaints.h"
+#include "gdbtypes.h"
 
 /* Functions related to demangled name parsing.  */
 
@@ -582,6 +583,48 @@ make_symbol_overload_list (struct symbol *fsym)
   return (sym_return_val);
 }
 
+/* Lookup the rtti type for a class name. */
+
+struct type *
+cp_lookup_rtti_type (const char *name, struct block *block)
+{
+  struct symbol * rtti_sym;
+  struct type * rtti_type;
+
+  rtti_sym = lookup_symbol (name, block, STRUCT_DOMAIN, NULL, NULL);
+
+  if (rtti_sym == NULL)
+    {
+      warning ("RTTI symbol not found for class '%s'", name);
+      return NULL;
+    }
+
+  if (SYMBOL_CLASS (rtti_sym) != LOC_TYPEDEF)
+    {
+      warning ("RTTI symbol for class '%s' is not a type", name);
+      return NULL;
+    }
+
+  rtti_type = SYMBOL_TYPE (rtti_sym);
+
+  switch (TYPE_CODE (rtti_type))
+    {
+    case TYPE_CODE_CLASS:
+      break;
+    case TYPE_CODE_NAMESPACE:
+      /* chastain/2003-11-26: the symbol tables often contain fake
+	 symbols for namespaces with the same name as the struct.
+	 This warning is an indication of a bug in the lookup order
+	 or a bug in the way that the symbol tables are populated.  */
+      warning ("RTTI symbol for class '%s' is a namespace", name);
+      return NULL;
+    default:
+      warning ("RTTI symbol for class '%s' has bad type", name);
+      return NULL;
+    }
+
+  return rtti_type;
+}
 
 /* Don't allow just "maintenance cplus".  */
 

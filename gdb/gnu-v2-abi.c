@@ -1,6 +1,6 @@
 /* Abstraction of GNU v2 abi.
 
-   Copyright 2001, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 
@@ -30,6 +30,7 @@
 #include "value.h"
 #include "demangle.h"
 #include "cp-abi.h"
+#include "cp-support.h"
 
 #include <ctype.h>
 
@@ -259,9 +260,9 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   *(strchr(demangled_name,' '))=0;
 
   /* Lookup the type for the name */
-  rtti_type=lookup_typename(demangled_name, (struct block *)0,1);
-
-  if (rtti_type==NULL)
+  /* FIXME: chastain/2003-11-26: block=NULL is bogus.  See pr gdb/1465. */
+  rtti_type = cp_lookup_rtti_type (demangled_name, NULL);
+  if (rtti_type == NULL)
     return NULL;
 
   if (TYPE_N_BASECLASSES(rtti_type) > 1 &&  full && (*full) != 1)
