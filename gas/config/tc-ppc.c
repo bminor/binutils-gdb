@@ -1033,9 +1033,9 @@ md_begin ()
      text csects to precede the data csects.  These symbols will not
      be output.  */
   ppc_text_csects = symbol_make ("dummy\001");
-  ppc_text_csects->sy_tc.within = ppc_text_csects;
+  symbol_get_tc (ppc_text_csects)->within = ppc_text_csects;
   ppc_data_csects = symbol_make ("dummy\001");
-  ppc_data_csects->sy_tc.within = ppc_data_csects;
+  symbol_get_tc (ppc_data_csects)->within = ppc_data_csects;
 #endif
 
 #ifdef TE_PE
@@ -2327,7 +2327,7 @@ ppc_comm (lcomm)
 	}
       else
 	{
-	  lcomm_sym->sy_tc.output = 1;
+	  symbol_get_tc (lcomm_sym)->output = 1;
 	  def_sym = lcomm_sym;
 	  def_size = 0;
 	}
@@ -2335,30 +2335,30 @@ ppc_comm (lcomm)
       subseg_set (bss_section, 1);
       frag_align (align, 0, 0);
   
-      def_sym->sy_frag = frag_now;
+      symbol_set_frag (def_sym, frag_now);
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, def_sym,
 			def_size, (char *) NULL);
       *pfrag = 0;
       S_SET_SEGMENT (def_sym, bss_section);
-      def_sym->sy_tc.align = align;
+      symbol_get_tc (def_sym)->align = align;
     }
   else if (lcomm)
     {
       /* Align the size of lcomm_sym.  */
-      lcomm_sym->sy_frag->fr_offset =
-	((lcomm_sym->sy_frag->fr_offset + (1 << align) - 1)
+      symbol_get_frag (lcomm_sym)->fr_offset =
+	((symbol_get_frag (lcomm_sym)->fr_offset + (1 << align) - 1)
 	 &~ ((1 << align) - 1));
-      if (align > lcomm_sym->sy_tc.align)
-	lcomm_sym->sy_tc.align = align;
+      if (align > symbol_get_tc (lcomm_sym)->align)
+	symbol_get_tc (lcomm_sym)->align = align;
     }
 
   if (lcomm)
     {
       /* Make sym an offset from lcomm_sym.  */
       S_SET_SEGMENT (sym, bss_section);
-      sym->sy_frag = lcomm_sym->sy_frag;
-      S_SET_VALUE (sym, lcomm_sym->sy_frag->fr_offset);
-      lcomm_sym->sy_frag->fr_offset += size;
+      symbol_set_frag (sym, symbol_get_frag (lcomm_sym));
+      S_SET_VALUE (sym, symbol_get_frag (lcomm_sym)->fr_offset);
+      symbol_get_frag (lcomm_sym)->fr_offset += size;
     }
 
   subseg_set (current_seg, current_subseg);
@@ -2390,7 +2390,7 @@ ppc_csect (ignore)
   if (S_GET_NAME (sym)[0] == '\0')
     {
       /* An unnamed csect is assumed to be [PR].  */
-      sym->sy_tc.class = XMC_PR;
+      symbol_get_tc (sym)->class = XMC_PR;
     }
 
   ppc_change_csect (sym);
@@ -2398,7 +2398,7 @@ ppc_csect (ignore)
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
-      sym->sy_tc.align = get_absolute_expression ();
+      symbol_get_tc (sym)->align = get_absolute_expression ();
     }
 
   demand_empty_rest_of_line ();
@@ -2411,7 +2411,7 @@ ppc_change_csect (sym)
      symbolS *sym;
 {
   if (S_IS_DEFINED (sym))
-    subseg_set (S_GET_SEGMENT (sym), sym->sy_tc.subseg);
+    subseg_set (S_GET_SEGMENT (sym), symbol_get_tc (sym)->subseg);
   else
     {
       symbolS **list_ptr;
@@ -2423,7 +2423,7 @@ ppc_change_csect (sym)
 	 figure out whether it should go in the text section or the
 	 data section.  */
       after_toc = 0;
-      switch (sym->sy_tc.class)
+      switch (symbol_get_tc (sym)->class)
 	{
 	case XMC_PR:
 	case XMC_RO:
@@ -2434,7 +2434,7 @@ ppc_change_csect (sym)
 	case XMC_TI:
 	case XMC_TB:
 	  S_SET_SEGMENT (sym, text_section);
-	  sym->sy_tc.subseg = ppc_text_subsegment;
+	  symbol_get_tc (sym)->subseg = ppc_text_subsegment;
 	  ++ppc_text_subsegment;
 	  list_ptr = &ppc_text_csects;
 	  break;
@@ -2446,10 +2446,11 @@ ppc_change_csect (sym)
 	case XMC_BS:
 	case XMC_UC:
 	  if (ppc_toc_csect != NULL
-	      && ppc_toc_csect->sy_tc.subseg + 1 == ppc_data_subsegment)
+	      && (symbol_get_tc (ppc_toc_csect)->subseg + 1
+		  == ppc_data_subsegment))
 	    after_toc = 1;
 	  S_SET_SEGMENT (sym, data_section);
-	  sym->sy_tc.subseg = ppc_data_subsegment;
+	  symbol_get_tc (sym)->subseg = ppc_data_subsegment;
 	  ++ppc_data_subsegment;
 	  list_ptr = &ppc_data_csects;
 	  break;
@@ -2463,28 +2464,30 @@ ppc_change_csect (sym)
       hold_chunksize = chunksize;
       chunksize = 64;
 
-      subseg_new (segment_name (S_GET_SEGMENT (sym)), sym->sy_tc.subseg);
+      subseg_new (segment_name (S_GET_SEGMENT (sym)),
+		  symbol_get_tc (sym)->subseg);
 
       chunksize = hold_chunksize;
 
       if (after_toc)
 	ppc_after_toc_frag = frag_now;
 
-      sym->sy_frag = frag_now;
+      symbol_set_frag (sym, frag_now);
       S_SET_VALUE (sym, (valueT) frag_now_fix ());
 
-      sym->sy_tc.align = 2;
-      sym->sy_tc.output = 1;
-      sym->sy_tc.within = sym;
+      symbol_get_tc (sym)->align = 2;
+      symbol_get_tc (sym)->output = 1;
+      symbol_get_tc (sym)->within = sym;
 	  
       for (list = *list_ptr;
-	   list->sy_tc.next != (symbolS *) NULL;
-	   list = list->sy_tc.next)
+	   symbol_get_tc (list)->next != (symbolS *) NULL;
+	   list = symbol_get_tc (list)->next)
 	;
-      list->sy_tc.next = sym;
+      symbol_get_tc (list)->next = sym;
 	  
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-      symbol_append (sym, list->sy_tc.within, &symbol_rootP, &symbol_lastP);
+      symbol_append (sym, symbol_get_tc (list)->within, &symbol_rootP,
+		     &symbol_lastP);
     }
 
   ppc_current_csect = sym;
@@ -2588,7 +2591,7 @@ ppc_lglobl (ignore)
 
   *input_line_pointer = endc;
 
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   demand_empty_rest_of_line ();
 }
@@ -2620,7 +2623,7 @@ ppc_rename (ignore)
     }
   ++input_line_pointer;
 
-  sym->sy_tc.real_name = demand_copy_C_string (&len);
+  symbol_get_tc (sym)->real_name = demand_copy_C_string (&len);
 
   demand_empty_rest_of_line ();
 }
@@ -2654,7 +2657,7 @@ ppc_stabx (ignore)
   sym = symbol_make (name);
   ppc_stab_symbol = false;
 
-  sym->sy_tc.real_name = name;
+  symbol_get_tc (sym)->real_name = name;
 
   (void) expression (&exp);
 
@@ -2668,17 +2671,17 @@ ppc_stabx (ignore)
       /* Fall through.  */
     case O_constant:
       S_SET_VALUE (sym, (valueT) exp.X_add_number);
-      sym->sy_frag = &zero_address_frag;
+      symbol_set_frag (sym, &zero_address_frag);
       break;
 
     case O_symbol:
       if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section)
-	sym->sy_value = exp;
+	symbol_set_value_expression (sym, &exp);
       else
 	{
 	  S_SET_VALUE (sym,
 		       exp.X_add_number + S_GET_VALUE (exp.X_add_symbol));
-	  sym->sy_frag = exp.X_add_symbol->sy_frag;
+	  symbol_set_frag (sym, symbol_get_frag (exp.X_add_symbol));
 	}
       break;
 
@@ -2686,12 +2689,12 @@ ppc_stabx (ignore)
       /* The value is some complex expression.  This will probably
          fail at some later point, but this is probably the right
          thing to do here.  */
-      sym->sy_value = exp;
+      symbol_set_value_expression (sym, &exp);
       break;
     }
 
   S_SET_SEGMENT (sym, ppc_coff_debug_section);
-  sym->bsym->flags |= BSF_DEBUGGING;
+  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
 
   if (*input_line_pointer != ',')
     {
@@ -2711,10 +2714,10 @@ ppc_stabx (ignore)
 
   S_SET_DATA_TYPE (sym, get_absolute_expression ());
 
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   if (S_GET_STORAGE_CLASS (sym) == C_STSYM)
-    sym->sy_tc.within = ppc_current_block;
+    symbol_get_tc (sym)->within = ppc_current_block;
 
   if (exp.X_op != O_symbol
       || ! S_IS_EXTERNAL (exp.X_add_symbol)
@@ -2724,8 +2727,8 @@ ppc_stabx (ignore)
     {
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_append (sym, exp.X_add_symbol, &symbol_rootP, &symbol_lastP);
-      if (ppc_current_csect->sy_tc.within == exp.X_add_symbol)
-	ppc_current_csect->sy_tc.within = sym;
+      if (symbol_get_tc (ppc_current_csect)->within == exp.X_add_symbol)
+	symbol_get_tc (ppc_current_csect)->within = sym;
     }
 
   demand_empty_rest_of_line ();
@@ -2780,15 +2783,19 @@ ppc_function (ignore)
 
   if (ext_sym != lab_sym)
     {
-      ext_sym->sy_value.X_op = O_symbol;
-      ext_sym->sy_value.X_add_symbol = lab_sym;
-      ext_sym->sy_value.X_op_symbol = NULL;
-      ext_sym->sy_value.X_add_number = 0;
+      expressionS exp;
+
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = lab_sym;
+      exp.X_op_symbol = NULL;
+      exp.X_add_number = 0;
+      exp.X_unsigned = 0;
+      symbol_set_value_expression (ext_sym, &exp);
     }
 
-  if (ext_sym->sy_tc.class == -1)
-    ext_sym->sy_tc.class = XMC_PR;
-  ext_sym->sy_tc.output = 1;
+  if (symbol_get_tc (ext_sym)->class == -1)
+    symbol_get_tc (ext_sym)->class = XMC_PR;
+  symbol_get_tc (ext_sym)->output = 1;
 
   if (*input_line_pointer == ',')
     {
@@ -2806,11 +2813,11 @@ ppc_function (ignore)
 	    {
 	      /* The fifth argument is the function size.  */
 	      ++input_line_pointer;
-	      ext_sym->sy_tc.size = symbol_new ("L0\001",
-						absolute_section,
-						(valueT) 0,
-						&zero_address_frag);
-	      pseudo_set (ext_sym->sy_tc.size);
+	      symbol_get_tc (ext_sym)->size = symbol_new ("L0\001",
+							  absolute_section,
+							  (valueT) 0,
+							  &zero_address_frag);
+	      pseudo_set (symbol_get_tc (ext_sym)->size);
 	    }
 	}
     }
@@ -2834,7 +2841,7 @@ ppc_bf (ignore)
 
   sym = symbol_make (".bf");
   S_SET_SEGMENT (sym, text_section);
-  sym->sy_frag = frag_now;
+  symbol_set_frag (sym, frag_now);
   S_SET_VALUE (sym, frag_now_fix ());
   S_SET_STORAGE_CLASS (sym, C_FCN);
 
@@ -2843,7 +2850,7 @@ ppc_bf (ignore)
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, coff_line_base);
 
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   ppc_frob_label (sym);
 
@@ -2862,12 +2869,12 @@ ppc_ef (ignore)
 
   sym = symbol_make (".ef");
   S_SET_SEGMENT (sym, text_section);
-  sym->sy_frag = frag_now;
+  symbol_set_frag (sym, frag_now);
   S_SET_VALUE (sym, frag_now_fix ());
   S_SET_STORAGE_CLASS (sym, C_FCN);
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, get_absolute_expression ());
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   ppc_frob_label (sym);
 
@@ -2901,10 +2908,10 @@ ppc_biei (ei)
      .text section.  */
   S_SET_SEGMENT (sym, text_section);
   S_SET_VALUE (sym, coff_n_line_nos);
-  sym->bsym->flags |= BSF_DEBUGGING;
+  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
 
   S_SET_STORAGE_CLASS (sym, ei ? C_EINCL : C_BINCL);
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
   
   for (look = last_biei ? last_biei : symbol_rootP;
        (look != (symbolS *) NULL
@@ -2949,10 +2956,10 @@ ppc_bs (ignore)
   sym = symbol_make (".bs");
   S_SET_SEGMENT (sym, now_seg);
   S_SET_STORAGE_CLASS (sym, C_BSTAT);
-  sym->bsym->flags |= BSF_DEBUGGING;
-  sym->sy_tc.output = 1;
+  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
+  symbol_get_tc (sym)->output = 1;
 
-  sym->sy_tc.within = csect;
+  symbol_get_tc (sym)->within = csect;
 
   ppc_frob_label (sym);
 
@@ -2975,8 +2982,8 @@ ppc_es (ignore)
   sym = symbol_make (".es");
   S_SET_SEGMENT (sym, now_seg);
   S_SET_STORAGE_CLASS (sym, C_ESTAT);
-  sym->bsym->flags |= BSF_DEBUGGING;
-  sym->sy_tc.output = 1;
+  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
+  symbol_get_tc (sym)->output = 1;
 
   ppc_frob_label (sym);
 
@@ -2996,14 +3003,14 @@ ppc_bb (ignore)
 
   sym = symbol_make (".bb");
   S_SET_SEGMENT (sym, text_section);
-  sym->sy_frag = frag_now;
+  symbol_set_frag (sym, frag_now);
   S_SET_VALUE (sym, frag_now_fix ());
   S_SET_STORAGE_CLASS (sym, C_BLOCK);
 
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, get_absolute_expression ());
 
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   SF_SET_PROCESS (sym);
 
@@ -3023,12 +3030,12 @@ ppc_eb (ignore)
 
   sym = symbol_make (".eb");
   S_SET_SEGMENT (sym, text_section);
-  sym->sy_frag = frag_now;
+  symbol_set_frag (sym, frag_now);
   S_SET_VALUE (sym, frag_now_fix ());
   S_SET_STORAGE_CLASS (sym, C_BLOCK);
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, get_absolute_expression ());
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   SF_SET_PROCESS (sym);
 
@@ -3051,10 +3058,10 @@ ppc_bc (ignore)
   name = demand_copy_C_string (&len);
   sym = symbol_make (name);
   S_SET_SEGMENT (sym, ppc_coff_debug_section);
-  sym->bsym->flags |= BSF_DEBUGGING;
+  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
   S_SET_STORAGE_CLASS (sym, C_BCOMM);
   S_SET_VALUE (sym, 0);
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   ppc_frob_label (sym);
 
@@ -3071,10 +3078,10 @@ ppc_ec (ignore)
 
   sym = symbol_make (".ec");
   S_SET_SEGMENT (sym, ppc_coff_debug_section);
-  sym->bsym->flags |= BSF_DEBUGGING;
+  symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
   S_SET_STORAGE_CLASS (sym, C_ECOMM);
   S_SET_VALUE (sym, 0);
-  sym->sy_tc.output = 1;
+  symbol_get_tc (sym)->output = 1;
 
   ppc_frob_label (sym);
 
@@ -3088,7 +3095,7 @@ ppc_toc (ignore)
      int ignore;
 {
   if (ppc_toc_csect != (symbolS *) NULL)
-    subseg_set (data_section, ppc_toc_csect->sy_tc.subseg);
+    subseg_set (data_section, symbol_get_tc (ppc_toc_csect)->subseg);
   else
     {
       subsegT subseg;
@@ -3102,23 +3109,24 @@ ppc_toc (ignore)
       ppc_toc_frag = frag_now;
 
       sym = symbol_find_or_make ("TOC[TC0]");
-      sym->sy_frag = frag_now;
+      symbol_set_frag (sym, frag_now);
       S_SET_SEGMENT (sym, data_section);
       S_SET_VALUE (sym, (valueT) frag_now_fix ());
-      sym->sy_tc.subseg = subseg;
-      sym->sy_tc.output = 1;
-      sym->sy_tc.within = sym;
+      symbol_get_tc (sym)->subseg = subseg;
+      symbol_get_tc (sym)->output = 1;
+      symbol_get_tc (sym)->within = sym;
 
       ppc_toc_csect = sym;
 	  
       for (list = ppc_data_csects;
-	   list->sy_tc.next != (symbolS *) NULL;
-	   list = list->sy_tc.next)
+	   symbol_get_tc (list)->next != (symbolS *) NULL;
+	   list = symbol_get_tc (list)->next)
 	;
-      list->sy_tc.next = sym;
+      symbol_get_tc (list)->next = sym;
 
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-      symbol_append (sym, list->sy_tc.within, &symbol_rootP, &symbol_lastP);
+      symbol_append (sym, symbol_get_tc (list)->within, &symbol_rootP,
+		     &symbol_lastP);
     }
 
   ppc_current_csect = ppc_toc_csect;
@@ -3210,8 +3218,8 @@ ppc_tc (ignore)
       {
 	symbolS *label;
 
-	label = ppc_current_csect->sy_tc.within;
-	if (label->sy_tc.class != XMC_TC0)
+	label = symbol_get_tc (ppc_current_csect)->within;
+	if (symbol_get_tc (label)->class != XMC_TC0)
 	  {
 	    as_bad (_(".tc with no label"));
 	    ignore_rest_of_line ();
@@ -3219,7 +3227,7 @@ ppc_tc (ignore)
 	  }
 
 	S_SET_SEGMENT (label, S_GET_SEGMENT (sym));
-	label->sy_frag = sym->sy_frag;
+	symbol_set_frag (label, symbol_get_frag (sym));
 	S_SET_VALUE (label, S_GET_VALUE (sym));
 
 	while (! is_end_of_line[(unsigned char) *input_line_pointer])
@@ -3229,10 +3237,10 @@ ppc_tc (ignore)
       }
 
     S_SET_SEGMENT (sym, now_seg);
-    sym->sy_frag = frag_now;
+    symbol_set_frag (sym, frag_now);
     S_SET_VALUE (sym, (valueT) frag_now_fix ());
-    sym->sy_tc.class = XMC_TC;
-    sym->sy_tc.output = 1;
+    symbol_get_tc (sym)->class = XMC_TC;
+    symbol_get_tc (sym)->output = 1;
 
     ppc_frob_label (sym);
   }
@@ -3912,16 +3920,18 @@ void
 ppc_symbol_new_hook (sym)
      symbolS *sym;
 {
+  struct ppc_tc_sy *tc;
   const char *s;
 
-  sym->sy_tc.next = NULL;
-  sym->sy_tc.output = 0;
-  sym->sy_tc.class = -1;
-  sym->sy_tc.real_name = NULL;
-  sym->sy_tc.subseg = 0;
-  sym->sy_tc.align = 0;
-  sym->sy_tc.size = NULL;
-  sym->sy_tc.within = NULL;
+  tc = symbol_get_tc (sym);
+  tc->next = NULL;
+  tc->output = 0;
+  tc->class = -1;
+  tc->real_name = NULL;
+  tc->subseg = 0;
+  tc->align = 0;
+  tc->size = NULL;
+  tc->within = NULL;
 
   if (ppc_stab_symbol)
     return;
@@ -3939,55 +3949,55 @@ ppc_symbol_new_hook (sym)
     {
     case 'B':
       if (strcmp (s, "BS]") == 0)
-	sym->sy_tc.class = XMC_BS;
+	tc->class = XMC_BS;
       break;
     case 'D':
       if (strcmp (s, "DB]") == 0)
-	sym->sy_tc.class = XMC_DB;
+	tc->class = XMC_DB;
       else if (strcmp (s, "DS]") == 0)
-	sym->sy_tc.class = XMC_DS;
+	tc->class = XMC_DS;
       break;
     case 'G':
       if (strcmp (s, "GL]") == 0)
-	sym->sy_tc.class = XMC_GL;
+	tc->class = XMC_GL;
       break;
     case 'P':
       if (strcmp (s, "PR]") == 0)
-	sym->sy_tc.class = XMC_PR;
+	tc->class = XMC_PR;
       break;
     case 'R':
       if (strcmp (s, "RO]") == 0)
-	sym->sy_tc.class = XMC_RO;
+	tc->class = XMC_RO;
       else if (strcmp (s, "RW]") == 0)
-	sym->sy_tc.class = XMC_RW;
+	tc->class = XMC_RW;
       break;
     case 'S':
       if (strcmp (s, "SV]") == 0)
-	sym->sy_tc.class = XMC_SV;
+	tc->class = XMC_SV;
       break;
     case 'T':
       if (strcmp (s, "TC]") == 0)
-	sym->sy_tc.class = XMC_TC;
+	tc->class = XMC_TC;
       else if (strcmp (s, "TI]") == 0)
-	sym->sy_tc.class = XMC_TI;
+	tc->class = XMC_TI;
       else if (strcmp (s, "TB]") == 0)
-	sym->sy_tc.class = XMC_TB;
+	tc->class = XMC_TB;
       else if (strcmp (s, "TC0]") == 0 || strcmp (s, "T0]") == 0)
-	sym->sy_tc.class = XMC_TC0;
+	tc->class = XMC_TC0;
       break;
     case 'U':
       if (strcmp (s, "UA]") == 0)
-	sym->sy_tc.class = XMC_UA;
+	tc->class = XMC_UA;
       else if (strcmp (s, "UC]") == 0)
-	sym->sy_tc.class = XMC_UC;
+	tc->class = XMC_UC;
       break;
     case 'X':
       if (strcmp (s, "XO]") == 0)
-	sym->sy_tc.class = XMC_XO;
+	tc->class = XMC_XO;
       break;
     }
 
-  if (sym->sy_tc.class == -1)
+  if (tc->class == -1)
     as_bad (_("Unrecognized symbol suffix"));
 }
 
@@ -4001,13 +4011,13 @@ ppc_frob_label (sym)
 {
   if (ppc_current_csect != (symbolS *) NULL)
     {
-      if (sym->sy_tc.class == -1)
-	sym->sy_tc.class = ppc_current_csect->sy_tc.class;
+      if (symbol_get_tc (sym)->class == -1)
+	symbol_get_tc (sym)->class = symbol_get_tc (ppc_current_csect)->class;
 
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-      symbol_append (sym, ppc_current_csect->sy_tc.within, &symbol_rootP,
-		     &symbol_lastP);
-      ppc_current_csect->sy_tc.within = sym;
+      symbol_append (sym, symbol_get_tc (ppc_current_csect)->within,
+		     &symbol_rootP, &symbol_lastP);
+      symbol_get_tc (ppc_current_csect)->within = sym;
     }
 }
 
@@ -4031,15 +4041,15 @@ ppc_frob_symbol (sym)
 
   /* Discard symbols that should not be included in the output symbol
      table.  */
-  if (! sym->sy_used_in_reloc
-      && ((sym->bsym->flags & BSF_SECTION_SYM) != 0
+  if (! symbol_used_in_reloc_p (sym)
+      && ((symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM) != 0
 	  || (! S_IS_EXTERNAL (sym)
-	      && ! sym->sy_tc.output
+	      && ! symbol_get_tc (sym)->output
 	      && S_GET_STORAGE_CLASS (sym) != C_FILE)))
     return 1;
 
-  if (sym->sy_tc.real_name != (char *) NULL)
-    S_SET_NAME (sym, sym->sy_tc.real_name);
+  if (symbol_get_tc (sym)->real_name != (char *) NULL)
+    S_SET_NAME (sym, symbol_get_tc (sym)->real_name);
   else
     {
       const char *name;
@@ -4072,10 +4082,11 @@ ppc_frob_symbol (sym)
       if (ppc_last_function != (symbolS *) NULL)
 	as_bad (_("two .function pseudo-ops with no intervening .ef"));
       ppc_last_function = sym;
-      if (sym->sy_tc.size != (symbolS *) NULL)
+      if (symbol_get_tc (sym)->size != (symbolS *) NULL)
 	{
-	  resolve_symbol_value (sym->sy_tc.size, 1);
-	  SA_SET_SYM_FSIZE (sym, (long) S_GET_VALUE (sym->sy_tc.size));
+	  resolve_symbol_value (symbol_get_tc (sym)->size, 1);
+	  SA_SET_SYM_FSIZE (sym,
+			    (long) S_GET_VALUE (symbol_get_tc (sym)->size));
 	}
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_FCN
@@ -4095,7 +4106,7 @@ ppc_frob_symbol (sym)
     }
 
   if (! S_IS_EXTERNAL (sym)
-      && (sym->bsym->flags & BSF_SECTION_SYM) == 0
+      && (symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM) == 0
       && S_GET_STORAGE_CLASS (sym) != C_FILE
       && S_GET_STORAGE_CLASS (sym) != C_FCN
       && S_GET_STORAGE_CLASS (sym) != C_BLOCK
@@ -4115,39 +4126,39 @@ ppc_frob_symbol (sym)
       /* Create a csect aux.  */
       i = S_GET_NUMBER_AUXILIARY (sym);
       S_SET_NUMBER_AUXILIARY (sym, i + 1);
-      a = &coffsymbol (sym->bsym)->native[i + 1].u.auxent;
-      if (sym->sy_tc.class == XMC_TC0)
+      a = &coffsymbol (symbol_get_bfdsym (sym))->native[i + 1].u.auxent;
+      if (symbol_get_tc (sym)->class == XMC_TC0)
 	{
 	  /* This is the TOC table.  */
 	  know (strcmp (S_GET_NAME (sym), "TOC") == 0);
 	  a->x_csect.x_scnlen.l = 0;
 	  a->x_csect.x_smtyp = (2 << 3) | XTY_SD;
 	}
-      else if (sym->sy_tc.subseg != 0)
+      else if (symbol_get_tc (sym)->subseg != 0)
 	{
 	  /* This is a csect symbol.  x_scnlen is the size of the
 	     csect.  */
-	  if (sym->sy_tc.next == (symbolS *) NULL)
+	  if (symbol_get_tc (sym)->next == (symbolS *) NULL)
 	    a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
 						       S_GET_SEGMENT (sym))
 				     - S_GET_VALUE (sym));
 	  else
 	    {
-	      resolve_symbol_value (sym->sy_tc.next, 1);
-	      a->x_csect.x_scnlen.l = (S_GET_VALUE (sym->sy_tc.next)
+	      resolve_symbol_value (symbol_get_tc (sym)->next, 1);
+	      a->x_csect.x_scnlen.l = (S_GET_VALUE (symbol_get_tc (sym)->next)
 				       - S_GET_VALUE (sym));
 	    }
-	  a->x_csect.x_smtyp = (sym->sy_tc.align << 3) | XTY_SD;
+	  a->x_csect.x_smtyp = (symbol_get_tc (sym)->align << 3) | XTY_SD;
 	}
       else if (S_GET_SEGMENT (sym) == bss_section)
 	{
 	  /* This is a common symbol.  */
-	  a->x_csect.x_scnlen.l = sym->sy_frag->fr_offset;
-	  a->x_csect.x_smtyp = (sym->sy_tc.align << 3) | XTY_CM;
+	  a->x_csect.x_scnlen.l = symbol_get_frag (sym)->fr_offset;
+	  a->x_csect.x_smtyp = (symbol_get_tc (sym)->align << 3) | XTY_CM;
 	  if (S_IS_EXTERNAL (sym))
-	    sym->sy_tc.class = XMC_RW;
+	    symbol_get_tc (sym)->class = XMC_RW;
 	  else
-	    sym->sy_tc.class = XMC_BS;
+	    symbol_get_tc (sym)->class = XMC_BS;
 	}
       else if (S_GET_SEGMENT (sym) == absolute_section)
 	{
@@ -4155,8 +4166,8 @@ ppc_frob_symbol (sym)
              ppc_adjust_symtab.  */
 	  ppc_saw_abs = true;
 	  a->x_csect.x_smtyp = XTY_LD;
-	  if (sym->sy_tc.class == -1)
-	    sym->sy_tc.class = XMC_XO;
+	  if (symbol_get_tc (sym)->class == -1)
+	    symbol_get_tc (sym)->class = XMC_XO;
 	}
       else if (! S_IS_DEFINED (sym))
 	{
@@ -4164,17 +4175,17 @@ ppc_frob_symbol (sym)
 	  a->x_csect.x_scnlen.l = 0;
 	  a->x_csect.x_smtyp = XTY_ER;
 	}
-      else if (sym->sy_tc.class == XMC_TC)
+      else if (symbol_get_tc (sym)->class == XMC_TC)
 	{
 	  symbolS *next;
 
 	  /* This is a TOC definition.  x_scnlen is the size of the
 	     TOC entry.  */
 	  next = symbol_next (sym);
-	  while (next->sy_tc.class == XMC_TC0)
+	  while (symbol_get_tc (next)->class == XMC_TC0)
 	    next = symbol_next (next);
 	  if (next == (symbolS *) NULL
-	      || next->sy_tc.class != XMC_TC)
+	      || symbol_get_tc (next)->class != XMC_TC)
 	    {
 	      if (ppc_after_toc_frag == (fragS *) NULL)
 		a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
@@ -4206,7 +4217,7 @@ ppc_frob_symbol (sym)
 	    abort ();
 
 	  /* Skip the initial dummy symbol.  */
-	  csect = csect->sy_tc.next;
+	  csect = symbol_get_tc (csect)->next;
 
 	  if (csect == (symbolS *) NULL)
 	    {
@@ -4215,31 +4226,34 @@ ppc_frob_symbol (sym)
 	    }
 	  else
 	    {
-	      while (csect->sy_tc.next != (symbolS *) NULL)
+	      while (symbol_get_tc (csect)->next != (symbolS *) NULL)
 		{
-		  resolve_symbol_value (csect->sy_tc.next, 1);
-		  if (S_GET_VALUE (csect->sy_tc.next) > S_GET_VALUE (sym))
+		  resolve_symbol_value (symbol_get_tc (csect)->next, 1);
+		  if (S_GET_VALUE (symbol_get_tc (csect)->next)
+		      > S_GET_VALUE (sym))
 		    break;
-		  csect = csect->sy_tc.next;
+		  csect = symbol_get_tc (csect)->next;
 		}
 
-	      a->x_csect.x_scnlen.p = coffsymbol (csect->bsym)->native;
-	      coffsymbol (sym->bsym)->native[i + 1].fix_scnlen = 1;
+	      a->x_csect.x_scnlen.p =
+		coffsymbol (symbol_get_bfdsym (csect))->native;
+	      coffsymbol (symbol_get_bfdsym (sym))->native[i + 1].fix_scnlen =
+		1;
 	    }
 	  a->x_csect.x_smtyp = XTY_LD;
 	}
 	
       a->x_csect.x_parmhash = 0;
       a->x_csect.x_snhash = 0;
-      if (sym->sy_tc.class == -1)
+      if (symbol_get_tc (sym)->class == -1)
 	a->x_csect.x_smclas = XMC_PR;
       else
-	a->x_csect.x_smclas = sym->sy_tc.class;
+	a->x_csect.x_smclas = symbol_get_tc (sym)->class;
       a->x_csect.x_stab = 0;
       a->x_csect.x_snstab = 0;
 
       /* Don't let the COFF backend resort these symbols.  */
-      sym->bsym->flags |= BSF_NOT_AT_END;
+      symbol_get_bfdsym (sym)->flags |= BSF_NOT_AT_END;
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_BSTAT)
     {
@@ -4247,8 +4261,10 @@ ppc_frob_symbol (sym)
 	 csect symbol.  BFD will do that for us if we set the right
 	 flags.  */
       S_SET_VALUE (sym,
-		   (valueT) coffsymbol (sym->sy_tc.within->bsym)->native);
-      coffsymbol (sym->bsym)->native->fix_value = 1;
+		   ((valueT)
+		    coffsymbol (symbol_get_bfdsym
+				(symbol_get_tc (sym)->within))->native));
+      coffsymbol (symbol_get_bfdsym (sym))->native->fix_value = 1;
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_STSYM)
     {
@@ -4256,8 +4272,8 @@ ppc_frob_symbol (sym)
       symbolS *csect;
 
       /* The value is the offset from the enclosing csect.  */
-      block = sym->sy_tc.within;
-      csect = block->sy_tc.within;
+      block = symbol_get_tc (sym)->within;
+      csect = symbol_get_tc (block)->within;
       resolve_symbol_value (csect, 1);
       S_SET_VALUE (sym, S_GET_VALUE (sym) - S_GET_VALUE (csect));
     }
@@ -4267,7 +4283,7 @@ ppc_frob_symbol (sym)
       /* We want the value to be a file offset into the line numbers.
          BFD will do that for us if we set the right flags.  We have
          already set the value correctly.  */
-      coffsymbol (sym->bsym)->native->fix_line = 1;
+      coffsymbol (symbol_get_bfdsym (sym))->native->fix_line = 1;
     }
 
   return 0;
@@ -4295,11 +4311,11 @@ ppc_adjust_symtab ()
 
       csect = symbol_create (".abs[XO]", absolute_section,
 			     S_GET_VALUE (sym), &zero_address_frag);
-      csect->bsym->value = S_GET_VALUE (sym);
+      symbol_get_bfdsym (csect)->value = S_GET_VALUE (sym);
       S_SET_STORAGE_CLASS (csect, C_HIDEXT);
       i = S_GET_NUMBER_AUXILIARY (csect);
       S_SET_NUMBER_AUXILIARY (csect, i + 1);
-      a = &coffsymbol (csect->bsym)->native[i + 1].u.auxent;
+      a = &coffsymbol (symbol_get_bfdsym (csect))->native[i + 1].u.auxent;
       a->x_csect.x_scnlen.l = 0;
       a->x_csect.x_smtyp = XTY_SD;
       a->x_csect.x_parmhash = 0;
@@ -4311,9 +4327,9 @@ ppc_adjust_symtab ()
       symbol_insert (csect, sym, &symbol_rootP, &symbol_lastP);
 
       i = S_GET_NUMBER_AUXILIARY (sym);
-      a = &coffsymbol (sym->bsym)->native[i].u.auxent;
-      a->x_csect.x_scnlen.p = coffsymbol (csect->bsym)->native;
-      coffsymbol (sym->bsym)->native[i].fix_scnlen = 1;
+      a = &coffsymbol (symbol_get_bfdsym (sym))->native[i].u.auxent;
+      a->x_csect.x_scnlen.p = coffsymbol (symbol_get_bfdsym (csect))->native;
+      coffsymbol (symbol_get_bfdsym (sym))->native[i].fix_scnlen = 1;
     }
 
   ppc_saw_abs = false;
@@ -4492,9 +4508,9 @@ ppc_fix_adjustable (fix)
 	   sy != (symbolS *) NULL;
 	   sy = symbol_next (sy))
 	{
-	  if (sy->sy_tc.class == XMC_TC0)
+	  if (symbol_get_tc (sy)->class == XMC_TC0)
 	    continue;
-	  if (sy->sy_tc.class != XMC_TC)
+	  if (symbol_get_tc (sy)->class != XMC_TC)
 	    break;
 	  resolve_symbol_value (sy, 1);
 	  if (val == S_GET_VALUE (sy))
@@ -4511,9 +4527,9 @@ ppc_fix_adjustable (fix)
 
   /* Possibly adjust the reloc to be against the csect.  */
   if (fix->fx_addsy != (symbolS *) NULL
-      && fix->fx_addsy->sy_tc.subseg == 0
-      && fix->fx_addsy->sy_tc.class != XMC_TC0
-      && fix->fx_addsy->sy_tc.class != XMC_TC
+      && symbol_get_tc (fix->fx_addsy)->subseg == 0
+      && symbol_get_tc (fix->fx_addsy)->class != XMC_TC0
+      && symbol_get_tc (fix->fx_addsy)->class != XMC_TC
       && S_GET_SEGMENT (fix->fx_addsy) != bss_section
       /* Don't adjust if this is a reloc in the toc section.  */
       && (S_GET_SEGMENT (fix->fx_addsy) != data_section
@@ -4532,29 +4548,29 @@ ppc_fix_adjustable (fix)
 	abort ();
 
       /* Skip the initial dummy symbol.  */
-      csect = csect->sy_tc.next;
+      csect = symbol_get_tc (csect)->next;
 
       if (csect != (symbolS *) NULL)
 	{
-	  while (csect->sy_tc.next != (symbolS *) NULL
-		 && (csect->sy_tc.next->sy_frag->fr_address
-		     <= fix->fx_addsy->sy_frag->fr_address))
+	  while (symbol_get_tc (csect)->next != (symbolS *) NULL
+		 && (symbol_get_frag (symbol_get_tc (csect)->next)->fr_address
+		     <= symbol_get_frag (fix->fx_addsy)->fr_address))
 	    {
 	      /* If the csect address equals the symbol value, then we
                  have to look through the full symbol table to see
                  whether this is the csect we want.  Note that we will
                  only get here if the csect has zero length.  */
-	      if ((csect->sy_frag->fr_address
-		   == fix->fx_addsy->sy_frag->fr_address)
+	      if ((symbol_get_frag (csect)->fr_address
+		   == symbol_get_frag (fix->fx_addsy)->fr_address)
 		  && S_GET_VALUE (csect) == S_GET_VALUE (fix->fx_addsy))
 		{
 		  symbolS *scan;
 
-		  for (scan = csect->sy_next;
+		  for (scan = symbol_next (csect);
 		       scan != NULL;
-		       scan = scan->sy_next)
+		       scan = symbol_next (scan))
 		    {
-		      if (scan->sy_tc.subseg != 0)
+		      if (symbol_get_tc (scan)->subseg != 0)
 			break;
 		      if (scan == fix->fx_addsy)
 			break;
@@ -4566,11 +4582,11 @@ ppc_fix_adjustable (fix)
 		    break;
 		}
 
-	      csect = csect->sy_tc.next;
+	      csect = symbol_get_tc (csect)->next;
 	    }
 
 	  fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
-			     - csect->sy_frag->fr_address);
+			     - symbol_get_frag (csect)->fr_address);
 	  fix->fx_addsy = csect;
 	}
     }
@@ -4581,10 +4597,11 @@ ppc_fix_adjustable (fix)
       && S_GET_SEGMENT (fix->fx_addsy) == bss_section
       && ! S_IS_EXTERNAL (fix->fx_addsy))
     {
-      resolve_symbol_value (fix->fx_addsy->sy_frag->fr_symbol, 1);
-      fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
-			 - S_GET_VALUE (fix->fx_addsy->sy_frag->fr_symbol));
-      fix->fx_addsy = fix->fx_addsy->sy_frag->fr_symbol;
+      resolve_symbol_value (symbol_get_frag (fix->fx_addsy)->fr_symbol, 1);
+      fix->fx_offset +=
+	(S_GET_VALUE (fix->fx_addsy)
+	 - S_GET_VALUE (symbol_get_frag (fix->fx_addsy)->fr_symbol));
+      fix->fx_addsy = symbol_get_frag (fix->fx_addsy)->fr_symbol;
     }
 
   return 0;
@@ -4604,10 +4621,11 @@ ppc_force_relocation (fix)
      we need to force the relocation.  */
   if (fix->fx_pcrel
       && fix->fx_addsy != NULL
-      && fix->fx_addsy->sy_tc.subseg != 0
-      && (fix->fx_addsy->sy_frag->fr_address > fix->fx_frag->fr_address
-	  || (fix->fx_addsy->sy_tc.next != NULL
-	      && (fix->fx_addsy->sy_tc.next->sy_frag->fr_address
+      && symbol_get_tc (fix->fx_addsy)->subseg != 0
+      && ((symbol_get_frag (fix->fx_addsy)->fr_address
+	   > fix->fx_frag->fr_address)
+	  || (symbol_get_tc (fix->fx_addsy)->next != NULL
+	      && (symbol_get_frag (symbol_get_tc (fix->fx_addsy)->next)->fr_address
 		  <= fix->fx_frag->fr_address))))
     return 1;
 
@@ -4623,7 +4641,7 @@ ppc_is_toc_sym (sym)
      symbolS *sym;
 {
 #ifdef OBJ_XCOFF
-  return sym->sy_tc.class == XMC_TC;
+  return symbol_get_tc (sym)->class == XMC_TC;
 #else
   return strcmp (segment_name (S_GET_SEGMENT (sym)), ".got") == 0;
 #endif
@@ -4727,9 +4745,9 @@ md_apply_fix3 (fixp, valuep, seg)
 	  && operand->shift == 0
 	  && operand->insert == NULL
 	  && fixp->fx_addsy != NULL
-	  && fixp->fx_addsy->sy_tc.subseg != 0
-	  && fixp->fx_addsy->sy_tc.class != XMC_TC
-	  && fixp->fx_addsy->sy_tc.class != XMC_TC0
+	  && symbol_get_tc (fixp->fx_addsy)->subseg != 0
+	  && symbol_get_tc (fixp->fx_addsy)->class != XMC_TC
+	  && symbol_get_tc (fixp->fx_addsy)->class != XMC_TC0
 	  && S_GET_SEGMENT (fixp->fx_addsy) != bss_section)
 	{
 	  value = fixp->fx_offset;

@@ -1,3 +1,8 @@
+1999-06-19  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-ppc.c: Update for symbol handling changes.
+	* config/obj-coff.c: Likewise.
+
 Fri Jun 18 14:34:18 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* tc-hppa.c: General cleanups of ELF support.  No more spaces

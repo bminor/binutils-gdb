@@ -1072,10 +1072,10 @@ coff_frob_symbol (symp, punt)
 #ifdef OBJ_XCOFF
   /* This is pretty horrible, but we have to set *punt correctly in
      order to call SA_SET_SYM_ENDNDX correctly.  */
-  if (! symp->sy_used_in_reloc
+  if (! symbol_used_in_reloc_p (symp)
       && ((symbol_get_bfdsym (symp)->flags & BSF_SECTION_SYM) != 0
 	  || (! S_IS_EXTERNAL (symp)
-	      && ! symp->sy_tc.output
+	      && ! symbol_get_tc (symp)->output
 	      && S_GET_STORAGE_CLASS (symp) != C_FILE)))
     *punt = 1;
 #endif
