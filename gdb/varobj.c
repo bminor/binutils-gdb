@@ -426,7 +426,7 @@ varobj_create (char *objname,
 
       block = NULL;
       if (fi != NULL)
-	block = get_frame_block (fi);
+	block = get_frame_block (fi, 0);
 
       p = expression;
       innermost_block = NULL;

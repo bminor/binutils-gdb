@@ -5699,7 +5699,7 @@ get_catch_sals (int this_level_only)
      but it's better than a core dump.  */
   if (selected_frame == NULL)
     error ("No selected frame.");
-  block = get_frame_block (selected_frame);
+  block = get_frame_block (selected_frame, 0);
   pc = selected_frame->pc;
 
   sals.nelts = 0;

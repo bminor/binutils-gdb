@@ -1,3 +1,8 @@
+2002-04-05  Jim Blandy  <jimb@redhat.com>
+
+	* mi-cmd-stack.c (list_args_or_locals): Pass new arg to
+	get_frame_block.  (See entry in gdb/ChangeLog.)
+
 2002-04-05  Elena Zannoni  <ezannoni@redhat.com>
 
 	* mi-cmd-disas.c (mi_cmd_disassemble): Use TARGET_PRINT_INSN

@@ -1,3 +1,14 @@
+2002-03-29  Jim Blandy  <jimb@redhat.com>
+
+	* stack.c (get_selected_block): Add new argument `addr_in_block',
+	used to return the exact code address we used to select the block,
+	not just the block.
+	* blockframe.c (get_frame_block, get_current_block): Same.
+	* frame.h (get_frame_block, get_current_block,
+	get_selected_block): Update declarations.
+	* linespec.c, stack.c, blockframe.c, breakpoint.c, findvar.c,
+	linespec.c, varobj.c, printcmd.c, symtab.c: Callers changed.
+
 2002-04-05  Michael Snyder  <msnyder@redhat.com>
 
 	* breakpoint.c (insert_breakpoints): Change 'hw' to 'hardware in

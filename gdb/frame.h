@@ -196,11 +196,12 @@ extern struct frame_info *get_current_frame (void);
 
 extern struct frame_info *get_next_frame (struct frame_info *);
 
-extern struct block *get_frame_block (struct frame_info *);
+extern struct block *get_frame_block (struct frame_info *,
+                                      CORE_ADDR *addr_in_block);
 
-extern struct block *get_current_block (void);
+extern struct block *get_current_block (CORE_ADDR *addr_in_block);
 
-extern struct block *get_selected_block (void);
+extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
 

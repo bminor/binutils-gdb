@@ -504,10 +504,23 @@ get_frame_saved_regs (struct frame_info *frame,
 #endif
 
 /* Return the innermost lexical block in execution
-   in a specified stack frame.  The frame address is assumed valid.  */
+   in a specified stack frame.  The frame address is assumed valid.
+
+   If ADDR_IN_BLOCK is non-zero, set *ADDR_IN_BLOCK to the exact code
+   address we used to choose the block.  We use this to find a source
+   line, to decide which macro definitions are in scope.
+
+   The value returned in *ADDR_IN_BLOCK isn't necessarily the frame's
+   PC, and may not really be a valid PC at all.  For example, in the
+   caller of a function declared to never return, the code at the
+   return address will never be reached, so the call instruction may
+   be the very last instruction in the block.  So the address we use
+   to choose the block is actually one byte before the return address
+   --- hopefully pointing us at the call instruction, or its delay
+   slot instruction.  */
 
 struct block *
-get_frame_block (struct frame_info *frame)
+get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
   CORE_ADDR pc;
 
@@ -520,13 +533,22 @@ get_frame_block (struct frame_info *frame)
        after the call insn, we probably want to make frame->pc point after
        the call insn anyway.  */
     --pc;
+
+  if (addr_in_block)
+    *addr_in_block = pc;
+
   return block_for_pc (pc);
 }
 
 struct block *
-get_current_block (void)
+get_current_block (CORE_ADDR *addr_in_block)
 {
-  return block_for_pc (read_pc ());
+  CORE_ADDR pc = read_pc ();
+
+  if (addr_in_block)
+    *addr_in_block = pc;
+
+  return block_for_pc (pc);
 }
 
 CORE_ADDR
@@ -559,7 +581,7 @@ get_pc_function_start (CORE_ADDR pc)
 struct symbol *
 get_frame_function (struct frame_info *frame)
 {
-  register struct block *bl = get_frame_block (frame);
+  register struct block *bl = get_frame_block (frame, 0);
   if (bl == 0)
     return 0;
   return block_function (bl);

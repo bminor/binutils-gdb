@@ -3312,7 +3312,7 @@ make_symbol_completion_list (char *text, char *word)
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
 
-  for (b = get_selected_block (); b != NULL; b = BLOCK_SUPERBLOCK (b))
+  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
     {
       if (!BLOCK_SUPERBLOCK (b))
 	{
@@ -3845,7 +3845,7 @@ make_symbol_overload_list (struct symbol *fsym)
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
 
-  for (b = get_selected_block (); b != NULL; b = BLOCK_SUPERBLOCK (b))
+  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
     {
       if (!BLOCK_SUPERBLOCK (b))
 	{

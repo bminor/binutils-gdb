@@ -1134,7 +1134,7 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
   old_chain = make_cleanup (free_funcalls, 0 /*ignore*/);
   funcall_chain = 0;
 
-  expression_context_block = block ? block : get_selected_block ();
+  expression_context_block = block ? block : get_selected_block (0);
 
   namecopy = (char *) alloca (strlen (lexptr) + 1);
   expout_size = 10;

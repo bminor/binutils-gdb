@@ -218,7 +218,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   stb = ui_out_stream_new (uiout);
 
-  block = get_frame_block (fi);
+  block = get_frame_block (fi, 0);
 
   ui_out_list_begin (uiout, locals ? "locals" : "args");
 

@@ -551,7 +551,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
 	if (frame == NULL)
 	  return 0;
-	b = get_frame_block (frame);
+	b = get_frame_block (frame, 0);
 
 	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
 	  {

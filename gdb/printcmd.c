@@ -1113,7 +1113,7 @@ address_info (char *exp, int from_tty)
   if (exp == 0)
     error ("Argument required.");
 
-  sym = lookup_symbol (exp, get_selected_block (), VAR_NAMESPACE,
+  sym = lookup_symbol (exp, get_selected_block (0), VAR_NAMESPACE,
 		       &is_a_field_of_this, (struct symtab **) NULL);
   if (sym == NULL)
     {
@@ -1549,7 +1549,7 @@ do_one_display (struct display *d)
     return;
 
   if (d->block)
-    within_current_scope = contained_in (get_selected_block (), d->block);
+    within_current_scope = contained_in (get_selected_block (0), d->block);
   else
     within_current_scope = 1;
   if (!within_current_scope)
@@ -1683,7 +1683,7 @@ Num Enb Expression\n");
       else if (d->format.format)
 	printf_filtered ("/%c ", d->format.format);
       print_expression (d->exp, gdb_stdout);
-      if (d->block && !contained_in (get_selected_block (), d->block))
+      if (d->block && !contained_in (get_selected_block (0), d->block))
 	printf_filtered (" (cannot be evaluated in the current context)");
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);

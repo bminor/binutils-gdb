@@ -1238,7 +1238,7 @@ static void
 print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
 			register struct ui_file *stream)
 {
-  register struct block *block = get_frame_block (fi);
+  register struct block *block = get_frame_block (fi, 0);
   register int values_printed = 0;
 
   if (block == 0)
@@ -1272,7 +1272,7 @@ print_frame_label_vars (register struct frame_info *fi, int this_level_only,
 			register struct ui_file *stream)
 {
   register struct blockvector *bl;
-  register struct block *block = get_frame_block (fi);
+  register struct block *block = get_frame_block (fi, 0);
   register int values_printed = 0;
   int index, have_default = 0;
   char *blocks_printed;
@@ -1501,17 +1501,21 @@ record_selected_frame (CORE_ADDR *frameaddrp, int *levelp)
 }
 
 /* Return the symbol-block in which the selected frame is executing.
-   Can return zero under various legitimate circumstances.  */
+   Can return zero under various legitimate circumstances.
+
+   If ADDR_IN_BLOCK is non-zero, set *ADDR_IN_BLOCK to the relevant
+   code address within the block returned.  We use this to decide
+   which macros are in scope.  */
 
 struct block *
-get_selected_block (void)
+get_selected_block (CORE_ADDR *addr_in_block)
 {
   if (!target_has_stack)
     return 0;
 
   if (!selected_frame)
-    return get_current_block ();
-  return get_frame_block (selected_frame);
+    return get_current_block (addr_in_block);
+  return get_frame_block (selected_frame, addr_in_block);
 }
 
 /* Find a frame a certain number of levels away from FRAME.
