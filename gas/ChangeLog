@@ -1,3 +1,16 @@
+Mon Oct 17 18:06:05 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* read.c (read_a_source_file): The second argument to as_where is
+	unsigned int *, not int *.
+
+Mon Oct 17 02:26:32 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c: Eliminate all uses of fx_addnumber.
+	(tc_gen_reloc): Simplify.  It's no longer necessary to set a
+	reloc's addend field to zero for function symbols.
+	(md_apply_fix): Simplify.  For fixups which will require a SOM
+	reloc, just clear out the necessary bits in the output file.
+
 Fri Oct 14 19:06:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (BISON): Use bison -y, not bison.

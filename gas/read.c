@@ -549,17 +549,17 @@ read_a_source_file (name)
 #ifdef OBJ_GENERATE_ASM_LINENO
 		      if (generate_asm_lineno == 0)
 			{
-		          if (ecoff_no_current_file())
+		          if (ecoff_no_current_file ())
 			    generate_asm_lineno = 1;
 			}
-		      else
-			{
+		      if (generate_asm_lineno == 1)
+		        {
 			  unsigned int lineno;
 			  char *s;
 
 			  as_where (&s, &lineno);
 			  OBJ_GENERATE_ASM_LINENO (s, lineno);
-			}
+		        }
 #endif
 
 		      md_assemble (s);	/* Assemble 1 instruction. */
