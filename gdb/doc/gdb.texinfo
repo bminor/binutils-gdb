@@ -8851,35 +8851,36 @@ transmitted and received data respectfully.
 @cindex protocol, @value{GDBN} remote serial
 @cindex serial protocol, @value{GDBN} remote
 @cindex remote serial protocol
-All @value{GDBN} commands and responses (other than acknowledgments)
-are sent as a @var{packet}.  A @var{packet} is introduced with the
-character @samp{$}, this is followed by an optional two-digit
-@var{sequence-id} and the character @samp{:}, the actual
-@var{packet-data}, and the terminating character @samp{#} followed by a
-two-digit @var{checksum}:
+All @value{GDBN} commands and responses (other than acknowledgments) are
+sent as a @var{packet}.  A @var{packet} is introduced with the character
+@samp{$}, the actual @var{packet-data}, and the terminating character
+@samp{#} followed by a two-digit @var{checksum}:
 
 @example
 @code{$}@var{packet-data}@code{#}@var{checksum}
 @end example
 @noindent
-or, with the optional @var{sequence-id}:
-@example
-@code{$}@var{sequence-id}@code{:}@var{packet-data}@code{#}@var{checksum}
-@end example
 
 @cindex checksum, for @value{GDBN} remote
 @noindent
 The two-digit @var{checksum} is computed as the modulo 256 sum of all
-characters between the leading @samp{$} and the trailing @samp{#} (that
-consisting of both the optional @var{sequence-id}@code{:} and the actual
-@var{packet-data}) (an eight bit unsigned checksum).
+characters between the leading @samp{$} and the trailing @samp{#} (an
+eight bit unsigned checksum).
+
+Implementors should note that prior to @value{GDBN} 5.0 the protocol
+specification also included an optional two-digit @var{sequence-id}:
+
+@example
+@code{$}@var{sequence-id}@code{:}@var{packet-data}@code{#}@var{checksum}
+@end example
 
 @cindex sequence-id, for @value{GDBN} remote
 @noindent
-The two-digit @var{sequence-id}, when present, is returned with the
-acknowledgment.  Beyond that its meaning is poorly defined.
-@value{GDBN} is not known to output @var{sequence-id}s.
+That @var{sequence-id} was appended to the acknowledgment.  @value{GDBN}
+has never output @var{sequence-id}s.  Stubs that handle packets added
+since @value{GDBN} 5.0 must not accept @var{sequence-id}.
 
+@cindex acknowledgment, for @value{GDBN} remote
 When either the host or the target machine receives a packet, the first
 response expected is an acknowledgment: either @samp{+} (to indicate
 the package was received correctly) or @samp{-} (to request
@@ -8890,13 +8891,6 @@ retransmission):
 -> @code{+}
 @end example
 @noindent
-If the received packet included a @var{sequence-id} than that is
-appended to a positive acknowledgment:
-
-@example
-<- @code{$}@var{sequence-id}@code{:}@var{packet-data}@code{#}@var{checksum}
--> @code{+}@var{sequence-id}
-@end example
 
 The host (@value{GDBN}) sends @var{command}s, and the target (the
 debugging stub incorporated in your program) sends a @var{response}.  In
@@ -8904,12 +8898,16 @@ the case of step and continue @var{command}s, the response is only sent
 when the operation has completed (the target has again stopped).
 
 @var{packet-data} consists of a sequence of characters with the
-exception of @samp{#} and @samp{$} (see @samp{X} packet for an
-exception). @samp{:} can not appear as the third character in a packet.
-Fields within the packet should be separated using @samp{,} and @samp{;}
-(unfortunately some packets chose to use @samp{:}).  Except where
-otherwise noted all numbers are represented in HEX with leading zeros
-suppressed.
+exception of @samp{#} and @samp{$} (see @samp{X} packet for additional
+exceptions).
+
+Fields within the packet should be separated using @samp{,} @samp{;} or
+@samp{:}.  Except where otherwise noted all numbers are represented in
+HEX with leading zeros suppressed.
+
+Implementors should note that prior to @value{GDBN} 5.0, the character
+@samp{:} could not appear as the third character in a packet (as it
+would potentially conflict with the @var{sequence-id}).
 
 Response @var{data} can be run-length encoded to save space.  A @samp{*}
 means that the next character is an @sc{ascii} encoding giving a repeat count
