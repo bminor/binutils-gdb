@@ -20,3 +20,9 @@ extern char *alloca ();
 
 #include <dirent.h>
 typedef struct dirent dirent;
+
+/* SVR4 systems should use <termios.h> rather than <termio.h>. */
+
+#if defined (USGr4)
+#define _POSIX_VERSION
+#endif

@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987,1989 Free Software Foundation, Inc.
+/* Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
 
    This file contains the Readline Library (the Library), a set of
    routines for providing Emacs style line input to programs that ask
@@ -9,18 +9,17 @@
 
    The Library is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
-   any later version.
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-   The Library is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
+   The Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   The GNU General Public License is often shipped with GNU software, and
-   is generally kept in a file called COPYING or LICENSE.  If you do not
-   have a copy of the license, write to the Free Software Foundation,
-   675 Mass Ave, Cambridge, MA 02139, USA. */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Remove these declarations when we have a complete libgnu.a. */
 /* #define STATIC_MALLOC */
@@ -30,19 +29,14 @@ extern char *xmalloc (), *xrealloc ();
 static char *xmalloc (), *xrealloc ();
 #endif /* STATIC_MALLOC */
 
-#include <stdio.h>
+#include "sysdep.h"
 #include <sys/types.h>
+#include <stdio.h>
 #include <fcntl.h>
+#ifndef	NO_SYS_FILE
 #include <sys/file.h>
-#include <signal.h>
-
-#if defined (__GNUC__)
-#  define alloca __builtin_alloca
-#else
-#  if defined (sparc) || defined (HAVE_ALLOCA_H)
-#    include <alloca.h>
-#  endif
 #endif
+#include <signal.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -118,34 +112,6 @@ struct passwd *getpwuid (), *getpwent ();
 #endif
 
 /* #define HACK_TERMCAP_MOTION */
-
-#if defined (_POSIX_VERSION) || defined (USGr3) || defined (USGr4)
-#  include <dirent.h>
-#  define direct dirent
-#  if defined (_POSIX_VERSION)
-#    define D_NAMLEN(d) (strlen ((d)->d_name))
-#  else /* !_POSIX_VERSION */
-#    define D_NAMLEN(d) ((d)->d_reclen)
-#  endif /* !_POSIX_VERSION */
-#else /* !_POSIX_VERSION && !USGr3 */
-#  define D_NAMLEN(d) ((d)->d_namlen)
-#  if !defined (USG)
-#    include <sys/dir.h>
-#  else /* USG */
-#    if defined (Xenix)
-#      include <sys/ndir.h>
-#    else /* !Xenix */
-#      include <ndir.h>
-#    endif /* !Xenix */
-#  endif /* USG */
-#endif /* !POSIX_VERSION && !USGr3 */
-
-#if defined (USG) && defined (TIOCGWINSZ)
-#  include <sys/stream.h>
-#  if defined (USGr4) || defined (USGr3)
-#    include <sys/ptem.h>
-#  endif /* USGr4 */
-#endif /* USG && TIOCGWINSZ */
 
 /* Some standard library routines. */
 #include "readline.h"
@@ -1226,7 +1192,7 @@ readline_default_bindings ()
 	  keymap[(unsigned char)kill].type == ISFUNC)
 	keymap[(unsigned char)kill].function = rl_unix_line_discard;
 
-#if defined (VLNEXT)
+#if defined (VLNEXT) && defined (TERMIOS_TTY_DRIVER)
       {
 	int nextc;
 
@@ -1236,7 +1202,7 @@ readline_default_bindings ()
 	    keymap[(unsigned char)nextc].type == ISFUNC)
 	  keymap[(unsigned char)nextc].function = rl_quoted_insert;
       }
-#endif /* VLNEXT */
+#endif /* VLNEXT && TERMIOS_TTY_DRIVER */
 
 #if defined (VWERASE)
       {
@@ -5137,7 +5103,7 @@ filename_completion_function (text, state)
   static char *users_dirname = (char *)NULL;
   static int filename_len;
 
-  struct dirent *entry = (struct dirent *)NULL;
+  dirent *entry = (dirent *)NULL;
 
   /* If we don't have any state, then do some initialization. */
   if (!state)
@@ -5203,7 +5169,7 @@ filename_completion_function (text, state)
 	{
 	  /* Otherwise, if these match upto the length of filename, then
 	     it is a match. */
-	    if (((int)D_NAMLEN (entry)) >= filename_len &&
+	    if (entry->d_name[0] == filename[0] && /* Quick test */
 		(strncmp (filename, entry->d_name, filename_len) == 0))
 	      {
 		break;
@@ -5227,7 +5193,7 @@ filename_completion_function (text, state)
       if (dirname && (strcmp (dirname, ".") != 0))
 	{
 	  temp = (char *)
-	    xmalloc (1 + strlen (users_dirname) + D_NAMLEN (entry));
+	    xmalloc (1 + strlen (users_dirname) + strlen (entry->d_name));
 	  strcpy (temp, users_dirname);
 	  strcat (temp, entry->d_name);
 	}

@@ -1,3 +1,12 @@
+Mon Feb 17 17:15:09 1992  Fred Fish  (fnf at cygnus.com)
+
+	* readline.c (readline_default_bindings):  Only make use of VLNEXT
+	when both VLNEXT and TERMIOS_TTY_DRIVER is defined.  On SVR4
+	<termio.h> includes <termios.h>, so VLNEXT is always defined.
+
+	* sysdep-norm.h (_POSIX_VERSION):  Define this for all SVR4
+	systems so that <termios.h> gets used, instead of <termio.h>.
+
 Fri Dec 20 12:04:31 1991  Fred Fish  (fnf at cygnus.com)
 
 	* configure.in:  Change svr4 references to sysv4.
