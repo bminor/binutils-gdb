@@ -3243,7 +3243,7 @@ coff_compute_section_file_positions (abfd)
 #ifdef COFF_PAGE_SIZE
       if ((abfd->flags & D_PAGED) != 0
 	  && (current->flags & SEC_ALLOC) != 0)
-	sofar += (current->vma - sofar) % page_size;
+	sofar += (current->vma - (bfd_vma) sofar) % page_size;
 #endif
       current->filepos = sofar;
 
