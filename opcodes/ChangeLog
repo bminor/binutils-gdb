@@ -1,3 +1,9 @@
+2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* Makefile.am (stamp-lib): ranlib the libopcodes.a in the build
+	directory.
+	* Makefile.in: Regenerate.
+
 2001-02-09  Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* Makefile.am: Add linux target for S/390.

@@ -214,6 +214,7 @@ stamp-lib: libopcodes.la
 	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
 	if [ -f $$libtooldir/libopcodes.a ]; then \
 	  cp $$libtooldir/libopcodes.a libopcodes.tmp; \
+	  $(RANLIB) libopcodes.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libopcodes.tmp libopcodes.a; \
 	else true; fi
 	touch stamp-lib
