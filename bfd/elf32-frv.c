@@ -111,7 +111,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_FRV_LABEL16,	        /* type */
-	 0,			/* rightshift */
+	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
