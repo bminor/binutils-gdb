@@ -1,3 +1,25 @@
+1999-02-03  Keith Seitz  <keiths@cygnus.com>
+ 
+        * remote.c (remote_binary_download, remote_binary_length): New
+        static globals for dealing with binary transmissions.
+        (remote_write_bytes): Add support for binary downloads
+        by shadowing the "M" packet with a new "X" packet. This
+        defaults to ON; if the stub does not understand this, it
+        will fall back to using "M".
+        (putpkt): Add support for binary downloading.
+        * monitor.c (monitor_expect): The mon2000 monitor
+        on the MSA2000 will also emit random DC1/DC3 chars.
+        * m32r-stub.c: Change all char's to unsigned char's
+        to support binary downloading.
+        (handle_exception): Add support for binary downloading
+        via a new "X" packet.
+        (getpacket): Do NOT strip eighth bit of incoming chars.
+        Watch out for escaped characters in the incoming stream.
+        (putpacket): Do NOT strip eighth bit of incoming chars.
+        (bin2mem): New function to write binary data directly to
+        memory.
+        * m32r-rom.c: Add new "mon2000" target.
+
 Tue Feb  2 18:40:29 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* hp-psymtab-read.c (hpread_build_psymtabs): Coerce first arg
