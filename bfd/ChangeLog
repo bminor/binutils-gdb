@@ -1,3 +1,7 @@
+Wed Mar 30 08:33:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/dpx2.h: Define POSIX_UTIME.
+
 Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* i386dynix.c, config/i386-dynix.mt:  New files, handling Dynix
