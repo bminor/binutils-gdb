@@ -63,15 +63,24 @@ do_objc_tests
 set name "break on multiply defined method"
 gdb_test_multiple "break multipleDef" $name \
 {
-    -re "\\\[0\\\] cancel.*\\\[1\\\] all.*\\\[2\\\] -.Decode multipleDef. at .*\\\[3\\\] multipleDef at .*" {
+    -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] -.Decode multipleDef. at .*\r\n\\\[3\\\] multipleDef at .*\r\n> $" {
 	send_gdb "3\n"
 	exp_continue
     }
-    -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file *" { pass $name }
+    -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*\r\n$gdb_prompt $" { pass $name }
     -re ".*$gdb_prompt $"   { kfail "gdb/1236" $name }
-    timeout                 { fail "$name (timeout)" }
 }
 
-gdb_test "run" \
-    "Starting program.*Breakpoint \[0-9\]+, multipleDef \\\(\\\) at .*" \
-    "continue after break on multiply defined symbol"
+set name "continue after break on multiply defined symbol"
+gdb_test_multiple "run" $name \
+{
+    -re "Starting program.*Breakpoint \[0-9\]+, multipleDef \\\(\\\) at .*\r\n$gdb_prompt $" {
+	pass $name
+    }
+    -re "Starting program.*\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] -.Decode multipleDef. at .*\r\n\\\[3\\\] multipleDef at .*\r\n> $" {
+	send_gdb "0\n"
+	kfail "gdb/1238" $name
+	# gdb is in a bad state here.
+	# It would be difficult to do any more tests after this.
+    }
+}
