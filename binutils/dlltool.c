@@ -1740,8 +1740,7 @@ assemble_file (source, dest)
   char * cmd;
   
   cmd = (char *) alloca (strlen (ASM_SWITCHES) + strlen (as_flags)
-			 + strlen (exp_name) + strlen (source)
-			 + strlen (dest) + 50);
+			 + strlen (source) + strlen (dest) + 50);
 
   sprintf (cmd, "%s %s -o %s %s", ASM_SWITCHES, as_flags, dest, source);
 
