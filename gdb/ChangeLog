@@ -1,3 +1,7 @@
+Fri Oct 17 13:22:02 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infcmd.c: Improve grammar of "set args" help.
+
 Thu Oct 16 15:03:58 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* remote-sds.c (sds_load): Properly declare as static.
