@@ -1,3 +1,7 @@
+Thu Dec  5 10:51:05 1991  Fred Fish  (fnf at cygnus.com)
+
+	* buildsym.c (define_symbol):  Supply missing parenthesis.
+
 Thu Dec  5 03:34:21 1991  John Gilmore  (gnu at cygnus.com)
 
 	* coredep.c (fetch_core_registers):  Fencepost error.  Fixed by

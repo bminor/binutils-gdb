@@ -1266,7 +1266,7 @@ define_symbol (valu, string, desc, type)
       /* If PCC says a parameter is a short or a char,
 	 it is really an int.  */
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (builtin_type_int)
-       && TYPE_CODE (SYMBOL_TYPE (sym) == TYPE_CODE_INT) {
+       && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT) {
 	SYMBOL_TYPE (sym) = TYPE_UNSIGNED (SYMBOL_TYPE (sym))?
 				builtin_type_unsigned_int:
 				builtin_type_int;
