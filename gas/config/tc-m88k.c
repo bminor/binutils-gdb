@@ -138,7 +138,6 @@ static char *get_pcr PARAMS ((char *param, struct m88k_insn *insn,
 static int calcop PARAMS ((struct m88k_opcode *format,
 			   char *param, struct m88k_insn *insn));
 
-
 extern char *myname;
 static struct hash_control *op_hash = NULL;
 
@@ -149,7 +148,7 @@ int md_seg_align = 7;
    another comment */
 const char comment_chars[] = ";";
 
-/* These chars only start a comment at the beginning of a line. */
+/* These chars only start a comment at the beginning of a line.  */
 const char line_comment_chars[] = "#";
 
 const char line_separator_chars[] = "";
@@ -1177,7 +1176,6 @@ md_estimate_size_before_relax (fragP, segment_type)
    doing here?
    Ian Taylor, Cygnus Support 13 Jul 1993 */
 
-
 /*
  * Risc relocations are completely different, so it needs
  * this machine dependent routine to emit them.
@@ -1239,7 +1237,6 @@ emit_relocations (fixP, segment_address_in_file)
 
 /* This routine can be subsumed by s_lcomm in read.c.
    Ian Taylor, Cygnus Support 13 Jul 1993 */
-
 
 static void
 s_bss ()

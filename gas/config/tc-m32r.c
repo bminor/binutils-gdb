@@ -128,7 +128,7 @@ const char FLT_CHARS[]            = "dD";
 
    In order to implement this, we keep track of each unmatched HI
    relocation.  We then sort them so that they immediately precede the
-   corresponding LO relocation. */
+   corresponding LO relocation.  */
 
 struct m32r_hi_fixup
 {

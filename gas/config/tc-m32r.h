@@ -1,5 +1,5 @@
 /* tc-m32r.h -- Header file for tc-m32r.c.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA. */
+   Boston, MA 02111-1307, USA.  */
 
 #define TC_M32R
 
@@ -36,7 +36,7 @@
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 long md_pcrel_from_section PARAMS ((struct fix *, segT));
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)   
+#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
@@ -99,4 +99,4 @@ int m32r_fill_insn PARAMS ((int));
 
 #define md_cleanup                 m32r_elf_section_change_hook
 #define md_elf_section_change_hook m32r_elf_section_change_hook
-extern void m32r_elf_section_change_hook ();    
+extern void m32r_elf_section_change_hook ();

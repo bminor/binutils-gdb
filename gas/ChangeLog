@@ -1,7 +1,17 @@
 2000-09-20  Kazu Hirata  <kazu@hxi.com>
 
-	* config/tc-mcore.c: Fix formatting.
+	* config/tc-m32r.c: Fix formatting.
+	* config/tc-m32r.h: Likewise.
+	* config/tc-m68851.h: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68hc11.h: Likewise.
+	* config/tc-m88k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
 	* config/tc-mcore.h: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mips.h: Likewise.
+	* config/tc-mn10200.h: Likewise.
+	* config/tc-mn10300.h: Likewise.
 	* config/tc-tahoe.c: Likewise.
 	* config/tc-tahoe.h: Likewise.
 

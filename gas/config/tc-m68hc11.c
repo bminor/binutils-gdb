@@ -2181,7 +2181,7 @@ find_opcode (opc, operands, nb_operands)
       if (*input_line_pointer == ',')
 	input_line_pointer++;
     }
-  
+
   return 0;
 }
 
@@ -2767,7 +2767,7 @@ md_apply_fix (fixp, valuep)
       as_fatal (_("Line %d: unknown relocation type: 0x%x."),
 		fixp->fx_line, fixp->fx_r_type);
     }
-  
+
   return 0;
 }
 

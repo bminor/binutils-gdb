@@ -1,5 +1,6 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright (C) 1993, 94, 95, 96, 97, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -61,7 +62,7 @@ extern int mips_do_align PARAMS ((int, const char *, int, int));
    embedded PIC code.  */
 #define DIFF_EXPR_OK
 
-/* Tell assembler that we have an itbl_mips.h header file to include. */
+/* Tell assembler that we have an itbl_mips.h header file to include.  */
 #define HAVE_ITBL_CPU
 
 /* The endianness of the target format may change based on command

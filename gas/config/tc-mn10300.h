@@ -16,7 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #define TC_MN10300
 
@@ -44,7 +44,6 @@ extern boolean mn10300_fix_adjustable PARAMS ((struct fix *));
 
 /* Fixup debug sections since we will never relax them.  */
 #define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
-
 
 #define md_operand(x)
 

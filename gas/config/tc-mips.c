@@ -1,5 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -7269,20 +7270,20 @@ mips_ip (str, ip)
 
 	    case 'm':		/* Full 20 bit break code.  */
 	      my_getExpression (&imm_expr, s);
-	      
+
 	      check_absolute_expr (ip, &imm_expr);
-	      
+
 	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
 		{
 		  as_warn (_("Illegal break code (%ld)"),
 			   (long) imm_expr.X_add_number);
 		  imm_expr.X_add_number &= 0xfffff;
 		}
-	      
+
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
-	      
+
 	      continue;
 
 	    case 'B':		/* syscall code */
