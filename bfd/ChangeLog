@@ -1,6 +1,11 @@
+2002-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (edit_opd): Correct test for discarded sections.
+
 2002-10-07  Mark Elbrecht  <snowball3@softhome.net>
 
-	* cofflink.c (mark_relocs): Don't mark relocations in excluded sections.
+	* cofflink.c (mark_relocs): Don't mark relocations in excluded
+	sections.
 
 2002-10-07  Alan Modra  <amodra@bigpond.net.au>
 
@@ -30,7 +35,7 @@
 	to correctly adjust got.refcount and plt.refcount.
 	(sh_elf_copy_indirect_symbol): Copy gotplt_refcount across.
 	(sh_elf_check_relocs): Increment gotplt_refcount.
-	
+
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Fix
@@ -49,10 +54,10 @@
 	R_X86_64_DTPOFF32 to st_value + addend in non-code sections.
 
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
-            Ken Raeburn  <raeburn@cygnus.com>
-            Aldy Hernandez  <aldyh@redhat.com>
-            Eric Christopher  <echristo@redhat.com>
-            Richard Sandiford  <rsandifo@redhat.com>
+	    Ken Raeburn  <raeburn@cygnus.com>
+	    Aldy Hernandez  <aldyh@redhat.com>
+	    Eric Christopher  <echristo@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
 
 	* archures.c (bfd_mach_mips4120, bfd_mach_mips5400): New.
 	(bfd_mach_mips5500): New.
@@ -254,7 +259,7 @@
 	* elfcode.h (elf_slurp_reloc_table_from_section): Check
 	for overflow.
 
-2002-09-17  Stan Cox <scox@redhat.com>	
+2002-09-17  Stan Cox <scox@redhat.com>
 
 	* elf64-mips.c (mips_elf64_be_swap_reloca_out): Handle type2 and type3.
 	(mips_elf64_final_gp): Don't make up gp value.
@@ -336,7 +341,7 @@
 2002-09-10  Michael Snyder  <msnyder@redhat.com>
 
 	* irix-core.c (do_sections, do_sections64): New functions.
-	(irix_core_core_file_p): Call new functions do_sections, 
+	(irix_core_core_file_p): Call new functions do_sections,
 	do_sections64, depending on corefile (32-bit or 64-bit).
 
 2002-09-09  Richard Henderson  <rth@redhat.com>
@@ -346,8 +351,8 @@
 
 2002-09-04  Kevin Buettner  <kevinb@redhat.com>
 
- 	* config.bfd (mips*-*-irix6*): Add new ABI vectors.  Make n32 default
- 	vector.
+	* config.bfd (mips*-*-irix6*): Add new ABI vectors.  Make n32 default
+	vector.
 
 2002-09-02  Nick Clifton  <nickc@redhat.com>
 
@@ -358,7 +363,7 @@
 	(v850_elf_relax_section): Replace caching of external symbols
 	with caching of internal symbols obtained from calling
 	bfd_elf_get_elf_syms().
-        Fixup problems with freeing cached allocated memory blocks.
+	Fixup problems with freeing cached allocated memory blocks.
 
 2002-09-02  Alan Modra  <amodra@bigpond.net.au>
 
@@ -527,7 +532,7 @@
 	* elf32-sh.c (sh_elf_finish_dynamic_sections): Set LSB of DT_INIT
 	value if .init is an SHmedia function.  Similarly for DT_FINI.
 	* elf64-sh64.c (sh64_elf64_finish_dynamic_sections): Likewise.
-	
+
 2002-08-23  Stephen Clarke <stephen.clarke@superh.com>
 
 	* elf32-sh.c (sh_elf_size_dynamic_sections): Zero initialize
@@ -537,7 +542,7 @@
 2002-08-22  Kaz Kojima <kkojima@rr.iij4u.or.jp>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use a simple
-	byte read when reading the return address register column. 
+	byte read when reading the return address register column.
 
 2002-08-22  Nick Clifton  <nickc@redhat.com>
 
@@ -603,9 +608,9 @@
 	argument declaration.
 
 2002-08-19  Elena Zannoni <ezannoni@redhat.com>
- 
-        * archures.c (bfd_mach_ppc_e500): Added.
-        * bfd-in2.h: Rebuilt.
+
+	* archures.c (bfd_mach_ppc_e500): Added.
+	* bfd-in2.h: Rebuilt.
 	* cpu-powerpc.c (bfd_powerpc_archs): Added e500.
 
 2002-08-19  Alan Modra  <amodra@bigpond.net.au>
@@ -615,7 +620,7 @@
 2002-08-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* elf.c (bfd_elf_get_elf_syms): Change type of `esym' to
- 	`bfd_byte'.
+	`bfd_byte'.
 
 2002-08-17  Stan Cox  <scox@redhat.com>
 
@@ -627,7 +632,7 @@
 	* bfd/elf32-sh.c (sh_elf_gc_mark_hook): For sh64, skip indirect
 	symbols when looking for section referred to by a relocation.
 	* bfd/elf64-sh.c (sh_elf64_gc_mark_hook): Likewise.
-	
+
 2002-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i370.c: Move reloc enum to include/elf/i370.h.
@@ -716,7 +721,7 @@
 
 2002-08-09  Graeme Peterson  <gp@qnx.com>
 
-	* Makefile.am: Add entries for elf32-ppcqnx.c, and add 
+	* Makefile.am: Add entries for elf32-ppcqnx.c, and add
 	elf32-qnx.h dependency to elfarmqnx-nabi.c and elf32-i386qnx.c.
 	* Makefile.in: Regenerate.
 	* config.bfd: Add support for powerpc{le}-*-nto targets.
