@@ -1,3 +1,8 @@
+Tue May 30 15:39:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* trad-core.c: From hpux-core.c, include <dirent.h> or
+ 	<sys/ndir.h> when possible.
+
 2000-05-31  Nick Clifton  <nickc@cygnus.com>
 
 	* opintl.h (_(String)): Explain why dgettext is used instead
