@@ -1,3 +1,8 @@
+2002-05-03  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/hang.exp: Check for corruption of the cv_type chain.
+	* gdb.c++/hang3.C: New file.
+
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.base/default.exp: Remove obsolete code.

@@ -29,13 +29,13 @@ if { [skip_cplus_tests] } { continue }
 set testfile hang
 set binfile ${objdir}/${subdir}/${testfile}
 
-foreach file {hang1 hang2} {
-    if  { [gdb_compile "${srcdir}/${subdir}/${file}.C" "${file}.o" object {debug c++}] != "" } {
+foreach file {hang1 hang2 hang3} {
+    if {[gdb_compile "${srcdir}/${subdir}/${file}.C" "${file}.o" object {c++ debug}] != ""} {
         gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
 }
 
-if {[gdb_compile "hang1.o hang2.o" ${binfile} executable {debug c++}] != "" } {
+if {[gdb_compile "hang1.o hang2.o hang3.o" ${binfile} executable {c++ debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -110,4 +110,19 @@ gdb_load ${binfile}
 # in `cleanup_undefined_types' corrupted the target type's `cv_type'
 # ring, `finish_cv_type' enters an infinite loop.
 
-gdb_test "print var_in_b" " = 1729" "can read debug info"
+# This checks that GDB recognizes when a structure is about to be
+# overwritten, and refuses, with a complaint.
+gdb_test "print var_in_b" " = 1729" "doesn't overwrite struct type"
+
+# This checks that cleanup_undefined_types doesn't create corrupt
+# cv_type chains.  Note that var_in_hang3 does need to be declared in
+# a separate compilation unit, whose psymtab depends on hang1.o's
+# psymtab.  Otherwise, GDB won't call cleanup_undefined_types (as it
+# finishes hang1.o's symbols) before it calls make_cv_type (while
+# reading hang3.o's symbols).
+#
+# The bug only happens when you compile with -gstabs+; Otherwise, GCC
+# won't include the `const' qualifier on `const_B_ptr' in `hang3.o''s
+# STABS, so GDB won't try to create a const variant of the smashed
+# struct type, and get caught by the corrupted cv_type chain.
+gdb_test "print var_in_hang3" " = 42" "doesn't corrupt cv_type chain"
