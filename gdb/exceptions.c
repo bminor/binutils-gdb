@@ -296,11 +296,15 @@ throw_reason (enum return_reason reason)
 }
 
 static void
-do_write (void *data, const char *buffer, long length_buffer)
+print_flush (void)
 {
-  ui_file_write (data, buffer, length_buffer);
+  if (deprecated_error_begin_hook)
+    deprecated_error_begin_hook ();
+  target_terminal_ours ();
+  wrap_here ("");		/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+  annotate_error_begin ();
 }
-
 
 static void
 print_exception (struct ui_file *file, struct exception e)
@@ -320,6 +324,7 @@ print_exception (struct ui_file *file, struct exception e)
 	  ui_file_write (file, start, end - start);
 	}
     }					    
+  fprintf_filtered (file, "\n");
 }
 
 void
@@ -327,12 +332,8 @@ exception_print (struct ui_file *file, struct exception e)
 {
   if (e.reason < 0 && e.message != NULL)
     {
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output */
-      gdb_flush (file);
-      annotate_error_begin ();
+      print_flush ();
       print_exception (file, e);
-      fprintf_filtered (file, "\n");
     }
 }
 
@@ -343,10 +344,8 @@ exception_fprintf (struct ui_file *file, struct exception e,
   if (e.reason < 0 && e.message != NULL)
     {
       va_list args;
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output */
-      gdb_flush (file);
-      annotate_error_begin ();
+
+      print_flush ();
 
       /* Print the prefix.  */
       va_start (args, prefix);
@@ -354,7 +353,6 @@ exception_fprintf (struct ui_file *file, struct exception e,
       va_end (args);
 
       print_exception (file, e);
-      fprintf_filtered (file, "\n");
     }
 }
 
@@ -366,47 +364,29 @@ NORETURN static void
 print_and_throw (enum return_reason reason, enum errors error,
 		 const char *prefix, const char *fmt, va_list ap)
 {
-  /* FIXME: cagney/2005-01-13: While xstrvprintf is simpler it alters
-     GDB's output.  Instead of the message being printed
-     line-at-a-time the message comes out all at once.  The problem is
-     that the MI testsuite is checks for line-at-a-time messages and
-     changing this behavior means updating the testsuite.  */
-
   struct exception e;
-  struct ui_file *tmp_stream;
-  long len;
-
-  /* Convert the message into a print stream.  */
-  tmp_stream = mem_fileopen ();
-  make_cleanup_ui_file_delete (tmp_stream);
-  vfprintf_unfiltered (tmp_stream, fmt, ap);
 
   /* Save the message.  */
   xfree (last_message);
-  last_message = ui_file_xstrdup (tmp_stream, &len);
+  last_message = xstrvprintf (fmt, ap);
+
+  /* Create the exception.  */
+  e.reason = reason;
+  e.error = error;
+  e.message = last_message;
 
   /* Print the mesage to stderr, but only if the catcher isn't going
      to handle/print it locally.  */
   if (current_catcher->print_message)
     {
-      if (deprecated_error_begin_hook)
-	deprecated_error_begin_hook ();
-
       /* Write the message plus any pre_print to gdb_stderr.  */
-      target_terminal_ours ();
-      wrap_here ("");		/* Force out any buffered output */
-      gdb_flush (gdb_stdout);
-      annotate_error_begin ();
+      print_flush ();
       if (error_pre_print)
 	fputs_filtered (error_pre_print, gdb_stderr);
-      ui_file_put (tmp_stream, do_write, gdb_stderr);
-      fprintf_filtered (gdb_stderr, "\n");
+      print_exception (gdb_stderr, e);
     }
 
   /* Throw the exception.  */
-  e.reason = reason;
-  e.error = error;
-  e.message = last_message;
   throw_exception (e);
 }
 
