@@ -292,6 +292,31 @@ static int prev_insn_unreordered;
 /* Non-zero if the previous previous instruction was in a .set
    noreorder.  */
 static int prev_prev_insn_unreordered;
+
+/* For ECOFF and ELF, relocations against symbols are done in two
+   parts, with a HI relocation and a LO relocation.  Each relocation
+   has only 16 bits of space to store an addend.  This means that in
+   order for the linker to handle carries correctly, it must be able
+   to locate both the HI and the LO relocation.  This means that the
+   relocations must appear in order in the relocation table.
+
+   In order to implement this, we keep track of each unmatched HI
+   relocation.  We then sort them so that they immediately precede the
+   corresponding LO relocation. */
+
+struct mips_hi_fixup
+{
+  /* Next HI fixup.  */
+  struct mips_hi_fixup *next;
+  /* This fixup.  */
+  fixS *fixp;
+  /* The section this fixup is in.  */
+  segT seg;
+};
+
+/* The list of unmatched HI relocs.  */
+
+static struct mips_hi_fixup *mips_hi_fixup_list;
 
 /* Since the MIPS does not have multiple forms of PC relative
    instructions, we do not have to do relaxing as is done on other
@@ -384,7 +409,8 @@ static int reg_needs_delay PARAMS ((int));
 static void append_insn PARAMS ((char *place,
 				 struct mips_cl_insn * ip,
 				 expressionS * p,
-				 bfd_reloc_code_real_type r));
+				 bfd_reloc_code_real_type r,
+				 boolean));
 static void mips_no_prev_insn PARAMS ((void));
 static void mips_emit_delays PARAMS ((void));
 #ifdef USE_STDARG
@@ -519,10 +545,20 @@ mips_pop_insert ()
 
 static char *expr_end;
 
+/* Expressions which appear in instructions.  These are set by
+   mips_ip.  */
+
 static expressionS imm_expr;
 static expressionS offset_expr;
+
+/* Relocs associated with imm_expr and offset_expr.  */
+
 static bfd_reloc_code_real_type imm_reloc;
 static bfd_reloc_code_real_type offset_reloc;
+
+/* This is set by mips_ip if imm_reloc is an unmatched HI16_S reloc.  */
+
+static boolean imm_unmatched_hi;
 
 /*
  * This function is called once, at assembler startup time.  It should
@@ -775,7 +811,10 @@ md_assemble (str)
   struct mips_cl_insn insn;
 
   imm_expr.X_op = O_absent;
+  imm_reloc = BFD_RELOC_UNUSED;
+  imm_unmatched_hi = false;
   offset_expr.X_op = O_absent;
+  offset_reloc = BFD_RELOC_UNUSED;
 
   mips_ip (str, &insn);
   if (insn_error)
@@ -790,11 +829,12 @@ md_assemble (str)
   else
     {
       if (imm_expr.X_op != O_absent)
-	append_insn ((char *) NULL, &insn, &imm_expr, imm_reloc);
+	append_insn ((char *) NULL, &insn, &imm_expr, imm_reloc,
+		     imm_unmatched_hi);
       else if (offset_expr.X_op != O_absent)
-	append_insn ((char *) NULL, &insn, &offset_expr, offset_reloc);
+	append_insn ((char *) NULL, &insn, &offset_expr, offset_reloc, false);
       else
-	append_insn ((char *) NULL, &insn, NULL, BFD_RELOC_UNUSED);
+	append_insn ((char *) NULL, &insn, NULL, BFD_RELOC_UNUSED, false);
     }
 }
 
@@ -876,11 +916,12 @@ reg_needs_delay (reg)
    used with RELOC_TYPE.  */
 
 static void
-append_insn (place, ip, address_expr, reloc_type)
+append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
      char *place;
      struct mips_cl_insn *ip;
      expressionS *address_expr;
      bfd_reloc_code_real_type reloc_type;
+     boolean unmatched_hi;
 {
   register unsigned long prev_pinfo, pinfo;
   char *f;
@@ -1112,10 +1153,24 @@ append_insn (place, ip, address_expr, reloc_type)
 	  /* Don't generate a reloc if we are writing into a variant
 	     frag.  */
 	  if (place == NULL)
-	    fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
-				address_expr,
-				reloc_type == BFD_RELOC_16_PCREL_S2,
-				reloc_type);
+	    {
+	      fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+				  address_expr,
+				  reloc_type == BFD_RELOC_16_PCREL_S2,
+				  reloc_type);
+	      if (unmatched_hi)
+		{
+		  struct mips_hi_fixup *hi_fixup;
+
+		  assert (reloc_type == BFD_RELOC_HI16_S);
+		  hi_fixup = ((struct mips_hi_fixup *)
+			      xmalloc (sizeof (struct mips_hi_fixup)));
+		  hi_fixup->fixp = fixp;
+		  hi_fixup->seg = now_seg;
+		  hi_fixup->next = mips_hi_fixup_list;
+		  mips_hi_fixup_list = hi_fixup;
+		}
+	    }
 	}
     }
 
@@ -1633,7 +1688,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   va_end (args);
   assert (r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
 
-  append_insn (place, &insn, ep, r);
+  append_insn (place, &insn, ep, r, false);
 }
 
 /*
@@ -1698,10 +1753,10 @@ macro_build_lui (place, counter, ep, regnum)
   if (r == BFD_RELOC_UNUSED)
     {
       insn.insn_opcode |= high_expr.X_add_number;
-      append_insn (place, &insn, NULL, r);
+      append_insn (place, &insn, NULL, r, false);
     }
   else
-    append_insn (place, &insn, &high_expr, r);
+    append_insn (place, &insn, &high_expr, r, false);
 }
 
 /*			set_at()
@@ -3648,7 +3703,8 @@ macro (ip)
 		       "d,v,t", tempreg, tempreg, GP);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT_LO16);
+		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT_LO16,
+		       tempreg);
 	  p = frag_var (rs_machine_dependent, 12 + gpdel, 0,
 			RELAX_ENCODE (12, 12 + gpdel, gpdel, 8 + gpdel, 0, 0),
 			offset_expr.X_add_symbol, (long) 0, (char *) NULL);
@@ -3659,7 +3715,7 @@ macro (ip)
 	    }
 	  macro_build (p, &icnt, &offset_expr,
 		       mips_isa < 3 ? "lw" : "ld",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16);
+		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
 	  p += 4;
 	  macro_build (p, &icnt, (expressionS *) NULL, "nop", "");
 	  p += 4;
@@ -4904,12 +4960,11 @@ macro2 (ip)
     as_warn ("Macro used $at after \".set noat\"");
 }
 
+/* This routine assembles an instruction into its binary format.  As a
+   side effect, it sets one of the global variables imm_reloc or
+   offset_reloc to the type of relocation to do if one of the operands
+   is an address expression.  */
 
-/*
-This routine assembles an instruction into its binary format.  As a side
-effect it sets one of the global variables imm_reloc or offset_reloc to the
-type of relocation to do if one of the operands is an address expression.
-*/
 static void
 mips_ip (str, ip)
      char *str;
@@ -5478,7 +5533,10 @@ mips_ip (str, ip)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
 		      else if (c == 'h')
-			imm_reloc = BFD_RELOC_HI16_S;
+			{
+			  imm_reloc = BFD_RELOC_HI16_S;
+			  imm_unmatched_hi = true;
+			}
 		      else
 			imm_reloc = BFD_RELOC_HI16;
 		    }
@@ -5590,7 +5648,10 @@ mips_ip (str, ip)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
 		      else if (c == 'h')
-			imm_reloc = BFD_RELOC_HI16_S;
+			{
+			  imm_reloc = BFD_RELOC_HI16_S;
+			  imm_unmatched_hi = true;
+			}
 		      else
 			imm_reloc = BFD_RELOC_HI16;
 		    }
@@ -6238,6 +6299,75 @@ cons_fix_new_mips (frag, where, nbytes, exp)
 
   fix_new_exp (frag_now, where, (int) nbytes, exp, 0,
 	       nbytes == 2 ? BFD_RELOC_16 : BFD_RELOC_32);
+}
+
+/* Sort any unmatched HI16_S relocs so that they immediately precede
+   the corresponding LO reloc.  This is called before md_apply_fix and
+   tc_gen_reloc.  Unmatched HI16_S relocs can only be generated by
+   explicit use of the %hi modifier.  */
+
+void
+mips_frob_file ()
+{
+  struct mips_hi_fixup *l;
+
+  for (l = mips_hi_fixup_list; l != NULL; l = l->next)
+    {
+      segment_info_type *seginfo;
+      fixS *f, *prev;
+
+      assert (l->fixp->fx_r_type == BFD_RELOC_HI16_S);
+
+      /* Check quickly whether the next fixup happens to be a matching
+         %lo.  */
+      if (l->fixp->fx_next != NULL
+	  && l->fixp->fx_next->fx_r_type == BFD_RELOC_LO16
+	  && l->fixp->fx_addsy == l->fixp->fx_next->fx_addsy
+	  && l->fixp->fx_offset == l->fixp->fx_next->fx_offset)
+	continue;
+
+      /* Look through the fixups for this segment for a matching %lo.
+         When we find one, move the %hi just in front of it.  */
+      seginfo = seg_info (l->seg);
+      prev = NULL;
+      for (f = seginfo->fix_root; f != NULL; f = f->fx_next)
+	{
+	  /* Check whether this is a %lo fixup which matches l->fixp;
+             we can't use it if the %lo is already matching a %hi.  */
+	  if (f->fx_r_type == BFD_RELOC_LO16
+	      && f->fx_addsy == l->fixp->fx_addsy
+	      && f->fx_offset == l->fixp->fx_offset
+	      && (prev == NULL
+		  || prev->fx_r_type != BFD_RELOC_HI16_S
+		  || prev->fx_addsy != f->fx_addsy
+		  || prev->fx_offset !=  f->fx_offset))
+	    {
+	      fixS **pf;
+
+	      /* Move l->fixp before f.  */
+	      for (pf = &seginfo->fix_root;
+		   *pf != l->fixp;
+		   pf = &(*pf)->fx_next)
+		assert (*pf != NULL);
+
+	      *pf = l->fixp->fx_next;
+
+	      l->fixp->fx_next = f;
+	      if (prev == NULL)
+		seginfo->fix_root = l->fixp;
+	      else
+		prev->fx_next = l->fixp;
+
+	      break;
+	    }
+
+	  prev = f;
+	}
+
+      if (f == NULL)
+	as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
+		       "Unmatched %%hi reloc");
+    }
 }
 
 /* When generating embedded PIC code we need to use a special

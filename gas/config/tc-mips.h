@@ -27,7 +27,6 @@
 #define TARGET_ARCH bfd_arch_mips
 
 #define ONLY_STANDARD_ESCAPES
-#define BACKSLASH_V
 #define WORKING_DOT_WORD	1
 #define OLD_FLOAT_READS
 #define REPEAT_CONS_EXPRESSIONS
@@ -78,6 +77,9 @@ extern int mips_parse_long_option PARAMS ((const char *));
 
 #define tc_frob_label(sym) mips_define_label (sym)
 extern void mips_define_label PARAMS ((struct symbol *));
+
+#define tc_frob_file() mips_frob_file ()
+extern void mips_frob_file PARAMS ((void));
 
 #define TC_CONS_FIX_NEW cons_fix_new_mips
 extern void cons_fix_new_mips ();

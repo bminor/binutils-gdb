@@ -1,3 +1,17 @@
+Thu Mar 28 15:27:47 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.h (tc_frob_file): Define.
+	(mips_frob_file): Declare.
+	* config/tc-mips.c (struct mips_hi_fixup): Define.
+	(mips_hi_fixup_list): New static variable.
+	(imm_unmatched_hi): New static variable.
+	(md_assemble): Clear imm_reloc, imm_unmatched_hi, and
+	offset_reloc.  Pass imm_unmatched_hi to append_insn.
+	(append_insn): Add unmatched_hi parameter.  If it is set, add the
+	new fixup to mips_hi_fixup_list.  Change all callers.
+	(mips_ip): Set imm_unmatched_hi when appropriate.
+	(mips_frob_file): New function.
+
 Thu Mar 28 11:47:59 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc-*-solaris2*): Renamed from sparc*-*-solaris2*.
