@@ -1,3 +1,13 @@
+Thu Aug 19 15:08:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (INSN_*): Changed values.  Removed unused definitions.
+	Added INSN_COND_BRANCH_LIKELY, INSN_ISA2 and INSN_ISA3.  Split
+	INSN_LOAD_DELAY into INSN_LOAD_MEMORY_DELAY and
+	INSN_LOAD_COPROC_DELAY.  Split INSN_COPROC_DELAY into
+	INSN_COPROC_MOVE_DELAY and INSN_COPROC_MEMORY_DELAY.
+	(M_*): Added new values for r6000 and r4000 macros.
+	(ANY_DELAY): Removed.
+
 Wed Aug 18 15:37:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h: Added M_LI_S and M_LI_SS.

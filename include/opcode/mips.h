@@ -95,7 +95,9 @@ struct mips_opcode
   const char *args;
   /* The basic opcode for the instruction.  When assembling, this
      opcode is modified by the arguments to produce the actual opcode
-     that is used.  */
+     that is used.  If pinfo is INSN_MACRO, then this is instead the
+     ISA level of the macro (0 or 1 is always supported, 2 is ISA 2,
+     etc.).  */
   unsigned long match;
   /* If pinfo is not INSN_MACRO, then this is a bit mask for the
      relevant portions of the opcode when disassembling.  If the
@@ -134,6 +136,7 @@ struct mips_opcode
    "w" 5 bit same register used as both target and destination (OP_*_RT)
    "C" 25 bit coprocessor function code (OP_*_COPZ)
    "B" 20 bit syscall function code (OP_*_SYSCALL)
+   "x" accept and ignore register name
 
    Floating point instructions:
    "D" 5 bit destination register (OP_*_FD)
@@ -160,62 +163,62 @@ struct mips_opcode
 
 /* Modifies the general purpose register in OP_*_RD.  */
 #define INSN_WRITE_GPR_D            0x00000001
-/* Modifies the general purpose register in OP_*_RS (FIXME: not used).  */
-#define INSN_WRITE_GPR_S            0x00000002
 /* Modifies the general purpose register in OP_*_RT.  */
-#define INSN_WRITE_GPR_T            0x00000004
+#define INSN_WRITE_GPR_T            0x00000002
 /* Modifies general purpose register 31.  */
-#define INSN_WRITE_GPR_31           0x00000008
+#define INSN_WRITE_GPR_31           0x00000004
 /* Modifies the floating point register in OP_*_FD.  */
-#define INSN_WRITE_FPR_D            0x00000010
-/* Modifies the floating point register in OP_*_FS (FIXME: not used).  */
-#define INSN_WRITE_FPR_S            0x00000020
+#define INSN_WRITE_FPR_D            0x00000008
+/* Modifies the floating point register in OP_*_FS.  */
+#define INSN_WRITE_FPR_S            0x00000010
 /* Modifies the floating point register in OP_*_FT.  */
-#define INSN_WRITE_FPR_T            0x00000040
-/* Reads the general purpose register in OP_*_RD (FIXME: not used).  */
-#define INSN_READ_GPR_D             0x00000080
+#define INSN_WRITE_FPR_T            0x00000020
 /* Reads the general purpose register in OP_*_RS.  */
-#define INSN_READ_GPR_S             0x00000100
+#define INSN_READ_GPR_S             0x00000040
 /* Reads the general purpose register in OP_*_RT.  */
-#define INSN_READ_GPR_T             0x00000200
-/* Reads general purpose register 31 (FIXME: not used).  */
-#define INSN_READ_GPR_31            0x00000400
-/* Reads the floating point register in OP_*_FD (FIXME: not used).  */
-#define INSN_READ_FPR_D             0x00000800
+#define INSN_READ_GPR_T             0x00000080
 /* Reads the floating point register in OP_*_FS.  */
-#define INSN_READ_FPR_S             0x00001000
+#define INSN_READ_FPR_S             0x00000100
 /* Reads the floating point register in OP_*_FT.  */
-#define INSN_READ_FPR_T             0x00002000
+#define INSN_READ_FPR_T             0x00000200
 /* Modifies coprocessor condition code.  */
-#define INSN_WRITE_COND_CODE        0x00004000
+#define INSN_WRITE_COND_CODE        0x00000400
 /* Reads coprocessor condition code.  */
-#define INSN_READ_COND_CODE         0x00008000
+#define INSN_READ_COND_CODE         0x00000800
 /* TLB operation.  */
-#define INSN_TLB                    0x00010000
+#define INSN_TLB                    0x00001000
 /* RFE (return from exception) instruction.  */
-#define INSN_RFE                    0x00020000
+#define INSN_RFE                    0x00002000
 /* Reads coprocessor register other than floating point register.  */
-#define INSN_COP                    0x00040000
-/* Instruction destination requires load delay.  */
-#define INSN_LOAD_DELAY             0x00080000
+#define INSN_COP                    0x00004000
+/* Instruction loads value from memory, requiring delay.  */
+#define INSN_LOAD_MEMORY_DELAY      0x00008000
+/* Instruction loads value from coprocessor, requiring delay.  */
+#define INSN_LOAD_COPROC_DELAY	    0x00010000
 /* Instruction has unconditional branch delay slot.  */
-#define INSN_UNCOND_BRANCH_DELAY    0x00100000
+#define INSN_UNCOND_BRANCH_DELAY    0x00020000
 /* Instruction has conditional branch delay slot.  */
-#define INSN_COND_BRANCH_DELAY      0x00200000
-/* Writes coprocessor register, requiring delay.  */
-#define INSN_COPROC_DELAY           0x00400000
+#define INSN_COND_BRANCH_DELAY      0x00040000
+/* Conditional branch likely: if branch not taken, insn nullified.  */
+#define INSN_COND_BRANCH_LIKELY	    0x00080000
+/* Moves to coprocessor register, requiring delay.  */
+#define INSN_COPROC_MOVE_DELAY      0x00100000
+/* Loads coprocessor register from memory, requiring delay.  */
+#define INSN_COPROC_MEMORY_DELAY    0x00200000
 /* Reads the HI register.  */
-#define INSN_READ_HI		    0x00800000
+#define INSN_READ_HI		    0x00400000
 /* Reads the LO register.  */
-#define INSN_READ_LO		    0x01000000
+#define INSN_READ_LO		    0x00800000
 /* Modifies the HI register.  */
-#define INSN_WRITE_HI		    0x02000000
+#define INSN_WRITE_HI		    0x01000000
 /* Modifies the LO register.  */
-#define INSN_WRITE_LO		    0x04000000
+#define INSN_WRITE_LO		    0x02000000
 /* Takes a trap (FIXME: why is this interesting?).  */
-#define INSN_TRAP                   0x08000000
-/* R4000 instruction.  */
-#define INSN_R4000	            0x80000000
+#define INSN_TRAP                   0x04000000
+/* MIPS ISA 2 instruction (R6000 or R4000).  */
+#define INSN_ISA2		    0x10000000
+/* MIPS ISA 3 instruction (R4000).  */
+#define INSN_ISA3		    0x20000000
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
@@ -236,27 +239,63 @@ enum {
     M_ADDU_I,
     M_AND_I,
     M_BEQ_I,
+    M_BEQL_I,
     M_BGE,
+    M_BGEL,
     M_BGE_I,
+    M_BGEL_I,
     M_BGEU,
+    M_BGEUL,
     M_BGEU_I,
+    M_BGEUL_I,
     M_BGT,
+    M_BGTL,
     M_BGT_I,
+    M_BGTL_I,
     M_BGTU,
+    M_BGTUL,
     M_BGTU_I,
+    M_BGTUL_I,
     M_BLE,
+    M_BLEL,
     M_BLE_I,
+    M_BLEL_I,
     M_BLEU,
+    M_BLEUL,
     M_BLEU_I,
+    M_BLEUL_I,
     M_BLT,
+    M_BLTL,
     M_BLT_I,
+    M_BLTL_I,
     M_BLTU,
+    M_BLTUL,
     M_BLTU_I,
+    M_BLTUL_I,
     M_BNE_I,
+    M_BNEL_I,
+    M_DADD_I,
+    M_DADDU_I,
+    M_DDIV_3,
+    M_DDIV_3I,
+    M_DDIVU_3,
+    M_DDIVU_3I,
     M_DIV_3,
     M_DIV_3I,
     M_DIVU_3,
     M_DIVU_3I,
+    M_DMUL,
+    M_DMUL_I, 
+    M_DMULO,
+    M_DMULO_I, 
+    M_DMULOU,
+    M_DMULOU_I, 
+    M_DREM_3,
+    M_DREM_3I,
+    M_DREMU_3,
+    M_DREMU_3I,
+    M_DSUB_I,
+    M_DSUBU_I,
     M_L_DOB,
     M_L_DAB,
     M_LA,
@@ -268,6 +307,11 @@ enum {
     M_LD_A,
     M_LD_OB,
     M_LD_AB,
+    M_LDC1_AB,
+    M_LDC2_AB,
+    M_LDC3_AB,
+    M_LDL_AB,
+    M_LDR_AB,
     M_LH_A,
     M_LH_AB,
     M_LHU_A,
@@ -277,6 +321,8 @@ enum {
     M_LI_DD,
     M_LI_S,
     M_LI_SS,
+    M_LL_AB,
+    M_LLD_AB,
     M_LS_A,
     M_LW_A,
     M_LW_AB,
@@ -292,6 +338,7 @@ enum {
     M_LWL_AB,
     M_LWR_A,
     M_LWR_AB,
+    M_LWU_AB,
     M_MUL,
     M_MUL_I, 
     M_MULO,
@@ -312,9 +359,16 @@ enum {
     M_S_DOB,
     M_S_DAB,
     M_S_S,
+    M_SC_AB,
+    M_SCD_AB,
     M_SD_A,
     M_SD_OB,
     M_SD_AB,
+    M_SDC1_AB,
+    M_SDC2_AB,
+    M_SDC3_AB,
+    M_SDL_AB,
+    M_SDR_AB,
     M_SEQ,
     M_SEQ_I,
     M_SGE,
@@ -353,6 +407,12 @@ enum {
     M_SWR_AB,
     M_SUB_I,
     M_SUBU_I,
+    M_TEQ_I,
+    M_TGE_I,
+    M_TGEU_I,
+    M_TLT_I,
+    M_TLTU_I,
+    M_TNE_I,
     M_TRUNCWD,
     M_TRUNCWS,
     M_ULH,
@@ -367,12 +427,6 @@ enum {
     M_USW_A,
     M_XOR_I
 };
-
-/* True if this instruction may require a delay slot.  */
-#define ANY_DELAY (INSN_LOAD_DELAY | INSN_UNCOND_BRANCH_DELAY \
-		   | INSN_COND_BRANCH_DELAY | INSN_COPROC_DELAY \
-		   | INSN_READ_HI | INSN_READ_LO \
-		   | INSN_READ_COND_CODE | INSN_WRITE_COND_CODE)
 
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
