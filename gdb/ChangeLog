@@ -1,5 +1,8 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* config/i386/nto.mh (NAT_FILE): Delete.
+	* config/i386/nm-nto.h: Delete.
+
 	* config/m68k/tm-vx68.h: Do not include "tm-m68k.h".
 	* config/m68k/tm-os68k.h: Ditto.
 	* config/m68k/tm-monitor.h: Ditto.
