@@ -1,3 +1,17 @@
+Sun Nov  3 12:07:08 1991  Per Bothner  (bothner at cygnus.com)
+
+	* hosts/h-news.h, hosts/h-rtbsd.h:
+	Get rid of MISSING_VFPRINTF, since libiberty provides one.
+	* bfd-in.h (bfd_print_symbol_type_hopw enum):   Add new option
+	bfd_print_symbol_nm, for use by nm.
+	* aoutx.h (NAME(aout,print_symbol)):  Add code for new
+	bfd_print_symbol_nm option, to print in nm format.
+	* coffcode.h (coff_print_symbol), ieee.c (ieee_print_symbol)
+	oasys.c (oasys_print_symbol):  Provide stub implementations
+	for bfd_print_symbol_nm.
+	* syms.c:  New function bfd_decode_symclass, used by nm printer.
+	New function bfd_stab_name to look up string name of stab code.
+
 Thu Oct 31 18:23:06 1991  John Gilmore  (gnu at cygnus.com)
 
 	* coff-rs6000.c:  Change name to "aixcoff-rs6000", to avoid

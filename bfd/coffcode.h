@@ -1909,6 +1909,7 @@ DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
     fprintf(file, "coff %lx %lx", (unsigned long) coffsymbol(symbol)->native,
 	    (unsigned long) coffsymbol(symbol)->lineno);
     break;
+  case bfd_print_symbol_nm:
   case bfd_print_symbol_all:
       {
 	CONST char           *section_name = symbol->section == (asection *) NULL ?
