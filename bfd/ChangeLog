@@ -1,3 +1,8 @@
+2002-05-17  Stuart Balfour <sbalfour@cisco.com>
+
+	* hash.c (bfd_hash_lookup): Remove computation of len from inside
+	hash loop.
+
 2002-05-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config.bfd: Add targets for sh64-linux (little endian and

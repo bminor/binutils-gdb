@@ -375,8 +375,8 @@ bfd_hash_lookup (table, string, create, copy)
     {
       hash += c + (c << 17);
       hash ^= hash >> 2;
-      ++len;
     }
+  len = (s - (const unsigned char *) string) - 1;
   hash += len + (len << 17);
   hash ^= hash >> 2;
 
