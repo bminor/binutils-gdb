@@ -608,6 +608,7 @@ static void
 st2000_mourn_inferior ()
 {
   remove_breakpoints ();
+  unpush_target (&st2000_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 

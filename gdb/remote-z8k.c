@@ -305,6 +305,7 @@ static void
 sim_mourn ()
 {
   sim_clear_breakpoints ();
+  unpush_target (&sim_ops);
   generic_mourn_inferior ();
 }
 

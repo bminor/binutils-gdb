@@ -885,6 +885,7 @@ void
 nindy_mourn_inferior ()
 {
   remove_breakpoints ();
+  unpush_target (&nindy_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 

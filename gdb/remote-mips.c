@@ -1330,6 +1330,7 @@ mips_create_inferior (execfile, args, env)
 static void
 mips_mourn_inferior ()
 {
+  unpush_target (&mips_ops);
   generic_mourn_inferior ();
 }
 

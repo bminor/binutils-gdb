@@ -964,6 +964,7 @@ void
 eb_mourn_inferior ()
 {
   remove_breakpoints ();
+  unpush_target (&eb_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 /* Define the target subroutine names */

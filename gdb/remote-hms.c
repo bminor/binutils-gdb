@@ -1299,6 +1299,7 @@ static void
 hms_mourn ()
 {
   hms_clear_breakpoints ();
+  unpush_target (&hms_ops);
   generic_mourn_inferior ();
 }
 
