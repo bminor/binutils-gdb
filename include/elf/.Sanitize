@@ -33,6 +33,7 @@ d30v.h
 dwarf.h
 dwarf2.h
 external.h
+fr30.h
 hppa.h
 i386.h
 internal.h

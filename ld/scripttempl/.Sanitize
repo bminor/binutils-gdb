@@ -50,6 +50,7 @@ elf.sc
 elfd10v.sc
 elfd30v.sc
 elfppc.sc
+fr30.sc
 go32coff.sc
 h8300.sc
 h8300h.sc
