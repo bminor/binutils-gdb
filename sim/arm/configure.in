@@ -1,0 +1,35 @@
+# This file is a shell script that supplies the information necessary
+# to tailor a template configure script into the configure script
+# appropriate for this directory.  For more information, check any
+# existing configure script.
+
+srctrigger=bag.c
+srcname="arm sim"
+
+# per-host:
+
+. ${srcdir}/../../bfd/configure.host
+
+# Set up to make a link between the host's include file and "sysdep.h".
+files="../../bfd/hosts/${my_host}.h"
+
+links="sysdep.h"
+
+if [ ! -f ${srcdir}/${files} ] ; then
+	files=../../bfd/hosts/std-host.h
+	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
+fi
+
+host_makefile_frag=
+if [ -f ${srcdir}/../../bfd/config/${my_host}.mh ] ; then
+	host_makefile_frag=../../bfd/config/${my_host}.mh
+fi
+
+# per-target:
+
+
+case "${target}" in
+  arm-*-*)		sim_target=arm ;;
+esac
+
+target_makefile_frag=${sim_target}.mt

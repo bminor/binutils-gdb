@@ -1,0 +1,58 @@
+This is the README file for ARMulator version 1.0, an ARM6 instruction 
+emulator.
+
+Configuration:
+	The armulator has one configuration option, the default endianness
+	of the processor.  This can be changed by building with ENDIAN=BIGEND
+	to produce a big-endian variant.  The debugger can also select the
+	endianness at run-time.
+
+Build instructions:
+
+	This program is known to compile using GCC 2.6.0 on a Sun4.  Other
+	builds are untested.  It almost certainly will not work on non-32bit
+	machines.
+
+	To build the program simply type make in the source directory,
+	followed by "make install"
+
+Using the emulator:
+
+	The emulator runs as a separate process, and communicates with a 
+	debugger via tcp.  To start the emulator type
+		armul <socknum>
+	where socknum is any number between 1024 and 65535.  If the socket is
+	already in use, armul will exit with an error.
+
+	This version of armul has been designed to work with gdb-4.13
+	with the ARM/RDP/RDI extensions added (available separately).  To
+	connect gdb to the ARMulator, start gdb and type
+		target arm <hostname>:<socknum>
+	where hostname is the name of the machine on which the armulator
+	is running, and socknum is the socket number specified when armul
+	was started.
+
+IMPORTANT:
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+	Advanced RISC Machines welcomes bug reports for this package,
+	but no undertaking can be made to provide support or reply to email.
+	Bugs should be sent to:
+		armgnu@armltd.co.uk
+
+
+
+	

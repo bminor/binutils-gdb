@@ -1,0 +1,120 @@
+#    Makefile for ARMulator:  ARM6 Instruction Emulator.
+#    Copyright (C) 1994 Advanced RISC Machines Ltd.
+# 
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+# 
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# These variables can be overridden
+
+#Default endianness of the processor (LITTLEEND or BIGEND)
+ENDIAN=LITTLEEND
+
+prefix=/usr/local
+CC = gcc
+CFLAGS = -O2 -D$(ENDIAN) $(CFL) 
+INSTALL_DIR = $(prefix)/bin
+INSTALL=cp
+
+# Everything else should be ok as it is.
+
+OBJS = armcopro.o armemu26.o armemu32.o arminit.o armos.o \
+	armsupp.o main.o parent.o kid.o communicate.o gdbhost.o \
+		bag.o armrdi.o
+
+SRCS = armcopro.c armemu.c arminit.c armos.c armvirt.c \
+	armsupp.c main.c parent.c kid.c communicate.c gdbhost.c \
+	bag.c armrdi.c
+INCS = armdefs.h armemu.h armfpe.h armopts.h armos.h bag.h communicate.h \
+	dbg_conf.h dbg_cp.h dbg_hif.h dbg_rdi.h gdbhost.h
+
+TARED = $(SRCS) $(INCS) README COPYING Makefile
+
+MODEL = armvirt
+
+VER=1.0
+
+all: armul
+
+install: all
+	$(INSTALL) armul $(INSTALL_DIR)
+
+armul: $(OBJS) $(MODEL).o
+	$(CC) $(CFLAGS) $(OBJS) $(MODEL).o -o $@ -lm -lXext -lX11
+
+clean:
+	rm -f *.o armul core
+
+distclean: clean
+	rm -f *~
+
+realclean: distclean
+	rm -f *.tar *.tar.gz
+
+armul.tar.gz: 
+	rm -rf armul-$(VER)
+	mkdir armul-$(VER)
+	cd armul-$(VER) ; \
+	for file in $(TARED) ; do \
+	  ln ../$${file} . ; \
+	done 
+	tar cf armul.tar armul-$(VER)
+	gzip armul.tar
+	mv armul.tar.gz armul-$(VER).tar.gz
+
+# memory models
+
+armvirt.o: armdefs.h armvirt.c
+	$(CC) $(CFLAGS) -c $*.c
+
+# other objects
+
+armos.o: armos.c armdefs.h armos.h armfpe.h
+	$(CC) $(CFLAGS) -c $*.c
+
+armcopro.o: armcopro.c armdefs.h 
+	$(CC) $(CFLAGS) -c $*.c
+
+armemu26.o: armemu.c armdefs.h armemu.h 
+	$(CC) $(CFLAGS) -o armemu26.o -c armemu.c
+
+armemu32.o: armemu.c armdefs.h armemu.h
+	$(CC) $(CFLAGS) -o armemu32.o -DMODE32 -c armemu.c
+
+arminit.o: arminit.c armdefs.h armemu.h
+	$(CC) $(CFLAGS) -c $*.c
+
+armrdi.o: armrdi.c armdefs.h armemu.h armos.h dbg_cp.h dbg_conf.h dbg_rdi.h \
+		dbg_hif.h communicate.h
+	$(CC) $(CFLAGS) -c $*.c
+
+armsupp.o: armsupp.c armdefs.h armemu.h
+	$(CC) $(CFLAGS) -c $*.c
+
+kid.o: kid.c armdefs.h dbg_conf.h dbg_hif.h dbg_rdi.h gdbhost.h communicate.h
+	$(CC) $(CFLAGS) -c $*.c
+
+main.o: main.c armdefs.h dbg_rdi.h dbg_conf.h
+	$(CC) $(CFLAGS) -c $*.c
+
+communicate.o: communicate.c armdefs.h
+	$(CC) $(CFLAGS) -c $*.c
+
+bag.o: bag.c bag.h
+	$(CC) $(CFLAGS) -c $*.c
+
+gdbhost.o: gdbhost.c armdefs.h communicate.h dbg_rdi.h armos.h
+	$(CC) $(CFLAGS) -c $*.c
+
+parent.o: parent.c armdefs.h dbg_rdi.h communicate.h
+	$(CC) $(CFLAGS) -c $*.c
