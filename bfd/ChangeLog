@@ -1,3 +1,8 @@
+2001-02-08  Geoffrey Keating  <geoffk@redhat.com>
+
+	* config.bfd: Enable coff64 for rs6000-*.  Patch from
+	<hzoli@austin.ibm.com>.
+
 2001-02-07  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* coffgen.c (coff_find_nearest_line): If stabs info is successfully

@@ -689,7 +689,7 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_pjl_vec bfd_elf32_pj_vec bfd_elf32_i386_vec"
     ;;
 
-  powerpc-*-aix* | powerpc-*-beos*)
+  powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec
     targ_selvecs="rs6000coff64_vec"
     ;;
@@ -716,10 +716,6 @@ case "${targ}" in
   powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
     targ_defvec=bfd_powerpcle_pe_vec
     targ_selvecs="bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
-    ;;
-
-  rs6000-*-*)
-    targ_defvec=rs6000coff_vec
     ;;
 
   sh-*-linux*)
