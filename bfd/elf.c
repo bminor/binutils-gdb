@@ -53,6 +53,7 @@ static boolean assign_section_numbers PARAMS ((bfd *));
 static INLINE int sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean elf_map_symbols PARAMS ((bfd *));
 static bfd_size_type get_program_header_size PARAMS ((bfd *));
+static boolean elfcore_read_notes PARAMS ((bfd *, bfd_vma, bfd_vma));
 
 /* Swap version information in and out.  The version information is
    currently size independent.  If that ever changes, this code will
@@ -1387,31 +1388,20 @@ _bfd_elf_new_section_hook (abfd, sec)
  */
 
 boolean
-bfd_section_from_phdr (abfd, hdr, index)
+_bfd_elf_make_section_from_phdr (abfd, hdr, index, typename)
      bfd *abfd;
      Elf_Internal_Phdr *hdr;
      int index;
+     const char *typename;
 {
   asection *newsect;
   char *name;
-  char *typename;
   char namebuf[64];
   int split;
 
   split = ((hdr->p_memsz > 0)
 	    && (hdr->p_filesz > 0)
 	    && (hdr->p_memsz > hdr->p_filesz));
-  switch (hdr->p_type)
-    {
-    case PT_NULL: typename = "null"; break;
-    case PT_LOAD: typename = "load"; break;
-    case PT_DYNAMIC: typename = "dynamic"; break;
-    case PT_INTERP: typename = "interp"; break;
-    case PT_NOTE: typename = "note"; break;
-    case PT_SHLIB: typename = "shlib"; break;
-    case PT_PHDR: typename = "phdr"; break;
-    default: typename = "segment"; break;
-    }
   sprintf (namebuf, "%s%d%s", typename, index, split ? "a" : "");
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
   if (!name)
@@ -1465,6 +1455,52 @@ bfd_section_from_phdr (abfd, hdr, index)
     }
 
   return true;
+}
+
+boolean
+bfd_section_from_phdr (abfd, hdr, index)
+     bfd *abfd;
+     Elf_Internal_Phdr *hdr;
+     int index;
+{
+  struct elf_backend_data *bed;
+
+  switch (hdr->p_type)
+    {
+    case PT_NULL:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "null");
+
+    case PT_LOAD:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "load");
+
+    case PT_DYNAMIC:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "dynamic");
+
+    case PT_INTERP:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "interp");
+
+    case PT_NOTE:
+      if (! _bfd_elf_make_section_from_phdr (abfd, hdr, index, "note"))
+	return false;
+      if (! elfcore_read_notes (abfd, hdr->p_offset, hdr->p_filesz))
+	return false;
+      return true;
+
+    case PT_SHLIB:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "shlib");
+
+    case PT_PHDR:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "phdr");
+
+    default:
+      /* Check for any processor-specific program segment types.
+         If no handler for them, default to making "segment" sections. */
+      bed = get_elf_backend_data (abfd);
+      if (bed->elf_backend_section_from_phdr)
+	return (*bed->elf_backend_section_from_phdr) (abfd, hdr, index);
+      else
+	return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "segment");
+    }
 }
 
 /* Initialize REL_HDR, the section-header for new section, containing
@@ -5308,6 +5344,8 @@ elfcore_read_notes (abfd, offset, size)
 }
 
 
+/* FIXME: This function is now unnecessary.  Callers can just call
+   bfd_section_from_phdr directly.  */
 
 boolean
 _bfd_elfcore_section_from_phdr (abfd, phdr, sec_num)
@@ -5316,10 +5354,6 @@ _bfd_elfcore_section_from_phdr (abfd, phdr, sec_num)
      int sec_num;
 {
   if (! bfd_section_from_phdr (abfd, phdr, sec_num))
-    return false;
-
-  if (phdr->p_type == PT_NOTE
-      && ! elfcore_read_notes (abfd, phdr->p_offset, phdr->p_filesz))
     return false;
 
   return true;

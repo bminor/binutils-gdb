@@ -1,3 +1,22 @@
+1999-11-26  Fred Fish  <fnf@cygnus.com>
+
+	* elf.c (elfcore_read_notes): Add prototype for static function.
+	(_bfd_elf_make_section_from_phdr): Renamed from bfd_section_from_phdr.
+	(bfd_section_from_phdr): Replacement function that calls
+	_bfd_elf_make_section_from_phdr for generic segment types and
+	backend fucntion pointed to by elf_backend_section_from_phdr for
+	backend specific segment types.
+	(_bfd_elfcore_section_from_phdr): Remove call to elfcore_read_notes,
+	now called by _bfd_elf_make_section_from_phdr.  Note that this func
+	is now just a stub between the caller and bfd_section_from_phdr.
+	
+	* elf-bfd.h (struct elf_backend_data): Add new function pointer
+	elf_backend_section_from_phdr.
+	(elf_backend_section_from_phdr): Add prototype.
+	
+	* elfxx-target.h (elf_backend_section_from_phdr): Define default.
+	(elfNN_bed): Add elf_backend_section_from_phdr.
+
 1999-11-25  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (bfd_arm_get_bfd_for_interworking):  Add

@@ -388,6 +388,12 @@ struct elf_backend_data
 						    Elf32_Internal_Shdr *,
 						    char *));
 
+  /* A function to handle unusual program segment types when creating BFD
+     sections from ELF program segments. */
+  boolean (*elf_backend_section_from_phdr) PARAMS ((bfd *,
+						    Elf32_Internal_Phdr *,
+						    int));
+
   /* A function to set up the ELF section header for a BFD section in
      preparation for writing it out.  This is where the flags and type
      fields are set for unusual sections.  */
@@ -945,6 +951,8 @@ extern boolean bfd_elf_mkcorefile PARAMS ((bfd *));
 extern Elf_Internal_Shdr *bfd_elf_find_section PARAMS ((bfd *, char *));
 extern boolean _bfd_elf_make_section_from_shdr
   PARAMS ((bfd *abfd, Elf_Internal_Shdr *hdr, const char *name));
+extern boolean _bfd_elf_make_section_from_phdr
+  PARAMS ((bfd *abfd, Elf_Internal_Phdr *hdr, int index, const char *typename));
 extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
