@@ -2241,12 +2241,17 @@ proc files_command {} {
   pack .files_window.close -side bottom -fill x -expand no -anchor s
   pack .files_window.scroll -side right -fill both
   pack .files_window.list -side left -fill both -expand yes
-  bind .files_window.list <Any-ButtonRelease-1> {
+  bind .files_window.list <ButtonRelease-1> {
     set file [%W get [%W curselection]]
     gdb_cmd "list $file:1,0"
     update_listing [gdb_loc $file:1]
     destroy .files_window
   }
+  # We must execute the listbox binding first, because it
+  # references the widget that will be destroyed by the widget
+  # binding for Button-Release-1.  Otherwise we try to use
+  # .files_window.list after the .files_window is destroyed.
+  bind_widget_after_class .files_window.list
 }
 
 button .files -text Files -command files_command

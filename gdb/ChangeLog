@@ -1,3 +1,10 @@
+Sat Jul 20 17:46:40 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (files_command): Reorder the binding tags for
+	the listbox widget to avoid referencing the listbox after
+	the containing widget has been destroyed by the action of
+	a previous binding.
+
 Sat Jul 20 10:41:06 1996  Fred Fish  <fnf@cygnus.com>
 
 	* dwarf2read.c (struct filenames): Change internal "struct file"
