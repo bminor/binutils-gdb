@@ -1015,7 +1015,7 @@ rombug_command (args, fromtty)
     error("Missing command.");
 	
   printf_monitor("%s\r", args);
-  expect(CMD_DELIM, 0);
+  expect_prompt(0);
 }
 
 #if 0

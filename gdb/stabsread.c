@@ -2455,6 +2455,7 @@ read_struct_fields (fip, pp, type, objfile)
 
   while (**pp != ';')
     {
+      if (os9k_stabs && **pp == ',') break;
       STABS_CONTINUE (pp);
       /* Get space to record the next field's data.  */
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
