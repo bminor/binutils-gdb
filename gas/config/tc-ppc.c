@@ -55,6 +55,10 @@ static void ppc_stabx PARAMS ((int));
 static void ppc_rename PARAMS ((int));
 static void ppc_toc PARAMS ((int));
 #endif
+#ifdef OBJ_ELF
+static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **));
+static void ppc_elf_cons PARAMS ((int));
+#endif
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -106,6 +110,12 @@ const pseudo_typeS md_pseudo_table[] =
   { "rename",	ppc_rename,	0 },
   { "stabx",	ppc_stabx,	0 },
   { "toc",	ppc_toc,	0 },
+#endif
+#ifdef OBJ_ELF
+  { "long",	ppc_elf_cons,	4 },
+  { "word",	ppc_elf_cons,	2 },
+  { "short",	ppc_elf_cons,	2 },
+  { "byte",	ppc_elf_cons,	1 },
 #endif
 
   /* This pseudo-op is used even when not generating XCOFF output.  */
@@ -187,6 +197,10 @@ static bfd_size_type ppc_debug_name_section_size;
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
 #endif /* OBJ_ELF */
 
+#ifndef WORKING_DOT_WORD
+const int md_short_jump_size = 4;
+const int md_long_jump_size = 4;
+#endif
 
 #ifdef OBJ_ELF
 CONST char *md_shortopts = "um:VQ:";
@@ -277,7 +291,8 @@ PowerPC options:\n\
 -mpwrx			generate code for IBM POWER/2 (RIOS2)\n\
 -mpwr			generate code for IBM POWER (RIOS1)\n\
 -m601			generate code for Motorola PowerPC 601\n\
--mppc			generate code for Motorola PowerPC 603/604\n\
+-mppc, -mppc32, -m603, -m604\n\
+			generate code for Motorola PowerPC 603/604\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n");
 #ifdef OBJ_ELF
   fprintf(stream, "\
@@ -469,6 +484,91 @@ ppc_insert_operand (insn, operand, val, file, line)
   return insn;
 }
 
+#ifdef OBJ_ELF
+/* Parse @got, etc. and return the desired relocation.  */
+static bfd_reloc_code_real_type
+ppc_elf_suffix (str_p)
+     char **str_p;
+{
+  char *str = *str_p;
+
+  if (*str != '@')
+    return BFD_RELOC_UNUSED;
+
+  if (strncmp (str, "@GOT", 4) == 0 || strncmp (str, "@got", 4) == 0)
+    {
+      *str_p += 4;
+      return BFD_RELOC_PPC_TOC16;
+    }
+  else if (strncmp (str, "@L", 2) == 0 || strncmp (str, "@l", 2) == 0)
+    {
+      *str_p += 2;
+      return BFD_RELOC_LO16;
+    }
+  else if (strncmp (str, "@HA", 3) == 0 || strncmp (str, "@ha", 3) == 0)
+    {
+      *str_p += 3;
+      return BFD_RELOC_HI16_S;
+    }
+  else if (strncmp (str, "@H", 2) == 0 || strncmp (str, "@h", 2) == 0)
+    {
+      *str_p += 2;
+      return BFD_RELOC_HI16;
+    }
+  else if (strncmp (str, "@PCREL", 6) == 0 || strncmp (str, "@pcrel", 6) == 0)
+    {				/* this is a hack */
+      *str_p += 6;
+      return BFD_RELOC_32_PCREL;
+    }
+
+  return BFD_RELOC_UNUSED;
+}
+
+/* Like normal .long, except support @got, etc. */
+/* worker to do .byte etc statements */
+/* clobbers input_line_pointer, checks */
+/* end-of-line. */
+static void
+ppc_elf_cons (nbytes)
+     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+{
+  expressionS exp;
+  bfd_reloc_code_real_type reloc;
+
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      expression (&exp);
+      if (nbytes == 4
+	  && exp.X_op == O_symbol
+	  && *input_line_pointer == '@'
+	  && (reloc = ppc_elf_suffix (&input_line_pointer)) != BFD_RELOC_UNUSED)
+	{
+	  register char *p = frag_more ((int) nbytes);
+	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
+	  int offset = (!reloc_howto) ? 0 : (nbytes - bfd_get_reloc_size (reloc_howto));
+
+	  if (offset < 0)
+	    offset = 0;
+
+	  fix_new_exp (frag_now, p - frag_now->fr_literal + offset, (int) nbytes - offset, &exp, 0, reloc);
+	}
+      else
+	emit_expr (&exp, (unsigned int) nbytes);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;		/* Put terminator back into stream. */
+  demand_empty_rest_of_line ();
+}
+
+#endif /* OBJ_ELF */
+
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
    that would screw up references to ``.''.  */
@@ -477,6 +577,7 @@ struct ppc_fixup
 {
   expressionS exp;
   int opindex;
+  bfd_reloc_code_real_type reloc;
 };
 
 #define MAX_INSN_FIXUPS (5)
@@ -498,6 +599,7 @@ md_assemble (str)
   int fc;
   char *f;
   int i;
+  bfd_reloc_code_real_type reloc;
 
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
@@ -632,6 +734,20 @@ md_assemble (str)
       else if (ex.X_op == O_constant)
 	insn = ppc_insert_operand (insn, operand, ex.X_add_number,
 				   (char *) NULL, 0);
+
+#ifdef OBJ_ELF
+      else if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
+	{
+	  /* We need to generate a fixup for this expression.  */
+	  if (fc >= MAX_INSN_FIXUPS)
+	    as_fatal ("too many fixups");
+	  fixups[fc].exp = ex;
+	  fixups[fc].opindex = 0;
+	  fixups[fc].reloc = reloc;
+	  ++fc;
+	}
+#endif /* OBJ_ELF */
+
       else
 	{
 	  /* We need to generate a fixup for this expression.  */
@@ -639,6 +755,7 @@ md_assemble (str)
 	    as_fatal ("too many fixups");
 	  fixups[fc].exp = ex;
 	  fixups[fc].opindex = *opindex_ptr;
+	  fixups[fc].reloc = BFD_RELOC_UNUSED;
 	  ++fc;
 	}
 
@@ -688,13 +805,49 @@ md_assemble (str)
       const struct powerpc_operand *operand;
 
       operand = &powerpc_operands[fixups[i].opindex];
-      fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
-		   &fixups[i].exp,
-		   (operand->flags & PPC_OPERAND_RELATIVE) != 0,
-		   ((bfd_reloc_code_real_type)
-		    (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+	{
+	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+	  int offset = (!reloc_howto) ? 0 : (4 - bfd_get_reloc_size (reloc_howto));
+
+	  if (offset < 0)
+	    offset = 0;
+
+	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, 4 - offset,
+		       &fixups[i].exp, (reloc_howto && reloc_howto->pc_relative),
+		       fixups[i].reloc);
+	}
+      else
+	fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+		     &fixups[i].exp,
+		     (operand->flags & PPC_OPERAND_RELATIVE) != 0,
+		     ((bfd_reloc_code_real_type)
+		       (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
     }
 }
+
+#ifndef WORKING_DOT_WORD
+/* Handle long and short jumps */
+void
+md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
+     char *ptr;
+     addressT from_addr, to_addr;
+     fragS *frag;
+     symbolS *to_symbol;
+{
+  abort ();
+}
+
+void
+md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
+     char *ptr;
+     addressT from_addr, to_addr;
+     fragS *frag;
+     symbolS *to_symbol;
+{
+  abort ();
+}
+#endif
 
 /* Handle a macro.  Gather all the operands, transform them as
    described by the macro, and call md_assemble recursively.  All the
@@ -1789,7 +1942,7 @@ ppc_symbol_new_hook (sym)
 	sym->sy_tc.class = XMC_TI;
       else if (strcmp (s, "TB]") == 0)
 	sym->sy_tc.class = XMC_TB;
-      else if (strcmp (s, "TC0]") == 0 || strcm (s, "T0]") == 0)
+      else if (strcmp (s, "TC0]") == 0 || strcmp (s, "T0]") == 0)
 	sym->sy_tc.class = XMC_TC0;
       break;
     case 'U':
@@ -2492,9 +2645,14 @@ md_apply_fix (fixp, valuep)
       switch (fixp->fx_r_type)
 	{
 	case BFD_RELOC_32:
+	case BFD_RELOC_32_PCREL:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 4);
 	  break;
+	case BFD_RELOC_LO16:
+	case BFD_RELOC_HI16:
+	case BFD_RELOC_HI16_S:
+	case BFD_RELOC_PPC_TOC16:
 	case BFD_RELOC_16:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 2);
@@ -2542,7 +2700,7 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "reloc not supported by object file format");
+		    "reloc %d not supported by object file format", (int)fixp->fx_r_type);
       return NULL;
     }
   reloc->addend = fixp->fx_addnumber;

@@ -1,3 +1,24 @@
+Wed Feb 15 15:07:00 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (md_pseudo_table): If ELF, go to ppc_elf_cons
+	instead of cons.
+	(md_show_usage): Show all of the PowerPc options.
+	(ppc_elf_suffix): New function to recognize ELF suffixes that
+	specify a relocation, such as @GOT.
+	(ppc_elf_cons): Replacement for the standard cons function that
+	knows about the ELF suffixes.
+	(ppc_fixup): Add reloc field to hold non-standard relocation.
+	(md_assemble): Handle ELF suffixes like @GOT.
+	(md_create_short_jump): Dummy in case WORKING_DOT_WORD is not
+	defined.
+	(md_create_long_jump): Ditto.
+	(md_short_jump_size): Ditto.
+	(md_long_jump_size): Ditto.
+	(md_apply_fix): Handle BFD_RELOC_32_PCREL, BFD_RELOC_LO16,
+	BFD_RELOC_HI16, BFD_RELOC_HI16_S, BFD_RELOC_PPC_TOC16, and
+	BFD_RELOC_16 relocations.  If relocation can not be found, print
+	the decimal value of the relocation.
+
 Wed Feb 15 11:46:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro): Don't use the target register as a
