@@ -1,3 +1,12 @@
+Mon May 31 11:36:08 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.t13/{Makefile.in,gdbme.c,bitfields.exp}: If we #defined the
+	signed keyword away, don't expect signed bitfields to be signed.
+
+	* gdb.t13/bitfields.exp (bitfield containment): Accept the fields
+	printing with only as many 1's as are in the field as well as printing
+	with 32 1's (see comment).
+
 Sat May 29 17:57:01 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t00/default.exp:  Start with a fresh gdb.
