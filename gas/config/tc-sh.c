@@ -2192,12 +2192,7 @@ sh_do_align (n, fill, len, max)
      int max;
 {
   if (fill == NULL
-#ifdef BFD_ASSEMBLER
-      && (now_seg->flags & SEC_CODE) != 0
-#else
-      && now_seg != data_section
-      && now_seg != bss_section
-#endif
+      && subseg_text_p (now_seg)
       && n > 1)
     {
       static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };

@@ -1,3 +1,16 @@
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* subsegs.c (subseg_text_p): New function.
+	* as.h (subseg_text_p): Declare.
+	* read.c (do_align): Use subseg_text_p to set the default fill.
+	* write.c (subsegs_finish): Likewise.
+	* config/obj-coff.c (write_object_file): Likewise.
+	* config/tc-i386.h (md_maybe_text): Don't define.
+	(md_do_align): Use subseg_text_p to set the default fill.
+	* config/tc-m32r.c (m32r_do_align): Likewise.
+	* config/tc-sh.c (sh_do_align): Likewise.
+	* config/tc-sparc.h (md_do_align): Likewise.
+
 1999-06-12  David O'Brien  <obrien@freebsd.org>
 
 	* configure.in: (i[3456]86-*-freebsd*): Now defaults to ELF.

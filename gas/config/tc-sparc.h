@@ -57,7 +57,7 @@ extern int sparc_pic_code;
 
 #define md_do_align(n, fill, len, max, around)				\
 if ((n) && (n) <= 10 && !need_pass_2 && !(fill)				\
-    && now_seg != data_section && now_seg != bss_section)		\
+    && subseg_text_p (now_seg))						\
   {									\
     char *p;								\
     p = frag_var (rs_align_code, 1 << n, 1, (relax_substateT) 1024,	\

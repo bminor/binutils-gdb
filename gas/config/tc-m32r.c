@@ -245,7 +245,7 @@ m32r_do_align (n, fill, len, max)
 {
   /* Only do this if the fill pattern wasn't specified.  */
   if (fill == NULL
-      && (now_seg->flags & SEC_CODE) != 0
+      && subseg_text_p (now_seg)
       /* Only do this special handling if aligning to at least a
 	 4 byte boundary.  */
       && n > 1

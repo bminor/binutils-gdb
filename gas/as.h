@@ -585,6 +585,7 @@ void subseg_set PARAMS ((segT seg, subsegT subseg));
 #ifdef BFD_ASSEMBLER
 segT subseg_get PARAMS ((const char *, int));
 #endif
+int subseg_text_p PARAMS ((segT));
 
 void start_dependencies PARAMS ((char *));
 void register_dependency PARAMS ((char *));

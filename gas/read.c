@@ -1173,21 +1173,7 @@ do_align (n, fill, len, max)
 
   if (fill == NULL)
     {
-      int maybe_text;
-
-#ifdef BFD_ASSEMBLER
-      if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
-	maybe_text = 1;
-      else
-	maybe_text = 0;
-#else
-      if (now_seg != data_section && now_seg != bss_section)
-	maybe_text = 1;
-      else
-	maybe_text = 0;
-#endif
-
-      if (maybe_text)
+      if (subseg_text_p (now_seg))
 	default_fill = NOP_OPCODE;
       else
 	default_fill = 0;

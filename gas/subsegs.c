@@ -564,6 +564,21 @@ section_symbol (sec)
 
 #endif /* BFD_ASSEMBLER */
 
+/* Return whether the specified segment is thought to hold text.  */
+
+int
+subseg_text_p (sec)
+     segT sec;
+{
+#ifdef BFD_ASSEMBLER
+  return (bfd_get_section_flags (stdoutput, sec) & SEC_CODE) != 0;
+#else
+  return (sec != data_section
+	  && sec != bss_section
+	  && strcmp (segment_name (sec), ".eh_frame") != 0);
+#endif
+}
+
 void
 subsegs_print_statistics (file)
      FILE *file;

@@ -3235,6 +3235,7 @@ write_object_file ()
 	 at the next frag.  */
 
       subseg_set (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
+
 #ifndef SUB_SEGMENT_ALIGN
 #define SUB_SEGMENT_ALIGN(SEG) 1
 #endif
@@ -3242,7 +3243,9 @@ write_object_file ()
       md_do_align (SUB_SEGMENT_ALIGN (now_seg), (char *) NULL, 0, 0,
 		   alignment_done);
 #endif
-      frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE, 0);
+      frag_align (SUB_SEGMENT_ALIGN (now_seg),
+		  subseg_text_p (now_seg) ? NOP_OPCODE : 0,
+		  0);
 #ifdef md_do_align
     alignment_done:
 #endif

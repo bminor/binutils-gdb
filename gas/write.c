@@ -1372,7 +1372,8 @@ subsegs_finish ()
          any alignment is meaningless, and, moreover, will look weird
          if we are generating a listing.  */
       frag_align (had_errors () ? 0 : SUB_SEGMENT_ALIGN (now_seg),
-		  NOP_OPCODE, 0);
+		  subseg_text_p (now_seg) ? NOP_OPCODE : 0,
+		  0);
 
       /* frag_align will have left a new frag.
 	 Use this last frag for an empty ".fill".
