@@ -30,9 +30,6 @@
 
 #define U_REGS_OFFSET 0
 
-/* Need R_OK etc, but USG isn't defined.  */
-#include <unistd.h>
-
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
    for now you have to specify some parameters that determine how gdb places
    the mappings in it's address space.  See the comments in map_to_address()

@@ -27,7 +27,4 @@
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
 
-/* Need R_OK etc, but USG isn't defined.  */
-#include <unistd.h>
-
 #endif /* XM_ARMLINUX_H */

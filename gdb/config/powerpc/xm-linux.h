@@ -27,9 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
 
-/* Need R_OK etc, but USG isn't defined.  */
-#include <unistd.h>
-
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
    for now you have to specify some parameters that determine how gdb places
    the mappings in it's address space.  See the comments in map_to_address()

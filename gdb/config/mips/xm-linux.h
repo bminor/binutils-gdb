@@ -30,7 +30,4 @@
 #endif
 #endif
 
-/* Need R_OK etc, but USG isn't defined.  */
-#include <unistd.h>
-
 #endif /* XM_MIPSLINUX_H */

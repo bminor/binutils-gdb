@@ -31,7 +31,4 @@
 
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 
-/* Need R_OK etc, but USG isn't defined.  */
-#include <unistd.h>
-
 #endif /* #ifndef XM_LINUX_H */
