@@ -117,29 +117,14 @@ value_cast (type, arg2)
      struct type *type;
      register value_ptr arg2;
 {
-  register enum type_code code1;
+  register enum type_code code1 = TYPE_CODE (type);
   register enum type_code code2;
   register int scalar;
 
   if (VALUE_TYPE (arg2) == type)
     return arg2;
 
-  /* Coerce arrays but not enums.  Enums will work as-is
-     and coercing them would cause an infinite recursion.  */
-  if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_ENUM)
-    COERCE_ARRAY (arg2);
-
-  COERCE_VARYING_ARRAY (arg2);
-
-  code1 = TYPE_CODE (type);
-  code2 = TYPE_CODE (VALUE_TYPE (arg2));
-
-  if (code1 == TYPE_CODE_COMPLEX) 
-    return cast_into_complex (type, arg2); 
-  if (code1 == TYPE_CODE_BOOL) 
-    code1 = TYPE_CODE_INT; 
-  if (code2 == TYPE_CODE_BOOL) 
-    code2 = TYPE_CODE_INT;
+  COERCE_REF(arg2);
 
   /* A cast to an undetermined-length array_type, such as (TYPE [])OBJECT,
      is treated like a cast to (TYPE [N])OBJECT,
@@ -162,6 +147,25 @@ value_cast (type, arg2)
 					     element_type, range_type);
       return arg2;
     }
+
+  if (current_language->c_style_arrays
+      && (VALUE_REPEATED (arg2)
+	  || TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_ARRAY))
+    arg2 = value_coerce_array (arg2);					\
+
+  if (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_FUNC)                   \
+    arg2 = value_coerce_function (arg2);
+
+  COERCE_VARYING_ARRAY (arg2);
+
+  code2 = TYPE_CODE (VALUE_TYPE (arg2));
+
+  if (code1 == TYPE_CODE_COMPLEX) 
+    return cast_into_complex (type, arg2); 
+  if (code1 == TYPE_CODE_BOOL) 
+    code1 = TYPE_CODE_INT; 
+  if (code2 == TYPE_CODE_BOOL) 
+    code2 = TYPE_CODE_INT;
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
 	    || code2 == TYPE_CODE_ENUM || code2 == TYPE_CODE_RANGE);
@@ -999,7 +1003,7 @@ call_function_by_hand (function, nargs, args)
   {
     struct block *b = block_for_pc (funaddr);
     /* If compiled without -g, assume GCC.  */
-    using_gcc = b == NULL || BLOCK_GCC_COMPILED (b);
+    using_gcc = b == NULL ? 0 : BLOCK_GCC_COMPILED (b);
   }
 
   /* Are we returning a value using a structure return or a normal
@@ -1065,6 +1069,9 @@ call_function_by_hand (function, nargs, args)
   sp = old_sp;		/* It really is used, for some ifdef's... */
 #endif
 
+  if (nargs < TYPE_NFIELDS (ftype))
+    error ("too few arguments in function call");
+
   for (i = nargs - 1; i >= 0; i--)
     {
       struct type *param_type;
@@ -1075,17 +1082,71 @@ call_function_by_hand (function, nargs, args)
       args[i] = value_arg_coerce (args[i], param_type);
     }
 
+#if defined (REG_STRUCT_HAS_ADDR)
+  {
+    /* This is a machine like the sparc, where we may need to pass a pointer
+       to the structure, not the structure itself.  */
+    for (i = nargs - 1; i >= 0; i--)
+      if ((TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_STRUCT
+	   || TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_UNION
+	   || TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_ARRAY
+	   || TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_STRING)
+	  && REG_STRUCT_HAS_ADDR (using_gcc, VALUE_TYPE (args[i])))
+	{
+	  CORE_ADDR addr;
+	  int len = TYPE_LENGTH (VALUE_TYPE (args[i]));
+#ifdef STACK_ALIGN
+	  int aligned_len = STACK_ALIGN (len);
+#else
+	  int aligned_len = len;
+#endif
+#if !(1 INNER_THAN 2)
+	  /* The stack grows up, so the address of the thing we push
+	     is the stack pointer before we push it.  */
+	  addr = sp;
+#else
+	  sp -= aligned_len;
+#endif
+	  /* Push the structure.  */
+	  write_memory (sp, VALUE_CONTENTS (args[i]), len);
+#if 1 INNER_THAN 2
+	  /* The stack grows down, so the address of the thing we push
+	     is the stack pointer after we push it.  */
+	  addr = sp;
+#else
+	  sp += aligned_len;
+#endif
+	  /* The value we're going to pass is the address of the thing
+	     we just pushed.  */
+	  args[i] = value_from_longest (lookup_pointer_type (value_type),
+					(LONGEST) addr);
+	}
+  }
+#endif /* REG_STRUCT_HAS_ADDR.  */
+
+  /* Reserve space for the return structure to be written on the
+     stack, if necessary */
+
+  if (struct_return)
+    {
+      int len = TYPE_LENGTH (value_type);
+#ifdef STACK_ALIGN
+      len = STACK_ALIGN (len);
+#endif
+#if 1 INNER_THAN 2
+      sp -= len;
+      struct_addr = sp;
+#else
+      struct_addr = sp;
+      sp += len;
+#endif
+    }
+
 #ifdef STACK_ALIGN
   /* If stack grows down, we must leave a hole at the top. */
   {
     int len = 0;
 
-    /* Reserve space for the return structure to be written on the
-       stack, if necessary */
-
-    if (struct_return)
-      len += TYPE_LENGTH (value_type);
-    
     for (i = nargs - 1; i >= 0; i--)
       len += TYPE_LENGTH (VALUE_TYPE (args[i]));
 #ifdef CALL_DUMMY_STACK_ADJUST
@@ -1098,49 +1159,6 @@ call_function_by_hand (function, nargs, args)
 #endif
   }
 #endif /* STACK_ALIGN */
-
-    /* Reserve space for the return structure to be written on the
-       stack, if necessary */
-
-    if (struct_return)
-      {
-#if 1 INNER_THAN 2
-	sp -= TYPE_LENGTH (value_type);
-	struct_addr = sp;
-#else
-	struct_addr = sp;
-	sp += TYPE_LENGTH (value_type);
-#endif
-      }
-
-#if defined (REG_STRUCT_HAS_ADDR)
-  {
-    /* This is a machine like the sparc, where we may need to pass a pointer
-       to the structure, not the structure itself.  */
-    for (i = nargs - 1; i >= 0; i--)
-      if (TYPE_CODE (VALUE_TYPE (args[i])) == TYPE_CODE_STRUCT
-	  && REG_STRUCT_HAS_ADDR (using_gcc, VALUE_TYPE (args[i])))
-	{
-	  CORE_ADDR addr;
-#if !(1 INNER_THAN 2)
-	  /* The stack grows up, so the address of the thing we push
-	     is the stack pointer before we push it.  */
-	  addr = sp;
-#endif
-	  /* Push the structure.  */
-	  sp = value_push (sp, args[i]);
-#if 1 INNER_THAN 2
-	  /* The stack grows down, so the address of the thing we push
-	     is the stack pointer after we push it.  */
-	  addr = sp;
-#endif
-	  /* The value we're going to pass is the address of the thing
-	     we just pushed.  */
-	  args[i] = value_from_longest (lookup_pointer_type (value_type),
-					(LONGEST) addr);
-	}
-  }
-#endif /* REG_STRUCT_HAS_ADDR.  */
 
 #ifdef PUSH_ARGUMENTS
   PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr);

@@ -1,3 +1,18 @@
+Fri Mar  3 17:42:48 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* valops.c (value_cast):  Cehck for cast to array type *before*
+	we coerce array to pointer (in case arg2 is already array).
+
+	* valops.c (call_function_by_hand):  Set using_gcc to 2 if using
+	gcc2.  Needed for REG_STRUCT_HAS_ADDR to work on sparc.
+	Also check REG_STRUCT_HAS_ADDR for union, array and string types.
+
+	* valops.c (call_function_by_hand):  Re-arrange code for pushing
+	paramaters on the stack so we can do better STACK_ALIGN.
+
+	* valops.c (call_function_by_hand):  Call error if the number
+	of arguments is fewer than parameter types in function type.
+
 Fri Mar  3 17:13:05 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-tdep.c (sparc_extract_struct_value_address): Move
