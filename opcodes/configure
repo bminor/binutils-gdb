@@ -796,6 +796,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_h8500_arch)		ta="$ta h8500-dis.o" ;;
 	bfd_hppa_arch)		ta="$ta hppa-dis.o" ;;
 	bfd_i386_arch)		ta="$ta i386-dis.o" ;;
+	bfd_i860_arch)		;;
 	bfd_i960_arch)		ta="$ta i960-dis.o" ;;
 	bfd_m68k_arch)		ta="$ta m68k-dis.o m68k-opc.o" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.o" ;;

@@ -1,3 +1,8 @@
+Mon Nov  6 17:39:47 1995  Harry Dolan  <dolan@ssd.intel.com>
+
+	* configure.in: Add case for bfd_i860_arch.
+	* configure: Rebuild.
+
 Fri Nov  3 12:45:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Correct fmoveml operands.
