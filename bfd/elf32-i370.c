@@ -1,5 +1,5 @@
 /* i370-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
@@ -791,7 +791,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (!info->shared)
 	{
@@ -1246,19 +1246,21 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared
+	  else if (info->unresolved_syms_in_objects == RM_IGNORE
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
-	      (*info->callbacks->undefined_symbol) (info,
-						    h->root.root.string,
-						    input_bfd,
-						    input_section,
-						    rel->r_offset,
-						    TRUE);
-	      ret = FALSE;
-	      continue;
+	      if ((*info->callbacks->undefined_symbol)
+		  (info, h->root.root.string, input_bfd,
+		   input_section, rel->r_offset,
+		   (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
+		    || ELF_ST_VISIBILITY (h->other))))
+		{
+		  ret = FALSE;
+		  continue;
+		}
+	      relocation = 0;
 	    }
 	}
 
@@ -1546,7 +1548,7 @@ static int i370_noop ()
 
 #define elf_backend_add_symbol_hook \
   (bfd_boolean (*) \
-     PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, \
+     PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *, \
 	      const char **, flagword *, asection **, bfd_vma *))) i370_noop
 #define elf_backend_finish_dynamic_symbol \
   (bfd_boolean (*) \

@@ -44,7 +44,6 @@ unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
 search_dirs_type * search_head;
 
-#ifndef MPW
 #ifdef VMS
 char * slash = "";
 #else
@@ -54,10 +53,6 @@ char * slash = "\\";
 char * slash = "/";
 #endif
 #endif
-#else /* MPW */
-/* The MPW path char is a colon.  */
-char * slash = ":";
-#endif /* MPW */
 
 typedef struct search_arch
 {

@@ -992,14 +992,13 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
        default WP_TEXT file flag has been cleared.  WP_TEXT may be cleared
        by ld --enable-auto-import (if auto-import is actually needed),
        by ld --omagic, or by obcopy --writable-text.  */
-  
-    if (strcmp (scnhdr_int->s_name, ".text") 
-	|| (bfd_get_file_flags (abfd) & WP_TEXT))
-      flags &= ~IMAGE_SCN_MEM_WRITE;
 
     for (p = known_sections; p->section_name; p++)
       if (strcmp (scnhdr_int->s_name, p->section_name) == 0)
 	{
+	  if (strcmp (scnhdr_int->s_name, ".text")
+	      || (bfd_get_file_flags (abfd) & WP_TEXT))
+	    flags &= ~IMAGE_SCN_MEM_WRITE;
 	  flags |= p->must_have;
 	  break;
 	}

@@ -7,7 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-07-11 13:58+0930\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-03-19 15:00+1030\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,6 +67,7 @@ msgid ""
 msgstr ""
 
 #: basic_blocks.c:577
+#, c-format
 msgid ""
 "\n"
 "Execution Summary:\n"
@@ -105,12 +107,14 @@ msgid "[cg_tally] arc from %s to %s traversed %lu times\n"
 msgstr ""
 
 #: cg_print.c:73
+#, c-format
 msgid ""
 "\t\t     Call graph (explanation follows)\n"
 "\n"
 msgstr ""
 
 #: cg_print.c:75
+#, c-format
 msgid ""
 "\t\t\tCall graph\n"
 "\n"
@@ -131,6 +135,7 @@ msgid ""
 msgstr ""
 
 #: cg_print.c:86
+#, c-format
 msgid ""
 " no time propagated\n"
 "\n"
@@ -194,6 +199,7 @@ msgid "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n"
 msgstr ""
 
 #: cg_print.c:604
+#, c-format
 msgid ""
 "Index by function name\n"
 "\n"
@@ -244,7 +250,7 @@ msgstr ""
 msgid "%s: file `%s' has no symbols\n"
 msgstr ""
 
-#: corefile.c:758
+#: corefile.c:764
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr ""
@@ -295,6 +301,7 @@ msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr ""
 
 #: gmon_io.c:592
+#, c-format
 msgid "time is in ticks, not seconds\n"
 msgstr ""
 
@@ -378,11 +385,13 @@ msgid "GNU gprof %s\n"
 msgstr ""
 
 #: gprof.c:418
+#, c-format
 msgid ""
 "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr ""
 
 #: gprof.c:419
+#, c-format
 msgid ""
 "This program is free software.  This program has absolutely no warranty.\n"
 msgstr ""
@@ -443,6 +452,7 @@ msgid ""
 msgstr ""
 
 #: hist.c:378
+#, c-format
 msgid ""
 " no time accumulated\n"
 "\n"
@@ -469,6 +479,7 @@ msgid "calls"
 msgstr ""
 
 #: hist.c:481
+#, c-format
 msgid ""
 "\n"
 "\n"
@@ -477,6 +488,7 @@ msgid ""
 msgstr ""
 
 #: hist.c:487
+#, c-format
 msgid "Flat profile:\n"
 msgstr ""
 

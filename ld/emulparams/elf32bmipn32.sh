@@ -18,3 +18,5 @@ EXECUTABLE_SYMBOLS="
 # Following the IRIX linker, we simply put .rodata in the data
 # segment.
 WRITABLE_RODATA=
+
+EXTRA_EM_FILE=irix

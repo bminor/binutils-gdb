@@ -263,6 +263,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-march}=@var{architecture}[+@var{extension}@dots{}]]
    [@b{-mfpu}=@var{floating-point-format}]
    [@b{-mfloat-abi}=@var{abi}]
+   [@b{-meabi}=@var{ver}]
    [@b{-mthumb}]
    [@b{-EB}|@b{-EL}]
    [@b{-mapcs-32}|@b{-mapcs-26}|@b{-mapcs-float}|

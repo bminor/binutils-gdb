@@ -787,7 +787,7 @@ obj_elf_section_name (void)
 	end++;
       if (end == input_line_pointer)
 	{
-	  as_warn (_("missing name"));
+	  as_bad (_("missing name"));
 	  ignore_rest_of_line ();
 	  return NULL;
 	}
@@ -938,7 +938,7 @@ obj_elf_section (int push)
 	      SKIP_WHITESPACE ();
 	      if (*input_line_pointer != '#')
 		{
-		  as_warn (_("character following name is not '#'"));
+		  as_bad (_("character following name is not '#'"));
 		  ignore_rest_of_line ();
 		  return;
 		}

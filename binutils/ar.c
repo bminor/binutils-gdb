@@ -1,6 +1,6 @@
 /* ar.c - Archive modify and extract.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -353,6 +353,7 @@ main (int argc, char **argv)
   char *inarch_filename;
   int show_version;
   int i;
+  int do_posix = 0;
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -459,107 +460,125 @@ main (int argc, char **argv)
   if (argc < 2)
     usage (0);
 
-  arg_ptr = argv[1];
+  arg_index = 1;
+  arg_ptr = argv[arg_index];
 
   if (*arg_ptr == '-')
-    ++arg_ptr;			/* compatibility */
-
-  while ((c = *arg_ptr++) != '\0')
     {
-      switch (c)
+      /* When the first option starts with '-' we support POSIX-compatible
+	 option parsing.  */
+      do_posix = 1;
+      ++arg_ptr;			/* compatibility */
+    }
+
+  do
+    {
+      while ((c = *arg_ptr++) != '\0')
 	{
-	case 'd':
-	case 'm':
-	case 'p':
-	case 'q':
-	case 'r':
-	case 't':
-	case 'x':
-	  if (operation != none)
-	    fatal (_("two different operation options specified"));
 	  switch (c)
 	    {
 	    case 'd':
-	      operation = delete;
-	      operation_alters_arch = TRUE;
-	      break;
 	    case 'm':
-	      operation = move;
-	      operation_alters_arch = TRUE;
-	      break;
 	    case 'p':
-	      operation = print_files;
-	      break;
 	    case 'q':
-	      operation = quick_append;
-	      operation_alters_arch = TRUE;
-	      break;
 	    case 'r':
-	      operation = replace;
-	      operation_alters_arch = TRUE;
-	      break;
 	    case 't':
-	      operation = print_table;
-	      break;
 	    case 'x':
-	      operation = extract;
+	      if (operation != none)
+		fatal (_("two different operation options specified"));
+	      switch (c)
+		{
+		case 'd':
+		  operation = delete;
+		  operation_alters_arch = TRUE;
+		  break;
+		case 'm':
+		  operation = move;
+		  operation_alters_arch = TRUE;
+		  break;
+		case 'p':
+		  operation = print_files;
+		  break;
+		case 'q':
+		  operation = quick_append;
+		  operation_alters_arch = TRUE;
+		  break;
+		case 'r':
+		  operation = replace;
+		  operation_alters_arch = TRUE;
+		  break;
+		case 't':
+		  operation = print_table;
+		  break;
+		case 'x':
+		  operation = extract;
+		  break;
+		}
+	    case 'l':
 	      break;
+	    case 'c':
+	      silent_create = 1;
+	      break;
+	    case 'o':
+	      preserve_dates = 1;
+	      break;
+	    case 'V':
+	      show_version = TRUE;
+	      break;
+	    case 's':
+	      write_armap = 1;
+	      break;
+	    case 'S':
+	      write_armap = -1;
+	      break;
+	    case 'u':
+	      newer_only = 1;
+	      break;
+	    case 'v':
+	      verbose = 1;
+	      break;
+	    case 'a':
+	      postype = pos_after;
+	      break;
+	    case 'b':
+	      postype = pos_before;
+	      break;
+	    case 'i':
+	      postype = pos_before;
+	      break;
+	    case 'M':
+	      mri_mode = 1;
+	      break;
+	    case 'N':
+	      counted_name_mode = TRUE;
+	      break;
+	    case 'f':
+	      ar_truncate = TRUE;
+	      break;
+	    case 'P':
+	      full_pathname = TRUE;
+	      break;
+	    default:
+	      /* xgettext:c-format */
+	      non_fatal (_("illegal option -- %c"), c);
+	      usage (0);
 	    }
-	case 'l':
-	  break;
-	case 'c':
-	  silent_create = 1;
-	  break;
-	case 'o':
-	  preserve_dates = 1;
-	  break;
-	case 'V':
-	  show_version = TRUE;
-	  break;
-	case 's':
-	  write_armap = 1;
-	  break;
-	case 'S':
-	  write_armap = -1;
-	  break;
-	case 'u':
-	  newer_only = 1;
-	  break;
-	case 'v':
-	  verbose = 1;
-	  break;
-	case 'a':
-	  postype = pos_after;
-	  break;
-	case 'b':
-	  postype = pos_before;
-	  break;
-	case 'i':
-	  postype = pos_before;
-	  break;
-	case 'M':
-	  mri_mode = 1;
-	  break;
-	case 'N':
-	  counted_name_mode = TRUE;
-	  break;
-	case 'f':
-	  ar_truncate = TRUE;
-	  break;
-	case 'P':
-	  full_pathname = TRUE;
-	  break;
-	default:
-	  /* xgettext:c-format */
-	  non_fatal (_("illegal option -- %c"), c);
-	  usage (0);
 	}
+
+      /* With POSIX-compatible option parsing continue with the next
+	 argument if it starts with '-'.  */
+      if (do_posix && arg_index + 1 < argc && argv[arg_index + 1][0] == '-')
+	arg_ptr = argv[++arg_index] + 1;
+      else
+	do_posix = 0;
     }
+  while (do_posix);
 
   if (show_version)
     print_version ("ar");
 
-  if (argc < 3)
+  ++arg_index;
+  if (arg_index >= argc)
     usage (0);
 
   if (mri_mode)
@@ -578,7 +597,7 @@ main (int argc, char **argv)
       if ((operation == none || operation == print_table)
 	  && write_armap == 1)
 	{
-	  ranlib_only (argv[2]);
+	  ranlib_only (argv[arg_index]);
 	  xexit (0);
 	}
 
@@ -587,8 +606,6 @@ main (int argc, char **argv)
 
       if (newer_only && operation != replace)
 	fatal (_("`u' is only meaningful with the `r' option."));
-
-      arg_index = 2;
 
       if (postype != pos_default)
 	posname = argv[arg_index++];

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* cr16c support added by NSC.
+
 * m32r Linux (ELF) support added by Renesas.
 
 * Improved linker's handling of unresolved symbols.  The switch

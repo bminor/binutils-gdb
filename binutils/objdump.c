@@ -1142,8 +1142,8 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 typedef struct
 {
   char *buffer;
-  size_t size;
-  char *current;
+  size_t pos;
+  size_t alloc;
 } SFILE;
 
 /* sprintf to a "stream".  */
@@ -1151,39 +1151,25 @@ typedef struct
 static int
 objdump_sprintf (SFILE *f, const char *format, ...)
 {
-  char *buf;
   size_t n;
   va_list args;
 
-  va_start (args, format);
-
-  vasprintf (&buf, format, args);
-
-  if (buf == NULL)
+  while (1)
     {
+      size_t space = f->alloc - f->pos;
+  
+      va_start (args, format);
+      n = vsnprintf (f->buffer + f->pos, space, format, args);
       va_end (args);
-      fatal (_("Out of virtual memory"));
+
+      if (space > n)
+	break;
+      
+      f->alloc = (f->alloc + n) * 2;
+      f->buffer = xrealloc (f->buffer, f->alloc);
     }
-
-  n = strlen (buf);
-
-  while ((size_t) ((f->buffer + f->size) - f->current) < n + 1)
-    {
-      size_t curroff;
-
-      curroff = f->current - f->buffer;
-      f->size *= 2;
-      f->buffer = xrealloc (f->buffer, f->size);
-      f->current = f->buffer + curroff;
-    }
-
-  memcpy (f->current, buf, n);
-  f->current += n;
-  f->current[0] = '\0';
-
-  free (buf);
-
-  va_end (args);
+  f->pos += n;
+  
   return n;
 }
 
@@ -1243,10 +1229,15 @@ disassemble_bytes (struct disassemble_info * info,
   int skip_addr_chars;
   bfd_vma addr_offset;
   int opb = info->octets_per_byte;
+  SFILE sfile;
 
   aux = (struct objdump_disasm_info *) info->application_data;
   section = aux->sec;
 
+  sfile.alloc = 120;
+  sfile.buffer = xmalloc (sfile.alloc);
+  sfile.pos = 0;
+  
   if (insns)
     octets_per_line = 4;
   else
@@ -1311,7 +1302,6 @@ disassemble_bytes (struct disassemble_info * info,
       else
 	{
 	  char buf[50];
-	  SFILE sfile;
 	  int bpc = 0;
 	  int pb = 0;
 
@@ -1344,9 +1334,7 @@ disassemble_bytes (struct disassemble_info * info,
 
 	  if (insns)
 	    {
-	      sfile.size = 120;
-	      sfile.buffer = xmalloc (sfile.size);
-	      sfile.current = sfile.buffer;
+	      sfile.pos = 0;
 	      info->fprintf_func = (fprintf_ftype) objdump_sprintf;
 	      info->stream = (FILE *) &sfile;
 	      info->bytes_per_line = 0;
@@ -1371,9 +1359,8 @@ disassemble_bytes (struct disassemble_info * info,
 		octets_per_line = info->bytes_per_line;
 	      if (octets < 0)
 		{
-		  if (sfile.current != sfile.buffer)
+		  if (sfile.pos)
 		    printf ("%s\n", sfile.buffer);
-		  free (sfile.buffer);
 		  break;
 		}
 	    }
@@ -1447,11 +1434,8 @@ disassemble_bytes (struct disassemble_info * info,
 
 	  if (! insns)
 	    printf ("%s", buf);
-	  else
-	    {
-	      printf ("%s", sfile.buffer);
-	      free (sfile.buffer);
-	    }
+	  else if (sfile.pos)
+	    printf ("%s", sfile.buffer);
 
 	  if (prefix_addresses
 	      ? show_raw_insn > 0
@@ -1558,6 +1542,8 @@ disassemble_bytes (struct disassemble_info * info,
 
       addr_offset += octets / opb;
     }
+
+  free (sfile.buffer);
 }
 
 static void

@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Renesas M32R.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -109,7 +109,7 @@ static int enable_special = 0;
 
 /* Non-zero if -bitinst has been specified, in which case support
    for extended M32R bit-field instruction set should be enabled.  */
-static int enable_special_m32r = 0;
+static int enable_special_m32r = 1;
 
 /* Non-zero if -float has been specified, in which case support for
    extended M32R floating point instruction set should be enabled.  */
@@ -216,7 +216,8 @@ struct option md_longopts[] =
 #define OPTION_NO_IGNORE_PARALLEL (OPTION_IGNORE_PARALLEL + 1)
 #define OPTION_SPECIAL		  (OPTION_NO_IGNORE_PARALLEL + 1)
 #define OPTION_SPECIAL_M32R       (OPTION_SPECIAL + 1)
-#define OPTION_SPECIAL_FLOAT      (OPTION_SPECIAL_M32R + 1)
+#define OPTION_NO_SPECIAL_M32R    (OPTION_SPECIAL_M32R + 1)
+#define OPTION_SPECIAL_FLOAT      (OPTION_NO_SPECIAL_M32R + 1)
 #define OPTION_WARN_UNMATCHED 	  (OPTION_SPECIAL_FLOAT + 1)
 #define OPTION_NO_WARN_UNMATCHED  (OPTION_WARN_UNMATCHED + 1)
   {"m32r",  no_argument, NULL, OPTION_M32R},
@@ -238,6 +239,7 @@ struct option md_longopts[] =
   {"nIp", no_argument, NULL, OPTION_NO_IGNORE_PARALLEL},
   {"hidden", no_argument, NULL, OPTION_SPECIAL},
   {"bitinst", no_argument, NULL, OPTION_SPECIAL_M32R},
+  {"no-bitinst", no_argument, NULL, OPTION_NO_SPECIAL_M32R},
   {"float", no_argument, NULL, OPTION_SPECIAL_FLOAT},
   /* Sigh.  I guess all warnings must now have both variants.  */
   {"warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
@@ -353,6 +355,10 @@ md_parse_option (c, arg)
       enable_special_m32r = 1;
       break;
 
+    case OPTION_NO_SPECIAL_M32R:
+      enable_special_m32r = 0;
+      break;
+
     case OPTION_SPECIAL_FLOAT:
       enable_special_float = 1;
       break;
@@ -409,6 +415,8 @@ md_show_usage (stream)
   -parallel               try to combine instructions in parallel\n"));
   fprintf (stream, _("\
   -no-parallel            disable -parallel\n"));
+  fprintf (stream, _("\
+  -no-bitinst             disallow the M32R2's extended bit-field instructions\n"));
   fprintf (stream, _("\
   -O                      try to optimize code.  Implies -parallel\n"));
 

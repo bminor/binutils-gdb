@@ -1073,11 +1073,6 @@ sizes.
 Like @file{elfcode.h}, but for functions that are specific to ELF core
 files.  This is included only by @file{elfcode.h}.
 
-@item elflink.h
-@cindex @file{elflink.h}
-Like @file{elfcode.h}, but for functions used by the ELF linker.  This
-is included only by @file{elfcode.h}.
-
 @item elfxx-target.h
 @cindex @file{elfxx-target.h}
 This file is the source for the generated files @file{elf32-target.h}
@@ -1482,8 +1477,7 @@ external data.  @file{elfcode.h} is compiled twice, once via
 @file{elfcode.h} includes functions to swap the ELF structures in and
 out of external form, as well as a few more complex functions.
 
-Linker support is found in @file{elflink.c} and @file{elflink.h}.  The
-latter file is compiled twice, for both 32 and 64 bit support.  The
+Linker support is found in @file{elflink.c}.  The
 linker support is only used if the processor specific file defines
 @samp{elf_backend_relocate_section}, which is required to relocate the
 section contents.  If that macro is not defined, the generic linker code

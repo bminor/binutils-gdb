@@ -1,6 +1,105 @@
+2004-04-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* emulparams/elf32bsmip.sh (EXTRA_EM_FILE): Define to irix.
+	* emulparams/elf64bmip.sh (EXTRA_EM_FILE): Likewise.
+	* emulparams/elf32bmipn32.sh (EXTRA_EM_FILE): Likewise.
+	* emultempl/irix.em: New file.
+	* Makefile.am (eelf32bsmip.c, eelf32bmipn32.c, eelf64bmip.c): Update
+	dependencies.
+	* Makefile.in: Regenerate.
+
+2004-04-01  Paul Brook  <paul@codesourcery.com>
+
+	* emultempl/armelf.em (byteswap_code): Add.
+	(arm_elf_before_allocation): Pass extra parameter.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_BE8.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add be8.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_BE8.
+	* emultempl/armelf_oabi.em: Pass extra parameter.
+	* ld.texinfo: Document --be8.
+
+2004-03-30  Stan Shebs  <shebs@apple.com>
+
+	Remove long-obsolete MPW support.
+	* mpw-config.in, mpw-make.sed, mac-ld.r: Remove files.
+	* Makefile.am (mpw): Remove file-presynthesizing actions.
+	* Makefile.in: Likewise.
+	* ldfile.c (slash): Remove MPW case.
+	* ldlex.l [MPW]: Remove unused definition.
+
+2004-03-30  Galit Heller  <Galit.Heller@nsc.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32cr16c.o.
+	(eelf32cr16c.c): New target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle cr16c-*-elf*.
+	* emulparams/elf32cr16c.sh: New file.
+	* scripttempl/elfcr16c.sc: Likewise
+	* NEWS: Mention support for new target.
+
+2004-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2004-03-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em: Update new bfd_elf_discard_info name.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+
+2004-03-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Update
+	size_dynamic_sections call.
+
+2004-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 51.
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Set
+	link_info.wrap_char.
+
+2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (parse_args): Don't set unresolved_syms_in_objects
+	or unresolved_syms_in_shared_libs for -Bdynamic and -Bstatic.
+
+2004-03-20  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32frvfd.sh (MAXPAGESIZE): Change to 16Kb.
+
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2004-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo: Add --as-needed doco.
+	* ldmain.c (as_needed): New global var.
+	* ldmain.h (as_needed): Declare.
+	* lexsup.c (option_values): Add OPTION_AS_NEEDED and
+	OPTION_NO_AS_NEEDED.
+	(ld_options): Likewise.
+	(parse_args): Handle them.
+	* ldlang.h (lang_input_statement_type): Add as_needed field.
+	* ldlang.c (new_afile): Set p->as_needed.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols): New function.
+	(gld${EMULATION_NAME}_try_needed): Use bfd_elf_set_dyn_lib_class.
+	(ld_${EMULATION_NAME}_emulation): Set LDEMUL_RECOGNIZED_FILE entry.
+
+	* ldlang.c (open_input_bfds): Remove useless cast.
+	(lang_do_assignments_1): Likewise.
+	(lang_for_each_input_section): Delete.
+
 2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
 
 	* configure.tgt: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
+
+2004-03-08  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-dll.c (pe_dll_generate_implib): Skip sections marked as
+	private when building implib.
 
 2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
 
@@ -8,6 +107,19 @@
 	SEC_THREAD_LOCAL.
 	(IGNORE_SECTION): Ignore .tbss sections too.
 	(lang_size_sections_1): .tbss sections do not advance dot.
+
+2004-03-01  Andreas Schwab  <schwab@suse.de>
+
+	* ld.texinfo (Options): Fix example for --wrap.
+
+2004-02-25  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-dll.c (fill_edata): Check that exported_symbol_sections is
+	not NULL.
+
+2004-02-23  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* ldlang.c (lang_check): Use %P, not %E, in error message.
 
 2004-02-23  Nathan Sidwell  <nathan@codesourcery.com>
 
@@ -25,7 +137,7 @@
 2004-02-23  Alan Modra <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_tree): Follow indirect symbols.
-	
+
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldgram.y (exp): Add two operand ALIGN.

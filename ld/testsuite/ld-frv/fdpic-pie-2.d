@@ -32,39 +32,41 @@ Disassembly of section \.text:
  618:	80 f8 00 00 	sethi hi\(0x0\),gr0
 Disassembly of section \.data:
 
-00010630 <D2>:
-   10630:	00 00 00 04 	add\.p gr0,gr4,gr0
-			10630: R_FRV_32	\.data
+00004630 <D2>:
+    4630:	00 00 00 04 	add\.p gr0,gr4,gr0
+			4630: R_FRV_32	\.data
 
-00010634 <GD0>:
-   10634:	00 00 00 00 	add\.p gr0,gr0,gr0
-			10634: R_FRV_FUNCDESC	GFb
-   10638:	00 00 00 04 	add\.p gr0,gr4,gr0
-			10638: R_FRV_32	\.text
+00004634 <GD0>:
+    4634:	00 00 00 04 	add\.p gr0,gr4,gr0
+			4634: R_FRV_FUNCDESC	\.text
+    4638:	00 00 00 04 	add\.p gr0,gr4,gr0
+			4638: R_FRV_32	\.text
 Disassembly of section \.got:
 
-000106b8 <_GLOBAL_OFFSET_TABLE_-0x18>:
-   106b8:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106b8: R_FRV_FUNCDESC_VALUE	\.text
-   106bc:	00 00 00 02 	add\.p gr0,fp,gr0
-   106c0:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106c0: R_FRV_FUNCDESC_VALUE	\.text
-   106c4:	00 00 00 02 	add\.p gr0,fp,gr0
-   106c8:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106c8: R_FRV_FUNCDESC_VALUE	\.text
-   106cc:	00 00 00 02 	add\.p gr0,fp,gr0
+000046b8 <_GLOBAL_OFFSET_TABLE_-0x18>:
+    46b8:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46b8: R_FRV_FUNCDESC_VALUE	\.text
+    46bc:	00 00 00 02 	add\.p gr0,fp,gr0
+    46c0:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46c0: R_FRV_FUNCDESC_VALUE	\.text
+    46c4:	00 00 00 02 	add\.p gr0,fp,gr0
+    46c8:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46c8: R_FRV_FUNCDESC_VALUE	\.text
+    46cc:	00 00 00 02 	add\.p gr0,fp,gr0
 
-000106d0 <_GLOBAL_OFFSET_TABLE_>:
+000046d0 <_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-			106dc: R_FRV_FUNCDESC	GF4
-   106e0:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106e0: R_FRV_32	\.text
-	\.\.\.
-			106e4: R_FRV_FUNCDESC	GF6
-			106e8: R_FRV_FUNCDESC	GF5
-   106ec:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106ec: R_FRV_32	\.data
-   106f0:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106f0: R_FRV_32	\.text
-   106f4:	00 00 00 04 	add\.p gr0,gr4,gr0
-			106f4: R_FRV_32	\.text
+    46dc:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46dc: R_FRV_FUNCDESC	\.text
+    46e0:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46e0: R_FRV_32	\.text
+    46e4:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46e4: R_FRV_FUNCDESC	\.text
+    46e8:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46e8: R_FRV_FUNCDESC	\.text
+    46ec:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46ec: R_FRV_32	\.data
+    46f0:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46f0: R_FRV_32	\.text
+    46f4:	00 00 00 04 	add\.p gr0,gr4,gr0
+			46f4: R_FRV_32	\.text

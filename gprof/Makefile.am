@@ -196,11 +196,11 @@ sym_ids.o: sym_ids.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h ../bfd/bfd.h \
   $(INCDIR)/symcat.h gconfig.h $(INCDIR)/bin-bugs.h search_list.h \
   source.h symtab.h cg_arcs.h sym_ids.h
-utils.o: utils.c $(INCDIR)/demangle.h $(INCDIR)/ansidecl.h \
-  gprof.h $(BFDDIR)/sysdep.h ../bfd/config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/filenames.h ../bfd/bfd.h $(INCDIR)/symcat.h \
-  gconfig.h $(INCDIR)/bin-bugs.h search_list.h source.h \
-  symtab.h cg_arcs.h utils.h
+utils.o: utils.c $(INCDIR)/demangle.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h gprof.h $(BFDDIR)/sysdep.h ../bfd/config.h \
+  $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h ../bfd/bfd.h \
+  $(INCDIR)/symcat.h gconfig.h $(INCDIR)/bin-bugs.h search_list.h \
+  source.h symtab.h cg_arcs.h utils.h
 i386.o: i386.c gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/config.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/symcat.h gconfig.h $(INCDIR)/bin-bugs.h \

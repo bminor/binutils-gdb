@@ -1740,6 +1740,33 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 	}
       break;
 
+    case EF_ARM_EABI_VER3:
+      strcat (buf, ", Version3 EABI");
+      while (e_flags)
+	{
+	  unsigned flag;
+
+	  /* Process flags one bit at a time.  */
+	  flag = e_flags & - e_flags;
+	  e_flags &= ~ flag;
+
+	  switch (flag)
+	    {
+	    case EF_ARM_BE8:
+	      strcat (buf, ", BE8");
+	      break;
+
+	    case EF_ARM_LE8:
+	      strcat (buf, ", LE8");
+	      break;
+
+	    default:
+	      unknown = 1;
+	      break;
+	    }
+	}
+      break;
+
     case EF_ARM_EABI_UNKNOWN:
       strcat (buf, ", GNU EABI");
       while (e_flags)
@@ -6767,7 +6794,7 @@ display_debug_pubnames (Elf_Internal_Shdr *section,
 	  if (offset != 0)
 	    {
 	      data += offset_size;
-	      printf ("    %ld\t\t%s\n", offset, data);
+	      printf ("    %-6ld\t\t%s\n", offset, data);
 	      data += strlen ((char *) data) + 1;
 	    }
 	}
@@ -7941,6 +7968,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_addr:
       printf (" %#lx", uvalue);
+      break;
 
     case DW_FORM_flag:
     case DW_FORM_data1:
@@ -9150,13 +9178,19 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_restore_state\n");
 	      rs = remembered_state;
-	      remembered_state = rs->next;
-	      frame_need_space (fc, rs->ncols-1);
-	      memcpy (fc->col_type, rs->col_type, rs->ncols);
-	      memcpy (fc->col_offset, rs->col_offset, rs->ncols * sizeof (int));
-	      free (rs->col_type);
-	      free (rs->col_offset);
-	      free (rs);
+	      if (rs)
+		{
+		  remembered_state = rs->next;
+		  frame_need_space (fc, rs->ncols-1);
+		  memcpy (fc->col_type, rs->col_type, rs->ncols);
+		  memcpy (fc->col_offset, rs->col_offset,
+			  rs->ncols * sizeof (int));
+		  free (rs->col_type);
+		  free (rs->col_offset);
+		  free (rs);
+		}
+	      else if (do_debug_frames_interp)
+		printf ("Mismatched DW_CFA_restore_state\n");
 	      break;
 
 	    case DW_CFA_def_cfa:
@@ -9321,7 +9355,7 @@ debug_displays[] =
   { ".debug_macinfo",		display_debug_macinfo },
   { ".debug_str",		display_debug_str },
   { ".debug_loc",		display_debug_loc },
-  { ".debug_pubtypes",		display_debug_not_supported },
+  { ".debug_pubtypes",		display_debug_pubnames },
   { ".debug_ranges",		display_debug_not_supported },
   { ".debug_static_func",	display_debug_not_supported },
   { ".debug_static_vars",	display_debug_not_supported },
@@ -9787,8 +9821,8 @@ process_mips_specific (FILE *file)
 	  free (econf64);
 	}
 
-      printf (_("\nSection '.conflict' contains %ld entries:\n"),
-	      (long) conflictsno);
+      printf (_("\nSection '.conflict' contains %lu entries:\n"),
+	      (unsigned long) conflictsno);
       puts (_("  Num:    Index       Value  Name"));
 
       for (cnt = 0; cnt < conflictsno; ++cnt)

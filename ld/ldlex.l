@@ -28,11 +28,6 @@ This was written by steve chamberlain
 
 #include <stdio.h>
 
-#ifdef MPW
-/* Prevent enum redefinition problems. */
-#define TRUE_FALSE_ALREADY_DEFINED
-#endif /* MPW */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "safe-ctype.h"

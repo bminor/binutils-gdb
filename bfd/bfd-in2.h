@@ -606,29 +606,30 @@ struct bfd_link_needed_list
   const char *name;
 };
 
+enum dynamic_lib_link_class {
+  DYN_NORMAL = 0,
+  DYN_AS_NEEDED = 1,
+  DYN_DT_NEEDED = 2
+};
+
 extern bfd_boolean bfd_elf_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean);
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
-extern bfd_boolean bfd_elf32_size_dynamic_sections
-  (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
-extern bfd_boolean bfd_elf64_size_dynamic_sections
+extern bfd_boolean bfd_elf_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
    struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
-extern void bfd_elf_set_dt_needed_soname
-  (bfd *, const char *);
 extern const char *bfd_elf_get_dt_soname
   (bfd *);
+extern void bfd_elf_set_dyn_lib_class
+  (bfd *, int);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf32_discard_info
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf64_discard_info
+extern bfd_boolean bfd_elf_discard_info
   (bfd *, struct bfd_link_info *);
 
 /* Return an upper bound on the number of bytes required to store a
@@ -792,7 +793,7 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *, int);
+  (bfd *, struct bfd_link_info *, int, int);
 
 extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);
@@ -1627,6 +1628,7 @@ enum bfd_architecture
 #define bfd_mach_sh3e       0x3e
 #define bfd_mach_sh4        0x40
 #define bfd_mach_sh4_nofpu  0x41
+#define bfd_mach_sh4_nommu_nofpu  0x42
 #define bfd_mach_sh4a       0x4a
 #define bfd_mach_sh4a_nofpu 0x4b
 #define bfd_mach_sh4al_dsp  0x4d
@@ -1682,6 +1684,7 @@ enum bfd_architecture
 #define bfd_mach_frvsimple     2
 #define bfd_mach_fr300         300
 #define bfd_mach_fr400         400
+#define bfd_mach_fr450         450
 #define bfd_mach_frvtomcat     499     /* fr500 prototype */
 #define bfd_mach_fr500         500
 #define bfd_mach_fr550         550
@@ -1702,6 +1705,8 @@ enum bfd_architecture
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
+  bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
+#define bfd_mach_cr16c         1
   bfd_arch_cris,      /* Axis CRIS */
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31
@@ -3339,6 +3344,48 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
 /* Motorola 68HC12 reloc.
 This is the 5 bits of a value.  */
   BFD_RELOC_M68HC12_5B,
+
+/* NS CR16C Relocations.  */
+  BFD_RELOC_16C_NUM08,
+  BFD_RELOC_16C_NUM08_C,
+  BFD_RELOC_16C_NUM16,
+  BFD_RELOC_16C_NUM16_C,
+  BFD_RELOC_16C_NUM32,
+  BFD_RELOC_16C_NUM32_C,
+  BFD_RELOC_16C_DISP04,
+  BFD_RELOC_16C_DISP04_C,
+  BFD_RELOC_16C_DISP08,
+  BFD_RELOC_16C_DISP08_C,
+  BFD_RELOC_16C_DISP16,
+  BFD_RELOC_16C_DISP16_C,
+  BFD_RELOC_16C_DISP24,
+  BFD_RELOC_16C_DISP24_C,
+  BFD_RELOC_16C_DISP24a,
+  BFD_RELOC_16C_DISP24a_C,
+  BFD_RELOC_16C_REG04,
+  BFD_RELOC_16C_REG04_C,
+  BFD_RELOC_16C_REG04a,
+  BFD_RELOC_16C_REG04a_C,
+  BFD_RELOC_16C_REG14,
+  BFD_RELOC_16C_REG14_C,
+  BFD_RELOC_16C_REG16,
+  BFD_RELOC_16C_REG16_C,
+  BFD_RELOC_16C_REG20,
+  BFD_RELOC_16C_REG20_C,
+  BFD_RELOC_16C_ABS20,
+  BFD_RELOC_16C_ABS20_C,
+  BFD_RELOC_16C_ABS24,
+  BFD_RELOC_16C_ABS24_C,
+  BFD_RELOC_16C_IMM04,
+  BFD_RELOC_16C_IMM04_C,
+  BFD_RELOC_16C_IMM16,
+  BFD_RELOC_16C_IMM16_C,
+  BFD_RELOC_16C_IMM20,
+  BFD_RELOC_16C_IMM20_C,
+  BFD_RELOC_16C_IMM24,
+  BFD_RELOC_16C_IMM24_C,
+  BFD_RELOC_16C_IMM32,
+  BFD_RELOC_16C_IMM32_C,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */

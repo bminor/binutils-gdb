@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Renesas / SuperH SH
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -131,6 +131,10 @@ int sh_relax;		/* set if -relax seen */
 /* Whether -small was seen.  */
 
 int sh_small;
+
+/* Flag to generate relocations against symbol values for local symbols.  */
+
+static int dont_adjust_reloc_32;
 
 /* preset architecture set, if given; zero otherwise.  */
 
@@ -1632,7 +1636,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AS_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1640,7 +1644,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AS_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1648,7 +1652,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AS_PMOD_N:
 	      if (user->type != AX_PMOD_N)
 		goto fail;
@@ -1656,7 +1660,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AX_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1664,7 +1668,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AX_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1672,7 +1676,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AX_PMOD_N:
 	      if (user->type != AX_PMOD_N)
 		goto fail;
@@ -1680,7 +1684,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AXY_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1689,7 +1693,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AXY_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1698,7 +1702,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AXY_PMOD_N:
 	      if (user->type != AX_PMOD_N)
 		goto fail;
@@ -1707,7 +1711,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AY_INC_N:
 	      if (user->type != A_INC_N)
 		goto fail;
@@ -1715,7 +1719,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AY_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1723,7 +1727,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AY_PMOD_N:
 	      if (user->type != AY_PMOD_N)
 		goto fail;
@@ -1740,7 +1744,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AYX_IND_N:
 	      if (user->type != A_IND_N)
 		goto fail;
@@ -1749,7 +1753,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
-	      
+
 	    case AYX_PMOD_N:
 	      if (user->type != AY_PMOD_N)
 		goto fail;
@@ -2143,6 +2147,7 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	  switch (i)
 	    {
 	    case REG_N:
+	    case REG_N_D:
 	      nbuf[index] = reg_n;
 	      break;
 	    case REG_M:
@@ -2158,6 +2163,9 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	      break;
 	    case REG_B:
 	      nbuf[index] = reg_b | 0x08;
+	      break;
+	    case REG_N_B01:
+	      nbuf[index] = reg_n | 0x01;
 	      break;
 	    case IMM0_4BY4:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0, operand);
@@ -2584,6 +2592,7 @@ md_assemble (char *str)
   sh_operand_info operand[3];
   sh_opcode_info *opcode;
   unsigned int size = 0;
+  char *initial_str = str;
 
 #ifdef HAVE_SH64
   if (sh64_isa_mode == sh64_isa_shmedia)
@@ -2610,7 +2619,45 @@ md_assemble (char *str)
 
   if (opcode == NULL)
     {
-      as_bad (_("unknown opcode"));
+      /* The opcode is not in the hash table.
+	 This means we definately have an assembly failure,
+	 but the instruction may be valid in another CPU variant.
+	 In this case emit something better than 'unknown opcode'.
+	 Search the full table in sh-opc.h to check. */
+
+      char *name = initial_str;
+      int name_length = 0;
+      const sh_opcode_info *op;
+      int found = 0;
+
+      /* identify opcode in string */
+      while (isspace (*name))
+	{
+	  name++;
+	}
+      while (!isspace (name[name_length]))
+	{
+	  name_length++;
+	}
+
+      /* search for opcode in full list */
+      for (op = sh_table; op->name; op++)
+	{
+	  if (strncasecmp (op->name, name, name_length) == 0)
+	    {
+	      found = 1;
+	      break;
+	    }
+	}
+
+      if ( found )
+	{
+	  as_bad (_("opcode not valid for this cpu variant"));
+	}
+      else
+	{
+	  as_bad (_("unknown opcode"));
+	}
       return;
     }
 
@@ -2840,6 +2887,7 @@ struct option md_longopts[] =
 #define OPTION_SMALL (OPTION_LITTLE + 1)
 #define OPTION_DSP (OPTION_SMALL + 1)
 #define OPTION_ISA                    (OPTION_DSP + 1)
+#define OPTION_RENESAS (OPTION_ISA + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
@@ -2847,8 +2895,10 @@ struct option md_longopts[] =
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
   {"isa",                    required_argument, NULL, OPTION_ISA},
+  {"renesas", no_argument, NULL, OPTION_RENESAS},
+
 #ifdef HAVE_SH64
-#define OPTION_ABI                    (OPTION_ISA + 1)
+#define OPTION_ABI                    (OPTION_RENESAS + 1)
 #define OPTION_NO_MIX                 (OPTION_ABI + 1)
 #define OPTION_SHCOMPACT_CONST_CRANGE (OPTION_NO_MIX + 1)
 #define OPTION_NO_EXPAND              (OPTION_SHCOMPACT_CONST_CRANGE + 1)
@@ -2889,9 +2939,17 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
       break;
 
+    case OPTION_RENESAS:
+      dont_adjust_reloc_32 = 1;
+      break;
+
     case OPTION_ISA:
       if (strcasecmp (arg, "sh4") == 0)
 	preset_target_arch = arch_sh4;
+      else if (strcasecmp (arg, "sh4-nofpu") == 0)
+	preset_target_arch = arch_sh4_nofpu;
+      else if (strcasecmp (arg, "sh4-nommu-nofpu") == 0)
+	preset_target_arch = arch_sh4_nommu_nofpu;
       else if (strcasecmp (arg, "sh4a") == 0)
 	preset_target_arch = arch_sh4a;
       else if (strcasecmp (arg, "dsp") == 0)
@@ -2972,18 +3030,23 @@ SH options:\n\
 -little			generate little endian code\n\
 -big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
+-renesas		disable optimization with section symbol for\n\
+			compatibility with Renesas assembler.\n\
 -small			align sections to 4 byte boundaries, not 16\n\
--dsp			enable sh-dsp insns, and disable floating-point ISAs.\n"));
+-dsp			enable sh-dsp insns, and disable floating-point ISAs.\n\
+-isa=[sh4\n\
+    | sh4-nofpu		sh4 with fpu disabled\n\
+    | sh4-nommu-nofpu   sh4 with no MMU or FPU\n\
+    | sh4a\n\
+    | dsp               same as '-dsp'\n\
+    | fp\n\
+    | any]		use most appropriate isa\n"));
 #ifdef HAVE_SH64
   fprintf (stream, _("\
--isa=[sh4\n\
-    | sh4a\n\
-    | dsp		same as '-dsp'\n\
-    | fp\n\
-    | shmedia		set as the default instruction set for SH64\n\
+-isa=[shmedia		set as the default instruction set for SH64\n\
     | SHmedia\n\
     | shcompact\n\
-    | SHcompact\n"));
+    | SHcompact]\n"));
   fprintf (stream, _("\
 -abi=[32|64]		set size of expanded SHmedia operands and object\n\
 			file type\n\
@@ -2994,13 +3057,6 @@ SH options:\n\
 -no-expand		do not expand MOVI, PT, PTA or PTB instructions\n\
 -expand-pt32		with -abi=64, expand PT, PTA and PTB instructions\n\
 			to 32 bits only\n"));
-#else
-  fprintf (stream, _("\
--isa=[sh4\n\
-    | sh4a\n\
-    | dsp		same as '-dsp'\n\
-    | fp\n\
-    | any]\n"));
 #endif /* HAVE_SH64 */
 }
 
@@ -3521,6 +3577,7 @@ sh_fix_adjustable (fixS *fixP)
   if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
       || fixP->fx_r_type == BFD_RELOC_SH_GOTPC
+      || ((fixP->fx_r_type == BFD_RELOC_32) && dont_adjust_reloc_32)
       || fixP->fx_r_type == BFD_RELOC_RVA)
     return 0;
 
@@ -3560,6 +3617,8 @@ sh_elf_final_processing (void)
     val = EF_SH3_DSP;
   else if (valid_arch & arch_sh3e)
     val = EF_SH3E;
+  else if (valid_arch & arch_sh4_nommu_nofpu)
+    val = EF_SH4_NOMMU_NOFPU;
   else if (valid_arch & arch_sh4_nofpu)
     val = EF_SH4_NOFPU;
   else if (valid_arch & arch_sh4)
@@ -4188,10 +4247,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
-#ifdef OBJ_ELF
-  if (rel->howto->type == R_SH_IND12W)
-      rel->addend += fixp->fx_offset - 4;
-#endif
+
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -4201,6 +4257,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
       assert (rel->howto != NULL);
     }
+#ifdef OBJ_ELF
+  else if (rel->howto->type == R_SH_IND12W)
+    rel->addend += fixp->fx_offset - 4;
+#endif
 
   return rel;
 }

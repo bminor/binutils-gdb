@@ -157,6 +157,9 @@ if [istarget sh*-*-*] then {
 	run_dump_test "tlspic"
 
 	run_dump_test "tlsnopic"
+
+	# Test -renesas.
+	run_dump_test "renesas-1"
     }
 }
 

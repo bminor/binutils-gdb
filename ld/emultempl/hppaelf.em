@@ -254,11 +254,11 @@ build_section_lists (lang_statement_union_type *statement)
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  /* bfd_elf32_discard_info just plays with debugging sections,
+  /* bfd_elf_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
-  if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
+  if (bfd_elf_discard_info (output_bfd, &link_info))
     need_laying_out = 1;
 
   /* If generating a relocatable output file, then we don't

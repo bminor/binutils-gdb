@@ -1,3 +1,88 @@
+2004-04-07  Benjamin Monate  <benjamin.monate@cea.fr>
+
+	PR 86
+	* arsup.c (ar_save): Use smart_rename.
+
+2004-04-01  Dean Luick <luick@cray.com>
+
+	* readelf.c (display_debug_pubnames): Align offset and data
+	columns.
+	(read_and_display_attr_value): Add missing break;
+	(debug_displays): Enable the display of the .debug_pubtypes
+	section.
+
+2004-03-30  Stan Shebs  <shebs@apple.com>
+
+	* mpw-config.in, mpw-make.sed, mac-binutils.r: Remove MPW
+	support files, no longer used.
+
+2004-03-23  Paul Brook  <paul@codesourcery.com>
+
+	* readelf.c (decode_ARM_machine_flags): Add EABI v3.
+
+2004-03-21  Richard Henderson  <rth@redhat.com>
+
+	* readelf.c (display_debug_frames): Don't crash for mismatched
+	DW_CFA_restore_state.
+
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2004-03-15  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* objdump.c (struct SFILE): Replace current pointer with pos
+	offset, rename size to alloc.
+	(objdump_sprintf): Avoid unnecessary copies in the common case
+	(disassemble_bytes): Keep sfile live throughout the
+	function. Adjust usage appropriately.
+
+2004-03-10  Ben Elliston  <bje@gnu.org>
+
+	* MAINTAINERS: Update my mail address.
+
+2004-03-08  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* deflex.l: Handle "PRIVATE" string.
+	* defparse.y (%token): Add PRIVATE.
+	(%type): Add opt_PRIVATE.
+	(expline): Pass opt_PRIVATE to def_exports.
+	(opt_PRIVATE): Handle PRIVATE token.
+	* dlltool.h (def_exports): Add 7th param for private flag to
+	declaration.
+	* dlltool.c: Add PRIVATE to comment on EXPORTS syntax.
+	(struct export): Add 'private' field.
+	(def_exports): Set 'private' field of struct exports.
+	(scan_drectve_symbols): Adjust calls to def_exports.
+	(scan_filtered_symbols): Likewise.
+	(dump_def_info): Print 'private' field.
+	(gen_def_file): Likewise.
+	(gen_lib_file): Skip generation of lib object if private.
+	Delete tmp object files in same order as they were generated.
+	Don't delete non-existent private object files.
+
+2004-02-27  Andreas Schwab  <schwab@suse.de>
+
+	* ar.c (main): Support POSIX-compatible argument parsing.
+
+2004-02-23  Daniel Lucq  <daniel@lucq.org>
+
+	* readelf.c (process_mips_specific): Print conflictsno as an
+	unsigned long.
+
+2004-02-21  Dmitry Timoshkov  <dmitry@baikal.ru>
+
+	* dlltool.c (gen_exp_file): Always output names for forwarded symbols.
+
+2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* objcopy.c (copy_section): Avoid warnings.
+
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
 	* ar.c (remove_output): Use bfd_cache_close.

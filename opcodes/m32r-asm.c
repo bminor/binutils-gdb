@@ -4,7 +4,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-asm.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2004 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -111,7 +111,10 @@ parse_hi16 (cd, strp, opindex, valuep)
       ++*strp;
       if (errmsg == NULL
 	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	value = (value >> 16) + (value & 0x8000 ? 1 : 0);
+        {
+          value = value + (value & 0x8000 ? 0x10000 : 0);
+          value >>= 16;
+        }
       *valuep = value;
       return errmsg;
     }

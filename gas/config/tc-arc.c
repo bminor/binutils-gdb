@@ -905,11 +905,6 @@ arc_extoper (opertype)
   name = input_line_pointer;
   c = get_symbol_end ();
   name = xstrdup (name);
-  if (NULL == name)
-    {
-      ignore_rest_of_line ();
-      return;
-    }
 
   p = name;
   while (*p)
@@ -1153,11 +1148,6 @@ arc_extinst (ignore)
   name = input_line_pointer;
   c = get_symbol_end ();
   name = xstrdup (name);
-  if (NULL == name)
-    {
-      ignore_rest_of_line ();
-      return;
-    }
   strcpy (syntax, name);
   name_len = strlen (name);
 
@@ -1305,18 +1295,7 @@ arc_extinst (ignore)
   strcat (syntax, "%S%L");
 
   ext_op = (struct arc_opcode *) xmalloc (sizeof (struct arc_opcode));
-  if (NULL == ext_op)
-    {
-      ignore_rest_of_line ();
-      return;
-    }
-
   ext_op->syntax = xstrdup (syntax);
-  if (NULL == ext_op->syntax)
-    {
-      ignore_rest_of_line ();
-      return;
-    }
 
   ext_op->mask  = I (-1) | ((0x3 == opcode) ? C (-1) : 0);
   ext_op->value = I (opcode) | ((0x3 == opcode) ? C (subopcode) : 0);

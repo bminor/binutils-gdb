@@ -1,6 +1,6 @@
 /* Parse options for the GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -112,6 +112,8 @@ enum option_values
   OPTION_SPLIT_BY_RELOC,
   OPTION_SPLIT_BY_FILE ,
   OPTION_WHOLE_ARCHIVE,
+  OPTION_AS_NEEDED,
+  OPTION_NO_AS_NEEDED,
   OPTION_WRAP,
   OPTION_FORCE_EXE_SUFFIX,
   OPTION_GC_SECTIONS,
@@ -438,6 +440,10 @@ static const struct ld_option ld_options[] =
      TWO_DASHES },
   { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
       '\0', NULL, N_("Include all objects from following archives"), TWO_DASHES },
+  { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
+      '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"), TWO_DASHES },
+  { {"no-as-needed", no_argument, NULL, OPTION_NO_AS_NEEDED},
+      '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"), TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
       '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES }
 };
@@ -634,27 +640,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_CALL_SHARED:
 	  config.dynamic_link = TRUE;
-	  /* When linking against shared libraries, the default behaviour is
-	     to report any unresolved references.  Although strictly speaking
-	     it is not a failure to encounter unresolved symbols at link time
-	     - the symbol *might* be available at load time - it is a strong
-	     indication that the resulting executable will not work.  Plus it
-	     is necessary for the correct execution of the autoconf package,
-	     which needs to be able to detect functions that are not provided
-	     by the host OS.  */
-	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
-	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_NON_SHARED:
 	  config.dynamic_link = FALSE;
-	  /* When linking against static libraries, the default
-	     behaviour is to report any unresolved references.  */
-	  if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
-	  if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
-	    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
 	  break;
 	case OPTION_CREF:
 	  command_line.cref = TRUE;
@@ -1155,6 +1143,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = TRUE;
+	  break;
+	case OPTION_AS_NEEDED:
+	  as_needed = TRUE;
+	  break;
+	case OPTION_NO_AS_NEEDED:
+	  as_needed = FALSE;
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);

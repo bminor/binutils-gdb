@@ -972,6 +972,18 @@ behaviour from release 2.14 onwards is to reject such input files, and
 so the @samp{--accept-unknown-input-arch} option has been added to
 restore the old behaviour.
 
+@kindex --as-needed
+@kindex --no-as-needed
+@item --as-needed
+@itemx --no-as-needed
+This option affects ELF DT_NEEDED tags for dynamic libraries mentioned
+on the command line after the @option{--as-needed} option.  Normally,
+the linker will add a DT_NEEDED tag for each dynamic library mentioned
+on the command line, regardless of whether the library is actually
+needed. @option{--as-needed} causes DT_NEEDED tags to only be emitted
+for libraries that satisfy some reference from regular objects.
+@option{--no-as-needed} restores the default behaviour.
+
 @kindex -assert @var{keyword}
 @item -assert @var{keyword}
 This option is ignored for SunOS compatibility.
@@ -1702,9 +1714,9 @@ Here is a trivial example:
 
 @smallexample
 void *
-__wrap_malloc (int c)
+__wrap_malloc (size_t c)
 @{
-  printf ("malloc called with %ld\n", c);
+  printf ("malloc called with %zu\n", c);
   return __real_malloc (c);
 @}
 @end smallexample
@@ -4749,6 +4761,12 @@ The @samp{--thumb-entry} switch is a duplicate of the generic
 But it also sets the bottom bit of the address, so that it can be
 branched to using a BX instruction, and the program will start
 executing in Thumb mode straight away.
+
+@cindex BE8
+@kindex --be8
+The @samp{--be8} switch instructs @command{ld} to generate BE8 format
+executables.  This option is only valid when linking big-endian objects.
+The resulting image will contain big-endian data and little-endian code.
 
 @ifclear GENERIC
 @lowersections

@@ -33,31 +33,31 @@ Disassembly of section \.text:
 Disassembly of section \.rofixup:
 
 000100e0 <__ROFIXUP_LIST__>:
-   100e0:	00 02 01 24 	sub\.p gr32,gr36,gr0
-   100e4:	00 02 01 28 	sub\.p gr32,gr40,gr0
-   100e8:	00 02 01 10 	sub\.p gr32,gr16,gr0
-   100ec:	00 02 01 14 	sub\.p gr32,gr20,gr0
-   100f0:	00 02 01 2c 	sub\.p gr32,gr44,gr0
-   100f4:	00 02 01 04 	sub\.p gr32,gr4,gr0
-   100f8:	00 02 01 08 	sub\.p gr32,gr8,gr0
-   100fc:	00 02 01 0c 	sub\.p gr32,gr12,gr0
-   10100:	00 02 01 18 	sub\.p gr32,gr24,gr0
+   100e0:	00 01 41 24 	sub\.p gr20,gr36,gr0
+   100e4:	00 01 41 28 	sub\.p gr20,gr40,gr0
+   100e8:	00 01 41 10 	sub\.p gr20,gr16,gr0
+   100ec:	00 01 41 14 	sub\.p gr20,gr20,gr0
+   100f0:	00 01 41 2c 	sub\.p gr20,gr44,gr0
+   100f4:	00 01 41 04 	sub\.p gr20,gr4,gr0
+   100f8:	00 01 41 08 	sub\.p gr20,gr8,gr0
+   100fc:	00 01 41 0c 	sub\.p gr20,gr12,gr0
+   10100:	00 01 41 18 	sub\.p gr20,gr24,gr0
 Disassembly of section \.data:
 
-00020104 <D1>:
-   20104:	00 02 01 08 	sub\.p gr32,gr8,gr0
+00014104 <D1>:
+   14104:	00 01 41 08 	sub\.p gr20,gr8,gr0
 
-00020108 <\.D0>:
-   20108:	00 02 01 10 	sub\.p gr32,gr16,gr0
-   2010c:	00 01 00 98 	addx\.p gr16,gr24,gr0,icc0
+00014108 <\.D0>:
+   14108:	00 01 41 10 	sub\.p gr20,gr16,gr0
+   1410c:	00 01 00 98 	addx\.p gr16,gr24,gr0,icc0
 Disassembly of section \.got:
 
-00020110 <_GLOBAL_OFFSET_TABLE_-0x8>:
-   20110:	00 01 00 98 	addx\.p gr16,gr24,gr0,icc0
-   20114:	00 02 01 18 	sub\.p gr32,gr24,gr0
+00014110 <_GLOBAL_OFFSET_TABLE_-0x8>:
+   14110:	00 01 00 98 	addx\.p gr16,gr24,gr0,icc0
+   14114:	00 01 41 18 	sub\.p gr20,gr24,gr0
 
-00020118 <_GLOBAL_OFFSET_TABLE_>:
+00014118 <_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-   20124:	00 01 00 98 	addx\.p gr16,gr24,gr0,icc0
-   20128:	00 02 01 10 	sub\.p gr32,gr16,gr0
-   2012c:	00 02 01 08 	sub\.p gr32,gr8,gr0
+   14124:	00 01 00 98 	addx\.p gr16,gr24,gr0,icc0
+   14128:	00 01 41 10 	sub\.p gr20,gr16,gr0
+   1412c:	00 01 41 08 	sub\.p gr20,gr8,gr0
