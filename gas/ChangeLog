@@ -1,3 +1,8 @@
+Thu Mar 17 13:36:09 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_import): Correctly handle importing of an
+	already defined symbol.
+
 Wed Mar 16 17:11:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Only accept overly large values for

@@ -4758,27 +4758,41 @@ pa_import (unused)
   name = input_line_pointer;
   c = get_symbol_end ();
 
-  symbol = symbol_find_or_make (name);
-  p = input_line_pointer;
-  *p = c;
-
-  if (!is_end_of_statement ())
+  symbol = symbol_find (name);
+  /* Ugh.  We might be importing a symbol defined earlier in the file,
+     in which case all the code below will really screw things up
+     (set the wrong segment, symbol flags & type, etc).  */
+  if (symbol == NULL || !S_IS_DEFINED (symbol))
     {
-      input_line_pointer++;
-      pa_type_args (symbol, 0);
+      symbol = symbol_find_or_make (name);
+      p = input_line_pointer;
+      *p = c;
+
+      if (!is_end_of_statement ())
+	{
+	  input_line_pointer++;
+	  pa_type_args (symbol, 0);
+	}
+      else
+	{
+	  /* Sigh.  To be compatable with the HP assembler and to help
+	     poorly written assembly code, we assign a type based on 
+	     the the current segment.  Note only BSF_FUNCTION really
+	     matters, we do not need to set the full SYMBOL_TYPE_* info.  */
+	  if (now_seg == text_section)
+	    symbol->bsym->flags |= BSF_FUNCTION;
+
+	  /* If the section is undefined, then the symbol is undefined
+	     Since this is an import, leave the section undefined.  */
+	  S_SET_SEGMENT (symbol, &bfd_und_section);
+	}
     }
   else
     {
-      /* Sigh.  To be compatable with the HP assembler and to help
-         poorly written assembly code, we assign a type based on 
-         the the current segment.  Note only BSF_FUNCTION really
-         matters, we do not need to set the full SYMBOL_TYPE_* info here.  */
-      if (now_seg == text_section)
-	symbol->bsym->flags |= BSF_FUNCTION;
-
-      /* If the section is undefined, then the symbol is undefined
-         Since this is an import, leave the section undefined.  */
-      S_SET_SEGMENT (symbol, &bfd_und_section);
+      /* The symbol was already defined.  Just eat everything up to
+	 the end of the current statement.  */
+      while (!is_end_of_statement ())
+	input_line_pointer++;
     }
 
   demand_empty_rest_of_line ();
