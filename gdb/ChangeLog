@@ -1,3 +1,9 @@
+2003-03-13  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (legacy_frame_p): New function.
+	(get_prev_frame): Use legacy_frame_p.
+	* frame.h (legacy_frame_p): Declare.
+
 2003-03-13  D. Venkatasubramanian <dvenkat@noida.hcltech.com>
 
         * MAINTAINERS (write after approval): Alphabetically

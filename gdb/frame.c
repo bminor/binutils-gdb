@@ -1327,10 +1327,7 @@ get_prev_frame (struct frame_info *this_frame)
      the legacy get_prev_frame method.  Just don't try to unwind a
      sentinel frame using that method - it doesn't work.  All sentinal
      frames use the new unwind code.  */
-  if ((DEPRECATED_INIT_FRAME_PC_P ()
-       || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
-       || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
-       || FRAME_CHAIN_P ())
+  if (legacy_frame_p (current_gdbarch)
       && this_frame->level >= 0)
     {
       prev_frame = legacy_get_prev_frame (this_frame);
@@ -1694,6 +1691,15 @@ deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
       make_cleanup (xfree, frame->extra_info);
     }
   return frame;
+}
+
+int
+legacy_frame_p (struct gdbarch *current_gdbarch)
+{
+  return (DEPRECATED_INIT_FRAME_PC_P ()
+	  || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
+	  || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
+	  || FRAME_CHAIN_P ());
 }
 
 void

@@ -701,4 +701,8 @@ extern struct context *deprecated_get_frame_context (struct frame_info *fi);
 extern void deprecated_set_frame_context (struct frame_info *fi,
 					  struct context *context);
 
+/* Return non-zero if the architecture is relying on legacy frame
+   code.  */
+extern int legacy_frame_p (struct gdbarch *gdbarch);
+
 #endif /* !defined (FRAME_H)  */
