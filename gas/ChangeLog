@@ -1,3 +1,18 @@
+Tue Nov 26 10:33:16 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add support for mips16 (16 bit MIPS implementation):
+	* config/tc-mips.c: Extensive additions for mips16 support, not
+	listed here.
+	(RELAX_OLD, RELAX_NEW): Use only 7 bits each.
+	(insn_uses_reg): Change last parameter to an enum.
+	* config/tc-mips.h (LOCAL_LABELS_DOLLAR): Define as 0.
+	(md_relax_frag): Define as mips_relax_frag.
+	(mips_relax_frag): Declare.
+	(struct mips_cl_insn): Add use_extend and extend fields.
+	(tc_fix_adjustable): Define.
+	* config/obj-elf.h (S_GET_OTHER): Define.
+	(S_SET_OTHER): Define.
+
 Mon Nov 25 18:02:29 1996  J.T. Conklin  <jtc@beauty.cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Implement cases for new <, >, m, n,
