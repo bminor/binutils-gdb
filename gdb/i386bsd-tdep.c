@@ -1,6 +1,6 @@
 /* Target-dependent code for i386 BSD's.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,7 +34,7 @@
 
 /* Return whether PC is in a BSD sigtramp routine.  */
 
-static int
+int
 i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);

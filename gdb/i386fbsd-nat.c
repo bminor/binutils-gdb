@@ -1,5 +1,6 @@
 /* Native-dependent code for FreeBSD/i386.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -98,8 +99,8 @@ _initialize_i386fbsd_nat (void)
     len = sizeof (ps_strings);
     if (sysctl (mib, 2, &ps_strings, &len, NULL, 0) == 0)
       {
-	i386fbsd_sigtramp_start = ps_strings - 128;
-	i386fbsd_sigtramp_end = ps_strings;
+	i386fbsd_sigtramp_start_addr = ps_strings - 128;
+	i386fbsd_sigtramp_end_addr = ps_strings;
       }
   }
 #endif

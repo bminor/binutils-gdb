@@ -1,5 +1,37 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	Fix OpenBSD/i386 sigtramp recognition.
+	* i386-tdep.h: Update copyright year.
+	(i386bsd_pc_in_sigtramp, i386bsd_sigtramp_start)
+	(i386bsd_sigtramp_end): New prototypes.
+	(i386fbsd_sigtramp_start_addr): Renamed from
+	i386fbsd_sigtramp_start.
+	(i386fbsd_sigtramp_end_addr): Renamed from i386fbsd_sigtramp_end.
+	(i386obsd_sigtramp_start_addr): Renamed from
+	i386obsd_sigtramp_start.
+	(i386obsd_sigtramp_end_addr): Renamed from i386obsd_sigtramp_end.
+	* i386bsd-tdep.c: Update copyright year.
+	(i386bsd_pc_in_sigtramp): Make public.
+	* i386fbsd-nat.c: Update copyright year.
+	(_initialize_i386fbsd_nat): Adjust for renamed variables.
+	* i386fbsd-tdep.c: Update copyright year.
+	(i386fbsd_sigtramp_start_addr): Renamed from
+	i386fbsd_sigtramp_start.
+	(i386fbsd_sigtramp_end_addr): Renamed from i386fbsd_sigtramp_end.
+	(i386fbsdaout_init_abi): Adjust for renamed variables.
+	* i386obsd-nat.c: Update copyright year.
+	(_initialize_i386obsd_nat): Adjust for renamed variables.
+	* i386obsd-tdep.c: Include "target.h".
+	(i386obsd_page_size): New variable.
+	(i386obsd_pc_in_sigtramp, i386obsd_sigtramp_start)
+	(i386obsd_sigtramp_end): New functions.
+	(i386obsd_sigtramp_start_addr): Renamed from
+	i386obsd_sigtramp_start.
+	(i386obsd_sigtramp_end_addr): Renamed from i386obsd_sigtramp_end.
+	(i386obsd_init_abi): Adjust for renamed variables.  Set
+	pc_in_sigtramp, sigtramp_start and sigtramp_end.
+	* Makefile.in (i386obsd-tdep.o): Update dependencies.
+
 	* amd64obsd-tdep.c (amd64obsd_pc_in_sigtramp): Adjust for signal
 	trampoline change in OpenBSD kernel.
 

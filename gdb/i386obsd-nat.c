@@ -1,5 +1,6 @@
 /* Native-dependent code for OpenBSD/i386.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -51,8 +52,8 @@ _initialize_i386obsd_nat (void)
     len = sizeof (_ps);
     if (sysctl (mib, 2, &_ps, &len, NULL, 0) == 0)
       {
-	i386obsd_sigtramp_start = (CORE_ADDR)_ps.val - 128;
-	i386obsd_sigtramp_end = (CORE_ADDR)_ps.val;
+	i386obsd_sigtramp_start_addr = (CORE_ADDR)_ps.val - 128;
+	i386obsd_sigtramp_end_addr = (CORE_ADDR)_ps.val;
       }
   }
 #endif
