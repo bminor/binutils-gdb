@@ -1,5 +1,28 @@
 2003-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.h (sparc64_regnum): Fix comment.
+	(sparc64_supply_rwindow, sparc64_fill_rwindow): Remove prototypes.
+	(sparc_supply_rwindow, sparc_fill_rwindow): New prototypes.
+	* sparc64-tdep.c (sparc64_pseudo_register_read): Add missing
+	`case' keyword.
+	(sparc64_register_info): Give the reister with number
+	SPARC64_STATE_REGNUM a name.
+	(sparc64_pseudo_register_write): Add support for %cwp, %pstate,
+	%asi and %ccr.
+	(sparc64_push_dummy_call): Take BIAS into account when checking
+	stcak alignment.
+	(sparc_software_single_step): Remove assertions that check whether
+	NPC and NNPC were zero.
+	(sparc_supply_rwindow): Make public.  Merge functionality with
+	sparc64_supply_rwindow.
+	(sparc_fill_rwindow): Make public.  Merge functionality with
+	sparc64_fill_rwindow.
+	(sparc64_supply_rwindow, sparc64_fill_rwindow): Remove.
+	* sparc64fbsd-nat.c (_initialize_sparc64fbsd_nat): Set
+	SPARCBSD_FPREG_SUPPLIES_P to sparc64fbsd_fpreg_supplies_p.
+	* sparc64fbsd-tdep.c (sparc64fbsd_supply_reg): Call
+	sparc_supply_rwindow instead of sparc64_supply_rwindow.
+
 	* reggroups.c: Add whitespace after declarations of local
 	variables in functions.
 

@@ -76,5 +76,5 @@ _initialize_sparc64fbsd_nat (void)
   sparcbsd_fill_fpreg = sparc64fbsd_fill_fpreg;
 
   sparcbsd_reg_supplies_p = sparc64fbsd_reg_supplies_p;
-  sparcbsd_fpreg_supplies_p = sparc64fbsd_reg_supplies_p;
+  sparcbsd_fpreg_supplies_p = sparc64fbsd_fpreg_supplies_p;
 }

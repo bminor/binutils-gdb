@@ -93,7 +93,7 @@ sparc64fbsd_supply_reg (const char *regs, int regnum)
       ULONGEST sp;
 
       regcache_cooked_read_unsigned (current_regcache, SPARC_SP_REGNUM, &sp);
-      sparc64_supply_rwindow (sp, regnum);
+      sparc_supply_rwindow (sp, regnum);
     }
 }
 

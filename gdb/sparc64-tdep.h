@@ -81,7 +81,7 @@ enum sparc64_regnum
   SPARC64_D0_REGNUM,		/* %d0 */
   SPARC64_D10_REGNUM = SPARC64_D0_REGNUM + 5, /* %d10 */
   SPARC64_D30_REGNUM = SPARC64_D0_REGNUM + 15, /* %d30 */
-  SPARC64_D32_REGNUM = SPARC64_D0_REGNUM + 16, /* %d30 */
+  SPARC64_D32_REGNUM = SPARC64_D0_REGNUM + 16, /* %d32 */
   SPARC64_D62_REGNUM = SPARC64_D0_REGNUM + 31, /* %d62 */
   SPARC64_Q0_REGNUM,		/* %q0 */
   SPARC64_Q8_REGNUM = SPARC64_Q0_REGNUM + 2, /* %q8 */
@@ -90,8 +90,8 @@ enum sparc64_regnum
   SPARC64_Q60_REGNUM = SPARC64_Q0_REGNUM + 15 /* %q60 */
 };
 
-extern void sparc64_supply_rwindow (CORE_ADDR sp, int regnum);
-extern void sparc64_fill_rwindow (CORE_ADDR sp, int regnum);
+extern void sparc_supply_rwindow (CORE_ADDR sp, int regnum);
+extern void sparc_fill_rwindow (CORE_ADDR sp, int regnum);
 
 /* Functions exported from sparc64fbsd-tdep.c.  */
 

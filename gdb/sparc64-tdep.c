@@ -271,7 +271,8 @@ static struct sparc64_register_info sparc64_register_info[] =
   
   /* This raw register contains the contents of %cwp, %pstate, %asi
      and %ccr as laid out in a %tstate register.  */
-  { NULL, &builtin_type_int64 },
+  /* FIXME: Give it a name until we start using register groups.  */
+  { "state", &builtin_type_int64 },
 
   { "fsr", &builtin_type_int64 },
   { "fprs", &builtin_type_int64 },
@@ -422,16 +423,16 @@ sparc64_pseudo_register_read (struct gdbarch *gdbarch,
       regcache_raw_read_unsigned (regcache, SPARC64_STATE_REGNUM, &state);
       switch (regnum)
 	{
-	SPARC64_CWP_REGNUM:
+	case SPARC64_CWP_REGNUM:
 	  state = (state >> 0) & ((1 << 5) - 1);
 	  break;
-	SPARC64_PSTATE_REGNUM:
+	case SPARC64_PSTATE_REGNUM:
 	  state = (state >> 8) & ((1 << 12) - 1);
 	  break;
-	SPARC64_ASI_REGNUM:
+	case SPARC64_ASI_REGNUM:
 	  state = (state >> 24) & ((1 << 8) - 1);
 	  break;
-	SPARC64_CCR_REGNUM:
+	case SPARC64_CCR_REGNUM:
 	  state = (state >> 32) & ((1 << 8) - 1);
 	  break;
 	}
@@ -470,6 +471,32 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
       regnum = SPARC64_F32_REGNUM + 2 * (regnum - SPARC64_Q32_REGNUM);
       regcache_raw_write (regcache, regnum, buf);
       regcache_raw_write (regcache, regnum + 1, ((const char *)buf) + 8);
+    }
+  else if (regnum == SPARC64_CWP_REGNUM
+	   || regnum == SPARC64_PSTATE_REGNUM
+	   || regnum == SPARC64_ASI_REGNUM
+	   || regnum == SPARC64_CCR_REGNUM)
+    {
+      ULONGEST state, bits;
+
+      regcache_raw_read_unsigned (regcache, SPARC64_STATE_REGNUM, &state);
+      bits = extract_unsigned_integer (buf, 8);
+      switch (regnum)
+	{
+	case SPARC64_CWP_REGNUM:
+	  state |= ((bits & ((1 << 5) - 1)) << 0);
+	  break;
+	case SPARC64_PSTATE_REGNUM:
+	  state |= ((bits & ((1 << 12) - 1)) << 8);
+	  break;
+	case SPARC64_ASI_REGNUM:
+	  state |= ((bits & ((1 << 8) - 1)) << 24);
+	  break;
+	case SPARC64_CCR_REGNUM:
+	  state |= ((bits & ((1 << 8) - 1)) << 32);
+	  break;
+	}
+      regcache_raw_write_unsigned (regcache, SPARC64_STATE_REGNUM, state);
     }
 }
 
@@ -1071,7 +1098,7 @@ sparc64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   sp -= 16 * 8;
 
   /* Stack should be 16-byte aligned at this point.  */
-  gdb_assert (sp % 16 == 0);
+  gdb_assert ((sp + BIAS) % 16 == 0);
 
   /* Finally, update the stack pointer.  */
   regcache_cooked_write_unsigned (regcache, SPARC_SP_REGNUM, sp);
@@ -1273,9 +1300,6 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     {
       CORE_ADDR pc;
 
-      gdb_assert (npc == 0);
-      gdb_assert (nnpc == 0);
-
       pc = sparc_address_from_register (SPARC64_PC_REGNUM);
       npc = sparc_address_from_register (SPARC64_NPC_REGNUM);
 
@@ -1375,40 +1399,15 @@ sparc64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Helper functions for dealing with register windows.  */
 
-static void
+void
 sparc_supply_rwindow (CORE_ADDR sp, int regnum)
 {
   int offset = 0;
   char buf[8];
   int i;
 
-  /* Clear out the top half of the temporary buffer, and put the
-     register value in the bottom half if we're in 64-bit mode.  */
-  if (gdbarch_ptr_bit (current_gdbarch) == 64)
-    {
-      memset (buf, 0, 4);
-      offset = 4;
-    }
-
-  for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-    {
-      if (regnum == i || regnum == -1)
-	{
-	  target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
-			      buf + offset, 4);
-	  supply_register (i, buf);
-	}
-    }
-}
-
-void
-sparc64_supply_rwindow (CORE_ADDR sp, int regnum)
-{
   if (sp & 1)
     {
-      char buf[8];
-      int i;
-
       /* Registers are 64-bit.  */
       sp += BIAS;
 
@@ -1416,8 +1415,7 @@ sparc64_supply_rwindow (CORE_ADDR sp, int regnum)
 	{
 	  if (regnum == i || regnum == -1)
 	    {
-	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 8),
-				  buf, sizeof (buf));
+	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 8), buf, 8);
 	      supply_register (i, buf);
 	    }
 	}
@@ -1426,39 +1424,37 @@ sparc64_supply_rwindow (CORE_ADDR sp, int regnum)
     {
       /* Registers are 32-bit.  Toss any sign-extension of the stack
 	 pointer.  */
-      sparc_supply_rwindow (sp & 0xffffffffUL, regnum);
+      sp &= 0xffffffffUL;
+
+      /* Clear out the top half of the temporary buffer, and put the
+	 register value in the bottom half if we're in 64-bit mode.  */
+      if (gdbarch_ptr_bit (current_gdbarch) == 64)
+	{
+	  memset (buf, 0, 4);
+	  offset = 4;
+	}
+
+      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    {
+	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
+				  buf + offset, 4);
+	      supply_register (i, buf);
+	    }
+	}
     }
 }
 
-static void
+void
 sparc_fill_rwindow (CORE_ADDR sp, int regnum)
 {
   int offset = 0;
   char buf[8];
   int i;
 
-  /* Only use the bottom half if we're in 64-bit mode.  */
-  if (gdbarch_ptr_bit (current_gdbarch) == 64)
-    offset = 4;
-
-  for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-    {
-      if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
-	{
-	  regcache_collect (i, buf);
-	  target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4), buf, 4);
-	}
-    }
-}
-
-void
-sparc64_fill_rwindow (CORE_ADDR sp, int regnum)
-{
   if (sp & 1)
     {
-      char buf[8];
-      int i;
-
       /* Registers are 64-bit.  */
       sp += BIAS;
 
@@ -1467,8 +1463,7 @@ sparc64_fill_rwindow (CORE_ADDR sp, int regnum)
 	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
 	    {
 	      regcache_collect (i, buf);
-	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 8),
-				   buf, sizeof (buf));
+	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 8), buf, 8);
 	    }
 	}
     }
@@ -1476,7 +1471,21 @@ sparc64_fill_rwindow (CORE_ADDR sp, int regnum)
     {
       /* Registers are 32-bit.  Toss any sign-extension of the stack
 	 pointer.  */
-      sparc_fill_rwindow (sp & 0xffffffffUL, regnum);
+      sp &= 0xffffffffUL;
+
+      /* Only use the bottom half if we're in 64-bit mode.  */
+      if (gdbarch_ptr_bit (current_gdbarch) == 64)
+	offset = 4;
+
+      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
+	    {
+	      regcache_collect (i, buf);
+	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
+				   buf + offset, 4);
+	    }
+	}
     }
 }
 
