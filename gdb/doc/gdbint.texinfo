@@ -3767,10 +3767,6 @@ value that is to be returned.
 This method has been deprecated in favour of @code{gdbarch_return_value}
 (@pxref{gdbarch_return_value}).
 
-@item SUN_FIXED_LBRAC_BUG
-@findex SUN_FIXED_LBRAC_BUG
-(Used only for Sun-3 and Sun-4 targets.)
-
 @item SYMBOL_RELOADING_DEFAULT
 @findex SYMBOL_RELOADING_DEFAULT
 The default value of the ``symbol-reloading'' variable.  (Never defined in
