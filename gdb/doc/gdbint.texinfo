@@ -1011,6 +1011,13 @@ This function outputs a value of an @code{int} variable.  It uses the
 the name of the field.
 @end deftypefun
 
+@deftypefun void ui_out_field_fmt_int (struct ui_out *@var{uiout}, int @var{width}, enum ui_align @var{alignment}, const char *@var{fldname}, int @var{value})
+This function outputs a value of an @code{int} variable.  It differs from
+@code{ui_out_field_int} in that the caller specifies the desired @var{width} and @var{alignment} of the output.
+@var{fldname} specifies
+the name of the field.
+@end deftypefun
+
 @deftypefun void ui_out_field_core_addr (struct ui_out *@var{uiout}, const char *@var{fldname}, CORE_ADDR @var{address})
 This function outputs an address.
 @end deftypefun
@@ -3061,13 +3068,6 @@ default value, for compatibility with older configurations.
 Return non-zero if register @var{regnum} can represent data values in a
 non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
-
-@item CPLUS_MARKER
-@findex CPLUS_MARKERz
-Define this to expand into the character that G@t{++} uses to distinguish
-compiler-generated identifiers from programmer-specified identifiers.
-By default, this expands into @code{'$'}.  Most System V targets should
-define this to @code{'.'}.
 
 @item DBX_PARM_SYMBOL_CLASS
 @findex DBX_PARM_SYMBOL_CLASS

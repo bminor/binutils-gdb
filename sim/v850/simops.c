@@ -1897,7 +1897,7 @@ OP_E607E0 (void)
   temp = load_mem (State.regs[ OP[0] ], 1);
   
   PSW &= ~PSW_Z;
-  if ((temp & (1 << State.regs[ OP[1] & 0x7 ])) == 0)
+  if ((temp & (1 << (State.regs[ OP[1] ] & 0x7))) == 0)
     PSW |= PSW_Z;
   
   trace_output (OP_BIT);
@@ -1924,7 +1924,7 @@ OP_22207E0 (void)
   						\
   trace_input (name, OP_BIT_CHANGE, 0);		\
   						\
-  bit  = 1 << State.regs[ OP[1] & 0x7 ];	\
+  bit  = 1 << (State.regs[ OP[1] ] & 0x7);	\
   temp = load_mem (State.regs[ OP[0] ], 1);	\
 						\
   PSW &= ~PSW_Z;				\

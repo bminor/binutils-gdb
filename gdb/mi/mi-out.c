@@ -109,14 +109,6 @@ mi_table_begin (struct ui_out *uiout,
 {
   struct ui_out_data *data = ui_out_data (uiout);
   mi_open (uiout, tblid, ui_out_type_tuple);
-  if (data->mi_version == 0)
-    {
-      if (nr_rows == 0)
-	data->suppress_output = 1;
-      else
-	mi_open (uiout, "hdr", ui_out_type_list);
-      return;
-    }
   mi_field_int (uiout, -1/*fldno*/, -1/*width*/, -1/*alin*/,
 		"nr_rows", nr_rows);
   mi_field_int (uiout, -1/*fldno*/, -1/*width*/, -1/*alin*/,
@@ -134,8 +126,6 @@ mi_table_body (struct ui_out *uiout)
     return;
   /* close the table header line if there were any headers */
   mi_close (uiout, ui_out_type_list);
-  if (data->mi_version == 0)
-    return;
   mi_open (uiout, "body", ui_out_type_list);
 }
 
@@ -146,11 +136,6 @@ mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   data->suppress_output = 0;
-  if (data->mi_version == 0)
-    {
-      mi_close (uiout, ui_out_type_tuple);
-      return;
-    }
   mi_close (uiout, ui_out_type_list); /* body */
   mi_close (uiout, ui_out_type_tuple);
 }
@@ -165,11 +150,6 @@ mi_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
   struct ui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
-  if (data->mi_version == 0)
-    {
-      mi_field_string (uiout, 0, width, alignment, 0, colhdr);
-      return;
-    }
   mi_open (uiout, NULL, ui_out_type_tuple);
   mi_field_int (uiout, 0, 0, 0, "width", width);
   mi_field_int (uiout, 0, 0, 0, "alignment", alignment);
@@ -361,10 +341,7 @@ mi_open (struct ui_out *uiout,
       fputc_unfiltered ('{', data->buffer);
       break;
     case ui_out_type_list:
-      if (data->mi_version == 0)
-	fputc_unfiltered ('{', data->buffer);
-      else
-	fputc_unfiltered ('[', data->buffer);
+      fputc_unfiltered ('[', data->buffer);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
@@ -382,10 +359,7 @@ mi_close (struct ui_out *uiout,
       fputc_unfiltered ('}', data->buffer);
       break;
     case ui_out_type_list:
-      if (data->mi_version == 0)
-	fputc_unfiltered ('}', data->buffer);
-      else
-	fputc_unfiltered (']', data->buffer);
+      fputc_unfiltered (']', data->buffer);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
@@ -426,6 +400,15 @@ mi_out_put (struct ui_out *uiout,
   struct ui_out_data *data = ui_out_data (uiout);
   ui_file_put (data->buffer, do_write, stream);
   ui_file_rewind (data->buffer);
+}
+
+/* Current MI version.  */
+
+int
+mi_version (struct ui_out *uiout)
+{
+  struct ui_out_data *data = ui_out_data (uiout);
+  return data->mi_version;
 }
 
 /* initalize private members at startup */

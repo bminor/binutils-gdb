@@ -49,7 +49,7 @@ static SIM_OPEN_KIND sim_kind;
 static char *myname;
 
 /* Memory size in bytes.  */
-static int mem_size = (1 << 23);
+static int mem_size = (1 << 21);
 
 /* Non-zero to display start up banner, and maybe other things.  */
 static int verbosity;
@@ -632,7 +632,7 @@ sim_open (kind, ptr, abfd, argv)
     {
       int i;
 
-      /* Scan for endian-ness switch.  */
+      /* Scan for endian-ness and memory-size switches.  */
       for (i = 0; (argv[i] != NULL) && (argv[i][0] != 0); i++)
 	if (argv[i][0] == '-' && argv[i][1] == 'E')
 	  {
@@ -666,6 +666,23 @@ sim_open (kind, ptr, abfd, argv)
 		  (sim_callback, "Unrecognised argument to -E option\n");
 		break;
 	      }
+	  }
+	else if (argv[i][0] == '-' && argv[i][1] == 'm')
+	  {
+	    if (argv[i][2] != '\0')
+	      sim_size (atoi (&argv[i][2]));
+	    else if (argv[i + 1] != NULL)
+	      {
+		sim_size (atoi (argv[i + 1]));
+		i++;
+	      }
+	    else
+	      {
+		sim_callback->printf_filtered (sim_callback,
+					       "Missing argument to -m option\n");
+		return NULL;
+	      }
+	      
 	  }
     }
 

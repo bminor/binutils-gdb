@@ -3,6 +3,15 @@
 
 *** Changes since GDB 5.3:
 
+* Default MI syntax changed to "mi2".
+
+The default MI (machine interface) syntax, enabled by the command line
+option "-i=mi", has been changed to "mi2".  The previous MI syntax,
+"mi1", can be enabled by sepcifying the option "-i=mi1".
+
+Support for the original "mi0" syntax (included in GDB 5.0) has been
+removed.
+
 * REMOVED configurations and files
 
 V850EA ISA				

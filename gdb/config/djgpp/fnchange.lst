@@ -28,6 +28,8 @@
 @V@/bfd/elf32-sh-nbsd.c @V@/bfd/e32shn.c
 @V@/bfd/elf32-sh64.c @V@/bfd/e32sh64.c
 @V@/bfd/elf32-sh64-nbsd.c @V@/bfd/e32sh64n.c
+@V@/bfd/elf64-alpha.c @V@/bfd/e64alphf.c
+@V@/bfd/elf64-alpha-fbsd.c @V@/bfd/e64alph.c
 @V@/bfd/elf64-sh64.c @V@/bfd/e64sh64.c
 @V@/bfd/elf64-sh64-nbsd.c @V@/bfd/e64sh64n.c
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp
@@ -86,7 +88,6 @@
 @V@/gdb/config/i386/nm-i386v42mp.h @V@/gdb/config/i386/nm-v42mp.h
 @V@/gdb/config/i386/tm-i386mk.h @V@/gdb/config/i386/tm-mk.h
 @V@/gdb/config/i386/tm-i386sol2.h @V@/gdb/config/i386/tm-sol2.h
-@V@/gdb/config/i386/tm-i386v4.h @V@/gdb/config/i386/tm-v4.h
 @V@/gdb/config/i386/tm-i386v42mp.h @V@/gdb/config/i386/tm-v42mp.h
 @V@/gdb/config/i386/xm-i386mach.h @V@/gdb/config/i386/xm-mach.h
 @V@/gdb/config/i386/xm-i386mk.h @V@/gdb/config/i386/xm-mk.h
@@ -131,6 +132,8 @@
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386linux-tdep.c
 @V@/gdb/i386bsd-nat.c @V@/gdb/i3bsd-nat.c
 @V@/gdb/i386bsd-tdep.c @V@/gdb/i3bsd-tdep.c
+@V@/gdb/i386gnu-nat.c @V@/gdb/i3gnu-nat.c
+@V@/gdb/i386gnu-tdep.c @V@/gdb/i3gnu-tdep.c
 @V@/gdb/i386nbsd-nat.c @V@/gdb/i3nbsd-nat.c
 @V@/gdb/i386nbsd-tdep.c @V@/gdb/i3nbsd-tdep.c
 @V@/gdb/ia64-aix-nat.c @V@/gdb/ia64aix-nat.c

@@ -1,3 +1,9 @@
+2002-09-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* wrapper.c (sim_open): Add support for -m<mem-size>.
+	(mem_size): Reduce to 2MB.
+	Fix PR gdb/433.
+
 2002-08-15  Nick Clifton  <nickc@redhat.com>
 
 	* armos.c (ARMul_OSHandleSWI): Catch and ignore SWIs of -1, they

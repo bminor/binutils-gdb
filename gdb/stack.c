@@ -51,9 +51,9 @@ void (*selected_frame_level_changed_hook) (int);
 
 void _initialize_stack (void);
 
-/* Prototypes for local functions. */
+void return_command (char *, int);
 
-static void return_command (char *, int);
+/* Prototypes for local functions. */
 
 static void down_command (char *, int);
 
@@ -359,7 +359,10 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
       if (level >= 0)
-	printf_filtered ("#%-2d ", level);
+        {
+          ui_out_text (uiout, "#");
+          ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
+        }
       annotate_function_call ();
       printf_filtered ("<function called from gdb>\n");
       annotate_frame_end ();
@@ -372,7 +375,10 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
       if (level >= 0)
-	printf_filtered ("#%-2d ", level);
+        {
+          ui_out_text (uiout, "#");
+          ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
+        }
       annotate_signal_handler_caller ();
       printf_filtered ("<signal handler called>\n");
       annotate_frame_end ();
@@ -549,8 +555,7 @@ print_frame (struct frame_info *fi,
   if (level >= 0)
     {
       ui_out_text (uiout, "#");
-      ui_out_field_fmt (uiout, "level", "%-2d", level);
-      ui_out_spaces (uiout, 1);
+      ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
     }
   if (addressprint)
     if (fi->pc != sal.pc || !sal.symtab || source == LOC_AND_ADDRESS)
@@ -1757,12 +1762,6 @@ down_command (char *count_exp, int from_tty)
 }
 
 void
-return_command_wrapper (char *retval_exp, int from_tty)
-{
-  return_command (retval_exp, from_tty);
-}
-
-static void
 return_command (char *retval_exp, int from_tty)
 {
   struct symbol *thisfun;

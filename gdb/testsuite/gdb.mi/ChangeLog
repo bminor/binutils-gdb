@@ -1,3 +1,20 @@
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-return.exp: Change expected frame output to remove extraneous
+	space in level field when frame level is single digit.  Part of
+	fix for PR gdb/192.
+	* mi-stack.exp: Ditto.
+	* mi1-return.exp: Ditto.
+	* mi1-stack.exp: Ditto.
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-var-block.exp: Change expected output from -var-update
+	command to expect list format for "changelist".  Fix for
+	PR gdb/672.
+	* mi-var-cmd.exp: Ditto.
+	* mi-var-child: Ditto.
+
 2002-09-25  Keith Seitz  <keiths@redhat.com>
 
 	* mi-pthreads.exp (get_mi_thread_list): Check if expect_out

@@ -179,7 +179,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %token <opcode> ASSIGN_MODIFY
 
-%token THIS SUPER NEW
+%token SUPER NEW
 
 %left ','
 %right '=' ASSIGN_MODIFY
@@ -365,9 +365,6 @@ Primary:
 
 PrimaryNoNewArray:
 	Literal
-|	THIS
-		{ write_exp_elt_opcode (OP_THIS);
-		  write_exp_elt_opcode (OP_THIS); }
 |	'(' Expression ')'
 |	ClassInstanceCreationExpression
 |	FieldAccess
@@ -1166,17 +1163,6 @@ yylex ()
 	{
 	  yylval.lval = 1;
 	  return BOOLEAN_LITERAL;
-	}
-      if (current_language->la_language == language_cplus
-	  && STREQN (tokstart, "this", 4))
-	{
-	  static const char this_name[] =
-				 { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
-
-	  if (lookup_symbol (this_name, expression_context_block,
-			     VAR_NAMESPACE, (int *) NULL,
-			     (struct symtab **) NULL))
-	    return THIS;
 	}
       break;
     case 3:

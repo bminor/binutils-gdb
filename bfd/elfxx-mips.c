@@ -364,6 +364,7 @@ static INLINE int elf_mips_isa PARAMS ((flagword));
 static INLINE char* elf_mips_abi_name PARAMS ((bfd *));
 static void mips_elf_irix6_finish_dynamic_symbol
   PARAMS ((bfd *, const char *, Elf_Internal_Sym *));
+static boolean _bfd_mips_elf_mach_extends_p PARAMS ((flagword, flagword));
 
 /* This will be used when we sort the dynamic relocation records.  */
 static bfd *reldyn_sorting_bfd;
@@ -1900,6 +1901,7 @@ mips_elf_create_got_section (abfd, info)
   flagword flags;
   register asection *s;
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
   struct mips_got_info *g;
   bfd_size_type amt;
 
@@ -1919,13 +1921,14 @@ mips_elf_create_got_section (abfd, info)
   /* Define the symbol _GLOBAL_OFFSET_TABLE_.  We don't do this in the
      linker script because we don't want to define the symbol if we
      are not creating a global offset table.  */
-  h = NULL;
+  bh = NULL;
   if (! (_bfd_generic_link_add_one_symbol
 	 (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
 	  (bfd_vma) 0, (const char *) NULL, false,
-	  get_elf_backend_data (abfd)->collect,
-	  (struct bfd_link_hash_entry **) &h)))
+	  get_elf_backend_data (abfd)->collect, &bh)))
     return false;
+
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
@@ -2937,6 +2940,10 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	 know where the shared library will wind up at load-time.  */
       outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
 				     R_MIPS_REL32);
+      outrel[1].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
+				     R_MIPS_NONE);
+      outrel[2].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
+				     R_MIPS_NONE);
 
       /* Adjust the output offset of the relocation to reference the
 	 correct location in the output file.  */
@@ -3058,8 +3065,17 @@ _bfd_elf_mips_mach (flags)
     case E_MIPS_MACH_4111:
       return bfd_mach_mips4111;
 
+    case E_MIPS_MACH_4120:
+      return bfd_mach_mips4120;
+
     case E_MIPS_MACH_4650:
       return bfd_mach_mips4650;
+
+    case E_MIPS_MACH_5400:
+      return bfd_mach_mips5400;
+
+    case E_MIPS_MACH_5500:
+      return bfd_mach_mips5500;
 
     case E_MIPS_MACH_SB1:
       return bfd_mach_mips_sb1;
@@ -3815,15 +3831,17 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       && strcmp (*namep, "__rld_obj_head") == 0)
     {
       struct elf_link_hash_entry *h;
+      struct bfd_link_hash_entry *bh;
 
       /* Mark __rld_obj_head as dynamic.  */
-      h = NULL;
+      bh = NULL;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, *namep, BSF_GLOBAL, *secp,
 	      (bfd_vma) *valp, (const char *) NULL, false,
-	      get_elf_backend_data (abfd)->collect,
-	      (struct bfd_link_hash_entry **) &h)))
+	      get_elf_backend_data (abfd)->collect, &bh)))
 	return false;
+
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
@@ -3879,6 +3897,7 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
      struct bfd_link_info *info;
 {
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
   flagword flags;
   register asection *s;
   const char * const *namep;
@@ -3937,13 +3956,14 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
     {
       for (namep = mips_elf_dynsym_rtproc_names; *namep != NULL; namep++)
 	{
-	  h = NULL;
+	  bh = NULL;
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, *namep, BSF_GLOBAL, bfd_und_section_ptr,
 		  (bfd_vma) 0, (const char *) NULL, false,
-		  get_elf_backend_data (abfd)->collect,
-		  (struct bfd_link_hash_entry **) &h)))
+		  get_elf_backend_data (abfd)->collect, &bh)))
 	    return false;
+
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_SECTION;
@@ -3979,26 +3999,17 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 
   if (!info->shared)
     {
-      h = NULL;
-      if (SGI_COMPAT (abfd))
-	{
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, abfd, "_DYNAMIC_LINK", BSF_GLOBAL, bfd_abs_section_ptr,
-		 (bfd_vma) 0, (const char *) NULL, false,
-		 get_elf_backend_data (abfd)->collect,
-		 (struct bfd_link_hash_entry **) &h)))
-	    return false;
-	}
-      else
-	{
-	  /* For normal mips it is _DYNAMIC_LINKING.  */
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, abfd, "_DYNAMIC_LINKING", BSF_GLOBAL,
-		 bfd_abs_section_ptr, (bfd_vma) 0, (const char *) NULL, false,
-		 get_elf_backend_data (abfd)->collect,
-		 (struct bfd_link_hash_entry **) &h)))
-	    return false;
-	}
+      const char *name;
+
+      name = SGI_COMPAT (abfd) ? "_DYNAMIC_LINK" : "_DYNAMIC_LINKING";
+      bh = NULL;
+      if (!(_bfd_generic_link_add_one_symbol
+	    (info, abfd, name, BSF_GLOBAL, bfd_abs_section_ptr,
+	     (bfd_vma) 0, (const char *) NULL, false,
+	     get_elf_backend_data (abfd)->collect, &bh)))
+	return false;
+
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
@@ -4015,26 +4026,15 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	  s = bfd_get_section_by_name (abfd, ".rld_map");
 	  BFD_ASSERT (s != NULL);
 
-	  h = NULL;
-	  if (SGI_COMPAT (abfd))
-	    {
-	      if (!(_bfd_generic_link_add_one_symbol
-		    (info, abfd, "__rld_map", BSF_GLOBAL, s,
-		     (bfd_vma) 0, (const char *) NULL, false,
-		     get_elf_backend_data (abfd)->collect,
-		     (struct bfd_link_hash_entry **) &h)))
-		return false;
-	    }
-	  else
-	    {
-	      /* For normal mips the symbol is __RLD_MAP.  */
-	      if (!(_bfd_generic_link_add_one_symbol
-		    (info, abfd, "__RLD_MAP", BSF_GLOBAL, s,
-		     (bfd_vma) 0, (const char *) NULL, false,
-		     get_elf_backend_data (abfd)->collect,
-		     (struct bfd_link_hash_entry **) &h)))
-		return false;
-	    }
+	  name = SGI_COMPAT (abfd) ? "__rld_map" : "__RLD_MAP";
+	  bh = NULL;
+	  if (!(_bfd_generic_link_add_one_symbol
+		(info, abfd, name, BSF_GLOBAL, s,
+		 (bfd_vma) 0, (const char *) NULL, false,
+		 get_elf_backend_data (abfd)->collect, &bh)))
+	    return false;
+
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
@@ -5935,8 +5935,20 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4111;
       break;
 
+    case bfd_mach_mips4120:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_4120;
+      break;
+
     case bfd_mach_mips4650:
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4650;
+      break;
+
+    case bfd_mach_mips5400:
+      val = E_MIPS_ARCH_4 | E_MIPS_MACH_5400;
+      break;
+
+    case bfd_mach_mips5500:
+      val = E_MIPS_ARCH_4 | E_MIPS_MACH_5500;
       break;
 
     case bfd_mach_mips5000:
@@ -7637,6 +7649,26 @@ _bfd_mips_elf_final_link (abfd, info)
   return true;
 }
 
+/* Return true if machine EXTENSION is an extension of machine BASE,
+   meaning that it should be safe to link code for the two machines
+   and set the output machine to EXTENSION.  EXTENSION and BASE are
+   both submasks of EF_MIPS_MACH.  */
+
+static boolean
+_bfd_mips_elf_mach_extends_p (base, extension)
+     flagword base, extension;
+{
+  /* The vr5500 ISA is an extension of the core vr5400 ISA, but doesn't
+     include the multimedia stuff.  It seems better to allow vr5400
+     and vr5500 code to be merged anyway, since many libraries will
+     just use the core ISA.  Perhaps we could add some sort of ASE
+     flag if this ever proves a problem.  */
+  return (base == 0
+	  || (base == E_MIPS_MACH_5400 && extension == E_MIPS_MACH_5500)
+	  || (base == E_MIPS_MACH_4100 && extension == E_MIPS_MACH_4111)
+	  || (base == E_MIPS_MACH_4100 && extension == E_MIPS_MACH_4120));
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -7743,10 +7775,9 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 
       /* If either has no machine specified, just compare the general isa's.
 	 Some combinations of machines are ok, if the isa's match.  */
-      if (! new_mach
-	  || ! old_mach
-	  || new_mach == old_mach
-	  )
+      if (new_mach == old_mach
+	  || _bfd_mips_elf_mach_extends_p (new_mach, old_mach)
+	  || _bfd_mips_elf_mach_extends_p (old_mach, new_mach))
 	{
 	  /* Don't warn about mixing code using 32-bit ISAs, or mixing code
 	     using 64-bit ISAs.  They will normally use the same data sizes
@@ -7763,8 +7794,11 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	  else
 	    {
 	      /* Do we need to update the mach field?  */
-	      if (old_mach == 0 && new_mach != 0) 
-		elf_elfheader (obfd)->e_flags |= new_mach;
+	      if (_bfd_mips_elf_mach_extends_p (old_mach, new_mach))
+		{
+		  elf_elfheader (obfd)->e_flags &= ~EF_MIPS_MACH;
+		  elf_elfheader (obfd)->e_flags |= new_mach;
+		}
 
 	      /* Do we need to update the ISA field?  */
 	      if (new_isa > old_isa)

@@ -3,6 +3,39 @@
 	* gdb.c++/namespace.exp: Add tests from within C::D::marker2.
 	* gdb.c++/namespace.cc: Add namespace C and its contents.
 
+2002-10-02  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/casts.cc, gdb.c++/casts.exp: New test.
+
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi1-basics.exp: Copy of mi1-basics.exp MIFLAGS set "-i=mi1".
+	* mi1-break.exp, mi1-console.exp, mi1-disassemble.exp: Ditto.
+	* mi1-eval.exp, mi1-hack-cli.exp, mi1-pthreads.exp: Ditto.
+	* mi1-read-memory.exp, mi1-regs.exp, mi1-return.exp: Ditto.
+	* mi1-simplerun.exp, mi1-stack.exp, mi1-stepi.exp: Ditto.
+	* mi1-until.exp, mi1-var-block.exp, mi1-var-child.exp: Ditto.
+	* mi1-var-cmd.exp, mi1-var-display.exp, mi1-watch.exp: Ditto.
+
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi0-basics.exp, mi0-break.exp, mi0-console.exp: Delete.
+	* mi0-disassemble.exp, mi0-eval.exp: Delete.
+	* mi0-hack-cli.exp, mi0-read-memory.exp: Delete.
+	* mi0-regs.exp, mi0-return.exp, mi0-simplerun.exp: Delete.
+	* mi0-stack.exp, mi0-stepi.exp, mi0-until.exp: Delete.
+	* mi0-var-block.exp, mi0-var-child.exp: Delete.
+	* mi0-var-cmd.exp, mi0-var-display.exp, mi0-watch.exp: Delete.
+	
+2002-09-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/annota1.exp (info break): Make directory components of
+	path optional since not all compilers emit this debug information.
+
+ 	* gdb.base/shlib-call.exp (step inside shr2): Don't fail if first
+ 	step ends up stepping out of the function instead of stopping on
+ 	the epilogue.
+
 2002-09-26  Keith Seitz  <keiths@redhat.com>
 
 	* lib/insight-support.exp (gdbtk_start): Figure out where

@@ -1276,13 +1276,12 @@ fill_in_vptr_fieldno (struct type *type)
          virtual (and hence we cannot share the table pointer).  */
       for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
 	{
-	  fill_in_vptr_fieldno (TYPE_BASECLASS (type, i));
-	  if (TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i)) >= 0)
+	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+	  fill_in_vptr_fieldno (baseclass);
+	  if (TYPE_VPTR_FIELDNO (baseclass) >= 0)
 	    {
-	      TYPE_VPTR_FIELDNO (type)
-		= TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i));
-	      TYPE_VPTR_BASETYPE (type)
-		= TYPE_VPTR_BASETYPE (TYPE_BASECLASS (type, i));
+	      TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (baseclass);
+	      TYPE_VPTR_BASETYPE (type) = TYPE_VPTR_BASETYPE (baseclass);
 	      break;
 	    }
 	}

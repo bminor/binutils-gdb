@@ -199,7 +199,6 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %token <opcode> ASSIGN_MODIFY
 
 /* C++ */
-%token THIS
 %token TRUEKEYWORD
 %token FALSEKEYWORD
 
@@ -532,11 +531,6 @@ exp	:	STRING
 	;
 
 /* C++.  */
-exp	:	THIS
-			{ write_exp_elt_opcode (OP_THIS);
-			  write_exp_elt_opcode (OP_THIS); }
-	;
-
 exp     :       TRUEKEYWORD    
                         { write_exp_elt_opcode (OP_LONG);
                           write_exp_elt_type (builtin_type_bool);
@@ -1615,17 +1609,6 @@ yylex ()
           {
             if (STREQN (tokstart, "true", 4))
               return TRUEKEYWORD;
-
-            if (STREQN (tokstart, "this", 4))
-              {
-                static const char this_name[] =
-                { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
-                
-                if (lookup_symbol (this_name, expression_context_block,
-                                   VAR_NAMESPACE, (int *) NULL,
-                                   (struct symtab **) NULL))
-                  return THIS;
-              }
           }
       break;
     case 3:

@@ -104,7 +104,7 @@ gdb_expect {
 # Test: c_variable-3.4
 # Desc: check foo, cb changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"foo\",in_scope=\"true\",type_changed=\"false\",name=\"cb\",in_scope=\"true\",type_changed=\"false\"\}" \
+	"\\^done,changelist=\\\[\{name=\"foo\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"cb\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
 	"update all vars: cb foo changed"
 
 # step to "foo = 321;"
@@ -155,7 +155,7 @@ mi_gdb_test "-var-evaluate-expression inner_foo" \
 clear_xfail *-*-*
 
 mi_gdb_test "-var-update foo" \
-	"\\^done,changelist=\{\}" \
+	"\\^done,changelist=\\\[\\\]" \
 	"update foo: did not change"
 
 mi_gdb_test "-var-delete inner_foo" \
@@ -193,7 +193,7 @@ gdb_expect {
 # Desc: check that only cb is in scope (known gdb problem)
 setup_xfail *-*-*
 mi_gdb_test "-var-update foo2" \
-	"\\^done,changelist=\{FIXME\}" \
+	"\\^done,changelist=\\\[FIXME\\\]" \
 	"update foo2 should be out of scope: KNOWN PROBLEM"
 clear_xfail *-*-*
 setup_xfail *-*-*
@@ -202,7 +202,7 @@ mi_gdb_test "-var-update foo" \
 	"update foo should be out of scope: KNOWN PROBLEM"
 clear_xfail *-*-*
 mi_gdb_test "-var-update cb" \
-	"\\^done,changelist=\{\}" \
+	"\\^done,changelist=\\\[\\\]" \
 	"update cb"
 
 # Test: c_variable-3.10

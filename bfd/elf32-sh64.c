@@ -411,16 +411,19 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       if (h == NULL)
 	{
 	  /* No previous datalabel symbol.  Make one.  */
+	  struct bfd_link_hash_entry *bh = NULL;
+	  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
 	  if (! _bfd_generic_link_add_one_symbol (info, abfd, dl_name,
 						  flags, *secp, *valp,
 						  *namep, false,
-						  get_elf_backend_data (abfd)->collect,
-						  (struct bfd_link_hash_entry **) &h))
+						  bed->collect, &bh))
 	    {
 	      free (dl_name);
 	      return false;
 	    }
 
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
 	  h->type = STT_DATALABEL;
 	}

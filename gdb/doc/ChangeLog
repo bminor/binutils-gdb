@@ -1,3 +1,34 @@
+2002-10-11  Klee Dienes  <kdienes@apple.com>
+
+	* gdb.texinfo (Registers): Mention vector registers as well as
+	floating registers in the documentation for 'info registers' and
+	'info all-registers'.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (CPLUS_MARKER): Remove item.
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbint.texinfo (Item Output Functions): Add new ui_out_field_fmt_int
+	interface definition.
+
+2002-10-03  Marko Mlinar   <markom@opencores.org>
+
+	* gdb.texinfo (Target Commands): Add or1k target specific
+	commands.
+	* gdb.texinfo (Contributors): Add myself to the contributors list.
+
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Mode Options): Update --interpreter option.  "mi2"
+	and "mi1" instead of "mi1" and "mi0".
+
+2002-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gdb.texinfo (Packets): Fix typos "alligned".
+	Correct z3/Z3 description.  Correct z4/Z4 title.
+
 2002-09-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* all-cfg.texi: Use @sc for GDB and GCC.  Update copyright.

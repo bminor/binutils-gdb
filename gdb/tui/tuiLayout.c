@@ -43,6 +43,7 @@
 #include "command.h"
 #include "symtab.h"
 #include "frame.h"
+#include "source.h"
 #include <ctype.h>
 
 #include "tui.h"
@@ -546,12 +547,13 @@ _extractDisplayStartAddr (void)
   TuiLayoutType curLayout = currentLayout ();
   CORE_ADDR addr;
   CORE_ADDR pc;
+  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
   switch (curLayout)
     {
     case SRC_COMMAND:
     case SRC_DATA_COMMAND:
-      find_line_pc (current_source_symtab,
+      find_line_pc (cursal.symtab,
 		    srcWin->detail.sourceInfo.startLineOrAddr.lineNo,
 		    &pc);
       addr = pc;

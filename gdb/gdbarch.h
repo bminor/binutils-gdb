@@ -2579,6 +2579,38 @@ extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * na
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CANNOT_STEP_BREAKPOINT)
+#define CANNOT_STEP_BREAKPOINT (0)
+#endif
+
+extern int gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch);
+extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int cannot_step_breakpoint);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CANNOT_STEP_BREAKPOINT)
+#error "Non multi-arch definition of CANNOT_STEP_BREAKPOINT"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CANNOT_STEP_BREAKPOINT)
+#define CANNOT_STEP_BREAKPOINT (gdbarch_cannot_step_breakpoint (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (HAVE_NONSTEPPABLE_WATCHPOINT)
+#define HAVE_NONSTEPPABLE_WATCHPOINT (0)
+#endif
+
+extern int gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch);
+extern void set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch, int have_nonsteppable_watchpoint);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (HAVE_NONSTEPPABLE_WATCHPOINT)
+#error "Non multi-arch definition of HAVE_NONSTEPPABLE_WATCHPOINT"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (HAVE_NONSTEPPABLE_WATCHPOINT)
+#define HAVE_NONSTEPPABLE_WATCHPOINT (gdbarch_have_nonsteppable_watchpoint (current_gdbarch))
+#endif
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

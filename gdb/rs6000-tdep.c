@@ -465,6 +465,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int prev_insn_was_prologue_insn = 1;
   int num_skip_non_prologue_insns = 0;
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   /* Attempt to find the end of the prologue when no limit is specified.
      Note that refine_prologue_limit() has been written so that it may
@@ -694,7 +695,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	{			/* mr r31, r1 */
 	  fdata->frameless = 0;
 	  framep = 1;
-	  fdata->alloca_reg = 31;
+	  fdata->alloca_reg = (tdep->ppc_gp0_regnum + 31);
 	  continue;
 
 	  /* Another way to set up the frame pointer.  */
@@ -703,7 +704,8 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	{			/* addi rX, r1, 0x0 */
 	  fdata->frameless = 0;
 	  framep = 1;
-	  fdata->alloca_reg = (op & ~0x38010000) >> 21;
+	  fdata->alloca_reg = (tdep->ppc_gp0_regnum
+			       + ((op & ~0x38010000) >> 21));
 	  continue;
 	}
       /* AltiVec related instructions.  */
@@ -1989,7 +1991,8 @@ rs6000_stab_reg_to_regnum (int num)
 static void
 rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
-  write_register (3, addr);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  write_register (tdep->ppc_gp0_regnum + 3, addr);
 }
 
 /* Write into appropriate registers a function return value
@@ -2793,7 +2796,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	break;
       case bfd_mach_ppc_7400:
 	tdep->ppc_vr0_regnum = 119;
-	tdep->ppc_vrsave_regnum = 153;
+	tdep->ppc_vrsave_regnum = 152;
 	tdep->ppc_ev0_regnum = -1;
 	tdep->ppc_ev31_regnum = -1;
 	break;

@@ -1,3 +1,17 @@
+2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
+            Ken Raeburn  <raeburn@cygnus.com>
+            Aldy Hernandez  <aldyh@redhat.com>
+            Eric Christopher  <echristo@redhat.com>
+            Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips-dis.c (print_insn_arg): Handle '[', ']', 'e' and '%'.
+	(mips_isa_type): Handle bfd_mach_mips4120, bfd_mach_mips5400
+	and bfd_mach_mips5500.
+	* mips-opc.c (V1): Include INSN_4111 and INSN_4120.
+	(N411, N412, N5, N54, N55): New convenience defines.
+	(mips_builtin_opcodes): Add vr4120, vr5400 and vr5500 opcodes.
+	Change dmadd16 and madd16 from V1 to N411.
+
 2002-09-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-dis.c (print_insn_mips): Always allow disassembly of

@@ -2649,6 +2649,8 @@ string_to_core_addr (const char *my_string)
 	    internal_error (__FILE__, __LINE__, "invalid decimal");
 	}
     }
+  if (INTEGER_TO_ADDRESS_P ())
+    addr = INTEGER_TO_ADDRESS (builtin_type_void_data_ptr, &addr); 
   return addr;
 }
 

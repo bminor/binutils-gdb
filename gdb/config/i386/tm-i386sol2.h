@@ -21,7 +21,7 @@
 #ifndef TM_I386SOL2_H
 #define TM_I386SOL2_H 1
 
-#include "i386/tm-i386v4.h"
+#include "i386/tm-i386.h"
 
 /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
    and for SunPRO 3.0, N_FUN symbols too.  */

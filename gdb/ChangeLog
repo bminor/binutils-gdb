@@ -153,6 +153,298 @@
 	* remote-sds.c (getmessage): Add semicolon after 'retry' label to
 	pacify GCC.
 
+2002-10-11  Martin M. Hunt  <hunt@redhat.com>
+
+	* utils.c (string_to_core_addr): After turning string into
+	a number, convert to a CORE_ADDR using INTEGER_TO_ADDRESS
+	which will do necessary sign-extension, etc.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* cp-valprint.c (vtbl_ptr_name_old): Delete.
+	(cp_is_vtbl_ptr_type): Don't check vtbl_ptr_name_old.
+	* demangle.c (cplus_markers): Update comment.  Put '$'
+	first.  Remove CPLUS_MARKER.
+	(_initialize_demangler): Don't call set_cplus_marker_for_demangling.
+	* jv-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* mips-tdep.c (mips_dump_tdep): Don't dump CPLUS_MARKER.
+	* objc-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* p-exp.y (yylex): Remove reference to CPLUS_MARKER.
+	* stabsread.c (vptr_name, vb_name): Replace CPLUS_MARKER with '$'.
+	(read_member_functions): Likewise for opname.
+	(read_tilde_fields): Use is_cplus_marker.
+
+	* defs.h (CPLUS_MARKER): Don't define.
+	* config/tm-sysv4.h (CPLUS_MARKER): Likewise.
+	* config/i386/xm-i386sco.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix3.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix6.h (CPLUS_MARKER): Likewise.
+	* config/rs6000/tm-rs6000.h (CPLUS_MARKER): Likewise.
+
+	* config/i386/tm-i386v4.h: Delete file.
+	* config/djgpp/fnchange.lst: Delete tm-i386v4.h.
+	* config/i386/tm-i386sol2.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-i386v42mp.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-ptx.h: Include "i386/tm-i386.h" instead.
+	* config/i386/i386gnu.mt (TM_FILE): Use tm-i386.h.
+	* config/i386/i386sco5.mt (TM_FILE): Likewise.
+	* config/i386/i386v4.mt (TM_FILE): Likewise.
+	* config/i386/ncr3000.mt (TM_FILE): Likewise.
+
+2002-10-10  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C,
+	accidentially not commited 2002-10-09
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-09  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C.
+	* gdbarch.sh (HAVE_NONSTEPPABLE_WATCHPOINT): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-08  Petr Sorfa <petrs@caldera.com>
+
+	Revised and re-submitted by John Wolfe <jlw@caldera.com>
+
+	Move the Dwarf 2 abbrev table to a per-compilation-unit structure,
+	so we can work on more than one compilation unit at a time.  This
+	helps prepare GDB to handle inter-CU die references.
+	* dwarf2read.c (ABBREV_HASH_SIZE): moved definition forward in
+	the code to be defined before struct comp_unit_head.
+	(comp_unit_head): Added new members - offset, cu_head,
+	begin_die, next and dwarf2_abbrevs.
+	(dwarf2_abbrevs): Removed single static var; now member of
+	struct comp_unit_head.
+	dwarf2_build_psymtabs_hard): Complete new struct comp_unit_head
+	members.
+	(psymtab_to_symtab_1): Changed to work with the new
+	struct comp_unit_head.
+	(dwarf2_read_abbrevs): Now accepts a cu_header parameter and
+	constructs the dwarf2_abbrevs[] inside the cu_header.
+	(dwarf2_empty_abbrev_table): Now expects a ptr to a
+	dwarf2_abbrev table to clean up.
+	(dwarf2_lookup_abbrev): Now accepts a cu_header parameter and
+	handling of dwarf2_abbrevs inside the cu_header.
+	(read_partial_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+	(read_full_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+
+2002-10-06  Christopher Faylor  <cgf@redhat.com>
+
+	* Makefile.in (install-gdbtk): Add missing continuation backslash to
+	insure that shell variables, such as "transformed_name" are propagated
+	to later shell statements in rule.
+
+2002-10-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386sco.h: Add protection against
+	multiple-inclusion.  Include "i386/nm-i386v.h".
+	(REGISTER_U_ADDR): Remove define.
+	(i386_register_u_addr): Remove prototype.
+
+2002-10-04  Michael Snyder  <msnyder@redhat.com>
+
+	* m32r-stub.c (handle_exception): Make sure exception is "trap"
+	before treating it as a single-step event.
+
+2002-10-03  Adam Fedor  <fedor@gnu.org>
+
+	* objc-lang.c: ARI fixes.  Change string.h to gdb_string.h.
+	(objc_demangle): Remove assignment in if statements, Replace
+	free with xfree.
+	(add_msglist): Likewise.
+	(end_msglist): Likewise.
+	(complare_selectors): Likewise.
+	(selectors_info): Likewise.
+	(compare_classes): Likewise.
+	(classes_info): Likewise.
+	(print_object_command): Likewise.
+	(find_objc_msgcall_submethod): Replace PTR with void *.
+	* objc-lang.h: Remove check for __STDC__.
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ui-out.h (ui_out_field_fmt_int): New prototype.
+	* ui-out.c (ui_out_field_fmt_int): New function allowing specification
+	of field width and alignment.
+	* stack.c (print_frame_info_base): When printing frame level, use
+	ui_out_field_fmt_int with a width of 2 and left alignment.  Fix for
+	PR gdb/192
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* MAINTAINERS: Add self to Write After Approval list.
+
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* infcmd.c (interrupt_target_command_wrapper): Delete.
+	(interrupt_target_command): Make non static.
+	(nofp_registers_info): Make static.
+	* stack.c (return_command_wrapper): Delete.
+	(return_command): Make non static.
+
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-top.c (gdb_setup_readline): New function. Code moved from
+	_initialize_event_loop().
+	(_initialize_event_loop): Call gdb_setup_readline().
+
+2002-10-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* infrun.c (resume): Convert #ifdef CANNOT_STEP_BREAKPOINT into C.
+	* gdbarch.sh (CANNOT_STEP_BREAKPOINT): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/778
+	* gdbtypes.c (fill_in_vptr_fieldno): Call check_typedef
+	before recursing.
+	* gnu-v3-abi.c (gnuv3_virtual_fn_field): Check return value
+	of fill_in_vptr_fieldno.
+
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* inferior.h (registers_info, stepi_command, nexti_command,
+	continue_command, interrupt_target_command): Export from infcmd.c.
+	* frame.h (args_info, selected_frame_level_changed_hook,
+	return_command): Export from stack.c.
+	* v850ice.c (stepi_command, nexti_command, continue_command): use
+	prototypes from inferior.h.
+	* tracepoint.c (registers_info, args_info, locals_info): Use
+	prototypes from frame.h and inferior.h.
+	* Makefile.in (mi-main.o): Add dependency on frame.h.
+
+2002-10-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_store_struct_return): Store struct_return
+	value in register 3 adjusted by ppc_gp0_regnum.
+
+	* rs6000-tdep.c (skip_prologue): Bias alloca_reg by ppc_gp0_regnum.
+
+2002-10-02  Marko Mlinar <markom@opencores.org>
+
+        * MAINTAINERS: Add myself to the Write After Approval list.
+
+2002-10-01  Alexandre Oliva  <aoliva@redhat.com>
+
+	* mips-tdep.c (mips_find_abi_section): .mdebug.abi64 is the name
+	of the section for the N64 ABI, fixed.
+
+	* config/mips/tm-irix6.h: Include solib.h.
+
+2002-10-01  Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2read.c (dwarf_stack_op_name): Recognize more dwarf3 and
+	GNU operators.
+
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that MI syntax, selected by "mi" changed to "mi2"
+	and that "mi0" syntax has been removed.
+
+2002-09-30  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (ppc-sysv-tdep.o): Depend on gdb_string_h.
+	* ppc-sysv-tdep.c: #include "gdb_string.h".
+	* remote-sds.c (getmessage): Add semicolon after 'retry' label to
+	pacify GCC.
+
+2002-10-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): For powerpc:7400, fix
+	"vrsave"'s register number.
+
+2002-09-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* mips-tdep.c (mips_frame_saved_pc): When a generic dummy frame,
+	use frame_unwind_signed_register to obtain the PC.
+	(mips_frame_chain): Handle a generic dummy frame.
+	(mips_init_extra_frame_info): When a generic dummy frame, don't
+	re-compute the frame base.
+	(mips_pop_frame): Handle generic dummy frames.
+	(mips_gdbarch_init): When generic dummy frames, set
+	use_generic_dummy_frames, push_dummy_frame to
+	generic_push_dummy_frame, pc_in_call_dummy to
+	generic_pc_in_call_dummy, and save_dummy_frame_top_of_stack to
+	generic_save_dummy_frame_tos.
+
+2002-09-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* blockframe.c (generic_find_dummy_frame): Rewrite.  Only test
+	against TOP when TOP was explictly set.
+	(generic_push_dummy_frame): Set TOP to zero.
+
+2002-09-30  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-loop.c (start_event_loop): Rename variable 'result' to
+	'gdb_result', to avoid conflicts with upcoming intepreters changes.
+
+2002-09-30  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (selected_thread_changed): New event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+
+2002-09-30  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* MAINTAINERS: Add self to Write After Approval list.
+
+2002-09-30  Fernando Nasser  <fnasser@redhat.com>
+
+	* disasm.c: New file.  
+	* disasm.h: New file.  
+	* mi/mi-cmd-disas.c (gdb_dis_asm_read_memory): Moved to disasm.c.
+	(compare_lines): Ditto.
+	(dump_insns): Ditto.
+	(do_mixed_source_and_assembly): Moved to disasm.c. Added uiout
+	argument.
+	(do_assembly_only): Ditto.
+	(do_disassembly): Renamed to gdb_disassembly and moved to
+	disasm.c.  Sdded uiout argument.
+	* Makefile.in: Add new files.  Reorder SFILES list. Update
+	dependencies.  Include libgdb.a later in the insight executable.
+
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Rename bfd/elf64-alpha.c and
+	bfd/elf64-alpha-fbsd.c.
+
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Rename i386gnu-nat.c and
+	i386gnu-tdep.c.
+
+2002-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gnu-nat.h (debug): Use __FILE__ and __LINE__ instead of
+	__FUNCTION__.
+	* gnu-nat.c (do_mach_notify_no_senders): Replace __FUNCTION__ with
+	function name.
+	(do_mach_notify_port_deleted, do_mach_notify_msg_accepted): Ditto.
+	(do_mach_notify_port_destroyed, do_mach_notify_send_once): Ditto.
+	(S_proc_setmsgport_reply, S_proc_getmsgport_reply): Ditto.
+	(S_msg_sig_post_reply): Ditto.
+	
+2002-09-28  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_use_struct_convention): Use definition according
+	to ABI.
+	(sh_push_arguments): Store in register with correct endianess.
+	(sh_default_store_return_value): Ditto.
+	(sh_gdbarch_init): Set sizeof long double to 8.
+
+2002-09-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h: Move inclusion of "ansidecl.h" before "gdb_locale.h".
+	Fix some whitespace problems.
+
 2002-09-27  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (cris-tdep.o): Depend on gdb_string_h.
@@ -271,7 +563,7 @@
 
 2002-09-22  Fernando Nasser  <fnasser@redhat.com>
 
-	* source.c (get_current__or_default_source_symtab_and_line): Initialize
+	* source.c (get_current_or_default_source_symtab_and_line): Initialize
 	sal.pc and sal.end fields.
 	(get_current_or_default_source_symtab_and_line): Ditto.
 	* breakpoint.c (parse_breakpoint_sals): Use correct accessor function
@@ -10604,9 +10896,9 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	* breakpoint.c (break_at_finish_command): Export.
 	(break_at_finish_at_depth_command): Export.
 	(tbreak_at_finish_command): Export.
-	(_initialize_breakpoint): Delete "xbreak" and "tbreak" commands.
+	(_initialize_breakpoint): Delete "xbreak" and "txbreak" commands.
 	* hppa-tdep.c (_initialize_hppa_tdep): Add "xbreak" and
-	"tbreak" commands, which are HPPA specific.
+	"txbreak" commands, which are HPPA specific.
 
 	* printcmd.c (disassemble_command): Remove an ancient
 	artifact of an old merge.

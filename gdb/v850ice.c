@@ -50,12 +50,6 @@ struct MessageIO
 /* Prototypes for functions located in other files */
 extern void break_command (char *, int);
 
-extern void stepi_command (char *, int);
-
-extern void nexti_command (char *, int);
-
-extern void continue_command (char *, int);
-
 extern int (*ui_loop_hook) (int);
 
 /* Prototypes for local functions */

@@ -80,7 +80,7 @@ proc test_return_simple {} {
 
     send_gdb "111-exec-return\n"
     gdb_expect {
-	-re "111\\^done,frame=\{level=\"0 \",addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",line=\"18\"\}\r\n$mi_gdb_prompt$" {pass "return from callee4 now"}
+	-re "111\\^done,frame=\{level=\"0\",addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",line=\"18\"\}\r\n$mi_gdb_prompt$" {pass "return from callee4 now"}
 	-re ".*\r\n$mi_gdb_prompt$" { fail "return from callee4 now" }
 	timeout { fail "return from callee4 now (timeout)"
 	}

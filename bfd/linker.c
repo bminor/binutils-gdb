@@ -1305,6 +1305,7 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 	  const char *name;
 	  const char *string;
 	  struct generic_link_hash_entry *h;
+	  struct bfd_link_hash_entry *bh;
 
 	  name = bfd_asymbol_name (p);
 	  if (((p->flags & BSF_INDIRECT) != 0
@@ -1326,12 +1327,12 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
 	  else
 	    string = NULL;
 
-	  h = NULL;
+	  bh = NULL;
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, p->flags, bfd_get_section (p),
-		  p->value, string, false, collect,
-		  (struct bfd_link_hash_entry **) &h)))
+		  p->value, string, false, collect, &bh)))
 	    return false;
+	  h = (struct generic_link_hash_entry *) bh;
 
 	  /* If this is a constructor symbol, and the linker didn't do
              anything with it, then we want to just pass the symbol
