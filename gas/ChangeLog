@@ -1,3 +1,96 @@
+Wed Aug 25 13:37:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	Merged changes from Pete Hoogenboom and Jeff Law at Utah:
+	* config/tc-hppa.c (pa_build_unwind_subspace): SEC_ALLOC should
+	not be on for .hppa_unwind.
+	(md_pseudo_table): .PARAM and .param are valid pseudo-ops for GAS.
+	(pa_param): New function to handle .PARAM directives.
+	(pa_ip): Pass "isbranch" argument down to pa_parse_*_compltr
+	functions.  Handle '|' for movb; allow movb,n.
+	(pa_parse_nonneg_cmpsub_cmpltr): Delete old useless
+	version.  Handle cases where no completer exists for
+	comb,n or addb,n.
+	(pa_parse_neg_cmpsub_cmpltr): Handle cases where no 
+	completer exists for comb,n or addb,n.  Make logic
+	mirror that of pa_parse_nonneg_cmpsub_cmpltr.
+	(pa_parse_nonneg_add_cmpltr): Likewise.
+	(pa_parse_neg_add_cmpltr): Likewise.
+	* tc-hppa.h (pa_param): Declare.
+
+Tue Aug 24 15:41:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-hppa.c (hppa_tc_make_symextn_section): Now static.
+	Added forward declaration.
+
+	Merged changes from Pete Hoogenboom and Jeff Law at Utah:
+
+	* config/obj-elf.c (elf_frob_file): Arguments were incorrect on
+	call to elf_tc_make_sections.
+	(obj_elf_version): A .note section shouldn't have the SEC_ALLOC
+	attribute.
+
+	* config/tc-hppa.c (hppa_tc_make_sections): Add some processing to
+	handle symbol extension sections.
+
+	* config/tc-hppa.c (pa_build_symextn_section): New function to
+	create a symbol extension section.
+	(pa_export_args): Make call to pa_build_symextn_section.
+	(hppa_tc_symbol, hppa_tc_make_sections,
+	hppa_tc_make_symextn_section): New functions.
+	* config/tc-hppa.h: Update elf_tc_symbol and elf_tc_make_sections
+	macros.
+
+	* read.c (emit_expr): Place check for TC_CONS_FIX_NEW in the
+	BFD_ASSEMBLER branch as well.
+
+	* config/tc-hppa.h: If ELF is the target object format, define
+	some ELF- and hppa-specific types and constants.
+
+	* config/tc-hppa.c (getExpression): Fix a typo.
+
+	* read.c (read_a_source_file): Use TC_EQUAL_IN_INSN to determine
+	if a `=' is part of an instruction.
+	(read_a_source_file): Handle case where end-of-line markers are
+	also used within instructions.
+	* config/tc-hppa.h (TC_EQUAL_IN_INSN, TC_EOL_IN_INSN): Define.
+
+	* config/tc-hppa.c (md_apply_fix_1): Keep relocations for
+	out-of-range branches/'calls using "bl" or calls which may need
+	argument relocation stubs.  Do not need/keep relocations for
+	conditional branches.
+	(elf_hppa_final_processing): Fix calculation of function size.
+
+	* config/obj-elf.c (obj_elf_version): Mark .note section as
+	READONLY.
+
+	* config/tc-hppa.c (parse_cons_expression_hppa): Pass exp, not the
+	address of exp, to expression.
+	(pa_build_unwind_subspace): Turn SEC_HAS_CONTENTS flag on.
+	(md_apply_fix_1): Delete unwanted comments.
+	(process_exit): Symbols marking the end of a function are always
+	BSF_LOCAL.
+
+	* config/tc-hppa.c: Include elf32-hppa.h from BFD tree.
+	(pa_space): Declare and initialize gdb_section.
+
+	* config/obj-elf.c (elf_frob_file): Change
+	elf_tc_final_processing_hook to elf_tc_final_processing.
+
+	* config/tc-hppa.c (fix_new_hppa): Fix argument list to match
+	argument type declarations.
+	(getExpression): Fix typo.
+	(pa_export_args): Change elf_symbol_type to elf32_symbol_type.
+	(elf_hppa_final_processing): Likewise.  Name changed from
+	elf_hppa_final_processing_hook.
+	(start_symbol_root, start_symbol_last): Deleted.
+
+	* config/tc-hppa.h (TC_PARSE_CONS_EXPRESSION): Fix typo.
+
+	* config/tc-hppa.h: Replace "symbolS" with "struct symbol" to
+	avoid changing include ordering.
+
+	* config/tc-hppa.c (pa_ip, case 'y'): Handle just like 't'.
+
 Mon Aug 23 12:47:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (set_at): Added unsignedp argument.  Use
