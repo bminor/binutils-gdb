@@ -1,4 +1,4 @@
-1999-09-02  Steve Chamberlain  <sac@pobox.com>
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
 
 	* binutils-all/objdump.exp: Add pj to cpus_expected.
 
