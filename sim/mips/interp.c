@@ -2795,32 +2795,37 @@ SignalException (int exception,...)
        sim_warning("ReservedInstruction 0x%08X at IPC = 0x%s",instruction,pr_addr(IPC));
      }
 
-    default:
+    case BreakPoint:
 #ifdef DEBUG
-     if (exception != BreakPoint)
-      callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%s\n",exception,pr_addr(IPC));
+	callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%s\n",exception,pr_addr(IPC));
 #endif /* DEBUG */
+      /* Keep a copy of the current A0 in-case this is the program exit
+	 breakpoint:  */
+      {
+	va_list ap;
+	unsigned int instruction;
+	va_start(ap,exception);
+	instruction = va_arg(ap,unsigned int);
+	va_end(ap);
+	/* Check for our special terminating BREAK: */
+	if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
+	  sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			   sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
+	}
+      }
+      if (state & simDELAYSLOT)
+	PC = IPC - 4; /* reference the branch instruction */
+      else
+	PC = IPC;
+      sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+		       sim_stopped, SIGTRAP);
+
+    default:
      /* Store exception code into current exception id variable (used
         by exit code): */
 
      /* TODO: If not simulating exceptions then stop the simulator
         execution. At the moment we always stop the simulation. */
-     /* state |= (simSTOP | simEXCEPTION); */
-
-     /* Keep a copy of the current A0 in-case this is the program exit
-        breakpoint:  */
-     if (exception == BreakPoint) {
-       va_list ap;
-       unsigned int instruction;
-       va_start(ap,exception);
-       instruction = va_arg(ap,unsigned int);
-       va_end(ap);
-       /* Check for our special terminating BREAK: */
-       if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
-	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-			  sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
-       }
-     }
 
      /* See figure 5-17 for an outline of the code below */
      if (! (SR & status_EXL))
@@ -2839,7 +2844,7 @@ SignalException (int exception,...)
        }
      else
        {
-	 CAUSE = 0;
+	 CAUSE = (exception << 2);
 	 vector = 0x180;
        }
      SR |= status_EXL;
@@ -2884,10 +2889,14 @@ SignalException (int exception,...)
        case Trap:
        case Watch:
        case SystemCall:
-       case BreakPoint:
 	 PC = EPC;
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
 			  sim_stopped, SIGTRAP);
+
+       case BreakPoint:
+	 PC = EPC;
+	 sim_engine_abort (sd, STATE_CPU (sd, 0), NULL_CIA,
+			   "FATAL: Should not encounter a breakpoint\n");
 
        default : /* Unknown internal exception */
 	 PC = EPC;
@@ -4111,6 +4120,12 @@ decode_coproc(instruction)
 		  SR = GPR[rt];
 		break;
 		/* 13 = Cause              R4000   VR4100  VR4300 */
+	      case 13:
+		if (code == 0x00)
+		  GPR[rt] = CAUSE;
+		else
+		  CAUSE = GPR[rt];
+		break;
 		/* 14 = EPC                R4000   VR4100  VR4300 */
 		/* 15 = PRId               R4000   VR4100  VR4300 */
 		/* 16 = Config             R4000   VR4100  VR4300 */
@@ -4362,16 +4377,16 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
        LO1ACCESS--;
 #endif /* WARN_LOHI */
 
-#if defined(WARN_ZERO)
       /* For certain MIPS architectures, GPR[0] is hardwired to zero. We
          should check for it being changed. It is better doing it here,
          than within the simulator, since it will help keep the simulator
          small. */
       if (ZERO != 0) {
+#if defined(WARN_ZERO)
         sim_warning("The ZERO register has been updated with 0x%s (PC = 0x%s) (reset back to zero)",pr_addr(ZERO),pr_addr(IPC));
+#endif /* WARN_ZERO */
         ZERO = 0; /* reset back to zero before next instruction */
       }
-#endif /* WARN_ZERO */
     } else /* simSKIPNEXT check */
      state &= ~simSKIPNEXT;
 
