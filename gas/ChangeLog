@@ -1,3 +1,8 @@
+Thu Dec 14 15:09:52 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (write_object_file): Set the s_align field to
+	the number of bytes, rather than to the power of 2.
+
 Tue Dec 12 12:19:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DISTCLEAN_HERE): New variable.
