@@ -1,3 +1,8 @@
+Fri Feb  2 11:42:15 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* aclocal.m4 (BFD_BINARY_FOPEN): Understand cygwin32.
+	* configure: Regenerate.
+
 Fri Feb  2 12:12:16 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-hppa.c (elf32_hppa_backend_symbol_table_processing): Don't
