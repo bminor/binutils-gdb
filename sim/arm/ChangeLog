@@ -1,3 +1,8 @@
+Thu Apr 17 18:33:01 1997  Fred Fish  <fnf@cygnus.com>
+
+	* arminit.c (ARMul_NewState): Preinitialize the state to
+	all zero/NULL.
+
 Thu Apr 17 02:39:02 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add sim-load.o.
