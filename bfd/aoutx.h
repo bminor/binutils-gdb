@@ -165,6 +165,14 @@ DESCRIPTION
 #define MY_swap_std_reloc_out NAME(aout,swap_std_reloc_out)
 #endif
 
+#ifndef MY_final_link_relocate
+#define MY_final_link_relocate _bfd_final_link_relocate
+#endif
+
+#ifndef MY_relocate_contents
+#define MY_relocate_contents _bfd_relocate_contents
+#endif
+
 #define howto_table_ext NAME(aout,ext_howto_table)
 #define howto_table_std NAME(aout,std_howto_table)
 
@@ -549,7 +557,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
     break;
   }
 
-  adata(abfd)->page_size = PAGE_SIZE;
+  adata(abfd)->page_size = TARGET_PAGE_SIZE;
   adata(abfd)->segment_size = SEGMENT_SIZE;
   adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
 
@@ -1048,7 +1056,7 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
   /* Rule (heuristic) for when to pad to a new page.  Note that there
      are (at least) two ways demand-paged (ZMAGIC) files have been
      handled.  Most Berkeley-based systems start the text segment at
-     (PAGE_SIZE).  However, newer versions of SUNOS start the text
+     (TARGET_PAGE_SIZE).  However, newer versions of SUNOS start the text
      segment right after the exec header; the latter is counted in the
      text segment size, and is paged in by the kernel with the rest of
      the text. */
@@ -3548,6 +3556,19 @@ NAME(aout,final_link) (abfd, info, callback)
       goto error_return;
     }
 
+  /* If we have a symbol named __DYNAMIC, force it out now.  This is
+     required by SunOS.  Doing this here rather than in sunos.c is a
+     hack, but it's easier than exporting everything which would be
+     needed.  */
+  {
+    struct aout_link_hash_entry *h;
+
+    h = aout_link_hash_lookup (aout_hash_table (info), "__DYNAMIC",
+			       false, false, false);
+    if (h != NULL)
+      aout_link_write_other_symbol (h, &aout_info);
+  }
+
   /* The most time efficient way to do the link would be to read all
      the input object files into memory and then sort out the
      information into the output file.  Unfortunately, that will
@@ -4566,7 +4587,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	  if (relocation == 0)
 	    r = bfd_reloc_ok;
 	  else
-	    r = _bfd_relocate_contents (howto,
+	    r = MY_relocate_contents (howto,
 					input_bfd, relocation,
 					contents + r_addr);
 	}
@@ -4635,7 +4656,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		return false;
 	    }
 
-	  r = _bfd_final_link_relocate (howto,
+	  r = MY_final_link_relocate (howto,
 					input_bfd, input_section,
 					contents, r_addr, relocation,
 					(bfd_vma) 0);
@@ -5019,7 +5040,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		return false;
 	    }
 
-	  r = _bfd_final_link_relocate (howto_table_ext + r_type,
+	  r = MY_final_link_relocate (howto_table_ext + r_type,
 					input_bfd, input_section,
 					contents, r_addr, relocation,
 					r_addend);
@@ -5207,7 +5228,7 @@ aout_link_reloc_link_order (finfo, o, p)
 	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
-	  r = _bfd_relocate_contents (howto, finfo->output_bfd,
+	  r = MY_relocate_contents (howto, finfo->output_bfd,
 				      pr->addend, buf);
 	  switch (r)
 	    {

@@ -85,11 +85,11 @@ MY(callback) (abfd)
   /* Don't set sizes now -- can't be sure until we know arch & mach.
      Sizes get set in set_sizes callback, later.  */
 #if 0
-  adata(abfd).page_size = PAGE_SIZE;
+  adata(abfd).page_size = TARGET_PAGE_SIZE;
 #ifdef SEGMENT_SIZE
   adata(abfd).segment_size = SEGMENT_SIZE;
 #else
-  adata(abfd).segment_size = PAGE_SIZE;
+  adata(abfd).segment_size = TARGET_PAGE_SIZE;
 #endif
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 #endif
@@ -170,11 +170,11 @@ MY(mkobject) (abfd)
     return false;
 #if 0 /* Sizes get set in set_sizes callback, later, after we know
 	 the architecture and machine.  */
-  adata(abfd).page_size = PAGE_SIZE;
+  adata(abfd).page_size = TARGET_PAGE_SIZE;
 #ifdef SEGMENT_SIZE
   adata(abfd).segment_size = SEGMENT_SIZE;
 #else
-  adata(abfd).segment_size = PAGE_SIZE;
+  adata(abfd).segment_size = TARGET_PAGE_SIZE;
 #endif
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 #endif
@@ -236,18 +236,18 @@ static boolean
 MY(set_sizes) (abfd)
      bfd *abfd;
 {
-  adata(abfd).page_size = PAGE_SIZE;
+  adata(abfd).page_size = TARGET_PAGE_SIZE;
 
 #ifdef SEGMENT_SIZE
   adata(abfd).segment_size = SEGMENT_SIZE;
 #else
-  adata(abfd).segment_size = PAGE_SIZE;
+  adata(abfd).segment_size = TARGET_PAGE_SIZE;
 #endif
 
 #ifdef ZMAGIC_DISK_BLOCK_SIZE
   adata(abfd).zmagic_disk_block_size = ZMAGIC_DISK_BLOCK_SIZE;
 #else
-  adata(abfd).zmagic_disk_block_size = PAGE_SIZE;
+  adata(abfd).zmagic_disk_block_size = TARGET_PAGE_SIZE;
 #endif
 
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
@@ -364,6 +364,9 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef	MY_write_armap
 #define	MY_write_armap		bsd_write_armap
+#endif
+#ifndef MY_read_ar_hdr
+#define MY_read_ar_hdr		_bfd_generic_read_ar_hdr
 #endif
 #ifndef	MY_truncate_arname
 #define	MY_truncate_arname		bfd_bsd_truncate_arname

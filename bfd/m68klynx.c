@@ -21,8 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define N_SHARED_LIB(x) 0
 
 #define TEXT_START_ADDR 0
-#define PAGE_SIZE 4096
-#define SEGMENT_SIZE PAGE_SIZE
+#define TARGET_PAGE_SIZE 4096
+#define SEGMENT_SIZE TARGET_PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_m68k
 
 #define MY(OP) CAT(m68klynx_aout_,OP)

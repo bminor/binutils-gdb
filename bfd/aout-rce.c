@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_BIG_ENDIAN_P
-#define PAGE_SIZE 4096
+#define TARGET_PAGE_SIZE 4096
 #define SEGMENT_SIZE 4096
 #define TEXT_START_ADDR	0x0
 /* #define N_HEADER_IN_TEXT(x) 0 */

@@ -20,8 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* THIS MODULE IS NOT FINISHED.  IT PROBABLY DOESN'T EVEN COMPILE.  */
 
 #if 0
-#define	PAGE_SIZE	4096
-#define	SEGMENT_SIZE	PAGE_SIZE
+#define	TARGET_PAGE_SIZE	4096
+#define	SEGMENT_SIZE	TARGET_PAGE_SIZE
 #define TEXT_START_ADDR 0
 #define BYTES_IN_WORD 4
 #endif
