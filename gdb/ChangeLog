@@ -9,28 +9,12 @@ Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)
 	* rs6000-tdep.c (single_step): Misc cleanups (CORE_ADDR not int,
 	don't use sizeof(int) for target stuff, etc).
 
-Wed Mar 24 08:48:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+Thu Mar 25 15:03:53 1993  Fred Fish  (fnf@cygnus.com)
 
-	* Clean up xcoff relocation.
-	objfiles.h (struct objfiles): Add section_offsets, num_sections.
-	symfile.c (syms_from_objfile), xcoffread.c (xcoff_symfile_offsets):
-	Set them.
-	symtab.h (struct general_symbol_info): Add section field.
-	minsyms.c (prim_record_minimal_symbol{,_and_info}): Set it.
-	xcoffread.c: Set section for symbols and msymbols.
-	(struct symtab): Add block_line_section field.
-	buildsym.c (end_symtab): Set it.
-	(end_symtab and callers): Add section parameter.
-	objfiles.c (objfile_relocate): New funciton.
-	xcoffexec.c (vmap_symtab): Use it.
-	xcoffsolib.h (struct vmap): Remove unused fields.
-	config/rs6000/tm-rs6000.h, stack.c, xcoffexec.c: Remove
-	CORE_NEEDS_RELOCATION, symtab_relocated.
-	config/rs6000/tm-rs6000.h: Remove use of loadinfotext.
-	rs6000-tdep.c: Make loadinfotext static.
-	breakpoint.c (fixup_breakpoints): Doc fix.
-	symtab.h (struct symtab), config/rs6000/tm-rs6000.h, buildsym.c
-	(end_symtab): primary field replaces nonreloc.
+	* alldeps.mak, configure.in, i860-break.h, i860-opcode.h,
+	i860-pinsn.c, i860-tdep.c, config/i860/*:  Remove incomplete i860
+	support that can't be integrated anyway due to lack of clear
+	authorship.
 
 Thu Mar 25 12:26:50 1993  Stu Grossman  (grossman@cygnus.com)
 
@@ -88,6 +72,29 @@ Thu Mar 25 10:10:28 1993  Fred Fish  (fnf@cygnus.com)
 Wed Mar 24 13:52:29 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 
 	* Makefile.in: recurse through SUBDIRS for dvi target too
+
+Wed Mar 24 08:48:30 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Clean up xcoff relocation.
+	objfiles.h (struct objfiles): Add section_offsets, num_sections.
+	symfile.c (syms_from_objfile), xcoffread.c (xcoff_symfile_offsets):
+	Set them.
+	symtab.h (struct general_symbol_info): Add section field.
+	minsyms.c (prim_record_minimal_symbol{,_and_info}): Set it.
+	xcoffread.c: Set section for symbols and msymbols.
+	(struct symtab): Add block_line_section field.
+	buildsym.c (end_symtab): Set it.
+	(end_symtab and callers): Add section parameter.
+	objfiles.c (objfile_relocate): New funciton.
+	xcoffexec.c (vmap_symtab): Use it.
+	xcoffsolib.h (struct vmap): Remove unused fields.
+	config/rs6000/tm-rs6000.h, stack.c, xcoffexec.c: Remove
+	CORE_NEEDS_RELOCATION, symtab_relocated.
+	config/rs6000/tm-rs6000.h: Remove use of loadinfotext.
+	rs6000-tdep.c: Make loadinfotext static.
+	breakpoint.c (fixup_breakpoints): Doc fix.
+	symtab.h (struct symtab), config/rs6000/tm-rs6000.h, buildsym.c
+	(end_symtab): primary field replaces nonreloc.
 
 Tue Mar 23 00:10:53 1993  John Gilmore  (gnu@cygnus.com)
 
