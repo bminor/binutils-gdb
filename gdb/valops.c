@@ -1536,7 +1536,10 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	    return v;
 	  }
 
-	if (t_field_name && t_field_name[0] == '\0')
+	if (t_field_name
+	    && (t_field_name[0] == '\0'
+		|| (TYPE_CODE (type) == TYPE_CODE_UNION
+		    && STREQ (t_field_name, "else"))))
 	  {
 	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
 	    if (TYPE_CODE (field_type) == TYPE_CODE_UNION

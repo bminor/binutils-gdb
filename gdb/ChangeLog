@@ -1,5 +1,7 @@
 Wed Sep 27 10:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* valops.c (search_struct_field):  Also allow "else" as a variant name,
+
 	* eval.c (evaluate_struct_tuple):  New function.  Used to evaluate
 	structure tuples.  Now also handles Chill variant records.
 	(get_label):  New function, used by evaluate_struct_tuple.
