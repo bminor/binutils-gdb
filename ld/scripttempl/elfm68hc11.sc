@@ -28,15 +28,7 @@ CTOR=".ctors ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+ PROVIDE (__CTOR_LIST__ = .); }
     ${CONSTRUCTING+${CTOR_START}}
-    *(.ctors)
-    /* We don't want to include the .ctor section from
-       from the crtend.o file until after the sorted ctors.
-       The .ctor section from the crtend file contains the
-       end of ctors marker and it must be last
-
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*(.ctors)) */
+    KEEP (*(.ctors))
 
     ${CONSTRUCTING+${CTOR_END}}
     ${CONSTRUCTING+ PROVIDE(__CTOR_END__ = .); }
@@ -45,12 +37,7 @@ CTOR=".ctors ${CONSTRUCTING-0} :
 DTOR="  .dtors	${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+ PROVIDE(__DTOR_LIST__ = .); }
-    *(.dtors)
-    /*
-    KEEP (*crtbegin.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*(.dtors)) */
+    KEEP (*(.dtors))
     ${CONSTRUCTING+ PROVIDE(__DTOR_END__ = .); }
   } ${RELOCATING+ > ${TEXT_MEMORY}}"
 
@@ -326,6 +313,8 @@ SECTIONS
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
     ${RELOCATING+*(.gnu.linkonce.t.*)}
+    ${RELOCATING+*(.tramp)}
+    ${RELOCATING+*(.tramp.*)}
 
     ${RELOCATING+${FINISH_CODE}}
 

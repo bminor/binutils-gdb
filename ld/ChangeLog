@@ -1,3 +1,9 @@
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* scripttempl/elfm68hc11.sc: Keep ctor/dtor sections; Take into
+	account .tramp sections;
+	* scripttempl/elfm68hc12.sc: Likewise.
+
 2003-07-17  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld/pe-dll.c: Add libcygwin to autofilter_liblist[]
