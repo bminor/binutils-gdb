@@ -1,3 +1,26 @@
+Mon Mar 11 12:35:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rddbg.c (read_section_stabs_debugging_info): Call save_stab for
+	each stab entry, call stab_context on an error, and call
+	free_saved_stabs before rturning.
+	(read_symbol_stabs_debugging_info): Likewise.
+	(SAVE_STABS_COUNT): Define.
+	(struct saved_stab): Define.
+	(saved_stabs, saved_stabs_index): New static variables.
+	(save_stab, stab_context, free_saved_stabs): New static functios.
+
+	* objdump.c (stab_name): Remove.
+	(struct stab_print): Remove.
+	(stab_print): Remove.
+	(dump_stabs): Don't initialize stab_name.
+	(print_section_stabs): Call bfd_get_stab_name rather than using
+	the stab_name array.
+
+Tue Feb 27 19:52:01 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* prdbg.c (pr_int_constant): Initialize info correctly.
+	(pr_float_constant): Likewise.
+
 Mon Feb 26 18:11:37 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update to handle shared library support.
