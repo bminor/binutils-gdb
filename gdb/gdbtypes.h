@@ -147,7 +147,7 @@ enum type_code
 
 /* No sign for this type.  In C++, "char", "signed char", and "unsigned
    char" are distinct types; so we need an extra flag to indicate the
-   absence ofa sign! */
+   absence of a sign! */
 
 #define TYPE_FLAG_NOSIGN	(1 << 1)
 
