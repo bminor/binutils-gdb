@@ -62,13 +62,8 @@
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
-/* Prototypes for i387_supply_fsave etc.  */
 #include "i387-tdep.h"
-
-/* Defines for XMM0_REGNUM etc. */
 #include "i386-tdep.h"
-
-/* Defines I386_LINUX_ORIG_EAX_REGNUM.  */
 #include "i386-linux-tdep.h"
 
 /* Defines ps_err_e, struct ps_prochandle.  */
@@ -111,11 +106,8 @@ static int regmap[] =
 #define GETREGS_SUPPLIES(regno) \
   ((0 <= (regno) && (regno) <= 15) || (regno) == I386_LINUX_ORIG_EAX_REGNUM)
 
-#define GETFPREGS_SUPPLIES(regno) \
-  (FP0_REGNUM <= (regno) && (regno) <= LAST_FPU_CTRL_REGNUM)
-
 #define GETFPXREGS_SUPPLIES(regno) \
-  (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
+  (I386_ST0_REGNUM <= (regno) && (regno) < I386_SSE_NUM_REGS)
 
 /* Does the current host support the GETREGS request?  */
 int have_ptrace_getregs =

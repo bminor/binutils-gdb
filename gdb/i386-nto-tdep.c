@@ -73,7 +73,7 @@ i386nto_supply_gregset (char *gpregs)
   unsigned regno;
   int empty = 0;
 
-  for (regno = 0; regno < FP0_REGNUM; regno++)
+  for (regno = 0; regno < I386_NUM_GREGS; regno++)
     {
       int offset = nto_reg_offset (regno);
       if (offset == -1)
@@ -111,9 +111,9 @@ i386nto_regset_id (int regno)
 {
   if (regno == -1)
     return NTO_REG_END;
-  else if (regno < FP0_REGNUM)
+  else if (regno < I386_NUM_GREGS)
     return NTO_REG_GENERAL;
-  else if (regno < FPC_REGNUM)
+  else if (regno < I386_NUM_GREGS + I386_NUM_FREGS)
     return NTO_REG_FLOAT;
 
   return -1;			/* Error.  */

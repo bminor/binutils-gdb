@@ -111,47 +111,10 @@ struct gdbarch_tdep
    (at most) in the FPU, but are zero-extended to 32 bits in GDB's
    register cache.  */
 
-/* "Generic" floating point control register.  */
-#define FPC_REGNUM	(FP0_REGNUM + 8)
-
-/* FPU control word.  */
-#define FCTRL_REGNUM	FPC_REGNUM
-
-/* FPU status word.  */
-#define FSTAT_REGNUM	(FPC_REGNUM + 1)
-
-/* FPU register tag word.  */
-#define FTAG_REGNUM	(FPC_REGNUM + 2)
-
-/* FPU instruction's code segment selector, called "FPU Instruction
-   Pointer Selector" in the IA-32 manuals.  */
-#define FISEG_REGNUM	(FPC_REGNUM + 3)
-
-/* FPU instruction's offset within segment.  */
-#define FIOFF_REGNUM	(FPC_REGNUM + 4)
-
-/* FPU operand's data segment.  */
-#define FOSEG_REGNUM	(FPC_REGNUM + 5)
-
-/* FPU operand's offset within segment */
-#define FOOFF_REGNUM	(FPC_REGNUM + 6)
-
-/* FPU opcode, bottom eleven bits.  */
-#define FOP_REGNUM	(FPC_REGNUM + 7)
-
 /* Return non-zero if REGNUM matches the FP register and the FP
    register set is active.  */
 extern int i386_fp_regnum_p (int regnum);
 extern int i386_fpc_regnum_p (int regnum);
-
-/* SSE registers.  */
-
-/* First SSE data register.  */
-#define XMM0_REGNUM	(FPC_REGNUM + 8)
-
-/* SSE control/status register.  */
-#define MXCSR_REGNUM \
-  (XMM0_REGNUM + gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
 /* Register numbers of various important registers.  */
 
@@ -188,10 +151,9 @@ enum i386_regnum
 
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
-extern int i386_frameless_signal_p (struct frame_info *frame);
 
-/* Return the name of register REG.  */
-extern char const *i386_register_name (int reg);
+/* Return the name of register REGNUM.  */
+extern char const *i386_register_name (int regnum);
 
 /* Return non-zero if REGNUM is a member of the specified group.  */
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,

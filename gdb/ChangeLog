@@ -1,5 +1,17 @@
 2004-09-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (FPC_REGNUM, FCTRL_REGNUM, FSTAT_REGNUM, FTAG_REGNUM)
+	(FISEG_REGNUM, FIOFF_REGNUM, FOSEG_REGNUM, FOOFF_REGNUM)
+	(FOP_REGNUM, XMM0_REGNUM, MXCSR_REGNUM): Remove macros.
+	(i386_frameless_signal_p): Remove prototype.
+	* i386-linux-nat.c (GETFPREGS_SUPPLIES): Remove macro.
+	(GETFPXREGS_SUPPLIES): Define using I386_ST0_REGNUM and
+	I386_SSE_NUM_REGS.
+	* i386-nto-tdep.c (i386nto_supply_gregset): Use I386_NUM_GREGS
+	instead of FP0_REGNUM.
+	(i386nto_regset_id): Use I386_NUM_GREGS and I386_NUM_FREGS instead
+	of FP0_REGNUM and FPC_REGNUM.
+
 	* solib-sunos.c (sunos_relocate_main_executable): Remove function.
 	(sunos_solib_create_inferior_hook): Don't call
 	sunos_relocate_main_executable.
