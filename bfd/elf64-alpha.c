@@ -1149,14 +1149,36 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 	    else
 	      all_optimized = false;
 
-	    /* ??? If target gp == current gp we can eliminate the gp reload.
-	       This does depend on every place a gp could be reloaded will
-	       be, which currently happens for all code produced by gcc, but
-	       not necessarily by hand-coded assembly, or if sibling calls
-	       are enabled in gcc.
+	    /* Even if the target is not in range for a direct branch,
+	       if we share a GP, we can eliminate the gp reload.  */
+	    if (optdest)
+	      {
+		Elf_Internal_Rela *gpdisp
+		  = (elf64_alpha_find_reloc_at_ofs
+		     (irel, irelend, urel->r_offset + 4, R_ALPHA_GPDISP));
+		if (gpdisp)
+		  {
+		    bfd_byte *p_ldah = info->contents + gpdisp->r_offset; 
+		    bfd_byte *p_lda = p_ldah + gpdisp->r_addend;
+		    unsigned int ldah = bfd_get_32 (info->abfd, p_ldah);
+		    unsigned int lda = bfd_get_32 (info->abfd, p_lda);
 
-	       Perhaps conditionalize this on a flag being set in the target
-	       object file's header, and have gcc set it?  */
+		    /* Verify that the instruction is "ldah $29,0($26)".
+		       Consider a function that ends in a noreturn call,
+		       and that the next function begins with an ldgp,
+		       and that by accident there is no padding between.
+		       In that case the insn would use $27 as the base.  */
+		    if (ldah == 0x27ba0000 && lda == 0x23bd0000)
+		      {
+			bfd_put_32 (info->abfd, INSN_UNOP, p_ldah);
+			bfd_put_32 (info->abfd, INSN_UNOP, p_lda);
+
+			gpdisp->r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
+			info->changed_contents = true;
+			info->changed_relocs = true;
+		      }
+		  }
+	      }
 	  }
 	  break;
 	}
