@@ -34,13 +34,6 @@
 #undef  START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 4
 
-#undef  STORE_STRUCT_RETURN
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { char buf[REGISTER_SIZE];	\
-    (SP) -= sizeof (ADDR);	\
-    store_address (buf, sizeof (ADDR), ADDR);	\
-    write_memory ((SP), buf, sizeof (ADDR)); }
-
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */

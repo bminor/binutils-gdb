@@ -279,16 +279,20 @@ extern void i386_register_convert_to_raw (struct type *type, int regnum,
 extern void i387_float_info (void);
 #define FLOAT_INFO { i387_float_info (); }
 #endif
-
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
 
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { char buf[REGISTER_SIZE];	\
-    (SP) -= sizeof (ADDR);	\
-    store_address (buf, sizeof (ADDR), ADDR);	\
-    write_memory ((SP), buf, sizeof (ADDR)); }
+#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+  i386_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr))
+extern CORE_ADDR i386_push_arguments (int nargs, struct value **args,
+				      CORE_ADDR sp, int struct_return,
+				      CORE_ADDR struct_addr);
+
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function.  */
+
+#define STORE_STRUCT_RETURN(addr, sp) \
+  i386_store_struct_return ((addr), (sp))
+extern void i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

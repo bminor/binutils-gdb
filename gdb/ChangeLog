@@ -1,3 +1,15 @@
+2001-03-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_push_arguments, i386_store_struct_return): New
+	functions.
+	* config/i386/tm-i386.h (PUSH_ARGUMENTS): New macro.
+	(STORE_STRUCT_RETURN): Redefine in terms of
+	i386_store_struct_return.
+	(i386_push_arguments, i386_store_struct_return): New prototypes.
+	* config/i386/tm-i386v.h (STORE_STRUCT_RETURN): Remove.  It's
+	definition was identical to the definition in "i386/tm-i386.h" so
+	the new definition should suffice too.
+
 2001-03-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* event-loop.c (toplevel) [!HAVE_POLL] [NO_FD_SET]: Remove unused

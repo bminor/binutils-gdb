@@ -694,6 +694,30 @@ get_longjmp_target (CORE_ADDR *pc)
 #endif /* GET_LONGJMP_TARGET */
 
 
+CORE_ADDR
+i386_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr)
+{
+  sp = default_push_arguments (nargs, args, sp, struct_return, struct_addr);
+  
+  if (struct_return)
+    {
+      char buf[4];
+
+      sp -= 4;
+      store_address (buf, 4, struct_addr);
+      write_memory (sp, buf, 4);
+    }
+
+  return sp;
+}
+
+void
+i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  /* Do nothing.  Everything was already done by i386_push_arguments.  */
+}
+
 /* These registers are used for returning integers (and on some
    targets also for returning `struct' and `union' values when their
    size and alignment match an integer type).  */
