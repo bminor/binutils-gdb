@@ -1,3 +1,25 @@
+2003-06-30  Jim Blandy  <jimb@redhat.com>
+
+	Patch from IBM (authors unspecified, probably Ulrich Weigand and
+	Gerhard Tonn) for argument passing on the S/390 and S/390x:
+	* s390-tdep.c (S390_STACK_FRAME_OVERHEAD): This is always space
+	for 16 registers, and then 32 more bytes.
+	(S390_STACK_PARAMETER_ALIGNMENT, S390_NUM_FP_PARAMETER_REGISTERS):
+	New macros.
+	(is_double_arg): The s390x doesn't handle DOUBLE_ARGS specially.
+	Move up in the file, since it's now used by is_simple_arg.
+	(is_simple_arg): Don't assume registers are four bytes long.
+	Exclude all double arguments.  Extended floats are not simple
+	args.
+	(is_power_of_two): New function.
+	(pass_by_copy_ref): Call is_power_of_two, and check that the
+	length fits in a register, rather than listing all the acceptable
+	sizes.  Extended floats are not passed by reference.
+	(s390_push_arguments): Don't assume registers are four bytes long.
+	Reserve an argument register to point to the buffer for structures
+	returned by value.  Use S390_NUM_FP_PARAMETER_REGISTERS and
+	S390_STACK_FRAME_OVERHEAD.
+
 2003-06-30  Andreas Schwab  <schwab@suse.de>
 
 	* utils.c (internal_vproblem): Use xvasprintf, not xasprintf, to
