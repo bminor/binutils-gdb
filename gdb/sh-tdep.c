@@ -411,6 +411,10 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
    r15-4-->r15, PR-->(r15) */
 #define IS_STS(x)  		((x) == 0x4f22)
 
+/* STS.L MACL,@-r15  0100111100010010
+   r15-4-->r15, MACL-->(r15) */
+#define IS_MACL_STS(x)  	((x) == 0x4f12)
+
 /* MOV.L Rm,@-r15  00101111mmmm0110
    r15-4-->r15, Rm-->(R15) */
 #define IS_PUSH(x) 		(((x) & 0xff0f) == 0x2f06)
@@ -458,6 +462,8 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 #define IS_MOVW_PCREL_TO_REG(x)	(((x) & 0xf000) == 0x9000)
 /* MOV.L @(disp*4,PC),Rn      1101nnnndddddddd */
 #define IS_MOVL_PCREL_TO_REG(x)	(((x) & 0xf000) == 0xd000)
+/* MOVI20 #imm20,Rn           0000nnnniiii0000 */
+#define IS_MOVI20(x)		(((x) & 0xf00f) == 0x0000)
 /* SUB Rn,R15                 00111111nnnn1000 */
 #define IS_SUB_REG_FROM_SP(x)	(((x) & 0xff0f) == 0x3f08)
 
@@ -467,6 +473,7 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 #define IS_RESTORE_FP(x)	((x) == 0x6ef6)
 #define IS_RTS(x)		((x) == 0x000b)
 #define IS_LDS(x)  		((x) == 0x4f26)
+#define IS_MACL_LDS(x)  	((x) == 0x4f16)
 #define IS_MOV_FP_SP(x)  	((x) == 0x6fe3)
 #define IS_ADD_REG_TO_FP(x)	(((x) & 0xff0f) == 0x3e0c)
 #define IS_ADD_IMM_FP(x) 	(((x) & 0xff00) == 0x7e00)
@@ -506,6 +513,11 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
       else if (IS_STS (inst))
 	{
 	  cache->saved_regs[PR_REGNUM] = cache->sp_offset;
+	  cache->sp_offset += 4;
+	}
+      else if (IS_MACL_STS (inst))
+	{
+	  cache->saved_regs[MACL_REGNUM] = cache->sp_offset;
 	  cache->sp_offset += 4;
 	}
       else if (IS_MOV_R3 (inst))
@@ -550,6 +562,25 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		  offset = (inst & 0xff) << 2;
 		  sav_offset =
 		    read_memory_integer (((pc & 0xfffffffc) + 4) + offset, 4);
+		}
+	    }
+	}
+      else if (IS_MOVI20 (inst))
+        {
+	  if (sav_reg < 0)
+	    {
+	      reg = GET_TARGET_REG (inst);
+	      if (reg < 14)
+	        {
+		  sav_reg = reg;
+		  sav_offset = GET_SOURCE_REG (inst) << 16;
+		  /* MOVI20 is a 32 bit instruction! */
+		  pc += 2;
+		  sav_offset |= read_memory_unsigned_integer (pc, 2);
+		  /* Now sav_offset contains an unsigned 20 bit value.
+		     It must still get sign extended.  */
+		  if (sav_offset & 0x00080000)
+		    sav_offset |= 0xfff00000;
 		}
 	    }
 	}
@@ -2389,8 +2420,16 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if (!IS_RESTORE_FP (read_memory_unsigned_integer (addr + 2, 2)))
 	return 0;
 
-      /* Step over possible lds.l @r15+,pr. */
       inst = read_memory_unsigned_integer (addr - 2, 2);
+
+      /* Step over possible lds.l @r15+,macl. */
+      if (IS_MACL_LDS (inst))
+	{
+	  addr -= 2;
+	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	}
+
+      /* Step over possible lds.l @r15+,pr. */
       if (IS_LDS (inst))
 	{
 	  addr -= 2;
@@ -2412,6 +2451,14 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  addr -= 2;
 	  inst = read_memory_unsigned_integer (addr - 2, 2);
 	}
+
+      /* On SH2a check if the previous instruction was perhaps a MOVI20.
+         That's allowed for the epilogue.  */
+      if ((gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a
+           || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a_nofpu)
+          && addr > func_addr + 6
+	  && IS_MOVI20 (read_memory_unsigned_integer (addr - 4, 2)))
+	addr -= 4;
 
       if (pc >= addr)
 	return 1;

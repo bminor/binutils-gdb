@@ -1,5 +1,15 @@
 2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (IS_MACL_STS): New define.
+	(IS_MOVI20): Ditto.
+	(IS_MACL_LDS): Ditto.
+	(sh_analyze_prologue): Recognize STS.L MACL,@-r15 and MOVI20
+	instructions in prologue.
+	(sh_in_function_epilogue_p): Recognize LDS.L @r15+,MACL and MOVI20
+	instructions in epilogue.
+
+2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
+
 	* sh-tdep.c (SH_NUM_REGS): Define as 67.
 	(sh_sh_register_name): Add eight empty register names.
 	(sh_sh3_register_name): Ditto.
