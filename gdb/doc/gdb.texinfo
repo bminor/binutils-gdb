@@ -273,11 +273,13 @@ omitted from this list, we would like to add your names!
 @end quotation
 
 So that they may not regard their long labor as thankless, we
-particularly thank those who shepherded GDB through major releases: Fred
-Fish (releases 4.12, 4.11, 4.10, 4.9), Stu Grossman and John Gilmore (releases
-4.8, 4.7, 4.6, 4.5, 4.4), John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and
-3.9); Jim Kingdon (releases 3.5, 3.4, 3.3); and Randy Smith (releases
-3.2, 3.1, 3.0).  As major maintainer of GDB for some period, each
+particularly thank those who shepherded GDB through major releases:
+Fred Fish (releases 4.12, 4.11, 4.10, and 4.9),
+Stu Grossman and John Gilmore (releases 4.8, 4.7, 4.6, 4.5, and 4.4),
+John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and 3.9);
+Jim Kingdon (releases 3.5, 3.4, and 3.3);
+and Randy Smith (releases 3.2, 3.1, and 3.0).
+As major maintainer of GDB for some period, each
 contributed significantly to the structure, stability, and capabilities
 of the entire debugger.
 
@@ -300,17 +302,22 @@ the original support for encapsulated COFF.
 
 Adam de Boor and Bradley Davis contributed the ISI Optimum V support.
 Per Bothner, Noboyuki Hikichi, and Alessandro Forin contributed MIPS
-support.  Jean-Daniel Fekete contributed Sun 386i support.  Chris
-Hanson improved the HP9000 support.  Noboyuki Hikichi and Tomoyuki
-Hasei contributed Sony/News OS 3 support.  David Johnson contributed
-Encore Umax support.  Jyrki Kuoppala contributed Altos 3068 support.
-Keith Packard contributed NS32K support.  Doug Rabson contributed
-Acorn Risc Machine support.  Chris Smith contributed Convex support
-(and Fortran debugging).  Jonathan Stone contributed Pyramid support.
-Michael Tiemann contributed SPARC support.  Tim Tucker contributed
-support for the Gould NP1 and Gould Powernode.  Pace Willison
-contributed Intel 386 support.  Jay Vosburgh contributed Symmetry
 support.
+Jean-Daniel Fekete contributed Sun 386i support.
+Chris Hanson improved the HP9000 support.
+Noboyuki Hikichi and Tomoyuki Hasei contributed Sony/News OS 3 support.
+David Johnson contributed Encore Umax support.
+Jyrki Kuoppala contributed Altos 3068 support.
+Jeff Law contributed HP PA and SOM support.
+Keith Packard contributed NS32K support.
+Doug Rabson contributed Acorn Risc Machine support.
+Bob Rusk contributed Harris Nighthawk CX-UX support.
+Chris Smith contributed Convex support (and Fortran debugging).
+Jonathan Stone contributed Pyramid support.
+Michael Tiemann contributed SPARC support.
+Tim Tucker contributed support for the Gould NP1 and Gould Powernode.
+Pace Willison contributed Intel 386 support.
+Jay Vosburgh contributed Symmetry support.
 
 Rich Schaefer and Peter Schauer helped with support of SunOS shared
 libraries.
@@ -338,6 +345,14 @@ symbols.
 @end ifclear
 
 Hitachi America, Ltd. sponsored the support for Hitachi microprocessors.
+
+Kung Hsu, Jeff Law, and Rick Sladkey added support for hardware
+watchpoints.
+
+Stu Grossman wrote gdbserver.
+
+Jim Kingdon, Peter Schauer, Ian Taylor, and Stu Grossman made
+nearly innumerable bug fixes and cleanups throughout GDB.
 
 @ifset NOVEL
 @node New Features
