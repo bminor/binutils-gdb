@@ -1,3 +1,8 @@
+2001-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/bspec-2.d, gas/mmix/bspec-1.d, gas/mmix/comment-1.d:
+	Prune and generalize, adjusting to generic ELF file layout changes.
+
 2001-11-04  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips.exp (svr4pic): Set if target is *-*-netbsd*.

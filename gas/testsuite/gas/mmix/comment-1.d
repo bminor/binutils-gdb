@@ -1,37 +1,13 @@
 #as: -no-expand
 #readelf: -Ssrx1 -x6
-
-There are 10 section headers, starting at offset 0x130:
-
-Section Headers:
-  \[Nr\] Name              Type             Address           Offset
-       Size              EntSize          Flags  Link  Info  Align
-  \[ 0\]                   NULL             0+  0+
-       0+  0+           0     0     0
-  \[ 1\] \.text             PROGBITS         0+  0+40
-       0+88  0+  AX       0     0     8
-  \[ 2\] \.rela\.text        RELA             0+  0+4f8
-       0+78  0+18           8     1     8
-  \[ 3\] \.data             PROGBITS         0+  0+c8
-       0+  0+  WA       0     0     1
-  \[ 4\] \.bss              NOBITS           0+  0+c8
-       0+  0+  WA       0     0     1
+There are 10 section headers, starting at offset 0x...:
+#...
   \[ 5\] \.MMIX\.spec_data\.4 PROGBITS         0+  0+c8
        0+  0+           0     0     1
   \[ 6\] \.MMIX\.reg_content PROGBITS         0+  0+c8
        0+8  0+   W       0     0     1
-  \[ 7\] \.shstrtab         STRTAB           0+  0+d0
-       0+5d  0+           0     0     1
-  \[ 8\] \.symtab           SYMTAB           0+  0+3b0
-       0+120  0+18           9     8     8
-  \[ 9\] \.strtab           STRTAB           0+  0+4d0
-       0+21  0+           0     0     1
-Key to Flags:
-  W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\)
-  I \(info\), L \(link order\), G \(group\), x \(unknown\)
-  O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
-
-Relocation section '\.rela\.text' at offset 0x4f8 contains 5 entries:
+#...
+Relocation section '\.rela\.text' at offset 0x... contains 5 entries:
 [ 	]+Offset[ 	]+Info[ 	]+Type[ 	]+Symbol's Value[ 	]+Symbol's Name[ 	]+Addend
 0+34  0+90000001e R_MMIX_ADDR19         0+  target                    \+ 2c
 0+46  0+a00000002 R_MMIX_16             0+  target2                   \+ 30
