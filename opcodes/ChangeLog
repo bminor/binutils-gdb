@@ -1,3 +1,55 @@
+start-sanitize-d30v
+Wed Aug 27 21:42:39 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	Merge changes from Martin Hunt:
+
+	* d30v-opc.c: Change mvfacc to accept 6-bit unsigned values.
+
+	* d30v-opc.c (pre_defined_registers): Add control registers from 0-63.
+	(d30v_opcode_tabel): Add dbt, rtd, srah, and srlh instructions. Fix
+	rot2h, sra2h, and srl2h to use new SHORT_A5S format.
+
+	* d30v-dis.c (print_insn): Fix disassembly of SHORT_D2 opcodes.
+
+	* d30v-dis.c (print_insn): First operand of d*i (delayed
+	branch) instructions is relative.
+
+	* d30v-opc.c (d30v_opcode_table): Change form for repeati.
+	(d30v_operand_table): Add IMM6S3 type.
+	(d30v_format_table): Change SHORT_D2. Add LONG_Db.
+
+	* d30v-dis.c: Fix bug with ".s" and ".l" extensions
+	and cmp instructions.
+
+	* d30v-opc.c: Correct entries for repeat*, and sat*.
+	Make IMM5 unsigned. Create IMM6U and IMM12S3U operand 
+	types. Correct several formats.
+
+	* d30v-opc.c: (pre_defined_registers): Add dpsw and dpc.
+
+	* d30v-opc.c (pre_defined_registers): Change control registers.
+
+	* d30v-opc.c (d30v_format_table): Correct SHORT_C1 and
+	SHORT_C2.  Manual was incorrect.
+
+	* d30v-dis.c (lookup_opcode):  Return value now indicates
+	if an opcode has a short and a long form.  Used for deciding
+	to append a ".s" or ".l".
+	(print_insn): Append a ".s" to an instruction if it is
+ 	the short form and ".l" if it is a long form. Do not append
+	anything if the instruction has only one possible size.
+
+	* d30v-opc.c: Change mulx2h to require an even register.
+	New form: SHORT_A2; a SHORT_A form that needs an even
+	register as the first operand.
+
+	* d30v-dis.c (print_insn_d30v): Fix problem where the last 
+	instruction was not being disassembled if there were an odd
+	number of instructions.
+
+	* d30v-opc.c (SHORT_M2, LONG_M2):  Two new forms.
+
+end-sanitize-d30v
 start-sanitize-v850e
 Fri Sep 12 11:43:54 1997  Nick Clifton  <nickc@cygnus.com>
 
