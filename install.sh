@@ -78,6 +78,8 @@ while [ x"$1" != x ]; do
 	    then
 		src=$1
 	    else
+		# this colon is to work around a 386BSD /bin/sh bug
+		:
 		dst=$1
 	    fi
 	    shift
