@@ -49,21 +49,16 @@ symbolic_link='ln -s'
 Makefile=Makefile
 Makefile_in=Makefile.in
 arguments=$*
+build_alias=
 configdirs=
 exec_prefix=
 exec_prefixoption=
 fatal=
 floating_point=default
 gas=default
-host_alias=
+host_alias=NOHOST
 host_makefile_frag=
 moveifchange=
-next_host=
-next_prefix=
-next_site=
-next_srcdir=
-next_target=
-next_tmpdir=
 norecursion=
 package_makefile_frag=
 prefix=/usr/local
@@ -82,9 +77,9 @@ site_option=
 srcdir=
 srctrigger=
 subdirs=
-target_alias=
+target_alias=NOTARGET
 target_makefile_frag=
-undefinedargs=
+undefs=NOUNDEFS
 version="$Revision$"
 x11=default
 
@@ -115,307 +110,266 @@ case "${progname}" in
         ;;
 esac
 
-for arg in $*
-do
-        # handle things that might have args following as separate words
-        if [ -n "${next_prefix}" ] ; then prefix=${arg} ; prefixoption="-prefix=${prefix}" ; next_prefix=
-        elif [ -n "${next_exec_prefix}" ] ; then
-                exec_prefix=${arg}
-                exec_prefixoption="-exec-prefix=${exec_prefix}"
-                next_exec_prefix=
-        elif [ -n "${next_site}" ] ; then site=${arg} ; site_option=-site=${site} ; next_site=
-        # remove any possible trailing slash from srcdir.  See note below.
-        elif [ -n "${next_srcdir}" ] ; then srcdir=`echo ${arg} | sed -e 's:/$::'` ; next_srcdir=
-        elif [ -n "${next_program_prefix}" ] ; then
-                program_prefix=${arg}
-                program_prefixoption="-program_prefix=${program_prefix}"
-                next_program_prefix=
-        elif [ -n "${next_program_suffix}" ] ; then
-                program_suffix=${arg}
-                program_suffixoption="-program_suffix=${program_suffix}"
-                next_program_suffix=
-        elif [ -n "${next_program_transform_name}" ] ; then
-                # Double any backslashes or dollar signs in the argument
-		if [ -n "${arg}" ] ; then
-			program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
-		fi
-                program_transform_nameoption="${program_transform_nameoption} --program-transform-name='${arg}'"
-                next_program_transform_name=
-        elif [ -n "${next_target}" ] ; then
-                next_target=
-                case "${target_alias}" in
-                "")
-                        target_alias="${arg}"
-                        ;;
-                *)
-                        echo '***' Can only configure for one target at a time.  1>&2
-                        fatal=yes
-                        ;;
-                esac
-        elif [ -n "${next_host}" ] ; then
-                next_host=
-                case "${host_alias}" in
-                "")
-                        host_alias="${arg}"
-                        ;;
-                *)
-                        echo '***' Can only configure for one host at a time.  1>&2
-                        fatal=yes
-                        ;;
-                esac
-        elif [ -n "${next_tmpdir}" ] ; then
-                next_tmpdir=
-                tmpdiroption="--tmpdir=${arg}"
-                TMPDIR=${arg}
+# Loop over all args
 
-        else
-                case ${arg} in
-                -exec_prefix=* | --exec_prefix=* | --exec_prefi=* | --exec_pref=* | --exec_pre=* | --exec_pr=* | --exec_p=* | --exec_=* | --exec=* | --exe=* | --ex=* | --e=* | -exec-prefix=* | --exec-prefix=* | --exec-prefi=* | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* )
-                        exec_prefix=`echo ${arg} | sed 's/^[-a-z_]*=//'`
-                        exec_prefixoption=${arg}
-                        ;;
-                -exec_prefix | --exec_prefix | --exec_prefi | --exec_pref | --exec_pre | --exec_pr | --exec_p | --exec_ | --exec | --exe | --ex | --e | -exec-prefix | --exec-prefix | --exec-prefi | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec-)
-                        next_exec_prefix=yes
-                        ;;
-                -gas | --g*)
-                        gas=yes
-                        ;;
-                -help | --he*)
-                        fatal=true
-                        ;;
-                -host=* | --host=* | --hos=* | --ho=*)
-                        case "${host_alias}" in
-                        "")
-                                host_alias="`echo ${arg} | sed 's/^[-a-z]*=//'`"
-                                ;;
-                        *)
-                                echo '***' Can only configure for one host at a time.  1>&2
-                                fatal=yes
-                                ;;
-                        esac
-                        ;;
-                -host=* | --host | --hos | --ho)
-                        case "${host_alias}" in
-                        "")
-                                next_host=yes
-                                ;;
-                        *)
-                                echo '***' Can only configure for one host at a time.  1>&2
-                                fatal=yes
-                                ;;
-                        esac
-                        ;;
-                -nfp | --nf*)
-                        floating_point=no
-                        ;;
-                -norecursion | --no*)
-                        norecursion=true
-                        ;;
-                -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=*)
-                        prefix=`echo ${arg} | sed 's/^[-a-z]*=//'`
-                        prefixoption=${arg}
-                        ;;
-                -prefix | --prefix | --prefi | --pref | --pre)
-                        next_prefix=yes
-                        ;;
-                -rm | --rm) removing=${arg} ;;
-                -program_prefix=* | --program_prefix=* | --program_prefi=* | --program_pref=* | --program_pre=* | --program_pr=* | --program_p=* | -program-prefix=* | --program-prefix=* | --program-prefi=* | --program-pref=* | --program-pre=* | --program-pr=* | --program-p=*)
-                        program_prefix=`echo ${arg} | sed 's/^[-a-z_]*=//'`
-                        program_prefixoption=${arg}
-                        ;;
-                -program_prefix | --program_prefix | --program_prefi | --program_pref | --program_pre | --program_pr | --program_p | -program-prefix | --program-prefix | --program-prefi | --program-pref | --program-pre | --program-pr | --program-p)
-                        next_program_prefix=yes
-                        ;;
-                -program_suffix=* | --program_suffix=* | --program_suffi=* | --program_suff=* | --program_suf=* | --program_su=* | --program_s=* | -program-suffix=* | --program-suffix=* | --program-suffi=* | --program-suff=* | --program-suf=* | --program-su=* | --program-s=*)
-                        program_suffix=`echo ${arg} | sed 's/^[-a-z_]*=//'`
-                        program_suffixoption=${arg}
-                        ;;
-                -program_suffix | --program_suffix | --program_suffi | --program_suff | --program_suf | --program_su | --program_s |-program-suffix | --program-suffix | --program-suffi | --program-suff | --program-suf | --program-su | --program-s)
-                        next_program_suffix=yes
-                        ;;
-                -program_transform_name=* | --program_transform_name=* | --program_transform_nam=* | --program_transform_na=* | --program_transform_n=* | --program_transform_=* | --program_transform=* | --program_transfor=* | --program_transfo=* | --program_transf=* | --program_trans=* | --program_tran=* | --program_tra=* | --program_tr=* | --program_t=* | -program-transform-name=* | --program-transform-name=* | --program-transform-nam=* | --program-transform-na=* | --program-transform-n=* | --program-transform-=* | --program-transform=* | --program-transfor=* | --program-transfo=* | --program-transf=* | --program-trans=* | --program-tran=* | --program-tra=* | --program-tr=* | --program-t=*)
-			arg=`echo ${arg} | sed -e 's/^[-a-z_]*=//'`
-                        # Double any \ or $ in the argument
-			if [ -n "${arg}" ] ; then
-	                        program_transform_name="${program_transform_name} -e `echo ${arg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
-			fi
-                        program_transform_nameoption="${program_transform_nameoption} --program-transform-name='${arg}'"
-                        ;;
-                -program_transform_name | --program_transform_name | --program_transform_nam | --program_transform_na | --program_transform_n | --program_transform_ | --program_transform | --program_transfor | --program_transfo | --program_transf | --program_trans | --program_tran | --program_tra | --program_tr | --program_t | -program-transform-name | --program-transform-name | --program-transform-nam | --program-transform-na | --program-transform-n | --program-transform- | --program-transform | --program-transfor | --program-transfo | --program-transf | --program-trans | --program-tran | --program-tra | --program-tr | --program-t)
-                        next_program_transform_name=yes
-                        ;;
-                -site=* | --site=* | --sit=* | --si=*)
-                        site_option=${arg}
-                        site=`echo ${arg} | sed 's/^[-a-z]*=//'`
-                        ;;
-                -site | --site | --sit)
-                        next_site=yes
-                        ;;
-                # remove trailing slashes.  Otherwise, when the file name gets
+while :
+do
+
+# Break out if there are no more args
+	case $# in
+	0)
+		break 2
+		;;
+	esac
+
+# Get the first arg, and shuffle
+	option=$1
+	shift
+
+# Make all options have two hyphens
+	orig_option=$option	# Save original for error messages
+	case $option in
+	--*) ;;
+	-*) option=-$option ;;
+	esac
+		
+# Split out the argument for options that take them
+	case $option in
+	--*=*)
+		optarg=`echo $option | sed -e 's/^[^=]*=//'`
+		;;
+# These options have mandatory values.  Since we didn't find an = sign,
+# the value must be in the next argument
+	--b* | --e* | --ho* | --pre* | --program-p* | --program-s* | --program-t* | --si* | --sr* | --ta* | --tm*)
+		optarg=$1
+		shift
+		;;
+	esac
+
+# Now, process the options
+	case $option in
+
+	--build* | --b*)
+		case "$build_alias" in
+		"") build_alias=$optarg ;;
+		*) echo '***' Can only configure for one build machine at a time.  1>&2
+		   fatal=yes
+		   ;;
+		esac
+		;;
+	--exec-prefix* | --e*)
+		exec_prefix=$optarg
+		exec_prefixoption="--exec-prefix=$optarg"
+		;;
+	--gas | --g*)
+		gas=yes
+		;;
+	--help | --he*)
+		fatal=true
+		;;
+	--host* | --ho*)
+		case $host_alias in
+		NOHOST) host_alias=$optarg ;;
+		*) echo '***' Can only configure for one host at a time.  1>&2
+		   fatal=yes
+		   ;;
+		esac
+		;;
+	--nfp | --nf*)
+		floating_point=no
+		;;
+	--norecursion | --no*)
+		norecursion=true
+		;;
+	--prefix* | --pre*)
+		prefix=$optarg
+		prefixoption="--prefix=$optarg"
+		;;
+	--program-prefix* | --program-p*)
+		program_prefix=$optarg
+		program_prefixoption="--program-prefix=$optarg"
+		;;
+	--program-suffix* | --program-s*)
+		program_suffix=$optarg
+		program_suffixoption="--program-suffix=$optarg"
+		;;
+	--program-transform-name* | --program-t*)
+		# Double any backslashes or dollar signs in the argument
+		program_transform_name="${program_transform_name} -e `echo ${optarg} | sed -e 's/\\\\/\\\\\\\\/g' -e 's/\\\$/$$/g'`"
+		program_transform_nameoption="--program-transform-nameoption='$optarg'"
+		;;
+	--rm)
+		removing=--rm
+		;;
+	--site* | --si*)
+		site=$optarg
+		site_option="--site=$optarg"
+		;;
+	--srcdir*/ | --sr*/)
+                # Remove trailing slashes.  Otherwise, when the file name gets
                 # bolted into an object file as debug info, it has two slashes in
                 # it.  Ordinarily this is ok, but emacs takes double slash to
                 # mean "forget the first part".
-                -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-                        srcdir=`echo ${arg} | sed 's/^[-a-z]*=//' | sed -e 's:/$::'`
-                        ;;
-                -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
-                        next_srcdir=yes
-                        ;;
-                -target=* | --target=* | --targe=* | --targ=* | --tar=* | --ta=*)
-                        case "${target_alias}" in
-                        "") target_alias="`echo ${arg} | sed 's/^[-a-z]*=//'`" ;;
-                        *)
-                                echo '***' Can only configure for one target at a time.  1>&2
-                                fatal=yes
-                                ;;
-                        esac
-                        ;;
-                -target | --target | --targe | --targ | --tar | --ta)
-                        next_target=yes
-                        ;;
-                -tmpdir=* | --tmpdir=* | --tmpdi=* | --tmpd=* | --tmp=* | --tm=*)
-                        tmpdiroption=${arg}
-                        TMPDIR=`echo ${arg} | sed 's/^[-a-z]*=//'`
-                        ;;
-                -tmpdir | --tmpdir | --tmpdi | --tmpd | --tmp | --tm)
-                        next_tmpdir=yes
-                        ;;
-                -v | -verbose | --v)
-                        redirect=
-                        verbose=-v
-                        ;;
-                -version | -V | --version | --V)
-                        echo "This is Cygnus Configure version" `echo ${version} | sed 's/[ $:]//g'`
-                        exit 0
-                        ;;
-                -with*=* | --with*=*)
-                        withopt=`echo ${arg} | sed 's:^-*\(with[^=]*\)=.*$:\1:;s/-/_/g'`
-                        withval=`echo ${arg} | sed 's:^-*with[^=]*=\(.*\)$:\1:'`
-                        eval $withopt="$withval"
-                        withoptions="$withoptions $arg"
-                        ;;
-                -without* | --without*)
-                        withopt=`echo ${arg} | sed 's:^-*without:with:;s/-/_/g'`		
-                        eval $withopt=no
-                        withoutoptions="$withoutoptions $arg"
-                        ;;
-                -with* | --with*)
-                        withopt=`echo ${arg} | sed 's:^-*with:with:;s/-/_/g'`
-                        eval $withopt=yes
-                        withoptions="$withoptions $arg"
-                        ;;
-                -x | --x) ;;
-                -* | --*)
-                        (echo ;
-                        echo "Unrecognized option: \"${arg}\"". ;
-                        echo) 1>&2
-                        fatal=true
-                        ;;
-                *)
-                        case "${undefs}" in
-                        "")
-                                undefs="${arg}"
-                                ;;
-                        *)
-                                echo '***' Can only configure for one host and one target at a time.  1>&2
-                                fatal=yes
-                                ;;
-                        esac
-                        ;;
-                esac
-        fi
+		srcdir=`echo $optarg | sed -e 's:/$::'`
+		;;
+	--srcdir* | --sr*)
+		srcdir=$optarg
+		;;
+	--target* | --ta*)
+		case $target_alias in
+		NOTARGET) target_alias=$optarg ;;
+		*) echo '***' Can only configure for one target at a time.  1>&2
+		   fatal=yes
+		   ;;
+		esac
+		;;
+	--tmpdir* | --tm*)
+		TMPDIR=$optarg
+		tmpdiroption="--tmpdir=$optarg"
+		;;
+	--verbose | --v | --verb*)
+		redirect=
+		verbose=--verbose
+		;;
+	--version | --V | --vers*)
+		echo "This is Cygnus Configure version" `echo ${version} | sed 's/[ $:]//g'`
+		exit 0
+		;;
+	--with-*)
+		case "$option" in
+		*=*)	;;
+		*)	optarg=yes ;;
+		esac
+
+		withopt=`echo ${option} | sed 's:^--::;s:=.*$::;s:-:_:g'`
+		eval $withopt="$optarg"
+		withoptions="$withoptions $option"
+		;;
+	--without-*)
+		withopt=`echo ${option} | sed 's:^--::;s:out::;s:-:_:g'`		
+		eval $withopt=no
+		withoutoptions="$withoutoptions $option"
+		;;
+	--x)	;;
+	--*)
+		exec 1>&2
+		echo
+		echo "Unrecognized option: \"$orig_option\"".
+		echo
+		fatal=true
+		;;
+	*)
+		case $undefs in
+		NOUNDEFS) undefs=$option ;;
+		*) echo '***' Can only configure for one host and one target at a time.  1>&2
+		   fatal=yes
+		   ;;
+		esac
+		;;
+	esac
 done
 
 # process host and target
+
+# The following section does some error checking, and then does defaulting for
+# the host and target.  The inputs are host, which comes from the --host
+# option, target, which comes from the --target options, and undefs, which is
+# an argument that isn't an option (cuz it doesn't start with --).  Ie:
+#	configure --host HOST --target TARGET --opt1 UNDEFS --opt2 --opt3 ...
+#
+# The first rule is that you aren't allowed to specify --host, --target and
+# undefs at the same time.  After that, we do defaulting.  The host defaults to
+# undefs.  Ie:
+#	configure --target TARGET --opt1 HOST --opt2
+#
+# If there are no undefs, the host defaults to the current host (as determined
+# by config.guess).
+#
+# Target defaults to undefs.  If undefs wasn't specified, then it defaults to
+# host.
+
 case "${fatal}" in
 "")
-#       # Complain if an arg is missing
-#       if [ -z "${host_alias}" ] ; then
-#               (echo ;
-#               echo "configure: No HOST specified." ;
-#               echo) 1>&2
-#               fatal=true
-#       fi
+	# Make sure that host, target & undefs aren't all specified at the
+	# same time.
+	case $host_alias---$target_alias---$undefs in
+	NOHOST---*---* | *---NOTARGET---* | *---*---NOUNDEFS)
+		;;
+	*) echo '***' Can only configure for one host and one target at a time.  1>&2
+	   fatal=yes
+	   break 2
+		;;
+	esac
 
-### This is a bit twisted.
-### * if all three are specified, this is an error.
-### * if we have neither hosts, nor unadorned args, guess with config.guess.
-### * if no hosts are specified, then the unadorned args are hosts, but if
-### there were none, this is an error.
-### * if no targets are specified, then the unadorned args are targets, but if
-### there were no unadorned args, then the hosts are also targets.
+	# Now, do defaulting for host.
+	case $host_alias in
+	NOHOST)
+		case $undefs in
+		NOUNDEFS)
+			# Neither --host option nor undefs were present.
+			# Call config.guess.
+			guesssys=`echo ${progname} | sed 's/configure$/config.guess/'`
+			if host_alias=`${guesssys}`
+			then
+				echo "Configuring for a ${host_alias} host." 1>&2
+				arguments="--host=$host_alias $arguments"
+			else
+				echo 'Config.guess failed to determine the host type.  You need to specify one.' 1>&2
+				fatal=yes
+			fi
+			;;
+		*)
+			host_alias=$undefs
+			;;
+		esac
+	esac
 
-        if [ -n "${host_alias}" -a -n "${target_alias}" -a -n "${undefs}" ]
-	then
-                echo '***' Can only configure for one host and one target at a time.  1>&2
-                fatal=yes
-        elif [ -z "${host_alias}" -a -z "${target_alias}" -a -z "${undefs}" ]
-	then
-                guesssys=`echo ${progname} | sed 's/configure$/config.guess/'`
-                if tmp_alias=`${guesssys}` ; then
-                        echo "Configuring for a ${tmp_alias} host." 1>&2
-                        host_alias=${tmp_alias}
-			case "${target_alias}" in
-			"") target_alias=${tmp_alias} ;;
-			*) ;;
-			esac
-			arguments="--host=${host_alias} ${arguments}"
-                else
-                        echo 'Config.guess failed to determine the host type.  You need to specify one.' 1>&2
-                        fatal=yes
-                fi
-        else
-                case "${host_alias}" in
-                "")
-                        case "${undefs}" in
-                        "")     host_alias=${target_alias} ;;
-                        *)      host_alias=${undefs} ;;
-                        esac
-                        ;;
-                *) ;;
-                esac
-
-                case "${target_alias}" in
-                "")
-                        case "${undefs}" in
-                        "")     target_alias=${host_alias} ;;
-                        *)      target_alias=${undefs} ;;
-                        esac
-                        ;;
-                *) ;;
-                esac
-        fi
-        ;;
+	# Do defaulting for target.  If --target option isn't present, default
+	# to undefs.  If undefs isn't present, default to host.
+	case $target_alias in
+	NOTARGET)
+		case $undefs in
+		NOUNDEFS)
+			target_alias=$host_alias
+			;;
+		*)
+			target_alias=$undefs
+			;;
+		esac
+	esac
+	;;
 *) ;;
 esac
 
 if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
-        (echo "Usage: configure HOST" ;
-        echo ;
-        echo "Options: [defaults in brackets]" ;
-        echo " --prefix=MYDIR            configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
-        echo " --exec-prefix=MYDIR       configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
-        echo " --help                    print this message. [normal config]" ;
-        echo " --norecursion             configure this directory only. [recurse]" ;
-        echo " --program-prefix=FOO      install programs with FOO prepended to their names. [ \"\" ]" ;
-        echo " --program-suffix=FOO      install programs with FOO appended to their names. [ \"\" ]" ;
-        echo " --program-transform-name=FOO      install programs with names transformed by sed pattern FOO. [ \"\" ]" ;
-        echo " --site=SITE               configure with site specific makefile for SITE" ;
-        echo " --srcdir=DIR              find the sources in DIR. [\".\" or \"..\"]" ;
-        echo " --target=TARGET           configure for TARGET.  [TARGET = HOST]" ;
-        echo " --tmpdir=TMPDIR           create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
-        echo " --nfp                     configure the compilers default to soft floating point. [hard float]" ;
-        echo " --with-FOO, --with-FOO=BAR specify that FOO is available"
-        echo " --without-FOO             specify that FOO is NOT available"
-        echo ;
-        echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
-        echo ;
-        ) 1>&2
-        if [ -r config.status ] ; then
-                cat config.status
-        fi
+	exec 1>&2
+	echo Usage: configure HOST
+	echo
+	echo Options: [defaults in brackets]
+	echo ' --prefix=MYDIR		 configure for installation of host dependent files into MYDIR. ["/usr/local"]'
+	echo ' --exec-prefix=MYDIR	 configure for installation of host dependent files into MYDIR. ["/usr/local"]'
+	echo ' --help			 print this message. [normal config]'
+	echo ' --build=BUILD		 configure for building on BUILD.  [BUILD=HOST]'
+	echo ' --host=HOST		 configure for HOST.  [determined via config.guess]'
+	echo ' --norecursion		 configure this directory only. [recurse]'
+	echo ' --program-prefix=FOO	 install programs with FOO prepended to their names. [ "" ]'
+	echo ' --program-suffix=FOO	 install programs with FOO appended to their names. [ "" ]'
+	echo ' --program-transform-name=FOO install programs with names transformed by sed pattern FOO. [ "" ]'
+	echo ' --site=SITE		 configure with site specific makefile for SITE'
+	echo ' --srcdir=DIR		 find the sources in DIR. ["." or ".."]'
+	echo ' --target=TARGET	 configure for TARGET.  [TARGET = HOST]'
+	echo ' --tmpdir=TMPDIR	 create temporary files in TMPDIR.  [ TMPDIR = "/tmp" ]'
+	echo ' --nfp			 configure the compilers default to soft floating point. [hard float]'
+	echo ' --with-FOO, --with-FOO=BAR specify that FOO is available'
+	echo ' --without-FOO		 specify that FOO is NOT available'
+	echo
+	echo 'Where HOST and TARGET are something like "vax", "sun3", "encore", etc.'
+	echo
+	if [ -r config.status ] ; then
+		cat config.status
+	fi
 
-        exit 1
+	exit 1
 fi
 
 configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
@@ -446,7 +400,7 @@ case "${srcdir}" in
                 if [ -r ${progname}.in ] ; then
                         srcdir=`echo ${progname} | sed 's:/configure$::'`
                 else
-                        echo '***' "Can't find configure.in.  Try using -srcdir=some_dir"  1>&2
+                        echo '***' "Can't find configure.in.  Try using --srcdir=some_dir"  1>&2
                         exit 1
                 fi
         fi
@@ -522,6 +476,18 @@ case "${srctrigger}" in
 *) ;;
 esac
 
+case "${build_alias}" in
+"")	;;
+*)
+	result=`${configsub} ${build_alias}`
+        buildopt="--build=${build_alias}"
+	build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+	build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+	build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+	build=${build_cpu}-${build_vendor}-${build_os}
+	;;
+esac
+
 result=`${configsub} ${host_alias}`
 host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
@@ -577,11 +543,11 @@ fi
 # Merge program_prefix and program_suffix onto program_transform_name
 # Use a double $ so that make ignores it
 if [ "${program_suffix}" != "" ] ; then
-    program_transform_name="-e s/\$\$/${program_suffix}/ ${program_transform_name}"
+    program_transform_name="-e s,\$\$,${program_suffix}, ${program_transform_name}"
 fi
 
 if [ "${program_prefix}" != "" ] ; then
-    program_transform_name="-e s/^/${program_prefix}/ ${program_transform_name}"
+    program_transform_name="-e s,^,${program_prefix}, ${program_transform_name}"
 fi
 
 for subdir in . ${subdirs} ; do
@@ -781,6 +747,17 @@ target_vendor = ${target_vendor}
 target_os = ${target_os}
 target_canonical = ${target_cpu}-${target_vendor}-${target_os}
 EOF
+	    case "${build}" in
+	      "") ;;
+	      *)  cat >> ${Makefile} << EOF
+build_alias = ${build_alias}
+build_cpu = ${build_cpu}
+build_vendor = ${build_vendor}
+build_os = ${build_os}
+build_canonical = ${build_cpu}-${build_vendor}-${build_os}
+EOF
+	    esac
+
             case "${package_makefile_frag}" in
               "") ;;
               /*) echo package_makefile_frag = ${package_makefile_frag} >>${Makefile} ;;
@@ -863,7 +840,7 @@ EOF
         # Makefiles.
 
         case "${norecursion}" in
-        "") arguments="${arguments} -norecursion" ;;
+        "") arguments="${arguments} --norecursion" ;;
         *) ;;
         esac
 
@@ -920,11 +897,11 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
                         ".") newsrcdir=${srcdir} ;; # no -srcdir option.  We're building in place.
                         /*) # absolute path
                                 newsrcdir=${srcdir}/${configdir}
-                                srcdiroption="-srcdir=${newsrcdir}"
+                                srcdiroption="--srcdir=${newsrcdir}"
                                 ;;
                         *) # otherwise relative
                                 newsrcdir=../${srcdir}/${configdir}
-                                srcdiroption="-srcdir=${newsrcdir}"
+                                srcdiroption="--srcdir=${newsrcdir}"
                                 ;;
                         esac
 
@@ -943,7 +920,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 
 ### The recursion line is here.
 			if [ ! -z "${recprog}" ] ; then
-	                        if eval ${config_shell} ${recprog} ${verbose} --host=${host_alias} --target=${target_alias} \
+	                        if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
         	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
                 	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
 	                                true

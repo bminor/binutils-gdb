@@ -1,3 +1,9 @@
+Thu Jan 20 16:13:41 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* configure:  Completely rewrite option processing.  Take
+	advantage of pattern-matching to avoid invoking test frequently.
+	Also clean up host and target defaulting logic.
+
 Mon Jan 17 15:06:56 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in: Replace all occurrances of "rootme" with "r" and
