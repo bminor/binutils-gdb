@@ -1,3 +1,19 @@
+Sun Jul 23 23:33:18 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Reinstate setting of stabsdirs variable, fix
+	typo in setting up configdirs for native builds.
+
+	* gdb.base/return.exp:  Fix typo in return double test.
+	* gdb.base/return.c (tmp2, tmp3):  Made global to inhibit the
+	compiler from optimizing them away.
+
+Fri Jul 21 11:39:34 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/gdbvars.exp: Expect zero or more additional cr-lf
+	sequences to be echo'd by gdb when using gdb_test.
+	* gdb.chill/chexp.exp: Likewise.
+	* gdb.fortran/exprs.exp: Likewise
+
 Thu Jul 20 13:28:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* gdb.base/a1-selftest.exp: Reset the timeout value to 30 seconds
