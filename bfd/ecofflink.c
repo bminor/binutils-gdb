@@ -1069,12 +1069,13 @@ ecoff_align_debug (abfd, debug, swap)
      const struct ecoff_debug_swap *swap;
 {
   HDRR * const symhdr = &debug->symbolic_header;
-  bfd_size_type debug_align, aux_align;
+  bfd_size_type debug_align, aux_align, rfd_align;
   size_t add;
 
   /* Adjust the counts so that structures are aligned.  */
   debug_align = swap->debug_align;
   aux_align = debug_align / sizeof (union aux_ext);
+  rfd_align = debug_align / swap->external_rfd_size;
 
   add = debug_align - (symhdr->cbLine & (debug_align - 1));
   if (add != debug_align)
@@ -1107,6 +1108,16 @@ ecoff_align_debug (abfd, debug, swap)
 	memset (debug->external_aux + symhdr->iauxMax, 0,
 		add * sizeof (union aux_ext));
       symhdr->iauxMax += add;
+    }
+
+  add = rfd_align - (symhdr->crfd & (rfd_align - 1));
+  if (add != rfd_align)
+    {
+      if (debug->external_rfd != (PTR) NULL)
+	memset (((char *) debug->external_rfd
+		 + symhdr->crfd * swap->external_rfd_size),
+		0, add * swap->external_rfd_size);
+      symhdr->crfd += add;
     }
 }
 
@@ -1300,7 +1311,6 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 {
   struct accumulate *ainfo = (struct accumulate *) handle;
   PTR space;
-  FDR fdr;
 
   if (! ecoff_write_symhdr (abfd, debug, swap, where))
     return false;
