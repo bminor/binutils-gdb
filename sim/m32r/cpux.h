@@ -122,276 +122,276 @@ struct argbuf {
   int written;
   union {
     struct { /* e.g. add $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_dr;
+      SI * i_sr;
       unsigned char in_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_add;
     struct { /* e.g. add3 $dr,$sr,$hash$slo16 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       HI f_simm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_add3;
     struct { /* e.g. and3 $dr,$sr,$uimm16 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       USI f_uimm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_and3;
     struct { /* e.g. or3 $dr,$sr,$hash$ulo16 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       UHI f_uimm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_or3;
     struct { /* e.g. addi $dr,$simm8 */
-      SI * f_r1;
+      SI * i_dr;
       SI f_simm8;
       unsigned char in_dr;
       unsigned char out_dr;
     } fmt_addi;
     struct { /* e.g. addv $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_dr;
+      SI * i_sr;
       unsigned char in_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_addv;
     struct { /* e.g. addv3 $dr,$sr,$simm16 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       SI f_simm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_addv3;
     struct { /* e.g. addx $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_dr;
+      SI * i_sr;
       unsigned char in_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_addx;
     struct { /* e.g. cmp $src1,$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src1;
+      SI * i_src2;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_cmp;
     struct { /* e.g. cmpi $src2,$simm16 */
-      SI * f_r2;
+      SI * i_src2;
       SI f_simm16;
       unsigned char in_src2;
     } fmt_cmpi;
     struct { /* e.g. cmpz $src2 */
-      SI * f_r2;
+      SI * i_src2;
       unsigned char in_src2;
     } fmt_cmpz;
     struct { /* e.g. div $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char in_dr;
       unsigned char out_dr;
     } fmt_div;
     struct { /* e.g. ld $dr,@$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_ld;
     struct { /* e.g. ld $dr,@($slo16,$sr) */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       HI f_simm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_ld_d;
     struct { /* e.g. ldb $dr,@$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_ldb;
     struct { /* e.g. ldb $dr,@($slo16,$sr) */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       HI f_simm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_ldb_d;
     struct { /* e.g. ldh $dr,@$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_ldh;
     struct { /* e.g. ldh $dr,@($slo16,$sr) */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       HI f_simm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_ldh_d;
     struct { /* e.g. ld $dr,@$sr+ */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
       unsigned char out_sr;
     } fmt_ld_plus;
     struct { /* e.g. ld24 $dr,$uimm24 */
-      SI * f_r1;
       ADDR f_uimm24;
+      SI * i_dr;
       unsigned char out_dr;
     } fmt_ld24;
     struct { /* e.g. ldi8 $dr,$simm8 */
-      SI * f_r1;
       SI f_simm8;
+      SI * i_dr;
       unsigned char out_dr;
     } fmt_ldi8;
     struct { /* e.g. ldi16 $dr,$hash$slo16 */
-      SI * f_r1;
       HI f_simm16;
+      SI * i_dr;
       unsigned char out_dr;
     } fmt_ldi16;
     struct { /* e.g. lock $dr,@$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_lock;
     struct { /* e.g. machi $src1,$src2,$acc */
-      SI * f_r1;
       UINT f_acc;
-      SI * f_r2;
+      SI * i_src1;
+      SI * i_src2;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_machi_a;
     struct { /* e.g. mulhi $src1,$src2,$acc */
-      SI * f_r1;
+      SI * i_src1;
+      SI * i_src2;
       UINT f_acc;
-      SI * f_r2;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_mulhi_a;
     struct { /* e.g. mv $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_mv;
     struct { /* e.g. mvfachi $dr,$accs */
-      SI * f_r1;
       UINT f_accs;
+      SI * i_dr;
       unsigned char out_dr;
     } fmt_mvfachi_a;
     struct { /* e.g. mvfc $dr,$scr */
-      SI * f_r1;
       UINT f_r2;
+      SI * i_dr;
       unsigned char out_dr;
     } fmt_mvfc;
     struct { /* e.g. mvtachi $src1,$accs */
-      SI * f_r1;
       UINT f_accs;
+      SI * i_src1;
       unsigned char in_src1;
     } fmt_mvtachi_a;
     struct { /* e.g. mvtc $sr,$dcr */
+      SI * i_sr;
       UINT f_r1;
-      SI * f_r2;
       unsigned char in_sr;
     } fmt_mvtc;
     struct { /* e.g. nop */
       int empty;
     } fmt_nop;
     struct { /* e.g. rac $accd,$accs,$imm1 */
-      UINT f_accd;
       UINT f_accs;
       USI f_imm1;
+      UINT f_accd;
     } fmt_rac_dsi;
     struct { /* e.g. seth $dr,$hash$hi16 */
-      SI * f_r1;
       UHI f_hi16;
+      SI * i_dr;
       unsigned char out_dr;
     } fmt_seth;
     struct { /* e.g. sll3 $dr,$sr,$simm16 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
       SI f_simm16;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_sll3;
     struct { /* e.g. slli $dr,$uimm5 */
-      SI * f_r1;
+      SI * i_dr;
       USI f_uimm5;
       unsigned char in_dr;
       unsigned char out_dr;
     } fmt_slli;
     struct { /* e.g. st $src1,@$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_st;
     struct { /* e.g. st $src1,@($slo16,$src2) */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
       HI f_simm16;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_st_d;
     struct { /* e.g. stb $src1,@$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_stb;
     struct { /* e.g. stb $src1,@($slo16,$src2) */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
       HI f_simm16;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_stb_d;
     struct { /* e.g. sth $src1,@$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_sth;
     struct { /* e.g. sth $src1,@($slo16,$src2) */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
       HI f_simm16;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_sth_d;
     struct { /* e.g. st $src1,@+$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
       unsigned char out_src2;
     } fmt_st_plus;
     struct { /* e.g. unlock $src1,@$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src2;
+      SI * i_src1;
       unsigned char in_src2;
       unsigned char in_src1;
     } fmt_unlock;
     struct { /* e.g. satb $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_satb;
     struct { /* e.g. sat $dr,$sr */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_sr;
+      SI * i_dr;
       unsigned char in_sr;
       unsigned char out_dr;
     } fmt_sat;
@@ -399,26 +399,23 @@ struct argbuf {
       int empty;
     } fmt_sadd;
     struct { /* e.g. macwu1 $src1,$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src1;
+      SI * i_src2;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_macwu1;
     struct { /* e.g. msblo $src1,$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src1;
+      SI * i_src2;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_msblo;
     struct { /* e.g. mulwu1 $src1,$src2 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src1;
+      SI * i_src2;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_mulwu1;
-    struct { /* e.g. sc */
-      int empty;
-    } fmt_sc;
   /* cti insns, kept separately so addr_cache is in fixed place */
   struct {
     union {
@@ -429,14 +426,14 @@ struct argbuf {
       IADDR f_disp24;
     } fmt_bc24;
     struct { /* e.g. beq $src1,$src2,$disp16 */
-      SI * f_r1;
-      SI * f_r2;
+      SI * i_src1;
+      SI * i_src2;
       IADDR f_disp16;
       unsigned char in_src1;
       unsigned char in_src2;
     } fmt_beq;
     struct { /* e.g. beqz $src2,$disp16 */
-      SI * f_r2;
+      SI * i_src2;
       IADDR f_disp16;
       unsigned char in_src2;
     } fmt_beqz;
@@ -463,16 +460,16 @@ struct argbuf {
       IADDR f_disp24;
     } fmt_bra24;
     struct { /* e.g. jc $sr */
-      SI * f_r2;
+      SI * i_sr;
       unsigned char in_sr;
     } fmt_jc;
     struct { /* e.g. jl $sr */
-      SI * f_r2;
+      SI * i_sr;
       unsigned char in_sr;
       unsigned char out_h_gr_14;
     } fmt_jl;
     struct { /* e.g. jmp $sr */
-      SI * f_r2;
+      SI * i_sr;
       unsigned char in_sr;
     } fmt_jmp;
     struct { /* e.g. rte */
@@ -481,6 +478,9 @@ struct argbuf {
     struct { /* e.g. trap $uimm4 */
       USI f_uimm4;
     } fmt_trap;
+    struct { /* e.g. sc */
+      int empty;
+    } fmt_sc;
     } fields;
 #if WITH_SCACHE_PBB_M32RXF
     SEM_PC addr_cache;
@@ -534,10 +534,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_ADD_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_ADD3_VARS \
   /* Instruction fields.  */ \
@@ -545,15 +545,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_ADD3_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_AND3_VARS \
   /* Instruction fields.  */ \
@@ -565,11 +565,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_AND3_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_uimm16 = EXTRACT_UNSIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_uimm16 = EXTRACT_UINT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_OR3_VARS \
   /* Instruction fields.  */ \
@@ -581,23 +581,23 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_OR3_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_uimm16 = EXTRACT_UNSIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_uimm16 = EXTRACT_UINT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_ADDI_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_simm8; \
+  INT f_simm8; \
   unsigned int length;
 #define EXTRACT_FMT_ADDI_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_simm8 = EXTRACT_SIGNED (insn, 16, 8, 8); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_simm8 = EXTRACT_INT (insn, 16, 8, 8); \
 
 #define EXTRACT_FMT_ADDV_VARS \
   /* Instruction fields.  */ \
@@ -608,10 +608,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_ADDV_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_ADDV3_VARS \
   /* Instruction fields.  */ \
@@ -619,15 +619,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_ADDV3_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_ADDX_VARS \
   /* Instruction fields.  */ \
@@ -638,34 +638,34 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_ADDX_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_BC8_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp8; \
+  INT f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BC8_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_disp8 = ((((EXTRACT_SIGNED (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_disp8 = ((((EXTRACT_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
 
 #define EXTRACT_FMT_BC24_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp24; \
+  INT f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BC24_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_disp24 = ((((EXTRACT_SIGNED (insn, 32, 8, 24)) << (2))) + (pc)); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_disp24 = ((((EXTRACT_INT (insn, 32, 8, 24)) << (2))) + (pc)); \
 
 #define EXTRACT_FMT_BEQ_VARS \
   /* Instruction fields.  */ \
@@ -673,15 +673,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_disp16; \
+  INT f_disp16; \
   unsigned int length;
 #define EXTRACT_FMT_BEQ_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_disp16 = ((((EXTRACT_SIGNED (insn, 32, 16, 16)) << (2))) + (pc)); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_disp16 = ((((EXTRACT_INT (insn, 32, 16, 16)) << (2))) + (pc)); \
 
 #define EXTRACT_FMT_BEQZ_VARS \
   /* Instruction fields.  */ \
@@ -689,87 +689,87 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_disp16; \
+  INT f_disp16; \
   unsigned int length;
 #define EXTRACT_FMT_BEQZ_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_disp16 = ((((EXTRACT_SIGNED (insn, 32, 16, 16)) << (2))) + (pc)); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_disp16 = ((((EXTRACT_INT (insn, 32, 16, 16)) << (2))) + (pc)); \
 
 #define EXTRACT_FMT_BL8_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp8; \
+  INT f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BL8_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_disp8 = ((((EXTRACT_SIGNED (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_disp8 = ((((EXTRACT_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
 
 #define EXTRACT_FMT_BL24_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp24; \
+  INT f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BL24_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_disp24 = ((((EXTRACT_SIGNED (insn, 32, 8, 24)) << (2))) + (pc)); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_disp24 = ((((EXTRACT_INT (insn, 32, 8, 24)) << (2))) + (pc)); \
 
 #define EXTRACT_FMT_BCL8_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp8; \
+  INT f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BCL8_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_disp8 = ((((EXTRACT_SIGNED (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_disp8 = ((((EXTRACT_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
 
 #define EXTRACT_FMT_BCL24_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp24; \
+  INT f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BCL24_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_disp24 = ((((EXTRACT_SIGNED (insn, 32, 8, 24)) << (2))) + (pc)); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_disp24 = ((((EXTRACT_INT (insn, 32, 8, 24)) << (2))) + (pc)); \
 
 #define EXTRACT_FMT_BRA8_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp8; \
+  INT f_disp8; \
   unsigned int length;
 #define EXTRACT_FMT_BRA8_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_disp8 = ((((EXTRACT_SIGNED (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_disp8 = ((((EXTRACT_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
 
 #define EXTRACT_FMT_BRA24_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_disp24; \
+  INT f_disp24; \
   unsigned int length;
 #define EXTRACT_FMT_BRA24_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_disp24 = ((((EXTRACT_SIGNED (insn, 32, 8, 24)) << (2))) + (pc)); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_disp24 = ((((EXTRACT_INT (insn, 32, 8, 24)) << (2))) + (pc)); \
 
 #define EXTRACT_FMT_CMP_VARS \
   /* Instruction fields.  */ \
@@ -780,10 +780,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_CMP_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_CMPI_VARS \
   /* Instruction fields.  */ \
@@ -791,15 +791,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_CMPI_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_CMPZ_VARS \
   /* Instruction fields.  */ \
@@ -810,10 +810,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_CMPZ_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_DIV_VARS \
   /* Instruction fields.  */ \
@@ -821,15 +821,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_DIV_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_JC_VARS \
   /* Instruction fields.  */ \
@@ -840,10 +840,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_JC_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_JL_VARS \
   /* Instruction fields.  */ \
@@ -854,10 +854,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_JL_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_JMP_VARS \
   /* Instruction fields.  */ \
@@ -868,10 +868,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_JMP_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_LD_VARS \
   /* Instruction fields.  */ \
@@ -882,10 +882,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_LD_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_LD_D_VARS \
   /* Instruction fields.  */ \
@@ -893,15 +893,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_LD_D_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_LDB_VARS \
   /* Instruction fields.  */ \
@@ -912,10 +912,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_LDB_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_LDB_D_VARS \
   /* Instruction fields.  */ \
@@ -923,15 +923,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_LDB_D_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_LDH_VARS \
   /* Instruction fields.  */ \
@@ -942,10 +942,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_LDH_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_LDH_D_VARS \
   /* Instruction fields.  */ \
@@ -953,15 +953,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_LDH_D_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_LD_PLUS_VARS \
   /* Instruction fields.  */ \
@@ -972,10 +972,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_LD_PLUS_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_LD24_VARS \
   /* Instruction fields.  */ \
@@ -985,21 +985,21 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_LD24_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_uimm24 = EXTRACT_UNSIGNED (insn, 32, 8, 24); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_uimm24 = EXTRACT_UINT (insn, 32, 8, 24); \
 
 #define EXTRACT_FMT_LDI8_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
   UINT f_r1; \
-  int f_simm8; \
+  INT f_simm8; \
   unsigned int length;
 #define EXTRACT_FMT_LDI8_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_simm8 = EXTRACT_SIGNED (insn, 16, 8, 8); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_simm8 = EXTRACT_INT (insn, 16, 8, 8); \
 
 #define EXTRACT_FMT_LDI16_VARS \
   /* Instruction fields.  */ \
@@ -1007,15 +1007,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_LDI16_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_LOCK_VARS \
   /* Instruction fields.  */ \
@@ -1026,10 +1026,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_LOCK_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MACHI_A_VARS \
   /* Instruction fields.  */ \
@@ -1041,11 +1041,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MACHI_A_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_acc = EXTRACT_UNSIGNED (insn, 16, 8, 1); \
-  f_op23 = EXTRACT_UNSIGNED (insn, 16, 9, 3); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_acc = EXTRACT_UINT (insn, 16, 8, 1); \
+  f_op23 = EXTRACT_UINT (insn, 16, 9, 3); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MULHI_A_VARS \
   /* Instruction fields.  */ \
@@ -1057,11 +1057,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MULHI_A_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_acc = EXTRACT_UNSIGNED (insn, 16, 8, 1); \
-  f_op23 = EXTRACT_UNSIGNED (insn, 16, 9, 3); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_acc = EXTRACT_UINT (insn, 16, 8, 1); \
+  f_op23 = EXTRACT_UINT (insn, 16, 9, 3); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MV_VARS \
   /* Instruction fields.  */ \
@@ -1072,10 +1072,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MV_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MVFACHI_A_VARS \
   /* Instruction fields.  */ \
@@ -1087,11 +1087,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MVFACHI_A_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_accs = EXTRACT_UNSIGNED (insn, 16, 12, 2); \
-  f_op3 = EXTRACT_UNSIGNED (insn, 16, 14, 2); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_accs = EXTRACT_UINT (insn, 16, 12, 2); \
+  f_op3 = EXTRACT_UINT (insn, 16, 14, 2); \
 
 #define EXTRACT_FMT_MVFC_VARS \
   /* Instruction fields.  */ \
@@ -1102,10 +1102,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MVFC_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MVTACHI_A_VARS \
   /* Instruction fields.  */ \
@@ -1117,11 +1117,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MVTACHI_A_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_accs = EXTRACT_UNSIGNED (insn, 16, 12, 2); \
-  f_op3 = EXTRACT_UNSIGNED (insn, 16, 14, 2); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_accs = EXTRACT_UINT (insn, 16, 12, 2); \
+  f_op3 = EXTRACT_UINT (insn, 16, 14, 2); \
 
 #define EXTRACT_FMT_MVTC_VARS \
   /* Instruction fields.  */ \
@@ -1132,10 +1132,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MVTC_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_NOP_VARS \
   /* Instruction fields.  */ \
@@ -1146,10 +1146,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_NOP_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_RAC_DSI_VARS \
   /* Instruction fields.  */ \
@@ -1163,13 +1163,13 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_RAC_DSI_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_accd = EXTRACT_UNSIGNED (insn, 16, 4, 2); \
-  f_bits67 = EXTRACT_UNSIGNED (insn, 16, 6, 2); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_accs = EXTRACT_UNSIGNED (insn, 16, 12, 2); \
-  f_bit14 = EXTRACT_UNSIGNED (insn, 16, 14, 1); \
-  f_imm1 = ((EXTRACT_UNSIGNED (insn, 16, 15, 1)) + (1)); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_accd = EXTRACT_UINT (insn, 16, 4, 2); \
+  f_bits67 = EXTRACT_UINT (insn, 16, 6, 2); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_accs = EXTRACT_UINT (insn, 16, 12, 2); \
+  f_bit14 = EXTRACT_UINT (insn, 16, 14, 1); \
+  f_imm1 = ((EXTRACT_UINT (insn, 16, 15, 1)) + (1)); \
 
 #define EXTRACT_FMT_RTE_VARS \
   /* Instruction fields.  */ \
@@ -1180,10 +1180,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_RTE_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_SETH_VARS \
   /* Instruction fields.  */ \
@@ -1195,11 +1195,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_SETH_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_hi16 = EXTRACT_UNSIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_hi16 = EXTRACT_UINT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_SLL3_VARS \
   /* Instruction fields.  */ \
@@ -1207,15 +1207,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_SLL3_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_SLLI_VARS \
   /* Instruction fields.  */ \
@@ -1226,10 +1226,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_SLLI_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_shift_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 3); \
-  f_uimm5 = EXTRACT_UNSIGNED (insn, 16, 11, 5); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_shift_op2 = EXTRACT_UINT (insn, 16, 8, 3); \
+  f_uimm5 = EXTRACT_UINT (insn, 16, 11, 5); \
 
 #define EXTRACT_FMT_ST_VARS \
   /* Instruction fields.  */ \
@@ -1240,10 +1240,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_ST_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_ST_D_VARS \
   /* Instruction fields.  */ \
@@ -1251,15 +1251,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_ST_D_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_STB_VARS \
   /* Instruction fields.  */ \
@@ -1270,10 +1270,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_STB_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_STB_D_VARS \
   /* Instruction fields.  */ \
@@ -1281,15 +1281,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_STB_D_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_STH_VARS \
   /* Instruction fields.  */ \
@@ -1300,10 +1300,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_STH_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_STH_D_VARS \
   /* Instruction fields.  */ \
@@ -1311,15 +1311,15 @@ struct scache {
   UINT f_r1; \
   UINT f_op2; \
   UINT f_r2; \
-  int f_simm16; \
+  INT f_simm16; \
   unsigned int length;
 #define EXTRACT_FMT_STH_D_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_SIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_simm16 = EXTRACT_INT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_ST_PLUS_VARS \
   /* Instruction fields.  */ \
@@ -1330,10 +1330,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_ST_PLUS_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_TRAP_VARS \
   /* Instruction fields.  */ \
@@ -1344,10 +1344,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_TRAP_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_uimm4 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_uimm4 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_UNLOCK_VARS \
   /* Instruction fields.  */ \
@@ -1358,10 +1358,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_UNLOCK_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_SATB_VARS \
   /* Instruction fields.  */ \
@@ -1373,11 +1373,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_SATB_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_uimm16 = EXTRACT_UNSIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_uimm16 = EXTRACT_UINT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_SAT_VARS \
   /* Instruction fields.  */ \
@@ -1389,11 +1389,11 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_SAT_CODE \
   length = 4; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 32, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 32, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 32, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 32, 12, 4); \
-  f_uimm16 = EXTRACT_UNSIGNED (insn, 32, 16, 16); \
+  f_op1 = EXTRACT_UINT (insn, 32, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 32, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 32, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 32, 12, 4); \
+  f_uimm16 = EXTRACT_UINT (insn, 32, 16, 16); \
 
 #define EXTRACT_FMT_SADD_VARS \
   /* Instruction fields.  */ \
@@ -1404,10 +1404,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_SADD_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MACWU1_VARS \
   /* Instruction fields.  */ \
@@ -1418,10 +1418,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MACWU1_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MSBLO_VARS \
   /* Instruction fields.  */ \
@@ -1432,10 +1432,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MSBLO_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MULWU1_VARS \
   /* Instruction fields.  */ \
@@ -1446,10 +1446,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_MULWU1_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_SC_VARS \
   /* Instruction fields.  */ \
@@ -1460,10 +1460,10 @@ struct scache {
   unsigned int length;
 #define EXTRACT_FMT_SC_CODE \
   length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+  f_op1 = EXTRACT_UINT (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UINT (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UINT (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UINT (insn, 16, 12, 4); \
 
 /* Queued output values of an instruction.  */
 
@@ -1696,5 +1696,12 @@ struct parexec {
   /* For conditionally written operands, bitmask of which ones were.  */
   int written;
 };
+
+/* Collection of various things for the trace handler to use.  */
+
+typedef struct trace_record {
+  PCADDR pc;
+  /* FIXME:wip */
+} TRACE_RECORD;
 
 #endif /* CPU_M32RXF_H */

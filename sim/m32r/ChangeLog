@@ -1,3 +1,16 @@
+Fri Dec  4 00:19:33 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cpu.h,decode.c,sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.h,decodex.c,modelx.c,semx-switch.c: Regenerate.
+end-sanitize-m32rx
+
+1998-11-22  Doug Evans  <devans@tobor.to.cygnus.com>
+
+	* devices.c (device_io_write_buffer): Fix typo.
+	* sim-if.c (sim_open): Hack in call to dv_sockser_install.
+	* tconfig.in (HAVE_DV_SOCKSER): Add but comment out.
+
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (M32R_OBJS): Delete extract.o.
