@@ -240,57 +240,57 @@ w89k_load (desc, file, hashmark)
 
 static struct target_ops w89k_ops;
 
-static char *w89k_inits[] = {"\r", NULL};
+static char *w89k_inits[] = {"\n", NULL};
 
 static struct monitor_ops w89k_cmds =
 {
   MO_GETMEM_NEEDS_RANGE|MO_FILL_USES_ADDR, /* flags */
   w89k_inits,			/* Init strings */
-  "g\r",			/* continue command */
-  "t\r",			/* single step */
-  NULL,				/* Interrupt char */
-  "bp %x\r",			/* set a breakpoint */
-  "bc %x\r",			/* clear a breakpoint */
-  "bc *\r",			/* clear all breakpoints */
-  "f %x %x %x\r",		/* memory fill cmd */
+  "g\n",			/* continue command */
+  "t\n",			/* single step */
+  "\003",			/* Interrupt char (^C) */
+  "bp %x\n",			/* set a breakpoint */
+  "bc %x\n",			/* clear a breakpoint */
+  "bc *\n",			/* clear all breakpoints */
+  "f %x %x %x\n",		/* memory fill cmd */
   {
-    "eb %x %x\r",		/* setmem.cmdb (addr, value) */
-    "eh %x %x\r",		/* setmem.cmdw (addr, value) */
-    "ew %x %x\r",		/* setmem.cmdl (addr, value) */
+    "eb %x %x\n",		/* setmem.cmdb (addr, value) */
+    "eh %x %x\n",		/* setmem.cmdw (addr, value) */
+    "ew %x %x\n",		/* setmem.cmdl (addr, value) */
     NULL,			/* setmem.cmdll (addr, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL,			/* setreg.term_cmd */
   },
   {
-    "db %x %x\r",		/* getmem.cmdb (startaddr, endaddr) */
-    "dh %x %x\r",		/* getmem.cmdw (startaddr, endaddr) */
-    "dw %x %x\r",		/* getmem.cmdl (startaddr, endaddr) */
+    "db %x %x\n",		/* getmem.cmdb (startaddr, endaddr) */
+    "dh %x %x\n",		/* getmem.cmdw (startaddr, endaddr) */
+    "dw %x %x\n",		/* getmem.cmdl (startaddr, endaddr) */
     NULL,			/* getmem.cmdll (startaddr, endaddr) */
     "  ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
   },
   {
-    "r %s %x\r",		/* setreg.cmd (name, value) */
+    "r %s %x\n",		/* setreg.cmd (name, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL,			/* setreg.term_cmd */
   },
   {
-    "r %s\r",			/* getreg.cmd (name) */
+    "r %s\n",			/* getreg.cmd (name) */
     "\r",			/* getreg.resp_delim */
     NULL,			/* getreg.term */
     NULL,			/* getreg.term_cmd */
   },
-  "r\r",			/* dump_registers */
+  "r\n",			/* dump_registers */
   "\\(\\w+\\)\\( +[0-9a-fA-F]+\\b\\)+",
   w89k_supply_register,		/* supply_register */
   w89k_load,			/* load routine */
-  "u %x\r",			/* download command */
-  "\r",				/* load response */
+  "u %x\n",			/* download command */
+  "\021",			/* load response (^Q) */
   "ROM>",			/* monitor command prompt */
-  NULL,				/* end-of-command delimitor */
+  "\n",				/* end-of-line terminator */
   NULL,				/* optional command terminator */
   &w89k_ops,			/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */

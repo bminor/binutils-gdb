@@ -1,3 +1,35 @@
+Wed May 10 18:59:26 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* hppa-tdep.c (read_unwind_info):  Cosmetic cleanup.
+	* (unwind_command):  Clean it up and make it print things out
+	nicer.
+	* monitor.c:  Add ^C handling capability (mostly ripped off from
+	remote.c).
+	* (monitor_printf):  Make it check the command echo.
+	* (monitor_printf_noecho):  Similar to above, but doesn't check
+	for echo.
+	* (monitor_stop):  No longer waits for prompt.  That is the job of
+	the caller.  This makes things work much better for monitor_wait,
+	which waits for the prompt itself.
+	* (monitor_open):  Deal with new monitor_stop semantics.  Also,
+	flush input after sending init strings to get rid of junk that may
+	be output.  Also, don't always send \r to remote.  Use
+	monitor_ops->line_term cuz proper character isn't always \r.
+	* (monitor_fetch_register):  Switch to completely different
+	algorithm to deal with lame-ass monitors which put spaces in the
+	middle of numbers, and prompt with a space!!!!!
+	* (monitor_read_memory_single):  New routine to be used with
+	monitors that can only return one byte/short/long at a time.  This
+	is selected via MO_GETMEM_READ_SINGLE.
+	* (monitor_load_srec):  Use monitor_printf_noecho for sending S
+	records.  Most targets don't echo them.
+	* (monitor.h):  Get rid of cmd_delim.  Add line_delim.
+	* op50n-rom.c (op50n_cmds):  Fill it up.  Make it work.
+	* w89k-rom.c:  Change all eols from \r to \n.  Change load_resp to
+	^Q to prevent error message.
+	* config/pa/tm-hppa.h (CALL_DUMMY (for hppro)):   Add special
+	instruction sequence at end to make restore_pc_queue happy.
+
 Wed May 10 15:59:00 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
 
 	* remote-est.c (est_open): Make static to match prototype.

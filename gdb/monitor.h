@@ -104,7 +104,7 @@ struct monitor_ops
   char *load;			/* load command */
   char *loadresp;		/* Response to load command */
   char *prompt;			/* monitor command prompt */
-  char *cmd_delim;		/* end-of-command delimitor */
+  char *line_term;		/* end-of-command delimitor */
   char *cmd_end;		/* optional command terminator */
   struct target_ops *target;	/* target operations */
   int stopbits;			/* number of stop bits */
@@ -126,6 +126,7 @@ struct monitor_ops
 					  matically supply register dump when
 					  coming back after a continue.  */
 #define MO_GETMEM_NEEDS_RANGE 0x8 /* getmem needs start addr and end addr */
+#define MO_GETMEM_READ_SINGLE 0x10 /* getmem can only read one loc at a time */
 
 extern struct monitor_ops        *current_monitor;
 

@@ -377,8 +377,8 @@ read_unwind_info (objfile)
   struct obj_unwind_info *ui;
 
   text_offset = ANOFFSET (objfile->section_offsets, 0);
-  ui = obstack_alloc (&objfile->psymbol_obstack,
-		      sizeof (struct obj_unwind_info));
+  ui = (struct obj_unwind_info *)obstack_alloc (&objfile->psymbol_obstack,
+						sizeof (struct obj_unwind_info));
 
   ui->table = NULL;
   ui->cache = NULL;
@@ -2610,11 +2610,7 @@ unwind_command (exp, from_tty)
      int from_tty;
 {
   CORE_ADDR address;
-  union
-    {
-      int *foo;
-      struct unwind_table_entry *u;
-    } xxx;
+  struct unwind_table_entry *u;
 
   /* If we have an expression, evaluate it and use it as the address.  */
 
@@ -2623,16 +2619,61 @@ unwind_command (exp, from_tty)
   else
     return;
 
-  xxx.u = find_unwind_entry (address);
+  u = find_unwind_entry (address);
 
-  if (!xxx.u)
+  if (!u)
     {
-      printf_unfiltered ("Can't find unwind table entry for PC 0x%x\n", address);
+      printf_unfiltered ("Can't find unwind table entry for %s\n", exp);
       return;
     }
 
-  printf_unfiltered ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
-	  xxx.foo[3]);
+  printf_unfiltered ("unwind_table_entry (0x%x):\n", u);
+
+  printf_unfiltered ("\tregion_start = ");
+  print_address (u->region_start, gdb_stdout);
+
+  printf_unfiltered ("\n\tregion_end = ");
+  print_address (u->region_end, gdb_stdout);
+
+#ifdef __STDC__
+#define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
+#else
+#define pif(FLD) if (u->FLD) printf_unfiltered (" FLD");
+#endif
+
+  printf_unfiltered ("\n\tflags =");
+  pif (Cannot_unwind);
+  pif (Millicode);
+  pif (Millicode_save_sr0);
+  pif (Entry_SR);
+  pif (Args_stored);
+  pif (Variable_Frame);
+  pif (Separate_Package_Body);
+  pif (Frame_Extension_Millicode);
+  pif (Stack_Overflow_Check);
+  pif (Two_Instruction_SP_Increment);
+  pif (Ada_Region);
+  pif (Save_SP);
+  pif (Save_RP);
+  pif (Save_MRP_in_frame);
+  pif (extn_ptr_defined);
+  pif (Cleanup_defined);
+  pif (MPE_XL_interrupt_marker);
+  pif (HP_UX_interrupt_marker);
+  pif (Large_frame);
+
+  putchar_unfiltered ('\n');
+
+#ifdef __STDC__
+#define pin(FLD) printf_unfiltered ("\t"#FLD" = 0x%x\n", u->FLD);
+#else
+#define pin(FLD) printf_unfiltered ("\tFLD = 0x%x\n", u->FLD);
+#endif
+
+  pin (Region_description);
+  pin (Entry_FR);
+  pin (Entry_GR);
+  pin (Total_frame_size);
 }
 #endif /* MAINTENANCE_CMDS */
 

@@ -53,57 +53,69 @@ static char *op50n_regnames[NUM_REGS] =
 
 static struct target_ops op50n_ops;
 
-static char *op50n_inits[] = {"\003.\n", NULL};
+static char *op50n_inits[] = {".\r", NULL};
 
 static struct monitor_ops op50n_cmds =
 {
-  0,				/* flags */
+  MO_CLR_BREAK_USES_ADDR /*| MO_GETMEM_READ_SINGLE*/, /* flags */
   op50n_inits,			/* Init strings */
-  "g\n",			/* continue command */
-  "t\n",			/* single step */
-  NULL,				/* Interrupt char */
-  "b %x\n",			/* set a breakpoint */
-  "bx %x\n",			/* clear a breakpoint */
-  NULL,				/* clear all breakpoints */
-  NULL,				/* memory fill cmd */
+  "g\r",			/* continue command */
+  "t\r",			/* single step */
+  "\003",			/* Interrupt char */
+  "b %x\r",			/* set a breakpoint */
+  "b %x,0\r",			/* clear breakpoint at addr */
+  "bx\r",			/* clear all breakpoints */
+  "fx %x s%x %x\r",		/* memory fill cmd (addr, len, val) */
   {
-    "sx %x %x;.\n",		/* setmem.cmdb (addr, value) */
-    NULL,			/* setmem.cmdw (addr, value) */
-    NULL,			/* setmem.cmdl (addr, value) */
+    "sx %x %x\r",		/* setmem.cmdb (addr, value) */
+    "sh %x %x\r",		/* setmem.cmdw (addr, value) */
+    "s %x %x\r",		/* setmem.cmdl (addr, value) */
     NULL,			/* setmem.cmdll (addr, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL,			/* setreg.term_cmd */
+    NULL,			/* setmem.resp_delim */
+    NULL,			/* setmem.term */
+    NULL,			/* setmem.term_cmd */
   },
+#if 0
   {
-    "sx %x\n",			/* getmem.cmdb (addr, value) */
-    NULL,			/* getmem.cmdw (addr, value) */
-    NULL,			/* getmem.cmdl (addr, value) */
-    NULL,			/* getmem.cmdll (addr, value) */
-    ": ",			/* getmem.resp_delim */
+    "sx %x\r",			/* getmem.cmdb (addr, len) */
+    "sh %x\r",			/* getmem.cmdw (addr, len) */
+    "s %x\r",			/* getmem.cmdl (addr, len) */
+    NULL,			/* getmem.cmdll (addr, len) */
+    " : ",			/* getmem.resp_delim */
+    " ",			/* getmem.term */
+    ".\r",			/* getmem.term_cmd */
+  },
+#else
+  {
+    "dx %x s%x\r",		/* getmem.cmdb (addr, len) */
+    NULL,			/* getmem.cmdw (addr, len) */
+    NULL,			/* getmem.cmdl (addr, len) */
+    NULL,			/* getmem.cmdll (addr, len) */
+    " : ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
   },
+#endif
   {
-    "x %s %x\n",		/* setreg.cmd (name, value) */
+    "x %s %x\r",		/* setreg.cmd (name, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL,			/* setreg.term_cmd */
   },
   {
-    "x %s\n",			/* getreg.cmd (name) */
+    "x %s\r",			/* getreg.cmd (name) */
     "=",			/* getreg.resp_delim */
-    NULL,			/* getreg.term */
-    NULL,			/* getreg.term_cmd */
+    " ",			/* getreg.term */
+    ".\r",			/* getreg.term_cmd */
   },
   NULL,				/* dump_registers */
   NULL,				/* register_pattern */
   NULL,				/* supply_register */
   NULL,				/* load routine */
-  "r 0\n",			/* download command */
+  "r 0\r",			/* download command */
   NULL,				/* load response */
-  "#",				/* monitor command prompt */
-  NULL,				/* end-of-command delimitor */
+  "\n#",			/* monitor command prompt */
+  "\r",				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
   &op50n_ops,			/* target operations */
   SERIAL_1_STOPBITS,		/* number of stop bits */
