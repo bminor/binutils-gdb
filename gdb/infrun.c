@@ -1005,20 +1005,25 @@ switch_thread:
 		 like a subroutine call. */
 	      ! stop_func_start
 
-	      /* If we do a call, we will be at the start of a function.  */
+	      /* If we do a call, we will be at the start of a function...  */
 	      || stop_pc == stop_func_start
-	      || AT_FUNCTION_START (stop_pc, stop_func_name, stop_func_start)
-
 #if 0
-	      /* Not conservative enough for 4.11.  FIXME: enable this
-		 after 4.11.  */
-	      /* Except on the Alpha with -O (and perhaps other machines
-		 with similar calling conventions), in which we might
-		 call the address after the load of gp.  Since prologues
-		 don't contain calls, we can't return to within one, and
-		 we don't jump back into them, so this check is OK.  */
-	      || stop_pc < prologue_pc
+	      /* Should be taken care of by the stop_pc < prologue_pc check
+		 below.  Also, on irix5 where this checks for stop_pc
+		 equal to stop_func_start plus 12, it would seem to be
+		 wrong for a function with a 4 byte prologue, and an 8 byte
+		 call; a "return" could end up at stop_func_start+12.  */
+
+	      || AT_FUNCTION_START (stop_pc, stop_func_name, stop_func_start)
 #endif
+
+	      /* ...except on the Alpha with -O (and also Irix 5 and
+		 perhaps others), in which we might call the address
+		 after the load of gp.  Since prologues don't contain
+		 calls, we can't return to within one, and we don't
+		 jump back into them, so this check is OK.  */
+
+	      || stop_pc < prologue_pc
 
 	      /* If we end up in certain places, it means we did a subroutine
 		 call.  I'm not completely sure this is necessary now that we

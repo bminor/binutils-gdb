@@ -1,3 +1,10 @@
+Thu Dec 30 10:16:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (wait_for_inferior): Enable code which assumes that if
+	we jump into the prologue from another function, then it was a
+	subroutine call.  #if 0 AT_FUNCTION_START; the above code should
+	take care of this case.
+
 Wed Dec 29 12:32:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* valprint.c (val_print_string): Change chunksize from 200
