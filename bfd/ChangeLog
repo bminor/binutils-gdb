@@ -1,3 +1,13 @@
+2001-03-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* reloc.c: (BFD_RELOC_CRIS_COPY, BFD_RELOC_CRIS_GLOB_DAT,
+	BFD_RELOC_CRIS_JUMP_SLOT, BFD_RELOC_CRIS_RELATIVE,
+	BFD_RELOC_CRIS_32_GOT, BFD_RELOC_CRIS_16_GOT,
+	BFD_RELOC_CRIS_32_GOTPLT, BFD_RELOC_CRIS_16_GOTPLT,
+	BFD_RELOC_CRIS_32_GOTREL, BFD_RELOC_CRIS_32_PLT_GOTREL,
+	BFD_RELOC_CRIS_32_PLT_PCREL): New relocs.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2001-03-21  Diego Novillo  <dnovillo@redhat.com>
 
 	(_bfd_mips_elf_relocate_section): Give a better error message when

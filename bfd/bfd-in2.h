@@ -2685,6 +2685,33 @@ This is the 3 bits of a value. */
   BFD_RELOC_CRIS_UNSIGNED_6,
   BFD_RELOC_CRIS_UNSIGNED_4,
 
+/* Relocs used in ELF shared libraries for CRIS. */
+  BFD_RELOC_CRIS_COPY,
+  BFD_RELOC_CRIS_GLOB_DAT,
+  BFD_RELOC_CRIS_JUMP_SLOT,
+  BFD_RELOC_CRIS_RELATIVE,
+
+/* 32-bit offset to symbol-entry within GOT. */
+  BFD_RELOC_CRIS_32_GOT,
+
+/* 16-bit offset to symbol-entry within GOT. */
+  BFD_RELOC_CRIS_16_GOT,
+
+/* 32-bit offset to symbol-entry within GOT, with PLT handling. */
+  BFD_RELOC_CRIS_32_GOTPLT,
+
+/* 16-bit offset to symbol-entry within GOT, with PLT handling. */
+  BFD_RELOC_CRIS_16_GOTPLT,
+
+/* 32-bit offset to symbol, relative to GOT. */
+  BFD_RELOC_CRIS_32_GOTREL,
+
+/* 32-bit offset to symbol with PLT entry, relative to GOT. */
+  BFD_RELOC_CRIS_32_PLT_GOTREL,
+
+/* 32-bit offset to symbol with PLT entry, relative to this relocation. */
+  BFD_RELOC_CRIS_32_PLT_PCREL,
+
 /* Intel i860 Relocations. */
   BFD_RELOC_860_COPY,
   BFD_RELOC_860_GLOB_DAT,

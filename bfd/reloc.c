@@ -2995,6 +2995,44 @@ ENUMX
 ENUMDOC
   These relocs are only used within the CRIS assembler.  They are not
   (at present) written to any object files.
+ENUM
+  BFD_RELOC_CRIS_COPY
+ENUMX
+  BFD_RELOC_CRIS_GLOB_DAT
+ENUMX
+  BFD_RELOC_CRIS_JUMP_SLOT
+ENUMX
+  BFD_RELOC_CRIS_RELATIVE
+ENUMDOC
+  Relocs used in ELF shared libraries for CRIS.
+ENUM
+  BFD_RELOC_CRIS_32_GOT
+ENUMDOC
+  32-bit offset to symbol-entry within GOT.
+ENUM
+  BFD_RELOC_CRIS_16_GOT
+ENUMDOC
+  16-bit offset to symbol-entry within GOT.
+ENUM
+  BFD_RELOC_CRIS_32_GOTPLT
+ENUMDOC
+  32-bit offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_CRIS_16_GOTPLT
+ENUMDOC
+  16-bit offset to symbol-entry within GOT, with PLT handling.
+ENUM
+  BFD_RELOC_CRIS_32_GOTREL
+ENUMDOC
+  32-bit offset to symbol, relative to GOT.
+ENUM
+  BFD_RELOC_CRIS_32_PLT_GOTREL
+ENUMDOC
+  32-bit offset to symbol with PLT entry, relative to GOT.
+ENUM
+  BFD_RELOC_CRIS_32_PLT_PCREL
+ENUMDOC
+  32-bit offset to symbol with PLT entry, relative to this relocation.
 
 ENUM
   BFD_RELOC_860_COPY
