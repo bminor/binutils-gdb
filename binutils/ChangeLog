@@ -1,3 +1,12 @@
+Tue Nov  9 15:22:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (i386_mangle_relocs): Adjust reloc address by
+	section output_offset.
+
+Fri Nov  5 12:11:52 1993  Jeffrey Osier  (jeffrey@thepub.cygnus.com)
+
+	* binutils.texi:  added nlmconv chapter
+
 Wed Nov  3 16:10:50 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* Makefile.in: Change RUNTESTFLAGS to RUNTEST_FLAGS
