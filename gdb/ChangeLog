@@ -11,8 +11,8 @@ Tue Apr 11 13:46:25 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 	Document it better.
 	* utils.c (warning): Use it.
 	* utils.c (error_begin): Doc fix.
-	* rs6000-nat.c (vmap_ldinfo): If symfile_objfile is not part of
-	any vmap, nuke it.
+	* rs6000-nat.c (vmap_ldinfo): If we don't find ldinfo for the
+	symfile_objfile, nuke it.
 
 Tue Apr 11 09:35:20 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 

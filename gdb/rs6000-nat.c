@@ -465,8 +465,9 @@ vmap_ldinfo (ldi)
 {
   struct stat ii, vi;
   register struct vmap *vp;
-  register got_one, retried;
+  int got_one, retried;
   CORE_ADDR ostart;
+  int got_exec_file;
 
   /* For each *ldi, see if we have a corresponding *vp.
      If so, update the mapping, and symbol table.
@@ -530,6 +531,10 @@ vmap_ldinfo (ldi)
 	    vp->tend   += vp->tadj;
 	  }
 
+	/* The objfile is only NULL for the exec file.  */
+	if (vp->objfile == NULL)
+	  got_exec_file = 1;
+
 	/* relocate symbol table(s). */
 	vmap_symtab (vp);
 
@@ -550,15 +555,7 @@ vmap_ldinfo (ldi)
      is unlikely that the symbol file is relocated to the proper
      address.  And we might have attached to a process which is
      running a different copy of the same executable.  */
-  for (got_one = 0, vp = vmap; vp != NULL; vp = vp->nxt)
-    {
-      if (symfile_objfile == vp->objfile)
-	{
-	  got_one = 1;
-	  break;
-	}
-    }
-  if (symfile_objfile != NULL && !got_one)
+  if (symfile_objfile != NULL && !got_exec_file)
     {
       warning_begin ();
       fputs_unfiltered ("Symbol file ", gdb_stderr);
