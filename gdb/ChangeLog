@@ -1,3 +1,11 @@
+2000-02-08  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* configure.in: Remove the addition of sol-thread.c to the
+	CONFIG_INITS list. This caused problems with init.c, because
+	sol-thread.c would be grepped twice for _initialize_* functions.
+	* configure: Ditto.
+	* Makefile.in: Add FIXME for init.c.
+
 2000-02-07  Jim Kingdon  <kingdon@redhat.com>
 
 	Clean up compiler warnings:

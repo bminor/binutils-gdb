@@ -321,7 +321,6 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          AC_DEFINE(HAVE_THREAD_DB_LIB)
          CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
-	 CONFIG_INITS="${CONFIG_INITS} sol-thread.c"
          AC_CHECK_LIB(dl, dlopen)
          if test "$GCC" = "yes" ; then
             # The GNU linker requires the -export-dynamic option to make

@@ -687,6 +687,13 @@ uninstall: force
 # Note that the set of files with init functions might change, or the names
 # of the functions might change, so this files needs to depend on all the
 # object files that will be linked into gdb.
+#
+# FIXME: There are 2 problems with this approach. First, if the INIT_FILES
+# list includes a file twice (because of some mistake somewhere else) 
+# the _initialize_* function will be included twice in init.c. Second, 
+# init.c may force unnecessary files to be linked in. Like for instance 
+# tui-file.c.
+#
 
 INIT_FILES = $(OBS) $(TSOBS) $(SUBDIR_INIT_FILES) @CONFIG_INITS@
 init.c: $(INIT_FILES)
