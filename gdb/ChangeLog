@@ -1,3 +1,7 @@
+2004-04-13  David Carlton  <carlton@kealia.com>
+
+	* MAINTAINERS: Move myself to "paper trail" section.
+
 2004-04-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* vax-tdep.c: Include "frame-base.h", "frame-unwind.h" and

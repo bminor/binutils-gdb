@@ -252,7 +252,7 @@ testsuite		(Global Maintainers)
   config                Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
-			David Carlton		carlton@kealia.com
+			David Carlton		carlton@bactrian.org
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   stabs (gdb.stabs)     Elena Zannoni           ezannoni@redhat.com
@@ -317,7 +317,7 @@ Dave Brolley					brolley@redhat.com
 Paul Brook					paul@codesourcery.com
 Kevin Buettner					kevinb@redhat.com
 Andrew Cagney					ac131313@redhat.com
-David Carlton					carlton@kealia.com
+David Carlton					carlton@bactrian.org
 Stephane Carrez					stcarrez@nerim.fr
 Michael Chastain				mec.gnu@mindspring.com
 Randolph Chung					tausq@debian.org
@@ -431,6 +431,7 @@ Folks that have been caught up in a paper trail:
 
 Chris Faylor					cgf@alum.bu.edu
 Jim Kingdon					jkingdon@engr.sgi.com
+David Carlton					carlton@bactrian.org
 
 --
 
