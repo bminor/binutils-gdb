@@ -22,7 +22,6 @@
 #include "frame.h"
 #include "inferior.h"
 #include "command.h"
-#include "signals.h"
 #include "serial.h"
 #include "terminal.h"
 #include "target.h"

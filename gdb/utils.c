@@ -40,7 +40,7 @@
 #undef reg
 #endif
 
-#include "signals.h"
+#include <signal.h>
 #include "gdbcmd.h"
 #include "serial.h"
 #include "bfd.h"

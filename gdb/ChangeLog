@@ -1,3 +1,16 @@
+2001-02-05  J.T. Conklin  <jtc@redback.com>
+
+	* signals.h: Removed.
+	* event-top.c (#include <signal.h>): Changed from signals.h.
+	* inflow.c: Likewise.
+	* mac-xdep.c: Likewise.
+	* ser-pipe.c: Likewise.
+	* ser-tcp.c: Likewise.
+	* standalone.c: Likewise.
+	* top.c: Likewise.
+	* utils.c: Likewise.
+	* Makefile.in: Removed signals.h from dependencies.
+
 2001-02-05  Christopher Faylor  <cgf@cygnus.com>
 
 	Change suggested by Dean Luick <luick@cray.com>

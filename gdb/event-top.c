@@ -24,9 +24,9 @@
 #include "inferior.h"
 #include "target.h"
 #include "terminal.h"		/* for job_control */
-#include "signals.h"
 #include "event-loop.h"
 #include "event-top.h"
+#include <signal.h>
 
 /* For dont_repeat() */
 #include "gdbcmd.h"

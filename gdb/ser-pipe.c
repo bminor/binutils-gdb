@@ -32,7 +32,7 @@
 #include <fcntl.h>
 #include "gdb_string.h"
 
-#include "signals.h"
+#include <signal.h>
 
 static int pipe_open (serial_t scb, const char *name);
 static void pipe_close (serial_t scb);

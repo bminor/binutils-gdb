@@ -616,7 +616,7 @@ cli_utils_h =	$(srcdir)/cli/cli-utils.h
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	dst.h environ.h $(gdbcmd_h) gdbcore.h \
 	gdb-stabs.h hpread.h $(inferior_h) language.h minimon.h monitor.h \
-	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
+	objfiles.h parser-defs.h partial-stab.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h f-lang.h \
 	jv-lang.h \
@@ -1519,7 +1519,7 @@ infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h symfile.h gdb_string.h
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
-	signals.h target.h terminal.h gdbthread.h gdb_string.h
+	target.h terminal.h gdbthread.h gdb_string.h
 
 infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h gdb_wait.h $(command_h)
@@ -1862,13 +1862,13 @@ scm-valprint.o: $(defs_h) $(value_h) parser-defs.h language.h  \
 
 ser-go32.o: ser-go32.c $(defs_h) serial.h 
 
-ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h
+ser-mac.o: ser-mac.c $(defs_h) serial.h 
 
-ser-ocd.o: ser-ocd.c $(defs_h) serial.h signals.h gdb_string.h
+ser-ocd.o: ser-ocd.c $(defs_h) serial.h gdb_string.h
 
-ser-pipe.o: ser-pipe.c $(defs_h) serial.h signals.h gdb_string.h ser-unix.h
+ser-pipe.o: ser-pipe.c $(defs_h) serial.h gdb_string.h ser-unix.h
 
-ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h gdb_string.h ser-unix.h
+ser-tcp.o: ser-tcp.c $(defs_h) serial.h gdb_string.h ser-unix.h
 
 ser-unix.o: ser-unix.c $(defs_h) serial.h ser-unix.h 
 
@@ -1962,7 +1962,7 @@ completer.o: completer.c completer.h $(gdbtypes_h) $(symtab_h) \
 	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
-	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
+	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h \
 	$(remote_utils_h) gdb_string.h $(event_loop_h) $(event_top_h) \
 	completer.h $(version_h)
 
@@ -1977,7 +1977,7 @@ ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
-	language.h signals.h target.h terminal.h $(readline_headers) \
+	language.h target.h terminal.h $(readline_headers) \
 	gdb_string.h $(event_loop_h) $(event_top_h)
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \

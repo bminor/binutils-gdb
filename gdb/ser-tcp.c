@@ -32,7 +32,7 @@
 #include <netinet/tcp.h>
 #endif
 
-#include "signals.h"
+#include <signal.h>
 #include "gdb_string.h"
 
 static int tcp_open (serial_t scb, const char *name);

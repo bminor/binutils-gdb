@@ -30,7 +30,7 @@
 #endif /* SIGTSTP and SIGIO defined (must be 4.2) */
 
 #include "defs.h"
-#include "signals.h"
+#include <signal.h>
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"

@@ -23,7 +23,7 @@
 #include "call-cmds.h"
 #include "symtab.h"
 #include "inferior.h"
-#include "signals.h"
+#include <signal.h>
 #include "target.h"
 #include "breakpoint.h"
 #include "gdbtypes.h"
