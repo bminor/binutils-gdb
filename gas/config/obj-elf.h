@@ -122,6 +122,9 @@ extern void obj_elf_section_change_hook PARAMS ((void));
 extern void obj_elf_section PARAMS ((int));
 extern void obj_elf_previous PARAMS ((int));
 extern void obj_elf_version PARAMS ((int));
+extern void obj_elf_common PARAMS ((int));
+extern void obj_elf_data PARAMS ((int));
+extern void obj_elf_text PARAMS ((int));
 
 /* BFD wants to write the udata field, which is a no-no for the
    globally defined sections.  */
