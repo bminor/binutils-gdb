@@ -514,6 +514,37 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   PTRACE_XFER_TYPE *buffer;
   struct cleanup *old_chain = NULL;
 
+#ifdef PT_IO
+  /* OpenBSD 3.1, NetBSD 1.6 and FreeBSD 5.0 have a new PT_IO request
+     that promises to be much more efficient in reading and writing
+     data in the traced process's address space.  */
+
+  {
+    struct ptrace_io_desc piod;
+
+    /* NOTE: We assume that there are no distinct address spaces for
+       instruction and data.  */
+    piod.piod_op = write ? PIOD_WRITE_D : PIOD_READ_D;
+    piod.piod_offs = (void *) memaddr;
+    piod.piod_addr = myaddr;
+    piod.piod_len = len;
+
+    if (ptrace (PT_IO, PIDGET (inferior_ptid), (caddr_t) &piod, 0) == -1)
+      {
+	/* If the PT_IO request is somehow not supported, fallback on
+           using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
+           to indicate failure.  */
+	if (errno != EINVAL)
+	  return 0;
+      }
+    else
+      {
+	/* Return the actual number of bytes read or written.  */
+	return piod.piod_len;
+      }
+  }
+#endif
+
   /* Allocate buffer of that many longwords.  */
   if (len < GDB_MAX_ALLOCA)
     {

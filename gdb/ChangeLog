@@ -1,5 +1,8 @@
 2002-11-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* infptrace.c (child_xfer_memory): Make use of the new PT_IO
+	request that's available in *BSD.
+
 	* i386-tdep.h (IS_FPU_CTRL_REGNUM): Remove.
 
 	* i387-tdep.c (i387_fill_fxsave): Use FOOFF_REGNUM instead of
