@@ -1,3 +1,9 @@
+2000-11-13  Fernando Nasser  <fnasser@redhat.com>
+
+	From Orjan Friberg  <orjanf@axis.com>:
+	* gdb.base/printcmds.exp: Escape curly braces followed by a number
+	in array print pattern match.
+
 2000-11-09  Fernando Nasser  <fnasser@redhat.com>
 
 	* gdb.c++/templates.exp (test_template_breakpoints): Change Britsh
