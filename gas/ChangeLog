@@ -5,6 +5,8 @@ Fri Feb 21 10:08:25 1997  Jim Wilson  <wilson@cygnus.com>
 
 Fri Feb 21 11:55:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (line_comment_chars): Add '*'.
+
 	* app.c (LEX_IS_TWOCHAR_COMMENT_2ND): Don't define.
 	(do_scrub_begin): Don't set lex['*'].
 	(do_scrub_chars): When handling LEX_IS_TWOCHAR_COMMENT_1ST, don't
