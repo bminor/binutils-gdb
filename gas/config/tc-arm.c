@@ -10339,7 +10339,7 @@ tc_gen_reloc (section, fixp)
     }
 
 #ifdef OBJ_ELF
-  if (code == BFD_RELOC_32_PCREL
+  if ((code == BFD_RELOC_32_PCREL || code == BFD_RELOC_32)
       && GOT_symbol
       && fixp->fx_addsy == GOT_symbol)
     {

@@ -1,3 +1,8 @@
+2002-10-23  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (tc_gen_reloc): Allow an absolute reference to
+	_GLOBAL_TABLE_OFFSET_ to be converted into a GOT reloc.
+
 2002-10-23  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.h (mmix_frob_file_before_adjust): Don't declare.
