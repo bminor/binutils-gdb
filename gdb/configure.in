@@ -248,6 +248,21 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
                CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Wl,-export-dynamic"
             fi
          fi
+	 # Sun randomly tweaked the prototypes in <proc_service.h>
+	 # at one point.
+	 AC_MSG_CHECKING(if <proc_service.h> is old)
+	 AC_CACHE_VAL(gdb_cv_proc_service_is_old,[
+	    AC_TRY_COMPILE([
+		#include <proc_service.h>
+		ps_err_e ps_pdwrite
+		    (struct ps_prochandle*, psaddr_t, const void*, size_t);
+	    ],, gdb_cv_proc_service_is_old=no,
+	        gdb_cv_proc_service_is_old=yes)
+	 ])
+	 AC_MSG_RESULT($gdb_cv_proc_service_is_old)
+	 if test $gdb_cv_proc_service_is_old = yes; then
+	    AC_DEFINE(PROC_SERVICE_IS_OLD)
+	 fi
       else
          AC_MSG_RESULT(no)
       fi

@@ -956,27 +956,33 @@ sol_thread_stop ()
 /* These routines implement the lower half of the thread_db interface.  Ie: the
    ps_* routines.  */
 
-/* Old versions of proc_service.h (1.3 94/10/27) have
-   prototypes that look like
-     (const struct ps_prochandle *, ...)
-   while newer versions use
-     (struct ps_prochandle *, ...)
-   and other such minor variations.
+/* Various versions of <proc_service.h> have slightly
+   different function prototypes.  In particular, we have
 
-   Someday, we might need to discover this in configure.in,
-   but the #ifdef below seems to be sufficient for now. */
+      NEWER		    	OLDER
+      struct ps_prochandle *  	const struct ps_prochandle *
+      void*			char*
+      const void*		char*
+      int			size_t
 
-#ifdef PS_OBJ_EXEC
-typedef struct ps_prochandle* gdb_ps_prochandle_t;
-typedef void* gdb_ps_read_buf_t;
-typedef const void* gdb_ps_write_buf_t;
-typedef size_t gdb_ps_size_t;
-#else
-typedef const struct ps_prochandle* gdb_ps_prochandle_t;
-typedef char* gdb_ps_read_buf_t;
-typedef char* gdb_ps_write_buf_t;
+   Which one you have depends on solaris version and what
+   patches you've applied.  On the theory that there are
+   only two major variants, we have configure check the
+   prototype of ps_pdwrite (), and use that info to make
+   appropriate typedefs here. */
+
+#ifdef PROC_SERVICE_IS_OLD
+typedef const struct ps_prochandle * gdb_ps_prochandle_t;
+typedef char * gdb_ps_read_buf_t;
+typedef char * gdb_ps_write_buf_t;
 typedef int gdb_ps_size_t;
+#else
+typedef struct ps_prochandle * gdb_ps_prochandle_t;
+typedef void * gdb_ps_read_buf_t;
+typedef const void * gdb_ps_write_buf_t;
+typedef size_t gdb_ps_size_t;
 #endif
+
 
 /* The next four routines are called by thread_db to tell us to stop and stop
    a particular process or lwp.  Since GDB ensures that these are all stopped

@@ -1,3 +1,11 @@
+Tue Oct 13 18:56:51 1998  Felix Lee  <flee@cygnus.com>
+
+	* sol-thread.c (ps_pstop, etc): simple test for proc_service.h
+ 	version didn't work for sol2.6; pushed it to autoconf.
+	* configure.in (gdb_cv_proc_service_is_old): new test.
+	* acconfig.h (PROC_SERVICE_IS_OLD): new define.
+	* configure, config.in: regenerate.
+	
 1998-10-13  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* blockframe.c (find_pc_sect_partial_function): Add braces to avoid
