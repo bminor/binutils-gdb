@@ -20,17 +20,25 @@ struct host_callback_struct
   int (*unlink) PARAMS ((host_callback *, const char *));
   int (*write) PARAMS ((host_callback *,int, const char *, int));
   int (*write_stdout) PARAMS ((host_callback *, const char *, int));
+  void (*flush_stdout) PARAMS ((host_callback *));
+  int (*write_stderr) PARAMS ((host_callback *, const char *, int));
+  void (*flush_stderr) PARAMS ((host_callback *));
 
   /* Used when the target has gone away, so we can close open
      handles and free memory etc etc.  */
   int (*shutdown) PARAMS ((host_callback *));
   int (*init)     PARAMS ((host_callback *));
 
-  /* Talk to the user on a console.  */
+  /* depreciated, use vprintf_filtered - Talk to the user on a console.  */
   void (*printf_filtered) PARAMS ((host_callback *, const char *, ...));
+
+  /* Talk to the user on a console.  */
+  void (*vprintf_filtered) PARAMS ((host_callback *, const char *, void *));
+
   /* Print an error message and "exit".
      In the case of gdb "exiting" means doing a longjmp back to the main
      command loop.  */
+  void (*evprintf_filtered) PARAMS ((host_callback *, const char *, void *));
   void (*error) PARAMS ((host_callback *, const char *, ...));
 
   int last_errno;		/* host format */
