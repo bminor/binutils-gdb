@@ -677,7 +677,7 @@ print_insn_hppa (memaddr, info)
 		case 'F':
 		  /* if no destination completer and not before a completer
 		     for fcmp, need a space here */
-		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == '?')
+		  if (s[1] == 'G' || s[1] == '?')
 		    fputs_filtered (float_format_names[GET_FIELD (insn, 19, 20)],
 				    info);
 		  else
@@ -701,7 +701,7 @@ print_insn_hppa (memaddr, info)
 		case 'I':
 		  /* if no destination completer and not before a completer
 		     for fcmp, need a space here */
-		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == '?')
+		  if (s[1] == '?')
 		    fputs_filtered (float_format_names[GET_FIELD (insn, 20, 20)],
 				    info);
 		  else
