@@ -1,3 +1,8 @@
+2004-02-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.asm/ia64.inc (gdbasm_startup): Make sure first instruction
+	executed is an alloc instruction.
+
 2004-02-11  David Carlton  <carlton@kealia.com>
 
 	* gdb.cp/breakpoint.exp: New.
