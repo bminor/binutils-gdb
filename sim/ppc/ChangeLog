@@ -1,3 +1,8 @@
+Mon Nov  6 10:39:28 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.{make,hdr}: Delete, no longer used.
+	* build-psim: Ditto.
+
 Mon Nov  6 20:49:56 1995  Andrew Cagney  <cagney@highland.com.au>
 
 	* sim_calls.c (sim_open): Fix parsing of `target sim' options.
