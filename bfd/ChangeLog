@@ -1,3 +1,8 @@
+2002-08-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version, set is_release.
+	* configure: Regenerated.
+
 2002-08-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
