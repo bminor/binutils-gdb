@@ -1,3 +1,9 @@
+2003-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	From Thierry Schneider  <tpschneider1@yahoo.com>:
+	* mi1-symbol.exp (-symbol-list-lines): New test file to
+	validate all symbol-related commands
+
 2003-04-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb792.exp: Skip when C++.
