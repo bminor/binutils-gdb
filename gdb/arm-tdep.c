@@ -184,20 +184,6 @@ struct arm_prologue_cache
 
 int arm_apcs_32 = 1;
 
-/* Flag set by arm_fix_call_dummy that tells whether the target
-   function is a Thumb function.  This flag is checked by
-   arm_push_arguments.  FIXME: Change the PUSH_ARGUMENTS macro (and
-   its use in valops.c) to pass the function address as an additional
-   parameter.  */
-
-static int target_is_thumb;
-
-/* Flag set by arm_fix_call_dummy that tells whether the calling
-   function is a Thumb function.  This flag is checked by
-   arm_pc_is_thumb.  */
-
-static int caller_is_thumb;
-
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  */
 
@@ -220,27 +206,6 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
     {
       return 0;
     }
-}
-
-/* Determine if the program counter specified in MEMADDR is in a call
-   dummy being called from a Thumb function.  */
-
-int
-arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
-{
-  CORE_ADDR sp = read_sp ();
-
-  /* FIXME: Until we switch for the new call dummy macros, this heuristic
-     is the best we can do.  We are trying to determine if the pc is on
-     the stack, which (hopefully) will only happen in a call dummy.
-     We hope the current stack pointer is not so far alway from the dummy
-     frame location (true if we have not pushed large data structures or
-     gone too many levels deep) and that our 1024 is not enough to consider
-     code regions as part of the stack (true for most practical purposes).  */
-  if (deprecated_pc_in_call_dummy (memaddr))
-    return caller_is_thumb;
-  else
-    return 0;
 }
 
 /* Remove useless bits from addresses in a running program.  */
@@ -2016,7 +1981,7 @@ arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (arm_pc_is_thumb (*pcptr) || arm_pc_is_thumb_dummy (*pcptr))
+  if (arm_pc_is_thumb (*pcptr))
     {
       *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
       *lenptr = tdep->thumb_breakpoint_size;
