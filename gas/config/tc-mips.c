@@ -7010,6 +7010,17 @@ mips16_ip (str, ip)
 		  /* Looks like a register name.  */
 		  break;
 		}
+
+	      if (s[0] == '('
+		  && args[1] == '('
+		  && s[1] == '$')
+		{
+		  /* It looks like the expression was omitted before a
+                     register indirection, which means that the
+                     expression is implicitly zero.  */
+		  continue;
+		}
+
 	      my_getExpression (&imm_expr, s);
 	      /* We need to relax this instruction.  */
 	      imm_reloc = (int) BFD_RELOC_UNUSED + c;
