@@ -1,3 +1,8 @@
+2001-04-30  Andreas Jaeger  <aj@suse.de>, Andreas Schwab <schwab@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Correct test for
+	R_X86_64_GOTPCREL, don't use assignments instead of comparisons.
+
 2001-04-27  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_sections): Only swap

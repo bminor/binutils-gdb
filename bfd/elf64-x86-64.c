@@ -1250,11 +1250,10 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if (r_type == R_X86_64_GOTPCREL
-		  || (r_type = R_X86_64_PLT32
-		      && splt != NULL
-		      && h->plt.offset != (bfd_vma) -1)
-		  || (r_type = R_X86_64_GOT32
+	      if ((r_type == R_X86_64_PLT32
+		   && splt != NULL
+		   && h->plt.offset != (bfd_vma) -1)
+		  || ((r_type == R_X86_64_GOT32 || r_type == R_X86_64_GOTPCREL)
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && (!info->shared
 			  || (! info->symbolic && h->dynindx != -1)
@@ -1408,6 +1407,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		relocation = sgot->output_offset + off;
 	    }
+
 	  break;
 
 	case R_X86_64_PLT32:
