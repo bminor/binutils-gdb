@@ -1,3 +1,7 @@
+2000-09-07  Kazu Hirata  <kazu@hxi.com>
+
+	* elf.c: Fix formatting.
+
 2000-09-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config.bfd (sh-*-linux*): Added.
