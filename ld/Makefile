@@ -32,7 +32,7 @@ MANSOURCES=ld.tex
 LDCSOURCES=ldlang.c ldmain.c ldwrite.c ld-lnk960.c ld-gld.c \
 	ld-gld960.c ld-emul.c ldversion.c ldmisc.c ldexp.c ldsym.c ldfile.c
 
-GENERATED_SOURCES=ldgram.tab.c ldlex.c
+GENERATED_SOURCES=ldgram.tab.c ldlex.c ldgram.tab.h y.tab.h
 GENERATED_HEADERS=ldgram.tab.h
 
 LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l
@@ -93,6 +93,7 @@ ldsym.o:ldsym.c
 clean:
 	- rm -f $(OBJS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
 	- rm -f ld ld1 ld2
+
 
 lintlog:$(SOURCES) Makefile
 	$(LINT) -abhxzn  $(CFLAGS)  $(LINTSOURCES) \

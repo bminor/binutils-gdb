@@ -19,7 +19,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ 
  *
  * $Log$
- * Revision 1.2  1991/03/22 23:02:34  steve
+ * Revision 1.3  1991/03/27 00:52:49  steve
+ * *** empty log message ***
+ *
+ * Revision 1.2  1991/03/22  23:02:34  steve
  * Brought up to sync with Intel again.
  *
  * Revision 1.3  1991/03/16  22:19:21  rich
@@ -2156,45 +2159,60 @@ char *memspec;
   current_section->region = lang_memory_region_lookup(memspec);
   stat_ptr = &statement_list;
 }
+/*
+ Create an absolute symbol with the given name with the value of the
+ address of first byte of the section named.
 
+ If the symbol already exists, then do nothing.
+*/
 void
 lang_abs_symbol_at_beginning_of(section, name)
 char *section;
 char *name;
 {
-  extern bfd *output_bfd;
-  extern asymbol *create_symbol();
-  asection *s = bfd_get_section_by_name(output_bfd, section);
-  asymbol *def = create_symbol(name,
-			       BSF_GLOBAL | BSF_EXPORT |
-			       BSF_ABSOLUTE,
-			       (asection *)NULL);
-  if (s != (asection *)NULL) {
-    def->value = s->vma;
-  }
-  else {
-    def->value = 0;
+  if (ldsym_get_soft(name) == (asymbol *)NULL) {
+    extern bfd *output_bfd;
+    extern asymbol *create_symbol();
+    asection *s = bfd_get_section_by_name(output_bfd, section);
+    asymbol *def = create_symbol(name,
+				 BSF_GLOBAL | BSF_EXPORT |
+				 BSF_ABSOLUTE,
+				 (asection *)NULL);
+    if (s != (asection *)NULL) {
+      def->value = s->vma;
+    }
+    else {
+      def->value = 0;
+    }
   }
 }
 
+/*
+ Create an absolute symbol with the given name with the value of the
+ address of the first byte after the end of the section named.
+
+ If the symbol already exists, then do nothing.
+*/
 void
 lang_abs_symbol_at_end_of(section, name)
 char *section;
 char *name;
 {
-  extern bfd *output_bfd;
-  extern asymbol *create_symbol();
-  asection *s = bfd_get_section_by_name(output_bfd, section);
-  /* Add a symbol called _end */
-  asymbol *def = create_symbol(name,
-			       BSF_GLOBAL | BSF_EXPORT |
-			       BSF_ABSOLUTE,
-			       (asection *)NULL);
-  if (s != (asection *)NULL) {
-    def->value = s->vma + s->size;
-  }
-  else {
-    def->value = 0;
+  if (ldsym_get_soft(name) == (asymbol *)NULL) {
+    extern bfd *output_bfd;
+    extern asymbol *create_symbol();
+    asection *s = bfd_get_section_by_name(output_bfd, section);
+    /* Add a symbol called _end */
+    asymbol *def = create_symbol(name,
+				 BSF_GLOBAL | BSF_EXPORT |
+				 BSF_ABSOLUTE,
+				 (asection *)NULL);
+    if (s != (asection *)NULL) {
+      def->value = s->vma + s->size;
+    }
+    else {
+      def->value = 0;
+    }
   }
 }
 
