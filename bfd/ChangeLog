@@ -1,3 +1,11 @@
+2003-04-15  Brian Ford  <ford@vss.fsi.com>
+
+	* peicode.h (coff_swap_scnhdr_in): If a section holds
+	uninitialized data and is from an object file or from an
+	executable image that has not initialized the s_size field, or if
+	the physical size is padded, use the virtual size (stored in
+	s_paddr) instead.
+
 2003-04-15  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Properly report

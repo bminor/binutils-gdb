@@ -256,15 +256,16 @@ coff_swap_scnhdr_in (abfd, ext, in)
     }
 
 #ifndef COFF_NO_HACK_SCNHDR_SIZE
-  /* If this section holds uninitialized data, use the virtual size
-     (stored in s_paddr) instead of the physical size.  */
-  if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
-      && (scnhdr_int->s_paddr > 0))
+  /* If this section holds uninitialized data and is from an object file
+     or from an executable image that has not initialized the field,
+     or if the physical size is padded, use the virtual size (stored in
+     s_paddr) instead.  */
+  if (scnhdr_int->s_paddr > 0
+      && (((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
+          && (! bfd_pe_executable_p (abfd) || scnhdr_int->s_size == 0))
+          || scnhdr_int->s_size > scnhdr_int->s_paddr))
     {
-     /* Always set it for non pe-obj files, and don't overwrite it
-        if it's zero for object files.  */
-     if (! bfd_pe_executable_p (abfd) || !scnhdr_int->s_size)
-       scnhdr_int->s_size = scnhdr_int->s_paddr;
+      scnhdr_int->s_size = scnhdr_int->s_paddr;
 
       /* This code used to set scnhdr_int->s_paddr to 0.  However,
          coff_set_alignment_hook stores s_paddr in virt_size, which
