@@ -1,3 +1,10 @@
+start-sanitize-sky
+Wed Jun  3 11:39:57 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* elf32-mips.c (_bfd_mips_elf_fake_sections): Update to use
+	Elf32_Dvp_External_Overlay instead of 64 bit version.
+
+end-sanitize-sky
 Wed Jun  3 12:18:24 1998  Stan Cox  <scox@equinox.cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Give an
