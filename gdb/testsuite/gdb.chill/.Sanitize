@@ -40,6 +40,8 @@ pr-5022.exp
 pr-5646.ch
 pr-5646-grt.ch
 pr-5646.exp
+pr-6292.ch
+pr-6292.exp
 result.ch
 result.exp
 tuples.ch

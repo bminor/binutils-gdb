@@ -103,7 +103,8 @@ GDBFLAGS = -nx
 #### host, target, and site specific Makefile frags come in here.
 
 EXECUTABLES = chillvars.exe result.exe tuples.exe \
-  pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe pr-5984.exe
+  pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe pr-5984.exe \
+  pr-6292.exe
 
 all:	$(EXECUTABLES)
 
