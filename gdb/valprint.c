@@ -728,10 +728,6 @@ val_print_string (addr, len, stream)
   struct cleanup *old_chain = NULL; /* Top of the old cleanup chain. */
   char peekchar;		/* Place into which we can read one char. */
 
-  /* If errcode is non-zero, this is the address which failed to read
-     successfully.  */
-  CORE_ADDR err_addr;
-
   /* First we need to figure out the limit on the number of characters we are
      going to attempt to fetch and print.  This is actually pretty simple.  If
      LEN is nonzero, then the limit is the minimum of LEN and print_max.  If
@@ -777,7 +773,6 @@ val_print_string (addr, len, stream)
 
     /* Read as much as we can. */
     nfetch = target_read_memory_partial (addr, bufptr, nfetch, &errcode);
-    err_addr = addr + nfetch;
     if (len != 0)
       {
 	addr += nfetch;
