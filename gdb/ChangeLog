@@ -1,11 +1,13 @@
 2004-03-07  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): Add missing "break".
+
 	* config/pa/tm-hppa.h (DEPRECATED_DO_REGISTERS_INFO)
 	(pa_do_registers_info): Delete.
 	* hppa-tdep.c (pa_do_registers_info, pa_do_strcat_registers_info)
 	(pa_print_registers, pa_print_fp_reg, pa_strcat_registers) 
 	(pa_strcat_fp_reg, pa_register_look_aside): Delete.
-	
+
 	* infcall.c (legacy_push_dummy_code): Delete #ifdef
 	GDB_TARGET_IS_HPPA code.
 	* config/pa/tm-hppa.h (DEPRECATED_FIX_CALL_DUMMY)

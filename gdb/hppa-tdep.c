@@ -3363,6 +3363,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case 8:
       set_gdbarch_return_value (gdbarch, hppa64_return_value);
+      break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
