@@ -4,6 +4,9 @@ Thu Jan 30 23:51:07 1992  John Gilmore  (gnu at cygnus.com)
 	* aout-target.h:  Use TARGET_BIG_ENDIAN_P to set up vector.
 	* host-aout.c:  Don't use aout-params.h; configure these systems
 	in their xm files, not in a randomly generated file.
+	* hosts/h-hp300bsd.h, h-tahoe.h, h-vaxbsd.h, h-vaxult.h:
+	Specify byte order.
+	* hosts/h-vaxbsd.h:  Define the form of exec and core files.
 
 Thu Jan 30 13:02:41 1992  Per Bothner  (bothner at cygnus.com)
 

@@ -12,6 +12,17 @@
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 
+#undef	ALIGN			/* They use it, we use it too */
+#include <machine/param.h>
+#undef	ALIGN			/* They use it, we use it too */
+
+#define	HOST_PAGE_SIZE		NBPG
+#define	HOST_MACHINE_ARCH	bfd_arch_vax
+
+#define	HOST_TEXT_START_ADDR	0
+#define	HOST_STACK_END_ADDR	KERNBASE
+#undef	HOST_BIG_ENDIAN_P
+
 /* EXACT TYPES */
 typedef char int8e_type;
 typedef unsigned char uint8e_type;
@@ -27,18 +38,4 @@ typedef short int16_type;
 typedef unsigned short uint16_type;
 typedef int int32_type;
 typedef unsigned int uint32_type;
-/* Macros for the 'type' part of an fopen, freopen or fdopen. 
-	<Read|Write>[Update]<Binary file><text file>
- */
-#define FOPEN_RB	"r"
-#define FOPEN_WB 	"w"
-#define FOPEN_AB 	"a"
-#define FOPEN_RUB 	"r+"
-#define FOPEN_WUB 	"w+"
-#define FOPEN_AUB 	"a+"
-#define FOPEN_RT	"r"
-#define FOPEN_WT 	"w"
-#define FOPEN_AT 	"a"
-#define FOPEN_RUT 	"r+"
-#define FOPEN_WUT 	"w+"
-#define FOPEN_AUT 	"a+"
+#include "fopen-same.h"
