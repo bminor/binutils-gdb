@@ -1,3 +1,8 @@
+2003-11-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-unwind.exp: Don't use runto_main.  Change
+	"continue" into "run".
+
 2003-11-23  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Partial fix for PR testsuite/1456.
