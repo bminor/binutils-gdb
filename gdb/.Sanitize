@@ -183,6 +183,8 @@ gdbcore.h
 gdbserver
 gdbtypes.c
 gdbtypes.h
+gnu-regex.c
+gnu-regex.h
 go32-xdep.c
 gould-tdep.c
 gould-xdep.c
@@ -266,8 +268,6 @@ procfs.c
 ptx4-nat.c
 pyr-tdep.c
 pyr-xdep.c
-regex.c
-regex.h
 remote-adapt.c
 remote-array.c
 remote-bug.c
