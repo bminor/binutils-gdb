@@ -1,5 +1,10 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* valprint.c (strcat_longest): Delete commented out function.
+	Update copyright.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Mark a29k as deleted.
 	* NEWS: Mention that a29k was removed.  Add OBSOLETE section.
 	Move new configurations to the top.

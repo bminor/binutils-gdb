@@ -1,7 +1,8 @@
 /* Print values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -413,109 +414,6 @@ print_longest (struct ui_file *stream, int format, int use_local,
     }
 #endif /* CC_HAS_LONG_LONG || PRINTF_HAS_LONG_LONG */
 }
-
-#if 0
-void
-strcat_longest (int format, int use_local, LONGEST val_long, char *buf,
-		int buflen)
-{
-/* FIXME: Use buflen to avoid buffer overflow.  */
-#if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
-  long vtop, vbot;
-
-  vtop = val_long >> (sizeof (long) * HOST_CHAR_BIT);
-  vbot = (long) val_long;
-
-  if ((format == 'd' && (val_long < INT_MIN || val_long > INT_MAX))
-      || ((format == 'u' || format == 'x') && (unsigned long long) val_long > UINT_MAX))
-    {
-      sprintf (buf, "0x%lx%08lx", vtop, vbot);
-      return;
-    }
-#endif
-
-#ifdef PRINTF_HAS_LONG_LONG
-  switch (format)
-    {
-    case 'd':
-      sprintf (buf,
-	       (use_local ? local_decimal_format_custom ("ll") : "%lld"),
-	       val_long);
-      break;
-    case 'u':
-      sprintf (buf, "%llu", val_long);
-      break;
-    case 'x':
-      sprintf (buf,
-	       (use_local ? local_hex_format_custom ("ll") : "%llx"),
-
-	       val_long);
-      break;
-    case 'o':
-      sprintf (buf,
-	       (use_local ? local_octal_format_custom ("ll") : "%llo"),
-	       val_long);
-      break;
-    case 'b':
-      sprintf (buf, local_hex_format_custom ("02ll"), val_long);
-      break;
-    case 'h':
-      sprintf (buf, local_hex_format_custom ("04ll"), val_long);
-      break;
-    case 'w':
-      sprintf (buf, local_hex_format_custom ("08ll"), val_long);
-      break;
-    case 'g':
-      sprintf (buf, local_hex_format_custom ("016ll"), val_long);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
-    }
-#else /* !PRINTF_HAS_LONG_LONG */
-  /* In the following it is important to coerce (val_long) to a long. It does
-     nothing if !LONG_LONG, but it will chop off the top half (which we know
-     we can ignore) if the host supports long longs.  */
-
-  switch (format)
-    {
-    case 'd':
-      sprintf (buf, (use_local ? local_decimal_format_custom ("l") : "%ld"),
-	       ((long) val_long));
-      break;
-    case 'u':
-      sprintf (buf, "%lu", ((unsigned long) val_long));
-      break;
-    case 'x':
-      sprintf (buf, (use_local ? local_hex_format_custom ("l") : "%lx"),
-	       ((long) val_long));
-      break;
-    case 'o':
-      sprintf (buf, (use_local ? local_octal_format_custom ("l") : "%lo"),
-	       ((long) val_long));
-      break;
-    case 'b':
-      sprintf (buf, local_hex_format_custom ("02l"),
-	       ((long) val_long));
-      break;
-    case 'h':
-      sprintf (buf, local_hex_format_custom ("04l"),
-	       ((long) val_long));
-      break;
-    case 'w':
-      sprintf (buf, local_hex_format_custom ("08l"),
-	       ((long) val_long));
-      break;
-    case 'g':
-      sprintf (buf, local_hex_format_custom ("016l"),
-	       ((long) val_long));
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
-    }
-
-#endif /* !PRINTF_HAS_LONG_LONG */
-}
-#endif
 
 /* This used to be a macro, but I don't think it is called often enough
    to merit such treatment.  */
