@@ -1,3 +1,9 @@
+start-sanitize-tic80
+Fri Dec 27 22:23:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h: New file.
+
+end-sanitize-tic80
 Wed Dec 18 10:06:31 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200.h (MN10200_OPERAND_NOCHECK): Define.
@@ -6,7 +12,9 @@ Sat Dec 14 10:48:31 1996  Fred Fish  <fnf@ninemoons.com>
 
 	* mn10200.h: Fix comment, mn10200_operand not powerpc_operand.
 	* mn10300.h: Fix comment, mn10300_operand not powerpc_operand.
+start-sanitize-v850
 	* v850.h: Fix comment, v850_operand not powerpc_operand.
+end-sanitize-v850
 	
 Mon Dec  9 16:45:39 1996  Jeffrey A Law  (law@cygnus.com)
 
