@@ -1461,6 +1461,31 @@ md_assemble (line)
 	    }
       }
 
+    if (i.disp_operands)
+      {
+	/* Try to use the smallest displacement type too.  */
+	int op;
+
+	for (op = i.operands; --op >= 0; )
+	  if ((i.types[op] & Disp)
+	      && i.op[op].imms->X_op == O_constant)
+	    {
+	      offsetT disp = i.op[op].disps->X_add_number;
+
+	      if (i.types[op] & Disp16)
+		{
+		  /* We know this operand is at most 16 bits, so
+		     convert to a signed 16 bit number before trying
+		     to see whether it will fit in an even smaller
+		     size.  */
+		  
+		  disp = (((disp & 0xffff) ^ 0x8000) - 0x8000);
+		}
+	      if (fits_in_signed_byte (disp))
+		i.types[op] |= Disp8;
+	    }
+      }
+
     overlap0 = 0;
     overlap1 = 0;
     overlap2 = 0;
@@ -2920,28 +2945,15 @@ i386_displacement (disp_start, disp_end)
       exp->X_op_symbol = (symbolS *) 0;
     }
 
-  if (exp->X_op == O_constant)
-    {
-      if (i.types[this_operand] & Disp16)
-	{
-	  /* We know this operand is at most 16 bits, so convert to a
-	     signed 16 bit number before trying to see whether it will
-	     fit in an even smaller size.  */
-	  exp->X_add_number =
-	    (((exp->X_add_number & 0xffff) ^ 0x8000) - 0x8000);
-	}
-      if (fits_in_signed_byte (exp->X_add_number))
-	i.types[this_operand] |= Disp8;
-    }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  else if (
+  if (exp->X_op != O_constant
 #ifdef BFD_ASSEMBLER
-	   OUTPUT_FLAVOR == bfd_target_aout_flavour &&
+      && OUTPUT_FLAVOR == bfd_target_aout_flavour
 #endif
-	   exp_seg != text_section
-	   && exp_seg != data_section
-	   && exp_seg != bss_section
-	   && exp_seg != undefined_section)
+      && exp_seg != text_section
+      && exp_seg != data_section
+      && exp_seg != bss_section
+      && exp_seg != undefined_section)
     {
 #ifdef BFD_ASSEMBLER
       as_bad (_("unimplemented segment %s in operand"), exp_seg->name);

@@ -1,3 +1,11 @@
+2000-06-22  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (i386_displacement): Don't assume a constant
+	displacement is necessarily 16 bits when in 16 bit code mode.
+	(md_assemble): Instead size the displacement here after we know
+	for sure that a .code16gcc operand hasn't automatically added
+	operand size prefixes.
+
 2000-06-21  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am: Rebuild dependency.
