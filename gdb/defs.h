@@ -758,6 +758,8 @@ extern void free ();
 #undef TARGET_BYTE_ORDER
 #define TARGET_BYTE_ORDER target_byte_order
 extern int target_byte_order;
+/* Nonzero when target_byte_order auto-detected */
+extern int target_byte_order_auto;
 #endif
 
 extern void set_endian_from_file PARAMS ((bfd *));
@@ -1004,7 +1006,7 @@ struct target_waitstatus;
 struct cmd_list_element;
 #endif
 
-extern void (*init_ui_hook) PARAMS ((void));
+extern void (*init_ui_hook) PARAMS ((char *argv0));
 extern void (*command_loop_hook) PARAMS ((void));
 extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,
 					      FILE *stream));

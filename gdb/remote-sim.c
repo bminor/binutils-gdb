@@ -506,16 +506,31 @@ gdbsim_open (args, from_tty)
 
   len = 7 + 1 + (args ? strlen (args) : 0) + 50;
   arg_buf = (char *) alloca (len);
-  sprintf (arg_buf, "gdbsim%s%s",
-	   args ? " " : "", args ? args : "");
+  strcpy (arg_buf, "gdbsim"); /* 7 */
+  /* Specify the byte order for the target when it is both selectable
+     and explicitly specified by the user (not auto detected). */
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
-  /* Since GDB always closes the target and updates byte-order when
-     opening a new file, TARGET_BYTE_ORDER is normally correct. */
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-    strcat (arg_buf, " -E big");
-  else
-    strcat (arg_buf, " -E little");
+  if (!target_byte_order_auto)
+    {
+      switch (TARGET_BYTE_ORDER)
+	{
+	case BIG_ENDIAN:
+	  strcat (arg_buf, " -E big");
+	  break;
+	case LITTLE_ENDIAN:
+	  strcat (arg_buf, " -E little");
+	  break;
+	default:
+	  fatal ("Value of TARGET_BYTE_ORDER unknown");
+	}
+    }
 #endif
+  /* finally, any explicit args */
+  if (args)
+    {
+      strcat (arg_buf, " "); /* 1 */
+      strcat (arg_buf, args);
+    }
   argv = buildargv (arg_buf);
   if (argv == NULL)
     error ("Insufficient memory available to allocate simulator arg list.");

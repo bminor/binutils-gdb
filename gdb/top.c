@@ -3126,7 +3126,7 @@ dont_repeat_command (ignored, from_tty)
 #define TARGET_BYTE_ORDER_DEFAULT BIG_ENDIAN
 #endif
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
-static int target_byte_order_auto = 1;
+int target_byte_order_auto = 1;
 #else
 static int target_byte_order_auto = 0;
 #endif
