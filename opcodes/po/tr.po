@@ -24,7 +24,7 @@ msgstr "atlama iþareti hizalý deðil"
 
 #: arc-dis.c:52
 msgid "Illegal limm reference in last instruction!\n"
-msgstr "Son yönergede geçersiz limm referansý!\n"
+msgstr "Son iþlemde geçersiz limm referansý!\n"
 
 #: arm-dis.c:489
 msgid "<illegal precision>"
@@ -102,7 +102,7 @@ msgstr "Ayrýþtýrma esnasýnda bilinmeyen alan %d bulundu.\n"
 #: fr30-asm.c:369 fr30-asm.c:373 fr30-asm.c:449 m32r-asm.c:377 m32r-asm.c:381
 #: m32r-asm.c:457
 msgid "unrecognized instruction"
-msgstr "bilinmeyen yönerge"
+msgstr "bilinmeyen iþlem"
 
 #: fr30-asm.c:415 m32r-asm.c:423
 #, c-format
@@ -116,12 +116,12 @@ msgstr "Satýr sonu bozuk "
 #: fr30-asm.c:551 m32r-asm.c:559
 #, c-format
 msgid "bad instruction `%.50s...'"
-msgstr "geçersiz yönerge `%.50s...'"
+msgstr "geçersiz iþlem `%.50s...'"
 
 #: fr30-asm.c:554 m32r-asm.c:562
 #, c-format
 msgid "bad instruction `%.50s'"
-msgstr "geçersiz yönerge `%.50s'"
+msgstr "geçersiz iþlem `%.50s'"
 
 #. Default text to print if an instruction isn't recognized.
 #: fr30-dis.c:39 m32r-dis.c:39

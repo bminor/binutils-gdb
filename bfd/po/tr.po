@@ -511,12 +511,12 @@ msgstr "\n      Tür: %s"
 #: elf32-arm.h:1179
 #, c-format
 msgid "%s: Warning: Arm BLX instruction targets Arm function '%s'."
-msgstr "%s: Uyarý: Arm BLX yönergesi Arm fonksiyonu '%s' hedefliyor."
+msgstr "%s: Uyarý: Arm BLX iþlemi Arm iþlevi '%s' hedefliyor."
 
 #: elf32-arm.h:1375
 #, c-format
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
-msgstr "%s: Uyarý: Thumb BLX yönergesi thumb fonksiyonu '%s'ý hedefliyor."
+msgstr "%s: Uyarý: Thumb BLX iþlemi thumb iþlevi '%s'ý hedefliyor."
 
 #: elf-hppa.h:1369 elf-hppa.h:1402 elf32-arm.h:1853 elf32-i386.c:1428
 #: elf32-ppc.c:3096 elf32-sh.c:2997 elf64-x86-64.c:271
@@ -773,7 +773,7 @@ msgstr "%1$s: Bir %3$s yer deðiþiminin hedefi (%2$s) yanlýþ bölümde (%4$s)"
 #: elf32-m32r.c:2010
 #, c-format
 msgid "%s: Instruction set mismatch with previous modules"
-msgstr "%s: Önceki modüllerle yönerge uyuþmazlýðý"
+msgstr "%s: Önceki modüllerle iþlem uyuþmazlýðý"
 
 #: elf32-m32r.c:2033
 #, c-format
@@ -782,11 +782,11 @@ msgstr "özel bayraklar = %lx"
 
 #: elf32-m32r.c:2038
 msgid ": m32r instructions"
-msgstr ": m32r yönergeleri"
+msgstr ": m32r iþlemleri"
 
 #: elf32-m32r.c:2039
 msgid ": m32rx instructions"
-msgstr ": m32rx yönergeleri"
+msgstr ": m32rx iþlemleri"
 
 #: elf32-m68k.c:433
 msgid " [cpu32]"
@@ -1096,7 +1096,7 @@ msgstr "v850ea platformu"
 
 #: elf64-alpha.c:951
 msgid "GPDISP relocation did not find ldah and lda instructions"
-msgstr "GPDISP yerdeðiþimi ldah ve lda yönergelerini bulamadý"
+msgstr "GPDISP yerdeðiþimi ldah ve lda iþlemlerini bulamadý"
 
 #: elf64-alpha.c:3014
 #, c-format

@@ -2989,7 +2989,7 @@ msgstr "  Giriþ Uzunluðu:              %d\n"
 #: readelf.c:5080
 #, c-format
 msgid "  Minimum Instruction Length:  %d\n"
-msgstr "  Minimum Yönerge Uzunluðu:    %d\n"
+msgstr "  Minimum Ýþlem Uzunluðu:    %d\n"
 
 #: readelf.c:5081
 #, c-format
@@ -3097,7 +3097,7 @@ msgstr "  PC'yi 0x%2$lx'e kadar %1$d ilerletir\n"
 #: readelf.c:5227
 #, c-format
 msgid "  Advance PC by fixed size amount %d to 0x%lx\n"
-msgstr "  PC'yi 0x%2$lx'e kadar %d ilerletir\n"
+msgstr "  PC'yi 0x%2$lx'e kadar %1$d ilerletir\n"
 
 #: readelf.c:5235
 #, c-format
