@@ -15,6 +15,7 @@
 #		.data section.
 #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
 #		.bss section besides __bss_start.
+#	EMBEDDED - whether this is for an embedded system. 
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -28,6 +29,13 @@ if [ -z "$ENTRY" ]; then
   mips*-*-irix5*) ENTRY=__start ;;
   *) ENTRY=_start ;;
   esac
+fi
+
+# if this is for an embedded system, don't add SIZEOF_HEADERS.
+if [ -z "$EMBEDDED" ]; then
+   test -z ${TEXT_BASE_ADDRESS} && TEXT_BASE_ADDRESS="${TEXT_START_ADDR} + SIZEOF_HEADERS"
+else
+   test -z ${TEXT_BASE_ADDRESS} && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}"
 fi
 
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
@@ -51,7 +59,7 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
-  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
+  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_BASE_ADDRESS};}}
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR} + SIZEOF_HEADERS;}}
   ${CREATE_SHLIB-${INTERP}}
   .reginfo     ${RELOCATING-0} : { *(.reginfo) }

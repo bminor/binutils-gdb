@@ -1,3 +1,11 @@
+Thu May  9 08:52:23 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* emulparams/{elf32bmip.sh,elf32lmip.sh,mipsidt.sh,mipsidtl.sh}:
+	Set a new variable to signify if the final target is an embedded
+	system. 
+	* scripttempl/{mips.sc,elfmips.sc}: Don't add SIZEOF_HEADERS to
+	.text for an embedded system.
+
 Tue May  7 10:56:11 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* scripttempl/pe.em (gld${EMULATION_NAME}_place_orphan): New function.
