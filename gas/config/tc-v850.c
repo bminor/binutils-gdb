@@ -1647,6 +1647,7 @@ md_assemble (str)
 		}
 	      else
 		{
+/* start-sanitize-v850e */
 		  if (reloc == BFD_RELOC_32)
 		    {
 		      if ((operand->flags & V850E_IMMEDIATE32) == 0)
@@ -1660,6 +1661,7 @@ md_assemble (str)
 		      extra_data            = ex.X_add_number;
 		      ex.X_add_number       = 0;
 		    }
+/* end-sanitize-v850e */
 		      
 		  if (fc > MAX_INSN_FIXUPS)
 		    as_fatal ("too many fixups");
