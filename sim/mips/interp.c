@@ -44,6 +44,7 @@ code on the hardware.
 #include "sky-vpe.h"
 #include "sky-libvpe.h"
 #include "sky-pke.h"
+#include "sky-gpuif.h"
 #include "idecode.h"
 #include "support.h"
 #undef SD
@@ -189,6 +190,9 @@ enum {
 #ifdef SKY_FUNIT
   ,OPTION_FLOAT_TYPE
 #endif
+  ,OPTION_GS_ENABLE
+  ,OPTION_GS_REFRESH1
+  ,OPTION_GS_REFRESH2
 #endif
 /* end-sanitize-sky */
 };
@@ -273,6 +277,45 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
       /*printf ("float-type=0x%08x\n", STATE_FP_TYPE_OPT (sd));*/
       return SIM_RC_OK;
 #endif
+
+    case OPTION_GS_ENABLE:
+      /* Enable GS libraries.  */
+      if ( arg && strcmp (arg, "on") == 0 )
+        gif_options (&gif_full,GIF_OPT_GS_ENABLE,1,0,0);
+      else if ( arg && strcmp (arg, "off") == 0 )
+        gif_options (&gif_full,GIF_OPT_GS_ENABLE,0,0,0);
+      else
+        {
+          fprintf (stderr, "Unrecognized enable-gs option `%s'\n", arg);
+          return SIM_RC_FAIL;
+        }
+      return SIM_RC_OK;
+
+    case OPTION_GS_REFRESH1:
+    case OPTION_GS_REFRESH2:
+      {
+        /* The GS has defineable register and register values.  */     
+        unsigned_4 address[2];
+        long long value[2];
+        char c[3];
+       
+        if ( arg && strlen (arg) == 59 && arg[10] == '=' &&
+             arg[29] == ':' &&  arg[40] == '=' &&
+             ( sscanf (arg,"%lx%c%Lx%c%lx%c%Lx", &address[0],&c[0],&value[0],
+                      &c[1],&address[1],&c[2],&value[1]) == 7 ))
+          {
+            gif_options (&gif_full, ( opt == OPTION_GS_REFRESH1 ) ?
+                         GIF_OPT_GS_REFRESH1:GIF_OPT_GS_REFRESH2,
+                         0,&address[0],&value[0]);
+          }
+        else
+          {
+            fprintf (stderr, "Unrecognized gs-refresh option `%s'\n", arg);
+            return SIM_RC_FAIL;
+          }
+      }
+      return SIM_RC_OK;
+   
 #endif
 /* end-sanitize-sky */
     }
@@ -295,6 +338,15 @@ static const OPTION mips_options[] =
       '\0', "host|target", "Use host (fast) or target (accurate) floating point",
       mips_option_handler },
 #endif
+  { {"enable-gs", required_argument, NULL, OPTION_GS_ENABLE},
+     '\0', "on|off", "Enable GS library routines",
+     mips_option_handler },
+  { {"gs-refresh1", required_argument, NULL, OPTION_GS_REFRESH1},
+     '\0', "0xaddress0=0xvalue0:0xaddress1=0xvalue1", "GS refresh buffer 1 addresses and values",
+     mips_option_handler },
+  { {"gs-refresh2", required_argument, NULL, OPTION_GS_REFRESH2},
+     '\0', "0xaddress0=0xvalue0:0xaddress1=0xvalue1", "GS refresh buffer 2 addresses and values",
+     mips_option_handler },
 #endif
 /* end-sanitize-sky */
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
