@@ -1,3 +1,11 @@
+2003-10-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* arch-utils.c (deprecated_select_gdbarch_hack): New function.
+	(gdbarch_from_bfd): New function.
+	(set_gdbarch_from_file): Re-implement using gdbarch_from_bfd and
+	deprecated_select_gdbarch_hack.
+	* arch-utils.h (gdbarch_from_bfd): New prototype.
+
 2003-10-27  Andrew Cagney  <cagney@redhat.com>
 
 	* osabi.c (gdbarch_init_osabi): Use info.bfd_arch_info instead of
