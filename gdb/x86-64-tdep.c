@@ -28,6 +28,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
 #include "gdb_assert.h"
@@ -1111,6 +1112,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				  (gdbarch_breakpoint_from_pc_ftype *)
 				  x86_64_breakpoint_from_pc);
 
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 
 /* Amount PC must be decremented by after a breakpoint.  This is often the
    number of bytes in BREAKPOINT but not always.  */
