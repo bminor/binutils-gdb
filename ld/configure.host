@@ -17,7 +17,8 @@ NATIVE_LIB_DIRS=
 case "${host}" in
 
 alpha*-*-linux*)
-  HOSTING_CRT0=/usr/lib/crt1.o
+  HOSTING_CRT0='-dynamic-linker `egrep "ld[^ ]*\.so" \`gcc --print-file-name=specs\` | sed -e "s,.*-dynamic-linker[ 	][ 	]*\(.*/ld[^ ]*.so..\).*,\1,"` `gcc --print-file-name=crt1.o` `gcc --print-file-name=crti.o` `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else gcc --print-file-name=crtbegin.o; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -L`dirname \`gcc --print-file-name=libc.so\`` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else gcc --print-file-name=crtend.o; fi` `gcc --print-file-name=crtn.o`'
   ;;
 
 alpha*-*-*)

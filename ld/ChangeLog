@@ -1,3 +1,8 @@
+Mon Feb  2 14:10:59 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Correct HOSTING_CRT0 in alpha*-*-linux* case to
+	accept either ld.so or ld-linux.so.
+
 Fri Jan 30 19:16:28 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.am ({CC,CXX}_FOR_TARGET): Change program_transform_name
