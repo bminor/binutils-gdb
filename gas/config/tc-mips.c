@@ -11026,6 +11026,85 @@ mips_force_relocation (fixp)
 	      || fixp->fx_r_type == BFD_RELOC_PCREL_LO16));
 }
 
+/* This hook is called before a fix is simplified.  We don't really
+   decide whether to skip a fix here.  Rather, we turn global symbols
+   used as branch targets into local symbols, such that they undergo
+   simplification.  We can only do this if the symbol is defined and
+   it is in the same section as the branch.  If this doesn't hold, we
+   emit a better error message than just saying the relocation is not
+   valid for the selected object format.
+
+   FIXP is the fix-up we're going to try to simplify, SEG is the
+   segment in which the fix up occurs.  The return value should be
+   non-zero to indicate the fix-up is valid for further
+   simplifications.  */
+
+int
+mips_validate_fix (fixP, seg)
+     struct fix *fixP;
+     asection *seg;
+{
+  /* There's a lot of discussion on whether it should be possible to
+     use R_MIPS_PC16 to represent branch relocations.  The outcome
+     seems to be that it can, but gas/bfd are very broken in creating
+     RELA relocations for this, so for now we only accept branches to
+     symbols in the same section.  Anything else is of dubious value,
+     since there's no guarantee that at link time the symbol would be
+     in range.  Even for branches to local symbols this is arguably
+     wrong, since it we assume the symbol is not going to be
+     overridden, which should be possible per ELF library semantics,
+     but then, there isn't a dynamic relocation that could be used to
+     this effect, and the target would likely be out of range as well.
+
+     Unfortunately, it seems that there is too much code out there
+     that relies on branches to symbols that are global to be resolved
+     as if they were local, like the IRIX tools do, so we do it as
+     well, but with a warning so that people are reminded to fix their
+     code.  If we ever get back to using R_MIPS_PC16 for branch
+     targets, this entire block should go away (and probably the
+     whole function).  */
+
+  if (fixP->fx_r_type == BFD_RELOC_16_PCREL_S2
+      && (((OUTPUT_FLAVOR == bfd_target_ecoff_flavour
+	    || OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	   && mips_pic != EMBEDDED_PIC)
+	  || bfd_reloc_type_lookup (stdoutput, BFD_RELOC_16_PCREL_S2) == NULL)
+      && fixP->fx_addsy)
+    {
+      if (! S_IS_DEFINED (fixP->fx_addsy))
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("Cannot branch to undefined symbol."));
+	  /* Avoid any further errors about this fixup.  */
+	  fixP->fx_done = 1;
+	}
+      else if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("Cannot branch to symbol in another section."));
+	  fixP->fx_done = 1;
+	}
+      else if (S_IS_EXTERNAL (fixP->fx_addsy))
+	{
+	  symbolS *sym = fixP->fx_addsy;
+
+	  as_warn_where (fixP->fx_file, fixP->fx_line,
+			 _("Pretending global symbol used as branch target is local."));
+
+	  fixP->fx_addsy = symbol_create (S_GET_NAME (sym),
+					  S_GET_SEGMENT (sym),
+					  S_GET_VALUE (sym),
+					  symbol_get_frag (sym));
+	  copy_symbol_attributes (fixP->fx_addsy, sym);
+	  S_CLEAR_EXTERNAL (fixP->fx_addsy);
+	  assert (symbol_resolved_p (sym));
+	  symbol_mark_resolved (fixP->fx_addsy);
+	}
+    }
+
+  return 1;
+}
+
 #ifdef OBJ_ELF
 static int
 mips_need_elf_addend_fixup (fixP)

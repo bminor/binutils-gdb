@@ -1,5 +1,11 @@
 2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
 
+	* config/tc-mips.c (mips_validate_fix): New function.
+	* config/tc-mips.h (TC_VALIDATE_FIX): Define.
+	(mips_validate_fix): Declare.
+
+2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
+
 	* Reverted 2003-03-02's patch.
 
 2003-03-11  Steve Ellcey  <sje@cup.hp.com>

@@ -140,6 +140,15 @@ extern int mips_fix_adjustable PARAMS ((struct fix *));
 #define TC_FORCE_RELOCATION(FIX) mips_force_relocation (FIX)
 extern int mips_force_relocation PARAMS ((struct fix *));
 
+/* We use this to turn branches to global symbols into branches to
+   local symbols, so that they can be simplified.  */
+#define TC_VALIDATE_FIX(fixp, this_segment, skip_label) \
+  do \
+    if (! mips_validate_fix ((fixp), (this_segment))) \
+      goto skip_label; \
+  while (0)
+extern int mips_validate_fix PARAMS ((struct fix *, asection *));
+
 /* Register mask variables.  These are set by the MIPS assembly code
    and used by ECOFF and possibly other object file formats.  */
 extern unsigned long mips_gprmask;
