@@ -61,6 +61,7 @@ macro.out
 mdouble.asm
 mdouble.err
 mdouble.out
+mri
 pl1.asm
 pl1.err
 pl1.out
