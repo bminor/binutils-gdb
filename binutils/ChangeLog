@@ -1,3 +1,10 @@
+Fri Jun 10 15:41:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objcopy.c (copy_archive): Make the temporary directory in the
+	same directory as the output BFD, since we may not have write
+	permission on the current directory.  Set the permissions of the
+	new directory to 0700, not 0777.
+
 Mon Jun  6 21:36:43 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* configure.in: if this is an rs6000 (and we're not building for

@@ -358,10 +358,10 @@ copy_archive (ibfd, obfd, output_target)
 {
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
-  char *dir = cat ("./#", make_tempname (""), "cd");
+  char *dir = make_tempname (bfd_get_filename (obfd));
 
   /* Make a temp directory to hold the contents.  */
-  mkdir (dir, 0777);
+  mkdir (dir, 0700);
   obfd->has_armap = ibfd->has_armap;
 
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
