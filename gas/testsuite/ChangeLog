@@ -1,3 +1,21 @@
+start-sanitize-tic80
+Sat Feb 22 20:24:23 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gas/tic80/{add.lst, bitnum.lst, ccode.lst, cregops.lst,
+ 	endmask.lst, regops.lst}: Remove ^M's from end of lines.
+	* gas/tic80/bitnum.s: Add comment to each line showing value
+	that symbolic BITNUM assembles to.  Add coverage for raw
+	numeric values for the BITNUM operand.
+	* gas/tic80/bitnum.d: Update due to bitnum.s changes.
+	* gas/tic80/regops.d: Update due to opcode library additions
+	of floating point test BITNUM values that are ambiguous with
+	the integral ones.
+	* gas/tic80/relocs1.s: New test case that tests simple relocs.
+	* gas/tic80/relocs1.d: Expected output for above.
+	* gas/tic80/relocs1.lst: TI assembler listing for above.
+	* gas/tic80/tic80.exp: Add relocs1 test.
+
+end-sanitize-tic80
 start-sanitize-d30v
 Fri Feb 21 14:23:14 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

@@ -9,4 +9,5 @@ if [istarget tic80*-*-*] then {
     run_dump_test "bitnum"
     run_dump_test "ccode"
     run_dump_test "add"
+    run_dump_test "relocs1"
 }

@@ -13,9 +13,9 @@ Disassembly of section .text:
   10:	0a 00 33 73 	and\.ff    r10,r12,r14
   14:	0a 80 32 73 	and\.ft    r10,r12,r14
   18:	0a 40 32 73 	and\.tf    r10,r12,r14
-  1c:	0a 40 39 1a 	bbo       r10,r8,lo\.w
+  1c:	0a 40 39 1a 	bbo       r10,r8,ib\.f
   20:	0a 60 39 fa 	bbo\.a     r10,r8,eq\.b
-  24:	0a 00 39 22 	bbz       r10,r8,ls\.w
+  24:	0a 00 39 22 	bbz       r10,r8,in\.f
   28:	0a 20 39 2a 	bbz\.a     r10,r8,hi\.w
   2c:	04 80 b9 21 	bcnd      r4,r6,lt0\.b
   30:	04 a0 b9 21 	bcnd\.a    r4,r6,lt0\.b
