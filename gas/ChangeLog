@@ -1,3 +1,13 @@
+Mon Oct  4 15:37:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m68k.c (m68k_ip): Mode 7.3 operand using PC should
+	have pc-relative fixup.
+	(md_parse_option): Move "-k" case down near "-pic" case.
+
+Thu Sep 30 11:05:35 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* config/z8k.c (md_pseudo_table): add "unseg".
+
 Wed Sep 29 16:15:11 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/m88k-opcode.h (m88k_opcodes): correct a few mistakes
