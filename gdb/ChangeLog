@@ -1,5 +1,8 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* remote-rdp.c: Update copyright.
+	(rdp_init): #if 0 references to "target_byte_order".
+
 	* mips-tdep.c (mips_o32_store_return_value): Delete function.
 	(mips_o32_return_value): Replace mips_o32_xfer_return_value.
 	(mips_o32_extract_return_value): Delete function.
