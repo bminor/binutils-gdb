@@ -1,3 +1,8 @@
+Tue May 14 12:35:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd.c: Remove #ifdef FILE_OFFSET_IS_CHAR_INDEX, and compile
+	the code unconditionally.
+
 Mon May 13 19:51:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libcoff-in.h (struct pei_section_tdata): Define structure.
