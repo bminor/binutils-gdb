@@ -1160,7 +1160,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Stack unwinding.  */
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);

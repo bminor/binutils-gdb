@@ -1603,7 +1603,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (d10v_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_deprecated_extract_return_value (gdbarch, d10v_extract_return_value);

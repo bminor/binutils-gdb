@@ -1,3 +1,16 @@
+2002-08-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* mcore-tdep.c (mcore_gdbarch_init): Use
+	generic_unwind_get_saved_register instead of
+	generic_get_saved_register.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* config/mn10200/tm-mn10200.h (GET_SAVED_REGISTER): Ditto.
+	* config/h8300/tm-h8300.h (GET_SAVED_REGISTER): Ditto.
+
 2002-08-05  Joel Brobecker  <brobecker@gnat.com>
 
 	* objfiles.h: Add missing #include "symfile.h"

@@ -1237,7 +1237,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_init_extra_frame_info (gdbarch, v850_init_extra_frame_info);
   set_gdbarch_frame_init_saved_regs (gdbarch, v850_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, v850_frame_chain);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_saved_pc_after_call (gdbarch, v850_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, v850_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);
