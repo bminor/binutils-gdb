@@ -1,5 +1,11 @@
 Mon Jun 28 10:09:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* printcmd.c (makeva*): New interface, for making a va_list.
+	(printf_command): Use it.
+	* config/m88k/xm-delta88.h: Remove VPRINTF define, not needed.
+	* config/pa/xm-pa.h: New file.
+	* config/pa/xm-hppa{b,h}.h: Include it.
+
 	* xcoffread.c: Remove obsolete NO_TYPEDEFS comment.
 
 Sun Jun 27 08:54:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
