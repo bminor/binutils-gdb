@@ -516,7 +516,7 @@ hpread_expand_symtab (struct objfile *objfile, int sym_offset, int sym_size,
   current_objfile = NULL;
   hp_som_som_object_present = 1;	/* Indicate we've processed an HP SOM SOM file */
 
-  return end_symtab (text_offset + text_size, objfile, 0);
+  return end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 }
 
 

@@ -1,5 +1,14 @@
 2000-10-24  Kevin Buettner  <kevinb@redhat.com>
 
+	* coffread.c (coff_end_symtab): When calling end_symtab(),
+	use SECT_OFF_TEXT() instead of 0 to represent the .text
+	section.
+	* hp-symtab-read.c (hpread_expand_symtab): Likewise.
+	* hpread.c (hpread_expand_symtab, hpread_process_one_debug_symbol):
+	Likewise.
+
+2000-10-24  Kevin Buettner  <kevinb@redhat.com>
+
 	* solib-svr4.c: New file created out of much of solib.c...
 	* solib.c (_SYSCALL32, BKPT_AT_SYMBOL): Move these defines to
 	solib-svr4.c.

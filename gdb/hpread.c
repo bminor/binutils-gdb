@@ -1064,7 +1064,7 @@ hpread_expand_symtab (struct objfile *objfile, int sym_offset, int sym_size,
 
   current_objfile = NULL;
 
-  return end_symtab (text_offset + text_size, objfile, 0);
+  return end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 }
 
 
@@ -1822,7 +1822,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	case DNTT_TYPE_MODULE:
 	  /* Ending a module ends the symbol table for that module.  */
 	  valu = text_offset + text_size + offset;
-	  (void) end_symtab (valu, objfile, 0);
+	  (void) end_symtab (valu, objfile, SECT_OFF_TEXT (objfile));
 	  break;
 
 	case DNTT_TYPE_FUNCTION:

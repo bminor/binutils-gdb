@@ -475,7 +475,7 @@ coff_end_symtab (struct objfile *objfile)
 
   last_source_start_addr = current_source_start_addr;
 
-  symtab = end_symtab (current_source_end_addr, objfile, 0);
+  symtab = end_symtab (current_source_end_addr, objfile, SECT_OFF_TEXT (objfile));
 
   if (symtab != NULL)
     free_named_symtabs (symtab->filename);
