@@ -137,6 +137,18 @@ static struct trans pr_flag_table[] =
 #if defined (PR_ISSYS)
   PR_ISSYS, "PR_ISSYS", "Is a system process",
 #endif
+#if defined (PR_STEP)
+  PR_STEP, "PR_STEP", "Process has single step pending",
+#endif
+#if defined (PR_KLC)
+  PR_KLC, "PR_KLC", "Kill-on-last-close is in effect",
+#endif
+#if defined (PR_ASYNC)
+  PR_ASYNC, "PR_ASYNC", "Asynchronous stop is in effect",
+#endif
+#if defined (PR_PCOMPAT)
+  PR_PCOMPAT, "PR_PCOMPAT", "Ptrace compatibility mode in effect",
+#endif
  0, NULL, NULL
 };
 
@@ -161,6 +173,9 @@ static struct trans pr_why_table[] =
 #endif
 #if defined (PR_JOBCONTROL)
  PR_JOBCONTROL, "PR_JOBCONTROL", "Default job control stop signal action",
+#endif
+#if defined (PR_SUSPENDED)
+ PR_SUSPENDED, "PR_SUSPENDED", "Process suspended",
 #endif
  0, NULL, NULL
 };
@@ -1781,15 +1796,15 @@ proc_set_exec_trap ()
   /* Turn off inherit-on-fork flag so that all grand-children of gdb
      start with tracing flags cleared. */
 
-#ifdef PIOCRFORK	/* Standard SVR4 */
-  (void) ioctl (fd, PIOCRFORK, NULL);
-#else
-#ifdef PIOCRESET	/* iris (for example) */
+#if defined (PIOCRESET)	/* New method */
   {
       long pr_flags;
       pr_flags = PR_FORK;
       (void) ioctl (fd, PIOCRESET, &pr_flags);
   }
+#else
+#if defined (PIOCRFORK)	/* Original method */
+  (void) ioctl (fd, PIOCRFORK, NULL);
 #endif
 #endif
 }
@@ -2612,15 +2627,18 @@ static char *
 mappingflags (flags)
      long flags;
 {
-  static char asciiflags[7];
+  static char asciiflags[8];
   
-  strcpy (asciiflags, "------");
-  if (flags & MA_STACK)  asciiflags[0] = 's';
-  if (flags & MA_BREAK)  asciiflags[1] = 'b';
-  if (flags & MA_SHARED) asciiflags[2] = 's';
-  if (flags & MA_READ)   asciiflags[3] = 'r';
-  if (flags & MA_WRITE)  asciiflags[4] = 'w';
-  if (flags & MA_EXEC)   asciiflags[5] = 'x';
+  strcpy (asciiflags, "-------");
+#if defined (MA_PHYS)
+  if (flags & MA_PHYS)   asciiflags[0] = 'd';
+#endif
+  if (flags & MA_STACK)  asciiflags[1] = 's';
+  if (flags & MA_BREAK)  asciiflags[2] = 'b';
+  if (flags & MA_SHARED) asciiflags[3] = 's';
+  if (flags & MA_READ)   asciiflags[4] = 'r';
+  if (flags & MA_WRITE)  asciiflags[5] = 'w';
+  if (flags & MA_EXEC)   asciiflags[6] = 'x';
   return (asciiflags);
 }
 
@@ -3012,7 +3030,7 @@ info_proc_mappings (pip, summary)
   if (!summary)
     {
       printf_filtered ("Mapped address spaces:\n\n");
-      printf_filtered ("\t%10s %10s %10s %10s %6s\n",
+      printf_filtered ("\t%10s %10s %10s %10s %7s\n",
 		       "Start Addr",
 		       "  End Addr",
 		       "      Size",
@@ -3025,7 +3043,7 @@ info_proc_mappings (pip, summary)
 	    {
 	      for (prmap = prmaps; prmap -> pr_size; ++prmap)
 		{
-		  printf_filtered ("\t%#10x %#10x %#10x %#10x %6s\n",
+		  printf_filtered ("\t%#10x %#10x %#10x %#10x %7s\n",
 				   prmap -> pr_vaddr,
 				   prmap -> pr_vaddr + prmap -> pr_size - 1,
 				   prmap -> pr_size,

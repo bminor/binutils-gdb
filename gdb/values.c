@@ -649,7 +649,7 @@ unpack_long (type, valaddr)
     {
       if (len == sizeof (char))
 	{
-	  char retval;
+	  SIGNED char retval;	/* plain chars might be unsigned on host */
 	  bcopy (valaddr, &retval, sizeof (retval));
 	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
 	  return retval;
