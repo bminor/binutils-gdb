@@ -30,7 +30,6 @@ AC_PROG_CC
 AC_PROG_INSTALL
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
-AC_C_CROSS
 if test "x$cross_compiling" = "xno"; then
   CC_FOR_BUILD='$(CC)'
 else
@@ -45,7 +44,10 @@ AC_SUBST(AR)
 AC_PROG_RANLIB
 
 # Check for common headers.
-AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h)
+# FIXME: Seems to me this can cause problems for i386-windows hosts.
+# At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
+AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h sys/time.h sys/resource.h)
+AC_CHECK_FUNCS(getrusage time)
 
 . ${srcdir}/../../bfd/configure.host
 
@@ -128,6 +130,10 @@ if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
   echo "Setting sim trace = $sim_trace" 6>&1
 fi],[sim_trace=""])dnl
 AC_SUBST(sim_trace)
+
+
+dnl Types used by common code
+AC_TYPE_SIGNAL
 
 
 dnl These are available to append to as desired.

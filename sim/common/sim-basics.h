@@ -65,6 +65,14 @@ void *zalloc (unsigned long size);
 void zfree(void*);
 
 
+/* Utilities for elapsed time reporting.  */
+/* Opaque type, known only inside sim_elapsed_time_foo fns.  */
+typedef unsigned long SIM_ELAPSED_TIME;
+/* Get reference point for future call to sim_time_elapsed.  */
+SIM_ELAPSED_TIME sim_elapsed_time_get (void);
+/* Elapsed time in milliseconds since START.  */
+unsigned long sim_elapsed_time_since (SIM_ELAPSED_TIME start);
+
 
 /* Global types that code manipulates */
 

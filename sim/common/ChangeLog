@@ -1,5 +1,12 @@
 Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* aclocal.m4: Check for headers time.h, sys/time.h, sys/resource.h.
+	Check for functions getrusage, time.
+	* sim-basics.h (SIM_ELAPSED_TIME): New typedef.
+	(sim_elapsed_time_get, sim_elapsed_time_since): Add prototypes.
+	* sim-utils.c: #include time.h, sys/time.h, sys/resource.h if able.
+	(sim_elapsed_time_get, sim_elapsed_time_since): New functions.
+
 	* sim-utils.c (sim_copy_argv, sim_analyze_program): New functions.
 
 	* sim-options.c, sim-options.h: New files.
