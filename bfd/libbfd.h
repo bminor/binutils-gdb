@@ -20,7 +20,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
 
 /* If you want to read and write large blocks, you might want to do it
    in quanta of this amount */
@@ -279,8 +278,6 @@ one first, to avoid running out of file descriptors.
 /*:cpu-i960.c*/
 
 /*:cpu-empty.c*/
-
-/*:howto.c*/
 
 /*:archures.c*/
 /* bfd_default_arch_struct

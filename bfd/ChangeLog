@@ -1,3 +1,11 @@
+Thu Oct  3 19:39:55 1991  John Gilmore  (gnu at cygnus.com)
+
+	* bfd-in.h:  enum boolean => enum bfd_boolean for SVR4.  Gumby's
+	prediction is vindicated!
+
+	* bfd-in.h, libbfd-in.h, doc/Makefile, doc/tolibbfd, doc/intobfd:
+	Remove refs to howto.c, since Steve forgot.
+
 Thu Oct  3 07:49:21 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* elf.c: took the abort out of set_arch_mach so that objdump -i will

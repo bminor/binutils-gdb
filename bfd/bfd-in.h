@@ -52,7 +52,7 @@ here.  */
 #	endif
 #endif
 
-#define BFD_VERSION "1.15"
+#define BFD_VERSION "0.18"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -61,7 +61,9 @@ typedef struct _bfd bfd;
    and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
    force me to change it. */
-typedef enum boolean {false, true} boolean;
+/* typedef enum boolean {false, true} boolean; */
+/* Yup, SVR4 has a "typedef enum boolean" in <sys/types.h>  -fnf */
+typedef enum bfd_boolean {false, true} boolean;
 
 /* Try to avoid breaking stuff */
 typedef  long int file_ptr;
@@ -323,7 +325,6 @@ extern CONST short _bfd_host_big_endian;
 
 /*:archures.c*/
 
-/*:howto.c*/
 /*:reloc.c*/
 
 /*:syms.c*/
