@@ -1,3 +1,9 @@
+Wed Sep 23 10:54:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (reg_name_search): Only warn if a name matches
+	both a register name and symbol name.
+	(find_format): Allow correct parsing of MVTSYS and MVFSYS insns.
+
 Tue Sep 22 17:49:16 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Implement EITHER_BUT_PREFER_MU

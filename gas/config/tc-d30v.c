@@ -168,13 +168,6 @@ reg_name_search (name)
   low = 0;
   high = reg_name_cnt () - 1;
 
-  if (symbol_find (name) != NULL)
-    {
-      if (warn_register_name_conflicts)
-	as_warn ("Register name %s conflicts with symbol of the same name",
-		 name);
-    }
-  
   do
     {
       middle = (low + high) / 2;
@@ -183,8 +176,17 @@ reg_name_search (name)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
-      else 
-	return pre_defined_registers[middle].value;
+      else
+	{
+	  if (symbol_find (name) != NULL)
+	    {
+	      if (warn_register_name_conflicts)
+		as_warn ("Register name %s conflicts with symbol of the same name",
+			 name);
+	    }
+  
+	  return pre_defined_registers[middle].value;
+	}
     }
   while (low <= high);
   
