@@ -1,3 +1,9 @@
+Thu Feb 15 10:39:17 1996  H.J. Lu  <hjl@zoom.com>
+
+	* Makefile.in ($(srcdir)/bfd-in2.h): Rename target from bfd-in2.h.
+	($(srcdir)/libbfd.h): Rename from libbfd.h.
+	($(srcdir)/libcoff.h): Rename from libcoff.h.
+
 Wed Feb 14 16:29:07 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
 
 	* ieee.c (ieee_write_expression): Only use an R variable for a

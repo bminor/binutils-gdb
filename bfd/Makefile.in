@@ -67,6 +67,8 @@ SHLIB_CFLAGS = @SHLIB_CFLAGS@
 COMMON_SHLIB = @COMMON_SHLIB@
 SHLINK = @SHLINK@
 
+SONAME = lib`echo $(SHLIB) | sed -e 's/^lib//' | sed '$(program_transform_name)'`
+
 CC_FOR_BUILD = @CC_FOR_BUILD@
 
 INCDIR = $(srcdir)/../include
@@ -496,9 +498,26 @@ $(SHLIB): stamp-picdir $(OFILES) piclist
 	rm -f $(SHLIB)
 	$(SHLIB_CC) $(SHLIB_CFLAGS) -o $(SHLIB) `cat piclist`
 
+# We make a link from libbfd.so to libbfd.so.VERSION for linking, and
+# also a link from libTARGET-bfd.so.VERSION for running.
 $(SHLINK): $(SHLIB)
+	ts=lib`echo $(SHLIB) | sed -e 's/^lib//' | sed -e '$(program_transform_name)'`; \
+	if [ "$$ts" != "$(SHLIB)" ]; then \
+	  rm -f $$ts; \
+	  ln -sf $(SHLIB) $$ts; \
+	else true; fi
 	rm -f $(SHLINK)
 	ln -sf $(SHLIB) $(SHLINK)
+
+# This target creates libTARGET-bfd.so.VERSION as a symlink to
+# libbfd.so.VERSION.  It is used on SunOS, which does not have SONAME.
+stamp-tshlink: $(SHLIB)
+	tf=lib`echo $(SHLIB) | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	if [ "$$tf" != "$(SHLIB)" ]; then \
+	  rm -f $$tf; \
+	  ln -sf $(SHLIB) $$tf; \
+	else true; fi
+	touch stamp-tshlink
 
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.
@@ -626,6 +645,9 @@ force:
 
 install: $(ALLLIBS)
 	for f in $(ALLLIBS); do \
+	  if [ "$$f" = "stamp-tshlink" ]; then \
+	    continue; \
+	  fi; \
 	  tf=lib`echo $$f | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
 	  rm -f $(libdir)/$$tf; \
 	  if [ "$$f" = "$(SHLINK)" ]; then \
@@ -736,15 +758,15 @@ headers:
 
 # The rules for the generated header files are here so that people can
 # type `make bfd-in2.h' if they remove it.  They are not run by default.
-bfd-in2.h:
+$(srcdir)/bfd-in2.h:
 	(cd $(docdir); $(MAKE) bfd.h $(FLAGS_TO_PASS))
 	cp $(docdir)/bfd.h bfd-in2.h-new
 	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
-libbfd.h:
+$(srcdir)/libbfd.h:
 	(cd $(docdir); $(MAKE) libbfd.h $(FLAGS_TO_PASS))
 	cp $(docdir)/libbfd.h libbfd.h-new
 	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
-libcoff.h:
+$(srcdir)/libcoff.h:
 	(cd $(docdir); $(MAKE) libcoff.h $(FLAGS_TO_PASS))
 	cp $(docdir)/libcoff.h libcoff.h-new
 	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
