@@ -1,5 +1,8 @@
 2001-03-23  Hans-Peter Nilsson  <hp@axis.com>
 
+	* gas/cris/pic-err-1.s, gas/cris/rd-pic-1.s, gas/cris/rd-pic-1.d:
+	New tests.
+
 	* gas/cris/branch-warn-1.s, gas/cris/branch-warn-2.s,
 	gas/cris/branch-warn-3.s: Tweak for fixed FIXME:s.
 
