@@ -1,5 +1,7 @@
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in: Update copyright.  Update dependencies.
+
 	* tui/tuiSourceWin.c (tui_update_breakpoint_info): Fix compile
 	problem.
 
