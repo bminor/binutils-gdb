@@ -1,3 +1,8 @@
+Fri Nov 29 16:59:25 1991  Fred Fish  (fnf at cygnus.com)
+
+	* symtab.c (sources_info):  Change simple printf of error message
+	to call to error().
+
 Fri Nov 29 16:04:21 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/gdb.texinfo: remove leading comments that survived M4 but

@@ -2372,8 +2372,7 @@ sources_info ()
   
   if (symtab_list == 0 && partial_symtab_list == 0)
     {
-      printf (no_symtab_msg);
-      return;
+      error (no_symtab_msg);
     }
   
   printf_filtered ("Source files for which symbols have been read in:\n\n");
