@@ -584,7 +584,7 @@ tui_cont_sig (int sig)
       resetty ();
 
       /* Force a refresh of the screen.  */
-      tuiRefreshAll ();
+      tui_refresh_all_win ();
 
       /* Update cursor position on the screen.  */
       wmove (cmdWin->generic.handle,
@@ -712,7 +712,7 @@ _tuiHandleResizeDuringIO (unsigned int originalCh)
 {
   if (tuiWinResized ())
     {
-      tuiRefreshAll ();
+      tui_refresh_all_win ();
       dont_repeat ();
       tuiSetWinResizedTo (FALSE);
       return '\n';

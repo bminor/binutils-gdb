@@ -178,7 +178,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 		  switch (newLayout)
 		    {
 		    case SRC_COMMAND:
-		      tuiSetWinFocusTo (srcWin);
+		      tui_set_win_focus_to (srcWin);
 		      layoutDef->displayMode = SRC_WIN;
 		      layoutDef->split = FALSE;
 		      break;
@@ -191,7 +191,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 		         ** We still want to show the assembly though!
 		       */
 		      addr = tui_get_begin_asm_address ();
-		      tuiSetWinFocusTo (disassemWin);
+		      tui_set_win_focus_to (disassemWin);
 		      layoutDef->displayMode = DISASSEM_WIN;
 		      layoutDef->split = FALSE;
 		      break;
@@ -205,16 +205,16 @@ tui_set_layout (enum tui_layout_type layoutType,
 		       */
 		      addr = tui_get_begin_asm_address ();
 		      if (winWithFocus == srcWin)
-			tuiSetWinFocusTo (srcWin);
+			tui_set_win_focus_to (srcWin);
 		      else
-			tuiSetWinFocusTo (disassemWin);
+			tui_set_win_focus_to (disassemWin);
 		      layoutDef->split = TRUE;
 		      break;
 		    case SRC_DATA_COMMAND:
 		      if (winWithFocus != dataWin)
-			tuiSetWinFocusTo (srcWin);
+			tui_set_win_focus_to (srcWin);
 		      else
-			tuiSetWinFocusTo (dataWin);
+			tui_set_win_focus_to (dataWin);
 		      layoutDef->displayMode = SRC_WIN;
 		      layoutDef->split = FALSE;
 		      break;
@@ -228,9 +228,9 @@ tui_set_layout (enum tui_layout_type layoutType,
 		       */
 		      addr = tui_get_begin_asm_address ();
 		      if (winWithFocus != dataWin)
-			tuiSetWinFocusTo (disassemWin);
+			tui_set_win_focus_to (disassemWin);
 		      else
-			tuiSetWinFocusTo (dataWin);
+			tui_set_win_focus_to (dataWin);
 		      layoutDef->displayMode = DISASSEM_WIN;
 		      layoutDef->split = FALSE;
 		      break;
@@ -239,7 +239,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 		    }
 		}
 	      if (newWinWithFocus != (TuiWinInfoPtr) NULL)
-		tuiSetWinFocusTo (newWinWithFocus);
+		tui_set_win_focus_to (newWinWithFocus);
 	      /*
 	         ** Now update the window content
 	       */
@@ -561,7 +561,7 @@ _tuiHandleXDBLayout (TuiLayoutDefPtr layoutDef)
   if (layoutDef->split)
     {
       tui_set_layout (SRC_DISASSEM_COMMAND, TUI_UNDEFINED_REGS);
-      tuiSetWinFocusTo (winList[layoutDef->displayMode]);
+      tui_set_win_focus_to (winList[layoutDef->displayMode]);
     }
   else
     {

@@ -1,5 +1,19 @@
 2004-02-06  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-win.h: Update copyright.  Include "tui-data.h".
+	(struct tui_win_info): Declare.
+	(tui_scroll_forward): Rename tuiScrollForward.
+	(tui_scroll_backward): Rename tuiScrollBackward.
+	(tui_scroll_left): Rename tuiScrollLeft.
+	(tui_scroll_right): Rename tuiScrollRight.
+	(tui_set_win_focus_to): Rename tuiSetWinFocusTo.
+	(tui_resize_all): Rename tuiResizeAll.
+	(tui_refresh_all_win): Rename tuiRefreshAll.
+	(tui_sigwinch_handler): Rename tuiSigwinchHandler.
+	* tui/tui-layout.c, * tui/tui-io.c: Update references.
+	* tui/tui-wingeneral.h, * tui/tui.c: Update references.
+	* tui/tui-disasm.c, * tui/tui-command.c: Update references.
+
 	* tui/tui-windata.h: Update copyright.  Include "tui-data.h".
 	(tui_erase_data_content): Rename tuiEraseDataContent.
 	(tui_display_all_data): Rename tuiDisplayAllData.

@@ -104,27 +104,27 @@ tui_dispatch_ctrl_char (unsigned int ch)
       switch (chCopy)
 	{
 	case KEY_NPAGE:
-	  tuiScrollForward (winInfo, 0);
+	  tui_scroll_forward (winInfo, 0);
 	  break;
 	case KEY_PPAGE:
-	  tuiScrollBackward (winInfo, 0);
+	  tui_scroll_backward (winInfo, 0);
 	  break;
 	case KEY_DOWN:
 	case KEY_SF:
-	  tuiScrollForward (winInfo, 1);
+	  tui_scroll_forward (winInfo, 1);
 	  break;
 	case KEY_UP:
 	case KEY_SR:
-	  tuiScrollBackward (winInfo, 1);
+	  tui_scroll_backward (winInfo, 1);
 	  break;
 	case KEY_RIGHT:
-	  tuiScrollLeft (winInfo, 1);
+	  tui_scroll_left (winInfo, 1);
 	  break;
 	case KEY_LEFT:
-	  tuiScrollRight (winInfo, 1);
+	  tui_scroll_right (winInfo, 1);
 	  break;
 	case '\f':
-	  tuiRefreshAll ();
+	  tui_refresh_all_win ();
 	  break;
 	default:
 	  c = chCopy;

@@ -1,5 +1,8 @@
 /* TUI window generic functions.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002, 2004 Free Software
+   Foundation, Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -19,27 +22,22 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef _TUI_WIN_H
-#define _TUI_WIN_H
+#ifndef TUI_WIN_H
+#define TUI_WIN_H
 
-/*****************************************
-** TYPE DEFINITIONS                        **
-******************************************/
+#include "tui/tui-data.h"
 
+struct tui_win_info;
 
-
-/*****************************************
-** PUBLIC FUNCTION EXTERNAL DECLS        **
-******************************************/
-extern void tuiScrollForward (TuiWinInfoPtr, int);
-extern void tuiScrollBackward (TuiWinInfoPtr, int);
-extern void tuiScrollLeft (TuiWinInfoPtr, int);
-extern void tuiScrollRight (TuiWinInfoPtr, int);
-extern void tui_scroll (TuiScrollDirection, TuiWinInfoPtr, int);
-extern void tuiSetWinFocusTo (TuiWinInfoPtr);
-extern void tuiResizeAll (void);
-extern void tuiRefreshAll (void);
-extern void tuiSigwinchHandler (int);
+extern void tui_scroll_forward (struct tui_win_info *, int);
+extern void tui_scroll_backward (struct tui_win_info *, int);
+extern void tui_scroll_left (struct tui_win_info *, int);
+extern void tui_scroll_right (struct tui_win_info *, int);
+extern void tui_scroll (enum tui_scroll_direction, struct tui_win_info *, int);
+extern void tui_set_win_focus_to (struct tui_win_info *);
+extern void tui_resize_all (void);
+extern void tui_refresh_all_win (void);
+extern void tui_sigwinch_handler (int);
 
 extern chtype tui_border_ulcorner;
 extern chtype tui_border_urcorner;
@@ -50,10 +48,9 @@ extern chtype tui_border_hline;
 extern int tui_border_attrs;
 extern int tui_active_border_attrs;
 
-extern int tui_update_variables ();
+extern int tui_update_variables (void);
 
 /* Update gdb's knowledge of the terminal size.  */
 extern void tui_update_gdb_sizes (void);
 
 #endif
-/*_TUI_WIN_H*/

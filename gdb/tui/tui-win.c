@@ -423,12 +423,9 @@ tui_update_gdb_sizes ()
 }
 
 
-/*
-   ** tuiSetWinFocusTo
-   **        Set the logical focus to winInfo
- */
+/* Set the logical focus to winInfo.    */
 void
-tuiSetWinFocusTo (TuiWinInfoPtr winInfo)
+tui_set_win_focus_to (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo))
     {
@@ -446,11 +443,8 @@ tuiSetWinFocusTo (TuiWinInfoPtr winInfo)
 }				/* tuiSetWinFocusTo */
 
 
-/*
-   ** tuiScrollForward().
- */
 void
-tuiScrollForward (TuiWinInfoPtr winToScroll, int numToScroll)
+tui_scroll_forward (TuiWinInfoPtr winToScroll, int numToScroll)
 {
   if (winToScroll != cmdWin)
     {
@@ -471,16 +465,10 @@ tuiScrollForward (TuiWinInfoPtr winToScroll, int numToScroll)
       else if (winToScroll == dataWin)
 	tui_vertical_data_scroll (FORWARD_SCROLL, _numToScroll);
     }
+}
 
-  return;
-}				/* tuiScrollForward */
-
-
-/*
-   ** tuiScrollBackward().
- */
 void
-tuiScrollBackward (TuiWinInfoPtr winToScroll, int numToScroll)
+tui_scroll_backward (TuiWinInfoPtr winToScroll, int numToScroll)
 {
   if (winToScroll != cmdWin)
     {
@@ -501,15 +489,11 @@ tuiScrollBackward (TuiWinInfoPtr winToScroll, int numToScroll)
       else if (winToScroll == dataWin)
 	tui_vertical_data_scroll (BACKWARD_SCROLL, _numToScroll);
     }
-  return;
-}				/* tuiScrollBackward */
+}
 
 
-/*
-   ** tuiScrollLeft().
- */
 void
-tuiScrollLeft (TuiWinInfoPtr winToScroll, int numToScroll)
+tui_scroll_left (TuiWinInfoPtr winToScroll, int numToScroll)
 {
   if (winToScroll != cmdWin)
     {
@@ -526,15 +510,11 @@ tuiScrollLeft (TuiWinInfoPtr winToScroll, int numToScroll)
       if (winToScroll == srcWin || winToScroll == disassemWin)
 	tui_horizontal_source_scroll (winToScroll, LEFT_SCROLL, _numToScroll);
     }
-  return;
-}				/* tuiScrollLeft */
+}
 
 
-/*
-   ** tuiScrollRight().
- */
 void
-tuiScrollRight (TuiWinInfoPtr winToScroll, int numToScroll)
+tui_scroll_right (TuiWinInfoPtr winToScroll, int numToScroll)
 {
   if (winToScroll != cmdWin)
     {
@@ -551,14 +531,10 @@ tuiScrollRight (TuiWinInfoPtr winToScroll, int numToScroll)
       if (winToScroll == srcWin || winToScroll == disassemWin)
 	tui_horizontal_source_scroll (winToScroll, RIGHT_SCROLL, _numToScroll);
     }
-  return;
-}				/* tuiScrollRight */
+}
 
 
-/*
-   ** tui_scroll().
-   **    Scroll a window.  Arguments are passed through a va_list.
- */
+/* Scroll a window.  Arguments are passed through a va_list.    */
 void
 tui_scroll (TuiScrollDirection direction,
 	    TuiWinInfoPtr winToScroll,
@@ -567,16 +543,16 @@ tui_scroll (TuiScrollDirection direction,
   switch (direction)
     {
     case FORWARD_SCROLL:
-      tuiScrollForward (winToScroll, numToScroll);
+      tui_scroll_forward (winToScroll, numToScroll);
       break;
     case BACKWARD_SCROLL:
-      tuiScrollBackward (winToScroll, numToScroll);
+      tui_scroll_backward (winToScroll, numToScroll);
       break;
     case LEFT_SCROLL:
-      tuiScrollLeft (winToScroll, numToScroll);
+      tui_scroll_left (winToScroll, numToScroll);
       break;
     case RIGHT_SCROLL:
-      tuiScrollRight (winToScroll, numToScroll);
+      tui_scroll_right (winToScroll, numToScroll);
       break;
     default:
       break;
@@ -584,11 +560,8 @@ tui_scroll (TuiScrollDirection direction,
 }
 
 
-/*
-   ** tuiRefreshAll().
- */
 void
-tuiRefreshAll (void)
+tui_refresh_all_win (void)
 {
   TuiWinType type;
 
@@ -905,7 +878,7 @@ _tuiSetFocus (char *arg, int fromTTY)
 The window name specified must be valid and visible.\n");
       else
 	{
-	  tuiSetWinFocusTo (winInfo);
+	  tui_set_win_focus_to (winInfo);
 	  keypad (cmdWin->generic.handle, (winInfo != cmdWin));
 	}
 
@@ -968,7 +941,7 @@ _tuiRefreshAll_command (char *arg, int fromTTY)
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
 
-  tuiRefreshAll ();
+  tui_refresh_all_win ();
 }
 
 

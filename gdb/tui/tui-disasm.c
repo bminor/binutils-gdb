@@ -286,7 +286,7 @@ tui_show_disassem (CORE_ADDR startAddr)
      ** source view isn't split
    */
   if (currentLayout () != SRC_DISASSEM_COMMAND && winWithFocus == srcWin)
-    tuiSetWinFocusTo (disassemWin);
+    tui_set_win_focus_to (disassemWin);
 
   return;
 }

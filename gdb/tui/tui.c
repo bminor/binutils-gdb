@@ -223,7 +223,7 @@ tui_rl_other_window (int count, int key)
   winInfo = tuiNextWin (tuiWinWithFocus ());
   if (winInfo)
     {
-      tuiSetWinFocusTo (winInfo);
+      tui_set_win_focus_to (winInfo);
       if (dataWin && dataWin->generic.isVisible)
         tui_refresh_data_win ();
       keypad (cmdWin->generic.handle, (winInfo != cmdWin));
@@ -390,7 +390,7 @@ tui_enable (void)
 
       tui_show_frame_info (0);
       tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
-      tuiSetWinFocusTo (srcWin);
+      tui_set_win_focus_to (srcWin);
       keypad (cmdWin->generic.handle, TRUE);
       wrefresh (cmdWin->generic.handle);
       tui_finish_init = 0;
@@ -417,7 +417,7 @@ tui_enable (void)
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
-  tuiRefreshAll ();
+  tui_refresh_all_win ();
 
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();

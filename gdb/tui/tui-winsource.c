@@ -122,7 +122,7 @@ tui_update_source_window_as_is (TuiWinInfoPtr winInfo, struct symtab *s,
 	   */
 	  if (tuiWinWithFocus () == disassemWin &&
 	      currentLayout () != SRC_DISASSEM_COMMAND)
-	    tuiSetWinFocusTo (srcWin);
+	    tui_set_win_focus_to (srcWin);
 	}
     }
 
