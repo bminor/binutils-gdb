@@ -1,5 +1,6 @@
-2003-06-17  Doug Evans  <dje@sebabeach.org>
+2003-06-17  Frank Ch. Eigler  <fche@redhat.com>
 
+	From Doug Evans <dje@sebabeach.org>:
 	* cgen-trace.h (sim_disasm_read_memory): Update args to be compatible
 	with disassemble_info:read_memory_func.
 	* cgen-trace.c (sim_disasm_read_memory): Ditto.
