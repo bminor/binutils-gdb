@@ -41,6 +41,7 @@ hppaosf.mt
 i386-aout.mt
 i386-bsd.mt
 i386-coff.mt
+i386-linux.mt
 i386sco.mh
 i386v.mh
 i386v.mt
