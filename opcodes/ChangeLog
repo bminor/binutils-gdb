@@ -1,3 +1,8 @@
+2001-10-12  John Healy  <jhealy@redhat.com>
+
+	* cgen-dis.in (print_insn): Use min (cd->base_insn_bitsize, buflen*8)
+	for the length when extracting the base part of the insn.
+
 2001-10-09  Bruno Haible  <haible@clisp.cons.org>
 
 	* cgen-asm.in (*_cgen_build_insn_regex): Generate a case sensitive

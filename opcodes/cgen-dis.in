@@ -218,9 +218,13 @@ print_insn (cd, pc, info, buf, buflen)
   CGEN_INSN_INT insn_value;
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
+  int basesize;
 
   /* Extract base part of instruction, just in case CGEN_DIS_* uses it. */
-  insn_value = cgen_get_insn_value (cd, buf, buflen * 8);
+  basesize = cd->base_insn_bitsize < buflen * 8 ?
+                                     cd->base_insn_bitsize : buflen * 8;
+  insn_value = cgen_get_insn_value (cd, buf, basesize);
+
 
   /* Fill in ex_info fields like read_insn would.  Don't actually call
      read_insn, since the incoming buffer is already read (and possibly
