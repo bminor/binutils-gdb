@@ -1,5 +1,6 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 1987, 1990, 1991, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1990, 1991, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -70,6 +71,11 @@ die horribly;
 #define LEX_AT 0
 #endif
 
+#ifndef LEX_BR
+/* The RS/6000 assembler uses {,},[,] as parts of symbol names.  */
+#define LEX_BR 0
+#endif
+
 /* used by is_... macros. our ctype[] */
 const char lex_type[256] =
 {
@@ -78,9 +84,9 @@ const char lex_type[256] =
   0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
-  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3,	/* PQRSTUVWXYZ[\]^_ */
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
   0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* `abcdefghijklmno */
-  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0,	/* pqrstuvwxyz{|}~. */
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 0, /* pqrstuvwxyz{|}~. */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -2272,6 +2278,7 @@ next_char_of_string ()
       c = NOT_A_CHAR;
       break;
 
+#ifndef NO_STRING_ESCAPES
     case '\\':
       switch (c = *input_line_pointer++)
 	{
@@ -2366,6 +2373,7 @@ next_char_of_string ()
 	  break;
 	}			/* switch on escaped char */
       break;
+#endif /* ! defined (NO_STRING_ESCAPES) */
 
     default:
       break;
