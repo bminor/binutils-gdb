@@ -30,7 +30,6 @@ Makefile.in
 all.m4
 amd29k.m4
 configure.in
-gdb-all.texinfo
 gdb.texinfo
 gdbint.texinfo
 gdbinv-m.m4.in

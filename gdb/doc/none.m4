@@ -17,6 +17,8 @@ _define__(<_BOUT__>,<0>)
 _define__(<_COFF__>,<0>)
 _define__(<_ELF__>,<0>)
 
+_define__(<_LUCID__>,<0>)		A programming environment.
+
 _define__(<_AMD29K__>,<0>)		Specific architectures.  Note none
 _define__(<_H8__>,<0>)
 _define__(<_I80386__>,<0>)		starts out on.

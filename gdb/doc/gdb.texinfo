@@ -583,7 +583,7 @@ However, a handful of commands are enough to get started using the
 debugger.  This chapter illustrates these commands.
 
 @iftex
-In this sample session, we emphasize user input like this: @i{input},
+In this sample session, we emphasize user input like this: @b{input},
 to make it easier to pick out from the surrounding output.
 @end iftex
 
@@ -601,21 +601,21 @@ same thing.  However, when we change the open quote string to
 procedure fails to define a new synonym @code{baz}:
 
 @smallexample
-$ @i{cd gnu/m4}
-$ @i{./m4}
-@i{define(foo,0000)}
+$ @b{cd gnu/m4}
+$ @b{./m4}
+@b{define(foo,0000)}
 
-@i{foo}
+@b{foo}
 0000
-@i{define(bar,defn(`foo'))}
+@b{define(bar,defn(`foo'))}
 
-@i{bar}
+@b{bar}
 0000
-@i{changequote(<QUOTE>,<UNQUOTE>)}
+@b{changequote(<QUOTE>,<UNQUOTE>)}
 
-@i{define(baz,defn(<QUOTE>foo<UNQUOTE>))}
-@i{baz}
-@i{C-d}
+@b{define(baz,defn(<QUOTE>foo<UNQUOTE>))}
+@b{baz}
+@b{C-d}
 m4: End of input: 0: fatal error: EOF in string
 @end smallexample
 
@@ -623,7 +623,7 @@ m4: End of input: 0: fatal error: EOF in string
 Let's use _GDBN__ to try to see what's going on.
 
 @smallexample
-$ @i{_GDBP__ m4}
+$ @b{_GDBP__ m4}
 @c FIXME: this falsifies the exact text played out, to permit smallbook
 @c FIXME... format to come out better.
 GDB is free software and you are welcome to distribute copies
@@ -642,7 +642,7 @@ tell _GDBN__ to use a narrower display width than usual, so that examples
 will fit in this manual.
 
 @smallexample
-(_GDBP__) @i{set width 70}
+(_GDBP__) @b{set width 70}
 @end smallexample
 
 @noindent
@@ -652,7 +652,7 @@ Having looked at the source, we know the relevant subroutine is
 @code{break} command.
 
 @smallexample
-(_GDBP__) @i{break m4_changequote}
+(_GDBP__) @b{break m4_changequote}
 Breakpoint 1 at 0x62f4: file builtin.c, line 879.
 @end smallexample
 
@@ -662,11 +662,11 @@ control; as long as control does not reach the @code{m4_changequote}
 subroutine, the program runs as usual:
 
 @smallexample
-(_GDBP__) @i{run}
+(_GDBP__) @b{run}
 Starting program: /work/Editorial/gdb/gnu/m4/m4
-@i{define(foo,0000)}
+@b{define(foo,0000)}
 
-@i{foo}
+@b{foo}
 0000
 @end smallexample
 
@@ -676,7 +676,7 @@ suspends execution of @code{m4}, displaying information about the
 context where it stops.
 
 @smallexample
-@i{changequote(<QUOTE>,<UNQUOTE>)}
+@b{changequote(<QUOTE>,<UNQUOTE>)}
 
 Breakpoint 1, m4_changequote (argc=3, argv=0x33c70) 
     at builtin.c:879
@@ -688,7 +688,7 @@ Now we use the command @code{n} (@code{next}) to advance execution to
 the next line of the current function.
 
 @smallexample
-(_GDBP__) @i{n}
+(_GDBP__) @b{n}
 882         set_quotes((argc >= 2) ? TOKEN_DATA_TEXT(argv[1])\
  : nil,
 @end smallexample
@@ -700,7 +700,7 @@ by using the command @code{s} (@code{step}) instead of @code{next}.
 subroutine, so it steps into @code{set_quotes}.
 
 @smallexample
-(_GDBP__) @i{s}
+(_GDBP__) @b{s}
 set_quotes (lq=0x34c78 "<QUOTE>", rq=0x34c88 "<UNQUOTE>")
     at input.c:530
 530         if (lquote != def_lquote)
@@ -715,7 +715,7 @@ in the stack as a whole: the @code{backtrace} command displays a
 stack frame for each active subroutine.
 
 @smallexample
-(_GDBP__) @i{bt}
+(_GDBP__) @b{bt}
 #0  set_quotes (lq=0x34c78 "<QUOTE>", rq=0x34c88 "<UNQUOTE>")
     at input.c:530
 #1  0x6344 in m4_changequote (argc=3, argv=0x33c70) 
@@ -733,15 +733,15 @@ times, we can use @samp{s}; the next two times we use @code{n} to avoid
 falling into the @code{xstrdup} subroutine.
 
 @smallexample
-(_GDBP__) @i{s}
+(_GDBP__) @b{s}
 0x3b5c  532         if (rquote != def_rquote)
-(_GDBP__) @i{s}
+(_GDBP__) @b{s}
 0x3b80  535         lquote = (lq == nil || *lq == '\0') ?  \
 def_lquote : xstrdup(lq);
-(_GDBP__) @i{n}
+(_GDBP__) @b{n}
 536         rquote = (rq == nil || *rq == '\0') ? def_rquote\
  : xstrdup(rq);
-(_GDBP__) @i{n}
+(_GDBP__) @b{n}
 538         len_lquote = strlen(rquote);
 @end smallexample
 
@@ -752,9 +752,9 @@ and right quotes we specified.  We can use the command @code{p}
 (@code{print}) to see their values.
 
 @smallexample
-(_GDBP__) @i{p lquote}
+(_GDBP__) @b{p lquote}
 $1 = 0x35d40 "<QUOTE>"
-(_GDBP__) @i{p rquote}
+(_GDBP__) @b{p rquote}
 $2 = 0x35d50 "<UNQUOTE>"
 @end smallexample
 
@@ -764,7 +764,7 @@ Let's look at some context; we can display ten lines of source
 surrounding the current line, with the @code{l} (@code{list}) command.
 
 @smallexample
-(_GDBP__) @i{l}
+(_GDBP__) @b{l}
 533             xfree(rquote);
 534
 535         lquote = (lq == nil || *lq == '\0') ? def_lquote\
@@ -784,13 +784,13 @@ Let's step past the two lines that set @code{len_lquote} and
 @code{len_rquote}, and then examine the values of those variables.
 
 @smallexample
-(_GDBP__) @i{n}
+(_GDBP__) @b{n}
 539         len_rquote = strlen(lquote);
-(_GDBP__) @i{n}
+(_GDBP__) @b{n}
 540     @}
-(_GDBP__) @i{p len_lquote}
+(_GDBP__) @b{p len_lquote}
 $3 = 9
-(_GDBP__) @i{p len_rquote}
+(_GDBP__) @b{p len_rquote}
 $4 = 7
 @end smallexample
 
@@ -803,9 +803,9 @@ any expression---and that expression can include subroutine calls and
 assignments.
 
 @smallexample
-(_GDBP__) p @i{len_lquote=strlen(lquote)}
+(_GDBP__) @b{p len_lquote=strlen(lquote)}
 $5 = 7
-(_GDBP__) p @i{len_rquote=strlen(rquote)}
+(_GDBP__) @b{p len_rquote=strlen(rquote)}
 $6 = 9
 @end smallexample
 
@@ -816,10 +816,10 @@ executing with the @code{c} (@code{continue}) command, and then try the
 example that caused trouble initially:
 
 @smallexample
-(_GDBP__) @i{c}
+(_GDBP__) @b{c}
 Continuing.
 
-@i{define(baz,defn(<QUOTE>foo<UNQUOTE>))}
+@b{define(baz,defn(<QUOTE>foo<UNQUOTE>))}
 
 baz
 0000
@@ -831,7 +831,7 @@ problem seems to have been just the two typos defining the wrong
 lengths.  We'll let @code{m4} exit by giving it an EOF as input.
 
 @smallexample
-@i{C-d}
+@b{C-d}
 Program exited normally.
 @end smallexample
 
@@ -841,7 +841,7 @@ indicates @code{m4} has finished executing.  We can end our _GDBN__
 session with the _GDBN__ @code{quit} command.
 
 @smallexample
-(_GDBP__) @i{quit}
+(_GDBP__) @b{quit}
 _1__@end smallexample
 
 @node Invocation, Commands, Sample Session, Top
@@ -1025,6 +1025,17 @@ terminates) is not issued when running in batch mode.
 @item -cd=@var{directory}
 Run _GDBN__ using @var{directory} as its working directory,
 instead of the current directory.
+
+_if__(_LUCID__)
+@item -energize @var{authentication}
+@itemx -cadillac @var{authentication}
+When the Energize programming system starts up _GDBN__, it uses this
+option to trigger an alternate mode of interaction.
+@var{authentication} is a pair of numeric codes that identify _GDBN__
+as a client in the Energize environment.  Avoid this option when you run
+_GDBN__ directly from the command line.  See @ref{Energize,,Using
+_GDBN__ with Energize} for more discussion of using _GDBN__ with Energize.
+_fi__(_LUCID__)
 
 @item -fullname
 @itemx -f
@@ -1314,6 +1325,15 @@ that you @emph{always} use @samp{-g} whenever you compile a program.
 You may think your program is correct, but there is no sense in pushing
 your luck.
 
+@cindex optimized code, debugging
+@cindex debugging optimized code
+When you debug a program compiled with @samp{-g -O}, remember that the
+optimizer is rearranging your code; the debugger will show you what's
+really there.  Don't be too surprised when the execution path doesn't
+exactly match your source file!  An extreme example: if you define a
+variable, but never use it, _GDBN__ will never see that
+variable---because the compiler optimizes it out of existence.
+
 Some things do not work as well with @samp{-g -O} as with just
 @samp{-g}, particularly on machines with instruction scheduling.  If in
 doubt, recompile with @samp{-g} alone, and if this fixes the problem,
@@ -1367,13 +1387,13 @@ that process run your program.  (In environments without processes,
 
 The execution of a program is affected by certain information it
 receives from its superior.  _GDBN__ provides ways to specify this
-information, which you must do @i{before} starting your program.  (You
+information, which you must do @emph{before} starting your program.  (You
 can change it after starting your program, but such changes will only affect
 your program the next time you start it.)  This information may be
 divided into four categories:
 
 @table @asis
-@item The @i{arguments.}
+@item The @emph{arguments.}
 Specify the arguments to give your program as the arguments of the
 @code{run} command.  If a shell is available on your target, the shell
 is used to pass the arguments, so that you may use normal conventions
@@ -1382,18 +1402,18 @@ the arguments.  In Unix systems, you can control which shell is used
 with the @code{SHELL} environment variable. @xref{Arguments, ,Your
 Program's Arguments}.
 
-@item The @i{environment.}
+@item The @emph{environment.}
 Your program normally inherits its environment from _GDBN__, but you can
 use the _GDBN__ commands @code{set environment} and @code{unset
 environment} to change parts of the environment that will be given to
 your program.  @xref{Environment, ,Your Program's Environment}.
 
-@item The @i{working directory.}
+@item The @emph{working directory.}
 Your program inherits its working directory from _GDBN__.  You can set
 _GDBN__'s working directory with the @code{cd} command in _GDBN__.
 @xref{Working Directory, ,Your Program's Working Directory}.
 
-@item The @i{standard input and output.}
+@item The @emph{standard input and output.}
 Your program normally uses the same device for standard input and
 standard output as _GDBN__ is using.  You can redirect input and output
 in the @code{run} command line, or you can use the @code{tty} command to
@@ -1720,6 +1740,9 @@ C++), you can also set breakpoints where an exception is raised
 (@pxref{Exception Handling, ,Breakpoints and Exceptions}).
 
 @cindex watchpoints
+@cindex memory tracing
+@cindex breakpoint on memory address
+@cindex breakpoint on variable modification
 A @dfn{watchpoint} is a special breakpoint that stops your program
 when the value of an expression changes.  You must use a different
 command to set watchpoints (@pxref{Set Watchpoints, ,Setting
@@ -1727,11 +1750,13 @@ Watchpoints}), but aside from that, you can manage a watchpoint like
 any other breakpoint: you enable, disable, and delete both breakpoints
 and watchpoints using the same commands.
 
-Each breakpoint or watchpoint is assigned a number when it is created;
-these numbers are successive integers starting with one.  In many of the
-commands for controlling various features of breakpoints you use the
-breakpoint number to say which breakpoint you want to change.  Each
-breakpoint may be @dfn{enabled} or @dfn{disabled}; if disabled, it has
+@cindex breakpoint numbers
+@cindex numbers for breakpoints
+_GDBN__ assigns a number to each breakpoint or watchpoint when you
+create it; these numbers are successive integers starting with one.  In
+many of the commands for controlling various features of breakpoints you
+use the breakpoint number to say which breakpoint you want to change.
+Each breakpoint may be @dfn{enabled} or @dfn{disabled}; if disabled, it has
 no effect on your program until you enable it again.
 
 @menu
@@ -1756,7 +1781,13 @@ no effect on your program until you enable it again.
 
 @kindex break
 @kindex b
-Breakpoints are set with the @code{break} command (abbreviated @code{b}).
+@kindex $bpnum
+@cindex latest breakpoint
+Breakpoints are set with the @code{break} command (abbreviated
+@code{b}).  The debugger convenience variable @samp{$bpnum} records the 
+number of the beakpoint you've set most recently; see @ref{Convenience
+Vars,, Convenience Variables} for a discussion of what you can do with
+convenience variables.
 
 You have several ways to say where the breakpoint should go.
 
@@ -1843,22 +1874,84 @@ classes.
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
 @item info breakpoints @r{[}@var{n}@r{]}
-@item info break @r{[}@var{n}@r{]}
-Print a list of all breakpoints (but not watchpoints) set and not
-deleted, showing their numbers, where in your program they are, and any
-special features in use for them. Disabled breakpoints are included in
-the list, but marked as disabled. @code{info break} with a breakpoint
+@itemx info break @r{[}@var{n}@r{]}
+@itemx info watchpoints @r{[}@var{n}@r{]}
+Print a table of all breakpoints and watchpoints set and not
+deleted, with the following columns for each breakpoint:
+
+@table @emph
+@item Breakpoint Numbers
+@item Type
+Breakpoint or watchpoint.
+@item Disposition
+Whether the breakpoint is marked to be disabled or deleted when hit.
+@item Enabled or Disabled
+Enabled breakpoints are marked with @samp{y}.  {n} marks breakpoints
+that are not enabled.
+@item Address
+Where the breakpoint is in your program, as a memory address
+@item What
+Where the breakpoint is in the source for your program, as a file and
+line number.
+@end table
+
+@noindent
+Breakpoint commands, if any, are listed after the line for the
+corresponding breakpoint.
+
+@noindent
+@code{info break} with a breakpoint
 number @var{n} as argument lists only that breakpoint.  The
 convenience variable @code{$_} and the default examining-address for
 the @code{x} command are set to the address of the last breakpoint
-listed (@pxref{Memory, ,Examining Memory}).  The equivalent command
-for watchpoints is @code{info watch}. 
+listed (@pxref{Memory, ,Examining Memory}).  
 @end table
 
 _GDBN__ allows you to set any number of breakpoints at the same place in
 your program.  There is nothing silly or meaningless about this.  When
 the breakpoints are conditional, this is even useful
 (@pxref{Conditions, ,Break Conditions}).
+
+@cindex negative breakpoint numbers
+@cindex internal _GDBN__ breakpoints
+_GDBN__ itself sometimes sets breakpoints in your program for special
+purposes, such as proper handling of @code{longjmp} (in C programs).
+These internal breakpoints are assigned negative numbers, starting with
+@code{-1}; @samp{info breakpoints} does not display them, but the
+similar command @samp{info all-breakpoints} does.
+
+@table @code
+@kindex all-breakpoints
+@item info all-breakpoints
+Using the same format as @samp{info breakpoints}, display both the
+breakpoints you've set explicitly, and those _GDBN__ is using for
+internal purposes.  Internal breakpoints are shown with negative
+breakpoint numbers.  The type column identifies what kind of breakpoint
+is shown:
+
+@table @code
+@item breakpoint
+Normal, explicitly set breakpoint.
+
+@item watchpoint
+Normal, explicitly set watchpoint.
+
+@item longjmp
+Internal breakpoint, used to handle correctly stepping through
+@code{longjmp} calls.
+
+@item longjmp resume
+Internal breakpoint at the target of a @code{longjmp}.
+
+@item until
+Temporary internal breakpoint used by the _GDBN__ @code{until} command.
+
+@item finish
+Temporary internal breakpoint used by the _GDBN__ @code{finish} command.
+@end table
+
+@end table
+
 
 @node Set Watchpoints, Exception Handling, Set Breaks, Breakpoints
 @subsection Setting Watchpoints
@@ -1881,8 +1974,8 @@ Set a watchpoint for an expression.
 
 @kindex info watchpoints
 @item info watchpoints
-This command prints a list of watchpoints; it is otherwise similar to
-@code{info break}.
+This command prints a list of watchpoints and breakpoints; it is the
+same as @code{info break}.
 @end table
 
 @node Exception Handling, Delete Breaks, Set Watchpoints, Breakpoints
@@ -2589,7 +2682,7 @@ _GDBN__ should not allow your program to see this signal.
 
 When a signal has been set to stop your program, your program cannot see the
 signal until you continue.  It will see the signal then, if @code{pass} is
-in effect for the signal in question @i{at that time}.  In other words,
+in effect for the signal in question @emph{at that time}.  In other words,
 after _GDBN__ reports a signal, you can use the @code{handle} command with
 @code{pass} or @code{nopass} to control whether that signal will be seen by
 your program when you later continue it.
@@ -3322,9 +3415,10 @@ is declared.
 There is an exception: you can refer to a variable or function whose
 scope is a single source file even if the current execution point is not
 in this file.  But it is possible to have more than one such variable or
-function with the same name (in different source files).  If that happens,
-referring to that name has unpredictable effects.  If you wish, you can
-specify a variable in a particular file, using the colon-colon notation:
+function with the same name (in different source files).  If that
+happens, referring to that name has unpredictable effects.  If you wish,
+you can specify a static variable in a particular function or file,
+using the colon-colon notation:
 
 @cindex colon-colon
 @iftex
@@ -3333,10 +3427,12 @@ specify a variable in a particular file, using the colon-colon notation:
 @end iftex
 @example
 @var{file}::@var{variable}
+@var{function}::@var{variable}
 @end example
 
 @noindent
-Here @var{file} is the name of the source file whose variable you want.
+Here @var{file} or @var{function} is the name of the context for the
+static @var{variable}.
 
 @cindex C++ scope resolution
 This use of @samp{::} is very rarely in conflict with the very similar
@@ -4609,6 +4705,12 @@ Pointer dereferencing.  Defined on pointer types.  Same precedence as
 
 @item &
 Address operator.  Defined on variables.  Same precedence as @code{++}.
+
+For debugging C++, _GDBN__ implements a use of @samp{&} beyond what's
+allowed in the C++ language itself: you can use @samp{&(&@var{ref})}
+(or, if you prefer, simply @samp{&&@var{ref}} to examine the address
+where a C++ reference variable (declared with @samp{&@var{ref}}) is
+stored.
 
 @item -
 Negative.  Defined on integral and floating-point types.  Same
@@ -6709,7 +6811,12 @@ string are the simple ones that consist of backslash followed by a
 letter.
 @end table
 
+_if__(_LUCID__)
+@node Emacs, Energize, Sequences, Top
+_fi__(_LUCID__)
+_if__(!_LUCID__)
 @node Emacs, _GDBN__ Bugs, Sequences, Top
+_fi__(!_LUCID__)
 @chapter Using _GDBN__ under GNU Emacs
 
 @cindex emacs
@@ -6880,7 +6987,37 @@ environment.  Users of this environment can use a new command,
 each value is printed in its own window.
 @end ignore
 
+_if__(_LUCID__)
+@node Energize, _GDBN__ Bugs, Emacs, Top
+@chapter Using _GDBN__ with Energize
+
+@cindex Energize
+The Energize Programming System is an integrated development environment
+that includes a point-and-click interface to many programming tools.
+When you use _GDBN__ in this environment, you can use the standard
+Energize graphical interface to drive _GDBN__; you can also, if you
+choose, type _GDBN__ commands as usual in a debugging window.  Even if
+you use the graphical interface, the debugging window (which uses Emacs,
+and resembles the standard Emacs interface to _GDBN__) displays the
+equivalent commands, so that the history of your debugging session is
+properly reflected.
+
+When Energize starts up a _GDBN__ session, it uses one of the
+command-line options @samp{-energize} or @samp{-cadillac} (``cadillac''
+is the name of the communications protocol used by the Energize system).
+This option makes _GDBN__ run as one of the tools in the Energize Tool
+Set: it sends all output to the Energize kernel, and accept input from
+it as well.
+
+See the user manual for the Energize Programming System for 
+information on how to use the Energize graphical interface and the other
+development tools that Energize integrates with _GDBN__.
+
+@node _GDBN__ Bugs, Renamed Commands, Energize, Top
+_fi__(_LUCID__)
+_if__(!_LUCID__)
 @node _GDBN__ Bugs, Renamed Commands, Emacs, Top
+_fi__(!_LUCID__)
 @chapter Reporting Bugs in _GDBN__
 @cindex Bugs in _GDBN__
 @cindex Reporting Bugs in _GDBN__
@@ -7298,10 +7435,10 @@ make
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where GDB will run.
 
-These @code{configure} and @code{make} commands build the three libraries @file{bfd},
-@file{readline}, and @file{libiberty}, then @code{gdb} itself.  The
-configured source files, and the binaries, are left in the
-corresponding source directories.
+This sequence of @code{configure} and @code{make} builds the three
+libraries @file{bfd}, @file{readline}, and @file{libiberty}, then
+@code{gdb} itself.  The configured source files, and the binaries, are
+left in the corresponding source directories.
 
 @code{configure} is a Bourne-shell (@code{/bin/sh}) script; if your
 system does not recognize this automatically when you run a different
@@ -7558,6 +7695,8 @@ If you specify @samp{--destdir=/usr/local}, for example, @code{make
 install} creates @file{/usr/local/bin/gdb}.
 
 @item --srcdir=@var{path}
+@strong{Warning: using this option requires GNU @code{make}, or another
+@code{make} that implements the @code{VPATH} feature.}@*
 Use this option to make configurations in directories separate from the
 GDB source directories.  Among other things, you can use this to
 build (or maintain) several configurations simultaneously, in separate
