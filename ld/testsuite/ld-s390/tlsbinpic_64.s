@@ -28,11 +28,6 @@ sh5:	.long 261
 sh6:	.long 262
 sh7:	.long 263
 sh8:	.long 264
-
-	.type sG1,@tls_object
-	.type sG2,@tls_object
-	.type sG3,@tls_object
-
 	.text
 	.globl	fn2
 	.type	fn2,@function

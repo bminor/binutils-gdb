@@ -30,10 +30,6 @@ sh6:	.word 262
 sh7:	.word 263
 sh8:	.word 264
 
-	.type sH1,@tls_object
-	.type sH2,@tls_object
-	.type sH5,@tls_object
-
 	.text
 	.align	4096
 .LLGETPC0:

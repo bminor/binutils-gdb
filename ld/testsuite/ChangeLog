@@ -1,3 +1,19 @@
+2004-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-powerpc/tls.s: Don't set tls type for undefined syms.
+	* ld-powerpc/tls32.s: Likewise.
+	* ld-powerpc/tlstoc.s: Likewise.
+	* ld-s390/tlsbin.s: Likewise.
+	* ld-s390/tlsbin_64.s: Likewise.
+	* ld-s390/tlsbinpic.s: Likewise.
+	* ld-s390/tlsbinpic_64.s: Likewise.
+	* ld-s390/tlspic1.s: Likewise.
+	* ld-s390/tlspic1_64.s: Likewise.
+	* ld-sparc/tlssunbin32.s: Likewise.
+	* ld-sparc/tlssunbinpic32.s: Likewise.
+	* ld-sparc/tlssunnopic32.s: Likewise.
+	* ld-sparc/tlssunpic32.s: Likewise.
+
 2004-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-s390/tlsbin.s: Set tls type for undefined syms.

@@ -19,9 +19,6 @@ ie4:	.long 0x56789abc
 le4:	.long 0x6789abcd
 le5:	.long 0x789abcde
 
-	.type gd,@tls_object
-	.type ld,@tls_object
-
 	.text
 _start:
 #extern syms

@@ -7,11 +7,6 @@ bl2:	.word 0
 bl3:	.word 0
 bl4:	.word 0
 bl5:	.word 0
-
-	.type sh1,@tls_object
-	.type sh2,@tls_object
-	.type sh3,@tls_object
-
 	.text
 	.align	4096
 	.globl	fn3
