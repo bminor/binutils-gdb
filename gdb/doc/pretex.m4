@@ -53,7 +53,7 @@ files mentioned are as follows:
 		the lines in "none.m4", but of course the second
 		argument to _define__ is <1> rather than <0>.
 
-		This is also a convenient place to define any macros
+		This is also a convenient place to _define__ any macros
 		that you want to expand to different text for
 		different configurations---for example, the name of
 		the program being described.
@@ -69,7 +69,7 @@ Handling" in the "Implementation" section below.
 B. WHAT GOES IN THE PRE-TEXINFO SOURCE
 
 For the most part, the text of your book.  In addition, you can
-include text that is included only conditionally, using the macros
+have text that is included only conditionally, using the macros
 _if__ and _fi__ defined below.  They BOTH take an argument!  This is
 primarily meant for readability (so a human can more easily see what
 conditional end matches what conditional beginning), but the argument
@@ -92,7 +92,7 @@ different configurations:
     _fi__(_AMD29K__ && !_ALL_ARCH__) 
 
 Note that you can use Boolean expressions in the arguments; the
-expression language is that of the builtin m4 macro "eval", described
+expression language is that of the built-in m4 macro `eval', described
 in the m4 manual.
 
 IV. IMPLEMENTATION
@@ -130,6 +130,7 @@ _ppf__(`m4wrap')
 _ppf__(`maketemp')
 _ppf__(`popdef')
 _ppf__(`pushdef')
+_ppf__(`regexp')
 _ppf__(`shift')
 _ppf__(`sinclude')
 _ppf__(`substr')
