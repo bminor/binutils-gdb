@@ -66,6 +66,13 @@ hppaelf_after_parse (void)
 static void
 hppaelf_create_output_section_statements (void)
 {
+  extern const bfd_target bfd_elf32_hppa_linux_vec;
+  extern const bfd_target bfd_elf32_hppa_vec;
+
+  if (link_info.hash->creator != &bfd_elf32_hppa_linux_vec
+      && link_info.hash->creator != &bfd_elf32_hppa_vec)
+    return;
+
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
 				   NULL);
@@ -256,7 +263,7 @@ gld${EMULATION_NAME}_finish (void)
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
-  if (! link_info.relocatable)
+  if (stub_file != NULL && !link_info.relocatable)
     {
       int ret = elf32_hppa_setup_section_lists (output_bfd, &link_info);
 
@@ -298,7 +305,7 @@ gld${EMULATION_NAME}_finish (void)
 	}
 
       /* Now build the linker stubs.  */
-      if (stub_file->the_bfd->sections != NULL)
+      if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
 	{
 	  if (! elf32_hppa_build_stubs (&link_info))
 	    einfo ("%X%P: can not build stubs: %E\n");

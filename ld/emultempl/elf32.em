@@ -845,7 +845,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   const char *rpath;
   asection *sinterp;
 
-  if (link_info.hash->creator->flavour == bfd_target_elf_flavour)
+  if (link_info.hash->type == bfd_link_elf_hash_table)
     _bfd_elf_tls_setup (output_bfd, &link_info);
 
   /* If we are going to make any variable assignments, we need to let

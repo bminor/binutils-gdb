@@ -1,3 +1,11 @@
+2003-12-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Test
+	hash table type rather than testing creator flavour.
+	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
+	Only create stub_file bfd if hash table creator is as expected.
+	(gld${EMULATION_NAME}_finish): Test stub_file.
+
 2003-11-28  Marcel Moolenaar  <marcel@xcllnt.net>
 
 	* emulparams/elf64_ia64_fbsd.sh (TEXT_START_ADDR): Define.
