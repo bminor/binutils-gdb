@@ -1,3 +1,7 @@
+Tue Aug 17 09:44:42 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* configure.in: Don't pass cpu to config.bfd.
+
 Tue Aug 17 12:23:52 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m88k-dis.c (m88kdis): Make class unsigned.
