@@ -94,7 +94,8 @@ struct ui_out_impl mi_ui_out_impl =
 
 extern void _initialize_mi_out (void);
 static void field_separator (struct ui_out *uiout);
-static void mi_open (struct ui_out *uiout, enum ui_out_type type);
+static void mi_open (struct ui_out *uiout, const char *name,
+		     enum ui_out_type type);
 static void mi_close (struct ui_out *uiout, enum ui_out_type type);
 
 static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
@@ -107,12 +108,8 @@ mi_table_begin (struct ui_out *uiout, int nbrofcols,
 		const char *tblid)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  field_separator (uiout);
-  if (tblid)
-    fprintf_unfiltered (data->buffer, "%s=", tblid);
-  mi_open (uiout, ui_out_type_tuple);
+  mi_open (uiout, tblid, ui_out_type_tuple);
   data->first_header = 0;
-  data->supress_field_separator = 1;
 }
 
 /* Mark beginning of a table body */
@@ -133,8 +130,6 @@ mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   mi_close (uiout, ui_out_type_tuple);
-  /* If table was empty this flag did not get reset yet */
-  data->supress_field_separator = 0;
 }
 
 /* Specify table header */
@@ -146,8 +141,7 @@ mi_table_header (struct ui_out *uiout, int width, int alignment,
   struct ui_out_data *data = ui_out_data (uiout);
   if (!data->first_header++)
     {
-      fputs_unfiltered ("hdr=", data->buffer);
-      mi_open (uiout, ui_out_type_tuple);
+      mi_open (uiout, "hdr", ui_out_type_tuple);
     }
   mi_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
@@ -161,11 +155,7 @@ mi_begin (struct ui_out *uiout,
 	  const char *id)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  field_separator (uiout);
-  data->supress_field_separator = 1;
-  if (id)
-    fprintf_unfiltered (data->buffer, "%s=", id);
-  mi_open (uiout, type);
+  mi_open (uiout, id, type);
 }
 
 /* Mark end of a list */
@@ -177,8 +167,6 @@ mi_end (struct ui_out *uiout,
 {
   struct ui_out_data *data = ui_out_data (uiout);
   mi_close (uiout, type);
-  /* If list was empty this flag did not get reset yet */
-  data->supress_field_separator = 0;
 }
 
 /* output an int field */
@@ -313,9 +301,14 @@ field_separator (struct ui_out *uiout)
 
 static void
 mi_open (struct ui_out *uiout,
+	 const char *name,
 	 enum ui_out_type type)
 {
   struct ui_out_data *data = ui_out_data (uiout);
+  field_separator (uiout);
+  data->supress_field_separator = 1;
+  if (name)
+    fprintf_unfiltered (data->buffer, "%s=", name);
   switch (type)
     {
     case ui_out_type_tuple:
@@ -345,6 +338,7 @@ mi_close (struct ui_out *uiout,
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
+  data->supress_field_separator = 0;
 }
 
 /* add a string to the buffer */
