@@ -1,5 +1,7 @@
 Wed Jun 15 20:44:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* as.c (parse_args): Cast xmalloc return value.
+
 	* Makefile.in (config-stamp): If $(defs) contains multiple words,
 	emit a #define line for each.
 	* configure.in: For sparc64 target, use sparc cpu files and add
