@@ -1,3 +1,7 @@
+2004-10-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* infcall.c (call_function_by_hand): Use correct VALUE_TYPE macro.
+
 2004-10-08  Nick Roberts  <nickrob@snap.net.nz>
 
 	* MAINTAINERS: Update e-mail address.

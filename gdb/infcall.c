@@ -307,7 +307,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   CORE_ADDR funaddr;
   int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
-  struct type *ftype = check_typedef (SYMBOL_TYPE (function));
+  struct type *ftype = check_typedef (VALUE_TYPE (function));
   CORE_ADDR bp_addr;
   struct regcache *caller_regcache;
   struct cleanup *caller_regcache_cleanup;
