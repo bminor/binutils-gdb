@@ -1,3 +1,10 @@
+2004-09-23  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/396
+	* elf32-sparc.c (elf32_sparc_final_write_processing): Handle
+	bfd_mach_sparc_sparclet and bfd_mach_sparc_sparclite.  Remove
+	redundant assignment of EM_SPARC.
+
 2004-09-22  Brian Ford  <ford@vss.fsi.com>
 
 	* pei-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Enable 16 byte

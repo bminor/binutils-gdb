@@ -3371,6 +3371,8 @@ elf32_sparc_final_write_processing (abfd, linker)
   switch (bfd_get_mach (abfd))
     {
     case bfd_mach_sparc :
+    case bfd_mach_sparc_sparclet :
+    case bfd_mach_sparc_sparclite :
       break; /* nothing to do */
     case bfd_mach_sparc_v8plus :
       elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
@@ -3389,7 +3391,6 @@ elf32_sparc_final_write_processing (abfd, linker)
 				       | EF_SPARC_SUN_US3;
       break;
     case bfd_mach_sparc_sparclite_le :
-      elf_elfheader (abfd)->e_machine = EM_SPARC;
       elf_elfheader (abfd)->e_flags |= EF_SPARC_LEDATA;
       break;
     default :
