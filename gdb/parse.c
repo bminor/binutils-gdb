@@ -354,10 +354,6 @@ write_exp_bitstring (str)
   write_exp_elt_longcst ((LONGEST) bits);
 }
 
-/* Type that corresponds to the address given in a minimal symbol.  */
-
-static struct type *msymbol_addr_type;
-
 /* Add the appropriate elements for a minimal symbol to the end of
    the expression.  */
 
@@ -368,7 +364,7 @@ write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
      struct type *data_symbol_type;
 {
   write_exp_elt_opcode (OP_LONG);
-  write_exp_elt_type (msymbol_addr_type);
+  write_exp_elt_type (lookup_pointer_type (builtin_type_void));
   write_exp_elt_longcst ((LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
   write_exp_elt_opcode (OP_LONG);
 
@@ -906,11 +902,4 @@ _initialize_parse ()
   type_stack_depth = 0;
   type_stack = (union type_stack_elt *)
     xmalloc (type_stack_size * sizeof (*type_stack));
-
-  /* We don't worry too much about what the name of this type is
-     because the name should rarely appear in output to the user.  */
-
-  msymbol_addr_type =
-    init_type (TYPE_CODE_PTR, TARGET_PTR_BIT / HOST_CHAR_BIT, 0,
-	       "void *", NULL);
 }
