@@ -1,3 +1,8 @@
+2001-03-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/m68kelf.em (m68k_elf_after_allocation): Call
+	after_allocation_default, not gld..._before_allocation.
+
 001-02-18  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.tgt: Add FreeBSD/Alpha, FreeBSD/x86-64, FreeBSD/ia64,
