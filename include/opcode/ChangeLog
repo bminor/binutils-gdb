@@ -1,3 +1,7 @@
+Tue Oct 24 10:49:10 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa.h: Add lci and syncdma instructions.
+
 Mon Oct 23 11:09:16 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* mips.h: Added INSN_4100 flag to mark NEC VR4100 specific
