@@ -1,3 +1,8 @@
+Thu Jul 22 15:41:09 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* Makefile.in: Use REMOTE_O macro not remote.o.
+	* config/i960/{nindy960,vxworks960}: Don't use remote.o.
+
 Thu Jul 22 12:43:25 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coredep.c: If NEED_SYS_CORE_H defined, include <sys/core.h>
