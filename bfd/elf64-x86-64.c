@@ -492,17 +492,17 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	  if (h == NULL)
 	    continue;
 
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  if (h->plt.refcount == -1)
-	    {
-	      h->plt.refcount = 1;
-	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	    }
+	    h->plt.refcount = 1;
 	  else
 	    h->plt.refcount += 1;
 	  break;
 
-	case R_X86_64_64:
+	case R_X86_64_8:
+	case R_X86_64_16:
 	case R_X86_64_32:
+	case R_X86_64_64:
 	case R_X86_64_32S:
 	case R_X86_64_PC32:
 	  if (h != NULL)
@@ -524,7 +524,9 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	     and symbol visibility changes render the symbol local.  */
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
-	      && (ELF64_R_TYPE (rel->r_info) != R_X86_64_PC32
+	      && (((ELF64_R_TYPE (rel->r_info) != R_X86_64_PC8)
+		  && (ELF64_R_TYPE (rel->r_info) != R_X86_64_PC16)
+		  && (ELF64_R_TYPE (rel->r_info) != R_X86_64_PC32))
 		  || (h != NULL
 		      && (! info->symbolic
 			  || (h->elf_link_hash_flags
@@ -560,7 +562,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 			flags |= SEC_ALLOC | SEC_LOAD;
 		      if (sreloc == NULL
 			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
+			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
 			return false;
 		    }
 		}
@@ -573,7 +575,10 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 		 that this function is only called if we are using an
 		 elf64_x86_64 linker hash table, which means that h is
 		 really a pointer to an elf64_x86_64_link_hash_entry.  */
-	      if (h != NULL && ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)
+	      if (h != NULL
+		  && ((ELF64_R_TYPE (rel->r_info) == R_X86_64_PC8)
+		      || (ELF64_R_TYPE (rel->r_info) == R_X86_64_PC16)
+		      || (ELF64_R_TYPE (rel->r_info) == R_X86_64_PC32)))
 		{
 		  struct elf64_x86_64_link_hash_entry *eh;
 		  struct elf64_x86_64_pcrel_relocs_copied *p;
@@ -611,7 +616,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_X86_64_GNU_VTENTRY:
-	  if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_offset))
+	  if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return false;
 	  break;
 	}
@@ -1725,6 +1730,7 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	      && (info->symbolic || h->dynindx == -1)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	{
+	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rela.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value
 			   + h->root.u.def.section->output_section->vma

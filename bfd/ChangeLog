@@ -1,3 +1,10 @@
+2001-06-07  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_symbol): Add an
+	assertion.
+	(elf64_x86_64_check_relocs): Fix VTENTRY relocation; set an
+	alignment of 8 for .rela sections; handle further relocations.
+
 2001-06-06  Christian Groessler <cpg@aladdin.de>
 
         * coff-z8k.c: Fix formatting.
