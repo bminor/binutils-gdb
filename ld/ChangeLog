@@ -1,3 +1,8 @@
+Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
+
+	* emulparams/elf64hppa.sh (OTHER_BSS_END_SECTIONS): Add
+	additional symbols referenced by newer crt0.o files from HP.
+
 2001-11-12  Anthony Green  <green@redhat.com>
 
 	* emulparams/armelf.sh (DATA_START_SYMBOLS): New symbol.

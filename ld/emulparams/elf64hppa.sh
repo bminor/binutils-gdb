@@ -31,7 +31,7 @@ OTHER_READWRITE_SECTIONS='.opd : { *(.opd) } PROVIDE (__gp = .); .plt : { *(.plt
 # __TLS_SIZE to the size of the thread bss section.
 OTHER_BSS_SECTIONS='.hbss : { *(.hbss) } .tbss : { *(.tbss) }'
 #OTHER_BSS_END_SYMBOLS='PROVIDE (__TLS_SIZE = SIZEOF (.tbss));'
-OTHER_BSS_END_SYMBOLS='PROVIDE (__TLS_SIZE = 0);'
+OTHER_BSS_END_SYMBOLS='PROVIDE (__TLS_SIZE = 0); PROVIDE(__TLS_INIT_SIZE = 0); PROVIDE(__TLS_INIT_START = 0); PROVIDE(__TLS_INIT_A = 0); PROVIDE(__TLS_PREALLOC_DTV_A = 0);'
 
 # HPs use .dlt where systems use .got.  Sigh.
 OTHER_GOT_RELOC_SECTIONS='.rela.dlt : { *(.rela.dlt) }'
