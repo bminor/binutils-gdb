@@ -5,6 +5,12 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* write.c (write_relocs): Call SET_SECTION_RELOCS if it is
+	defined.
+	* config/obj-coff.h (SET_SECTION_RELOCS): Define.
+	* doc/internals.texi (Object format backend): Document
+	SET_SECTION_RELOCS.
+
 	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust
 	relocations against global symbols if TE_PE.
 

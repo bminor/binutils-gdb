@@ -1068,6 +1068,10 @@ write_relocs (abfd, sec, xxx)
 			   (bfd_get_section_flags (abfd, sec)
 			    & (flagword) ~SEC_RELOC));
 
+#ifdef SET_SECTION_RELOCS
+  SET_SECTION_RELOCS (sec, relocs, n);
+#endif
+
 #ifdef DEBUG3
   {
     int i;

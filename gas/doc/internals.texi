@@ -1374,6 +1374,13 @@ completed, but before the relocations have been generated.
 @item obj_frob_file_after_relocs
 If you define this macro, GAS will call it after the relocs have been
 generated.
+
+@item SET_SECTION_RELOCS (@var{sec}, @var{relocs}, @var{n})
+@cindex SET_SECTION_RELOCS
+If you define this, it will be called after the relocations have been set for
+the section @var{sec}.  The list of relocations is in @var{relocs}, and the
+number of relocations is in @var{n}.  This is only used with
+@code{BFD_ASSEMBLER}.
 @end table
 
 @node Emulations

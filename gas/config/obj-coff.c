@@ -1314,6 +1314,8 @@ coff_adjust_section_syms (abfd, sec, x)
       && sec != bss_section)
     return;
   secsym = section_symbol (sec);
+  /* This is an estimate; we'll plug in the real value using
+     SET_SECTION_RELOCS later */
   SA_SET_SCN_NRELOC (secsym, nrelocs);
   SA_SET_SCN_NLINNO (secsym, nlnno);
 }

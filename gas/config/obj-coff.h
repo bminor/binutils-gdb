@@ -841,4 +841,8 @@ extern void obj_coff_pe_handle_link_once ();
 extern void obj_coff_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) obj_coff_init_stab_section (seg)
 
+/* Store the number of relocations in the section aux entry.  */
+#define SET_SECTION_RELOCS(sec, relocs, n) \
+  SA_SET_SCN_NRELOC (section_symbol (sec), n)
+
 #endif /* OBJ_FORMAT_H */
