@@ -1,3 +1,12 @@
+2004-02-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.h: Update copyright year.
+	(i387_collect_fxsave): New prototype.
+	* i387-tdep.c: Update copyright year.
+	(i387_collect_fxsave): New function containing most of the code
+	from i387_fill_fxsave.
+	(i387_fill_fxsave): Call i387_collect_fxsave.
+
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
         * amd64-linux-nat.c (ps_get_thread_area): When architecture is
