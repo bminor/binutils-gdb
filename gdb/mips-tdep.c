@@ -5741,9 +5741,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Unwind the frame.  */
   set_gdbarch_unwind_pc (gdbarch, mips_unwind_pc);
-  frame_unwind_append_sniffer (gdbarch, mips_mdebug_frame_sniffer);
   set_gdbarch_unwind_dummy_id (gdbarch, mips_unwind_dummy_id);
-  frame_base_append_sniffer (gdbarch, mips_mdebug_frame_base_sniffer);
 
   /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
@@ -5807,6 +5805,10 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  /* Unwind the frame.  */
+  frame_unwind_append_sniffer (gdbarch, mips_mdebug_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, mips_mdebug_frame_base_sniffer);
 
   return gdbarch;
 }

@@ -1,3 +1,16 @@
+2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (mips-linux-tdep.o): Update dependencies.
+	* mips-tdep.c (mips_gdbarch_init): Move frame predicates
+	to after osabi initialization.
+	* mips-linux-tdep.c: Include "trad-frame.h" and "tramp-frame.h".
+	(mips_linux_o32_sigframe_init, mips_linux_n32n64_sigframe_init): New
+	functions.
+	(mips_linux_o32_sigframe, mips_linux_o32_rt_sigframe)
+	(mips_linux_n32_rt_sigframe, mips_linux_n64_rt_sigframe): New
+	variables.
+	(mips_linux_init_abi): Append signal trampoline unwinders.
+
 2004-03-24  Andrew Cagney  <cagney@redhat.com>
 
 	* tramp-frame.h (TRAMP_SENTINEL_INSN): Define, document.
