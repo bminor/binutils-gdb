@@ -2,6 +2,7 @@
 
 	From Mark Elbrecht:
 	* makefile.dos: Remove; obsolete.
+	* configure.bat: Remove; obsolete.
 
 1999-07-14  Richard Henderson  <rth@cygnus.com>
 
