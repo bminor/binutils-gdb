@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -253,7 +253,6 @@ lookup_minimal_symbol_text (name, sfile, objf)
   return NULL;
 }
 
-
 /* Search through the minimal symbol table for each objfile and find the
    symbol whose address is the largest address that is still less than or
    equal to PC.  Returns a pointer to the minimal symbol if such a symbol
@@ -325,6 +324,15 @@ lookup_minimal_symbol_by_pc (pc)
 		      lo = new;
 		    }
 		}
+
+	      /* If we have multiple symbols at the same address, we want
+		 hi to point to the last one.  That way we can find the
+		 right symbol if it has an index greater than hi.  */
+	      while (hi < objfile -> minimal_symbol_count - 1
+		     && (SYMBOL_VALUE_ADDRESS (&msymbol[hi])
+			 == SYMBOL_VALUE_ADDRESS (&msymbol[hi+1])))
+		hi++;
+
 	      /* The minimal symbol indexed by hi now is the best one in this
 		 objfile's minimal symbol table.  See if it is the best one
 		 overall. */

@@ -1,5 +1,5 @@
 /* Read os9/os9k symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1409,8 +1409,7 @@ os9k_read_ofile_symtab (pst)
      which comes from pst->textlow is correct. */
   if (last_source_start_addr == 0)
     last_source_start_addr = text_offset;
-  pst->symtab = end_symtab (text_offset + text_size, 0, 0, objfile,
-			    SECT_OFF_TEXT);
+  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT);
   end_stabs ();
 }
 
@@ -1566,7 +1565,7 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	      *p = '\0';
 	      if (symfile_depth++ == 0) {
 		if (last_source_file) {
-          	  end_symtab (valu, 0, 0, objfile, SECT_OFF_TEXT);
+          	  end_symtab (valu, objfile, SECT_OFF_TEXT);
 		  end_stabs ();
 		}
 		start_stabs ();

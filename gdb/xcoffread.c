@@ -1,5 +1,5 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    	     Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -1023,7 +1023,7 @@ read_xcoff_symtab (pst)
 	  if (last_source_file)
 	    {
 	      pst->symtab =
-		end_symtab (cur_src_end_addr, 1, 0, objfile, SECT_OFF_TEXT);
+		end_symtab (cur_src_end_addr, objfile, SECT_OFF_TEXT);
 	      end_stabs ();
 	    }
 
@@ -1087,8 +1087,7 @@ read_xcoff_symtab (pst)
 			{
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
-			  end_symtab (file_end_addr, 1, 0, objfile,
-				      SECT_OFF_TEXT);
+			  end_symtab (file_end_addr, objfile, SECT_OFF_TEXT);
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
@@ -1203,7 +1202,7 @@ read_xcoff_symtab (pst)
 
 	  complete_symtab (filestring, file_start_addr);
 	  cur_src_end_addr = file_end_addr;
-	  end_symtab (file_end_addr, 1, 0, objfile, SECT_OFF_TEXT);
+	  end_symtab (file_end_addr, objfile, SECT_OFF_TEXT);
 	  end_stabs ();
 
 	  /* XCOFF, according to the AIX 3.2 documentation, puts the filename
@@ -1393,7 +1392,7 @@ read_xcoff_symtab (pst)
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      s = end_symtab (file_end_addr, 1, 0, objfile, SECT_OFF_TEXT);
+      s = end_symtab (file_end_addr, objfile, SECT_OFF_TEXT);
       /* When reading symbols for the last C_FILE of the objfile, try
          to make sure that we set pst->symtab to the symtab for the
          file, not to the _globals_ symtab.  I'm not sure whether this
@@ -1844,6 +1843,12 @@ xcoff_symfile_init (objfile)
   /* Allocate struct to keep track of the symfile */
   objfile -> sym_private = xmmalloc (objfile -> md,
 				     sizeof (struct coff_symfile_info));
+
+  /* XCOFF objects may be reordered, so set OBJF_REORDERED.  If we
+     find this causes a significant slowdown in gdb then we could
+     set it in the debug symbol readers only when necessary.  */
+  objfile->flags |= OBJF_REORDERED;
+
   init_entry_point_info (objfile);
 }
 

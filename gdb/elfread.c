@@ -1,5 +1,5 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -705,9 +705,13 @@ elf_symfile_finish (objfile)
    just a stub. */
 
 static void
-elf_symfile_init (ignore)
-     struct objfile *ignore;
+elf_symfile_init (objfile)
+     struct objfile *objfile;
 {
+  /* ELF objects may be reordered, so set OBJF_REORDERED.  If we
+     find this causes a significant slowdown in gdb then we could
+     set it in the debug symbol readers only when necessary.  */
+  objfile->flags |= OBJF_REORDERED;
 }
 
 /* ELF specific parsing routine for section offsets.

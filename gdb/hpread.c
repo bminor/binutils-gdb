@@ -1,5 +1,5 @@
 /* Read hp debug symbols and convert to internal format, for GDB.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1996 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1116,7 +1116,7 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 
   current_objfile = NULL;
 
-  return end_symtab (text_offset + text_size, 0, 0, objfile, 0);
+  return end_symtab (text_offset + text_size, objfile, 0);
 }
 
 
@@ -1896,7 +1896,7 @@ hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
 	case DNTT_TYPE_MODULE:
 	  /* Ending a module ends the symbol table for that module.  */
 	  valu = text_offset + text_size + offset;
-	  (void) end_symtab (valu, 0, 0, objfile, 0);
+	  (void) end_symtab (valu, objfile, 0);
 	  break;
 
 	case DNTT_TYPE_FUNCTION:

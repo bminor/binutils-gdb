@@ -1,5 +1,5 @@
 /* Build symbol tables in GDB's internal format.
-   Copyright (C) 1986-1995 Free Software Foundation, Inc.
+   Copyright (C) 1986-1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -231,7 +231,7 @@ extern char *
 pop_subfile PARAMS ((void));
 
 extern struct symtab *
-end_symtab PARAMS ((CORE_ADDR, int, int, struct objfile *, int));
+end_symtab PARAMS ((CORE_ADDR, struct objfile *, int));
 
 extern void
 scan_file_globals PARAMS ((struct objfile *));

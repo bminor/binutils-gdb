@@ -1,5 +1,6 @@
 /* DWARF debugging format support for GDB.
-   Copyright (C) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996
+   Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
 
@@ -1926,7 +1927,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
 
-  symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile, 0);
+  symtab = end_symtab (dip -> at_high_pc, objfile, 0);
   if (symtab != NULL)
     {
       symtab -> language = cu_language;

@@ -1,5 +1,5 @@
 /* Support routines for building symbol tables in GDB's internal format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1995, 1996
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -737,10 +737,8 @@ start_symtab (name, dirname, start_addr)
    because then gdb will never know about this empty file (FIXME). */
 
 struct symtab *
-end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
+end_symtab (end_addr, objfile, section)
      CORE_ADDR end_addr;
-     int sort_pending;
-     int sort_linevec;
      struct objfile *objfile;
      int section;
 {
@@ -774,14 +772,12 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
 	}
     }
 
-  /* It is unfortunate that in xcoff, pending blocks might not be ordered
-     in this stage. Especially, blocks for static functions will show up at
-     the end.  We need to sort them, so tools like `find_pc_function' and
-     `find_pc_block' can work reliably. */
-
-  if (sort_pending && pending_blocks)
+  /* Reordered executables may have out of order pending blocks; if
+     OBJF_REORDERED is true, then sort the pending blocks.  */
+  if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
     {
-      /* FIXME!  Remove this horrid bubble sort and use qsort!!! */
+      /* FIXME!  Remove this horrid bubble sort and use qsort!!!
+	 It'd be a whole lot easier if they weren't in a linked list!!! */
       int swapped;
       do
 	{
@@ -865,12 +861,11 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
 	      subfile->line_vector = (struct linetable *)
 		xrealloc ((char *) subfile->line_vector, linetablesize);
 #endif
-	      /* If sort_linevec is false, we might want just check to make
-		 sure they are sorted and complain() if not, as a way of
-		 tracking down compilers/symbol readers which don't get
-		 them sorted right.  */
 
-	      if (sort_linevec)
+	      /* Like the pending blocks, the line table may be scrambled
+		 in reordered executables.  Sort it if OBJF_REORDERED is
+		 true.  */
+	      if (objfile->flags & OBJF_REORDERED)
 		qsort (subfile->line_vector->item,
 		       subfile->line_vector->nitems,
 		       sizeof (struct linetable_entry), compare_line_numbers);

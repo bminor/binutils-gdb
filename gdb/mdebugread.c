@@ -1,5 +1,5 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -3271,7 +3271,7 @@ psymtab_to_symtab_1 (pst, filename)
 	  else
 	    complain (&stab_unknown_complaint, name);
 	}
-      st = end_symtab (pst->texthigh, 0, 0, pst->objfile, SECT_OFF_TEXT);
+      st = end_symtab (pst->texthigh, pst->objfile, SECT_OFF_TEXT);
       end_stabs ();
 
       /* Sort the symbol table now, we are done adding symbols to it.

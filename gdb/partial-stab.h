@@ -1,5 +1,5 @@
 /* Shared code to pre-read a stab (dbx-style), when building a psymtab.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -103,7 +103,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		  && CUR_SYMBOL_VALUE >= pst->textlow)
 		{
 		  END_PSYMTAB (pst, psymtab_include_list, includes_used,
-			       symnum * symbol_size, CUR_SYMBOL_VALUE,
+			       symnum * symbol_size,
+			       CUR_SYMBOL_VALUE > pst->texthigh
+				 ? CUR_SYMBOL_VALUE : pst->texthigh, 
 			       dependency_list, dependencies_used);
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
@@ -214,7 +216,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	      if (pst)
 		{
 		  END_PSYMTAB (pst, psymtab_include_list, includes_used,
-			       symnum * symbol_size, valu,
+			       symnum * symbol_size,
+			       valu > pst->texthigh ? valu : pst->texthigh,
 			       dependency_list, dependencies_used);
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
@@ -364,6 +367,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	case N_SCOPE:		/* Same.   */
 
 	  SET_NAMESTRING();
+
+#ifdef DBXREAD_ONLY
+	  /* See if this is an end of function stab.  */
+	  if (CUR_SYMBOL_TYPE == N_FUN && ! strcmp (namestring, ""))
+	    {
+	      unsigned long valu;
+
+	      /* It's value is the size (in bytes) of the function for
+		 function relative stabs, or the address of the function's
+		 end for old style stabs.  */
+	      valu = CUR_SYMBOL_VALUE + last_function_start;
+	      if (pst->texthigh == 0 || valu > pst->texthigh)
+		pst->texthigh = valu;
+	      break;
+	     }
+#endif
 
 	  p = (char *) strchr (namestring, ':');
 	  if (!p)
@@ -527,6 +546,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	    case 'f':
 	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
+	      /* Keep track of the start of the last function so we
+		 can handle end of function symbols.  */
+	      last_function_start = CUR_SYMBOL_VALUE;
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
@@ -541,6 +563,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		startup_file_end = CUR_SYMBOL_VALUE;
 #endif
 	      /* End kludge.  */
+
+	      /* In reordered executables this function may lie outside
+		 the bounds created by N_SO symbols.  If that's the case
+		 use the address of this function as the low bound for
+		 the partial symbol table.  */
+	      if (pst->textlow == 0 || CUR_SYMBOL_VALUE < pst->textlow)
+		pst->textlow = CUR_SYMBOL_VALUE;
 #endif /* DBXREAD_ONLY */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
@@ -554,6 +583,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	    case 'F':
 	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
+	      /* Keep track of the start of the last function so we
+		 can handle end of function symbols.  */
+	      last_function_start = CUR_SYMBOL_VALUE;
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
@@ -568,6 +600,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		startup_file_end = CUR_SYMBOL_VALUE;
 #endif
 	      /* End kludge.  */
+	      /* In reordered executables this function may lie outside
+		 the bounds created by N_SO symbols.  If that's the case
+		 use the address of this function as the low bound for
+		 the partial symbol table.  */
+	      if (pst->textlow == 0 || CUR_SYMBOL_VALUE < pst->textlow)
+		pst->textlow = CUR_SYMBOL_VALUE;
 #endif /* DBXREAD_ONLY */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,

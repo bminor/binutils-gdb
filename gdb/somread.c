@@ -1,5 +1,5 @@
 /* Read HP PA/Risc object files for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1996 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -408,13 +408,16 @@ som_symfile_finish (objfile)
   hpread_symfile_finish (objfile);
 }
 
-/* SOM specific initialization routine for reading symbols.
+/* SOM specific initialization routine for reading symbols.  */
 
-   Nothing SOM specific left to do anymore.  */
 static void
 som_symfile_init (objfile)
      struct objfile *objfile;
 {
+  /* SOM objects may be reordered, so set OBJF_REORDERED.  If we
+     find this causes a significant slowdown in gdb then we could
+     set it in the debug symbol readers only when necessary.  */
+  objfile->flags |= OBJF_REORDERED;
   hpread_symfile_init (objfile);
 }
 
