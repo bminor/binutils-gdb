@@ -1,3 +1,10 @@
+Wed Mar  8 15:21:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add new mips4 instructions.  Don't set INSN_RFE for
+	`rfe'.
+	* mips-dis.c (print_insn_arg): Handle new argument types 'h', 'R',
+	'N', and 'M'.
+
 Wed Mar  8 02:54:05 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* m68k-dis.c (opcode): New function.  Returns address of opcode
@@ -16,7 +23,6 @@ Tue Mar  7 21:14:14 1995  Doug Evans  <dje@chestnut.cygnus.com>
 	* arc-dis.c (print_insn_arc_base): Split into big and little fns.
 	(print_insn_arc_{host,graphics,audio}): Likewise.
 	(print_insn): Add prototype.
-	Delete "+ 4" addition to relative branch address.
 	(arc_get_disassembler): New arg `big_p'.  Return little or big
 	print fn accordingly.
 	* arc-opc.c (arc_opcode_init_tables): Init arc_operand_map once.
