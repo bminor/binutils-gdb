@@ -1,3 +1,9 @@
+2005-02-10  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf64-mips.c (mips16_gprel_reloc): Update a comment.
+	* elfn32-mips.c (mips16_gprel_reloc): Keep R_MIPS16_GPREL
+	relocations against external symbols unchanged.
+
 2005-02-08  Paul Brook  <paul@codesourcery.com>
 
 	* elflink.c (elf_link_input_bfd): Ignore symbols from null input

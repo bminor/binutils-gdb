@@ -1709,8 +1709,8 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_signed_vma val;
   bfd_vma relocation;
 
-  /* If we're relocating, and this is an external symbol with no
-     addend, we don't want to change anything.  */
+  /* If we're relocating, and this is an external symbol, we don't want
+     to change anything.  */
   if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)

@@ -1507,6 +1507,16 @@ mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_signed_vma val;
   bfd_vma relocation;
 
+  /* If we're relocating, and this is an external symbol, we don't want
+     to change anything.  */
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (symbol->flags & BSF_LOCAL) != 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
   if (output_bfd != NULL)
     relocatable = TRUE;
   else
