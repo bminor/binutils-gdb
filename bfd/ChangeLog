@@ -1,3 +1,12 @@
+Thu Jan 14 15:51:58 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* libcoff.h, coffgen.c (coff_count_linenumbers), coffcode.h
+	(coff_write_object_contents): coff_count_linenumbers returns the
+	number of line number records it found.
+
+	* coffgen.c (coff_write_linenumbers): only write out line numbers
+	in the section they belong to.
+
 Mon Jan 11 18:32:22 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* targets.c (bfd_target): Added relocateable argument to
