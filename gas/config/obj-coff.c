@@ -255,10 +255,10 @@ relax_addressT segment_address_in_file;
 			   Two relocations are emmited, R_IHIHALF, and R_IHCONST. The second one 
 			   doesn't contain a symbol, but uses the value for offset */
 			if (ri.r_type == R_IHIHALF) {
-			  /* now emit the second bit */
-			  ri.r_type = R_IHCONST;	
-			  ri.r_symndx = 0;
-			*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
+			    /* now emit the second bit */
+			    ri.r_type = R_IHCONST;	
+			    ri.r_symndx = fixP->fx_addnumber;
+			    *where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
 			}
 
 #endif
