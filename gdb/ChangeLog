@@ -1,5 +1,9 @@
 2001-06-29  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/arm/tm-arm.h: Include "floatformat.h".
+
+2001-06-29  Andrew Cagney  <ac131313@redhat.com>
+
 	* i387-tdep.c: Include "gdb_assert.h".
 	(print_i387_value): Use extract_floating to extract the FP value
 	from a zero padded local buffer.
