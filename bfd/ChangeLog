@@ -1,3 +1,8 @@
+2003-03-28  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Correctly combine
+	visibilities.
+
 2003-03-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Reset self_dtpmod_offset
