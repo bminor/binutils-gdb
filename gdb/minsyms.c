@@ -298,7 +298,8 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
      enum minimal_symbol_type ms_type;
      struct objfile *objfile;
 {
-  prim_record_minimal_symbol (name, address, ms_type, NULL, -1, objfile);
+  prim_record_minimal_symbol_and_info (name, address, ms_type,
+				       NULL, -1, objfile);
 }
 
 void
