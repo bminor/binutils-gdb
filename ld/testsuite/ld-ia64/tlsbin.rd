@@ -1,7 +1,7 @@
 #source: tlsbinpic.s
 #source: tlsbin.s
 #as:
-#ld: -shared -melf64_ia64
+#ld: -shared
 #readelf: -WSsrl
 #target: ia64-*-*
 

@@ -1,7 +1,7 @@
 #source: tlspic1.s
 #source: tlspic2.s
 #as:
-#ld: -shared -melf64_ia64
+#ld: -shared
 #readelf: -WSsrl
 #target: ia64-*-*
 

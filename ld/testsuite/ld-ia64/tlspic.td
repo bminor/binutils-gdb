@@ -1,11 +1,11 @@
 #source: tlspic1.s
 #source: tlspic2.s
 #as:
-#ld: -shared -melf64_ia64
+#ld: -shared
 #objdump: -sj.tdata
 #target: ia64-*-*
 
-.*: +file format elf64-ia64-little
+.*: +file format elf..-ia64-.*
 
 Contents of section .tdata:
  12000 11000000 12000000 13000000 14000000  .*

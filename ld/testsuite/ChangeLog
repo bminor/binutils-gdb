@@ -1,3 +1,18 @@
+2003-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ia64/ia64.exp: Remove -melf64_ia64.
+
+	* ld-ia64/tlsbin.dd: Remove -melf64_ia64. Match elf..-ia64-.*
+	instead of elf64-ia64-little.
+	* ld-ia64/tlsbin.rd: Likewise.
+	* ld-ia64/tlsbin.sd: Likewise.
+	* ld-ia64/tlsbin.td: Likewise.
+	* ld-ia64/tlsg.sd: Likewise.
+	* ld-ia64/tlspic.dd: Likewise.
+	* ld-ia64/tlspic.rd: Likewise.
+	* ld-ia64/tlspic.sd: Likewise.
+	* ld-ia64/tlspic.td: Likewise.
+
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/mips-elf-flags.exp: Add tests for combinations
