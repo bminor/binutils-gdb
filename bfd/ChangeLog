@@ -1,4 +1,19 @@
+Fri Sep 24 00:42:23 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* osf-core.c:  New file for OSF/1 core file support.
+	* config/alphaosf.mh (HDEFINES):  Set to -DHPUX_CORE.
+	(HDEPFILES):  Set to hpux-core.o.
+	* bfd-in2.h (union tdata):  Add osf_core_data member.
+	* targets.c:  If OSF_CORE is defined, add osf_core_vec to target list.
+	* Makefile.in (OPTIONAL_BACKENDS):  Add osf-core.o.
+	(osf-core.o):  New dependency.
+
 Thu Sep 23 21:04:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Remove note about making --with-bfd-targets use canonical
+	target configuration name (already done); reword item about
+	separating reading and writing stuff to not refer to a
+	non-existent item.
 
 	* ecoff.h (ecoff_set_arch_mach_hook): Accept MIPS_MAGIC_LITTLE2
 	and MIPS_MAGIC_BIG2.
