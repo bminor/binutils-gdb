@@ -31,6 +31,7 @@ ld-cdtest
 ld-empic
 ld-scripts
 ld-shared
+ld-versados
 
 Things-to-lose:
 
