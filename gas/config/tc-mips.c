@@ -9251,7 +9251,6 @@ md_parse_option (c, arg)
 
     case OPTION_GP32:
       mips_gp32 = 1;
-      mips_64 = 0;
 
       /* We deliberately don't allow "-gp32" to set the MIPS_32BITMODE
 	 flag in object files because to do so would make it
@@ -9269,7 +9268,6 @@ md_parse_option (c, arg)
 
     case OPTION_GP64:
       mips_gp32 = 0;
-      mips_64 = 1;
 #if 0
       mips_32bitmode = 0;
 #endif

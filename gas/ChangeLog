@@ -1,3 +1,8 @@
+2001-09-14  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (md_parse_option): Remove setting mips_64 via
+	-mgp32/mgp64.
+
 2001-09-14  Kevin Lo <kevlo@openbsd.org>
 
 	* configure.in: Add arm-openbsd target.
