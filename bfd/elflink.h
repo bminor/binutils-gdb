@@ -75,6 +75,8 @@ static int elf_link_sort_cmp2
   PARAMS ((const void *, const void *));
 static size_t elf_link_sort_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection **));
+static boolean elf_section_ignore_discarded_relocs
+  PARAMS ((asection *));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -6287,7 +6289,8 @@ elf_link_input_bfd (finfo, input_bfd)
 	     .eh_frame to describe a routine in the linkonce section,
 	     and it turns out to be hard to remove the .eh_frame
 	     entry too.  FIXME.  */
-	  if (!finfo->info->relocateable)
+	  if (!finfo->info->relocateable
+	      && !elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
 
@@ -6591,7 +6594,12 @@ elf_link_input_bfd (finfo, input_bfd)
 	}
 
       /* Write out the modified section contents.  */
-      if (elf_section_data (o)->stab_info)
+      if (bed->elf_backend_write_section
+	  && bed->elf_backend_write_section (output_bfd, o, contents))
+	{
+	  /* Section written out.  */
+	}
+      else if (elf_section_data (o)->stab_info)
 	{
 	  if (! (_bfd_write_section_stabs
 		 (output_bfd, &elf_hash_table (finfo->info)->stab_info,
@@ -7756,3 +7764,200 @@ elf_collect_hash_codes (h, data)
 
   return true;
 }
+
+boolean
+elf_reloc_symbol_deleted_p (offset, cookie)
+     bfd_vma offset;
+     PTR cookie;
+{
+  struct elf_reloc_cookie *rcookie = (struct elf_reloc_cookie *)cookie;
+
+  if (rcookie->bad_symtab)
+    rcookie->rel = rcookie->rels;
+
+  for (; rcookie->rel < rcookie->relend; rcookie->rel++)
+    {
+      unsigned long r_symndx = ELF_R_SYM (rcookie->rel->r_info);
+      Elf_Internal_Sym isym;
+
+      if (! rcookie->bad_symtab)
+	if (rcookie->rel->r_offset > offset)
+	  return false;
+      if (rcookie->rel->r_offset != offset)
+	continue;
+
+      if (rcookie->locsyms)
+	elf_swap_symbol_in (rcookie->abfd,
+			    ((Elf_External_Sym *)rcookie->locsyms) + r_symndx,
+			    &isym);
+
+      if (r_symndx >= rcookie->locsymcount
+	  || (rcookie->locsyms
+	      && ELF_ST_BIND (isym.st_info) != STB_LOCAL))
+	{
+	  struct elf_link_hash_entry *h;
+
+	  h = rcookie->sym_hashes[r_symndx - rcookie->extsymoff];
+
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  if ((h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
+	      && ! bfd_is_abs_section (h->root.u.def.section)
+	      && bfd_is_abs_section (h->root.u.def.section
+				     ->output_section))
+	    return true;
+	  else
+	    return false;
+	}
+      else if (rcookie->locsyms)
+	{
+	  /* It's not a relocation against a global symbol,
+	     but it could be a relocation against a section
+	     symbol for a discarded section.  */
+	  asection *isec;
+
+	  /* Need to: get the symbol; get the section.  */
+	  if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
+	    {
+	      isec = section_from_elf_index (rcookie->abfd, isym.st_shndx);
+	      if (isec != NULL
+		  && ELF_ST_TYPE (isym.st_info) == STT_SECTION
+		  && ! bfd_is_abs_section (isec)
+		  && bfd_is_abs_section (isec->output_section))
+		return true;
+	    }
+	}
+      return false;
+    }
+  return false;
+}
+
+/* Discard unneeded references to discarded sections.
+   Returns true if any section's size was changed.  */
+/* This function assumes that the relocations are in sorted order,
+   which is true for all known assemblers.  */
+
+boolean
+elf_bfd_discard_info (info)
+     struct bfd_link_info *info;
+{
+  struct elf_reloc_cookie cookie;
+  asection *o;
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_External_Sym *freesyms;
+  struct elf_backend_data *bed;
+  bfd *abfd;
+  boolean ret = false;
+
+  if (info->relocateable
+      || info->traditional_format
+      || info->hash->creator->flavour != bfd_target_elf_flavour
+      || ! is_elf_hash_table (info)
+      || info->strip == strip_all
+      || info->strip == strip_debugger)
+    return false;
+  for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
+    {
+      bed = get_elf_backend_data (abfd);
+
+      if ((abfd->flags & DYNAMIC) != 0)
+	continue;
+
+      o = bfd_get_section_by_name (abfd, ".stab");
+      if (! o && ! bed->elf_backend_discard_info)
+	continue;
+
+      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+
+      cookie.abfd = abfd;
+      cookie.sym_hashes = elf_sym_hashes (abfd);
+      cookie.bad_symtab = elf_bad_symtab (abfd);
+      if (cookie.bad_symtab)
+	{
+	  cookie.locsymcount =
+	    symtab_hdr->sh_size / sizeof (Elf_External_Sym);
+	  cookie.extsymoff = 0;
+	}
+      else
+	{
+	  cookie.locsymcount = symtab_hdr->sh_info;
+	  cookie.extsymoff = symtab_hdr->sh_info;
+	}
+
+      freesyms = NULL;
+      if (symtab_hdr->contents)
+        cookie.locsyms = (void *) symtab_hdr->contents;
+      else if (cookie.locsymcount == 0)
+        cookie.locsyms = NULL;
+      else
+        {
+          bfd_size_type amt = cookie.locsymcount * sizeof (Elf_External_Sym);
+          cookie.locsyms = bfd_malloc (amt);
+          if (cookie.locsyms == NULL
+              || bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+              || bfd_bread (cookie.locsyms, amt, abfd) != amt)
+	    {
+	      /* Something is very wrong - but we can still do our job for
+		 global symbols, so don't give up.  */
+	      if (cookie.locsyms)
+		free (cookie.locsyms);
+	      cookie.locsyms = NULL;
+            }
+	  else
+	    {
+	      freesyms = cookie.locsyms;
+	    }
+        }
+
+      if (o)
+	{
+	  cookie.rels = (NAME(_bfd_elf,link_read_relocs)
+			 (abfd, o, (PTR) NULL,
+			  (Elf_Internal_Rela *) NULL,
+			  info->keep_memory));
+	  if (cookie.rels)
+	    {
+	      cookie.rel = cookie.rels;
+	      cookie.relend =
+		cookie.rels + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	      if (_bfd_discard_section_stabs (abfd, o,
+					      elf_section_data (o)->stab_info,
+					      elf_reloc_symbol_deleted_p,
+					      &cookie))
+		ret = true;
+	      if (! info->keep_memory)
+		free (cookie.rels);
+	    }
+	}
+
+      if (bed->elf_backend_discard_info)
+	{
+	  if (bed->elf_backend_discard_info (abfd, &cookie, info))
+	    ret = true;
+	}
+
+      if (freesyms)
+	free (freesyms);
+    }
+  return ret;
+}
+
+static boolean
+elf_section_ignore_discarded_relocs (sec)
+     asection *sec;
+{
+  if (strcmp (sec->name, ".stab") == 0)
+    return true;
+  else if ((get_elf_backend_data (sec->owner)
+	    ->elf_backend_ignore_discarded_relocs != NULL)
+	   && (get_elf_backend_data (sec->owner)
+	       ->elf_backend_ignore_discarded_relocs (sec)))
+    return true;
+  else
+    return false;
+}
+
+

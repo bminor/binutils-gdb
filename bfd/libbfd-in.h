@@ -446,6 +446,11 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 extern boolean _bfd_link_section_stabs
   PARAMS ((bfd *, PTR *, asection *, asection *, PTR *));
 
+/* Eliminate stabs for discarded functions and symbols.  */
+extern boolean _bfd_discard_section_stabs
+  PARAMS ((bfd *, asection *, PTR,
+	   boolean (*) (bfd_vma, PTR), PTR));
+
 /* Write out the .stab section when linking stabs in sections.  */
 
 extern boolean _bfd_write_section_stabs

@@ -1,3 +1,8 @@
+2001-11-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): New.
+	(struct ld_emulation_xfer_struct): Use it.
+
 Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
 
 	* emulparams/elf64hppa.sh (OTHER_BSS_END_SECTIONS): Add

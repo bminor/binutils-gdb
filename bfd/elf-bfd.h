@@ -381,6 +381,17 @@ enum elf_reloc_type_class {
   reloc_class_copy
 };
 
+struct elf_reloc_cookie
+{
+  Elf_Internal_Rela *rels, *rel, *relend;
+  void *locsyms;
+  bfd *abfd;
+  size_t locsymcount;
+  size_t extsymoff;
+  struct elf_link_hash_entry **sym_hashes;
+  boolean bad_symtab;
+};
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -702,6 +713,21 @@ struct elf_backend_data
   /* This function returns class of a reloc type.  */
   enum elf_reloc_type_class (*elf_backend_reloc_type_class)
     PARAMS ((const Elf_Internal_Rela *));
+
+  /* This function, if defined, removes information about discarded functions
+     from other sections which mention them.  */
+  boolean (*elf_backend_discard_info)
+    PARAMS ((bfd *, struct elf_reloc_cookie *, struct bfd_link_info *));
+
+  /* This function, if defined, signals that the function above has removed
+     the discarded relocations for this section.  */
+  boolean (*elf_backend_ignore_discarded_relocs)
+    PARAMS ((asection *));
+
+  /* This function, if defined, may write out the given section.
+     Returns true if it did so and false if the caller should.  */
+  boolean (*elf_backend_write_section)
+    PARAMS ((bfd *, asection *, bfd_byte *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
@@ -1436,6 +1462,11 @@ extern boolean _bfd_elf64_gc_record_vtinherit
   PARAMS ((bfd *, asection *, struct elf_link_hash_entry *, bfd_vma));
 extern boolean _bfd_elf64_gc_record_vtentry
   PARAMS ((bfd *, asection *, struct elf_link_hash_entry *, bfd_vma));
+
+extern boolean _bfd_elf32_reloc_symbol_deleted_p
+  PARAMS ((bfd_vma, PTR));
+extern boolean _bfd_elf64_reloc_symbol_deleted_p
+  PARAMS ((bfd_vma, PTR));
 
 /* MIPS ELF specific routines.  */
 

@@ -502,6 +502,176 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
   return false;
 }
 
+
+/* This function is called for each input file before the stab
+   section is relocated.  It discards stab entries for discarded
+   functions and variables.  The function returns true iff
+   any entries have been deleted.
+*/
+
+boolean
+_bfd_discard_section_stabs (abfd, stabsec, psecinfo,
+			    reloc_symbol_deleted_p, cookie)
+     bfd *abfd;
+     asection *stabsec;
+     PTR psecinfo;
+     boolean (*reloc_symbol_deleted_p) (bfd_vma, PTR);
+     PTR cookie;
+{
+  bfd_size_type count, amt;
+  struct stab_section_info *secinfo;
+  bfd_byte *stabbuf = NULL;
+  bfd_byte *sym, *symend;
+  bfd_size_type skip;
+  bfd_size_type *pstridx;
+  int deleting;
+
+  if (stabsec->_raw_size == 0)
+    {
+      /* This file does not contain stabs debugging information.  */
+      return false;
+    }
+
+  if (stabsec->_raw_size % STABSIZE != 0)
+    {
+      /* Something is wrong with the format of these stab symbols.
+         Don't try to optimize them.  */
+      return false;
+    }
+
+  if ((stabsec->output_section != NULL
+       && bfd_is_abs_section (stabsec->output_section)))
+    {
+      /* At least one of the sections is being discarded from the
+         link, so we should just ignore them.  */
+      return false;
+    }
+
+  /* We should have initialized our data in _bfd_link_stab_sections.
+     If there was some bizarre error reading the string sections, though,
+     we might not have.  Bail rather than asserting.  */
+  if (psecinfo == NULL)
+    return false;
+
+  count = stabsec->_raw_size / STABSIZE;
+  secinfo = (struct stab_section_info *) psecinfo;
+
+  /* Read the stabs information from abfd.  */
+
+  stabbuf = (bfd_byte *) bfd_malloc (stabsec->_raw_size);
+  if (stabbuf == NULL)
+    goto error_return;
+
+  if (! bfd_get_section_contents (abfd, stabsec, stabbuf, (bfd_vma) 0,
+				  stabsec->_raw_size))
+    goto error_return;
+
+  /* Look through the stabs symbols and discard any information for
+     discarded functions.  */
+
+  skip = 0;
+  deleting = -1;
+
+  symend = stabbuf + stabsec->_raw_size;
+  for (sym = stabbuf, pstridx = secinfo->stridxs;
+       sym < symend;
+       sym += STABSIZE, ++pstridx)
+    {
+      int type;
+
+      if (*pstridx == (bfd_size_type) -1)
+	{
+	  /* This stab was deleted in a previous pass.  */
+	  continue;
+	}
+
+      type = sym[TYPEOFF];
+
+      if (type == N_FUN)
+	{
+	  int strx = bfd_get_32 (abfd, sym + STRDXOFF);
+
+	  if (strx == 0)
+	    {
+	      if (deleting)
+		{
+		  skip++;
+		  *pstridx = -1;
+		}
+	      deleting = -1;
+	      continue;
+	    }
+	  deleting = 0;
+	  if ((*reloc_symbol_deleted_p) (sym + VALOFF - stabbuf, cookie))
+	    deleting = 1;
+	}
+
+      if (deleting == 1)
+	{
+	  *pstridx = -1;
+	  skip++;
+	}
+      else if (deleting == -1)
+	{
+	  /* Outside of a function.  Check for deleted variables.  */
+	  if (type == N_STSYM || type == N_LCSYM)
+	    if ((*reloc_symbol_deleted_p) (sym + VALOFF - stabbuf, cookie))
+	      {
+		*pstridx = -1;
+		skip ++;
+	      }
+	  /* We should also check for N_GSYM entries which reference a
+	     deleted global, but those are less harmful to debuggers
+	     and would require parsing the stab strings.  */
+	}
+    }
+
+  free (stabbuf);
+  stabbuf = NULL;
+
+  /* Shrink the stabsec as needed.  */
+  stabsec->_cooked_size -= skip * STABSIZE;
+  if (stabsec->_cooked_size == 0)
+    stabsec->flags |= SEC_EXCLUDE;
+
+  /* Recalculate the `cumulative_skips' array now that stabs have been
+     deleted for this section.  */
+
+  if (skip != 0)
+    {
+      bfd_size_type i, offset;
+      bfd_size_type *pskips;
+
+      if (secinfo->cumulative_skips == NULL)
+	{
+	  amt = count * sizeof (bfd_size_type);
+	  secinfo->cumulative_skips = (bfd_size_type *) bfd_alloc (abfd, amt);
+	  if (secinfo->cumulative_skips == NULL)
+	    goto error_return;
+	}
+
+      pskips = secinfo->cumulative_skips;
+      pstridx = secinfo->stridxs;
+      offset = 0;
+
+      for (i = 0; i < count; i++, pskips++, pstridx++)
+	{
+	  *pskips = offset;
+	  if (*pstridx == (bfd_size_type) -1)
+	    offset += STABSIZE;
+	}
+
+      BFD_ASSERT (offset != 0);
+    }
+
+  return (skip > 0);
+
+ error_return:
+  if (stabbuf != NULL)
+    free (stabbuf);
+  return false;
+}
+
 /* Write out the stab section.  This is called with the relocated
    contents.  */
 

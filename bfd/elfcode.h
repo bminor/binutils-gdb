@@ -123,6 +123,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_slurp_reloc_table		NAME(bfd_elf,slurp_reloc_table)
 #define elf_link_create_dynamic_sections \
   NAME(bfd_elf,link_create_dynamic_sections)
+#define elf_bfd_discard_info		NAME(bfd_elf,discard_info)
+#define elf_reloc_symbol_deleted_p	NAME(_bfd_elf,reloc_symbol_deleted_p)
 #define elf_link_record_dynamic_symbol  _bfd_elf_link_record_dynamic_symbol
 #define elf_bfd_final_link		NAME(bfd_elf,bfd_final_link)
 #define elf_create_pointer_linker_section NAME(bfd_elf,create_pointer_linker_section)

@@ -80,6 +80,8 @@ static asection *output_prev_sec_find
   PARAMS ((lang_output_section_statement_type *));
 static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
+static void gld${EMULATION_NAME}_finish
+  PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script
   PARAMS ((int *isfile));
 
@@ -1319,6 +1321,25 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   return true;
 }
 
+static void
+gld${EMULATION_NAME}_finish ()
+{
+  ${LDEMUL_FINISH+${LDEMUL_FINISH} ();}
+
+  if (bfd_elf${ELFSIZE}_discard_info (&link_info))
+    {
+      /* Resize the sections.  */
+      lang_size_sections (stat_ptr->head, abs_output_section,
+			  &stat_ptr->head, 0, (bfd_vma) 0, false);
+
+      /* Redo special stuff.  */
+      ldemul_after_allocation ();
+
+      /* Do the assignments again.  */
+      lang_do_assignments (stat_ptr->head, abs_output_section,
+			   (fill_type) 0, (bfd_vma) 0);
+    }
+}
 EOF
 fi
 
@@ -1618,7 +1639,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  ${LDEMUL_FINISH-NULL},
+  gld${EMULATION_NAME}_finish,
   ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},

@@ -1,3 +1,37 @@
+2001-11-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* bfd-in.h (bfd_elf32_discard_info): Add prototype.
+	(bfd_elf64_discard_info): Likewise.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (struct elf_reloc_cookie): New.
+	(struct elf_backend_data): Add elf_backend_discard_info,
+	elf_backend_ignore_discarded_relocs, and elf_backend_write_section.
+	(_bfd_elf32_reloc_symbol_deleted_p): Add prototype.
+	(_bfd_elf64_reloc_symbol_deleted_p): Likewise.
+	* elf32-mips.c (_bfd_elf32_mips_discard_info): New.
+	(_bfd_elf32_mips_ignore_discarded_relocs): New.
+	(_bfd_elf32_mips_write_section): New.
+	(elf_backend_discard_info): Define.
+	(elf_backend_ignore_discarded_relocs): Define.
+	(elf_backend_write_section): Define.
+	* elfcode.h (elf_bfd_discard_info): Define.
+	(elf_reloc_symbol_deleted_p): Define.
+	* elflink.h (elf_link_input_bfd): Check
+	elf_section_ignore_discarded_relocs.  Call
+	bed->elf_backend_write_section if available.
+	(elf_reloc_symbol_deleted_p): New.
+	(elf_bfd_discard_info): New.
+	(elf_section_ignore_discarded_relocs): New.
+	* elfxx-target.h (elf_backend_discard_info): Define.
+	(elf_backend_ignore_discarded_relocs): Define.
+	(elf_backend_write_section): Define.
+	(elfNN_bed): Add elf_backend_discard_info,
+	elf_backend_ignore_discarded_relocs, and
+	elf_backend_write_section.
+	* libbfd-in.h (_bfd_discard_section_stabs): Add prototype.
+	* libbfd.h: Regenerate.
+	* stabs.c (_bfd_discard_section_stabs): New.
+
 2001-11-14  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Use the "unresolved_reloc"
