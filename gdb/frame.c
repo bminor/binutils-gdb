@@ -674,12 +674,12 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
 }
 
 void
-generic_unwind_get_saved_register (char *raw_buffer,
-				   int *optimizedp,
-				   CORE_ADDR *addrp,
-				   struct frame_info *frame,
-				   int regnum,
-				   enum lval_type *lvalp)
+deprecated_unwind_get_saved_register (char *raw_buffer,
+				      int *optimizedp,
+				      CORE_ADDR *addrp,
+				      struct frame_info *frame,
+				      int regnum,
+				      enum lval_type *lvalp)
 {
   int optimizedx;
   CORE_ADDR addrx;

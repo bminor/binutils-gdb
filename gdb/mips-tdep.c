@@ -5453,8 +5453,8 @@ mips_get_saved_register (char *raw_buffer,
     lvalp = &lvalx;
   if (optimizedp == NULL)
     optimizedp = &optimizedx;
-  generic_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
-                                     regnum, lvalp);
+  deprecated_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
+					regnum, lvalp);
   /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
      have a pseudo register range that correspons to the ABI's, rather
      than the ISA's, view of registers.  These registers would then

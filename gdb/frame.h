@@ -492,19 +492,16 @@ extern int generic_pc_in_call_dummy (CORE_ADDR pc,
 
 extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 
-void generic_unwind_get_saved_register (char *raw_buffer,
-				        int *optimizedp,
-				        CORE_ADDR *addrp,
-				        struct frame_info *frame,
-				        int regnum,
-				        enum lval_type *lvalp);
 
-/* The function generic_get_saved_register() has been made obsolete.
-   DEPRECATED_GET_SAVED_REGISTER now defaults to the recursive
-   equivalent - generic_unwind_get_saved_register() - so there is no
-   need to even set DEPRECATED_GET_SAVED_REGISTER.  Architectures that
-   need to override the register unwind mechanism should modify
-   frame->unwind().  */
+/* The DEPRECATED_GET_SAVED_REGISTER architecture interface is
+   entirely redundant.  New architectures should implement per-frame
+   unwinders (ref "frame-unwind.h").  */
+extern void deprecated_unwind_get_saved_register (char *raw_buffer,
+						  int *optimizedp,
+						  CORE_ADDR *addrp,
+						  struct frame_info *frame,
+						  int regnum,
+						  enum lval_type *lvalp);
 extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 						   struct frame_info *, int,
 						   enum lval_type *);

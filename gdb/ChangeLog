@@ -1,5 +1,12 @@
 2003-06-09  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (deprecated_unwind_get_saved_register): Rename
+	generic_unwind_get_saved_register, update comments.
+	* mips-tdep.c (mips_get_saved_register): Update.
+	* frame.c (deprecated_unwind_get_saved_register): Update.
+
+2003-06-09  Andrew Cagney  <cagney@redhat.com>
+
 	* vax-tdep.c (vax_frame_locals_address): Delete function.
 	(vax_gdbarch_init): Do not set frame_locals_address.
 	* m68hc11-tdep.c (m68hc11_frame_locals_address): Delete function.
