@@ -1,5 +1,16 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* xstormy16-tdep.c (xstormy16_in_solib_call_trampoline)
+	(xstormy16_gdbarch_init): Do not set in_solib_call_trampoline,
+	delete corresponding unused function.
+	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): Really do not set
+	in_solib_call_trampoline.
+	* config/arm/tm-embed.h (IN_SOLIB_CALL_TRAMPOLINE): Delete.
+	* config/powerpc/tm-linux.h: Delete #undef IN_SOLIB_CALL_TRAMPOLINE.
+	* config/mips/tm-nbsd.h: Ditto.
+	* config/arm/tm-linux.h: Ditto.
+	* config/mips/tm-linux.h: Ditto.
+
 	* armnbsd-tdep.c (arm_netbsd_aout_init_abi)
 	(arm_netbsd_aout_in_solib_call_trampoline): Do not set
 	in_solib_call_trampoline, delete corresponding unused function.

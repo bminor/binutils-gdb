@@ -27,9 +27,6 @@
 #include "config/tm-linux.h"
 
 /* We've multi-arched this.  */
-#undef IN_SOLIB_CALL_TRAMPOLINE
-
-/* We've multi-arched this.  */
 #undef SKIP_TRAMPOLINE_CODE
 
 /* When we call a function in a shared library, and the PLT sends us

@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* We've multi-arched these.  (Note that this completely undoes the
    effect of config/tm-linux.h #including config/tm-sysv4.h.)  */
-#undef IN_SOLIB_CALL_TRAMPOLINE
 #undef SKIP_TRAMPOLINE_CODE
 
 /* Make sure nexti gets the help it needs for debugging assembly code

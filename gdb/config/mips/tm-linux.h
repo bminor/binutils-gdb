@@ -35,10 +35,4 @@
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(PC) mips_linux_in_dynsym_resolve_code (PC)
 int mips_linux_in_dynsym_resolve_code (CORE_ADDR pc);
 
-/* We don't want all of tm-sysv4.h's shared library trampoline code either.
-   Note that by undefining IN_SOLIB_CALL_TRAMPOLINE here we will use the
-   gdbarch vector's version instead.  */
-
-#undef IN_SOLIB_CALL_TRAMPOLINE
-
 #endif /* TM_MIPSLINUX_H */

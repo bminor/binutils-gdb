@@ -577,12 +577,6 @@ xstormy16_skip_trampoline_code (CORE_ADDR pc)
   return 0;
 }
 
-static int
-xstormy16_in_solib_call_trampoline (CORE_ADDR pc, char *name)
-{
-  return xstormy16_skip_trampoline_code (pc) != 0;
-}
-
 /* Function pointers are 16 bit.  The address space is 24 bit, using
    32 bit addresses.  Pointers to functions on the XStormy16 are implemented
    by using 16 bit pointers, which are either direct pointers in case the
@@ -849,8 +843,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, xstormy16_return_value);
 
   set_gdbarch_skip_trampoline_code (gdbarch, xstormy16_skip_trampoline_code);
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-					xstormy16_in_solib_call_trampoline);
 
   set_gdbarch_print_insn (gdbarch, print_insn_xstormy16);
 

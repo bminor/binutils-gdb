@@ -24,7 +24,6 @@
 
 #include "solib.h"
 
-#undef IN_SOLIB_CALL_TRAMPOLINE
 #undef SKIP_TRAMPOLINE_CODE
 #undef DEPRECATED_IGNORE_HELPER_CALL
 
