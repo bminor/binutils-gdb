@@ -57,7 +57,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 #include "ldlang.h"
 /* IMPORT */
-
+extern int symbol_truncate;
 extern bfd *output_bfd;
 extern strip_symbols_type strip_symbols;
 extern discard_locals_type discard_locals;
@@ -100,12 +100,13 @@ DEFUN(hash_string,(key),
 {
   register CONST char *cp;
   register int k;
-
+  register int l = 0;
   cp = key;
   k = 0;
-  while (*cp)
+  while (*cp && l < symbol_truncate) {
     k = (((k << 1) + (k >> 14)) ^ (*cp++)) & 0x3fff;
-
+    l++;
+  }
   return k;
 }
 
@@ -120,7 +121,7 @@ DEFUN(search,(key,hashval) ,
 {
   ldsym_type *bp;				   
   for (bp = global_symbol_hash_table[hashval]; bp; bp = bp->link)
-    if (! strcmp (key, bp->name)) {
+    if (! strncmp (key, bp->name, symbol_truncate)) {
       if (bp->flags & SYM_INDIRECT) {	
 	/* Use the symbol we're aliased to instead */
 	return (ldsym_type *)(bp->sdefs_chain);
@@ -259,7 +260,7 @@ process_keepsyms (table, size)
 	*ptr-- = 0;
       ptr = obstack_base (&obstack);
       for (sym = out; sym < end; sym++)
-	if (!strcmp ((*sym)->name, ptr))
+	if (!strncmp ((*sym)->name, ptr, symbol_truncate))
 	  {
 	    KEEP (sym);
 	    found = 1;
