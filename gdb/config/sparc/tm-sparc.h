@@ -162,7 +162,15 @@ extern CORE_ADDR sparc_pc_adjust();
 #define	CPS_REGNUM 71		/* Coprocessor status register */
 
 /* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  */
+   register state, the array `registers'.  On the sparc, `registers'
+   contains the ins and locals, even though they are saved on the
+   stack rather than with the other registers, and this causes hair
+   and confusion in places like pop_frame.  It probably would be
+   better to remove the ins and locals from `registers', make sure
+   that get_saved_register can get them from the stack (even in the
+   innermost frame), and make this the way to access them.  For the
+   frame pointer we would do that via TARGET_READ_FP.  */
+
 #define REGISTER_BYTES (32*4+32*4+8*4)
 
 /* Index within `registers' of the first byte of the space for
