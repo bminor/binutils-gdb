@@ -1,3 +1,8 @@
+2000-07-08  Christopher Faylor <cgf@cygnus.com>
+
+	* Makefile.in (install-info): Find files to install in either the
+	build or source directories (adapted from Makefile.am).
+
 2000-07-07  Nicholas Duffek  <nsd@redhat.com>
 
 	* stabs.texinfo: Fix spelling errors.
