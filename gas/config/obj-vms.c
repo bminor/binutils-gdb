@@ -100,7 +100,7 @@ static struct input_file *find_file PARAMS ((symbolS *));
 
 enum advanced_type
 {
-  BASIC, POINTER, ARRAY, ENUM, STRUCT, UNION, FUNCTION, VOID, UNKNOWN
+  BASIC, POINTER, ARRAY, ENUM, STRUCT, UNION, FUNCTION, VOID, ALIAS, UNKNOWN
 };
 
 /*
@@ -167,6 +167,12 @@ static char *symbol_name;
 
 static structure_count = 0;
 
+/* This variable is used to indicate that we are making the last attempt to
+   parse the stabs, and that we should define as much as we can, and ignore 
+   the rest */
+
+static int final_pass;
+
 /* This variable is used to keep track of the current structure number
  * for a given variable.  If this is < 0, that means that the structure
  * has not yet been defined to the debugger.  This is still cool, since
@@ -222,6 +228,16 @@ static char Object_Record_Buffer[512];	/* Buffer for object file records  */
 static int Object_Record_Offset;/* Offset to end of data	   */
 static int Current_Object_Record_Type;	/* Type of record in above	   */
 
+/*
+ *	Macros for moving data around.  Must work on big-endian systems.
+ */
+#ifdef HO_VMS  /* These are more efficient for VMS->VMS systems */
+#define COPY_LONG(dest,val) {*(long *) dest = val; }
+#define COPY_SHORT(dest,val) {*(short *) dest = val; }
+#else
+#define	COPY_LONG(dest,val) { md_number_to_chars(dest, val, 4); }
+#define	COPY_SHORT(dest,val) { md_number_to_chars(dest, val, 2); }
+#endif
 /*
  *	Macros for placing data into the object record buffer
  */
@@ -335,6 +351,10 @@ static void
 obj_aout_stab (what)
      int what;
 {
+#ifndef NO_LISTING
+	extern int listing;
+#endif /* NO_LISTING */
+
   register symbolS *symbolP = 0;
   register char *string;
   int saved_type = 0;
@@ -436,6 +456,22 @@ obj_aout_stab (what)
       pseudo_set (symbolP);
       symbolP->sy_symbol.n_type = saved_type;
     }
+
+#ifndef NO_LISTING
+	if (listing && !goof) 
+	    {
+		    if (symbolP->sy_symbol.n_type == N_SLINE) 
+			{
+				
+				listing_source_line(symbolP->sy_symbol.n_desc);
+			}
+		    else if (symbolP->sy_symbol.n_type == N_SO
+			     || symbolP->sy_symbol.n_type == N_SOL) 
+			{
+				listing_source_file(string);
+			}			  
+	    }
+#endif  
 
   if (goof)
     ignore_rest_of_line ();
@@ -568,6 +604,7 @@ Flush_VMS_Object_Record_Buffer ()
 {
   int i;
   short int zero;
+  int RecLen;
   /*
    *	If the buffer is empty, we are done
    */
@@ -577,7 +614,8 @@ Flush_VMS_Object_Record_Buffer ()
    *	Write the data to the file
    */
 #ifndef HO_VMS			/* For cross-assembly purposes. */
-  i = write (VMS_Object_File_FD, &Object_Record_Offset, 2);
+  md_number_to_chars((char *) &RecLen, Object_Record_Offset, 2);
+  i = write (VMS_Object_File_FD, &RecLen, 2);
 #endif /* not HO_VMS */
   i = write (VMS_Object_File_FD,
 	     Object_Record_Buffer,
@@ -766,8 +804,7 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
  *	Make a debugger reference to a struct, union or enum.
  */
 static
-VMS_Store_Struct (Struct_Index)
-     int Struct_Index;
+VMS_Store_Struct (int Struct_Index)
 {
   /*
    *	We are writing a "OBJ_S_C_DBG" record
@@ -794,8 +831,7 @@ VMS_Store_Struct (Struct_Index)
  *	Make a debugger reference to partially define a struct, union or enum.
  */
 static
-VMS_Def_Struct (Struct_Index)
-     int Struct_Index;
+VMS_Def_Struct (int Struct_Index)
 {
   /*
    *	We are writing a "OBJ_S_C_DBG" record
@@ -818,8 +854,7 @@ VMS_Def_Struct (Struct_Index)
 }
 
 static
-VMS_Set_Struct (Struct_Index)
-     int Struct_Index;
+VMS_Set_Struct (int Struct_Index)
 {				/* see previous functions for comments */
   Set_VMS_Object_File_Record (OBJ_S_C_DBG);
   if (Object_Record_Offset == 0)
@@ -887,7 +922,7 @@ VMS_TBT_Module_Begin ()
   /*
    *	Language type == "C"
    */
-  *(long *) cp = DST_S_C_C;
+  COPY_LONG (cp, DST_S_C_C);
   cp += sizeof (long);
   /*
    *	Store the module name
@@ -1054,7 +1089,7 @@ VMS_TBT_Routine_End (Max_Size, sp)
   /*
    *	Size of routine
    */
-  *((long *) (Local + 3)) = Size;
+  COPY_LONG (&Local[3], Size);
   /*
    *	Store the record
    */
@@ -1130,8 +1165,7 @@ VMS_TBT_Block_Begin (symbolP, Psect, Name)
  *	Write the Traceback Block End record
  */
 static
-VMS_TBT_Block_End (Size)
-     int Size;
+VMS_TBT_Block_End (int Size)
 {
   char Local[16];
 
@@ -1140,7 +1174,7 @@ VMS_TBT_Block_End (Size)
    */
   Local[0] = 6;
   Local[1] = DST_S_C_BLKEND;
-  *((long *) (Local + 3)) = Size;
+  COPY_LONG (&Local[3], Size);
   /*
    *	Unused
    */
@@ -1180,7 +1214,7 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
        *	Set Line number
        */
       Local[2] = DST_S_C_SET_LINE_NUM;
-      *((unsigned short *) (Local + 3)) = Line_Number - 1;
+      COPY_SHORT (&Local[3], Line_Number - 1);
       /*
        *	Set PC
        */
@@ -1221,7 +1255,7 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
 	  Local[0] = 1 + 1 + 4;
 	  Local[1] = DST_S_C_LINE_NUM;
 	  Local[2] = DST_S_C_TERM_L;
-	  *((long *) (Local + 3)) = Offset;
+	  COPY_LONG (&Local[3], Offset);
 	  VMS_Store_Immediate_Data (Local, 7, OBJ_S_C_TBT);
 	  /*
 	   *	Done
@@ -1246,7 +1280,7 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
 	  else
 	    {
 	      *cp++ = DST_S_C_INCR_LINUM_W;
-	      *(short *) cp = Line_Number - 1;
+	      COPY_SHORT (cp, Line_Number - 1);
 	      cp += sizeof (short);
 	    }
 	}
@@ -1262,13 +1296,13 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
 	  if (Offset < 0x10000)
 	    {
 	      *cp++ = DST_S_C_DELTA_PC_W;
-	      *(short *) cp = Offset;
+	      COPY_SHORT (cp, Offset);
 	      cp += sizeof (short);
 	    }
 	  else
 	    {
 	      *cp++ = DST_S_C_DELTA_PC_L;
-	      *(long *) cp = Offset;
+	      COPY_LONG (cp, Offset);
 	      cp += sizeof (long);
 	    }
 	}
@@ -1366,7 +1400,7 @@ VMS_TBT_Source_File (Filename, ID_Number)
   /*
    *	File ID
    */
-  *(short *) cp = ID_Number;
+  COPY_SHORT (cp, ID_Number);
   cp += sizeof (short);
 #ifndef HO_VMS
   /*
@@ -1465,19 +1499,19 @@ VMS_TBT_Source_Lines (ID_Number, Starting_Line_Number, Number_Of_Lines)
   /*
    *	File ID Number
    */
-  *(short *) cp = ID_Number;
+  COPY_SHORT (cp, ID_Number);
   cp += sizeof (short);
   /*
    *	Set record number
    */
   *cp++ = DST_S_C_SRC_SETREC_L;
-  *(long *) cp = Starting_Line_Number;
+  COPY_LONG (cp, Starting_Line_Number);
   cp += sizeof (long);
   /*
    *	Define lines
    */
   *cp++ = DST_S_C_SRC_DEFLINES_W;
-  *(short *) cp = Number_Of_Lines;
+  COPY_SHORT (cp, Number_Of_Lines);
   cp += sizeof (short);
   /*
    *	Done
@@ -1656,6 +1690,8 @@ find_symbol (dbx_type)
     };
   if (spnt == (struct VMS_DBG_Symbol *) NULL)
     return 0;			/*Dunno what this is*/
+  if(spnt->advanced == ALIAS)
+    return find_symbol(spnt->type2);
   return spnt;
 }
 
@@ -1669,38 +1705,32 @@ static
 push (value, size)
      int value, size;
 {
-  char *pnt;
   int i;
   int size1;
-  long int val;
-  val = value;
-  pnt = (char *) &val;
   size1 = size;
   if (size < 0)
     {
       size1 = -size;
-      pnt += size1 - 1;
-    };
-  if (size < 0)
-    for (i = 0; i < size1; i++)
-      {
-	Local[Lpnt--] = *pnt--;
-	if (Lpnt < 0)
-	  {
-	    overflow = 1;
-	    Lpnt = 1;
-	  };
-      }
+      if (Lpnt < size1)
+	{
+	  overflow = 1;
+	  Lpnt = 1;
+	  return;
+	};
+      Lpnt -= size1;
+      md_number_to_chars (&Local[Lpnt + 1], value, size1);
+    }
   else
-    for (i = 0; i < size1; i++)
-      {
-	Asuffix[Apoint++] = *pnt++;
-	if (Apoint >= MAX_DEBUG_RECORD)
-	  {
-	    overflow = 1;
-	    Apoint = MAX_DEBUG_RECORD - 1;
-	  };
-      }
+    {
+      if (Apoint + size1 >= MAX_DEBUG_RECORD)
+	{
+	  overflow = 1;
+	  Apoint = MAX_DEBUG_RECORD - 1;
+	  return;
+	};
+      md_number_to_chars (&Asuffix[Apoint], value, size1);
+      Apoint += size1;
+    };
 }
 
 /* this routine generates the array descriptor for a given array */
@@ -1891,7 +1921,7 @@ generate_suffix (spnt, dbx_type)
 {
   int ilen;
   int i;
-  static CONST char pvoid[6] = {5, 0xaf, 0, 1, 0, 5};
+  CONST char pvoid[6] = {5, 0xaf, 0, 1, 0, 5};
   struct VMS_DBG_Symbol *spnt1;
   Apoint = 0;
   Lpnt = MAX_DEBUG_RECORD - 1;
@@ -1979,9 +2009,8 @@ VMS_DBG_record (spnt, Psect, Offset, Name)
 	Local[i++] = DBG_S_C_FUNCTION_PARAMETER;
       else
 	Local[i++] = DBG_S_C_LOCAL_SYM;
-      pnt = (char *) &Offset;
-      for (j = 0; j < 4; j++)
-	Local[i++] = *pnt++;	/* copy the offset */
+      COPY_LONG (&Local[i], Offset);
+      i += 4;
     }
   else
     {
@@ -2349,9 +2378,8 @@ forward_reference (pnt)
       pnt = (char *) strchr (pnt, ':');
       pnt = cvt_integer (pnt + 1, &i);
       spnt = find_symbol (i);
-      if (spnt == (struct VMS_DBG_Symbol *) NULL)
-	return 0;
-      while ((spnt->advanced == POINTER) || (spnt->advanced == ARRAY))
+      if(spnt != (struct VMS_DBG_Symbol*) NULL) {
+	while((spnt->advanced == POINTER) || (spnt->advanced == ARRAY))
 	{
 	  i = spnt->type2;
 	  spnt1 = find_symbol (spnt->type2);
@@ -2362,10 +2390,30 @@ forward_reference (pnt)
 	    break;
 	  spnt = spnt1;
 	};
+      };
       pnt = cvt_integer (pnt + 1, &i);
       pnt = cvt_integer (pnt + 1, &i);
   } while (*++pnt != ';');
   return 0;			/* no forward refences found */
+}
+
+/* Used to check a single element of a structure on the final pass*/
+
+static int
+final_forward_reference (spnt)
+  struct VMS_DBG_Symbol * spnt;
+{
+	struct VMS_DBG_Symbol * spnt1;
+	if(spnt != (struct VMS_DBG_Symbol*) NULL) {
+	  while((spnt->advanced == POINTER) || (spnt->advanced == ARRAY)){
+	    spnt1 = find_symbol(spnt->type2);
+	    if((spnt->advanced == ARRAY) &&
+	       (spnt1 == (struct VMS_DBG_Symbol*) NULL))return 1;
+	    if(spnt1 == (struct VMS_DBG_Symbol*) NULL) break;
+	    spnt=spnt1;
+	  };
+	};
+	return 0;	/* no forward refences found */
 }
 
 /* This routine parses the stabs directives to find any definitions of dbx type
@@ -2379,6 +2427,10 @@ forward_reference (pnt)
  * a structure/enum/union) and this is why we process them immediately.
  * After we process the pointer, then we search for defs that are nested even
  * deeper.
+ * 8/15/92: We have to process arrays right away too, because there can
+ * be multiple references to identical array types in one structure
+ * definition, and only the first one has the definition.  (We tend to
+ * parse from the back going forward.
  */
 static int
 VMS_typedef_parse (str)
@@ -2396,7 +2448,8 @@ VMS_typedef_parse (str)
   struct VMS_DBG_Symbol *spnt1;
 /* check for any nested def's */
   pnt = (char *) strchr (str + 1, '=');
-  if ((pnt != (char *) NULL) && (*(str + 1) != '*'))
+  if ((pnt != (char *) NULL) && (*(str + 1) != '*')
+    && (str[1] != 'a' || str[2] != 'r'))
     if (VMS_typedef_parse (pnt) == 1)
       return 1;
 /* now find dbx_type of entry */
@@ -2450,6 +2503,14 @@ VMS_typedef_parse (str)
 	  spnt->advanced = UNKNOWN;
 	  return 0;
 	};
+      pnt1 = cvt_integer(pnt,&i1);
+      if(i1 != spnt->dbx_type)
+	{
+	  spnt->advanced = ALIAS;
+	  spnt->type2 = i1;
+	  strcpy(str, pnt1);
+	  return 0;
+	}
       printf ("gcc-as warning(debugger output):");
       printf (" %d is an unknown untyped variable.\n", spnt->dbx_type);
       return 1;			/* do not know what this is */
@@ -2525,7 +2586,7 @@ VMS_typedef_parse (str)
 	spnt->advanced = UNION;
       spnt->VMS_type = DBG_S_C_ADVANCED_TYPE;
       pnt1 = cvt_integer (pnt + 1, &spnt->data_size);
-      if (forward_reference (pnt))
+      if (!final_pass && forward_reference(pnt))
 	{
 	  spnt->struc_numb = -1;
 	  return 1;
@@ -2557,9 +2618,8 @@ VMS_typedef_parse (str)
       while (*pnt2 != '\0')
 	Local[i++] = *pnt2++;
       i2 = spnt->data_size * 8;	/* number of bits */
-      pnt2 = (char *) &i2;
-      for (i1 = 0; i1 < 4; i1++)
-	Local[i++] = *pnt2++;
+      COPY_LONG(&Local[i], i2);
+      i += 4;
       VMS_Store_Immediate_Data (Local, i, OBJ_S_C_DBG);
       i = 0;
       if (pnt != symbol_name)
@@ -2596,14 +2656,20 @@ VMS_typedef_parse (str)
 	      Local[i++] = 7 + strlen (pnt2);
 	      spnt1 = find_symbol (dtype);
 	      /* check if this is a forward reference */
+	      if(final_pass && final_forward_reference(spnt1))
+		{
+		  printf("gcc-as warning(debugger output):");
+		  printf("structure element %s has undefined type\n",pnt2);
+		  i--;
+		  continue;
+		}
 	      if (spnt1 != (struct VMS_DBG_Symbol *) NULL)
 		Local[i++] = spnt1->VMS_type;
 	      else
 		Local[i++] = DBG_S_C_ADVANCED_TYPE;
 	      Local[i++] = DBG_S_C_STRUCT_ITEM;
-	      pnt = (char *) &i2;
-	      for (i1 = 0; i1 < 4; i1++)
-		Local[i++] = *pnt++;
+	      COPY_LONG (&Local[i], i2);
+	      i += 4;
 	      Local[i++] = strlen (pnt2);
 	      while (*pnt2 != '\0')
 		Local[i++] = *pnt2++;
@@ -2657,9 +2723,8 @@ VMS_typedef_parse (str)
 	  Local[i++] = 7 + strlen (pnt);
 	  Local[i++] = DBG_S_C_ENUM_ITEM;
 	  Local[i++] = 0x00;
-	  pnt2 = (char *) &i1;
-	  for (i2 = 0; i2 < 4; i2++)
-	    Local[i++] = *pnt2++;
+	  COPY_LONG (&Local[i], i1);
+	  i += 4;
 	  Local[i++] = strlen (pnt);
 	  pnt2 = pnt;
 	  while (*pnt != '\0')
@@ -2683,6 +2748,9 @@ VMS_typedef_parse (str)
       pnt1 = cvt_integer (pnt + 1, &spnt->index_min);
       pnt1 = cvt_integer (pnt1 + 1, &spnt->index_max);
       pnt1 = cvt_integer (pnt1 + 1, &spnt->type2);
+      pnt=(char*)strchr(str+1,'=');
+      if((pnt != (char*) NULL)) 
+	if(VMS_typedef_parse(pnt) == 1 ) return 1;
       break;
     case 'f':
       spnt->advanced = FUNCTION;
@@ -2724,6 +2792,10 @@ parsing do not have to worry about it */
  * We need to be careful, since sometimes there are forward references to
  * other symbol types, and these cannot be resolved until we have completed
  * the parse.
+ *
+ * Also check and see if we are using continuation stabs, if we are, then
+ * paste together the entire contents of the stab before we pass it to 
+ * VMS_typedef_parse.
  */
 static int
 VMS_LSYM_Parse ()
@@ -2732,6 +2804,7 @@ VMS_LSYM_Parse ()
   char *pnt1;
   char *pnt2;
   char *str;
+  char *parse_buffer = 0;
   char fixit[10];
   int incomplete, i, pass, incom1;
   struct VMS_DBG_Symbol *spnt;
@@ -2739,6 +2812,7 @@ VMS_LSYM_Parse ()
   struct forward_ref *fpnt;
   symbolS *sp;
   pass = 0;
+  final_pass = 0;
   incomplete = 0;
   do
     {
@@ -2765,24 +2839,65 @@ VMS_LSYM_Parse ()
 		case N_FUN:	/*sometimes these contain typedefs*/
 		  str = S_GET_NAME (sp);
 		  symbol_name = str;
-		  pnt = (char *) strchr (str, ':');
-		  if (pnt == (char *) NULL)
-		    break;
-		  *pnt = '\0';
-		  pnt1 = pnt + 1;
-		  pnt2 = (char *) strchr (pnt1, '=');
-		  if (pnt2 == (char *) NULL)
+		  pnt = str + strlen(str) -1;
+		  if (*pnt == '?')  /* Continuation stab.  */
 		    {
-		      *pnt = ':';	/* replace colon */
-		      break;
-		    };		/* no symbol here */
-		  incomplete += VMS_typedef_parse (pnt2);
-		  *pnt = ':';	/* put back colon so variable def code finds dbx_type*/
+		      symbolS *spnext;
+		      int tlen = 0;
+		      spnext = sp;
+		      do {
+			tlen += strlen(str) - 1;
+			spnext = symbol_next (spnext);
+			str = S_GET_NAME (spnext);
+			pnt = str + strlen(str) - 1;
+		      } while (*pnt == '?');
+		      tlen += strlen(str);
+		      parse_buffer = (char *) malloc (tlen + 1);
+		      strcpy(parse_buffer, S_GET_NAME (sp));
+		      pnt2 = parse_buffer + strlen(S_GET_NAME (sp)) - 1;
+		      *pnt2 = '\0';
+		      spnext = sp;
+		      do {
+			spnext = symbol_next (spnext);
+			str = S_GET_NAME (spnext);
+			strcat (pnt2, S_GET_NAME (spnext));
+			pnt2 +=  strlen(str) - 1;
+			*str = '\0';  /* Erase this string  */
+			if (*pnt2 != '?') break;
+			*pnt2 = '\0';
+		      } while (1 == 1);
+		      str = parse_buffer;
+		      symbol_name = str;
+		    };
+		  pnt = (char *) strchr (str, ':');
+		  if (pnt != (char *) NULL)
+		    {
+		      *pnt = '\0';
+		      pnt1 = pnt + 1;
+		      pnt2 = (char *) strchr (pnt1, '=');
+		      if (pnt2 != (char *) NULL)
+			incomplete += VMS_typedef_parse (pnt2);
+		      if (parse_buffer){
+			/*  At this point the parse buffer should just contain name:nn.
+			    If it does not, then we are in real trouble. Anyway, 
+			    this is always shorter than the original line. */
+			strcpy(S_GET_NAME (sp), parse_buffer);
+			free (parse_buffer);
+			parse_buffer = 0;
+		      };
+		      *pnt = ':';	/* put back colon so variable def code finds dbx_type*/
+		    };
 		  break;
 		}		/*switch*/
 	    }			/* if */
 	}			/*for*/
       pass++;
+/* Make one last pass, if needed, and define whatever we can that is left */
+      if(final_pass == 0 && incomplete == incom1)
+        {
+          final_pass = 1;
+	  incom1 ++;  /* Force one last pass through */
+	};
   } while ((incomplete != 0) && (incomplete != incom1));
   /* repeat until all refs resolved if possible */
 /*	if (pass > 1) printf(" Required %d passes\n",pass);*/
@@ -2931,8 +3046,7 @@ VMS_DBG_Define_Routine (symbolP, Curr_Routine, Txt_Psect)
 #include <time.h>
 
 /* Manufacure a VMS like time on a unix based system. */
-get_VMS_time_on_unix (Now)
-     char *Now;
+get_VMS_time_on_unix (char *Now)
 {
   char *pnt;
   time_t timeb;
@@ -3058,7 +3172,7 @@ Write_VMS_MHD_Records ()
       cp = "GNU AS  V";
       while (*cp)
 	PUT_CHAR (*cp++);
-      cp = strchr (version_string, '.');
+      cp = strchr (&version_string, '.');
       while (*cp != ' ')
 	cp--;
       cp++;
@@ -3631,9 +3745,8 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
 	default:
 	  {
 	    char Error_Line[256];
-	    sprintf (Error_Line,
-		     "Globalsymbol attribute for symbol %s was unexpected.\n",
-		     Name);
+	    sprintf (Error_Line, "Globalsymbol attribute for"
+		     " symbol %s was unexpected.\n", Name);
 	    error (Error_Line);
 	    break;
 	  };
@@ -3803,10 +3916,8 @@ VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
 	      Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
 	      if (Size > 4)
 		error ("Invalid data type for globalvalue");
-	      globalvalue = 0;
-	      
-	      memcpy (&globalvalue, Data_Segment + S_GET_VALUE (sp) -
-		     text_siz, Size);
+	      globalvalue = md_chars_to_number (Data_Segment + 
+		     S_GET_VALUE (sp) - text_siz , Size);
 	      /* Three times for good luck.  The linker seems to get confused
 	         if there are fewer than three */
 	      VMS_Global_Symbol_Spec (stripped_name, 0, 0, 2);
@@ -4664,6 +4775,18 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 					 vsp);
 	  if (Globalref)
 	    Psect_Number--;
+
+/* See if this is an external vtable.  We want to help the linker find
+   these things in libraries, so we make a symbol reference.  This
+   is not compatible with VAX-C usage for variables, but since vtables are
+   only used internally by g++, we can get away with this hack.  */
+
+	  if(strncmp (S_GET_NAME (sp), "__vt.", 5) == 0)
+	    VMS_Global_Symbol_Spec (S_GET_NAME(sp),
+				    vsp->Psect_Index,
+				    0,
+				    0);
+
 #ifdef	NOT_VAX_11_C_COMPATIBLE
 	  /*
 	   *	Place a global symbol at the
@@ -4728,6 +4851,18 @@ VMS_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 					 vsp);
 	  if (Globalref)
 	    Psect_Number--;
+
+/* See if this is an external vtable.  We want to help the linker find
+   these things in libraries, so we make a symbol definition.  This
+   is not compatible with VAX-C usage for variables, but since vtables are
+   only used internally by g++, we can get away with this hack.  */
+
+	  if(strncmp (S_GET_NAME (sp), "__vt.", 5) == 0)
+	    VMS_Global_Symbol_Spec (S_GET_NAME (sp),
+				    vsp->Psect_Index,
+				    0,
+				    1);
+
 #ifdef	NOT_VAX_11_C_COMPATIBLE
 	  /*
 	   *	Place a global symbol at the

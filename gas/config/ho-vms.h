@@ -17,7 +17,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HO_VAX 1
+#define HO_VMS 1
 
 #include "ho-vax.h"
 
