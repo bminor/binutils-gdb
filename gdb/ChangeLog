@@ -1,3 +1,7 @@
+Tue Nov  7 12:59:14 1995  Raymond Jou  <rjou@mexican.cygnus.com>
+
+	* mac-gdb.r: Added #ifdef Macgdb.
+
 Tue Nov  7 14:59:51 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* remote-mips.c (mips_initialize): Updated to talk to VR4300 RISQ

@@ -12,6 +12,8 @@ resource 'vers' (1) {
 	"4.12.3, Copyright \251 1994 Free Software Foundation, Inc."
 };
 
+#ifdef Macgdb /* Exclude the following from SIOWgdb which uses SIOW.r.  */
+
 resource 'MBAR' (128) {
 	{ mApple, mFile, mEdit, mDebug };
 };
@@ -146,3 +148,5 @@ resource 'DLOG' (128) {
 	128,
 	""
 };
+
+#endif
