@@ -44,8 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)			\
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
-    REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM,				\
-				 REGISTER_VIRTUAL_TYPE (FP0_REGNUM),	\
+    REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, TYPE,			\
 				 &REGBUF[REGISTER_BYTE (FP0_REGNUM)],	\
 				 VALBUF);				\
   else									\
@@ -65,14 +64,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
       {									\
 	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
-	REGISTER_CONVERT_TO_RAW (REGISTER_VIRTUAL_TYPE (FP0_REGNUM),	\
-				 FP0_REGNUM, VALBUF, raw_buf);		\
-	write_register_bytes (FP0_REGNUM,				\
+	REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buf);	\
+	write_register_bytes (REGISTER_BYTE (FP0_REGNUM),		\
 			      raw_buf, REGISTER_RAW_SIZE (FP0_REGNUM)); \
       }									\
   else									\
     write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0), \
 			  VALBUF, TYPE_LENGTH (TYPE))
+
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.  */
+
+#define FRAME_NUM_ARGS(val, fi)  \
+{ register CORE_ADDR pc = FRAME_SAVED_PC (fi);			\
+  register int insn = 0177777 & read_memory_integer (pc, 2);	\
+  val = 0;							\
+  if (insn == 0047757 || insn == 0157374)  /* lea W(sp),sp or addaw #W,sp */ \
+    val = read_memory_integer (pc + 2, 2);			\
+  else if ((insn & 0170777) == 0050217 /* addql #N, sp */	\
+	   || (insn & 0170777) == 0050117)  /* addqw */		\
+    { val = (insn >> 9) & 7; if (val == 0) val = 8; }		\
+  else if (insn == 0157774) /* addal #WW, sp */			\
+    val = read_memory_integer (pc + 2, 4);			\
+  val >>= 2; }
 
 /* On M68040 versions of sysV68 R3V7.1, ptrace(PT_WRITE_I) does not clear
    the processor's instruction cache as it should.  */

@@ -77,3 +77,10 @@ _initialize_delta68_nat ()
       exit (1);
     }
 }
+
+clear_insn_cache ()
+{
+#ifdef MCT_TEXT /* in sys/signal.h on sysV68 R3V7.1 */
+  memctl(0, 4096, MCT_TEXT);
+#endif
+}

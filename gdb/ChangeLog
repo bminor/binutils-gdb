@@ -1,3 +1,15 @@
+Mon Feb 10 12:37:47 1998  Philippe De Muyter  <phdm@macqel.be>
+
+        * m68k/tm-delta68.h (EXTRACT_RETURN_VALUE): Type argument for
+        `REGISTER_CONVERT_TO_VIRTUAL is `TYPE', not
+        `REGISTER_VIRTUAL_TYPE (FP0_REGNUM)';
+        (STORE_RETURN_VALUE): Ditto, and offset for `write_register_bytes'
+        is `REGISTER_BYTE (FP0_REGNUM)', not `FP0_REGNUM'.
+        (FRAME_NUM_ARGS): New macro.
+        * m68k/tm-news.h (EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE): Ditto.
+        * delta68-nat.c (clear_insn_cache): New function, forgotten in previous
+        patch.
+
 Mon Feb  9 11:10:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c: Replace references to IMEM_ADDR and DMEM_ADDR with
@@ -27,7 +39,7 @@ Mon Feb  9 15:35:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in (init.c): Ignore errors when making init.c.  Seems
 	necessary to work around bug in Solaris make.
 
-Sun Jul  6 02:44:28 1997  Philippe De Muyter  <phdm@macqel.be>
+Sun Feb  6 02:44:28 1997  Philippe De Muyter  <phdm@macqel.be>
 
         * m68k/tm-delta68.h (CPLUS_MARKER): Macro deleted.
         (EXTRACT_STRUCT_VALUE_ADDRESS): Macro defined.
