@@ -17,8 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "ho-sysv.h"
-
 /* This header file contains the #defines specific
    to HPUX changes sent me by cph@zurich.ai.mit.edu */
 #ifndef hpux
@@ -30,5 +28,14 @@
 #endif /* setbuffer */
 
 #define setbuffer(stream, buf, size)
+
+/* Some basic include files.  Avoid including ho-sysv.h as it defines
+   malloc and free and the declarations do not match what HPUX puts
+   in its include files!  Declaring such system functions is not all
+   that good of an idea.  */
+#include <ctype.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 /* end of ho-hpux.h */
