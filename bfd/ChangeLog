@@ -1,3 +1,7 @@
+1998-07-22  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf32-ppc.c: Change use of pp_reloc_type to elf_ppc_reloc_type.
+
 Wed Jul 22 16:27:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-hppa.h: Let ELF header define the enum containing the
