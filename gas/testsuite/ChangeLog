@@ -6,9 +6,14 @@ Wed Feb 15 15:43:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* gas/mips/usd.s: New file.
 	* gas/mips/mips.exp: Run new tests.
 
+Thu Feb  9 10:57:39 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/applybug.s: New test.
+	* gas/hppa/reloc/reloc.exp (do_applybug_test): Run it.
+
 Thu Feb  2 00:34:55 1995  Jeff Law  (law@snake.cs.utah.edu)
 
-        * gas/hppa/reloc/picreloc.c: New test.
+        * gas/hppa/reloc/picreloc.s: New test.
 	* gas/hppa/reloc/reloc.exp (do_pic_relocation_test): Run it.
 
 Fri Jan 27 14:02:02 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
