@@ -1,3 +1,7 @@
+2001-07-13  Philip Blundell  <philb@gnu.org>
+
+	* arm-dis.c (print_insn_arm): Use decimal for offsets in LDR/STR.
+
 2001-07-12  Jeff Johnston  <jjohnstn@redhat.com>
 
         * cgen-asm.in: Include "xregex.h" always to enable the libiberty
