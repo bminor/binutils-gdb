@@ -1,3 +1,12 @@
+2003-08-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Mode Options): Mention that level three is the
+	highest available and that level 2 is deprecated.
+	(Annotations Overview): Mention annotation levels. Cross reference
+	to "Limitations of the Annotation Interface" in annotate.texi.
+	(TODO, Value Annotations, Frame Annotations): Delete section.
+	(Displays, Breakpoint Info): Delete.
+
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
 	* agentexpr.texi: Delete @bye.
