@@ -1,3 +1,13 @@
+Fri Jul 24 18:15:21 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* op_utils.c (do_syscall): Rewrite to use common/syscall.c.
+	(syscall_read_mem, syscall_write_mem): New functions for syscall
+	callbacks.
+	* mn10300_sim.h: Add prototypes for syscall_read_mem and
+	syscall_write_mem. 
+	* mn10300.igen: Change C++ style comments to C style comments.
+	Check for divide by zero in div and divu ops.
+
 start-sanitize-am33
 Fri Jul 24 12:49:28 1998  Jeffrey A Law  (law@cygnus.com)
 
