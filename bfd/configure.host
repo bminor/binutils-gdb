@@ -18,6 +18,7 @@ case "${host}" in
 # The order of matching is critical when multiple lines could match.
 
 alpha-*-*)		my_host=alphaosf ; host64=true ;;
+arm-*-riscix)		my_host=riscix ;;
 a29k-*-*)		my_host=ultra3 ;;
 
 hppa*-*-hpux*)		my_host=hppahpux ;;
@@ -35,7 +36,7 @@ i[345]86-*-go32*)	my_host=go32 ;;
 i[345]86-esix-sysv3*)	my_host=esix ;;
 i[345]86-*-sysv4*)	my_host=i386v4 ;;
 i[345]86-*-sysv*)	my_host=i386v ;;
-i[345]86-*-solaris*)	my_host=i386v ;;
+i[345]86-*-solaris*)	my_host=solaris2 ;;
 i[345]86-*-sco*)	my_host=i386sco ;;
 i[345]86-*-mach3*)	my_host=i386mach3 ;;
 i[345]86-*-osf1mk*)	my_host=i386osf1mk ;;
@@ -80,7 +81,7 @@ m88*-*-dgux*)		my_host=dgux ;;
 m88*-*-mach3*)		my_host=m88kmach3 ;;
 
 ns32k-pc532-mach)	my_host=pc532mach ;;
-ns32k-pc532-netbsd*)    my_host=pc532mach ;;
+ns32k-*-netbsd*)	my_host=ns32knbsd ;;
 
 romp-*-*)		my_host=rtbsd ;;
 
@@ -89,6 +90,7 @@ rs6000-*-lynx*)		my_host=rs6000lynx ;;
 rs6000-*-*)		my_host=rs6000 ;;
 
 sparc-*-lynxos*)	my_host=sparclynx ;;
+sparc-*-netbsd*)	my_host=sparcnbsd;;
 sparc-*-sunos64*)	my_host=sparc-ll ;;
 sparc-*-sysv4*)		my_host=sysv4 ;;
 sparc-*-solaris2*)	my_host=solaris2 ;;

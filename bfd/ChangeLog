@@ -1,3 +1,8 @@
+Sat Nov 19 03:10:51 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.host (i[345]86-*-solaris*):  Use solaris2 to
+	enable extraction of procfs info from core file for GDB.
+
 Thu Nov 17 17:37:39 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* reloc.c (bfd_reloc_code_type): Add new value BFD_RELOC_12_PCREL.
