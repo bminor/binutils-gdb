@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Mon Nov 4 16:01:21 PST 1991, by rich@rtl.cygnus.com
+# Last Mod Tue Nov 5 12:18:34 PST 1991, by rich@rtl.cygnus.com
 #
 # $Id$
 
@@ -101,8 +101,7 @@ bootstrap3:
 	$(MAKE) comparison
 
 pass:
-	cp $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-                then echo .$(target) ; fi`/gstdarg.h $(unsubdir)/gas/stdarg.h
+	cp $(srcdir)/gcc/gstdarg.h $(unsubdir)/gas$(subdir)/stdarg.h
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
 		"CC=`pwd`/$(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc \
