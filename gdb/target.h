@@ -1152,12 +1152,6 @@ struct section_table *target_section_by_addr (struct target_ops *target,
 					      CORE_ADDR addr);
 
 
-/* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
-   Returns 0 if OK, 1 on error.  */
-
-extern int build_section_table (bfd *, struct section_table **,
-				struct section_table **);
-
 /* From mem-break.c */
 
 extern int memory_remove_breakpoint (CORE_ADDR, char *);

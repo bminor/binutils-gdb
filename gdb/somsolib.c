@@ -42,6 +42,7 @@
 #include "language.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "exec.h"
 
 #include <fcntl.h>
 
@@ -54,10 +55,6 @@
 
 /* #define SOLIB_DEBUG
  */
-
-/* Defined in exec.c; used to prevent dangling pointer bug.
- */
-extern struct target_ops exec_ops;
 
 /* This lives in hppa-tdep.c. */
 extern struct unwind_table_entry *find_unwind_entry (CORE_ADDR pc);

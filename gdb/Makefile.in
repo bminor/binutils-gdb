@@ -662,6 +662,7 @@ dwarf2loc_h = dwarf2loc.h
 environ_h = environ.h
 event_loop_h = event-loop.h
 event_top_h = event-top.h
+exec_h = exec.h $(target_h)
 expression_h = expression.h $(symtab_h) $(doublest_h)
 f_lang_h = f-lang.h
 frame_base_h = frame-base.h
@@ -1648,7 +1649,7 @@ corefile.o: corefile.c $(defs_h) $(gdb_string_h) $(inferior_h) $(symtab_h) \
 	$(dis_asm_h) $(gdb_stat_h) $(completer_h)
 corelow.o: corelow.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(command_h) $(bfd_h) $(target_h) $(gdbcore_h) \
-	$(gdbthread_h) $(regcache_h) $(symfile_h)
+	$(gdbthread_h) $(regcache_h) $(symfile_h) $(exec_h)
 core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(gregset_h)
 core-sol2.o: core-sol2.c $(defs_h) $(gdb_string_h) $(regcache_h) \
@@ -1745,7 +1746,8 @@ event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
 	$(gdbcmd_h)
 exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
-	$(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) $(xcoffsolib_h)
+	$(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) $(xcoffsolib_h) \
+	$(exec_h)
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(value_h) $(language_h) $(parser_defs_h) $(user_regs_h) $(target_h) \
 	$(gdb_string_h) $(block_h)
@@ -2097,7 +2099,7 @@ osabi.o: osabi.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(osabi_h) \
 pa64solib.o: pa64solib.c $(defs_h) $(frame_h) $(bfd_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h)
+	$(regcache_h) $(exec_h)
 parse.o: parse.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(expression_h) $(value_h) $(command_h) $(language_h) \
 	$(parser_defs_h) $(gdbcmd_h) $(symfile_h) $(inferior_h) \
@@ -2277,7 +2279,7 @@ solib-aix5.o: solib-aix5.c $(defs_h) $(gdb_string_h) $(elf_external_h) \
 solib.o: solib.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(command_h) $(target_h) $(frame_h) \
 	$(gdb_regex_h) $(inferior_h) $(environ_h) $(language_h) $(gdbcmd_h) \
-	$(completer_h) $(filenames_h) $(solist_h)
+	$(completer_h) $(filenames_h) $(solist_h) $(exec_h)
 solib-irix.o: solib-irix.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(solist_h)
 solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
@@ -2298,7 +2300,7 @@ somread.o: somread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 somsolib.o: somsolib.c $(defs_h) $(frame_h) $(bfd_h) $(som_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h) $(gdb_assert_h)
+	$(regcache_h) $(gdb_assert_h) $(exec_h)
 source.o: source.c $(defs_h) $(symtab_h) $(expression_h) $(language_h) \
 	$(command_h) $(source_h) $(gdbcmd_h) $(frame_h) $(value_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(gdbcore_h) $(gdb_regex_h) \
@@ -2432,7 +2434,7 @@ w89k-rom.o: w89k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(completer_h) $(regcache_h) $(top_h) \
 	$(i386_tdep_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \
-	$(gdb_string_h) $(gdbthread_h) $(gdbcmd_h)
+	$(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) $(exec_h)
 wince.o: wince.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(command_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) $(wince_stub_h) \

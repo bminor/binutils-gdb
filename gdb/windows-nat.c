@@ -52,6 +52,7 @@
 #include "gdbcmd.h"
 #include <sys/param.h>
 #include <unistd.h>
+#include "exec.h"
 
 /* The ui's event loop. */
 extern int (*ui_loop_hook) (int signo);

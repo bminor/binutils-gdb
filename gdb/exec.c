@@ -1,7 +1,8 @@
 /* Work with executable files, for GDB. 
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -30,6 +31,7 @@
 #include "objfiles.h"
 #include "completer.h"
 #include "value.h"
+#include "exec.h"
 
 #ifdef USG
 #include <sys/types.h>

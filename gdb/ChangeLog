@@ -1,5 +1,23 @@
 2003-10-22  Andrew Cagney  <cagney@redhat.com>
 
+	* exec.h: New file.
+	* win32-nat.c: Include "exec.h".
+	* solib.c: Include "exec.h".
+	* target.h (build_section_table): Delete declaration.
+	* somsolib.c: Include "exec.h".
+	(exec_ops): Delete extern declaration.
+	* rs6000-nat.c: Update copyright.  Include "exec.h".
+	(exec_ops): Delete extern declaration.
+	* pa64solib.c: Update copyright.  Include "exec.h".
+	(exec_ops): Delete extern declaration.
+	* exec.c: Update copyright.  Include "exec.h".
+	* corelow.c: Update dependencies.  Include "exec.h".
+	* Makefile.in (exec_h): Define.
+	(exec.o, somsolib.o): Update dependencies.
+	(pa64solib.o, corelow.o): Update dependencies.
+
+2003-10-22  Andrew Cagney  <cagney@redhat.com>
+
 	* target.c: Include "gdb_assert.h" (target_read): Call
 	"target_read_partial", not "target_write_partial".
 	(default_read_partial, default_write_partial): New function.

@@ -1,7 +1,8 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -34,6 +35,7 @@
 #include "arch-utils.h"
 #include "language.h"		/* for local_hex_string().  */
 #include "ppc-tdep.h"
+#include "exec.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -126,8 +128,6 @@ typedef union {
 #define LDI_FILENAME(ldi, arch64)	LDI_FIELD(ldi, arch64, filename)
 
 extern struct vmap *map_vmap (bfd * bf, bfd * arch);
-
-extern struct target_ops exec_ops;
 
 static void vmap_exec (void);
 
