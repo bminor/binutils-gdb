@@ -417,9 +417,6 @@ struct internal_reloc
 #define R_RELBYTE	017
 #define R_RELWORD	020
 
-#define R_PCRBYTE	022
-#define R_PCRWORD	023
-#define R_PCRLONG	024
 
 
 #define R_PCR16L 128
@@ -444,3 +441,21 @@ struct internal_reloc
 #define R_JMP1     0x43    /* Special h8 16bit jmp which could be
 			      pcrel */
 #define R_JMP2 0x44 /* a branch which used to be a jmp */
+#define R_RELLONG_NEG  0x45
+
+
+/* Z8k modes */
+#define R_DA	  0x01	/* Absolute direct address */
+#define R_CALL    0x02  /* Absolute address which could be a callr */
+#define R_JP	  0x03  /* Absolute address which could be a jp */
+#define R_REL16   0x04  /* 16 bit PC rel */
+
+#define R_CALLR	  0x05	/* callr 12 bit disp */
+#define R_JR	  0x06	/* jr  8 bit disp */
+#define R_SEG     0x10  /* set if in segmented mode */
+
+#define R_IMM16   0x20  /* 16 bit abs */
+#define R_IMM32   0x21  /* 32 bit abs */
+#define R_IMM8    0x22  /* 8 bit abs */
+#define R_IMM4L   0x23  /* low nibble */
+#define R_IMM4H   0x24  /* high nibble */

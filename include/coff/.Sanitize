@@ -38,7 +38,7 @@ mips.h
 rs6000.h
 sym.h
 symconst.h
-
+z8k.h
 Do-last:
 
 echo Done in `pwd`.
