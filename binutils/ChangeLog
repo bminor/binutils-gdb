@@ -1,3 +1,8 @@
+Fri Oct  6 14:08:51 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* sysinfo.y: Eliminate unused terminals "[" and "]" and unused
+	nonterminal "name".  One s/r conflict remains.
+
 Fri Oct  6 12:00:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ar.c (do_quick_append): Comment out.
