@@ -81,7 +81,7 @@ i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
    The instruction sequence for normal signals is
        pop    %eax
-       mov    $0x77,%eax
+       mov    $0x77, %eax
        int    $0x80
    or 0x58 0xb8 0x77 0x00 0x00 0x00 0xcd 0x80.
 
@@ -103,17 +103,17 @@ i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    to the ones used by the kernel.  Therefore, these trampolines are
    supported too.  */
 
-#define LINUX_SIGTRAMP_INSN0 (0x58)	/* pop %eax */
-#define LINUX_SIGTRAMP_OFFSET0 (0)
-#define LINUX_SIGTRAMP_INSN1 (0xb8)	/* mov $NNNN,%eax */
-#define LINUX_SIGTRAMP_OFFSET1 (1)
-#define LINUX_SIGTRAMP_INSN2 (0xcd)	/* int */
-#define LINUX_SIGTRAMP_OFFSET2 (6)
+#define LINUX_SIGTRAMP_INSN0	0x58	/* pop %eax */
+#define LINUX_SIGTRAMP_OFFSET0	0
+#define LINUX_SIGTRAMP_INSN1	0xb8	/* mov $NNNN, %eax */
+#define LINUX_SIGTRAMP_OFFSET1	1
+#define LINUX_SIGTRAMP_INSN2	0xcd	/* int */
+#define LINUX_SIGTRAMP_OFFSET2	6
 
 static const unsigned char linux_sigtramp_code[] =
 {
   LINUX_SIGTRAMP_INSN0,					/* pop %eax */
-  LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77,%eax */
+  LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77, %eax */
   LINUX_SIGTRAMP_INSN2, 0x80				/* int $0x80 */
 };
 
@@ -167,20 +167,20 @@ i386_linux_sigtramp_start (CORE_ADDR pc)
 
 /* This function does the same for RT signals.  Here the instruction
    sequence is
-       mov    $0xad,%eax
+       mov    $0xad, %eax
        int    $0x80
    or 0xb8 0xad 0x00 0x00 0x00 0xcd 0x80.
 
    The effect is to call the system call rt_sigreturn.  */
 
-#define LINUX_RT_SIGTRAMP_INSN0 (0xb8)	/* mov $NNNN,%eax */
-#define LINUX_RT_SIGTRAMP_OFFSET0 (0)
-#define LINUX_RT_SIGTRAMP_INSN1 (0xcd)	/* int */
-#define LINUX_RT_SIGTRAMP_OFFSET1 (5)
+#define LINUX_RT_SIGTRAMP_INSN0		0xb8 /* mov $NNNN, %eax */
+#define LINUX_RT_SIGTRAMP_OFFSET0	0
+#define LINUX_RT_SIGTRAMP_INSN1		0xcd /* int */
+#define LINUX_RT_SIGTRAMP_OFFSET1	5
 
 static const unsigned char linux_rt_sigtramp_code[] =
 {
-  LINUX_RT_SIGTRAMP_INSN0, 0xad, 0x00, 0x00, 0x00,	/* mov $0xad,%eax */
+  LINUX_RT_SIGTRAMP_INSN0, 0xad, 0x00, 0x00, 0x00,	/* mov $0xad, %eax */
   LINUX_RT_SIGTRAMP_INSN1, 0x80				/* int $0x80 */
 };
 
@@ -239,50 +239,47 @@ i386_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	  || strcmp ("__restore_rt", name) == 0);
 }
 
-/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
-   address of the associated sigcontext structure.  */
+/* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
+#define I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 20
+
+/* Assuming NEXT_FRAME is a frame following a GNU/Linux sigtramp
+   routine, return the address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386_linux_sigcontext_addr (struct frame_info *frame)
+i386_linux_sigcontext_addr (struct frame_info *next_frame)
 {
   CORE_ADDR pc;
+  CORE_ADDR sp;
+  char buf[4];
 
-  pc = i386_linux_sigtramp_start (get_frame_pc (frame));
+  frame_unwind_register (next_frame, SP_REGNUM, buf);
+  sp = extract_unsigned_integer (buf, 4);
+
+  pc = i386_linux_sigtramp_start (frame_pc_unwind (next_frame));
   if (pc)
     {
-      CORE_ADDR sp;
-
-      if (get_next_frame (frame))
-	/* If this isn't the top frame, the next frame must be for the
-	   signal handler itself.  The sigcontext structure lives on
-	   the stack, right after the signum argument.  */
-	return get_frame_base (get_next_frame (frame)) + 12;
-
-      /* This is the top frame.  We'll have to find the address of the
-	 sigcontext structure by looking at the stack pointer.  Keep
-	 in mind that the first instruction of the sigtramp code is
-	 "pop %eax".  If the PC is at this instruction, adjust the
-	 returned value accordingly.  */
-      sp = read_register (SP_REGNUM);
-      if (pc == get_frame_pc (frame))
+      /* The sigcontext structure lives on the stack, right after
+	 the signum argument.  We determine the address of the
+	 sigcontext structure by looking at the frame's stack
+	 pointer.  Keep in mind that the first instruction of the
+	 sigtramp code is "pop %eax".  If the PC is after this
+	 instruction, adjust the returned value accordingly.  */
+      if (pc == frame_pc_unwind (next_frame))
 	return sp + 4;
       return sp;
     }
 
-  pc = i386_linux_rt_sigtramp_start (get_frame_pc (frame));
+  pc = i386_linux_rt_sigtramp_start (frame_pc_unwind (next_frame));
   if (pc)
     {
-      if (get_next_frame (frame))
-	/* If this isn't the top frame, the next frame must be for the
-	   signal handler itself.  The sigcontext structure is part of
-	   the user context.  A pointer to the user context is passed
-	   as the third argument to the signal handler.  */
-	return read_memory_integer (get_frame_base (get_next_frame (frame))
-				    + 16, 4) + 20;
+      CORE_ADDR ucontext_addr;
 
-      /* This is the top frame.  Again, use the stack pointer to find
-	 the address of the sigcontext structure.  */
-      return read_memory_integer (read_register (SP_REGNUM) + 8, 4) + 20;
+      /* The sigcontext structure is part of the user context.  A
+	 pointer to the user context is passed as the third argument
+	 to the signal handler.  */
+      read_memory (sp + 8, buf, 4);
+      ucontext_addr = extract_unsigned_integer (buf, 4) + 20;
+      return ucontext_addr + I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
     }
 
   error ("Couldn't recognize signal trampoline.");
@@ -322,7 +319,7 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
    be considered too special-purpose for general consumption.  */
 
 static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfile_p)
+find_minsym_and_objfile (char *name, struct objfile **objfilep)
 {
   struct objfile *objfile;
 
@@ -335,7 +332,7 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
 	  if (SYMBOL_LINKAGE_NAME (msym)
 	      && strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
 	    {
-	      *objfile_p = objfile;
+	      *objfilep = objfile;
 	      return msym;
 	    }
 	}
@@ -345,9 +342,9 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
 }
 
 static CORE_ADDR
-skip_hurd_resolver (CORE_ADDR pc)
+skip_gnu_resolver (CORE_ADDR pc)
 {
-  /* The HURD dynamic linker is part of the GNU C library, so many
+  /* The GNU dynamic linker is part of the GNU C library, so many
      GNU/Linux distributions use it.  (All ELF versions, as far as I
      know.)  An unresolved PLT entry points to "_dl_runtime_resolve",
      which calls "fixup" to patch the PLT, and then passes control to
@@ -374,7 +371,7 @@ skip_hurd_resolver (CORE_ADDR pc)
 	= lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return (DEPRECATED_SAVED_PC_AFTER_CALL (get_current_frame ()));
+	return frame_pc_unwind (get_current_frame ()); 
     }
 
   return 0;
@@ -393,7 +390,7 @@ i386_linux_skip_solib_resolver (CORE_ADDR pc)
   CORE_ADDR result;
 
   /* Plug in functions for other kinds of resolvers here.  */
-  result = skip_hurd_resolver (pc);
+  result = skip_gnu_resolver (pc);
   if (result)
     return result;
 
@@ -461,7 +458,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
   set_gdbarch_register_reggroup_p (gdbarch, i386_linux_register_reggroup_p);
-  set_gdbarch_deprecated_register_bytes (gdbarch, I386_SSE_SIZEOF_REGS + 4);
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 

@@ -1,3 +1,94 @@
+2003-05-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.h (i386bsd_sigcontext_addr): Remove prototype.
+	(I386_SIZEOF_GREGS, I386_SIZEOF_FREGS, I386_SIZEOF_XREGS): Remove
+	defenitions.
+	(IS_FP_REGNUM, IS_SSE_REGNUM): Remove definitions.
+	* i386-tdep.c: Mark functions that are 64-bit safe as such.
+	(I386_EAX_REGNUM, I386_EDX_REGNUM, I386_ESP_REGNUM,
+	I386_EBP_REGNUM, I386_EIP_REGNUM, I386_EFLAGS_REGNUM,
+	I386_ST0_REGNUM): New defines.
+	(CODESTREAM_BUFSIZ, codestream_tell, codestream_peek,
+	codestream_get): Remove define.
+	(codestream_next_addr, condestream_addr, condestream_buf,
+	codestream_off, codestream_cnt): Remove variables.
+	(codestream_fill, codestream_seek, codestream_read): Remove
+	functions.
+	(i386_follow_jump): Rewrite to avoid usage of removed codestream
+	functionality.
+	(i386_get_frame_setup, i386_frameless_signal_p, i386_frame_chain,
+	i386_sigtramp_saved_pc, i386_sigtramp_saved_sp,
+	i386_frame_saved_pc, i386_saved_pc_after_call,
+	i386_frame_num_args, i386_frame_init_saved_regs,
+	i386_push_return_address, i386_do_pop_frame, i386_pop_frame,
+	i386_push_arguments): Remove functions.
+	(i386_skip_prologue): Rewrite to avoid usage of removed codestream
+	functionality.  Use i386_analyze_prologue instead of
+	i386_get_frame_setup.
+	(I386_NUM_SAVED_REGS): New define.
+	(struct i386_frame_cache): New structure.
+	(i386_alloc_frame_cache, i386_analyze_struct_return,
+	i386_skip_probe, i386_analyze_frame_setup,
+	i386_analyze_register_saves, i386_analyze_prologue,
+	i386_unwind_pc, i386_frame_cache, i386_frame_this_id,
+	i386_frame_prev_register, i386_sigtramp_frame_cache,
+	i386_sigtramp_frame_this_id, i386_sigtramp_frame_prev_register,
+	i386_frame_p, i386_sigtramp_frame_p, i386_frame_base_address,
+	i386_unwind_dummy_id, i386_save_dummy_tos, i386_push_dummy_call):
+	New functions.
+	(i386_frame_unwind, i386_sigtramp_frame_unwind, i386_frame_base):
+	New variables.
+	(LOW_RETURN_REGNUM, HIGH_RETURN_REGNUM): Define in terms of
+	I386_EAX_REGNUM and I386_EDX_REGNUM.
+	(i386_extract_return_value, i386_store_return_value): Use
+	I386_ST0_REGNUM where appropriate.
+	(i386_extract_struct_value_address): Rewrite to use extract_address.
+	(i386_svr4_pc_in_sigtramp): Add comment.
+	(i386_svr4_sigcontext_addr): Rewrite.
+	(i386_svr4_init_abi): Adjust TDEP->sc_pc_offset and
+	TDEP->sc_sp_offset.
+	(i386_gdbarch_init): Don't set deprecated_init_frame_pc.  Set
+	sp_regnum, fp_regnum, pc_regnum, ps_regnum and fp0_regnum in terms
+	of new defines.  Set push_dummy_call, don't set
+	deprecated_push_arguments, deprecated_push_return_address,
+	deprecated_pop_frame.  Don't set parm_boundary.  Don't set
+	deprecated_frame_chain, deprecated_frame_saved_pc,
+	deprecated_saved_pc_after_call.  Set unwind_dummy_id,
+	save_dummy_frame_tos, unwind_pc.  Call
+	frame_unwind_append_predicate and frame_base_set_default.  Don't
+	set deprecated_dummy_write_pc.  Don't set deprecated_fp_regnum.
+	Don't set frameless_function_invocation.  Don't set
+	deprecated_register_bytes, deprecated_register_size,
+	deprecated_call_dummy_words and deprecated_sizeof_call_dummy.
+	* i386-linux-tdep.c: Fix formatting in some comments.
+	(LINUX_SIGTRAMP_INSN0, LINUX_SIGTRAMP_OFFSET0,
+	LINUX_SIGTRAMP_INSN1, LINUX_SIGTRAMP_OFFSET1,
+	LINUX_SIGTRAMP_INSN2, LINUX_SIGTRAMP_OFFSET2,
+	LINUX_RT_SIGTRAMP_INSN0, LINUX_RT_SIGTRAMP_OFFSET0,
+	LINUX_RT_SIGTRAMP_INSN1, LINUX_RT_SIGTRAMP_OFFSET1): Drop
+	redundant parentheses.
+	(I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET): New define.
+	(i386_linux_sigcontext_addr): Use it.  Rewrite.
+	(find_minsym_and_objfile): Change name of second argument.
+	(skip_gnu_resolver): Renamed from skip_hurd_resolver.  All callers
+	changed.  Use frame_pc_unwind instead of
+	DEPRECATED_SAVED_PC_AFTER_CALL.
+	(i386_linux_init_abi): Don't set deprecated_register_bytes.
+	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Rewrite.
+	* i386-nto-tdep.c (i386nto_sigcontext_addr): Adapt for new frame
+	unwinder.
+	* i386-cygwin-tdep.c: Don't include "gdbcore.h", "frame.h" and
+	"dummy-frame.h".
+	(i386_cygwin_frame_chain_valid, i386_cygwin_frame_chain): Removed.
+	(_initialize_i386_cygwin_tdep): New prototype.
+	(i386_cygwin_init_abi): Don't set deprecated_frame_chain and
+	deprecated_frame_chain_valid.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Don't set
+	TDEP->sigcontext_addr, TDEP->sc_pc_offset and TDEP->sc_sp_offset.
+	Rely on the SVR4 defaults.
+	* config/i386/i386sol2.mt (TDEPFILES): Remove i386bsd-tdep.o.
+	* Makefile.in (i386-tdep.o, i386-cygwin-tdep.o): Update dependencies.
+
 2003-05-30  Andrew Cagney  <cagney@redhat.com>
 
 	* infcall.c (call_function_by_hand): Always call

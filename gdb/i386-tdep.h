@@ -136,8 +136,6 @@ extern int i386_mxcsr_regnum_p (int regnum);
 #define FCOFF_REGNUM FIOFF_REGNUM
 #define FDS_REGNUM FOSEG_REGNUM
 #define FDOFF_REGNUM FOOFF_REGNUM
-#define IS_FP_REGNUM(n) i386_fp_regnum_p (n)
-#define IS_SSE_REGNUM(n) i386_sse_regnum_p (n)
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_FREGS	16
@@ -145,16 +143,6 @@ extern int i386_mxcsr_regnum_p (int regnum);
 
 #define I386_SSE_NUM_REGS	(I386_NUM_GREGS + I386_NUM_FREGS \
 				 + I386_NUM_XREGS)
-
-/* Sizes of individual register sets.  These cover the entire register
-   file, so summing up the sizes of those portions actually present
-   yields DEPRECATED_REGISTER_BYTES.  */
-#define I386_SIZEOF_GREGS	(I386_NUM_GREGS * 4)
-#define I386_SIZEOF_FREGS	(8 * 10 + 8 * 4)
-#define I386_SIZEOF_XREGS	(8 * 16 + 4)
-
-#define I386_SSE_SIZEOF_REGS	(I386_SIZEOF_GREGS + I386_SIZEOF_FREGS \
-				 + I386_SIZEOF_XREGS)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
@@ -178,7 +166,6 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 
 /* Functions exported from i386bsd-tdep.c.  */
 
-extern CORE_ADDR i386bsd_sigcontext_addr (struct frame_info *frame);
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
 
 #endif /* i386-tdep.h */
