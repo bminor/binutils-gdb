@@ -1,3 +1,7 @@
+Thu Dec 10 12:49:24 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-opc.c: Regenerate.
+
 start-sanitize-sky
 Wed Dec  9 14:57:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 
