@@ -141,6 +141,8 @@ gdba.el
 gdbcmd.h
 gdbcore.h
 gdbserver
+gdbtk.c
+gdbtk.tcl
 gdbtypes.c
 gdbtypes.h
 go32-xdep.c
