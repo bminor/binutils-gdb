@@ -147,13 +147,11 @@ OPCODES = $(OPCODEDIR)/libopcodes.a
 all: $(ADDL_LIBS) $(PROGS) testsuite
 
 testsuite:
-	echo "testsuite"; \
-	 if [ -d testsuite ]; then \
+	if [ -d testsuite ]; then \
 			(rootme=`pwd`/ ; export rootme ; \
 			 rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
 			 cd testsuite; $(MAKE) $(FLAGS_TO_PASS)); \
-        fi; \
-
+	else true ; fi
 
 check: all
 	/bin/sh $(srcdir)/sanity.sh .

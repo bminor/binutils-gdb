@@ -1,3 +1,9 @@
+Thu Feb 25 15:57:00 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ardup.c:  Add extern declaration of strdup.
+	* Makefile.in (testsuite):  Add 'else true' since otherwise
+	Ultrix /bin/sh complains.
+
 Wed Feb 24 19:44:18 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Set VERSION to 2.1.
