@@ -1,3 +1,10 @@
+Mon Aug 22 10:49:37 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* i386linux.c (linux_add_one_symbol): Create a fixup for any
+	defined absolute symbol, not just GOT or PLT symbols.
+	(linux_tally_symbols): Correct handling of references to defined
+	symbols.
+
 Thu Aug 18 16:29:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	Get ld -x -r to handle a.out set symbols correctly.
