@@ -176,7 +176,7 @@ print_semantic_body(lf *file,
   /* Architecture expects r0 to be zero.  Instead of having to check
      every read to see if it is refering to r0 just zap the r0
      register */
-  if ((code & generate_with_semantic_delayed_branch))
+  if ((code & generate_with_zero_r0))
     {
       lf_printf (file, "\n");
       lf_printf (file, "GPR(0) = 0;\n");
@@ -201,7 +201,7 @@ print_semantic_body(lf *file,
   else {
     /* abort so it is implemented now */
     table_entry_print_cpp_line_nr(file, instruction->file_entry);
-    lf_printf(file, "engine_error (SD, CPU, cia, \"%s:%d:0x%%08lx:%%s unimplemented\\n\",\n",
+    lf_printf(file, "sim_engine_abort (SD, CPU, cia, \"%s:%d:0x%%08lx:%%s unimplemented\\n\",\n",
 	      filter_filename(instruction->file_entry->file_name),
 	      instruction->file_entry->line_nr);
     if ((code & generate_with_semantic_delayed_branch))

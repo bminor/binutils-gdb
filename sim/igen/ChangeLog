@@ -1,3 +1,13 @@
+Fri May 23 12:01:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-semantics.c (print_semantic_body): Incorrect test for
+ 	zero-r0 code.
+
+Fri May 16 14:32:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-semantics.c (print_semantic_body): Use common sim-engine
+ 	interface.
+
 Fri May 16 11:48:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-semantics.c (print_semantic_body): Add code to clear r0.
