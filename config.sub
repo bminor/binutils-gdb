@@ -404,8 +404,7 @@ case $basic_machine in
 		;;
 	ultra3)
 		basic_machine=a29k-nyu
-# Is sym1 really a different system, or is it really sysv?
-#		os=-sym1
+		os=-sym1
 		;;
 	vxworks960)
 		basic_machine=i960-wrs
@@ -437,6 +436,9 @@ case $basic_machine in
 	sparc)
 		basic_machine=sparc-sun
 		;;
+	fx2800)
+		basic_machine=i860-alliant
+		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
 		exit 1
@@ -453,8 +455,8 @@ case $os in
 	# Each alternative must end in a *, to match a version number.
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
-	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* \
-	      | -amigados* | -msdos* \
+	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* | -sym* \
+	      | -amigados* | -msdos* | -none* \
 	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs*)
 		;;
 # start-sanitize-v9
@@ -478,6 +480,12 @@ case $os in
 		;;
 	-ctix* | -irix* | -uts*)
 		os=-sysv
+		;;
+	-svr4)
+		os=-sysv4
+		;;
+	-svr3)
+		os=-sysv3
 		;;
 	*)
 		# Get rid of the `-' at the beginning of $os.
