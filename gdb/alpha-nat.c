@@ -267,6 +267,6 @@ static struct core_fns alpha_elf_core_fns =
 void
 _initialize_core_alpha (void)
 {
-  add_core_fns (&alpha_osf_core_fns);
-  add_core_fns (&alpha_elf_core_fns);
+  deprecated_add_core_fns (&alpha_osf_core_fns);
+  deprecated_add_core_fns (&alpha_elf_core_fns);
 }

@@ -333,5 +333,5 @@ for different positive values.", "Show QNX NTO internal debugging.\n",
 #endif
 
   /* Register core file support.  */
-  add_core_fns (&regset_core_fns);
+  deprecated_add_core_fns (&regset_core_fns);
 }

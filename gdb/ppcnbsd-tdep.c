@@ -245,6 +245,6 @@ _initialize_ppcnbsd_tdep (void)
   gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_NETBSD_ELF,
 			  ppcnbsd_init_abi);
 
-  add_core_fns (&ppcnbsd_core_fns);
-  add_core_fns (&ppcnbsd_elfcore_fns);
+  deprecated_add_core_fns (&ppcnbsd_core_fns);
+  deprecated_add_core_fns (&ppcnbsd_elfcore_fns);
 }

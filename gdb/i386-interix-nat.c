@@ -148,7 +148,7 @@ static struct core_fns interix_core_fns =
 void
 _initialize_core_interix (void)
 {
-  add_core_fns (&interix_core_fns);
+  deprecated_add_core_fns (&interix_core_fns);
 }
 
 /* We don't have a /proc/pid/file or /proc/pid/exe to read a link from,

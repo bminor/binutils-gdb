@@ -3645,7 +3645,7 @@ _initialize_cris_tdep (void)
                "Note that this displays the address after the jump to the "
                "subroutine.", &cmdlist);
   
-  add_core_fns (&cris_elf_core_fns);
+  deprecated_add_core_fns (&cris_elf_core_fns);
   
 }
 

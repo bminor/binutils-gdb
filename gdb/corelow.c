@@ -50,9 +50,9 @@
 #define O_BINARY 0
 #endif
 
-/* List of all available core_fns.  On gdb startup, each core file register
-   reader calls add_core_fns() to register information on each core format it
-   is prepared to read. */
+/* List of all available core_fns.  On gdb startup, each core file
+   register reader calls deprecated_add_core_fns() to register
+   information on each core format it is prepared to read.  */
 
 static struct core_fns *core_file_fns = NULL;
 
@@ -104,7 +104,7 @@ struct target_ops core_ops;
    handle. */
 
 void
-add_core_fns (struct core_fns *cf)
+deprecated_add_core_fns (struct core_fns *cf)
 {
   cf->next = core_file_fns;
   core_file_fns = cf;

@@ -229,6 +229,6 @@ _initialize_alphanbsd_tdep (void)
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD_ELF,
                           alphanbsd_init_abi);
 
-  add_core_fns (&alphanbsd_core_fns);
-  add_core_fns (&alphanbsd_elfcore_fns);
+  deprecated_add_core_fns (&alphanbsd_core_fns);
+  deprecated_add_core_fns (&alphanbsd_elfcore_fns);
 }

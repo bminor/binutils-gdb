@@ -1,6 +1,8 @@
 /* Machine independent variables that describe the core file under GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2004 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -194,15 +196,18 @@ struct core_fns
 				 unsigned core_reg_size,
 				 int which, CORE_ADDR reg_addr);
 
-    /* Finds the next struct core_fns.  They are allocated and initialized
-       in whatever module implements the functions pointed to; an 
-       initializer calls add_core_fns to add them to the global chain.  */
+    /* Finds the next struct core_fns.  They are allocated and
+       initialized in whatever module implements the functions pointed
+       to; an initializer calls deprecated_add_core_fns to add them to
+       the global chain.  */
 
     struct core_fns *next;
 
   };
 
-extern void add_core_fns (struct core_fns *cf);
+/* NOTE: cagney/2004-04-05: Replaced by "regset.h" and
+   regset_from_core_section().  */
+extern void deprecated_add_core_fns (struct core_fns *cf);
 extern int default_core_sniffer (struct core_fns *cf, bfd * abfd);
 extern int default_check_format (bfd * abfd);
 

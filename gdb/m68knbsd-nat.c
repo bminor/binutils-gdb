@@ -99,5 +99,5 @@ static struct core_fns m68knbsd_core_fns =
 void
 _initialize_m68knbsd_nat (void)
 {
-  add_core_fns (&m68knbsd_core_fns);
+  deprecated_add_core_fns (&m68knbsd_core_fns);
 }

@@ -1223,5 +1223,5 @@ _initialize_core_rs6000 (void)
      starting a child process. */
   rs6000_set_host_arch_hook = set_host_arch;
 
-  add_core_fns (&rs6000_core_fns);
+  deprecated_add_core_fns (&rs6000_core_fns);
 }

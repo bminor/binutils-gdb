@@ -1166,5 +1166,5 @@ _initialize_mips_linux_tdep (void)
 			      mips_linux_init_abi);
     }
 
-  add_core_fns (&regset_core_fns);
+  deprecated_add_core_fns (&regset_core_fns);
 }

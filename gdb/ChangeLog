@@ -1,3 +1,30 @@
+2004-04-21  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbcore.h: Update copyright.
+	(deprecated_add_core_fns): Rename add_core_fns.
+	* win32-nat.c (_initialize_core_win32): Update.
+	* sun3-nat.c (_initialize_core_sun3): Update.
+	* shnbsd-tdep.c (_initialize_shnbsd_tdep): Update.
+	* rs6000-nat.c (_initialize_core_rs6000): Update.
+	* ppcnbsd-tdep.c (_initialize_ppcnbsd_tdep): Update.
+	* nto-tdep.c (_initialize_nto_tdep): Update.
+	* ns32knbsd-nat.c (_initialize_ns32knbsd_nat): Update.
+	* mipsnbsd-tdep.c (_initialize_mipsnbsd_tdep): Update.
+	* mips-nat.c (_initialize_core_mips): Update.
+	* mips-linux-tdep.c (_initialize_mips_linux_tdep): Update.
+	* m68knbsd-nat.c (_initialize_m68knbsd_nat): Update.
+	* m68klinux-nat.c (_initialize_m68k_linux_nat): Update.
+	* lynx-nat.c (_initialize_core_lynx): Update.
+	* irix5-nat.c (_initialize_core_irix5): Update.
+	* i386-interix-nat.c (_initialize_core_interix): Update.
+	* cris-tdep.c (_initialize_cris_tdep): Update.
+	* corelow.c (deprecated_add_core_fns): Update.
+	* core-regset.c (_initialize_core_regset): Update.
+	* core-aout.c (_initialize_core_aout): Update.
+	* armnbsd-nat.c (_initialize_arm_netbsd_nat): Update.
+	* alphanbsd-tdep.c (_initialize_alphanbsd_tdep): Update.
+	* alpha-nat.c (_initialize_core_alpha): Update.
+
 2004-04-21  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (registers_e500, registers_7400): Doc fixes.

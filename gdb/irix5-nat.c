@@ -277,5 +277,5 @@ static struct core_fns irix5_core_fns =
 void
 _initialize_core_irix5 (void)
 {
-  add_core_fns (&irix5_core_fns);
+  deprecated_add_core_fns (&irix5_core_fns);
 }

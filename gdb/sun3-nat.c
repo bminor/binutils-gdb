@@ -162,5 +162,5 @@ static struct core_fns sun3_core_fns =
 void
 _initialize_core_sun3 (void)
 {
-  add_core_fns (&sun3_core_fns);
+  deprecated_add_core_fns (&sun3_core_fns);
 }

@@ -182,7 +182,7 @@ static struct core_fns nat_core_fns =
 void
 _initialize_ns32knbsd_nat (void)
 {
-  add_core_fns (&nat_core_fns);
+  deprecated_add_core_fns (&nat_core_fns);
 }
 
 
