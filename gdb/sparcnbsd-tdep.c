@@ -312,4 +312,6 @@ _initialize_sparnbsd_tdep (void)
 			  sparc32nbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_ELF,
 			  sparc32nbsd_elf_init_abi);
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_OPENBSD_ELF,
+			  sparc32nbsd_elf_init_abi);
 }

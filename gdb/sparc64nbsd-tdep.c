@@ -243,4 +243,6 @@ _initialize_sparc64nbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
 			  GDB_OSABI_NETBSD_ELF, sparc64nbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
+			  GDB_OSABI_OPENBSD_ELF, sparc64nbsd_init_abi);
 }

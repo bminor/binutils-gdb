@@ -190,6 +190,8 @@ sparc-*-linux*)		gdb_target=linux ;;
 sparc64-*-linux*)	gdb_target=linux64 ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
+sparc-*-openbsd*)	gdb_target=nbsd ;;
+sparc64-*-openbsd*)	gdb_target=nbsd64 ;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
 			gdb_target=sol2
 			;;

@@ -1,3 +1,13 @@
+2004-01-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS (New native configurations): Mention OpenBSD/sparc and
+	OpenBSD/sparc64.
+	* configure.tgt: Add sparc-*-openbsd* and sparc64-*-openbsd*.
+	* configure.host: Likewise.
+	* sparcnbsd-tdep.c (_initialize_sparnbsd_tdep): Register OS ABI
+	handler for OpenBSD.
+	* sparc64nbsd-tdep.c (_initialize_sparc64nbsd_tdep): Likewise.
+
 2004-01-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcnbsd-tdep.c (sparcnbsd_core_osabi_sniffer): New function.
