@@ -1,3 +1,8 @@
+Thu May  7 13:12:50 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* configure.com: If the version number can not be found in
+	configure.in, set it to "unknown" rather than "2.8.1".
+
 Wed May  6 09:46:05 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* elf32-mips.c (elf_mips_mach): New.
