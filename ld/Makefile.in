@@ -391,13 +391,11 @@ lintlog:$(SOURCES) Makefile
 tags TAGS:$(SOURCES) $(HEADERS)
 	etags -t $?
 
-release:
-	(cd /4/steve/ld; tar cf -  $(LDSOURCES) $(HEADERS) $(MANSOURCES)) | tar xf - 
 
 objdump:objdump.c 
 
 install: $(LD_PROG)
-	$(INSTALL_PROGRAM) ld.new $(bindir)/ld
+	$(INSTALL_PROGRAM) ld.new $(ddestdir)/bin/ld
 # Something like the following might make sense for install, but doesn't work
 # - it is too fragile, depending on a gcc binary int the right place.
 # Perhaps using gcc/version.c might work?
