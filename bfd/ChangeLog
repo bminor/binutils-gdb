@@ -3,7 +3,8 @@
 	* elf32-hppa.c (elf32_hppa_check_relocs): Fix weak sym handling in
 	currently unused RELATIVE_DYNAMIC_RELOCS code.
 	(hppa_discard_copies): Likewise.
-	(elf32_hppa_size_stubs): Size `input_list' array correctly.
+	(elf32_hppa_size_stubs): Size `input_list' array correctly.  Correct
+	comments.  Don't check non-code output sections for stub grouping.
 
 2000-09-20  Alan Modra  <alan@linuxcare.com.au>
 

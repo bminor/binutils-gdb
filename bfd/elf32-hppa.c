@@ -2440,15 +2440,8 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
   hplink->add_stub_section = add_stub_section;
   hplink->layout_sections_again = layout_sections_again;
 
-  /* Count the number of input BFDs, find the top input section id,
-     and the top output section index.  We can't use output_bfd
-     section_count here to find the top output section index as some
-     sections may have been removed, and _bfd_strip_section_from_output
-     doesn't renumber the indices.  Also, sections created by the
-     linker aren't counted, and to make matters worse, aren't even on
-     the output_bfd section list.  We could probably just ignore
-     sections created by the linker, but this way seems safer.  */
-  for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0, top_index = 0;
+  /* Count the number of input BFDs and find the top input section id.  */
+  for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next)
     {
@@ -2459,10 +2452,6 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 	{
 	  if (top_id < section->id)
 	    top_id = section->id;
-	  if (section->output_section != NULL
-	      && section->output_section->owner == output_bfd
-	      && top_index < section->output_section->index)
-	    top_index = section->output_section->index;
 	}
     }
 
@@ -2471,12 +2460,41 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
   if (hplink->stub_group == NULL)
     return false;
 
-  /* Now make a list of input sections for each output section.  */
+  /* Make a list of input sections for each output section included in
+     the link.
+
+     We can't use output_bfd->section_count here to find the top output
+     section index as some sections may have been removed, and
+     _bfd_strip_section_from_output doesn't renumber the indices.  */
+  for (section = output_bfd->sections, top_index = 0;
+       section != NULL;
+       section = section->next)
+    {
+      if (top_index < section->index)
+	top_index = section->index;
+    }
+
   input_list
-    = (asection **) bfd_zmalloc (sizeof (asection *) * (top_index + 1));
+    = (asection **) bfd_malloc (sizeof (asection *) * (top_index + 1));
   if (input_list == NULL)
     return false;
 
+  /* For sections we aren't interested in, mark their entries with a
+     value we can check later.  */
+  list = input_list + top_index;
+  do
+    *list = bfd_abs_section_ptr;
+  while (list-- != input_list);
+
+  for (section = output_bfd->sections;
+       section != NULL;
+       section = section->next)
+    {
+      if ((section->flags & SEC_CODE) != 0 && section->index <= top_index)
+	input_list[section->index] = NULL;
+    }
+
+  /* Now actually build the lists.  */
   for (input_bfd = info->input_bfds;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next)
@@ -2486,15 +2504,19 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 	   section = section->next)
 	{
 	  if (section->output_section != NULL
-	      && section->output_section->owner == output_bfd)
+	      && section->output_section->owner == output_bfd
+	      && section->output_section->index <= top_index)
 	    {
 	      list = input_list + section->output_section->index;
-	      /* Steal the link_sec pointer for our list.  */
+	      if (*list != bfd_abs_section_ptr)
+		{
+		  /* Steal the link_sec pointer for our list.  */
 #define PREV_SEC(sec) (hplink->stub_group[(sec)->id].link_sec)
-	      /* This happens to make the list in reverse order, which
-		 is what we want.  */
-	      PREV_SEC (section) = *list;
-	      *list = section;
+		  /* This happens to make the list in reverse order,
+		     which is what we want.  */
+		  PREV_SEC (section) = *list;
+		  *list = section;
+		}
 	    }
 	}
     }
@@ -2506,9 +2528,11 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
      _init and _fini functions into multiple parts.  Putting a stub in
      the middle of a function is not a good idea.  */
   list = input_list + top_index;
-  while (list-- != input_list)
+  do
     {
       asection *tail = *list;
+      if (tail == bfd_abs_section_ptr)
+	continue;
       while (tail != NULL)
 	{
 	  asection *curr;
@@ -2558,7 +2582,9 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 	  tail = prev;
 	}
     }
+  while (list-- != input_list);
   free (input_list);
+#undef PREV_SEC
 
   /* We want to read in symbol extension records only once.  To do this
      we need to read in the local symbols in parallel and save them for
