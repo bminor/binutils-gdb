@@ -546,7 +546,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
       else
 	{
 	  int i;
-	  const char *buf = bufferp;
+	  const unsigned char *buf = bufferp;
 	  fprintf_unfiltered (gdb_stdlog, "[");
 	  for (i = 0; i < register_size (current_gdbarch, regnum); i++)
 	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
