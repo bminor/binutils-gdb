@@ -847,15 +847,15 @@ const struct m68k_opcode m68k_opcodes[] =
 {"fmoved",	two(0xF000, 0x7400), two(0xF1C0, 0xFC7F), "IiF7ws", cfloat },
 {"fmovel",	two(0xF000, 0x4000), two(0xF1C0, 0xFC7F), "Ii;lF7", mfloat },
 {"fmovel",	two(0xF000, 0x6000), two(0xF1C0, 0xFC7F), "IiF7$l", mfloat },
+/* FIXME: the next two variants should not permit moving an address
+   register to anything but the floating point instruction register.  */
+{"fmovel",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "Iis8%s", mfloat },
+{"fmovel",	two(0xF000, 0x8000), two(0xF1C0, 0xE3FF), "Ii*ls8", mfloat },
 {"fmovel",	two(0xF000, 0x4000), two(0xF1C0, 0xFC7F), "IibsF7", cfloat },
 {"fmovel",	two(0xF000, 0x6000), two(0xF1C0, 0xFC7F), "IiF7bs", cfloat },
   /* Move the FP control registers */
 {"fmovel",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "Iis8ps", cfloat },
 {"fmovel",	two(0xF000, 0x8000), two(0xF1C0, 0xE3FF), "Iibss8", cfloat },
-/* FIXME: the next two variants should not permit moving an address
-   register to anything but the floating point instruction register.  */
-{"fmovel",	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "Iis8%s", mfloat },
-{"fmovel",	two(0xF000, 0x8000), two(0xF1C0, 0xE3FF), "Ii*ls8", mfloat },
 {"fmovep",	two(0xF000, 0x4C00), two(0xF1C0, 0xFC7F), "Ii;pF7", mfloat },
 {"fmovep",	two(0xF000, 0x6C00), two(0xF1C0, 0xFC00), "IiF7~pkC", mfloat },
 {"fmovep",	two(0xF000, 0x7C00), two(0xF1C0, 0xFC0F), "IiF7~pDk", mfloat },
