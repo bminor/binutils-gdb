@@ -1537,7 +1537,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(target_h) $(gdbthread_h) \
 	$(gdb_string_h) $(gdb_events_h) $(linespec_h) $(ui_out_h) \
-	$(completer_h) $(gdb_h)
+	$(completer_h) $(gdb_h) $(cli_script_h)
 
 buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(complaints_h) \

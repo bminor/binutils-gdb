@@ -45,6 +45,7 @@
 #include "completer.h"
 #include "gdb.h"
 #include "ui-out.h"
+#include "cli/cli-script.h"
 
 #include "gdb-events.h"
 

@@ -1,3 +1,9 @@
+2002-08-27  Elena Zannoni  <ezannoni@redhat.com>
+
+	* cli/cli-script.h (copy_command_lines): Export.
+	* breakpoint.c: Include cli/cli-script.h.
+	* Makefile.in (breakpoint.o): Update dependencies.
+
 2002-08-26  Joel Brobecker  <brobecker@gnat.com>
 
 	* cli/cli-script.c (copy_command_lines): New function.
@@ -230,6 +236,14 @@
 	PRSABORT and PRSTOP.
 	This change will be needed by the Interix port.
 
+2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_arguments): use
+	write_register wherever possible instead of manipulating the
+	register bytes directly.
+	Assign VALUE_CONTENTS to a variable and use that.
+	The GPR numbers are now dependent on the architecture.
+	
 2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (struct rs6000_framedata): Add saved_ev and
