@@ -6,6 +6,10 @@ Fri Feb 12 08:09:11 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* relax.c (relax_section): don't complain if the script file isn't
 	relaxable but -relax is set
 
+Thu Feb 18 17:58:45 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: go32 is the 3rd part of the triple, not the 2nd
+
 Wed Feb  3 09:05:56 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mipsbig.sh: New file.  Big endian MIPS emulation.
