@@ -1,3 +1,7 @@
+2002-02-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/gdbserver.1: Document --attach.
+
 2002-02-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.h (struct gdbarch_tdep): Add fields for breakpoint
