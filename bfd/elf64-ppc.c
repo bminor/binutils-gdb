@@ -1658,6 +1658,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 {
   /* Check if we have the same endianess.  */
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
       const char *msg;
@@ -1785,19 +1786,19 @@ struct ppc_dyn_relocs
    ppc_stub_plt_branch:
    Similar to the above, but a 24 bit branch in the stub section won't
    reach its destination.
-   .	addis	%r12,%r2,xxx@ha
-   .	ld	%r11,xxx@l(%r12)
+   .	addis	%r12,%r2,xxx@toc@ha
+   .	ld	%r11,xxx@toc@l(%r12)
    .	mtctr	%r11
    .	bctr
 
    ppc_stub_plt_call:
    Used to call a function in a shared library.
-   .	addis	%r12,%r2,xxx@ha
+   .	addis	%r12,%r2,xxx@toc@ha
    .	std	%r2,40(%r1)
-   .	ld	%r11,xxx+0@l(%r12)
-   .	ld	%r2,xxx+8@l(%r12)
+   .	ld	%r11,xxx+0@toc@l(%r12)
+   .	ld	%r2,xxx+8@toc@l(%r12)
    .	mtctr	%r11
-   .	ld	%r11,xxx+16@l(%r12)
+   .	ld	%r11,xxx+16@toc@l(%r12)
    .	bctr
 */
 
