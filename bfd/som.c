@@ -2294,10 +2294,9 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	  som_symbol_data (*reloc->sym_ptr_ptr)->reloc_count += scale;
 	}
     }
-#if 0
+
   /* Now sort the symbols.  */
   qsort (syms, num_syms, sizeof (asymbol *), compare_syms);
-#endif
 
   /* Compute the symbol indexes, they will be needed by the relocation
      code.  */
