@@ -1,5 +1,9 @@
 Thu Mar 16 12:14:41 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* xcoffread.c (read_xcoff_symtab): When creating a dummy parameter
+	inferred from the traceback tags, give its type the name
+	"<non-float parameter>".
+
 	* stabsread.c (rs6000_builtin_type): Recognize types -31 to -34.
 
 Wed Mar 15 15:09:29 1995  Stu Grossman  (grossman@cygnus.com)

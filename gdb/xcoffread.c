@@ -1,5 +1,5 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    	     Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -1446,10 +1446,29 @@ read_xcoff_symtab (objfile, nsyms)
 			    }
 			  else
 			    {
-			      /* fixed parm, use (int*) for hex rep. */
+			      static struct type *intparm_type;
+			      if (intparm_type == NULL)
+				{
+
+				  /* Create a type, which is a pointer
+				     type (a kludge to make it print
+				     in hex), but which has a name
+				     indicating we don't know the real
+				     type.  */
+
+				  intparm_type =
+				    init_type
+				      (TYPE_CODE_PTR,
+				       TARGET_PTR_BIT / HOST_CHAR_BIT,
+				       0,
+				       "<non-float parameter>",
+				       NULL);
+				  TYPE_TARGET_TYPE (intparm_type) =
+				    builtin_type_void;
+				}
 			      ADD_PARM_TO_PENDING
 				(parm, parmvalue,
-				 lookup_pointer_type (builtin_type_int),
+				 intparm_type,
 				 local_symbols);
 			      parmvalue += sizeof (int);
 			    }
