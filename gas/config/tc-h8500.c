@@ -1,5 +1,5 @@
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
-   Copyright (C) 1993, 94, 95, 1998 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 98, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -94,7 +94,7 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
 /*
   This function is called once, at assembler startup time.  This should
-  set up all the tables, etc that the MD part of the assembler needs
+  set up all the tables, etc. that the MD part of the assembler needs
   */
 
 void
@@ -933,7 +933,7 @@ build_relaxable_instruction (opcode, operand)
     }
 }
 
-/* Now we know what sort of opcodes it is, lets build the bytes -
+/* Now we know what sort of opcodes it is, let's build the bytes -
  */
 static void
 build_bytes (opcode, operand)
@@ -1081,7 +1081,7 @@ build_bytes (opcode, operand)
 }
 
 /* This is the guts of the machine-dependent assembler.  STR points to a
-   machine dependent instruction.  This funciton is supposed to emit
+   machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.
    */
 
@@ -1175,8 +1175,8 @@ DEFUN (tc_headers_hook, (headers),
 #define MAX_LITTLENUMS 6
 
 /* Turn a string in input_line_pointer into a floating point constant of type
-   type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
-   emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
+   type, and store the appropriate bytes in *LITP.  The number of LITTLENUMS
+   emitted is stored in *SIZEP .  An error message is returned, or NULL on OK.
    */
 char *
 md_atof (type, litP, sizeP)
