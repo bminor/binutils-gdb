@@ -1,6 +1,8 @@
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
-      * gdb/config/h8300/tm-h8300.h : Addition of extern variable h8300_normal_mode 
-      * gdb/h8300-tdep.c (BINWORD): Update BINWORD for h8300_normal_mode
+
+	* gdb/config/h8300/tm-h8300.h (h8300_normal_mode): Add external
+	declaration.
+	* gdb/h8300-tdep.c (BINWORD): Update BINWORD for h8300_normal_mode
         (h8300_examine_prologue): Use h8300_normal_mode flag
         (h8300_gdbarch_init): Set architecture info for normal mode
 
