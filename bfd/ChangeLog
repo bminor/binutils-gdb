@@ -1,3 +1,9 @@
+Mon Oct  3 04:41:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-core.c (rs6000coff_core_p):  Set SEC_HAS_CONTENTS flag
+	for .stack and .ldinfo sections. Cast coredata.c_tab to a
+	file_ptr to avoid warnings from gcc.
+
 Fri Sep 30 13:11:38 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_bfd_final_link): Remove assertion when a non
