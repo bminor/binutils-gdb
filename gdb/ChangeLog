@@ -1,5 +1,21 @@
 2005-01-25  Andrew Cagney  <cagney@gnu.org>
 
+	* ppc-linux-tdep.c: Include "tramp-frame.h"
+	(struct ppc_linux_sigtramp_cache)
+	(ppc_linux_sigtramp_this_id, ppc_linux_sigtramp_prev_register)
+	(ppc_linux_sigtramp_unwind, ppc_linux_sigtramp_sniffer)
+	(ppc_linux_sigtramp_cache): Delete.
+	(ppc32_linux_sigaction_cache_init)
+	(ppc64_linux_sigaction_cache_init)
+	(ppc32_linux_sighandler_cache_init)
+	(ppc64_linux_sighandler_cache_init)
+	(ppc32_linux_sigaction_tramp_frame)
+	(ppc64_linux_sigaction_tramp_frame)
+	(ppc32_linux_sighandler_tramp_frame)
+	(ppc64_linux_sighandler_tramp_frame)
+	(ppc_linux_sigtramp_cache, ppc_linux_init_abi): Implement 32 and
+	64-bit, sigaction and siginfo tramp-frame unwinders.
+
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Always set
         long_double_bit to 8.
 
