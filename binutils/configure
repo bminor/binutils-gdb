@@ -4735,7 +4735,7 @@ else
   cat conftest.$ac_ext >&5
 fi
 rm -f conftest*
-test "$ac_cv_search_frexp" = "no" && for i in -lm; do
+test "$ac_cv_search_frexp" = "no" && for i in m; do
 LIBS="-l$i  $ac_func_search_save_LIBS"
 cat > conftest.$ac_ext <<EOF
 #line 4742 "configure"
