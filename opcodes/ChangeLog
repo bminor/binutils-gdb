@@ -1,3 +1,7 @@
+Tue Sep  7 13:50:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-dis.c (print_insn_hppa): Handle 'Z' argument.
+
 1999-09-07  Nick Clifton  <nickc@cygnus.com>
 
 	* sh-opc.h: Add mulu.w and muls.w patterns.  These are the correct

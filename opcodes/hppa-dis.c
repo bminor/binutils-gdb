@@ -83,7 +83,7 @@ static const char add_cond_names[][5] = {
   ",tr", ",<>", ",>=", ",>", ",uv", ",vnz", ",nsv", ",ev"
 };
 static const char add_cond_64_names[][6] = {
-  ",*", ",*=", ",*<", ",*<=", ",*nuv", ",*znv", ",*sv", ",*od",
+  "", ",*=", ",*<", ",*<=", ",*nuv", ",*znv", ",*sv", ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", ",*uv", ",*vnz", ",*nsv", ",*ev"
 };
 static const char wide_add_cond_names[][5] = {
@@ -94,21 +94,21 @@ static const char *const logical_cond_names[] = {
   "", ",=", ",<", ",<=", 0, 0, 0, ",od",
   ",tr", ",<>", ",>=", ",>", 0, 0, 0, ",ev"};
 static const char *const logical_cond_64_names[] = {
-  ",*", ",*=", ",*<", ",*<=", 0, 0, 0, ",*od",
+  "", ",*=", ",*<", ",*<=", 0, 0, 0, ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", 0, 0, 0, ",*ev"};
 static const char *const unit_cond_names[] = {
   "", 0, ",sbz", ",shz", ",sdc", 0, ",sbc", ",shc",
   ",tr", 0, ",nbz", ",nhz", ",ndc", 0, ",nbc", ",nhc"
 };
 static const char *const unit_cond_64_names[] = {
-  ",*", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
+  "", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
   ",*tr", ",*nwz", ",*nbz", ",*nhz", ",*ndc", ",*nwc", ",*nbc", ",*nhc"
 };
 static const char shift_cond_names[][4] = {
   "", ",=", ",<", ",od", ",tr", ",<>", ",>=", ",ev"
 };
 static const char shift_cond_64_names[][5] = {
-  ",*", ",*=", ",*<", ",*od", ",*tr", ",*<>", ",*>=", ",*ev"
+  "", ",*=", ",*<", ",*od", ",*tr", ",*<>", ",*>=", ",*ev"
 };
 static const char bb_cond_64_names[][5] = {
   ",*<", ",*>="
@@ -763,6 +763,12 @@ print_insn_hppa (memaddr, info)
 		     of address.  */
 		  fput_const (extract_17 (insn), info);
 		  break;
+
+		case 'Z':
+		  /* addil %r1 implicit output.  */
+		  (*info->fprintf_func) (info->stream, "%r1");
+		  break;
+		  
 		case '.':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    GET_FIELD (insn, 24, 25));
