@@ -8,7 +8,7 @@
 
 	* configure.in (LINGUAS): Add tr.
 	* configure: Regenerate.
-	* po/tr.po: Important from translation project's web site.
+	* po/tr.po: Import from translation project's web site.
 
 2001-12-03  Alan Modra  <amodra@bigpond.net.au>
 

@@ -2,7 +2,7 @@
 
 	* configure.in (LINGUAS): Add tr.
 	* configure: Regenerate.
-	* po/tr.po: Important from translation project's web site.
+	* po/tr.po: Import from translation project's web site.
 
 2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
