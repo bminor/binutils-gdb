@@ -90,7 +90,7 @@ else
 		if [ -n "${safe}" ] ; then
 			mv $i .Recover
 		else
-			rm sparc-opcode.h
+			rm $i
 		fi
 		mv new $i
 	done
@@ -101,7 +101,11 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/09/04 02:51:18  rich
+# Revision 1.13  1991/09/13 05:17:53  gnu
+# Removes sparc-opcode.h rather than the file it is sanitizing, if not testing!
+# (fixed...)
+#
+# Revision 1.12  1991/09/04  02:51:18  rich
 # Adding "recover"'ability.
 #
 # Revision 1.11  1991/09/02  21:21:47  rich
