@@ -1,3 +1,9 @@
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote.c (remote_prepare_to_store): Replace call to
+	deprecated_read_register_bytes with multiple regcache_raw_read
+	calls.
+
 2003-06-17  Kris Warkentin  <kewarken@qnx.com>
 
 	* i386-nto-tdep.c (i386nto_sigcontext_addr): Make sp a CORE_ADDR.

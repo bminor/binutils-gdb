@@ -3532,16 +3532,19 @@ remote_fetch_registers (int regnum)
 static void
 remote_prepare_to_store (void)
 {
+  struct remote_state *rs = get_remote_state ();
+  int i;
+  char buf[MAX_REGISTER_SIZE];
+
   /* Make sure the entire registers array is valid.  */
   switch (remote_protocol_P.support)
     {
     case PACKET_DISABLE:
     case PACKET_SUPPORT_UNKNOWN:
-      /* NOTE: This isn't rs->sizeof_g_packet because here, we are
-         forcing the register cache to read its and not the target
-         registers.  */
-      deprecated_read_register_bytes (0, (char *) NULL,
-				      DEPRECATED_REGISTER_BYTES); /* OK */
+      /* Make sure all the necessary registers are cached.  */
+      for (i = 0; i < NUM_REGS; i++)
+	if (rs->regs[i].in_g_packet)
+	  regcache_raw_read (current_regcache, rs->regs[i].regnum, buf);
       break;
     case PACKET_ENABLE:
       break;
