@@ -163,14 +163,6 @@ struct gdbarch_tdep
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
 
-/* Return the offset into the register array of the start of register
-   number REG.  */
-extern int i386_register_byte (int reg);
-
-/* Return the number of bytes of storage in GDB's register array
-   occupied by register REG.  */
-extern int i386_register_raw_size (int reg);
-
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 

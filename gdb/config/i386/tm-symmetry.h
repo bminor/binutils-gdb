@@ -225,30 +225,6 @@ switch (regno) { \
 #undef  REGISTER_BYTES
 #define REGISTER_BYTES ((10 * 4) + (8 * 10) + (31 * 4))
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-#undef  REGISTER_BYTE
-#define REGISTER_BYTE(N) 		\
-(((N) < 3) ? ((N) * 4) :		\
-((N) < 5) ? ((((N) - 2) * 10) + 2) :	\
-((N) < 8) ? ((((N) - 5) * 4) + 32) :	\
-((N) < 14) ? ((((N) - 8) * 10) + 44) :	\
-    ((((N) - 14) * 4) + 104))
-
-/* Number of bytes of storage in the actual machine representation
- * for register N.  All registers are 4 bytes, except 387 st(0) - st(7),
- * which are 80 bits each. 
- */
-
-#undef  REGISTER_RAW_SIZE
-#define REGISTER_RAW_SIZE(N) \
-(((N) < 3) ? 4 :	\
-((N) < 5) ? 10 :	\
-((N) < 8) ? 4 :		\
-((N) < 14) ? 10 :	\
-    4)
-
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 

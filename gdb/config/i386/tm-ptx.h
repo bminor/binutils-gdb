@@ -149,24 +149,6 @@ extern int ptx_register_u_addr (int, int);
 #undef  REGISTER_BYTES
 #define REGISTER_BYTES ((10 * 4) + (8 * 10) + (31 * 4))
 
-/* Index within `registers' of the first byte of the space for register N. */
-
-#undef  REGISTER_BYTE
-#define REGISTER_BYTE(N) 		\
-(((N) < ST0_REGNUM) ? ((N) * 4) : \
- ((N) < FP1_REGNUM) ? (40 + (((N) - ST0_REGNUM) * 10)) : \
- (40 + 80 + (((N) - FP1_REGNUM) * 4)))
-
-/* Number of bytes of storage in the actual machine representation for
-   register N.  All registers are 4 bytes, except 387 st(0) - st(7),
-   which are 80 bits each. */
-
-#undef  REGISTER_RAW_SIZE
-#define REGISTER_RAW_SIZE(N) \
-(((N) < ST0_REGNUM) ? 4 : \
- ((N) < FP1_REGNUM) ? 10 : \
- 4)
-
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
 #undef  MAX_REGISTER_RAW_SIZE

@@ -47,27 +47,6 @@ i386_linux_register_name (int reg)
 
   return i386_register_name (reg);
 }
-
-static int
-i386_linux_register_byte (int reg)
-{
-  /* Deal with the extra "orig_eax" pseudo register.  */
-  if (reg == I386_LINUX_ORIG_EAX_REGNUM)
-    return (i386_register_byte (I386_LINUX_ORIG_EAX_REGNUM - 1)
-	    + i386_register_raw_size (I386_LINUX_ORIG_EAX_REGNUM - 1));
-
-  return i386_register_byte (reg);
-}
-
-static int
-i386_linux_register_raw_size (int reg)
-{
-  /* Deal with the extra "orig_eax" pseudo register.  */
-  if (reg == I386_LINUX_ORIG_EAX_REGNUM)
-    return 4;
-
-  return i386_register_raw_size (reg);
-}
 
 /* Recognizing signal handler frames.  */
 
@@ -458,8 +437,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
   set_gdbarch_register_bytes (gdbarch, I386_SSE_SIZEOF_REGS + 4);
-  set_gdbarch_register_byte (gdbarch, i386_linux_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, i386_linux_register_raw_size);
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 

@@ -56,27 +56,6 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
-/* i386_register_offset[i] is the offset into the register file of the
-   start of register number i.  We initialize this from
-   i386_register_size.  */
-static int i386_register_offset[I386_SSE_NUM_REGS];
-
-/* i386_register_size[i] is the number of bytes of storage in GDB's
-   register array occupied by register i.  */
-static int i386_register_size[I386_SSE_NUM_REGS] = {
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-  10, 10, 10, 10,
-  10, 10, 10, 10,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-   4
-};
-
 /* Return the name of register REG.  */
 
 const char *
@@ -88,23 +67,6 @@ i386_register_name (int reg)
     return NULL;
 
   return i386_register_names[reg];
-}
-
-/* Return the offset into the register array of the start of register
-   number REG.  */
-int
-i386_register_byte (int reg)
-{
-  return i386_register_offset[reg];
-}
-
-/* Return the number of bytes of storage in GDB's register array
-   occupied by register REG.  */
-
-int
-i386_register_raw_size (int reg)
-{
-  return i386_register_size[reg];
 }
 
 /* Convert stabs register number REG to the appropriate register
@@ -1439,8 +1401,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_register_byte (gdbarch, i386_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
@@ -1545,19 +1505,6 @@ void
 _initialize_i386_tdep (void)
 {
   register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
-
-  /* Initialize the table saying where each register starts in the
-     register file.  */
-  {
-    int i, offset;
-
-    offset = 0;
-    for (i = 0; i < I386_SSE_NUM_REGS; i++)
-      {
-	i386_register_offset[i] = offset;
-	offset += i386_register_size[i];
-      }
-  }
 
   tm_print_insn = gdb_print_insn_i386;
   tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;
