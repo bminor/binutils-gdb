@@ -59,7 +59,7 @@ fetch_inferior_registers (int regno)
   ptrace (PT_GETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
   for (i = 0; i < 32; i++)
-    RF (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
+    RF (FP0_REGNUM + i, inferior_fp_registers.fpreg[i]);
 #endif
 
   registers_fetched ();
@@ -87,7 +87,7 @@ store_inferior_registers (int regno)
 
 #ifdef PT_SETFPREGS
   for (i = 0; i < 32; i++)
-    RS (FP0_REGNUM + i, inferior_fp_registers.r_regs[i]);
+    RS (FP0_REGNUM + i, inferior_fp_registers.fpreg[i]);
   ptrace (PT_SETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
 #endif
@@ -120,7 +120,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 #ifdef PT_FPGETREGS
   /* Floating point registers */
   for (i = 0; i < 32; i++)
-    RF (FP0_REGNUM + i, core_reg->freg.r_regs[i]);
+    RF (FP0_REGNUM + i, core_reg->freg.fpreg[i]);
 #endif
 
   registers_fetched ();

@@ -1,3 +1,9 @@
+2001-04-30  J.T. Conklin  <jtc@redback.com>
+
+	* ppcnbsd-nat.c (fetch_inferior_registers)
+ 	(store_inferior_registers, fetch_core_registers): Changed to use
+	fpreg[] instead of r_regs[] to access floating point registers.
+
 2001-04-30  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c: Get rid of the function prototypes.
