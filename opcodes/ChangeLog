@@ -1,3 +1,8 @@
+Fri Jun  5 19:15:04 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-opc.c (tstb, tstw, tstl): Don't allow pcrel on
+	68000/68008/68010.
+
 Wed Jun  3 18:56:22 1998  H.J. Lu  <hjl@gnu.org>
 
 	* i386-dis.c (dis386): Change 0x60 to "pushaS", 0x61 to "popaS".
