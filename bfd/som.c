@@ -4680,8 +4680,8 @@ som_bfd_copy_private_symbol_data (ibfd, isymbol, obfd, osymbol)
      bfd *obfd;
      asymbol *osymbol;
 {
-  struct som_symbol *input_symbol = isymbol;
-  struct som_symbol *output_symbol = osymbol;
+  struct som_symbol *input_symbol = (struct som_symbol *) isymbol;
+  struct som_symbol *output_symbol = (struct som_symbol *) osymbol;
 
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_som_flavour

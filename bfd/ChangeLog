@@ -1,3 +1,8 @@
+Mon Aug  7 23:03:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* som.c (som_bfd_copy_private_symbol_data): Cast initializations
+	to avoid warnings.
+
 Mon Aug  7 14:51:08 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_decode_symclass): Handle absolute symbols by checking
