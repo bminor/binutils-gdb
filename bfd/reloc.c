@@ -1956,6 +1956,13 @@ ENUMDOC
      GP register.
 
 ENUM
+  BFD_RELOC_ALPHA_BRSGP
+ENUMDOC
+  Like BFD_RELOC_23_PCREL_S2, except that the source and target must
+  share a common GP, and the target address is adjusted for 
+  STO_ALPHA_STD_GPLOAD.
+
+ENUM
   BFD_RELOC_MIPS_JMP
 ENUMDOC
   Bits 27..2 of the relocation address shifted right 2 bits;

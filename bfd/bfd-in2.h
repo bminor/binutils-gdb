@@ -2136,6 +2136,11 @@ GP register.  */
   BFD_RELOC_ALPHA_GPREL_HI16,
   BFD_RELOC_ALPHA_GPREL_LO16,
 
+/* Like BFD_RELOC_23_PCREL_S2, except that the source and target must
+share a common GP, and the target address is adjusted for 
+STO_ALPHA_STD_GPLOAD.  */
+  BFD_RELOC_ALPHA_BRSGP,
+
 /* Bits 27..2 of the relocation address shifted right 2 bits;
 simple reloc otherwise.  */
   BFD_RELOC_MIPS_JMP,
