@@ -1,6 +1,12 @@
 2002-07-12  Kevin Buettner  <kevinb@redhat.com>
 
 	From Nicholas Duffek:
+	* rs6000-nat.c (vmap_ldinfo, xcoff_relocate_core): Call
+	target_new_objfile_hook.
+
+2002-07-12  Kevin Buettner  <kevinb@redhat.com>
+
+	From Nicholas Duffek:
 	* xcoffread.c (scan_xcoff_symtab): Recognize XMC_TD as a data storage
 	csect.
 

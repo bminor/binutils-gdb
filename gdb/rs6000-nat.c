@@ -832,6 +832,11 @@ vmap_ldinfo (LdInfo *ldi)
 	  /* relocate symbol table(s). */
 	  vmap_symtab (vp);
 
+	  /* Announce new object files.  Doing this after symbol relocation
+	     makes aix-thread.c's job easier. */
+	  if (target_new_objfile_hook && vp->objfile)
+	    target_new_objfile_hook (vp->objfile);
+
 	  /* There may be more, so we don't break out of the loop.  */
 	}
 
@@ -1109,6 +1114,9 @@ xcoff_relocate_core (struct target_ops *target)
 	}
 
       vmap_symtab (vp);
+
+      if (target_new_objfile_hook && vp != vmap && vp->objfile)
+	target_new_objfile_hook (vp->objfile);
     }
   while (LDI_NEXT (ldi, arch64) != 0);
   vmap_exec ();
