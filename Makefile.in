@@ -337,7 +337,7 @@ dvi: do-dvi
 install-info: install-info-dirs do-install-info dir.info
 	if [ -f dir.info ] ; then \
 	  $(INSTALL_DATA) dir.info $(infodir)/dir.info ; \
-	fi
+	else true ; fi
 
 do-install-info: install-info-dirs
 
@@ -1256,6 +1256,28 @@ install-tk: force
 		true ; \
 	fi
 
+### tclX
+all-tclX: all-tcl all-tk
+	@if [ -f ./tclX/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tclX; \
+		$(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-tclX: force
+	@if [ -f ./tclX/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tclX; \
+		$(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+
 ### expect
 all-expect: all-tcl
 	@if [ -f ./expect/Makefile ] ; then \
@@ -1517,6 +1539,7 @@ dir.info: do-install-info
 	if [ -f $(srcdir)/texinfo/gen-info-dir ] ; then \
 	  $(srcdir)/texinfo/gen-info-dir $(infodir) $(srcdir)/texinfo/dir.info-template > dir.info.new ; \
 	  mv -f dir.info.new dir.info ; \
+	else true ; \
 	fi
 
 dist:

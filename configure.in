@@ -24,7 +24,7 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk"
+host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk tclX"
 
 # these tools are built for the host environment
 #
@@ -157,7 +157,7 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/gas//'`
     ;;
   rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/tk//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   hppa*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`

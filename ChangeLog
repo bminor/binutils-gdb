@@ -1,3 +1,10 @@
+Wed Mar 10 03:11:56 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: a couple of 'else true' for decstation,
+	support for TclX
+
+	* configure.in: configure tclX too; don't remove Tk on RS/6000 anymore
+
 Tue Mar  9 16:06:12 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in (setup-dirs): change invocation of make to $(MAKE).
