@@ -1,3 +1,16 @@
+2001-07-05  Steve Ellcey  <sje@cup.hp.com>
+
+	* config/tc-ia64.c (special_section): Add SPECIAL_SECTION_INIT_ARRAY
+	and SPECIAL_SECTION_FINI_ARRAY.
+	(special_section_name): Add .init_array and .fini_array.
+	(md_pseudo_table): Add init_array and fini_array.
+	(md): Add pointer_size and pointer_size_shift fields.
+	(setup_unwind_header): New static function.
+	(output_unw_records): Modify to use setup_unwind_header.
+	(generate_unwind_image, dot_endp): Modify to use md.pointer_size and
+	md.pointer_size_shift.
+	(md_begin): Initialize md.pointer_size and md.pointer_size_shift.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* README (Supported platforms): m88k no longer suffers bitrot.

@@ -61,13 +61,17 @@
 
 enum special_section
   {
+    /* IA-64 ABI section pseudo-ops.  */
     SPECIAL_SECTION_BSS = 0,
     SPECIAL_SECTION_SBSS,
     SPECIAL_SECTION_SDATA,
     SPECIAL_SECTION_RODATA,
     SPECIAL_SECTION_COMMENT,
     SPECIAL_SECTION_UNWIND,
-    SPECIAL_SECTION_UNWIND_INFO
+    SPECIAL_SECTION_UNWIND_INFO,
+    /* HPUX specific section pseudo-ops.  */
+    SPECIAL_SECTION_INIT_ARRAY,
+    SPECIAL_SECTION_FINI_ARRAY,
   };
 
 enum reloc_func
@@ -279,6 +283,9 @@ static struct
       int g_reg_set_conditionally[128];
     } last_groups[3];
     int group_idx;
+
+    int pointer_size;       /* size in bytes of a pointer */
+    int pointer_size_shift; /* shift size of a pointer for alignment */
   }
 md;
 
@@ -523,7 +530,8 @@ static const bfd_vma nop[IA64_NUM_UNITS] =
 static char special_section_name[][20] =
   {
     {".bss"}, {".sbss"}, {".sdata"}, {".rodata"}, {".comment"},
-    {".IA_64.unwind"}, {".IA_64.unwind_info"}
+    {".IA_64.unwind"}, {".IA_64.unwind_info"},
+    {".init_array"}, {".fini_array"}
   };
 
 static char *special_linkonce_name[] =
@@ -2757,6 +2765,37 @@ fixup_unw_records (list)
     }
 }
 
+/* Helper routine for output_unw_records.  Emits the header for the unwind
+   info.  */
+
+static int
+setup_unwind_header(int size, unsigned char **mem)
+{
+  int x, extra = 0;
+
+  /* pad to pointer-size boundry.  */
+  x = size % md.pointer_size;
+  if (x != 0)
+    extra = md.pointer_size - x;
+
+  /* Add 8 for the header + a pointer for the 
+     personality offset.  */
+  *mem = xmalloc (size + extra + 8 + md.pointer_size);
+
+  /* Clear the padding area and personality.  */
+  memset (*mem + 8 + size, 0 , extra + md.pointer_size);
+  /* Initialize the header area.  */
+
+  md_number_to_chars (*mem, (((bfd_vma) 1 << 48)     /* version */
+			     | (unwind.personality_routine
+				? ((bfd_vma) 3 << 32) /* U & E handler flags */
+				: 0)
+			     | ((size + extra) / md.pointer_size)), /* length */
+		      8);
+
+  return extra;
+}
+
 /* Generate an unwind image from a record list.  Returns the number of
    bytes in the resulting image. The memory image itselof is returned
    in the 'ptr' parameter.  */
@@ -2765,7 +2804,7 @@ output_unw_records (list, ptr)
      unw_rec_list *list;
      void **ptr;
 {
-  int size, x, extra = 0;
+  int size, extra;
   unsigned char *mem;
 
   *ptr = NULL;
@@ -2774,35 +2813,17 @@ output_unw_records (list, ptr)
   fixup_unw_records (list);
   size = calc_record_size (list);
 
-  /* pad to 8 byte boundry.  */
-  x = size % 8;
-  if (x != 0)
-    extra = 8 - x;
-
   if (size > 0 || unwind.force_unwind_entry)
     {
       unwind.force_unwind_entry = 0;
-
-      /* Add 8 for the header + 8 more bytes for the personality offset.  */
-      mem = xmalloc (size + extra + 16);
+      extra = setup_unwind_header(size, &mem);
 
       vbyte_mem_ptr = mem + 8;
-      /* Clear the padding area and personality.  */
-      memset (mem + 8 + size, 0 , extra + 8);
-      /* Initialize the header area.  */
-      md_number_to_chars (mem,
-			  (((bfd_vma) 1 << 48)     /* version */
-			   | (unwind.personality_routine
-			      ? ((bfd_vma) 3 << 32) /* U & E handler flags */
-			      : 0)
-			   | ((size + extra) / 8)),  /* length (dwords) */
-			  8);
-
       process_unw_records (list, output_vbyte_mem);
 
       *ptr = mem;
 
-      size += extra + 16;
+      size += extra + 8 + md.pointer_size;
     }
   return size;
 }
@@ -3171,9 +3192,9 @@ generate_unwind_image (text_name)
 
   /* Generate the unwind record.  */
   size = output_unw_records (unwind.list, (void **) &unw_rec);
-  if (size % 8 != 0)
-    as_bad ("Unwind record is not a multiple of 8 bytes.");
-
+  if (size % md.pointer_size != 0)
+    as_bad ("Unwind record is not a multiple of %d bytes.", md.pointer_size);
+                      
   /* If there are unwind records, switch sections, and output the info.  */
   if (size != 0)
     {
@@ -3186,9 +3207,10 @@ generate_unwind_image (text_name)
       bfd_set_section_flags (stdoutput, now_seg,
 			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
-      /* Make sure the section has 8 byte alignment.  */
-      frag_align (3, 0, 0);
-      record_alignment (now_seg, 3);
+      /* Make sure the section has 4 byte alignment for ILP32 and
+	 8 byte alignment for LP64.  */
+      frag_align (md.pointer_size_shift, 0, 0);
+      record_alignment (now_seg, md.pointer_size_shift);
 
       /* Set expression which points to start of unwind descriptor area.  */
       unwind.info = expr_build_dot ();
@@ -3894,11 +3916,14 @@ dot_endp (dummy)
       bfd_set_section_flags (stdoutput, now_seg,
 			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
-      /* Make sure the section has 8 byte alignment.  */
-      record_alignment (now_seg, 3);
+      /* Make sure that section has 4 byte alignment for ILP32 and
+         8 byte alignment for LP64.  */
+      record_alignment (now_seg, md.pointer_size_shift);
 
-      ptr = frag_more (24);
-      where = frag_now_fix () - 24;
+      /* Need space for 3 pointers for procedure start, procedure end,
+	 and unwind info.  */
+      ptr = frag_more (3 * md.pointer_size);
+      where = frag_now_fix () - (3 * md.pointer_size);
       bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
 
       /* Issue the values of  a) Proc Begin, b) Proc End, c) Unwind Record. */
@@ -4606,6 +4631,8 @@ const pseudo_typeS md_pseudo_table[] =
     { "comment", dot_special_section, SPECIAL_SECTION_COMMENT },
     { "ia_64.unwind", dot_special_section, SPECIAL_SECTION_UNWIND },
     { "ia_64.unwind_info", dot_special_section, SPECIAL_SECTION_UNWIND_INFO },
+    { "init_array", dot_special_section, SPECIAL_SECTION_INIT_ARRAY },
+    { "fini_array", dot_special_section, SPECIAL_SECTION_FINI_ARRAY },
     { "proc", dot_proc, 0 },
     { "body", dot_body, 0 },
     { "prologue", dot_prologue, 0 },
@@ -6482,6 +6509,19 @@ md_begin ()
 
   if (! ok)
      as_warn (_("Could not set architecture and machine"));
+
+  /* Set the pointer size and pointer shift size depending on md.flags */
+
+  if (md.flags & EF_IA_64_ABI64)
+    {
+      md.pointer_size = 8;         /* pointers are 8 bytes */
+      md.pointer_size_shift = 3;   /* alignment is 8 bytes = 2^2 */
+    }
+  else
+    {
+      md.pointer_size = 4;         /* pointers are 4 bytes */
+      md.pointer_size_shift = 2;   /* alignment is 4 bytes = 2^2 */
+    }
 
   md.mem_offset.hint = 0;
   md.path = 0;
