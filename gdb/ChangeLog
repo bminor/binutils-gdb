@@ -1,5 +1,19 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (deprecated_frame_xmalloc): Delete function.
+	(deprecated_set_frame_extra_info_hack): Delete function.
+	(deprecated_set_frame_saved_regs_hack): Delete function.
+	* frame.h (deprecated_frame_xmalloc): Delete declaration.
+	(deprecated_set_frame_extra_info_hack): Delete declaration.
+	(deprecated_set_frame_saved_regs_hack): Delete declaration.
+	* mcore-tdep.c (analyze_dummy_frame): Instead of
+	deprecated_frame_xmalloc, deprecated_set_frame_saved_regs_hack,
+	and deprecated_set_frame_extra_info_hack use
+	deprecated_frame_xmalloc_with_cleanup.
+	* mn10300-tdep.c (analyze_dummy_frame): Ditto.
+	* mips-tdep.c (mips_init_extra_frame_info): Delete call to
+	deprecated_set_frame_saved_regs_hack.
+
 	* mips-tdep.c (mips_frame_chain): Delete call to
 	deprecated_inside_entry_file.
 

@@ -2223,34 +2223,13 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
   frame->this_id.value.stack_addr = base;
 }
 
-void
-deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
-				      CORE_ADDR *saved_regs)
-{
-  frame->saved_regs = saved_regs;
-}
-
-void
-deprecated_set_frame_extra_info_hack (struct frame_info *frame,
-				      struct frame_extra_info *extra_info)
-{
-  frame->extra_info = extra_info;
-}
-
-struct frame_info *
-deprecated_frame_xmalloc (void)
-{
-  struct frame_info *frame = XMALLOC (struct frame_info);
-  memset (frame, 0, sizeof (*frame));
-  frame->this_id.p = 1;
-  return frame;
-}
-
 struct frame_info *
 deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
 				       long sizeof_extra_info)
 {
-  struct frame_info *frame = deprecated_frame_xmalloc ();
+  struct frame_info *frame = XMALLOC (struct frame_info);
+  memset (frame, 0, sizeof (*frame));
+  frame->this_id.p = 1;
   make_cleanup (xfree, frame);
   if (sizeof_saved_regs > 0)
     {
