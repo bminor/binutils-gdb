@@ -22,11 +22,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <setjmp.h>
 #include "top.h"
 #include "target.h"
+#include "inferior.h"
+#include "call-cmds.h"
 
 #include "getopt.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 #include <string.h>
 /* R_OK lives in either unistd.h or sys/file.h.  */
@@ -48,6 +51,8 @@ static int top_level_val;
   (((top_level_val = setjmp (error_return)) \
     ? (PTR) 0 : (PTR) memcpy (quit_return, error_return, sizeof (jmp_buf))) \
    , top_level_val)
+
+extern void gdb_init PARAMS ((void));
 
 int
 main (argc, argv)
@@ -549,7 +554,9 @@ proc_wait (pid, status)
      int pid;
      int *status;
 {
+#ifndef __GO32__
   return wait (status);
+#endif
 }
 
 void
