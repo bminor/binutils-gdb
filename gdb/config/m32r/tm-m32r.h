@@ -92,13 +92,18 @@ struct type;
 struct value;
 #endif
 
-/* #define EXTRA_FRAME_INFO struct frame_saved_regs fsr; */
 /* Define other aspects of the stack frame. 
-   we keep a copy of the worked out return pc lying around, since it
-   is a useful bit of info */
+   We keep the offsets of all saved registers, 'cause we need 'em a lot!
+   We also keep the current size of the stack frame, and whether 
+   the frame pointer is valid (for frameless functions, and when we're
+   still in the prologue of a function with a frame) */
 
 /* mvs_check  EXTRA_FRAME_INFO */
-#define EXTRA_FRAME_INFO	struct frame_saved_regs fsr;
+#define EXTRA_FRAME_INFO  	\
+  struct frame_saved_regs fsr;	\
+  int framesize;		\
+  int using_frame_pointer;
+
 
 extern void m32r_init_extra_frame_info PARAMS ((struct frame_info *fi));
 /* mvs_check  INIT_EXTRA_FRAME_INFO */

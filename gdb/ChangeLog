@@ -1,3 +1,10 @@
+start-sanitize-m32r
+Tue Nov  5 10:21:02 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* m32r-tdep.c: Improved frame_chain and fn prologue analysis.
+	* config/tm-m32r.h: Add framesize and register to extra_frame_info.
+end-sanitize-m32r
+
 Tue Nov  5 10:08:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/gdbwin.h:  Remove bogus definition of CORE_ADDR.

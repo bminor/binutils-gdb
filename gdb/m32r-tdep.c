@@ -93,9 +93,6 @@ m32r_scan_prologue (fi, fsr)
   /* this code essentially duplicates skip_prologue, 
      but we need the start address below.  */
 
-  if (fsr)
-    memset (fsr->regs, '\000', sizeof fsr->regs);
-
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
     {
       sal = find_pc_line (prologue_start, 0);
@@ -109,7 +106,7 @@ m32r_scan_prologue (fi, fsr)
 	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
   else
-    prologue_end = prologue_start + 48; /* We're in the boondocks: allow for */
+    prologue_end = prologue_start + 40; /* We're in the boondocks: allow for */
 					/* 16 pushes, an add, and "mv fp,sp" */
 
   prologue_end = min (prologue_end, fi->pc);
@@ -149,15 +146,20 @@ m32r_scan_prologue (fi, fsr)
 	    insn  &= 0x00ffffff;	/* positive */
 	  framesize += insn;
 	}
-      else if (insn == 0x1d8f)			/* mv fp, sp */
-	break;					/* end of stack adjustments */
+      else if (insn == 0x1d8f) {	/* mv fp, sp */
+	fi->using_frame_pointer = 1;	/* fp is now valid */
+	break;				/* end of stack adjustments */
+      }
+      else
+	break;				/* anything else isn't prologue */
     }
   return framesize;
 }
 
 /* This function actually figures out the frame address for a given pc and
-   sp.  This is tricky on the v850 because we only use an explicit frame
-   pointer when using alloca().  The only reliable way to get this info is to
+   sp.  This is tricky on the m32r because we sometimes don't use an explicit
+   frame pointer, and the previous stack pointer isn't necessarily recorded
+   on the stack.  The only reliable way to get this info is to
    examine the prologue.
 */
 
@@ -166,23 +168,31 @@ m32r_init_extra_frame_info (fi)
      struct frame_info *fi;
 {
   int reg;
-  int framesize;
 
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
-  framesize = m32r_scan_prologue (fi, &fi->fsr);
+  memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
+  fi->using_frame_pointer = 0;
+  fi->framesize = m32r_scan_prologue (fi, &fi->fsr);
 #if 0
   if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
     fi->frame = dummy_frame_stack->sp;
   else 
 #endif
     if (!fi->next)
-      fi->frame = read_register (SP_REGNUM);
+      if (fi->using_frame_pointer)
+	fi->frame = read_register (FP_REGNUM);
+      else
+	fi->frame = read_register (SP_REGNUM);
+    else 	/* fi->next means this is not the innermost frame */
+      if (fi->using_frame_pointer)		/* we have an FP */
+	if (fi->next->fsr.regs[FP_REGNUM] != 0)	/* caller saved our FP */
+	  fi->frame = read_memory_integer (fi->next->fsr.regs[FP_REGNUM], 4);
 
   for (reg = 0; reg < NUM_REGS; reg++)
     if (fi->fsr.regs[reg] != 0)
-      fi->fsr.regs[reg] = fi->frame + framesize - fi->fsr.regs[reg];
+      fi->fsr.regs[reg] = fi->frame + fi->framesize - fi->fsr.regs[reg];
 }
 
 /* Find the caller of this frame.  We do this by seeing if RP_REGNUM is saved
@@ -222,27 +232,19 @@ m32r_find_callers_reg (fi, regnum)
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
-   For m32r, simply get the saved FP off the stack.
+   For m32r, we save the frame size when we initialize the frame_info.
  */
 
 CORE_ADDR
 m32r_frame_chain (fi)
      struct frame_info *fi;
 {
-  CORE_ADDR saved_fp = fi->fsr.regs[FP_REGNUM];
-  CORE_ADDR fn_start, fn_end;
+  CORE_ADDR fn_start;
 
-  if (saved_fp != 0)
-    return read_memory_integer (saved_fp, 4);
-  else {
-    if (find_pc_partial_function (fi->pc, 0, &fn_start, &fn_end))
-      if (fn_start == entry_point_address ())
-	return 0;		/* in _start fn, don't chain further */
-      else
-	return read_register (FP_REGNUM);
-    else			/* in the woods, what to do? */
-      return 0;			/* for now, play it safe and give up... */
-  }
+  if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
+    if (fn_start == entry_point_address ())
+      return 0;		/* in _start fn, don't chain further */
+  return fi->frame + fi->framesize;
 }
 
 /* All we do here is record SP and FP on the call dummy stack */
