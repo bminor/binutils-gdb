@@ -28,19 +28,10 @@
 #include <time.h>
 #include <errno.h>
 #include <string.h>
-#include <fcntl.h>
+#include "targ-vals.h"
 
-#ifndef O_RDONLY
-#define O_RDONLY 0
-#endif
-#ifndef O_WRONLY
-#define O_WRONLY 1
-#endif
-#ifndef O_RDWR
-#define O_RDWR   2
-#endif
-#ifndef O_BINARY
-#define O_BINARY 0
+#ifndef TARGET_O_BINARY
+#define TARGET_O_BINARY 0
 #endif
 
 #ifdef __STDC__
@@ -260,18 +251,18 @@ ARMword ARMul_OSLastErrorP (ARMul_State * state)
 
 static int translate_open_mode[] =
 {
-  O_RDONLY,			/* "r"   */
-  O_RDONLY + O_BINARY,		/* "rb"  */
-  O_RDWR,			/* "r+"  */
-  O_RDWR + O_BINARY,		/* "r+b" */
-  O_WRONLY + O_CREAT + O_TRUNC,	/* "w"   */
-  O_WRONLY + O_BINARY + O_CREAT + O_TRUNC,	/* "wb"  */
-  O_RDWR + O_CREAT + O_TRUNC,	/* "w+"  */
-  O_RDWR + O_BINARY + O_CREAT + O_TRUNC,	/* "w+b" */
-  O_WRONLY + O_APPEND + O_CREAT,	/* "a"   */
-  O_WRONLY + O_BINARY + O_APPEND + O_CREAT,	/* "ab"  */
-  O_RDWR + O_APPEND + O_CREAT,	/* "a+"  */
-  O_RDWR + O_BINARY + O_APPEND + O_CREAT	/* "a+b" */
+  TARGET_O_RDONLY,		/* "r"   */
+  TARGET_O_RDONLY + TARGET_O_BINARY,	/* "rb"  */
+  TARGET_O_RDWR,		/* "r+"  */
+  TARGET_O_RDWR + TARGET_O_BINARY,		/* "r+b" */
+  TARGET_O_WRONLY + TARGET_O_CREAT + TARGET_O_TRUNC,	/* "w"   */
+  TARGET_O_WRONLY + TARGET_O_BINARY + TARGET_O_CREAT + TARGET_O_TRUNC,	/* "wb"  */
+  TARGET_O_RDWR + TARGET_O_CREAT + TARGET_O_TRUNC,	/* "w+"  */
+  TARGET_O_RDWR + TARGET_O_BINARY + TARGET_O_CREAT + TARGET_O_TRUNC,	/* "w+b" */
+  TARGET_O_WRONLY + TARGET_O_APPEND + TARGET_O_CREAT,	/* "a"   */
+  TARGET_O_WRONLY + TARGET_O_BINARY + TARGET_O_APPEND + TARGET_O_CREAT,	/* "ab"  */
+  TARGET_O_RDWR + TARGET_O_APPEND + TARGET_O_CREAT,	/* "a+"  */
+  TARGET_O_RDWR + TARGET_O_BINARY + TARGET_O_APPEND + TARGET_O_CREAT	/* "a+b" */
 };
 
 static void
@@ -325,7 +316,7 @@ SWIopen (ARMul_State * state, ARMword name, ARMword SWIflags)
   /* Filename ":tt" is special: it denotes stdin/out.  */
   if (strcmp (dummy, ":tt") == 0)
     {
-      if (flags == O_RDONLY)	/* opening tty "r" */
+      if (flags == TARGET_O_RDONLY) /* opening tty "r" */
 	state->Reg[0] = 0;	/* stdin */
       else
 	state->Reg[0] = 1;	/* stdout */

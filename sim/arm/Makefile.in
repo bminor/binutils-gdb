@@ -28,7 +28,7 @@ SIM_OBJS = armemu26.o armemu32.o arminit.o armos.o armsupp.o \
 ## COMMON_POST_CONFIG_FRAG
 
 
-armos.o: armos.c armdefs.h armos.h armfpe.h
+armos.o: armos.c armdefs.h armos.h armfpe.h targ-vals.h
 
 armcopro.o: armcopro.c armdefs.h
 maverick.o: maverick.c armdefs.h
