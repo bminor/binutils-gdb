@@ -1,3 +1,8 @@
+Tue Jan 11 21:52:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* app.c (do_scrub_next_char): Another attempt to fix bugs
+	dealing with labels without colons (for HPPA and MRI).
+
 Tue Jan 11 17:01:06 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* expr.c (integer_constant): Fix computation of too_many_digits.
@@ -27,6 +32,7 @@ Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	emitting nop instructions.
 	* Makefile.in (listing.o): Depends upon subsegs.h.
 
+>>>>>>> 1.484
 Mon Jan 10 09:52:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): Put check for missing label on .PROC
