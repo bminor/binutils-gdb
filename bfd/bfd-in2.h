@@ -1839,6 +1839,7 @@ through 0. */
   BFD_RELOC_ARC_B26,
 /* end-sanitize-arc */
 
+
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
 assumed to be 0. */
