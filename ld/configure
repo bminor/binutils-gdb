@@ -4723,6 +4723,7 @@ all_targets=
 EMUL=
 all_emuls=
 all_emul_extras=
+all_libpath=
 
 rm -f tdirs
 
@@ -4757,12 +4758,15 @@ do
 	esac
     done
 
-    all_libpath=$targ_emul
-    for i in $targ_extra_libpath; do
+    for i in $targ_emul $targ_extra_libpath; do
 	case " $all_libpath " in
 	*" ${i} "*) ;;
 	*)
-	  all_libpath="$all_libpath ${i}"
+	  if test -z "$all_libpath"; then
+	    all_libpath=${i}
+	  else
+	    all_libpath="$all_libpath ${i}"
+	  fi
 	  ;;
 	esac
     done

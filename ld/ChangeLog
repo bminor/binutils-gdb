@@ -1,3 +1,7 @@
+1999-06-20  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in (all_libpath): Accumulate across all enabled targets.
+
 Sun Jun 20 14:10:33 1999  Richard Henderson  <rth@cygnus.com>
 
 	* emultempl/armelf.em: Watch EMULATION_LIBPATH instead of
