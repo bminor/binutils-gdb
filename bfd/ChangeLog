@@ -1,3 +1,8 @@
+2002-05-29  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (arm-*-netbsd*): Add bfd_elf32_littlearm_vec
+	and bfd_elf32_bigarm_vec to targ_selvecs.
+
 2002-05-29  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	* peXXigen.c (pe_print_idata): Fix seg faults on printing import tables
