@@ -87,6 +87,8 @@ run.c
 scope.exp
 scope0.c
 scope1.c
+setshow.c
+setshow.exp
 setvar.c
 setvar.exp
 sigall.c
