@@ -311,6 +311,7 @@ gen-aout: $(srcdir)/gen-aout.c Makefile
 
 BFDIN_H= $(srcdir)/bfd-in2.h
 
+bfd.h : $(BFD_H) ; @true
 $(BFD_H): stmp-bfd.h ; @true
 
 # The funny stuff here with the generated script is because I haven't
