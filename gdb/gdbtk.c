@@ -88,6 +88,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef SIOCSPGRP
 #endif
 
+static int No_Update = 0;
 static int load_in_progress = 0;
 static int in_fputs = 0;
 
@@ -1081,6 +1082,8 @@ gdb_immediate_command (clientData, interp, argc, argv)
   if (running_now || load_in_progress)
     return TCL_OK;
 
+  No_Update = 0;
+
   Tcl_DStringAppend (result_ptr, "", -1);
   save_ptr = result_ptr;
   result_ptr = NULL;
@@ -1106,11 +1109,18 @@ gdb_cmd (clientData, interp, argc, argv)
 {
   Tcl_DString *save_ptr = NULL;
 
-  if (argc != 2)
+  if (argc < 2)
     error ("wrong # args");
 
   if (running_now || load_in_progress)
     return TCL_OK;
+
+  /* If there is a third argument, it'll mean that we do NOT want to run
+     the idle and busy hooks when we call execute_command. */
+  if (argc > 2)
+    No_Update = 1;
+  else
+    No_Update = 0;
 
   /* for the load instruction (and possibly others later) we
      set result_ptr to NULL so gdbtk_fputs() will not buffer
@@ -1904,10 +1914,12 @@ gdbtk_call_command (cmdblk, arg, from_tty)
   if (cmdblk->class == class_run || cmdblk->class == class_trace)
     {
       running_now = 1;
-      Tcl_Eval (interp, "gdbtk_tcl_busy");
+      if (!No_Update)
+        Tcl_Eval (interp, "gdbtk_tcl_busy");
       (*cmdblk->function.cfunc)(arg, from_tty);
       running_now = 0;
-      Tcl_Eval (interp, "gdbtk_tcl_idle");
+      if (!No_Update)
+        Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);

@@ -1,3 +1,8 @@
+Sat Mar 28 12:13:23 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_cmd): If argc > 2, assume that the busy and idle hooks
+	should not be called.
+
 Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * gdbtk.c: (gdb_trace_status) new function.
