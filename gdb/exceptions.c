@@ -249,20 +249,6 @@ throw_exception (struct exception exception)
   if (sync_execution)
     do_exec_error_cleanups (ALL_CLEANUPS);
 
-  if (annotation_level > 1)
-    switch (exception.reason)
-      {
-      case RETURN_QUIT:
-	annotate_quit ();
-	break;
-      case RETURN_ERROR:
-	/* Assume that these are all errors.  */
-	annotate_error ();
-	break;
-      default:
-	internal_error (__FILE__, __LINE__, "Bad switch.");
-      }
-
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h. */
@@ -286,7 +272,6 @@ throw_reason (enum return_reason reason)
       break;
     case RETURN_ERROR:
       exception.error = GENERIC_ERROR;
-      exception.message = last_message;
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
@@ -325,6 +310,20 @@ print_exception (struct ui_file *file, struct exception e)
 	}
     }					    
   fprintf_filtered (file, "\n");
+
+  /* Now append the annotation.  */
+  switch (e.reason)
+    {
+    case RETURN_QUIT:
+      annotate_quit ();
+      break;
+    case RETURN_ERROR:
+      /* Assume that these are all errors.  */
+      annotate_error ();
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, _("Bad switch."));
+    }
 }
 
 void
@@ -356,13 +355,30 @@ exception_fprintf (struct ui_file *file, struct exception e,
     }
 }
 
+void
+print_any_exception (struct ui_file *file, const char *prefix,
+		     struct exception e)
+{
+  if (e.reason < 0 && e.message != NULL)
+    {
+      target_terminal_ours ();
+      wrap_here ("");		/* Force out any buffered output */
+      gdb_flush (gdb_stdout);
+      annotate_error_begin ();
+
+      /* Print the prefix.  */
+      if (prefix != NULL && prefix[0] != '\0')
+	fputs_filtered (prefix, file);
+      print_exception (file, e);
+    }
+}
+
 NORETURN static void
-print_and_throw (enum return_reason reason, enum errors error,
-		 const char *prefix, const char *fmt,
-		 va_list ap) ATTR_NORETURN;
+throw_it (enum return_reason reason, enum errors error, const char *prefix,
+	  const char *fmt, va_list ap) ATTR_NORETURN;
 NORETURN static void
-print_and_throw (enum return_reason reason, enum errors error,
-		 const char *prefix, const char *fmt, va_list ap)
+throw_it (enum return_reason reason, enum errors error, const char *prefix,
+	  const char *fmt, va_list ap)
 {
   struct exception e;
 
@@ -375,17 +391,6 @@ print_and_throw (enum return_reason reason, enum errors error,
   e.error = error;
   e.message = last_message;
 
-  /* Print the mesage to stderr, but only if the catcher isn't going
-     to handle/print it locally.  */
-  if (current_catcher->print_message)
-    {
-      /* Write the message plus any pre_print to gdb_stderr.  */
-      print_flush ();
-      if (error_pre_print)
-	fputs_filtered (error_pre_print, gdb_stderr);
-      print_exception (gdb_stderr, e);
-    }
-
   /* Throw the exception.  */
   throw_exception (e);
 }
@@ -393,13 +398,13 @@ print_and_throw (enum return_reason reason, enum errors error,
 NORETURN void
 throw_verror (enum errors error, const char *fmt, va_list ap)
 {
-  print_and_throw (RETURN_ERROR, error, error_pre_print, fmt, ap);
+  throw_it (RETURN_ERROR, error, error_pre_print, fmt, ap);
 }
 
 NORETURN void
 throw_vfatal (const char *fmt, va_list ap)
 {
-  print_and_throw (RETURN_QUIT, NO_ERROR, quit_pre_print, fmt, ap);
+  throw_it (RETURN_QUIT, NO_ERROR, quit_pre_print, fmt, ap);
 }
 
 NORETURN void
@@ -407,7 +412,7 @@ throw_error (enum errors error, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);
-  print_and_throw (RETURN_ERROR, error, error_pre_print, fmt, args);
+  throw_it (RETURN_ERROR, error, error_pre_print, fmt, args);
   va_end (args);
 }
 
@@ -479,6 +484,7 @@ catch_exceptions_with_msg (struct ui_out *uiout,
   SIGJMP_BUF *catch = catcher_init (uiout, NULL, &exception, mask, 1);
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = (*func) (uiout, func_args);
+  print_any_exception (gdb_stderr, NULL, exception);
   gdb_assert (val >= 0);
   gdb_assert (exception.reason <= 0);
   if (exception.reason < 0)
@@ -510,6 +516,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
      also catch "return".  */
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = func (func_args);
+  print_any_exception (gdb_stderr, errstring, exception);
   if (exception.reason != 0)
     return 0;
   return val;

@@ -1,5 +1,16 @@
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.c (print_and_throw): Delete, replaced by throw_it.
+	(throw_reason): Leave the exception's message field blank.
+	(throw_it): New function, create the exception and throw it.
+	(throw_verror, throw_vfatal, throw_error): Call throw_it.
+	(print_any_exception): New function.
+	(catch_errors, catch_exceptions_with_msg): Call
+	print_any_exception.
+	(throw_exception): Move code calling annotate_error and
+	annotate_quit from here ...
+	(print_exception): ... to here.
+
 	* exceptions.c (exception_fprintf, exception_print): Move printing
 	of \n from here ...
 	(print_exception): ... to here.
