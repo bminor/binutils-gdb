@@ -1,3 +1,13 @@
+2005-02-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-elfvsb/hidden2.d: Expect OBJECT.
+	* ld-elfvsb/hidden2.s: Force type OBJECT.
+	* ld-elfvsb/hidden2.ld: Place .dynamic explicitly.
+	* ld-elf/start.s: Provide __start for MIPS.
+	* ld-elfcomm/elfcomm.exp: Accept MIPS common section.  XFAIL size change
+	test.
+	* ld-elf/warn1.d: Use group.ld instead of -Ttext.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* lib/ld-lib.exp (run_dump_test): Don't require a dump program if
