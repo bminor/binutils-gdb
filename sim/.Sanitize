@@ -28,6 +28,7 @@ Makefile.in
 arm
 configure
 configure.in
+common
 h8300
 h8500
 ppc
