@@ -4,7 +4,7 @@ Wed Nov 27 01:23:41 1991  John Gilmore  (gnu at cygnus.com)
 
 	* symtab.h:  target_type is not used in record types.
 	Eliminate TYPE_MAIN_VARIANT and TYPE_NEXT_VARIANT.  Eliminate
-	lookup_method_type.
+	lookup_method_type.  Add TYPE_TYPE_SPECIFIC macro.
 
 	* symtab.c (lookup_member_type):  Don't chain them up, just
 	allocate one in symbol_obstack when we need one.
@@ -30,6 +30,8 @@ Wed Nov 27 01:23:41 1991  John Gilmore  (gnu at cygnus.com)
 	* mipsread.c:  Eliminate "template" types.  Build new, real
 	types whenever we need them.  Allocate cplus structures as needed.
 	Bulletproof the type parsing a bit more.  Mark storage leaks.
+	(parse_type):  Copy TYPE_TYPE_SPECIFIC when copying a real type
+	on top of a partial type.
 
 Fri Nov 22 16:39:57 1991  John Gilmore  (gnu at cygnus.com)
 

@@ -195,7 +195,7 @@ struct type
   int vptr_fieldno;
 
   /* Slot to point to additional language-specific fields of this type.  */
-  union
+  union type_specific
     {
       struct type **arg_types;
       struct cplus_struct_type *cplus_stuff;
@@ -674,6 +674,7 @@ int current_source_line;
 #define TYPE_FN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fields
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
+#define	TYPE_TYPE_SPECIFIC(thistype) (thistype)->type_specific
 #define TYPE_ARG_TYPES(thistype) (thistype)->type_specific.arg_types
 #define TYPE_CPLUS_SPECIFIC(thistype) (thistype)->type_specific.cplus_stuff
 #define TYPE_BASECLASS(thistype,index) (thistype)->fields[index].type

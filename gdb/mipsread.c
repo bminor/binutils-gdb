@@ -1056,6 +1056,7 @@ static struct type *parse_type(ax, sh, bs)
 	TIR            *t;
 	struct type    *tp = 0, *tp1;
 	char           *fmt;
+	int             i;
 
 	/* Procedures start off by one */
 	if (sh->st == stProc || sh->st == stStaticProc)
@@ -1150,11 +1151,15 @@ static struct type *parse_type(ax, sh, bs)
 			 */
 			TYPE_CODE(tp1) = TYPE_CODE(tp);
 			TYPE_NAME(tp1) = obsavestring(name, strlen(name));
-			if (TYPE_CODE(tp1) == TYPE_CODE_ENUM) {
-				int             i;
+			TYPE_TYPE_SPECIFIC(tp1) = TYPE_TYPE_SPECIFIC(tp);
 
+			/* Now do cleanup based on the final type.  */
+			switch (TYPE_CODE (tp1)) {
+			case TYPE_CODE_ENUM:
 				for (i = 0; i < TYPE_NFIELDS(tp1); i++)
-					make_enum_constant(&TYPE_FIELD(tp1,i), tp1);
+					make_enum_constant(&TYPE_FIELD(tp1,i),
+							   tp1);
+				break;
 			}
 		}
 		if (tp1 != tp) {
