@@ -2,8 +2,8 @@ Wed May  1 13:38:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* subsegs.h (segment_info_type): If MANY_SEGMENTS and not
 	BFD_ASSEMBLER, add name field.
-	* config/obj-coff.c (coff_header_append): Handle long section
-	names.
+	* config/obj-coff.c: Include "libiberty.h".
+	(coff_header_append): Handle long section names.
 	(crawl_symbols): Just use the name field for the symbol name,
 	without worrying about null byte termination.
 	(w_strings): Handle long section names.

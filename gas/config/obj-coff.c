@@ -22,6 +22,7 @@
 #include "as.h"
 #include "obstack.h"
 #include "subsegs.h"
+#include "libiberty.h"
 
 /* I think this is probably always correct.  */
 #ifndef KEEP_RELOC_INFO
@@ -1937,8 +1938,8 @@ coff_header_append (abfd, h)
 	  if (strlen (segment_info[i].name) > SCNNMLEN)
 	    {
 	      memset (segment_info[i].scnhdr.s_name, 0, SCNNMLEN);
-	      sprintf (segment_info[i].scnhdr.s_name, "/%d", string_size);
-	      string_size += strlen (segment_info[i].scnhdr.name) + 1;
+	      sprintf (segment_info[i].scnhdr.s_name, "/%lu", string_size);
+	      string_size += strlen (segment_info[i].name) + 1;
 	    }
 #endif
 
@@ -2939,6 +2940,7 @@ w_strings (where)
 {
   symbolS *symbolP;
   struct filename_list *filename_list_scan = filename_list_head;
+  unsigned int i;
 
   /* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
   md_number_to_chars (where, (valueT) string_byte_count, 4);
@@ -3075,7 +3077,7 @@ extern void
 write_object_file ()
 {
   int i;
-  char *name;
+  const char *name;
   struct frchain *frchain_ptr;
 
   object_headers headers;
@@ -3277,7 +3279,6 @@ segT
 obj_coff_add_segment (name)
      const char *name;
 {
-  unsigned int len;
   unsigned int i;
 
 #ifndef COFF_LONG_SECTION_NAMES
@@ -4138,7 +4139,8 @@ adjust_stab_section(abfd, seg)
      segT seg;
 {
   segT stabstrseg = SEG_UNKNOWN;
-  char *secname, *name, *name2;
+  const char *secname, *name2;
+  char *name;
   char *p = NULL;
   int i, strsz = 0, nsyms;
   fragS *frag = segment_info[seg].frchainP->frch_root;
