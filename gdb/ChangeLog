@@ -1,5 +1,10 @@
 2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* remote-mips.c (mips_initialize): Remove unneeded call to
+	get_selected_frame.  Suggested by Atsushi Nemoto <anemo@mba.ocn.ne.jp>.
+
+2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	Merge from mainline:
 	2003-07-31  Daniel Jacobowitz  <drow@mvista.com>
 
