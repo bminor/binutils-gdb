@@ -46,29 +46,16 @@
 #include "config.h"
 #include "subsegs.h"
 
-#if __STDC__ == 1
-
-/* This prototype for got_sig() is ansi.  If you want
-   anything else, then your compiler is lying to you when
-   it says that it is __STDC__.  If you want to change it,
-   #ifdef protect it from those of us with real ansi
-   compilers. */
-
-#define SIGTY void
-
-static void got_sig (int sig);
-static void perform_an_assembly_pass (int argc, char **argv);
-
-#else /* __STDC__ */
-
 #ifndef SIGTY
+#ifdef __STDC__
+#define SIGTY void
+#else
 #define SIGTY int
-#endif
+#endif /* __STDC__ */
+#endif /* SIGTY */
 
-static SIGTY got_sig ();
-static void perform_an_assembly_pass ();
-
-#endif /* not __STDC__ */
+static SIGTY got_sig PARAMS ((int sig));
+static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS 0
@@ -84,6 +71,21 @@ segT diff_section, absent_section;
 segT text_section, data_section, bss_section;
 #endif
 
+void
+print_version_id ()
+{
+  static int printed;
+  if (printed)
+    return;
+  printed = 1;
+
+  fprintf (stderr, "GNU assembler version %s (%s)", GAS_VERSION, TARGET_ALIAS);
+#ifdef BFD_ASSEMBLER
+  fprintf (stderr, ", using BFD version %s", BFD_VERSION);
+#endif
+  fprintf (stderr, "\n");
+}
+
 int 
 main (argc, argv)
      int argc;
@@ -118,7 +120,6 @@ main (argc, argv)
   symbol_begin ();
   subsegs_begin ();
   read_begin ();
-  md_begin ();
   input_scrub_begin ();
   frag_init ();
   /*
@@ -276,17 +277,12 @@ main (argc, argv)
 #else /* not VMS */
 	      if (*arg && strcmp (arg, "ersion"))
 		{
-		  as_warn ("Unknown -v option ignored");
+		  as_warn ("Unknown option `-v%s' ignored", arg);
 		  arg += strlen (arg);
 		  break;
 		}
 
-	      fprintf (stderr, "GNU assembler version %s (%s)",
-		       GAS_VERSION, TARGET_ALIAS);
-#ifdef BFD_ASSEMBLER
-	      fprintf (stderr, ", using BFD version %s", BFD_VERSION);
-#endif
-	      fprintf (stderr, "\n");
+	      print_version_id ();
 #endif /* not VMS */
 	      while (*arg)
 		arg++;		/* Skip the rest */
@@ -342,6 +338,13 @@ main (argc, argv)
     {
       write_object_file ();	/* relax() addresses then emit object file */
     }				/* we also check in write_object_file() just before emit. */
+#ifdef BFD_ASSEMBLER
+  else
+    {
+      output_file_close (out_file_name);
+      unlink (out_file_name);
+    }
+#endif
 
   input_scrub_end ();
   md_end ();			/* MACHINE.c */
@@ -374,7 +377,6 @@ perform_an_assembly_pass (argc, argv)
      char **argv;
 {
   int saw_a_file = 0;
-  unsigned int i;
 #ifdef BFD_ASSEMBLER
   flagword applicable;
 #endif
@@ -383,10 +385,11 @@ perform_an_assembly_pass (argc, argv)
 
 #ifndef BFD_ASSEMBLER
 #ifdef MANY_SEGMENTS
-  for (i = SEG_E0; i < SEG_UNKNOWN; i++)
-    {
+  {
+    unsigned int i;
+    for (i = SEG_E0; i < SEG_UNKNOWN; i++)
       segment_info[i].fix_root = 0;
-    }
+  }
   /* Create the three fixed ones */
   subseg_new (SEG_E0, 0);
   subseg_new (SEG_E1, 0);
@@ -407,11 +410,8 @@ perform_an_assembly_pass (argc, argv)
   /* Create the standard sections, and those the assembler uses
      internally.  */
   text_section = subseg_new (".text", 0);
-  text_section->output_section = text_section;
   data_section = subseg_new (".data", 0);
-  data_section->output_section = data_section;
   bss_section = subseg_new (".bss", 0);
-  bss_section->output_section = bss_section;
   /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
      to have relocs, otherwise we don't find out in time. */
   applicable = bfd_applicable_section_flags (stdoutput);
@@ -432,6 +432,10 @@ perform_an_assembly_pass (argc, argv)
 
   subseg_new (".text", 0);
 #endif /* BFD_ASSEMBLER */
+
+  /* This may add symbol table entries, which requires having an open BFD,
+     and sections already created, in BFD_ASSEMBLER mode.  */
+  md_begin ();
 
   argv++;			/* skip argv[0] */
   argc--;			/* skip argv[0] */
@@ -458,7 +462,9 @@ got_sig (sig)
   as_bad ("Interrupted by signal %d", sig);
   if (here_before++)
     exit (EXIT_FAILURE);
+#if 0 /* If SIGTY is void, this produces warnings.  */
   return ((SIGTY) 0);
+#endif
 }
 
 /* end of as.c */
