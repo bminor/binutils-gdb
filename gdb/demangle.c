@@ -49,58 +49,6 @@ extern void _initialize_demangler (void);
 
 static char *current_demangling_style_string;
 
-/* List of supported demangling styles.  Contains the name of the style as
-   seen by the user, and the enum value that corresponds to that style. */
-
-static const struct demangler
-  {
-    char *demangling_style_name;
-    enum demangling_styles demangling_style;
-    char *demangling_style_doc;
-  }
-demanglers[] =
-{
-  {
-    AUTO_DEMANGLING_STYLE_STRING,
-      auto_demangling,
-      "Automatic selection based on executable"
-  }
-  ,
-  {
-    GNU_DEMANGLING_STYLE_STRING,
-      gnu_demangling,
-      "GNU (g++) style demangling"
-  }
-  ,
-  {
-    LUCID_DEMANGLING_STYLE_STRING,
-      lucid_demangling,
-      "Lucid (lcc) style demangling"
-  }
-  ,
-  {
-    ARM_DEMANGLING_STYLE_STRING,
-      arm_demangling,
-      "ARM style demangling"
-  }
-  ,
-  {
-    HP_DEMANGLING_STYLE_STRING,
-      hp_demangling,
-      "HP (aCC) style demangling"
-  }
-  ,
-  {
-    EDG_DEMANGLING_STYLE_STRING,
-      edg_demangling,
-      "EDG style demangling"
-  }
-  ,
-  {
-    NULL, unknown_demangling, NULL
-  }
-};
-
 static void set_demangling_command (char *, int, struct cmd_list_element *);
 
 /* Set current demangling style.  Called by the "set demangle-style"
@@ -122,14 +70,16 @@ static void set_demangling_command (char *, int, struct cmd_list_element *);
 static void
 set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
-  const struct demangler *dem;
+  const struct demangler_engine *dem;
 
   /*  First just try to match whatever style name the user supplied with
      one of the known ones.  Don't bother special casing for an empty
      name, we just treat it as any other style name that doesn't match.
      If we match, update the current demangling style enum. */
 
-  for (dem = demanglers; dem->demangling_style_name != NULL; dem++)
+  for (dem = libiberty_demanglers; 
+       dem->demangling_style != unknown_demangling; 
+       dem++)
     {
       if (STREQ (current_demangling_style_string,
 		 dem->demangling_style_name))
@@ -143,7 +93,7 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
      style name and supply a list of valid ones.  FIXME:  This should
      probably be done with some sort of completion and with help. */
 
-  if (dem->demangling_style_name == NULL)
+  if (dem->demangling_style == unknown_demangling)
     {
       if (*current_demangling_style_string != '\0')
 	{
@@ -151,7 +101,9 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 			     current_demangling_style_string);
 	}
       printf_unfiltered ("The currently understood settings are:\n\n");
-      for (dem = demanglers; dem->demangling_style_name != NULL; dem++)
+      for (dem = libiberty_demanglers; 
+	   dem->demangling_style != unknown_demangling; 
+	   dem++)
 	{
 	  printf_unfiltered ("%-10s %s\n", dem->demangling_style_name,
 			     dem->demangling_style_doc);
@@ -168,10 +120,11 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	  /* This can happen during initialization if gdb is compiled with
 	     a DEMANGLING_STYLE value that is unknown, so pick the first
 	     one as the default. */
-	  current_demangling_style = demanglers[0].demangling_style;
+	  current_demangling_style = libiberty_demanglers[0].demangling_style;
 	  current_demangling_style_string =
-	    savestring (demanglers[0].demangling_style_name,
-			strlen (demanglers[0].demangling_style_name));
+	    savestring (
+              libiberty_demanglers[0].demangling_style_name,
+	      strlen (libiberty_demanglers[0].demangling_style_name));
 	  warning ("`%s' style demangling chosen as the default.\n",
 		   current_demangling_style_string);
 	}
