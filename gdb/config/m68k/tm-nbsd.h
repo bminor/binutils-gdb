@@ -1,4 +1,4 @@
-/* Macro definitions for m68k running under NetBSD.
+/* Target-dependent definitions for NetBSD/m68k.
 
    Copyright 1994, 1996, 2001, 2004 Free Software Foundation, Inc.
 
@@ -22,28 +22,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-#include <sys/param.h>
-#include <machine/vmparam.h>
+#include "solib.h"
 
-/* Define BPT_VECTOR if it is different than the default.
-   This is the vector number used by traps to indicate a breakpoint. */
-#define BPT_VECTOR		0xf
-
-/* Address of end of stack space.  */
-#define STACK_END_ADDR USRSTACK
-
-/* For NetBSD, sigtramp is 32 bytes before STACK_END_ADDR.  */
-#define DEPRECATED_IN_SIGTRAMP(PC,FUNC_NAME) \
-((PC) >= (STACK_END_ADDR - 32) && (PC) < (STACK_END_ADDR))
-
-#include "m68k/tm-m68k.h"
-
-/* Return non-zero if we are in a shared library trampoline code stub. */
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
-  (name && !strcmp(name, "_DYNAMIC"))
-
-extern use_struct_convention_fn m68knbsd_use_struct_convention;
-#define USE_STRUCT_CONVENTION(gcc_p, type) \
-        m68knbsd_use_struct_convention(gcc_p, type)
-
-#endif /* TM_NBSD_H */
+#endif /* tm-nbsd.h */

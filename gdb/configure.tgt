@@ -113,7 +113,7 @@ m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
-m68*-*-netbsd*)		gdb_target=nbsdaout ;;
+m68*-*-netbsd*)		gdb_target=nbsd ;;
 m68*-*-openbsd*)	gdb_target=obsd ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-uclinux*)	gdb_target=monitor ;;

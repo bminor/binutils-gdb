@@ -1,3 +1,25 @@
+2004-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68knbsd-nat.c: Remove file.
+	* m68knbsd-tdep.c: Remove file.
+	* Makefile.in: (m68knbsd-nat.o, m68knbsd-tdep.o): Remove
+	dependencies.
+	* configure.host: Add m68k-*-netbsdelf*.
+	* configure.tgt (m68k-*-netbsd*): Set gdb_target to nbsd.
+	* config/m68k/nbsdaout.mh (NATDEPFILES): Add m68kbsd-nat.o,
+	solib.o and solib-sunos.o.  Remove m68knbsd-nat.o, corelow.o.
+	(XM_FILE): Remove.
+	* config/m68k/nbsdelf.mh: New file.
+	* config/m68k/nbsd.mt: New file.
+	* config/m68k/nbsdaout.mt: Remove file.
+	* config/m68k/tm-nbsd.h: Don't include <sys/param.h>,
+	<machine/vmparam.h> and "m68k/tm-m68k.h".  Include "solib.h".
+	(BPT_VECTOR, STACK_END_ADDR): Remove defines.
+	(DEPRECATED_SIGTRAMP_START, DEPRECATED_SIGTRAMP_END): Likewise.
+	(use_struct_convention): Remove prototype.
+	(USE_STRUCT_CONVENTION): Remove define.
+	* config/m68k/xm-nbsd.h: Remove file.
+
 2004-05-04  Michael Snyder  <msnyder@redhat.com>
 
 	* m68k-tdep.c (m68k_gdbarch_init): Default to using 
