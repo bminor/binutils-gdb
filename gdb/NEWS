@@ -3,21 +3,122 @@
 
 *** Changes in GDB-4.7:
 
-auto demangling style
-improved dwarf support?
-redundant SO fix...
-hppa cross host
-better c++ support?
-apollo 68b host
-remote.c improved (new T message)
-improved 29k support
-host/native/target split
-bugs bugs bugs
-sparc-stub.c
-rs6000 cleanups...  cross host
+ * New native hosts
 
-==>Sun Aug 30 21:32:17 1992  Ian Lance Taylor  (ian@cygnus.com)
+some 386 support
 
+ * New cross target hosts
+
+HP/Apollo 68k (under the BSD domain)
+
+ * New cross targets
+
+Fujitsu SparcLite - This is a Sparc without floating-point intended for
+imbedded applications.
+
+ * G++/C++ support
+
+As always, G++ support keeps on impoving.  We now deal with Cfront style
+name mangling, and can even extract type info from mangled symbols.
+
+Calling of virtual functions and inferior methods has been improved as well.
+
+GDB can now automatically figure out which symbol mangling style your C++
+compiler uses.
+
+ * Major bug fixes
+
+The crash that was occuring when debugging Sun Ansi-C compiled binaries has
+been fixed.  This was due mishandling of the extra SO stabs that the
+compiler was outputting.
+
+We also finally got Ultrix 4.2 up and running in house, and were able to
+really fix core file support!
+
+It was discovered that the reason that single-stepping was so slow on all
+of the Mips based platforms (primarily SGI and DEC) was that we were trying
+to demangle and lookup a symbol used for internal purposes on every instruction
+that was being stepped through.  Changing the name of that symbol so that it
+couldn't be mistaken for a C++ mangled symbol sped things up a great deal.
+
+We also sped up symbol lookups in general by getting much smarter about
+when symbol mangling was necessary.
+
+ * 29k support
+
+A bunch of work has been done to improve the general 29k support.  In
+particular, a new user controllable variable 'call_scratch_address' can be
+used to specify the location of a scratch area to be used when GDB needs to
+call a function in the target.  This was necessary because the usual method
+of putting the scratch area on the stack was not feasible for systems that
+have seperate instruction and data spaces.
+
+We also did a bunch of work on the 29k UDI (Universal Debugger Interface)
+code, but at the last minute we discovered that we didn't have all of the
+appropriate copyright paperwork, and had to yank it all out.  We are working
+with AMD to resolve this, and hope to have it available soon.
+
+ * Remote stuff
+
+We have made some improvements in the remote serial line protocol which should
+speed up things a great deal (especially for targets with lots of registers).
+The remote code now supports a new `expedited status' ('T') message which
+replaces the old 'S' status message.  This message has a much more flexible
+format which allows the remote stub to send an arbitrary set of registers
+whenever the stub takes control.  This greatly speeds up stepping, as the
+stub can supply only the registers GDB requires during this process.  It
+eliminates the need to fetch the entire register set for each instruction being
+stepped through.
+
+GDB was also made a bit smarter about reading registers from the target.  It
+now makes much more use of the cache.  In effect, it now implements a
+write-through cache, and only reads the registers when if the target has run.
+
+There is also a new remote stub for Sparc processors.  You can find it in
+gdb-4.7/gdb/sparc-stub.c.  This was written to support the SparcLite product,
+but actually contains no SparcLite specific code.  It should run on any
+stand-alone Sparc processor with a serial port that can be dedicated to GDB
+for remote debugging.
+
+ * Host/native/target split
+
+GDB has had some major internal surgery recently in order to untangle some
+of the mess related to supporting hosts and remote targets.  Now, when you
+configure GDB for a remote target, it may no longer load in all of the host
+support for debugging local programs.  This means that if you make a GDB to
+debug a remote vxWorks target from a Sun4 host, you will no longer get
+ptrace() or Sun4 core file support.  This surgery was necessary to ensure
+that arbitrary host/target combinations were possible.  In particular, it
+makes it much more practical to build new configurations for remote targets
+that in the past were only hosts.
+
+The primary concept behind the detanglement was to seperate the code into
+one of three categories.  The host category is for code that is host
+specific, and can only be compiled for a particular host configuration.
+The target category is for code which is target specific, but can be
+compiled on any host.  The native category is for the situation where the
+host and target are the same system (this usually means that you are going
+to debug an inferior process).
+
+ * General
+
+There is a new opcodes library which will contain all of the disassembly
+routines, and opcode tables at some point in the future.  At present, it
+only contains Sparc and Z8000 routines.  This was done in order to get the
+assembler and the debugger to share these routines.
+
+The file gdb-4.7/gdb/doc/stabs.texinfo is a (relatively) complete reference
+to the stabs symbol info used by the debugger.  It is (as far as we know)
+the only published document on this fascinating topic.
+
+There are now pre-command hooks that are used to attach arbitrary commands
+to any command.  The commands in the hook will be executed prior to the
+users command.  You can creat a hook which will be executed whenever the
+program stops.
+
+BFD now supports the Zilog Z8000 microprocessor.
+
+And, of course, many bugs have been fixed.
 
 *** Changes in GDB-4.6:
 
