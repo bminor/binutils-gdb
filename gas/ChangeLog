@@ -1,3 +1,16 @@
+start-sanitize-arc
+Mon May 22 16:56:58 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* config/tc-arc.c (md_pcrel_from): Return 0 for undefined symbols.
+end-sanitize-arc
+
+Sun May 21 21:36:17 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c: Reverse changes from Dec. 19th which
+	changed the way unwinds were built for ELF.  Rely on relocation
+	symbol reductions to avoid placing the end of function marker
+	symbols into the object file's symbol table.
+
 Sat May 20 12:31:36 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Added improved VMS support from Pat Rankin:
