@@ -34,7 +34,7 @@ by the Free Software Foundation.
 @sp 10
 @titlefont{GNU Coding Standards}
 @author{Richard Stallman}
-@author{last updated 21 April 1992}
+@author{last updated 3 May 1992}
 @c Note date also appears below.
 @page
 
@@ -66,7 +66,7 @@ END-INFO-DIR-ENTRY
 @node Top, Reading Non-Free Code, (dir), (dir)
 @top Version
 
-Last updated 21 April 1992.
+Last updated 3 May 1992.
 @c Note date also appears above.
 @end ifinfo
 
@@ -394,37 +394,52 @@ easy to install in a nonstandard place.  The standard names for these
 variables are:
 
 @table @samp
+@item prefix
+A prefix used in constructing the default values of the variables listed
+below.  The default value of @code{prefix} should be @file{/usr/local}
+(at least for now).
+
+@item exec_prefix
+A prefix used in constructing the default values of the some of the
+variables listed below.  The default value of @code{exec_prefix} should
+be @code{$(prefix)}.
+
+Generally, @code{$(exec_prefix)} is used for directories that contain
+machine-specific files (such as executables and subroutine libraries),
+while @code{$(prefix)} is used directly for other directories.
+
 @item bindir
 The directory for installing executable programs that users can run.
-This should normally be @file{/usr/local/bin}, but it should be based on
-the value of @code{$(prefix)}.
+This should normally be @file{/usr/local/bin}, but it should be written
+as @file{$(exec_prefix)/bin}.
+
+@item libdir
+The directory for installing executable files to be run by the program
+rather than by users.  Object files and libraries of object code should
+also go in this directory.  The idea is that this directory is used for
+files that pertain to a specific machine architecture, but need not be
+in the path for commands.  The value of @code{libdir} should normally be
+@file{/usr/local/lib}, but it should be written as
+@file{$(exec_prefix)/lib}.
 
 @item datadir
 The directory for installing read-only data files which the programs
 refer to while they run.  This directory is used for files which are
 independent of the type of machine being used.  This should normally be
-@file{/usr/local/lib}, but it should be based on the value of
-@code{$(prefix)}.
+@file{/usr/local/lib}, but it should be written as
+@file{$(prefix)/lib}.
 
 @item statedir
 The directory for installing data files which the programs modify while
 they run.  These files should be independent of the type of machine
 being used, and it should be possible to share them among machines at a
 network installation.  This should normally be @file{/usr/local/lib},
-but it should be based on the value of @code{$(prefix)}.
-
-@item libdir
-The directory for installing executable files to be run by the program
-rather than by users.  Object files and libraries of object code should
-also go in this directory.  The idea is that this directory is used for
-files that pertain to a specific machine architecture.  This should
-normally be @file{/usr/local/lib}, but it should be based on the value of
-@code{$(prefix)}.
+but it should be written as @file{$(prefix)/lib}.
 
 @item includedir
 The directory for installing @samp{#include} header files to be included
 by user programs.  This should normally be @file{/usr/local/include},
-but it should be based on the value of @code{$(prefix)}.
+but it should be written as @file{$(prefix)/include}.
 
 Most compilers other than GCC do not look for header files in
 @file{/usr/local/include}.  So installing the header files this way is
@@ -466,17 +481,12 @@ a period followed by the appropriate digit.
 
 @item infodir
 The directory for installing the info files for this package.  By
-default, it should be @file{/usr/local/info}, but it should be based on the
-value of @code{$(prefix)}.
+default, it should be @file{/usr/local/info}, but it should be written
+as @file{$(prefix)/info}.
 
 @item srcdir
 The directory for the sources being compiled.  The value of this
 variable is normally inserted by the @code{configure} shell script.
-
-@item prefix
-A prefix used in constructing the default values of the variables listed
-above.  The default value of @code{prefix} should be @file{/usr/local}
-(at least for now).
 @end table
 
 For example:
@@ -485,12 +495,14 @@ For example:
 # Common prefix for installation directories.
 # NOTE: This directory must exist when you start installation.
 prefix = /usr/local
+exec_prefix = $(prefix)
 # Directory in which to put the executable for the command `gcc'
-bindir = $(prefix)/bin
+bindir = $(exec_prefix)/bin
 # Directory in which to put the directories used by the compiler.
-libdir = $(prefix)/lib
+libdir = $(exec_prefix)/lib
+# Directory in which to put the Info files.
+infodir = $(prefix)/info
 @end example
-
 
 @node Configuration
 @chapter How Configuration Should Work
@@ -1316,4 +1328,9 @@ distinct.
 Include in your distribution a copy of the @file{texinfo.tex} you used
 to test print any @file{*.texinfo} files.
 
+Likewise, if your program uses small GNU software packages like regex,
+getopt, obstack, or termcap, include them in the distribution file.
+Leaving them out would make the distribution file a little smaller at
+the expense of possible inconvenience to a user who doesn't know what
+other files to get.
 @bye

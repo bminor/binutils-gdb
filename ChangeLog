@@ -1,4 +1,15 @@
+Fri May  8 08:31:41 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* standards.texi: updated to 3 may, fixed librid <-> libdir typo.
+
+Fri May  1 18:00:50 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: macroize flags passed on recursion.  remove
+	  fileutils.
+
 Thu Apr 30 08:56:20 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure: get makesrcdir right for subdirs deeper than 1.
 
 	* Makefile.in: pass INSTALL, INSTALL_DATA, INSTALL_PROGRAM on
 	  install.
