@@ -1,3 +1,21 @@
+Mon Apr 29 10:33:10 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* ld-shared/shared.exp: Run the shared library tests on
+ 	Linux/m68k.
+
+Fri Apr  5 16:20:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-shared/shared.exp: Run the shared library tests on Linux.
+
+Mon Feb 26 12:45:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-shared/shared.exp: Don't use -fpic on MIPS targets.
+
+Wed Jan 31 15:09:57 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* ld-srec/srec.exp: Add xfails for hppa*-*-*elf*.
+	* ld-undefined/undefined.exp: Likewise.
+
 Fri Jan 26 18:43:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-undefined/undefined.exp: ELF targets should now pass the
