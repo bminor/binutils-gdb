@@ -333,6 +333,9 @@ v850_comm (area)
 	  char * pfrag;
 	  int    align;
 	  flagword	applicable;
+
+	  old_sec = now_seg;
+	  old_subsec = now_subseg;
       
 	  applicable = bfd_applicable_section_flags (stdoutput);
 		  
@@ -374,10 +377,6 @@ v850_comm (area)
 	      break;
 	    }
 
-	  /* allocate_bss: */
-	  old_sec = now_seg;
-	  old_subsec = now_subseg;
-	  
 	  if (temp)
 	    {
 	      /* convert to a power of 2 alignment */
@@ -1208,14 +1207,14 @@ void
 md_show_usage (stream)
   FILE * stream;
 {
-  fprintf (stream, _("V850 options:\n"));
-  fprintf (stream, _("\t-mwarn-signed-overflow    Warn if signed immediate values overflow\n"));
-  fprintf (stream, _("\t-mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n"));
-  fprintf (stream, _("\t-mv850                    The code is targeted at the v850\n"));
+  fprintf (stream, _(" V850 options:\n"));
+  fprintf (stream, _("  -mwarn-signed-overflow    Warn if signed immediate values overflow\n"));
+  fprintf (stream, _("  -mwarn-unsigned-overflow  Warn if unsigned immediate values overflow\n"));
+  fprintf (stream, _("  -mv850                    The code is targeted at the v850\n"));
 /* start-sanitize-v850e */
-  fprintf (stream, _("\t-mv850e                   The code is targeted at the v850e\n"));
-  fprintf (stream, _("\t-mv850ea                  The code is targeted at the v850ea\n"));
-  fprintf (stream, _("\t-mv850any                 The code is generic, despite any processor specific instructions\n"));
+  fprintf (stream, _("  -mv850e                   The code is targeted at the v850e\n"));
+  fprintf (stream, _("  -mv850ea                  The code is targeted at the v850ea\n"));
+  fprintf (stream, _("  -mv850any                 The code is generic, despite any processor specific instructions\n"));
 /* end-sanitize-v850e */
 } 
 
