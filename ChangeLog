@@ -1,3 +1,7 @@
+Wed Mar 18 09:24:59 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in: Add Thumb-pe target.
+
 Tue Mar 17 16:59:00 1998  Syd Polk <spolk@cygnus.com>
 	* Makefile.in - changed sn targets to snavigator
 	* configure.in - changed sn targets to snavigator
