@@ -732,7 +732,7 @@ for this_target in $target $canon_targets ; do
       m68008)		cpu_type=m68k ;;
       m683??)		cpu_type=m68k ;;
       m8*)		cpu_type=m88k ;;
-      mips*el)		cpu_type=mips endian=little;;
+      mips*el)		cpu_type=mips endian=little ;;
       mips*)		cpu_type=mips endian=big ;;
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
@@ -878,7 +878,7 @@ for this_target in $target $canon_targets ; do
       mips-*-irix*)         fmt=ecoff targ=mips-big ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
       mips-*-sysv*)         fmt=ecoff targ=mips-big ;;
-      mips-*-elf* | mips-*-rtems*)
+      mips-*-elf* | mips-*-rtems* | mips-*-linux*)
 			    fmt=elf 
 			    case "$endian" in
 			    big) targ=mips-big ;;
@@ -943,7 +943,7 @@ for this_target in $target $canon_targets ; do
       sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
 
 # start-sanitize-tic80
-      tic80-*-coff)           fmt=coff targ=tic80coff;;
+      tic80-*-coff)	    fmt=coff targ=tic80coff;;
 # end-sanitize-tic80
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
 

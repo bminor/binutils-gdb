@@ -79,7 +79,7 @@ changequote(,)dnl
       m683??)		cpu_type=m68k ;;
 changequote([,])dnl
       m8*)		cpu_type=m88k ;;
-      mips*el)		cpu_type=mips endian=little;;
+      mips*el)		cpu_type=mips endian=little ;;
       mips*)		cpu_type=mips endian=big ;;
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
@@ -225,7 +225,7 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff targ=mips-big ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
       mips-*-sysv*)         fmt=ecoff targ=mips-big ;;
-      mips-*-elf* | mips-*-rtems*)
+      mips-*-elf* | mips-*-rtems* | mips-*-linux*)
 			    fmt=elf 
 			    case "$endian" in
 			    big) targ=mips-big ;;
