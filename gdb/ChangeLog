@@ -1,3 +1,11 @@
+1998-12-07  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* rs6000-tdep.c (pop_frame): Correctly find the registers saved in
+	the stack frame.  Their offset from the previous stack frame is in
+	fdata.gpr_offset and fdata.fpr_offset, not fdata.offset.
+	(gdb.base/return.exp)
+	* config/rs6000/tm-rs6000.h: Doc fixes.
+
 1998-12-03  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * monitor.c (monitor_read_memory): Zero out pattern buffers
