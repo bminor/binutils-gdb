@@ -1,3 +1,8 @@
+Wed Jan 25 18:13:14 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* eval.c (evaluate_subexp case OP_ARRAY):  Fix calls to memset:
+	TYPE_LENGTH is length in bytes, not bits.
+
 Wed Jan 25 08:19:35 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (proceed): Flush stdout before resuming inferior.
