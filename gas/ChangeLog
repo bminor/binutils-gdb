@@ -1,3 +1,8 @@
+Wed Mar 29 17:16:30 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
+
+	* config/tc-m68k.c (md_apply_fix_2): Cast negative offsets to offsetT
+	(for hosting on 64 bit machines).
+
 Tue Mar 21 16:53:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_show_usage): Mention -mips4 and -m4650.
