@@ -50,6 +50,7 @@ case "${host}" in
   i[34]86-ibm-aix*)		gas_host=i386aix	;;
   i[34]86-*-isc*)		gas_host=sysv		;;
   i386-sun-sunos*)		gas_host=sun386		;;
+  i386-*-mach3*)		gas_host=mach3		;;
 
   m68k-sun-sunos*)		gas_host=sun3		;;
   m68*-*-hpux)			gas_host=hpux		;;
