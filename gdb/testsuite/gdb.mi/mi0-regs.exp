@@ -112,8 +112,8 @@ proc sparc_register_tests { } {
     global decimal
     set octal "\[0-7\]+"
     set binary "\[0-1\]+"
-    set float "-?\[0-9\]+(\.\[0-9\]+)?(e\[+\-\]\[0-9\]+)?"
-    set float2 "\-?\[0-9\]+"
+    set float "\\-?((\[0-9\]+(\\.\[0-9\]+)?(e\[-+\]\[0-9\]+)?)|(nan\\($hex\\)))"
+    set float2 "\\-?\[0-9\]+"
 
     mi_gdb_test "111-data-list-register-names" \
 	    "111\\^done,register-names=\{\"g0\",\"g1\",\"g2\",\"g3\",\"g4\",\"g5\",\"g6\",\"g7\",\"o0\",\"o1\",\"o2\",\"o3\",\"o4\",\"o5\",\"sp\",\"o7\",\"l0\",\"l1\",\"l2\",\"l3\",\"l4\",\"l5\",\"l6\",\"l7\",\"i0\",\"i1\",\"i2\",\"i3\",\"i4\",\"i5\",\"fp\",\"i7\",\"f0\",\"f1\",\"f2\",\"f3\",\"f4\",\"f5\",\"f6\",\"f7\",\"f8\",\"f9\",\"f10\",\"f11\",\"f12\",\"f13\",\"f14\",\"f15\",\"f16\",\"f17\",\"f18\",\"f19\",\"f20\",\"f21\",\"f22\",\"f23\",\"f24\",\"f25\",\"f26\",\"f27\",\"f28\",\"f29\",\"f30\",\"f31\",\"y\",\"psr\",\"wim\",\"tbr\",\"pc\",\"npc\",\"fpsr\",\"cpsr\"\}" \
@@ -160,7 +160,7 @@ proc sparc_register_tests { } {
     # Don't know how useful this test is
 
     mi_gdb_test "002-data-list-changed-registers" \
-	    "002\\^done,changed-registers=\{\"1\",\"9\",\"10\",\"11\",\"12\",\"13\",\"14\",\"15\",\"16\",\"23\",\"24\",\"25\",\"26\",\"27\",\"28\",\"30\",\"31\",\"65\",\"68\",\"69\"\}" \
+	    "002\\^done,changed-registers=\{(\"${decimal}\"(,\"${decimal}\")*)?\}" \
 	    "list changed registers"
 }
 

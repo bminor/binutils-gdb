@@ -1,5 +1,17 @@
 2002-02-05  Jim Blandy  <jimb@redhat.com>
 
+	* mi-regs.exp: Various cleanups for SPARC-only tests.
+	(test_breakpoints_creation_and_listing): Format of breakpoint
+	table has changed.
+	(sparc_register_tests): Expand floating-point number regexp to
+	recognize NaN values, too.  Replace ineffectual single backslash
+	before a hyphen with a double backslash.  Don't check the exact
+	numbers of the registers which have changed, since there's no way
+	to know which registers changed, exactly; just check that the
+	result is well-formed.
+	* mi0-regs.exp: (sparc_register_tests): Same as for
+	sparc_register_tests in mi-regs.exp.
+
 	* mi-var-child.exp ("get children of struct_declarations", "get
 	children of struct_declarations.s2.u2.u1s2", "get children of
 	weird"): Tolerate argument types when they appear in function
