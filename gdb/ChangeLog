@@ -1,5 +1,8 @@
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
+	* configure.in (CONFIG_LIB_OBS): Replace with CONFIG_OBS.
+	* configure: Re-generate.
+
 	* mips-tdep.c (mips_gdbarch_init): Group deprecated frame unwind
 	methods.
 

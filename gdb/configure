@@ -8899,7 +8899,7 @@ echo "configure:8895: checking for HPUX/OSF thread support" >&5
 #define HAVE_HPUX_THREAD_SUPPORT 1
 EOF
 
-            CONFIG_LIB_OBS="${CONFIG_LIB_OBS} hpux-thread.o"
+            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             echo "$ac_t""no (suppressed because you are not using GCC)" 1>&6
@@ -8921,7 +8921,7 @@ echo "configure:8918: checking for Solaris thread debugging library" >&5
 #define HAVE_THREAD_DB_LIB 1
 EOF
 
-         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} sol-thread.o"
+         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
          echo $ac_n "checking for dlopen in -ldl""... $ac_c" 1>&6
 echo "configure:8928: checking for dlopen in -ldl" >&5
@@ -9076,7 +9076,7 @@ fi
       echo "$ac_t""$gdb_cv_have_aix_thread_debug" 1>&6
       if test $gdb_cv_have_aix_thread_debug = yes; then
          CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
-         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} aix-thread.o"
+         CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
          CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -lpthdebug"
       fi
       ;;

@@ -859,7 +859,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          if test "$GCC" = "yes" ; then
             AC_MSG_RESULT(yes)
             AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
-            CONFIG_LIB_OBS="${CONFIG_LIB_OBS} hpux-thread.o"
+            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             AC_MSG_RESULT(no (suppressed because you are not using GCC))
@@ -877,7 +877,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
       if test -f /usr/lib/libthread_db.so.1 ; then
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_THREAD_DB_LIB)
-         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} sol-thread.o"
+         CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
          AC_CHECK_LIB(dl, dlopen)
          if test "$GCC" = "yes" ; then
@@ -924,7 +924,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
       AC_MSG_RESULT($gdb_cv_have_aix_thread_debug)
       if test $gdb_cv_have_aix_thread_debug = yes; then
          CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
-         CONFIG_LIB_OBS="${CONFIG_LIB_OBS} aix-thread.o"
+         CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
          CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -lpthdebug"
       fi
       ;;
