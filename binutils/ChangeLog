@@ -1,3 +1,7 @@
+Thu Oct  5 20:53:08 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* bucomm.c: Always include time.h.
+
 Thu Oct  5 17:25:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (compare_symbols): Sort gnu_compiled and gcc2_compiled
