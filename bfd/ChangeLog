@@ -1,3 +1,8 @@
+2003-06-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* cpu-ia64-opc.c (ext_imms_scaled): Don't sign extend using shifts.
+	(ins_imms, ins_immsm1u4): Likewise.  Warning fix.
+
 2003-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* archive.c: Convert to C90, remove unnecessary prototypes and casts.
