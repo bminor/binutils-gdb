@@ -1,5 +1,8 @@
 2005-01-10  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: Hans-Peter Nilsson and Orjan Friberg can commit
+	changes to CRIS.
+
 	* MAINTAINERS: Remove "Maintenance Only".  Spell out that CAN
 	COMMIT means can approve).
 

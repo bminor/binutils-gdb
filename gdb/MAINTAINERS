@@ -68,7 +68,6 @@ the native maintainer when resolving ABI issues.
 			Theodore A. Roth	troth@openavr.org
 
 	cris		--target=cris-elf ,-Werror
-			Orjan Friberg		orjanf@axis.com
 
 	d10v		OBSOLETE
 
@@ -127,10 +126,12 @@ the native maintainer when resolving ABI issues.
 The following developers CAN COMMIT changes (and hence approve
 patches) to specific architectures:
 
-	Randolph Chung (pa)
+	Hans-Peter Nilsson (cris)	
 	Jeff Johnston (ia64)
-	Kei Sakamoto (m32r)
 	Joel Brobecker (mips)
+	Kei Sakamoto (m32r)
+	Orjan Friberg (cris)
+	Randolph Chung (pa)
 	Ulrich Weigand (s390)
 
 All developers recognized by this file can make arbitrary changes to
