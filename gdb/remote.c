@@ -3060,6 +3060,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	      {
 		unsigned char *p1;
 		char *p_temp;
+		int fieldsize;
 
 		/* Read the register number */
 		regno = strtol ((const char *) p, &p_temp, 16);
@@ -3093,8 +3094,9 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    if (hex2bin (p, regs, REGISTER_RAW_SIZE (regno)) 
-			< REGISTER_RAW_SIZE (regno))
+		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
+		    p += 2 * fieldsize;
+		    if (fieldsize < REGISTER_RAW_SIZE (regno))
 		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (regno, regs);
 		  }

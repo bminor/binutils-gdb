@@ -1,3 +1,8 @@
+2001-05-21  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c (remote_async_wait): Added new variable fieldsize.
+	Add fieldsize (return value of hex2bin) to string pointer p.
+
 2001-05-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* m68hc11-tdep.c (m68hc11_pop_frame): Fix stack pointer computation.
