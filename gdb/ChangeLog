@@ -1,3 +1,11 @@
+2002-11-26  Martin M. Hunt  <hunt@redhat.com>
+
+	* Makefile.in: Remove Tix dependencies.
+	* acinclude.m4: Ditto.
+	* aclocal.m4: Ditto.
+	* configure.in: Ditto.
+	* configure: Regenerated.
+	
 2002-11-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (TARGET_FLOAT_FORMAT): Print the float format name.

@@ -261,11 +261,6 @@ ITK_CFLAGS = @ITKHDIR@
 ITK = @ITKLIB@
 ITK_DEPS = @ITK_DEPS@ 
 
-# Where is Tix?  Typically in ../tix.
-TIX_CFLAGS = @TIXHDIR@
-TIX = @TIXLIB@
-TIX_DEPS = @TIX_DEPS@
-
 X11_CFLAGS = @TK_XINCLUDES@
 X11_LDFLAGS =
 X11_LIBS =
@@ -295,7 +290,7 @@ SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c \
 	gdbtk/generic/gdbtk-main.c
 SUBDIR_GDBTK_DEPS = \
-	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)
+	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TK_DEPS) $(TCL_DEPS)
 SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
@@ -1446,7 +1441,7 @@ procfs.o: $(srcdir)/procfs.c
 
 v850ice.o: $(srcdir)/v850ice.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-		$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+		$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(GDBTK_CFLAGS) \
 		$(srcdir)/v850ice.c
 
@@ -2444,7 +2439,7 @@ gdbtk.o: $(srcdir)/gdbtk/generic/gdbtk.c \
 	$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) $(gdb_string_h) \
 	$(tracepoint_h) $(top_h) 
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-        $(ITK_CFLAGS) $(TIX_CFLAGS) \
+        $(ITK_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk.c \
 		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\" -DSRC_DIR=\"$(GDBTK_SRC_DIR)\"
@@ -2455,7 +2450,7 @@ gdbtk-bp.o: $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 		$(defs_h) $(breakpoint_h) $(tracepoint_h) \
 		$(symfile_h) $(symtab_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
+	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
@@ -2465,7 +2460,7 @@ gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
 	$(command_h) $(bfd_h) $(top_h) $(symfile_h) $(objfiles_h) $(target_h) \
 	$(gdb_string_h) $(tracepoint_h) $(source_h) $(regcache_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)	\
-	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
+	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-cmds.c		\
 	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
@@ -2474,13 +2469,13 @@ gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
 	$(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) $(gdb_string_h) \
 	$(tracepoint_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-main.o: $(srcdir)/gdbtk/generic/gdbtk-main.c $(defs_h) $(main_h) \
 	$(gdb_string_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-main.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
@@ -2489,7 +2484,7 @@ gdbtk-register.o: $(srcdir)/gdbtk/generic/gdbtk-register.c \
 		$(srcdir)/gdbtk/generic/gdbtk-cmds.h \
 		$(defs_h) $(frame_h) $(value_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
+	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-register.c \
 	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
@@ -2499,14 +2494,14 @@ gdbtk-stack.o: $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 	$(defs_h) $(frame_h) $(value_h) $(target_h) $(breakpoint_h) \
 	$(linespec_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
+	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
 		$(srcdir)/gdbtk/generic/gdbtk.h \
 		$(defs_h) $(value_h) $(varobj_h) $(gdb_string_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-varobj.c
 

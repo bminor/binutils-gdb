@@ -1042,7 +1042,6 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_TKH
 	   CY_AC_PATH_ITCLH
 	   CY_AC_PATH_ITKH
-	   CY_AC_PATH_TIXH
 
 
 	   # now look for Tk library stuff
@@ -1078,14 +1077,6 @@ if test "${enable_gdbtk}" = "yes"; then
 	     ITK_DEPS="${ITK_LIB_FULL_PATH}"
            fi
 
-	   # now look for Tix library stuff
-	   CY_AC_PATH_TIXCONFIG
-           if test -z "${no_tix}"; then
-             CY_AC_LOAD_TIXCONFIG
-	     TIXLIB="${TIX_BUILD_LIB_SPEC}"
-	     TIX_DEPS="${TIX_BUILD_LOCATION}/${TIX_LIB_FILE}"
-           fi
-
            ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 	   # Tcl/Tk 8.1 require -fwritable strings.  I don't
            # know whether 8.2 will or not, but I bet it will.
@@ -1098,7 +1089,7 @@ if test "${enable_gdbtk}" = "yes"; then
            fi
 
 	   # Include some libraries that Tcl and Tk want.
-	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
@@ -1136,8 +1127,6 @@ AC_SUBST(ITCLLIB)
 AC_SUBST(ITCL_DEPS)
 AC_SUBST(ITKLIB)
 AC_SUBST(ITK_DEPS)
-AC_SUBST(TIXLIB)
-AC_SUBST(TIX_DEPS)
 AC_SUBST(GDBTKLIBS)
 AC_SUBST(GDBTK_CFLAGS)
 AC_SUBST(GDBTK_SRC_DIR)
