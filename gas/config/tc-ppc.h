@@ -206,6 +206,9 @@ do {								\
 
 #endif /* OBJ_XCOFF */
 
+extern const char       ppc_symbol_chars[];
+#define tc_symbol_chars ppc_symbol_chars
+
 #ifdef OBJ_ELF
 
 /* Support for SHF_EXCLUDE and SHT_ORDERED */

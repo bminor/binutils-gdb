@@ -182,6 +182,10 @@ const char EXP_CHARS[] = "eE";
 /* Characters which mean that a number is a floating point constant,
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
+
+/* '+' and '-' can be used as postfix predicate predictors for conditional 
+   branches.  So they need to be accepted as symbol characters.  */
+const char ppc_symbol_chars[] = "+-";
 
 /* The target specific pseudo-ops which we support.  */
 
