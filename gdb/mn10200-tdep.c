@@ -72,7 +72,6 @@ mn10200_frame_chain (fi)
 
   /* current pc is fi->pc */
   /* current fp is fi->frame */  
-
   /* current sp is: */
   curr_sp = read_register (SP_REGNUM);
 
@@ -95,22 +94,22 @@ mn10200_frame_chain (fi)
     {
 	/* printf("scanning prologue\n"); */
 	/* FIXME -- fill out this case later */
-        return 0x666; /* bogus value */
+        return 0x0; /* bogus value */
     }
 
   if (past_prologue) /* if we don't need to scan the prologue */
     {
-/*    printf("we're past the prologue\n"); */
       callers_pc = fi->frame - REGISTER_SIZE;
-      callers_fp = fi->frame - ((n_movm_args + 1) * REGISTER_SIZE);
-/*
+      callers_fp = fi->frame - (4 * REGISTER_SIZE);
+
+#if 0
       printf("callers_pc = 0x%x ; callers_fp = 0x%x\n",
 	     callers_pc, callers_fp);
-
       printf("*callers_pc = 0x%x ; *callers_fp = 0x%x\n",
 	     read_memory_integer(callers_pc, REGISTER_SIZE),
 	     read_memory_integer(callers_fp, REGISTER_SIZE));
-*/
+#endif
+
       return read_memory_integer(callers_fp, REGISTER_SIZE);
     }
 

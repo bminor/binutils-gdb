@@ -1,3 +1,8 @@
+Tue Jan 28 15:39:50 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* mn10200-tdep.c (mn10200_frame_chain): get basic backtracing
+	working
+
 Mon Jan 27 14:31:52 1997  Mark Alexander  <marka@cygnus.com>
 
 First set of changes for mips16:
