@@ -180,7 +180,7 @@
 	* config/xm-aix4.h, config/alpha/xm-alphalinux.h,
 	config/i386/xm-cygwin.h, config/rs6000/xm-rs6000.h
 	(HAVE_SIGSETMASK): Remove.
-	* aclocal.m4, config.in, configure
+	* aclocal.m4, config.in, configure: Regenerated.
 
 2001-08-26  Andrew Cagney  <ac131313@redhat.com>
 
