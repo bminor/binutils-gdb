@@ -29,6 +29,7 @@ Things-to-keep:
 
 INSTALL
 Makefile.in
+README
 README.configure
 bison
 bfd
@@ -55,7 +56,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1991/08/22 07:30:50  gnu
+# Revision 1.8  1991/08/23 07:15:55  gnu
+# Make README stick...
+#
+# Revision 1.7  1991/08/22  07:30:50  gnu
 # New config.sub.
 #
 # Revision 1.6  1991/07/31  05:15:37  gnu
