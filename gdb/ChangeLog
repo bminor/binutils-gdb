@@ -1,3 +1,9 @@
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_analyze_register_saves): Handle register saves
+	at the start of a frameless function.  This probably fixes PR
+	backtrace/1338.
+
 2003-08-17  Michael Chastain  <mec@shout.net>
 
 	* symfile.c (find_sym_fns): Remove special case for apollo target.
