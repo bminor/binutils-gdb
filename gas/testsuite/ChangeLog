@@ -1,3 +1,8 @@
+2001-03-17  Philip Blundell  <philb@gnu.org>
+
+	* gas/vtable/vtable.exp: Don't run tests on AVR.
+	* gas/macros/macros.exp: Mark strings test xfail for AVR.
+
 2001-02-23  H.J. Lu  <hjl@gnu.org>
 
 	* gas/ia64/opc-a-err.l: Fix "cmp4.lt.or".
