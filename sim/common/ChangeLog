@@ -4,6 +4,9 @@ Mon Nov 24 12:09:59 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-hrw.c (sim_read): Use read map, not write map.
 
+	* Make-common.in (all): Add .gdbinit.
+	* gdbinit.in: Add dump command.
+
 Sun Nov 23 10:57:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.c (sim_fpu_abs, sim_fpu_neg, sim_fpu_inv), sim-fpu.h:
