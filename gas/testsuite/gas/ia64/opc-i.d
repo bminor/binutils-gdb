@@ -38,9 +38,9 @@ Disassembly of section \.text:
   9c:	50 30 08 74       	            pmin1\.u r4=r5,r6
   a0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
   a6:	40 28 18 14 3a 80 	            pmax1\.u r4=r5,r6
-  ac:	50 30 18 75       	            pmin2\.u r4=r5,r6
+  ac:	50 30 18 75       	            pmin2 r4=r5,r6
   b0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
-  b6:	40 28 18 9c 3a 80 	            pmax2\.u r4=r5,r6
+  b6:	40 28 18 9c 3a 80 	            pmax2 r4=r5,r6
   bc:	50 30 58 74       	            psad1 r4=r5,r6
   c0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
   c6:	40 28 2c 28 3b 80 	            mux1 r4=r5,@rev
@@ -126,13 +126,13 @@ Disassembly of section \.text:
  270:	0c 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
  276:	00 00 00 02 00 80 	            nop\.f 0x0
  27c:	50 30 58 4d       	            dep r4=r5,r6,10,7
- 280:	04 00 00 00 01 00 	\[MLI\]       nop\.m 0x0
+ 280:	04 00 00 00 01 00 	\[MLX\]       nop\.m 0x0
  286:	00 00 00 00 00 80 	            movl r4=0x0
  28c:	00 00 00 60 
- 290:	04 00 00 00 01 c0 	\[MLI\]       nop\.m 0x0
+ 290:	04 00 00 00 01 c0 	\[MLX\]       nop\.m 0x0
  296:	ff ff ff ff 7f 80 	            movl r4=0xffffffffffffffff
  29c:	f0 f7 ff 6f 
- 2a0:	04 00 00 00 01 80 	\[MLI\]       nop\.m 0x0
+ 2a0:	04 00 00 00 01 80 	\[MLX\]       nop\.m 0x0
  2a6:	90 78 56 34 12 80 	            movl r4=0x1234567890abcdef
  2ac:	f0 76 6d 66 
  2b0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
@@ -178,8 +178,8 @@ Disassembly of section \.text:
  386:	20 30 10 86 28 40 	            tbit\.z\.or p2,p3=r4,3
  38c:	80 20 0c 59       	            tbit\.z\.or\.andcm p2,p3=r4,4
  390:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
- 396:	20 54 10 86 28 40 	            tbit\.nz\.or p2,p3=r4,5
- 39c:	c8 20 0c 58       	            tbit\.nz\.and p2,p3=r4,6
+ 396:	30 54 10 84 28 60 	            tbit\.nz\.or p3,p2=r4,5
+ 39c:	c8 20 08 58       	            tbit\.nz\.and p3,p2=r4,6
  3a0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  3a6:	30 74 10 84 2c 60 	            tbit\.nz\.or\.andcm p3,p2=r4,7
  3ac:	00 21 08 50       	            tbit\.z p3,p2=r4,8
@@ -190,8 +190,8 @@ Disassembly of section \.text:
  3c6:	20 b4 10 86 28 40 	            tbit\.nz\.or p2,p3=r4,11
  3cc:	88 21 0c 59       	            tbit\.nz\.or\.andcm p2,p3=r4,12
  3d0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
- 3d6:	20 d0 10 86 28 40 	            tbit\.z\.or p2,p3=r4,13
- 3dc:	c0 21 0c 58       	            tbit\.z\.and p2,p3=r4,14
+ 3d6:	30 d0 10 84 28 60 	            tbit\.z\.or p3,p2=r4,13
+ 3dc:	c0 21 08 58       	            tbit\.z\.and p3,p2=r4,14
  3e0:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  3e6:	30 f0 10 84 2c 40 	            tbit\.z\.or\.andcm p3,p2=r4,15
  3ec:	10 20 0c 50       	            tnat\.z p2,p3=r4
@@ -202,8 +202,8 @@ Disassembly of section \.text:
  406:	20 08 10 86 28 40 	            tnat\.z\.or p2,p3=r4
  40c:	10 20 0c 59       	            tnat\.z\.or\.andcm p2,p3=r4
  410:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
- 416:	20 0c 10 86 28 40 	            tnat\.nz\.or p2,p3=r4
- 41c:	18 20 0c 58       	            tnat\.nz\.and p2,p3=r4
+ 416:	30 0c 10 84 28 60 	            tnat\.nz\.or p3,p2=r4
+ 41c:	18 20 08 58       	            tnat\.nz\.and p3,p2=r4
  420:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  426:	30 0c 10 84 2c 60 	            tnat\.nz\.or\.andcm p3,p2=r4
  42c:	10 20 08 50       	            tnat\.z p3,p2=r4
@@ -214,11 +214,11 @@ Disassembly of section \.text:
  446:	20 0c 10 86 28 40 	            tnat\.nz\.or p2,p3=r4
  44c:	18 20 0c 59       	            tnat\.nz\.or\.andcm p2,p3=r4
  450:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
- 456:	20 08 10 86 28 40 	            tnat\.z\.or p2,p3=r4
- 45c:	10 20 0c 58       	            tnat\.z\.and p2,p3=r4
+ 456:	30 08 10 84 28 60 	            tnat\.z\.or p3,p2=r4
+ 45c:	10 20 08 58       	            tnat\.z\.and p3,p2=r4
  460:	00 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  466:	30 08 10 84 2c 60 	            tnat\.z\.or\.andcm p3,p2=r4
- 46c:	40 88 04 07       	            mov b3=r4
+ 46c:	40 88 08 07       	            mov b3=r4
  470:	01 00 00 00 01 00 	\[MII\]       nop\.m 0x0
  476:	30 20 24 84 03 00 	            mov\.imp b3=r4,570 <_start\+0x570>
  47c:	00 00 04 00       	            nop\.i 0x0;;

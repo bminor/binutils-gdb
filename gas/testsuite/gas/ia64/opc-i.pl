@@ -105,6 +105,9 @@ _start:
 
 	dep r4 = 0, r5, 0, 16
 	dep r4 = -1, r5, 0, 63
+// Insert padding NOPs to force the same template selection as IAS.
+	nop.m 0
+	nop.f 0
 	dep r4 = r5, r6, 10, 7
 
 	movl r4 = 0

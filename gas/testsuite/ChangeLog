@@ -1,5 +1,12 @@
 Mon Apr 24 16:35:08 2000  Jim Wilson  <wilson@cygnus.com>
 
+	* gas/ia64/opc-i.d: Change pmin2.u to pmin2.  Change pmax2.u to pmax2.
+	Change MLI to MLX.  Switch operands for output matching tbit.z.orcm,
+	tbit.z.andcm, tbit.nz.orcm, tbit.nz.andcm, tnat.z.orcm, tnat.z.andcm,
+	tnat.nz.orcm, tnat.nz.andcm inputs.
+	* gas/ia64/opc-i.pl: Insert padding nops before last dep.
+	* gas/ia64/opc-i.s: Regenerate.
+	
 	* gas/ia64/opc-i.s: Regenerate.
 	* gas/ia64/opc-f.pl: Add explicit stop at end.
 	
