@@ -65,11 +65,11 @@ version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(unsubdir)/../gcc/ve
 srcdir = .
 # Common prefix for installation directories.
 # NOTE: This directory must exist when you start installation.
-destdir = /usr/local
+ddestdir = /usr/local
 # Directory in which to put the executable for the command `gcc'
-bindir = $(destdir)/bin
+bindir = $(ddestdir)/bin
 # Directory in which to put the directories used by the compiler.
-libdir = $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
+libdir = $(ddestdir)/lib
 # Directory in which the compiler finds executables, libraries, etc.
 libsubdir = $(libdir)/gcc/$(target)/$(version)
 # Number to put in man-page filename.
