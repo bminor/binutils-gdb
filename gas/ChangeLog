@@ -1,3 +1,20 @@
+Tue Sep 26 14:57:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Support all of the V.4
+	relocations.
+	(ppc_elf_cons): Remove restriction that @ suffixes must be done
+	with .long.  Add error if relocation does not fit in the number of
+	bytes provided.
+	(md_assemble): For absolute branches, map PC relative relocations
+	back into an equivalent absolute relocation.
+	(md_pcrel_from): If TC_FORCE_RELOCATION is true, relocation offset
+	is 0, not segment start.
+	(md_apply_fix3): Don't bother writing addend into the instruction,
+	since it is ignored, given that we use RELA relocations for ELF.
+
+	* config/tc-ppc.h (TC_FORCE_RELOCATION): Define to force all
+	branch prediction relocations to always be emitted.
+
 Mon Sep 25 16:08:43 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Lower case reloc before

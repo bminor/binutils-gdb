@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define TC_PPC
 
@@ -28,12 +28,15 @@
 #define TARGET_ARCH (ppc_arch ())
 extern enum bfd_architecture ppc_arch PARAMS ((void));
 
+/* Whether or not the target is big endian */
+extern int target_big_endian;
+
 /* The target BFD format.  */
 #ifdef OBJ_COFF
 #define TARGET_FORMAT "aixcoff-rs6000"
 #endif
 #ifdef OBJ_ELF
-#define TARGET_FORMAT "elf32-powerpc"
+#define TARGET_FORMAT (target_big_endian) ? "elf32-powerpc" : "elf32-powerpcle"
 #endif
 
 /* Permit temporary numeric labels.  */
@@ -63,7 +66,7 @@ extern enum bfd_architecture ppc_arch PARAMS ((void));
 /* Set the endianness we are using.  Default to big endian.  */
 #ifndef TARGET_BYTES_BIG_ENDIAN
 #ifndef TARGET_BYTES_LITTLE_ENDIAN
-#define TARGET_BYTES_BIG_ENDIAN
+#define TARGET_BYTES_BIG_ENDIAN 1
 #endif
 #endif
 
@@ -145,6 +148,9 @@ extern void ppc_frob_section PARAMS ((asection *));
 #define tc_frob_symbol(sym, punt) punt = ppc_frob_symbol (sym)
 extern int ppc_frob_symbol PARAMS ((struct symbol *));
 
+/* Niclas Andersson <nican@ida.liu.se> says this is needed.  */
+#define SUB_SEGMENT_ALIGN(SEG) 2
+
 /* Finish up the file.  */
 #define tc_frob_file() ppc_frob_file ()
 extern void ppc_frob_file PARAMS ((void));
@@ -157,6 +163,14 @@ extern void ppc_frob_file PARAMS ((void));
 #ifndef GLOBAL_OFFSET_TABLE_NAME
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 #endif
+
+/* Branch prediction relocations must force relocation */
+#define TC_FORCE_RELOCATION(FIXP)					\
+((FIXP)->fx_r_type == BFD_RELOC_PPC_B16_BRTAKEN				\
+ || (FIXP)->fx_r_type == BFD_RELOC_PPC_B16_BRNTAKEN			\
+ || (FIXP)->fx_r_type == BFD_RELOC_PPC_BA16_BRTAKEN			\
+ || (FIXP)->fx_r_type == BFD_RELOC_PPC_BA16_BRNTAKEN)
+
 #endif /* OBJ_ELF */
 
 /* call md_apply_fix3 with segment instead of md_apply_fix */
