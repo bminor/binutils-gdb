@@ -36,6 +36,8 @@
 #endif /* NO_VARARGS */
 #endif /* NO_STDARG */
 
+extern char *strerror ();
+
 /*
  * Despite the rest of the comments in this file, (FIXME-SOON),
  * here is the current scheme for error messages etc:
@@ -128,10 +130,6 @@ as_perror (gripe, filename)
      char *gripe;		/* Unpunctuated error theme. */
      char *filename;
 {
-#ifndef HAVE_STRERROR
-  extern char *strerror ();
-#endif /* HAVE_STRERROR */
-
   as_where ();
   fprintf (stderr, gripe, filename);
   fprintf (stderr, ": %s\n", strerror (errno));
@@ -206,7 +204,7 @@ as_warn (const char *Format,...)
   va_list args;
   char buffer[200];
 
-  if (!flagseen['W'])
+  if (!flag_suppress_warnings)
     {
       ++warning_count;
       as_where ();
@@ -232,7 +230,7 @@ as_warn (Format, va_alist)
   va_list args;
   char buffer[200];
 
-  if (!flagseen['W'])
+  if (!flag_suppress_warnings)
     {
       ++warning_count;
       as_where ();
@@ -253,8 +251,7 @@ as_warn (Format, va_alist)
 as_warn (Format, args)
      char *Format;
 {
-  /* -W supresses warning messages. */
-  if (!flagseen['W'])
+  if (!flag_suppress_warnings)
     {
       ++warning_count;
       as_where ();
@@ -354,7 +351,7 @@ as_fatal (const char *Format,...)
 
   as_where ();
   va_start (args, Format);
-  fprintf (stderr, "FATAL:");
+  fprintf (stderr, "Assembler fatal error:");
   vfprintf (stderr, Format, args);
   (void) putc ('\n', stderr);
   va_end (args);
@@ -372,7 +369,7 @@ as_fatal (Format, va_alist)
 
   as_where ();
   va_start (args);
-  fprintf (stderr, "FATAL:");
+  fprintf (stderr, "Assembler fatal error:");
   vfprintf (stderr, Format, args);
   (void) putc ('\n', stderr);
   va_end (args);
@@ -385,7 +382,7 @@ as_fatal (Format, args)
      char *Format;
 {
   as_where ();
-  fprintf (stderr, "FATAL:");
+  fprintf (stderr, "Assembler fatal error:");
   _doprnt (Format, &args, stderr);
   (void) putc ('\n', stderr);
   /* as_where(); */
@@ -394,5 +391,45 @@ as_fatal (Format, args)
 
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
+
+void
+fprint_value (file, val)
+     FILE *file;
+     valueT val;
+{
+  if (sizeof (val) <= sizeof (long))
+    {
+      fprintf (file, "%ld", val);
+      return;
+    }
+#ifdef BFD_ASSEMBLER
+  if (sizeof (val) <= sizeof (bfd_vma))
+    {
+      fprintf_vma (file, val);
+      return;
+    }
+#endif
+  abort ();
+}
+
+void
+sprint_value (buf, val)
+     char *buf;
+     valueT val;
+{
+  if (sizeof (val) <= sizeof (long))
+    {
+      sprintf (buf, "%ld", val);
+      return;
+    }
+#ifdef BFD_ASSEMBLER
+  if (sizeof (val) <= sizeof (bfd_vma))
+    {
+      sprintf_vma (buf, val);
+      return;
+    }
+#endif
+  abort ();
+}
 
 /* end of messages.c */

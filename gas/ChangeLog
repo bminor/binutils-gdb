@@ -1,3 +1,8 @@
+Mon Oct 11 16:14:43 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* messages.c (as_fatal): Do mention that it's the assembler that
+	got the fatal error.
+
 Fri Oct  8 14:09:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_gprmask, mips_cprmask): New variables to
