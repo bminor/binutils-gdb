@@ -1,3 +1,8 @@
+2005-01-04  Andrew Cagney  <cagney@gnu.org>
+
+	* version.in: Change format from 6.3.0.90_YYYY-MM-DD-cvs to
+	6.3.0.YYYYMMDD-cvs.
+
 2004-11-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (decode_frame_entry_1): Correctly skip
