@@ -1,6 +1,29 @@
+Sat Jan  9 19:31:43 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-stub.c:  Use a seperate stack for our traps.
+	* Handle recursive traps.
+	* Remove all trap init code.  This needs to be done by the
+	environment.
+	* (set_mem_fault_trap):  Call exceptionHandler() to setup this
+	trap.
+	* (handle_exception):  See if we are at breakinst, if so, then
+	advance PC sp that users can just step out of breakpoint().
+	* (case 'G'):  Don't let GDB hack CWP.  Also, copy saved regs to
+	new place if SP has changed.
+	* (case 's'):  Get rid of this, we can't do it yet.
+	* (case 't'):  New command to test any old random feature.
+	* (case 'r'):  New command to reset the system.
+	* (breakpoint):  Add label to breakpoint trap instruction so that
+	handle_exception() can detect where we are and get past the
+	breakpoint trivially.
+
 Thu Jan  7 13:33:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips-pinsn.c: Actual work now done by opcodes/mips-dis.c.
+
+Thu Jan  7 09:21:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: recognise all sparclite variants
 
 Wed Jan  6 10:14:51 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 

@@ -99,7 +99,7 @@ extern getDebugChar();   /* read and return a single char */
 /* at least NUMREGBYTES*2 are needed for register packets */
 #define BUFMAX 2048
 
-static int initialized;  /* boolean flag. != 0 means we've been initialized */
+static int initialized = 0;	/* !0 means we've been initialized */
 
 static void set_mem_fault_trap();
 
@@ -123,27 +123,27 @@ enum regnames {G0, G1, G2, G3, G4, G5, G6, G7,
 /***************************  ASSEMBLY CODE MACROS *************************/
 /* 									   */
 
-#define BREAKPOINT() asm("   ta 1");
-
-extern unsigned long rdtbr();
+extern void trap_low();
 
 asm("
+	.reserve trapstack, 1000 * 4, \"bss\", 8
+
+	.data
+	.align	4
+
+in_trap_handler:
+	.word	0
+
 	.text
 	.align 4
-
-! Read the TBR.
-
-	.globl _rdtbr
-_rdtbr:
-	retl
-	mov	%tbr, %o0
 
 ! This function is called when any SPARC trap (except window overflow or
 ! underflow) occurs.  It makes sure that the invalid register window is still
 ! available before jumping into C code.  It will also restore the world if you
 ! return from handle_exception.
 
-trap_low:
+	.globl _trap_low
+_trap_low:
 	mov	%psr, %l0
 	mov	%wim, %l3
 
@@ -176,29 +176,39 @@ trap_low:
 	mov	%l4, %g1		! Restore %g1
 
 window_fine:
-	sub	%fp, (16+1+6+1+72)*4, %sp ! Make room for input & locals
+	sethi	%hi(in_trap_handler), %l4
+	ld	[%lo(in_trap_handler) + %l4], %l5
+	tst	%l5
+	bg	recursive_trap
+	inc	%l5
+
+	set	trapstack+1000*4, %sp	! Switch to trap stack
+
+recursive_trap:
+	st	%l5, [%lo(in_trap_handler) + %l4]
+	sub	%sp,(16+1+6+1+72)*4,%sp	! Make room for input & locals
  					! + hidden arg + arg spill
 					! + doubleword alignment
 					! + registers[72] local var
 
-	std	%g0, [%fp + (-72 + 0) * 4] ! registers[Gx]
-	std	%g2, [%fp + (-72 + 2) * 4]
-	std	%g4, [%fp + (-72 + 4) * 4]
-	std	%g6, [%fp + (-72 + 6) * 4]
+	std	%g0, [%sp + (24 + 0) * 4] ! registers[Gx]
+	std	%g2, [%sp + (24 + 2) * 4]
+	std	%g4, [%sp + (24 + 4) * 4]
+	std	%g6, [%sp + (24 + 6) * 4]
 
-	std	%i0, [%fp + (-72 + 8) * 4] ! registers[Ox]
-	std	%i2, [%fp + (-72 + 10) * 4]
-	std	%i4, [%fp + (-72 + 12) * 4]
-	std	%i6, [%fp + (-72 + 14) * 4]
+	std	%i0, [%sp + (24 + 8) * 4] ! registers[Ox]
+	std	%i2, [%sp + (24 + 10) * 4]
+	std	%i4, [%sp + (24 + 12) * 4]
+	std	%i6, [%sp + (24 + 14) * 4]
 					! F0->F31 not implemented
 	mov	%y, %l4
 	mov	%tbr, %l5
-	st	%l4, [%fp + (-72 + 64) * 4] ! Y
-	st	%l0, [%fp + (-72 + 65) * 4] ! PSR
-	st	%l3, [%fp + (-72 + 66) * 4] ! WIM
-	st	%l5, [%fp + (-72 + 67) * 4] ! TBR
-	st	%l1, [%fp + (-72 + 68) * 4] ! PC
-	st	%l2, [%fp + (-72 + 69) * 4] ! NPC
+	st	%l4, [%sp + (24 + 64) * 4] ! Y
+	st	%l0, [%sp + (24 + 65) * 4] ! PSR
+	st	%l3, [%sp + (24 + 66) * 4] ! WIM
+	st	%l5, [%sp + (24 + 67) * 4] ! TBR
+	st	%l1, [%sp + (24 + 68) * 4] ! PC
+	st	%l2, [%sp + (24 + 69) * 4] ! NPC
 
 					! CPSR and FPSR not impl
 
@@ -206,28 +216,34 @@ window_fine:
 	mov	%l4, %psr		! Turn on traps, disable interrupts
 
 	call	_handle_exception
-	add	%fp, -72 * 4, %o0	! Pass address of registers
+	add	%sp, 24 * 4, %o0	! Pass address of registers
 
 	restore				! Ensure that previous window is valid
 	save	%g0, %g0, %g0		!  by causing a window_underflow trap
 
 ! Reload all of the registers that aren't on the stack
 
-	ld	[%fp + (-72 + 1) * 4], %g1 ! registers[Gx]
-	ldd	[%fp + (-72 + 2) * 4], %g2
-	ldd	[%fp + (-72 + 4) * 4], %g4
-	ldd	[%fp + (-72 + 6) * 4], %g6
+	ld	[%sp + (24 + 1) * 4], %g1 ! registers[Gx]
+	ldd	[%sp + (24 + 2) * 4], %g2
+	ldd	[%sp + (24 + 4) * 4], %g4
+	ldd	[%sp + (24 + 6) * 4], %g6
 
-	ldd	[%fp + (-72 + 8) * 4], %o0 ! registers[Ox]
-	ldd	[%fp + (-72 + 10) * 4], %o2
-	ldd	[%fp + (-72 + 12) * 4], %o4
-	ldd	[%fp + (-72 + 14) * 4], %o6
+	ldd	[%sp + (24 + 8) * 4], %i0 ! registers[Ox]
+	ldd	[%sp + (24 + 10) * 4], %i2
+	ldd	[%sp + (24 + 12) * 4], %i4
+	ldd	[%sp + (24 + 14) * 4], %i6
 
-	ldd	[%fp + (-72 + 64) * 4], %l0 ! Y & PSR
-	ldd	[%fp + (-72 + 68) * 4], %l2 ! PC & NPC
+	ldd	[%sp + (24 + 64) * 4], %l0 ! Y & PSR
+	ldd	[%sp + (24 + 68) * 4], %l2 ! PC & NPC
 	mov	%l0, %y
 	mov	%l1, %psr		! Make sure that traps are disabled
 					! for rett
+
+	sethi	%hi(in_trap_handler), %l4
+	ld	[%lo(in_trap_handler) + %l4], %l5
+	dec	%l5
+	st	%l5, [%lo(in_trap_handler) + %l4]
+
 	jmpl	%l2, %g0		! Restore old PC
 	rett	%l3			! Restore old nPC
 ");
@@ -289,6 +305,11 @@ getpacket(buffer)
 	{
 	  xmitcsum = hex(getDebugChar()) << 4;
 	  xmitcsum |= hex(getDebugChar());
+#if 0
+	  /* Humans shouldn't have to figure out checksums to type to it. */
+	  putDebugChar ('+');
+	  return;
+#endif
 	  if (checksum != xmitcsum)
 	    putDebugChar('-');	/* failed checksum */
 	  else
@@ -434,51 +455,15 @@ static struct hard_trap_info
   {0, 0}			/* Must be last */
 };
 
-/* Each entry in the trap vector occupies four words. */
-
-struct trap_entry
-{
-  unsigned long ti[4];
-};
-
-extern struct trap_entry fltr_proto;
-extern struct trap_entry fltr_set_mem_err;
-asm ("
-	.data
-	.globl _fltr_proto
-	.align 4
-_fltr_proto:			! First level trap routine prototype
-	sethi %hi(trap_low), %l0
-	jmpl %lo(trap_low)+%l0, %g0
-	nop
-	nop
-
-! Trap handler for memory errors.  This just sets mem_err to be non-zero.  It
-! assumes that %l1 is non-zero.  This should be safe, as it is doubtful that
-! 0 would ever contain code that could mem fault.  This routine will skip
-! past the faulting instruction after setting mem_err.
-
-_fltr_set_mem_err:
-	sethi %hi(_mem_err), %l0
-	st %l1, [%l0 + %lo(_mem_err)]
-	jmpl %l2, %g0
-	rett %l2+4
-
-	.text
-");
-
 /* Set up exception handlers for tracing and breakpoints */
 
 void
 set_debug_traps()
 {
-  struct trap_entry *tb;	/* Trap vector base address */
   struct hard_trap_info *ht;
 
-  tb = (struct trap_entry *)(rdtbr() & ~0xfff);
-
   for (ht = hard_trap_info; ht->tt && ht->signo; ht++)
-    tb[ht->tt] = fltr_proto;
+    exceptionHandler(ht->tt, trap_low);
 
   /* In case GDB is started before us, ack any packets (presumably
      "$?#xx") sitting there.  */
@@ -488,20 +473,33 @@ set_debug_traps()
   initialized = 1;
 }
 
+asm ("
+! Trap handler for memory errors.  This just sets mem_err to be non-zero.  It
+! assumes that %l1 is non-zero.  This should be safe, as it is doubtful that
+! 0 would ever contain code that could mem fault.  This routine will skip
+! past the faulting instruction after setting mem_err.
+
+	.text
+	.align 4
+
+_fltr_set_mem_err:
+	sethi %hi(_mem_err), %l0
+	st %l1, [%l0 + %lo(_mem_err)]
+	jmpl %l2, %g0
+	rett %l2+4
+");
+
 static void
 set_mem_fault_trap(enable)
      int enable;
 {
-  struct trap_entry *tb;	/* Trap vector base address */
-
+  extern void fltr_set_mem_err();
   mem_err = 0;
 
-  tb = (struct trap_entry *)(rdtbr() & ~0xfff);
-
   if (enable)
-    tb[9] = fltr_set_mem_err;
+    exceptionHandler(9, fltr_set_mem_err);
   else
-    tb[9] = fltr_proto;
+    exceptionHandler(9, trap_low);
 }
 
 /* Convert the SPARC hardware trap type code to a unix signal number. */
@@ -553,6 +551,8 @@ hexToInt(char **ptr, int *intValue)
  * otherwise.
  */
 
+extern void breakinst();
+
 static void
 handle_exception (registers)
      unsigned long *registers;
@@ -583,6 +583,12 @@ handle_exception (registers)
 	restore
 	restore
 ");
+
+  if (registers[PC] == (unsigned long)breakinst)
+    {
+      registers[PC] = registers[NPC];
+      registers[NPC] += 4;
+    }
 
   sp = (unsigned long *)registers[SP];
 
@@ -652,8 +658,7 @@ handle_exception (registers)
 	  {
 	    ptr = remcomOutBuffer;
 	    ptr = mem2hex((char *)registers, ptr, 16 * 4, 0); /* G & O regs */
-	    ptr = mem2hex(sp + 0, ptr, 8 * 4, 0); /* L regs */
-	    ptr = mem2hex(sp + 8, ptr, 8 * 4, 0); /* I regs */
+	    ptr = mem2hex(sp + 0, ptr, 16 * 4, 0); /* L & I regs */
 	    memset(ptr, '0', 32 * 8); /* Floating point */
 	    mem2hex((char *)&registers[Y],
 		    ptr + 32 * 4 * 2,
@@ -664,12 +669,29 @@ handle_exception (registers)
 
 	case 'G':	   /* set the value of the CPU registers - return OK */
 	  {
+	    unsigned long *newsp, psr;
+
+	    psr = registers[PSR];
+
 	    ptr = &remcomInBuffer[1];
 	    hex2mem(ptr, (char *)registers, 16 * 4, 0); /* G & O regs */
-	    hex2mem(ptr + 16 * 4 * 2, sp + 0, 8 * 4, 0); /* L regs */
-	    hex2mem(ptr + 24 * 4 * 2, sp + 8, 8 * 4, 0); /* I regs */
+	    hex2mem(ptr + 16 * 4 * 2, sp + 0, 16 * 4, 0); /* L & I regs */
 	    hex2mem(ptr + 64 * 4 * 2, (char *)&registers[Y],
 		    8 * 4, 0);	/* Y, PSR, WIM, TBR, PC, NPC, FPSR, CPSR */
+
+	    /* See if the stack pointer has moved.  If so, then copy the saved
+	       locals and ins to the new location.  This keeps the window
+	       overflow and underflow routines happy.  */
+
+	    newsp = (unsigned long *)registers[SP];
+	    if (sp != newsp)
+	      sp = memcpy(newsp, sp, 16 * 4);
+
+	    /* Don't allow CWP to be modified. */
+
+	    if (psr != registers[PSR])
+	      registers[PSR] = (psr & 0x1f) | (registers[PSR] & ~0x1f);
+
 	    strcpy(remcomOutBuffer,"OK");
 	  }
 	  break;
@@ -712,7 +734,6 @@ handle_exception (registers)
 	  break;
 
 	case 'c':    /* cAA..AA    Continue at address AA..AA(optional) */
-	case 's':    /* sAA..AA   Step one instruction from AA..AA(optional) */
 	  /* try to read optional parameter, pc unchanged if no parm */
 
 	  ptr = &remcomInBuffer[1];
@@ -733,6 +754,16 @@ handle_exception (registers)
 	  /* kill the program */
 	case 'k' :		/* do nothing */
 	  break;
+#if 0
+	case 't':		/* Test feature */
+	  asm (" std %f31,[%sp]");
+	  break;
+#endif
+	case 'r':		/* Reset */
+	  asm ("call 0
+		nop ");
+	  break;
+
 #if 0
 Disabled until we can unscrew this properly
 
@@ -785,6 +816,11 @@ x1:	  break;
 void
 breakpoint()
 {
-  if (initialized)
-    BREAKPOINT();
+  if (!initialized)
+    return;
+
+  asm("	.globl _breakinst
+
+	_breakinst: ta 1
+      ");
 }
