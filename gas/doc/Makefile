@@ -41,8 +41,11 @@ as.mm: as-${CONFIG}.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
+		-e '/@noindent/d' \
 		as-${CONFIG}.texinfo | \
-	texi2roff -mm >as.mm 
+	texi2roff -mm | \
+	sed -e 's/---/\\(em/g' \
+	>as.mm 
 
 # roff output (-me)
 as.me: as-${CONFIG}.texinfo
@@ -59,6 +62,9 @@ as-all.texinfo: as.texinfo pretex.m4 none.m4 all.m4
 
 as-amd29k.texinfo: as.texinfo pretex.m4 none.m4 amd29k.m4
 	${M4} pretex.m4 none.m4 amd29k.m4 as.texinfo >as-amd29k.texinfo
+
+as-amd29k-coff.texinfo: as.texinfo pretex.m4 none.m4 amd29k-coff.m4
+	${M4} pretex.m4 none.m4 amd29k-coff.m4 as.texinfo >as-amd29k-coff.texinfo
 
 as-gen.texinfo: as.texinfo pretex.m4 none.m4 gen.m4
 	${M4} pretex.m4 none.m4 gen.m4 as.texinfo >as-gen.texinfo
