@@ -1,3 +1,21 @@
+Wed Sep  7 23:24:50 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* defs.h (enum misc_command_type, command_control_type): Enums
+	for describing the command and control types.
+	(struct command_line): Add new fields to keep track of the command
+	type and body associated with the command.
+	* top.c: Include value.h.  Delete whitespace at the end of lines.
+	(build_command_line, get_command_line): New functions.
+	(execute_control_command, while_command, if_command): Likewise.
+	(realloc_body_list, read_next_line): Likewise.
+	(recurse_read_control_structure): Likewise.
+	(execute_user_command): Call execute_control_command.
+	(read_command_lines): Simplify by calling read_next_line, call
+	read_control_structure for "if" and "while" commands.
+	(free_command_lines): Free new fields in the command structure.
+	(define_command): Reset control_level to zero.
+	(init_main): Install command handlers for "if" and "while" commands.
+
 Tue Sep  6 16:24:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	 * c-typeprint.c (c_type_print_varspec_prefix,
