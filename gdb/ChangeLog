@@ -1,3 +1,10 @@
+2000-05-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (gdbtypes.o, varobj.o): Depend on wrapper.h.
+
+	* wrapper.h (gdb_value_subscript, wrap_value_subscript): Add
+	prototypes.
+
 Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* proc-events.c (init_syscall_table): Delete stray ``;''.
