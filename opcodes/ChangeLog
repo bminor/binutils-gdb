@@ -1,3 +1,7 @@
+Tue Nov 11 23:53:41 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	sh-opc.h (sh_table): Remove ftst/nan.
+
 start-sanitize-vr5400
 Mon Nov  3 13:23:15 1997  Ken Raeburn  <raeburn@cygnus.com>
 
