@@ -1,3 +1,8 @@
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Replace remaining instances of
+	mips_o32_use_struct_convention with always_use_struct_convention.
+
 2003-06-12  David Carlton  <carlton@kealia.com>
 
 	* cp-namespace.c (cp_set_block_scope): Comment out

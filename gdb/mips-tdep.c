@@ -5790,8 +5790,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_o32_reg_struct_has_addr);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 mips_o32_use_struct_convention);
+      set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
