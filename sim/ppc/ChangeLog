@@ -1,3 +1,26 @@
+1999-01-22  Jim Lemke <jlemke@cygnus.com>
+
+	* igen.c(gen_semantics_[ch]): setup/use of new option (-o mpc860c0[=n]).
+	interrupts.[ch](mpc860c0_instruction_program_interrupt): added.
+	ppc-instructions(the four branch insn groups): detect problematic br's.
+	psim.c(is_num - added, psim_options): Parse and init new option.
+	These changes are currently under #ifdef WITH_OPTION_MPC860C0.
+
+1998-12-01  Ken Raeburn  <raeburn@cygnus.com>
+
+	* hw_nvram.c (hw_nvram_bcd): Force value to fit in 0..99.
+
+Fri Nov 20 12:17:28 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* main.c (sim_io_poll_quit): Stub function.
+
+	* events.c (SIM_EVENTS_POLL_RATE): Define.
+	(sim_events_poll): Copy function from common/sim-events.c.
+	(event_queue_init): Copy scheduling of sim_events_poll from same.
+
+	* sim_callbacks.h, sim_calls.c (sim_io_poll_quit): New function,
+ 	poll the external environment.
+
 1998-11-19  Michael Meissner  <meissner@cygnus.com>
 
 	* ppc-instructions (is_{NaN,inf}): Use unsigned64 to get the
@@ -6,11 +29,11 @@
 
 Mon Sep 28 09:42:45 1998  Drew Moseley  <dmoseley@cygnus.com>
 
-	* table.c (table_open): For cygwin hosts, we need to use the return value
-	from the read routine as the number of bytes to process.  This apparently
- 	is due to text-mode vs binary-mode.  If the mounts are done text-mode,
- 	then the size returnedby fstat() may be different than the number of
- 	bytes "read" in text mode.
+	* table.c (table_open): For cygwin hosts, we need to use the
+ 	return value from the read routine as the number of bytes to
+ 	process.  This apparently is due to text-mode vs binary-mode.  If
+ 	the mounts are done text-mode, then the size returnedby fstat()
+ 	may be different than the number of bytes "read" in text mode.
 
 Sun Oct  4 00:50:47 1998  Felix Lee  <flee@cygnus.com>
 
