@@ -3,7 +3,7 @@
 	.set noreorder
 	.set noat
 
-	.globl text_label .text
+	.text
 text_label:
 
 	addr.ps		$f4, $f8, $f19

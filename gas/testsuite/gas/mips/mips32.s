@@ -3,7 +3,7 @@
         .set noreorder
       .set noat
 
-      .globl text_label .text
+      .text
 text_label:
 
       # unprivileged CPU instructions
