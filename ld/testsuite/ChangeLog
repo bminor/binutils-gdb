@@ -1,3 +1,13 @@
+2003-04-29  H.J. Lu <hjl@gnu.org>
+
+	* ld-ia64/tlsbin.dd: Updated.
+	* ld-ia64/tlsbin.rd: Likewise.
+	* ld-ia64/tlsbin.sd: Likewise.
+	* ld-ia64/tlsbin.td: Likewise.
+	* ld-ia64/tlspic.rd: Likewise.
+	* ld-ia64/tlspic.sd: Likewise.
+	* ld-ia64/tlspic.td: Likewise.
+
 2003-04-29  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* ld-selective/3.cc (start): New function.

@@ -1,3 +1,12 @@
+2003-04-29  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/ia64.exp: Add align.
+
+	* gas/ia64/align.d: New file.
+	* gas/ia64/align.s: Likewise.
+
+	* ia64/dependency-1.d: Remove the padding.
+
 2003-04-30  H.J. Lu <hjl@gnu.org>
 
 	* gas/ia64/ia64.exp: Add real.

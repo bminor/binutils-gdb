@@ -1,5 +1,12 @@
 2003-04-30  H.J. Lu <hjl@gnu.org>
 
+	* config/tc-ia64.c (md_section_align): Deleted.
+
+	* config/tc-ia64.h (SUB_SEGMENT_ALIGN): New.
+	(md_section_align): New.
+
+2003-04-30  H.J. Lu <hjl@gnu.org>
+
 	* config/tc-ia64.c (stmt_float_cons): Fix alignment for real10
 	and add real16.
 	(md_pseudo_table): Add "xreal16", "xreal16.ua", "real16" and

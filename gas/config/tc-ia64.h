@@ -59,6 +59,8 @@ extern const char *ia64_target_format PARAMS ((void));
 #define LEX_QM		LEX_NAME	/* allow `?' inside name */
 #define LEX_HASH	LEX_END_NAME	/* allow `#' ending a name */
 
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
+
 struct ia64_fix
   {
     int bigendian;			/* byte order at fix location */
@@ -116,6 +118,7 @@ extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
 #define TC_CONS_FIX_NEW(f,o,l,e)	ia64_cons_fix_new (f, o, l, e)
 #define TC_VALIDATE_FIX(fix,seg,skip)	ia64_validate_fix (fix)
 #define MD_PCREL_FROM_SECTION(fix,sec)	ia64_pcrel_from_section (fix, sec)
+#define md_section_align(seg,size)	(size)
 #define md_do_align(n,f,l,m,j)		ia64_md_do_align (n,f,l,m)
 #define HANDLE_ALIGN(f)			ia64_handle_align (f)
 #define md_elf_section_type(str,len)	ia64_elf_section_type (str, len)

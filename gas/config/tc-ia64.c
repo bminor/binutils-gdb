@@ -10605,18 +10605,6 @@ md_atof (type, lit, size)
   return 0;
 }
 
-/* Round up a section's size to the appropriate boundary.  */
-valueT
-md_section_align (seg, size)
-     segT seg;
-     valueT size;
-{
-  int align = bfd_get_section_alignment (stdoutput, seg);
-  valueT mask = ((valueT) 1 << align) - 1;
-
-  return (size + mask) & ~mask;
-}
-
 /* Handle ia64 specific semantics of the align directive.  */
 
 void
