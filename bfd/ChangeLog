@@ -1,3 +1,19 @@
+Wed Feb  9 12:55:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* archive.c (bfd_ar_hdr_from_filesystem): Cast status elements
+	when passing them to sprintf.  Use %ld instead of %d.
+
+	* coff-rs6000.c (rs6000coff_mkarchive): Return false.
+	(rs6000_coff_snarf_ar_hdr): Don't declare errno; it's not used.
+	Also removed unused variable namelen.
+	(rs6000coff_write_armap): Declare orl_count and stridx parameters.
+
+Tue Feb  8 18:00:34 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libbfd-in.h (xmalloc): Don't declare parameter type, to avoid
+	conflicts.
+	* libbfd.h: Rebuilt.
+
 Tue Feb  8 15:55:50 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* coff-alpha.c (reloc_nil): New function.
