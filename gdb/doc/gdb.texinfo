@@ -4376,9 +4376,9 @@ registers (in the selected stack frame).
 Print the names and values of all registers, including floating-point
 registers.
 
-@item info registers @var{regname}
-Print the relativized value of register @var{regname}.  @var{regname}
-may be any register name valid on the machine you are using, with
+@item info registers @var{regname} @{dots}
+Print the relativized value of each specified register @var{regname}.  
+@var{regname} may be any register name valid on the machine you are using, with
 or without the initial @samp{$}.
 @end table
 

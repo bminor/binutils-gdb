@@ -1,3 +1,8 @@
+Sat Aug 15 03:14:59 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdb.texinfo, refcard.tex:  Document mult args on `info reg'.
+	* Makefile.in (refcard.ps, lrefcard.ps):  Add missing $(srdir).
+
 Fri Aug 14 21:08:47 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Add section on partial symbol tables.
