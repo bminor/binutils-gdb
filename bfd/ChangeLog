@@ -1,3 +1,9 @@
+1999-08-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* coffgen.c (coff_find_nearest_line): When looking for file, use
+	last best match rather than first.  If address is beyond last line
+	number record, don't return the last line as the correct value.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* section.c (SEC_SMALL_DATA): Rename from SEC_SHORT.

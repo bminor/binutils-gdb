@@ -2200,9 +2200,11 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 		}
 	    }
 
+	  /* We use <= MAXDIFF here so that if we get a zero length
+             file, we actually use the next file entry.  */
 	  if (p2 < pend
 	      && offset + sec_vma >= (bfd_vma) p2->u.syment.n_value
-	      && offset + sec_vma - (bfd_vma) p2->u.syment.n_value < maxdiff)
+	      && offset + sec_vma - (bfd_vma) p2->u.syment.n_value <= maxdiff)
 	    {
 	      *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
 	      maxdiff = offset + sec_vma - p2->u.syment.n_value;
@@ -2239,6 +2241,8 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 
   if (section->lineno != NULL)
     {
+      bfd_vma last_value = 0;
+
       l = &section->lineno[i];
 
       for (; i < section->lineno_count; i++)
@@ -2250,6 +2254,7 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	      if (coff->symbol.value > offset)
 		break;
 	      *functionname_ptr = coff->symbol.name;
+	      last_value = coff->symbol.value;
 	      if (coff->native)
 		{
 		  combined_entry_type *s = coff->native;
@@ -2277,6 +2282,20 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	      *line_ptr = l->line_number + line_base - 1;
 	    }
 	  l++;
+	}
+
+      /* If we fell off the end of the loop, then assume that this
+	 symbol has no line number info.  Otherwise, symbols with no
+	 line number info get reported with the line number of the
+	 last line of the last symbol which does have line number
+	 info.  We use 0x100 as a slop to account for cases where the
+	 last line has executable code.  */
+      if (i >= section->lineno_count
+	  && last_value != 0
+	  && offset - last_value > 0x100)
+	{
+	  *functionname_ptr = NULL;
+	  *line_ptr = 0;
 	}
     }
 
