@@ -73,7 +73,7 @@ BFDDIR = "{topsrcdir}"bfd
 CSEARCH =  -i {INCDIR},{INCDIR}:,{BFDDIR}:,::bfd:,"{INCDIR}":mpw:,::extra-include:
 DEP = mkdep
 
-ALL_CFLAGS =  -mc68020 -mc68881 -model far {CSEARCH}
+ALL_CFLAGS =  {CSEARCH} {ARCHDEFS}
 
 TARGETLIB = libopcodes.o
 
@@ -87,7 +87,7 @@ ALL_MACHINES = a29k-dis.o alpha-dis.o h8300-dis.o h8500-dis.o ¶
 
 # BFD_MACHINES is set by configure.in.
 
-OFILES = {BFD_MACHINES} "{o}"dis-buf.c.o
+OFILES = {BFD_MACHINES} "{o}"dis-buf.c.o "{o}"disassemble.c.o
 
 #### host and target dependent Makefile fragments come in here.
 ###
@@ -120,6 +120,8 @@ all \Option-f {TARGETLIB}
 #	 rm -f {TARGETLIB}
 	 Lib -o {TARGETLIB} {OFILES}
 #	 {RANLIB} {TARGETLIB}
+
+"{o}"disassemble.c.o \Option-f "{s}"disassemble.c {INCDIR}:dis-asm.h
 
 "{o}"a29k-dis.o \Option-f "{s}"a29k-dis.c {INCDIR}:dis-asm.h {INCDIR}:opcode:a29k.h
 "{o}"dis-buf.c.o \Option-f "{s}"dis-buf.c {INCDIR}:dis-asm.h

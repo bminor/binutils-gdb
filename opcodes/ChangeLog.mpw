@@ -1,3 +1,10 @@
+Tue Jun  7 18:45:39 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in (target_arch): Compute from canonical target.
+	(m68k, mips, powerpc, sparc): Add architectures.
+	* mpw-make.in (disassemble.c.o): Add.
+	(ALL_CFLAGS): Remove special flags (-mc68020 -mc68881 -model far). 
+
 Wed Mar 30 15:30:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in (BFD_MACHINES): Set to a default value.
