@@ -2288,11 +2288,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 will use the symbol's value, which may point to a PLT entry, but we
 	 don't need to handle that here.  If we created a PLT entry, all
 	 branches in this object should go to it.  */
-      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32
-#ifndef OLD_ARM_ABI
-	   && r_type != R_ARM_PREL31
-#endif
-	   )
+      if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
 	  && h != NULL
 	  && splt != NULL
 	  && h->plt.offset != (bfd_vma) -1)
@@ -2314,11 +2310,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 into the output file to be resolved at run time.  */
       if (info->shared
 	  && (input_section->flags & SEC_ALLOC)
-	  && ((r_type != R_ARM_REL32
-#ifndef OLD_ARM_ABI
-	      && r_type != R_ARM_PREL31
-#endif
-	      ) || !SYMBOL_CALLS_LOCAL (info, h))
+	  && (r_type != R_ARM_REL32
+	      || !SYMBOL_CALLS_LOCAL (info, h))
 	  && (h == NULL
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	      || h->root.type != bfd_link_hash_undefweak)
@@ -2326,6 +2319,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 #ifndef OLD_ARM_ABI
 	  && r_type != R_ARM_CALL
 	  && r_type != R_ARM_JUMP24
+	  && r_type != R_ARM_PREL31
 #endif
 	  && r_type != R_ARM_PLT32)
 	{
@@ -3200,6 +3194,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 #ifndef OLD_ARM_ABI
 		case R_ARM_CALL:
 		case R_ARM_JUMP24:
+		case R_ARM_PREL31:
 #endif
 	        case R_ARM_ABS32:
 		case R_ARM_THM_PC22:
@@ -3891,9 +3886,6 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 		h->plt.refcount -= 1;
 
 	      if (r_type == R_ARM_ABS32
-#ifndef OLD_ARM_ABI
-		  || r_type == R_ARM_PREL31
-#endif
 		  || r_type == R_ARM_REL32)
 		{
 		  eh = (struct elf32_arm_link_hash_entry *) h;
@@ -4042,6 +4034,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 #ifndef OLD_ARM_ABI
 		    || r_type == R_ARM_CALL
 		    || r_type == R_ARM_JUMP24
+		    || r_type == R_ARM_PREL31
 #endif
 		    || r_type == R_ARM_PLT32)
 		  h->needs_plt = 1;
@@ -4156,9 +4149,6 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  }
 
 		if (r_type == R_ARM_ABS32
-#ifndef OLD_ARM_ABI
-		    || r_type == R_ARM_PREL31
-#endif
 		    || r_type == R_ARM_REL32)
 		  p->count += 1;
 	      }

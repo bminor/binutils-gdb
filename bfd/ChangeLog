@@ -1,3 +1,10 @@
+2004-11-13  Paul Brook  <paul@codesourcery.com>
+
+	* bfd/elf32-arm.c (elf32_arm_final_link_relocate): Resolve
+	R_ARM_PREL31 relocations to PLT entries.
+	(elf32_arm_relocate_section, elf32_arm_gc_sweep_hook): Ditto.
+	(elf32_arm_check_relocs): Ditto.
+
 2004-11-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-isa.c (xtensa_interface_class_id): New.
