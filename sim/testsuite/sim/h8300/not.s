@@ -538,8 +538,8 @@ not_w_disp2dst:
 	set_ccr_zero
 
 	;;  not.w @(dd:2, erd)
-	mov	#word_dest-1, er1
-	not.w	@(1:2, er1)	; reg plus 2-bit displacement
+	mov	#word_dest-2, er1
+	not.w	@(2:2, er1)	; reg plus 2-bit displacement
 ;;; 	.word	0x0155
 ;;; 	.word	0x6918
 ;;; 	.word	0x1710
@@ -553,7 +553,7 @@ not_w_disp2dst:
 	beq	.Lwdisp2
 	fail
 .Lwdisp2:
-	test_h_gr32 word_dest-1 er1	; er1 contains address minus one
+	test_h_gr32 word_dest-2 er1	; er1 contains address minus one
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -859,8 +859,8 @@ not_l_disp2dst:
 	set_ccr_zero
 
 	;;  not.l @(dd:2, erd)
-	mov	#long_dest-1, er1
-	not.l	@(1:2, er1)	; reg plus 2-bit displacement
+	mov	#long_dest-4, er1
+	not.l	@(4:2, er1)	; reg plus 2-bit displacement
 ;;; 	.word	0x0105
 ;;; 	.word	0x6918
 ;;; 	.word	0x1730
@@ -874,7 +874,7 @@ not_l_disp2dst:
 	beq	.Lldisp2
 	fail
 .Lldisp2:
-	test_h_gr32 long_dest-1 er1	; er1 contains address minus one
+	test_h_gr32 long_dest-4 er1	; er1 contains address minus one
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3

@@ -12,27 +12,39 @@
 	.data
 byte_dest1:
 	.byte	0
+	.byte	0
 byte_dest2:
+	.byte	0
 	.byte	0
 byte_dest3:
 	.byte	0
+	.byte	0
 byte_dest4:
+	.byte	0
 	.byte	0
 byte_dest5:
 	.byte	0
+	.byte	0
 byte_dest6:
+	.byte	0
 	.byte	0
 byte_dest7:
 	.byte	0
+	.byte	0
 byte_dest8:
+	.byte	0
 	.byte	0
 byte_dest9:
 	.byte	0
+	.byte	0
 byte_dest10:
+	.byte	0
 	.byte	0
 byte_dest11:
 	.byte	0
+	.byte	0
 byte_dest12:
+	.byte	0
 	.byte	0
 	
 	start
@@ -144,11 +156,11 @@ stc_ccr_disp16:
 	set_grs_a5a5
 	set_ccr_zero
 
-	mov	#byte_dest4, er1
+	mov	#byte_dest5-1, er1
 	ldc	#0xff, ccr
 	stc	ccr, @(1:16,er1)	; disp16 dest (5)
 
-	test_h_gr32 byte_dest4, er1	; er1 still contains address
+	test_h_gr32 byte_dest5-1, er1	; er1 still contains address
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
@@ -162,11 +174,11 @@ stc_exr_disp16:
 	set_grs_a5a5
 	set_ccr_zero
 
-	mov	#byte_dest7, er1
+	mov	#byte_dest6+1, er1
 	ldc	#0x87, exr
 	stc	exr, @(-1:16,er1)	; disp16 dest (6)
 
-	test_h_gr32 byte_dest7, er1	; er1 still contains address
+	test_h_gr32 byte_dest6+1, er1	; er1 still contains address
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
@@ -180,11 +192,11 @@ stc_ccr_disp32:
 	set_grs_a5a5
 	set_ccr_zero
 
-	mov	#byte_dest6, er1
+	mov	#byte_dest7-1, er1
 	ldc	#0xff, ccr
 	stc	ccr, @(1:32,er1)	; disp32 dest (7)
 
-	test_h_gr32 byte_dest6, er1	; er1 still contains address
+	test_h_gr32 byte_dest7-1, er1	; er1 still contains address
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
@@ -198,11 +210,11 @@ stc_exr_disp32:
 	set_grs_a5a5
 	set_ccr_zero
 
-	mov	#byte_dest9, er1
+	mov	#byte_dest8+1, er1
 	ldc	#0x87, exr
 	stc	exr, @(-1:32,er1)	; disp16 dest (8)
 
-	test_h_gr32 byte_dest9, er1	; er1 still contains address
+	test_h_gr32 byte_dest8+1, er1	; er1 still contains address
 
 	test_gr_a5a5 2		; Make sure other general regs not disturbed
 	test_gr_a5a5 3
@@ -215,11 +227,11 @@ stc_ccr_predecr:
 	set_grs_a5a5
 	set_ccr_zero
 
-	mov	#byte_dest10, er1
+	mov	#byte_dest9+2, er1
 	ldc	#0xff, ccr
 	stc	ccr, @-er1	; predecr dest (9)
 
-	test_h_gr32 byte_dest9, er1	; er1 still contains address 
+	test_h_gr32  byte_dest9 er1	; er1 still contains address
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
@@ -233,7 +245,7 @@ stc_exr_predecr:
 	set_grs_a5a5
 	set_ccr_zero
 
-	mov	#byte_dest11, er1
+	mov	#byte_dest10+2, er1
 	ldc	#0x87, exr
 	stc	exr, @-er1	; predecr dest (10)
 

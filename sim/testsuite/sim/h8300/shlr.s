@@ -1194,8 +1194,8 @@ shlr_w_disp2_1:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#word_dest-2, er0
-	shlr.w	@(2:2, er0)	; shift right logical by one, disp2
+	mov	#word_dest-4, er0
+	shlr.w	@(4:2, er0)	; shift right logical by one, disp2
 ;;;	.word	0x0156
 ;;;	.word	0x6908
 ;;;	.word	0x1110
@@ -1205,7 +1205,7 @@ shlr_w_disp2_1:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 word_dest-2 er0
+	test_h_gr32 word_dest-4 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -1517,8 +1517,8 @@ shlr_w_disp2_2:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#word_dest-2, er0
-	shlr.w	#2, @(2:2, er0)	; shift right logical by two, disp2
+	mov	#word_dest-4, er0
+	shlr.w	#2, @(4:2, er0)	; shift right logical by two, disp2
 ;;;	.word	0x0156
 ;;;	.word	0x6908
 ;;;	.word	0x1150
@@ -1528,7 +1528,7 @@ shlr_w_disp2_2:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 word_dest-2 er0
+	test_h_gr32 word_dest-4 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -1838,8 +1838,8 @@ shlr_w_disp2_4:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#word_dest-2, er0
-	shlr.w	#4, @(2:2, er0)	; shift right logical by four, disp2
+	mov	#word_dest-4, er0
+	shlr.w	#4, @(4:2, er0)	; shift right logical by four, disp2
 ;;;	.word	0x0156
 ;;;	.word	0x6908
 ;;;	.word	0x1120
@@ -1849,7 +1849,7 @@ shlr_w_disp2_4:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 word_dest-2 er0
+	test_h_gr32 word_dest-4 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -2159,8 +2159,8 @@ shlr_w_disp2_8:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#word_dest-2, er0
-	shlr.w	#8, @(2:2, er0)	; shift right logical by eight, disp2
+	mov	#word_dest-4, er0
+	shlr.w	#8, @(4:2, er0)	; shift right logical by eight, disp2
 ;;;	.word	0x0156
 ;;;	.word	0x6908
 ;;;	.word	0x1160
@@ -2170,7 +2170,7 @@ shlr_w_disp2_8:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 word_dest-2 er0
+	test_h_gr32 word_dest-4 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -2515,8 +2515,8 @@ shlr_l_disp2_1:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	shlr.l	@(2:2, er0)	; shift right logical by one, disp2
+	mov	#long_dest-8, er0
+	shlr.l	@(8:2, er0)	; shift right logical by one, disp2
 ;;;	.word	0x0106
 ;;;	.word	0x6908
 ;;;	.word	0x1130
@@ -2526,7 +2526,7 @@ shlr_l_disp2_1:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 long_dest-2 er0
+	test_h_gr32 long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -2853,8 +2853,8 @@ shlr_l_disp2_2:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	shlr.l	#2, @(2:2, er0)	; shift right logical by two, disp2
+	mov	#long_dest-8, er0
+	shlr.l	#2, @(8:2, er0)	; shift right logical by two, disp2
 ;;;	.word	0x0106
 ;;;	.word	0x6908
 ;;;	.word	0x1170
@@ -2864,7 +2864,7 @@ shlr_l_disp2_2:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 long_dest-2 er0
+	test_h_gr32 long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -3188,8 +3188,8 @@ shlr_l_disp2_4:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	shlr.l	#4, @(2:2, er0)	; shift right logical by four, disp2
+	mov	#long_dest-8, er0
+	shlr.l	#4, @(8:2, er0)	; shift right logical by four, disp2
 ;;;	.word	0x0106
 ;;;	.word	0x6908
 ;;;	.word	0x1138
@@ -3199,7 +3199,7 @@ shlr_l_disp2_4:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 long_dest-2 er0
+	test_h_gr32 long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -3523,8 +3523,8 @@ shlr_l_disp2_8:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	shlr.l	#8, @(2:2, er0)	; shift right logical by eight, disp2
+	mov	#long_dest-8, er0
+	shlr.l	#8, @(8:2, er0)	; shift right logical by eight, disp2
 ;;;	.word	0x0106
 ;;;	.word	0x6908
 ;;;	.word	0x1178
@@ -3534,7 +3534,7 @@ shlr_l_disp2_8:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 long_dest-2 er0
+	test_h_gr32 long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -3858,8 +3858,8 @@ shlr_l_disp2_16:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	shlr.l	#16, @(2:2, er0)	; shift right logical by 16, dest2
+	mov	#long_dest-8, er0
+	shlr.l	#16, @(8:2, er0)	; shift right logical by 16, dest2
 ;;;	.word	0x0106
 ;;;	.word	0x6908
 ;;;	.word	0x11f8
@@ -3869,7 +3869,7 @@ shlr_l_disp2_16:
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32 long_dest-2 er0
+	test_h_gr32 long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
