@@ -1,3 +1,8 @@
+2001-07-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_data_evaluate_expression): Replace value_ptr
+	with `struct value *'.
+
 2001-07-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* mi-out.c (mi_table_header, mi_field_int, mi_field_skip)

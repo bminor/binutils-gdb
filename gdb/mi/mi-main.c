@@ -659,7 +659,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 {
   struct expression *expr;
   struct cleanup *old_chain = NULL;
-  value_ptr val;
+  struct value *val;
   struct ui_stream *stb = NULL;
 
   stb = ui_out_stream_new (uiout);
