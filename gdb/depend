@@ -39,9 +39,9 @@ breakpoint.o : breakpoint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
 buildsym.o : buildsym.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h objfiles.h \
   buildsym.h 
-c-exp.tab.o : c-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
-  ${srcdir}/parser-defs.h ${srcdir}/value.h ${srcdir}/language.h ${srcdir}/../include/bfd.h ${srcdir}/symfile.h ${srcdir}/objfiles.h 
+c-exp.tab.o : c-exp.tab.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h frame.h expression.h parser-defs.h \
+  value.h language.h ${srcdir}/../include/bfd.h symfile.h objfiles.h 
 coffread.o : coffread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h breakpoint.h frame.h value.h \
   expression.h ${srcdir}/../include/bfd.h symfile.h objfiles.h buildsym.h ${srcdir}/../include/coff/internal.h \
@@ -183,7 +183,7 @@ irix4-nat.o : irix4-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
 language.o : language.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h value.h expression.h gdbcmd.h \
   command.h frame.h language.h target.h ${srcdir}/../include/bfd.h parser-defs.h 
-m2-exp.tab.o : m2-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status ${srcdir}/nm.h ${srcdir}/../include/fopen-same.h \
+m2-exp.tab.o : m2-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
   ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/parser-defs.h ${srcdir}/../include/bfd.h ${srcdir}/symfile.h ${srcdir}/objfiles.h 
 m68k-pinsn.o : m68k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \

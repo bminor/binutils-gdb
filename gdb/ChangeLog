@@ -1,3 +1,8 @@
+Thu Nov  5 17:12:42 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (depend):  Add nm.h to the list of things to fixup.
+	* depend:  Redo, to fixup nm.h problems with *-tab.c files.
+
 Thu Nov  5 00:19:51 1992  John Gilmore  (gnu@cygnus.com)
 
 	* i386-stub.c:  Remove ansidecl.h and the few uses of it.
