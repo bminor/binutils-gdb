@@ -76,7 +76,7 @@ est_supply_register (char *regname, int regnamelen, char *val, int vallen)
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
 
-static char *
+static const char *
 est_regname (int index) 
 {
   
