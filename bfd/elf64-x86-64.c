@@ -34,8 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* The relocation "howto" table.  Order of fields:
    type, size, bitsize, pc_relative, complain_on_overflow, special_function,
    name, partial_inplace, src_mask, dst_pack, pcrel_offset  */
-static reloc_howto_type x86_64_elf_howto_table[] =
-{
+static reloc_howto_type x86_64_elf_howto_table[] = {
   HOWTO(R_X86_64_NONE,          0,0, 0,false,0,complain_overflow_dont,    0, "R_X86_64_NONE",   false,0x00000000,0x00000000,false),
   HOWTO(R_X86_64_64,    0,4,64,false,0,complain_overflow_bitfield,0, "R_X86_64_64",     false,MINUS_ONE ,MINUS_ONE ,false),
   HOWTO(R_X86_64_PC32,          0,4,32,true ,0,complain_overflow_signed  ,0, "R_X86_64_PC32",   false,0xffffffff,0xffffffff,true),
@@ -80,7 +79,6 @@ static CONST struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_8_PCREL,                R_X86_64_PC8, },
 };
 
-
 static reloc_howto_type *elf64_x86_64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf64_x86_64_info_to_howto
@@ -102,14 +100,14 @@ elf64_x86_64_reloc_type_lookup (abfd, code)
        i++)
     {
       if (x86_64_reloc_map[i].bfd_reloc_val == code)
-      return &x86_64_elf_howto_table[(int)
-                                     x86_64_reloc_map[i].elf_reloc_val];
+	return &x86_64_elf_howto_table[(int)
+				       x86_64_reloc_map[i].elf_reloc_val];
     }
   return 0;
 }
 
-
 /* Given an x86_64 ELF reloc type, fill in an arelent structure.  */
+
 static void
 elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -129,11 +127,9 @@ elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
 
 /* x86_64  ELF linker hash table.  */
 
-struct elf64_x86_64_link_hash_table
-{
+struct elf64_x86_64_link_hash_table {
   struct elf_link_hash_table root;
 };
-
 
 /* Get the X86-64 ELF linker hash table from a link_info structure.  */
 
@@ -149,7 +145,7 @@ elf64_x86_64_link_hash_table_create (abfd)
   struct elf64_x86_64_link_hash_table *ret;
 
   ret = ((struct elf64_x86_64_link_hash_table *)
-       bfd_alloc (abfd, sizeof (struct elf64_x86_64_link_hash_table)));
+	 bfd_alloc (abfd, sizeof (struct elf64_x86_64_link_hash_table)));
   if (ret == (struct elf64_x86_64_link_hash_table *) NULL)
     return NULL;
 
@@ -220,124 +216,123 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
       r_type = ELF64_R_TYPE (rel->r_info);
 
       if ((indx = (unsigned) r_type) >= R_X86_64_max)
-      {
-        bfd_set_error (bfd_error_bad_value);
-        return false;
-      }
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
       howto = x86_64_elf_howto_table + indx;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
 
       if (info->relocateable)
-      {
-        /* This is a relocateable link.  We don't have to change
-           anything, unless the reloc is against a section symbol,
-           in which case we have to adjust according to where the
-           section symbol winds up in the output section.  */
-        if (r_symndx < symtab_hdr->sh_info)
-          {
-            sym = local_syms + r_symndx;
-            if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-              {
-                sec = local_sections[r_symndx];
-                rel->r_addend += sec->output_offset + sym->st_value;
-              }
-          }
+	{
+	  /* This is a relocateable link.  We don't have to change
+	     anything, unless the reloc is against a section symbol,
+	     in which case we have to adjust according to where the
+	     section symbol winds up in the output section.  */
+	  if (r_symndx < symtab_hdr->sh_info)
+	    {
+	      sym = local_syms + r_symndx;
+	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		{
+		  sec = local_sections[r_symndx];
+		  rel->r_addend += sec->output_offset + sym->st_value;
+		}
+	    }
 
-        continue;
-      }
+	  continue;
+	}
 
       /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
       if (r_symndx < symtab_hdr->sh_info)
-      {
-        sym = local_syms + r_symndx;
-        sec = local_sections[r_symndx];
-        relocation = (sec->output_section->vma
-                      + sec->output_offset
-                      + sym->st_value);
-      }
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+	}
       else
-      {
-        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-        while (h->root.type == bfd_link_hash_indirect
-               || h->root.type == bfd_link_hash_warning)
-          h = (struct elf_link_hash_entry *) h->root.u.i.link;
-        if (h->root.type == bfd_link_hash_defined
-            || h->root.type == bfd_link_hash_defweak)
-          {
-            sec = h->root.u.def.section;
-            if (sec->output_section == NULL)
-              {
-                (*_bfd_error_handler)
-                  (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-                   bfd_get_filename (input_bfd), h->root.root.string,
-                   bfd_get_section_name (input_bfd, input_section));
-                relocation = 0;
-              }
-            else
-              relocation = (h->root.u.def.value
-                            + sec->output_section->vma
-                            + sec->output_offset);
-          }
-        else if (h->root.type == bfd_link_hash_undefweak)
-          relocation = 0;
-        else
-          {
-            if (! ((*info->callbacks->undefined_symbol)
-                   (info, h->root.root.string, input_bfd,
-                    input_section, rel->r_offset,
-                    (!info->shared || info->no_undefined
-                     || ELF_ST_VISIBILITY (h->other)))))
-              return false;
-            relocation = 0;
-          }
-      }
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sec = h->root.u.def.section;
+	      if (sec->output_section == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
+		     bfd_get_filename (input_bfd), h->root.root.string,
+		     bfd_get_section_name (input_bfd, input_section));
+		  relocation = 0;
+		}
+	      else
+		relocation = (h->root.u.def.value
+			      + sec->output_section->vma
+			      + sec->output_offset);
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    relocation = 0;
+	  else
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd,
+		      input_section, rel->r_offset,
+		      (!info->shared || info->no_undefined
+		       || ELF_ST_VISIBILITY (h->other)))))
+		return false;
+	      relocation = 0;
+	    }
+	}
       /* This function should support shared objects, but don't.  */
       if (info->shared)
-      abort();
+	abort ();
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-                                  contents, rel->r_offset,
-                                  relocation, rel->r_addend);
+				    contents, rel->r_offset,
+				    relocation, rel->r_addend);
 
       if (r != bfd_reloc_ok)
-      {
-        switch (r)
-          {
-          default:
-          case bfd_reloc_outofrange:
-            abort ();
-          case bfd_reloc_overflow:
-            {
-              const char *name;
+	{
+	  switch (r)
+	    {
+	    default:
+	    case bfd_reloc_outofrange:
+	      abort ();
+	    case bfd_reloc_overflow:
+	      {
+		const char *name;
 
-              if (h != NULL)
-                name = h->root.root.string;
-              else
-                {
-                  name = bfd_elf_string_from_elf_section (input_bfd,
-                                                          symtab_hdr->sh_link,
-                                                          sym->st_name);
-                  if (name == NULL)
-                    return false;
-                  if (*name == '\0')
-                    name = bfd_section_name (input_bfd, sec);
-                }
-              if (! ((*info->callbacks->reloc_overflow)
-                     (info, name, howto->name, (bfd_vma) 0,
-                      input_bfd, input_section, rel->r_offset)))
-                return false;
-            }
-            break;
-          }
-      }
+		if (h != NULL)
+		  name = h->root.root.string;
+		else
+		  {
+		    name = bfd_elf_string_from_elf_section (input_bfd,
+							    symtab_hdr->sh_link,
+							    sym->st_name);
+		    if (name == NULL)
+		      return false;
+		    if (*name == '\0')
+		      name = bfd_section_name (input_bfd, sec);
+		  }
+		if (! ((*info->callbacks->reloc_overflow)
+		       (info, name, howto->name, (bfd_vma) 0,
+			input_bfd, input_section, rel->r_offset)))
+		  return false;
+	      }
+	      break;
+	    }
+	}
     }
   return true;
 }
-
 
 #define TARGET_LITTLE_SYM             bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME            "elf64-x86-64"
