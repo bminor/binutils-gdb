@@ -54,6 +54,150 @@ static INLINE int sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean elf_map_symbols PARAMS ((bfd *));
 static bfd_size_type get_program_header_size PARAMS ((bfd *));
 
+/* Swap version information in and out.  The version information is
+   currently size independent.  If that ever changes, this code will
+   need to move into elfcode.h.  */
+
+/* Swap in a Verdef structure.  */
+
+void
+_bfd_elf_swap_verdef_in (abfd, src, dst)
+     bfd *abfd;
+     const Elf_External_Verdef *src;
+     Elf_Internal_Verdef *dst;
+{
+  dst->vd_version = bfd_h_get_16 (abfd, src->vd_version);
+  dst->vd_flags   = bfd_h_get_16 (abfd, src->vd_flags);
+  dst->vd_ndx     = bfd_h_get_16 (abfd, src->vd_ndx);
+  dst->vd_cnt     = bfd_h_get_16 (abfd, src->vd_cnt);
+  dst->vd_hash    = bfd_h_get_32 (abfd, src->vd_hash);
+  dst->vd_aux     = bfd_h_get_32 (abfd, src->vd_aux);
+  dst->vd_next    = bfd_h_get_32 (abfd, src->vd_next);
+}
+
+/* Swap out a Verdef structure.  */
+
+void
+_bfd_elf_swap_verdef_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Verdef *src;
+     Elf_External_Verdef *dst;
+{
+  bfd_h_put_16 (abfd, src->vd_version, dst->vd_version);
+  bfd_h_put_16 (abfd, src->vd_flags, dst->vd_flags);
+  bfd_h_put_16 (abfd, src->vd_ndx, dst->vd_ndx);
+  bfd_h_put_16 (abfd, src->vd_cnt, dst->vd_cnt);
+  bfd_h_put_32 (abfd, src->vd_hash, dst->vd_hash);
+  bfd_h_put_32 (abfd, src->vd_aux, dst->vd_aux);
+  bfd_h_put_32 (abfd, src->vd_next, dst->vd_next);
+}
+
+/* Swap in a Verdaux structure.  */
+
+void
+_bfd_elf_swap_verdaux_in (abfd, src, dst)
+     bfd *abfd;
+     const Elf_External_Verdaux *src;
+     Elf_Internal_Verdaux *dst;
+{
+  dst->vda_name = bfd_h_get_32 (abfd, src->vda_name);
+  dst->vda_next = bfd_h_get_32 (abfd, src->vda_next);
+}
+
+/* Swap out a Verdaux structure.  */
+
+void
+_bfd_elf_swap_verdaux_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Verdaux *src;
+     Elf_External_Verdaux *dst;
+{
+  bfd_h_put_32 (abfd, src->vda_name, dst->vda_name);
+  bfd_h_put_32 (abfd, src->vda_next, dst->vda_next);
+}
+
+/* Swap in a Verneed structure.  */
+
+void
+_bfd_elf_swap_verneed_in (abfd, src, dst)
+     bfd *abfd;
+     const Elf_External_Verneed *src;
+     Elf_Internal_Verneed *dst;
+{
+  dst->vn_version = bfd_h_get_16 (abfd, src->vn_version);
+  dst->vn_cnt     = bfd_h_get_16 (abfd, src->vn_cnt);
+  dst->vn_file    = bfd_h_get_32 (abfd, src->vn_file);
+  dst->vn_aux     = bfd_h_get_32 (abfd, src->vn_aux);
+  dst->vn_next    = bfd_h_get_32 (abfd, src->vn_next);
+}
+
+/* Swap out a Verneed structure.  */
+
+void
+_bfd_elf_swap_verneed_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Verneed *src;
+     Elf_External_Verneed *dst;
+{
+  bfd_h_put_16 (abfd, src->vn_version, dst->vn_version);
+  bfd_h_put_16 (abfd, src->vn_cnt, dst->vn_cnt);
+  bfd_h_put_32 (abfd, src->vn_file, dst->vn_file);
+  bfd_h_put_32 (abfd, src->vn_aux, dst->vn_aux);
+  bfd_h_put_32 (abfd, src->vn_next, dst->vn_next);
+}
+
+/* Swap in a Vernaux structure.  */
+
+void
+_bfd_elf_swap_vernaux_in (abfd, src, dst)
+     bfd *abfd;
+     const Elf_External_Vernaux *src;
+     Elf_Internal_Vernaux *dst;
+{
+  dst->vna_hash  = bfd_h_get_32 (abfd, src->vna_hash);
+  dst->vna_flags = bfd_h_get_16 (abfd, src->vna_flags);
+  dst->vna_other = bfd_h_get_16 (abfd, src->vna_other);
+  dst->vna_name  = bfd_h_get_32 (abfd, src->vna_name);
+  dst->vna_next  = bfd_h_get_32 (abfd, src->vna_next);
+}
+
+/* Swap out a Vernaux structure.  */
+
+void
+_bfd_elf_swap_vernaux_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Vernaux *src;
+     Elf_External_Vernaux *dst;
+{
+  bfd_h_put_32 (abfd, src->vna_hash, dst->vna_hash);
+  bfd_h_put_16 (abfd, src->vna_flags, dst->vna_flags);
+  bfd_h_put_16 (abfd, src->vna_other, dst->vna_other);
+  bfd_h_put_32 (abfd, src->vna_name, dst->vna_name);
+  bfd_h_put_32 (abfd, src->vna_next, dst->vna_next);
+}
+
+/* Swap in a Versym structure.  */
+
+void
+_bfd_elf_swap_versym_in (abfd, src, dst)
+     bfd *abfd;
+     const Elf_External_Versym *src;
+     Elf_Internal_Versym *dst;
+{
+  dst->vs_vers = bfd_h_get_16 (abfd, src->vs_vers);
+}
+
+/* Swap out a Versym structure.  */
+
+void
+_bfd_elf_swap_versym_out (abfd, src, dst)
+     bfd *abfd;
+     const Elf_Internal_Versym *src;
+     Elf_External_Versym *dst;
+{
+  bfd_h_put_16 (abfd, src->vs_vers, dst->vs_vers);
+}
+
 /* Standard ELF hash function.  Do not change this function; you will
    cause invalid hash tables to be generated.  (Well, you would if this
    were being used yet.)  */
@@ -475,6 +619,11 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case DT_JMPREL: name = "JMPREL"; break;
 	    case DT_AUXILIARY: name = "AUXILIARY"; stringp = true; break;
 	    case DT_FILTER: name = "FILTER"; stringp = true; break;
+	    case DT_VERSYM: name = "VERSYM"; break;
+	    case DT_VERDEF: name = "VERDEF"; break;
+	    case DT_VERDEFNUM: name = "VERDEFNUM"; break;
+	    case DT_VERNEED: name = "VERNEED"; break;
+	    case DT_VERNEEDNUM: name = "VERNEEDNUM"; break;
 	    }
 
 	  fprintf (f, "  %-11s ", name);
@@ -495,6 +644,52 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 
       free (dynbuf);
       dynbuf = NULL;
+    }
+
+  if ((elf_dynverdef (abfd) != 0 && elf_tdata (abfd)->verdef == NULL)
+      || (elf_dynverref (abfd) != 0 && elf_tdata (abfd)->verref == NULL))
+    {
+      if (! _bfd_elf_slurp_version_tables (abfd))
+	return false;
+    }
+
+  if (elf_dynverdef (abfd) != 0)
+    {
+      Elf_Internal_Verdef *t;
+
+      fprintf (f, "\nVersion definitions:\n");
+      for (t = elf_tdata (abfd)->verdef; t != NULL; t = t->vd_nextdef)
+	{
+	  fprintf (f, "%d 0x%2.2x 0x%8.8lx %s\n", t->vd_ndx,
+		   t->vd_flags, t->vd_hash, t->vd_nodename);
+	  if (t->vd_auxptr->vda_nextptr != NULL)
+	    {
+	      Elf_Internal_Verdaux *a;
+
+	      fprintf (f, "\t");
+	      for (a = t->vd_auxptr->vda_nextptr;
+		   a != NULL;
+		   a = a->vda_nextptr)
+		fprintf (f, "%s ", a->vda_nodename);
+	      fprintf (f, "\n");
+	    }
+	}
+    }
+
+  if (elf_dynverref (abfd) != 0)
+    {
+      Elf_Internal_Verneed *t;
+
+      fprintf (f, "\nVersion References:\n");
+      for (t = elf_tdata (abfd)->verref; t != NULL; t = t->vn_nextref)
+	{
+	  Elf_Internal_Vernaux *a;
+
+	  fprintf (f, "  required from %s:\n", t->vn_filename);
+	  for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+	    fprintf (f, "    0x%8.8lx 0x%2.2x %2.2d %s\n", a->vna_hash,
+		     a->vna_flags, a->vna_other, a->vna_nodename);
+	}
     }
 
   return true;
@@ -582,6 +777,7 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->got_offset = (bfd_vma) -1;
       ret->plt_offset = (bfd_vma) -1;
       ret->linker_section_pointer = (elf_linker_section_pointers_t *)0;
+      ret->verinfo.verdef = NULL;
       ret->type = STT_NOTYPE;
       ret->other = 0;
       /* Assume that we have been called by a non-ELF symbol reader.
@@ -899,6 +1095,21 @@ bfd_section_from_shdr (abfd, shindex)
       }
       break;
 
+    case SHT_GNU_verdef:
+      elf_dynverdef (abfd) = shindex;
+      elf_tdata (abfd)->dynverdef_hdr = *hdr;
+      break;
+
+    case SHT_GNU_versym:
+      elf_dynversym (abfd) = shindex;
+      elf_tdata (abfd)->dynversym_hdr = *hdr;
+      break;
+
+    case SHT_GNU_verneed:
+      elf_dynverref (abfd) = shindex;
+      elf_tdata (abfd)->dynverref_hdr = *hdr;
+      break;
+
     case SHT_SHLIB:
       return true;
 
@@ -1113,11 +1324,28 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_type = SHT_REL;
       this_hdr->sh_entsize = bed->s->sizeof_rel;
     }
-  else if (strcmp (asect->name, ".note") == 0)
+  else if (strncmp (asect->name, ".note", 5) == 0)
     this_hdr->sh_type = SHT_NOTE;
   else if (strncmp (asect->name, ".stab", 5) == 0
 	   && strcmp (asect->name + strlen (asect->name) - 3, "str") == 0)
     this_hdr->sh_type = SHT_STRTAB;
+  else if (strcmp (asect->name, ".gnu.version") == 0)
+    {
+      this_hdr->sh_type = SHT_GNU_versym;
+      this_hdr->sh_entsize = sizeof (Elf_External_Versym);
+    }
+  else if (strcmp (asect->name, ".gnu.version_d") == 0)
+    {
+      this_hdr->sh_type = SHT_GNU_verdef;
+      this_hdr->sh_entsize = 0;
+      this_hdr->sh_info = elf_tdata (abfd)->cverdefs;
+    }
+  else if (strcmp (asect->name, ".gnu.version_r") == 0)
+    {
+      this_hdr->sh_type = SHT_GNU_verneed;
+      this_hdr->sh_entsize = 0;
+      this_hdr->sh_info = elf_tdata (abfd)->cverrefs;
+    }
   else if ((asect->flags & SEC_ALLOC) != 0
 	   && (asect->flags & SEC_LOAD) != 0)
     this_hdr->sh_type = SHT_PROGBITS;
@@ -1323,16 +1551,20 @@ assign_section_numbers (abfd)
 
 	case SHT_DYNAMIC:
 	case SHT_DYNSYM:
+	case SHT_GNU_verneed:
+	case SHT_GNU_verdef:
 	  /* sh_link is the section header index of the string table
-	     used for the dynamic entries or symbol table.  */
+	     used for the dynamic entries, or the symbol table, or the
+	     version strings.  */
 	  s = bfd_get_section_by_name (abfd, ".dynstr");
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	  break;
 
 	case SHT_HASH:
+	case SHT_GNU_versym:
 	  /* sh_link is the section header index of the symbol table
-	     this hash table is for.  */
+	     this hash table or version table is for.  */
 	  s = bfd_get_section_by_name (abfd, ".dynsym");
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
@@ -1898,6 +2130,30 @@ map_sections_to_segments (abfd)
       pm = &m->next;
     }
 
+  /* For each loadable .note section, add a PT_NOTE segment.  We don't
+     use bfd_get_section_by_name, because if we link together
+     nonloadable .note sections and loadable .note sections, we will
+     generate two .note sections in the output file.  FIXME: Using
+     names for section types is bogus anyhow.  */
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if ((s->flags & SEC_LOAD) != 0
+	  && strncmp (s->name, ".note", 5) == 0)
+	{
+	  m = ((struct elf_segment_map *)
+	       bfd_zalloc (abfd, sizeof (struct elf_segment_map)));
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_NOTE;
+	  m->count = 1;
+	  m->sections[0] = s;
+
+	  *pm = m;
+	  pm = &m->next;
+	}
+    }
+
   free (sections);
   sections = NULL;
 
@@ -2310,6 +2566,16 @@ get_program_header_size (abfd)
     {
       /* We need a PT_DYNAMIC segment.  */
       ++segs;
+    }
+
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      if ((s->flags & SEC_LOAD) != 0
+	  && strncmp (s->name, ".note", 5) == 0)
+	{
+	  /* We need a PT_NOTE segment.  */
+	  ++segs;
+	}
     }
 
   /* Let the backend count up any program headers it might need.  */
@@ -3361,7 +3627,185 @@ _bfd_elf_canonicalize_dynamic_reloc (abfd, storage, syms)
 
   return ret;
 }
+
+/* Read in the version information.  */
 
+boolean
+_bfd_elf_slurp_version_tables (abfd)
+     bfd *abfd;
+{
+  bfd_byte *contents = NULL;
+
+  if (elf_dynverdef (abfd) != 0)
+    {
+      Elf_Internal_Shdr *hdr;
+      Elf_External_Verdef *everdef;
+      Elf_Internal_Verdef *iverdef;
+      unsigned int i;
+
+      hdr = &elf_tdata (abfd)->dynverdef_hdr;
+
+      elf_tdata (abfd)->verdef =
+	((Elf_Internal_Verdef *)
+	 bfd_zalloc (abfd, hdr->sh_info * sizeof (Elf_Internal_Verdef)));
+      if (elf_tdata (abfd)->verdef == NULL)
+	goto error_return;
+
+      elf_tdata (abfd)->cverdefs = hdr->sh_info;
+
+      contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
+      if (contents == NULL)
+	goto error_return;
+      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
+	  || bfd_read ((PTR) contents, 1, hdr->sh_size, abfd) != hdr->sh_size)
+	goto error_return;
+
+      everdef = (Elf_External_Verdef *) contents;
+      iverdef = elf_tdata (abfd)->verdef;
+      for (i = 0; i < hdr->sh_info; i++, iverdef++)
+	{
+	  Elf_External_Verdaux *everdaux;
+	  Elf_Internal_Verdaux *iverdaux;
+	  unsigned int j;
+
+	  _bfd_elf_swap_verdef_in (abfd, everdef, iverdef);
+
+	  iverdef->vd_bfd = abfd;
+
+	  iverdef->vd_auxptr = ((Elf_Internal_Verdaux *)
+				bfd_alloc (abfd,
+					   (iverdef->vd_cnt
+					    * sizeof (Elf_Internal_Verdaux))));
+	  if (iverdef->vd_auxptr == NULL)
+	    goto error_return;
+
+	  everdaux = ((Elf_External_Verdaux *)
+		      ((bfd_byte *) everdef + iverdef->vd_aux));
+	  iverdaux = iverdef->vd_auxptr;
+	  for (j = 0; j < iverdef->vd_cnt; j++, iverdaux++)
+	    {
+	      _bfd_elf_swap_verdaux_in (abfd, everdaux, iverdaux);
+
+	      iverdaux->vda_nodename =
+		bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
+						 iverdaux->vda_name);
+	      if (iverdaux->vda_nodename == NULL)
+		goto error_return;
+
+	      if (j + 1 < iverdef->vd_cnt)
+		iverdaux->vda_nextptr = iverdaux + 1;
+	      else
+		iverdaux->vda_nextptr = NULL;
+
+	      everdaux = ((Elf_External_Verdaux *)
+			  ((bfd_byte *) everdaux + iverdaux->vda_next));
+	    }
+
+	  iverdef->vd_nodename = iverdef->vd_auxptr->vda_nodename;
+
+	  if (i + 1 < hdr->sh_info)
+	    iverdef->vd_nextdef = iverdef + 1;
+	  else
+	    iverdef->vd_nextdef = NULL;
+
+	  everdef = ((Elf_External_Verdef *)
+		     ((bfd_byte *) everdef + iverdef->vd_next));
+	}
+
+      free (contents);
+      contents = NULL;
+    }
+
+  if (elf_dynverref (abfd) != 0)
+    {
+      Elf_Internal_Shdr *hdr;
+      Elf_External_Verneed *everneed;
+      Elf_Internal_Verneed *iverneed;
+      unsigned int i;
+
+      hdr = &elf_tdata (abfd)->dynverref_hdr;
+
+      elf_tdata (abfd)->verref =
+	((Elf_Internal_Verneed *)
+	 bfd_zalloc (abfd, hdr->sh_info * sizeof (Elf_Internal_Verneed)));
+      if (elf_tdata (abfd)->verref == NULL)
+	goto error_return;
+
+      elf_tdata (abfd)->cverrefs = hdr->sh_info;
+
+      contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
+      if (contents == NULL)
+	goto error_return;
+      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
+	  || bfd_read ((PTR) contents, 1, hdr->sh_size, abfd) != hdr->sh_size)
+	goto error_return;
+
+      everneed = (Elf_External_Verneed *) contents;
+      iverneed = elf_tdata (abfd)->verref;
+      for (i = 0; i < hdr->sh_info; i++, iverneed++)
+	{
+	  Elf_External_Vernaux *evernaux;
+	  Elf_Internal_Vernaux *ivernaux;
+	  unsigned int j;
+
+	  _bfd_elf_swap_verneed_in (abfd, everneed, iverneed);
+
+	  iverneed->vn_bfd = abfd;
+
+	  iverneed->vn_filename =
+	    bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
+					     iverneed->vn_file);
+	  if (iverneed->vn_filename == NULL)
+	    goto error_return;
+
+	  iverneed->vn_auxptr =
+	    ((Elf_Internal_Vernaux *)
+	     bfd_alloc (abfd,
+			iverneed->vn_cnt * sizeof (Elf_Internal_Vernaux)));
+
+	  evernaux = ((Elf_External_Vernaux *)
+		      ((bfd_byte *) everneed + iverneed->vn_aux));
+	  ivernaux = iverneed->vn_auxptr;
+	  for (j = 0; j < iverneed->vn_cnt; j++, ivernaux++)
+	    {
+	      _bfd_elf_swap_vernaux_in (abfd, evernaux, ivernaux);
+
+	      ivernaux->vna_nodename =
+		bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
+						 ivernaux->vna_name);
+	      if (ivernaux->vna_nodename == NULL)
+		goto error_return;
+
+	      if (j + 1 < iverneed->vn_cnt)
+		ivernaux->vna_nextptr = ivernaux + 1;
+	      else
+		ivernaux->vna_nextptr = NULL;
+
+	      evernaux = ((Elf_External_Vernaux *)
+			  ((bfd_byte *) evernaux + ivernaux->vna_next));
+	    }
+
+	  if (i + 1 < hdr->sh_info)
+	    iverneed->vn_nextref = iverneed + 1;
+	  else
+	    iverneed->vn_nextref = NULL;
+
+	  everneed = ((Elf_External_Verneed *)
+		      ((bfd_byte *) everneed + iverneed->vn_next));
+	}
+
+      free (contents);
+      contents = NULL;
+    }
+
+  return true;
+
+ error_return:
+  if (contents == NULL)
+    free (contents);
+  return false;
+}
+
 asymbol *
 _bfd_elf_make_empty_symbol (abfd)
      bfd *abfd;
@@ -3385,6 +3829,19 @@ _bfd_elf_get_symbol_info (ignore_abfd, symbol, ret)
      symbol_info *ret;
 {
   bfd_symbol_info (symbol, ret);
+}
+
+/* Return whether a symbol name implies a local symbol.  In ELF, local
+   symbols generally start with ``.L''.  Most targets use this
+   function for the is_local_label_name entry point, but some override
+   it.  */
+
+boolean
+_bfd_elf_is_local_label_name (abfd, name)
+     bfd *abfd;
+     const char *name;
+{
+  return name[0] == '.' && name[1] == 'L';
 }
 
 alent *
