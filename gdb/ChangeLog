@@ -1,3 +1,7 @@
+Thu Jun  3 17:36:56 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* ser-go32.c:  Clean up lots of compilation nits.
+
 Thu Jun  3 14:44:57 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* Patches from Jeffrey Law <law@cs.utah.edu>.
