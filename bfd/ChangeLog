@@ -1,3 +1,15 @@
+Fri Apr 19 19:21:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-ppc.c (record_toc): Add cast to avoid warning.
+	(ppc_allocate_toc_section): Likewise.
+	(coff_ppc_relocate_section): Remove ANSI C string concatenation.
+	(ppc_coff_reloc_type_lookup): Remove unreached code.
+	* coffcode.h (coff_write_object_contents): Don't take the address
+	of an array.
+	* peicode.h (pe_print_idata): Add casts to avoid warning.
+	(pe_print_edata): Likewise.
+	(pe_print_reloc): Remove ANSI C string concatenation.
+
 Thu Apr 18 18:51:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libcoff-in.h (struct coff_final_link_info): Add last_bf_index

@@ -828,7 +828,7 @@ record_toc(toc_section, our_toc_offset, cat, name)
 {
   /* add this entry to our toc addr-offset-name list */
   struct list_ele *t;
-  t = bfd_malloc (sizeof (struct list_ele));
+  t = (struct list_ele *) bfd_malloc (sizeof (struct list_ele));
   if (t == NULL)
     abort ();
   t->next = 0;
@@ -1491,8 +1491,7 @@ fprintf(stderr,
 		    if (our_toc_offset >= 65535)
 		      {
 			fprintf(stderr,
-				"TOCDEFN Relocation exceeded "
-				"displacment of 65535\n");
+				"TOCDEFN Relocation exceeded displacement of 65535\n");
 			abort();
 		      }
 
@@ -1714,8 +1713,7 @@ fprintf(stderr,
 						 false, false, true);
 		    if (myh == 0) 
 		      {
-			fprintf(stderr, "Missing idata magic cookies, "
-				"this cannot work anyway...\n");
+			fprintf(stderr, "Missing idata magic cookies, this cannot work anyway...\n");
 			abort();
 		      }
 		    
@@ -1974,7 +1972,7 @@ ppc_allocate_toc_section (info)
       abort();
     }
 
-  foo = bfd_alloc(bfd_of_toc_owner, global_toc_size);
+  foo = (bfd_byte *) bfd_alloc(bfd_of_toc_owner, global_toc_size);
   memset(foo, test_char, global_toc_size);
 
   s->_raw_size = s->_cooked_size = global_toc_size;
@@ -2545,8 +2543,7 @@ ppc_coff_reloc_type_lookup (abfd, code)
     default: 
       return NULL;
     }
-  
-  return NULL;
+  /*NOTREACHED*/
 }
 
 #undef HOW2MAP
