@@ -1,3 +1,8 @@
+Thu Feb  1 20:20:14 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/hppa.exp: Compile directly into an executable, use
+	the executable, not the .o to run the tests from.
+
 Wed Jan 31 14:21:09 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/break.exp: Don't test for program exit or exit status
