@@ -5643,34 +5643,36 @@ command set as a whole more consistent and easier to use and remember:
 @kindex unset                      
 
 @ifinfo
-OLD COMMAND                NEW COMMAND
----------------            ----------------------------------
-add-syms                   add-symbol-file
-delete environment         unset environment
-info convenience           show convenience
-info copying               show copying
-info directories           show directories     
-info editing               show commands
-info history               show values
-info targets               help target
-info values                show values
-info version               show version
-info warranty              show warranty
-set/show addressprint      set/show print address
-set/show array-max         set/show print elements
-set/show arrayprint        set/show print array
-set/show asm-demangle      set/show print asm-demangle
-set/show caution           set/show confirm
-set/show demangle          set/show print demangle
-set/show history write     set/show history save
-set/show prettyprint       set/show print pretty
-set/show screen-height     set/show height
-set/show screen-width      set/show width
-set/show sevenbit-strings  set/show print sevenbit-strings
-set/show unionprint        set/show print union
-set/show vtblprint         set/show print vtbl
+@example
+OLD COMMAND               NEW COMMAND
+---------------           -------------------------------
+add-syms                  add-symbol-file
+delete environment        unset environment
+info convenience          show convenience
+info copying              show copying
+info directories          show directories     
+info editing              show commands
+info history              show values
+info targets              help target
+info values               show values
+info version              show version
+info warranty             show warranty
+set/show addressprint     set/show print address
+set/show array-max        set/show print elements
+set/show arrayprint       set/show print array
+set/show asm-demangle     set/show print asm-demangle
+set/show caution          set/show confirm
+set/show demangle         set/show print demangle
+set/show history write    set/show history save
+set/show prettyprint      set/show print pretty
+set/show screen-height    set/show height
+set/show screen-width     set/show width
+set/show sevenbit-strings set/show print sevenbit-strings
+set/show unionprint       set/show print union
+set/show vtblprint        set/show print vtbl
 
-unset                      [ No longer an alias for delete ]
+unset                     [No longer an alias for delete]
+@end example
 @end ifinfo
 
 @tex
@@ -5837,7 +5839,7 @@ creates the following directories:
 @var{gnusrc}/Host-sun4/Target-vx960
 @var{gnusrc}/bfd/Host-sun4/Target-vx960
 @var{gnusrc}/gdb/Host-sun4/Target-vx960
-@var{gnusrc}/gdb/libiberty/Host-sun4/Target-vx960
+@var{gnusrc}/libiberty/Host-sun4/Target-vx960
 @var{gnusrc}/readline/Host-sun4/Target-vx960
 @end example
 @noindent
