@@ -1,3 +1,10 @@
+2002-02-09  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf64-mmix.c (_bfd_mmix_finalize_linker_allocated_gregs): Check
+	that base-plus-offset reloc accounting is consistent.
+	(mmix_elf_relax_section): Keep base-plus-offset reloc accounting
+	up to date for undefined symbols.
+
 2002-02-08  Eric Christopher  <echristo@redhat.com>
 
 	From Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>

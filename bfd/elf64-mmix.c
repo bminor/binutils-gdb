@@ -2177,6 +2177,21 @@ _bfd_mmix_finalize_linker_allocated_gregs (abfd, link_info)
   if (contents == NULL)
     return false;
 
+  /* Sanity check: If these numbers mismatch, some relocation has not been
+     accounted for and the rest of gregdata is probably inconsistent.
+     It's a bug, but it's more helpful to identify it than segfaulting
+     below.  */
+  if (gregdata->n_remaining_bpo_relocs_this_relaxation_round
+      != gregdata->n_bpo_relocs)
+    {
+      (*_bfd_error_handler)
+	(_("Internal inconsistency: remaining %u != max %u.\n\
+  Please report this bug."),
+	 gregdata->n_remaining_bpo_relocs_this_relaxation_round,
+	 gregdata->n_bpo_relocs);
+      return false;
+    }
+
   for (lastreg = 255, i = 0, j = 0; j < n_gregs; i++)
     if (gregdata->reloc_request[i].regindex != lastreg)
       {
@@ -2287,7 +2302,6 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
      struct bfd_link_info *link_info;
      boolean *again;
 {
-
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *shndx_hdr;
   Elf_Internal_Rela *internal_relocs;
@@ -2431,9 +2445,12 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 	  if (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
 	    {
-	      /* This appears to be a reference to an undefined
-                 symbol.  Just ignore it--it will be caught by the
-                 regular reloc processing.  */
+	      /* This appears to be a reference to an undefined symbol.
+		 Just ignore it--it will be caught by the regular reloc
+		 processing.  We need to keep BPO reloc accounting
+		 consistent, though.  */
+	      gregdata->n_remaining_bpo_relocs_this_relaxation_round--;
+	      bpono++;
 	      continue;
 	    }
 
