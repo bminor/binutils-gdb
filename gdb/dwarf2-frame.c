@@ -886,6 +886,8 @@ struct comp_unit
   bfd_vma dbase;
 };
 
+const struct objfile_data *dwarf2_frame_data;
+
 static unsigned int
 read_1_byte (bfd *bfd, char *buf)
 {
@@ -1130,7 +1132,7 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
 
       offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
       
-      fde = objfile->sym_private;
+      fde = objfile_data (objfile, dwarf2_frame_data);
       while (fde)
 	{
 	  if (*pc >= fde->initial_location + offset
@@ -1150,8 +1152,8 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
 static void
 add_fde (struct comp_unit *unit, struct dwarf2_fde *fde)
 {
-  fde->next = unit->objfile->sym_private;
-  unit->objfile->sym_private = fde;
+  fde->next = objfile_data (unit->objfile, dwarf2_frame_data);
+  set_objfile_data (unit->objfile, dwarf2_frame_data, fde);
 }
 
 #ifdef CC_HAS_LONG_LONG
@@ -1546,4 +1548,13 @@ dwarf2_build_frame_info (struct objfile *objfile)
       while (frame_ptr < unit.dwarf_frame_buffer + unit.dwarf_frame_size)
 	frame_ptr = decode_frame_entry (&unit, frame_ptr, 0);
     }
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_dwarf2_frame (void);
+
+void
+_initialize_dwarf2_frame (void)
+{
+  dwarf2_frame_data = register_objfile_data ();
 }

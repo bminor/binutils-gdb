@@ -1,3 +1,26 @@
+2003-09-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2003-07-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* objfiles.h (struct objfile): Add memebers `data' and `num_data'.
+	(register_objfile_data, set_objfile_data, objfile_data): New
+	prototypes.
+	* objfiles.c (objfile_alloc_data, objfile_free_data): New
+	prototypes.
+	(allocate_objfile): Call objfile_alloc_data.
+	(free_objfile): Call objfile_free_data.
+	(struct objfile_data): New.
+	(struct objfile_data_registration): New.
+	(struct objfile_data_registry): New.
+	(objfile_data_registry): New variable.
+	(register_objfile_data): New function.
+	(objfile_alloc_data, objfile_free_data): New functions.
+	(set_objfile_data, objfile_data): New functions.
+	* dwarf2-frame.c (dwarf2_frame_data): New variable.
+	(dwarf2_frame_find_fde, add_fde): Use new per-objfile data mechanism.
+	(_initialize_dwarf2_frame): New function and prototype.
+
 2003-09-13  Andrew Cagney  <cagney@redhat.com>
 
 	* linux-nat.h (struct target_waitstatus): Declare opaque.
