@@ -87,6 +87,7 @@ LIBCXXFLAGS_FOR_TARGET = $(CXXFLAGS_FOR_TARGET) -fno-implicit-templates
 RANLIB = ranlib
 
 DLLTOOL = dlltool
+WINDRES = windres
 
 NM = nm
 
@@ -263,6 +264,17 @@ DLLTOOL_FOR_TARGET = ` \
     fi; \
   fi`
 
+WINDRES_FOR_TARGET = ` \
+  if [ -f $$r/binutils/windres ] ; then \
+    echo $$r/binutils/windres ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(WINDRES); \
+    else \
+       t='$(program_transform_name)'; echo windres | sed -e 's/x/x/' $$t ; \
+    fi; \
+  fi`
+
 AR_FOR_TARGET = ` \
   if [ -f $$r/binutils/ar ] ; then \
     echo $$r/binutils/ar ; \
@@ -341,6 +353,7 @@ BASE_FLAGS_TO_PASS = \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+	"WINDRES_FOR_TARGET=$(WINDRES_FOR_TARGET)" \
 	"YACC=$(BISON)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
@@ -357,8 +370,8 @@ EXTRA_HOST_FLAGS = \
 	'DLLTOOL=$(DLLTOOL)' \
 	'LD=$(LD)' \
 	'NM=$(NM)' \
-	'RANLIB=$(RANLIB)' 
-
+	'RANLIB=$(RANLIB)' \
+	'WINDRES=$(WINDRES)'
 
 FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
 
@@ -391,7 +404,8 @@ EXTRA_TARGET_FLAGS = \
 	'LIBCXXFLAGS=$$(LIBCXXFLAGS_FOR_TARGET)' \
 	'NM=$$(NM_FOR_TARGET)' \
 	'PICFLAG=$$(PICFLAG_FOR_TARGET)' \
-	'RANLIB=$$(RANLIB_FOR_TARGET)'
+	'RANLIB=$$(RANLIB_FOR_TARGET)' \
+	'WINDRES=$$(WINDRES_FOR_TARGET)'
 
 TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 
@@ -412,6 +426,7 @@ EXTRA_GCC_FLAGS = \
 	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
+	'WINDRES=$$(WINDRES_FOR_TARGET)' \
 	"GCC_FOR_TARGET=$(GCC_FOR_TARGET)" \
 	`if test x"$(LANGUAGES)" != x; then echo "LANGUAGES=$(LANGUAGES)"; fi` \
 	`if test x"$(STMP_FIXPROTO)" != x; then echo "STMP_FIXPROTO=$(STMP_FIXPROTO)"; fi` \
@@ -861,12 +876,12 @@ $(DO_X):
 	      done; \
 	      ;; \
 	    esac ; \
-	    export AR AS CC CXX LD NM RANLIB DLLTOOL; \
+	    export AR AS CC CXX LD NM RANLIB DLLTOOL WINDRES; \
 	    if (cd ./$$i; \
 	        $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
 			"CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
 			"RANLIB=$${RANLIB}" \
-			"DLLTOOL=$${DLLTOOL}" \
+			"DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
 			$${target}); \
 	    then true; else exit 1; fi; \
 	  else true; fi; \
@@ -880,12 +895,12 @@ $(DO_X):
 	    for flag in $(EXTRA_TARGET_FLAGS); do \
 		eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'|"`; \
 	    done; \
-	    export AR AS CC CXX LD NM RANLIB DLLTOOL; \
+	    export AR AS CC CXX LD NM RANLIB DLLTOOL WINDRES; \
 	    if (cd $(TARGET_SUBDIR)/$$i; \
 	        $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
 			"CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
 			"RANLIB=$${RANLIB}" \
-			"DLLTOOL=$${DLLTOOL}" \
+			"DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
 			$${target}); \
 	    then true; else exit 1; fi; \
 	  else true; fi; \
@@ -1140,6 +1155,7 @@ $(CONFIGURE_TARGET_MODULES):
             LDFLAGS="$(LDFLAGS_FOR_TARGET)"; export LDFLAGS; \
 	    NM="$(NM_FOR_TARGET)"; export NM; \
 	    RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
+	    WINDRES="$(WINDRES_FOR_TARGET)"; export WINDRES; \
 	    echo Configuring in $(TARGET_SUBDIR)/$${dir}; \
 	    cd $(TARGET_SUBDIR)/$${dir}; \
 	    case $(srcdir) in \

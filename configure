@@ -738,6 +738,7 @@ if [ "${build}" != "${host}" ]; then
   tools="${tools} DLLTOOL DLLTOOL_FOR_TARGET GCC_FOR_TARGET HOST_PREFIX"
   tools="${tools} HOST_PREFIX_1 LD LD_FOR_TARGET LEX MAKEINFO NM"
   tools="${tools} NM_FOR_TARGET RANLIB RANLIB_FOR_TARGET"
+  tools="${tools} WINDRES WINDRES_FOR_TARGET"
 
   for var in ${tools}; do
     if [ -z "`eval 'echo $'"${var}"`" -a -r Makefile ]; then
@@ -778,6 +779,8 @@ t loop
   NM_FOR_TARGET=${NM_FOR_TARGET-${target_alias}-nm}
   RANLIB=${RANLIB-${host_alias}-ranlib}
   RANLIB_FOR_TARGET=${RANLIB_FOR_TARGET-${target_alias}-ranlib}
+  WINDRES=${WINDRES-${host_alias}-windres}
+  WINDRES_FOR_TARGET=${WINDRES_FOR_TARGET-${target_alias}-windres}
 
   if [ -z "${BISON}" ]; then
     IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
@@ -825,6 +828,7 @@ t loop
   export LD
   export NM
   export RANLIB
+  export WINDRES
 else
   # If CC is still not set, try to get gcc.
   if [ -z "${CC}" ]; then

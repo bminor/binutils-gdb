@@ -1,3 +1,16 @@
+Thu Jun 26 13:59:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (WINDRES): New variable.
+	(WINDRES_FOR_TARGET): New variable.
+	(BASE_FLAGS_TO_PASS): Add WINDRES_FOR_TARGET.
+	(EXTRA_HOST_FLAGS): Add WINDRES.
+	(EXTRA_TARGET_FLAGS): Add WINDRES.
+	(EXTRA_GCC_FLAGS): Add WINDRES.
+	($(DO_X)): Pass down WINDRES.
+	($(CONFIGURE_TARGET_MODULES)): Set WINDRES when configuring.
+	* configure: Treat WINDRES like DLLTOOL, and WINDRES_FOR_TARGET like
+	DLLTOOL_FOR_TARGET.
+
 Wed Jun 25 15:01:26 1997  Felix Lee  <flee@cygnus.com>
 
 	* configure.in: configure sim before gdb for win32-x-ppc
