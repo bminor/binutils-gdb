@@ -1,12 +1,18 @@
 start-sanitize-gdbtk
-Fri Jun 21 09:46:47 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
+Fri Jun 21 11:04:47 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (create_register_windows): Include missing '$'s.
+	Add global declarations for various reg_format_* variables.
+
+Fri Jun 21 09:46:47 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.c (get_register): Support for printing raw formats.
 	* gdbtk.tcl: Add hint for using debug_interface.
 	(center_window, add_breakpoint_frame, delete_breakpoint_frame):
 	Enclose arg in braces for consistency.
 	(create_registers_window, populate_reg_window, update_registers):
-	Major rewrite to support displaying multiple formats in the register window.
+	Major rewrite to support displaying multiple formats in the register
+ 	window.
 	(init_reg_info): New function.
 	(recompute_reg_display_list):  Reset reg_display_list, start
 	register display lines at line 2.

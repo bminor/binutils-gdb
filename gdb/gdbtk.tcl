@@ -1766,6 +1766,13 @@ proc reg_config_menu {} {
 #
 
 proc create_registers_window {} {
+    global reg_format_natural
+    global reg_format_decimal
+    global reg_format_hex
+    global reg_format_octal
+    global reg_format_raw
+    global reg_format_binary
+    global reg_format_unsigned
 
     # If we already have a register window, just use that one.
 
@@ -1782,37 +1789,37 @@ proc create_registers_window {} {
     .reg.menubar.view.menu delete 0 last
 
     # Natural menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_natural(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_natural(label) \
 	    -variable reg_format_natural(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
     # Decimal menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_decimal(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_decimal(label) \
 	    -variable reg_format_decimal(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
     # Hex menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_hex(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_hex(label) \
 	    -variable reg_format_hex(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
     # Octal menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_octal(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_octal(label) \
 	    -variable reg_format_octal(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
     # Binary menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_binary(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_binary(label) \
 	    -variable reg_format_binary(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
     # Unsigned menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_unsigned(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_unsigned(label) \
 	    -variable reg_format_unsigned(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
     # Raw menu item
-    .reg.menubar.view.menu add checkbutton -label reg_format_raw(label) \
+    .reg.menubar.view.menu add checkbutton -label $reg_format_raw(label) \
 	    -variable reg_format_raw(enable) -onvalue on -offvalue off \
 	    -command {update_registers redraw}
 
