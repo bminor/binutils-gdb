@@ -247,7 +247,6 @@ changequote(,)dnl
       i386-*-freebsdaout* | i386-*-freebsd[12].* | i386-*-freebsd[12])
                             fmt=aout em=386bsd ;;
 changequote([,])dnl
-      i386-*-freebsd*)	    fmt=elf bfd_gas=yes ;;
       i386-*-coff | i386-*-sysv* | i386-*-sco3.2v5*coff | i386-*-isc*)
                           fmt=coff ;;
       i386-*-sco3.2v5*)      fmt=elf
@@ -437,6 +436,7 @@ changequote([,])dnl
 
       w65-*-*)              fmt=coff ;;
 
+      *-*-freebsd*)	    fmt=elf bfd_gas=yes ;;
       *-*-aout | *-*-scout)
 			    fmt=aout ;;
       *-*-nindy*)

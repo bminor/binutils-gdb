@@ -75,6 +75,9 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 #define TARGET_MACH		(i386_mach ())
 extern unsigned long i386_mach PARAMS ((void));
 
+#ifdef TE_FreeBSD
+#define AOUT_TARGET_FORMAT	"a.out-i386-freebsd"
+#endif
 #ifdef TE_NetBSD
 #define AOUT_TARGET_FORMAT	"a.out-i386-netbsd"
 #endif
