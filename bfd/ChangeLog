@@ -1,3 +1,8 @@
+2000-05-02  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (prep_headers): USe ELFOSABI_NONE instead of
+	ELFOSABI_SYSV.
+
 2000-05-02  Alan Modra  <alan@linuxcare.com.au>
 
 	* targets.c (bfd_target_vector): Restore bfd_elf32_hppa_vec.
