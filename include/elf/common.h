@@ -139,6 +139,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EM_CYGNUS_MN10200	0xdead
 #define EM_CYGNUS_MN10300	0xbeef
 
+/* FR30 magic number - no EABI available.  */
+#define EM_CYGNUS_FR30		0x46523330
+
 /* See the above comment before you add a new EM_* value here.  */
 
 /* Values for e_version */
@@ -214,7 +217,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define NT_PSTATUS	10		/* Has a struct pstatus */
 #define NT_FPREGS	12		/* Has a struct fpregset */
 #define NT_PSINFO	13		/* Has a struct psinfo */
-#define NT_LWPSTATUS	16		/* Has a struct lwpstatus_t
+#define NT_LWPSTATUS	16		/* Has a struct lwpstatus_t */
 #define NT_LWPSINFO	17		/* Has a struct lwpsinfo_t */
 
 /* Values of note segment descriptor types for object files.  */

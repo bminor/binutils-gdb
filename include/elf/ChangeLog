@@ -1,3 +1,9 @@
+Wed Nov  4 15:56:50 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* common.h (EM_CYGNUS_FR30): New machine number.
+
+	* fr30.h: New file: Definitions for the FR30.
+
 Fri Oct 30 11:54:15 1998  Catherine Moore  <clm@cygnus.com>
 
         From Philip Blundell <pb@nexus.co.uk>:
