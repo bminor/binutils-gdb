@@ -1,3 +1,17 @@
+2003-05-15  Andrew Cagney  <cagney@redhat.com>
+
+	* c-lang.c (c_printstr): Delete "extern inspect_it" declaration.
+	* p-valprint.c (pascal_object_print_value_fields): Ditto.
+	* p-lang.c (pascal_printstr): Ditto.
+	* objc-lang.c (objc_printstr): Ditto.
+	* m2-lang.c (m2_printstr): Ditto.
+	* jv-valprint.c (java_print_value_fields): Ditto.
+	* f-lang.c (f_printstr): Ditto.
+	* cp-valprint.c (cp_print_value_fields): Ditto.  Include "valprint.h".
+	* ada-valprint.c (inspect_it, repeat_count_threshold): Ditto, and
+	for repeat_count_threshold.
+	* Makefile.in (cp-valprint.o): Update dependencies.
+
 2003-05-15  Jeff Johnston  <jjohnstn@redhat.com>
  
 	* ia64-tdep.c: Increase max_skip_non_prologue_insns to 40.

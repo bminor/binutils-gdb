@@ -301,7 +301,6 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      extern int inspect_it;
       int fields_seen = 0;
 
       for (i = n_baseclasses; i < len; i++)

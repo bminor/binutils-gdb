@@ -755,7 +755,6 @@ pascal_object_print_value_fields (struct type *type, char *valaddr,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      extern int inspect_it;
       int fields_seen = 0;
 
       if (dont_print_statmem == 0)
