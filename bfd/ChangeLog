@@ -1,3 +1,11 @@
+2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Decay
+	GOT_PAGE/GOT_OFST referencing overridable symbol to
+	GOT_DISP/addend.
+	(_bfd_mips_elf_check_relocs): Handle GOT_PAGE referencing
+	global symbol as GOT_DISP.
+
 2003-04-10  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_relocate_section): Don't continue to the
