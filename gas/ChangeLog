@@ -23,8 +23,6 @@
 	redifinition warning.
 	(md_apply_fix): Added cast from enum to int for fixP->fx_r_type.
 	(hppa_force_relocation): ditto
-	(pa_vtable_entry): ditto
-	(pa_vtable_inherit): ditto
 	(md_apply_fix): Added cast to buf to fix warnings.
 
 	* config/tc-hppa.h (pa_define_label, parse_cons_expression_hppa,
