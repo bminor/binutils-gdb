@@ -665,6 +665,7 @@ struct d10v_unwind_cache *
 d10v_frame_unwind_cache (struct frame_info *next_frame,
 			 void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   CORE_ADDR pc;
   ULONGEST prev_sp;
   ULONGEST this_base;
@@ -689,7 +690,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
        pc > 0 && pc < frame_pc_unwind (next_frame);
        pc += 4)
     {
-      op = (unsigned long) read_memory_integer (pc, 4);
+      op = get_frame_memory_unsigned (next_frame, pc, 4);
       if ((op & 0xC0000000) == 0xC0000000)
 	{
 	  /* long instruction */
@@ -753,9 +754,10 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
     {
       /* The SP was saved (which is very unusual), the frame base is
 	 just the PREV's frame's TOP-OF-STACK.  */
-      this_base = read_memory_unsigned_integer (info->saved_regs[D10V_SP_REGNUM], 
-						register_size (current_gdbarch,
-							       D10V_SP_REGNUM));
+      this_base
+	= get_frame_memory_unsigned (next_frame,
+				     info->saved_regs[D10V_SP_REGNUM], 
+				     register_size (gdbarch, D10V_SP_REGNUM));
       prev_sp = this_base;
     }
   else
@@ -779,9 +781,9 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 
   if (info->saved_regs[LR_REGNUM])
     {
-      CORE_ADDR return_pc 
-	= read_memory_unsigned_integer (info->saved_regs[LR_REGNUM], 
-					register_size (current_gdbarch, LR_REGNUM));
+      CORE_ADDR return_pc
+	= get_frame_memory_unsigned (next_frame, info->saved_regs[LR_REGNUM], 
+				     register_size (gdbarch, LR_REGNUM));
       info->return_pc = d10v_make_iaddr (return_pc);
     }
   else
@@ -873,7 +875,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	int i;
 	fprintf_filtered (file, "  ");
 	frame_read_register (frame, a, num);
-	for (i = 0; i < register_size (current_gdbarch, a); i++)
+	for (i = 0; i < register_size (gdbarch, a); i++)
 	  {
 	    fprintf_filtered (file, "%02x", (num[i] & 0xff));
 	  }
@@ -1450,6 +1452,7 @@ saved_regs_unwinder (struct frame_info *next_frame,
 		     enum lval_type *lvalp, CORE_ADDR *addrp,
 		     int *realnump, void *bufferp)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   if (this_saved_regs[regnum] != 0)
     {
       if (regnum == D10V_SP_REGNUM)
@@ -1461,7 +1464,7 @@ saved_regs_unwinder (struct frame_info *next_frame,
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    store_unsigned_integer (bufferp,
-				    register_size (current_gdbarch, regnum),
+				    register_size (gdbarch, regnum),
 				    this_saved_regs[regnum]);
 	}
       else
@@ -1475,8 +1478,8 @@ saved_regs_unwinder (struct frame_info *next_frame,
 	  if (bufferp != NULL)
 	    {
 	      /* Read the value in from memory.  */
-	      read_memory (this_saved_regs[regnum], bufferp,
-			   register_size (current_gdbarch, regnum));
+	      get_frame_memory (next_frame, this_saved_regs[regnum], bufferp,
+				register_size (gdbarch, regnum));
 	    }
 	}
       return;

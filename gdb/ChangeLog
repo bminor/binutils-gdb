@@ -1,3 +1,14 @@
+2003-06-03  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_frame_memory_signed): New function.
+	(get_frame_memory, get_frame_memory_unsigned): New function.
+	(get_frame_arch): New function.
+	* frame.h (get_frame_signed_memory, get_frame_arch): Declare.
+	(get_frame_memory, get_frame_unsigned_memory): Declare.
+	* d10v-tdep.c (d10v_frame_unwind_cache): Use
+	get_frame_memory_unsigned and get_frame_arch.
+	(d10v_frame_unwind_cache, saved_regs_unwinder): Ditto.
+
 2003-06-03  Raoul Gough  <RaoulGough@yahoo.co.uk>
 
 	* MAINTAINERS (write after approval): Add myself.

@@ -2219,6 +2219,37 @@ deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
   return frame;
 }
 
+/* Memory access methods.  */
+
+void
+get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr, void *buf,
+		  int len)
+{
+  read_memory (addr, buf, len);
+}
+
+LONGEST
+get_frame_memory_signed (struct frame_info *this_frame, CORE_ADDR addr,
+			 int len)
+{
+  return read_memory_integer (addr, len);
+}
+
+ULONGEST
+get_frame_memory_unsigned (struct frame_info *this_frame, CORE_ADDR addr,
+			   int len)
+{
+  return read_memory_unsigned_integer (addr, len);
+}
+
+/* Architecture method.  */
+
+struct gdbarch *
+get_frame_arch (struct frame_info *this_frame)
+{
+  return current_gdbarch;
+}
+
 int
 legacy_frame_p (struct gdbarch *current_gdbarch)
 {
