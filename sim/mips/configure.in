@@ -131,8 +131,7 @@ sim_m16_filter="16"
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)	sim_default_gen=M16
-			#sim_use_gen=M16
-			sim_use_gen=NO
+			sim_use_gen=M16
 			sim_igen_machine="-M tx19"
 			sim_m16_machine="-M tx19"
 			sim_igen_filter="32"
