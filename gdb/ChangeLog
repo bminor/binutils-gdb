@@ -1,3 +1,10 @@
+Mon Mar 20 07:34:48 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* hppah-nat.c (store_inferior_registers):  Move check for
+	CANNOT_STORE_REGISTER to a better place.  Fixes ptrace I/O errors
+	found by test suite during function calls, which attempts to write
+	unwritable registers.
+
 Sat Mar 18 02:02:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_symbol):  If finishing a function without

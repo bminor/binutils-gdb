@@ -60,6 +60,8 @@ store_inferior_registers (regno)
 
   if (regno >= 0)
     {
+      if (CANNOT_STORE_REGISTER (regno))
+	return;
       regaddr = register_addr (regno, offset);
       errno = 0;
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
@@ -90,22 +92,14 @@ store_inferior_registers (regno)
 		sprintf (msg, "writing register %s: %s",
 			 reg_names[regno], err);
 		warning (msg);
-		goto error_exit;
+		return;
 	      }
 	    regaddr += sizeof(int);
 	  }
     }
   else
-    {
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  if (CANNOT_STORE_REGISTER (regno))
-	    continue;
-	  store_inferior_registers (regno);
-	}
-    }
- error_exit:
-  return;
+    for (regno = 0; regno < NUM_REGS; regno++)
+      store_inferior_registers (regno);
 }
 
 /* Fetch one register.  */
