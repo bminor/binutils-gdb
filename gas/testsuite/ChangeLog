@@ -1,3 +1,8 @@
+2001-07-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/lif-empic.d: Add back dollar signs before floating
+	point register names.
+
 2001-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/relax.s: Test rs_space.
