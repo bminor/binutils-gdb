@@ -1,3 +1,14 @@
+Thu Oct 12 13:36:15 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* corelow.c (core_open): Don't update the to_sections and
+	to_sections_end fields in core_ops here.  It's too late.
+	* irix5-nat.c (solib_add): Update the to_sections and
+	to_sections_end fields in core_ops here if needed.
+	* osfsolib.c (solib_add): Likewise.
+	* rs6000-nat.c (xcoff_reload_core): Likewise.
+	* solib.c (solib_add): Likewise.
+	* somsolib.c (solib_add): Likewise.
+
 Wed Oct 11 17:25:59 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* Makefile.in (VERSION): Bump version to 4.15.1
