@@ -1,3 +1,8 @@
+2005-03-09  Ben Elliston  <bje@au.ibm.com>
+
+	* gas/maxq10/maxq10.exp: Remove stray semicolons.
+	* gas/maxq20/maxq20.exp: Likewise.
+
 2005-03-08  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/no-fit.[ls]: New.
