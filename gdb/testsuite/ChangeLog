@@ -61,6 +61,16 @@
 	From Kei Sakamoto <sakamoto.kei@renesas.com>:
 	* gdb.base/relocate.c (dummy): New padding array.
 
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.disasm/8300s.s: Fix syntax of bsr insn.  
+
+	* gdb.disasm/h8300s.exp : Minor changes in disassembler output require
+	patterns to be more general, accepting old and new output.
+	Some output chars (such as '+') also must be quoted.
+	Some addresses are displayed numerically instead of 
+	symbolically.
+
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/return2.exp: Don't test long-long return.
