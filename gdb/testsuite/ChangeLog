@@ -1,3 +1,10 @@
+Fri Aug  6 13:38:08 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* gdb.t10/nodebug.exp:  Expect to find local/global minimal symbols
+	in text, data, and bss.
+	* gdb.t10/nodebug.c:  Add local and global test variables for
+	initialized and uninitialized data.
+
 Thu Aug  5 12:18:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/unix-gdb.exp (gdb_exit): Add "wait".
