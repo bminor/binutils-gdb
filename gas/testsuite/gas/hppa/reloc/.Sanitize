@@ -33,10 +33,10 @@ fixupbug.s
 funcrelocbug.s
 labelopbug.s
 plabelbug.s
+reduce.s
+reduce2.s
 reloc.exp
-relocreduce.s
-relocreduce2.s
-r_no_relocbug.s
+r_no_reloc.s
 roundmode.s
 selectorbug.s
 
