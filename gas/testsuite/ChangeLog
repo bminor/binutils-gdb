@@ -1,3 +1,9 @@
+2002-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/intel16.s: New.
+	* gas/i386/intel16.d: New.
+	* gas/i386/i386.exp: Run it.
+
 2002-07-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* lib/gas-defs.exp (run_dump_test): Run objdump/nm/objcopy/readelf
