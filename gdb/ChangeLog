@@ -1,3 +1,7 @@
+2001-05-16  Michael Snyder  <msnyder@redhat.com>
+
+	* infcmd.c (do_registers_info): Move alloca outside of loop.
+
 2001-05-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (sparc_gdbarch_init): Get the architecture from
