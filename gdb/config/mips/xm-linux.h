@@ -1,5 +1,6 @@
-/* Host definitions for Linux/MIPS.
-   Copyright 2001 Free Software Foundation, Inc.
+/* Host definitions for GNU/Linux on MIPS.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

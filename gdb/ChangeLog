@@ -7,6 +7,16 @@
 	* ia64-linux-nat.c, infrun.c, linux-proc.c: Ditto.
 	* proc-service.c, i386-linux-tdep.c, ppc-linux-tdep.c: Ditto.
 	* s390-tdep.c: Ditto.
+	* config/nm-linux.h, config/alpha/nm-linux.h: Ditto.
+	* config/alpha/tm-alpha.h, config/alpha/tm-alphalinux.h:
+	* config/alpha/xm-alphalinux.h, config/i386/nm-linux.h: Ditto.
+	* config/i386/nm-x86-64.h, config/i386/tm-linux.h: Ditto.
+	* config/m68k/tm-linux.h, config/mips/nm-linux.h: Ditto.
+	* config/mips/tm-linux.h, config/mips/xm-linux.h: Ditto.
+	* config/powerpc/tm-linux.h, config/s390/nm-linux.h: Ditto.
+	* config/s390/tm-linux.h, config/sh/tm-linux.h: Ditto.
+	* config/sparc/nm-linux.h, config/sparc/tm-linux.h: Ditto.
+	* config/sparc/tm-sp64linux.h, config/sparc/xm-linux.h: Ditto.
 	Fix PR gdb/378.
 	
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>

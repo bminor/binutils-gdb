@@ -1,6 +1,7 @@
-/* Macro definitions for running gdb on a Sparc running Linux.
-   Copyright 1989, 1992, 1996, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+/* Macro definitions for running gdb on a Sparc running GNU/Linux.
+
+   Copyright 1989, 1992, 1996, 1998, 1999, 2000, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 

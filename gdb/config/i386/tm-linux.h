@@ -1,6 +1,7 @@
 /* Definitions to target GDB to GNU/Linux on 386.
-   Copyright 1992, 1993, 1995, 1996, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1995, 1996, 1998, 1999, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,7 +61,7 @@ extern int i386_linux_register_byte (int reg);
 #define REGISTER_RAW_SIZE(reg) i386_linux_register_raw_size ((reg))
 extern int i386_linux_register_raw_size (int reg);
 
-/* Linux/ELF uses stabs-in-ELF with the DWARF register numbering
+/* GNU/Linux ELF uses stabs-in-ELF with the DWARF register numbering
    scheme by default, so we must redefine STAB_REG_TO_REGNUM.  This
    messes up the floating-point registers for a.out, but there is not
    much we can do about that.  */

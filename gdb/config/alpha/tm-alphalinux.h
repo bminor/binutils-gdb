@@ -1,6 +1,9 @@
-/* Definitions to make GDB run on an Alpha box under Linux.  The
-   definitions here are used when the _target_ system is running Linux.
-   Copyright 1996, 1998, 1999, 2000 Free Software Foundation, Inc.
+/* Definitions to make GDB run on an Alpha box under GNU/Linux.  The
+   definitions here are used when the _target_ system is running
+   GNU/Linux.
+
+   Copyright 1996, 1998, 1999, 2000, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -38,7 +41,7 @@ extern long alpha_linux_sigtramp_offset (CORE_ADDR);
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2
-   on Linux and most implementations.  */
+   on GNU/Linux and most implementations.  */
 
 #undef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 2
@@ -69,8 +72,8 @@ extern long alpha_linux_sigtramp_offset (CORE_ADDR);
 
 /* If FRAME refers to a sigtramp frame, return the address of the next frame.
 
-   Under Linux, sigtramp handlers have dynamically generated procedure
-   descriptors that make this hack unnecessary.  */
+   Under GNU/Linux, sigtramp handlers have dynamically generated
+   procedure descriptors that make this hack unnecessary.  */
 
 #undef FRAME_PAST_SIGTRAMP_FRAME
 #define FRAME_PAST_SIGTRAMP_FRAME(frame, pc)	(0)

@@ -1,5 +1,7 @@
-/* Target-specific definitions for Linux running on a Hitachi Super-H.
-   Copyright 2000 Free Software Foundation, Inc.
+/* Target-specific definitions for GNU/Linux running on a Hitachi
+   Super-H.
+
+   Copyright 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +20,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Pull in Linux generic defs */
+/* Pull in GNU/Linux generic defs.  */
 #include "tm-linux.h"
 
 /* Pull in sh-target defs */

@@ -1,5 +1,6 @@
-/* Target-dependent definitions for Linux/MIPS.
-   Copyright 2001 Free Software Foundation, Inc.
+/* Target-dependent definitions for GNU/Linux MIPS.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,7 +31,7 @@
 #undef SKIP_TRAMPOLINE_CODE
 #undef IGNORE_HELPER_CALL
 
-/* Linux/MIPS has __SIGRTMAX == 127.  */
+/* GNU/Linux MIPS has __SIGRTMAX == 127.  */
 
 #define REALTIME_LO 32
 #define REALTIME_HI 128

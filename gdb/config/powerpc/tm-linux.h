@@ -1,5 +1,6 @@
-/* Definitions to target GDB to Linux on 386.
-   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
+/* Definitions to target GDB to GNU/Linux on PowerPC.
+
+   Copyright 1992, 1993, 2000, 2002 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux.
-   Copyright 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Linux is SVR4-ish but its /proc file system isn't.  */
+/* GNU/Linux is SVR4-ish but its /proc file system isn't.  */
 #undef USE_PROC_FS
 
 /* Tell GDB that we can attach and detach other processes.  */

@@ -1,5 +1,6 @@
-/* Macro definitions for GDB for a UltraSparc running Linux.
-   Copyright 2001 Free Software Foundation, Inc.
+/* Macro definitions for GDB for a UltraSparc running GNU/Linux.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

@@ -17,7 +17,8 @@
    should issue an ERROR result.. */
 
 #ifdef __linux__
-#define  _MIT_POSIX_THREADS 1	/* Linux (or at least RedHat 4.0) needs this */
+#define  _MIT_POSIX_THREADS 1	/* GNU/Linux (or at least RedHat 4.0)
+                                   needs this */
 #endif
 
 #include <pthread.h>

@@ -1,5 +1,6 @@
-/* Host definitions for GDB running on an Alpha under Linux
-   Copyright 1996, 2001 Free Software Foundation, Inc.
+/* Host definitions for GDB running on an Alpha under GNU/Linux.
+
+   Copyright 1996, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

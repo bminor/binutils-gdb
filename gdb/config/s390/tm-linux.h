@@ -1,5 +1,7 @@
-/* Target definitions for GDB for a s390 running Linux.
-   Copyright 2001 Free Software Foundation, Inc.
+/* Target definitions for GDB for a s390 running GNU/Linux.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
 

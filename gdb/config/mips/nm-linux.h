@@ -1,5 +1,6 @@
-/* Native-dependent definitions for Linux/MIPS.
-   Copyright 1996, 2001 Free Software Foundation, Inc.
+/* Native-dependent definitions for GNU/Linux on MIPS.
+
+   Copyright 1996, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

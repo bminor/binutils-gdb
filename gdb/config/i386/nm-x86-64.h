@@ -1,6 +1,7 @@
-/* Native support for Linux/x86-64.
-   Copyright 2001, 2002  Free Software Foundation, Inc.
-   Contributed by Jiri Smid, SuSE Labs.
+/* Native support for GNU/Linux x86-64.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.  Contributed by
+   Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
 
