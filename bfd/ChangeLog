@@ -172,6 +172,10 @@
 	* elf32-arm.h (elf32_arm_final_link_relocate): Fix handling of
 	R_ARM_THM_PC11.
 
+2002-09-11  Jeffrey Law  <law@redhat.com>
+
+	* elf32-h8300.c (elf32_h8_relax_section): Fix typo.
+
 2002-09-11  Andrew Haley  <aph@cambridge.redhat.com>
 
 	* elf.c (_bfd_elf_find_nearest_line): Check functionname_ptr and
@@ -1811,7 +1815,7 @@
 	* elf64-ppc.c (ppc64_elf_relocate_section): Allow unresolved
 	relocs in opd for non-shared too.
 
-2002-06-06  Jeffrey Law <law@redhat.com
+2002-06-06  Jeffrey Law  <law@redhat.com>
 
 	* elf32-h8300.c (elf32_h8_relax_section): Ignore uninteresting
 	relocations.
