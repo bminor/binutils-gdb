@@ -1,5 +1,8 @@
 Fri Apr 18 11:14:43 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* sim-options.c (standard_options): Add --endian.
+	(standard_option_handler): Likewise.
+
 	* nrun.c: #include <signal.h>.
  	(main, cntrl_c): Wrap calls to sim_resume in a SIGINT
  	handler that calls sim_stop ().

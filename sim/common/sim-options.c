@@ -70,6 +70,17 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
    options to another table or use a HAVE_FOO macro to ifdef out unavailable
    options.  */
 
+/* ??? One might want to conditionally compile out the entries that
+   aren't enabled.  There's a distinction, however, between options a
+   simulator can't support and options that haven't been configured in.
+   Certainly options a simulator can't support shouldn't appear in the
+   output of --help.  Whether the same thing applies to options that haven't
+   been configured in or not isn't something I can get worked up over.
+   [Note that conditionally compiling them out might simply involve moving
+   the option to another table.]
+   If you decide to conditionally compile them out as well, delete this
+   comment and add a comment saying that that is the rule.  */
+
 #define OPTION_DEBUG_INSN	(OPTION_START + 0)
 #define OPTION_DEBUG_FILE	(OPTION_START + 1)
 #define OPTION_TRACE_INSN	(OPTION_START + 2)
@@ -91,6 +102,12 @@ static const OPTION standard_options[] =
   { {"verbose", no_argument, NULL, 'v'},
       'v', NULL, "Verbose output",
       standard_option_handler },
+
+#if defined (SIM_HAVE_BIENDIAN) /* ??? && WITH_TARGET_BYTE_ORDER == 0 */
+  { {"endian", required_argument, NULL, 'E'},
+      'E', "big|little", "Set endianness",
+      standard_option_handler },
+#endif
 
   { {"debug", no_argument, NULL, 'D'},
       'D', NULL, "Print debugging messages",
@@ -138,7 +155,7 @@ static const OPTION standard_options[] =
 
 #ifdef SIM_HAVE_SIMCACHE
   { {"simcache-size", required_argument, NULL, 'c'},
-      'c', "SIM CACHE SIZE", "Specify size of simulator instruction cache",
+      'c', "SIM CACHE SIZE", "Specify size of simulator execution cache",
       standard_option_handler },
 #endif
 
@@ -150,7 +167,7 @@ static const OPTION standard_options[] =
 
 #ifdef SIM_HAVE_MAX_INSNS
   { {"max-insns", required_argument, NULL, 'M'},
-      'M', "MAX INSNS", "Specify maximum instructions to execute",
+      'M', "MAX INSNS", "Specify maximum number of instructions to execute",
       standard_option_handler },
 #endif
 
@@ -204,6 +221,34 @@ standard_option_handler (sd, opt, arg)
     case 'v' :
       STATE_VERBOSE_P (sd) = 1;
       break;
+
+#ifdef SIM_HAVE_BIENDIAN
+    case 'E' :
+      if (strcmp (arg, "big") == 0)
+	{
+	  if (WITH_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+	    {
+	      sim_io_eprintf (sd, "Simulator compiled for little endian only.\n");
+	      return SIM_RC_FAIL;
+	    }
+	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
+	}
+      else if (strcmp (arg, "little") == 0)
+	{
+	  if (WITH_TARGET_BYTE_ORDER == BIG_ENDIAN)
+	    {
+	      sim_io_eprintf (sd, "Simulator compiled for big endian only.\n");
+	      return SIM_RC_FAIL;
+	    }
+	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
+	}
+      else
+	{
+	  sim_io_eprintf (sd, "Invalid endian specification `%s'\n", arg);
+	  return SIM_RC_FAIL;
+	}
+      break;
+#endif
 
     case 'D' :
       if (! WITH_DEBUG)
