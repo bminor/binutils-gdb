@@ -98,6 +98,7 @@ int current_environment;
 int current_alignment;
 int current_floating_point;
 ppc_model current_ppc_model = WITH_DEFAULT_PPC_MODEL;
+model_enum current_model = WITH_DEFAULT_MODEL;
 
 
 /* create a device tree from the image */
@@ -653,6 +654,8 @@ run_until_stop(psim *system,
 							 instruction,
 							 cia,
 							 cache_entry);
+
+	      mon_event(mon_event_icache_miss, processor, cia);
 	      cache_entry->address = cia;
 	      cache_entry->semantic = semantic;
 	      cia = semantic(processor, cache_entry, cia);
@@ -746,6 +749,8 @@ run_until_stop(psim *system,
 						 instruction,
 						 cia,
 						 cache_entry);
+
+	    mon_event(mon_event_icache_miss, system->processors[current_cpu], cia);
 	    cache_entry->address = cia;
 	    cache_entry->semantic = semantic;
 	    cpu_set_program_counter(processor,

@@ -21,7 +21,7 @@
 #ifndef _OPTIONS_C_
 #define _OPTIONS_C_
 
-#include "basics.h"
+#include "cpu.h"
 #include "options.h"
 
 STATIC_INLINE const char *
@@ -85,25 +85,6 @@ options_mon (int mon)
   return "UNKNOWN";
 }
 
-STATIC_INLINE const char *
-options_ppc (ppc_model ppc)
-{
-  switch (ppc) {
-  case PPC_MODEL_UNKNOWN:	return "NONE";
-  case PPC_MODEL_601:		return "601";
-  case PPC_MODEL_602:		return "602";
-  case PPC_MODEL_603:		return "603";
-  case PPC_MODEL_603e:		return "603e";
-  case PPC_MODEL_604:		return "604";
-  case PPC_MODEL_403:		return "403";
-  case PPC_MODEL_505:		return "505";
-  case PPC_MODEL_821:		return "821";
-  case PPC_MODEL_860:		return "860";
-  }
-
-  return "UNKNOWN";
-}
-
 void
 print_options (void)
 {
@@ -129,9 +110,9 @@ print_options (void)
   printf_filtered ("WITH_ASSERT              = %d\n", WITH_ASSERT);
   printf_filtered ("WITH_MON                 = %s\n", options_mon (WITH_MON));
   printf_filtered ("WITH_FUNCTION_UNIT       = %d\n", WITH_FUNCTION_UNIT);
-  printf_filtered ("WITH_DEFAULT_PPC_MODEL   = %s\n", options_ppc (WITH_DEFAULT_PPC_MODEL));
-  printf_filtered ("WITH_PPC_MODEL           = %s\n", options_ppc (WITH_PPC_MODEL));
-  printf_filtered ("WITH_RESERVE_BITS        = %d\n", WITH_RESERVE_BITS);
+  printf_filtered ("WITH_DEFAULT_MODEL       = %s\n", model_name[WITH_DEFAULT_MODEL]);
+  printf_filtered ("WITH_MODEL               = %s\n", model_name[WITH_MODEL]);
+  printf_filtered ("WITH_RESERVED_BITS       = %d\n", WITH_RESERVED_BITS);
   printf_filtered ("DEFAULT_INLINE           = %d\n", DEFAULT_INLINE);
   printf_filtered ("SIM_ENDIAN_INLINE        = %d\n", SIM_ENDIAN_INLINE);
   printf_filtered ("BITS_INLINE              = %d\n", BITS_INLINE);

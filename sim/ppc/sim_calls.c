@@ -23,9 +23,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "basics.h"
-#include "function_unit.h"
+#include "cpu.h"
 #include "psim.h"
+#include "options.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -93,13 +93,13 @@ sim_open (char *args)
 	    break;
 	  case 'm':
 	    if (p[1])
-	      function_unit_model(p+1);
+	      model_set(p+1);
 	    else {
 	      argp += 1;
 	      if (argv[argp] == NULL)
 		error("Missing <trace> option for -t\n");
 	      else
-		function_unit_model(argv[argp]);
+		model_set(argv[argp]);
 	    }
 	    break;
 	  case 'i':
@@ -115,6 +115,9 @@ sim_open (char *args)
       argp += 1;
     }
   }
+
+  if (ppc_trace[trace_opts])
+    print_options ();
 
   /* do something */
   TRACE(trace_tbd, ("sim_open() - TBD - should parse the arguments\n"));
@@ -173,8 +176,8 @@ sim_read (SIM_ADDR mem, unsigned char *buf, int length)
 {
   int result = psim_read_memory(simulator, MAX_NR_PROCESSORS,
 				buf, mem, length);
-  TRACE(trace_gdb, ("sim_read(mem=0x%x, buf=0x%x, length=%d) = %d\n",
-		    mem, buf, length, result));
+  TRACE(trace_gdb, ("sim_read(mem=0x%lx, buf=0x%lx, length=%d) = %d\n",
+		    (long)mem, (long)buf, length, result));
   return result;
 }
 
@@ -185,8 +188,8 @@ sim_write (SIM_ADDR mem, unsigned char *buf, int length)
   int result = psim_write_memory(simulator, MAX_NR_PROCESSORS,
 				 buf, mem, length,
 				 1/*violate_ro*/);
-  TRACE(trace_gdb, ("sim_write(mem=0x%x, buf=0x%x, length=%d) = %d\n",
-		    mem, buf, length, result));
+  TRACE(trace_gdb, ("sim_write(mem=0x%lx, buf=0x%lx, length=%d) = %d\n",
+		    (long)mem, (long)buf, length, result));
   return result;
 }
 
@@ -197,8 +200,8 @@ sim_fetch_register (int regno, unsigned char *buf)
   if (simulator == NULL) {
     return;
   }
-  TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%x)\n",
-		    regno, register_names[regno], buf));
+  TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%lx)\n",
+		    regno, register_names[regno], (long)buf));
   psim_read_register(simulator, MAX_NR_PROCESSORS,
 		     buf, register_names[regno],
 		     raw_transfer);
@@ -210,8 +213,8 @@ sim_store_register (int regno, unsigned char *buf)
 {
   if (simulator == NULL)
     return;
-  TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%x)\n",
-		    regno, register_names[regno], buf));
+  TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",
+		    regno, register_names[regno], (long)buf));
   psim_write_register(simulator, MAX_NR_PROCESSORS,
 		      buf, register_names[regno],
 		      raw_transfer);
@@ -286,8 +289,8 @@ sim_stop_reason (enum sim_stop *reason, int *sigrc)
   
   }
 
-  TRACE(trace_gdb, ("sim_stop_reason(reason=0x%x(%d), sigrc=0x%x(%d))\n",
-		    reason, *reason, sigrc, *sigrc));
+  TRACE(trace_gdb, ("sim_stop_reason(reason=0x%lx(%ld), sigrc=0x%lx(%ld))\n",
+		    (long)reason, (long)*reason, (long)sigrc, (long)*sigrc));
 }
 
 

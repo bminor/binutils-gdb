@@ -236,6 +236,12 @@ extern int current_floating_point;
 #define WITH_ASSERT			1
 #endif
 
+/* Whether to check instructions for reserved bits being set */
+
+#ifndef WITH_RESERVED_BITS
+#define WITH_RESERVED_BITS		1
+#endif
+
 /* include monitoring code */
 
 #define MONITOR_INSTRUCTION_ISSUE	1
@@ -281,6 +287,19 @@ extern ppc_model current_ppc_model;
 #define CURRENT_PPC_MODEL (WITH_PPC_MODEL	\
 			   ? WITH_PPC_MODEL	\
 			   : current_ppc_model)
+
+/* Current CPU model (models are in the generated models.h include file)  */
+#ifndef WITH_MODEL
+#define WITH_MODEL			0
+#endif
+
+#define CURRENT_MODEL (WITH_MODEL	\
+		       ? WITH_MODEL	\
+		       : current_model)
+
+#ifndef WITH_DEFAULT_MODEL
+#define WITH_DEFAULT_MODEL		DEFAULT_MODEL
+#endif
 
 /* INLINE CODE SELECTION:
 
@@ -454,7 +473,13 @@ extern ppc_model current_ppc_model;
 #define IDECODE_INLINE			DEFAULT_INLINE
 #endif
 
-/* Code to simule functional units of real machines */
+/* Model specific code used in simulating functional units */
+
+#ifndef MODEL_INLINE
+#define	MODEL_INLINE			DEFAULT_INLINE
+#endif
+
+/* Code to simulate functional units of real machines */
 
 #ifndef FUNCTION_UNIT_INLINE
 #define FUNCTION_UNIT_INLINE		DEFAULT_INLINE

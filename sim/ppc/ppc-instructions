@@ -50,6 +50,31 @@
 #
 #	5	Description
 #
+#
+# For flags marked 'model', the fields are interpreted as follows:
+#
+#	1	Not used
+#
+#	2	Not used
+#
+#	3	"macro"
+#
+#	4	String name for model
+#
+#	5	Specific CPU model, must be an identifier
+#
+#	6	Comma separated list of functional units
+
+# Flags for model.h
+::model-macro:::#define PPC_LOAD      0x00000001
+::model-macro:::#define PPC_STORE     0x00000002
+::model-macro:::#define PPC_SERIALIZE 0x00000004
+
+# PowerPC models
+::model:604:PPC604:SCIU=2 single cycle integer,MCIU=1 multiple cycle integer,FPU=1 floating point,LSU=1 memory,BPU=1 branch
+::model:603e:PPC603e:IU=1 integer,FPU=1 floating point,LSU=1 memory,SRU=1 system register,BPU=1 branch
+::model:603:PPC603:IU=1 integer,FPU=1 floating point,LSU=1 memory,SRU=1 system register,BPU=1 branch
+
 
 # The following (illegal) instruction is `known' by gen and is
 # called when ever an illegal instruction is encountered
@@ -526,10 +551,16 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # I.2.4.1 Branch Instructions
 #
 0.18,6.LI,30.AA,31.LK:I:t::Branch
+*PPC603:PPC603_BPU:1:1:0
+*PPC603e:PPC603_BPU:1:1:0
+*PPC604:PPC603_BPU:1:1:0
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
 	if (LK) LR = (spreg)CIA+4;
 0.16,6.BO,11.BI,16.BD,30.AA,31.LK:B:t::Branch Conditional
+*PPC603:PPC603_BPU:1:1:0
+*PPC603e:PPC603_BPU:1:1:0
+*PPC604:PPC603_BPU:1:1:0
 	int M, ctr_ok, cond_ok;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
@@ -541,6 +572,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  else    NIA = IEA(CIA + EXTS(BD_0b00));
 	if (LK) LR = (spreg)IEA(CIA + 4);
 0.19,6.BO,11.BI,16./,21.16,31.LK:XL:t::Branch Conditional to Link Register
+*PPC603:PPC603_BPU:1:1:0
+*PPC603e:PPC603_BPU:1:1:0
+*PPC604:PPC603_BPU:1:1:0
 	int M, ctr_ok, cond_ok;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
@@ -550,6 +584,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (ctr_ok && cond_ok) NIA = IEA(LR_0b00);
 	if (LK) LR = (spreg)IEA(CIA + 4);
 0.19,6.BO,11.BI,16./,21.528,31.LK:XL:t::Branch Conditional to Count Register
+*PPC603:PPC603_BPU:1:1:0
+*PPC603e:PPC603_BPU:1:1:0
+*PPC604:PPC603_BPU:1:1:0
 	int cond_ok;
 	cond_ok = BO{0} || (CR{BI} == BO{1});
 	if (cond_ok) NIA = IEA(CTR_0b00);
@@ -1035,6 +1072,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.14,6.RT,11.RA,16.SI:D:T::Add Immediate
+*PPC603:PPC603_IU:1:1:0
+*PPC603e:PPC603e_IU|PPC603e_SRU:1:1:0
+*PPC604:PPC604_SCIU:1:1:0
 	if (RA_is_0) *rT = EXTS(SI);
 	else         *rT = *rA + EXTS(SI);
 0.15,6.RT,11.RA,16.SI:D:::Add Immediate Shifted

@@ -80,6 +80,7 @@ ALIGNMENT_CFLAGS = @sim_alignment@
 FLOAT_CFLAGS = @sim_float@
 TRACE_CFLAGS = @sim_trace@
 ASSERT_CFLAGS = @sim_assert@
+RESERVED_CFLAGS = @sim_reserved@
 MONITOR_CFLAGS = @sim_monitor@
 FUNC_CFLAGS = @sim_func@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@
@@ -96,6 +97,7 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(FLOAT_CFLAGS) \
   $(TRACE_CFLAGS) \
   $(ASSERT_CFLAGS) \
+  $(RESERVED_CFLAGS) \
   $(MONITOR_CFLAGS) \
   $(FUNC_CFLAGS) \
   $(MODEL_CFLAGS)
@@ -172,7 +174,8 @@ CPU_H = \
 	icache.h \
 	itable.h \
 	mon.h \
-	function_unit.h
+	function_unit.h \
+	model.h
 
 EMUL_GENERIC_H = \
 	$(CPU_H) \
@@ -190,7 +193,8 @@ BUILT_SRC_WO_CONFIG = \
 	idecode.h idecode.c \
 	semantics.h semantics.c \
 	itable.h itable.c \
-	spreg.h spreg.c
+	spreg.h spreg.c \
+	model.h model.c
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \
@@ -239,6 +243,7 @@ LIB_OBJ = \
 	registers.o \
 	vm.o \
 	corefile.o \
+	model.o \
 	function_unit.o \
 	spreg.o \
 	cpu.o \
@@ -302,9 +307,11 @@ corefile.o: corefile.c corefile.h $(BASICS_H) device_tree.h
 
 function_unit.o: function_unit.c $(CPU_H)
 
+model.o: model.c $(CPU_H)
+
 events.o: events.c events.h $(BASICS_H) 
 
-sim_calls.o: sim_calls.c $(PSIM_H) function_unit.h itable.h ../../gdb/tm.h devices.h options.h
+sim_calls.o: sim_calls.c $(CPU_H) $(PSIM_H) ../../gdb/tm.h devices.h options.h
 
 spreg.o: spreg.h spreg.c words.h
 
@@ -355,7 +362,9 @@ tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/.
 		-n idecode.h   -D tmp-idecode.h \
 		-n idecode.c   -d tmp-idecode.c \
 		-n itable.h    -T tmp-itable.h \
-		-n itable.c    -t tmp-itable.c
+		-n itable.c    -t tmp-itable.c \
+		-n model.h     -M tmp-model.h \
+		-n model.c     -m tmp-model.c
 	$(srcdir)/../../move-if-change tmp-icache.h icache.h
 	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
 	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
@@ -363,13 +372,15 @@ tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/.
 	$(srcdir)/../../move-if-change tmp-semantics.c semantics.c
 	$(srcdir)/../../move-if-change tmp-itable.h itable.h
 	$(srcdir)/../../move-if-change tmp-itable.c itable.c
+	$(srcdir)/../../move-if-change tmp-model.h model.h
+	$(srcdir)/../../move-if-change tmp-model.c model.c
 	touch tmp-igen
 
 # NOTE: Some versions of make don't handle files created as side-effects
 # uncomment the below if that is the case.
 
 $(TARGETLIB): tmp-igen tmp-dgen
-itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c: tmp-igen
+itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c model.h model.c: tmp-igen
 spreg.h spreg.c: tmp-dgen
 
 dgen: dgen.o table.o lf.o misc.o filter_filename.o

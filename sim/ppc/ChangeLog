@@ -1,5 +1,72 @@
+Sun Nov 12 07:58:09 1995  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* options.c (print_options): Print out WITH_{,DEFAULT_}MODEL, not
+	WITH_PPC_{,DEFAULT_}_MODEL.
+	(options_ppc): Delete now unused function.
+	(cpu.h): Include cpu.h, not just basics.h.
+
+	* std-config.h (WITH_{,DEFAULT_}MODEL): Define.
+
+	* igen.c (model_macros, last_model_macro): New statics to keep
+	track of macros to go in model.h.
+	(insn_table_load_insns): Add model-macros to model_macros linked
+	list.
+	(model_table_fields): Add field for printable name.
+	(gen_model_h): If there are model macros defined, print them out.
+	Print out DEFAULT_MODEL as the first model if there any models
+	specified, otherwise MODEL_NONE.  Print out external decl for
+	current_model.  Print out decl for model_set.
+	(gen_model_c): Add function model_set.  Switch to use printable
+	name for the model, not the internal identifier used.
+
+	* psim.c (current_model): New global variable.
+
+	* ppc-instructions: Add macros for flag defines.  Switch first
+	model so 604 is first.
+
+	* main.c (main): Call model_set, not function_unit_model.
+	* sim_calls.c (sim_open): Ditto.
+	* sim_calls.c, Makefile.in: sim_calls.c now includes cpu.h.
+
 Sat Nov 11 07:27:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* mon.h (mon_events): New enumeration for other events we want to
+	handle.
+	(mon_event): Add declaration for function.
+
+	* mon.c (mon_event): New function.
+	(mon_print_info): Print icache misses.
+
+	* psim.c (run_until_stop): Monitor icache misses.
+
+	* configure.in (--enable-sim-inline): Fix typos in handling comma
+	separated inline options.
+	(--enable-sim-icache): Echo icache size.
+	* configure: Regenerate.
+
+	* igen.c (semantics_h_print_function): Emit STATIC_SEMANTICS
+	instead of INLINE_SEMANTICS so that the compiler won't keep all of
+	the semantic functions as inline RTL, given that the address of
+	the function is taken which forces outline calls anyway.
+	(lf_print_c_semantic_function_header): Ditto.
+	(gen_semantics_h): Define STATIC_SEMANTICS as nothing if not
+	defined.
+	(lf_print_c_cracker_function): Emit STATIC_IDECODE instead of
+	STATIC_INLINE_IDECODE.
+	(gen_idecode_c): Define STATIC_IDECODE if not defined.
+	(gen_model_h): Use #ifdefs to define types to hold model units,
+	cycles, and flags.
+	(model_table_insert): Add a sentinel functional unit at the end to
+	simplify loop processing.
+	(model_c_insn): Use <function-unit>_SENTINAL instead of 0 for any
+	instruction not specifing a function unit for the current model.
+	(gen_model_{c,h}): Provide bounds for model_time_mapping.
+	
+	* inline.h (STATIC_SEMANTICS): Define to be static if
+	SEMANTICS_INLINE is defined.
+	(STATIC_IDECODE): Define to be static if IDECODE_INLINE is
+	defined.
+	
 	* options.c (print_options): Fix typo.
 
 Fri Nov 10 06:39:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>

@@ -24,6 +24,7 @@
 
 #include "psim.h"
 #include "function_unit.h"
+#include "options.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -109,7 +110,7 @@ main(int argc, char **argv)
 	trace_option(optarg);
 	break;
       case 'm':
-	function_unit_model(optarg);
+	model_set(optarg);
 	break;
       case 'i':
 	print_info = 1;
@@ -124,6 +125,9 @@ main(int argc, char **argv)
   if (optind >= argc)
     usage();
   name_of_file = argv[optind];
+
+  if (ppc_trace[trace_opts])
+    print_options ();
 
   /* create the simulator */
   system = psim_create(name_of_file);

@@ -588,7 +588,8 @@ typedef enum {
 } function_table_fields;
 
 typedef enum {
-  model_name = insn_name,
+  model_name = insn_nmemonic,
+  model_identifer = insn_name,
   model_func = insn_comment,
 } model_table_fields;
 
@@ -612,6 +613,7 @@ typedef struct _model model;
 struct _model {
   model *next;
   char *name;
+  char *printable_name;
   model_func_unit *func_unit_start;
   model_func_unit *func_unit_end;
 };
@@ -646,6 +648,8 @@ typedef enum {
 static model *models;
 static model *last_model;
 
+static insn *model_macros;
+static insn *last_model_macro;
 
 static void
 insn_table_insert_function(insn_table *table,
@@ -678,7 +682,8 @@ model_table_insert(insn_table *table,
   unsigned unit, mask;
   int number;
 
-  new_model->name = file_entry->fields[model_name];
+  new_model->name = file_entry->fields[model_identifer];
+  new_model->printable_name = file_entry->fields[model_name];
   name_len = strlen(new_model->name);
 
   /* append it to the end of the model list */
@@ -763,6 +768,29 @@ model_table_insert(insn_table *table,
       memcpy(func_unit->comment, comment, end - comment);
     }
   }
+
+  /* Add an 'sentinel' function unit at the end to simpify the loop */
+  func_unit = ZALLOC(model_func_unit);
+  if (new_model->func_unit_end)
+    new_model->func_unit_end->next = func_unit;
+  else
+    new_model->func_unit_start = func_unit;
+
+  new_model->func_unit_end = func_unit;
+
+  /* Record function unit name as model name _ unit name */
+  func_name_len = name_len + sizeof("_SENTINEL");
+  if (table->max_func_unit_name_len < func_name_len)
+    table->max_func_unit_name_len = func_name_len;
+
+  func_unit->name = name = (char *)zalloc(func_name_len);
+  func_unit->number = 0;
+  func_unit->mask = unit;
+  func_unit->comment = "dummy";
+  table->max_func_unit_mask |= unit;
+
+  memcpy(name, new_model->name, name_len);
+  strcpy(name + name_len, "_SENTINEL");
 }
 
 
@@ -1080,6 +1108,15 @@ insn_table_load_insns(char *file_name)
     }
     else if (it_is("model", file_entry->fields[insn_flags])) {
       model_table_insert(table, file_entry);
+    }
+    else if (it_is("model-macro", file_entry->fields[insn_flags])) {
+      insn *macro = ZALLOC(insn);
+      macro->file_entry = file_entry;
+      if (last_model_macro)
+	last_model_macro->next = macro;
+      else
+	model_macros = macro;
+      last_model_macro = macro;
     }
     else {
       insn_fields *fields;
@@ -1558,7 +1595,7 @@ semantics_h_print_function(lf *file,
 			   insn_bits *expanded_bits)
 {
   lf_printf(file, "\n");
-  lf_printf(file, "INLINE_SEMANTICS unsigned_word ");
+  lf_printf(file, "STATIC_SEMANTICS unsigned_word ");
   lf_print_function_name(file,
 			 basename,
 			 expanded_bits,
@@ -1624,6 +1661,10 @@ gen_semantics_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef INLINE_SEMANTICS\n");
   lf_printf(file, "#define INLINE_SEMANTICS\n");
+  lf_printf(file, "#endif\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "#ifndef STATIC_SEMANTICS\n");
+  lf_printf(file, "#define STATIC_SEMANTICS\n");
   lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
   lf_printf(file, "\n");
@@ -2200,7 +2241,7 @@ lf_print_c_semantic_function_header(lf *file,
 				    insn_bits *expanded_bits)
 {
   lf_printf(file, "\n");
-  lf_printf(file, "INLINE_SEMANTICS unsigned_word\n");
+  lf_printf(file, "STATIC_SEMANTICS unsigned_word\n");
   lf_print_function_name(file,
 			 basename,
 			 expanded_bits,
@@ -2609,7 +2650,7 @@ lf_print_c_cracker_function(lf *file,
 {
   /* if needed, generate code to enter this routine into a cache */
   lf_printf(file, "\n");
-  lf_printf(file, "STATIC_INLINE_IDECODE idecode_semantic *\n");
+  lf_printf(file, "STATIC_IDECODE idecode_semantic *\n");
   lf_print_function_name(file,
 			 instruction->file_entry->fields[insn_name],
 			 expanded_bits,
@@ -2699,6 +2740,10 @@ gen_idecode_c(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef STATIC_INLINE_IDECODE\n");
   lf_printf(file, "#define STATIC_INLINE_IDECODE STATIC_INLINE\n");
+  lf_printf(file, "#endif\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "#ifndef STATIC_IDECODE\n");
+  lf_printf(file, "#define STATIC_IDECODE\n");
   lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
   lf_printf(file, "#include \"cpu.h\"\n");
@@ -2900,6 +2945,7 @@ gen_model_h(insn_table *table, lf *file)
 {
   model *model_ptr;
   model_func_unit *func_unit_ptr;
+  insn *macro;
   int hex_size;
 
   lf_print_copyleft(file);
@@ -2910,21 +2956,46 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "#ifndef INLINE_MODEL\n");
   lf_printf(file, "#define INLINE_MODEL\n");
   lf_printf(file, "#endif\n");
+  lf_printf(file, "#ifndef STATIC_INLINE_MODEL\n");
+  lf_printf(file, "#define STATIC_INLINE_MODEL STATIC_INLINE\n");
+  lf_printf(file, "#endif\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "\n");
+
+  if (table->max_func_unit_mask > 0xffff) {
+    hex_size = 8;
+    lf_printf(file, "#ifndef MODEL_UNITS\n");
+    lf_printf(file, "#define MODEL_UNITS unsigned32\n");
+    lf_printf(file, "#endif\n");
+    lf_printf(file, "\n");
+
+    lf_printf(file, "#ifndef MODEL_CYCLES\n");
+    lf_printf(file, "#define MODEL_CYCLES unsigned16\n");
+    lf_printf(file, "#endif\n");
+    lf_printf(file, "\n");
+  } else {
+    hex_size = 4;
+    lf_printf(file, "#ifndef MODEL_UNITS\n");
+    lf_printf(file, "#define MODEL_UNITS unsigned16\n");
+    lf_printf(file, "#endif\n");
+    lf_printf(file, "\n");
+
+    lf_printf(file, "#ifndef MODEL_CYCLES\n");
+    lf_printf(file, "#define MODEL_CYCLES unsigned8\n");
+    lf_printf(file, "#endif\n");
+    lf_printf(file, "\n");
+  }
+
+  lf_printf(file, "#ifndef MODEL_FLAGS\n");
+  lf_printf(file, "#define MODEL_FLAGS unsigned32\n");
+  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
 
   lf_printf(file, "typedef struct _model_time {\t/* Instruction cycle time */\n");
-  if (table->max_func_unit_mask > 0xffff) {
-    hex_size = 8;
-    lf_printf(file, "  unsigned32 units;\n");
-    lf_printf(file, "  unsigned16 initial;\n");
-    lf_printf(file, "  unsigned16 finish;\n");
-  } else {
-    hex_size = 4;
-    lf_printf(file, "  unsigned16 units;\n");
-    lf_printf(file, "  unsigned8  initial;\n");
-    lf_printf(file, "  unsigned8  finish;\n");
-  }
-  lf_printf(file, "  unsigned32 flags;\n");
+  lf_printf(file, "  MODEL_UNITS  units;\n");
+  lf_printf(file, "  MODEL_CYCLES initial;\n");
+  lf_printf(file, "  MODEL_CYCLES finish;\n");
+  lf_printf(file, "  MODEL_FLAGS  flags;\n");
   lf_printf(file, "} model_time;\n");
   lf_printf(file, "\n");
 
@@ -2935,6 +3006,9 @@ gen_model_h(insn_table *table, lf *file)
   }
   lf_printf(file, "  nr_models\n");
   lf_printf(file, "} model_enum;\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "#define DEFAULT_MODEL MODEL_%s\n", (models) ? models->name : "NONE");
   lf_printf(file, "\n");
 
   for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
@@ -2953,9 +3027,19 @@ gen_model_h(insn_table *table, lf *file)
     lf_printf(file, "\n");
   }
 
+  if (model_macros) {
+    for(macro = model_macros; macro; macro = macro->next)
+      lf_printf(file, "%s\n", macro->file_entry->fields[insn_comment]);
+    lf_printf(file, "\n");
+  }
+
+  lf_printf(file, "extern model_enum current_model;\n");
   lf_printf(file, "extern const char *model_name[ (int)nr_models ];\n");
   lf_printf(file, "extern const char *const *const model_func_unit_name[ (int)nr_models ];\n");
-  lf_printf(file, "extern const model_time *const model_time_mapping[];\n");
+  lf_printf(file, "extern const model_time *const model_time_mapping[ (int)nr_models ];\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "INLINE_MODEL void model_set\n");
+  lf_printf(file, "(const char *name);\n");
   lf_printf(file, "\n");
   lf_printf(file, "#endif /* _MODEL_H_ */\n");
 }
@@ -2975,12 +3059,12 @@ model_c_insn(insn_table *entry,
 {
   model_c_data *data_ptr = (model_c_data *)data;
   lf *file = data_ptr->file;
-  model *current_model = data_ptr->model_ptr;
+  char *current_name = data_ptr->model_ptr->name;
   table_model_entry *model_ptr = instruction->file_entry->model_first;
   int i;
 
   while (model_ptr) {
-    if (model_ptr->fields[insn_model_name] == current_model->name) {
+    if (model_ptr->fields[insn_model_name] == current_name) {
       lf_printf(file, "  {");
       for(i = insn_model_unit; i < nr_insn_model_table_fields; i++) {
 	lf_printf(file, " %s,", model_ptr->fields[i]);
@@ -2992,7 +3076,7 @@ model_c_insn(insn_table *entry,
     model_ptr = model_ptr->next;
   }
 
-  lf_printf(file, "  { 0 },\n");
+  lf_printf(file, "  { %s_SENTINEL },\n", current_name);
 }
 
 static void 
@@ -3007,10 +3091,6 @@ gen_model_c(insn_table *table, lf *file)
   lf_printf(file, "#ifndef _MODEL_C_\n");
   lf_printf(file, "#define _MODEL_C_\n");
   lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_INLINE_MODEL\n");
-  lf_printf(file, "#define STATIC_INLINE_MODEL STATIC_INLINE\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
   lf_printf(file, "#include \"cpu.h\"\n");
   lf_printf(file, "\n");
 
@@ -3018,7 +3098,7 @@ gen_model_c(insn_table *table, lf *file)
   lf_printf(file, "const char *model_name[ (int)nr_models ] = {\n");
   lf_printf(file, "  \"NONE\",\n");
   for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
-    lf_printf(file, "  \"%s\",\n", model_ptr->name);
+    lf_printf(file, "  \"%s\",\n", model_ptr->printable_name);
   }
   lf_printf(file, "};\n");
   lf_printf(file, "\n");
@@ -3078,12 +3158,38 @@ gen_model_c(insn_table *table, lf *file)
     lf_printf(file, "\n");
   }
 
-  lf_printf(file, "const model_time *const model_time_mapping[] = {\n");
+  lf_printf(file, "const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
   lf_printf(file, "  (const model_time *const)0,\n");
   for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
     lf_printf(file, "  model_time_%s,\n", model_ptr->name);
   }
   lf_printf(file, "};\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "INLINE_MODEL void\n");
+  lf_printf(file, "model_set(const char *name)\n");
+  lf_printf(file, "{\n");
+  if (models) {
+    lf_printf(file, "  model_enum model;\n");
+    lf_printf(file, "  for(model = MODEL_%s; model < nr_models; model++) {\n", models->name);
+    lf_printf(file, "    if(strcasecmp(name, model_name[model]) == 0) {\n");
+    lf_printf(file, "      current_model = model;\n");
+    lf_printf(file, "      return;\n");
+    lf_printf(file, "    }\n");
+    lf_printf(file, "  }\n");
+    lf_printf(file, "\n");
+    lf_printf(file, "  error(\"Unknown model '%%s', Models which are known are:%%s\n\",\n");
+    lf_printf(file, "        name,\n");
+    lf_printf(file, "        \"");
+    for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+      lf_printf(file, "\\n\\t%s", model_ptr->printable_name);
+    }
+    lf_printf(file, "\");\n");
+  } else {
+    lf_printf(file, "  error(\"No models are currently known about\");\n");
+  }
+
+  lf_printf(file, "}\n");
   lf_printf(file, "\n");
 
   lf_printf(file, "#endif /* _MODEL_C_ */\n");
