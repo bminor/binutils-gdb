@@ -1,3 +1,7 @@
+Thu Aug 22 11:16:02 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Add @DASH_C_FLAG@ to compiler edit.
+
 Wed Aug 21 11:26:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elf.sc: Put .gnu.linkonce* sections in appropriate
