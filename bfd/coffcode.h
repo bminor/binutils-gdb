@@ -3114,8 +3114,7 @@ coff_close_and_cleanup (abfd)
 	return false;
       }
 
-  /* We depend on bfd_close to free all the memory on the obstack.  */
-  /* FIXME if bfd_release is not using obstacks! */
+  /* We depend on bfd_close to free all the memory on the objalloc.  */
   return true;
 }
 

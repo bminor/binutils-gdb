@@ -1,5 +1,36 @@
 Mon Mar 17 11:32:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd-in.h: Don't include obstack.h.
+	(struct bfd_hash_table): Change memory field to PTR.
+	* bfd.c (struct _bfd): Change memory field to PTR.
+	* bfd-in2.h: Rebuild.
+	* libbfd-in.h (bfd_release): Declare as function, don't define as
+	macro.
+	* libbfd.h: Rebuild.
+	* opncls.c: Include "objalloc.h" rather than "obstack.h".  Use
+	objalloc routines rather than obstack routines.
+	(obstack_chunk_alloc, obstack_chunk_free): Don't define.
+	(getpagesize): Don't define.
+	(_bfd_new_bfd): Don't set _bfd_chunksize.
+	(bfd_openr): Free new bfd and objalloc on failure.
+	(bfd_fdopenr, bfd_openstreamr, bfd_openw): Likewise.
+	(bfd_alloc_size): Remove.
+	(bfd_release): New function.
+	* hash.c: Include "objalloc.h" rather than "obstack.h".  Use
+	objalloc routines rather than obstack routines.
+	(obstack_chunk_alloc, obstack_chunk_free): Don't define.
+	* ecofflink.c: Include "objalloc.h" rather than "obstack.h".  Use
+	objalloc routines rather than obstack routines.
+	(obstack_chunk_alloc, obstack_chunk_free): Don't define.
+	(struct accumulate): Change memory to struct objalloc *.
+	* liboasys.h (oasys_data_type): Remove oasys_obstack field.
+	* dep-in.sed: Don't remove obstack.h from dependency list.
+	* Makefile.in: Rebuild dependencies.
+	(BFD_H_DEPS): Remove obstack.h.
+	(install): Don't install obstack.h.
+	* Many files: Don't include "obstack.h".
+	* VERSION: Bump.
+
 	* opncls.c (bfd_alloc_grow, bfd_alloc_finish): Remove.
 	* libbfd-in.h (bfd_alloc_grow, bfd_alloc_finish): Don't declare.
 	* libbfd.h: Rebuild.

@@ -1,5 +1,5 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)
 
@@ -36,7 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 
 #include "libbfd.h"
-#include "obstack.h"
 
 #include "coff/powerpc.h"
 #include "coff/internal.h"
@@ -68,6 +67,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define MARK_AS_WRITTEN(x)  ((x) |= 1)
 #define MAKE_ADDR_AGAIN(x)  ((x) &= ~1)
 
+
+/* Turn on this check if you suspect something amiss in the hash tables */
+#ifdef DEBUG_HASH
+
+/* Need a 7 char string for an eye catcher */
+#define EYE "krkjunk"
+
+#define HASH_CHECK_DCL char eye_catcher[8];
+#define HASH_CHECK_INIT(ret)      strcpy(ret->eye_catcher, EYE)
+#define HASH_CHECK(addr) \
+ if (strcmp(addr->eye_catcher, EYE) != 0) \
+  { \
+    fprintf(stderr,\
+    "File %s, line %d, Hash check failure, bad eye %8s\n", \
+    __FILE__, __LINE__, addr->eye_catcher); \
+    abort(); \
+ }
+
+
+#else
+
+#define HASH_CHECK_DCL
+#define HASH_CHECK_INIT(ret)
+#define HASH_CHECK(addr)
+
+#endif
+
 /* In order not to add an int to every hash table item for every coff
    linker, we define our own hash table, derived from the coff one */
 
@@ -82,20 +108,10 @@ struct ppc_coff_link_hash_entry
   bfd_vma toc_offset;               /* Our addition, as required */
   int symbol_is_glue;
   unsigned long int glue_insn;
-  char eye_catcher[8];
+
+  HASH_CHECK_DCL
 };
 
-/* Need a 7 char string for an eye catcher */
-#define EYE "krkjunk"
-
-#define CHECK_EYE(addr) \
- if (strcmp(addr, EYE) != 0) \
-  { \
-    fprintf(stderr,\
-    "File %s, line %d, Hash check failure, bad eye %8s\n", \
-    __FILE__, __LINE__, addr); \
-    abort(); \
- }
 
 /* PE linker hash table.  */
 
@@ -140,7 +156,8 @@ ppc_coff_link_hash_newfunc (entry, table, string)
       SET_UNALLOCATED(ret->toc_offset);
       ret->symbol_is_glue = 0;
       ret->glue_insn = 0;
-      strcpy(ret->eye_catcher, EYE);
+
+      HASH_CHECK_INIT(ret);
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -186,8 +203,8 @@ ppc_coff_link_hash_table_create (abfd)
 
 
 /* The nt loader points the toc register to &toc + 32768, in order to */
-/* use the complete range of a 16-bit displacement (I guess). We have */
-/* to adjust for this when we fix up loads displaced off the toc reg. */
+/* use the complete range of a 16-bit displacement. We have to adjust */
+/* for this when we fix up loads displaced off the toc reg.           */
 #define TOC_LOAD_ADJUSTMENT (-32768)
 #define TOC_SECTION_NAME ".private.toc"
 
@@ -852,7 +869,7 @@ record_toc(toc_section, our_toc_offset, cat, name)
 #ifdef COFF_IMAGE_WITH_PE
 
 /* record a toc offset against a symbol */
-static int
+static boolean
 ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -861,7 +878,6 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
      enum toc_type toc_kind;
 {
   struct ppc_coff_link_hash_entry *h;
-  int ret_val;
   const char *name;
 
   int *local_syms;
@@ -871,7 +887,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
   h = (struct ppc_coff_link_hash_entry *) (obj_coff_sym_hashes (abfd)[sym]);
   if (h != 0)
     {
-      CHECK_EYE(h->eye_catcher);
+      HASH_CHECK(h);
     }
 
   if (h == 0) 
@@ -896,31 +912,15 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
       if (IS_UNALLOCATED(local_syms[sym])) 
 	{
 	  local_syms[sym] = global_toc_size;
-	  ret_val = global_toc_size;
 	  global_toc_size += 4;
 
 	  /* The size must fit in a 16bit displacment */
-	  if (global_toc_size >= 65535)
+	  if (global_toc_size > 65535)
 	    {
-	      fprintf(stderr,
-		      "Exceeded toc size of 65535\n");
-	      abort();
+	      (*_bfd_error_handler) ("TOC overflow");
+	      bfd_set_error (bfd_error_file_too_big);
+	      return false;
 	    }
-
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "Setting toc_offset for local sym %d to %d\n",
-		  sym, ret_val);
-#endif
-	}
-      else
-	{
-	  ret_val = local_syms[sym];
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "toc_offset already set for local sym %d to %d\n",
-		  sym, ret_val);
-#endif
 	}
     }
   else
@@ -932,154 +932,20 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
       if (IS_UNALLOCATED(h->toc_offset))
 	{
 	  h->toc_offset = global_toc_size;
-	  ret_val = global_toc_size;
 	  global_toc_size += 4;
 
 	  /* The size must fit in a 16bit displacment */
 	  if (global_toc_size >= 65535)
 	    {
-	      fprintf(stderr,
-		      "Exceeded toc size of 65535\n");
-	      abort();
-	    }
-
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "Setting toc_offset for sym %d (%s) [h=%p] to %d\n",
-		  sym, name, h, ret_val);
-#endif
-	}
-      else
-	{
-	  ret_val = h->toc_offset;
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "toc_offset already set for sym %d (%s) [h=%p] to %d\n",
-		  sym, name, h, ret_val);
-#endif
-	}
-    }
-
-  return ret_val;
-}
-
-#endif /* COFF_IMAGE_WITH_PE */
-
-#if 0
-
-/* FIXME: record a toc offset against a data-in-toc symbol */
-/* Now, there is currenly some confusion on what this means. In some 
-   compilers one sees the moral equivalent of:
-      .tocd
-      define some data
-      .text
-      refer to the data with a [tocv] qualifier
-   In general, one sees something to indicate that a tocd has been
-   seen, and that would trigger the allocation of data in toc. The IBM
-   docs seem to suggest that anything with the TOCDEFN qualifier should
-   never trigger storage allocation. However, in the kernel32.lib that 
-   we've been using for our test bed, there are a couple of variables
-   referenced that fail that test.
-
-   So it can't work that way.
-*/
-static int
-ppc_record_data_in_toc_entry(abfd, info, sec, sym, toc_kind)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     int sym;
-     enum toc_type toc_kind;
-{
-  struct ppc_coff_link_hash_entry *h = 0;
-  int ret_val;
-  const char *name;
-
-  int *local_syms;
-
-  h = (struct ppc_coff_link_hash_entry *) (obj_coff_sym_hashes (abfd)[sym]);
-
-  if (h == 0) 
-    { 
-      local_syms = obj_coff_local_toc_table(abfd);
-      if (local_syms == 0)
-	{
-	  int i;
-	  /* allocate a table */
-	  local_syms = 
-	    (int *) bfd_zalloc (abfd, 
-				obj_raw_syment_count(abfd) * sizeof(int));
-	  if (local_syms == 0)
-	    return false;
-	  obj_coff_local_toc_table(abfd) = local_syms;
-	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
-	    {
-	      SET_UNALLOCATED(local_syms[i]);
+	      (*_bfd_error_handler) ("TOC overflow");
+	      bfd_set_error (bfd_error_file_too_big);
+	      return false;
 	    }
 	}
-
-      if (IS_UNALLOCATED(local_syms[sym])) 
-	{
-	  local_syms[sym] = global_toc_size;
-	  ret_val = global_toc_size;
-	  global_toc_size += 4;
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "Setting data_in_toc_offset for local sym %d to %d\n",
-		  sym, ret_val);
-#endif
-	}
-      else
-	{
-	  ret_val = local_syms[sym];
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "data_in_toc_offset already set for local sym %d to %d\n",
-		  sym, ret_val);
-#endif
-	}
-    }
-  else
-    {
-      CHECK_EYE(h->eye_catcher);
-
-      name = h->root.root.root.string;
-
-      /* check to see if there's a toc slot allocated. If not, do it
-	 here. It will be used in relocate_section */
-      if (IS_UNALLOCATED(h->toc_offset))
-	{
-#if 0
-	  h->toc_offset = global_toc_size;
-#endif
-	  ret_val = global_toc_size;
-	  /* We're allocating a chunk of the toc, as opposed to a slot */
-	  /* FIXME: alignment? */
-	  
-	  global_toc_size += 4;
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "Setting data_in_toc_offset for sym %d (%s) [h=%p] to %d\n",
-		  sym, name, h, ret_val);
-#endif
-	}
-      else
-	{
-	  ret_val = h->toc_offset;
-#ifdef TOC_DEBUG
-	  fprintf(stderr,
-		  "data_in_toc_offset already set for sym %d (%s) [h=%p] to %d\n",
-		  sym, name, h, ret_val);
-#endif
-	}
     }
 
-  return ret_val;
+  return true;
 }
-
-#endif /* 0 */
-
-#ifdef COFF_IMAGE_WITH_PE
 
 /* record a toc offset against a symbol */
 static void
@@ -1091,11 +957,8 @@ ppc_mark_symbol_as_glue(abfd, sym, rel)
   struct ppc_coff_link_hash_entry *h;
 
   h = (struct ppc_coff_link_hash_entry *) (obj_coff_sym_hashes (abfd)[sym]);
-#ifdef DEBUG_RELOC
-  fprintf(stderr,
-	  "ppc_mark_symbol_as_glue:\n");
-#endif
-  CHECK_EYE(h->eye_catcher);
+
+  HASH_CHECK(h);
 
   h->symbol_is_glue = 1;
   h->glue_insn = bfd_get_32 (abfd, (bfd_byte *) &rel->r_vaddr);
@@ -1105,32 +968,6 @@ ppc_mark_symbol_as_glue(abfd, sym, rel)
 
 #endif /* COFF_IMAGE_WITH_PE */
 
-#if 0
-
-/* Provided the symbol, returns the value reffed */
-static long get_symbol_value PARAMS ((asymbol *));
-
-static long
-get_symbol_value (symbol)       
-     asymbol *symbol;
-{                                             
-  long relocation = 0;
-
-  if (bfd_is_com_section (symbol->section))
-    {
-      relocation = 0;                           
-    }
-  else 
-    {                                      
-      relocation = symbol->value +
-	symbol->section->output_section->vma +
-	  symbol->section->output_offset;
-    }                                           
-
-  return(relocation);
-}
-
-#endif /* 0 */
 
 /* Return true if this relocation should
    appear in the output .reloc section. */
@@ -1180,8 +1017,6 @@ pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   unsigned short r_type;
   unsigned long addr = reloc_entry->address ; /*+ input_section->vma*/
 	
-  fprintf(stderr, "pe_ppc_reloc (%s)\n", TARGET_LITTLE_NAME);
-
   r_type = reloc_entry->howto->type;
 
   if (output_bfd) 
@@ -1240,15 +1075,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd_vma relocation;
   reloc_howto_type *howto = 0;
   
-#ifdef DEBUG_RELOC
-  fprintf(stderr, 
-	  "pe_ppc_relocate_section (%s) for %s in bfd %s\n", 
-	  TARGET_LITTLE_NAME,
-	  input_section->name,
-	  input_bfd->filename);
-  
-#endif  
-
   /* If we are performing a relocateable link, we don't need to do a
      thing.  The caller will take care of adjusting the reloc
      addresses and symbol indices.  */
@@ -1274,23 +1100,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
       unsigned short r_type  = EXTRACT_TYPE (rel->r_type);
       unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
   
-#ifdef DEBUG_RELOC
-      /* now examine flags */
-      if (r_flags != 0) 
-	{
-	  fprintf (stderr, "Reloc with flags found!");
-	  if ( r_flags & IMAGE_REL_PPC_NEG ) 
-	    fprintf (stderr, " NEG");
-	  if ( r_flags & IMAGE_REL_PPC_BRTAKEN )
-	    fprintf (stderr, " BRTAKEN");
-	  if ( r_flags & IMAGE_REL_PPC_BRNTAKEN )
-	    fprintf (stderr, " BRNTAKEN");
-	  if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
-	    fprintf (stderr, " TOCDEFN");
-	  fprintf(stderr, "\n");
-	}
-#endif
-
       symndx = rel->r_symndx;
       loc = contents + rel->r_vaddr - input_section->vma;
 
@@ -1308,7 +1117,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    (obj_coff_sym_hashes (input_bfd)[symndx]);
 	  if (h != 0) 
 	    {
-	      CHECK_EYE(h->eye_catcher);
+	      HASH_CHECK(h);
 	    }
 
 	  sym = syms + symndx;
@@ -1316,8 +1125,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r_type == IMAGE_REL_PPC_IMGLUE && h == 0)
 	{
-	  fprintf(stderr,
-		  "relocate_section: IMGLUE reloc has no name!\n");
+	  /* An IMGLUE reloc must have a name. Something is very wrong. */
 	  abort();
 	}
 
@@ -1340,7 +1148,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  CHECK_EYE(h->eye_catcher);
+	  HASH_CHECK(h);
 
 	  if (h->root.root.type == bfd_link_hash_defined
 	      || h->root.root.type == bfd_link_hash_defweak)
@@ -1365,11 +1173,10 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
       switch (r_type)
 	{
 	default:
-	  fprintf( stderr, 
-		  "ERROR: during reloc processing -- unsupported reloc %s\n", 
-		  howto->name);
+	  (*_bfd_error_handler)
+	    ("%s: unsupported relocation type 0x%02x",
+	     bfd_get_filename (input_bfd), r_type);
 	  bfd_set_error (bfd_error_bad_value);
-	  abort();
 	  return false;
 	case IMAGE_REL_PPC_TOCREL16:
 	  {
@@ -1382,17 +1189,10 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {
 		toc_section = bfd_get_section_by_name (bfd_of_toc_owner, 
 						       TOC_SECTION_NAME);
-#ifdef TOC_DEBUG
-
-		fprintf(stderr,
-			"BFD of toc owner %p (%s), section addr of %s %p\n",
-			 bfd_of_toc_owner, bfd_of_toc_owner->filename, 
-			TOC_SECTION_NAME, toc_section);
-#endif
 
 		if ( toc_section == NULL ) 
 		  {
-		    fprintf(stderr, "No Toc section!\n");
+		    /* There is no toc section. Something is very wrong. */
 		    abort();
 		  }
 	      }
@@ -1423,27 +1223,14 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		       again.
 		     */
 		    MAKE_ADDR_AGAIN(our_toc_offset);
-#ifdef TOC_DEBUG
-
-		    fprintf(stderr,
-			    "Not writing out toc_offset of %d for %s\n", 
-			    our_toc_offset, name);
-#endif
 		  }
 		else
 		  {
 		    /* write out the toc entry */
-		    record_toc(toc_section, our_toc_offset, priv, strdup(name));
-#ifdef TOC_DEBUG
-		    fprintf(stderr,
-			    "Writing out toc_offset "
-			    "toc_section (%p,%p)+%d val %d for %s\n", 
-			    toc_section,
-			    toc_section->contents,
-			    our_toc_offset, 
-			    val,
-			    name);
-#endif
+		    record_toc(toc_section, 
+			       our_toc_offset, 
+			       priv, 
+			       strdup(name));
 
 		    bfd_put_32(output_bfd,
 			       val,
@@ -1475,29 +1262,19 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		       dll linkage, takes advantage of that and considers 
 		       the IAT to be part of the toc, thus saving a load.
 		    */
-#ifdef DEBUG_RELOC
-		    fprintf(stderr,
- "TOCDEFN is on, (%s) (%p) our_toc_offset = %x, val (%x) vma (%x) off (%x)\n", 
-			    name, h, our_toc_offset,
-			    val, toc_section->output_section->vma, 
-			    toc_section->output_offset);
-#endif
 
 		    our_toc_offset = val - 
 		      (toc_section->output_section->vma + 
 		       toc_section->output_offset);
 
-#ifdef DEBUG_RELOC
-		    fprintf(stderr,
-			    "               our_toc_offset set to %x\n", our_toc_offset);
-#endif
-
 		    /* The size must still fit in a 16bit displacment */
 		    if (our_toc_offset >= 65535)
 		      {
-			fprintf(stderr,
-				"Error: TOCDEFN Relocation of %d for %s exceeded displacement of 65535\n", our_toc_offset, name);
-			abort();
+			(*_bfd_error_handler)
+			  ("%s: Relocation for %s of %x exceeds Toc size limit", 
+			   bfd_get_filename (input_bfd), name, our_toc_offset);
+			bfd_set_error (bfd_error_bad_value);
+			return false;
 		      }
 
 		    record_toc(toc_section, our_toc_offset, pub, strdup(name));
@@ -1509,27 +1286,10 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		       again.
 		     */
 		    MAKE_ADDR_AGAIN(our_toc_offset);
-#ifdef TOC_DEBUG
-		    fprintf(stderr,
-			    "Not writing out toc_offset of %d for %s\n", 
-			    our_toc_offset, name);
-#endif
 		  }
 		else
 		  {
 		    record_toc(toc_section, our_toc_offset, pub, strdup(name));
-
-#ifdef TOC_DEBUG
-		    /* write out the toc entry */
-		    fprintf(stderr,
-			    "Writing out toc_offset "
-			    "toc_section (%p,%p)+%d val %d for %s\n", 
-			    toc_section,
-			    toc_section->contents,
-			    our_toc_offset, 
-			    val,
-			    name);
-#endif
 
 		    /* write out the toc entry */
 		    bfd_put_32(output_bfd,
@@ -1558,10 +1318,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (coff_data(output_bfd)->pe)
 		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
 
-#ifdef DEBUG_RELOC
-		fprintf(stderr,
-			"  Toc Section .reloc candidate addr = %x\n", addr);
-#endif
 		fwrite (&addr, 1,4, (FILE *) info->base_file);
 	      }
 
@@ -1570,9 +1326,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if ( (r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN &&
 		our_toc_offset > toc_section->_raw_size)
 	      {
-		fprintf(stderr,
-			"reloc offset is bigger than the toc size!\n");
-		abort();
+		(*_bfd_error_handler)
+		  ("%s: Relocation exceeds allocated TOC (%x)", 
+		   bfd_get_filename (input_bfd),
+		   toc_section->_raw_size);
+		bfd_set_error (bfd_error_bad_value);
+		return false;
 	      }
 
 	    /* Now we know the relocation for this toc reference */
@@ -1645,15 +1404,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (h->symbol_is_glue == 1) 
 	      break;
 	    my_name = h->root.root.root.string;
-	    fprintf(stderr, 
-		    "Warning: previously missed IMGLUE reloc %s <file %s, section %s>\n", 
-		    howto->name,
-		    bfd_get_filename(input_bfd),
-		    input_section->name);
-	    break;
 
+	    (*_bfd_error_handler)
+	      ("%s: Out of order IMGLUE reloc for %s", 
+	       bfd_get_filename (input_bfd), my_name);
+	    bfd_set_error (bfd_error_bad_value);
+	    return false;
 	  }
-	  break;
 
 	case IMAGE_REL_PPC_ADDR32NB:
 	  {
@@ -1684,12 +1441,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 					     "__idata4_magic__",
 					     false, false, true);
 		import_table_size = myh->root.u.def.value;
-#ifdef DEBUG_RELOC
-		fprintf(stderr,
-			"first computation triggered fta %x, ts %d(%x), its %d(%x)\n",
-			first_thunk_address, thunk_size, thunk_size, import_table_size,
-			import_table_size);
-#endif
 	      }
 
 	    if (h == 0)
@@ -1718,7 +1469,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 						 false, false, true);
 		    if (myh == 0) 
 		      {
-			fprintf(stderr, "Missing idata magic cookies, this cannot work anyway...\n");
+			/* Missing magic cookies. Something is very wrong. */
 			abort();
 		      }
 		    
@@ -1745,13 +1496,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 						     "__idata4_magic__",
 						     false, false, true);
 			import_table_size = myh->root.u.def.value;
-#ifdef DEBUG_RELOC
-
-			fprintf(stderr,
-				"second computation triggered fta %x, ts %d(%x), its %d(%x)\n",
-				first_thunk_address, thunk_size, thunk_size, import_table_size,
-				import_table_size);
-#endif
 		      }
 		  }
 	      }
@@ -1801,19 +1545,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (coff_data(output_bfd)->pe)
 		{
-#ifdef DEBUG_RELOC
-		  bfd_vma before_addr = addr;
-#endif
 		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
-#ifdef DEBUG_RELOC
-		  fprintf(stderr,
-			  " adjusted down from %x to %x", before_addr, addr);
-#endif
 		}
-#ifdef DEBUG_RELOC
-	      fprintf(stderr, "\n");
-#endif
-
 	      fwrite (&addr, 1,4, (FILE *) info->base_file);
 	    }
 	}
@@ -1844,43 +1577,18 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		buf[SYMNMLEN] = '\0';
 		name = buf;
 	      }
-#if 0
-	    else
-	      {
-		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
-		if (name == NULL)
-		  return false;
-	      }
-#endif
 
 	    if (! ((*info->callbacks->reloc_overflow)
 		   (info, name, howto->name, 
 		    (bfd_vma) 0, input_bfd,
 		    input_section, rel->r_vaddr - input_section->vma)))
 	      {
-#ifdef DEBUG_RELOC
-		fprintf(stderr, 
-			"pe_ppc_relocate_section (%s) for %s in bfd %s RETURNING TRUE\n", 
-			TARGET_LITTLE_NAME,
-			input_section->name,
-			input_bfd->filename);
-  
-#endif  
 		return false;
 	      }
 	  }
 	}
 
     }     
-
-#ifdef DEBUG_RELOC
-  fprintf(stderr, 
-	  "pe_ppc_relocate_section (%s) for %s in bfd %s RETURNING TRUE\n", 
-	  TARGET_LITTLE_NAME,
-	  input_section->name,
-	  input_bfd->filename);
-  
-#endif  
 
   return true;
 }
@@ -1965,15 +1673,14 @@ ppc_allocate_toc_section (info)
 
   if (bfd_of_toc_owner == 0)
     {
-      fprintf(stderr,
-	      "There is no bfd that owns the toc section!\n");
+      /* No toc owner? Something is very wrong. */
       abort();
     }
 
   s = bfd_get_section_by_name ( bfd_of_toc_owner , TOC_SECTION_NAME);
   if (s == NULL) 
     {
-      fprintf(stderr, "No Toc section!\n");
+      /* No toc section? Something is very wrong. */
       abort();
     }
 
@@ -1994,12 +1701,6 @@ ppc_process_before_allocation (abfd, info)
   asection *sec;
   struct internal_reloc *i, *rel;
 
-#ifdef DEBUG_RELOC
-  fprintf(stderr, 
-	  "ppc_process_before_allocation: BFD %s\n", 
-	  bfd_get_filename(abfd));
-#endif
-
   /* here we have a bfd that is to be included on the link. We have a hook
      to do reloc rummaging, before section sizes are nailed down. */
 
@@ -2015,15 +1716,6 @@ ppc_process_before_allocation (abfd, info)
 
   for (; sec != 0; sec = sec->next)
   {
-    int toc_offset;
-
-#ifdef DEBUG_RELOC
-    fprintf(stderr, 
-	    "  section %s reloc count %d\n", 
-	    sec->name, 
-	    sec->reloc_count);
-#endif
-
     if (sec->reloc_count == 0) 
       continue;
 
@@ -2038,46 +1730,20 @@ ppc_process_before_allocation (abfd, info)
       {
 	unsigned short r_type  = EXTRACT_TYPE (rel->r_type);
 	unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
+	boolean ok = true;
 
-#ifdef DEBUG_RELOC
-	/* now examine flags */
-	if (r_flags != 0) 
-	  {
-	    fprintf (stderr, "Reloc with flags found!");
-	    if ( r_flags & IMAGE_REL_PPC_NEG ) 
-	      fprintf (stderr, " NEG");
-	    if ( r_flags & IMAGE_REL_PPC_BRTAKEN )
-	      fprintf (stderr, " BRTAKEN");
-	    if ( r_flags & IMAGE_REL_PPC_BRNTAKEN )
-	      fprintf (stderr, " BRNTAKEN");
-	    if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
-		fprintf (stderr, " TOCDEFN");
-	    fprintf(stderr, "\n");
-	  }
-#endif
-	
 	DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
 
 	switch(r_type) 
 	  {
 	  case IMAGE_REL_PPC_TOCREL16:
-#if 0
-	    /* FIXME:
-	       This remains unimplemented for now, as it currently adds
-	       un-necessary elements to the toc. All we need to do today
-	       is not do anything if TOCDEFN is on.
-	    */
-	    if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
-	      toc_offset = ppc_record_data_in_toc_entry(abfd, info, sec, 
-							rel->r_symndx, 
-							default_toc);
-	    else
-	      toc_offset = ppc_record_toc_entry(abfd, info, sec, 
-						rel->r_symndx, default_toc);
-#endif
+	    /* if TOCDEFN is on, ignore as someone else has allocated the
+	       toc entry */
 	    if ( (r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN )
-	      toc_offset = ppc_record_toc_entry(abfd, info, sec, 
-						rel->r_symndx, default_toc);
+	      ok = ppc_record_toc_entry(abfd, info, sec, 
+					rel->r_symndx, default_toc);
+	    if (!ok)
+	      return false;
 	    break;
 	  case IMAGE_REL_PPC_IMGLUE:
 	    ppc_mark_symbol_as_glue(abfd, rel->r_symndx, rel);
@@ -2344,38 +2010,11 @@ ppc_coff_rtype2howto (relent, internal)
 
   /* the masking process only slices off the bottom byte for r_type. */
   if ( r_type > MAX_RELOC_INDEX ) 
-    {
-      fprintf(stderr, 
-	      "ppc_coff_rtype2howto: reloc index %d out of range [%d, %ld]\n",
-	      internal->r_type, 0, (long) MAX_RELOC_INDEX);
-      abort();
-    }
+    abort();
 
   /* check for absolute crap */
   if ( junk != 0 )
-    {
-      fprintf(stderr, 
-	      "ppc_coff_rtype2howto: reloc index %d contains junk %d\n",
-	      internal->r_type, junk);
-      abort();
-    }
-
-#ifdef DEBUG_RELOC
-  /* now examine flags */
-  if (r_flags != 0) 
-    {
-      fprintf (stderr, "Reloc with flags found!");
-      if ( r_flags & IMAGE_REL_PPC_NEG ) 
-	fprintf (stderr, " NEG");
-      if ( r_flags & IMAGE_REL_PPC_BRTAKEN )
-	fprintf (stderr, " BRTAKEN");
-      if ( r_flags & IMAGE_REL_PPC_BRNTAKEN )
-	fprintf (stderr, " BRNTAKEN");
-      if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
-	fprintf (stderr, " TOCDEFN");
-      fprintf(stderr, "\n");
-    }
-#endif
+    abort();
 
   switch(r_type) 
     {
@@ -2442,39 +2081,12 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
   /* the masking process only slices off the bottom byte for r_type. */
   if ( r_type > MAX_RELOC_INDEX ) 
-    {
-      fprintf(stderr, 
-	      "coff_ppc_rtype_to_howto: index %d out of range [%d, %ld]\n",
-	      r_type, 0, (long) MAX_RELOC_INDEX);
-      abort();
-    }
+    abort();
   
   /* check for absolute crap */
   if ( junk != 0 )
-    {
-      fprintf(stderr, 
-	      "coff_ppc_rtype_to_howto: reloc index %d contains junk %d\n",
-	      rel->r_type, junk);
-      abort();
-    }
-  
-#ifdef DEBUG_RELOC
-  /* now examine flags */
-  if (r_flags != 0) 
-    {
-      fprintf (stderr, "Reloc with flags found!");
-      if ( r_flags & IMAGE_REL_PPC_NEG ) 
-	fprintf (stderr, " NEG");
-      if ( r_flags & IMAGE_REL_PPC_BRTAKEN )
-	fprintf (stderr, " BRTAKEN");
-      if ( r_flags & IMAGE_REL_PPC_BRNTAKEN )
-	fprintf (stderr, " BRNTAKEN");
-      if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
-	fprintf (stderr, " TOCDEFN");
-      fprintf(stderr, "\n");
-    }
-#endif
-  
+    abort();
+    
   switch(r_type) 
     {
     case IMAGE_REL_PPC_ADDR32NB:
@@ -2528,12 +2140,6 @@ ppc_coff_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-  
-#ifdef DEBUG_RELOC
-  fprintf(stderr, "ppc_coff_reloc_type_lookup for %s\n",
-	  bfd_get_reloc_code_name(code));
-#endif
-
   switch (code)
     {
       HOW2MAP(BFD_RELOC_32_GOTOFF,    IMAGE_REL_PPC_IMGLUE);
@@ -2623,20 +2229,13 @@ ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
 
       flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY ;
 
-#ifdef TOC_DEBUG
-      fprintf(stderr,
-	      "ppc_coff_swap_sym_in_hook: about to create the %s section\n",
-	      TOC_SECTION_NAME);
-#endif
-
       s = bfd_make_section (abfd, TOC_SECTION_NAME);
 
       if (s == NULL
 	  || !bfd_set_section_flags (abfd, s, flags)
 	  || !bfd_set_section_alignment (abfd, s, 2))
 	{
-	  fprintf(stderr,
-		  "toc section allocation failed!\n");
+	  /* FIXME: set appropriate bfd error */
 	  abort();
 	}
 
@@ -2738,7 +2337,10 @@ ppc_bfd_coff_final_link (abfd, info)
 
   /* Compute the file positions for all the sections.  */
   if (! abfd->output_has_begun)
-    bfd_coff_compute_section_file_positions (abfd);
+    {
+      if (! bfd_coff_compute_section_file_positions (abfd))
+	return false;
+    }
 
   /* Count the line numbers and relocation entries required for the
      output file.  Set the file positions for the relocs.  */

@@ -1,5 +1,5 @@
 /* BFD semi-generic back-end for a.out binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1236,7 +1236,7 @@ aout_get_external_symbols (abfd)
       syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
 #else
       /* We allocate using malloc to make the values easy to free
-	 later on.  If we put them on the obstack it might not be
+	 later on.  If we put them on the objalloc it might not be
 	 possible to free them.  */
       syms = ((struct external_nlist *)
 	      bfd_malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
@@ -4263,10 +4263,7 @@ aout_link_write_symbols (finfo, input_bfd)
 		  break;
 		case discard_l:
 		  if ((type & N_STAB) == 0
-		      && *name == *finfo->info->lprefix
-		      && (finfo->info->lprefix_len == 1
-			  || strncmp (name, finfo->info->lprefix,
-				      finfo->info->lprefix_len) == 0))
+		      && bfd_is_local_label_name (input_bfd, name))
 		    skip = true;
 		  break;
 		case discard_all:

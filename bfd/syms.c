@@ -88,7 +88,7 @@ SUBSECTION
 |	     process_symbol (symbol_table[i]);
 |	  }
 
-	All storage for the symbols themselves is in an obstack
+	All storage for the symbols themselves is in an objalloc
 	connected to the BFD; it is freed when the BFD is closed.
 
 
@@ -351,6 +351,8 @@ bfd_is_local_label (abfd, sym)
      asymbol *sym;
 {
   if ((sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
+    return false;
+  if (sym->name == NULL)
     return false;
   return bfd_is_local_label_name (abfd, sym->name);
 }

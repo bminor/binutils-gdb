@@ -1,5 +1,5 @@
 /* Routines to link ECOFF debugging information.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "libbfd.h"
-#include "obstack.h"
+#include "objalloc.h"
 #include "aout/stab_gnu.h"
 #include "coff/internal.h"
 #include "coff/sym.h"
@@ -46,10 +46,9 @@ static boolean mk_fdrtab PARAMS ((bfd *,
 				  const struct ecoff_debug_swap * const,
 				  struct ecoff_find_line *));
 static long fdrtab_lookup PARAMS ((struct ecoff_find_line *, bfd_vma));
-
-/* Obstack allocation and deallocation routines.  */
-#define obstack_chunk_alloc malloc
-#define obstack_chunk_free free
+static boolean lookup_line
+  PARAMS ((bfd *, struct ecoff_debug_info * const,
+	   const struct ecoff_debug_swap * const, struct ecoff_find_line *));
 
 /* Routines to swap auxiliary information in and out.  I am assuming
    that the auxiliary information format is always going to be target
@@ -392,8 +391,8 @@ struct accumulate
   struct shuffle *rfd_end;
   /* The size of the largest file shuffle.  */
   unsigned long largest_file_shuffle;
-  /* An obstack for debugging information.  */
-  struct obstack memory;
+  /* An objalloc for debugging information.  */
+  struct objalloc *memory;
 };
 
 /* Add a file entry to a shuffle list.  */
@@ -426,8 +425,8 @@ add_file_shuffle (ainfo, head, tail, input_bfd, offset, size)
       return true;
     }
 
-  n = (struct shuffle *) obstack_alloc (&ainfo->memory,
-					sizeof (struct shuffle));
+  n = (struct shuffle *) objalloc_alloc (ainfo->memory,
+					 sizeof (struct shuffle));
   if (!n)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -465,8 +464,8 @@ add_memory_shuffle (ainfo, head, tail, data, size)
 {
   struct shuffle *n;
      
-  n = (struct shuffle *) obstack_alloc (&ainfo->memory,
-					sizeof (struct shuffle));
+  n = (struct shuffle *) objalloc_alloc (ainfo->memory,
+					 sizeof (struct shuffle));
   if (!n)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -534,7 +533,8 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
       output_debug->symbolic_header.issMax = 1;
     }
 
-  if (!obstack_begin (&ainfo->memory, 4050))
+  ainfo->memory = objalloc_create ();
+  if (ainfo->memory == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return NULL;
@@ -561,7 +561,7 @@ bfd_ecoff_debug_free (handle, output_bfd, output_debug, output_swap, info)
   if (! info->relocateable)
     bfd_hash_table_free (&ainfo->str_hash.table);
 
-  obstack_free (&ainfo->memory, (PTR) NULL);
+  objalloc_free (ainfo->memory);
 
   free (ainfo);
 }
@@ -666,7 +666,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 					     * sizeof (RFDT)));
 
   sz = (input_symhdr->crfd + input_symhdr->ifdMax) * external_rfd_size;
-  rfd_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
+  rfd_out = (bfd_byte *) objalloc_alloc (ainfo->memory, sz);
   if (!input_debug->ifdmap || !rfd_out)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -766,7 +766,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
   /* Look through the FDR's and copy over all associated debugging
      information.  */
   sz = copied * external_fdr_size;
-  fdr_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
+  fdr_out = (bfd_byte *) objalloc_alloc (ainfo->memory, sz);
   if (!fdr_out)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -821,7 +821,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	 out again.  */
       fgotfilename = false;
       sz = fdr.csym * external_sym_size;
-      sym_out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
+      sym_out = (bfd_byte *) objalloc_alloc (ainfo->memory, sz);
       if (!sym_out)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -978,8 +978,8 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  output_symhdr->issMax += fdr.cbSs;
 	}
 
-      if ((output_bfd->xvec->header_byteorder_big_p
-	   == input_bfd->xvec->header_byteorder_big_p)
+      if ((output_bfd->xvec->header_byteorder
+	   == input_bfd->xvec->header_byteorder)
 	  && input_debug->adjust == (struct ecoff_value_adjust *) NULL)
 	{
 	  /* The two BFD's have the same endianness, and we don't have
@@ -1022,7 +1022,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 		+ fdr.ipdFirst * insz);
 	  end = in + fdr.cpd * insz;
 	  sz = fdr.cpd * outsz;
-	  out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
+	  out = (bfd_byte *) objalloc_alloc (ainfo->memory, sz);
 	  if (!out)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
@@ -1063,7 +1063,7 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 		+ fdr.ioptBase * insz);
 	  end = in + fdr.copt * insz;
 	  sz = fdr.copt * outsz;
-	  out = (bfd_byte *) obstack_alloc (&ainfo->memory, sz);
+	  out = (bfd_byte *) objalloc_alloc (ainfo->memory, sz);
 	  if (!out)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
@@ -1244,8 +1244,8 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
       internal_sym.sc = scUndefined;
       internal_sym.index = indexNil;
 
-      external_sym = (PTR) obstack_alloc (&ainfo->memory,
-					  output_swap->external_sym_size);
+      external_sym = (PTR) objalloc_alloc (ainfo->memory,
+					   output_swap->external_sym_size);
       if (!external_sym)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -1264,8 +1264,8 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
      the lang field to be langC.  The fBigendian field will
      indicate little endian format, but it doesn't matter because
      it only applies to aux fields and there are none.  */
-  external_fdr = (PTR) obstack_alloc (&ainfo->memory,
-				      output_swap->external_fdr_size);
+  external_fdr = (PTR) objalloc_alloc (ainfo->memory,
+				       output_swap->external_fdr_size);
   if (!external_fdr)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1949,27 +1949,23 @@ fdrtab_lookup (line_info, offset)
   return mid;
 }
 
-/* Do the work of find_nearest_line.  */
+/* Look up a line given an address, storing the information in
+   LINE_INFO->cache.  */
 
-boolean
-_bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
-			line_info, filename_ptr, functionname_ptr, retline_ptr)
+static boolean
+lookup_line (abfd, debug_info, debug_swap, line_info)
      bfd *abfd;
-     asection *section;
-     bfd_vma offset;
      struct ecoff_debug_info * const debug_info;
      const struct ecoff_debug_swap * const debug_swap;
      struct ecoff_find_line *line_info;
-     const char **filename_ptr;
-     const char **functionname_ptr;
-     unsigned int *retline_ptr;
 {
   struct ecoff_fdrtab_entry *tab;
+  bfd_vma offset;
   boolean stabs;
   FDR *fdr_ptr;
   int i;
   
-  offset += section->vma;
+  offset = line_info->cache.start;
      
   /* Build FDR table (sorted by object file's base-address) if we
      don't have it already.  */
@@ -2155,7 +2151,10 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
 	    }
 	  lineno += delta;
 	  if (offset < count * 4)
-	    break;
+	    {
+	      line_info->cache.stop += count * 4 - offset;
+	      break;
+	    }
 	  offset -= count * 4;
 	}
 
@@ -2163,9 +2162,9 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
          symbols, at least according to gdb/mipsread.c.  */
       if (fdr_ptr->rss == -1)
 	{
-	  *filename_ptr = NULL;
+	  line_info->cache.filename = NULL;
 	  if (pdr.isym == -1)
-	    *functionname_ptr = NULL;
+	    line_info->cache.functionname = NULL;
 	  else
 	    {
 	      EXTR proc_ext;
@@ -2175,24 +2174,30 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
 		 ((char *) debug_info->external_ext
 		  + pdr.isym * debug_swap->external_ext_size),
 		 &proc_ext);
-	      *functionname_ptr = debug_info->ssext + proc_ext.asym.iss;
+	      line_info->cache.functionname = (debug_info->ssext
+					       + proc_ext.asym.iss);
 	    }
 	}
       else
 	{
 	  SYMR proc_sym;
 
-	  *filename_ptr = debug_info->ss + fdr_ptr->issBase + fdr_ptr->rss;
+	  line_info->cache.filename = (debug_info->ss
+				       + fdr_ptr->issBase
+				       + fdr_ptr->rss);
 	  (*debug_swap->swap_sym_in)
 	    (abfd,
 	     ((char *) debug_info->external_sym
-	      + (fdr_ptr->isymBase + pdr.isym) * debug_swap->external_sym_size),
+	      + ((fdr_ptr->isymBase + pdr.isym)
+		 * debug_swap->external_sym_size)),
 	     &proc_sym);
-	  *functionname_ptr = debug_info->ss + fdr_ptr->issBase + proc_sym.iss;
+	  line_info->cache.functionname = (debug_info->ss
+					   + fdr_ptr->issBase
+					   + proc_sym.iss);
 	}
       if (lineno == ilineNil)
 	lineno = 0;
-      *retline_ptr = lineno;
+      line_info->cache.line_num = lineno;
     }
   else
     {
@@ -2220,9 +2225,9 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
 	 looking through the symbols until we find both a line number
 	 and a function name which are beyond the address we want.  */
 
-      *filename_ptr = NULL;
-      *functionname_ptr = NULL;
-      *retline_ptr = 0;
+      line_info->cache.filename = NULL;
+      line_info->cache.functionname = NULL;
+      line_info->cache.line_num = 0;
 
       directory_name = NULL;
       main_file_name = NULL;
@@ -2300,12 +2305,12 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
 		{
 		  low_line_vma = sym.value;
 		  line_file_name = current_file_name;
-		  *retline_ptr = sym.index;
+		  line_info->cache.line_num = sym.index;
 		}
 	    }
 	}
 
-      if (*retline_ptr != 0)
+      if (line_info->cache.line_num != 0)
 	main_file_name = line_file_name;
 
       /* We need to remove the stuff after the colon in the function
@@ -2339,21 +2344,60 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
 	  colon = strchr (buffer, ':');
 	  if (colon != NULL)
 	    *colon = '\0';
-	  *functionname_ptr = buffer;
+	  line_info->cache.functionname = buffer;
 	}
 
       if (main_file_name != NULL)
 	{
 	  if (directory_name == NULL || main_file_name[0] == '/')
-	    *filename_ptr = main_file_name;
+	    line_info->cache.filename = main_file_name;
 	  else
 	    {
 	      sprintf (buffer + funclen, "%s%s", directory_name,
 		       main_file_name);
-	      *filename_ptr = buffer + funclen;
+	      line_info->cache.filename = buffer + funclen;
 	    }
 	}
     }
+
+  return true;
+}
+
+/* Do the work of find_nearest_line.  */
+
+boolean
+_bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
+			line_info, filename_ptr, functionname_ptr, retline_ptr)
+     bfd *abfd;
+     asection *section;
+     bfd_vma offset;
+     struct ecoff_debug_info * const debug_info;
+     const struct ecoff_debug_swap * const debug_swap;
+     struct ecoff_find_line *line_info;
+     const char **filename_ptr;
+     const char **functionname_ptr;
+     unsigned int *retline_ptr;
+{
+  offset += section->vma;
+
+  if (line_info->cache.sect == NULL
+      || line_info->cache.sect != section
+      || offset < line_info->cache.start
+      || offset >= line_info->cache.stop)
+    {
+      line_info->cache.sect = section;
+      line_info->cache.start = offset;
+      line_info->cache.stop = offset;
+      if (! lookup_line (abfd, debug_info, debug_swap, line_info))
+	{
+	  line_info->cache.sect = NULL;
+	  return false;
+	}
+    }
+
+  *filename_ptr = line_info->cache.filename;
+  *functionname_ptr = line_info->cache.functionname;
+  *retline_ptr = line_info->cache.line_num;
 
   return true;
 }

@@ -22,8 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "objalloc.h"
 #include "libbfd.h"
-#include "obstack.h"
 
 #ifndef S_IXUSR
 #define S_IXUSR 0100	/* Execute by owner.  */
@@ -38,14 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* fdopen is a loser -- we should use stdio exclusively.  Unfortunately
    if we do that we can't use fcntl.  */
 
-
-#define obstack_chunk_alloc malloc
-#define obstack_chunk_free free
-
-#ifndef HAVE_GETPAGESIZE
-#define getpagesize()	2048
-#endif
-
+/* FIXME: This is no longer used.  */
 long _bfd_chunksize = -1;
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
@@ -55,25 +48,15 @@ _bfd_new_bfd ()
 {
   bfd *nbfd;
 
-  nbfd = (bfd *)bfd_zmalloc (sizeof (bfd));
-  if (!nbfd)
-    return 0;
+  nbfd = (bfd *) bfd_zmalloc (sizeof (bfd));
+  if (nbfd == NULL)
+    return NULL;
 
-  if (_bfd_chunksize <= 0)
-    {
-      _bfd_chunksize = getpagesize ();
-      if (_bfd_chunksize <= 0)
-	_bfd_chunksize = 2048;
-      /* Leave some slush space, since many malloc implementations
-	 prepend a header, and may wind up wasting another page
-	 because of it.  */
-      _bfd_chunksize -= 32;
-    }
-
-  if (!obstack_begin(&nbfd->memory, _bfd_chunksize))
+  nbfd->memory = (PTR) objalloc_create ();
+  if (nbfd->memory == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
-      return 0;
+      return NULL;
     }
 
   nbfd->arch_info = &bfd_default_arch_struct;
@@ -81,14 +64,14 @@ _bfd_new_bfd ()
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
   nbfd->where = 0;
-  nbfd->sections = (asection *)NULL;
+  nbfd->sections = (asection *) NULL;
   nbfd->format = bfd_unknown;
-  nbfd->my_archive = (bfd *)NULL;
+  nbfd->my_archive = (bfd *) NULL;
   nbfd->origin = 0;				
   nbfd->opened_once = false;
   nbfd->output_has_begun = false;
   nbfd->section_count = 0;
-  nbfd->usrdata = (PTR)NULL;
+  nbfd->usrdata = (PTR) NULL;
   nbfd->cacheable = false;
   nbfd->flags = BFD_NO_FLAGS;
   nbfd->mtime_set = false;
@@ -104,7 +87,7 @@ _bfd_new_bfd_contained_in (obfd)
 {
   bfd *nbfd;
 
-  nbfd = _bfd_new_bfd();
+  nbfd = _bfd_new_bfd ();
   nbfd->xvec = obfd->xvec;
   nbfd->my_archive = obfd;
   nbfd->direction = read_direction;
@@ -144,27 +127,33 @@ bfd_openr (filename, target)
   bfd *nbfd;
   const bfd_target *target_vec;
 
-  nbfd = _bfd_new_bfd();
+  nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
     return NULL;
 
   target_vec = bfd_find_target (target, nbfd);
-  if (target_vec == NULL) {
-    bfd_set_error (bfd_error_invalid_target);
-    return NULL;
-  }
+  if (target_vec == NULL)
+    {
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      bfd_set_error (bfd_error_invalid_target);
+      return NULL;
+    }
 
   nbfd->filename = filename;
   nbfd->direction = read_direction;
 
-  if (bfd_open_file (nbfd) == NULL) {
-    bfd_set_error (bfd_error_system_call);	/* File didn't exist, or some such */
-    bfd_release(nbfd,0);
-    return NULL;
-  }
+  if (bfd_open_file (nbfd) == NULL)
+    {
+      /* File didn't exist, or some such */
+      bfd_set_error (bfd_error_system_call);
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
+    }
+
   return nbfd;
 }
-
 
 /* Don't try to `optimize' this function:
 
@@ -218,16 +207,19 @@ bfd_fdopenr (filename, target, fd)
 #endif
   if (fdflags == -1) return NULL;
 
-  nbfd = _bfd_new_bfd();
-
+  nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
     return NULL;
 
   target_vec = bfd_find_target (target, nbfd);
-  if (target_vec == NULL) {
-    bfd_set_error (bfd_error_invalid_target);
-    return NULL;
-  }
+  if (target_vec == NULL)
+    {
+      bfd_set_error (bfd_error_invalid_target);
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
+    }
+
 #if defined(VMS) || defined(__GO32__)
   nbfd->iostream = (PTR)fopen(filename, FOPEN_RB);
 #else
@@ -239,10 +231,13 @@ bfd_fdopenr (filename, target, fd)
   default: abort ();
   }
 #endif
-  if (nbfd->iostream == NULL) {
-    (void) obstack_free (&nbfd->memory, (PTR)0);
-    return NULL;
-  }
+
+  if (nbfd->iostream == NULL)
+    {
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
+    }
 
   /* OK, put everything where it belongs */
 
@@ -252,15 +247,20 @@ bfd_fdopenr (filename, target, fd)
      be written through, although doing so requires that we end
      the previous clause with a preposition.  */
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
-  switch (fdflags & (O_ACCMODE)) {
-  case O_RDONLY: nbfd->direction = read_direction; break;
-  case O_WRONLY: nbfd->direction = write_direction; break;
-  case O_RDWR: nbfd->direction = both_direction; break;
-  default: abort ();
-  }
-				
+  switch (fdflags & O_ACCMODE)
+    {
+    case O_RDONLY: nbfd->direction = read_direction; break;
+    case O_WRONLY: nbfd->direction = write_direction; break;
+    case O_RDWR: nbfd->direction = both_direction; break;
+    default: abort ();
+    }
+
   if (! bfd_cache_init (nbfd))
-    return NULL;
+    {
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
+    }
   nbfd->opened_once = true;
 
   return nbfd;
@@ -296,6 +296,8 @@ bfd_openstreamr (filename, target, stream)
   if (target_vec == NULL)
     {
       bfd_set_error (bfd_error_invalid_target);
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
       return NULL;
     }
 
@@ -304,7 +306,11 @@ bfd_openstreamr (filename, target, stream)
   nbfd->direction = read_direction;
 				
   if (! bfd_cache_init (nbfd))
-    return NULL;
+    {
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
+    }
 
   return nbfd;
 }
@@ -342,21 +348,29 @@ bfd_openw (filename, target)
   /* nbfd has to point to head of malloc'ed block so that bfd_close may
      reclaim it correctly. */
 
-  nbfd = _bfd_new_bfd();
+  nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
     return NULL;
 
   target_vec = bfd_find_target (target, nbfd);
-  if (target_vec == NULL) return NULL;
+  if (target_vec == NULL)
+    {
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
+    }
 
   nbfd->filename = filename;
   nbfd->direction = write_direction;
 
-  if (bfd_open_file (nbfd) == NULL) {
-    bfd_set_error (bfd_error_system_call);	/* File not writeable, etc */
-    (void) obstack_free (&nbfd->memory, (PTR)0);
-    return NULL;
+  if (bfd_open_file (nbfd) == NULL)
+    {
+      bfd_set_error (bfd_error_system_call);	/* File not writeable, etc */
+      objalloc_free ((struct objalloc *) nbfd->memory);
+      free (nbfd);
+      return NULL;
   }
+
   return nbfd;
 }
 
@@ -375,7 +389,7 @@ DESCRIPTION
 	and closed. If the created file is executable, then
 	<<chmod>> is called to mark it as such.
 
-	All memory attached to the BFD's obstacks is released.
+	All memory attached to the BFD is released.
 
 	The file descriptor associated with the BFD is closed (even
 	if it was passed in to BFD by <<bfd_fdopenr>>).
@@ -420,8 +434,8 @@ bfd_close (abfd)
 	}
     }
 
-  (void) obstack_free (&abfd->memory, (PTR)0);
-  (void) free (abfd);
+  objalloc_free ((struct objalloc *) abfd->memory);
+  free (abfd);
 
   return ret;
 }
@@ -442,7 +456,7 @@ DESCRIPTION
 	If the created file is executable, then <<chmod>> is called
 	to mark it as such.
 
-	All memory attached to the BFD's obstacks is released.
+	All memory attached to the BFD is released.
 
 RETURNS
 	<<true>> is returned if all is ok, otherwise <<false>>.
@@ -474,38 +488,12 @@ bfd_close_all_done (abfd)
 		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
 	}
     }
-  (void) obstack_free (&abfd->memory, (PTR)0);
-  (void) free(abfd);
+
+  objalloc_free ((struct objalloc *) abfd->memory);
+  free (abfd);
+
   return ret;
 }
-
-
-/*
-FUNCTION	
-	bfd_alloc_size
-
-SYNOPSIS
-	bfd_size_type bfd_alloc_size(bfd *abfd);
-
-DESCRIPTION
-        Return the number of bytes in the obstacks connected to @var{abfd}.
-
-*/
-
-bfd_size_type
-bfd_alloc_size (abfd)
-     bfd *abfd;
-{
-  struct _obstack_chunk *chunk = abfd->memory.chunk;
-  size_t size = 0;
-  while (chunk) {
-    size += chunk->limit - &(chunk->contents[0]);
-    chunk = chunk->prev;
-  }
-  return size;
-}
-
-
 
 /*
 FUNCTION
@@ -527,15 +515,16 @@ bfd_create (filename, templ)
      CONST char *filename;
      bfd *templ;
 {
-  bfd *nbfd = _bfd_new_bfd();
-  if (nbfd == (bfd *)NULL)
-    return (bfd *)NULL;
+  bfd *nbfd;
+
+  nbfd = _bfd_new_bfd ();
+  if (nbfd == NULL)
+    return NULL;
   nbfd->filename = filename;
-  if(templ) {
+  if (templ)
     nbfd->xvec = templ->xvec;
-  }
   nbfd->direction = no_direction;
-  bfd_set_format(nbfd, bfd_object);
+  bfd_set_format (nbfd, bfd_object);
   return nbfd;
 }
 
@@ -547,8 +536,8 @@ SYNOPSIS
 	PTR bfd_alloc (bfd *abfd, size_t wanted);
 
 DESCRIPTION
-	Allocate a block of @var{wanted} bytes of memory in the obstack
-	attached to <<abfd>> and return a pointer to it.
+	Allocate a block of @var{wanted} bytes of memory attached to
+	<<abfd>> and return a pointer to it.
 */
 
 
@@ -559,7 +548,7 @@ bfd_alloc (abfd, size)
 {
   PTR ret;
 
-  ret = obstack_alloc (&(abfd->memory), size);
+  ret = objalloc_alloc (abfd->memory, (unsigned long) size);
   if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
   return ret;
@@ -571,8 +560,19 @@ bfd_zalloc (abfd, size)
      size_t size;
 {
   PTR res;
-  res = bfd_alloc(abfd, size);
+
+  res = bfd_alloc (abfd, size);
   if (res)
-    memset(res, 0, (size_t)size);
+    memset (res, 0, size);
   return res;
+}
+
+/* Free a block allocated for a BFD.  */
+
+void
+bfd_release (abfd, block)
+     bfd *abfd;
+     PTR block;
+{
+  objalloc_free_block ((struct objalloc *) abfd->memory, block);
 }

@@ -1,5 +1,5 @@
 /* BFD back-end for AMD 29000 COFF binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
    Contributed by David Wood at New York University 7/8/91.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include "obstack.h"
 #include "coff/a29k.h"
 #include "coff/internal.h"
 #include "libcoff.h"

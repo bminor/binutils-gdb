@@ -49,7 +49,6 @@ extern "C" {
 #endif
 
 #include "ansidecl.h"
-#include "obstack.h"
 
 /* These two lines get substitutions done by commands in Makefile.in.  */
 #define BFD_VERSION  "@VERSION@"
@@ -380,8 +379,9 @@ struct bfd_hash_table
   struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
 					     struct bfd_hash_table *,
 					     const char *));
-  /* An obstack for this hash table.  */
-  struct obstack memory;
+   /* An objalloc for this hash table.  This is a struct objalloc *,
+     but we use PTR to avoid requiring the inclusion of objalloc.h.  */
+  PTR memory;
 };
 
 /* Initialize a hash table.  */
@@ -709,9 +709,6 @@ bfd_close PARAMS ((bfd *abfd));
 
 boolean 
 bfd_close_all_done PARAMS ((bfd *));
-
-bfd_size_type 
-bfd_alloc_size PARAMS ((bfd *abfd));
 
 bfd *
 bfd_create PARAMS ((CONST char *filename, bfd *templ));
@@ -2263,8 +2260,10 @@ struct _bfd
      /* Used by the application to hold private data*/
     PTR usrdata;
 
-     /* Where all the allocated stuff under this BFD goes */
-    struct obstack memory;
+   /* Where all the allocated stuff under this BFD goes.  This is a
+     struct objalloc *, but we use PTR to avoid requiring the inclusion of
+     objalloc.h.  */
+    PTR memory;
 };
 
 typedef enum bfd_error
@@ -2731,6 +2730,9 @@ CAT(NAME,_canonicalize_dynamic_reloc)
 
  PTR backend_data;
 } bfd_target;
+boolean 
+bfd_set_default_target  PARAMS ((const char *name));
+
 const bfd_target *
 bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 
