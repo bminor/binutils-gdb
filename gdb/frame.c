@@ -135,9 +135,11 @@ struct frame_info
 
 static int frame_debug;
 
-/* Flag to indicate whether backtraces should stop at main.  */
+/* Flag to indicate whether backtraces should stop at main et.al.  */
 
-static int backtrace_below_main;
+static int backtrace_past_main;
+static unsigned int backtrace_limit = UINT_MAX;
+
 
 void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
@@ -1829,7 +1831,7 @@ get_prev_frame (struct frame_info *this_frame)
   gdb_assert (this_frame != NULL);
 
   if (this_frame->level >= 0
-      && !backtrace_below_main
+      && !backtrace_past_main
       && inside_main_func (get_frame_pc (this_frame)))
     /* Don't unwind past main(), bug always unwind the sentinel frame.
        Note, this is done _before_ the frame has been marked as
@@ -1839,6 +1841,11 @@ get_prev_frame (struct frame_info *this_frame)
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog, "-> NULL // inside main func }\n");
       return NULL;
+    }
+
+  if (this_frame->level > backtrace_limit)
+    {
+      error ("Backtrace limit of %d exceeded", backtrace_limit);
     }
 
   /* If we're already inside the entry function for the main objfile,
@@ -2397,18 +2404,39 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
+static struct cmd_list_element *set_backtrace_cmdlist;
+static struct cmd_list_element *show_backtrace_cmdlist;
+
+static void
+set_backtrace_cmd (char *args, int from_tty)
+{
+  help_list (set_backtrace_cmdlist, "set backtrace ", -1, gdb_stdout);
+}
+
+static void
+show_backtrace_cmd (char *args, int from_tty)
+{
+  cmd_show_list (show_backtrace_cmdlist, from_tty, "");
+}
+
 void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
 
-  /* FIXME: cagney/2003-01-19: This command needs a rename.  Suggest
-     `set backtrace {past,beyond,...}-main'.  Also suggest adding `set
-     backtrace ...-start' to control backtraces past start.  The
-     problem with `below' is that it stops the `up' command.  */
+  add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, "\
+Set backtrace specific variables.\n\
+Configure backtrace variables such as the backtrace limit",
+		  &set_backtrace_cmdlist, "set backtrace ",
+		  0/*allow-unknown*/, &setlist);
+  add_prefix_cmd ("backtrace", class_maintenance, show_backtrace_cmd, "\
+Show backtrace specific variables\n\
+Show backtrace variables such as the backtrace limit",
+		  &show_backtrace_cmdlist, "show backtrace ",
+		  0/*allow-unknown*/, &showlist);
 
-  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
-			   &backtrace_below_main, "\
+  add_setshow_boolean_cmd ("past-main", class_obscure,
+			   &backtrace_past_main, "\
 Set whether backtraces should continue past \"main\".\n\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
@@ -2417,8 +2445,17 @@ Show whether backtraces should continue past \"main\".\n\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.",
-			   NULL, NULL, &setlist, &showlist);
+			   NULL, NULL, &set_backtrace_cmdlist,
+			   &show_backtrace_cmdlist);
 
+  add_setshow_uinteger_cmd ("limit", class_obscure,
+			    &backtrace_limit, "\
+Set an upper bound on the number of backtrace levels.\n\
+No more than the specified number of frames can be displayed or examined.\n
+Zero is unlimited.", "\
+Show the upper bound on the number of backtrace levels.",
+			    NULL, NULL, &set_backtrace_cmdlist,
+			    &show_backtrace_cmdlist);
 
   /* Debug this files internals. */
   add_show_from_set (add_set_cmd ("frame", class_maintenance, var_zinteger,
