@@ -1,3 +1,14 @@
+Fri Aug 12 11:22:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (elf_link_add_object_symbols): If there is no symbol
+	table, try using the dynamic symbol table.  From Eric Youngdale
+	<ericy@cais.cais.com>.
+
+	* configure.host (sparc-*-solaris2*): Use solaris2, not sysv4.
+	The linker depends upon configuring for solaris2.
+	* hosts/solaris2.h: New file; include hosts/sysv4.h.
+	* config/solaris2.mh: New file; copy of config/sysv4.mh.
+
 Wed Aug 10 13:09:38 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* aoutx.h (adjust_z_magic): Make sure data section is padded to

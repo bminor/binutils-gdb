@@ -3995,6 +3995,16 @@ elf_link_add_object_symbols (abfd, info)
   add_symbol_hook = get_elf_backend_data (abfd)->elf_add_symbol_hook;
   collect = get_elf_backend_data (abfd)->collect;
 
+  /* A stripped shared library might only have a dynamic symbol table,
+     not a regular symbol table.  In that case we can still go ahead
+     and link using the dynamic symbol table.  */
+  if (elf_onesymtab (abfd) == 0
+      && elf_dynsymtab (abfd) != 0)
+    {
+      elf_onesymtab (abfd) = elf_dynsymtab (abfd);
+      elf_tdata (abfd)->symtab_hdr = elf_tdata (abfd)->dynsymtab_hdr;
+    }
+
   hdr = &elf_tdata (abfd)->symtab_hdr;
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
 
@@ -5238,6 +5248,13 @@ elf_bfd_final_link (abfd, info)
 	     assign_section_numbers will create a reloc section.  */
 	  o->flags &=~ SEC_RELOC;
 	}
+
+      /* If the SEC_ALLOC flag is not set, force the section VMA to
+	 zero.  This is done in elf_fake_sections as well, but forcing
+	 the VMA to 0 here will ensure that relocs against these
+	 sections are handled correctly.  */
+      if ((o->flags & SEC_ALLOC) == 0)
+	o->vma = 0;
     }
 
   /* Figure out the file positions for everything but the symbol table
