@@ -136,7 +136,7 @@ static bfd_boolean xtensa_elf_dynamic_symbol_p
 static bfd_vma elf_xtensa_create_plt_entry
   PARAMS ((bfd *, bfd *, unsigned));
 static int elf_xtensa_combine_prop_entries
-  PARAMS ((bfd *, const char *));
+  PARAMS ((bfd *, asection *, asection *));
 static bfd_boolean elf_xtensa_discard_info_for_section
   PARAMS ((bfd *, struct elf_reloc_cookie *, struct bfd_link_info *,
 	   asection *));
@@ -205,6 +205,8 @@ static bfd_vma get_elf_r_symndx_offset
 static bfd_boolean pcrel_reloc_fits
   PARAMS ((xtensa_operand, bfd_vma, bfd_vma));
 static bfd_boolean xtensa_is_property_section
+  PARAMS ((asection *));
+static bfd_boolean xtensa_is_littable_section
   PARAMS ((asection *));
 static bfd_boolean is_literal_section
   PARAMS ((asection *));
@@ -904,7 +906,7 @@ elf_xtensa_create_dynamic_sections (dynobj, info)
      bfd *dynobj;
      struct bfd_link_info *info;
 {
-  flagword flags;
+  flagword flags, noalloc_flags;
   asection *s;
 
   /* First do all the standard stuff.  */
@@ -916,8 +918,9 @@ elf_xtensa_create_dynamic_sections (dynobj, info)
   if (!add_extra_plt_sections (dynobj, plt_reloc_count))
     return FALSE;
 
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED | SEC_READONLY);
+  noalloc_flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
+		   | SEC_LINKER_CREATED | SEC_READONLY);
+  flags = noalloc_flags | SEC_ALLOC | SEC_LOAD;
 
   /* Mark the ".got.plt" section READONLY.  */
   s = bfd_get_section_by_name (dynobj, ".got.plt");
@@ -932,10 +935,17 @@ elf_xtensa_create_dynamic_sections (dynobj, info)
       || ! bfd_set_section_alignment (dynobj, s, 2))
     return FALSE;
 
+  /* Create ".got.loc" (literal tables for use by dynamic linker).  */
+  s = bfd_make_section (dynobj, ".got.loc");
+  if (s == NULL
+      || ! bfd_set_section_flags (dynobj, s, flags)
+      || ! bfd_set_section_alignment (dynobj, s, 2))
+    return FALSE;
+
   /* Create ".xt.lit.plt" (literal table for ".got.plt*").  */
   s = bfd_make_section (dynobj, ".xt.lit.plt");
   if (s == NULL
-      || ! bfd_set_section_flags (dynobj, s, flags)
+      || ! bfd_set_section_flags (dynobj, s, noalloc_flags)
       || ! bfd_set_section_alignment (dynobj, s, 2))
     return FALSE;
 
@@ -1136,8 +1146,8 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
      bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  bfd *dynobj;
-  asection *s, *srelplt, *splt, *sgotplt, *srelgot, *spltlittbl;
+  bfd *dynobj, *abfd;
+  asection *s, *srelplt, *splt, *sgotplt, *srelgot, *spltlittbl, *sgotloc;
   bfd_boolean relplt, relgot;
   int plt_entries, plt_chunks, chunk;
 
@@ -1241,6 +1251,28 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	      splt->_raw_size = 0;
 	    }
 	}
+
+      /* Allocate space in ".got.loc" to match the total size of all the
+	 literal tables.  */
+      sgotloc = bfd_get_section_by_name (dynobj, ".got.loc");
+      if (sgotloc == NULL)
+	abort ();
+      sgotloc->_raw_size = spltlittbl->_raw_size;
+      for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
+	{
+	  if (abfd->flags & DYNAMIC)
+	    continue;
+	  for (s = abfd->sections; s != NULL; s = s->next)
+	    {
+	      /* Skip input sections that are being discarded.  */
+	      if (!bfd_is_abs_section (s)
+		  && bfd_is_abs_section (s->output_section))
+		continue;
+
+	      if (xtensa_is_littable_section (s) && s != spltlittbl)
+		sgotloc->_raw_size += s->_raw_size;
+	    }
+	}
     }
 
   /* Allocate memory for dynamic sections.  */
@@ -1291,7 +1323,8 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
       else if (strcmp (name, ".got") != 0
 	       && strcmp (name, ".plt") != 0
 	       && strcmp (name, ".got.plt") != 0
-	       && strcmp (name, ".xt.lit.plt") != 0)
+	       && strcmp (name, ".xt.lit.plt") != 0
+	       && strcmp (name, ".got.loc") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -2236,24 +2269,26 @@ elf_xtensa_finish_dynamic_symbol (output_bfd, info, h, sym)
    on error.  */
 
 static int
-elf_xtensa_combine_prop_entries (output_bfd, secname)
+elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
      bfd *output_bfd;
-     const char *secname;
+     asection *sxtlit;
+     asection *sgotloc;
 {
-  asection *sec;
   bfd_byte *contents;
   property_table_entry *table;
-  bfd_size_type section_size;
+  bfd_size_type section_size, sgotloc_size;
   bfd_vma offset;
   int n, m, num;
 
-  sec = bfd_get_section_by_name (output_bfd, secname);
-  if (!sec)
-    return -1;
-
-  section_size = (sec->_cooked_size != 0 ? sec->_cooked_size : sec->_raw_size);
+  section_size = (sxtlit->_cooked_size != 0
+		  ? sxtlit->_cooked_size : sxtlit->_raw_size);
   BFD_ASSERT (section_size % 8 == 0);
   num = section_size / 8;
+
+  sgotloc_size = (sgotloc->_cooked_size != 0
+		  ? sgotloc->_cooked_size : sgotloc->_raw_size);
+  if (sgotloc_size != section_size)
+    return -1;
 
   contents = (bfd_byte *) bfd_malloc (section_size);
   table = (property_table_entry *)
@@ -2264,9 +2299,10 @@ elf_xtensa_combine_prop_entries (output_bfd, secname)
   /* The ".xt.lit.plt" section has the SEC_IN_MEMORY flag set and this
      propagates to the output section, where it doesn't really apply and
      where it breaks the following call to bfd_get_section_contents.  */
-  sec->flags &= ~SEC_IN_MEMORY;
+  sxtlit->flags &= ~SEC_IN_MEMORY;
 
-  if (! bfd_get_section_contents (output_bfd, sec, contents, 0, section_size))
+  if (! bfd_get_section_contents (output_bfd, sxtlit, contents, 0,
+				  section_size))
     return -1;
 
   /* There should never be any relocations left at this point, so this
@@ -2321,11 +2357,15 @@ elf_xtensa_combine_prop_entries (output_bfd, secname)
   if ((bfd_size_type) (num * 8) < section_size)
     {
       memset (&contents[num * 8], 0, section_size - num * 8);
-      sec->_cooked_size = num * 8;
+      sxtlit->_cooked_size = num * 8;
     }
 
-  if (! bfd_set_section_contents (output_bfd, sec, contents, 0, section_size))
+  if (! bfd_set_section_contents (output_bfd, sxtlit, contents, 0,
+				  section_size))
     return -1;
+
+  /* Copy the contents to ".got.loc".  */
+  memcpy (sgotloc->contents, contents, section_size);
 
   free (contents);
   return num;
@@ -2340,7 +2380,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
      struct bfd_link_info *info;
 {
   bfd *dynobj;
-  asection *sdyn, *srelplt, *sgot;
+  asection *sdyn, *srelplt, *sgot, *sxtlit, *sgotloc;
   Elf32_External_Dyn *dyncon, *dynconend;
   int num_xtlit_entries;
 
@@ -2466,7 +2506,12 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 
   /* Combine adjacent literal table entries.  */
   BFD_ASSERT (! info->relocatable);
-  num_xtlit_entries = elf_xtensa_combine_prop_entries (output_bfd, ".xt.lit");
+  sxtlit = bfd_get_section_by_name (output_bfd, ".xt.lit");
+  sgotloc = bfd_get_section_by_name (dynobj, ".got.loc");
+  if (!sxtlit || !sgotloc)
+    return FALSE;
+  num_xtlit_entries =
+    elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc);
   if (num_xtlit_entries < 0)
     return FALSE;
 
@@ -2486,13 +2531,11 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 	  break;
 
 	case DT_XTENSA_GOT_LOC_SZ:
-	  s = bfd_get_section_by_name (output_bfd, ".xt.lit");
-	  BFD_ASSERT (s);
 	  dyn.d_un.d_val = num_xtlit_entries;
 	  break;
 
 	case DT_XTENSA_GOT_LOC_OFF:
-	  name = ".xt.lit";
+	  name = ".got.loc";
 	  goto get_vma;
 	case DT_PLTGOT:
 	  name = ".got";
@@ -5264,9 +5307,27 @@ relax_property_section (abfd, sec, link_info)
 	     relaxed; shrinking _raw_size means that these checks will
 	     not be unnecessarily lax.)  */
 	  sec->_raw_size = sec->_cooked_size;
+
+	  if (xtensa_is_littable_section (sec))
+	    {
+	      bfd *dynobj = elf_hash_table (link_info)->dynobj;
+	      if (dynobj)
+		{
+		  asection *sgotloc =
+		    bfd_get_section_by_name (dynobj, ".got.loc");
+		  if (sgotloc)
+		    {
+		      bfd_size_type sgotloc_size =
+			(sgotloc->_cooked_size ? sgotloc->_cooked_size
+			 : sgotloc->_raw_size);
+		      sgotloc->_cooked_size = sgotloc_size - removed_bytes;
+		      sgotloc->_raw_size = sgotloc_size - removed_bytes;
+		    }
+		}
+	    }
 	}
     }
-	  
+
  error_return:
   release_internal_relocs (sec, internal_relocs);
   release_contents (sec, contents);
@@ -5584,12 +5645,42 @@ static bfd_boolean
 xtensa_is_property_section (sec)
      asection *sec;
 {
-  static int len = sizeof (".gnu.linkonce.t.") - 1;
+  static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
 
-  return (strcmp (".xt.insn", sec->name) == 0
-	  || strcmp (".xt.lit", sec->name) == 0
-	  || strncmp (".gnu.linkonce.x.", sec->name, len) == 0
-	  || strncmp (".gnu.linkonce.p.", sec->name, len) == 0);
+  if (strncmp (".xt.insn", sec->name, 8) == 0
+      || strncmp (".xt.lit", sec->name, 7) == 0)
+    return TRUE;
+
+  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0)
+    {
+      if (strncmp ("x.", sec->name + linkonce_len, 2) == 0
+	  || strncmp ("p.", sec->name + linkonce_len, 2) == 0)
+	return TRUE;
+      if (strstr (sec->name + linkonce_len, ".xt.insn") != NULL
+	  || strstr (sec->name + linkonce_len, ".xt.lit") != NULL)
+	return TRUE;
+    }
+  return FALSE;
+}
+
+
+static bfd_boolean 
+xtensa_is_littable_section (sec)
+     asection *sec;
+{
+  static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
+
+  if (strncmp (".xt.lit", sec->name, 7) == 0)
+    return TRUE;
+
+  if (strncmp (".gnu.linkonce.", sec->name, linkonce_len) == 0)
+    {
+      if (strncmp ("p.", sec->name + linkonce_len, 2) == 0)
+	return TRUE;
+      if (strstr (sec->name + linkonce_len, ".xt.lit") != NULL)
+	return TRUE;
+    }
+  return FALSE;
 }
 
 

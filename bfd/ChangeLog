@@ -1,3 +1,21 @@
+2003-07-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_create_dynamic_sections): Create new
+	.got.loc section.  Do not set SEC_ALLOC or SEC_LOAD flags for the
+	.xt.lit.plt section.
+	(elf_xtensa_size_dynamic_sections): Set size of the .got.loc section
+	and allocate memory for it.
+	(elf_xtensa_combine_prop_entries): Copy contents of .xt.lit output
+	section to the .got.loc section.
+	(elf_xtensa_finish_dynamic_sections): Fix up call to
+	elf_xtensa_combine_prop_entries and set DT_XTENSA_GOT_LOC_OFF to
+	the address of .got.loc.
+	(relax_property_section): Shrink .got.loc to match changes in any
+	literal table section.
+	(xtensa_is_property_section): Change to match
+	xtensa_get_property_section_name.
+	(xtensa_is_littable_section): New.
+
 2003-07-10  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (IA64_HOWTO): Set dst_mask to -1 instead of

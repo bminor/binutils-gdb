@@ -1,3 +1,12 @@
+2003-07-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* emulparams/elf32xtensa.sh (OTHER_READONLY_SECTIONS): Replace .xt.lit
+	with new .got.loc section.
+	(OTHER_READWRITE_SECTIONS): Do not combine linkonce sections for
+	non-relocating links.
+	(OTHER_SECTIONS): Add .xt.lit here.  Change it to keep linkonce
+	sections separate for non-relocating links; likewise for .xt.insn.
+
 2003-07-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	2001-08-22  Alexandre Oliva  <aoliva@redhat.com>
