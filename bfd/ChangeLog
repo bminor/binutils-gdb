@@ -1,3 +1,8 @@
+Tue Jul  5 13:56:52 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (swap_out_syms): Get alignment of common symbol from
+	st_value field of saved ELF symbol information, if there is any.
+
 Mon Jul  4 19:13:32 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.h (R_HPPA_COMPLEX): Define.
