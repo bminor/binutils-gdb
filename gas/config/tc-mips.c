@@ -7393,9 +7393,13 @@ md_section_align (seg, addr)
      asection *seg;
      valueT addr;
 {
+#ifndef OBJ_ELF
   int align = bfd_get_section_alignment (stdoutput, seg);
 
   return ((addr + (1 << align) - 1) & (-1 << align));
+#else
+  return addr;
+#endif
 }
 
 /* Utility routine, called from above as well.  If called while the

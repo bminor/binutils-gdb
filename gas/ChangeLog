@@ -1,3 +1,8 @@
+Fri Aug  2 11:23:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_section_align): Don't change addr if
+	OBJ_ELF.
+
 Thu Aug  1 23:51:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c: Revert yesterday's changes.
