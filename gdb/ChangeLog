@@ -1,3 +1,13 @@
+2004-05-15  Joel Brobecker  <brobecker@gnat.com>
+
+	* rs6000-tdep.c (store_param_on_stack_p): New function,
+	an improved version of some code extracted from skip_prologue().
+	(skip_prologue): Use store_param_on_stack_p() to detect
+	instructions saving a parameter on the stack. Detect when r0
+	is used to save a parameter.
+	Do not mark "li rx, SIMM" instructions as part of the prologue,
+	unless the following instruction is also part of the prologue.
+
 2004-05-14  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (handle_inferior_event): Simplify

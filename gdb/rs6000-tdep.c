@@ -592,6 +592,76 @@ refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc)
   return lim_pc;
 }
 
+/* Return nonzero if the given instruction OP can be part of the prologue
+   of a function and saves a parameter on the stack.  FRAMEP should be
+   set if one of the previous instructions in the function has set the
+   Frame Pointer.  */
+
+static int
+store_param_on_stack_p (unsigned long op, int framep, int *r0_contains_arg)
+{
+  /* Move parameters from argument registers to temporary register.  */
+  if ((op & 0xfc0007fe) == 0x7c000378)         /* mr(.)  Rx,Ry */
+    {
+      /* Rx must be scratch register r0.  */
+      const int rx_regno = (op >> 16) & 31;
+      /* Ry: Only r3 - r10 are used for parameter passing.  */
+      const int ry_regno = GET_SRC_REG (op);
+
+      if (rx_regno == 0 && ry_regno >= 3 && ry_regno <= 10)
+        {
+          *r0_contains_arg = 1;
+          return 1;
+        }
+      else
+        return 0;
+    }
+
+  /* Save a General Purpose Register on stack.  */
+
+  if ((op & 0xfc1f0003) == 0xf8010000 ||       /* std  Rx,NUM(r1) */
+      (op & 0xfc1f0000) == 0xd8010000)         /* stfd Rx,NUM(r1) */
+    {
+      /* Rx: Only r3 - r10 are used for parameter passing.  */
+      const int rx_regno = GET_SRC_REG (op);
+
+      return (rx_regno >= 3 && rx_regno <= 10);
+    }
+           
+  /* Save a General Purpose Register on stack via the Frame Pointer.  */
+
+  if (framep &&
+      ((op & 0xfc1f0000) == 0x901f0000 ||     /* st rx,NUM(r31) */
+       (op & 0xfc1f0000) == 0x981f0000 ||     /* stb Rx,NUM(r31) */
+       (op & 0xfc1f0000) == 0xd81f0000))      /* stfd Rx,NUM(r31) */
+    {
+      /* Rx: Usually, only r3 - r10 are used for parameter passing.
+         However, the compiler sometimes uses r0 to hold an argument.  */
+      const int rx_regno = GET_SRC_REG (op);
+
+      return ((rx_regno >= 3 && rx_regno <= 10)
+              || (rx_regno == 0 && *r0_contains_arg));
+    }
+
+  if ((op & 0xfc1f0000) == 0xfc010000)         /* frsp, fp?,NUM(r1) */
+    {
+      /* Only f2 - f8 are used for parameter passing.  */
+      const int src_regno = GET_SRC_REG (op);
+
+      return (src_regno >= 2 && src_regno <= 8);
+    }
+
+  if (framep && ((op & 0xfc1f0000) == 0xfc1f0000))  /* frsp, fp?,NUM(r31) */
+    {
+      /* Only f2 - f8 are used for parameter passing.  */
+      const int src_regno = GET_SRC_REG (op);
+
+      return (src_regno >= 2 && src_regno <= 8);
+    }
+
+  /* Not an insn that saves a parameter on stack.  */
+  return 0;
+}
 
 static CORE_ADDR
 skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
@@ -614,6 +684,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int minimal_toc_loaded = 0;
   int prev_insn_was_prologue_insn = 1;
   int num_skip_non_prologue_insns = 0;
+  int r0_contains_arg = 0;
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (current_gdbarch);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
@@ -682,11 +753,15 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	     ones.  */
 	  if (lr_reg < 0)
 	    lr_reg = (op & 0x03e00000);
+          if (lr_reg == 0)
+            r0_contains_arg = 0;
 	  continue;
 	}
       else if ((op & 0xfc1fffff) == 0x7c000026)
 	{			/* mfcr Rx */
 	  cr_reg = (op & 0x03e00000);
+          if (cr_reg == 0)
+            r0_contains_arg = 0;
 	  continue;
 
 	}
@@ -733,6 +808,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 				   for >= 32k frames */
 	  fdata->offset = (op & 0x0000ffff) << 16;
 	  fdata->frameless = 0;
+          r0_contains_arg = 0;
 	  continue;
 
 	}
@@ -741,6 +817,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 				   lf of >= 32k frames */
 	  fdata->offset |= (op & 0x0000ffff);
 	  fdata->frameless = 0;
+          r0_contains_arg = 0;
 	  continue;
 
 	}
@@ -874,26 +951,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  /* store parameters in stack */
 	}
       /* Move parameters from argument registers to temporary register.  */
-      else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
-               (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
-               (((op >> 21) & 31) <= 10) &&
-               (((op >> 16) & 31) == 0)) /* Rx: scratch register r0 */
-        {
-          continue;
-        }
-      else if ((op & 0xfc1f0003) == 0xf8010000 ||	/* std rx,NUM(r1) */
-	       (op & 0xfc1f0000) == 0xd8010000 ||	/* stfd Rx,NUM(r1) */
-	       (op & 0xfc1f0000) == 0xfc010000)		/* frsp, fp?,NUM(r1) */
-	{
-	  continue;
-
-	  /* store parameters in stack via frame pointer */
-	}
-      else if (framep &&
-	       ((op & 0xfc1f0000) == 0x901f0000 ||     /* st rx,NUM(r31) */
-                (op & 0xfc1f0000) == 0x981f0000 ||     /* stb Rx,NUM(r31) */
-		(op & 0xfc1f0000) == 0xd81f0000 ||     /* stfd Rx,NUM(r31) */
-		(op & 0xfc1f0000) == 0xfc1f0000))      /* frsp, fp?,NUM(r31) */
+      else if (store_param_on_stack_p (op, framep, &r0_contains_arg))
         {
 	  continue;
 
@@ -962,8 +1020,15 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
       else if ((op & 0xffff0000) == 0x38000000         /* li r0, SIMM */
                || (op & 0xffff0000) == 0x39c00000)     /* li r14, SIMM */
 	{
+          if ((op & 0xffff0000) == 0x38000000)
+            r0_contains_arg = 0;
 	  li_found_pc = pc;
 	  vr_saved_offset = SIGNED_SHORT (op);
+
+          /* This insn by itself is not part of the prologue, unless
+             if part of the pair of insns mentioned above. So do not
+             record this insn as part of the prologue yet.  */
+          prev_insn_was_prologue_insn = 0;
 	}
       /* Store vector register S at (r31+r0) aligned to 16 bytes.  */      
       /* 011111 sssss 11111 00000 00111001110 */
