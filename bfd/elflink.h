@@ -8482,7 +8482,12 @@ elf_bfd_discard_info (output_bfd, info)
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh, ehdr,
 						 elf_reloc_symbol_deleted_p,
 						 &cookie))
-	    ret = true;
+	    {
+	      /* Relocs have been edited.  Ensure edited version is
+		 used later in relocate_section.  */
+	      elf_section_data (eh)->relocs = cookie.rels;
+	      ret = true;
+	    }
 	  if (cookie.rels && elf_section_data (eh)->relocs != cookie.rels)
 	    free (cookie.rels);
 	}
