@@ -35,7 +35,8 @@
 #include "gdb_string.h"
 #include "event-loop.h"
 #include "ui-out.h"
-#if defined (TUI) || defined (GDBTK)
+
+#if defined (TUI)
 /* FIXME: cagney/2000-01-31: This #include is to allow older code such
    as that found in the TUI to continue to build. */
 #include "tui/tui-file.h"
@@ -199,10 +200,7 @@ captured_main (void *data)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   current_directory = gdb_dirbuf;
 
-#if defined (TUI) || defined (GDBTK)
-  /* Older code uses the tui_file and fputs_unfiltered_hook().  It
-     should be using a customized UI_FILE object and re-initializing
-     within its own _initialize function.  */
+#if defined (TUI)
   gdb_stdout = tui_fileopen (stdout);
   gdb_stderr = tui_fileopen (stderr);
   gdb_stdlog = gdb_stdout;	/* for moment */

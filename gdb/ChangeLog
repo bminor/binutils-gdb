@@ -1,3 +1,8 @@
+2001-04-04  Martin M. Hunt  <hunt@redhat.com>
+
+	* main.c (captured_main): For GDBtk, don't use tui_fileopen().
+	Handle all stream setup in gdbtk_init
+
 2001-04-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_extract_return_value): Don't return the return
