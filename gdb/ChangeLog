@@ -1,3 +1,30 @@
+2002-07-03  Grace Sainsbury  <graces@redhat.com>
+
+	* config/mcore/tm-mcore.h (GDB_MULTI_ARCH): Add macro. Set to 0.
+	(REGISTER_SIZE): Remove.
+	(MAX_REGISTER_RAW_SIZE): Remove.
+	(REGISTER_VIRTUAL_TYPE): Remove.
+	(MAX_REGISTER_VIRTUAL_SIZE): Remove.
+	(REGISTER_NAME): Remove.
+	(USE_GENERIC_DUMMY_FRAMES): Remove.
+	(CALL_DUMMY): Remove.
+	(CALL_DUMMY_START_OFFSET): Remove.
+	(CALL_DUMMY_BREAKPOINT_OFFSET): Remove.
+	(CALL_DUMMY_LOCATION): Remove.
+	(FIX_CALL_DUMMY): Remove.
+	(CALL_DUMMY_ADDRESS): Remove.
+	(SIZEOF_CALL_DUMMY_WORDS): Remove.
+	(SAVE_DUMMY_FRAME_TOS): Remove.
+	* mcore-tdep.c (MCORE_REG_SIZE, MCORE_NUM_REGS): Add macros.
+	(mcore_register_virtual_type): New function.
+	(mcore_register_byte): New function.
+	(mcore_register_size): New function.
+	(mcore_register_name): New function.
+	(mcore_gdbarch_init): New function. Add set_gdbarch calls for
+	macros removed from tm-mcore.h.
+	(mcore_dump_tdep): Add.
+	(_initialize_mcore_tdep): Add gdbarch_register call.
+
 2002-07-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_frameless_signal_p): Provide an argument in to

@@ -23,6 +23,9 @@
 #include "symtab.h"		/* For namespace_enum.  */
 #include "symfile.h"		/* For entry_point_address().  */
 
+#define GDB_MULTI_ARCH 0
+
+#if !GDB_MULTI_ARCH
 /* All registers are 32 bits */
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4
@@ -34,11 +37,14 @@
 #define REGISTER_RAW_SIZE(REG) 4
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
+#endif
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
 
+#if !GDB_MULTI_ARCH
 extern char *mcore_register_names[];
 #define REGISTER_NAME(I) mcore_register_names[I]
+#endif
 
 /* Registers. The Motorola MCore contains:
 
@@ -117,6 +123,7 @@ extern CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
 extern void mcore_pop_frame (struct frame_info *fi);
 #define POP_FRAME mcore_pop_frame (get_current_frame ())
 
+#if !GDB_MULTI_ARCH
 #define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
 #define CALL_DUMMY_START_OFFSET      (0)
@@ -126,6 +133,7 @@ extern void mcore_pop_frame (struct frame_info *fi);
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 #define SIZEOF_CALL_DUMMY_WORDS      0
 #define SAVE_DUMMY_FRAME_TOS(SP)     generic_save_dummy_frame_tos (SP)
+#endif
 
 extern CORE_ADDR mcore_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  mcore_push_return_address (PC, SP)
@@ -137,7 +145,9 @@ extern CORE_ADDR mcore_push_arguments (int, struct value **, CORE_ADDR,
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = mcore_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
+#if !GDB_MULTI_ARCH
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)
+#endif
 
 /* MCore will never pass a sturcture by reference. It will always be split
    between registers and stack. */
