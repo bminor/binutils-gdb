@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Thu Oct 31 02:58:25 PST 1991, by rich@rtl.cygnus.com
+# Last Mod Mon Nov 4 16:01:21 PST 1991, by rich@rtl.cygnus.com
 #
 # $Id$
 
@@ -32,7 +32,7 @@ AR = ar
 AR_FLAGS = cq
 
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
-	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison/ ; \
+	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L $(srcdir)/bison/ ; \
 	else echo yacc ; fi`
 
 SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib
