@@ -1,3 +1,17 @@
+Sun Mar 14 02:30:08 1993  John Gilmore  (gnu@cygnus.com)
+
+	Remove a few remaining underscore/no-underscore remnants from
+	config files.
+
+	* config/{m68k-un.mt, sparc-un.mt}:  Remove.
+	* config/m68k-noun.mt: Rename to m68k-fp.mt.
+	* config/sparc-noun.mt: Rename to sparc-em.mt.
+	* tm-68k-noun.h, tm-spc-noun.h:  Remove.
+	* tm-68k-un.h:  Rename to tm-68k-fp.h.
+	* tm-spc-un.h:  Rename to tm-spc-em.h.
+	* tm-sun4sol2.h: Cleanup.
+	* configure.in (m68k-*, sparc-* targets):  Corresponding changes.
+
 Sat Mar 13 14:58:22 1993  John Gilmore  (gnu@cygnus.com)
 
 	* symmisc.c (std_in, std_out, std_err):  Move initializations
@@ -1530,8 +1544,7 @@ Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
 	* solib.c:  Replace NAMES_HAVE_UNDERSCORE.
 	* stabsread.h:  Remove NAMES_HAVE_UNDERSCORE and HASH_OFFSET.
 	* symfile.c (syms_from_objfile):  Insert debugging check to test
-	NAMES_HAVE_UNDERSCORE setting against the BFD support.  FIXME,
-	remove this (and all tm-*.h NAMES_HAVE_UNDERSCORE) soon.
+	NAMES_HAVE_UNDERSCORE setting against the BFD support.
 
 	* doc/gdbint.texinfo (Host Conditionals):  Remove
 	NAMES_HAVE_UNDERSCORE, SOME_NAMES_HAVE_DOT, document
@@ -3575,7 +3588,7 @@ Wed Sep  2 00:10:43 1992  John Gilmore  (gnu@cygnus.com)
 
 	* tm-68k-un.h, tm-68k-noun.h, tm-spc-un.h, tm-spc-noun.h:  New
 	target definitions for embedded with and without underlines on
-	identifiers.  FIXME -- this ought to be known by BFD instead.
+	identifiers.
 
 	* tm-sparc.h, tm-sun2.h, tm-sun3.h:  Delete NAMES_HAVE_UNDERSCORE:
 	not a parameter of the CPU, but of the development environment.
