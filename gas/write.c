@@ -920,7 +920,7 @@ write_relocs (abfd, sec, xxx)
 #else
   n = n * MAX_RELOC_EXPANSION;
   /* Set up reloc information as well.  */
-  relocs = (arelent **) xmalloc (stdoutput, n * sizeof (arelent *));
+  relocs = (arelent **) xmalloc (n * sizeof (arelent *));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
