@@ -21,7 +21,7 @@ TAG	= latest-$(DATE)
 
 INSTALLDIR = /bang/installed-progressive/$(TAG)
 
-GCC = gcc -O -g
+GCC = gcc -O 
 CFLAGS = -g
 
 log	= 1>$(canonhost)-build-log 2>&1
@@ -42,7 +42,7 @@ endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
 TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i386-aout
-GCC = gcc -O -g -msoft-float
+GCC = gcc -O -msoft-float
 CC = cc -J
 all: all-cygnus
 endif
@@ -72,7 +72,9 @@ endif
 
 ifeq ($(canonhost),m68k-hp-hpux)
 TARGETS	= m68k-vxworks
+TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 CC = cc +O1000 -Wp,-P
+CFLAGS = 
 all: all-native
 endif
 
