@@ -1,3 +1,8 @@
+2004-07-28  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/tc-hppa.h (TARGET_FORMAT): Set to "elf32-hppa-netbsd"
+	for TE_NetBSD.
+
 2004-05-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (operand, operator): Don't reject '++' and '--'.
