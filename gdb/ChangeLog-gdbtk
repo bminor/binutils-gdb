@@ -1,3 +1,15 @@
+1998-08-18  Keith Seitz  <keiths@cygnus.com>
+	
+	* gdbtk-hooks.c (gdbtk_add_hooks): Set selected_frame_level_changed_hook.
+	(gdbtk_selected_frame_changed): New function.
+
+	* gdbtk-cmds.c (Gdbtk_Init): Add command gdb_stack into interpreter.
+	Link gdb's global selected_frame_level with interpreter global
+	gdb_selected_frame_level.
+	(gdb_stack): New function to faciltate speedier backtraces from
+	gdbtk.
+	(get_frame_name): New helper function for gdb_stack.
+
 Tue Aug 18 15:42:40 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_listfuncs): Strip out global constructors

@@ -73,13 +73,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 int in_fputs = 0;
 
-int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
-void (*pre_add_symbol_hook) PARAMS ((char *));
-void (*post_add_symbol_hook) PARAMS ((void));
+extern int  (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
+extern void (*pre_add_symbol_hook) PARAMS ((char *));
+extern void (*post_add_symbol_hook) PARAMS ((void));
+extern void (*selected_frame_level_changed_hook) PARAMS ((int));
 
 #ifdef __CYGWIN32__
 extern void (*ui_loop_hook) PARAMS ((int));
 #endif
+
 static void   gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
@@ -107,6 +109,7 @@ static void gdbtk_print_frame_info PARAMS ((struct symtab *, int, int, int));
 static void gdbtk_post_add_symbol PARAMS ((void));
 static void pc_changed PARAMS ((void));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
+static void gdbtk_selected_frame_changed PARAMS ((int));
 
 /*
  * gdbtk_fputs can't be static, because we need to call it in gdbtk.c.
@@ -153,7 +156,8 @@ gdbtk_add_hooks(void)
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
   pc_changed_hook = pc_changed;
-
+  selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
+  
 }
 
 /* These control where to put the gdb output which is created by
@@ -452,34 +456,34 @@ gdbtk_call_command (cmdblk, arg, from_tty)
   if (cmdblk->class == class_run || cmdblk->class == class_trace)
     {
 
-/* HACK! HACK! This is to get the gui to update the tstart/tstop
-   button only incase of tstart/tstop commands issued from the console
-   We don't want to update the src window, so we need to have specific
-   procedures to do tstart and tstop
-   Unfortunately this will not display errors from tstart or tstop in the 
-   console window itself, but as dialogs.*/
+      /* HACK! HACK! This is to get the gui to update the tstart/tstop
+         button only incase of tstart/tstop commands issued from the console
+         We don't want to update the src window, so we need to have specific
+         procedures to do tstart and tstop
+         Unfortunately this will not display errors from tstart or tstop in the 
+         console window itself, but as dialogs.*/
 
       if (!strcmp(cmdblk->name, "tstart") && !No_Update)
         {
-              Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstart"); 
-              (*cmdblk->function.cfunc)(arg, from_tty);
+          Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstart"); 
+          (*cmdblk->function.cfunc)(arg, from_tty);
         }
       else if (!strcmp(cmdblk->name, "tstop") && !No_Update) 
-             {
-              Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstop"); 
-              (*cmdblk->function.cfunc)(arg, from_tty);
-             }
-/* end of hack */
-           else 
-             {
-                 running_now = 1;
-                 if (!No_Update)
-                   Tcl_Eval (gdbtk_interp, "gdbtk_tcl_busy");
-                 (*cmdblk->function.cfunc)(arg, from_tty);
-                 running_now = 0;
-                 if (!No_Update)
-                   Tcl_Eval (gdbtk_interp, "gdbtk_tcl_idle");
-             }
+        {
+          Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstop"); 
+          (*cmdblk->function.cfunc)(arg, from_tty);
+        }
+      /* end of hack */
+      else 
+        {
+          running_now = 1;
+          if (!No_Update)
+            Tcl_Eval (gdbtk_interp, "gdbtk_tcl_busy");
+          (*cmdblk->function.cfunc)(arg, from_tty);
+          running_now = 0;
+          if (!No_Update)
+            Tcl_Eval (gdbtk_interp, "gdbtk_tcl_idle");
+        }
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
@@ -680,4 +684,9 @@ tracepoint_notify(tp, action)
     }
 }
 
-
+static void
+gdbtk_selected_frame_changed (level)
+     int level;
+{
+  Tcl_UpdateLinkedVar (gdbtk_interp, "gdb_selected_frame_level");
+}

@@ -142,10 +142,15 @@ extern int breakpoint_count;
 
 
 /*
- * Declarations for routines used only in this file.
+ * Declarations for routines exported from this file
  */
 
 int Gdbtk_Init (Tcl_Interp *interp);
+
+/*
+ * Declarations for routines used only in this file.
+ */
+
 static int compare_lines PARAMS ((const PTR, const PTR));
 static int comp_files PARAMS ((const void *, const void *));
 static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
@@ -206,6 +211,8 @@ static int gdb_get_tracepoint_info PARAMS ((ClientData, Tcl_Interp *, int,
 					    Tcl_Obj *CONST objv[]));
 static int gdbtk_dis_asm_read_memory PARAMS ((bfd_vma, bfd_byte *, int, disassemble_info *));
 static int get_pc_register PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
+static int gdb_stack PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
+
 char * get_prompt PARAMS ((void));
 static void get_register PARAMS ((int, void *));
 static void get_register_name PARAMS ((int, void *));
@@ -214,6 +221,7 @@ static int perror_with_name_wrapper PARAMS ((char *args));
 static void register_changed_p PARAMS ((int, void *));
 void TclDebug PARAMS ((const char *fmt, ...));
 static int wrapped_call (char *opaque_args);
+static void get_frame_name PARAMS ((Tcl_Interp *interp, Tcl_Obj *list, struct frame_info *fi));
 
 /* Gdbtk_Init
  *    This loads all the Tcl commands into the Tcl interpreter.
@@ -294,6 +302,11 @@ Gdbtk_Init (interp)
   Tcl_CreateObjCommand (interp, "gdb_set_bp", call_wrapper, gdb_set_bp,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_trace_frame_num",
                         call_wrapper, gdb_get_trace_frame_num,  NULL);  
+  Tcl_CreateObjCommand (interp, "gdb_stack", call_wrapper, gdb_stack, NULL);
+
+  Tcl_LinkVar (interp, "gdb_selected_frame_level", 
+               (char *) &selected_frame_level,
+               TCL_LINK_INT | TCL_LINK_READ_ONLY);
 
   Tcl_PkgProvide(interp, "Gdbtk", GDBTK_VERSION);
   return TCL_OK;
@@ -2958,6 +2971,186 @@ gdb_get_breakpoint_list (clientData, interp, objc, objv)
       }
 
   return TCL_OK;
+}
+
+/* The functions in this section deal with stacks and backtraces. */
+
+/* This implements the tcl command gdb_stack.
+ * It builds up a list of stack frames.
+ *
+ * Tcl Arguments:
+ *    start  - starting stack frame
+ *    count - number of frames to inspect
+ * Tcl Result:
+ *    A list of function names
+ */
+
+static int
+gdb_stack (clientData, interp, objc, objv)     ClientData clientData;
+     Tcl_Interp *interp;
+     int objc;
+     Tcl_Obj *CONST objv[];
+{
+  int start, count;
+
+  if (objc < 3)
+    {
+      Tcl_WrongNumArgs (interp, 1, objv, "start count");
+      result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+
+  if (Tcl_GetIntFromObj (NULL, objv[1], &start))
+    {
+      result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+  if (Tcl_GetIntFromObj (NULL, objv[2], &count))
+    {
+      result_ptr->flags |= GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+
+  Tcl_SetListObj (result_ptr->obj_ptr, 0, NULL);
+
+  if (target_has_stack)
+    {
+      struct frame_info *top;
+      struct frame_info *fi;
+
+      /* Find the outermost frame */
+      fi = get_current_frame ();
+      while (fi != NULL)
+        {
+          top = fi;
+          fi = get_prev_frame (fi);
+        }
+
+      /* top now points to the top (outermost frame) of the
+         stack, so point it to the requested start */
+      start = -start;
+      top   = find_relative_frame (top, &start);
+
+      /* If start != 0, then we have asked to start outputting
+         frames beyond the innermost stack frame */
+      if (start == 0)
+        {
+          fi = top; 
+          while (fi && count--)
+            {
+              get_frame_name (interp, result_ptr->obj_ptr, fi);
+              fi = get_next_frame (fi);
+            }
+        }
+    }
+
+  return TCL_OK;
+}
+
+/* A helper function for get_stack which adds information about
+ * the stack frame FI to the caller's LIST.
+ *
+ * This is stolen from print_frame_info in stack.c.
+ */
+static void
+get_frame_name (interp, list, fi)
+     Tcl_Interp *interp;
+     Tcl_Obj *list;
+     struct frame_info *fi;
+{
+  struct symtab_and_line sal;
+  struct symbol *func = NULL;
+  register char *funname = 0;
+  enum language funlang = language_unknown;
+  Tcl_Obj *objv[1];
+
+  if (frame_in_dummy (fi))
+    {
+      objv[0] = Tcl_NewStringObj ("<function called from gdb>\n", -1);
+      Tcl_ListObjAppendElement (interp, list, objv[0]);
+      return;
+    }
+  if (fi->signal_handler_caller)
+    {
+      objv[0] = Tcl_NewStringObj ("<signal handler called>\n", -1);
+      Tcl_ListObjAppendElement (interp, list, objv[0]);
+      return;
+    }
+
+  sal =
+    find_pc_line (fi->pc,
+                  fi->next != NULL
+                  && !fi->next->signal_handler_caller
+                  && !frame_in_dummy (fi->next));
+  
+  func = find_pc_function (fi->pc);
+  if (func)
+    {
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      if (msymbol != NULL
+          && (SYMBOL_VALUE_ADDRESS (msymbol) 
+              > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
+        {
+          func = 0;
+          funname = SYMBOL_NAME (msymbol);
+          funlang = SYMBOL_LANGUAGE (msymbol);
+        }
+      else
+        {
+          funname = SYMBOL_NAME (func);
+          funlang = SYMBOL_LANGUAGE (func);
+        }
+    }
+  else
+    {
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      if (msymbol != NULL)
+        {
+          funname = SYMBOL_NAME (msymbol);
+          funlang = SYMBOL_LANGUAGE (msymbol);
+        }
+    }
+  
+  if (sal.symtab)
+    {
+      objv[0] = Tcl_NewStringObj (funname, -1);
+      Tcl_ListObjAppendElement (interp, list, objv[0]);
+    }
+  else
+    {
+#if 0
+      /* we have no convenient way to deal with this yet... */
+      if (fi->pc != sal.pc || !sal.symtab)
+        {
+          print_address_numeric (fi->pc, 1, gdb_stdout);
+          printf_filtered (" in ");
+        }
+      printf_symbol_filtered (gdb_stdout, funname ? funname : "??", funlang,
+                               DMGL_ANSI);
+#endif
+      objv[0] = Tcl_NewStringObj (funname != NULL ? funname : "??", -1);
+#ifdef PC_LOAD_SEGMENT
+      /* If we couldn't print out function name but if can figure out what
+         load segment this pc value is from, at least print out some info
+         about its load segment. */
+      if (!funname)
+        {
+          Tcl_AppendStringsToObj (objv[0], " from ", PC_LOAD_SEGMENT (fi->pc),
+                                  (char *) NULL);
+        }
+#endif
+#ifdef PC_SOLIB
+      if (!funname)
+        {
+          char *lib = PC_SOLIB (fi->pc);
+          if (lib)
+            {
+              Tcl_AppendStringsToObj (objv[0], " from ", lib, (char *) NULL);
+            }
+        }
+#endif
+      Tcl_ListObjAppendElement (interp, list, objv[0]);
+    }
 }
 
 
