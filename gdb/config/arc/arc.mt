@@ -4,4 +4,5 @@ TM_FILE= tm-arc.h
 
 REMOTE_OBS= dcache.o remote-utils.o
 
-SER_HARDWIRE= ser-go32-para.o
+# This isn't supported yet and prevents gdb from building.
+#SER_HARDWIRE= ser-go32-para.o
