@@ -1,5 +1,7 @@
 /* Simulator instruction extractor for m32r.
 
+This file is machine generated with CGEN.
+
 Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of the GNU Simulators.
@@ -320,6 +322,14 @@ EX_FN_NAME (m32r,fmt_11_bl8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGB
 
   abuf->length = length;
   abuf->addr = pc;
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      abuf->h_gr_set = 0 | (1 << 14);
+    }
+#endif
 #undef FLD
 }
 
@@ -337,6 +347,14 @@ EX_FN_NAME (m32r,fmt_12_bl24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 
   abuf->length = length;
   abuf->addr = pc;
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      abuf->h_gr_set = 0 | (1 << 14);
+    }
+#endif
 #undef FLD
 }
 
@@ -499,6 +517,7 @@ EX_FN_NAME (m32r,fmt_19_jl) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
   if (PROFILE_MODEL_P (current_cpu))
     {
       abuf->h_gr_get = 0 | (1 << f_r2);
+      abuf->h_gr_set = 0 | (1 << 14);
     }
 #endif
 #undef FLD
@@ -960,17 +979,33 @@ EX_FN_NAME (m32r,fmt_37_rac) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGB
 }
 
 void
-EX_FN_NAME (m32r,fmt_38_seth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32r,fmt_38_rte) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
-#define FLD(f) abuf->fields.fmt_38_seth.f
-  EXTRACT_FMT_38_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
+#define FLD(f) abuf->fields.fmt_38_rte.f
+  EXTRACT_FMT_38_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
 
-  EXTRACT_FMT_38_SETH_CODE
+  EXTRACT_FMT_38_RTE_CODE
+
+  /* Record the fields for the semantic handler.  */
+  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_38_rte", (char *) 0));
+
+  abuf->length = length;
+  abuf->addr = pc;
+#undef FLD
+}
+
+void
+EX_FN_NAME (m32r,fmt_39_seth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+{
+#define FLD(f) abuf->fields.fmt_39_seth.f
+  EXTRACT_FMT_39_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
+
+  EXTRACT_FMT_39_SETH_CODE
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = & CPU (h_gr)[f_r1];
   FLD (f_hi16) = f_hi16;
-  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_38_seth", "dr 0x%x", 'x', f_r1, "hi16 0x%x", 'x', f_hi16, (char *) 0));
+  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_39_seth", "dr 0x%x", 'x', f_r1, "hi16 0x%x", 'x', f_hi16, (char *) 0));
 
   abuf->length = length;
   abuf->addr = pc;
@@ -986,17 +1021,17 @@ EX_FN_NAME (m32r,fmt_38_seth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_39_slli) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32r,fmt_40_slli) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
-#define FLD(f) abuf->fields.fmt_39_slli.f
-  EXTRACT_FMT_39_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
+#define FLD(f) abuf->fields.fmt_40_slli.f
+  EXTRACT_FMT_40_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
 
-  EXTRACT_FMT_39_SLLI_CODE
+  EXTRACT_FMT_40_SLLI_CODE
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = & CPU (h_gr)[f_r1];
   FLD (f_uimm5) = f_uimm5;
-  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_39_slli", "dr 0x%x", 'x', f_r1, "uimm5 0x%x", 'x', f_uimm5, (char *) 0));
+  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_40_slli", "dr 0x%x", 'x', f_r1, "uimm5 0x%x", 'x', f_uimm5, (char *) 0));
 
   abuf->length = length;
   abuf->addr = pc;
@@ -1013,18 +1048,18 @@ EX_FN_NAME (m32r,fmt_39_slli) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_40_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32r,fmt_41_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
-#define FLD(f) abuf->fields.fmt_40_st_d.f
-  EXTRACT_FMT_40_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+#define FLD(f) abuf->fields.fmt_41_st_d.f
+  EXTRACT_FMT_41_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
 
-  EXTRACT_FMT_40_ST_D_CODE
+  EXTRACT_FMT_41_ST_D_CODE
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = & CPU (h_gr)[f_r1];
   FLD (f_r2) = & CPU (h_gr)[f_r2];
   FLD (f_simm16) = f_simm16;
-  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_40_st_d", "src1 0x%x", 'x', f_r1, "src2 0x%x", 'x', f_r2, "slo16 0x%x", 'x', f_simm16, (char *) 0));
+  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_41_st_d", "src1 0x%x", 'x', f_r1, "src2 0x%x", 'x', f_r2, "slo16 0x%x", 'x', f_simm16, (char *) 0));
 
   abuf->length = length;
   abuf->addr = pc;
@@ -1040,16 +1075,16 @@ EX_FN_NAME (m32r,fmt_40_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_41_trap) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32r,fmt_42_trap) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
-#define FLD(f) abuf->fields.fmt_41_trap.f
-  EXTRACT_FMT_41_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
+#define FLD(f) abuf->fields.fmt_42_trap.f
+  EXTRACT_FMT_42_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
 
-  EXTRACT_FMT_41_TRAP_CODE
+  EXTRACT_FMT_42_TRAP_CODE
 
   /* Record the fields for the semantic handler.  */
   FLD (f_uimm4) = f_uimm4;
-  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_41_trap", "uimm4 0x%x", 'x', f_uimm4, (char *) 0));
+  TRACE_EXTRACT (current_cpu, (current_cpu, pc, "fmt_42_trap", "uimm4 0x%x", 'x', f_uimm4, (char *) 0));
 
   abuf->length = length;
   abuf->addr = pc;

@@ -9,6 +9,7 @@ typedef struct _sim_cpu SIM_CPU;
    sim-basics.h and cgen-types.h needs config.h.  */
 #include "config.h"
 
+#include "ansidecl.h"
 #include "cgen-types.h"
 #include "arch.h"
 #include "sim-basics.h"
@@ -24,7 +25,6 @@ typedef SI sim_cia;
 #include "cgen-sim.h"
 /*#include "cgen-mem.h"*/
 #include "cgen-trace.h"
-#include "cpu-opc.h" /* Needed for INSN_NAME.  */
 #include "cpu-sim.h"
 
 #ifdef WANT_CPU_M32R

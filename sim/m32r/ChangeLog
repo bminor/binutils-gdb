@@ -1,3 +1,26 @@
+Thu Feb  5 12:44:31 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (m32r.o): Depend on cpu.h
+	(extract.o): Pass -DSCACHE_P.
+	* mloop.in (extract{16,32}): Update call to m32r_decode.
+	* arch.h,cpu.h,cpuall.h,decode.[ch]: Regenerate.
+	* extract.c,model.c,sem-switch.c,sem.c: Regenerate.
+	* sim-main.h: #include "ansidecl.h".
+	Don't include cpu-opc.h, done by arch.h.
+start-sanitize-m32rx
+	* Makefile.in (M32RX_OBJS): Build m32rx support now.
+	(m32rx.o): New rule.
+	* m32r-sim.h (m32rx_h_cr_[gs]et): Define.
+	* m32rx.c (m32rx_{fetch,store}_register): Update {get,set} of PC.
+	(m32rx_h_accums_get): New function.
+	* mloopx.in: Update call to m32rx_decode.  Rewrite exec loop.
+	* cpux.h,decodex.[ch],modelx.c,readx.c,semx.c: Regenerate.
+end-sanitize-m32rx
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
