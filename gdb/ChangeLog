@@ -1,3 +1,7 @@
+2000-12-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (symfile.o): Add gdb-stabs.h to dependencies list.
+
 2000-12-04  Kevin Buettner  <kevinb@redhat.com>
 
 	* elfread.c (record_minimal_symbol_and_info): Don't guess

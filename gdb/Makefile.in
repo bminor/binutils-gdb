@@ -1903,9 +1903,9 @@ sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 
 symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
-	$(expression_h) $(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) \
-	language.h objfiles.h symfile.h $(symtab_h) target.h \
-	gdb_string.h completer.h
+	$(expression_h) gdb-stabs.h $(gdbcmd_h) $(gdbcore_h) \
+	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) \
+	target.h gdb_string.h completer.h
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
