@@ -1,3 +1,8 @@
+2003-12-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Don't skip the return
+	address column.
+
 2003-12-21  Jim Blandy  <jimb@redhat.com>
 
 	* breakpoint.c (bpstat_do_actions): To ensure that
