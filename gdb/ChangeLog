@@ -1,3 +1,13 @@
+2004-10-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips64obsd-nat.c, mips64obsd-tdep.c: New files.
+	* configure.host: Add mips64*-*-openbsd*.
+	* configure.tgt: Add mips64*-*-openbsd*.
+	* Makefile.in (ALLDEPFILES): Add mips64obsd-nat.o,
+	mips64obsd-tdep.c.
+	(mips64obsd-nat.o, mips64obsd-tdep.o): New dependecies.
+	* config/mips/obsd64.mh, config/mips/obsd64.mt: New files.
+
 2004-10-21  Joel Brobecker  <brobecker@gnat.com>
 
 	* symtab.c (symbol_search_name): Minor reformatting.
