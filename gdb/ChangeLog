@@ -1,5 +1,8 @@
 2001-06-01  Jim Blandy  <jimb@redhat.com>
 
+	* gnu-v3-abi.c (gnu_v3_abi_ops, vtable_type_gdbarch_data): Make
+	these static --- there's no reason other files should use these.
+
 	* partial-stab.h (case N_FUN: case 'f':, case N_FUN: case 'F':)
 	Fix memory leak.
 

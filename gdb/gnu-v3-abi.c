@@ -24,7 +24,7 @@
 #include "cp-abi.h"
 #include "demangle.h"
 
-struct cp_abi_ops gnu_v3_abi_ops;
+static struct cp_abi_ops gnu_v3_abi_ops;
 
 static int
 gnuv3_is_vtable_name (const char *name)
@@ -76,7 +76,7 @@ gnuv3_is_operator_name (const char *name)
    vtable_type_gdbarch_data is a gdbarch per-architecture data pointer
    which refers to the struct type * for this structure, laid out
    appropriately for the architecture.  */
-struct gdbarch_data *vtable_type_gdbarch_data;
+static struct gdbarch_data *vtable_type_gdbarch_data;
 
 
 /* Human-readable names for the numbers of the fields above.  */
