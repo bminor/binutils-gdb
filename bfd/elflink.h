@@ -3220,6 +3220,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		      break;
 		    }
 
+	      bfd_set_error (bfd_error_nonrepresentable_section);
 	      return false;
 	    }
 

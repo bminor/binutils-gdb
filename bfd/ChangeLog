@@ -1,3 +1,9 @@
+2002-03-14  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set the BFD
+	error to bfd_error_nonrepresentable_section for reinit_array
+	section in DSO.
+
 2002-03-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* coffcode.h (coff_slurp_symbol_table): When adding BSF_WEAK flag,
