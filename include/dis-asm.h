@@ -172,6 +172,9 @@ extern int print_insn_v850		PARAMS ((bfd_vma, disassemble_info*));
 /* start-sanitize-tic80 */
 extern int print_insn_tic80		PARAMS ((bfd_vma, disassemble_info*));
 /* end-sanitize-tic80 */
+/* start-sanitize-sky */
+extern int print_insn_txvu		PARAMS ((bfd_vma, disassemble_info*));
+/* end-sanitize-sky */
 
 /* Fetch the disassembler for a given BFD, if that support is available.  */
 extern disassembler_ftype disassembler	PARAMS ((bfd *));
@@ -199,9 +202,6 @@ extern void generic_print_address
 /* Always true.  */
 extern int generic_symbol_at_address
   PARAMS ((bfd_vma, struct disassemble_info *));
-
-/* Pass through the symbol associated with the address being disassembled:  */
-extern void disasm_symaddr PARAMS ((asymbol *sym, disassemble_info *info));
 
 /* Macro to initialize a disassemble_info struct.  This should be called
    by all applications creating such a struct.  */
