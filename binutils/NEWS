@@ -1,5 +1,9 @@
 -*- text -*-
 
+* New command line switches added to objcopy to allow symbols to be kept as
+  global symbols, and also to specify files containing lists of such symbols.
+  by Honda Hiroki.
+
 * Support for OpenRISC by Johan Rydberg.
 
 * New command line switch to objcopy -B (or --binary-architecture) which sets
