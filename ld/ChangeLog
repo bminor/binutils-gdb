@@ -1,5 +1,9 @@
 Thu Sep 28 12:34:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/sparccoff.sc: Add .ctors/.dtors handling like other
+	COFF targets, allowing for the leading underscore used on SPARC
+	COFF.
+
 	* lexsup.c (parse_args): Handle -assert.
 	* emulparams/sun4.sh (GENERATE_SHLIB_SCRIPT): Define.
 	* emultempl/sunos.em (gld${EMULATION_NAME}_get_script): Use the
