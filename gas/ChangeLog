@@ -1,3 +1,13 @@
+at Sep 18 12:13:28 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (md_assemble): Fix dwarf2 line handling.
+	(pa_ip): Handle 'fX'.
+
+Sat Sep 18 12:13:28 1999  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-hppa.c (md_assemble): Fix dwarf2 line handling.
+        (pa_ip): Handle 'fX'.
+
 Fri Sep 17 11:57:34 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Do not build

@@ -1463,14 +1463,15 @@ md_assemble (str)
     {
       bfd_vma addr;
 
-      /* I haven't got a clue why the -8 is necessary, but this
-	 seems to work.  Someone should really document what all
-	 the frag nonsense does and more precisely what the dwarf2
-	 code needs.  */
-
-      addr = frag_now->fr_address + frag_now_fix () - 8;
-      dwarf2_gen_line_info (addr, &debug_line);
+      /* First update the notion of the current source line.  */
       dwarf2_where (&debug_line);
+
+      /* We want the offset of the start of this instruction within the
+	 the current frag.  */
+      addr = frag_now->fr_address + frag_now_fix () - 4;
+
+      /* And record the information.  */
+      dwarf2_gen_line_info (addr, &debug_line);
     }
 #endif
 }
@@ -3157,6 +3158,7 @@ pa_ip (str)
 		  }
 
 		/* Float operand 1 with L/R selection.  */
+		case 'X':
 		case 'A':
 		  {
 		    struct pa_11_fp_reg_struct result;
