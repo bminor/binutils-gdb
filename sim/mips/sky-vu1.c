@@ -174,7 +174,7 @@ vu1_init(SIM_DESC sd)
 #include <stdio.h>
 #include <sys/types.h>
 #include <strings.h>
-#include "libvpe.h"
+#include "sky-libvpe.h"
 
 char	ifilename[64] = "vu.bin";
 char	ofilename[64] = "";
