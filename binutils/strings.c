@@ -115,7 +115,7 @@ main (argc, argv)
 {
   int optc;
   int exit_status = 0;
-  boolean files_given = false;	/* false if any files were given.  */
+  boolean files_given = false;
 
   program_name = argv[0];
   string_min = -1;
@@ -144,7 +144,8 @@ main (argc, argv)
 	  string_min = integer_arg (optarg);
 	  if (string_min < 1)
 	    {
-	      fprintf (stderr, "%s: invalid number %s\n", program_name, optarg);
+	      fprintf (stderr, "%s: invalid number %s\n",
+		       program_name, optarg);
 	      exit (1);
 	    }
 	  break;
