@@ -1170,10 +1170,8 @@ s_lsym ()
   register char *name;
   register char c;
   register char *p;
-  register segT segment;
   expressionS exp;
   register symbolS *symbolP;
-  valueT val;
 
   /* we permit ANY defined expression: BSD4.2 demands constants */
   name = input_line_pointer;
@@ -1190,7 +1188,14 @@ s_lsym ()
       return;
     }
   input_line_pointer++;
-  val = get_absolute_expression ();
+  expression (&exp);
+  if (exp.X_op != O_constant
+      && exp.X_op != O_register)
+    {
+      as_bad ("bad expression");
+      ignore_rest_of_line ();
+      return;
+    }
   *p = 0;
   symbolP = symbol_find_or_make (name);
 
@@ -1206,8 +1211,11 @@ s_lsym ()
     {
       /* The name might be an undefined .global symbol; be sure to
 	 keep the "external" bit. */
-      S_SET_SEGMENT (symbolP, segment);
-      S_SET_VALUE (symbolP, val);
+      S_SET_SEGMENT (symbolP,
+		     (exp.X_op == O_constant
+		      ? absolute_section
+		      : reg_section));
+      S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
     }
   else
     {
@@ -1694,7 +1702,7 @@ emit_expr (exp, nbytes)
 #ifdef BFD_ASSEMBLER
       fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes, exp, 0,
 		   /* @@ Should look at CPU word size.  */
-		   BFD_RELOC_32);
+		   nbytes == 8 ? BFD_RELOC_64 : BFD_RELOC_32);
 #else
 #ifdef TC_CONS_FIX_NEW
       TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
