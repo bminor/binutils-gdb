@@ -659,7 +659,7 @@ clean mostlyclean: clean-here
 # Like clean but also delete the links made to configure gas.
 
 DISTCLEAN_HERE = config.status Makefile targ-env.h targ-cpu.h obj-format.h \
-	TAGS itbl-cpu.h \
+	TAGS itbl-cpu.h site.exp site.bak \
 	config-stamp config.h conf config.log config.cache .gdbinit \
 	testsuite/Makefile testsuite/config.status
 
