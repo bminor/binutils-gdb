@@ -1,3 +1,12 @@
+2001-07-03  Mark Elbrecht  <snowball3@softhome.net>
+
+	* cofflink.c (_bfd_coff_link_input_bfd): Skip section symbols from
+	sections being discarded.
+
+2001-07-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cofflink.c (_bfd_coff_link_input_bfd): 
+
 2001-06-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfcore.h (elf_core_file_p): Call bfd_section_from_phdr directly
