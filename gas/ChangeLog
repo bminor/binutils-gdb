@@ -1,5 +1,7 @@
 Sat Jan 15 09:20:55 1994  Doug Evans  (dje@canuck.cygnus.com)
 
+	* app.c (do_scrub_next_char): Allow lines like " foolab :".
+
 	* read.c (emit_expr): Fix computation of mask.
 	* config/obj-elf.c (obj_elf_section): Fix loop termination test.
 
