@@ -151,6 +151,11 @@ Mon Sep 20 21:44:06 1999  Geoffrey Keating  <geoffk@cygnus.com>
         * sim-fpu.c (i2fpu): Keep the guard bits sticky when converting
         large values.
 
+Tue Feb  8 16:33:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* run.c (main): Check the sim_stop_reason and only halt simulation
+ 	when a valid stop condition is identified.
+
 Wed Sep 15 14:12:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-tree.c, hw-properties.c, hw-instances.c: Include "sim-io.h".

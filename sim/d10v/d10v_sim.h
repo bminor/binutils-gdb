@@ -395,6 +395,7 @@ enum
 
 #define SIG_D10V_STOP	-1
 #define SIG_D10V_EXIT	-2
+#define SIG_D10V_BUS    -3
 
 #define SEXT3(x)	((((x)&0x7)^(~3))+4)	
 

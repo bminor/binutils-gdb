@@ -231,26 +231,30 @@ main (ac, av)
   if (sim_create_inferior (sd, abfd, prog_args, NULL) == SIM_RC_FAIL)
     exit (1);
 
-  prev_sigint = signal (SIGINT, cntrl_c);
   if (trace)
     {
       int done = 0;
+      prev_sigint = signal (SIGINT, cntrl_c);
       while (!done)
 	{
 	  done = sim_trace (sd);
 	}
+      signal (SIGINT, prev_sigint);
     }
   else
     {
-      sim_resume (sd, 0, 0);
+      do
+	{
+	  prev_sigint = signal (SIGINT, cntrl_c);
+	  sim_resume (sd, 0, sigrc);
+	  signal (SIGINT, prev_sigint);
+	  sim_stop_reason (sd, &reason, &sigrc);
+	}
+      while (reason == sim_stopped && sigrc != SIGINT);
     }
-  signal (SIGINT, prev_sigint);
 
   if (verbose)
     sim_info (sd, 0);
-
-  sim_stop_reason (sd, &reason, &sigrc);
-
   sim_close (sd, 0);
 
   /* If reason is sim_exited, then sigrc holds the exit code which we want
