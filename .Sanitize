@@ -108,7 +108,8 @@ else
 	done
 fi
 
-if grep 'sanitize' * ; then
-	echo Some mentions of Sanitize are still left in the sources!
-fi
-
+for i in * ; do
+	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+		echo Some mentions of Sanitize are still left in $i!
+	fi
+done
