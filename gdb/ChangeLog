@@ -8,8 +8,8 @@ Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 	usage of fputc_unfiltered and putchar_unfiltered.  Eliminate
 	putc_unfiltered (it's superfluous).
 
-	* command.h command.c:  Add var_enum command type.  It's like
-	var_string but allows only only one of the specified strings.
+	* command.h command.c top.c:  Add var_enum command type.  It's
+	like var_string but allows only only one of the specified strings.
 
 Mon Mar  6 15:03:59 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 

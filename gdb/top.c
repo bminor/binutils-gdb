@@ -1638,6 +1638,12 @@ line_completion_function (text, matches, line_buffer, point)
 		      rl_completer_word_break_characters =
 			gdb_completer_command_word_break_characters;
 		    }
+		  else if (c->enums)
+		    {
+		      list = complete_on_enum (c->enums, p, word);
+		      rl_completer_word_break_characters =
+			gdb_completer_command_word_break_characters;
+		    }
 		  else
 		    {
 		      /* It is a normal command; what comes after it is
@@ -1680,6 +1686,10 @@ line_completion_function (text, matches, line_buffer, point)
 		  /* It is an unrecognized subcommand of a prefix command,
 		     e.g. "info adsfkdj".  */
 		  list = NULL;
+		}
+	      else if (c->enums)
+		{
+		  list = complete_on_enum (c->enums, p, word);
 		}
 	      else
 		{
