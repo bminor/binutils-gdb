@@ -127,7 +127,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 	    {
 	      DBG (CALLDEBUG,
 		   printf (_("[find_call] 0x%lx: jsr%s <indirect_child>\n"),
-			   (unsigned long) pc - delta,
+			   (unsigned long) pc - (unsigned long) delta,
 			   pc->j.func == Jxx_FUNC_JSR ? "" : "_coroutine"));
 	      arc_add (parent, &indirect_child, (unsigned long) 0);
 	    }
@@ -136,7 +136,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 	case OP_BSR:
 	  DBG (CALLDEBUG,
 	       printf (_("[find_call] 0x%lx: bsr"),
-		       (unsigned long) pc - delta));
+		       (unsigned long) pc - (unsigned long) delta));
 	  /*
 	   * Regular PC relative addressing.  Check that this is the
 	   * address of a function.  The linker sometimes redirects

@@ -1,3 +1,8 @@
+2001-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* sparc.c (sparc_find_call): Warning fix.
+	* alpha.c (alpha_find_call): Likewise.
+
 2001-08-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* alpha.c: Add missing prototypes.

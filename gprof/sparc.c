@@ -64,7 +64,7 @@ sparc_find_call (parent, p_lowpc, p_highpc)
 	{
 	  DBG (CALLDEBUG,
 	       printf ("[find_call] 0x%lx: callf",
-		       (unsigned long) instr - delta));
+		       (unsigned long) instr - (unsigned long) delta));
 	  /*
 	   * Regular pc relative addressing check that this is the
 	   * address of a function.
