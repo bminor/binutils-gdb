@@ -407,11 +407,15 @@ struct block
 
 /* Macro to loop through all symbols in a block BL.
    i counts which symbol we are looking at, and sym points to the current
-   symbol.  */
+   symbol.
+   The contortion at the end is to avoid reading past the last valid
+   BLOCK_SYM.  */
 #define ALL_BLOCK_SYMBOLS(bl, i, sym)			\
 	for ((i) = 0, (sym) = BLOCK_SYM ((bl), (i));	\
 	     (i) < BLOCK_NSYMS ((bl));			\
-	     ++(i), (sym) = BLOCK_SYM ((bl), (i)))
+	     ++(i), (sym) = ((i) < BLOCK_NSYMS ((bl)))	\
+			    ? BLOCK_SYM ((bl), (i))	\
+			    : NULL)
 
 /* Nonzero if symbols of block BL should be sorted alphabetically.
    Don't sort a block which corresponds to a function.  If we did the
