@@ -1,3 +1,7 @@
+2000-04-30  Ben Elliston  <bje@redhat.com>
+
+	* bfdint.texi (BFD generated files): Fix another typo.
+
 2000-04-17  Ben Elliston  <bje@redhat.com>
 
 	* bfdint.texi (BFD_JUMP_TABLE macros): Fix typo.
