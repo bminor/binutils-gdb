@@ -1,3 +1,12 @@
+Mon Oct 16 11:12:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (XMC_TD): Define.
+
+Tue Oct 10 18:41:03 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (struct internal_aouthdr): Add o_cputype field.
+	* rs6000.h (AOUTHDR): Rename o_resv1 to o_cputype.
+
 Mon Oct  9 14:45:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rs6000.h (AOUTHDR): Add o_maxdata field.  Add comments.
