@@ -1,3 +1,8 @@
+Wed Sep 24 16:54:40 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * configure.in (sh*-*-rtems*): New target, like sh-*-elf*.
+	* configure: Rebuild.
+
 Wed Sep 24 11:30:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/c-i386.texi (i386-Float): Remove incorrect assertion that

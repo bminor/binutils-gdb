@@ -259,6 +259,7 @@ changequote([,])dnl
 
       sh-*-elf*)	    fmt=elf ;;
       sh-*-coff*)           fmt=coff ;;
+      sh-*-rtems*)	    fmt=elf ;;
 
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
@@ -285,10 +286,8 @@ changequote([,])dnl
 
 # start-sanitize-v850e
       v850e-*-*)	    fmt=elf bfd_gas=yes ;;
-# end-sanitize-v850e
-# start-sanitize-v850eq
       v850eq-*-*)	    fmt=elf bfd_gas=yes ;;
-# end-sanitize-v850eq
+# end-sanitize-v850e
       vax-*-bsd* | vax-*-ultrix*)
 			    fmt=aout ;;
       vax-*-vms)            fmt=vms ;;
