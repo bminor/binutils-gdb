@@ -1,5 +1,5 @@
 /* Read hp debug symbols and convert to internal format, for GDB.
-   Copyright 1993, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1996, 1998, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,22 +21,18 @@
    and by Cygnus Support.  */
 
 /* Common include file for hp_symtab_read.c and hp_psymtab_read.c.
- * This has nested includes of a bunch of stuff.
- */
+   This has nested includes of a bunch of stuff. */
 #include "hpread.h"
 #include "demangle.h"
 
 /* To generate dumping code, uncomment this define.  The dumping
- * itself is controlled by routine-local statics called "dumping".
- */
+   itself is controlled by routine-local statics called "dumping". */
 /* #define DUMPING            1 */ 
 
-/* To use the quick look-up tables, uncomment this define.
- */
+/* To use the quick look-up tables, uncomment this define. */
 #define QUICK_LOOK_UP      0
 
-/* To call PXDB to process un-processed files, uncomment this define.
- */
+/* To call PXDB to process un-processed files, uncomment this define. */
 #define USE_PXDB           1
 
 /* Forward procedure declarations */
@@ -68,10 +64,7 @@ static struct partial_symtab *hpread_end_psymtab
 
 #ifdef USE_PXDB
 
-/**************************************************
- *
- * NOTE use of system files!  May not be portable.
- */
+/* NOTE use of system files!  May not be portable. */
  
 #define PXDB_SVR4 "/opt/langtools/bin/pxdb"
 #define PXDB_BSD  "/usr/bin/pxdb"
@@ -281,13 +274,10 @@ hpread_pxdb_needed (sym_bfd)
   
 #ifdef QUICK_LOOK_UP
 
-/********************
- *
- * This flag can be set to zero to use the old
- * style psymtab (build from a scan of the LNTT)
- * or to one to try to use the quick look-up
- * tables.
- */
+/* This flag can be set to zero to use the old
+   style psymtab (build from a scan of the LNTT)
+   or to one to try to use the quick look-up
+   tables. */
 int psym_new_style = 1;
 
 
@@ -401,7 +391,6 @@ record_pst_syms (start_sym, end_sym)
    we don't care about overlaps, etc. 
 
    Return 0 => not found */
-
 static int
 find_next_pst_start (index)
     int index;
@@ -428,7 +417,6 @@ find_next_pst_start (index)
    PXDB_HEADER_P as in hpread_quick_traverse (to allow macros to work).
 
    Return 0 => not found */ 
-   
 static int
 find_next_file_isym (index, qFD, curr_fd, pxdb_header_p)
     int                    index;
@@ -450,7 +438,6 @@ find_next_file_isym (index, qFD, curr_fd, pxdb_header_p)
    PXDB_HEADER_P as in hpread_quick_traverse (to allow macros to work).
 
    Return 0 => not found */ 
-
 static int
 find_next_proc_isym (index, qPD, curr_pd, pxdb_header_p)
     int                    index;
@@ -472,7 +459,6 @@ find_next_proc_isym (index, qPD, curr_pd, pxdb_header_p)
    PXDB_HEADER_P as in hpread_quick_traverse (to allow macros to work).
 
    Return 0 => not found */ 
-
 static int
 find_next_module_isym (index, qMD, curr_md, pxdb_header_p)
     int                    index;
@@ -563,15 +549,13 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
         }
 
 /* I asked for this in the hope it would fix bug CHFts22228, but
-* later decided it's not the right fix. I'm leaving the code
-* commented out for now in case we decide we actually want to do this.
-* - RT
-*/
+   later decided it's not the right fix. I'm leaving the code
+   commented out for now in case we decide we actually want to do this.
+   - RT */
 #if 0
         /* Check this routine--if it's a class member function,
-         * add the class to the psymtab.  We only need to add
-         * the class once in each module, so check.
-         */
+           add the class to the psymtab.  We only need to add
+           the class once in each module, so check. */
         if( qPD[curr_pd].member ) {
 
             class = qPD[curr_pd].icd;
@@ -607,15 +591,14 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
         }
 #endif
 
-        /* Add this routine symbol to the list in the objfile. */
-        /* Unfortunately we have to go to the LNTT to determine the
-         * correct list to put it on. An alternative (which the
-         * code used to do) would be to not check and always throw
-         * it on the "static" list. But if we go that route, then
-         * symbol_lookup() needs to be tweaked a bit to account
-         * for the fact that the function might not be found on
-         * the correct list in the psymtab. - RT
-         */
+        /* Add this routine symbol to the list in the objfile. 
+           Unfortunately we have to go to the LNTT to determine the
+           correct list to put it on. An alternative (which the
+           code used to do) would be to not check and always throw
+           it on the "static" list. But if we go that route, then
+           symbol_lookup() needs to be tweaked a bit to account
+           for the fact that the function might not be found on
+           the correct list in the psymtab. - RT */
         dn_bufp = hpread_get_lntt (qPD[curr_pd].isym, objfile);
         if (dn_bufp->dfunc.global)
             add_psymbol_with_dem_name_to_list (
@@ -662,15 +645,14 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
 
 
 /* Traverse the quick look-up tables, building a set of psymtabs.
- *
- * This constructs a psymtab for modules and files in the quick lookup
- * tables.
- * 
- * Mostly, modules correspond to compilation units, so we try to
- * create psymtabs that correspond to modules; however, in some cases
- * a file can result in a compiled object which does not have a module
- * entry for it, so in such cases we create a psymtab for the file. 
- */
+ 
+   This constructs a psymtab for modules and files in the quick lookup
+   tables.
+  
+   Mostly, modules correspond to compilation units, so we try to
+   create psymtabs that correspond to modules; however, in some cases
+   a file can result in a compiled object which does not have a module
+   entry for it, so in such cases we create a psymtab for the file.  */
 
 int
 hpread_quick_traverse(
@@ -734,7 +716,7 @@ hpread_quick_traverse(
   }
 
   /* First we need to find the starting points of the quick
-   * look-up tables in the GNTT. */
+     look-up tables in the GNTT. */
 
   addr = gntt_bits;
 
@@ -797,23 +779,21 @@ hpread_quick_traverse(
 #endif
 
   /* We need this index only while hp-symtab-read.c expects
-   * a byte offset to the end of the LNTT entries for a given
-   * psymtab.  Thus the need for it should go away someday.
-   *
-   * When it goes away, then we won't have any need to load the
-   * LNTT from the objfile at psymtab-time, and start-up will be
-   * faster.  To make that work, we'll need some way to create
-   * a null pst for the "globals" pseudo-module.
-   */
+     a byte offset to the end of the LNTT entries for a given
+     psymtab.  Thus the need for it should go away someday.
+   
+     When it goes away, then we won't have any need to load the
+     LNTT from the objfile at psymtab-time, and start-up will be
+     faster.  To make that work, we'll need some way to create
+     a null pst for the "globals" pseudo-module. */
   max_LNTT_sym_index = LNTT_SYMCOUNT (objfile);
 
   /* Scan the module descriptors and make a psymtab for each.
-   *
-   * We know the MDs, FDs and the PDs are in order by starting
-   * address.  We use that fact to traverse all three arrays in
-   * parallel, knowing when the next PD is in a new file
-   * and we need to create a new psymtab.
-   */
+   
+     We know the MDs, FDs and the PDs are in order by starting
+     address.  We use that fact to traverse all three arrays in
+     parallel, knowing when the next PD is in a new file
+     and we need to create a new psymtab. */
   curr_pd   = 0;        /* Current procedure entry      */
   curr_fd   = 0;        /* Current file entry           */
   curr_md   = 0;        /* Current module entry         */
@@ -827,8 +807,7 @@ hpread_quick_traverse(
   syms_in_pst = 0;      /* Symbol count for psymtab     */ 
 
   /* Psts actually just have pointers into the objfile's
-   * symbol table, not their own symbol tables.
-   */
+     symbol table, not their own symbol tables. */
   global_syms = objfile -> global_psymbols.list;
   static_syms = objfile -> static_psymbols.list;
 
@@ -840,8 +819,7 @@ hpread_quick_traverse(
      Returning false from this function will make the caller
      (build_psymbols) scan the table from the beginning and 
      not use the quick lookup tables.
-     F90 has modules so this poses no porblem.
-  */
+     F90 has modules so this poses no problem. */
   if (!strcmp (&vt_bits[(long)qMD[0].sbMod], "end.c"))
     return 0;
 #endif
@@ -881,9 +859,9 @@ hpread_quick_traverse(
       char *full_name_string;
 
       /* First check for modules like "version.c", which have no code
-       * in them but still have qMD entries.  They also have no qFD or
-       * qPD entries.  Their start address is -1 and their end address
-       * is 0.  */
+         in them but still have qMD entries.  They also have no qFD or
+         qPD entries.  Their start address is -1 and their end address
+         is 0.  */
       if(VALID_CURR_MODULE && (CURR_MODULE_START == -1) && (CURR_MODULE_END == NULL)) {
 
           mod_name_string = &vt_bits[(long) qMD[curr_md].sbMod];
@@ -894,9 +872,9 @@ hpread_quick_traverse(
 #endif
 
           /* We'll skip the rest (it makes error-checking easier), and
-           * just make an empty pst.  Right now empty psts are not put
-           * in the pst chain, so all this is for naught, but later it
-           * might help.  */
+             just make an empty pst.  Right now empty psts are not put
+             in the pst chain, so all this is for naught, but later it
+             might help.  */
 
           pst = hpread_start_psymtab( objfile,
                          section_offsets,  /* ?? */
@@ -986,14 +964,14 @@ hpread_quick_traverse(
               }
 #endif
               /* Create the basic psymtab, connecting it in the list
-               * for this objfile and pointing its symbol entries
-               * to the current end of the symbol areas in the objfile.
-               *
-               * The "ldsymoff" parameter is the byte offset in the LNTT
-               * of the first symbol in this file.  Some day we should
-               * turn this into an index (fix in hp-symtab-read.c as well).
-               * And it's not even the right byte offset, as we're using
-               * the size of a union! FIXME!  */
+                 for this objfile and pointing its symbol entries
+                 to the current end of the symbol areas in the objfile.
+               
+                 The "ldsymoff" parameter is the byte offset in the LNTT
+                 of the first symbol in this file.  Some day we should
+                 turn this into an index (fix in hp-symtab-read.c as well).
+                 And it's not even the right byte offset, as we're using
+                 the size of a union! FIXME!  */
               pst = hpread_start_psymtab( objfile,
                                           section_offsets,  /* ?? */
                                           full_name_string,
@@ -1008,7 +986,7 @@ hpread_quick_traverse(
               B_CLRALL( class_entered, pxdb_header_p->cd_entries );
 
               /* Scan the procedure descriptors for procedures in the current
-               * file, based on the starting addresses. */
+                 file, based on the starting addresses. */
 
               syms_in_pst = scan_procs (&curr_pd, qPD, pxdb_header_p->pd_entries,
                                          start_adr, end_adr,
@@ -1076,8 +1054,7 @@ hpread_quick_traverse(
                           full_name_string, start_adr, end_adr, CURR_FILE_ISYM, end_sym);
               }
 #endif
-              /* Prepare for the next psymtab.
-               */
+              /* Prepare for the next psymtab. */
               global_syms = objfile->global_psymbols.next;
               static_syms = objfile->static_psymbols.next;
               free( class_entered );
@@ -1112,7 +1089,8 @@ hpread_quick_traverse(
 
               /* For the end address, we scan through the files till we find one
                  that overlaps the current module but ends beyond it; if no such file exists we
-                 simply use the module's start address.  (Note, if file entries themselves overlap
+                 simply use the module's start address.  
+                 (Note, if file entries themselves overlap
                  we take the longest overlapping extension beyond the end of the module...)
                  We assume that modules never overlap. */ 
 
@@ -1156,23 +1134,23 @@ hpread_quick_traverse(
               }
 
               /* Use one file to get the full name for the module.  This
-               * situation can arise if there is executable code in a #include
-               * file.  Each file with code in it gets a qFD.  Files which don't
-               * contribute code don't get a qFD, even if they include files
-               * which do, e.g.: 
-               *
-               *    body.c:                    rtn.h:
-               *        int x;                     int main() {
-               *        #include "rtn.h"               return x;
-               *                                   }
-               *
-               * There will a qFD for "rtn.h",and a qMD for "body.c",
-               * but no qMD for "rtn.h" or qFD for "body.c"!
-               *
-               * We pick the name of the last file to overlap with this
-               * module.  C convention is to put include files first.  In a
-               * perfect world, we could check names and use the file whose full
-               * path name ends with the module name. */
+                 situation can arise if there is executable code in a #include
+                 file.  Each file with code in it gets a qFD.  Files which don't
+                 contribute code don't get a qFD, even if they include files
+                 which do, e.g.: 
+               
+                   body.c:                    rtn.h:
+                       int x;                     int main() {
+                       #include "rtn.h"               return x;
+                                                  }
+               
+                 There will a qFD for "rtn.h",and a qMD for "body.c",
+                 but no qMD for "rtn.h" or qFD for "body.c"!
+               
+                 We pick the name of the last file to overlap with this
+                 module.  C convention is to put include files first.  In a
+                 perfect world, we could check names and use the file whose full
+                 path name ends with the module name. */
 
               if (VALID_CURR_FILE)
                   full_name_string = &vt_bits[ (long) qFD[curr_fd].sbFile ];
@@ -1201,14 +1179,14 @@ hpread_quick_traverse(
               }
 #endif
               /* Create the basic psymtab, connecting it in the list
-               * for this objfile and pointing its symbol entries
-               * to the current end of the symbol areas in the objfile.
-               *
-               * The "ldsymoff" parameter is the byte offset in the LNTT
-               * of the first symbol in this file.  Some day we should
-               * turn this into an index (fix in hp-symtab-read.c as well).
-               * And it's not even the right byte offset, as we're using
-               * the size of a union! FIXME!  */
+                 for this objfile and pointing its symbol entries
+                 to the current end of the symbol areas in the objfile.
+               
+                 The "ldsymoff" parameter is the byte offset in the LNTT
+                 of the first symbol in this file.  Some day we should
+                 turn this into an index (fix in hp-symtab-read.c as well).
+                 And it's not even the right byte offset, as we're using
+                 the size of a union! FIXME!  */
               pst = hpread_start_psymtab( objfile,
                                           section_offsets,  /* ?? */
                                           full_name_string,
@@ -1223,7 +1201,7 @@ hpread_quick_traverse(
               B_CLRALL( class_entered, pxdb_header_p->cd_entries );
 
               /* Scan the procedure descriptors for procedures in the current
-               * module, based on the starting addresses. */
+                 module, based on the starting addresses. */
 
               syms_in_pst = scan_procs (&curr_pd, qPD, pxdb_header_p->pd_entries,
                                          start_adr, end_adr,
@@ -1292,8 +1270,7 @@ hpread_quick_traverse(
               }
 #endif
 
-              /* Prepare for the next psymtab.
-               */
+              /* Prepare for the next psymtab. */
               global_syms = objfile->global_psymbols.next;
               static_syms = objfile->static_psymbols.next;
               free( class_entered ); 
@@ -1345,11 +1322,10 @@ hpread_quick_traverse(
 
 #ifdef NEVER_NEVER
   /* Now build psts for non-module things (in the tail of
-   * the LNTT, after the last END MODULE entry).
-   *
-   * If null psts were kept on the chain, this would be
-   * a solution.  FIXME
-   */
+     the LNTT, after the last END MODULE entry).
+   
+     If null psts were kept on the chain, this would be
+     a solution.  FIXME */
    pst = hpread_start_psymtab( objfile,
                                section_offsets,
 			      "globals",
@@ -1369,7 +1345,7 @@ hpread_quick_traverse(
 
    return 1;
 
-}     /* End of hpread_quick_traverse.                */
+}     /* End of hpread_quick_traverse. */
 
 
 /* Get appropriate header, based on pxdb type. 
@@ -1382,19 +1358,17 @@ hpread_get_header( objfile, pxdb_header_p )
   asection *pinfo_section, *debug_section, *header_section;
 
 #ifdef DUMPING
-  /* Turn on for debugging information
-   */
+  /* Turn on for debugging information */
   static int dumping = 0;
 #endif
 
   header_section = bfd_get_section_by_name (objfile->obfd, "$HEADER$");
   if( !header_section ) {
       /* We don't have either PINFO or DEBUG sections.  But
-       * stuff like "libc.sl" has no debug info.  There's no
-       * need to warn the user of this, as it may be ok. The
-       * caller will figure it out and issue any needed
-       * messages.
-       */
+         stuff like "libc.sl" has no debug info.  There's no
+         need to warn the user of this, as it may be ok. The
+         caller will figure it out and issue any needed
+         messages. */
 #ifdef DUMPING
       if( dumping )
          printf( "==No debug info at all for %s.\n", objfile->name );
@@ -1404,29 +1378,25 @@ hpread_get_header( objfile, pxdb_header_p )
   }
 
   /* We would like either a $DEBUG$ or $PINFO$ section.
-   * Once we know which, we can understand the header
-   * data (which we have defined to suit the more common
-   * $DEBUG$ case).
-   */
+     Once we know which, we can understand the header
+     data (which we have defined to suit the more common
+     $DEBUG$ case). */
   debug_section  = bfd_get_section_by_name (objfile->obfd, "$DEBUG$" );
   pinfo_section  = bfd_get_section_by_name (objfile->obfd, "$PINFO$" );
   if( debug_section ) {
-      /* The expected case: normal pxdb header.
-       */
+      /* The expected case: normal pxdb header. */
       bfd_get_section_contents( objfile->obfd, header_section,
                                 pxdb_header_p, 0, sizeof( PXDB_header ));
 
       if( !pxdb_header_p->pxdbed ) {
-          /* This shouldn't happen if we check in "symfile.c".
-           */
+          /* This shouldn't happen if we check in "symfile.c". */
           return 0;
       }   /* DEBUG section */
   }
 
   else if( pinfo_section ) {
       /* The DOC case; we need to translate this into a
-       * regular header.
-       */
+         regular header. */
        DOC_info_PXDB_header    doc_header;
   
 #ifdef DUMPING
@@ -1441,14 +1411,12 @@ hpread_get_header( objfile, pxdb_header_p )
                                 sizeof( DOC_info_PXDB_header ));
                                 
       if( !doc_header.pxdbed ) {
-          /* This shouldn't happen if we check in "symfile.c".
-           */
+          /* This shouldn't happen if we check in "symfile.c". */
           warning ("File \"%s\" not processed by pxdb!", objfile->name);
           return 0;
       }
 
-      /* Copy relevent fields to standard header passed in.
-       */
+      /* Copy relevent fields to standard header passed in. */
       pxdb_header_p->pd_entries = doc_header.pd_entries;
       pxdb_header_p->fd_entries = doc_header.fd_entries;
       pxdb_header_p->md_entries = doc_header.md_entries;
@@ -1495,8 +1463,7 @@ hpread_get_header( objfile, pxdb_header_p )
    be called on a file without native HP C debugging symbols.
 
    FIXME, there should be a cleaner peephole into the BFD environment
-   here.
-*/
+   here. */
 void
 hpread_symfile_init (objfile)
      struct objfile *objfile;
@@ -1528,13 +1495,12 @@ hpread_symfile_init (objfile)
 			/ sizeof (struct dntt_type_block);
 
   /* Read in data from the $LNTT$ subspace.   Also keep track of the number
-   *  of LNTT symbols.
-   *
-   * FIXME: this could be moved into the psymtab-to-symtab expansion
-   *        code, and save startup time.  At the moment this data is
-   *        still used, though.  We'd need a way to tell hp-symtab-read.c
-   *        whether or not to load the LNTT.
-   */
+      of LNTT symbols.
+   
+     FIXME: this could be moved into the psymtab-to-symtab expansion
+            code, and save startup time.  At the moment this data is
+            still used, though.  We'd need a way to tell hp-symtab-read.c
+            whether or not to load the LNTT. */
   lntt_section = bfd_get_section_by_name (objfile->obfd, "$LNTT$");
   if (!lntt_section)
     return;
@@ -1580,24 +1546,23 @@ hpread_symfile_init (objfile)
 }
 
 /* Scan and build partial symbols for a symbol file.
- *
- *  The minimal symbol table (either SOM or HP a.out) has already been
- *  read in; all we need to do is setup partial symbols based on the
- *  native debugging information.
- *
- *  Note that the minimal table is produced by the linker, and has
- *  only global routines in it; the psymtab is based on compiler-
- *  generated debug information and has non-global
- *  routines in it as well as files and class information.
- *
- *  We assume hpread_symfile_init has been called to initialize the
- *  symbol reader's private data structures.
- *
- *  SECTION_OFFSETS contains offsets relative to which the symbols in the
- *  various sections are (depending where the sections were actually loaded).
- *  MAINLINE is true if we are reading the main symbol table (as
- *  opposed to a shared lib or dynamically loaded file).
- */
+ 
+    The minimal symbol table (either SOM or HP a.out) has already been
+    read in; all we need to do is setup partial symbols based on the
+    native debugging information.
+ 
+    Note that the minimal table is produced by the linker, and has
+    only global routines in it; the psymtab is based on compiler-
+    generated debug information and has non-global
+    routines in it as well as files and class information.
+ 
+    We assume hpread_symfile_init has been called to initialize the
+    symbol reader's private data structures.
+ 
+    SECTION_OFFSETS contains offsets relative to which the symbols in the
+    various sections are (depending where the sections were actually loaded).
+    MAINLINE is true if we are reading the main symbol table (as
+   opposed to a shared lib or dynamically loaded file). */
 void
 hpread_build_psymtabs (objfile, section_offsets, mainline)
      struct objfile         *objfile;
@@ -1606,8 +1571,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 {
 
 #ifdef DUMPING
-  /* Turn this on to get debugging output.
-   */
+  /* Turn this on to get debugging output. */
   static int dumping   = 0;
 #endif
 
@@ -1663,15 +1627,13 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
 #ifdef QUICK_LOOK_UP
 {
-  /* Begin code for new-style loading of quick look-up tables.
-   */
+  /* Begin code for new-style loading of quick look-up tables. */
 
  /* elz: this checks whether the file has beeen processed by pxdb.
     If not we would like to try to read the psymbols in
     anyway, but it turns out to be not so easy. So this could 
     actually be commented out, but I leave it in, just in case
-    we decide to add support for non-pxdb-ed stuff in the future.
- */
+    we decide to add support for non-pxdb-ed stuff in the future. */
  bfd *abfd;
  abfd = symfile_bfd_open (objfile->name);
  if (!hpread_pxdb_needed(abfd))
@@ -1682,8 +1644,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
       if( hpread_get_header( objfile, &pxdb_header )) {
           /* Build a minimal table.  No types, no global variables,
-           * no include files....
-           */
+             no include files.... */
 #ifdef DUMPING
           if( dumping )
               printf( "\nNew method for %s\n", objfile->name );
@@ -1701,8 +1662,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
             have modules, and the quick method still works.
             So, if modules (other than those in end.c) are
             not found we give up on the quick table stuff, 
-            and fall back on the slower method
-         */
+            and fall back on the slower method  */
          found_modules_in_program = hpread_quick_traverse(
                                           objfile,
                                           section_offsets,
@@ -1713,16 +1673,15 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
           discard_cleanups (old_chain);
 
           /* Set up to scan the global section of the LNTT.
-           *
-           * This field is not always correct: if there are
-           * no globals, it will point to the last record in
-           * the regular LNTT, which is usually an END MODULE.
-           *
-           * Since it might happen that there could be a file
-           * with just one global record, there's no way to
-           * tell other than by looking at the record, so that's
-           * done below.
-           */
+           
+             This field is not always correct: if there are
+             no globals, it will point to the last record in
+             the regular LNTT, which is usually an END MODULE.
+           
+             Since it might happen that there could be a file
+             with just one global record, there's no way to
+             tell other than by looking at the record, so that's
+             done below. */
           if (found_modules_in_program)
              scan_start = pxdb_header.globals;
           else
@@ -1738,30 +1697,27 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
   }  /* End of new method code */
 } /* end of if pxdb exists */
-/*
- * elz: if pxdb does not exists on the system, then scan the whole debug info
- * Actually this will never be reached because we error out in case there 
- * is no pxdb on the system. It turns out that the debug info cannot be
- * handled the same way as after bxdb has been run, and gdb gets very 
- * very confused. Ileave this in anyway, in case one day we want to 
- * support non pxdb-ed files. 
- */
+ /* elz: if pxdb does not exists on the system, then scan the whole debug info
+    Actually this will never be reached because we error out in case there 
+    is no pxdb on the system. It turns out that the debug info cannot be
+    handled the same way as after bxdb has been run, and gdb gets very 
+    very confused. Ileave this in anyway, in case one day we want to 
+    support non pxdb-ed files. */
  else scan_start = 0; 
 
- bfd_close(abfd); /*close the bfd we opened to check for pxdb*/
+ bfd_close(abfd); /* close the bfd we opened to check for pxdb */
 
-} /*end of ifdef QUICK_LOOK_UP*/
+} /* end of ifdef QUICK_LOOK_UP */
 #else
   scan_start = 0; /* if we don't want quick lookup tables start
                      from the beginning */
 #endif
 
   /* Make two passes, one over the GNTT symbols, the other for the
-   * LNTT symbols.
-   *
-   * JB comment: above isn't true--they only make one pass, over
-   * the LNTT.
-   */
+     LNTT symbols.
+   
+    JB comment: above isn't true--they only make one pass, over
+    the LNTT.  */
   for (i = 0; i < 1; i++)
     {
       int within_function = 0;
@@ -1792,13 +1748,11 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 #ifdef QUICK_LOOK_UP
               if (scan_start == hp_symnum
               &&  symcount   == hp_symnum + 1) {
-                 /*
-                  * If there are NO globals in an executable,
-                  * PXDB's index to the globals will point to
-                  * the last record in the file, which 
-                  * could be this record. (this happened for F77 libraries)
-                  * ignore it and be done!
-                  */
+                 /* If there are NO globals in an executable,
+                    PXDB's index to the globals will point to
+                    the last record in the file, which 
+                    could be this record. (this happened for F77 libraries)
+                    ignore it and be done! */
                   continue;
               }
 #endif
@@ -1979,13 +1933,11 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 #ifdef QUICK_LOOK_UP
               if (scan_start == hp_symnum
               &&  symcount   == hp_symnum + 1) {
-                 /*
-                  * If there are NO globals in an executable,
-                  * PXDB's index to the globals will point to
-                  * the last record in the file, which is
-                  * probably an END MODULE, i.e. this record.
-                  * ignore it and be done!
-                  */
+                 /* If there are NO globals in an executable,
+                    PXDB's index to the globals will point to
+                    the last record in the file, which is
+                    probably an END MODULE, i.e. this record.
+                    ignore it and be done! */
                   continue;
               }
 #endif
@@ -2046,11 +1998,10 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
                   valu += ANOFFSET (section_offsets, SECT_OFF_DATA);
 
                 /* Luckily, dvar, svar, typedef, and tagdef all
-	         * have their "global" bit in the same place, so it works
-		 * (though it's bad programming practice) to reference
-	         * "dsvar.global" even though we may be looking at
-		 * any of the above four types.
-                 */
+	           have their "global" bit in the same place, so it works
+		   (though it's bad programming practice) to reference
+	          "dsvar.global" even though we may be looking at
+		  any of the above four types. */
 		if (dn_bufp->dsvar.global)
 		  {
 		    add_psymbol_to_list (namestring, strlen (namestring),
@@ -2069,17 +2020,16 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  }
 
                 /* For TAGDEF's, the above code added the tagname to the
-                 * struct namespace. This will cause tag "t" to be found
-                 * on a reference of the form "(struct t) x". But for
-                 * C++ classes, "t" will also be a typename, which we
-                 * want to find on a reference of the form "ptype t".
-                 * Therefore, we also add "t" to the var namespace.
-                 * Do the same for enum's due to the way aCC generates
-                 * debug info for these (see more extended comment
-                 * in hp-symtab-read.c).
-                 * We do the same for templates, so that "ptype t"
-                 * where "t" is a template also works.
-                 */
+                   struct namespace. This will cause tag "t" to be found
+                   on a reference of the form "(struct t) x". But for
+                   C++ classes, "t" will also be a typename, which we
+                   want to find on a reference of the form "ptype t".
+                   Therefore, we also add "t" to the var namespace.
+                   Do the same for enum's due to the way aCC generates
+                   debug info for these (see more extended comment
+                   in hp-symtab-read.c).
+                   We do the same for templates, so that "ptype t"
+                   where "t" is a template also works. */
 		if (dn_bufp->dblock.kind == DNTT_TYPE_TAGDEF &&
                     dn_bufp->dtype.type.dnttp.index < LNTT_SYMCOUNT (objfile)) {
                   int global = dn_bufp->dtag.global;
@@ -2136,8 +2086,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	}
     }
 
-  /* End any pending partial symbol table.
-   */
+  /* End any pending partial symbol table. */
   if (pst)
     {
       hpread_end_psymtab (pst, psymtab_include_list, includes_used,
@@ -2306,8 +2255,7 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   int offset = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT);
 
 #ifdef DUMPING
-  /* Turn on to see what kind of a psymtab we've built.
-   */
+  /* Turn on to see what kind of a psymtab we've built. */
   static int dumping = 0;
 #endif
   
@@ -2392,17 +2340,15 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       && pst->n_static_syms == 0)
     {
       /* Throw away this psymtab, it's empty.  We can't deallocate it, since
-	 it is on the obstack, but we can forget to chain it on the list.  */
-      /* Empty psymtabs happen as a result of header files which don't have
+	 it is on the obstack, but we can forget to chain it on the list. 
+         Empty psymtabs happen as a result of header files which don't have
 	 any symbols in them.  There can be a lot of them.  But this check
 	 is wrong, in that a psymtab with N_SLINE entries but nothing else
 	 is not empty, but we don't realize that.  Fixing that without slowing
 	 things down might be tricky.
-       *
-       * It's also wrong if we're using the quick look-up tables, as
-       * we can get empty psymtabs from modules with no routines in
-       * them.      
-       */
+         It's also wrong if we're using the quick look-up tables, as
+         we can get empty psymtabs from modules with no routines in
+         them. */
 
       discard_psymtab (pst);
 

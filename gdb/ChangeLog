@@ -1,3 +1,7 @@
+Wed Jan 27 13:20:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* hp-psymtab-read.c: reformatted comments, updated copyright.
+
 start-sanitize-carp start-sanitize-vr4xxx
 Wed Jan 27 15:09:22 1999  Andrew Cagney  <cagney@chook.cygnus.com>
 
