@@ -1,3 +1,11 @@
+2002-12-13  Michael Snyder  <msnyder@to-limbo.toronto.redhat.com>
+
+	* thread-db.c (thread_from_lwp): Uniquify error msg.
+	(lwp_from_thread): Ditto.
+	(check_event): Ditto.
+	(find_new_threads_callback): Ditto.
+	(thread_db_pid_to_str): Ditto.
+
 2002-12-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.h (get_frame_saved_regs): Declare.

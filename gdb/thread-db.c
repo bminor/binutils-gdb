@@ -250,7 +250,8 @@ thread_from_lwp (ptid_t ptid)
 
   err = td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
-    error ("Cannot get thread info: %s", thread_db_err_str (err));
+    error ("thread_from_lwp: cannot get thread info: %s", 
+	   thread_db_err_str (err));
 
   return BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
 }
@@ -272,7 +273,8 @@ lwp_from_thread (ptid_t ptid)
 
   err = td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
-    error ("Cannot get thread info: %s", thread_db_err_str (err));
+    error ("lwp_from_thread: cannot get thread info: %s", 
+	   thread_db_err_str (err));
 
   return BUILD_LWP (ti.ti_lid, GET_PID (ptid));
 }
@@ -685,7 +687,8 @@ check_event (ptid_t ptid)
 
   err = td_thr_get_info_p (msg.th_p, &ti);
   if (err != TD_OK)
-    error ("Cannot get thread info: %s", thread_db_err_str (err));
+    error ("check_event: cannot get thread info: %s", 
+	   thread_db_err_str (err));
 
   ptid = BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
 
@@ -950,7 +953,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 
   err = td_thr_get_info_p (th_p, &ti);
   if (err != TD_OK)
-    error ("Cannot get thread info: %s", thread_db_err_str (err));
+    error ("find_new_threads_callback: cannot get thread info: %s", 
+	   thread_db_err_str (err));
 
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
@@ -993,7 +997,7 @@ thread_db_pid_to_str (ptid_t ptid)
 
       err = td_thr_get_info_p (&th, &ti);
       if (err != TD_OK)
-	error ("Cannot get thread info for thread %ld: %s",
+	error ("thread_db_pid_to_str: cannot get thread info for %ld: %s",
 	       (long) GET_THREAD (ptid), thread_db_err_str (err));
 
       if (ti.ti_state == TD_THR_ACTIVE && ti.ti_lid != 0)
