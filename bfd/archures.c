@@ -111,9 +111,12 @@ DESCRIPTION
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
-.  start-sanitize-rce
-.  bfd_arch_rce,        {* Motorola RCE *}
-.  end-sanitize-rce
+. {* start-sanitize-rce *}
+.  bfd_arch_rce,       {* Motorola RCE *}
+. {* end-sanitize-rce *}
+. {* start-sanitize-arc *}
+.  bfd_arch_arc,       {* Argonaut RISC Core *}
+. {* end-sanitize-arc *}
 .  bfd_arch_last
 .  };
 
@@ -426,6 +429,9 @@ bfd_arch_bits_per_address (abfd)
 
 extern void bfd_a29k_arch PARAMS ((void));
 extern void bfd_alpha_arch PARAMS ((void));
+/* start-sanitize-arc */
+extern void bfd_arc_arch PARAMS ((void));
+/* end-sanitize-arc */
 extern void bfd_arm_arch PARAMS ((void));
 extern void bfd_h8300_arch PARAMS ((void));
 extern void bfd_h8500_arch PARAMS ((void));
@@ -447,13 +453,16 @@ extern void bfd_we32k_arch PARAMS ((void));
 extern void bfd_z8k_arch PARAMS ((void));
 extern void bfd_ns32k_arch PARAMS ((void));
 
-static void (*archures_init_table[]) PARAMS ((void)) = 
+static void (*const archures_init_table[]) PARAMS ((void)) = 
 {
 #ifdef SELECT_ARCHITECTURES
   SELECT_ARCHITECTURES,
 #else
   bfd_a29k_arch,
   bfd_alpha_arch,
+/* start-sanitize-arc */
+  bfd_arc_arch,
+/* end-sanitize-arc */
   bfd_arm_arch,
   bfd_h8300_arch,
   bfd_h8500_arch,
@@ -496,13 +505,9 @@ DESCRIPTION
 void
 bfd_arch_init ()
 {
-    void (**ptable) PARAMS ((void));
-    for (ptable = archures_init_table; 
-	 *ptable ;
-	 ptable++)
-    {
-	(*ptable)();
-    }
+    void (*const *ptable) PARAMS ((void));
+    for (ptable = archures_init_table; *ptable ; ptable++)
+      (*ptable)();
 }
 
 
