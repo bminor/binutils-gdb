@@ -139,13 +139,13 @@ static int error_index;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common
-%token OPTION_EB OPTION_EL OPTION_G OPTION_Gval
-%token OPTION_format  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
+%token OPTION_EB OPTION_EL OPTION_G OPTION_Gval OPTION_help
+%token OPTION_format OPTION_oformat  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
 %token OPTION_v OPTION_V OPTION_m OPTION_memul OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
 %token OPTION_Map
-%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax
+%token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax OPTION_version
 %token <name> OPTION_l OPTION_L OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token <name> OPTION_y
 %token OPTION_Ur 
@@ -180,15 +180,24 @@ command_line:
 
 command_line_option:
         	OPTION_Bstatic { }
+	|	OPTION_help
+			{	
+			help ();
+			exit (0);
+			}
 	|	OPTION_v
 			{	
 			ldversion(0);
-			option_v = true;
 			}
 	|	OPTION_V
 			{	
 			ldversion(1);
 			option_v = true;
+			}
+	|	OPTION_version
+			{	
+			ldversion(0);
+			exit(0);
 			}
 	|	OPTION_t {
 			trace_files = true;
@@ -257,9 +266,10 @@ command_line_option:
 			{
 			force_make_executable = true;
 			}
-        |      OPTION_sort_common {
-	config.sort_common = true;
-      }
+        |      OPTION_sort_common
+			{
+			config.sort_common = true;
+			}
     	|      OPTION_d {
 			  command_line.force_common_definition = true;
 			}
@@ -282,6 +292,10 @@ command_line_option:
 	| 	OPTION_format NAME
 	           {
 			  lang_add_target($2);
+       		   }
+	| 	OPTION_oformat NAME
+	           {
+			  lang_add_output_format($2, 0);
        		   }
 	| 	OPTION_Texp 
 		{ ldlex_expression();
@@ -313,7 +327,8 @@ command_line_option:
 		/* Ignore */
 		}
 	|	OPTION_c filename 
-			{ ldfile_open_command_file($2); } mri_script_file  END {  ldlex_command();}
+			{ldfile_open_command_file($2); }
+		mri_script_file  END {  ldlex_command();}
 
 	|	OPTION_Tfile 
 			{ ldfile_open_command_file($1); } script_file
@@ -370,7 +385,6 @@ command_line_option:
 		    lang_add_input_file($1,lang_input_file_is_file_enum,
 					(char *)NULL);
 		}
-	| '{' script_file '}'  
 	;
 
 
@@ -488,7 +502,7 @@ ifile_p1:
 	|	OUTPUT '(' filename ')'
 		{ lang_add_output($3); }
         | OUTPUT_FORMAT '(' NAME ')'
-		  { lang_add_output_format($3); }
+		  { lang_add_output_format($3, 1); }
         | OUTPUT_ARCH '(' NAME ')'
 		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION

@@ -163,19 +163,19 @@ line:
 
 @c FIXME!  -relax only avail h8/300, i960.  Conditionals screwed in examples.
 @smallexample
-ld [-o @var{output} ] @var{objfile}@dots{}
+ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
   [ -defsym @var{symbol}=@var{expression} ]
   [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
-  [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -i ]
-  [ -l@var{ar} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
+  [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ --help ]  [ -i ]
+  [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
   [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
   [ -oformat @var{output-format} ]  [ -R @var{filename} ]  [ -relax ]
   [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]
   [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]
-  [ -Tbss @var{bssorg} ]  [ -t ]  [ -u @var{sym}]  [-V]  [-v]  [ -X ]  [-x ]
-  [ -y@var{symbol} ]
+  [ -Tbss @var{bssorg} ]  [ -t ]  [ -u @var{symbol}]  [-V]  [-v]  [ --version ]
+  [ -y@var{symbol} ]  [ -X ]  [-x ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -358,17 +358,26 @@ Ignored.  Provided for compatibility with other tools.
 Set the maximum size of objects to be optimized using the GP register to
 @var{size} under MIPS ECOFF.  Ignored for other object file formats.
 
+@item --help
+@kindex --help
+@cindex help
+@cindex usage
+Print a summary of the command-line options on the standard output and exit.
+This option and @samp{--version} begin with two dashes instead of one
+for compatibility with other GNU programs.  The other options start with
+only one dash for compatibility with other linkers.
+
 @kindex -i
 @cindex incremental link
 @item -i
 Perform an incremental link (same as option @samp{-r}).
 
 @cindex archive files, from cmd line
-@kindex -l@var{ar}
+@kindex -l@var{archive}
 @item -l@var{ar} 
-Add archive file @var{ar} to the list of files to link.  This 
+Add archive file @var{archive} to the list of files to link.  This 
 option may be used any number of times.  @code{ld} will search its
-path-list for occurrences of @code{lib@var{ar}.a} for every @var{ar}
+path-list for occurrences of @code{lib@var{ar}.a} for every @var{archive}
 specified.
 
 @cindex search directory, from cmd line
@@ -519,16 +528,12 @@ for compatibility with other linkers, you may omit the leading
 @itemx -T@var{commandfile}
 @kindex -T @var{script}
 @cindex script files
-Read link commands from the file
-@var{commandfile}.  These commands completely override @code{ld}'s
-default link format (rather than adding to it); @var{commandfile} must
-specify everything necessary to describe the target format.
-@xref{Commands}.
-If @var{commandfile} does not exist, @code{ld} looks for it in the directories
-specified by any @samp{-L} options.
-
-You may also include a script of link commands directly in the command
-line by bracketing it between @samp{@{} and @samp{@}}.
+Read link commands from the file @var{commandfile}.  These commands
+completely override @code{ld}'s default link format (rather than adding
+to it); @var{commandfile} must specify everything necessary to describe
+the target format.  @xref{Commands}.  If @var{commandfile} does not
+exist, @code{ld} looks for it in the directories specified by any
+preceding @samp{-L} options.  Multiple @samp{-T} options accumulate.
 
 @item -t 
 @kindex -t
@@ -536,10 +541,10 @@ line by bracketing it between @samp{@{} and @samp{@}}.
 @cindex input files, displaying
 Print the names of the input files as @code{ld} processes them.
 
-@item -u @var{sym}
-@kindex -u @var{sym}
+@item -u @var{symbol}
+@kindex -u @var{symbol}
 @cindex undefined symbol
-Force @var{sym} to be entered in the output file as an undefined symbol.
+Force @var{symbol} to be entered in the output file as an undefined symbol.
 Doing this may, for example, trigger linking of additional modules from
 standard libraries.  @samp{-u} may be repeated with different option
 arguments to enter additional undefined symbols.
@@ -558,13 +563,16 @@ turn serve as input to @code{ld}.  When linking C++ programs, @samp{-Ur}
 @kindex -V
 @cindex version
 Display the version number for @code{ld} and list the supported emulations.
-Print which input files can and can not be opened.
+Display which input files can and can not be opened.
 
 @item -v
 @kindex -v
 @cindex version
 Display the version number for @code{ld}.
-Print which input files can and can not be opened.
+
+@item --version
+@kindex --version
+Display the version number for @code{ld} and exit.
 
 @item -X 
 @kindex -X
@@ -637,9 +645,6 @@ linker either explicitly through the @samp{-T} option, or implicitly as
 an ordinary file. If the linker opens a file which it cannot recognize
 as a supported object or archive format, it tries to interpret the file
 as a command file.
-
-You can also include a script directly on the @code{ld} command line,
-delimited by the characters @samp{@{} and @samp{@}}.
 
 @menu
 * Scripts::                     Linker Scripts
@@ -2008,148 +2013,7 @@ conversion and during output. @xref{BFD information loss}.
 @node BFD outline
 @section How it works: an outline of BFD
 @cindex opening object files
-When an object file is opened, BFD subroutines automatically
-determine the format of the input object file, and build a descriptor in
-memory with pointers to routines that will be used to access elements of
-the object file's data structures.
-
-As different information from the the object files is required,
-BFD reads from different sections of the file and processes them.
-For example, a very common operation for the linker is processing symbol
-tables.  Each BFD back end provides a routine for converting
-between the object file's representation of symbols and an internal
-canonical format. When the linker asks for the symbol table of an object
-file, it calls through the memory pointer to the BFD
-back end routine which reads and converts the table into a canonical
-form.  The linker then operates upon the common form. When the link is
-finished and the linker writes the symbol table of the output file,
-another BFD back end routine is called which takes the newly
-created symbol table and converts it into the chosen output format.
-
-@node BFD information loss
-@section Information Loss
-@emph{Information can be lost during output.} The output formats
-supported by BFD do not provide identical facilities, and
-information which may be described in one form has nowhere to go in
-another format. One example of this is alignment information in
-@code{b.out}. There is nowhere in an @code{a.out} format file to store
-alignment information on the contained data, so when a file is linked
-from @code{b.out} and an @code{a.out} image is produced, alignment
-information will not propagate to the output file. (The linker will
-still use the alignment information internally, so the link is performed
-correctly).
-
-Another example is COFF section names. COFF files may contain an
-unlimited number of sections, each one with a textual section name. If
-the target of the link is a format which does not have many sections (e.g.,
-@code{a.out}) or has sections without names (e.g., the Oasys format) the
-link cannot be done simply. You can circumvent this problem by
-describing the desired input-to-output section mapping with the command
-language.
-
-@emph{Information can be lost during canonicalization.} The BFD
-internal canonical form of the external formats is not exhaustive; there
-are structures in input formats for which there is no direct
-representation internally.  This means that the BFD back ends
-cannot maintain all possible data richness through the transformation
-between external to internal and back to external formats.
-
-This limitation is only a problem when using the linker to read one
-format and write another. Each BFD back end is responsible for
-maintaining as much data as possible, and the internal BFD
-canonical form has structures which are opaque to the BFD core,
-and exported only to the back ends. When a file is read in one format,
-the canonical form is generated for BFD and the linker. At the
-same time, the back end saves away any information which would otherwise
-be lost. If the data is then written back in the same format, the back
-end routine will be able to use the canonical form provided by the
-BFD core as well as the information it prepared earlier.  Since
-there is a great deal of commonality between back ends,
-there is no information lost when
-linking big endian COFF to little endian COFF, or from @code{a.out} to
-@code{b.out}.  When a mixture of formats is linked, the information is
-only lost from the files whose format differs from the destination.
-
-@node Mechanism
-@section Mechanism 
-The greatest potential for loss of information occurs when there is the least
-overlap between the information provided by the source format, that
-stored by the canonical format, and that needed by the
-destination format. A brief description of the canonical form may help
-you understand which kinds of data you can count on preserving across
-conversions.
-@cindex BFD canonical format
-@cindex internal object-file format
-
-@table @emph
-@item files
-Information on target machine architecture, particular implementation,
-and format type are stored on a per-file basis. Other information
-includes a demand pagable bit and a write protected bit.
-Information like Unix magic numbers is not stored here---only the magic
-numbers' meaning, so a @code{ZMAGIC} file would have both the demand pagable
-bit and the write protected text bit set.
-
-The byte order of the target is stored on a per-file basis, so that big-
-and little-endian object files may be linked with one another.
-
-@item sections
-Each section in the input file contains the name of the section, the
-original address in the object file, various options, size and alignment
-information and pointers into other BFD data structures.
-
-@item symbols
-Each symbol contains a pointer to the object file which originally
-defined it, its name, its value, and various option bits.  When a
-BFD back end reads in a symbol table, the back end relocates all
-symbols to make them relative to the base of the section where they were
-defined.  Doing this ensures that each symbol points to its containing
-section.  Each symbol also has a varying amount of hidden
-private data for the BFD back end.  Since the symbol points to the
-original file, the private data format for that symbol is accessible.
-@code{ld} can operate on a collection of symbols of wildly different
-formats without problems.
-
-Normal global and simple local symbols are maintained on output, so an
-output file (no matter its format) will retain symbols pointing to
-functions and to global, static, and common variables.  Some symbol
-information is not worth retaining; in @code{a.out}, type information is
-stored in the symbol table as long symbol names. This information would
-be useless to most COFF debuggers and may be thrown away with
-appropriate command line switches. (The GNU debugger @code{gdb} does
-support @code{a.out} style debugging information in COFF).
-
-There is one word of type information within the symbol, so if the
-format supports symbol type information within symbols (for example, COFF,
-IEEE, Oasys) and the type is simple enough to fit within one word
-(nearly everything but aggregates), the information will be preserved.
-
-@item relocation level
-Each canonical BFD relocation record contains a pointer to the symbol to
-relocate to, the offset of the data to relocate, the section the data
-is in, and a pointer to a relocation type descriptor. Relocation is
-performed by passing messages through the relocation type
-descriptor and the symbol pointer. Therefore, relocations can be performed
-on output data using a relocation method that is only available in one of the
-input formats. For instance, Oasys provides a byte relocation format.
-A relocation record requesting this relocation type would point
-indirectly to a routine to perform this, so the relocation may be
-performed on a byte being written to a COFF file, even though 68k COFF
-has no such relocation type.
-@c FIXME why specific reference to 68K above?
-
-@item line numbers
-Object formats can contain, for debugging purposes, some form of mapping
-between symbols, source line numbers, and addresses in the output file.
-These addresses have to be relocated along with the symbol information.
-Each symbol with an associated list of line number records points to the
-first record of the list.  The head of a line number list consists of a
-pointer to the symbol, which allows finding out the address of the
-function whose line number is being described. The rest of the list is
-made up of pairs: offsets into the section and line numbers. Any format
-which can simply derive this information can pass it successfully
-between formats (COFF, IEEE and Oasys).
-@end table
+@include ../bfd/doc/bfdsumm.texi
 @end ifclear
 
 @node MRI

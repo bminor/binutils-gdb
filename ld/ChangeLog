@@ -1,3 +1,7 @@
+Thu Jul  8 10:53:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldgram.y (OPTION_v): Don't turn on verbose output.
+
 Wed Jul  7 11:33:12 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (install): Don't install as $(tooldir)/bin/gld;
