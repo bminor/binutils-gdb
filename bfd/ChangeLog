@@ -5,6 +5,12 @@
 
 2001-08-29  Jeff Law <law@redhat.com>
 
+	* elf32-h8300.c: Put all prototypes together.
+	(elf32_h8_info_to_howto): Parameter elf_reloc is used.
+	(elf32_h8_final_link_relocate): New function for linker.
+	(elf32_h8_relocate_section): Similarly.
+	(elf_backend_relocate_section): Define.
+
 	* cpu-h8300.c (h8300_scan, compatible): Prototype.
 	(h8300_scan): Handle architecture:machine encodings typically
 	found in linker scripts.

@@ -27,6 +27,18 @@ static reloc_howto_type *elf32_h8_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void elf32_h8_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+static void elf32_h8_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static int elf32_h8_mach
+  PARAMS ((flagword));
+static bfd_reloc_status_type elf32_h8_final_link_relocate
+  PARAMS ((unsigned long, bfd *, bfd *, asection *,
+	   bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
+	   struct bfd_link_info *, asection *, int));
+static boolean elf32_h8_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
+	   bfd_byte *, Elf_Internal_Rela *,
+	   Elf_Internal_Sym *, asection **));
 
 /* This does not include any relocation information, but should be
    good enough for GDB or objdump to read the file.  */
@@ -184,14 +196,6 @@ static const struct elf_reloc_map h8_reloc_map[] =
   { BFD_RELOC_H8_DIR32A16, R_H8_DIR32A16_X },
 };
 
-static reloc_howto_type *elf32_h8_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void elf32_h8_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
-static void elf32_h8_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
-static int elf32_h8_mach
-  PARAMS ((flagword));
 
 static reloc_howto_type *
 elf32_h8_reloc_type_lookup (abfd, code)
@@ -212,7 +216,7 @@ static void
 elf32_h8_info_to_howto (abfd, bfd_reloc, elf_reloc)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *bfd_reloc;
-     Elf32_Internal_Rela *elf_reloc ATTRIBUTE_UNUSED;
+     Elf32_Internal_Rela *elf_reloc;
 {
   unsigned int r;
   unsigned int i;
@@ -238,6 +242,235 @@ elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
   abort ();
   r = ELF32_R_TYPE (elf_reloc->r_info);
   bfd_reloc->howto = &h8_elf_howto_table[r];
+}
+
+
+/* Perform a relocation as part of a final link.  */
+static bfd_reloc_status_type
+elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
+			      input_section, contents, offset, value,
+			      addend, info, sym_sec, is_local)
+     unsigned long r_type;
+     bfd *input_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd_byte *contents;
+     bfd_vma offset;
+     bfd_vma value;
+     bfd_vma addend;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sym_sec ATTRIBUTE_UNUSED;
+     int is_local ATTRIBUTE_UNUSED;
+{
+  bfd_byte *hit_data = contents + offset;
+
+  switch (r_type)
+    {
+
+    case R_H8_NONE:
+      return bfd_reloc_ok;
+
+    case R_H8_DIR32:
+    case R_H8_DIR32A16:
+      value += addend;
+      bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_H8_DIR16:
+    case R_H8_DIR16A8:
+    case R_H8_DIR16R8:
+      value += addend;
+      bfd_put_16 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    /* AKA R_RELBYTE */
+    case R_H8_DIR8:
+      value += addend;
+
+      if ((long) value > 0x7f || (long) value < -0x80)
+	return bfd_reloc_overflow;
+
+      bfd_put_8 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_H8_DIR24A8:
+    case R_H8_DIR24R8:
+      value += addend;
+
+      if ((long) value > 0x7fffff || (long) value < -0x800000)
+	return bfd_reloc_overflow;
+
+      value &= 0xffffff;
+      value |= (bfd_get_32 (input_bfd, hit_data) & 0xff000000);
+      bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    default:
+      return bfd_reloc_notsupported;
+    }
+}
+
+/* Relocate an H8 ELF section.  */
+static boolean
+elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
+			   contents, relocs, local_syms, local_sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rel, *relend;
+
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (input_bfd);
+
+  rel = relocs;
+  relend = relocs + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      int r_type;
+      unsigned long r_symndx;
+      Elf_Internal_Sym *sym;
+      asection *sec;
+      struct elf_link_hash_entry *h;
+      bfd_vma relocation;
+      bfd_reloc_status_type r;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      r_type = ELF32_R_TYPE (rel->r_info);
+
+      if (info->relocateable)
+	{
+	  /* This is a relocateable link.  We don't have to change
+             anything, unless the reloc is against a section symbol,
+             in which case we have to adjust according to where the
+             section symbol winds up in the output section.  */
+	  if (r_symndx < symtab_hdr->sh_info)
+	    {
+	      sym = local_syms + r_symndx;
+	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		{
+		  sec = local_sections[r_symndx];
+		  rel->r_addend += sec->output_offset + sym->st_value;
+		}
+	    }
+
+	  continue;
+	}
+
+      /* This is a final link.  */
+      h = NULL;
+      sym = NULL;
+      sec = NULL;
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+	}
+      else
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sec = h->root.u.def.section;
+	      relocation = (h->root.u.def.value
+			    + sec->output_section->vma
+			    + sec->output_offset);
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    relocation = 0;
+	  else
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd,
+		      input_section, rel->r_offset, true)))
+		return false;
+	      relocation = 0;
+	    }
+	}
+
+      r = elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
+					input_section,
+					contents, rel->r_offset,
+					relocation, rel->r_addend,
+					info, sec, h == NULL);
+
+      if (r != bfd_reloc_ok)
+	{
+	  const char *name;
+	  const char *msg = (const char *) 0;
+	  arelent bfd_reloc;
+	  reloc_howto_type *howto;
+
+	  elf32_h8_info_to_howto (input_bfd, &bfd_reloc, rel);
+	  howto = bfd_reloc.howto;
+	  
+	  if (h != NULL)
+	    name = h->root.root.string;
+	  else
+	    {
+	      name = (bfd_elf_string_from_elf_section
+		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
+	      if (name == NULL || *name == '\0')
+		name = bfd_section_name (input_bfd, sec);
+	    }
+
+	  switch (r)
+	    {
+	    case bfd_reloc_overflow:
+	      if (! ((*info->callbacks->reloc_overflow)
+		     (info, name, howto->name, (bfd_vma) 0,
+		      input_bfd, input_section, rel->r_offset)))
+		return false;
+	      break;
+
+	    case bfd_reloc_undefined:
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, name, input_bfd, input_section,
+		      rel->r_offset, true)))
+		return false;
+	      break;
+
+	    case bfd_reloc_outofrange:
+	      msg = _("internal error: out of range error");
+	      goto common_error;
+
+	    case bfd_reloc_notsupported:
+	      msg = _("internal error: unsupported relocation error");
+	      goto common_error;
+
+	    case bfd_reloc_dangerous:
+	      msg = _("internal error: dangerous error");
+	      goto common_error;
+
+	    default:
+	      msg = _("internal error: unknown error");
+	      /* fall through */
+
+	    common_error:
+	      if (!((*info->callbacks->warning)
+		    (info, msg, name, input_bfd, input_section,
+		     rel->r_offset)))
+		return false;
+	      break;
+	    }
+	}
+    }
+
+  return true;
 }
 
 /* Object files encode the specific H8 model they were compiled
@@ -355,5 +588,8 @@ elf32_h8_merge_private_bfd_data (ibfd, obfd)
    dynobj = elf_hash_table (info)->dynobj;
    and thus requires an elf hash table.  */
 #define bfd_elf32_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
+
+/* Use an H8 specific linker, not the ELF generic linker.  */
+#define elf_backend_relocate_section elf32_h8_relocate_section
 
 #include "elf32-target.h"
