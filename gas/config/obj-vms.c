@@ -113,21 +113,28 @@ enum advanced_type
 struct VMS_DBG_Symbol
 {
   struct VMS_DBG_Symbol *next;
-  enum advanced_type advanced;	/* description of what this is */
-  int dbx_type;			/* this record is for this type */
-  int type2;			/* For advanced types this is the type referred to.
-					i.e. the type a pointer points to, or the type
-					of object that makes up an array */
-  int VMS_type;			/* Use this type when generating a variable def */
-  int index_min;		/* used for arrays - this will be present for all */
-  int index_max;		/* entries, but will be meaningless for non-arrays */
-  int data_size;		/* size in bytes of the data type.  For an array, this
-				   is the size of one element in the array */
-  int struc_numb;		/* Number of the structure/union/enum - used for ref */
+  /* description of what this is */
+  enum advanced_type advanced;
+  /* this record is for this type */
+  int dbx_type;
+  /* For advanced types this is the type referred to.  I.e., the type
+     a pointer points to, or the type of object that makes up an
+     array.  */
+  int type2;
+  /* Use this type when generating a variable def */
+  int VMS_type;
+  /* used for arrays - this will be present for all */
+  int index_min;
+  /* entries, but will be meaningless for non-arrays */
+  int index_max;
+  /* Size in bytes of the data type.  For an array, this is the size
+     of one element in the array */
+  int data_size;
+  /* Number of the structure/union/enum - used for ref */
+  int struc_numb;
 };
 
-struct VMS_DBG_Symbol *VMS_Symbol_type_list =
-{(struct VMS_DBG_Symbol *) NULL};
+struct VMS_DBG_Symbol *VMS_Symbol_type_list;
 
 /*
  * We need this structure to keep track of forward references to
