@@ -1,3 +1,9 @@
+Mon Sep 30 11:16:34 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* top.c (execute_control_command):  Free values from while_control
+	and if_control conditions after evaluation to avoid storage leaks.
+	From Peter Schauer.
+ 
 start-sanitize-v850
 Fri Sep 27 17:43:06 1996  Stu Grossman  (grossman@critters.cygnus.com)
 

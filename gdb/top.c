@@ -813,6 +813,7 @@ execute_control_command (cmd)
   struct command_line *current;
   struct cleanup *old_chain = 0;
   value_ptr val;
+  value_ptr val_mark;
   int loop;
   enum command_control_type ret;
   char *new_line;
@@ -852,13 +853,18 @@ execute_control_command (cmd)
 	/* Keep iterating so long as the expression is true.  */
 	while (loop == 1)
 	  {
+	    int cond_result;
+
 	    QUIT;
 
 	    /* Evaluate the expression.  */
+	    val_mark = value_mark ();
 	    val = evaluate_expression (expr);
+	    cond_result = value_true (val);
+	    value_free_to_mark (val_mark);
 
 	    /* If the value is false, then break out of the loop.  */
-	    if (!value_true (val))
+	    if (!cond_result)
 	      break;
 
 	    /* Execute the body of the while statement.  */
@@ -906,6 +912,7 @@ execute_control_command (cmd)
 	ret = simple_control;
 
 	/* Evaluate the conditional.  */
+	val_mark = value_mark ();
 	val = evaluate_expression (expr);
 
 	/* Choose which arm to take commands from based on the value of the
@@ -914,6 +921,7 @@ execute_control_command (cmd)
 	  current = *cmd->body_list;
 	else if (cmd->body_count == 2)
 	  current = *(cmd->body_list + 1);
+	value_free_to_mark (val_mark);
 
 	/* Execute commands in the given arm.  */
 	while (current)
