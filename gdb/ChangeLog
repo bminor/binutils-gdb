@@ -1,3 +1,8 @@
+2002-01-08  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-proc.c (child_pid_to_exec_file): Use readlink to get the
+	real name of the executable, rather than the /proc name.
+
 2002-01-03  Michael Snyder  <msnyder@redhat.com>
 
 	Implement a "generate-core-file" command in gdb, save target state.

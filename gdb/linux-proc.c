@@ -37,11 +37,19 @@
 char *
 child_pid_to_exec_file (int pid)
 {
-  static char fname[MAXPATHLEN];
+  char *name1, *name2;
 
-  sprintf (fname, "/proc/%d/exe", pid);
-  /* FIXME use readlink to get the real name. */
-  return fname;
+  name1 = xmalloc (MAXPATHLEN);
+  name2 = xmalloc (MAXPATHLEN);
+  make_cleanup (xfree, name1);
+  make_cleanup (xfree, name2);
+  memset (name2, 0, MAXPATHLEN);
+
+  sprintf (name1, "/proc/%d/exe", pid);
+  if (readlink (name1, name2, MAXPATHLEN) > 0)
+    return name2;
+  else
+    return name1;
 }
 
 /* Function: linux_find_memory_regions
