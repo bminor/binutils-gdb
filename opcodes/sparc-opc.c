@@ -23,6 +23,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.	*/
    instruction's name rather than the args.  This would make gas faster, pinsn
    slower, but would mess up some macros a bit.  xoxorich. */
 
+/* v9 FIXME: Doesn't accept `iprefetch', `setX', `signx', `cleartop', `cas',
+   `casx', `clrx', `clruw' synthetic instructions for v9.  */
+
 #include <stdio.h>
 #include "ansidecl.h"
 #define BFD_EMIT_TABLE
@@ -37,7 +40,7 @@ const char *architecture_pname[] = {
 	NULL,
 };
 
-/* v9: This file is correct for SPARC Version 9 Draft 1.0.4.  */
+/* v9: This file is correct for SPARC Version 9 Draft 1.1.  */
 
 #define COND(x)		(((x)&0xf)<<25)
 #define MCOND(x,i_or_f)	((((i_or_f)&1)<<18)|(((x)>>11)&(0xf<<14)))	/* v9 */
@@ -1686,10 +1689,15 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
  { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T 9,G",   flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T 9,G", flags|F_DELAYED, v9 }
 
+/* v9: We must put `brfcx' before `brfc', to ensure that we never match
+   v9: something against an expression unless it is an expression.  Otherwise,
+   v9: we end up with undefined symbol tables entries, because they get added,
+   v9: but are not deleted if the pattern fails to match.  */
+
 #define condfc(fop, cop, mask, flags) \
-  brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags), \
   brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
-  brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)), flags) \
+  brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags), \
+  brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)), flags)
 
 #define condf(fop, mask, flags) \
   brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
@@ -1723,7 +1731,8 @@ condfc("fbule",	"cb013", 0xe, 0),
 { "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI_RS2(~0),	"1", F_DELAYED, v6 }, /* jmpl rs1+%g0,%g0 */
 { "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"1+i", F_DELAYED, v6 }, /* jmpl rs1+i,%g0 */
 { "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"i+1", F_DELAYED, v6 }, /* jmpl i+rs1,%g0 */
-{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|RS1_G0,	"i", F_DELAYED, v6 }, /* jmpl %g0+i,%g0 */
+{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|RS1_G0,		"i", F_DELAYED, v6 }, /* jmpl %g0+i,%g0 */
+{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|SIMM13(~0),	"1", F_DELAYED, v6 }, /* jmpl rs1+0,%g0 */
 
 { "nop",	F2(0, 4), 0xfeffffff, "", 0, v6 }, /* sethi 0, %g0 */
 
