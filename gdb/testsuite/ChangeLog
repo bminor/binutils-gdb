@@ -1,3 +1,12 @@
+Fri Oct 11 17:05:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (clean mostlyclean): Also remove chill *.grt files.
+	(distclean maintainer-clean realclean): No need to remove files
+ 	twice.  Nuke the duplicates.
+	* gdb.base/Makefile.in (EXECUTABLES): Add "structs".
+	* gdb.threads/Makefile.in (distclean maintainer-clean realclean): 
+	Remove config.h along with other config files.
+
 Mon Sep 30 20:16:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/interrupt.exp: Add i*86-*-linux* setup_xfail for
