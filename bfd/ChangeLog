@@ -1,3 +1,13 @@
+start-sanitize-sky
+Tue Feb 10 13:25:14 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* archures.c (bfd_mach_dvp_{vif,gif}): Renamed from ..._{pke,gpuif}.
+	(bfd_txvu_arch): Delete.
+	* cpu-mips.c (arch_info_struct): dvp:{vif,gif} renamed from
+	dvp:{pke,gpuif}.
+	* bfd-in2.h: Regenerate.
+
+end-sanitize-sky
 Tue Feb 10 15:01:39 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change -linux* to -linux-gnu*.
