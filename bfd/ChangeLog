@@ -1,3 +1,19 @@
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf32-sh64-com.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-sh64-com.c.
+	(elf32-sh64-com.lo): New dependency list.
+	* Makefile.in: Regenerate.
+	* configure.in (bfd_elf32_sh64_vec, bfd_elf32_sh64l_vec)
+	(bfd_elf32_sh64nbsd_vec, bfd_elf32_sh64lnbsd_vec): Add
+	elf32-sh64-com.lo.
+	* configure: Regenerate.
+	* elf32-sh64.c (sh64_address_in_cranges)
+	(sh64_get_contents_type, sh64_address_is_shmedia): Move to...
+	(crange_qsort_cmpb, crange_qsort_cmpl, crange_bsearch_cmpb):
+	(crange_bsearch_cmpl): Prepend _bfd_sh64_ to name and move to...
+	* elf32-sh64-com.c: ...here.  New file.
+
 2002-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-openrisc.c (openrisc_elf_gc_mark_hook): Remove
