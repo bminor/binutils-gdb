@@ -1,3 +1,15 @@
+Tue Dec  8 19:51:50 1998  Mark Klein  <mklein@dis.com>
+
+	* configure.in (hppa-*-mpeix*): New target.
+	* config/obj-som.h (obj_som_compiler): Declare.
+	* config/obj-som.c (compiler_seen): New static variable.
+	(obj_som_compiler): New function.
+	* config/tc-hppa.c: Update tc_data uses for change to bfd/som.h.
+ 	(md_pseudo_table): Add "compiler" if OBJ_SOM.
+	(pa_type_args): Set hppa_priv_level.
+	(pa_compiler): New static function if OBJ_SOM.
+	* configure: Rebuild.
+
 Tue Dec  8 15:00:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (output_leb128): Don't mark as inline.
