@@ -181,7 +181,7 @@ CC_FOR_TARGET = ` \
     if [ "@host@" = "@target@" ] ; then \
       echo $(CC); \
     else \
-      echo gcc | sed '$(program_transform_name)'; \
+      echo gcc | sed '$(transform)'; \
     fi; \
   fi`
 
@@ -952,7 +952,7 @@ dlltool.o:dlltool.c
 # coff/sym.h and coff/ecoff.h won't be found by the automatic dependency
 # scripts, since they are only included conditionally.
 nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
-	ldname=`echo ld | sed '$(program_transform_name)'`; \
+	ldname=`echo ld | sed '$(transform)'`; \
 	$(COMPILE) -c -DLD_NAME="\"$${ldname}\"" @NLMCONV_DEFS@ $(srcdir)/nlmconv.c
 
 # Targets to rebuild dependencies in this Makefile.

@@ -1,3 +1,9 @@
+Fri Jan 30 19:16:28 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.am (CC_FOR_TARGET,nlmcomv.o): Change program_transform_name
+	to transform.
+	* Makefile.in: Regenerate.
+
 Thu Jan 29 16:24:04 1998  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* dlltool.c: Define exit status macros for _WIN32 but not
