@@ -1,3 +1,9 @@
+Fri Mar 31 16:13:48 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config/slite-gdb.exp: Responds to load symbol table prompt.
+	* gdb.base/break.exp: Adjust line number, fix rerun.
+	* gdb.base/langs0.c: Add #ifdef usestubs.
+
 Thu Mar 30 15:36:55 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* gdb.base/list.exp: Adjust line contents after adding new lines in
