@@ -1,3 +1,9 @@
+Tue Jul 20 16:21:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf32-sparc.c (elf_sparc_howto_table): Don't use "^&" before
+	function name; it's valid without, and some compilers give
+	warnings with it there.
+
 Tue Jul 20 08:21:15 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* bfd-in.h:  Apply some of the changes that were made to bfd-in2.h.
