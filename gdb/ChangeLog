@@ -1,3 +1,7 @@
+2003-09-25  Jerome Guitton  <guitton@act-europe.fr>
+
+	* MAINTAINERS (write after approval): Add myself.
+
 2003-09-25  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c: Include "dwarf2-frame.h".
