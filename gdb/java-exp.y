@@ -646,25 +646,31 @@ parse_number (p, len, parsed_float, putithere)
   if (parsed_float)
     {
       /* It's a float since it contains a point or an exponent.  */
+      char c;
+      int num = 0;	/* number of tokens scanned by scanf */
+      char saved_char = p[len];
 
+      p[len] = 0;	/* null-terminate the token */
       if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
-	sscanf (p, "%g", &putithere->typed_val_float.dval);
+	num = sscanf (p, "%g%c", &putithere->typed_val_float.dval, &c);
       else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
-	sscanf (p, "%lg", &putithere->typed_val_float.dval);
+	num = sscanf (p, "%lg%c", &putithere->typed_val_float.dval, &c);
       else
 	{
 #ifdef PRINTF_HAS_LONG_DOUBLE
-	  sscanf (p, "%Lg", &putithere->typed_val_float.dval);
+	  num = sscanf (p, "%Lg%c", &putithere->typed_val_float.dval, &c);
 #else
 	  /* Scan it into a double, then assign it to the long double.
 	     This at least wins with values representable in the range
 	     of doubles. */
 	  double temp;
-	  sscanf (p, "%lg", &temp);
+	  num = sscanf (p, "%lg%c", &temp, &c);
 	  putithere->typed_val_float.dval = temp;
 #endif
 	}
-
+      p[len] = saved_char;	/* restore the input stream */
+      if (num != 1) 		/* check scanf found ONLY a float ... */
+	return ERROR;
       /* See if it has `f' or `d' suffix (float or double).  */
 
       c = tolower (p[len - 1]);

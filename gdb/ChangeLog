@@ -1,5 +1,7 @@
 Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* c-exp.y, java-exp.y: make parse_number reject "123DEADBEEF".
+	(fix by Bob Manson).
 	* top.c: change "to enable to enable" to "to enable" in a couple
 	of help strings.
 
