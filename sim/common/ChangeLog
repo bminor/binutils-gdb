@@ -1,5 +1,10 @@
 Fri Sep  5 08:39:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-utils.c (sim_do_commandf): New function, printf version of
+ 	sim_do_command.
+
+	* sim-basics.h (asprintf, vasprintf): Hack, define for CYGWIN32. 
+	
 	* sim-alu.h (ALU64_ADD): Use explicit MSEXTRACTED64, do not assume
  	bit endianness.
 	(SIGNED64, UNSIGNED64): Delete.

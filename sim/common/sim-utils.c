@@ -221,3 +221,20 @@ sim_elapsed_time_since (start)
 #endif
 #endif
 }
+
+
+
+/* do_command but with printf style formatting of the arguments */
+void
+sim_do_commandf (SIM_DESC sd,
+		 const char *fmt,
+		 ...)
+{
+  va_list ap;
+  char *buf;
+  va_start (ap, fmt);
+  vasprintf (&buf, fmt, ap);
+  sim_do_command (sd, buf);
+  va_end (ap);
+  free (buf);
+}
