@@ -64,6 +64,9 @@ alpha-opc.c
 arm-dis.c
 arm-opc.h
 a29k-dis.c
+cgen-asm.c
+cgen-dis.c
+cgen-opc.c
 config.in
 configure
 configure.bat
@@ -79,6 +82,10 @@ h8500-opc.h
 hppa-dis.c
 i386-dis.c
 i960-dis.c
+m32r-asm.c
+m32r-dis.c
+m32r-opc.c
+m32r-opc.h
 m68k-dis.c
 m68k-opc.c
 m88k-dis.c
