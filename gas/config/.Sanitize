@@ -32,10 +32,23 @@ atof-ieee.c
 atof-vax.c
 coff.gnu.h
 cplus-dem.c
-tmake-ebmon29k
-hmake-a29k
-hmake-cygnus
-hmake-i386
+mh-a29k
+mt-ebmon29k	
+mt-m68k		
+obj-ieee.h	
+tc-mips.c
+mh-cygnus	
+mt-h8300	
+mt-mips		
+tc-h8300.c	
+tc-mips.h
+mh-i386		
+mt-h8300hds	
+obj-ieee.c	
+tc-h8300.h	
+tc-sparc.c
+mh-a29k
+mh-cygnus
 ho-a29k.h
 ho-ansi.h
 ho-cygnus.h
@@ -112,7 +125,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/10/22 03:26:06  steve
+# Revision 1.6  1991/11/05 21:21:12  sac
+# Added a load of mt/mh files
+#
+# Revision 1.5  1991/10/22  03:26:06  steve
 # tmake-ebmon
 #
 # Revision 1.4  1991/09/04  01:55:53  rich
