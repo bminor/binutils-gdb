@@ -1205,10 +1205,13 @@ show_user_1 (c, stream)
   cmdlines = c->user_commands;
   if (!cmdlines)
     return;
-  fprintf_filtered (stream, "User command %s:\n", c->name);
+  fputs_filtered ("User command ", stream);
+  fputs_filtered (c->name, stream);
+  fputs_filtered (":\n", stream);
   while (cmdlines)
     {
-      fprintf_filtered (stream, "%s\n", cmdlines->line); 
+      fputs_filtered (cmdlines->line, stream); 
+      fputs_filtered ("\n", stream); 
       cmdlines = cmdlines->next;
     }
   fputs_filtered ("\n", stream);

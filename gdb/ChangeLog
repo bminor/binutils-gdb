@@ -18,6 +18,10 @@ Wed Mar 17 09:46:31 1993  Jim Kingdon  (kingdon@cygnus.com)
 	* xcoffread.c (xcoff_symfile_read): Only read stringtab and
 	debugsec if there are a non-zero number of symbols.
 
+Tue Mar 16 18:08:45 1993  John Gilmore  (gnu@cygnus.com)
+
+	* command.c (show_user):  Avoid fprintf_filtered botch (AGAIN!).
+
 Tue Mar 16 15:18:17 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffexec.c (add_vmap): Wrap symbol read in catch_errors.
