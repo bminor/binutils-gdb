@@ -3105,6 +3105,12 @@ into 22 bits.  */
   BFD_RELOC_390_TLS_DTPOFF,
   BFD_RELOC_390_TLS_TPOFF,
 
+/* Long displacement extension.  */
+  BFD_RELOC_390_20,
+  BFD_RELOC_390_GOT20,
+  BFD_RELOC_390_GOTPLT20,
+  BFD_RELOC_390_TLS_GOTIE20,
+
 /* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,
 

@@ -3373,6 +3373,17 @@ ENUMDOC
   s390 tls relocations.
 
 ENUM
+  BFD_RELOC_390_20
+ENUMX
+  BFD_RELOC_390_GOT20
+ENUMX
+  BFD_RELOC_390_GOTPLT20
+ENUMX
+  BFD_RELOC_390_TLS_GOTIE20
+ENUMDOC
+  Long displacement extension.
+
+ENUM
   BFD_RELOC_IP2K_FR9
 ENUMDOC
   Scenix IP2K - 9-bit register number / data address

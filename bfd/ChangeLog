@@ -1,3 +1,20 @@
+2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (s390_elf_ldisp_reloc): New prototype.
+	(s390_tls_reloc): New function.
+	(elf_howto_table): Add long displacement relocations R_390_20,
+	R_390_GOT20, R_390_GOTPLT20 and R_390_TLS_GOTIE20.
+	(elf_s390_reloc_type_lookup): Likewise.
+	(elf_s390_check_relocs): Likewise.
+	(elf_s390_gc_sweep_hook): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	* elf64-s390.c: Same changes as for elf32-s390.c.
+	* reloc.c: Add long displacement relocations BFD_RELOC_390_20,
+	BFD_RELOC_390_GOT20, BFD_RELOC_390_GOTPLT20 and 
+	BFD_RELOC_390_TLS_GOTIE20.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
 2003-06-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* cpu-ia64-opc.c (ext_imms_scaled): Don't sign extend using shifts.

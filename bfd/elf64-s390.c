@@ -86,6 +86,8 @@ static bfd_vma tpoff
   PARAMS ((struct bfd_link_info *, bfd_vma));
 static void invalid_tls_insn
   PARAMS ((bfd *, asection *, Elf_Internal_Rela *));
+static bfd_reloc_status_type s390_elf_ldisp_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 #include "elf/s390.h"
 
@@ -216,6 +218,14 @@ static reloc_howto_type elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_390_TLS_DTPOFF", FALSE, 0, MINUS_ONE, FALSE),
   HOWTO(R_390_TLS_TPOFF, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_390_TLS_TPOFF", FALSE, 0, MINUS_ONE, FALSE),
+  HOWTO(R_390_20,        0, 2, 20, FALSE, 8, complain_overflow_dont,
+	s390_elf_ldisp_reloc, "R_390_20",      FALSE, 0,0x0fffff00, FALSE),
+  HOWTO(R_390_GOT20,	 0, 2, 20, FALSE, 8, complain_overflow_dont,
+	s390_elf_ldisp_reloc, "R_390_GOT20",   FALSE, 0,0x0fffff00, FALSE),
+  HOWTO(R_390_GOTPLT20,  0, 2, 20, FALSE, 8, complain_overflow_dont,
+	s390_elf_ldisp_reloc, "R_390_GOTPLT20", FALSE, 0,0x0fffff00, FALSE),
+  HOWTO(R_390_TLS_GOTIE20, 0, 2, 20, FALSE, 8, complain_overflow_dont,
+	s390_elf_ldisp_reloc, "R_390_TLS_GOTIE20", FALSE, 0,0x0fffff00, FALSE),
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -335,6 +345,14 @@ elf_s390_reloc_type_lookup (abfd, code)
       return &elf_howto_table[(int) R_390_TLS_DTPOFF];
     case BFD_RELOC_390_TLS_TPOFF:
       return &elf_howto_table[(int) R_390_TLS_TPOFF];
+    case BFD_RELOC_390_20:
+      return &elf_howto_table[(int) R_390_20];
+    case BFD_RELOC_390_GOT20:
+      return &elf_howto_table[(int) R_390_GOT20];
+    case BFD_RELOC_390_GOTPLT20:
+      return &elf_howto_table[(int) R_390_GOTPLT20];
+    case BFD_RELOC_390_TLS_GOTIE20:
+      return &elf_howto_table[(int) R_390_TLS_GOTIE20];
     case BFD_RELOC_VTABLE_INHERIT:
       return &elf64_s390_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
@@ -385,6 +403,58 @@ s390_tls_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (output_bfd)
     reloc_entry->address += input_section->output_offset;
   return bfd_reloc_ok;
+}
+
+/* Handle the large displacement relocs.  */
+static bfd_reloc_status_type
+s390_elf_ldisp_reloc (abfd, reloc_entry, symbol, data, input_section,
+                      output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message ATTRIBUTE_UNUSED;
+{
+  reloc_howto_type *howto = reloc_entry->howto;
+  bfd_vma relocation;
+  bfd_vma insn;
+
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+  if (output_bfd != NULL)
+    return bfd_reloc_continue;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  relocation = (symbol->value
+		+ symbol->section->output_section->vma
+		+ symbol->section->output_offset);
+  relocation += reloc_entry->addend;
+  if (howto->pc_relative)
+    {
+      relocation -= (input_section->output_section->vma
+		     + input_section->output_offset);
+      relocation -= reloc_entry->address;
+    }
+
+  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address); 
+  insn |= (relocation & 0xfff) << 16 | (relocation & 0xff000) >> 4;
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
+
+  if ((bfd_signed_vma) relocation < - 0x80000
+      || (bfd_signed_vma) relocation > 0x7ffff)
+    return bfd_reloc_overflow;
+  else
+    return bfd_reloc_ok;
 }
 
 static bfd_boolean
@@ -890,16 +960,19 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	{
 	case R_390_GOT12:
 	case R_390_GOT16:
+	case R_390_GOT20:
 	case R_390_GOT32:
 	case R_390_GOT64:
 	case R_390_GOTENT:
 	case R_390_GOTPLT12:
 	case R_390_GOTPLT16:
+	case R_390_GOTPLT20:
 	case R_390_GOTPLT32:
 	case R_390_GOTPLT64:
 	case R_390_GOTPLTENT:
 	case R_390_TLS_GD64:
 	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE20:
 	case R_390_TLS_GOTIE64:
 	case R_390_TLS_IEENT:
 	case R_390_TLS_IE64:
@@ -969,6 +1042,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 
 	case R_390_GOTPLT12:
 	case R_390_GOTPLT16:
+	case R_390_GOTPLT20:
 	case R_390_GOTPLT32:
 	case R_390_GOTPLT64:
 	case R_390_GOTPLTENT:
@@ -996,6 +1070,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 
 	case R_390_TLS_IE64:
 	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE20:
 	case R_390_TLS_GOTIE64:
 	case R_390_TLS_IEENT:
 	  if (info->shared)
@@ -1004,6 +1079,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 
 	case R_390_GOT12:
 	case R_390_GOT16:
+	case R_390_GOT20:
 	case R_390_GOT32:
 	case R_390_GOT64:
 	case R_390_GOTENT:
@@ -1014,6 +1090,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	    default:
 	    case R_390_GOT12:
 	    case R_390_GOT16:
+	    case R_390_GOT20:
 	    case R_390_GOT32:
 	    case R_390_GOTENT:
 	      tls_type = GOT_NORMAL;
@@ -1026,6 +1103,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	      tls_type = GOT_TLS_IE;
 	      break;
 	    case R_390_TLS_GOTIE12:
+	    case R_390_TLS_GOTIE20:
 	    case R_390_TLS_IEENT:
 	      tls_type = GOT_TLS_IE_NLT;
 	      break;
@@ -1355,10 +1433,12 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_390_TLS_GD64:
 	case R_390_TLS_IE64:
 	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE20:
 	case R_390_TLS_GOTIE64:
 	case R_390_TLS_IEENT:
 	case R_390_GOT12:
 	case R_390_GOT16:
+	case R_390_GOT20:
 	case R_390_GOT32:
 	case R_390_GOT64:
 	case R_390_GOTOFF16:
@@ -1382,6 +1462,7 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_390_8:
 	case R_390_12:
 	case R_390_16:
+	case R_390_20:
 	case R_390_32:
 	case R_390_64:
 	case R_390_PC16:
@@ -1409,6 +1490,7 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 
 	case R_390_GOTPLT12:
 	case R_390_GOTPLT16:
+	case R_390_GOTPLT20:
 	case R_390_GOTPLT32:
 	case R_390_GOTPLT64:
 	case R_390_GOTPLTENT:
@@ -2264,6 +2346,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	case R_390_GOTPLT12:
 	case R_390_GOTPLT16:
+	case R_390_GOTPLT20:
 	case R_390_GOTPLT32:
 	case R_390_GOTPLT64:
 	case R_390_GOTPLTENT:
@@ -2298,6 +2381,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_390_GOT12:
 	case R_390_GOT16:
+	case R_390_GOT20:
 	case R_390_GOT32:
 	case R_390_GOT64:
 	case R_390_GOTENT:
@@ -2713,6 +2797,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE20:
 	case R_390_TLS_IEENT:
 	  if (h == NULL)
 	    {
@@ -2936,7 +3021,19 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	   (long) rel->r_offset,
 	   h->root.root.string);
 
-      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+      if (r_type == R_390_20
+	  || r_type == R_390_GOT20
+	  || r_type == R_390_GOTPLT20
+	  || r_type == R_390_TLS_GOTIE20)
+	{
+	  relocation += rel->r_addend;
+	  relocation = (relocation&0xfff) << 8 | (relocation&0xff000) >> 12;
+	  r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					contents, rel->r_offset,
+					relocation, 0);
+	}
+      else
+	r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				      contents, rel->r_offset,
 				      relocation, rel->r_addend);
 
