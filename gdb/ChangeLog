@@ -3,6 +3,7 @@ Mon Mar 23 13:07:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* configure.in (sim-gpu2): Added --with-sim-gpu2 as configure
  	option, to allow gdb+sim linking with sky GPU2 library.
+	* configure: Regenerated.
 end-sanitize-sky
 	
 Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
