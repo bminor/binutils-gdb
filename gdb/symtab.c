@@ -1280,37 +1280,44 @@ find_line_pc (symtab, line)
    Returns 0 if could not find the specified line.  */
 
 int
-find_line_pc_range (symtab, thisline, startptr, endptr)
-     struct symtab *symtab;
-     int thisline;
+find_line_pc_range (sal, startptr, endptr)
+     struct symtab_and_line sal;
      CORE_ADDR *startptr, *endptr;
 {
   struct linetable *l;
   int ind;
   int exact_match;		/* did we get an exact linenumber match */
+  CORE_ADDR startaddr;
+  struct symtab_and_line found_sal;
 
-  if (symtab == 0)
+  startaddr = sal.pc;
+  if (startaddr == 0)
+    {
+      startaddr = find_line_pc (sal.symtab, sal.line);
+    }
+  if (startaddr == 0)
     return 0;
 
-  if (find_line_symtab (symtab, thisline, &l, &ind, &exact_match))
-    {
-      *startptr = l->item[ind].pc;
-      /* If we have not seen an entry for the specified line,
-	 assume that means the specified line has zero bytes.  */
-      if (!exact_match || ind == l->nitems-1)
-	*endptr = *startptr;
-      else
-	/* Perhaps the following entry is for the following line.
-	   It's worth a try.  */
-	if (ind+1 < l->nitems
-	 && l->item[ind+1].line == thisline + 1)
-	  *endptr = l->item[ind+1].pc;
-	else
-	  *endptr = find_line_pc (symtab, thisline+1);
-      return 1;
-    }
+  /* This whole function is based on address.  For example, if line 10 has
+     two parts, one from 0x100 to 0x200 and one from 0x300 to 0x400, then
+     "info line *0x123" should say the line goes from 0x100 to 0x200
+     and "info line *0x355" should say the line goes from 0x300 to 0x400.
+     This also insures that we never give a range like "starts at 0x134
+     and ends at 0x12c".  */
 
-  return 0;
+  found_sal = find_pc_line (startaddr, 0);
+  if (found_sal.line != sal.line)
+    {
+      /* The specified line (sal) has zero bytes.  */
+      *startptr = found_sal.pc;
+      *endptr = found_sal.pc;
+    }
+  else
+    {
+      *startptr = found_sal.pc;
+      *endptr = found_sal.end;
+    }
+  return 1;
 }
 
 /* Given a line table and a line number, return the index into the line

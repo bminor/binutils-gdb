@@ -85,8 +85,9 @@ struct general_symbol_info
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
      does not get relocated relative to a section.
-     Disclaimer: currently this is just used for xcoff, so don't expect
-     all symbol-reading code to set it correctly.  */
+     Disclaimer: currently this is just used for xcoff, so don't
+     expect all symbol-reading code to set it correctly (the ELF code
+     also tries to set it correctly).  */
 
   int section;
 };
@@ -680,7 +681,7 @@ struct section_offsets
 
 #define	ANOFFSET(secoff, whichone)	(secoff->offsets[whichone])
 
-/* Each source file is represented by a struct symtab. 
+/* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
 struct symtab
@@ -690,12 +691,14 @@ struct symtab
 
     struct symtab *next;
 
-    /* List of all symbol scope blocks for this symtab.  */
+    /* List of all symbol scope blocks for this symtab.  May be shared
+       between different symtabs (and normally is for all the symtabs
+       in a given compilation unit).  */
 
     struct blockvector *blockvector;
 
     /* Table mapping core addresses to line numbers for this file.
-       Can be NULL if none.  */
+       Can be NULL if none.  Never shared between different symtabs.  */
 
     struct linetable *linetable;
 
@@ -722,7 +725,8 @@ struct symtab
        free_contents => do a tree walk and free each object.
        free_nothing => do nothing; some other symtab will free
          the data this one uses.
-      free_linetable => free just the linetable.  */
+      free_linetable => free just the linetable.  FIXME: Is this redundant
+      with the primary field?  */
 
     enum free_code
       {
@@ -992,8 +996,6 @@ lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
 extern struct minimal_symbol *
 lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
 
-extern struct minimal_symbol *lookup_next_minimal_symbol PARAMS ((CORE_ADDR));
-
 extern void
 init_minimal_symbol_collection PARAMS ((void));
 
@@ -1034,7 +1036,8 @@ extern CORE_ADDR
 find_line_pc PARAMS ((struct symtab *, int));
 
 extern int 
-find_line_pc_range PARAMS ((struct symtab *, int, CORE_ADDR *, CORE_ADDR *));
+find_line_pc_range PARAMS ((struct symtab_and_line, int,
+			    CORE_ADDR *, CORE_ADDR *));
 
 extern void
 resolve_sal_pc PARAMS ((struct symtab_and_line *));

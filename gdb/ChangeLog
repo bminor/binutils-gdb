@@ -1,5 +1,11 @@
 Mon Nov  1 09:40:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symtab.c, symtab.h, source.c: Change find_line_pc_range to take
+	a struct symtab_and_line argument, rather than a symtab and a line.
+	Re-write it to be based on the address rather than bogusly adding
+	one to the line number and hoping that has something to do with the
+	end of the line.
+
 	* config/m88k/m88k.mh (NATDEPFILES): Remove exec.o.
 
 	* paread.c (pa_symtab_read): Change comments to say ignoring
