@@ -1,3 +1,8 @@
+2002-10-14  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section) [BRSGP]: Increment
+	VALUE, not ADDEND.
+
 2002-10-14  Stephen Clarke <stephen.clarke@superh.com>
 
 	* elf32-sh.c (elf_sh_link_hash_entry): Replace
