@@ -7,7 +7,7 @@
 	* configure.in: Define OBJDUMP_DEFS.  Default to empty.
 	(arm, xscale, d10v): For these targets define OBJDUMP_DEFS to
 	-DDISASSEMBLER_NEEDS_RELOCS.
-	* confgiure: Regenerate.
+	* configure: Regenerate.
 
 	* objdump.c (disassemble_bytes): If DISASSEMBLER_NEEDS_RELOCS
 	is defined read in the relocs even if dump_reloc_info is
