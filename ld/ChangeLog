@@ -1,3 +1,7 @@
+Wed Jun  5 20:42:31 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* configure.tgt (shle*-*-elf*, sh64le-*-elf*): New configurations.
+
 2002-06-05  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* emulparams/ns32knbsd.sh (EXECUTABLE_SYMBOLS): Set _DYNAMIC to 0.

@@ -1,3 +1,7 @@
+Wed Jun  5 20:43:27 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config.bfd (sh64l*-*-elf*, shl*-*-elf*): New configurations.
+
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (group_signature): Swap in the whole symbol, and handle
