@@ -1159,6 +1159,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 			      sizeof (struct mips_extra_func_info)));
 	  SYMBOL_VALUE (s) = (long) e;
 	  e->numargs = top_stack->numargs;
+	  e->pdr.framereg = -1;
 	  add_symbol (s, top_stack->cur_block);
 
 	  /* Reallocate symbols, saving memory */
@@ -3096,6 +3097,7 @@ psymtab_to_symtab_1 (pst, filename)
 		  SYMBOL_CLASS (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = builtin_type_void;
 		  SYMBOL_VALUE (s) = (long) e;
+		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, &local_symbols);
 		}
 	    }

@@ -1,3 +1,16 @@
+Thu Mar  9 17:19:47 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* mdebugread.c (parse_symbol, psymtab_to_symtab_1): Initialize
+	pdr.framereg field of MIPS_EFI_SYMBOL_NAME symbol to -1.  That way
+	we know whether the PDR ever got set.
+	* mips-tdep.c (find_proc_desc): If pdr.framereg field is -1, don't
+	use the PDR, just examine prologues instead.
+
+Wed Mar  8 23:35:10 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somsolib.c (som_solib_section_offsets): Get offset of text
+	section right. 
+
 Wed Mar  8 16:12:21 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.c (gdb_get_breakpoint_info):  Return error if breakpoint
