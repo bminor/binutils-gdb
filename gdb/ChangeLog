@@ -1,3 +1,28 @@
+Sat Apr  6 00:46:26 1996  Fred Fish  <fnf@cygnus.com>
+
+	* symfile.c (INLINE_ADD_PSYMBOL): Remove ifdef.
+	(add_psymbol_to_list): Add an arg for passing CORE_ADDR values and
+	use it, rather than calling add_psymbol_addr_to_list.
+	(add_psymbol_addr_to_list): Delete.
+	(add_psymbol_to_list): Make psymbol static to avoid random data in
+	gaps due to alignment of structure members.
+	* symfile.h (INLINE_ADD_PSYMBOL, ADD_PSYMBOL_TO_LIST,
+ 	ADD_PSYMBOL_ADDR_TO_LIST): Remove.  Real world tests show no
+	performance improvements by inlining via complicated macros and
+	they just make gdb larger and harder to maintain.
+	* dwarfread.c (add_enum_psymbol): Replace ADD_PSYMBOL_TO_LIST
+	and/or ADD_PSYMBOL_ADDR_TO_LIST macro(s) with call to
+	add_psymbol_to_list with appropriate long or CORE_ADDR args.
+	(add_partial_symbol): Ditto.
+	* partial-stab.h: Ditto.
+	* os9kread.c (read_os9k_psymtab): Ditto
+	* mdebugread.c (parse_partial_symbols): Ditto.
+	(handle_psymbol_enumerators): Ditto.
+	(demangle.h): Include.
+	* hpread.c (hpread_build_psymtabs): Ditto.
+	(hpread_build_psymtabs): Ditto.
+	(demangle.h): Include
+
 start-sanitize-gdbtk
 Fri Apr  5 13:44:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
 

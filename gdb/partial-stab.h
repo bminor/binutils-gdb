@@ -404,39 +404,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef STATIC_TRANSFORM_NAME
 	      namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
-	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
-					VAR_NAMESPACE, LOC_STATIC,
-					objfile->static_psymbols,
-					CUR_SYMBOL_VALUE,
-					psymtab_language, objfile);
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_STATIC,
+				   &objfile->static_psymbols,
+				   0, CUR_SYMBOL_VALUE,
+				   psymtab_language, objfile);
 	      continue;
 	    case 'G':
 	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_DATA);
 	      /* The addresses in these entries are reported to be
 		 wrong.  See the code that reads 'G's for symtabs. */
-	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
-					VAR_NAMESPACE, LOC_STATIC,
-					objfile->global_psymbols,
-					CUR_SYMBOL_VALUE,
-					psymtab_language, objfile);
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_STATIC,
+				   &objfile->global_psymbols,
+				   0, CUR_SYMBOL_VALUE,
+				   psymtab_language, objfile);
 	      continue;
 
 	    case 'T':
 	      if (p != namestring)	/* a name is there, not just :T... */
 		{
-		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		  add_psymbol_to_list (namestring, p - namestring,
 				       STRUCT_NAMESPACE, LOC_TYPEDEF,
-				       objfile->static_psymbols,
-				       CUR_SYMBOL_VALUE,
+				       &objfile->static_psymbols,
+				       CUR_SYMBOL_VALUE, 0,
 				       psymtab_language, objfile);
 		  if (p[2] == 't')
 		    {
 		      /* Also a typedef with the same name.  */
-		      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		      add_psymbol_to_list (namestring, p - namestring,
 					   VAR_NAMESPACE, LOC_TYPEDEF,
-					   objfile->static_psymbols,
-					   CUR_SYMBOL_VALUE, psymtab_language,
-					   objfile);
+					   &objfile->static_psymbols,
+					   CUR_SYMBOL_VALUE, 0,
+					   psymtab_language, objfile);
 		      p += 1;
 		    }
 		  /* The semantics of C++ state that "struct foo { ... }"
@@ -447,21 +447,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		  else if (psymtab_language == language_cplus)
 		   {
 		      /* Also a typedef with the same name.  */
-		      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		      add_psymbol_to_list (namestring, p - namestring,
 					   VAR_NAMESPACE, LOC_TYPEDEF,
-					   objfile->static_psymbols,
-					   CUR_SYMBOL_VALUE, psymtab_language,
-					   objfile);
+					   &objfile->static_psymbols,
+					   CUR_SYMBOL_VALUE, 0,
+					   psymtab_language, objfile);
 		   }
 		}
 	      goto check_enum;
 	    case 't':
 	      if (p != namestring)	/* a name is there, not just :T... */
 		{
-		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		  add_psymbol_to_list (namestring, p - namestring,
 				       VAR_NAMESPACE, LOC_TYPEDEF,
-				       objfile->static_psymbols,
-				       CUR_SYMBOL_VALUE,
+				       &objfile->static_psymbols,
+				       CUR_SYMBOL_VALUE, 0,
 				       psymtab_language, objfile);
 		}
 	    check_enum:
@@ -520,10 +520,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 			;
 		      /* Note that the value doesn't matter for
 			 enum constants in psymtabs, just in symtabs.  */
-		      ADD_PSYMBOL_TO_LIST (p, q - p,
+		      add_psymbol_to_list (p, q - p,
 					   VAR_NAMESPACE, LOC_CONST,
-					   objfile->static_psymbols, 0,
-					   psymtab_language, objfile);
+					   &objfile->static_psymbols, 0,
+					   0, psymtab_language, objfile);
 		      /* Point past the name.  */
 		      p = q;
 		      /* Skip over the value.  */
@@ -537,10 +537,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	      continue;
 	    case 'c':
 	      /* Constant, e.g. from "const" in Pascal.  */
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_CONST,
-				   objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
+				   &objfile->static_psymbols, CUR_SYMBOL_VALUE,
+				   0, psymtab_language, objfile);
 	      continue;
 
 	    case 'f':
@@ -574,10 +574,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 			   != ANOFFSET (section_offsets, SECT_OFF_TEXT)))
 		pst->textlow = CUR_SYMBOL_VALUE;
 #endif /* DBXREAD_ONLY */
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
+				   &objfile->static_psymbols, CUR_SYMBOL_VALUE,
+				   0, psymtab_language, objfile);
 	      continue;
 
 	      /* Global functions were ignored here, but now they
@@ -613,10 +613,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 			   != ANOFFSET (section_offsets, SECT_OFF_TEXT)))
 		pst->textlow = CUR_SYMBOL_VALUE;
 #endif /* DBXREAD_ONLY */
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   objfile->global_psymbols, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
+				   &objfile->global_psymbols, CUR_SYMBOL_VALUE,
+				   0, psymtab_language, objfile);
 	      continue;
 
 	      /* Two things show up here (hopefully); static symbols of

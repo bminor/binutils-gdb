@@ -32,6 +32,7 @@
 #include "complaints.h"
 #include "gdb-stabs.h"
 #include "gdbtypes.h"
+#include "demangle.h"
 
 /* Private information attached to an objfile which we use to find
    and internalize the HP C debug symbols within that objfile.  */
@@ -506,10 +507,10 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 	      valu = dn_bufp->dfunc.lowaddr +
 		ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
-	      ADD_PSYMBOL_TO_LIST (namestring, strlen (namestring),
+	      add_psymbol_to_list (namestring, strlen (namestring),
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   objfile->static_psymbols, valu,
-				   language_unknown, objfile);
+				   &objfile->static_psymbols, valu,
+				   0, language_unknown, objfile);
 	      within_function = 1;
 	      continue;
 	    case DNTT_TYPE_BEGIN:
@@ -575,19 +576,19 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		  }
 		if (dn_bufp->dsvar.global)
 		  {
-		    ADD_PSYMBOL_TO_LIST (namestring, strlen (namestring),
+		    add_psymbol_to_list (namestring, strlen (namestring),
 					 namespace, storage,
-					 objfile->global_psymbols,
+					 &objfile->global_psymbols,
 					 dn_bufp->dsvar.location,
-					 language_unknown, objfile);
+					 0, language_unknown, objfile);
 		  }
 		else
 		  {
-		    ADD_PSYMBOL_TO_LIST (namestring, strlen (namestring),
+		    add_psymbol_to_list (namestring, strlen (namestring),
 					 namespace, storage,
-					 objfile->static_psymbols,
+					 &objfile->static_psymbols,
 					 dn_bufp->dsvar.location,
-					 language_unknown, objfile);
+					 0, language_unknown, objfile);
 		  }
 		continue;
 	      }
@@ -604,10 +605,10 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 					      objfile->global_psymbols.next,
 					      objfile->static_psymbols.next);
 		}
-	      ADD_PSYMBOL_TO_LIST (namestring, strlen (namestring),
+	      add_psymbol_to_list (namestring, strlen (namestring),
 				   VAR_NAMESPACE, LOC_CONST,
-				   objfile->static_psymbols, 0,
-				   language_unknown, objfile);
+				   &objfile->static_psymbols, 0,
+				   0, language_unknown, objfile);
 	      continue;
 	    default:
 	      continue;

@@ -2553,8 +2553,8 @@ add_enum_psymbol (dip, objfile)
       while (scan < listend)
 	{
 	  scan += TARGET_FT_LONG_SIZE (objfile);
-	  ADD_PSYMBOL_TO_LIST (scan, strlen (scan), VAR_NAMESPACE, LOC_CONST,
-			       objfile -> static_psymbols, 0, cu_language,
+	  add_psymbol_to_list (scan, strlen (scan), VAR_NAMESPACE, LOC_CONST,
+			       &objfile -> static_psymbols, 0, 0, cu_language,
 			       objfile);
 	  scan += strlen (scan) + 1;
 	}
@@ -2586,34 +2586,34 @@ add_partial_symbol (dip, objfile)
   switch (dip -> die_tag)
     {
     case TAG_global_subroutine:
-      ADD_PSYMBOL_ADDR_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+      add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 				VAR_NAMESPACE, LOC_BLOCK,
-				objfile -> global_psymbols,
-				dip -> at_low_pc, cu_language, objfile);
+				&objfile -> global_psymbols,
+				0, dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_global_variable:
-      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+      add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
-			   objfile -> global_psymbols,
-			   0, cu_language, objfile);
+			   &objfile -> global_psymbols,
+			   0, 0, cu_language, objfile);
       break;
     case TAG_subroutine:
-      ADD_PSYMBOL_ADDR_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+      add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 				VAR_NAMESPACE, LOC_BLOCK,
-				objfile -> static_psymbols,
-				dip -> at_low_pc, cu_language, objfile);
+				&objfile -> static_psymbols,
+				0, dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_local_variable:
-      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+      add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
-			   objfile -> static_psymbols,
-			   0, cu_language, objfile);
+			   &objfile -> static_psymbols,
+			   0, 0, cu_language, objfile);
       break;
     case TAG_typedef:
-      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+      add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_TYPEDEF,
-			   objfile -> static_psymbols,
-			   0, cu_language, objfile);
+			   &objfile -> static_psymbols,
+			   0, 0, cu_language, objfile);
       break;
     case TAG_class_type:
     case TAG_structure_type:
@@ -2622,17 +2622,17 @@ add_partial_symbol (dip, objfile)
       /* Do not add opaque aggregate definitions to the psymtab.  */
       if (!dip -> has_at_byte_size)
 	break;
-      ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+      add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 			   STRUCT_NAMESPACE, LOC_TYPEDEF,
-			   objfile -> static_psymbols,
-			   0, cu_language, objfile);
+			   &objfile -> static_psymbols,
+			   0, 0, cu_language, objfile);
       if (cu_language == language_cplus)
 	{
 	  /* For C++, these implicitly act as typedefs as well. */
-	  ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
+	  add_psymbol_to_list (dip -> at_name, strlen (dip -> at_name),
 			       VAR_NAMESPACE, LOC_TYPEDEF,
-			       objfile -> static_psymbols,
-			       0, cu_language, objfile);
+			       &objfile -> static_psymbols,
+			       0, 0, cu_language, objfile);
 	}
       break;
     }

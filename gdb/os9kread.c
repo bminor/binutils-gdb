@@ -737,35 +737,35 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	      }
 
 	    case 'v':
-	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
-					VAR_NAMESPACE, LOC_STATIC,
-					objfile->static_psymbols,
-					CUR_SYMBOL_VALUE,
-					psymtab_language, objfile);
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_STATIC,
+				   &objfile->static_psymbols,
+				   0, CUR_SYMBOL_VALUE,
+				   psymtab_language, objfile);
 	      continue;
 	    case 'V':
-	      ADD_PSYMBOL_ADDR_TO_LIST (namestring, p - namestring,
-					VAR_NAMESPACE, LOC_STATIC,
-					objfile->global_psymbols,
-					CUR_SYMBOL_VALUE,
-					psymtab_language, objfile);
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_NAMESPACE, LOC_STATIC,
+				   &objfile->global_psymbols,
+				   0, CUR_SYMBOL_VALUE,
+				   psymtab_language, objfile);
 	      continue;
 
 	    case 'T':
 	      if (p != namestring)	/* a name is there, not just :T... */
 		{
-		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		  add_psymbol_to_list (namestring, p - namestring,
 				       STRUCT_NAMESPACE, LOC_TYPEDEF,
-				       objfile->static_psymbols,
-				       CUR_SYMBOL_VALUE,
+				       &objfile->static_psymbols,
+				       CUR_SYMBOL_VALUE, 0,
 				       psymtab_language, objfile);
 		  if (p[2] == 't')
 		    {
 		      /* Also a typedef with the same name.  */
-		      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		      add_psymbol_to_list (namestring, p - namestring,
 					   VAR_NAMESPACE, LOC_TYPEDEF,
-					   objfile->static_psymbols,
-					   CUR_SYMBOL_VALUE, psymtab_language,
+					   &objfile->static_psymbols,
+					   CUR_SYMBOL_VALUE, 0, psymtab_language,
 					   objfile);
 		      p += 1;
 		    }
@@ -777,10 +777,10 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 		  else if (psymtab_language == language_cplus)
 		   {
 		      /* Also a typedef with the same name.  */
-		      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		      add_psymbol_to_list (namestring, p - namestring,
 					   VAR_NAMESPACE, LOC_TYPEDEF,
-					   objfile->static_psymbols,
-					   CUR_SYMBOL_VALUE, psymtab_language,
+					   &objfile->static_psymbols,
+					   CUR_SYMBOL_VALUE, 0, psymtab_language,
 					   objfile);
 		   }
 		}
@@ -788,10 +788,10 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	    case 't':
 	      if (p != namestring)	/* a name is there, not just :T... */
 		{
-		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+		  add_psymbol_to_list (namestring, p - namestring,
 				       VAR_NAMESPACE, LOC_TYPEDEF,
-				       objfile->static_psymbols,
-				       CUR_SYMBOL_VALUE,
+				       &objfile->static_psymbols,
+				       CUR_SYMBOL_VALUE, 0,
 				       psymtab_language, objfile);
 		}
 	    check_enum:
@@ -841,10 +841,10 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 			;
 		      /* Note that the value doesn't matter for
 			 enum constants in psymtabs, just in symtabs.  */
-		      ADD_PSYMBOL_TO_LIST (p, q - p,
+		      add_psymbol_to_list (p, q - p,
 					   VAR_NAMESPACE, LOC_CONST,
-					   objfile->static_psymbols, 0,
-					   psymtab_language, objfile);
+					   &objfile->static_psymbols, 0,
+					   0, psymtab_language, objfile);
 		      /* Point past the name.  */
 		      p = q;
 		      /* Skip over the value.  */
@@ -858,10 +858,10 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	      continue;
 	    case 'c':
 	      /* Constant, e.g. from "const" in Pascal.  */
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_CONST,
-				   objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
+				   &objfile->static_psymbols, CUR_SYMBOL_VALUE,
+				   0, psymtab_language, objfile);
 	      continue;
 
 	    case 'f':
@@ -869,10 +869,10 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
               if (pst && pst->textlow == 0)
                 pst->textlow = CUR_SYMBOL_VALUE;
 
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
+				   &objfile->static_psymbols, CUR_SYMBOL_VALUE,
+				   0, psymtab_language, objfile);
 	      continue;
 
 	    case 'F':
@@ -880,10 +880,10 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
               if (pst && pst->textlow == 0)
                 pst->textlow = CUR_SYMBOL_VALUE;
 
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
-				   objfile->global_psymbols, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
+				   &objfile->global_psymbols, CUR_SYMBOL_VALUE,
+				   0, psymtab_language, objfile);
 	      continue;
 
 	    case 'p':

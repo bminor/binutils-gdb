@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "buildsym.h"
 #include "stabsread.h"
 #include "complaints.h"
+#include "demangle.h"
 
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */
@@ -2696,15 +2697,15 @@ parse_partial_symbols (objfile, section_offsets)
 		     symbol table, and the MAIN__ symbol via the minimal
 		     symbol table.  */
 		  if (sh.st == stProc)
-		    ADD_PSYMBOL_TO_LIST (name, strlen (name),
+		    add_psymbol_to_list (name, strlen (name),
 					 VAR_NAMESPACE, LOC_BLOCK,
-					 objfile->global_psymbols,
-					 sh.value, psymtab_language, objfile);
+					 &objfile->global_psymbols,
+					 sh.value, 0, psymtab_language, objfile);
 		  else
-		    ADD_PSYMBOL_TO_LIST (name, strlen (name),
+		    add_psymbol_to_list (name, strlen (name),
 					 VAR_NAMESPACE, LOC_BLOCK,
-					 objfile->static_psymbols,
-					 sh.value, psymtab_language, objfile);
+					 &objfile->static_psymbols,
+					 sh.value, 0, psymtab_language, objfile);
 
 		  /* Skip over procedure to next one. */
 		  if (sh.index >= hdr->iauxMax)
@@ -2792,10 +2793,10 @@ parse_partial_symbols (objfile, section_offsets)
 		      && sh.iss != 0
 		      && sh.index != cur_sdx + 2)
 		    {
-		      ADD_PSYMBOL_TO_LIST (name, strlen (name),
+		      add_psymbol_to_list (name, strlen (name),
 					   STRUCT_NAMESPACE, LOC_TYPEDEF,
-					   objfile->static_psymbols,
-					   sh.value,
+					   &objfile->static_psymbols,
+					   sh.value, 0,
 					   psymtab_language, objfile);
 		    }
 		  handle_psymbol_enumerators (objfile, fh, sh.st, sh.value);
@@ -2831,10 +2832,10 @@ parse_partial_symbols (objfile, section_offsets)
 		  continue;
 		}
 	      /* Use this gdb symbol */
-	      ADD_PSYMBOL_TO_LIST (name, strlen (name),
+	      add_psymbol_to_list (name, strlen (name),
 				   VAR_NAMESPACE, class,
-				   objfile->static_psymbols, sh.value,
-				   psymtab_language, objfile);
+				   &objfile->static_psymbols, sh.value,
+				   0, psymtab_language, objfile);
 	    skip:
 	      cur_sdx++;	/* Go to next file symbol */
 	    }
@@ -2907,11 +2908,11 @@ parse_partial_symbols (objfile, section_offsets)
 		  break;
 		}
 	      name = debug_info->ssext + psh->iss;
-	      ADD_PSYMBOL_ADDR_TO_LIST (name, strlen (name),
-				        VAR_NAMESPACE, class,
-				        objfile->global_psymbols,
-					svalue,
-				        psymtab_language, objfile);
+	      add_psymbol_to_list (name, strlen (name),
+				   VAR_NAMESPACE, class,
+				   &objfile->global_psymbols,
+				   0, svalue,
+				   psymtab_language, objfile);
 	    }
 	}
 
@@ -3076,10 +3077,10 @@ handle_psymbol_enumerators (objfile, fh, stype, svalue)
 
       /* Note that the value doesn't matter for enum constants
 	 in psymtabs, just in symtabs.  */
-      ADD_PSYMBOL_TO_LIST (name, strlen (name),
+      add_psymbol_to_list (name, strlen (name),
 			   VAR_NAMESPACE, LOC_CONST,
-			   objfile->static_psymbols, 0,
-			   psymtab_language, objfile);
+			   &objfile->static_psymbols, 0,
+			   0, psymtab_language, objfile);
       ext_sym += external_sym_size;
     }
 }
