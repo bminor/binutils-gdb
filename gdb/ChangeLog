@@ -1,3 +1,28 @@
+2002-09-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.c (check_stub_method): Make static.
+	(check_stub_method_group): New function.
+	* gdbtypes.h: Update prototypes.
+	* cp-support.c: New file.
+	* cp-support.h: New file.
+
+	* stabsread.c: Include "cp-abi.h" and "cp-support.h".
+	(update_method_name_from_physname): New function.
+	(read_member_functions): Correct method names for operators
+	and v3 constructors/destructors.  Separate v2 constructors and
+	destructors.
+	* Makefile.in (stabsread.o): Update dependencies.
+	(SFILES): Add cp-support.c.
+	(COMMON_OBS): Add cp-support.o.
+	(cp_support_h, cp-support.o): Add.
+
+	* cp-valprint.c (cp_print_class_method): Call
+	check_stub_method_group instead of check_stub_method.  Remove
+	extraneous QUITs.
+	* p-valprint.c (pascal_object_print_class_method): Likewise.
+	* valops.c (search_struct_method): Likewise.
+	(find_method_list, value_struct_elt_for_reference): Likewise.
+
 2002-09-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (SIGTRAMP_END): Change to a predicate function.

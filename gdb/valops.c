@@ -2302,12 +2302,11 @@ search_struct_method (char *name, struct value **arg1p,
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	  name_matched = 1;
 
+	  check_stub_method_group (type, i);
 	  if (j > 0 && args == 0)
 	    error ("cannot resolve overloaded method `%s': no arguments supplied", name);
 	  else if (j == 0 && args == 0)
 	    {
-	      if (TYPE_FN_FIELD_STUB (f, j))
-		check_stub_method (type, i, j);
 	      v = value_fn_field (arg1p, f, j, type, offset);
 	      if (v != NULL)
 		return v;
@@ -2315,8 +2314,6 @@ search_struct_method (char *name, struct value **arg1p,
 	  else
 	    while (j >= 0)
 	      {
-		if (TYPE_FN_FIELD_STUB (f, j))
-		  check_stub_method (type, i, j);
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			      TYPE_VARARGS (TYPE_FN_FIELD_TYPE (f, j)),
 			      TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, j)),
@@ -2555,20 +2552,15 @@ find_method_list (struct value **argp, char *method, int offset,
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
       if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
 	{
-	  /* Resolve any stub methods.  */
 	  int len = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
-	  int j;
 
 	  *num_fns = len;
 	  *basetype = type;
 	  *boffset = offset;
 
-	  for (j = 0; j < len; j++)
-	    {
-	      if (TYPE_FN_FIELD_STUB (f, j))
-		check_stub_method (type, i, j);
-	    }
+	  /* Resolve any stub methods.  */
+	  check_stub_method_group (type, i);
 
 	  return f;
 	}
@@ -3094,6 +3086,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
 
+	  check_stub_method_group (t, i);
+
 	  if (intype == 0 && j > 1)
 	    error ("non-unique member `%s' requires type instantiation", name);
 	  if (intype)
@@ -3107,8 +3101,6 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else
 	    j = 0;
 
-	  if (TYPE_FN_FIELD_STUB (f, j))
-	    check_stub_method (t, i, j);
 	  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 	    {
 	      return value_from_longest

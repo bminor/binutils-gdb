@@ -44,6 +44,8 @@
 #include "demangle.h"
 #include "language.h"
 #include "doublest.h"
+#include "cp-abi.h"
+#include "cp-support.h"
 
 #include <ctype.h>
 
@@ -3080,6 +3082,27 @@ rs6000_builtin_type (int typenum)
 
 /* This page contains subroutines of read_type.  */
 
+/* Replace *OLD_NAME with the method name portion of PHYSNAME.  */
+
+static void
+update_method_name_from_physname (char **old_name, char *physname)
+{
+  char *method_name;
+
+  method_name = method_name_from_physname (physname);
+
+  if (method_name == NULL)
+    error ("bad physname %s\n", physname);
+
+  if (strcmp (*old_name, method_name) != 0)
+    {
+      xfree (*old_name);
+      *old_name = method_name;
+    }
+  else
+    xfree (method_name);
+}
+
 /* Read member function stabs info for C++ classes.  The form of each member
    function data is:
 
@@ -3377,6 +3400,164 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	}
       else
 	{
+	  int has_stub = 0;
+	  int has_destructor = 0, has_other = 0;
+	  int is_v3 = 0;
+	  struct next_fnfield *tmp_sublist;
+
+	  /* Various versions of GCC emit various mostly-useless
+	     strings in the name field for special member functions.
+
+	     For stub methods, we need to defer correcting the name
+	     until we are ready to unstub the method, because the current
+	     name string is used by gdb_mangle_name.  The only stub methods
+	     of concern here are GNU v2 operators; other methods have their
+	     names correct (see caveat below).
+
+	     For non-stub methods, in GNU v3, we have a complete physname.
+	     Therefore we can safely correct the name now.  This primarily
+	     affects constructors and destructors, whose name will be
+	     __comp_ctor or __comp_dtor instead of Foo or ~Foo.  Cast
+	     operators will also have incorrect names; for instance,
+	     "operator int" will be named "operator i" (i.e. the type is
+	     mangled).
+
+	     For non-stub methods in GNU v2, we have no easy way to
+	     know if we have a complete physname or not.  For most
+	     methods the result depends on the platform (if CPLUS_MARKER
+	     can be `$' or `.', it will use minimal debug information, or
+	     otherwise the full physname will be included).
+
+	     Rather than dealing with this, we take a different approach.
+	     For v3 mangled names, we can use the full physname; for v2,
+	     we use cplus_demangle_opname (which is actually v2 specific),
+	     because the only interesting names are all operators - once again
+	     barring the caveat below.  Skip this process if any method in the
+	     group is a stub, to prevent our fouling up the workings of
+	     gdb_mangle_name.
+
+	     The caveat: GCC 2.95.x (and earlier?) put constructors and
+	     destructors in the same method group.  We need to split this
+	     into two groups, because they should have different names.
+	     So for each method group we check whether it contains both
+	     routines whose physname appears to be a destructor (the physnames
+	     for and destructors are always provided, due to quirks in v2
+	     mangling) and routines whose physname does not appear to be a
+	     destructor.  If so then we break up the list into two halves.
+	     Even if the constructors and destructors aren't in the same group
+	     the destructor will still lack the leading tilde, so that also
+	     needs to be fixed.
+
+	     So, to summarize what we expect and handle here:
+
+	        Given         Given          Real         Real       Action
+	     method name     physname      physname   method name
+
+	     __opi            [none]     __opi__3Foo  operator int    opname
+	                                                           [now or later]
+	     Foo              _._3Foo       _._3Foo      ~Foo       separate and
+	                                                               rename
+	     operator i     _ZN3FoocviEv _ZN3FoocviEv operator int    demangle
+	     __comp_ctor  _ZN3FooC1ERKS_ _ZN3FooC1ERKS_   Foo         demangle
+	  */
+
+	  tmp_sublist = sublist;
+	  while (tmp_sublist != NULL)
+	    {
+	      if (tmp_sublist->fn_field.is_stub)
+		has_stub = 1;
+	      if (tmp_sublist->fn_field.physname[0] == '_'
+		  && tmp_sublist->fn_field.physname[1] == 'Z')
+		is_v3 = 1;
+
+	      if (is_destructor_name (tmp_sublist->fn_field.physname))
+		has_destructor++;
+	      else
+		has_other++;
+
+	      tmp_sublist = tmp_sublist->next;
+	    }
+
+	  if (has_destructor && has_other)
+	    {
+	      struct next_fnfieldlist *destr_fnlist;
+	      struct next_fnfield *last_sublist;
+
+	      /* Create a new fn_fieldlist for the destructors.  */
+
+	      destr_fnlist = (struct next_fnfieldlist *)
+		xmalloc (sizeof (struct next_fnfieldlist));
+	      make_cleanup (xfree, destr_fnlist);
+	      memset (destr_fnlist, 0, sizeof (struct next_fnfieldlist));
+	      destr_fnlist->fn_fieldlist.name
+		= obconcat (&objfile->type_obstack, "", "~",
+			    new_fnlist->fn_fieldlist.name);
+
+	      destr_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
+		obstack_alloc (&objfile->type_obstack,
+			       sizeof (struct fn_field) * has_destructor);
+	      memset (destr_fnlist->fn_fieldlist.fn_fields, 0,
+		  sizeof (struct fn_field) * has_destructor);
+	      tmp_sublist = sublist;
+	      last_sublist = NULL;
+	      i = 0;
+	      while (tmp_sublist != NULL)
+		{
+		  if (!is_destructor_name (tmp_sublist->fn_field.physname))
+		    {
+		      tmp_sublist = tmp_sublist->next;
+		      continue;
+		    }
+		  
+		  destr_fnlist->fn_fieldlist.fn_fields[i++]
+		    = tmp_sublist->fn_field;
+		  if (last_sublist)
+		    last_sublist->next = tmp_sublist->next;
+		  else
+		    sublist = tmp_sublist->next;
+		  last_sublist = tmp_sublist;
+		  tmp_sublist = tmp_sublist->next;
+		}
+
+	      destr_fnlist->fn_fieldlist.length = has_destructor;
+	      destr_fnlist->next = fip->fnlist;
+	      fip->fnlist = destr_fnlist;
+	      nfn_fields++;
+	      total_length += has_destructor;
+	      length -= has_destructor;
+	    }
+	  else if (is_v3)
+	    {
+	      /* v3 mangling prevents the use of abbreviated physnames,
+		 so we can do this here.  There are stubbed methods in v3
+		 only:
+		 - in -gstabs instead of -gstabs+
+		 - or for static methods, which are output as a function type
+		   instead of a method type.  */
+
+	      update_method_name_from_physname (&new_fnlist->fn_fieldlist.name,
+						sublist->fn_field.physname);
+	    }
+	  else if (has_destructor && new_fnlist->fn_fieldlist.name[0] != '~')
+	    {
+	      new_fnlist->fn_fieldlist.name = concat ("~", main_fn_name, NULL);
+	      xfree (main_fn_name);
+	    }
+	  else if (!has_stub)
+	    {
+	      char dem_opname[256];
+	      int ret;
+	      ret = cplus_demangle_opname (new_fnlist->fn_fieldlist.name,
+					      dem_opname, DMGL_ANSI);
+	      if (!ret)
+		ret = cplus_demangle_opname (new_fnlist->fn_fieldlist.name,
+					     dem_opname, 0);
+	      if (ret)
+		new_fnlist->fn_fieldlist.name
+		  = obsavestring (dem_opname, strlen (dem_opname),
+				  &objfile->type_obstack);
+	    }
+
 	  new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
 	    obstack_alloc (&objfile->type_obstack,
 			   sizeof (struct fn_field) * length);

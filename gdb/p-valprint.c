@@ -620,13 +620,11 @@ pascal_object_print_class_method (char *valaddr, struct type *type,
 	  f = TYPE_FN_FIELDLIST1 (domain, i);
 	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
 
+	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
-	      QUIT;
 	      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
 		{
-		  if (TYPE_FN_FIELD_STUB (f, j))
-		    check_stub_method (domain, i, j);
 		  kind = "virtual ";
 		  goto common;
 		}
@@ -646,15 +644,11 @@ pascal_object_print_class_method (char *valaddr, struct type *type,
 	  f = TYPE_FN_FIELDLIST1 (domain, i);
 	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
 
+	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
-	      QUIT;
-	      if (TYPE_FN_FIELD_STUB (f, j))
-		check_stub_method (domain, i, j);
 	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
-		{
-		  goto common;
-		}
+		goto common;
 	    }
 	}
     }
