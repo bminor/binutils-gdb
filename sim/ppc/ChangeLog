@@ -15,7 +15,7 @@ Tue Nov 28 13:38:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* mon.c (mon_print_info): Ditto.
 	* ppc-instructions (PPC_INSN_* macros, branch handling): Ditto.
 
-	* mon.c (mon_print_info): Print instructins/second if verbose > 0,
+	* mon.c (mon_print_info): Print instructions/second if verbose > 0,
 	rather than > 1.
 
 	* main.c (main): Set current_model_issue to MODEL_ISSUE_PROCESS if
