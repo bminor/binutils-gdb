@@ -1,5 +1,8 @@
 2001-09-13  Jim Blandy  <jimb@redhat.com>
 
+	* monitor.c (monitor_load): Don't delete symtab users, or reset
+	inferior_ptid.
+	
 	* monitor.c (monitor_load): Fix indentation.
 
 2001-09-11  Jim Blandy  <jimb@redhat.com>

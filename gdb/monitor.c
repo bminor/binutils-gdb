@@ -2206,15 +2206,19 @@ monitor_load (char *file, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_ptid = null_ptid ;	/* No process now */
+  /* There used to be code here which would clear inferior_ptid and
+     call clear_symtab_users.  None of that should be necessary:
+     monitor targets should behave like remote protocol targets, and
+     since generic_load does none of those things, this function
+     shouldn't either.
 
-  /* This is necessary because many things were based on the PC at the
-     time that we attached to the monitor, which is no longer valid
-     now that we have loaded new code (and just changed the PC).
-     Another way to do this might be to call normal_stop, except that
-     the stack may not be valid, and things would get horribly
-     confused... */
-  clear_symtab_users ();
+     Furthermore, clearing inferior_ptid is *incorrect*.  After doing
+     a load, we still have a valid connection to the monitor, with a
+     live processor state to fiddle with.  The user can type
+     `continue' or `jump *start' and make the program run.  If they do
+     these things, however, GDB will be talking to a running program
+     while inferior_ptid is null_ptid; this makes things like
+     reinit_frame_cache very confused.  */
 }
 
 static void
