@@ -107,6 +107,7 @@ pyramid-*-*)		gdb_host=pyramid ;;
 
 romp-*-*)		gdb_host=rtbsd ;;
 
+rs6000-*-lynxos*)	gdb_host=rs6000lynx ;;
 rs6000-*-*)		gdb_host=rs6000 ;;
 
 sparc-*-lynxos*)	gdb_host=sparclynx ;;
@@ -280,6 +281,7 @@ pn-*-*)			gdb_target=pn ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;
 
+rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
 sparc-*-aout*)		gdb_target=sparc-em ;;

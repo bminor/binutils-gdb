@@ -96,78 +96,86 @@ static int regmap[] =
 };
 #endif
 
-#ifdef SPARC
-/* Mappings from tm-sparc.h */
-
-#define FX(ENTRY)(offsetof(struct fcontext, ENTRY))
+#ifdef rs6000
 
 static int regmap[] =
 {
-  -1,				/* g0 */
-  X(g1),
-  X(g2),
-  X(g3),
-  X(g4),
-  -1,				/* g5->g7 aren't saved by Lynx */
-  -1,
-  -1,
+  X(iregs[0]),			/* r0 */
+  X(iregs[1]),
+  X(iregs[2]),
+  X(iregs[3]),
+  X(iregs[4]),
+  X(iregs[5]),
+  X(iregs[6]),
+  X(iregs[7]),
+  X(iregs[8]),
+  X(iregs[9]),
+  X(iregs[10]),
+  X(iregs[11]),
+  X(iregs[12]),
+  X(iregs[13]),
+  X(iregs[14]),
+  X(iregs[15]),
+  X(iregs[16]),
+  X(iregs[17]),
+  X(iregs[18]),
+  X(iregs[19]),
+  X(iregs[20]),
+  X(iregs[21]),
+  X(iregs[22]),
+  X(iregs[23]),
+  X(iregs[24]),
+  X(iregs[25]),
+  X(iregs[26]),
+  X(iregs[27]),
+  X(iregs[28]),
+  X(iregs[29]),
+  X(iregs[30]),
+  X(iregs[31]),
 
-  X(o[0]),
-  X(o[1]),
-  X(o[2]),
-  X(o[3]),
-  X(o[4]),
-  X(o[5]),
-  X(o[6]),			/* sp */
-  X(o[7]),			/* ra */
+  X(fregs[0]),			/* f0 */
+  X(fregs[1]),
+  X(fregs[2]),
+  X(fregs[3]),
+  X(fregs[4]),
+  X(fregs[5]),
+  X(fregs[6]),
+  X(fregs[7]),
+  X(fregs[8]),
+  X(fregs[9]),
+  X(fregs[10]),
+  X(fregs[11]),
+  X(fregs[12]),
+  X(fregs[13]),
+  X(fregs[14]),
+  X(fregs[15]),
+  X(fregs[16]),
+  X(fregs[17]),
+  X(fregs[18]),
+  X(fregs[19]),
+  X(fregs[20]),
+  X(fregs[21]),
+  X(fregs[22]),
+  X(fregs[23]),
+  X(fregs[24]),
+  X(fregs[25]),
+  X(fregs[26]),
+  X(fregs[27]),
+  X(fregs[28]),
+  X(fregs[29]),
+  X(fregs[30]),
+  X(fregs[31]),
 
-  -1,-1,-1,-1,-1,-1,-1,-1,	/* l0 -> l7 */
-
-  -1,-1,-1,-1,-1,-1,-1,-1,	/* i0 -> i7 */
-
-  FX(f.fregs[0]),		/* f0 */
-  FX(f.fregs[1]),
-  FX(f.fregs[2]),
-  FX(f.fregs[3]),
-  FX(f.fregs[4]),
-  FX(f.fregs[5]),
-  FX(f.fregs[6]),
-  FX(f.fregs[7]),
-  FX(f.fregs[8]),
-  FX(f.fregs[9]),
-  FX(f.fregs[10]),
-  FX(f.fregs[11]),
-  FX(f.fregs[12]),
-  FX(f.fregs[13]),
-  FX(f.fregs[14]),
-  FX(f.fregs[15]),
-  FX(f.fregs[16]),
-  FX(f.fregs[17]),
-  FX(f.fregs[18]),
-  FX(f.fregs[19]),
-  FX(f.fregs[20]),
-  FX(f.fregs[21]),
-  FX(f.fregs[22]),
-  FX(f.fregs[23]),
-  FX(f.fregs[24]),
-  FX(f.fregs[25]),
-  FX(f.fregs[26]),
-  FX(f.fregs[27]),
-  FX(f.fregs[28]),
-  FX(f.fregs[29]),
-  FX(f.fregs[30]),
-  FX(f.fregs[31]),
-
-  X(y),
-  X(psr),
-  X(wim),
-  X(tbr),
-  X(pc),
-  X(npc),
-  FX(fsr),			/* fpsr */
-  -1,				/* cpsr */
+  X(srr0),			/* IAR (PC) */
+  X(srr1),			/* MSR (PS) */
+  X(cr),			/* CR */
+  X(lr),			/* LR */
+  X(ctr),			/* CTR */
+  X(xer),			/* XER */
+  X(mq)				/* MQ */
 };
-#endif
+
+#endif /* rs6000 */
 
 #ifdef SPARC
 
@@ -205,7 +213,7 @@ fetch_inferior_registers (regno)
       retval = ptrace (PTRACE_GETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &ec,
 		       0);
       if (errno)
-	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
+	perror_with_name ("ptrace(PTRACE_GETREGS)");
   
       memset (buf, 0, REGISTER_RAW_SIZE (G0_REGNUM));
       supply_register (G0_REGNUM, buf);
@@ -258,7 +266,7 @@ fetch_inferior_registers (regno)
       retval = ptrace (PTRACE_GETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) &fc,
 		       0);
       if (errno)
-	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
+	perror_with_name ("ptrace(PTRACE_GETFPREGS)");
   
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], fc.f.fregs,
 	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
@@ -315,7 +323,7 @@ store_inferior_registers (regno)
       retval = ptrace (PTRACE_SETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &ec,
 		       0);
       if (errno)
-	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
+	perror_with_name ("ptrace(PTRACE_SETREGS)");
     }
 
   if (whatregs & WHATREGS_STACK)
@@ -362,7 +370,7 @@ store_inferior_registers (regno)
       retval = ptrace (PTRACE_GETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) &fc,
 		       0);
       if (errno)
-	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
+	perror_with_name ("ptrace(PTRACE_GETFPREGS)");
   
       memcpy (fc.f.fregs, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	      32 * REGISTER_RAW_SIZE (FP0_REGNUM));
@@ -373,12 +381,12 @@ store_inferior_registers (regno)
       retval = ptrace (PTRACE_SETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) &fc,
 		       0);
       if (errno)
-	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
+	perror_with_name ("ptrace(PTRACE_SETFPREGS)");
       }
 }
 #endif /* SPARC */
 
-#ifndef SPARC
+#if defined (I386) || defined (M68K) || defined (rs6000)
 
 /* Return the offset relative to the start of the per-thread data to the
    saved context block.  */
@@ -395,12 +403,12 @@ registers_addr(pid)
   stblock = (CORE_ADDR) ptrace (PTRACE_THREADUSER, pid, (PTRACE_ARG3_TYPE)0,
 				0);
   if (errno)
-    perror_with_name ("registers_addr(PTRACE_THREADUSER)");
+    perror_with_name ("ptrace(PTRACE_THREADUSER)");
 
   ecp = (CORE_ADDR) ptrace (PTRACE_PEEKTHREAD, pid, (PTRACE_ARG3_TYPE)ecpoff,
 			    0);
   if (errno)
-    perror_with_name ("registers_addr(PTRACE_PEEKTHREAD)");
+    perror_with_name ("ptrace(PTRACE_PEEKTHREAD)");
 
   return ecp - stblock;
 }
@@ -432,7 +440,7 @@ fetch_inferior_registers (regno)
       char buf[MAX_REGISTER_RAW_SIZE];
       int ptrace_fun = PTRACE_PEEKTHREAD;
 
-#ifdef PTRACE_PEEKUSP
+#ifdef M68K
       ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
 #endif
 
@@ -444,7 +452,7 @@ fetch_inferior_registers (regno)
 	  reg = ptrace (ptrace_fun, inferior_pid,
 			(PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), 0);
 	  if (errno)
-	    perror_with_name ("fetch_inferior_registers(ptrace)");
+	    perror_with_name ("ptrace(PTRACE_PEEKUSP)");
   
 	  *(int *)&buf[i] = reg;
 	}
@@ -478,7 +486,10 @@ store_inferior_registers (regno)
     {
       int ptrace_fun = PTRACE_POKEUSER;
 
-#ifdef PTRACE_POKEUSP
+      if (CANNOT_STORE_REGISTER (regno))
+	continue;
+
+#ifdef M68K
       ptrace_fun = regno == SP_REGNUM ? PTRACE_POKEUSP : PTRACE_POKEUSER;
 #endif
 
@@ -492,11 +503,11 @@ store_inferior_registers (regno)
 	  ptrace (ptrace_fun, inferior_pid,
 		  (PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), reg);
 	  if (errno)
-	    perror_with_name ("PTRACE_POKEUSER");
+	    perror_with_name ("ptrace(PTRACE_POKEUSP)");
 	}
     }
 }
-#endif /* ifndef SPARC */
+#endif /* defined (I386) || defined (M68K) || defined (rs6000) */
 
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */

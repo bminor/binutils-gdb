@@ -26,19 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "xcoffsolib.h"
 
-#include <sys/param.h>
-#include <sys/dir.h>
-#include <sys/user.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
 #include <a.out.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/core.h>
-#include <sys/ldr.h>
-
 
 extern struct obstack frame_cache_obstack;
 
@@ -514,7 +502,6 @@ pop_frame ()
   flush_cached_frames ();
   set_current_frame (create_new_frame (prev_sp, lr));
 }
-
 
 /* fixup the call sequence of a dummy function, with the real function address.
    its argumets will be passed by gdb. */
@@ -1108,54 +1095,6 @@ rs6000_frame_chain (thisframe)
 
   return fp;
 }
-
-
-/* xcoff_relocate_symtab -	hook for symbol table relocation.
-   also reads shared libraries.. */
-
-xcoff_relocate_symtab (pid)
-unsigned int pid;
-{
-#define	MAX_LOAD_SEGS 64		/* maximum number of load segments */
-
-    struct ld_info *ldi;
-    int temp;
-
-    ldi = (void *) alloca(MAX_LOAD_SEGS * sizeof (*ldi));
-
-    /* According to my humble theory, AIX has some timing problems and
-       when the user stack grows, kernel doesn't update stack info in time
-       and ptrace calls step on user stack. That is why we sleep here a little,
-       and give kernel to update its internals. */
-
-    usleep (36000);
-
-    errno = 0;
-    ptrace(PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-	   MAX_LOAD_SEGS * sizeof(*ldi), ldi);
-    if (errno) {
-      perror_with_name ("ptrace ldinfo");
-      return 0;
-    }
-
-    vmap_ldinfo(ldi);
-
-   do {
-     /* We are allowed to assume CORE_ADDR == pointer.  This code is
-	native only.  */
-     add_text_to_loadinfo ((CORE_ADDR) ldi->ldinfo_textorg,
-			   (CORE_ADDR) ldi->ldinfo_dataorg);
-    } while (ldi->ldinfo_next
-	     && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
-
-#if 0
-  /* Now that we've jumbled things around, re-sort them.  */
-  sort_minimal_symbols ();
-#endif
-
-  /* relocate the exec and core sections as well. */
-  vmap_exec ();
-}
 
 /* Keep an array of load segment information and their TOC table addresses.
    This info will be useful when calling a shared library function by hand. */
@@ -1211,7 +1150,6 @@ xcoff_add_toc_to_loadinfo (unsigned long tocoff)
   }
   loadinfo [loadinfotocindex++].toc_offset = tocoff;
 }
-
 
 void
 add_text_to_loadinfo (textaddr, dataaddr)

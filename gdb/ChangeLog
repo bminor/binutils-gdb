@@ -1,3 +1,20 @@
+Fri Feb 11 16:11:38 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Add Lynx/rs6000 support.
+	* lynx-nat.c:  Clean up some Sparc stuff.  Clean up ptrace error
+	messages.  Add rs6000 support.  Don't try to modify unwritable
+	registers.
+	* rs6000-nat.c:  Move lots of native dependent stuff (like core
+	file support) from rs6000-tdep.c & xcoffexec.c to here.
+	* rs6000-tdep.c:  Move native dependent stuff to nat.c.
+	* xcoffexec.c:  Move native dependent stuff to nat.c.
+	* config/rs6000/nm-rs6000.h:  Move defs of SOLIB_* macros to here
+	from tm	file.
+	* config/rs6000/tm-rs6000.h:  Remove defs of SOLIB_* funcs, cuz they're
+	really native.
+	* config/rs6000/tm-rs6000lynx.h, config/rs6000/xm-rs6000lynx.h:
+	New files to support Lynx/rs6000.
+
 Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* README:  Remove note about gcc warnings on alpha, these should be
