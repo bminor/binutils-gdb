@@ -141,6 +141,7 @@ a29k-tdep.c
 a68v-nat.c
 abug-rom.c
 acconfig.h
+acinclude.m4
 aclocal.m4
 alpha-nat.c
 alpha-tdep.c
@@ -304,9 +305,9 @@ m3-nat.c
 m32r-rom.c
 m32r-stub.c
 m32r-tdep.c
-m68klinux-nat.c
 m68k-stub.c
 m68k-tdep.c
+m68klinux-nat.c
 m68knbsd-nat.c
 m88k-nat.c
 m88k-tdep.c
