@@ -12,6 +12,7 @@ srcname="gnu development package"
 # XXX - FIXME there needs to be a case for mh_dgux
 
 case "${host_os}" in
+m88kbcs)	host_makefile_frag=config/mh-delta88;;
 sysv* | irix*)	host_makefile_frag=config/mh-sysv ;;
 svr4)		host_makefile_frag=config/mh-svr4 ;;
 esac
