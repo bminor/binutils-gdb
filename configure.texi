@@ -244,6 +244,30 @@ This option sets the @code{configure} variable @code{prefix}.  Generated
 Makefiles will have their @code{prefix} variables set to this value.
 (See @ref{Install Details}.)
 
+@item -program_prefix=@var{string}
+Configure the source to install certain programs using @var{string} as a
+prefix.  This applies to programs which might be used for cross-compilation,
+such as the compiler and the binutils, and also to programs which have the same
+name as a common Unix program, such as make.
+
+This option sets the @code{configure} variable @code{program_prefix}.
+Generated Makefiles will have their @code{program_prefix} variables set to this
+value.  (See @ref{Install Details}.)
+
+@item -program_suffix=@var{string}
+Configure the source to install certain programs using @var{string} as a
+suffix.  This applies to programs which might be used for cross-compilation.
+
+@item -program_transform_name=@var{sed-pattern}
+Configure the source to install certain programs using the names that result
+from passing the usual name through @code{sed} invoked with @var{sed-pattern}.
+This option may be given multiple times; each @var{sed-pattern} will be applied
+in turn.  This applies to programs which might be used for cross-compilation.
+
+This option sets the @code{configure} variable @code{program_transform_name}.
+Generated Makefiles will have their @code{program_transform_name} variables set
+to this value.  (See @ref{Install Details}.)
+
 @item -recurring
 @c Wouldn't it make more sense to call this "-quiet"? (FIXME).
 This option is used internally by @code{configure} when recurring on

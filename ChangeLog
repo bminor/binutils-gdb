@@ -1,3 +1,10 @@
+Sun Aug 30 21:12:11 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: added -program_transform_name option, used as
+	argument to sed when installing programs.
+	configure.texi: added documentation for -program_prefix,
+	-program_suffix and -program_transform_name.
+
 Thu Aug 27 21:59:44 1992  John Gilmore  (gnu@cygnus.com)
 
 	* config.sub:  Accept i486 where i386 ok.
