@@ -45,7 +45,7 @@ struct internal_reloc;
 #define TC_COFF_FIX2RTYPE(fixP) abort ();
 
 #define BFD_ARCH bfd_arch_h8300
-#define COFF_MAGIC ( Smode ? 0x8302 : Hmode ? 0x8301 : 0x8300)
+#define COFF_MAGIC ( Smode && Nmode ? 0x8304 : Hmode && Nmode ? 0x8303 : Smode ? 0x8302 : Hmode ? 0x8301 : 0x8300)
 #define TC_COUNT_RELOC(x) (1)
 #define IGNORE_NONSTANDARD_ESCAPES
 
@@ -92,5 +92,6 @@ extern void tc_reloc_mangle
 
 extern int Hmode;
 extern int Smode;
+extern int Nmode;
 
 #define md_operand(x)

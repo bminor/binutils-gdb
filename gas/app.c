@@ -27,7 +27,7 @@
    pair.  This needs better error-handling.  */
 
 #include <stdio.h>
-#include "as.h"			/* For BAD_CASE() only */
+#include "as.h"			/* For BAD_CASE() only.  */
 
 #if (__STDC__ != 1)
 #ifndef const

@@ -164,9 +164,11 @@ DESCRIPTION
 .  bfd_arch_m98k,      {* Motorola 98xxx *}
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
 .  bfd_arch_h8300,     {* Renesas H8/300 (formerly Hitachi H8/300) *}
-.#define bfd_mach_h8300   1
-.#define bfd_mach_h8300h  2
-.#define bfd_mach_h8300s  3
+.#define bfd_mach_h8300    1
+.#define bfd_mach_h8300h   2
+.#define bfd_mach_h8300s   3
+.#define bfd_mach_h8300hn  4
+.#define bfd_mach_h8300sn  5
 .  bfd_arch_pdp11,     {* DEC PDP-11 *}
 .  bfd_arch_powerpc,   {* PowerPC *}
 .#define bfd_mach_ppc		32

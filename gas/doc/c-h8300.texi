@@ -134,8 +134,8 @@ with other development tools.
 @cindex machine directives, H8/300 (none)
 @cindex @code{word} directive, H8/300
 @cindex @code{int} directive, H8/300
-@code{@value{AS}} has only one machine-dependent directive for the
-H8/300:
+@code{@value{AS}} has the following machine-dependent directives for
+the H8/300:
 
 @table @code
 @cindex H8/300H, assembling for
@@ -143,6 +143,21 @@ H8/300:
 Recognize and emit additional instructions for the H8/300H variant, and
 also make @code{.int} emit 32-bit numbers rather than the usual (16-bit)
 for the H8/300 family.
+
+@item .h8300s
+Recognize and emit additional instructions for the H8S variant, and
+also make @code{.int} emit 32-bit numbers rather than the usual (16-bit)
+for the H8/300 family.
+
+@item .h8300hn
+Recognize and emit additional instructions for the H8/300H variant in
+normal mode, and also make @code{.int} emit 32-bit numbers rather than 
+the usual (16-bit) for the H8/300 family.
+
+@item .h8300sn
+Recognize and emit additional instructions for the H8S variant in
+normal mode, and also make @code{.int} emit 32-bit numbers rather than 
+the usual (16-bit) for the H8/300 family.
 @end table
 
 On the H8/300 family (including the H8/300H) @samp{.word} directives

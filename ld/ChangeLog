@@ -1,3 +1,16 @@
+2003-04-23 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
+	
+	* Makefile.am (ALL_EMULATIONS): Add eh8300hn.o, eh8300sn.o, 
+	eh8300hnelf.o, eh8300snelf.o and respective rules.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add h8300hn, h8300sn, h8300hnelf, h8300snelf
+	* emulparams/h8300hn.sh: New
+	* emulparams/h8300sn.sh: New
+	* emulparams/h8300hnelf.sh: New	
+	* emulparams/h8300snelf.sh: New
+	* scripttempl/h8300hn.sc: new
+	* scripttempl/h8300sn.sc: new
+
 2003-04-23  H.J. Lu <hjl@gnu.org>
 
 	* ldmain.c (link_callbacks): Initialize error_handler.

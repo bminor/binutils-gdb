@@ -573,6 +573,12 @@ elf32_h8_mach (flags)
 
     case E_H8_MACH_H8300S:
       return bfd_mach_h8300s;
+
+    case E_H8_MACH_H8300HN:
+      return bfd_mach_h8300hn;
+
+    case E_H8_MACH_H8300SN:
+      return bfd_mach_h8300sn;
     }
 }
 
@@ -600,6 +606,14 @@ elf32_h8_final_write_processing (abfd, linker)
 
     case bfd_mach_h8300s:
       val = E_H8_MACH_H8300S;
+      break;
+
+    case bfd_mach_h8300hn:
+      val = E_H8_MACH_H8300HN;
+      break;
+
+    case bfd_mach_h8300sn:
+      val = E_H8_MACH_H8300SN;
       break;
     }
 

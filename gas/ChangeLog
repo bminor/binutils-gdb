@@ -1,3 +1,10 @@
+2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
+
+	* config/tc-h8300.c (Nmode, h8300hnmode, h8300snmode): New.
+	(md_pseudo_table): Add h8300hn, h8300sn.
+	* config/tc-h8300.h (COFF_MAGIC): Handle h8300hn, h8300sn.
+	* doc/c-h8300.texi : Add documentation for new machine directives.
+
 2003-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ppc.c (ppc_symbol_chars): Define.

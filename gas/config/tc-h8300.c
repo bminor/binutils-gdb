@@ -42,10 +42,13 @@ void cons        PARAMS ((int));
 void sbranch     PARAMS ((int));
 void h8300hmode  PARAMS ((int));
 void h8300smode  PARAMS ((int));
+void h8300hnmode PARAMS ((int));
+void h8300snmode PARAMS ((int));
 static void pint PARAMS ((int));
 
 int Hmode;
 int Smode;
+int Nmode;
 
 #define PSIZE (Hmode ? L_32 : L_16)
 #define DMODE (L_16)
@@ -89,6 +92,32 @@ h8300smode (arg)
 }
 
 void
+h8300hnmode (arg)
+     int arg ATTRIBUTE_UNUSED;
+{
+  Hmode = 1;
+  Smode = 0;
+  Nmode = 1;
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300hn))
+    as_warn (_("could not set architecture and machine"));
+#endif
+}
+
+void
+h8300snmode (arg)
+     int arg ATTRIBUTE_UNUSED;
+{
+  Smode = 1;
+  Hmode = 1;
+  Nmode = 1;
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300sn))
+    as_warn (_("could not set architecture and machine"));
+#endif
+}
+
+void
 sbranch (size)
      int size;
 {
@@ -111,7 +140,9 @@ pint (arg)
 const pseudo_typeS md_pseudo_table[] =
 {
   {"h8300h", h8300hmode, 0},
+  {"h8300hn", h8300hnmode, 0},
   {"h8300s", h8300smode, 0},
+  {"h8300sn", h8300snmode, 0},
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
 
