@@ -1,3 +1,7 @@
+Tue Apr 22 14:43:46 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim-load.c (sim_load_file): #include <stdio.h> for NULL.
+
 Wed Apr 23 02:55:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (insert_sim_event): Call sim_io_error instead of
