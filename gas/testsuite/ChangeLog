@@ -1,3 +1,18 @@
+Mon Feb 28 14:10:04 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* lib/gas-defs.exp (objdump): New proc.
+	(objdump_start): Deleted unused proc.
+	(objdump_start_common): Merged into objdump_start_no_subdir.
+
+	* gas/alpha/fp.exp: Use objdump instead of
+	objdump_start_no_subdir, since the former actually waits for
+	objdump to finish.  Specify .rdata section only.  Make comment
+	indicate Alpha architecture rather than SPARC.
+	* gas/alpha/fp.d: Omit .reginfo patterns.  Just use "." to match
+	against ASCII code 0x2a ("*", special in regexp).
+	* gas/sun4/addend.exp: Use objdump instead of
+	objdump_start_no_subdir.
+
 Thu Feb 24 07:11:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * gas/hppa/more.parse/parse.exp (no subspace test): Only expect
