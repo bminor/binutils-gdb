@@ -1,3 +1,11 @@
+2001-05-25  H.J. Lu  <hjl@gnu.org>
+
+	* emulparams/aixrs6.sh: Add SYSCALL_MASK and SYMBOL_MODE_MASK
+	like emulparams/aixppc.sh.
+
+	* emultempl/aix.em (sc): Use ${srcdir}/emultempl/ostring.sed
+	instead of ${srcdir}/emultempl/stringify.sed.
+
 2001-05-25  Timothy Wall  <twall@oculustech.com>
 
 	* emulparams/elf64_aix.sh: Change settings to match IBM linker
