@@ -4376,7 +4376,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 static bfd_boolean
 ppc_elf_add_symbol_hook (bfd *abfd,
 			 struct bfd_link_info *info,
-			 const Elf_Internal_Sym *sym,
+			 Elf_Internal_Sym *sym,
 			 const char **namep ATTRIBUTE_UNUSED,
 			 flagword *flagsp ATTRIBUTE_UNUSED,
 			 asection **secp,

@@ -61,7 +61,7 @@ static bfd_boolean sparc64_elf_size_dynamic_sections
 static int sparc64_elf_get_symbol_type
   PARAMS (( Elf_Internal_Sym *, int));
 static bfd_boolean sparc64_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean sparc64_elf_output_arch_syms
   PARAMS ((bfd *, struct bfd_link_info *, PTR,
@@ -1385,7 +1385,7 @@ static bfd_boolean
 sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp ATTRIBUTE_UNUSED;

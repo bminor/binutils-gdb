@@ -4715,7 +4715,7 @@ _bfd_mips_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 
 bfd_boolean
 _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-			       const Elf_Internal_Sym *sym, const char **namep,
+			       Elf_Internal_Sym *sym, const char **namep,
 			       flagword *flagsp ATTRIBUTE_UNUSED,
 			       asection **secp, bfd_vma *valp)
 {

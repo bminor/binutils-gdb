@@ -1,5 +1,29 @@
 2004-03-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (elf_backend_add_symbol_hook): Define.
+	(ppc64_elf_add_symbol_hook): New function.
+	* elf-bfd.h (struct elf_backend_data <elf_add_symbol_hook>): Remove
+	const from Elf_Internal_Sym param.
+	* elflink.c (elf_link_add_object_symbols): Adjust.
+	* elf-hppa.h (elf_hppa_add_symbol_hook): Adjust.
+	* elf32-frv.c (elf32_frv_add_symbol_hook): Adjust.
+	* elf32-i370.c (elf_backend_add_symbol_hook): Adjust.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Adjust.
+	* elf32-m68hc1x.c (elf32_m68hc11_add_symbol_hook): Adjust.
+	* elf32-m68hc1x.h (elf32_m68hc11_add_symbol_hook): Adjust.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Adjust.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Adjust.
+	* elf32-v850.c (v850_elf_add_symbol_hook): Adjust.
+	* elf64-alpha.c (elf64_alpha_add_symbol_hook): Adjust.
+	* elf64-mmix.c (mmix_elf_add_symbol_hook): Adjust.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Adjust.
+	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Adjust.
+	* elfxx-ia64.c (elfNN_ia64_add_symbol_hook): Adjust.
+	* elfxx-mips.c (_bfd_mips_elf_add_symbol_hook): Adjust.
+	* elfxx-mips.h (_bfd_mips_elf_add_symbol_hook): Adjust.
+
+2004-03-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* elfxx-target.h (bfd_elfNN_bfd_link_add_symbols): Define.
 	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): Delete.
 	(_bfd_elf_sort_symbol, _bfd_elf_add_dt_needed_tag): Delete.

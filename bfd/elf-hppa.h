@@ -1,5 +1,6 @@
 /* Common code for PA ELF implementations.
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1070,7 +1071,7 @@ static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
 static bfd_boolean
 elf_hppa_add_symbol_hook (bfd *abfd,
 			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			  const Elf_Internal_Sym *sym,
+			  Elf_Internal_Sym *sym,
 			  const char **namep ATTRIBUTE_UNUSED,
 			  flagword *flagsp ATTRIBUTE_UNUSED,
 			  asection **secp,

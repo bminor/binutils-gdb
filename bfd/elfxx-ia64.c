@@ -192,7 +192,7 @@ static bfd_boolean elfNN_ia64_fake_sections
 static void elfNN_ia64_final_write_processing
   PARAMS ((bfd *abfd, bfd_boolean linker));
 static bfd_boolean elfNN_ia64_add_symbol_hook
-  PARAMS ((bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *sym,
+  PARAMS ((bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *sym,
 	   const char **namep, flagword *flagsp, asection **secp,
 	   bfd_vma *valp));
 static int elfNN_ia64_additional_program_headers
@@ -1430,7 +1430,7 @@ static bfd_boolean
 elfNN_ia64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;

@@ -1548,7 +1548,7 @@ static int i370_noop ()
 
 #define elf_backend_add_symbol_hook \
   (bfd_boolean (*) \
-     PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, \
+     PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *, \
 	      const char **, flagword *, asection **, bfd_vma *))) i370_noop
 #define elf_backend_finish_dynamic_symbol \
   (bfd_boolean (*) \

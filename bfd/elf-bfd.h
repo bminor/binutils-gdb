@@ -625,7 +625,7 @@ struct elf_backend_data
      indices, and must set at least *FLAGS and *SEC for each processor
      dependent case; failure to do so will cause a link error.  */
   bfd_boolean (*elf_add_symbol_hook)
-    (bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *,
+    (bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *,
      const char **name, flagword *flags, asection **sec, bfd_vma *value);
 
   /* If this field is not NULL, it is called by the elf_link_output_sym

@@ -2848,7 +2848,7 @@ static bfd_boolean
 elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 {
   bfd_boolean (*add_symbol_hook)
-    (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+    (bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
      const char **, flagword *, asection **, bfd_vma *);
   bfd_boolean (*check_relocs)
     (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);

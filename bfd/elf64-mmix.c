@@ -205,7 +205,7 @@ static bfd_boolean mmix_elf_section_from_bfd_section
   PARAMS ((bfd *, asection *, int *));
 
 static bfd_boolean mmix_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 
 static bfd_boolean mmix_elf_is_local_label_name
@@ -2175,7 +2175,7 @@ bfd_boolean
 mmix_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;

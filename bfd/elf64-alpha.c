@@ -123,7 +123,7 @@ static bfd_boolean elf64_alpha_size_rela_got_section
 static bfd_boolean elf64_alpha_size_rela_got_1
   PARAMS ((struct alpha_elf_link_hash_entry *, struct bfd_link_info *));
 static bfd_boolean elf64_alpha_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static struct alpha_elf_got_entry *get_got_entry
   PARAMS ((bfd *, struct alpha_elf_link_hash_entry *, unsigned long,
@@ -2363,7 +2363,7 @@ static bfd_boolean
 elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
