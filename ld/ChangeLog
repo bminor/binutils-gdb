@@ -1,3 +1,8 @@
+2004-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_new_vers_pattern): Dot
+	prefix the symbol field too.
+
 2004-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmain.c (link_callbacks): Remove "error_handler".

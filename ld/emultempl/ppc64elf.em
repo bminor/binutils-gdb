@@ -420,6 +420,14 @@ gld${EMULATION_NAME}_new_vers_pattern (struct bfd_elf_version_expr *entry)
   dot_pat[0] = '.';
   memcpy (dot_pat + 1, entry->pattern, len - 1);
   dot_entry->pattern = dot_pat;
+  if (entry->symbol != NULL)
+    {
+      len = strlen (entry->symbol) + 2;
+      dot_pat = xmalloc (len);
+      dot_pat[0] = '.';
+      memcpy (dot_pat + 1, entry->symbol, len - 1);
+      dot_entry->symbol = dot_pat;
+    }
   return dot_entry;
 }
 
