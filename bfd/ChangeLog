@@ -1,3 +1,24 @@
+Tue Aug 25 08:39:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* syms.c: move mis-inserted patch.
+
+Fri Aug 14 15:39:29 PDT 1992  Howard Chu  (hyc@hanauma.jpl.nasa.gov)
+
+	Documentation fixes:
+	* ctors.c, format.c, section.c, reloc.c: append " -" to item tags.
+	* reloc.c, section.c, syms.c, targets.c: add DOCDD before @node
+		comments.
+	* reloc.c: break out addend item from surrounding text.
+
+	* doc.str (DOCDD): Defined. Adds text to output.
+	(bodytext): Put bulletize before kill_bogus_lines.
+	* chew.c (bulletize): End itemization after a blank line, to
+	prevent following text from being swallowed up in an item.
+
+Mon Aug 24 20:50:22 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Add sparclite as a target.
+
 Mon Aug 24 12:06:31 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ieee.c (ieee_get_symtab): always null terminate the symbol list,
@@ -54,6 +75,7 @@ Fri Aug 14 19:22:18 1992  Per Bothner  (bothner@cygnus.com)
 	* trad-core.c:  Don't include <machine/reg.h>.  It doesn't
 	seem to be needed, and many machines don't have it.
 
+>>>>>>> 1.274
 Thu Aug 13 09:53:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-m68k.c (vector): read and write archives in coff format.
