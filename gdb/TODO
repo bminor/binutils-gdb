@@ -1,10 +1,67 @@
+Contents
+--------
 
-	gdb bug list
-	John Gilmore, gnu@cygnus.com
+If you find inaccuracies in this list, please send mail to
+bug-gdb@prep.ai.mit.edu. 
 
-This bug list is probably not up to date or accurate, but it reflects
-some known bugs in gdb, if you are into bug-hunting.
+* Things to do for Mach.
+* General to do list.
 
+Things to do for Mach
+---------------------
+
+This section is up to date as of 28 Oct 1993.
+
+All my attempted compilation was on douglas.gnu.ai.mit.edu.  
+
+0.  Get it to compile and run again, especially for non-threaded
+programs (some of the following are sub-tasks for this).
+
+1.  attach_command still contains a call to wait_for_inferior which is
+wrong for Mach.  Need to figure out a way to push this functionality
+into target_attach (perhaps by having target_attach, for non-Mach
+targets, call a function which does what is now in attach_command).
+
+2.  jtv's port contains an #ifdef which skips the call to
+insert_step_breakpoint right after SOLIB_CREATE_INFERIOR_HOOK, but
+goes ahead and calls insert_breakpoints.  I don't understand this--the
+comment would appear to apply to all breakpoints.  Perhaps it is an
+artifact from a previous version of the Mach port?  (BTW, the modern
+equivalent is the call to proceed from m3_create_inferior; proceed
+inserts breakpoints).
+
+3.  Get the thread stuff to use the new generic thread code (enhancing
+the generic thread code to include any missing features).  This is
+necessary to make thread-specific breakpoints work again.  If someone
+wants to try to patch up the old Mach threads code, need to deal with
+the hooks for PREPARE_TO_PROCEED and ATTACH_TO_THREAD, which I haven't
+merged--can these go in target_resume()?
+
+4.  BFD problem--"Undefined symbol _aout_32_swap_exec_header_in".
+
+5.  The linker complains about mfree and so on being multiply defined.
+As one version is in a library, this seems like a linker bug.  But I
+think changing MMALLOC_LIB to MMALLOC in the .mh files is all that is
+necessary to fix it.
+
+6.  i386_mach3_float_info and register_addr were undefined in the
+link.  I haven't investigated, but probably just another easy
+configuration thing or something.
+
+7.  I couldn't find mach_port_t in any of the headers in
+/usr/include/*.h or /usr/include/mach/*.h (I think those are the two
+places I tried).  Typedeffing it to void * in nm-m3.h seemed to work,
+but of course that's hardly an elegant solution.
+
+8.  Implement the features which CMU gdb has which the main GDB does
+not.  This could be done by getting paperwork from CMU and merging
+their changes, or by reimplementing them.
+
+General To Do List
+------------------
+
+This to do list is probably not up to date, and opinions may vary
+about the importance or even desirability of some of the items.
 
 It should be possible to use symbols from shared libraries before we know
 exactly where the libraries will be loaded.  E.g. "b perror" before running
@@ -80,8 +137,10 @@ it matches the source line indicated.
 
 The prompt at end of screen should accept space as well as CR.
 
-"List" should put you into a pseudo-"more" where you can hit space 
-to get more, forever to eof.
+"List" should put you into a pseudo-"more" where you can hit space to
+get more, forever to eof.  (questionable--you can already hit return
+to get more, and modal user interfaces are evil -kingdon, 28 Oct
+1993).
 
 Check STORE_RETURN_VALUE on all architectures.  Check near it in tm-sparc.h
 for other bogosities.
@@ -90,14 +149,12 @@ Check for storage leaks in GDB, I'm sure there are a lot!
 
 vtblprint of a vtbl should demangle the names it's printing.
 
-Backtrace should point out what the currently selected frame is, in its
-display, perhaps showing "@3 foo (bar, ...)" rather than "#3 foo (bar, ...)".
+Backtrace should point out what the currently selected frame is, in
+its display, perhaps showing "@3 foo (bar, ...)" or ">3 foo (bar,
+...)" rather than "#3 foo (bar, ...)".
 
 "i program" should work for core files, and display more info, like what
 actually caused it to die.
-
-Hitting ^Z to an inferior doesn't work right, it takes several continues
-to make it actually go.
 
 "x/10i" should shorten the long name, if any, on subsequent lines.
 
@@ -145,13 +202,6 @@ should be found, only their actual values.
 There should be a way for "set" commands to validate the new setting
 before it takes effect.
 
-The "display" command should become the "always" command, e.g.
-	"always print XXX"
-	"always p/xxx XXX"
-	"always echo foo"
-	"always call XXX"
-	"always x/i $pc", etc.
-
 A mess of floating point opcodes are missing from sparc-opcode.h.
 Also, a little program should test the table for bits that are
 overspecified or underspecified.  E.g. if the must-be-ones bits
@@ -179,8 +229,6 @@ reset in wait_for_inferior after bpstat_stop_status call, then.
 
 i line VAR produces "Line number not known for symbol ``var''.".  I
 thought we were stashing that info now!
-
-Make sure we can handle executables with no symbol info, e.g. /bin/csh.
 
 We should be able to write to random files at hex offsets like adb.
 
@@ -213,7 +261,9 @@ When quitting with a running program, if a core file was previously
 examined, you get "Couldn't read float regs from core file"...if 
 indeed it can't.  generic_mourn_inferior...
 
-Check signal argument to remote proceed's and error if set.
+Have remote targets give a warning on a signal argument to
+target_resume.  Or better yet, extend the protocols so that it works
+like it does on the Unix-like systems.
 
 Sort help and info output.
 
@@ -233,9 +283,6 @@ probably simply broken.  When reconfiguring this part of gdb, I could
 only make guesses about how to redo some of those files, and I
 probably guessed wrong, or left them "for later" when I have a
 machine that can attempt to build them.
-
-Use the complain() mechanism for handling all the error() calls in dbxread.c,
-and in similar situations in coffread.c and mipsread.c.
 
 When doing "step" or "next", if a few lines of source are skipped between
 the previous line and the current one, print those lines, not just the
@@ -257,8 +304,9 @@ ptype &malloc     ==> "char *(*)()"
 call printf ("%x\n", malloc)   ==> wierd value, should be same as
 call printf ("%x\n", &malloc)  ==> correct value
 
-Fix dbxread.c symbol reading in the presence of interrupts.  It currently
-leaves a cleanup to blow away the entire symbol table when a QUIT occurs.
+Fix dbxread.c symbol reading in the presence of interrupts.  It
+currently leaves a cleanup to blow away the entire symbol table when a
+QUIT occurs.  (What's wrong with that? -kingdon, 28 Oct 1993).
 
 Mipsread.c reads include files depth-first, because the dependencies
 in the psymtabs are way too inclusive (it seems to me).  Figure out what
@@ -284,7 +332,6 @@ mipsread.c needs to check for old symtabs and psymtabs for the same
 files, the way it happens for dbxread.c and coffread.c, for VxWorks
 incremental symbol table reloading.
 
-When attached to a non-child process, ^C or other signals are not
-propagated to the child.  Do this in the GDB signal handler, using 
-target_kill().  AMD version: ^C should do ^Ak to stop ebmon.
-
+Get all the remote systems (where the protocol allows it) to be able to
+stop the remote system when the GDB user types ^C (like remote.c
+does).  For ebmon, use ^Ak.

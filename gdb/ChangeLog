@@ -1,3 +1,16 @@
+Thu Oct 28 09:14:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add section on Mach.  Stop calling it a "bug list".
+	Remove John's name and email address.  Remove item on "always"
+	("hook-stop" takes care of this).  Remove item on executables with
+	no symbols (this works on some machines, at least).  Remove item
+	about calling error() during symbol reading (I think all the important
+	ones have been cleaned up).  Revise items about signals and remote
+	systems.  Remove section on ^Z requiring several continues to make
+	it go (this now works.  Perhaps the item is based on confusion over
+	programs (like GDB itself) which catch SIGTSTP and then re-send
+	themselves the signal.  PR 2575 might contain relevant info).
+
 Thu Oct 28 16:55:34 1993  Fred Fish  (fnf@cygnus.com)
 
 	* NEWS:  Note improvements in C++ support, preliminary thread
