@@ -40,6 +40,11 @@ amd)
 	;;
 esac
 
+case "${target_cpu}" in
+	mips)  configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//;s/gas//'`
+	;;
+esac
+
 
 target_makefile_frag=config/mt-${bfd_target}
 
