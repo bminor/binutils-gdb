@@ -1,3 +1,12 @@
+2001-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	1999-10-19  Linus Nordberg  <linus@swox.se>
+	* elf-bfd.h (struct elf_backend_data): Add want_got_sym.
+	* elfxx-target.h (elf_backend_want_got_sym): Define.
+	(elfNN_bed): Add elf_backend_want_got_sym.
+	* elflink.c (_bfd_elf_create_got_section): Define
+	_GLOBAL_OFFSET_TABLE_ only if bed->want_got_sym.
+
 2001-08-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* dwarf2.c (struct dwarf2_debug): Add sec, sec_info_ptr and syms.

@@ -73,24 +73,27 @@ _bfd_elf_create_got_section (abfd, info)
 	return false;
     }
 
-  /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the .got
-     (or .got.plt) section.  We don't do this in the linker script
-     because we don't want to define the symbol if we are not creating
-     a global offset table.  */
-  h = NULL;
-  if (!(_bfd_generic_link_add_one_symbol
-	(info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
-	 bed->got_symbol_offset, (const char *) NULL, false,
-	 bed->collect, (struct bfd_link_hash_entry **) &h)))
-    return false;
-  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-  h->type = STT_OBJECT;
+  if (bed->want_got_sym)
+    {
+      /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the .got
+	 (or .got.plt) section.  We don't do this in the linker script
+	 because we don't want to define the symbol if we are not creating
+	 a global offset table.  */
+      h = NULL;
+      if (!(_bfd_generic_link_add_one_symbol
+	    (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
+	     bed->got_symbol_offset, (const char *) NULL, false,
+	     bed->collect, (struct bfd_link_hash_entry **) &h)))
+	return false;
+      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+      h->type = STT_OBJECT;
 
-  if (info->shared
-      && ! _bfd_elf_link_record_dynamic_symbol (info, h))
-    return false;
+      if (info->shared
+	  && ! _bfd_elf_link_record_dynamic_symbol (info, h))
+	return false;
 
-  elf_hash_table (info)->hgot = h;
+      elf_hash_table (info)->hgot = h;
+    }
 
   /* The first bit of the global offset table is the header.  */
   s->_raw_size += bed->got_header_size + bed->got_symbol_offset;

@@ -694,6 +694,7 @@ struct elf_backend_data
   unsigned plt_not_loaded : 1;
   unsigned plt_alignment : 4;
   unsigned can_gc_sections : 1;
+  unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
 };
 
