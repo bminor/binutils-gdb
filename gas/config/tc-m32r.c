@@ -731,6 +731,7 @@ target_make_parallel (buffer)
 
 /* Assemble two instructions with an explicit parallel operation (||) or
    sequential operation (->).  */
+
 static void
 assemble_two_insns (str, str2, parallel_p)
      char * str;
@@ -761,7 +762,14 @@ assemble_two_insns (str, str2, parallel_p)
       return;
     }
 
-  if (! enable_special
+  /* Check it.  */
+  if (CGEN_FIELDS_BITSIZE (&first.fields) != 16)
+    {
+      /* xgettext:c-format */
+      as_bad (_("not a 16 bit instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_special
       && CGEN_INSN_ATTR (first.insn, CGEN_INSN_SPECIAL))
     {
       /* xgettext:c-format */
@@ -838,7 +846,13 @@ assemble_two_insns (str, str2, parallel_p)
     }
 
   /* Check it.  */
-  if (! enable_special
+  if (CGEN_FIELDS_BITSIZE (&second.fields) != 16)
+    {
+      /* xgettext:c-format */
+      as_bad (_("not a 16 bit instruction '%s'"), str);
+      return;
+    }
+  else if (! enable_special
       && CGEN_INSN_ATTR (second.insn, CGEN_INSN_SPECIAL))
     {
       /* xgettext:c-format */
@@ -1040,6 +1054,13 @@ md_assemble (str)
 
       insn.orig_insn = insn.insn;
 /* start-sanitize-m32rx */
+      /* If the previous insn was relaxable, then it may be expanded
+	 to fill the current 16 bit slot.  Emit a NOP here to occupy
+	 this slot, so that we can start at optimizing at a 32 bit
+	 boundary.  */
+      if (prev_insn.insn && seen_relaxable_p && optimize)
+	fill_insn (0);
+      
       if (enable_m32rx)
 	{
 	  /* Get the indices of the operands of the instruction.

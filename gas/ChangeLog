@@ -1,3 +1,9 @@
+1998-12-21  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (md_assemble): Emit a NOP after a relaxable 16
+	bit insn when optimizing, so that parallelised instructions will
+	start on a 32 bit boundary.
+
 1998-12-19  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (mips_eabi64): New.
