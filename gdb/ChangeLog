@@ -1,3 +1,12 @@
+Sun Mar  6 17:36:53 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* solib.c (elf_locate_base):  New function to locate the address
+	of the dynamic linker's runtime structure in the dynamic info section.
+	* solib.c (locate_base):  Use it instead of iterating over the list
+	of mapped address segments.
+	* solib.c (look_for_base, bfd_lookup_symbol):  Removed, no longer
+	necessary.
+
 Fri Mar  4 09:50:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (pc_in_linker_stub): Move decl to beginning of file.
