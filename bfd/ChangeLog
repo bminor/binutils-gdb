@@ -1,3 +1,7 @@
+2003-12-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (elfcore_grok_note): Allow multiple .auxv sections.
+
 2003-09-18  Andreas Schwab  <schwab@suse.de>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Use

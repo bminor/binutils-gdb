@@ -6810,7 +6810,7 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 
     case NT_AUXV:
       {
-	asection *sect = bfd_make_section (abfd, ".auxv");
+	asection *sect = bfd_make_section_anyway (abfd, ".auxv");
 
 	if (sect == NULL)
 	  return FALSE;
