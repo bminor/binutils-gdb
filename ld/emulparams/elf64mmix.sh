@@ -44,17 +44,17 @@ OTHER_TEXT_SECTIONS='
  PROVIDE (Main = DEFINED (Main) ? Main : (DEFINED (_start) ? _start : _start.));
 '
 
-OTHER_RELOCATING_SECTIONS='
+OTHER_SECTIONS="
  .MMIX.reg_contents :
  {
    /* Note that this section always has a fixed VMA - that of its
       first register * 8.  */
    *(.MMIX.reg_contents);
  }
-'
+"
 
 # FIXME: Also bit by the PROVIDE bug?  If not, this could be
 # EXECUTABLE_SYMBOLS.
 # By default, put the high end of the stack where the register stack
 # begins.  They grow in opposite directions.  */
-OTHER_SECTIONS='PROVIDE (__Stack_start = 0x6000000000000000);'
+OTHER_END_SYMBOLS="PROVIDE (__Stack_start = 0x6000000000000000);"

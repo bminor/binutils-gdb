@@ -8,7 +8,8 @@ ARCH=hppa
 MACHINE=hppa1.1    # We use 1.1 specific features.
 NOP=0x08000240
 START="_start"
-OTHER_READONLY_SECTIONS='.PARISC.unwind : { *(.PARISC.unwind) } '
+OTHER_READONLY_SECTIONS="
+  .PARISC.unwind ${RELOCATING-0} : { *(.PARISC.unwind) }"
 DATA_START_SYMBOLS='PROVIDE ($global$ = .);'
 DATA_PLT=
 GENERATE_SHLIB_SCRIPT=yes

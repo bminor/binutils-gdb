@@ -92,7 +92,7 @@ SECTIONS
   ${RELOCATING+PROVIDE (etext = .);}
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
-  ${RELOCATING+${OTHER_READONLY_SECTIONS}}
+  ${OTHER_READONLY_SECTIONS}
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  It would
@@ -118,7 +118,7 @@ SECTIONS
     ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
-  ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
+  ${OTHER_READWRITE_SECTIONS}
 
   .got1		${RELOCATING-0} : { *(.got1) }
   .dynamic	${RELOCATING-0} : { *(.dynamic) }
@@ -212,7 +212,6 @@ SECTIONS
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
 
-  /* These must appear regardless of ${RELOCATING}.  */
   ${OTHER_SECTIONS}
 }
 EOF

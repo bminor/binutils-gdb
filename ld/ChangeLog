@@ -1,3 +1,98 @@
+2001-11-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (CONFIG_STATUS_DEPENDENCIES): Define.
+	(config.status): Delete rule.
+	Add extra dependencies to cover sourced emulparams files.
+	* Makefile.in: Regenerate.
+
+	* scripttempl/elf.sc: Order <section>, <section>.* and
+	corresponding linkonce sections as seen in input files.
+	Formatting fixes.  Zero vma of all sections if not relocating.
+	(STACK): Define and insert if STACK_ADDR defined.
+	(OTHER_RELOCATING_SECTIONS): Delete.
+	(OTHER_END_SYMBOLS): Define.
+	(OTHER_READONLY_SECTIONS): Always insert, not just when relocating.
+	(OTHER_READWRITE_SECTIONS): Likewise.
+	(OTHER_GOT_SECTIONS): Likewise.
+	(OTHER_SDATA_SECTIONS): Likewise.
+	(OTHER_BSS_SECTIONS): Likewise.
+	* scripttempl/elfi370.sc (OTHER_READONLY_SECTIONS): Likewise.
+	(OTHER_READWRITE_SECTIONS): Likewise.
+	* scripttempl/nw.sc (OTHER_READONLY_SECTIONS): Likewise.
+	(OTHER_READWRITE_SECTIONS): Likewise
+
+	* emulparams/armelf.sh (OTHER_RELOCATING_SECTIONS): Delete.
+	(STACK_ADDR): Define.
+	* emulparams/armelf_oabi.sh: As for armelf.sh.
+	* emulparams/elf32mcore.sh: As for armelf.sh.
+	* emulparams/h8300elf.sh: As for armelf.sh.
+	* emulparams/mn10200.sh: As for armelf.sh.
+	* emulparams/shelf.sh: As for armelf.sh.
+
+	* emulparams/elf32fr30.sh (OTHER_RELOCATING_SECTIONS): Delete.
+	(OTHER_END_SYMBOLS): Define.
+	* emulparams/m32relf.sh: As for elf32fr30.sh.
+	* emulparams/h8300helf.sh: As for elf32fr30.sh.
+	* emulparams/h8300self.sh: As for elf32fr30.sh.
+
+	* emulparams/criself.sh (OTHER_READONLY_SECTIONS): Protect symbol
+	defines with RELOCATING test.
+	(OTHER_SDATA_SECTIONS): Likewise.
+	(OTHER_RELOCATING_SECTIONS): Delete, replacing with..
+	(OTHER_END_SYMBOLS): ..this.
+	* emulparams/crislinux.sh: As for criself.sh.
+
+	* emulparams/elf32bmipn32.sh (OTHER_SDATA_SECTIONS): Zero vma
+	if not relocating.
+	(OTHER_RELOCATING_SECTIONS): Delete, replacing with..
+	(OTHER_SECTIONS): ..this.  Zero vma if not relocating.  Order
+	normal and linkonce sections as seen in input files.
+	* emulparams/elf32bmip.sh (DATA_ADDR): Don't define if EMBEDDED.
+	(TEXT_DYNAMIC): Likewise.
+	(INITIAL_READONLY_SECTIONS): Zero vma if not relocating.
+	(OTHER_SDATA_SECTIONS): Likewise.
+	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS): Likewise.
+	* emulparams/shlelf_linux.sh (OTHER_READWRITE_SECTIONS): Likewise.
+	* emulparams/elf64alpha.sh (OTHER_READONLY_SECTIONS): Likewise.
+	* emulparams/hppalinux.sh (OTHER_READONLY_SECTIONS): Likewise.
+	* emulparams/elf64_aix.sh (OTHER_GOT_SECTIONS): Likewise.
+	(OTHER_PLT_RELOC_SECTIONS): Likewise.
+	(OTHER_READONLY_SECTIONS): Likewise.  Order normal and linkonce
+	sections as seen in input files.
+	* emulparams/elf64_ia64.sh: As for emulparams/elf64_aix.sh.
+	* emulparams/hppa64linux.sh (OTHER_READONLY_SECTIONS): Zero vma
+	if not relocating.
+	(OTHER_READWRITE_SECTIONS, OTHER_BSS_SECTIONS): Likewise.
+	(OTHER_BSS_END_SYMBOLS): Merge from elf64hppa.sh.
+	* emulparams/elf64mmix.sh (OTHER_RELOCATING_SECTIONS): Delete.
+	(OTHER_SECTIONS): Instead, use this..
+	(OTHER_END_SYMBOLS): ..and this.
+
+	* emulparams/elf32b4300.sh: Source elf32bmip.sh, remove duplicates.
+	* emulparams/elf32bsmip.sh: Likewise.
+	* emulparams/elf32btsmip.sh: Likewise.
+	* emulparams/elf32ebmip.sh: Likewise.
+	* emulparams/elf32lmip.sh: Likewise.
+	* emulparams/elf32elmip.sh: Source elf32lmip.sh, remove duplicates.
+	* emulparams/elf32lsmip.sh: Likewise.
+	* emulparams/elf32ltsmip.sh: Source elf32btsmip.sh, remove duplicates.
+	* emulparams/elf32l4300.sh: Source elf32b4300.sh, remove duplicates.
+	* emulparams/elf64bmip.sh: Source elf32bmipn32.sh, remove duplicates.
+	* emulparams/elf64btsmip.sh: Likewise.
+	* emulparams/elf64ltsmip.sh: Source elf64btsmip.sh, remove duplicates.
+	* emulparams/elf32lppc.sh: Source elf32ppc.sh, remove duplicates.
+	* emulparams/elf32ppclinux.sh: Likewise.
+	* emulparams/elf32ppcsim.sh: Likewise.
+	* emulparams/elf32lppcsim.sh: Source elf32lppc.sh, remove duplicates.
+	* emulparams/elf64hppa.sh: Source hppa64linux.sh, remove duplicates.
+	* emulparams/h8300helf.sh: Source h8300elf.sh, remove duplicates.
+	* emulparams/h8300self.sh: Likewise.
+	* emulparams/mn10300.sh: Source mn10200.sh, remove duplicates.
+	* emulparams/sh.sh: Comment.
+	* emulparams/shl.sh: Source sh.sh, remove duplicates.
+	* emulparams/shlelf.sh: Source shelf.sh, remove duplicates.
+	* emulparams/shelf_linux.sh: Source shlelf_linux.sh, remove duplicates.
+
 2001-11-21  David Heine <dlheine@tensilica.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 
@@ -44,7 +139,7 @@
 
 Tue Nov 13 11:27:14 2001  Ross Alexander <ross.alexander@uk.neceur.com>
 
-	* emulparams/elf64hppa.sh (OTHER_BSS_END_SECTIONS): Add
+	* emulparams/elf64hppa.sh (OTHER_BSS_END_SYMBOLS): Add
 	additional symbols referenced by newer crt0.o files from HP.
 
 2001-11-12  Anthony Green  <green@redhat.com>

@@ -32,11 +32,11 @@ __start = DEFINED(__start) ? __start :
 '
 
 # Smuggle an "OTHER_TEXT_END_SYMBOLS" here.
-OTHER_READONLY_SECTIONS='PROVIDE (__Etext = .);'
+OTHER_READONLY_SECTIONS="${RELOCATING+PROVIDE (__Etext = .);}"
 DATA_START_SYMBOLS='PROVIDE (__Sdata = .);'
 
 # Smuggle an "OTHER_DATA_END_SYMBOLS" here.
-OTHER_SDATA_SECTIONS='PROVIDE (__Edata = .);'
+OTHER_SDATA_SECTIONS="${RELOCATING+PROVIDE (__Edata = .);}"
 
 # If .bss does not immediately follow .data but has its own start
 # address, we can't get to it with OTHER_BSS_SYMBOLS, neither can we
@@ -95,11 +95,8 @@ CTOR_END='
  ___elf_ctors_dtors_end = .;
 '
 
-
-# Smuggle an "OTHER_ALL_END_SYMBOLS" here.
 # Also add the other symbols provided for rsim/xsim and elinux.
-OTHER_RELOCATING_SECTIONS='
-PROVIDE (__Eall = .);
-PROVIDE (__Endmem = 0x10000000); 
-PROVIDE (__Stacksize = 0);
-'
+OTHER_END_SYMBOLS="
+  PROVIDE (__Eall = .);
+  PROVIDE (__Endmem = 0x10000000); 
+  PROVIDE (__Stacksize = 0);"

@@ -12,7 +12,8 @@ GENERATE_SHLIB_SCRIPT=yes
 DATA_PLT=
 NOP=0x47ff041f
 
-OTHER_READONLY_SECTIONS='.reginfo : { *(.reginfo) }'
+OTHER_READONLY_SECTIONS="
+  .reginfo      ${RELOCATING-0} : { *(.reginfo) }"
 
 # This code gets inserted into the generic elf32.sc linker script
 # and allows us to define our own command line switches.

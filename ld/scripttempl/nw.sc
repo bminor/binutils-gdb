@@ -87,7 +87,7 @@ SECTIONS
   .dtors   ${RELOCATING-0} : { *(.dtors)   }
   .rodata  ${RELOCATING-0} : { *(.rodata)  }
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
-  ${RELOCATING+${OTHER_READONLY_SECTIONS}}
+  ${OTHER_READONLY_SECTIONS}
 
   /* Read-write section, merged into data segment: */
   ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
@@ -98,7 +98,7 @@ SECTIONS
     ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
-  ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
+  ${OTHER_READWRITE_SECTIONS}
   .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
   .dynamic     ${RELOCATING-0} : { *(.dynamic) }
   ${DATA_PLT+${PLT}}
@@ -125,7 +125,6 @@ SECTIONS
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }
 
-  /* These must appear regardless of ${RELOCATING}.  */
   ${OTHER_SECTIONS}
 }
 EOF
