@@ -135,6 +135,11 @@ proc mi_gdb_start { } {
 	    remote_close host;
 	    return -1;
 	}
+	-re ".*Interpreter `mi' unrecognized." {
+	    untested "Skip mi tests (not compiled with mi support)."
+	    remote_close host;
+	    return -1;
+	}
 	timeout {
 	    perror "(timeout) GDB never initialized after 10 seconds."
 	    remote_close host;
