@@ -4679,16 +4679,26 @@ md_apply_fix3 (fixP, valP, seg)
 	value = -4;
 	break;
 
-      case BFD_RELOC_386_GOT32:
       case BFD_RELOC_386_TLS_GD:
       case BFD_RELOC_386_TLS_LDM:
       case BFD_RELOC_386_TLS_IE_32:
       case BFD_RELOC_386_TLS_IE:
       case BFD_RELOC_386_TLS_GOTIE:
-      case BFD_RELOC_X86_64_GOT32:
       case BFD_RELOC_X86_64_TLSGD:
       case BFD_RELOC_X86_64_TLSLD:
       case BFD_RELOC_X86_64_GOTTPOFF:
+	value = 0; /* Fully resolved at runtime.  No addend.  */
+	/* Fallthrough */
+      case BFD_RELOC_386_TLS_LE:
+      case BFD_RELOC_386_TLS_LDO_32:
+      case BFD_RELOC_386_TLS_LE_32:
+      case BFD_RELOC_X86_64_DTPOFF32:
+      case BFD_RELOC_X86_64_TPOFF32:
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+	break;
+
+      case BFD_RELOC_386_GOT32:
+      case BFD_RELOC_X86_64_GOT32:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
 	break;
 

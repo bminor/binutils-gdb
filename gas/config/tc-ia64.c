@@ -10413,8 +10413,9 @@ md_apply_fix3 (fix, valP, seg)
     }
   if (fix->fx_addsy)
     {
-      if (fix->fx_r_type == (int) BFD_RELOC_UNUSED)
+      switch (fix->fx_r_type)
 	{
+	case BFD_RELOC_UNUSED:
 	  /* This must be a TAG13 or TAG13b operand.  There are no external
 	     relocs defined for them, so we must give an error.  */
 	  as_bad_where (fix->fx_file, fix->fx_line,
@@ -10422,6 +10423,18 @@ md_apply_fix3 (fix, valP, seg)
 			elf64_ia64_operands[fix->tc_fix_data.opnd].desc);
 	  fix->fx_done = 1;
 	  return;
+
+	case BFD_RELOC_IA64_TPREL14:
+	case BFD_RELOC_IA64_TPREL22:
+	case BFD_RELOC_IA64_TPREL64I:
+	case BFD_RELOC_IA64_LTOFF_TPREL22:
+	case BFD_RELOC_IA64_LTOFF_DTPMOD22:
+	case BFD_RELOC_IA64_DTPREL14:
+	case BFD_RELOC_IA64_DTPREL22:
+	case BFD_RELOC_IA64_DTPREL64I:
+	case BFD_RELOC_IA64_LTOFF_DTPREL22:
+	  S_SET_THREAD_LOCAL (fix->fx_addsy);
+	  break;
 	}
 
       /* ??? This is a hack copied from tc-i386.c to make PCREL relocs

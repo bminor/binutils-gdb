@@ -1261,6 +1261,8 @@ md_apply_fix3 (fixP, valP, seg)
 
 #ifdef OBJ_ELF
     case BFD_RELOC_ALPHA_BRSGP:
+      return;
+
     case BFD_RELOC_ALPHA_TLSGD:
     case BFD_RELOC_ALPHA_TLSLDM:
     case BFD_RELOC_ALPHA_GOTDTPREL16:
@@ -1271,6 +1273,8 @@ md_apply_fix3 (fixP, valP, seg)
     case BFD_RELOC_ALPHA_TPREL_HI16:
     case BFD_RELOC_ALPHA_TPREL_LO16:
     case BFD_RELOC_ALPHA_TPREL16:
+      if (fixP->fx_addsy)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
       return;
 #endif
 

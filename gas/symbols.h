@@ -102,6 +102,7 @@ extern void S_SET_EXTERNAL PARAMS ((symbolS *));
 extern void S_SET_NAME PARAMS ((symbolS *, char *));
 extern void S_CLEAR_EXTERNAL PARAMS ((symbolS *));
 extern void S_SET_WEAK PARAMS ((symbolS *));
+extern void S_SET_THREAD_LOCAL PARAMS ((symbolS *));
 #endif
 
 #ifndef WORKING_DOT_WORD

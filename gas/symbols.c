@@ -1951,6 +1951,25 @@ S_SET_WEAK (s)
 }
 
 void
+S_SET_THREAD_LOCAL (s)
+     symbolS *s;
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  if (bfd_is_com_section (s->bsym->section)
+      && (s->bsym->flags & BSF_THREAD_LOCAL) != 0)
+    return;
+  s->bsym->flags |= BSF_THREAD_LOCAL;
+  if ((s->bsym->flags & BSF_FUNCTION) != 0)
+    as_bad (_("Accessing function `%s' as thread-local object"),
+	    S_GET_NAME (s));
+  else if (! bfd_is_und_section (s->bsym->section)
+	   && (s->bsym->section->flags & SEC_THREAD_LOCAL) == 0)
+    as_bad (_("Accessing `%s' as thread-local object"),
+	    S_GET_NAME (s));
+}
+
+void
 S_SET_NAME (s, name)
      symbolS *s;
      char *name;
