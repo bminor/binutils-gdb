@@ -1,5 +1,8 @@
 2000-04-19  Alan Modra  <alan@linuxcare.com.au>
 
+	* config/obj-elf.c (obj_elf_change_section): Check for changed
+	section attributes.
+
 	* Makefile.am: (CPU_MULTI_VALID): Remove.
 	(MULTI_CPU_TYPES): Define.
 	(MULTI_CPU_OBJ_VALID): Define.
@@ -11,7 +14,7 @@
 
 2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
-	* Makefile.am (FLEX, LEX): Get them from configure.
+	* Makefile.am (YACC, LEX): Get them from configure.
 
 2000-04-18  H.J. Lu  (hjl@gnu.org)
 

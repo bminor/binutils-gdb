@@ -617,8 +617,10 @@ obj_elf_change_section (name, type, attr, push)
      char *name;
      int type, attr, push;
 {
-  int new_sec;
+  asection *old_sec;
   segT sec;
+  flagword flags;
+  int i;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -639,48 +641,56 @@ obj_elf_change_section (name, type, attr, push)
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
-  new_sec = bfd_get_section_by_name (stdoutput, name) == NULL;
+  old_sec = bfd_get_section_by_name (stdoutput, name);
   sec = subseg_new (name, 0);
 
-  if (new_sec)
-    {
-      flagword flags;
-      symbolS *secsym;
-      int i;
-
-      /* See if this is one of the special sections.  */
-      for (i = 0; special_sections[i].name != NULL; i++)
-        if (strcmp (name, special_sections[i].name) == 0)
-          {
-	    if (type == SHT_NULL)
-	      type = special_sections[i].type;
-	    else if (type != special_sections[i].type)
-	      as_warn (_("Setting incorrect section type for %s"), name);
-
-	    if ((attr &~ special_sections[i].attributes) != 0)
+  /* See if this is one of the special sections.  */
+  for (i = 0; special_sections[i].name != NULL; i++)
+    if (strcmp (name, special_sections[i].name) == 0)
+      {
+	if (type == SHT_NULL)
+	  type = special_sections[i].type;
+	else if (type != special_sections[i].type)
+	  {
+	    if (old_sec == NULL)
 	      {
-	        /* As a GNU extension, we permit a .note section to be
-		   allocatable.  If the linker sees an allocateable .note
-		   section, it will create a PT_NOTE segment in the output
-		   file.  */
-		if (strcmp (name, ".note") != 0
-		    || attr != SHF_ALLOC)
-		  as_warn (_("Setting incorrect section attributes for %s"),
-			   name);
+		as_warn (_("Setting incorrect section type for %s"), name);
 	      }
-	    attr |= special_sections[i].attributes;
-	    break;
+	    else
+	      {
+		as_warn (_("Ignoring incorrect section type for %s"), name);
+		type = special_sections[i].type;
+	      }
 	  }
+	if ((attr &~ special_sections[i].attributes) != 0
+	    && old_sec == NULL)
+	  {
+	    /* As a GNU extension, we permit a .note section to be
+	       allocatable.  If the linker sees an allocateable .note
+	       section, it will create a PT_NOTE segment in the output
+	       file.  */
+	    if (strcmp (name, ".note") != 0
+		|| attr != SHF_ALLOC)
+	      as_warn (_("Setting incorrect section attributes for %s"),
+		       name);
+	  }
+	attr |= special_sections[i].attributes;
+	break;
+      }
 
-      /* Convert ELF type and flags to BFD flags.  */
-      flags = (SEC_RELOC
-	       | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
-	       | ((attr & SHF_ALLOC) ? SEC_ALLOC : 0)
-	       | (((attr & SHF_ALLOC) && type != SHT_NOBITS) ? SEC_LOAD : 0)
-	       | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
+  /* Convert ELF type and flags to BFD flags.  */
+  flags = (SEC_RELOC
+	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
+	   | ((attr & SHF_ALLOC) ? SEC_ALLOC : 0)
+	   | (((attr & SHF_ALLOC) && type != SHT_NOBITS) ? SEC_LOAD : 0)
+	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
 #ifdef md_elf_section_flags
-      flags = md_elf_section_flags (flags, attr, type);
+  flags = md_elf_section_flags (flags, attr, type);
 #endif
+
+  if (old_sec == NULL)
+    {
+      symbolS *secsym;
 
       /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
       if (type == SHT_NOBITS)
@@ -695,9 +705,19 @@ obj_elf_change_section (name, type, attr, push)
       else
         symbol_table_insert (section_symbol (sec));
     }
+  else if (attr != 0)
+    {
+      /* If section attributes are specified the second time we see a
+	 particular section, then check that they are the same as we
+	 saw the first time.  */
+      if ((old_sec->flags ^ flags)
+	  & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+	     | SEC_EXCLUDE | SEC_SORT_ENTRIES))
+	as_warn (_("Ignoring changed section attributes for %s"), name);
+    }
 
 #ifdef md_elf_section_change_hook
-      md_elf_section_change_hook ();
+  md_elf_section_change_hook ();
 #endif
 }
 
