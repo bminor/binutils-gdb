@@ -1,3 +1,8 @@
+Wed Jan 11 22:36:40 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* libiberty.h (_hex_array_size, _hex_bad, _hex_value, hex_init,
+	hex_p, hex_value): New macros and declarations, for hex.c.
+
 Fri Jan  6 17:44:14 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* dis-asm.h: Make idempotent.
