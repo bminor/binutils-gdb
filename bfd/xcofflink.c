@@ -2477,7 +2477,7 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
       char *fnname;
       struct xcoff_link_hash_entry *hfn;
 
-      fnname = (char *) malloc (strlen (h->root.root.string + 2));
+      fnname = (char *) malloc (strlen (h->root.root.string) + 2);
       if (fnname == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -4011,12 +4011,33 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	    skip = true;
 	  else
 	    {
+	      bfd_vma tocval, tocend;
+
+	      tocval = ((*csectpp)->output_section->vma
+			+ (*csectpp)->output_offset
+			+ isym.n_value
+			- (*csectpp)->vma);
+	      /* We want to find out if tocval is a good value to use
+                 as the TOC anchor--that is, whether we can access all
+                 of the TOC using a 16 bit offset from tocval.  This
+                 test assumes that the TOC comes at the end of the
+                 output section, as it does in the default linker
+                 script.  If the TOC anchor is too far into the .toc
+                 section, the relocation routine will report
+                 overflows.  */
+	      tocend = ((*csectpp)->output_section->vma
+			+ (*csectpp)->output_section->_raw_size);
+	      if (tocval + 0x8000 < tocend)
+		{
+		  bfd_vma tocadd;
+
+		  tocadd = tocend - (tocval + 0x8000);
+		  tocval += tocadd;
+		  isym.n_value += tocadd;
+		}
+
 	      finfo->toc_symindx = output_index;
-	      xcoff_data (finfo->output_bfd)->toc =
-		((*csectpp)->output_section->vma
-		 + (*csectpp)->output_offset
-		 + isym.n_value
-		 - (*csectpp)->vma);
+	      xcoff_data (finfo->output_bfd)->toc = tocval;
 	      xcoff_data (finfo->output_bfd)->toc_section =
 		(*csectpp)->output_section;
 	      require = true;
@@ -4993,7 +5014,7 @@ xcoff_write_global_symbol (h, p)
 		- xcoff_data (output_bfd)->toc);
       if ((h->descriptor->flags & XCOFF_SET_TOC) != 0)
 	tocoff += h->descriptor->u.toc_offset;
-      bfd_put_32 (output_bfd, XCOFF_GLINK_FIRST | tocoff, p);
+      bfd_put_32 (output_bfd, XCOFF_GLINK_FIRST | (tocoff & 0xffff), p);
       for (i = 0, p += 4;
 	   i < sizeof xcoff_glink_code / sizeof xcoff_glink_code[0];
 	   i++, p += 4)
@@ -5568,10 +5589,16 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	  else
 	    {
 	      sec = sections[symndx];
-              val = (sec->output_section->vma
-		     + sec->output_offset
-		     + sym->n_value
-		     - sec->vma);
+	      /* Hack to make sure we use the right TOC anchor value
+                 if this reloc is against the TOC anchor.  */
+	      if (sec->name[3] == '0'
+		  && strcmp (sec->name, ".tc0") == 0)
+		val = xcoff_data (output_bfd)->toc;
+	      else
+		val = (sec->output_section->vma
+		       + sec->output_offset
+		       + sym->n_value
+		       - sec->vma);
 	    }
 	}
       else

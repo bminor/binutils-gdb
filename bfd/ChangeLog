@@ -1,3 +1,13 @@
+Mon Nov 20 14:54:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_link_input_bfd): Adjust the TOC anchor value
+	if it is not large enough to accomodate the entire TOC area with
+	signed 16 bit offsets.
+	(xcoff_write_global_symbol): Handle negative TOC offsets in global
+	linkage code.
+	(_bfd_ppc_xcoff_relocate_section): Adjust relocations against a
+	TOC anchor to use the TOC value used in the output file.
+
 Sat Nov 18 18:01:41 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffgen.c (_bfd_coff_get_external_symbols): Cast malloc return.
