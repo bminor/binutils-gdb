@@ -64,7 +64,7 @@ remote_open (char *name)
 	termios.c_lflag = 0;
 	termios.c_cflag &= ~(CSIZE | PARENB);
 	termios.c_cflag |= CLOCAL | CS8;
-	termios.c_cc[VMIN] = 0;
+	termios.c_cc[VMIN] = 1;
 	termios.c_cc[VTIME] = 0;
 
 	tcsetattr (remote_desc, TCSANOW, &termios);
@@ -81,7 +81,7 @@ remote_open (char *name)
 	termio.c_lflag = 0;
 	termio.c_cflag &= ~(CSIZE | PARENB);
 	termio.c_cflag |= CLOCAL | CS8;
-	termio.c_cc[VMIN] = 0;
+	termio.c_cc[VMIN] = 1;
 	termio.c_cc[VTIME] = 0;
 
 	ioctl (remote_desc, TCSETA, &termio);

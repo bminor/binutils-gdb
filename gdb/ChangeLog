@@ -1,3 +1,8 @@
+2001-07-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/remote-utils.c (remote_open):  Set VMIN to 1
+	in HAVE_TERMIO/HAVE_TERMIOS cases.
+
 2001-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (stop_wait_callback): Add support for flushing
