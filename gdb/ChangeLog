@@ -1,3 +1,7 @@
+2002-02-28  Jason Merrill  <jason@redhat.com>
+
+	* dwarf2read.c (dwarf_cfi_name): Add new codes.
+
 2002-02-27  Fred Fish  <fnf@redhat.com>
 
 	* blockframe.c (generic_fix_call_dummy): Fix obvious typo in

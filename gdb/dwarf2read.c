@@ -5603,9 +5603,31 @@ dwarf_cfi_name (register unsigned cfi_opc)
       return "DW_CFA_def_cfa_register";
     case DW_CFA_def_cfa_offset:
       return "DW_CFA_def_cfa_offset";
+
+    /* DWARF 3 */
+    case DW_CFA_def_cfa_expression:
+      return "DW_CFA_def_cfa_expression";
+    case DW_CFA_expression:
+      return "DW_CFA_expression";
+    case DW_CFA_offset_extended_sf:
+      return "DW_CFA_offset_extended_sf";
+    case DW_CFA_def_cfa_sf:
+      return "DW_CFA_def_cfa_sf";
+    case DW_CFA_def_cfa_offset_sf:
+      return "DW_CFA_def_cfa_offset_sf";
+
       /* SGI/MIPS specific */
     case DW_CFA_MIPS_advance_loc8:
       return "DW_CFA_MIPS_advance_loc8";
+
+    /* GNU extensions */
+    case DW_CFA_GNU_window_save:
+      return "DW_CFA_GNU_window_save";
+    case DW_CFA_GNU_args_size:
+      return "DW_CFA_GNU_args_size";
+    case DW_CFA_GNU_negative_offset_extended:
+      return "DW_CFA_GNU_negative_offset_extended";
+
     default:
       return "DW_CFA_<unknown>";
     }
