@@ -29,7 +29,7 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "target.h"
-#include "wait.h"
+#include "gdb_wait.h"
 /*#include "terminal.h" */
 #include "gdbcmd.h"
 #include "objfiles.h"

@@ -47,7 +47,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "breakpoint.h"
-#include "wait.h"
+#include "gdb_wait.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"

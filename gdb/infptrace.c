@@ -25,16 +25,7 @@
 #include "target.h"
 #include "gdb_string.h"
 
-#ifdef HAVE_WAIT_H
-#include <wait.h>
-#else
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#endif
-
-/* "wait.h" fills in the gaps left by <wait.h> */
-#include "wait.h"	/* NOTE: This is ../include/wait.h */
+#include "gdb_wait.h"
 
 #include "command.h"
 

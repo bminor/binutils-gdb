@@ -25,9 +25,7 @@
 #include "ser-unix.h"
 
 #include <sys/types.h>
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
+#include "gdb_wait.h"
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>

@@ -1,3 +1,23 @@
+Wed Feb  9 18:59:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (wait_h): Delete macro.  Update all dependencies
+ 	specifying gdb_wait.h instead.
+
+	* ser-unix.c, ser-pipe.c, remote.c, remote-udi.c, remote-sds.c,
+ 	remote-os9k.c, remote-es.c, remote-rdp.c, remote-vx960.c,
+ 	remote-vx.c, remote-st.c, remote-nindy.c, remote-mm.c,
+ 	convex-xdep.c, convex-tdep.c, target.c, win32-nat.c, standalone.c,
+ 	remote-vxmips.c, remote-vxsparc.c, remote-vx68.c, remote-vx29k.c,
+ 	remote-sim.c, remote-rdi.c, remote-mips.c, remote-eb.c,
+ 	remote-e7000.c, remote-bug.c, remote-array.c, remote-adapt.c,
+ 	ppc-bdm.c, ocd.c, monitor.c, m3-nat.c, linux-thread.c,
+ 	infttrace.c, lin-thread.c, infptrace.c, gnu-nat.c, gdbarch.c,
+ 	fork-child.c, command.c: Include "gdb_wait.h" instead of <wait.h>
+ 	or <sys/wait.h>.
+
+	* gdb_wait.h: New file.  Based on ../include/wait.h. Include
+ 	<sys/wait.h> or <wait.h> and then define any missing WIF macros.
+
 Wed Feb  9 01:14:54 2000  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* config/d10v/tm-d10v.h (NO_EXTRA_ALIGNMENT_NEEDED): Define.

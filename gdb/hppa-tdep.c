@@ -49,7 +49,7 @@
 /*#include <sys/user.h>         After a.out.h  */
 #include <sys/file.h>
 #include "gdb_stat.h"
-#include "wait.h"
+#include "gdb_wait.h"
 
 #include "gdbcore.h"
 #include "gdbcmd.h"

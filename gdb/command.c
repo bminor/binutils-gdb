@@ -26,13 +26,7 @@
 #include "ui-out.h"
 #endif
 
-#if HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#elif HAVE_WAIT_H
-#include <wait.h>
-#endif
-
-#include "wait.h"
+#include "gdb_wait.h"
 
 /* FIXME: this should be auto-configured!  */
 #ifdef __MSDOS__

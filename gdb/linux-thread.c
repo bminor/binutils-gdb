@@ -49,7 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <sys/types.h> /* for pid_t */
 #include <sys/ptrace.h> /* for PT_* flags */
-#include <sys/wait.h> /* for WUNTRACED and __WCLONE flags */
+#include "gdb_wait.h" /* for WUNTRACED and __WCLONE flags */
 #include <signal.h> /* for struct sigaction and NSIG */
 #include <sys/utsname.h>
 
@@ -58,7 +58,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "inferior.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
-#include "wait.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
 

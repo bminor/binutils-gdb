@@ -37,7 +37,7 @@
 #include "gdbarch.h"
 #include "inferior.h"
 #include "target.h"
-#include "wait.h"
+#include "gdb_wait.h"
 #include "value.h"
 #include "command.h"
 #include <signal.h>

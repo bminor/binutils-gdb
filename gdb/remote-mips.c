@@ -24,7 +24,7 @@
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
-#include "wait.h"
+#include "gdb_wait.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "serial.h"

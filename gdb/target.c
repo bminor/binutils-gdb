@@ -30,7 +30,7 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "wait.h"
+#include "gdb_wait.h"
 #include <signal.h>
 
 extern int errno;

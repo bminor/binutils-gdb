@@ -23,7 +23,7 @@
 /* OBSOLETE #include "value.h" */
 /* OBSOLETE #include "frame.h" */
 /* OBSOLETE #include "inferior.h" */
-/* OBSOLETE #include "wait.h" */
+/* OBSOLETE #include "gdb_wait.h" */
 /* OBSOLETE  */
 /* OBSOLETE #include <signal.h> */
 /* OBSOLETE #include <fcntl.h> */

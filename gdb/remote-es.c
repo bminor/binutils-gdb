@@ -104,7 +104,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"
-#include "wait.h"
+#include "gdb_wait.h"
 #include "command.h"
 #include "remote-utils.h"
 #include "gdbcore.h"

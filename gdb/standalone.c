@@ -34,7 +34,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
-#include "wait.h"
+#include "gdb_wait.h"
 
 
 /* Random system calls, mostly no-ops to prevent link problems  */
