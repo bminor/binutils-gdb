@@ -36,7 +36,7 @@ proc gdb_target_monitor { } {
 	return -1;
     }
     if [target_info exists baud] {
-	send_gdb "set remotebaud [target_info baud]\n"
+	gdb_test "set remotebaud [target_info baud]" "" ""
     }
     if [target_info exists netport] {
 	set serialport "[target_info netport]"
@@ -47,25 +47,33 @@ proc gdb_target_monitor { } {
     for {set j 1} {$j <= 2} {incr j} {
 	for {set i 1} {$i <= 3} {incr i} {
 	    send_gdb "target $targetname $serialport\n"
-	    expect {
-		-re "Remote MIPS debugging.*" {
+	    gdb_expect {
+		-re "A program is being debugged already.*ill it.*y or n. $" {
+		    send_gdb "y\n";
+		    exp_continue;
+		}
+		-re ".*Couldn't establish connection to remote.*$gdb_prompt" {
+		    verbose "Connection failed"
+		}
+		-re "Remote MIPS debugging.*$gdb_prompt" {
 		    verbose "Set target to $targetname"
 		    return
 		}
-		-re "Remote debugging using $serialport.*" {
+		-re "Remote debugging using $serialport.*$gdb_prompt" {
 		    verbose "Set target to $targetname"
 		    return
 		}
-		-re "Remote target $targetname connected to.*"	{
+		-re "Remote target $targetname connected to.*$gdb_prompt" {
 		    verbose "Set target to $targetname"
 		    return
 		}
-		-re "Connection refused" {
+		-re "Connection refused.*$gdb_prompt" {
 		    verbose "Connection refused by remote target.  Pausing, and trying again."
 		    sleep 30
 		    continue
 		}
-		timeout { 
+		timeout {
+		    send_gdb "";
 		    break
 		}
 	    }
@@ -76,8 +84,7 @@ proc gdb_target_monitor { } {
     }
 
     perror "Couldn't set target for $targetname, port is $serialport."
-    cleanup
-    exit $exit_status
+    return -1;
 }
 
 #
@@ -107,17 +114,10 @@ proc gdb_load { arg } {
     send_gdb "load $arg\n"
     set timeout 1000
     verbose "Timeout is now $timeout seconds" 2
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {
-	    if { $verbose > 1 } {
-		send_user "Loaded $arg into $GDB\n"
-	    }
+	    verbose "Loaded $arg into $GDB\n"
 	    return 1
-	}
-	-re "$gdb_prompt $"     {
-	    if { $verbose > 1 } {
-		perror "GDB couldn't load."
-	    }
 	}
 	timeout {
 	    if { $verbose > 1 } {

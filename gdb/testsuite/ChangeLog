@@ -1,7 +1,48 @@
+Fri Feb 28 20:47:39 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/monitor.exp: Detect the "Couldn't establish connection"
+	message from GDB.
+
+Tue Feb 25 14:08:55 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/bitfields.exp: Use runto instead of explicit
+	gdb_run_cmd/gdb_expect sequences.
+
+	* gdb.base/break.exp(text_next_with_recursion): Add match for
+	gdb_expect call.
+
+	* config/monitor.exp(gdb_target_monitor): Calling exit loses big.
+	We also need to handle the "A program is being debugged already"
+	prompt from gdb. Use gdb_test to set the baud rate.
+
+	* lib/gdb.exp(gdb_init): Increase the default expect buffer size
+	to 20000. Really. I mean it.
+
 Mon Feb 24 13:23:26 1997  Bob Manson  <manson@charmed.cygnus.com>
 
-	* lib/gdb.exp(gdb_test): Generate a FAIL message when
-	send_gdb fails.
+	* lib/gdb.exp(gdb_test): Generate a FAIL message when send_gdb
+ 	fails. If suppress_flag is set, skip perror message about not
+ 	being able to send to GDB.
+	(send_gdb): If suppress_flag is set, don't try to send commands to
+ 	GDB.
+	(gdb_expect): If suppress_flag is set, always fail immediately.
+	(gdb_suppress_tests, gdb_stop_suppressing_tests): New functions.
+	(gdb_init): Call gdb_stop_suppressing_tests.
+	(default_gdb_exit): Ditto.
+	(default_gdb_start): Ditto.
+
+	* gdb.base/bitfields.exp: Call gdb_suppress_tests and
+ 	gdb_stop_suppressing_tests as appropriate.
+	* gdb.base/break.exp: Ditto.
+ 	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/commands.exp: Ditto.
+	* gdb.base/exprs.exp: Ditto.
+ 	* gdb.base/funcargs.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/recurse.exp: Ditto.
+ 	* gdb.base/scope.exp:  Ditto.
+	* gdb.base/structs.exp: Ditto.
+	* gdb.c++/inherit.exp: Ditto.
 
 Sun Feb 23 19:56:02 1997  Bob Manson  <manson@charmed.cygnus.com>
 
