@@ -17,10 +17,12 @@ case "${host}" in
 # Note that these entries cannot be fully alphabetical.  Don't try.
 # The order of matching is critical when multiple lines could match.
 
+alpha-*-*)		my_host=alphaosf ; host64=true ;;
 a29k-*-*)		my_host=ultra3 ;;
 
 hppa*-hp-hpux)		my_host=hppahpux ;;
 hppa*-hp-bsd)		my_host=hppabsd ;;
+hppa*-hp-osf)		my_host=hppaosf ;;
 
 i[34]86-*-bsd)		my_host=i386bsd ;;
 i[34]86-ncr*-sysv4*)	my_host=ncr3000 ;;
@@ -37,18 +39,22 @@ i[34]86-*-aix*)		my_host=i386aix ;;
 
 i860-*-*)		my_host=stratus ;;
 
+mips-dec-bsd*)          my_host=mipsbsd ;;
 mips-dec-*)		my_host=decstation ;;
-mips-sgi-irix3)		my_host=irix3 ;;
-mips-sgi-irix4)		my_host=irix4 ;;
+mips-sgi-irix3*)	my_host=irix3 ;;
+mips-sgi-irix4*)	my_host=irix4 ;;
+mips-*-sysv*)		my_host=riscos ;;
 
+m68*-apollo*-sysv*)	my_host=apollov68 ;;
+m68*-apollo*-bsd*)	my_host=apollo68 ;;
+m68*-convergent-sysv*)	my_host=miniframe ;;
 m68*-cbm-amigados)	my_host=amigados ;;
 m68*-cbm-sysv4*)	my_host=amix ;;
 m68*-hp-hpux)		my_host=hp300 ;;
 m68*-hp-bsd)		my_host=hp300bsd ;;
+m68*-motorola-sysv*)	my_host=delta68 ;;
 m68*-sony-*)		my_host=news ;;
 m68*-sun-*)		my_host=sun3 ;;
-m68*-apollo*-sysv*)	my_host=apollov68 ;;
-m68*-apollo*-bsd*)	my_host=apollo68 ;;
 
 m88k-motorola-*)	my_host=delta88 ;;
 m88k-harris-*)		my_host=harris ;;
@@ -66,6 +72,7 @@ sparc-*-*)		my_host=sparc ;;
 
 tahoe-*-*)		my_host=tahoe ;;
 
+vax-*-ultrix2*)		my_host=vaxult2 ;;
 vax-*-ultrix*)		my_host=vaxult ;;
 vax-*-*)		my_host=vaxbsd ;;
 

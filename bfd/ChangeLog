@@ -1,3 +1,48 @@
+Fri Jul  2 10:13:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in, hosts/delta68.h, config/delta68.mh: Add stuff for
+	Motorola Delta 68.
+
+Wed Jun 30 06:02:43 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* targets.c (bfd_elf64_{big,little}_generic_vec): Declare, and
+	include in search list if BFD64 is defined.
+
+	* libelf.h (CAT4): Added a version for Saber-C, ANSI mode.
+	(bfd_elf64_*): Declarations for 64-bit versions of many routines.
+
+Tue Jun 29 22:50:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elf64-target.h, elf64-generic.c: New files.
+	* Makefile.in (BFD64_BACKENDS): Include elf64-generic.o.
+	(elf64-generic.o): List dependencies.
+
+	* Makefile.in: List target `all' explicitly before host/target
+	makefile fragments are included, in case they define any new
+	targets.
+
+	* elfcode.h (ELF_R_INFO, ELF_R_SYM): Define as 32- or 64-bit
+	versions as appropriate.  Uses updated.
+	(elf_debug_section): Declare before use.
+	(elf_debug_file): New function.
+	(bfd_section_from_shdr, bfd_shdr_from_section, elf_fake_sections):
+	Alignment value in section header is n_bytes, not log2.
+	(new_section_hook): Do nothing for now.
+	(bfd_section_from_shdr): Use Elf_External_Rel[a], not 32-bit
+	version explicitly.
+	(elf_core_file_p): Simplify check for correct class (word size).
+	(elf_make_sections, elf_fake_sections, elf_write_object_contents):
+	Initialize all fields when creating data structures.
+	(elf_locate_sh): Renamed from bfd_elfXX_locate_sh, made static.
+	(elf_compute_section_file_positions): Set correct class in output
+	file.
+	(elf_write_object_contents): Section symbols have empty names in
+	output file.
+
+	* libbfd.c (bfd_xmalloc, zalloc): Be sure to cast malloc, memset
+	args to size_t before call.
+	(bfd_add_to_string_table): Cast zalloc arg to bfd_size_type.
+
 Tue Jun 29 10:49:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_find_nearest_line): If procedure has no line
