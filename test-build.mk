@@ -27,33 +27,11 @@ else
 ### from here to very near the end of the file is the real guts of this 
 ### Makefile, and it is not seen if the variable 'host' is not set 
 
-###
-### START EDITTING HERE!!!
-### These things will need to be set differently for each release.
-###
-
 ### from which cvs tree are we working?
 TREE := devo
 
-### binaries should be installed into?
-ROOTING := /usr/cygnus
+include $(TREE)/release-info
 
-### When working from a tagged set of source, this should be the tag.  If not,
-### then set the macro to be empty.
-CVS_TAG := 
-
-### The name of the cvs module for this release.  The intersection of
-### CVS_MODULE and CVS_TAG defines the source files in this release.
-CVS_MODULE := latest
-
-### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-930426
-
-### Historically, binaries were installed here.  This is changing.
-release_root := $(ROOTING)/$(RELEASE_TAG)
-
-### STOP EDITTING HERE!!!
-### With luck, eventually, nothing else will need to be editted.
 
 TIME 		:= time
 GCC 		:= gcc -O
@@ -203,9 +181,7 @@ build-all: build-native build-latest
 endif
 
 ifeq ($(target),mips-idt-ecoff)
-configargs	= -with-gnu-as
-else
-configargs	=
+configargs	:= $(configargs) -with-gnu-as
 endif
 
 else
@@ -222,9 +198,7 @@ endif
 #all:	in-place do1 do2 do3 comparison
 
 ifeq ($(subst mips-sgi-irix4,mips-dec-ultrix,$(host)),mips-dec-ultrix)
-configargs	= -with-gnu-as
-else
-configargs	=
+configargs	:= $(configargs) -with-gnu-as
 endif
 
 endif
@@ -628,7 +602,9 @@ BUILD_HOST_HOLES := \
 
 BUILD_HOLES_DIRS := $(PARTIAL_HOLE_DIRS)
 
+ifdef BUILD_HOST_HOLES_DIR
 $(BUILD_HOST_HOLES_DIR): $(build)-x-$(host)-stamp-holes
+endif
 
 $(build)-x-$(host)-stamp-holes:
 	-rm -rf $(BUILD_HOST_HOLES_DIR)
@@ -664,7 +640,9 @@ BUILD_TARGET_HOLES := \
 	$(NM_FOR_TARGET) \
 	$(RANLIB_FOR_TARGET)
 
+ifdef BUILD_TARGET_HOLES_DIR
 $(BUILD_TARGET_HOLES_DIR): $(build)-x-$(target)-stamp-holes
+endif
 
 $(build)-x-$(target)-stamp-holes:
 	-rm -rf $(BUILD_TARGET_HOLES_DIR)
