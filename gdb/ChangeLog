@@ -1,3 +1,12 @@
+2003-01-10  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (decode_line_1): Rename variable 's' to
+	'file_symtab'.
+	(decode_all_digits): Rename argument 's' to 'file_symtab'.
+	(decode_dollar): Ditto.
+	(decode_variable): Ditto.
+	(symbol_found): Ditto.
+
 2003-01-09  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: update file list for testsuite/gdb.c++.

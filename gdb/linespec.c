@@ -78,26 +78,26 @@ symtabs_and_lines decode_all_digits (char **argptr,
 				     struct symtab *default_symtab,
 				     int default_line,
 				     char ***canonical,
-				     struct symtab *s,
+				     struct symtab *file_symtab,
 				     char *q);
 
 static struct symtabs_and_lines decode_dollar (char *copy,
 					       int funfirstline,
 					       struct symtab *default_symtab,
 					       char ***canonical,
-					       struct symtab *s);
+					       struct symtab *file_symtab);
 
 static struct symtabs_and_lines decode_variable (char *copy,
 						 int funfirstline,
 						 char ***canonical,
-						 struct symtab *s);
+						 struct symtab *file_symtab);
 
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
 				char ***canonical,
 				char *copy,
 				struct symbol *sym,
-				struct symtab *s,
+				struct symtab *file_symtab,
 				struct symtab *sym_symtab);
 
 static struct
@@ -561,7 +561,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 {
   char *p;
   char *q;
-  struct symtab *s = NULL;
+  /* If a file name is specified, this is its symtab.  */
+  struct symtab *file_symtab = NULL;
 
   char *copy;
   /* This is NULL if there are no parens in *ARGPTR, or a pointer to
@@ -614,7 +615,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       /* No, the first part is a filename; set s to be that file's
 	 symtab.  Also, move argptr past the filename.  */
 
-      s = symtab_from_filename (argptr, p, is_quote_enclosed);
+      file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
     }
 #if 0
   /* No one really seems to know why this was added. It certainly
@@ -665,7 +666,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (q != *argptr && (*q == 0 || *q == ' ' || *q == '\t' || *q == ','))
     /* We found a token consisting of all digits -- at least one digit.  */
     return decode_all_digits (argptr, default_symtab, default_line,
-			      canonical, s, q);
+			      canonical, file_symtab, q);
 
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
@@ -708,12 +709,12 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   if (*copy == '$')
     return decode_dollar (copy, funfirstline, default_symtab,
-			  canonical, s);
+			  canonical, file_symtab);
 
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
 
-  return decode_variable (copy, funfirstline, canonical, s);
+  return decode_variable (copy, funfirstline, canonical, file_symtab);
 }
 
 
@@ -1218,7 +1219,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
 static struct symtabs_and_lines
 decode_all_digits (char **argptr, struct symtab *default_symtab,
 		   int default_line, char ***canonical,
-		   struct symtab *s, char *q)
+		   struct symtab *file_symtab, char *q)
 
 {
   struct symtabs_and_lines values;
@@ -1231,7 +1232,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
   sign = none;
 
   /* We might need a canonical line spec if no file was specified.  */
-  int need_canonical = (s == 0) ? 1 : 0;
+  int need_canonical = (file_symtab == 0) ? 1 : 0;
 
   init_sal (&val);
 
@@ -1241,7 +1242,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
      set_default_source_symtab_and_line uses
      select_source_symtab that calls us with such an argument  */
 
-  if (s == 0 && default_symtab == 0)
+  if (file_symtab == 0 && default_symtab == 0)
     {
       /* Make sure we have at least a default source file. */
       set_default_source_symtab_and_line ();
@@ -1258,13 +1259,13 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
     case plus:
       if (q == *argptr)
 	val.line = 5;
-      if (s == 0)
+      if (file_symtab == 0)
 	val.line = default_line + val.line;
       break;
     case minus:
       if (q == *argptr)
 	val.line = 15;
-      if (s == 0)
+      if (file_symtab == 0)
 	val.line = default_line - val.line;
       else
 	val.line = 1;
@@ -1276,15 +1277,15 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
   while (*q == ' ' || *q == '\t')
     q++;
   *argptr = q;
-  if (s == 0)
-    s = default_symtab;
+  if (file_symtab == 0)
+    file_symtab = default_symtab;
 
   /* It is possible that this source file has more than one symtab, 
      and that the new line number specification has moved us from the
-     default (in s) to a new one.  */
-  val.symtab = find_line_symtab (s, val.line, NULL, NULL);
+     default (in file_symtab) to a new one.  */
+  val.symtab = find_line_symtab (file_symtab, val.line, NULL, NULL);
   if (val.symtab == 0)
-    val.symtab = s;
+    val.symtab = file_symtab;
 
   val.pc = 0;
   values.sals = (struct symtab_and_line *)
@@ -1302,7 +1303,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
 
 static struct symtabs_and_lines
 decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
-	       char ***canonical, struct symtab *s)
+	       char ***canonical, struct symtab *file_symtab)
 {
   struct value *valx;
   int index = 0;
@@ -1333,7 +1334,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
       /* Look up entire name as a symbol first */
       sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
-      s = (struct symtab *) 0;
+      file_symtab = (struct symtab *) 0;
       need_canonical = 1;
       /* Symbol was found --> jump to normal symbol processing.  */
       if (sym)
@@ -1347,7 +1348,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	return minsym_found (funfirstline, msymbol);
 
       /* Not a user variable or function -- must be convenience variable */
-      need_canonical = (s == 0) ? 1 : 0;
+      need_canonical = (file_symtab == 0) ? 1 : 0;
       valx = value_of_internalvar (lookup_internalvar (copy + 1));
       if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
 	error ("Convenience variables used in line specs must have integer values.");
@@ -1356,7 +1357,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
   init_sal (&val);
 
   /* Either history value or convenience value from above, in valx */
-  val.symtab = s ? s : default_symtab;
+  val.symtab = file_symtab ? file_symtab : default_symtab;
   val.line = value_as_long (valx);
   val.pc = 0;
 
@@ -1372,12 +1373,12 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
 
 
-/* Decode a linespec that's a variable.  If S is non-NULL,
+/* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
    look in that symtab's static variables first.  */
 
 static struct symtabs_and_lines
 decode_variable (char *copy, int funfirstline, char ***canonical,
-		 struct symtab *s)
+		 struct symtab *file_symtab)
 {
   struct symbol *sym;
   /* The symtab that SYM was found in.  */
@@ -1386,12 +1387,15 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
   struct minimal_symbol *msymbol;
 
   sym = lookup_symbol (copy,
-		       (s ? BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
+		       (file_symtab
+			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
+					     STATIC_BLOCK)
 			: get_selected_block (0)),
 		       VAR_NAMESPACE, 0, &sym_symtab);
 
   if (sym != NULL)
-    return symbol_found (funfirstline, canonical, copy, sym, s, sym_symtab);
+    return symbol_found (funfirstline, canonical, copy, sym,
+			 file_symtab, sym_symtab);
 
   msymbol = lookup_minimal_symbol (copy, NULL, NULL);
 
@@ -1416,7 +1420,7 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 
 static struct symtabs_and_lines
 symbol_found (int funfirstline, char ***canonical, char *copy,
-	      struct symbol *sym, struct symtab *s,
+	      struct symbol *sym, struct symtab *file_symtab,
 	      struct symtab *sym_symtab)
 {
   struct symtabs_and_lines values;
@@ -1435,7 +1439,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 
       /* We might need a canonical line spec if it is a static
 	 function.  */
-      if (s == 0)
+      if (file_symtab == 0)
 	{
 	  struct blockvector *bv = BLOCKVECTOR (sym_symtab);
 	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
