@@ -1,3 +1,14 @@
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* mi2-basics.exp: Copy base MI .exp file, set MIFLAGS to -i=mi2.
+	* mi2-break.exp, mi2-cli.exp, mi2-console.exp: Ditto.
+	* mi2-disassemble.exp, mi2-eval.exp, mi2-file.exp: Ditto.
+	* mi2-hack-cli.exp, mi2-pthreads.exp, mi2-read-memory.exp: Ditto.
+	* mi2-regs.exp, mi2-return.exp, mi2-simplerun.exp: Ditto.
+	* mi2-stack.exp, mi2-stepi.exp, mi2-syn-frame.exp: Ditto.
+	* mi2-until.exp, mi2-var-block.exp, mi2-var-child.exp: Ditto.
+	* mi2-var-cmd.exp, mi2-var-display.exp, mi2-watch.exp: Ditto.
+
 2003-05-03  J. Brobecker  <brobecker@gnat.com>
 
 	From Thierry Schneider  <tpschneider1@yahoo.com>:

@@ -1,3 +1,8 @@
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Mode Options): Mention that "mi2" was included in
+	GDB 6.0.
+
 2003-08-06  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (Mode Options): Mention that level three is the
