@@ -1,3 +1,7 @@
+2000-05-16  Catherine Moore  <clm@cygnux.com>
+
+	* som.c (som_decode_symclass):  Recognize weak symbols.
+
 2000-05-16  Szabolcs Szakacsits <szaka@F-Secure.com>
 
 	* peigen.c (pe_print_idata): Undo part of 2000-05-12 change that
