@@ -782,6 +782,15 @@ lang_bool_type ()
     {
     case language_chill:
       return builtin_type_chill_bool;
+    case language_fortran:
+      sym = lookup_symbol ("logical", NULL, VAR_NAMESPACE, NULL, NULL);
+      if (sym)
+	{
+	  struct type *type = SYMBOL_TYPE (sym);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	    return type;
+	}
+      return builtin_type_f_logical_s2;
     case language_cplus:
       sym = lookup_symbol ("bool", NULL, VAR_NAMESPACE, NULL, NULL);
       if (sym)
