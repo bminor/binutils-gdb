@@ -1,3 +1,8 @@
+2003-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* README: Update binutils references to 2.13.
+	Add paragraph about using --disable-nls.
+
 2003-02-24  Elias Athanasopoulos  <elathan@phys.uoa.gr>
 
 	* doc/binutils.texi (nm --size-sort): Update.

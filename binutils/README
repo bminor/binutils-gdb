@@ -18,7 +18,7 @@ Unpacking and Installation -- quick overview
 
 When you unpack the binutils archive file, you will get a directory
 called something like `binutils-XXX', where XXX is the number of the
-release.  (Probably 2.12 or higher).  This directory contains
+release.  (Probably 2.13 or higher).  This directory contains
 various files and sub-directories.  Most of the files in the top
 directory are for information and for configuration.  The actual
 source code is in sub-directories.
@@ -83,6 +83,18 @@ To build under openVMS/AXP, see the file makefile.vms in the top level
 directory.
 
 
+Native Language Support
+=======================
+
+By default Native Language Support will be enabled for binutils.  On
+some systems however this support is not present and can lead to error
+messages such as "undefined reference to `libintl_gettext'" when
+building there tools.  If that happens the NLS support can be disabled
+by adding the --disable-nls switch to the configure line like this:
+
+	../binutils-XXX/configure --disable-nls
+
+
 If you don't have ar
 ====================
 
@@ -110,7 +122,7 @@ the ranlib program in order to build the distribution.
 Porting
 =======
 
-Binutils-2.12 supports many different architectures, but there
+Binutils-2.13 supports many different architectures, but there
 are many more not supported, including some that were supported
 by earlier versions.  We are hoping for volunteers to improve this
 situation.
