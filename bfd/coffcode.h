@@ -1327,7 +1327,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
     }
 #endif
 
-#if defined ARM 
+#ifdef ARM 
   /* Set the flags field from the COFF header read in */
   if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
     coff->flags = 0;
