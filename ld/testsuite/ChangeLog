@@ -1,3 +1,11 @@
+2003-04-27  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvsb/elfvsb.dat: Updated.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfvsb/main.c: Likewise.
+	* ld-elfvsb/sh1.c: Likewise.
+	* ld-elfvsb/sh2.c: Likewise.
+
 2003-04-26  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-m68hc11/bug-3331.d: New test.

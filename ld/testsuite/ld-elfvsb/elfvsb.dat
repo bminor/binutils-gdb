@@ -20,3 +20,7 @@ main_visibility_check () == 1
 visibility_checkvar () == 1
 visibility_checkvarptr () == 1
 main_visibility_checkvar () == 1
+main_visibility_checkcom () == 1
+shlib_visibility_checkcom () == 1
+main_visibility_checkweak () == 1
+shlib_visibility_checkweak () == 1
