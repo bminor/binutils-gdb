@@ -1,4 +1,57 @@
-Mon Feb 24 17:08:01 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+Tue Mar 10 21:49:18 1992  K. Richard Pixley  (rich@mars.cygnus.com)
+
+	* configure: use relative paths for configure and srcdir whenever
+	  possible.
+
+Tue Mar 10 18:01:55 1992  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in:  Fix libg++ rule to check for gcc directory
+	before using gcc/gcc.  Also pass XTRAFLAGS.
+
+Thu Mar  5 21:45:07 1992  K. Richard Pixley  (rich@sendai)
+
+	* Makefile.in: added stmp-files so that directories aren't polled
+	  when they are already built.
+
+	* configure.texi: fixed a node pointer problem.
+
+Thu Mar  5 12:05:58 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* config.sub configure.in config/.Sanitize config/mh-irix4
+	gdb/.Sanitize gdb/configure.in gdb/mips-tdep.c gdb/mipsread.c
+	gdb/procfs.c gdb/signame.h gdb/tm-irix3.h gdb/tm-mips.h
+	gdb/xm-irix4.h gdb/config/.Sanitize gdb/config/mt-irix3
+	gdb/config/mh-irix4 texinfo/configure.in:  Port to SGI Irix-4.x.
+
+Wed Mar  4 02:57:46 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure: -recurring becomes -silent.  corrected help message
+	  for -site= option.
+
+	* Makefile.in: mkdir $(exec_prefix) and $(tooldir).
+
+Tue Mar  3 14:51:21 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure: when building Makefile for crosses, replace
+	  tooldir and program_prefix.  default srcdir from location of
+	  config.sub.  remove "for host in hosts" and "for target in
+	  targets" loops.
+
+Wed Feb 26 19:48:25 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: Do not pass bindir or mandir to cvs.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
+
+	* configure.texi: remove most references to multiple hosts,
+	  multiple targets, subdirs, etc.
+
+	* configure.man: removed rcsid. reference config.sub not
+	  config.subr.
 
 	* Makefile.in: mkdir $(infodir) on install-info.
 
