@@ -761,85 +761,6 @@ m68k_frame_sniffer (struct frame_info *next_frame)
   return &m68k_frame_unwind;
 }
 
-/* Signal trampolines.  */
-
-static struct m68k_frame_cache *
-m68k_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
-{
-  struct m68k_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  struct m68k_sigtramp_info info;
-  char buf[4];
-  int i;
-
-  if (*this_cache)
-    return *this_cache;
-
-  cache = m68k_alloc_frame_cache ();
-
-  frame_unwind_register (next_frame, M68K_SP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 4) - 4;
-
-  info = tdep->get_sigtramp_info (next_frame);
-
-  for (i = 0; i < M68K_NUM_REGS; i++)
-    if (info.sc_reg_offset[i] != -1)
-      cache->saved_regs[i] = info.sigcontext_addr + info.sc_reg_offset[i];
-
-  *this_cache = cache;
-  return cache;
-}
-
-static void
-m68k_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
-			     struct frame_id *this_id)
-{
-  struct m68k_frame_cache *cache =
-    m68k_sigtramp_frame_cache (next_frame, this_cache);
-
-  /* See the end of m68k_push_dummy_call.  */
-  *this_id = frame_id_build (cache->base + 8, frame_pc_unwind (next_frame));
-}
-
-static void
-m68k_sigtramp_frame_prev_register (struct frame_info *next_frame,
-				   void **this_cache,
-				   int regnum, int *optimizedp,
-				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, void *valuep)
-{
-  /* Make sure we've initialized the cache.  */
-  m68k_sigtramp_frame_cache (next_frame, this_cache);
-
-  m68k_frame_prev_register (next_frame, this_cache, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
-}
-
-static const struct frame_unwind m68k_sigtramp_frame_unwind =
-{
-  SIGTRAMP_FRAME,
-  m68k_sigtramp_frame_this_id,
-  m68k_sigtramp_frame_prev_register
-};
-
-static const struct frame_unwind *
-m68k_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
-
-  /* We shouldn't even bother to try if the OSABI didn't register
-     a get_sigtramp_info handler.  */
-  if (!gdbarch_tdep (current_gdbarch)->get_sigtramp_info)
-    return NULL;
-
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
-    return &m68k_sigtramp_frame_unwind;
-
-  return NULL;
-}
-
 static CORE_ADDR
 m68k_frame_base_address (struct frame_info *next_frame, void **this_cache)
 {
@@ -1091,7 +1012,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #else
   tdep->jb_pc = -1;
 #endif
-  tdep->get_sigtramp_info = NULL;
   tdep->struct_return = pcc_struct_return;
 
   /* Frame unwinder.  */
@@ -1112,7 +1032,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, m68k_get_longjmp_target);
 
-  frame_unwind_append_sniffer (gdbarch, m68k_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, m68k_frame_sniffer);
 
   return gdbarch;

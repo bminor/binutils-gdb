@@ -1,5 +1,23 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (m68klinux-nat.o): Update dependencies.
+	* m68klinux-tdep.c: Include "trad-frame.h" and "frame-unwind.h".
+	(m68k_linux_sigtramp_frame_cache)
+	(m68k_linux_sigtramp_frame_this_id)
+	(m68k_linux_sigtramp_frame_prev_register)
+	(m68k_linux_sigtramp_frame_unwind)
+	(m68k_linux_sigtramp_frame_sniffer)
+	(struct m68k_linux_sigtramp_info, m68k_linux_init_abi): Code from
+	m68k-tdep.h and m68k-tdep.c, add "linux" to function and variable
+	names, use trad-frame.h.
+	* m68k-tdep.h (struct gdbarch_tdep): Delete get_sigtramp_info.
+	(struct m68k_sigtramp_info): Delete.
+	* m68k-tdep.c (m68k_sigtramp_frame_cache)
+	(m68k_sigtramp_frame_this_id, m68k_sigtramp_frame_prev_register)
+	(m68k_sigtramp_frame_unwind, m68k_sigtramp_frame_sniffer)
+	(m68k_gdbarch_init): Delete all the sigtramp code, moved to
+	"m68klinux-tdep.c".
+
 	* infrun.c (check_sigtramp2): Delete check for
 	DEPRECATED_PC_IN_SIGTRAMP and INNER_THAN.
 

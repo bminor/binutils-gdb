@@ -49,15 +49,6 @@ enum m68k_regnum
 /* Size of the largest register.  */
 #define M68K_MAX_REGISTER_SIZE	12
 
-struct m68k_sigtramp_info
-{
-  /* Address of sigcontext.  */
-  CORE_ADDR sigcontext_addr;
-
-  /* Offset of registers in `struct sigcontext'.  */
-  int *sc_reg_offset;
-};
-
 /* Convention for returning structures.  */
 
 enum struct_return
@@ -75,9 +66,6 @@ struct gdbarch_tdep
   int jb_pc;
   /* The size of each entry in the jump buffer.  */
   size_t jb_elt_size;
-
-  /* Get info about sigtramp.  */
-  struct m68k_sigtramp_info (*get_sigtramp_info) (struct frame_info *);
 
   /* Convention for returning structures.  */
   enum struct_return struct_return;
