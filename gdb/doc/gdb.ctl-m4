@@ -1,6 +1,6 @@
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Controlling _GDBN__, Sequences, Targets, Top
 @chapter Controlling _GDBN__
 
@@ -63,9 +63,11 @@ Disable command line editing.
 @kindex show editing
 @item show editing
 Show whether command line editing is enabled.
+@end table
 
 @node History, Screen Size, Editing, Controlling _GDBN__
 @section Command History
+@table @code
 @cindex history substitution
 @cindex history file
 @kindex set history filename
@@ -128,7 +130,7 @@ or @code{vi} may wish to read it.
 @xref{Command Line Editing}.
 @end iftex
 
-@group
+@c @group
 @kindex show history
 @item show history
 @itemx show history filename
@@ -137,7 +139,7 @@ or @code{vi} may wish to read it.
 @itemx show history expansion
 These commands display the state of the _GDBN__ history parameters.
 @code{show history} by itself displays all four states.
-@end group
+@c @end group
 
 @end table
 
