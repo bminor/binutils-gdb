@@ -1,5 +1,11 @@
 Thu Jan 23 22:24:43 1992  Fred Fish  (fnf at cygnus.com)
 
+	* procfs.c
+	(child_xfer_memory): Takes pointer to a struct, not entire struct.
+	(inferior_proc_init):  Fix non-ANSI version of args.
+	(attach):  Call print_sys_errmsg with correct number of args.
+	(mappingflags):  Make static, does not need to be global.
+
 	* i386-tdep.c (i386_frame_num_args):  Takes a pointer to a struct
 	not the entire struct itself.
 

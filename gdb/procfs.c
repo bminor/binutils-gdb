@@ -263,7 +263,7 @@ DEFUN(child_xfer_memory, (memaddr, myaddr, len, dowrite, target),
       char *myaddr AND
       int len AND
       int dowrite AND
-      struct target_ops target /* ignored */)
+      struct target_ops *target /* ignored */)
 {
   int nbytes = 0;
 
@@ -376,7 +376,7 @@ NOTES
  */
 
 void
-DEFUN(inferior_proc_init, (int pid),
+DEFUN(inferior_proc_init, (pid),
       int pid)
 {
   if (!open_proc_file (pid, &pi))
@@ -674,11 +674,11 @@ DEFUN(attach, (pid),
   prdelset (&pi.prrun.pr_fault, FLTPAGE);
   if (ioctl (pi.fd, PIOCSFAULT, &pi.prrun.pr_fault))
     {
-      print_sys_errmsg ("PIOCSFAULT failed");
+      print_sys_errmsg ("PIOCSFAULT failed", errno);
     }
   if (ioctl (pi.fd, PIOCSTRACE, &pi.prrun.pr_trace))
     {
-      print_sys_errmsg ("PIOCSTRACE failed");
+      print_sys_errmsg ("PIOCSTRACE failed", errno);
     }
   attach_flag = 1;
   return (pid);
@@ -1189,8 +1189,9 @@ DEFUN(open_proc_file, (pid, pip),
   return (pip -> valid);
 }
 
-char *mappingflags (flags)
-long flags;
+static char *
+DEFUN (mappingflags, (flags),
+       long flags)
 {
   static char asciiflags[7];
   
