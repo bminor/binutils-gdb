@@ -133,7 +133,7 @@ bfd_vma version_info[16];
 Elf_Internal_Ehdr elf_header;
 Elf_Internal_Shdr *section_headers;
 Elf_Internal_Phdr *program_headers;
-Elf_Internal_Dyn *dynamic_segment;
+Elf_Internal_Dyn *dynamic_section;
 Elf_Internal_Shdr *symtab_shndx_hdr;
 int show_name;
 int do_dynamic;
@@ -2457,7 +2457,7 @@ usage (void)
   -n --notes             Display the core notes (if present)\n\
   -r --relocs            Display the relocations (if present)\n\
   -u --unwind            Display the unwind info (if present)\n\
-  -d --dynamic           Display the dynamic segment (if present)\n\
+  -d --dynamic           Display the dynamic section (if present)\n\
   -V --version-info      Display the version sections (if present)\n\
   -A --arch-specific     Display architecture specific information (if any).\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
@@ -3147,8 +3147,41 @@ process_program_headers (FILE *file)
 	  if (dynamic_addr)
 	    error (_("more than one dynamic segment\n"));
 
-	  dynamic_addr = segment->p_offset;
-	  dynamic_size = segment->p_filesz;
+	  /* Try to locate the .dynamic section. If there is
+	     a section header table, we can easily locate it.  */
+	  if (section_headers != NULL)
+	    {
+	      Elf_Internal_Shdr *sec;
+	      unsigned int j;
+
+	      for (j = 0, sec = section_headers;
+		   j < elf_header.e_shnum;
+		   j++, sec++)
+		if (strcmp (SECTION_NAME (sec), ".dynamic") == 0)
+		  break;
+
+	      if (j == elf_header.e_shnum || sec->sh_size == 0)
+		{
+		  error (_("no .dynamic section in the dynamic segment"));
+		  break;
+		}
+
+	      dynamic_addr = sec->sh_offset;
+	      dynamic_size = sec->sh_size;
+
+	      if (dynamic_addr < segment->p_offset
+		  || dynamic_addr > segment->p_offset + segment->p_filesz)
+		warn (_("the .dynamic section is not contained within the dynamic segment"));
+	      else if (dynamic_addr > segment->p_offset)
+		warn (_("the .dynamic section is not the first section in the dynamic segment."));
+	    }
+	  else
+	    {
+	      /* Otherwise, we can only assume that the .dynamic
+		 section is the first section in the DYNAMIC segment.  */
+	      dynamic_addr = segment->p_offset;
+	      dynamic_size = segment->p_filesz;
+	    }
 	  break;
 
 	case PT_INTERP:
@@ -4472,7 +4505,7 @@ process_unwind (FILE *file)
 }
 
 static void
-dynamic_segment_mips_val (Elf_Internal_Dyn *entry)
+dynamic_section_mips_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
@@ -4546,7 +4579,7 @@ dynamic_segment_mips_val (Elf_Internal_Dyn *entry)
 
 
 static void
-dynamic_segment_parisc_val (Elf_Internal_Dyn *entry)
+dynamic_section_parisc_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
@@ -4602,7 +4635,7 @@ dynamic_segment_parisc_val (Elf_Internal_Dyn *entry)
 }
 
 static void
-dynamic_segment_ia64_val (Elf_Internal_Dyn *entry)
+dynamic_section_ia64_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
@@ -4621,34 +4654,27 @@ dynamic_segment_ia64_val (Elf_Internal_Dyn *entry)
 }
 
 static int
-get_32bit_dynamic_segment (FILE *file)
+get_32bit_dynamic_section (FILE *file)
 {
   Elf32_External_Dyn *edyn;
   Elf_Internal_Dyn *entry;
   bfd_size_type i;
 
   edyn = get_data (NULL, file, dynamic_addr, dynamic_size,
-		   _("dynamic segment"));
+		   _("dynamic section"));
   if (!edyn)
     return 0;
 
-  /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
-     how large this .dynamic is now.  We can do this even before the byte
-     swapping since the DT_NULL tag is recognizable.  */
-  dynamic_size = 0;
-  while (*(Elf32_Word *) edyn[dynamic_size++].d_tag != DT_NULL)
-    ;
+  dynamic_section = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
 
-  dynamic_segment = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
-
-  if (dynamic_segment == NULL)
+  if (dynamic_section == NULL)
     {
       error (_("Out of memory\n"));
       free (edyn);
       return 0;
     }
 
-  for (i = 0, entry = dynamic_segment;
+  for (i = 0, entry = dynamic_section;
        i < dynamic_size;
        i++, entry++)
     {
@@ -4662,34 +4688,27 @@ get_32bit_dynamic_segment (FILE *file)
 }
 
 static int
-get_64bit_dynamic_segment (FILE *file)
+get_64bit_dynamic_section (FILE *file)
 {
   Elf64_External_Dyn *edyn;
   Elf_Internal_Dyn *entry;
   bfd_size_type i;
 
   edyn = get_data (NULL, file, dynamic_addr, dynamic_size,
-		   _("dynamic segment"));
+		   _("dynamic section"));
   if (!edyn)
     return 0;
 
-  /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
-     how large this .dynamic is now.  We can do this even before the byte
-     swapping since the DT_NULL tag is recognizable.  */
-  dynamic_size = 0;
-  while (*(bfd_vma *) edyn[dynamic_size++].d_tag != DT_NULL)
-    ;
+  dynamic_section = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
 
-  dynamic_segment = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
-
-  if (dynamic_segment == NULL)
+  if (dynamic_section == NULL)
     {
       error (_("Out of memory\n"));
       free (edyn);
       return 0;
     }
 
-  for (i = 0, entry = dynamic_segment;
+  for (i = 0, entry = dynamic_section;
        i < dynamic_size;
        i++, entry++)
     {
@@ -4734,9 +4753,10 @@ get_dynamic_flags (bfd_vma flags)
   return buff;
 }
 
-/* Parse and display the contents of the dynamic segment.  */
+/* Parse and display the contents of the dynamic section.  */
+
 static int
-process_dynamic_segment (FILE *file)
+process_dynamic_section (FILE *file)
 {
   Elf_Internal_Dyn *entry;
   bfd_size_type i;
@@ -4744,23 +4764,23 @@ process_dynamic_segment (FILE *file)
   if (dynamic_size == 0)
     {
       if (do_dynamic)
-	printf (_("\nThere is no dynamic segment in this file.\n"));
+	printf (_("\nThere is no dynamic section in this file.\n"));
 
       return 1;
     }
 
   if (is_32bit_elf)
     {
-      if (! get_32bit_dynamic_segment (file))
+      if (! get_32bit_dynamic_section (file))
 	return 0;
     }
-  else if (! get_64bit_dynamic_segment (file))
+  else if (! get_64bit_dynamic_section (file))
     return 0;
 
   /* Find the appropriate symbol table.  */
   if (dynamic_symbols == NULL)
     {
-      for (i = 0, entry = dynamic_segment;
+      for (i = 0, entry = dynamic_section;
 	   i < dynamic_size;
 	   ++i, ++entry)
 	{
@@ -4806,7 +4826,7 @@ process_dynamic_segment (FILE *file)
   /* Similarly find a string table.  */
   if (dynamic_strings == NULL)
     {
-      for (i = 0, entry = dynamic_segment;
+      for (i = 0, entry = dynamic_section;
 	   i < dynamic_size;
 	   ++i, ++entry)
 	{
@@ -4852,7 +4872,7 @@ process_dynamic_segment (FILE *file)
     {
       unsigned long syminsz = 0;
 
-      for (i = 0, entry = dynamic_segment;
+      for (i = 0, entry = dynamic_section;
 	   i < dynamic_size;
 	   ++i, ++entry)
 	{
@@ -4900,12 +4920,12 @@ process_dynamic_segment (FILE *file)
     }
 
   if (do_dynamic && dynamic_addr)
-    printf (_("\nDynamic segment at offset 0x%lx contains %ld entries:\n"),
+    printf (_("\nDynamic section at offset 0x%lx contains %ld entries:\n"),
 	    dynamic_addr, (long) dynamic_size);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
 
-  for (i = 0, entry = dynamic_segment;
+  for (i = 0, entry = dynamic_section;
        i < dynamic_size;
        i++, entry++)
     {
@@ -5272,13 +5292,13 @@ process_dynamic_segment (FILE *file)
 		{
 		case EM_MIPS:
 		case EM_MIPS_RS3_LE:
-		  dynamic_segment_mips_val (entry);
+		  dynamic_section_mips_val (entry);
 		  break;
 		case EM_PARISC:
-		  dynamic_segment_parisc_val (entry);
+		  dynamic_section_parisc_val (entry);
 		  break;
 		case EM_IA_64:
-		  dynamic_segment_ia64_val (entry);
+		  dynamic_section_ia64_val (entry);
 		  break;
 		default:
 		  print_vma (entry->d_un.d_val, PREFIX_HEX);
@@ -6268,7 +6288,7 @@ process_syminfo (FILE *file ATTRIBUTE_UNUSED)
 	    {
 	      print_symbol (10,
 			    dynamic_strings
-			    + (dynamic_segment
+			    + (dynamic_section
 			       [dynamic_syminfo[i].si_boundto].d_un.d_val));
 	      putchar (' ' );
 	    }
@@ -9704,11 +9724,11 @@ process_mips_specific (FILE *file)
   size_t conflicts_offset = 0;
 
   /* We have a lot of special sections.  Thanks SGI!  */
-  if (dynamic_segment == NULL)
+  if (dynamic_section == NULL)
     /* No information available.  */
     return 0;
 
-  for (entry = dynamic_segment; entry->d_tag != DT_NULL; ++entry)
+  for (entry = dynamic_section; entry->d_tag != DT_NULL; ++entry)
     switch (entry->d_tag)
       {
       case DT_MIPS_LIBLIST:
@@ -10554,7 +10574,7 @@ process_object (char *file_name, FILE *file)
     }
 
   if (process_program_headers (file))
-    process_dynamic_segment (file);
+    process_dynamic_section (file);
 
   process_relocs (file);
 

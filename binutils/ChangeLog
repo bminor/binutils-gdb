@@ -1,3 +1,19 @@
+2004-06-18  Jie Zhang  <zhangjie@magima.com.cn>
+
+	* readelf.c (process_program_headers): When locating the dynamic
+	section use the section table if it is present.
+	(dynamic_segment): Renamed to dynamic_section.
+	Replace references to dynamic segment with references to dynamic
+	section, except where appropriate.
+	(dynamic_segment_mips_val): Rename to dynamic_section_mips_val.
+	(dynamic_segment_parisc_val): Rename to dynamic_section_parisc_val.
+	(dynamic_segment_ia64_val): Rename to dynamic_section_ia64_val.
+	(get_32bit_dynamic_segment): Rename to get_32bit_dynamic_section.
+	Remove tag counting code as it is no longer needed.
+	(get_64bit_dynamic_segment): Rename to get_64bit_dynamic_section.
+	Remove tag counting code as it is no longer needed.
+	(process_dynamic_segment): Rename to process_dynamic_section.
+	
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (copy_section): Use bfd_get_section_size instead of
