@@ -1,3 +1,7 @@
+2002-11-07  Joel Brobecker  <brobecker@gnat.com>
+
+	* PROBLEMS: Document gdb/816 (unable to read core file on alpha-osf).
+
 2002-11-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (deprecated_registers_fetched): Update.
