@@ -320,6 +320,7 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_STDC
 AC_CHECK_HEADERS(link.h)
+AC_CHECK_HEADERS(machine/reg.h)
 AC_CHECK_HEADERS(nlist.h)
 AC_CHECK_HEADERS(poll.h sys/poll.h)
 AC_CHECK_HEADERS(proc_service.h thread_db.h)
@@ -454,6 +455,16 @@ AC_ARG_WITH(included-regex,
 if test "$gdb_with_regex" = yes; then
   AC_DEFINE(USE_INCLUDED_REGEX, 1,
     [Define to 1 if the regex included in libiberty should be used.])
+fi
+
+# See if <machine/reg.h> degines `struct reg'.
+AC_CACHE_CHECK([for struct reg in machine/reg.h], gdb_cv_struct_reg,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <machine/reg.h>], [struct reg r;],
+gdb_cv_struct_reg=yes, gdb_cv_struct_reg=no)])
+if test $gdb_cv_struct_reg = yes; then
+  AC_DEFINE(HAVE_STRUCT_REG, 1,
+            [Define to 1 if your system has struct reg in <machine/reg.h>.])
 fi
 
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.

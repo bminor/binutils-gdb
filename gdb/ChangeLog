@@ -1,3 +1,9 @@
+2003-11-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Check for <machine/reg.h>.  Check for `struct reg'
+	in <machine/reg.h>.
+	* configure, config.in: Regenerate.
+
 2003-11-07  Mark Kettenis  <kettenis@gnu.org>
 
 	From Peter Schauer  <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>:

@@ -278,6 +278,9 @@
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
 
+/* Define if you have the <machine/reg.h> header file.  */
+#undef HAVE_MACHINE_REG_H
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
@@ -446,6 +449,9 @@
 
 /* Define to 1 if the regex included in libiberty should be used. */
 #undef USE_INCLUDED_REGEX
+
+/* Define to 1 if your system has struct reg in <machine/reg.h>. */
+#undef HAVE_STRUCT_REG
 
 /* Define if <stdint.h> provides the uintptr_t type. */
 #undef HAVE_UINTPTR_T
