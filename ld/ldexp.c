@@ -456,11 +456,12 @@ fold_name (tree, current_section, allocation_done, dot)
       case SIZEOF:
 	if (allocation_done != lang_first_phase_enum)
 	  {
+            int opb = bfd_octets_per_byte (output_bfd);
 	    lang_output_section_statement_type *os;
 
 	    os = lang_output_section_find (tree->name.name);
 	    check (os, tree->name.name, "SIZEOF");
-	    result = new_abs (os->bfd_section->_raw_size);
+	    result = new_abs (os->bfd_section->_raw_size / opb);
 	  }
 	else
 	  result = invalid ();

@@ -1,3 +1,24 @@
+2000-02-03  Timothy Wall <twall@redhat.com>
+
+	* ld/ldexp.c (fold_name): Make SIZEOF operator return byte count, not
+	octet count.
+	* ld/ldlang.c (print_input_section, print_data_statement,
+	print_reloc_statement, print_padding_statement): Print target
+	address values and section sizes as bytes, not octets.
+	(insert_pad) Calculate padding size in octets, and adjust "dot"
+	by bytes.
+	(size_input_section) Always adjust "dot" by bytes, not octets.
+	(lang_check_section_addresses, lang_do_assignments) Adjust
+	"dot" by bytes, not octets.  Use the larger of the directive size
+	or octets_per_byte for the number of octets actually allocated in
+	the output section.
+	(lang_set_startof) Make sure STARTOF returns a target address.
+	(lang_one_common) Record size changes in octets.
+	(lang_abs_symbol_at_end_of) Section end symbol's value is
+	recorded in target bytes.
+	* ld.texinfo:   Updated description of BYTE, SHORT, LONG, etc.
+	to be clear about behavior when an octet is smaller than one byte.
+	
 2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* ldcref.c (output_cref): Don't pass message strings to printf
