@@ -1,3 +1,10 @@
+2001-03-29  H.J. Lu  <hjl@gnu.org>
+
+	* gas/i386/relax.s: New test for relaxation between sections.
+	* gas/i386/relax.d: New.
+
+	* gas/i386/i386.exp: Add tests for ELF.
+
 2001-03-27  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/lineno.d: Allow for the possibility that
