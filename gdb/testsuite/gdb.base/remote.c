@@ -23,16 +23,16 @@ BEGIN {
 
 */
 
-#ifdef mc68hc11
+#include <limits.h>
+/* For targets with 16bit int, use a 1k buffer. */
+#if INT_MAX < 32768
 # define RANDOM_DATA_SIZE (1024)
-#endif
-
+#else
 /* Use a character buffer to avoid byte order problems. 48k is
    chosen so that the buffer required at least 3 16k packets but
    targets often have no more than 64k of data. */
 /* If you change this data, you will also have to change the checks
    for the data in remote.c */
-#ifndef RANDOM_DATA_SIZE
 # define RANDOM_DATA_SIZE (3 * 2048 * 8)
 # define BIG_RANDOM_DATA
 #endif
