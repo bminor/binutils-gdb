@@ -184,6 +184,7 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
 				  xmalloc, xfree);
       rt_common_objfile->minimal_symbol_count = 0;
       rt_common_objfile->msymbols = NULL;
+      terminate_minimal_symbol_table (rt_common_objfile);
     }
 
   init_minimal_symbol_collection ();

@@ -1,3 +1,20 @@
+2003-02-03  Jim Blandy  <jimb@redhat.com>
+
+	Use a single, consistent representation for an empty minimal
+	symbol table in an objfile.
+	* objfiles.c (terminate_minimal_symbol_table): New function.
+	(allocate_objfile): Call it.
+	* objfiles.h (terminate_minimal_symbol_table): New declaration.
+	(ALL_MSYMBOLS): No need to test whether (objfile)->msymbols is
+	non-NULL. 
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): To see whether
+	objfile has minimal symbols, compare minimal_symbol_count to zero,
+	instead of comparing msymbols with NULL.
+	* objfiles.c (have_minimal_symbols): Same.
+	* solib-sunos.c (solib_add_common_symbols): Call
+	terminate_minimal_symbol_table.
+	* symfile.c (reread_symbols): Same.
+	
 2003-02-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* s390-tdep.c (s390_address_class_type_flags)

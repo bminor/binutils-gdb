@@ -515,6 +515,8 @@ extern struct objfile *allocate_objfile (bfd *, int);
 
 extern int build_objfile_section_table (struct objfile *);
 
+extern void terminate_minimal_symbol_table (struct objfile *objfile);
+
 extern void put_objfile_before (struct objfile *, struct objfile *);
 
 extern void objfile_to_front (struct objfile *);
@@ -595,8 +597,7 @@ extern int is_in_import_list (char *, struct objfile *);
 
 #define	ALL_MSYMBOLS(objfile, m) \
   ALL_OBJFILES (objfile)	 \
-    if ((objfile)->msymbols)	 \
-      ALL_OBJFILE_MSYMBOLS (objfile, m)
+    ALL_OBJFILE_MSYMBOLS (objfile, m)
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++)
