@@ -1,5 +1,9 @@
 Thu Feb 15 12:44:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Don't tamper with LDFLAGS.  Call AC_PROG_CC before
+	configure.host.
+	* configure: Rebuild.
+
 	* configure.in: Substitute RPATH_ENVVAR.
 	* configure: Rebuild.
 	* Makefile.in (RPATH_ENVVAR): New variable.
