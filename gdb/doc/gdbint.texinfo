@@ -4154,14 +4154,16 @@ algorithms of @value{GDBN}.
 @cindex cleanups
 
 Cleanups are a structured way to deal with things that need to be done
-later.  When your code does something (like @code{malloc} some memory,
-or open a file) that needs to be undone later (e.g., free the memory or
-close the file), it can make a cleanup.  The cleanup will be done at
-some future point: when the command is finished, when an error occurs,
-or when your code decides it's time to do cleanups.
+later.
 
-You can also discard cleanups, that is, throw them away without doing
-what they say.  This is only done if you ask that it be done.
+When your code does something (e.g., @code{xmalloc} some memory, or
+@code{open} a file) that needs to be undone later (e.g., @code{xfree}
+the memory or @code{close} the file), it can make a cleanup.  The
+cleanup will be done at some future point: when the command is finished
+and control returns to the top level; when an error occurs and the stack
+is unwound; or when your code decides it's time to explicitly perform
+cleanups.  Alternatively you can elect to discard the cleanups you
+created.
 
 Syntax:
 
@@ -4173,32 +4175,75 @@ Declare a variable which will hold a cleanup chain handle.
 @item @var{old_chain} = make_cleanup (@var{function}, @var{arg});
 Make a cleanup which will cause @var{function} to be called with
 @var{arg} (a @code{char *}) later.  The result, @var{old_chain}, is a
-handle that can be passed to @code{do_cleanups} or
-@code{discard_cleanups} later.  Unless you are going to call
-@code{do_cleanups} or @code{discard_cleanups} yourself, you can ignore
-the result from @code{make_cleanup}.
+handle that can later be passed to @code{do_cleanups} or
+@code{discard_cleanups}.  Unless you are going to call
+@code{do_cleanups} or @code{discard_cleanups}, you can ignore the result
+from @code{make_cleanup}.
 
 @findex do_cleanups
 @item do_cleanups (@var{old_chain});
-Perform all cleanups done since @code{make_cleanup} returned
-@var{old_chain}.  E.g.:
-
-@example
-make_cleanup (a, 0); 
-old = make_cleanup (b, 0); 
-do_cleanups (old);
-@end example
-
-@noindent
-will call @code{b()} but will not call @code{a()}.  The cleanup that
-calls @code{a()} will remain in the cleanup chain, and will be done
-later unless otherwise discarded.@refill
+Do all cleanups added to the chain since the corresponding
+@code{make_cleanup} call was made.
 
 @findex discard_cleanups
 @item discard_cleanups (@var{old_chain});
 Same as @code{do_cleanups} except that it just removes the cleanups from
 the chain and does not call the specified functions.
 @end table
+
+Cleanups are implemented as a chain.  The handle returned by
+@code{make_cleanups} includes the cleanup passed to the call and any
+later cleanups appended to the chain (but not yet discarded or
+performed).  E.g.:
+
+@example
+make_cleanup (a, 0); 
+@{
+  struct cleanup *old = make_cleanup (b, 0); 
+  make_cleanup (c, 0)
+  ...
+  do_cleanups (old);
+@}
+@end example
+
+@noindent
+will call @code{c()} and @code{b()} but will not call @code{a()}.  The
+cleanup that calls @code{a()} will remain in the cleanup chain, and will
+be done later unless otherwise discarded.@refill
+
+Your function should explicitly do or discard the cleanups it creates.
+Failing to do this leads to non-deterministic behavior since the caller
+will arbitrarily do or discard your functions cleanups.  This need leads
+to two common cleanup styles.
+
+The first style is try/finally.  Before it exits, your code-block calls
+@code{do_cleanups} with the old cleanup chain and thus ensures that your
+code-block's cleanups are always performed.  For instance, the following
+code-segment avoids a memory leak problem (even when @code{error} is
+called and a forced stack unwind occurs) by ensuring that the
+@code{xfree} will always be called:
+
+@example
+struct cleanup *old = make_cleanup (null_cleanup, 0);
+data = xmalloc (sizeof blah);
+make_cleanup (xfree, data);
+... blah blah ...
+do_cleanups (old);
+@end example
+
+The second style is try/except.  Before it exits, your code-block calls
+@code{discard_cleanups} with the old cleanup chain and thus ensures that
+any created cleanups are not performed.  For instance, the following
+code segment, ensures that the file will be closed but only if there is
+an error:
+
+@example
+FILE *file = fopen ("afile", "r");
+struct cleanup *old = make_cleanup (close_file, file);
+... blah blah ...
+discard_cleanups (old);
+return file;
+@end example
 
 Some functions, e.g. @code{fputs_filtered()} or @code{error()}, specify
 that they ``should not be called when cleanups are not in place''.  This
