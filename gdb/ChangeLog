@@ -1,3 +1,8 @@
+Mon Jun 14 09:23:51 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* isi-xdep.c: New file.
+	* config/m68k/isi.mh (XDEPFILES): Add isi-xdep.o
+
 Sun Jun 13 09:17:48 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config/m68k/xm-news.h: Include <sys/param.h>.
