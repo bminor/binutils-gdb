@@ -6,7 +6,7 @@
 void
 OP_300 ()
 {
-  unsigned int op0, op1, op2;
+  unsigned int op2;
   int result, temp;
 
   temp = OP[1];
@@ -21,7 +21,7 @@ OP_300 ()
 void
 OP_400 ()
 {
-  unsigned int op0, op1, op2;
+  unsigned int op2;
   int result, temp;
 
   temp = OP[1];
@@ -36,7 +36,7 @@ OP_400 ()
 void
 OP_500 ()
 {
-  unsigned int op0, op1, op2;
+  unsigned int op2;
   int result, temp;
 
   temp = OP[1];
@@ -50,8 +50,8 @@ OP_500 ()
 void
 OP_380 ()
 {
-  unsigned int op0, op1, op2;
-  int result, temp;
+  unsigned int op0, op1;
+  int temp;
 
   op0 = State.regs[OP[0]];
   temp = OP[1];
@@ -64,8 +64,8 @@ OP_380 ()
 void
 OP_480 ()
 {
-  unsigned int op0, op1, op2;
-  int result, temp;
+  unsigned int op0, op1;
+  int temp;
 
   op0 = State.regs[OP[0]];
   temp = OP[1];
@@ -78,8 +78,8 @@ OP_480 ()
 void
 OP_501 ()
 {
-  unsigned int op0, op1, op2;
-  int result, temp;
+  unsigned int op0, op1;
+  int temp;
 
   op0 = State.regs[OP[0]];
   temp = OP[1];
@@ -92,7 +92,7 @@ OP_501 ()
 void
 OP_700 ()
 {
-  unsigned int op0, op1, op2;
+  unsigned int op0, op2;
   int result, temp;
 
   op0 = State.regs[OP[0]];
@@ -108,7 +108,7 @@ OP_700 ()
 void
 OP_720 ()
 {
-  unsigned int op0, op1, op2;
+  unsigned int op0, op2;
   int result, temp;
 
   op0 = State.regs[OP[0]];
@@ -125,7 +125,7 @@ OP_720 ()
 void
 OP_10720 ()
 {
-  unsigned int op0, op1, op2;
+  unsigned int op0,  op2;
   int result, temp;
 
   op0 = State.regs[OP[0]];
@@ -142,7 +142,7 @@ void
 OP_740 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = State.regs[OP[1]];
@@ -157,7 +157,7 @@ void
 OP_760 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = State.regs[OP[1]];
@@ -173,7 +173,7 @@ void
 OP_10760 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = State.regs[OP[1]];
@@ -189,7 +189,6 @@ void
 OP_580 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -205,7 +204,6 @@ void
 OP_581 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -221,7 +219,6 @@ void
 OP_582 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -237,7 +234,6 @@ void
 OP_583 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -253,7 +249,6 @@ void
 OP_584 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -269,7 +264,6 @@ void
 OP_585 ()
 {
   unsigned int op0;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   State.pc += op0;
@@ -280,7 +274,6 @@ void
 OP_586 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -296,7 +289,6 @@ void
 OP_587 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -313,7 +305,6 @@ void
 OP_588 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -329,7 +320,6 @@ void
 OP_589 ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -345,7 +335,6 @@ void
 OP_58A ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -361,7 +350,6 @@ void
 OP_58B ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -377,7 +365,6 @@ void
 OP_58C ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -393,7 +380,6 @@ void
 OP_58D ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -409,7 +395,6 @@ void
 OP_58E ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -425,7 +410,6 @@ void
 OP_58F ()
 {
   unsigned int op0, psw;
-  int temp;
 
   op0 = ((signed)OP[0] << 23) >> 23;
   psw = State.sregs[5];
@@ -651,7 +635,7 @@ OP_6E0 ()
 void
 OP_40 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, ov, s, z;
   int temp;
 
   /* Compute the result.  */
@@ -671,7 +655,10 @@ OP_40 ()
       ov = 0;
     }
   else
-    ov = 1;
+    {
+      result = 0x0;
+      ov = 1;
+    }
 
   /* Compute the condition codes.  */
   z = (result == 0);
@@ -741,7 +728,7 @@ OP_7E0 ()
 {
   /* Hack alert.  We turn off a bit in op0 since we really only
      wanted 4 bits.  */
-  unsigned int op0, psw, result;
+  unsigned int op0, psw, result = 0;
 
   op0 = OP[0] & 0xf;
   psw = State.sregs[5];
@@ -978,7 +965,7 @@ OP_80 ()
 void
 OP_160 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s;
 
   /* Compute the result.  */
   op0 = State.regs[OP[0]];
@@ -1038,7 +1025,7 @@ OP_640 ()
 void
 OP_2A0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s, cy;
 
   op0 = OP[0] & 0x1f;
   op1 = State.regs[OP[1]];
@@ -1053,14 +1040,14 @@ OP_2A0 ()
   State.regs[OP[1]] = result;
   State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
   State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
+		| (cy ? PSW_CY : 0));
 }
 
 /* sar reg1, reg2 */
 void
 OP_A007E0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s, cy;
 
   op0 = State.regs[OP[0]] & 0x1f;
   op1 = State.regs[OP[1]];
@@ -1082,7 +1069,7 @@ OP_A007E0 ()
 void
 OP_2C0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s, cy;
 
   op0 = OP[0] & 0x1f;
   op1 = State.regs[OP[1]];
@@ -1104,7 +1091,7 @@ OP_2C0 ()
 void
 OP_C007E0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s, cy;
 
   op0 = State.regs[OP[0]] & 0x1f;
   op1 = State.regs[OP[1]];
@@ -1126,7 +1113,7 @@ OP_C007E0 ()
 void
 OP_280 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s, cy;
 
   op0 = OP[0] & 0x1f;
   op1 = State.regs[OP[1]];
@@ -1148,7 +1135,7 @@ OP_280 ()
 void
 OP_8007E0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s, cy;
 
   op0 = State.regs[OP[0]] & 0x1f;
   op1 = State.regs[OP[1]];
@@ -1170,7 +1157,7 @@ OP_8007E0 ()
 void
 OP_100 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s;
 
   /* Compute the result.  */
   op0 = State.regs[OP[0]];
@@ -1191,7 +1178,7 @@ OP_100 ()
 void
 OP_680 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s;
 
   op0 = OP[0] & 0xffff;
   op1 = State.regs[OP[1]];
@@ -1211,7 +1198,7 @@ OP_680 ()
 void
 OP_140 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s;
 
   /* Compute the result.  */
   op0 = State.regs[OP[0]];
@@ -1232,7 +1219,7 @@ OP_140 ()
 void
 OP_6C0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z;
 
   op0 = OP[0] & 0xffff;
   op1 = State.regs[OP[1]];
@@ -1251,7 +1238,7 @@ OP_6C0 ()
 void
 OP_120 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s;
 
   /* Compute the result.  */
   op0 = State.regs[OP[0]];
@@ -1272,7 +1259,7 @@ OP_120 ()
 void
 OP_6A0 ()
 {
-  unsigned int op0, op1, result, z, s, cy, ov;
+  unsigned int op0, op1, result, z, s;
 
   op0 = OP[0] & 0xffff;
   op1 = State.regs[OP[1]];
@@ -1292,7 +1279,7 @@ OP_6A0 ()
 void
 OP_20 ()
 {
-  unsigned int op0, result, z, s, cy, ov;
+  unsigned int op0, result, z, s;
 
   /* Compute the result.  */
   op0 = State.regs[OP[0]];
@@ -1313,7 +1300,7 @@ void
 OP_7C0 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = OP[1] & 0x7;
@@ -1333,7 +1320,7 @@ void
 OP_47C0 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = OP[1] & 0x7;
@@ -1353,7 +1340,7 @@ void
 OP_87C0 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = OP[1] & 0x7;
@@ -1373,7 +1360,7 @@ void
 OP_C7C0 ()
 {
   unsigned int op0, op1, op2;
-  int result, temp;
+  int temp;
 
   op0 = State.regs[OP[0]];
   op1 = OP[1] & 0x7;

@@ -4,14 +4,17 @@ static void write_header PARAMS ((void));
 static void write_opcodes PARAMS ((void));
 static void write_template PARAMS ((void));
 
+long Opcodes[512];
+static int curop=0;
+
 int
 main (argc, argv)
      int argc;
      char *argv[];
 {
-  if ((argc > 1) && (strcmp (argv[1],"-h") == 0))
+  if ((argc > 1) && (strcmp (argv[1], "-h") == 0))
     write_header();
-  else if ((argc > 1) && (strcmp (argv[1],"-t") == 0))
+  else if ((argc > 1) && (strcmp (argv[1], "-t") == 0))
     write_template ();
   else
     write_opcodes();
@@ -25,7 +28,8 @@ write_header ()
   struct v850_opcode *opcode;
 
   for (opcode = (struct v850_opcode *)v850_opcodes; opcode->name; opcode++)
-    printf("void OP_%X PARAMS ((void));\t\t/* %s */\n",opcode->opcode, opcode->name);
+    printf("void OP_%X PARAMS ((void));\t\t/* %s */\n",
+	   opcode->opcode, opcode->name);
 }
 
 
@@ -43,7 +47,7 @@ write_template ()
 
   for (opcode = (struct v850_opcode *)v850_opcodes; opcode->name; opcode++)
     {
-      printf("/* %s */\nvoid\nOP_%X ()\n{\n",opcode->name,opcode->opcode);
+      printf("/* %s */\nvoid\nOP_%X ()\n{\n", opcode->name, opcode->opcode);
 	  
       /* count operands */
       j = 0;
@@ -57,37 +61,25 @@ write_template ()
       switch (j)
 	{
 	case 0:
-	  printf ("printf(\"   %s\\n\");\n",opcode->name);
+	  printf ("printf(\"   %s\\n\");\n", opcode->name);
 	  break;
 	case 1:
-	  printf ("printf(\"   %s\\t%%x\\n\",OP[0]);\n",opcode->name);
+	  printf ("printf(\"   %s\\t%%x\\n\", OP[0]);\n", opcode->name);
 	  break;
 	case 2:
-	  printf ("printf(\"   %s\\t%%x,%%x\\n\",OP[0],OP[1]);\n",opcode->name);
+	  printf ("printf(\"   %s\\t%%x,%%x\\n\",OP[0],OP[1]);\n",
+		  opcode->name);
 	  break;
 	case 3:
-	  printf ("printf(\"   %s\\t%%x,%%x,%%x\\n\",OP[0],OP[1],OP[2]);\n",opcode->name);
+	  printf ("printf(\"   %s\\t%%x,%%x,%%x\\n\",OP[0],OP[1],OP[2]);\n",
+		  opcode->name);
 	  break;
 	default:
-	  fprintf (stderr,"Too many operands: %d\n",j);
+	  fprintf (stderr,"Too many operands: %d\n", j);
 	}
       printf ("}\n\n");
     }
 }
-
-
-long Opcodes[512];
-static int curop=0;
-
-check_opcodes( long op)
-{
-  int i;
-
-  for (i=0;i<curop;i++)
-    if (Opcodes[i] == op)
-      fprintf(stderr,"DUPLICATE OPCODES: %x\n",op);
-}
-
 
 static void
 write_opcodes ()
@@ -105,8 +97,6 @@ write_opcodes ()
       printf ("  { %ld,%ld,OP_%X,",
 	      opcode->opcode, opcode->mask, opcode->opcode);
       
-      /* REMOVE ME */
-      check_opcodes (opcode->opcode);
       Opcodes[curop++] = opcode->opcode;
 
       /* count operands */
@@ -130,11 +120,8 @@ write_opcodes ()
 	    {
 	      if (j)
 		printf (", ");
-#if 0
-	      if ((flags & OPERAND_REG) && (opcode->format == LONG_L))
-		shift += 15;
-#endif
-	      printf ("%d,%d,%d",shift,v850_operands[opcode->operands[i]].bits,flags);
+	      printf ("%d,%d,%d", shift,
+		      v850_operands[opcode->operands[i]].bits,flags);
 	      j = 1;
 	    }
 	}

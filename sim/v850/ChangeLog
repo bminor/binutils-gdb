@@ -1,5 +1,18 @@
 Tue Sep  3 10:20:30 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gencode.c: Fix various indention & style problems.
+	Remove test code.  Remove #if 0 code.
+	* interp.c: Provide prototypes for all static functions.
+	Fix minor indention problems.
+	(sim_open, sim_resume): Remove unused variables.
+	(sim_read): Return type is "int".
+	* simops.c: Remove unused variables.
+	(divh): Make result of divide-by-zero zero.
+	(setf): Initialize result to keep compiler quiet.
+	(sar instructions): These just clear the overflow bit.
+	* v850_sim.h: Provide prototypes for put_byte, put_half
+	and put_word.
+
 	* interp.c: OP should be an array of 32bit operands!
 	(v850_callback): Declare.
 	(do_format_5): Fix extraction of OP[0].
