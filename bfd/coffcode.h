@@ -1261,11 +1261,9 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	case F_I960KA:
 	  machine = bfd_mach_i960_ka_sa;
 	  break;
-	  /* start-sanitize-i960xl */
-	case F_I960XL:
-	  machine = bfd_mach_i960_xl;
+	case F_I960JX:
+	  machine = bfd_mach_i960_jx;
 	  break;
-	  /* end-sanitize-i960xl */
 	case F_I960HX:
 	  machine = bfd_mach_i960_hx;
 	  break;
@@ -1748,11 +1746,9 @@ coff_set_flags (abfd, magicp, flagsp)
 	  case bfd_mach_i960_ka_sa:
 	    flags = F_I960KA;
 	    break;
-	    /* start-sanitize-i960xl */
-	  case bfd_mach_i960_xl:
-	    flags = F_I960XL;
+	  case bfd_mach_i960_jx:
+	    flags = F_I960JX;
 	    break;
-	    /* end-sanitize-i960xl */
 	  case bfd_mach_i960_hx:
 	    flags = F_I960HX;
 	    break;
@@ -3524,7 +3520,9 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #else /* ! defined (coff_relocate_section) */
 #define coff_relocate_section NULL
 #define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#ifndef coff_bfd_link_add_symbols
 #define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#endif
 #define coff_bfd_final_link _bfd_generic_final_link
 #endif /* ! defined (coff_relocate_section) */
 #define coff_bfd_link_split_section  _bfd_generic_link_split_section

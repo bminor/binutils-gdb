@@ -1,5 +1,8 @@
 Thu Mar 14 16:06:06 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* coffcode.h: Allow specific backends to override the
+	bfd_link_add_symbols routine.
+
 	* coff-h8300.c: Include genlink.h.
 	(howto_table): Add R_MEM_INDIRECT.
 	(rtype2howto): Support R_MEM_INDIRECT.
