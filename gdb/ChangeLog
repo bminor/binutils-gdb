@@ -1,3 +1,16 @@
+Fri Dec 11 09:07:05 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* i386b-nat.c: Include "expression.h".
+
+	* symtab.h: Don't include "gnu-regex.h".
+	
+	* solib.c (solib_add_common_symbols): Cast parameters passed to
+ 	make_cleanup to use the new make_cleanup_func typedef.
+
+	* inftarg.c: Include "wait.h" after, rather than before, <wait.h>.
+  	"wait.h" was defining all WIF* macro's instead of filling in those
+ 	that <wait.h> missed.
+
 Fri Dec 11 09:52:04 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbtk-cmds.c, mipsm3-nat.c, hppah-nat.c, infptrace.c,

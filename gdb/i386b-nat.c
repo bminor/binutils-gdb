@@ -125,6 +125,7 @@ i386_register_u_addr (blockend, regnum)
 #endif /* !FETCH_INFERIOR_REGISTERS */
 
 #ifdef FLOAT_INFO
+#include "expression.h"
 #include "language.h"			/* for local_hex_string */
 #include "floatformat.h"
 
