@@ -84,7 +84,4 @@ typedef struct mips_extra_func_info
 #define DEPRECATED_IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_ignore_helper (CORE_ADDR pc);
 
-/* Definitions and declarations used by mips-tdep.c and remote-mips.c  */
-typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
-
 #endif /* TM_MIPS_H */

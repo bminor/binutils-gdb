@@ -1,3 +1,9 @@
+2004-10-30  Andrew Cagney  <cagney@gnu.org>
+
+	* config/mips/tm-mips.h (t_insn): Delete.
+	* mips-tdep.c (mips_fetch_instruction, mips_skip_trampoline_code):
+	Replace t_insn with ULONGEST.
+
 2004-10-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* mipsnbsd-tdep.c: Include "regset.h" and "gdb_assert.h".

@@ -847,7 +847,7 @@ mips_write_pc (CORE_ADDR pc, ptid_t ptid)
 /* Fetch and return instruction from the specified location.  If the PC
    is odd, assume it's a MIPS16 instruction; otherwise MIPS32.  */
 
-static t_inst
+static ULONGEST
 mips_fetch_instruction (CORE_ADDR addr)
 {
   char buf[MIPS_INSN32_SIZE];
@@ -4506,7 +4506,7 @@ mips_skip_trampoline_code (CORE_ADDR pc)
 	         address from those two instructions.  */
 
 	      CORE_ADDR target_pc = read_signed_register (2);
-	      t_inst inst;
+	      ULONGEST inst;
 	      int i;
 
 	      /* See if the name of the target function is  __fn_stub_*.  */
