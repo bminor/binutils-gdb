@@ -1,3 +1,14 @@
+2003-06-30  David Carlton  <carlton@kealia.com>
+
+	Band-aid for PR c++/1245.
+	* Makefile.in (cp-support.o): Depend on complaints_h.
+	* cp-support.c: Include complaints.h.  Add declaration for
+	find_last_component.
+	(cp_find_first_component): Separate code into
+	cp_find_first_component_aux.
+	(cp_find_first_component_aux): Call demangled_name_complaint.
+	(demangled_name_complaint): New.
+
 2003-06-30  Andrew Cagney  <cagney@redhat.com>
 
 	* remote.c (remote_async_wait): Fix -Wformat problem.

@@ -1,3 +1,8 @@
+2003-06-30  David Carlton  <carlton@kealia.com>
+
+	* gdb.c++/maint.exp (test_invalid_name): New.
+	(test_first_component): Add tests for invalid names.
+
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/print-threads.exp (test_all_threads): Add kfail for
