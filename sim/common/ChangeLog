@@ -1,5 +1,8 @@
 Wed Nov 19 13:25:48 1997  Michael Meissner  <meissner@cygnus.com>
 
+	* sim-options.c: Don't include ../libiberty/alloca-conf.h any
+	more, since alloca is not used in this file.
+
 	* sim-alu.h (ALU{32,64}_*): Rewrite 32 and 64 bit ALU support to
 	correctly set the carry and overflow bits for those types.
 	(ALU{8,16,32,64}_{ADD,SUB}_CA): Take VAL argument to add along
