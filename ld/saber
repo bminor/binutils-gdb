@@ -1,0 +1,17 @@
+load -I. ld__a29k.c
+load -I. ld__h8300hms.c
+load -I. ld__lnk960.c
+load -I. ld__sun3.c
+load -I. ldlex.c
+load -I. ld__ebmon29k.c
+load -I. ld__h8300xray.c
+load -I. ld__m88kbcs.c
+load -I. ld__sun4.c
+load -I. ld__gld960.c
+load -I. ld__hp300bsd.c
+load -I. ld__news.c
+load -I. ld__vanilla.c
+load -I. ld__go32.c
+load -I. ld__i386aout.c
+load -I. ld__st2000.c
+load -I. ldgram.c

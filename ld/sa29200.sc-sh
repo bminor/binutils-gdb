@@ -1,0 +1,24 @@
+cat <<EOF
+OUTPUT_FORMAT("${OUTPUT_FORMAT}")
+ENTRY(start)
+
+SECTIONS {
+  .text ${RELOCATING+${TEXT_START_ADDR}} : 
+    {
+	*(.text);
+	${RELOCATING+_etext = .};
+    }
+  data . :
+    {
+	*(.data);
+	${RELOCATING+_edata = .};
+	${CONSTRUCTING+CONSTRUCTORS}
+    }
+  .bss  . :
+    { 
+	*(COMMON) 	
+	*(.bss)
+	${RELOCATING+_end = .};
+    } 
+}
+EOF
