@@ -1,5 +1,10 @@
 2004-03-15  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (rs6000_register_virtual_type): Make registers
+	unsigned.
+
+2004-03-15  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (gdbarch_data_pre_init_fytpe)
 	(gdbarch_data_register_pre_init, gdbarch_data_post_init_fytpe)
 	(gdbarch_data_register_post_init): Replace gdbarch_data_init_ftype

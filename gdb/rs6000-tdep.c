@@ -1862,12 +1862,12 @@ rs6000_register_virtual_type (int n)
 	case 0:
 	  return builtin_type_int0;
 	case 4:
-	  return builtin_type_int32;
+	  return builtin_type_uint32;
 	case 8:
 	  if (tdep->ppc_ev0_regnum <= n && n <= tdep->ppc_ev31_regnum)
 	    return builtin_type_vec64;
 	  else
-	    return builtin_type_int64;
+	    return builtin_type_uint64;
 	  break;
 	case 16:
 	  return builtin_type_vec128;
