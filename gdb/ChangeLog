@@ -1,3 +1,7 @@
+Wed Dec 28 15:29:02 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* a29k-tdep.c (pop_frame): Fix a variable name.
+
 Wed Dec 28 12:21:39 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (push_dummy_frame): Refine code to determine what

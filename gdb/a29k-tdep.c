@@ -748,7 +748,7 @@ pop_frame ()
 {
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR rfb = read_register (RFB_REGNUM);		      
-  CORE_ADDR gr1 = fi->frame + fi->rsize;
+  CORE_ADDR gr1 = frame->frame + frame->rsize;
   CORE_ADDR lr1;							      
   CORE_ADDR original_lr0;
   int must_fix_lr0 = 0;
