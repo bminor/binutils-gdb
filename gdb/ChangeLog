@@ -1,3 +1,33 @@
+Fri Jul 26 13:20:02 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* Partial update to README (which still needs work for this
+	release!): (1) use of configure corrected for new script, 
+                   (2) "make gdb.dvi" and "make gdb.info" mentioned.
+
+Wed Jul 24 06:44:02 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* symtab.c (lookup_symbol):  Don't complain right off about
+	no debug symbols; use the misc function vector first.
+	(list_symbols):  Use misc function vector to find symbols
+	that don't have debug info, and print them.
+	(find_pc_symtab):  Temporarily avoid fatal() when psymtab
+	PC range doesn't match symtab PC range, as it does on the 
+	MIPS because our symtab reading isn't perfect.
+
+	* dbxread.c (dbx_symfile_read):  Make warning about
+	"no debug symbols" slightly nicer.
+
+	* source.c (select_source_symtab):  If "main" symbol exists,
+	but decode_line_spec can't find line info, don't just return
+	a zero; try other source symtabs or give an error.
+
+	* mipsread.c (parse_partial_symbols):  Sort the psymtabs by
+	their low addresses first, then rip through fixing high addrs.
+
+	* ns32k-opcode.h (sfsr):  Bugfix from Rune Nerg}rd,
+	<runene@ifi.uio.no>.
+	(NS32K_SVC_IMMED_OPERANDS):  Reverse the #ifndef.
+
 Tue Jul 23 18:52:43 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* Minor, mostly mechanical, cleanup of doc subdir for clean 

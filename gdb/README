@@ -5,77 +5,99 @@ present in version 3 and new bugs.  I have filed all the bug reports
 and fixes mailed to bug-gdb, and the fixes in particular will move
 into these sources as I find the time.
 
-	      => THIS VERSION IS FRAGILE! <=
+This release moves the generic GNU include files, the BFD ("binary
+file description") library, the
+getopt routines, obstacks, and the readline library into the parent
+directory of gdb.  The idea is that a variety of GNU tools can share a
+common copy of these things.
 
-	It depends on preliminary versions of a new "binary file
-	descriptor" library, a new global "include" directory, 
-	and separate libraries for "readline" and "libiberty", which
-	are packaged separately from GDB.  You must obtain, configure
-	and build these libraries manually, then configure and build gdb.
-	When building gdb's for multiple platforms, you must manually
-	rebuild the libraries separately for each platform.  Yes, of
-	course, we are working on this!  FIXME!
+These generic files are packaged separately from GDB.  You must obtain
+them separately from GDB, and unpack them into the same directory, so
+that the directories:
 
-	Configure and build the libraries for your host system by:
+	bfd	gdb	include	libiberty	readline	texinfo
 
-		cd ../bfd
-		./configure HOSTNAME
-		make
+are all in the same directory.  There should also be a "configure"
+script (and its parameters, in "configure.in" and "Makefile.in"),
+in the same place.
 
-		cd ../libiberty
-		./configure HOSTNAME
-		make
+Once you have this stuff unpacked, you can cd to the directory in which
+you unpacked them, and type:
+
+	./configure HOSTNAME
+	make
+
+and all the libraries, as well as GDB will be configured and built.
+
+
+When building gdb's for multiple platforms, you must manually
+rebuild the libraries separately for each platform.	FIXME FIXME no more!
+MENTION VPATH.
 
 		cd ../readline
 		[edit Makefile as appropriate]
 		make
 
-	Then you can cd ../gdb-whatever, and config and build gdb.
-
-This release moves the generic GNU include files, the BFD library, the
-getopt routines, obstacks, and the readline library into the parent
-directory of gdb.  The idea is that a variety of GNU tools can share a
-common copy of these things.
-
 A summary of features new since gdb-3.5 is in the file `WHATS.NEW'.
 
-The best way to build GDB, in my opinion, is in a subdirectory.  I use
-a naming convention "=XXX" where XXX is the machine type I'm building
-for.  Nothing depends on this, it's just how I remember which
-subdirectories are what.  So, once you have the BFD library built for
-that machine, you can do:
+The best way to build GDB (and the supporting libraries and include
+files), in my opinion, is in subdirectories.  The configure script
+does this automatically if you specify more than one HOSTNAME; you can
+force it, even for one host only, by using configure's "+forcesubdirs"
+option (which you can abbreviate to +f).  configure will create two
+directory levels, Host-machine and Target-machine.   "machine"
+depends on your configuration options; the two directory levels
+reflect the fact that GDB can be configured for cross-debugging
+(described further below).
 
-	cd gdb-x.yy	(the directory where this README is)
-	mkdir =XXX	(e.g. mkdir =vax)
-	cd =XXX
-	../config.gdb machine
+For example, you can do
+
+	cd ..		(the directory *above* where this README is)
+	configure +f mymachine
+	cd Host-mymachine/Target-mymachine
 	make
 
-Machine is like "vax" or "sun4".  For more information type `../config.gdb'.
+Machine is like "vax" or "sun4".  For more information type
+`./configure'.  For a list of host machines, see the "xconfig"
+directory; for a list of targets, see the "tconfig" directory.
+
 
 Once you have done that, just `make' will do everything, producing an
-executable `gdb' in this directory.
+executable `gdb' in this directory.  You can install it anywhere; it has
+no hardwired paths in it.  However, you should make sure that the shell
+on your path (named by the SHELL environment variable) is publicly
+readable; various systems refuse to let GDB debug child programs which
+are not readable, and GDB uses the shell to start your program.
 
 You can also build gdb binaries in a completely different directory from its 
-sources, by specifying "srcdir=YYY" to config.gdb, giving it an absolute
-or relative path to the source directory.  
+sources, by specifying "-destdir=YYY" to ./configure, giving it an absolute
+or relative path to the installation directory.  
 
 GDB can be used as a cross-debugger, running on a machine of one type
 while debugging a program running on a machine of another type.  You
-configure it this way by specifying `config.gdb host target' where host
-is where GDB runs, and target is where your program runs.
+configure it this way by specifying `./configure host -target=target'
+where host is where GDB runs, and target is where your program runs.
 
 If you want a new (current to this release) version of the manual, you
-will have to use the gdb.texinfo and texinfo.tex files provided with
-this distribution.  For details see the texinfo manual (distributed
-with emacs and as a printed manual).
+can run, from the GDB source directory,
+	make gdb.dvi
+to make the TeX device-independent output file, or
+	make gdb.info 
+to make the "info" version for online browsing.  The former assumes
+you have a running TeX on your system; the latter, a running makeinfo.
+The source for the GDB manual is in the doc/gdb.texinfo file (and a
+few other files it includes) provided with this distribution.  The
+Makefile attempts to use a texinfo.tex from a "texinfo" directory
+parallel to the GDB directory (../texinfo/texinfo.tex, from the
+directory where this README is).  For details see the texinfo manual
+(distributed with emacs and as a printed manual).
 
 About languages other than C...
 
 C++ support has been integrated into gdb.  GDB should work with FORTRAN
-programs.  (If you have problem, please send a bug report; note that you
+programs.  (If you have problems, please send a bug report; you
 may have to refer to some FORTRAN variables with a trailing
-underscore).  I am not aware of anyone who is working on getting it
+underscore).  I am not aware of anyone who is working on getting gdb
 to use the syntax of any language other than C or C++.  Pascal programs
 which use sets, subranges, file variables, or nested functions will not
 currently work.
@@ -105,15 +127,18 @@ stubs to be used with remote.c.  They are designeded to run standalone
 on a 68k or 386 cpu and communicate properly with the remote.c stub
 over a serial line.
 
-The file rem-multi.shar contains a general stub that can probably be
-running on various different flavors of unix to allow debugging over a
+The file rem-multi.shar contains a general stub that can probably
+run on various different flavors of unix to allow debugging over a
 serial line from one machine to another.
 
 The files remote-eb.c and remote-nindy.c are two examples of remote
 interfaces for talking to existing ROM monitors (for the AMD 29000 and the
-Intel 960 repsectively).  There is also a remote interface for the
-VxWorks realtime kernel, which communicates over TCP/IP, in remote-vx.c
-and the vx-share subdirectory.
+Intel 960 repsectively).
+
+Remote-vx.c and the vx-share subdirectory contain a remote interface for the
+VxWorks realtime kernel, which communicates over TCP using the Sun
+RPC library.  This would be a useful starting point for other remote-
+via-ethernet back ends.
 
 About reporting bugs...
 
@@ -140,11 +165,11 @@ xconfig/<machine>
 This contains Makefile stuff for when the host system is <machine>.
 It also specifies the name of the xm-XXX.h file for this machine.
 
-tm-XXX.h (tm.h is a link to this file, created by config.gdb).
+tm-XXX.h (tm.h is a link to this file, created by configure).
 This file contains macro definitions that express information
 about the target machine's registers, stack frame format and instructions.
 
-xm-XXX.h (xm.h is a link to this file, created by config.gdb).
+xm-XXX.h (xm.h is a link to this file, created by configure).
 This contains macro definitions describing the host system environment,
 such as byte order, host C compiler and library, ptrace support,
 and core file structure.
