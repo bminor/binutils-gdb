@@ -1,5 +1,13 @@
 2001-11-06 Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* p-lang.c (is_pascal_string_type): New function to determine if a 
+	type is a string type.
+	* p-lang.h: Add prototype for is_pascal_string_type.
+	* p-valprint.c (pascal_val_print) : Use is_pascal_string_type function 
+	to display strings nicely.
+
+2001-11-06 Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* p-exp.y (yylex): Only change case of expression if symbol is found.
 	Also check for GPC standard name form.
 

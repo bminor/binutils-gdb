@@ -63,6 +63,8 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
   unsigned len;
   struct type *elttype;
   unsigned eltlen;
+  int length_pos, length_size, string_pos;
+  int char_size;
   LONGEST val;
   CORE_ADDR addr;
 
@@ -187,16 +189,17 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	     as GDB does not recognize stabs pascal strings
 	     Pascal strings are mapped to records
 	     with lowercase names PM  */
-	  /* I don't know what GPC does :( PM */
-	  if (TYPE_CODE (elttype) == TYPE_CODE_STRUCT &&
-	      TYPE_NFIELDS (elttype) == 2 &&
-	      strcmp (TYPE_FIELDS (elttype)[0].name, "length") == 0 &&
-	      strcmp (TYPE_FIELDS (elttype)[1].name, "st") == 0 &&
-	      addr != 0)
+          if (is_pascal_string_type (elttype, &length_pos,
+                                     &length_size, &string_pos, &char_size)
+	      && addr != 0)
 	    {
-	      char bytelength;
-	      read_memory (addr, &bytelength, 1);
-	      i = val_print_string (addr + 1, bytelength, 1, stream);
+	      ULONGEST string_length;
+              void *buffer;
+              buffer = xmalloc (length_size);
+              read_memory (addr + length_pos, buffer, length_size);
+	      string_length = extract_unsigned_integer (buffer, length_size);
+              xfree (buffer);
+              i = val_print_string (addr + string_pos, string_length, char_size, stream);
 	    }
 	  else if (pascal_object_is_vtbl_member (type))
 	    {
@@ -205,8 +208,8 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 
 	      struct minimal_symbol *msymbol =
 	      lookup_minimal_symbol_by_pc (vt_address);
-	      if ((msymbol != NULL) &&
-		  (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
+	      if ((msymbol != NULL)
+		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 		{
 		  fputs_filtered (" <", stream);
 		  fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
@@ -315,12 +318,11 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	}
       else
 	{
-	  if ((TYPE_NFIELDS (type) == 2) &&
-	      (strcmp (TYPE_FIELDS (type)[0].name, "length") == 0) &&
-	      (strcmp (TYPE_FIELDS (type)[1].name, "st") == 0))
+          if (is_pascal_string_type (type, &length_pos, &length_size,
+                                     &string_pos, &char_size))
 	    {
-	      len = (*(valaddr + embedded_offset)) & 0xff;
-	      LA_PRINT_STRING (stream, valaddr + embedded_offset + 1, len, /* width ?? */ 0, 0);
+	      len = extract_unsigned_integer (valaddr + embedded_offset + length_pos, length_size);
+	      LA_PRINT_STRING (stream, valaddr + embedded_offset + string_pos, len, char_size, 0);
 	    }
 	  else
 	    pascal_object_print_value_fields (type, valaddr + embedded_offset, address, stream, format,

@@ -17,7 +17,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* This file is derived from p-lang.c */
+/* This file is derived from c-lang.c */
 
 #include "defs.h"
 #include "symtab.h"
@@ -27,8 +27,56 @@
 #include "language.h"
 #include "p-lang.h"
 #include "valprint.h"
-
+#include <ctype.h>
+ 
 extern void _initialize_pascal_language (void);
+
+
+/* Determines if type TYPE is a pascal string type.
+   Returns 1 if the type is a known pascal type
+   This function is used by p-valprint.c code to allow better string display.
+   If it is a pascal string type, then it also sets info needed
+   to get the length and the data of the string
+   length_pos, length_size and string_pos are given in bytes.
+   char_size gives the element size in bytes.
+   FIXME: if the position or the size of these fields
+   are not multiple of TARGET_CHAR_BIT then the results are wrong
+   but this does not happen for Free Pascal nor for GPC.  */
+int
+is_pascal_string_type (struct type *type,int *length_pos,
+                       int * length_size, int *string_pos, int *char_size)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    {
+      /* Old Borland type pascal strings from Free Pascal Compiler.  */
+      /* Two fields: length and st.  */
+      if (TYPE_NFIELDS (type) == 2 
+          && strcmp (TYPE_FIELDS (type)[0].name, "length") == 0 
+          && strcmp (TYPE_FIELDS (type)[1].name, "st") == 0)
+        {
+          *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
+          *length_size = TYPE_FIELD_TYPE (type, 0)->length;
+          *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
+          *char_size = 1;
+          return 1;
+        };
+      /* GNU pascal strings.  */
+      /* Three fields: Capacity, length and schema$ or _p_schema.  */
+      if (TYPE_NFIELDS (type) == 3
+          && strcmp (TYPE_FIELDS (type)[0].name, "Capacity") == 0
+          && strcmp (TYPE_FIELDS (type)[1].name, "length") == 0)
+        {
+          *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
+          *length_size = TYPE_FIELD_TYPE (type, 1)->length;
+          *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
+          /* FIXME: how can I detect wide chars in GPC ?? */
+          *char_size = 1;
+          return 1;
+        };
+    }
+  return 0;
+}
+
 static void pascal_one_char (int, struct ui_file *, int *);
 
 /* Print the character C on STREAM as part of the contents of a literal
