@@ -1,3 +1,8 @@
+2004-09-24  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
+	* Makefile.in (.y.c): Modify $(YLWRAP) invocation to use
+	the new argument order.
+
 2004-09-23  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Remove "broken" from XStormy16 entry.
