@@ -39,7 +39,6 @@
 #include <sys/uio.h>
 #include <sys/utsname.h>
 #include <sys/vfs.h>
-#include <linux/module.h>
 #include <linux/sysctl.h>
 #include <linux/types.h>
 #include <linux/unistd.h>
@@ -507,27 +506,6 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
           case __NR_fcntl:
             result = fcntl(arg1, arg2, arg3);
             errcode = errno;
-            break;
-
-          case __NR_ustat:
-            {
-              struct ustat ubuf;
-
-              result = ustat(arg1, &ubuf);
-              errcode = errno;
-
-              if (result != 0)
-                break;
-
-              ubuf.f_tfree = conv_endian(ubuf.f_tfree);
-              ubuf.f_tinode = conv_endian(ubuf.f_tinode);
-              if ((s.write_mem) (cb, &s, arg2, (char *) &ubuf, sizeof(ubuf))
-                  != sizeof(ubuf))
-                {
-                  result = -1;
-                  errcode = EINVAL;
-                }
-            }
             break;
 
           case __NR_dup2:
@@ -1115,26 +1093,6 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
           case __NR_mprotect:
             result = mprotect((void *) arg1, arg2, arg3);
             errcode = errno;
-            break;
-
-          case __NR_get_kernel_syms:
-            {
-              struct kernel_sym table;
-
-              result = get_kernel_syms(&table);
-              errcode = errno;
-
-              if (result != 0)
-                break;
-
-              table.value = conv_endian(table.value);
-              if ((s.write_mem) (cb, &s, arg1, (char *) &table, sizeof(table))
-                  != sizeof(table))
-                {
-                  result = -1;
-                  errcode = EINVAL;
-                }
-            }
             break;
 
           case __NR_fchdir:
