@@ -88,4 +88,8 @@ extern void cp_set_block_scope (const struct symbol *symbol,
 
 extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
 
+/* The list of "maint cplus" commands.  */
+
+extern struct cmd_list_element *maint_cplus_cmd_list;
+
 #endif /* CP_SUPPORT_H */

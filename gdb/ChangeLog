@@ -1,3 +1,26 @@
+2003-04-30  David Carlton  <carlton@bactrian.org>
+
+	* Makefile.in (cp-namespace.o): Update dependencies.
+	(cp-support.o): Ditto.
+	* cp-support.h: Declare maint_cplus_cmd_list.
+	* cp-namespace.c: Move variables namespace_block,
+	possible_namespace_block, namespace_objfile here from
+	cp-support.c.
+	Move functions initialize_namespace_blocks, get_namespace_block,
+	get_possible_namespace_block, free_namespace_blocks,
+	check_one_possible_namespace_symbol,
+	check_possible_namespace_symbols_loop, maintenance_print_namespace
+	here from cp-support.c.
+	Include objfiles.h, gdbtypes.h, dictionary.h, gdbcmd.h.
+	* cp-namespace.c (_initialize_cp_namespace): New.
+	(maintenance_cplus_namespace): Rename from
+	maintenance_print_namespace.
+	* cp-support.c (cp_find_first_component): Fix typo in comment.
+	(_initialize_cp_support): Don't add 'maint print
+	namespace'.
+	Make maint_cplus_cmd_list extern.
+	Prune includes.
+
 2003-04-18  David Carlton  <carlton@bactrian.org>
 
 	* mdebugread.c (parse_symbol): Move up declaration of 'iter'.
