@@ -1,5 +1,9 @@
 Sat Jun 29 13:38:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in (arm-*-riscix*): Set emulation to riscix.
+	* configure: Rebuild.
+	* config/te-riscix.h: New file to define TE_RISCIX.
+
 	* config/tc-sh.h (SUB_SEGMENT_ALIGN): Define.
 
 Fri Jun 28 15:14:31 1996  Ian Lance Taylor  <ian@cygnus.com>

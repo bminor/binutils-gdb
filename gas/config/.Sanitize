@@ -139,6 +139,7 @@ te-pc532mach.h
 te-pe.h
 te-ppcnw.h
 te-psos.h
+te-riscix.h
 te-sco386.h
 te-sun3.h
 te-sysv32.h
