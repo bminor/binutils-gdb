@@ -2474,8 +2474,6 @@ EOF
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips-*-sysv4*MP* | mips-*-gnu*)
-			    fmt=elf em=tmips ;;
       mips-*-linux-gnu*)
 			    fmt=elf em=tmips
 			    cat >> confdefs.h <<\EOF
@@ -2483,6 +2481,8 @@ EOF
 EOF
 
 			    ;;
+      mips-*-sysv4*MP* | mips-*-gnu*)
+			    fmt=elf em=tmips ;;
       mips-*-sysv*)         fmt=ecoff ;;
       mips-*-elf* | mips-*-rtems* | mips-*-openbsd*)
 			    fmt=elf ;;

@@ -1,5 +1,10 @@
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
+	* configure.in: Move "mips-*-linux-gnu*" before "mips-*-gnu*".
+	* configure: Regenerate.
+
+2001-06-07  H.J. Lu  <hjl@gnu.org>
+
 	* configure.in: Use MIPS_STABS_ELF for Linux/mips and remove
 	ecoff emulation.
 	* configure: Regenerate.
