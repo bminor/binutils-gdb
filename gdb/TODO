@@ -268,17 +268,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
 
 --
 
-Allow GDB to use installed regex.  Think about updating regex to more
-recent version (Andrew Cagney).
-
-Re: A new patch for regex
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00635.html
-
-A patch for gnu-regex
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00568.html
-
---
-
 ChangeLog.mi vs ChangeLog-mi (Andrew Cagney)
 Needs further debate.
 

@@ -1,5 +1,9 @@
 2000-04-03  H.J. Lu  <hjl@gnu.org>
 
+	* TODO: Remove the regex entry.
+
+2000-04-03  H.J. Lu  <hjl@gnu.org>
+
 	* gdb_regex.h: New. Include "regex.h" if USE_INCLUDED_REGEX
 	is defined and <regex.h> otherwise.
 
