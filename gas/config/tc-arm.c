@@ -2646,6 +2646,178 @@ validate_offset_imm (val, hwse)
   return val;
 }
 
+
+#ifdef OBJ_ELF
+enum mstate
+{
+  MAP_DATA,
+  MAP_ARM,
+  MAP_THUMB
+};
+
+/* This code is to handle mapping symbols as defined in the ARM ELF spec.
+   (This text is taken from version B-02 of the spec):
+
+      4.4.7 Mapping and tagging symbols
+
+      A section of an ARM ELF file can contain a mixture of ARM code,
+      Thumb code, and data.  There are inline transitions between code
+      and data at literal pool boundaries. There can also be inline
+      transitions between ARM code and Thumb code, for example in
+      ARM-Thumb inter-working veneers.  Linkers, machine-level
+      debuggers, profiling tools, and disassembly tools need to map
+      images accurately. For example, setting an ARM breakpoint on a
+      Thumb location, or in a literal pool, can crash the program
+      being debugged, ruining the debugging session.
+
+      ARM ELF entities are mapped (see section 4.4.7.1 below) and
+      tagged (see section 4.4.7.2 below) using local symbols (with
+      binding STB_LOCAL).  To assist consumers, mapping and tagging
+      symbols should be collated first in the symbol table, before
+      other symbols with binding STB_LOCAL.
+
+      To allow properly collated mapping and tagging symbols to be
+      skipped by consumers that have no interest in them, the first
+      such symbol should have the name $m and its st_value field equal
+      to the total number of mapping and tagging symbols (including
+      the $m) in the symbol table.
+
+      4.4.7.1 Mapping symbols
+
+      $a    Labels the first byte of a sequence of ARM instructions.
+            Its type is STT_FUNC.
+
+      $d    Labels the first byte of a sequence of data items.
+            Its type is STT_OBJECT.
+
+      $t    Labels the first byte of a sequence of Thumb instructions.
+            Its type is STT_FUNC.
+
+      This list of mapping symbols may be extended in the future.
+
+      Section-relative mapping symbols
+
+      Mapping symbols defined in a section define a sequence of
+      half-open address intervals that cover the address range of the
+      section. Each interval starts at the address defined by a
+      mapping symbol, and continues up to, but not including, the
+      address defined by the next (in address order) mapping symbol or
+      the end of the section. A corollary is that there must be a
+      mapping symbol defined at the beginning of each section.
+      Consumers can ignore the size of a section-relative mapping
+      symbol. Producers can set it to 0.
+
+      Absolute mapping symbols
+
+      Because of the need to crystallize a Thumb address with the
+      Thumb-bit set, absolute symbol of type STT_FUNC (symbols of type
+      STT_FUNC defined in section SHN_ABS) need to be mapped with $a
+      or $t.
+
+      The extent of a mapping symbol defined in SHN_ABS is [st_value,
+      st_value + st_size), or [st_value, st_value + 1) if st_size = 0,
+      where [x, y) denotes the half-open address range from x,
+      inclusive, to y, exclusive.
+
+      In the absence of a mapping symbol, a consumer can interpret a
+      function symbol with an odd value as the Thumb code address
+      obtained by clearing the least significant bit of the
+      value. This interpretation is deprecated, and it may not work in
+      the future.
+
+   Note - the Tagging symbols ($b, $f, $p $m) have been dropped from
+   the EABI (which is still under development), so they are not
+   implemented here.  */
+
+static void
+mapping_state (enum mstate state)
+{
+  static enum mstate mapstate = MAP_DATA;
+  symbolS * symbolP;
+  const char * symname;
+  int type;
+
+  if (mapstate == state)
+    /* The mapping symbol has already been emitted.
+       There is nothing else to do.  */
+    return;
+
+  mapstate = state;
+
+  switch (state)
+    {
+    case MAP_DATA:
+      symname = "$d";
+      type = BSF_OBJECT;
+      break;
+    case MAP_ARM:
+      symname = "$a";
+      type = BSF_FUNCTION;
+      break;
+    case MAP_THUMB:
+      symname = "$t";
+      type = BSF_FUNCTION;
+      break;
+    default:
+      abort ();
+    }
+
+  symbolP = symbol_new (symname, now_seg, (valueT) frag_now_fix (), frag_now);
+  symbol_table_insert (symbolP);
+  symbol_get_bfdsym (symbolP)->flags |= type | BSF_LOCAL;
+  
+  switch (state)
+    {
+    case MAP_ARM:
+      THUMB_SET_FUNC (symbolP, 0);
+      ARM_SET_THUMB (symbolP, 0);
+      ARM_SET_INTERWORK (symbolP, support_interwork);
+      break;
+      
+    case MAP_THUMB:
+      THUMB_SET_FUNC (symbolP, 1);
+      ARM_SET_THUMB (symbolP, 1);
+      ARM_SET_INTERWORK (symbolP, support_interwork);
+      break;
+      
+    case MAP_DATA:
+    default:
+      return;
+    }
+}
+
+/* When we change sections we need to issue a new mapping symbol.  */
+
+static void
+arm_elf_change_section (void)
+{
+  flagword flags;
+
+  if (!SEG_NORMAL (now_seg))
+    return;
+
+  flags = bfd_get_section_flags (stdoutput, now_seg);
+
+  /* We can ignore sections that only contain debug info.  */
+  if ((flags & SEC_ALLOC) == 0)
+    return;
+
+  if (flags & SEC_CODE)
+    {
+      if (thumb_mode)
+	mapping_state (MAP_THUMB);
+      else
+	mapping_state (MAP_ARM);
+    }
+  else
+    /* This section does not contain code.  Therefore it must contain data.  */
+    mapping_state (MAP_DATA);    
+}
+#else
+#define mapping_state(a)
+#endif /* OBJ_ELF */
+
+
 static void
 s_req (a)
      int a ATTRIBUTE_UNUSED;
@@ -2732,6 +2904,7 @@ s_bss (ignore)
      marking in_bss, then looking at s_skip for clues.  */
   subseg_set (bss_section, 0);
   demand_empty_rest_of_line ();
+  mapping_state (MAP_DATA);
 }
 
 static void
@@ -2970,6 +3143,7 @@ opcode_select (width)
              coming from ARM mode, which is word-aligned.  */
 	  record_alignment (now_seg, 1);
 	}
+      mapping_state (MAP_THUMB);
       break;
 
     case 32:
@@ -2985,6 +3159,7 @@ opcode_select (width)
 
 	  record_alignment (now_seg, 1);
 	}
+      mapping_state (MAP_ARM);
       break;
 
     default:
@@ -11681,6 +11856,7 @@ md_assemble (str)
 	      return;
 	    }
 
+	  mapping_state (MAP_THUMB);
 	  inst.instruction = opcode->value;
 	  inst.size = opcode->size;
 	  (*opcode->parms) (p);
@@ -11706,6 +11882,7 @@ md_assemble (str)
 	      return;
 	    }
 
+          mapping_state (MAP_ARM);
 	  inst.instruction = opcode->value;
 	  inst.size = INSN_SIZE;
 	  (*opcode->parms) (p);
@@ -12809,6 +12986,7 @@ s_arm_elf_cons (nbytes)
   md_cons_align (nbytes);
 #endif
 
+  mapping_state (MAP_DATA);
   do
     {
       bfd_reloc_code_real_type reloc;

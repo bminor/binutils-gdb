@@ -22,6 +22,7 @@
 * ARM Floating Point::       Floating Point
 * ARM Directives::           ARM Machine Directives
 * ARM Opcodes::              Opcodes
+* ARM Mapping Symbols::      Mapping Symbols
 @end menu
 
 @node ARM Options
@@ -438,4 +439,33 @@ This instruction will not make use of the literal pool.
 For information on the ARM or Thumb instruction sets, see @cite{ARM
 Software Development Toolkit Reference Manual}, Advanced RISC Machines
 Ltd.
+
+@node ARM Mapping Symbols
+@section Mapping Symbols
+
+The ARM ELF specification requires that special symbols be inserted
+into object files to mark certain features:
+
+@table @code
+
+@cindex @code{$a}
+@item $a
+At the start of a region of code containing ARM instructions.
+
+@cindex @code{$t}
+@item $t
+At the start of a region of code containing THUMB instructions.
+
+@cindex @code{$d}
+@item $d
+At the start of a region of data.
+
+@end table
+
+The assembler will automatically insert these symbols for you - there
+is no need to code them yourself.  Support for tagging symbols ($b,
+$f, $p and $m) which is also mentioned in the current ARM ELF
+specification is not implemented.  This is because they have been
+dropped from the new EABI and so tools cannot rely upon their
+presence.
 

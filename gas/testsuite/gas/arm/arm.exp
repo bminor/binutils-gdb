@@ -68,6 +68,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     
     if {[istarget *-*-elf*] || [istarget *-*-linux*]} then {
 	run_dump_test "pic"
+
+	run_dump_test "mapping"
     }
 
     gas_test "offset.s" "" $stdoptlist "OFFSET_IMM regression"

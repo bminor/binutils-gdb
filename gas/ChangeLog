@@ -1,3 +1,17 @@
+2003-11-13  Nick Clifton  <nickc@redhat.com>
+
+	* tc-arm.c (mapping_state): New function.  Emit a mapping
+	symbol if necessary.
+        (arm_elf_change_section): New function.  Intercept section
+	changes and generate mapping symbols.
+        (s_bss): Likewise.
+        (s_arm_elf_cons): Likewise.
+        (opcode_select): Choose the correct mapping state.
+        (md_assemble): Likewise.
+        * tc-arm.h (md_elf_section_change_hook): Define.
+        * doc/c-arm.texi (ARM Mapping Symbols): New node.
+	* NEWS: Mention new feature.
+
 2003-11-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.am (install, install-info, RECURSIVE_TARGETS): Define.

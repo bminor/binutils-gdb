@@ -90,6 +90,9 @@ struct fix;
 #ifdef OBJ_ELF
 # define TARGET_FORMAT elf32_arm_target_format()
   extern const char * elf32_arm_target_format PARAMS ((void));
+
+# define md_elf_section_change_hook() arm_elf_change_section
+  extern void arm_elf_change_section (void);
 #endif
 
 #define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
