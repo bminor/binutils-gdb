@@ -1,3 +1,9 @@
+Thu May  7 11:54:25 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (config.status): Add explicit target so that
+	config.status depends upon bfd/configure.in.
+	* Makefile.in: Rebuild.
+
 Thu May  7 09:33:02 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips-opc.c (break, sdbbp): Added two-operand variety of ISA1
