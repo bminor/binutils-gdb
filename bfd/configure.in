@@ -41,7 +41,7 @@ m88k)
 	esac
 	;;
 
-m68k|m680[01234]0)
+m68*)
 	case "${host_vendor}" in
 	cbm)
 		case ${host_os} in

@@ -1,3 +1,11 @@
+Tue Aug 18 12:57:45 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+ 	* Makefile.in: added FLAGS_TO_PASS, and used it for all recursive
+	invocations of make.  Also, always create installation
+	directories.
+
+	* config/apollov68.mh: removed -g from CC definition.
+
 Mon Aug 17 13:40:08 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/decstation.mh (HDEFINES): Specify "-G 4" to avoid
