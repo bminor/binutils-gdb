@@ -133,7 +133,7 @@ typedef enum cgen_operand_attr {
 } CGEN_OPERAND_ATTR;
 
 /* Number of non-boolean elements in cgen_operand.  */
-#define CGEN_OPERAND_MAX_ATTRS ((int) CGEN_OPERAND_ABS_ADDR)
+#define CGEN_OPERAND_NBOOL_ATTRS ((int) CGEN_OPERAND_ABS_ADDR)
 
 /* Enum declaration for cgen_insn attrs.  */
 typedef enum cgen_insn_attr {
@@ -146,7 +146,7 @@ typedef enum cgen_insn_attr {
 } CGEN_INSN_ATTR;
 
 /* Number of non-boolean elements in cgen_insn.  */
-#define CGEN_INSN_MAX_ATTRS ((int) CGEN_INSN_ALIAS)
+#define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_ALIAS)
 
 /* Insn types are used by the simulator.  */
 /* Enum declaration for m32r instruction types.  */
@@ -387,7 +387,8 @@ typedef enum hw_type {
  , HW_H_ABORT
 /* end-sanitize-m32rx */
  , HW_H_COND, HW_H_SM, HW_H_BSM, HW_H_IE
- , HW_H_BIE, HW_H_BCOND, HW_H_BPC, HW_MAX
+ , HW_H_BIE, HW_H_BCOND, HW_H_BPC, HW_H_LOCK
+ , HW_MAX
 } HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
