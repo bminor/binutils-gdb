@@ -76,6 +76,12 @@ extern void obj_elf_version PARAMS ((int));
    globally defined sections.  */
 #define obj_sec_sym_ok_for_reloc(SEC)	((SEC)->owner != 0)
 
+/* When setting one symbol equal to another, by default we probably
+   want them to have the same "size", whatever it means in the current
+   context.  */
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST,SRC) \
+  S_SET_SIZE ((DEST), S_GET_SIZE (SRC))
+
 /* Stabs go in a separate section.  */
 #define SEPARATE_STAB_SECTIONS
 
