@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -48,6 +48,7 @@ int dump_dynamic_symtab;	/* -T */
 int dump_reloc_info;		/* -r */
 int dump_dynamic_reloc_info;	/* -R */
 int dump_ar_hdrs;		/* -a */
+int dump_private_headers;	/* -p */
 int with_line_numbers;		/* -l */
 boolean with_source_code;	/* -S */
 int dump_stab_section_info;	/* --stabs */
@@ -120,7 +121,7 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-ahifdDrRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
+Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--archive-headers] [--target=bfdname] [--disassemble]\n\
        [--disassemble-all] [--file-headers] [--section-headers] [--headers]\n\
        [--info] [--section=section-name] [--line-numbers] [--source]\n",
@@ -128,7 +129,7 @@ Usage: %s [-ahifdDrRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
   fprintf (stream, "\
        [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
-       [--wide] [--version] [--help] objfile...\n\
+       [--wide] [--version] [--help] [--private-headers] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
   exit (status);
@@ -137,6 +138,7 @@ at least one option besides -l (--line-numbers) must be given\n");
 static struct option long_options[]=
 {
   {"all-headers", no_argument, NULL, 'x'},
+  {"private-headers", no_argument, NULL, 'p'},
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"disassemble", no_argument, NULL, 'd'},
@@ -340,8 +342,14 @@ compare_relocs (ap, bp)
   else if (a->address < b->address)
     return -1;
 
-  return compare_symbols ((const PTR) a->sym_ptr_ptr,
-			  (const PTR) b->sym_ptr_ptr);
+  /* So that associated relocations tied to the same address show up
+     in the correct order, we don't do any further sorting.  */
+  if (a > b)
+    return 1;
+  else if (a < b)
+    return -1;
+  else
+    return 0;
 }
 
 /* Print VMA symbolically to INFO if possible.  */
@@ -1109,24 +1117,22 @@ dump_section_stabs (abfd, stabsect_name, strsect_name)
      char *strsect_name;
 {
   asection *s;
-  if (read_section_stabs (abfd, stabsect_name, strsect_name))
-    {
-      print_section_stabs (abfd, stabsect_name, strsect_name);
-      free (stabs);
-      free (strtab);
-    }
 
-  /* Check for names which are supersets of the selected name */
+  /* Check for section names for which stabsect_name is a prefix, to
+     handle .stab0, etc.  */
   for (s = abfd->sections;
-       s;
+       s != NULL;
        s = s->next)
     {
-      if (strncmp (stabsect_name, s->name, strlen (stabsect_name)) == 0) 
+      if (strncmp (stabsect_name, s->name, strlen (stabsect_name)) == 0
+	  && strncmp (strsect_name, s->name, strlen (strsect_name)) != 0)
 	{
-	  read_section_stabs (abfd, s->name, strsect_name);
-	  print_section_stabs (abfd, s->name, strsect_name);
-	  free (stabs);
-	  free (strtab);
+	  if (read_section_stabs (abfd, s->name, strsect_name))
+	    {
+	      print_section_stabs (abfd, s->name, strsect_name);
+	      free (stabs);
+	      free (strtab);
+	    }
 	}
     }
 }
@@ -1156,7 +1162,13 @@ dump_bfd_header (abfd)
   printf ("\nstart address 0x");
   printf_vma (abfd->start_address);
 }
-
+
+static void
+dump_bfd_private_header (abfd)
+bfd *abfd;
+{
+  bfd_print_private_bfd_data (abfd, stdout);
+}
 static void
 display_bfd (abfd)
      bfd *abfd;
@@ -1180,6 +1192,8 @@ display_bfd (abfd)
     print_arelt_descr (stdout, abfd, true);
   if (dump_file_header)
     dump_bfd_header (abfd);
+  if (dump_private_headers)
+    dump_bfd_private_header (abfd);
   putchar ('\n');
   if (dump_section_headers)
     dump_headers (abfd);
@@ -1705,7 +1719,7 @@ main (argc, argv)
 
   bfd_init ();
 
-  while ((c = getopt_long (argc, argv, "ib:m:VdDlfahrRtTxsSj:w", long_options,
+  while ((c = getopt_long (argc, argv, "pib:m:VdDlfahrRtTxsSj:w", long_options,
 			   (int *) 0))
 	 != EOF)
     {
@@ -1732,7 +1746,11 @@ main (argc, argv)
 	case 'i':
 	  formats_info = true;
 	  break;
+	case 'p':
+	  dump_private_headers = 1;
+	  break;
 	case 'x':
+	  dump_private_headers = 1;
 	  dump_symtab = 1;
 	  dump_reloc_info = 1;
 	  dump_file_header = true;

@@ -1,3 +1,20 @@
+Thu Aug 31 16:30:22 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (add_indirect): New.
+	(asm_prefix): New
+	(gen_exp_file): Timestamp should be 0. Insert prefix when
+	needed. New code for indirection.
+	(gen_lib_file): Timestamp should be 0. Insert prefix
+	when needed.
+	(usage): Document --add-indirect.
+	(main): Cope with new option.
+
+	* objdump.c (dump_private_headers): New.
+	(usage): Document new option.
+	(long_option): Add private-headers.
+	(dump_bfd_private_header): New.
+	(main): Cope with new option.
+
 Thu Aug 31 04:09:16 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dlltool.c (run): Add missing 3rd arg to waitpid.
