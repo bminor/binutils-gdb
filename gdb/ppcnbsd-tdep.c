@@ -201,13 +201,6 @@ static struct core_fns ppcnbsd_elfcore_fns =
   NULL					/* next */
 };
 
-static int
-ppcnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
-{
-  /* FIXME: Need to add support for kernel-provided signal trampolines.  */
-  return (nbsd_pc_in_sigtramp (pc, func_name));
-}
-
 /* NetBSD is confused.  It appears that 1.5 was using the correct SVr4
    convention but, 1.6 switched to the below broken convention.  For
    the moment use the broken convention.  Ulgh!.  */
@@ -288,7 +281,6 @@ static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
   /* For NetBSD, this is an on again, off again thing.  Some systems
      do use the broken struct convention, and some don't.  */
   set_gdbarch_return_value (gdbarch, ppcnbsd_return_value);

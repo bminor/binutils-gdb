@@ -1,3 +1,9 @@
+2004-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* ppcnbsd-tdep.c (ppcnbsd_init_abi): Do not set
+	deprecated_pc_in_sigtramp.
+	(ppcnbsd_pc_in_sigtramp): Delete function.
+
 2004-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/m68k/nm-nbsd.h: Tweak comments.
