@@ -1,5 +1,10 @@
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (EXTRA_STACK_ALIGNMENT_NEEDED): Don't require when
+	multi-arch partial.
+	
+2002-02-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh: Map LEVEL onto a symbolic GT_LEVEL.  Exit on bad
 	field.  Use diff -u.
 	* gdbarch.c: Re-generate.
