@@ -126,7 +126,8 @@ store_inferior_registers (int regno)
 	  /* Set the priv level (stored in the low two bits of the PC.  */
 	  temp |= 0x3;
 
-	  ttrace_write_reg_64 (inferior_pid, (CORE_ADDR)addr, (CORE_ADDR)&temp);
+	  ttrace_write_reg_64 (PIDGET (inferior_ptid), (CORE_ADDR)addr,
+	                       (CORE_ADDR)&temp);
 
 	  /* If we fail to write the PC, give a true error instead of
 	     just a warning.  */
@@ -151,7 +152,8 @@ store_inferior_registers (int regno)
       for (i = 0; i < len; i += sizeof (int))
 	{
 	  errno = 0;
-	  call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) addr + i,
+	  call_ptrace (PT_WUREGS, PIDGET (inferior_ptid),
+	               (PTRACE_ARG3_TYPE) addr + i,
 		       *(int *) &registers[REGISTER_BYTE (regno) + i]);
 	  if (errno != 0)
 	    {
@@ -234,7 +236,7 @@ fetch_register (int regno)
       /* Copy an int from the U area to buf.  Fill the least
          significant end if len != raw_size.  */
       * (int *) &buf[offset + i] =
-	  call_ptrace (PT_RUREGS, inferior_pid,
+	  call_ptrace (PT_RUREGS, PIDGET (inferior_ptid),
 		       (PTRACE_ARG3_TYPE) addr + i, 0);
       if (errno != 0)
 	{
@@ -297,14 +299,15 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  /* Need part of initial word -- fetch it.  */
 	  buffer[0] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER,
-				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+				   PIDGET (inferior_ptid),
+				   (PTRACE_ARG3_TYPE) addr, 0);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
 	    = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER,
-			   inferior_pid,
+			   PIDGET (inferior_ptid),
 			   (PTRACE_ARG3_TYPE) (addr
 					       + (count - 1) * sizeof (int)),
 			   0);
@@ -326,7 +329,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  errno = 0;
 	  pt_request = (addr < text_end) ? PT_WIUSER : PT_WDUSER;
 	  pt_status = call_ptrace (pt_request,
-				   inferior_pid,
+				   PIDGET (inferior_ptid),
 				   (PTRACE_ARG3_TYPE) addr,
 				   buffer[i]);
 
@@ -338,7 +341,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	      errno = 0;
 	      pt_request = (pt_request == PT_WIUSER) ? PT_WDUSER : PT_WIUSER;
 	      pt_status = call_ptrace (pt_request,
-				       inferior_pid,
+				       PIDGET (inferior_ptid),
 				       (PTRACE_ARG3_TYPE) addr,
 				       buffer[i]);
 
@@ -358,7 +361,8 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  errno = 0;
 	  buffer[i] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER,
-				   inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+				   PIDGET (inferior_ptid),
+				   (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    {
 	      xfree (buffer);
@@ -389,7 +393,7 @@ child_post_follow_inferior_by_clone (void)
      At this point, the clone has attached to the child.  Because of
      the SIGSTOP, we must now deliver a SIGCONT to the child, or it
      won't behave properly. */
-  status = kill (inferior_pid, SIGCONT);
+  status = kill (PIDGET (inferior_ptid), SIGCONT);
 }
 
 
@@ -433,10 +437,11 @@ child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
 /* Format a process id, given PID.  Be sure to terminate
    this with a null--it's going to be printed via a "%s".  */
 char *
-child_pid_to_str (pid_t pid)
+child_pid_to_str (ptid_t ptid)
 {
   /* Static because address returned */
   static char buf[30];
+  pid_t pid = PIDGET (ptid);
 
   /* Extra NULLs for paranoia's sake */
   sprintf (buf, "process %d\0\0\0\0", pid);
@@ -450,10 +455,13 @@ child_pid_to_str (pid_t pid)
    Note: This is a core-gdb tid, not the actual system tid.
    See infttrace.c for details.  */
 char *
-hppa_tid_to_str (pid_t tid)
+hppa_tid_to_str (ptid_t ptid)
 {
   /* Static because address returned */
   static char buf[30];
+  /* This seems strange, but when I did the ptid conversion, it looked
+     as though a pid was always being passed.  - Kevin Buettner  */
+  pid_t tid = PIDGET (ptid);
 
   /* Extra NULLs for paranoia's sake */
   sprintf (buf, "system thread %d\0\0\0\0", tid);
@@ -626,7 +634,7 @@ hppa_range_profitable_for_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len)
 }
 
 char *
-hppa_pid_or_tid_to_str (pid_t id)
+hppa_pid_or_tid_to_str (ptid_t id)
 {
   /* In the ptrace world, there are only processes. */
   return child_pid_to_str (id);
@@ -814,9 +822,9 @@ child_acknowledge_created_inferior (int pid)
 }
 
 void
-child_post_startup_inferior (int pid)
+child_post_startup_inferior (ptid_t ptid)
 {
-  require_notification_of_events (pid);
+  require_notification_of_events (PIDGET (ptid));
 }
 
 void
@@ -1040,7 +1048,7 @@ child_pid_to_exec_file (int pid)
   char four_chars[4];
   int name_index;
   int i;
-  int saved_inferior_pid;
+  ptid_t saved_inferior_ptid;
   boolean done;
 
 #ifdef PT_GET_PROCESS_PATHNAME
@@ -1062,19 +1070,19 @@ child_pid_to_exec_file (int pid)
   name_index = 0;
   done = 0;
 
-  /* On the chance that pid != inferior_pid, set inferior_pid
-     to pid, so that (grrrr!) implicit uses of inferior_pid get
+  /* On the chance that pid != inferior_ptid, set inferior_ptid
+     to pid, so that (grrrr!) implicit uses of inferior_ptid get
      the right id.  */
 
-  saved_inferior_pid = inferior_pid;
-  inferior_pid = pid;
+  saved_inferior_ptid = inferior_ptid;
+  inferior_ptid = pid_to_ptid (pid);
 
   /* Try to grab a null-terminated string. */
   while (!done)
     {
       if (target_read_memory (top_of_stack, four_chars, 4) != 0)
 	{
-	  inferior_pid = saved_inferior_pid;
+	  inferior_ptid = saved_inferior_ptid;
 	  return NULL;
 	}
       for (i = 0; i < 4; i++)
@@ -1089,11 +1097,11 @@ child_pid_to_exec_file (int pid)
 
   if (exec_file_buffer[0] == '\0')
     {
-      inferior_pid = saved_inferior_pid;
+      inferior_ptid = saved_inferior_ptid;
       return NULL;
     }
 
-  inferior_pid = saved_inferior_pid;
+  inferior_ptid = saved_inferior_ptid;
   return exec_file_buffer;
 }
 
@@ -1124,7 +1132,7 @@ pre_fork_inferior (void)
    return "TRUE".  */
 
 int
-child_thread_alive (int pid)
+child_thread_alive (ptid_t ptid)
 {
   return 1;
 }

@@ -744,7 +744,7 @@ locate_base (void)
 	debug_base = elf_locate_base ();
 #ifdef HANDLE_SVR4_EXEC_EMULATORS
       /* Try it the hard way for emulated executables.  */
-      else if (inferior_pid != 0 && target_has_execution)
+      else if (!ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
 	proc_iterate_over_mappings (look_for_base);
 #endif
     }
@@ -1571,7 +1571,7 @@ svr4_solib_create_inferior_hook (void)
   stop_signal = TARGET_SIGNAL_0;
   do
     {
-      target_resume (-1, 0, stop_signal);
+      target_resume (pid_to_ptid (-1), 0, stop_signal);
       wait_for_inferior ();
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);

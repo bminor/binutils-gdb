@@ -1232,10 +1232,10 @@ int mach_really_waiting;
 
    There is no other way to exit this loop.
 
-   Returns the inferior_pid for rest of gdb.
+   Returns the inferior_ptid for rest of gdb.
    Side effects: Set *OURSTATUS.  */
-int
-mach_really_wait (int pid, struct target_waitstatus *ourstatus)
+ptid_t
+mach_really_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   kern_return_t ret;
   int w;
@@ -1311,7 +1311,7 @@ mach_really_wait (int pid, struct target_waitstatus *ourstatus)
 		    }
 		}
 	      store_waitstatus (ourstatus, w);
-	      return inferior_pid;
+	      return inferior_ptid;
 	    }
 	}
 
@@ -1346,7 +1346,7 @@ mach_really_wait (int pid, struct target_waitstatus *ourstatus)
 	  mach3_exception_actions (&w, FALSE, "Task");
 
 	  store_waitstatus (ourstatus, w);
-	  return inferior_pid;
+	  return inferior_ptid;
 	}
     }
 }
@@ -3815,14 +3815,14 @@ kill_inferior_fast (void)
 {
   WAITTYPE w;
 
-  if (inferior_pid == 0 || inferior_pid == 1)
+  if (PIDGET (inferior_ptid) == 0 || PIDGET (inferior_ptid) == 1)
     return;
 
   /* kill() it, since the Unix server does not otherwise notice when
    * killed with task_terminate().
    */
-  if (inferior_pid > 0)
-    kill (inferior_pid, SIGKILL);
+  if (PIDGET (inferior_ptid) > 0)
+    kill (PIDGET (inferior_ptid), SIGKILL);
 
   /* It's propably terminate already */
   (void) task_terminate (inferior_task);
@@ -3884,7 +3884,7 @@ ptrace (int a, int b, int c, int d)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-m3_resume (int pid, int step, enum target_signal signal)
+m3_resume (ptid_t ptid, int step, enum target_signal signal)
 {
   kern_return_t ret;
 
@@ -3913,8 +3913,8 @@ m3_resume (int pid, int step, enum target_signal signal)
 
   vm_read_cache_valid = FALSE;
 
-  if (signal && inferior_pid > 0)	/* Do not signal, if attached by MID */
-    kill (inferior_pid, target_signal_to_host (signal));
+  if (signal && PIDGET (inferior_ptid) > 0)	/* Do not signal, if attached by MID */
+    kill (PIDGET (inferior_ptid), target_signal_to_host (signal));
 
   if (step)
     {
@@ -4014,10 +4014,10 @@ m3_do_attach (int pid)
     {
       mid_attach (-(pid));
 
-      /* inferior_pid will be NEGATIVE! */
-      inferior_pid = pid;
+      /* inferior_ptid will be NEGATIVE! */
+      inferior_ptid = pid_to_ptid (pid);
 
-      return inferior_pid;
+      return PIDGET (inferior_ptid);
     }
 
   inferior_task = task_by_pid (pid);
@@ -4026,9 +4026,9 @@ m3_do_attach (int pid)
 
   task_attach (inferior_task);
 
-  inferior_pid = pid;
+  inferior_ptid = pid_to_ptid (pid);
 
-  return inferior_pid;
+  return PIDGET (inferior_ptid);
 }
 
 /* Attach to process PID, then initialize for debugging it
@@ -4053,15 +4053,17 @@ m3_attach (char *args, int from_tty)
       exec_file = (char *) get_exec_file (0);
 
       if (exec_file)
-	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file, target_pid_to_str (pid));
+	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
+	                   target_pid_to_str (pid_to_ptid (pid)));
       else
-	printf_unfiltered ("Attaching to %s\n", target_pid_to_str (pid));
+	printf_unfiltered ("Attaching to %s\n",
+	                   target_pid_to_str (pid_to_ptid (pid)));
 
       gdb_flush (gdb_stdout);
     }
 
-  m3_do_attach (pid);
-  inferior_pid = pid;
+  m3_do_attach (pid_to_ptid (pid));
+  inferior_ptid = pid_to_ptid (pid);
   push_target (&m3_ops);
 }
 
@@ -4149,8 +4151,8 @@ m3_do_detach (int signal)
   if (remove_breakpoints ())
     warning ("Could not remove breakpoints when detaching");
 
-  if (signal && inferior_pid > 0)
-    kill (inferior_pid, signal);
+  if (signal && PIDGET (inferior_ptid) > 0)
+    kill (PIDGET (inferior_ptid), signal);
 
   /* the task might be dead by now */
   (void) task_resume (inferior_task);
@@ -4179,14 +4181,14 @@ m3_detach (char *args, int from_tty)
       if (exec_file == 0)
 	exec_file = "";
       printf_unfiltered ("Detaching from program: %s %s\n",
-			 exec_file, target_pid_to_str (inferior_pid));
+			 exec_file, target_pid_to_str (inferior_ptid));
       gdb_flush (gdb_stdout);
     }
   if (args)
     siggnal = atoi (args);
 
   m3_do_detach (siggnal);
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   unpush_target (&m3_ops);	/* Pop out of handling an inferior */
 }
 #endif /* ATTACH_DETACH */
@@ -4212,7 +4214,7 @@ m3_files_info (struct target_ops *ignore)
 {
   /* FIXME: should print MID and all that crap.  */
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
-      attach_flag ? "attached" : "child", target_pid_to_str (inferior_pid));
+      attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
 }
 
 static void
@@ -4458,7 +4460,7 @@ init_m3_ops (void)
   m3_ops.to_attach = m3_attach;
   m3_ops.to_detach = m3_detach;
   m3_ops.to_resume = m3_resume;
-  m3_ops.to_wait = mach_really__wait;
+  m3_ops.to_wait = mach_really_wait;
   m3_ops.to_fetch_registers = fetch_inferior_registers;
   m3_ops.to_store_registers = store_inferior_registers;
   m3_ops.to_prepare_to_store = m3_prepare_to_store;

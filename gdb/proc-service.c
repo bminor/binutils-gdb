@@ -61,21 +61,21 @@ typedef size_t gdb_ps_size_t;
 /* Helper functions.  */
 
 static void
-restore_inferior_pid (void *arg)
+restore_inferior_ptid (void *arg)
 {
-  int *saved_pid_ptr = arg;
-  inferior_pid = *saved_pid_ptr;
+  ptid_t *saved_pid_ptr = arg;
+  inferior_ptid = *saved_pid_ptr;
   xfree (arg);
 }
 
 static struct cleanup *
-save_inferior_pid (void)
+save_inferior_ptid (void)
 {
-  int *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr;
 
-  saved_pid_ptr = xmalloc (sizeof (int));
-  *saved_pid_ptr = inferior_pid;
-  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
 
 /* Transfer LEN bytes of memory between BUF and address ADDR in the
@@ -90,10 +90,10 @@ static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, paddr_t addr,
 		char *buf, size_t len, int write)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
   int ret;
 
-  inferior_pid = ph->pid;
+  inferior_ptid = pid_to_ptid (ph->pid);
 
   if (write)
     ret = target_write_memory (addr, buf, len);
@@ -250,9 +250,9 @@ ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
 ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
   target_fetch_registers (-1);
   fill_gregset ((gdb_gregset_t *) gregset, -1);
@@ -267,9 +267,9 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 ps_err_e
 ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
   /* FIXME: We should really make supply_gregset const-correct.  */
   supply_gregset ((gdb_gregset_t *) gregset);
@@ -286,9 +286,9 @@ ps_err_e
 ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       gdb_prfpregset_t *fpregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
   target_fetch_registers (-1);
   fill_fpregset ((gdb_fpregset_t *) fpregset, -1);
@@ -304,9 +304,9 @@ ps_err_e
 ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       const gdb_prfpregset_t *fpregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
 
   /* FIXME: We should really make supply_fpregset const-correct.  */
   supply_fpregset ((gdb_fpregset_t *) fpregset);

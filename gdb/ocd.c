@@ -151,7 +151,7 @@ ocd_error (char *s, int error_code)
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
 
 int
-ocd_thread_alive (int th)
+ocd_thread_alive (ptid_t th)
 {
   return 1;
 }
@@ -344,7 +344,7 @@ device the OCD device is attached to (e.g. /dev/ttya).");
      variables, especially since GDB will someday have a notion of debugging
      several processes.  */
 
-  inferior_pid = 42000;
+  inferior_ptid = pid_to_ptid (42000);
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -376,7 +376,7 @@ ocd_detach (char *args, int from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-ocd_resume (int pid, int step, enum target_signal siggnal)
+ocd_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   int pktlen;
 
@@ -1251,7 +1251,7 @@ ocd_load (char *args, int from_tty)
 {
   generic_load (args, from_tty);
 
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 
 /* This is necessary because many things were based on the PC at the time that
    we attached to the monitor, which is no longer valid now that we have loaded

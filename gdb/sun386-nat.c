@@ -187,9 +187,9 @@
 /* OBSOLETE  */
 /* OBSOLETE   registers_fetched (); */
 /* OBSOLETE  */
-/* OBSOLETE   ptrace (PTRACE_GETREGS, inferior_pid, */
+/* OBSOLETE   ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid), */
 /* OBSOLETE 	  (PTRACE_ARG3_TYPE) & inferior_registers); */
-/* OBSOLETE   ptrace (PTRACE_GETFPREGS, inferior_pid, */
+/* OBSOLETE   ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid), */
 /* OBSOLETE 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers); */
 /* OBSOLETE  */
 /* OBSOLETE   memcpy (registers, &inferior_registers, sizeof inferior_registers); */
@@ -226,25 +226,25 @@
 /* OBSOLETE        instruction that moves eax into ebp gets single-stepped.  */ */
 /* OBSOLETE     { */
 /* OBSOLETE       int stack = inferior_registers.r_reg[SP_REGNUM]; */
-/* OBSOLETE       int stuff = ptrace (PTRACE_PEEKDATA, inferior_pid, */
+/* OBSOLETE       int stuff = ptrace (PTRACE_PEEKDATA, PIDGET (inferior_ptid), */
 /* OBSOLETE 			  (PTRACE_ARG3_TYPE) stack); */
 /* OBSOLETE       int reg = inferior_registers.r_reg[EAX]; */
 /* OBSOLETE       inferior_registers.r_reg[EAX] = */
 /* OBSOLETE 	inferior_registers.r_reg[FP_REGNUM]; */
-/* OBSOLETE       ptrace (PTRACE_SETREGS, inferior_pid, */
+/* OBSOLETE       ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid), */
 /* OBSOLETE 	      (PTRACE_ARG3_TYPE) & inferior_registers); */
-/* OBSOLETE       ptrace (PTRACE_POKEDATA, inferior_pid, (PTRACE_ARG3_TYPE) stack, */
+/* OBSOLETE       ptrace (PTRACE_POKEDATA, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) stack, */
 /* OBSOLETE 	      0xc589); */
-/* OBSOLETE       ptrace (PTRACE_SINGLESTEP, inferior_pid, (PTRACE_ARG3_TYPE) stack, */
+/* OBSOLETE       ptrace (PTRACE_SINGLESTEP, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) stack, */
 /* OBSOLETE 	      0); */
 /* OBSOLETE       wait (0); */
-/* OBSOLETE       ptrace (PTRACE_POKEDATA, inferior_pid, (PTRACE_ARG3_TYPE) stack, */
+/* OBSOLETE       ptrace (PTRACE_POKEDATA, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) stack, */
 /* OBSOLETE 	      stuff); */
 /* OBSOLETE       inferior_registers.r_reg[EAX] = reg; */
 /* OBSOLETE     } */
 /* OBSOLETE #endif */
-/* OBSOLETE   ptrace (PTRACE_SETREGS, inferior_pid, */
+/* OBSOLETE   ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid), */
 /* OBSOLETE 	  (PTRACE_ARG3_TYPE) & inferior_registers); */
-/* OBSOLETE   ptrace (PTRACE_SETFPREGS, inferior_pid, */
+/* OBSOLETE   ptrace (PTRACE_SETFPREGS, PIDGET (inferior_ptid), */
 /* OBSOLETE 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers); */
 /* OBSOLETE } */

@@ -341,7 +341,8 @@ void (*memory_changed_hook) (CORE_ADDR addr, int len);
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 
-int (*target_wait_hook) (int pid, struct target_waitstatus * status);
+ptid_t (*target_wait_hook) (ptid_t ptid,
+                            struct target_waitstatus * status);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */
@@ -1709,7 +1710,7 @@ set_prompt (char *s)
 int
 quit_confirm (void)
 {
-  if (inferior_pid != 0 && target_has_execution)
+  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
       char *s;
 
@@ -1746,7 +1747,7 @@ quit_force (char *args, int from_tty)
       exit_code = (int) value_as_long (val);
     }
 
-  if (inferior_pid != 0 && target_has_execution)
+  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
       if (attach_flag)
 	target_detach (args, from_tty);

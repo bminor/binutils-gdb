@@ -57,9 +57,9 @@ fetch_inferior_registers (int regno)
   struct reg inferior_registers;
   struct env387 inferior_fpregisters;
 
-  ptrace (PT_GETREGS, inferior_pid,
+  ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-  ptrace (PT_GETFPREGS, inferior_pid,
+  ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) &inferior_fpregisters, 0);
 
   RF ( 0, inferior_registers.r_eax);
@@ -142,9 +142,9 @@ store_inferior_registers (int regno)
   RS (FDOFF_REGNUM,   inferior_fpregisters.operand);
   RS (FOP_REGNUM,     inferior_fpregisters.opcode);
   
-  ptrace (PT_SETREGS, inferior_pid,
+  ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-  ptrace (PT_SETFPREGS, inferior_pid,
+  ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) &inferior_fpregisters, 0);
 }
 

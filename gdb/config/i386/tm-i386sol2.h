@@ -54,7 +54,8 @@ extern char *sunpro_static_transform_name (char *);
 /* Macros to extract process id and thread id from a composite pid/tid.
    Allocate lower 16 bits for process id, next 15 bits for thread id, and
    one bit for a flag to indicate a user thread vs. a kernel thread.  */
-#define PIDGET(PID)		(((PID) & 0xffff))
+#define PIDGET0(PID)		(((PID) & 0xffff))
+#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
 #define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
 #define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
 

@@ -63,9 +63,10 @@ extern void clear_sigio_trap (void);
 
 extern char *inferior_io_terminal;
 
-/* Pid of our debugged inferior, or 0 if no inferior now.  */
+/* Collected pid, tid, etc. of the debugged inferior.  When there's
+   no inferior, PIDGET (inferior_ptid) will be 0. */
 
-extern int inferior_pid;
+extern ptid_t inferior_ptid;
 
 /* Is the inferior running right now, as a result of a 'run&',
    'continue&' etc command? This is used in asycn gdb to determine
@@ -78,7 +79,7 @@ extern int target_executing;
    redisplay the prompt until the execution is actually over. */
 extern int sync_execution;
 
-/* This is only valid when inferior_pid is non-zero.
+/* This is only valid when inferior_ptid is non-zero.
 
    If this is 0, then exec events should be noticed and responded to
    by the debugger (i.e., be reported to the user).
@@ -122,15 +123,15 @@ extern int run_stack_dummy (CORE_ADDR, char *);
 
 extern CORE_ADDR read_pc (void);
 
-extern CORE_ADDR read_pc_pid (int);
+extern CORE_ADDR read_pc_pid (ptid_t);
 
-extern CORE_ADDR generic_target_read_pc (int);
+extern CORE_ADDR generic_target_read_pc (ptid_t);
 
 extern void write_pc (CORE_ADDR);
 
-extern void write_pc_pid (CORE_ADDR, int);
+extern void write_pc_pid (CORE_ADDR, ptid_t);
 
-extern void generic_target_write_pc (CORE_ADDR, int);
+extern void generic_target_write_pc (CORE_ADDR, ptid_t);
 
 extern CORE_ADDR read_sp (void);
 
@@ -208,9 +209,9 @@ extern int attach (int);
 extern void detach (int);
 
 /* PTRACE method of waiting for inferior process.  */
-int ptrace_wait (int, int *);
+int ptrace_wait (ptid_t, int *);
 
-extern void child_resume (int, int, enum target_signal);
+extern void child_resume (ptid_t, int, enum target_signal);
 
 #ifndef PTRACE_ARG3_TYPE
 #define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
@@ -224,7 +225,7 @@ extern void pre_fork_inferior (void);
 
 extern int proc_iterate_over_mappings (int (*)(int, CORE_ADDR));
 
-extern int procfs_first_available (void);
+extern ptid_t procfs_first_available (void);
 
 /* From fork-child.c */
 
@@ -261,7 +262,8 @@ extern int signal_print_update (int, int);
 
 extern int signal_pass_update (int, int);
 
-extern void get_last_target_status(int *pid, struct target_waitstatus *status);
+extern void get_last_target_status(ptid_t *ptid,
+                                   struct target_waitstatus *status);
 
 /* From infcmd.c */
 
@@ -362,7 +364,7 @@ extern int proceed_to_finish;
 
 extern char *stop_registers;
 
-/* Nonzero if the child process in inferior_pid was attached rather
+/* Nonzero if the child process in inferior_ptid was attached rather
    than forked.  */
 
 extern int attach_flag;

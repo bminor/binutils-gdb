@@ -51,7 +51,7 @@
 
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 
-static void mm_resume ();
+static void mm_resume (ptid_t ptid, int step, enum target_signal sig)
 static void mm_fetch_registers ();
 static int fetch_register ();
 static void mm_store_registers ();
@@ -523,7 +523,7 @@ mm_detach (char *args, int from_tty)
 ** Tell the remote machine to resume.  */
 
 static void
-mm_resume (int pid, int step, enum target_signal sig)
+mm_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   if (sig != TARGET_SIGNAL_0)
     warning ("Can't send signals to a remote MiniMon system.");
@@ -547,8 +547,8 @@ mm_resume (int pid, int step, enum target_signal sig)
 ** Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
-static int
-mm_wait (struct target_waitstatus *status)
+static ptid_t
+mm_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int i, result;
   int old_timeout = timeout;
@@ -692,7 +692,7 @@ halted:
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;
-  return 0;
+  return inferior_ptid;
 }
 
 /******************************************************* REMOTE_FETCH_REGISTERS

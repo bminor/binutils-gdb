@@ -190,12 +190,13 @@ i386_float_info (void)
   struct env387 fps_fixed;
   int i;
 
-  if (inferior_pid)
+  if (! ptid_equal (inferior_ptid, null_ptid))
     {
       char buf[10];
       unsigned short status;
 
-      ptrace (PT_READ_FPR, inferior_pid, buf, offsetof (struct env387, status));
+      ptrace (PT_READ_FPR, PIDGET (inferior_ptid), buf,
+              offsetof (struct env387, status));
       memcpy (&status, buf, sizeof (status));
       fpsaved = status;
     }
@@ -211,13 +212,13 @@ i386_float_info (void)
       return;
     }
 
-  if (inferior_pid)
+  if (! ptid_equal (inferior_ptid, null_ptid))
     {
       int offset;
       for (offset = 0; offset < sizeof (fps); offset += 10)
 	{
 	  char buf[10];
-	  ptrace (PT_READ_FPR, inferior_pid, buf, offset);
+	  ptrace (PT_READ_FPR, PIDGET (inferior_ptid), buf, offset);
 	  memcpy ((char *) &fps.control + offset, buf,
 		  MIN (10, sizeof (fps) - offset));
 	}
@@ -234,10 +235,10 @@ fetch_register (int regno)
 {
   char buf[MAX_REGISTER_RAW_SIZE];
   if (regno < FP0_REGNUM)
-    *(int *) buf = ptrace (PT_READ_GPR, inferior_pid,
+    *(int *) buf = ptrace (PT_READ_GPR, PIDGET (inferior_ptid),
 			   PT_REG (regmap[regno]), 0, 0);
   else
-    ptrace (PT_READ_FPR, inferior_pid, buf,
+    ptrace (PT_READ_FPR, PIDGET (inferior_ptid), buf,
 	    (regno - FP0_REGNUM) * 10 + offsetof (struct env387, regs));
   supply_register (regno, buf);
 }
@@ -259,10 +260,11 @@ store_register (int regno)
   char buf[80];
   errno = 0;
   if (regno < FP0_REGNUM)
-    ptrace (PT_WRITE_GPR, inferior_pid, PT_REG (regmap[regno]),
+    ptrace (PT_WRITE_GPR, PIDGET (inferior_ptid), PT_REG (regmap[regno]),
 	    *(int *) &registers[REGISTER_BYTE (regno)], 0);
   else
-    ptrace (PT_WRITE_FPR, inferior_pid, &registers[REGISTER_BYTE (regno)],
+    ptrace (PT_WRITE_FPR, PIDGET (inferior_ptid),
+            &registers[REGISTER_BYTE (regno)],
 	    (regno - FP0_REGNUM) * 10 + offsetof (struct env387, regs));
 
   if (errno != 0)

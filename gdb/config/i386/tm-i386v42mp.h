@@ -43,7 +43,8 @@
 #define PIDBITS 16
 
 /* Return the process id stored in composite PID. */
-#define PIDGET(PID)             (((PID) & ((1 << PIDBITS) - 1)))
+#define PIDGET0(PID)            (((PID) & ((1 << PIDBITS) - 1)))
+#define PIDGET(PID)             ((PIDGET0 (PID) == ((1 << PIDBITS) -1)) ? -1 : PIDGET0 (PID))
 
 /* Return the thread or lwp id stored in composite PID. */
 #define TIDGET(PID)             (((PID) & 0x3fffffff) >> PIDBITS)

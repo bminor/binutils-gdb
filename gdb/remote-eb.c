@@ -520,7 +520,7 @@ eb_detach (int from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-eb_resume (int pid, int step, enum target_signal sig)
+eb_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   if (step)
     {
@@ -559,8 +559,8 @@ eb_resume (int pid, int step, enum target_signal sig)
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
-int
-eb_wait (struct target_waitstatus *status)
+ptid_t
+eb_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   /* Strings to look for.  '?' means match any single character.  
      Note that with the algorithm we use, the initial character

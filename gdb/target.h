@@ -196,9 +196,9 @@ struct target_ops
     void (*to_require_attach) (char *, int);
     void (*to_detach) (char *, int);
     void (*to_require_detach) (int, char *, int);
-    void (*to_resume) (int, int, enum target_signal);
-    int (*to_wait) (int, struct target_waitstatus *);
-    void (*to_post_wait) (int, int);
+    void (*to_resume) (ptid_t, int, enum target_signal);
+    ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
+    void (*to_post_wait) (ptid_t, int);
     void (*to_fetch_registers) (int);
     void (*to_store_registers) (int);
     void (*to_prepare_to_store) (void);
@@ -261,7 +261,7 @@ struct target_ops
     void (*to_load) (char *, int);
     int (*to_lookup_symbol) (char *, CORE_ADDR *);
     void (*to_create_inferior) (char *, char *, char **);
-    void (*to_post_startup_inferior) (int);
+    void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
     void (*to_clone_and_follow_inferior) (int, int *);
     void (*to_post_follow_inferior_by_clone) (void);
@@ -281,10 +281,10 @@ struct target_ops
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (void);
     int (*to_can_run) (void);
-    void (*to_notice_signals) (int pid);
-    int (*to_thread_alive) (int pid);
+    void (*to_notice_signals) (ptid_t ptid);
+    int (*to_thread_alive) (ptid_t ptid);
     void (*to_find_new_threads) (void);
-    char *(*to_pid_to_str) (int);
+    char *(*to_pid_to_str) (ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
     void (*to_stop) (void);
     int (*to_query) (int /*char */ , char *, char *, int *);
@@ -421,18 +421,18 @@ extern void target_detach (char *, int);
 #define target_require_detach(pid, args, from_tty)	\
      (*current_target.to_require_detach) (pid, args, from_tty)
 
-/* Resume execution of the target process PID.  STEP says whether to
+/* Resume execution of the target process PTID.  STEP says whether to
    single-step or to run free; SIGGNAL is the signal to be given to
    the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
    pass TARGET_SIGNAL_DEFAULT.  */
 
-#define	target_resume(pid, step, siggnal)				\
+#define	target_resume(ptid, step, siggnal)				\
   do {									\
     dcache_invalidate(target_dcache);					\
-    (*current_target.to_resume) (pid, step, siggnal);			\
+    (*current_target.to_resume) (ptid, step, siggnal);			\
   } while (0)
 
-/* Wait for process pid to do something.  Pid = -1 to wait for any pid
+/* Wait for process pid to do something.  PTID = -1 to wait for any pid
    to do something.  Return pid of child, or -1 in case of error;
    store status through argument pointer STATUS.  Note that it is
    *not* OK to return_to_top_level out of target_wait without popping
@@ -440,8 +440,8 @@ extern void target_detach (char *, int);
    to the prompt with a debugging target but without the frame cache,
    stop_pc, etc., set up.  */
 
-#define	target_wait(pid, status)		\
-     (*current_target.to_wait) (pid, status)
+#define	target_wait(ptid, status)		\
+     (*current_target.to_wait) (ptid, status)
 
 /* The target_wait operation waits for a process event to occur, and
    thereby stop the process.
@@ -453,8 +453,8 @@ extern void target_detach (char *, int);
    This operation provides a target-specific hook that allows the
    necessary bookkeeping to be performed to track such sequences.  */
 
-#define target_post_wait(pid, status) \
-     (*current_target.to_post_wait) (pid, status)
+#define target_post_wait(ptid, status) \
+     (*current_target.to_post_wait) (ptid, status)
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
@@ -514,9 +514,9 @@ extern char *child_core_file_to_sym_file (char *);
 extern void child_post_attach (int);
 #endif
 
-extern void child_post_wait (int, int);
+extern void child_post_wait (ptid_t, int);
 
-extern void child_post_startup_inferior (int);
+extern void child_post_startup_inferior (ptid_t);
 
 extern void child_acknowledge_created_inferior (int);
 
@@ -554,7 +554,7 @@ extern int child_has_syscall_event (int, enum target_waitkind *, int *);
 
 extern int child_has_exited (int, int, int *);
 
-extern int child_thread_alive (int);
+extern int child_thread_alive (ptid_t);
 
 /* From exec.c */
 
@@ -640,7 +640,7 @@ extern void target_load (char *arg, int from_tty);
 #define target_lookup_symbol(name, addrp) \
      (*current_target.to_lookup_symbol) (name, addrp)
 
-/* Start an inferior process and set inferior_pid to its pid.
+/* Start an inferior process and set inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().
@@ -660,8 +660,8 @@ extern void target_load (char *arg, int from_tty);
 
    Such targets will supply an appropriate definition for this function.  */
 
-#define target_post_startup_inferior(pid) \
-     (*current_target.to_post_startup_inferior) (pid)
+#define target_post_startup_inferior(ptid) \
+     (*current_target.to_post_startup_inferior) (ptid)
 
 /* On some targets, the sequence of starting up an inferior requires
    some synchronization between gdb and the new inferior process, PID.  */
@@ -803,13 +803,13 @@ extern void target_load (char *arg, int from_tty);
 
 /* post process changes to signal handling in the inferior.  */
 
-#define target_notice_signals(pid) \
-     (*current_target.to_notice_signals) (pid)
+#define target_notice_signals(ptid) \
+     (*current_target.to_notice_signals) (ptid)
 
 /* Check to see if a thread is still alive.  */
 
-#define target_thread_alive(pid) \
-     (*current_target.to_thread_alive) (pid)
+#define target_thread_alive(ptid) \
+     (*current_target.to_thread_alive) (ptid)
 
 /* Query for new threads and add them to the thread list.  */
 
@@ -944,7 +944,7 @@ extern void target_link (char *, CORE_ADDR *);
 #ifndef target_tid_to_str
 #define target_tid_to_str(PID) \
      target_pid_to_str (PID)
-extern char *normal_pid_to_str (int pid);
+extern char *normal_pid_to_str (ptid_t ptid);
 #endif
 
 /* Return a short string describing extra information about PID,

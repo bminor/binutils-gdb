@@ -329,7 +329,7 @@ open_symbol_file_object (void *from_ttyp)
   struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
   struct so_list *sos;
 
-  sos = build_so_list_from_mapfile (PIDGET (inferior_pid),
+  sos = build_so_list_from_mapfile (PIDGET (inferior_ptid),
                                     MA_MAINEXEC, MA_MAINEXEC);
 
 
@@ -374,7 +374,7 @@ aix5_current_sos (void)
   struct so_list *sos;
 
   /* Fetch the list of mappings, excluding the main executable. */
-  sos = build_so_list_from_mapfile (PIDGET (inferior_pid), MA_MAINEXEC, 0);
+  sos = build_so_list_from_mapfile (PIDGET (inferior_ptid), MA_MAINEXEC, 0);
 
   /* Reverse the list; it looks nicer when we print it if the mappings
      are in the same order as in the map file.  */
@@ -701,7 +701,7 @@ aix5_relocate_main_executable (void)
   struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
 
   /* Fetch the mappings for the main executable from the map file.  */
-  so = build_so_list_from_mapfile (PIDGET (inferior_pid),
+  so = build_so_list_from_mapfile (PIDGET (inferior_ptid),
                                    MA_MAINEXEC, MA_MAINEXEC);
 
   /* Make sure we actually have some mappings to work with.  */
@@ -858,7 +858,7 @@ aix5_find_global_pointer (CORE_ADDR addr)
   CORE_ADDR global_pointer = 0;
   struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
 
-  sos = build_so_list_from_mapfile (PIDGET (inferior_pid), 0, 0);
+  sos = build_so_list_from_mapfile (PIDGET (inferior_ptid), 0, 0);
 
   for (so = sos; so != NULL; so = so->next)
     {
@@ -902,7 +902,7 @@ aix5_find_gate_addresses (CORE_ADDR *start, CORE_ADDR *end)
   struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
 
   /* Fetch the mappings for the main executable from the map file.  */
-  so = build_so_list_from_mapfile (PIDGET (inferior_pid),
+  so = build_so_list_from_mapfile (PIDGET (inferior_ptid),
                                    MA_KERNTEXT, MA_KERNTEXT);
 
   /* Make sure we actually have some mappings to work with.  */

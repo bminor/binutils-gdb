@@ -99,7 +99,7 @@ int sync_execution = 0;
    when the inferior stopped in a different thread than it had been
    running in.  */
 
-static int previous_inferior_pid;
+static ptid_t previous_inferior_ptid;
 
 /* This is true for configurations that may follow through execl() and
    similar functions.  At present this is only true for HP-UX native.  */
@@ -332,6 +332,9 @@ static unsigned char *signal_program;
 	(flags)[signum] = 0; \
   } while (0)
 
+/* Value to pass to target_resume() to cause all threads to resume */
+
+#define RESUME_ALL (pid_to_ptid (-1))
 
 /* Command list pointer for the "stop" placeholder.  */
 
@@ -409,7 +412,7 @@ static int number_of_threads_in_syscalls;
 /* This is a cached copy of the pid/waitstatus of the last event
    returned by target_wait()/target_wait_hook().  This information is
    returned by get_last_target_status(). */
-static int target_last_wait_pid = -1;
+static ptid_t target_last_wait_ptid;
 static struct target_waitstatus target_last_waitstatus;
 
 /* This is used to remember when a fork, vfork or exec event
@@ -441,7 +444,7 @@ pending_follow;
    set to 1, a vfork event has been seen, but cannot be followed
    until the exec is seen.
 
-   (In the latter case, inferior_pid is still the parent of the
+   (In the latter case, inferior_ptid is still the parent of the
    vfork, and pending_follow.fork_event.child_pid is the child.  The
    appropriate process is followed, according to the setting of
    follow-fork-mode.) */
@@ -513,7 +516,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
     }
 
   /* If we're to be following the child, then attach to it, detach
-     from inferior_pid, and set inferior_pid to child_pid. */
+     from inferior_ptid, and set inferior_ptid to child_pid. */
   else if (follow_mode == follow_fork_mode_child)
     {
       char child_pid_spelling[100];	/* Arbitrary length. */
@@ -536,7 +539,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
       /* Also reset the solib inferior hook from the parent. */
 #ifdef SOLIB_REMOVE_INFERIOR_HOOK
-      SOLIB_REMOVE_INFERIOR_HOOK (inferior_pid);
+      SOLIB_REMOVE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
 
       /* Detach from the parent. */
@@ -544,7 +547,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
       target_detach (NULL, 1);
 
       /* Attach to the child. */
-      inferior_pid = child_pid;
+      inferior_ptid = pid_to_ptid (child_pid);
       sprintf (child_pid_spelling, "%d", child_pid);
       dont_repeat ();
 
@@ -588,7 +591,7 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
 
       /* We continue to follow the parent.  To help distinguish the two
          debuggers, though, both we and our clone will reset our prompts. */
-      sprintf (pid_suffix, "[%d] ", inferior_pid);
+      sprintf (pid_suffix, "[%d] ", PIDGET (inferior_ptid));
       set_prompt (strcat (get_prompt (), pid_suffix));
     }
 
@@ -650,11 +653,12 @@ follow_vfork (int parent_pid, int child_pid)
   follow_inferior_fork (parent_pid, child_pid, 0, 1);
 
   /* Did we follow the child?  Had it exec'd before we saw the parent vfork? */
-  if (pending_follow.fork_event.saw_child_exec && (inferior_pid == child_pid))
+  if (pending_follow.fork_event.saw_child_exec
+      && (PIDGET (inferior_ptid) == child_pid))
     {
       pending_follow.fork_event.saw_child_exec = 0;
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_exec (inferior_pid, pending_follow.execd_pathname);
+      follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
       xfree (pending_follow.execd_pathname);
     }
 }
@@ -676,13 +680,14 @@ follow_exec (int pid, char *execd_pathname)
       (pending_follow.kind == TARGET_WAITKIND_VFORKED))
     {
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_vfork (inferior_pid, pending_follow.fork_event.child_pid);
+      follow_vfork (PIDGET (inferior_ptid),
+                    pending_follow.fork_event.child_pid);
       follow_vfork_when_exec = 0;
-      saved_pid = inferior_pid;
+      saved_pid = PIDGET (inferior_ptid);
 
       /* Did we follow the parent?  If so, we're done.  If we followed
          the child then we must also follow its exec(). */
-      if (inferior_pid == pending_follow.fork_event.parent_pid)
+      if (PIDGET (inferior_ptid) == pending_follow.fork_event.parent_pid)
 	return;
     }
 
@@ -731,7 +736,8 @@ follow_exec (int pid, char *execd_pathname)
 
   gdb_flush (gdb_stdout);
   target_mourn_inferior ();
-  inferior_pid = saved_pid;	/* Because mourn_inferior resets inferior_pid. */
+  inferior_ptid = pid_to_ptid (saved_pid);
+  			/* Because mourn_inferior resets inferior_ptid. */
   push_target (tgt);
 
   /* That a.out is now the one to use. */
@@ -747,7 +753,7 @@ follow_exec (int pid, char *execd_pathname)
   SOLIB_RESTART ();
 #endif
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
-  SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
+  SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
 
   /* Reinsert all breakpoints.  (Those which were symbolic have
@@ -866,7 +872,8 @@ resume (int step, enum target_signal sig)
     {
     case (TARGET_WAITKIND_FORKED):
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_fork (inferior_pid, pending_follow.fork_event.child_pid);
+      follow_fork (PIDGET (inferior_ptid),
+                   pending_follow.fork_event.child_pid);
       break;
 
     case (TARGET_WAITKIND_VFORKED):
@@ -874,14 +881,15 @@ resume (int step, enum target_signal sig)
 	int saw_child_exec = pending_follow.fork_event.saw_child_exec;
 
 	pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-	follow_vfork (inferior_pid, pending_follow.fork_event.child_pid);
+	follow_vfork (PIDGET (inferior_ptid),
+	              pending_follow.fork_event.child_pid);
 
 	/* Did we follow the child, but not yet see the child's exec event?
 	   If so, then it actually ought to be waiting for us; we respond to
 	   parent vfork events.  We don't actually want to resume the child
 	   in this situation; we want to just get its exec event. */
 	if (!saw_child_exec &&
-	    (inferior_pid == pending_follow.fork_event.child_pid))
+	    (PIDGET (inferior_ptid) == pending_follow.fork_event.child_pid))
 	  should_resume = 0;
       }
       break;
@@ -902,7 +910,7 @@ resume (int step, enum target_signal sig)
 
   if (should_resume)
     {
-      int resume_pid;
+      ptid_t resume_ptid;
 
       if (use_thread_step_needed && thread_step_needed)
 	{
@@ -915,7 +923,7 @@ resume (int step, enum target_signal sig)
 	    {
 	      /* Breakpoint deleted: ok to do regular resume
 	         where all the threads either step or continue. */
-	      resume_pid = -1;
+	      resume_ptid = RESUME_ALL;
 	    }
 	  else
 	    {
@@ -927,7 +935,7 @@ resume (int step, enum target_signal sig)
 		  trap_expected = 1;
 		  step = 1;
 		}
-	      resume_pid = inferior_pid;
+	      resume_ptid = inferior_ptid;
 	    }
 	}
       else
@@ -935,11 +943,11 @@ resume (int step, enum target_signal sig)
 	  /* Vanilla resume. */
 	  if ((scheduler_mode == schedlock_on) ||
 	      (scheduler_mode == schedlock_step && step != 0))
-	    resume_pid = inferior_pid;
+	    resume_ptid = inferior_ptid;
 	  else
-	    resume_pid = -1;
+	    resume_ptid = RESUME_ALL;
 	}
-      target_resume (resume_pid, step, sig);
+      target_resume (resume_ptid, step, sig);
     }
 
   discard_cleanups (old_cleanups);
@@ -1230,8 +1238,8 @@ struct execution_control_state
     int current_line;
     struct symtab *current_symtab;
     int handling_longjmp;	/* FIXME */
-    int pid;
-    int saved_inferior_pid;
+    ptid_t ptid;
+    ptid_t saved_inferior_ptid;
     int update_step_sp;
     int stepping_through_solib_after_catch;
     bpstat stepping_through_solib_catchpoints;
@@ -1240,7 +1248,7 @@ struct execution_control_state
     int new_thread_event;
     struct target_waitstatus tmpstatus;
     enum infwait_states infwait_state;
-    int waiton_pid;
+    ptid_t waiton_ptid;
     int wait_some_more;
   };
 
@@ -1284,7 +1292,7 @@ wait_for_inferior (void)
   thread_step_needed = 0;
 
   /* We'll update this if & when we switch to a new thread. */
-  previous_inferior_pid = inferior_pid;
+  previous_inferior_ptid = inferior_ptid;
 
   overlay_cache_invalid = 1;
 
@@ -1299,9 +1307,9 @@ wait_for_inferior (void)
   while (1)
     {
       if (target_wait_hook)
-	ecs->pid = target_wait_hook (ecs->waiton_pid, ecs->wp);
+	ecs->ptid = target_wait_hook (ecs->waiton_ptid, ecs->wp);
       else
-	ecs->pid = target_wait (ecs->waiton_pid, ecs->wp);
+	ecs->ptid = target_wait (ecs->waiton_ptid, ecs->wp);
 
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
@@ -1344,7 +1352,7 @@ fetch_inferior_event (void *client_data)
       thread_step_needed = 0;
 
       /* We'll update this if & when we switch to a new thread. */
-      previous_inferior_pid = inferior_pid;
+      previous_inferior_ptid = inferior_ptid;
 
       overlay_cache_invalid = 1;
 
@@ -1358,9 +1366,9 @@ fetch_inferior_event (void *client_data)
     }
 
   if (target_wait_hook)
-    async_ecs->pid = target_wait_hook (async_ecs->waiton_pid, async_ecs->wp);
+    async_ecs->ptid = target_wait_hook (async_ecs->waiton_ptid, async_ecs->wp);
   else
-    async_ecs->pid = target_wait (async_ecs->waiton_pid, async_ecs->wp);
+    async_ecs->ptid = target_wait (async_ecs->waiton_ptid, async_ecs->wp);
 
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (async_ecs);
@@ -1398,7 +1406,7 @@ init_execution_control_state (struct execution_control_state *ecs)
   ecs->current_line = ecs->sal.line;
   ecs->current_symtab = ecs->sal.symtab;
   ecs->infwait_state = infwait_normal_state;
-  ecs->waiton_pid = -1;
+  ecs->waiton_ptid = pid_to_ptid (-1);
   ecs->wp = &(ecs->ws);
 }
 
@@ -1419,9 +1427,9 @@ check_for_old_step_resume_breakpoint (void)
    target_wait()/target_wait_hook().  */
 
 void
-get_last_target_status(int *pid, struct target_waitstatus *status)
+get_last_target_status(ptid_t *ptidp, struct target_waitstatus *status)
 {
-  *pid = target_last_wait_pid;
+  *ptidp = target_last_wait_ptid;
   *status = target_last_waitstatus;
 }
 
@@ -1436,7 +1444,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   int stepped_after_stopped_by_watchpoint;
 
   /* Cache the last pid/waitstatus. */
-  target_last_wait_pid = ecs->pid;
+  target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;
 
   /* Keep this extra brace for now, minimizes diffs.  */
@@ -1453,7 +1461,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   is serviced in this loop, below. */
 	if (ecs->enable_hw_watchpoints_after_wait)
 	  {
-	    TARGET_ENABLE_HW_WATCHPOINTS (inferior_pid);
+	    TARGET_ENABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
 	    ecs->enable_hw_watchpoints_after_wait = 0;
 	  }
 	stepped_after_stopped_by_watchpoint = 0;
@@ -1467,9 +1475,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 * FIXME: shouldn't we look at currently_stepping ()?
 	 */
 	if (scheduler_mode == schedlock_on)
-	  target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
+	  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
 	else
-	  target_resume (-1, 0, TARGET_SIGNAL_0);
+	  target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
 	ecs->infwait_state = infwait_normal_state;
 	prepare_to_wait (ecs);
 	return;
@@ -1492,20 +1500,21 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     /* If it's a new process, add it to the thread database */
 
-    ecs->new_thread_event = ((ecs->pid != inferior_pid) && !in_thread_list (ecs->pid));
+    ecs->new_thread_event = (! ptid_equal (ecs->ptid, inferior_ptid) 
+                             && ! in_thread_list (ecs->ptid));
 
     if (ecs->ws.kind != TARGET_WAITKIND_EXITED
 	&& ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
 	&& ecs->new_thread_event)
       {
-	add_thread (ecs->pid);
+	add_thread (ecs->ptid);
 
 #ifdef UI_OUT
 	ui_out_text (uiout, "[New ");
-	ui_out_text (uiout, target_pid_or_tid_to_str (ecs->pid));
+	ui_out_text (uiout, target_pid_or_tid_to_str (ecs->ptid));
 	ui_out_text (uiout, "]\n");
 #else
-	printf_filtered ("[New %s]\n", target_pid_or_tid_to_str (ecs->pid));
+	printf_filtered ("[New %s]\n", target_pid_or_tid_to_str (ecs->ptid));
 #endif
 
 #if 0
@@ -1528,7 +1537,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   Therefore we need to continue all threads in order to
 	   make progress.  */
 
-	target_resume (-1, 0, TARGET_SIGNAL_0);
+	target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
 	prepare_to_wait (ecs);
 	return;
 #endif
@@ -1616,10 +1625,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   interested in reacting to forks of the child.  Note that
 	   we expect the child's fork event to be available if we
 	   waited for it now. */
-	if (inferior_pid == ecs->pid)
+	if (ptid_equal (inferior_ptid, ecs->ptid))
 	  {
 	    pending_follow.fork_event.saw_parent_fork = 1;
-	    pending_follow.fork_event.parent_pid = ecs->pid;
+	    pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
 	    pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 	    prepare_to_wait (ecs);
 	    return;
@@ -1627,16 +1636,16 @@ handle_inferior_event (struct execution_control_state *ecs)
 	else
 	  {
 	    pending_follow.fork_event.saw_child_fork = 1;
-	    pending_follow.fork_event.child_pid = ecs->pid;
+	    pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
 	    pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
 	  }
 
-	stop_pc = read_pc_pid (ecs->pid);
-	ecs->saved_inferior_pid = inferior_pid;
-	inferior_pid = ecs->pid;
+	stop_pc = read_pc_pid (ecs->ptid);
+	ecs->saved_inferior_ptid = inferior_ptid;
+	inferior_ptid = ecs->ptid;
 	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
-	inferior_pid = ecs->saved_inferior_pid;
+	inferior_ptid = ecs->saved_inferior_ptid;
 	goto process_event_stop_test;
 
 	/* If this a platform which doesn't allow a debugger to touch a
@@ -1656,10 +1665,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   it execs, and the child has not yet exec'd.  We probably
 	   should warn the user to that effect when the catchpoint
 	   triggers...) */
-	if (ecs->pid == inferior_pid)
+	if (ptid_equal (ecs->ptid, inferior_ptid))
 	  {
 	    pending_follow.fork_event.saw_parent_fork = 1;
-	    pending_follow.fork_event.parent_pid = ecs->pid;
+	    pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
 	    pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 	  }
 
@@ -1669,13 +1678,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 	else
 	  {
 	    pending_follow.fork_event.saw_child_fork = 1;
-	    pending_follow.fork_event.child_pid = ecs->pid;
+	    pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
 	    pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
-	    target_post_startup_inferior (pending_follow.fork_event.child_pid);
+	    target_post_startup_inferior (
+	      pid_to_ptid (pending_follow.fork_event.child_pid));
 	    follow_vfork_when_exec = !target_can_follow_vfork_prior_to_exec ();
 	    if (follow_vfork_when_exec)
 	      {
-		target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
+		target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
 		prepare_to_wait (ecs);
 		return;
 	      }
@@ -1698,7 +1708,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    inferior_ignoring_leading_exec_events--;
 	    if (pending_follow.kind == TARGET_WAITKIND_VFORKED)
 	      ENSURE_VFORKING_PARENT_REMAINS_STOPPED (pending_follow.fork_event.parent_pid);
-	    target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
+	    target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
 	    prepare_to_wait (ecs);
 	    return;
 	  }
@@ -1709,7 +1719,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  savestring (ecs->ws.value.execd_pathname,
 		      strlen (ecs->ws.value.execd_pathname));
 
-	/* Did inferior_pid exec, or did a (possibly not-yet-followed)
+	/* Did inferior_ptid exec, or did a (possibly not-yet-followed)
 	   child of a vfork exec?
 
 	   ??rehrauer: This is unabashedly an HP-UX specific thing.  On
@@ -1733,7 +1743,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       the parent vfork event is delivered.  A single-step
 	       suffices. */
 	    if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
-	      target_resume (ecs->pid, 1, TARGET_SIGNAL_0);
+	      target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 	    /* We expect the parent vfork event to be available now. */
 	    prepare_to_wait (ecs);
 	    return;
@@ -1741,15 +1751,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	/* This causes the eventpoints and symbol table to be reset.  Must
 	   do this now, before trying to determine whether to stop. */
-	follow_exec (inferior_pid, pending_follow.execd_pathname);
+	follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
 	xfree (pending_follow.execd_pathname);
 
-	stop_pc = read_pc_pid (ecs->pid);
-	ecs->saved_inferior_pid = inferior_pid;
-	inferior_pid = ecs->pid;
+	stop_pc = read_pc_pid (ecs->ptid);
+	ecs->saved_inferior_ptid = inferior_ptid;
+	inferior_ptid = ecs->ptid;
 	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
-	inferior_pid = ecs->saved_inferior_pid;
+	inferior_ptid = ecs->saved_inferior_ptid;
 	goto process_event_stop_test;
 
 	/* These syscall events are returned on HP-UX, as part of its
@@ -1773,7 +1783,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	number_of_threads_in_syscalls++;
 	if (number_of_threads_in_syscalls == 1)
 	  {
-	    TARGET_DISABLE_HW_WATCHPOINTS (inferior_pid);
+	    TARGET_DISABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
 	  }
 	resume (0, TARGET_SIGNAL_0);
 	prepare_to_wait (ecs);
@@ -1794,7 +1804,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   here, which will be serviced immediately after the target
 	   is waited on. */
       case TARGET_WAITKIND_SYSCALL_RETURN:
-	target_resume (ecs->pid, 1, TARGET_SIGNAL_0);
+	target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 
 	if (number_of_threads_in_syscalls > 0)
 	  {
@@ -1830,12 +1840,12 @@ handle_inferior_event (struct execution_control_state *ecs)
        all threads in order to make progress.  */
     if (ecs->new_thread_event)
       {
-	target_resume (-1, 0, TARGET_SIGNAL_0);
+	target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
 	prepare_to_wait (ecs);
 	return;
       }
 
-    stop_pc = read_pc_pid (ecs->pid);
+    stop_pc = read_pc_pid (ecs->ptid);
 
     /* See if a thread hit a thread-specific breakpoint that was meant for
        another thread.  If so, then step that thread past the breakpoint,
@@ -1850,13 +1860,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    ecs->random_signal = 0;
 	    if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK,
-					  ecs->pid))
+					  ecs->ptid))
 	      {
 		int remove_status;
 
 		/* Saw a breakpoint, but it was hit by the wrong thread.
 		   Just continue. */
-		write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->pid);
+		write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
 
 		remove_status = remove_breakpoints ();
 		/* Did we fail to remove breakpoints?  If so, try
@@ -1868,15 +1878,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 		   then either :-) or execs. */
 		if (remove_status != 0)
 		  {
-		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->pid);
+		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->ptid);
 		  }
 		else
 		  {		/* Single step */
-		    target_resume (ecs->pid, 1, TARGET_SIGNAL_0);
+		    target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 		    /* FIXME: What if a signal arrives instead of the
 		       single-step happening?  */
 
-		    ecs->waiton_pid = ecs->pid;
+		    ecs->waiton_ptid = ecs->ptid;
 		    ecs->wp = &(ecs->ws);
 		    ecs->infwait_state = infwait_thread_hop_state;
 		    prepare_to_wait (ecs);
@@ -1888,9 +1898,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 		 * FIXME: shouldn't we look at currently_stepping ()?
 		 */
 		if (scheduler_mode == schedlock_on)
-		  target_resume (ecs->pid, 0, TARGET_SIGNAL_0);
+		  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
 		else
-		  target_resume (-1, 0, TARGET_SIGNAL_0);
+		  target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
 		prepare_to_wait (ecs);
 		return;
 	      }
@@ -1914,7 +1924,7 @@ handle_inferior_event (struct execution_control_state *ecs)
        Note that if there's any kind of pending follow (i.e., of a fork,
        vfork or exec), we don't want to do this now.  Rather, we'll let
        the next resume handle it. */
-    if ((ecs->pid != inferior_pid) &&
+    if (! ptid_equal (ecs->ptid, inferior_ptid) &&
 	(pending_follow.kind == TARGET_WAITKIND_SPURIOUS))
       {
 	int printed = 0;
@@ -1957,7 +1967,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    if (signal_program[stop_signal] == 0)
 	      stop_signal = TARGET_SIGNAL_0;
 
-	    target_resume (ecs->pid, 0, stop_signal);
+	    target_resume (ecs->ptid, 0, stop_signal);
 	    prepare_to_wait (ecs);
 	    return;
 	  }
@@ -1971,10 +1981,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   be lost.  This may happen as a result of the target module
 	   mishandling thread creation.  */
 
-	if (in_thread_list (inferior_pid) && in_thread_list (ecs->pid))
+	if (in_thread_list (inferior_ptid) && in_thread_list (ecs->ptid))
 	  { /* Perform infrun state context switch: */
 	    /* Save infrun state for the old thread.  */
-	    save_infrun_state (inferior_pid, prev_pc,
+	    save_infrun_state (inferior_ptid, prev_pc,
 			       prev_func_start, prev_func_name,
 			       trap_expected, step_resume_breakpoint,
 			       through_sigtramp_breakpoint,
@@ -1986,7 +1996,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 			       ecs->stepping_through_sigtramp);
 
 	    /* Load infrun state for the new thread.  */
-	    load_infrun_state (ecs->pid, &prev_pc,
+	    load_infrun_state (ecs->ptid, &prev_pc,
 			       &prev_func_start, &prev_func_name,
 			       &trap_expected, &step_resume_breakpoint,
 			       &through_sigtramp_breakpoint,
@@ -1998,10 +2008,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 			       &ecs->stepping_through_sigtramp);
 	  }
 
-	inferior_pid = ecs->pid;
+	inferior_ptid = ecs->ptid;
 
 	if (context_hook)
-	  context_hook (pid_to_thread_id (ecs->pid));
+	  context_hook (pid_to_thread_id (ecs->ptid));
 
 	flush_cached_frames ();
       }
@@ -2021,14 +2031,14 @@ handle_inferior_event (struct execution_control_state *ecs)
     if (INSTRUCTION_NULLIFIED)
       {
 	registers_changed ();
-	target_resume (ecs->pid, 1, TARGET_SIGNAL_0);
+	target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
 
 	/* We may have received a signal that we want to pass to
 	   the inferior; therefore, we must not clobber the waitstatus
 	   in WS. */
 
 	ecs->infwait_state = infwait_nullified_state;
-	ecs->waiton_pid = ecs->pid;
+	ecs->waiton_ptid = ecs->ptid;
 	ecs->wp = &(ecs->tmpstatus);
 	prepare_to_wait (ecs);
 	return;
@@ -2070,9 +2080,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	remove_breakpoints ();
 	registers_changed ();
-	target_resume (ecs->pid, 1, TARGET_SIGNAL_0);	/* Single step */
+	target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);	/* Single step */
 
-	ecs->waiton_pid = ecs->pid;
+	ecs->waiton_ptid = ecs->ptid;
 	ecs->wp = &(ecs->ws);
 	ecs->infwait_state = infwait_nonstep_watch_state;
 	prepare_to_wait (ecs);
@@ -2558,7 +2568,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 #if defined(SOLIB_ADD)
 	/* Have we reached our destination?  If not, keep going. */
-	if (SOLIB_IN_DYNAMIC_LINKER (ecs->pid, stop_pc))
+	if (SOLIB_IN_DYNAMIC_LINKER (PIDGET (ecs->ptid), stop_pc))
 	  {
 	    ecs->another_trap = 1;
 	    keep_going (ecs);
@@ -3119,26 +3129,26 @@ stop_stepping (struct execution_control_state *ecs)
     {
       /* Are we stopping for a vfork event?  We only stop when we see
          the child's event.  However, we may not yet have seen the
-         parent's event.  And, inferior_pid is still set to the
+         parent's event.  And, inferior_ptid is still set to the
          parent's pid, until we resume again and follow either the
          parent or child.
 
-         To ensure that we can really touch inferior_pid (aka, the
+         To ensure that we can really touch inferior_ptid (aka, the
          parent process) -- which calls to functions like read_pc
          implicitly do -- wait on the parent if necessary. */
       if ((pending_follow.kind == TARGET_WAITKIND_VFORKED)
 	  && !pending_follow.fork_event.saw_parent_fork)
 	{
-	  int parent_pid;
+	  ptid_t parent_ptid;
 
 	  do
 	    {
 	      if (target_wait_hook)
-		parent_pid = target_wait_hook (-1, &(ecs->ws));
+		parent_ptid = target_wait_hook (pid_to_ptid (-1), &(ecs->ws));
 	      else
-		parent_pid = target_wait (-1, &(ecs->ws));
+		parent_ptid = target_wait (pid_to_ptid (-1), &(ecs->ws));
 	    }
-	  while (parent_pid != inferior_pid);
+	  while (! ptid_equal (parent_ptid, inferior_ptid));
 	}
 
       /* Assuming the inferior still exists, set these up for next
@@ -3283,7 +3293,7 @@ prepare_to_wait (struct execution_control_state *ecs)
 	 as part of their normal status mechanism. */
 
       registers_changed ();
-      ecs->waiton_pid = -1;
+      ecs->waiton_ptid = pid_to_ptid (-1);
       ecs->wp = &(ecs->ws);
     }
   /* This is the old end of the while loop.  Let everybody know we
@@ -3433,13 +3443,13 @@ normal_stop (void)
 
      (Note that there's no point in saying anything if the inferior
      has exited!) */
-  if ((previous_inferior_pid != inferior_pid)
+  if (! ptid_equal (previous_inferior_ptid, inferior_ptid)
       && target_has_execution)
     {
       target_terminal_ours_for_output ();
       printf_filtered ("[Switching to %s]\n",
-		       target_pid_or_tid_to_str (inferior_pid));
-      previous_inferior_pid = inferior_pid;
+		       target_pid_or_tid_to_str (inferior_ptid));
+      previous_inferior_ptid = inferior_ptid;
     }
 
   /* Make sure that the current_frame's pc is correct.  This
@@ -3559,7 +3569,8 @@ and/or watchpoints.\n");
 
 #ifdef UI_OUT
 	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
-	    ui_out_field_int (uiout, "thread-id", pid_to_thread_id (inferior_pid));
+	    ui_out_field_int (uiout, "thread-id",
+	                      pid_to_thread_id (inferior_ptid));
 #endif
 	  /* The behavior of this routine with respect to the source
 	     flag is:
@@ -3842,7 +3853,7 @@ Are you sure you want to change it? ",
       argv++;
     }
 
-  target_notice_signals (inferior_pid);
+  target_notice_signals (inferior_ptid);
 
   if (from_tty)
     {

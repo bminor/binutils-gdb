@@ -83,7 +83,7 @@ fetch_inferior_registers (int regno)
       regaddr = REGISTER_PTRACE_ADDR (regno);
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
-	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
+	  *(int *) &buf[i] = ptrace (PT_READ_U, PIDGET (inferior_ptid),
 				     (PTRACE_ARG3_TYPE) regaddr, 0);
 	  regaddr += sizeof (int);
 	}
@@ -114,7 +114,7 @@ store_inferior_registers (int regno)
 	return;
       regaddr = REGISTER_PTRACE_ADDR (regno);
       errno = 0;
-      ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+      ptrace (PT_WRITE_U, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) regaddr,
 	      read_register (regno));
       if (errno != 0)
 	{

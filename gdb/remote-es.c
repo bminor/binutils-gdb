@@ -140,9 +140,9 @@ es1800_xfer_inferior_memory (CORE_ADDR, char *, int, int,
 
 static void es1800_prepare_to_store (void);
 
-static int es1800_wait (int, struct target_waitstatus *);
+static ptid_t es1800_wait (ptid_t, struct target_waitstatus *);
 
-static void es1800_resume (int, int, enum target_signal);
+static void es1800_resume (ptid_t, int, enum target_signal);
 
 static void es1800_detach (char *, int);
 
@@ -500,7 +500,7 @@ es1800_detach (char *args, int from_tty)
    siggnal - the signal value to be given to the target (0 = no signal) */
 
 static void
-es1800_resume (int pid, int step, enum target_signal siggnal)
+es1800_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   char buf[PBUFSIZ];
 
@@ -523,8 +523,8 @@ es1800_resume (int pid, int step, enum target_signal siggnal)
    storing status in STATUS just as `wait' would.
    status -  */
 
-static int
-es1800_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+es1800_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   unsigned char buf[PBUFSIZ];
   int old_timeout = timeout;
@@ -589,7 +589,7 @@ es1800_wait (int pid, struct target_waitstatus *status)
     }
   signal (SIGINT, old_sigint);
   timeout = old_timeout;
-  return (0);
+  return inferior_ptid;
 }
 
 
@@ -1206,9 +1206,9 @@ get_break_addr (int vec, CORE_ADDR *addrp)
 static void
 es1800_kill (void)
 {
-  if (inferior_pid != 0)
+  if (!ptid_equal (inferior_ptid, null_ptid))
     {
-      inferior_pid = 0;
+      inferior_ptid = null_ptid;
       es1800_mourn_inferior ();
     }
 }
@@ -1273,7 +1273,7 @@ es1800_load (char *filename, int from_tty)
     }
 
   breakpoint_init_inferior ();
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   if (from_tty)
     {
       printf ("Downloading \"%s\" to the ES 1800\n", filename);
@@ -1374,7 +1374,7 @@ bfd_copy (bfd *from_bfd, bfd *to_bfd)
 
 #endif
 
-/* Start an process on the es1800 and set inferior_pid to the new
+/* Start an process on the es1800 and set inferior_ptid to the new
    process' pid.
    execfile - the file to run
    args     - arguments passed to the program
@@ -1427,7 +1427,7 @@ es1800_create_inferior (char *execfile, char *args, char **env)
   /* The "process" (board) is already stopped awaiting our commands, and
      the program is already downloaded.  We just set its PC and go.  */
 
-  inferior_pid = pid;		/* Needed for wait_for_inferior below */
+  inferior_ptid = pid_to_ptid (pid);	/* Needed for wait_for_inferior below */
 
   clear_proceed_status ();
 
@@ -1961,7 +1961,7 @@ es1800_child_detach (char *args, int from_tty)
   pop_target ();
   if (from_tty)
     {
-      printf ("Ending debugging the process %d.\n", inferior_pid);
+      printf ("Ending debugging the process %d.\n", PIDGET (inferior_ptid));
     }
 }
 

@@ -376,8 +376,8 @@ v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE-
 #
 v::IEEE_FLOAT:int:ieee_float::::0:0::0:::
 #
-f::TARGET_READ_PC:CORE_ADDR:read_pc:int pid:pid::0:generic_target_read_pc::0
-f::TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, int pid:val, pid::0:generic_target_write_pc::0
+f::TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
+f::TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 f::TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
 f::TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:generic_target_write_fp::0
 f::TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0

@@ -878,7 +878,7 @@ som_solib_create_inferior_hook (void)
     }
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  store_unsigned_integer (buf, 4, inferior_pid);
+  store_unsigned_integer (buf, 4, PIDGET (inferior_ptid));
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
@@ -1033,9 +1033,9 @@ keep_going:
 
 
 static void
-reset_inferior_pid (int saved_inferior_pid)
+reset_inferior_ptid (int saved_inferior_ptid)
 {
-  inferior_pid = saved_inferior_pid;
+  inferior_ptid = saved_inferior_ptid;
 }
 
 
@@ -1057,11 +1057,11 @@ som_solib_remove_inferior_hook (int pid)
   int status;
   char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
   unsigned int dld_flags_value;
-  int saved_inferior_pid = inferior_pid;
-  struct cleanup *old_cleanups = make_cleanup (reset_inferior_pid, saved_inferior_pid);
+  int saved_inferior_ptid = inferior_ptid;
+  struct cleanup *old_cleanups = make_cleanup (reset_inferior_ptid, saved_inferior_ptid);
 
   /* Ensure that we're really operating on the specified process. */
-  inferior_pid = pid;
+  inferior_ptid = pid_to_ptid (pid);
 
   /* We won't bother to remove the solib breakpoints from this process.
 

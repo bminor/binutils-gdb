@@ -38,7 +38,7 @@ extern CORE_ADDR skip_trampoline_code (CORE_ADDR pc, char *name);
 #define ADD_SHARED_SYMBOL_FILES dll_symbol_command
 
 struct target_ops;
-char *cygwin_pid_to_str (int pid);
+char *cygwin_pid_to_str (ptid_t ptid);
 void child_solib_add (char *, int, struct target_ops *);
 char *child_solib_loaded_library_pathname(int);
 void child_clear_solibs (void);

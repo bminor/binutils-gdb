@@ -71,7 +71,7 @@ static void update_current_target (void);
 
 static void nosupport_runtime (void);
 
-static void normal_target_post_startup_inferior (int pid);
+static void normal_target_post_startup_inferior (ptid_t ptid);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
    MYADDR.  Returns 0 for success, errno code for failure (which
@@ -92,9 +92,9 @@ static void debug_to_attach (char *, int);
 
 static void debug_to_detach (char *, int);
 
-static void debug_to_resume (int, int, enum target_signal);
+static void debug_to_resume (ptid_t, int, enum target_signal);
 
-static int debug_to_wait (int, struct target_waitstatus *);
+static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
 
 static void debug_to_fetch_registers (int);
 
@@ -134,9 +134,9 @@ static void debug_to_mourn_inferior (void);
 
 static int debug_to_can_run (void);
 
-static void debug_to_notice_signals (int);
+static void debug_to_notice_signals (ptid_t);
 
-static int debug_to_thread_alive (int);
+static int debug_to_thread_alive (ptid_t);
 
 static void debug_to_stop (void);
 
@@ -271,7 +271,7 @@ nosymbol (char *name, CORE_ADDR *addrp)
 static void
 nosupport_runtime (void)
 {
-  if (!inferior_pid)
+  if (ptid_equal (inferior_ptid, null_ptid))
     noprocess ();
   else
     error ("No run-time support for this");
@@ -363,13 +363,13 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (int, char *, int)) 
 	    target_ignore);
   de_fault (to_resume, 
-	    (void (*) (int, int, enum target_signal)) 
+	    (void (*) (ptid_t, int, enum target_signal)) 
 	    noprocess);
   de_fault (to_wait, 
-	    (int (*) (int, struct target_waitstatus *)) 
+	    (ptid_t (*) (ptid_t, struct target_waitstatus *)) 
 	    noprocess);
   de_fault (to_post_wait, 
-	    (void (*) (int, int)) 
+	    (void (*) (ptid_t, int)) 
 	    target_ignore);
   de_fault (to_fetch_registers, 
 	    (void (*) (int)) 
@@ -416,7 +416,7 @@ cleanup_target (struct target_ops *t)
   de_fault (to_create_inferior, 
 	    maybe_kill_then_create_inferior);
   de_fault (to_post_startup_inferior, 
-	    (void (*) (int)) 
+	    (void (*) (ptid_t)) 
 	    target_ignore);
   de_fault (to_acknowledge_created_inferior, 
 	    (void (*) (int)) 
@@ -474,10 +474,10 @@ cleanup_target (struct target_ops *t)
   de_fault (to_can_run, 
 	    return_zero);
   de_fault (to_notice_signals, 
-	    (void (*) (int)) 
+	    (void (*) (ptid_t)) 
 	    target_ignore);
   de_fault (to_thread_alive, 
-	    (int (*) (int)) 
+	    (int (*) (ptid_t)) 
 	    return_zero);
   de_fault (to_find_new_threads, 
 	    (void (*) (void)) 
@@ -1376,7 +1376,7 @@ generic_mourn_inferior (void)
 {
   extern int show_breakpoint_hit_counts;
 
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   attach_flag = 0;
   breakpoint_init_inferior (inf_exited);
   registers_changed ();
@@ -2162,11 +2162,11 @@ int target_activity_fd;
    buffer.  */
 
 char *
-normal_pid_to_str (int pid)
+normal_pid_to_str (ptid_t ptid)
 {
   static char buf[30];
 
-  sprintf (buf, "process %d", pid);
+  sprintf (buf, "process %d", PIDGET (ptid));
   return buf;
 }
 
@@ -2183,7 +2183,7 @@ normal_pid_to_str (int pid)
    target_acknowledge_forked_child.
  */
 static void
-normal_target_post_startup_inferior (int pid)
+normal_target_post_startup_inferior (ptid_t ptid)
 {
   /* This space intentionally left blank. */
 }
@@ -2270,24 +2270,25 @@ debug_to_require_detach (int pid, char *args, int from_tty)
 }
 
 static void
-debug_to_resume (int pid, int step, enum target_signal siggnal)
+debug_to_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
-  debug_target.to_resume (pid, step, siggnal);
+  debug_target.to_resume (ptid, step, siggnal);
 
-  fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n", pid,
+  fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n", PIDGET (ptid),
 		      step ? "step" : "continue",
 		      target_signal_to_name (siggnal));
 }
 
-static int
-debug_to_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
 {
-  int retval;
+  ptid_t retval;
 
-  retval = debug_target.to_wait (pid, status);
+  retval = debug_target.to_wait (ptid, status);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_wait (%d, status) = %d,   ", pid, retval);
+		      "target_wait (%d, status) = %d,   ", PIDGET (ptid),
+		      PIDGET (retval));
   fprintf_unfiltered (gdb_stdlog, "status->kind = ");
   switch (status->kind)
     {
@@ -2327,12 +2328,12 @@ debug_to_wait (int pid, struct target_waitstatus *status)
 }
 
 static void
-debug_to_post_wait (int pid, int status)
+debug_to_post_wait (ptid_t ptid, int status)
 {
-  debug_target.to_post_wait (pid, status);
+  debug_target.to_post_wait (ptid, status);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_wait (%d, %d)\n",
-		      pid, status);
+		      PIDGET (ptid), status);
 }
 
 static void
@@ -2521,12 +2522,12 @@ debug_to_create_inferior (char *exec_file, char *args, char **env)
 }
 
 static void
-debug_to_post_startup_inferior (int pid)
+debug_to_post_startup_inferior (ptid_t ptid)
 {
-  debug_target.to_post_startup_inferior (pid);
+  debug_target.to_post_startup_inferior (ptid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_startup_inferior (%d)\n",
-		      pid);
+		      PIDGET (ptid));
 }
 
 static void
@@ -2776,22 +2777,23 @@ debug_to_can_run (void)
 }
 
 static void
-debug_to_notice_signals (int pid)
+debug_to_notice_signals (ptid_t ptid)
 {
-  debug_target.to_notice_signals (pid);
+  debug_target.to_notice_signals (ptid);
 
-  fprintf_unfiltered (gdb_stdlog, "target_notice_signals (%d)\n", pid);
+  fprintf_unfiltered (gdb_stdlog, "target_notice_signals (%d)\n",
+                      PIDGET (ptid));
 }
 
 static int
-debug_to_thread_alive (int pid)
+debug_to_thread_alive (ptid_t ptid)
 {
   int retval;
 
-  retval = debug_target.to_thread_alive (pid);
+  retval = debug_target.to_thread_alive (ptid);
 
   fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
-		      pid, retval);
+		      PIDGET (ptid), retval);
 
   return retval;
 }

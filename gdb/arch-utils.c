@@ -252,11 +252,11 @@ default_prepare_to_proceed (int select_it)
 int
 generic_prepare_to_proceed (int select_it)
 {
-  int wait_pid;
+  ptid_t wait_ptid;
   struct target_waitstatus wait_status;
 
   /* Get the last target status returned by target_wait().  */
-  get_last_target_status (&wait_pid, &wait_status);
+  get_last_target_status (&wait_ptid, &wait_status);
 
   /* Make sure we were stopped at a breakpoint.  */
   if (wait_status.kind != TARGET_WAITKIND_STOPPED
@@ -265,10 +265,11 @@ generic_prepare_to_proceed (int select_it)
       return 0;
     }
 
-  if (wait_pid != -1 && inferior_pid != wait_pid)
+  if (!ptid_equal (wait_ptid, minus_one_ptid)
+      && !ptid_equal (inferior_ptid, wait_ptid))
     {
       /* Switched over from WAIT_PID.  */
-      CORE_ADDR wait_pc = read_pc_pid (wait_pid);
+      CORE_ADDR wait_pc = read_pc_pid (wait_ptid);
 
       /* Avoid switching where it wouldn't do any good, i.e. if both
          threads are at the same breakpoint.  */
@@ -278,7 +279,7 @@ generic_prepare_to_proceed (int select_it)
 	    {
 	      /* User hasn't deleted the breakpoint.  Switch back to
 		 WAIT_PID and return non-zero.  */
-	      inferior_pid = wait_pid;
+	      inferior_ptid = wait_ptid;
 
 	      /* FIXME: This stuff came from switch_to_thread() in
 		 thread.c (which should probably be a public function).  */

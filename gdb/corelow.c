@@ -77,7 +77,7 @@ static void add_to_thread_list (bfd *, asection *, PTR);
 
 static int ignore (CORE_ADDR, char *);
 
-static int core_file_thread_alive (int tid);
+static int core_file_thread_alive (ptid_t tid);
 
 static void init_core_ops (void);
 
@@ -185,7 +185,7 @@ core_close (int quitting)
 
   if (core_bfd)
     {
-      inferior_pid = 0;		/* Avoid confusion from thread stuff */
+      inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff */
 
       /* Clear out solib state while the bfd is still open. See
          comments in clear_solib in solib.c. */
@@ -242,13 +242,20 @@ add_to_thread_list (bfd *abfd, asection *asect, PTR reg_sect_arg)
 
   thread_id = atoi (bfd_section_name (abfd, asect) + 5);
 
-  add_thread (thread_id);
+  add_thread (pid_to_ptid (thread_id));
 
 /* Warning, Will Robinson, looking at BFD private data! */
 
   if (reg_sect != NULL
       && asect->filepos == reg_sect->filepos)	/* Did we find .reg? */
-    inferior_pid = thread_id;	/* Yes, make it current */
+#ifdef pid_to_ptid
+    /* Needed to prevent regressions in ptid conversion phase 1.  This
+       bit of code will be deleted in favor of the #else branch in
+       phase 3.  */
+    inferior_ptid = thread_id;	/* Yes, make it current */
+#else
+    inferior_ptid = pid_to_ptid (thread_id);	/* Yes, make it current */
+#endif
 }
 
 /* This routine opens and sets up the core file bfd.  */
@@ -384,10 +391,10 @@ core_detach (char *args, int from_tty)
    them to core_vec->core_read_registers, as the register set numbered
    WHICH.
 
-   If inferior_pid is zero, do the single-threaded thing: look for a
-   section named NAME.  If inferior_pid is non-zero, do the
+   If inferior_ptid is zero, do the single-threaded thing: look for a
+   section named NAME.  If inferior_ptid is non-zero, do the
    multi-threaded thing: look for a section named "NAME/PID", where
-   PID is the shortest ASCII decimal representation of inferior_pid.
+   PID is the shortest ASCII decimal representation of inferior_ptid.
 
    HUMAN_NAME is a human-readable name for the kind of registers the
    NAME section contains, for use in error messages.
@@ -406,8 +413,16 @@ get_core_register_section (char *name,
   bfd_size_type size;
   char *contents;
 
-  if (inferior_pid)
-    sprintf (section_name, "%s/%d", name, inferior_pid);
+#ifdef pid_to_ptid
+    /* Needed to prevent regressions in ptid conversion phase 1.  This
+       bit of code will be deleted in favor of the #else branch in
+       phase 3.  */
+  if (inferior_ptid)
+    sprintf (section_name, "%s/%d", name, inferior_ptid);
+#else
+  if (PIDGET (inferior_ptid))
+    sprintf (section_name, "%s/%d", name, PIDGET (inferior_ptid));
+#endif
   else
     strcpy (section_name, name);
 
@@ -485,7 +500,7 @@ ignore (CORE_ADDR addr, char *contents)
    behaviour.
  */
 static int
-core_file_thread_alive (int tid)
+core_file_thread_alive (ptid_t tid)
 {
   return 1;
 }

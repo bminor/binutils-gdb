@@ -1183,7 +1183,7 @@ remote_rdp_close (int quitting)
    to the target, or zero for no signal.  */
 
 static void
-remote_rdp_resume (int pid, int step, enum target_signal siggnal)
+remote_rdp_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   if (step)
     rdp_step ();
@@ -1195,8 +1195,8 @@ remote_rdp_resume (int pid, int step, enum target_signal siggnal)
    or -1 in case of error; store status through argument pointer STATUS,
    just as `wait' would.  */
 
-static int
-remote_rdp_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+remote_rdp_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   switch (ds.rdi_stopped_status)
     {
@@ -1222,7 +1222,7 @@ remote_rdp_wait (int pid, struct target_waitstatus *status)
 #endif
     }
 
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 /* Get ready to modify the registers array.  On machines which store
@@ -1348,7 +1348,7 @@ remote_rdp_create_inferior (char *exec_file, char *allargs, char **env)
   /* This gives us a chance to set up the command line */
   rdp_set_command_line (exec_file, allargs);
 
-  inferior_pid = 42;
+  inferior_ptid = pid_to_ptid (42);
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   /*

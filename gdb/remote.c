@@ -79,8 +79,9 @@ static void remote_prepare_to_store (void);
 
 static void remote_fetch_registers (int regno);
 
-static void remote_resume (int pid, int step, enum target_signal siggnal);
-static void remote_async_resume (int pid, int step,
+static void remote_resume (ptid_t ptid, int step,
+                           enum target_signal siggnal);
+static void remote_async_resume (ptid_t ptid, int step,
 				 enum target_signal siggnal);
 static int remote_start_remote (PTR);
 
@@ -114,8 +115,10 @@ static void remote_send (char *buf, long sizeof_buf);
 
 static int readchar (int timeout);
 
-static int remote_wait (int pid, struct target_waitstatus *status);
-static int remote_async_wait (int pid, struct target_waitstatus *status);
+static ptid_t remote_wait (ptid_t ptid,
+                                 struct target_waitstatus *status);
+static ptid_t remote_async_wait (ptid_t ptid,
+                                       struct target_waitstatus *status);
 
 static void remote_kill (void);
 static void remote_async_kill (void);
@@ -133,7 +136,7 @@ static void interrupt_query (void);
 
 static void set_thread (int, int);
 
-static int remote_thread_alive (int);
+static int remote_thread_alive (ptid_t);
 
 static void get_offsets (void);
 
@@ -177,7 +180,7 @@ static void packet_command (char *, int);
 
 static int stub_unpack_int (char *buff, int fieldlength);
 
-static int remote_current_thread (int oldpid);
+static ptid_t remote_current_thread (ptid_t oldptid);
 
 static void remote_find_new_threads (void);
 
@@ -894,15 +897,16 @@ record_currthread (int currthread)
 
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
-  if (!in_thread_list (currthread))
+  if (!in_thread_list (pid_to_ptid (currthread)))
     {
-      add_thread (currthread);
+      add_thread (pid_to_ptid (currthread));
 #ifdef UI_OUT
       ui_out_text (uiout, "[New ");
-      ui_out_text (uiout, target_pid_to_str (currthread));
+      ui_out_text (uiout, target_pid_to_str (pid_to_ptid (currthread)));
       ui_out_text (uiout, "]\n");
 #else
-      printf_filtered ("[New %s]\n", target_pid_to_str (currthread));
+      printf_filtered ("[New %s]\n",
+                       target_pid_to_str (pid_to_ptid (currthread)));
 #endif
     }
 }
@@ -940,8 +944,9 @@ set_thread (int th, int gen)
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
 
 static int
-remote_thread_alive (int tid)
+remote_thread_alive (ptid_t ptid)
 {
+  int tid = PIDGET (ptid);
   char buf[16];
 
   if (tid < 0)
@@ -1615,25 +1620,26 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
 static int
 remote_newthread_step (threadref *ref, void *context)
 {
-  int pid;
+  ptid_t ptid;
 
-  pid = threadref_to_int (ref);
-  if (!in_thread_list (pid))
-    add_thread (pid);
+  ptid = pid_to_ptid (threadref_to_int (ref));
+
+  if (!in_thread_list (ptid))
+    add_thread (ptid);
   return 1;			/* continue iterator */
 }
 
 #define CRAZY_MAX_THREADS 1000
 
-static int
-remote_current_thread (int oldpid)
+static ptid_t
+remote_current_thread (ptid_t oldpid)
 {
   char *buf = alloca (PBUFSIZ);
 
   putpkt ("qC");
   getpkt (buf, PBUFSIZ, 0);
   if (buf[0] == 'Q' && buf[1] == 'C')
-    return strtol (&buf[2], NULL, 16);
+    return pid_to_ptid (strtol (&buf[2], NULL, 16));
   else
     return oldpid;
 }
@@ -1647,8 +1653,8 @@ remote_find_new_threads (void)
 {
   remote_threadlist_iterator (remote_newthread_step, 0,
 			      CRAZY_MAX_THREADS);
-  if (inferior_pid == MAGIC_NULL_PID)	/* ack ack ack */
-    inferior_pid = remote_current_thread (inferior_pid);
+  if (PIDGET (inferior_ptid) == MAGIC_NULL_PID)	/* ack ack ack */
+    inferior_ptid = remote_current_thread (inferior_ptid);
 }
 
 /*
@@ -1680,8 +1686,8 @@ remote_threads_info (void)
 	      do
 		{
 		  tid = strtol (bufp, &bufp, 16);
-		  if (tid != 0 && !in_thread_list (tid))
-		    add_thread (tid);
+		  if (tid != 0 && !in_thread_list (pid_to_ptid (tid)))
+		    add_thread (pid_to_ptid (tid));
 		}
 	      while (*bufp++ == ',');	/* comma-separated list */
 	      putpkt ("qsThreadInfo");
@@ -1724,7 +1730,7 @@ remote_threads_extra_info (struct thread_info *tp)
 
   if (use_threadextra_query)
     {
-      sprintf (bufp, "qThreadExtraInfo,%x", tp->pid);
+      sprintf (bufp, "qThreadExtraInfo,%x", PIDGET (tp->ptid));
       putpkt (bufp);
       getpkt (bufp, PBUFSIZ, 0);
       if (bufp[0] != 0)
@@ -1748,7 +1754,7 @@ remote_threads_extra_info (struct thread_info *tp)
   use_threadextra_query = 0;
   set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
     | TAG_MOREDISPLAY | TAG_DISPLAY;
-  int_to_threadref (&id, tp->pid);
+  int_to_threadref (&id, PIDGET (tp->ptid));
   if (remote_get_threadinfo (&id, set, &threadinfo))
     if (threadinfo.active)
       {
@@ -2019,7 +2025,7 @@ remote_start_remote (PTR dummy)
   /* Let the stub know that we want it to return the thread.  */
   set_thread (-1, 0);
 
-  inferior_pid = remote_current_thread (inferior_pid);
+  inferior_ptid = remote_current_thread (inferior_ptid);
 
   get_offsets ();		/* Get text, data & bss offsets */
 
@@ -2136,7 +2142,7 @@ serial device is attached to the remote system\n\
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
 
-  inferior_pid = MAGIC_NULL_PID;
+  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -2162,7 +2168,7 @@ serial device is attached to the remote system\n\
      support svr4 shared libraries.  */
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd) 	/* No use without an exec file. */
-    SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
+    SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
 }
 
@@ -2223,7 +2229,7 @@ serial device is attached to the remote system\n\
      flag indicating that a target is active.  These functions should
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
-  inferior_pid = MAGIC_NULL_PID;
+  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
 
   /* With this target we start out by owning the terminal. */
   remote_async_terminal_ours_p = 1;
@@ -2265,7 +2271,7 @@ serial device is attached to the remote system\n\
      support svr4 shared libraries.  */
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd) 	/* No use without an exec file. */
-    SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
+    SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #endif
 }
 
@@ -2347,9 +2353,10 @@ static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
 static int last_sent_step;
 
 static void
-remote_resume (int pid, int step, enum target_signal siggnal)
+remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   char *buf = alloca (PBUFSIZ);
+  int pid = PIDGET (ptid);
   char *p;
 
   if (pid == -1)
@@ -2435,9 +2442,10 @@ remote_resume (int pid, int step, enum target_signal siggnal)
 
 /* Same as remote_resume, but with async support. */
 static void
-remote_async_resume (int pid, int step, enum target_signal siggnal)
+remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   char *buf = alloca (PBUFSIZ);
+  int pid = PIDGET (ptid);
   char *p;
 
   if (pid == -1)
@@ -2744,8 +2752,8 @@ remote_console_output (char *msg)
    Returns "pid", which in the case of a multi-threaded 
    remote OS, is the thread-id.  */
 
-static int
-remote_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+remote_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   unsigned char *buf = alloca (PBUFSIZ);
   int thread_num = -1;
@@ -2953,14 +2961,14 @@ Packet Dropped");
 got_status:
   if (thread_num != -1)
     {
-      return thread_num;
+      return pid_to_ptid (thread_num);
     }
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 /* Async version of remote_wait. */
-static int
-remote_async_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   unsigned char *buf = alloca (PBUFSIZ);
   int thread_num = -1;
@@ -3177,9 +3185,9 @@ Packet Dropped");
 got_status:
   if (thread_num != -1)
     {
-      return thread_num;
+      return pid_to_ptid (thread_num);
     }
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 /* Number of bytes of registers this stub implements.  */
@@ -3198,7 +3206,7 @@ remote_fetch_registers (int regno)
   char *p;
   char *regs = alloca (REGISTER_BYTES);
 
-  set_thread (inferior_pid, 1);
+  set_thread (PIDGET (inferior_ptid), 1);
 
   sprintf (buf, "g");
   remote_send (buf, PBUFSIZ);
@@ -3322,7 +3330,7 @@ remote_store_registers (int regno)
   char *p;
   char *regs;
 
-  set_thread (inferior_pid, 1);
+  set_thread (PIDGET (inferior_ptid), 1);
 
   if (regno >= 0)
     {
@@ -4996,7 +5004,7 @@ threadalive_test (char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
 
-  if (remote_thread_alive (sample_thread))
+  if (remote_thread_alive (pid_to_ptid (sample_thread)))
     printf_filtered ("PASS: Thread alive test\n");
   else
     printf_filtered ("FAIL: Thread alive test\n");
@@ -5107,11 +5115,11 @@ init_remote_threadtests (void)
    buffer.  */
 
 static char *
-remote_pid_to_str (int pid)
+remote_pid_to_str (ptid_t ptid)
 {
   static char buf[30];
 
-  sprintf (buf, "Thread %d", pid);
+  sprintf (buf, "Thread %d", PIDGET (ptid));
   return buf;
 }
 
@@ -5282,7 +5290,7 @@ device is attached to the remote system (e.g. host:port).");
      flag indicating that a target is active.  These functions should
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
-  inferior_pid = MAGIC_NULL_PID;
+  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
 
   /* Start the remote connection; if error (0), discard this target. */
 
@@ -5514,15 +5522,15 @@ minitelnet (void)
     }
 }
 
-static int
-remote_cisco_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+remote_cisco_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   if (minitelnet () != ENTER_DEBUG)
     {
       error ("Debugging session terminated by protocol error");
     }
   putpkt ("?");
-  return remote_wait (pid, status);
+  return remote_wait (ptid, status);
 }
 
 static void

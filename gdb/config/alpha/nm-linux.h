@@ -74,8 +74,8 @@ extern int lin_lwp_prepare_to_proceed (void);
 #undef PREPARE_TO_PROCEED
 #define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
 
-extern void lin_lwp_attach_lwp (int pid, int verbose);
-#define ATTACH_LWP(pid, verbose) lin_lwp_attach_lwp ((pid), (verbose))
+extern void lin_lwp_attach_lwp (ptid_t pid, int verbose);
+#define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 
 #include <signal.h>
 

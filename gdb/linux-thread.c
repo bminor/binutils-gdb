@@ -205,10 +205,11 @@ static CORE_ADDR linuxthreads_breakpoint_addr;
 #endif
 /* Check to see if the given thread is alive.  */
 static int
-linuxthreads_thread_alive (int pid)
+linuxthreads_thread_alive (ptid_t ptid)
 {
   errno = 0;
-  return ptrace (PT_READ_U, pid, (PTRACE_ARG3_TYPE)0, 0) >= 0 || errno == 0;
+  return ptrace (PT_READ_U, PIDGET (ptid), (PTRACE_ARG3_TYPE)0, 0) >= 0 
+         || errno == 0;
 }
 
 /* On detach(), find a SIGTRAP status.  If stop is non-zero, find a
@@ -308,7 +309,7 @@ linuxthreads_find_trap (int pid, int stop)
   for (;;)
     {
       /* resume the child every time... */
-      child_resume (pid, 1, TARGET_SIGNAL_0);
+      child_resume (pid_to_ptid (pid), 1, TARGET_SIGNAL_0);
 
       /* loop as long as errno == EINTR:
 	 waitpid syscall may be aborted due to GDB receiving a signal. 
@@ -373,24 +374,24 @@ linuxthreads_find_trap (int pid, int stop)
   return 1;
 }
 
-/* Cleanup stub for save_inferior_pid.  */
+/* Cleanup stub for save_inferior_ptid.  */
 static void
-restore_inferior_pid (void *arg)
+restore_inferior_ptid (void *arg)
 {
-  int *saved_pid_ptr = arg;
-  inferior_pid = *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr = arg;
+  inferior_ptid = *saved_ptid_ptr;
   xfree (arg);
 }
 
-/* Register a cleanup to restore the value of inferior_pid.  */
+/* Register a cleanup to restore the value of inferior_ptid.  */
 static struct cleanup *
-save_inferior_pid (void)
+save_inferior_ptid (void)
 {
-  int *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr;
   
-  saved_pid_ptr = xmalloc (sizeof (int));
-  *saved_pid_ptr = inferior_pid;
-  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
 
 static void
@@ -633,9 +634,10 @@ remove_breakpoint (int pid)
     if (linuxthreads_breakpoint_zombie[j].pid == pid)
       break;
 
-  if (in_thread_list (pid) && linuxthreads_thread_alive (pid))
+  if (in_thread_list (pid_to_ptid (pid)) 
+      && linuxthreads_thread_alive (pid_to_ptid (pid)))
     {
-      CORE_ADDR pc = read_pc_pid (pid);
+      CORE_ADDR pc = read_pc_pid (pid_to_ptid (pid));
       if (linuxthreads_breakpoint_addr == pc - DECR_PC_AFTER_BREAK
 	  && j > linuxthreads_breakpoint_last)
 	{
@@ -651,7 +653,7 @@ remove_breakpoint (int pid)
 static void
 kill_thread (int pid)
 {
-  if (in_thread_list (pid))
+  if (in_thread_list (pid_to_ptid (pid)))
     {
       ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
     }
@@ -665,17 +667,17 @@ kill_thread (int pid)
 static void
 resume_thread (int pid)
 {
-  if (pid != inferior_pid
-      && in_thread_list (pid)
-      && linuxthreads_thread_alive (pid))
+  if (pid != PIDGET (inferior_ptid)
+      && in_thread_list (pid_to_ptid (pid))
+      && linuxthreads_thread_alive (pid_to_ptid (pid)))
     {
       if (pid == linuxthreads_step_pid)
 	{
-	  child_resume (pid, 1, linuxthreads_step_signo);
+	  child_resume (pid_to_ptid (pid), 1, linuxthreads_step_signo);
 	}
       else
 	{
-	  child_resume (pid, 0, TARGET_SIGNAL_0);
+	  child_resume (pid_to_ptid (pid), 0, TARGET_SIGNAL_0);
 	}
     }
 }
@@ -684,14 +686,16 @@ resume_thread (int pid)
 static void
 detach_thread (int pid)
 {
-  if (in_thread_list (pid) && linuxthreads_thread_alive (pid))
+  ptid_t ptid = pid_to_ptid (pid);
+
+  if (in_thread_list (ptid) && linuxthreads_thread_alive (ptid))
     {
       /* Remove pending SIGTRAP and SIGSTOP */
       linuxthreads_find_trap (pid, 1);
 
-      inferior_pid = pid;
+      inferior_ptid = ptid;
       detach (TARGET_SIGNAL_0);
-      inferior_pid = linuxthreads_manager_pid;
+      inferior_ptid = pid_to_ptid (linuxthreads_manager_pid);
     }
 }
 
@@ -707,17 +711,18 @@ attach_thread (int pid)
 static void
 stop_thread (int pid)
 {
-  if (pid != inferior_pid)
+  if (pid != PIDGET (inferior_ptid))
     {
-      if (in_thread_list (pid))
+      if (in_thread_list (pid_to_ptid (pid)))
 	{
 	  kill (pid, SIGSTOP);
 	}
       else if (ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0) == 0)
 	{
 	  if (!linuxthreads_attach_pending)
-	    printf_filtered ("[New %s]\n", target_pid_to_str (pid));
-	  add_thread (pid);
+	    printf_filtered ("[New %s]\n",
+	                     target_pid_to_str (pid_to_ptid (pid)));
+	  add_thread (pid_to_ptid (pid));
 	  if (linuxthreads_sig_debug.signal)
 	    {
 	      /* After a new thread in glibc 2.1 signals gdb its existence,
@@ -738,7 +743,7 @@ wait_thread (int pid)
   int status;
   int rpid;
 
-  if (pid != inferior_pid && in_thread_list (pid))
+  if (pid != PIDGET (inferior_ptid) && in_thread_list (pid_to_ptid (pid)))
     {
       /* loop as long as errno == EINTR:
 	 waitpid syscall may be aborted if GDB receives a signal. 
@@ -778,7 +783,7 @@ wait_thread (int pid)
 	    {
 	      break;
 	    }
-	  if (errno != EINTR && linuxthreads_thread_alive (pid))
+	  if (errno != EINTR && linuxthreads_thread_alive (pid_to_ptid (pid)))
 	    perror_with_name ("wait_thread/waitpid");
 
 	  /* the thread is dead.  */
@@ -805,20 +810,20 @@ update_stop_threads (int test_pid)
     {
       if (linuxthreads_manager)
 	{
-	  if (test_pid > 0 && test_pid != inferior_pid)
+	  if (test_pid > 0 && test_pid != PIDGET (inferior_ptid))
 	    {
-	      old_chain = save_inferior_pid ();
-	      inferior_pid = test_pid;
+	      old_chain = save_inferior_ptid ();
+	      inferior_ptid = pid_to_ptid (test_pid);
 	    }
 	  read_memory (linuxthreads_manager,
 		       (char *)&linuxthreads_manager_pid, sizeof (pid_t));
 	}
       if (linuxthreads_initial)
 	{
-	  if (test_pid > 0 && test_pid != inferior_pid)
+	  if (test_pid > 0 && test_pid != PIDGET (inferior_ptid))
 	    {
-	      old_chain = save_inferior_pid ();
-	      inferior_pid = test_pid;
+	      old_chain = save_inferior_ptid ();
+	      inferior_ptid = pid_to_ptid (test_pid);
 	    }
 	  read_memory(linuxthreads_initial,
 		      (char *)&linuxthreads_initial_pid, sizeof (pid_t));
@@ -828,13 +833,14 @@ update_stop_threads (int test_pid)
   if (linuxthreads_manager_pid != 0)
     {
       if (old_chain == NULL && test_pid > 0 &&
-	  test_pid != inferior_pid && linuxthreads_thread_alive (test_pid))
+	  test_pid != PIDGET (inferior_ptid) 
+	  && linuxthreads_thread_alive (pid_to_ptid (test_pid)))
 	{
-	  old_chain = save_inferior_pid ();
-	  inferior_pid = test_pid;
+	  old_chain = save_inferior_ptid ();
+	  inferior_ptid = pid_to_ptid (test_pid);
 	}
 
-      if (linuxthreads_thread_alive (inferior_pid))
+      if (linuxthreads_thread_alive (inferior_ptid))
 	{
 	  if (test_pid > 0)
 	    {
@@ -844,14 +850,14 @@ update_stop_threads (int test_pid)
 		  stop_thread (linuxthreads_manager_pid);
 		  wait_thread (linuxthreads_manager_pid);
 		}
-	      if (!in_thread_list (test_pid))
+	      if (!in_thread_list (pid_to_ptid (test_pid)))
 	        {
 		  if (!linuxthreads_attach_pending)
 		    printf_filtered ("[New %s]\n",
-				     target_pid_to_str (test_pid));
-		  add_thread (test_pid);
+				     target_pid_to_str (pid_to_ptid (test_pid)));
+		  add_thread (pid_to_ptid (test_pid));
 		  if (linuxthreads_sig_debug.signal
-		      && inferior_pid == test_pid)
+		      && PIDGET (inferior_ptid) == test_pid)
 		    {
 		      /* After a new thread in glibc 2.1 signals gdb its
 			 existence, it suspends itself and wait for
@@ -1033,7 +1039,7 @@ any thread other than the main thread.");
   linuxthreads_breakpoint_zombie = (struct linuxthreads_breakpoint *)
     xmalloc (sizeof (struct linuxthreads_breakpoint) * (linuxthreads_max + 1));
 
-  if (inferior_pid && 
+  if (PIDGET (inferior_ptid) != 0 && 
       !linuxthreads_attach_pending && 
       !using_thread_db)		/* suppressed by thread_db module */
     {
@@ -1041,7 +1047,7 @@ any thread other than the main thread.");
 
       target_write_memory (linuxthreads_debug, (char *)&on, sizeof (on));
       linuxthreads_attach_pending = 1;
-      update_stop_threads (inferior_pid);
+      update_stop_threads (PIDGET (inferior_ptid));
       linuxthreads_attach_pending = 0;
     }
 
@@ -1062,13 +1068,14 @@ linuxthreads_prepare_to_proceed (int step)
   if (!linuxthreads_max
       || !linuxthreads_manager_pid
       || !linuxthreads_breakpoint_pid
-      || !breakpoint_here_p (read_pc_pid (linuxthreads_breakpoint_pid)))
+      || !breakpoint_here_p (
+	    read_pc_pid (pid_to_ptid (linuxthreads_breakpoint_pid))))
     return 0;
 
   if (step)
     {
       /* Mark the current inferior as single stepping process.  */
-      linuxthreads_step_pid = inferior_pid;
+      linuxthreads_step_pid = PIDGET (inferior_ptid);
     }
 
   linuxthreads_inferior_pid = linuxthreads_breakpoint_pid;
@@ -1078,9 +1085,10 @@ linuxthreads_prepare_to_proceed (int step)
 /* Convert a pid to printable form. */
 
 char *
-linuxthreads_pid_to_str (int pid)
+linuxthreads_pid_to_str (ptid_t ptid)
 {
   static char buf[100];
+  int pid = PIDGET (ptid);
 
   sprintf (buf, "%s %d%s", linuxthreads_max ? "Thread" : "Pid", pid,
 	   (pid == linuxthreads_manager_pid) ? " (manager thread)"
@@ -1139,26 +1147,28 @@ linuxthreads_detach (char *args, int from_tty)
 		continue;
 
 	      pid = linuxthreads_breakpoint_zombie[i].pid;
-	      if (!linuxthreads_thread_alive (pid))
+	      if (!linuxthreads_thread_alive (pid_to_ptid (pid)))
 		continue;
 
-	      if (linuxthreads_breakpoint_zombie[i].pc != read_pc_pid (pid))
+	      if (linuxthreads_breakpoint_zombie[i].pc 
+	           != read_pc_pid (pid_to_ptid (pid)))
 		continue;
 
 	      /* Continue in STEP mode until the thread pc has moved or
 		 until SIGTRAP is found on the same PC.  */
 	      if (linuxthreads_find_trap (pid, 0)
-		  && linuxthreads_breakpoint_zombie[i].pc == read_pc_pid (pid))
+		  && linuxthreads_breakpoint_zombie[i].pc 
+		       == read_pc_pid (pid_to_ptid (pid)))
 		write_pc_pid (linuxthreads_breakpoint_zombie[i].pc
-			      - DECR_PC_AFTER_BREAK, pid);
+			      - DECR_PC_AFTER_BREAK, pid_to_ptid (pid));
 	    }
 
 	  /* Detach thread after thread.  */
-	  inferior_pid = linuxthreads_manager_pid;
+	  inferior_ptid = pid_to_ptid (linuxthreads_manager_pid);
 	  iterate_active_threads (detach_thread, 1);
 
 	  /* Remove pending SIGTRAP and SIGSTOP */
-	  linuxthreads_find_trap (inferior_pid, 1);
+	  linuxthreads_find_trap (PIDGET (inferior_ptid), 1);
 
 	  linuxthreads_wait_last = -1;
 	  WSETSTOP (linuxthreads_exit_status, 0);
@@ -1184,11 +1194,11 @@ linuxthreads_detach (char *args, int from_tty)
    signal activated.  */
 
 static void
-linuxthreads_resume (int pid, int step, enum target_signal signo)
+linuxthreads_resume (ptid_t ptid, int step, enum target_signal signo)
 {
   if (!linuxthreads_max || stop_soon_quietly || linuxthreads_manager_pid == 0)
     {
-      child_ops.to_resume (pid, step, signo);
+      child_ops.to_resume (ptid, step, signo);
     }
   else
     {
@@ -1205,28 +1215,28 @@ linuxthreads_resume (int pid, int step, enum target_signal signo)
 	  struct cleanup *old_chain = NULL;
 	  int i;
 
-	  if (pid < 0)
+	  if (PIDGET (ptid) < 0)
 	    {
-	      linuxthreads_step_pid = step ? inferior_pid : 0;
+	      linuxthreads_step_pid = step ? PIDGET (inferior_ptid) : 0;
 	      linuxthreads_step_signo = signo;
-	      rpid = inferior_pid;
+	      rpid = PIDGET (inferior_ptid);
 	    }
 	  else
-	    rpid = pid;
+	    rpid = PIDGET (ptid);
 
-	  if (pid < 0 || !step)
+	  if (PIDGET (ptid) < 0 || !step)
 	    {
 	      linuxthreads_breakpoints_inserted = 1;
 
 	      /* Walk through linuxthreads array in order to resume threads */
-	      if (pid >= 0 && inferior_pid != pid)
+	      if (PIDGET (ptid) >= 0 && !ptid_equal (inferior_ptid, ptid))
 		{
-		  old_chain = save_inferior_pid ();
-		  inferior_pid = pid;
+		  old_chain = save_inferior_ptid ();
+		  inferior_ptid = ptid;
 		}
 
 	      iterate_active_threads (resume_thread, 0);
-	      if (linuxthreads_manager_pid != inferior_pid
+	      if (linuxthreads_manager_pid != PIDGET (inferior_ptid)
 		  && !linuxthreads_pending_status (linuxthreads_manager_pid))
 		resume_thread (linuxthreads_manager_pid);
 	    }
@@ -1237,7 +1247,8 @@ linuxthreads_resume (int pid, int step, enum target_signal signo)
 	  for (i = 0; i <= linuxthreads_breakpoint_last; i++)
 	    if (linuxthreads_breakpoint_zombie[i].pid == rpid)
 	      {
-		if (linuxthreads_breakpoint_zombie[i].pc != read_pc_pid (rpid))
+		if (linuxthreads_breakpoint_zombie[i].pc 
+		      != read_pc_pid (pid_to_ptid (rpid)))
 		  {
 		    /* The current pc is out of zombie breakpoint.  */
 		    REMOVE_BREAKPOINT_ZOMBIE(i);
@@ -1253,7 +1264,7 @@ linuxthreads_resume (int pid, int step, enum target_signal signo)
       /* [unles it has a wait event pending] */
       if (!linuxthreads_pending_status (rpid))
 	{
-	  child_ops.to_resume (rpid, step, signo);
+	  child_ops.to_resume (pid_to_ptid (rpid), step, signo);
 	}
     }
 }
@@ -1313,14 +1324,15 @@ linux_child_wait (int pid, int *rpid, int *status)
 /* Wait for any threads to stop.  We may have to convert PID from a thread id
    to a LWP id, and vice versa on the way out.  */
 
-static int
-linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
+static ptid_t
+linuxthreads_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   int status;
   int rpid;
   int i;
   int last;
   int *wstatus;
+  int pid = PIDGET (ptid);
 
   if (linuxthreads_max && !linuxthreads_breakpoints_inserted)
     wstatus = alloca (LINUXTHREAD_NSIG * sizeof (int));
@@ -1340,7 +1352,7 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 	  if (linuxthreads_inferior_pid)
 	    pid = linuxthreads_inferior_pid;
 	  else if (pid < 0)
-	    pid = inferior_pid;
+	    pid = PIDGET (inferior_ptid);
 	  last = rpid = 0;
 	}
       else if (pid < 0 && linuxthreads_wait_last >= 0)
@@ -1383,7 +1395,7 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 	      if (WIFEXITED(linuxthreads_exit_status))
 		{
 		  store_waitstatus (ourstatus, linuxthreads_exit_status);
-		  return inferior_pid;
+		  return inferior_ptid;
 		}
 	      else
 		{
@@ -1393,7 +1405,7 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 		  /* Claim it exited with unknown signal.  */
 		  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
 		  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-		  return -1;
+		  return pid_to_ptid (-1);
 		}
 	    }
 
@@ -1420,7 +1432,8 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 		    linuxthreads_breakpoint_zombie[i].pid = rpid;
 		    linuxthreads_breakpoint_last++;
 		  }
-		linuxthreads_breakpoint_zombie[i].pc = read_pc_pid (rpid);
+		linuxthreads_breakpoint_zombie[i].pc 
+		  = read_pc_pid (pid_to_ptid (rpid));
 		linuxthreads_breakpoint_zombie[i].step = 1;
 	      }
 	    else
@@ -1435,7 +1448,7 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 			wstatus[last++] = status;
 		      }
 		  }
-		child_resume (rpid, 1, TARGET_SIGNAL_0);
+		child_resume (pid_to_ptid (rpid), 1, TARGET_SIGNAL_0);
 		continue;
 	      }
 	  if (linuxthreads_inferior_pid)
@@ -1453,11 +1466,12 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 		{
 		  if (linuxthreads_step_pid == rpid)
 		    {
-		      child_resume (rpid, 1, linuxthreads_step_signo);
+		      child_resume (pid_to_ptid (rpid), 1,
+		                    linuxthreads_step_signo);
 		    }
 		  else
 		    {
-		      child_resume (rpid, 0, TARGET_SIGNAL_0);
+		      child_resume (pid_to_ptid (rpid), 0, TARGET_SIGNAL_0);
 		    }
 		}
 	      continue;
@@ -1490,7 +1504,8 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 	    {
 	      /* There is a potential zombie breakpoint */
 	      if (WIFEXITED(status)
-		  || linuxthreads_breakpoint_zombie[i].pc != read_pc_pid (rpid))
+		  || linuxthreads_breakpoint_zombie[i].pc 
+		       != read_pc_pid (pid_to_ptid (rpid)))
 	        {
 		  /* The current pc is out of zombie breakpoint.  */
 		  REMOVE_BREAKPOINT_ZOMBIE(i);
@@ -1500,14 +1515,14 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 	        {
 		  /* This is a real one ==> decrement PC and restart.  */
 		  write_pc_pid (linuxthreads_breakpoint_zombie[i].pc
-				- DECR_PC_AFTER_BREAK, rpid);
+				- DECR_PC_AFTER_BREAK, pid_to_ptid (rpid));
 		  if (linuxthreads_step_pid == rpid)
 		    {
-		      child_resume (rpid, 1, linuxthreads_step_signo);
+		      child_resume (pid_to_ptid (rpid), 1, linuxthreads_step_signo);
 		    }
 		  else
 		    {
-		      child_resume (rpid, 0, TARGET_SIGNAL_0);
+		      child_resume (pid_to_ptid (rpid), 0, TARGET_SIGNAL_0);
 		    }
 		  continue;
 		}
@@ -1518,7 +1533,7 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
 	    update_stop_threads (rpid);
 
 	}
-      else if (rpid != inferior_pid)
+      else if (rpid != PIDGET (inferior_ptid))
 	continue;
 
       store_waitstatus (ourstatus, status);
@@ -1542,7 +1557,7 @@ linuxthreads_wait (int pid, struct target_waitstatus *ourstatus)
       else if (linuxthreads_breakpoint_pid)
 	linuxthreads_breakpoint_pid = 0;
 
-      return rpid;
+      return pid_to_ptid (rpid);
     }
 }
 
@@ -1610,17 +1625,17 @@ linuxthreads_kill (void)
   int rpid;
   int status;
 
-  if (inferior_pid == 0)
+  if (PIDGET (inferior_ptid) == 0)
     return;
 
   if (linuxthreads_max && linuxthreads_manager_pid != 0)
     {
       /* Remove all threads status.  */
-      inferior_pid = linuxthreads_manager_pid;
+      inferior_ptid = pid_to_ptid (linuxthreads_manager_pid);
       iterate_active_threads (kill_thread, 1);
     }
 
-  kill_thread (inferior_pid);
+  kill_thread (PIDGET (inferior_ptid));
 
 #if 0
   /* doing_quit_force solves a real problem, but I think a properly
@@ -1639,9 +1654,9 @@ linuxthreads_kill (void)
 	      kill_thread (rpid);
 	}
       else
-	while ((rpid = waitpid (inferior_pid, &status, 0)) > 0)
+	while ((rpid = waitpid (PIDGET (inferior_ptid), &status, 0)) > 0)
 	  if (!WIFEXITED(status))
-	    ptrace (PT_KILL, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0);
+	    ptrace (PT_KILL, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) 0, 0);
     }
 #endif
 

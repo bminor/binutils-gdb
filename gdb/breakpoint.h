@@ -521,7 +521,7 @@ extern int breakpoint_inserted_here_p (CORE_ADDR);
 
 extern int frame_in_dummy (struct frame_info *);
 
-extern int breakpoint_thread_match (CORE_ADDR, int);
+extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 
 extern void until_break_command (char *, int);
 
@@ -598,7 +598,7 @@ extern void update_breakpoints_after_exec (void);
    be detached and allowed to run free.
 
    It is an error to use this function on the process whose id is
-   inferior_pid.  */
+   inferior_ptid.  */
 extern int detach_breakpoints (int);
 
 extern void enable_longjmp_breakpoint (void);

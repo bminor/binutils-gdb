@@ -67,7 +67,7 @@ static void array_open ();
 static void array_close ();
 static void array_detach ();
 static void array_attach ();
-static void array_resume ();
+static void array_resume (ptid_t ptid, int step, enum target_signal sig);
 static void array_fetch_register ();
 static void array_store_register ();
 static void array_fetch_registers ();
@@ -79,7 +79,8 @@ static void array_create_inferior ();
 static void array_mourn_inferior ();
 static void make_gdb_packet ();
 static int array_xfer_memory ();
-static int array_wait ();
+static ptid_t array_wait (ptid_t ptid,
+                                 struct target_waitstatus *status);
 static int array_insert_breakpoint ();
 static int array_remove_breakpoint ();
 static int tohex ();
@@ -697,7 +698,7 @@ array_attach (char *args, int from_tty)
  * array_resume -- Tell the remote machine to resume.
  */
 static void
-array_resume (int pid, int step, enum target_signal sig)
+array_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   debuglogs (1, "array_resume (step=%d, sig=%d)", step, sig);
 
@@ -717,8 +718,8 @@ array_resume (int pid, int step, enum target_signal sig)
  * array_wait -- Wait until the remote machine stops, then return,
  *          storing status in status just as `wait' would.
  */
-static int
-array_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+array_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   int result, i;
@@ -784,7 +785,7 @@ array_wait (int pid, struct target_waitstatus *status)
 
   timeout = old_timeout;
 
-  return 0;
+  return inferior_ptid;
 }
 
 /*

@@ -78,7 +78,7 @@ static unsigned int os_version, os_major, os_minor, os_release;
 
 /* On Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
-   case, inferior_pid will contain the main process ID and the
+   case, inferior_ptid will contain the main process ID and the
    individual thread (process) ID mashed together.  These macros are
    used to separate them out.  These definitions should be overridden
    if thread support is included.  */
@@ -89,13 +89,14 @@ static unsigned int os_version, os_major, os_minor, os_release;
 #endif
 
 int
-get_thread_id (int inferior_pid)
+get_thread_id (ptid_t ptid)
 {
-  int tid = TIDGET (inferior_pid);
-  if (0 == tid) tid = inferior_pid;
+  int tid = TIDGET (ptid);
+  if (0 == tid)
+    tid = PIDGET (ptid);
   return tid;
 }
-#define GET_THREAD_ID(PID)	get_thread_id ((PID));
+#define GET_THREAD_ID(PTID)	get_thread_id ((PTID));
 
 static void
 fetch_nwfpe_single (unsigned int fn, FPA11 * fpa11)
@@ -230,7 +231,7 @@ fetch_fpregister (int regno)
   FPA11 fp;
   
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
 
   /* Read the floating point state.  */
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
@@ -279,7 +280,7 @@ fetch_fpregs (void)
   FPA11 fp;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   /* Read the floating point state.  */
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
@@ -327,7 +328,7 @@ store_fpregister (int regno)
   FPA11 fp;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   /* Read the floating point state.  */
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
@@ -365,7 +366,7 @@ store_fpregs (void)
   FPA11 fp;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   /* Read the floating point state.  */
   ret = ptrace (PT_GETFPREGS, tid, 0, &fp);
@@ -403,7 +404,7 @@ fetch_register (int regno)
   struct pt_regs regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
   if (ret < 0)
@@ -440,7 +441,7 @@ fetch_regs (void)
   struct pt_regs regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
   if (ret < 0)
@@ -474,7 +475,7 @@ store_register (int regno)
     return;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   /* Get the general registers from the process.  */
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
@@ -502,7 +503,7 @@ store_regs (void)
   struct pt_regs regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = GET_THREAD_ID (inferior_pid);
+  tid = GET_THREAD_ID (inferior_ptid);
   
   /* Fetch the general registers.  */
   ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);

@@ -63,17 +63,18 @@ extern int ia64_register_u_addr(int, int);
 #define HAVE_STEPPABLE_WATCHPOINT 1
 
 #define STOPPED_BY_WATCHPOINT(W) \
-  ia64_linux_stopped_by_watchpoint (inferior_pid)
-extern CORE_ADDR ia64_linux_stopped_by_watchpoint (int);
+  ia64_linux_stopped_by_watchpoint (inferior_ptid)
+extern CORE_ADDR ia64_linux_stopped_by_watchpoint (ptid_t ptid);
 
 #define target_insert_watchpoint(addr, len, type) \
-  ia64_linux_insert_watchpoint (inferior_pid, addr, len, type)
-extern int ia64_linux_insert_watchpoint (int pid, CORE_ADDR addr,
+  ia64_linux_insert_watchpoint (inferior_ptid, addr, len, type)
+extern int ia64_linux_insert_watchpoint (ptid_t ptid, CORE_ADDR addr,
                                          int len, int rw);
 
 #define target_remove_watchpoint(addr, len, type) \
-  ia64_linux_remove_watchpoint (inferior_pid, addr, len)
-extern int ia64_linux_remove_watchpoint (int pid, CORE_ADDR addr, int len);
+  ia64_linux_remove_watchpoint (inferior_ptid, addr, len)
+extern int ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr,
+                                         int len);
 
 /* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
    once we have converted all Linux targets to use the new threads
@@ -83,8 +84,8 @@ extern int lin_lwp_prepare_to_proceed (void);
 #undef PREPARE_TO_PROCEED
 #define PREPARE_TO_PROCEED(select_it) lin_lwp_prepare_to_proceed ()
 
-extern void lin_lwp_attach_lwp (int pid, int verbose);
-#define ATTACH_LWP(pid, verbose) lin_lwp_attach_lwp ((pid), (verbose))
+extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
+#define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 
 #include <signal.h>
 

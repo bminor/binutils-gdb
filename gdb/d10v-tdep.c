@@ -885,29 +885,29 @@ show_regs (char *args, int from_tty)
 }
 
 CORE_ADDR
-d10v_read_pc (int pid)
+d10v_read_pc (ptid_t ptid)
 {
-  int save_pid;
+  ptid_t save_ptid;
   CORE_ADDR pc;
   CORE_ADDR retval;
 
-  save_pid = inferior_pid;
-  inferior_pid = pid;
+  save_ptid = inferior_ptid;
+  inferior_ptid = ptid;
   pc = (int) read_register (PC_REGNUM);
-  inferior_pid = save_pid;
+  inferior_ptid = save_ptid;
   retval = D10V_MAKE_IADDR (pc);
   return retval;
 }
 
 void
-d10v_write_pc (CORE_ADDR val, int pid)
+d10v_write_pc (CORE_ADDR val, ptid_t ptid)
 {
-  int save_pid;
+  ptid_t save_ptid;
 
-  save_pid = inferior_pid;
-  inferior_pid = pid;
+  save_ptid = inferior_ptid;
+  inferior_ptid = ptid;
   write_register (PC_REGNUM, D10V_CONVERT_IADDR_TO_RAW (val));
-  inferior_pid = save_pid;
+  inferior_ptid = save_ptid;
 }
 
 CORE_ADDR

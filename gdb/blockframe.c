@@ -265,8 +265,8 @@ reinit_frame_cache (void)
 {
   flush_cached_frames ();
 
-  /* FIXME: The inferior_pid test is wrong if there is a corefile.  */
-  if (inferior_pid != 0)
+  /* FIXME: The inferior_ptid test is wrong if there is a corefile.  */
+  if (PIDGET (inferior_ptid) != 0)
     {
       select_frame (get_current_frame (), 0);
     }

@@ -44,9 +44,9 @@
    and figure out where the shared libraries have got to.  */
 
 #define	SOLIB_ADD(a, b, c)	\
-  if (inferior_pid)	\
+  if (PIDGET (inferior_ptid))	\
     /* Attach to process.  */  \
-    xcoff_relocate_symtab (inferior_pid); \
+    xcoff_relocate_symtab (PIDGET (inferior_ptid)); \
   else		\
     /* Core file.  */ \
     xcoff_relocate_core (c);

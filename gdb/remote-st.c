@@ -339,7 +339,7 @@ st2000_detach (int from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-st2000_resume (int pid, int step, enum target_signal sig)
+st2000_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   if (step)
     {
@@ -358,8 +358,8 @@ st2000_resume (int pid, int step, enum target_signal sig)
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
-static int
-st2000_wait (struct target_waitstatus *status)
+static ptid_t
+st2000_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
 
@@ -375,7 +375,7 @@ st2000_wait (struct target_waitstatus *status)
 
   timeout = old_timeout;
 
-  return 0;
+  return inferior_ptid;
 }
 
 /* Return the name of register number REGNO in the form input and output by

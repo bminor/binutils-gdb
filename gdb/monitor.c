@@ -67,13 +67,13 @@ static void monitor_store_register (int regno);
 static void monitor_printable_string (char *newstr, char *oldstr, int len);
 static void monitor_error (char *function, char *message, CORE_ADDR memaddr, int len, char *string, int final_char);
 static void monitor_detach (char *args, int from_tty);
-static void monitor_resume (int pid, int step, enum target_signal sig);
+static void monitor_resume (ptid_t ptid, int step, enum target_signal sig);
 static void monitor_interrupt (int signo);
 static void monitor_interrupt_twice (int signo);
 static void monitor_interrupt_query (void);
 static void monitor_wait_cleanup (void *old_timeout);
 
-static int monitor_wait (int pid, struct target_waitstatus *status);
+static ptid_t monitor_wait (ptid_t ptid, struct target_waitstatus *status);
 static void monitor_fetch_registers (int regno);
 static void monitor_store_registers (int regno);
 static void monitor_prepare_to_store (void);
@@ -833,7 +833,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   push_target (targ_ops);
 
-  inferior_pid = 42000;		/* Make run command think we are busy... */
+  inferior_ptid = pid_to_ptid (42000);	/* Make run command think we are busy... */
 
   /* Give monitor_wait something to read */
 
@@ -922,7 +922,7 @@ monitor_supply_register (int regno, char *valstr)
 /* Tell the remote machine to resume.  */
 
 static void
-monitor_resume (int pid, int step, enum target_signal sig)
+monitor_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   /* Some monitors require a different command when starting a program */
   monitor_debug ("MON resume\n");
@@ -1072,8 +1072,8 @@ monitor_wait_filter (char *buf,
 /* Wait until the remote machine stops, then return, storing status in
    status just as `wait' would.  */
 
-static int
-monitor_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+monitor_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   char buf[TARGET_BUF_SIZE];
@@ -1149,7 +1149,7 @@ monitor_wait (int pid, struct target_waitstatus *status)
 
   in_monitor_wait = 0;
 
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 /* Fetch register REGNO, or all registers if REGNO is -1. Returns
@@ -2180,7 +2180,7 @@ monitor_load (char *file, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid ;	/* No process now */
 
 /* This is necessary because many things were based on the PC at the time that
    we attached to the monitor, which is no longer valid now that we have loaded

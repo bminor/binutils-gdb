@@ -546,9 +546,9 @@ pc_is_mips16 (bfd_vma memaddr)
    all registers should be sign extended for simplicity? */
 
 static CORE_ADDR
-mips_read_pc (int pid)
+mips_read_pc (ptid_t ptid)
 {
-  return read_signed_register_pid (PC_REGNUM, pid);
+  return read_signed_register_pid (PC_REGNUM, ptid);
 }
 
 /* This returns the PC of the first inst after the prologue.  If we can't

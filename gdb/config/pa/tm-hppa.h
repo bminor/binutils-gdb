@@ -767,12 +767,12 @@ extern CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
 #endif
 
 #define TARGET_READ_PC(pid) target_read_pc (pid)
-extern CORE_ADDR target_read_pc (int);
+extern CORE_ADDR target_read_pc (ptid_t);
 
 #define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)
-extern void target_write_pc (CORE_ADDR, int);
+extern void target_write_pc (CORE_ADDR, ptid_t);
 
-#define TARGET_READ_FP() target_read_fp (inferior_pid)
+#define TARGET_READ_FP() target_read_fp (PIDGET (inferior_ptid))
 extern CORE_ADDR target_read_fp (int);
 
 /* For a number of horrible reasons we may have to adjust the location

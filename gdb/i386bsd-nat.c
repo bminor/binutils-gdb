@@ -166,7 +166,8 @@ fetch_inferior_registers (int regno)
 {
   gregset_t gregs;
 
-  if (ptrace (PT_GETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+  if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
     perror_with_name ("Couldn't get registers");
 
   supply_gregset (&gregs);
@@ -175,7 +176,7 @@ fetch_inferior_registers (int regno)
     {
       fpregset_t fpregs;
 
-      if (ptrace (PT_GETFPREGS, inferior_pid,
+      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
@@ -191,25 +192,26 @@ store_inferior_registers (int regno)
 {
   gregset_t gregs;
 
-  if (ptrace (PT_GETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+  if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
     perror_with_name ("Couldn't get registers");
 
   fill_gregset (&gregs, regno);
 
-  if (ptrace (PT_SETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+  if (ptrace (PT_SETREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
     perror_with_name ("Couldn't write registers");
 
   if (regno == -1 || regno >= FP0_REGNUM)
     {
       fpregset_t fpregs;
 
-      if (ptrace (PT_GETFPREGS, inferior_pid,
+      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
       fill_fpregset (&fpregs, regno);
   
-      if (ptrace (PT_SETFPREGS, inferior_pid,
+      if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");
     }
@@ -231,7 +233,8 @@ i386bsd_dr_set (int regnum, unsigned int value)
 {
   struct dbreg dbregs;
 
-  if (ptrace (PT_GETDBREGS, inferior_pid, (PTRACE_ARG3_TYPE) &dbregs, 0) == -1)
+  if (ptrace (PT_GETDBREGS, PIDGET (inferior_ptid),
+              (PTRACE_ARG3_TYPE) &dbregs, 0) == -1)
     perror_with_name ("Couldn't get debug registers");
 
   /* For some mysterious reason, some of the reserved bits in the
@@ -241,7 +244,8 @@ i386bsd_dr_set (int regnum, unsigned int value)
 
   DBREG_DRX ((&dbregs), regnum) = value;
 
-  if (ptrace (PT_SETDBREGS, inferior_pid, (PTRACE_ARG3_TYPE) &dbregs, 0) == -1)
+  if (ptrace (PT_SETDBREGS, PIDGET (inferior_ptid),
+              (PTRACE_ARG3_TYPE) &dbregs, 0) == -1)
     perror_with_name ("Couldn't write debug registers");
 }
 
@@ -277,7 +281,8 @@ i386bsd_dr_get_status (void)
      way to fix this is to add the hardware breakpoint and watchpoint
      stuff to the target vectore.  For now, just return zero if the
      ptrace call fails.  */
-  if (ptrace (PT_GETDBREGS, inferior_pid, (PTRACE_ARG3_TYPE) &dbregs, 0) == -1)
+  if (ptrace (PT_GETDBREGS, PIDGET (inferior_ptid),
+	      (PTRACE_ARG3_TYPE) & dbregs, 0) == -1)
 #if 0
     perror_with_name ("Couldn't read debug registers");
 #else

@@ -67,8 +67,8 @@ solib_info (char *args, int from_tty)
   struct vmap *vp = vmap;
 
   /* Check for new shared libraries loaded with load ().  */
-  if (inferior_pid)
-    xcoff_relocate_symtab (inferior_pid);
+  if (! ptid_equal (inferior_ptid, null_ptid))
+    xcoff_relocate_symtab (PIDGET (inferior_ptid));
 
   if (vp == NULL || vp->nxt == NULL)
     {
@@ -101,8 +101,8 @@ sharedlibrary_command (char *pattern, int from_tty)
   dont_repeat ();
 
   /* Check for new shared libraries loaded with load ().  */
-  if (inferior_pid)
-    xcoff_relocate_symtab (inferior_pid);
+  if (! ptid_equal (inferior_ptid, null_ptid))
+    xcoff_relocate_symtab (PIDGET (inferior_ptid));
 
   if (pattern)
     {

@@ -927,7 +927,7 @@ r3900_load (char *filename, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid;		/* No process now */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid

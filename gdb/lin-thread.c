@@ -127,11 +127,12 @@
 
 #ifndef TIDGET
 #define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#define PIDGET(PID)		(((PID) & 0xffff))
+#define PIDGET0(PID)		(((PID) & 0xffff))
+#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
 #define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
 #endif
 
-/* Macros for superimposing PID and TID into inferior_pid.  */
+/* Macros for superimposing PID and TID into inferior_ptid.  */
 #define THREAD_FLAG		0x80000000
 #define is_thread(ARG)		(((ARG) & THREAD_FLAG) != 0)
 #define is_lwp(ARG)		(((ARG) & THREAD_FLAG) == 0)
@@ -303,8 +304,8 @@ ps_ptwrite (gdb_ps_prochandle_t ph,	/* write to text segment */
   return rw_common (ph, addr, (char *) buf, size, PS_WRITE);
 }
 
-static struct cleanup *save_inferior_pid    (void);
-static void            restore_inferior_pid (void *saved_pid);
+static struct cleanup *save_inferior_ptid    (void);
+static void            restore_inferior_ptid (void *saved_pid);
 static char *thr_err_string   (td_err_e);
 static char *thr_state_string (td_thr_state_e);
 
@@ -315,9 +316,8 @@ td_thragent_t *      main_threadagent;
  * Common proc_service routine for reading and writing memory.  
  */
 
-/* FIXME: once we've munged the inferior_pid, why can't we
+/* FIXME: once we've munged the inferior_ptid, why can't we
    simply call target_read/write_memory and return?  */
-
 
 static ps_err_e
 rw_common (const struct ps_prochandle *ph,
@@ -326,11 +326,11 @@ rw_common (const struct ps_prochandle *ph,
 	   int     size,
 	   int     write_p)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
   int to_do = size;
   int done  = 0;
 
-  inferior_pid = main_prochandle.pid;
+  inferior_ptid = pid_to_ptid (main_prochandle.pid);
 
   while (to_do > 0)
     {
@@ -353,19 +353,19 @@ rw_common (const struct ps_prochandle *ph,
 }
 
 /* Cleanup functions used by the register callbacks
-   (which have to manipulate the global inferior_pid).  */
+   (which have to manipulate the global inferior_ptid).  */
 
 ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph,		/* Get LWP general regs */
 	     lwpid_t     lwpid,
 	     prgregset_t gregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, main_prochandle.pid);
+  inferior_ptid = BUILD_LWP (lwpid, main_prochandle.pid);
   current_target.to_fetch_registers (-1);
 
-  fill_gregset (gregset, -1);
+  fill_gregset ((gdb_gregset_t *) gregset, -1);
   do_cleanups (old_chain);
 
   return PS_OK;
@@ -376,10 +376,10 @@ ps_lsetregs (gdb_ps_prochandle_t ph,		/* Set LWP general regs */
 	     lwpid_t           lwpid,
 	     const prgregset_t gregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, main_prochandle.pid);
-  supply_gregset (gregset);
+  inferior_ptid = BUILD_LWP (lwpid, main_prochandle.pid);
+  supply_gregset ((gdb_gregset_t *) gregset);
   current_target.to_store_registers (-1);
   do_cleanups (old_chain);
   return PS_OK;
@@ -390,9 +390,9 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph,		/* Get LWP float regs */
 	       lwpid_t       lwpid,
 	       gdb_prfpregset_t *fpregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, main_prochandle.pid);
+  inferior_ptid = BUILD_LWP (lwpid, main_prochandle.pid);
   current_target.to_fetch_registers (-1);
   fill_fpregset (fpregset, -1);
   do_cleanups (old_chain);
@@ -404,9 +404,9 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph,		/* Set LWP float regs */
 	       lwpid_t             lwpid,
 	       const gdb_prfpregset_t *fpregset)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  inferior_pid = BUILD_LWP (lwpid, main_prochandle.pid);
+  inferior_ptid = BUILD_LWP (lwpid, main_prochandle.pid);
   supply_fpregset (fpregset);
   current_target.to_store_registers (-1);
   do_cleanups (old_chain);
@@ -628,44 +628,44 @@ init_thread_db_library (void)
 
    LOCAL FUNCTION
 
-   save_inferior_pid - Save inferior_pid on the cleanup list
-   restore_inferior_pid - Restore inferior_pid from the cleanup list
+   save_inferior_ptid - Save inferior_ptid on the cleanup list
+   restore_inferior_ptid - Restore inferior_ptid from the cleanup list
 
    SYNOPSIS
 
-   struct cleanup *save_inferior_pid (void);
-   void            restore_inferior_pid (void *saved_pid);
+   struct cleanup *save_inferior_ptid (void);
+   void            restore_inferior_ptid (void *saved_pid);
 
    DESCRIPTION
 
-   These two functions act in unison to restore inferior_pid in
+   These two functions act in unison to restore inferior_ptid in
    case of an error.
 
    NOTES
 
-   inferior_pid is a global variable that needs to be changed by many
+   inferior_ptid is a global variable that needs to be changed by many
    of these routines before calling functions in procfs.c.  In order
-   to guarantee that inferior_pid gets restored (in case of errors),
-   you need to call save_inferior_pid before changing it.  At the end
+   to guarantee that inferior_ptid gets restored (in case of errors),
+   you need to call save_inferior_ptid before changing it.  At the end
    of the function, you should invoke do_cleanups to restore it.
 
  */
 
 static struct cleanup *
-save_inferior_pid (void)
+save_inferior_ptid (void)
 {
-  int *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr;
   
-  saved_pid_ptr = xmalloc (sizeof (int));
-  *saved_pid_ptr = inferior_pid;
-  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
 
 static void
-restore_inferior_pid (void *arg)
+restore_inferior_ptid (void *arg)
 {
-  int *saved_pid_ptr = arg;
-  inferior_pid = *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr = arg;
+  inferior_ptid = *saved_ptid_ptr;
   xfree (arg);
 }
 
@@ -920,10 +920,10 @@ enable_thread_event_reporting (td_thragent_t *ta)
     }
 
   /* Set up the breakpoint. */
-  create_thread_event_breakpoint (notify.u.bptaddr);
+  create_thread_event_breakpoint ((CORE_ADDR) notify.u.bptaddr);
 
   /* Save it's location. */
-  thread_creation_bkpt_address = notify.u.bptaddr;
+  thread_creation_bkpt_address = (CORE_ADDR) notify.u.bptaddr;
 
   /* thread death */
   /* get breakpoint location */
@@ -933,10 +933,10 @@ enable_thread_event_reporting (td_thragent_t *ta)
       return;
     }
   /* Set up the breakpoint. */
-  create_thread_event_breakpoint (notify.u.bptaddr);
+  create_thread_event_breakpoint ((CORE_ADDR) notify.u.bptaddr);
 
   /* Save it's location. */
-  thread_death_bkpt_address = notify.u.bptaddr;
+  thread_death_bkpt_address = (CORE_ADDR) notify.u.bptaddr;
 }
 
 /* This function handles the global parts of disabling thread events.
@@ -969,6 +969,7 @@ check_for_thread_event (struct target_waitstatus *tws, int event_pid)
 {
   /* FIXME: to be more efficient, we should keep a static 
      list of threads, and update it only here (with td_ta_thr_iter). */
+  return 0;
 }
 
 static void
@@ -1044,7 +1045,7 @@ thread_db_new_objfile (struct objfile *objfile)
     goto quit;	/* un-interesting object file */
 
   /* Initialize our "main prochandle" with the main inferior pid.  */
-  main_prochandle.pid = PIDGET (inferior_pid);
+  main_prochandle.pid = PIDGET (inferior_ptid);
 
   /* Now attempt to open a thread_db connection to the 
      thread library running in the child process.  */
@@ -1058,7 +1059,7 @@ thread_db_new_objfile (struct objfile *objfile)
     break;	
   case TD_OK:		/* libthread detected in child: we go live now! */
     thread_db_push_target ();
-    event_pid = inferior_pid;	/* for resume */
+    event_pid = PIDGET (inferior_ptid);	/* for resume */
 
     /* Now stop everyone else, and attach any new threads you find.  */
     p_td_ta_thr_iter (main_threadagent, 
@@ -1105,14 +1106,14 @@ quit:
  */
 
 static int
-thread_db_alive (int pid)
+thread_db_alive (ptid_t ptid)
 {
-  if (is_thread (pid))		/* user-space (non-kernel) thread */
+  if (is_thread (ptid))		/* user-space (non-kernel) thread */
     {
       td_thrhandle_t th;
       td_err_e ret;
+      int pid = GET_THREAD (ptid);
 
-      pid = GET_THREAD (pid);
       if ((ret = p_td_ta_map_id2thr (main_threadagent, pid, &th)) != TD_OK)
 	return 0;		/* thread not found */
       if ((ret = p_td_thr_validate (&th)) != TD_OK)
@@ -1120,7 +1121,7 @@ thread_db_alive (int pid)
       return 1;			/* known thread: return true */
     }
   else if (target_beneath->to_thread_alive)
-    return target_beneath->to_thread_alive (pid);
+    return target_beneath->to_thread_alive (ptid);
   else
     return 0;		/* default to "not alive" (shouldn't happen anyway) */
 }
@@ -1166,17 +1167,17 @@ get_lwp_from_thread_id (int tid	/* thread_t? */)
  */
 
 static char *
-thread_db_pid_to_str (int pid)
+thread_db_pid_to_str (ptid_t ptid)
 {
   static char buf[100];
   td_thrhandle_t th;
   td_thrinfo_t ti;
   td_err_e ret;
 
-  if (is_thread (pid))
+  if (is_thread (ptid))
     {
       if ((ret = p_td_ta_map_id2thr (main_threadagent, 
-				     GET_THREAD (pid),
+				     GET_THREAD (ptid),
 				     &th)) != TD_OK)
 	error ("thread_db: map_id2thr failed: %s", thr_err_string (ret));
 
@@ -1185,14 +1186,14 @@ thread_db_pid_to_str (int pid)
 
       if (ti.ti_state == TD_THR_ACTIVE &&
 	  ti.ti_lid != 0)
-	sprintf (buf, "Thread %d (LWP %d)", ti.ti_tid, ti.ti_lid);
+	sprintf (buf, "Thread %ld (LWP %d)", ti.ti_tid, ti.ti_lid);
       else
-	sprintf (buf, "Thread %d (%s)", ti.ti_tid,
+	sprintf (buf, "Thread %ld (%s)", ti.ti_tid,
 		 thr_state_string (ti.ti_state));
     }
-  else if (GET_LWP (pid))
-    sprintf (buf, "LWP %d", GET_LWP (pid));
-  else return normal_pid_to_str (pid);
+  else if (GET_LWP (ptid))
+    sprintf (buf, "LWP %ld", GET_LWP (ptid));
+  else return normal_pid_to_str (ptid);
 
   return buf;
 }
@@ -1210,7 +1211,7 @@ thread_db_files_info (struct target_ops *tgt_vector)
 }
 
 /* 
- * xfer_memory has to munge the inferior_pid before passing the call
+ * xfer_memory has to munge the inferior_ptid before passing the call
  * down to the target layer.  
  */
 
@@ -1222,14 +1223,14 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
   struct cleanup *old_chain;
   int ret;
 
-  old_chain = save_inferior_pid ();
+  old_chain = save_inferior_ptid ();
 
-  if (is_thread (inferior_pid) ||
-      !target_thread_alive (inferior_pid))
+  if (is_thread (inferior_ptid) ||
+      !target_thread_alive (inferior_ptid))
     {
       /* FIXME: use the LID/LWP, so that underlying process layer
 	 can read memory from specific threads?  */
-      inferior_pid = main_prochandle.pid;
+      inferior_ptid = pid_to_ptid (main_prochandle.pid);
     }
 
   ret = target_beneath->to_xfer_memory (memaddr, myaddr, len,
@@ -1239,7 +1240,7 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
 }
 
 /* 
- * fetch_registers has to determine if inferior_pid is a user-space thread.
+ * fetch_registers has to determine if inferior_ptid is a user-space thread.
  * If so, we use the thread_db API to get the registers.
  * And if not, we call the underlying process stratum.
  */
@@ -1253,15 +1254,15 @@ thread_db_fetch_registers (int regno)
   thread_t thread;
   td_err_e ret;
 
-  if (!is_thread (inferior_pid))	/* kernel thread */
+  if (!is_thread (inferior_ptid))	/* kernel thread */
     {			/* pass the request on to the target underneath.  */
       target_beneath->to_fetch_registers (regno);
       return;
     }
 
-  /* convert inferior_pid into a td_thrhandle_t */
+  /* convert inferior_ptid into a td_thrhandle_t */
 
-  if ((thread = GET_THREAD (inferior_pid)) == 0)
+  if ((thread = GET_THREAD (inferior_ptid)) == 0)
     error ("fetch_registers:  thread == 0");
 
   if ((ret = p_td_ta_map_id2thr (main_threadagent, thread, &thandle)) != TD_OK)
@@ -1283,13 +1284,13 @@ thread_db_fetch_registers (int regno)
    because the td routines call ps_lget* which affect the values stored in the
    registers array.  */
 
-  supply_gregset (gregset);
+  supply_gregset ((gdb_gregset_t *) gregset);
   supply_fpregset (&fpregset);
 
 }
 
 /* 
- * store_registers has to determine if inferior_pid is a user-space thread.
+ * store_registers has to determine if inferior_ptid is a user-space thread.
  * If so, we use the thread_db API to get the registers.
  * And if not, we call the underlying process stratum.
  */
@@ -1303,15 +1304,15 @@ thread_db_store_registers (int regno)
   thread_t thread;
   td_err_e ret;
 
-  if (!is_thread (inferior_pid))	/* Kernel thread: */
+  if (!is_thread (inferior_ptid))	/* Kernel thread: */
     {		/* pass the request on to the underlying target vector.  */
       target_beneath->to_store_registers (regno);
       return;
     }
 
-  /* convert inferior_pid into a td_thrhandle_t */
+  /* convert inferior_ptid into a td_thrhandle_t */
 
-  if ((thread = GET_THREAD (inferior_pid)) == 0)
+  if ((thread = GET_THREAD (inferior_ptid)) == 0)
     error ("store_registers: thread == 0");
 
   if ((ret = p_td_ta_map_id2thr (main_threadagent, thread, &thandle)) != TD_OK)
@@ -1335,7 +1336,7 @@ thread_db_store_registers (int regno)
 
     }
 
-  fill_gregset  (gregset, regno);
+  fill_gregset  ((gdb_gregset_t *) gregset, regno);
   fill_fpregset (&fpregset, regno);
 
   if ((ret = p_td_thr_setgregs (&thandle, gregset)) != TD_OK)
@@ -1350,12 +1351,12 @@ handle_new_thread (int tid,	/* user thread id */
 		   int lid,	/* kernel thread id */
 		   int verbose)
 {
-  int gdb_pid = BUILD_THREAD (tid, main_prochandle.pid);
+  ptid_t gdb_ptid = BUILD_THREAD (tid, main_prochandle.pid);
   int wait_pid, wait_status;
 
   if (verbose)
-    printf_filtered ("[New %s]\n", target_pid_to_str (gdb_pid));
-  add_thread (gdb_pid);
+    printf_filtered ("[New %s]\n", target_pid_to_str (gdb_ptid));
+  add_thread (gdb_ptid);
 
   if (lid != main_prochandle.pid)
     {
@@ -1408,7 +1409,7 @@ find_new_threads_callback (const td_thrhandle_t *th, void *ignored)
 static void
 thread_db_find_new_threads (void)
 {
-  if (inferior_pid == -1)	/* FIXME: still necessary? */
+  if (PIDGET (inferior_ptid) == -1)	/* FIXME: still necessary? */
     {
       printf_filtered ("No process.\n");
       return;
@@ -1427,7 +1428,7 @@ thread_db_find_new_threads (void)
 /*
  * Resume all threads, or resume a single thread.
  * If step is true, then single-step the appropriate thread
- * (or single-step inferior_pid, but continue everyone else).
+ * (or single-step inferior_ptid, but continue everyone else).
  * If signo is true, then send that signal to at least one thread.
  */
 
@@ -1467,7 +1468,7 @@ resume_thread_callback (const td_thrhandle_t *th, void *data)
       /* Unconditionally continue the thread with no signal.
 	 Only the event thread will get a signal of any kind.  */
 
-      target_beneath->to_resume (ti.ti_lid, 0, 0);
+      target_beneath->to_resume (pid_to_ptid (ti.ti_lid), 0, 0);
     }
   return 0;
 }
@@ -1480,7 +1481,7 @@ new_resume_thread_callback (threadinfo *thread, void *data)
     {
       /* Unconditionally continue the thread with no signal (for now).  */
 
-      target_beneath->to_resume (thread->lid, 0, 0);
+      target_beneath->to_resume (pid_to_ptid (thread->lid), 0, 0);
     }
   return 0;
 }
@@ -1490,29 +1491,29 @@ static int last_resume_step;
 static int last_resume_signo;
 
 static void
-thread_db_resume (int pid, int step, enum target_signal signo)
+thread_db_resume (ptid_t ptid, int step, enum target_signal signo)
 {
-  last_resume_pid   = pid;
+  last_resume_pid   = PIDGET (ptid);
   last_resume_step  = step;
   last_resume_signo = signo;
 
   /* resuming a specific pid? */
-  if (pid != -1)
+  if (PIDGET (ptid) != -1)
     {
-      if (is_thread (pid))
-	pid = get_lwp_from_thread_id (GET_THREAD (pid));
-      else if (GET_LWP (pid))
-	pid = GET_LWP (pid);
+      if (is_thread (ptid))
+	ptid = pid_to_ptid (get_lwp_from_thread_id (GET_THREAD (ptid)));
+      else if (GET_LWP (ptid))
+	ptid = pid_to_ptid (GET_LWP (ptid));
     }
 
   /* Apparently the interpretation of 'pid' is dependent on 'step':
      If step is true, then a specific pid means 'step only this pid'.
      But if step is not true, then pid means 'continue ALL pids, but
      give the signal only to this one'.  */
-  if (pid != -1 && step)
+  if (PIDGET (ptid) != -1 && step)
     {
       /* FIXME: is this gonna work in all circumstances? */
-      target_beneath->to_resume (pid, step, signo);
+      target_beneath->to_resume (ptid, step, signo);
     }
   else
     {
@@ -1529,11 +1530,11 @@ thread_db_resume (int pid, int step, enum target_signal signo)
       /* now resume event thread, and if necessary also main thread. */
       if (event_pid)
 	{
-	  target_beneath->to_resume (event_pid, step, signo);
+	  target_beneath->to_resume (pid_to_ptid (event_pid), step, signo);
 	}
       if (event_pid != main_prochandle.pid)
 	{
-	  target_beneath->to_resume (main_prochandle.pid, 0, 0);
+	  target_beneath->to_resume (pid_to_ptid (main_prochandle.pid), 0, 0);
 	}
     }
 }
@@ -1546,7 +1547,7 @@ stop_or_attach_thread_callback (const td_thrhandle_t *th, void *data)
 {
   td_thrinfo_t ti;
   td_err_e     ret;
-  int          gdb_pid;
+  ptid_t      gdb_ptid;
   int on_off = 1;
 
   if ((ret = p_td_thr_get_info (th, &ti)) != TD_OK)
@@ -1559,8 +1560,8 @@ stop_or_attach_thread_callback (const td_thrhandle_t *th, void *data)
      We build this list anew at every wait event.  */
   insert_thread (ti.ti_tid, ti.ti_lid, ti.ti_state, ti.ti_type);
   /* Now: if we've already seen it, stop it, else add it and attach it.  */
-  gdb_pid = BUILD_THREAD (ti.ti_tid, main_prochandle.pid);
-  if (!in_thread_list (gdb_pid))	/* new thread */
+  gdb_ptid = BUILD_THREAD (ti.ti_tid, main_prochandle.pid);
+  if (!in_thread_list (gdb_ptid))	/* new thread */
     {
       handle_new_thread (ti.ti_tid, ti.ti_lid, 1);
       /* Enable thread events */
@@ -1655,13 +1656,14 @@ wait_for_stop (int pid)
 
 	  if (retpid != event_pid &&
 	      signo == SIGTRAP &&
-	      breakpoint_inserted_here_p (read_pc_pid (retpid) - 
+	      breakpoint_inserted_here_p (read_pc_pid (pid_to_ptid (retpid)) - 
 					  DECR_PC_AFTER_BREAK))
 	    {
 	      /* Set the pc to before the trap and DO NOT re-send the signal */
 	      if (DECR_PC_AFTER_BREAK)
-		write_pc_pid (read_pc_pid (retpid) - DECR_PC_AFTER_BREAK,
-			      retpid);
+		write_pc_pid (read_pc_pid (pid_to_ptid (retpid)) 
+		                - DECR_PC_AFTER_BREAK,
+			      pid_to_ptid (retpid));
 	    }
 
 	  /* Since SIGINT gets forwarded to the entire process group
@@ -1676,7 +1678,7 @@ wait_for_stop (int pid)
 	    {
 	      wstatus [signo] = 1;
 	    }
-	  child_resume (retpid, 0, TARGET_SIGNAL_0);
+	  child_resume (pid_to_ptid (retpid), 0, TARGET_SIGNAL_0);
 	  continue;
 	}
 
@@ -1732,14 +1734,15 @@ new_wait_thread_callback (threadinfo *thread, void *data)
  * user-space thread.  
  */
 
-static int
-thread_db_wait (int pid, struct target_waitstatus *ourstatus)
+static ptid_t
+thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   td_thrhandle_t thandle;
   td_thrinfo_t ti;
   td_err_e ret;
   lwpid_t lwp;
   int retpid;
+  ptid_t retptid;
   int status;
   int save_errno;
 
@@ -1753,10 +1756,10 @@ thread_db_wait (int pid, struct target_waitstatus *ourstatus)
 
   /* FIXME: should I do the wait right here inline?  */
 #if 0
-  if (pid == -1)
+  if (PIDGET (ptid) == -1)
     lwp = -1;
   else
-    lwp = get_lwp_from_thread_id (GET_THREAD (pid));
+    lwp = get_lwp_from_thread_id (GET_THREAD (ptid));
 #endif
 
 
@@ -1767,7 +1770,7 @@ thread_db_wait (int pid, struct target_waitstatus *ourstatus)
      FIXME: do I have any killing to do?
      Can I get this event mistakenly from a thread?  */
   if (ourstatus->kind == TARGET_WAITKIND_EXITED)
-    return retpid;
+    return pid_to_ptid (retpid);
 
   /* OK, we got an event of interest.
      Go stop all threads and look for new ones.
@@ -1809,44 +1812,46 @@ thread_db_wait (int pid, struct target_waitstatus *ourstatus)
 
   /* If the process layer does not furnish an lwp,
      then perhaps the returned pid IS the lwp... */
-  if ((lwp = GET_LWP (retpid)) == 0)
+#if 0 /* Always true (if it'd compile...) */
+  if ((lwp = GET_LWP (pid_to_ptid (retpid))) == 0)
+#endif
     lwp = retpid;
 
   if ((ret = p_td_ta_map_lwp2thr (main_threadagent, lwp, &thandle)) != TD_OK)
-    return retpid;	/* LWP is not mapped onto a user-space thread. */
+    return pid_to_ptid (retpid); /* LWP is not mapped onto a user-space thread. */
 
   if ((ret = p_td_thr_validate (&thandle)) != TD_OK)
-    return retpid;	/* LWP is not mapped onto a valid thread. */
+    return pid_to_ptid (retpid);	/* LWP is not mapped onto a valid thread. */
 
   if ((ret = p_td_thr_get_info (&thandle, &ti)) != TD_OK)
     {
       warning ("thread_db: thr_get_info failed ('%s')", thr_err_string (ret));
-      return retpid;
+      return pid_to_ptid (retpid);
     }
 
-  retpid = BUILD_THREAD (ti.ti_tid, main_prochandle.pid);
+  retptid = BUILD_THREAD (ti.ti_tid, main_prochandle.pid);
   /* If this is a new user thread, notify GDB about it.  */
-  if (!in_thread_list (retpid))
+  if (!in_thread_list (retptid))
     {
-      printf_filtered ("[New %s]\n", target_pid_to_str (retpid));
-      add_thread (retpid);
+      printf_filtered ("[New %s]\n", target_pid_to_str (retptid));
+      add_thread (retptid);
     }
 
 #if 0
   /* Now detect if this is a thread creation/deletion event: */
   check_for_thread_event (ourstatus, retpid);
 #endif
-  return retpid;
+  return retptid;
 }
 
 /* 
  * kill has to call the underlying kill.
- * FIXME: I'm not sure if it's necessary to check inferior_pid any more,
- * but we might need to fix inferior_pid up if it's a user thread.
+ * FIXME: I'm not sure if it's necessary to check inferior_ptid any more,
+ * but we might need to fix inferior_ptid up if it's a user thread.
  */
 
 static int
-kill_thread_callback (td_thrhandle_t *th, void *data)
+kill_thread_callback (const td_thrhandle_t *th, void *data)
 {
   td_thrinfo_t ti;
   td_err_e     ret;
@@ -1874,7 +1879,7 @@ static void thread_db_kill (void)
 
   /* Fixme: 
      For Linux, threads may need to be waited.  */
-  if (inferior_pid != 0)
+  if (! ptid_equal (inferior_ptid, null_ptid))
     {
       /* Go kill the children first.  Save the main thread for last. */
       p_td_ta_thr_iter (main_threadagent, 
@@ -1891,7 +1896,7 @@ static void thread_db_kill (void)
 	 detach would not work.  */
       disable_thread_event_reporting (main_threadagent);
 
-      inferior_pid = main_prochandle.pid;
+      inferior_ptid = pid_to_ptid (main_prochandle.pid);
 
       /* 
        * Since both procfs_kill and ptrace_kill call target_mourn, 
@@ -1936,7 +1941,7 @@ static void thread_db_mourn_inferior (void)
  */
 
 static int
-detach_thread_callback (td_thrhandle_t *th, void *data)
+detach_thread_callback (const td_thrhandle_t *th, void *data)
 {
   /* Called once per thread.  */
   td_thrinfo_t ti;
@@ -1969,8 +1974,8 @@ detach_thread_callback (td_thrhandle_t *th, void *data)
       /* Now cancel any pending SIGTRAPS.  FIXME!  */
 
       /* Call underlying detach method.  FIXME just detach it.  */
-      old_chain = save_inferior_pid ();
-      inferior_pid = ti.ti_lid;
+      old_chain = save_inferior_ptid ();
+      inferior_ptid = pid_to_ptid (ti.ti_lid);
       detach (TARGET_SIGNAL_0);
       do_cleanups (old_chain);
     }
@@ -1999,7 +2004,7 @@ thread_db_detach (char *args, int from_tty)
   thread_db_unpush_target ();
 
   /* above call nullifies target_beneath, so don't use that! */
-  inferior_pid = PIDGET (inferior_pid);
+  inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
   target_detach (args, from_tty);
 }
 

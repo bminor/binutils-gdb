@@ -753,7 +753,7 @@ adapt_detach (char *args, int from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-adapt_resume (int pid, int step, enum target_signal sig)
+adapt_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   if (step)
     {
@@ -781,8 +781,8 @@ adapt_resume (int pid, int step, enum target_signal sig)
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
-int
-adapt_wait (struct target_waitstatus *status)
+ptid_t
+adapt_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   /* Strings to look for.  '?' means match any single character.  
      Note that with the algorithm we use, the initial character
@@ -815,7 +815,7 @@ adapt_wait (struct target_waitstatus *status)
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = TARGET_SIGNAL_TRAP;
       need_artificial_trap--;
-      return 0;
+      return inferior_ptid;
     }
 
   timeout = 0;			/* Don't time out -- user program is running. */
@@ -871,7 +871,7 @@ adapt_wait (struct target_waitstatus *status)
     }
   timeout = old_timeout;
   immediate_quit = old_immediate_quit;
-  return 0;
+  return inferior_ptid;
 }
 
 /* Return the name of register number REGNO

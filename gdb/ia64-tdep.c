@@ -612,27 +612,27 @@ ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 }
 
 CORE_ADDR
-ia64_read_pc (int pid)
+ia64_read_pc (ptid_t ptid)
 {
-  CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, pid);
-  CORE_ADDR pc_value   = read_register_pid (IA64_IP_REGNUM, pid);
+  CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, ptid);
+  CORE_ADDR pc_value   = read_register_pid (IA64_IP_REGNUM, ptid);
   int slot_num = (psr_value >> 41) & 3;
 
   return pc_value | (slot_num * SLOT_MULTIPLIER);
 }
 
 void
-ia64_write_pc (CORE_ADDR new_pc, int pid)
+ia64_write_pc (CORE_ADDR new_pc, ptid_t ptid)
 {
   int slot_num = (int) (new_pc & 0xf) / SLOT_MULTIPLIER;
-  CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, pid);
+  CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, ptid);
   psr_value &= ~(3LL << 41);
   psr_value |= (CORE_ADDR)(slot_num & 0x3) << 41;
 
   new_pc &= ~0xfLL;
 
-  write_register_pid (IA64_PSR_REGNUM, psr_value, pid);
-  write_register_pid (IA64_IP_REGNUM, new_pc, pid);
+  write_register_pid (IA64_PSR_REGNUM, psr_value, ptid);
+  write_register_pid (IA64_IP_REGNUM, new_pc, ptid);
 }
 
 #define IS_NaT_COLLECTION_ADDR(addr) ((((addr) >> 3) & 0x3f) == 0x3f)

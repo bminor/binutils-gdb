@@ -132,10 +132,10 @@ gnu_fetch_registers (int regno)
   /* Make sure we know about new threads.  */
   inf_update_procs (current_inferior);
 
-  thread = inf_tid_to_thread (current_inferior, inferior_pid);
+  thread = inf_tid_to_thread (current_inferior, PIDGET (inferior_ptid));
   if (!thread)
     error ("Can't fetch registers from thread %d: No such thread",
-	   inferior_pid);
+	   PIDGET (inferior_ptid));
 
   if (regno < NUM_GREGS || regno == -1)
     {
@@ -256,10 +256,10 @@ gnu_store_registers (int regno)
   /* Make sure we know about new threads.  */
   inf_update_procs (current_inferior);
 
-  thread = inf_tid_to_thread (current_inferior, inferior_pid);
+  thread = inf_tid_to_thread (current_inferior, PIDGET (inferior_ptid));
   if (!thread)
     error ("Couldn't store registers into thread %d: No such thread",
-	   inferior_pid);
+	   PIDGET (inferior_ptid));
 
   if (regno < NUM_GREGS || regno == -1)
     {

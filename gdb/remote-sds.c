@@ -62,7 +62,7 @@ static void sds_prepare_to_store (void);
 
 static void sds_fetch_registers (int);
 
-static void sds_resume (int, int, enum target_signal);
+static void sds_resume (ptid_t, int, enum target_signal);
 
 static int sds_start_remote (PTR);
 
@@ -86,7 +86,7 @@ static int sds_send (unsigned char *, int);
 
 static int readchar (int);
 
-static int sds_wait (int, struct target_waitstatus *);
+static ptid_t sds_wait (ptid_t, struct target_waitstatus *);
 
 static void sds_kill (void);
 
@@ -347,7 +347,7 @@ static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
 int last_sent_step;
 
 static void
-sds_resume (int pid, int step, enum target_signal siggnal)
+sds_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   unsigned char buf[PBUFSIZ];
 
@@ -416,8 +416,8 @@ int kill_kludge;
    STATUS just as `wait' would.  Returns "pid" (though it's not clear
    what, if anything, that means in the case of this target).  */
 
-static int
-sds_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+sds_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   unsigned char buf[PBUFSIZ];
   int retlen;
@@ -433,7 +433,7 @@ sds_wait (int pid, struct target_waitstatus *status)
     {
       just_started = 0;
       status->kind = TARGET_WAITKIND_STOPPED;
-      return inferior_pid;
+      return inferior_ptid;
     }
 
   while (1)
@@ -457,7 +457,7 @@ sds_wait (int pid, struct target_waitstatus *status)
 	}
     }
 got_status:
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 static unsigned char sprs[16];
@@ -1001,7 +1001,7 @@ sds_mourn (void)
 static void
 sds_create_inferior (char *exec_file, char *args, char **env)
 {
-  inferior_pid = 42000;
+  inferior_ptid = pid_to_ptid (42000);
 
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
@@ -1015,7 +1015,7 @@ sds_load (char *filename, int from_tty)
 {
   generic_load (filename, from_tty);
 
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 }
 
 /* The SDS monitor has commands for breakpoint insertion, although it

@@ -54,7 +54,7 @@
 
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 extern struct value *call_function_by_hand ();
-static void udi_resume (int pid, int step, enum target_signal sig);
+static void udi_resume (ptid_t ptid, int step, enum target_signal sig);
 static void udi_fetch_registers (int regno);
 static void udi_load (char *args, int from_tty);
 static void fetch_register (int regno);
@@ -148,7 +148,7 @@ udi_create_inferior (char *execfile, char *args, char **env)
       entry.Offset = 0;
     }
 
-  inferior_pid = 40000;
+  inferior_ptid = pid_to_ptid (40000);
 
   if (!entry.Offset)
     download (execfile, 0);
@@ -318,7 +318,7 @@ udi_close (			/*FIXME: how is quitting used */
 
   /* Do not try to close udi_session_id again, later in the program.  */
   udi_session_id = -1;
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 
   printf_filtered ("  Ending remote debugging\n");
 }
@@ -370,7 +370,7 @@ udi_detach (char *args, int from_tty)
   /* Don't try to UDIDisconnect it again in udi_close, which is called from
      pop_target.  */
   udi_session_id = -1;
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 
   pop_target ();
 
@@ -383,7 +383,7 @@ udi_detach (char *args, int from_tty)
 ** Tell the remote machine to resume.  */
 
 static void
-udi_resume (int pid, int step, enum target_signal sig)
+udi_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   UDIError tip_error;
   UDIUInt32 Steps = 1;
@@ -408,8 +408,8 @@ udi_resume (int pid, int step, enum target_signal sig)
 ** Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
-static int
-udi_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+udi_wait (int ptid_t, struct target_waitstatus *status)
 {
   UDIInt32 MaxTime;
   UDIPId PId;
@@ -584,7 +584,7 @@ udi_wait (int pid, struct target_waitstatus *status)
 
   timeout = old_timeout;	/* Restore original timeout value */
   immediate_quit = old_immediate_quit;
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 #if 0
@@ -1012,7 +1012,7 @@ udi_kill (void)
   UDIStop ();
 
   udi_session_id = -1;
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 
   if (from_tty)
     printf_unfiltered ("Target has been stopped.");
@@ -1032,7 +1032,7 @@ udi_kill (void)
 
   /* Do not try to close udi_session_id again, later in the program.  */
   udi_session_id = -1;
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 }
 
 /* 

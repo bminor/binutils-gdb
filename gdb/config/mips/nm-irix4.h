@@ -51,17 +51,17 @@
    GDB to step over the watchpoint. */
 
 #define STOPPED_BY_WATCHPOINT(W) \
-  procfs_stopped_by_watchpoint(inferior_pid)
-extern int procfs_stopped_by_watchpoint (int);
+  procfs_stopped_by_watchpoint(inferior_ptid)
+extern int procfs_stopped_by_watchpoint (ptid_t);
 
 #define HAVE_NONSTEPPABLE_WATCHPOINT
 
 /* Use these macros for watchpoint insertion/deletion.  */
 /* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
 #define target_insert_watchpoint(ADDR, LEN, TYPE) \
-     procfs_set_watchpoint (inferior_pid, ADDR, LEN, TYPE, 0)
+     procfs_set_watchpoint (inferior_ptid, ADDR, LEN, TYPE, 0)
 #define target_remove_watchpoint(ADDR, LEN, TYPE) \
-     procfs_set_watchpoint (inferior_pid, ADDR, 0, 0, 0)
-extern int procfs_set_watchpoint (int, CORE_ADDR, int, int, int);
+     procfs_set_watchpoint (inferior_ptid, ADDR, 0, 0, 0)
+extern int procfs_set_watchpoint (ptid_t, CORE_ADDR, int, int, int);
 
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1

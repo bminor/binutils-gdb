@@ -586,13 +586,13 @@ h8500_write_sp (CORE_ADDR v)
 }
 
 CORE_ADDR
-h8500_read_pc (int pid)
+h8500_read_pc (ptid_t ptid)
 {
   return read_register (PC_REGNUM);
 }
 
 void
-h8500_write_pc (CORE_ADDR v, int pid)
+h8500_write_pc (CORE_ADDR v, ptid_t ptid)
 {
   write_register (PC_REGNUM, v);
 }

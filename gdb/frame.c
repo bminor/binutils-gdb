@@ -23,7 +23,7 @@
 #include "frame.h"
 #include "target.h"
 #include "value.h"
-#include "inferior.h"	/* for inferior_pid */
+#include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
 
 /* FIND_SAVED_REGISTER ()

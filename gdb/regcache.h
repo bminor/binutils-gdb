@@ -66,15 +66,15 @@ extern void write_register_bytes (int regbyte, char *myaddr, int len);
 extern ULONGEST read_register (int regnum);
 
 /* Rename to read_unsigned_register_pid()? */
-extern ULONGEST read_register_pid (int regnum, int pid);
+extern ULONGEST read_register_pid (int regnum, ptid_t ptid);
 
 extern LONGEST read_signed_register (int regnum);
 
-extern LONGEST read_signed_register_pid (int regnum, int pid);
+extern LONGEST read_signed_register_pid (int regnum, ptid_t ptid);
 
 extern void write_register (int regnum, LONGEST val);
 
-extern void write_register_pid (int regnum, CORE_ADDR val, int pid);
+extern void write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid);
 
 extern void supply_register (int regnum, char *val);
 

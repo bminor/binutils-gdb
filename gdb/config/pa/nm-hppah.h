@@ -219,21 +219,21 @@ extern void hppa_disable_page_protection_events (int);
 
 /* Use these macros for watchpoint insertion/deletion.  */
 #define target_insert_watchpoint(addr, len, type) \
-        hppa_insert_hw_watchpoint (inferior_pid, addr, (LONGEST)(len), type)
+        hppa_insert_hw_watchpoint (PIDGET (inferior_ptid), addr, (LONGEST)(len), type)
 
 #define target_remove_watchpoint(addr, len, type) \
-        hppa_remove_hw_watchpoint (inferior_pid, addr, (LONGEST)(len), type)
+        hppa_remove_hw_watchpoint (PIDGET (inferior_ptid), addr, (LONGEST)(len), type)
 
 /* We call our k-thread processes "threads", rather
  * than processes.  So we need a new way to print
  * the string.  Code is in hppah-nat.c.
  */
 
-extern char *child_pid_to_str (pid_t);
+extern char *child_pid_to_str (ptid_t);
 
-#define target_tid_to_str( pid ) \
-        hppa_tid_to_str( pid )
-extern char *hppa_tid_to_str (pid_t);
+#define target_tid_to_str( ptid ) \
+        hppa_tid_to_str( ptid )
+extern char *hppa_tid_to_str (ptid_t);
 
 /* For this, ID can be either a process or thread ID, and the function
    will describe it appropriately, returning the description as a printable
@@ -244,7 +244,7 @@ extern char *hppa_tid_to_str (pid_t);
  */
 #define target_pid_or_tid_to_str(ID) \
         hppa_pid_or_tid_to_str (ID)
-extern char *hppa_pid_or_tid_to_str (pid_t);
+extern char *hppa_pid_or_tid_to_str (ptid_t);
 
 /* This is used when handling events caused by a call to vfork().  On ptrace-
    based HP-UXs, when you resume the vforked child, the parent automagically

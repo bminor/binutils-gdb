@@ -257,29 +257,29 @@ extern void set_gdbarch_ieee_float (struct gdbarch *gdbarch, int ieee_float);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC)
-#define TARGET_READ_PC(pid) (generic_target_read_pc (pid))
+#define TARGET_READ_PC(ptid) (generic_target_read_pc (ptid))
 #endif
 
-typedef CORE_ADDR (gdbarch_read_pc_ftype) (int pid);
-extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, int pid);
+typedef CORE_ADDR (gdbarch_read_pc_ftype) (ptid_t ptid);
+extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype *read_pc);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_PC)
-#define TARGET_READ_PC(pid) (gdbarch_read_pc (current_gdbarch, pid))
+#define TARGET_READ_PC(ptid) (gdbarch_read_pc (current_gdbarch, ptid))
 #endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_PC)
-#define TARGET_WRITE_PC(val, pid) (generic_target_write_pc (val, pid))
+#define TARGET_WRITE_PC(val, ptid) (generic_target_write_pc (val, ptid))
 #endif
 
-typedef void (gdbarch_write_pc_ftype) (CORE_ADDR val, int pid);
-extern void gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, int pid);
+typedef void (gdbarch_write_pc_ftype) (CORE_ADDR val, ptid_t ptid);
+extern void gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, ptid_t ptid);
 extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftype *write_pc);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_PC)
-#define TARGET_WRITE_PC(val, pid) (gdbarch_write_pc (current_gdbarch, val, pid))
+#define TARGET_WRITE_PC(val, ptid) (gdbarch_write_pc (current_gdbarch, val, ptid))
 #endif
 #endif
 

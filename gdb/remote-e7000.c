@@ -710,7 +710,7 @@ e7000_detach (char *arg, int from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-e7000_resume (int pid, int step, enum target_signal sigal)
+e7000_resume (ptid_t ptid, int step, enum target_signal sigal)
 {
   if (step)
     puts_e7000debug ("S\r");
@@ -1645,7 +1645,7 @@ e7000_load (char *args, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid;	/* No process now */
 
 /* This is necessary because many things were based on the PC at the time that
    we attached to the monitor, which is no longer valid now that we have loaded
@@ -1999,8 +1999,8 @@ static char *estrings[] =
 /* Wait until the remote machine stops, then return, storing status in
    STATUS just as `wait' would.  */
 
-static int
-e7000_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+e7000_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int stop_reason;
   int regno;
@@ -2122,7 +2122,7 @@ e7000_wait (int pid, struct target_waitstatus *status)
       internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
-  return 0;
+  return inferior_ptid;
 }
 
 /* Stop the running program.  */

@@ -215,12 +215,12 @@ call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
    hook before returning.  */
 
 int
-ptrace_wait (int pid, int *status)
+ptrace_wait (ptid_t ptid, int *status)
 {
   int wstate;
 
   wstate = wait (status);
-  target_post_wait (wstate, *status);
+  target_post_wait (pid_to_ptid (wstate), *status);
   return wstate;
 }
 
@@ -228,8 +228,9 @@ void
 kill_inferior (void)
 {
   int status;
+  int pid =  PIDGET (inferior_ptid);
 
-  if (inferior_pid == 0)
+  if (pid == 0)
     return;
 
   /* This once used to call "kill" to kill the inferior just in case
@@ -240,8 +241,8 @@ kill_inferior (void)
 
      The kill call causes problems under hpux10, so it's been removed;
      if this causes problems we'll deal with them as they arise.  */
-  ptrace (PT_KILL, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0);
-  ptrace_wait (0, &status);
+  ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+  ptrace_wait (null_ptid, &status);
   target_mourn_inferior ();
 }
 
@@ -252,15 +253,17 @@ kill_inferior (void)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (int pid, int step, enum target_signal signal)
+child_resume (ptid_t ptid, int step, enum target_signal signal)
 {
+  int pid = PIDGET (ptid);
+
   errno = 0;
 
   if (pid == -1)
     /* Resume all threads.  */
     /* I think this only gets used in the non-threaded case, where "resume
-       all threads" and "resume inferior_pid" are the same.  */
-    pid = inferior_pid;
+       all threads" and "resume inferior_ptid" are the same.  */
+    pid = PIDGET (inferior_ptid);
 
   /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
      it was.  (If GDB wanted it to start some other way, we have already
@@ -312,7 +315,8 @@ void
 detach (int signal)
 {
   errno = 0;
-  ptrace (PT_DETACH, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
+  ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) 1,
+          signal);
   if (errno)
     perror_with_name ("ptrace");
   attach_flag = 0;
@@ -356,7 +360,7 @@ _initialize_kernel_u_addr (void)
 /* U_REGS_OFFSET is the offset of the registers within the u area.  */
 #if !defined (U_REGS_OFFSET)
 #define U_REGS_OFFSET \
-  ptrace (PT_READ_U, inferior_pid, \
+  ptrace (PT_READ_U, PIDGET (inferior_ptid), \
 	  (PTRACE_ARG3_TYPE) (offsetof (struct user, u_ar0)), 0) \
     - KERNEL_U_ADDR
 #endif
@@ -387,8 +391,8 @@ fetch_register (int regno)
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_pid)) == 0)
-    tid = inferior_pid;		/* no thread id, just use process id */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
@@ -453,8 +457,8 @@ store_register (int regno)
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_pid)) == 0)
-    tid = inferior_pid;		/* no thread id, just use process id */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
@@ -535,14 +539,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_pid), 
+	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_ptid), 
 			      (PTRACE_ARG3_TYPE) addr, 0);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1] 
-	    = ptrace (PT_READ_I, PIDGET (inferior_pid),
+	    = ptrace (PT_READ_I, PIDGET (inferior_ptid),
 		      ((PTRACE_ARG3_TYPE)
 		       (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))),
 		      0);
@@ -559,14 +563,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  ptrace (PT_WRITE_D, PIDGET (inferior_pid), 
+	  ptrace (PT_WRITE_D, PIDGET (inferior_ptid), 
 		  (PTRACE_ARG3_TYPE) addr, buffer[i]);
 	  if (errno)
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 	         Gould NP1, at least.  */
 	      errno = 0;
-	      ptrace (PT_WRITE_I, PIDGET (inferior_pid), 
+	      ptrace (PT_WRITE_I, PIDGET (inferior_ptid), 
 		      (PTRACE_ARG3_TYPE) addr, buffer[i]);
 	    }
 	  if (errno)
@@ -582,7 +586,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_pid),
+	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
 			      (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    return 0;
@@ -632,7 +636,7 @@ udot_info (char *dummy1, int dummy2)
 	    }
 	  printf_filtered ("%04x:", udot_off);
 	}
-      udot_val = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) udot_off, 0);
+      udot_val = ptrace (PT_READ_U, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) udot_off, 0);
       if (errno != 0)
 	{
 	  sprintf (mess, "\nreading user struct at offset 0x%x", udot_off);

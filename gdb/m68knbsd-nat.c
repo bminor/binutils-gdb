@@ -34,12 +34,12 @@ fetch_inferior_registers (int regno)
   struct reg inferior_registers;
   struct fpreg inferior_fp_registers;
 
-  ptrace (PT_GETREGS, inferior_pid,
+  ptrace (PT_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
   memcpy (&registers[REGISTER_BYTE (0)], &inferior_registers,
 	  sizeof (inferior_registers));
 
-  ptrace (PT_GETFPREGS, inferior_pid,
+  ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
   memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	  sizeof (inferior_fp_registers));
@@ -55,12 +55,12 @@ store_inferior_registers (int regno)
 
   memcpy (&inferior_registers, &registers[REGISTER_BYTE (0)],
 	  sizeof (inferior_registers));
-  ptrace (PT_SETREGS, inferior_pid,
+  ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
 
   memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	  sizeof (inferior_fp_registers));
-  ptrace (PT_SETFPREGS, inferior_pid,
+  ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0);
 }
 

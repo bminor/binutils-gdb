@@ -115,7 +115,7 @@ bug_load (char *args, int fromtty)
 
   sr_check_open ();
 
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   abfd = bfd_openr (args, 0);
   if (!abfd)
     {
@@ -232,7 +232,7 @@ bug_open (char *args, int from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-bug_resume (int pid, int step, enum target_signal sig)
+bug_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   if (step)
     {
@@ -261,8 +261,8 @@ static char *wait_strings[] =
   NULL,
 };
 
-int
-bug_wait (int pid, struct target_waitstatus *status)
+ptid_t
+bug_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int old_timeout = sr_get_timeout ();
   int old_immediate_quit = immediate_quit;
@@ -325,7 +325,7 @@ bug_wait (int pid, struct target_waitstatus *status)
 
   sr_set_timeout (old_timeout);
   immediate_quit = old_immediate_quit;
-  return 0;
+  return inferior_ptid;
 }
 
 /* Return the name of register number REGNO

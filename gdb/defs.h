@@ -843,6 +843,38 @@ enum val_prettyprint
     /* Use the default setting which the user has specified.  */
     Val_pretty_default
   };
+
+/* A collection of the various "ids" necessary for identifying
+   the inferior.  This consists of the process id (pid, thread
+   id (tid), and other fields necessary for uniquely identifying
+   the inferior process/thread being debugged.
+
+   The present typedef is obviously quite naive with respect to
+   the magnitudes that real life pids and tids can take on and
+   will be replaced with something more robust shortly.  */
+
+typedef int ptid_t;
+
+/* Convert a pid to a ptid_t.  This macro is temporary and will
+   be replaced shortly.  */
+
+#define pid_to_ptid(PID) ((ptid_t) MERGEPID ((PID),0))
+
+/* Define a value for the null (or zero) pid.  This macro is temporary
+   and will go away shortly.  */
+
+#define null_ptid (pid_to_ptid (0))
+
+/* Define a value for the -1 pid.  This macro is temporary and will go
+   away shortly.  */
+
+#define minus_one_ptid (pid_to_ptid (-1))
+
+/* Define a ptid comparison operator.  This macro is temporary and will
+   be replaced with a real function shortly.  */
+
+#define ptid_equal(PTID1,PTID2) ((PTID1) == (PTID2))
+
 
 
 /* Optional host machine definition.  Pure autoconf targets will not
@@ -1302,7 +1334,8 @@ extern void (*readline_end_hook) (void);
 extern void (*register_changed_hook) (int regno);
 extern void (*memory_changed_hook) (CORE_ADDR addr, int len);
 extern void (*context_hook) (int);
-extern int (*target_wait_hook) (int pid, struct target_waitstatus * status);
+extern ptid_t (*target_wait_hook) (ptid_t ptid,
+                                         struct target_waitstatus * status);
 
 extern void (*attach_hook) (void);
 extern void (*detach_hook) (void);

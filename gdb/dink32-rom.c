@@ -99,15 +99,13 @@ dink32_supply_register (char *regname, int regnamelen, char *val, int vallen)
 static void
 dink32_load (struct monitor_ops *monops, char *filename, int from_tty)
 {
-  extern int inferior_pid;
-
   generic_load (filename, from_tty);
 
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid;		/* No process now */
 }
 
 

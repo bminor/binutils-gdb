@@ -124,7 +124,8 @@ static void thread_db_find_new_threads (void);
 
 #ifndef TIDGET
 #define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#define PIDGET(PID)		(((PID) & 0xffff))
+#define PIDGET0(PID)		(((PID) & 0xffff))
+#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
 #define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
 #endif
 
@@ -151,21 +152,21 @@ struct private_thread_info
 /* Helper functions.  */
 
 static void
-restore_inferior_pid (void *arg)
+restore_inferior_ptid (void *arg)
 {
-  int *saved_pid_ptr = arg;
-  inferior_pid = *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr = arg;
+  inferior_ptid = *saved_ptid_ptr;
   xfree (arg);
 }
 
 static struct cleanup *
-save_inferior_pid (void)
+save_inferior_ptid (void)
 {
-  int *saved_pid_ptr;
+  ptid_t *saved_ptid_ptr;
 
-  saved_pid_ptr = xmalloc (sizeof (int));
-  *saved_pid_ptr = inferior_pid;
-  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
+  saved_ptid_ptr = xmalloc (sizeof (ptid_t));
+  *saved_ptid_ptr = inferior_ptid;
+  return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
 }
 
 
@@ -252,50 +253,50 @@ thread_db_state_str (td_thr_state_e state)
 
 /* Convert between user-level thread ids and LWP ids.  */
 
-static int
-thread_from_lwp (int pid)
+static ptid_t
+thread_from_lwp (ptid_t ptid)
 {
   td_thrinfo_t ti;
   td_thrhandle_t th;
   td_err_e err;
 
-  if (GET_LWP (pid) == 0)
-    pid = BUILD_LWP (pid, pid);
+  if (GET_LWP (ptid) == 0)
+    ptid = BUILD_LWP (GET_PID (ptid), GET_PID (ptid));
 
-  gdb_assert (is_lwp (pid));
+  gdb_assert (is_lwp (ptid));
 
-  err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (pid), &th);
+  err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
   if (err != TD_OK)
     error ("Cannot find user-level thread for LWP %d: %s",
-	   GET_LWP (pid), thread_db_err_str (err));
+	   GET_LWP (ptid), thread_db_err_str (err));
 
   err = td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-  return BUILD_THREAD (ti.ti_tid, GET_PID (pid));
+  return BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
 }
 
-static int
-lwp_from_thread (int pid)
+static ptid_t
+lwp_from_thread (ptid_t ptid)
 {
   td_thrinfo_t ti;
   td_thrhandle_t th;
   td_err_e err;
 
-  if (! is_thread (pid))
-    return pid;
+  if (! is_thread (ptid))
+    return ptid;
 
-  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (pid), &th);
+  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (ptid), &th);
   if (err != TD_OK)
     error ("Cannot find thread %ld: %s",
-	   (long) GET_THREAD (pid), thread_db_err_str (err));
+	   (long) GET_THREAD (ptid), thread_db_err_str (err));
 
   err = td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-  return BUILD_LWP (ti.ti_lid, GET_PID (pid));
+  return BUILD_LWP (ti.ti_lid, GET_PID (ptid));
 }
 
 
@@ -544,7 +545,7 @@ thread_db_new_objfile (struct objfile *objfile)
   /* Initialize the structure that identifies the child process.  Note
      that at this point there is no guarantee that we actually have a
      child process.  */
-  proc_handle.pid = GET_PID (inferior_pid);
+  proc_handle.pid = GET_PID (inferior_ptid);
 
   /* Now attempt to open a connection to the thread library.  */
   err = td_ta_new_p (&proc_handle, &thread_agent);
@@ -593,7 +594,7 @@ thread_db_new_objfile (struct objfile *objfile)
 }
 
 static void
-attach_thread (int pid, const td_thrhandle_t *th_p,
+attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p, int verbose)
 {
   struct thread_info *tp;
@@ -602,31 +603,31 @@ attach_thread (int pid, const td_thrhandle_t *th_p,
   check_thread_signals ();
 
   if (verbose)
-    printf_unfiltered ("[New %s]\n", target_pid_to_str (pid));
+    printf_unfiltered ("[New %s]\n", target_pid_to_str (ptid));
 
   /* Add the thread to GDB's thread list.  */
-  tp = add_thread (pid);
+  tp = add_thread (ptid);
   tp->private = xmalloc (sizeof (struct private_thread_info));
   tp->private->lwpid = ti_p->ti_lid;
 
   /* Under Linux, we have to attach to each and every thread.  */
 #ifdef ATTACH_LWP
-  if (ti_p->ti_lid != GET_PID (pid))
-    ATTACH_LWP (BUILD_LWP (ti_p->ti_lid, GET_PID (pid)), 0);
+  if (ti_p->ti_lid != GET_PID (ptid))
+    ATTACH_LWP (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid)), 0);
 #endif
 
   /* Enable thread event reporting for this thread.  */
   err = td_thr_event_enable_p (th_p, 1);
   if (err != TD_OK)
     error ("Cannot enable thread event reporting for %s: %s",
-	   target_pid_to_str (pid), thread_db_err_str (err));
+	   target_pid_to_str (ptid), thread_db_err_str (err));
 }
 
 static void
-detach_thread (int pid, int verbose)
+detach_thread (ptid_t ptid, int verbose)
 {
   if (verbose)
-    printf_unfiltered ("[%s exited]\n", target_pid_to_str (pid));
+    printf_unfiltered ("[%s exited]\n", target_pid_to_str (ptid));
 }
 
 static void
@@ -639,16 +640,16 @@ thread_db_detach (char *args, int from_tty)
 }
 
 static void
-thread_db_resume (int pid, int step, enum target_signal signo)
+thread_db_resume (ptid_t ptid, int step, enum target_signal signo)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
 
-  if (pid == -1)
-    inferior_pid = lwp_from_thread (inferior_pid);
-  else if (is_thread (pid))
-    pid = lwp_from_thread (pid);
+  if (GET_PID (ptid) == -1)
+    inferior_ptid = lwp_from_thread (inferior_ptid);
+  else if (is_thread (ptid))
+    ptid = lwp_from_thread (ptid);
 
-  target_beneath->to_resume (pid, step, signo);
+  target_beneath->to_resume (ptid, step, signo);
 
   do_cleanups (old_chain);
 }
@@ -658,7 +659,7 @@ thread_db_resume (int pid, int step, enum target_signal signo)
    the event.  */
 
 static void
-check_event (int pid)
+check_event (ptid_t ptid)
 {
   td_event_msg_t msg;
   td_thrinfo_t ti;
@@ -666,7 +667,7 @@ check_event (int pid)
   CORE_ADDR stop_pc;
 
   /* Bail out early if we're not at a thread event breakpoint.  */
-  stop_pc = read_pc_pid (pid) - DECR_PC_AFTER_BREAK;
+  stop_pc = read_pc_pid (ptid) - DECR_PC_AFTER_BREAK;
   if (stop_pc != td_create_bp_addr && stop_pc != td_death_bp_addr)
     return;
 
@@ -683,7 +684,7 @@ check_event (int pid)
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-  pid = BUILD_THREAD (ti.ti_tid, GET_PID (pid));
+  ptid = BUILD_THREAD (ti.ti_tid, GET_PID (ptid));
 
   switch (msg.event)
     {
@@ -700,8 +701,8 @@ check_event (int pid)
       /* We may already know about this thread, for instance when the
          user has issued the `info threads' command before the SIGTRAP
          for hitting the thread creation breakpoint was reported.  */
-      if (! in_thread_list (pid))
-	attach_thread (pid, msg.th_p, &ti, 1);
+      if (! in_thread_list (ptid))
+	attach_thread (ptid, msg.th_p, &ti, 1);
       return;
 
     case TD_DEATH:
@@ -712,10 +713,10 @@ check_event (int pid)
 	error ("Thread death event doesn't match breakpoint.");
 #endif
 
-      if (! in_thread_list (pid))
+      if (! in_thread_list (ptid))
 	error ("Spurious thread death event.");
 
-      detach_thread (pid, 1);
+      detach_thread (ptid, 1);
       return;
 
     default:
@@ -723,34 +724,34 @@ check_event (int pid)
     }
 }
 
-static int
-thread_db_wait (int pid, struct target_waitstatus *ourstatus)
+static ptid_t
+thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
-  extern int trap_pid;
+  extern ptid_t trap_ptid;
 
-  if (pid != -1 && is_thread (pid))
-    pid = lwp_from_thread (pid);
+  if (GET_PID (ptid) != -1 && is_thread (ptid))
+    ptid = lwp_from_thread (ptid);
 
-  pid = target_beneath->to_wait (pid, ourstatus);
+  ptid = target_beneath->to_wait (ptid, ourstatus);
 
   if (proc_handle.pid == 0)
     /* The current child process isn't the actual multi-threaded
        program yet, so don't try to do any special thread-specific
        post-processing and bail out early.  */
-    return pid;
+    return ptid;
 
   if (ourstatus->kind == TARGET_WAITKIND_EXITED)
-    return -1;
+    return pid_to_ptid (-1);
 
   if (ourstatus->kind == TARGET_WAITKIND_STOPPED
       && ourstatus->value.sig == TARGET_SIGNAL_TRAP)
     /* Check for a thread event.  */
-    check_event (pid);
+    check_event (ptid);
 
-  if (trap_pid)
-    trap_pid = thread_from_lwp (trap_pid);
+  if (!ptid_equal (trap_ptid, null_ptid))
+    trap_ptid = thread_from_lwp (trap_ptid);
 
-  return thread_from_lwp (pid);
+  return thread_from_lwp (ptid);
 }
 
 static int
@@ -758,17 +759,17 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		       struct mem_attrib *attrib,
 		       struct target_ops *target)
 {
-  struct cleanup *old_chain = save_inferior_pid ();
+  struct cleanup *old_chain = save_inferior_ptid ();
   int xfer;
 
-  if (is_thread (inferior_pid))
+  if (is_thread (inferior_ptid))
     {
       /* FIXME: This seems to be necessary to make sure breakpoints
          are removed.  */
-      if (! target_thread_alive (inferior_pid))
-	inferior_pid = GET_PID (inferior_pid);
+      if (! target_thread_alive (inferior_ptid))
+	inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
       else
-	inferior_pid = lwp_from_thread (inferior_pid);
+	inferior_ptid = lwp_from_thread (inferior_ptid);
     }
 
   xfer = target_beneath->to_xfer_memory (memaddr, myaddr, len, write, attrib, target);
@@ -785,27 +786,27 @@ thread_db_fetch_registers (int regno)
   gdb_prfpregset_t fpregset;
   td_err_e err;
 
-  if (! is_thread (inferior_pid))
+  if (! is_thread (inferior_ptid))
     {
       /* Pass the request to the target beneath us.  */
       target_beneath->to_fetch_registers (regno);
       return;
     }
 
-  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (inferior_pid), &th);
+  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (inferior_ptid), &th);
   if (err != TD_OK)
     error ("Cannot find thread %ld: %s",
-	   (long) GET_THREAD (inferior_pid), thread_db_err_str (err));
+	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
 
   err = td_thr_getgregs_p (&th, gregset);
   if (err != TD_OK)
     error ("Cannot fetch general-purpose registers for thread %ld: %s",
-	   (long) GET_THREAD (inferior_pid), thread_db_err_str (err));
+	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
 
   err = td_thr_getfpregs_p (&th, &fpregset);
   if (err != TD_OK)
     error ("Cannot get floating-point registers for thread %ld: %s",
-	   (long) GET_THREAD (inferior_pid), thread_db_err_str (err));
+	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
 
   /* Note that we must call supply_gregset after calling the thread_db
      routines because the thread_db routines call ps_lgetgregs and
@@ -822,17 +823,17 @@ thread_db_store_registers (int regno)
   gdb_prfpregset_t fpregset;
   td_err_e err;
 
-  if (! is_thread (inferior_pid))
+  if (! is_thread (inferior_ptid))
     {
       /* Pass the request to the target beneath us.  */
       target_beneath->to_store_registers (regno);
       return;
     }
 
-  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (inferior_pid), &th);
+  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (inferior_ptid), &th);
   if (err != TD_OK)
     error ("Cannot find thread %ld: %s",
-	   (long) GET_THREAD (inferior_pid), thread_db_err_str (err));
+	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
 
   if (regno != -1)
     {
@@ -849,11 +850,11 @@ thread_db_store_registers (int regno)
   err = td_thr_setgregs_p (&th, gregset);
   if (err != TD_OK)
     error ("Cannot store general-purpose registers for thread %ld: %s",
-	   (long) GET_THREAD (inferior_pid), thread_db_err_str (err));
+	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
   err = td_thr_setfpregs_p (&th, &fpregset);
   if (err != TD_OK)
     error ("Cannot store floating-point registers  for thread %ld: %s",
-	   (long) GET_THREAD (inferior_pid), thread_db_err_str (err));
+	   (long) GET_THREAD (inferior_ptid), thread_db_err_str (err));
 }
 
 static void
@@ -869,13 +870,13 @@ thread_db_create_inferior (char *exec_file, char *allargs, char **env)
 }
 
 static void
-thread_db_post_startup_inferior (int pid)
+thread_db_post_startup_inferior (ptid_t ptid)
 {
   if (proc_handle.pid == 0)
     {
       /* The child process is now the actual multi-threaded
          program.  Snatch its process ID...  */
-      proc_handle.pid = GET_PID (pid);
+      proc_handle.pid = GET_PID (ptid);
 
       /* ...and perform the remaining initialization steps.  */
       enable_thread_event_reporting ();
@@ -893,14 +894,14 @@ thread_db_mourn_inferior (void)
 }
 
 static int
-thread_db_thread_alive (int pid)
+thread_db_thread_alive (ptid_t ptid)
 {
-  if (is_thread (pid))
+  if (is_thread (ptid))
     {
       td_thrhandle_t th;
       td_err_e err;
 
-      err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (pid), &th);
+      err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (ptid), &th);
       if (err != TD_OK)
 	return 0;
 
@@ -912,7 +913,7 @@ thread_db_thread_alive (int pid)
     }
 
   if (target_beneath->to_thread_alive)
-    return target_beneath->to_thread_alive (pid);
+    return target_beneath->to_thread_alive (ptid);
 
   return 0;
 }
@@ -922,16 +923,16 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 {
   td_thrinfo_t ti;
   td_err_e err;
-  int pid;
+  ptid_t ptid;
 
   err = td_thr_get_info_p (th_p, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
-  pid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_pid));
+  ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
 
-  if (! in_thread_list (pid))
-    attach_thread (pid, th_p, &ti, 1);
+  if (! in_thread_list (ptid))
+    attach_thread (ptid, th_p, &ti, 1);
 
   return 0;
 }
@@ -950,24 +951,24 @@ thread_db_find_new_threads (void)
 }
 
 static char *
-thread_db_pid_to_str (int pid)
+thread_db_pid_to_str (ptid_t ptid)
 {
-  if (is_thread (pid))
+  if (is_thread (ptid))
     {
       static char buf[64];
       td_thrhandle_t th;
       td_thrinfo_t ti;
       td_err_e err;
 
-      err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (pid), &th);
+      err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (ptid), &th);
       if (err != TD_OK)
 	error ("Cannot find thread %ld: %s",
-	       (long) GET_THREAD (pid), thread_db_err_str (err));
+	       (long) GET_THREAD (ptid), thread_db_err_str (err));
 
       err = td_thr_get_info_p (&th, &ti);
       if (err != TD_OK)
 	error ("Cannot get thread info for thread %ld: %s",
-	       (long) GET_THREAD (pid), thread_db_err_str (err));
+	       (long) GET_THREAD (ptid), thread_db_err_str (err));
 
       if (ti.ti_state == TD_THR_ACTIVE && ti.ti_lid != 0)
 	{
@@ -983,10 +984,10 @@ thread_db_pid_to_str (int pid)
       return buf;
     }
 
-  if (target_beneath->to_pid_to_str (pid))
-    return target_beneath->to_pid_to_str (pid);
+  if (target_beneath->to_pid_to_str (ptid))
+    return target_beneath->to_pid_to_str (ptid);
 
-  return normal_pid_to_str (pid);
+  return normal_pid_to_str (ptid);
 }
 
 static void

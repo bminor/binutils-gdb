@@ -431,7 +431,7 @@ rombug_detach (int from_tty)
  * Tell the remote machine to resume.
  */
 static void
-rombug_resume (int pid, int step, enum target_signal sig)
+rombug_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   if (monitor_log)
     fprintf (log_file, "\nIn Resume (step=%d, sig=%d)\n", step, sig);
@@ -460,8 +460,8 @@ rombug_resume (int pid, int step, enum target_signal sig)
  * storing status in status just as `wait' would.
  */
 
-static int
-rombug_wait (int pid, struct target_waitstatus *status)
+static ptid *
+rombug_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   struct section_offsets *offs;
@@ -499,7 +499,7 @@ rombug_wait (int pid, struct target_waitstatus *status)
       objfile_relocate (symfile_objfile, offs);
     }
 
-  return 0;
+  return inferior_ptid;
 }
 
 /* Return the name of register number regno in the form input and output by

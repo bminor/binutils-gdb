@@ -110,7 +110,6 @@ m32r_load_1 (void *dummy)
 static void
 m32r_load (char *filename, int from_tty)
 {
-  extern int inferior_pid;
   bfd *abfd;
   asection *s;
   unsigned int i, data_count = 0;
@@ -166,7 +165,7 @@ m32r_load (char *filename, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid;	/* No process now */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid
@@ -458,7 +457,6 @@ m32r_upload_command (char *args, int from_tty)
   bfd *abfd;
   asection *s;
   time_t start_time, end_time;	/* for timing of download */
-  extern int inferior_pid;
   int resp_len, data_count = 0;
   char buf[1024];
   struct hostent *hostent;
@@ -565,7 +563,7 @@ m32r_upload_command (char *args, int from_tty)
       report_transfer_performance (data_count, start_time, end_time);
       printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
     }
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid;	/* No process now */
 
   /* This is necessary because many things were based on the PC at the
      time that we attached to the monitor, which is no longer valid

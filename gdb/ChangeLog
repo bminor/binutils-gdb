@@ -1,3 +1,383 @@
+2001-05-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* defs.h (ptid_t): New typedef.
+	(pid_to_ptid, null_ptid, minus_one_ptid, ptid_equal): New macros.
+
+	* a68v-nat.c, alphabsd-nat.c, arch-utils.c, arm-linux-nat.c,
+	blockframe.c, breakpoint.c, breakpoint.h,
+	config/i386/nm-i386sol2.h, config/i386/tm-i386sco5.h,
+	config/ia64/nm-linux.h, config/m68k/nm-hp300bsd.h,
+	config/mips/nm-irix4.h, config/mips/nm-irix5.h,
+	config/pa/nm-hppah.h, config/pa/tm-hppa.h,
+	config/rs6000/nm-rs6000.h, config/sparc/nm-sun4sol2.h,
+	corelow.c, cxux-nat.c, d10v-tdep.c, dink32-rom.c,
+	dve3900-rom.c, fork-child.c, frame.c, gnu-nat.c, go32-nat.c,
+	hp300ux-nat.c, hppa-tdep.c, hppab-nat.c, hppah-nat.c,
+	hpux-thread.c, i386-linux-nat.c, i386aix-nat.c, i386b-nat.c,
+	i386bsd-nat.c, i386gnu-nat.c, i386mach-nat.c, i386nbsd-nat.c,
+	infcmd.c, inferior.h, inflow.c, infptrace.c, infrun.c,
+	inftarg.c, infttrace.c, lin-lwp.c, lin-thread.c,
+	linux-thread.c, lynx-nat.c, m3-nat.c, m32r-rom.c,
+	m68knbsd-nat.c, m88k-nat.c, mac-nat.c, mips-nat.c,
+	mon960-rom.c, monitor.c, ns32knbsd-nat.c, ocd.c, ppc-bdm.c,
+	ppcnbsd-nat.c, proc-service.c, procfs.c, ptx4-nat.c,
+	regcache.c, remote-adapt.c, remote-array.c, remote-bug.c,
+	remote-e7000.c, remote-es.c, remote-mips.c, remote-mm.c,
+	remote-nindy.c, remote-os9k.c, remote-rdi.c, remote-rdp.c,
+	remote-sds.c, remote-sim.c, remote-st.c, remote-udi.c,
+	remote-vx.c, remote.c, rs6000-nat.c, sol-thread.c,
+	solib-aix5.c, solib-svr4.c, somsolib.c, sparc-nat.c,
+	standalone.c, sun3-nat.c, sun386-nat.c, symm-nat.c, target.c,
+	target.h, thread-db.c, thread.c, top.c, ultra3-nat.c,
+	uw-thread.c, v850ice.c, win32-nat.c, wince.c, xcoffsolib.c
+	(inferior_pid):  Rename to inferior_ptid everywhere - even in
+	comments and obsolete ports.  In cases where this variable
+	really is supposed to be used as a process id, use PIDGET() to
+	extract the process id component from inferior_ptid.  The
+	other cases, either involving other variables whose types had
+	to be changed or functions whose signatures had to changed
+	are listed separately below.
+
+	* arm-linux-nat.c (get_thread_id): Change type of argument
+	representing a combined process/thread id from ``int'' to
+	``ptid_t''.  Also change parameter name to ptid.
+	* breakpoint.h, breakpoint.c (breakpoint_thread_match): Likewise.
+	* corelow.c (core_file_thread_alive): Likewise.
+	* d10v-tdep.c (d10v_read_pc, d10v_write_pc): Likewise.
+	* defs.h (*target_wait_hook): Likewise.
+	* gdbthread.h (thread_info, delete_thread, pid_to_thread_id)
+	(find_thread_pid, save_infrun_state, load_infrun_state): Likewise.
+	* gnu-nat.c (gnu_thread_alive, gnu_pid_to_str, gnu_wait)
+	(gnu_resume): Likewise.
+	* go32-nat.c (go32_wait, go32_resume): Likewise.
+	* h8500-tdep.c (h8500_read_pc, h8500_write_pc): Likewise.
+	* hppa-tdep.c (target_read_pc, target_write_pc): Likewise.
+	* hppah-nat.c (child_pid_to_str, hppa_tid_to_str,
+	(hppa_pid_or_tid_to_str, child_post_startup_inferior)
+	(child_thread_alive): Likewise.
+	* hpux-thread.c (hpux_thread_notice_signals, hpux_thread_alive)
+	(hpux_pid_to_str, hpux_thread_wait, hpux_thread_resume): Likewise.
+	* i386-linux-nat.c (child_resume): Likewise.
+	* ia64-linux-nat.c (enable_watchpoints_in_psr, fetch_debug_register)
+	(store_debug_register, fetch_debug_register_pair)
+	(store_debug_register_pair, ia64_linux_insert_watchpoint)
+	(ia64_linux_remove_watchpoint, ia64_linux_stopped_by_watchpoint):
+	Likewise.
+	* ia64-tdep.c (ia64_read_pc, ia64_write_pc): Likewise.
+	* inferior.h (read_pc_pid, generic_target_read_pc, write_pc_pid)
+	(generic_target_write_pc, ptrace_wait, child_resume)
+	(get_last_target_status): Likewise.
+	* infptrace.c (ptrace_wait, child_resume): Likewise.
+	* inftarg.c (child_wait, child_post_wait, child_thread_live)
+	(child_pid_to_str): Likewise.
+	* infttrace.c (ptrace_wait, child_thread_alive, child_resume)
+	(hppa_pid_or_tid_to_str, child_post_startup_inferior): Likewise.
+	* lin-lwp.c (add_lwp, delete_lwp, find_lwp_pid, lin_lwp_attach_lwp)
+	(lin_lwp_resume, lin_lwp_wait, lin_lwp_thread_alive)
+	(lin_lwp_pid_to_str): Likewise.
+	* lin-thread.c (thread_db_alive, thread_db_pid_to_str)
+	(thread_db_resume, thread_db_wait): Likewise.
+	* linux-thread.c (linuxthreads_thread_alive, linuxthreads_pid_to_str)
+	(linuxthreads_resume, linuxthreads_wait): Likewise.
+	* lynx-nat.c (child_wait, child_thread_alive, child_resume)
+	(child_pid_to_str): Likewise.
+	* m3-nat.c (mach_really_wait, m3_resume): Likewise.
+	* mac-nat.c (child_wait, child_resume): Likewise.
+	* mips-tdep.c (mips_read_pc): Likewise.
+	* monitor.c (monitor_wait, monitor_resume): Likewise.
+	* ocd.c, ocd.h (ocd_thread_alive, ocd_resume): Likewise.
+	* ppc-bdm.c (bdm_ppc_wait): Likewise.
+	* procfs.c (do_attach, procfs_wait, procfs_resume)
+	(procfs_notice_signals, procfs_thread_alive, procfs_pid_to_str)
+	(procfs_set_watchpoint, procfs_stopped_by_watchpoint)
+	(procfs_find_LDT_entry): Likewise.
+	* regcache.c (read_register_pid, read_signed_register_pid)
+	(write_register_pid, generic_target_read_pc, read_pc_pid)
+	(generic_target_write_pc, write_pc_pid): Likewise.
+	* regcache.h (read_register_pid, read_signed_register_pid)
+	(write_register_pid): Likewise.
+	* remote-adapt.c (adapt_wait, adapt_resume): Likewise.
+	* remote-array.c (array_wait, array_resume): Likewise.
+	* remote-bug.c (bug_wait, bug_resume): Likewise.
+	* remote-e7000.c (e7000_wait, e7000_resume): Likewise.
+	* remote-eb.c (eb_wait, eb_resume): Likewise.
+	* remote-es.c (es1800_wait, es1800_resume): Likewise.
+	* remote-mips.c (mips_wait, mips_resume): Likewise.
+	* remote-mm.c (mm_wait, mm_resume): Likewise.
+	* remote-nindy.c (nindy_wait, nindy_resume): Likewise.
+	* remote-os9k.c (rombug_wait, rombug_resume): Likewise.
+	* remote-rdi.c (arm_rdi_wait, arm_rdi_resume): Likewise.
+	* remote-rdp.c (remote_rdp_resume, remote_rdp_wait): Likewise.
+	* remote-sds.c (sds_wait, sds_resume): Likewise.
+	* remote-sim.c (gdbsim_wait, gdbsim_resume): Likewise.
+	* remote-st.c (st2000_wait, st2000_resume): Likewise.
+	* remote-udi.c (udi_wait, udi_resume): Likewise.
+	* remote-vx.c (vx_wait, vx_resume): Likewise.
+	* remote.c (remote_current_thread, remote_resume, remote_wait)
+	(remote_async_resume, remote_async_wait, remote_cisco_wait)
+	(remote_thread_alive): Likewise.
+	* sol-thread.c (thread_to_lwp, lwp_to_thread, sol_thread_resume)
+	(sol_thread_wait, sol_thread_notice_signals, sol_thread_alive)
+	(solaris_pid_to_str): Likewise.
+	* symm-nat.c (child_wait, child_resume): Likewise.
+	* target.c (debug_to_resume, debug_to_wait, debug_to_post_wait)
+	(debug_to_notice_signals, debug_to_thread_alive)
+	(normal_target_post_startup_inferior, normal_pid_to_str)
+	(debug_to_post_startup_inferior): Likewise.
+	* target.h (to_resume, to_wait, to_post_wait)
+	(to_post_startup_inferior, to_notice_signals, to_thread_alive)
+	(to_pid_to_str [all in struct target_ops]): Likewise.
+	(child_post_wait, child_thread_alive, normal_pid_to_str): Likewise.
+	* thread-db.c (thread_from_lwp, lwp_from_thread, thread_db_wait)
+	(attach_thread, detach_thread, thread_db_resume, check_event)
+	(thread_db_post_startup_inferior, thread_db_thread_alive)
+	(thread_db_pid_to_str): Likewise.
+	* thread.c (add_thread, delete_thread, find_thread_pid)
+	(pid_to_thread_id, in_thread_list, load_infrun_state)
+	(save_infrun_state, switch_to_thread, restore_current_thread)
+	(make_cleanup_restore_current_thread): Likewise.
+	* top.c (target_wait_hook): Likewise.
+	* uw-thread.c (dbgpid, thr_to_lwp, lwp_to_thr, add_thread_uw)
+	(uw_thread_resume, libtrhead_stub, uw_thread_wait, uw_thread_alive)
+	(uw_thread_pid_to_str): Likewise.
+	* v850ice.c (v850ice_wait, v850ice_resume): Likewise.
+	* win32-nat.c (child_wait, child_resume, win32_child_thread_alive)
+	(cywin_pid_to_str): Likewise.
+	* wince.c (child_wait, child_resume, win32_child_thread_alive):
+	Likewise.
+	* config/nm-linux.h (linuxthreads_pid_to_str): Likewise.
+	* config/nm-lynx.h (child_wait, lynx_pid_to_str): Likewise.
+	* config/alpha/nm-linux.h (lin_lwp_attach_lwp): Likewise.
+	* config/arm/nm-linux.h (lin_lwp_attach_lwp): Likewise.
+	* config/h8500/tm-h8500.h (h8500_read_pc, h8500_write_pc): Likewise.
+	* config/i386/nm-i386sol2.h (procfs_stopped_by_watchpoint)
+	(procfs_set_watchpoint): Likewise.
+	* config/i386/nm-linux.h (lin_lwp_attach_lwp): Likewise.
+	* config/i386/nm-ptx4.h (child_wait): Likewise.
+	* config/i386/nm-symmetry.h (child_wait): Likewise.
+	* config/i386/tm-cygwin.h (cygwin_pid_to_str): Likewise.
+	* config/ia64/nm-linux.h (ia64_linux_stopped_by_watchpoint)
+	(ia64_linux_insert_watchpoint, ia64_linux_remove_watchpoint)
+	(lin_lwp_attach_lwp): Likewise.
+	* config/mips/nm-irix4.h, config/mips/nm-irix5.h
+	(procfs_stopped_by_watchpoint, procfs_set_watchpoint): Likewise.
+	* config/pa/nm-hppah.h (child_pid_to_str, hppa_tid_to_str)
+	(hppa_pid_or_tid_to_str): Likewise.
+	* config/pa/tm-hppa.h (target_read_pc, target_write_pc): Likewise.
+	* config/powerpc/nm-linux.h (lin_lwp_attach_lwp): Likewise.
+	* config/sparc/nm-sun4sol2.h (procfs_stopped_by_watchpoint)
+	(procfs_set_watchpoint): Likewise.
+
+	* gdbthread.h (thread_id_to_pid): Change return type which
+	represents a combined process/thread id from ``int'' to
+	``ptid_t''.
+	* gnu-nat.c (gnu_wait): Likewise.
+	* go32-nat.c (go32_wait): Likewise.
+	* hpux-thread.c (hpux_thread_wait): Likewise.
+	* inferior.h (procfs_first_available): Likewise.
+	* inftarg.c (child_wait): Likewise.
+	* infttrace.c (ptrace_wait): Likewise.
+	* lin-lwp.c (lin_lwp_wait): Likewise.
+	* lin-thread.c (thread_db_wait): Likewise.
+	* linux-thread.c (linuxthreads_wait): Likewise.
+	* lynx-nat.c (child_wait): Likewise.
+	* m3-nat.c (mach_really_wait): Likewise.
+	* mac-nat.c (child_wait): Likewise.
+	* monitor.c (monitor_wait): Likewise.
+	* ppc-bdm.c (bdm_ppc_wait): Likewise.
+	* procfs.c (do_attach, procfs_wait, procfs_first_available): Likewise.
+	* remote-adapt.c (adapt_wait): Likewise.
+	* remote-array.c (array_wait): Likewise.
+	* remote-bug.c (bug_wait): Likewise.
+	* remote-e7000.c (e7000_wait): Likewise.
+	* remote-eb.c (eb_wait): Likewise.
+	* remote-es.c (es1800_wait): Likewise.
+	* remote-mips.c (mips_wait): Likewise.
+	* remote-mm.c (mm_wait): Likewise.
+	* remote-nindy.c (nindy_wait): Likewise.
+	* remote-os9k (rombug_wait): Likewise.
+	* remote-rdi.c (arm_rdi_wait): Likewise.
+	* remote-rdp.c (remote_rdp_wait): Likewise.
+	* remote-sds.c (sds_wait): Likewise.
+	* remote-sim.c (gdbsim_wait): Likewise.
+	* remote-st.c (st2000_wait): Likewise.
+	* remote-udi.c (udi_wait): Likewise.
+	* remote-vx.c (vx_wait): Likewise.
+	* remote.c (remote_wait, remote_async_wait, remote_current_thread)
+	(remote_cisco_wait): Likewise.
+	* sol-thread.c (thread_to_lwp, lwp_to_thread, sol_thread_wait):
+	Likewise.
+	* symm-nat.c (child_wait): Likewise.
+	* target.c (debug_to_wait): Likewise.
+	* target.h (to_wait [in struct target_ops]): Likewise.
+	* thread.c (thread_id_to_pid): Likewise.
+	* thread-db.c (thread_from_lwp, lwp_from_thread, thread_db_wait):
+	Likewise.
+	* top.c (*target_wait_hook): Likewise.
+	* uw-thread.c (lwp_to_thr, uw_thread_wait): Likewise.
+	* v850ice.c (v850ice_wait): Likewise.
+	* win32-nat.c (child_wait): Likewise.
+	* wince.c (child_wait): Likewise.
+	* config/nm-lynx.h (child_wait): Likewise.
+	* config/i386/nm-ptx4.h (child_wait): Likewise.
+	* config/i386/nm-symmetry.h (child_wait): Likewise.
+
+	* arch-utils.c (generic_prepare_to_proceed): Rename wait_pid
+	to wait_ptid and change its type from ``int'' to ``ptid_t''.
+	* breakpoint.c (reattach_breakpoints, detach_breakpoints): Likewise,
+	but rename saved_inferior_pid to saved_inferior_ptid.
+	* d10v-tdep.c (d10v_read_pc, d10_write_pc): Likewise, but rename
+	save_pid to save_ptid.
+	* gdbthread.h (struct thread_info): Likewise, but rename pid to ptid.
+	* hppah-nat.c (child_pid_to_exec): Likewise, but rename
+	saved_inferior_pid to saved_inferior_ptid.
+	* hpux-thread.c (main_ptid): Likewise, but rename from main_pid.
+	* infrun.c (previous_inferior_pid [static global]): Likewise,
+	but rename to previous_inferior_ptid.
+	(resume): Likewise, but rename resume_pid to resume_ptid.
+	(struct execution_control_state): Likewise, but rename
+	pid to ptid, saved_inferior_pid to saved_inferior_ptid,
+	and waiton_pid to waiton_ptid.
+	(target_last_wait_pid): Likewise, but rename to
+	target_last_wait_ptid.
+	* infttrace.c (saved_real_pid): Likewise, but rename to
+	saved_real_ptid.
+	(child_pid_to_exec_file): Likewise, but rename saved_inferior_pid
+	to saved_inferior_ptid.
+	* lin-lwp.c (struct lwp_info): Likewise, but rename pid to ptid.
+	(trap_ptid): Likewise, but renamed from trap_pid.
+	* lin-thread.c (handle_new_thread): Likewise, but rename gdb_pid
+	to gdb_ptid.
+	* linux-thread.c (detach_thread): Likewise, but rename pid to ptid.
+	(thread_db_wait): Likewise, but rename ret_pid to retptid.
+	* procfs.c (procfs_wait): Likewise, for retval whose name
+	doesn't change.  Also, ``temp'' becomes two separate variables,
+	one named temp_tid (an int) and the other temp_ptid.
+	(procfs_notice_thread): Likewise (type change) for gdb_threadid
+	whose name does not change.
+	* regcache.c (registers_ptid): Likewise, but renamed from
+	registers_pid.
+	(read_register_pid, read_signed_register_pid, write_register_pid):
+	Likewise, but rename save_pid to save_ptid.
+	(read_pc_pid, write_pc_pid): Likewise, but rename saved_inferior_pid
+	to saved_inferior_ptid.
+	* remote.c (remote_newthread_step): Likewise, but rename pid to ptid.
+	* sol-thread.c (struct ps_prochandle): Likewise.
+	(sol_thread_resume): Likewise, for save_pid which becomes save_ptid.
+	(sol_thread_wait): Likewise, for rtnval whose name does not
+	change, and for save_pid which becomes save_ptid.
+	(solaris_pid_to_str): Likewise for lwp whose name does not change.
+	(sol_find_new_threads_callback): Likewise, for pid which becomes
+	ptid.
+	* target.h (target_resume, target_wait, target_post_wait)
+	(target_post_startup_inferior, target_notice_signals)
+	(target_thread_alive): Likewise.
+	* thread.c (info_threads_command): Likewise, but rename
+	current_pid to current_ptid.
+	(struct current_thread_cleanup): Likewise, but rename field
+	inferior_pid to inferior_ptid.
+	* thread-db.c (find_new_threads_callback): Likewise, but rename
+	pid to ptid.
+	* uw-thread.c (thr_to_lwp): Likewise for lid whose name does not
+	change.
+	(lwp_to_tr): Likewise fo tid whose name remains unchanged.
+	(thr_infpid, lwp_infpid, notice_thread, libthread_stub): Likewise,
+	but rename pid to ptid.
+	* config/alpha/nm-linux.h (ATTACH_LWP): Likewise.
+	* config/arm/nm-linux.h (ATTACH_LWP): Likewise.
+	* config/i386/nm-linux.h (ATTACH_LWP): Likewise.
+	* config/ia64/nm-linux.h (ATTACH_LWP): Likewise.
+	* config/pa/nm-hppah.h (target_tid_to_str): Likewise.
+	* config/powerpc/nm-linux.h (ATTACH_LWP): Likewise.
+
+	* arch-utils.c (generic_prepare_to_proceed):  Test for the
+	"zero" ptid by using ptid_equal() to test to see if variable
+	in question is the same as null_ptid.  This replaces a direct
+	test against zero.
+	* cxux-nat.c (add_shared_symbol_files): Likewise.
+	* i386aix-nat.c, i386b-nat.c (i386_float_info): Likewise.
+	* infcmd.c (run_command): Likewise.
+	* inflow.c (kill_command): Likewise.
+	* infttrace.c (call_ttrace): Likewise.
+	* lin-lwp.c (lin_lwp_prepare_to_proceed): Likewise.
+	* lin-thread.c (thread_db_kill): Likewise.
+	* procfs.c (procfs_kill_inferior, procfs_mourn_inferior): Likewise.
+	* remote-es.c (es1800_kill): Likewise.
+	* sol-thread.c (sol_thread_create_inferior): Likewise.
+	* solib.c (locate_base): Likewise.
+	* target.c (nosupport_runtime): Likewise.
+	* thread-db.c (thread_db_wait): Likewise.
+	* top.c (quit_confirm, quit_force): Likewise.
+	* uw-thread (lwp_infpid, uw_thread_resume): Likewise.
+
+	* infrun.c (handle_inferior_event, stop_stepping, normal_stop):
+	Use ptid_equal to compare value of process/thread ids instead of
+	``=='' and ``!='' operators.
+	lin-lwp.c (delete_lwp, lin_lwp_prepare_to_proceed)
+	(stop_wait_callback, lin_lwp_wait): Likewise.
+	* procfs.c (procfs_wait): Likewise.
+	* regcache.c (read_register_bytes, read_register_gen)
+	(write_register_gen, read_register, read_register_pid)
+	(read_signed_register, read_signed_register_pid, write_register)
+	(write_register_pid, supply_register): Likewise.
+	* remote-vx.c (vx_resume): Likewise.
+	* sol-thread.c (sol_thread_wait): Likewise.
+	* symm-nat.c (kill_inferior): Likewise.
+	* thread.c (delete_thread, find_thread_pid, pid_to_thread_id)
+	(in_thread_list, info_threads_command, switch_to_thread)
+	(restore_current_thread): Likewise.
+	* uw-thread (libtread_stub): Likewise.
+
+	* arm-linux-nat.c (GET_THREAD_ID): Change PID to PTID.
+
+	* corelow.c (add_to_thread_list): Convert argument in add_thread()
+	call to a ptid_t.
+	* gnu-nat.c (inf_validate_procs): Likewise.
+	* linux-thread.c (stop_thread, update_stop_threads): Likewise.
+	* remote.c (record_currthread, remote_threads_info): Likewise.
+	* win32-nat.c (child_add_thread): Likewise.
+
+	* hpux-thread.c (save_inferior_pid, restore_inferior_pid): Rename,
+	respectively, to save_inferior_ptid() and restore_inferior_ptid().
+	Adjust implementations to operate on ``ptid_t'' instead of ``int''.
+	* lin-lwp.c (save_inferior_pid, restore_inferior_pid): Likewise.
+	* lin-thread.c (save_inferior_pid, restore_inferior_pid): Likewise.
+	* linux-thread.c (save_inferior_pid, restore_inferior_pid): Likewise.
+	* proc-service.c (save_inferior_pid, restore_inferior_pid): Likewise.
+	* sol-thread.c (save_inferior_pid, restore_inferior_pid): Likewise.
+	* thread-db.c (save_inferior_pid, restore_inferior_pid): Likewise.
+
+	* infrun.c (RESUME_ALL): New macro representing the -1 ptid
+	to be passed to target_resume() when all threads should resume.
+	(resume): Set resume_ptid to RESUME_ALL rather than -1.
+	(handle_inferior_event): Invoke target_resume() with RESUME_ALL
+	instead of -1.
+	* irix5-nat.c (solib_create_inferior_hook): Convert -1 to
+	a ptid_t in target_resume() call.
+	* osfsolib.c (solib_create_inferior_hook): Likewise.
+	* solib-svr4.c (solib_create_inferior_hook): Likewise.
+
+	* lin-lwp.c (PIDGET, PIDGET0): Rename original PIDGET macro to
+	PIDGET0.  Define new PIDGET macro which uses PIDGET0, the only
+	difference being that the 0xffff pattern will be interpreted
+	as -1.
+	* lin-thread.c (PIDGET, PIDGET0): Likewise.
+	* thread-db.c (PIDGET, PIDGET0): Likewise.
+	* config/nm-linux.h (PIDGET, PIDGET0): Likewise.
+	* config/i386/tm-i386sol2.h (PIDGET, PIDGET0): Likewise.
+	* config/i386/tm-i386v42mp.h (PIDGET, PIDGET0): Likewise.
+	* config/sparc/tm-sun4sol2.h (PIDGET, PIDGET0): Likewise.
+
+	* m3-nat.c (init_m3_ops): Fix typo; initialize to_wait field to
+	mach_really_wait rather than mach_really__wait.
+	* lin-thread.c (check_for_thread_event): Fix warning; make function
+	actually return a value.
+
+	* gdbarch.sh (TARGET_READ_PC, TARGET_WRITE_PC): Change type of
+	``pid'' arguments from ``int'' to ``ptid_t''.  Also renamed
+	pid to ptid.
+	* gdbarch.h, gdbarch.c: Regenerated.
+
 2001-05-03  Jonathan Larmour  <jlarmour@redhat.com>
 
 	* rdi-share/devsw.c: Include <time.h> for struct tm

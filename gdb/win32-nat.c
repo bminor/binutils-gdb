@@ -79,7 +79,7 @@ enum
 extern struct target_ops child_ops;
 
 static void child_stop (void);
-static int win32_child_thread_alive (int);
+static int win32_child_thread_alive (ptid_t);
 void child_kill_inferior (void);
 
 static int last_sig = 0;	/* Set if a signal was received from the
@@ -233,7 +233,7 @@ child_add_thread (DWORD id, HANDLE h)
   th->h = h;
   th->next = thread_head.next;
   thread_head.next = th;
-  add_thread (id);
+  add_thread (pid_to_ptid (id));
   return th;
 }
 
@@ -262,8 +262,8 @@ child_delete_thread (DWORD id)
   thread_info *th;
 
   if (info_verbose)
-    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (id));
-  delete_thread (id);
+    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (pid_to_ptid (id)));
+  delete_thread (pid_to_ptid (id));
 
   for (th = &thread_head;
        th->next != NULL && th->next->id != id;
@@ -313,7 +313,7 @@ do_child_fetch_inferior_registers (int r)
 static void
 child_fetch_inferior_registers (int r)
 {
-  current_thread = thread_rec (inferior_pid, TRUE);
+  current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
   do_child_fetch_inferior_registers (r);
 }
 
@@ -333,7 +333,7 @@ do_child_store_inferior_registers (int r)
 static void
 child_store_inferior_registers (int r)
 {
-  current_thread = thread_rec (inferior_pid, TRUE);
+  current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
   do_child_store_inferior_registers (r);
 }
 
@@ -849,7 +849,8 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 			     current_event.u.CreateThread.hThread);
       if (info_verbose)
 	printf_unfiltered ("[New %s]\n",
-			   target_pid_to_str (current_event.dwThreadId));
+			   target_pid_to_str (
+			     pid_to_ptid (current_event.dwThreadId)));
       retval = current_event.dwThreadId;
       break;
 
@@ -942,7 +943,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
   else
     {
       current_thread = th ? : thread_rec (current_event.dwThreadId, TRUE);
-      inferior_pid = retval;
+      inferior_ptid = pid_to_ptid (retval);
     }
 
 out:
@@ -950,9 +951,11 @@ out:
 }
 
 /* Wait for interesting events to occur in the target process. */
-static int
-child_wait (int pid, struct target_waitstatus *ourstatus)
+static ptid_t
+child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
+  int pid = PIDGET (ptid);
+
   /* We loop when we get a non-standard exception rather than return
      with a SPURIOUS because resume can try and step or modify things,
      which needs a current_thread->h.  But some of these exceptions mark
@@ -963,7 +966,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
     {
       int retval = get_child_debug_event (pid, ourstatus);
       if (retval)
-	return retval;
+	return pid_to_ptid (retval);
       else
 	{
 	  int detach = 0;
@@ -1032,10 +1035,10 @@ child_attach (char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (pid));
+			   target_pid_to_str (pid_to_ptid (pid)));
       else
 	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (pid));
+			   target_pid_to_str (pid_to_ptid (pid)));
 
       gdb_flush (gdb_stdout);
     }
@@ -1053,10 +1056,10 @@ child_detach (char *args ATTRIBUTE_UNUSED, int from_tty)
       if (exec_file == 0)
 	exec_file = "";
       printf_unfiltered ("Detaching from program: %s %s\n", exec_file,
-			 target_pid_to_str (inferior_pid));
+			 target_pid_to_str (inferior_ptid));
       gdb_flush (gdb_stdout);
     }
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   unpush_target (&child_ops);
 }
 
@@ -1066,7 +1069,7 @@ static void
 child_files_info (struct target_ops *ignore ATTRIBUTE_UNUSED)
 {
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
-      attach_flag ? "attached" : "child", target_pid_to_str (inferior_pid));
+      attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
 }
 
 /* ARGSUSED */
@@ -1076,7 +1079,7 @@ child_open (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
   error ("Use the \"run\" command to start a Unix child process.");
 }
 
-/* Start an inferior win32 child process and sets inferior_pid to its pid.
+/* Start an inferior win32 child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
@@ -1276,11 +1279,12 @@ child_kill_inferior (void)
 }
 
 void
-child_resume (int pid, int step, enum target_signal sig)
+child_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   thread_info *th;
   DWORD continue_status = last_sig > 0 && last_sig < NSIG ?
   DBG_EXCEPTION_NOT_HANDLED : DBG_CONTINUE;
+  int pid = PIDGET (ptid);
 
   last_sig = 0;
 
@@ -1326,7 +1330,8 @@ child_can_run (void)
 static void
 child_close (int x ATTRIBUTE_UNUSED)
 {
-  DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
+  DEBUG_EVENTS (("gdb: child_close, inferior_ptid=%d\n",
+                PIDGET (inferior_ptid)));
 }
 
 struct target_ops child_ops;
@@ -1437,17 +1442,21 @@ _initialize_inftarg (void)
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
    it means that the pid has died.  Otherwise it is assumed to be alive. */
 static int
-win32_child_thread_alive (int pid)
+win32_child_thread_alive (ptid_t ptid)
 {
+  int pid = PIDGET (ptid);
+
   return WaitForSingleObject (thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
     FALSE : TRUE;
 }
 
 /* Convert pid to printable format. */
 char *
-cygwin_pid_to_str (int pid)
+cygwin_pid_to_str (ptid_t ptid)
 {
   static char buf[80];
+  int pid = PIDGET (ptid);
+
   if ((DWORD) pid == current_event.dwProcessId)
     sprintf (buf, "process %d", pid);
   else

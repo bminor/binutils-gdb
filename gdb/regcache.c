@@ -49,10 +49,9 @@ char *registers;
 
 signed char *register_valid;
 
-/* The thread/process associated with the current set of registers.
-   For now, -1 is special, and means `no current process'.  */
+/* The thread/process associated with the current set of registers. */
 
-static int registers_pid = -1;
+static ptid_t registers_ptid;
 
 /*
  * FUNCTIONS:
@@ -154,7 +153,7 @@ registers_changed (void)
 {
   int i;
 
-  registers_pid = -1;
+  registers_ptid = pid_to_ptid (-1);
 
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  This particular call is used to clean up
@@ -280,10 +279,10 @@ static void
 legacy_read_register_gen (int regnum, char *myaddr)
 {
   gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
-  if (registers_pid != inferior_pid)
+  if (! ptid_equal (registers_ptid, inferior_ptid))
     {
       registers_changed ();
-      registers_pid = inferior_pid;
+      registers_ptid = inferior_ptid;
     }
 
   if (!register_cached (regnum))
@@ -332,10 +331,10 @@ legacy_write_register_gen (int regnum, char *myaddr)
   if (CANNOT_STORE_REGISTER (regnum))
     return;
 
-  if (registers_pid != inferior_pid)
+  if (! ptid_equal (registers_ptid, inferior_ptid))
     {
       registers_changed ();
-      registers_pid = inferior_pid;
+      registers_ptid = inferior_ptid;
     }
 
   size = REGISTER_RAW_SIZE (regnum);
@@ -440,21 +439,22 @@ read_register (int regnum)
 }
 
 ULONGEST
-read_register_pid (int regnum, int pid)
+read_register_pid (int regnum, ptid_t ptid)
 {
+  ptid_t save_ptid;
   int save_pid;
   CORE_ADDR retval;
 
-  if (pid == inferior_pid)
+  if (ptid_equal (ptid, inferior_ptid))
     return read_register (regnum);
 
-  save_pid = inferior_pid;
+  save_ptid = inferior_ptid;
 
-  inferior_pid = pid;
+  inferior_ptid = ptid;
 
   retval = read_register (regnum);
 
-  inferior_pid = save_pid;
+  inferior_ptid = save_ptid;
 
   return retval;
 }
@@ -470,21 +470,21 @@ read_signed_register (int regnum)
 }
 
 LONGEST
-read_signed_register_pid (int regnum, int pid)
+read_signed_register_pid (int regnum, ptid_t ptid)
 {
-  int save_pid;
+  ptid_t save_ptid;
   LONGEST retval;
 
-  if (pid == inferior_pid)
+  if (ptid_equal (ptid, inferior_ptid))
     return read_signed_register (regnum);
 
-  save_pid = inferior_pid;
+  save_ptid = inferior_ptid;
 
-  inferior_pid = pid;
+  inferior_ptid = ptid;
 
   retval = read_signed_register (regnum);
 
-  inferior_pid = save_pid;
+  inferior_ptid = save_ptid;
 
   return retval;
 }
@@ -503,23 +503,23 @@ write_register (int regnum, LONGEST val)
 }
 
 void
-write_register_pid (int regnum, CORE_ADDR val, int pid)
+write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
 {
-  int save_pid;
+  ptid_t save_ptid;
 
-  if (pid == inferior_pid)
+  if (ptid_equal (ptid, inferior_ptid))
     {
       write_register (regnum, val);
       return;
     }
 
-  save_pid = inferior_pid;
+  save_ptid = inferior_ptid;
 
-  inferior_pid = pid;
+  inferior_ptid = ptid;
 
   write_register (regnum, val);
 
-  inferior_pid = save_pid;
+  inferior_ptid = save_ptid;
 }
 
 /* SUPPLY_REGISTER()
@@ -536,10 +536,10 @@ void
 supply_register (int regnum, char *val)
 {
 #if 1
-  if (registers_pid != inferior_pid)
+  if (! ptid_equal (registers_ptid, inferior_ptid))
     {
       registers_changed ();
-      registers_pid = inferior_pid;
+      registers_ptid = inferior_ptid;
     }
 #endif
 
@@ -590,12 +590,12 @@ supply_register (int regnum, char *val)
    TARGET_READ_PC directly. (cagney). */
 
 CORE_ADDR
-generic_target_read_pc (int pid)
+generic_target_read_pc (ptid_t ptid)
 {
 #ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
     {
-      CORE_ADDR pc_val = ADDR_BITS_REMOVE ((CORE_ADDR) read_register_pid (PC_REGNUM, pid));
+      CORE_ADDR pc_val = ADDR_BITS_REMOVE ((CORE_ADDR) read_register_pid (PC_REGNUM, ptid));
       return pc_val;
     }
 #endif
@@ -605,37 +605,37 @@ generic_target_read_pc (int pid)
 }
 
 CORE_ADDR
-read_pc_pid (int pid)
+read_pc_pid (ptid_t ptid)
 {
-  int saved_inferior_pid;
+  ptid_t saved_inferior_ptid;
   CORE_ADDR pc_val;
 
-  /* In case pid != inferior_pid. */
-  saved_inferior_pid = inferior_pid;
-  inferior_pid = pid;
+  /* In case ptid != inferior_ptid. */
+  saved_inferior_ptid = inferior_ptid;
+  inferior_ptid = ptid;
 
-  pc_val = TARGET_READ_PC (pid);
+  pc_val = TARGET_READ_PC (ptid);
 
-  inferior_pid = saved_inferior_pid;
+  inferior_ptid = saved_inferior_ptid;
   return pc_val;
 }
 
 CORE_ADDR
 read_pc (void)
 {
-  return read_pc_pid (inferior_pid);
+  return read_pc_pid (inferior_ptid);
 }
 
 void
-generic_target_write_pc (CORE_ADDR pc, int pid)
+generic_target_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
 #ifdef PC_REGNUM
   if (PC_REGNUM >= 0)
-    write_register_pid (PC_REGNUM, pc, pid);
+    write_register_pid (PC_REGNUM, pc, ptid);
   if (NPC_REGNUM >= 0)
-    write_register_pid (NPC_REGNUM, pc + 4, pid);
+    write_register_pid (NPC_REGNUM, pc + 4, ptid);
   if (NNPC_REGNUM >= 0)
-    write_register_pid (NNPC_REGNUM, pc + 8, pid);
+    write_register_pid (NNPC_REGNUM, pc + 8, ptid);
 #else
   internal_error (__FILE__, __LINE__,
 		  "generic_target_write_pc");
@@ -643,23 +643,23 @@ generic_target_write_pc (CORE_ADDR pc, int pid)
 }
 
 void
-write_pc_pid (CORE_ADDR pc, int pid)
+write_pc_pid (CORE_ADDR pc, ptid_t ptid)
 {
-  int saved_inferior_pid;
+  ptid_t saved_inferior_ptid;
 
-  /* In case pid != inferior_pid. */
-  saved_inferior_pid = inferior_pid;
-  inferior_pid = pid;
+  /* In case ptid != inferior_ptid. */
+  saved_inferior_ptid = inferior_ptid;
+  inferior_ptid = ptid;
 
-  TARGET_WRITE_PC (pc, pid);
+  TARGET_WRITE_PC (pc, ptid);
 
-  inferior_pid = saved_inferior_pid;
+  inferior_ptid = saved_inferior_ptid;
 }
 
 void
 write_pc (CORE_ADDR pc)
 {
-  write_pc_pid (pc, inferior_pid);
+  write_pc_pid (pc, inferior_ptid);
 }
 
 /* Cope with strage ways of getting to the stack and frame pointers */
@@ -774,4 +774,8 @@ _initialize_regcache (void)
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   "Force gdb to flush its register cache (maintainer command)");
+
+   /* Initialize the thread/process associated with the current set of
+      registers.  For now, -1 is special, and means `no current process'.  */
+  registers_ptid = pid_to_ptid (-1);
 }

@@ -255,7 +255,7 @@ non_dle (char *buf, int n)
 /* Tell the remote machine to resume.  */
 
 void
-nindy_resume (int pid, int step, enum target_signal siggnal)
+nindy_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
     warning ("Can't send signals to remote NINDY targets.");
@@ -316,8 +316,8 @@ clean_up_int (void)
  * Return to caller, storing status in 'status' just as `wait' would.
  */
 
-static int
-nindy_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+nindy_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   fd_set fds;
   int c;
@@ -409,7 +409,7 @@ nindy_wait (int pid, struct target_waitstatus *status)
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = i960_fault_to_signal (stop_code);
     }
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 /* Read the remote registers into the block REGS.  */
@@ -513,7 +513,7 @@ nindy_create_inferior (char *execfile, char *args, char **env)
   /* The "process" (board) is already stopped awaiting our commands, and
      the program is already downloaded.  We just set its PC and go.  */
 
-  inferior_pid = pid;		/* Needed for wait_for_inferior below */
+  inferior_ptid = pid_to_ptid (pid);	/* Needed for wait_for_inferior below */
 
   clear_proceed_status ();
 

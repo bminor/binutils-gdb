@@ -164,8 +164,10 @@ static void go32_open (char *name, int from_tty);
 static void go32_close (int quitting);
 static void go32_attach (char *args, int from_tty);
 static void go32_detach (char *args, int from_tty);
-static void go32_resume (int pid, int step, enum target_signal siggnal);
-static int go32_wait (int pid, struct target_waitstatus *status);
+static void go32_resume (ptid_t ptid, int step,
+                         enum target_signal siggnal);
+static ptid_t go32_wait (ptid_t ptid,
+                               struct target_waitstatus *status);
 static void go32_fetch_registers (int regno);
 static void store_register (int regno);
 static void go32_store_registers (int regno);
@@ -315,7 +317,7 @@ static int resume_is_step;
 static int resume_signal = -1;
 
 static void
-go32_resume (int pid, int step, enum target_signal siggnal)
+go32_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   int i;
 
@@ -339,7 +341,7 @@ go32_resume (int pid, int step, enum target_signal siggnal)
 static char child_cwd[FILENAME_MAX];
 
 static int
-go32_wait (int pid, struct target_waitstatus *status)
+go32_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int i;
   unsigned char saved_opcode;
@@ -558,7 +560,7 @@ go32_stop (void)
 {
   normal_stop ();
   cleanup_client ();
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   prog_has_started = 0;
 }
 
@@ -632,7 +634,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
   save_npx ();
 #endif
 
-  inferior_pid = SOME_PID;
+  inferior_ptid = pid_to_ptid (SOME_PID);
   push_target (&go32_ops);
   clear_proceed_status ();
   insert_breakpoints ();

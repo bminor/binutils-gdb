@@ -40,7 +40,8 @@
 
 static void bdm_ppc_open (char *name, int from_tty);
 
-static int bdm_ppc_wait (int pid, struct target_waitstatus *target_status);
+static ptid_t bdm_ppc_wait (ptid_t ptid,
+                            struct target_waitstatus *target_status);
 
 static void bdm_ppc_fetch_registers (int regno);
 
@@ -97,8 +98,8 @@ bdm_ppc_open (char *name, int from_tty)
    Returns "pid" (though it's not clear what, if anything, that
    means in the case of this target).  */
 
-static int
-bdm_ppc_wait (int pid, struct target_waitstatus *target_status)
+static ptid_t
+bdm_ppc_wait (ptid_t ptid, struct target_waitstatus *target_status)
 {
   int stop_reason;
 
@@ -109,7 +110,7 @@ bdm_ppc_wait (int pid, struct target_waitstatus *target_status)
   if (stop_reason)
     {
       target_status->value.sig = TARGET_SIGNAL_INT;
-      return inferior_pid;
+      return inferior_ptid;
     }
 
   target_status->value.sig = TARGET_SIGNAL_TRAP;	/* XXX for now */
@@ -124,7 +125,7 @@ bdm_ppc_wait (int pid, struct target_waitstatus *target_status)
   }
 #endif
 
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 static int bdm_regmap[] =

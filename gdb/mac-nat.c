@@ -78,8 +78,8 @@ child_store_inferior_registers (int r)
     }
 }
 
-static int
-child_wait (int pid, struct target_waitstatus *ourstatus)
+static ptid_t
+child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
 }
 
@@ -116,15 +116,16 @@ child_attach (char *args, int from_tty)
 
 	  if (exec_file)
 	    printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			       target_pid_to_str (pid));
+			       target_pid_to_str (pid_to_ptid (pid)));
 	  else
-	    printf_unfiltered ("Attaching to %s\n", target_pid_to_str (pid));
+	    printf_unfiltered ("Attaching to %s\n",
+	                       target_pid_to_str (pid_to_ptid (pid)));
 
 	  gdb_flush (gdb_stdout);
 	}
       /* Do we need to do anything special? */
       attach_flag = 1;
-      inferior_pid = pid;
+      inferior_ptid = pid_to_ptid (pid);
       push_target (&child_ops);
     }
 }
@@ -140,10 +141,10 @@ child_detach (char *args, int from_tty)
       if (exec_file == 0)
 	exec_file = "";
       printf_unfiltered ("Detaching from program: %s %s\n", exec_file,
-			 target_pid_to_str (inferior_pid));
+			 target_pid_to_str (inferior_ptid));
       gdb_flush (gdb_stdout);
     }
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
   unpush_target (&child_ops);
 }
 
@@ -153,7 +154,7 @@ static void
 child_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
-      attach_flag ? "attached" : "child", target_pid_to_str (inferior_pid));
+      attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
 }
 
 /* ARGSUSED */
@@ -163,7 +164,7 @@ child_open (char *arg, int from_tty)
   error ("Use the \"run\" command to start a Mac application.");
 }
 
-/* Start an inferior Mac program and sets inferior_pid to its pid.
+/* Start an inferior Mac program and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
@@ -202,7 +203,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
       error ("Error launching %s, code %d\n", exec_file, launch_err);
     }
 
-  inferior_pid = launchparms.launchProcessSN.lowLongOfPSN;
+  inferior_ptid = pid_to_ptid (launchparms.launchProcessSN.lowLongOfPSN);
   /* FIXME be sure that high long of PSN is 0 */
 
   push_target (&child_ops);
@@ -251,7 +252,7 @@ child_kill_inferior (void)
 }
 
 void
-child_resume (int pid, int step, enum target_signal signal)
+child_resume (ptid_t ptid, int step, enum target_signal signal)
 {
 }
 

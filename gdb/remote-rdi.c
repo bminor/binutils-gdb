@@ -60,7 +60,8 @@ static void arm_rdi_prepare_to_store (void);
 
 static void arm_rdi_fetch_registers (int regno);
 
-static void arm_rdi_resume (int pid, int step, enum target_signal siggnal);
+static void arm_rdi_resume (ptid_t pid, int step,
+                            enum target_signal siggnal);
 
 static int arm_rdi_start_remote (char *dummy);
 
@@ -76,7 +77,7 @@ static void arm_rdi_mourn (void);
 
 static void arm_rdi_send (char *buf);
 
-static int arm_rdi_wait (int pid, struct target_waitstatus *status);
+static int arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status);
 
 static void arm_rdi_kill (void);
 
@@ -339,10 +340,10 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   printf_filtered ("Connected to ARM RDI target.\n");
   closed_already = 0;
-  inferior_pid = 42;
+  inferior_ptid = pid_to_ptid (42);
 }
 
-/* Start an inferior process and set inferior_pid to its pid.
+/* Start an inferior process and set inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().
@@ -374,7 +375,7 @@ arm_rdi_create_inferior (char *exec_file, char *args, char **env)
   strcat (arg_buf, " ");
   strcat (arg_buf, args);
 
-  inferior_pid = 42;
+  inferior_ptid = pid_to_ptid (42);
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   if (env != NULL)
@@ -438,7 +439,7 @@ arm_rdi_close (int quitting)
 	  printf_filtered ("RDI_close: %s\n", rdi_error_message (rslt));
 	}
       closed_already = 1;
-      inferior_pid = 0;
+      inferior_ptid = null_ptid;
       Adp_CloseDevice ();
       generic_mourn_inferior ();
     }
@@ -447,7 +448,7 @@ arm_rdi_close (int quitting)
 /* Tell the remote machine to resume.  */
 
 static void
-arm_rdi_resume (int pid, int step, enum target_signal siggnal)
+arm_rdi_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   int rslt;
   PointHandle point;
@@ -512,8 +513,8 @@ interrupt_query (void)
    STATUS just as `wait' would.  Returns "pid" (though it's not clear
    what, if anything, that means in the case of this target).  */
 
-static int
-arm_rdi_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+arm_rdi_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   status->kind = (execute_status == RDIError_NoError ?
 		  TARGET_WAITKIND_EXITED : TARGET_WAITKIND_STOPPED);
@@ -521,7 +522,7 @@ arm_rdi_wait (int pid, struct target_waitstatus *status)
   /* convert stopped code from target into right signal */
   status->value.sig = rdi_error_signal (execute_status);
 
-  return inferior_pid;
+  return inferior_ptid;
 }
 
 /* Read the remote registers into the block REGS.  */

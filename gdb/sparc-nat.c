@@ -74,7 +74,7 @@ fetch_inferior_registers (int regno)
       || regno >= Y_REGNUM
       || (!register_valid[SP_REGNUM] && regno < I7_REGNUM))
     {
-      if (0 != ptrace (PTRACE_GETREGS, inferior_pid,
+      if (0 != ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 		       (PTRACE_ARG3_TYPE) & inferior_registers, 0))
 	perror ("ptrace_getregs");
 
@@ -104,7 +104,7 @@ fetch_inferior_registers (int regno)
       regno == FPS_REGNUM ||
       (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31))
     {
-      if (0 != ptrace (PTRACE_GETFPREGS, inferior_pid,
+      if (0 != ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
 		       (PTRACE_ARG3_TYPE) & inferior_fp_registers,
 		       0))
 	perror ("ptrace_getfpregs");
@@ -230,7 +230,7 @@ store_inferior_registers (int regno)
       inferior_registers.r_y =
 	*(int *) &registers[REGISTER_BYTE (Y_REGNUM)];
 
-      if (0 != ptrace (PTRACE_SETREGS, inferior_pid,
+      if (0 != ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
 		       (PTRACE_ARG3_TYPE) & inferior_registers, 0))
 	perror ("ptrace_setregs");
     }
@@ -244,7 +244,7 @@ store_inferior_registers (int regno)
       memcpy (&inferior_fp_registers.Fpu_fsr,
 	      &registers[REGISTER_BYTE (FPS_REGNUM)], sizeof (FPU_FSR_TYPE));
       if (0 !=
-	  ptrace (PTRACE_SETFPREGS, inferior_pid,
+	  ptrace (PTRACE_SETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) & inferior_fp_registers, 0))
 	perror ("ptrace_setfpregs");
     }

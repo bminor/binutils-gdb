@@ -61,8 +61,8 @@ static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
-static void restore_current_thread (int);
-static void switch_to_thread (int pid);
+static void restore_current_thread (ptid_t);
+static void switch_to_thread (ptid_t ptid);
 static void prune_threads (void);
 
 static void
@@ -103,13 +103,13 @@ init_thread_list (void)
    so that back_ends can initialize their private data.  */
 
 struct thread_info *
-add_thread (int pid)
+add_thread (ptid_t ptid)
 {
   struct thread_info *tp;
 
   tp = (struct thread_info *) xmalloc (sizeof (struct thread_info));
 
-  tp->pid = pid;
+  tp->ptid = ptid;
   tp->num = ++highest_thread_num;
   tp->prev_pc = 0;
   tp->prev_func_start = 0;
@@ -132,14 +132,14 @@ add_thread (int pid)
 }
 
 void
-delete_thread (int pid)
+delete_thread (ptid_t ptid)
 {
   struct thread_info *tp, *tpprev;
 
   tpprev = NULL;
 
   for (tp = thread_list; tp; tpprev = tp, tp = tp->next)
-    if (tp->pid == pid)
+    if (ptid_equal (tp->ptid, ptid))
       break;
 
   if (!tp)
@@ -165,14 +165,14 @@ find_thread_id (int num)
   return NULL;
 }
 
-/* Find a thread_info by matching 'pid'.  */
+/* Find a thread_info by matching PTID.  */
 struct thread_info *
-find_thread_pid (int pid)
+find_thread_pid (ptid_t ptid)
 {
   struct thread_info *tp;
 
   for (tp = thread_list; tp; tp = tp->next)
-    if (tp->pid == pid)
+    if (ptid_equal (tp->ptid, ptid))
       return tp;
 
   return NULL;
@@ -218,34 +218,34 @@ valid_thread_id (int num)
 }
 
 int
-pid_to_thread_id (int pid)
+pid_to_thread_id (ptid_t ptid)
 {
   struct thread_info *tp;
 
   for (tp = thread_list; tp; tp = tp->next)
-    if (tp->pid == pid)
+    if (ptid_equal (tp->ptid, ptid))
       return tp->num;
 
   return 0;
 }
 
-int
+ptid_t
 thread_id_to_pid (int num)
 {
   struct thread_info *thread = find_thread_id (num);
   if (thread)
-    return thread->pid;
+    return thread->ptid;
   else
-    return -1;
+    return pid_to_ptid (-1);
 }
 
 int
-in_thread_list (int pid)
+in_thread_list (ptid_t ptid)
 {
   struct thread_info *tp;
 
   for (tp = thread_list; tp; tp = tp->next)
-    if (tp->pid == pid)
+    if (ptid_equal (tp->ptid, ptid))
       return 1;
 
   return 0;			/* Never heard of 'im */
@@ -285,7 +285,7 @@ gdb_list_thread_ids (/* output object */)
 /* Load infrun state for the thread PID.  */
 
 void
-load_infrun_state (int pid, CORE_ADDR *prev_pc, CORE_ADDR *prev_func_start,
+load_infrun_state (ptid_t ptid, CORE_ADDR *prev_pc, CORE_ADDR *prev_func_start,
 		   char **prev_func_name, int *trap_expected,
 		   struct breakpoint **step_resume_breakpoint,
 		   struct breakpoint **through_sigtramp_breakpoint,
@@ -299,7 +299,7 @@ load_infrun_state (int pid, CORE_ADDR *prev_pc, CORE_ADDR *prev_func_start,
 
   /* If we can't find the thread, then we're debugging a single threaded
      process.  No need to do anything in that case.  */
-  tp = find_thread_id (pid_to_thread_id (pid));
+  tp = find_thread_id (pid_to_thread_id (ptid));
   if (tp == NULL)
     return;
 
@@ -322,7 +322,7 @@ load_infrun_state (int pid, CORE_ADDR *prev_pc, CORE_ADDR *prev_func_start,
 /* Save infrun state for the thread PID.  */
 
 void
-save_infrun_state (int pid, CORE_ADDR prev_pc, CORE_ADDR prev_func_start,
+save_infrun_state (ptid_t ptid, CORE_ADDR prev_pc, CORE_ADDR prev_func_start,
 		   char *prev_func_name, int trap_expected,
 		   struct breakpoint *step_resume_breakpoint,
 		   struct breakpoint *through_sigtramp_breakpoint,
@@ -336,7 +336,7 @@ save_infrun_state (int pid, CORE_ADDR prev_pc, CORE_ADDR prev_func_start,
 
   /* If we can't find the thread, then we're debugging a single-threaded
      process.  Nothing to do in that case.  */
-  tp = find_thread_id (pid_to_thread_id (pid));
+  tp = find_thread_id (pid_to_thread_id (ptid));
   if (tp == NULL)
     return;
 
@@ -360,11 +360,11 @@ save_infrun_state (int pid, CORE_ADDR prev_pc, CORE_ADDR prev_func_start,
 static int
 thread_alive (struct thread_info *tp)
 {
-  if (tp->pid == -1)
+  if (PIDGET (tp->ptid) == -1)
     return 0;
-  if (!target_thread_alive (tp->pid))
+  if (!target_thread_alive (tp->ptid))
     {
-      tp->pid = -1;		/* Mark it as dead */
+      tp->ptid = pid_to_ptid (-1);	/* Mark it as dead */
       return 0;
     }
   return 1;
@@ -379,7 +379,7 @@ prune_threads (void)
     {
       next = tp->next;
       if (!thread_alive (tp))
-	delete_thread (tp->pid);
+	delete_thread (tp->ptid);
     }
 }
 
@@ -394,7 +394,7 @@ static void
 info_threads_command (char *arg, int from_tty)
 {
   struct thread_info *tp;
-  int current_pid;
+  ptid_t current_ptid;
   struct frame_info *cur_frame;
   int saved_frame_level = selected_frame_level;
   int counter;
@@ -407,18 +407,18 @@ info_threads_command (char *arg, int from_tty)
 
   prune_threads ();
   target_find_new_threads ();
-  current_pid = inferior_pid;
+  current_ptid = inferior_ptid;
   for (tp = thread_list; tp; tp = tp->next)
     {
-      if (tp->pid == current_pid)
+      if (ptid_equal (tp->ptid, current_ptid))
 	printf_filtered ("* ");
       else
 	printf_filtered ("  ");
 
 #ifdef HPUXHPPA
-      printf_filtered ("%d %s", tp->num, target_tid_to_str (tp->pid));
+      printf_filtered ("%d %s", tp->num, target_tid_to_str (tp->ptid));
 #else
-      printf_filtered ("%d %s", tp->num, target_pid_to_str (tp->pid));
+      printf_filtered ("%d %s", tp->num, target_pid_to_str (tp->ptid));
 #endif
 
       extra_info = target_extra_thread_info (tp);
@@ -426,14 +426,14 @@ info_threads_command (char *arg, int from_tty)
 	printf_filtered (" (%s)", extra_info);
       puts_filtered ("  ");
 
-      switch_to_thread (tp->pid);
+      switch_to_thread (tp->ptid);
       if (selected_frame)
 	print_only_stack_frame (selected_frame, -1, 0);
       else
 	printf_filtered ("[No stack.]\n");
     }
 
-  switch_to_thread (current_pid);
+  switch_to_thread (current_ptid);
 
   /* Code below copied from "up_silently_base" in "stack.c".
    * It restores the frame set by the user before the "info threads"
@@ -461,12 +461,12 @@ info_threads_command (char *arg, int from_tty)
 /* Switch from one thread to another. */
 
 static void
-switch_to_thread (int pid)
+switch_to_thread (ptid_t ptid)
 {
-  if (pid == inferior_pid)
+  if (ptid_equal (ptid, inferior_ptid))
     return;
 
-  inferior_pid = pid;
+  inferior_ptid = ptid;
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
@@ -474,34 +474,34 @@ switch_to_thread (int pid)
 }
 
 static void
-restore_current_thread (int pid)
+restore_current_thread (ptid_t ptid)
 {
-  if (pid != inferior_pid)
+  if (! ptid_equal (ptid, inferior_ptid))
     {
-      switch_to_thread (pid);
+      switch_to_thread (ptid);
       print_stack_frame (get_current_frame (), 0, -1);
     }
 }
 
 struct current_thread_cleanup
 {
-  int inferior_pid;
+  ptid_t inferior_ptid;
 };
 
 static void
 do_restore_current_thread_cleanup (void *arg)
 {
   struct current_thread_cleanup *old = arg;
-  restore_current_thread (old->inferior_pid);
+  restore_current_thread (old->inferior_ptid);
   xfree (old);
 }
 
 static struct cleanup *
-make_cleanup_restore_current_thread (int inferior_pid)
+make_cleanup_restore_current_thread (ptid_t inferior_ptid)
 {
   struct current_thread_cleanup *old
     = xmalloc (sizeof (struct current_thread_cleanup));
-  old->inferior_pid = inferior_pid;
+  old->inferior_ptid = inferior_ptid;
   return make_cleanup (do_restore_current_thread_cleanup, old);
 }
 
@@ -525,7 +525,7 @@ thread_apply_all_command (char *cmd, int from_tty)
   if (cmd == NULL || *cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup_restore_current_thread (inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid);
 
   /* It is safe to update the thread list now, before
      traversing it for "thread apply all".  MVS */
@@ -538,14 +538,14 @@ thread_apply_all_command (char *cmd, int from_tty)
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
-	switch_to_thread (tp->pid);
+	switch_to_thread (tp->ptid);
 #ifdef HPUXHPPA
 	printf_filtered ("\nThread %d (%s):\n",
 			 tp->num,
-			 target_tid_to_str (inferior_pid));
+			 target_tid_to_str (inferior_ptid));
 #else
 	printf_filtered ("\nThread %d (%s):\n", tp->num,
-			 target_pid_to_str (inferior_pid));
+			 target_pid_to_str (inferior_ptid));
 #endif
 	execute_command (cmd, from_tty);
 	strcpy (cmd, saved_cmd); /* Restore exact command used previously */
@@ -572,7 +572,7 @@ thread_apply_command (char *tidlist, int from_tty)
   if (*cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup_restore_current_thread (inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid);
 
   /* Save a copy of the command in case it is clobbered by
      execute_command */
@@ -615,13 +615,13 @@ thread_apply_command (char *tidlist, int from_tty)
 	    warning ("Thread %d has terminated.", start);
 	  else
 	    {
-	      switch_to_thread (tp->pid);
+	      switch_to_thread (tp->ptid);
 #ifdef HPUXHPPA
 	      printf_filtered ("\nThread %d (%s):\n", tp->num,
-			       target_tid_to_str (inferior_pid));
+			       target_tid_to_str (inferior_ptid));
 #else
 	      printf_filtered ("\nThread %d (%s):\n", tp->num,
-			       target_pid_to_str (inferior_pid));
+			       target_pid_to_str (inferior_ptid));
 #endif
 	      execute_command (cmd, from_tty);
 	      strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
@@ -644,11 +644,11 @@ thread_command (char *tidstr, int from_tty)
       /* Don't generate an error, just say which thread is current. */
       if (target_has_stack)
 	printf_filtered ("[Current thread is %d (%s)]\n",
-			 pid_to_thread_id (inferior_pid),
+			 pid_to_thread_id (inferior_ptid),
 #if defined(HPUXHPPA)
-			 target_tid_to_str (inferior_pid)
+			 target_tid_to_str (inferior_ptid)
 #else
-			 target_pid_to_str (inferior_pid)
+			 target_pid_to_str (inferior_ptid)
 #endif
 	  );
       else
@@ -681,25 +681,25 @@ see the IDs of currently known threads.", num);
   if (!thread_alive (tp))
     error ("Thread ID %d has terminated.\n", num);
 
-  switch_to_thread (tp->pid);
+  switch_to_thread (tp->ptid);
 
 #ifdef UI_OUT
   ui_out_text (uiout, "[Switching to thread ");
-  ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_pid));
+  ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
   ui_out_text (uiout, " (");
 #if defined(HPUXHPPA)
-  ui_out_text (uiout, target_tid_to_str (inferior_pid));
+  ui_out_text (uiout, target_tid_to_str (inferior_ptid));
 #else
-  ui_out_text (uiout, target_pid_to_str (inferior_pid));
+  ui_out_text (uiout, target_pid_to_str (inferior_ptid));
 #endif
   ui_out_text (uiout, ")]");
 #else /* UI_OUT */
   printf_filtered ("[Switching to thread %d (%s)]\n",
-		   pid_to_thread_id (inferior_pid),
+		   pid_to_thread_id (inferior_ptid),
 #if defined(HPUXHPPA)
-		   target_tid_to_str (inferior_pid)
+		   target_tid_to_str (inferior_ptid)
 #else
-		   target_pid_to_str (inferior_pid)
+		   target_pid_to_str (inferior_ptid)
 #endif
     );
 #endif /* UI_OUT */

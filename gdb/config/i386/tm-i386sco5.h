@@ -52,12 +52,12 @@
 #define HAVE_STEPPABLE_WATCHPOINT
 
 #define STOPPED_BY_WATCHPOINT(W)  \
-  i386_stopped_by_watchpoint (inferior_pid)
+  i386_stopped_by_watchpoint (PIDGET (inferior_ptid))
 
 #define target_insert_watchpoint(addr, len, type)  \
-  i386_insert_watchpoint (inferior_pid, addr, len, type)
+  i386_insert_watchpoint (PIDGET (inferior_ptid), addr, len, type)
 
 #define target_remove_watchpoint(addr, len, type)  \
-  i386_remove_watchpoint (inferior_pid, addr, len)
+  i386_remove_watchpoint (PIDGET (inferior_ptid), addr, len)
 
 #endif /* ifndef TM_I386SCO5_H */

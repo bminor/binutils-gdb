@@ -93,7 +93,7 @@ void ocd_close (int quitting);
 
 void ocd_detach (char *args, int from_tty);
 
-void ocd_resume (int pid, int step, enum target_signal siggnal);
+void ocd_resume (ptid_t ptid, int step, enum target_signal siggnal);
 
 void ocd_prepare_to_store (void);
 
@@ -111,7 +111,7 @@ void ocd_mourn (void);
 
 void ocd_create_inferior (char *exec_file, char *args, char **env);
 
-int ocd_thread_alive (int th);
+int ocd_thread_alive (ptid_t th);
 
 void ocd_error (char *s, int error_code);
 

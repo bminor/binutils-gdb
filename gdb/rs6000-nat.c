@@ -201,7 +201,7 @@ fetch_register (int regno)
   if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
     {
       nr = regno - FP0_REGNUM + FPR0;
-      ptrace32 (PT_READ_FPR, inferior_pid, addr, nr, 0);
+      ptrace32 (PT_READ_FPR, PIDGET (inferior_ptid), addr, nr, 0);
     }
 
   /* Bogus register number. */
@@ -219,13 +219,13 @@ fetch_register (int regno)
 	nr = regno;
 
       if (!ARCH64 ())
-	*addr = ptrace32 (PT_READ_GPR, inferior_pid, (int *)nr, 0, 0);
+	*addr = ptrace32 (PT_READ_GPR, PIDGET (inferior_ptid), (int *)nr, 0, 0);
       else
 	{
 	  /* PT_READ_GPR requires the buffer parameter to point to long long,
 	     even if the register is really only 32 bits. */
 	  long long buf;
-	  ptrace64 (PT_READ_GPR, inferior_pid, nr, 0, (int *)&buf);
+	  ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, (int *)&buf);
 	  if (REGISTER_RAW_SIZE (regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
@@ -260,7 +260,7 @@ store_register (int regno)
   if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
     {
       nr = regno - FP0_REGNUM + FPR0;
-      ptrace32 (PT_WRITE_FPR, inferior_pid, addr, nr, 0);
+      ptrace32 (PT_WRITE_FPR, PIDGET (inferior_ptid), addr, nr, 0);
     }
 
   /* Bogus register number. */
@@ -289,7 +289,7 @@ store_register (int regno)
 	nr = regno;
 
       if (!ARCH64 ())
-	ptrace32 (PT_WRITE_GPR, inferior_pid, (int *)nr, *addr, 0);
+	ptrace32 (PT_WRITE_GPR, PIDGET (inferior_ptid), (int *)nr, *addr, 0);
       else
 	{
 	  /* PT_WRITE_GPR requires the buffer parameter to point to an 8-byte
@@ -299,7 +299,7 @@ store_register (int regno)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
-	  ptrace64 (PT_WRITE_GPR, inferior_pid, nr, 0, (int *)&buf);
+	  ptrace64 (PT_WRITE_GPR, PIDGET (inferior_ptid), nr, 0, (int *)&buf);
 	}
     }
 
@@ -373,9 +373,10 @@ read_word (CORE_ADDR from, int *to, int arch64)
   errno = 0;
 
   if (arch64)
-    *to = ptrace64 (PT_READ_I, inferior_pid, from, 0, NULL);
+    *to = ptrace64 (PT_READ_I, PIDGET (inferior_ptid), from, 0, NULL);
   else
-    *to = ptrace32 (PT_READ_I, inferior_pid, (int *)(long) from, 0, NULL);
+    *to = ptrace32 (PT_READ_I, PIDGET (inferior_ptid), (int *)(long) from,
+                    0, NULL);
 
   return !errno;
 }
@@ -441,9 +442,9 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
       for (i = 0, errno = 0; i < count; i++, addr += sizeof (int))
 	{
 	  if (arch64)
-	    ptrace64 (PT_WRITE_D, inferior_pid, addr, buf[i], NULL);
+	    ptrace64 (PT_WRITE_D, PIDGET (inferior_ptid), addr, buf[i], NULL);
 	  else
-	    ptrace32 (PT_WRITE_D, inferior_pid, (int *)(long) addr,
+	    ptrace32 (PT_WRITE_D, PIDGET (inferior_ptid), (int *)(long) addr,
 		      buf[i], NULL);
 
 	  if (errno)
@@ -482,9 +483,9 @@ exec_one_dummy_insn (void)
   prev_pc = read_pc ();
   write_pc (DUMMY_INSN_ADDR);
   if (ARCH64 ())
-    ret = ptrace64 (PT_CONTINUE, inferior_pid, 1, 0, NULL);
+    ret = ptrace64 (PT_CONTINUE, PIDGET (inferior_ptid), 1, 0, NULL);
   else
-    ret = ptrace32 (PT_CONTINUE, inferior_pid, (int *)1, 0, NULL);
+    ret = ptrace32 (PT_CONTINUE, PIDGET (inferior_ptid), (int *)1, 0, NULL);
 
   if (ret != 0)
     perror ("pt_continue");
@@ -493,7 +494,7 @@ exec_one_dummy_insn (void)
     {
       pid = wait (&status);
     }
-  while (pid != inferior_pid);
+  while (pid != PIDGET (inferior_ptid));
 
   write_pc (prev_pc);
   target_remove_breakpoint (DUMMY_INSN_ADDR, shadow_contents);

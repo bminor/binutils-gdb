@@ -131,7 +131,7 @@ char *inferior_io_terminal;
    being debugged it should be nonzero (currently 3 is used) for remote
    debugging.  */
 
-int inferior_pid;
+ptid_t inferior_ptid;
 
 /* Last signal that the inferior received (why it stopped).  */
 
@@ -258,7 +258,7 @@ run_command (char *args, int from_tty)
 
   dont_repeat ();
 
-  if (inferior_pid != 0 && target_has_execution)
+  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
       if (from_tty
 	  && !query ("The program being debugged has been started already.\n\
@@ -1690,7 +1690,7 @@ attach_command (char *args, int from_tty)
   exec_file = (char *) get_exec_file (0);
   if (!exec_file)
     {
-      exec_file = target_pid_to_exec_file (inferior_pid);
+      exec_file = target_pid_to_exec_file (PIDGET (inferior_ptid));
       if (exec_file)
 	{
 	  /* It's possible we don't have a full path, but rather just a
@@ -1720,7 +1720,7 @@ attach_command (char *args, int from_tty)
 
   /* Take any necessary post-attaching actions for this platform.
    */
-  target_post_attach (inferior_pid);
+  target_post_attach (PIDGET (inferior_ptid));
 
   normal_stop ();
 

@@ -207,9 +207,9 @@ terminal_init_inferior (void)
      debugging target with a version of target_terminal_init_inferior which
      passes in the process group to a generic routine which does all the work
      (and the non-threaded child_terminal_init_inferior can just pass in
-     inferior_pid to the same routine).  */
+     inferior_ptid to the same routine).  */
   /* We assume INFERIOR_PID is also the child's process group.  */
-  terminal_init_inferior_with_pgrp (PIDGET (inferior_pid));
+  terminal_init_inferior_with_pgrp (PIDGET (inferior_ptid));
 #endif /* PROCESS_GROUP_TYPE */
 }
 
@@ -573,11 +573,11 @@ new_tty (void)
 static void
 kill_command (char *arg, int from_tty)
 {
-  /* FIXME:  This should not really be inferior_pid (or target_has_execution).
+  /* FIXME:  This should not really be inferior_ptid (or target_has_execution).
      It should be a distinct flag that indicates that a target is active, cuz
      some targets don't have processes! */
 
-  if (inferior_pid == 0)
+  if (ptid_equal (inferior_ptid, null_ptid))
     error ("The program is not being run.");
   if (!query ("Kill the program being debugged? "))
     error ("Not confirmed.");
@@ -605,7 +605,7 @@ static void
 pass_signal (int signo)
 {
 #ifndef _WIN32
-  kill (PIDGET (inferior_pid), SIGINT);
+  kill (PIDGET (inferior_ptid), SIGINT);
 #endif
 }
 
@@ -647,7 +647,7 @@ handle_sigio (int signo)
     {
 #ifndef _WIN32
       if ((*target_activity_function) ())
-	kill (inferior_pid, SIGINT);
+	kill (PIDGET (inferior_ptid), SIGINT);
 #endif
     }
 }
@@ -735,7 +735,7 @@ _initialize_inflow (void)
   add_com ("kill", class_run, kill_command,
 	   "Kill execution of program being debugged.");
 
-  inferior_pid = 0;
+  inferior_ptid = null_ptid;
 
   terminal_is_ours = 1;
 

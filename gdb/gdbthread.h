@@ -31,7 +31,7 @@
 struct thread_info
 {
   struct thread_info *next;
-  int pid;			/* "Actual process id";
+  ptid_t ptid;			/* "Actual process id";
 				    In fact, this may be overloaded with 
 				    kernel thread id, etc.  */
   int num;			/* Convenient handle (GDB thread id) */
@@ -73,29 +73,29 @@ extern void init_thread_list (void);
 /* Add a thread to the thread list.
    Note that add_thread now returns the handle of the new thread,
    so that the caller may initialize the private thread data.  */
-extern struct thread_info *add_thread (int pid);
+extern struct thread_info *add_thread (ptid_t ptid);
 
 /* Delete an existing thread list entry.  */
-extern void delete_thread (int);
+extern void delete_thread (ptid_t);
 
 /* Translate the integer thread id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra thread information).  */
-extern int thread_id_to_pid (int);
+extern ptid_t thread_id_to_pid (int);
 
 /* Translate a 'pid' (which may be overloaded with extra thread information) 
    into the integer thread id (GDB's homegrown id, not the system's).  */
-extern int pid_to_thread_id (int pid);
+extern int pid_to_thread_id (ptid_t ptid);
 
 /* Boolean test for an already-known pid (which may be overloaded with
    extra thread information).  */
-extern int in_thread_list (int pid);
+extern int in_thread_list (ptid_t ptid);
 
 /* Boolean test for an already-known thread id (GDB's homegrown id, 
    not the system's).  */
 extern int valid_thread_id (int thread);
 
 /* Search function to lookup a thread by 'pid'.  */
-extern struct thread_info *find_thread_pid (int pid);
+extern struct thread_info *find_thread_pid (ptid_t ptid);
 
 /* Iterator function to call a user-provided callback function
    once for each known thread.  */
@@ -103,7 +103,7 @@ typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
 /* infrun context switch: save the debugger state for the given thread.  */
-extern void save_infrun_state (int       pid,
+extern void save_infrun_state (ptid_t ptid,
 			       CORE_ADDR prev_pc,
 			       CORE_ADDR prev_func_start,
 			       char     *prev_func_name,
@@ -121,7 +121,7 @@ extern void save_infrun_state (int       pid,
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
-extern void load_infrun_state (int        pid,
+extern void load_infrun_state (ptid_t ptid,
 			       CORE_ADDR *prev_pc,
 			       CORE_ADDR *prev_func_start,
 			       char     **prev_func_name,

@@ -80,7 +80,7 @@
 /* OBSOLETE /* Global Registers */ */
 /* OBSOLETE #ifdef ULTRA3 */
 /* OBSOLETE   errno = 0; */
-/* OBSOLETE   ptrace (PT_READ_STRUCT, inferior_pid, */
+/* OBSOLETE   ptrace (PT_READ_STRUCT, PIDGET (inferior_ptid), */
 /* OBSOLETE 	  (PTRACE_ARG3_TYPE) register_addr (GR96_REGNUM, 0), */
 /* OBSOLETE 	  (int) &pt_struct.pt_gr[0], 32 * 4); */
 /* OBSOLETE   if (errno != 0) */
@@ -101,7 +101,7 @@
 /* OBSOLETE /* Local Registers */ */
 /* OBSOLETE #ifdef ULTRA3 */
 /* OBSOLETE   errno = 0; */
-/* OBSOLETE   ptrace (PT_READ_STRUCT, inferior_pid, */
+/* OBSOLETE   ptrace (PT_READ_STRUCT, PIDGET (inferior_ptid), */
 /* OBSOLETE 	  (PTRACE_ARG3_TYPE) register_addr (LR0_REGNUM, 0), */
 /* OBSOLETE 	  (int) &pt_struct.pt_lr[0], 128 * 4); */
 /* OBSOLETE   if (errno != 0) */
@@ -154,7 +154,7 @@
 /* OBSOLETE 	return; */
 /* OBSOLETE       regaddr = register_addr (regno, 0); */
 /* OBSOLETE       errno = 0; */
-/* OBSOLETE       ptrace (PT_WRITE_U, inferior_pid, */
+/* OBSOLETE       ptrace (PT_WRITE_U, PIDGET (inferior_ptid), */
 /* OBSOLETE 	      (PTRACE_ARG3_TYPE) regaddr, read_register (regno)); */
 /* OBSOLETE       if (errno != 0) */
 /* OBSOLETE 	{ */
@@ -171,7 +171,7 @@
 /* OBSOLETE       for (regno = LR0_REGNUM; regno < LR0_REGNUM + 128; regno++) */
 /* OBSOLETE 	pt_struct.pt_gr[regno] = read_register (regno); */
 /* OBSOLETE       errno = 0; */
-/* OBSOLETE       ptrace (PT_WRITE_STRUCT, inferior_pid, */
+/* OBSOLETE       ptrace (PT_WRITE_STRUCT, PIDGET (inferior_ptid), */
 /* OBSOLETE 	      (PTRACE_ARG3_TYPE) register_addr (GR1_REGNUM, 0), */
 /* OBSOLETE 	      (int) &pt_struct.pt_gr1, (1 * 32 * 128) * 4); */
 /* OBSOLETE       if (errno != 0) */
@@ -190,7 +190,7 @@
 /* OBSOLETE       pt_struct.pt_bp = read_register (BP_REGNUM); */
 /* OBSOLETE       pt_struct.pt_fc = read_register (FC_REGNUM); */
 /* OBSOLETE       errno = 0; */
-/* OBSOLETE       ptrace (PT_WRITE_STRUCT, inferior_pid, */
+/* OBSOLETE       ptrace (PT_WRITE_STRUCT, PIDGET (inferior_ptid), */
 /* OBSOLETE 	      (PTRACE_ARG3_TYPE) register_addr (CPS_REGNUM, 0), */
 /* OBSOLETE 	      (int) &pt_struct.pt_psr, (10) * 4); */
 /* OBSOLETE       if (errno != 0) */
@@ -238,7 +238,7 @@
 /* OBSOLETE   else */
 /* OBSOLETE     { */
 /* OBSOLETE       errno = 0; */
-/* OBSOLETE       val = ptrace (PT_READ_U, inferior_pid, */
+/* OBSOLETE       val = ptrace (PT_READ_U, PIDGET (inferior_ptid), */
 /* OBSOLETE 		    (PTRACE_ARG3_TYPE) register_addr (regno, 0), 0); */
 /* OBSOLETE       if (errno != 0) */
 /* OBSOLETE 	{ */

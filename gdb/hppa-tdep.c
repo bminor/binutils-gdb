@@ -1397,7 +1397,7 @@ push_dummy_frame (struct inferior_status *inf_status)
      We also need a number of horrid hacks to deal with lossage in the
      PC queue registers (apparently they're not valid when the in syscall
      bit is set).  */
-  pc = target_read_pc (inferior_pid);
+  pc = target_read_pc (inferior_ptid);
   int_buffer = read_register (FLAGS_REGNUM);
   if (int_buffer & 0x2)
     {
@@ -1631,7 +1631,7 @@ restore_pc_queue (struct frame_saved_regs *fsr)
          any other choice?  Is there *any* way to do this stuff with
          ptrace() or some equivalent?).  */
       resume (1, 0);
-      target_wait (inferior_pid, &w);
+      target_wait (inferior_ptid, &w);
 
       if (w.kind == TARGET_WAITKIND_SIGNALLED)
 	{
@@ -2076,9 +2076,9 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 	   such that it points to the PC value written immediately above
 	   (ie the call dummy).  */
         resume (1, 0);
-        target_wait (inferior_pid, &w);
+        target_wait (inferior_ptid, &w);
         resume (1, 0);
-        target_wait (inferior_pid, &w);
+        target_wait (inferior_ptid, &w);
 
 	/* Restore the two instructions at the old PC locations.  */
         *((int *) buf) = inst1;
@@ -2162,7 +2162,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
          stub rather than the export stub or real function for lazy binding
          to work correctly
 
-         /* If we are using the gcc PLT call routine, then we need to
+         If we are using the gcc PLT call routine, then we need to
          get the import stub for the target function.  */
       if (using_gcc_plt_call && som_solib_get_got_by_pc (fun))
 	{
@@ -2370,7 +2370,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   if (flags & 2)
     return pc;
 #ifndef GDB_TARGET_IS_PA_ELF
-  else if (som_solib_get_got_by_pc (target_read_pc (inferior_pid)))
+  else if (som_solib_get_got_by_pc (target_read_pc (inferior_ptid)))
     return pc;
 #endif
   else
@@ -2404,26 +2404,26 @@ target_read_fp (int pid)
    bits.  */
 
 CORE_ADDR
-target_read_pc (int pid)
+target_read_pc (ptid_t ptid)
 {
-  int flags = read_register_pid (FLAGS_REGNUM, pid);
+  int flags = read_register_pid (FLAGS_REGNUM, ptid);
 
   /* The following test does not belong here.  It is OS-specific, and belongs
      in native code.  */
   /* Test SS_INSYSCALL */
   if (flags & 2)
-    return read_register_pid (31, pid) & ~0x3;
+    return read_register_pid (31, ptid) & ~0x3;
 
-  return read_register_pid (PC_REGNUM, pid) & ~0x3;
+  return read_register_pid (PC_REGNUM, ptid) & ~0x3;
 }
 
 /* Write out the PC.  If currently in a syscall, then also write the new
    PC value into %r31.  */
 
 void
-target_write_pc (CORE_ADDR v, int pid)
+target_write_pc (CORE_ADDR v, ptid_t ptid)
 {
-  int flags = read_register_pid (FLAGS_REGNUM, pid);
+  int flags = read_register_pid (FLAGS_REGNUM, ptid);
 
   /* The following test does not belong here.  It is OS-specific, and belongs
      in native code.  */
@@ -2431,10 +2431,10 @@ target_write_pc (CORE_ADDR v, int pid)
      privilege bits set correctly.  */
   /* Test SS_INSYSCALL */
   if (flags & 2)
-    write_register_pid (31, v | 0x3, pid);
+    write_register_pid (31, v | 0x3, ptid);
 
-  write_register_pid (PC_REGNUM, v, pid);
-  write_register_pid (NPC_REGNUM, v + 4, pid);
+  write_register_pid (PC_REGNUM, v, ptid);
+  write_register_pid (NPC_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -2645,7 +2645,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
   for (i = start; i < 2; i++)
     {
       errno = 0;
-      raw_val[i] = call_ptrace (PT_RUREGS, inferior_pid,
+      raw_val[i] = call_ptrace (PT_RUREGS, PIDGET (inferior_ptid),
 				(PTRACE_ARG3_TYPE) regaddr, 0);
       if (errno != 0)
 	{
@@ -4026,7 +4026,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 	    }
 	}
 
-      /* Quit if we hit any kind of branch the previous iteration.
+      /* Quit if we hit any kind of branch the previous iteration. */
       if (final_iteration)
 	break;
 
@@ -4108,7 +4108,7 @@ setup_d_pid_in_inferior (void)
     }
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  store_unsigned_integer (buf, 4, inferior_pid);	/* FIXME 32x64? */
+  store_unsigned_integer (buf, 4, PIDGET (inferior_ptid)); /* FIXME 32x64? */
   if (target_write_memory (anaddr, buf, 4))	/* FIXME 32x64? */
     {
       warning ("Unable to write __d_pid");
@@ -4378,7 +4378,7 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
   if (enable)
     {
       /* Ensure that __d_pid is set up correctly -- end.c code checks this. :-( */
-      if (inferior_pid > 0)
+      if (PIDGET (inferior_ptid) > 0)
 	{
 	  if (setup_d_pid_in_inferior ())
 	    return (struct symtab_and_line *) -1;
@@ -4601,7 +4601,7 @@ hppa_prepare_to_proceed (void)
   pid_t old_thread;
   pid_t current_thread;
 
-  old_thread = hppa_switched_threads (inferior_pid);
+  old_thread = hppa_switched_threads (PIDGET (inferior_ptid));
   if (old_thread != 0)
     {
       /* Switched over from "old_thread".  Try to do
@@ -4612,8 +4612,8 @@ hppa_prepare_to_proceed (void)
 
       /* Yuk, shouldn't use global to specify current
          thread.  But that's how gdb does it. */
-      current_thread = inferior_pid;
-      inferior_pid = old_thread;
+      current_thread = PIDGET (inferior_ptid);
+      inferior_ptid = pid_to_ptid (old_thread);
 
       new_pc = read_pc ();
       if (new_pc != old_pc	/* If at same pc, no need */
@@ -4625,14 +4625,14 @@ hppa_prepare_to_proceed (void)
 	  registers_changed ();
 #if 0
 	  printf ("---> PREPARE_TO_PROCEED (was %d, now %d)!\n",
-		  current_thread, inferior_pid);
+		  current_thread, PIDGET (inferior_ptid));
 #endif
 
 	  return 1;
 	}
 
       /* Otherwise switch back to the user-chosen thread. */
-      inferior_pid = current_thread;
+      inferior_ptid = pid_to_ptid (current_thread);
       new_pc = read_pc ();	/* Re-prime register cache */
     }
 

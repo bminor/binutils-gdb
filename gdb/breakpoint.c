@@ -988,13 +988,13 @@ insert_breakpoints (void)
 	switch (b->type)
 	  {
 	  case bp_catch_fork:
-	    val = target_insert_fork_catchpoint (inferior_pid);
+	    val = target_insert_fork_catchpoint (PIDGET (inferior_ptid));
 	    break;
 	  case bp_catch_vfork:
-	    val = target_insert_vfork_catchpoint (inferior_pid);
+	    val = target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
 	    break;
 	  case bp_catch_exec:
-	    val = target_insert_exec_catchpoint (inferior_pid);
+	    val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
 	    break;
 	  default:
 	    warning ("Internal error, %s line %d.", __FILE__, __LINE__);
@@ -1061,10 +1061,10 @@ reattach_breakpoints (int pid)
 {
   register struct breakpoint *b;
   int val;
-  int saved_inferior_pid = inferior_pid;
+  ptid_t saved_inferior_ptid = inferior_ptid;
 
-  /* FIXME: use a cleanup, to insure that inferior_pid gets replaced! */
-  inferior_pid = pid;	/* Because remove_breakpoint will use this global. */
+  /* FIXME: use a cleanup, to insure that inferior_ptid gets replaced! */
+  inferior_ptid = pid_to_ptid (pid);	/* Because remove_breakpoint will use this global. */
   ALL_BREAKPOINTS (b)
   {
     if (b->inserted)
@@ -1076,12 +1076,12 @@ reattach_breakpoints (int pid)
 	  val = target_insert_breakpoint (b->address, b->shadow_contents);
 	if (val != 0)
 	  {
-	    inferior_pid = saved_inferior_pid;
+	    inferior_ptid = saved_inferior_ptid;
 	    return val;
 	  }
       }
   }
-  inferior_pid = saved_inferior_pid;
+  inferior_ptid = saved_inferior_ptid;
   return 0;
 }
 
@@ -1205,13 +1205,13 @@ detach_breakpoints (int pid)
 {
   register struct breakpoint *b;
   int val;
-  int saved_inferior_pid = inferior_pid;
+  ptid_t saved_inferior_ptid = inferior_ptid;
 
-  if (pid == inferior_pid)
-    error ("Cannot detach breakpoints of inferior_pid");
+  if (pid == PIDGET (inferior_ptid))
+    error ("Cannot detach breakpoints of inferior_ptid");
 
-  /* FIXME: use a cleanup, to insure that inferior_pid gets replaced! */
-  inferior_pid = pid;	/* Because remove_breakpoint will use this global. */
+  /* FIXME: use a cleanup, to insure that inferior_ptid gets replaced! */
+  inferior_ptid = pid_to_ptid (pid);	/* Because remove_breakpoint will use this global. */
   ALL_BREAKPOINTS (b)
   {
     if (b->inserted)
@@ -1219,12 +1219,12 @@ detach_breakpoints (int pid)
 	val = remove_breakpoint (b, mark_inserted);
 	if (val != 0)
 	  {
-	    inferior_pid = saved_inferior_pid;
+	    inferior_ptid = saved_inferior_ptid;
 	    return val;
 	  }
       }
   }
-  inferior_pid = saved_inferior_pid;
+  inferior_ptid = saved_inferior_ptid;
   return 0;
 }
 
@@ -1347,13 +1347,13 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
       switch (b->type)
 	{
 	case bp_catch_fork:
-	  val = target_remove_fork_catchpoint (inferior_pid);
+	  val = target_remove_fork_catchpoint (PIDGET (inferior_ptid));
 	  break;
 	case bp_catch_vfork:
-	  val = target_remove_vfork_catchpoint (inferior_pid);
+	  val = target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
 	  break;
 	case bp_catch_exec:
-	  val = target_remove_exec_catchpoint (inferior_pid);
+	  val = target_remove_exec_catchpoint (PIDGET (inferior_ptid));
 	  break;
 	default:
 	  warning ("Internal error, %s line %d.", __FILE__, __LINE__);
@@ -1565,12 +1565,12 @@ frame_in_dummy (struct frame_info *frame)
    PC is valid for process/thread PID.  */
 
 int
-breakpoint_thread_match (CORE_ADDR pc, int pid)
+breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 {
   struct breakpoint *b;
   int thread;
 
-  thread = pid_to_thread_id (pid);
+  thread = pid_to_thread_id (ptid);
 
   ALL_BREAKPOINTS (b)
     if (b->enable != disabled
@@ -2422,10 +2422,11 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
        ignore it. */
     if ((b->type == bp_catch_load)
 #if defined(SOLIB_HAVE_LOAD_EVENT)
-	&& (!SOLIB_HAVE_LOAD_EVENT (inferior_pid)
+	&& (!SOLIB_HAVE_LOAD_EVENT (PIDGET (inferior_ptid))
 	    || ((b->dll_pathname != NULL)
 		&& (strcmp (b->dll_pathname, 
-			    SOLIB_LOADED_LIBRARY_PATHNAME (inferior_pid)) 
+			    SOLIB_LOADED_LIBRARY_PATHNAME (
+			      PIDGET (inferior_ptid)))
 		    != 0)))
 #endif
       )
@@ -2433,25 +2434,28 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 
     if ((b->type == bp_catch_unload)
 #if defined(SOLIB_HAVE_UNLOAD_EVENT)
-	&& (!SOLIB_HAVE_UNLOAD_EVENT (inferior_pid)
+	&& (!SOLIB_HAVE_UNLOAD_EVENT (PIDGET (inferior_ptid))
 	    || ((b->dll_pathname != NULL)
 		&& (strcmp (b->dll_pathname, 
-			    SOLIB_UNLOADED_LIBRARY_PATHNAME (inferior_pid)) 
+			    SOLIB_UNLOADED_LIBRARY_PATHNAME (
+			      PIDGET (inferior_ptid)))
 		    != 0)))
 #endif
       )
       continue;
 
     if ((b->type == bp_catch_fork)
-	&& !target_has_forked (inferior_pid, &b->forked_inferior_pid))
+	&& !target_has_forked (PIDGET (inferior_ptid),
+	                       &b->forked_inferior_pid))
       continue;
 
     if ((b->type == bp_catch_vfork)
-	&& !target_has_vforked (inferior_pid, &b->forked_inferior_pid))
+	&& !target_has_vforked (PIDGET (inferior_ptid),
+	                        &b->forked_inferior_pid))
       continue;
 
     if ((b->type == bp_catch_exec)
-	&& !target_has_execd (inferior_pid, &b->exec_pathname))
+	&& !target_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
       continue;
 
     if (ep_is_exception_catchpoint (b) &&
@@ -3034,9 +3038,11 @@ bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
       if (ep->triggered_dll_pathname != NULL)
 	xfree (ep->triggered_dll_pathname);
       if (ep->type == bp_catch_load)
-	dll_pathname = SOLIB_LOADED_LIBRARY_PATHNAME (inferior_pid);
+	dll_pathname = SOLIB_LOADED_LIBRARY_PATHNAME (
+	                 PIDGET (inferior_ptid));
       else
-	dll_pathname = SOLIB_UNLOADED_LIBRARY_PATHNAME (inferior_pid);
+	dll_pathname = SOLIB_UNLOADED_LIBRARY_PATHNAME (
+	                 PIDGET (inferior_ptid));
 #else
       dll_pathname = NULL;
 #endif
@@ -4319,8 +4325,8 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
   /* If we're debugging a multi-threaded program, then we
      want momentary breakpoints to be active in only a 
      single thread of control.  */
-  if (in_thread_list (inferior_pid))
-    b->thread = pid_to_thread_id (inferior_pid);
+  if (in_thread_list (inferior_ptid))
+    b->thread = pid_to_thread_id (inferior_ptid);
 
   return b;
 }
@@ -5324,7 +5330,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
      startup sequence by the dynamic linker.
 
      However, I tried avoiding that by having HP-UX's implementation of
-     TARGET_CAN_USE_HW_WATCHPOINT return FALSE if there was no inferior_pid
+     TARGET_CAN_USE_HW_WATCHPOINT return FALSE if there was no inferior_ptid
      yet, which forced slow watches before a "run" or "attach", and it
      still fails somewhere in the startup code.
 
@@ -6056,7 +6062,7 @@ catch_load_command_1 (char *arg, int tempflag, int from_tty)
   /* Create a load breakpoint that only triggers when a load of
      the specified dll (or any dll, if no pathname was specified)
      occurs. */
-  SOLIB_CREATE_CATCH_LOAD_HOOK (inferior_pid, tempflag, 
+  SOLIB_CREATE_CATCH_LOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
 				dll_pathname, cond_string);
 }
 
@@ -6098,7 +6104,7 @@ catch_unload_command_1 (char *arg, int tempflag, int from_tty)
   /* Create an unload breakpoint that only triggers when an unload of
      the specified dll (or any dll, if no pathname was specified)
      occurs. */
-  SOLIB_CREATE_CATCH_UNLOAD_HOOK (inferior_pid, tempflag, 
+  SOLIB_CREATE_CATCH_UNLOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
 				  dll_pathname, cond_string);
 }
 #endif /* SOLIB_ADD */
@@ -7138,14 +7144,14 @@ breakpoint_re_set (void)
 /* Reset the thread number of this breakpoint:
 
    - If the breakpoint is for all threads, leave it as-is.
-   - Else, reset it to the current thread for inferior_pid. */
+   - Else, reset it to the current thread for inferior_ptid. */
 void
 breakpoint_re_set_thread (struct breakpoint *b)
 {
   if (b->thread != -1)
     {
-      if (in_thread_list (inferior_pid))
-	b->thread = pid_to_thread_id (inferior_pid);
+      if (in_thread_list (inferior_ptid))
+	b->thread = pid_to_thread_id (inferior_ptid);
     }
 }
 

@@ -38,11 +38,11 @@ fetch_inferior_registers (int regno)
 
   registers_fetched ();
 
-  ptrace (PTRACE_GETREGS, inferior_pid,
+  ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers);
 
   if (FP0_REGNUM >= 0)
-    ptrace (PTRACE_GETFPREGS, inferior_pid,
+    ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
 	    (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 
   memcpy (registers, &inferior_registers, 16 * 4);
@@ -83,10 +83,10 @@ store_inferior_registers (int regno)
 	    sizeof inferior_fp_registers - 
 	    sizeof inferior_fp_registers.fps_regs);
 
-  ptrace (PTRACE_SETREGS, inferior_pid,
+  ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) & inferior_registers);
   if (FP0_REGNUM >= 0)
-    ptrace (PTRACE_SETFPREGS, inferior_pid,
+    ptrace (PTRACE_SETFPREGS, PIDGET (inferior_ptid),
 	    (PTRACE_ARG3_TYPE) & inferior_fp_registers);
 }
 

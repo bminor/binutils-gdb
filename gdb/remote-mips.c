@@ -85,9 +85,11 @@ static void mips_close (int quitting);
 
 static void mips_detach (char *args, int from_tty);
 
-static void mips_resume (int pid, int step, enum target_signal siggnal);
+static void mips_resume (ptid_t ptid, int step,
+                         enum target_signal siggnal);
 
-static int mips_wait (int pid, struct target_waitstatus *status);
+static ptid_t mips_wait (ptid_t ptid,
+                               struct target_waitstatus *status);
 
 static int mips_map_regno (int regno);
 
@@ -1704,7 +1706,7 @@ mips_detach (char *args, int from_tty)
    where PMON does return a reply.  */
 
 static void
-mips_resume (int pid, int step, enum target_signal siggnal)
+mips_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   int err;
 
@@ -1736,8 +1738,8 @@ mips_signal_from_protocol (int sig)
 
 /* Wait until the remote stops, and return a wait status.  */
 
-static int
-mips_wait (int pid, struct target_waitstatus *status)
+static ptid_t
+mips_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   int rstatus;
   int err;
@@ -1757,7 +1759,7 @@ mips_wait (int pid, struct target_waitstatus *status)
     {
       status->kind = TARGET_WAITKIND_STOPPED;
       status->value.sig = TARGET_SIGNAL_TRAP;
-      return 0;
+      return inferior_ptid;
     }
 
   /* No timeout; we sit here as long as the program continues to execute.  */
@@ -1888,7 +1890,7 @@ mips_wait (int pid, struct target_waitstatus *status)
       status->value.sig = mips_signal_from_protocol (rstatus & 0x7f);
     }
 
-  return 0;
+  return inferior_ptid;
 }
 
 /* We have to map between the register numbers used by gdb and the
@@ -2230,7 +2232,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 
   init_wait_for_inferior ();
 
-  /* FIXME: Should we set inferior_pid here?  */
+  /* FIXME: Should we set inferior_ptid here?  */
 
   proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
@@ -3439,7 +3441,7 @@ mips_load (char *file, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_pid = 0;		/* No process now */
+  inferior_ptid = null_ptid;	/* No process now */
 
 /* This is necessary because many things were based on the PC at the time that
    we attached to the monitor, which is no longer valid now that we have loaded

@@ -849,15 +849,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #ifdef TARGET_READ_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_PC(pid)",
-                      XSTRING (TARGET_READ_PC (pid)));
+                      "TARGET_READ_PC(ptid)",
+                      XSTRING (TARGET_READ_PC (ptid)));
 #endif
 #if defined (TARGET_WRITE_PC) && GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "TARGET_WRITE_PC(val, pid)",
-                      XSTRING (TARGET_WRITE_PC (val, pid)));
+                      "TARGET_WRITE_PC(val, ptid)",
+                      XSTRING (TARGET_WRITE_PC (val, ptid)));
 #endif
 #ifdef TARGET_READ_FP
   fprintf_unfiltered (file,
@@ -2392,14 +2392,14 @@ set_gdbarch_ieee_float (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_read_pc (struct gdbarch *gdbarch, int pid)
+gdbarch_read_pc (struct gdbarch *gdbarch, ptid_t ptid)
 {
   if (gdbarch->read_pc == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_read_pc invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_read_pc called\n");
-  return gdbarch->read_pc (pid);
+  return gdbarch->read_pc (ptid);
 }
 
 void
@@ -2410,14 +2410,14 @@ set_gdbarch_read_pc (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, int pid)
+gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, ptid_t ptid)
 {
   if (gdbarch->write_pc == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_write_pc invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_write_pc called\n");
-  gdbarch->write_pc (val, pid);
+  gdbarch->write_pc (val, ptid);
 }
 
 void
