@@ -1,3 +1,25 @@
+Fri Sep 23 14:42:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-mips.c (load_register): Always use addiu when adding a
+	constant to $zero--no need to use daddiu.
+	(macro): Hack the -mips3 overflow tests to not fail when offsetT
+	is only 32 bits.
+
+	* symbols.h (copy_symbol_attributes): Declare.
+
+Thu Sep 22 21:58:24 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* listing.c: Bugfixes based in part on patches from Paul
+	Kranenburg.
+	(listing_newline): Check filename as well as line number when
+	deciding whether to record it.
+	(list_symbol_table) [S_IS_REGISTER]: Check that S_IS_REGISTER is
+	false (if defined) as well as checking for reg_section.
+	(listing_listing): Iterate fetching lines while line number is too
+	low, and we haven't run off the end of the input file.
+
+	* config/vms-conf.h: Changed HAVE_DELETE to HAVE_REMOVE.
+
 Thu Sep 22 13:39:10 1994  Kung Hsu  (kung@x1.cygnus.com)
 
 	* ecoff.c (ecoff_generate_asm_lineno): check if
@@ -16,6 +38,14 @@ Wed Sep 21 18:17:35 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* read.c (pseudo_set): Call copy_symbol_attributes, but only if
 	X_add_number is zero.
 	* config/obj-elf.h (obj_frob_forward_symbol): Deleted.
+
+	* config/tc-i960.c: Lots of whitespace, comment reformatting,
+	using GNU indent.
+	(strchr): Don't declare.
+	[BFD_ASSEMBLER]: Don't compile md_convert_frag,
+	md_estimate_size_before_relax, md_ri_to_chars,
+	md_create_short_jump, md_create_long_jump.
+	(brtab_emit): Use data_section, not SEG_DATA.
 
 	Mon Aug 19 17:14:44 1994  Pat Rankin  (rankin@eql.caltech.edu)
 
