@@ -2331,7 +2331,8 @@ _bfd_mips_elf_object_p (abfd)
   /* Irix 5 and 6 is broken.  Object file symbol tables are not always
      sorted correctly such that local symbols precede global symbols,
      and the sh_info field in the symbol table is not always right.  */
-  elf_bad_symtab (abfd) = true;
+  if (SGI_COMPAT(abfd))
+    elf_bad_symtab (abfd) = true;
 
   bfd_default_set_arch_mach (abfd, bfd_arch_mips,
 			     elf_mips_mach (elf_elfheader (abfd)->e_flags));
