@@ -10,6 +10,11 @@ Tue Dec 20 11:11:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Tue Dec 20 13:58:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	Patches from kkojima@mix.or.jp (Kazumoto Kojima):
+	* mipsbsd.c (mips_howto_table_ext): Change sizes of memory relocs
+	apply to from two bytes to four bytes.
+	* MY(reloc_howto_type_lookup): Handle BFD_RELOC_CTOR.
+
 	* elf32-i386.c (elf_i386_relocate_section): Correct and expand the
 	list of cases for which relocation need not be computed.
 	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.

@@ -19,7 +19,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BYTES_IN_WORD 4
-#define ARCH 32
 /* #define ENTRY_CAN_BE_ZERO */
 #define N_HEADER_IN_TEXT(x) 1
 #define N_SHARED_LIB(x) 0
@@ -202,7 +201,7 @@ mips_fix_jmp_addr (abfd,reloc_entry,symbol,data,input_section,output_bfd)
     return bfd_reloc_continue;
 
   /* If this is an undefined symbol, return error */
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && (symbol->flags & BSF_WEAK) == 0)
     return bfd_reloc_undefined;
 
@@ -256,7 +255,7 @@ mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
     return bfd_reloc_continue;
 
   /* If this is an undefined symbol, return error */
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && (symbol->flags & BSF_WEAK) == 0)
     return bfd_reloc_undefined;
 
@@ -285,14 +284,14 @@ static reloc_howto_type mips_howto_table_ext[] = {
   {MIPS_RELOC_JMP,     2, 2, 26, false, 0, complain_overflow_dont,
 	mips_fix_jmp_addr,
 	"MIPS_JMP", false, 0, 0x03ffffff, false},
-  {MIPS_RELOC_WDISP16, 2, 1, 16, true,  0, complain_overflow_signed, 0,
+  {MIPS_RELOC_WDISP16, 2, 2, 16, true,  0, complain_overflow_signed, 0,
 	"WDISP16",  false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_HI16,   16, 1, 16, false, 0, complain_overflow_bitfield, 0,
+  {MIPS_RELOC_HI16,   16, 2, 16, false, 0, complain_overflow_bitfield, 0,
 	"HI16",     false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_HI16_S, 16, 1, 16, false, 0, complain_overflow_bitfield,
+  {MIPS_RELOC_HI16_S, 16, 2, 16, false, 0, complain_overflow_bitfield,
         mips_fix_hi16_s,
         "HI16_S",   false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_LO16,    0, 1, 16, false, 0, complain_overflow_dont, 0,
+  {MIPS_RELOC_LO16,    0, 2, 16, false, 0, complain_overflow_dont, 0,
 	"LO16",     false, 0, 0x0000ffff, false},
 };
 
@@ -307,6 +306,7 @@ MY(reloc_howto_type_lookup) (abfd, code)
 
   switch (code)
     {
+    case BFD_RELOC_CTOR:
     case BFD_RELOC_32:
       return (&mips_howto_table_ext[MIPS_RELOC_32]);
     case BFD_RELOC_MIPS_JMP:
