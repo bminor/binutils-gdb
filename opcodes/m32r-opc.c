@@ -311,7 +311,7 @@ static const CGEN_HW_ENTRY m32r_cgen_hw_entries[] =
 
 /* The operand table.  */
 
-#define OP_ENT(op) m32r_cgen_operand_table[SYMCAT2 (M32R_OPERAND_,op)]
+#define OP_ENT(op) m32r_cgen_operand_table[CONCAT2 (M32R_OPERAND_,op)]
 const CGEN_OPERAND m32r_cgen_operand_table[MAX_OPERANDS] =
 {
 /* pc: program counter */
