@@ -8,6 +8,10 @@ Tue Dec 31 15:12:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 end-sanitize-v850
 Tue Dec 31 12:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (read_a_source_file): Check mri_pending_align after
+	checking for a macro.  From Ronald F. Guilmette
+	<rfg@monkeys.com>.
+
 	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
 
 	* config/tc-sparc.c (md_apply_fix3): Rename from md_apply_fix, and

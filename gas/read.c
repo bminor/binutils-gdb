@@ -44,7 +44,6 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "subsegs.h"
 #include "sb.h"
 #include "macro.h"
-#include "libiberty.h"
 #include "obstack.h"
 #include "listing.h"
 #include "ecoff.h"
@@ -727,14 +726,8 @@ read_a_source_file (name)
 			goto quit;
 		    }
 		  else
-		    {		/* machine instruction */
+		    {
 		      int inquote = 0;
-
-		      if (mri_pending_align)
-			{
-			  do_align (1, (char *) NULL, 0);
-			  mri_pending_align = 0;
-			}
 
 		      /* WARNING: c has char, which may be end-of-line. */
 		      /* Also: input_line_pointer->`\0` where c was. */
@@ -787,6 +780,12 @@ read_a_source_file (name)
 				input_scrub_next_buffer (&input_line_pointer);
 			      continue;
 			    }
+			}
+
+		      if (mri_pending_align)
+			{
+			  do_align (1, (char *) NULL, 0);
+			  mri_pending_align = 0;
 			}
 
 		      md_assemble (s);	/* Assemble 1 instruction. */
@@ -975,6 +974,10 @@ read_a_source_file (name)
     }				/* while (more buffers to scan) */
 
  quit:
+
+#ifdef md_cleanup
+  md_cleanup();
+#endif
   input_scrub_close ();		/* Close the input file */
 }
 
