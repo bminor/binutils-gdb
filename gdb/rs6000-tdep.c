@@ -691,7 +691,7 @@ function_frame_info (pc, fdata)
 CORE_ADDR
 push_arguments (nargs, args, sp, struct_return, struct_addr)
   int nargs;
-  value *args;
+  value_ptr *args;
   CORE_ADDR sp;
   int struct_return;
   CORE_ADDR struct_addr;
@@ -700,7 +700,7 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
   int argno;					/* current argument number */
   int argbytes;					/* current argument byte */
   char tmp_buffer [50];
-  value arg;
+  value_ptr arg;
   int f_argno = 0;				/* current floating point argno */
 
   CORE_ADDR saved_sp, pc;
@@ -775,7 +775,7 @@ ran_out_of_registers_for_arguments:
 
   if ((argno < nargs) || argbytes) {
     int space = 0, jj;
-    value val;
+    value_ptr val;
 
     if (argbytes) {
       space += ((len - argbytes + 3) & -4);

@@ -1,3 +1,7 @@
+Tue Mar 15 10:05:27 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* rs6000-tdep.c: Change value to value_ptr.
+
 Sun Mar 13 09:45:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i386m3-nat.c: Include floatformat.h.
