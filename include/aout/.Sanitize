@@ -33,6 +33,7 @@ ar.h
 encap.h
 host.h
 hp.h
+hp300hpux.h
 hppa.h
 ranlib.h
 reloc.h
