@@ -366,6 +366,9 @@ static boolean elf32_hppa_adjust_dynamic_symbol
 static boolean hppa_handle_PIC_calls
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
+static boolean allocate_plt_and_got
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
 #if ((! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT) \
      || RELATIVE_DYNAMIC_RELOCS)
 static boolean hppa_discard_copies
@@ -766,7 +769,8 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
 #if LONG_BRANCH_VIA_PLT
       if (hash != NULL
 	  && hash->elf.dynindx != -1
-	  && hash->elf.plt.offset != (bfd_vma) -1)
+	  && hash->elf.plt.offset != (bfd_vma) -1
+	  && hash->elf.type != STT_PARISC_MILLI)
 	{
 	  /* If we are doing a shared link and find we need a long
 	     branch stub, then go via the .plt if possible.  */
@@ -1302,7 +1306,18 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	     create a PLT entry for all PLABELs, because PLABELs with
 	     local symbols may be passed via a pointer to another
 	     object.  Additionally, output a dynamic relocation
-	     pointing to the PLT entry.  */
+	     pointing to the PLT entry.
+	     For executables, the original 32-bit ABI allowed two
+	     different styles of PLABELs (function pointers):  For
+	     global functions, the PLABEL word points into the .plt
+	     two bytes past a (function address, gp) pair, and for
+	     local functions the PLABEL points directly at the
+	     function.  The magic +2 for the first type allows us to
+	     differentiate between the two.  As you can imagine, this
+	     is a real pain when it comes to generating code to call
+	     functions indirectly or to compare function pointers.
+	     We avoid the mess by always pointing a PLABEL into the
+	     .plt, even for local functions.  */
 	  need_entry = PLT_PLABEL | NEED_PLT | NEED_DYNREL;
 	  break;
 
@@ -1333,6 +1348,8 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		 where a symbol is forced local by versioning, or due
 		 to symbolic linking, and we lose the .plt entry.  */
 	      need_entry = NEED_PLT | NEED_STUBREL;
+	      if (h->elf.type == STT_PARISC_MILLI)
+		need_entry = NEED_STUBREL;
 	    }
 	  break;
 
@@ -1431,9 +1448,6 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 								  &h->elf))
 			return false;
 		    }
-
-		  hplink->sgot->_raw_size += GOT_ENTRY_SIZE;
-		  hplink->srelgot->_raw_size += sizeof (Elf32_External_Rela);
 		}
 	      else
 		h->elf.got.refcount += 1;
@@ -1458,20 +1472,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		  memset (local_got_refcounts, -1, size);
 		}
 	      if (local_got_refcounts[r_symndx] == -1)
-		{
-		  local_got_refcounts[r_symndx] = 1;
-
-		  hplink->sgot->_raw_size += GOT_ENTRY_SIZE;
-		  if (info->shared)
-		    {
-		      /* If we are generating a shared object, we need to
-			 output a reloc so that the dynamic linker can
-			 adjust this GOT entry (because the address
-			 the shared library is loaded at is not fixed).  */
-		      hplink->srelgot->_raw_size +=
-			sizeof (Elf32_External_Rela);
-		    }
-		}
+		local_got_refcounts[r_symndx] = 1;
 	      else
 		local_got_refcounts[r_symndx] += 1;
 	    }
@@ -1773,8 +1774,6 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry *h;
   struct elf32_hppa_link_hash_table *hplink;
   bfd *dynobj;
-  asection *sgot;
-  asection *srelgot;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -1786,9 +1785,6 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   dynobj = hplink->root.dynobj;
   if (dynobj == NULL)
     return true;
-
-  sgot = hplink->sgot;
-  srelgot = hplink->srelgot;
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -1802,27 +1798,12 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
 	  {
 	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	    if (h->got.refcount > 0)
-	      {
-		h->got.refcount -= 1;
-		if (h->got.refcount == 0)
-		  {
-		    sgot->_raw_size -= GOT_ENTRY_SIZE;
-		    srelgot->_raw_size -= sizeof (Elf32_External_Rela);
-		  }
-	      }
+	      h->got.refcount -= 1;
 	  }
 	else if (local_got_refcounts != NULL)
 	  {
 	    if (local_got_refcounts[r_symndx] > 0)
-	      {
-		local_got_refcounts[r_symndx] -= 1;
-		if (local_got_refcounts[r_symndx] == 0)
-		  {
-		    sgot->_raw_size -= GOT_ENTRY_SIZE;
-		    if (info->shared)
-		      srelgot->_raw_size -= sizeof (Elf32_External_Rela);
-		  }
-	      }
+	      local_got_refcounts[r_symndx] -= 1;
 	  }
 	break;
 
@@ -1879,6 +1860,17 @@ elf32_hppa_hide_symbol (info, h)
       h->plt.offset = (bfd_vma) -1;
     }
 }
+
+/* This is the condition under which elf32_hppa_finish_dynamic_symbol
+   will be called from elflink.h.  If elflink.h doesn't call our
+   finish_dynamic_symbol routine, we'll need to do something about
+   initializing any .plt and .got entries in elf32_hppa_relocate_section.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
+  ((DYN)								\
+   && ((INFO)->shared							\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
@@ -1938,19 +1930,6 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 	    }
 	}
 
-      /* Make an entry in the .plt section.  */
-      s = hplink->splt;
-      h->plt.offset = s->_raw_size;
-      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
-	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
-	{
-	  /* Add some extra space for the dynamic linker to use.  */
-	  s->_raw_size += PLABEL_PLT_ENTRY_SIZE;
-	}
-      else
-	s->_raw_size += PLT_ENTRY_SIZE;
-
       if (! ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.  */
@@ -1960,16 +1939,8 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
 		return false;
 	    }
-
-	  if (h->dynindx != -1 || info->shared)
-	    {
-	      /* We also need to make an entry in the .rela.plt section.  */
-	      s = hplink->srelplt;
-	      s->_raw_size += sizeof (Elf32_External_Rela);
-
-	      hplink->need_plt_stub = 1;
-	    }
 	}
+
       return true;
     }
 
@@ -2061,13 +2032,8 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 static boolean
 hppa_handle_PIC_calls (h, inf)
      struct elf_link_hash_entry *h;
-     PTR inf;
+     PTR inf ATTRIBUTE_UNUSED;
 {
-  struct bfd_link_info *info;
-  bfd *dynobj;
-  struct elf32_hppa_link_hash_table *hplink;
-  asection *s;
-
   if (! (h->plt.refcount > 0
 	 && (h->root.type == bfd_link_hash_defined
 	     || h->root.type == bfd_link_hash_defweak)
@@ -2082,14 +2048,67 @@ hppa_handle_PIC_calls (h, inf)
   ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
   ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 
+  return true;
+}
+
+/* Allocate space in .plt, .got and associated reloc sections for
+   global syms.  */
+
+static boolean
+allocate_plt_and_got (h, inf)
+     struct elf_link_hash_entry *h;
+     PTR inf;
+{
+  struct bfd_link_info *info;
+  struct elf32_hppa_link_hash_table *hplink;
+  asection *s;
+
   info = (struct bfd_link_info *) inf;
   hplink = hppa_link_hash_table (info);
-  dynobj = hplink->root.dynobj;
+  if ((hplink->root.dynamic_sections_created
+       && h->plt.refcount > 0)
+      || ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
+    {
+      /* Make an entry in the .plt section.  */
+      s = hplink->splt;
+      h->plt.offset = s->_raw_size;
+      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
+	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  /* Add some extra space for the dynamic linker to use.  */
+	  s->_raw_size += PLABEL_PLT_ENTRY_SIZE;
+	}
+      else
+	s->_raw_size += PLT_ENTRY_SIZE;
 
-  /* Make an entry in the .plt section.  */
-  s = hplink->splt;
-  h->plt.offset = s->_raw_size;
-  s->_raw_size += PLT_ENTRY_SIZE;
+      if (! ((struct elf32_hppa_link_hash_entry *) h)->pic_call
+	  && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+	{
+	  /* We also need to make an entry in the .rela.plt section.  */
+	  hplink->srelplt->_raw_size += sizeof (Elf32_External_Rela);
+	  hplink->need_plt_stub = 1;
+	}
+    }
+  else
+    {
+      h->plt.offset = (bfd_vma) -1;
+      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+    }
+
+  if (h->got.refcount > 0)
+    {
+      boolean dyn;
+
+      s = hplink->sgot;
+      h->got.offset = s->_raw_size;
+      s->_raw_size += GOT_ENTRY_SIZE;
+      dyn = hplink->root.dynamic_sections_created;
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+	hplink->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+    }
+  else
+    h->got.offset = (bfd_vma) -1;
 
   return true;
 }
@@ -2206,32 +2225,54 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 			      clobber_millicode_symbols,
 			      info);
 
-      /* Set up .plt offsets for local plabels.  */
+      /* Set up .got and .plt offsets for local syms.  */
       for (i = info->input_bfds; i; i = i->link_next)
 	{
+	  bfd_signed_vma *local_got;
+	  bfd_signed_vma *end_local_got;
 	  bfd_signed_vma *local_plt;
 	  bfd_signed_vma *end_local_plt;
 	  bfd_size_type locsymcount;
 	  Elf_Internal_Shdr *symtab_hdr;
+	  asection *srel;
 
-	  local_plt = elf_local_got_refcounts (i);
-	  if (!local_plt)
+	  if (bfd_get_flavour (i) != bfd_target_elf_flavour)
+	    continue;
+
+	  local_got = elf_local_got_refcounts (i);
+	  if (!local_got)
 	    continue;
 
 	  symtab_hdr = &elf_tdata (i)->symtab_hdr;
 	  locsymcount = symtab_hdr->sh_info;
-	  local_plt += locsymcount;
-	  end_local_plt = local_plt + locsymcount;
+	  end_local_got = local_got + locsymcount;
+	  s = hplink->sgot;
+	  srel = hplink->srelgot;
+	  for (; local_got < end_local_got; ++local_got)
+	    {
+	      if (*local_got > 0)
+		{
+		  *local_got = s->_raw_size;
+		  s->_raw_size += GOT_ENTRY_SIZE;
+		  if (info->shared)
+		    srel->_raw_size += sizeof (Elf32_External_Rela);
+		}
+	      else
+		*local_got = (bfd_vma) -1;
+	    }
 
+	  local_plt = end_local_got;
+	  end_local_plt = local_plt + locsymcount;
+	  s = hplink->splt;
+	  srel = hplink->srelplt;
 	  for (; local_plt < end_local_plt; ++local_plt)
 	    {
 	      if (*local_plt > 0)
 		{
-		  s = hplink->splt;
 		  *local_plt = s->_raw_size;
 		  s->_raw_size += PLT_ENTRY_SIZE;
 		  if (info->shared)
-		    hplink->srelplt->_raw_size += sizeof (Elf32_External_Rela);
+		    srel->_raw_size += sizeof (Elf32_External_Rela);
 		}
 	      else
 		*local_plt = (bfd_vma) -1;
@@ -2247,14 +2288,12 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	elf_link_hash_traverse (&hplink->root,
 				hppa_handle_PIC_calls,
 				info);
-
-      /* We may have created entries in the .rela.got section.
-	 However, if we are not creating the dynamic sections, we will
-	 not actually use these entries.  Reset the size of .rela.got,
-	 which will cause it to get stripped from the output file
-	 below.  */
-      hplink->srelgot->_raw_size = 0;
     }
+
+  /* Allocate global sym .plt and .got entries.  */
+  elf_link_hash_traverse (&hplink->root,
+			  allocate_plt_and_got,
+			  info);
 
 #if ((! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT) \
      || RELATIVE_DYNAMIC_RELOCS)
@@ -3164,9 +3203,8 @@ elf32_hppa_final_link (abfd, info)
 {
   asection *s;
 
-  /* Invoke the regular ELF garbage collecting linker to do all the
-     work.  */
-  if (!_bfd_elf32_gc_common_final_link (abfd, info))
+  /* Invoke the regular ELF linker to do all the work.  */
+  if (!bfd_elf32_bfd_final_link (abfd, info))
     return false;
 
   /* If we're producing a final executable, sort the contents of the
@@ -3635,16 +3673,14 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h != NULL)
 	    {
 	      bfd_vma off;
+	      boolean dyn;
 
 	      off = h->elf.got.offset;
 	      if (off == (bfd_vma) -1)
 		abort ();
 
-	      if (! hplink->root.dynamic_sections_created
-		  || (info->shared
-		      && (info->symbolic || h->elf.dynindx == -1)
-		      && (h->elf.elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) != 0))
+	      dyn = hplink->root.dynamic_sections_created;
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &h->elf))
 		{
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
@@ -3742,8 +3778,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (h != NULL)
 		{
 		  off = h->elf.plt.offset;
-		  if (!info->shared
-		      && (h->elf.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
+		  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, &h->elf))
 		    {
 		      /* In a non-shared link, adjust_dynamic_symbols
 			 isn't called for symbols forced local.  We
@@ -4133,15 +4168,14 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + hplink->sgot->output_offset
 		      + hplink->sgot->output_section->vma);
 
-      /* If this is a static link, or it is a -Bsymbolic link and the
-	 symbol is defined locally or was forced to be local because
-	 of a version file, we just want to emit a RELATIVE reloc.
-	 The entry in the global offset table will already have been
-	 initialized in the relocate_section function.  */
-      if (! hplink->root.dynamic_sections_created
-	  || (info->shared
-	      && (info->symbolic || h->dynindx == -1)
-	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+      /* If this is a -Bsymbolic link and the symbol is defined
+	 locally or was forced to be local because of a version file,
+	 we just want to emit a RELATIVE reloc.  The entry in the
+	 global offset table will already have been initialized in the
+	 relocate_section function.  */
+      if (info->shared
+	  && (info->symbolic || h->dynindx == -1)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	{
 	  rel.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
 	  rel.r_addend = (h->root.u.def.value

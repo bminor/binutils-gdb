@@ -1,3 +1,22 @@
+2001-05-30  Alan Modra  <amodra@one.net.au>
+
+	* elf32-hppa.c (elf32_hppa_check_relocs): Don't NEED_PLT for
+	millicode.  Don't allocate .got and .rela.got space here..
+	(elf32_hppa_gc_sweep_hook): ..and no need to deallocate here..
+	(elf32_hppa_adjust_dynamic_symbol): ..and don't allocate .plt and
+	.rela.plt here..
+	(hppa_handle_PIC_calls): ..nor here..
+	(allocate_plt_and_got): ..instead do it all here.  New function.
+	(elf32_hppa_size_dynamic_sections): Allocate local .got space and
+	call allocate_plt_and_got.  No need to zap .got if not dynamic.
+	(elf32_hppa_final_link): Call regular bfd_final_link instead of
+	gc_common_final_link.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(elf32_hppa_relocate_section): Use it here.
+	(elf32_hppa_finish_dynamic_symbol): Remove superfluous test of
+	dynamic_sections_created.
+	(hppa_type_of_stub): Don't LONG_BRANCH_VIA_PLT if millicode sym.
+
 2001-05-28  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_86_64_size_info): Remove, we can use the
@@ -6,7 +25,6 @@
 
 2001-05-28  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
-	src/bfd/ChangeLog
 	* elflink.h (elf_link_size_reloc_section): Use bfd_zmalloc instead of
 	a zeroing loop.
 	(elf_link_output_relocs): Handle MIPS ELF64 relocations correctly.
