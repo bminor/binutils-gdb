@@ -1,10 +1,16 @@
 start-sanitize-d10v
+Thu Jul 25 15:22:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (md_assemble): Now handles multiline
+	instructions.
+
 Thu Jul 25 12:03:33 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Fix packaging bug. Added range checking.
 	Added kludge for divs instruction.  Fixed minor problem with
 	multiple text sections.
-
+	* config/tc-d10v.h (d10v_cleanup): Change prototype. 
+	
 Tue Jul 23 10:49:36 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (md_apply_fix3): Fix all instruction
