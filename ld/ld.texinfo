@@ -9,7 +9,7 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Ld::                          The GNU linker.
+* Ld: (ld).                       The GNU linker.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
@@ -97,6 +97,9 @@ This file documents the GNU linker ld.
 @ifclear GENERIC
 @ifset H8300
 * H8/300::                      ld and the H8/300
+@end ifset
+@ifset Hitachi
+* Hitachi::                     ld and other Hitachi micros
 @end ifset
 @ifset I960
 * i960::                        ld and the Intel 960 family
@@ -1432,6 +1435,15 @@ sequence of characters, but any name which does not conform to the standard
 @code{ld} symbol name syntax must be quoted.
 @xref{Symbols, , Symbol Names}.
 
+The linker will not create output sections which do not have any
+contents.  This is for convenience when referring to input sections that
+may or may not exist.  For example,
+@example
+.foo @{ *(.foo @}
+@end example
+will only create a @samp{.foo} section in the output file if there is a
+@samp{.foo} section in at least one input file.
+
 @node Section Placement
 @subsection Section Placement
 
@@ -1713,7 +1725,7 @@ optional portions:
 SECTIONS @{
 @dots{}
 @var{secname} @var{start} BLOCK(@var{align}) (NOLOAD) : AT ( @var{ldadr} )
-  @{ @var{contents} @} =@var{fill} >@var{region}
+  @{ @var{contents} @} >@var{region} =@var{fill}
 @dots{}
 @}
 @end smallexample
@@ -1722,7 +1734,7 @@ SECTIONS @{
 Definition}, and @pxref{Section Placement} for details on
 @var{contents}.  The remaining elements---@var{start},
 @code{BLOCK(@var{align)}}, @code{(NOLOAD)}, @code{AT ( @var{ldadr} )},
-@code{=@var{fill}}, and @code{>@var{region}}---are all optional.
+@code{>@var{region}}, and @code{=@var{fill}}---are all optional.
 
 @table @code
 @cindex start address, section
@@ -1816,6 +1828,13 @@ for (dst = _bstart; dst< _bend; dst++)
   *dst = 0;
 @end smallexample
 
+@kindex >@var{region}
+@cindex section, assigning to memory region
+@cindex memory regions and sections
+@item >@var{region}
+Assign this section to a previously defined region of memory.  
+@xref{MEMORY}.
+
 @kindex =@var{fill}
 @cindex section fill pattern
 @cindex fill pattern, entire section
@@ -1827,13 +1846,6 @@ when written to the output file will be filled with the two least
 significant bytes of the value, repeated as necessary.  You can also
 change the fill value with a @code{FILL} statement in the @var{contents}
 of a section definition.
-
-@kindex >@var{region}
-@cindex section, assigning to memory region
-@cindex memory regions and sections
-@item >@var{region}
-Assign this section to a previously defined region of memory.  
-@xref{MEMORY}.
 
 @end table
 
@@ -2071,6 +2083,19 @@ top page of memory).
 @lowersections
 @end ifclear
 @end ifset
+
+@ifclear GENERIC
+@ifset Hitachi
+@c This stuff is pointless to say unless you're especially concerned
+@c with Hitachi chips; don't enable it for generic case, please.
+@node Hitachi
+@chapter @code{ld} and other Hitachi chips
+
+@code{ld} also supports the H8/300H, the H8/500, and the Hitachi SH.  No
+special features, commands, or command-line options are required for
+these chips.
+@end ifset
+@end ifclear
 
 @ifset I960
 @ifclear GENERIC

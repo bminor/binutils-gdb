@@ -1,3 +1,18 @@
+Wed May 11 16:24:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Don't create unnecessary output sections.
+	* ldlang.c (out_bfd_get_section_by_name): Remove.
+	(wild_section): Call bfd_get_section_by_name rather than
+	our_bfd_get_section_by_name.  Don't call wild_doit if there is no
+	section.
+	(lang_create_output_section_statements): Remove.
+	(map_input_to_output_sections): For several cases, call init_os if
+	it has not already been called.
+	(lang_size_sections): If output section was not created, skip it.
+	(lang_process): Don't call lan_create_output_section_statements.
+	(lang_place_orphans): Skip files with just_syms_flags set to true.
+	* ld.texinfo: Document change.
+
 Tue May 10 14:31:16 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (wild_doit): Don't bother initializing the vma and

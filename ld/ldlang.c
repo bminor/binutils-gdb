@@ -81,8 +81,6 @@ static void wild_doit PARAMS ((lang_statement_list_type *ptr,
 			       asection *section,
 			       lang_output_section_statement_type *output,
 			       lang_input_statement_type *file));
-static asection *our_bfd_get_section_by_name PARAMS ((bfd *abfd,
-						      const char *section));
 static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  const char *section,
 				  lang_input_statement_type *file,
@@ -98,7 +96,6 @@ static void ldlang_open_output PARAMS ((lang_statement_union_type *statement));
 static void open_input_bfds PARAMS ((lang_statement_union_type *statement));
 static void lang_reasonable_defaults PARAMS ((void));
 static void lang_place_undefineds PARAMS ((void));
-static void lang_create_output_section_statements PARAMS ((void));
 static void map_input_to_output_sections
   PARAMS ((lang_statement_union_type *s,
 	   const char *target,
@@ -701,14 +698,6 @@ wild_doit (ptr, section, output, file)
   }
 }
 
-static asection *
-our_bfd_get_section_by_name (abfd, section)
-     bfd * abfd;
-     CONST char *section;
-{
-  return bfd_get_section_by_name (abfd, section);
-}
-
 static void
 wild_section (ptr, section, file, output)
      lang_wild_statement_type * ptr;
@@ -723,21 +712,21 @@ wild_section (ptr, section, file, output)
       if (section == (char *) NULL)
 	{
 	  /* Do the creation to all sections in the file */
-	  for (s = file->the_bfd->sections; s != (asection *) NULL; s = s->next)
-	  {
-	    /* except for bss */
-	    if ((s->flags & SEC_IS_COMMON)  == 0)
+	  for (s = file->the_bfd->sections; s != NULL; s = s->next)
 	    {
-	      wild_doit (&ptr->children, s, output, file);
+	      /* except for bss */
+	      if ((s->flags & SEC_IS_COMMON)  == 0)
+		{
+		  wild_doit (&ptr->children, s, output, file);
+		}
 	    }
-	  }
 	}
       else
 	{
 	  /* Do the creation to the named section only */
-	  wild_doit (&ptr->children,
-		     our_bfd_get_section_by_name (file->the_bfd, section),
-		     output, file);
+	  s = bfd_get_section_by_name (file->the_bfd, section);
+	  if (s != NULL)
+	    wild_doit (&ptr->children, s, output, file);
 	}
     }
 }
@@ -1038,27 +1027,6 @@ lang_place_undefineds ()
     }
 }
 
-/* Copy important data from out internal form to the bfd way. Also
-   create a section for the dummy file
- */
-
-static void
-lang_create_output_section_statements ()
-{
-  lang_statement_union_type *os;
-
-  for (os = lang_output_section_statement.head;
-       os != (lang_statement_union_type *) NULL;
-       os = os->output_section_statement.next)
-    {
-      lang_output_section_statement_type *s =
-      &os->output_section_statement;
-
-      init_os (s);
-    }
-
-}
-
 /* Open input files and attatch to output sections */
 static void
 map_input_to_output_sections (s, target, output_section_statement)
@@ -1100,6 +1068,10 @@ map_input_to_output_sections (s, target, output_section_statement)
 	case lang_reloc_statement_enum:
 	case lang_assignment_statement_enum:
 	case lang_padding_statement_enum:
+	case lang_input_statement_enum:
+	  if (output_section_statement != NULL
+	      && output_section_statement->bfd_section == NULL)
+	    init_os (output_section_statement);
 	  break;
 	case lang_afile_asection_pair_statement_enum:
 	  FAIL ();
@@ -1118,9 +1090,6 @@ map_input_to_output_sections (s, target, output_section_statement)
 		       s->address_statement.section_name);
 	      }
 	  }
-	  break;
-	case lang_input_statement_enum:
-	  /* A standard input statement, has no wildcards */
 	  break;
 	}
     }
@@ -1638,6 +1607,12 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      {
        bfd_vma after;
        lang_output_section_statement_type *os = &s->output_section_statement;
+
+       if (os->bfd_section == NULL)
+	 {
+	   /* This section was never actually created.  */
+	   break;
+	 }
 
        /* If this is a COFF shared library section, use the size and
 	  address from the input section.  FIXME: This is COFF
@@ -2256,6 +2231,9 @@ lang_place_orphans ()
     {
       asection *s;
 
+      if (file->just_syms_flag)
+	continue;
+
       for (s = file->the_bfd->sections;
 	   s != (asection *) NULL;
 	   s = s->next)
@@ -2516,9 +2494,6 @@ lang_process ()
   current_target = default_target;
 
   lang_for_each_statement (ldlang_open_output);	/* Open the output file */
-  /* For each output section statement, create a section in the output
-     file */
-  lang_create_output_section_statements ();
 
   ldemul_create_output_section_statements ();
 
