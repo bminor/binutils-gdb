@@ -1,3 +1,20 @@
+2001-09-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-svr4.h (set_solib_svr4_fetch_link_map_offsets): Add
+	argument ``gdbarch''.
+	* solib-svr4.c (SVR4_FETCH_LINK_MAP_OFFSETS): Change default value.
+	(default_svr4_fetch_link_map_offsets): Rename to
+	legacy_fetch_link_map_offsets().
+	(svr4_fetch_link_map_offsets): New function.
+	(fetch_link_map_offsets, fetch_link_map_offsets_init): Deleted.
+	(fetch_link_map_offsets_gdbarch_data): New static global.
+	(set_solib_svr4_fetch_link_map_offsets): Add argument ``gdbarch''.
+	Revise to invoke set_gdbarch_data().
+	(init_fetch_link_map_offsets): Change return type and add an
+	argument so that it may be used as a gdbarch_data initializer.
+	(_initialize_svr4_solib): Eliminate use of gdbarch swap mechanism.
+	Use gdbarch data mechanism instead.
+
 2001-09-25  Jiri Smid  <smid@suse.cz>
 
 	* x86-64-linux-tdep.c (LINUX_SIGINFO_SIZE): Add.
