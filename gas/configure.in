@@ -29,7 +29,7 @@
 
 srctrigger=as.c
 srcname="gas"
-need_bfd=
+need_bfd=no
 configdirs=doc
 
 # per-host:
@@ -46,6 +46,9 @@ case "${host}" in
     ;;	
   mips-dec-ultrix) 
     gas_host=decstation 
+    ;;
+  mips-*-bsd)
+    gas_host=mipsbsd
     ;;
   i[34]86-ibm-aix*)
     gas_host=i386aix
@@ -72,6 +75,21 @@ esac
 
 # per-target:
 
+# not yet...
+case ${with_bfd_assembler} in
+  yes)
+    echo "*** Warning:  GAS BFD configuration option not yet supported" 1>&2
+    need_bfd=yes
+    bfd_gas=yes
+    ;;
+  no | "")
+    ;;
+  *)
+    echo "*** Bad value \"${with_bfd_assembler}\" for --with_bfd_assembler option" 1>&2
+    exit 1
+    ;;
+esac
+
 # assign cpu type
 emulation=generic
 
@@ -79,10 +97,10 @@ cpu_type=${target_cpu}
 
 # check for architecture variants
 case ${target_cpu} in
-  sparclite)    cpu_type=sparc ;;
+  sparclite*)   cpu_type=sparc ;;
   sparc64)	cpu_type=sparc obj_format=aout ;;
   m680[01234]0) cpu_type=m68k ;;
-  m683?2)       cpu_type=m68k ;;
+  m683??)       cpu_type=m68k ;;
 esac
 
 gas_target=${cpu_type}
@@ -91,22 +109,22 @@ gas_target=${cpu_type}
 case ${target} in
   a29k-amd-udi)
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     gas_target=ebmon29k
     ;;
   a29k-amd-ebmon)
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     gas_target=ebmon29k
     ;;
   a29k-amd-ebmonold)
     obj_format=coff
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     gas_target=ebmon29k
     ;;
   i[34]86-ibm-aix*)
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     gas_target=i386coff
     emulation=i386aix
     ;;
@@ -115,7 +133,7 @@ case ${target} in
     ;;
   i[34]86-*-coff | i[34]86-*-sysv* | i[34]86-*-sco* | i[34]86-*-isc*)
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     gas_target=i386coff
     ;; 
   i[34]86-*-go32) 
@@ -138,10 +156,26 @@ case ${target} in
     ;;
   m68k-*-coff)
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     gas_target=m68kcoff
     ;;
-  sparclite-fujitsu-none)
+  mips-*-bsd*)
+    # don't change emulation like *-*-bsd does
+    bfd_gas=yes
+    obj_format=aout
+    gas_target=mips-lit
+    ;;
+  mips-*-ultrix*)
+    bfd_gas=yes
+    obj_format=ecoff
+    gas_target=mips-lit
+    ;;
+  mips-*-irix* | mips-*-ecoff)
+    bfd_gas=yes
+    obj_format=ecoff
+    gas_target=mips-big
+    ;;
+  sparclite*-fujitsu-none)
     obj_format=aout
     ;;
   *-*-aout | *-*-scout | *-*-linux)
@@ -159,7 +193,7 @@ case ${target} in
     ;;
   *-*-xray | *-*-hms)
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     ;;
   *-*-sysv32)
     obj_format=coff
@@ -167,7 +201,7 @@ case ${target} in
     ;;
   *-*-sim)	
     obj_format=coffbfd
-    need_bfd="./../bfd/libbfd.a"
+    need_bfd=yes
     ;;
   *-*-coff* | *-sysv* | *-*-sco*)
     obj_format=coff
@@ -181,6 +215,17 @@ case ${target} in
     ;;
   *-*-coff)
     obj_format=coff
+    ;;
+  *-*-elf | *-*-solaris*)
+    case ${bfd_gas} in
+      yes) ;;
+      *)
+	echo "*** warning: gas ${target_os} configuration implies" 1>&2
+	echo "             (unsupported) --with-bfd-assembler option" 1>&2
+	bfd_gas=yes
+	;;
+    esac
+    obj_format=elf
     ;;
   *-*-vms)
     obj_format=vms
@@ -205,5 +250,24 @@ files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/atof-${atof}.c"
 
 links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-targ.c"
+
+# post-target:
+
+case ${bfd_gas} in
+  yes)
+    echo BFDDEF=-DBFD_ASSEMBLER >> Makefile
+    need_bfd=yes
+    ;;
+  *)
+    ;;
+esac
+
+case ${need_bfd} in
+  yes)
+    echo BFDLIB=../bfd/libbfd.a >> Makefile
+    ;;
+  *)
+    ;;
+esac
 
 # end of gas/configure.in
