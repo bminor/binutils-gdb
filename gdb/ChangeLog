@@ -1,3 +1,8 @@
+Wed Sep 29 18:34:22 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  Add deps for i386lynx-nat.o and i386lynx-tdep.o to
+	keep non-gnu makes happy.
+
 Wed Sep 29 10:52:19 1993  Kung Hsu  (kung@cygnus.com)
 
 	* c-valprint.c: to fix virtual table print bug (pr2695).
