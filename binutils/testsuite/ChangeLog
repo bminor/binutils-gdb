@@ -1,13 +1,16 @@
 2002-04-10  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* binutils-all/windres/capstyle.rsd: Regernate using MSVC.
-	* binutils-all/windres/deflang.rsd: Regernate using MSVC.
-	* binutils-all/windres/dialogsignature.rsd: Regernate using MSVC.
-	* binutils-all/windres/escapea.rsd: Regernate using MSVC.
-	* binutils-all/windres/escapex.rsd: Regernate using MSVC.
-	* binutils-all/windres/nocaption.rsd: Regernate using MSVC.
-	* binutils-all/windres/printstyle.rsd: Regernate using MSVC.
-	* binutils-all/windres/sublang.rsd: Regernate using MSVC.
+	* binutils-all/ar.exp (long_filenames): Delete the abc... files
+	upon successfully completion of the test.
+
+	* binutils-all/windres/capstyle.rsd: Regenerate using MSVC.
+	* binutils-all/windres/deflang.rsd: Regenerate using MSVC.
+	* binutils-all/windres/dialogsignature.rsd: Regenerate using MSVC.
+	* binutils-all/windres/escapea.rsd: Regenerate using MSVC.
+	* binutils-all/windres/escapex.rsd: Regenerate using MSVC.
+	* binutils-all/windres/nocaption.rsd: Regenerate using MSVC.
+	* binutils-all/windres/printstyle.rsd: Regenerate using MSVC.
+	* binutils-all/windres/sublang.rsd: Regenerate using MSVC.
 
 2002-04-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
