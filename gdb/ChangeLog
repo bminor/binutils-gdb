@@ -1,3 +1,9 @@
+2003-01-30  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppa64.h (CALL_DUMMY_LOCATION): Remove #undef
+	causing some regressions due to a change in the default value
+	for this macro.
+
 2003-01-29  Richard Henderson  <rth@redhat.com>
 	    Elena Zannoni  <ezannoni@redhat.com>
 	    Daniel Jacobowitz  <drow@mvista.com>
