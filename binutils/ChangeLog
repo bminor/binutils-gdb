@@ -1,3 +1,7 @@
+Thu May 27 16:58:31 1993  Jeffrey Osier  (jeffrey@cygnus.com)
+
+        * biutils.texi:  revised c++filt chapter
+
 Wed May 26 17:24:17 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (FLAGS_TO_PASS): Pass down CC and CFLAGS.

@@ -1102,22 +1102,33 @@ archives, @samp{strip -v} lists all members of the archive.
 @kindex c++filt
 @cindex demangling C++ symbols
 
-The C++ language provides function overloading, which means that
-you can write many function with the same name (but taking
-different kinds of parameters).  So that the linker can keep these
-overloaded functions from clashing, all C++ function names are
-encoded (``mangled'') into a funny-looking low-level assembly label.
-The @code{c++filt} program does the inverse mapping:  It decodes
-(``demangles'') low-level names into user-level names.
+The C++ language provides function overloading, which means that you can
+write many functions with the same name (providing each takes parameters
+of different types).  All C++ function names are encoded into a
+low-level assembly label (in some circles this is described as
+@dfn{mangling}). The @code{c++filt} program does the inverse mapping: it
+decodes (@dfn{demangles}) low-level names into user-level names so that
+the linker can keep these overloaded functions from clashing.
 
-When you use @code{c++filt} as a filter (which is usually the case),
-it reads from standard input.  Every alphanumeric word (consisting
-of letters, digits, underscores, dollars, or periods) seen in the
-input is a potential label.  If the label decodes into a C++ name.
-the C++ name will replace the low-level name in the output.
+Every alphanumeric word (consisting of letters, digits, underscores,
+dollars, or periods) seen in the input is a potential label.  If the
+label decodes into a C++ name, the C++ name replaces the low-level
+name in the output.
 
 A typical use of @code{c++filt} is to pipe the output of @code{nm}
-though it.
+though it, using @code{c++filt} as a filter:
+
+@example
+nm @var{objfile} | c++filt
+@end example
+
+You can also use @code{c++filt} to decipher individual symbols:
+
+@example
+c++filt @var{symbol}
+@end example
+
+All results are printed on the standard output.
 
 Note that on some systems, both the C and C++ compilers put an
 underscore in front of every name.  (I.e. the C name @code{foo} gets the
