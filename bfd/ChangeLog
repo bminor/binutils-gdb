@@ -1,3 +1,11 @@
+Tue Aug 16 00:12:31 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* i386linux.c (linux_link_create_dynamic_sections): Create section
+	named .linux-dynamic, not .dynamic.
+	(linux_add_one_symbol): Use .linux-dynamic, not .dynamic.
+	(bfd_linux_size_dynamic_sections): Likewise.
+	(linux_finish_dynamic_link): Likewise.
+
 Mon Aug 15 12:16:56 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coffgen.c (STRING_SIZE_SIZE): Define.
