@@ -1,3 +1,9 @@
+Thu Jun 30 15:05:28 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* write.c (write_object_file): Use bfd_com_section_ptr.
+	* as.h (absolute_section, undefined_section): Use new BFD macros
+	bfd_abs_section_ptr and bfd_und_section_ptr.
+
 Thu Jun 30 14:36:37 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-mips.c (macro): For M_LI_SS, decide how to handle it
