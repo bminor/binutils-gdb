@@ -26,7 +26,10 @@ Things-to-keep:
 Makefile.in
 configure.in
 configure
-source.exp
+
+asm-source.exp
+asmsrc1.s
+asmsrc2.s
 
 Things-to-lose:
 

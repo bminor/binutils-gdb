@@ -5,7 +5,7 @@ dnl script appropriate for this directory.  For more information, check
 dnl any existing configure script.
 
 AC_PREREQ(2.5)
-AC_INIT(source.exp)
+AC_INIT(asm-source.exp)
 
 CC=${CC-cc}
 AC_SUBST(CC)
