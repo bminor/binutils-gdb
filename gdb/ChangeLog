@@ -1,5 +1,10 @@
 2003-06-26  Andrew Cagney  <cagney@redhat.com>
 
+	* config/djgpp/fnchange.lst: Fix 8.3 problem with sim/ppc's
+	altivec_expression.h and altivec_registers.h.
+
+2003-06-26  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (gdb_print_insn_mips): Only explicitly set
 	info->mach when MIPS16.  Patch suggested by Fred Fish.
 
