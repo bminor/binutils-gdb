@@ -312,24 +312,47 @@ core_stack_size(core *memory)
 INLINE_CORE void 
 core_add_data(core *memory, unsigned_word incr)
 {
-  memory->data_upper_bound += incr;
-  if (memory->data_upper_bound > memory->data_high_water) {
-    malloc_core_memory(memory, memory->data_high_water, incr,
-		     device_is_readable | device_is_writeable);
-    memory->data_high_water = memory->data_upper_bound;
+  unsigned_word new_upper_bound = memory->data_upper_bound + incr;
+  if (new_upper_bound > memory->data_high_water) {
+    if (memory->data_upper_bound >= memory->data_high_water)
+      /* all the memory is new */
+      malloc_core_memory(memory,
+			 memory->data_upper_bound,
+			 incr,
+			 device_is_readable | device_is_writeable);
+    else
+      /* some of the memory was already allocated, only need to add
+         missing bit */
+      malloc_core_memory(memory,
+			 memory->data_high_water,
+			 new_upper_bound - memory->data_high_water,
+			 device_is_readable | device_is_writeable);
+    memory->data_high_water = new_upper_bound;
   }
+  memory->data_upper_bound = new_upper_bound;
 }
 
 
 INLINE_CORE void 
 core_add_stack(core *memory, unsigned_word incr)
 {
-  memory->stack_lower_bound -= incr;
-  if (memory->stack_lower_bound < memory->stack_low_water) {
-    malloc_core_memory(memory, memory->stack_lower_bound, incr,
-		       device_is_readable | device_is_writeable);
-    memory->stack_low_water = memory->stack_lower_bound;
+  unsigned_word new_lower_bound = memory->stack_lower_bound - incr;
+  if (new_lower_bound < memory->stack_low_water) {
+    if (memory->stack_lower_bound <= memory->stack_low_water)
+      /* all the memory is new */
+      malloc_core_memory(memory,
+			 new_lower_bound,
+			 incr,
+			 device_is_readable | device_is_writeable);
+    else
+      /* allocate only the extra bit */
+      malloc_core_memory(memory,
+			 new_lower_bound, 
+			 memory->stack_low_water - new_lower_bound,
+			 device_is_readable | device_is_writeable);
+    memory->stack_low_water = new_lower_bound;
   }
+  memory->stack_lower_bound = new_lower_bound;
 }
 
 

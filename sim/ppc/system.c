@@ -169,13 +169,17 @@ system_call(cpu *processor,
 #  error "SYS_break"
 #endif
     {
-      unsigned_word new_sbrk = ALIGN_PAGE(cpu_registers(processor)->gpr[3]);
-      unsigned_word old_sbrk = core_data_upper_bound(cpu_core(processor));
-      signed_word delta = new_sbrk - old_sbrk;
+      /* pretend to extend the heap so that it reaches addresss
+         new_break while in truth, if growth is needed grow it by a
+         page aligned amount */
+      unsigned_word new_break = ALIGN_8(cpu_registers(processor)->gpr[3]);
+      unsigned_word old_break = core_data_upper_bound(cpu_core(processor));
+      signed_word delta = new_break - old_break;
       if (delta > 0)
-	core_add_data(cpu_core(processor), delta);
+	core_add_data(cpu_core(processor),
+		      ALIGN_PAGE(new_break) - old_break);
       cpu_registers(processor)->gpr[0] = 0;
-      cpu_registers(processor)->gpr[3] = new_sbrk;
+      cpu_registers(processor)->gpr[3] = new_break;
       break;
     }
 
