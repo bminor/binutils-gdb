@@ -1,3 +1,12 @@
+Mon Apr  5 17:37:37 1993  John Gilmore  (gnu@cygnus.com)
+
+	* sparc-dis.c: Make "ta" the default trap instruction, "t" the alias.
+
+Fri Apr  2 07:24:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* a29k-dis.c, sparc-dis.c, sparc-opc.c: Use CONST rather than
+	const.
+
 Thu Apr  1 11:20:43 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* sparc-dis.c: Use fprintf_func a few places where I forgot,
