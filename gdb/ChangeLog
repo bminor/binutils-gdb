@@ -1,3 +1,9 @@
+2000-04-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (examine_prologue): Recognize store instructions;
+	those whose source operands are input registers which haven't
+	been seen before are considered to be part of the prologue.
+
 Tue Apr 25 13:51:58 2000  glen mccready  <gkm@pobox.com>
 
 	* rs6000-nat.c (xcoff_relocate_symtam): Recover from the wrong

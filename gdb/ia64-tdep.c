@@ -707,6 +707,11 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
   int mem_stack_frame_size = 0;
   int spill_reg   = 0;
   CORE_ADDR spill_addr = 0;
+  char instores[8];
+  char infpstores[8];
+
+  memset (instores, 0, sizeof instores);
+  memset (infpstores, 0, sizeof infpstores);
 
   if (frame && !frame->saved_regs)
     {
@@ -749,7 +754,13 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
       if (next_pc == 0)
 	break;
 
-      if (it == I && ((instr & 0x1eff8000000LL) == 0x00188000000LL))
+      if (it == B || ((instr & 0x3fLL) != 0LL))
+	{
+	  /* Exit loop upon hitting a branch instruction or a predicated
+	     instruction. */
+	  break;
+	}
+      else if (it == I && ((instr & 0x1eff8000000LL) == 0x00188000000LL))
         {
 	  /* Move from BR */
 	  int b2 = (int) ((instr & 0x0000000e000LL) >> 13);
@@ -899,6 +910,48 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 		spill_addr = 0;		/* must be done spilling */
 	      last_prologue_pc = next_pc;
 	    }
+	  else if (qp == 0 && 32 <= rM && rM < 40 && !instores[rM-32])
+	    {
+	      /* Allow up to one store of each input register. */
+	      instores[rM-32] = 1;
+	      last_prologue_pc = next_pc;
+	    }
+	}
+      else if (it == M && ((instr & 0x1ff08000000LL) == 0x08c00000000LL))
+	{
+	  /* One of
+	       st1 [rN] = rM
+	       st2 [rN] = rM
+	       st4 [rN] = rM
+	       st8 [rN] = rM
+	     Note that the st8 case is handled in the clause above.
+	     
+	     Advance over stores of input registers. One store per input
+	     register is permitted. */
+	  int rM = (int) ((instr & 0x000000fe000LL) >> 13);
+	  int qp = (int) (instr & 0x0000000003fLL);
+	  if (qp == 0 && 32 <= rM && rM < 40 && !instores[rM-32])
+	    {
+	      instores[rM-32] = 1;
+	      last_prologue_pc = next_pc;
+	    }
+	}
+      else if (it == M && ((instr & 0x1ff88000000LL) == 0x0cc80000000LL))
+        {
+	  /* Either
+	       stfs [rN] = fM
+	     or
+	       stfd [rN] = fM
+
+	     Advance over stores of floating point input registers.  Again
+	     one store per register is permitted */
+	  int fM = (int) ((instr & 0x000000fe000LL) >> 13);
+	  int qp = (int) (instr & 0x0000000003fLL);
+	  if (qp == 0 && 8 <= fM && fM < 16 && !infpstores[fM - 8])
+	    {
+	      infpstores[fM-8] = 1;
+	      last_prologue_pc = next_pc;
+	    }
 	}
       else if (it == M
             && (   ((instr & 0x1ffc8000000LL) == 0x08ec0000000LL)
@@ -925,8 +978,6 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	      last_prologue_pc = next_pc;
 	    }
 	}
-      else if (it == B || ((instr & 0x3fLL) != 0LL))
-	break;
 
       pc = next_pc;
     }
