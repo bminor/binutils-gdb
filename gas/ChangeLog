@@ -1,3 +1,11 @@
+Fri Jan 31 10:46:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (relax_segment): Give an error if a .space symbol is
+	common or undefined.
+
+	* read.c (read_a_source_file): Don't handle mri_pending_align if
+	the handler is s_globl or s_ignore.
+
 Thu Jan 30 11:46:59 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/tc-d10v.c (find_opcode): Remove unused variable "numops".

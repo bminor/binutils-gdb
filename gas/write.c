@@ -2202,8 +2202,11 @@ relax_segment (segment_frag_root, segment)
 		if (symbolP)
 		  {
 		    growth = S_GET_VALUE (symbolP);
-		    if (symbolP->sy_frag != &zero_address_frag)
-		      as_bad (".space specifies non-absolute value");
+		    if (symbolP->sy_frag != &zero_address_frag
+			|| S_IS_COMMON (symbolP)
+			|| ! S_IS_DEFINED (symbolP))
+		      as_bad_where (fragP->fr_file, fragP->fr_line,
+				    ".space specifies non-absolute value");
 		    fragP->fr_symbol = 0;
 		    if (growth < 0)
 		      {

@@ -719,7 +719,9 @@ read_a_source_file (name)
 				    || pop->poc_handler == s_ifc
 				    || pop->poc_handler == s_ifeqs
 				    || pop->poc_handler == s_else
-				    || pop->poc_handler == s_endif)))
+				    || pop->poc_handler == s_endif
+				    || pop->poc_handler == s_globl
+				    || pop->poc_handler == s_ignore)))
 			{
 			  do_align (1, (char *) NULL, 0);
 			  mri_pending_align = 0;
