@@ -133,13 +133,19 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   if (bfd_check_format (entry->the_bfd, bfd_object)
       && (entry->the_bfd->flags & DYNAMIC) != 0)
     {
-      char *needed_name;
+      char *filname, *needed_name;
 
       ASSERT (entry->is_archive && entry->search_dirs_flag);
-      needed_name = (char *) xmalloc (strlen (filename)
-				      + strlen (arch)
-				      + sizeof "lib.so");
-      sprintf (needed_name, "lib%s%s.so", filename, arch);
+
+      /* Rather than duplicating the logic above.  Just use the
+	 filename we recorded earlier.o
+
+	 First strip off everything before the last '/'.  */
+      filename = strrchr (entry->filename, '/');
+      filename++;
+
+      needed_name = (char *) xmalloc (strlen (filename)) + 1;
+      strcpy (needed_name, filename);
       bfd_elf_set_dt_needed_name (entry->the_bfd, needed_name);
     }
 

@@ -1,5 +1,9 @@
 Thu Sep 16 10:59:56 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Use the same filename extension for the bfd_elf_dt_needed_name call
+	as we did for finding the library.
+
 	* emulparms/elf64hppa.sh (DATA_START_SYMBOLS): Define.
 	(OTHER_READWRITE_SECTIONS): No longer define __hp_load_map.
 
