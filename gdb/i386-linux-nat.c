@@ -469,7 +469,15 @@ store_fpxregs (int tid, int regno)
     return 0;
   
   if (ptrace (PTRACE_GETFPXREGS, tid, 0, &fpxregs) == -1)
-    perror_with_name ("Couldn't read floating-point and SSE registers");
+    {
+      if (errno == EIO)
+	{
+	  have_ptrace_getfpxregs = 0;
+	  return 0;
+	}
+
+      perror_with_name ("Couldn't read floating-point and SSE registers");
+    }
 
   fill_fpxregset (&fpxregs, regno);
 

@@ -1,3 +1,8 @@
+2000-12-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (store_fpxregs): Add code to detect support for
+	the PTRACE_GETFPXREGS request, and return zero if it's not.
+
 2000-12-21  Fernando Nasser  <fnasser@redhat.com>
 
 	* TODO: Add pre-uiout code removal to 5.2 cleanups.
