@@ -457,7 +457,7 @@ print_insn_mips (memaddr, word, info)
   info->display_endian = info->endian;
   info->insn_info_valid = 1;
   info->branch_delay_insns = 0;
-  info->data_size = 0;      
+  info->data_size = 0;
   info->insn_type = dis_nonbranch;
   info->target = 0;
   info->target2 = 0;
