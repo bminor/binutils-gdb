@@ -4415,7 +4415,6 @@ echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and a wo
 
       # don't change em like *-*-bsd does
       mips-dec-openbsd*)		fmt=elf endian=little ;;
-      mips-dec-bsd*)			fmt=aout endian=little ;;
       mips-sony-bsd*)			fmt=ecoff ;;
       mips-*-bsd*)
 	    { { echo "$as_me:$LINENO: error: Unknown vendor for mips-bsd configuration." >&5

@@ -1,3 +1,10 @@
+2004-04-11  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* config.bfd: Remove mips*-*-mach3* and mips*-dec-mach3* targets.
+	* configure.in: Remove mips-dec-bsd*, mips-dec-mach3*, mips-*-mach3*
+	targets amd aout_mips_big_vec, aout_mips_little_vec target vectors.
+	* configure: Regenerate.
+
 2004-04-08  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elflink.c: Include libiberty.h.
