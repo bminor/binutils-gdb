@@ -1,3 +1,8 @@
+Mon Apr  8 11:56:23 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Add -E as a synonym for -export-dynamic,
+	for HP/UX compatibility.
+
 Fri Apr  5 14:30:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_check_ld_so_conf): New

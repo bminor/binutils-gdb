@@ -65,7 +65,7 @@ parse_args (argc, argv)
      as if it were the argument of an option with character code 1.  */
 
   const char *shortopts =
-    "-a:A:b:c:de:F::G:gh:iL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
+    "-a:A:b:c:de:EF::G:gh:iL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -114,6 +114,7 @@ parse_args (argc, argv)
   /* Sorted alphabeticaly, except for the PE options grouped at the end. */
     {"assert", required_argument, NULL, OPTION_ASSERT},
     {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
+    {"Bshareable", no_argument, NULL, OPTION_SHARED }, /* FreeBSD.  */
     {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
     {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
     {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -279,6 +280,7 @@ parse_args (argc, argv)
 	  command_line.embedded_relocs = true;
 	  break;
 	case OPTION_EXPORT_DYNAMIC:
+	case 'E': /* HP/UX compatibility.  */
 	  command_line.export_dynamic = true;
 	  break;
 	case 'e':
