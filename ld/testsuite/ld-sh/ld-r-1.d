@@ -11,7 +11,7 @@
 # where and which addends to use and how.  A file linked -r must have the
 # same layout as a plain assembly file: the addend is in the data only.
 
-Relocation section '\.rela\.text' at offset 0x1b8 contains 1 entries:
+Relocation section '\.rela\.text' at offset 0x1b4 contains 1 entries:
  Offset     Info    Type            Symbol's Value  Symbol's Name          Addend
 00000008  00000101 R_SH_DIR32            00000000  \.text                     \+ 0
 

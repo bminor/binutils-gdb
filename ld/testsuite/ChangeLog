@@ -1,3 +1,7 @@
+2001-11-15  H.J. Lu <hjl@gnu.org>
+
+	* ld-sh/ld-r-1.d: Updated.
+
 2001-11-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ld-bootstrap/bootstrap.exp: Only scan tail of executable for
