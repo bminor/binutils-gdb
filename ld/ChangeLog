@@ -8,7 +8,7 @@
 	if trace_file_tries is non-zero.
 
 	* ld.texinfo: Document the usage of DT_RPATH/DT_RUNPATH.
-	* News: Mention it.
+	* NEWS: Mention it.
 
 2000-08-14  Jason Eckhardt  <jle@cygnus.com>
 
