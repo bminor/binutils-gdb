@@ -1,5 +1,12 @@
 Sat Jan 22 08:30:42 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* remote-mips.c (mips_initialize): Clear mips_initializing via
+	cleanup chain, not directly.
+
+	* ser-unix.c (wait_for) [HAVE_TERMIO, HAVE_TERMIOS]: Make a timeout
+	of -1 mean forever, like in the HAVE_SGTTY case.  Warn if we are
+	munging the timeout due to the limited range of c_cc[VTIME].
+
 	* fork-child.c, inferior.h (fork_inferior): New argument shell_file.
 	* procfs.c (procfs_create_inferior), inftarg.c (child_create_inferior),
 	m3-nat.c (m3_create_inferior): Pass it.

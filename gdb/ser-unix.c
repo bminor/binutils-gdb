@@ -435,11 +435,41 @@ wait_for(scb, timeout)
       fprintf_unfiltered(gdb_stderr, "get_tty_state failed: %s\n", safe_strerror(errno));
 
 #ifdef HAVE_TERMIOS
-    state.termios.c_cc[VTIME] = timeout * 10;
+    if (timeout < 0)
+      {
+	/* No timeout.  */
+	state.termios.c_cc[VTIME] = 0;
+	state.termios.c_cc[VMIN] = 1;
+      }
+    else
+      {
+	state.termios.c_cc[VMIN] = 0;
+	state.termios.c_cc[VTIME] = timeout * 10;
+	if (state.termios.c_cc[VTIME] != timeout * 10)
+	  {
+	    warning ("Timeout value %d too large, using %d", timeout,
+		     state.termios.c_cc[VTIME] / 10);
+	  }
+      }
 #endif
 
 #ifdef HAVE_TERMIO
-    state.termio.c_cc[VTIME] = timeout * 10;
+    if (timeout < 0)
+      {
+	/* No timeout.  */
+	state.termio.c_cc[VTIME] = 0;
+	state.termio.c_cc[VMIN] = 1;
+      }
+    else
+      {
+	state.termio.c_cc[VMIN] = 0;
+	state.termio.c_cc[VTIME] = timeout * 10;
+	if (state.termio.c_cc[VTIME] != timeout * 10)
+	  {
+	    warning ("Timeout value %d too large, using %d", timeout,
+		     state.termio.c_cc[VTIME] / 10);
+	  }
+      }
 #endif
 
     scb->current_timeout = timeout;

@@ -888,6 +888,13 @@ mips_request (cmd, addr, data, perr, timeout)
   return rresponse;
 }
 
+static void
+mips_initialize_cleanups (arg)
+     PTR arg;
+{
+  mips_initializing = 0;
+}
+
 /* Initialize a new connection to the MIPS board, and make sure we are
    really connected.  */
 
@@ -897,9 +904,16 @@ mips_initialize ()
   char cr;
   char buff[DATA_MAXLEN + 1];
   int err;
+  struct cleanup *old_cleanups = make_cleanup (mips_initialize_cleanups, NULL);
 
+  /* What is this code doing here?  I don't see any way it can happen, and
+     it might mean mips_initializing didn't get cleared properly.
+     So I'll make it a warning.  */
   if (mips_initializing)
-    return;
+    {
+      warning ("internal error: mips_initialize called twice");
+      return;
+    }
 
   mips_initializing = 1;
 
@@ -929,7 +943,7 @@ mips_initialize ()
     }
   mips_receive_packet (buff, 1, 3);
 
-  mips_initializing = 0;
+  do_cleanups (old_cleanups);
 
   /* If this doesn't call error, we have connected; we don't care if
      the request itself succeeds or fails.  */
