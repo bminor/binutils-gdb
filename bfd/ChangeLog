@@ -1,3 +1,8 @@
+1999-07-21  Ian Lance Taylor  <ian@zembu.com>
+
+	From Mark Elbrecht:
+	* makefile.dos: Remove; obsolete.
+
 1999-07-21  H.J. Lu  <hjl@gnu.org>
 
 	* config.bfd (i[3456]86-*-vxworks*): Add targ_underscore=yes.

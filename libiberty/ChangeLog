@@ -1,3 +1,8 @@
+1999-07-21  Ian Lance Taylor  <ian@zembu.com>
+
+	From Mark Elbrecht:
+	* makefile.dos: Remove; obsolete.
+
 1999-07-14  Richard Henderson  <rth@cygnus.com>
 
 	* argv.c: Include stdlib.h and string.h instead of
