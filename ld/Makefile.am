@@ -674,7 +674,7 @@ bfdsumm.texi: Makefile
 # We want to reconfigure if configure.host or configure.tgt changes.
 Makefile: configure.host configure.tgt
 
-MOSTCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
+MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h tmpdir crtbegin.o crtend.o
 CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 

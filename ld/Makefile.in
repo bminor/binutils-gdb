@@ -305,7 +305,7 @@ ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
 # This is the real libbfd.a created by libtool.
 TESTBFDLIB = ../bfd/.libs/libbfd.a
 
-MOSTCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
+MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h tmpdir crtbegin.o crtend.o
 CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 
