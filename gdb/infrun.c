@@ -1344,6 +1344,14 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_bpstat = bpstat_stop_status (&stop_pc, 1);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
+
+      /* If no catchpoint triggered for this, then keep going.  */
+      if (ecs->random_signal)
+	{
+	  stop_signal = TARGET_SIGNAL_0;
+	  keep_going (ecs);
+	  return;
+	}
       goto process_event_stop_test;
 
     case TARGET_WAITKIND_EXECD:
@@ -1392,6 +1400,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
+
+      /* If no catchpoint triggered for this, then keep going.  */
+      if (ecs->random_signal)
+	{
+	  stop_signal = TARGET_SIGNAL_0;
+	  keep_going (ecs);
+	  return;
+	}
       goto process_event_stop_test;
 
       /* These syscall events are returned on HP-UX, as part of its
@@ -1830,54 +1846,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   else
     ecs->random_signal = 1;
-  /* If a fork, vfork or exec event was seen, then there are two
-     possible responses we can make:
 
-     1. If a catchpoint triggers for the event (ecs->random_signal == 0),
-     then we must stop now and issue a prompt.  We will resume
-     the inferior when the user tells us to.
-     2. If no catchpoint triggers for the event (ecs->random_signal == 1),
-     then we must resume the inferior now and keep checking.
-
-     In either case, we must take appropriate steps to "follow" the
-     the fork/vfork/exec when the inferior is resumed.  For example,
-     if follow-fork-mode is "child", then we must detach from the
-     parent inferior and follow the new child inferior.
-
-     In either case, setting pending_follow causes the next resume()
-     to take the appropriate following action. */
 process_event_stop_test:
-  if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
-    {
-      if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
-	{
-	  trap_expected = 1;
-	  stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
-	  return;
-	}
-    }
-  else if (ecs->ws.kind == TARGET_WAITKIND_VFORKED)
-    {
-      if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
-	{
-	  stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
-	  return;
-	}
-    }
-  else if (ecs->ws.kind == TARGET_WAITKIND_EXECD)
-    {
-      pending_follow.kind = ecs->ws.kind;
-      if (ecs->random_signal)	/* I.e., no catchpoint triggered for this. */
-	{
-	  trap_expected = 1;
-	  stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
-	  return;
-	}
-    }
-
   /* For the program's own signals, act according to
      the signal handling tables.  */
 
