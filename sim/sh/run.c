@@ -113,10 +113,11 @@ main (ac, av)
 	  if (verbose)
 	    sim_info (0);
 
-	  /* Find out what was in r0 and return that */
+	  /* Assume we left through the exit system call,
+	     in which case r5 has the exit code */
 	  {
 	    unsigned char b[4];
-	    sim_fetch_register (0, b);
+	    sim_fetch_register (5, b);
 	    return b[3];
 	  }
 

@@ -1,3 +1,19 @@
+Wed Dec 28 21:25:31 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* interp.c (BUSERROR): New macro.
+	([r|w][bwl]at[little|big]) New functions.
+	(sim_resume): If GO32 check for interrupt every now
+	and again.  Decrement PC if SIGBUS seen.
+	* run.c (main):  Return result of simulated _exit.
+
+Mon Dec  5 21:59:51 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (gencode): Allow build in different directory.
+
+Wed Nov 30 17:47:13 1994  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* Makefile.in (gencode): Change $< to gencode.c for portability.
+
 Wed Nov 23 21:31:55 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* interp.c ([wr][bwl]at): New functions.
