@@ -581,7 +581,6 @@ proc build_vers_lib_pic { test source libname other mapfile verexp versymexp sym
 }
 
 proc test_ldfail { test flag source execname other mapfile whyfail } {
-    global ld
     global srcdir
     global subdir
     global exec_output
@@ -617,7 +616,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
 	set script_arg "$script $srcdir/$subdir/$mapfile"
     }
 
-    if {![ld_link $ld $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
+    if {![ld_simple_link $CC $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
 	pass "$test"
 	return
     }
@@ -686,7 +685,6 @@ proc test_strip_vers_lib { test srclib libname verexp versymexp } {
 
 
 proc build_exec { test source execname flags solibname verexp versymexp symexp } {
-    global ld
     global srcdir
     global subdir
     global exec_output
@@ -715,7 +713,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
 	set solibname_lib $tmpdir/$solibname
     }
 
-    if {![ld_link $ld $tmpdir/$execname "$flags $tmpdir/$execname.o $solibname_lib"]}     {
+    if {![ld_simple_link $CC $tmpdir/$execname "$flags $tmpdir/$execname.o $solibname_lib"]}     {
 	fail "$test"
 	return
     }
@@ -877,7 +875,7 @@ build_exec "vers16" vers16.c vers16 "" vers16a.so "" vers16.dsym ""
 # Test a weak versioned symbol.
 build_vers_lib_no_pic "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
 build_vers_lib_no_pic "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
-build_exec "vers19" vers19.c vers19 "-rpath ." vers18.so vers19.ver vers19.dsym ""
+build_exec "vers19" vers19.c vers19 "-Wl,-rpath,." vers18.so vers19.ver vers19.dsym ""
 
 build_vers_lib_no_pic "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
 exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so

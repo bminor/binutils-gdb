@@ -1,3 +1,24 @@
+2003-05-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* config/default.exp (gcc_ld_flag): New. Make the newly built
+	linker available to gcc.
+	* lib/ld-lib.exp (default_ld_simple_link): Pass $gcc_ld_flag
+	to gcc.
+
+	* ld-elfvers/vers.exp: Use "ld_simple_link $CC" to build shared
+	libraries.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+	* ld-shared/shared.exp: Likewise.
+
+	* ld-elfvers/vers.exp: Use "-Wl,-rpath,." to build shared
+	libraries.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+
+	* ld-elfvsb/elfvsb.exp: Remove xfail for powerpc-*-linux*.
+
+	* ld-elfweak/elfweak.exp: Use PIC for shared libraries.
+
 2003-05-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-m68hc11/link-hcs12.d: New test.

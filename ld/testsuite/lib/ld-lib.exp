@@ -154,6 +154,7 @@ proc default_ld_link { ld target objects } {
 proc default_ld_simple_link { ld target objects } {
     global host_triplet
     global link_output
+    global gcc_ld_flag
 
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
@@ -164,6 +165,13 @@ proc default_ld_simple_link { ld target objects } {
 	set flags [big_or_little_endian]
     } else {
 	set flags ""
+    }
+
+    # If we are compiling with gcc, we want to add gcc_ld_flag to
+    # flags.  Rather than determine this in some complex way, we guess
+    # based on the name of the compiler.
+    if {[string match "*gcc*" $ld] || [string match "*++*" $ld]} then {
+	set flags "$gcc_ld_flag $flags"
     }
 
     verbose -log "$ld $flags -o $target $objects"
