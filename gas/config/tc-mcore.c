@@ -335,13 +335,11 @@ mcore_fill (unused)
 	}
 
       poolspan += size * repeat;
-      
-      check_literals (1, 0);
     }
   
   s_fill (unused);
 
-  check_literals (1, 0);
+  check_literals (2, 0);
 }
 
 /* Handle the section changing pseudo-ops.  These call through to the
@@ -713,7 +711,7 @@ check_literals (kind, offset)
   
   if (poolspan > SPANCLOSE && kind > 0)
     dump_literals (0);
-  else if (/* poolspan > SPANEXIT &&*/ kind > 1)
+  else if (poolspan > SPANEXIT && kind > 1)
     dump_literals (0);
   else if (poolspan >= (SPANPANIC - poolsize * 2))
     dump_literals (1);
