@@ -722,10 +722,6 @@ wait_for_inferior ()
 	{
 	  struct target_waitstatus tmpstatus;
 
-#if 0
-	  resume (1,0);
-	  continue;
-#endif
 	  registers_changed ();
 	  target_resume (pid, 1, TARGET_SIGNAL_0);
 
