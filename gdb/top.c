@@ -1845,7 +1845,7 @@ read_next_line (command)
   else
     prompt_ptr = NULL;
 
-  p = command_line_input (prompt_ptr, instream == stdin, "command");
+  p = command_line_input (prompt_ptr, instream == stdin, "commands");
 
   /* Not sure what to do here.  */
   if (p == NULL)
