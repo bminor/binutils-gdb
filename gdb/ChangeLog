@@ -1,3 +1,8 @@
+Mon Dec 11 06:52:02 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-typeprint.c (chill_type_print_base): Slightly change of printing
+	of variant structures.
+
 Mon Dec 11 00:36:01 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valops.c (value_cast):  Handle casts to and from TYPE_CODE_CHAR.

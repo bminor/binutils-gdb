@@ -260,7 +260,8 @@ chill_type_print_base (type, stream, show, level)
 				fputs_filtered ("\n", stream);
 			      }
 			  }
-			fputs_filtered ("ESAC\n", stream);
+			print_spaces_filtered (level + 4, stream);
+			fputs_filtered ("ESAC", stream);
 		      }
 		    else
 		      chill_print_type (field_type,
