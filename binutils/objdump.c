@@ -2660,6 +2660,12 @@ main (argc, argv)
 	  machine = optarg;
 	  break;
 	case 'M':
+	  if (disassembler_options)
+	    {
+	      non_fatal ("multiple separate -M options are not supported.");
+	      non_fatal ("please combine them into a single, space separated option.");
+	      non_fatal ("ignoring option '-M%s'", disassembler_options);
+	    }
 	  disassembler_options = optarg;
 	  break;
 	case 'j':

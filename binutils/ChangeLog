@@ -1,5 +1,13 @@
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
+	* objdump.c (main): Issue a warning message if multiple -M
+	switches are used.
+	
+	* doc/binutils.texi (objdump): Update documentation about -M
+	option.
+	
+2003-07-17  Nick Clifton  <nickc@redhat.com>
+
 	* po/es.po: New Spanish translation.
 
 2003-07-11  Alan Modra  <amodra@bigpond.net.au>
