@@ -5099,6 +5099,10 @@ section contains data
 section does not contain data (i.e., section only occupies space)
 @end table
 
+Note on targets where the @code{@@} character is the start of a comment (eg
+ARM) then another character is used instead.  For example the ARM port uses the
+@code{%} character.
+
 If @var{flags} contains @code{M} flag, @var{type} argument must be specified
 as well as @var{entsize} argument. Sections with @code{M} flag but not
 @code{S} flag must contain fixed size constants, each @var{entsize} octets

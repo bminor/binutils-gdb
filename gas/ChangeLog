@@ -1,3 +1,9 @@
+2002-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Note that if '@' is a comment
+	character then another symbol is used to prefix the section's
+	type.
+
 2002-08-22  Christian Groessler <chris@groessler.org>
 
 	* config/tc-z8k.c (get_operands): Adjust ptr variable also in
