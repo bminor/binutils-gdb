@@ -1,3 +1,8 @@
+Fri May  3 08:57:17 1996  Tom Tromey  <tromey@lisa.cygnus.com>
+
+	* Makefile.in (all-inet): Depend on all-tcl.
+	(all-inet): Depend on all-send-pr.
+
 Tue Apr 30 13:55:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (powerpcle-*-solaris*): Turn off tk and tcl
