@@ -1,3 +1,7 @@
+Sun Jan  2 21:41:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m68k/tm-sun3.h: Don't define BELIEVE_PCC_PROMOTION.
+
 Sat Jan  1 04:35:23 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (wait_for_inferior):  Do not step or step resume past
