@@ -1,6 +1,12 @@
 Thu Jul 24 13:03:26 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix spelling on fpaddX, fpsubX insns.
+	Make array const.
+	* sparc-dis.c (sorted_opcodes): New static local.
+	(struct opcode_hash): `opcode' is pointer to const element.
+	(build_hash): First arg is now table of sorted pointers.
+	(print_insn_sparc): Sort opcodes by sorting table of pointers.
+	(compare_opcodes): Update.
 
 Tue Jul 15 12:05:23 1997  Doug Evans  <dje@canuck.cygnus.com>
 
