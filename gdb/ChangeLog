@@ -1,3 +1,9 @@
+Wed Feb 17 13:40:29 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* language.c (struct op_print unk_op_print_tab): use the enum
+	  values rather naked zeros as initializers.  Avoids warnings from
+	  ultrix type compilers.
+
 Tue Feb 16 00:53:20 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (VERSION):  Roll to 4.7.6.

@@ -1198,7 +1198,7 @@ unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
 
 static struct type ** const (unknown_builtin_types[]) = { 0 };
 static const struct op_print unk_op_print_tab[] = {
-    {NULL, 0, 0, 0}
+    {NULL, OP_NULL, PREC_NULL, 0}
 };
 
 const struct language_defn unknown_language_defn = {
