@@ -1,3 +1,7 @@
+2002-12-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* lin-lwp.c (strsignal): Make extern declaration match that of glibc.
+
 2002-12-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* f-valprint.c (info_common_command): Use get_frame_pc.

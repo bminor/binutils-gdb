@@ -34,7 +34,7 @@
 #include "gdbcmd.h"
 
 static int debug_lin_lwp;
-extern const char *strsignal (int sig);
+extern char *strsignal (int sig);
 
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
    are processes sharing the same VM space.  A multi-threaded process
