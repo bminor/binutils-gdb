@@ -1,3 +1,16 @@
+Tue May 25 15:34:25 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: configure looks for ####, so remove lines with many
+	'#' characters.
+	* config/irix4.mh, config/i386v.mh: New files; set HOSTING_CRT0
+	and HOSTING_LIBS correctly so that ``make check'' will work.
+
+Thu May 20 13:56:16 1993  Per Bothner  (bothner@deneb.cygnus.com)
+
+	* mips.sc-sh:  Define _etext, _edata, and _end, in addition
+	to etext, edata, and end.  Needed for IRIX 4.0.5F.
+	Patch from mwp@iconix.oz.au (Michael Paddon).
+
 Thu May 20 11:42:06 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* mipsbsd.sc-sh: Renamed from aout-mipsbsd.sc-sh.

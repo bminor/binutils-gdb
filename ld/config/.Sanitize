@@ -40,9 +40,11 @@ hppaosf.mt
 i386-aout.mt
 i386-bsd.mt
 i386-coff.mt
+i386v.mh
 i386v.mt
 i960.mt
 ieee-h8300.mt
+irix4.mh
 m68k-coff.mt
 m68k.mt
 m68kv.mt

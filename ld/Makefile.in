@@ -98,7 +98,7 @@ HOSTING_EMU=LDEMULATION=$(EMUL); export LDEMULATION
 C++ = g++ -fgnu-linker
 
 ### Host, target, and site specific Makefile fragments come in here.
-###
+####
 
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
@@ -120,11 +120,12 @@ BFDLIB=./../bfd/libbfd.a
 LIBIBERTY=./../libiberty/libiberty.a
 
 ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
-	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o \
+	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o em_hp3hpux.o \
 	em_h8300hms.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
-	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500hms.o
+	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500hms.o \
+	em_hppaosf.o
 
 # start-sanitize-sh
 OTHER_EMULATIONS=em_sh.o
@@ -144,7 +145,7 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c lexsup.c ldctor.c mri.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
-	em_gld.c em_sun3.c em_go32.c em_m88k.c em_ebmon29k.c \
+	em_gld.c em_sun3.c em_go32.c em_m88k.c em_ebmon29k.c em_hppaosf.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
 	relax.c lderror.c
 
@@ -205,7 +206,7 @@ ldlex.c: ldlex.l ldgram.h
 # These all start with em_ so 'make clean' can find them.
 
 GENSCRIPTS=sh $(srcdir)/genscripts.sh ${srcdir} ${host_alias} ${target_alias}
-GEN_DEPENDS=./mkscript $(srcdir)/genscripts.sh
+GEN_DEPENDS=mkscript $(srcdir)/genscripts.sh
 
 em_sun4.c: $(srcdir)/sun4.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
@@ -225,6 +226,12 @@ em_vax.c: $(srcdir)/vax.sh \
 em_hp300bsd.c: $(srcdir)/hp300bsd.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} hp300bsd.sh
+em_hp3hpux.c: $(srcdir)/hp3hpux.sh \
+  $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} hp3hpux.sh
+em_hppaosf.c: $(srcdir)/hppaosf.sh \
+  $(srcdir)/hppaosf.em $(srcdir)/hppaosf.sc-sh ${GEN_DEPENDS}
+	${GENSCRIPTS} hppaosf.sh
 em_i386aout.c: $(srcdir)/i386aout.sh \
   $(srcdir)/generic.em $(srcdir)/aout.sc-sh ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout.sh
@@ -318,7 +325,6 @@ check-cdtest: cdtest $(srcdir)/cdtest.exp
 	./cdtest >cdtest.out
 	diff $(srcdir)/cdtest.exp cdtest.out
 
-######################################################################
 # DOCUMENTATION TARGETS
 # Manual configuration file; not usually attached to normal configuration,
 # because almost all configs use "gen" version of manual.
@@ -418,10 +424,11 @@ ld-index.me: ld.me
 		texi2index >ld-index.me
 
 
-######################################################################
+mkscript.o: $(srcdir)/mkscript.c
+	$(CC_FOR_BUILD) -c $(srcdir)/mkscript.c
 
-./mkscript: $(srcdir)/mkscript.c
-	$(CC_FOR_BUILD)  -o mkscript $(srcdir)/mkscript.c
+mkscript: mkscript.o
+	$(CC_FOR_BUILD) -o mkscript mkscript.o
 
 ldlex.o: ldlex.c ldgram.h
 ldgram.o: ldgram.c
@@ -476,7 +483,7 @@ de-stage3: force
 	-rmdir stage3
 
 # Stuff that should be included in a distribution:
-LDDISTSTUFF=ldgram.c ldgram.h ldlex.c ld.mm
+LDDISTSTUFF=ldgram.c ldgram.h ldlex.c
 diststuff: $(LDDISTSTUFF)
 
 mostlyclean:
