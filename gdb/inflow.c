@@ -317,9 +317,11 @@ terminal_ours_1 (int output_only)
 
   if (!terminal_is_ours)
     {
+#ifdef SIGTTOU
       /* Ignore this signal since it will happen when we try to set the
          pgrp.  */
-      void (*osigttou) ();
+      void (*osigttou) () = NULL;
+#endif
       int result;
 
       terminal_is_ours = 1;

@@ -1,3 +1,8 @@
+2001-02-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* inflow.c (terminal_ours_1): Initialize ``osigtou''.  Only
+ 	declare when have SIGTTOU.
+
 2001-02-14  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/fnchange.lst: Add entries for gdb/gdbtk/*/ChangeLog-*.
