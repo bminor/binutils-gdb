@@ -639,7 +639,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
 
     obj_textsec (abfd)->filepos = sizeof(struct internal_exec);
     obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos 
-                                +  obj_textsec (abfd)->_cooked_size;
+                                 +  obj_textsec (abfd)->_raw_size;
 
   }
   /* regardless, once we know what we're doing, we might as well get going */
