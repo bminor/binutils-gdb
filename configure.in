@@ -54,27 +54,27 @@ fi
 # exist yet.
 
 case "${host}" in
-hppa*-*-*)
-	configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
-	;;
-*-*-solaris2)
-	configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
-	;;
+  hppa*-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
+    ;;
+  *-*-solaris2)
+    configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
+    ;;
 esac
 
 case "${target}" in
-mips-*-*)
-	configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
-	;;
-rs6000-*-*)
-	configdirs=`echo ${configdirs} | sed -e 's/gas//;s/binutils//;s/ld//;s/libgcc//'`
-	;;
-hppa*-*-*)
-	configdirs=`echo ${configdirs} | sed -e 's/gas//;s/bfd//;s/gdb//;s/binutils//;s/gdbtest//;s/ld//;s/libg++//'`
-	;;
-*-*-solaris2)
-	configdirs=`echo ${configdirs} | sed -e 's/gas//'`
-	;;
+  mips-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    ;;
+  rs6000-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/gas//;s/binutils//;s/ld//;s/libgcc//'`
+    ;;
+  hppa*-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/gas//;s/bfd//;s/gdb//;s/binutils//;s/gdbtest//;s/ld//;s/libg++//'`
+    ;;
+  *-*-solaris2)
+    configdirs=`echo ${configdirs} | sed -e 's/gas//'`
+    ;;
 esac
 
 
