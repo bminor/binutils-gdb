@@ -1,3 +1,8 @@
+2001-04-13  Roger Sayle  <roger@metaphorics.com>
+
+	* coff-i386.c (TARGET_SYM): SEC_READONLY is an applicable section
+	flag on pe-i386 targets.
+
 2001-04-13  Jakub Jelinek  <jakub@redhat.com>
 
 	* libbfd-in.h (_bfd_merge_section): New.

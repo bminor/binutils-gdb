@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 386 COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -576,7 +576,7 @@ const bfd_target
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
 #ifdef COFF_WITH_PE
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_READONLY
 #endif
    | SEC_CODE | SEC_DATA),
 
