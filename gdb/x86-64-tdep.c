@@ -597,13 +597,14 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 {
   int intreg = 0;
   int ssereg = 0;
-  /* For varargs functions we have to pass the total number of SSE arguments
-     in %rax.  So, let's count this number.  */
+  /* For varargs functions we have to pass the total number of SSE
+     registers used in %rax.  So, let's count this number.  */
   int total_sse_args = 0;
   /* Once an SSE/int argument is passed on the stack, all subsequent
      arguments are passed there.  */
   int sse_stack = 0;
   int int_stack = 0;
+  unsigned total_sp;
   int i;
   char buf[8];
   static int int_parameter_registers[INT_REGS] =
@@ -644,7 +645,8 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 	    int_stack = 1;
 	  if (ssereg / 2 + needed_sseregs > SSE_REGS)
 	    sse_stack = 1;
-	  total_sse_args += needed_sseregs;
+	  if (!sse_stack)
+	    total_sse_args += needed_sseregs;
 
 	  for (j = 0; j < n; j++)
 	    {
@@ -720,13 +722,29 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 	}
     }
 
+  /* We have to make sure that the stack is 16-byte aligned after the
+     setup.  Let's calculate size of arguments first, align stack and
+     then fill in the arguments.  */
+  total_sp = 0;
+  for (i = 0; i < stack_values_count; i++)
+    {
+      struct value *arg = args[stack_values[i]];
+      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+      total_sp += (len + 7) & ~7;
+    }
+  /* total_sp is now a multiple of 8, if it is not a multiple of 16,
+     change the stack pointer so that it will be afterwards correctly
+     aligned.  */
+  if (total_sp & 15)
+    sp -= 8;
+    
   /* Push any remaining arguments onto the stack.  */
   while (--stack_values_count >= 0)
     {
       struct value *arg = args[stack_values[stack_values_count]];
       int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
 
-      /* Make sure the stack stays eightbyte-aligned.  */
+      /* Make sure the stack is 8-byte-aligned.  */
       sp -= (len + 7) & ~7;
       write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
     }
