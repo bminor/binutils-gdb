@@ -313,7 +313,10 @@ SUBSUBSECTION
 	<<bfdlink.h>>).  These structures describe how to create the
 	contents of the output section in terms of the contents of
 	various input sections, fill constants, and, eventually, other
-	types of information.
+	types of information.  They also describe relocs that must be
+	created by the BFD backend, but do not correspond to any input
+	file; this is used to support -Ur, which builds constructors
+	while generating a relocateable object file.
 
 INODE
 Relocating the section contents, Writing the symbol table, Information provided by the linker, Performing the Final Link
@@ -409,12 +412,19 @@ SUBSUBSECTION
 static struct bfd_hash_entry *generic_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
 	   const char *));
+static boolean generic_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *, boolean collect));
 static boolean generic_link_add_object_symbols
-  PARAMS ((bfd *, struct bfd_link_info *));
-static boolean generic_link_check_archive_element
+  PARAMS ((bfd *, struct bfd_link_info *, boolean collect));
+static boolean generic_link_check_archive_element_no_collect
   PARAMS ((bfd *, struct bfd_link_info *, boolean *pneeded));
+static boolean generic_link_check_archive_element_collect
+  PARAMS ((bfd *, struct bfd_link_info *, boolean *pneeded));
+static boolean generic_link_check_archive_element
+  PARAMS ((bfd *, struct bfd_link_info *, boolean *pneeded, boolean collect));
 static boolean generic_link_add_symbol_list
-  PARAMS ((bfd *, struct bfd_link_info *, bfd_size_type count, asymbol **));
+  PARAMS ((bfd *, struct bfd_link_info *, bfd_size_type count, asymbol **,
+	   boolean collect));
 static boolean generic_add_output_symbol
   PARAMS ((bfd *, size_t *psymalloc, asymbol *));
 static boolean default_fill_link_order
@@ -601,24 +611,54 @@ _bfd_generic_link_hash_table_create (abfd)
   return &ret->root;
 }
 
-/* Generic function to add symbols from an object file to the global
-   hash table.  */
+/* Generic function to add symbols to from an object file to the
+   global hash table.  This version does not automatically collect
+   constructors by name.  */
 
 boolean
 _bfd_generic_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  return generic_link_add_symbols (abfd, info, false);
+}
+
+/* Generic function to add symbols from an object file to the global
+   hash table.  This version automatically collects constructors by
+   name, as the collect2 program does.  It should be used for any
+   target which does not provide some other mechanism for setting up
+   constructors and destructors; these are approximately those targets
+   for which gcc uses collect2 and do not support stabs.  */
+
+boolean
+_bfd_generic_link_add_symbols_collect (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  return generic_link_add_symbols (abfd, info, true);
+}
+
+/* Add symbols from an object file to the global hash table.  */
+
+static boolean
+generic_link_add_symbols (abfd, info, collect)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     boolean collect;
+{
   boolean ret;
 
   switch (bfd_get_format (abfd))
     {
     case bfd_object:
-      ret = generic_link_add_object_symbols (abfd, info);
+      ret = generic_link_add_object_symbols (abfd, info, collect);
       break;
     case bfd_archive:
-      ret = _bfd_generic_link_add_archive_symbols
-	(abfd, info, generic_link_check_archive_element);
+      ret = (_bfd_generic_link_add_archive_symbols
+	     (abfd, info,
+	      (collect
+	       ? generic_link_check_archive_element_collect
+	       : generic_link_check_archive_element_no_collect)));
       break;
     default:
       bfd_set_error (bfd_error_wrong_format);
@@ -631,9 +671,10 @@ _bfd_generic_link_add_symbols (abfd, info)
 /* Add symbols from an object file to the global hash table.  */
 
 static boolean
-generic_link_add_object_symbols (abfd, info)
+generic_link_add_object_symbols (abfd, info, collect)
      bfd *abfd;
      struct bfd_link_info *info;
+     boolean collect;
 {
   size_t symsize;
   asymbol **symbols;
@@ -649,7 +690,8 @@ generic_link_add_object_symbols (abfd, info)
     }
   symbol_count = bfd_canonicalize_symtab (abfd, symbols);
 
-  result = generic_link_add_symbol_list (abfd, info, symbol_count, symbols);
+  result = generic_link_add_symbol_list (abfd, info, symbol_count, symbols,
+					 collect);
   free (symbols);
   return result;
 }
@@ -926,13 +968,42 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
   return false;
 }
 
-/* See if we should include an archive element.  */
+/* See if we should include an archive element.  This version is used
+   when we do not want to automatically collect constructors based on
+   the symbol name, presumably because we have some other mechanism
+   for finding them.  */
 
 static boolean
-generic_link_check_archive_element (abfd, info, pneeded)
+generic_link_check_archive_element_no_collect (abfd, info, pneeded)
      bfd *abfd;
      struct bfd_link_info *info;
      boolean *pneeded;
+{
+  return generic_link_check_archive_element (abfd, info, pneeded, false);
+}
+
+/* See if we should include an archive element.  This version is used
+   when we want to automatically collect constructors based on the
+   symbol name, as collect2 does.  */
+
+static boolean
+generic_link_check_archive_element_collect (abfd, info, pneeded)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     boolean *pneeded;
+{
+  return generic_link_check_archive_element (abfd, info, pneeded, true);
+}
+
+/* See if we should include an archive element.  Optionally collect
+   constructors.  */
+
+static boolean
+generic_link_check_archive_element (abfd, info, pneeded, collect)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     boolean *pneeded;
+     boolean collect;
 {
   size_t symsize;
   asymbol **symbols = NULL;
@@ -986,7 +1057,7 @@ generic_link_check_archive_element (abfd, info, pneeded)
 							 bfd_asymbol_name (p)))
 	    goto error_return;
 	  if (! generic_link_add_symbol_list (abfd, info, symbol_count,
-					      symbols))
+					      symbols, collect))
 	    goto error_return;
 	  *pneeded = true;
 	  goto successful_return;
@@ -1051,14 +1122,19 @@ generic_link_check_archive_element (abfd, info, pneeded)
   return false;
 }
 
-/* Add the symbol from an object file to the global hash table.  */
+/* Add the symbols from an object file to the global hash table.  ABFD
+   is the object file.  INFO is the linker information.  SYMBOL_COUNT
+   is the number of symbols.  SYMBOLS is the list of symbols.  COLLECT
+   is true if constructors should be automatically collected by name
+   as is done by collect2.  */
 
 static boolean
-generic_link_add_symbol_list (abfd, info, symbol_count, symbols)
+generic_link_add_symbol_list (abfd, info, symbol_count, symbols, collect)
      bfd *abfd;
      struct bfd_link_info *info;
      bfd_size_type symbol_count;
      asymbol **symbols;
+     boolean collect;
 {
   asymbol **pp, **ppend;
 
@@ -1098,14 +1174,9 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols)
 	  else
 	    string = NULL;
 
-	  /* We pass the constructor argument as false, for
-	     compatibility.  As backends are converted they can
-	     arrange to pass the right value (the right value is the
-	     size of a function pointer if gcc uses collect2 for the
-	     object file format, zero if it does not).  */
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, p->flags, bfd_get_section (p),
-		  p->value, string, false, 0,
+		  p->value, string, false, collect,
 		  (struct bfd_link_hash_entry **) &h)))
 	    return false;
 
@@ -1208,14 +1279,14 @@ static const enum link_action link_action[8][7] =
      which case it is the warning string.
    COPY is true if NAME or STRING must be copied into locally
      allocated memory if they need to be saved.
-   CONSTRUCTOR is true if we should automatically collect gcc
-     constructor or destructor names.
+   COLLECT is true if we should automatically collect gcc constructor
+     or destructor names as collect2 does.
    HASHP, if not NULL, is a place to store the created hash table
      entry.  */
 
 boolean
 _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
-				  string, copy, constructor, hashp)
+				  string, copy, collect, hashp)
      struct bfd_link_info *info;
      bfd *abfd;
      const char *name;
@@ -1224,7 +1295,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
      bfd_vma value;
      const char *string;
      boolean copy;
-     boolean constructor;
+     boolean collect;
      struct bfd_link_hash_entry **hashp;
 {
   enum link_row row;
@@ -1308,7 +1379,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	     and destructors and pass them up in a callback.  We only
 	     do this for certain object file types, since many object
 	     file types can handle this automatically.  */
-	  if (constructor && name[0] == '_')
+	  if (collect && name[0] == '_')
 	    {
 	      const char *s;
 
@@ -1526,6 +1597,7 @@ _bfd_generic_final_link (abfd, info)
 	   o != (asection *) NULL;
 	   o = o->next)
 	{
+	  o->reloc_count = 0;
 	  for (p = o->link_order_head;
 	       p != (struct bfd_link_order *) NULL;
 	       p = p->next)
@@ -1571,6 +1643,7 @@ _bfd_generic_final_link (abfd, info)
 		  bfd_set_error (bfd_error_no_memory);
 		  return false;
 		}
+	      o->flags |= SEC_RELOC;
 	      /* Reset the count so that it can be used as an index
 		 when putting in the output relocs.  */
 	      o->reloc_count = 0;
@@ -2091,6 +2164,11 @@ _bfd_default_link_order (abfd, info, sec, link_order)
       return default_indirect_link_order (abfd, info, sec, link_order);
     case bfd_fill_link_order:
       return default_fill_link_order (abfd, info, sec, link_order);
+    case bfd_data_link_order:
+      return bfd_set_section_contents (abfd, sec,
+				       (PTR) link_order->u.data.contents,
+				       (file_ptr) link_order->offset,
+				       link_order->size);
     }
 }
 

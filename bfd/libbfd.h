@@ -178,6 +178,12 @@ extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create
 extern boolean _bfd_generic_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* Generic add symbol routine.  This version is used by targets for
+   which the linker must collect constructors and destructors by name,
+   as the collect2 program does.  */
+extern boolean _bfd_generic_link_add_symbols_collect
+  PARAMS ((bfd *, struct bfd_link_info *));
+
 /* Generic archive add symbol routine.  */
 extern boolean _bfd_generic_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *,

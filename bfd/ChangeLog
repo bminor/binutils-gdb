@@ -1,3 +1,34 @@
+Tue Mar 22 13:09:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf32-mips.c (mips_elf_final_link): Account for link_order
+	relocs when allocating space for relocations.  Set SEC_RELOC flag
+	for any section which has relocs.  Handle link_order relocs in
+	link_order loop.  Use _bfd_generic_link_add_symbols_collect for
+	add_symbls entry point.
+
+	* linker.c (_bfd_generic_final_link): Set reloc_count to 0 before
+	counting relocs.  Set SEC_RELOC flag for any section which has
+	relocs.
+
+	* linker.c (_bfd_default_link_order): Handle bfd_data_link_order.
+
+	* linker.c (_bfd_generic_link_add_symbols): Just call
+	generic_link_add_symbols.
+	(_bfd_generic_link_add_symbols_collect): New function, like
+	_bfd_generic_link_add_symbols but also collect constructors and
+	destructors by name as collect2 does.
+	(generic_link_add_symbols): New function, like old
+	_bfd_generic_link_add_symbols but with collect argument.
+	(generic_link_add_object_symbols): Take collect argument.
+	(generic_link_check_archive_element_no_collect): New function.
+	(generic_link_check_archive_element_collect): New function.
+	(generic_link_check_archive_element): Take collect argument.
+	(generic_link_add_symbol_list): Take collect argument.
+	(_bfd_generic_link_add_one_symbol): Rename constructor argument to
+	collect.
+	* libbfd-in.h (_bfd_generic_link_add_symbols_collect): Declare.
+	* libbfd.h: Rebuilt.
+
 Tue Mar 22 10:04:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* archive.c (bfd_construct_extended_name_table): Use ar_padchar
