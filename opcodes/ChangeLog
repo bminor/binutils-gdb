@@ -1,3 +1,9 @@
+2005-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* crx-dis.c (make_instruction): Move argument structure into inner
+	scope and ensure that all of its fields are initialised before
+	they are used.
+
 2005-02-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* arc-ext.c: Warning fixes.

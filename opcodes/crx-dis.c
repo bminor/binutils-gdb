@@ -655,10 +655,11 @@ make_instruction (void)
 {
   int i;
   unsigned int shift;
-  argument a;
 
   for (i = 0; i < currInsn.nargs; i++)
     {
+      argument a = { 0 };
+
       a.type = getargtype (instruction->operands[i].op_type);
       if (instruction->operands[i].op_type == cst4
 	  || instruction->operands[i].op_type == rbase_dispu4)
