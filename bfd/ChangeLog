@@ -1,3 +1,7 @@
+Sat Nov 10 08:56:02 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* binary.c: Include safe-ctype.h after bfd.h and sysdep.h.
+
 2001-11-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Don't copy STN_UNDEF
