@@ -155,6 +155,7 @@ CODE_FRAGMENT
 .      struct elf_core_tdata_struct *elf_core_data;
 .      struct bout_data_struct *bout_data;
 .      struct sun_core_struct *sun_core_data;
+.      struct trad_core_struct *trad_core_data;
 .      PTR any;
 .      } tdata;
 .  
