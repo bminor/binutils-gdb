@@ -1,3 +1,7 @@
+2001-08-29  Ben Elliston  <bje@redhat.com>
+
+	* stabs.c (stab_demangle_template): Initialise s4.
+
 2001-08-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (dump_relocations): Recognise EM_PPC64.

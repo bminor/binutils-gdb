@@ -4461,7 +4461,7 @@ stab_demangle_template (minfo, pp, pname)
      regular demangling routine.  */
   if (pname != NULL)
     {
-      char *s1, *s2, *s3, *s4;
+      char *s1, *s2, *s3, *s4 = NULL;
       char *from, *to;
 
       s1 = savestring (orig, *pp - orig);
