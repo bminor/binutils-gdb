@@ -698,7 +698,8 @@ not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h $(INCDIR)/progress.h bucomm.h config.h \
-  $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h
+  $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h $(INCDIR)/libiberty.h \
+  budbg.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h $(INCDIR)/getopt.h $(INCDIR)/progress.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h \

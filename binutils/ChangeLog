@@ -1,3 +1,7 @@
+Wed Jan 10 15:33:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Updated dependencies.
+
 Mon Jan  8 18:02:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c: Add global function write_ieee_debugging_info and a
