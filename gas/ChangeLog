@@ -1,3 +1,8 @@
+Tue Aug 16 01:48:20 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_comm): Set sy_resolved for the common
+	symbol.
+
 Fri Aug 12 17:51:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-mips.c (md_begin): Drop "el" from the end of
