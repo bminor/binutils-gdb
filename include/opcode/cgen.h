@@ -579,7 +579,7 @@ void CGEN_SYM (init_insert) PARAMS ((void));
 void CGEN_SYM (init_extract) PARAMS ((void));
 const struct cgen_insn *
 CGEN_SYM (assemble_insn) PARAMS ((const char *, struct cgen_fields *,
-				  cgen_insn_t *));
+				  cgen_insn_t *, char **));
 int CGEN_SYM (insn_supported) PARAMS ((const struct cgen_syntax *));
 #if 0 /* old */
 int CGEN_SYM (opval_supported) PARAMS ((const struct cgen_opval *));
@@ -609,34 +609,28 @@ extern cgen_print_fn CGEN_SYM (print_insn);
 /* Read in a cpu description file.  */
 const char * cgen_read_cpu_file PARAMS ((const char *));
 
-/* The interface to the assembler is intended to be clean in the sense that
+/* Assembler interface.
+
+   The interface to the assembler is intended to be clean in the sense that
    libopcodes.a is a standalone entity and could be used with any assembler.
-   Well, that's the intention.  Given that, we define an interface between us
-   and the assembler.  The interface will obviously be slanted towards gas,
-   but at least it's a start.
+   Not that one would necessarily want to do that but rather that it helps
+   keep a clean interface.  The interface will obviously be slanted towards
+   GAS, but at least it's a start.
 
    Parsing is controlled by the assembler which calls
    CGEN_SYM (assemble_insn).  If it can parse and build the entire insn
    it doesn't call back to the assembler.  If it needs/wants to call back
-   to the assembler, cgen_asm_parse_operand is called.
-   cgen_asm_parse_operand can either
+   to the assembler, (*cgen_asm_parse_operand_fn) is called which can either
+
    - return a number to be inserted in the insn
    - return a "register" value to be inserted
      (the register might not be a register per pe)
    - queue the argument and return a marker saying the expression has been
      queued (eg: a fix-up)
    - return an error message indicating the expression wasn't recognizable
-   After parsing is done, CGEN_SYM (assemble_insn) calls
-   cgen_asm_finish_insn to output the insn and record the relocs.
-*/
 
-/* Call this for each insn to initialize the assembler callback interface.  */
-void cgen_asm_insn_init PARAMS ((void));
-
-/* Add a register to the assembler's hash table.
-   This makes lets GAS parse registers for us.
-   ??? This isn't currently used, but it could be in the future.  */
-void cgen_asm_record_register PARAMS ((char *, int));
+   The result is an error message or NULL for success.
+   The parsed value is stored in the bfd_vma *.  */
 
 enum cgen_asm_result {
   CGEN_ASM_NUMBER, CGEN_ASM_REGISTER, CGEN_ASM_QUEUED, CGEN_ASM_ERROR
@@ -644,11 +638,32 @@ enum cgen_asm_result {
 
 /* Don't require bfd.h unnecessarily.  */
 #ifdef BFD_VERSION
+extern const char * (*cgen_asm_parse_operand_fn)
+     PARAMS ((const char **, int, int, enum cgen_asm_result *, bfd_vma *));
+#endif
+
+/* These are GAS specific.  They're not here as part of the interface,
+   but rather that we need to put them somewhere.  */
+
+/* Call this for each insn to initialize the assembler callback interface.  */
+void cgen_asm_init_parse PARAMS ((void));
+
+/* Don't require bfd.h unnecessarily.  */
+#ifdef BFD_VERSION
+/* The result is an error message or NULL for success.
+   The parsed value is stored in the bfd_vma *.  */
 const char *cgen_asm_parse_operand PARAMS ((const char **, int, int,
 					    enum cgen_asm_result *,
 					    bfd_vma *));
 #endif
 
+/* Add a register to the assembler's hash table.
+   This makes lets GAS parse registers for us.
+   ??? This isn't currently used, but it could be in the future.  */
+void cgen_asm_record_register PARAMS ((char *, int));
+
+/* After CGEN_SYM (assemble_insn) is done, this is called to
+   output the insn and record any fixups.  */
 void cgen_asm_finish_insn PARAMS ((const struct cgen_insn *, cgen_insn_t *,
 				   unsigned int));
 

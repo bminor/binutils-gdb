@@ -1,3 +1,8 @@
+Thu Apr 10 14:35:00 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cgen.h (<cpu>_cgen_assemble_insn): New arg for errmsg.
+	(cgen_asm_parse_operand_fn): Declare.
+
 Sat Apr  5 13:14:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h: Revert last patch for the NON_BROKEN_OPCODES cases.
