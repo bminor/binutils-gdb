@@ -36,6 +36,7 @@ EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.cp gdb.disasm \
+	gdb.dwarf2 \
 	gdb.fortran gdb.java gdb.mi gdb.objc gdb.threads gdb.trace \
 	$(SUBDIRS)
 

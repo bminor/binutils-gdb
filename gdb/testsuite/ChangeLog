@@ -1,3 +1,12 @@
+2004-10-12  Daniel Jacobowitz  <dan@debian.org>
+
+	* configure.in: Add gdb.dwarf2.
+	* configure: Regenerated.
+	* Makefile.in: Add gdb.dwarf2.
+	* gdb.dwarf2/Makefile.in, gdb.dwarf2/dw2-basic.S,
+	gdb.dwarf2/dw2-basic.exp, gdb.dwarf2/main.c,
+	gdb.dwarf2/file1.txt: New files.
+
 2004-10-11  Orjan Friberg  <orjanf@axis.com>
 
 	* gdb.threads/bp_in_thread.exp: Use runto_main and "continue" instead 

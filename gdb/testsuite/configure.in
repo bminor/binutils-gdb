@@ -121,6 +121,6 @@ AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT([Makefile \
   gdb.ada/Makefile gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
-  gdb.cp/Makefile gdb.disasm/Makefile gdb.fortran/Makefile \
-  gdb.java/Makefile gdb.mi/Makefile \
+  gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
+  gdb.fortran/Makefile gdb.java/Makefile gdb.mi/Makefile \
   gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile])
