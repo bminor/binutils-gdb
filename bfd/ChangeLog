@@ -1,3 +1,8 @@
+2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* aoutx.h (NAME(aout,find_nearest_line)): Correct case for N_SO
+	being the last symbol.
+
 2005-02-07  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf32-mips.c (mips_elf_gprel32_reloc): Reject

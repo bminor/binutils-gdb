@@ -2748,7 +2748,7 @@ NAME(aout,find_nearest_line)
 	      /* Look ahead to next symbol to check if that too is an N_SO.  */
 	      p++;
 	      if (*p == NULL)
-		break;
+		goto done;
 	      q = (aout_symbol_type *) (*p);
 	      if (q->type != (int)N_SO)
 		goto next;
