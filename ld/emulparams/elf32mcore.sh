@@ -27,3 +27,6 @@ OTHER_BSS_END_SYMBOLS="__bss_end__ = . ;"
 # Hmmm, there's got to be a better way.  This sets the stack to the
 # top of the simulator memory (2^19 bytes).
 OTHER_RELOCATING_SECTIONS='.stack 0x80000 : { _stack = .; *(.stack) }'
+
+TEMPLATE_NAME=elf32
+GENERATE_SHLIB_SCRIPT=yes

@@ -1,3 +1,8 @@
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Define.
+	(TEMPLATE_NAME): Define.
+
 Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
 
 	* configure.tgt (i386-*-rtemself*, sh-*-rtemself*): New targets.
