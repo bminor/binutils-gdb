@@ -1,3 +1,13 @@
+Tue Jun 20 17:47:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-esh.c: New file, modified for MPW from esh.c.
+	* scripttempl/sh.sc: Reformatted to simplify MPWification,
+	use *() to concat stab sections instead of [].
+
+Thu Jun 15 08:48:16 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* scripttempl/armpe.sc: Add constructor support.
+
 Tue Jun 13 09:11:20 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* ldlang.c (lang_size_sections):  Any section with a DATA
