@@ -1,3 +1,8 @@
+1999-06-23  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am (dlltool_SOURCES): Add dyn-string.c.
+	* Makefile.in: Rebuild.
+
 1999-06-23  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* configure.in (HAVE_EXECUTABLE_SUFFIX): Define.

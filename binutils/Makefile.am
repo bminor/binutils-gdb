@@ -234,7 +234,7 @@ sysinfo.o: sysinfo.c
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
-dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
+dlltool_SOURCES = dlltool.c defparse.y deflex.l dyn-string.c $(BULIBS)
 dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dlltool.o:dlltool.c

@@ -267,7 +267,7 @@ addr2line_SOURCES = addr2line.c $(BULIBS)
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
-dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
+dlltool_SOURCES = dlltool.c defparse.y deflex.l dyn-string.c $(BULIBS)
 dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
@@ -331,8 +331,8 @@ coffdump_OBJECTS =  coffdump.o coffgrok.o bucomm.o version.o filemode.o
 coffdump_LDADD = $(LDADD)
 coffdump_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 coffdump_LDFLAGS = 
-dlltool_OBJECTS =  dlltool.o defparse.o deflex.o bucomm.o version.o \
-filemode.o
+dlltool_OBJECTS =  dlltool.o defparse.o deflex.o dyn-string.o bucomm.o \
+version.o filemode.o
 dlltool_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 dlltool_LDFLAGS = 
 windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
