@@ -97,7 +97,10 @@
 #define RELOC_WDISP30 11
 #endif
 
-
+#ifdef TC_I960
+#include "coff/i960.h"
+#define TARGET_FORMAT "coff-Intel-little"
+#endif
 
 
 #ifndef OBJ_COFF_MAX_AUXENTRIES
