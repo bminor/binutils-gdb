@@ -1,5 +1,8 @@
 Sun Jun 13 09:17:48 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* valprint.c (_initialize_valprint): Use c->function.sfunc not just
+	c->function.
+
 	* dbxread.c (process_one_symbol): If SUN_FIXED_LBRAC_BUG is not
 	defined, don't worry about Sun's silly LBRAC bug.
 	* config/m68k/tm-sun3.h: Define SUN_FIXED_LBRAC_BUG to 0.
