@@ -42,17 +42,12 @@
 #include "doublest.h"
 
 #include "elf-bfd.h"
-
 #include "solib-svr4.h"
 
-#include "elf-bfd.h"
 /* sh64 flags */
 #include "elf/sh.h"
 /* registers numbers shared with the simulator */
 #include "gdb/sim-sh.h"
-
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 void (*sh_show_regs) (void);
 CORE_ADDR (*skip_prologue_hard_way) (CORE_ADDR);
@@ -1395,7 +1390,7 @@ sign_extend (int value, int bits)
 static void
 sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 {
-  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof(int));
+  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof (int));
   int rn;
   int have_fp = 0;
   int fp_regnum;
@@ -1602,7 +1597,7 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 static void
 sh_fp_frame_init_saved_regs (struct frame_info *fi)
 {
-  int where[NUM_REGS + NUM_PSEUDO_REGS];
+  int *where = (int *) alloca ((NUM_REGS + NUM_PSEUDO_REGS) * sizeof (int));
   int rn;
   int have_fp = 0;
   int depth;
@@ -3309,18 +3304,6 @@ sh_default_register_virtual_type (int reg_nr)
 
    The other pseudo registers (the FVs) also don't pose a problem
    because they are stored as 4 individual FP elements. */
-
-int
-sh_sh4_register_convertible (int nr)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-    return (tdep->DR0_REGNUM <= nr
-	    && nr <= tdep->DR_LAST_REGNUM);
-  else 
-    return 0;
-}
 
 static void
 sh_sh4_register_convert_to_virtual (int regnum, struct type *type,

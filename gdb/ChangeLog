@@ -1,5 +1,10 @@
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
+        * sh-tdep.c: Clean up code erroneously reintroduced by previous
+	big patch.
+
+2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
         * sh-tdep.c: Include correct file.
 
 2002-05-10  Elena Zannoni  <ezannoni@redhat.com>
