@@ -1,3 +1,7 @@
+Mon Nov  8 07:45:01 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Remove h8300h, we have multilib now.
+
 Mon Nov  8 06:09:18 1993  D. V. Henkel-Wallace  (gumby@cirdan.cygnus.com)
 
 	* configure.in: Support generic netware as being ELF format.
