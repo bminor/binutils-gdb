@@ -56,15 +56,11 @@ ldctor.c
 ldctor.h
 ldemul.c
 ldemul.h
-lderror.c
-lderror.h
 ldexp.c
 ldexp.h
 ldfile.c
 ldfile.h
 ldgram.y
-ldindr.c
-ldindr.h
 ldint.texinfo
 ldlang.c
 ldlang.h
@@ -74,19 +70,13 @@ ldmain.c
 ldmain.h
 ldmisc.c
 ldmisc.h
-ldsym.c
-ldsym.h
 ldver.c
 ldver.h
-ldwarn.c
-ldwarn.h
 ldwrite.c
 ldwrite.h
 lexsup.c
 mri.c
 mri.h
-relax.c
-relax.h
 scripttempl
 
 Things-to-lose:
