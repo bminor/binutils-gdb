@@ -1,3 +1,16 @@
+2004-08-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_branch_reloc): Check .opd is in a regular
+	object file.
+	(struct sfpr_def_parms): Save some space.
+	(sfpr_define): Here too.
+
+	* elf64-ppc.c (compare_symbols): Put section syms first.
+	(sym_exists_at): New function.
+	(ppc64_elf_get_synthetic_symtab): Use relocs to find code entry
+	points only for relocatable files.  Use .opd section contents
+	otherwise.  Generally clean up the code.
+
 2004-08-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (STD_R0_0R1, STD_R0_0R12, LD_R0_0R1, LD_R0_0R12,
