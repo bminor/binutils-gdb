@@ -48,7 +48,7 @@ typed input.
 * Programming::		How to use History in your programs.
 @end menu
 
-@node Introduction, Interactive Use, , Top
+@node Introduction, Interactive Use, Top, Top
 @unnumbered Introduction
 
 Many programs read input from the user a line at a time.  The GNU history
