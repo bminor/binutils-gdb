@@ -135,7 +135,7 @@ LIBIBERTY=./../libiberty/libiberty.a
 
 ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o em_hp3hpux.o \
-	em_h8300.o em_ebmon29k.o em_sun4.o em_gld960.o \
+	em_h8300.o em_h8300h.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500.o \
@@ -257,6 +257,9 @@ em_m88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
 em_h8300.c: $(srcdir)/emulparams/h8300.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300.sh
+em_h8300h.c: $(srcdir)/emulparams/h8300h.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300h.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} h8300h.sh
 em_h8500.c: $(srcdir)/emulparams/h8500.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8500.sh

@@ -1,3 +1,9 @@
+Thu Jul 15 14:43:34 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* Makefile.in: Add h8300h support.
+	emulparms/h8300h.sh: New file.
+	scripttemp/h8300h.sc: New file.
+
 Thu Jul 15 12:44:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldfile.c (ldfile_open_file): In error message, use the name the
