@@ -1,3 +1,7 @@
+2003-04-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb_indent.sh: Recognize pid_t and sigset_t as types.
+
 2003-04-11  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_SAVED_PC_AFTER_CALL): Deprecate
