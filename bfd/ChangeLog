@@ -1,3 +1,7 @@
+2003-08-26  Michael Snyder  <msnyder@redhat.com>
+
+	* cpu-frv.c: Remove unused enum.
+
 2003-08-25  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* reloc.c: Fix documentation for MIPS ELF relocations.
