@@ -140,14 +140,19 @@ After the configure script finishes, run Make:
 
 	make
 
+If you want to produce the documentation (for example, if you changed
+some of the Texinfo sources), type this:
+
+	make info
+
 When Make finishes, you can install the package:
 
-	make install INSTALL='/dev/env/DJDIR/bin/ginstall -c'
+	make -k install prefix='${DJDIR}' INSTALL='ginstall -c'
 
 The above doesn't install the docs; for that you will need to say
 this:
 
-	make -k install-info INSTALL='/dev/env/DJDIR/bin/ginstall -c'
+	make -k install-info prefix='${DJDIR}' INSTALL='ginstall -c'
 
 (The -k switch is required, because some unneeded targets that are
 part of the install process fail; -k lets Make run to completion
@@ -163,16 +168,18 @@ script gdb/config/djgpp/djcheck.sh, like this:
 		cd gdb/testsuite
 		sh ../config/djgpp/djcheck.sh
 
-This will run for a while and should not print anything.  Any test
-that fails to produce the expected output will cause the diffs between
-the expected and the actual output be printed, and in addition will
-leave behind a file SOMETHING.tst (where SOMETHING is the name of one
-of the tests).  You should compare each of the *.tst files with the
-corresponding *.out file and convince yourself that the differences do
-not indicate a real problem.  Examples of differences you can
-disregard are changes in the copyright blurb printed by GDB, values of
-unitialized variables, addresses of global variables like argv[] and
-envp[] (which depend on the size of your environment), etc.
+This will run for a while and should not print anything, except the
+messages "Running tests in DIR", where DIR is one of the
+subdirectories of the testsuite.  Any test that fails to produce the
+expected output will cause the diffs between the expected and the
+actual output be printed, and in addition will leave behind a file
+SOMETHING.tst (where SOMETHING is the name of the failed test).  You
+should compare each of the *.tst files with the corresponding *.out
+file and convince yourself that the differences do not indicate a real
+problem.  Examples of differences you can disregard are changes in the
+copyright blurb printed by GDB, values of unitialized variables,
+addresses of global variables like argv[] and envp[] (which depend on
+the size of your environment), etc.
 
 Note that djcheck.sh only recurses into those of the subdirectories of
 the test suite which test features supported by the DJGPP port of GDB.
