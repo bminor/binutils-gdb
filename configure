@@ -680,16 +680,22 @@ ${progname}" ${arguments}  "
 					POPDIR=${PWD}
 					cd ${configdir} 
 
-### figure out what to do with srcdir
+### figure out what to do with srcdir & guest configure
 					case "${srcdir}" in
-					".") ;; # do nothing.  We're building in place.
-					/*) srcdiroption="-srcdir=${srcdir}/${configdir}" ;; # absolute path
-					*) srcdiroption="-srcdir=../${srcdir}/${configdir}" ;; # otherwise relative
+					".") newsrcdir=${srcdir} ;; # no -srcdir option.  We're building in place.
+					/*) # absolute path
+						newsrcdir=${srcdir}/${configdir}
+						srcdiroption="-srcdir=${newsrcdir}"
+						;;
+					*) # otherwise relative
+						newsrcdir=../${srcdir}/${configdir}
+						srcdiroption="-srcdir=${newsrcdir}"
+						;;
 					esac
 
 ### The recursion line is here.
-					if [ -f configure ] ; then
-						recprog=`pwd`/configure
+					if [ -f ${newsrcdir}/configure ] ; then
+						recprog=${newsrcdir}/configure
 					else
 						recprog=${progname}
 					fi
