@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* NOTE: This is a header file, but it contains executable routines.
    This is done this way because these routines are substantially
@@ -52,7 +52,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 /* ECOFF auxiliary information swapping routines.  These are the same
-   for all ECOFF targets, so they are defined in ecoff.c.  */
+   for all ECOFF targets, so they are defined in ecofflink.c.  */
+
 extern void _bfd_ecoff_swap_tir_in
   PARAMS ((int, const struct tir_ext *, TIR *));
 extern void _bfd_ecoff_swap_tir_out
@@ -61,6 +62,25 @@ extern void _bfd_ecoff_swap_rndx_in
   PARAMS ((int, const struct rndx_ext *, RNDXR *));
 extern void _bfd_ecoff_swap_rndx_out
   PARAMS ((int, const RNDXR *, struct rndx_ext *));
+
+/* Prototypes for functions defined in this file.  */
+
+static void ecoff_swap_hdr_in PARAMS ((bfd *, PTR, HDRR *));
+static void ecoff_swap_hdr_out PARAMS ((bfd *, const HDRR *, PTR));
+static void ecoff_swap_fdr_in PARAMS ((bfd *, PTR, FDR *));
+static void ecoff_swap_fdr_out PARAMS ((bfd *, const FDR *, PTR));
+static void ecoff_swap_pdr_in PARAMS ((bfd *, PTR, PDR *));
+static void ecoff_swap_pdr_out PARAMS ((bfd *, const PDR *, PTR));
+static void ecoff_swap_sym_in PARAMS ((bfd *, PTR, SYMR *));
+static void ecoff_swap_sym_out PARAMS ((bfd *, const SYMR *, PTR));
+static void ecoff_swap_ext_in PARAMS ((bfd *, PTR, EXTR *));
+static void ecoff_swap_ext_out PARAMS ((bfd *, const EXTR *, PTR));
+static void ecoff_swap_rfd_in PARAMS ((bfd *, PTR, RFDT *));
+static void ecoff_swap_rfd_out PARAMS ((bfd *, const RFDT *, PTR));
+static void ecoff_swap_opt_in PARAMS ((bfd *, PTR, OPTR *));
+static void ecoff_swap_opt_out PARAMS ((bfd *, const OPTR *, PTR));
+static void ecoff_swap_dnr_in PARAMS ((bfd *, PTR, DNR *));
+static void ecoff_swap_dnr_out PARAMS ((bfd *, const DNR *, PTR));
 
 /* Swap in the symbolic header.  */
 
@@ -187,7 +207,7 @@ ecoff_swap_fdr_in (abfd, ext_copy, intern)
   intern->crfd          = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_crfd);
 
   /* now the fun stuff... */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     intern->lang        = (ext->f_bits1[0] & FDR_BITS1_LANG_BIG)
 					>> FDR_BITS1_LANG_SH_BIG;
     intern->fMerge      = 0 != (ext->f_bits1[0] & FDR_BITS1_FMERGE_BIG);
@@ -252,7 +272,7 @@ ecoff_swap_fdr_out (abfd, intern_copy, ext_ptr)
   bfd_h_put_32 (abfd, intern->crfd, (bfd_byte *)ext->f_crfd);
 
   /* now the fun stuff... */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     ext->f_bits1[0] = (((intern->lang << FDR_BITS1_LANG_SH_BIG)
 			& FDR_BITS1_LANG_BIG)
 		       | (intern->fMerge ? FDR_BITS1_FMERGE_BIG : 0)
@@ -283,9 +303,8 @@ ecoff_swap_fdr_out (abfd, intern_copy, ext_ptr)
 #endif
 }
 
-/* start-sanitize-mpw */
 #ifndef MPW_C
-/* end-sanitize-mpw */
+
 /* Swap in the procedure descriptor record.  */
 
 static void
@@ -297,7 +316,9 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
   struct pdr_ext ext[1];
 
   *ext = *(struct pdr_ext *) ext_copy;
-  
+
+  memset ((PTR) intern, 0, sizeof (*intern));
+
   intern->adr           = ecoff_get_off (abfd, (bfd_byte *)ext->p_adr);
   intern->isym          = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_isym);
   intern->iline         = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_iline);
@@ -318,7 +339,7 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
 
 #ifdef ECOFF_64
   intern->gp_prologue = bfd_h_get_8 (abfd, (bfd_byte *) ext->p_gp_prologue);
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       intern->gp_used = 0 != (ext->p_bits1[0] & PDR_BITS1_GP_USED_BIG);
       intern->reg_frame = 0 != (ext->p_bits1[0] & PDR_BITS1_REG_FRAME_BIG);
@@ -377,7 +398,7 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
 
 #ifdef ECOFF_64
   bfd_h_put_8 (abfd, intern->gp_prologue, (bfd_byte *) ext->p_gp_prologue);
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       ext->p_bits1[0] = ((intern->gp_used ? PDR_BITS1_GP_USED_BIG : 0)
 			 | (intern->reg_frame ? PDR_BITS1_REG_FRAME_BIG : 0)
@@ -407,7 +428,7 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
     abort();
 #endif
 }
-/* start-sanitize-mpw */
+
 #else /* MPW_C */
 /* Same routines, but with ECOFF_64 code removed, so ^&%$#&! MPW C doesn't
    corrupt itself and then freak out. */
@@ -481,7 +502,6 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
 #endif
 }
 #endif /* MPW_C */
-/* end-sanitize-mpw */
 
 /* Swap in a symbol record.  */
 
@@ -499,7 +519,7 @@ ecoff_swap_sym_in (abfd, ext_copy, intern)
   intern->value         = ecoff_get_off (abfd, (bfd_byte *)ext->s_value);
 
   /* now the fun stuff... */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     intern->st          =  (ext->s_bits1[0] & SYM_BITS1_ST_BIG)
 					   >> SYM_BITS1_ST_SH_BIG;
     intern->sc          = ((ext->s_bits1[0] & SYM_BITS1_SC_BIG)
@@ -549,7 +569,7 @@ ecoff_swap_sym_out (abfd, intern_copy, ext_ptr)
   ecoff_put_off (abfd, intern->value, (bfd_byte *)ext->s_value);
 
   /* now the fun stuff... */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     ext->s_bits1[0] = (((intern->st << SYM_BITS1_ST_SH_BIG)
 			& SYM_BITS1_ST_BIG)
 		       | ((intern->sc >> SYM_BITS1_SC_SH_LEFT_BIG)
@@ -594,7 +614,7 @@ ecoff_swap_ext_in (abfd, ext_copy, intern)
   *ext = *(struct ext_ext *) ext_copy;
   
   /* now the fun stuff... */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     intern->jmptbl      = 0 != (ext->es_bits1[0] & EXT_BITS1_JMPTBL_BIG);
     intern->cobol_main  = 0 != (ext->es_bits1[0] & EXT_BITS1_COBOL_MAIN_BIG);
     intern->weakext     = 0 != (ext->es_bits1[0] & EXT_BITS1_WEAKEXT_BIG);
@@ -634,7 +654,7 @@ ecoff_swap_ext_out (abfd, intern_copy, ext_ptr)
   *intern = *intern_copy;	/* Make it reasonable to do in-place.  */
   
   /* now the fun stuff... */
-  if (abfd->xvec->header_byteorder_big_p != false) {
+  if (bfd_header_big_endian (abfd)) {
     ext->es_bits1[0] = ((intern->jmptbl ? EXT_BITS1_JMPTBL_BIG : 0)
 			| (intern->cobol_main ? EXT_BITS1_COBOL_MAIN_BIG : 0)
 			| (intern->weakext ? EXT_BITS1_WEAKEXT_BIG : 0));
@@ -717,7 +737,7 @@ ecoff_swap_opt_in (abfd, ext_copy, intern)
 
   *ext = *(struct opt_ext *) ext_copy;
 
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       intern->ot = ext->o_bits1[0];
       intern->value = (((unsigned int) ext->o_bits2[0]
@@ -735,7 +755,7 @@ ecoff_swap_opt_in (abfd, ext_copy, intern)
 		       | (ext->o_bits4[0] << OPT_BITS2_VALUE_SH_LEFT_LITTLE));
     }
 
-  _bfd_ecoff_swap_rndx_in (abfd->xvec->header_byteorder_big_p != false,
+  _bfd_ecoff_swap_rndx_in (bfd_header_big_endian (abfd),
 			   &ext->o_rndx, &intern->rndx);
 
   intern->offset = bfd_h_get_32 (abfd, (bfd_byte *) ext->o_offset);
@@ -759,7 +779,7 @@ ecoff_swap_opt_out (abfd, intern_copy, ext_ptr)
 
   *intern = *intern_copy;	/* Make it reasonable to do in-place.  */
 
-  if (abfd->xvec->header_byteorder_big_p != false)
+  if (bfd_header_big_endian (abfd))
     {
       ext->o_bits1[0] = intern->ot;
       ext->o_bits2[0] = intern->value >> OPT_BITS2_VALUE_SH_LEFT_BIG;
@@ -774,7 +794,7 @@ ecoff_swap_opt_out (abfd, intern_copy, ext_ptr)
       ext->o_bits4[0] = intern->value >> OPT_BITS4_VALUE_SH_LEFT_LITTLE;
     }
 
-  _bfd_ecoff_swap_rndx_out (abfd->xvec->header_byteorder_big_p != false,
+  _bfd_ecoff_swap_rndx_out (bfd_header_big_endian (abfd),
 			    &intern->rndx, &ext->o_rndx);
 
   bfd_h_put_32 (abfd, intern->value, (bfd_byte *) ext->o_offset);
