@@ -1963,19 +1963,26 @@ input file's format.
 @end table
 
 In any place where you may use a specific file or section name, you may
-also use a wildcard pattern.  The wildcard handling is similar to that
-used by the Unix shell.  A @samp{*} character matches any number of
-characters.  A @samp{?} character matches any single character.  The
-sequence @samp{[@var{chars}]} will match a single instance of any of the
+also use a wildcard pattern.  The linker handles wildcards much as the
+Unix shell does.  A @samp{*} character matches any number of characters.
+A @samp{?} character matches any single character.  The sequence
+@samp{[@var{chars}]} will match a single instance of any of the
 @var{chars}; the @samp{-} character may be used to specify a range of
 characters, as in @samp{[a-z]} to match any lower case letter.  A
 @samp{\} character may be used to quote the following character.
 
-When using a wildcard to match a file name, the wildcard characters will
-not match a @samp{/} character (used to separate directory names on
+When a file name is matched with a wildcard, the wildcard characters
+will not match a @samp{/} character (used to separate directory names on
 Unix).  A pattern consisting of a single @samp{*} character is an
-exception; it will always match any file name.  The wildcard characters
-will match a @samp{/} character in a section name.
+exception; it will always match any file name.  In a section name, the
+wildcard characters will match a @samp{/} character.
+
+Wildcards only match files which are explicitly specified on the command
+line.  The linker does not search directories to expand wildcards.
+However, if you specify a simple file name---a name with no wildcard
+characters---in a linker script, and the file name is not also specified
+on the command line, the linker will attempt to open the file as though
+it appeared on the command line.
 
 In the following example, the command script arranges the output file
 into three consecutive sections, named @code{.text}, @code{.data}, and
