@@ -1563,13 +1563,17 @@ as reported by info trace (NOT addresses!).");
   add_info ("itrace", trace_info,
 	    "Display info about the trace data buffer.");
 
-  add_setshow_boolean_cmd ("itracedisplay", no_class, &trace_display,
-			   "Set automatic display of trace.\n",
-			   "Show automatic display of trace.\n",
+  add_setshow_boolean_cmd ("itracedisplay", no_class, &trace_display, "\
+Set automatic display of trace.", "\
+Show automatic display of trace.", "\
+Controls the display of d10v specific instruction trace information.", "\
+Automatic display of trace is %s.",
 			   NULL, NULL, &setlist, &showlist);
   add_setshow_boolean_cmd ("itracesource", no_class,
-			   &default_trace_show_source,
-			   "Set display of source code with trace.\n",
-			   "Show display of source code with trace.\n",
+			   &default_trace_show_source, "\
+Set display of source code with trace.", "\
+Show display of source code with trace.", "\
+When on source code is included in the d10v instruction trace display.", "\
+Display of source code with trace is %s.",
 			   NULL, NULL, &setlist, &showlist);
 }

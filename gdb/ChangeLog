@@ -1,5 +1,26 @@
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_zinteger_cmd)
+	(add_setshow_cmd, add_setshow_auto_boolean_cmd)
+	(add_setshow_boolean_cmd, add_setshow_cmd_full): Add help_doc and
+	print parameters.  Make string parameters constant.
+	* command.h: Update.  Update copyright.
+	* remote.c (add_packet_config_cmd, _initialize_remote): Ditto.
+	* observer.c (_initialize_observer): Ditto.
+	* frame.c (_initialize_frame): Ditto.
+	* complaints.c (_initialize_complaints): Ditto.
+	* maint.c (_initialize_maint_cmds): Ditto.
+	* target.c (initialize_targets): Ditto.
+	* cli/cli-logging.c (_initialize_cli_logging): Ditto.
+	* infcall.c (_initialize_infcall): Ditto.
+	* arm-tdep.c (_initialize_arm_tdep): Ditto.
+	* m32r-rom.c (_initialize_m32r_rom): Ditto.
+	* remote-rdi.c (_initialize_remote_rdi): Ditto.
+	* d10v-tdep.c (_initialize_d10v_tdep): Ditto.
+	* mips-tdep.c (_initialize_mips_tdep): Ditto.
+
+2004-07-28  Andrew Cagney  <cagney@gnu.org>
+
 	* gdbtypes.c (lookup_primitive_typename): Delete function.
 	* gdbtypes.h (lookup_primitive_typename): Delete declaration.
 	* ada-lex.l: Use language_lookup_primitive_type_by_name.

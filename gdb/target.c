@@ -2430,11 +2430,12 @@ command.", &setdebuglist),
 
   add_setshow_boolean_cmd ("trust-readonly-sections", class_support, 
 			   &trust_readonly, "\
-Set mode for reading from readonly sections.\n\
+Set mode for reading from readonly sections.", "\
+Show mode for reading from readonly sections.", "\
 When this mode is on, memory reads from readonly sections (such as .text)\n\
 will be read from the object file instead of from the target.  This will\n\
 result in significant performance improvement for remote targets.", "\
-Show mode for reading from readonly sections.\n",
+Mode for reading from readonly sections is %s.",
 			   NULL, NULL,
 			   &setlist, &showlist);
 

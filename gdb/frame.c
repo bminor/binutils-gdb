@@ -2233,23 +2233,22 @@ Show backtrace variables such as the backtrace limit",
 
   add_setshow_boolean_cmd ("past-main", class_obscure,
 			   &backtrace_past_main, "\
-Set whether backtraces should continue past \"main\".\n\
+Set whether backtraces should continue past \"main\".", "\
+Show whether backtraces should continue past \"main\".", "\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.", "\
-Show whether backtraces should continue past \"main\".\n\
-Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
-the backtrace at \"main\".  Set this variable if you need to see the rest\n\
-of the stack trace.",
+Whether backtraces should continue past \"main\" is %s.",
 			   NULL, NULL, &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
   add_setshow_uinteger_cmd ("limit", class_obscure,
 			    &backtrace_limit, "\
-Set an upper bound on the number of backtrace levels.\n\
+Set an upper bound on the number of backtrace levels.", "\
+Show the upper bound on the number of backtrace levels.", "\
 No more than the specified number of frames can be displayed or examined.\n\
 Zero is unlimited.", "\
-Show the upper bound on the number of backtrace levels.",
+An upper bound on the number of backtrace levels is %s.",
 			    NULL, NULL, &set_backtrace_cmdlist,
 			    &show_backtrace_cmdlist);
 

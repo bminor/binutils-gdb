@@ -1,7 +1,7 @@
 /* Support for complaint handling during symbol reading in GDB.
 
-   Copyright 1990, 1991, 1992, 1993, 1995, 1998, 1999, 2000, 2002 Free
-   Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1995, 1998, 1999, 2000, 2002,
+   2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -312,9 +312,11 @@ void
 _initialize_complaints (void)
 {
   add_setshow_cmd ("complaints", class_support, var_zinteger,
-		   &stop_whining,
-		   "Set max number of complaints about incorrect symbols.",
-		   "Show max number of complaints about incorrect symbols.",
+		   &stop_whining, "\
+Set max number of complaints about incorrect symbols.", "\
+Show max number of complaints about incorrect symbols.", "\
+Set to zero to disable incorrect symbol complaints.", "\
+Max number of complaints about incorrect symbols is %s.",
 		   NULL, NULL,
 		   &setlist, &showlist);
 

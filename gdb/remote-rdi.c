@@ -1,6 +1,6 @@
 /* GDB interface to ARM RDI library.
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -995,24 +995,24 @@ _initialize_remote_rdi (void)
 	   "Withough an argument, it will display current state.\n",
 	   &maintenancelist);
 
-  add_setshow_boolean_cmd
-    ("rdiromatzero", no_class, &rom_at_zero,
-     "Set target has ROM at addr 0.\n"
-     "A true value disables vector catching, false enables vector catching.\n"
-     "This is evaluated at the time the 'target rdi' command is executed\n",
-     "Show if target has ROM at addr 0.\n",
-     NULL, NULL,
-     &setlist, &showlist);
+  add_setshow_boolean_cmd ("rdiromatzero", no_class, &rom_at_zero, "\
+Set target has ROM at addr 0.", "\
+Show if target has ROM at addr 0.", "\
+A true value disables vector catching, false enables vector catching.\n\
+This is evaluated at the time the 'target rdi' command is executed.", "\
+Target has ROM at addr 0 is %s.",
+			   NULL, NULL,
+			   &setlist, &showlist);
 
-  add_setshow_boolean_cmd
-    ("rdiheartbeat", no_class, &rdi_heartbeat,
-     "Set enable for ADP heartbeat packets.\n"
-     "I don't know why you would want this. If you enable them,\n"
-     "it will confuse ARM and EPI JTAG interface boxes as well\n"
-     "as the Angel Monitor.\n",
-     "Show enable for ADP heartbeat packets.\n",
-     NULL, NULL,
-     &setlist, &showlist);
+  add_setshow_boolean_cmd ("rdiheartbeat", no_class, &rdi_heartbeat, "\
+Set enable for ADP heartbeat packets.", "\
+Show enable for ADP heartbeat packets.", "\
+I don't know why you would want this. If you enable them,\n\
+it will confuse ARM and EPI JTAG interface boxes as well\n\
+as the Angel Monitor.", "\
+Enable for ADP heartbeat packets is %s.",
+			   NULL, NULL,
+			   &setlist, &showlist);
 }
 
 /* A little dummy to make linking with the library succeed. */

@@ -1,5 +1,6 @@
 /* GDB Notifications to Observers.
-   Copyright 2003 Free Software Foundation, Inc.
+
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -199,10 +200,10 @@ void
 _initialize_observer (void)
 {
   add_setshow_zinteger_cmd ("observer", class_maintenance, &observer_debug, "\
-Set observer debugging.\n\
-When non-zero, observer debugging is enabled.",  "\
-Show observer debugging.\n\
-When non-zero, observer debugging is enabled.",
+Set observer debugging.", "\
+Show observer debugging.", "\
+When non-zero, observer debugging is enabled.", "\
+Observer debugging is %s.",
 			    NULL, NULL,
 			    &setdebuglist, &showdebuglist);
 }

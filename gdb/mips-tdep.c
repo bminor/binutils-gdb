@@ -6186,24 +6186,24 @@ search.  The only need to set it is when debugging a stripped executable.", &set
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
   add_setshow_auto_boolean_cmd ("mask-address", no_class, &mask_address_var, "\
-Set zeroing of upper 32 bits of 64-bit addresses.\n\
+Set zeroing of upper 32 bits of 64-bit addresses.", "\
+Show zeroing of upper 32 bits of 64-bit addresses.", "\
 Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
 allow GDB to determine the correct value.\n", "\
-Show zeroing of upper 32 bits of 64-bit addresses.",
+Zerroing of upper 32 bits of 64-bit address is %s.",
 				NULL, show_mask_address, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */
   add_setshow_cmd ("remote-mips64-transfers-32bit-regs", class_obscure,
 		   var_boolean, &mips64_transfers_32bit_regs_p, "\
-Set compatibility with 64-bit MIPS targets that transfer 32-bit quantities.\n\
+Set compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
+Show compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
 Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
 that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
 64 bits for others.  Use \"off\" to disable compatibility mode", "\
-Show compatibility with 64-bit MIPS targets that transfer 32-bit quantities.\n\
-Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
-that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
-64 bits for others.  Use \"off\" to disable compatibility mode", set_mips64_transfers_32bit_regs, NULL, &setlist, &showlist);
+Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.",
+ set_mips64_transfers_32bit_regs, NULL, &setlist, &showlist);
 
   /* Debug this files internals. */
   deprecated_add_show_from_set

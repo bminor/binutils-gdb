@@ -646,6 +646,8 @@ add_packet_config_cmd (struct packet_config *config,
   struct cmd_list_element *show_cmd;
   char *set_doc;
   char *show_doc;
+  char *help_doc;
+  char *print;
   char *cmd_name;
   config->name = name;
   config->title = title;
@@ -655,10 +657,13 @@ add_packet_config_cmd (struct packet_config *config,
 			name, title);
   show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
 			 name, title);
+  print = xstrprintf ("Current use of remote protocol `%s' (%s) is %%s",
+		      name, title);
   /* set/show TITLE-packet {auto,on,off} */
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc,
+				"", print,
 				set_func, show_func,
 				set_remote_list, show_remote_list);
   /* set/show remote NAME-packet {auto,on,off} -- legacy */
@@ -5423,9 +5428,11 @@ response packet.  GDB supplies the initial `$' character, and the\n\
 terminating `#' character and checksum.",
 	   &maintenancelist);
 
-  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break,
-			   "Set whether to send break if interrupted.\n",
-			   "Show whether to send break if interrupted.\n",
+  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break, "\
+Set whether to send break if interrupted.", "\
+Show whether to send break if interrupted.", "\
+If set, a break, instead of a cntrl-c, is sent to the remote target.", "\
+Whether to send break if interrupted is %s.",
 			   NULL, NULL,
 			   &setlist, &showlist);
 
@@ -5464,15 +5471,17 @@ terminating `#' character and checksum.",
 
   add_setshow_cmd ("hardware-watchpoint-limit", no_class,
 		   var_zinteger, &remote_hw_watchpoint_limit, "\
-Set the maximum number of target hardware watchpoints.\n\
+Set the maximum number of target hardware watchpoints.", "\
+Show the maximum number of target hardware watchpoints.", "\
 Specify a negative limit for unlimited.", "\
-Show the maximum number of target hardware watchpoints.\n",
+The maximum number of target hardware watchpoints is %s.",
 		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
   add_setshow_cmd ("hardware-breakpoint-limit", no_class,
 		   var_zinteger, &remote_hw_breakpoint_limit, "\
-Set the maximum number of target hardware breakpoints.\n\
+Set the maximum number of target hardware breakpoints.", "\
+Show the maximum number of target hardware breakpoints.", "\
 Specify a negative limit for unlimited.", "\
-Show the maximum number of target hardware breakpoints.\n",
+The maximum number of target hardware breakpoints is %s.",
 		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
 
   deprecated_add_show_from_set
@@ -5565,8 +5574,11 @@ in a memory packet.\n",
   /* Keep the old ``set remote Z-packet ...'' working. */
   add_setshow_auto_boolean_cmd ("Z-packet", class_obscure,
 				&remote_Z_packet_detect, "\
-Set use of remote protocol `Z' packets",
-				"Show use of remote protocol `Z' packets ",
+Set use of remote protocol `Z' packets", "\
+Show use of remote protocol `Z' packets ", "\
+When set, GDB will attempt to use the remote breakpoint and watchpoint\n\
+packets.", "\
+Use of remote protocol `Z' packets is %s",
 				set_remote_protocol_Z_packet_cmd,
 				show_remote_protocol_Z_packet_cmd,
 				&remote_set_cmdlist, &remote_show_cmdlist);

@@ -860,10 +860,11 @@ of time passes without a response from the target, an error occurs.",
 
 
   add_setshow_boolean_cmd ("profile", class_maintenance,
-			   &maintenance_profile_p,
-			   "Set internal profiling.\n"
-			   "When enabled GDB is profiled.",
-			   "Show internal profiling.\n",
+			   &maintenance_profile_p, "\
+Set internal profiling.", "\
+Show internal profiling.", "\
+When enabled GDB is profiled.", "\
+Internal profiling is %s.",
 			   maintenance_set_profile_cmd, NULL,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
