@@ -2259,7 +2259,7 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
     {
       _bfd_error_handler (_("\
-Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
+ERROR: %s is compiled for EABI version %d, whereas %s is compiled for version %d"),
 			  bfd_archive_filename (ibfd),
 			  (in_flags & EF_ARM_EABIMASK) >> 24,
 			  bfd_get_filename (obfd),
@@ -2273,7 +2273,7 @@ Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
       if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
 	{
 	  _bfd_error_handler (_("\
-Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
+ERROR: %s is compiled for APCS-%d, whereas target %s uses APCS-%d"),
 			      bfd_archive_filename (ibfd),
 			      in_flags & EF_ARM_APCS_26 ? 26 : 32,
 			      bfd_get_filename (obfd),
@@ -2285,12 +2285,12 @@ Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
 	{
 	  if (in_flags & EF_ARM_APCS_FLOAT)
 	    _bfd_error_handler (_("\
-Error: %s passes floats in FP registers, whereas %s passes them in integer registers"),
+ERROR: %s passes floats in float registers, whereas %s passes them in integer registers"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-Error: %s passes floats in integer registers, whereas %s passes them in FP registers"),
+ERROR: %s passes floats in integer registers, whereas %s passes them in float registers"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
@@ -2301,12 +2301,12 @@ Error: %s passes floats in integer registers, whereas %s passes them in FP regis
 	{
 	  if (in_flags & EF_ARM_VFP_FLOAT)
 	    _bfd_error_handler (_("\
-Error: %s uses VFP instructions, whereas %s uses FPA instructions"),
+ERROR: %s uses VFP instructions, whereas %s uses FPA instructions"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-Error: %s uses FPA instructions, whereas %s uses VFP instructions"),
+ERROR: %s uses FPA instructions, whereas %s uses VFP instructions"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
@@ -2326,12 +2326,12 @@ Error: %s uses FPA instructions, whereas %s uses VFP instructions"),
 	    {
 	      if (in_flags & EF_ARM_SOFT_FLOAT)
 		_bfd_error_handler (_ ("\
-Error: %s uses software FP, whereas %s uses hardware FP"),
+ERROR: %s uses software FP, whereas %s uses hardware FP"),
 				    bfd_archive_filename (ibfd),
 				    bfd_get_filename (obfd));
 	      else
 		_bfd_error_handler (_ ("\
-Error: %s uses hardware FP, whereas %s uses software FP"),
+ERROR: %s uses hardware FP, whereas %s uses software FP"),
 				    bfd_archive_filename (ibfd),
 				    bfd_get_filename (obfd));
 
@@ -2395,9 +2395,9 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 	fprintf (file, _(" [interworking enabled]"));
 
       if (flags & EF_ARM_APCS_26)
-	fprintf (file, _(" [APCS-26]"));
+	fprintf (file, " [APCS-26]");
       else
-	fprintf (file, _(" [APCS-32]"));
+	fprintf (file, " [APCS-32]");
 
       if (flags & EF_ARM_VFP_FLOAT)
 	fprintf (file, _(" [VFP float format]"));

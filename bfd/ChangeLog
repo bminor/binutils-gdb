@@ -1,3 +1,14 @@
+2002-01-31  Philipp Thomas  <pthomas@suse.de>
+
+        * coff-arm.c (coff_arm_merge_private_bfd_data): Move ERROR
+        to front of message. Unify messages with elf32-arm.h. Use
+        commas where neccessary.
+        * elf32-arm.h (elf32_arm_merge_private_bfd_data): Use all upcase
+        ERROR in messages. Unify messages with coff-arm.c. Correct
+        VFP/FPA error message.
+        (elf32_arm_print_private_bfd_data): Don't mark APCS-26 and
+        APCS-32 for translation.
+
 2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	Perform on-demand global register allocation from
