@@ -4021,7 +4021,7 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
    failed. */
 
 int
-gdbarch_update (struct gdbarch_info info)
+gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_list **list;

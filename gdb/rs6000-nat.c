@@ -908,7 +908,10 @@ set_host_arch (int pid)
   memset (&info, 0, sizeof info);
   info.bfd_arch_info = bfd_get_arch_info (&abfd);
 
-  gdbarch_update (info);
+  if (!gdbarch_update_p (info))
+    {
+      internal_error ("set_host_arch: failed to select architecture");
+    }
 }
 
 

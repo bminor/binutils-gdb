@@ -789,13 +789,15 @@ extern void gdbarch_free (struct gdbarch *);
    architecture manipulation commands.
 
    The INFO parameter shall be fully initialized (\`\`memset (&INFO,
-   sizeof (info), 0)'' set relevant fields) before gdbarch_update() is
-   called.  gdbarch_update() shall initialize any \`\`default'' fields
-   using information obtained from the previous architecture or
+   sizeof (info), 0)'' set relevant fields) before gdbarch_update_p()
+   is called.  gdbarch_update_p() shall initialize any \`\`default''
+   fields using information obtained from the previous architecture or
    INFO.ABFD (if specified) before calling the corresponding
-   architectures INIT function. */
+   architectures INIT function.
 
-extern int gdbarch_update (struct gdbarch_info info);
+   Returns non-zero if the update succeeds */
+
+extern int gdbarch_update_p (struct gdbarch_info info);
 
 
 
@@ -1723,7 +1725,7 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
    failed. */
 
 int
-gdbarch_update (struct gdbarch_info info)
+gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_list **list;

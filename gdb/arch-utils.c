@@ -298,7 +298,10 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	  struct gdbarch_info info;
 	  memset (&info, 0, sizeof info);
 	  info.byte_order = LITTLE_ENDIAN;
-	  gdbarch_update (info);
+	  if (! gdbarch_update_p (info))
+	    {
+	      printf_unfiltered ("Little endian target not supported by GDB\n");
+	    }
 	}
       else
 	{
@@ -313,7 +316,10 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 	  struct gdbarch_info info;
 	  memset (&info, 0, sizeof info);
 	  info.byte_order = BIG_ENDIAN;
-	  gdbarch_update (info);
+	  if (! gdbarch_update_p (info))
+	    {
+	      printf_unfiltered ("Big endian target not supported by GDB\n");
+	    }
 	}
       else
 	{
@@ -484,7 +490,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
 	internal_error ("set_architecture: bfd_scan_arch failed");
-      if (gdbarch_update (info))
+      if (gdbarch_update_p (info))
 	target_architecture_auto = 0;
       else
 	printf_unfiltered ("Architecture `%s' not reconized.\n",
@@ -546,7 +552,8 @@ set_gdbarch_from_file (bfd *abfd)
       struct gdbarch_info info;
       memset (&info, 0, sizeof info);
       info.abfd = abfd;
-      gdbarch_update (info);
+      if (! gdbarch_update_p (info))
+	error ("Architecture of file not reconized.\n");
     }
   else
     {
@@ -641,7 +648,10 @@ initialize_current_architecture (void)
 
   if (GDB_MULTI_ARCH)
     {
-      gdbarch_update (info);
+      if (! gdbarch_update_p (info))
+	{
+	  internal_error ("initialize_current_architecture: Selection of initial architecture failed");
+	}
     }
 
   /* Create the ``set architecture'' command appending ``auto'' to the

@@ -1,3 +1,12 @@
+2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
+
+	* rs6000-nat.c (set_host_arch): Check value returned by
+	gdbarch_update_p.
+	* gdbarch.sh (gdbarch_update_p): Rename gdbarch_update.
+	* gdbarch.h, gdbarch.c: Regenerate
+	* arch-utils.c (set_gdbarch_from_file,
+ 	initialize_current_architecture, set_endian): Update.
+
 2000-08-10  Jimmy Guo  <guo@cup.hp.com>
 
 	* c-lang.c: Set case sensitivity on for c_language_defn,
