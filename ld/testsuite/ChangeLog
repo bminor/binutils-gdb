@@ -1,3 +1,8 @@
+Thu Jul 15 18:00:30 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* ld-undefined/undefined.exp: XFAIL on IRIX6 for the usual as
+	with other DWARF2 targets.
+
 1999-07-13  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-undefined/undefined.exp: Do not expect arm toolchains to fail
