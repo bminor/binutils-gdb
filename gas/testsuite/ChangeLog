@@ -1,3 +1,8 @@
+2004-01-12  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel18.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2004-01-09  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/vfp2.s, gas/arm/vfp2.d: New test.

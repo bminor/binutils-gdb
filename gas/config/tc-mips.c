@@ -3169,7 +3169,7 @@ macro_build_jalr (int icnt, expressionS *ep)
 
   if (HAVE_NEWABI)
     {
-      frag_grow (4);
+      frag_grow (8);
       f = frag_more (0);
     }
   macro_build (NULL, &icnt, NULL, "jalr", "d,s", RA, PIC_CALL_REG);
