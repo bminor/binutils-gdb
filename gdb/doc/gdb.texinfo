@@ -10453,6 +10453,16 @@ informs @value{GDBN} that a new library has been loaded.  If @var{mode}
 is @code{off}, symbols must be loaded manually, using the
 @code{sharedlibrary} command.  The default value is @code{on}.
 
+@cindex memory used for symbol tables
+If your program uses lots of shared libraries with debug info that
+takes large amounts of memory, you can decrease the @value{GDBN}
+memory footprint by preventing it from automatically loading the
+symbols from shared libraries.  To that end, type @kbd{set
+auto-solib-add off} before running the inferior, then load each
+library whose debug symbols you do need with @kbd{sharedlibrary
+@var{regexp}}, where @var{regexp} is a regular expresion that matches
+the libraries whose symbols you want to be loaded.
+
 @kindex show auto-solib-add
 @item show auto-solib-add
 Display the current autoloading mode.

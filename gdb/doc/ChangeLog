@@ -3,6 +3,8 @@
 	* gdb.texinfo (SVR4 Process Information): Document subcommands of
 	"info proc" that are already implemented.  Add index entries.
 	(Working Directory): Add a cross-reference to "info proc" command.
+	(Files): Add a tip for decreasing memory used for symtabs from
+	shared libraries.
 
 2004-10-12  Andrew Cagney  <cagney@gnu.org>
 
