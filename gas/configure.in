@@ -40,7 +40,7 @@ case "${host_cpu}" in
 a29k | rs6000 | vax)  gas_host=${host_cpu} ;;	
 mips)
 	case "${host_os}" in
-	ultrix) gas_host=decstation ;;
+	ultrix*) gas_host=decstation ;;
 	esac
 	;;
 i386)
@@ -133,12 +133,16 @@ coff* | sysv*)
 vxworks)
 	case ${target_cpu} in
 	i960) obj_format=bout ;;
-	m68k)
+	m68k|m680[01234]0)
 		obj_format=aout
 		emulation=sun3
 		;;
 	*) obj_format=aout ;;
 	esac
+	;;
+OSE)
+	obj_format=aout
+	emulation=sun3
 	;;
 *)
 	case ${target_vendor} in
@@ -166,6 +170,7 @@ esac
 # check for architecture variants
 case ${target_cpu} in
 sparclite) cpu_type=sparc ;;
+m680[01234]0) cpu_type=m68k ;;
 esac
 
 # and target makefile frag
