@@ -1,5 +1,35 @@
 2002-05-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldemul.c (ldemul_new_vers_pattern): New function.
+	* ldemul.h (ldemul_new_vers_pattern): Declare.
+	(struct ld_emulation_xfer_struct): Add new_vers_pattern.
+	* ldlang.c (lang_new_vers_pattern): Call ldemul_new_vers_pattern.
+	* emultempl/ppc64elf.em (dotsyms): New static var.
+	(gld${EMULATION_NAME}_new_vers_pattern): New function.
+	(LDEMUL_NEW_VERS_PATTERN): Define.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_DOTSYMS, OPTION_NO_DOTSYMS.
+	(PARSE_AND_LIST_LONGOPTS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle them.
+	* emultempl/aix.em (ld_${EMULATION_NAME}_emulation): Update
+	initialiser.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf_oabi.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/mipsecoff.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+
+2002-05-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* genscripts.sh (LIB_PATH): For native targets, concatenate $libdir
 	and $NATIVE_LIB_DIRS.  Add $tool_lib before other libs.
 	(LIB_SEARCH_DIRS): No need to use "tr".

@@ -5083,7 +5083,7 @@ lang_new_vers_pattern (orig, new, lang)
       ret->match = lang_vers_match_lang_c;
     }
 
-  return ret;
+  return ldemul_new_vers_pattern (ret);
 }
 
 /* This is called for each set of variable names and match

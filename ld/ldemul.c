@@ -308,3 +308,12 @@ ldemul_find_potential_libraries (name, entry)
 
   return 0;
 }
+
+struct bfd_elf_version_expr *
+ldemul_new_vers_pattern (entry)
+     struct bfd_elf_version_expr *entry;
+{
+  if (ld_emulation->new_vers_pattern)
+    entry = (*ld_emulation->new_vers_pattern) (entry);
+  return entry;
+}

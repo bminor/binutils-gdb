@@ -38,11 +38,16 @@ static int need_laying_out = 0;
    should use a suitable default size.  */
 static bfd_signed_vma group_size = 1;
 
+/* Whether to add ".foo" entries for each "foo" in a version script.  */
+static int dotsyms = 1;
+
 static void ppc_create_output_section_statements PARAMS ((void));
 static asection *ppc_add_stub_section PARAMS ((const char *, asection *));
 static void ppc_layout_sections_again PARAMS ((void));
 static void gld${EMULATION_NAME}_after_allocation PARAMS ((void));
 static void build_section_lists PARAMS ((lang_statement_union_type *));
+static struct bfd_elf_version_expr *gld${EMULATION_NAME}_new_vers_pattern
+  PARAMS ((struct bfd_elf_version_expr *));
 
 /* This is called before the input files are opened.  We create a new
    fake input file to hold the stub sections.  */
@@ -242,6 +247,7 @@ build_section_lists (statement)
     }
 }
 
+
 /* Final emulation specific call.  */
 
 static void
@@ -301,6 +307,77 @@ gld${EMULATION_NAME}_finish ()
 }
 
 
+/* Add a pattern matching ".foo" for every "foo" in a version script.
+
+   The reason for doing this is that many shared library version
+   scripts export a selected set of functions or data symbols, forcing
+   others local.  eg.
+
+   . VERS_1 {
+   .       global:
+   .               this; that; some; thing;
+   .       local:
+   .               *;
+   .   };
+
+   To make the above work for PowerPC64, we need to export ".this",
+   ".that" and so on, otherwise only the function descriptor syms are
+   exported.  Lack of an exported function code sym may cause a
+   definition to be pulled in from a static library.  */
+
+struct bfd_elf_version_expr *
+gld${EMULATION_NAME}_new_vers_pattern (entry)
+     struct bfd_elf_version_expr *entry;
+{
+  struct bfd_elf_version_expr *dot_entry;
+  struct bfd_elf_version_expr *next;
+  unsigned int len;
+  char *dot_pat;
+
+  if (!dotsyms || entry->pattern[0] == '*')
+    return entry;
+
+  /* Is the script adding ".foo" explicitly?  */
+  if (entry->pattern[0] == '.')
+    {
+      /* We may have added this pattern automatically.  Don't add it
+	 again.  Quadratic behaviour here is acceptable as the list
+	 may be traversed for each input bfd symbol.  */
+      for (next = entry->next; next != NULL; next = next->next)
+	{
+	  if (strcmp (next->pattern, entry->pattern) == 0
+	      && next->match == entry->match)
+	    {
+	      next = entry->next;
+	      free (entry->pattern);
+	      free (entry);
+	      return next;
+	    }
+	}
+      return entry;
+    }
+
+  /* Don't add ".foo" if the script has already done so.  */
+  for (next = entry->next; next != NULL; next = next->next)
+    {
+      if (next->pattern[0] == '.'
+	  && strcmp (next->pattern + 1, entry->pattern) == 0
+	  && next->match == entry->match)
+	return entry;
+    }
+
+  dot_entry = (struct bfd_elf_version_expr *) xmalloc (sizeof *dot_entry);
+  dot_entry->next = entry;
+  len = strlen (entry->pattern) + 2;
+  dot_pat = xmalloc (len);
+  dot_pat[0] = '.';
+  memcpy (dot_pat + 1, entry->pattern, len - 1);
+  dot_entry->pattern = dot_pat;
+  dot_entry->match = entry->match;
+  return dot_entry;
+}
+
+
 /* Avoid processing the fake stub_file in vercheck, stat_needed and
    check_needed routines.  */
 
@@ -335,6 +412,8 @@ EOF
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE		301
+#define OPTION_DOTSYMS			(OPTION_STUBGROUP_SIZE + 1)
+#define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 '
 
 # The options are repeated below so that no abbreviations are allowed.
@@ -342,6 +421,10 @@ PARSE_AND_LIST_PROLOGUE='
 PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
+  { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
+  { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
+  { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
+  { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -354,6 +437,15 @@ PARSE_AND_LIST_OPTIONS='
                           after each stub section.  Values of +/-1 indicate\n\
                           the linker should choose suitable defaults.\n"
 		   ));
+  fprintf (file, _("\
+  --dotsyms             For every version pattern \"foo\" in a version script,\n\
+                          add \".foo\" so that function code symbols are\n\
+                          treated the same as function descriptor symbols.\n\
+                          Defaults to on.\n"
+		   ));
+  fprintf (file, _("\
+  --no-dotsyms          Don'\''t do anything special in version scripts.\n"
+		   ));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -365,6 +457,18 @@ PARSE_AND_LIST_ARGS_CASES='
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
       break;
+
+    case OPTION_DOTSYMS:
+      {
+	dotsyms = 1;
+      }
+      break;
+
+    case OPTION_NO_DOTSYMS:
+      {
+	dotsyms = 0;
+      }
+      break;
 '
 
 # Put these extra ppc64elf routines in ld_${EMULATION_NAME}_emulation
@@ -372,3 +476,4 @@ PARSE_AND_LIST_ARGS_CASES='
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
+LDEMUL_NEW_VERS_PATTERN=gld${EMULATION_NAME}_new_vers_pattern

@@ -1937,6 +1937,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_unrecognized_file,
   gld_${EMULATION_NAME}_list_options,
   gld_${EMULATION_NAME}_recognized_file,
-  gld_${EMULATION_NAME}_find_potential_libraries
+  gld_${EMULATION_NAME}_find_potential_libraries,
+  NULL	/* new_vers_pattern */
 };
 EOF
