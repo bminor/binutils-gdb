@@ -386,6 +386,9 @@
 /* Define if you have the <sys/syscall.h> header file.  */
 #undef HAVE_SYS_SYSCALL_H
 
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
+
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
 
@@ -458,6 +461,18 @@
 
 /* Define to 1 if we found this declaration otherwise define to 0. */
 #undef HAVE_DECL_GETOPT
+
+/* Define to 1 if we found this declaration otherwise define to 0. */
+#undef HAVE_DECL_PTRACE
+
+/* Define as the return type of ptrace. */
+#undef PTRACE_TYPE_RET
+
+/* Define to the type of arg 3 for ptrace. */
+#undef PTRACE_TYPE_ARG3
+
+/* Define to the type of arg 5 for ptrace. */
+#undef PTRACE_TYPE_ARG5
 
 /* Define if sigsetjmp is available.  */
 #undef HAVE_SIGSETJMP

@@ -413,6 +413,7 @@ AC_CHECK_HEADERS(sys/ptrace.h ptrace.h)
 AC_CHECK_HEADERS(sys/reg.h sys/debugreg.h)
 AC_CHECK_HEADERS(sys/select.h)
 AC_CHECK_HEADERS(sys/syscall.h)
+AC_CHECK_HEADERS(sys/types.h)
 AC_CHECK_HEADERS(sys/user.h)
 AC_CHECK_HEADERS(sys/wait.h wait.h)
 AC_CHECK_HEADERS(termios.h termio.h sgtty.h)
@@ -447,6 +448,7 @@ AC_MSG_RESULT($gdb_cv_have_struct_stat_with_st_blocks_member)
 if test $gdb_cv_have_struct_stat_with_st_blocks_member = yes; then
   AC_DEFINE(HAVE_STRUCT_STAT_ST_BLOCKS)
 fi
+
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
@@ -481,6 +483,69 @@ AC_CHECK_FUNCS(setpgid setpgrp)
 AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
 AC_CHECK_FUNCS(socketpair)
 AC_CHECK_FUNCS(syscall)
+
+# Check the return and argument types of ptrace.  No canned test for
+# this, so roll our own.
+gdb_ptrace_headers='
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if HAVE_SYS_PTRACE_H
+# include <sys/ptrace.h>
+#endif
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+'
+# There is no point in checking if we don't have a prototype.
+gcc_AC_CHECK_DECLS(ptrace, , [
+  : ${gdb_cv_func_ptrace_ret='int'}
+  : ${gdb_cv_func_ptrace_args='int,int,long,long'}
+], $gdb_ptrace_headers)
+# Check return type.
+AC_CACHE_CHECK([return type of ptrace], gdb_cv_func_ptrace_ret,
+  AC_TRY_COMPILE($gdb_ptrace_headers,
+    [extern long ptrace ();],
+    gdb_cv_func_ptrace_ret='long',
+    gdb_cv_func_ptrace_ret='int'))
+AC_DEFINE_UNQUOTED(PTRACE_TYPE_RET, $gdb_cv_func_ptrace_ret,
+  [Define as the return type of ptrace.])
+# Check argument types.
+AC_CACHE_CHECK([types of arguments for ptrace], gdb_cv_func_ptrace_args, [
+for gdb_arg1 in 'int' 'long'; do
+ for gdb_arg2 in 'pid_t' 'int' 'long'; do
+  for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long'; do
+   for gdb_arg4 in 'int' 'long'; do
+     AC_TRY_COMPILE($gdb_ptrace_headers, [
+extern $gdb_cv_func_ptrace_ret
+  ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
+], [gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4";
+    break 4;])
+    for gdb_arg5 in 'int *' 'int' 'long'; do
+     AC_TRY_COMPILE($gdb_ptrace_headers, [
+extern $gdb_cv_func_ptrace_ret
+  ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4, $gdb_arg5);
+], [
+gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4,$gdb_arg5";
+    break 5;])
+    done
+   done
+  done
+ done
+done
+# Provide a safe default value.
+: ${gdb_cv_func_ptrace_args='int,int,long,long'}
+])
+ac_save_IFS=$IFS; IFS=','
+set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
+IFS=$ac_save_IFS
+shift
+AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG3, ($[3]),
+  [Define to the type of arg 3 for ptrace.])
+if test -n "$[5]"; then
+  AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG5, ($[5]),
+    [Define to the type of arg 5 for ptrace.])
+fi
 
 dnl AC_FUNC_SETPGRP does not work when cross compiling
 dnl Instead, assume we will have a prototype for setpgrp if cross compiling.
