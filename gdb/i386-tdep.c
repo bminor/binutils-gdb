@@ -1102,10 +1102,10 @@ i386_register_virtual_type (int regnum)
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
-  if (IS_FP_REGNUM (regnum))
+  if (FP_REGNUM_P (regnum))
     return builtin_type_i387_ext;
 
-  if (IS_SSE_REGNUM (regnum))
+  if (SSE_REGNUM_P (regnum))
     return builtin_type_vec128i;
 
   if (mmx_regnum_p (regnum))
@@ -1175,7 +1175,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static int
 i386_register_convertible (int regnum)
 {
-  return IS_FP_REGNUM (regnum);
+  return FP_REGNUM_P (regnum);
 }
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
@@ -1185,7 +1185,7 @@ static void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
-  gdb_assert (IS_FP_REGNUM (regnum));
+  gdb_assert (FP_REGNUM_P (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1208,7 +1208,7 @@ static void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
-  gdb_assert (IS_FP_REGNUM (regnum));
+  gdb_assert (FP_REGNUM_P (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1460,7 +1460,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      on having a `long double' that's not `long' at all.  */
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
 
-  /* Although the i386 extended floating-point has only 80 significant
+  /* Although the i387 extended floating-point has only 80 significant
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
@@ -1469,11 +1469,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
 
-  set_gdbarch_sp_regnum (gdbarch, 4);
-  set_gdbarch_fp_regnum (gdbarch, 5);
-  set_gdbarch_pc_regnum (gdbarch, 8);
-  set_gdbarch_ps_regnum (gdbarch, 9);
-  set_gdbarch_fp0_regnum (gdbarch, 16);
+  set_gdbarch_sp_regnum (gdbarch, 4); /* %esp */
+  set_gdbarch_fp_regnum (gdbarch, 5); /* %ebp */
+  set_gdbarch_pc_regnum (gdbarch, 8); /* %eip */
+  set_gdbarch_ps_regnum (gdbarch, 9); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, 16);	/* %st(0) */
 
   /* Use the "default" register numbering scheme for stabs and COFF.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
@@ -1518,7 +1518,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
   set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
-  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
 
