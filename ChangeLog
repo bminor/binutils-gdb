@@ -1,5 +1,7 @@
 Mon Mar 15 15:44:35 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* configure.in (h8300-*-*, h8500-*-*): Don't build libg++.
+
 	* Makefile.in (GCC_FLAGS_TO_PASS): Reset some variables that gcc
 	doesn't use to avoid ARG_MAX overflow on SCO.
 

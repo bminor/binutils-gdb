@@ -185,6 +185,18 @@ case "${target}" in
   *-*-vms)
     configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
     ;;
+  h8300-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/libg++//'`
+## start-sanitize-chill
+    configdirs=`echo ${configdirs} | sed -e 's/chillrt//'`
+## end-sanitize-chill
+    ;;
+  h8500-*-*)
+    configdirs=`echo ${configdirs} | sed -e 's/libg++//'`
+## start-sanitize-chill
+    configdirs=`echo ${configdirs} | sed -e 's/chillrt//'`
+## end-sanitize-chill
+    ;;
 esac
 
 
