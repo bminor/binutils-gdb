@@ -620,8 +620,8 @@ elf64_ia64_relax_section (abfd, sec, link_info, again)
   boolean changed_contents = false;
   boolean changed_relocs = false;
 
-  /* Assume we're not going to change any sizes, and we we'll only
-     need one pass.  */
+  /* Assume we're not going to change any sizes, and we'll only need
+     one pass.  */
   *again = false;
 
   /* Nothing to do if there are no relocations.  */
