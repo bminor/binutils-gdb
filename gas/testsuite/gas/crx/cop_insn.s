@@ -4,6 +4,11 @@ foodata: .word 42
 	 .text
 footext:
 
+	.global cpi
+cpi:
+cpi $0x2, $0x1234
+cpi $3, $0x8765, $0x4321
+
 	.global mtcr
 mtcr:
 mtcr $0xf, r1, c14
