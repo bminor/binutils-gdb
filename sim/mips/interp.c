@@ -3545,7 +3545,10 @@ decode_coproc (SIM_DESC sd,
 		unsigned_4 data;
 		/* enum + int calculation, argh! */
 		id = VU_REG_MST + 16 * id;
-		read_vu_misc_reg(&(vu0_device.regs), id, & data);
+		if (id >= VU_REG_CMSAR0)
+		  read_vu_special_reg(&vu0_device, id, & data);
+		else
+		  read_vu_misc_reg(&(vu0_device.regs), id, & data);
 		GPR[rt] = EXTEND32(T2H_4(data));
 	      }
 	  }
@@ -3584,8 +3587,11 @@ decode_coproc (SIM_DESC sd,
 	      {
 		unsigned_4 data = H2T_4(GPR[rt]);
 		/* enum + int calculation, argh! */
-		id = VU_REG_MST + 16 * id;
-		write_vu_misc_reg(&(vu0_device.regs), id, & data);
+		id = VU_REG_VI + 16 * id;
+		if (id >= VU_REG_CMSAR0)
+		  write_vu_special_reg(&vu0_device, id, & data);
+		else
+		  write_vu_misc_reg(&(vu0_device.regs), id, & data);
 	      }
 	  }
 	else if(i_10_0 == 0x3bf) /* VWAITQ */
