@@ -1,3 +1,8 @@
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-sh-low.c (sh_regmap): Fix FP register offsets, reported by
+	SUGIOKA Toshinobu <sugioka@itonet.co.jp>.
+
 2003-06-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (SFILES): Update.
