@@ -51,6 +51,7 @@ glob
 gprof
 grep
 include
+ispell
 ld
 libg++
 libgcc
