@@ -1,3 +1,7 @@
+2002-05-26  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/call-rt-st.exp: Fix typo in brace quoting.
+
 2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* lib/gdb.exp (gdb_wrapper_init): Just because

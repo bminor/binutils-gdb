@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ if ![gdb_skip_stdio_test "print print_one_large_struct(...)"] {
 if {![gdb_skip_float_test "print print_one_double(*d1)"] && \
         ![gdb_skip_stdio_test "print print_one_double(*d1)"] } {
     print_struct_call "print_one_double(*d1)" \
-	    ".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+.\[0-9\]+ = \\{double1 = 1\\.111\[0-9\]*\}"
+	    ".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+.\[0-9\]+ = \\{double1 = 1\\.111\[0-9\]*\\}"
 }
 
 if {![gdb_skip_float_test "print print_two_floats(*f3)"] && \
