@@ -1,3 +1,7 @@
+2002-04-12  Michael Snyder  <msnyder@redhat.com>
+
+	* source.c: White space fix-up.
+
 2002-04-12  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (read_relative_register_raw_bytes): Delete declaration.

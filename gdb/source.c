@@ -523,7 +523,7 @@ source_info (char *ignore, int from_tty)
    Otherwise, return -1, with errno set for the last name we tried to open.  */
 
 /*  >>>> This should only allow files of certain types,
-   >>>>  eg executable, non-directory */
+    >>>>  eg executable, non-directory */
 int
 openp (const char *path, int try_cwd_first, const char *string,
        int mode, int prot,
