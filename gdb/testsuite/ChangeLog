@@ -1,3 +1,8 @@
+2004-07-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp: Remove KFAIL of "backtrace in
+	gdb1718".  PR backtrace/1718 partially fixed.
+
 2004-07-27  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.threads/watchthreads.exp: New test for threaded watchpoints.
