@@ -1,3 +1,8 @@
+2001-04-24  Jim Blandy  <jimb@redhat.com>
+
+	* c-typeprint.c (c_type_print_cv_qualifier): Don't print `const'
+	qualifier on C++ references; all references are innately const.
+
 2001-04-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* event-top.h: Fix formatting.

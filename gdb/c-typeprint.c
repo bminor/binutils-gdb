@@ -293,7 +293,11 @@ c_type_print_cv_qualifier (struct type *type, struct ui_file *stream,
 {
   int flag = 0;
 
-  if (TYPE_CONST (type))
+  /* We don't print `const' qualifiers for references --- since all
+     operators affect the thing referenced, not the reference itself,
+     every reference is `const'.  */
+  if (TYPE_CONST (type)
+      && TYPE_CODE (type) != TYPE_CODE_REF)
     {
       if (need_pre_space)
 	fprintf_filtered (stream, " ");
