@@ -1,5 +1,10 @@
 Thu Feb 12 14:10:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
+	* configure.host (alpha*-*-netbsd*): New host.
+	* configure.tgt (alpha*-*-netbsd*, powerpc-*-netbsd*): New
+	targets.
+
 	* lexsup.c (help): Update bug-gnu-utils address.
 	* ld.texinfo (Bug Reporting): Likewise.
 
