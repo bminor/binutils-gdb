@@ -1,3 +1,8 @@
+Tue Feb  9 10:38:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* configure.in: Do not use the ./support directory.
+	* configure: Regenerate.
+
 Wed Jan  6 12:24:19 1999  Christopher Faylor <cgf@cygnus.com>
 
 	* configure.in: Use LOCAL_CFLAGS rather than CFLAGS for
