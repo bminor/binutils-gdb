@@ -134,6 +134,7 @@ lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { 0 };
 static const char *entry_symbol = 0;
+boolean entry_from_cmdline;
 boolean lang_has_input_file = false;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
@@ -1241,9 +1242,11 @@ print_output_section_statement (output_section_statement)
   print_nl ();
   if (output_section_statement->load_base)
     {
-      int b = exp_get_abs_int(output_section_statement->load_base,
+      bfd_vma b = exp_get_abs_int(output_section_statement->load_base,
 				0, "output base", lang_final_phase_enum);
-      fprintf (config.map_file, "Output address   %08x\n", b);
+      fprintf (config.map_file, "Output address   ");
+      fprintf_vma (config.map_file, b);
+      fprintf (config.map_file, "\n");
     }
   if (output_section_statement->section_alignment >= 0
       || output_section_statement->subsection_alignment >= 0) 
@@ -2347,7 +2350,7 @@ lang_one_common (h, info)
   power_of_two = h->u.c.p->alignment_power;
 
   if (config.sort_common
-      && power_of_two < *(int *) info)
+      && power_of_two < (unsigned int) *(int *) info)
     return true;
 
   section = h->u.c.p->section;
@@ -2589,17 +2592,23 @@ lang_add_output (name, from_script)
 
 static lang_output_section_statement_type *current_section;
 
-static int topower(x)
+static int
+topower (x)
      int x;
 {
-  unsigned  int i = 1;
+  unsigned int i = 1;
   int l;
-  if (x < 0) return -1;
+
+  if (x < 0)
+    return -1;
+
   for (l = 0; l < 32; l++) 
-  {
-    if (i >= x) return l;
-    i<<=1;
-  }
+    {
+      if (i >= (unsigned int) x)
+	return l;
+      i <<= 1;
+    }
+
   return 0;
 }
 void
@@ -2834,16 +2843,14 @@ lang_section_start (name, address)
 void
 lang_add_entry (name, cmdline)
      CONST char *name;
-     int cmdline;
+     boolean cmdline;
 {
-  static int from_cmdline;
-
   if (entry_symbol == NULL
       || cmdline
-      || ! from_cmdline)
+      || ! entry_from_cmdline)
     {
       entry_symbol = name;
-      from_cmdline = cmdline;
+      entry_from_cmdline = cmdline;
     }
 #if 0 
   /* don't do this yet.  It seems to work (the executables run), but the 

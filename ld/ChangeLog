@@ -1,3 +1,10 @@
+Wed Oct  4 17:37:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (exp_get_abs_int): Return bfd_vma, not int.
+	* ldexp.h (exp_get_abs_int): Update declaration.
+	* ldlang.c (print_output_section_statement): Use fprintf_vma to
+	print return value of exp_get_abs_int.
+
 Mon Oct  2 13:56:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (global_stat): New file static variable.
