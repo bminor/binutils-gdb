@@ -1,3 +1,7 @@
+Tue Mar 30 08:06:24 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* findvar.c [REG_STRUCT_HAS_ADDR]: Add comment.
+
 Tue Mar 30 00:14:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-pinsn.c: Add missing include of dis-asm.h.
