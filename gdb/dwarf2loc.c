@@ -32,6 +32,7 @@
 #include "ax-gdb.h"
 #include "regcache.h"
 #include "objfiles.h"
+#include "exceptions.h"
 
 #include "elf/dwarf2.h"
 #include "dwarf2expr.h"
@@ -188,9 +189,66 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
   CORE_ADDR addr;
 
   if (target_get_thread_local_address_p ())
-    addr = target_get_thread_local_address (inferior_ptid,
-					    debaton->objfile,
-					    offset);
+    {
+      ptid_t ptid = inferior_ptid;
+      struct objfile *objfile = debaton->objfile;
+      volatile struct exception ex;
+
+      TRY_CATCH (ex, RETURN_MASK_ALL)
+	{
+	  addr = target_get_thread_local_address (ptid, objfile, offset);
+	}
+      /* If an error occurred, print TLS related messages here.  Otherwise,
+         throw the error to some higher catcher.  */
+      if (ex.reason < 0)
+	{
+	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
+
+	  switch (ex.error)
+	    {
+	    case TLS_NO_LIBRARY_SUPPORT_ERROR:
+	      error (_("Cannot find thread-local variables in this thread library."));
+	      break;
+	    case TLS_LOAD_MODULE_NOT_FOUND_ERROR:
+	      if (objfile_is_library)
+		error (_("Cannot find shared library `%s' in dynamic"
+		         " linker's load module list"), objfile->name);
+	      else
+		error (_("Cannot find executable file `%s' in dynamic"
+		         " linker's load module list"), objfile->name);
+	      break;
+	    case TLS_NOT_ALLOCATED_YET_ERROR:
+	      if (objfile_is_library)
+		error (_("The inferior has not yet allocated storage for"
+		         " thread-local variables in\n"
+		         "the shared library `%s'\n"
+		         "for %s"),
+		       objfile->name, target_pid_to_str (ptid));
+	      else
+		error (_("The inferior has not yet allocated storage for"
+		         " thread-local variables in\n"
+		         "the executable `%s'\n"
+		         "for %s"),
+		       objfile->name, target_pid_to_str (ptid));
+	      break;
+	    case TLS_GENERIC_ERROR:
+	      if (objfile_is_library)
+		error (_("Cannot find thread-local storage for %s, "
+		         "shared library %s:\n%s"),
+		       target_pid_to_str (ptid),
+		       objfile->name, ex.message);
+	      else
+		error (_("Cannot find thread-local storage for %s, "
+		         "executable file %s:\n%s"),
+		       target_pid_to_str (ptid),
+		       objfile->name, ex.message);
+	      break;
+	    default:
+	      throw_exception (ex);
+	      break;
+	    }
+	}
+    }
   /* It wouldn't be wrong here to try a gdbarch method, too; finding
      TLS is an ABI-specific thing.  But we don't do that yet.  */
   else

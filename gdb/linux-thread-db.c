@@ -27,6 +27,7 @@
 #include "gdb_thread_db.h"
 
 #include "bfd.h"
+#include "exceptions.h"
 #include "gdbthread.h"
 #include "inferior.h"
 #include "symfile.h"
@@ -1238,7 +1239,6 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
 {
   if (is_thread (ptid))
     {
-      int objfile_is_library = (objfile->flags & OBJF_SHARED);
       td_err_e err;
       void *address;
       CORE_ADDR lm;
@@ -1246,7 +1246,12 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
 
       /* glibc doesn't provide the needed interface.  */
       if (!td_thr_tls_get_addr_p)
-	error (_("Cannot find thread-local variables in this thread library."));
+	{
+	  struct exception e 
+	    = { RETURN_ERROR, TLS_NO_LIBRARY_SUPPORT_ERROR, 0 };
+
+	  throw_exception (e);
+	}
 
       /* Get the address of the link map for this objfile.  */
       lm = svr4_fetch_objfile_link_map (objfile);
@@ -1254,12 +1259,10 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
       /* Whoops, we couldn't find one. Bail out.  */
       if (!lm)
 	{
-	  if (objfile_is_library)
-	    error (_("Cannot find shared library `%s' link_map in dynamic"
-		   " linker's module list"), objfile->name);
-	  else
-	    error (_("Cannot find executable file `%s' link_map in dynamic"
-		   " linker's module list"), objfile->name);
+	  struct exception e
+	    = { RETURN_ERROR, TLS_LOAD_MODULE_NOT_FOUND_ERROR, 0 };
+
+	  throw_exception (e);
 	}
 
       /* Get info about the thread.  */
@@ -1277,34 +1280,21 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
 	  /* Now, if libthread_db provided the initialization image's
 	     address, we *could* try to build a non-lvalue value from
 	     the initialization image.  */
-	  if (objfile_is_library)
-	    error (_("The inferior has not yet allocated storage for"
-		   " thread-local variables in\n"
-		   "the shared library `%s'\n"
-		   "for the thread %ld"),
-		   objfile->name, (long) GET_THREAD (ptid));
-	  else
-	    error (_("The inferior has not yet allocated storage for"
-		   " thread-local variables in\n"
-		   "the executable `%s'\n"
-		   "for the thread %ld"),
-		   objfile->name, (long) GET_THREAD (ptid));
+
+	  struct exception e
+	    = { RETURN_ERROR, TLS_NOT_ALLOCATED_YET_ERROR, 0 };
+
+	  throw_exception (e);
 	}
 #endif
 
       /* Something else went wrong.  */
       if (err != TD_OK)
 	{
-	  if (objfile_is_library)
-	    error (_("Cannot find thread-local storage for thread %ld, "
-		   "shared library %s:\n%s"),
-		   (long) GET_THREAD (ptid),
-		   objfile->name, thread_db_err_str (err));
-	  else
-	    error (_("Cannot find thread-local storage for thread %ld, "
-		   "executable file %s:\n%s"),
-		   (long) GET_THREAD (ptid),
-		   objfile->name, thread_db_err_str (err));
+	  struct exception e
+	    = { RETURN_ERROR, TLS_GENERIC_ERROR, thread_db_err_str (err) };
+
+	  throw_exception (e);
 	}
 
       /* Cast assuming host == target.  Joy.  */
@@ -1312,10 +1302,15 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
     }
 
   if (target_beneath->to_get_thread_local_address)
-    return target_beneath->to_get_thread_local_address (ptid, objfile,
-							offset);
+    return target_beneath->to_get_thread_local_address (ptid, objfile, offset);
+  else
+    {
+      struct exception e
+	= { RETURN_ERROR, TLS_GENERIC_ERROR,
+	    "TLS not supported on this target" };
 
-  error (_("Cannot find thread-local values on this target."));
+      throw_exception (e);
+    }
 }
 
 static void

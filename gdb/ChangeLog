@@ -1,3 +1,16 @@
+2005-03-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (dwarf2loc.o, linux-thread-db.o): Add dependencies.
+	* exceptions.h (TLS_NO_LIBRARY_SUPPORT_ERROR, TLS_GENERIC_ERROR)
+	(TLS_LOAD_MODULE_NOT_FOUND_ERROR, TLS_NOT_ALLOCATED_YET_ERROR):
+	New error/exception enums.
+	* dwarf2loc.c (exceptions.h): Include.
+	(dwarf_expr_tls_address): Invoke target_get_thread_local_address()
+	via TRY_CATCH mechanism.  Print error messages for TLS related
+	exceptions.
+	* linux-thread-db.c (thread_db_get_thread_local_address): Throw
+	exceptions instead of printing errors.
+
 2005-03-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* utils.c (safe_strerror): Use xsnprintf instead of sprintf.

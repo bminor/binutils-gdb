@@ -56,6 +56,22 @@ enum errors {
      exception.message.  */
   GENERIC_ERROR,
   NOT_FOUND_ERROR,
+
+  /* Thread library lacks support necessary for finding thread local
+     storage.  */
+  TLS_NO_LIBRARY_SUPPORT_ERROR,
+
+  /* Load module not found while attempting to find thread local storage.  */
+  TLS_LOAD_MODULE_NOT_FOUND_ERROR,
+
+  /* Thread local storage has not been allocated yet.  */
+  TLS_NOT_ALLOCATED_YET_ERROR,
+
+  /* Something else went wrong while attempting to find thread local
+     storage.  The ``struct exception'' message field provides more
+     detail.  */
+  TLS_GENERIC_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };
