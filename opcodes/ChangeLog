@@ -1,3 +1,12 @@
+Thu Jan 25 03:39:10 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-dis.c (print_insn_sparc): NUMOPCODES replaced with
+	sparc_num_opcodes.  Update architecture enum values.
+	* sparc-opc.c (sparc_opcode_archs): Replaces architecture_pname.
+	(sparc_opcode_lookup_arch): New function.
+	(sparc_num_opcodes): Renamed from bfd_sparc_num_opcodes.
+	(sparc_opcodes): Add v9a shutdown insn.
+
 Mon Jan 22 08:29:59 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): Renamed from print_insn.

@@ -28,16 +28,43 @@ Boston, MA 02111-1307, USA.	*/
 #include "ansidecl.h"
 #include "opcode/sparc.h"
 
-const char *architecture_pname[] = {
-	"v6",
-	"v7",
-	"v8",
-	"sparclite",
-	"v9",
-	"v9a", /* v9 with ultrasparc additions */
-	NULL,
+/* Some defines to make life easy.  */
+#define v6		SPARC_OPCODE_ARCH_V6
+#define v7		SPARC_OPCODE_ARCH_V7
+#define v8		SPARC_OPCODE_ARCH_V8
+#define sparclite	SPARC_OPCODE_ARCH_SPARCLITE
+#define v9		SPARC_OPCODE_ARCH_V9
+#define v9a		SPARC_OPCODE_ARCH_V9A
+
+/* Table of opcode architectures.
+   The order is defined in opcode/sparc.h.  */
+const struct sparc_opcode_arch sparc_opcode_archs[] = {
+  { "v6", 0 },
+  { "v7", 0 },
+  { "v8", 0 },
+  { "sparclite", (1 << v9) | (1 << v9a) },
+  { "v9", 1 << sparclite },
+  { "v9a", 1 << sparclite }, /* v9 with ultrasparc additions */
+  { NULL, 0 }
 };
 
+/* Given NAME, return it's architecture entry.  */
+
+const enum sparc_opcode_arch_val
+sparc_opcode_lookup_arch (name)
+     const char *name;
+{
+  const struct sparc_opcode_arch *p;
+
+  for (p = &sparc_opcode_archs[0]; p->name; ++p)
+    {
+      if (strcmp (name, p->name) == 0)
+	return (enum sparc_opcode_arch_val) (p - &sparc_opcode_archs[0]);
+    }
+
+  return SPARC_OPCODE_ARCH_BAD;
+}
+
 /* Branch condition field.  */
 #define COND(x)		(((x)&0xf)<<25)
 
@@ -93,7 +120,7 @@ const char *architecture_pname[] = {
 #define XCC (1<<12) /* v9 */
 #define FCC(x)	(((x)&0x3)<<11) /* v9 */
 #define FBFCC(x)	(((x)&0x3)<<20)	/* v9 */
-
+
 /* The order of the opcodes in the table is significant:
 	
 	* The assembler requires that all instances of the same mnemonic must
@@ -1460,9 +1487,13 @@ IMPDEP ("impdep2", 0x37),
 { "casx",	F3(3, 0x3e, 0)|ASI(0x80), F3(~3, ~0x3e, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, v9 }, /* casxa [rs1]ASI_P,rs2,rd */
 { "casxl",	F3(3, 0x3e, 0)|ASI(0x88), F3(~3, ~0x3e, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, v9 }, /* casxa [rs1]ASI_P_L,rs2,rd */
 
+/* Ultrasparc extensions */
+/* FIXME: lots more to go */
+{ "shutdown",	F3F(2, 0x36, 0x80), F3(~2, ~0x36, ~0x80)|RD_G0|RS1_G0|RS2_G0, "", 0, v9a },
+
 };
 
-const int bfd_sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
+const int sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
 
 /* Utilities for argument parsing.  */
 
