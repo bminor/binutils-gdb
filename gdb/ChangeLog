@@ -1,5 +1,8 @@
 Fri Aug 23 14:07:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
+	* doc/Makefile, Makefile.in: generate "gdb-all.texi" rather than
+	"gdb-all.texinfo" 
+
 	* doc/rdl-apps.texi: renamed from rdl-apps.texinfo
 
 	* Makefile.in, doc/Makefile, doc/.Sanitize, doc/gdb.texinfo:

@@ -545,17 +545,17 @@ refcard.ps : $(srcdir)/doc/refcard.tex
 	mv $(srcdir)/doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi : $(srcdir)/doc/gdb-all.texinfo $(srcdir)/doc/rdl-apps.texi
+gdb.dvi : $(srcdir)/doc/gdb-all.texi $(srcdir)/doc/rdl-apps.texi
 	( cd $(srcdir)/doc; make gdb.dvi )
 	mv $(srcdir)/doc/gdb.dvi .
 
 # GDB MANUAL: info file
-gdb.info: $(srcdir)/doc/gdb-all.texinfo
+gdb.info: $(srcdir)/doc/gdb-all.texi
 	( cd $(srcdir)/doc; make gdb.info )
 	mv $(srcdir)/doc/gdb.info* .
 
-$(srcdir)/doc/gdb-all.texinfo:
-	(cd $(srcdir)/doc; $(MAKE) gdb-all.texinfo)
+$(srcdir)/doc/gdb-all.texi:
+	(cd $(srcdir)/doc; $(MAKE) gdb-all.texi)
 $(srcdir)/doc/rdl-apps.texi:
 	(cd $(srcdir)/doc; $(MAKE) rdl-apps.texi)
 
