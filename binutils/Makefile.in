@@ -61,7 +61,7 @@ BISONFLAGS = -tvd
 TEXI2ROFF=texi2roff
 
 # Distribution version
-VERSION=1.96
+VERSION=1.97
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 

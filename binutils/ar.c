@@ -37,9 +37,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/time.h>
 #endif
 #include <errno.h>
+#ifndef errno
+extern int errno;
+#endif
 #define BUFSIZE 8192
 
-void EXFUN(open_inarch,(char *archive_filename));
+
 
 
 PROTO(void, print_contents, (bfd * member));
@@ -391,7 +394,7 @@ char *file;
     return filename;
 }
 
- void
+int 
 open_inarch(archive_filename)
     char           *archive_filename;
 {
@@ -406,7 +409,7 @@ open_inarch(archive_filename)
 	  fprintf (stderr, "%s: %s not found.\n", program_name,
 		   archive_filename);
 	  maybequit();
-	  return ;
+	  return 0;
 	}	
 	if (!silent_create)
 	    fprintf(stderr,
@@ -446,6 +449,7 @@ open_inarch(archive_filename)
 	if (bfd_error != no_more_archived_files)
 	    goto bloser;
     }
+return 1;
 }
 
 

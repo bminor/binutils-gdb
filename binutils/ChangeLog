@@ -1,3 +1,8 @@
+Tue May  5 12:00:58 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Bump to version 1.97.
+	* ar.c:  Declare errno for machines that need it.
+
 Mon May  4 23:29:51 1992  John Gilmore  (gnu@cygnus.com)
 
 	* objdump.c (display_info):  Handle error cases without coredump.
