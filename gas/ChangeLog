@@ -1,3 +1,8 @@
+2003-07-22  H.J. Lu <hongjiu.lu@intel.com>
+ 
+	* read.c (do_parse_cons_expression): Mark nbytes unused to
+	silence gcc.
+
 2003-07-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-h8300.c (get_specific): No PCREL8 encoding for bsr/bc

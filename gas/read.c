@@ -3348,7 +3348,8 @@ parse_repeat_cons PARAMS ((expressionS *exp, unsigned int nbytes));
 #endif
 
 void
-do_parse_cons_expression (expressionS *exp, int nbytes)
+do_parse_cons_expression (expressionS *exp,
+			  int nbytes ATTRIBUTE_UNUSED)
 {
   TC_PARSE_CONS_EXPRESSION (exp, nbytes);
 }
