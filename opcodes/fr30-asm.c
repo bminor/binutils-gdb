@@ -157,9 +157,6 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_U4C :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U4C, &fields->f_u4c);
       break;
-    case FR30_OPERAND_M4 :
-      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_M4, &fields->f_m4);
-      break;
     case FR30_OPERAND_U8 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_U8, &fields->f_u8);
       break;
@@ -187,15 +184,11 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_I32 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_I32, &fields->f_i32);
       break;
+    case FR30_OPERAND_M4 :
+      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_M4, &fields->f_m4);
+      break;
     case FR30_OPERAND_I20 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_I20, &fields->f_i20);
-      break;
-    case FR30_OPERAND_LABEL9 :
-      {
-        bfd_vma value;
-        errmsg = cgen_parse_address (od, strp, FR30_OPERAND_LABEL9, 0, NULL,  & value);
-        fields->f_rel9 = value;
-      }
       break;
     case FR30_OPERAND_DIR8 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR8, &fields->f_dir8);
@@ -205,6 +198,13 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
       break;
     case FR30_OPERAND_DIR10 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR10, &fields->f_dir10);
+      break;
+    case FR30_OPERAND_LABEL9 :
+      {
+        bfd_vma value;
+        errmsg = cgen_parse_address (od, strp, FR30_OPERAND_LABEL9, 0, NULL,  & value);
+        fields->f_rel9 = value;
+      }
       break;
     case FR30_OPERAND_LABEL12 :
       {
@@ -305,13 +305,6 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
     case FR30_OPERAND_U4C :
       errmsg = insert_normal (od, fields->f_u4c, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 12, 4, 16, total_length, buffer);
       break;
-    case FR30_OPERAND_M4 :
-      {
-        long value = fields->f_m4;
-        value = ((value) & (15));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
-      }
-      break;
     case FR30_OPERAND_U8 :
       errmsg = insert_normal (od, fields->f_u8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       break;
@@ -359,6 +352,13 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
     case FR30_OPERAND_I32 :
       errmsg = insert_normal (od, fields->f_i32, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 0, 32, 32, total_length, buffer);
       break;
+    case FR30_OPERAND_M4 :
+      {
+        long value = fields->f_m4;
+        value = ((value) & (15));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
+      }
+      break;
     case FR30_OPERAND_I20 :
       {
 do {
@@ -371,13 +371,6 @@ do {
         errmsg = insert_normal (od, fields->f_i20_16, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED)|(1<<CGEN_OPERAND_VIRTUAL), 16, 0, 16, 16, total_length, buffer);
         if (errmsg)
           break;
-      }
-      break;
-    case FR30_OPERAND_LABEL9 :
-      {
-        long value = fields->f_rel9;
-        value = ((int) (((value) - (((pc) + (2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_DIR8 :
@@ -397,10 +390,17 @@ do {
         errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       }
       break;
+    case FR30_OPERAND_LABEL9 :
+      {
+        long value = fields->f_rel9;
+        value = ((int) (((value) - (((pc) + (2))))) >> (1));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, buffer);
+      }
+      break;
     case FR30_OPERAND_LABEL12 :
       {
         long value = fields->f_rel12;
-        value = ((int) (((value) - (((pc) & (-2))))) >> (1));
+        value = ((int) (((value) - (((pc) + (2))))) >> (1));
         errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 5, 11, 16, total_length, buffer);
       }
       break;
