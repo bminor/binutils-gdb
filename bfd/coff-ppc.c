@@ -704,8 +704,6 @@ static reloc_howto_type ppc_coff_howto_table[] =
 
 /* Some really cheezy macros that can be turned on to test stderr :-) */
 
-#define DEBUG_RELOC
-
 #ifdef DEBUG_RELOC
 #define UN_IMPL(x)                                           \
 {                                                            \
@@ -735,8 +733,10 @@ static reloc_howto_type ppc_coff_howto_table[] =
 
 #define DUMP_RELOC2(n,r)                     \
 {                                            \
-   fprintf(stderr,"%s sym %d, r_vaddr %d\n", \
-	   n, r->r_symndx, r->r_vaddr);      \
+   fprintf(stderr,"%s sym %d, r_vaddr %d %s\n", \
+	   n, r->r_symndx, r->r_vaddr,\
+	   (((r->r_type) & IMAGE_REL_PPC_TOCDEFN) == 0) \
+	   ?" ":" TOCDEFN"  );      \
 }
 
 #else
@@ -893,6 +893,123 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 #ifdef TOC_DEBUG
 	  fprintf(stderr,
 		  "toc_offset already set for sym %d (%s) [h=%p] to %d\n",
+		  sym, name, h, ret_val);
+#endif
+	}
+    }
+
+  return ret_val;
+}
+/* FIXME: record a toc offset against a data-in-toc symbol */
+/* Now, there is currenly some confusion on what this means. In some 
+   compilers one sees the moral equivalent of:
+      .tocd
+      define some data
+      .text
+      refer to the data with a [tocv] qualifier
+   In general, one sees something to indicate that a tocd has been
+   seen, and that would trigger the allocation of data in toc. The IBM
+   docs seem to suggest that anything with the TOCDEFN qualifier should
+   never trigger storage allocation. However, in the kernel32.lib that 
+   we've been using for our test bed, there are a couple of variables
+   referenced that fail that test.
+
+   So it can't work that way.
+*/
+static int
+ppc_record_data_in_toc_entry(abfd, info, sec, sym, toc_kind)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     int sym;
+     enum toc_type toc_kind;
+{
+  bfd_byte *t;
+  bfd_byte *old_contents;
+  asection *s;
+  int element_size;
+  int data;
+  int offset;
+  struct ppc_coff_link_hash_entry *h = 0;
+  struct coff_symbol_struct *target;
+  int ret_val;
+  const char *name;
+
+  int *local_syms;
+
+  h = (struct ppc_coff_link_hash_entry *) (obj_coff_sym_hashes (abfd)[sym]);
+
+  if (h == 0) 
+    { 
+      local_syms = obj_coff_local_toc_table(abfd);
+      if (local_syms == 0)
+	{
+	  int i;
+	  /* allocate a table */
+	  local_syms = 
+	    (int *) bfd_zalloc (abfd, 
+				obj_raw_syment_count(abfd) * sizeof(int));
+	  if (local_syms == 0)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  obj_coff_local_toc_table(abfd) = local_syms;
+	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
+	    local_syms[i] = 1;
+	}
+
+      if (local_syms[sym] == 1) 
+	{
+	  local_syms[sym] = global_toc_size;
+	  ret_val = global_toc_size;
+	  global_toc_size += 4;
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "Setting data_in_toc_offset for local sym %d to %d\n",
+		  sym, ret_val);
+#endif
+	}
+      else
+	{
+	  ret_val = local_syms[sym];
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "data_in_toc_offset already set for local sym %d to %d\n",
+		  sym, ret_val);
+#endif
+	}
+    }
+  else
+    {
+      CHECK_EYE(h->eye_catcher);
+
+      name = h->root.root.root.string;
+
+      /* check to see if there's a toc slot allocated. If not, do it
+	 here. It will be used in relocate_section */
+      if (h->toc_offset == 1)
+	{
+#if 0
+	  h->toc_offset = global_toc_size;
+#endif
+	  ret_val = global_toc_size;
+	  /* We're allocating a chunk of the toc, as opposed to a slot */
+	  /* FIXME: alignment? */
+	  
+	  global_toc_size += 4;
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "Setting data_in_toc_offset for sym %d (%s) [h=%p] to %d\n",
+		  sym, name, h, ret_val);
+#endif
+	}
+      else
+	{
+	  ret_val = h->toc_offset;
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "data_in_toc_offset already set for sym %d (%s) [h=%p] to %d\n",
 		  sym, name, h, ret_val);
 #endif
 	}
@@ -1193,17 +1310,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		  }
 	      }
 
-#if 0
-	    if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
-	      {
-		/* Somehow, we are to assume that the toc has already been
-		   done for this one, and the offset is the value of
-		   the symbol? */
-		fprintf(stderr,
-			"Symbol value %d\n", val);
-	      }
-#endif
-
 	    /* 
 	     *  Amazing bit tricks present. As we may have seen earlier, we
 	     *  use the 1 bit to tell us whether or not a toc offset has been
@@ -1263,7 +1369,17 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		const char *name = h->root.root.root.string;
 		our_toc_offset = h->toc_offset;
 
-		if ((our_toc_offset & 1) != 0)
+		if ( (r_flags & IMAGE_REL_PPC_TOCDEFN) == IMAGE_REL_PPC_TOCDEFN &&
+		      our_toc_offset == 1)
+		  {
+		    /* This is unbelievable cheese. Some knowledgable asm hacker has decided to
+		       use r2 as a base for loading a value. He/She does this by setting the
+		       tocdefn bit, and not supplying a toc definition. The behaviour is then
+		       to use the value of the symbol as a toc index. Good Grief.
+		    */
+		    our_toc_offset = val - (toc_section->output_section->vma + toc_section->output_offset);
+		  }
+		else if ((our_toc_offset & 1) != 0)
 		  {
 		    /* if it has been written out, it is marked with the 
 		       1 bit. Fix up our offset, but do not write it out
@@ -1324,7 +1440,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 
 	    /* FIXME: this test is conservative */
-	    if (our_toc_offset > toc_section->_raw_size)
+	    if ( (r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN &&
+		our_toc_offset > toc_section->_raw_size)
 	      {
 		fprintf(stderr,
 			"reloc offset is bigger than the toc size!\n");
@@ -1479,8 +1596,17 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  }
 	  break;
 
-	case IMAGE_REL_PPC_ADDR16:
 	case IMAGE_REL_PPC_REL24:
+	  DUMP_RELOC2(howto->name, rel);
+	  val -= (input_section->output_section->vma
+		  + input_section->output_offset);
+
+	  rstat = _bfd_relocate_contents (howto,
+					  input_bfd, 
+					  val, 
+					  loc);
+	  break;
+	case IMAGE_REL_PPC_ADDR16:
 	case IMAGE_REL_PPC_ADDR24:
 	case IMAGE_REL_PPC_ADDR32:
 	  DUMP_RELOC2(howto->name, rel);
@@ -1604,12 +1730,6 @@ ppc_allocate_toc_section (info)
   bfd_byte *foo;
   static char test_char = '1';
 
-#ifdef DEBUG_TOC
-  fprintf(stderr,
-	  "ppc_allocate_toc_section: allocating %s section of size %d\n",
-	  TOC_SECTION_NAME, global_toc_size);
-#endif
-
   if ( global_toc_size == 0 ) /* FIXME: does this get me in trouble? */
     return true;
 
@@ -1711,8 +1831,13 @@ ppc_process_before_allocation (abfd, info)
 	switch(r_type) 
 	  {
 	  case IMAGE_REL_PPC_TOCREL16:
-	    toc_offset = ppc_record_toc_entry(abfd, info, sec, 
-					      rel->r_symndx, default_toc);
+	    if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
+	      toc_offset = ppc_record_data_in_toc_entry(abfd, info, sec, 
+							rel->r_symndx, 
+							default_toc);
+	    else
+	      toc_offset = ppc_record_toc_entry(abfd, info, sec, 
+						rel->r_symndx, default_toc);
 	    break;
 	  case IMAGE_REL_PPC_IMGLUE:
 	    ppc_mark_symbol_as_glue(abfd, rel->r_symndx, rel);

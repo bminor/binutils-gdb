@@ -1,3 +1,12 @@
+Thu Nov 16 15:16:42 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (ppc_record_data_in_toc_entry): new function
+	(coff_ppc_relocate_section): Handle TOCDEFN attribute
+	(coff_ppc_relocate_section): Correct REL24 handling
+	(ppc_process_before_allocation): Correct TOCDEFN handling
+
+	* peicode.h (dir_names): Added name descriptions
+
 Thu Nov 16 03:38:03 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* VERSION: Updated to cygnus-2.6.
