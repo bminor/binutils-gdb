@@ -220,6 +220,7 @@ CFILES = \
 	atof-generic.c \
 	bignum-copy.c \
 	cond.c \
+	depend.c \
 	ecoff.c \
 	expr.c \
 	flonum-copy.c \
@@ -400,6 +401,7 @@ OBJS = \
 	atof-generic.o \
 	bignum-copy.o \
 	cond.o \
+	depend.o \
 	expr.o \
 	flonum-konst.o \
 	flonum-copy.o \

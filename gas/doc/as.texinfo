@@ -875,6 +875,7 @@ assembler.)
 
 * L::             -L to retain local labels
 * M::		  -M or --mri to assemble in MRI compatibility mode
+* MD::            --MD for dependency tracking
 * o::             -o to name the object file
 * R::             -R to join data and text sections
 * statistics::    --statistics to see statistics about assembly
@@ -1145,6 +1146,21 @@ The i960 @code{.output} pseudo-op is not supported.
 The i960 @code{.setreal} pseudo-op is not supported.
 
 @end itemize
+
+@node MD
+@section Dependency tracking: @code{--MD}
+
+@kindex --MD
+@cindex dependency tracking
+@cindex make rules
+
+@code{@value{AS}} can generate a dependency file for the file it creates.  This
+file consists of a single rule suitable for @code{make} describing the
+dependencies of the main source file.
+
+The rule is written to the file named in its argument.
+
+This feature is used in the automatic updating of makefiles.
 
 @node o
 @section Name the Object File: @code{-o}
@@ -5052,7 +5068,8 @@ Jeff Law at the University of Utah (HPPA mainly), Michael Meissner of the Open
 Software Foundation (i386 mainly), and Ken Raeburn of Cygnus Support (sparc,
 and some initial 64-bit support).
 
-Richard Henderson rewrote the Alpha assembler.
+Richard Henderson rewrote the Alpha assembler. Klaus Kaempf wrote GAS and BFD
+support for openVMS/Alpha.
 
 Several engineers at Cygnus Support have also provided many small bug fixes and
 configuration enhancements.
