@@ -4882,7 +4882,9 @@ tc_gen_reloc (section, fixp)
 	    case 1: code = BFD_RELOC_8;  break;
 	    case 2: code = BFD_RELOC_16; break;
 	    case 4: code = BFD_RELOC_32; break;
+#ifdef BFD64
 	    case 8: code = BFD_RELOC_64; break;
+#endif
 	    }
 	}
       break;

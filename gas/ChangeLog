@@ -1,3 +1,12 @@
+2002-03-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (tc_gen_reloc): Don't attempt to handle 8 byte
+	relocs except when BFD64.
+
+	* write.c (number_to_chars_bigendian): Don't abort when N is
+	larger than sizeof (VAL).
+	(number_to_chars_littleendian): Likewise.
+
 2002-03-05  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* config/tc-hppa.c (md_apply_fix3): Add cast.
