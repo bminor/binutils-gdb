@@ -1,5 +1,7 @@
 Wed Aug 24 11:49:19 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* configure.host, config.bfd: Change i[34]86 to i[345]86.
+
 	* coffgen.c (coff_real_object_p): Set obj_conv_table_size here,
 	rather than waiting until coff_slurp_symbol_table.
 	(coff_write_alien_symbol): Just ignore BSF_DEBUGGING symbols.
