@@ -1,3 +1,15 @@
+Thu Jan  7 13:33:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips-pinsn.c: Actual work now done by opcodes/mips-dis.c.
+
+Wed Jan  6 10:14:51 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* symfile.c: If O_BINARY isn't defined, set it to 0, call openp for
+	binary files oring in the right bit.
+
+	* main.c, source.c, state.c, symmisc.c: use macros defined in
+	fopen-{bin|both} when fopening files.
+
 Wed Jan  6 08:19:11 1993  Fred Fish  (fnf@cygnus.com)
 
 	* defs.h (HOST_CHAR_BIT):  New macro, defaults to either CHAR_BIT
@@ -76,6 +88,14 @@ Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
 	* ch-lang.c (chill_op_print_tab):  Fix MOD entry to use
 	BINOP_MOD instead of BINOP_REM.  Add REM entry, using BINOP_REM.
 	**** end-sanitize-chill ****
+
+Mon Jan  4 07:35:31 1993  Steve Chamberlain  (sac@wahini.cygnus.com)
+
+	* command.c (shell_escape, make_command, _initialize_command):
+	don't create or use fork if CANT_FORK is defined.
+	* serial.h, ser-go32.c: now compiles, but "the obvious problems of
+	code written for the IBM PC" remain.
+	* xm-go32.h: define CANT_FORK
 
 Sun Jan  3 14:24:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
