@@ -1,3 +1,48 @@
+Thu May 11 16:43:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	tekhex.c (first_phase): Understand type 0 symbols.
+	(tekhex_write_object_contents): Fix typo in final record.
+
+Thu May 11 16:43:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	pr ld/6840
+
+	* coff-i960.c (optcall_callback): don't try and optimize
+	undefined refs. 
+	(coff_write_relocs): Search for broken relocs on the way
+	out and fix them up.
+	(coff_renumber_symbols): Calculate and return index of
+	first undefined symbol.
+	(coff_write_object_contents): Call coff_renumber_symbols 
+	and coff_write_relocs with the new args.
+	* libcoff.h: (coff_renumber_symbols, coff_renumber_symbols):
+	Modified prototypes.
+
+Thu May 11 16:43:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+			  Tom Griest <griest@cs.yale.edu>
+
+	Initial support for PE format. 
+	
+	* Makefile.in, targets.c, configure.in, config.bfd:
+	Add support for i386-*-winnt and i386-*-pe.
+	* archive.c (do_slurp_coff_armap):  Understand NTPE format
+	archives.
+	(_bfd_slurp_extended_name_table): Turn \ in a filename
+	into /.
+	* bfd-in.h (bfd_link_subsystem, _bfd_link_stack_heap): New.
+	* coff-i386.c  (howto_table): Conditionalize PCRELOFFSET.
+	* coffcode.h (IMAGE_BASE): New.
+	(coff_compute_section_file_positions): Throw away .junk
+	sections for PE, align symbols.
+	(coff_write_object_contents): Throw away .junk sections
+	for PE. Remember info on .idata and .rsrc sections.
+	Fill in the PE header.
+	(coff_slurp_symbol_table): PE uses C_SECTION class.
+	* cofflink.c (_bfd_coff_final_link): Keep PE info up to date.
+	(_bfd_coff_generic_relocate_section): Cope with PE relocs.
+	* coffswap.h (coff_swap_{aout/file/scn/sym}hdr_{in/out}): 
+	New code for PE headers.
+
 Tue May  9 17:01:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.bfd: Add little endian PowerPC support.

@@ -202,6 +202,8 @@ oasys.c
 opncls.c
 osf-core.c
 pc532-mach.c
+pe-i386.c
+pei-i386.c
 ptrace-core.c
 reloc.c
 reloc16.c
