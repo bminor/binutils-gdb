@@ -1,3 +1,28 @@
+Wed Nov  3 13:48:27 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* aout64.h (RELOC_STD_BITS_BASEREL_LITTLE): Make it 0x10 (Ken's
+	suggestion) to avoid conflict with RELOC_STD_BITS_EXTERN_LITTLE.
+
+Fri Oct 29 15:09:52 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* hp300hpux.h (N_SHARED_LIB): Define to be 0.
+
+Mon Sep 13 21:00:56 1993  John Gilmore  (gnu@cygnus.com)
+
+	* ar.h (ARMAP_TIME_OFFSET):  Add and describe.
+
+Mon Aug 23  Sean Fagan  (sef@cygnus.com)
+
+	* aout64.h [ARCH_SIZE != 64]: Allow N_BADMAG to be overridden.
+
+Mon Aug 16 14:30:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stab_gnu.h: Include aout/stab.def not just stab.def.
+
+Sun Jul 18 21:41:47 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* dynix3.h: New, for symmetry running dynix.
+
 Thu Jul  8 12:52:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* aout64.h (N_BADMAG): Recognize QMAGIC.

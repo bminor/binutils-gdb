@@ -40,10 +40,12 @@ struct external_exec
 /* This indicates a demand-paged executable with the header in the text.
    As far as I know it is only used by 386BSD and/or BSDI.  */
 #define QMAGIC 0314
-#define N_BADMAG(x)	  (N_MAGIC(x) != OMAGIC		\
+# ifndef N_BADMAG
+#  define N_BADMAG(x)	  (N_MAGIC(x) != OMAGIC		\
 			&& N_MAGIC(x) != NMAGIC		\
   			&& N_MAGIC(x) != ZMAGIC \
 		        && N_MAGIC(x) != QMAGIC)
+# endif /* N_BADMAG */
 #endif
 
 #endif
@@ -55,12 +57,13 @@ struct external_exec
 #endif
 
 /* The difference between PAGE_SIZE and N_SEGSIZE is that PAGE_SIZE is
-   the the finest granularity at which you can page something, thus it
+   the finest granularity at which you can page something, thus it
    controls the padding (if any) before the text segment of a ZMAGIC
    file.  N_SEGSIZE is the resolution at which things can be marked as
    read-only versus read/write, so it controls the padding between the
-   text segment and the data segment.  These are the same for most
-   machines, but different for sun3.  */
+   text segment and the data segment (in memory; on disk the padding
+   between them is PAGE_SIZE).  PAGE_SIZE and N_SEGSIZE are the same
+   for most machines, but different for sun3.  */
 
 /* By default, segment size is constant.  But some machines override this
    to be a function of the a.out header (e.g. machine type).  */
@@ -179,7 +182,7 @@ struct external_exec
 #ifndef N_DATOFF
 #define N_DATOFF(x) \
  (N_MAGIC(x) == OMAGIC ? N_TXTOFF(x) + N_TXTSIZE(x) : \
-  N_SEGSIZE(x) + ((N_TXTOFF(x) + N_TXTSIZE(x) - 1) & ~(N_SEGSIZE(x) - 1)))
+  PAGE_SIZE + ((N_TXTOFF(x) + N_TXTSIZE(x) - 1) & ~(PAGE_SIZE - 1)))
 #endif
 
 #ifndef N_TRELOFF
@@ -295,7 +298,7 @@ struct reloc_std_external {
 #define	RELOC_STD_BITS_EXTERN_LITTLE	0x08
 
 #define	RELOC_STD_BITS_BASEREL_BIG	0x08
-#define	RELOC_STD_BITS_BASEREL_LITTLE	0x08
+#define	RELOC_STD_BITS_BASEREL_LITTLE	0x10
 
 #define	RELOC_STD_BITS_JMPTABLE_BIG	0x04
 #define	RELOC_STD_BITS_JMPTABLE_LITTLE	0x04
