@@ -1,4 +1,9 @@
-2003-11-13  Andrew Cagney  <cagney@redhat.com>
+2003-11-14  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ppc-sysv-tdep.o): Update dependencies.
+	* ppc-sysv-tdep.c: Include "objfiles.h".
+	(ppc64_sysv_abi_push_dummy_call): Provide the
+	the FN's objfile when looking for the descriptor.
 
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Set PPC64's
 	"name_of_malloc" to ".malloc".
