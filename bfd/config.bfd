@@ -185,7 +185,6 @@ case "${targ}" in
   i[3456]86-*-linux*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386linux_vec
-    targ_underscore=yes
     ;;
   i[3456]86-*-lynxos*)
     targ_defvec=i386lynx_coff_vec
@@ -195,7 +194,6 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386mach3_vec
     targ_cflags=-DSTAT_FOR_EXEC
-    targ_underscore=yes
     ;;
   i[3456]86-*-mach* | i[3456]86-*-osf1mk*)
     targ_defvec=i386mach3_vec
@@ -416,11 +414,11 @@ case "${targ}" in
     ;;
   mips*el*-*-linux*)
     targ_defvec=bfd_elf32_littlemips_vec
-    targ_selvecs="bfd_elf32_bigmips_vec ecoff_little_vec ecoff_big_vec"
+    targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec ecoff_little_vec ecoff_big_vec"
     ;;
   mips*-*-linux*)
     targ_defvec=bfd_elf32_bigmips_vec
-    targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
+    targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
 
   mn10200-*-*)

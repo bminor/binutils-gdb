@@ -1,5 +1,9 @@
 Fri Mar 28 11:56:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.bfd: Add bfd_elf64_{big,little}mips_vec to targ_selvecs
+	for mips*el*-*-linux* and mips*-*-linux*.  From H.J. Lu
+	<hjl@lucon.org> and Ralf Baechle <ralf@gnu.ai.mit.edu>.
+
 	* bfd.c: Include "libiberty.h".
 	(strerror): Don't declare.
 	(bfd_errmsg): Call xstrerror rather than strerror.
