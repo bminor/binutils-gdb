@@ -67,6 +67,8 @@
 #include "frame.h"
 #include "breakpoint.h"
 #include "inferior.h"
+#include "symtab.h"
+#include "source.h"
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;
@@ -543,10 +545,11 @@ _tuiReset (void)
 void
 tui_show_source (const char *file, int line)
 {
+  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
   /* make sure that the source window is displayed */
   tuiAddWinToLayout (SRC_WIN);
 
-  tuiUpdateSourceWindowsWithLine (current_source_symtab, line);
+  tuiUpdateSourceWindowsWithLine (cursal.symtab, line);
   tuiUpdateLocatorFilename (file);
 }
 

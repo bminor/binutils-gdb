@@ -53,6 +53,7 @@
 #include "frame.h"
 #include "cli/cli-cmds.h"
 #include "top.h"
+#include "source.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -1364,6 +1365,8 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
       if (winInfo->generic.content != (OpaquePtr) NULL)
 	{
 	  TuiLineOrAddress lineOrAddr;
+	  struct symtab_and_line cursal
+	    = get_current_source_symtab_and_line ();
 
 	  if (winInfo->generic.type == SRC_WIN)
 	    lineOrAddr.lineNo =
@@ -1373,19 +1376,20 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	      winInfo->detail.sourceInfo.startLineOrAddr.addr;
 	  freeWinContent (&winInfo->generic);
 	  tuiUpdateSourceWindow (winInfo,
-				 current_source_symtab, lineOrAddr, TRUE);
+				 cursal.symtab, lineOrAddr, TRUE);
 	}
       else if (selected_frame != (struct frame_info *) NULL)
 	{
 	  TuiLineOrAddress line;
-	  extern int current_source_line;
+	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+
 
 	  s = find_pc_symtab (selected_frame->pc);
 	  if (winInfo->generic.type == SRC_WIN)
-	    line.lineNo = current_source_line;
+	    line.lineNo = cursal.line;
 	  else
 	    {
-	      find_line_pc (s, current_source_line, &line.addr);
+	      find_line_pc (s, cursal.line, &line.addr);
 	    }
 	  tuiUpdateSourceWindow (winInfo, s, line, TRUE);
 	}

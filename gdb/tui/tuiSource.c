@@ -337,11 +337,12 @@ tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
       TuiLineOrAddress l;
       struct symtab *s;
       TuiWinContent content = (TuiWinContent) srcWin->generic.content;
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-      if (current_source_symtab == (struct symtab *) NULL)
+      if (cursal.symtab == (struct symtab *) NULL)
 	s = find_pc_symtab (selected_frame->pc);
       else
-	s = current_source_symtab;
+	s = cursal.symtab;
 
       if (scrollDirection == FORWARD_SCROLL)
 	{

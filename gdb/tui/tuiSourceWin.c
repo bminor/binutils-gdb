@@ -45,6 +45,7 @@
 #include "frame.h"
 #include "breakpoint.h"
 #include "value.h"
+#include "source.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -125,9 +126,12 @@ tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
       tuiUpdateExecInfo (winInfo);
       if (winInfo->generic.type == SRC_WIN)
 	{
-	  current_source_line = lineOrAddr.lineNo +
+	  struct symtab_and_line sal;
+	  
+	  sal.line = lineOrAddr.lineNo +
 	    (winInfo->generic.contentSize - 2);
-	  current_source_symtab = s;
+	  sal.symtab = s;
+	  set_current_source_symtab_and_line (&sal);
 	  /*
 	     ** If the focus was in the asm win, put it in the src
 	     ** win if we don't have a split layout
@@ -348,11 +352,12 @@ tuiHorizontalSourceScroll (TuiWinInfoPtr winInfo,
     {
       int offset;
       struct symtab *s;
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-      if (current_source_symtab == (struct symtab *) NULL)
+      if (cursal.symtab == (struct symtab *) NULL)
 	s = find_pc_symtab (selected_frame->pc);
       else
-	s = current_source_symtab;
+	s = cursal.symtab;
 
       if (direction == LEFT_SCROLL)
 	offset = winInfo->detail.sourceInfo.horizontalOffset + numToScroll;
