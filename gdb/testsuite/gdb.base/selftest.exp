@@ -170,6 +170,12 @@ proc do_steps_and_nexts {} {
 		set description "step over current_directory initialization"
 		set command "step"
 	    }
+	    -re ".*gdb_sysroot = .*$gdb_prompt $" {
+		# NOTE: carlton/2003-01-15: More optimization reordering,
+		# observed on GCC 3.1.
+		set description "step over gdb_sysroot initialization"
+		set command "step"
+	    }
 	    -re "\[ \t\]+\{\r\n$gdb_prompt $" {
 		setup_xfail "mips-*-irix5*"
 		fail "$description ended up at odd location"
