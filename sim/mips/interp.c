@@ -40,6 +40,8 @@ code on the hardware.
 #define PROFILE (1)
 #endif
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <ansidecl.h>
@@ -47,6 +49,16 @@ code on the hardware.
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -177,8 +189,8 @@ static host_callback *callback = NULL; /* handle onto the current callback struc
 /* To keep this default simulator simple, and fast, we use a direct
    vector of registers. The internal simulator engine then uses
    manifests to access the correct slot. */
-ut_reg registers[LAST_EMBED_REGNUM + 1];
-int register_widths[LAST_EMBED_REGNUM + 1];
+static ut_reg registers[LAST_EMBED_REGNUM + 1];
+static int register_widths[LAST_EMBED_REGNUM + 1];
 
 #define GPR     (&registers[0])
 #if defined(HASFPU)
@@ -208,19 +220,19 @@ int register_widths[LAST_EMBED_REGNUM + 1];
 #define SP      (registers[29])
 #define RA      (registers[31])
 
-ut_reg EPC = 0; /* Exception PC */
+static ut_reg EPC = 0; /* Exception PC */
 
 #if defined(HASFPU)
 /* Keep the current format state for each register: */
-FP_formats fpr_state[32];
+static FP_formats fpr_state[32];
 #endif /* HASFPU */
 
 /* VR4300 CP0 configuration register: */
-unsigned int CONFIG = 0;
+static unsigned int CONFIG = 0;
 
 /* The following are internal simulator state variables: */
-ut_reg IPC = 0; /* internal Instruction PC */
-ut_reg DSPC = 0;  /* delay-slot PC */
+static ut_reg IPC = 0; /* internal Instruction PC */
+static ut_reg DSPC = 0;  /* delay-slot PC */
 
 
 /* TODO : these should be the bitmasks for these bits within the
@@ -301,12 +313,12 @@ ut_reg DSPC = 0;  /* delay-slot PC */
    the register update to be delayed for a single instruction
    cycle. */
 #define PSLOTS (5) /* Maximum number of instruction cycles */
-int    pending_in;
-int    pending_out;
-int    pending_total;
-int    pending_slot_count[PSLOTS];
-int    pending_slot_reg[PSLOTS];
-ut_reg pending_slot_value[PSLOTS];
+static int    pending_in;
+static int    pending_out;
+static int    pending_total;
+static int    pending_slot_count[PSLOTS];
+static int    pending_slot_reg[PSLOTS];
+static ut_reg pending_slot_value[PSLOTS];
 
 /* The following are not used for MIPS IV onwards: */
 #define PENDING_FILL(r,v) {\
@@ -324,7 +336,7 @@ printf("DBG: FILL        reg %d value = 0x%08X%08X\n",(r),WORD64HI(v),WORD64LO(v
 printf("DBG: FILL AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",pending_in,pending_out,pending_total);\
                           }
 
-int LLBIT = 0;
+static int LLBIT = 0;
 /* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
    read-write instructions. It is set when a linked load occurs. It is
    tested and cleared by the conditional store. It is cleared (during
@@ -332,8 +344,8 @@ int LLBIT = 0;
    be atomic. In particular, it is cleared by exception return
    instructions. */
 
-int HIACCESS = 0;
-int LOACCESS = 0;
+static int HIACCESS = 0;
+static int LOACCESS = 0;
 /* The HIACCESS and LOACCESS counts are used to ensure that
    corruptions caused by using the HI or LO register to close to a
    following operation are spotted. */
@@ -384,9 +396,9 @@ int LOACCESS = 0;
 /* At the moment these values will be the same, since we do not have
    access to the pipeline cycle count information from the simulator
    engine. */
-unsigned int instruction_fetches = 0;
-unsigned int instruction_fetch_overflow = 0;
-unsigned int pipeline_ticks = 0;
+static unsigned int instruction_fetches = 0;
+static unsigned int instruction_fetch_overflow = 0;
+static unsigned int pipeline_ticks = 0;
 #endif
 
 /* Flags in the "state" variable: */
@@ -408,8 +420,8 @@ unsigned int pipeline_ticks = 0;
 #define simEXCEPTION    (1 << 26) /* 0 = no exception; 1 = exception has occurred */
 #define simEXIT         (1 << 27) /* 0 = do nothing; 1 = run-time exit() processing */
 
-unsigned int state = 0;
-unsigned int rcexit = 0; /* _exit() reason code holder */
+static unsigned int state = 0;
+static unsigned int rcexit = 0; /* _exit() reason code holder */
 
 #define DELAYSLOT()     {\
                           if (state & simDELAYSLOT) callback->printf_filtered(callback,"SIM Warning: Delay slot already activated (branch in delay slot?)\n");\
@@ -427,27 +439,27 @@ unsigned int rcexit = 0; /* _exit() reason code holder */
 #define K1SIZE  (0x20000000)
 
 /* Very simple memory model to start with: */
-unsigned char *membank = NULL;
-ut_reg membank_base = K1BASE;
-unsigned membank_size = (1 << 20); /* (16 << 20); */ /* power-of-2 */
+static unsigned char *membank = NULL;
+static ut_reg membank_base = K1BASE;
+static unsigned membank_size = (1 << 20); /* (16 << 20); */ /* power-of-2 */
 
 /* Simple run-time monitor support */
-unsigned char *monitor = NULL;
-ut_reg monitor_base = 0xBFC00000;
-unsigned monitor_size = (1 << 11); /* power-of-2 */
+static unsigned char *monitor = NULL;
+static ut_reg monitor_base = 0xBFC00000;
+static unsigned monitor_size = (1 << 11); /* power-of-2 */
 
 #if defined(TRACE)
-char *tracefile = "trace.din"; /* default filename for trace log */
-FILE *tracefh = NULL;
+static char *tracefile = "trace.din"; /* default filename for trace log */
+static FILE *tracefh = NULL;
 #endif /* TRACE */
 
 #if defined(PROFILE)
-unsigned profile_frequency = 256;
-unsigned profile_nsamples = (128 << 10);
-unsigned short *profile_hist = NULL;
-ut_reg profile_minpc;
-ut_reg profile_maxpc;
-int profile_shift = 0; /* address shift amount */
+static unsigned profile_frequency = 256;
+static unsigned profile_nsamples = (128 << 10);
+static unsigned short *profile_hist = NULL;
+static ut_reg profile_minpc;
+static ut_reg profile_maxpc;
+static int profile_shift = 0; /* address shift amount */
 #endif /* PROFILE */
 
 /* The following are used to provide shortcuts to the required version
@@ -458,10 +470,10 @@ typedef unsigned int (*fnptr_swap_word) PARAMS((unsigned int data));
 typedef uword64 (*fnptr_read_long) PARAMS((unsigned char *memory));
 typedef uword64 (*fnptr_swap_long) PARAMS((uword64 data));
 
-fnptr_read_word host_read_word;
-fnptr_read_long host_read_long;
-fnptr_swap_word host_swap_word;
-fnptr_swap_long host_swap_long;
+static fnptr_read_word host_read_word;
+static fnptr_read_long host_read_long;
+static fnptr_swap_word host_swap_word;
+static fnptr_swap_long host_swap_long;
 
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
@@ -3185,7 +3197,7 @@ Convert(rm,op,from,to)
         /* Round result to nearest representable value. When two
            representable values are equally near, round to the value
            that has a least significant bit of zero (i.e. is even). */
-#if defined(sun)
+#ifdef HAVE_ANINT
         tmp = (float)anint((double)tmp);
 #else
         /* TODO: Provide round-to-nearest */
@@ -3195,7 +3207,7 @@ Convert(rm,op,from,to)
        case FP_RM_TOZERO:
         /* Round result to the value closest to, and not greater in
            magnitude than, the result. */
-#if defined(sun)
+#ifdef HAVE_AINT
         tmp = (float)aint((double)tmp);
 #else
         /* TODO: Provide round-to-zero */
@@ -3241,7 +3253,7 @@ Convert(rm,op,from,to)
 
       switch (rm) {
        case FP_RM_NEAREST:
-#if defined(sun)
+#ifdef HAVE_ANINT
         tmp = anint(*(double *)&tmp);
 #else
         /* TODO: Provide round-to-nearest */
@@ -3249,7 +3261,7 @@ Convert(rm,op,from,to)
         break;
 
        case FP_RM_TOZERO:
-#if defined(sun)
+#ifdef HAVE_AINT
         tmp = aint(*(double *)&tmp);
 #else
         /* TODO: Provide round-to-zero */
