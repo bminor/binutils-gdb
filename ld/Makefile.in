@@ -128,7 +128,7 @@ CC_FOR_TARGET = ` \
     if [ "@host@" = "@target@" ] ; then \
       echo $(CC); \
     else \
-      echo gcc | sed '$(program_transform_name)'; \
+      echo gcc | sed '$(transform)'; \
     fi; \
   fi`
 
@@ -144,7 +144,7 @@ CXX_FOR_TARGET = ` \
     if [ "@host@" = "@target@" ] ; then \
       echo $(CXX); \
     else \
-      echo gcc | sed '$(program_transform_name)'; \
+      echo gcc | sed '$(transform)'; \
     fi; \
   fi`
 

@@ -1,3 +1,9 @@
+Fri Jan 30 19:16:28 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.am ({CC,CXX}_FOR_TARGET): Change program_transform_name
+	to transform.
+	* Makefile.in: Regenerate.
+
 Fri Jan 30 19:15:17 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* scripttempl/elfppc.sc: Put .dynsbss in .sbss.
