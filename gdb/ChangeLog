@@ -1,3 +1,10 @@
+Thu Oct 14 21:35:55 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* remote-mon.c (general_open): Set dev_name. Minor tweaking to get
+	it working again.
+	* config/m68k/tm-monitor.h: Remove floating point register names
+	as there aren't any on any of the monitors that use this code.
+
 Wed Oct 13 11:47:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* inflow.c: Pass pointer to process group, not process group itself,

@@ -1,4 +1,4 @@
-/* Remote debugging interface for MONITOR boot monitor, for GDB.
+/* Remote debugging interface for boot monitors, for GDB.
    Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
 
@@ -71,7 +71,9 @@ struct cmd_list_element *showlist;
 static void monitor_close();
 static void monitor_fetch_register();
 static void monitor_store_register();
-static int kiodebug;				/* flag set by "set remotedebug" */
+#if 0
+static int sr_get_debug();			/* flag set by "set remotedebug" */
+#endif
 static int hashmark;				/* flag set by "set hash" */
 
 #define LOG_FILE "monitor.log"
@@ -117,7 +119,7 @@ readchar(timeout)
 
   c = SERIAL_READCHAR(monitor_desc, timeout);
 
-  if (kiodebug)
+  if (sr_get_debug())
     putchar(c & 0x7f);
 
 #ifdef LOG_FILE
@@ -150,7 +152,7 @@ expect(string, discard)
   char *p = string;
   int c;
 
-  if (kiodebug)
+  if (sr_get_debug())
     printf ("Expecting \"%s\"\n", string);
 
   immediate_quit = 1;
@@ -164,7 +166,7 @@ expect(string, discard)
 	  if (*p == '\0')
 	    {
 	      immediate_quit = 0;
-	      if (kiodebug)
+	      if (sr_get_debug())
 		printf ("\nMatched\n");
 	      return;
 	    }
@@ -330,8 +332,10 @@ general_open(args, name, from_tty)
 
   target_preopen(from_tty);
 
-  monitor_close(0);
+/*  if (is_open) */
+    monitor_close(0);
 
+  strcpy(dev_name, args);
   monitor_desc = SERIAL_OPEN(dev_name);
 
   if (monitor_desc == NULL)
@@ -587,7 +591,7 @@ monitor_store_register (regno)
     monitor_store_registers ();
   else
     {
-      if (kiodebug)
+      if (sr_get_debug())
 	printf ("Setting register %s to 0x%x\n", get_reg_name (regno), read_register (regno));
 
       printf_monitor (SET_REG, get_reg_name (regno),
@@ -636,7 +640,7 @@ monitor_write_inferior_memory (memaddr, myaddr, len)
       expect (sprintf (buf, MEM_PROMPT, memaddr + i), 1); 
       expect (CMD_DELIM);
       printf_monitor ("%x", myaddr[i]);
-      if (kiodebug)
+      if (sr_get_debug())
 	printf ("\nSet 0x%x to 0x%x\n", memaddr + i, myaddr[i]);
       if (CMD_END)
 	{
@@ -696,7 +700,7 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
 	len_this_pass -= startaddr % 16;
       if (len_this_pass > (len - count))
 	len_this_pass = (len - count);
-      if (kiodebug)
+      if (sr_get_debug())
 	printf ("\nDisplay %d bytes at %x\n", len_this_pass, startaddr);
 
       for (i = 0; i < len_this_pass; i++)
@@ -704,7 +708,7 @@ monitor_read_inferior_memory(memaddr, myaddr, len)
 	  printf_monitor (MEM_DIS_CMD, startaddr);
 	  expect (sprintf(buf, MEM_PROMPT, startaddr), 1);
 	  get_hex_byte (&myaddr[count++]);
-	  if (kiodebug)
+	  if (sr_get_debug())
 	    printf ("\nRead a 0x%x from 0x%x\n", myaddr[count-1], startaddr);
 	  if (CMD_END) 
 	    {
@@ -772,7 +776,7 @@ monitor_insert_breakpoint (addr, shadow)
     if (breakaddr[i] == 0)
       {
 	breakaddr[i] = addr;
-	if (kiodebug)
+	if (sr_get_debug())
 	  printf ("Breakpoint at %x\n", addr);
 	monitor_read_inferior_memory(addr, shadow, memory_breakpoint_size);
 	printf_monitor(SET_BREAK_CMD, addr);
@@ -826,7 +830,7 @@ monitor_load (arg)
   char buf[DOWNLOAD_LINE_SIZE];
   int i, bytes_read;
 
-  if (kiodebug)
+  if (sr_get_debug())
     printf ("Loading %s to monitor\n", arg);
 
   download = fopen (arg, "r");
@@ -1174,13 +1178,14 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 void
 _initialize_remote_monitors ()
 {
-  add_show_from_set (
+/***  add_show_from_set (
                      add_set_cmd ("remotedebug", no_class, var_boolean,
                                   (char *)&kiodebug,
                                   "Set debugging of I/O to a serial based Monitor.\n\
 When enabled, debugging info is displayed.",
                                   &setlist),
 		     &showlist);
+***/
   add_show_from_set (
                      add_set_cmd ("hash", no_class, var_boolean,
                                   (char *)&hashmark,
