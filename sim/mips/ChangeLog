@@ -1,4 +1,8 @@
 start-sanitize-r5900
+Wed Nov 11 16:53:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* r5900.igen (RSQRT): Set both I/SI and D/SD when div-0.
+
 Thu Nov  5 10:29:42 EST 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* r5900.igen (r59fp_opdiv): Correct erroneous FGR[FD] reference.

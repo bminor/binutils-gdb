@@ -1,3 +1,7 @@
+Wed Nov 11 17:42:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* f-rsqrt.s: div(-0) can set both I/SI + D/SD.
+
 Thu Nov  5 10:37:40 EST 1998  Frank Ch. Eigler <fche@cygnus.com>
 
 	* t-prot3w.s: Correct test of prot3w insn.
