@@ -109,7 +109,7 @@ amd64obsd_sigtramp_p (struct frame_info *next_frame)
 
   /* If we can't read the instructions at START_PC, return zero.  */
   buf = alloca (sizeof sigreturn);
-  if (target_read_memory (start_pc + 0x7, buf, sizeof sigreturn))
+  if (target_read_memory (start_pc + 7, buf, sizeof sigreturn))
     return 0;
 
   /* Check for sigreturn(2).  */
@@ -125,9 +125,25 @@ amd64obsd_sigtramp_p (struct frame_info *next_frame)
 static CORE_ADDR
 amd64obsd_sigcontext_addr (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  ULONGEST offset = (pc & (amd64obsd_page_size - 1));
+
   /* The %rsp register points at `struct sigcontext' upon entry of a
-     signal trampoline.  */
-  return frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
+     signal trampoline.  The relevant part of the trampoline is
+
+        call    *%rax
+        movq    %rsp, %rdi
+        pushq   %rdi
+        movq    $SYS_sigreturn,%rax
+        int     $0x80
+
+     (see /usr/src/sys/arch/amd64/amd64/locore.S).  The `pushq'
+     instruction clobbers %rsp, but its value is saved in `%rdi'.  */
+
+  if (offset > 6)
+    return frame_unwind_register_unsigned (next_frame, AMD64_RDI_REGNUM);
+  else
+    return frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
 }
 
 /* OpenBSD 3.5 or later.  */
