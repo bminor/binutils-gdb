@@ -1,3 +1,8 @@
+Fri Aug 11 13:04:32 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* symtab.c (list_symbols): if break command set breakpoint on matched
+	symbol.
+
 Wed Aug  9 18:59:05 1995  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h (strchr, strrchr, strstr, strtok, strerror): Enclose in

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -2871,6 +2871,13 @@ list_symbols (regexp, class, bpt, from_tty)
 					 (struct block *) NULL, VAR_NAMESPACE,
 					 0, (struct symtab **) NULL) == NULL)
 			{
+                          if (bpt)
+                            {
+                              break_command (SYMBOL_NAME (msymbol), from_tty);
+                              printf_filtered ("<function, no debug info>%s;\n",
+                                               SYMBOL_SOURCE_NAME (msymbol));
+                              continue;
+                            }
 			  if (!found_in_file)
 			    {
 			      printf_filtered ("\nNon-debugging symbols:\n");
