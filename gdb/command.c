@@ -1216,8 +1216,10 @@ shell_escape (arg, from_tty)
       else
 	execl (user_shell, p, "-c", arg, 0);
 
-      fprintf_unfiltered (gdb_stderr, "Exec of shell failed\n");
-      exit (0);
+      fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
+			  safe_strerror (errno));
+      gdb_flush (gdb_stderr);
+      _exit (0177);
     }
 
   if (pid != -1)
