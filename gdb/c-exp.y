@@ -834,12 +834,9 @@ type	:	ptype
 			{ $$ = lookup_member_type
 			    (lookup_function_type ($1), $3);
 			  free ((PTR)$8); }
-	/* "const" and "volatile" are curently ignored. */
-	|	CONST_KEYWORD type { $$ = $2; }
-	|	VOLATILE_KEYWORD type { $$ = $2; }
 	;
 
-typebase
+typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
@@ -888,6 +885,9 @@ typebase
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
 			}
+	/* "const" and "volatile" are curently ignored. */
+	|	CONST_KEYWORD typebase { $$ = $2; }
+	|	VOLATILE_KEYWORD typebase { $$ = $2; }
 	;
 
 typename:	TYPENAME

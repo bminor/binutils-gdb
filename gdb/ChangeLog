@@ -1,3 +1,8 @@
+Mon Oct 19 12:45:23 1992  Per Bothner  (bothner@cygnus.com)
+
+	* c-exp.y:  Moved handling of 'const' and 'volatile' from
+	<type> to <typebase>.  This removes 2 conflicts.
+
 Sun Oct 18 00:36:30 1992  Fred Fish  (fnf@cygnus.com)
 
 	* breakpoint.c (breakpoint_re_set_one):  Don't delete watchpoints
