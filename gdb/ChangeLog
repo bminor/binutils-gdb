@@ -1,3 +1,7 @@
+2004-09-07  Jim Blandy  <jimb@redhat.com>
+
+	* frame.h (frame_register): Doc fix.
+
 2004-09-07  Andrew Cagney  <cagney@gnu.org>
 
 	* vx-share/wait.h: Delete #ifdef USG.
