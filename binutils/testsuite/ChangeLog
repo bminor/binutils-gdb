@@ -1,3 +1,50 @@
+Mon Jan 17 16:57:02 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* binutils.all/objdump.exp: Trim list of format names expected,
+	and accept any known CPU type.
+
+Thu Dec  2 20:50:24 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* Makefile.in: Remove some stuff from the site.exp file.
+	* config/unix.exp: Add global before seeing if the variables for
+	nm, objdump, and size exist.
+
+Wed Nov  3 11:12:32 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* config/udi.exp,unix.exp: Transform tool name.
+	* binutils.all/*.exp: Clear errorInfo after exec.
+
+Fri Jul  2 12:41:20 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* binutils.all/*.exp: Use -- for long arguments rather than +.
+
+Fri Jun  4 10:52:29 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: change srctrigger to Makefile.in 
+
+Wed May 26 17:27:46 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (FLAGS_TO_PASS): Pass down CC and CFLAGS.
+
+Fri May  7 13:58:44 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* binutils.all/objdump.exp: Update for new usage message.
+
+Mon Apr 19 14:08:52 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* binutils.all/*.exp: Use the new util_test proc.
+	* Makefile.in: Create a local site.exp file with config info.
+
+Thu Mar 25 05:38:47 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* nm.all/configure.in (srcname): Delete extra quote.
+
+Mon Feb 22 07:54:03 1993  Mike Werner  (mtw@poseidon.cygnus.com)
+
+        * binutils/testsuite: made modifications to testcases, etc., to allow
+        them to work properly  given the reorganization of deja-gnu and the
+        relocation of the testcases from deja-gnu to a "tool" subdirectory.
+
 Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
 	* binutils/testsuite: Initial creation of binutils/testsuite.
