@@ -1,4 +1,29 @@
+Wed Dec 10 23:37:11 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_input_bfd): Handle a relocateable link in
+	which a relocation refers to an indirect or warning symbol.
+
 Wed Dec 10 11:15:55 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (bfd_arm_coff_final_link): Function deleted.
+	(coff_arm_final_link_postscript): New function.
+	(coff_arm_link_output_has_begun): New function.
+
+	* libcoff.h (struct bfd_coff_backend_data): Add new fields:
+	_bfd_coff_link_output_has_begun and
+	_bfd_coff_final_link_postscript.  Add new macros:
+	bfd_coff_link_output_has_begun() and
+	bfd_coff_final_link_postscript().
+
+	* cofflink.c (_bfd_coff_final_link): Insert calls to
+	bfd_coff_link_output_has_begun() and
+	bfd_coff_final_link_postscript().
+
+	* coffcode.h: Add two new fields to bfd_coff_backend_data
+	structure: _bfd_coff_link_output_has_begun and
+	_bfd_coff_final_link_postscript.  Add default initialisers for
+	these fields.  Add overridable aliases for the coff swap functions
+	in the backend data structure.
 
 	* elf32-v850.c: Update with patches from the branch to fix
 	HI16_S/LO16 reloc pairs.

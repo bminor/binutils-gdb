@@ -4731,6 +4731,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		      || (elf_bad_symtab (input_bfd)
 			  && finfo->sections[r_symndx] == NULL))
 		    {
+		      struct elf_link_hash_entry *rh;
 		      long indx;
 
 		      /* This is a reloc against a global symbol.  We
@@ -4741,13 +4742,18 @@ elf_link_input_bfd (finfo, input_bfd)
 			 for this symbol.  The symbol index is then
 			 set at the end of elf_bfd_final_link.  */
 		      indx = r_symndx - extsymoff;
-		      *rel_hash = elf_sym_hashes (input_bfd)[indx];
+		      rh = elf_sym_hashes (input_bfd)[indx];
+		      while (rh->root.type == bfd_link_hash_indirect
+			     || rh->root.type == bfd_link_hash_warning)
+			rh = (struct elf_link_hash_entry *) rh->root.u.i.link;
 
 		      /* Setting the index to -2 tells
 			 elf_link_output_extsym that this symbol is
 			 used by a reloc.  */
-		      BFD_ASSERT ((*rel_hash)->indx < 0);
-		      (*rel_hash)->indx = -2;
+		      BFD_ASSERT (rh->indx < 0);
+		      rh->indx = -2;
+
+		      *rel_hash = rh;
 
 		      continue;
 		    }
