@@ -95,7 +95,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Number of machine registers */
 
-#define NUM_REGS 73
+#define NUM_REGS 80
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
@@ -107,10 +107,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	"t8",	"t9",	"k0",	"k1",	"gp",	"sp",	"s8",	"ra", \
 	"sr",	"lo",	"hi",	"bad",	"cause","pc",    \
 	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7", \
-	"f8",   "f9",   "f10",   "f11",   "f12",   "f13",   "f14",   "f15", \
-	"f16",   "f17",   "f18",   "f19",   "f20",   "f21",   "f22",   "f23",\
-	"f24",   "f25",   "f26",   "f27",   "f28",   "f29",   "f30",   "f31",\
-	"fsr",   "fir", "fp" \
+	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15", \
+	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",\
+	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",\
+	"fsr",  "fir",  "fp",   "inx",  "rand", "tlblo","ctxt", "tlbhi",\
+	"epc",  "prid"\
     }
 
 /* Register numbers of various important registers.
@@ -134,6 +135,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FCRCS_REGNUM 70         /* FP control/status */
 #define FCRIR_REGNUM 71         /* FP implementation/revision */
 #define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
+#define	FIRST_EMBED_REGNUM 73	/* First supervisor register for embedded use */
+#define	LAST_EMBED_REGNUM 79	/* Last one */
 
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
    of register dumps. */

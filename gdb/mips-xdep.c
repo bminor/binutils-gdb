@@ -1,5 +1,5 @@
 /* Low level MIPS interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -144,7 +144,8 @@ store_inferior_registers (regno)
 	{
 	  if (regno == ZERO_REGNUM || regno == PS_REGNUM
 	      || regno == BADVADDR_REGNUM || regno == CAUSE_REGNUM
-	      || regno == FCRIR_REGNUM || regno == FP_REGNUM)
+	      || regno == FCRIR_REGNUM || regno == FP_REGNUM
+	      || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
 	    continue;
 	  regaddr = register_addr (regno, 1);
 	  errno = 0;

@@ -1,5 +1,14 @@
 Thu Feb 27 11:48:47 1992  John Gilmore  (gnu at cygnus.com)
 
+	* remote.c:  Make it work for embedded MIPS.  Increase buffer
+	size, and use throughout.  Round buffer size up if too many regs.
+	Support baud rate setting and try for an 8-bit path.  If
+	interrupted while waiting for target, send a ^C down the wire.
+	Avoid single-byte reads.
+	* tm-mips.h:  Add more embedded-system registers to REGISTER_NAMES
+	and NUM_REGS.
+	* mips-xdep.h:  Avoid the embedded regs when on Unix.
+
 	* mipsread.c:  Byte-swap the symbol table structures, using
 	routines from ecoff.c, to read a symbol table written in any
 	of the four possible byte orders.

@@ -1,21 +1,21 @@
-/* Memory-access and commands for inferior process, for GDB.
-   Copyright (C) 1988-1991 Free Software Foundation, Inc.
+/* Remote target communications for serial-line targets in custom GDB protocol
+   Copyright 1988, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Remote communication protocol.
    All values are encoded in ascii hex digits.
@@ -70,7 +70,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <fcntl.h>
 #include "defs.h"
-#include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"
@@ -83,9 +82,62 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <signal.h>
 
-extern void add_syms_addr_command ();
-extern struct value *call_function_by_hand();
-extern void start_remote ();
+/* Prototypes for local functions */
+
+static void
+remote_write_bytes PARAMS ((CORE_ADDR, char *, int));
+
+static void
+remote_read_bytes PARAMS ((CORE_ADDR, char *, int));
+
+static void
+remote_files_info PARAMS ((struct target_ops *));
+
+static int
+remote_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+
+static void 
+remote_prepare_to_store PARAMS ((void));
+
+static void
+remote_fetch_registers PARAMS ((int));
+
+static void
+remote_resume PARAMS ((int, int));
+
+static void
+remote_open PARAMS ((char *, int));
+
+static void
+remote_close PARAMS ((int));
+
+static void
+remote_store_registers PARAMS ((int));
+
+static void
+getpkt PARAMS ((char *));
+
+static void
+putpkt PARAMS ((char *));
+
+static void
+remote_send PARAMS ((char *));
+
+static int
+readchar PARAMS ((void));
+
+static int
+remote_wait PARAMS ((WAITTYPE *));
+
+static int
+tohex PARAMS ((int));
+
+static int
+fromhex PARAMS ((int));
+
+static void
+remote_detach PARAMS ((char *, int));
+
 
 extern struct target_ops remote_ops;	/* Forward decl */
 
@@ -101,19 +153,17 @@ int icache;
    starts.  */
 int remote_desc = -1;
 
-#define	PBUFSIZ	400
+#define	PBUFSIZ	1024
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
 #define MAXBUFBYTES ((PBUFSIZ-32)/2)
 
-static void remote_send ();
-static void putpkt ();
-static void getpkt ();
-#if 0
-static void dcache_flush ();
+/* Round up PBUFSIZ to hold all the registers, at least.  */
+#if REGISTER_BYTES > MAXBUFBYTES
+#undef	PBUFSIZ
+#define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
 #endif
-
 
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
 #ifndef HAVE_TERMIO
@@ -127,17 +177,10 @@ remote_timer ()
 }
 #endif
 
-/* Initialize remote connection */
-
-void
-remote_start()
-{
-}
-
 /* Clean up connection to a remote debugger.  */
 
 /* ARGSUSED */
-void
+static void
 remote_close (quitting)
      int quitting;
 {
@@ -146,15 +189,58 @@ remote_close (quitting)
   remote_desc = -1;
 }
 
+/* Translate baud rates from integers to damn B_codes.  Unix should
+   have outgrown this crap years ago, but even POSIX wouldn't buck it.  */
+
+#ifndef B19200
+#define B19200 EXTA
+#endif
+#ifndef B38400
+#define B38400 EXTB
+#endif
+
+static struct {int rate, damn_b;} baudtab[] = {
+	{0, B0},
+	{50, B50},
+	{75, B75},
+	{110, B110},
+	{134, B134},
+	{150, B150},
+	{200, B200},
+	{300, B300},
+	{600, B600},
+	{1200, B1200},
+	{1800, B1800},
+	{2400, B2400},
+	{4800, B4800},
+	{9600, B9600},
+	{19200, B19200},
+	{38400, B38400},
+	{-1, -1},
+};
+
+static int
+damn_b (rate)
+     int rate;
+{
+  int i;
+
+  for (i = 0; baudtab[i].rate != -1; i++)
+    if (rate == baudtab[i].rate) return baudtab[i].damn_b;
+  return B38400;	/* Random */
+}
+
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-void
+static void
 remote_open (name, from_tty)
      char *name;
      int from_tty;
 {
   TERMINAL sg;
+  int a_rate, b_rate;
+  int baudrate_set = 0;
 
   if (name == 0)
     error (
@@ -173,13 +259,32 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (remote_desc < 0)
     perror_with_name (name);
 
+  if (baud_rate)
+    {
+      if (1 != sscanf (baud_rate, "%d ", &a_rate))
+	{
+	  b_rate = damn_b (a_rate);
+	  baudrate_set = 1;
+	}
+    }
+
   ioctl (remote_desc, TIOCGETP, &sg);
 #ifdef HAVE_TERMIO
   sg.c_cc[VMIN] = 0;		/* read with timeout.  */
   sg.c_cc[VTIME] = timeout * 10;
   sg.c_lflag &= ~(ICANON | ECHO);
+  sg.c_cflag &= ~PARENB;	/* No parity */
+  sg.c_cflag |= CS8;		/* 8-bit path */
+  if (baudrate_set)
+    sg.c_cflag = (sb.c_cflag & ~CBAUD) | b_rate;
 #else
-  sg.sg_flags = RAW;
+  sg.sg_flags |= RAW | ANYP;
+  sg.sg_flags &= ~ECHO;
+  if (baudrate_set)
+    {
+      sg.sg_ispeed = b_rate;
+      sg.sg_ospeed = b_rate;
+    }
 #endif
   ioctl (remote_desc, TIOCSETP, &sg);
 
@@ -256,7 +361,7 @@ tohex (nib)
 
 /* Tell the remote machine to resume.  */
 
-void
+static void
 remote_resume (step, siggnal)
      int step, siggnal;
 {
@@ -274,19 +379,33 @@ remote_resume (step, siggnal)
   putpkt (buf);
 }
 
+/* Send ^C to target to halt it.  Target will respond, and send us a
+   packet.  */
+
+void remote_interrupt()
+{
+  write (remote_desc, "\003", 1);	/* Send a ^C */
+}
+
+
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.
    Returns "pid" (though it's not clear what, if anything, that
    means in the case of this target).  */
 
-int
+static int
 remote_wait (status)
      WAITTYPE *status;
 {
   unsigned char buf[PBUFSIZ];
-
+  void (*ofunc)();
+  
   WSETEXIT ((*status), 0);
-  getpkt (buf);
+
+  ofunc = signal (SIGINT, remote_interrupt);
+  getpkt ((char *) buf);
+  signal (SIGINT, ofunc);
+
   if (buf[0] == 'E')
     error ("Remote failure reply: %s", buf);
   if (buf[0] != 'S')
@@ -299,7 +418,7 @@ remote_wait (status)
 
 /* Currently we just read all the registers, so we don't use regno.  */
 /* ARGSUSED */
-void
+static void
 remote_fetch_registers (regno)
      int regno;
 {
@@ -330,7 +449,7 @@ remote_fetch_registers (regno)
 /* Prepare to store registers.  Since we send them all, we have to
    read out the ones we don't want to change first.  */
 
-void 
+static void 
 remote_prepare_to_store ()
 {
   remote_fetch_registers (-1);
@@ -340,7 +459,7 @@ remote_prepare_to_store ()
    FIXME, eventually just store one register if that's all that is needed.  */
 
 /* ARGSUSED */
-int
+static void
 remote_store_registers (regno)
      int regno;
 {
@@ -362,7 +481,6 @@ remote_store_registers (regno)
   *p = '\0';
 
   remote_send (buf);
-  return 0;
 }
 
 #if 0
@@ -405,7 +523,7 @@ remote_store_word (addr, word)
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.  */
 
-void
+static void
 remote_write_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -420,7 +538,7 @@ remote_write_bytes (memaddr, myaddr, len)
 
   sprintf (buf, "M%x,%x:", memaddr, len);
 
-  /* Command describes registers byte by byte,
+  /* We send target system values byte by byte, in increasing byte addresses,
      each byte encoded as two hex characters.  */
 
   p = buf + strlen (buf);
@@ -440,7 +558,7 @@ remote_write_bytes (memaddr, myaddr, len)
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.  */
 
-void
+static void
 remote_read_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
@@ -456,7 +574,7 @@ remote_read_bytes (memaddr, myaddr, len)
   sprintf (buf, "m%x,%x", memaddr, len);
   remote_send (buf);
 
-  /* Reply describes registers byte by byte,
+  /* Reply describes memory byte by byte,
      each byte encoded as two hex characters.  */
 
   p = buf;
@@ -473,12 +591,14 @@ remote_read_bytes (memaddr, myaddr, len)
    to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
    nonzero.  Returns length of data written or read; 0 for error.  */
 
-int
-remote_xfer_inferior_memory(memaddr, myaddr, len, should_write)
+/* ARGSUSED */
+static int
+remote_xfer_memory(memaddr, myaddr, len, should_write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int should_write;
+     struct target_ops *target;			/* ignored */
 {
   int origlen = len;
   int xfersize;
@@ -500,8 +620,9 @@ remote_xfer_inferior_memory(memaddr, myaddr, len, should_write)
   return origlen; /* no error possible */
 }
 
-void
-remote_files_info ()
+static void
+remote_files_info (target)
+struct target_ops *target;
 {
   printf ("remote files info missing here.  FIXME.\n");
 }
@@ -527,22 +648,35 @@ Receiver responds with:
 
 */
 
+/* Read a single character from the remote end.
+   (If supported, we actually read many characters and buffer them up.)  */
+
 static int
 readchar ()
 {
   char buf;
+  static int inbuf_index, inbuf_count;
+#define	INBUFSIZE	PBUFSIZ
+  static char inbuf[INBUFSIZE];
 
-  buf = '\0';
+  if (inbuf_index >= inbuf_count)
+    {
+      /* Time to do another read... */
+      inbuf_index = 0;
+      inbuf_count = 0;
+      inbuf[0] = 0;		/* Just in case */
 #ifdef HAVE_TERMIO
-  /* termio does the timeout for us.  */
-  read (remote_desc, &buf, 1);
+      /* termio does the timeout for us.  */
+      inbuf_count = read (remote_desc, inbuf, INBUFSIZE);
 #else
-  alarm (timeout);
-  read (remote_desc, &buf, 1);
-  alarm (0);
+      alarm (timeout);
+      inbuf_count = read (remote_desc, inbuf, INBUFSIZE);
+      alarm (0);
 #endif
+    }
 
-  return buf & 0x7f;
+  /* Just return the next character from the buffer.  */
+  return inbuf[inbuf_index++] & 0x7f;
 }
 
 /* Send the command in BUF to the remote machine,
@@ -570,13 +704,16 @@ putpkt (buf)
 {
   int i;
   unsigned char csum = 0;
-  char buf2[500];
+  char buf2[PBUFSIZ];
   int cnt = strlen (buf);
   char ch;
   char *p;
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
+
+  if (cnt > sizeof(buf2) - 5)		/* Prosanity check */
+    abort();
 
   p = buf2;
   *p++ = '$';
@@ -827,24 +964,45 @@ dcache_init ()
 /* Define the target subroutine names */
 
 struct target_ops remote_ops = {
-	"remote", "Remote serial target in gdb-specific protocol",
-	"Use a remote computer via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-	remote_open, remote_close,
-	0, remote_detach, remote_resume, remote_wait,  /* attach */
-	remote_fetch_registers, remote_store_registers,
-	remote_prepare_to_store, 0, 0, /* conv_from, conv_to */
-	remote_xfer_inferior_memory, remote_files_info,
-	0, 0, /* insert_breakpoint, remove_breakpoint, */
-	0, 0, 0, 0, 0,	/* Terminal crud */
-	0, /* kill */
-	0, add_syms_addr_command,  /* load */
-	call_function_by_hand,
-	0, /* lookup_symbol */
-	0, 0, /* create_inferior FIXME, mourn_inferior FIXME */
-	process_stratum, 0, /* next */
-	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
-	OPS_MAGIC,		/* Always the last thing */
+  "remote",			/* to_shortname */
+  "Remote serial target in gdb-specific protocol",	/* to_longname */
+  "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
+  remote_open,			/* to_open */
+  remote_close,			/* to_close */
+  NULL,				/* to_attach */
+  remote_detach,		/* to_detach */
+  remote_resume,		/* to_resume */
+  remote_wait,			/* to_wait */
+  remote_fetch_registers,	/* to_fetch_registers */
+  remote_store_registers,	/* to_store_registers */
+  remote_prepare_to_store,	/* to_prepare_to_store */
+  NULL,				/* to_convert_to_virtual */
+  NULL,				/* to_convert_from_virtual */
+  remote_xfer_memory,		/* to_xfer_memory */
+  remote_files_info,		/* to_files_info */
+  NULL,				/* to_insert_breakpoint */
+  NULL,				/* to_remove_breakpoint */
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  NULL,				/* to_kill */
+  NULL,				/* to_load */
+  NULL,				/* to_lookup_symbol */
+  NULL,				/* to_create_inferior */
+  NULL,				/* to_mourn_inferior */
+  process_stratum,		/* to_stratum */
+  NULL,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  NULL,				/* sections */
+  NULL,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
 };
 
 void
