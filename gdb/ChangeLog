@@ -1,5 +1,15 @@
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2002-02-19 Paul Eggert <eggert@twinsun.com>:
+	* Makefile.in (VER): Change "head -1" to "sed q", since POSIX
+	1003.1-2001 no longer allows "head -1".
+	* gdb/Makefile.in (version.c): Likewise.
+	* gdb/doc/Makefile.in (GDBvn.texi): Likewise.
+	* gdb/CONTRIBUTE: Change "diff -c3" to "diff -c", which is
+	equivalent.  POSIX 1003.1-2001 no longer allows "diff -c3".
+
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
 	* cli/cli-decode.c (cmd_cfunc_eq): New function.
 	* command.h (cmd_cfunc_eq): Declare.
 	* cli/cli-decode.h (cmd_cfunc_eq): Ditto.

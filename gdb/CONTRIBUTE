@@ -70,7 +70,7 @@ o	Submitting Patches
 	documentation (i.e., .texi files).
 
 	The patch itself. If you are accessing the CVS repository use
-	"cvs update; cvs diff -c3p"; else, use "diff -c3p OLD NEW" or
+	"cvs update; cvs diff -cp"; else, use "diff -cp OLD NEW" or
 	"diff -up OLD NEW". If your version of diff does not support
 	these options, then get the latest version of GNU diff.
 

@@ -1043,7 +1043,7 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ \
 version.c: Makefile version.in
 	rm -f version.c-tmp version.c
 	echo '#include "version.h"' >> version.c-tmp
-	echo 'const char version[] = "'"`head -1 ${srcdir}/version.in`"'";' >> version.c-tmp
+	echo 'const char version[] = "'"`sed q ${srcdir}/version.in`"'";' >> version.c-tmp
 	echo 'const char host_name[] = "$(host_alias)";' >> version.c-tmp
 	echo 'const char target_name[] = "$(target_alias)";' >> version.c-tmp
 	mv version.c-tmp version.c
