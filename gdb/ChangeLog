@@ -1,5 +1,8 @@
 Fri Aug 13 14:37:05 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* remote-hms.c (hms_wait): use -1 for timeout's which means block
+	  forever rather than 99999.
+
 	* ser-unix.c (get_tty_state): if a descriptor is not a tty, then
 	  simply save encode this fact as the process group and return
 	  success rather than an error.

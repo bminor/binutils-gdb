@@ -702,7 +702,7 @@ hms_wait (status)
       return 0;
     }
 
-  timeout = 99999;		/* Don't time out -- user program is running. */
+  timeout = -1;		/* Don't time out -- user program is running. */
   immediate_quit = 1;		/* Helps ability to QUIT */
   while (1)
     {
