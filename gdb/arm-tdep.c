@@ -3004,6 +3004,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* XXX For an RDI target we should ask the target if it can single-step.  */
   set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 
+  /* Disassembly.  */
+  set_gdbarch_print_insn (gdbarch, gdb_print_insn_arm);
+
   /* Minsymbol frobbing.  */
   set_gdbarch_elf_make_msymbol_special (gdbarch, arm_elf_make_msymbol_special);
   set_gdbarch_coff_make_msymbol_special (gdbarch,
@@ -3101,8 +3104,6 @@ _initialize_arm_tdep (void)
                           arm_init_abi_eabi_v2);
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_APCS,
                           arm_init_abi_apcs);
-
-  tm_print_insn = gdb_print_insn_arm;
 
   /* Get the number of possible sets of register names defined in opcodes.  */
   num_disassembly_options = get_arm_regname_num_options ();

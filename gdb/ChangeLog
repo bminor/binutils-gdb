@@ -1,3 +1,8 @@
+2003-03-25  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_gdbarch_init): Register the disassembler function.
+	(_initialize_arm_tdep): Don't set tm_print_insn.
+
 2003-03-24  Adam Fedor  <fedor@gnu.org>
 
 	* Makefile.in (YYOBJ): Add objc-exp.tab.o
