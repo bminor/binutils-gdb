@@ -127,19 +127,15 @@ proc recurse_tests {} {
     gdb_stop_suppressing_tests;
 }
 
-# Only enabled for some targets merely because it has not been tested 
-# elsewhere.
-if {[istarget "sparc*-*-sunos4*"] || [istarget "hppa*-*-bsd*"] || [istarget "hppa*-*-hpux*"] || [istarget "sparclet-*-*"] || [istarget "m32r-*-elf"] || [istarget "mn10200-*-*"] || [istarget "mn10300-*-*"]} then {
+# Preserve the old timeout, and set a new one that should be
+# sufficient to avoid timing out during this test.
+set oldtimeout $timeout
+set timeout [expr "$timeout + 60"]
+verbose "Timeout is now $timeout seconds" 2
 
-    # Preserve the old timeout, and set a new one that should be
-    # sufficient to avoid timing out during this test.
-    set oldtimeout $timeout
-    set timeout [expr "$timeout + 60"]
-    verbose "Timeout is now $timeout seconds" 2
+recurse_tests
 
-    recurse_tests
+# Restore the preserved old timeout value.
+set timeout $oldtimeout
+verbose "Timeout is now $timeout seconds" 2
 
-    # Restore the preserved old timeout value.
-    set timeout $oldtimeout
-    verbose "Timeout is now $timeout seconds" 2
-}

@@ -1,3 +1,11 @@
+2000-07-26  Scott Bambrough <scottb@netwinder.org>
+
+	* gdb.base/recurse.exp: Run tests for all targets.
+	* gdb.base/so-impl-ld.exp: Added wildcard to handle the
+	gnu-oldld case on ARM.
+	* gdb.base/watchpoint.exp (test_stepping): Clear xfail
+	for ARM targets.
+ 
 Mon Jul 24 07:46:02 CDT 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* gdb.java/configure.in (AC_INIT): Use jmisc.exp.
