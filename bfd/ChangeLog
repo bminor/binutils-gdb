@@ -1,3 +1,9 @@
+Thu Aug  4 11:32:23 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (elf_bfd_final_link): Force the vma of sections which
+	do not have SEC_ALLOC set to be 0.  This is needed to handle
+	relocs against debugging sections.
+
 Wed Aug  3 16:45:41 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coff-i960.c (coff_i960_relocate): Rewrote to change relocs
