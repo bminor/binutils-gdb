@@ -16,12 +16,10 @@ coredep.c\
 corelow.c\
 exec.c\
 fork-child.c\
-go32-nat.c\
 go32-xdep.c\
 gould-pinsn.c\
 gould-xdep.c\
-h8300-tdep.c\
-hp300ux-xdep.c\
+hp300ux-nat.c\
 hppa-pinsn.c\
 hppab-core.c\
 hppab-nat.c\
@@ -35,8 +33,6 @@ i386mach-nat.c\
 i386v-nat.c\
 i386v4-nat.c\
 i387-tdep.c\
-i860-pinsn.c\
-i860-tdep.c\
 i960-pinsn.c\
 i960-tdep.c\
 infptrace.c\
@@ -53,6 +49,7 @@ mips-tdep.c\
 news-xdep.c\
 nindy-tdep.c\
 ns32k-pinsn.c\
+paread.c\
 procfs.c\
 pyr-pinsn.c\
 pyr-tdep.c\
@@ -60,7 +57,6 @@ pyr-xdep.c\
 remote-adapt.c\
 remote-eb.c\
 remote-es1800.c\
-remote-hms.c\
 remote-mm.c\
 remote-nindy.c\
 remote-st2000.c\
@@ -85,6 +81,7 @@ ultra3-xdep.c\
 umax-xdep.c\
 vax-pinsn.c\
 xcoffexec.c\
+xcoffread.c\
 xcoffsolib.c
 
 ALLDEPFILES_SUBDIR=\
@@ -96,10 +93,36 @@ nindy-share/ttyflush.c\
 29k-share/udi/udr.c\
 vx-share/xdr_ld.c\
 vx-share/xdr_ptrace.c\
-vx-share/xdr_rdb.c\
-vx-share/xdr_regs.c
+vx-share/xdr_rdb.c
 
 ALLPARAM=\
+nm-apollo68b.h\
+nm-apollo68v.h\
+nm-hp300bsd.h\
+nm-hp300hpux.h\
+nm-hppab.h\
+nm-hppah.h\
+nm-i386bsd.h\
+nm-i386mach.h\
+nm-i386sco.h\
+nm-i386sco4.h\
+nm-i386v.h\
+nm-i386v4.h\
+nm-irix3.h\
+nm-irix4.h\
+nm-linux.h\
+nm-m88k.h\
+nm-mips.h\
+nm-news.h\
+nm-rs6000.h\
+nm-sun2.h\
+nm-sun3.h\
+nm-sun386.h\
+nm-sun4os4.h\
+nm-sysv4.h\
+nm-ultra3.h\
+nm-umax.h\
+nm-vax.h\
 tm-29k.h\
 tm-3b1.h\
 tm-68k-noun.h\
@@ -111,7 +134,6 @@ tm-bigmips.h\
 tm-convex.h\
 tm-delta88.h\
 tm-es1800.h\
-tm-h8300.h\
 tm-hp300bsd.h\
 tm-hp300hpux.h\
 tm-hppab.h\
@@ -135,7 +157,6 @@ tm-rs6000.h\
 tm-spc-noun.h\
 tm-spc-un.h\
 tm-st2000.h\
-tm-stratus.h\
 tm-sun2.h\
 tm-sun2os4.h\
 tm-sun3.h\
@@ -184,7 +205,6 @@ xm-pn.h\
 xm-pyr.h\
 xm-rs6000.h\
 xm-rtbsd.h\
-xm-stratus.h\
 xm-sun2.h\
 xm-sun3.h\
 xm-sun386.h\
@@ -222,7 +242,6 @@ ALLCONFIG=\
 ./config/delta88.mt\
 ./config/es1800.mt\
 ./config/go32.mh\
-./config/h8300hms.mt\
 ./config/hp300bsd.mh\
 ./config/hp300bsd.mt\
 ./config/hp300hpux.mh\
@@ -236,6 +255,7 @@ ALLCONFIG=\
 ./config/i386bsd.mt\
 ./config/i386mach.mh\
 ./config/i386sco.mh\
+./config/i386sco4.mh\
 ./config/i386sol2.mh\
 ./config/i386sol2.mt\
 ./config/i386v.mh\
@@ -279,8 +299,6 @@ ALLCONFIG=\
 ./config/sparc-noun.mt\
 ./config/sparc-un.mt\
 ./config/st2000.mt\
-./config/stratus.mh\
-./config/stratus.mt\
 ./config/sun2os3.mh\
 ./config/sun2os3.mt\
 ./config/sun2os4.mh\

@@ -16,29 +16,39 @@ am29k-tdep.o : am29k-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
 arm-pinsn.o : arm-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/arm.h 
 blockframe.o : blockframe.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h objfiles.h \
-  frame.h gdbcore.h value.h gdbtypes.h expression.h target.h inferior.h breakpoint.h 
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h frame.h gdbcore.h value.h gdbtypes.h expression.h target.h inferior.h \
+  breakpoint.h 
 breakpoint.o : breakpoint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h frame.h breakpoint.h value.h gdbtypes.h \
   expression.h gdbcore.h ${srcdir}/../include/bfd.h gdbcmd.h command.h inferior.h target.h \
   language.h ${srcdir}/../include/demangle.h 
 buildsym.o : buildsym.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h objfiles.h \
-  buildsym.h 
+  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h complaints.h buildsym.h 
 c-exp.tab.o : c-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
-  ${srcdir}/parser-defs.h ${srcdir}/value.h ${srcdir}/language.h ${srcdir}/../include/bfd.h ${srcdir}/symfile.h ${srcdir}/objfiles.h 
-ch-exp.tab.o : ch-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
-  ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/parser-defs.h ${srcdir}/../include/bfd.h ${srcdir}/symfile.h ${srcdir}/objfiles.h 
+  tm.h config.status ${srcdir}/expression.h ${srcdir}/parser-defs.h ${srcdir}/value.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
+  ${srcdir}/gdbtypes.h ${srcdir}/language.h ${srcdir}/c-lang.h 
+c-lang.o : c-lang.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h expression.h parser-defs.h language.h \
+  c-lang.h 
+c-typeprint.o : c-typeprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symtab.h gdbtypes.h expression.h \
+  value.h gdbcore.h target.h command.h gdbcmd.h language.h ${srcdir}/../include/demangle.h \
+  c-lang.h typeprint.h 
+c-valprint.o : c-valprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h expression.h value.h ${srcdir}/../include/demangle.h \
+  valprint.h language.h 
 coffread.o : coffread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h breakpoint.h frame.h value.h \
-  expression.h ${srcdir}/../include/bfd.h symfile.h objfiles.h buildsym.h ${srcdir}/../include/coff/internal.h \
-  ${srcdir}/../bfd/libcoff.h 
+  expression.h ${srcdir}/../include/bfd.h symfile.h ${srcdir}/../include/demangle.h objfiles.h \
+  buildsym.h complaints.h ${srcdir}/../bfd/libbfd.h ${srcdir}/../include/coff/internal.h ${srcdir}/../bfd/libcoff.h 
 command.o : command.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status gdbcmd.h command.h symtab.h ${srcdir}/../include/obstack.h value.h gdbtypes.h expression.h 
+complaints.o : complaints.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status complaints.h gdbcmd.h command.h 
 convex-pinsn.o : convex-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status symtab.h ${srcdir}/../include/obstack.h convx-opcode.h 
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/convex.h 
 core.o : core.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h command.h ${srcdir}/../include/bfd.h target.h gdbcore.h 
@@ -47,26 +57,30 @@ coredep.o : coredep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status 
 corelow.o : corelow.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h command.h ${srcdir}/../include/bfd.h target.h gdbcore.h 
+cp-valprint.o : cp-valprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status ${srcdir}/../include/obstack.h symtab.h gdbtypes.h expression.h value.h command.h \
+  gdbcmd.h 
 dbxread.o : dbxread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h breakpoint.h frame.h value.h gdbtypes.h expression.h command.h \
   target.h ${srcdir}/../include/bfd.h gdbcore.h ${srcdir}/../bfd/libbfd.h ${srcdir}/../bfd/libaout.h symfile.h \
-  objfiles.h buildsym.h stabsread.h gdb-stabs.h ${srcdir}/../include/demangle.h language.h \
-  ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def \
+  ${srcdir}/../include/demangle.h objfiles.h buildsym.h stabsread.h gdb-stabs.h language.h \
+  complaints.h ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def \
   partial-stab.h 
 demangle.o : demangle.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status command.h gdbcmd.h ${srcdir}/../include/demangle.h 
 dwarfread.o : dwarfread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h gdbtypes.h symfile.h \
-  objfiles.h ${srcdir}/../bfd/libbfd.h ${srcdir}/../include/elf/dwarf.h buildsym.h ${srcdir}/../include/demangle.h 
+  ${srcdir}/../include/demangle.h objfiles.h ${srcdir}/../bfd/libbfd.h ${srcdir}/../include/elf/dwarf.h \
+  buildsym.h expression.h language.h complaints.h 
 elfread.o : elfread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/../include/elf/common.h ${srcdir}/../include/elf/external.h ${srcdir}/../include/elf/internal.h \
   ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h ${srcdir}/../bfd/libbfd.h symtab.h symfile.h \
-  objfiles.h buildsym.h gdb-stabs.h 
+  ${srcdir}/../include/demangle.h objfiles.h buildsym.h gdb-stabs.h complaints.h 
 environ.o : environ.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status environ.h 
 eval.o : eval.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h value.h expression.h target.h \
-  ${srcdir}/../include/bfd.h frame.h 
+  ${srcdir}/../include/bfd.h frame.h language.h 
 exec.o : exec.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h gdbcmd.h command.h gdbcore.h 
@@ -81,16 +95,14 @@ fork-child.o : fork-child.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
   gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/wait.h gdbcore.h \
   terminal.h 
 gdbtypes.o : gdbtypes.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h objfiles.h \
-  gdbtypes.h expression.h language.h target.h value.h ${srcdir}/../include/demangle.h 
+  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h gdbtypes.h expression.h language.h target.h value.h complaints.h 
 go32-xdep.o : go32-xdep.c 
 gould-pinsn.o : gould-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h frame.h gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/opcode/np1.h 
 gould-xdep.o : gould-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
-h8300-tdep.o : h8300-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status frame.h ${srcdir}/../include/obstack.h symtab.h 
 hppa-pinsn.o : hppa-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/hppa.h 
 hppab-nat.o : hppab-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
@@ -101,10 +113,11 @@ hppab-tdep.o : hppab-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h gdbcmd.h command.h 
 hppah-nat.o : hppah-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
-  gdbtypes.h expression.h 
+  gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h 
 hppah-tdep.o : hppah-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
-  gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h gdbcmd.h command.h 
+  gdbtypes.h expression.h ${srcdir}/../include/wait.h gdbcore.h ${srcdir}/../include/bfd.h gdbcmd.h \
+  command.h target.h symfile.h ${srcdir}/../include/demangle.h objfiles.h 
 i386-pinsn.o : i386-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h 
 i386-tdep.o : i386-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
@@ -145,8 +158,17 @@ language.o : language.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.statu
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h value.h expression.h gdbcmd.h \
   command.h frame.h language.h target.h ${srcdir}/../include/bfd.h parser-defs.h 
 m2-exp.tab.o : m2-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/symtab.h ${srcdir}/../include/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
-  ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/parser-defs.h ${srcdir}/../include/bfd.h ${srcdir}/symfile.h ${srcdir}/objfiles.h 
+  tm.h config.status ${srcdir}/expression.h ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
+  ${srcdir}/gdbtypes.h ${srcdir}/parser-defs.h ${srcdir}/m2-lang.h 
+m2-lang.o : m2-lang.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h expression.h parser-defs.h language.h \
+  m2-lang.h 
+m2-typeprint.o : m2-typeprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symtab.h gdbtypes.h expression.h \
+  value.h gdbcore.h target.h command.h gdbcmd.h language.h ${srcdir}/../include/demangle.h \
+  m2-lang.h 
+m2-valprint.o : m2-valprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status ${srcdir}/../include/obstack.h symtab.h gdbtypes.h valprint.h 
 m68k-pinsn.o : m68k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/m68k.h gdbcore.h ${srcdir}/../include/bfd.h \
   ieee-float.h 
@@ -170,21 +192,23 @@ maint.o : maint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h
 mem-break.o : mem-break.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status 
 minsyms.o : minsyms.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h objfiles.h 
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h 
 mips-nat.o : mips-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
 mips-pinsn.o : mips-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/mips.h 
+  tm.h config.status 
 mips-tdep.o : mips-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h gdbcmd.h command.h language.h gdbcore.h ${srcdir}/../include/bfd.h \
-  symfile.h objfiles.h 
+  symfile.h ${srcdir}/../include/demangle.h objfiles.h 
 mipsread.o : mipsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm-mips.h ${srcdir}/../include/coff/sym.h ${srcdir}/../include/coff/symconst.h symtab.h ${srcdir}/../include/obstack.h \
-  gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h symfile.h objfiles.h buildsym.h stabsread.h \
-  gdb-stabs.h ${srcdir}/../include/coff/mips.h ${srcdir}/../include/coff/ecoff-ext.h ${srcdir}/../bfd/libbfd.h \
-  ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def \
+  gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h symfile.h ${srcdir}/../include/demangle.h objfiles.h \
+  buildsym.h stabsread.h complaints.h gdb-stabs.h ${srcdir}/../include/coff/internal.h \
+  ${srcdir}/../include/coff/mips.h ${srcdir}/../include/coff/ecoff-ext.h ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h \
+  ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def ${srcdir}/../bfd/libcoff.h ${srcdir}/../bfd/libecoff.h \
   expression.h language.h partial-stab.h 
 news-xdep.o : news-xdep.c 
 Onindy.o : ${srcdir}/nindy-share/Onindy.c ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/block_io.h \
@@ -198,7 +222,8 @@ nindy-tdep.o : nindy-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
 ns32k-pinsn.o : ns32k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h ns32k-opcode.h gdbcore.h ${srcdir}/../include/bfd.h 
 objfiles.o : objfiles.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h objfiles.h 
+  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h 
 parse.o : parse.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h frame.h expression.h value.h \
   command.h language.h parser-defs.h 
@@ -225,10 +250,6 @@ remote-es1800.o : remote-es1800.c defs.h ${srcdir}/../include/ansidecl.h xm.h co
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/wait.h terminal.h \
   command.h 
-remote-hms.o : remote-hms.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
-  gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h \
-  gdbcore.h 
 remote-mm.o : remote-mm.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h minimon.h target.h ${srcdir}/../include/bfd.h 
@@ -248,7 +269,7 @@ remote-udi.o : remote-udi.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
 remote-vx.o : remote-vx.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h ${srcdir}/../include/wait.h target.h ${srcdir}/../include/bfd.h gdbcore.h \
-  command.h symfile.h ${srcdir}/vx-share/ptrace.h ${srcdir}/vx-share/xdr_ptrace.h ${srcdir}/vx-share/xdr_ld.h \
+  command.h complaints.h ${srcdir}/vx-share/ptrace.h ${srcdir}/vx-share/xdr_ptrace.h ${srcdir}/vx-share/xdr_ld.h \
   ${srcdir}/vx-share/xdr_rdb.h ${srcdir}/vx-share/dbgRpcLib.h 
 remote.o : remote.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
@@ -259,12 +280,13 @@ rs6000-pinsn.o : rs6000-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h conf
 ser-bsd.o : ser-bsd.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status serial.h 
 solib.o : solib.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h objfiles.h \
-  gdbcore.h command.h target.h frame.h regex.h inferior.h breakpoint.h value.h \
-  gdbtypes.h expression.h 
+  tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h gdbcore.h command.h target.h frame.h regex.h inferior.h breakpoint.h \
+  value.h gdbtypes.h expression.h 
 source.o : source.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h expression.h language.h command.h gdbcmd.h \
-  frame.h gdbcore.h ${srcdir}/../include/bfd.h regex.h symfile.h objfiles.h 
+  frame.h gdbcore.h ${srcdir}/../include/bfd.h regex.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h 
 sparc-nat.o : sparc-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h 
@@ -276,8 +298,8 @@ sparc-tdep.o : sparc-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
   gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h ieee-float.h gdbcore.h 
 stabsread.o : stabsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h gdbtypes.h symfile.h \
-  objfiles.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def buildsym.h \
-  stabsread.h 
+  ${srcdir}/../include/demangle.h objfiles.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def \
+  buildsym.h complaints.h stabsread.h 
 stack.o : stack.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status value.h symtab.h ${srcdir}/../include/obstack.h gdbtypes.h expression.h language.h \
   frame.h gdbcmd.h command.h gdbcore.h ${srcdir}/../include/bfd.h target.h breakpoint.h \
@@ -288,8 +310,8 @@ sun3-nat.o : sun3-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.statu
 sun386-nat.o : sun386-nat.c 
 symfile.o : symfile.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h \
-  frame.h target.h value.h expression.h symfile.h objfiles.h gdbcmd.h command.h \
-  breakpoint.h language.h 
+  frame.h target.h value.h expression.h symfile.h ${srcdir}/../include/demangle.h objfiles.h \
+  gdbcmd.h command.h breakpoint.h language.h complaints.h 
 symm-tdep.o : symm-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
@@ -298,16 +320,21 @@ symm-xdep.o : symm-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
 symmisc.o : symmisc.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h ${srcdir}/../include/bfd.h symfile.h \
-  objfiles.h breakpoint.h frame.h value.h expression.h command.h language.h 
+  ${srcdir}/../include/demangle.h objfiles.h breakpoint.h frame.h value.h expression.h \
+  command.h language.h 
 symtab.o : symtab.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h \
-  frame.h target.h value.h expression.h symfile.h objfiles.h gdbcmd.h command.h \
-  call-cmds.h regex.h language.h ${srcdir}/../include/demangle.h 
+  frame.h target.h value.h expression.h symfile.h ${srcdir}/../include/demangle.h objfiles.h \
+  gdbcmd.h command.h call-cmds.h regex.h language.h 
 tahoe-pinsn.o : tahoe-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/tahoe.h 
 target.o : target.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h gdbcmd.h command.h symtab.h \
-  inferior.h breakpoint.h frame.h value.h gdbtypes.h expression.h symfile.h objfiles.h 
+  inferior.h breakpoint.h frame.h value.h gdbtypes.h expression.h symfile.h ${srcdir}/../include/demangle.h \
+  objfiles.h 
+typeprint.o : typeprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
+  tm.h config.status ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symtab.h gdbtypes.h expression.h \
+  value.h gdbcore.h command.h gdbcmd.h target.h language.h ${srcdir}/../include/demangle.h 
 ultra3-nat.o : ultra3-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
@@ -319,10 +346,10 @@ umax-xdep.o : umax-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
 utils.o : utils.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status signals.h gdbcmd.h command.h terminal.h ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h \
-  target.h ${srcdir}/../include/demangle.h 
+  target.h ${srcdir}/../include/demangle.h expression.h language.h 
 valarith.o : valarith.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status value.h symtab.h ${srcdir}/../include/obstack.h gdbtypes.h expression.h target.h \
-  ${srcdir}/../include/bfd.h 
+  ${srcdir}/../include/bfd.h language.h 
 valprint.o : valprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h value.h expression.h gdbcore.h \
   ${srcdir}/../include/bfd.h gdbcmd.h command.h target.h language.h ${srcdir}/../include/demangle.h 
@@ -336,4 +363,6 @@ xdr_ld.o : ${srcdir}/vx-share/xdr_ld.c ${srcdir}/vx-share/vxWorks.h ${srcdir}/vx
 xdr_ptrace.o : ${srcdir}/vx-share/xdr_ptrace.c ${srcdir}/vx-share/vxWorks.h ${srcdir}/vx-share/vxTypes.h ${srcdir}/vx-share/xdr_ptrace.h 
 xdr_rdb.o : ${srcdir}/vx-share/xdr_rdb.c ${srcdir}/vx-share/vxWorks.h ${srcdir}/vx-share/vxTypes.h ${srcdir}/vx-share/xdr_rdb.h 
 xcoffread.o : xcoffread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h 
+  tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h gdbtypes.h symfile.h \
+  ${srcdir}/../include/demangle.h objfiles.h buildsym.h stabsread.h gdb-stabs.h complaints.h \
+  ${srcdir}/../include/coff/internal.h ${srcdir}/../bfd/libcoff.h ${srcdir}/../include/coff/rs6000.h 
