@@ -348,12 +348,12 @@ x86_64_linux_dr_get_status (void)
 {
   return x86_64_linux_dr_get (DR_STATUS);
 }
+
 
-extern ps_err_e
+ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
-
 /* This definition comes from prctl.h, but some kernels may not have it.  */
 #ifndef PTRACE_ARCH_PRCTL
 #define PTRACE_ARCH_PRCTL      30
@@ -367,17 +367,18 @@ ps_get_thread_area (const struct ps_prochandle *ph,
     {
     case FS:
       if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
-       return PS_OK;
+	return PS_OK;
       break;
     case GS:
       if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
-       return PS_OK;
+	return PS_OK;
       break;
     default:                   /* Should not happen.  */
       return PS_BADADDR;
     }
   return PS_ERR;               /* ptrace failed.  */
 }
+
 
 void
 child_post_startup_inferior (ptid_t ptid)

@@ -1,5 +1,13 @@
 2003-08-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-nat.c (ps_get_thread_area): Don't define as extern.
+	Only define PTRACE_GET_THREAD_AREA is not already defined.
+	Various style fixes in code and comments and some additional
+	spelling fixes in comments.  Move after functions dealing with
+	debug registers.
+	* x86-64-linux-nat.c (ps_get_thread_area): Don't define as extern.
+	Fix coding-style.
+
 	* alphafbsd-tdep.c (alphafbsd_sigcontext_addr): Use
 	frame_unwind_register_unsigned instead of
 	frame_unwind_unsigned_register.
