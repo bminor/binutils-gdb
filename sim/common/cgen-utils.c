@@ -24,10 +24,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "decode.h"
 
 #define MEMOPS_DEFINE_INLINE
-#include "cgen-mem.h"
+#include "mem-ops.h"
 
 #define SEMOPS_DEFINE_INLINE
-#include "cgen-sem.h"
+#include "sem-ops.h"
 
 const char *mode_names[] = {
   "VM",

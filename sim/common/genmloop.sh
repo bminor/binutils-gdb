@@ -35,8 +35,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-main.h"
 #include "bfd.h"
-#include "cgen-mem.h"
-#include "cgen-sem.h"
+#include "mem-ops.h"
+#include "sem-ops.h"
 #include "cgen-scache.h"
 #include "cpu-opc.h"
 #include "cpu-sim.h"
