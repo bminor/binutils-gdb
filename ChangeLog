@@ -1,3 +1,12 @@
+Tue Oct  8 10:39:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Patches from Geoffrey Noer <noer@cygnus.com>:
+	* configure.in: If configuring for newlib, pass --with-newlib to
+	subdirectories.
+	* Makefile.in (CC_FOR_TARGET): If winsup/Makefile exists, pass a
+	-Bnewlib/ and -Lwinsup to gcc.
+	(CXX_FOR_TARGET): Likewise.
+
 Mon Oct  7 10:59:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ETC_SUPPORT): Add configure.

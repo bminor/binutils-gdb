@@ -172,7 +172,11 @@ INSTALL_TARGET = install-dirs \
 CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
-      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+      if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+      else \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+      fi; \
     else \
       echo $$r/gcc/xgcc -B$$r/gcc/; \
     fi; \
@@ -201,7 +205,11 @@ CHILL_FOR_TARGET = ` \
 CXX_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
-      echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+      if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+      else \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+      fi; \
     else \
       echo $$r/gcc/xgcc -B$$r/gcc/; \
     fi; \

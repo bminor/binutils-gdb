@@ -747,6 +747,14 @@ if [ x${use_gnu_ld} = x ] ; then
   fi
 fi
 
+# If using newlib, add --with-newlib to the withoptions so that gcc/configure
+# can detect this case.
+
+if [ x${with_newlib} != xno ] && echo " ${target_configdirs} " | grep " target-newlib " > /dev/null 2>&1 && [ -d ${srcdir}/newlib ] ; then
+  with_newlib=yes
+  withoptions="$withoptions --with-newlib"
+fi
+
 if [ x${shared} = xyes ]; then
   case "${target}" in
     hppa*)		target_makefile_frag=config/mt-papic ;;
