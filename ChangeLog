@@ -1,3 +1,8 @@
+Fri Aug 19 12:40:25 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* Makefile.in:  Remove (for now) librx as a host library,
+	now that we're building it for target.
+
 Fri Aug 19 10:49:17 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* configure: Fix up help message; from karl@owl.hq.ileaf.com
