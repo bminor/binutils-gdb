@@ -115,6 +115,16 @@ Fri Jun 19 17:08:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* elf.c (_bfd_elf_section_from_bfd_section): Call bfd_set_error on
 	failure.
 
+start-sanitize-sky
+Thu Jun 18 23:59:30 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* reloc.c: New relocs BFD_RELOC_MIPS_DVP_11_S4,
+	BFD_RELOC_MIPS_DVP_U15_S3.
+	* elf32-mips.c: Handle them.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+end-sanitize-sky
 Tue Jun 16 11:55:55 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (copy_private_bfd_data): Improve handling of Solaris

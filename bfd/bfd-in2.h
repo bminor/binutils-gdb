@@ -1841,6 +1841,14 @@ lower instruction word, and the value is in 128 bit units. */
 
 /* This is a 27 bit address left shifted by 4. */
   BFD_RELOC_MIPS_DVP_27_S4,
+
+/* This is the 11 bit offset operand of ilw/stw instructions
+left shifted by 4. */
+  BFD_RELOC_MIPS_DVP_11_S4,
+
+/* This is the 15 bit unsigned immediate operand of the iaddiu instruction
+left shifted by 3. */
+  BFD_RELOC_MIPS_DVP_U15_S3,
 /* end-sanitize-sky */
 
 
