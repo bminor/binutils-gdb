@@ -1,6 +1,90 @@
+Tue Aug 13 16:17:56 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* blockframe.c (frameless_look_for_prologue):  Speed up by
+	calling SKIP_PROLOGUE_FRAMELESS_P if it's defined.
+	* tm-sparc.h (SKIP_PROLOGUE, SKIP_PROLOGUE_FRAMELESS_P):
+	Define two variants, one faster.
+	* sparc-tdep.c (sparc_frame_chain):  Use target_read_memory
+	and return zero, rather than giving an error.
+	(setup_arbitrary_frame):  Initialize the PC in the new frame.
+	(skip_prologue):  Add a second arg saying whether we're just
+	checking for a frameless function or not.
+
+	* core.c (core_open, core_close, core_xfer_memory):  Move
+	section table pointers and bfd* into the target_ops.
+	(core_open):  Allow errors in shared lib reading, etc.
+	(core_files_info):  Describe shared library sections.
+
+	* exec.c (exec_open, exec_close, exec_xfer_memory, xfer_memory,
+	exec_files_info, set_section_command):  Move section table
+	pointers and bfd* into the target_ops.
+	(add_to_section_table):  Add BFD to section table.
+
+	* target.c (target_xfer_memory, target_info):  Pass target to
+	xfer_memory and target_info functions.
+	* target.h:   ''
+
+	* gdbcore.h:  Move struct section_table.
+	* target.h:  New home of struct section_table.
+
+	* solib.c (solib_add):  New argument is the target_ops whose
+	section list is to be added to, if any.  Reallocate the
+	sections in that target to add any that come from shared libs.
+	(throughout) so_sections renamed to sections.
+	(solib_xfer_memory):  Deleted.
+	* tm-sunos.h (SOLIB_ADD):  Add target argument.
+	(SOLIB_XFER_MEMORY):  Delete.
+
+	* core.c, exec.c, inftarg.c, remote-eb.c, remote-nindy.c,
+	remote-vx.c, remote.c, target.c, target.h:  Remove add_syms vector
+	from target_ops.  It's the same on all targets.  Add two section
+	pointers to target_ops.
+
+	* stack.c (find_relative_frame):  Dump ancient algorithm for
+	"down", just use handy "next" pointers.
+	(frame_command):  Don't error if there is no stack; let user
+	set one.
+
+	* inflow.c (new_tty_prefork, new_tty):  New prefork routine
+	modifies static state in the parent process; new_tty itself
+	runs in the child and modifies the child's file descriptors
+	to match the saved static state.
+	* infrun.c (child_create_inferior):  Call new_tty_prefork,
+	fork, then new_tty.
+
+	* infptrace.c (child_xfer_memory):  Add ignored target arg.
+	* remote-eb.c (eb_xfer_inferior_memory):  ''
+	* remote-nindy.c (nindy_xfer_inferior_memory):  ''
+	* remote-vx.c (vx_xfer_memory):    ''
+	* remote.c (remote_xfer_memory):   ''.  Rename from
+	remote_xfer_inferior_memory.
+
+	* main.c (main):  Only try to attach "corefile" argument if
+	it starts with a digit.
+
+	* symfile.c (symbol_reloading):  New "set/show" variable.
+	(symbol_file_add):  Shorten message about symbol reading.
+	(add_symbol_file_command):  Merge with add_syms_addr_command,
+	since this should work on all targets now.
+	(stop_whining):  Default to zero, to shut up complaints
+	about bad symbol tables on many systems.
+	(free_named_symtabs):  Just exit unless symbol_reloading.
+
+	* xm-sun3os4.h, xm-sun4os4.h:  Define BROKEN_LARGE_ALLOCA,
+	and add comment explaining shared library screw.
+
+	* source.c:  #if defined => #ifdef.
+
+Thu Aug  8 12:23:19 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* doc/gdbint.texinfo:  Improve doc on porting to new OS's.
+
 Tue Aug  6 17:16:15 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
-	* Makefile: use doc/Makefile for doc targets
+	* doc/rdl-apps.texinfo: provide default readline-appendix finder
+	(doc/Makefile knows how to make one for local config)
+
+	* Makefile.in: use doc/Makefile for doc targets
 
 	* doc/Makefile: GDB documentation now has its own Makefile
 	  doc/refcard.tex: renamed from "gdbrc.tex"

@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -34,12 +34,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "gdbcore.h"
+#include "regex.h"
 
 extern char *strstr();
 
 extern void set_next_address ();
-
-void mod_path ();
 
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
@@ -97,25 +96,27 @@ select_source_symtab (s)
       free (sals.sals);
       current_source_symtab = sal.symtab;
       current_source_line = max (sal.line - (lines_to_list () - 1), 1);
-      return;
+      if (current_source_symtab)
+        return;
     }
   
   /* All right; find the last file in the symtab list (ignoring .h's).  */
 
-  if (s = symtab_list)
+  current_source_line = 1;
+
+  for (s = symtab_list; s; s = s->next)
     {
-      do
-	{
-	  char *name = s->filename;
-	  int len = strlen (name);
-	  if (! (len > 2 && !strcmp (&name[len - 2], ".h")))
-	    current_source_symtab = s;
-	  s = s->next;
-	}
-      while (s);
-      current_source_line = 1;
+      char *name = s->filename;
+      int len = strlen (name);
+      if (! (len > 2 && !strcmp (&name[len - 2], ".h")))
+	current_source_symtab = s;
     }
-  else if (partial_symtab_list)
+  if (current_source_symtab)
+    return;
+
+  /* Howabout the partial symtab list?  */
+
+  if (partial_symtab_list)
     {
       ps = partial_symtab_list;
       while (ps)
@@ -131,10 +132,11 @@ select_source_symtab (s)
 	  fatal ("Internal: select_source_symtab: readin pst found and no symtabs.");
 	else
 	  current_source_symtab = PSYMTAB_TO_SYMTAB (cs_pst);
-      else
-	current_source_symtab = 0;
-      current_source_line = 1;
     }
+  if (current_source_symtab)
+    return;
+
+  error ("Can't find a default source file");
 }
 
 static void
@@ -193,7 +195,7 @@ directory_command (dirname, from_tty)
 	}
     }
   else
-    mod_path (dirname, from_tty, &source_path);
+    mod_path (dirname, &source_path);
   if (from_tty)
     show_directories ();
   forget_cached_source_info ();
@@ -202,9 +204,8 @@ directory_command (dirname, from_tty)
 /* Add zero or more directories to the front of an arbitrary path.  */
 
 void
-mod_path (dirname, from_tty, which_path)
+mod_path (dirname, which_path)
      char *dirname;
-     int from_tty;
      char **which_path;
 {
   char *old = *which_path;
@@ -541,7 +542,7 @@ find_source_lines (s, desc)
   if (exec_bfd && bfd_get_mtime(exec_bfd) < st.st_mtime)
     printf ("Source file is more recent than executable.\n");
 
-#if defined (BROKEN_LARGE_ALLOCA)
+#ifdef BROKEN_LARGE_ALLOCA
   data = (char *) xmalloc (st.st_size);
   make_cleanup (free, data);
 #else
@@ -773,7 +774,7 @@ list_command (arg, from_tty)
   char *p;
 
   if (symtab_list == 0 && partial_symtab_list == 0)
-    error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
+    error ("No symbol table is loaded.  Use the \"file\" command.");
 
   /* Pull in a current source symtab if necessary */
   if (current_source_symtab == 0 &&
@@ -982,6 +983,7 @@ line_info (arg, from_tty)
 
 /* Commands to search the source file for a regexp.  */
 
+/* ARGSUSED */
 static void
 forward_search_command (regex, from_tty)
      char *regex;
@@ -1024,15 +1026,16 @@ forward_search_command (regex, from_tty)
   stream = fdopen (desc, "r");
   clearerr (stream);
   while (1) {
+/* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
     char buf[4096];		/* Should be reasonable??? */
     register char *p = buf;
 
-    c = fgetc (stream);
+    c = getc (stream);
     if (c == EOF)
       break;
     do {
       *p++ = c;
-    } while (c != '\n' && (c = fgetc (stream)) >= 0);
+    } while (c != '\n' && (c = getc (stream)) >= 0);
 
     /* we now have a source line in buf, null terminate and match */
     *p = 0;
@@ -1052,6 +1055,7 @@ forward_search_command (regex, from_tty)
   fclose (stream);
 }
 
+/* ARGSUSED */
 static void
 reverse_search_command (regex, from_tty)
      char *regex;
@@ -1095,15 +1099,16 @@ reverse_search_command (regex, from_tty)
   clearerr (stream);
   while (line > 1)
     {
+/* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
       char buf[4096];		/* Should be reasonable??? */
       register char *p = buf;
 
-      c = fgetc (stream);
+      c = getc (stream);
       if (c == EOF)
 	break;
       do {
 	*p++ = c;
-      } while (c != '\n' && (c = fgetc (stream)) >= 0);
+      } while (c != '\n' && (c = getc (stream)) >= 0);
 
       /* We now have a source line in buf; null terminate and match.  */
       *p = 0;
