@@ -1,5 +1,8 @@
 Wed Apr 20 16:45:51 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* coff-sparc.c (sparccoff_vec): Change minimum alignment power to
+	2, so that stab sections can be multiples of 4 bytes only.
+
 	* hosts/i386aix.h: Changes to avoid prototypes conflicts with the
 	ones defined in stdlib.h.  (From Minh Tran-Le.)
 
