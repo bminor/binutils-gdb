@@ -1,5 +1,8 @@
 2001-11-06  Jim Blandy  <jimb@redhat.com>
 
+	* Makefile.in (ALLDEPFILES): Add s390-tdep.c and s390-nat.c.
+	(s390-tdep.o, s390-nat.o): New rules.
+
 	* s390-nat.c (s390_register_u_addr): Pass proper arguments to
  	internal_error.
 
