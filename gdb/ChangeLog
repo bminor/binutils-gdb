@@ -1,5 +1,8 @@
 2004-12-05  Mark Kettenis  <kettenis@gnu.org>
 
+	* somsolib.c [PA_SOM_ONLY] (no_shared_libraries): New function.
+	* config/pa/hppahpux.mt (TDEPFILES): Remove solib.o.
+
 	* hppa-hpux-tdep.c: Update copyright notice and year.
 
 2004-12-05  Richard Earnshaw  <rearnsha@arm.com>
