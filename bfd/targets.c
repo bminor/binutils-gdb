@@ -743,6 +743,7 @@ extern const bfd_target ptrace_core_vec;
 extern const bfd_target sco5_core_vec;
 extern const bfd_target trad_core_vec;
 
+extern const bfd_target bfd_elf32_am33lin_vec;
 static const bfd_target * const _bfd_target_vector[] = {
 
 #ifdef SELECT_VECS
@@ -1061,6 +1062,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&w65_vec,
 	&we32kcoff_vec,
 	&z8kcoff_vec,
+	&bfd_elf32_am33lin_vec,
 #endif /* not SELECT_VECS */
 
 /* Always support S-records, for convenience.  */

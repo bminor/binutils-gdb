@@ -372,6 +372,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	efi-app-ia32.c \
 	elf.c \
+	elf32-am33lin.lo \
 	elf32-arc.c \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
@@ -1123,6 +1124,10 @@ efi-app-ia32.lo: efi-app-ia32.c $(INCDIR)/filenames.h \
 elf.lo: elf.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h
+elf32-am33lin.lo: elf32-am33lin.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h elf-m10300.c
 elf32-arc.lo: elf32-arc.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \

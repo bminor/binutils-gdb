@@ -4842,12 +4842,14 @@ _bfd_mn10300_elf_finish_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
+#ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
 #define ELF_MACHINE_CODE	EM_MN10300
 #define ELF_MACHINE_ALT1	EM_CYGNUS_MN10300
 #define ELF_MAXPAGESIZE		0x1000
+#endif
 
 #define elf_info_to_howto		mn10300_info_to_howto
 #define elf_info_to_howto_rel		0
@@ -4864,7 +4866,9 @@ _bfd_mn10300_elf_finish_dynamic_sections (output_bfd, info)
 #define bfd_elf32_bfd_link_hash_table_free \
 				elf32_mn10300_link_hash_table_free
 
+#ifndef elf_symbol_leading_char
 #define elf_symbol_leading_char '_'
+#endif
 
 /* So we can set bits in e_flags.  */
 #define elf_backend_final_write_processing \

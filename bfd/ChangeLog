@@ -1,3 +1,23 @@
+2003-07-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	2001-09-12  Alexandre Oliva  <aoliva@redhat.com>
+	* elf32-am33lin.c (ELF_MACHINE_CODE): Redefine to EM_MN10300.
+	(ELF_MACHINE_ALT1): Define to EM_CYGNUS_MN10300.
+	2001-06-02  Nick Clifton  <nickc@cambridge.redhat.com>
+	* elf32-am33lin.c: Rename global functions.
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* config.bfd (am33_2.0, am33_2.0-*-linux*): Added.
+	* configure.in (bfd_elf32_am33lin_vec): Added.
+	* Makefile.am (BFD32_BACKENDS): Added elf32-am33lin.lo.
+	(elf32-am33lin.lo): List dependencies.
+	* aclocal.m4, configure, Makefile.in: Rebuilt.
+	* elf-m10300.c (TARGET_LITTLE_SYM, TARGET_LITTLE_NAME,
+	ELF_ARCH, ELF_MACHINE_CODE, ELF_MAXPAGESIZE): Define only if
+	ELF_ARCH was not defined before.
+	(elf_symbol_leading_char): Define if not defined.
+	* elf32-am33lin.c: Override the definitions above.
+	* targets.c (bfd_elf32_am33lin_vec): New.
+
 2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
