@@ -31,6 +31,10 @@
 #include "obstack.h"
 #include "opcode/i386.h"
 
+#ifndef TC_RELOC
+#define TC_RELOC(X,Y) (Y)
+#endif
+
 /* 'md_assemble ()' gathers together information and puts it into a
    i386_insn. */
 
@@ -57,6 +61,13 @@ struct _i386_insn
 
     /* Displacements (if given) for each operand. */
     expressionS *disps[MAX_OPERANDS];
+
+    /* Relocation type for operand */
+#ifdef BFD_ASSEMBLER
+    enum bfd_reloc_code_real disp_reloc[MAX_OPERANDS];
+#else
+    int disp_reloc[MAX_OPERANDS];
+#endif
 
     /* Immediate operands (if given) for each operand. */
     expressionS *imms[MAX_OPERANDS];
@@ -137,7 +148,7 @@ static char digit_chars[256];
 #define is_digit_char(x) (digit_chars[(unsigned char) x])
 
 /* put here all non-digit non-letter charcters that may occur in an operand */
-static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:";
+static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
 
 static char *ordinal_names[] = {"first", "second", "third"}; /* for printfs */
 
@@ -232,6 +243,8 @@ static reg_entry *parse_register PARAMS ((char *reg_string));
 #ifndef I386COFF
 static void s_bss PARAMS ((int));
 #endif
+
+symbolS *GOT_symbol;		/* Pre-defined "__GLOBAL_OFFSET_TABLE" */
 
 static INLINE unsigned long
 mode_from_disp_size (t)
@@ -622,10 +635,13 @@ pt (t)
 
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type
-reloc (size, pcrel)
+reloc (size, pcrel, other)
      int size;
      int pcrel;
+     bfd_reloc_code_real_type other;
 {
+  if (other != NO_RELOC) return other;
+
   if (pcrel)
     switch (size)
       {
@@ -650,20 +666,38 @@ reloc (size, pcrel)
   return BFD_RELOC_NONE;
 }
 #else
-#define reloc(SIZE,PCREL)	0
+#define reloc(SIZE,PCREL,OTHER)	0
 #define BFD_RELOC_32		0
 #define BFD_RELOC_32_PCREL	0
+#define BFD_RELOC_386_PLT32	0
+#define BFD_RELOC_386_GOT32	0
+#define BFD_RELOC_386_GOTOFF	0
 #endif
+
+/*
+ * Here we decide which fixups can be adjusted to make them relative to
+ * the beginning of the section instead of the symbol.  Basically we need
+ * to make sure that the dynamic relocations are done correctly, so in
+ * some cases we force the original symbol to be used.
+ */
+tc_i386_fix_adjustable(fixP)
+     fixS * fixP;
+{
+	/* Prevent all adjustments to global symbols. */
+	if(!S_IS_LOCAL(fixP->fx_addsy)) return 0;
+	return 1;
+}
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
+
 void
 md_assemble (line)
      char *line;
 {
   /* Holds template once we've found it. */
-  register template *t;
+  template *t;
 
   /* Count the size of the instruction generated.  */
   int insn_size = 0;
@@ -671,8 +705,12 @@ md_assemble (line)
   /* Possible templates for current insn */
   templates *current_templates = (templates *) 0;
 
+  int j;
+
   /* Initialize globals. */
   memset (&i, '\0', sizeof (i));
+  for (j = 0; j < MAX_OPERANDS; j++)
+    i.disp_reloc[j] = NO_RELOC;
   memset (disp_expressions, '\0', sizeof (disp_expressions));
   memset (im_expressions, '\0', sizeof (im_expressions));
   save_stack_p = save_stack;	/* reset stack pointer */
@@ -1459,7 +1497,8 @@ md_assemble (line)
 	else
 	  {
 	    fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-			 i.disps[0], 1, reloc (size, 1));
+			 i.disps[0], 1, reloc (size, 1, i.disp_reloc[0]));
+
 	  }
       }
     else if (t->opcode_modifier & JumpInterSegment)
@@ -1587,7 +1626,8 @@ md_assemble (line)
 			p = frag_more (4);
 			insn_size += 4;
 			fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
-				     i.disps[n], 0, BFD_RELOC_32);
+					    i.disps[n], 0, 
+					    TC_RELOC(i.disp_reloc[n], BFD_RELOC_32));
 		      }
 		  }
 	      }
@@ -1631,19 +1671,34 @@ md_assemble (line)
 		      }
 		    else
 		      {		/* not absolute_section */
-			/* need a 32-bit fixup (don't support 8bit non-absolute ims) */
-			/* try to support other sizes ... */
+			/* Need a 32-bit fixup (don't support 8bit
+			   non-absolute ims).  Try to support other
+			   sizes ... */
+			int r_type;
 			int size;
+			int pcrel = 0;
+
 			if (i.types[n] & (Imm8 | Imm8S))
 			  size = 1;
 			else if (i.types[n] & Imm16)
 			  size = 2;
 			else
 			  size = 4;
+			r_type = reloc (size, 0, i.disp_reloc[0]);
 			p = frag_more (size);
 			insn_size += size;
+#ifdef BFD_ASSEMBLER
+			if (r_type = BFD_RELOC_32
+			    && i.imms[n]->X_op == O_symbol
+			    && GOT_symbol
+			    && GOT_symbol == i.imms[n]->X_add_symbol)
+			  {
+			    r_type = BFD_RELOC_386_GOTPC;
+			    i.imms[n]->X_add_number += 3;
+			  }
+#endif
 			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-				     i.imms[n], 0, reloc (size, 0));
+				     i.imms[n], pcrel, r_type);
 		      }
 		  }
 	      }
@@ -1990,11 +2045,61 @@ i386_operand (operand_string)
 	  char *save_input_line_pointer;
 	  exp = &disp_expressions[i.disp_operands];
 	  i.disps[this_operand] = exp;
+	  i.disp_reloc[this_operand] = NO_RELOC;
 	  i.disp_operands++;
 	  save_input_line_pointer = input_line_pointer;
 	  input_line_pointer = displacement_string_start;
 	  END_STRING_AND_SAVE (displacement_string_end);
+
+	  {
+	    /*
+	     * We can have operands of the form
+	     *   <symbol>@GOTOFF+<nnn>
+	     * Take the easy way out here and copy everything
+	     * into a temporary buffer...
+	     */
+	    register char *cp;
+	    if (cp = strchr(input_line_pointer,'@')) {
+	      char tmpbuf[BUFSIZ];
+	      
+	      if(!GOT_symbol)
+		GOT_symbol = symbol_find_or_make(GLOBAL_OFFSET_TABLE_NAME);
+
+	      if (strncmp(cp+1, "PLT", 3) == 0) {
+		i.disp_reloc[this_operand] = BFD_RELOC_386_PLT32;
+		*cp = '\0';
+		strcpy(tmpbuf, input_line_pointer);
+		strcat(tmpbuf, cp+1+3);
+		*cp = '@';
+	      } else if (strncmp(cp+1, "GOTOFF", 6) == 0) {
+		i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
+		*cp = '\0';
+		strcpy(tmpbuf, input_line_pointer);
+		strcat(tmpbuf, cp+1+6);
+		*cp = '@';
+	      } else if (strncmp(cp+1, "GOT", 3) == 0) {
+		i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
+		*cp = '\0';
+		strcpy(tmpbuf, input_line_pointer);
+		strcat(tmpbuf, cp+1+3);
+		*cp = '@';
+	      } else
+		as_bad("Bad reloc specifier '%s' in expression", cp+1);
+	      input_line_pointer = tmpbuf;
+	    }
+	  }
+
 	  exp_seg = expression (exp);
+
+#ifdef BFD_ASSEMBLER
+	  /* We do this to make sure that the section symbol is in
+	     the symbol table.  We will ultimately change the relocation
+	     to be relative to the beginning of the section */
+	  if(i.disp_reloc[this_operand] == BFD_RELOC_386_GOTOFF &&
+	     S_IS_LOCAL(exp->X_add_symbol))
+	    section_symbol(exp->X_add_symbol->bsym->section);
+#endif
+
 	  if (*input_line_pointer)
 	    as_bad ("Ignoring junk '%s' after expression", input_line_pointer);
 	  RESTORE_END_STRING (displacement_string_end);
@@ -2103,8 +2208,17 @@ md_estimate_size_before_relax (fragP, segment)
 	  opcode[0] = 0xe9;	/* dword disp jmp */
 	  fragP->fr_fix += 4;
 	  fix_new (fragP, old_fr_fix, 4,
-		   fragP->fr_symbol,
-		   fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
+				 fragP->fr_symbol,
+		   fragP->fr_offset, 1,
+		   (GOT_symbol && /* Not quite right - we should switch on
+				     presence of @PLT, but I cannot see how
+				     to get to that from here.  We should have
+				     done this in md_assemble to really
+				     get it right all of the time, but I
+				     think it does not matter that much, as
+				     this will be right most of the time. ERY*/
+		    S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)?
+		   BFD_RELOC_386_PLT32 : BFD_RELOC_32_PCREL);
 	  break;
 
 	default:
@@ -2115,7 +2229,12 @@ md_estimate_size_before_relax (fragP, segment)
 	  fragP->fr_fix += 1 + 4;	/* we've added an opcode byte */
 	  fix_new (fragP, old_fr_fix + 1, 4,
 		   fragP->fr_symbol,
-		   fragP->fr_offset, 1, BFD_RELOC_32_PCREL);
+		   fragP->fr_offset, 1, 
+		   (GOT_symbol &&  /* Not quite right - we should switch on
+				     presence of @PLT, but I cannot see how
+				     to get to that from here.  ERY */
+		    S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)?
+		   BFD_RELOC_386_PLT32 : BFD_RELOC_32_PCREL);
 	  break;
 	}
       frag_wane (fragP);
@@ -2303,6 +2422,68 @@ md_apply_fix_1 (fixP, value)
 	}
 #endif
     }
+
+  /* Fix a few things - the dynamic linker expects certain values here,
+     and we must not dissappoint it. */
+#ifdef OBJ_ELF
+  if(fixP->fx_addsy)
+    switch(fixP->fx_r_type) {
+    case BFD_RELOC_386_PLT32:
+      /* Make the jump instruction point to the address of the operand.  At
+	 runtime we merely add the offset to the actual PLT entry. */
+      value = 0xfffffffc;
+      break;
+    case BFD_RELOC_386_GOTPC:
+/*
+ *  This is tough to explain.  We end up with this one if we have
+ * operands that look like "_GLOBAL_OFFSET_TABLE_+[.-.L284]".  The goal
+ * here is to obtain the absolute address of the GOT, and it is strongly
+ * preferable from a performance point of view to avoid using a runtime
+ * relocation for this.  The actual sequence of instructions often look 
+ * something like:
+ * 
+ * 	call	.L66
+ * .L66:
+ * 	popl	%ebx
+ * 	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L66],%ebx
+ * 
+ * 	The call and pop essentially return the absolute address of
+ * the label .L66 and store it in %ebx.  The linker itself will
+ * ultimately change the first operand of the addl so that %ebx points to
+ * the GOT, but to keep things simple, the .o file must have this operand
+ * set so that it generates not the absolute address of .L66, but the
+ * absolute address of itself.  This allows the linker itself simply
+ * treat a GOTPC relocation as asking for a pcrel offset to the GOT to be
+ * added in, and the addend of the relocation is stored in the operand
+ * field for the instruction itself.
+ * 
+ * 	Our job here is to fix the operand so that it would add the correct
+ * offset so that %ebx would point to itself.  The thing that is tricky is
+ * that .-.L66 will point to the beginning of the instruction, so we need
+ * to further modify the operand so that it will point to itself.
+ * There are other cases where you have something like:
+ * 
+ * 	.long	$_GLOBAL_OFFSET_TABLE_+[.-.L66]
+ * 
+ * and here no correction would be required.  Internally in the assembler
+ * we treat operands of this form as not being pcrel since the '.' is 
+ * explicitly mentioned, and I wonder whether it would simplify matters
+ * to do it this way.  Who knows.  In earlier versions of the PIC patches,
+ * the pcrel_adjust field was used to store the correction, but since the
+ * expression is not pcrel, I felt it would be confusing to do it this way.
+ */
+      value += fixP->fx_where + fixP->fx_frag->fr_address - fixP->fx_offset;
+      break;
+    case BFD_RELOC_386_GOT32:
+      value = 0; /* Fully resolved at runtime.  No addend. */
+    case BFD_RELOC_386_GOTOFF:
+      /* Here everything should be correct already.  Just wanted to mention
+       this explicitly so no one things I forgot it. */
+    default:
+      break;
+    }
+#endif
+
 #endif
   md_number_to_chars (p, value, fixP->fx_size);
 }
@@ -2483,6 +2664,18 @@ symbolS *
 md_undefined_symbol (name)
      char *name;
 {
+	if (*name == '_' && *(name+1) == 'G'
+	    && strcmp(name, GLOBAL_OFFSET_TABLE_NAME) == 0)
+	  {
+	    if(!GOT_symbol)
+	      {
+		if(symbol_find(name)) 
+		  as_bad("GOT already in symbol table");
+		GOT_symbol = symbol_new (name, undefined_section, 
+					 (valueT) 0, &zero_address_frag);
+	      };
+	    return GOT_symbol;
+	  }
   return 0;
 }
 
@@ -2533,6 +2726,8 @@ s_bss (ignore)
 
 
 #ifdef BFD_ASSEMBLER
+#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
+#define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
 
 arelent *
 tc_gen_reloc (section, fixp)
@@ -2542,26 +2737,39 @@ tc_gen_reloc (section, fixp)
   arelent *rel;
   bfd_reloc_code_real_type code;
 
-#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
-  switch (F (fixp->fx_size, fixp->fx_pcrel))
+  switch(fixp->fx_r_type)
     {
-#define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
-#ifndef OBJ_ELF
-      MAP (1, 0, BFD_RELOC_8);
-      MAP (2, 0, BFD_RELOC_16);
-#endif
-      MAP (4, 0, BFD_RELOC_32);
-#ifndef OBJ_ELF
-      MAP (1, 1, BFD_RELOC_8_PCREL);
-      MAP (2, 1, BFD_RELOC_16_PCREL);
-#endif
-      MAP (4, 1, BFD_RELOC_32_PCREL);
+    case BFD_RELOC_386_PLT32:
+    case BFD_RELOC_386_GOT32:
+    case BFD_RELOC_386_GOTOFF:
+    case BFD_RELOC_386_GOTPC:
+      code = fixp->fx_r_type;
+      break;
     default:
-      as_bad ("Can not do %d byte %srelocation", fixp->fx_size,
-	      fixp->fx_pcrel ? "pc-relative" : "");
+      switch (F (fixp->fx_size, fixp->fx_pcrel))
+	{
+#ifndef OBJ_ELF
+	  MAP (1, 0, BFD_RELOC_8);
+	  MAP (2, 0, BFD_RELOC_16);
+#endif
+	  MAP (4, 0, BFD_RELOC_32);
+#ifndef OBJ_ELF
+	  MAP (1, 1, BFD_RELOC_8_PCREL);
+	  MAP (2, 1, BFD_RELOC_16_PCREL);
+#endif
+	  MAP (4, 1, BFD_RELOC_32_PCREL);
+	default:
+	  as_bad ("Can not do %d byte %srelocation", fixp->fx_size,
+		  fixp->fx_pcrel ? "pc-relative" : "");
+	}
     }
 #undef MAP
 #undef F
+
+  if (code == BFD_RELOC_32
+      && GOT_symbol
+      && fixp->fx_addsy == GOT_symbol)
+    code = BFD_RELOC_386_GOTPC;
 
   rel = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
   assert (rel != 0);
