@@ -43,6 +43,7 @@ sparc.h
 sym.h
 symconst.h
 we32k.h
+w65.h
 z8k.h
 
 Things-to-lose:
