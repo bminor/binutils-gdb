@@ -56,6 +56,7 @@ FLONUM_TYPE generic_floating_point_number =
 /* If nonzero, we've been asked to assemble nan, +inf or -inf */
 int generic_floating_point_magic;
 
+void
 floating_constant (expressionP)
      expressionS *expressionP;
 {
@@ -85,40 +86,38 @@ floating_constant (expressionP)
 }
 
 
-
+void
 integer_constant (radix, expressionP)
      int radix;
      expressionS *expressionP;
 {
-  register char *digit_2;	/*->2nd digit of number. */
+  char *digit_2;	/*->2nd digit of number. */
   char c;
 
-  register valueT number;	/* offset or (absolute) value */
-  register short int digit;	/* value of next digit in current radix */
-  register short int maxdig = 0;/* highest permitted digit value. */
-  register int too_many_digits = 0;	/* if we see >= this number of */
-  register char *name;		/* points to name of symbol */
-  register symbolS *symbolP;	/* points to symbol */
+  valueT number;	/* offset or (absolute) value */
+  short int digit;	/* value of next digit in current radix */
+  short int maxdig = 0;/* highest permitted digit value. */
+  int too_many_digits = 0;	/* if we see >= this number of */
+  char *name;		/* points to name of symbol */
+  symbolS *symbolP;	/* points to symbol */
 
   int small;			/* true if fits in 32 bits. */
   extern const char hex_value[]; /* in hex_value.c */
 
-  /* may be bignum, or may fit in 32 bits. */
-  /*
-   * most numbers fit into 32 bits, and we want this case to be fast.
-   * so we pretend it will fit into 32 bits. if, after making up a 32
-   * bit number, we realise that we have scanned more digits than
-   * comfortably fit into 32 bits, we re-scan the digits coding
-   * them into a bignum. for decimal and octal numbers we are conservative: some
-   * numbers may be assumed bignums when in fact they do fit into 32 bits.
-   * numbers of any radix can have excess leading zeros: we strive
-   * to recognise this and cast them back into 32 bits.
-   * we must check that the bignum really is more than 32
-   * bits, and change it back to a 32-bit number if it fits.
-   * the number we are looking for is expected to be positive, but
-   * if it fits into 32 bits as an unsigned number, we let it be a 32-bit
-   * number. the cavalier approach is for speed in ordinary cases.
-   */
+  /* May be bignum, or may fit in 32 bits. */
+  /* Most numbers fit into 32 bits, and we want this case to be fast.
+     so we pretend it will fit into 32 bits.  If, after making up a 32
+     bit number, we realise that we have scanned more digits than
+     comfortably fit into 32 bits, we re-scan the digits coding them
+     into a bignum.  For decimal and octal numbers we are
+     conservative: Some numbers may be assumed bignums when in fact
+     they do fit into 32 bits.  Numbers of any radix can have excess
+     leading zeros: We strive to recognise this and cast them back
+     into 32 bits.  We must check that the bignum really is more than
+     32 bits, and change it back to a 32-bit number if it fits.  The
+     number we are looking for is expected to be positive, but if it
+     fits into 32 bits as an unsigned number, we let it be a 32-bit
+     number.  The cavalier approach is for speed in ordinary cases. */
 
   switch (radix)
     {
@@ -239,8 +238,12 @@ integer_constant (radix, expressionP)
 
 	      }
 	    else
-	      {			/* either not seen or not defined. */
-		as_bad ("backw. ref to unknown label \"%d:\", 0 assumed.", number);
+	      {
+		/* either not seen or not defined. */
+		/* @@ Should print out the original string instead of
+		   the parsed number.  */
+		as_bad ("backw. ref to unknown label \"%d:\", 0 assumed.",
+			(int) number);
 		expressionP->X_seg = absolute_section;
 	      }
 
@@ -320,11 +323,12 @@ integer_constant (radix, expressionP)
 
     }
   else
-    {				/* not a small number */
+    {
+      /* not a small number */
       expressionP->X_add_number = number;
       expressionP->X_seg = big_section;
       input_line_pointer--;	/*->char following number. */
-    }				/* if (small) */
+    }
 }				/* integer_constant() */
 
 
@@ -345,16 +349,11 @@ integer_constant (radix, expressionP)
 
 static segT
 operand (expressionP)
-     register expressionS *expressionP;
+     expressionS *expressionP;
 {
-  register char c;
-  register symbolS *symbolP;	/* points to symbol */
-  register char *name;		/* points to name of symbol */
-  /* invented for humans only, hope */
-  /* optimising compiler flushes it! */
-  register short int radix;	/* 2, 8, 10 or 16, 0 when floating */
-  /* 0 means we saw start of a floating- */
-  /* point constant. */
+  char c;
+  symbolS *symbolP;	/* points to symbol */
+  char *name;		/* points to name of symbol */
 
   /* digits, assume it is a bignum. */
 
@@ -565,7 +564,7 @@ operand (expressionP)
 #endif
 	  symbolP = symbol_new (fake,
 				now_seg,
-	       (valueT) (obstack_next_free (&frags) - frag_now->fr_literal),
+	       (valueT) ((char*)obstack_next_free (&frags) - frag_now->fr_literal),
 				frag_now);
 
 	  expressionP->X_add_number = 0;
@@ -651,7 +650,7 @@ operand (expressionP)
 
 static void
 clean_up_expression (expressionP)
-     register expressionS *expressionP;
+     expressionS *expressionP;
 {
   segT s = expressionP->X_seg;
   if (s == absent_section
@@ -725,8 +724,8 @@ expr_part (symbol_1_PP, symbol_2_P)
      symbolS *symbol_2_P;
 {
   segT return_value;
-#ifndef MANY_SEGMENTS
-#ifndef OBJ_ECOFF
+
+#if !defined (BFD_ASSEMBLER) && (defined (OBJ_AOUT) || defined (OBJ_BOUT))
   int test = ((*symbol_1_PP) == NULL
 	      || (S_GET_SEGMENT (*symbol_1_PP) == text_section)
 	      || (S_GET_SEGMENT (*symbol_1_PP) == data_section)
@@ -739,7 +738,6 @@ expr_part (symbol_1_PP, symbol_2_P)
 	  || (S_GET_SEGMENT (symbol_2_P) == bss_section)
 	  || (!S_IS_DEFINED (symbol_2_P)));
   assert (test);
-#endif
 #endif
   if (*symbol_1_PP)
     {
@@ -793,8 +791,7 @@ expr_part (symbol_1_PP, symbol_2_P)
 	  return_value = absolute_section;
 	}
     }
-#ifndef MANY_SEGMENTS
-#ifndef OBJ_ECOFF
+#if defined (OBJ_AOUT) && !defined (BFD_ASSEMBLER)
   test = (return_value == absolute_section
 	  || return_value == text_section
 	  || return_value == data_section
@@ -802,7 +799,6 @@ expr_part (symbol_1_PP, symbol_2_P)
 	  || return_value == undefined_section
 	  || return_value == pass1_section);
   assert (test);
-#endif
 #endif
   know ((*symbol_1_PP) == NULL
 	|| (S_GET_SEGMENT (*symbol_1_PP) == return_value));
@@ -895,14 +891,14 @@ static const operator_rankT
 /* Return resultP->X_seg. */
 segT 
 expr (rank, resultP)
-     register operator_rankT rank;	/* Larger # is higher rank. */
-     register expressionS *resultP;	/* Deliver result here. */
+     operator_rankT rank;	/* Larger # is higher rank. */
+     expressionS *resultP;	/* Deliver result here. */
 {
   expressionS right;
-  register operatorT op_left;
-  register char c_left;		/* 1st operator character. */
-  register operatorT op_right;
-  register char c_right;
+  operatorT op_left;
+  char c_left;		/* 1st operator character. */
+  operatorT op_right;
+  char c_right;
 
   know (rank >= 0);
   (void) operand (resultP);
@@ -970,7 +966,7 @@ expr (rank, resultP)
 	       * does not cause any further inaccuracy.
 	       */
 
-	      register symbolS *symbolP;
+	      symbolS *symbolP;
 
 	      right.X_add_number = -right.X_add_number;
 	      symbolP = right.X_add_symbol;
@@ -987,13 +983,14 @@ expr (rank, resultP)
 	    {
 	      segT seg1;
 	      segT seg2;
-#ifndef MANY_SEGMENTS
-#ifndef OBJ_ECOFF
+#if 0 /* @@ This rejects stuff in common sections too.  Figure out some
+	 reasonable test, and make it clean...  */
+#if !defined (MANY_SEGMENTS) && !defined (OBJ_ECOFF)
 	      know (resultP->X_seg == data_section || resultP->X_seg == text_section || resultP->X_seg == bss_section || resultP->X_seg == undefined_section || resultP->X_seg == diff_section || resultP->X_seg == absolute_section || resultP->X_seg == pass1_section || resultP->X_seg == reg_section);
 
 	      know (right.X_seg == data_section || right.X_seg == text_section || right.X_seg == bss_section || right.X_seg == undefined_section || right.X_seg == diff_section || right.X_seg == absolute_section || right.X_seg == pass1_section);
 #endif
-#endif
+#endif /* 0 */
 	      clean_up_expression (&right);
 	      clean_up_expression (resultP);
 
@@ -1047,7 +1044,8 @@ expr (rank, resultP)
 		  /* Will be absolute_section. */
 		  if (resultP->X_seg != absolute_section || right.X_seg != absolute_section)
 		    {
-		      as_bad ("Relocation error. Absolute 0 assumed.");
+		      as_bad ("Relocation error: Symbolic expressions may only involve");
+		      as_bad ("  addition and subtraction. Absolute 0 assumed.");
 		      resultP->X_seg = absolute_section;
 		      resultP->X_add_number = 0;
 		    }
@@ -1066,7 +1064,7 @@ expr (rank, resultP)
 			    }
 			  else
 			    {
-			      as_warn ("Division by 0. 0 assumed.");
+			      as_warn ("Division by 0.  Result of 0 substituted.");
 			      resultP->X_add_number = 0;
 			    }
 			  break;
@@ -1096,6 +1094,8 @@ expr (rank, resultP)
 			  break;
 
 			case O_right_shift:
+			  /* @@ We should distinguish signed versus
+			     unsigned here somehow.  */
 			  resultP->X_add_number >>= right.X_add_number;
 			  break;
 
@@ -1138,7 +1138,7 @@ expr (rank, resultP)
 char
 get_symbol_end ()
 {
-  register char c;
+  char c;
 
   while (is_part_of_name (c = *input_line_pointer++))
     ;
