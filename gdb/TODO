@@ -10,9 +10,8 @@ bug-gdb@prep.ai.mit.edu.
 Things to do for Mach
 ---------------------
 
-This section is up to date as of 28 Oct 1993.
-
-All my attempted compilation was on douglas.gnu.ai.mit.edu.  
+Note: If mach_port_t is undefined, you have mach2 headers instead of
+mach3 headers.  Get the mach3 headers or typedef it to unsigned int.
 
 0.  Get it to compile and run again, especially for non-threaded
 programs (some of the following are sub-tasks for this).
@@ -45,15 +44,9 @@ Believed to be fixed (fix not yet tested).
 
 6.  i386_mach3_float_info and register_addr were undefined in the
 link.  I haven't investigated, but probably just another easy
-configuration thing or something.
+configuration thing or something. (possibly already fixed).
 
-7.  I couldn't find mach_port_t in any of the headers in
-/usr/include/*.h or /usr/include/mach/*.h (I think those are the two
-places I grepped; I don't know what headers I was actually getting).
-Typedeffing it to void * in nm-m3.h seemed to work, but of course
-that's hardly an elegant solution.
-
-8.  Implement the features which CMU gdb has which the main GDB does
+7.  Implement the features which CMU gdb has which the main GDB does
 not.  This could be done by getting paperwork from CMU and merging
 their changes, or by reimplementing them.
 

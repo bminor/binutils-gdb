@@ -1211,7 +1211,7 @@ int mach_really_waiting;
    Returns the inferior_pid for rest of gdb.
    Side effects: Set *OURSTATUS.  */
 int
-mach_really_wait (w)
+mach_really_wait (ourstatus)
      struct target_waitstatus *ourstatus;
 {
   int pid;
@@ -4225,6 +4225,14 @@ m3_detach (args, from_tty)
 }
 #endif /* ATTACH_DETACH */
 
+static void
+m3_open (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  error ("Use the \"run\" command to start a Unix child process.");
+}
+
 #ifdef DUMP_SYSCALL
 #ifdef __STDC__
 #define STR(x) #x
@@ -4445,7 +4453,7 @@ struct target_ops m3_ops = {
   "mach",			/* to_shortname */
   "Mach child process",	/* to_longname */
   "Mach child process (started by the \"run\" command).",	/* to_doc */
-  ??_open,			/* to_open */
+  m3_open,			/* to_open */
   0,				/* to_close */
   m3_attach,			/* to_attach */
   m3_detach, 		/* to_detach */

@@ -446,8 +446,6 @@ OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o nlmread.o \
 	serial.o mdebugread.o
 
-RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
-
 TSOBS = inflow.o
 
 NTSOBS = standalone.o
@@ -573,14 +571,6 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 gdb1: gdb
 	rm -f gdb1
 	cp gdb gdb1
-
-# This is a remote stub which runs under unix and starts up an
-# inferior process.  This is at least useful for debugging GDB's
-# remote support.
-rapp: $(RAPP_OBS)
-	rm -f rapp_init.c
-	$(srcdir)/munch $(MUNCH_DEFINE) $(RAPP_OBS) > rapp_init.c
-	$(CC-LD) $(INTERNAL_LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 
 config.status:
 	@echo "You must configure gdb.  Look at the README file for details."

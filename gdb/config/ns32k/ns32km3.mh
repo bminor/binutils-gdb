@@ -2,6 +2,7 @@
 
 NATDEPFILES= m3-nat.o ns32km3-nat.o
 XM_FILE= xm-ns32km3.h
+NAT_FILE= nm-m3.h
 
 # Don't use the mmalloc library in Mach 3.
 MMALLOC = 

@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef _OS_MACH3_H_
-#define _OS_MACH3_H
+#ifndef NM_M3_H
+#define NM_M3_H
 
 #include <mach.h>
 
@@ -114,4 +114,4 @@ struct emul_stack_top {
 /* If in mach_msg() and ^C is typed set immediate_quit */
 #define REQUEST_QUIT() mach3_request_quit ()
 
-#endif /* _OS_MACH3_H_ */
+#endif /* NM_M3_H */

@@ -1,3 +1,16 @@
+Sun Feb  6 06:55:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/mips/mipsm3.mh, config/i386/i386m3.mh,
+	config/ns32k/ns32km3.mh: Define NAT_FILE.
+	* config/nm-m3.h: Change guard from _OS_MACH3_H_ and _OS_MACH3_H
+	(it was inconsistent and namespace-wrong) to NM_M3_H.
+	* m3-nat.c (mach_really_wait): Change parameter name to ourstatus.
+	(m3_open): New function.
+	(m3_ops): Use it.
+	* TODO: Update Mach section.
+
+	* Makefile.in: Remove "rapp" stuff; it is superseded by gdbserver.
+
 Sun Feb  6 13:26:21 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* printcmd.c (printf_command):  Add missing single-letter
