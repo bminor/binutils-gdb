@@ -1,3 +1,8 @@
+2004-09-03  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.in (GDB_TM_FILE): Fix typo, use gdb_target_cpu and not
+	gdb_host_cpu.
+
 2004-09-02  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips_insn32_frame_cache): Remove some dead code.
