@@ -1,3 +1,18 @@
+Wed Jul  3 15:02:21 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* m68k-parse.h (m68k_register): Add new coldfile control
+	registers.
+
+	* config/tc-m68k.c (mcf5200_control_regs): New variable, 
+	array of control registers for the coldfire.
+	(cpu_of_arch): Added mcf5200.
+	(archs): Added mcf5200.
+	(init_table): Add new control registers.
+	(m68k_ip): Added support for new control registers.
+	(m68k_init_after_args): Likewise.
+
+	* config/tc-m68k.c (md_show_usage): Add -m5200 to usage text.
+
 Wed Jul  3 16:05:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.h (AOUT_MACHTYPE): Define as 0 if TE_386BSD.
