@@ -115,7 +115,7 @@ you to them for more information.
 @menu
 * Flow::			Overview of debugging information flow
 * Stabs format::		Overview of stab format
-* String field::		The @code{.stabs} @var{string} field
+* String field::		The string field
 * C example::			A simple example in C source
 * Assembly code::		The simple example at the assembly level
 @end menu
@@ -163,9 +163,9 @@ directives such as @code{.file} and @code{.bi}) instead of
 The overall format of each class of stab is:
 
 @example
-.stabs "@var{string}",@var{type},0,@var{desc},@var{value}
-.stabn @var{type},0,@var{desc},@var{value}
-.stabd @var{type},0,@var{desc}
+.stabs "@var{string}",@var{type},@var{other},@var{desc},@var{value}
+.stabn @var{type},@var{other},@var{desc},@var{value}
+.stabd @var{type},@var{other},@var{desc}
 .stabx "@var{string}",@var{value},@var{type},@var{sdb-type}
 @end example
 
@@ -175,7 +175,8 @@ For @code{.stabn} and @code{.stabd}, there is no @var{string} (the
 @code{n_strx} field is zero; see @ref{Symbol tables}).  For
 @code{.stabd}, the @var{value} field is implicit and has the value of
 the current file location.  For @code{.stabx}, the @var{sdb-type} field
-is unused for stabs and can always be set to zero.
+is unused for stabs and can always be set to zero.  The @var{other}
+field is almost always unused and can be set to zero.
 
 The number in the @var{type} field gives some basic information about
 which type of stab this is (or whether it @emph{is} a stab, as opposed
@@ -186,15 +187,15 @@ possible values for, any remaining @var{string}, @var{desc}, or
 in numeric order of the valid @var{type} field values for stab directives.
 
 @node String field
-@section The @code{.stabs} @var{string} field
+@section The String Field
 
-For @code{.stabs} the @var{string} field holds the meat of the
-debugging information.  The generally unstructured nature of this field
-is what makes stabs extensible.  For some stab types the @var{string} field
+For most stabs the string field holds the meat of the
+debugging information.  The flexible nature of this field
+is what makes stabs extensible.  For some stab types the string field
 contains only a name.  For other stab types the contents can be a great
 deal more complex.
 
-The overall format is of the @var{string} field is:
+The overall format of the string field for most stab types is:
 
 @example
 "@var{name}:@var{symbol-descriptor} @var{type-information}"
@@ -261,16 +262,16 @@ elements are placed more closely in memory, to save memory at the
 expense of speed.
 @end table
 
-All of this can make the @var{string} field quite long.  All
+All of this can make the string field quite long.  All
 versions of GDB, and some versions of dbx, can handle arbitrarily long
 strings.  But many versions of dbx cretinously limit the strings to
 about 80 characters, so compilers which must work with such dbx's need
 to split the @code{.stabs} directive into several @code{.stabs}
 directives.  Each stab duplicates exactly all but the
-@var{string} field.  The @var{string} field of
+string field.  The string field of
 every stab except the last is marked as continued with a
 double-backslash at the end.  Removing the backslashes and concatenating
-the @var{string} fields of each stab produces the original,
+the string fields of each stab produces the original,
 long string.
 
 @node C example
@@ -376,7 +377,7 @@ blocks of code.
 @findex N_MAIN
 Most languages allow the main program to have any name.  The
 @code{N_MAIN} stab type tells the debugger the name that is used in this
-program.  Only the @var{string} field is significant; it is the name of
+program.  Only the string field is significant; it is the name of
 a function which is the main program.  Most C compilers do not use this
 stab (they expect the debugger to assume that the name is @code{main}),
 but some C compilers emit an @code{N_MAIN} stab for the @code{main}
@@ -388,11 +389,11 @@ function.
 @findex N_SO
 Before any other stabs occur, there must be a stab specifying the source
 file.  This information is contained in a symbol of stab type
-@code{N_SO}; the @var{string} field contains the name of the file.  The
-@var{value} of the symbol is the start address of the portion of the
+@code{N_SO}; the string field contains the name of the file.  The
+value of the symbol is the start address of the portion of the
 text section corresponding to that file.
 
-With the Sun Solaris2 compiler, the @var{desc} field contains a
+With the Sun Solaris2 compiler, the desc field contains a
 source-language code.
 @c Do the debuggers use it?  What are the codes? -djm
 
@@ -427,8 +428,8 @@ common with @code{N_BINCL}).
 
 @findex N_SOL
 An @code{N_SOL} symbol specifies which include file subsequent symbols
-refer to.  The @var{string} field is the name of the file and the
-@var{value} is the text address corresponding to the start of the
+refer to.  The string field is the name of the file and the
+value is the text address corresponding to the start of the
 previous include file and the start of this one.  To specify the main
 source file again, use an @code{N_SOL} symbol with the name of the main
 source file.
@@ -438,9 +439,9 @@ source file.
 @findex N_EXCL
 The @code{N_BINCL} approach works as follows.  An @code{N_BINCL} symbol
 specifies the start of an include file.  In an object file, only the
-@var{string} is significant; the Sun linker puts data into some of the
+string is significant; the Sun linker puts data into some of the
 other fields.  The end of the include file is marked by an
-@code{N_EINCL} symbol (which has no @var{string} field).  In an object
+@code{N_EINCL} symbol (which has no string field).  In an object
 file, there is no significant data in the @code{N_EINCL} symbol; the Sun
 linker puts data into some of the fields.  @code{N_BINCL} and
 @code{N_EINCL} can be nested.
@@ -459,8 +460,8 @@ For the start of an include file in XCOFF, use the @file{.bi} assembler
 directive, which generates a @code{C_BINCL} symbol.  A @file{.ei}
 directive, which generates a @code{C_EINCL} symbol, denotes the end of
 the include file.  Both directives are followed by the name of the
-source file in quotes, which becomes the @var{string} for the symbol.
-The @var{value} of each symbol, produced automatically by the assembler
+source file in quotes, which becomes the string for the symbol.
+The value of each symbol, produced automatically by the assembler
 and linker, is the offset into the executable of the beginning
 (inclusive, as you'd expect) or end (inclusive, as you would not expect)
 of the portion of the COFF line table that corresponds to this include
@@ -471,7 +472,7 @@ file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
 
 @findex N_SLINE
 An @code{N_SLINE} symbol represents the start of a source line.  The
-@var{desc} field contains the line number and the @var{value} field
+desc field contains the line number and the value field
 contains the code address for the start of that source line.  On most
 machines the address is absolute; for Sun's stabs-in-ELF, it is relative
 to the function in which the @code{N_SLINE} symbol occurs.
@@ -483,8 +484,8 @@ numbers in the data or bss segments, respectively.  They are identical
 to @code{N_SLINE} but are relocated differently by the linker.  They
 were intended to be used to describe the source location of a variable
 declaration, but I believe that GCC2 actually puts the line number in
-the @var{desc} field of the stab for the variable itself.  GDB has been
-ignoring these symbols (unless they contain a @var{string} field) since
+the desc field of the stab for the variable itself.  GDB has been
+ignoring these symbols (unless they contain a string field) since
 at least GDB 3.5.
 
 For single source lines that generate discontiguous code, such as flow
@@ -514,7 +515,7 @@ one has complained).
 
 A function is represented by an @samp{F} symbol descriptor for a global
 (extern) function, and @samp{f} for a static (local) function.  The
-@var{value} field is the address of the start of the function (absolute
+value field is the address of the start of the function (absolute
 for @code{a.out}; relative to the start of the file for Sun's
 stabs-in-ELF).  The type information of the stab represents the return
 type of the function; thus @samp{foo:f5} means that foo is a function
@@ -631,7 +632,7 @@ brace) and the @code{N_RBRAC} (right brace) stab types.  The variables
 defined inside a block precede the @code{N_LBRAC} symbol for most
 compilers, including GCC.  Other compilers, such as the Convex, Acorn
 RISC machine, and Sun @code{acc} compilers, put the variables after the
-@code{N_LBRAC} symbol.  The @var{value} fields of the @code{N_LBRAC} and
+@code{N_LBRAC} symbol.  The values of the @code{N_LBRAC} and
 @code{N_RBRAC} symbols are the start and end addresses of the code of
 the block, respectively.  For most machines, they are relative to the
 starting address of this source file.  For the Gould NP1, they are
@@ -642,9 +643,9 @@ The @code{N_LBRAC} and @code{N_RBRAC} stabs that describe the block
 scope of a procedure are located after the @code{N_FUN} stab that
 represents the procedure itself.
 
-Sun documents the @var{desc} field of @code{N_LBRAC} and
+Sun documents the desc field of @code{N_LBRAC} and
 @code{N_RBRAC} symbols as containing the nesting level of the block.
-However, dbx seems to not care, and GCC always sets @var{desc} to
+However, dbx seems to not care, and GCC always sets desc to
 zero.
 
 @node Constants
@@ -748,7 +749,7 @@ preceding @samp{@var{type-number}=}.  This is a bad idea; there is no
 guarantee that type descriptors are distinct from symbol descriptors.
 Stabs for stack variables use the @code{N_LSYM} stab type.
 
-The @var{value} of the stab is the offset of the variable within the
+The value of the stab is the offset of the variable within the
 local variables.  On most machines this is an offset from the frame
 pointer and is negative.  The location of the stab specifies which block
 it is defined in; see @ref{Block structure}.
@@ -815,7 +816,7 @@ produce an external symbol.
 @c According to an old version of this manual, AIX uses C_RPSYM instead
 @c of C_RSYM.  I am skeptical; this should be verified.
 Register variables have their own stab type, @code{N_RSYM}, and their
-own symbol descriptor, @samp{r}.  The stab's @var{value} field contains the
+own symbol descriptor, @samp{r}.  The stab's value field contains the
 number of the register where the variable data will be stored.
 @c .stabs "name:type",N_RSYM,0,RegSize,RegNumber (Sun doc)
 
@@ -846,12 +847,12 @@ I believe Fortran is the only language with this feature.
 @findex N_ECOMM
 A @code{N_BCOMM} stab begins a common block and an @code{N_ECOMM} stab
 ends it.  The only field that is significant in these two stabs is the
-@var{string}, which names a normal (non-debugging) symbol that gives the
+string, which names a normal (non-debugging) symbol that gives the
 address of the common block.
 
 @findex N_ECOML
 Each stab between the @code{N_BCOMM} and the @code{N_ECOMM} specifies a
-member of that common block; its @var{value} is the offset within the
+member of that common block; its value is the offset within the
 common block of that variable.  The @code{N_ECOML} stab type is
 documented for this purpose, but Sun's Fortran compiler uses
 @code{N_GSYM} instead.  The test case I looked at had a common block
@@ -919,7 +920,7 @@ depends on how the parameter is being passed.
 
 @findex N_PSYM
 Parameters passed on the stack use the symbol descriptor @samp{p} and
-the @code{N_PSYM} symbol type.  The @var{value} of the symbol is an offset
+the @code{N_PSYM} symbol type.  The value of the symbol is an offset
 used to locate the parameter on the stack; its exact meaning is
 machine-dependent, but on most machines it is an offset from the frame
 pointer.
@@ -983,7 +984,7 @@ know that it is an argument.
 Because that approach is kind of ugly, some compilers use symbol
 descriptor @samp{P} or @samp{R} to indicate an argument which is in a
 register.  Symbol type @code{C_RPSYM} is used with @samp{R} and
-@code{N_RSYM} is used with @samp{P}.  The symbol @var{value} field is
+@code{N_RSYM} is used with @samp{P}.  The symbol's value field is
 the register number.  @samp{P} and @samp{R} mean the same thing; the
 difference is that @samp{P} is a GNU invention and @samp{R} is an IBM
 (XCOFF) invention.  As of version 4.9, GDB should handle either one.
@@ -1033,7 +1034,7 @@ latter case the type of the @samp{@var{arg}:p} symbol is @code{double}
 and the type of the @samp{@var{arg}:} symbol is @code{float}).  GCC, at
 least on the 960, uses a single @samp{p} symbol descriptor for an
 argument which is stored as a local variable but uses @code{N_LSYM}
-instead of @code{N_PSYM}.  In this case, the @var{value} of the symbol
+instead of @code{N_PSYM}.  In this case, the value of the symbol
 is an offset relative to the local variables for that function, not
 relative to the arguments; on some machines those are the same thing,
 but not on all.
@@ -1058,9 +1059,9 @@ Conformant arrays are a feature of Modula-2, and perhaps other
 languages, in which the size of an array parameter is not known to the
 called function until run-time.  Such parameters have two stabs: a
 @samp{x} for the array itself, and a @samp{C}, which represents the size
-of the array.  The @var{value} of the @samp{x} stab is the offset in the
+of the array.  The value of the @samp{x} stab is the offset in the
 argument list where the address of the array is stored (it this right?
-it is a guess); the @var{value} of the @samp{C} stab is the offset in the
+it is a guess); the value of the @samp{C} stab is the offset in the
 argument list where the size of the array (in elements? in bytes?) is
 stored.
 
@@ -1889,7 +1890,7 @@ transformations that the assembler and linker make on data from stabs.
 
 Each time the assembler encounters a stab directive, it puts
 each field of the stab into a corresponding field in a symbol table
-entry of its output file.  If the stab contains a @var{string} field, the
+entry of its output file.  If the stab contains a string field, the
 symbol table entry for that stab points to a string table entry
 containing the string data from the stab.  Assembler labels become
 relocatable addresses.  Symbol table entries in a.out have the format:
@@ -1905,10 +1906,11 @@ struct internal_nlist @{
 @};
 @end example
 
-For @code{.stabs} directives, the @code{n_strx} field holds the offset
-in bytes from the start of the string table to the string table entry
-containing the @var{string} field.  For other classes of stabs
-(@code{.stabn} and @code{.stabd}) this field is zero.
+If the stab has a string, the @code{n_strx} field holds the offset in
+bytes of the string within the string table.  The string is terminated
+by a NUL character.  If the stab lacks a string (for example, it was
+produced by a @code{.stabn} or @code{.stabd} directive), the
+@code{n_strx} field is zero.
 
 Symbol table entries with @code{n_type} field values greater than 0x1f
 originated as stabs generated by the compiler (with one random
@@ -1935,7 +1937,7 @@ value of the stab.  Thus for stab types like @code{N_RSYM} and
 low 5 bits are @code{N_ABS}, which tells the linker not to relocate the
 value.
 
-Where the @var{value} field of a stab contains an assembly language label,
+Where the value of a stab contains an assembly language label,
 it is transformed by each build step.  The assembler turns it into a
 relocatable address and the linker turns it into an absolute address.
 
@@ -1998,7 +2000,7 @@ The variable is represented by two symbol table entries in the object
 file (see below).  The first one originated as a stab.  The second one
 is an external symbol.  The upper case @samp{D} signifies that the
 @code{n_type} field of the symbol table contains 7, @code{N_DATA} with
-local linkage.  The @var{value} field is empty for the stab entry.  For
+local linkage.  The value field is empty for the stab entry.  For
 the linker symbol, it contains the relocatable address corresponding to
 the variable.
 
@@ -2660,8 +2662,10 @@ description in the class stab shows this ordering.
 @node Stab types
 @appendix Table of stab types
 
-The following are all the possible values for the stab @var{type} field, for
-@code{a.out} files, in numeric order.  This does not apply to XCOFF.
+The following are all the possible values for the stab type field, for
+@code{a.out} files, in numeric order.  This does not apply to XCOFF, but
+it does apply to stabs in ELF.  Stabs in ECOFF use these values but add
+0x8f300 to distinguish them from non-stab symbols.
 
 The symbolic names are defined in the file @file{include/aout/stabs.def}.
 
@@ -2901,9 +2905,9 @@ Gould non-base registers; see @ref{Gould}.
 @node Symbol descriptors
 @appendix Table of symbol descriptors
 
-These tell in the @code{.stabs} @var{string} field what kind of symbol
-the stab represents.  They follow the colon which follows the symbol
-name.  @xref{String field}, for more information about their use.
+The symbol descriptor is the character which follows the colon in many
+stabs, and which tells what kind of stab it is.  @xref{String field},
+for more information about their use.
 
 @c Please keep this alphabetical
 @table @code
@@ -3009,8 +3013,8 @@ Function return variable; see @ref{Parameters}.
 @node Type descriptors
 @appendix Table of type descriptors
 
-These tell in the @code{.stabs} @var{string} field what kind of type is being
-defined.  They follow the type number and an equals sign.
+The type descriptor is the character which follows the type number and
+an equals sign.  It specifies what kind of type is being defined.
 @xref{String field}, for more information about their use.
 
 @table @code
@@ -3249,7 +3253,7 @@ Sun source code browser, path to @file{.cb} file
 <<?>>
 "path to associated @file{.cb} file"
 
-Note: @var{type} field value overlaps with N_BSLINE.
+Note: N_BROWS has the same value as N_BSLINE.
 @end deffn
 
 @node N_DEFD
@@ -3259,10 +3263,10 @@ Note: @var{type} field value overlaps with N_BSLINE.
 @findex N_DEFD
 GNU Modula2 definition module dependency.
 
-GNU Modula-2 definition module dependency.  @var{value} is the modification
-time of the definition file.  @var{other} is non-zero if it is imported with
-the GNU M2 keyword @code{%INITIALIZE}.  Perhaps @code{N_M2C} can be used
-if there are enough empty fields?
+GNU Modula-2 definition module dependency.  The value is the
+modification time of the definition file.  The other field is non-zero
+if it is imported with the GNU M2 keyword @code{%INITIALIZE}.  Perhaps
+@code{N_M2C} can be used if there are enough empty fields?
 @end deffn
 
 @node N_EHDECL
@@ -3294,11 +3298,11 @@ Note: conflicts with @code{N_EHDECL}  <<?>>
 @findex N_CATCH
 GNU C++ @code{catch} clause
 
-GNU C++ @code{catch} clause.  @code{value} is its address.  @code{desc}
+GNU C++ @code{catch} clause.  The value is its address.  The desc field
 is nonzero if this entry is immediately followed by a @code{CAUGHT} stab
 saying what exception was caught.  Multiple @code{CAUGHT} stabs means
-that multiple exceptions can be caught here.  If @code{desc} is 0, it
-means all exceptions are caught here.
+that multiple exceptions can be caught here.  If desc is 0, it means all
+exceptions are caught here.
 @end deffn
 
 @node N_SSYM
@@ -3308,7 +3312,7 @@ means all exceptions are caught here.
 @findex N_SSYM
 Structure or union element.
 
-@code{value} is offset in the structure.
+The value is the offset in the structure.
 
 <<?looking at structs and unions in C I didn't see these>>
 @end deffn
@@ -3319,7 +3323,7 @@ Structure or union element.
 @deffn @code{.stabn} N_ENTRY
 @findex N_ENTRY
 Alternate entry point.
-@code{value} is its address.
+The value is its address.
 <<?>>
 @end deffn
 
@@ -3369,7 +3373,7 @@ these in the header file is a complete mystery to me).
 @deffn @code{.stabn} N_LENG
 @findex N_LENG
 Second symbol entry containing a length-value for the preceding entry.
-The @var{value} is the length.
+The value is the length.
 @end deffn
 
 @node Questions
@@ -3379,10 +3383,10 @@ The @var{value} is the length.
 @item
 @c I think this is changed in GCC 2.4.5 to put the line number there.
 For GNU C stabs defining local and global variables (@code{N_LSYM} and
-@code{N_GSYM}), the @var{desc} field is supposed to contain the source
-line number on which the variable is defined.  In reality the @var{desc}
+@code{N_GSYM}), the desc field is supposed to contain the source
+line number on which the variable is defined.  In reality the desc
 field is always 0.  (This behavior is defined in @file{dbxout.c} and
-putting a line number in @var{desc} is controlled by @samp{#ifdef
+putting a line number in desc is controlled by @samp{#ifdef
 WINNING_GDB}, which defaults to false). GDB supposedly uses this
 information if you say @samp{list @var{var}}.  In reality, @var{var} can
 be a variable defined in the program and GDB says @samp{function
