@@ -1,3 +1,16 @@
+1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (InvMem): New flag.  Add to AnyMem.
+	(ReverseRegRegmem): Remove.
+	(ImmExt): New flag.  Renumber some of the opcode_modifier bits.
+	* config/tc-i386.c (md_assemble): Test for PIII SIMD and AMD
+	3DNow! via ImmExt opcode_modifier.  Remove ReverseRegRegmem
+	kludge.
+
+	From  Doug Ledford <dledford@redhat.com>
+	* config/tc-i386.h (RegXMM): New for P/III.
+	* config/tc-i386.c: Add support for P/III.
+
 Sat May  8 23:28:50 1999  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ppc.c (md_parse_option): Recognize -mppc64bridge.
