@@ -1,3 +1,13 @@
+Mon Dec 21 13:30:34 1998  Mark Alexander  <marka@cygnus.com>
+
+	* value.c (value_virtual_fn_field): Handle the situation where
+	vtbl is a pointer to a structure instead of a pointer to an array.
+
+Mon Dec 21 10:38:11 1998  Andrew Cagney  <cagney@chook>
+
+	* mips-tdep.c: (MIPS_DEFAULT_FPU_TYPE): Default to
+ 	MIPS_FPU_DOUBLE.
+
 1998-12-17  J.T. Conklin  <jtc@redbacknetworks.com>
 
 	* blockframe.c (get_frame_saved_regs): If the saved_regs_addr ptr
