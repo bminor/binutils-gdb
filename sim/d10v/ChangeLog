@@ -1,3 +1,12 @@
+Wed Nov 20 19:41:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* interp.c (sim_open): Cast result of calloc, and make sure NULL
+	was not returned.
+	(dmem_addr): If address is illegal or in I/O space, signal a bus
+	error.
+	(pc_addr): Signal bus error, not illegal instruction for bogus
+	pc.
+
 Wed Nov 20 01:23:03 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in: Delete all stuff moved to ../common/Make-common.in.
