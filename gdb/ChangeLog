@@ -1,3 +1,7 @@
+2001-04-05  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* README: Don't mention gdba.el.
+
 2001-04-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         From  Jimmy Guo  <guo@cup.hp.com>

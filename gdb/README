@@ -575,9 +575,7 @@ check:
 for an up-to-date list.
 
    Emacs users will very likely enjoy the Grand Unified Debugger mode;
-try typing `M-x gdb RET'.  Those interested in experimenting with a
-new kind of gdb-mode should load gdb/gdba.el into GNU Emacs 19.25 or
-later.  Comments on this mode are also welcome.
+try typing `M-x gdb RET'.
 
 
 Writing Code for GDB
