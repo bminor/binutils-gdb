@@ -15,6 +15,12 @@
 
 Do-first:
 
+if ( echo $* | grep keep\-chill > /dev/null ) ; then
+	keep_these_too="gdb.t30 gdb.t31"
+else
+	lose_these_too="gdb.t30 gdb.t31"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -53,8 +59,6 @@ gdb.t21
 gdb.t22
 gdb.t23
 gdb.t24
-gdb.t30
-gdb.t31
 lib
 
 Things-to-lose:
