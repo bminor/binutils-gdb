@@ -120,6 +120,8 @@ typedef unsigned HOST_64_BIT uint64_type;
 #if !defined (uint64_type) && defined (__GNUC__)
 #define uint64_type unsigned long long
 #define int64_type long long
+#endif
+#ifndef uint64_typeLOW
 #define uint64_typeLOW(x) ((unsigned long)(((x) & 0xffffffff)))
 #define uint64_typeHIGH(x) ((unsigned long)(((x) >> 32) & 0xffffffff))
 #endif
@@ -128,10 +130,12 @@ typedef unsigned HOST_64_BIT bfd_vma;
 typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
+#ifndef fprintf_vma
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
 #define sprintf_vma(s,x) \
 		sprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
+#endif
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
@@ -547,16 +551,26 @@ struct ecoff_debug_info;
 struct ecoff_debug_swap;
 struct ecoff_extr;
 struct symbol_cache_entry;
+struct bfd_link_info;
 #endif
-extern boolean bfd_ecoff_debug_accumulate
+extern PTR bfd_ecoff_debug_init
   PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap,
+	   struct bfd_link_info *));
+extern void bfd_ecoff_debug_free
+  PARAMS ((PTR handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap,
+	   struct bfd_link_info *));
+extern boolean bfd_ecoff_debug_accumulate
+  PARAMS ((PTR handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
 	   const struct ecoff_debug_swap *output_swap,
 	   bfd *input_bfd, struct ecoff_debug_info *input_debug,
 	   const struct ecoff_debug_swap *input_swap,
-	   boolean relocateable));
-extern boolean bfd_ecoff_debug_link_other
-  PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
-	   const struct ecoff_debug_swap *output_swap, bfd *input_bfd));
+	   struct bfd_link_info *));
+extern boolean bfd_ecoff_debug_accumulate_other
+  PARAMS ((PTR handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap, bfd *input_bfd,
+	   struct bfd_link_info *));
 extern boolean bfd_ecoff_debug_externals
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
@@ -575,6 +589,10 @@ extern bfd_size_type bfd_ecoff_debug_size
 extern boolean bfd_ecoff_write_debug
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap, file_ptr where));
+extern boolean bfd_ecoff_write_accumulated_debug
+  PARAMS ((PTR handle, bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap,
+	   struct bfd_link_info *info, file_ptr where));
 
 /* And more from the source.  */
 void 
@@ -1259,6 +1277,7 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_64,
   BFD_RELOC_32,
   BFD_RELOC_16,        
+  BFD_RELOC_14,
   BFD_RELOC_8,
 
    /* PC-relative relocations */
@@ -1283,12 +1302,23 @@ typedef enum bfd_reloc_code_real
    /* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
      word displacement, e.g. for SPARC) */
   BFD_RELOC_32_PCREL_S2,
+   /* signed 16-bit pc-relative, shifted right 2 bits (e.g. for MIPS) */
+  BFD_RELOC_16_PCREL_S2,
+   /* this is used on the Alpha */
+  BFD_RELOC_23_PCREL_S2,
 
    /* High 22 bits of 32-bit value, placed into lower 22 bits of
      target word; simple reloc.  */
   BFD_RELOC_HI22,
    /* Low 10 bits.  */
   BFD_RELOC_LO10,
+
+   /* For systems that allocate a Global Pointer register, these are
+     displacements off that register.  These relocation types are
+     handled specially, because the value the register will have is
+     decided relatively late.  */
+  BFD_RELOC_GPREL16,
+  BFD_RELOC_GPREL32,
 
    /* Reloc types used for i960/b.out.  */
   BFD_RELOC_I960_CALLJ,
@@ -1331,12 +1361,49 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_LO7,
    /* end-sanitize-v9 */
 
+   /* Alpha ECOFF relocations.  Some of these treat the symbol or "addend"
+     in some special way.  */
+   /* For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
+     writing; when reading, it will be the absolute section symbol.  The
+     addend is the displacement in bytes of the "lda" instruction from
+     the "ldah" instruction (which is at the address of this reloc).  */
+  BFD_RELOC_ALPHA_GPDISP_HI16,
+   /* For GPDISP_LO16 ("ignore") relocations, the symbol is handled as
+     with GPDISP_HI16 relocs.  The addend is ignored when writing the
+     relocations out, and is filled in with the file's GP value on
+     reading, for convenience.  */
+  BFD_RELOC_ALPHA_GPDISP_LO16,
+
+   /* The Alpha LITERAL/LITUSE relocs are produced by a symbol reference;
+     the assembler turns it into a LDQ instruction to load the address of
+     the symbol, and then fills in a register in the real instruction.
+
+     The LITERAL reloc, at the LDQ instruction, refers to the .lita
+     section symbol.  The addend is ignored when writing, but is filled
+     in with the file's GP value on reading, for convenience, as with the
+     GPDISP_LO16 reloc.
+
+     The LITUSE reloc, on the instruction using the loaded address, gives
+     information to the linker that it might be able to use to optimize
+     away some literal section references.  The symbol is ignored (read
+     as the absolute section symbol), and the "addend" indicates the type
+     of instruction using the register:
+              1 - "memory" fmt insn
+              2 - byte-manipulation (byte offset reg)
+              3 - jsr (target of branch)
+
+     The GNU linker currently doesn't do any of this optimizing.  */
+  BFD_RELOC_ALPHA_LITERAL,
+  BFD_RELOC_ALPHA_LITUSE,
+
+   /* The HINT relocation indicates a value that should be filled into the
+     "hint" field of a jmp/jsr/ret instruction, for possible branch-
+     prediction logic which may be provided on some processors.  */
+  BFD_RELOC_ALPHA_HINT,
+
    /* Bits 27..2 of the relocation address shifted right 2 bits;
      simple reloc otherwise.  */
   BFD_RELOC_MIPS_JMP,
-
-   /* signed 16-bit pc-relative, shifted right 2 bits (e.g. for MIPS) */
-  BFD_RELOC_16_PCREL_S2,
 
    /* High 16 bits of 32-bit value; simple reloc.  */
   BFD_RELOC_HI16,
@@ -1348,8 +1415,8 @@ typedef enum bfd_reloc_code_real
    /* Low 16 bits.  */
   BFD_RELOC_LO16,
 
-   /* 16 bit relocation relative to the global pointer.  */
-  BFD_RELOC_MIPS_GPREL,
+   /* relocation relative to the global pointer.  */
+#define BFD_RELOC_MIPS_GPREL BFD_RELOC_GPREL16
 
    /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
@@ -1357,7 +1424,7 @@ typedef enum bfd_reloc_code_real
    /* MIPS ELF relocations.  */
   BFD_RELOC_MIPS_GOT16,
   BFD_RELOC_MIPS_CALL16,
-  BFD_RELOC_MIPS_GPREL32,
+#define BFD_RELOC_MIPS_GPREL32 BFD_RELOC_GPREL32
 
    /* These are, so far, specific to HPPA processors.  I'm not sure that some
      don't duplicate other reloc types, such as BFD_RELOC_32 and _32_PCREL.

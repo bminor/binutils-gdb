@@ -1,3 +1,24 @@
+Wed Jan 19 17:28:59 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/alphaosf.mh (HDEFINES): Don't define HOST_64_BIT here;
+	that's dealt with elsewhere.
+	* hosts/alphaosf.h (sprintf_vma, fprintf_vma): New macros.
+	(uint64_typeHIGH, uint64_typeLOW): Comment with HOST_64_BIT so
+	they get copied to bfd.h.
+
+	* reloc.c (enum bfd_reloc_code_real): Add some Alpha relocation
+	types.  Reorganized some of the existing ones.
+	* coff-alpha.c (alpha_howto_table): Construct 64-bit negative one
+	values in case of compilation on a 32-bit machine.  Fix pcrel
+	fields of some reloc types.
+	(alpha_bfd_reloc_type_lookup): Handle more relocation types.
+
+	* bfd-in.h (uint64_typeHIGH, uint64_typeLOW): Supply default
+	definitions when not defined, regardless of whether uint64_type is
+	a defined macro or not.
+	(fprintf_vma, sprintf_vma): Define only if fprintf_vma is not
+	already defined.
+
 Wed Jan 19 00:02:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (translate_to_native_sym_flags): Set the type of a
