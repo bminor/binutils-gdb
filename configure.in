@@ -3,7 +3,13 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="m4 autoconf mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb emacs ispell make grep diff rcs cvs patch send_pr libg++ newlib gprof gdbtest libm tgas etc tcl expect tk deja-gnu z8ksim sed fileutils shellutils textutils time wdiff find"
+
+configdirs="mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb make patch send_pr libg++ gprof gdbtest libm tgas etc tcl expect tk deja-gnu z8ksim"
+
+cross_only_tools="xiberty newlib"
+
+native_only_tools="m4 autoconf ispell grep diff rcs cvs sed fileutils shellutils textutils wdiff find emacs"
+
 srctrigger=move-if-change
 srcname="gnu development package"
 
@@ -42,16 +48,15 @@ case "${target}" in
 esac
 
 
-# remove various programs from consideration.  some of these are not
-# reasonable to build for a native compilation (eg newlib).  some of these
-# aren't built for each cross compiler toolchain (eg emacs).
+# some tools are only suitable for building in a "native" situation.
+# Those are added when we have a host==target configuration.  For cross
+# toolchains, we add some directories that should only be useful in a
+# cross-compiler.
 
 if [ x"${host}" = x"${target}" ] ; then
-	# remove from native toolchains
-	configdirs=`echo ${configdirs} | sed -e 's/newlib//'`
+	configdirs="${configdirs} ${native_only_tools}"
 else
-	# remove from cross compilers in general
-	configdirs=`echo ${configdirs} | sed -e 's/emacs//;s/ispell//;s/rcs//;s/cvs//'`
+	configdirs="${configdirs} ${cross_only_tools}"
 fi	
 
 # remove more programs from consideration, based on the host or 
@@ -69,13 +74,13 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/tk//'`
     ;;
   hppa*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/bfd//;s/gdb//'`
     ;;
   *-*-solaris2)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/emacs//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
 esac
 
