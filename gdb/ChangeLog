@@ -1,3 +1,8 @@
+Mon Aug 23 17:16:23 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* m88k-tdep.c: remove include of sys/dir.h.  Appears unnecessary
+	  and isn't available on solaris.
+
 Mon Aug 23 14:56:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m88k/{delta88v4.mt,delta88v4.mh}: New files
