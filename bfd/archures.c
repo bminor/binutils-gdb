@@ -145,6 +145,12 @@ DESCRIPTION
 . {* end-sanitize-tic80 *}
 . {* start-sanitize-v850 *}
 .  bfd_arch_v850,      {* NEC V850 *}
+. {* start-sanitize-v850e *}
+#define bfd_mach_v850e	'E'
+. {* end-sanitize-v850e *}
+. {* start-sanitize-v850eq *}
+#define bfd_mach_v850eq	'Q'
+. {* end-sanitize-v850eq *}
 . {* end-sanitize-v850 *}
 .  bfd_arch_arc,       {* Argonaut RISC Core *}
 .#define bfd_mach_arc_base 0
@@ -265,8 +271,8 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
 /* start-sanitize-v850*/
   &bfd_v850_arch,
 /* end-sanitize-v850 */
-#endif
   0
+#endif
 };
 
 /*

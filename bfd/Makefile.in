@@ -153,12 +153,6 @@ ALL_MACHINES = \
 	$(start-sanitize-v850) \
 	cpu-v850.lo \
 	$(end-sanitize-v850) \
-	$(start-sanitize-v850e) \
-	cpu-v850e.lo \
-	$(end-sanitize-v850e) \
-	$(start-sanitize-v850eq) \
-	cpu-v850eq.lo \
-	$(end-sanitize-v850eq) \
 	cpu-vax.lo \
 	cpu-we32k.lo \
 	cpu-w65.lo \
@@ -1016,20 +1010,6 @@ elf32-v850.lo: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
 end-sanitize-v850:
-
-start-sanitize-v850e:
-cpu-v850e.lo: cpu-v850e.c
-elf32-v850.lo: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-target.h
-end-sanitize-v850e:
-
-start-sanitize-v850eq:
-cpu-v850eq.lo: cpu-v850eq.c
-elf32-v850.lo: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-target.h
-end-sanitize-v850eq:
 
 start-sanitize-tic80:
 cpu-tic80.lo: cpu-tic80.c

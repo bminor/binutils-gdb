@@ -1,16 +1,42 @@
+start-sanitize-v850
+Mon Aug 25 15:35:46 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-v850.c (scan): New function.
+	(arch_info_struct): New structure.
+	(bfd_v850_arch): Add link into arch_info_structure.
+
+	* config.bfd (targ_cpu): All v850 variants use the bfd_arch_v850
+	architecture. 
+
+	* elf32-v850.c (v850_elf_object_p): New function.
+
+start-sanitize-v850e
+	* archures.c (bfd_mach_v850e): Machine value for v850e.
+	
+	* bfd-in2.h (bfd_mach_v850e): Machine value for v850e.
+	
+	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850e machine	
+	number.
+	
+	* elf.c (prep_headers): Add support for v850e machine number. 
+end-sanitize-v850e
+	
+start-sanitize-v850eq
+	* archures.c (bfd_mach_v850eq): Machine value for v850eq.
+	
+	* bfd-in2.h (bfd_mach_v850eq): Machine value for v850eq.
+	
+	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850eq machine
+	number.
+	
+	* elf.c (prep_headers): Add support for v850eq machine number. 
+end-sanitize-v850eq
+end-sanitize-v850
+
 Mon Aug 25 14:07:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Clear the
  	cached_stab field if the offset prevents us from using the cache.
-
-start-sanitize-v850e
-Mon Aug 25 10:04:35 1997  Nick Clifton  <nickc@cygnus.com>
-
-	* Makefile.in: Add rule to build cpu-v850e.lo object file.
-start-sanitize-v850eq
-	* Makefile.in: Add rule to build cpu-v850eq.lo object file.
-end-sanitize-v850eq
-end-sanitize-v850e
 
 Mon Aug 25 12:08:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 

@@ -2872,10 +2872,20 @@ prep_headers (abfd)
 /* end-sanitize-d30v */
 /* start-sanitize-v850 */
     case bfd_arch_v850:
-      i_ehdrp->e_machine = EM_CYGNUS_V850;
+      switch (bfd_get_mach (abfd))
+	{
+	default:
+	case 0:               i_ehdrp->e_machine = EM_CYGNUS_V850; break;
+/* start-sanitize-v850e */
+	case bfd_mach_v850e:  i_ehdrp->e_machine = EM_CYGNUS_V850E; break;
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+	case bfd_mach_v850eq: i_ehdrp->e_machine = EM_CYGNUS_V850EQ; break;
+/* end-sanitize-v850eq */
+	}
       break;
 /* end-sanitize-v850 */
-    case bfd_arch_arc:
+   case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
     case bfd_arch_m32r:
