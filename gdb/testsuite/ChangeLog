@@ -1,9 +1,37 @@
+Tue Jan  5 13:05:32 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by David Taylor
+ 	<taylor@cygnus.com>, Elena Zannoni <ezannoni@cygnus.com>, and
+ 	Edith Epstein <eepstein@cygnus.com> as part of a project to merge
+ 	in changes by HP.
+
+	* gdb.base/bitops.exp: new file.
+	* gdb.base/default.exp: change expected messages for catch and
+	info catch tests to reflect HP merge changes.
+	* gdb.base/enable-disable-break.exp
+	* gdb.base/ending-run.c: new file.
+	* gdb.base/long_long.c: new file.
+	* gdb.base/maint.exp: new file.
+	* gdb.base/pointers2.exp: new file.
+	* gdb.base/shlib-call2.exp: new file.
+	* gdb.base/solib.exp: new file.
+	* gdb.base/step-test.c: new file.
+	* gdb.c++/anon-union.cc: new file.
+
+	* gdb.base/scope.exp: compile one file at a time, then link.
+	* gdb.base/langs.exp: ditto.
+	* gdb.base/list.exp: ditto.
+	
 Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by David Taylor
  	<taylor@cygnus.com>, Elena Zannoni <ezannoni@cygnus.com>, and
  	Edith Epstein <eepstein@cygnus.com> as part of a project to merge
  	in changes by HP.
+	
+	* gdb.c++/inherit.exp: if on hppa*-*-hpux* and not using gcc,
+	skip tests.  When compiling pass c++ flag to gdb_compile.
+	* gdb.c++/
 	
 	* lib/gdb.exp (get_compiler_info): new, optional argument -- args;
 	test for on hppa*-*-hpux*; use args to see if c++ was specified.
