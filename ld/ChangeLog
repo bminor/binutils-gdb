@@ -1,3 +1,7 @@
+2002-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf32ppc.sh (ARCH): Set to "powerpc:common".
+
 2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* Makefile.am: Add etic4xcoff.o in ALL_EMULATIONS list and
