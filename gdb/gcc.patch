@@ -1,63 +1,72 @@
-Recent versions of gcc have had a bug in how they emit debugging
-information for C++ methods (when using dbx-style stabs).
-This patch should fix the problem.  Fix you can't fix gcc,
-you can alternatively define GCC_MANGLE_BUG when compling gdb/symtab.c.
+In the 2.3.2 release of gcc/g++, how the compiler handles resolving
+multiple inheritance lattices was reworked to properly discover
+ambiguities.  We recently found an example which causes this new
+algorithm to fail in a very subtle way.  For the time being, this
+patch will make the compiler use the old algorithm, which works for
+the failing case we've found.  Note it will revert the compiler's
+ability to properly deduce MI ambiguities in many cases (to its state
+in 2.2.2 and 2.3.1).  This bug will be fixed in the next gcc/g++
+release.
 
-===================================================================
-RCS file: /rel/cvsfiles/devo/gcc/dbxout.c,v
-retrieving revision 1.53
-diff -c -r1.53 dbxout.c
-*** 1.53	1992/07/05 09:50:22
---- dbxout.c	1992/07/09 07:00:33
+Brendan Kehoe (brendan@cygnus.com)
+
+*** cp-search.c.~1~	Thu Feb 18 18:03:24 1993
+--- cp-search.c	Thu Feb 18 18:03:27 1993
 ***************
-*** 683,688 ****
---- 683,689 ----
-    tree type_encoding;
-    register tree fndecl;
-    register tree last;
-+   char formatted_type_identifier_length[16];
-    register int type_identifier_length;
+*** 2389,2392 ****
+--- 2389,2393 ----
+        if ((*qfn)(base_binfo))
+  	{
++ #if 0
+  	  if (fn == dfs_init_vbase_pointers)
+  	    {
+***************
+*** 2464,2467 ****
+--- 2465,2469 ----
+  	      saw_first_vbase = save_saw_first_vbase;
+  	    } else
++ #endif
+  	      dfs_walk (base_binfo, fn, qfn);
+  	}
+*************** dfs_init_vbase_pointers (binfo)
+*** 2658,2661 ****
+--- 2660,2664 ----
+      return;
   
-    if (methods == NULL_TREE)
-***************
-*** 711,716 ****
---- 712,719 ----
++ #if 0
+    this_vbase_ptr = vbase_decl_ptr_intermediate;
   
-    type_identifier_length = IDENTIFIER_LENGTH (type_encoding);
+*************** dfs_init_vbase_pointers (binfo)
+*** 2662,2668 ****
+    if (TYPE_POINTER_TO (type) != TREE_TYPE (this_vbase_ptr))
+      my_friendly_abort (125);
   
-+   sprintf(formatted_type_identifier_length, "%d", type_identifier_length);
-+ 
-    if (TREE_CODE (methods) == FUNCTION_DECL)
-      fndecl = methods;
-    else if (TREE_VEC_ELT (methods, 0) != NULL_TREE)
-***************
-*** 754,762 ****
---- 757,769 ----
-  		  if (debug_name[0] == '_' && debug_name[1] == '_')
-  		    {
-  		      char *method_name = debug_name + 2;
-+ 		      char *length_ptr = formatted_type_identifier_length;
-  		      /* Get past const and volatile qualifiers.  */
-  		      while (*method_name == 'C' || *method_name == 'V')
-  			method_name++;
-+ 		      /* Skip digits for length of type_encoding. */
-+ 		      while (*method_name == *length_ptr && *length_ptr)
-+ 			  length_ptr++, method_name++;
-  		      if (! strncmp (method_name,
-  				     IDENTIFIER_POINTER (type_encoding),
-  				     type_identifier_length))
-***************
-*** 768,775 ****
---- 775,786 ----
-  	      else if (debug_name[0] == '_' && debug_name[1] == '_')
-  		{
-  		  char *ctor_name = debug_name + 2;
-+ 		  char *length_ptr = formatted_type_identifier_length;
-  		  while (*ctor_name == 'C' || *ctor_name == 'V')
-  		    ctor_name++;
-+ 		  /* Skip digits for length of type_encoding. */
-+ 		  while (*ctor_name == *length_ptr && *length_ptr)
-+ 		      length_ptr++, ctor_name++;
-  		  if (!strncmp (IDENTIFIER_POINTER (type_encoding), ctor_name,
-  				type_identifier_length))
-  		    debug_name = ctor_name + type_identifier_length;
+- #if 0
+    distance = get_base_distance (type, TREE_TYPE (vbase_decl), 0, &path);
+    if (distance == -2)
+      {
+--- 2665,2672 ----
+    if (TYPE_POINTER_TO (type) != TREE_TYPE (this_vbase_ptr))
+      my_friendly_abort (125);
++ #endif
+  
+    distance = get_base_distance (type, TREE_TYPE (vbase_decl), 0, &path);
++ #if 0
+    if (distance == -2)
+      {
+*************** dfs_init_vbase_pointers (binfo)
+*** 2669,2672 ****
+--- 2673,2677 ----
+        error ("inheritance lattice too complex below");
+      }
++ #endif
+    while (path)
+      {
+*************** dfs_init_vbase_pointers (binfo)
+*** 2682,2685 ****
+--- 2687,2691 ----
+      this_vbase_ptr = convert_pointer_to (type, vbase_decl_ptr);
+  
++ #if 0
+    /* This happens when it is ambiguous. */
+    if (this_vbase_ptr == error_mark_node)

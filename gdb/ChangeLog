@@ -4,6 +4,20 @@ Thu Feb 18 22:44:40 1993  Stu Grossman  (grossman@cygnus.com)
 	* am29k-tdep.c:  More minor nits with arg types for
 	supply_register, NULL vs. 0, read_register_gen, & reginv_com.
 
+Thu Feb 18 22:38:03 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gcc.patch:  Update for a different GCC (G++) bug.
+	* main.c (print_gdb_version):  Update copyright year to 1993.
+	* nm-hp300bsd.h:  Decide whether this is BSD 4.3 or 4.4,
+	conditionalize this file on it.  FIXME, right way is to split
+	these into two config files.  
+	(ATTACH_DETACH):  Define for BSD 4.4
+	(PTRACE_ARG_TYPE):  caddr_t for BSD 4.4, unset for 4.3.
+	(U_REGS_OFFSET):  Revise for 4.4.
+	(REGISTER_U_ADDR):  Separate for 4.4, but it doesn't work yet.
+	* xm-hp300bsd.h:  Move definitions of UINT_MAX, INT_MAX, INT_MIN,
+	LONG_MAX into this file to avoid cpp "redefinition" warnings.
+
 Thu Feb 18 16:13:28 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* nm-hp300bsd.h (PTRACE_ARG3_TYPE): FSF's hp300's have int* not
