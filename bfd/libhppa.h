@@ -583,7 +583,7 @@ static INLINE int
 bfd_hppa_insn2fmt (insn)
      unsigned long insn;
 {
-  char int = -1;
+  int fmt = -1;
   unsigned char op = get_opcode (insn);
   
   switch (op)
