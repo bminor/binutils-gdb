@@ -434,6 +434,7 @@ void scrub_to_string PARAMS ((int ch));
 void subsegs_begin PARAMS ((void));
 void subseg_change PARAMS ((segT seg, int subseg));
 segT subseg_new PARAMS ((const char *name, subsegT subseg));
+segT subseg_force_new PARAMS ((const char *name, subsegT subseg));
 void subseg_set PARAMS ((segT seg, subsegT subseg));
 
 struct expressionS;
