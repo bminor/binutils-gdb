@@ -1,3 +1,10 @@
+Wed Jan 31 17:23:32 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* coff-i386.c (coff_i386_reloc_type_lookup): Add BFD_RELOC_32_PCREL.
+	* config.bfd (i[345]86-*-win32): Becomes i[345]86-*-cygwin32.
+	(powerpcle-*-cygwin32): New.
+	* peicode.h (add_data_entry): Get address from vma.
+
 Wed Jan 31 16:23:57 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elflink.c (_bfd_elf_create_linker_section): If the symbol
