@@ -1,3 +1,26 @@
+Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-d10v.c (remote_d10v_open): Call push_remote_target
+ 	instead of open_remote_target.
+
+	* remote.c (remote_xfer_memory): Use REMOTE_TRANSLATE_XFER_ADDRESS
+ 	to translate addr/size when defined.
+	(open_remote_target): Delete.
+	
+	* target.h (open_remote_target): Delete.
+	
+	* config/d10v/tm-d10v.h (REMOTE_TRANSLATE_XFER_ADDRESS): Define.
+	
+Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Define. True when
+ 	sizeof type > 1.
+
+Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Define. True when
+ 	sizeof type > 1.
+
 Sun Feb 15 16:10:50 1998  Ron Unrau   <runrau@cygnus.com>
 
 	* parse.c (write_dollar_variable): call new function 

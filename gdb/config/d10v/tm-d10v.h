@@ -178,6 +178,17 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
      (extract_address ((REGBUF) + REGISTER_BYTE (ARG1_REGNUM), REGISTER_RAW_SIZE (ARG1_REGNUM)) | DMEM_START)
+
+/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
+   and TYPE is the type (which is known to be struct, union or array).
+
+   The d10v returns anything less than 8 bytes in size in
+   registers. */
+
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+   (TYPE_LENGTH (type) > 1)
+
 
 
 /* Define other aspects of the stack frame. 
@@ -314,3 +325,13 @@ CORE_ADDR d10v_read_fp PARAMS ((void));
 #define TARGET_PTR_BIT (4 * TARGET_CHAR_BIT)
 #define TARGET_DOUBLE_BIT (4 * TARGET_CHAR_BIT)
 #define TARGET_LONG_DOUBLE_BIT (8 * TARGET_CHAR_BIT)
+
+
+/* For the d10v when talking to the remote d10v board, GDB addresses
+   need to be translated into a format that the d10v rom monitor
+   understands. */
+
+int remote_d10v_translate_xfer_address PARAMS ((CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr));
+#define REMOTE_TRANSLATE_XFER_ADDRESS(GDB_ADDR, GDB_LEN, REM_ADDR, REM_LEN) \
+(REM_LEN) = remote_d10v_translate_xfer_address ((GDB_ADDR), (GDB_LEN), &(REM_ADDR))
+

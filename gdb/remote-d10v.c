@@ -44,40 +44,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Prototypes for local functions */
 
-static int remote_d10v_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-					    int len, int should_write,
-					    struct target_ops *target));
-
 static void remote_d10v_open PARAMS ((char *name, int from_tty));
 
-static void remote_d10v_mourn PARAMS ((void));
-
-static void initialize_remote_d10v_ops PARAMS ((int copy_remote));
-
 /* Define the target subroutine names */
-
-struct target_ops remote_d10v_ops;
-extern struct target_ops remote_ops;
-extern struct target_ops extended_remote_ops;
-struct target_ops *inherited_ops = &extended_remote_ops;
-
-void
-init_remote_d10v_ops (copy_remote)
-     int copy_remote;
-{
-  printf_filtered ("Opening d10v ...\n");
-  if (copy_remote)
-    memcpy (&remote_d10v_ops, inherited_ops, sizeof remote_d10v_ops);
-  remote_d10v_ops.to_shortname = "d10v";
-  remote_d10v_ops.to_longname = "Remote d10v serial target in gdb-specific protocol";
-  remote_d10v_ops.to_doc = "Use a remote d10v via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).";
-  remote_d10v_ops.to_open = remote_d10v_open;
-  remote_d10v_ops.to_xfer_memory = remote_d10v_xfer_memory;
-  remote_d10v_ops.to_mourn_inferior = remote_d10v_mourn;
-  remote_d10v_ops.to_magic = OPS_MAGIC;
-}
-
+static struct target_ops remote_d10v_ops;
 
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
@@ -87,38 +57,19 @@ remote_d10v_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  init_remote_d10v_ops (1);
-  open_remote_target (name, from_tty, &remote_d10v_ops,
-		      inherited_ops == &extended_remote_ops);
+  pop_target ();
+  push_remote_target (name, from_tty);
 }
 
 
-/* Worker function for remote_mourn.  */
-static void
-remote_d10v_mourn ()
-{
-  if (inherited_ops == &remote_ops)
-    {
-      unpush_target (&remote_d10v_ops);
-      generic_mourn_inferior ();
-    }
-  /* see remote.c:extended_remote_mourn() for why an extended remote
-     target doesn't mourn */
-}
-
-
-/* Read or write LEN bytes from inferior memory at MEMADDR, transferring
-   to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
-   nonzero.  Returns length of data written or read; 0 for error.  */
-
-/* ARGSUSED */
-static int
-remote_d10v_xfer_memory(memaddr, myaddr, nr_bytes, write_p, target)
+/* Translate a GDB virtual ADDR/LEN into a format the remote target
+   understands.  Returns number of bytes that can be transfered
+   starting at taddr, ZERO if no bytes can be transfered. */
+int
+remote_d10v_translate_xfer_address (memaddr, nr_bytes, taddr)
      CORE_ADDR memaddr;
-     char *myaddr;
      int nr_bytes;
-     int write_p;
-     struct target_ops *target;			/* ignored */
+     CORE_ADDR *taddr;
 {
   CORE_ADDR phys;
   CORE_ADDR seg;
@@ -259,21 +210,19 @@ remote_d10v_xfer_memory(memaddr, myaddr, nr_bytes, write_p, target)
       }
 
 
-  printf_unfiltered ("%s-xfer: 0x%08lx -> 0x%08lx imap0=%04x imap1=%04x, dmap=%04x, %s->%s, %d bytes\n",
-		     (write_p ? "wr" : "rd"),
-		     (long) memaddr,
-		     (long) phys,
-		     (int) imap0, (int) imap1, (int) dmap,
-		     from, to,
-		     (int) nr_bytes);
-
-  return inherited_ops->to_xfer_memory (phys, myaddr, nr_bytes, write_p, target);
+  *taddr = phys;
+  return nr_bytes;
 }
 
 
 void
 _initialize_remote_d10v ()
 {
-  init_remote_d10v_ops (0);
+  remote_d10v_ops.to_shortname = "d10v";
+  remote_d10v_ops.to_longname = "Remote d10v serial target in gdb-specific protocol";
+  remote_d10v_ops.to_doc = "Use a remote d10v via a serial line, using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  remote_d10v_ops.to_open = remote_d10v_open;
+
   add_target (&remote_d10v_ops);
 }
