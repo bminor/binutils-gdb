@@ -1,3 +1,9 @@
+Sat Apr 19 22:50:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_compute_section_file_positions): Force the
+	potential last byte in the file to be written out when
+	COFF_IMAGE_WITH_PE.
+
 Fri Apr 18 11:42:55 1997  Niklas Hallqvist  <niklas@appli.se>
 
 	* coff-alpha.c (bsd_alpha_howto_table): Cloned from alpha_howto_table
