@@ -307,6 +307,8 @@ static boolean elfNN_ia64_print_private_bfd_data
   PARAMS ((bfd *abfd, PTR ptr));
 static enum elf_reloc_type_class elfNN_ia64_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
+static void elfNN_hpux_post_process_headers
+  PARAMS ((bfd *abfd, struct bfd_link_info *info));
 
 /* ia64-specific relocation */
 
@@ -1126,11 +1128,29 @@ elfNN_ia64_final_write_processing (abfd, linker)
 	    {
 	      /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.t.FOO */
 	      size_t len2 = sizeof (".gnu.linkonce.t.") - 1;
-	      char *once_name = alloca (len2 + strlen (sname) - len + 1);
+	      char *once_name = bfd_malloc (len2 + strlen (sname + len) + 1);
 
-	      memcpy (once_name, ".gnu.linkonce.t.", len2);
-	      strcpy (once_name + len2, sname + len);
-	      text_sect = bfd_get_section_by_name (abfd, once_name);
+	      if (once_name != NULL)
+		{
+		  memcpy (once_name, ".gnu.linkonce.t.", len2);
+		  strcpy (once_name + len2, sname + len);
+		  text_sect = bfd_get_section_by_name (abfd, once_name);
+		  free (once_name);
+		}
+	      else
+		/* Should only happen if we run out of memory, in
+		   which case we're probably toast anyway.  Try to
+		   cope by finding the section the slow way.  */
+		for (text_sect = abfd->sections;
+		     text_sect != NULL;
+		     text_sect = text_sect->next)
+		  {
+		    if (strncmp (bfd_section_name (abfd, text_sect),
+				 ".gnu.linkonce.t.", len2) == 0
+			&& strcmp (bfd_section_name (abfd, text_sect) + len2,
+				   sname + len) == 0)
+		      break;
+		  }
 	    }
 	  else
 	    /* last resort: fall back on .text */
@@ -1758,6 +1778,7 @@ get_local_sym_hash (ia64_info, abfd, rel, create)
 {
   char *addr_name;
   size_t len;
+  struct elfNN_ia64_local_hash_entry *ret;
 
   /* Construct a string for use in the elfNN_ia64_local_hash_table.
      name describes what was once anonymous memory.  */
@@ -1765,13 +1786,17 @@ get_local_sym_hash (ia64_info, abfd, rel, create)
   len = sizeof (void*)*2 + 1 + sizeof (bfd_vma)*4 + 1 + 1;
   len += 10;	/* %p slop */
 
-  addr_name = alloca (len);
+  addr_name = bfd_malloc (len);
+  if (addr_name == NULL)
+    return 0;
   sprintf (addr_name, "%p:%lx",
 	   (void *) abfd, (unsigned long) ELFNN_R_SYM (rel->r_info));
 
   /* Collect the canonical entry data for this address.  */
-  return elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
-				       addr_name, create, create);
+  ret = elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
+				      addr_name, create, create);
+  free (addr_name);
+  return ret;
 }
 
 /* Find and/or create a descriptor for dynamic symbol info.  This will
@@ -4395,6 +4420,17 @@ elfNN_ia64_reloc_type_class (rela)
       return reloc_class_normal;
     }
 }
+
+static void
+elfNN_hpux_post_process_headers (abfd, info)
+	bfd *abfd;
+	struct bfd_link_info *info ATTRIBUTE_UNUSED;
+{
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
+  i_ehdrp->e_ident[EI_ABIVERSION] = 1;
+}
 
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -4491,5 +4527,25 @@ elfNN_ia64_reloc_type_class (rela)
 #define bfd_elfNN_bfd_link_add_symbols 	elfNN_ia64_aix_link_add_symbols
 
 #define elfNN_bed elfNN_ia64_aix_bed
+
+#include "elfNN-target.h"
+
+/* HPUX-specific vectors.  */
+
+#undef  TARGET_LITTLE_SYM
+#undef  TARGET_LITTLE_NAME
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM                  bfd_elfNN_ia64_hpux_big_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME                 "elfNN-ia64-hpux-big"
+
+#undef  elf_backend_post_process_headers
+#define elf_backend_post_process_headers elfNN_hpux_post_process_headers
+
+#undef  ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE                 0x1000  /* 1K */
+
+#undef  elfNN_bed
+#define elfNN_bed elfNN_ia64_hpux_bed
 
 #include "elfNN-target.h"

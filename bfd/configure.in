@@ -554,6 +554,7 @@ do
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.lo elf32.lo $elf" ;;
     bfd_elf32_i960_vec)		tb="$tb elf32-i960.lo elf32.lo $elf" ;;
     bfd_elf32_ia64_big_vec)	tb="$tb elf32-ia64.lo elf32.lo $elf" ;;
+    bfd_elf32_ia64_hpux_big_vec) tb="$tb elf32-ia64.lo elf32.lo $elf";;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_oabi_vec) tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;
@@ -592,6 +593,7 @@ do
     bfd_elf64_ia64_aix_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_aix_little_vec) tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
+    bfd_elf64_ia64_hpux_big_vec) tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elf32-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
