@@ -1,3 +1,11 @@
+Sat Mar 28 16:33:02 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-arm.c: Define all globally visible variables and functions
+	only when COFF_WITH_PE is not defined.
+	* configure.in (armpe_little_vec, armpe_big_vec): Add
+	coff-arm.lo.
+	* configure: Rebuild.
+
 Fri Mar 27 16:06:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Fix some gcc -Wall warnings:
