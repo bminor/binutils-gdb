@@ -1,3 +1,18 @@
+2000-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/h8300.sc: Use ${CONSTRUCTING...} to enclose
+	constructors and destructors.
+	* scripttempl/h8300h.sc: Ditto.
+	* scripttempl/h8300s.sc: Ditto.
+	* scripttempl/h8500.sc: Ditto.
+	* scripttempl/h8500b.sc: Ditto.
+	* scripttempl/h8500c.sc: Ditto.
+	* scripttempl/h8500m.sc: Ditto.
+	* scripttempl/h8500s.sc: Ditto.
+	* scripttempl/v850.sc: Ditto.
+	* scripttempl/w65.sc: Ditto.
+	* scripttempl/z8000.sc: Ditto.
+
 2000-11-02  Per Lundberg  <plundis@chaosdev.org>
 
 	* Makefile.in (e_i386_chaos.c): New rule.

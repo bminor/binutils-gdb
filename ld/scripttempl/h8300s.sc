@@ -1,3 +1,13 @@
+TORS=".tors :
+  {
+    ___ctors = . ;
+    *(.ctors)
+    ___ctors_end = . ;
+    ___dtors = . ;
+    *(.dtors)
+    ___dtors_end = . ;
+  } > ram"
+
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(h8300s)
@@ -24,53 +34,64 @@ MEMORY
 
 SECTIONS 				
 { 					
-.vectors : {
-	/* Use something like this to place a specific function's address
-	   into the vector table.
+.vectors :
+	 {
+	  /* Use something like this to place a specific function's address
+	     into the vector table.
 
-	LONG(ABSOLUTE(_foobar)) */
+	     LONG (ABSOLUTE (_foobar)).  */
 
-	*(.vectors)
+	  *(.vectors)
 	} ${RELOCATING+ > vectors}
-.text :	{ 					
-	*(.rodata) 				
-	*(.text) 				
-	*(.strings)
-   	${RELOCATING+ _etext = . ; }
+	
+.text :
+	{ 					
+	  *(.rodata) 				
+	  *(.text) 				
+	  *(.strings)
+   	  ${RELOCATING+ _etext = . ; }
 	} ${RELOCATING+ > ram}
-.tors : {
-	___ctors = . ;
-	*(.ctors)
-	___ctors_end = . ;
-	___dtors = . ;
-	*(.dtors)
-	___dtors_end = . ;
+	
+	${CONSTRUCTING+${TORS}}
+	
+.data :
+	{
+	  *(.data)
+	  ${RELOCATING+ _edata = . ; }
 	} ${RELOCATING+ > ram}
-.data : {
-	*(.data)
-	${RELOCATING+ _edata = . ; }
-	} ${RELOCATING+ > ram}
-.bss : {
-	${RELOCATING+ _bss_start = . ;}
-	*(.bss)
-	*(COMMON)
-	${RELOCATING+ _end = . ;  }
+	
+.bss :
+	{
+	  ${RELOCATING+ _bss_start = . ;}
+	  *(.bss)
+	  *(COMMON)
+	  ${RELOCATING+ _end = . ;  }
 	} ${RELOCATING+ >ram}
-.stack : {
-	${RELOCATING+ _stack = . ; }
-	*(.stack)
+	
+.stack :
+	{
+	  ${RELOCATING+ _stack = . ; }
+	  *(.stack)
 	} ${RELOCATING+ > topram}
-.tiny : {
-	*(.tiny)
+	
+.tiny :
+	{
+	  *(.tiny)
 	} ${RELOCATING+ > tiny}
-.eight : {
-	*(.eight)
+	
+.eight :
+	{
+	  *(.eight)
 	} ${RELOCATING+ > eight}
-.stab 0 ${RELOCATING+(NOLOAD)} : {
-	[ .stab ]
+	
+.stab 0 ${RELOCATING+(NOLOAD)} :
+	{
+	  [ .stab ]
 	}
-.stabstr 0 ${RELOCATING+(NOLOAD)} : {
-	[ .stabstr ]
+	
+.stabstr 0 ${RELOCATING+(NOLOAD)} :
+	{
+	  [ .stabstr ]
 	}
 }
 EOF

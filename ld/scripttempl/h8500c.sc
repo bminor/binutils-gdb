@@ -1,3 +1,11 @@
+TORS="
+    ___ctors = . ;
+    *(.ctors)
+    ___ctors_end = . ;
+    ___dtors = . ;
+    *(.dtors)
+    ___dtors_end = . ;"
+
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
@@ -20,15 +28,12 @@ SECTIONS
 	${RELOCATING+ _edata = . ; }
 	} ${RELOCATING+ > ram}
 
-.rdata 0x30000  : {
+.rdata 0x30000  :
+       {
 	*(.rdata); 
-	___ctors = . ;
-	*(.ctors)
-	___ctors_end = . ;
-	___dtors = . ;
-	*(.dtors)
-	___dtors_end = . ;
-}  ${RELOCATING+ > ram}
+	  
+	${CONSTRUCTING+${TORS}}
+	}  ${RELOCATING+ > ram}
 
 .bss  0x40000 :
 	{
