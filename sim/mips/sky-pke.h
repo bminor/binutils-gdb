@@ -463,7 +463,7 @@ int read_pke_pcx (struct pke_device *device, void *buf);
          memcpy((void*) & value, (unsigned_##size*)(data), size); \
          sim_core_write_aligned_##size(cpu, CIA_GET(cpu), write_map, \
                                        (SIM_ADDR)(addr), value); \
-         if (indebug (me->dev.name)) \
+         if (indebug ((me)->dev.name)) \
            { \
              int i; \
              unsigned_##size value_te; \
@@ -489,13 +489,6 @@ int read_pke_pcx (struct pke_device *device, void *buf);
            } \
         } while(0)      
 
-
-/* Disassembly file definitions  */
 void pke_options (struct pke_device *device, unsigned_4 option, char *option_string);
-#define PKE_OPT_DEBUG_NAME       1
-#define PKE_OPT_TRACE_ON         2
-#define PKE_OPT_TRACE_OFF        3
-#define PKE_OPT_TRACE_NAME       4
-#define PKE_OPT_CLOSE            5
 
 #endif /* H_PKE_H */
