@@ -176,14 +176,14 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-eb.c
-remote-es1800.c
+remote-es.c
 remote-hms.c
 remote-mips.c
 remote-mm.c
 remote-monitor.c
 remote-nindy.c
 remote-sim.c
-remote-st2000.c
+remote-st.c
 remote-udi.c
 remote-vx.c
 remote-z8k.c

@@ -1,3 +1,11 @@
+Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Rename remote-es1800.c to remote-es.c
+	and remote-st2000.c to remote-st.c for 14-char filenames.
+	config/m68k/{es1800,st2000}: Use the new names.
+
+	* mips-tdep.c (isa_NAN): Don't return true on -0.
+
 Fri Jun 11 10:24:35 1993  Fred Fish  (fnf@cygnus.com)
 
 	* defs.h (INT_MAX):  Cast unsigned shift result to int.
