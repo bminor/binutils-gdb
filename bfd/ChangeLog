@@ -1,3 +1,11 @@
+start-sanitize-m32r
+Mon Sep 23 09:23:41 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* reloc.c: Rename m32r relocs.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+	* elf32-m32r.c: Update.
+end-sanitize-m32r
+
 Fri Sep 20 11:43:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (aout_link_input_section_ext): When doing a relocateable
