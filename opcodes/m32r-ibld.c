@@ -145,7 +145,22 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
     }
 
   /* Ensure VALUE will fit.  */
-  if (! CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED))
+  if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGN_OPT))
+    {
+      long minval = - (1L << (length - 1));
+      unsigned long maxval = mask;
+      
+      if ((value > 0 && (unsigned long) value > maxval)
+	  || value < minval)
+	{
+	  /* xgettext:c-format */
+	  sprintf (errbuf,
+		   _("operand out of range (%ld not between %ld and %lu)"),
+		   value, minval, maxval);
+	  return errbuf;
+	}
+    }
+  else if (! CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED))
     {
       unsigned long maxval = mask;
       
@@ -400,7 +415,7 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
 #endif
      long *valuep;
 {
-  CGEN_INSN_INT value, mask;
+  long value, mask;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value
      so give it a standard value of zero.  */
@@ -428,9 +443,9 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
 	word_length = total_length;
     }
 
-  /* Does the value reside in INSN_VALUE?  */
+  /* Does the value reside in INSN_VALUE, and at the right alignment?  */
 
-  if (CGEN_INT_INSN_P || word_offset == 0)
+  if (CGEN_INT_INSN_P || (word_offset == 0 && word_length == total_length))
     {
       if (CGEN_INSN_LSB0_P)
 	value = insn_value >> ((word_offset + start + 1) - length);

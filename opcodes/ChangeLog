@@ -1,3 +1,8 @@
+2001-08-12  Richard Henderson  <rth@redhat.com>
+
+	* cgen-ibld.in (extract_normal): Match type of VALUE and MASK
+	to *VALUEP.  Regenerate all cgen files.
+
 2001-08-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* mips-dis.c (print_insn_mips): Remove OPCODE_IS_MEMBER's gp32

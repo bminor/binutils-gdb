@@ -34,6 +34,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "openrisc-desc.h"
 #include "openrisc-opc.h"
 #include "opintl.h"
+#include "xregex.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -257,6 +258,104 @@ openrisc_cgen_init_asm (cd)
 }
 
 
+
+/*
+  Regex construction routine.
+
+  This translates an opcode syntax string into a regex string,
+  by replacing any non-character syntax element (such as an
+  opcode) with the pattern '.*'
+
+  It then compiles the regex and stores it in the opcode, for
+  later use by openrisc_cgen_assemble_insn
+
+  returns NULL for success, an error message for failure 
+*/
+
+char * 
+openrisc_cgen_build_insn_regex (insn)
+     CGEN_INSN *insn;
+{  
+  CGEN_OPCODE *opc = CGEN_INSN_OPCODE (insn);
+  const char *mnem = CGEN_INSN_MNEMONIC (insn);
+  int mnem_len;
+  char rxbuf[CGEN_MAX_RX_ELEMENTS];
+  char *rx = rxbuf;
+  const CGEN_SYNTAX_CHAR_TYPE *syn;
+  int reg_err;
+
+  syn = CGEN_SYNTAX_STRING (CGEN_OPCODE_SYNTAX (opc));
+
+  /* Mnemonics come first in the syntax string  */
+  if (! CGEN_SYNTAX_MNEMONIC_P (* syn)) return "missing mnemonic in syntax string";
+  ++syn;
+
+  /* copy the literal mnemonic out of the insn */
+  memset (rx, 0, CGEN_MAX_RX_ELEMENTS);
+  mnem_len = strlen(mnem);
+  memcpy (rx, mnem, mnem_len);
+  rx += mnem_len;
+
+  /* copy any remaining literals from the syntax string into the rx */
+  for(; * syn != 0 && rx < rxbuf + (CGEN_MAX_RX_ELEMENTS - 9); ++syn, ++rx) 
+    {
+      if (CGEN_SYNTAX_CHAR_P (* syn)) 
+	{
+	 char tmp = CGEN_SYNTAX_CHAR (* syn);
+	 switch (tmp) 
+           {
+	     /* escape any regex metacharacters in the syntax */
+	   case '.': case '[': case '\\': 
+	   case '*': case '^': case '$': 
+
+#ifdef CGEN_ESCAPE_EXTENDED_REGEX
+	   case '?': case '{': case '}': 
+	   case '(': case ')': case '*':
+	   case '|': case '+': case ']':
+#endif
+
+	     * rx++ = '\\';
+	     break;  
+	   }
+	 /* insert syntax char into rx */
+	* rx = tmp;
+	}
+      else
+	{
+	  /* replace non-syntax fields with globs */
+	  * rx = '.';
+	  * ++rx = '*';
+	}
+    }
+
+  /* trailing whitespace ok */
+  * rx++ = '['; 
+  * rx++ = ' '; 
+  * rx++ = '\t'; 
+  * rx++ = ']'; 
+  * rx++ = '*'; 
+
+  /* but anchor it after that */
+  * rx++ = '$'; 
+  * rx = '\0';
+
+  CGEN_INSN_RX (insn) = xmalloc (sizeof (regex_t));
+  reg_err = regcomp ((regex_t *) CGEN_INSN_RX (insn), rxbuf, REG_NOSUB|REG_ICASE);
+
+  if (reg_err == 0) 
+    return NULL;
+  else
+    {
+      static char msg[80];
+      regerror (reg_err, (regex_t *) CGEN_INSN_RX (insn), msg, 80);
+      regfree ((regex_t *) CGEN_INSN_RX (insn));
+      free (CGEN_INSN_RX (insn));
+      (CGEN_INSN_RX (insn)) = NULL;
+    return msg;
+    }
+}
+
+
 /* Default insn parser.
 
    The syntax string is scanned and operands are parsed and stored in FIELDS.
@@ -423,6 +522,7 @@ openrisc_cgen_assemble_insn (cd, str, fields, buf, errmsg)
   CGEN_INSN_LIST *ilist;
   const char *parse_errmsg = NULL;
   const char *insert_errmsg = NULL;
+  int recognized_mnemonic = 0;
 
   /* Skip leading white space.  */
   while (isspace (* str))
@@ -438,6 +538,7 @@ openrisc_cgen_assemble_insn (cd, str, fields, buf, errmsg)
   for ( ; ilist != NULL ; ilist = CGEN_ASM_NEXT_INSN (ilist))
     {
       const CGEN_INSN *insn = ilist->insn;
+      recognized_mnemonic = 1;
 
 #ifdef CGEN_VALIDATE_INSN_SUPPORTED 
       /* not usually needed as unsupported opcodes shouldn't be in the hash lists */
@@ -453,6 +554,11 @@ openrisc_cgen_assemble_insn (cd, str, fields, buf, errmsg)
 	continue;
 
       str = start;
+
+      /* skip this insn if str doesn't look right lexically */
+      if (CGEN_INSN_RX (insn) != NULL &&
+	  regexec ((regex_t *) CGEN_INSN_RX (insn), str, 0, NULL, 0) == REG_NOMATCH)
+	continue;
 
       /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
@@ -481,6 +587,7 @@ openrisc_cgen_assemble_insn (cd, str, fields, buf, errmsg)
        Failing that, use parse_errmsg */
     tmp_errmsg = (insert_errmsg ? insert_errmsg :
 		  parse_errmsg ? parse_errmsg :
+		  recognized_mnemonic ? _("unrecognized form of instruction") :
 		  _("unrecognized instruction"));
 
     if (strlen (start) > 50)

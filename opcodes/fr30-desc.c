@@ -122,8 +122,8 @@ static const CGEN_ISA fr30_cgen_isa_table[] = {
 /* Machine variants.  */
 
 static const CGEN_MACH fr30_cgen_mach_table[] = {
-  { "fr30", "fr30", MACH_FR30 },
-  { 0, 0, 0 }
+  { "fr30", "fr30", MACH_FR30, 0 },
+  { 0, 0, 0, 0 }
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_gr_names_entries[] =
@@ -153,7 +153,7 @@ CGEN_KEYWORD fr30_cgen_opval_gr_names =
 {
   & fr30_cgen_opval_gr_names_entries[0],
   19,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_cr_names_entries[] =
@@ -180,7 +180,7 @@ CGEN_KEYWORD fr30_cgen_opval_cr_names =
 {
   & fr30_cgen_opval_cr_names_entries[0],
   16,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_dr_names_entries[] =
@@ -197,7 +197,7 @@ CGEN_KEYWORD fr30_cgen_opval_dr_names =
 {
   & fr30_cgen_opval_dr_names_entries[0],
   6,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_ps_entries[] =
@@ -209,7 +209,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_ps =
 {
   & fr30_cgen_opval_h_ps_entries[0],
   1,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r13_entries[] =
@@ -221,7 +221,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_r13 =
 {
   & fr30_cgen_opval_h_r13_entries[0],
   1,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r14_entries[] =
@@ -233,7 +233,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_r14 =
 {
   & fr30_cgen_opval_h_r14_entries[0],
   1,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 static CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_r15_entries[] =
@@ -245,7 +245,7 @@ CGEN_KEYWORD fr30_cgen_opval_h_r15 =
 {
   & fr30_cgen_opval_h_r15_entries[0],
   1,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 
@@ -1476,11 +1476,9 @@ static void
 fr30_cgen_rebuild_tables (cd)
      CGEN_CPU_TABLE *cd;
 {
-  int i,n_isas;
+  int i;
   unsigned int isas = cd->isas;
-#if 0
   unsigned int machs = cd->machs;
-#endif
 
   cd->int_insn_p = CGEN_INT_INSN_P;
 
@@ -1518,20 +1516,26 @@ fr30_cgen_rebuild_tables (cd)
 	  cd->min_insn_bitsize = isa->min_insn_bitsize;
 	if (isa->max_insn_bitsize > cd->max_insn_bitsize)
 	  cd->max_insn_bitsize = isa->max_insn_bitsize;
-
-	++n_isas;
       }
 
-#if 0 /* Does nothing?? */
   /* Data derived from the mach spec.  */
   for (i = 0; i < MAX_MACHS; ++i)
     if (((1 << i) & machs) != 0)
       {
 	const CGEN_MACH *mach = & fr30_cgen_mach_table[i];
 
-	++n_machs;
+	if (mach->insn_chunk_bitsize != 0)
+	{
+	  if (cd->insn_chunk_bitsize != 0 && cd->insn_chunk_bitsize != mach->insn_chunk_bitsize)
+	    {
+	      fprintf (stderr, "fr30_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'\n",
+		       cd->insn_chunk_bitsize, mach->insn_chunk_bitsize);
+	      abort ();
+	    }
+
+ 	  cd->insn_chunk_bitsize = mach->insn_chunk_bitsize;
+	}
       }
-#endif
 
   /* Determine which hw elements are used by MACH.  */
   build_hw_table (cd);

@@ -434,12 +434,12 @@ print_insn (cd, pc, info, buf, buflen)
      char *buf;
      int buflen;
 {
-  unsigned long insn_value;
+  CGEN_INSN_INT insn_value;
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
 
   /* Extract base part of instruction, just in case CGEN_DIS_* uses it. */
-  insn_value = bfd_get_bits (buf, buflen * 8, info->endian == BFD_ENDIAN_BIG);
+  insn_value = cgen_get_insn_value (cd, buf, buflen * 8);
 
   /* Fill in ex_info fields like read_insn would.  Don't actually call
      read_insn, since the incoming buffer is already read (and possibly
@@ -505,7 +505,7 @@ print_insn (cd, pc, info, buf, buflen)
 	    }
 	  else
 	    length = CGEN_EXTRACT_FN (cd, insn)
-	      (cd, insn, &ex_info, insn_value, &fields, pc);
+	      (cd, insn, &ex_info, insn_value_cropped, &fields, pc);
 
 	  /* length < 0 -> error */
 	  if (length < 0)
@@ -539,18 +539,27 @@ default_print_insn (cd, pc, info)
      disassemble_info *info;
 {
   char buf[CGEN_MAX_INSN_SIZE];
+  int buflen;
   int status;
 
-  /* Read the base part of the insn.  */
+  /* Attempt to read the base part of the insn.  */
+  buflen = cd->base_insn_bitsize / 8;
+  status = (*info->read_memory_func) (pc, buf, buflen, info);
 
-  status = (*info->read_memory_func) (pc, buf, cd->base_insn_bitsize / 8, info);
+  /* Try again with the minimum part, if min < base.  */
+  if (status != 0 && (cd->min_insn_bitsize < cd->base_insn_bitsize))
+    {
+      buflen = cd->min_insn_bitsize / 8;
+      status = (*info->read_memory_func) (pc, buf, buflen, info);
+    }
+
   if (status != 0)
     {
       (*info->memory_error_func) (status, pc, info);
       return -1;
     }
 
-  return print_insn (cd, pc, info, buf, cd->base_insn_bitsize / 8);
+  return print_insn (cd, pc, info, buf, buflen);
 }
 
 /* Main entry point.

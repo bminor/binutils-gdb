@@ -415,7 +415,7 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
 #endif
      long *valuep;
 {
-  CGEN_INSN_INT value, mask;
+  long value, mask;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value
      so give it a standard value of zero.  */

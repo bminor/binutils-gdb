@@ -325,13 +325,19 @@ print_insn (cd, pc, info, buf, buflen)
      char *buf;
      int buflen;
 {
-  unsigned long insn_value;
+  CGEN_INSN_INT insn_value;
   const CGEN_INSN_LIST *insn_list;
   CGEN_EXTRACT_INFO ex_info;
 
-  int rc = read_insn (cd, pc, info, buf, buflen, & ex_info, & insn_value);
-  if (rc != 0)
-    return rc;
+  /* Extract base part of instruction, just in case CGEN_DIS_* uses it. */
+  insn_value = cgen_get_insn_value (cd, buf, buflen * 8);
+
+  /* Fill in ex_info fields like read_insn would.  Don't actually call
+     read_insn, since the incoming buffer is already read (and possibly
+     modified a la m32r).  */
+  ex_info.valid = (1 << buflen) - 1;
+  ex_info.dis_info = info;
+  ex_info.insn_bytes = buf;
 
   /* The instructions are stored in hash lists.
      Pick the first one and keep trying until we find the right one.  */
@@ -342,6 +348,7 @@ print_insn (cd, pc, info, buf, buflen)
       const CGEN_INSN *insn = insn_list->insn;
       CGEN_FIELDS fields;
       int length;
+      unsigned long insn_value_cropped;
 
 #ifdef CGEN_VALIDATE_INSN_SUPPORTED 
       /* not needed as insn shouldn't be in hash lists if not supported */
@@ -356,7 +363,17 @@ print_insn (cd, pc, info, buf, buflen)
       /* Basic bit mask must be correct.  */
       /* ??? May wish to allow target to defer this check until the extract
 	 handler.  */
-      if ((insn_value & CGEN_INSN_BASE_MASK (insn))
+
+      /* Base size may exceed this instruction's size.  Extract the
+         relevant part from the buffer. */
+      if ((CGEN_INSN_BITSIZE (insn) / 8) < buflen &&
+	  (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
+	insn_value_cropped = bfd_get_bits (buf, CGEN_INSN_BITSIZE (insn), 
+					   info->endian == BFD_ENDIAN_BIG);
+      else
+	insn_value_cropped = insn_value;
+
+      if ((insn_value_cropped & CGEN_INSN_BASE_MASK (insn))
 	  == CGEN_INSN_BASE_VALUE (insn))
 	{
 	  /* Printing is handled in two passes.  The first pass parses the
@@ -379,7 +396,7 @@ print_insn (cd, pc, info, buf, buflen)
 	    }
 	  else
 	    length = CGEN_EXTRACT_FN (cd, insn)
-	      (cd, insn, &ex_info, insn_value, &fields, pc);
+	      (cd, insn, &ex_info, insn_value_cropped, &fields, pc);
 
 	  /* length < 0 -> error */
 	  if (length < 0)
@@ -413,18 +430,27 @@ default_print_insn (cd, pc, info)
      disassemble_info *info;
 {
   char buf[CGEN_MAX_INSN_SIZE];
+  int buflen;
   int status;
 
-  /* Read the base part of the insn.  */
+  /* Attempt to read the base part of the insn.  */
+  buflen = cd->base_insn_bitsize / 8;
+  status = (*info->read_memory_func) (pc, buf, buflen, info);
 
-  status = (*info->read_memory_func) (pc, buf, cd->base_insn_bitsize / 8, info);
+  /* Try again with the minimum part, if min < base.  */
+  if (status != 0 && (cd->min_insn_bitsize < cd->base_insn_bitsize))
+    {
+      buflen = cd->min_insn_bitsize / 8;
+      status = (*info->read_memory_func) (pc, buf, buflen, info);
+    }
+
   if (status != 0)
     {
       (*info->memory_error_func) (status, pc, info);
       return -1;
     }
 
-  return print_insn (cd, pc, info, buf, cd->base_insn_bitsize / 8);
+  return print_insn (cd, pc, info, buf, buflen);
 }
 
 /* Main entry point.

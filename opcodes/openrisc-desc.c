@@ -129,9 +129,9 @@ static const CGEN_ISA openrisc_cgen_isa_table[] = {
 /* Machine variants.  */
 
 static const CGEN_MACH openrisc_cgen_mach_table[] = {
-  { "openrisc", "openrisc", MACH_OPENRISC },
-  { "or1300", "openrisc:1300", MACH_OR1300 },
-  { 0, 0, 0 }
+  { "openrisc", "openrisc", MACH_OPENRISC, 0 },
+  { "or1300", "openrisc:1300", MACH_OR1300, 0 },
+  { 0, 0, 0, 0 }
 };
 
 static CGEN_KEYWORD_ENTRY openrisc_cgen_opval_h_gr_entries[] =
@@ -177,7 +177,7 @@ CGEN_KEYWORD openrisc_cgen_opval_h_gr =
 {
   & openrisc_cgen_opval_h_gr_entries[0],
   35,
-  0, 0, 0, 0
+  0, 0, 0, 0, ""
 };
 
 
@@ -779,11 +779,9 @@ static void
 openrisc_cgen_rebuild_tables (cd)
      CGEN_CPU_TABLE *cd;
 {
-  int i,n_isas;
+  int i;
   unsigned int isas = cd->isas;
-#if 0
   unsigned int machs = cd->machs;
-#endif
 
   cd->int_insn_p = CGEN_INT_INSN_P;
 
@@ -821,20 +819,26 @@ openrisc_cgen_rebuild_tables (cd)
 	  cd->min_insn_bitsize = isa->min_insn_bitsize;
 	if (isa->max_insn_bitsize > cd->max_insn_bitsize)
 	  cd->max_insn_bitsize = isa->max_insn_bitsize;
-
-	++n_isas;
       }
 
-#if 0 /* Does nothing?? */
   /* Data derived from the mach spec.  */
   for (i = 0; i < MAX_MACHS; ++i)
     if (((1 << i) & machs) != 0)
       {
 	const CGEN_MACH *mach = & openrisc_cgen_mach_table[i];
 
-	++n_machs;
+	if (mach->insn_chunk_bitsize != 0)
+	{
+	  if (cd->insn_chunk_bitsize != 0 && cd->insn_chunk_bitsize != mach->insn_chunk_bitsize)
+	    {
+	      fprintf (stderr, "openrisc_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'\n",
+		       cd->insn_chunk_bitsize, mach->insn_chunk_bitsize);
+	      abort ();
+	    }
+
+ 	  cd->insn_chunk_bitsize = mach->insn_chunk_bitsize;
+	}
       }
-#endif
 
   /* Determine which hw elements are used by MACH.  */
   build_hw_table (cd);

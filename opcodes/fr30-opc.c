@@ -1368,6 +1368,7 @@ fr30_cgen_init_opcode_table (cd)
     {
       insns[i].base = &ib[i];
       insns[i].opcode = &oc[i];
+      fr30_cgen_build_insn_regex (& insns[i]);
     }
   cd->macro_insn_table.init_entries = insns;
   cd->macro_insn_table.entry_size = sizeof (CGEN_IBASE);
@@ -1376,7 +1377,10 @@ fr30_cgen_init_opcode_table (cd)
   oc = & fr30_cgen_insn_opcode_table[0];
   insns = (CGEN_INSN *) cd->insn_table.init_entries;
   for (i = 0; i < MAX_INSNS; ++i)
-    insns[i].opcode = &oc[i];
+    {
+      insns[i].opcode = &oc[i];
+      fr30_cgen_build_insn_regex (& insns[i]);
+    }
 
   cd->sizeof_fields = sizeof (CGEN_FIELDS);
   cd->set_fields_bitsize = set_fields_bitsize;
