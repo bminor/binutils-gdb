@@ -1,5 +1,7 @@
 2004-07-14  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-tdep.h (ppc_num_vrs): New enum constant.
+
 	* ppc-tdep.h (ppc_num_srs): New enum constant.
 
 	* ppc-tdep.h (ppc_spr_mq, ppc_spr_xer, ppc_spr_rtcu, ppc_spr_rtcl)

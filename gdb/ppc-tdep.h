@@ -174,8 +174,9 @@ struct gdbarch_tdep
 enum
   {
     ppc_num_gprs = 32,          /* 32 general-purpose registers */
-    ppc_num_fprs = 32           /* 32 floating-point registers */
+    ppc_num_fprs = 32,          /* 32 floating-point registers */
     ppc_num_srs = 16,           /* 16 segment registers */
+    ppc_num_vrs = 32            /* 32 Altivec vector registers */
   };
 
 
