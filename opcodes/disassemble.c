@@ -28,9 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* start-sanitize-d10v */
 #define ARCH_d10v
 /* end-sanitize-d10v */
-/* start-sanitize-v850 */
-#define ARCH_v850
-/* end-sanitize-v850 */
+/* start-sanitize-d30v */
+#define ARCH_d30v
+/* end-sanitize-d30v */
 #define ARCH_h8300
 #define ARCH_h8500
 #define ARCH_hppa
@@ -39,12 +39,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_m68k
 #define ARCH_m88k
 #define ARCH_mips
-#define ARCH_mn10x00
+#define ARCH_mn10200
+#define ARCH_mn10300
 #define ARCH_ns32k
 #define ARCH_powerpc
 #define ARCH_rs6000
 #define ARCH_sh
 #define ARCH_sparc
+/* start-sanitize-tic80 */
+#define ARCH_tic80
+/* end-sanitize-tic80 */
+/* start-sanitize-v850 */
+#define ARCH_v850
+/* end-sanitize-v850 */
 #define ARCH_w65
 #define ARCH_z8k
 #endif
@@ -96,6 +103,13 @@ disassembler (abfd)
       break;
 #endif
 /* end-sanitize-d10v */
+/* start-sanitize-d30v */
+#ifdef ARCH_d30v
+    case bfd_arch_d30v:
+      disassemble = print_insn_d30v;
+      break;
+#endif
+/* end-sanitize-d30v */
 #ifdef ARCH_h8300
     case bfd_arch_h8300:
       if (bfd_get_mach(abfd) == bfd_mach_h8300h)
@@ -149,9 +163,14 @@ disassembler (abfd)
 	disassemble = print_insn_little_mips;
       break;
 #endif
-#ifdef ARCH_mn10x00
-    case bfd_arch_mn10x00:
-      disassemble = print_insn_mn10x00;
+#ifdef ARCH_mn10200
+    case bfd_arch_mn10200:
+      disassemble = print_insn_mn10200;
+      break;
+#endif
+#ifdef ARCH_mn10300
+    case bfd_arch_mn10300:
+      disassemble = print_insn_mn10300;
       break;
 #endif
 #ifdef ARCH_powerpc
@@ -180,6 +199,13 @@ disassembler (abfd)
       disassemble = print_insn_sparc;
       break;
 #endif
+/* start-sanitize-tic80 */
+#ifdef ARCH_tic80
+    case bfd_arch_tic80:
+      disassemble = print_insn_tic80;
+      break;
+#endif
+/* end-sanitize-tic80 */
 /* start-sanitize-v850 */
 #ifdef ARCH_v850
     case bfd_arch_v850:

@@ -83,6 +83,9 @@ ALL_MACHINES = a29k-dis.o alpha-dis.o alpha-opc.o h8300-dis.o h8500-dis.o \
 	$(start-sanitize-d10v) \
 	d10v-dis.o d10v-opc.o \
 	$(end-sanitize-d10v) \
+	$(start-sanitize-d30v) \
+	d30v-dis.o d30v-opc.o \
+	$(end-sanitize-d30v) \
 	hppa-dis.o i386-dis.o i960-dis.o m68k-dis.o m68k-opc.o \
 	m88k-dis.o mn10200-dis.o mn10200-opc.o mn10300-dis.o \
 	mn10300-opc.o mips-dis.o mips-opc.o mips16-opc.o sh-dis.o \
@@ -109,7 +112,7 @@ FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
-ALL_CFLAGS = $(CSEARCH) @HDEFINES@ $(CFLAGS)
+ALL_CFLAGS = -D_GNU_SOURCE $(CSEARCH) @HDEFINES@ $(CFLAGS)
 
 .c.o:
 	if [ -n "$(PICFLAG)" ]; then \
@@ -306,7 +309,7 @@ config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config
 	$(SHELL) config.status --recheck
 
 dep: $(CFILES)
-	mkdep $(CFLAGS) $?
+	mkdep $(ALL_CFLAGS) $?
 
 stamp-picdir:
 	if [ -n "$(PICFLAG)" ] && [ ! -d pic ]; then \

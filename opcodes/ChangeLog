@@ -1,3 +1,14 @@
+start-sanitize-d30v
+Tue Feb 18 17:43:43 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* Makefile.in: Added d30v object files.
+	* configure: (bfd_d30v_arch) Rebuilt.
+	* configure.in: (bfd_d30v_arch) Added new case.
+	* d30v-dis.c: New file.
+	* d30v-opc.c: New file.
+	* disassemble.c (disassembler) Add entry for d30v.
+
+end-sanitize-d30v	
 start-sanitize-tic80
 Tue Feb 18 16:32:08 1997  Fred Fish  <fnf@cygnus.com>
 

@@ -1176,6 +1176,9 @@ if test x${all_targets} = xfalse ; then
 # start-sanitize-d10v
 	bfd_d10v_arch)		ta="$ta d10v-dis.o d10v-opc.o" ;;
 # end-sanitize-d10v
+# start-sanitize-d30v
+	bfd_d30v_arch)		ta="$ta d30v-dis.o d30v-opc.o" ;;
+# end-sanitize-d30v
 	bfd_h8300_arch)		ta="$ta h8300-dis.o" ;;
 	bfd_h8500_arch)		ta="$ta h8500-dis.o" ;;
 	bfd_hppa_arch)		ta="$ta hppa-dis.o" ;;
@@ -1195,6 +1198,9 @@ if test x${all_targets} = xfalse ; then
 	bfd_sh_arch)		ta="$ta sh-dis.o" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.o sparc-opc.o" ;;
 	bfd_tahoe_arch)		;;
+# start-sanitize-tic80
+	bfd_tic80_arch)		ta="$ta tic80-dis.o tic80-opc.o" ;;
+# end-sanitize-tic80
 # start-sanitize-v850
 	bfd_v850_arch)		ta="$ta v850-opc.o v850-dis.o" ;;
 # end-sanitize-v850
