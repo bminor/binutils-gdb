@@ -1,3 +1,8 @@
+2004-08-19  Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.tgt (arm*-*-symbianelf*): New target.
+	(arm*-*-eabi*): Likewise.
+
 2004-08-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* emultempl/ppc64elf.em (non_overlapping_opd): New variable.
