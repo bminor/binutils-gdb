@@ -1,3 +1,10 @@
+2002-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Extend where[] array
+	to include space for pseudoregs as well. Update loops accordingly.
+	(sh_fp_frame_init_saved_regs): Ditto.
+	(sh_init_extra_frame_info, sh_pop_frame): Split long lines.
+
 2002-02-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Andreas Schwab is GNU/Linux m68k maintainer.
