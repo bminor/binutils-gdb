@@ -2188,14 +2188,14 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 					     &coff_data(abfd)->line_info))
     return false;
 
+  if (found)
+    return true;
+
   /* Also try examining DWARF2 debugging information.  */
   if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, 0,
 				     &coff_data(abfd)->dwarf2_find_line_info))
-    return true;
-
-if (found)
     return true;
 
   *filename_ptr = 0;

@@ -1,3 +1,8 @@
+2001-02-07  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* coffgen.c (coff_find_nearest_line): If stabs info is successfully
+	found, do not attempt to find dwarf2 info before returning.
+
 2001-02-07  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (is_global_symbol_definition): Rename to
