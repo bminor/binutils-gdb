@@ -2637,8 +2637,6 @@ NAME(aout,find_nearest_line)
 {
   /* Run down the file looking for the filename, function and linenumber */
   asymbol **p;
-  static  char buffer[100];
-  static  char filename_buffer[200];
   CONST char *directory_name = NULL;
   CONST char *main_file_name = NULL;
   CONST char *current_file_name = NULL;
@@ -2646,6 +2644,9 @@ NAME(aout,find_nearest_line)
   bfd_vma low_line_vma = 0;
   bfd_vma low_func_vma = 0;
   asymbol *func = 0;
+  size_t filelen, funclen;
+  char *buf;
+
   *filename_ptr = abfd->filename;
   *functionname_ptr = 0;
   *line_ptr = 0;
@@ -2705,39 +2706,68 @@ NAME(aout,find_nearest_line)
   }
 
  done:
-  if (*line_ptr)
+  if (*line_ptr != 0)
     main_file_name = line_file_name;
-  if (main_file_name) {
+
+  if (main_file_name == NULL
+      || main_file_name[0] == '/'
+      || directory_name == NULL)
+    filelen = 0;
+  else
+    filelen = strlen (directory_name) + strlen (main_file_name);
+  if (func == NULL)
+    funclen = 0;
+  else
+    funclen = strlen (bfd_asymbol_name (func));
+
+  if (adata (abfd).line_buf != NULL)
+    free (adata (abfd).line_buf);
+  if (filelen + funclen == 0)
+    adata (abfd).line_buf = buf = NULL;
+  else
+    {
+      adata (abfd).line_buf = buf = (char *) malloc (filelen + funclen + 2);
+      if (adata (abfd).line_buf == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+    }
+
+  if (main_file_name != NULL)
+    {
       if (main_file_name[0] == '/' || directory_name == NULL)
-	  *filename_ptr = main_file_name;
-      else {
-	  sprintf(filename_buffer, "%.140s%.50s",
-		  directory_name, main_file_name);
-	  *filename_ptr = filename_buffer;
-      }
-  }
+	*filename_ptr = main_file_name;
+      else
+	{
+	  sprintf (buf, "%s%s", directory_name, main_file_name);
+	  *filename_ptr = buf;
+	  buf += filelen + 1;
+	}
+    }
+
   if (func)
     {
-      CONST char *function = func->name;
+      const char *function = func->name;
       char *p;
 
       /* The caller expects a symbol name.  We actually have a
 	 function name, without the leading underscore.  Put the
 	 underscore back in, so that the caller gets a symbol name.  */
       if (bfd_get_symbol_leading_char (abfd) == '\0')
-	strncpy (buffer, function, sizeof (buffer) - 1);
+	strcpy (buf, function);
       else
 	{
-	  buffer[0] = bfd_get_symbol_leading_char (abfd);
-	  strncpy (buffer + 1, function, sizeof (buffer) - 2);
+	  buf[0] = bfd_get_symbol_leading_char (abfd);
+	  strcpy (buf + 1, function);
 	}
-      buffer[sizeof(buffer)-1] = 0;
       /* Have to remove : stuff */
-      p = strchr(buffer,':');
+      p = strchr (buf, ':');
       if (p != NULL)
 	*p = '\0';
-      *functionname_ptr = buffer;
+      *functionname_ptr = buf;
     }
+
   return true;
 }
 

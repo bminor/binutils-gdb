@@ -5,6 +5,11 @@ Mon Sep 25 16:04:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libaout.h (struct aoutdata): Add line_buf field.
+	* aoutx.h (NAME(aout,find_nearest_line)): Remove statics buffer
+	and filename_buffer.  Instead, use a malloc buffer stored in the
+	new line_buf field.  Remove length restrictions.
+
 	* coffgen.c (string_size): Remove static variable.
 	(debug_string_size, debug_string_section): Likewise.
 	(coff_fix_symbol_name): Add string_size_p, debug_string_section_p,
