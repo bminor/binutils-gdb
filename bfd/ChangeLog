@@ -1,3 +1,7 @@
+1999-06-28  Jim Pick  <jim@jimpick.com>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Mind no_undefined
+
 Tue Jun 29 02:25:03 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.c (elf_hppa_howto_table): Use bfd_elf_generic_reloc as
