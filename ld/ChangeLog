@@ -1,3 +1,7 @@
+Mon Dec 11 15:13:41 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* scripttempl/ppcpe.sc (FINI): Moved the .reloc section.
+
 Wed Dec  6 14:33:50 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* ldlang.c (print_statement{,s}): Delete duplicate prototype.
