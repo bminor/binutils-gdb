@@ -2020,22 +2020,22 @@ _initialize_wince (void)
   struct cmd_list_element *set;
   init_child_ops ();
 
-  deprecated_add_show_from_set
-    (add_set_cmd ((char *) "remotedirectory", no_class,
-		  var_string_noescape, (char *) &remote_directory,
-		  (char *) "Set directory for remote upload.\n",
-		  &setlist),
-     &showlist);
+  add_setshow_string_noescape_cmd ("remotedirectory", no_class,
+				   &remote_directory, _("\
+Set directory for remote upload."), _("\
+Show directory for remote upload."), NULL,
+				   NULL, /* FIXME: i18n: */
+				   NULL, NULL,
+				   &setlist, &showlist);
   remote_directory = xstrdup (remote_directory);
 
-  set = add_set_cmd ((char *) "remoteupload", no_class,
-		     var_string_noescape, (char *) &remote_upload,
-		     (char *) "\
-Set how to upload executables to remote device.\n",
-		     &setlist);
-
-  deprecated_add_show_from_set (set, &showlist);
-  set_cmd_cfunc (set, set_upload_type);
+  add_setshow_string_noescape_cmd ("remoteupload", no_class,
+				   &remote_upload, _("\
+Set how to upload executables to remote device."), _("\
+Show how to upload executables to remote device."), NULL,
+				   NULL, /* FIXME: i18n: */
+				   set_upload_type, NULL,
+				   &setlist, &showlist);
   set_upload_type (NULL, 0);
 
   deprecated_add_show_from_set

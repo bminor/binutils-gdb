@@ -138,8 +138,6 @@ static int simple_overlay_update_1 (struct obj_section *);
 
 static void add_filename_language (char *ext, enum language lang);
 
-static void set_ext_lang_command (char *args, int from_tty);
-
 static void info_ext_lang_command (char *args, int from_tty);
 
 static char *find_separate_debug_file (struct objfile *objfile);
@@ -2090,7 +2088,7 @@ add_filename_language (char *ext, enum language lang)
 static char *ext_args;
 
 static void
-set_ext_lang_command (char *args, int from_tty)
+set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
 {
   int i;
   char *cp = ext_args;
@@ -3596,12 +3594,14 @@ for access from GDB."), &cmdlist);
 
   /* Filename extension to source language lookup table: */
   init_filename_language_table ();
-  c = add_set_cmd ("extension-language", class_files, var_string_noescape,
-		   (char *) &ext_args,
-		   "Set mapping between filename extension and source language.\n\
-Usage: set extension-language .foo bar",
-		   &setlist);
-  set_cmd_cfunc (c, set_ext_lang_command);
+  add_setshow_string_noescape_cmd ("extension-language", class_files,
+				   &ext_args, _("\
+Set mapping between filename extension and source language."), _("\
+Show mapping between filename extension and source language."), _("\
+Usage: set extension-language .foo bar"),
+				   set_ext_lang_command,
+				   NULL, /* FIXME: i18n: */
+				   &setlist, &showlist);
 
   add_info ("extensions", info_ext_lang_command,
 	    _("All filename extensions associated with a source language."));

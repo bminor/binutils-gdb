@@ -448,13 +448,15 @@ No arg means have no core file.  This command has been superseded by the\n\
 `target core' and `detach' commands."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  c = add_set_cmd ("gnutarget", class_files, var_string_noescape,
-		   (char *) &gnutarget_string,
-		   "Set the current BFD target.\n\
-Use `set gnutarget auto' to specify automatic detection.",
-		   &setlist);
-  set_cmd_sfunc (c, set_gnutarget_command);
-  deprecated_add_show_from_set (c, &showlist);
+  
+  add_setshow_string_noescape_cmd ("gnutarget", class_files,
+				   &gnutarget_string, _("(\
+Set the current BFD target."), _("\
+Show the current BFD target."), _("\
+Use `set gnutarget auto' to specify automatic detection."),
+				   set_gnutarget_command,
+				   NULL, /* FIXME: i18n: */
+				   &setlist, &showlist);
 
   if (getenv ("GNUTARGET"))
     set_gnutarget (getenv ("GNUTARGET"));

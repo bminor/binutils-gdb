@@ -1,5 +1,12 @@
 2005-02-17  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_string_noescape_cmd): New function.
+	* command.h (add_setshow_string_noescape_cmd): Declare.
+	* wince.c (_initialize_wince): Use.
+	* symfile.c (_initialize_symfile): Use.
+	(set_ext_lang_command): Update declaration.
+	* corefile.c (_initialize_core): Use.
+
 	* cli/cli-decode.c (add_setshow_cmd_full, add_setshow_enum_cmd)
 	(add_setshow_auto_boolean_cmd, add_setshow_boolean_cmd)
 	(add_setshow_filename_cmd, add_setshow_string_cmd)
