@@ -1,3 +1,8 @@
+Mon Nov 24 15:47:49 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c: Make variables and functions static, so that this
+	file can be included in multiple object files.
+
 Sat Nov 22 15:16:00 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c: Add support for PIC and APCS-FLOAT type binaries.

@@ -726,10 +726,10 @@ arm_reloc_type_lookup(abfd,code)
 
 /* The set of global variables that mark the total size of each kind
    of glue required. */
-long int global_thumb_glue_size = 0;
-long int global_arm_glue_size = 0;
+static long int global_thumb_glue_size = 0;
+static long int global_arm_glue_size = 0;
 
-bfd* bfd_of_glue_owner = 0;
+static bfd * bfd_of_glue_owner = 0;
 
 /* some typedefs for holding instructions */
 typedef unsigned long int insn32;
@@ -1459,7 +1459,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-boolean
+static boolean
 arm_allocate_interworking_sections (info) 
      struct bfd_link_info *info;
 {
@@ -1620,7 +1620,7 @@ record_thumb_to_arm_glue (info, h)
   return;
 }
 
-boolean
+static boolean
 arm_process_before_allocation (abfd, info)
      bfd *                   abfd;
      struct bfd_link_info *  info;
@@ -2047,10 +2047,9 @@ arm_get_last()
 
 #define ARM_HACKS
 
-
 /* Do the final link step.  */
 
-boolean
+static boolean
 coff_arm_bfd_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
