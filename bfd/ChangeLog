@@ -1,3 +1,15 @@
+2000-06-26  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* archures.c (bfd_mach_avr5): Define.
+	* bfd-in2.h (bfd_mach_avr5): Define.
+	* cpu-avr.c (arch_info_struct): Rename bfd_mach_avr4 to
+	bfd_mach_avr5, add bfd_mach_avr4.  Update comments.
+	(compatible): Update comment.  Add missing test.
+	* elf32-avr.c (avr_final_link_relocate): Support 8K wrap
+	for avr2 and avr4.  Simplify 8K wrap code.
+	(bfd_elf_avr_final_write_processing): Recognize bfd_mach_avr5.
+	(elf32_avr_object_p): Recognize E_AVR_MACH_AVR5.
+
 2000-06-26  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-h8300.c: Fix formatting.

@@ -548,15 +548,15 @@ avr_final_link_relocate (howto, input_bfd, input_section,
       if (srel < -2048 || srel > 2047)
 	{
 	  /* Apply WRAPAROUND if possible.  */
-	  if (bfd_get_mach (input_bfd) == bfd_mach_avr2)
+	  switch (bfd_get_mach (input_bfd))
 	    {
-	      if (srel > 2047)
-		srel -= 4096;
-	      else
-		srel += 4096;
+	    case bfd_mach_avr2:
+	    case bfd_mach_avr4:
+	      break;
+
+	    default:
+	      return bfd_reloc_overflow;
 	    }
-	  else
-	    return bfd_reloc_overflow;
 	}
 
       x = bfd_get_16 (input_bfd, contents);
@@ -899,6 +899,9 @@ bfd_elf_avr_final_write_processing (abfd, linker)
       val = E_AVR_MACH_AVR4;
       break;
 
+    case bfd_mach_avr5:
+      val = E_AVR_MACH_AVR5;
+      break;
     }
 
   elf_elfheader (abfd)->e_machine = EM_AVR;
@@ -933,6 +936,10 @@ elf32_avr_object_p (abfd)
 
 	case E_AVR_MACH_AVR4:
 	  e_set = bfd_mach_avr4;
+	  break;
+
+	case E_AVR_MACH_AVR5:
+	  e_set = bfd_mach_avr5;
 	  break;
 	}
     }

@@ -59,9 +59,10 @@ struct mcu_type_s
 static struct mcu_type_s mcu_types[] =
 {
   {"avr1",      AVR_ISA_TINY1,    bfd_mach_avr1},
-  {"avr2",      AVR_ISA_85xx,     bfd_mach_avr2},
+  {"avr2",      AVR_ISA_2xxx,     bfd_mach_avr2},
   {"avr3",      AVR_ISA_M103,     bfd_mach_avr3},
-  {"avr4",      AVR_ISA_ALL,      bfd_mach_avr4},
+  {"avr4",      AVR_ISA_M83,      bfd_mach_avr4},
+  {"avr5",      AVR_ISA_ALL,      bfd_mach_avr5},
   {"at90s1200", AVR_ISA_1200,     bfd_mach_avr1},
   {"attiny10",  AVR_ISA_TINY1,    bfd_mach_avr1},
   {"attiny11",  AVR_ISA_TINY1,    bfd_mach_avr1},
@@ -76,15 +77,17 @@ static struct mcu_type_s mcu_types[] =
   {"at90s4433", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s4414", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s4434", AVR_ISA_2xxx,     bfd_mach_avr2},
-  {"at90s8515", AVR_ISA_85xx,     bfd_mach_avr2},
-  {"at90s8535", AVR_ISA_85xx,     bfd_mach_avr2},
-  {"at90c8534", AVR_ISA_85xx,     bfd_mach_avr2},
+  {"at90s8515", AVR_ISA_2xxx,     bfd_mach_avr2},
+  {"at90s8535", AVR_ISA_2xxx,     bfd_mach_avr2},
+  {"at90c8534", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"atmega603", AVR_ISA_M603,     bfd_mach_avr3},
   {"atmega103", AVR_ISA_M103,     bfd_mach_avr3},
-  {"atmega161", AVR_ISA_M161,     bfd_mach_avr4},
-  {"at94k10",   AVR_ISA_94K,      bfd_mach_avr4},
-  {"at94k20",   AVR_ISA_94K,      bfd_mach_avr4},
-  {"at94k40",   AVR_ISA_94K,      bfd_mach_avr4},
+  {"atmega83",  AVR_ISA_M83,      bfd_mach_avr4},
+  {"atmega85",  AVR_ISA_M83,      bfd_mach_avr4},
+  {"atmega161", AVR_ISA_M161,     bfd_mach_avr5},
+  {"atmega163", AVR_ISA_M161,     bfd_mach_avr5},
+  {"atmega32",  AVR_ISA_M161,     bfd_mach_avr5},
+  {"at94k",     AVR_ISA_94K,      bfd_mach_avr5},
   {NULL, 0, 0}
 };
 
@@ -204,10 +207,11 @@ md_show_usage (stream)
      _ ("AVR options:\n"
 	"  -mmcu=[avr-name] select microcontroller variant\n"
 	"                   [avr-name] can be:\n"
-	"                   avr1 - AT90S1200\n"
-	"                   avr2 - AT90S2xxx, AT90S4xxx, AT90S85xx, ATtiny22\n"
-	"                   avr3 - ATmega103 or ATmega603\n"
-	"                   avr4 - ATmega161\n"
+	"                   avr1 - AT90S1200, ATtiny1x, ATtiny28\n"
+	"                   avr2 - AT90S2xxx, AT90S4xxx, AT90S8xxx, ATtiny22\n"
+	"                   avr3 - ATmega103, ATmega603\n"
+	"                   avr4 - ATmega83, ATmega85\n"
+	"                   avr5 - ATmega161, ATmega163, ATmega32, AT94K\n"
 	"                   or immediate microcontroller name.\n"));
 }
 
@@ -244,10 +248,16 @@ md_parse_option (c, arg)
 
       if (!mcu_types[i].name)
 	as_fatal (_ ("unknown MCU: %s\n"), arg);
-      if (avr_mcu == &default_mcu)
+
+      /* It is OK to redefine mcu type within the same avr[1-5] bfd machine
+	 type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
+	 as .arch ... in the asm output at the same time.  */
+
+      if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
 	avr_mcu = &mcu_types[i];
       else
-	as_fatal (_ ("redefinition of mcu type `%s'"), mcu_types[i].name);
+	as_fatal (_ ("redefinition of mcu type `%s' to `%s'"),
+		  avr_mcu->name, mcu_types[i].name);
       return 1;
     }
   return 0;
@@ -818,14 +828,8 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	  if (value < -2048 || value > 2047)
 	    {
-	      if (avr_mcu->isa & AVR_ISA_WRAP)
-		{
-		  if (value > 2047)
-		    value -= 4096;
-		  else
-		    value += 4096;
-		}
-	      else
+	      /* No wrap for devices with >8K of program memory.  */
+	      if (avr_mcu->isa & AVR_ISA_MEGA)
 		as_bad_where (fixp->fx_file, fixp->fx_line,
 			      _("operand out of range: %ld"), value);
 	    }

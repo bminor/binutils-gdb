@@ -1,3 +1,15 @@
+2000-06-26  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* config/tc-avr.c (mcu_types): Rename avr4 to avr5, add avr4.
+	Add more MCU types for avr4 and avr5.  Replace at94k{10,20,40}
+	with just at94k.  Change AVR_ISA_85xx back to AVR_ISA_2xxx.
+	(md_show_usage): Update usage message.
+	(md_parse_option): Allow redefinition of MCU type within the
+	same avr[1-5] bfd machine type.  Show both old and new MCU type
+	in the error message.
+	(md_apply_fix3): Support 8K wrap if AVR_ISA_MEGA is not set.
+	Simplify 8K wrap code.
+
 2000-06-25  Kazu Hirata  <kazu@hxi.com>
 
         * config/obj-aout.c: Remove all uses of DEFUN.

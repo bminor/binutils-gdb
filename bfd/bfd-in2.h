@@ -1468,6 +1468,7 @@ enum bfd_architecture
 #define bfd_mach_avr2          2
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
+#define bfd_mach_avr5          5
   bfd_arch_last
   };
 

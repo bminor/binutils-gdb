@@ -1,4 +1,4 @@
-ARCH=avr:4
+ARCH=avr:5
 MACHINE=
 SCRIPT_NAME=elf32avr
 OUTPUT_FORMAT="elf32-avr"

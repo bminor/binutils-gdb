@@ -1,3 +1,7 @@
+2000-06-26  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* emulparams/avrmega161.sh (ARCH): Change to avr:5.
+
 2000-06-24  Alan Modra  <alan@linuxcare.com.au>
 
 	* NEWS: arm-elf does --gc-sections too.
