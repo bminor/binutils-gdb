@@ -1,3 +1,8 @@
+2004-11-22  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic54x.c (tic54x_adjust_symtab): Adjust call to
+	c_dot_file_symbol.
+
 2004-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-msp430.c (struct rcodes_s, MSP430_RLC, msp430_rcodes,

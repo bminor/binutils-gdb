@@ -5379,7 +5379,7 @@ tic54x_adjust_symtab ()
       char *filename;
       unsigned lineno;
       as_where (&filename, &lineno);
-      c_dot_file_symbol (filename);
+      c_dot_file_symbol (filename, 0);
     }
 }
 
