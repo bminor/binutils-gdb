@@ -1,5 +1,7 @@
 Mon Sep 11 11:39:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/configure.in: Remove unused file.
+
 	* app.c (do_scrub_chars): Grab all available spaces at start of
 	line before preserving a single space.  Remove state == 0 test
 	which will never succeed.

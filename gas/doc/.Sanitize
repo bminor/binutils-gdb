@@ -25,7 +25,6 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
-configure.in
 all.texi
 as.1
 as.texinfo
