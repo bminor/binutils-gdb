@@ -1,3 +1,10 @@
+2005-03-23  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic30.c: Convert to ISO C90 formatting.
+	* config/tc-tic30.h: Convert to ISO C90 formatting.
+	* config/tc-pdp11.c: Convert to ISO C90 formatting.
+	* config/atof-vax.c: Convert to ISO C90 formatting.
+
 2005-03-21  Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-mips.c (mips_frob_file): Sort BFD_RELOC_MIPS16_LO16

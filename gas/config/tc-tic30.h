@@ -1,5 +1,5 @@
 /* tc-tic30.h -- Header file for tc-tic30.c
-   Copyright 1998, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 2000, 2002, 2005 Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
    This file is part of GAS, the GNU Assembler.
@@ -30,27 +30,23 @@
 
 #define TARGET_ARCH		bfd_arch_tic30
 #define TARGET_BYTES_BIG_ENDIAN	1
-
 #define WORKING_DOT_WORD
-
-char *output_invalid PARAMS ((int c));
-
-#define END_OF_INSN '\0'
-#define MAX_OPERANDS 6
-#define DIRECT_REFERENCE '@'
-#define INDIRECT_REFERENCE '*'
-#define PARALLEL_SEPARATOR '|'
-#define INSN_SIZE 4
+#define END_OF_INSN 		'\0'
+#define MAX_OPERANDS 		6
+#define DIRECT_REFERENCE 	'@'
+#define INDIRECT_REFERENCE 	'*'
+#define PARALLEL_SEPARATOR 	'|'
+#define INSN_SIZE 		4
 
 /* Define this to 1 if you want the debug output to be on stdout,
    otherwise stderr will be used.  If stderr is used, there will be a
    better synchronisation with the as_bad outputs, but you can't
    capture the output.  */
-#define USE_STDOUT 0
+#define USE_STDOUT 		0
 
 #define tc_unrecognized_line tic30_unrecognized_line
 
-extern int tic30_unrecognized_line PARAMS ((int));
+extern int tic30_unrecognized_line (int);
 
 #define tc_aout_pre_write_hook {}
 
