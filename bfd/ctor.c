@@ -25,11 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION
 	Constructors
 
-	Classes in C++ have 'constructors' and 'destructors'.  These
+	Classes in C++ have `constructors' and `destructors'.  These
 	are functions which are called automatically by the language
 	whenever data of a class is created or destroyed.  Class data
 	which is static data may also be have a type which requires
-	'construction', the contructor must be called before the data
+	`construction', the contructor must be called before the data
 	can be referenced, so the contructor must be called before the
 	program begins. 
 
@@ -43,7 +43,7 @@ SECTION
 	<<__GLOBAL__$I$foo>> might be the label of a contructor for
 	the class @var{foo}.  The solution on unfortunate systems
 	(most system V machines) is to perform a partial link on all
-	the .o files, do an <<nm>> on the result, run <<awk>> or some
+	the <<.o>> files, do an <<nm>> on the result, run <<awk>> or some
 	such over the result looking for strange <<__GLOBAL__$>>
 	symbols, generate a C program from this, compile it and link
 	with the partially linked input. This process is usually
@@ -68,7 +68,7 @@ SECTION
 	information necessary to call the function. 
 
 	o table id -
-	The type of symbol, ie is it a contructor, a destructor or
+	The type of symbol, i.e., is it a constructor, a destructor or
 	something else someone dreamed up to make our lives difficult.
 
 	This module takes this information and then builds extra
