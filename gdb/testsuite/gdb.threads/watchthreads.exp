@@ -31,7 +31,7 @@ if [target_info exists gdb,no_hardware_watchpoints] {
     return 0;
 }
 
-set testfile "schedlock"
+set testfile "watchthreads"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
@@ -60,17 +60,20 @@ set args_1 0
 gdb_test "watch args\[0\]" "Hardware watchpoint 2: args\\\[0\\\]"
 gdb_test "watch args\[1\]" "Hardware watchpoint 3: args\\\[1\\\]"
 
+set init_line [expr [gdb_get_line_number "Init value"]+1]
+set inc_line [gdb_get_line_number "Loop increment"]
+
 # Loop and continue to allow both watchpoints to be triggered.
 for {set i 0} {$i < 30} {incr i} {
   set test_flag 0
   gdb_test_multiple "continue" "threaded watch loop" {
-    -re "Hardware watchpoint 2: args\\\[0\\\].*Old value = 0.*New value = 1.*main \\\(\\\) at .*schedlock.c:21.*$gdb_prompt $"
+    -re "Hardware watchpoint 2: args\\\[0\\\].*Old value = 0.*New value = 1.*main \\\(\\\) at .*watchthreads.c:$init_line.*$gdb_prompt $"
        { set args_0 1; set test_flag 1 }
-    -re "Hardware watchpoint 3: args\\\[1\\\].*Old value = 0.*New value = 1.*main \\\(\\\) at .*schedlock.c:21.*$gdb_prompt $"
+    -re "Hardware watchpoint 3: args\\\[1\\\].*Old value = 0.*New value = 1.*main \\\(\\\) at .*watchthreads.c:$init_line.*$gdb_prompt $"
        { set args_1 1; set test_flag 1 }
-    -re "Hardware watchpoint 2: args\\\[0\\\].*Old value = $args_0.*New value = [expr $args_0+1].*in thread_function \\\(arg=0x0\\\) at .*schedlock.c:42.*$gdb_prompt $"
+    -re "Hardware watchpoint 2: args\\\[0\\\].*Old value = $args_0.*New value = [expr $args_0+1].*in thread_function \\\(arg=0x0\\\) at .*watchthreads.c:$inc_line.*$gdb_prompt $"
        { set args_0 [expr $args_0+1]; set test_flag 1 }
-    -re "Hardware watchpoint 3: args\\\[1\\\].*Old value = $args_1.*New value = [expr $args_1+1].*in thread_function \\\(arg=0x1\\\) at .*schedlock.c:42.*$gdb_prompt $"
+    -re "Hardware watchpoint 3: args\\\[1\\\].*Old value = $args_1.*New value = [expr $args_1+1].*in thread_function \\\(arg=0x1\\\) at .*watchthreads.c:$inc_line.*$gdb_prompt $"
        { set args_1 [expr $args_1+1]; set test_flag 1 }
   }
   # If we fail above, don't bother continuing loop

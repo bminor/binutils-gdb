@@ -1,3 +1,12 @@
+2004-10-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.threads/schedlock.c: Add comment markers to use to find
+	line numbers.
+	* gdb.threads/schedlock.exp: Adjust regex to handle the new
+	comments.
+	* gdb.threads/watchthreads.exp: Use gdb_get_line_number to find
+	breakpoint lines.
+
 2004-10-12  Daniel Jacobowitz  <dan@debian.org>
 
 	* gdb.dwarf2/dw2-basic.exp: Run on Hurd also.
