@@ -1,3 +1,8 @@
+2003-12-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* blockframe.c (inside_main_func): Don't treat a zero PC specially.
+	Needed to fix PR backtrace/1476.
+
 2003-12-16  David Carlton  <carlton@kealia.com>
 
 	* cp-support.c (class_name_from_physname): Add DMGL_PARAMS.
