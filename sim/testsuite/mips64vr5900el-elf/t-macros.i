@@ -95,6 +95,7 @@
 	.endm
 
 	.macro start
+	.text
 	.globl _start
 	.set noreorder
 _start:

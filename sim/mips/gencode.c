@@ -3580,8 +3580,8 @@ build_instruction (doisa, features, mips16, insn)
      break;
 
     case PSRLVW:
-     printf("GPR_UD(destreg,0) = RT_UW(0) >> (RS_UB(0) & 0x1F);\n");
-     printf("GPR_UD(destreg,1) = RT_UW(2) >> (RS_UB(8) & 0x1F);\n");
+     printf("GPR_UD(destreg,0) = SIGNEXTEND ( RT_UW(0) >> (RS_UB(0) & 0x1F), 31);\n");
+     printf("GPR_UD(destreg,1) = SIGNEXTEND ( RT_UW(2) >> (RS_UB(8) & 0x1F), 31);\n");
      break;
 
     case PSRAVW:
@@ -3658,14 +3658,18 @@ build_instruction (doisa, features, mips16, insn)
      {
        char* name = name_for_data_len( insn );
        char* letter = letter_for_data_len( insn );
+       char* min = min_for_data_len( insn );
+       char* max = max_for_data_len( insn );
 
        printf("int i;\n");
        printf("for(i=0;i<%sS_IN_MMI_REGS;i++)\n", name );
        printf("  {\n");
-       printf("  if (RT_S%s(i) < 0)\n", letter );
-       printf("    GPR_S%s(destreg,i) = -RT_S%s(i);\n", letter, letter );
-       printf("  else\n");
+       printf("  if (RT_S%s(i) >= 0)\n", letter );
        printf("    GPR_S%s(destreg,i) =  RT_S%s(i);\n", letter, letter );
+       printf("  else if (RT_S%s(i) == %s)\n", letter, min );
+       printf("    GPR_S%s(destreg,i) = %s;\n", letter, max );
+       printf("  else\n");
+       printf("    GPR_S%s(destreg,i) = -RT_S%s(i);\n", letter, letter );
        printf("  }\n");
        break;
      }

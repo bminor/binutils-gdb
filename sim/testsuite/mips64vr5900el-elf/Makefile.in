@@ -72,8 +72,8 @@ LD_FOR_TARGET = `\
   fi`
 
 RUN_FOR_TARGET = `\
-  if [ -x ../../../sim/${target_cpu}/run ]; then \
-    echo ../../../sim/${target_cpu}/run ; \
+  if [ -x ../../../sim/mips/run ]; then \
+    echo ../../../sim/mips/run ; \
   else \
     echo $(target_alias)-run ; \
   fi`
@@ -83,6 +83,8 @@ TESTS = \
 	exit47.ko \
 	\
 	t-mtsa.ok \
+	t-pabsh.ok \
+	t-pabsw.ok \
 	t-paddb.ok \
 	t-paddsb.ok \
 	t-paddsh.ok \
@@ -126,6 +128,7 @@ TESTS = \
 	t-ppacw.ok \
 	t-prot3w.ok \
 	t-psllvw.ok \
+	t-psrlvw.ok \
 	t-psravw.ok \
 	t-psubsb.ok \
 	t-psubsh.ok \
@@ -154,7 +157,7 @@ sanity:
 
 # Rules for running the tests
 
-.SUFFIXES: .u .ok .tx59 .hi .ko
+.SUFFIXES: .u .uue .ok .ok .tx59 .hi .ko .ko
 .tx59.ok:
 	rm -f tmp-$* $*.hi
 	ulimit -t 5 ; $(RUN_FOR_TARGET) $*.tx59 > tmp-$*
@@ -179,20 +182,15 @@ sanity:
 # Rules for building all the tests and packing them into
 # uuencoded files.
 
-
-.SUFFIXES: .u .S .tx59
-.S.u:
-	rm -f $*.o $*.tx59
-	$(AS_FOR_TARGET) $(srcdir)/$*.S -o $*.o
-	$(LD_FOR_TARGET) -o $* $*.o
-	uuencode < $* $* > $*.u
-	rm -f $*.o $*
-.S.tx59:
-	rm -f $*.o $*.tx59
-	$(AS_FOR_TARGET) $(srcdir)/$*.S -o $*.o
-	$(LD_FOR_TARGET) -o $*.tx59 $*.o
-	rm -f $*.o $*
-
+.tx59.u:
+	uuencode < $*.tx59 $*.tx59 > $*.u
+	@echo "Move $*.u $*.uue"
+.uue.tx59:
+	uudecode $(srcdir)/$*.uue
+.o.tx59:
+	$(LD_FOR_TARGET) -Ttext 0xa0020000 -o $*.tx59 $*.o
+.s.o:
+	$(AS_FOR_TARGET) -I $(srcdir) $(srcdir)/$*.s -o $*.o
 
 
 #

@@ -1,3 +1,11 @@
+Mon Sep  1 16:58:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (TESTS): Add t-psrlvw, t-pabsh, t-pabsw.
+	(.s.o, .o.tx59): Add -Ttext 0xa002000, to ld.  Add -I <srcdir> to
+ 	as.
+
+	t-psrlvw.s, t-pabsh, t-pabsw: New files.
+
 Tue Jul 29 10:56:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* t-mtsa.s: Check move/from SA instructions.

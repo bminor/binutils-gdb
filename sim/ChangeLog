@@ -1,3 +1,8 @@
+Mon Sep  1 16:48:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (testdir): When a testsuite directory, add that to
+ 	the list of confdirs.
+
 Tue Aug 19 11:17:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (extra_subdirs): Enable igen ready for V850.

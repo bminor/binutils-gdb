@@ -53,7 +53,7 @@ case "${target}" in
   d30v-*-*)
 	sim_target=d30v
 	only_if_gcc=yes
-	extra_subdirs="${extra_subdirs} igen testsuite"
+	extra_subdirs="${extra_subdirs} igen"
 	;;
 # end-sanitize-d30v
   h8300*-*-*)		sim_target=h8300 ;;
@@ -130,6 +130,14 @@ case "${target}" in
 	;;
   *)			sim_target=none ;;
 esac
+
+
+# Is there a testsuite directory for the target?
+testdir=`echo ${target} | sed -e 's/-.*-/-/'`
+if test -r ${srcdir}/testsuite/${testdir}/configure ; then
+  extra_subdirs="${extra_subdirs} testsuite"
+fi
+
 
 case "${enable_sim}" in
 no)	sim_target=none ;;

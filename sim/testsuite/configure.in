@@ -5,8 +5,7 @@ dnl script appropriate for this directory.  For more information, check
 dnl any existing configure script.
 
 AC_PREREQ(2.5)
-dnl FIXME - think of a truly uniq file to this directory
-AC_INIT(d30v-elf)
+AC_INIT(common/bits-tst.c)
 
 CC=${CC-cc}
 AC_SUBST(CC)
@@ -16,17 +15,11 @@ AC_CANONICAL_SYSTEM
 # Directories to use in all configurations.
 configdirs=""
 
-
 # add test sub-directory for appropriate targets
-case "${target}" in
-# start-sanitize-d30v
-	d30v-*-elf)		configdirs="${configdirs} d30v-elf" ;;
-# end-sanitize-d30v
-# start-sanitize-r5900
-	mips64vr5900el-*-elf)	configdirs="${configdirs} mips64vr5900el-elf" ;;
-# end-sanitize-r5900
-	*)		;;
-esac
+testdir=`echo ${target} | sed -e 's/-.*-/-/'`
+if test -r ${srcdir}/${testdir}/configure ; then
+  configdirs="${configdirs} $testdir"
+fi
 
 # configure the subdirectories too
 AC_CONFIG_SUBDIRS($configdirs)

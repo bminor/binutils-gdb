@@ -31,6 +31,10 @@ exit47.s
 hello.s
 loop.s
 t-macros.i
+
+t-mtsa.s
+t-pabsh.s
+t-pabsw.s
 t-paddb.s
 t-paddsb.s
 t-paddsh.s
@@ -75,6 +79,7 @@ t-ppacw.s
 t-prot3w.s
 t-psllvw.s
 t-psravw.s
+t-psrlvw.s
 t-psubsb.s
 t-psubsh.s
 t-psubsw.s
@@ -83,6 +88,7 @@ t-psubuh.s
 t-psubuw.s
 t-psubw.s
 t-qfsrv.s
+
 tick.s
 
 Things-to-lose:

@@ -1,0 +1,13 @@
+Mon Sep  1 16:43:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (configdirs): Test for the target directory instead
+ 	of matching on a target.
+
+end-sanitize-r5900
+Tue Jul 15 13:43:20 1997  Andrew Cagney  <cagney@sendai.cygnus.com>
+
+	* configure.in (configdirs): Configure mipsr5900rv5900el
+ 	directory.
+	* configure: Regenerate.
+
+start-sanitize-r5900
