@@ -89,9 +89,6 @@ struct elf_link_hash_entry
      set to -2 if the symbol is used by a reloc.  */
   long indx;
 
-  /* Symbol size.  */
-  bfd_size_type size;
-
   /* Symbol index as a dynamic symbol.  Initialized to -1, and remains
      -1 if this is not a dynamic symbol.  */
   /* ??? Note that this is consistently used as a synonym for tests
@@ -109,30 +106,13 @@ struct elf_link_hash_entry
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;
 
+  /* Hash value of the name computed using the ELF hash function.  */
+  unsigned long elf_hash_value;
+
   /* If this is a weak defined symbol from a dynamic object, this
      field points to a defined symbol with the same value, if there is
      one.  Otherwise it is NULL.  */
   struct elf_link_hash_entry *weakdef;
-
-  /* If this symbol requires an entry in the global offset table, the
-     processor specific backend uses this field to track usage and
-     final offset.  We use a union and two names primarily to document
-     the intent of any particular piece of code.  The field should be
-     used as a count until size_dynamic_sections, at which point the
-     contents of the .got is fixed.  Afterward, if this field is -1,
-     then the symbol does not require a global offset table entry.  */
-  union
-    {
-      bfd_signed_vma refcount;
-      bfd_vma offset;
-    } got;
-
-  /* Same, but tracks a procedure linkage table entry.  */
-  union
-    {
-      bfd_signed_vma refcount;
-      bfd_vma offset;
-    } plt;
 
   /* If this symbol is used in the linker created sections, the processor
      specific backend uses this field to map the field into the offset
@@ -162,14 +142,34 @@ struct elf_link_hash_entry
   /* Virtual table derivation info.  */
   struct elf_link_hash_entry *vtable_parent;
 
+  /* If this symbol requires an entry in the global offset table, the
+     processor specific backend uses this field to track usage and
+     final offset.  We use a union and two names primarily to document
+     the intent of any particular piece of code.  The field should be
+     used as a count until size_dynamic_sections, at which point the
+     contents of the .got is fixed.  Afterward, if this field is -1,
+     then the symbol does not require a global offset table entry.  */
+  union
+    {
+      bfd_signed_vma refcount;
+      bfd_vma offset;
+    } got;
+
+  /* Same, but tracks a procedure linkage table entry.  */
+  union
+    {
+      bfd_signed_vma refcount;
+      bfd_vma offset;
+    } plt;
+
+  /* Symbol size.  */
+  bfd_size_type size;
+
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
   char type;
 
   /* Symbol st_other value, symbol visibility.  */
   unsigned char other;
-
-  /* Hash value of the name computed using the ELF hash function.  */
-  unsigned long elf_hash_value;
 
   /* Some flags; legal values follow.  */
   unsigned short elf_link_hash_flags;

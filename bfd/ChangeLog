@@ -1,5 +1,8 @@
 2001-10-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_link_hash_entry): Reorganise for better
+	packing.
+
 	* elf32-mips.c (mips_elf_record_global_got_symbol): Set got.offset 
 	to 1 rather than 0 to avoid confusing copy_indirect_symbol.
 	(mips_elf_sort_hash_table_f): Compare got.offset against 1.
