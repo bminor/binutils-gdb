@@ -1,5 +1,8 @@
 Thu Mar 14 19:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (DO_X): Don't get confused if CC contains `=' in an
+	option.
+
 	* configure.in (mips*-nec-sysvr4*): Use a host_makefile_frag of
 	config/mh-necv4.
 
