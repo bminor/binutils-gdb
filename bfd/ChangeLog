@@ -1,3 +1,12 @@
+Tue Sep  7 14:17:02 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libbfd-in.h: Removed swapping routines declarations.
+	* bfd-in.h: Added swapping routine declarations, and renamed them
+	from _do_* to bfd_*.
+	* libbfd.c: Renamed swapping routines from _do_* to _bfd_*.
+	* Changed all callers.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+
 Mon Sep  6 15:28:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-i386.c (elf_howto_table): Set pcrel_offset to true for
