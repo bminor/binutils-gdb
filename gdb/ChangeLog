@@ -1,3 +1,13 @@
+Fri Feb  6 16:17:30 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * config/mips/tm-mips64.h (TARGET_LONG_BIT): Allow final target to
+        override.
+        (TARGET_LONG_LONG_BIT): Likewise.
+        (TARGET_PTR_BIT): Likewise.
+start-sanitize-r5900
+        * config/mips/tm-r5900.h (TARGET_PTR_BIT): Define to 32 bits.
+end-sanitize-r5900
+
 start-sanitize-sky
 Fri Feb  6 14:33:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
