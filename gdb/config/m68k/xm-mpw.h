@@ -19,53 +19,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "m68k/xm-m68k.h"
 
+#include "mpw.h"
+
 #include "fopen-bin.h"
 
 #include "spin.h"
 
 #define CANT_FORK
-
-#ifdef MPW_C
-
-/* MPW C is basically ANSI, but doesn't actually enable __STDC__,
-   nor does it allow __STDC__ to be #defined. */
-
-#ifndef ALMOST_STDC
-#define ALMOST_STDC
-#endif
-
-#endif /* MPW_C */
-
-#ifdef BFD_TRUE_FALSE
-#ifndef false
-#define false mpw_false
-#endif
-#ifndef true
-#define true mpw_true
-#endif
-#endif
-
-#ifdef MPW_C
-
-#undef  __PTR_TO_INT
-#define __PTR_TO_INT(P) ((int)(P))
-#undef __INT_TO_PTR
-#define __INT_TO_PTR(P) ((char *)(P))
-
-#endif
-
-#include <stdio.h>
-
-FILE *mpw_fopen ();
-int mpw_fseek ();
-void mpw_abort ();
-
-/* Map these standard functions to improved versions in libiberty. */
-
-#define fopen mpw_fopen
-#define open mpw_open
-#define fseek mpw_fseek
-#define abort mpw_abort
 
 /* Map these standard functions to versions that can do I/O in a console
    window. */
@@ -80,21 +40,6 @@ void mpw_abort ();
 #define fflush hacked_fflush
 
 #define fgetc hacked_fgetc
-
-/* Define as macros so as to mask the previous enum. */
-
-#ifndef BFD_TRUE_FALSE
-#ifndef false
-#define false ffalse
-#endif
-#ifndef true
-#define true ttrue
-#endif
-#endif
-
-#ifndef TRUE_FALSE_ALREADY_DEFINED
-#define TRUE_FALSE_ALREADY_DEFINED
-#endif
 
 #define POSIX_UTIME
 

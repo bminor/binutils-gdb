@@ -1,3 +1,17 @@
+Thu Oct 19 12:15:37 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Adapt to work with autoconf'ed configury;
+	build config.h, add empty definitions to mk.tmp.
+	(powerpc-apple-macos): Make it work.
+	* mpw-make.sed: New file, sed commands to translate Unix makefile
+	into MPW syntax.
+	* mpw-make.in: Remove.
+	* mac-gdb.r: New file, was macgdb.r, renamed for consistency
+	with other tools, now includes cfrg resource.
+	* macgdb.r: Remove.
+	* config/m68k/xm-mpw.h: Remove most of contents, replace with
+	include of include/mpw/mpw.h.
+
 Tue Oct 17 10:38:53 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* hppa-tdep.c (frame_chain): Fix more obscure problems caused
