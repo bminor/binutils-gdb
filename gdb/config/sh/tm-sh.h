@@ -62,7 +62,8 @@ enum
     GBR_REGNUM = 18,
     VBR_REGNUM = 19,
     MACH_REGNUM = 20,
-    MACL_REGNUM = 21
+    MACL_REGNUM = 21,
+    SR_REGNUM = 22
   };
 
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
