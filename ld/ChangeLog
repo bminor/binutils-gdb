@@ -2485,3 +2485,7 @@ Fri Oct  4 21:51:58 1991  John Gilmore  (gnu at cygnus.com)
 	* ldfile.c, ldlang.c, ldmain.c, ldwrite.c:  Cope with renames of a
 	few BFD types & enums.
 
+
+Local Variables:
+version-control: never
+End:
