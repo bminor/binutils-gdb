@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
@@ -2121,21 +2121,21 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	         4 octets for 64bit assembly.  */
 	      if (HAVE_64BIT_GPRS &&
 		  (*reloc_type == BFD_RELOC_16
-		  || *reloc_type == BFD_RELOC_32
-		  || *reloc_type == BFD_RELOC_MIPS_JMP
-		  || *reloc_type == BFD_RELOC_HI16_S
-		  || *reloc_type == BFD_RELOC_LO16
-		  || *reloc_type == BFD_RELOC_GPREL16
-		  || *reloc_type == BFD_RELOC_MIPS_LITERAL
-		  || *reloc_type == BFD_RELOC_GPREL32
-		  || *reloc_type == BFD_RELOC_64
-		  || *reloc_type == BFD_RELOC_CTOR
-		  || *reloc_type == BFD_RELOC_MIPS_SUB
-		  || *reloc_type == BFD_RELOC_MIPS_HIGHEST
-		  || *reloc_type == BFD_RELOC_MIPS_HIGHER
-		  || *reloc_type == BFD_RELOC_MIPS_SCN_DISP
-		  || *reloc_type == BFD_RELOC_MIPS_REL16
-		  || *reloc_type == BFD_RELOC_MIPS_RELGOT))
+		   || *reloc_type == BFD_RELOC_32
+		   || *reloc_type == BFD_RELOC_MIPS_JMP
+		   || *reloc_type == BFD_RELOC_HI16_S
+		   || *reloc_type == BFD_RELOC_LO16
+		   || *reloc_type == BFD_RELOC_GPREL16
+		   || *reloc_type == BFD_RELOC_MIPS_LITERAL
+		   || *reloc_type == BFD_RELOC_GPREL32
+		   || *reloc_type == BFD_RELOC_64
+		   || *reloc_type == BFD_RELOC_CTOR
+		   || *reloc_type == BFD_RELOC_MIPS_SUB
+		   || *reloc_type == BFD_RELOC_MIPS_HIGHEST
+		   || *reloc_type == BFD_RELOC_MIPS_HIGHER
+		   || *reloc_type == BFD_RELOC_MIPS_SCN_DISP
+		   || *reloc_type == BFD_RELOC_MIPS_REL16
+		   || *reloc_type == BFD_RELOC_MIPS_RELGOT))
 		fixp[0]->fx_no_overflow = 1;
 
 	      if (unmatched_hi)
@@ -2182,7 +2182,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		       || *reloc_type == BFD_RELOC_MIPS_SCN_DISP
 		       || *reloc_type == BFD_RELOC_MIPS_REL16
 		       || *reloc_type == BFD_RELOC_MIPS_RELGOT))
-		     fixp[1]->fx_no_overflow = 1;
+		    fixp[1]->fx_no_overflow = 1;
 
 		  if (reloc_type[2] != BFD_RELOC_UNUSED)
 		    {
@@ -2214,7 +2214,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 			   || *reloc_type == BFD_RELOC_MIPS_SCN_DISP
 			   || *reloc_type == BFD_RELOC_MIPS_REL16
 			   || *reloc_type == BFD_RELOC_MIPS_RELGOT))
-		       fixp[2]->fx_no_overflow = 1;
+			fixp[2]->fx_no_overflow = 1;
 		    }
 		}
 	    }
@@ -2913,7 +2913,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   /* Search until we get a match for NAME.  */
   while (1)
     {
-      /* It is assumed here that macros will never generate 
+      /* It is assumed here that macros will never generate
          MIPS-3D instructions.  */
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
@@ -4704,57 +4704,57 @@ macro (ip)
 	      /* We don't do GP optimization for now because RELAX_ENCODE can't
 		 hold the data for such large chunks.  */
 
-	    if (used_at == 0)
-	      {
-		macro_build (p, &icnt, &offset_expr, "lui", "t,u",
-			     tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
-		macro_build (p, &icnt, &offset_expr, "lui", "t,u",
-			     AT, (int) BFD_RELOC_HI16_S);
-		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
-			     tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
-		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
-			     AT, AT, (int) BFD_RELOC_LO16);
-		macro_build (p, &icnt, (expressionS *) NULL, "dsll32",
-			     "d,w,<", tempreg, tempreg, 0);
-		macro_build (p, &icnt, (expressionS *) NULL, "dadd", "d,v,t",
-			     tempreg, tempreg, AT);
-		used_at = 1;
-	      }
-	    else
-	      {
-		macro_build (p, &icnt, &offset_expr, "lui", "t,u",
-			     tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
-		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
-			     tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
-		macro_build (p, &icnt, (expressionS *) NULL, "dsll", "d,w,<",
-			     tempreg, tempreg, 16);
-		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
-			     tempreg, tempreg, (int) BFD_RELOC_HI16_S);
-		macro_build (p, &icnt, (expressionS *) NULL, "dsll", "d,w,<",
-			     tempreg, tempreg, 16);
-		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
-			     tempreg, tempreg, (int) BFD_RELOC_LO16);
-	      }
-	  }
-	else
-	  {
-	    if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
-		&& ! nopic_need_relax (offset_expr.X_add_symbol, 1))
-	      {
-		frag_grow (20);
-		macro_build ((char *) NULL, &icnt, &offset_expr, "addiu",
-			     "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
-		p = frag_var (rs_machine_dependent, 8, 0,
-			      RELAX_ENCODE (4, 8, 0, 4, 0,
-					    mips_opts.warn_about_macros),
-			      offset_expr.X_add_symbol, 0, NULL);
-	      }
-	    macro_build_lui (p, &icnt, &offset_expr, tempreg);
-	    if (p != NULL)
-	      p += 4;
-	    macro_build (p, &icnt, &offset_expr, "addiu",
-			 "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
-	  }
+	      if (used_at == 0)
+		{
+		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
+		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			       AT, (int) BFD_RELOC_HI16_S);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       AT, AT, (int) BFD_RELOC_LO16);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dsll32",
+			       "d,w,<", tempreg, tempreg, 0);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dadd", "d,v,t",
+			       tempreg, tempreg, AT);
+		  used_at = 1;
+		}
+	      else
+		{
+		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dsll", "d,w,<",
+			       tempreg, tempreg, 16);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_HI16_S);
+		  macro_build (p, &icnt, (expressionS *) NULL, "dsll", "d,w,<",
+			       tempreg, tempreg, 16);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_LO16);
+		}
+	    }
+	  else
+	    {
+	      if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+		  && ! nopic_need_relax (offset_expr.X_add_symbol, 1))
+		{
+		  frag_grow (20);
+		  macro_build ((char *) NULL, &icnt, &offset_expr, "addiu",
+			       "t,r,j", tempreg, GP, (int) BFD_RELOC_GPREL16);
+		  p = frag_var (rs_machine_dependent, 8, 0,
+				RELAX_ENCODE (4, 8, 0, 4, 0,
+					      mips_opts.warn_about_macros),
+				offset_expr.X_add_symbol, 0, NULL);
+		}
+	      macro_build_lui (p, &icnt, &offset_expr, tempreg);
+	      if (p != NULL)
+		p += 4;
+	      macro_build (p, &icnt, &offset_expr, "addiu",
+			   "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
+	    }
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
@@ -5291,7 +5291,7 @@ macro (ip)
 		    }
 		  if (mips_opts.noreorder)
 		    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
-			     "nop", "");
+				 "nop", "");
 		  expr1.X_add_number = mips_cprestore_offset;
 		  macro_build ((char *) NULL, &icnt, &expr1,
 			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
@@ -7373,8 +7373,8 @@ mips16_macro (ip)
 		   xreg, yreg);
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
-	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
-		     "6", 7);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "break",
+		   "6", 7);
       --mips_opts.noreorder;
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s2, "x", zreg);
       break;
@@ -7529,7 +7529,7 @@ mips16_macro (ip)
 
     case M_ABS:
       expr1.X_add_number = 0;
-      macro_build ((char *) NULL, &icnt, &expr1, "slti", "x,8",  yreg);
+      macro_build ((char *) NULL, &icnt, &expr1, "slti", "x,8", yreg);
       if (xreg != yreg)
 	move_register (&icnt, xreg, yreg);
       expr1.X_add_number = 2;
@@ -7701,7 +7701,7 @@ mips_ip (str, ip)
 
       if (OPCODE_IS_MEMBER (insn,
 			    (mips_opts.isa
-	      		     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
+			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
 			    mips_arch))
 	ok = true;
       else
@@ -7882,14 +7882,14 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
-            case 'C':           /* Coprocessor code */
+	    case 'C':           /* Coprocessor code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number >= (1<<25))
+	      if ((unsigned long) imm_expr.X_add_number >= (1 << 25))
 		{
 		  as_warn (_("Coproccesor code > 25 bits (%ld)"),
 			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= ((1<<25) - 1);
+		  imm_expr.X_add_number &= ((1 << 25) - 1);
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number;
 	      imm_expr.X_op = O_absent;
@@ -8404,9 +8404,9 @@ mips_ip (str, ip)
 			  (imm_expr.X_add_number >> 16) & 0xffff;
 #ifdef OBJ_ELF
 		      else if (c == S_EX_HIGHEST)
-			  *imm_reloc = BFD_RELOC_MIPS_HIGHEST;
+			*imm_reloc = BFD_RELOC_MIPS_HIGHEST;
 		      else if (c == S_EX_HIGHER)
-			  *imm_reloc = BFD_RELOC_MIPS_HIGHER;
+			*imm_reloc = BFD_RELOC_MIPS_HIGHER;
 		      else if (c == S_EX_GP_REL)
 			{
 			  /* This occurs in NewABI only.  */
@@ -8542,7 +8542,7 @@ mips_ip (str, ip)
 			}
 #ifdef OBJ_ELF
 		      else if (c == S_EX_HIGHEST)
-			  *imm_reloc = BFD_RELOC_MIPS_HIGHEST;
+			*imm_reloc = BFD_RELOC_MIPS_HIGHEST;
 		      else if (c == S_EX_GP_REL)
 			{
 			  /* This occurs in NewABI only.  */
@@ -9415,18 +9415,18 @@ my_getSmallParser (str, len, nestlevel)
 	      && (e = b + strcspn (b, ") \t"))
 	      && e - b > 1 && e - b < 4)
 	    {
-	       if ((e - b == 3
-		    && ((b[1] == 'f' && b[2] == 'p')
-			|| (b[1] == 's' && b[2] == 'p')
-			|| (b[1] == 'g' && b[2] == 'p')
-			|| (b[1] == 'a' && b[2] == 't')
-			|| (ISDIGIT (b[1])
-			    && ISDIGIT (b[2]))))
-		   || (ISDIGIT (b[1])))
-		 {
-		   *len = strcspn (*str, ")") + 1;
-		   return S_EX_REGISTER;
-		 }
+	      if ((e - b == 3
+		   && ((b[1] == 'f' && b[2] == 'p')
+		       || (b[1] == 's' && b[2] == 'p')
+		       || (b[1] == 'g' && b[2] == 'p')
+		       || (b[1] == 'a' && b[2] == 't')
+		       || (ISDIGIT (b[1])
+			   && ISDIGIT (b[2]))))
+		  || (ISDIGIT (b[1])))
+		{
+		  *len = strcspn (*str, ")") + 1;
+		  return S_EX_REGISTER;
+		}
 	    }
 	}
       /* Check for percent_op (in parentheses).  */
@@ -9477,7 +9477,7 @@ my_getPercentOp (str, len, nestlevel)
   while (i < (sizeof (percent_op) / sizeof (struct percent_op_match)))
     {
       if (strncmp (*str, percent_op[i].str, strlen (percent_op[i].str)))
-	  i++;
+	i++;
       else
 	{
 	  int type = percent_op[i].type;
@@ -9571,7 +9571,7 @@ my_getSmallExpression (ep, str)
     }
   else
     {
-      as_fatal(_("internal error"));
+      as_fatal (_("internal error"));
     }
 
   if (nestlevel <= 0)
@@ -9906,27 +9906,27 @@ md_parse_option (c, arg)
 		  }
 	      }
 	    else
-		cpu = ci->cpu;
+	      cpu = ci->cpu;
 	  }
 
 	switch (c)
 	  {
 	  case OPTION_MTUNE:
 	    if (mips_tune != CPU_UNKNOWN && mips_tune != cpu)
-	      as_warn(_("A different -mtune= was already specified, is now "
-			"-mtune=%s"), arg);
+	      as_warn (_("A different -mtune= was already specified, is now "
+			 "-mtune=%s"), arg);
 	    mips_tune = cpu;
 	    break;
 	  case OPTION_MARCH:
 	    if (mips_arch != CPU_UNKNOWN && mips_arch != cpu)
-	      as_warn(_("A different -march= was already specified, is now "
-			"-march=%s"), arg);
+	      as_warn (_("A different -march= was already specified, is now "
+			 "-march=%s"), arg);
 	    mips_arch = cpu;
 	    break;
 	  case OPTION_MCPU:
 	    if (mips_cpu != CPU_UNKNOWN && mips_cpu != cpu)
-	      as_warn(_("A different -mcpu= was already specified, is now "
-			"-mcpu=%s"), arg);
+	      as_warn (_("A different -mcpu= was already specified, is now "
+			 "-mcpu=%s"), arg);
 	    mips_cpu = cpu;
 	  }
       }
@@ -9935,8 +9935,8 @@ md_parse_option (c, arg)
     case OPTION_M4650:
       if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R4650)
 	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R4650))
-        as_warn(_("A different -march= or -mtune= was already specified, "
-		  "is now -m4650"));
+	as_warn (_("A different -march= or -mtune= was already specified, "
+		   "is now -m4650"));
       mips_arch = CPU_R4650;
       mips_tune = CPU_R4650;
       break;
@@ -9947,8 +9947,8 @@ md_parse_option (c, arg)
     case OPTION_M4010:
       if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R4010)
 	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R4010))
-        as_warn(_("A different -march= or -mtune= was already specified, "
-		  "is now -m4010"));
+	as_warn (_("A different -march= or -mtune= was already specified, "
+		   "is now -m4010"));
       mips_arch = CPU_R4010;
       mips_tune = CPU_R4010;
       break;
@@ -9959,8 +9959,8 @@ md_parse_option (c, arg)
     case OPTION_M4100:
       if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_VR4100)
 	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_VR4100))
-        as_warn(_("A different -march= or -mtune= was already specified, "
-		  "is now -m4100"));
+	as_warn (_("A different -march= or -mtune= was already specified, "
+		   "is now -m4100"));
       mips_arch = CPU_VR4100;
       mips_tune = CPU_VR4100;
       break;
@@ -9971,8 +9971,8 @@ md_parse_option (c, arg)
     case OPTION_M3900:
       if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R3900)
 	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R3900))
-        as_warn(_("A different -march= or -mtune= was already specified, "
-		  "is now -m3900"));
+	as_warn (_("A different -march= or -mtune= was already specified, "
+		   "is now -m3900"));
       mips_arch = CPU_R3900;
       mips_tune = CPU_R3900;
       break;
@@ -10488,7 +10488,7 @@ mips_need_elf_addend_fixup (fixP)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   bfd_byte *buf;
@@ -10515,7 +10515,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
 	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY);
 
-  value = * valP;
+  value = *valP;
 
   /* If we aren't adjusting this fixup to be against the section
      symbol, we need to adjust the value.  */
@@ -11331,45 +11331,45 @@ s_mipsset (x)
 	 say, misuse can cause serious problems.  */
       isa = atoi (name + 4);
       switch (isa)
-      {
-      case  0:
-	mips_opts.gp32 = file_mips_gp32;
-	mips_opts.fp32 = file_mips_fp32;
-	mips_opts.abi = file_mips_abi;
-	break;
-      case  1:
-      case  2:
-      case 32:
-	mips_opts.gp32 = 1;
-	mips_opts.fp32 = 1;
-	break;
-      case  3:
-      case  4:
-      case  5:
-      case 64:
-	/* Loosen ABI register width restriction.  */
-	if (mips_opts.abi == O32_ABI)
-	  mips_opts.abi = NO_ABI;
-	mips_opts.gp32 = 0;
-	mips_opts.fp32 = 0;
-	break;
-      default:
-	as_bad (_("unknown ISA level %s"), name + 4);
-	break;
-      }
+	{
+	case  0:
+	  mips_opts.gp32 = file_mips_gp32;
+	  mips_opts.fp32 = file_mips_fp32;
+	  mips_opts.abi = file_mips_abi;
+	  break;
+	case  1:
+	case  2:
+	case 32:
+	  mips_opts.gp32 = 1;
+	  mips_opts.fp32 = 1;
+	  break;
+	case  3:
+	case  4:
+	case  5:
+	case 64:
+	  /* Loosen ABI register width restriction.  */
+	  if (mips_opts.abi == O32_ABI)
+	    mips_opts.abi = NO_ABI;
+	  mips_opts.gp32 = 0;
+	  mips_opts.fp32 = 0;
+	  break;
+	default:
+	  as_bad (_("unknown ISA level %s"), name + 4);
+	  break;
+	}
 
       switch (isa)
-      {
-      case  0: mips_opts.isa = file_mips_isa;   break;
-      case  1: mips_opts.isa = ISA_MIPS1;       break;
-      case  2: mips_opts.isa = ISA_MIPS2;       break;
-      case  3: mips_opts.isa = ISA_MIPS3;       break;
-      case  4: mips_opts.isa = ISA_MIPS4;       break;
-      case  5: mips_opts.isa = ISA_MIPS5;       break;
-      case 32: mips_opts.isa = ISA_MIPS32;      break;
-      case 64: mips_opts.isa = ISA_MIPS64;      break;
-      default: as_bad (_("unknown ISA level %s"), name + 4); break;
-      }
+	{
+	case  0: mips_opts.isa = file_mips_isa;   break;
+	case  1: mips_opts.isa = ISA_MIPS1;       break;
+	case  2: mips_opts.isa = ISA_MIPS2;       break;
+	case  3: mips_opts.isa = ISA_MIPS3;       break;
+	case  4: mips_opts.isa = ISA_MIPS4;       break;
+	case  5: mips_opts.isa = ISA_MIPS5;       break;
+	case 32: mips_opts.isa = ISA_MIPS32;      break;
+	case 64: mips_opts.isa = ISA_MIPS64;      break;
+	default: as_bad (_("unknown ISA level %s"), name + 4); break;
+	}
     }
   else if (strcmp (name, "autoextend") == 0)
     mips_opts.noautoextend = 0;
@@ -11833,7 +11833,7 @@ s_mips_weakext (ignore)
       if (exp.X_op != O_symbol)
 	{
 	  as_bad ("bad .weakext directive");
-	  ignore_rest_of_line();
+	  ignore_rest_of_line ();
 	  return;
 	}
       symbol_set_value_expression (symbolP, &exp);
@@ -12802,7 +12802,7 @@ mips_elf_final_processing ()
   if (mips_pic != NO_PIC)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 
-  /* Set MIPS ELF flags for ASEs. */
+  /* Set MIPS ELF flags for ASEs.  */
 #if 0 /* XXX FIXME */
   if (file_ase_mips3d)
     elf_elfheader (stdoutput)->e_flags |= ???;
