@@ -3009,12 +3009,18 @@ macro_build_jalr (icnt, ep)
      int icnt;
      expressionS *ep;
 {
+  char *f;
+  
   if (HAVE_NEWABI)
-    frag_more (0);
+    {
+      frag_grow (4);
+      f = frag_more (0);
+    }
   macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr", "d,s",
 	       RA, PIC_CALL_REG);
   if (HAVE_NEWABI)
-    fix_new_exp (frag_now, 0, 0, ep, false, BFD_RELOC_MIPS_JALR);
+    fix_new_exp (frag_now, f - frag_now->fr_literal,
+		 0, ep, false, BFD_RELOC_MIPS_JALR);
 }
 
 /*
@@ -11644,7 +11650,7 @@ s_cpsetup (ignore)
   expressionS ex_sym;
   int reg1;
   int icnt = 0;
-  char *sym;
+  char *f;
 
   /* If we are not generating SVR4 PIC code, .cpsetup is ignored.
      We also need NewABI support.  */
@@ -11683,15 +11689,7 @@ s_cpsetup (ignore)
   else
     ++input_line_pointer;
   SKIP_WHITESPACE ();
-  sym = input_line_pointer;
-  while (ISALNUM (*input_line_pointer))
-    ++input_line_pointer;
-  *input_line_pointer = 0;
-
-  ex_sym.X_op = O_symbol;
-  ex_sym.X_add_symbol = symbol_find_or_make (sym);
-  ex_sym.X_op_symbol = NULL;
-  ex_sym.X_add_number = 0;
+  expression (&ex_sym);
 
   if (mips_cpreturn_register == -1)
     {
@@ -11707,14 +11705,25 @@ s_cpsetup (ignore)
     macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",
 		 "d,v,t", mips_cpreturn_register, mips_gp_register, 0);
 
+  /* Ensure there's room for the next two instructions, so that `f'
+     doesn't end up with an address in the wrong frag.  */
+  frag_grow (8);
+  f = frag_more (0);
   macro_build ((char *) NULL, &icnt, &ex_sym, "lui", "t,u", mips_gp_register,
 	       (int) BFD_RELOC_GPREL16);
-  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
-  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_HI16_S);
+  fix_new (frag_now, f - frag_now->fr_literal,
+	   0, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
+  fix_new (frag_now, f - frag_now->fr_literal,
+	   0, NULL, 0, 0, BFD_RELOC_HI16_S);
+
+  f = frag_more (0);
   macro_build ((char *) NULL, &icnt, &ex_sym, "addiu", "t,r,j",
 	       mips_gp_register, mips_gp_register, (int) BFD_RELOC_GPREL16);
-  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
-  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_LO16);
+  fix_new (frag_now, f - frag_now->fr_literal,
+	   0, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
+  fix_new (frag_now, f - frag_now->fr_literal,
+	   0, NULL, 0, 0, BFD_RELOC_LO16);
+
   macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 	       HAVE_64BIT_ADDRESSES ? "daddu" : "addu", "d,v,t",
 	       mips_gp_register, mips_gp_register, reg1);
