@@ -1530,26 +1530,19 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 		{
 		  /* stack grows downward */
 		  sp -= aligned_len;
+		  /* ... so the address of the thing we push is the
+		     stack pointer after we push it.  */
+		  addr = sp;
 		}
 	      else
 		{
 		  /* The stack grows up, so the address of the thing
 		     we push is the stack pointer before we push it.  */
 		  addr = sp;
-		}
-	      /* Push the structure.  */
-	      write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
-	      if (INNER_THAN (1, 2))
-		{
-		  /* The stack grows down, so the address of the thing
-		     we push is the stack pointer after we push it.  */
-		  addr = sp;
-		}
-	      else
-		{
-		  /* stack grows upward */
 		  sp += aligned_len;
 		}
+	      /* Push the structure.  */
+	      write_memory (addr, VALUE_CONTENTS_ALL (args[i]), len);
 	      /* The value we're going to pass is the address of the
 		 thing we just pushed.  */
 	      /*args[i] = value_from_longest (lookup_pointer_type (value_type),

@@ -1,3 +1,9 @@
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
+	From Mon Nov 20 13:59:29 2000 Andrew Cagney <cagney@b1.cygnus.com>:
+	* valops.c (hand_function_call): Simplify computation of the
+	address of the pushed argument.
+ 
 2001-03-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* p-exp.y (parse_number): Avoid shift overflow when ``long''.
