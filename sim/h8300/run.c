@@ -49,16 +49,12 @@ main (ac, av)
 	}
   
       else 
+	name = av[i];
+    }
 
-	if (verbose)
+  if (verbose)
+    printf ("run %s\n", name);
 
-	  {
-
-	    name = av[i];
-
-	    printf ("run %s\n", name);
-
-	  }
       abfd = bfd_openr (name, "coff-h8300");
       if (abfd) 
 	{
@@ -82,7 +78,6 @@ main (ac, av)
 	    }
 	}
   
-    }
 
   return 1;
 }
