@@ -21,7 +21,8 @@ d10v target		Andrew Cagney		cagney@cygnus.com
 d30v target		Andrew Cagney		cagney@cygnus.com
 mips target		Andrew Cagney		cagney@cygnus.com
 mn10300 target		Andrew Cagney		cagney@cygnus.com
-powerpc target		Elena Zannoni		ezannoni@cygnus.com
+powerpc target		Kevin Buettner		kevinb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
 arm target		Jim Ingham		jingham@cygnus.com
 m32r target		Michael Snyder		msnyder@cygnus.com
 
@@ -32,9 +33,11 @@ with the arch and core maintainer when resolving more generic
 problems.
 
 hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
-djgpp native		DJ Delorie		dj@cygnus.com
+djgpp native		Eli Zaretskii		eliz@gnu.org
+			DJ Delorie		dj@cygnus.com
 win32 host & native	Chris Faylor		cgf@cygnus.com
-x86 linux native	Jim Blandy		jimb@cygnus.com
+GNU/Linux x86 native	Jim Blandy		jimb@cygnus.com
+GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 hurd native		Mark Kettenis		kettenis@wins.va.nl
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
@@ -77,6 +80,10 @@ libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
 
 
 		Write After Approval
+
+J.T. Conklin					jtc@redback.com
+Jim Kingdon					kingdon@redhat.com
+Jason Molenda					jsm@cygnus.com
 
 * Indicates folks we need to get Kerberos/ssh accounts ready so they
 can write in the source tree
