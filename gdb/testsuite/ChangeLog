@@ -1,3 +1,14 @@
+Mon Jul 25 15:35:56 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* gdb.base/opaque.exp: use runto instead of messing around with
+	  breakpoints.
+
+	* gdb.base/bitfields.exp: restart between tests on netware targets
+	  because breakpoints aren't relocated after target death.  Run
+	  processes to completion.
+
+	* gdb.base/{opaque,watchpoint}.exp: Use gdb_run_cmd.
+
 Sun Jul 24 09:55:51 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in:  Remove extra tabs that confuse some versions
