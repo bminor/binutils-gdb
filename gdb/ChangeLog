@@ -1,3 +1,9 @@
+2002-08-21  Jim Blandy  <jimb@redhat.com>
+
+	* valops.c (value_cast): Simplify and correct logic for doing a
+	static cast from a pointer to a base class to a pointer to a
+	derived class.
+
 2002-08-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* infcmd.c (default_print_registers_info): Replace

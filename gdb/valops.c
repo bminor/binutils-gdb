@@ -361,18 +361,11 @@ value_cast (struct type *type, struct value *arg2)
 				       value_zero (t1, not_lval), 0, t1, 1);
 		  if (v)
 		    {
-		      struct value *v2 = value_ind (arg2);
-		      VALUE_ADDRESS (v2) -= VALUE_ADDRESS (v)
-			+ VALUE_OFFSET (v);
-
-                      /* JYG: adjust the new pointer value and
-			 embedded offset. */
-                      v2->aligner.contents[0] -=  VALUE_EMBEDDED_OFFSET (v);
-                      VALUE_EMBEDDED_OFFSET (v2) = 0;
-
-		      v2 = value_addr (v2);
-		      VALUE_TYPE (v2) = type;
-		      return v2;
+                      CORE_ADDR addr2 = value_as_address (arg2);
+                      addr2 -= (VALUE_ADDRESS (v)
+                                + VALUE_OFFSET (v)
+                                + VALUE_EMBEDDED_OFFSET (v));
+                      return value_from_pointer (type, addr2);
 		    }
 		}
 	    }
