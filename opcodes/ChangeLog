@@ -1,3 +1,8 @@
+Tue Oct 25 17:07:57 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* mips-opc.c: Use or instead of addu for pseudo-op move, since
+	addu does not work correctly if -mips3.
+
 Wed Oct 19 13:40:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* a29k-dis.c (print_special): Add special register names defined
