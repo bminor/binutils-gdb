@@ -56,7 +56,7 @@
 #define PSW_REGNUM 11
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
-#define E0_REGNUM 14
+#define E0_REGNUM 15
 
 /* Pseudo register that contains true address of executing stack frame */
 #define FP_REGNUM 31

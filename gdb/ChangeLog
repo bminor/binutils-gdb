@@ -1,3 +1,7 @@
+2001-03-02  Matt Hiller  <hiller@redhat.com>
+
+	* config/mn10300/tm-mn10300.h (E0_REGNUM): Correct to 15.
+
 2001-03-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* sparc-nat.c (sparc-nat.c): Don't include self.
@@ -242,6 +246,12 @@ Tue Feb 27 23:56:23 2001  Andrew Cagney  <ac131313@redhat.com>
 2001-02-28  Matt Hiller  <hiller@redhat.com>	
 	
 	* MAINTAINERS: Add Matt Hiller to Write After Approval list.
+
+2001-02-27  Matt Hiller  <hiller@redhat.com>
+
+	* mn10300-tdep.c (mn10300_stab_reg_to_regnum): New function.
+	(mn10300_gdbarch_init): Set appropriate elements of gdbarch to
+	mn10300_stab_reg_to_regnum.
 
 Tue Feb 27 16:56:13 2001  David Taylor  <taylor@redhat.com>
 
