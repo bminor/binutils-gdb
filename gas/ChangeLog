@@ -1,3 +1,8 @@
+2004-11-25  Theodore A. Roth  <troth@openavr.org>
+
+	* gas/config/tc-avr.c (mcu_types): Add support for atmega165,
+	atmega325, atmega3250, atmega645 and atmega6450.
+
 2004-11-25 Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (optimize_imm): Adjust immediates to only those
