@@ -1,5 +1,8 @@
 Wed Sep 24 11:29:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* m68k-opc.c: Correct movew of an immediate operand to %sr or %ccr
+	for mcf5200.
+
 	* configure.in: Call AC_CHECK_TOOL before AM_PROG_LIBTOOL.
 	* aclocal.m4: Rebuild with new libtool.
 	* configure: Rebuild.
