@@ -1,3 +1,35 @@
+2002-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_addr16_ha_reloc): Delete.
+	(ppc64_elf_ha_reloc): New function.
+	(ppc64_elf_brtaken_reloc): New function.
+	(ppc64_elf_sectoff_reloc): New function.
+	(ppc64_elf_sectoff_ha_reloc): New function.
+	(ppc64_elf_toc_reloc): New function.
+	(ppc64_elf_toc_ha_reloc): New function.
+	(ppc64_elf_toc64_reloc): New function.
+	(ppc64_elf_unhandled_reloc): New function.
+	(ppc64_elf_howto_raw): Use the above.
+	<R_PPC64_RELATIVE>: Mark pc_relative, pcrel_offset.
+	<R_PPC64_SECTOFF>: Not pc_relative or pcrel_offset.  Fix dst_mask.
+	<R_PPC64_SECTOFF_DS>: Likewise.
+	(IS_ABSOLUTE_RELOC): Update.
+	(struct ppc_link_hash_table): Add have_undefweak.
+	(ppc64_elf_link_hash_table_create): Init.
+	(func_desc_adjust): Set have_undefweak.
+	(ppc64_elf_func_desc_adjust): Call func_desc_adjust earlier.  Only
+	add the .sfpr blr when have_undefweak.
+	(ppc64_elf_setup_section_lists): Check hash table flavour.
+	(ppc64_elf_next_input_section): Move output_section->owner test to
+	ppc64elf.em.
+	(ppc64_elf_set_toc): Rename to ppc64_elf_toc, remove info param
+	and relocatable test.  Return TOCstart and don't set elf_gp.
+	(ppc64_elf_relocate_section): Correct BRTAKEN/BRNTAKEN branch
+	offset calculation.  Add assert on weak sym branch tweaks.
+	* elf64-ppc.h (ppc64_elf_set_toc): Delete.
+	(ppc64_elf_toc): Declare.
+	(ppc64_elf_next_input_section): Update.
+	
 2002-05-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Don't bomb on NULL

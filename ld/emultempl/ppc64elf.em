@@ -24,6 +24,7 @@
 cat >>e${EMULATION_NAME}.c <<EOF
 
 #include "ldctor.h"
+#include "libbfd.h"
 #include "elf64-ppc.h"
 
 /* Fake input file for stubs.  */
@@ -222,8 +223,8 @@ ppc_layout_sections_again ()
 static void
 gld${EMULATION_NAME}_after_allocation ()
 {
-  if (!ppc64_elf_set_toc (output_bfd, &link_info))
-    einfo ("%X%P: can not set TOC base: %E\n");
+  if (!link_info.relocateable)
+    _bfd_set_gp_value (output_bfd, ppc64_elf_toc (output_bfd));
 }
 
 
@@ -232,9 +233,11 @@ build_section_lists (statement)
      lang_statement_union_type *statement;
 {
   if (statement->header.type == lang_input_section_enum
-      && !statement->input_section.ifile->just_syms_flag)
+      && !statement->input_section.ifile->just_syms_flag
+      && statement->input_section.section->output_section != NULL
+      && statement->input_section.section->output_section->owner == output_bfd)
     {
-      ppc64_elf_next_input_section (output_bfd, &link_info,
+      ppc64_elf_next_input_section (&link_info,
 				    statement->input_section.section);
     }
 }
