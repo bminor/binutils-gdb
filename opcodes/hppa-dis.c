@@ -366,7 +366,7 @@ print_insn_hppa (memaddr, info)
 	  
 	  (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
-	  if (!strchr ("cCY<?!@-+&U>~nZFIM", opcode->args[0]))
+	  if (!strchr ("cCY<?!@-+&U>~nZFIMad", opcode->args[0]))
 	    (*info->fprintf_func) (info->stream, " ");
 	  for (s = opcode->args; *s != '\0'; ++s)
 	    {
@@ -453,11 +453,11 @@ print_insn_hppa (memaddr, info)
 		  fputs_filtered (add_cond_names[GET_FIELD (insn, 16, 18) + 8],
 				  info);
 		  break;
-		case 'd':
+		case 'a':
 		  (*info->fprintf_func) (info->stream, "%s",
 				    compare_cond_names[GET_COND (insn)]);
 		  break;
-		case 'a':
+		case 'd':
 		case '!':
 		  (*info->fprintf_func) (info->stream, "%s",
 				    add_cond_names[GET_FIELD (insn, 16, 18)]);

@@ -1,3 +1,10 @@
+Tue Jun 15 13:36:10 1993  Stu Grossman  (grossman@cygnus.com)
+
+	Changes from Jeff Law, law@cs.utah.edu:
+	* hppa-dis.c: Fix typo.  'a' and 'd' were reversed.
+	Do not print a space before the completers specified by
+	'a' and 'd'.
+
 Fri Jun 11 18:40:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* mips-dis.c: No longer need to bomb out if HOST_64_BIT is
