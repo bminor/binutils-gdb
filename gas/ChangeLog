@@ -1,9 +1,18 @@
+Mon Aug  2 17:35:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* app.c (do_scrub_next_char): Reset state to 0 after .appline if
+	file name is not seen.
+
 Thu Jul 29 22:21:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* write.c: Don't use short int in a prototype.
 
 	* expr.c (operand): Make return value simply depend on contents of
 	returned expression.
+
+Thu Jul 29 18:38:37 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: sparc*-aout and sparc*-vxworks are BFD assemblers
 
 Thu Jul 29 18:38:37 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
