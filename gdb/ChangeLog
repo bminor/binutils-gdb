@@ -1,3 +1,12 @@
+Mon May 15 18:37:56 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* breakpoint.c:  Move defaults of watchpoint related macros into
+	target.h.  Use BP_TEMPFLAG and BP_HARDWAREFLAG instead of
+	constants.
+	* infrun.c (wait_for_inferior):  Enhance comment near
+	STOPPED_BY_WATCHPOINT.
+	* target.h:  Macros from breakpoint.c.
+
 Mon May 15 17:11:38 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/i386/{i386sol2.mh, i386v4.mh, ncr3000.mh},
