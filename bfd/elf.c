@@ -2197,7 +2197,7 @@ prep_headers (abfd)
 
   i_ehdrp->e_ident[EI_CLASS] = bed->s->elfclass;
   i_ehdrp->e_ident[EI_DATA] =
-    abfd->xvec->byteorder_big_p ? ELFDATA2MSB : ELFDATA2LSB;
+    bfd_big_endian (abfd) ? ELFDATA2MSB : ELFDATA2LSB;
   i_ehdrp->e_ident[EI_VERSION] = bed->s->ev_current;
 
   for (count = EI_PAD; count < EI_NIDENT; count++)
@@ -2512,6 +2512,7 @@ copy_private_bfd_data (ibfd, obfd)
 		 && (bfd_vma) s->filepos >= p->p_offset
 		 && ((bfd_vma) s->filepos + s->_raw_size
 		     <= p->p_offset + p->p_filesz)))
+	    && (s->flags & SEC_ALLOC) != 0
 	    && s->output_section != NULL)
 	  ++csecs;
 
@@ -2549,6 +2550,7 @@ copy_private_bfd_data (ibfd, obfd)
 		   && (bfd_vma) s->filepos >= p->p_offset
 		   && ((bfd_vma) s->filepos + s->_raw_size
 		       <= p->p_offset + p->p_filesz)))
+	      && (s->flags & SEC_ALLOC) != 0
 	      && s->output_section != NULL)
 	    {
 	      m->sections[isec] = s->output_section;

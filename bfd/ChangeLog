@@ -1,3 +1,9 @@
+Wed Dec 20 19:14:18 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* elf.c (copy_private_bfd_data): When attaching sections to
+	segments ignore sections that won't be allocated.  Patch from
+	Andreas Schwab.
+
 Tue Dec 19 20:01:43 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config.bfd: Match on m68k-cbm-* only if OS doesn't match
