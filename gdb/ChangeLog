@@ -372,6 +372,11 @@ Thu Jun  1 20:05:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: More suggestions added.
 
+2000-06-01  Klee Dienes  <kdienes@apple.com>
+
+	* MAINTAINERS: Add Klee Dienes and Jim Ingham as maintainers for
+	Mac OS X and Objective C components (to be contributed).
+
 2000-05-31  J.T. Conklin  <jtc@redback.com>
 
 	* configure.host: Add patterns for i[3456]86-*-netbsdaout*
