@@ -1,3 +1,8 @@
+Wed Apr  7 14:11:07 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdbint.texinfo:  Update for new config directory structure.
+	Add info about internal type data structures.
+
 Mon Apr  5 09:06:30 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (SFILES_INCLUDED): gdb-config.texi is no longer in
