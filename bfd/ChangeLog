@@ -1,3 +1,8 @@
+Mon Apr  8 12:09:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Set HLDFLAGS and SHLIB_CFLAGS for *-dec-osf*
+	host when configuring with --enable-shard.
+
 Fri Apr  5 12:24:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd: Add i[345]86-*-freebsdelf* target; from John Polstra

@@ -71,6 +71,8 @@ if [ "${shared}" = "true" ]; then
   *-dec-osf*)
     # -fpic is not needed on the Alpha.
     PICFLAG=
+    HLDFLAGS='-rpath $(libdir)'
+    SHLIB_CFLAGS='-shared -Wl,-soname,$(SONAME)'
     ;;
   *-*-hpux*)
     # HP/UX uses .sl for shared libraries.
@@ -89,7 +91,10 @@ if [ "${shared}" = "true" ]; then
     ;;
   *-*-linux*)
     SHLIB_CFLAGS='-shared -Wl,-soname,$(SONAME)'
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
+    case "$(libdir)" in
+      /lib | /usr/lib) ;;
+      *) HLDFLAGS='-Wl,-rpath,$(libdir)' ;;
+    esac
     ;;
   *-*-sysv4* | *-*-solaris*)
     SHLIB_CFLAGS='-shared -h $(SONAME)'
