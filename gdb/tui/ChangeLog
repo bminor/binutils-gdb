@@ -1,3 +1,10 @@
+2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_rl_other_window): New function to switch the TUI active
+	window and give focus to a next window.
+	(tui_initialize_readline): Bind it to c-x o.
+	(tui_rl_next_keymap): Activate TUI mode when entering SingleKey mode.
+
 2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui.c (tui_enable): Call tuiRefreshAll to make sure the window
