@@ -98,7 +98,8 @@ add_symbol_to_list (symbol, listhead)
   (*listhead)->symbol[(*listhead)->nsyms++] = symbol;
 }
 
-/* Find a symbol on a pending list.  */
+/* Find a symbol named NAME on a LIST.  NAME need not be '\0'-terminated;
+   LENGTH is the length of the name.  */
 
 struct symbol *
 find_symbol_in_list (list, name, length)
@@ -297,7 +298,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 
 static struct blockvector *
 make_blockvector (objfile)
-      struct objfile *objfile;
+     struct objfile *objfile;
 {
   register struct pending_block *next;
   register struct blockvector *blockvector;
@@ -358,7 +359,9 @@ make_blockvector (objfile)
 
 
 /* Start recording information about source code that came from an included
-   (or otherwise merged-in) source file with a different name.  */
+   (or otherwise merged-in) source file with a different name.  NAME is
+   the name of the file (cannot be NULL), DIRNAME is the directory in which
+   it resides (or NULL if not known).  */
 
 void
 start_subfile (name, dirname)
@@ -572,8 +575,20 @@ compare_line_numbers (ln1p, ln2p)
      const PTR ln1p;
      const PTR ln2p;
 {
-  return (((struct linetable_entry *) ln1p) -> line -
-	  ((struct linetable_entry *) ln2p) -> line);
+  struct linetable_entry *ln1 = (struct linetable_entry *) ln1p;
+  struct linetable_entry *ln2 = (struct linetable_entry *) ln2p;
+
+  /* Note: this code does not assume that CORE_ADDRs can fit in ints.
+     Please keep it that way.  */
+  if (ln1->pc < ln2->pc)
+    return -1;
+
+  if (ln1->pc > ln2->pc)
+    return 1;
+
+  /* If pc equal, sort by line.  I'm not sure whether this is optimum
+     behavior (see comment at struct linetable in symtab.h).  */
+  return ln1->line - ln2->line;
 }
 
 
@@ -699,7 +714,13 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
   /* Cleanup any undefined types that have been left hanging around
      (this needs to be done before the finish_blocks so that
      file_symbols is still good).
-     FIXME:  Stabs specific. */
+
+     Both cleanup_undefined_types and finish_global_stabs are stabs
+     specific, but harmless for other symbol readers, since on gdb
+     startup or when finished reading stabs, the state is set so these
+     are no-ops.  FIXME: Is this handled right in case of QUIT?  Can
+     we make this cleaner?  */
+
   cleanup_undefined_types ();
   finish_global_stabs (objfile);
 
@@ -737,11 +758,20 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
 	{
 	  if (subfile->line_vector)
 	    {
-	      /* First, shrink the linetable to make more memory.  */
 	      linetablesize = sizeof (struct linetable) +
 		subfile->line_vector->nitems * sizeof (struct linetable_entry);
+#if 0
+	      /* I think this is artifact from before it went on the obstack.
+		 I doubt we'll need the memory between now and when we
+		 free it later in this function.  */
+	      /* First, shrink the linetable to make more memory.  */
 	      subfile->line_vector = (struct linetable *)
 		xrealloc ((char *) subfile->line_vector, linetablesize);
+#endif
+	      /* If sort_linevec is false, we might want just check to make
+		 sure they are sorted and complain() if not, as a way of
+		 tracking down compilers/symbol readers which don't get
+		 them sorted right.  */
 
 	      if (sort_linevec)
 		qsort (subfile->line_vector->item,

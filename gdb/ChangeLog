@@ -1,3 +1,19 @@
+Wed Sep  1 11:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.h (struct linetable), xcoffread.c (arrange_linetable):
+	Revise comments re linetable sorting.
+	* buildsym.c (compare_line_numbers): Sort by pc, not by line.
+	* coffread.c: Tell end_symtab to sort the line table.
+
+	* coffread.c: Re-work a lot of the coff-specific stuff to use stuff
+	in buildsym.c.  This includes coff_finish_block, coff_context_stack,
+	coff_local_symbols, coff_file_symbols, coff_global_symbols,
+	coff_end_symtab and coff_add_symbol_to_list.
+	(read_enum_type): Deal with it now that we have a "struct pending"
+	not a "struct coff_pending".
+
+	* buildsym.c (end_symtab): Don't realloc subfile->linetable.
+
 Wed Sep  1 13:12:43 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* a68v-nat.c, altos-xdep.c, convex-tdep.c, convex-xdep.c,

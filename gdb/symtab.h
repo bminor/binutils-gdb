@@ -523,7 +523,10 @@ enum address_class
      frame address" used by COFF, stabs, etc., and we don't know how
      to convert between these until we start examining prologues.
 
-     Note that LOC_BASEREG is much less general than a DWARF expression.  */
+     Note that LOC_BASEREG is much less general than a DWARF expression.
+     We don't need the generality (at least not yet), and storing a general
+     DWARF expression would presumably take up more space than the existing
+     scheme.  */
 
   LOC_BASEREG,
 
@@ -628,26 +631,27 @@ struct linetable_entry
   CORE_ADDR pc;
 };
 
-/* The order of entries in the linetable is significant.
+/* The order of entries in the linetable is significant.  They should
+   be sorted by increasing values of the pc field.  If there is more than
+   one entry for a given pc, then I'm not sure what should happen (and
+   I not sure whether we currently handle it the best way).
 
-   It should generally be in ascending line number order.  Line table
-   entries for a function at lines 10-40 should come before entries
-   for a function at lines 50-70.
-
-   A for statement looks like this
+   Example: a C for statement generally looks like this
 
    	10	0x100	- for the init/test part of a for stmt.
    	20	0x200
    	30	0x300
    	10	0x400	- for the increment part of a for stmt.
 
-   FIXME: this description is incomplete.  coffread.c is said to get
-   the linetable order wrong (would arrange_linenos from xcoffread.c
-   work for normal COFF too?).  */
+   */
 
 struct linetable
 {
   int nitems;
+
+  /* Actually NITEMS elements.  If you don't like this use of the
+     `struct hack', you can shove it up your ANSI (seriously, if the
+     committee tells us how to do it, we can probably go along).  */
   struct linetable_entry item[1];
 };
 
