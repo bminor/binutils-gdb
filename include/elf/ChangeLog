@@ -1,6 +1,8 @@
 1998-07-22 13:07  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mn10300.h: Rewrite relocation definition using macros.
+	* mips.h: Likewise.
+	* ppc.h: Likewise.
 
 1998-07-21 13:07  Ulrich Drepper  <drepper@cygnus.com>
 

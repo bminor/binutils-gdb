@@ -28,19 +28,60 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define _ELF_MIPS_H
 
 /* Relocation types.  */
-#define R_MIPS_NONE	0
-#define R_MIPS_16	1
-#define R_MIPS_32	2
-#define R_MIPS_REL32	3
-#define R_MIPS_26	4
-#define R_MIPS_HI16	5
-#define R_MIPS_LO16	6
-#define R_MIPS_GPREL16	7
-#define R_MIPS_LITERAL	8
-#define R_MIPS_GOT16	9
-#define R_MIPS_PC16	10
-#define R_MIPS_CALL16	11
-#define R_MIPS_GPREL32	12
+START_RELOC_NUMBERS (elf_mips_reloc_type)
+  RELOC_NUMBER (R_MIPS_NONE, 0)
+  RELOC_NUMBER (R_MIPS_16, 1)
+  RELOC_NUMBER (R_MIPS_32, 2)
+  RELOC_NUMBER (R_MIPS_REL32, 3)
+  RELOC_NUMBER (R_MIPS_26, 4)
+  RELOC_NUMBER (R_MIPS_HI16, 5)
+  RELOC_NUMBER (R_MIPS_LO16, 6)
+  RELOC_NUMBER (R_MIPS_GPREL16, 7)
+  RELOC_NUMBER (R_MIPS_LITERAL, 8)
+  RELOC_NUMBER (R_MIPS_GOT16, 9)
+  RELOC_NUMBER (R_MIPS_PC16, 10)
+  RELOC_NUMBER (R_MIPS_CALL16, 11)
+  RELOC_NUMBER (R_MIPS_GPREL32	12)
+  /* The remaining relocs are defined on Irix, although they are not
+     in the MIPS ELF ABI.  */
+  RELOC_NUMBER (R_MIPS_UNUSED1, 13)
+  RELOC_NUMBER (R_MIPS_UNUSED2, 14)
+  RELOC_NUMBER (R_MIPS_UNUSED3, 15)
+  RELOC_NUMBER (R_MIPS_SHIFT5, 16)
+  RELOC_NUMBER (R_MIPS_SHIFT6, 17)
+  RELOC_NUMBER (R_MIPS_64, 18)
+  RELOC_NUMBER (R_MIPS_GOT_DISP, 19)
+  RELOC_NUMBER (R_MIPS_GOT_PAGE, 20)
+  RELOC_NUMBER (R_MIPS_GOT_OFST, 21)
+  RELOC_NUMBER (R_MIPS_GOT_HI16, 22)
+  RELOC_NUMBER (R_MIPS_GOT_LO16, 23)
+  RELOC_NUMBER (R_MIPS_SUB, 24)
+  RELOC_NUMBER (R_MIPS_INSERT_A, 25)
+  RELOC_NUMBER (R_MIPS_INSERT_B, 26)
+  RELOC_NUMBER (R_MIPS_DELETE, 27)
+  RELOC_NUMBER (R_MIPS_HIGHER, 28)
+  RELOC_NUMBER (R_MIPS_HIGHEST, 29)
+  RELOC_NUMBER (R_MIPS_CALL_HI16, 30)
+  RELOC_NUMBER (R_MIPS_CALL_LO16, 31)
+/* start-sanitize-r5900 */
+  /* This is used by a mips co-processor instruction.  */
+  RELOC_NUMBER (R_MIPS15_S3, 32)
+/* end-sanitize-r5900 */
+  RELOC_NUMBER (R_MIPS_max, 33)
+  /* These relocs are used for the mips16.  */
+  RELOC_NUMBER (R_MIPS16_26, 100)
+  RELOC_NUMBER (R_MIPS16_GPREL, 101)
+/* start-sanitize-sky */
+  /* These relocs are for the dvp.  */
+  RELOC_NUMBER (R_MIPS_DVP_11_PCREL, 120)
+  RELOC_NUMBER (R_MIPS_DVP_27_S4, 121)
+  RELOC_NUMBER (R_MIPS_DVP_11_S4, 122)
+  RELOC_NUMBER (R_MIPS_DVP_U15_S3, 123)
+/* end-sanitize-sky */
+  /* These are GNU extensions to enable C++ vtable garbage collection.  */
+  RELOC_NUMBER (R_MIPS_GNU_VTINHERIT, 253)
+  RELOC_NUMBER (R_MIPS_GNU_VTENTRY, 254)
+END_RELOC_NUMBERS
 
 /* Processor specific flags for the ELF header e_flags field.  */
 
