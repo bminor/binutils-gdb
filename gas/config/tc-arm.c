@@ -562,20 +562,6 @@ static CONST struct asm_psr psrs[] =
   {"SPSR_csxf",	false, PSR_c | PSR_s | PSR_x | PSR_f},
   {"SPSR_cxfs",	false, PSR_c | PSR_x | PSR_f | PSR_s},
   {"SPSR_cxsf",	false, PSR_c | PSR_x | PSR_s | PSR_f},
-  /* For backwards compatability with older toolchain we also
-     support lower case versions of some of these flags.  */
-  {"cpsr",	true,  PSR_c | PSR_f},
-  {"cpsr_all",	true,  PSR_c | PSR_f},
-  {"spsr",	false, PSR_c | PSR_f},
-  {"spsr_all",	false, PSR_c | PSR_f},
-  {"cpsr_flg",	true,  PSR_f},
-  {"cpsr_f",    true,  PSR_f},
-  {"spsr_flg",	false, PSR_f},
-  {"spsr_f",    false, PSR_f},
-  {"cpsr_c",	true,  PSR_c},
-  {"cpsr_ctl",	true,  PSR_c},
-  {"spsr_c",	false, PSR_c},
-  {"spsr_ctl",	false, PSR_c}
 };
 
 /* Functions called by parser.  */
@@ -1772,6 +1758,13 @@ arm_psr_parse (ccp)
 
   /* Terminate the word.  */
   *--p = 0;
+
+  /* CPSR's and SPSR's can now be lowercase.  This is just a convenience
+     feature for ease of use and backwards compatibility.  */
+  if (!strncmp (start, "cpsr", 4))
+    strncpy (start, "CPSR", 4);
+  else if (!strncmp (start, "spsr", 4))
+    strncpy (start, "SPSR", 4);
 
   /* Now locate the word in the psr hash table.  */
   psr = (CONST struct asm_psr *) hash_find (arm_psr_hsh, start);

@@ -1,3 +1,9 @@
+2000-10-27  Aldy Hernandez  <aldyh@redhat.com>
+
+        * config/tc-arm.c (psrs): Remove lowercase versions of spsr* and
+        cpsr*.
+        (arm_psr_parse): Handle lowercase CPSR and SPSR.
+
 2000-10-25  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2out.c (dwarf2_generate_asm_lineno): New function: Generate
