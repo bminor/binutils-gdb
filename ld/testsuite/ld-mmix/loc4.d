@@ -27,7 +27,6 @@ SYMBOL TABLE:
 2000000000000008 g     O \*ABS\*	0+ _end
 0+1004 g     O \.text	0+ _start\.
 
-
 Contents of section \.text:
  1000 fd030303 e3fd0001                    .*
 Contents of section \.data:

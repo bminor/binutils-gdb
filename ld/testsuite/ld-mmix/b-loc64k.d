@@ -14,7 +14,6 @@ SYMBOL TABLE:
 0+4 g       \.text Main
 0+4 g       \.text a
 
-
 Disassembly of section \.text:
 
 0+ <Main-0x4>:

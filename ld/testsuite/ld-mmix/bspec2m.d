@@ -13,7 +13,6 @@ SYMBOL TABLE:
 0+fc g       \*ABS\* ext1
 0+ g       \.text _start
 
-
 Contents of section \.text:
  0+ e3fd0001                             .*
 Contents of section \.MMIX\.spec_data\.2:

@@ -1,3 +1,14 @@
+2001-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/local7m.d, ld-mmix/loc4.d, ld-mmix/loc4m.d,
+ 	ld-mmix/loc1.d, ld-mmix/bspec1m.d, ld-mmix/bspec2m.d,
+ 	ld-mmix/b-nosym.d, ld-mmix/b-fixo2.d, ld-mmix/b-loc64k.d,
+ 	ld-mmix/undef-3m.d, ld-mmix/locto.s, ld-mmix/loct.s,
+ 	ld-mmix/local3m.d, ld-mmix/local1m.d, ld-mmix/loc6m.d,
+ 	ld-mmix/loc2.s, ld-mmix/loc1.s, ld-mmix/gregldo1.s,
+ 	ld-mmix/dloc1.s, ld-mmix/b-widec3.s, ld-mmix/b-nosym.s: Remove
+ 	unnecessary empty lines.
+
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix: New testsuite directory.

@@ -16,4 +16,3 @@ Contents of section \.text:
  0000 e3fd0001                             .*
 Contents of section \.data:
  0200 00000004 00000005 00000006           .*
-

@@ -16,5 +16,3 @@ SYMBOL TABLE:
 0+ g       \.text Main
 0+ g       \*UND\* undefd
 0+ g       \.text _start
-
-

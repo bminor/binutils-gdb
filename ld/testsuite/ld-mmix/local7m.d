@@ -14,7 +14,6 @@ SYMBOL TABLE:
 0+fc g       \*ABS\* ext1
 0+8 g       \.text _start
 
-
 Contents of section \.text:
  0000 fd030201 fd020202 e3fd0001           .*
 Contents of section \.MMIX\.reg_contents:
