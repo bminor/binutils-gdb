@@ -1,5 +1,10 @@
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.c (xfree_regcache_descr): Delete function.
+	(_initialize_regcache): Update call to register_gdbarch_data.
+	(init_regcache_descr, init_legacy_regcache_descr): Use
+	GDBARCH_OBSTACK_XALLOC and GDBARCH_OBSTACK_CALLOC.
+
 	* remote.c (free_remote_state): Delete function.
 	(_initialize_remote): Update register_gdbarch_data.
 	(init_remote_state): Use GDBARCH_OBSTACK_XALLOC and

@@ -99,8 +99,10 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
      offets at runtime.  This currently isn't possible as some ISAs
      define overlapping register regions - see the mess in
      read_register_bytes() and write_register_bytes() registers.  */
-  descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
-  descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
+  descr->sizeof_register
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
+  descr->register_offset
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       /* FIXME: cagney/2001-12-04: This code shouldn't need to use
@@ -148,7 +150,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   gdb_assert (gdbarch != NULL);
 
   /* Create an initial, zero filled, table.  */
-  descr = XCALLOC (1, struct regcache_descr);
+  descr = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct regcache_descr);
   descr->gdbarch = gdbarch;
 
   /* Total size of the register space.  The raw registers are mapped
@@ -158,8 +160,8 @@ init_regcache_descr (struct gdbarch *gdbarch)
   descr->sizeof_cooked_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
 
   /* Fill in a table of register types.  */
-  descr->register_type = XCALLOC (descr->nr_cooked_registers,
-				  struct type *);
+  descr->register_type
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, struct type *);
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       if (gdbarch_register_type_p (gdbarch))
@@ -208,8 +210,10 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   {
     long offset = 0;
-    descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
-    descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
+    descr->sizeof_register
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
+    descr->register_offset
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     for (i = 0; i < descr->nr_cooked_registers; i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
@@ -249,19 +253,6 @@ static struct regcache_descr *
 regcache_descr (struct gdbarch *gdbarch)
 {
   return gdbarch_data (gdbarch, regcache_descr_handle);
-}
-
-static void
-xfree_regcache_descr (struct gdbarch *gdbarch, void *ptr)
-{
-  struct regcache_descr *descr = ptr;
-  if (descr == NULL)
-    return;
-  xfree (descr->register_offset);
-  xfree (descr->sizeof_register);
-  descr->register_offset = NULL;
-  descr->sizeof_register = NULL;
-  xfree (descr);
 }
 
 /* Utility functions returning useful register attributes stored in
@@ -1671,8 +1662,7 @@ extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 void
 _initialize_regcache (void)
 {
-  regcache_descr_handle = register_gdbarch_data (init_regcache_descr,
-						 xfree_regcache_descr);
+  regcache_descr_handle = register_gdbarch_data (init_regcache_descr, NULL);
   REGISTER_GDBARCH_SWAP (current_regcache);
   register_gdbarch_swap (&deprecated_registers, sizeof (deprecated_registers), NULL);
   register_gdbarch_swap (&deprecated_register_valid, sizeof (deprecated_register_valid), NULL);
