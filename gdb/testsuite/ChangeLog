@@ -1,4 +1,19 @@
+Sun Mar  7 15:14:09 1993  Rob Savoye  (rob@cygnus.com)
+
+	* config/*-gdb.exp: returns an error, rather than exiting on
+	internal errors.
+
+Tue Mar  2 18:09:32 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t03/gdbme.c:  Add pointer to struct variable.
+	* gdb.t03/ptype.exp:  Test equivalence of '.' and '->' for
+	referencing struct members.
+
 Thu Feb 25 10:39:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (mips-idt-ecoff): New target.
+	* config/mips-gdb.exp: New file for remote board using MIPS remote
+	debugging protocol.
 
 	* Redid configuration scheme.  Removed gdb.t*/configure.in.
 	Renamed gdb.t*/in-gdbme* to gdb.t*/gdbme*.  Changed to use CC, CXX
