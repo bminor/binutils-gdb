@@ -1,3 +1,9 @@
+2004-02-19  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* printcmd.c (print_scalar_formatted): Do not check for sizeof
+	type being greater than sizeof of host's LONGEST.  Always use
+	unpack_long() unless format 'f' chosen.
+
 2004-02-19  Joel Brobecker  <brobecker@gnat.com>
 
 	Committed by Elena Zannoni  <ezannoni@redhat.com>

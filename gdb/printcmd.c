@@ -1,7 +1,7 @@
 /* Print values for GNU debugger GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -350,44 +350,7 @@ print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
   LONGEST val_long;
   unsigned int len = TYPE_LENGTH (type);
 
-  if (len > sizeof (LONGEST)
-      && (format == 't'
-	  || format == 'c'
-	  || format == 'o'
-	  || format == 'u'
-	  || format == 'd'
-	  || format == 'x'))
-    {
-      if (!TYPE_UNSIGNED (type)
-	  || !extract_long_unsigned_integer (valaddr, len, &val_long))
-	{
-	  /* We can't print it normally, but we can print it in hex.
-	     Printing it in the wrong radix is more useful than saying
-	     "use /x, you dummy".  */
-	  /* FIXME:  we could also do octal or binary if that was the
-	     desired format.  */
-	  /* FIXME:  we should be using the size field to give us a
-	     minimum field width to print.  */
-
-	  if (format == 'o')
-	    print_octal_chars (stream, valaddr, len);
-	  else if (format == 'd')
-	    print_decimal_chars (stream, valaddr, len);
-	  else if (format == 't')
-	    print_binary_chars (stream, valaddr, len);
-	  else
-	    /* replace with call to print_hex_chars? Looks
-	       like val_print_type_code_int is redoing
-	       work.  - edie */
-
-	    val_print_type_code_int (type, valaddr, stream);
-
-	  return;
-	}
-
-      /* If we get here, extract_long_unsigned_integer set val_long.  */
-    }
-  else if (format != 'f')
+  if (format != 'f')
     val_long = unpack_long (type, valaddr);
 
   /* If the value is a pointer, and pointers and addresses are not the
