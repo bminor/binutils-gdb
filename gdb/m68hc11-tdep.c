@@ -39,6 +39,47 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/m68hc11.h"
 #include "elf-bfd.h"
 
+/* Macros for setting and testing a bit in a minimal symbol.
+   For 68HC11/68HC12 we have two flags that tell which return
+   type the function is using.  This is used for prologue and frame
+   analysis to compute correct stack frame layout.
+   
+   The MSB of the minimal symbol's "info" field is used for this purpose.
+   This field is already being used to store the symbol size, so the
+   assumption is that the symbol size cannot exceed 2^30.
+
+   MSYMBOL_SET_RTC	Actually sets the "RTC" bit.
+   MSYMBOL_SET_RTI	Actually sets the "RTI" bit.
+   MSYMBOL_IS_RTC       Tests the "RTC" bit in a minimal symbol.
+   MSYMBOL_IS_RTI       Tests the "RTC" bit in a minimal symbol.
+   MSYMBOL_SIZE         Returns the size of the minimal symbol,
+   			i.e. the "info" field with the "special" bit
+   			masked out.  */
+
+#define MSYMBOL_SET_RTC(msym)                                           \
+        MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
+					| 0x80000000)
+
+#define MSYMBOL_SET_RTI(msym)                                           \
+        MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
+					| 0x40000000)
+
+#define MSYMBOL_IS_RTC(msym)				\
+	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+
+#define MSYMBOL_IS_RTI(msym)				\
+	(((long) MSYMBOL_INFO (msym) & 0x40000000) != 0)
+
+#define MSYMBOL_SIZE(msym)				\
+	((long) MSYMBOL_INFO (msym) & 0x3fffffff)
+
+enum insn_return_kind {
+  RETURN_RTS,
+  RETURN_RTC,
+  RETURN_RTI
+};
+
+  
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,
@@ -99,20 +140,24 @@ struct gdbarch_tdep
     /* Description of instructions in the prologue.  */
     struct insn_sequence *prologue;
 
+    /* True if the page memory bank register is available
+       and must be used.  */
+    int use_page_register;
+
     /* ELF flags for ABI.  */
     int elf_flags;
   };
 
 #define M6811_TDEP gdbarch_tdep (current_gdbarch)
 #define STACK_CORRECTION (M6811_TDEP->stack_correction)
+#define USE_PAGE_REGISTER (M6811_TDEP->use_page_register)
 
 struct frame_extra_info
 {
-  int frame_reg;
   CORE_ADDR return_pc;
-  CORE_ADDR dummy;
   int frameless;
   int size;
+  enum insn_return_kind return_kind;
 };
 
 /* Table of registers for 68HC11.  This includes the hard registers
@@ -313,7 +358,15 @@ m68hc11_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 m68hc11_frame_args_address (struct frame_info *frame)
 {
-  return frame->frame + frame->extra_info->size + STACK_CORRECTION + 2;
+  CORE_ADDR addr;
+
+  addr = frame->frame + frame->extra_info->size + STACK_CORRECTION + 2;
+  if (frame->extra_info->return_kind == RETURN_RTC)
+    addr += 1;
+  else if (frame->extra_info->return_kind == RETURN_RTI)
+    addr += 7;
+
+  return addr;
 }
 
 static CORE_ADDR
@@ -528,6 +581,28 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
   return 0;
 }
 
+/* Return the instruction that the function at the PC is using.  */
+static enum insn_return_kind
+m68hc11_get_return_insn (CORE_ADDR pc)
+{
+  struct minimal_symbol *sym;
+
+  /* A flag indicating that this is a STO_M68HC12_FAR or STO_M68HC12_INTERRUPT
+     function is stored by elfread.c in the high bit of the info field.
+     Use this to decide which instruction the function uses to return.  */
+  sym = lookup_minimal_symbol_by_pc (pc);
+  if (sym == 0)
+    return RETURN_RTS;
+
+  if (MSYMBOL_IS_RTC (sym))
+    return RETURN_RTC;
+  else if (MSYMBOL_IS_RTI (sym))
+    return RETURN_RTI;
+  else
+    return RETURN_RTS;
+}
+
+
 /* Analyze the function prologue to find some information
    about the function:
     - the PC of the first line (for m68hc11_skip_prologue)
@@ -715,19 +790,35 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR pc;
   CORE_ADDR addr;
-  
+
   if (fi->saved_regs == NULL)
     frame_saved_regs_zalloc (fi);
   else
     memset (fi->saved_regs, 0, sizeof (fi->saved_regs));
 
   pc = fi->pc;
+  fi->extra_info->return_kind = m68hc11_get_return_insn (pc);
   m68hc11_guess_from_prologue (pc, fi->frame, &pc, &fi->extra_info->size,
                                fi->saved_regs);
 
   addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
   if (soft_regs[SOFT_FP_REGNUM].name)
     fi->saved_regs[SOFT_FP_REGNUM] = addr - 2;
+
+  /* Take into account how the function was called/returns.  */
+  if (fi->extra_info->return_kind == RETURN_RTC)
+    {
+      fi->saved_regs[HARD_PAGE_REGNUM] = addr;
+      addr++;
+    }
+  else if (fi->extra_info->return_kind == RETURN_RTI)
+    {
+      fi->saved_regs[HARD_CCR_REGNUM] = addr;
+      fi->saved_regs[HARD_D_REGNUM] = addr + 1;
+      fi->saved_regs[HARD_X_REGNUM] = addr + 3;
+      fi->saved_regs[HARD_Y_REGNUM] = addr + 5;
+      addr += 7;
+    }
   fi->saved_regs[HARD_SP_REGNUM] = addr;
   fi->saved_regs[HARD_PC_REGNUM] = fi->saved_regs[HARD_SP_REGNUM];
 }
@@ -747,20 +838,27 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   if (fromleaf)
     {
+      fi->extra_info->return_kind = m68hc11_get_return_insn (fi->pc);
       fi->extra_info->return_pc = m68hc11_saved_pc_after_call (fi);
     }
   else
     {
-      addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
+      addr = fi->saved_regs[HARD_PC_REGNUM];
       addr = read_memory_unsigned_integer (addr, 2) & 0x0ffff;
+
+      /* Take into account the 68HC12 specific call (PC + page).  */
+      if (fi->extra_info->return_kind == RETURN_RTC
+          && addr >= 0x08000 && addr < 0x0c000
+          && USE_PAGE_REGISTER)
+        {
+          CORE_ADDR page_addr = fi->saved_regs[HARD_PAGE_REGNUM];
+
+          unsigned page = read_memory_unsigned_integer (page_addr, 1);
+          addr -= 0x08000;
+          addr += ((page & 0x0ff) << 14);
+          addr += 0x1000000;
+        }
       fi->extra_info->return_pc = addr;
-#if 0
-      printf ("Pc@0x%04x, FR 0x%04x, size %d, read ret @0x%04x -> 0x%04x\n",
-              fi->pc,
-              fi->frame, fi->size,
-              addr & 0x0ffff,
-              fi->return_pc);
-#endif
     }
 }
 
@@ -786,10 +884,17 @@ show_regs (char *args, int from_tty)
 		   ccr & M6811_V_BIT ? 'V' : '-',
 		   ccr & M6811_C_BIT ? 'C' : '-');
 
-  printf_filtered ("D=%04x IX=%04x IY=%04x\n",
+  printf_filtered ("D=%04x IX=%04x IY=%04x",
 		   (int) read_register (HARD_D_REGNUM),
 		   (int) read_register (HARD_X_REGNUM),
 		   (int) read_register (HARD_Y_REGNUM));
+
+  if (USE_PAGE_REGISTER)
+    {
+      printf_filtered (" Page=%02x",
+                       (int) read_register (HARD_PAGE_REGNUM));
+    }
+  printf_filtered ("\n");
 
   nr = 0;
   for (i = SOFT_D1_REGNUM; i < M68HC11_ALL_REGS; i++)
@@ -1044,6 +1149,21 @@ m68hc11_register_raw_size (int reg_nr)
     }
 }
 
+/* Test whether the ELF symbol corresponds to a function using rtc or
+   rti to return.  */
+   
+static void
+m68hc11_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+{
+  unsigned char flags;
+
+  flags = ((elf_symbol_type *)sym)->internal_elf_sym.st_other;
+  if (flags & STO_M68HC12_FAR)
+    MSYMBOL_SET_RTC (msym);
+  if (flags & STO_M68HC12_INTERRUPT)
+    MSYMBOL_SET_RTI (msym);
+}
+
 static int
 gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
 {
@@ -1092,11 +1212,13 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     {
     case bfd_arch_m68hc11:
       tdep->stack_correction = 1;
+      tdep->use_page_register = 0;
       tdep->prologue = m6811_prologue;
       break;
 
     case bfd_arch_m68hc12:
       tdep->stack_correction = 0;
+      tdep->use_page_register = elf_flags & E_M68HC12_BANKS;
       tdep->prologue = m6812_prologue;
       break;
 
@@ -1197,6 +1319,10 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
+
+  /* Minsymbol frobbing.  */
+  set_gdbarch_elf_make_msymbol_special (gdbarch,
+                                        m68hc11_elf_make_msymbol_special);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 

@@ -1,5 +1,24 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (m68hc11_elf_make_msymbol_special): New function.
+	(m68hc11_gdbarch_init): Install it in gdbarch.
+	(MSYMBOL_SET_RTC, MSYMBOL_SET_RTI): New to set symbol specific flags.
+	(MSYMBOL_IS_RTC, MSYMBOL_IS_RTI): New to test these flags.
+	(MSYMBOL_SIZE): New for documentation.
+	(insn_return_kind): Enum to specify how a function returns.
+	(frame_extra_info): Cleanup and record the return mode.
+	(gdbarch_tdep, USE_PAGE_REGISTER): New to control the use of page 
+	register in address computation.
+	(m68hc11_get_return_insn): New to obtain the return instruction used
+	by the function.
+	(m68hc11_frame_init_saved_regs): Take into account the return
+	instruction used by the function for far and interrupt functions.
+	(m68hc11_init_extra_frame_info): Take into account page register.
+	(m68hc11_frame_args_address): Adjust according to the return mode.
+	(show_regs): Print page register only when it's used.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (HARD_PAGE_REGNUM): Define for 68HC12 page register.
 	(M68HC11_LAST_HARD_REG, m68hc11_register_names): Update.
 	(m68hc11_register_virtual_type): Return a 8-bit type for 8-bit
