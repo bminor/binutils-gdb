@@ -1,5 +1,5 @@
 /* BFD support for the ARC processor
-   Copyright 1994, 1995, 1997 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1997, 2001 Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.

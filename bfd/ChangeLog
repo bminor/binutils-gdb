@@ -1,3 +1,8 @@
+2001-03-08  Nick Clifton  <nickc@redhat.com>
+
+	* Most files: Update copyright notices using Perl script created
+	by Kevin Buettner <kevinb@redhat.com>.
+	
 2001-03-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Conditionalise
@@ -443,7 +448,7 @@
 
 2001-02-06  H.J. Lu  <hjl@gnu.org>
 
-	* bfd/peicode.h (coff_swap_filehdr_in): Remove the e_magic
+	* peicode.h (coff_swap_filehdr_in): Remove the e_magic
 	checking.
 	(pe_bfd_object_p): Rewrite with external_PEI_DOS_hdr and
 	external_PEI_IMAGE_hdr.
@@ -978,13 +983,13 @@
 	(_bfd_mips_elf_final_write_processing): Add cases for
 	bfd_mach_mips5 and bfd_mach_mips64.
 
-	* bfd/aoutx.h (NAME(aout,machine_type)): Add a
+	* aoutx.h (NAME(aout,machine_type)): Add a
 	bfd_mach_mips_sb1 case.
-	* bfd/archures.c (bfd_mach_mips_sb1): New constant.
-	* bfd/bfd-in2.h (bfd_mach_mips_sb1): New constant.
-	* bfd/cpu-mips.c (I_sb1): New constant.
+	* archures.c (bfd_mach_mips_sb1): New constant.
+	* bfd-in2.h (bfd_mach_mips_sb1): New constant.
+	* cpu-mips.c (I_sb1): New constant.
 	(arch_info_struct): Add entry for bfd_mach_mips_sb1.
-	* bfd/elf32-mips.c (elf_mips_mach): Add case for
+	* elf32-mips.c (elf_mips_mach): Add case for
 	E_MIPS_MACH_SB1.
 	(_bfd_mips_elf_final_write_processing): Add case for
 	bfd_mach_mips_sb1.
@@ -1665,7 +1670,7 @@
 
 2000-09-15  Kenneth Block  <Kenneth.Block@compaq.com>
 
-	* bfd/elf64-alpha.c (elf64_alpha_relax_with_lituse): ld performs
+	* elf64-alpha.c (elf64_alpha_relax_with_lituse): ld performs
 	LITUSE relocations incorrectly if -relax is specified on the ld
 	command line and the displacement field of the load or store
 	instruction is non-zero. (Patch by paul.winalski@compaq.com)
@@ -1968,7 +1973,7 @@
 
 	* section.c (SEC_HAS_GOT_REF): Define new flag for asection.
 	(bfd_get_unique_section_name): New function.
-	* bfd_in2.h: Regenerate.
+	* bfd-in2.h: Regenerate.
 
 	* elf64-hppa.c (elf64_hppa_check_relocs): Handle R_PARISC_PCREL12F.
 	(elf64_hppa_size_dynamic_sections): Remove the FIXME at bfd_zalloc
@@ -2230,7 +2235,7 @@
 
 2000-08-05  Jason Eckhardt  <jle@cygnus.com>
 
-	* elf32-i860 (elf32_i860_howto_table): New structure.
+	* elf32-i860.c (elf32_i860_howto_table): New structure.
 	(lookup_howto): New function.
 	(elf32_i860_reloc_type_lookup): New function.
 	(elf32_i860_info_to_howto_rela): New function.
@@ -3117,11 +3122,6 @@
 	* trad-core.c: From hpux-core.c, include <dirent.h> or
 	<sys/ndir.h> when possible.
 
-2000-05-31  Nick Clifton  <nickc@cygnus.com>
-
-	* opintl.h (_(String)): Explain why dgettext is used instead
-	of gettext.
-
 2000-05-31  Ulrich Drepper  <drepper@redhat.com>
 
 	* elf.c (_bfd_elf_slurp_version_tables): Correct reading of version
@@ -3399,9 +3399,9 @@
 
 2000-05-03  Mark Elbrecht  <snowball3@bigfoot.com>
 
-	* bfd/coff-go32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add entry for
+	* coff-go32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add entry for
 	the .bss section.
-	* bfd/coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
+	* coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
 
 2000-05-02  H.J. Lu  <hjl@gnu.org>
 

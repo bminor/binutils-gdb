@@ -235,7 +235,7 @@ Fri Sep  2 13:33:44 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 Wed Jan 12 18:37:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd.texinfo: Added Linker Functions node.
-	* doc/Makefile.in (DOCFILES): Added linker.texi.
+	* Makefile.in (DOCFILES): Added linker.texi.
 	(SRCDOC): Added linker.c.
 	(linker.texi): New target.
 
@@ -350,9 +350,9 @@ Thu Nov  5 03:13:55 1992  John Gilmore  (gnu@cygnus.com)
 
 	Cleanup:  Replace all uses of EXFUN in the BFD sources, with PARAMS.
 
- 	* doc/chew.c (exfunstuff):  Eliminate.
+ 	* chew.c (exfunstuff):  Eliminate.
 	(paramstuff):  Replace exfunstuff with function to generate PARAMS.
-	* doc/proto.str:  Use paramstuff rather than exfunstuff.
+	* proto.str:  Use paramstuff rather than exfunstuff.
 
 Mon Aug 17 12:40:32 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 

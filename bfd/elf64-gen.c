@@ -1,5 +1,5 @@
 /* Generic support for 64-bit ELF
-   Copyright 1993, 1995, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 

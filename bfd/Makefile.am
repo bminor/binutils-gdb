@@ -504,7 +504,7 @@ HFILES = \
 
 POTFILES = $(CFILES) $(HFILES)
 
-po/POTFILES.in: @MAINT@ Makefile
+po/POTFILES.in: @MAINT@ Makefile $(POTFILES)
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
