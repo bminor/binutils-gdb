@@ -1,3 +1,8 @@
+2002-10-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.in (mips64vr-elf, mips64vrel-elf): New config.
+	* configure: Regenerate.
+
 2002-10-13  Eric Christopher  <echristo@redhat.com>, Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.c (s_gpdword): New function.
