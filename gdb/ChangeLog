@@ -1,3 +1,10 @@
+Thu Aug 13 11:54:46 1992  John Gilmore  (gnu at cygnus.com)
+
+	* breakpoint.c (enable_longjmp_breakpoint,
+	disable_longjmp_breakpoint, set_longjmp_resume_breakpoint):
+	Check for duplicate breakpoints at the same address.  Bug report
+	and preliminary fix from Dave Morrison, <drmorris@us.oracle.com>.
+
 Wed Aug 12 11:14:58 1992  Fred Fish  (fnf@cygnus.com)
 
 	* buildsym.c (end_symtab):  Document that end_symtab can return
