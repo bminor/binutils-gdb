@@ -3456,7 +3456,9 @@ build_instruction (doisa, features, mips16, insn)
      printf("  if ((format != fmt_single) && (format != fmt_double))\n");
      printf("   SignalException(ReservedInstruction,instruction);\n");
      printf("  else\n");
-     printf("   StoreFPR(destreg,format,%s(SquareRoot(ValueFPR(fs,format),format)));\n",((insn->flags & RECIP) ? "Recip" : ""));
+     printf("   StoreFPR(destreg,format,%s(SquareRoot(ValueFPR(fs,format),format)%s));\n",
+          ((insn->flags & RECIP) ? "Recip" : ""),
+          ((insn->flags & RECIP) ? ",format" : ""));
      break ;
 
     case FPCEIL:

@@ -1,3 +1,8 @@
+Thu Oct 16 10:31:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gencode.c (build_instruction): For "FPSQRT", output correct
+ 	number of arguments to Recip.
+	
 Tue Oct 14 17:38:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (interp.o): Depends on sim-main.h
