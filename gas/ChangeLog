@@ -1,3 +1,11 @@
+Tue Aug  8 02:31:38 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* write.c (relax_align): Add extra padding for linkrelax only if
+	LINKER_RELAXING_SHRINKS_ONLY is defined.
+	* config/tc-i960.h (LINKER_RELAXING_SHRINKS_ONLY): Define it.
+	* doc/internals.texi (Relaxation): Write up some stuff on linker
+	relaxing and LINKER_RELAXING_SHRINKS_ONLY.
+
 Mon Aug  7 17:18:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/m68k-parse.y: New file: bison grammar for m68k operands,

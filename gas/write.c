@@ -413,8 +413,9 @@ cvt_frag_to_fill (sec, fragP)
      fragS *fragP;
 #else
 static void
-cvt_frag_to_fill (headersP, fragP)
+cvt_frag_to_fill (headersP, sec, fragP)
      object_headers *headersP;
+     segT sec;
      fragS *fragP;
 #endif
 {
@@ -446,7 +447,7 @@ cvt_frag_to_fill (headersP, fragP)
 #ifdef BFD_ASSEMBLER
       md_convert_frag (stdoutput, sec, fragP);
 #else
-      md_convert_frag (headersP, fragP);
+      md_convert_frag (headersP, sec, fragP);
 #endif
 
       assert (fragP->fr_next == NULL || (fragP->fr_next->fr_address - fragP->fr_address == fragP->fr_fix));
@@ -639,6 +640,13 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    || bfd_is_com_section (symsec))
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
+#ifdef UNDEFINED_DIFFERENCE_OK
+	    /* We have the difference of an undefined symbol and some
+	       other symbol.  Make sure to mark the other symbol as used
+	       in a relocation so that it will always be output.  */
+	    if (fixp->fx_subsy)
+	      fixp->fx_subsy->sy_used_in_reloc = 1;
+#endif
 	    goto done;
 	  }
 
@@ -1309,7 +1317,7 @@ write_object_file ()
 
   for (fragP = text_frag_root; fragP; fragP = fragP->fr_next)
     {
-      cvt_frag_to_fill (&headers, fragP);
+      cvt_frag_to_fill (&headers, SEG_TEXT, fragP);
 
       /* Some assert macros don't work with # directives mixed in.  */
 #ifndef NDEBUG
@@ -1725,10 +1733,12 @@ relax_align (address, alignment)
 
   mask = ~((~0) << alignment);
   new_address = (address + mask) & (~mask);
+#ifdef LINKER_RELAXING_SHRINKS_ONLY
   if (linkrelax)
     /* We must provide lots of padding, so the linker can discard it
        when needed.  The linker will not add extra space, ever.  */
     new_address += (1 << alignment);
+#endif
   return (new_address - address);
 }
 
@@ -2221,6 +2231,15 @@ fixup_segment (fixP, this_segment_type)
 		  fixP->fx_pcrel = 1;
 		  sub_symbolP = 0;
 		  fixP->fx_subsy = 0;
+		}
+#endif
+#ifdef UNDEFINED_DIFFERENCE_OK
+	      /* The PA needs this for PIC code generation.  We basically
+		 don't want to do anything if we have the difference of two
+		 symbols at this point.  */
+	      else if (1)
+		{
+		  /* Leave it alone.  */
 		}
 #endif
 #ifdef BFD_ASSEMBLER
