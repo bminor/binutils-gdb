@@ -1,3 +1,10 @@
+Mon Apr 27 11:49:55 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from H.J. Lu <hjl@gnu.org>:
+	* elf.c (bfd_elf_get_bfd_needed_list): New function.
+	* bfd-in.h (bfd_elf_get_bfd_needed_list): Declare.
+	* bfd-in2.h: Rebuild.
+
 Sat Apr 25 20:07:53 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (struct alpha_relax_info): Replace elfsym with other.

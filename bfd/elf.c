@@ -916,7 +916,7 @@ bfd_elf_set_dt_needed_name (abfd, name)
 }
 
 /* Get the list of DT_NEEDED entries for a link.  This is a hook for
-   the ELF emulation code.  */
+   the linker ELF emulation code.  */
 
 struct bfd_link_needed_list *
 bfd_elf_get_needed_list (abfd, info)
@@ -940,6 +940,91 @@ bfd_elf_get_dt_soname (abfd)
       && bfd_get_format (abfd) == bfd_object)
     return elf_dt_name (abfd);
   return NULL;
+}
+
+/* Get the list of DT_NEEDED entries from a BFD.  This is a hook for
+   the ELF linker emulation code.  */
+
+boolean
+bfd_elf_get_bfd_needed_list (abfd, pneeded)
+     bfd *abfd;
+     struct bfd_link_needed_list **pneeded;
+{
+  asection *s;
+  bfd_byte *dynbuf = NULL;
+  int elfsec;
+  unsigned long link;
+  bfd_byte *extdyn, *extdynend;
+  size_t extdynsize;
+  void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
+
+  *pneeded = NULL;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour
+      || bfd_get_format (abfd) != bfd_object)
+    return true;
+
+  s = bfd_get_section_by_name (abfd, ".dynamic");
+  if (s == NULL || s->_raw_size == 0)
+    return true;
+
+  dynbuf = (bfd_byte *) bfd_malloc (s->_raw_size);
+  if (dynbuf == NULL)
+    goto error_return;
+
+  if (! bfd_get_section_contents (abfd, s, (PTR) dynbuf, (file_ptr) 0,
+				  s->_raw_size))
+    goto error_return;
+
+  elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
+  if (elfsec == -1)
+    goto error_return;
+
+  link = elf_elfsections (abfd)[elfsec]->sh_link;
+
+  extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
+  swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
+
+  extdyn = dynbuf;
+  extdynend = extdyn + s->_raw_size;
+  for (; extdyn < extdynend; extdyn += extdynsize)
+    {
+      Elf_Internal_Dyn dyn;
+
+      (*swap_dyn_in) (abfd, (PTR) extdyn, &dyn);
+
+      if (dyn.d_tag == DT_NULL)
+	break;
+
+      if (dyn.d_tag == DT_NEEDED)
+	{
+	  const char *string;
+	  struct bfd_link_needed_list *l;
+
+	  string = bfd_elf_string_from_elf_section (abfd, link,
+						    dyn.d_un.d_val);
+	  if (string == NULL)
+	    goto error_return;
+
+	  l = (struct bfd_link_needed_list *) bfd_alloc (abfd, sizeof *l);
+	  if (l == NULL)
+	    goto error_return;
+
+	  l->by = abfd;
+	  l->name = string;
+	  l->next = *pneeded;
+	  *pneeded = l;
+	}
+    }
+
+  free (dynbuf);
+
+  return true;
+
+ error_return:
+  if (dynbuf != NULL)
+    free (dynbuf);
+  return false;
 }
 
 /* Allocate an ELF string table--force the first byte to be zero.  */
