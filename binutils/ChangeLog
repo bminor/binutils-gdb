@@ -1,5 +1,8 @@
 1998-12-02  Ulrich Drepper  <drepper@cygnus.com>
 
+	* readelf.c (process_mips_specific): Print .conflict section
+	content.
+
 	* readelf.c (process_mips_specific): Print l_flags in liblist in
 	textual form.
 

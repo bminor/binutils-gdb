@@ -1,5 +1,7 @@
 1998-12-02  Ulrich Drepper  <drepper@cygnus.com>
 
+	* mips.h: Add external data type for conflict section.
+
 	* mips.h: Add more LL_* options from Irix 6.5.
 
 	* mips.h: Add R_MIPS_JALR and adjust R_MIPS_max appropriately.
