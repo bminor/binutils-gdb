@@ -226,11 +226,8 @@ mn10300-*-*)		gdb_target=mn10300 ;;
 
 none-*-*)		gdb_target=none ;;
 
-# OBSOLETE ns32k-*-mach3*)		gdb_target=ns32km3 ;;
 ns32k-*-netbsd*)	gdb_target=nbsd
 		configdirs="${configdirs} gdbserver" ;;
-# OBSOLETE ns32k-utek-sysv*)	gdb_target=merlin ;;
-# OBSOLETE ns32k-utek-*)		gdb_target=umax ;;
 
 powerpc-*-macos*)	gdb_target=macos ;;
 powerpc-*-netbsd*)	gdb_target=nbsd

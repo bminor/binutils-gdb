@@ -34,23 +34,6 @@ _initialize_ns32k_tdep (void)
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-/* OBSOLETE CORE_ADDR */
-/* OBSOLETE merlin_skip_prologue (CORE_ADDR pc) */
-/* OBSOLETE { */
-/* OBSOLETE   register int op = read_memory_integer (pc, 1); */
-/* OBSOLETE   if (op == 0x82) */
-/* OBSOLETE     { */
-/* OBSOLETE       op = read_memory_integer (pc + 2, 1); */
-/* OBSOLETE       if ((op & 0x80) == 0) */
-/* OBSOLETE 	pc += 3; */
-/* OBSOLETE       else if ((op & 0xc0) == 0x80) */
-/* OBSOLETE 	pc += 4; */
-/* OBSOLETE       else */
-/* OBSOLETE 	pc += 6; */
-/* OBSOLETE     } */
-/* OBSOLETE   return pc; */
-/* OBSOLETE } */
-
 CORE_ADDR
 umax_skip_prologue (CORE_ADDR pc)
 {
@@ -67,43 +50,6 @@ umax_skip_prologue (CORE_ADDR pc)
     }
   return pc;
 }
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-/* OBSOLETE int */
-/* OBSOLETE merlin_frame_num_args (struct frame_info *fi) */
-/* OBSOLETE { */
-/* OBSOLETE   int numargs; */
-/* OBSOLETE   CORE_ADDR pc; */
-/* OBSOLETE   int insn; */
-/* OBSOLETE   int addr_mode; */
-/* OBSOLETE   int width; */
-/* OBSOLETE  */
-/* OBSOLETE   pc = FRAME_SAVED_PC (fi); */
-/* OBSOLETE   insn = read_memory_integer (pc, 2); */
-/* OBSOLETE   addr_mode = (insn >> 11) & 0x1f; */
-/* OBSOLETE   insn = insn & 0x7ff; */
-/* OBSOLETE   if ((insn & 0x7fc) == 0x57c */
-/* OBSOLETE       && addr_mode == 0x14)	 *//* immediate */
-/* OBSOLETE     { */
-/* OBSOLETE       if (insn == 0x57c)	 *//* adjspb */
-/* OBSOLETE 	width = 1; */
-/* OBSOLETE       else if (insn == 0x57d)	 *//* adjspw */
-/* OBSOLETE 	width = 2; */
-/* OBSOLETE       else if (insn == 0x57f)	 *//* adjspd */
-/* OBSOLETE 	width = 4; */
-/* OBSOLETE       else */
-/* OBSOLETE 	internal_error (__FILE__, __LINE__, "bad else"); */
-/* OBSOLETE       numargs = read_memory_integer (pc + 2, width); */
-/* OBSOLETE       if (width > 1) */
-/* OBSOLETE 	flip_bytes (&numargs, width); */
-/* OBSOLETE       numargs = -sign_extend (numargs, width * 8) / 4; */
-/* OBSOLETE     } */
-/* OBSOLETE   else */
-/* OBSOLETE     numargs = -1; */
-/* OBSOLETE   return numargs; */
-/* OBSOLETE } */
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.

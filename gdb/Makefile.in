@@ -1769,8 +1769,6 @@ nlmread.o: nlmread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(gdb_stabs_h) $(objfiles_h) $(symfile_h) $(symtab_h) $(stabsread_h) \
 	$(gdb_string_h)
 
-# OBSOLETE ns32km3-nat.o: ns32km3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
-
 ttyflush.o: nindy-share/ttyflush.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
 
@@ -2107,12 +2105,6 @@ top.o: top.c $(top_h) $(bfd_h) $(getopt_h) $(readline_headers) $(call_cmds_h) \
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) $(target_h) \
 	$(value_h) $(gdb_string_h) $(cp_abi_h)
-
-# OBSOLETE ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
-
-# OBSOLETE ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
-
-# OBSOLETE umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(language_h) $(target_h) $(terminal_h) $(readline_headers) \

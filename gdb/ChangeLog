@@ -1,5 +1,30 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Note that ns32k-*-mach3*, ns32k-umax-*, ns32k-utek-sysv*
+	and ns32k-utek-* were deleted.
+	* Makefile.in (ultra3-nat.o, ultra3-xdep.o): Delete.
+	(umax-xdep.o, ns32km3-nat.o): Delete.
+	* configure.tgt: Delete ns32k-*-mach3*, ns32k-utek-sysv* and
+	ns32k-utek-* targets.
+	* configure.host: Delete ns32k-*-mach3*, ns32k-umax-* and
+	ns32k-utek-sysv* hosts.
+	* ultra3-nat.c: Delete file.
+	* ultra3-xdep.c: Delete file.
+	* umax-xdep.o: Delete file.
+	* ns32km3-nat: Delete file.
+	* config/ns32k/merlin.mh: Delete file.
+	* config/ns32k/merlin.mt: Delete file.
+	* config/ns32k/nm-umax.h: Delete file.
+	* config/ns32k/ns32km3.mh: Delete file.
+	* config/ns32k/ns32km3.mt: Delete file.
+	* config/ns32k/tm-merlin.h: Delete file.
+	* config/ns32k/tm-ns32km3.h: Delete file.
+	* config/ns32k/umax.mh: Delete file.
+	* config/ns32k/umax.mt: Delete file.
+	* config/ns32k/xm-merlin.h: Delete file.
+	* config/ns32k/xm-ns32km3.h: Delete file.
+	* config/ns32k/xm-umax.h: Delete file.
+	
 	* NEWS: Note that m88*-harris-cxux* was deleted.
 	* configure.host: Delete m88*-harris-cxux* host.
 	* configure.tgt: Delete m88*-harris-cxux* target.
