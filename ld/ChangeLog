@@ -1,3 +1,8 @@
+Wed Jan 24 20:59:40 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_parse_args):
+	correct spelling.
+
 Wed Jan 24 16:59:19 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* configure.tgt (sparc64-*-solaris2*): New configuration.
