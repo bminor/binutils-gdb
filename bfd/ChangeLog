@@ -1,5 +1,8 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (hppa_som_gen_reloc_type): New function.
+	(som_bfd_reloc_type_lookup): New function.
+
 	* som.c (try_prev_fixup): New function.
 	(som_reloc_skip): New function.
 	(som_reloc_addend): New function.

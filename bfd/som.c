@@ -700,7 +700,90 @@ hppa_som_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
     }
   return bfd_reloc_ok;
 }
-  
+
+/* Given a generic HPPA relocation type, the instruction format,
+   and a field selector, return an appropriate SOM reloation.
+
+   FIXME.  Need to handle %RR, %LR and the like as field selectors.
+   These will need to generate multiple SOM relocations.  */ 
+
+int **
+hppa_som_gen_reloc_type (abfd, base_type, format, field)
+     bfd *abfd;
+     int base_type;
+     int format;
+     int field;
+{
+  int *final_type, **final_types;
+
+  final_types = (int **) bfd_alloc_by_size_t (abfd, sizeof (int *) * 2);
+  final_type = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
+
+
+  final_types[0] = final_type;
+  final_types[1] = NULL;
+
+  /* Default to the basic relocation passed in.  */
+  *final_type = base_type;
+
+  switch (base_type)
+    {
+    case R_HPPA:
+      /* PLABELs get their own relocation type.  */
+      if (field == e_psel
+	  || field == e_lpsel
+	  || field == e_rpsel)
+	  {
+	    /* A PLABEL relocation that has a size of 32 bits must
+	       be a R_DATA_PLABEL.  All others are R_CODE_PLABELs.  */
+	    if (format == 32)
+	      *final_type = R_DATA_PLABEL;
+	    else
+	      *final_type = R_CODE_PLABEL;
+	  }
+      /* A relocatoin in the data space is always a full 32bits.  */
+      else if (format == 32)
+	*final_type = R_DATA_ONE_SYMBOL;
+
+      break;
+
+    case R_HPPA_GOTOFF:
+      /* More PLABEL special cases.  */
+      if (field == e_psel
+	  || field == e_lpsel
+	  || field == e_rpsel)
+	*final_type = R_DATA_PLABEL;
+      break;
+
+    case R_HPPA_NONE:
+    case R_HPPA_ABS_CALL:
+    case R_HPPA_PCREL_CALL:
+    case R_HPPA_COMPLEX:
+    case R_HPPA_COMPLEX_PCREL_CALL:
+    case R_HPPA_COMPLEX_ABS_CALL:
+      /* Right now we can default all these.  */
+      break;
+    }
+  return final_types;
+}
+
+/* Return the address of the correct entry in the PA SOM relocation
+   howto table.  */
+
+static reloc_howto_type *
+som_bfd_reloc_type_lookup (arch, code)
+     bfd_arch_info_type *arch;
+     bfd_reloc_code_real_type code;
+{
+  if ((int) code < (int) R_NO_RELOCATION + 255)
+    {
+      BFD_ASSERT ((int) som_hppa_howto_table[(int) code].type == (int) code);
+      return &som_hppa_howto_table[(int) code];
+    }
+
+  return (reloc_howto_type *) 0;
+}
+
 /* Perform some initialization for an object.  Save results of this
    initialization in the BFD.  */
 
