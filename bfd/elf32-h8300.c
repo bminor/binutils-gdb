@@ -69,8 +69,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_NONE",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -83,8 +83,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_DIR32",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -97,8 +97,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_DIR16",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -111,9 +111,9 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 8,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
-	 "R_H8_DIR16",		/* name */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
+	 "R_H8_DIR8",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x000000ff,		/* dst_mask */
@@ -126,7 +126,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR16A8",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -140,7 +140,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR16R8",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -154,7 +154,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR24A8",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0xff000000,		/* src_mask */
@@ -168,7 +168,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 special,			/* special_function */
+	 special,		/* special_function */
 	 "R_H8_DIR24R8",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0xff000000,		/* src_mask */
@@ -181,8 +181,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_DIR32",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -195,8 +195,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_PCREL16",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -209,8 +209,8 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 8,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 special,			/* special_function */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 special,		/* special_function */
 	 "R_H8_PCREL8",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0xff,			/* src_mask */

@@ -1,3 +1,7 @@
+2003-05-12  Paul Clarke  <paulc@senet.com.au>
+
+	* elf32-h8300.c: Fix typo in name of R_H8_DIR8 reloc.
+
 2003-05-11  Jason Eckhardt  <jle@rice.edu>
 
 	* elf32-i860.c (elf32_i860_relocate_highadj): Properly
