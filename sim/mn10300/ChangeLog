@@ -1,3 +1,10 @@
+Fri May 16 16:36:17 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (load_mem): If we get a load from an out of range
+	address, abort.
+	(store_mem): Likewise for stores.
+	(max_mem): New variable.
+
 Tue May  6 13:24:36 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300_sim.h: Fix ordering of bits in the PSW.

@@ -33,6 +33,7 @@ struct hash_entry
 #endif
 };
 
+static int max_mem = 0;
 struct hash_entry hash_table[MAX_HASH+1];
 
 
@@ -241,6 +242,9 @@ load_mem_big (addr, len)
 {
   uint8 *p = addr + State.mem;
 
+  if (addr > max_mem)
+    abort ();
+
   switch (len)
     {
     case 1:
@@ -262,6 +266,9 @@ load_mem (addr, len)
      int len;
 {
   uint8 *p = addr + State.mem;
+
+  if (addr > max_mem)
+    abort ();
 
   switch (len)
     {
@@ -285,6 +292,9 @@ store_mem (addr, len, data)
      uint32 data;
 {
   uint8 *p = addr + State.mem;
+
+  if (addr > max_mem)
+    abort ();
 
   switch (len)
     {
@@ -314,6 +324,7 @@ sim_size (power)
   if (State.mem)
     free (State.mem);
 
+  max_mem = 1 << power;
   State.mem = (uint8 *) calloc (1,  1 << power);
   if (!State.mem)
     {
