@@ -18,11 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-srcdir = .
+VPATH = @srcdir@
+srcdir = @srcdir@
 
-prefix = /usr/local
+prefix = @prefix@
 
-exec_prefix = $(prefix)
+exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 
@@ -44,16 +45,15 @@ docdir = doc
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/..; pwd`/install.sh -c
+INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
 AR = ar
 AR_FLAGS = rc
 CFLAGS = -g
-BISON = bison
 MAKEINFO = makeinfo
-RANLIB = ranlib
+RANLIB = @RANLIB@
 
 CC_FOR_BUILD = $(CC)
 
@@ -62,7 +62,6 @@ CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
 SUBDIRS = doc
-
 
 TARGETLIB = libbfd.a
 
@@ -224,12 +223,17 @@ OPTIONAL_BACKENDS = \
 	cisco-core.o
 
 # These are defined by configure.in:
-# WORDSIZE=32
-# BFD_BACKENDS = $(BFD32_BACKENDS)
+WORDSIZE = @wordsize@
+ALL_BACKENDS = @all_backends@
+BFD_BACKENDS = @bfd_backends@
+BFD_MACHINES = @bfd_machines@
+TDEFAULTS = @tdefaults@
 
 all:
 
 #### host and target dependent Makefile fragments come in here.
+# @target_makefile_frag@
+# @host_makefile_frag@
 ###
 
 FLAGS_TO_PASS = \
@@ -476,7 +480,7 @@ install:
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
 	fi
 
-Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile: Makefile.in configure.in @frags@
 	$(SHELL) config.status
 
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -496,7 +500,7 @@ dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
 		-e 's!@BFD_H@!$(BFD_H)!'	\
 		-e 's!@INCDIR@!$(INCDIR)!'	\
-		-e 's!@srcdir@!$(srcdir)!'
+		-e 's!@SRCDIR@!$(srcdir)!'
 
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile

@@ -17,11 +17,12 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
 
-srcdir = .
+VPATH = @srcdir@
+srcdir = @srcdir@
 
-prefix = /usr/local
+prefix = @prefix@
 
-exec_prefix = $(prefix)
+exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 
@@ -43,16 +44,12 @@ docdir = $(datadir)/doc
 MKDOC=./chew
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = `cd $(srcdir)/../..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
-AR = ar
-AR_FLAGS = qv
-BISON = bison
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
-RANLIB = ranlib
 CFLAGS = -g
 
 CC_FOR_BUILD = $(CC)
@@ -63,13 +60,11 @@ CC_FOR_BUILD = $(CC)
 .c.o:
 	$(CC) -c -I.. -I$(srcdir)/.. -I$(srcdir)/../../include $(H_CFLAGS) $(CFLAGS) $<
 
-# main GDB source directory
-
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfd.texi  cache.texi coffcode.texi \
 	core.texi elf.texi elfcode.texi  format.texi  libbfd.texi  \
 	opncls.texi  reloc.texi  section.texi  \
-	syms.texi  targets.texi init.texi ctor.texi
+	syms.texi  targets.texi init.texi hash.texi linker.texi
 
 PROTOS = archive.p archures.p bfd.p \
 	 core.p format.p \
@@ -77,7 +72,7 @@ PROTOS = archive.p archures.p bfd.p \
 	section.p syms.p targets.p  \
 	format.p  core.p init.p
 
-IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip ctor.ip coffcode.ip
+IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip coffcode.ip
 
 # SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction 
 # between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
@@ -89,7 +84,8 @@ SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
 	$(srcdir)/../elfcode.h  $(srcdir)/../format.c \
 	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
 	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
-	$(srcdir)/../syms.c  $(srcdir)/../targets.c
+	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
+	$(srcdir)/../hash.c $(srcdir)/../linker.c
 
 SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
 	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../core.c \
@@ -101,7 +97,7 @@ SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
 SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
 	$(srcdir)/../reloc.c $(srcdir)/../cpu-h8300.c \
 	$(srcdir)/../cpu-i960.c $(srcdir)/../archures.c \
-	$(srcdir)/../init.c $(srcdir)/../ctor.c
+	$(srcdir)/../init.c
 
 STAGESTUFF = $(DOCFILES) *.info*
 
@@ -183,15 +179,16 @@ targets.texi: $(MKDOC) $(srcdir)/../targets.c $(srcdir)/doc.str
 init.texi: $(MKDOC) $(srcdir)/../init.c $(srcdir)/doc.str
 	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../init.c >init.texi
 
-ctor.texi: $(MKDOC) $(srcdir)/../ctor.c $(srcdir)/doc.str
-	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../ctor.c >ctor.texi
+hash.texi: $(MKDOC) $(srcdir)/../hash.c $(srcdir)/doc.str
+	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../hash.c >hash.texi
 
+linker.texi: $(MKDOC) $(srcdir)/../linker.c $(srcdir)/doc.str
+	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../linker.c >linker.texi
 
 libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(srcdir)/../init.c		\
 	$(srcdir)/../libbfd.c		\
 	$(srcdir)/../cache.c		\
-	$(srcdir)/../ctor.c		\
 	$(srcdir)/../reloc.c		\
 	$(srcdir)/../cpu-h8300.c	\
 	$(srcdir)/../cpu-i960.c		\
@@ -202,7 +199,6 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../init.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../libbfd.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../cache.c >>libbfd.h
-	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../ctor.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../reloc.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../cpu-h8300.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../cpu-i960.c >>libbfd.h
@@ -304,6 +300,6 @@ de-stage3: force
 
 force:
 
-Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
-	$(SHELL) ./config.status
+Makefile: $(srcdir)/Makefile.in
+	cd .. && $(SHELL) ./config.status
 

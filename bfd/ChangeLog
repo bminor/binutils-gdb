@@ -1,3 +1,17 @@
+Wed Jul  5 04:16:35 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
+
+	Autoconfiscation:
+	* configure.in, Makefile.in, doc/Makefile.in: Switch from Cygnus
+	configure to autoconf ways of processing --enable arguments,
+	setting up symlinks, incorporating makefile fragments, printing
+	messages at configuration time, setting variables in Makefile.
+	Deleted some unused variables.  Check for ranlib via autoconf.
+	For now, configure script removes doc/config.status.
+	* configure: New file.
+	* dep-in.sed: Use @SRCDIR@ instead of @srcdir@, so Makefile.in
+	line doesn't get broken by configure.
+	* doc/configure.in: Removed.
+
 Tue Jul  4 12:22:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* archive.c (_bfd_construct_extended_name_table): If

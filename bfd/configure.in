@@ -1,42 +1,63 @@
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+AC_PREREQ(2.3)
+AC_INIT(libbfd.c)
 
-configdirs="doc"
-srctrigger=libbfd.c
-srcname="BFD"
-target_dependent=true
+AC_ARG_ENABLE(64-bit-bfd,
+[    64-bit-bfd         64-bit support (on hosts with narrower word sizes)],
+[case "{$enableval}" in
+  yes)  want64=true  ;;
+  no)   want64=false ;;
+  *)    AC_MSG_ERROR(bad value ${enableval} for 64-bit-bfd option) ;;
+esac],[want64=false])dnl
+AC_ARG_ENABLE(targets,
+[    targets            alternative target configurations besides the primary],
+[case "${enableval}" in
+  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac])dnl
+
+AC_CONFIG_AUX_DIR(`cd $srcdir/..;pwd`)
+AC_CANONICAL_SYSTEM
+if test -z "$target" ; then
+    AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
+fi
+AC_ARG_PROGRAM
+
 host64=false
 target64=false
-want64=false
 
-# per-host:
+# host stuff:
 
 . ${srcdir}/configure.host
 
+AC_PROG_RANLIB
+
 # Set up to make a link between the host's include file and "sysdep.h".
-files="hosts/${my_host}.h"
-links="sysdep.h"
+files=hosts/${my_host}.h
 
-if [ ! -f ${srcdir}/${files} ] ; then
+if test ! -f ${srcdir}/${files} ; then
 	files=../bfd/hosts/std-host.h
-	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
+	AC_MSG_WARN(BFD has no specific support for host ${host} -- using std-host)
 fi
 
-host_makefile_frag=
-if [ -f ${srcdir}/config/${my_host}.mh ] ; then
-	host_makefile_frag=config/${my_host}.mh
-fi
+AC_LINK_FILES($files, sysdep.h)
 
-# per-target:
+if test -f ${srcdir}/config/${my_host}.mh ; then
+	host_makefile_frag=$srcdir/config/${my_host}.mh
+else
+	host_makefile_frag=/dev/null
+fi
+AC_SUBST_FILE(host_makefile_frag)
+
+# target stuff:
 
 # Canonicalize the secondary target names.
-if [ -n "$enable_targets" ]; then
+if test -n "$enable_targets" ; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
 	result=`$configsub $targ 2>/dev/null`
-	if [ -n "$result" ]; then
+	if test -n "$result" ; then
 	    canon_targets="$canon_targets $result"
 	else
 	    # Allow targets that config.sub doesn't recognize, like "all".
@@ -51,17 +72,17 @@ for targ in $target $canon_targets
 do
     bfd_target=`${config_shell} $srcdir/config.bfd $targ`
 
-    if [ "x$bfd_target" = "xall" ]; then
+    if test "x$bfd_target" = "xall" ; then
         all_targets=true
     else
-	if [ ! -f ${srcdir}/config/${bfd_target}.mt ] ; then
-	    echo '***' No file ${srcdir}/config/${bfd_target}.mt 1>&2
-	    echo '***' BFD does not support target ${bfd_target} 1>&2
-	    echo '***' Look in bfd/config.bfd for supported targets 1>&2
+	if test ! -f ${srcdir}/config/${bfd_target}.mt ; then
+	    AC_MSG_ERROR(*** No file ${srcdir}/config/${bfd_target}.mt.
+*** BFD does not support target ${bfd_target}.
+*** Look in bfd/config.bfd for supported targets.)
 	    exit 1
 	fi
 
-	if [ "x$targ" = "x$target" ]; then
+	if test "x$targ" = "x$target" ; then
 	    target_makefile_frag=${srcdir}/config/${bfd_target}.mt
 	else
 	    target_extra_frags="$target_extra_frags ${srcdir}/config/${bfd_target}.mt"
@@ -69,20 +90,12 @@ do
     fi
 done
 
-# We don't do any links based on the target system, just makefile config.
-
-# post-target:
-
-rm -f Makefile.tmp Makefile.2
-mv Makefile Makefile.tmp
-
-case ${enable_64_bit_bfd} in
-  yes)		want64=true  ;;
-  no | "")	want64=false ;;
-  *)
-    echo "*** bad value \"${enable_64_bit_bfd}\" for 64-bit-bfd flag; ignored" 1>&2
-    ;;
-esac
+frags=$target_makefile_frag
+if test $host_makefile_frag != /dev/null ; then
+    frags="$frags $host_makefile_frag"
+fi
+AC_SUBST_FILE(target_makefile_frag)
+AC_SUBST(frags)
 
 # This processing still needs to be done if we're to decide properly whether
 # 64-bit support needs to be compiled in.  Currently, it will be included if
@@ -91,6 +104,7 @@ esac
 # no "--with-64-bit-bfd" option is given, even if "--with-targets=all" is
 # used.
 
+changequote(,)dnl
 # The default vector in the primary target.
 DEFAULT_VECTOR=`sed -n '
 s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
@@ -126,6 +140,7 @@ for i in $SELECT_ARCHITECTURES ; do
     esac
 done
 SELECT_ARCHITECTURES="$f"
+changequote([,])dnl
 
 # Target backend .o files.
 tb=
@@ -137,7 +152,11 @@ do
     # with the two vector lists in targets.c.
     a29kcoff_big_vec)		tb="$tb coff-a29k.o cofflink.o" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
+    armpe_vec)			tb="$tb pe-arm.o cofflink.o " ;;
+    armpei_vec)			tb="$tb pei-arm.o cofflink.o " ;;
     aout0_big_vec)		tb="$tb aout0.o aout32.o stab-syms.o" ;;
+    aout_arm_big_vec)		tb="$tb aout-arm.o aout32.o stab-syms.o" ;;
+    aout_arm_little_vec)	tb="$tb aout-arm.o aout32.o stab-syms.o" ;;
     aout_mips_big_vec)		tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
     aout_mips_little_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
     apollocoff_vec)		tb="$tb coff-apollo.o" ;;
@@ -182,6 +201,8 @@ do
     i386dynix_vec)		tb="$tb i386dynix.o aout32.o stab-syms.o" ;;
     i386coff_vec)		tb="$tb coff-i386.o cofflink.o" ;;
     i386msdos_vec)		tb="$tb i386msdos.o" ;;
+    i386pe_vec)			tb="$tb pe-i386.o cofflink.o " ;;
+    i386pei_vec)		tb="$tb pei-i386.o cofflink.o" ;;
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
     i386lynx_coff_vec)		tb="$tb cf-i386lynx.o cofflink.o lynx-core.o stab-syms.o" ;;
@@ -224,9 +245,10 @@ do
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
     w65_vec)			tb="$tb coff-w65.o reloc16.o" ;;
+    versados_vec)		tb="$tb versados.o" ;;
 
     "")			;;
-    *) echo "*** unknown target vector $vec" 1>&2; exit 1 ;;
+    *) AC_MSG_ERROR(*** unknown target vector $vec) ;;
     esac
 done
 
@@ -255,7 +277,7 @@ ta="$f"
 bfd_backends="$tb"
 bfd_machines="$ta"
 
-if [ x${all_targets} = xtrue ]; then
+if test x${all_targets} = xtrue ; then
   bfd_backends="${bfd_backends}"' $(ALL_BACKENDS)'
   bfd_machines="${bfd_machines}"' $(ALL_MACHINES)'
 else	# all_targets is true
@@ -277,19 +299,18 @@ case ${host64}-${target64}-${want64} in
     ;;
 esac
 
-echo WORDSIZE=${wordsize}		>> Makefile.2
-echo ALL_BACKENDS=${all_backends}	>> Makefile.2
-echo BFD_BACKENDS=${bfd_backends}	>> Makefile.2
-echo BFD_MACHINES=${bfd_machines}	>> Makefile.2
+AC_SUBST(wordsize)
+AC_SUBST(all_backends)
+AC_SUBST(bfd_backends)
+AC_SUBST(bfd_machines)
 
 test -n "$DEFAULT_VECTOR" && defvec="$DEFAULT_VECTOR"
 
-tdefaults="TDEFAULTS ="
+tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
 test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
-echo "${tdefaults}" >> Makefile.2
+AC_SUBST(tdefaults)
 
-cat Makefile.tmp >> Makefile.2
-rm -f Makefile.tmp
-mv Makefile.2 Makefile
+rm -f doc/config.status
+AC_OUTPUT(Makefile doc/Makefile)
