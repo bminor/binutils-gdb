@@ -418,7 +418,7 @@ struct coff_symbol *cs;
       /* This can happen with old versions of GCC.
 	 GCC 2.3.3-930426 does not exhibit this on a test case which
 	 a user said produced the message for him.  */
-      struct complaint msg = {"Nested C_BINCL symbols", 0, 0};
+      static struct complaint msg = {"Nested C_BINCL symbols", 0, 0};
       complain (&msg);
     }
   ++inclDepth;
@@ -452,7 +452,7 @@ struct coff_symbol *cs;
 
   if (inclDepth == 0)
     {
-      struct complaint msg = {"Mismatched C_BINCL/C_EINCL pair", 0, 0};
+      static struct complaint msg = {"Mismatched C_BINCL/C_EINCL pair", 0, 0};
       complain (&msg);
     }
 
@@ -1814,7 +1814,7 @@ read_symbol (symbol, symno)
 {
   if (symno < 0 || symno >= symtbl_num_syms)
     {
-      struct complaint msg =
+      static struct complaint msg =
 	{"Invalid symbol offset", 0, 0};
       complain (&msg);
       symbol->n_value = 0;

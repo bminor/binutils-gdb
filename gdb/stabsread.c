@@ -534,7 +534,7 @@ define_symbol (valu, string, desc, type, objfile)
 	    goto normal;
 
 	  default:
-	    complain (unrecognized_cplus_name_complaint, string);
+	    complain (&unrecognized_cplus_name_complaint, string);
 	    goto normal;		/* Do *something* with it */
 	}
     }
@@ -1469,7 +1469,7 @@ rs6000_builtin_type (typenum)
     /* requires builtin `real' */
     return lookup_fundamental_type (current_objfile, FT_FLOAT);
   default:
-    complain (rs6000_builtin_complaint, typenum);
+    complain (&rs6000_builtin_complaint, typenum);
     return NULL;
   }
 }
@@ -2262,7 +2262,7 @@ read_tilde_fields (fip, pp, type, objfile)
 		    }
 		}
 	      /* Virtual function table field not found.  */
-	      complain (vtbl_notfound_complaint, TYPE_NAME (type));
+	      complain (&vtbl_notfound_complaint, TYPE_NAME (type));
 	      return 0;
 	    }
 	  else

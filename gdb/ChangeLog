@@ -1,5 +1,11 @@
 Fri May 21 09:04:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* complaint.c: Make sure all complain() pass the address of the struct.
+
+	* xcoffread.c: Make sure all struct complaints are static not auto.
+
+	* Makefile.in: Add rule for xcoffexec.o like that for paread.o.
+
 	* xcoffread.c (process_xcoff_symbol, case C_LSYM): Use define_symbol.
 
 Wed May 19 12:33:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
