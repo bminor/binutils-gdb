@@ -1,3 +1,13 @@
+Fri Mar 10 19:21:19 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/obj-coff.c: Redo my 10 Jan change, but	get it right this
+	time. :-)
+	(fixup_segment): If linkrelax is set, just return.
+	(write_object_file): Don't treat h8300 and z8k specially with
+	regard to fixups.
+	* config/tc-h8300.c (md_begin): Set linkrelax.
+	* config/tc-z8k.c (md_begin): Ditto.
+
 Thu Mar  9 18:01:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (coff_header_append): Check return value of
