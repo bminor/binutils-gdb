@@ -1,5 +1,7 @@
 2001-07-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/powerpc/xm-linux.h: Fix corrupted file.
+
 	* configure.in: Add check for sigsetjmp.
 	* config/m68k/xm-linux.h (HAVE_SIGSETJMP): Removed.
 	* config/xm-sysv4.h (HAVE_SIGSETJMP): Removed.
