@@ -1,5 +1,5 @@
 /* vms.c -- Write out a VAX/VMS object file
-   Copyright 1987, 1988, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001
+   Copyright 1987, 1988, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -31,6 +31,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
+#include <fcntl.h>
 
 /* What we do if there is a goof.  */
 #define error as_fatal
@@ -260,9 +261,9 @@ static int gave_compiler_message = 0;
 /*
  *	Global data (Object records limited to 512 bytes by VAX-11 "C" runtime)
  */
-static int VMS_Object_File_FD;	/* File Descriptor for object file */
+static int VMS_Object_File_FD;		/* File Descriptor for object file */
 static char Object_Record_Buffer[512];	/* Buffer for object file records  */
-static int Object_Record_Offset;/* Offset to end of data	   */
+static size_t Object_Record_Offset;	/* Offset to end of data	   */
 static int Current_Object_Record_Type;	/* Type of record in above	   */
 
 /*
@@ -344,84 +345,150 @@ const segT N_TYPE_seg[N_TYPE + 2] =
 
 /* Local support routines which return a value.  */
 
-static struct input_file *find_file PARAMS ((symbolS *));
-static struct VMS_DBG_Symbol *find_symbol PARAMS ((int));
-static symbolS *Define_Routine PARAMS ((symbolS *,int,symbolS *,int));
+static struct input_file *find_file
+  PARAMS ((symbolS *));
+static struct VMS_DBG_Symbol *find_symbol
+  PARAMS ((int));
+static symbolS *Define_Routine
+  PARAMS ((symbolS *, int, symbolS *, int));
 
-static char *cvt_integer PARAMS ((char *,int *));
-static char *fix_name PARAMS ((char *));
-static char *get_struct_name PARAMS ((char *));
+static char *cvt_integer
+  PARAMS ((char *, int *));
+static char *fix_name
+  PARAMS ((char *));
+static char *get_struct_name
+  PARAMS ((char *));
 
-static offsetT VMS_Initialized_Data_Size PARAMS ((symbolS *,unsigned));
+static offsetT VMS_Initialized_Data_Size
+  PARAMS ((symbolS *, unsigned));
 
-static int VMS_TBT_Source_File PARAMS ((char *,int));
-static int gen1 PARAMS ((struct VMS_DBG_Symbol *,int));
-static int forward_reference PARAMS ((char *));
-static int final_forward_reference PARAMS ((struct VMS_DBG_Symbol *));
-static int VMS_typedef_parse PARAMS ((char *));
-static int hash_string PARAMS ((const char *));
-static int VMS_Psect_Spec PARAMS ((const char *,int,enum ps_type,
-				   struct VMS_Symbol *));
+static int VMS_TBT_Source_File
+  PARAMS ((char *, int));
+static int gen1
+  PARAMS ((struct VMS_DBG_Symbol *, int));
+static int forward_reference
+  PARAMS ((char *));
+static int final_forward_reference
+  PARAMS ((struct VMS_DBG_Symbol *));
+static int VMS_typedef_parse
+  PARAMS ((char *));
+static int hash_string
+  PARAMS ((const char *));
+static int VMS_Psect_Spec
+  PARAMS ((const char *, int, enum ps_type, struct VMS_Symbol *));
 
 /* Local support routines which don't directly return any value.  */
 
-static void s_const PARAMS ((int));
-static void Create_VMS_Object_File PARAMS ((void));
-static void Flush_VMS_Object_Record_Buffer PARAMS ((void));
-static void Set_VMS_Object_File_Record PARAMS ((int));
-static void Close_VMS_Object_File PARAMS ((void));
-static void vms_tir_stack_psect PARAMS ((int,int,int));
-static void VMS_Store_Immediate_Data PARAMS ((const char *,int,int));
-static void VMS_Set_Data PARAMS ((int,int,int,int));
-static void VMS_Store_Struct PARAMS ((int));
-static void VMS_Def_Struct PARAMS ((int));
-static void VMS_Set_Struct PARAMS ((int));
-static void VMS_TBT_Module_Begin PARAMS ((void));
-static void VMS_TBT_Module_End PARAMS ((void));
-static void VMS_TBT_Routine_Begin PARAMS ((symbolS *,int));
-static void VMS_TBT_Routine_End PARAMS ((int,symbolS *));
-static void VMS_TBT_Block_Begin PARAMS ((symbolS *,int,char *));
-static void VMS_TBT_Block_End PARAMS ((valueT));
-static void VMS_TBT_Line_PC_Correlation PARAMS ((int,int,int,int));
-static void VMS_TBT_Source_Lines PARAMS ((int,int,int));
-static void fpush PARAMS ((int,int));
-static void rpush PARAMS ((int,int));
-static void array_suffix PARAMS ((struct VMS_DBG_Symbol *));
-static void new_forward_ref PARAMS ((int));
-static void generate_suffix PARAMS ((struct VMS_DBG_Symbol *,int));
-static void bitfield_suffix PARAMS ((struct VMS_DBG_Symbol *,int));
-static void setup_basic_type PARAMS ((struct VMS_DBG_Symbol *));
-static void VMS_DBG_record PARAMS ((struct VMS_DBG_Symbol *,int,int,char *));
-static void VMS_local_stab_Parse PARAMS ((symbolS *));
-static void VMS_stab_parse PARAMS ((symbolS *,int,int,int,int));
-static void VMS_GSYM_Parse PARAMS ((symbolS *,int));
-static void VMS_LCSYM_Parse PARAMS ((symbolS *,int));
-static void VMS_STSYM_Parse PARAMS ((symbolS *,int));
-static void VMS_RSYM_Parse PARAMS ((symbolS *,symbolS *,int));
-static void VMS_LSYM_Parse PARAMS ((void));
-static void Define_Local_Symbols PARAMS ((symbolS *,symbolS *,symbolS *,int));
-static void Write_VMS_MHD_Records PARAMS ((void));
-static void Write_VMS_EOM_Record PARAMS ((int,valueT));
-static void VMS_Case_Hack_Symbol PARAMS ((const char *,char *));
-static void VMS_Modify_Psect_Attributes PARAMS ((const char *,int *));
-static void VMS_Global_Symbol_Spec PARAMS ((const char *,int,int,int));
-static void VMS_Local_Environment_Setup PARAMS ((const char *));
-static void VMS_Emit_Globalvalues PARAMS ((unsigned,unsigned,char *));
-static void VMS_Procedure_Entry_Pt PARAMS ((char *,int,int,int));
-static void VMS_Set_Psect PARAMS ((int,int,int));
-static void VMS_Store_Repeated_Data PARAMS ((int,char *,int,int));
-static void VMS_Store_PIC_Symbol_Reference PARAMS ((symbolS *,int,
-						    int,int,int,int));
-static void VMS_Fix_Indirect_Reference PARAMS ((int,int,fragS *,fragS *));
+static void s_const
+  PARAMS ((int));
+static void Create_VMS_Object_File
+  PARAMS ((void));
+static void Flush_VMS_Object_Record_Buffer
+  PARAMS ((void));
+static void Set_VMS_Object_File_Record
+  PARAMS ((int));
+static void Close_VMS_Object_File
+  PARAMS ((void));
+static void vms_tir_stack_psect
+  PARAMS ((int, int, int));
+static void VMS_Store_Immediate_Data
+  PARAMS ((const char *, int, int));
+static void VMS_Set_Data
+  PARAMS ((int, int, int, int));
+static void VMS_Store_Struct
+  PARAMS ((int));
+static void VMS_Def_Struct
+  PARAMS ((int));
+static void VMS_Set_Struct
+  PARAMS ((int));
+static void VMS_TBT_Module_Begin
+  PARAMS ((void));
+static void VMS_TBT_Module_End
+  PARAMS ((void));
+static void VMS_TBT_Routine_Begin
+  PARAMS ((symbolS *, int));
+static void VMS_TBT_Routine_End
+  PARAMS ((int, symbolS *));
+static void VMS_TBT_Block_Begin
+  PARAMS ((symbolS *, int, char *));
+static void VMS_TBT_Block_End
+  PARAMS ((valueT));
+static void VMS_TBT_Line_PC_Correlation
+  PARAMS ((int, int, int, int));
+static void VMS_TBT_Source_Lines
+  PARAMS ((int, int, int));
+static void fpush
+  PARAMS ((int, int));
+static void rpush
+  PARAMS ((int, int));
+static void array_suffix
+  PARAMS ((struct VMS_DBG_Symbol *));
+static void new_forward_ref
+  PARAMS ((int));
+static void generate_suffix
+  PARAMS ((struct VMS_DBG_Symbol *, int));
+static void bitfield_suffix
+  PARAMS ((struct VMS_DBG_Symbol *, int));
+static void setup_basic_type
+  PARAMS ((struct VMS_DBG_Symbol *));
+static void VMS_DBG_record
+  PARAMS ((struct VMS_DBG_Symbol *, int, int, char *));
+static void VMS_local_stab_Parse
+  PARAMS ((symbolS *));
+static void VMS_stab_parse
+  PARAMS ((symbolS *, int, int, int, int));
+static void VMS_GSYM_Parse
+  PARAMS ((symbolS *, int));
+static void VMS_LCSYM_Parse
+  PARAMS ((symbolS *, int));
+static void VMS_STSYM_Parse
+  PARAMS ((symbolS *, int));
+static void VMS_RSYM_Parse
+  PARAMS ((symbolS *, symbolS *, int));
+static void VMS_LSYM_Parse
+  PARAMS ((void));
+static void Define_Local_Symbols
+  PARAMS ((symbolS *, symbolS *, symbolS *, int));
+static void Write_VMS_MHD_Records
+  PARAMS ((void));
+static void Write_VMS_EOM_Record
+  PARAMS ((int, valueT));
+static void VMS_Case_Hack_Symbol
+  PARAMS ((const char *, char *));
+static void VMS_Modify_Psect_Attributes
+  PARAMS ((const char *, int *));
+static void VMS_Global_Symbol_Spec
+  PARAMS ((const char *, int, int, int));
+static void VMS_Local_Environment_Setup
+  PARAMS ((const char *));
+static void VMS_Emit_Globalvalues
+  PARAMS ((unsigned, unsigned, char *));
+static void VMS_Procedure_Entry_Pt
+  PARAMS ((char *, int, int, int));
+static void VMS_Set_Psect
+  PARAMS ((int, int, int));
+static void VMS_Store_Repeated_Data
+  PARAMS ((int, char *, int, int));
+static void VMS_Store_PIC_Symbol_Reference
+  PARAMS ((symbolS *, int, int, int, int, int));
+static void VMS_Fix_Indirect_Reference
+  PARAMS ((int, addressT, fragS *, fragS *));
 
 /* Support code which used to be inline within vms_write_object_file.  */
-static void vms_fixup_text_section PARAMS ((unsigned,struct frag *,struct frag *));
-static void synthesize_data_segment PARAMS ((unsigned,unsigned,struct frag *));
-static void vms_fixup_data_section PARAMS ((unsigned,unsigned));
-static void global_symbol_directory PARAMS ((unsigned,unsigned));
-static void local_symbols_DST PARAMS ((symbolS *,symbolS *));
-static void vms_build_DST PARAMS ((unsigned));
-static void vms_fixup_xtors_section PARAMS ((struct VMS_Symbol *, int));
+static void vms_fixup_text_section
+  PARAMS ((unsigned, struct frag *, struct frag *));
+static void synthesize_data_segment
+  PARAMS ((unsigned, unsigned, struct frag *));
+static void vms_fixup_data_section
+  PARAMS ((unsigned, unsigned));
+static void global_symbol_directory
+  PARAMS ((unsigned, unsigned));
+static void local_symbols_DST
+  PARAMS ((symbolS *, symbolS *));
+static void vms_build_DST
+  PARAMS ((unsigned));
+static void vms_fixup_xtors_section
+  PARAMS ((struct VMS_Symbol *, int));
 
 
 /* The following code defines the special types of pseudo-ops that we
@@ -580,13 +647,17 @@ obj_crawl_symbol_chain (headers)
 static void
 Create_VMS_Object_File ()
 {
-#if	defined(eunice) || !defined(VMS)
+#ifdef eunice
   VMS_Object_File_FD = creat (out_file_name, 0777, "var");
-#else	/* eunice */
+#else
+#ifndef VMS
+  VMS_Object_File_FD = creat (out_file_name, 0777);
+#else	/* VMS */
   VMS_Object_File_FD = creat (out_file_name, 0, "rfm=var",
 			      "ctx=bin", "mbc=16", "deq=64", "fop=tef",
 			      "shr=nil");
-#endif	/* eunice */
+#endif	/* !VMS */
+#endif	/* !eunice */
   /* Deal with errors.  */
   if (VMS_Object_File_FD < 0)
     as_fatal (_("Couldn't create VMS object file \"%s\""), out_file_name);
@@ -626,8 +697,8 @@ Flush_VMS_Object_Record_Buffer ()
 #endif /* not VMS */
 
   /* Write the data to the file.  */
-  if (write (VMS_Object_File_FD, Object_Record_Buffer, Object_Record_Offset)
-      != Object_Record_Offset)
+  if ((size_t) write (VMS_Object_File_FD, Object_Record_Buffer,
+		      Object_Record_Offset) != Object_Record_Offset)
     error (_("I/O error writing VMS object file"));
 
   /* The buffer is now empty.  */
@@ -947,7 +1018,7 @@ VMS_TBT_Routine_End (Max_Size, sp)
      symbolS *sp;
 {
   symbolS *symbolP;
-  int Size = 0x7fffffff;
+  unsigned long Size = 0x7fffffff;
   char Local[16];
   valueT sym_value, sp_value = S_GET_VALUE (sp);
 
@@ -4169,7 +4240,7 @@ VMS_Store_PIC_Symbol_Reference (Symbol, Offset, PC_Relative,
 static void
 VMS_Fix_Indirect_Reference (Text_Psect, Offset, fragP, text_frag_root)
      int Text_Psect;
-     int Offset;
+     addressT Offset;
      register fragS *fragP;
      fragS *text_frag_root;
 {
@@ -4592,7 +4663,7 @@ vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
 
 static void
 synthesize_data_segment (data_siz, text_siz, data_frag_root)
-     unsigned data_siz ATTRIBUTE_UNUSED;
+     unsigned data_siz;
      unsigned text_siz;
      struct frag *data_frag_root;
 {
@@ -4628,7 +4699,8 @@ synthesize_data_segment (data_siz, text_siz, data_frag_root)
 
 static void
 vms_fixup_data_section (data_siz, text_siz)
-     unsigned data_siz, text_siz;
+     unsigned int data_siz ATTRIBUTE_UNUSED;
+     unsigned int text_siz;
 {
   register struct VMS_Symbol *vsp;
   register struct fix *fixP;

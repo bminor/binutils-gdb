@@ -1,5 +1,13 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/obj-vms.c: Formatting.  Include fnctl.h.
+	(Create_VMS_Object_File): Fix creat call for sane unix systems.
+	(Object_Record_Offset): Make it a size_t.
+	(Flush_VMS_Object_Record_Buffer): Fix signed/unsigned warning.
+	(VMS_TBT_Routine_End <Size>): Make var unsigned long.
+	(VMS_Fix_Indirect_Reference <Offset>): Make arg addressT.
+	(synthesize_data_segment <data_size>): Remove ATTRIBUTE_UNUSED.
+	(vms_fixup_data_section <data_size>): Add here instead.
 	* config/e-criself.c: Fix typo in last change.
 
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
