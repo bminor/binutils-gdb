@@ -1,5 +1,9 @@
 Thu Oct  9 15:17:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/Makefile.am (CPU_DOCS): Define.
+	(as.info): Depend upon $(CPU_DOCS).
+	* doc/Makefile.in: Rebuild.
+
 	* configure.in: Remove AM_PROG_INSTALL; it's called by
 	AM_INIT_AUTOMAKE.
 	* configure: Rebuild.
