@@ -364,6 +364,17 @@ if test x"$silent" != x"yes"; then
   echo "Setting model-issue flags = $sim_model_issue" 6>&1
 fi],[sim_model_issue=""])dnl
 
+AC_ARG_ENABLE(sim-stdio,
+[  --enable-sim-stdio			Specify whether to use stdio for console input/output.],
+[case "${enableval}" in
+  yes)	sim_stdio="-DWITH_STDIO=DO_USE_STDIO";;
+  no)	sim_stdio="-DWITH_STDIO=DONT_USE_STDIO";;
+  *)	AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-stdio"); sim_stdio="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_stdio" != x""; then
+  echo "Setting stdio flags = $sim_stdio" 6>&1
+fi],[sim_stdio=""])dnl
+
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
@@ -405,6 +416,7 @@ AC_SUBST(sim_monitor)
 AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
+AC_SUBST(sim_stdio)
 
 AC_CHECK_FUNCS(getrusage)
 

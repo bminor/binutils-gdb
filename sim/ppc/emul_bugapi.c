@@ -166,6 +166,9 @@ struct _os_emul_data {
   unsigned_word stall_cpu_loop_address;
   int little_endian;
   int floating_point_available;
+  /* I/O devices */
+  device_instance *output;
+  device_instance *input;
 };
 
 
@@ -214,6 +217,10 @@ emul_bugapi_create(device *root,
     = device_find_boolean_property(root, "/options/little-endian?");
   bugapi->floating_point_available
     = device_find_boolean_property(root, "/openprom/options/floating-point?");
+  bugapi->input
+    = device_find_ihandle_property(root, "/chosen/stdin");
+  bugapi->output
+    = device_find_ihandle_property(root, "/chosen/stdout");
 
   /* initialization */
   device_tree_add_parsed(root, "/openprom/init/register/0.pc 0x%lx",
@@ -239,15 +246,15 @@ emul_bugapi_create(device *root,
   /* patch the system call instruction to call this emulation and then
      do an rfi */
   node = device_tree_add_parsed(root, "/openprom/init/data@0x%lx",
-				(long)bugapi->system_call_address);
+				(unsigned long)bugapi->system_call_address);
   device_tree_add_parsed(node, "./real-address 0x%lx",
-			 (long)bugapi->system_call_address);
+			 (unsigned long)bugapi->system_call_address);
   device_tree_add_parsed(node, "./data 0x%x",
 			 emul_call_instruction);
   node = device_tree_add_parsed(root, "/openprom/init/data@0x%lx",
-				(long)(bugapi->system_call_address + 4));
+				(unsigned long)bugapi->system_call_address + 4);
   device_tree_add_parsed(node, "./real-address 0x%lx",
-			 (long)(bugapi->system_call_address + 4));
+			 (unsigned long)bugapi->system_call_address + 4);
   device_tree_add_parsed(node, "./data 0x%x",
 			 emul_rfi_instruction);
 
@@ -293,7 +300,8 @@ emul_bugapi_instruction_name(int call_id)
 }
 
 static int
-emul_bugapi_do_read(cpu *processor,
+emul_bugapi_do_read(os_emul_data *bugapi,
+		    cpu *processor,
 		    unsigned_word cia,
 		    unsigned_word buf,
 		    int nbytes)
@@ -308,9 +316,11 @@ emul_bugapi_do_read(cpu *processor,
   emul_read_buffer((void *)scratch_buffer, buf, nbytes, processor, cia);
   
   /* read */
-  status = read (0, (void *)scratch_buffer, nbytes);
+  status = device_instance_read(bugapi->input,
+				(void *)scratch_buffer, nbytes);
 
-  if (status == -1) {
+  /* -1 = error, -2 = nothing available - see "serial" [IEEE1275] */
+  if (status < 0) {
     status = 0;
   }
 
@@ -327,14 +337,14 @@ emul_bugapi_do_read(cpu *processor,
 }
 
 static void
-emul_bugapi_do_write(cpu *processor,
+emul_bugapi_do_write(os_emul_data *bugapi,
+		     cpu *processor,
 		     unsigned_word cia,
 		     unsigned_word buf,
 		     int nbytes,
 		     const char *suffix)
 {
   void *scratch_buffer = NULL;
-  char *p;
   int nr_moved;
 
   /* get a tempoary bufer */
@@ -354,14 +364,13 @@ emul_bugapi_do_write(cpu *processor,
       }
   
       /* write */
-      for (p = (char *)scratch_buffer; nbytes-- > 0; p++)
-	printf_filtered("%c", *p);
+      device_instance_write(bugapi->output, scratch_buffer, nbytes);
 
       zfree(scratch_buffer);
     }
 
   if (suffix)
-    printf_filtered("%s", suffix);
+    device_instance_write(bugapi->output, suffix, strlen(suffix));
 
   flush_stdoutput ();
 }
@@ -370,10 +379,10 @@ static int
 emul_bugapi_instruction_call(cpu *processor,
 			     unsigned_word cia,
 			     unsigned_word ra,
-			     os_emul_data *emul_data)
+			     os_emul_data *bugapi)
 {
   const int call_id = cpu_registers(processor)->gpr[10];
-  const char *my_prefix = "bugapi";
+  const char *my_prefix UNUSED = "bugapi";
   unsigned char uc;
 
   ITRACE (trace_os_emul,(" 0x%x %s, r3 = 0x%lx, r4 = 0x%lx\n",
@@ -382,7 +391,7 @@ emul_bugapi_instruction_call(cpu *processor,
 			 (long)cpu_registers(processor)->gpr[4]));;
 
   /* check that this isn't an invalid instruction */
-  if (cia != emul_data->system_call_address)
+  if (cia != bugapi->system_call_address)
     return 0;
   switch (call_id) {
   default:
@@ -392,23 +401,28 @@ emul_bugapi_instruction_call(cpu *processor,
   /* read a single character, output r3 = byte */
   /* FIXME: Add support to unbuffer input */
   case _INCHR:
-    if (read (0, &uc, 1) < 0)
+    if (device_instance_read(bugapi->input, (void *)&uc, 1) <= 0)
       uc = 0;
     cpu_registers(processor)->gpr[3] = uc;
     break;
   /* read a line of at most 256 bytes, r3 = ptr to 1st byte, output r3 = ptr to last byte+1  */
   case _INLN:
-    cpu_registers(processor)->gpr[3] += emul_bugapi_do_read(processor, cia,
+    cpu_registers(processor)->gpr[3] += emul_bugapi_do_read(bugapi,
+							    processor, cia,
 							    cpu_registers(processor)->gpr[3],
 							    256);
     break;
   /* output a character, r3 = character */
   case _OUTCHR:
-    printf_filtered("%c", (char)cpu_registers(processor)->gpr[3]);
+    {
+      char out = (char)cpu_registers(processor)->gpr[3];
+      device_instance_write(bugapi->output, &out, 1);
+    }
     break;
   /* output a string, r3 = ptr to 1st byte, r4 = ptr to last byte+1 */
   case _OUTSTR:
-    emul_bugapi_do_write(processor, cia,
+    emul_bugapi_do_write(bugapi,
+			 processor, cia,
 			 cpu_registers(processor)->gpr[3],
 			 cpu_registers(processor)->gpr[4] - cpu_registers(processor)->gpr[3],
 			 (const char *)0);
@@ -416,14 +430,15 @@ emul_bugapi_instruction_call(cpu *processor,
   /* output a string followed by \r\n, r3 = ptr to 1st byte, r4 = ptr to last byte+1 */
   case _OUTLN:
 					
-    emul_bugapi_do_write(processor, cia,
+    emul_bugapi_do_write(bugapi,
+			 processor, cia,
 			 cpu_registers(processor)->gpr[3],
 			 cpu_registers(processor)->gpr[4] - cpu_registers(processor)->gpr[3],
 			 "\n");
     break;
   /* output a \r\n */
   case _PCRLF:
-    printf_filtered("\n");
+    device_instance_write(bugapi->output, "\n", 1);
     break;
   /* return to ppcbug monitor */
   case _RETURN:

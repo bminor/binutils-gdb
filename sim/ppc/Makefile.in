@@ -1,7 +1,7 @@
 #
 #   This file is part of the program psim.
 #
-#   Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+#   Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -84,6 +84,7 @@ ASSERT_CFLAGS = @sim_assert@
 RESERVED_CFLAGS = @sim_reserved@
 MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
+STDIO_CFLAGS = @sim_stdio@
 WARNING_CFLAGS = @sim_warnings@
 CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(ENDIAN_CFLAGS) \
@@ -100,7 +101,8 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(ASSERT_CFLAGS) \
   $(RESERVED_CFLAGS) \
   $(MONITOR_CFLAGS) \
-  $(MODEL_CFLAGS)
+  $(MODEL_CFLAGS) \
+  $(STDIO_CFLAGS)
 
 STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
@@ -297,7 +299,7 @@ os_emul.o: os_emul.c emul_netbsd.h emul_chirp.h emul_bugapi.h $(EMUL_GENERIC_H)
 emul_generic.o: emul_generic.c $(EMUL_GENERIC_H)
 
 emul_netbsd.o: emul_netbsd.c emul_netbsd.h $(EMUL_GENERIC_H)
-emul_chirp.o: emul_chirp.c emul_chirp.h cap.h $(EMUL_GENERIC_H)
+emul_chirp.o: emul_chirp.c emul_chirp.h $(EMUL_GENERIC_H)
 emul_bugapi.o: emul_bugapi.c emul_bugapi.h $(EMUL_GENERIC_H)
 
 registers.o: registers.c $(REGISTERS_H) $(BASICS_H) 
@@ -326,7 +328,7 @@ spreg.o: spreg.h spreg.c $(BASICS_H)
 
 main.o: main.c $(PSIM_H) itable.h options.h
 
-device.o: device.c $(DEVICE_TABLE_H)
+device.o: device.c $(DEVICE_TABLE_H) cap.h
 
 device_table.o: device_table.c $(DEVICE_TABLE_H) events.h
 

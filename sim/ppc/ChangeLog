@@ -1,3 +1,38 @@
+Fri Mar 29 12:17:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (STDIO_CFLAGS): Pass on result of @sim_stdio@
+	configuration variable.
+	(CONFIG_CFLAGS): Include STDIO_CFLAGS.
+
+	* std-config.h (DO{,NT}_USE_STDIO): New flags for whether we
+	should use stdio for console input.
+	(WITH_STDIO): If not defined, define as DONT_USE_STDIO.
+
+	* configure.in (--enable-sim-stdio): Add new switch to control
+	whether stdio is used for console I/O.
+	* configure: Regenerate.
+
+	* device_table.c (console_use_stdio): New static variable set from
+	WITH_STDIO.
+	(scan_console): If console_use_stdio, use getchar to read byte
+	instead of doing polling I/O.
+	(write_console): If console_use_stdio, write byte with putchar.
+	(console_io_write_buffer_callback): If console_use_stdio, fflush
+	stdout.
+	(console_instance_write_callback): Ditto.
+	(console_instance_read_callback): If console_use_stdio, use fgets
+	to read line.
+
+Fri Mar 29 12:17:58 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* emul_bugapi.c (_os_emul_data): Add fields for output, input.
+	(emul_bugapi_create): Create input, output from /chosen/stdin and
+	/chosen/stdout.
+	(emul_bugapi_do_{read,write}): Switch to use device_instance
+	interface.
+	(emul_bugapi_instruction_call): Change calls to
+	emul_bugapi_do_{read,write} to pass device instance argument.
+
 Tue Mar 26 14:57:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c (idecode_switch_end): Fix 2/26 change so that an extra

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,24 +62,83 @@
    from <name>@<int>,<nr_bytes>) to its parent at address zero and
    with read/write access. */
 
-STATIC_INLINE_DEVICE_TABLE void
-generic_init_callback(device *me,
-		      psim *system)
+typedef struct _reg_spec {
+  unsigned32 base;
+  unsigned32 size;
+} reg_spec;
+
+void
+generic_device_init_address(device *me,
+			    psim *system)
 {
-  unsigned_word addr;
-  unsigned nr_bytes;
-  if (scand_uw_u(device_name(me), &addr, &nr_bytes) != 2)
-    error("generic_init_callback() invalid nr_bytes in %s\n", device_name(me));
-  device_attach_address(device_parent(me),
-			device_name(me),
-			attach_callback,
-			0 /*space*/,
-			addr,
-			nr_bytes,
-			access_read_write,
-			me);
+  const device_property *reg = device_find_array_property(me, "reg");
+  const reg_spec *spec = reg->array;
+  int nr_entries = reg->sizeof_array / sizeof(reg_spec);
+
+  if ((reg->sizeof_array % sizeof(reg_spec)) != 0)
+    error("devices/%s reg property is of wrong size\n", device_name(me));
+ 
+  while (nr_entries > 0) {
+    device_attach_address(device_parent(me),
+			  device_name(me),
+			  attach_callback,
+			  0 /*space*/,
+			  BE2H_4(spec->base),
+			  BE2H_4(spec->size),
+			  access_read_write_exec,
+			  me);
+    spec++;
+    nr_entries--;
+  }
 }
 
+int
+generic_device_unit_decode(device *me,
+			   const char *unit,
+			   device_unit *phys)
+{
+  memset(phys, 0, sizeof(device_unit));
+  if (unit == NULL)
+    return 0;
+  else {
+    char *pos = (char*)unit; /* force for strtoul() */
+    while (1) {
+      char *old_pos = pos;
+      long int val = strtoul(pos, &pos, 0);
+      if (old_pos == pos && *pos == '\0')
+	return phys->nr_cells;
+      if (old_pos == pos && *pos != '\0')
+	return -1;
+      if (phys->nr_cells == 4)
+	return -1;
+      phys->cells[phys->nr_cells] = val;
+      phys->nr_cells++;
+    }
+  }
+}
+
+int
+generic_device_unit_encode(device *me,
+			   const device_unit *phys,
+			   char *buf,
+			   int sizeof_buf)
+{
+  int i;
+  int len;
+  char *pos = buf; /* force for strtoul() */
+  for (i = 0; i < phys->nr_cells; i++) {
+    if (pos != buf) {
+      strcat(pos, ",");
+      pos = strchr(pos, '\0');
+    }
+    sprintf(pos, "0x%lx", (unsigned long)phys->cells[i]);
+    pos = strchr(pos, '\0');
+  }
+  len = pos - buf;
+  if (len >= sizeof_buf)
+    error("generic_unit_encode - buffer overflow\n");
+  return len;
+}
 
 /* DMA a file into memory */
 STATIC_INLINE_DEVICE_TABLE int
@@ -208,41 +267,98 @@ unimp_device_dma_write_buffer(device *me,
 }
 
 void
-unimp_device_attach_interrupt(device *me,
-			      device *who,
-			      int interrupt_line,
-			      const char *name)
+unimp_device_interrupt_event(device *me,
+			     int my_port,
+			     device *source,
+			     int source_port,
+			     int level,
+			     cpu *processor,
+			     unsigned_word cia)
 {
-  error("device_attach_interrupt_callback for %s not implemented\n", device_name(me));
+  error("unimp_device_interrupt_event for %s unimplemented\n",
+	device_name(me));
 }
 
 void
-unimp_device_detach_interrupt(device *me,
-			      device *who,
-			      int interrupt_line,
-			      const char *name)
+unimp_device_child_interrupt_event(device *me,
+				   device *parent,
+				   device *source,
+				   int source_port,
+				   int level,
+				   cpu *processor,
+				   unsigned_word cia)
 {
-  error("device_detach_interrupt_callback for %s not implemented\n", device_name(me));
+  error("unimp_device_child_interrupt_event_callback for %s unimplemented\n",
+	device_name(me));
+}
+      
+int
+unimp_device_unit_decode(device *me,
+			 const char *unit,
+			 device_unit *address)
+{
+  error("unimp_device_unit_decode_callback for %s unimplemented\n",
+	device_name(me));
+  return 0;
+}
+
+int
+unimp_device_unit_encode(device *me,
+			 const device_unit *unit_address,
+			 char *buf,
+			 int sizeof_buf)
+{
+  error("unimp_device_unit_encode_callback for %s unimplemented\n",
+	device_name(me));
+  return 0;
+}
+
+void *
+unimp_device_instance_create(device *me,
+			     const char *args)
+{
+  error("unimp_device_instance_create_callback for %s unimplemented\n",
+	device_name(me));
+  return 0;
 }
 
 void
-unimp_device_interrupt(device *me,
-		       device *who,
-		       int interrupt_line,
-		       int interrupt_status,
-		       cpu *processor,
-		       unsigned_word cia)
+unimp_device_instance_delete(device_instance *instance)
 {
-  error("device_interrupt_callback for %s not implemented\n", device_name(me));
+  error("unimp_device_instance_delete_callback for %s unimplemented\n",
+	device_instance_name(instance));
 }
 
-void
-unimp_device_interrupt_ack(device *me,
-			   int interrupt_line,
-			   int interrupt_status)
+int
+unimp_device_instance_read(device_instance *instance,
+			   void *buf,
+			   unsigned_word len)
 {
-  error("device_interrupt_ack_callback for %s not implemented\n", device_name(me));
+  error("unimp_device_instance_read_callback for %s unimplemented\n",
+	device_instance_name(instance));
+  return 0;
 }
+
+int
+unimp_device_instance_write(device_instance *instance,
+			    const void *buf,
+			    unsigned_word len)
+{
+  error("unimp_device_instance_write_callback for %s unimplemented\n",
+	device_instance_name(instance));
+  return 0;
+}
+
+int
+unimp_device_instance_seek(device_instance *instance,
+			   unsigned_word pos_hi,
+			   unsigned_word pos_lo)
+{
+  error("unimp_device_instance_seek_callback for %s unimplemented\n",
+	device_instance_name(instance));
+  return 0;
+}
+
 
 void
 unimp_device_ioctl(device *me,
@@ -287,9 +403,9 @@ passthrough_device_detach_address(device *me,
 				  attach_type attach,
 				  int space,
 				  unsigned_word addr,
-			   unsigned nr_bytes,
-			   access_type access,
-			   device *who) /*callback/default*/
+				  unsigned nr_bytes,
+				  access_type access,
+				  device *who) /*callback/default*/
 {
   device_detach_address(device_parent(me), name, attach,
 			space, addr, nr_bytes, access,
@@ -298,10 +414,10 @@ passthrough_device_detach_address(device *me,
 
 unsigned
 passthrough_device_dma_read_buffer(device *me,
-			    void *dest,
-			    int space,
-			    unsigned_word addr,
-			    unsigned nr_bytes)
+				   void *dest,
+				   int space,
+				   unsigned_word addr,
+				   unsigned nr_bytes)
 {
   return device_dma_read_buffer(device_parent(me), dest,
 				space, addr, nr_bytes);
@@ -321,42 +437,18 @@ passthrough_device_dma_write_buffer(device *me,
 				 violate_read_only_section);
 }
 
-void
-passthrough_device_attach_interrupt(device *me,
-				    device *who,
-				    int interrupt_line,
-				    const char *name)
+int
+ignore_device_unit_decode(device *me,
+			  const char *unit,
+			  device_unit *phys)
 {
-  device_attach_interrupt(device_parent(me), who,
-			  interrupt_line, name);
-}
-
-void
-passthrough_device_detach_interrupt(device *me,
-			     device *who,
-			     int interrupt_line,
-			     const char *name)
-{
-  device_detach_interrupt(device_parent(me), who,
-			  interrupt_line, name);
-}
-
-
-void
-passthrough_device_interrupt(device *me,
-		      device *who,
-		      int interrupt_line,
-		      int interrupt_status,
-		      cpu *processor,
-		      unsigned_word cia)
-{
-  device_interrupt(device_parent(me), who,
-				  interrupt_line, interrupt_status,
-				  processor, cia);
+  memset(phys, 0, sizeof(device_unit));
+  return 0;
 }
 
 
 static const device_callbacks passthrough_callbacks = {
+  ignore_device_init,
   ignore_device_init,
   passthrough_device_attach_address,
   passthrough_device_detach_address,
@@ -364,10 +456,15 @@ static const device_callbacks passthrough_callbacks = {
   unimp_device_io_write_buffer,
   passthrough_device_dma_read_buffer,
   passthrough_device_dma_write_buffer,
-  passthrough_device_attach_interrupt,
-  passthrough_device_detach_interrupt,
-  passthrough_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  generic_device_unit_decode,
+  generic_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
@@ -408,6 +505,70 @@ typedef enum {
   console_size = 16,
 } console_offsets;
 
+static int console_use_stdio = WITH_STDIO;
+
+/* check the console for an available character */
+static void
+scan_console(console_device *console)
+{ /* check for input */
+  int flags;
+  int status;
+
+  /* Use stdio if desired.  */
+  if (console_use_stdio) {
+    int ch = getchar ();
+    if (ch == EOF) {
+      console->input.status = 0;
+      console->input.buffer = '\0';
+    } else {
+      console->input.status = 1;
+      console->input.buffer = ch;
+    }
+    return;
+  }
+
+  /* get the old status */
+  flags = fcntl(0, F_GETFL, 0);
+  if (flags == -1) {
+    perror("console");
+    return;
+  }
+
+  /* temp, disable blocking IO */
+  status = fcntl(0, F_SETFL, flags | O_NDELAY);
+  if (status == -1) {
+    perror("console");
+    return;
+  }
+  /* try for input */
+  status = read(0, &console->input.buffer, 1);
+  if (status == 1) {
+    console->input.status = 1;
+  }
+  else {
+    console->input.status = 0;
+  }
+  /* return to regular vewing */
+  flags = fcntl(0, F_SETFL, flags);
+  if (flags == -1) {
+    perror("console");
+    return;
+  }
+}
+
+/* write the character to the console */
+static void
+write_console(console_device *console,
+	      char val)
+{
+  DTRACE(console, ("<%c:%d>", val, val));
+  if (console_use_stdio)
+    putchar (val);
+  else
+    printf_filtered("%c", val) ;
+  console->output.buffer = val;
+  console->output.status = 1;
+}
 
 static unsigned
 console_io_read_buffer_callback(device *me,
@@ -423,41 +584,14 @@ console_io_read_buffer_callback(device *me,
 
   /* determine what was read */
 
-  switch ((int)addr) {
+  switch ((int)addr & console_offset_mask) {
 
   case console_read_buffer:
     val = console->input.buffer;
     break;
 
   case console_read_status:
-    { /* check for input */
-      int flags;
-      int status;
-      /* get the old status */
-      flags = fcntl(0, F_GETFL, 0);
-      if (flags == -1) {
-	perror("console");
-	val = 0;
-	break;
-      }
-      /* temp, disable blocking IO */
-      status = fcntl(0, F_SETFL, flags | O_NDELAY);
-      if (status == -1) {
-	perror("console");
-	val = 0;
-	break;
-      }
-      /* try for input */
-      status = read(0, &console->input.buffer, 1);
-      if (status == 1) {
-	console->input.status = 1;
-      }
-      else {
-	console->input.status = 0;
-      }
-      /* return to regular vewing */
-      fcntl(0, F_SETFL, flags);
-    }
+    scan_console(console);
     val = console->input.status;
     break;
 
@@ -493,48 +627,117 @@ console_io_write_buffer_callback(device *me,
   console_device *console = (console_device*)device_data(me);
   unsigned_1 val = *(unsigned_1*)source;
 
-  switch ((int)addr) {
+  switch ((int)addr & console_offset_mask) {
+
   case console_read_buffer:
     console->input.buffer = val;
     break;
+
   case console_read_status:
     console->input.status = val;
     break;
+
   case console_write_buffer:
-    DTRACE(console, ("<%c:%d>", val, val));
-    printf_filtered("%c",val) ;
-    console->output.buffer = val;
-    console->output.status = 1;
+    write_console(console, val);
+    if (console_use_stdio)
+      fflush (stdout);
     break;
+
   case console_write_status:
     console->output.status = val;
     break;
+
   default:
     error("console_write_callback() internal error\n");
+
   }
 	 
   return nr_bytes;
 }
 
+/* instances of the console device */
+static void *
+console_instance_create_callback(device *me,
+				 const char *args)
+{
+  /* make life easier, attach the console data to the instance */
+  return device_data(me);
+}
+
+static void
+console_instance_delete_callback(device_instance *instance)
+{
+  /* nothing to delete, the console is attached to the device */
+  return;
+}
+
+static int
+console_instance_read_callback(device_instance *instance,
+			       void *buf,
+			       unsigned_word len)
+{
+  console_device *console = device_instance_data(instance);
+  if (console_use_stdio) {
+    char *p = fgets (buf, len, stdin);
+    if (!p)
+      return ferror (stdin) ? -1 : -2;
+
+    return strlen (p);
+  }
+
+  if (!console->input.status)
+    scan_console(console);
+  if (console->input.status) {
+    *(char*)buf = console->input.buffer;
+    console->input.status = 0;
+    return 1;
+  }
+  else {
+    return -2; /* not ready */
+  }
+}
+
+static int
+console_instance_write_callback(device_instance *instance,
+				const void *buf,
+				unsigned_word len)
+{
+  int i;
+  const char *chp = buf;
+  console_device *console = device_instance_data(instance);
+  for (i = 0; i < len; i++)
+    write_console(console, chp[i]);
+  if (console_use_stdio && len)
+    fflush (stdout);
+  return i;
+}
 
 static device_callbacks const console_callbacks = {
-  generic_init_callback,
+  generic_device_init_address,
+  ignore_device_init,
   unimp_device_attach_address,
   unimp_device_detach_address,
   console_io_read_buffer_callback,
   console_io_write_buffer_callback,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  console_instance_create_callback,
+  console_instance_delete_callback,
+  console_instance_read_callback,
+  console_instance_write_callback,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
 
 static void *
 console_create(const char *name,
+	       const device_unit *unit_address,
+	       const char *args,
 	       device *parent)
 {
   /* create the descriptor */
@@ -548,17 +751,17 @@ console_create(const char *name,
 
 
 
-/* ICU device: icu@0x<address>,4
+/* ICU device: icu@<address>
 
-   Single 4 byte register.  Read returns processor number.  Write
-   interrupts specified processor.
+   <address> : read - processor nr
+   <address> : write - interrupt processor nr
+   <address> + 4 : read - nr processors
+
+   Single byte registers that control a simple ICU.
 
    Illustrates passing of events to parent device. Passing of
-   interrupts to parent bus.
+   interrupts to an interrupt destination. */
 
-   NB: For the sake of illustrating the passing of interrupts.  This
-   device doesn't pass interrupt events to its parent.  Instead it
-   passes them back to its self. */
 
 static unsigned
 icu_io_read_buffer_callback(device *me,
@@ -569,10 +772,16 @@ icu_io_read_buffer_callback(device *me,
 			    cpu *processor,
 			    unsigned_word cia)
 {
-  unsigned_1 val;
-  val = cpu_nr(processor);
   memset(dest, 0, nr_bytes);
-  *(unsigned_1*)dest = val;
+  switch (addr & 4) {
+  case 0:
+    *(unsigned_1*)dest = cpu_nr(processor);
+    break;
+  case 4:
+    *(unsigned_1*)dest =
+      device_find_integer_property(me, "/openprom/options/smp");
+    break;
+  }
   return nr_bytes;
 }
 
@@ -590,25 +799,63 @@ icu_io_write_buffer_callback(device *me,
   /* tell the parent device that the interrupt lines have changed.
      For this fake ICU.  The interrupt lines just indicate the cpu to
      interrupt next */
-  device_interrupt(device_parent(me), me,
-		   val, val,
-		   processor, cia);
+  device_interrupt_event(me,
+			 val, /*my_port*/
+			 val, /*val*/
+			 processor, cia);
   return nr_bytes;
 }
 
+static void
+icu_do_interrupt(event_queue *queue,
+		 void *data)
+{
+  cpu *target = (cpu*)data;
+  /* try to interrupt the processor.  If the attempt fails, try again
+     on the next tick */
+  if (!external_interrupt(target))
+    event_queue_schedule(queue, 1, icu_do_interrupt, target);
+}
+
+
+static void
+icu_interrupt_event_callback(device *me,
+			     int my_port,
+			     device *source,
+			     int source_port,
+			     int level,
+			     cpu *processor,
+			     unsigned_word cia)
+{
+  /* the interrupt controller can't interrupt a cpu at any time.
+     Rather it must synchronize with the system clock before
+     performing an interrupt on the given processor */
+  psim *system = cpu_system(processor);
+  cpu *target = psim_cpu(system, my_port);
+  if (target != NULL) {
+    event_queue *events = cpu_event_queue(target);
+    event_queue_schedule(events, 1, icu_do_interrupt, target);
+  }
+}
 
 static device_callbacks const icu_callbacks = {
-  generic_init_callback,
+  generic_device_init_address,
+  ignore_device_init,
   unimp_device_attach_address,
   unimp_device_detach_address,
   icu_io_read_buffer_callback,
   icu_io_write_buffer_callback,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  icu_interrupt_event_callback,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
@@ -650,80 +897,153 @@ halt_io_write_buffer_callback(device *me,
 
 
 static device_callbacks const halt_callbacks = {
-  generic_init_callback,
+  generic_device_init_address,
+  ignore_device_init,
   unimp_device_attach_address,
   unimp_device_detach_address,
   halt_io_read_buffer_callback,
   halt_io_write_buffer_callback,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
 
 
-/* Register init device: register
+/* Register init device: register@<nothing>
 
    Properties attached to the register device specify the name/value
    initialization pair for cpu registers.
 
-   FIXME: A specific processor can be initialized by creating a
-   property with a name like `0.pc'. */
+   A specific processor can be initialized by creating a property with
+   a name like `0.pc'.
+
+   Properties are normally processed old-to-new and this function
+   needs to allow older (first in) properties to override new (last
+   in) ones.  The suport function do_register_init() manages this. */
 
 static void
-register_init(device *me,
-	      const char *name,
-	      void *data)
+do_register_init(device *me,
+		 psim *system,
+		 const device_property *prop)
 {
-  psim *system = (psim*)data;
-  unsigned32 value = device_find_integer_property(me, name);
-  int processor;
-  if (isdigit(name[0]) && name[1] == '.') {
-    processor = atol(name);
-    name += 2;
-    DTRACE(register, ("%d.%s=0x%lx\n", processor, name, (unsigned long)value));
-  }    
-  else {
-    processor = -1;
-    DTRACE(register, ("%s=0x%lx\n", name, (unsigned long)value));
+  if (prop != NULL) {
+    const char *name = prop->name;
+    unsigned32 value = device_find_integer_property(me, name);
+    int processor;
+
+    do_register_init(me, system, device_next_property(prop));
+
+    if (strchr(name, '.') == NULL) {
+      processor = -1;
+      DTRACE(register, ("%s=0x%lx\n", name, (unsigned long)value));
+    }
+    else {
+      char *end;
+      processor = strtoul(name, &end, 0);
+      ASSERT(end[0] == '.');
+      name = end+1;
+      DTRACE(register, ("%d.%s=0x%lx\n", processor, name,
+			(unsigned long)value));
+    }    
+    psim_write_register(system, processor, /* all processors */
+			&value,
+			name,
+			cooked_transfer);
   }
-  psim_write_register(system, processor, /* all processors */
-		      &value,
-		      name,
-		      cooked_transfer);
 }
-
+		 
 
 static void
-register_init_callback(device *me,
-		       psim *system)
+register_init_data_callback(device *me,
+			    psim *system)
 {
-  device_traverse_properties(me, register_init, system);
+  const device_property *prop = device_find_property(me, NULL);
+  do_register_init(me, system, prop);
 }
 
 
 static device_callbacks const register_callbacks = {
-  register_init_callback,
+  ignore_device_init,
+  register_init_data_callback,
   unimp_device_attach_address,
   unimp_device_detach_address,
   unimp_device_io_read_buffer,
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
 
 
-/* VEA VM device: vm@0x<stack-base>,<nr_bytes>
+/* Trace device:
+
+   Properties attached to the trace device are names and values for
+   the various trace variables.  When initialized trace goes through
+   the propertie and sets the global trace variables so that they
+   match what was specified in the device tree. */
+
+static void
+trace_init_data_callback(device *me,
+			 psim *system)
+{
+  const device_property *prop = device_find_property(me, NULL);
+  while (prop != NULL) {
+    const char *name = prop->name;
+    unsigned32 value = device_find_integer_property(me, name);
+    trace_option(name, value);
+    prop = device_next_property(prop);
+  }
+}
+
+
+static device_callbacks const trace_callbacks = {
+  ignore_device_init,
+  trace_init_data_callback,
+  unimp_device_attach_address,
+  unimp_device_detach_address,
+  unimp_device_io_read_buffer,
+  unimp_device_io_write_buffer,
+  unimp_device_dma_read_buffer,
+  unimp_device_dma_write_buffer,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
+  unimp_device_ioctl,
+};
+
+
+
+/* VEA VM:
+
+   vm@<stack-base>
+     stack-base =
+     nr-bytes =
 
    A VEA mode device. This sets its self up as the default memory
    device capturing all accesses (reads/writes) to currently unmapped
@@ -759,12 +1079,15 @@ typedef struct _vm_device {
 
 
 static void
-vm_init_callback(device *me,
-		 psim *system)
+vm_init_address_callback(device *me,
+			 psim *system)
 {
   vm_device *vm = (vm_device*)device_data(me);
 
   /* revert the stack/heap variables to their defaults */
+  vm->stack_base = device_find_integer_property(me, "stack-base");
+  vm->stack_bound = (vm->stack_base
+		     + device_find_integer_property(me, "nr-bytes"));
   vm->stack_lower_limit = vm->stack_bound;
   vm->heap_base = 0;
   vm->heap_bound = 0;
@@ -917,87 +1240,98 @@ vm_ioctl_callback(device *me,
 
 
 static device_callbacks const vm_callbacks = {
-  vm_init_callback,
+  vm_init_address_callback,
+  ignore_device_init,
   vm_attach_address,
   passthrough_device_detach_address,
   vm_io_read_buffer_callback,
   vm_io_write_buffer_callback,
   unimp_device_dma_read_buffer,
   passthrough_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  generic_device_unit_decode,
+  generic_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   vm_ioctl_callback,
 };
 
 
 static void *
 vea_vm_create(const char *name,
+	      const device_unit *address,
+	      const char *args,
 	      device *parent)
 {
   vm_device *vm = ZALLOC(vm_device);
-  unsigned_word addr;
-  unsigned nr_bytes;
-
-  /* extract out the stack parameters */
-  if (scand_uw_u(name, &addr, &nr_bytes) != 2)
-    error("vm_device_create() invalid vm device %s\n", name);
-  vm->stack_base = addr;
-  vm->stack_bound = addr + nr_bytes;
   return vm;
 }
 
 
 
-/* Memory init device: memory@0x<addr>,<size>,<access>
+/* Memory init device: memory@0x<addr>
 
    This strange device is used create sections of memory */
 
 static void
-memory_init_callback(device *me,
-		     psim *system)
+memory_init_address_callback(device *me,
+			     psim *system)
 {
-  unsigned_word addr;
-  unsigned nr_bytes;
-  unsigned access;
-  int nr_args;
+  const device_property *reg = device_find_array_property(me, "reg");
+  const reg_spec *spec = reg->array;
+  int nr_entries = reg->sizeof_array / sizeof(*spec);
 
-  nr_args = scand_uw_u_u(device_name(me), &addr, &nr_bytes, &access);
-  switch (nr_args) {
-  case 2:
-    access = access_read_write_exec;
-    break;
-  case 3:
-    break;
-  default:
-    error("memory_init_callback() invalid memory device %s\n", device_name(me));
-    break;
+  if ((reg->sizeof_array % sizeof(*spec)) != 0)
+    error("devices/%s reg property of incorrect size\n", device_name(me));
+  while (nr_entries > 0) {
+    device_attach_address(device_parent(me),
+			  device_name(me),
+			  attach_raw_memory,
+			  0 /*address space*/,
+			  BE2H_4(spec->base),
+			  BE2H_4(spec->size),
+			  access_read_write_exec,
+			  me);
+    spec++;
+    nr_entries--;
   }
-
-  device_attach_address(device_parent(me),
-			device_name(me),
-			attach_raw_memory,
-			0 /*address space*/,
-			addr,
-			nr_bytes,
-			(access_type)access,
-			me);
 }
 
+static void *
+memory_instance_create_callback(device *me,
+				const char *args)
+{
+  return me; /* for want of any thing better */
+}
+
+static void
+memory_instance_delete_callback(device_instance *instance)
+{
+  return;
+}
 
 static device_callbacks const memory_callbacks = {
-  memory_init_callback,
+  memory_init_address_callback,
+  ignore_device_init,
   unimp_device_attach_address,
   unimp_device_detach_address,
   unimp_device_io_read_buffer,
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  memory_instance_create_callback,
+  memory_instance_delete_callback,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
@@ -1026,9 +1360,10 @@ iobus_attach_address_callback(device *me,
     error("iobus_attach_address_callback() no space for %s/%s\n",
 	  device_name(me), name);
   /* get the bus address */
-  if (scand_uw(device_name(me), &iobus_addr) != 1)
+  if (device_unit_address(me)->nr_cells != 1)
     error("iobus_attach_address_callback() invalid address for %s\n",
 	  device_name(me));
+  iobus_addr = device_unit_address(me)->cells[0];
   device_attach_address(device_parent(me),
 			device_name(me),
 			type,
@@ -1040,39 +1375,8 @@ iobus_attach_address_callback(device *me,
 }
 
 
-STATIC_INLINE_DEVICE_TABLE void
-iobus_do_interrupt(event_queue *queue,
-		   void *data)
-{
-  cpu *target = (cpu*)data;
-  /* try to interrupt the processor.  If the attempt fails, try again
-     on the next tick */
-  if (!external_interrupt(target))
-    event_queue_schedule(queue, 1, iobus_do_interrupt, target);
-}
-
-
-static void
-iobus_interrupt_callback(device *me,
-			 device *who,
-			 int interrupt_line,
-			 int interrupt_status,
-			 cpu *processor,
-			 unsigned_word cia)
-{
-  /* the interrupt controler can't interrupt a cpu at any time.
-     Rather it must synchronize with the system clock before
-     performing an interrupt on the given processor */
-  psim *system = cpu_system(processor);
-  cpu *target = psim_cpu(system, interrupt_status);
-  if (target != NULL) {
-    event_queue *events = cpu_event_queue(target);
-    event_queue_schedule(events, 1, iobus_do_interrupt, target);
-  }
-}
-
-
 static device_callbacks const iobus_callbacks = {
+  ignore_device_init,
   ignore_device_init,
   iobus_attach_address_callback,
   unimp_device_detach_address,
@@ -1080,10 +1384,15 @@ static device_callbacks const iobus_callbacks = {
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  iobus_interrupt_callback,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  generic_device_unit_decode,
+  generic_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
@@ -1096,109 +1405,122 @@ static device_callbacks const iobus_callbacks = {
 
 
 static void
-file_init_callback(device *me,
-		   psim *system)
+file_init_data_callback(device *me,
+			psim *system)
 {
-  unsigned_word addr;
   int count;
-  char file_name[1024];
-
-  if (scand_uw_c(device_name(me), &addr, file_name, sizeof(file_name)) != 2)
-    error("devices/file - Usage: file@<address>,<file-name>\n");
- 
+  const char *file_name = device_find_string_property(me, "file-name");
+  unsigned_word addr = device_find_integer_property(me, "real-address");
   /* load the file */
   count = dma_file(me, file_name, addr);
   if (count < 0)
-    error("device_table/%s - Problem loading file %s\n", device_name(me), file_name);
+    error("device_table/%s - Problem loading file %s\n",
+	  device_name(me), file_name);
 }
 
 
 static device_callbacks const file_callbacks = {
-  file_init_callback,
+  ignore_device_init,
+  file_init_data_callback,
   unimp_device_attach_address,
   unimp_device_detach_address,
   unimp_device_io_read_buffer,
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
 
 
-/* DATA device: data@<address>,<count>,<value>
+/* DATA device: data@<address>
 
-   Store <value> at <address> using <count> size transfer */
+     <data> - property containing the value to store
+     <real-address> - address to store data at
+
+   Store <data> at <address> using approperiate byte order */
 
 static void
-data_init_callback(device *me,
-		   psim *system)
+data_init_data_callback(device *me,
+			psim *system)
 {
-  unsigned_word addr;
-  unsigned count;
-  unsigned value;
-  union {
-    unsigned_1 v1;
-    unsigned_2 v2;
-    unsigned_4 v4;
-    unsigned_8 v8;
-  } buf;
-
-  if (scand_uw_u_u(device_name(me), &addr, &count, &value) != 3)
-    error("devices/data - Usage: data@<address>,<count>,<value>\n");
- 
-  /* store the data value */
-  switch (count) {
-  case 1:
-    buf.v1 = H2T_1(value);
+  unsigned_word addr = device_find_integer_property(me, "real-address");
+  const device_property *data = device_find_property(me, "data");
+  if (data == NULL)
+    error("devices/data - missing data property\n");
+  switch (data->type) {
+  case integer_property:
+    {
+      unsigned32 buf = device_find_integer_property(me, "data");
+      H2T(buf);
+      if (device_dma_write_buffer(device_parent(me),
+				  &buf,
+				  0 /*address-space*/,
+				  addr,
+				  sizeof(buf), /*nr-bytes*/
+				  1 /*violate ro*/) != sizeof(buf))
+	error("devices/%s - Problem storing integer 0x%x at 0x%lx\n",
+	      device_name(me), (long)buf, (unsigned long)addr);
+    }
     break;
-  case 2:
-    buf.v2 = H2T_2(value);
+  default:
+    error("devices/%s - write of this data is not yet implemented\n", device_name(me));
     break;
-  case 4:
-    buf.v4 = H2T_4(value);
-    break;
-  case 8:
-    buf.v8 = H2T_8(value);
-    break;
-  }
-  if (device_dma_write_buffer(device_parent(me),
-			      &buf,
-			      0 /*address-space*/,
-			      addr,
-			      count, /*nr-bytes*/
-			      1 /*violate ro*/) != count) {
-    error("devices/%s - Problem storing 0x%x at 0x%lx\n",
-	  device_name(me), value, (long)addr);
   }
 }
 
 
 static device_callbacks const data_callbacks = {
-  data_init_callback,
+  ignore_device_init,
+  data_init_data_callback,
   unimp_device_attach_address,
   unimp_device_detach_address,
   unimp_device_io_read_buffer,
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
 
 
-/* HTAB: htab@<address>,<nr_bytes>
-   PTE: pte@<real-address>,<virtual-address>,<nr_bytes>,<wimg>,<pp>
-   PTE: pte@<real-address>,<wimg>,<pp>,<binary>
+/* HTAB:
 
+   htab@<real-address>
+     real-address =
+     nr-bytes =
+
+   pte@<real-address>
+     real-address =
+     virtual-address =
+     nr-bytes =
+     wimg =
+     pp =
+
+   pte@<real-address>
+     real-address =
+     file-name =
+     wimg =
+     pp =
+     
    HTAB defines the location (in physical memory) of a HASH table.
    PTE (as a child of HTAB) defines a mapping that is to be entered
    into that table.
@@ -1206,7 +1528,6 @@ static device_callbacks const data_callbacks = {
    NB: All the work in this device is done during init by the PTE.
    The pte, looks up its parent to determine the address of the HTAB
    and then uses DMA calls to establish the required mapping. */
-
 
 STATIC_INLINE_DEVICE_TABLE void
 htab_decode_hash_table(device *parent,
@@ -1218,11 +1539,10 @@ htab_decode_hash_table(device *parent,
   unsigned n;
   /* determine the location/size of the hash table */
   if (parent == NULL
-      || strncmp(device_name(parent), "htab@", strlen("htab@")) != 0)
-    error("devices/htab - missing htab device\n");
-  if (scand_uw_u(device_name(parent), &htab_ra, &htab_nr_bytes) != 2)
-    error("devices/%s - Usage: htab@<real-addr>,<nr_bytes>\n",
-	  device_name(parent));
+      || strcmp(device_name(parent), "htab") != 0)
+    error("devices/htab - missing htab parent device\n");
+  htab_ra = device_find_integer_property(parent, "real-address");
+  htab_nr_bytes = device_find_integer_property(parent, "nr-bytes");
   for (n = htab_nr_bytes; n > 1; n = n / 2) {
     if (n % 2 != 0)
       error("devices/%s - htab size 0x%x not a power of two\n",
@@ -1237,7 +1557,6 @@ htab_decode_hash_table(device *parent,
   DTRACE(htab, ("htab - htaborg=0x%lx htabmask=0x%lx\n",
 		(unsigned long)*htaborg, (unsigned long)*htabmask));
 }
-
 
 STATIC_INLINE void
 htab_map_page(device *me,
@@ -1435,13 +1754,12 @@ htab_dma_binary(bfd *abfd,
   zfree(section_init); /* only free if load */
 }
 
-
 STATIC_INLINE_DEVICE_TABLE void
 htab_map_binary(device *me,
 		unsigned_word ra,
 		unsigned wimg,
 		unsigned pp,
-		char *file_name,
+		const char *file_name,
 		unsigned32 htaborg,
 		unsigned32 htabmask)
 {
@@ -1499,28 +1817,41 @@ htab_map_binary(device *me,
 }
 
 static void
-htab_init_callback(device *me,
-		   psim *system)
+htab_init_data_callback(device *me,
+			psim *system)
 {
   if (WITH_TARGET_WORD_BITSIZE != 32)
     error("devices/htab: only 32bit targets currently suported\n");
 
   /* only the pte does work */
-  if (strncmp(device_name(me), "pte@", strlen("pte@")) == 0) {
+  if (strcmp(device_name(me), "pte") == 0) {
     unsigned32 htaborg;
     unsigned32 htabmask;
-    signed32 pte_va; /* so that 0xff...0 is make 0xffffff00 */
-    unsigned32 pte_ra;
-    unsigned pte_nr_bytes;
-    unsigned pte_wimg;
-    unsigned pte_pp;
-    char file_name[1024];
 
     htab_decode_hash_table(device_parent(me), &htaborg, &htabmask);
 
-    /* handle a normal mapping definition */
-    if (scand_uw_uw_u_u_u(device_name(me), &pte_ra, &pte_va, &pte_nr_bytes,
-			  &pte_wimg, &pte_pp) == 5) {
+    if (device_find_property(me, "file-name") != NULL) {
+      /* map in a binary */
+      unsigned32 pte_ra = device_find_integer_property(me, "real-address");
+      unsigned pte_wimg = device_find_integer_property(me, "wimg");
+      unsigned pte_pp = device_find_integer_property(me, "pp");
+      const char *file_name = device_find_string_property(me, "file-name");
+      DTRACE(htab, ("pte - ra=0x%lx, wimg=%ld, pp=%ld, file-name=%s\n",
+		    (unsigned long)pte_ra,
+		    (unsigned long)pte_wimg,
+		    (long)pte_pp,
+		    file_name));
+      htab_map_binary(me, pte_ra, pte_wimg, pte_pp, file_name,
+		      htaborg, htabmask);
+    }
+    else {
+      /* handle a normal mapping definition */
+      /* so that 0xff...0 is make 0xffffff00 */
+      signed32 pte_va = device_find_integer_property(me, "virtual-address");
+      unsigned32 pte_ra = device_find_integer_property(me, "real-address");
+      unsigned pte_nr_bytes = device_find_integer_property(me, "nr-bytes");
+      unsigned pte_wimg = device_find_integer_property(me, "wimg");
+      unsigned pte_pp = device_find_integer_property(me, "pp");
       DTRACE(htab, ("pte - ra=0x%lx, wimg=%ld, pp=%ld, va=0x%lx, nr_bytes=%ld\n",
 		    (unsigned long)pte_ra,
 		    (long)pte_wimg,
@@ -1530,64 +1861,28 @@ htab_init_callback(device *me,
       htab_map_region(me, pte_ra, pte_va, pte_nr_bytes, pte_wimg, pte_pp,
 		      htaborg, htabmask);
     }
-    else if (scand_uw_u_u_c(device_name(me), &pte_ra, &pte_wimg, &pte_pp,
-			    file_name, sizeof(file_name)) == 4) {
-      DTRACE(htab, ("pte - ra=0x%lx, wimg=%ld, pp=%ld, binary=%s\n",
-		    (unsigned long)pte_ra,
-		    (unsigned long)pte_wimg,
-		    (long)pte_pp,
-		    file_name));
-      htab_map_binary(me, pte_ra, pte_wimg, pte_pp, file_name,
-		      htaborg, htabmask);
-    }
-    else {
-      error("devices/%s - Usage: %s\nor\t%s\n",
-	    device_name(me),
-	    "pte@,<real-addr>,<virtual-addr>,<nr-bytes>,<wimg>,<pp>",
-	    "pte@<real-addr>,<wimg>,<pp>,<binary>");
-    }
   }
 }
 
 
 static device_callbacks const htab_callbacks = {
-  htab_init_callback,
+  ignore_device_init,
+  htab_init_data_callback,
   unimp_device_attach_address,
   unimp_device_detach_address,
   unimp_device_io_read_buffer,
   unimp_device_io_write_buffer,
   passthrough_device_dma_read_buffer,
   passthrough_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
-  unimp_device_ioctl,
-};
-
-
-
-/* Simulator device: sim@0x<address>,<nr_bytes>
-
-   Eventually gives access to the hardware configuration.  For
-   instance, it could allow the setting (on the fly) of variables such
-   as hardware floating-point or strict-alignment.
-
-   It's intended use is as part of testing the simulators
-   functionality */
-
-static device_callbacks const sim_callbacks = {
-  ignore_device_init,
-  unimp_device_attach_address,
-  unimp_device_detach_address,
-  unimp_device_io_read_buffer,
-  unimp_device_io_write_buffer,
-  unimp_device_dma_read_buffer,
-  unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  generic_device_unit_decode,
+  generic_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
@@ -1676,15 +1971,12 @@ update_for_binary_section(bfd *abfd,
 
 
 static void
-binary_init_callback(device *me,
-		     psim *system)
+binary_init_data_callback(device *me,
+			  psim *system)
 {
-  const char *file_name;
+  /* get the file name */
+  const char *file_name = device_find_string_property(me, "file-name");
   bfd *image;
-
-
-  /* get the property specifying the file name */
-  file_name = device_find_next_property(me, NULL);
 
   /* open the file */
   image = bfd_openr(file_name, NULL);
@@ -1710,17 +2002,23 @@ binary_init_callback(device *me,
 
 
 static device_callbacks const binary_callbacks = {
-  binary_init_callback,
+  ignore_device_init,
+  binary_init_data_callback,
   unimp_device_attach_address,
   unimp_device_detach_address,
   unimp_device_io_read_buffer,
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   unimp_device_ioctl,
 };
 
@@ -1914,21 +2212,17 @@ stack_ioctl_callback(device *me,
   DTRACE(stack,
 	 ("stack_ioctl_callback(me=0x%lx:%s, system=0x%lx, processor=0x%lx, cia=0x%lx, argv=0x%lx, envp=0x%lx)\n",
 	  (long)me, device_name(me), (long)system, (long)processor, (long)cia, (long)argv, (long)envp));
-  stack_type  = device_find_next_property(me, NULL);
-  if (stack_type != NULL) {
-    if (strcmp(stack_type, "elf") == 0)
-      create_elf_stack_frame(system, stack_pointer, argv, envp);
-    else if (strcmp(stack_type, "xcoff") == 0)
-      create_aix_stack_frame(system, stack_pointer, argv, envp);
-  }
+  stack_type = device_find_string_property(me, "stack-type");
+  if (strcmp(stack_type, "elf") == 0)
+    create_elf_stack_frame(system, stack_pointer, argv, envp);
+  else if (strcmp(stack_type, "xcoff") == 0)
+    create_aix_stack_frame(system, stack_pointer, argv, envp);
   DTRACE(stack, 
 	 ("stack_ioctl_callback() = void\n"));
 }
 
-
-
-
 static device_callbacks const stack_callbacks = {
+  ignore_device_init,
   ignore_device_init,
   unimp_device_attach_address,
   unimp_device_detach_address,
@@ -1936,10 +2230,15 @@ static device_callbacks const stack_callbacks = {
   unimp_device_io_write_buffer,
   unimp_device_dma_read_buffer,
   unimp_device_dma_write_buffer,
-  unimp_device_attach_interrupt,
-  unimp_device_detach_interrupt,
-  unimp_device_interrupt,
-  unimp_device_interrupt_ack,
+  unimp_device_interrupt_event,
+  unimp_device_child_interrupt_event,
+  unimp_device_unit_decode,
+  unimp_device_unit_encode,
+  unimp_device_instance_create,
+  unimp_device_instance_delete,
+  unimp_device_instance_read,
+  unimp_device_instance_write,
+  unimp_device_instance_seek,
   stack_ioctl_callback,
 };
 
@@ -1948,6 +2247,7 @@ static device_callbacks const stack_callbacks = {
 device_descriptor device_table[] = {
   { "console", console_create, &console_callbacks },
   { "memory", NULL, &memory_callbacks },
+  { "eeprom", NULL, &memory_callbacks },
   { "vm", vea_vm_create, &vm_callbacks },
   { "halt", NULL, &halt_callbacks },
   { "icu", NULL, &icu_callbacks },
@@ -1958,12 +2258,17 @@ device_descriptor device_table[] = {
   { "htab", NULL, &htab_callbacks },
   { "pte", NULL, &htab_callbacks }, /* yep - uses htab's table */
   { "stack", NULL, &stack_callbacks },
-  { "sim", NULL, &sim_callbacks },
   { "load-binary", NULL, &binary_callbacks },
   { "map-binary", NULL, &binary_callbacks },
+  /* standard OpenBoot devices */
+  { "aliases", NULL, &passthrough_callbacks },
   { "options", NULL, &passthrough_callbacks },
-  { "init", NULL, &passthrough_callbacks },
   { "chosen", NULL, &passthrough_callbacks },
+  { "packages", NULL, &passthrough_callbacks },
+  { "cpus", NULL, &passthrough_callbacks },
+  { "openprom", NULL, &passthrough_callbacks },
+  { "init", NULL, &passthrough_callbacks },
+  { "trace", NULL, &trace_callbacks },
   { NULL },
 };
 
