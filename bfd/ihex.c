@@ -104,6 +104,18 @@ Another document reports these additional types:
    10..13	Upper 16 bits of start address
    14..15	Checksum in hex notation
    16..17	Carriage return, line feed
+
+The MRI compiler uses this, which is a repeat of type 5:
+
+  EXTENDED START RECORD
+   Byte 1	Header = colon (:)
+   2..3		The byte count, must be "04"
+   4..7		Load address, must be "0000"
+   8..9		Record type, must be "05"
+   10..13	Upper 16 bits of start address
+   14..17	Lower 16 bits of start address
+   18..19	Checksum in hex notation
+   20..21	Carriage return, line feed
 */
 
 #include "bfd.h"
@@ -257,7 +269,6 @@ ihex_scan (abfd)
      bfd *abfd;
 {
   bfd_vma segbase;
-  bfd_vma extbase;
   asection *sec;
   int lineno;
   boolean error;
@@ -270,7 +281,6 @@ ihex_scan (abfd)
 
   abfd->start_address = 0;
 
-  extbase = 0;
   segbase = 0;
   sec = NULL;
   lineno = 1;
@@ -366,7 +376,7 @@ ihex_scan (abfd)
 	    case 0:
 	      /* This is a data record.  */
 	      if (sec != NULL
-		  && sec->vma + sec->_raw_size == extbase + segbase + addr)
+		  && sec->vma + sec->_raw_size == segbase + addr)
 		{
 		  /* This data goes at the end of the section we are
                      currently building.  */
@@ -386,8 +396,8 @@ ihex_scan (abfd)
 		  if (sec == NULL)
 		    goto error_return;
 		  sec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
-		  sec->vma = extbase + segbase + addr;
-		  sec->lma = extbase + segbase + addr;
+		  sec->vma = segbase + addr;
+		  sec->lma = segbase + addr;
 		  sec->_raw_size = len;
 		  sec->filepos = pos;
 		}
@@ -454,7 +464,7 @@ ihex_scan (abfd)
 
 	    case 5:
 	      /* An extended linear start address record.  */
-	      if (len != 2)
+	      if (len != 2 && len != 4)
 		{
 		  (*_bfd_error_handler)
 		    ("%s:%d: bad extended linear start address length in Intel Hex file",
@@ -463,7 +473,10 @@ ihex_scan (abfd)
 		  goto error_return;
 		}
 
-	      abfd->start_address += HEX4 (buf) << 16;
+	      if (len == 2)
+		abfd->start_address += HEX4 (buf) << 16;
+	      else
+		abfd->start_address = (HEX4 (buf) << 16) + HEX4 (buf + 4);
 
 	      sec = NULL;
 
@@ -778,11 +791,9 @@ static boolean
 ihex_write_object_contents (abfd)
      bfd *abfd;
 {
-  bfd_vma extbase;
   bfd_vma segbase;
   struct ihex_data_list *l;
 
-  extbase = 0;
   segbase = 0;
   for (l = abfd->tdata.ihex_data->head; l != NULL; l = l->next)
     {
@@ -801,7 +812,7 @@ ihex_write_object_contents (abfd)
 	  if (now > CHUNK)
 	    now = CHUNK;
 
-	  if (where > extbase + segbase + 0xffff)
+	  if (where > segbase + 0xffff)
 	    {
 	      bfd_byte addr[2];
 
@@ -816,8 +827,8 @@ ihex_write_object_contents (abfd)
 		}
 	      else
 		{
-		  extbase = where & 0xffff0000;
-		  if (where > extbase + 0xffff)
+		  segbase = where & 0xffff0000;
+		  if (where > segbase + 0xffff)
 		    {
 		      char buf[20];
 
@@ -828,15 +839,14 @@ ihex_write_object_contents (abfd)
 		      bfd_set_error (bfd_error_bad_value);
 		      return false;
 		    }
-		  addr[0] = (extbase >> 24) & 0xff;
-		  addr[1] = (extbase >> 16) & 0xff;
+		  addr[0] = (segbase >> 24) & 0xff;
+		  addr[1] = (segbase >> 16) & 0xff;
 		  if (! ihex_write_record (abfd, 2, 0, 4, addr))
 		    return false;
 		}
 	    }
 
-	  if (! ihex_write_record (abfd, now, where - (extbase + segbase),
-				   0, p))
+	  if (! ihex_write_record (abfd, now, where - segbase, 0, p))
 	    return false;
 
 	  where += now;
@@ -852,21 +862,24 @@ ihex_write_object_contents (abfd)
 
       start = abfd->start_address;
 
-      if (start > 0xfffff)
+      if (start <= 0xfffff)
+	{
+	  startbuf[0] = ((start & 0xf0000) >> 12) & 0xff;
+	  startbuf[1] = 0;
+	  startbuf[2] = (start >> 8) & 0xff;
+	  startbuf[3] = start & 0xff;
+	  if (! ihex_write_record (abfd, 4, 0, 3, startbuf))
+	    return false;
+	}
+      else
 	{
 	  startbuf[0] = (start >> 24) & 0xff;
 	  startbuf[1] = (start >> 16) & 0xff;
-	  if (! ihex_write_record (abfd, 2, 0, 5, startbuf))
+	  startbuf[2] = (start >> 8) & 0xff;
+	  startbuf[3] = start & 0xff;
+	  if (! ihex_write_record (abfd, 4, 0, 5, startbuf))
 	    return false;
-	  start &= 0xffff;
 	}
-
-      startbuf[0] = ((start & 0xf0000) >> 12) & 0xff;
-      startbuf[1] = 0;
-      startbuf[2] = (start >> 8) & 0xff;
-      startbuf[3] = start & 0xff;
-      if (! ihex_write_record (abfd, 4, 0, 3, startbuf))
-	return false;
     }
 
   if (! ihex_write_record (abfd, 0, 0, 1, NULL))
@@ -958,8 +971,8 @@ const bfd_target ihex_vec =
 {
   "ihex",			/* name */
   bfd_target_ihex_flavour,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target byte order */
+  BFD_ENDIAN_UNKNOWN,		/* target headers byte order */
   0,				/* object flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD),	/* section flags */
   0,				/* leading underscore */
