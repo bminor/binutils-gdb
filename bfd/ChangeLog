@@ -1,3 +1,12 @@
+2002-04-22  Richard Smith  <richard@ex-parrot.com>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (struct eh_cie_fde): Add per_encoding_relative.
+	(_bfd_elf_discard_section_eh_frame): Set it for CIEs with pcrel
+	encoded personality.
+	(_bfd_elf_write_section_eh_frame): Adjust pcrel encoded personality
+	for CIE/FDE removal.
+
 2002-04-20  Tom Rix  <trix@redhat.com>
 
 	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_in): Fix C_FILE auxent.
