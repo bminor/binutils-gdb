@@ -1,3 +1,17 @@
+Sun Aug 23 11:04:08 1992  Fred Fish  (fnf@cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set):  Select a default source
+	symtab if one is not currently selected.
+	* utils.c (query):  Call wrap_here before building the output
+	query string, to turn off wrapping and flush any buffered output.
+	Otherwise our query may end up in the wrap buffer and never be
+	seen by the user.
+	* eval.c (evaluate_subexp):  Report error when attempting to
+	evaluate subscript for types without a target type, rather
+	than dumping core by using the NULL pointer.
+	* symfile.c (symbol_file_command):  Forget current_source_symtab
+	and current_source_line when discarding symbol table.
+
 Sat Aug 22 22:33:20 1992  John Gilmore  (gnu@cygnus.com)
 
 	Bug fixes from Andrew Heybey <ath@lcs.mit.edu>.

@@ -78,7 +78,7 @@ int ansi_conformant;
 extern int errno;
 extern int attach_flag;
 extern char registers[];
-static CORE_ADDR get_saved_basereg();
+CORE_ADDR get_saved_basereg();
 
 #define INSTRUCTION_LENGTH 4
 #define REGISTER_LENGTH 4
@@ -2227,3 +2227,4 @@ char *valbuf;
       write_register_bytes (REGISTER_BYTE (R16), valbuf, TYPE_LENGTH (type));
  
 }
+

@@ -470,4 +470,5 @@ i860 takes them in registers */
 /* used to indicate that the misc function vector has size information about
    misc functions -- currently true for elf format only -- mlf */
 #define MISC_FUNCTIONS_HAS_SIZE
-#define GET_BASEREG_VALUE(frame,basereg)   get_saved_basereg(frame, basereg);
+#define FRAME_GET_BASEREG_VALUE(frame,basereg)   get_saved_basereg(frame, basereg);
+
