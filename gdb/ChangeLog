@@ -1,5 +1,8 @@
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb_dirent.h: Mark up valid uses of <dirent.h>, d_namelen and
+	strlen d_name.
+
 	* main.c (captured_main): Delete #ifdef ADDITIONAL_OPTIONS,
 	ADDITIONAL_OPTION_CASES, and ADDITIONAL_OPTION_HANDLER code.
 	(print_gdb_help): Delete #ifdef ADDITIONAL_OPTION_HELP code.
