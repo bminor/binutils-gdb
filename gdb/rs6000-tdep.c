@@ -1624,7 +1624,10 @@ rs6000_register_virtual_type (int n)
       switch (size)
 	{
 	case 8:
-	  return builtin_type_int64;
+	  if (tdep->ppc_ev0_regnum <= n && n <= tdep->ppc_ev31_regnum)
+	    return builtin_type_vec64;
+	  else
+	    return builtin_type_int64;
 	  break;
 	case 16:
 	  return builtin_type_vec128;
@@ -1690,6 +1693,68 @@ rs6000_register_convert_to_raw (struct type *type, int n,
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
+}
+
+static void
+e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+			   int reg_nr, void *buffer)
+{
+  int base_regnum;
+  int offset = 0;
+  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
+
+  if (reg_nr >= tdep->ppc_gp0_regnum 
+      && reg_nr <= tdep->ppc_gplast_regnum)
+    {
+      base_regnum = reg_nr - tdep->ppc_gp0_regnum + tdep->ppc_ev0_regnum;
+
+      /* Build the value in the provided buffer.  */ 
+      /* Read the raw register of which this one is the lower portion.  */
+      regcache_raw_read (regcache, base_regnum, temp_buffer);
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	offset = 4;
+      memcpy ((char *) buffer, temp_buffer + offset, 4);
+    }
+}
+
+static void
+e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+			    int reg_nr, const void *buffer)
+{
+  int base_regnum;
+  int offset = 0;
+  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
+
+  if (reg_nr >= tdep->ppc_gp0_regnum 
+      && reg_nr <= tdep->ppc_gplast_regnum)
+    {
+      base_regnum = reg_nr - tdep->ppc_gp0_regnum + tdep->ppc_ev0_regnum;
+      /* reg_nr is 32 bit here, and base_regnum is 64 bits.  */
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	offset = 4;
+
+      /* Let's read the value of the base register into a temporary
+	 buffer, so that overwriting the last four bytes with the new
+	 value of the pseudo will leave the upper 4 bytes unchanged.  */
+      regcache_raw_read (regcache, base_regnum, temp_buffer);
+
+      /* Write as an 8 byte quantity.  */
+      memcpy (temp_buffer + offset, (char *) buffer, 4);
+      regcache_raw_write (regcache, base_regnum, temp_buffer);
+    }
+}
+
+/* Convert a dwarf2 register number to a gdb REGNUM.  */
+static int
+e500_dwarf2_reg_to_regnum (int num)
+{
+  int regnum;
+  if (0 <= num && num <= 31)
+    return num + gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum;
+  else 
+    return num;
 }
 
 /* Convert a dbx stab register number (from `r' declaration) to a gdb
@@ -1930,6 +1995,10 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 #define PPC_UISA_SPRS \
   /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R4(fpscr)
 
+/* UISA-level SPRs for PowerPC without floating point support.  */
+#define PPC_UISA_NOFP_SPRS \
+  /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R0
+
 /* Segment registers, for PowerPC.  */
 #define PPC_SEGMENT_REGS \
   /* 71 */ R32(sr0),  R32(sr1),  R32(sr2),  R32(sr3),  \
@@ -1956,6 +2025,20 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /*135*/R16(vr16),R16(vr17),R16(vr18),R16(vr19),R16(vr20),R16(vr21),R16(vr22),R16(vr23), \
   /*143*/R16(vr24),R16(vr25),R16(vr26),R16(vr27),R16(vr28),R16(vr29),R16(vr30),R16(vr31), \
   /*151*/R4(vscr), R4(vrsave)
+
+/* Vectors of hi-lo general purpose registers.  */
+#define PPC_EV_REGS \
+  /* 0*/R8(ev0), R8(ev1), R8(ev2), R8(ev3), R8(ev4), R8(ev5), R8(ev6), R8(ev7),  \
+  /* 8*/R8(ev8), R8(ev9), R8(ev10),R8(ev11),R8(ev12),R8(ev13),R8(ev14),R8(ev15), \
+  /*16*/R8(ev16),R8(ev17),R8(ev18),R8(ev19),R8(ev20),R8(ev21),R8(ev22),R8(ev23), \
+  /*24*/R8(ev24),R8(ev25),R8(ev26),R8(ev27),R8(ev28),R8(ev29),R8(ev30),R8(ev31)
+
+/* Lower half of the EV registers.  */
+#define PPC_GPRS_PSEUDO_REGS \
+  /*  0 */ P(r0), P(r1), P(r2), P(r3), P(r4), P(r5), P(r6), P(r7),  \
+  /*  8 */ P(r8), P(r9), P(r10),P(r11),P(r12),P(r13),P(r14),P(r15), \
+  /* 16 */ P(r16),P(r17),P(r18),P(r19),P(r20),P(r21),P(r22),P(r23), \
+  /* 24 */ P(r24),P(r25),P(r26),P(r27),P(r28),P(r29),P(r30),P(r31), \
 
 /* IBM POWER (pre-PowerPC) architecture, user-level view.  We only cover
    user-level SPR's.  */
@@ -2126,6 +2209,18 @@ static const struct reg registers_7400[] =
   /* FIXME? Add more registers? */
 };
 
+/* Motorola e500.  */
+static const struct reg registers_e500[] =
+{
+  R(pc), R(ps),
+  /* cr, lr, ctr, xer, "" */
+  PPC_UISA_NOFP_SPRS,
+  /* 7...38 */
+  PPC_EV_REGS,
+  /* 39...70 */
+  PPC_GPRS_PSEUDO_REGS
+};
+
 /* Information about a particular processor variant.  */
 
 struct variant
@@ -2233,6 +2328,9 @@ static struct variant variants[] =
   {"7400", "Motorola/IBM PowerPC 7400 (G4)", bfd_arch_powerpc,
    bfd_mach_ppc_7400, -1, -1, tot_num_registers (registers_7400),
    registers_7400},
+  {"e500", "Motorola PowerPC e500", bfd_arch_powerpc,
+   bfd_mach_ppc_e500, -1, -1, tot_num_registers (registers_e500),
+   registers_e500},
 
   /* 64-bit */
   {"powerpc64", "PowerPC 64-bit user-level", bfd_arch_powerpc,
@@ -2430,20 +2528,48 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->ppc_mq_regnum = -1;
   tdep->ppc_fpscr_regnum = power ? 71 : 70;
 
+  set_gdbarch_pc_regnum (gdbarch, 64);
+  set_gdbarch_sp_regnum (gdbarch, 1);
+  set_gdbarch_fp_regnum (gdbarch, 1);
+
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
       {
       case bfd_mach_ppc: 
 	tdep->ppc_vr0_regnum = 71;
 	tdep->ppc_vrsave_regnum = 104;
+	tdep->ppc_ev0_regnum = -1;
+	tdep->ppc_ev31_regnum = -1;
 	break;
       case bfd_mach_ppc_7400:
 	tdep->ppc_vr0_regnum = 119;
 	tdep->ppc_vrsave_regnum = 153;
+	tdep->ppc_ev0_regnum = -1;
+	tdep->ppc_ev31_regnum = -1;
+	break;
+      case bfd_mach_ppc_e500:
+        tdep->ppc_gp0_regnum = 39;
+        tdep->ppc_gplast_regnum = 70;
+        tdep->ppc_toc_regnum = -1;
+        tdep->ppc_ps_regnum = 1;
+        tdep->ppc_cr_regnum = 2;
+        tdep->ppc_lr_regnum = 3;
+        tdep->ppc_ctr_regnum = 4;
+        tdep->ppc_xer_regnum = 5;
+	tdep->ppc_ev0_regnum = 7;
+	tdep->ppc_ev31_regnum = 38;
+        set_gdbarch_pc_regnum (gdbarch, 0);
+        set_gdbarch_sp_regnum (gdbarch, 40);
+        set_gdbarch_fp_regnum (gdbarch, 40);
+        set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
+        set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
+        set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
 	break;
       default:
 	tdep->ppc_vr0_regnum = -1;
 	tdep->ppc_vrsave_regnum = -1;
+	tdep->ppc_ev0_regnum = -1;
+	tdep->ppc_ev31_regnum = -1;
 	break;
       }   
 
@@ -2476,9 +2602,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
-  set_gdbarch_sp_regnum (gdbarch, 1);
-  set_gdbarch_fp_regnum (gdbarch, 1);
-  set_gdbarch_pc_regnum (gdbarch, 64);
+  set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
   set_gdbarch_register_size (gdbarch, wordsize);
   set_gdbarch_register_bytes (gdbarch, off);

@@ -1,5 +1,24 @@
 2002-08-20  Elena Zannoni  <ezannoni@redhat.com>
 
+	* ppc-tdep.h (struct gdbarch_tdep): Add ev registers.
+
+	* rs6000-tdep.c (rs6000_register_virtual_type): Return 64 bit
+	vector type for ev registers.
+	(e500_pseudo_register_read): New function.
+	(e500_pseudo_register_write): New function.
+	(e500_dwarf2_reg_to_regnum): New function.
+	(PPC_UISA_NOFP_SPRS): New macro.
+	(PPC_EV_REGS): New macro.
+	(PPC_GPRS_PSEUDO_REGS): New macro.
+	(registers_e500): New register set for e500.
+	(variants): Add e500 variant.
+	(rs6000_gdbarch_init): Move setting of pc, sp, fp regnums to
+	before setting architectural dependent variations.  Initialize ev
+	registers numbers.  Add case for e500 architecture.  Set the
+	number of pseudo registers.
+
+2002-08-20  Elena Zannoni  <ezannoni@redhat.com>
+
         * rs6000-tdep.c: Clean up comments.
 
 2002-08-20  Andrew Cagney  <cagney@redhat.com>
