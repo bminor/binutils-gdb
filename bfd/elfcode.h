@@ -1150,7 +1150,8 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 
       /* If we have a SHT_SYMTAB_SHNDX section for the symbol table,
 	 read the raw contents.  */
-      if (elf_elfsections (abfd)[shndx_hdr->sh_link] == hdr)
+      if (elf_elfsections (abfd) != NULL
+	  && elf_elfsections (abfd)[shndx_hdr->sh_link] == hdr)
 	{
 	  amt = shndx_hdr->sh_size;
 	  x_shndx = (Elf_External_Sym_Shndx *) bfd_malloc (amt);

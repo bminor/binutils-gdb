@@ -1,3 +1,8 @@
+2001-12-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcode.h (elf_slurp_symbol_table): Test elf_elfsections for NULL,
+	as can happen with a core file, before dereferencing.
+
 2001-12-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): If new_size
