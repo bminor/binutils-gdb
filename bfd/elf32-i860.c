@@ -1,5 +1,5 @@
 /* Intel i860 specific support for 32-bit ELF.
-   Copyright 1993, 1995, 1999, 2000, 2001, 2002
+   Copyright 1993, 1995, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Full i860 support contributed by Jason Eckhardt <jle@cygnus.com>.
@@ -840,7 +840,7 @@ i860_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
    zero.
 
    This function is responsible for adjusting the section contents as
-   necessary, and (if using Rela relocs and generating a relocateable
+   necessary, and (if using Rela relocs and generating a relocatable
    output file) adjusting the reloc addend as necessary.
 
    This function does not have to worry about setting the reloc
@@ -854,7 +854,7 @@ i860_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
@@ -876,7 +876,7 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;

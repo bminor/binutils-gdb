@@ -438,7 +438,7 @@ struct coff_debug_merge_hash_table
    bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
 
 /* Information we keep for each section in the output file when doing
-   a relocateable link.  */
+   a relocatable link.  */
 
 struct coff_link_section_info
 {
@@ -465,7 +465,7 @@ struct coff_final_link_info
   bfd_boolean global_to_static;
   /* Hash table for long symbol names.  */
   struct bfd_strtab_hash *strtab;
-  /* When doing a relocateable link, an array of information kept for
+  /* When doing a relocatable link, an array of information kept for
      each output section, indexed by the target_index field.  */
   struct coff_link_section_info *section_info;
   /* Symbol index of last C_FILE symbol (-1 if none).  */

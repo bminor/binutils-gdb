@@ -88,7 +88,7 @@ SUBSECTION
 
 	For example, with each entry in the hash table the a.out
 	linker keeps the index the symbol has in the final output file
-	(this index number is used so that when doing a relocateable
+	(this index number is used so that when doing a relocatable
 	link the symbol index used in the output file can be quickly
 	filled in when copying over a reloc).  The a.out linker code
 	defines the required structures and functions for a hash table
@@ -277,7 +277,7 @@ SUBSECTION
 	the input sections and copy the data into the output sections.
 	It must build an output symbol table including any local
 	symbols from the input files and the global symbols from the
-	hash table.  When producing relocateable output, it must
+	hash table.  When producing relocatable output, it must
 	modify the input relocs and write them into the output file.
 	There may also be object format dependent work to be done.
 
@@ -317,7 +317,7 @@ SUBSUBSECTION
 	types of information.  They also describe relocs that must be
 	created by the BFD backend, but do not correspond to any input
 	file; this is used to support -Ur, which builds constructors
-	while generating a relocateable object file.
+	while generating a relocatable object file.
 
 INODE
 Relocating the section contents, Writing the symbol table, Information provided by the linker, Performing the Final Link
@@ -339,7 +339,7 @@ SUBSUBSECTION
 	input files.  The <<_bfd_final_link>> function should read the
 	contents of the section and any associated relocs, apply the
 	relocs to the section contents, and write out the modified
-	section contents.  If performing a relocateable link, the
+	section contents.  If performing a relocatable link, the
 	relocs themselves must also be modified and written out.
 
 @findex _bfd_relocate_contents
@@ -2043,7 +2043,7 @@ _bfd_generic_final_link (abfd, info)
   if (! generic_add_output_symbol (abfd, &outsymalloc, NULL))
     return FALSE;
 
-  if (info->relocateable)
+  if (info->relocatable)
     {
       /* Allocate space for the output relocs for each section.  */
       for (o = abfd->sections;
@@ -2362,7 +2362,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		  break;
 		case discard_sec_merge:
 		  output = TRUE;
-		  if (info->relocateable
+		  if (info->relocatable
 		      || ! (sym->section->flags & SEC_MERGE))
 		    break;
 		  /* FALLTHROUGH */
@@ -2534,7 +2534,7 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
 {
   arelent *r;
 
-  if (! info->relocateable)
+  if (! info->relocatable)
     abort ();
   if (sec->orelocation == (arelent **) NULL)
     abort ();
@@ -2767,7 +2767,7 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
   BFD_ASSERT (input_section->output_offset == link_order->offset);
   BFD_ASSERT (input_section->_cooked_size == link_order->size);
 
-  if (info->relocateable
+  if (info->relocatable
       && input_section->reloc_count > 0
       && output_section->orelocation == (arelent **) NULL)
     {
@@ -2777,7 +2777,7 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
 	 types of object files.  Handling this case correctly is
 	 difficult, and sometimes impossible.  */
       (*_bfd_error_handler)
-	(_("Attempt to do relocateable link with %s input and %s output"),
+	(_("Attempt to do relocatable link with %s input and %s output"),
 	 bfd_get_target (input_bfd), bfd_get_target (output_bfd));
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -2842,7 +2842,7 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
   if (contents == NULL && sec_size != 0)
     goto error_return;
   new_contents = (bfd_get_relocated_section_contents
-		  (output_bfd, info, link_order, contents, info->relocateable,
+		  (output_bfd, info, link_order, contents, info->relocatable,
 		   _bfd_generic_link_get_symbols (input_bfd)));
   if (!new_contents)
     goto error_return;

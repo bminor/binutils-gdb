@@ -840,7 +840,7 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **secp;
      bfd_vma *valp;
 {
-  if (! info->relocateable
+  if (! info->relocatable
       && (*namep)[0] == '_' && (*namep)[1] == 'S'
       && strcmp (*namep, "_SDA_BASE_") == 0
       && info->hash->creator->flavour == bfd_target_elf_flavour)
@@ -903,7 +903,7 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    symbol value correctly.  We look up the symbol _SDA_BASE_ in the output
    BFD.  If we can't find it, we're stuck.  We cache it in the ELF
    target data.  We don't need to adjust the symbol value for an
-   external symbol if we are producing relocateable output.  */
+   external symbol if we are producing relocatable output.  */
 
 static bfd_reloc_status_type
 m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
@@ -948,7 +948,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocateable output file) adjusting the reloc addend as
+   relocatable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -962,7 +962,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
@@ -987,7 +987,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd_boolean ret = TRUE;
 
 #if !USE_REL
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 #endif
 
@@ -1031,9 +1031,9 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       r_symndx = ELF32_R_SYM (rel->r_info);
 
 #if USE_REL
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
@@ -1350,10 +1350,10 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
   /* Assume nothing changes.  */
   *again = FALSE;
 
-  /* We don't have to do anything for a relocateable link, if
+  /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0
@@ -1744,12 +1744,12 @@ m32r_elf_relax_delete_bytes (abfd, sec, addr, count)
 
 static bfd_byte *
 m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
-					 data, relocateable, symbols)
+					 data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -1762,11 +1762,11 @@ m32r_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
-  if (relocateable
+  if (relocatable
       || elf_section_data (input_section)->this_hdr.contents == NULL)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order, data,
-						       relocateable,
+						       relocatable,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -2050,7 +2050,7 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

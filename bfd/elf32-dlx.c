@@ -1,5 +1,5 @@
 /* DLX specific support for 32-bit ELF
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -320,7 +320,7 @@ _bfd_dlx_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
   return ret;
 }
 
-/* ELF relocs are against symbols.  If we are producing relocateable
+/* ELF relocs are against symbols.  If we are producing relocatable
    output, and the reloc is against an external symbol, and nothing
    has given us any additional addend, the resulting reloc will also
    be against the same symbol.  In such a case, we don't want to
@@ -328,7 +328,7 @@ _bfd_dlx_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
    all be done at final link time.  Rather than put special case code
    into bfd_perform_relocation, all the reloc types use this howto
    function.  It just short circuits the reloc if producing
-   relocateable output against an external symbol.  */
+   relocatable output against an external symbol.  */
 
 static bfd_reloc_status_type
 elf32_dlx_relocate16  (abfd, reloc_entry, symbol, data,
@@ -532,7 +532,7 @@ elf32_dlx_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

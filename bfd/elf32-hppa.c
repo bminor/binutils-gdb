@@ -1214,7 +1214,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
   asection *sreloc;
   asection *stubreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = hppa_link_hash_table (info);
@@ -3593,7 +3593,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;

@@ -1,3 +1,41 @@
+2003-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo: Correct spelling of "relocatable".
+	* ldctor.c: Likewise
+	* ldexp.c: Likewise
+	* ldfile.c: Likewise
+	* ldint.texinfo: Likewise
+	* ldlang.c: Likewise
+	* ldmain.c: Likewise
+	* ldwrite.c: Likewise
+	* lexsup.c: Likewise
+	* emultempl/aix.em: Likewise
+	* emultempl/alphaelf.em: Likewise
+	* emultempl/armcoff.em: Likewise
+	* emultempl/armelf_oabi.em: Likewise
+	* emultempl/beos.em: Likewise
+	* emultempl/elf32.em: Likewise
+	* emultempl/generic.em: Likewise
+	* emultempl/gld960.em: Likewise
+	* emultempl/gld960c.em: Likewise
+	* emultempl/hppaelf.em: Likewise
+	* emultempl/linux.em: Likewise
+	* emultempl/lnk960.em: Likewise
+	* emultempl/m68hc1xelf.em: Likewise
+	* emultempl/m68kcoff.em: Likewise
+	* emultempl/m68kelf.em: Likewise
+	* emultempl/mipsecoff.em: Likewise
+	* emultempl/mipself.em: Likewise
+	* emultempl/mmix-elfnmmo.em: Likewise
+	* emultempl/mmo.em: Likewise
+	* emultempl/needrelax.em: Likewise
+	* emultempl/pe.em: Likewise
+	* emultempl/ppc64elf.em: Likewise
+	* emultempl/sh64elf.em: Likewise
+	* emultempl/sunos.em: Likewise
+	* emultempl/ticoff.em: Likewise
+	* emultempl/xtensaelf.em: Likewise
+
 2003-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em: Convert to C90.
@@ -766,7 +804,7 @@
 
 2002-01-14  Charles Wilson  <cwilson@ece.gatech.edu>
 
-	* ld/ld.texinfo (node WIN32): Some clarifications
+	* ld.texinfo (node WIN32): Some clarifications
 	and formatting fixups.
 
 2003-01-09  Chris Demetriou  <cgd@broadcom.com>
@@ -820,7 +858,7 @@
 
 2003-01-03  Charles Wilson  <cwilson@ece.gatech.edu>
 
-	* ld/pe-dll.c (autofilter_symbollist): Add cygwin_crt0.
+	* pe-dll.c (autofilter_symbollist): Add cygwin_crt0.
 
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
@@ -873,7 +911,7 @@
 2002-12-30  Ralf Habacker  <Ralf.Habacker@freenet.de>
 	    Charles Wilson  <cwilson@ece.gatech.edu>
 
-	* ld/config.in (HAVE_REALPATH): New entry.
+	* config.in (HAVE_REALPATH): New entry.
 	(HAVE_SYS_STAT_H, HAVE_SYS_TYPES_H): Removed: obsolete.
 
 2002-12-30  Ralf Habacker  <ralf.habacker@freenet.de>
@@ -923,7 +961,7 @@
 
 2002-12-17  Ralf Habacker  <ralf.habacker@freenet.de>
 
-	* ld/emultempl/pe.em (pe_find_data_imports): Don't search for data
+	* emultempl/pe.em (pe_find_data_imports): Don't search for data
 	import when auto-import is disabled.
 
 2002-12-17  Danny Smith  <dannysmith@users.sourceforge.net>
@@ -1388,8 +1426,8 @@
 
 	* configure.in: added --with-lib-path argument to ld's configure
 	to set LIB_PATH.
-	* ld/NEWS: Document new switch.
-	* ld/README: Mention new switch.
+	* NEWS: Document new switch.
+	* README: Mention new switch.
 	* configure: Regenerate.
 	* Makefile.in: Regenerate.
 
@@ -1696,7 +1734,7 @@
 
 2002-06-20  Nathanael Nerode  <neroden@twcny.rr.com>
 
-	* ld/configure.host (romp): Drop support.
+	* configure.host (romp): Drop support.
 
 2002-06-18  Chris Demetriou  <cgd@broadcom.com>
 
@@ -1751,9 +1789,9 @@
 
 2002-06-07  Charles Wilson  <cwilson@ece.gatech.edu>
 
-	* ld/ldmain.c (main): initialize link_info.pei386_auto_import
+	* ldmain.c (main): initialize link_info.pei386_auto_import
 	to -1 == implicit enable.
-	* ld/emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):
+	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):
 	initialize link_info.pei386_auto_import to -1 == implicit
 	enable.
 	(gld_${EMULATION_NAME}_parse_args): When processing
@@ -2177,7 +2215,7 @@
 
 2002-04-07  matthew green  <mrg@redhat.com>
 
-	* ld/configure.host (*-*-netbsd*): Add support for NetBSD/ELF.
+	* configure.host (*-*-netbsd*): Add support for NetBSD/ELF.
 
 2002-04-04  Alan Modra  <amodra@bigpond.net.au>
 
@@ -2768,8 +2806,8 @@
 	* configure.tgt (sh*le-*-netbsdelf*): New target.
 	(sh*-*-netbsdelf*): New target.
 	* emulparams/shelf.sh: Document that shelf_nbsd.sh sources this file.
-	* ld/emulparams/shelf_nbsd.sh: New emulation.
-	* ld/emulparams/shlelf_nbsd.sh: New emulation.
+	* emulparams/shelf_nbsd.sh: New emulation.
+	* emulparams/shlelf_nbsd.sh: New emulation.
 
 2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
 

@@ -287,7 +287,7 @@ main (argc, argv)
      interface by default.  */
   demangling = getenv ("COLLECT_NO_DEMANGLE") == NULL;
 
-  link_info.relocateable = FALSE;
+  link_info.relocatable = FALSE;
   link_info.emitrelocations = FALSE;
   link_info.task_link = FALSE;
   link_info.shared = FALSE;
@@ -350,7 +350,7 @@ main (argc, argv)
 
   ldemul_set_symbols ();
 
-  if (link_info.relocateable)
+  if (link_info.relocatable)
     {
       if (command_line.gc_sections)
 	einfo ("%P%F: --gc-sections and -r may not be used together\n");
@@ -376,7 +376,7 @@ main (argc, argv)
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
      don't see how else this can be handled, since in this case we
      must preserve all externally visible symbols.  */
-  if (link_info.relocateable && link_info.strip == strip_all)
+  if (link_info.relocatable && link_info.strip == strip_all)
     {
       link_info.strip = strip_debugger;
       if (link_info.discard == discard_sec_merge)
@@ -475,7 +475,7 @@ main (argc, argv)
 
   /* Print error messages for any missing symbols, for any warning
      symbols, and possibly multiple definitions.  */
-  if (link_info.relocateable)
+  if (link_info.relocatable)
     output_bfd->flags &= ~EXEC_P;
   else
     output_bfd->flags |= EXEC_P;
@@ -489,9 +489,9 @@ main (argc, argv)
   if (nocrossref_list != NULL)
     check_nocrossrefs ();
 
-  /* Even if we're producing relocateable output, some non-fatal errors should
+  /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
-     want to ignore for relocateable output?)  */
+     want to ignore for relocatable output?)  */
   if (!config.make_executable && !force_make_executable)
     {
       if (trace_files)
@@ -509,7 +509,7 @@ main (argc, argv)
       /* If the --force-exe-suffix is enabled, and we're making an
 	 executable file and it doesn't end in .exe, copy it to one
 	 which does.  */
-      if (! link_info.relocateable && command_line.force_exe_suffix)
+      if (! link_info.relocatable && command_line.force_exe_suffix)
 	{
 	  int len = strlen (output_filename);
 
@@ -1129,7 +1129,7 @@ constructor_callback (info, constructor, name, abfd, section, value)
   /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
      useful error message.  */
   if (bfd_reloc_type_lookup (output_bfd, BFD_RELOC_CTOR) == NULL
-      && (link_info.relocateable
+      && (link_info.relocatable
 	  || bfd_reloc_type_lookup (abfd, BFD_RELOC_CTOR) == NULL))
     einfo (_("%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"));
 

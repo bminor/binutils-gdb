@@ -73,7 +73,7 @@ m68hc11_elf_${EMULATION_NAME}_before_allocation ()
 
   /* If generating a relocatable output file, then we don't
      have to generate the trampolines.  */
-  if (link_info.relocateable)
+  if (link_info.relocatable)
     return;
 
   ret = elf32_m68hc11_setup_section_lists (output_bfd, &link_info);

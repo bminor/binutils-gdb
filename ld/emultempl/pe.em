@@ -706,7 +706,7 @@ gld_${EMULATION_NAME}_set_symbols ()
 
   if (!init[IMAGEBASEOFF].inited)
     {
-      if (link_info.relocateable)
+      if (link_info.relocatable)
 	init[IMAGEBASEOFF].value = 0;
       else if (init[DLLOFF].value || link_info.shared)
 #ifdef DLL_SUPPORT
@@ -719,8 +719,8 @@ gld_${EMULATION_NAME}_set_symbols ()
 	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
     }
 
-  /* Don't do any symbol assignments if this is a relocateable link.  */
-  if (link_info.relocateable)
+  /* Don't do any symbol assignments if this is a relocatable link.  */
+  if (link_info.relocatable)
     return;
 
   /* Glue the assignments into the abs section.  */
@@ -776,7 +776,7 @@ gld_${EMULATION_NAME}_after_parse ()
      opened, so registering the symbol as undefined will make a
      difference.  */
 
-  if (! link_info.relocateable && entry_symbol.name != NULL)
+  if (! link_info.relocatable && entry_symbol.name != NULL)
     ldlang_add_undef (entry_symbol.name);
 }
 
@@ -1021,7 +1021,7 @@ gld_${EMULATION_NAME}_after_open ()
 #if ! (defined (TARGET_IS_i386pe) || defined (TARGET_IS_armpe))
   if (link_info.shared)
 #else
-  if (!link_info.relocateable)
+  if (!link_info.relocatable)
 #endif
     pe_dll_build_sections (output_bfd, &link_info);
 
@@ -1461,7 +1461,7 @@ gld_${EMULATION_NAME}_finish ()
 #ifdef DLL_SUPPORT
   if (link_info.shared
 #if !defined(TARGET_IS_shpe) && !defined(TARGET_IS_mipspe)
-    || (!link_info.relocateable && pe_def_file->num_exports != 0)
+    || (!link_info.relocatable && pe_def_file->num_exports != 0)
 #endif
     )
     {
@@ -1556,7 +1556,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
   /* Look through the script to see where to place this section.  */
   hold_section_name = xstrdup (secname);
-  if (!link_info.relocateable)
+  if (!link_info.relocatable)
     {
       dollar = strchr (hold_section_name, '$');
       if (dollar != NULL)
@@ -1662,7 +1662,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	    }
 	}
 
-      if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+      if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
 	address = exp_intop ((bfd_vma) 0);
       else
 	{
@@ -1934,11 +1934,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c

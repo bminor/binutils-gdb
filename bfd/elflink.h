@@ -463,7 +463,7 @@ elf_link_add_object_symbols (abfd, info)
       /* You can't use -r against a dynamic object.  Also, there's no
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
-      if (info->relocateable || info->hash->creator != abfd->xvec)
+      if (info->relocatable || info->hash->creator != abfd->xvec)
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
 	  goto error_return;
@@ -534,7 +534,7 @@ elf_link_add_object_symbols (abfd, info)
 		      FALSE, collect, (struct bfd_link_hash_entry **) NULL)))
 		goto error_return;
 
-	      if (! info->relocateable)
+	      if (! info->relocatable)
 		{
 		  /* Clobber the section size so that the warning does
 		     not get copied into the output file.  */
@@ -1658,7 +1658,7 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
-  if (! info->relocateable && ! dynamic
+  if (! info->relocatable && ! dynamic
       && is_elf_hash_table (info))
     {
       asection *s;
@@ -1968,7 +1968,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (notesec)
 	{
 	  elf_tdata (output_bfd)->stack_flags = PF_R | PF_W | exec;
-	  if (exec && info->relocateable
+	  if (exec && info->relocatable
 	      && notesec->output_section != bfd_abs_section_ptr)
 	    notesec->output_section->flags |= SEC_CODE;
 	}
@@ -2909,7 +2909,7 @@ struct elf_outext_info
   struct elf_final_link_info *finfo;
 };
 
-/* When performing a relocateable link, the input relocations are
+/* When performing a relocatable link, the input relocations are
    preserved.  But, if they reference global symbols, the indices
    referenced must be updated.  Update all the relocations in
    REL_HDR (there are COUNT of them), using the data in REL_HASH.  */
@@ -3186,7 +3186,7 @@ elf_bfd_final_link (abfd, info)
   dynamic = elf_hash_table (info)->dynamic_sections_created;
   dynobj = elf_hash_table (info)->dynobj;
 
-  emit_relocs = (info->relocateable
+  emit_relocs = (info->relocatable
 		 || info->emitrelocations
 		 || bed->elf_backend_emit_relocs);
 
@@ -3271,7 +3271,7 @@ elf_bfd_final_link (abfd, info)
 	      if (sec->flags & SEC_MERGE)
 		merged = TRUE;
 
-	      if (info->relocateable || info->emitrelocations)
+	      if (info->relocatable || info->emitrelocations)
 		reloc_count = sec->reloc_count;
 	      else if (bed->elf_backend_count_relocs)
 		{
@@ -3396,7 +3396,7 @@ elf_bfd_final_link (abfd, info)
 	o->vma = 0;
     }
 
-  if (! info->relocateable && merged)
+  if (! info->relocatable && merged)
     elf_link_hash_traverse (elf_hash_table (info),
 			    _bfd_elf_link_sec_merge_syms, (PTR) abfd);
 
@@ -3524,7 +3524,7 @@ elf_bfd_final_link (abfd, info)
 	  if (o != NULL)
 	    o->target_index = bfd_get_symcount (abfd);
 	  elfsym.st_shndx = i;
-	  if (info->relocateable || o == NULL)
+	  if (info->relocatable || o == NULL)
 	    elfsym.st_value = 0;
 	  else
 	    elfsym.st_value = o->vma;
@@ -3635,13 +3635,13 @@ elf_bfd_final_link (abfd, info)
      Unfortunately, there is no way to know the total number of local
      symbols until we have seen all of them, and the local symbol
      indices precede the global symbol indices.  This means that when
-     we are generating relocateable output, and we see a reloc against
+     we are generating relocatable output, and we see a reloc against
      a global symbol, we can not know the symbol index until we have
      finished examining all the local symbols to see which ones we are
      going to output.  To deal with this, we keep the relocations in
      memory, and don't output them until the end of the link.  This is
      an unfortunate waste of memory, but I don't see a good way around
-     it.  Fortunately, it only happens when performing a relocateable
+     it.  Fortunately, it only happens when performing a relocatable
      link, which is not the common case.  FIXME: If keep_memory is set
      we could write the relocs out and then read them again; I don't
      know how bad the memory loss will be.  */
@@ -4081,7 +4081,7 @@ elf_bfd_final_link (abfd, info)
 	}
     }
 
-  if (info->relocateable)
+  if (info->relocatable)
     {
       bfd_boolean failed = FALSE;
 
@@ -4453,7 +4453,7 @@ elf_link_output_extsym (h, data)
      program is run.  We don't have to worry about symbols that are
      referenced by regular files, because we will already have issued
      warnings for them.  */
-  if (! finfo->info->relocateable
+  if (! finfo->info->relocatable
       && (finfo->info->executable
 	  || ! finfo->info->allow_shlib_undefined)
       && h->root.type == bfd_link_hash_undefined
@@ -4472,7 +4472,7 @@ elf_link_output_extsym (h, data)
 
   /* We should also warn if a forced local symbol is referenced from
      shared libraries.  */
-  if (! finfo->info->relocateable
+  if (! finfo->info->relocatable
       && (! finfo->info->shared || ! finfo->info->allow_shlib_undefined)
       && (h->elf_link_hash_flags
 	  & (ELF_LINK_FORCED_LOCAL | ELF_LINK_HASH_REF_DYNAMIC
@@ -4570,11 +4570,11 @@ elf_link_output_extsym (h, data)
 		return FALSE;
 	      }
 
-	    /* ELF symbols in relocateable files are section relative,
-	       but in nonrelocateable files they are virtual
+	    /* ELF symbols in relocatable files are section relative,
+	       but in nonrelocatable files they are virtual
 	       addresses.  */
 	    sym.st_value = h->root.u.def.value + input_sec->output_offset;
-	    if (! finfo->info->relocateable)
+	    if (! finfo->info->relocatable)
 	      {
 		sym.st_value += input_sec->output_section->vma;
 		if (h->type == STT_TLS)
@@ -4657,7 +4657,7 @@ elf_link_output_extsym (h, data)
 
   /* If a non-weak symbol with non-default visibility is not defined
      locally, it is a fatal error.  */
-  if (! finfo->info->relocateable
+  if (! finfo->info->relocatable
       && ELF_ST_VISIBILITY (sym.st_other) != STV_DEFAULT
       && ELF_ST_BIND (sym.st_info) != STB_WEAK
       && h->root.type == bfd_link_hash_undefined
@@ -4787,7 +4787,7 @@ elf_link_input_bfd (finfo, input_bfd)
   if ((input_bfd->flags & DYNAMIC) != 0)
     return TRUE;
 
-  emit_relocs = (finfo->info->relocateable
+  emit_relocs = (finfo->info->relocatable
 		 || finfo->info->emitrelocations
 		 || bed->elf_backend_emit_relocs);
 
@@ -4882,7 +4882,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	continue;
 
       /* If we are discarding all local symbols, we don't want to
-	 output this one.  If we are generating a relocateable output
+	 output this one.  If we are generating a relocatable output
 	 file, then some of the local symbols may be required by
 	 relocs; we output them below as we discover that they are
 	 needed.  */
@@ -4897,7 +4897,7 @@ elf_link_input_bfd (finfo, input_bfd)
       if ((isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
 	  && isec != NULL
 	  && ((! isec->linker_mark && (isec->flags & SEC_HAS_CONTENTS) != 0)
-	      || (! finfo->info->relocateable
+	      || (! finfo->info->relocatable
 		  && (isec->flags & SEC_EXCLUDE) != 0)))
 	continue;
 
@@ -4912,7 +4912,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	   && (bfd_hash_lookup (finfo->info->keep_hash, name, FALSE, FALSE)
 	       == NULL))
 	  || (((finfo->info->discard == discard_sec_merge
-		&& (isec->flags & SEC_MERGE) && ! finfo->info->relocateable)
+		&& (isec->flags & SEC_MERGE) && ! finfo->info->relocatable)
 	       || finfo->info->discard == discard_l)
 	      && bfd_is_local_label_name (input_bfd, name)))
 	continue;
@@ -4929,7 +4929,7 @@ elf_link_input_bfd (finfo, input_bfd)
 
       *pindex = bfd_get_symcount (output_bfd);
 
-      /* ELF symbols in relocateable files are section relative, but
+      /* ELF symbols in relocatable files are section relative, but
 	 in executable files they are virtual addresses.  Note that
 	 this code assumes that all ELF sections have an associated
 	 BFD section with a reasonable value for output_offset; below
@@ -4937,7 +4937,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	 output_section.  Any special sections must be set up to meet
 	 these requirements.  */
       osym.st_value += isec->output_offset;
-      if (! finfo->info->relocateable)
+      if (! finfo->info->relocatable)
 	{
 	  osym.st_value += isec->output_section->vma;
 	  if (ELF_ST_TYPE (osym.st_info) == STT_TLS)
@@ -5108,7 +5108,7 @@ elf_link_input_bfd (finfo, input_bfd)
 
 	     The back end routine is responsible for adjusting the
 	     section contents as necessary, and (if using Rela relocs
-	     and generating a relocateable output file) adjusting the
+	     and generating a relocatable output file) adjusting the
 	     reloc addend as necessary.
 
 	     The back end routine does not have to worry about setting
@@ -5118,7 +5118,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	     internal symbols, and can access the hash table entries
 	     for the external symbols via elf_sym_hashes (input_bfd).
 
-	     When generating relocateable output, the back end routine
+	     When generating relocatable output, the back end routine
 	     must handle STB_LOCAL/STT_SECTION symbols specially.  The
 	     output symbol is going to be a section symbol
 	     corresponding to the output section, which will require
@@ -5157,7 +5157,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			  + elf_section_data (o->output_section)->rel_count
 			  + elf_section_data (o->output_section)->rel_count2);
 	      last_offset = o->output_offset;
-	      if (!finfo->info->relocateable)
+	      if (!finfo->info->relocatable)
 		last_offset += o->output_section->vma;
 	      for (next_erel = 0; irela < irelaend; irela++, next_erel++)
 		{
@@ -5190,7 +5190,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		  irela->r_offset += o->output_offset;
 
 		  /* Relocs in an executable have to be virtual addresses.  */
-		  if (!finfo->info->relocateable)
+		  if (!finfo->info->relocatable)
 		    irela->r_offset += o->output_section->vma;
 
 		  last_offset = irela->r_offset;
@@ -5294,7 +5294,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			    return FALSE;
 
 			  sym.st_value += sec->output_offset;
-			  if (! finfo->info->relocateable)
+			  if (! finfo->info->relocatable)
 			    {
 			      sym.st_value += osec->vma;
 			      if (ELF_ST_TYPE (sym.st_info) == STT_TLS)
@@ -5322,7 +5322,7 @@ elf_link_input_bfd (finfo, input_bfd)
 
 	      /* Swap out the relocs.  */
 	      if (bed->elf_backend_emit_relocs
-		  && !(finfo->info->relocateable
+		  && !(finfo->info->relocatable
 		       || finfo->info->emitrelocations))
 		reloc_emitter = bed->elf_backend_emit_relocs;
 	      else
@@ -5522,10 +5522,10 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
     }
 
   /* The address of a reloc is relative to the section in a
-     relocateable file, and is a virtual address in an executable
+     relocatable file, and is a virtual address in an executable
      file.  */
   offset = link_order->offset;
-  if (! info->relocateable)
+  if (! info->relocatable)
     offset += output_section->vma;
 
   for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
@@ -6189,7 +6189,7 @@ elf_gc_sections (abfd, info)
 	     struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   if (!get_elf_backend_data (abfd)->can_gc_sections
-      || info->relocateable || info->emitrelocations
+      || info->relocatable || info->emitrelocations
       || elf_hash_table (info)->dynamic_sections_created)
     return TRUE;
 
@@ -6599,7 +6599,7 @@ elf_bfd_discard_info (output_bfd, info)
 	continue;
 
       eh = bfd_get_section_by_name (abfd, ".eh_frame");
-      if (info->relocateable
+      if (info->relocatable
 	  || (eh != NULL
 	      && (eh->_raw_size == 0
 		  || bfd_is_abs_section (eh->output_section))))
@@ -6705,7 +6705,7 @@ elf_bfd_discard_info (output_bfd, info)
     }
 
   if (info->eh_frame_hdr
-      && !info->relocateable
+      && !info->relocatable
       && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
     ret = TRUE;
 

@@ -130,9 +130,9 @@ $s/$/n"/
 cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 0;
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xu`;
-  else if (link_info.relocateable)
+  else if (link_info.relocatable)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xr`;
   else if (!config.text_read_only)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
@@ -150,9 +150,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 1;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable)
+  else if (link_info.relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

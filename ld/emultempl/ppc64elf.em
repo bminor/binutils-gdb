@@ -270,7 +270,7 @@ ppc_layout_sections_again (void)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
-  if (!link_info.relocateable)
+  if (!link_info.relocatable)
     _bfd_set_gp_value (output_bfd, ppc64_elf_toc (output_bfd));
 }
 
@@ -319,7 +319,7 @@ gld${EMULATION_NAME}_finish (void)
 
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
-  if (stub_file != NULL && !link_info.relocateable)
+  if (stub_file != NULL && !link_info.relocatable)
     {
       int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info);
       if (ret != 0)

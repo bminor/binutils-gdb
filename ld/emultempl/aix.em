@@ -613,15 +613,15 @@ gld${EMULATION_NAME}_after_open ()
   struct set_info *p;
 
   /* Call ldctor_build_sets, after pretending that this is a
-     relocateable link.  We do this because AIX requires relocation
+     relocatable link.  We do this because AIX requires relocation
      entries for all references to symbols, even in a final
      executable.  Of course, we only want to do this if we are
      producing an XCOFF output file.  */
-  r = link_info.relocateable;
+  r = link_info.relocatable;
   if (strstr (bfd_get_target (output_bfd), "xcoff") != NULL)
-    link_info.relocateable = TRUE;
+    link_info.relocatable = TRUE;
   ldctor_build_sets ();
-  link_info.relocateable = r;
+  link_info.relocatable = r;
 
   /* For each set, record the size, so that the XCOFF backend can
      output the correct csect length.  */
@@ -1293,11 +1293,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu		       >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr		       >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn		       >> e${EMULATION_NAME}.c
@@ -1314,9 +1314,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable)
+  else if (link_info.relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

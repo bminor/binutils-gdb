@@ -1,6 +1,6 @@
 /* ldctor.c -- constructor support routines
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
    By Steve Chamberlain <sac@cygnus.com>
 
 This file is part of GLD, the Gnu Linker.
@@ -278,12 +278,12 @@ ldctor_build_sets ()
 	     .long elementN
 	     .long 0
 	 except that we use the right size instead of .long.  When
-	 generating relocateable output, we generate relocs instead of
+	 generating relocatable output, we generate relocs instead of
 	 addresses.  */
       howto = bfd_reloc_type_lookup (output_bfd, p->reloc);
       if (howto == (reloc_howto_type *) NULL)
 	{
-	  if (link_info.relocateable)
+	  if (link_info.relocatable)
 	    {
 	      einfo (_("%P%X: %s does not support reloc %s for set %s\n"),
 		     bfd_get_target (output_bfd),
@@ -292,7 +292,7 @@ ldctor_build_sets ()
 	      continue;
 	    }
 
-	  /* If this is not a relocateable link, all we need is the
+	  /* If this is not a relocatable link, all we need is the
 	     size, which we can get from the input BFD.  */
 	  if (p->elements->section->owner != NULL)
 	    howto = bfd_reloc_type_lookup (p->elements->section->owner,
@@ -369,7 +369,7 @@ ldctor_build_sets ()
 	  if (! bfd_is_abs_section (e->section))
 	    e->section->flags |= SEC_KEEP;
 
-	  if (link_info.relocateable)
+	  if (link_info.relocatable)
 	    lang_add_reloc (p->reloc, howto, e->section, e->name,
 			    exp_intop (e->value));
 	  else

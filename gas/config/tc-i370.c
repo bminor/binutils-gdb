@@ -1,6 +1,6 @@
 /* tc-i370.c -- Assembler for the IBM 360/370/390 instruction set.
    Loosely based on the ppc files by Linas Vepstas <linas@linas.org> 1998, 99
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -2552,7 +2552,7 @@ i370_byte (ignore)
    give to this location in the toc; this will be a symbol with class
    TC.  The rest of the arguments are 4 byte values to actually put at
    this location in the TOC; often there is just one more argument, a
-   relocateable symbol reference.
+   relocatable symbol reference.
 
    When not generating XCOFF output, the arguments are the same, but
    the first argument is simply ignored.  */

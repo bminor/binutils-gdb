@@ -354,7 +354,7 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
 
   insert = FALSE;
 
-  if (! info->relocateable
+  if (! info->relocatable
       && linux_hash_table (info)->dynobj == NULL
       && strcmp (name, SHARABLE_CONFLICTS) == 0
       && (flags & BSF_CONSTRUCTOR) != 0

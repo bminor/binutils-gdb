@@ -38,7 +38,7 @@ static int elf64alpha_32bit = 0;
 static void
 alpha_after_parse ()
 {
-  if (elf64alpha_32bit && !link_info.shared && !link_info.relocateable)
+  if (elf64alpha_32bit && !link_info.shared && !link_info.relocatable)
     lang_section_start (".interp",
 			exp_binop ('+',
 				   exp_intop (ALPHA_TEXT_START_32BIT),

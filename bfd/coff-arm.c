@@ -1,6 +1,6 @@
 /* BFD back-end for ARM COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1247,13 +1247,13 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	return FALSE;
 
       /* The relocation_section function will skip pcrel_offset relocs
-         when doing a relocateable link.  However, we want to convert
+         when doing a relocatable link.  However, we want to convert
          ARM26 to ARM26D relocs if possible.  We return a fake howto in
          this case without pcrel_offset set, and adjust the addend to
          compensate.  */
       if (rel->r_type == ARM_26
           && h != NULL
-          && info->relocateable
+          && info->relocatable
           && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
           && (h->root.u.def.section->output_section
@@ -1283,18 +1283,18 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	 the next opcode's pc, so is off by one.  */
 #if 0 /* This appears to have been true for WINCE 2.0, but it is not
 	 true for WINCE 3.0.  */
-      if (howto->pc_relative && !info->relocateable)
+      if (howto->pc_relative && !info->relocatable)
 	addend -= 8;
 #endif
 #endif
 
-      /* If we are doing a relocateable link, then we can just ignore
+      /* If we are doing a relocatable link, then we can just ignore
          a PC relative reloc that is pcrel_offset.  It will already
-         have the correct value.  If this is not a relocateable link,
+         have the correct value.  If this is not a relocatable link,
          then we should ignore the symbol value.  */
       if (howto->pc_relative && howto->pcrel_offset)
         {
-          if (info->relocateable)
+          if (info->relocatable)
             continue;
 	  /* FIXME - it is not clear which targets need this next test
 	     and which do not.  It is known that it is needed for the
@@ -1341,7 +1341,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
              stub generation to the final linker pass. If we fail to
 	     verify that the name is defined, we'll try to build stubs
 	     for an undefined name...  */
-          if (! info->relocateable
+          if (! info->relocatable
 	      && (   h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak))
             {
@@ -1595,7 +1595,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		     + sec->output_offset);
 	      }
 
-	  else if (! info->relocateable)
+	  else if (! info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
@@ -1617,7 +1617,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	rstat = bfd_reloc_ok;
 #ifndef ARM_WINCE
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
-      else if (! info->relocateable
+      else if (! info->relocatable
 	       && howto->type == ARM_THUMB23)
         {
           /* This is pretty much a copy of what the default
@@ -1743,7 +1743,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	 Is this the best way to fix up thumb addresses? krk@cygnus.com
 	 Probably not, but it works, and if it works it don't need fixing!  nickc@cygnus.com */
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
-      if (! info->relocateable
+      if (! info->relocatable
 	  && (rel->r_type == ARM_32 || rel->r_type == ARM_RVA32))
 	{
 	  /* Determine if we need to set the bottom bit of a relocated address
@@ -2023,7 +2023,7 @@ bfd_arm_get_bfd_for_interworking (abfd, info)
 
   /* If we are only performing a partial link do not bother
      getting a bfd to hold the glue.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   globals = coff_arm_hash_table (info);
@@ -2078,7 +2078,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* Here we have a bfd that is to be included on the link.  We have a hook
@@ -2198,7 +2198,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 #define coff_bfd_copy_private_bfd_data          coff_arm_copy_private_bfd_data
 #define coff_bfd_link_hash_table_create		coff_arm_link_hash_table_create
 
-/* When doing a relocateable link, we want to convert ARM26 relocs
+/* When doing a relocatable link, we want to convert ARM26 relocs
    into ARM26D relocs.  */
 
 static bfd_boolean

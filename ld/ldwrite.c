@@ -1,5 +1,5 @@
 /* ldwrite.c -- write out the linked file
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002, 2003
    Free Software Foundation, Inc.
    Written by Steve Chamberlain sac@cygnus.com
 
@@ -441,7 +441,7 @@ split_sections (abfd, info)
 		  || info->strip == strip_some)
 		thislines = sec->lineno_count;
 
-	      if (info->relocateable)
+	      if (info->relocatable)
 		thisrelocs = sec->reloc_count;
 
 	      if (sec->_cooked_size != 0)
@@ -450,7 +450,7 @@ split_sections (abfd, info)
 		thissize = sec->_raw_size;
 
 	    }
-	  else if (info->relocateable
+	  else if (info->relocatable
 		   && (p->type == bfd_section_reloc_link_order
 		       || p->type == bfd_symbol_reloc_link_order))
 	    thisrelocs++;

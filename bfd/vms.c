@@ -1,6 +1,6 @@
 /* vms.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
@@ -132,7 +132,7 @@ static int vms_sizeof_headers
 static bfd_byte *vms_bfd_get_relocated_section_contents
   PARAMS ((bfd *abfd, struct bfd_link_info *link_info,
 	   struct bfd_link_order *link_order, bfd_byte *data,
-	   bfd_boolean relocateable, asymbol **symbols));
+	   bfd_boolean relocatable, asymbol **symbols));
 static bfd_boolean vms_bfd_relax_section
   PARAMS ((bfd *abfd, asection *section, struct bfd_link_info *link_info,
 	   bfd_boolean *again));
@@ -1691,17 +1691,17 @@ vms_sizeof_headers (abfd, reloc)
 
 static bfd_byte *
 vms_bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
-					 relocateable, symbols)
+					 relocatable, symbols)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
      struct bfd_link_order *link_order ATTRIBUTE_UNUSED;
      bfd_byte *data ATTRIBUTE_UNUSED;
-     bfd_boolean relocateable ATTRIBUTE_UNUSED;
+     bfd_boolean relocatable ATTRIBUTE_UNUSED;
      asymbol **symbols ATTRIBUTE_UNUSED;
 {
 #if VMS_DEBUG
   vms_debug (1, "vms_bfd_get_relocated_section_contents(%p, %p, %p, %p, %s, %p)\n",
-			abfd, link_info, link_order, data, (relocateable)?"True":"False", symbols);
+			abfd, link_info, link_order, data, (relocatable)?"True":"False", symbols);
 #endif
   return 0;
 }

@@ -75,7 +75,7 @@ elf_xtensa_place_orphan (file, s)
      asection *s;
 {
   /* Early exit for relocatable links.  */
-  if (link_info.relocateable)
+  if (link_info.relocatable)
     return FALSE;
 
   return gld${EMULATION_NAME}_place_orphan (file, s);
@@ -148,7 +148,7 @@ elf_xtensa_before_allocation ()
 
   /* TBD: We need to force the page alignments to here and only do
      them as needed for the entire output section.  Finally, if this
-     is a relocateable link then we need to add alignment notes so
+     is a relocatable link then we need to add alignment notes so
      that the literals can be separated later.  */
 }
 

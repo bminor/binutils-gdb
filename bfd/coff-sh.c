@@ -706,7 +706,7 @@ sh_relax_section (abfd, sec, link_info, again)
 
   *again = FALSE;
 
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;
@@ -2969,7 +2969,7 @@ sh_relocate_section (output_bfd, info, input_bfd, input_section, contents,
 		     + sec->output_section->vma
 		     + sec->output_offset);
 	    }
-	  else if (! info->relocateable)
+	  else if (! info->relocatable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
@@ -3024,12 +3024,12 @@ sh_relocate_section (output_bfd, info, input_bfd, input_section, contents,
 
 static bfd_byte *
 sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
-					data, relocateable, symbols)
+					data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   asection *input_section = link_order->u.indirect.section;
@@ -3040,12 +3040,12 @@ sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
-  if (relocateable
+  if (relocatable
       || coff_section_data (input_bfd, input_section) == NULL
       || coff_section_data (input_bfd, input_section)->contents == NULL)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order, data,
-						       relocateable,
+						       relocatable,
 						       symbols);
 
   memcpy (data, coff_section_data (input_bfd, input_section)->contents,

@@ -483,9 +483,9 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
 			continue;
 		      }
 
-		    /* If we emit relocateable contents, we need a
+		    /* If we emit relocatable contents, we need a
 		       relocation for the start address.  */
-		    if (link_info.relocateable || link_info.emitrelocations)
+		    if (link_info.relocatable || link_info.emitrelocations)
 		      {
 			/* FIXME: We could perhaps use lang_add_reloc and
 			   friends here, but I'm not really sure that
@@ -555,7 +555,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
     }
 
   /* The .cranges section will have this size, no larger or smaller.
-     Since relocs (if relocateable linking) will be emitted into the
+     Since relocs (if relocatable linking) will be emitted into the
      "extended" size, we must set the raw size to the total.  We have to
      keep track of the number of new .cranges entries.
 

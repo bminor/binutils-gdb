@@ -3861,7 +3861,7 @@ ppc_vbyte (dummy)
    give to this location in the toc; this will be a symbol with class
    TC.  The rest of the arguments are N-byte values to actually put at
    this location in the TOC; often there is just one more argument, a
-   relocateable symbol reference.  The size of the value to store
+   relocatable symbol reference.  The size of the value to store
    depends on target word size.  A 32-bit target uses 4-byte values, a
    64-bit target uses 8-byte values.
 

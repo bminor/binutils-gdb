@@ -1193,7 +1193,7 @@ lang_add_section (ptr, section, output, file)
      link.  Discard debugging sections marked with SEC_EXCLUDE on a
      relocatable link too.  */
   if ((flags & SEC_EXCLUDE) != 0
-      && ((flags & SEC_DEBUGGING) != 0 || !link_info.relocateable))
+      && ((flags & SEC_DEBUGGING) != 0 || !link_info.relocatable))
     discard = TRUE;
 
   /* Discard input sections which are assigned to a section named
@@ -1252,7 +1252,7 @@ lang_add_section (ptr, section, output, file)
 	 format targets, .text$foo sections go into .text and it's odd
 	 to see .text with SEC_LINK_ONCE set.  */
 
-      if (! link_info.relocateable)
+      if (! link_info.relocatable)
 	flags &= ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES);
 
       /* If this is not the first input section, and the SEC_READONLY
@@ -1274,7 +1274,7 @@ lang_add_section (ptr, section, output, file)
 	}
 
       /* For now make .tbss normal section.  */
-      if ((flags & SEC_THREAD_LOCAL) && ! link_info.relocateable)
+      if ((flags & SEC_THREAD_LOCAL) && ! link_info.relocatable)
 	flags |= SEC_LOAD;
 
       section->output_section->flags |= flags;
@@ -1965,7 +1965,7 @@ ldlang_open_output (statement)
       ASSERT (output_bfd == (bfd *) NULL);
       output_bfd = open_output (statement->output_statement.name);
       ldemul_set_output_arch ();
-      if (config.magic_demand_paged && !link_info.relocateable)
+      if (config.magic_demand_paged && !link_info.relocatable)
 	output_bfd->flags |= D_PAGED;
       else
 	output_bfd->flags &= ~D_PAGED;
@@ -3058,7 +3058,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax,
 			 & (SEC_ALLOC | SEC_LOAD)) != 0
 			&& (bfd_get_section_flags (output_bfd, os->bfd_section)
 			    & SEC_NEVER_LOAD) == 0
-			&& ! link_info.relocateable
+			&& ! link_info.relocatable
 			&& check_regions
 			&& strcmp (os->region->name, "*default*") == 0
 			&& lang_memory_region_list != NULL
@@ -3139,7 +3139,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax,
 	      ASSERT (after == os->bfd_section->vma);
 	    else if ((os->bfd_section->flags & SEC_HAS_CONTENTS) == 0
 		     && (os->bfd_section->flags & SEC_THREAD_LOCAL)
-		     && ! link_info.relocateable)
+		     && ! link_info.relocatable)
 	      os->bfd_section->_raw_size = 0;
 	    else
 	      os->bfd_section->_raw_size =
@@ -3585,7 +3585,7 @@ lang_set_startof ()
 {
   asection *s;
 
-  if (link_info.relocateable)
+  if (link_info.relocatable)
     return;
 
   for (s = output_bfd->sections; s != NULL; s = s->next)
@@ -3632,7 +3632,7 @@ lang_finish ()
   struct bfd_link_hash_entry *h;
   bfd_boolean warn;
 
-  if (link_info.relocateable || link_info.shared)
+  if (link_info.relocatable || link_info.shared)
     warn = FALSE;
   else
     warn = TRUE;
@@ -3741,7 +3741,7 @@ lang_check ()
 	 input format may not have equivalent representations in
 	 the output format (and besides BFD does not translate
 	 relocs for other link purposes than a final link).  */
-      if ((link_info.relocateable || link_info.emitrelocations)
+      if ((link_info.relocatable || link_info.emitrelocations)
 	  && (compatible == NULL
 	      || bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd))
 	  && (bfd_get_file_flags (input_bfd) & HAS_RELOC) != 0)
@@ -3794,7 +3794,7 @@ lang_common ()
 {
   if (command_line.inhibit_common_definition)
     return;
-  if (link_info.relocateable
+  if (link_info.relocatable
       && ! command_line.force_common_definition)
     return;
 
@@ -3935,7 +3935,7 @@ lang_place_orphans ()
 		  /* This is a lonely common section which must have
 		     come from an archive.  We attach to the section
 		     with the wildcard.  */
-		  if (! link_info.relocateable
+		  if (! link_info.relocatable
 		      || command_line.force_common_definition)
 		    {
 		      if (default_common_section == NULL)
@@ -4353,7 +4353,7 @@ lang_process ()
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();
 
-  if (! link_info.relocateable)
+  if (! link_info.relocatable)
     {
       /* Look for a text section and set the readonly attribute in it.  */
       asection *found = bfd_get_section_by_name (output_bfd, ".text");
@@ -4371,7 +4371,7 @@ lang_process ()
      and other back-ends size dynamic sections.  */
   ldemul_before_allocation ();
 
-  if (!link_info.relocateable)
+  if (!link_info.relocatable)
     strip_excluded_output_sections ();
 
   /* We must record the program headers before we try to fix the
@@ -4449,7 +4449,7 @@ lang_process ()
 		       (fill_type *) 0, (bfd_vma) 0);
 
   /* Make sure that the section addresses make sense.  */
-  if (! link_info.relocateable
+  if (! link_info.relocatable
       && command_line.check_section_addresses)
     lang_check_section_addresses ();
 

@@ -1101,7 +1101,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
   asection *srelgot;
   asection *sreloc;
 
-  if (info->relocateable || !(sec->flags & SEC_ALLOC))
+  if (info->relocatable || !(sec->flags & SEC_ALLOC))
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -2022,7 +2022,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;

@@ -3085,7 +3085,7 @@ ppc_elf_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
 #ifdef DEBUG
@@ -3716,7 +3716,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   asection *sec;
   struct ppc_elf_link_hash_table *htab;
 
-  if (info->relocateable || info->shared)
+  if (info->relocatable || info->shared)
     return TRUE;
 
   htab = ppc_elf_hash_table (info);
@@ -3911,7 +3911,7 @@ ppc_elf_add_symbol_hook (bfd *abfd,
 			 bfd_vma *valp)
 {
   if (sym->st_shndx == SHN_COMMON
-      && !info->relocateable
+      && !info->relocatable
       && sym->st_size <= elf_gp_size (abfd)
       && info->hash->creator->flavour == bfd_target_elf_flavour)
     {
@@ -4148,7 +4148,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocateable output file) adjusting the reloc addend as
+   relocatable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -4162,7 +4162,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
@@ -4195,10 +4195,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	   bfd_archive_filename (input_bfd),
 	   bfd_section_name(input_bfd, input_section),
 	   (long) input_section->reloc_count,
-	   (info->relocateable) ? " (relocatable)" : "");
+	   (info->relocatable) ? " (relocatable)" : "");
 #endif
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   if (!ppc_elf_howto_table[R_PPC_ADDR32])

@@ -427,7 +427,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
   asection *srelgot;
   asection *sreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1358,7 +1358,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -2153,7 +2153,7 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   bfd_byte *p;
   bfd_size_type amt;
 
-  BFD_ASSERT (! info->relocateable);
+  BFD_ASSERT (! info->relocatable);
 
   *errmsg = NULL;
 

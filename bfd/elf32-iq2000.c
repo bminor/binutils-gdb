@@ -458,7 +458,7 @@ iq2000_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel_end;
   bfd_boolean changed = FALSE;
   
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
   
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -531,7 +531,7 @@ iq2000_elf_check_relocs (abfd, info, sec, relocs)
    zero.
 
    This function is responsible for adjusting the section contents as
-   necessary, and (if using Rela relocs and generating a relocateable
+   necessary, and (if using Rela relocs and generating a relocatable
    output file) adjusting the reloc addend as necessary.
 
    This function does not have to worry about setting the reloc
@@ -545,7 +545,7 @@ iq2000_elf_check_relocs (abfd, info, sec, relocs)
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocateable output, this function must handle
+   When generating relocatable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted

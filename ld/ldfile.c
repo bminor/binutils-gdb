@@ -338,7 +338,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
     {
       char *string;
 
-      if (entry->dynamic && ! link_info.relocateable)
+      if (entry->dynamic && ! link_info.relocatable)
 	{
 	  if (ldemul_open_dynamic_archive (arch, search, entry))
 	    {

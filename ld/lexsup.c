@@ -234,8 +234,8 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },
   { {"emit-relocs", no_argument, NULL, 'q'},
       'q', NULL, "Generate relocations in final output", TWO_DASHES },
-  { {"relocateable", no_argument, NULL, 'r'},
-      'r', NULL, N_("Generate relocateable output"), TWO_DASHES },
+  { {"relocatable", no_argument, NULL, 'r'},
+      'r', NULL, N_("Generate relocatable output"), TWO_DASHES },
   { {NULL, no_argument, NULL, '\0'},
       'i', NULL, NULL, ONE_DASH },
   { {"just-symbols", required_argument, NULL, 'R'},
@@ -860,7 +860,7 @@ parse_args (argc, argv)
 	       and will seg-fault the next time around.  */
 	    einfo(_("%P%F: bad -rpath option\n"));
 
-	  link_info.relocateable = TRUE;
+	  link_info.relocatable = TRUE;
 	  config.build_constructors = FALSE;
 	  config.magic_demand_paged = FALSE;
 	  config.text_read_only = FALSE;
@@ -1042,7 +1042,7 @@ parse_args (argc, argv)
 	  link_info.task_link = TRUE;
 	  /* Fall through - do an implied -r option.  */
 	case OPTION_UR:
-	  link_info.relocateable = TRUE;
+	  link_info.relocatable = TRUE;
 	  config.build_constructors = TRUE;
 	  config.magic_demand_paged = FALSE;
 	  config.text_read_only = FALSE;

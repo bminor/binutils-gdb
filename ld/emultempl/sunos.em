@@ -383,7 +383,7 @@ gld${EMULATION_NAME}_after_open ()
   struct bfd_link_needed_list *needed, *l;
 
   /* We only need to worry about this when doing a final link.  */
-  if (link_info.relocateable || link_info.shared)
+  if (link_info.relocatable || link_info.shared)
     return;
 
   /* Get the list of files which appear in ld_need entries in dynamic
@@ -689,7 +689,7 @@ gld${EMULATION_NAME}_before_allocation ()
   /* The SunOS native linker creates a shared library whenever there
      are any undefined symbols in a link, unless -e is used.  This is
      pretty weird, but we are compatible.  */
-  if (! link_info.shared && ! link_info.relocateable && ! entry_from_cmdline)
+  if (! link_info.shared && ! link_info.relocatable && ! entry_from_cmdline)
     {
       struct bfd_link_hash_entry *h;
 
@@ -730,7 +730,7 @@ gld${EMULATION_NAME}_before_allocation ()
      one.  We need to create the symbol before calling
      size_dynamic_sections, although we can't set the value until
      afterward.  */
-  if (! link_info.relocateable)
+  if (! link_info.relocatable)
     {
       hdyn = bfd_link_hash_lookup (link_info.hash, "__DYNAMIC", TRUE, FALSE,
 				   FALSE);
@@ -823,7 +823,7 @@ gld${EMULATION_NAME}_before_allocation ()
   /* We must assign a value to __DYNAMIC.  It should be zero if we are
      not doing a dynamic link, or the start of the .dynamic section if
      we are doing one.  */
-  if (! link_info.relocateable)
+  if (! link_info.relocatable)
     {
       hdyn->type = bfd_link_hash_defined;
       hdyn->u.def.value = 0;
@@ -989,11 +989,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable) return'         >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'         >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
@@ -1010,9 +1010,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable)
+  else if (link_info.relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

@@ -1,3 +1,102 @@
+2003-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* aout-ns32k.c: Correct spelling of "relocatable".
+	* aoutx.h: Likewise.
+	* bfd-in.h: Likewise.
+	* bfd.c: Likewise.
+	* bout.c: Likewise.
+	* coff-a29k.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-i386.c: Likewise.
+	* coff-i860.c: Likewise.
+	* coff-i960.c: Likewise.
+	* coff-m68k.c: Likewise.
+	* coff-m88k.c: Likewise.
+	* coff-mcore.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-or32.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* cofflink.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* ecoff.c: Likewise.
+	* ecofflink.c: Likewise.
+	* elf-bfd.h: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf-hppa.h: Likewise.
+	* elf-m10200.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.h: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d10v.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-i860.c: Likewise.
+	* elf32-i960.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-iq2000.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-openrisc.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-mips.c: Likewise.
+	* elf64-mmix.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elflink.h: Likewise.
+	* elfn32-mips.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* i386linux.c: Likewise.
+	* ieee.c: Likewise.
+	* libcoff-in.h: Likewise.
+	* linker.c: Likewise.
+	* m68klinux.c: Likewise.
+	* pdp11.c: Likewise.
+	* pe-mips.c: Likewise.
+	* peXXigen.c: Likewise.
+	* reloc.c: Likewise.
+	* reloc16.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sunos.c: Likewise.
+	* syms.c: Likewise.
+	* versados.c: Likewise.
+	* vms.c: Likewise.
+	* xcofflink.c: Likewise.
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2003-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Report plt reloc against
@@ -2604,7 +2703,7 @@
 	in a local var.  Comment typo fixes.
 	(h8300_bfd_link_add_symbols): Likewise.
 
-	* bfd/reloc.c (struct reloc_howto_struct): Revise src_mask and
+	* reloc.c (struct reloc_howto_struct): Revise src_mask and
 	dst_mask comments.
 	* bfd-in2.h: Regenerate.
 
@@ -4355,9 +4454,9 @@
 
 2002-08-16  Stephen Clarke <stephen.clarke@superh.com>
 
-	* bfd/elf32-sh.c (sh_elf_gc_mark_hook): For sh64, skip indirect
+	* elf32-sh.c (sh_elf_gc_mark_hook): For sh64, skip indirect
 	symbols when looking for section referred to by a relocation.
-	* bfd/elf64-sh.c (sh_elf64_gc_mark_hook): Likewise.
+	* elf64-sh.c (sh_elf64_gc_mark_hook): Likewise.
 
 2002-08-15  Alan Modra  <amodra@bigpond.net.au>
 

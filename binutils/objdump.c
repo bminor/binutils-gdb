@@ -735,7 +735,7 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
 	     == bfd_asymbol_value (sorted_syms[thisplace - 1])))
     --thisplace;
 
-  /* If the file is relocateable, and the symbol could be from this
+  /* If the file is relocatable, and the symbol could be from this
      section, prefer a symbol from this section over symbols from
      others, even if the other symbol's value might be closer.
 

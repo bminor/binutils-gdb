@@ -65,7 +65,7 @@ MY(put_reloc) PARAMS ((bfd *, int, int, bfd_vma, reloc_howto_type *,
 		       struct reloc_std_external *));
 
 /* The ns32k series is ah, unusual, when it comes to relocation.
-   There are three storage methods for relocateable objects.  There
+   There are three storage methods for relocatable objects.  There
    are displacements, immediate operands and ordinary twos complement
    data. Of these, only the last fits into the standard relocation
    scheme.  Immediate operands are stored huffman encoded and

@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2000, 2001 Free Software Foundation, Inc.
+#   Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 #   Written by Michael Sokolov <msokolov@ivan.Harhan.ORG>, based on armelf.em
 #
 # This file is part of GLD, the Gnu Linker.
@@ -47,7 +47,7 @@ m68k_elf_after_open ()
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
   if (command_line.embedded_relocs
-      && (! link_info.relocateable))
+      && (! link_info.relocatable))
     {
       bfd *abfd;
 
@@ -131,7 +131,7 @@ m68k_elf_after_allocation ()
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
   if (command_line.embedded_relocs
-      && (! link_info.relocateable))
+      && (! link_info.relocatable))
     {
       bfd *abfd;
 

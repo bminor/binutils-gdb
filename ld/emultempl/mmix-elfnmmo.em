@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001, 2002 Free Software Foundation, Inc.
+#   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -42,7 +42,7 @@ mmix_before_allocation ()
      maintenance burden of checking that it still does what we need.)  */
 
   /* Force -relax on if not doing a relocatable link.  */
-  if (! link_info.relocateable)
+  if (! link_info.relocatable)
     command_line.relax = TRUE;
 
   if (!_bfd_mmix_prepare_linker_allocated_gregs (output_bfd, &link_info))

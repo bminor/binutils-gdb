@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002, 2003 Free Software Foundation, Inc.
 #   Written by Mitch Lichtenberg <mpl@broadcom.com> and
 #   Chris Demetriou <cgd@broadcom.com> based on m68kelf.em and mipsecoff.em.
 #
@@ -49,7 +49,7 @@ mips_elf${ELFSIZE}_after_open()
   gld${EMULATION_NAME}_after_open ();
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
-  if (command_line.embedded_relocs && (! link_info.relocateable))
+  if (command_line.embedded_relocs && (! link_info.relocatable))
     {  
       bfd *abfd;
 
@@ -140,7 +140,7 @@ mips_elf${ELFSIZE}_after_allocation ()
   after_allocation_default ();
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
-  if (command_line.embedded_relocs && (! link_info.relocateable))
+  if (command_line.embedded_relocs && (! link_info.relocatable))
     {
       bfd *abfd;
       

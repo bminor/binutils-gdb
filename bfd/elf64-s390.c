@@ -849,7 +849,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
   bfd_signed_vma *local_got_refcounts;
   int tls_type, old_tls_type;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf_s390_hash_table (info);
@@ -2169,7 +2169,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf_s390_hash_table (info);

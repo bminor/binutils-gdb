@@ -728,9 +728,9 @@ This option is currently only supported on ELF platforms.
 @cindex partial link
 @cindex relocatable output
 @kindex -r
-@kindex --relocateable
+@kindex --relocatable
 @item -r
-@itemx --relocateable
+@itemx --relocatable
 Generate relocatable output---i.e., generate an output file that can in
 turn serve as input to @command{ld}.  This is often called @dfn{partial
 linking}.  As a side effect, in environments that support standard Unix

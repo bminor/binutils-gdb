@@ -181,7 +181,7 @@ Changes in binutils 2.6:
 Changes in binutils 2.5:
 
 * Changed objdump -dr to dump the relocs interspersed with the assembly
-  listing, for a more useful listing of relocateable files.
+  listing, for a more useful listing of relocatable files.
 
 * Changed objdump -d/--disassemble to only disassemble SEC_CODE sections.
   Added -D/--disassemble-all option to disassemble all sections.

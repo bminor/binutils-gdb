@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -134,7 +134,7 @@ exp_print_token (code, infix_p)
     { ADDR, "ADDR" },
     { LOADADDR, "LOADADDR" },
     { MAX_K, "MAX_K" },
-    { REL, "relocateable" },
+    { REL, "relocatable" },
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
     { DATA_SEGMENT_END, "DATA_SEGMENT_END" }
   };
@@ -215,7 +215,7 @@ exp_bigintop (value, str)
   return new;
 }
 
-/* Build an expression representing an unnamed relocateable value.  */
+/* Build an expression representing an unnamed relocatable value.  */
 
 etree_type *
 exp_relop (section, value)
@@ -528,7 +528,7 @@ fold_name (tree, current_section, allocation_done, dot)
 	{
 	  result = new_abs ((bfd_vma)
 			    bfd_sizeof_headers (output_bfd,
-						link_info.relocateable));
+						link_info.relocatable));
 	}
       else
 	{

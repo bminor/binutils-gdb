@@ -817,7 +817,7 @@ elf_i386_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf_i386_hash_table (info);
@@ -2034,7 +2034,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
 	  bfd_vma val;
 	  bfd_byte *where;

@@ -643,7 +643,7 @@ gld${EMULATION_NAME}_after_open ()
   struct bfd_link_needed_list *needed, *l;
 
   /* We only need to worry about this when doing a final link.  */
-  if (link_info.relocateable || !link_info.executable)
+  if (link_info.relocatable || !link_info.executable)
     return;
 
   /* Get the list of files which appear in DT_NEEDED entries in
@@ -1146,7 +1146,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   int isdyn = 0;
 
   secname = bfd_get_section_name (s->owner, s);
-  if (! link_info.relocateable
+  if (! link_info.relocatable
       && link_info.combreloc
       && (s->flags & SEC_ALLOC)
       && strncmp (secname, ".rel", 4) == 0)
@@ -1181,7 +1181,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   /* If this is a final link, then always put .gnu.warning.SYMBOL
      sections into the .text section to get them out of the way.  */
   if (link_info.executable
-      && ! link_info.relocateable
+      && ! link_info.relocatable
       && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
       && hold_text.os != NULL)
     {
@@ -1197,7 +1197,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 #define HAVE_SECTION(hold, name) \
 (hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
 
-  if ((s->flags & SEC_EXCLUDE) != 0 && !link_info.relocateable)
+  if ((s->flags & SEC_EXCLUDE) != 0 && !link_info.relocatable)
     {
       if (s->output_section == NULL)
 	s->output_section = bfd_abs_section_ptr;
@@ -1278,7 +1278,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
     }
 
   address = NULL;
-  if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+  if (link_info.relocatable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
     address = exp_intop ((bfd_vma) 0);
 
   load_base = NULL;
@@ -1462,11 +1462,11 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
@@ -1505,9 +1505,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocateable && config.build_constructors)
+  if (link_info.relocatable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable)
+  else if (link_info.relocatable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

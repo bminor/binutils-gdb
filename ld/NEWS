@@ -170,7 +170,7 @@ not copied into the output file.  This is used by glibc.
 * When an ELF section named .gnu.warning.SYMBOL is encountered in an input
 file, and the symbol SYMBOL is referenced by some object file, the contents of
 the section are displayed as an error message.  The section is not copied into
-the output file, unless doing a relocateable or shared link.  This is used by
+the output file, unless doing a relocatable or shared link.  This is used by
 glibc.
 
 * New options -split-by-reloc and -split-by-file.

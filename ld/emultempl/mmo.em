@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001, 2002 Free Software Foundation, Inc.
+#   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -97,7 +97,7 @@ mmo_place_orphan (file, s)
   asection *snew, **pps, *bfd_section;
 
   /* We have nothing to say for anything other than a final link.  */
-  if (link_info.relocateable
+  if (link_info.relocatable
       || (bfd_get_section_flags (s->owner, s)
 	  & (SEC_EXCLUDE | SEC_LOAD)) != SEC_LOAD)
     return FALSE;

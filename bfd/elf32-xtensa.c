@@ -127,7 +127,7 @@ static char *build_encoding_error_message
   PARAMS ((xtensa_opcode, xtensa_encode_result));
 static bfd_reloc_status_type bfd_elf_xtensa_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static void do_fix_for_relocateable_link
+static void do_fix_for_relocatable_link
   PARAMS ((Elf_Internal_Rela *, bfd *, asection *));
 static void do_fix_for_final_link
   PARAMS ((Elf_Internal_Rela *, asection *, bfd_vma *));
@@ -609,7 +609,7 @@ elf_xtensa_check_relocs (abfd, info, sec, relocs)
   property_table_entry *lit_table;
   int ltblsize;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -1662,7 +1662,7 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
   asection *reloc_target_output_section;
   bfd_boolean is_weak_undef;
 
-  /* ELF relocs are against symbols.  If we are producing relocateable
+  /* ELF relocs are against symbols.  If we are producing relocatable
      output, and the reloc is against an external symbol, the resulting
      reloc will also be against the same symbol.  In such a case, we
      don't want to change anything about the way the reloc is handled,
@@ -1841,7 +1841,7 @@ xtensa_elf_dynamic_symbol_p (info, h)
 
 
 /* Relocate an Xtensa ELF section.  This is invoked by the linker for
-   both relocateable and final links.  */
+   both relocatable and final links.  */
 
 static bfd_boolean
 elf_xtensa_relocate_section (output_bfd, info, input_bfd,
@@ -1909,9 +1909,9 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link. 
+	  /* This is a relocatable link. 
 	     1) If the reloc is against a section symbol, adjust
 	     according to the output section.
 	     2) If there is a new target for this relocation,
@@ -1922,7 +1922,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	  if (relaxing_section)
 	    {
 	      /* Check if this references a section in another input file.  */
-	      do_fix_for_relocateable_link (rel, input_bfd, input_section);
+	      do_fix_for_relocatable_link (rel, input_bfd, input_section);
 	      r_type = ELF32_R_TYPE (rel->r_info);
 	    }
 
@@ -1934,7 +1934,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	      r_type = ELF32_R_TYPE (rel->r_info);
 	    }
 
-	  /* This is a relocateable link, so we don't have to change
+	  /* This is a relocatable link, so we don't have to change
 	     anything unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
@@ -1950,7 +1950,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 
 	  /* If there is an addend with a partial_inplace howto,
 	     then move the addend to the contents.  This is a hack
-	     to work around problems with DWARF in relocateable links
+	     to work around problems with DWARF in relocatable links
 	     with some previous version of BFD.  Now we can't easily get
 	     rid of the hack without breaking backward compatibility.... */
 	  if (rel->r_addend)
@@ -1973,7 +1973,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		}
 	    }
 
-	  /* Done with work for relocateable link; continue with next reloc.  */
+	  /* Done with work for relocatable link; continue with next reloc.  */
 	  continue;
 	}
 
@@ -2465,7 +2465,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
     }
 
   /* Combine adjacent literal table entries.  */
-  BFD_ASSERT (! info->relocateable);
+  BFD_ASSERT (! info->relocatable);
   num_xtlit_entries = elf_xtensa_combine_prop_entries (output_bfd, ".xt.lit");
   if (num_xtlit_entries < 0)
     return FALSE;
@@ -4431,10 +4431,10 @@ is_resolvable_asm_expansion (abfd, sec, contents, irel, link_info,
   if (!target_sec->output_section)
     return FALSE;
       
-  /* For relocateable sections, we can only simplify when the output
+  /* For relocatable sections, we can only simplify when the output
      section of the target is the same as the output section of the
      source.  */
-  if (link_info->relocateable
+  if (link_info->relocatable
       && (target_sec->output_section != sec->output_section))
     return FALSE;
 
@@ -5345,7 +5345,7 @@ relax_section_symbols (abfd, sec)
 /* "Fix" handling functions, called while performing relocations.  */
 
 static void
-do_fix_for_relocateable_link (rel, input_bfd, input_section)
+do_fix_for_relocatable_link (rel, input_bfd, input_section)
      Elf_Internal_Rela *rel;
      bfd *input_bfd;
      asection *input_section;
