@@ -54,12 +54,12 @@ amdahl)
 amigados)
 	cpu=m68k
 	vendor=cbm
-	os=amigados # Native AmigaDOS
+	os=amigados   # Native Amiga operating system
 	;;
 amigaunix | amix)
 	cpu=m68k
 	vendor=cbm
-	os=svr4 # System V Release 4 (svr4 is an industry recognized acronym)
+	os=svr4
 	;;
 apollo68)
 	cpu=m68k
@@ -232,6 +232,11 @@ mmax)
 	cpu=ns32k
 	vendor=encore
 	os=sysv # maybe?
+	;;
+ncr3000)
+	cpu=i386
+	vendor=ncr
+	os=svr4
 	;;
 news | news700 | news800 | news900)
 	cpu=m68k
