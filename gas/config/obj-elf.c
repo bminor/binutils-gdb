@@ -1373,6 +1373,10 @@ obj_elf_ident (ignore)
   segT old_section = now_seg;
   int old_subsection = now_subseg;
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   if (!comment_section)
     {
       char *p;
@@ -1493,8 +1497,8 @@ elf_get_extr (sym, ext)
 /*ARGSUSED*/
 static void
 elf_set_index (sym, indx)
-     asymbol *sym;
-     bfd_size_type indx;
+     asymbol *sym ATTRIBUTE_UNUSED;
+     bfd_size_type indx ATTRIBUTE_UNUSED;
 {
 }
 
@@ -1705,7 +1709,11 @@ elf_frob_file_after_relocs ()
 	 this?  */
       sec->_raw_size = bfd_ecoff_debug_size (stdoutput, &debug, debug_swap);
 
-      if (! bfd_set_section_contents (stdoutput, sec, (PTR) NULL,
+      /* Pass BUF to bfd_set_section_contents because this will
+         eventually become a call to fwrite, and ISO C prohibits
+         passing a NULL pointer to a stdio function even if the
+         pointer will not be used.  */
+      if (! bfd_set_section_contents (stdoutput, sec, (PTR) buf,
 				      (file_ptr) 0, (bfd_size_type) 0))
 	as_fatal (_("Can't start writing .mdebug section: %s"),
 		  bfd_errmsg (bfd_get_error ()));

@@ -1,3 +1,13 @@
+1999-11-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/obj-elf.c (obj_elf_ident): Call md_flush_pending_output
+	if it is defined.
+
+	* config/obj-elf.c (elf_set_index): Add ATTRIBUTE_UNUSED.
+
+	* config/obj-elf.c (elf_frob_file_after_relocs): Don't pass NULL
+	to bfd_set_section_contents.
+
 1999-11-03  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mcore.h (TARGET_BYTES_BIG_ENDIAN): Change to false.
