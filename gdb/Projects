@@ -83,8 +83,6 @@ Enhance the gdb manual with extra examples where needed.
 Arrange for list_command not to use decode_line_1 and thus not require
 symbols to be read in simply to read a source file.
 
-Allow patching of executables, a la "adb -w".
-
 Add a command for searching memory, a la adb.  It specifies size,
 mask, value, start address.  ADB searches until it finds it or hits
 an error (or is interrupted).

@@ -1,8 +1,8 @@
-		README for gdb-4.3 release
-	John Gilmore	 		7 Dec 1991
+		README for gdb-4.4 release
+    John Gilmore & Stu Grossman 	31 Jan 1992
 
 This is GDB, the GNU source-level debugger, presently running under un*x.
-A summary of features new since gdb-3.5 is in the file `WHATS.NEW'.
+A summary of new features is in the file `WHATS.NEW'.
 
 
 Unpacking and Installation -- quick overview
@@ -11,22 +11,21 @@ Unpacking and Installation -- quick overview
 In this release, the GDB debugger sources, the generic GNU include
 files, the BFD ("binary file description") library, the readline library,
 and a miscellaneous library all have directories of their own underneath
-the gdb-4.3 directory.  The idea is that a variety of GNU tools can
+the gdb-4.4 directory.  The idea is that a variety of GNU tools can
 share a common copy of these things.  Configuration scripts and
 makefiles exist to cruise up and down this directory tree and
 automatically build all the pieces in the right order.
 
-When you unpack the gdb-4.3.tar.Z file, you'll get a directory called
-`gdb-4.3', which contains:
+When you unpack the gdb-4.4.tar.Z file, you'll get a directory called
+`gdb-4.4', which contains:
 
-  Makefile.in       config/           gdb/              texinfo/
-  README            config.sub*       include/
-  README.configure  configure*        libiberty/
-  bfd/              configure.in      readline/
+  DOC.configure  bfd/           configure*     glob/          readline/
+  Makefile.in    config/        configure.in   include/       texinfo/
+  README         config.sub*    gdb/           libiberty/
 
 To build GDB, you can just do:
 
-	cd gdb-4.3
+	cd gdb-4.4
 	./configure HOSTTYPE		(e.g. sun4, decstation)
 	make
 	cp gdb/gdb /usr/local/bin/gdb	(or wherever you want)
@@ -42,22 +41,22 @@ while debugging a program running on a machine of another type.  See below.
 More Documentation
 ==================
 
-   The GDB 4.3 release includes an already-formatted reference card,
+   The GDB 4.4 release includes an already-formatted reference card,
 ready for printing on a PostScript printer, as
-`gdb-4.3/gdb/refcard.ps'.  It uses the most common PostScript fonts:
+`gdb-4.4/gdb/refcard.ps'.  It uses the most common PostScript fonts:
 the Times family, Courier, and Symbol.  If you have a PostScript
 printer, you can print the reference card by just sending `refcard.ps'
 to the printer.
 
    The release also includes the online Info version of this manual
-already formatted: the main Info file is `gdb-4.3/gdb/gdb.info', and it
+already formatted: the main Info file is `gdb-4.4/gdb/gdb.info', and it
 refers to subordinate files matching `gdb.info*' in the same directory.
 
    If you want to make these Info files yourself from the GDB manual's
 source, you need the GNU `makeinfo' program.  Once you have it, you
 can type
 
-     cd gdb-4.3/gdb
+     cd gdb-4.4/gdb
      make gdb.info
 
 to make the Info file.
@@ -69,7 +68,7 @@ several things:
      Knuth, must be installed on your system and available through
      your execution path.
 
-   * `gdb-4.3/texinfo': TeX macros defining the GNU Documentation
+   * `gdb-4.4/texinfo': TeX macros defining the GNU Documentation
      Format.
 
    * *A DVI output program.*  TeX does not actually make marks on
@@ -80,7 +79,7 @@ several things:
 
 Once you have these things, you can type
 
-     cd gdb-4.3/gdb
+     cd gdb-4.4/gdb
      make gdb.dvi
 
 to format the text of this manual, and print it with the usual output
@@ -91,7 +90,7 @@ PostScript printer, or you want to use Computer Modern fonts instead,
 you can still print it if you have TeX.  Format the reference card by
 typing
 
-     cd gdb-4.3/gdb
+     cd gdb-4.4/gdb
      make refcard.dvi
 
 The GDB reference card is designed to print in landscape mode on US
@@ -108,30 +107,30 @@ preparing GDB for installation; you can then use `make' to build the
 `gdb' program.
 
    The gdb distribution includes all the source code you need for gdb
-in a single directory `gdb-4.3'.  That directory in turn contains:
+in a single directory `gdb-4.4'.  That directory in turn contains:
 
-`gdb-4.3/configure (and supporting files)'
+`gdb-4.4/configure (and supporting files)'
      script for configuring GDB and all its supporting libraries.
 
-`gdb-4.3/gdb'
+`gdb-4.4/gdb'
      the source specific to GDB itself
 
-`gdb-4.3/bfd'
+`gdb-4.4/bfd'
      source for the Binary File Descriptor Library
 
-`gdb-4.3/include'
+`gdb-4.4/include'
      GNU include files
 
-`gdb-4.3/libiberty'
+`gdb-4.4/libiberty'
      source for the `-liberty' free software library
 
-`gdb-4.3/readline'
+`gdb-4.4/readline'
      source for the GNU command-line interface
 
-It is most convenient to run `configure' from the `gdb-4.3' directory.
+It is most convenient to run `configure' from the `gdb-4.4' directory.
  The simplest way to configure and build GDB is the following:
 
-     cd gdb-4.3
+     cd gdb-4.4
      ./configure HOST
      make
 
@@ -150,7 +149,7 @@ directories in the GDB distribution (if you only want to configure
 that subdirectory); but be sure to specify a path to it.  For example,
 to configure only the `bfd' subdirectory,
 
-     cd gdb-4.3/bfd
+     cd gdb-4.4/bfd
      ../configure HOST
 
    You can install `gdb' anywhere; it has no hardwired paths.  Simply
@@ -179,7 +178,7 @@ even for a single configuration.  You can specify the use of
 subdirectories using the `+subdirs' option (abbreviated `+sub').  For
 example, you can build GDB this way on a Sun 4 as follows:
 
-     cd gdb-4.3
+     cd gdb-4.4
      ./configure +sub sun4
      cd H-sun4/T-sun4
      make
@@ -198,21 +197,21 @@ the other hand, whenever you specify both hosts and targets on the
 same command line, `configure' creates all combinations of the hosts
 and targets you list.
 
-   If you run `configure' from a directory (notably, `gdb-4.3') that
+   If you run `configure' from a directory (notably, `gdb-4.4') that
 contains source directories for multiple libraries or programs,
 `configure' creates the `H-HOST/T-TARGET' subdirectories in each
 library or program's source directory.  For example, typing:
 
-     cd gdb-4.3
+     cd gdb-4.4
      configure sun4 +target=vxworks960
 
 creates the following directories:
 
-     gdb-4.3/H-sun4/T-vxworks960
-     gdb-4.3/bfd/H-sun4/T-vxworks960
-     gdb-4.3/gdb/H-sun4/T-vxworks960
-     gdb-4.3/libiberty/H-sun4/T-vxworks960
-     gdb-4.3/readline/H-sun4/T-vxworks960
+     gdb-4.4/H-sun4/T-vxworks960
+     gdb-4.4/bfd/H-sun4/T-vxworks960
+     gdb-4.4/gdb/H-sun4/T-vxworks960
+     gdb-4.4/libiberty/H-sun4/T-vxworks960
+     gdb-4.4/readline/H-sun4/T-vxworks960
 
    When you run `make' to build a program or library, you must run it
 in a configured directory.  If you made a single configuration,
@@ -221,8 +220,8 @@ have `H-HOST/T-TARGET' subdirectories, run `make' in those
 subdirectories.
 
    The `Makefile' generated by `configure' for each source directory
-runs recursively, so that typing `make' in `gdb-4.3' (or in a
-`gdb-4.3/H-HOST/T-TARGET' subdirectory) builds all the required
+runs recursively, so that typing `make' in `gdb-4.4' (or in a
+`gdb-4.4/H-HOST/T-TARGET' subdirectory) builds all the required
 libraries, then GDB.
 
    When you have multiple hosts or targets configured, you can run
@@ -249,7 +248,7 @@ a `+target=TARGET' option, but the equivalent full name is
 `sparc-sun-sunos4'.
 
    The following table shows all the architectures, hosts, and OS
-prefixes that `configure' recognizes in GDB 4.3.  Entries in the "OS
+prefixes that `configure' recognizes in GDB 4.4.  Entries in the "OS
 prefix" column ending in a `*' may be followed by a release number.
 
 
@@ -286,7 +285,7 @@ prefix" column ending in a `*' may be followed by a release number.
      combinations of architecture, vendor, and OS.  There is by no
      means support available for all possible combinations!
 
-   The `configure' script accompanying GDB 4.3 does not provide any
+   The `configure' script accompanying GDB 4.4 does not provide any
 query facility to list all supported host and target names or aliases.
  `configure' calls the Bourne shell script `config.sub' to map
 abbreviations to full names; you can read the script, if you wish, or
@@ -305,7 +304,7 @@ you can use it to test your guesses on abbreviations--for example:
      % sh config.sub i486v
      *** Configuration "i486v" not recognized
 
-`config.sub' is also distributed in the directory `gdb-4.3'.
+`config.sub' is also distributed in the directory `gdb-4.4'.
 
 
 `configure' Options
@@ -393,7 +392,7 @@ or nested functions will not currently work.
 I have't done this myself so I can't really offer any advice.
 Remote debugging over serial lines works fine, but the kernel debugging
 code in here has not been tested in years.  Van Jacobson claims to have
-better kernel debugging, but won't release it for ordinary mortals.
+better kernel debugging.
 
 
 		Remote debugging
@@ -424,7 +423,7 @@ via-ethernet back ends.
 
 The correct address for reporting bugs found in gdb is
 "bug-gdb@prep.ai.mit.edu".  Please email all bugs to that address.
-Please include the GDB version number (e.g. gdb-4.3), and how
+Please include the GDB version number (e.g. gdb-4.4), and how
 you configured it (e.g. "sun4" or "mach386 host, i586-intel-synopsys
 target").
 
@@ -446,7 +445,7 @@ the compiler actually outputs or the debugger actually understands.
 
 If you port gdb to a new machine, please send the required changes to
 bug-gdb@prep.ai.mit.edu.  There's lots of information about doing your
-own port in the file gdb-4.3/gdb/doc/gdbint.texinfo, which you can
+own port in the file gdb-4.4/gdb/doc/gdbint.texinfo, which you can
 print out, or read with `info' (see the Makefile.in there).  If your
 changes are more than a few lines, obtain and send in a copyright
 assignment from gnu@prep.ai.mit.edu, as described in the section
