@@ -1,5 +1,33 @@
 Wed Feb 14 16:29:07 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
 
+	* ieee.c (ieee_write_expression): Only use an R variable for a
+	local symbol.  Don't output a zero offset.  Handle a zero address.
+	(SRC_MASK, PCREL_OFFSET): Define based on KEEPMINUSPCININST.
+	(rel32_howto, rel16_howto, rel8_howto): Use SRC_MASK and
+	PCREL_OFFSET.
+	(parse_expression): Don't try to handle multiple occurrences of a
+	P variable.  Handle I variables differently from X variables.  Fix
+	the order of minus expressions.
+	(ieee_slurp_external_symbols): Generate an I variable for an NN
+	record.  Fix handling of ATI and ATX records.
+	(ieee_slurp_sections): Only set minimal section attributes.
+	Adjust them later, based on the section contents.
+	(ieee_object_p): Read in the file until just after the ME record.
+	Call ieee_slurp_section_data to set the section flags.
+	(do_one): Add iterations parameter.  Only repeat the first load
+	item.  Set the section and file reloc flags.
+	(ieee_slurp_section_data): Set section flags.  Pass iterations to
+	do_one.
+	(ieee_canonicalize_reloc): Handle I variables.
+	(do_with_relocs): Only emit relocation size when necessary.
+	Increase MAXRUN to 127.  Change ov to be assigned, and take
+	src_mask and pcrel_offset into account.
+	(ieee_write_data_part): Skip sections that are not loaded.
+	(ieee_write_external_part): Don't output optional last entry of WX
+	records.
+	(ieee_write_me_part): Make setting of me_record neater.
+	(ieee_generic_stat_arch_elt): Get the size of an archive element.
+
 	* syms.c (stt): Add entries for zerovars, vars, and code.
 
 	* elfcode.h (validate_reloc): New static function.
