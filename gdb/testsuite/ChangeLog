@@ -1,3 +1,8 @@
+Sat May 21 10:05:08 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* Revert the previous changes.  Please see Rob's directory
+	  /lisa/test/rob/progressive/gdb/testsuite for these fixes.
+
 Thu May 19 12:51:00 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in, configure.in, config/mips-gdb.exp,

@@ -19,24 +19,24 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-# set the prompt if it doesn't exist
-global prompt
-if ![info exists prompt] then {
-    set prompt "\[(\]gdb\[)\]"
-}
-
 # Generic gdb subroutines that should work for any target.  If these
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
 
 global GDB
 if ![info exists GDB] then {
-    set GDB [findfile $base_dir/../gdb "gdb" [transform gdb ]]
+    set GDB [transform gdb]
 }
 
 global GDBFLAGS
 if ![info exists GDBFLAGS] then {
     set GDBFLAGS ""
+}
+
+# set the prompt if it doesn't exist
+global prompt
+if ![info exists prompt] then {
+    set prompt "\[(\]gdb\[)\]"
 }
 
 #
@@ -301,13 +301,12 @@ proc default_gdb_exit {} {
     # This used to be 1 for unix-gdb.exp
     set timeout 5
 
-    # this will kill the gdb process, it's cleaner than sending a quit.
-      close
-  
-    # Before this was here sometimes "uit" would get sent to the next GDB
-    # (assuming this is immediately followed by gdb_start), which would
-    # cause a loss of syncronization (i.e. all the stuff that swallows a
-    # prompt would swallow the wrong one).
+    # We used to try to send "quit" to GDB, and wait for it to die.
+    # Dealing with all the cases and errors got pretty hairy.  Just close it, 
+    # that is simpler.
+    close
+
+    # Omitting this probably would cause strange timing-dependent failures.
     wait
 }
 
@@ -371,72 +370,6 @@ oaded."
             perror "couldn't load $arg into $GDB (end of file)."
             return -1
         }
-    }
-}
-
-
-#
-# start gdb -- start gdb running
-#
-proc default_gdb_start { } {
-    global verbose
-    global GDB
-    global GDBFLAGS
-    global prompt
-    global spawn_id
-    global timeout
-    verbose "Spawning $GDB $GDBFLAGS"
-    
-    set oldtimeout $timeout
-    set timeout [expr "$timeout + 60"]
-    if [ llength $GDBFLAGS ] then {
-	if {[which $GDB] != 0} then {
-	    spawn $GDB $GDBFLAGS
-	} else {
-	    perror "$GDB does not exist."
-	    exit 1
-	}
-    } else {
-	if {[which $GDB] != 0} then {
-	    spawn $GDB
-	} else {
-	    perror "$GDB does not exist."
-	    exit 1
-	}
-    }
-    expect {
-	-re ".*\r\n$prompt $" {
-	    verbose "GDB initialized for native mode"
-	}
-	-re "$prompt $"	{
-	    perror "GDB never initialized."
-	    return -1
-	}
-	timeout		{
-	    perror "(timeout) GDB never initialized."
-  	    return -1
-  	}
-      }
-    set timeout $oldtimeout
-    # force the height to "unlimited", so no pagers get used
-    send "set height 0\n"
-    expect {
-	-re ".*$prompt $" { 
-	    verbose "Setting height to 0." 2
-	}
-	timeout {
-	    warning "Couldn't set the height to 0."
-	}
-    }
-    # force the width to "unlimited", so no wraparound occurs
-    send "set width 0\n"
-    expect {
-	-re ".*$prompt $" {
-	    verbose "Setting width to 0." 2
-	}
-	timeout {
-	    warning "Couldn't set the width to 0."
-	}
     }
 }
 

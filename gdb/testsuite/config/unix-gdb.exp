@@ -60,8 +60,70 @@ proc gdb_load { arg } {
     return [gdb_file_cmd $arg]
 }
 
+#
+# start gdb -- start gdb running
+#
+
 proc gdb_start {} {
-    default_gdb_start
+    global verbose
+    global GDB
+    global GDBFLAGS
+    global prompt
+    global spawn_id
+    global timeout
+    verbose "Spawning $GDB $GDBFLAGS"
+    
+    set oldtimeout $timeout
+    set timeout [expr "$timeout + 60"]
+    if [ llength $GDBFLAGS ] then {
+	if {[which $GDB] != 0} then {
+	    spawn $GDB $GDBFLAGS
+	} else {
+	    perror "$GDB does not exist."
+	    exit 1
+	}
+    } else {
+	if {[which $GDB] != 0} then {
+	    spawn $GDB
+	} else {
+	    perror "$GDB does not exist."
+	    exit 1
+	}
+    }
+    expect {
+	-re ".*\r\n$prompt $" {
+	    verbose "GDB initialized for native mode"
+	}
+	-re "$prompt $"	{
+	    perror "GDB never initialized."
+	    return -1
+	}
+	timeout		{
+	    perror "(timeout) GDB never initialized."
+	    return -1
+	}
+    }
+    set timeout $oldtimeout
+    # force the height to "unlimited", so no pagers get used
+    send "set height 0\n"
+    expect {
+	-re ".*$prompt $" { 
+	    verbose "Setting height to 0." 2
+	}
+	timeout {
+	    warning "Couldn't set the height to 0."
+	}
+    }
+    # force the width to "unlimited", so no wraparound occurs
+    send "set width 0\n"
+    expect {
+	-re ".*$prompt $" {
+	    verbose "Seting width to 0." 2
+	}
+	timeout {
+	    warning "Couldn't set the width to 0."
+	}
+    }
 }
 
 proc gdb_exit { } {

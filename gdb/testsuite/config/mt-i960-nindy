@@ -1,1 +1,59 @@
-CFLAGS_FOR_TARGET = -nostartfiles
+# compilers and assemblers
+CC = i960-intel-nindy-gcc
+CFLAGS = -g -D${target_os}
+C++ = ${CC}
+C++FLAGS = ${CFLAGS}
+CXX = ${CC}
+CXXFLAGS = ${CFLAGS}
+AS = i960-intel-nindy-as
+ASFLAGS = 
+FC =
+FCFLAGS = 
+LD = ld
+LDFLAGS = 
+LIBS = 
+
+# binutils
+
+RANLIB = i960-intel-nindy-ranlib
+RANLIBFLAGS =
+
+NM = i960-intel-nindy-nm
+NMFLAGS =
+
+SIZE = i960-intel-nindy-size
+SIZEFLAGS =
+
+STRIP = i960-intel-nindy-strip
+STRIPFLAGS =
+
+OBJDUMP = i960-intel-nindy-objdump
+OBJDUMPFLAGS =
+
+DEMANGLE = i960-intel-nindy-demangle
+DEMANGLEFLAGS =
+
+COPY = i960-intel-nindy-copy
+COPYFLAGS =
+
+# other utils
+LEX = flex
+LEXFLAGS =
+
+YACC = byacc
+YACCFLAGS = 
+
+AR = i960-intel-nindy-ar
+ARFLAGS =
+
+CPP = ${CC} -E
+CPPFLAGS = 
+
+GDB = i960-intel-nindy-gdb
+GDBFLAGS = -nx
+
+DIFF = diff
+DIFFFLAGS = 
+
+RUNTEST=i960-intel-nindy-runtest
+RUNTESTFLAGS=
