@@ -1,3 +1,16 @@
+start-sanitize-tic80
+Thu Feb  6 17:34:09 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (tic80_operands): Add REG_0_E, REG_22_E,
+	and REG_DEST_E for register operands that have to be
+	an even numbered register.  Add REG_FPA for operands that
+	are one of the floating point accumulator registers.
+	Add TIC80_OPERAND_MASK to flags for ENDMASK operand.
+	(tic80_opcodes): Change entries that need even numbered
+	register operands to use the new operand table entries.
+	Add "or" entries that are identical to "or.tt" entries.
+
+end-sanitize-tic80
 Wed Feb  5 11:12:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips16-opc.c: Add new cases of exit instruction for

@@ -330,19 +330,42 @@ const struct tic80_operand tic80_operands[] =
 #define REG_0 (SPFI + 1)
   { 5, 0, NULL, NULL, TIC80_OPERAND_GPR },
 
+  /* Even register in bits 4-0 */
+
+#define REG_0_E (REG_0 + 1)
+  { 5, 0, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_EVEN },
+
   /* Register in bits 26-22 */
 
-#define REG_22 (REG_0 + 1)
+#define REG_22 (REG_0_E + 1)
   { 5, 22, NULL, NULL, TIC80_OPERAND_GPR },
+
+  /* Even register in bits 26-22 */
+
+#define REG_22_E (REG_22 + 1)
+  { 5, 22, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_EVEN },
 
   /* Register in bits 31-27 */
 
-#define REG_DEST (REG_22 + 1)
+#define REG_DEST (REG_22_E + 1)
   { 5, 27, NULL, NULL, TIC80_OPERAND_GPR },
+
+  /* Even register in bits 31-27 */
+
+#define REG_DEST_E (REG_DEST + 1)
+  { 5, 27, NULL, NULL, TIC80_OPERAND_GPR + TIC80_OPERAND_EVEN },
+
+  /* Floating point accumulator register (a0-a3) specified by bit 16 (MSB)
+     and bit 11 (LSB) */
+  /* FIXME!  Needs to use functions to insert and extract the register
+     number in bits 16 and 11. */
+
+#define REG_FPA (REG_DEST_E + 1)
+  { 0, 0, NULL, NULL, TIC80_OPERAND_FPA },
 
   /* Short signed PC word offset in bits 14-0 */
 
-#define OFF_SS_PC (REG_DEST + 1)
+#define OFF_SS_PC (REG_FPA + 1)
   { 15, 0, NULL, NULL, TIC80_OPERAND_PCREL | TIC80_OPERAND_SIGNED },
 
   /* Long signed PC word offset in following 32 bit word */
@@ -415,7 +438,7 @@ const struct tic80_operand tic80_operands[] =
 
   /* Unsigned immediate in bits 9-5, used only for shift instructions */
 #define ENDMASK (ROTATE + 1)
-  { 5, 5, NULL, NULL, 0 },
+  { 5, 5, NULL, NULL, TIC80_OPERAND_ENDMASK },
 
 };
 
@@ -650,8 +673,8 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"dld",	OP_REG(0x344) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.b",	OP_LI(0x341)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.b",	OP_REG(0x340) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.d",	OP_LI(0x347)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.d",	OP_REG(0x346) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.d",	OP_LI(0x347)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"dld.d",	OP_REG(0x346) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
   {"dld.h",	OP_LI(0x343)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.h",	OP_REG(0x342) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
 
@@ -668,8 +691,8 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"dst",	OP_REG(0x364) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst.b",	OP_LI(0x361)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst.b",	OP_REG(0x360) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst.d",	OP_LI(0x367)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst.d",	OP_REG(0x366) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst.d",	OP_LI(0x367)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"dst.d",	OP_REG(0x366) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
   {"dst.h",	OP_LI(0x363)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst.h",	OP_REG(0x362) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
 
@@ -685,45 +708,45 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Floating-point addition */
 
-  {"fadd.ddd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fadd.dsd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fadd.sdd",	OP_LI(0x3E1)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fadd.sdd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fadd.ssd",	OP_LI(0x3E1)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fadd.ssd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
+  {"fadd.ddd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22_E, REG_DEST_E}	},
+  {"fadd.dsd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22, REG_DEST_E}	},
+  {"fadd.sdd",	OP_LI(0x3E1)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22_E, REG_DEST_E}	},
+  {"fadd.sdd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22_E, REG_DEST_E}	},
+  {"fadd.ssd",	OP_LI(0x3E1)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST_E}	},
+  {"fadd.ssd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST_E}	},
   {"fadd.sss",	OP_LI(0x3E1)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
   {"fadd.sss",	OP_REG(0x3E0) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
 
   /* Floating point compare */
 
-  {"fcmp.dd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fcmp.ds",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fcmp.sd",	OP_LI(0x3EB)  | PD(0) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3),  0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fcmp.sd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0, REG_22, REG_DEST}	},
+  {"fcmp.dd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0_E, REG_22_E, REG_DEST}	},
+  {"fcmp.ds",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0_E, REG_22, REG_DEST}	},
+  {"fcmp.sd",	OP_LI(0x3EB)  | PD(0) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3),  0,	 {SPFI, REG_22_E, REG_DEST}	},
+  {"fcmp.sd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0, REG_22_E, REG_DEST}	},
   {"fcmp.ss",	OP_LI(0x3EB)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3),  0,	 {SPFI, REG_22, REG_DEST}	},
   {"fcmp.ss",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  0,	 {REG_0, REG_22, REG_DEST}	},
 
   /* Floating point divide */
 
-  {"fdiv.ddd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fdiv.dsd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fdiv.sdd",	OP_LI(0x3E7)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fdiv.sdd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fdiv.ssd",	OP_LI(0x3E7)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fdiv.ssd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
+  {"fdiv.ddd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22_E, REG_DEST_E}	},
+  {"fdiv.dsd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22, REG_DEST_E}	},
+  {"fdiv.sdd",	OP_LI(0x3E7)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22_E, REG_DEST_E}	},
+  {"fdiv.sdd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22_E, REG_DEST_E}	},
+  {"fdiv.ssd",	OP_LI(0x3E7)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST_E}	},
+  {"fdiv.ssd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST_E}	},
   {"fdiv.sss",	OP_LI(0x3E7)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
   {"fdiv.sss",	OP_REG(0x3E6) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
 
   /* Floating point multiply */
 
-  {"fmpy.ddd",	OP_REG(0x3E4) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fmpy.dsd",	OP_REG(0x3E4) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.ddd",	OP_REG(0x3E4) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22_E, REG_DEST_E}	},
+  {"fmpy.dsd",	OP_REG(0x3E4) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22, REG_DEST_E}	},
   {"fmpy.iii",	OP_LI(0x3E5)  | PD(2) | P2(2) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_22, REG_DEST}	},
   {"fmpy.iii",	OP_REG(0x3E4) | PD(2) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fmpy.sdd",	OP_LI(0x3E5)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fmpy.sdd",	OP_REG(0x3E4) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  {"fmpy.ssd",	OP_LI(0x3E5)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  {"fmpy.ssd",	OP_REG(0x3E4) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.sdd",	OP_LI(0x3E5)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22_E, REG_DEST_E}	},
+  {"fmpy.sdd",	OP_REG(0x3E4) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22_E, REG_DEST_E}	},
+  {"fmpy.ssd",	OP_LI(0x3E5)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST_E}	},
+  {"fmpy.ssd",	OP_REG(0x3E4) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST_E}	},
   {"fmpy.sss",	OP_LI(0x3E5)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
   {"fmpy.sss",	OP_REG(0x3E4) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
   {"fmpy.uuu",	OP_LI(0x3E5)  | PD(3) | P2(3) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LUI, REG_22, REG_DEST}	},
@@ -731,112 +754,112 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Convert/Round to Minus Infinity */
 
-  {"frndm.dd",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndm.di",	OP_REG(0x3E8) | PD(2) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndm.ds",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndm.du",	OP_REG(0x3E8) | PD(3) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndm.id",	OP_LI(0x3E9)  | PD(1) | P2(3) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndm.id",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndm.dd",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST_E}	},
+  {"frndm.di",	OP_REG(0x3E8) | PD(2) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndm.ds",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndm.du",	OP_REG(0x3E8) | PD(3) | P2(3) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndm.id",	OP_LI(0x3E9)  | PD(1) | P2(3) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndm.id",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndm.is",	OP_LI(0x3E9)  | PD(0) | P2(3) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndm.is",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndm.sd",	OP_LI(0x3E9)  | PD(1) | P2(3) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
-  {"frndm.sd",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndm.sd",	OP_LI(0x3E9)  | PD(1) | P2(3) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST_E}	},
+  {"frndm.sd",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndm.si",	OP_LI(0x3E9)  | PD(2) | P2(3) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndm.si",	OP_REG(0x3E8) | PD(2) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndm.ss",	OP_LI(0x3E9)  | PD(0) | P2(3) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndm.ss",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndm.su",	OP_LI(0x3E9)  | PD(3) | P2(3) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndm.su",	OP_REG(0x3E8) | PD(3) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndm.ud",	OP_LI(0x3E9)  | PD(1) | P2(3) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndm.ud",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndm.ud",	OP_LI(0x3E9)  | PD(1) | P2(3) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndm.ud",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndm.us",	OP_LI(0x3E9)  | PD(0) | P2(3) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndm.us",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
 
   /* Convert/Round to Nearest */
 
-  {"frndn.dd",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndn.di",	OP_REG(0x3E8) | PD(2) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndn.ds",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndn.du",	OP_REG(0x3E8) | PD(3) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndn.id",	OP_LI(0x3E9)  | PD(1) | P2(0) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndn.id",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndn.dd",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST_E}	},
+  {"frndn.di",	OP_REG(0x3E8) | PD(2) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndn.ds",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndn.du",	OP_REG(0x3E8) | PD(3) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndn.id",	OP_LI(0x3E9)  | PD(1) | P2(0) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndn.id",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndn.is",	OP_LI(0x3E9)  | PD(0) | P2(0) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndn.is",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndn.sd",	OP_LI(0x3E9)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
-  {"frndn.sd",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndn.sd",	OP_LI(0x3E9)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST_E}	},
+  {"frndn.sd",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndn.si",	OP_LI(0x3E9)  | PD(2) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndn.si",	OP_REG(0x3E8) | PD(2) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndn.ss",	OP_LI(0x3E9)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndn.ss",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndn.su",	OP_LI(0x3E9)  | PD(3) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndn.su",	OP_REG(0x3E8) | PD(3) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndn.ud",	OP_LI(0x3E9)  | PD(1) | P2(0) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndn.ud",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndn.ud",	OP_LI(0x3E9)  | PD(1) | P2(0) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndn.ud",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndn.us",	OP_LI(0x3E9)  | PD(0) | P2(0) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndn.us",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
 
   /* Convert/Round to Positive Infinity */
 
-  {"frndp.dd",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndp.di",	OP_REG(0x3E8) | PD(2) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndp.ds",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndp.du",	OP_REG(0x3E8) | PD(3) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndp.id",	OP_LI(0x3E9)  | PD(1) | P2(2) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndp.id",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndp.dd",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST_E}	},
+  {"frndp.di",	OP_REG(0x3E8) | PD(2) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndp.ds",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndp.du",	OP_REG(0x3E8) | PD(3) | P2(2) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndp.id",	OP_LI(0x3E9)  | PD(1) | P2(2) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndp.id",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndp.is",	OP_LI(0x3E9)  | PD(0) | P2(2) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndp.is",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndp.sd",	OP_LI(0x3E9)  | PD(1) | P2(2) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
-  {"frndp.sd",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndp.sd",	OP_LI(0x3E9)  | PD(1) | P2(2) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST_E}	},
+  {"frndp.sd",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndp.si",	OP_LI(0x3E9)  | PD(2) | P2(2) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndp.si",	OP_REG(0x3E8) | PD(2) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndp.ss",	OP_LI(0x3E9)  | PD(0) | P2(2) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndp.ss",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndp.su",	OP_LI(0x3E9)  | PD(3) | P2(2) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndp.su",	OP_REG(0x3E8) | PD(3) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndp.ud",	OP_LI(0x3E9)  | PD(1) | P2(2) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndp.ud",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndp.ud",	OP_LI(0x3E9)  | PD(1) | P2(2) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndp.ud",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndp.us",	OP_LI(0x3E9)  | PD(0) | P2(2) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndp.us",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
 
   /* Convert/Round to Zero */
 
-  {"frndz.dd",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndz.di",	OP_REG(0x3E8) | PD(2) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndz.ds",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndz.du",	OP_REG(0x3E8) | PD(3) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndz.id",	OP_LI(0x3E9)  | PD(1) | P2(1) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndz.id",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndz.dd",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST_E}	},
+  {"frndz.di",	OP_REG(0x3E8) | PD(2) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndz.ds",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndz.du",	OP_REG(0x3E8) | PD(3) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST}	},
+  {"frndz.id",	OP_LI(0x3E9)  | PD(1) | P2(1) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndz.id",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndz.is",	OP_LI(0x3E9)  | PD(0) | P2(1) | P1(2),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndz.is",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndz.sd",	OP_LI(0x3E9)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
-  {"frndz.sd",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndz.sd",	OP_LI(0x3E9)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST_E}	},
+  {"frndz.sd",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndz.si",	OP_LI(0x3E9)  | PD(2) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndz.si",	OP_REG(0x3E8) | PD(2) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndz.ss",	OP_LI(0x3E9)  | PD(0) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndz.ss",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
   {"frndz.su",	OP_LI(0x3E9)  | PD(3) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"frndz.su",	OP_REG(0x3E8) | PD(3) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"frndz.ud",	OP_LI(0x3E9)  | PD(1) | P2(1) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
-  {"frndz.ud",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"frndz.ud",	OP_LI(0x3E9)  | PD(1) | P2(1) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST_E}	},
+  {"frndz.ud",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"frndz.us",	OP_LI(0x3E9)  | PD(0) | P2(1) | P1(3),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {LSI, REG_DEST}	},
   {"frndz.us",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
 
   /* Floating point square root */
 
-  {"fsqrt.dd",	OP_REG(0x3EE) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
-  {"fsqrt.sd",	OP_LI(0x3EF)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
-  {"fsqrt.sd",	OP_REG(0x3EE) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
+  {"fsqrt.dd",	OP_REG(0x3EE) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_DEST_E}	},
+  {"fsqrt.sd",	OP_LI(0x3EF)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST_E}	},
+  {"fsqrt.sd",	OP_REG(0x3EE) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST_E}	},
   {"fsqrt.ss",	OP_LI(0x3EF)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_DEST}	},
   {"fsqrt.ss",	OP_REG(0x3EE) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_DEST}	},
 
   /* Floating point subtraction */
 
-  { "fsub.ddd",	OP_REG(0x3E2) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  { "fsub.dsd",	OP_REG(0x3E2) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  { "fsub.sdd",	OP_LI(0x3E3)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  { "fsub.sdd",	OP_REG(0x3E2) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
-  { "fsub.ssd",	OP_LI(0x3E3)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
-  { "fsub.ssd",	OP_REG(0x3E2) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
+  { "fsub.ddd",	OP_REG(0x3E2) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22_E, REG_DEST_E}	},
+  { "fsub.dsd",	OP_REG(0x3E2) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0_E, REG_22, REG_DEST_E}	},
+  { "fsub.sdd",	OP_LI(0x3E3)  | PD(1) | P2(1) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22_E, REG_DEST_E}	},
+  { "fsub.sdd",	OP_REG(0x3E2) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22_E, REG_DEST_E}	},
+  { "fsub.ssd",	OP_LI(0x3E3)  | PD(1) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST_E}	},
+  { "fsub.ssd",	OP_REG(0x3E2) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST_E}	},
   { "fsub.sss",	OP_LI(0x3E3)  | PD(0) | P2(0) | P1(0),	MASK_LI  | PD(3) | P2(3) | P1(3), 0,	 {SPFI, REG_22, REG_DEST}	},
   { "fsub.sss",	OP_REG(0x3E2) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), 0,	 {REG_0, REG_22, REG_DEST}	},
 
@@ -862,9 +885,9 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"ld.b",	OP_LI(0x341)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.b",	OP_REG(0x340) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.b",	OP_SI(0x20),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
-  {"ld.d",	OP_LI(0x347)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.d",	OP_REG(0x346) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.d",	OP_SI(0x23),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.d",	OP_LI(0x347)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"ld.d",	OP_REG(0x346) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"ld.d",	OP_SI(0x23),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST_E}		},
   {"ld.h",	OP_LI(0x343)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.h",	OP_REG(0x342) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.h",	OP_SI(0x21),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
@@ -882,7 +905,7 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   {"lmo",	OP_LI(0x3F0),	MASK_LI,	0,	{REG_22, REG_DEST}	},
 
-  /* Bitwise logical OR */
+  /* Bitwise logical OR.  Note that "or.tt" and "or" are the same instructions. */
 
   {"or.ff",	OP_LI(0x33D),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or.ff",	OP_REG(0x33C),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
@@ -896,6 +919,9 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"or.tt",	OP_LI(0x32F),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or.tt",	OP_REG(0x32E),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
   {"or.tt",	OP_SI(0x17),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
+  {"or",	OP_LI(0x32F),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
+  {"or",	OP_REG(0x32E),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
+  {"or",	OP_SI(0x17),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
 
   /* Read Control Register */
 
@@ -1010,9 +1036,9 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"st.b",	OP_LI(0x361)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st.b",	OP_REG(0x360) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st.b",	OP_SI(0x30),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
-  {"st.d",	OP_LI(0x367)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.d",	OP_REG(0x366) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.d",	OP_SI(0x33),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+  {"st.d",	OP_LI(0x367)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"st.d",	OP_REG(0x366) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"st.d",	OP_SI(0x33),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST_E}},
   {"st.h",	OP_LI(0x363)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st.h",	OP_REG(0x362) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st.h",	OP_SI(0x31),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
@@ -1050,25 +1076,24 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Vector Floating-Point Add */
 
-  {"vadd.dd",	OP_REG(0x3C0) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
-  {"vadd.sd",	OP_LI(0x3C1)  | P2(1) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
-  {"vadd.sd",	OP_REG(0x3C0) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vadd.dd",	OP_REG(0x3C0) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0_E, REG_22_E, REG_22_E}	},
+  {"vadd.sd",	OP_LI(0x3C1)  | P2(1) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22_E, REG_22_E}	},
+  {"vadd.sd",	OP_REG(0x3C0) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22_E, REG_22_E}	},
   {"vadd.ss",	OP_LI(0x3C1)  | P2(0) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
   {"vadd.ss",	OP_REG(0x3C0) | P2(0) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
 
-  /* Vector Floating-Point Multiply and Add to Accumulator
-   FIXME! This is not yet implemented.  From the documentation there appears to be no way to
-   tell the difference between the opcodes for instructions that have register destinations
-   and instructions that have accumulator destinations.  Further investigation is necessary.
-   Since this isn't critical to getting a TIC80 toolchain up and running, it is defered
-   until later. */
+  /* Vector Floating-Point Multiply and Add to Accumulator FIXME! This is not yet fully implemented.
+   From the documentation there appears to be no way to tell the difference between the opcodes for
+   instructions that have register destinations and instructions that have accumulator destinations.
+   Further investigation is necessary.  Since this isn't critical to getting a TIC80 toolchain up
+   and running, it is defered until later. */
 
   /* Vector Floating-Point Multiply
    Note: If r0 is in the destination reg, then this is a "vector nop" instruction. */
 
-  {"vmpy.dd",	OP_REG(0x3C4) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22, REG_22} },
-  {"vmpy.sd",	OP_LI(0x3C5)  | P2(1) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {SPFI, REG_22, REG_22}	},
-  {"vmpy.sd",	OP_REG(0x3C4) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22, REG_22} },
+  {"vmpy.dd",	OP_REG(0x3C4) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0_E, REG_22_E, REG_22_E} },
+  {"vmpy.sd",	OP_LI(0x3C5)  | P2(1) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {SPFI, REG_22_E, REG_22_E}	},
+  {"vmpy.sd",	OP_REG(0x3C4) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22_E, REG_22_E} },
   {"vmpy.ss",	OP_LI(0x3C5)  | P2(0) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {SPFI, REG_22, REG_22}	},
   {"vmpy.ss",	OP_REG(0x3C4) | P2(0) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22, REG_22} },
 
@@ -1083,20 +1108,20 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Vector Round with Integer Input */
 
-  {"vrnd.id",	OP_LI (0x3CB)  | P2(1) | P1(0),	MASK_LI  | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LSI, REG_22}},
-  {"vrnd.id",	OP_REG (0x3CA) | P2(1) | P1(0),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
+  {"vrnd.id",	OP_LI (0x3CB)  | P2(1) | P1(0),	MASK_LI  | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LSI, REG_22_E}},
+  {"vrnd.id",	OP_REG (0x3CA) | P2(1) | P1(0),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22_E}},
   {"vrnd.is",	OP_LI (0x3CB)  | P2(0) | P1(0),	MASK_LI  | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LSI, REG_22}},
   {"vrnd.is",	OP_REG (0x3CA) | P2(0) | P1(0),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
-  {"vrnd.ud",	OP_LI (0x3CB)  | P2(1) | P1(1),	MASK_LI  | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LUI, REG_22}},
-  {"vrnd.ud",	OP_REG (0x3CA) | P2(1) | P1(1),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
+  {"vrnd.ud",	OP_LI (0x3CB)  | P2(1) | P1(1),	MASK_LI  | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LUI, REG_22_E}},
+  {"vrnd.ud",	OP_REG (0x3CA) | P2(1) | P1(1),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22_E}},
   {"vrnd.us",	OP_LI (0x3CB)  | P2(0) | P1(1),	MASK_LI  | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LUI, REG_22}},
   {"vrnd.us",	OP_REG (0x3CA) | P2(0) | P1(1),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
 
   /* Vector Floating-Point Subtract */
 
-  {"vsub.dd",	OP_REG(0x3C2) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
-  {"vsub.sd",	OP_LI(0x3C3)  | P2(1) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
-  {"vsub.sd",	OP_REG(0x3C2) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vsub.dd",	OP_REG(0x3C2) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0_E, REG_22_E, REG_22_E}	},
+  {"vsub.sd",	OP_LI(0x3C3)  | P2(1) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22_E, REG_22_E}	},
+  {"vsub.sd",	OP_REG(0x3C2) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22_E, REG_22_E}	},
   {"vsub.ss",	OP_LI(0x3C3)  | P2(0) | P1(0),	MASK_LI  | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
   {"vsub.ss",	OP_REG(0x3C2) | P2(0) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
 
@@ -1104,16 +1129,16 @@ const struct tic80_opcode tic80_opcodes[] = {
    vector instructions so that the disassembler will always print the load/store instruction second for
    vector instructions that have two instructions in the same opcode. */
 
-  {"vld0.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
+  {"vld0.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST_E} },
   {"vld0.s",	OP_V(0x1E) | V_m(1) | V_S(0) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
-  {"vld1.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
+  {"vld1.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST_E} },
   {"vld1.s",	OP_V(0x1E) | V_m(1) | V_S(0) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
 
   /* Vector Store Data Into Memory - Note that the vector load/store instructions come after the other
    vector instructions so that the disassembler will always print the load/store instruction second for
    vector instructions that have two instructions in the same opcode. */
 
-  {"vst.d",	OP_V(0x1E) | V_m(0) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
+  {"vst.d",	OP_V(0x1E) | V_m(0) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST_E} },
   {"vst.s",	OP_V(0x1E) | V_m(0) | V_S(0) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
 
   {"xnor",	OP_LI(0x333),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST} },
