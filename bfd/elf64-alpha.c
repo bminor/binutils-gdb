@@ -2640,7 +2640,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
       if (h && ((info->shared
 		 && (!info->symbolic || info->allow_shlib_undefined))
 		|| ! (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
-		|| h->root.type == bfd_link_hash_defweak))
+		|| h->root.root.type == bfd_link_hash_defweak))
         maybe_dynamic = true;
 
       need = 0;
@@ -2815,12 +2815,13 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	      else
 		rent->count++;
 	    }
-	  else if (info->shared && (sec->flags & SEC_ALLOC))
+	  else if (info->shared)
 	    {
 	      /* If this is a shared library, and the section is to be
 		 loaded into memory, we need a RELATIVE reloc.  */
 	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
-	      if (sec->flags & SEC_READONLY)
+	      if ((sec->flags & (SEC_READONLY | SEC_ALLOC))
+		  == (SEC_READONLY | SEC_ALLOC))
 		info->flags |= DF_TEXTREL;
 	    }
 	}

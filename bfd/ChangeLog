@@ -1,3 +1,8 @@
+2002-06-01  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_check_relocs): Fix typo on maybe_dynamic
+	check; don't suppress dynamic relocs for non-allocated sections.
+
 2002-05-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in2.h: Regenerate.
