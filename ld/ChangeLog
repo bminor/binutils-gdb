@@ -1,3 +1,14 @@
+Thu Nov  3 19:35:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (check): Add missing "else true" clause.
+
+	* emulparams/vax.sh (OUTPUT_FORMAT): Use "a.out".
+
+	* scripttempl/go32coff.sc: Changes from DJ Delorie: Change default
+	entry point to "start".  Align at end of each section to 0x200.
+	Start .text section 0x1000 later.  Add _etext, _edata, _end
+	symbols.
+
 Wed Nov  2 12:17:49 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ldctor.c (ldctor_add_set_entry): Don't permit a set to be
