@@ -482,7 +482,12 @@ void init_frame_pc ();
 
 /* These are mostly dummies for the a29k because INIT_FRAME_PC
    sets prev->frame instead.  */
-#define FRAME_CHAIN(thisframe) ((thisframe)->frame + (thisframe)->rsize)
+/* If rsize is zero, we must be at end of stack (or otherwise hosed).
+   If we don't check rsize, we loop forever if we see rsize == 0.  */
+#define FRAME_CHAIN(thisframe) \
+  ((thisframe)->rsize == 0 \
+   ? 0 \
+   : (thisframe)->frame + (thisframe)->rsize)
 
 /* Determine if the frame has a 'previous' and back-traceable frame. */
 #define FRAME_IS_UNCHAINED(frame)	((frame)->flags & TRANSPARENT)

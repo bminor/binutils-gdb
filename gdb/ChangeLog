@@ -1,3 +1,7 @@
+Thu Sep 16 20:37:06 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* config/a29k/tm-a29k.h (FRAME_CHAIN): If rsize is zero, return zero.
+
 Thu Sep 16 13:16:22 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Allow user to single step within
