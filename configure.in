@@ -565,7 +565,7 @@ case "${target}" in
   arm-*-coff*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-  thumb-*-coff) # CYGNUS LOCAL nickc/thumb
+  thumb-*-coff)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   thumb-*-pe) # CYGNUS LOCAL nickc/thumb
@@ -982,7 +982,7 @@ fi
 # can be created.  At this point the main configure script has set CC.
 echo "int main () { return 0; }" > conftest.c
 ${CC} -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c
-if [ $? = 0 ] && [ -s conftest ]; then
+if [ $? = 0 ] && [ -s conftest -o -s conftest.exe ]; then
   :
 else
   echo 1>&2 "*** The command '${CC} -o conftest ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} conftest.c' failed."
