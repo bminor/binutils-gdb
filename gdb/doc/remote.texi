@@ -440,9 +440,9 @@ allows you to connect your program with a remote @value{GDBN} via
 because it requires essentially the same operating-system facilities
 that @value{GDBN} itself does.  In fact, a system that can run
 @code{gdbserver} to connect to a remote @value{GDBN} could also run
-@var{GDBN} locally!  @code{gdbserver} is sometimes useful nevertheless,
+@value{GDBN} locally!  @code{gdbserver} is sometimes useful nevertheless,
 because it is a much smaller program than @value{GDBN} itself.  It is
-also easier to port than all of @var{GDBN}, so you may be able to get
+also easier to port than all of @value{GDBN}, so you may be able to get
 started more quickly on a new system by using @code{gdbserver}.
 
 @value{GDBN} and @code{gdbserver} communicate via either a serial line

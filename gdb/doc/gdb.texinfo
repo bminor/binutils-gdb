@@ -3392,7 +3392,7 @@ commands:
 @cindex @code{heuristic-fence-post} (MIPS)
 @table @code
 @item set heuristic-fence-post @var{limit}
-Restrict @var{GDBN} to examining at most @var{limit} bytes in its search
+Restrict @value{GDBN} to examining at most @var{limit} bytes in its search
 for the beginning of a function.  A value of @code{0} (the default)
 means there is no limit.
 
