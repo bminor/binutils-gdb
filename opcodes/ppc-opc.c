@@ -1,5 +1,5 @@
 /* ppc-opc.c -- PowerPC opcode list
-   Copyright (c) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (c) 1994, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -2688,7 +2688,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "nand",    XRC(31,476,0), X_MASK,	COM,		{ RA, RS, RB } },
 { "nand.",   XRC(31,476,1), X_MASK,	COM,		{ RA, RS, RB } },
 
-{ "dcread",  X(31,486),	XRT_MASK,	PPC403,		{ RA, RB } },
+{ "dcread",  X(31,486),	X_MASK,		PPC403,		{ RT, RA, RB }},
 
 { "nabs",    XO(31,488,0,0), XORB_MASK, M601,		{ RT, RA } },
 { "nabs.",   XO(31,488,0,1), XORB_MASK, M601,		{ RT, RA } },

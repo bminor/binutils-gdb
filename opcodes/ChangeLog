@@ -1,3 +1,8 @@
+2000-02-22  Ian Lance Taylor  <ian@zembu.com>
+
+	From Grant Erickson <gerickso@Brocade.COM>:
+	* ppc-opc.c: Correct dcread--it takes 3 arguments, not 2.
+
 2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* dis-buf.c (buffer_read_memory): Change `length' param and all int
