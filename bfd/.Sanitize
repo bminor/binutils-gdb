@@ -447,7 +447,7 @@ else
 	done
 fi
 
-tic80_files="ChangeLog Makefile.in archures.c bfd-in2.h config.bfd configure configure.in targets.c"
+tic80_files="ChangeLog Makefile.in archures.c bfd-in2.h config.bfd configure configure.in targets.c coffcode.h"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
 		if test ! -d $i && (grep sanitize-tic80 $i > /dev/null) ; then
