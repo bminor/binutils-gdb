@@ -23,6 +23,8 @@
 #define _SIM_ENDIAN_C_
 
 #include "sim-basics.h"
+#include "sim-assert.h"
+#include "sim-io.h"
 
 
 #if !defined(_SWAP_1)
@@ -54,6 +56,17 @@
   SET out.dword;
 #endif
 
+#ifndef _SWAP_16
+#define _SWAP_16(SET,RAW) \
+  union { unsigned_16 word; unsigned_4 words[4]; } in, out; \
+  in.word = (RAW); \
+  _SWAP_4 (out.words[0] =, in.words[3]); \
+  _SWAP_4 (out.words[1] =, in.words[2]); \
+  _SWAP_4 (out.words[2] =, in.words[1]); \
+  _SWAP_4 (out.words[3] =, in.words[0]); \
+  SET out.word;
+#endif
+
 
 #define N 1
 #include "sim-n-endian.h"
@@ -68,6 +81,10 @@
 #undef N
 
 #define N 8
+#include "sim-n-endian.h"
+#undef N
+
+#define N 16
 #include "sim-n-endian.h"
 #undef N
 

@@ -1,3 +1,17 @@
+Mon Oct 27 12:00:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-endian.c (_SWAP_16): Define.  Generate 126 bit swap code.
+
+	* sim-n-core.h (sim_core_trace_N): New function.
+	(sim_core_read_aligned_N, sim_core_write_aligned_N): Use,
+	(sim_core_read_unaligned_N): Do not retyrn bogus value wden error.
+
+	* sim-endian.h:  Add 128 bit variant.
+
+	* sim-core.h, sim-core.c: Add 128 bit variant.
+
+	* sim-types.h: Add signed128 and unsigned128 types using a struct.
+
 Fri Oct 24 11:33:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (sim_events_process): Clear events->work_pending.

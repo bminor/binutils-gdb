@@ -247,18 +247,20 @@ DECLARE_SIM_CORE_WRITE_N(aligned,1)
 DECLARE_SIM_CORE_WRITE_N(aligned,2)
 DECLARE_SIM_CORE_WRITE_N(aligned,4)
 DECLARE_SIM_CORE_WRITE_N(aligned,8)
+DECLARE_SIM_CORE_WRITE_N(aligned,16)
 DECLARE_SIM_CORE_WRITE_N(aligned,word)
 
 DECLARE_SIM_CORE_WRITE_N(unaligned,1)
 DECLARE_SIM_CORE_WRITE_N(unaligned,2)
 DECLARE_SIM_CORE_WRITE_N(unaligned,4)
 DECLARE_SIM_CORE_WRITE_N(unaligned,8)
+DECLARE_SIM_CORE_WRITE_N(unaligned,16)
 DECLARE_SIM_CORE_WRITE_N(unaligned,word)
 
 #define sim_core_write_1 sim_core_write_aligned_1
 #define sim_core_write_2 sim_core_write_aligned_2
 #define sim_core_write_4 sim_core_write_aligned_4
-#define sim_core_write_8 sim_core_write_aligned_8
+#define sim_core_write_16 sim_core_write_aligned_16
 
 #undef DECLARE_SIM_CORE_WRITE_N
 
@@ -275,18 +277,21 @@ DECLARE_SIM_CORE_READ_N(aligned,1)
 DECLARE_SIM_CORE_READ_N(aligned,2)
 DECLARE_SIM_CORE_READ_N(aligned,4)
 DECLARE_SIM_CORE_READ_N(aligned,8)
+DECLARE_SIM_CORE_READ_N(aligned,16)
 DECLARE_SIM_CORE_READ_N(aligned,word)
 
 DECLARE_SIM_CORE_READ_N(unaligned,1)
 DECLARE_SIM_CORE_READ_N(unaligned,2)
 DECLARE_SIM_CORE_READ_N(unaligned,4)
 DECLARE_SIM_CORE_READ_N(unaligned,8)
+DECLARE_SIM_CORE_READ_N(unaligned,16)
 DECLARE_SIM_CORE_READ_N(unaligned,word)
 
 #define sim_core_read_1 sim_core_read_aligned_1
 #define sim_core_read_2 sim_core_read_aligned_2
 #define sim_core_read_4 sim_core_read_aligned_4
 #define sim_core_read_8 sim_core_read_aligned_8
+#define sim_core_read_16 sim_core_read_aligned_16
 
 #undef DECLARE_SIM_CORE_READ_N
 

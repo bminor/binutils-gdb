@@ -1,7 +1,6 @@
 /* This file is part of psim (model of the PowerPC(tm) architecture)
 
-   Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
-   Copyright (C) 1997, Free Software Foundation, Inc.
+   Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License
@@ -63,12 +62,14 @@ typedef unsigned char unsigned8;
 typedef unsigned short unsigned16;
 typedef unsigned long unsigned32;
 
-#if defined __GNUC__ || defined _WIN32
+#if defined __GNUC__ || defined _MSC_VER
 #ifdef __GNUC__
 
 typedef long long natural64;
 typedef signed long long signed64;
 typedef unsigned long long unsigned64;
+typedef struct { unsigned64 a[2]; } unsigned128;
+typedef struct { signed64 a[2]; } signed128;
 
 #define UNSIGNED64(X) (X##ULL)
 #define SIGNED64(X) (X##LL)
@@ -76,20 +77,22 @@ typedef unsigned long long unsigned64;
 #define UNSIGNED32(X) (X##UL)
 #define SIGNED32(X) (X##L)
 
-#else	/* _WIN32 */
+#else	/* _MSC_VER */
 
 typedef __int64 natural64;
 typedef signed __int64 signed64;
 typedef unsigned __int64 unsigned64;
+typeded struct { unsigned64 hi; unsigned64 lo; } unsigned128;
+typeded struct { signed64 hi; signed64 lo; } signed128;
 
 #define UNSIGNED64(X) (X##ui64)
 #define SIGNED64(X) (X##i64)
 
-#define SIGNED32(X) (X)
-#define UNSIGNED32(X) (X)
+#define SIGNED32(X) (X##ui32)
+#define UNSIGNED32(X) (X##i32)
 
-#endif /* _WIN32 */
-#else /* Not GNUC or WIN32 */
+#endif /* _MSC_VER */
+#else /* Not GNUC or _MSC_VER */
 /* Not supported */
 #endif
 
@@ -98,16 +101,19 @@ typedef natural8 natural_1;
 typedef natural16 natural_2;
 typedef natural32 natural_4;
 typedef natural64 natural_8;
+/* typedef natural64 natural_8; */
 
 typedef signed8 signed_1;
 typedef signed16 signed_2;
 typedef signed32 signed_4;
 typedef signed64 signed_8;
+typedef signed128 signed_16;
 
 typedef unsigned8 unsigned_1;
 typedef unsigned16 unsigned_2;
 typedef unsigned32 unsigned_4;
 typedef unsigned64 unsigned_8;
+typedef unsigned128 unsigned_16;
 
 
 /* for general work, the following are defined */
@@ -121,7 +127,8 @@ typedef unsigned64 unsigned_8;
 typedef natural64 natural_word;
 typedef unsigned64 unsigned_word;
 typedef signed64 signed_word;
-#else
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
 typedef natural32 natural_word;
 typedef unsigned32 unsigned_word;
 typedef signed32 signed_word;

@@ -34,10 +34,59 @@
 #define sim_core_write_aligned_N XCONCAT2(sim_core_write_aligned_,N)
 #define sim_core_read_unaligned_N XCONCAT2(sim_core_read_unaligned_,N)
 #define sim_core_write_unaligned_N XCONCAT2(sim_core_write_unaligned_,N)
+#define sim_core_trace_N XCONCAT2(sim_core_trace_,N)
 
+
+/* TAGS: sim_core_trace_1 sim_core_trace_2 */
+/* TAGS: sim_core_trace_4 sim_core_trace_8 */
+/* TAGS: sim_core_trace_6 sim_core_trace_word */
+
+STATIC_SIM_CORE(void)
+sim_core_trace_N (sim_cpu *cpu,
+		  sim_cia cia,
+		  char *transfer,
+		  sim_core_maps map,
+		  address_word addr,
+		  unsigned_N val)
+{
+#if (N == 16)
+  trace_printf (CPU_STATE (cpu), cpu,
+		"sim-n-core.h:%d: %s-%d %s:0x%08lx -> 0x%08lx%08lx%08lx%08lx\n",
+		__LINE__,
+		transfer, sizeof (unsigned_N),
+		sim_core_map_to_str (map),
+		(unsigned long) addr,
+		(unsigned long) V4_16 (val, 0),
+		(unsigned long) V4_16 (val, 1),
+		(unsigned long) V4_16 (val, 2),
+		(unsigned long) V4_16 (val, 3));
+#endif
+#if (N == 8)
+  trace_printf (CPU_STATE (cpu), cpu,
+		"sim-n-core.h:%d: %s-%d %s:0x%08lx -> 0x%08lx%08lx\n",
+		__LINE__,
+		transfer, sizeof (unsigned_N),
+		sim_core_map_to_str (map),
+		(unsigned long) addr,
+		(unsigned long) V4_8 (val, 0),
+		(unsigned long) V4_8 (val, 1));
+#endif
+#if (N == 4)
+  trace_printf (CPU_STATE (cpu), cpu,
+		"sim-n-core.h:%d: %s-%d %s:0x%08lx -> 0x%0*lx\n",
+		__LINE__,
+		transfer, sizeof (unsigned_N),
+		sim_core_map_to_str (map),
+		(unsigned long) addr,
+		sizeof (unsigned_N) * 2,
+		(unsigned long) val);
+#endif
+}
+
+  
 /* TAGS: sim_core_read_aligned_1 sim_core_read_aligned_2 */
 /* TAGS: sim_core_read_aligned_4 sim_core_read_aligned_8 */
-/* TAGS: sim_core_read_aligned_word */
+/* TAGS: sim_core_read_aligned_16 sim_core_read_aligned_word */
 
 INLINE_SIM_CORE(unsigned_N)
 sim_core_read_aligned_N(sim_cpu *cpu,
@@ -78,30 +127,13 @@ sim_core_read_aligned_N(sim_cpu *cpu,
     val = T2H_N (*(unsigned_N*) sim_core_translate (mapping, addr));
   PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
-    if (sizeof (unsigned_N) > 4)
-      trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.h:%d: read-%d %s:0x%08lx -> 0x%08lx%08lx\n",
-		    __LINE__,
-		    sizeof (unsigned_N),
-		    sim_core_map_to_str (map),
-		    (unsigned long) addr,
-		    (unsigned long) (((unsigned64)(val)) >> 32),
-		    (unsigned long) val);
-    else
-      trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.h:%d: read-%d %s:0x%08lx -> 0x%0*lx\n",
-		    __LINE__,
-		    sizeof (unsigned_N),
-		    sim_core_map_to_str (map),
-		    (unsigned long) addr,
-		    sizeof (unsigned_N) * 2,
-		    (unsigned long) val);
+    sim_core_trace_N (cpu, __LINE__, "read", map, addr, val);
   return val;
 }
 
 /* TAGS: sim_core_read_unaligned_1 sim_core_read_unaligned_2 */
 /* TAGS: sim_core_read_unaligned_4 sim_core_read_unaligned_8 */
-/* TAGS: sim_core_read_unaligned_word */
+/* TAGS: sim_core_read_unaligned_16 sim_core_read_unaligned_word */
 
 INLINE_SIM_CORE(unsigned_N)
 sim_core_read_unaligned_N(sim_cpu *cpu,
@@ -122,7 +154,6 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 	SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
 			 sizeof (unsigned_N), addr,
 			 read_transfer, sim_core_unaligned_signal);
-	return -1;
       case NONSTRICT_ALIGNMENT:
 	{
 	  unsigned_N val;
@@ -142,18 +173,16 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
 			  "internal error - %s - mixed alignment",
 			  XSTRING (sim_core_read_unaligned_N));
-	return 0;
       default:
 	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
 			  "internal error - %s - bad switch",
 			  XSTRING (sim_core_read_unaligned_N));
-	return 0;
       }
 }
 
 /* TAGS: sim_core_write_aligned_1 sim_core_write_aligned_2 */
 /* TAGS: sim_core_write_aligned_4 sim_core_write_aligned_8 */
-/* TAGS: sim_core_write_aligned_word */
+/* TAGS: sim_core_write_aligned_16 sim_core_write_aligned_word */
 
 INLINE_SIM_CORE(void)
 sim_core_write_aligned_N(sim_cpu *cpu,
@@ -195,29 +224,12 @@ sim_core_write_aligned_N(sim_cpu *cpu,
     *(unsigned_N*) sim_core_translate (mapping, addr) = H2T_N (val);
   PROFILE_COUNT_CORE (cpu, addr, sizeof (unsigned_N), map);
   if (TRACE_P (cpu, TRACE_CORE_IDX))
-    if (sizeof (unsigned_N) > 4)
-      trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.h:%d: write-%d %s:0x%08lx <- 0x%08lx%08lx\n",
-		    __LINE__,
-		    sizeof (unsigned_N),
-		    sim_core_map_to_str (map),
-		    (unsigned long) addr,
-		    (unsigned long) (((unsigned64)(val)) >> 32),
-		    (unsigned long) val);
-    else
-      trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.h:%d: write-%d %s:0x%08lx <- 0x%0*lx\n",
-		    __LINE__,
-		    sizeof (unsigned_N),
-		    sim_core_map_to_str (map),
-		    (unsigned long) addr,
-		    sizeof (unsigned_N) * 2,
-		    (unsigned long) val);
+    sim_core_trace_N (cpu, __LINE__, "write", map, addr, val);
 }
 
 /* TAGS: sim_core_write_unaligned_1 sim_core_write_unaligned_2 */
 /* TAGS: sim_core_write_unaligned_4 sim_core_write_unaligned_8 */
-/* TAGS: sim_core_write_unaligned_word */
+/* TAGS: sim_core_write_unaligned_16 sim_core_write_unaligned_word */
 
 INLINE_SIM_CORE(void)
 sim_core_write_unaligned_N(sim_cpu *cpu,
@@ -277,3 +289,4 @@ sim_core_write_unaligned_N(sim_cpu *cpu,
 #undef sim_core_write_aligned_N
 #undef sim_core_read_unaligned_N
 #undef sim_core_write_unaligned_N
+#undef sim_core_trace_N

@@ -760,7 +760,7 @@ sim_core_xor_write_buffer (SIM_DESC sd,
 
 
 
-/* define the read/write 1/2/4/8/word functions */
+/* define the read/write 1/2/4/8/16/word functions */
 
 #define N 1
 #include "sim-n-core.h"
@@ -775,6 +775,10 @@ sim_core_xor_write_buffer (SIM_DESC sd,
 #undef N
 
 #define N 8
+#include "sim-n-core.h"
+#undef N
+
+#define N 16
 #include "sim-n-core.h"
 #undef N
 
