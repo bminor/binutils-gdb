@@ -510,14 +510,29 @@ int	fromtty;
   {
     if (s->flags & SEC_LOAD) 
     {
-      char *buffer = xmalloc(s->_raw_size);
-      bfd_get_section_contents(abfd, s, buffer, 0, s->_raw_size);
+      int i;
 
-      hms_write_inferior_memory(s->vma, buffer, s->_raw_size);
+      
+#define DELTA 2048
+      char *buffer = xmalloc(DELTA);
+      printf_filtered("%s: %4x .. %4x  ",s->name, s->vma, s->vma + s->_raw_size);
+      for (i = 0; i < s->_raw_size; i+= DELTA) 
+      {
+	int delta = DELTA;
+	if (delta > s->_raw_size - i)
+	 delta = s->_raw_size - i ;
+
+	bfd_get_section_contents(abfd, s, buffer, i, delta);
+	hms_write_inferior_memory(s->vma + i, buffer, delta);
+	printf_filtered("*");
+	fflush(stdout);
+      }
+  printf_filtered(  "\n");      
       free(buffer);
     }
     s = s->next;
   }
+
   
   DEXIT("hms_load()");
 }
@@ -545,16 +560,19 @@ hms_create_inferior (execfile, args, env)
   
   if (OPEN(hms_desc))
   {
-    
+char buffer[100];    
     hms_kill(NULL,NULL);	 
     hms_clear_breakpoints();
     init_wait_for_inferior ();
     /* Clear the input because what the hms sends back is different
      * depending on whether it was running or not.
      */
+/*sprintf(buffer,"g %x", entry_pt);
 
-    hms_write_cr("r");
-	
+    hms_write_cr(buffer);
+	*/
+hms_write_cr("");
+
     expect_prompt();
 
 
@@ -680,6 +698,7 @@ set_rate()
 #endif
 
   ioctl (hms_desc, TIOCSETP, &sg);
+  
 }
 
 static void
@@ -690,14 +709,13 @@ get_baudrate_right()
   
   while (!is_baudrate_right()) 
   {
+    which_rate++;
+
     if (baudtab[which_rate].rate == -1)
     {
       which_rate = 0;
     }
-    else
-    {
-      which_rate++;
-    }
+
     
     baudrate = baudtab[which_rate].rate;
     printf_filtered("Board not responding, trying %d baud\n",baudrate);
@@ -860,9 +878,8 @@ hms_resume (step, sig)
   if (step)	
   {
     hms_write_cr("s");
-
-    hms_write("\003",1);
-    expect_prompt();
+    expect("Step>");
+    
     /* Force the next hms_wait to return a trap.  Not doing anything
        about I/O from the target means that the user has to type
        "continue" to see any.  FIXME, this should be fixed.  */
@@ -871,7 +888,7 @@ hms_resume (step, sig)
   else
   {
     hms_write_cr("g");
-    expect("g\r");
+    expect("g");
   }
   DEXIT("hms_resume()");
 }
@@ -888,7 +905,7 @@ hms_wait (status)
      of the string cannot recur in the string, or we will not
      find some cases of the string in the input.  */
   
-  static char bpt[] = "At breakpoint:\r";
+  static char bpt[] = "At breakpoint:";
   /* It would be tempting to look for "\n[__exit + 0x8]\n"
      but that requires loading symbols with "yc i" and even if
      we did do that we don't know that the file has symbols.  */
@@ -920,46 +937,56 @@ hms_wait (status)
 
   timeout = 0;			/* Don't time out -- user program is running. */
   immediate_quit = 1;		/* Helps ability to QUIT */
-  while (1) {
-      QUIT;			/* Let user quit and leave process running */
-      ch_handled = 0;
-      ch = readchar ();
-      if (ch == *bp) {
-	  bp++;
-	  if (*bp == '\0')
-	   break;
-	  ch_handled = 1;
+  while (1) 
+  {
+    QUIT;			/* Let user quit and leave process running */
+    ch_handled = 0;
+    ch = readchar ();
+    if (ch == *bp) 
+    {
+	bp++;
+	if (*bp == '\0')
+	 break;
+	ch_handled = 1;
 
-	  *swallowed_p++ = ch;
-	} else
-	 bp = bpt;
-      if (ch == *ep || *ep == '?') {
-	  ep++;
-	  if (*ep == '\0')
-	   break;
-
-	  if (!ch_handled)
-	   *swallowed_p++ = ch;
-	  ch_handled = 1;
-	} else
-	 ep = exitmsg;
-      if (!ch_handled) {
-	  char *p;
-	  /* Print out any characters which have been swallowed.  */
-	  for (p = swallowed; p < swallowed_p; ++p)
-	   putc (*p, stdout);
-	  swallowed_p = swallowed;
-
-	  
-	  if ((ch != '\r' && ch != '\n') || swallowed_cr>10) 
-	  {
-	    putc (ch, stdout);
-	    swallowed_cr = 10;
-	  }
-	  swallowed_cr ++;
-	  
-	}
+	*swallowed_p++ = ch;
+      } 
+    else 
+    {
+      bp = bpt;
     }
+    if (ch == *ep || *ep == '?') 
+    {
+	ep++;
+	if (*ep == '\0')
+	 break;
+
+	if (!ch_handled)
+	 *swallowed_p++ = ch;
+	ch_handled = 1;
+      } 
+    else 
+    {
+      ep = exitmsg;
+    }
+      
+    if (!ch_handled) {
+	char *p;
+	/* Print out any characters which have been swallowed.  */
+	for (p = swallowed; p < swallowed_p; ++p)
+	 putc (*p, stdout);
+	swallowed_p = swallowed;
+
+	  
+	if ((ch != '\r' && ch != '\n') || swallowed_cr>10) 
+	{
+	  putc (ch, stdout);
+	  swallowed_cr = 10;
+	}
+	swallowed_cr ++;
+	  
+      }
+  }
   if (*bp== '\0') 
   {
     WSETSTOP ((*status), SIGTRAP);
@@ -1044,11 +1071,11 @@ char *a;
 {
   int i;
   write(hms_desc,a,l);
-if (!quiet)
-  for (i = 0; i < l ; i++)
-  {
-    printf("%c", a[i]);
-  }
+  if (!quiet)
+   for (i = 0; i < l ; i++)
+   {
+     printf("%c", a[i]);
+   }
 }
 
 hms_write_cr(s)
@@ -1081,8 +1108,6 @@ hms_fetch_registers ()
     linebuf[REGREPLY_SIZE] = 0;
     gottok = 0;    
     if (linebuf[0] == 'r' &&
-	linebuf[1] == '\r' &&
-	linebuf[2] == '\n' &&
 	linebuf[3] == 'P' &&
 	linebuf[4] == 'C' &&
 	linebuf[5] == '=' && 
@@ -1359,7 +1384,7 @@ hms_read_inferior_memory(memaddr, myaddr, len)
   if (memaddr & 0xf) abort();
   if (len != 16) abort();
   
-  sprintf(buffer, "m %4x %4x", start, end);
+  sprintf(buffer, "m %4x %4x", start & 0xffff, end & 0xffff);
   hms_write_cr(buffer);
   /* drop the echo and newline*/
   for (i = 0; i < 13; i++)
@@ -1410,7 +1435,7 @@ hms_read_inferior_memory(memaddr, myaddr, len)
   
   
   
-  hms_write("\003",1);
+  hms_write_cr(" ");
   expect_prompt();
   
 
@@ -1620,9 +1645,13 @@ char *s;
     }  
 }
 
-static hms_speed(s)
+static 
+hms_speed(s)
 char *s;
 {
+check_open();
+
+  
   if (s) 
   {
     char buffer[100];
@@ -1637,10 +1666,7 @@ char *s;
       which++;
     }
     
-
-    
     printf_filtered("Checking target is in sync\n");
-
     
     get_baudrate_right();
     baudrate = newrate;
@@ -1648,7 +1674,7 @@ char *s;
 		    baudrate);    
     
     sprintf(buffer, "tm %d. N 8 1", baudrate);
-    hms_write(buffer);
+    hms_write_cr(buffer);
   }    
 }
 

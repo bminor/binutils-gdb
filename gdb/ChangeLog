@@ -1,3 +1,12 @@
+Mon Mar  2 23:00:12 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* gdbtypes.c (lookup_pointer_type): initialize the TYPE_LENGTH of
+	a ptype to reflect the setting of TARGET_PTR_BIT.  Set the
+	TYPE_FLAGS of a ptype to TYPE_FLAG_UNSIGNED.
+	* tm-h8300.h, h8300-tdep.c, remote-hms.c: personal checkpoint
+	* printcmd.c (print_address): if ADDR_BITS_REMOVE is defined, use
+	it before printing out the hex shape of an address.
+
 Sun Mar  1 17:41:09 1992  Per Bothner  (bothner@cygnus.com)
 
 	* rs6000-xdep.c (frame_initial_stack_address):  Move

@@ -44,11 +44,12 @@ extern void init_extra_frame_info ();
 
 
 #define IEEE_FLOAT
-
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 #undef TARGET_INT_BIT
 #define TARGET_INT_BIT 16
+#undef TARGET_PTR_BIT
+#define TARGET_PTR_BIT 16
 
 
 /* Offset from address of function to start of its code.
@@ -304,3 +305,8 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 #define NAMES_HAVE_UNDERSCORE
 
 typedef unsigned short INSN_WORD;
+
+#define ADDR_BITS_REMOVE(addr) ((addr) & 0xffff)
+#define ADDR_BITS_SET(addr) (((addr)))
+
+#define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)

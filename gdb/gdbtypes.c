@@ -80,11 +80,12 @@ lookup_pointer_type (type)
       TYPE_POINTER_TYPE (type) = ptype;
       
       /* We assume the machine has only one representation for pointers!  */
-      /* FIXME:  This confuses host<->target data representations, and is a
-	 poor assumption besides. */
       
-      TYPE_LENGTH (ptype) = sizeof (char *);
+      TYPE_LENGTH (ptype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
       TYPE_CODE (ptype) = TYPE_CODE_PTR;
+      
+      /* pointers are unsigned */
+      TYPE_FLAGS(ptype) |= TYPE_FLAG_UNSIGNED;
       
     }
   return (ptype);

@@ -55,17 +55,17 @@ CORE_ADDR start_pc;
   /* Skip past all push insns */
   short int w;
   
-  w = read_memory_integer(start_pc, 2);
+  w = read_memory_short(start_pc);
   while (IS_PUSH(w)) 
   {
     start_pc+=2;  
-    w = read_memory_integer(start_pc, 2);
+    w = read_memory_short(start_pc);
   }
 
   /* Skip past a move to FP */
   if (IS_MOVE_FP(w)) {
       start_pc +=2 ;
-      w = read_memory_integer(start_pc, 2);
+      w = read_memory_short(start_pc);
     }
 
   return start_pc;  
@@ -287,7 +287,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   /* Locals are always reffed based from the fp */
   fi->locals_pointer = after_prolog_fp ;
   /* The PC is at a known place */
-  fi->from_pc = read_memory_integer(after_prolog_fp + reg_save_depth-2 , 2);
+  fi->from_pc = read_memory_short(after_prolog_fp + reg_save_depth-2 );
   
 
   /* Rememeber any others too */
@@ -307,7 +307,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   }	
   if (have_fp) 
    /* We keep the old FP in the SP spot */
-   fsr->regs[SP_REGNUM] = read_memory_integer(fsr->regs[6],2);
+   fsr->regs[SP_REGNUM] = (read_memory_short(fsr->regs[6])) ;
   else 
    fsr->regs[SP_REGNUM] = after_prolog_fp + reg_save_depth;
   
@@ -384,7 +384,7 @@ void h8300_pop_frame()
   {
     if(fsr.regs[regnum]) 
     {
-      write_register(regnum, read_memory_integer (fsr.regs[regnum], 2));
+      write_register(regnum, read_memory_short (fsr.regs[regnum]));
     }
   
     flush_cached_frames();
