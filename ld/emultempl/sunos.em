@@ -334,7 +334,7 @@ gld${EMULATION_NAME}_before_allocation ()
 
       lang_for_each_input_file (gld${EMULATION_NAME}_set_need);
 
-      ASSERT (need_pnames - sneed->contents == need_size);
+      ASSERT ((bfd_size_type) (need_pnames - sneed->contents) == need_size);
     }
 
   if (srules != NULL)
@@ -540,6 +540,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
   else if (!config.magic_demand_paged)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xn`;
+  else if (link_info.shared)
+    return `sed "$sc" ldscripts/${EMULATION_NAME}.xs`;
   else
     return `sed "$sc" ldscripts/${EMULATION_NAME}.x`;
 }
@@ -560,6 +562,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
     return "ldscripts/${EMULATION_NAME}.xbn";
   else if (!config.magic_demand_paged)
     return "ldscripts/${EMULATION_NAME}.xn";
+  else if (link_info.shared)
+    return "ldscripts/${EMULATION_NAME}.xs";
   else
     return "ldscripts/${EMULATION_NAME}.x";
 }

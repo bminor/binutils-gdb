@@ -24,7 +24,6 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include <ctype.h>
 #include "getopt.h"
 #include "bfdlink.h"
-#include "config.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldmisc.h"
@@ -34,6 +33,7 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "ldlex.h"
 #include "ldfile.h"
 #include "ldver.h"
+#include "ldemul.h"
 
 /* Somewhere above, sys/stat.h got included . . . . */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
@@ -47,15 +47,6 @@ unsigned long strtoul ();
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));
 
-/* PE format; declare additional functions */
-static void set_pe_subsystem PARAMS ((void));
-static void set_pe_stack_heap PARAMS ((bfd_link_pe_info_dval *reserve,
-				    bfd_link_pe_info_dval *commit));
-static void set_pe_value PARAMS ((bfd_link_pe_info_dval *val));
-
-/* PE info; passed to bfd if any pe options set. */
-static bfd_link_pe_info pe_info;
-
 
 void
 parse_args (argc, argv)
@@ -64,6 +55,7 @@ parse_args (argc, argv)
 {
   int i;
   int ingroup = 0;
+  char *default_dirlist = NULL;
 
   /* Starting the short option string with '-' is for programs that
      expect options and other ARGV-elements in any order and that care about
@@ -75,13 +67,13 @@ parse_args (argc, argv)
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
-#define OPTION_CALL_SHARED		150
+#define OPTION_ASSERT			150
+#define OPTION_CALL_SHARED		(OPTION_ASSERT + 1)
 #define OPTION_DEFSYM			(OPTION_CALL_SHARED + 1)
 #define OPTION_DYNAMIC_LINKER		(OPTION_DEFSYM + 1)
 #define OPTION_EB			(OPTION_DYNAMIC_LINKER + 1)
 #define OPTION_EL			(OPTION_EB + 1)
-#define OPTION_HEAP			(OPTION_EL + 1)
-#define OPTION_EMBEDDED_RELOCS		(OPTION_HEAP + 1)
+#define OPTION_EMBEDDED_RELOCS		(OPTION_EL + 1)
 #define OPTION_EXPORT_DYNAMIC		(OPTION_EMBEDDED_RELOCS + 1)
 #define OPTION_HELP			(OPTION_EXPORT_DYNAMIC + 1)
 #define OPTION_IGNORE			(OPTION_HELP + 1)
@@ -112,23 +104,10 @@ parse_args (argc, argv)
 #define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
 
-/* Used for setting flags in the PE header. */
-#define OPTION_BASE_FILE		(OPTION_WHOLE_ARCHIVE + 1)
-#define OPTION_DLL			(OPTION_BASE_FILE + 1)
-#define OPTION_FILE_ALIGNMENT		(OPTION_DLL + 1)
-#define OPTION_IMAGE_BASE		(OPTION_FILE_ALIGNMENT + 1)
-#define OPTION_MAJOR_IMAGE_VERSION	(OPTION_IMAGE_BASE + 1)
-#define OPTION_MAJOR_OS_VERSION		(OPTION_MAJOR_IMAGE_VERSION + 1)
-#define OPTION_MAJOR_SUBSYSTEM_VERSION	(OPTION_MAJOR_OS_VERSION + 1)
-#define OPTION_MINOR_IMAGE_VERSION	(OPTION_MAJOR_SUBSYSTEM_VERSION + 1)
-#define OPTION_MINOR_OS_VERSION		(OPTION_MINOR_IMAGE_VERSION + 1)
-#define OPTION_MINOR_SUBSYSTEM_VERSION	(OPTION_MINOR_OS_VERSION + 1)
-#define OPTION_SECTION_ALIGNMENT	(OPTION_MINOR_SUBSYSTEM_VERSION + 1)
-#define OPTION_STACK                    (OPTION_SECTION_ALIGNMENT + 1)
-#define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
 
   static struct option longopts[] = {
   /* Sorted alphabeticaly, except for the PE options grouped at the end. */
+    {"assert", required_argument, NULL, OPTION_ASSERT},
     {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
     {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
     {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
@@ -179,21 +158,6 @@ parse_args (argc, argv)
     {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
     {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
 
-  /* PE options */
-    {"base-file", required_argument, NULL, OPTION_BASE_FILE},
-    {"dll", no_argument, NULL, OPTION_DLL},
-    {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
-    {"heap", required_argument, NULL, OPTION_HEAP}, 
-    {"image-base", required_argument, NULL, OPTION_IMAGE_BASE}, 
-    {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
-    {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
-    {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
-    {"minor-image-version", required_argument, NULL, OPTION_MINOR_IMAGE_VERSION},
-    {"minor-os-version", required_argument, NULL, OPTION_MINOR_OS_VERSION},
-    {"minor-subsystem-version", required_argument, NULL, OPTION_MINOR_SUBSYSTEM_VERSION},
-    {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
-    {"stack", required_argument, NULL, OPTION_STACK},
-    {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
       
     {NULL, no_argument, NULL, 0}
   };
@@ -220,11 +184,15 @@ parse_args (argc, argv)
       /* getopt_long_only is like getopt_long, but '-' as well as '--' can
 	 indicate a long option.  */
       int longind;
-      int optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
+      int optc;
+
+      if (ldemul_parse_args (argc, argv))
+	continue;
+
+      optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
 
       if (optc == -1)
 	break;
-
       switch (optc)
 	{
 	default:
@@ -247,6 +215,29 @@ parse_args (argc, argv)
 	    config.dynamic_link = true;
 	  else
 	    einfo ("%P%F: unrecognized -a option `%s'\n", optarg);
+	  break;
+	case OPTION_ASSERT:
+	  /* FIXME: We just ignore these, except for pure-text, but we
+             should handle them.  */
+	  if (strcmp (optarg, "definitions") == 0)
+	    ;
+	  else if (strcmp (optarg, "nodefinitions") == 0)
+	    ;
+	  else if (strcmp (optarg, "nosymbolic") == 0)
+	    ;
+	  else if (strcmp (optarg, "pure-text") == 0)
+	    {
+	      /* FIXME: This is wrong.  We do it this way as a hack to
+                 support SunOS4, on which gcc -shared will pass
+                 -assert pure-text to the linker.  The SunOS linker
+                 will automatically create a shared library if there
+                 are any undefined symbols, but our linker does not
+                 know how to do that (it seems to require an extra
+                 pass over the relocs).  */
+	      link_info.shared = true;
+	    }
+	  else
+	    einfo ("%P%F: unrecognized -assert option `%s'\n", optarg);
 	  break;
 	case 'A':
 	  ldfile_add_arch (optarg);
@@ -344,7 +335,6 @@ parse_args (argc, argv)
 	     something, or can we create a new option to do that
 	     (with a syntax similar to -defsym)?
 	     getopt can't handle two args to an option without kludges.  */
-	  set_default_dirlist (optarg);
 	  break;
 	case 'o':
 	  lang_add_output (optarg, 0); 
@@ -411,7 +401,7 @@ parse_args (argc, argv)
 	case OPTION_SHARED:
 	  link_info.shared = true;
 	  break;
-	case 'h': /* Used on Solaris.  */
+	case 'h':		/* Used on Solaris.  */
 	case OPTION_SONAME:
 	  command_line.soname = optarg;
 	  break;
@@ -490,7 +480,9 @@ parse_args (argc, argv)
 	  link_info.discard = discard_all;
 	  break;
 	case 'Y':
-	  set_default_dirlist (optarg);
+	  if (strncmp (optarg, "P,", 2) == 0)
+	    optarg += 2;
+	  default_dirlist = optarg;
 	  break;
 	case 'y':
 	  add_ysym (optarg);
@@ -529,64 +521,15 @@ parse_args (argc, argv)
 	  ingroup = 0;
 	  break;
 
-
-
-	case OPTION_BASE_FILE:
-	  link_info.base_file = (PTR) fopen (optarg,"w");
-	  if (link_info.base_file == NULL)
-	    {
-	      fprintf (stderr, "%s: Can't open base file %s\n",
-		       program_name, optarg);
-	      xexit (1);
-	    }
-	  break;
-
-	  /* PE options */
-	case OPTION_HEAP: 
-	  set_pe_stack_heap (&pe_info.heap_reserve,  &pe_info.heap_commit);
-	  break;
-	case OPTION_STACK: 
-	  set_pe_stack_heap (&pe_info.stack_reserve,  &pe_info.stack_commit);
-	  break;
-	case OPTION_SUBSYSTEM:
-	  set_pe_subsystem ();
-	  break;
-	case OPTION_MAJOR_OS_VERSION:
-	  set_pe_value (&pe_info.major_os_version);
-	  break;
-	case OPTION_MINOR_OS_VERSION:
-	  set_pe_value (&pe_info.minor_os_version);
-	  break;
-	case OPTION_MAJOR_SUBSYSTEM_VERSION:
-	  set_pe_value (&pe_info.major_subsystem_version);
-	  break;
-	case OPTION_MINOR_SUBSYSTEM_VERSION:
-	  set_pe_value (&pe_info.minor_subsystem_version);
-	  break;
-	case OPTION_MAJOR_IMAGE_VERSION:
-	  set_pe_value (&pe_info.major_image_version);
-	  break;
-	case OPTION_MINOR_IMAGE_VERSION:
-	  set_pe_value (&pe_info.minor_image_version);
-	  break;
-	case OPTION_FILE_ALIGNMENT:
-	  set_pe_value (&pe_info.file_alignment);
-	  break;
-	case OPTION_SECTION_ALIGNMENT:
-	  set_pe_value (&pe_info.section_alignment);
-	  break;
-	case OPTION_DLL:
-	  pe_info.dll.defined = 1;
-	  pe_info.dll.value = 1;
-	  break;
-	case OPTION_IMAGE_BASE:
-	  set_pe_value (&pe_info.image_base);
-	  break;
 	}
     }
 
   if (ingroup)
     lang_leave_group ();
+
+  if (default_dirlist != NULL)
+    set_default_dirlist (default_dirlist);
+
 }
 
 /* Add the (colon-separated) elements of DIRLIST_PTR to the
@@ -623,75 +566,3 @@ set_section_start (sect, valstr)
   lang_section_start (sect, exp_intop (val));
 }
 
-/* PE/WIN32; added routines to get the subsystem type, heap and/or stack
-   parameters which may be input from the command line */
-
-static void
-set_pe_subsystem ()
-{
-  int i;
-  static struct 
-    {
-      char *name ;
-      int value;
-    }
-  v[] =
-    {
-      {"native", BFD_PE_NATIVE},
-      {"windows",BFD_PE_WINDOWS},
-      {"console",BFD_PE_CONSOLE},
-      {"os2",BFD_PE_OS2},
-      {"posix", BFD_PE_POSIX},
-      {0,0}
-    };
-
-  for (i = 0; v[i].name; i++)
-    {
-      if (!strcmp (optarg, v[i].name)) 
-	{
-	  link_info.pe_info = &pe_info;	  
-	  pe_info.subsystem.value = v[i].value;
-	  pe_info.subsystem.defined = 1;
-	  return;
-	}
-    }
-  einfo ("%P%F: invalid subsystem type `%s'\n", optarg);
-}
-
-static void 
-set_pe_value (ptr)
-     bfd_link_pe_info_dval *ptr;
-{
-  char *end;
-  ptr->value = strtoul (optarg, &end, 16);
-  if (end == optarg)
-    {
-      einfo ("%P%F: invalid hex number for PE parameter '%s'\n", optarg);
-    }
-
-  optarg = end;
-  ptr->defined = 1;
-  link_info.pe_info = &pe_info;
-}
-
-static void
-set_pe_stack_heap (reserve, commit)
-     bfd_link_pe_info_dval *reserve;
-     bfd_link_pe_info_dval *commit;
-{
-  char *begin_commit;
-  char *end;
-
-  set_pe_value (reserve);
-  if (*optarg == ',')
-    {
-      optarg++;
-      set_pe_value (commit);
-    }
-  else if (*optarg)
-    {
-      einfo ("%P%F: strange hex info for PE parameter '%s'\n", optarg);
-    }
-}
-
-

@@ -7,7 +7,9 @@ ${STACKZERO+${RELOCATING+${STACKZERO}}}
 ${SHLIB_PATH+${RELOCATING+${SHLIB_PATH}}}
 SECTIONS
 {
-  .text ${RELOCATING+${TEXT_START_ADDR}}:
+  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR};}}
+  ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
+  .text :
   {
     CREATE_OBJECT_SYMBOLS
     *(.text)
@@ -19,22 +21,24 @@ SECTIONS
     *(.dynstr)
     *(.rules)
     *(.need)
+    ${RELOCATING+_etext = .;}
+    ${RELOCATING+__etext = .;}
     ${PAD_TEXT+${RELOCATING+. = ${DATA_ALIGNMENT};}}
-    ${RELOCATING+_etext = ${DATA_ALIGNMENT};}
-    ${RELOCATING+__etext = ${DATA_ALIGNMENT};}
   }
-  .data  ${RELOCATING+${DATA_ALIGNMENT}} :
+  ${RELOCATING+. = ${DATA_ALIGNMENT};}
+  .data :
   {
     /* The first three sections are for SunOS dynamic linking.  */
     *(.dynamic)
     *(.got)
     *(.plt)
     *(.data)
+    *(.linux-dynamic) /* For Linux dynamic linking.  */
     ${CONSTRUCTING+CONSTRUCTORS}
     ${RELOCATING+_edata  =  .;}
     ${RELOCATING+__edata  =  .;}
   }
-  .bss ${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
+  .bss :
   {
    ${RELOCATING+ __bss_start = .};
    *(.bss)
