@@ -2442,12 +2442,13 @@ phex (ULONGEST l, int sizeof_l)
 char *
 phex_nz (ULONGEST l, int sizeof_l)
 {
-  char *str = get_cell ();
+  char *str;
   switch (sizeof_l)
     {
     case 8:
       {
 	unsigned long high = (unsigned long) (l >> thirty_two);
+	str = get_cell ();
 	if (high == 0)
 	  sprintf (str, "%lx", (unsigned long) (l & 0xffffffff));
 	else
@@ -2456,13 +2457,15 @@ phex_nz (ULONGEST l, int sizeof_l)
 	break;
       }
     case 4:
+      str = get_cell ();
       sprintf (str, "%lx", (unsigned long) l);
       break;
     case 2:
+      str = get_cell ();
       sprintf (str, "%x", (unsigned short) (l & 0xffff));
       break;
     default:
-      phex_nz (l, sizeof (l));
+      str = phex_nz (l, sizeof (l));
       break;
     }
   return str;

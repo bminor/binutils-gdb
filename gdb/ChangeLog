@@ -1,5 +1,10 @@
 2001-11-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* utils.c (phex_nz): For default case, set str to phex_nz return
+	value.
+
+2001-11-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* TODO (register_buffer): Delete.
 	* regcache.c (register_buffer): Make static.
 	(regcache_collect): New function.
