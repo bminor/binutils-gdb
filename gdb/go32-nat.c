@@ -93,13 +93,13 @@ save_npx (void)
   asm ("inb    $0xa0, %%al
        testb $0x20, %%al
        jz 1f
-       xorb %% al, %%al
-       outb %% al, $0xf0
+       xorb %%al, %%al
+       outb %%al, $0xf0
        movb $0x20, %%al
-       outb %% al, $0xa0
-       outb %% al, $0x20
+       outb %%al, $0xa0
+       outb %%al, $0x20
 1:
-       fnsave % 0
+       fnsave %0
        fwait "
 :     "=m" (npx)
 :				/* No input */
@@ -107,10 +107,6 @@ save_npx (void)
 }
 
 /* *INDENT-ON* */
-
-
-
-
 
 /* ------------------------------------------------------------------------- */
 /* Reload the contents of the NPX from the global variable `npx'.  */

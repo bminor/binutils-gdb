@@ -1,3 +1,9 @@
+2002-01-13  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (save_npx) [__DJGPP_MINOR__ < 3]: Remove extraneous
+	white space which prevented compilation.  Reported by DSK
+	<dsk@student.unsw.edu.au>.
+
 2001-12-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* i387-nat.c (i387_fill_fxsave): Change type of ``val'' from char
