@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: shift
+#name: i860 shift
 
 .*: +file format .*
 

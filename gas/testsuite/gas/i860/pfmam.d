@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: pfmam
+#name: i860 pfmam
 
 .*: +file format .*
 

@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: iarith
+#name: i860 iarith
 
 .*: +file format .*
 

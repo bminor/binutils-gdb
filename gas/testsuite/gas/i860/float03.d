@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: float03
+#name: i860 float03
 
 .*: +file format .*
 

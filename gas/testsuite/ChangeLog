@@ -1,5 +1,9 @@
 2003-08-03  Jason Eckhardt  <jle@rice.edu>
 
+	* gas/i860/*.d: Prefix name with "i860".
+
+2003-08-03  Jason Eckhardt  <jle@rice.edu>
+
 	* gas/i860/dual01.{s,d}: New files.
 	* gas/i860/dual02-err.{s,l}: New files.
 	* gas/i860/dual03.{s,d}: New files.

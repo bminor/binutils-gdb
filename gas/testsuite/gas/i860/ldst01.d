@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: ldst01 (ld.l)
+#name: i860 ldst01 (ld.l)
 
 .*: +file format .*
 

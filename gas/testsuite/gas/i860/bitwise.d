@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: bitwise
+#name: i860 bitwise
 
 .*: +file format .*
 

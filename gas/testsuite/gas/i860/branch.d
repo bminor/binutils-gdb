@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: branch
+#name: i860 branch
 
 .*: +file format .*
 

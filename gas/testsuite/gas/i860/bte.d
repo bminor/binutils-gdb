@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: bte/btne
+#name: i860 bte/btne
 
 .*: +file format .*
 

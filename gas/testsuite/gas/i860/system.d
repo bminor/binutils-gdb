@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: system
+#name: i860 system
 
 .*: +file format .*
 

@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: regress01
+#name: i860 regress01
 
 .*: +file format .*
 

@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: pfsm
+#name: i860 pfsm
 
 .*: +file format .*
 

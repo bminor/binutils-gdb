@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: form/pform
+#name: i860 form/pform
 
 .*: +file format .*
 

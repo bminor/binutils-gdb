@@ -1,6 +1,6 @@
 #as: -mxp
 #objdump: -dr
-#name: xp (XP-only instructions)
+#name: i860 xp (XP-only instructions)
 
 .*: +file format .*
 

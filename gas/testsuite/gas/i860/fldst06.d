@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: fldst06 (fst.q)
+#name: i860 fldst06 (fst.q)
 
 .*: +file format .*
 

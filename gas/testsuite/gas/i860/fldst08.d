@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: fldst08 (pfld.d)
+#name: i860 fldst08 (pfld.d)
 
 .*: +file format .*
 

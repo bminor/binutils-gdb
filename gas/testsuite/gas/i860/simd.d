@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: simd
+#name: i860 simd
 
 .*: +file format .*
 
