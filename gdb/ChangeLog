@@ -1,3 +1,19 @@
+2002-08-27  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (osabi.o, i387-tdep.o, i386-linux-nat.o, lin-lwp.o,
+	ax-gdb.o, signals.o, jv-valprint.o, c-valprint.o, cp-abi.o):
+	Update dependencies.
+	* i387-tdep.c: Include gdb_string.h.
+	* osabi.c: Likewise.
+	* i386-linux-nat.c: Likewise.
+	* lin-lwp.c: Likewise.
+	* ax-gdb.c: Likewise.
+	* signals/signals.c: Likewise.
+	* jv-valprint.c: Likewise.
+	* p-lang.c: Likewise.
+	* c-valprint.c: Likewise.
+	* cp-abi.c: Likewise.
+
 2002-08-27  Elena Zannoni  <ezannoni@redhat.com>
 
 	* cli/cli-script.h (copy_command_lines): Export.

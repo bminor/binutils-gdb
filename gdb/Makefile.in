@@ -1557,7 +1557,8 @@ c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdb_string_h)
 
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(cp_abi_h)
+	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(cp_abi_h) \
+	$(gdb_string_h)
 
 doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(gdb_string_h)
@@ -1622,7 +1623,7 @@ linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) $(gregset_h) \
 	$(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) $(cli_decode_h) \
 	$(gdb_string_h)
 
-cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
+cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(gdb_string_h)
 
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
@@ -1740,7 +1741,7 @@ gdbtypes.o: gdbtypes.c $(bfd_h) $(complaints_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
 	$(target_h) $(value_h) $(gdb_string_h) $(wrapper_h) $(cp_abi_h)
 
-osabi.o: osabi.c $(defs_h) $(BFD_SRC)/elf-bfd.h
+osabi.o: osabi.c $(gdb_string_h) $(defs_h) $(BFD_SRC)/elf-bfd.h
 
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 	$(command_h) $(floatformat_h) $(target_h) i387-tdep.h $(regcache_h)
@@ -1753,7 +1754,7 @@ gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 
 gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h) \
 	$(gdb_assert_h) $(gdb_string_h)
- 
+
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(dis_asm_h) \
 	$(gdbcmd_h) $(gdbtypes_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
 	$(regcache_h)
@@ -1815,7 +1816,8 @@ i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(symtab_h) $(symfile_h) $(objfiles_h) $(regcache_h) \
-	$(i386_linux_tdep_h) $(i386_tdep_h) $(i387_tdep_h)
+	$(i386_linux_tdep_h) $(i386_tdep_h) $(i387_tdep_h) \
+	$(gdb_string_h)
 
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h)
@@ -1823,7 +1825,8 @@ i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 i386v4-nat.o: i386v4-nat.c $(defs_h) $(regcache_h)
 
 i387-tdep.o: i387-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(language_h) $(regcache_h) $(doublest_h) i386-tdep.h
+	$(inferior_h) $(language_h) $(regcache_h) $(doublest_h) i386-tdep.h \
+	$(gdb_string_h)
 
 # OBSOLETE i960-tdep.o: i960-tdep.c $(defs_h) $(symtab_h) $(value_h) $(frame_h) \
 # OBSOLETE 	$(floatformat_h) $(target_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
@@ -1871,7 +1874,8 @@ jv-typeprint.o: jv-typeprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 
 jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(demangle_h) $(valprint_h) \
-	$(language_h) jv-lang.h $(c_lang_h) gdbcore.h $(annotate_h)
+	$(language_h) jv-lang.h $(c_lang_h) gdbcore.h $(annotate_h) \
+	$(gdb_string_h)
 
 kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) $(target_h) $(gdb_string_h) \
 	kod.h
@@ -2100,7 +2104,7 @@ thread-db.o: thread-db.c $(defs_h) $(gdb_assert_h) gdb_proc_service.h \
 	$(objfiles_h) $(target_h) $(regcache_h)
 
 lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_wait_h) $(gdbthread_h) \
-	$(inferior_h) $(target_h) $(gdbcmd_h) $(regcache_h)
+	$(inferior_h) $(target_h) $(gdbcmd_h) $(regcache_h) $(gdb_string_h)
 
 proc-service.o: proc-service.c $(defs_h) $(inferior_h) gdb_proc_service.h \
 	$(symtab_h) $(target_h) gregset.h
@@ -2297,7 +2301,8 @@ tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h \
 ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h)
 
 ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
-	$(value_h) $(expression_h) $(command_h) $(ax_h) $(gdbcmd_h) ax-gdb.h
+	$(value_h) $(expression_h) $(command_h) $(ax_h) $(gdbcmd_h) ax-gdb.h \
+	$(gdb_string_h)
 
 sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
@@ -2612,7 +2617,7 @@ rdi-share/libangsd.a:	force
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the mi directory.
 
-signals.o: $(srcdir)/signals/signals.c $(defs_h) $(target_h)
+signals.o: $(srcdir)/signals/signals.c $(defs_h) $(target_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/signals/signals.c
 
 #
