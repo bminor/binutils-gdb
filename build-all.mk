@@ -217,21 +217,21 @@ endif
 
 ifeq ($(canonhost),i386-lynx)
 TARGETS = $(NATIVE)
-CC = /bin/gcc
+CC = /usr/cygnus/progressive/bin/gcc
 all: all-cygnus
 SHELL=/bin/bash
 endif
 
 ifeq ($(canonhost),m68k-lynx)
 TARGETS = $(NATIVE)
-CC = /bin/gcc
+CC = /usr/cygnus/progressive/bin/gcc
 all: all-cygnus
 SHELL=/bin/bash
 endif
 
 ifeq ($(canonhost),sparc-lynx)
 TARGETS = $(NATIVE)
-CC = /bin/gcc
+CC = /usr/cygnus/progressive/bin/gcc
 all: all-cygnus
 SHELL=/bin/bash
 endif

@@ -1,3 +1,8 @@
+Wed Aug  3 04:58:16 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* change CC to /usr/latest/bin/gcc for lynx host builds, since
+	/bin/gcc isn't good enough to build gcc.
+
 Wed Jul 27 09:07:14 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (GDB_SUPPORT_FILES): Remove
