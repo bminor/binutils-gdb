@@ -32,8 +32,6 @@ struct subspace_dictionary;
 #define FILE_HDR_SIZE sizeof(struct header)
 #define AUX_HDR_SIZE sizeof(struct som_exec_auxhdr)
 
-unsigned int millicode_start, millicode_end;
-
 typedef struct hppa_symbol
 {
   asymbol symbol;
@@ -48,27 +46,15 @@ struct hppadata
   struct som_exec_auxhdr *aux_hdr;
   hppa_symbol_type *symbols;
 
-  /* For ease, we do this */
-  asection *textsec;
-  asection *datasec;
-  asection *bsssec;
-
   /* We remember these offsets so that after check_file_format, we have
      no dependencies on the particular format of the exec_hdr.  */
-  file_ptr dbx_sym_filepos;
-  file_ptr dbx_str_filepos;
 
-  file_ptr hp_sym_filepos;
-  file_ptr hp_str_filepos;
+  file_ptr sym_filepos;
+  file_ptr str_filepos;
 
-  int dbx_sym_count;
-  int hp_sym_count;
-
-  unsigned dbx_stringtab_size;
-  unsigned hp_stringtab_size;
+  unsigned stringtab_size;
 
   /* Size of a symbol table entry in external form */
-  unsigned dbx_symbol_entry_size;
   unsigned hp_symbol_entry_size;
 };
 
@@ -76,23 +62,13 @@ struct hppa_data_struct {
   struct hppadata a;
 };
 
-#define padata(bfd)              ((bfd)->tdata.hppa_data->a)
-#define obj_file_hdr(bfd)           (padata(bfd).file_hdr)
-#define obj_aux_hdr(bfd)            (padata(bfd).aux_hdr)
-#define obj_pa_symbols(bfd)   (padata(bfd).symbols)
-#define obj_textsec(bfd)        (padata(bfd).textsec)
-#define obj_datasec(bfd)        (padata(bfd).datasec)
-#define obj_bsssec(bfd)         (padata(bfd).bsssec)
-#define obj_dbx_sym_filepos(bfd)    (padata(bfd).dbx_sym_filepos)
-#define obj_dbx_str_filepos(bfd)    (padata(bfd).dbx_str_filepos)
-#define obj_hp_sym_filepos(bfd) (padata(bfd).hp_sym_filepos)
-#define obj_hp_str_filepos(bfd) (padata(bfd).hp_str_filepos)
-#define obj_dbx_sym_count(bfd)   (padata(bfd).dbx_sym_count)
-#define obj_hp_sym_count(bfd)   (padata(bfd).hp_sym_count)
-#define obj_dbx_stringtab_size(bfd)  (padata(bfd).dbx_stringtab_size)
-#define obj_hp_stringtab_size(bfd)  (padata(bfd).hp_stringtab_size)
-#define obj_dbx_symbol_entry_size(bfd)  (padata(bfd).dbx_symbol_entry_size)
-#define obj_hp_symbol_entry_size(bfd)  (padata(bfd).hp_symbol_entry_size)
+#define padata(bfd)		((bfd)->tdata.hppa_data->a)
+#define obj_file_hdr(bfd)	(padata(bfd).file_hdr)
+#define obj_aux_hdr(bfd)	(padata(bfd).aux_hdr)
+#define obj_pa_symbols(bfd)	(padata(bfd).symbols)
+#define obj_sym_filepos(bfd)	(padata(bfd).sym_filepos)
+#define obj_str_filepos(bfd)	(padata(bfd).str_filepos)
+#define obj_stringtab_size(bfd)	(padata(bfd).stringtab_size)
 
 /* We take the address of the first element of an asymbol to ensure that the
    macro is only ever applied to an asymbol */
@@ -116,3 +92,68 @@ struct hppa_core_struct
 #define core_datasec(bfd) (core_hdr(bfd)->data_section)
 #define core_stacksec(bfd) (core_hdr(bfd)->stack_section)
 #define core_regsec(bfd) (core_hdr(bfd)->reg_section)
+
+/* HP PA-RISC relocation types */
+
+enum hppa_reloc_field_selector_type
+{
+	R_HPPA_FSEL	= 0x0,
+	R_HPPA_LSSEL	= 0x1,
+	R_HPPA_RSSEL	= 0x2,
+	R_HPPA_LSEL	= 0x3,
+	R_HPPA_RSEL	= 0x4,
+	R_HPPA_LDSEL	= 0x5,
+	R_HPPA_RDSEL	= 0x6,
+	R_HPPA_LRSEL	= 0x7,
+	R_HPPA_RRSEL	= 0x8,
+	R_HPPA_PSEL	= 0x9,	/* P'	: procedure address for shlib's	*/
+	R_HPPA_LPSEL	= 0xa,	/* LP'	: L' for procedure addresses	*/
+	R_HPPA_RPSEL	= 0xb,	/* RP'	: R' for procedure addresses	*/
+
+	R_HPPA_TSEL	= 0xc,	/* T'	: DLT-relative offset for shlib's	*/
+	R_HPPA_LTSEL	= 0xd,	/* LT'	: L' for DLT-relative offsets	*/
+	R_HPPA_RTSEL	= 0xe	/* RT'	: R' for DLT-relative offsets	*/
+
+};
+
+/* for compatibility */
+enum hppa_reloc_field_selector_type_alt
+{
+	e_fsel	= R_HPPA_FSEL,
+	e_lssel	= R_HPPA_LSSEL,
+	e_rssel	= R_HPPA_RSSEL,
+	e_lsel	= R_HPPA_LSEL,
+	e_rsel	= R_HPPA_RSEL,
+	e_ldsel	= R_HPPA_LDSEL,
+	e_rdsel	= R_HPPA_RDSEL,
+	e_lrsel	= R_HPPA_LRSEL,
+	e_rrsel	= R_HPPA_RRSEL,
+	e_psel	= R_HPPA_PSEL,	/* P'	: procedure address for shlib's	*/
+	e_lpsel	= R_HPPA_LPSEL,	/* LP'	: L' for procedure addresses	*/
+	e_rpsel	= R_HPPA_RPSEL,	/* RP'	: R' for procedure addresses	*/
+
+	e_tsel	= R_HPPA_TSEL,	/* T'	: DLT-relative offset for shlib's	*/
+	e_ltsel	= R_HPPA_LTSEL,	/* LT'	: L' for DLT-relative offsets	*/
+	e_rtsel	= R_HPPA_RTSEL	/* RT'	: R' for DLT-relative offsets	*/
+};
+
+enum hppa_reloc_expr_type
+{
+	R_HPPA_E_ONE	= 0,
+	R_HPPA_E_TWO	= 1,
+	R_HPPA_E_PCREL	= 2,
+	R_HPPA_E_CON	= 3,
+	R_HPPA_E_PLABEL	= 7,
+	R_HPPA_E_ABS	= 18
+};
+
+/* for compatibility */
+enum hppa_reloc_expr_type_alt
+{
+	e_one	= R_HPPA_E_ONE,
+	e_two	= R_HPPA_E_TWO,
+	e_pcrel	= R_HPPA_E_PCREL,
+	e_con	= R_HPPA_E_CON,
+	e_plabel = R_HPPA_E_PLABEL,
+	e_abs	= R_HPPA_E_ABS
+};
