@@ -174,6 +174,7 @@ main (argc, argv)
   char **matching;
 
   program_name = argv[0];
+  xmalloc_set_program_name (program_name);
 
   bfd_init ();
 
@@ -300,7 +301,7 @@ main (argc, argv)
   if (! bfd_check_format_matches (inbfd, bfd_object, &matching))
     {
       bfd_nonfatal (input_file);
-      if (bfd_error == file_ambiguously_recognized)
+      if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	{
 	  list_matching_formats (matching);
 	  free (matching);
@@ -710,7 +711,7 @@ main (argc, argv)
 	  || ! bfd_check_format (sharedbfd, bfd_object))
 	{
 	  fprintf (stderr, "%s:%s: %s\n", program_name, sharelib_file,
-		   bfd_errmsg (bfd_error));
+		   bfd_errmsg (bfd_get_error ()));
 	  sharelib_file = NULL;
 	}
       else

@@ -1,3 +1,8 @@
+Thu Feb 17 09:28:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ar.c, bucomm.c, nlmconv.c, nm.c, objcopy.c, objdump.c, 
+	size.c: Use bfd_get_error and bfd_set_error and new error names.
+
 Fri Feb 11 15:54:51 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* objcopy.c (strip_main, copy_main): Add missing 'break' in switch.
