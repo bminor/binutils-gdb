@@ -1,3 +1,12 @@
+2004-04-27  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (xtensa_read_table_entries): Use section _cooked_size
+	if set.  Check reloc_done flag before applying relocations.  Use
+	output addresses, both when applying relocations and when comparing
+	against the specified section.
+	(elf_xtensa_relocate_section): Use output address to check if dynamic
+	reloc is in a literal pool.  Set section's reloc_done flag.
+
 2004-04-21  Philip Blundell  <pb@nexus.co.uk>
 
 	* elf32-arm.h (elf32_arm_check_relocs): Don't output REL32

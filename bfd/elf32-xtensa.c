@@ -497,13 +497,15 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
   int block_count;
   bfd_size_type num_records;
   Elf_Internal_Rela *internal_relocs;
+  bfd_vma section_addr;
 
   table_section_name = 
     xtensa_get_property_section_name (section, sec_name);
   table_section = bfd_get_section_by_name (abfd, table_section_name);
   free (table_section_name);
   if (table_section != NULL)
-    table_size = bfd_get_section_size_before_reloc (table_section);
+    table_size = (table_section->_cooked_size
+		  ? table_section->_cooked_size : table_section->_raw_size);
   
   if (table_size == 0) 
     {
@@ -517,10 +519,12 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
     bfd_malloc (num_records * sizeof (property_table_entry));
   block_count = 0;
   
+  section_addr = section->output_section->vma + section->output_offset;
+
   /* If the file has not yet been relocated, process the relocations
      and sort out the table entries that apply to the specified section.  */
   internal_relocs = retrieve_internal_relocs (abfd, table_section, TRUE);
-  if (internal_relocs)
+  if (internal_relocs && !table_section->reloc_done)
     {
       unsigned i;
 
@@ -539,7 +543,7 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
 	    {
 	      bfd_vma sym_off = get_elf_r_symndx_offset (abfd, r_symndx);
 	      blocks[block_count].address =
-		(section->vma + sym_off + rel->r_addend
+		(section_addr + sym_off + rel->r_addend
 		 + bfd_get_32 (abfd, table_data + rel->r_offset));
 	      blocks[block_count].size =
 		bfd_get_32 (abfd, table_data + rel->r_offset + 4);
@@ -549,16 +553,16 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
     }
   else
     {
-      /* No relocations.  Presumably the file has been relocated
-	 and the addresses are already in the table.  */
+      /* The file has already been relocated and the addresses are
+	 already in the table.  */
       bfd_vma off;
 
       for (off = 0; off < table_size; off += 8) 
 	{
 	  bfd_vma address = bfd_get_32 (abfd, table_data + off);
 
-	  if (address >= section->vma
-	      && address < ( section->vma + section->_raw_size))
+	  if (address >= section_addr
+	      && address < ( section_addr + section->_raw_size))
 	    {
 	      blocks[block_count].address = address;
 	      blocks[block_count].size =
@@ -2044,8 +2048,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		     and not in a literal pool.  */
 		  if ((input_section->flags & SEC_READONLY) != 0
 		      && !elf_xtensa_in_literal_pool (lit_table, ltblsize,
-						      input_section->vma
-						      + rel->r_offset))
+						      outrel.r_offset))
 		    {
 		      error_message =
 			_("dynamic relocation in read-only section");
@@ -2144,6 +2147,8 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 
   if (lit_table)
     free (lit_table);
+
+  input_section->reloc_done = TRUE;
 
   return TRUE;
 }
