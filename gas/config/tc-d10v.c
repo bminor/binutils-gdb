@@ -63,6 +63,9 @@ typedef struct _fixups
 static Fixups FixUps[2];
 static Fixups *fixups;
 
+/* True if instruction swapping warnings should be inhibited.  */
+static unsigned char flag_warn_suppress_instructionswap; /* --nowarnswap */
+
 /* local functions */
 static int reg_name_search PARAMS ((char *name));
 static int register_name PARAMS ((expressionS *expressionP));
@@ -210,8 +213,8 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, "D10V options:\n\
--O                      optimize.  Will do some operations in parallel.\n");
+  fprintf(stream, _("D10V options:\n\
+-O                      optimize.  Will do some operations in parallel.\n"));
 } 
 
 int
@@ -266,7 +269,7 @@ md_atof (type, litP, sizeP)
       break;
     default:
       *sizeP = 0;
-      return "bad call to md_atof";
+      return _("bad call to md_atof");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -471,9 +474,9 @@ get_operands (exp)
 	}
       
       if (exp[numops].X_op == O_illegal) 
-	as_bad ("illegal operand");
+	as_bad (_("illegal operand"));
       else if (exp[numops].X_op == O_absent) 
-	as_bad ("missing operand");
+	as_bad (_("missing operand"));
 
       numops++;
       p = input_line_pointer;
@@ -513,7 +516,7 @@ d10v_insert_operand (insn, op_type, value, left, fix)
 
   /* truncate to the proper number of bits */
   if (check_range (value, bits, d10v_operands[op_type].flags))
-    as_bad_where (fix->fx_file, fix->fx_line, "operand out of range: %d", value);
+    as_bad_where (fix->fx_file, fix->fx_line, _("operand out of range: %d"), value);
 
   value &= 0x7FFFFFFF >> (31 - bits);
   insn |= (value << shift);
@@ -562,7 +565,7 @@ build_insn (opcode, opers, insn)
 	  /* now create a fixup */
 
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
-	    as_fatal ("too many fixups");
+	    as_fatal (_("too many fixups"));
 
 	  if (AT_WORD_P (&opers[i]))
 	    {
@@ -595,7 +598,7 @@ build_insn (opcode, opers, insn)
 
       /* truncate to the proper number of bits */
       if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
-	as_bad("operand out of range: %d",number);
+	as_bad(_("operand out of range: %d"),number);
       number &= 0x7FFFFFFF >> (31 - bits);
       insn = insn | (number << shift);
     }
@@ -656,7 +659,7 @@ write_1_short (opcode, insn, fx)
   int i, where;
 
   if (opcode->exec_type & PARONLY)
-    as_fatal ("Instruction must be executed in parallel with another instruction.");
+    as_fatal (_("Instruction must be executed in parallel with another instruction."));
 
   /* the other container needs to be NOP */
   /* according to 4.3.1: for FM=00, sub-instructions performed only
@@ -708,10 +711,10 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
   if ( (exec_type != 1) && ((opcode1->exec_type & PARONLY)
 	                || (opcode2->exec_type & PARONLY)))
-    as_fatal("Instruction must be executed in parallel");
+    as_fatal(_("Instruction must be executed in parallel"));
   
   if ( (opcode1->format & LONG_OPCODE) || (opcode2->format & LONG_OPCODE))
-    as_fatal ("Long instructions may not be combined.");
+    as_fatal (_("Long instructions may not be combined."));
 
   if(opcode1->exec_type & BRANCH_LINK && exec_type == 0)
     {
@@ -751,22 +754,22 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       break;
     case 1:	/* parallel */
       if (opcode1->exec_type & SEQ || opcode2->exec_type & SEQ)
-	as_fatal ("One of these instructions may not be executed in parallel.");
+	as_fatal (_("One of these instructions may not be executed in parallel."));
 
       if (opcode1->unit == IU)
 	{
 	  if (opcode2->unit == IU)
-	    as_fatal ("Two IU instructions may not be executed in parallel");
+	    as_fatal (_("Two IU instructions may not be executed in parallel"));
           if (!flag_warn_suppress_instructionswap)
-	    as_warn ("Swapping instruction order");
+	    as_warn (_("Swapping instruction order"));
  	  insn = FM00 | (insn2 << 15) | insn1;
 	}
       else if (opcode2->unit == MU)
 	{
 	  if (opcode1->unit == MU)
-	    as_fatal ("Two MU instructions may not be executed in parallel");
+	    as_fatal (_("Two MU instructions may not be executed in parallel"));
           if (!flag_warn_suppress_instructionswap)
-	    as_warn ("Swapping instruction order");
+	    as_warn (_("Swapping instruction order"));
 	  insn = FM00 | (insn2 << 15) | insn1;
 	}
       else
@@ -776,19 +779,33 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	}
       break;
     case 2:	/* sequential */
-      if (opcode1->unit == IU)
-	as_fatal ("IU instruction may not be in the left container");
-      insn = FM01 | (insn1 << 15) | insn2;  
+      if (opcode1->unit != IU)
+	insn = FM01 | (insn1 << 15) | insn2;  
+      else if (opcode2->unit == MU || opcode2->unit == EITHER)
+	{
+          if (!flag_warn_suppress_instructionswap)
+	    as_warn (_("Swapping instruction order"));
+	  insn = FM10 | (insn2 << 15) | insn1;  
+	}
+      else
+	as_fatal (_("IU instruction may not be in the left container"));
       fx = fx->next;
       break;
     case 3:	/* reverse sequential */
-      if (opcode2->unit == MU)
-	as_fatal ("MU instruction may not be in the right container");
-      insn = FM10 | (insn1 << 15) | insn2;  
+      if (opcode2->unit != MU)
+	insn = FM10 | (insn1 << 15) | insn2;
+      else if (opcode1->unit == IU || opcode1->unit == EITHER)
+	{
+          if (!flag_warn_suppress_instructionswap)
+	    as_warn (_("Swapping instruction order"));
+	  insn = FM01 | (insn2 << 15) | insn1;  
+	}
+      else
+	as_fatal (_("MU instruction may not be in the right container"));
       fx = fx->next;
       break;
     default:
-      as_fatal("unknown execution type passed to write_2_short()");
+      as_fatal(_("unknown execution type passed to write_2_short()"));
     }
 
   f = frag_more(4);
@@ -1001,7 +1018,7 @@ md_assemble (str)
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode);
 	  if (prev_insn == -1)
-	    as_fatal ("can't find opcode ");
+	    as_fatal (_("can't find opcode "));
 	  fixups = fixups->next;
 	  str = str2 + 2;
 	}
@@ -1015,7 +1032,7 @@ md_assemble (str)
 	  etype = extype;
 	  return;
 	}
-      as_fatal ("can't find opcode ");
+      as_fatal (_("can't find opcode "));
     }
 
   if (etype)
@@ -1028,7 +1045,7 @@ md_assemble (str)
   if (opcode->format & LONG_OPCODE) 
     {
       if (extype) 
-	as_fatal("Unable to mix instructions as specified");
+	as_fatal(_("Unable to mix instructions as specified"));
       d10v_cleanup();
       write_long (opcode, insn, fixups);
       prev_opcode = NULL;
@@ -1046,7 +1063,7 @@ md_assemble (str)
   else
     {
       if (extype) 
-	as_fatal("Unable to mix instructions as specified");
+	as_fatal(_("Unable to mix instructions as specified"));
       /* save off last instruction so it may be packed on next pass */
       prev_opcode = opcode;
       prev_insn = insn;
@@ -1094,7 +1111,7 @@ do_assemble (str, opcode)
   /* find the first opcode with the proper name */
   *opcode = (struct d10v_opcode *)hash_find (d10v_hash, name);
   if (*opcode == NULL)
-      as_fatal ("unknown opcode: %s",name);
+      as_fatal (_("unknown opcode: %s"),name);
 
   save = input_line_pointer;
   input_line_pointer = op_end;
@@ -1152,7 +1169,7 @@ find_opcode (opcode, myops)
 		  & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
 		     | OPERAND_FFLAG | OPERAND_CFLAG | OPERAND_CONTROL)))
 	    {
-	      as_bad ("bad opcode or operands");
+	      as_bad (_("bad opcode or operands"));
 	      return 0;
 	    }
 	}
@@ -1201,7 +1218,7 @@ find_opcode (opcode, myops)
 		}
 	      next_opcode++;
 	    }
-	  as_fatal ("value out of range");
+	  as_fatal (_("value out of range"));
 	}
       else
 	{
@@ -1270,7 +1287,7 @@ find_opcode (opcode, myops)
 
   if (!match)  
     {
-      as_bad ("bad opcode or operands");
+      as_bad (_("bad opcode or operands"));
       return (0);
     }
 
@@ -1281,7 +1298,7 @@ find_opcode (opcode, myops)
     {
       if ((d10v_operands[opcode->operands[i]].flags & OPERAND_EVEN) &&
 	  (myops[i].X_add_number & 1)) 
-	as_fatal("Register number must be EVEN");
+	as_fatal(_("Register number must be EVEN"));
       if (myops[i].X_op == O_register)
 	{
 	  if (!(d10v_operands[opcode->operands[i]].flags & OPERAND_REG)) 
@@ -1312,7 +1329,7 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format", (int)fixp->fx_r_type);
+                    _("reloc %d not supported by object file format"), (int)fixp->fx_r_type);
       return NULL;
     }
   reloc->addend = fixp->fx_addnumber;
@@ -1369,7 +1386,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    {
 	      /* We don't actually support subtracting a symbol.  */
  	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    "expression too complex");
+			    _("expression too complex"));
 	    }
 	}
     }
@@ -1421,7 +1438,7 @@ md_apply_fix3 (fixp, valuep, seg)
       bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       break;
     default:
-      as_fatal ("line %d: unknown relocation type: 0x%x",fixp->fx_line,fixp->fx_r_type);
+      as_fatal (_("line %d: unknown relocation type: 0x%x"),fixp->fx_line,fixp->fx_r_type);
     }
   return 0;
 }
