@@ -1,5 +1,7 @@
 Fri Jun 17 11:01:04 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c: Misc trivial changes to make gcc -Wall happy.
+
 	* config/tc-hppa.h (elf_hppa_final_processing): Declare.
 
 Wed Jun 15 20:44:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
