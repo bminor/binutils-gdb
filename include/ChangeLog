@@ -1,3 +1,8 @@
+Tue Dec 22 22:42:46 1992  Fred Fish  (fnf@cygnus.com)
+
+	* demangle.h:  Protect file from multiple inclusions with
+	#if !defined(DEMANGLE_H)...#define DEMANGLE_H...#endif.
+
 Mon Dec 21 21:25:50 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* bfd.h:  Update to get hppa_core_struct from bfd.c.
