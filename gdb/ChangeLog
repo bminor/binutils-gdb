@@ -1,3 +1,8 @@
+Sun Jan 31 13:18:33 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From J.T. Conklin <jtc@redbacknetworks.com>:
+	* remote.c (remote_query): Fix tipo.
+
 Fri Jan 29 15:25:09 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.tgt (v850): Add wildcard to match.

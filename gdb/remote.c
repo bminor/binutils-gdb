@@ -3033,7 +3033,7 @@ remote_query (query_type, buf, outbuf, bufsiz)
   *p2 = buf[i];
 
   if ( buf[i] )
-    error ("query larger than avaiable buffer");
+    error ("query larger than available buffer");
 
   i = putpkt (buf2);
   if ( i < 0 ) return i;
