@@ -4886,6 +4886,103 @@ static struct bfd_elf_special_section const elfNN_ia64_special_sections[]=
 };
 
 static bfd_boolean
+elfNN_ia64_object_p (bfd *abfd)
+{
+  asection *sec;
+  asection **tail;
+  asection *group, *unwi, *unw;
+  flagword flags;
+  const char *name;
+  char *unwi_name, *unw_name;
+  bfd_size_type amt;
+
+  if (abfd->flags & DYNAMIC)
+    return TRUE;
+
+  /* Flags for fake group section.  */
+  flags = (SEC_LINKER_CREATED | SEC_GROUP | SEC_LINK_ONCE
+	   | SEC_EXCLUDE);
+
+  /* We add a fake section group for each .gnu.linkonce.t.* section,
+     which isn't in a section group, and its unwind sections.  */
+  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+    {
+      if (elf_sec_group (sec) == NULL
+	  && ((sec->flags & (SEC_LINK_ONCE | SEC_CODE | SEC_GROUP))
+	      == (SEC_LINK_ONCE | SEC_CODE))
+	  && strncmp (sec->name, ".gnu.linkonce.t.", 16) == 0)
+	{
+	  name = sec->name + 16;
+
+	  amt = strlen (name) + sizeof (".gnu.linkonce.ia64unwi.");
+	  unwi_name = bfd_alloc (abfd, amt);
+	  if (!unwi_name)
+	    return FALSE;
+
+	  strcpy (stpcpy (unwi_name, ".gnu.linkonce.ia64unwi."), name);
+	  unwi = bfd_get_section_by_name (abfd, unwi_name);
+
+	  amt = strlen (name) + sizeof (".gnu.linkonce.ia64unw.");
+	  unw_name = bfd_alloc (abfd, amt);
+	  if (!unw_name)
+	    return FALSE;
+
+	  strcpy (stpcpy (unw_name, ".gnu.linkonce.ia64unw."), name);
+	  unw = bfd_get_section_by_name (abfd, unw_name);
+
+	  tail = abfd->section_tail;
+
+	  /* We need to create a fake group section for it and its
+	     unwind sections.  */
+	  group = bfd_make_section_anyway (abfd, name);
+	  if (group == NULL
+	      || ! bfd_set_section_flags (abfd, group, flags))
+	    return FALSE;
+
+	  /* Move the fake group section to the beginning.  */
+	  BFD_ASSERT (*tail == group);
+	  bfd_section_list_remove (abfd, tail);
+	  bfd_section_list_insert (abfd, &abfd->sections, group);
+
+	  elf_next_in_group (group) = sec;
+
+	  elf_group_name (sec) = name;
+	  elf_next_in_group (sec) = sec;
+	  elf_sec_group (sec) = group;
+
+	  if (unwi)
+	    {
+	      elf_group_name (unwi) = name;
+	      elf_next_in_group (unwi) = sec;
+	      elf_next_in_group (sec) = unwi;
+	      elf_sec_group (unwi) = group;
+	    }
+
+	   if (unw)
+	     {
+	       elf_group_name (unw) = name;
+	       if (unwi)
+		 {
+		   elf_next_in_group (unw) = elf_next_in_group (unwi);
+		   elf_next_in_group (unwi) = unw;
+		 }
+	       else
+		 {
+		   elf_next_in_group (unw) = sec;
+		   elf_next_in_group (sec) = unw;
+		 }
+	       elf_sec_group (unw) = group;
+	     }
+
+	   /* Fake SHT_GROUP section header.  */
+	  elf_section_data (group)->this_hdr.bfd_section = group;
+	  elf_section_data (group)->this_hdr.sh_type = SHT_GROUP;
+	}
+    }
+  return TRUE;
+}
+
+static bfd_boolean
 elfNN_ia64_hpux_vec (const bfd_target *vec)
 {
   extern const bfd_target bfd_elfNN_ia64_hpux_big_vec;
@@ -4967,6 +5064,9 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 	elfNN_ia64_is_local_label_name
 #define bfd_elfNN_bfd_relax_section \
 	elfNN_ia64_relax_section
+
+#define elf_backend_object_p \
+	elfNN_ia64_object_p
 
 /* Stuff for the BFD linker: */
 #define bfd_elfNN_bfd_link_hash_table_create \

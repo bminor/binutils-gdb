@@ -3460,7 +3460,7 @@ static char *special_linkonce_name[] =
   };
 
 static void
-start_unwind_section (const segT text_seg, int sec_index, int linkonce_empty)
+start_unwind_section (const segT text_seg, int sec_index)
 {
   /*
     Use a slightly ugly scheme to derive the unwind section names from
@@ -3522,8 +3522,6 @@ start_unwind_section (const segT text_seg, int sec_index, int linkonce_empty)
       prefix = special_linkonce_name [sec_index - SPECIAL_SECTION_UNWIND];
       suffix += sizeof (".gnu.linkonce.t.") - 1;
     }
-  else if (linkonce_empty)
-    return;
 
   prefix_len = strlen (prefix);
   suffix_len = strlen (suffix);
@@ -3611,7 +3609,7 @@ generate_unwind_image (const segT text_seg)
       expressionS exp;
       bfd_reloc_code_real_type reloc;
 
-      start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO, 0);
+      start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO);
 
       /* Make sure the section has 4 byte alignment for ILP32 and
 	 8 byte alignment for LP64.  */
@@ -3652,8 +3650,6 @@ generate_unwind_image (const segT text_seg)
 	  unwind.personality_routine = 0;
 	}
     }
-  else
-    start_unwind_section (text_seg, SPECIAL_SECTION_UNWIND_INFO, 1);
 
   free_saved_prologue_counts ();
   unwind.list = unwind.tail = unwind.current_entry = NULL;
@@ -4426,7 +4422,7 @@ dot_endp (dummy)
       subseg_set (md.last_text_seg, 0);
       proc_end = expr_build_dot ();
 
-      start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND, 0);
+      start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND);
 
       /* Make sure that section has 4 byte alignment for ILP32 and
          8 byte alignment for LP64.  */
@@ -4466,9 +4462,6 @@ dot_endp (dummy)
 			    bytes_per_address);
 
     }
-  else
-    start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND, 1);
-
   subseg_set (saved_seg, saved_subseg);
 
   if (unwind.proc_start)

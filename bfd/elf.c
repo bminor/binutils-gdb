@@ -2728,7 +2728,7 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
    in here too, while we're at it.  */
 
 static bfd_boolean
-assign_section_numbers (bfd *abfd)
+assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 {
   struct elf_obj_tdata *t = elf_tdata (abfd);
   asection *sec;
@@ -2741,16 +2741,35 @@ assign_section_numbers (bfd *abfd)
 
   _bfd_elf_strtab_clear_all_refs (elf_shstrtab (abfd));
 
-  /* Put SHT_GROUP sections first.  */
-  for (sec = abfd->sections; sec; sec = sec->next)
+  /* SHT_GROUP sections are in relocatable files only.  */
+  if (link_info == NULL || link_info->relocatable)
     {
-      d = elf_section_data (sec);
+      asection **secp;
 
-      if (d->this_hdr.sh_type == SHT_GROUP)
+      /* Put SHT_GROUP sections first.  */
+      secp = &abfd->sections;
+      while (*secp)
 	{
-	  if (section_number == SHN_LORESERVE)
-	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	  d->this_idx = section_number++;
+	  d = elf_section_data (*secp);
+
+	  if (d->this_hdr.sh_type == SHT_GROUP)
+	    { 
+	      if ((*secp)->flags & SEC_LINKER_CREATED)
+		{
+		  /* Remove the linker created SHT_GROUP sections.  */
+		  bfd_section_list_remove (abfd, secp);
+		  abfd->section_count--;
+		  continue;
+		}
+	      else 
+		{
+		  if (section_number == SHN_LORESERVE)
+		    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
+		  d->this_idx = section_number++;
+		}
+	    }
+
+	  secp = &(*secp)->next;
 	}
     }
 
@@ -3277,7 +3296,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   if (failed)
     return FALSE;
 
-  if (!assign_section_numbers (abfd))
+  if (!assign_section_numbers (abfd, link_info))
     return FALSE;
 
   /* The backend linker builds symbol table information itself.  */

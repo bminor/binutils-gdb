@@ -2,6 +2,14 @@
 
 	* elf.c (bfd_elf_set_group_contents): Ignore linker created
 	group section. 
+	(assign_section_numbers): Accept link_info. Check SHT_GROUP
+	sections for relocatable files only. Remove the linker created
+	group sections.
+	(_bfd_elf_compute_section_file_positions): Pass link_info to
+	assign_section_numbers.
+
+	* elfxx-ia64.c (elfNN_ia64_object_p): New.
+	(elf_backend_object_p): Defined.
 
 2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
