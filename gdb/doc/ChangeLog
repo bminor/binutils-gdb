@@ -1,3 +1,9 @@
+Thu Jan 14 17:10:12 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (GDBvn.texi): Fix match expression to work with
+	current format of VERSION in gdb/Makefile.in.
+	* gdb.texinfo: Fix node ref to match new readline.
+
 Wed Jan 13 10:38:40 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 
 	* gdb.texinfo: Changes made as part of a project to merge in 
@@ -9,7 +15,6 @@ Wed Jan 13 10:38:40 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 	  some HPUX specific limitations for shared library support.
 	  
 	  There are also a number of @node changes.
-	
 
 1999-01-12  Jason Molenda  (jsm@bugshack.cygnus.com)
 

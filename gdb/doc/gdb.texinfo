@@ -218,7 +218,7 @@ Free Software Foundation, Inc.
 @end ifclear
 
 * Command Line Editing::        Command Line Editing
-* Using History::               Using History Interactively
+* Using History Interactively:: Using History Interactively
 * Installing GDB::              Installing GDB
 * Index::                       Index
 
@@ -10260,7 +10260,7 @@ make gdb.dvi
 @end example
 @end ifclear
 
-@node Installing GDB, Index, Using History, Top
+@node Installing GDB, Index, Using History Interactively, Top
 @appendix Installing @value{GDBN}
 @cindex configuring @value{GDBN}
 @cindex installation
