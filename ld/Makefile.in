@@ -144,6 +144,7 @@ ldm88k.o: ./mkscript ldm88k.x ldm88k.xr ldm88k.xu
 # The .c files for these are (for now) specially written (not ldtemplete).
 ldgld960.o: ./mkscript ldgld960.x
 ldlnk960.o: ./mkscript ldlnk960.x ldlnk960.xr
+h8300hds.o: ./mkscript h8300hds.x
 
 
 #$(BFDLIB): $(BFDSOURCES)
@@ -181,6 +182,7 @@ ldgram.c:ldgram.y
 ldgld68k.x :ldgld68k.sc 
 ldgld68kUr.x :ldgld68kUr.sc 
 ldgld68kr.x :ldgld68kr.sc 
+h8300hds.x:h8300hds.sc
 ldgld.x :ldgld.sc 
 ldgldUr.x :ldgldUr.sc 
 ldgldr.x :ldgldr.sc 
