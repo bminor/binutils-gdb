@@ -20,6 +20,8 @@ Tue Jul 22 17:19:45 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE
 	(bfd_target_vector): Add go32stubbedcoff_vec.
 	* configure.in (go32coff_vec): New target vector.
 	(go32stubbedcoff_vec): Likewise.
+	* config.bfd (i[3456]86-*-msdosdjgpp*): New target.
+	(i[3456]86-*-go32*): Change to be like new msdosdjgpp*.
 	* Makefile.in: Rebuild dependencies.
  	(BFD32_BACKENDS): Add coff-stubgo32.o.
 	(BFD32_BACKENDS_CFILES): Add coff-stubgo32.c.
