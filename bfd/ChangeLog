@@ -1,3 +1,8 @@
+1999-01-28  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c (fr30_reloc_map): Add R_FR30_GNU_VTINHERIT and
+	R_FR30_GNU_VTENTRY relocs.
+
 Thu Jan 28 11:08:16 1999  Catherine Moore  <clm@cygnus.com>
 
        * elflink.h (elf_link_output_sym):  Zero syms which are

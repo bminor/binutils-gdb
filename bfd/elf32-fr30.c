@@ -203,6 +203,36 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 0x0000,		/* src_mask */
 	 0x07ff,		/* dst_mask */
 	 false),		/* pcrel_offset */
+  /* GNU extension to record C++ vtable hierarchy */
+  HOWTO (R_FR30_GNU_VTINHERIT, /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont, /* complain_on_overflow */
+         NULL,                  /* special_function */
+         "R_FR30_GNU_VTINHERIT", /* name */
+         false,                 /* partial_inplace */
+         0,                     /* src_mask */
+         0,                     /* dst_mask */
+         false),                /* pcrel_offset */
+
+  /* GNU extension to record C++ vtable member usage */
+  HOWTO (R_FR30_GNU_VTENTRY,     /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont, /* complain_on_overflow */
+         _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
+         "R_FR30_GNU_VTENTRY",   /* name */
+         false,                 /* partial_inplace */
+         0,                     /* src_mask */
+         0,                     /* dst_mask */
+         false),                /* pcrel_offset */
+ 
 };
 
 /* Utility to actually perform an R_FR30_20 reloc.  */
@@ -313,6 +343,8 @@ static const struct fr30_reloc_map fr30_reloc_map [] =
   { BFD_RELOC_FR30_10_IN_8,   R_FR30_10_IN_8 },
   { BFD_RELOC_FR30_9_PCREL,   R_FR30_9_PCREL },
   { BFD_RELOC_FR30_12_PCREL,  R_FR30_12_PCREL },
+  { BFD_RELOC_VTABLE_INHERIT, R_FR30_GNU_VTINHERIT },
+  { BFD_RELOC_VTABLE_ENTRY,   R_FR30_GNU_VTENTRY },
 };
 
 static reloc_howto_type *
