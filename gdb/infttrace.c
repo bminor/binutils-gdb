@@ -2596,7 +2596,7 @@ count_unhandled_events (int real_pid, lwpid_t real_tid)
  *
  * Note: used by core gdb and so uses the pseudo-pid (really tid).
  */
-ptid_t
+int
 ptrace_wait (ptid_t ptid, int *status)
 {
   ttstate_t tsp;
@@ -2621,13 +2621,13 @@ ptrace_wait (ptid_t ptid, int *status)
       if (errno == ESRCH)
 	{
 	  *status = 0;		/* WIFEXITED */
-	  return inferior_ptid;
+	  return PIDGET (inferior_ptid);
 	}
 
       warning ("Call of ttrace_wait returned with errno %d.",
 	       errno);
       *status = ttwait_return;
-      return inferior_ptid;
+      return PIDGET (inferior_ptid);
     }
 
   real_pid = tsp.tts_pid;
@@ -2888,7 +2888,7 @@ ptrace_wait (ptid_t ptid, int *status)
       *status = _SIGTRAP;
     }
 
-  target_post_wait (tsp.tts_pid, *status);
+  target_post_wait (pid_to_ptid (tsp.tts_pid), *status);
 
 
 #ifdef THREAD_DEBUG
@@ -2914,7 +2914,7 @@ ptrace_wait (ptid_t ptid, int *status)
       warning ("Internal error: process-wait failed.");
     }
 
-  return pid_to_ptid (return_pid);
+  return return_pid;
 }
 
 

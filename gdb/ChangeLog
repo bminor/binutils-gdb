@@ -1,5 +1,12 @@
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
+	Fix some PID/TPID fallout for HP/UX.
+	From 2001-07-22 Rodney Brown <rbrown64@csc.com.au>:
+	* infttrace.c (ptrace_wait): Match external declaration,
+	and match target_post_wait declaration.
+
+2001-07-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Add Orjan Friberg as cris target maintainer.
 	(cris): Set --enable-gdb-build-warnings flag to -w.
 
