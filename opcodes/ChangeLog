@@ -1,3 +1,8 @@
+2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c (print_indexed_operand): Fix PC-relative address
+	for 9 and 16-bit PC-relative addressing mode.
+
 2002-12-05  Aldy Hernandez  <aldyh@redhat.com>
 
 	* ppc-opc.c: Delete evsabs, evsnabs, evsneg, evsadd, evssub,

@@ -183,6 +183,7 @@ print_indexed_operand (memaddr, info, indirect, mov_insn, pc_offset, endaddr)
 	  sval = ((buffer[1] << 8) | (buffer[2] & 0x0FF));
 	  sval &= 0x0FFFF;
 	  pos += 2;
+          endaddr += 2;
 	}
       else
 	{
@@ -190,6 +191,7 @@ print_indexed_operand (memaddr, info, indirect, mov_insn, pc_offset, endaddr)
 	  if (buffer[0] & 0x01)
 	    sval |= 0xff00;
 	  pos++;
+          endaddr++;
 	}
       (*info->fprintf_func) (info->stream, "%d,%s",
 			     (int) sval, reg_name[reg]);
