@@ -1,3 +1,9 @@
+2004-08-31  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/sigstep.exp (breakpoint_to_handler_entry)
+	(skip_to_handler_entry): New procedures.  Test stepping into a
+	handler when the breakpoint is at the handler's entry point.
+
 2004-08-30  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/sigstep.exp (breakpoint_over_handler): Remove kfail
