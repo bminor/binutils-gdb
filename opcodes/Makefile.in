@@ -378,7 +378,7 @@ CPUDIR = $(CGENDIR)/cpu
 CGEN = `if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi`
 CGENFLAGS = -v
 
-CGENDEPS = ../cgen/stamp-cgen \
+CGENDEPS = \
 	$(CGENDIR)/desc.scm $(CGENDIR)/desc-cpu.scm \
 	$(CGENDIR)/opcodes.scm $(CGENDIR)/opc-asmdis.scm \
 	$(CGENDIR)/opc-ibld.scm $(CGENDIR)/opc-itab.scm \
