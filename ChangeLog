@@ -1,8 +1,6 @@
-Mon Feb 26 15:25:19 1996  Doug Evans  <dje@charmed.cygnus.com>
+Tue Feb 27 14:31:51 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
-	* config.sub (sparc*frw*): Delete.  Use -mflat now.
-
-	* configure.in (sparc64-*): Use mh-sparcpic if --enabled-shared.
+	* configure.in (m68k-*-linux*): New host.
 
 Mon Feb 26 14:32:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
