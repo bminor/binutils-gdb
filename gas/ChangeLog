@@ -1,5 +1,12 @@
 Tue Feb  8 16:00:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/tc-alpha.c (GP_ADJUSTMENT): Move definition to start of
+	file.
+	(tc_gen_reloc): Remove uninitialized variable `code', and code
+	that tried to use it (incorrectly).  For LITERAL reloc, set addend
+	to negative of GP value.
+	(load_symbol_address): Don't adjust return value by GP_ADJUSTMENT.
+
 	* write.c (write_relocs): Print some sensible error message if
 	bfd_perform_relocation returns bfd_reloc_overflow.
 
