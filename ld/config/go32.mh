@@ -1,0 +1,4 @@
+CC_FOR_BUILD=gcc
+CC=i386-go32-gcc -O2 -fno-omit-frame-pointer -Xlinker -S
+
+
