@@ -1607,6 +1607,12 @@ it should use the @samp{START_RELOC_NUMBERS}, @samp{RELOC_NUMBER},
 macros to create a table mapping the number used to indentify a
 relocation to a name describing that relocation.
 
+While not a BFD component, you probably also want to make the binutils
+program @samp{readelf} parse your ELF objects.  For this, you need to add
+a dependency for @file{readelf.o} on @file{include/elf/@var{cpu}.h} in
+@file{binutils/Makefile.am}, and code for @code{EM_@var{cpu}} as
+appropriate in @file{binutils/readelf.c}.
+
 @node BFD ELF processor linker
 @subsubsection Processor specific linker support
 

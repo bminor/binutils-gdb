@@ -1,3 +1,8 @@
+Wed May 24 12:03:25 2000  Hans-Peter Nilsson  <hp@axis.com>
+
+	* bfdint.texi (BFD ELF processor required): Add paragraph about
+	target necessities for readelf.
+
 2000-04-30  Ben Elliston  <bje@redhat.com>
 
 	* bfdint.texi (BFD generated files): Fix another typo.
