@@ -43,8 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef savestring
 
 #include <sys/types.h>
-#ifdef USG
-/* What is this for?  X_OK?  */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

@@ -1,3 +1,24 @@
+Mon Jul 31 14:32:30 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in: Check for unistd.h.
+	* configure: Regenerated.
+
+	* command.c, cp-valprint.c, fork-child.c, i386-tdep.c,
+	i386b-nat.c, inflow.c, main.c, maint.c, objfiles.c, solib.c,
+	source.c, stack.c, symfile.c, top.c, utils.c: Include strings.h
+	and/or unistd.h to bring prototypes into scope.
+
+Sun Jul 30 01:40:11 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-tdep.c (frame_saved_pc):  Check for signal handler caller
+	before trying to determine the start of the function.
+	(skip_prologue):  Skip subroutine call which might save the
+	floating point registers only if it is within the first three
+	instructions.
+	Reinstate setting of alloca_reg if setup of a gcc frame pointer
+	is found.
+	(frame_get_cache_fsr):  Use new fields in rs6000_framedata.
+
 Sat Jul 29 14:43:35 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* sparclite: Removed subdirectory.  aload and eload are now in

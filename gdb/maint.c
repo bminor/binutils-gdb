@@ -33,6 +33,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h" /* For language.h */
 #include "language.h"
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 static void maintenance_command PARAMS ((char *, int));
 
 static void maintenance_dump_me PARAMS ((char *, int));

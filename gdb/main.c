@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -32,8 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 
 #include <string.h>
-/* R_OK lives in either unistd.h or sys/file.h.  */
-#ifdef USG
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifndef	NO_SYS_FILE
@@ -104,15 +103,13 @@ main (argc, argv)
 
   long time_at_startup = get_run_time ();
 
-/* start-sanitize-mpw */
+  START_PROGRESS (argv[0], 0);
+
 #ifdef MPW
-  /* Drop into MacsBug, but only if the executable is specially named. */
-  if (strcmp(argv[0], "DEBUGGDB") == 0)
-    DebugStr("\pat start of GDB main");
   /* Do all Mac-specific setup. */
   mac_init ();
 #endif /* MPW */
-/* end-sanitize-mpw */
+
   /* This needs to happen before the first use of malloc.  */
   init_malloc ((PTR) NULL);
 
@@ -143,6 +140,7 @@ main (argc, argv)
   current_directory = gdb_dirbuf;
 
   /* Parse arguments and options.  */
+#ifndef WIN32
   {
     int c;
     /* When var field is 0, use flag field to record the equivalent
@@ -233,6 +231,8 @@ main (argc, argv)
 	    break;
 	  case 'f':
 	    annotation_level = 1;
+/* We have probably been invoked from emacs.  Disable window interface.  */
+	    use_windows = 0;
 	    break;
 	  case 's':
 	    symarg = optarg;
@@ -319,6 +319,7 @@ main (argc, argv)
       quiet = 1;
   }
 
+#endif
   gdb_init ();
 
   /* Do these (and anything which might call wrap_here or *_filtered)
@@ -344,12 +345,6 @@ main (argc, argv)
 
       /* But don't use *_filtered here.  We don't want to prompt for continue
 	 no matter how small the screen or how much we're going to print.  */
-/* start-sanitize-mpw */
-/* For reasons too ugly to describe... */
-#ifdef MPW_C
-      fputs_unfiltered ("This is the GNU debugger.\n", gdb_stdout);
-#else
-/* end-sanitize-mpw */
       fputs_unfiltered ("\
 This is the GNU debugger.  Usage:\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
@@ -358,24 +353,27 @@ Options:\n\
   --quiet            Do not print version number on startup.\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --epoch            Output information used by epoch emacs-GDB interface.\n\
+", gdb_stdout);
+      fputs_unfiltered ("\
   --batch            Exit after processing options.\n\
   --nx               Do not read .gdbinit file.\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
   --cd=DIR           Change current directory to DIR.\n\
   --directory=DIR    Search for source files in DIR.\n\
+", gdb_stdout);
+      fputs_unfiltered ("\
   --command=FILE     Execute GDB commands from FILE.\n\
   --symbols=SYMFILE  Read symbols from SYMFILE.\n\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
   --se=FILE          Use FILE as symbol file and executable file.\n\
+", gdb_stdout);
+      fputs_unfiltered ("\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --readnow          Fully read symbol files on first access.\n\
   --nw		     Do not use a window interface.\n\
 ", gdb_stdout);
-/* start-sanitize-mpw */
-#endif /* MPW_C */
-/* end-sanitize-mpw */
 #ifdef ADDITIONAL_OPTION_HELP
       fputs_unfiltered (ADDITIONAL_OPTION_HELP, gdb_stdout);
 #endif
@@ -398,6 +396,8 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
     }
 
   error_pre_print = "\n\n";
+  quit_pre_print = error_pre_print;
+
   /* We may get more than one warning, don't double space all of them... */
   warning_pre_print = "\nwarning: ";
 
@@ -478,6 +478,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   if (!quiet)
     printf_filtered ("\n");
   error_pre_print = "\n";
+  quit_pre_print = error_pre_print;
   warning_pre_print = "\nwarning: ";
 
   if (corearg != NULL)
@@ -497,7 +498,8 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
 #endif
 
   /* Error messages should no longer be distinguished with extra output. */
-  error_pre_print = 0;
+  error_pre_print = NULL;
+  quit_pre_print = NULL;
   warning_pre_print = "warning: ";
 
   /* Read the .gdbinit file in the current directory, *if* it isn't
@@ -541,6 +543,8 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
   BEFORE_MAIN_LOOP_HOOK;
 #endif
 
+  END_PROGRESS (argv[0]);
+
   /* Show time and/or space usage.  */
 
   if (display_time)
@@ -560,8 +564,10 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
 			 (long) (lim - (char *) &environ));
     }
 
-  /* The command loop.  */
-
+  /* The default command loop. 
+     The WIN32 Gui calls this main to set up gdb's state, and 
+     has its own command loop. */
+#if !defined (WIN32)
   while (1)
     {
       if (!SET_TOP_LEVEL ())
@@ -577,7 +583,10 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
           quit_command ((char *)0, instream == stdin);
 	}
     }
+
   /* No exit -- exit is through quit_command.  */
+#endif
+
 }
 
 void

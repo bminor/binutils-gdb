@@ -1,5 +1,6 @@
 /* Handle SunOS and SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995
+   Free Software Foundation, Inc.
    
 This file is part of GDB.
 
@@ -23,19 +24,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #include <signal.h>
 #include <string.h>
-#include <link.h>
 #include <sys/param.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #ifndef SVR4_SHARED_LIBS
  /* SunOS shared libs need the nlist structure.  */
 #include <a.out.h> 
 #else
-#include "libelf.h"
-#ifndef DT_MIPS_RLD_MAP
-#include "elf/mips.h"
+#include "elf/external.h"
 #endif
-#endif
+
+#include <link.h>
 
 #include "symtab.h"
 #include "bfd.h"
@@ -48,6 +48,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "regex.h"
 #include "inferior.h"
 #include "language.h"
+#include "gdbcmd.h"
 
 #define MAX_PATH_SIZE 256		/* FIXME: Should be dynamic */
 
@@ -79,11 +80,28 @@ static char *bkpt_names[] = {
 #ifndef SVR4_SHARED_LIBS
 static char *debug_base_symbols[] = {
   "_DYNAMIC",
+  "_DYNAMIC__MGC",
   NULL
 };
 #endif
 
+static char *main_name_list[] = {
+  "main_$main",
+  NULL
+};
+
 /* local data declarations */
+
+/* If true, then shared library symbols will be added automatically
+   when the inferior is created.  This is almost always what users
+   will want to have happen; but for very large programs, the startup
+   time will be excessive, and so if this is a problem, the user can
+   clear this flag and then add the shared library symbols as needed.
+   Note that there is a potential for confusion, since if the shared
+   library symbols are not loaded, commands like "info fun" will *not*
+   report all the functions that are actually present.  */
+   
+int auto_solib_add_at_startup = 1;
 
 #ifndef SVR4_SHARED_LIBS
 
@@ -172,7 +190,10 @@ elf_locate_base PARAMS ((void));
 #else
 
 static void
-solib_add_common_symbols PARAMS ((struct rtc_symb *, struct objfile *));
+allocate_rt_common_objfile PARAMS ((void));
+
+static void
+solib_add_common_symbols PARAMS ((struct rtc_symb *));
 
 #endif
 
@@ -270,32 +291,67 @@ solib_map_sections (so)
   do_cleanups (old_chain);
 }
 
-/* Read all dynamically loaded common symbol definitions from the inferior
-   and add them to the minimal symbol table for the shared library objfile.  */
-
 #ifndef SVR4_SHARED_LIBS
 
-/* In GDB 4.9 this routine was a real performance hog.  According to
-   some gprof data which mtranle@paris.IntelliCorp.COM (Minh Tran-Le)
-   sent, almost all the time spend in solib_add (up to 20 minutes with
-   35 shared libraries) was spent here, with 5/6 in
-   lookup_minimal_symbol and 1/6 in read_memory.
-
-   To fix this, we moved the call to special_symbol_handling out of the
-   loop in solib_add, so this only gets called once, rather than once
-   for every shared library, and also removed the call to lookup_minimal_symbol
-   in this routine.  */
+/* Allocate the runtime common object file.  */
 
 static void
-solib_add_common_symbols (rtc_symp, objfile)
+allocate_rt_common_objfile ()
+{
+  struct objfile *objfile;
+  struct objfile *last_one;
+
+  objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
+  memset (objfile, 0, sizeof (struct objfile));
+  objfile -> md = NULL;
+  obstack_specify_allocation (&objfile -> psymbol_obstack, 0, 0, xmalloc,
+			      free);
+  obstack_specify_allocation (&objfile -> symbol_obstack, 0, 0, xmalloc,
+			      free);
+  obstack_specify_allocation (&objfile -> type_obstack, 0, 0, xmalloc,
+			      free);
+  objfile -> name = mstrsave (objfile -> md, "rt_common");
+
+  /* Add this file onto the tail of the linked list of other such files. */
+
+  objfile -> next = NULL;
+  if (object_files == NULL)
+    object_files = objfile;
+  else
+    {
+      for (last_one = object_files;
+	   last_one -> next;
+	   last_one = last_one -> next);
+      last_one -> next = objfile;
+    }
+
+  rt_common_objfile = objfile;
+}
+
+/* Read all dynamically loaded common symbol definitions from the inferior
+   and put them into the minimal symbol table for the runtime common
+   objfile.  */
+
+static void
+solib_add_common_symbols (rtc_symp)
     struct rtc_symb *rtc_symp;
-    struct objfile *objfile;
 {
   struct rtc_symb inferior_rtc_symb;
   struct nlist inferior_rtc_nlist;
   int len;
   char *name;
   char *origname;
+
+  /* Remove any runtime common symbols from previous runs.  */
+
+  if (rt_common_objfile != NULL && rt_common_objfile -> minimal_symbol_count)
+    {
+      obstack_free (&rt_common_objfile -> symbol_obstack, 0);
+      obstack_specify_allocation (&rt_common_objfile -> symbol_obstack, 0, 0,
+				  xmalloc, free);
+      rt_common_objfile -> minimal_symbol_count = 0;
+      rt_common_objfile -> msymbols = NULL;
+    }
 
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
@@ -318,38 +374,23 @@ solib_add_common_symbols (rtc_symp, objfile)
 	  origname = name = xmalloc (len);
 	  read_memory ((CORE_ADDR) inferior_rtc_nlist.n_un.n_name, name, len);
 
-	  /* Don't enter the symbol twice if the target is re-run. */
+	  /* Allocate the runtime common objfile if necessary. */
+	  if (rt_common_objfile == NULL)
+	    allocate_rt_common_objfile ();
 
-	  if (name[0] == bfd_get_symbol_leading_char (objfile->obfd))
-	    {
-	      name++;
-	    }
-
-#if 0
-	  /* I think this is unnecessary, GDB can probably deal with
-	     duplicate minimal symbols, more or less.  And the duplication
-	     which used to happen because this was called for each shared
-	     library is gone now that we are just called once.  */
-	  /* FIXME:  Do we really want to exclude symbols which happen
-	     to match symbols for other locations in the inferior's
-	     address space, even when they are in different linkage units? */
-	  if (lookup_minimal_symbol (name, (struct objfile *) NULL) == NULL)
-#endif
-	    {
-	      name = obsavestring (name, strlen (name),
-				   &objfile -> symbol_obstack);
-	      prim_record_minimal_symbol (name, inferior_rtc_nlist.n_value,
-					  mst_bss, objfile);
-	    }
+	  name = obsavestring (name, strlen (name),
+			       &rt_common_objfile -> symbol_obstack);
+	  prim_record_minimal_symbol (name, inferior_rtc_nlist.n_value,
+				      mst_bss, rt_common_objfile);
 	  free (origname);
 	}
       rtc_symp = inferior_rtc_symb.rtc_next;
     }
 
   /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. */
+     minimal symbols for the runtime common objfile.  */
 
-  install_minimal_symbols (objfile);
+  install_minimal_symbols (rt_common_objfile);
 }
 
 #endif	/* SVR4_SHARED_LIBS */
@@ -501,6 +542,8 @@ look_for_base (fd, baseaddr)
     }
   if (!bfd_check_format (interp_bfd, bfd_object))
     {
+      /* FIXME-leak: on failure, might not free all memory associated with
+	 interp_bfd.  */
       bfd_close (interp_bfd);
       return (0);
     }
@@ -518,6 +561,8 @@ look_for_base (fd, baseaddr)
     }
   if (address == 0)
     {
+      /* FIXME-leak: on failure, might not free all memory associated with
+	 interp_bfd.  */
       bfd_close (interp_bfd);
       return (0);
     }
@@ -535,6 +580,8 @@ look_for_base (fd, baseaddr)
       address += baseaddr;
     }
   debug_base = address;
+  /* FIXME-leak: on failure, might not free all memory associated with
+     interp_bfd.  */
   bfd_close (interp_bfd);
   return (1);
 }
@@ -567,20 +614,20 @@ DESCRIPTION
 static CORE_ADDR
 elf_locate_base ()
 {
-  struct elf_internal_shdr *dyninfo_sect;
+  sec_ptr dyninfo_sect;
   int dyninfo_sect_size;
   CORE_ADDR dyninfo_addr;
   char *buf;
   char *bufend;
 
   /* Find the start address of the .dynamic section.  */
-  dyninfo_sect = bfd_elf_find_section (exec_bfd, ".dynamic");
+  dyninfo_sect = bfd_get_section_by_name (exec_bfd, ".dynamic");
   if (dyninfo_sect == NULL)
     return 0;
-  dyninfo_addr = dyninfo_sect->sh_addr;
+  dyninfo_addr = bfd_section_vma (exec_bfd, dyninfo_sect);
 
   /* Read in .dynamic section, silently ignore errors.  */
-  dyninfo_sect_size = dyninfo_sect->sh_size;
+  dyninfo_sect_size = bfd_section_size (exec_bfd, dyninfo_sect);
   buf = alloca (dyninfo_sect_size);
   if (target_read_memory (dyninfo_addr, buf, dyninfo_sect_size))
     return 0;
@@ -606,6 +653,7 @@ elf_locate_base ()
 	  dyn_ptr = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_un.d_ptr);
 	  return dyn_ptr;
 	}
+#ifdef DT_MIPS_RLD_MAP
       else if (dyn_tag == DT_MIPS_RLD_MAP)
 	{
 	  char pbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
@@ -617,6 +665,7 @@ elf_locate_base ()
 	    return 0;
 	  return extract_unsigned_integer (pbuf, sizeof (pbuf));
 	}
+#endif
     }
 
   /* DT_DEBUG entry not found.  */
@@ -678,7 +727,7 @@ locate_base ()
 
   for (symbolp = debug_base_symbols; *symbolp != NULL; symbolp++)
     {
-      msymbol = lookup_minimal_symbol (*symbolp, symfile_objfile);
+      msymbol = lookup_minimal_symbol (*symbolp, NULL, symfile_objfile);
       if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
 	  address = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -887,6 +936,23 @@ symbol_add_stub (arg)
   return (1);
 }
 
+/* This function will check the so name to see if matches the main list.
+   In some system the main object is in the list, which we want to exclude */
+
+static int match_main (soname)
+    char *soname;
+{
+char **mainp;
+
+for (mainp = main_name_list; *mainp != NULL; mainp++)
+  {
+    if (strcmp (soname, *mainp) == 0)
+	return (1);
+  }
+
+return (0);
+}
+
 /*
 
 GLOBAL FUNCTION
@@ -931,7 +997,7 @@ solib_add (arg_string, from_tty, target)
       count = 0;
       while ((so = find_solib (so)) != NULL)
 	{
-	  if (so -> so_name[0])
+	  if (so -> so_name[0] && !match_main (so -> so_name))
 	    {
 	      count += so -> sections_end - so -> sections;
 	    }
@@ -973,7 +1039,8 @@ solib_add (arg_string, from_tty, target)
   /* Now add the symbol files.  */
   while ((so = find_solib (so)) != NULL)
     {
-      if (so -> so_name[0] && re_exec (so -> so_name))
+      if (so -> so_name[0] && re_exec (so -> so_name) && 
+      !match_main (so -> so_name))
 	{
 	  so -> from_tty = from_tty;
 	  if (so -> symbols_loaded)
@@ -998,16 +1065,6 @@ solib_add (arg_string, from_tty, target)
      frameless.  */
   if (so_last)
     reinit_frame_cache ();
-
-  /* Calling this once at the end means that we put all the minimal
-     symbols for commons into the objfile for the last shared library.
-     Since they are in common, this should not be a problem.  If we
-     delete the objfile with the minimal symbols, we can put all the
-     symbols into a new objfile (and will on the next call to solib_add).
-
-     An alternate approach would be to create an objfile just for
-     common minsyms, thus not needing any objfile argument to
-     solib_add_common_symbols.  */
 
   if (so_last)
     special_symbol_handling (so_last);
@@ -1131,7 +1188,9 @@ clear_solib()
       if (so_list_head -> abfd)
 	{
 	  bfd_filename = bfd_get_filename (so_list_head -> abfd);
-	  bfd_close (so_list_head -> abfd);
+	  if (!bfd_close (so_list_head -> abfd))
+	    warning ("cannot close \"%s\": %s",
+		     bfd_filename, bfd_errmsg (bfd_get_error ()));
 	}
       else
 	/* This happens for the executable on SVR4.  */
@@ -1303,7 +1362,7 @@ enable_break ()
   breakpoint_addr = 0;
   for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
     {
-      msymbol = lookup_minimal_symbol (*bkpt_namep, symfile_objfile);
+      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
       if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
 	  bkpt_addr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -1444,7 +1503,8 @@ solib_create_inferior_hook()
       warning ("shared library handler failed to disable breakpoint");
     }
 
-  solib_add ((char *) 0, 0, (struct target_ops *) 0);
+  if (auto_solib_add_at_startup)
+    solib_add ((char *) 0, 0, (struct target_ops *) 0);
 }
 
 /*
@@ -1463,9 +1523,9 @@ DESCRIPTION
 	way, we are called to do any system specific symbol handling that 
 	is needed.
 
-	For Suns, this consists of grunging around in the dynamic linkers
-	structures to find symbol definitions for "common" symbols and 
-	adding them to the minimal symbol table for the corresponding
+	For SunOS4, this consists of grunging around in the dynamic
+	linkers structures to find symbol definitions for "common" symbols
+	and adding them to the minimal symbol table for the runtime common
 	objfile.
 
 */
@@ -1508,7 +1568,7 @@ struct so_list *so;
 
   if (debug_copy.ldd_cp)
     {
-      solib_add_common_symbols (debug_copy.ldd_cp, so -> objfile);
+      solib_add_common_symbols (debug_copy.ldd_cp);
     }
 
 #endif	/* !SVR4_SHARED_LIBS */
@@ -1546,4 +1606,14 @@ _initialize_solib()
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", info_sharedlibrary_command, 
 	    "Status of loaded shared object libraries.");
+
+  add_show_from_set
+    (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
+		  (char *) &auto_solib_add_at_startup,
+		  "Set autoloading of shared library symbols at startup.\n\
+If nonzero, symbols from all shared object libraries will be loaded\n\
+automatically when the inferior begins execution.  Otherwise, symbols\n\
+must be loaded manually, using `sharedlibrary'.",
+		  &setlist),
+     &showlist);
 }

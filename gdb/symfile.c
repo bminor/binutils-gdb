@@ -42,6 +42,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -312,9 +315,14 @@ entry_point_address()
 }
 
 /* Remember the lowest-addressed loadable section we've seen.  
-   This function is called via bfd_map_over_sections.  */
+   This function is called via bfd_map_over_sections. 
 
-#if 0 	/* Not used yet */
+   In case of equal vmas, the section with the largest size becomes the
+   lowest-addressed loadable section.
+
+   If the vmas and sizes are equal, the last section is considered the
+   lowest-addressed loadable section.  */
+
 static void
 find_lowest_section (abfd, sect, obj)
      bfd *abfd;
@@ -327,10 +335,13 @@ find_lowest_section (abfd, sect, obj)
     return;
   if (!*lowest)
     *lowest = sect;		/* First loadable section */
-  else if (bfd_section_vma (abfd, *lowest) >= bfd_section_vma (abfd, sect))
+  else if (bfd_section_vma (abfd, *lowest) > bfd_section_vma (abfd, sect))
     *lowest = sect;		/* A lower loadable section */
+  else if (bfd_section_vma (abfd, *lowest) == bfd_section_vma (abfd, sect)
+	   && (bfd_section_size (abfd, (*lowest))
+	       <= bfd_section_size (abfd, sect)))
+    *lowest = sect;
 }
-#endif 
 
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
@@ -387,8 +398,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   /* Convert addr into an offset rather than an absolute address.
      We find the lowest address of a loaded segment in the objfile,
      and assume that <addr> is where that got loaded.  Due to historical
-     precedent, we warn if that doesn't happen to be the ".text"
-     segment.  */
+     precedent, we warn if that doesn't happen to be a text segment.  */
 
   if (mainline)
     {
@@ -397,18 +407,15 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   else
     {
       lowest_sect = bfd_get_section_by_name (objfile->obfd, ".text");
-#if 0
-      lowest_sect = 0;
-      bfd_map_over_sections (objfile->obfd, find_lowest_section,
-			     (PTR) &lowest_sect);
-#endif
+      if (lowest_sect == NULL)
+	bfd_map_over_sections (objfile->obfd, find_lowest_section,
+			       (PTR) &lowest_sect);
 
-      if (lowest_sect == 0)
+      if (lowest_sect == NULL)
 	warning ("no loadable sections found in added symbol-file %s",
 		 objfile->name);
-      else if (0 == bfd_get_section_name (objfile->obfd, lowest_sect)
-	       || !STREQ (".text",
-			      bfd_get_section_name (objfile->obfd, lowest_sect)))
+      else if ((bfd_get_section_flags (objfile->obfd, lowest_sect) & SEC_CODE)
+	       == 0)
 	/* FIXME-32x64--assumes bfd_vma fits in long.  */
 	warning ("Lowest section in %s is %s at 0x%lx",
 		 objfile->name,
@@ -794,6 +801,9 @@ symfile_bfd_open (name)
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
+      /* FIXME: should be checking for errors from bfd_close (for one thing,
+	 on error it does not free all the storage associated with the
+	 bfd).  */
       bfd_close (sym_bfd);	/* This also closes desc */
       make_cleanup (free, name);
       error ("\"%s\": can't read symbols: %s.", name,
@@ -885,6 +895,9 @@ generic_load (filename, from_tty)
       perror_with_name (filename);
       return;
     }
+  /* FIXME: should be checking for errors from bfd_close (for one thing,
+     on error it does not free all the storage associated with the
+     bfd).  */
   old_cleanups = make_cleanup (bfd_close, loadfile_bfd);
 
   if (!bfd_check_format (loadfile_bfd, bfd_object)) 
@@ -1107,7 +1120,8 @@ reread_symbols ()
 	     BFD without closing the descriptor.  */
 	  obfd_filename = bfd_get_filename (objfile->obfd);
 	  if (!bfd_close (objfile->obfd))
-	    error ("Can't close BFD for %s.", objfile->name);
+	    error ("Can't close BFD for %s: %s", objfile->name,
+		   bfd_errmsg (bfd_get_error ()));
 	  objfile->obfd = bfd_openr (obfd_filename, gnutarget);
 	  if (objfile->obfd == NULL)
 	    error ("Can't open %s to read symbols.", objfile->name);
@@ -1239,7 +1253,7 @@ deduce_language_from_filename (filename)
   else if (STREQ (c, ".c"))
     return language_c;
   else if (STREQ (c, ".cc") || STREQ (c, ".C") || STREQ (c, ".cxx")
-	   || STREQ (c, ".cpp") || STREQ (c, ".cp"))
+	   || STREQ (c, ".cpp") || STREQ (c, ".cp") || STREQ (c, ".c++"))
     return language_cplus;
   else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
     return language_chill;
@@ -1650,6 +1664,39 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
 
 #endif /* !INLINE_ADD_PSYMBOL */
 
+/* Initialize storage for partial symbols.  */
+
+void
+init_psymbol_list (objfile, total_symbols)
+     struct objfile *objfile;
+     int total_symbols;
+{
+  /* Free any previously allocated psymbol lists.  */
+  
+  if (objfile -> global_psymbols.list)
+    {
+      mfree (objfile -> md, (PTR)objfile -> global_psymbols.list);
+    }
+  if (objfile -> static_psymbols.list)
+    {
+      mfree (objfile -> md, (PTR)objfile -> static_psymbols.list);
+    }
+  
+  /* Current best guess is that approximately a twentieth
+     of the total symbols (in a debugging file) are global or static
+     oriented symbols */
+  
+  objfile -> global_psymbols.size = total_symbols / 10;
+  objfile -> static_psymbols.size = total_symbols / 10;
+  objfile -> global_psymbols.next =
+    objfile -> global_psymbols.list = (struct partial_symbol *)
+      xmmalloc (objfile -> md, objfile -> global_psymbols.size
+			     * sizeof (struct partial_symbol));
+  objfile -> static_psymbols.next =
+    objfile -> static_psymbols.list = (struct partial_symbol *)
+      xmmalloc (objfile -> md, objfile -> static_psymbols.size
+			     * sizeof (struct partial_symbol));
+}
 
 void
 _initialize_symfile ()

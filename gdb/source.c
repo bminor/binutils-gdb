@@ -31,16 +31,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "gdbcore.h"
 #include "regex.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"
 #include "gdbtypes.h"
-
-#ifndef DIRNAME_SEPARATOR
-#define DIRNAME_SEPARATOR ':'
-#endif
 
 /* Prototypes for local functions. */
 
@@ -248,7 +247,7 @@ directory_command (dirname, from_tty)
   /* FIXME, this goes to "delete dir"... */
   if (dirname == 0)
     {
-      if (query ("Reinitialize source path to empty? ", ""))
+      if (query ("Reinitialize source path to empty? "))
 	{
 	  free (source_path);
 	  init_source_path ();
@@ -307,7 +306,7 @@ mod_path (dirname, which_path)
 	  }
       }
 
-      if (p[-1] == '/')
+      if (SLASH_P (p[-1]))
 	/* Sigh. "foo/" => "foo" */
 	--p;
       *p = '\0';
@@ -320,7 +319,7 @@ mod_path (dirname, which_path)
 	      name = current_directory;
 	      goto append;
 	    }
-	  else if (p[-2] == '/')
+	  else if (SLASH_P (p[-2]))
 	    {
 	      if (p - name == 2)
 		{
@@ -342,8 +341,8 @@ mod_path (dirname, which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
-      else if (name[0] != '/' && name[0] != '$')
-	name = concat (current_directory, "/", name, NULL);
+      else if (!SLASH_P (name[0]) && name[0] != '$') 
+	  name = concat (current_directory, SLASH_STRING, name, NULL);
       else
 	name = savestring (name, p - name);
       make_cleanup (free, name);
@@ -365,7 +364,7 @@ mod_path (dirname, which_path)
 	    fprintf_unfiltered (gdb_stderr, "Warning: ");
 	    print_sys_errmsg (name, save_errno);
 	  }
-	else if ((st.st_mode & S_IFMT) != S_IFDIR)
+	else if (!S_ISDIR(st.st_mode))
 	  warning ("%s is not a directory.", name);
       }
 
@@ -490,16 +489,20 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
   if (!path)
     path = ".";
 
-  if (try_cwd_first || string[0] == '/')
+  if (try_cwd_first || SLASH_P (string[0]))
     {
+      int i;
       filename = string;
       fd = open (filename, mode, prot);
-      if (fd >= 0 || string[0] == '/' || strchr (string, '/'))
+      if (fd >= 0)
+	goto done;
+      for (i = 0; string[i]; i++)
+	if (SLASH_P(string[0]))
 	goto done;
     }
 
   /* ./foo => foo */
-  while (string[0] == '.' && string[1] == '/')
+  while (string[0] == '.' && SLASH_P (string[1]))
     string += 2;
 
   alloclen = strlen (path) + strlen (string) + 2;
@@ -533,10 +536,10 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
       }
 
       /* Remove trailing slashes */
-      while (len > 0 && filename[len-1] == '/')
+      while (len > 0 && SLASH_P (filename[len-1]))
        filename[--len] = 0;
 
-      strcat (filename+len, "/");
+      strcat (filename+len, SLASH_STRING);
       strcat (filename, string);
 
       fd = open (filename, mode);
@@ -548,18 +551,19 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
     {
       if (fd < 0)
 	*filename_opened = (char *) 0;
-      else if (filename[0] == '/')
+      else if (ROOTED_P (filename))
 	*filename_opened = savestring (filename, strlen (filename));
       else
 	{
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
 	  
 	  *filename_opened = concat (current_directory, 
-				     '/' == current_directory[strlen(current_directory)-1]? "": "/",
+				     SLASH_CHAR
+				     == current_directory[strlen(current_directory)-1] 
+  				     ? "": SLASH_STRING,
 				     filename, NULL);
         }
     }
-/* start-sanitize-mpw */
 #ifdef MPW
   /* This is a debugging hack that can go away when all combinations
      of Mac and Unix names are handled reasonably.  */
@@ -575,8 +579,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
 	printf("\n");
       }
   }
-#endif
-/* end-sanitize-mpw */
+#endif /* MPW */
 
   return fd;
 }
@@ -633,7 +636,6 @@ open_source_file (s)
       if (p != s->filename)
 	result = openp (path, 0, p, O_RDONLY, 0, &s->fullname);
     }
-/* start-sanitize-mpw */
 #ifdef MPW
   if (result < 0)
     {
@@ -650,7 +652,7 @@ open_source_file (s)
 	result = openp (path, 0, p, O_RDONLY, 0, &s->fullname);
     }
 #endif /* MPW */
-/* end-sanitize-mpw */
+
   if (result >= 0)
     {
       fullname = s->fullname;

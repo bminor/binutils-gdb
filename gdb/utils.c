@@ -30,6 +30,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #include <ctype.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "signals.h"
 #include "gdbcmd.h"
@@ -304,27 +307,31 @@ error_begin ()
 NORETURN void
 error (char *string, ...)
 #else
+void
 error (va_alist)
      va_dcl
 #endif
 {
-#ifdef ANSI_PROTOTYPES
   va_list args;
+#ifdef ANSI_PROTOTYPES
   va_start (args, string);
 #else
   va_start (args);
 #endif
   if (error_hook)
-    error_hook();
+    (*error_hook) ();
   else 
     {
-      char *string1;
       error_begin ();
 #ifdef ANSI_PROTOTYPES
       vfprintf_filtered (gdb_stderr, string, args);
 #else
-      string1 = va_arg (args, char *);
-      vfprintf_filtered (gdb_stderr, string1, args);
+      {
+	char *string1;
+
+	string1 = va_arg (args, char *);
+	vfprintf_filtered (gdb_stderr, string1, args);
+      }
 #endif
       fprintf_filtered (gdb_stderr, "\n");
       va_end (args);

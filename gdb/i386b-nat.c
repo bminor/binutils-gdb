@@ -72,6 +72,7 @@ i386_register_u_addr (blockend, regnum)
 
 
 #ifdef FLOAT_INFO
+#include "language.h"			/* for local_hex_string */
 #include "floatformat.h"
 
 #include <sys/param.h>
@@ -115,7 +116,7 @@ struct env387
   unsigned char regs[8][10];
 };
 
-static
+static void
 print_387_status (status, ep)
      unsigned short status;
      struct env387 *ep;
@@ -124,7 +125,6 @@ print_387_status (status, ep)
   int bothstatus;
   int top;
   int fpreg;
-  unsigned char *p;
   
   bothstatus = ((status != 0) && (ep->status != 0));
   if (status != 0) 

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <string.h>
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
@@ -25,22 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "floatformat.h"
 #include "symtab.h"
 
-static long
-i386_get_frame_setup PARAMS ((int));
+static long i386_get_frame_setup PARAMS ((int));
 
-static void
-i386_follow_jump PARAMS ((void));
+static void i386_follow_jump PARAMS ((void));
 
-static void
-codestream_read PARAMS ((unsigned char *, int));
+static void codestream_read PARAMS ((unsigned char *, int));
 
-static void
-codestream_seek PARAMS ((int));
+static void codestream_seek PARAMS ((int));
 
-static unsigned char 
-codestream_fill PARAMS ((int));
-
-/* helper functions for tm-i386.h */
+static unsigned char  codestream_fill PARAMS ((int));
 
 /* Stdio style buffering was used to minimize calls to ptrace, but this
    buffering did not take into account that the code section being accessed
@@ -432,7 +426,12 @@ i386_frame_find_saved_regs (fip, fsrp)
 	  op = codestream_get ();
 	  if (op < 0x50 || op > 0x57)
 	    break;
+#ifdef I386_REGNO_TO_SYMMETRY
+	  /* Dynix uses different internal numbering.  Ick.  */
+	  fsrp->regs[I386_REGNO_TO_SYMMETRY(op - 0x50)] = adr;
+#else
 	  fsrp->regs[op - 0x50] = adr;
+#endif
 	  adr -= 4;
 	}
     }
@@ -545,16 +544,14 @@ i386_push_dummy_frame ()
 void
 i386_pop_frame ()
 {
-  FRAME frame = get_current_frame ();
+  struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
   int regnum;
   struct frame_saved_regs fsr;
-  struct frame_info *fi;
   char regbuf[MAX_REGISTER_RAW_SIZE];
   
-  fi = get_frame_info (frame);
-  fp = fi->frame;
-  get_frame_saved_regs (fi, &fsr);
+  fp = FRAME_FP (frame);
+  get_frame_saved_regs (frame, &fsr);
   for (regnum = 0; regnum < NUM_REGS; regnum++) 
     {
       CORE_ADDR adr;
@@ -570,8 +567,6 @@ i386_pop_frame ()
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
-  set_current_frame ( create_new_frame (read_register (FP_REGNUM),
-					read_pc ()));
 }
 
 #ifdef GET_LONGJMP_TARGET
@@ -639,13 +634,12 @@ i386_extract_return_value(type, regbuf, valbuf)
 
 CORE_ADDR
 i386v4_sigtramp_saved_pc (frame)
-     FRAME frame;
+     struct frame_info *frame;
 {
   CORE_ADDR saved_pc_offset = 4;
   char *name = NULL;
 
-  find_pc_partial_function (frame->pc, &name,
-			    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+  find_pc_partial_function (frame->pc, &name, NULL, NULL);
   if (name)
     {
       if (STREQ (name, "_sigreturn"))
@@ -661,3 +655,9 @@ i386v4_sigtramp_saved_pc (frame)
   return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
 }
 #endif /* I386V4_SIGTRAMP_SAVED_PC */
+
+void
+_initialize_i386_tdep ()
+{
+  tm_print_insn = print_insn_i386;
+}
