@@ -9,7 +9,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930401
+DATE	= 930408
 
 TAG	= latest-$(DATE)
 
@@ -39,41 +39,43 @@ canonhost := i386-sco3.2v4
 endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.1)
-TARGETS	= $(NATIVE) m68k-aout	i386-aout	a29k-amd-udi \
-	i960-vxworks		m68k-coff	m68k-vxworks \
-	i960-intel-nindy	sparc-aout	sparc-vxworks \
-	sparclite-aout          sparclitefrwcompat-aout
+TARGETS = $(NATIVE)	m68k-aout	m68k-vxworks	i960-intel-nindy \
+	i386-aout	a29k-amd-udi	sparc-vxworks	m68k-coff \
+	i960-vxworks	sparc-aout	sparclite-aout	\
+	sparclitefrwcompat-aout 	h8300-hms	z8k-sim \
+	mips-idt-ecoff
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
-TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i386-aout
+TARGETS = $(NATIVE) m68k-aout m68k-vxworks m68k-coff
 GCC = gcc -O -msoft-float
 CC = cc -J
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),sparc-sun-solaris2)
-TARGETS	= $(NATIVE) m68k-aout sparc-aout a29k-amd-udi
+TARGETS = $(NATIVE) m68k-vxworks m68k-aout sparc-aout
 CC = cc -Xs
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-dec-ultrix)
-TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i960-vxworks \
-	  sparc-vxworks m68k-coff i386-aout sparc-aout i960-intel-nindy
+TARGETS = $(NATIVE) m68k-aout
+# TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i960-vxworks \
+#	  sparc-vxworks m68k-coff i386-aout sparc-aout i960-intel-nindy
 CC = cc -Wf,-XNg1000
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
-TARGETS	= $(NATIVE) m68k-vxworks a29k-amd-udi
+TARGETS	= $(NATIVE) m68k-vxworks
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
-TARGETS	= $(NATIVE) m68k-vxworks i960-vxworks m68k-aout
+TARGETS	= $(NATIVE) m68k-aout m68k-vxworks i960-vxworks
 all: all-cygnus
 endif
 
@@ -86,11 +88,12 @@ all: all-native
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
+TARGETS = i960-vxworks m68k-aout m68k-vxworks
 #TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
-TARGETS	= m68k-aout	i386-aout	a29k-amd-udi \
-	  i960-vxworks	m68k-coff	m68k-vxworks \
-	  sparc-aout			sparc-vxworks \
-	  sparclite-aout		sparclitefrwcompat-aout
+#TARGETS	= m68k-aout	i386-aout	a29k-amd-udi \
+#	  i960-vxworks	m68k-coff	m68k-vxworks \
+#	  sparc-aout			sparc-vxworks \
+#	  sparclite-aout		sparclitefrwcompat-aout
 CC = cc 
 all: all-native
 endif
