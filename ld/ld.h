@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002, 2004
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -241,6 +241,9 @@ typedef struct {
   /* If set, only search library directories explicitly selected
      on the command line.  */
   bfd_boolean only_cmd_line_lib_dirs;
+
+  /* The size of the hash table to use.  */
+  bfd_size_type hash_table_size;
 } ld_config_type;
 
 extern ld_config_type config;

@@ -267,6 +267,7 @@ main (int argc, char **argv)
   config.has_shared = FALSE;
   config.split_by_reloc = (unsigned) -1;
   config.split_by_file = (bfd_size_type) -1;
+  config.hash_table_size = 0;
   command_line.force_common_definition = FALSE;
   command_line.inhibit_common_definition = FALSE;
   command_line.interpreter = NULL;
@@ -343,6 +344,9 @@ main (int argc, char **argv)
   ldemul_before_parse ();
   lang_has_input_file = FALSE;
   parse_args (argc, argv);
+
+  if (config.hash_table_size != 0)
+    bfd_hash_set_default_size (config.hash_table_size);
 
   ldemul_set_symbols ();
 

@@ -1,3 +1,15 @@
+2004-05-21  Andy Chittenden  <achittenden@bluearc.com>
+
+	* hash.c (bfd_default_hash_table_size): New variable.
+	(bfd_hash_table_init): Use new variable instead of DEFAULT_SIZE.
+	(bfd_hash_set_default_size): New function.  Set the default size
+	to a selected prime number close to the argument.  Document new
+	function.
+	* bfd-in.h: Add prototype for  bfd_hash_set_default_size.
+	* bfd-in2.h: Regenerate.
+	* Makefile.am (hash.lo): Add dependency upon libiberty.h.
+	* Makefile.in: Regenerate.
+
 2004-05-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* libaout.h (machine_type): Add M_88K_OPENBSD and M_HPPA_OPENBSD.

@@ -1734,13 +1734,27 @@ If you specify @option{--disable-new-dtags}, no new dynamic tags will be
 created. By default, the new dynamic tags are not created. Note that
 those options are only available for ELF systems.
 
+@kindex --hash-size=@var{number}
+Set the default size of the linker's hash tables to a prime number
+close to @var{number}.  Increasing this value can reduce the length of
+time it takes the linker to perform its tasks, at the expense of
+increasing the linker's memory requirements.  Similarly reducing this
+value can reduce the memory requirements at the expense of speed.
+
 @kindex --reduce-memory-overheads
 @item --reduce-memory-overheads
 This option reduces memory requirements at ld runtime, at the expense of
 linking speed.  This was introduced to to select the old O(n^2) algorithm
 for link map file generation, rather than the new O(n) algorithm which uses
-about 40% more memory for symbol storage.  It may be also be used for
-similar such tradeoffs in the future.
+about 40% more memory for symbol storage.
+
+Another affect of the switch is to set the default hash table size to
+1021, which again saves memory at the cost of lengthening the linker's
+run time.  This is not done however if the *option{--hash-size} switch
+has been used.
+
+The @option{--reduce-memory-overheads} switch may be also be used to
+enable other tradeoffs in future versions of the linker.
 
 @end table
 

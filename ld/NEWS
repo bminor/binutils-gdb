@@ -1,11 +1,19 @@
 -*- text -*-
 
+* A new linker command line switch has been added which allows the hash table
+  size to be set to a suitable prime value near to its argument.  This switch
+  is --hash-size=<NUMBER>.  Also if the switch --reduce-memory-overheads is
+  used, and --hash-size has not been used, then the default value will be set
+  to 1021.
+
 * Linker map files are now generated with an O(N) algorithm for finding symbols
   that are defined in each section.  This uses about 40% more memory for
   symbols than the old O(N^2) algorithm.  You can use the new
   --reduce-memory-overheads option to select the old algorithm; this option
   might also be used in the future to select similar tradeoffs.
 
+Changes in 2.15:
+  
 * New PE --large-address-aware option to indicate executables support virtual
   addresses greater than 2 gigabytes.
 

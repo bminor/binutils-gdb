@@ -433,6 +433,11 @@ extern void bfd_hash_traverse
    bfd_boolean (*) (struct bfd_hash_entry *, void *),
    void *info);
 
+/* Allows the default size of a hash table to be configured. New hash
+   tables allocated using bfd_hash_table_init will be created with
+   this size.  */
+extern void bfd_hash_set_default_size (bfd_size_type);
+
 #define COFF_SWAP_TABLE (void *) &bfd_coff_std_swap_table
 
 /* User program access to BFD facilities.  */

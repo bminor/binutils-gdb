@@ -894,7 +894,7 @@ syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 targets.lo: targets.c $(INCDIR)/filenames.h $(INCDIR)/fnmatch.h \
   targmatch.h
-hash.lo: hash.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h
+hash.lo: hash.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h $(INCDIR)/libiberty.h
 linker.lo: linker.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   genlink.h
 srec.lo: srec.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \

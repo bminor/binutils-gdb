@@ -118,6 +118,7 @@ enum option_values
   OPTION_FORCE_EXE_SUFFIX,
   OPTION_GC_SECTIONS,
   OPTION_NO_GC_SECTIONS,
+  OPTION_HASH_SIZE,
   OPTION_CHECK_SECTIONS,
   OPTION_NO_CHECK_SECTIONS,
   OPTION_NO_UNDEFINED,
@@ -328,6 +329,8 @@ static const struct ld_option ld_options[] =
   { {"no-gc-sections", no_argument, NULL, OPTION_NO_GC_SECTIONS},
       '\0', NULL, N_("Don't remove unused sections (default)"),
       TWO_DASHES },
+  { {"hash-size=<NUMBER>", required_argument, NULL, OPTION_HASH_SIZE},
+      '\0', NULL, N_("Set default hash table size close to <NUMBER>"), TWO_DASHES },
   { {"help", no_argument, NULL, OPTION_HELP},
       '\0', NULL, N_("Print option help"), TWO_DASHES },
   { {"init", required_argument, NULL, OPTION_INIT},
@@ -364,6 +367,8 @@ static const struct ld_option ld_options[] =
       '\0', N_("TARGET"), N_("Specify target of output file"), EXACTLY_TWO_DASHES },
   { {"qmagic", no_argument, NULL, OPTION_IGNORE},
       '\0', NULL, N_("Ignored for Linux compatibility"), ONE_DASH },
+  { {"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS},
+      '\0', NULL, N_("Reduce memory overheads, possibly taking much longer"), TWO_DASHES },
   { {"relax", no_argument, NULL, OPTION_RELAX},
       '\0', NULL, N_("Relax branches on certain targets"), TWO_DASHES },
   { {"retain-symbols-file", required_argument, NULL,
@@ -447,8 +452,6 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"), TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
       '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
-  { {"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS},
-      '\0', NULL, N_("reduce memory overheads, possibly taking much longer"), TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1224,9 +1227,24 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_FINI:
 	  link_info.fini_function = optarg;
 	  break;
+
 	case OPTION_REDUCE_MEMORY_OVERHEADS:
 	  command_line.reduce_memory_overheads = TRUE;
+	  if (config.hash_table_size == 0)
+	    config.hash_table_size = 1021;
 	  break;
+
+        case OPTION_HASH_SIZE:
+	  {
+	    bfd_size_type new_size;
+
+            new_size = strtoul (optarg, NULL, 0);
+            if (new_size)
+              config.hash_table_size = new_size;
+            else
+              einfo (_("%P%X: --hash-size needs a numeric argument\n"));
+          }
+          break;
 	}
     }
 

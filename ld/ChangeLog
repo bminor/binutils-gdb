@@ -1,3 +1,18 @@
+2004-05-21  Andy Chittenden  <achittenden@bluearc.com>
+
+	* ld.h (ld_config_type): Add new field: hash_table_size.
+	* ldmain.c: Initialise the new field to zero.  If it is non-zero
+	after parsing the linker's command line call
+	bfd_hash_set_default_size.
+	* lexsup.c (option_values): Add OPTION_HASH_SIZE.
+	(ld_options): Add hash-size.
+	(parse_args): Parse --hash-size option.  Allow
+	--reduce-memory-overheads to set the default hash table size as
+	well.
+	* ld.texinfo: Document the new switch.  Also mention that
+	--reduce-memory-overheads can affect the hash table size.
+	* NEWS: Mention the new feature.
+
 2004-05-19  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* NEWS: Mention new linker map file generation and the
