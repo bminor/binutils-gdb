@@ -1,5 +1,8 @@
 2002-07-09  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/libdso-3.d, ld-cris/dso-3.s, ld-cris/noglob1.s,
+	ld-cris/noglob1.d: New tests.
+
 	* ld-cris/libdso-1.d: Tweak for change in size of dynamic sections.
 
 2002-07-03  Alan Modra  <amodra@bigpond.net.au>
