@@ -286,6 +286,9 @@ struct subspace_dictionary_chain
     /* Index of containing space.  */
     unsigned long ssd_space_index;
 
+    /* Nonzero if this space has been defined by the user code.  */
+    unsigned int ssd_defined;
+
     /* Which quadrant within the space this subspace should be loaded into.  */
     unsigned char ssd_quadrant;
 
@@ -596,7 +599,7 @@ static ssd_chain_struct *update_subspace PARAMS ((sd_chain_struct *,
 						  char, char, char, int,
 						  int, int, int, subsegT));
 static sd_chain_struct *is_defined_space PARAMS ((char *));
-static ssd_chain_struct *is_defined_subspace PARAMS ((char *, subsegT));
+static ssd_chain_struct *is_defined_subspace PARAMS ((char *));
 static sd_chain_struct *pa_segment_to_space PARAMS ((asection *));
 static ssd_chain_struct * pa_subsegment_to_subspace PARAMS ((asection *,
 							     subsegT));
@@ -1171,6 +1174,7 @@ static struct default_space_dict pa_def_spaces[] =
 #define SPACE_NAME_INDEX(space_chain)   (space_chain)->sd_name_index
 
 #define SUBSPACE_SPACE_INDEX(ss_chain)  (ss_chain)->ssd_space_index
+#define SUBSPACE_DEFINED(ss_chain)	(ss_chain)->ssd_defined
 #define SUBSPACE_QUADRANT(ss_chain)	(ss_chain)->ssd_quadrant
 #define SUBSPACE_ALIGN(ss_chain)	(ss_chain)->ssd_alignment
 #define SUBSPACE_ACCESS(ss_chain)	(ss_chain)->ssd_access_control_bits
@@ -4936,11 +4940,17 @@ pa_import (unused)
   if (!is_end_of_statement ())
     {
       input_line_pointer++;
-      /* Hmmm.  This doesn't look right.  */ 
       pa_export_args (symbol);
     }
   else
     {
+      /* Sigh.  To be compatable with the HP assembler and to help
+	 poorly written assembly code, we assign a type based on 
+	 the the current segment.  Note only BSF_FUNCTION really
+	 matters, we do not need to set the full SYMBOL_TYPE_* info here.  */
+      if (now_seg == text_section)
+	symbol->bsym->flags |= BSF_FUNCTION;
+
       /* If the section is undefined, then the symbol is undefined
          Since this is an import, leave the section undefined.  */
       S_SET_SEGMENT (symbol, &bfd_und_section);
@@ -5505,8 +5515,10 @@ pa_subspace (unused)
       alias = NULL;
 
       space = current_space;
-      ssd = is_defined_subspace (name, space->sd_last_subseg);
-      if (ssd)
+      ssd = is_defined_subspace (ss_name);
+      /* Allow user to override the builtin attributes of subspaces.  But
+	 only allow the attributes to be changed once!  */
+      if (ssd && SUBSPACE_DEFINED (ssd))
 	{
 	  subseg_set (ssd->ssd_seg, ssd->ssd_subseg);
 	  if (!is_end_of_statement ())
@@ -5640,7 +5652,7 @@ pa_subspace (unused)
 	 but the "standard" sections for ELF.  */
       if (ssd)
 	section = ssd->ssd_seg;
-      if (alias)
+      else if (alias)
 	section = subseg_new (alias, 0);
       else if (! alias && USE_ALIASES)
 	{
@@ -5661,7 +5673,6 @@ pa_subspace (unused)
       bfd_set_section_vma (stdoutput, section,
 			   pa_subspace_start (space, quadrant));
 	 
-      
       /* Now that all the flags are set, update an existing subspace,
          or create a new one.  */
       if (ssd)
@@ -5670,7 +5681,7 @@ pa_subspace (unused)
 					    code_only, common, dup_common,
 					    sort, zero, access, space_index,
 					    alignment, quadrant, 
-					    ssd->ssd_subseg);
+					    section);
       else
 	current_subspace = create_new_subspace (space, ss_name, loadable,
 						code_only, common,
@@ -5682,6 +5693,7 @@ pa_subspace (unused)
       current_subspace->ssd_seg = section;
       subseg_set (current_subspace->ssd_seg, current_subspace->ssd_subseg);
     }
+  SUBSPACE_DEFINED (current_subspace) = 1;
   return;
 }
 
@@ -6004,7 +6016,7 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
 {
   ssd_chain_struct *chain_entry;
 
-  if ((chain_entry = is_defined_subspace (name, subseg)))
+  if ((chain_entry = is_defined_subspace (name)))
     {
       SUBSPACE_ACCESS (chain_entry) = access;
       SUBSPACE_LOADABLE (chain_entry) = loadable;
@@ -6083,9 +6095,8 @@ pa_segment_to_space (seg)
    own subspace.  */
 
 static ssd_chain_struct *
-is_defined_subspace (name, subseg)
+is_defined_subspace (name)
      char *name;
-     subsegT subseg;
 {
   sd_chain_struct*space_chain;
   ssd_chain_struct *subspace_chain;

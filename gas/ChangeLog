@@ -1,5 +1,17 @@
 Sun Oct 31 00:36:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (subspace_dictionary_chain): Add new ssd_defined
+	field.  Define SUBSPACE_DEFINED accessor macro.
+	(pa_subspace): Allow user to override subspace attributes for
+	built-in subspaces.  Set ssd_defined at the end of fcn -- that
+	way the attributes can only be changed once.  Pass newly allocated
+	name to is_defined_subspace, not a pointer to the input line.
+	Fix typo in space/subspace rework.
+	(is_defined_subspace): Delete unused 2nd arg.  All callers changed.
+
+	* config/tc-hppa.c (pa_import): If currently in the text segment
+	and a symbol is imported without type information, set BSF_FUNCTION
+	for the symbol.
 	* write.c (relax_and_size_seg): Correct test to determine if
 	the section's size was rounded up.
 
