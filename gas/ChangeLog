@@ -1,3 +1,15 @@
+Wed Jul  1 20:06:20 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_vtable_inherit, obj_elf_vtable_entry): New.
+	(elf_pseudo_table): Add them.
+	* config/tc-mips.c (mips_force_relocation): Force vtable relocs.
+	(md_apply_fix): Accept them.
+	(mips_fix_adjustable): Don't adjust them.
+	(tc_gen_reloc): Mung BFD_RELOC_VTABLE_ENTRY for Rel.
+	* config/tc-ppc.c (md_apply_fix3): Accept vtable relocs.
+	* config/tc-ppc.h (TC_FORCE_RELOCATION_SECTION): Force vtable relocs.
+	(tc_fix_adjustable): Don't adjust them.
+
 Wed Jul  1 16:35:32 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Makefile.am (CGEN_CPU_PREFIX): New variable.

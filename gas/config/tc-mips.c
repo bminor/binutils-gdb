@@ -439,6 +439,11 @@ static int prev_insn_extended;
    noreorder.  */
 static int prev_prev_insn_unreordered;
 
+/* start-sanitize-branchbug4011 */
+/* Non-zero if the previous insn had one or more labels */
+static int prev_insn_labels;
+
+/* end-sanitize-branchbug4011 */
 /* If this is set, it points to a frag holding nop instructions which
    were inserted before the start of a noreorder section.  If those
    nops turn out to be unnecessary, the size of the frag can be
@@ -614,6 +619,15 @@ static const int mips16_to_32_reg_map[] =
 #define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x2000) != 0)
 #define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x2000)
 #define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x2000)
+/* start-sanitize-branchbug4011 */
+/* The 4011 core has a bug in it's branch processing that
+   an be avoided if branches never branches (where branches
+   are defined as those starting with 'b').  We do this here
+   by insuring that labels are not directly on branch instructions,
+   and if they are inserting a no-op between the label and the
+   branch. */
+static int mips_fix_4011_branch_bug = 0;
+/* end-sanitize-branchbug4011 */
 
 /* Prototypes for static functions.  */
 
@@ -1462,6 +1476,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   char *f;
   fixS *fixp;
   int nops = 0;
+  /* start-sanitize-branchbug4011 */
+  int label_nop = 0;          /* True if a no-op needs to appear between
+				 the current insn and the current labels */
+  /* end-sanitize-branchbug4011 */
 
   /* Mark instruction labels in mips16 mode.  */
   if (mips_opts.mips16)
@@ -1662,6 +1680,25 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  && ip->insn_opcode == (mips_opts.mips16 ? 0x6500 : 0))
 	--nops;
 
+      /* start-sanitize-branchbug4011 */
+      /* If we have a label on a branch insn, we need at least one no-op
+	 between the label and the branch.  The pinfo flags in this test
+	 must cover all the kinds of branches.  */
+      if (mips_fix_4011_branch_bug
+	  && insn_labels != NULL
+	  && (ip->insn_mo->pinfo 
+	      & (INSN_UNCOND_BRANCH_DELAY
+		 |INSN_COND_BRANCH_DELAY
+		 |INSN_COND_BRANCH_LIKELY)))
+	{
+	  label_nop = 1;
+	  
+	  /* Make sure we've got at least one nop. */
+	  if (nops == 0) 
+	    nops = 1;
+	}
+
+      /* end-sanitize-branchbug4011 */
       /* Now emit the right number of NOP instructions.  */
       if (nops > 0 && ! mips_opts.noreorder)
 	{
@@ -1673,6 +1710,12 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  old_frag = frag_now;
 	  old_frag_offset = frag_now_fix ();
 
+	  /* start-sanitize-branchbug4011 */
+	  /* Emit the nops that should be before the label. */
+	  if (label_nop)
+	    nops -= 1;
+
+	  /* end-sanitize-branchbug4011 */
 	  for (i = 0; i < nops; i++)
 	    emit_nop ();
 
@@ -1704,6 +1747,15 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  if (ECOFF_DEBUGGING)
 	    ecoff_fix_loc (old_frag, old_frag_offset);
 #endif
+	  /* start-sanitize-branchbug4011 */
+	  if (label_nop)
+	    {
+	      /* Emit the nop after the label, and return the
+		 nop count to it's proper value. */
+	      emit_nop ();
+	      nops += 1;
+	    }
+	  /* end-sanitize-branchbug4011 */
 	}
       else if (prev_nop_frag != NULL)
 	{
@@ -1947,6 +1999,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      /* If the previous insn is already in a branch delay
 		 slot, then we can not swap.  */
 	      || prev_insn_is_delay_slot
+	      /* start-sanitize-branchbug4011 */
+	      /* We can't swap the branch back to a previous label */
+	      || (mips_fix_4011_branch_bug && prev_insn_labels)
+	      /* end-sanitize-branchbug4011 */
 	      /* If the previous previous insn was in a .set
 		 noreorder, we can't swap.  Actually, the MIPS
 		 assembler will swap in this situation.  However, gcc
@@ -2254,6 +2310,9 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       prev_insn_frag = frag_now;
       prev_insn_where = f - frag_now->fr_literal;
       prev_insn_valid = 1;
+      /* start-sanitize-branchbug4011 */
+      prev_insn_labels = !! insn_labels;
+      /* end-sanitize-branchbug4011 */
     }
   else if (place == NULL)
     {
@@ -2265,6 +2324,9 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       prev_insn_reloc_type = reloc_type;
       prev_prev_insn_unreordered = prev_insn_unreordered;
       prev_insn_unreordered = 1;
+      /* start-sanitize-branchbug4011 */
+      prev_insn_labels = !! insn_labels;
+      /* end-sanitize-branchbug4011 */
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -2302,6 +2364,9 @@ mips_no_prev_insn (preserve)
   prev_insn_is_delay_slot = 0;
   prev_insn_unreordered = 0;
   prev_insn_extended = 0;
+  /* start-sanitize-branchbug4011 */
+  prev_insn_labels = 0;
+  /* end-sanitize-branchbug4011 */
   prev_insn_reloc_type = BFD_RELOC_UNUSED;
   prev_prev_insn_unreordered = 0;
   mips_clear_insn_labels ();
@@ -7323,7 +7388,9 @@ mips_ip (str, ip)
 	      continue;
 
 	    case '9':		/* vi27 for vcallmsr */
-	      if (strncmp (s, "vi27", 4) == 0)
+	      if (strncmp (s, "$vi27", 5) == 0)
+		s += 5;
+	      else if (strncmp (s, "vi27", 4) == 0)
 		s += 4;
 	      else
 		as_bad (_("expected vi27"));
@@ -7566,6 +7633,17 @@ mips_ip (str, ip)
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
+		  /* start-sanitize-r5900 */
+		  /* Allow "$viNN" as coprocessor register name */
+		  if (mips_5900
+		      && *args == 'G'
+		      && s[1] == 'v'
+		      && s[2] == 'i')
+		    {
+		      s += 2;
+		    }
+		  /* end-sanitize-r5900 */
+
 		  if (isdigit (s[1]))
 		    {
 		      ++s;
@@ -7796,11 +7874,20 @@ mips_ip (str, ip)
 		}
 
 	      /* start-sanitize-r5900 */
-	      /* Handle vf and vi regsiters for vu0.  */
-	      if (s[0] == 'v'
-		  && (s[1] == 'f' || s[1] == 'i')
-		  && isdigit (s[2]))
-		{
+	      /* Handle vf and vi regsiters for vu0.  Handle optional
+                 `$' prefix. */
+	      
+	      if ((s[0] == 'v'
+		   && (s[1] == 'f' || s[1] == 'i')
+		   && isdigit (s[2]))
+		  ||
+		  (s[0] == '$'
+		   && s[1] == 'v'
+		   && (s[2] == 'f' || s[2] == 'i')
+		   && isdigit (s[3])))
+  		{
+		  if(s[0] == '$')
+		    ++s;
 		  s += 2;
 		  regno = 0;
 		  do
@@ -9292,6 +9379,12 @@ struct option md_longopts[] = {
   {"no-m4320", no_argument, NULL, OPTION_NO_M4320},
 
   /* end-sanitize-vr4320 */
+  /* start-sanitize-branchbug4011 */
+#define OPTION_FIX_4011_BRANCH_BUG (OPTION_MD_BASE + 34)
+  {"fix-4011-branch-bug", no_argument, NULL, OPTION_FIX_4011_BRANCH_BUG},
+#define OPTION_NO_FIX_4011_BRANCH_BUG (OPTION_MD_BASE + 35)
+  {"no-fix-4011-branch-bug", no_argument, NULL, OPTION_NO_FIX_4011_BRANCH_BUG},
+  /* end-sanitize-branchbug4011 */
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -9672,6 +9765,16 @@ md_parse_option (c, arg)
       }
       break;
 
+      /* start-sanitize-branchbug4011 */
+    case OPTION_FIX_4011_BRANCH_BUG:
+      mips_fix_4011_branch_bug = 1;
+      break;
+
+    case OPTION_NO_FIX_4011_BRANCH_BUG:
+      mips_fix_4011_branch_bug = 0;
+      break;
+
+      /* end-sanitize-branchbug4011 */
     default:
       return 0;
     }
@@ -9897,6 +10000,10 @@ int
 mips_force_relocation (fixp)
      fixS *fixp;
 {
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
   return (mips_pic == EMBEDDED_PIC
 	  && (fixp->fx_pcrel
 	      || SWITCH_TABLE (fixp)
@@ -9916,7 +10023,9 @@ md_apply_fix (fixP, valueP)
 
   assert (fixP->fx_size == 4
 	  || fixP->fx_r_type == BFD_RELOC_16
-	  || fixP->fx_r_type == BFD_RELOC_64);
+	  || fixP->fx_r_type == BFD_RELOC_64
+	  || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY);
 
   value = *valueP;
 
@@ -10129,6 +10238,18 @@ md_apply_fix (fixP, valueP)
 	}
 
       md_number_to_chars ((char *) buf, (valueT) insn, 4);
+      break;
+
+    case BFD_RELOC_VTABLE_INHERIT:
+      fixP->fx_done = 0;
+      if (fixP->fx_addsy
+          && !S_IS_DEFINED (fixP->fx_addsy)
+          && !S_IS_WEAK (fixP->fx_addsy))
+        S_SET_WEAK (fixP->fx_addsy);
+      break;
+
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixP->fx_done = 0;
       break;
 
     default:
@@ -11375,6 +11496,9 @@ mips_fix_adjustable (fixp)
 {
   if (fixp->fx_r_type == BFD_RELOC_MIPS16_JMP)
     return 0;
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
   if (fixp->fx_addsy == NULL)
     return 1;
 #ifdef OBJ_ELF
@@ -11529,6 +11653,14 @@ tc_gen_reloc (section, fixp)
 	}
       else
 	abort ();
+    }
+
+  /* Since MIPS ELF uses Rel instead of Rela, encode the vtable entry
+     to be used in the relocation's section offset.  */
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    {
+      reloc->address = reloc->addend;
+      reloc->addend = 0;
     }
 
   /* Since DIFF_EXPR_OK is defined in tc-mips.h, it is possible that
