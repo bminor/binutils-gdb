@@ -1,3 +1,11 @@
+2003-12-05  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Partial fix for PR testsuite/1456.
+	* gdb.base/scope.exp (test_at_main): Replace references to
+	gcc_compiled with calls to test_compiler_info.
+	(test_at_foo): Likewise.
+	(test_at_bar): Likewise.
+
 2003-12-04  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Partial fix for PR testsuite/1456.
