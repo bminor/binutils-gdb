@@ -1,3 +1,7 @@
+Mon Oct 14 11:44:03 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/Makefile (as.ms): one more sed workaround for texi2roff
+
 Fri Oct 11 18:18:37 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/Makefile: new targets as.info, as.ms
