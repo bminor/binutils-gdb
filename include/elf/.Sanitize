@@ -25,14 +25,6 @@ else
 	lose_these_too="${arc_files} ${lose_these_too}"
 fi
 
-d10v_files="d10v.h"
-
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-	keep_these_too="${d10v_files} ${keep_these_too}"
-else
-	lose_these_too="${d10v_files} ${lose_these_too}"
-fi
-
 m32r_files="m32r.h"
 
 if ( echo $* | grep keep\-m32r > /dev/null ) ; then
