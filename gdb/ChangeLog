@@ -1,3 +1,33 @@
+Mon May  8 11:19:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (size_auto, size_32, size_64, size_enums): Rename
+ 	saved_gpreg_size_auto, saved_gpreg_size_32, saved_gpreg_size_64
+ 	and saved_gpreg_size_enums.
+	(mips_stack_argsize): Update. Cleanup.
+
+	* mips-tdep.c (STACK_ARGSIZE): Delete macro.  Replaced by
+ 	MIPS_STACK_ARGSIZE.
+	(MIPS_NABI32): Delete macro. Replaced by
+ 	MIPS_REGS_HAVE_STACK_HOME_P.
+	(mips_push_arguments): Update.
+	(mips_push_arguments): Replace check for MIPS_EABI or MIPS_NABI32
+ 	with test for MIPS_REGS_HAVE_STACK_HOME_P.
+	(MIPS_REGS_HAVE_STACK_HOME_P): Define.  Provide non- multi-arch
+ 	default.
+	(struct gdbarch_tdep): Add mips_regs_have_stack_home_p and
+ 	mips_default_stack_argsize.
+	(MIPS_STACK_ARGSIZE): Define as mips_stack_argsize.
+	(mips_stack_argsize_string): New static variable.
+	(mips_stack_argsize): New function, handle default case.
+	(__initialize_mips_tdep): Add command ``set mips stack-arg-size''
+ 	implemented as an enum using size_auto et.al.
+	(mips_gdbarch_init): Initialize mips_default_stack_argsize and
+ 	mips_regs_have_stack_home_p.
+
+	* config/mips/tm-irix5.h (MIPS_DEFAULT_SAVED_REGSIZE): Define as 8
+ 	for n32.
+	(MIPS_REGS_HAVE_STACK_HOME_P): Define as 0 for n32.
+
 Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* procfs.c (PROCFS_TRACE): Delete definition.

@@ -46,21 +46,20 @@ struct frame_extra_info
     int num_args;
   };
 
-/* We allow the user to override MIPS_SAVED_REGSIZE, so define
-   the subcommand enum settings allowed. */
-static char saved_gpreg_size_auto[] = "auto";
-static char saved_gpreg_size_32[] = "32";
-static char saved_gpreg_size_64[] = "64";
+/* Various MIPS ISA options (related to stack analysis) can be
+   overridden dynamically.  Establish an enum/array for managing
+   them. */
 
-static char *saved_gpreg_size_enums[] = {
-  saved_gpreg_size_auto,
-  saved_gpreg_size_32,
-  saved_gpreg_size_64,
+static char size_auto[] = "auto";
+static char size_32[] = "32";
+static char size_64[] = "64";
+
+static char *size_enums[] = {
+  size_auto,
+  size_32,
+  size_64,
   0
 };
-
-/* The current (string) value of saved_gpreg_size. */
-static char *mips_saved_regsize_string = saved_gpreg_size_auto;
 
 /* Some MIPS boards don't support floating point while others only
    support single-precision floating-point operations.  See also
@@ -80,12 +79,6 @@ static int mips_fpu_type_auto = 1;
 static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 #define MIPS_FPU_TYPE mips_fpu_type
 
-#ifndef MIPS_DEFAULT_SAVED_REGSIZE
-#define MIPS_DEFAULT_SAVED_REGSIZE MIPS_REGSIZE
-#endif
-
-#define MIPS_SAVED_REGSIZE (mips_saved_regsize())
-
 /* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
 #ifndef FP_REGISTER_DOUBLE
 #define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
@@ -104,6 +97,8 @@ struct gdbarch_tdep
     int mips_last_fp_arg_regnum;
     int mips_default_saved_regsize;
     int mips_fp_register_double;
+    int mips_regs_have_home_p;
+    int mips_default_stack_argsize;
   };
 
 #if GDB_MULTI_ARCH
@@ -126,10 +121,29 @@ struct gdbarch_tdep
 #define MIPS_FPU_TYPE (gdbarch_tdep (current_gdbarch)->mips_fpu_type)
 #endif
 
+/* Return the currently configured (or set) saved register size. */
+
 #if GDB_MULTI_ARCH
 #undef MIPS_DEFAULT_SAVED_REGSIZE
 #define MIPS_DEFAULT_SAVED_REGSIZE (gdbarch_tdep (current_gdbarch)->mips_default_saved_regsize)
+#elif !defined (MIPS_DEFAULT_SAVED_REGSIZE)
+#define MIPS_DEFAULT_SAVED_REGSIZE MIPS_REGSIZE
 #endif
+
+static char *mips_saved_regsize_string = size_auto;
+
+#define MIPS_SAVED_REGSIZE (mips_saved_regsize())
+
+static unsigned int
+mips_saved_regsize ()
+{
+  if (mips_saved_regsize_string == size_auto)
+    return MIPS_DEFAULT_SAVED_REGSIZE;
+  else if (mips_saved_regsize_string == size_64)
+    return 8;
+  else /* if (mips_saved_regsize_string == size_32) */
+    return 4;
+}
 
 /* Indicate that the ABI makes use of double-precision registers
    provided by the FPU (rather than combining pairs of registers to
@@ -140,6 +154,43 @@ struct gdbarch_tdep
 #undef FP_REGISTER_DOUBLE
 #define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
 #endif
+
+/* Does the caller allocate a ``home'' for each register used in the
+   function call?  The N32 ABI and MIPS_EABI do not, the others do. */
+
+#if GDB_MULTI_ARCH
+#undef MIPS_REGS_HAVE_HOME_P
+#define MIPS_REGS_HAVE_HOME_P (gdbarch_tdep (current_gdbarch)->mips_regs_have_home_p)
+#elif !defined (MIPS_REGS_HAVE_HOME_P)
+#define MIPS_REGS_HAVE_HOME_P (!MIPS_EABI)
+#endif
+
+/* The amount of space reserved on the stack for registers. This is
+   different to MIPS_SAVED_REGSIZE as it determines the alignment of
+   data allocated after the registers have run out. */
+
+#if GDB_MULTI_ARCH
+#undef MIPS_DEFAULT_STACK_ARGSIZE
+#define MIPS_DEFAULT_STACK_ARGSIZE (gdbarch_tdep (current_gdbarch)->mips_default_statck_argsize)
+#elif !defined (MIPS_DEFAULT_STACK_ARGSIZE)
+#define MIPS_DEFAULT_STACK_ARGSIZE (MIPS_DEFAULT_SAVED_REGSIZE)
+#endif
+
+#define MIPS_STACK_ARGSIZE (mips_stack_argsize ())
+
+static char *mips_stack_argsize_string = size_auto;
+
+static unsigned int
+mips_stack_argsize (void)
+{
+  if (mips_stack_argsize_string == size_auto)
+    return MIPS_DEFAULT_STACK_ARGSIZE;
+  else if (mips_stack_argsize_string == size_64)
+    return 8;
+  else /* if (mips_stack_argsize_string == size_32) */
+    return 4;
+}
+
 
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
@@ -324,19 +375,6 @@ mips_print_extra_frame_info (fi)
     printf_filtered (" frame pointer is at %s+%s\n",
 		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
 		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
-}
-
-/* Return the currently configured (or set) saved register size */
-
-static unsigned int
-mips_saved_regsize ()
-{
-  if (mips_saved_regsize_string == saved_gpreg_size_auto)
-    return MIPS_DEFAULT_SAVED_REGSIZE;
-  else if (mips_saved_regsize_string == saved_gpreg_size_64)
-    return 8;
-  else /* if (mips_saved_regsize_string == saved_gpreg_size_32) */
-    return 4;
 }
 
 /* Convert between RAW and VIRTUAL registers.  The RAW register size
@@ -1993,20 +2031,6 @@ setup_arbitrary_frame (argc, argv)
   return create_new_frame (argv[0], argv[1]);
 }
 
-/*
- * STACK_ARGSIZE -- how many bytes does a pushed function arg take up on the stack?
- *
- * For n32 ABI, eight.
- * For all others, he same as the size of a general register.
- */
-#if defined (_MIPS_SIM_NABI32) && _MIPS_SIM == _MIPS_SIM_NABI32
-#define MIPS_NABI32   1
-#define STACK_ARGSIZE 8
-#else
-#define MIPS_NABI32   0
-#define STACK_ARGSIZE MIPS_SAVED_REGSIZE
-#endif
-
 CORE_ADDR
 mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
@@ -2158,15 +2182,15 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		  int longword_offset = 0;
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 		    {
-		      if (STACK_ARGSIZE == 8 &&
+		      if (MIPS_STACK_ARGSIZE == 8 &&
 			  (typecode == TYPE_CODE_INT ||
 			   typecode == TYPE_CODE_PTR ||
 			   typecode == TYPE_CODE_FLT) && len <= 4)
-			longword_offset = STACK_ARGSIZE - len;
+			longword_offset = MIPS_STACK_ARGSIZE - len;
 		      else if ((typecode == TYPE_CODE_STRUCT ||
 				typecode == TYPE_CODE_UNION) &&
-			       TYPE_LENGTH (arg_type) < STACK_ARGSIZE)
-			longword_offset = STACK_ARGSIZE - len;
+			       TYPE_LENGTH (arg_type) < MIPS_STACK_ARGSIZE)
+			longword_offset = MIPS_STACK_ARGSIZE - len;
 		    }
 
 		  write_memory (sp + stack_offset + longword_offset,
@@ -2223,9 +2247,8 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	         stack offset does not get incremented until after
 	         we have used up the 8 parameter registers.  */
 
-	      if (!(MIPS_EABI || MIPS_NABI32) ||
-		  argnum >= 8)
-		stack_offset += ROUND_UP (partial_len, STACK_ARGSIZE);
+	      if (MIPS_REGS_HAVE_HOME_P || argnum >= 8)
+		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
     }
@@ -3809,6 +3832,7 @@ mips_gdbarch_init (info, arches)
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     }
+  tdep->mips_default_stack_argsize = tdep->mips_default_saved_regsize;
 
   /* FIXME: jlarmour/2000-04-07: There *is* a flag EF_MIPS_32BIT_MODE
      that could indicate -gp32 BUT gas/config/tc-mips.c contains the
@@ -3873,6 +3897,8 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = 11;
       /* EABI uses F12 through F19 for args */
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
+      /* EABI does not reserve home space for registers */
+      tdep->mips_regs_have_home_p = 0;
     }
   else
     {
@@ -3880,6 +3906,8 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = 7;
       /* old ABI uses F12 through F15 for args */
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
+      /* Old ABI reserves home space for registers */
+      tdep->mips_regs_have_home_p = 1;
     }
 
   /* enable/disable the MIPS FPU */
@@ -4004,7 +4032,7 @@ _initialize_mips_tdep ()
   /* Allow the user to override the saved register size. */
   add_show_from_set (add_set_enum_cmd ("saved-gpreg-size",
 				  class_obscure,
-			          saved_gpreg_size_enums,
+			          size_enums,
 				  (char *) &mips_saved_regsize_string, "\
 Set size of general purpose registers saved on the stack.\n\
 This option can be set to one of:\n\
@@ -4014,6 +4042,20 @@ This option can be set to one of:\n\
           saved GP register size from information contained in the executable.\n\
           (default: auto)",
 				  &setmipscmdlist),
+		     &showmipscmdlist);
+
+  /* Allow the user to override the argument stack size. */
+  add_show_from_set (add_set_enum_cmd ("stack-arg-size",
+				       class_obscure,
+				       size_enums,
+				       (char *) &mips_stack_argsize_string, "\
+Set the amount of stack space reserved for each argument.\n\
+This option can be set to one of:\n\
+  32    - Force GDB to allocate 32-bit chunks per argument\n\
+  64    - Force GDB to allocate 64-bit chunks per argument\n\
+  auto  - Allow GDB to determine the correct setting from the current\n\
+          target and executable (default)",
+				       &setmipscmdlist),
 		     &showmipscmdlist);
 
   /* Let the user turn off floating point and set the fence post for

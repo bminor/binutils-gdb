@@ -1,5 +1,5 @@
 /* Target machine description for SGI Iris under Irix 5, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1990-1993, 1995, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,10 @@
 
 #include "mips/tm-irix3.h"
 
+/* FIXME: cagney/2000-04-04: Testing the _MIPS_SIM_NABI32 and
+   _MIPS_SIM in a tm-*.h file is simply wrong!  Those are
+   host-dependant macros (provided by /usr/include) and stop any
+   chance of the target being cross compiled */
 #if defined (_MIPS_SIM_NABI32) && _MIPS_SIM == _MIPS_SIM_NABI32
 /*
  * Irix 6 (n32 ABI) has 32-bit GP regs and 64-bit FP regs
@@ -45,6 +49,15 @@
 
 #undef  MIPS_LAST_ARG_REGNUM
 #define MIPS_LAST_ARG_REGNUM 11	/* N32 uses R4 through R11 for args */
+
+/* MIPS_STACK_ARGSIZE -- how many bytes does a pushed function arg take
+   up on the stack? For the n32 ABI, eight bytes are reserved for each
+   register. Like MIPS_SAVED_REGSIZE but different. */
+#define MIPS_DEFAULT_STACK_ARGSIZE 8
+
+/* N32 does not reserve home space for registers used to carry
+   parameters. */
+#define MIPS_REGS_HAVE_HOME_P 0
 
 #endif /* N32 */
 
