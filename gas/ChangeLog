@@ -1,3 +1,8 @@
+Mon Jun  1 12:47:30 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-m32r.c (m32r_do_align): Only fill code sections with
+	nops if fill pattern not specified.
+
 Mon Jun  1 14:08:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Andrew Crabtree <andrewc@typhoon.rose.hp.com>:
