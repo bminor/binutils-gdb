@@ -197,14 +197,15 @@ get_java_utf8_name (obstack, name)
 {
   char *chrs;
   value_ptr temp = name;
-  int name_length = (int) value_as_long
-    (value_struct_elt (&temp, NULL, "length", NULL, "structure"));
-  temp = name;
-  temp = value_struct_elt (&temp, NULL, "data", NULL, "structure");
+  int name_length;
+  CORE_ADDR data_addr;
+  temp = value_struct_elt (&temp, NULL, "length", NULL, "structure");
+  name_length = (int) value_as_long (temp);
+  data_addr = VALUE_ADDRESS (temp) + VALUE_OFFSET (temp)
+    + TYPE_LENGTH (VALUE_TYPE (temp));
   chrs = obstack_alloc (obstack, name_length+1);
   chrs [name_length] = '\0';
-  read_memory_section (VALUE_ADDRESS (temp) + VALUE_OFFSET (temp),
-		       chrs, name_length, NULL);
+  read_memory_section (data_addr, chrs, name_length, NULL);
   return chrs;
 }
 
@@ -378,7 +379,7 @@ java_link_class_type (type, clas)
 
   temp = clas;
   temp = value_struct_elt (&temp, NULL, "bfsize", NULL, "structure");
-  TYPE_LENGTH (type) = JAVA_OBJECT_SIZE + value_as_long (temp);
+  TYPE_LENGTH (type) = value_as_long (temp);
 
   fields = NULL;
   for (i = TYPE_N_BASECLASSES (type);  i < nfields;  i++)
@@ -403,6 +404,8 @@ java_link_class_type (type, clas)
       temp = field;
       accflags = value_as_long (value_struct_elt (&temp, NULL, "accflags",
 						  NULL, "structure"));
+      temp = field;
+      temp = value_struct_elt (&temp, NULL, "info", NULL, "structure");
       boffset = value_as_long (value_struct_elt (&temp, NULL, "boffset",
 						  NULL, "structure"));
       if (accflags & 0x0001) /* public access */
@@ -418,13 +421,9 @@ java_link_class_type (type, clas)
 	  SET_TYPE_FIELD_PROTECTED (type, i);
 	}
       if (accflags & 0x0008)  /* ACC_STATIC */
-	{
-	  TYPE_FIELD_BITPOS (type, i) = -1;
-	  /* Hack for TYPE_FIELD_STATIC_PHYSNAME to prevent a crash. FIXME. */
-	  type->fields[i].bitsize = (long) "???";
-	}
+	SET_FIELD_PHYSADDR(TYPE_FIELD(type, i), boffset);
       else
-	TYPE_FIELD_BITPOS (type, i) = 8 * (JAVA_OBJECT_SIZE + boffset);
+	TYPE_FIELD_BITPOS (type, i) = 8 * boffset;
       if (accflags & 0x8000) /* FIELD_UNRESOLVED_FLAG */
 	{
 	  TYPE_FIELD_TYPE (type, i) = get_java_object_type (); /* FIXME */

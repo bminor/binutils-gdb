@@ -59,6 +59,7 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
      int recurse;
      enum val_prettyprint pretty;
 {
+  CHECK_TYPEDEF (type);
   if (is_object_type (type))
     {
       CORE_ADDR obj_addr = unpack_pointer (type, valaddr);
@@ -70,6 +71,10 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  type = lookup_pointer_type (type);
 	}
     }
-  return c_val_print (type, valaddr, address, stream, format,
-		      deref_ref, recurse, pretty);
+  switch (TYPE_CODE (type))
+    {
+    default:
+      return c_val_print (type, valaddr, address, stream, format,
+			  deref_ref, recurse, pretty);
+    }
 }

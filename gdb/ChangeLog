@@ -8,6 +8,15 @@ Tue Aug  5 13:37:14 1997  Per Bothner  <bothner@cygnus.com>
 	* value.h, values.c (value_static_field):  New function.
 	* cp-valprint.c, valops.c:  Modify to use value_static_field.
 
+	* jv-lang.c (get_java_utf8_name):  Re-write so it works with
+	implied (missing) data field, as defined by cc1java.
+	(java_link_class_type):  Type length and field offset (in interior)
+	now includes object header.  Get static fields working.
+	* jv-lang.h (JAVA_OBJECT_SIZE):  Update for change in Kaffe.
+	* jv-typeprint.c (java_type_print_derivation_info,
+	java_type_print_base):  New functions, for better Java output.
+	* jv-valprint.c:  Start to support Java-specific output.
+
 Sun Aug  3 08:18:09 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-valprint.c (c_val_print):  Use extract_address to retrieve

@@ -23,7 +23,7 @@ java_parse PARAMS ((void));	/* Defined in jv-exp.y */
 extern void
 java_error PARAMS ((char *));	/* Defined in jv-exp.y */
 
-#define JAVA_OBJECT_SIZE (6 * 4)  /* sizeof (struct Object) FIXME ! */
+#define JAVA_OBJECT_SIZE (1 * 4)  /* sizeof (struct Object) FIXME ! */
 
 extern struct type *java_int_type;
 extern struct type *java_byte_type;
