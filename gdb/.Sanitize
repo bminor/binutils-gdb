@@ -117,6 +117,7 @@ m88k-opcode.h
 m88k-pinsn.c
 m88k-tdep.c
 m88k-xdep.c
+mach386-xdep.c
 main.c
 mcheck.c
 mem-break.c
@@ -243,6 +244,7 @@ xm-bigmips.h
 xm-convex.h
 xm-hp300bsd.h
 xm-hp300hpux.h
+xm-i386mach.h
 xm-i386sco.h
 xm-i386v.h
 xm-i386v32.h
