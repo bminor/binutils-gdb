@@ -31,7 +31,7 @@ DEBUG	= -g
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
-# Whether to get roff to put indexing entries on stdout
+# Whether to get roff to put indexing entries on stderr
 #TEXI2OPT =
 # You neeed this to generate ld-index.ms
 TEXI2OPT = -i
@@ -208,10 +208,10 @@ ld.dvi: ld.texinfo
 ld.info: ld.texinfo
 	makeinfo ld.texinfo
 
-#edit instances of "ms" to "me" or "mm" to suit your preferences.
-# (we don't use a variable because we don't trust all makes to handle
-# a var in the target name right).
 # roff output (-ms)
+#   edit instances of "ms" to "me" or "mm" to suit your preferences.
+#   (we don't use a variable because we don't trust all makes to handle
+#   a var in the target name right).
 ld.ms: ld.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
