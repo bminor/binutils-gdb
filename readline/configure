@@ -6235,19 +6235,18 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_func_wcwidth" >&5
 echo "${ECHO_T}$ac_cv_func_wcwidth" >&6
 if test $ac_cv_func_wcwidth = yes; then
-  have_wcwidth=yes
-fi
-
-if test "$have_wcwidth" = yes; then
   cat >>confdefs.h <<\_ACEOF
 #define HAVE_WCWIDTH 1
 _ACEOF
 
-
-else
-  WCWIDTH_OBJ=wcwidth.o
-
 fi
+
+if test "$ac_cv_func_wcwidth" = no && test "$ac_cv_header_wchar_h" = yes; then
+  WCWIDTH_OBJ=wcwidth.o
+else
+  WCWIDTH_OBJ=
+fi
+
 
 echo "$as_me:$LINENO: checking for mbstate_t" >&5
 echo $ECHO_N "checking for mbstate_t... $ECHO_C" >&6
