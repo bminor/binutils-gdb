@@ -1,3 +1,8 @@
+2004-09-24  Paul Brook  <paul@codeosurcery.com>
+
+	* scripttempl/elf.sc: Keep .preinit_array, .init_array and
+	.fini_array sections.
+
 2004-09-19  Andreas Schwab  <schwab@suse.de>
 
 	* ldexp.c (fold_binary) [DATA_SEGMENT_ALIGN]: Adjust data segment

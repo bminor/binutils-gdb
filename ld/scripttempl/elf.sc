@@ -335,15 +335,15 @@ cat <<EOF
      be empty, which isn't pretty.  */
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
-  .preinit_array   ${RELOCATING-0} : { *(.preinit_array) }
+  .preinit_array   ${RELOCATING-0} : { KEEP (*(.preinit_array)) }
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
 
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
-  .init_array   ${RELOCATING-0} : { *(.init_array) }
+  .init_array   ${RELOCATING-0} : { KEEP (*(.init_array)) }
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
 
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
-  .fini_array   ${RELOCATING-0} : { *(.fini_array) }
+  .fini_array   ${RELOCATING-0} : { KEEP (*(.fini_array)) }
   ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
 
   ${RELOCATING+${CTOR}}
