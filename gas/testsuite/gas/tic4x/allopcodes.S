@@ -6,201 +6,236 @@
 ;;;  
 ;;;  To rebuild this file you must use
 ;;;    ./rebuild.sh
+;;;
+;;;  These definitions are used within this file:
+;;;    TEST_C3X    Enables testing of c3x opcodes
+;;;    TEST_C4X    Enables testing of c4x opcodes
+;;;    TEST_ENH    Enable testing of enhanced opcodes
+;;;    TEST_IDLE2  Enable testing of IDLE2 command
+;;;    TEST_LPWR   Enable testing of LOPOWER commands
 ;;; 
 #include "opclasses.h"
         
             .text
-start:      B_CLASS( absf )
-            P_CLASS( absf, stf )
-            A_CLASS( absi )
-            P_CLASS( absi, sti )
-            A_CLASS( addc )
-            TC_CLASS( addc )
-            B_CLASS( addf )
-            SC_CLASS( addf )
-            QC_CLASS( addf, stf )
-            A_CLASS( addi )
-            TC_CLASS( addi )
-            QC_CLASS( addi, sti )
-            AU_CLASS( and )
-            TC_CLASS( and )
-            QC_CLASS( and, sti )
-            AU_CLASS( andn )
-            T_CLASS( andn )
-            A_CLASS( ash )
-            T_CLASS( ash )
-            Q_CLASS( ash, sti )
-            J_CLASS( bC, b )
-            J_CLASS( bCd, bd )
+            ;;------------------------------------
+            ;;  C3X INSNS
+            ;;------------------------------------ 
+start:      B_CLASS(   absf,        TEST_C3X )
+            P_CLASS(   absf, stf,   TEST_C3X )
+            A_CLASS(   absi,        TEST_C3X )
+            P_CLASS(   absi, sti,   TEST_C3X )
+            A_CLASS(   addc,        TEST_C3X )
+            TC_CLASS(  addc,        TEST_C3X )
+            B_CLASS(   addf,        TEST_C3X )
+            SC_CLASS(  addf,        TEST_C3X )
+            QC_CLASS(  addf, stf,   TEST_C3X )
+            A_CLASS(   addi,        TEST_C3X )
+            TC_CLASS(  addi,        TEST_C3X )
+            QC_CLASS(  addi, sti,   TEST_C3X )
+            AU_CLASS(  and,         TEST_C3X )
+            TC_CLASS(  and,         TEST_C3X )
+            QC_CLASS(  and, sti,    TEST_C3X )
+            AU_CLASS(  andn,        TEST_C3X )
+            T_CLASS(   andn,        TEST_C3X )
+            A_CLASS(   ash,         TEST_C3X )
+            T_CLASS(   ash,         TEST_C3X )
+            Q_CLASS(   ash, sti,    TEST_C3X )
+            J_CLASS(   bC, b,       TEST_C3X )
+            J_CLASS(   bCd, bd,     TEST_C3X )
+            .ifdef TEST_C3X
 br_I:       br      start
 brd_I:      brd     start
 call_I:     call    start
 call_JS:    callc   R0
             callc   start
-            B_CLASS( cmpf )
-            S2_CLASS( cmpf )
-            A_CLASS( cmpi )
-            T2_CLASS( cmpi )
-            D_CLASS( dbC, db )
-            D_CLASS( dbCd, dbd )
-            AF_CLASS( fix )
-            P_CLASS( fix, sti )
-            BI_CLASS( float )
-            P_CLASS( float, stf )
+            .endif
+            B_CLASS(   cmpf,        TEST_C3X )
+            S2_CLASS(  cmpf,        TEST_C3X )
+            A_CLASS(   cmpi,        TEST_C3X )
+            T2_CLASS(  cmpi,        TEST_C3X )
+            D_CLASS(   dbC, db,     TEST_C3X )
+            D_CLASS(   dbCd, dbd,   TEST_C3X )
+            AF_CLASS(  fix,         TEST_C3X )
+            P_CLASS(   fix, sti,    TEST_C3X )
+            BI_CLASS(  float,       TEST_C3X )
+            P_CLASS(   float, stf,  TEST_C3X )
+            .ifdef TEST_C3X
 iack_Z:     iack    @start
             iack    *+AR0(1)
 idle_Z:     idle
+            .endif
             .ifdef TEST_IDLE2
 idle2_Z:    idle2
             .endif
-            B_CLASS( lde )
-            B_CLASS( ldf )
-            LL_CLASS( ldf )
-            P_CLASS( ldf, stf )
-            BB_CLASS( ldfC )
-            B6_CLASS( ldfi )
-            A_CLASS( ldi )
-            LL_CLASS( ldi )
-            P_CLASS( ldi, sti )
-            AB_CLASS( ldiC )
-            A6_CLASS( ldii )
+            B_CLASS(   lde,         TEST_C3X )
+            B_CLASS(   ldf,         TEST_C3X )
+            LL_CLASS(  ldf,         TEST_C3X )
+            P_CLASS(   ldf, stf,    TEST_C3X )
+            BB_CLASS(  ldfC,        TEST_C3X )
+            B6_CLASS(  ldfi,        TEST_C3X )
+            A_CLASS(   ldi,         TEST_C3X )
+            LL_CLASS(  ldi,         TEST_C3X )
+            P_CLASS(   ldi, sti,    TEST_C3X )
+            AB_CLASS(  ldiC,        TEST_C3X )
+            A6_CLASS(  ldii,        TEST_C3X )
+            .ifdef TEST_C3X
 ldp_Z:      ldp     start
-            B_CLASS( ldm )
+            .endif
+            B_CLASS(  ldm,          TEST_C3X )
             .ifdef TEST_LPWR
 lopower_Z:  lopower
             .endif
-            A_CLASS( lsh )
-            T_CLASS( lsh )
-            Q_CLASS( lsh, sti )
+            A_CLASS(   lsh,         TEST_C3X )
+            T_CLASS(   lsh,         TEST_C3X )
+            Q_CLASS(   lsh, sti,    TEST_C3X )
             .ifdef TEST_LPWR
 maxspeed_Z: maxspeed
             .endif
-            B_CLASS( mpyf )
-            SC_CLASS( mpyf )
-            M_CLASS( mpyf, addf )
-            QC_CLASS( mpyf, stf )
-            M_CLASS( mpyf, subf )
-            A_CLASS( mpyi )
-            TC_CLASS( mpyi )
-            M_CLASS( mpyi, addi )
-            QC_CLASS( mpyi, sti )
-            M_CLASS( mpyi, subi )
-            A_CLASS( negb )
-            B_CLASS( negf )
-            P_CLASS( negf, stf )
-            A_CLASS( negi )
-            P_CLASS( negi, sti )
-            A2_CLASS( nop )
-            B_CLASS( norm )
-            AU_CLASS( not )
-            P_CLASS( not, sti )
-            AU_CLASS( or )
-            TC_CLASS( or )
-            QC_CLASS( or, sti )
-            R_CLASS( pop )
-            RF_CLASS( popf )
-            R_CLASS( push )
-            RF_CLASS( pushf )
+            B_CLASS(   mpyf,        TEST_C3X )
+            SC_CLASS(  mpyf,        TEST_C3X )
+            M_CLASS(   mpyf, addf,  TEST_C3X )
+            QC_CLASS(  mpyf, stf,   TEST_C3X )
+            M_CLASS(   mpyf, subf,  TEST_C3X )
+            A_CLASS(   mpyi,        TEST_C3X )
+            TC_CLASS(  mpyi,        TEST_C3X )
+            M_CLASS(   mpyi, addi,  TEST_C3X )
+            QC_CLASS(  mpyi, sti,   TEST_C3X )
+            M_CLASS(   mpyi, subi,  TEST_C3X )
+            A_CLASS(   negb,        TEST_C3X )
+            B_CLASS(   negf,        TEST_C3X )
+            P_CLASS(   negf, stf,   TEST_C3X )
+            A_CLASS(   negi,        TEST_C3X )
+            P_CLASS(   negi, sti,   TEST_C3X )
+            A2_CLASS(  nop,         TEST_C3X )
+            B_CLASS(   norm,        TEST_C3X )
+            AU_CLASS(  not,         TEST_C3X )
+            P_CLASS(   not, sti,    TEST_C3X )
+            AU_CLASS(  or,          TEST_C3X )
+            TC_CLASS(  or,          TEST_C3X )
+            QC_CLASS(  or, sti,     TEST_C3X )
+            R_CLASS(   pop,         TEST_C3X )
+            RF_CLASS(  popf,        TEST_C3X )
+            R_CLASS(   push,        TEST_C3X )
+            RF_CLASS(  pushf,       TEST_C3X )
+            .ifdef TEST_C3X
 reti_Z:     retiC
             reti
 rets_Z:     retsC
             rets
-            B_CLASS( rnd )
-            R_CLASS( rol )
-            R_CLASS( rolc )
-            R_CLASS( ror )
-            R_CLASS( rorc )
+            .endif
+            B_CLASS(   rnd,         TEST_C3X )
+            R_CLASS(   rol,         TEST_C3X )
+            R_CLASS(   rolc,        TEST_C3X )
+            R_CLASS(   ror,         TEST_C3X )
+            R_CLASS(   rorc,        TEST_C3X )
+            .ifdef TEST_C3X
 rptb_I2:    rptb    start
-            A3_CLASS( rpts )
+            .endif
+            A3_CLASS(  rpts,        TEST_C3X )
+            .ifdef TEST_C3X
 sigi_Z:     sigi
-            B7_CLASS( stf )
-            LS_CLASS( stf )
-            B7_CLASS( stfi )
-            A7_CLASS( sti )
-            LS_CLASS( sti )
-            A7_CLASS( stii )
-            A_CLASS( subb )
-            T_CLASS( subb )
-            A_CLASS( subc )
-            B_CLASS( subf )
-            S_CLASS( subf )
-            Q_CLASS( subf, stf )
-            A_CLASS( subi )
-            T_CLASS( subi )
-            Q_CLASS( subi, sti )
-            A_CLASS( subrb )
-            B_CLASS( subrf )
-            A_CLASS( subri )
+            .endif
+            B7_CLASS(  stf,         TEST_C3X )
+            LS_CLASS(  stf,         TEST_C3X )
+            B7_CLASS(  stfi,        TEST_C3X )
+            A7_CLASS(  sti,         TEST_C3X )
+            LS_CLASS(  sti,         TEST_C3X )
+            A7_CLASS(  stii,        TEST_C3X )
+            A_CLASS(   subb,        TEST_C3X )
+            T_CLASS(   subb,        TEST_C3X )
+            A_CLASS(   subc,        TEST_C3X )
+            B_CLASS(   subf,        TEST_C3X )
+            S_CLASS(   subf,        TEST_C3X )
+            Q_CLASS(   subf, stf,   TEST_C3X )
+            A_CLASS(   subi,        TEST_C3X )
+            T_CLASS(   subi,        TEST_C3X )
+            Q_CLASS(   subi, sti,   TEST_C3X )
+            A_CLASS(   subrb,       TEST_C3X )
+            B_CLASS(   subrf,       TEST_C3X )
+            A_CLASS(   subri,       TEST_C3X )
+            .ifdef TEST_C3X
 swi_Z:      swi
 trap_Z:     trapC   10
             trap    10
-            AU_CLASS( tstb )
-            T2C_CLASS( tstb )
-            AU_CLASS( xor )
-            TC_CLASS( xor )
-            QC_CLASS( xor, sti )
-    
+            .endif
+            AU_CLASS(  tstb,        TEST_C3X )
+            T2C_CLASS( tstb,        TEST_C3X )
+            AU_CLASS(  xor,         TEST_C3X )
+            TC_CLASS(  xor,         TEST_C3X )
+            QC_CLASS(  xor, sti,    TEST_C3X )
+
+            ;;------------------------------------
+            ;;  C4X INSNS
+            ;;------------------------------------ 
             .ifdef  TEST_C4X
-            J_CLASS( bCaf, baf )
-            J_CLASS( bCat, bat )
-            B6_CLASS( frieee )
-            P_CLASS( frieee, stf )
+            J_CLASS(   bCaf, baf,   TEST_C4X )
+            J_CLASS(   bCat, bat,   TEST_C4X )
+            B6_CLASS(  frieee,      TEST_C4X )
+            P_CLASS(   frieee, stf, TEST_C4X )
+            .ifdef TEST_C4X
 laj_I:      laj     start
 laj_JS:     lajc    R0
             lajc    start
 lat_Z:      latC    10
-            A_CLASS( lb0 )
-            A_CLASS( lb1 )
-            A_CLASS( lb2 )
-            A_CLASS( lb3 )
-            AU_CLASS( lbu0 )
-            AU_CLASS( lbu1 )
-            AU_CLASS( lbu2 )
-            AU_CLASS( lbu3 )
-            AY_CLASS( lda )
+            .endif
+            A_CLASS(   lb0,         TEST_C4X )
+            A_CLASS(   lb1,         TEST_C4X )
+            A_CLASS(   lb2,         TEST_C4X )
+            A_CLASS(   lb3,         TEST_C4X )
+            AU_CLASS(  lbu0,        TEST_C4X )
+            AU_CLASS(  lbu1,        TEST_C4X )
+            AU_CLASS(  lbu2,        TEST_C4X )
+            AU_CLASS(  lbu3,        TEST_C4X )
+            AY_CLASS(  lda,         TEST_C4X )
+            .ifdef TEST_C4X
 ldep_Z:     ldep    IVTP, AR0
 ldhi_Z:     ldhi    35, R0
             ldhi    start, R0
 ldpe_Z:     ldpe    AR0, IVTP
 ldpk_Z:     ldpk    start
-            A_CLASS( lh0 )
-            A_CLASS( lh1 )
-            AU_CLASS( lhu0 )
-            AU_CLASS( lhu1 )
-            A_CLASS( lwl0 )
-            A_CLASS( lwl1 )
-            A_CLASS( lwl2 )
-            A_CLASS( lwl3 )
-            A_CLASS( lwr0 )
-            A_CLASS( lwr1 )
-            A_CLASS( lwr2 )
-            A_CLASS( lwr3 )
-            A_CLASS( mb0 )
-            A_CLASS( mb1 )
-            A_CLASS( mb2 )
-            A_CLASS( mb3 )
-            A_CLASS( mh0 )
-            A_CLASS( mh1 )
-            A_CLASS( mh2 )
-            A_CLASS( mh3 )
-            A_CLASS( mpyshi )
-            TC_CLASS( mpyshi )
-            A_CLASS( mpyuhi )
-            TC_CLASS( mpyuhi )
-            BA_CLASS( rcpf )
+            .endif
+            A_CLASS(   lh0,         TEST_C4X )
+            A_CLASS(   lh1,         TEST_C4X )
+            AU_CLASS(  lhu0,        TEST_C4X )
+            AU_CLASS(  lhu1,        TEST_C4X )
+            A_CLASS(   lwl0,        TEST_C4X )
+            A_CLASS(   lwl1,        TEST_C4X )
+            A_CLASS(   lwl2,        TEST_C4X )
+            A_CLASS(   lwl3,        TEST_C4X )
+            A_CLASS(   lwr0,        TEST_C4X )
+            A_CLASS(   lwr1,        TEST_C4X )
+            A_CLASS(   lwr2,        TEST_C4X )
+            A_CLASS(   lwr3,        TEST_C4X )
+            A_CLASS(   mb0,         TEST_C4X )
+            A_CLASS(   mb1,         TEST_C4X )
+            A_CLASS(   mb2,         TEST_C4X )
+            A_CLASS(   mb3,         TEST_C4X )
+            A_CLASS(   mh0,         TEST_C4X )
+            A_CLASS(   mh1,         TEST_C4X )
+            A_CLASS(   mh2,         TEST_C4X )
+            A_CLASS(   mh3,         TEST_C4X )
+            A_CLASS(   mpyshi,      TEST_C4X )
+            TC_CLASS(  mpyshi,      TEST_C4X )
+            A_CLASS(   mpyuhi,      TEST_C4X )
+            TC_CLASS(  mpyuhi,      TEST_C4X )
+            BA_CLASS(  rcpf,        TEST_C4X )
+            .ifdef TEST_C4X
 retid_Z:    retiCd
             retid
 rptb2_I2:   rptb    AR0
 rptbd_I2:   rptbd  start
             rptbd   AR0
-            B_CLASS( rsqrf )
-            A6_CLASS( sigi )
+            .endif
+            B_CLASS(   rsqrf,       TEST_C4X )
+            A6_CLASS(  sigi,        TEST_C4X )
+            .ifdef TEST_C4X
 sti2_A7:    sti     -5, @start
             sti     -5, *+AR0(5)
 stik_Z:     stik    -5, @start
             stik    -5, *+AR0(5)
-            B_CLASS( toieee )
-            P_CLASS( toieee, stf )
+            .endif
+            B_CLASS(   toieee,      TEST_C4X )
+            P_CLASS(   toieee, stf, TEST_C4X )
             .endif
             .end
         

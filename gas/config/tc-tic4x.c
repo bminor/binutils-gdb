@@ -42,22 +42,7 @@
   o Evaluation of constant floating point expressions (expr.c needs
     work!)
 
-  o Warnings issued if parallel load of same register. Applies to LL
-    class. Can be applied to destination of the LS class as well, but
-    the test will be more complex.
-
-  o Support 'abc' constants?
-
-  o Support new opcodes and implement a silicon version switch (maybe
-    -mpg)
-
-  o Disallow non-float registers in float instructions.
-
-  o Make sure the source and destination register is NOT equal when
-    the C4X LDA insn is used (arg mode Q,Y)
-
-  o Merge the C3x op-table and the c4x op-table, and adhere to the
-    last argument when parsing the hash.
+  o Support 'abc' constants (that is 0x616263)
 */
 
 #include <stdio.h>
@@ -88,8 +73,42 @@ static struct hash_control *c4x_op_hash = NULL;
 static struct hash_control *c4x_asg_hash = NULL;
 
 static unsigned int c4x_cpu = 0;	/* Default to TMS320C40.  */
+static unsigned int c4x_revision = 0;   /* CPU revision */
+static unsigned int c4x_idle2 = 0;      /* Idle2 support */
+static unsigned int c4x_lowpower = 0;   /* Lowpower support */
+static unsigned int c4x_enhanced = 0;   /* Enhanced opcode support */
 static unsigned int c4x_big_model = 0;	/* Default to small memory model.  */
 static unsigned int c4x_reg_args = 0;	/* Default to args passed on stack.  */
+static unsigned long c4x_oplevel = 0;   /* Opcode level */
+
+#define OPTION_CPU      'm'
+#define OPTION_BIG      (OPTION_MD_BASE + 1)
+#define OPTION_SMALL    (OPTION_MD_BASE + 2)
+#define OPTION_MEMPARM  (OPTION_MD_BASE + 3)
+#define OPTION_REGPARM  (OPTION_MD_BASE + 4)
+#define OPTION_IDLE2    (OPTION_MD_BASE + 5)
+#define OPTION_LOWPOWER (OPTION_MD_BASE + 6)
+#define OPTION_ENHANCED (OPTION_MD_BASE + 7)
+#define OPTION_REV      (OPTION_MD_BASE + 8)
+
+CONST char *md_shortopts = "bm:prs";
+struct option md_longopts[] =
+{
+  { "mcpu",   required_argument, NULL, OPTION_CPU },
+  { "mdsp",   required_argument, NULL, OPTION_CPU },
+  { "mbig",         no_argument, NULL, OPTION_BIG },
+  { "msmall",       no_argument, NULL, OPTION_SMALL },
+  { "mmemparm",     no_argument, NULL, OPTION_MEMPARM },
+  { "mregparm",     no_argument, NULL, OPTION_REGPARM },
+  { "midle2",       no_argument, NULL, OPTION_IDLE2 },
+  { "mlowpower",    no_argument, NULL, OPTION_LOWPOWER },
+  { "menhanced",    no_argument, NULL, OPTION_ENHANCED },
+  { "mrev",   required_argument, NULL, OPTION_REV },
+  { NULL, no_argument, NULL, 0 }
+};
+
+size_t md_longopts_size = sizeof (md_longopts);
+
 
 typedef enum
   {
@@ -185,7 +204,9 @@ static int c4x_indirect_parse
 static char *c4x_operand_parse
   PARAMS ((char *, c4x_operand_t *));
 static int c4x_operands_match
-  PARAMS ((c4x_inst_t *, c4x_insn_t *));
+  PARAMS ((c4x_inst_t *, c4x_insn_t *, int));
+static void c4x_insn_check
+  PARAMS ((c4x_insn_t *));
 static void c4x_insn_output
   PARAMS ((c4x_insn_t *));
 static int c4x_operands_parse
@@ -1239,11 +1260,11 @@ c4x_version (x)
   input_line_pointer =
     c4x_expression_abs (input_line_pointer, &temp);
   if (!IS_CPU_C3X (temp) && !IS_CPU_C4X (temp))
-    as_bad ("This assembler does not support processor generation %d\n",
+    as_bad ("This assembler does not support processor generation %d",
 	    temp);
 
   if (c4x_cpu && temp != c4x_cpu)
-    as_warn ("Changing processor generation on fly not supported...\n");
+    as_warn ("Changing processor generation on fly not supported...");
   c4x_cpu = temp;
   demand_empty_rest_of_line ();
 }
@@ -1389,6 +1410,11 @@ c4x_inst_add (insts)
 
   d = name;
 
+  /* We do not care about INSNs that is not a part of our
+     oplevel setting */
+  if (!insts->oplevel & c4x_oplevel)
+    return ok;
+
   while (1)
     {
       switch (*s)
@@ -1450,6 +1476,34 @@ md_begin ()
   int ok = 1;
   unsigned int i;
 
+  /* Setup the proper opcode level according to the
+     commandline parameters */
+  c4x_oplevel = OP_C3X;
+
+  if ( IS_CPU_C4X(c4x_cpu) )
+    c4x_oplevel |= OP_C4X;
+
+  if ( (   c4x_cpu == 31 && c4x_revision >= 6)
+       || (c4x_cpu == 32 && c4x_revision >= 2)
+       || (c4x_cpu == 33)
+       || c4x_enhanced )
+    c4x_oplevel |= OP_ENH;
+
+  if ( (   c4x_cpu == 30 && c4x_revision >= 7)
+       || (c4x_cpu == 31 && c4x_revision >= 5)
+       || (c4x_cpu == 32)
+       || c4x_lowpower )
+    c4x_oplevel |= OP_LPWR;
+
+  if ( (   c4x_cpu == 30 && c4x_revision >= 7)
+       || (c4x_cpu == 31 && c4x_revision >= 5)
+       || (c4x_cpu == 32)
+       || (c4x_cpu == 33)
+       || (c4x_cpu == 40 && c4x_revision >= 5)
+       || (c4x_cpu == 44)
+       || c4x_idle2 )
+    c4x_oplevel |= OP_IDLE2;
+
   /* Create hash table for mnemonics.  */
   c4x_op_hash = hash_new ();
 
@@ -1457,14 +1511,8 @@ md_begin ()
   c4x_asg_hash = hash_new ();
 
   /* Add mnemonics to hash table, expanding conditional mnemonics on fly.  */
-  for (i = 0; i < c3x_num_insts; i++)
-    ok &= c4x_inst_add ((void *) &c3x_insts[i]);
-
-  if (IS_CPU_C4X (c4x_cpu))
-    {
-      for (i = 0; i < c4x_num_insts; i++)
-	ok &= c4x_inst_add ((void *) &c4x_insts[i]);
-    }
+  for (i = 0; i < c4x_num_insts; i++)
+    ok &= c4x_inst_add ((void *) &c4x_insts[i]);
 
   /* Create dummy inst to avoid errors accessing end of table.  */
   c4x_inst_make ("", 0, "");
@@ -1695,12 +1743,12 @@ c4x_operand_parse (s, operand)
 
     case '*':
       ret = -1;
-      for (i = 0; i < num_indirects; i++)
+      for (i = 0; i < c4x_num_indirects; i++)
 	if ((ret = c4x_indirect_parse (operand, &c4x_indirects[i])))
 	  break;
       if (ret < 0)
 	break;
-      if (i < num_indirects)
+      if (i < c4x_num_indirects)
 	{
 	  operand->mode = M_INDIRECT;
 	  /* Indirect addressing mode number.  */
@@ -1753,9 +1801,10 @@ c4x_operand_parse (s, operand)
 }
 
 static int 
-c4x_operands_match (inst, insn)
+c4x_operands_match (inst, insn, check)
      c4x_inst_t *inst;
      c4x_insn_t *insn;
+     int check;
 {
   const char *args = inst->args;
   unsigned long opcode = inst->opcode;
@@ -1809,8 +1858,9 @@ c4x_operands_match (inst, insn)
                 }
               else
                 {
-		  as_bad ("LDF's immediate value of %ld is too large",
-			  (long) exp->X_add_number);
+		  if (!check)
+                    as_bad ("Immediate value of %ld is too large for ldf",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
                 }
@@ -1836,8 +1886,9 @@ c4x_operands_match (inst, insn)
                 }
               else
                 {
-		  as_bad ("Direct value of %ld is too large",
-			  (long) exp->X_add_number);
+		  if (!check)
+                    as_bad ("Direct value of %ld is too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
                 }
@@ -1858,7 +1909,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_AR0, 24, 22);
 	  else
 	    {
-	      as_bad ("Destination register must be ARn");
+              if (!check)
+                as_bad ("Destination register must be ARn");
 	      ret = -1;
 	    }
 	  continue;
@@ -1876,8 +1928,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Immediate value of %ld is too large",
-			  (long) exp->X_add_number);
+		  if (!check)
+                    as_bad ("Immediate value of %ld is too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -1904,8 +1957,9 @@ c4x_operands_match (inst, insn)
 	  if (operand->expr.X_add_number != 0
 	      && operand->expr.X_add_number != 0x18)
 	    {
-	      as_bad ("Invalid indirect addressing mode");
-	      ret = -1;
+              if (!check)
+                as_bad ("Invalid indirect addressing mode");
+              ret = -1;
 	      continue;
 	    }
 	  INSERTU (opcode, operand->aregno - REG_AR0, 2, 0);
@@ -1927,7 +1981,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg, 7, 0);
 	  else
 	    {
-	      as_bad ("Register must be Rn");
+              if (!check)
+                as_bad ("Register must be Rn");
 	      ret = -1;
 	    }
           continue;
@@ -1966,7 +2021,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg, 15, 8);
 	  else
 	    {
-	      as_bad ("Register must be Rn");
+              if (!check)
+                as_bad ("Register must be Rn");
 	      ret = -1;
 	    }
           continue;
@@ -1979,10 +2035,22 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_R0, 18, 16);
 	  else
 	    {
-	      as_bad ("Register must be R0--R7");
+              if (!check)
+                as_bad ("Register must be R0--R7");
 	      ret = -1;
 	    }
 	  continue;
+
+        case 'i':
+          if ( operand->mode == M_REGISTER
+               && c4x_oplevel & OP_ENH )
+            {
+              reg = exp->X_add_number;
+              INSERTU (opcode, reg, 4, 0);
+              INSERTU (opcode, 7, 7, 5);
+              continue;
+            }
+          /* Fallthrough */
 
 	case 'I':
 	  if (operand->mode != M_INDIRECT)
@@ -1991,14 +2059,26 @@ c4x_operands_match (inst, insn)
 	    {
 	      if (IS_CPU_C4X (c4x_cpu))
 		break;
-	      as_bad ("Invalid indirect addressing mode displacement %d",
-		      operand->disp);
+              if (!check)
+                as_bad ("Invalid indirect addressing mode displacement %d",
+                        operand->disp);
 	      ret = -1;
 	      continue;
 	    }
 	  INSERTU (opcode, operand->aregno - REG_AR0, 2, 0);
 	  INSERTU (opcode, operand->expr.X_add_number, 7, 3);
 	  continue;
+
+        case 'j':
+          if ( operand->mode == M_REGISTER
+               && c4x_oplevel & OP_ENH )
+            {
+              reg = exp->X_add_number;
+              INSERTU (opcode, reg, 12, 8);
+              INSERTU (opcode, 7, 15, 13);
+              continue;
+            }
+          /* Fallthrough */
 
 	case 'J':
 	  if (operand->mode != M_INDIRECT)
@@ -2007,8 +2087,9 @@ c4x_operands_match (inst, insn)
 	    {
 	      if (IS_CPU_C4X (c4x_cpu))
 		break;
-	      as_bad ("Invalid indirect addressing mode displacement %d",
-		      operand->disp);
+              if (!check)
+                as_bad ("Invalid indirect addressing mode displacement %d",
+                        operand->disp);
 	      ret = -1;
 	      continue;
 	    }
@@ -2024,7 +2105,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_R0, 21, 19);
 	  else
 	    {
-	      as_bad ("Register must be R0--R7");
+              if (!check)
+                as_bad ("Register must be R0--R7");
 	      ret = -1;
 	    }
 	  continue;
@@ -2037,7 +2119,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_R0, 24, 22);
 	  else
 	    {
-	      as_bad ("Register must be R0--R7");
+              if (!check)
+                as_bad ("Register must be R0--R7");
 	      ret = -1;
 	    }
 	  continue;
@@ -2050,7 +2133,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_R2, 22, 22);
 	  else
 	    {
-	      as_bad ("Destination register must be R2 or R3");
+              if (!check)
+                as_bad ("Destination register must be R2 or R3");
 	      ret = -1;
 	    }
 	  continue;
@@ -2063,7 +2147,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_R0, 23, 23);
 	  else
 	    {
-	      as_bad ("Destination register must be R0 or R1");
+              if (!check)
+                as_bad ("Destination register must be R0 or R1");
 	      ret = -1;
 	    }
 	  continue;
@@ -2077,7 +2162,8 @@ c4x_operands_match (inst, insn)
 	  if (operand->expr.X_add_number != 0
 	      && operand->expr.X_add_number != 0x18)
 	    {
-	      as_bad ("Invalid indirect addressing mode");
+              if (!check)
+                as_bad ("Invalid indirect addressing mode");
 	      ret = -1;
 	      continue;
 	    }
@@ -2098,8 +2184,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Displacement value of %ld is too large",
-			  (long) exp->X_add_number);
+                  if (!check)
+                    as_bad ("Displacement value of %ld is too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -2125,7 +2212,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg, 15, 0);
 	  else
 	    {
-	      as_bad ("Register must be Rn");
+              if (!check)
+                as_bad ("Register must be Rn");
 	      ret = -1;
 	    }
           continue;
@@ -2146,7 +2234,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg, 20, 16);
 	  else
 	    {
-	      as_bad ("Register must be Rn");
+              if (!check)
+                as_bad ("Register must be Rn");
 	      ret = -1;
 	    }
           continue;
@@ -2156,7 +2245,8 @@ c4x_operands_match (inst, insn)
 	    break;
 	  if (exp->X_op == O_big)
 	    {
-	      as_bad ("Floating point number not valid in expression");
+              if (!check)
+                as_bad ("Floating point number not valid in expression");
 	      ret = -1;
 	      continue;
 	    }
@@ -2169,8 +2259,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Signed immediate value %ld too large",
-			  (long) exp->X_add_number);
+		  if (!check)
+                    as_bad ("Signed immediate value %ld too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -2210,8 +2301,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Immediate value of %ld is too large",
-			  (long) exp->X_add_number);
+                  if (!check)
+                    as_bad ("Immediate value of %ld is too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -2230,8 +2322,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Unsigned immediate value %ld too large",
-			  (long) exp->X_add_number);
+                  if (!check)
+                    as_bad ("Unsigned immediate value %ld too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -2267,8 +2360,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Immediate value of %ld is too large",
-			  (long) exp->X_add_number);
+                  if (!check)
+                    as_bad ("Immediate value of %ld is too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -2282,7 +2376,8 @@ c4x_operands_match (inst, insn)
 	    break;
 	  if (exp->X_op == O_big)
 	    {
-	      as_bad ("Floating point number not valid in expression");
+              if (!check)
+                as_bad ("Floating point number not valid in expression");
 	      ret = -1;
 	      continue;
 	    }
@@ -2295,8 +2390,9 @@ c4x_operands_match (inst, insn)
 		}
 	      else
 		{
-		  as_bad ("Immediate value %ld too large",
-			  (long) exp->X_add_number);
+                  if (!check)
+                    as_bad ("Immediate value %ld too large",
+                            (long) exp->X_add_number);
 		  ret = -1;
 		  continue;
 		}
@@ -2313,7 +2409,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_IVTP, 4, 0);
 	  else
 	    {
-	      as_bad ("Register must be ivtp or tvtp");
+              if (!check)
+                as_bad ("Register must be ivtp or tvtp");
 	      ret = -1;
 	    }
 	  continue;
@@ -2326,7 +2423,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg, 20, 16);
 	  else
 	    {
-	      as_bad ("Register must be address register");
+              if (!check)
+                as_bad ("Register must be address register");
 	      ret = -1;
 	    }
 	  continue;
@@ -2339,7 +2437,8 @@ c4x_operands_match (inst, insn)
 	    INSERTU (opcode, reg - REG_IVTP, 20, 16);
 	  else
 	    {
-	      as_bad ("Register must be ivtp or tvtp");
+              if (!check)
+                as_bad ("Register must be ivtp or tvtp");
 	      ret = -1;
 	    }
 	  continue;
@@ -2383,6 +2482,38 @@ c4x_operands_match (inst, insn)
 	  BAD_CASE (*args);
 	}
       return 0;
+    }
+}
+
+static void
+c4x_insn_check (insn)
+     c4x_insn_t *insn;
+{
+  
+  if (!strcmp(insn->name, "lda"))
+    {
+      if (insn->num_operands < 2 || insn->num_operands > 2)
+        as_fatal ("Illegal internal LDA insn definition");
+
+      if ( insn->operands[0].mode == M_REGISTER
+           && insn->operands[1].mode == M_REGISTER
+           && insn->operands[0].expr.X_add_number == insn->operands[1].expr.X_add_number )
+        as_bad ("Source and destination register should not be equal");
+    }
+  else if( !strcmp(insn->name, "ldi_ldi")
+           || !strcmp(insn->name, "ldi1_ldi2")
+           || !strcmp(insn->name, "ldi2_ldi1")
+           || !strcmp(insn->name, "ldf_ldf")
+           || !strcmp(insn->name, "ldf1_ldf2")
+           || !strcmp(insn->name, "ldf2_ldf1") )
+    {
+      if ( insn->num_operands < 4 && insn->num_operands > 5 )
+        as_fatal ("Illegal internal %s insn definition", insn->name);
+      
+      if ( insn->operands[1].mode == M_REGISTER
+           && insn->operands[insn->num_operands-1].mode == M_REGISTER
+           && insn->operands[1].expr.X_add_number == insn->operands[insn->num_operands-1].expr.X_add_number )
+        as_warn ("Equal parallell destination registers, one result will be discarded");
     }
 }
 
@@ -2445,6 +2576,7 @@ md_assemble (str)
   int i;
   int parsed = 0;
   c4x_inst_t *inst;		/* Instruction template.  */
+  c4x_inst_t *first_inst;
 
   if (str && insn->parallel)
     {
@@ -2491,23 +2623,30 @@ md_assemble (str)
 	  return;
 	}
 
-      /* FIXME:  The list of templates should be scanned
-         for the candidates with the desired number of operands.
-         We shouldn't issue error messages until we have
-         whittled the list of candidate templates to the most
-         likely one...  We could cache a parsed form of the templates
-         to reduce the time required to match a template.  */
-
       inst = insn->inst;
-
+      first_inst = NULL;
       do
-	ok = c4x_operands_match (inst, insn);
-      while (!ok && !strcmp (inst->name, inst[1].name) && inst++);
+        {
+          ok = c4x_operands_match (inst, insn, 1);
+          if (ok < 0)
+            {
+              if (!first_inst)
+                first_inst = inst;
+              ok = 0;
+            }
+      } while (!ok && !strcmp (inst->name, inst[1].name) && inst++);
 
       if (ok > 0)
-	c4x_insn_output (insn);
+        {
+          c4x_insn_check (insn);
+          c4x_insn_output (insn);
+        }
       else if (!ok)
-	as_bad ("Invalid operands for %s", insn->name);
+        {
+          if (first_inst)
+            c4x_operands_match (first_inst, insn, 0);
+          as_bad ("Invalid operands for %s", insn->name);
+        }
       else
 	as_bad ("Invalid instruction %s", insn->name);
     }
@@ -2715,13 +2854,6 @@ md_estimate_size_before_relax (fragP, segtype)
   return 0;
 }
 
-CONST char *md_shortopts = "bm:prs";
-struct option md_longopts[] =
-{
-  {NULL, no_argument, NULL, 0}
-};
-
-size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -2730,25 +2862,54 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
-    case 'b':			/* big model */
-      c4x_big_model = 1;
-      break;
-    case 'm':			/* -m[c][34]x */
+    case OPTION_CPU:             /* cpu brand */
       if (tolower (*arg) == 'c')
 	arg++;
       c4x_cpu = atoi (arg);
       if (!IS_CPU_C3X (c4x_cpu) && !IS_CPU_C4X (c4x_cpu))
-	as_warn ("Unsupported processor generation %d\n", c4x_cpu);
+	as_warn ("Unsupported processor generation %d", c4x_cpu);
       break;
-    case 'p':			/* push args */
+
+    case OPTION_REV:             /* cpu revision */
+      c4x_revision = atoi (arg);
+      break;
+
+    case 'b':
+      as_warn ("Option -b is depreciated, please use -mbig");
+    case OPTION_BIG:             /* big model */
+      c4x_big_model = 1;
+      break;
+
+    case 'p':
+      as_warn ("Option -p is depreciated, please use -mmemparm");
+    case OPTION_MEMPARM:         /* push args */
       c4x_reg_args = 0;
       break;
-    case 'r':			/* register args */
+
+    case 'r':			
+      as_warn ("Option -r is depreciated, please use -mregparm");
+    case OPTION_REGPARM:        /* register args */
       c4x_reg_args = 1;
       break;
-    case 's':			/* small model */
+
+    case 's':
+      as_warn ("Option -s is depreciated, please use -msmall");
+    case OPTION_SMALL:		/* small model */
       c4x_big_model = 0;
       break;
+
+    case OPTION_IDLE2:
+      c4x_idle2 = 1;
+      break;
+
+    case OPTION_LOWPOWER:
+      c4x_lowpower = 1;
+      break;
+
+    case OPTION_ENHANCED:
+      c4x_enhanced = 1;
+      break;
+
     default:
       return 0;
     }
@@ -2760,15 +2921,26 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fputs ("\
-C[34]x options:\n\
--m30 | -m31 | -m32 | -m33 | -m40 | -m44\n\
-			specify variant of architecture\n\
--b                      big memory model\n\
--p                      pass arguments on stack\n\
--r                      pass arguments in registers (default)\n\
--s                      small memory model (default)\n",
-	 stream);
+  fprintf (stream,
+      _("\nTIC4X options:\n"
+	"  -mcpu=CPU  -mCPU        select architecture variant. CPU can be:\n"
+	"                            30 - TMS320C30\n"
+	"                            31 - TMS320C31, TMS320LC31\n"
+	"                            32 - TMS320C32\n"
+        "                            33 - TMS320VC33\n"
+	"                            40 - TMS320C40\n"
+	"                            44 - TMS320C44\n"
+        "  -mrev=REV               set cpu hardware revision (integer numbers).\n"
+        "                          Combinations of -mcpu and -mrev will enable/disable\n"
+        "                          the appropriate options (-midle2, -mlowpower and\n"
+        "                          -menhanced) according to the selected type\n"
+        "  -mbig                   select big memory model\n"
+        "  -msmall                 select small memory model (default)\n"
+        "  -mregparm               select register parameters (default)\n"
+        "  -mmemparm               select memory parameters\n"
+        "  -midle2                 enable IDLE2 support\n"
+        "  -mlowpower              enable LOPOWER and MAXSPEED support\n"
+        "  -menhanced              enable enhanced opcode support\n"));
 }
 
 /* This is called when a line is unrecognized.  This is used to handle
@@ -3010,7 +3182,7 @@ tc_gen_reloc (seg, fixP)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    "reloc %d not supported by object file format",
+		    "Reloc %d not supported by object file format",
 		    (int) fixP->fx_r_type);
       return NULL;
     }

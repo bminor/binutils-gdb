@@ -185,7 +185,7 @@ Disassembly of section .text:
   92:	20a02000.*
 
 00000093 <Type_K>:
-  93:	c400c0c0.*
+  93:	c408c0c0.*
   94:	c410c0c0.*
   95:	c438c0c0.*
 

@@ -231,7 +231,7 @@ Type_J: addf3   R0,*AR0,R0      ; Indirect addressing (G=10)
         ;;
         ;; Type K - Register (0-7)
         ;;
-Type_K: ldf     *AR0,R0 &|| ldf *AR0,R0
+Type_K: ldf     *AR0,R0 &|| ldf *AR0,R1
         ldf     *AR0,R0 &|| ldf *AR0,R2
         ldf     *AR0,R0 &|| ldf *AR0,R7
 

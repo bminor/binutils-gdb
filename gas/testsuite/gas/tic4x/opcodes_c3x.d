@@ -535,7 +535,7 @@ Disassembly of section .text:
  16e:	83000001.*
  16f:	83020001.*
 
-00000170 <addf3_mpyf3_M>:
+00000170 <addf3_mpyf_M>:
  170:	80080100.*
  171:	80100100.*
  172:	81000001.*
@@ -565,7 +565,7 @@ Disassembly of section .text:
  188:	83000001.*
  189:	83020001.*
 
-0000018a <addf3_mpyf_M>:
+0000018a <addf3_mpyf3_M>:
  18a:	80080100.*
  18b:	80100100.*
  18c:	81000001.*
@@ -671,7 +671,7 @@ Disassembly of section .text:
  1e2:	87000001.*
  1e3:	87020001.*
 
-000001e4 <subf3_mpyf3_M>:
+000001e4 <subf3_mpyf_M>:
  1e4:	84080100.*
  1e5:	84100100.*
  1e6:	85000001.*
@@ -701,7 +701,7 @@ Disassembly of section .text:
  1fc:	87000001.*
  1fd:	87020001.*
 
-000001fe <subf3_mpyf_M>:
+000001fe <subf3_mpyf3_M>:
  1fe:	84080100.*
  1ff:	84100100.*
  200:	85000001.*
@@ -814,7 +814,7 @@ Disassembly of section .text:
  25b:	8b000001.*
  25c:	8b020001.*
 
-0000025d <addi3_mpyi3_M>:
+0000025d <addi3_mpyi_M>:
  25d:	88080100.*
  25e:	88100100.*
  25f:	89000001.*
@@ -844,7 +844,7 @@ Disassembly of section .text:
  275:	8b000001.*
  276:	8b020001.*
 
-00000277 <addi3_mpyi_M>:
+00000277 <addi3_mpyi3_M>:
  277:	88080100.*
  278:	88100100.*
  279:	89000001.*
@@ -950,7 +950,7 @@ Disassembly of section .text:
  2cf:	8f000001.*
  2d0:	8f020001.*
 
-000002d1 <subi3_mpyi3_M>:
+000002d1 <subi3_mpyi_M>:
  2d1:	8c080100.*
  2d2:	8c100100.*
  2d3:	8d000001.*
@@ -980,7 +980,7 @@ Disassembly of section .text:
  2e9:	8f000001.*
  2ea:	8f020001.*
 
-000002eb <subi3_mpyi_M>:
+000002eb <subi3_mpyi3_M>:
  2eb:	8c080100.*
  2ec:	8c100100.*
  2ed:	8d000001.*

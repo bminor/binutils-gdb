@@ -22,7 +22,39 @@
 	* testsuite/gas/tic4x/tic4x.exp: Create
 	* testsuite/gas/tic4x/zeros.d: Create
 	* testsuite/gas/tic4x/zeros.s: Create 
-
+	* config/tc-tic4x.c: Fixed proper commandline
+	parameters. Added support for new opcode-list format. General
+	error message fixups.
+	(c4x_inst_add): Reject insn not for our CPU
+	(md_begin): Added matrix for setting the proper opcode-level &
+	device-flags according to cpu type and revision. Rewrite the
+	opcode hasher.
+	(c4x_operand_parse): Fix opcode bug
+	(c4x_operands_match): New function argument. Added dry-run
+	mechanism, that is optional error generation. Added constraint 'i'
+	and 'j'.
+	(c4x_insn_check): Added new function for post-verification of the
+	generated insn.
+	(md_assemble): Check all opcodes before croaking because of an
+	argument mismatch. Need this to be able to fully support
+	ortogonally arguments.
+	(md_parse_options): Revised commandprompt swicthes and added new
+	ones.
+	(md_show_usage): Complete rewrite of printout.
+	* testsuite/gas/tic4x/addressing.s: Fix bug in one insn
+	* testsuite/gas/tic4x/addressing_c3x.d: Update thereafter
+	* testsuite/gas/tic4x/addressing_c4x.d: Update thereafter
+	* testsuite/gas/tic4x/allopcodes.S: Add support for new
+	opclass.h changes
+	* testsuite/gas/tic4x/opclasses.h: Added testsuites for
+	the new enhanced opcodes.
+	* testsuite/gas/tic4x/opcodes.s: Regenerate
+	* testsuite/gas/tic4x/opcodes_c3x.d: Update from above
+	* testsuite/gas/tic4x/opcodes_c4x.d: Update from above
+	* testsuite/gas/tic4x/opcodes_new.d: Added new testsuite for
+	the enhanced and special insns.
+	* testsuite/gas/tic4x/tic4x.exp: Added the opcodes_new testsuite
+	
 2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c: Remove c4x_pseudo_ignore function.

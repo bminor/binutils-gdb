@@ -1,3 +1,12 @@
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: Added support for enhanced and special insn.
+	(c4x_print_op): Added insn class 'i' and 'j'
+	(c4x_hash_opcode_special): Add to support special insn
+	(c4x_hash_opcode): Update to support the new opcode-list
+	format. Add support for the new special insns.
+	(c4x_disassemble): New opcode-list support.
+
 2002-11-16  Klee Dienes  <kdienes@apple.com>
 
 	* m88k-dis.c: Include libiberty.h (for xmalloc).
