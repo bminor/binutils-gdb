@@ -18,6 +18,7 @@ Mon Aug 16 13:52:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* main.c (cd_command): If current_directory on entry is "/", then
 	don't append an extra slash.
+	Don't assume that /../.. means /.
 
 	* target.c (target_xfer_memory): Clear errno before calling
 	to_xfer_memory.
