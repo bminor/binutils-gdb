@@ -1,3 +1,7 @@
+Sat Aug 13 08:22:50 1994  Fred Fish  (fnf@cygnus.com)
+
+	* environ.c (init_environ):  If no environment, do nothing.
+
 Fri Aug 12 15:52:37 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* remote.c (remote_wait):  Return inferior_pid instead of 0 for
