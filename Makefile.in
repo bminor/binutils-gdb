@@ -65,7 +65,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils opcodes ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb binutils opcodes ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
 OTHERS = 
 
 ALL = all.normal
@@ -135,14 +135,14 @@ install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
-	all-byacc all-flex all-bfd all-ld all-gas all-tgas all-gcc \
-	all-binutils all-opcodes all-libg++ all-readline all-gdb \
+	all-byacc all-flex all-opcodes all-bfd all-ld all-gas all-tgas \
+	all-gcc all-binutils  all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
 	all-newlib all-gprof all-send_pr all-libm
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
-	all-bfd all-readline all-gdb all-binutils all-opcodes all-gcc \
+	 all-opcodes all-bfd all-readline all-gdb all-binutils all-gcc \
 	all-newlib
 #	$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
