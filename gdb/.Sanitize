@@ -86,7 +86,6 @@ gmalloc.c
 gmalloc.h
 gould-pinsn.c
 gould-xdep.c
-hp-include
 hp300ux-xdep.c
 i386-pinsn.c
 i386-stub.c

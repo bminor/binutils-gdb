@@ -224,8 +224,7 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # tdesc-lib cannot be named simply tdesc, because if it were, GNU make
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
-OTHERS = Makefile.in depend alldeps.mak \
-	 createtags munch configure configure.in config.sub \
+OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
 	 ChangeLog ChangeLog-3.x refcard.ps \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING $(YYFILES) \
@@ -235,7 +234,7 @@ OTHERS = Makefile.in depend alldeps.mak \
 
 # Subdirectories of gdb, which should be included in their entirety in
 # gdb-xxx.tar.Z:
-TARDIRS = doc hp-include # tests
+TARDIRS = doc # tests
 
 # GDB "info" files, which should be included in their entirety
 INFOFILES = gdb.info*
