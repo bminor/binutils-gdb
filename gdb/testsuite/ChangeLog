@@ -1,3 +1,10 @@
+2003-12-31  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.exp: Rewrite.  Clean up patterns to match
+	current versions of gcc, including gcc abi 2.  Use "breakpoint"
+	and "continue" instead of restarting the target program.  Use
+	gdb_test_multiple and gdb_test for all tests.
+
 2004-01-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Update copyright year.  Link statically
