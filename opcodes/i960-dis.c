@@ -1,5 +1,5 @@
 /* Disassemble i80960 instructions.
-   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -21,27 +21,27 @@ Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "dis-asm.h"
 
 static const char *const reg_names[] = {
-/*  0 */	"pfp", "sp",  "rip", "r3",  "r4",  "r5",  "r6",  "r7", 
+/*  0 */	"pfp", "sp",  "rip", "r3",  "r4",  "r5",  "r6",  "r7",
 /*  8 */	"r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
-/* 16 */	"g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7", 
-/* 24 */	"g8",  "g9",  "g10", "g11", "g12", "g13", "g14", "fp", 
-/* 32 */	"pc",  "ac",  "ip",  "tc",  "fp0", "fp1", "fp2", "fp3" 
+/* 16 */	"g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7",
+/* 24 */	"g8",  "g9",  "g10", "g11", "g12", "g13", "g14", "fp",
+/* 32 */	"pc",  "ac",  "ip",  "tc",  "fp0", "fp1", "fp2", "fp3"
 };
 
 
 static FILE *stream;		/* Output goes here */
 static struct disassemble_info *info;
-static void print_addr();
-static void ctrl();
-static void cobr();
-static void reg();
-static int mem();
-static void ea();
-static void dstop();
-static void regop();
-static void invalid();
-static int pinsn();
-static void put_abs();
+static void print_addr PARAMS ((bfd_vma));
+static void ctrl PARAMS ((bfd_vma, unsigned long, unsigned long));
+static void cobr PARAMS ((bfd_vma, unsigned long, unsigned long));
+static void reg PARAMS ((unsigned long));
+static int mem PARAMS ((bfd_vma, unsigned long, unsigned long, int));
+static void ea PARAMS ((bfd_vma, int, char *, char *, int, unsigned int));
+static void dstop PARAMS ((int, int, int));
+static void regop PARAMS ((int, int, int, int));
+static void invalid PARAMS ((int));
+static int pinsn PARAMS ((bfd_vma, unsigned long, unsigned long));
+static void put_abs PARAMS ((unsigned long, unsigned long));
 
 
 /* Print the i960 instruction at address 'memaddr' in debugged memory,
@@ -150,7 +150,7 @@ pinsn( memaddr, word1, word2 )
 		instr_len = mem( memaddr, word1, word2, 0 );
 		break;
 	default:
-		/* invalid instruction, print as data word */ 
+		/* invalid instruction, print as data word */
 		invalid( word1 );
 		break;
 	}
@@ -163,7 +163,8 @@ pinsn( memaddr, word1, word2 )
 static void
 ctrl( memaddr, word1, word2 )
     bfd_vma memaddr;
-    unsigned long word1, word2;
+    unsigned long word1;
+    unsigned long word2 ATTRIBUTE_UNUSED;
 {
 	int i;
 	static const struct tabent ctrl_tab[] = {
@@ -229,7 +230,8 @@ ctrl( memaddr, word1, word2 )
 static void
 cobr( memaddr, word1, word2 )
     bfd_vma memaddr;
-    unsigned long word1, word2;
+    unsigned long word1;
+    unsigned long word2 ATTRIBUTE_UNUSED;
 {
 	int src1;
 	int src2;
@@ -493,33 +495,33 @@ reg( word1 )
 	  { 0x58d,	"notor",	3 },
 	  { 0x58e,	"nand",		3 },
 	  { 0x58f,	"alterbit",	3 },
-	  { 0x590, 	"addo",		3 },
-	  { 0x591, 	"addi",		3 },
-	  { 0x592, 	"subo",		3 },
-	  { 0x593, 	"subi",		3 },
+	  { 0x590,	"addo",		3 },
+	  { 0x591,	"addi",		3 },
+	  { 0x592,	"subo",		3 },
+	  { 0x593,	"subi",		3 },
 	  { 0x594,	"cmpob",	2 },
 	  { 0x595,	"cmpib",	2 },
 	  { 0x596,	"cmpos",	2 },
 	  { 0x597,	"cmpis",	2 },
-	  { 0x598, 	"shro",		3 },
-	  { 0x59a, 	"shrdi",	3 },
-	  { 0x59b, 	"shri",		3 },
-	  { 0x59c, 	"shlo",		3 },
-	  { 0x59d, 	"rotate",	3 },
-	  { 0x59e, 	"shli",		3 },
-	  { 0x5a0, 	"cmpo",		2 },
-	  { 0x5a1, 	"cmpi",		2 },
-	  { 0x5a2, 	"concmpo",	2 },
-	  { 0x5a3, 	"concmpi",	2 },
-	  { 0x5a4, 	"cmpinco",	3 },
-	  { 0x5a5, 	"cmpinci",	3 },
-	  { 0x5a6, 	"cmpdeco",	3 },
-	  { 0x5a7, 	"cmpdeci",	3 },
-	  { 0x5ac, 	"scanbyte",	2 },
+	  { 0x598,	"shro",		3 },
+	  { 0x59a,	"shrdi",	3 },
+	  { 0x59b,	"shri",		3 },
+	  { 0x59c,	"shlo",		3 },
+	  { 0x59d,	"rotate",	3 },
+	  { 0x59e,	"shli",		3 },
+	  { 0x5a0,	"cmpo",		2 },
+	  { 0x5a1,	"cmpi",		2 },
+	  { 0x5a2,	"concmpo",	2 },
+	  { 0x5a3,	"concmpi",	2 },
+	  { 0x5a4,	"cmpinco",	3 },
+	  { 0x5a5,	"cmpinci",	3 },
+	  { 0x5a6,	"cmpdeco",	3 },
+	  { 0x5a7,	"cmpdeci",	3 },
+	  { 0x5ac,	"scanbyte",	2 },
 	  { 0x5ad,	"bswap",	-2 },
-	  { 0x5ae, 	"chkbit",	2 },
-	  { 0x5b0, 	"addc",		3 },
-	  { 0x5b2, 	"subc",		3 },
+	  { 0x5ae,	"chkbit",	2 },
+	  { 0x5b0,	"addc",		3 },
+	  { 0x5b2,	"subc",		3 },
 	  { 0x5b4,	"intdis",	0 },
 	  { 0x5b5,	"inten",	0 },
 	  { 0x5cc,	"mov",		-2 },
@@ -573,7 +575,7 @@ reg( word1 )
 	  { 0x66f,	"syncf",	0 },
 	  { 0x670,	"emul",		3 },
 	  { 0x671,	"ediv",		3 },
-	  { 0x673, 	"ldtime",	-1 },
+	  { 0x673,	"ldtime",	-1 },
 	  { 0x674,	"Fcvtir",	-2 },
 	  { 0x675,	"Fcvtilr",	-2 },
 	  { 0x676,	"Fscalerl",	3 },
@@ -612,9 +614,9 @@ reg( word1 )
 	  { 0x6c3,	"Fcvtzril",	-2 },
 	  { 0x6c9,	"Fmovr",	-2 },
 	  { 0x6d9,	"Fmovrl",	-2 },
-	  { 0x6e1, 	"Fmovre",	-2 },
-	  { 0x6e2, 	"Fcpysre",	3 },
-	  { 0x6e3, 	"Fcpyrsre",	3 },
+	  { 0x6e1,	"Fmovre",	-2 },
+	  { 0x6e2,	"Fcpysre",	3 },
+	  { 0x6e3,	"Fcpyrsre",	3 },
 	  { 0x701,	"mulo",		3 },
 	  { 0x708,	"remo",		3 },
 	  { 0x70b,	"divo",		3 },
@@ -765,7 +767,7 @@ ea( memaddr, mode, reg2, reg3, word1, word2 )
 	scale = scale_tab[scale];
 
 	switch (mode) {
-	case 4:	 					/* (reg) */
+	case 4:						/* (reg) */
 		(*info->fprintf_func)( stream, "(%s)", reg2 );
 		break;
 	case 5:						/* displ+8(ip) */
@@ -809,7 +811,7 @@ ea( memaddr, mode, reg2, reg3, word1, word2 )
 
 
 /************************************************/
-/* Register Instruction Operand  		*/
+/* Register Instruction Operand		*/
 /************************************************/
 static void
 regop( mode, spec, reg, fp )
@@ -873,7 +875,7 @@ invalid( word1 )
     int word1;
 {
 	(*info->fprintf_func)( stream, ".word\t0x%08x", (unsigned) word1 );
-}	
+}
 
 static void
 print_addr(a)
@@ -884,7 +886,8 @@ bfd_vma a;
 
 static void
 put_abs( word1, word2 )
-    unsigned long word1, word2;
+    unsigned long word1 ATTRIBUTE_UNUSED;
+    unsigned long word2 ATTRIBUTE_UNUSED;
 {
 #ifdef IN_GDB
 	return;

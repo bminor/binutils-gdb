@@ -45,8 +45,12 @@ static int print_insn_mips
   PARAMS ((bfd_vma, unsigned long int, struct disassemble_info *));
 static void print_insn_arg
   PARAMS ((const char *, unsigned long, bfd_vma, struct disassemble_info *));
+static void mips_isa_type
+  PARAMS ((int, int *, int *));
 static int print_insn_mips16
   PARAMS ((bfd_vma, struct disassemble_info *));
+static int is_newabi
+  PARAMS ((Elf_Internal_Ehdr *));
 static void print_mips16_insn_arg
   PARAMS ((int, const struct mips_opcode *, int, boolean, int, bfd_vma,
 	   struct disassemble_info *));

@@ -1,3 +1,19 @@
+2001-08-21  Andreas Jaeger  <aj@suse.de>
+
+	* i960-dis.c: Add parameters for prototypes
+	(ctrl): Add unused attributes.
+	(cobr): Likewise.
+	(put_abs): Likewise.
+
+	* mips-dis.c: Add missing prototypes.
+	* a29k-dis.c: Likewise.
+	* arc-dis.c: Likewise.
+	* ia64-opc.c: Likewise.
+
+	* s390-dis.c: Add missing prototypes.
+	(init_disasm): Remove unused attribute since the parameter is
+	used.
+
 2001-08-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-opc.c (M1): Define. Reformatted Code.
@@ -72,8 +88,8 @@
 
 2001-07-28  Matthias Kramm <kramm@quiss.org>
 
-	* i386-dis.c: Change formatting conventions for architecture 
-	i386:intel to better match the format of various intel i386 
+	* i386-dis.c: Change formatting conventions for architecture
+	i386:intel to better match the format of various intel i386
 	assemblers, like nasm, tasm or masm.
 
 2001-07-24  Alan Modra  <amodra@bigpond.net.au>
@@ -116,9 +132,9 @@
         * cgen-asm.in: Include "xregex.h" always to enable the libiberty
         regex support.
         (@arch@_cgen_build_insn_regex): New routine from Graydon.
-        (@arch@_cgen_assemble_insn): Add Graydon's code to use regex 
+        (@arch@_cgen_assemble_insn): Add Graydon's code to use regex
 	to verify if it is worth parsing the insn as insn "x".  Also update
-	error message when insn is not a recognized format of the insn vs 
+	error message when insn is not a recognized format of the insn vs
 	when the insn is completely unrecognized.
 
 2001-07-11  Frank Ch. Eigler  <fche@redhat.com>

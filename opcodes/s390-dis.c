@@ -29,11 +29,15 @@ static int init_flag = 0;
 static int opc_index[256];
 static int current_arch_mask = 0;
 
+static void init_disasm PARAMS ((struct disassemble_info *));
+static unsigned int s390_extract_operand
+  PARAMS ((unsigned char *, const struct s390_operand *));
+
 /* Set up index table for first opcode byte.  */
 
 static void
 init_disasm (info)
-     struct disassemble_info *info ATTRIBUTE_UNUSED;
+     struct disassemble_info *info;
 {
   const struct s390_opcode *opcode;
   const struct s390_opcode *opcode_end;
