@@ -283,7 +283,7 @@ disassemble (memaddr, info, insn, extension, size)
 	  && size == mysize)
 	{
 	  const unsigned char *opindex_ptr;
-	  unsigned int nocomma, memop;
+	  unsigned int nocomma;
 	  int paren = 0;
 	  
 	  match = 1;
@@ -304,7 +304,7 @@ disassemble (memaddr, info, insn, extension, size)
 		  value = insn & ((1 << operand->bits) - 1);
 		  value <<= (32 - operand->bits);
 		  temp = extension >> operand->shift;
-		  temp &= ((1 << 32 - operand->bits) - 1);
+		  temp &= ((1 << (32 - operand->bits)) - 1);
 		  value |= temp;
 		}
 	      else if ((operand->flags & MN10300_OPERAND_EXTENDED) != 0)

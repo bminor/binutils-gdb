@@ -1,3 +1,10 @@
+Fri Dec  6 14:48:09 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c: Add some comments explaining the various
+ 	operands and such.
+
+	* mn10300-dis.c (disassemble): Fix minor gcc -Wall warnings.
+
 Thu Dec  5 12:09:48 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-dis.c (print_insn_arg): Handle new < and > operand

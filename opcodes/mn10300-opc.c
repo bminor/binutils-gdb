@@ -23,51 +23,71 @@ const struct mn10300_operand mn10300_operands[] = {
 #define UNUSED	0
   {0, 0, 0}, 
 
+/* dn register in the first register operand position.  */
 #define DN0      (UNUSED+1)
   {2, 0, MN10300_OPERAND_DREG},
 
+/* dn register in the second register operand position.  */
 #define DN1      (DN0+1)
   {2, 2, MN10300_OPERAND_DREG},
 
+/* dn register in the third register operand position.  */
 #define DN2      (DN1+1)
   {2, 4, MN10300_OPERAND_DREG},
 
+/* dm register in the first register operand position.  */
 #define DM0      (DN2+1)
   {2, 0, MN10300_OPERAND_DREG},
 
+/* dm register in the second register operand position.  */
 #define DM1      (DM0+1)
   {2, 2, MN10300_OPERAND_DREG},
 
+/* dm register in the third register operand position.  */
 #define DM2      (DM1+1)
   {2, 4, MN10300_OPERAND_DREG},
 
+/* an register in the first register operand position.  */
 #define AN0      (DM2+1)
   {2, 0, MN10300_OPERAND_AREG},
 
+/* an register in the second register operand position.  */
 #define AN1      (AN0+1)
   {2, 2, MN10300_OPERAND_AREG},
 
+/* an register in the third register operand position.  */
 #define AN2      (AN1+1)
   {2, 4, MN10300_OPERAND_AREG},
 
+/* am register in the first register operand position.  */
 #define AM0      (AN2+1)
   {2, 0, MN10300_OPERAND_AREG},
 
+/* am register in the second register operand position.  */
 #define AM1      (AM0+1)
   {2, 2, MN10300_OPERAND_AREG},
 
+/* am register in the third register operand position.  */
 #define AM2      (AM1+1)
   {2, 4, MN10300_OPERAND_AREG},
 
+/* 8 bit unsigned immediate which may promote to a 16bit
+   unsigned immediate.  */
 #define IMM8    (AM2+1)
   {8, 0, MN10300_OPERAND_PROMOTE},
 
+/* 16 bit unsigned immediate which may promote to a 32bit
+   unsigned immediate.  */
 #define IMM16    (IMM8+1)
   {16, 0, MN10300_OPERAND_PROMOTE},
 
+/* 16 bit pc-relative immediate which may promote to a 16bit
+   pc-relative immediate.  */
 #define IMM16_PCREL    (IMM16+1)
   {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_PCREL},
 
+/* 16bit unsigned dispacement in a memory operation which
+   may promote to a 32bit displacement.  */
 #define IMM16_MEM    (IMM16_PCREL+1)
   {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
 
@@ -79,9 +99,11 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM32    (IMM16_MEM+1)
   {16, 0, MN10300_OPERAND_SPLIT},
 
+/* 32bit pc-relative offset.  */
 #define IMM32_PCREL    (IMM32+1)
   {16, 0, MN10300_OPERAND_SPLIT | MN10300_OPERAND_PCREL},
 
+/* 32bit memory offset.  */
 #define IMM32_MEM    (IMM32_PCREL+1)
   {16, 0, MN10300_OPERAND_SPLIT | MN10300_OPERAND_MEMADDR},
 
@@ -111,63 +133,82 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM32_HIGH24_LOWSHIFT16    (IMM32_HIGH24+1)
   {24, 16, MN10300_OPERAND_SPLIT | MN10300_OPERAND_PCREL},
 
+/* Stack pointer.  */
 #define SP    (IMM32_HIGH24_LOWSHIFT16+1)
   {8, 0, MN10300_OPERAND_SP},
 
+/* Processor status word.  */
 #define PSW    (SP+1)
   {0, 0, MN10300_OPERAND_PSW},
 
+/* MDR register.  */
 #define MDR    (PSW+1)
   {0, 0, MN10300_OPERAND_MDR},
 
+/* Index register.  */
 #define DI (MDR+1)
   {2, 2, MN10300_OPERAND_DREG},
 
+/* 8 bit signed displacement, may promote to 16bit signed dispacement.  */
 #define SD8    (DI+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
+/* 16 bit signed displacement, may promote to 32bit dispacement.  */
 #define SD16    (SD8+1)
   {16, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
+/* 8 bit signed displacement that can not promote.  */
 #define SD8N    (SD16+1)
   {8, 0, MN10300_OPERAND_SIGNED},
 
+/* 8 bit pc-relative displacement.  */
 #define SD8N_PCREL    (SD8N+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PCREL},
 
+/* 8 bit signed displacement shifted left 8 bits in the instruction.  */
 #define SD8N_SHIFT8    (SD8N_PCREL+1)
   {8, 8, MN10300_OPERAND_SIGNED},
 
+/* 8 bit signed immediate which may promote to 16bit signed immediate.  */
 #define SIMM8    (SD8N_SHIFT8+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
+/* 16 bit signed immediate which may promote to 32bit  immediate.  */
 #define SIMM16    (SIMM8+1)
   {16, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
+/* Either an open paren or close paren.  */
 #define PAREN	(SIMM16+1)
   {0, 0, MN10300_OPERAND_PAREN}, 
 
+/* dn register that appears in the first and second register positions.  */
 #define DN01     (PAREN+1)
   {2, 0, MN10300_OPERAND_DREG | MN10300_OPERAND_REPEATED},
 
+/* an register that appears in the first and second register positions.  */
 #define AN01     (DN01+1)
   {2, 0, MN10300_OPERAND_AREG | MN10300_OPERAND_REPEATED},
 
+/* 16bit pc-relative displacement which may promote to 32bit pc-relative
+   displacement.  */
 #define D16_SHIFT (AN01+1)
   {16, 8, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_PCREL},
 
+/* 8 bit immediate found in the extension word.  */
 #define IMM8E    (D16_SHIFT+1)
   {8, 0, MN10300_OPERAND_EXTENDED},
 
+/* Register list found in the extension word shifted 8 bits left.  */
 #define REGSE_SHIFT8    (IMM8E+1)
   {8, 8, MN10300_OPERAND_EXTENDED | MN10300_OPERAND_REG_LIST},
 
+/* Register list shifted 8 bits left.  */
 #define REGS_SHIFT8 (REGSE_SHIFT8 + 1)
   {8, 8, MN10300_OPERAND_REG_LIST},
 
+/* Reigster list.  */
 #define REGS    (REGS_SHIFT8+1)
   {8, 0, MN10300_OPERAND_REG_LIST},
-
 } ; 
 
 #define MEM(ADDR) PAREN, ADDR, PAREN 
