@@ -129,19 +129,19 @@ const struct v850_operand v850_operands[] = {
 
 const struct v850_opcode v850_opcodes[] = {
 /* load/store instructions */
-{ "sld.b",	OP(0x00),		OP_MASK,	IF4A, 2 },
-{ "sld.h",	OP(0x00),		OP_MASK,	IF4C, 2 },
-{ "sld.w",	OP(0x00),		OP_MASK,	IF4C, 2 },
+{ "sld.b",	one(0x0300),		one(0x0780),	IF4A, 2 },
+{ "sld.h",	one(0x0400),		one(0x0780),	IF4A, 2 },
+{ "sld.w",	one(0x0500),		one(0x0780),	IF4A, 2 },
 { "sst.b",	OP(0x00),		OP_MASK,	IF4B, 2 },
 { "sst.h",	OP(0x00),		OP_MASK,	IF4D, 2 },
 { "sst.w",	OP(0x00),		OP_MASK,	IF4D, 2 },
 
-{ "ld.b",	OP(0x00),		OP_MASK,	IF7A, 4 },
-{ "ld.h",	OP(0x00),		OP_MASK,	IF7A, 4 },
-{ "ld.w",	OP(0x00),		OP_MASK,	IF7A, 4 },
-{ "st.b",	OP(0x00),		OP_MASK,	IF7B, 4 },
-{ "st.h",	OP(0x00),		OP_MASK,	IF7B, 4 },
-{ "st.w",	OP(0x00),		OP_MASK,	IF7B, 4 },
+{ "ld.b",	two(0x0700,0x0000),	two (0x07e0,0x0000),	IF7A, 4 },
+{ "ld.h",	two(0x0720,0x0000),	two (0x07e0,0x0001),	IF7A, 4 },
+{ "ld.w",	two(0x0720,0x0001),	two (0x07e0,0x0001),	IF7A, 4 },
+{ "st.b",	two(0x0740,0x0000),	two (0x07e0,0x0000),	IF7B, 4 },
+{ "st.h",	two(0x0760,0x0000),	two (0x07e0,0x0001),	IF7B, 4 },
+{ "st.w",	two(0x0760,0x0001),	two (0x07e0,0x0001),	IF7B, 4 },
 
 /* arithmetic operation instructions */
 { "mov",        OP(0x00),		OP_MASK,	IF1, 2 },
