@@ -1,5 +1,7 @@
 2004-07-08  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/attach.exp: Cleanup copyright.  Re-indent.
+
 	* gdb.base/sigbpt.exp: Make the common part of each test name a
 	prefix instead of suffix.
 
