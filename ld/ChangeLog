@@ -1,3 +1,8 @@
+Wed May 10 18:37:59 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* scripttempl/hppaelf.sc:  Remove .PARISC.unwind section from text
+	segment.  This allows ld -r to preserve unwind sections.
+
 Tue May  9 17:19:57 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: Add little endian PowerPC support.
