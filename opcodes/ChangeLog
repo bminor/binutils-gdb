@@ -1,3 +1,8 @@
+Wed Jul 17 10:12:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Fix bugs in coldfire insns relating
+ 	to bcc, trapfl, subxl, and wddata discovered by Andreas Schwab.
+
 Mon Jul 15 16:59:55 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* i386-dis.c:  Get rid of print_insn_i8086.  Use info.mach to
