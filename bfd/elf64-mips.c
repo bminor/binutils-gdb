@@ -1371,9 +1371,9 @@ mips_elf64_be_swap_reloca_out (abfd, src, dst)
   BFD_ASSERT(src[1].r_addend == 0);
   BFD_ASSERT(src[2].r_addend == 0);
 
-  mirela.r_type2 = ELF64_MIPS_R_TYPE2 (src[1].r_info);
+  mirela.r_type2 = ELF64_MIPS_R_TYPE (src[1].r_info);
   mirela.r_ssym = ELF64_MIPS_R_SSYM (src[1].r_info);
-  mirela.r_type3 = ELF64_MIPS_R_TYPE3 (src[2].r_info);
+  mirela.r_type3 = ELF64_MIPS_R_TYPE (src[2].r_info);
 
   mips_elf64_swap_reloca_out (abfd, &mirela,
 			      (Elf64_Mips_External_Rela *) dst);
