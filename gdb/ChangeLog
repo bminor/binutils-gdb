@@ -1,3 +1,19 @@
+Sun Aug  6 22:14:25 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (frame_saved_pc): Don't try to dig a return pointer
+	out of a long branch stub.
+
+Fri Aug  4 13:37:31 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* xcoffread.c (process_linenos): Fix typo in last change.
+
+Thu Aug  3 22:01:26 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* ch-exp.y (write_lower_upper_value):  Add prototype so bison
+	generated parser will insert prototype before first func usage.
+	Bison and byacc order the output sections differently.  Also
+	make function static.
+
 Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Update all FSF addresses except those in COPYING* files.

@@ -863,9 +863,13 @@ restart:
     }
 
   /* If PC is inside a linker stub, then dig out the address the stub
-     will return to.  */
+     will return to. 
+
+     Don't do this for long branch stubs.  Why?  For some unknown reason
+     _start is marked as a long branch stub in hpux10.  */
   u = find_unwind_entry (pc);
-  if (u && u->stub_type != 0)
+  if (u && u->stub_type != 0
+      && u->stub_type != LONG_BRANCH)
     {
       unsigned int insn;
 
