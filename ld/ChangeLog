@@ -1,5 +1,8 @@
 2004-10-11  Jakub Jelinek  <jakub@redhat.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_parse_ld_so_conf): Avoid
+	getline for portability.
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_ld_so_conf): New structure.
 	(gld${EMULATION_NAME}_parse_ld_so_conf,
 	gld${EMULATION_NAME}_parse_ld_so_conf_include): New functions.

@@ -563,15 +563,30 @@ gld${EMULATION_NAME}_parse_ld_so_conf
      (struct gld${EMULATION_NAME}_ld_so_conf *info, const char *filename)
 {
   FILE *f = fopen (filename, FOPEN_RT);
-  char *line = NULL;
-  size_t linelen = 0;
+  char *line;
+  size_t linelen;
 
   if (f == NULL)
     return;
 
-  while (getline (&line, &linelen, f) != -1)
+  linelen = 256;
+  line = xmalloc (linelen);
+  do
     {
-      char *p;
+      char *p = line, *q;
+
+      /* Normally this would use getline(3), but we need to be portable.  */
+      while ((q = fgets (p, linelen - (p - line), f)) != NULL
+	     && strlen (q) == linelen - (p - line) - 1
+	     && line[linelen - 2] != '\n')
+	{
+	  line = xrealloc (line, 2 * linelen);
+	  p = line + linelen - 1;
+	  linelen += linelen;
+	}
+
+      if (q == NULL && p == line)
+	break;
 
       p = strchr (line, '\n');
       if (p)
@@ -647,6 +662,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf
 	  info->path[info->len] = '\0';
 	}
     }
+  while (! feof (f));
   free (line);
   fclose (f);
 }
