@@ -26,6 +26,13 @@
 
 /* Unless explicitly specified, GDB obstacks always use xmalloc() and
    xfree().  */
+/* Note: ezannoni 2004-02-09: One could also specify the allocation
+   functions using a special init function for each obstack,
+   obstack_specify_allocation.  However we just use obstack_init and
+   let these defines here do the job.  While one could argue the
+   superiority of one approach over the other, we just chose one
+   throughout.  */
+
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
 

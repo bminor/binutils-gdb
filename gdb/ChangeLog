@@ -1,5 +1,15 @@
 2004-02-09  Elena Zannoni  <ezannoni@redhat.com>
 
+	* bcache.c (bcache_xmalloc): Use obstack_init instead of
+	obstack_specify_allocation.
+	* objfiles.c (allocate_objfile): Ditto.
+	* solib-sunos.c (solib_add_common_symbols) 
+	(allocate_rt_common_objfile): Ditto.
+	* symfile.c (reread_symbols): Ditto.
+	* gdb_obstack.h: Add comment.
+
+2004-02-09  Elena Zannoni  <ezannoni@redhat.com>
+
 	* linespec.c (decode_line_1, locate_first_half)
 	(decode_compound, lookup_prefix_sym): Update comments. Delete old
 	commented out code.

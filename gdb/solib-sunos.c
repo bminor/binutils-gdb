@@ -145,8 +145,7 @@ allocate_rt_common_objfile (void)
   objfile->md = NULL;
   objfile->psymbol_cache = bcache_xmalloc ();
   objfile->macro_cache = bcache_xmalloc ();
-  obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
-			      xfree);
+  obstack_init (&objfile->objfile_obstack);
   objfile->name = mstrsave (objfile->md, "rt_common");
 
   /* Add this file onto the tail of the linked list of other such files. */
@@ -182,8 +181,7 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
   if (rt_common_objfile != NULL && rt_common_objfile->minimal_symbol_count)
     {
       obstack_free (&rt_common_objfile->objfile_obstack, 0);
-      obstack_specify_allocation (&rt_common_objfile->objfile_obstack, 0, 0,
-				  xmalloc, xfree);
+      obstack_init (&rt_common_objfile->objfile_obstack);
       rt_common_objfile->minimal_symbol_count = 0;
       rt_common_objfile->msymbols = NULL;
       terminate_minimal_symbol_table (rt_common_objfile);
