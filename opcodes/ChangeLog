@@ -1,5 +1,7 @@
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* po/POTFILES.in: Regenerate.
+
 	* ppc-opc.c (PPC64): Revert 2001-10-12. Do include PPC_OPCODE_PPC.
 	(insert_bat, extract_bat, insert_bba, extract_bba,
 	insert_bd, extract_bd, insert_bdm, extract_bdm,

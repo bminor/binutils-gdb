@@ -68,6 +68,8 @@ mcore-opc.h
 mips-dis.c
 mips-opc.c
 mips16-opc.c
+mmix-dis.c
+mmix-opc.c
 ns32k-dis.c
 openrisc-asm.c
 openrisc-desc.c
