@@ -142,6 +142,9 @@ proc do_function_calls {} {
 	gdb_test "p t_float_values(float_val1,-2.3765)" " = 1"
 
 	# Test passing of arguments which might not be widened.
+        # Under stabs, GCC doesn't tell us whether the function was
+        # prototyped or not.
+        if {$gcc_compiled} { setup_xfail_format "stabs" }
 	gdb_test "p t_float_values2(0.0,0.0)" " = 0"
 
 	# Although PR 5318 mentions SunOS specifically, this seems
@@ -152,7 +155,12 @@ proc do_function_calls {} {
 		setup_xfail "alpha-dec-osf2*" "i*86-*-sysv4*" 5318
 	    }
 	}
+        
+        # Under stabs, GCC doesn't tell us whether the function was
+        # prototyped or not.
+        if {$gcc_compiled} { setup_xfail_format "stabs" }
 	gdb_test "p t_float_values2(3.14159,float_val2)" " = 1"
+
 	gdb_test "p t_small_values(1,2,3,4,5,6,7,8,9,10)" " = 55"
 
 	gdb_test "p t_double_values(0.0,0.0)" " = 0"
@@ -289,6 +297,8 @@ if { $hp_aCC_compiler } {
 	}
     }
 }
+
+get_debug_format
 
 # Make sure that malloc gets called and that the floating point unit
 # is initialized via a call to t_double_values.
