@@ -1,3 +1,11 @@
+Mon Nov 13 13:12:46 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* partial-stab.h: Remove GDB_TARGET_IS_HPPA kludge.
+
+Fri Nov 10 13:08:54 1995  Jeff Law  (law@kahlua.cs.utah.edu)
+
+	* terminal.h (HAVE_SGTTY): Fix typo.
+
 Thu Nov  9 17:34:01 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (gdb_target): Build in the simulator for all
