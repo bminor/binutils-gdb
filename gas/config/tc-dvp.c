@@ -951,7 +951,7 @@ assemble_vu (str)
 
   if (p == NULL)
     {
-      as_bad ("lower slot missing in `%s'", str);
+      as_bad ("lower instruction missing");
       return;
     }
 
@@ -970,6 +970,12 @@ assemble_vu (str)
   /* Don't assemble next one if we couldn't assemble the first.  */
   if (opcode == NULL)
     return;
+
+  if (*str == 0)
+    {
+      as_bad ("lower instruction missing");
+      return;
+    }
 
   /* Assemble the lower insn.
      Pass `fixup_count' for `init_fixup_count' so that we don't clobber

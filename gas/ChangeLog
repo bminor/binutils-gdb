@@ -1,3 +1,10 @@
+start-sanitize-sky
+Tue Jun  9 12:20:44 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (assemble_vu): Print better error message if
+	lower insn is missing.
+
+end-sanitize-sky
 Tue Jun  9 13:52:53 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Rebuild dependencies.
