@@ -1,3 +1,9 @@
+Thu Feb 20 13:52:16 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10200.c (mn10200_elf_final_link_relocate): New function.
+	(mn10200_elf_relocate_section): Likewise.
+	(elf_backend_relocate_section): Define.
+
 start-sanitize-d30v
 Tue Feb 18 17:22:59 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
