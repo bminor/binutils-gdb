@@ -1,7 +1,9 @@
 Tue Aug 24 16:17:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
-	* ldlang.c: define BYTE_SIZE, SHORT_SIZE, and LONG_SIZE which are
-	  no longer in bfd.h.
+	* ld.h: define BYTE_SIZE, SHORT_SIZE, and LONG_SIZE which are no
+	  longer in bfd.h.
+
+	* ldlang.c, ld.h: updated copyright.
 
 Tue Aug 17 15:22:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
