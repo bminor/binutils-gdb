@@ -1,7 +1,15 @@
+Tue Nov  5 13:33:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/basic.exp: Check bit patterns for indexed mov,
+	movbu, movhu instructions.  Check bit patterns for more bit
+	operations.  Check bit patterns for various 16bit call, retf
+	and ret instructions.
+	* gas/mn10300/other.s: Update operands for better test coverage.
+
 Mon Nov  4 12:55:11 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* gas/mn10300/basic.exp: Check bit patterns for a
-	couple more mov and cmp instructions.
+	* gas/mn10300/basic.exp: Check bit patterns for a couple more
+	mov and cmp instructions.
 
 Tue Oct 29 17:05:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
