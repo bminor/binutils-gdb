@@ -1,3 +1,8 @@
+2001-08-29  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-var-cmd.exp, mi0-var-cmd.exp: Variable lpcharacter has one
+	child.  Soften floating point tests.
+
 2001-08-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi0-var-block.exp, mi0-stack.exp, mi0-simplerun.exp,

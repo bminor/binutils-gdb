@@ -100,7 +100,7 @@ mi_gdb_test "-var-create lcharacter * lcharacter" \
 	"create local variablelcharacter "
 
 mi_gdb_test "-var-create lpcharacter * lpcharacter" \
-	"\\^done,name=\"lpcharacter\",numchild=\"0\",type=\"char \\*\"" \
+	"\\^done,name=\"lpcharacter\",numchild=\"1\",type=\"char \\*\"" \
 	"create local variable lpcharacter"
 
 mi_gdb_test "-var-create llong * llong" \
@@ -391,14 +391,14 @@ mi_gdb_test "-var-assign lplong &llong" \
 	"\\^done,value=\"$hex\"" \
 	"assign to lplong"
 
-mi_gdb_test "-var-assign lfloat 3.4" \
-	"\\^done,value=\"3.4.*\"" \
+mi_gdb_test "-var-assign lfloat 3.4567" \
+	"\\^done,value=\"3.45.*\"" \
 	"assign to lfloat"
 mi_gdb_test "-var-evaluate-expression lfloat" \
-	"\\^done,value=\"3.4.*\"" \
+	"\\^done,value=\"3.45.*\"" \
 	"eval lfloat"
-mi_gdb_test "-var-assign lfloat 1.2" \
-	"\\^done,value=\"1.2.*\"" \
+mi_gdb_test "-var-assign lfloat 1.2345" \
+	"\\^done,value=\"1.23.*\"" \
 	"assign to lfloat"
 
 mi_gdb_test "-var-assign lpfloat &lfloat+4" \
