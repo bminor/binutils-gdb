@@ -233,7 +233,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* In most of GDB, getting the args address is too important to
    just say "I don't know". */
 
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame+4)
+#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
 /* Address to use as an anchor for finding local variables */
 
