@@ -196,7 +196,6 @@ clean-info:
 # Making a dist:
 # cvs rtag binutils-x-yy ld+utils
 # cvs co -r binutils-x-yy ld+utils
-# Sanitize
 # cd {HERE}; make dist [-f Makefile.in]
 
 dist: $(DIST_NAME).tar.z
