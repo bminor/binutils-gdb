@@ -236,7 +236,7 @@ opt_equal_name:
 	;
 
 opt_base: BASE	'=' NUMBER	{ $$ = $3;}
-	|	{ $$ = 0;}
+	|	{ $$ = -1;}
 	;
 
 dot_name: ID		{ $$ = $1; }
