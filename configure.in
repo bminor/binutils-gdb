@@ -241,11 +241,6 @@ case "${target}" in
     esac
     # but that's okay since emacs doesn't work anyway
     noconfigdirs="$noconfigdirs emacs"
-
-    # static versions of several key libraries are not available, 
-    # so building our entire toolchain is impossible until 
-    # the GNU linker supports shared libraries
-    noconfigdirs="$noconfigdirs ld"
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
@@ -297,19 +292,12 @@ case "${target}" in
     else
            use_gnu_ld=no
     fi
-  ;;
-  sparc-*-solaris2*)
-    # See i386-*-solaris2* above.
-    noconfigdirs="$noconfigdirs ld"
     ;;
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld newlib opcodes"
     ;;
   vax-*-*)
     noconfigdirs="$noconfigdirs newlib"
-    ;;
-  *-*-sysv4)
-    use_gnu_ld=no
     ;;
   *-*-lynxos*)
      # Newlib makes problems for libg++ in crosses.

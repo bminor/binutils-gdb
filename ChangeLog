@@ -1,3 +1,9 @@
+Thu May 19 17:12:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Use ld for i[34]86-*-sysv4* and sparc-*-solaris2*.
+	Don't set use_gnu_ld to no for *-*-sysv4; that only controls
+	whether we pass down --with-gnu-ld anyhow.
+
 Thu May 19 09:29:12 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* Makefile.in (INSTALL_LAST): Change operation so it works
