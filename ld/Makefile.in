@@ -133,7 +133,7 @@ LD_PROG	= ld.new
 BFDLIB=./../bfd/libbfd.a
 LIBIBERTY=./../libiberty/libiberty.a
 
-ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
+ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_i386linux.o em_go32.o \
 	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o em_hp3hpux.o \
 	em_h8300.o em_h8300h.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o \
@@ -242,6 +242,9 @@ em_hppaosf.c: $(srcdir)/emulparams/hppaosf.sh \
 em_i386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout.sh
+em_i386linux.c: $(srcdir)/emulparams/i386linux.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386linux.sh
 em_ebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k.sh
