@@ -1,3 +1,16 @@
+Mon Nov 15 13:37:58 1993  david d `zoo' zuhn  (zoo@cirdan.cygnus.com)
+
+	* mh-sysv4 (AR_FLAGS): change from cq to cr
+
+Fri Nov  5 08:12:32 1993  D. V. Henkel-Wallace  (gumby@blues.cygnus.com)
+
+	* mh-unixware: remove.  It's the same as sysv4, and config.guess
+	can't tell the difference.  So don't allow skew.
+
+Wed Oct 20 20:35:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mh-hp300: Revert yesterday's change, but add comment explaining.
+
 Tue Oct 19 18:58:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mh-hp300: Don't define CFLAGS to empty.  Why should hp300 be
