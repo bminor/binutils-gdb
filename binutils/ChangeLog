@@ -1,3 +1,8 @@
+Fri Dec  1 14:41:56 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed (install, install-only): Edit in Mac-specific
+	install procedure.
+
 Thu Nov 30 20:26:02 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* dlltool.c (ppc_jtab): The binary glue for PowerPC dll linkage,

@@ -66,6 +66,24 @@ BUILD_DLLTOOL = \
 # Fix an over-eagerness.
 /echo.*WARNING.*This file/s/'.*'/' '/
 
+/^install \\Option-f /,/^$/c\
+install \\Option-f  all install-only\
+\
+install-only \\Option-f\
+	If "`Exists "{prefix}"`" == ""\
+		Echo "{prefix}" does not exist, cannot install anything\
+		Exit 1\
+	End If\
+	If "`Exists "{bindir}"`" == ""\
+		NewFolder "{bindir}"\
+	End If\
+	# Need to copy all the tools\
+	For prog in {PROGS}\
+		Set progname `echo {prog} | sed -e 's/.new//'`\
+		Duplicate -y :{prog} "{bindir}"{progname}\
+	End For\
+
+
 # Remove un-useful targets.
 /^Makefile \\Option-f/,/^$/d
 /^"{o}"config.h \\Option-f/,/^$/d
