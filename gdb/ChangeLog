@@ -1,3 +1,8 @@
+2004-02-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* proc-api.c (write_with_trace): Initialize local variable to
+	silence compiler warning.
+
 2004-02-06  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-source.h: Do not include "defs.h".
