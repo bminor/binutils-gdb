@@ -1,5 +1,24 @@
 Wed Jun 15 01:54:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldemul.h (ldemul_open_dynamic_archive): Declare.
+	(ld_emulation_xfer_type): Add new field open_dynamic_archive.
+	* ldemul.c: Include ldexp.h and ldlang.h.
+	(ldemul_open_dynamic_archive): New function.
+	* ldfile.h (ldfile_open_file_search): Declare.
+	* ldfile.c: Include ldemul.h.
+	(try_open_bfd): Rename from cache_bfd_openr.  Return boolean
+	argument, not bfd *.  Change all callers.
+	(ldfile_open_file_search): Rename from open_a.  Return boolean
+	argument, not bfd *.  Clean up.  Change all callers.
+	(ldfile_open_file): If doing a dynamic link, call
+	ldemul_open_dynamic_archive rather than assuming the extension of
+	a dynamic object is ".so".
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	New function.
+	(ld_${EMULATION_NAME}_emulation): Initialize open_dynamic_archive
+	field.
+	* emultempl/sunos.em (ld_${EMULATION_NAME}_emulation): Likewise.
+
 	* ldmain.c (get_emulation): Ignore -m486 for Linux compatibility.
 	* lexsup.c (parse_args): Ignore -qmagic for Linux compatibility.
 	Accept -static as a synonym for -non_shared.
