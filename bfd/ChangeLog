@@ -1,5 +1,47 @@
 2001-06-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c (elf_i386_discard_copies): Rename to
+	discard_copies, and use elf_link_hash_entry arg rather than
+	elf_i386_link_hash_entry.
+	(elf_i386_link_hash_traverse): Delete.
+	(elf_i386_size_dynamic_sections): Adjust call to discard_copies.
+	Tidy sizing of dynamic sections.
+	(elf_i386_check_relocs <R_386_32, R_386_PC32>): Reference count
+	possible .plt entries.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(elf_i386_adjust_dynamic_symbol): Discard .plt entries for
+	everything with plt.refcount <= 0.
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't allocate .got and
+	.relgot space here.
+	(elf_i386_gc_sweep_hook): ..and no need to deallocate here..
+	(elf32_hppa_adjust_dynamic_symbol): ..and don't allocate .plt and
+	.rel.plt here..
+	(allocate_plt_and_got): ..instead do it all here.  New function.
+	(elf_i386_size_dynamic_sections): Allocate local .got space and
+	call allocate_plt_and_got.  No need to zap .relgot if not dynamic.
+	(bfd_elf32_bfd_final_link): Delete.  (ie. use regular final link
+	rather than gc variety).
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(elf_i386_relocate_section): Use it here and correct handling of
+	R_386_GOT32.  Provide section and offset for "unresolvable
+	relocation" error message.
+	(elf_i386_finish_dynamic_symbol): Correct handling of R_386_GOT32.
+
+	* elf32-i386.c (struct elf_i386_link_hash_table): Add sgot,
+	sgotplt, srelgot, splt, srelplt, sdynbss, srelbss fields.
+	(elf_i386_link_hash_table_create): Init them.
+	(create_got_section): New function.
+	(elf_i386_create_dynamic_sections): New function.
+	(elf_backend_create_dynamic_sections): Set to above.
+	(elf_i386_check_relocs): Use shortcuts from hash table rather than
+	calling bfd_get_section_by_name.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(elf_i386_adjust_dynamic_symbol): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+
 	* elf32-hppa.c (allocate_plt_and_got): Skip indirect and warning syms.
 
 2001-06-02  H.J. Lu  <hjl@gnu.org>
