@@ -1,3 +1,9 @@
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-top.c (gdb_setup_readline): New function. Code moved from
+	_initialize_event_loop().
+	(_initialize_event_loop): Call gdb_setup_readline().
+
 2002-10-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* infrun.c (resume): Convert #ifdef CANNOT_STEP_BREAKPOINT into C.
@@ -13,7 +19,7 @@
 	of fill_in_vptr_fieldno.
 
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
- 
+
 	* inferior.h (registers_info, stepi_command, nexti_command,
 	continue_command, interrupt_target_command): Export from infcmd.c.
 	* frame.h (args_info, selected_frame_level_changed_hook,
