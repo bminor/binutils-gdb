@@ -3,9 +3,12 @@ Tue Aug 26 09:46:22 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-v850.texi (V850 Opcodes): Correct name for tiny data area
 	pointer. 
-end-sanitize-v850
 
+end-sanitize-v850
 Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (i386_align_code): Correct 16 bit noops.  From
+	Gabriel Paubert <paubert@iram.es>.
 
 	* config/tc-i386.c (md_assemble): In JumpByte case, when looking
 	for a WORD_PREFIX_OPCODE, change it to ADDR_PREFIX_OPCODE if this
