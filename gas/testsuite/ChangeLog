@@ -1,5 +1,13 @@
 2003-12-22  Nick Clifton  <nickc@redhat.com>
 
+	* gas/sh/err-sh4a-fp.s: Fix spelling of opcode fssra.
+	* gas/sh/err-sh4a-fp.d: Likewise.
+	* gas/sh/sh4a-fp.s: Likewise.
+	* gas/sh/sh4al-dsp.d: Fix expected opcode values for a couple of
+	instructions.	
+
+2003-12-22  Nick Clifton  <nickc@redhat.com>
+
 	* gas/arm/archv6.d (as): Use -march=armv6j.
 	* gas/arm/thumbv6.d (as): Likewise.
 

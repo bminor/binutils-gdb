@@ -10,10 +10,10 @@ start address 0x00000000
 Disassembly of section \.text:
 0x00000000 43 34       	ldrc	r3
 0x00000002 4c 34       	ldrc	r12
-0x00000004 8c 0a       	ldrc	#10
-0x00000006 8c f3       	ldrc	#-13
-0x00000008 00 c8       	setdmx	
-0x0000000a 00 98       	setdmy	
+0x00000004 8a 0a       	ldrc	#10
+0x00000006 8a f3       	ldrc	#-13
+0x00000008 00 98       	setdmx	
+0x0000000a 00 c8       	setdmy	
 0x0000000c 00 88       	clrdmxy	
 
 0x0000000e f1 16       	movx\.w	@r4,x0	movy\.w	a0,@r7\+
