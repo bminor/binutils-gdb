@@ -197,32 +197,66 @@ set_movm_offsets (struct frame_info *fi, int movm_args)
   if (fi == NULL || movm_args == 0)
     return;
 
-  if (movm_args & 0x10)
+  if (movm_args & movm_other_bit)
+    {
+      /* The `other' bit leaves a blank area of four bytes at the
+         beginning of its block of saved registers, making it 32 bytes
+         long in total.  */
+      fi->saved_regs[LAR_REGNUM]    = fi->frame + offset + 4;
+      fi->saved_regs[LIR_REGNUM]    = fi->frame + offset + 8;
+      fi->saved_regs[MDR_REGNUM]    = fi->frame + offset + 12;
+      fi->saved_regs[A0_REGNUM + 1] = fi->frame + offset + 16;
+      fi->saved_regs[A0_REGNUM]     = fi->frame + offset + 20;
+      fi->saved_regs[D0_REGNUM + 1] = fi->frame + offset + 24;
+      fi->saved_regs[D0_REGNUM]     = fi->frame + offset + 28;
+      offset += 32;
+    }
+  if (movm_args & movm_a3_bit)
     {
       fi->saved_regs[A3_REGNUM] = fi->frame + offset;
       offset += 4;
     }
-  if (movm_args & 0x20)
+  if (movm_args & movm_a2_bit)
     {
       fi->saved_regs[A2_REGNUM] = fi->frame + offset;
       offset += 4;
     }
-  if (movm_args & 0x40)
+  if (movm_args & movm_d3_bit)
     {
       fi->saved_regs[D3_REGNUM] = fi->frame + offset;
       offset += 4;
     }
-  if (movm_args & 0x80)
+  if (movm_args & movm_d2_bit)
     {
       fi->saved_regs[D2_REGNUM] = fi->frame + offset;
       offset += 4;
     }
-  if (AM33_MODE && movm_args & 0x02)
+  if (AM33_MODE)
     {
-      fi->saved_regs[E0_REGNUM + 5] = fi->frame + offset;
-      fi->saved_regs[E0_REGNUM + 4] = fi->frame + offset + 4;
-      fi->saved_regs[E0_REGNUM + 3] = fi->frame + offset + 8;
-      fi->saved_regs[E0_REGNUM + 2] = fi->frame + offset + 12;
+      if (movm_args & movm_exother_bit)
+        {
+          fi->saved_regs[MCVF_REGNUM]   = fi->frame + offset;
+          fi->saved_regs[MCRL_REGNUM]   = fi->frame + offset + 4;
+          fi->saved_regs[MCRH_REGNUM]   = fi->frame + offset + 8;
+          fi->saved_regs[MDRQ_REGNUM]   = fi->frame + offset + 12;
+          fi->saved_regs[E0_REGNUM + 1] = fi->frame + offset + 16;
+          fi->saved_regs[E0_REGNUM + 0] = fi->frame + offset + 20;
+          offset += 24;
+        }
+      if (movm_args & movm_exreg1_bit)
+        {
+          fi->saved_regs[E0_REGNUM + 7] = fi->frame + offset;
+          fi->saved_regs[E0_REGNUM + 6] = fi->frame + offset + 4;
+          fi->saved_regs[E0_REGNUM + 5] = fi->frame + offset + 8;
+          fi->saved_regs[E0_REGNUM + 4] = fi->frame + offset + 12;
+          offset += 16;
+        }
+      if (movm_args & movm_exreg0_bit)
+        {
+          fi->saved_regs[E0_REGNUM + 3] = fi->frame + offset;
+          fi->saved_regs[E0_REGNUM + 2] = fi->frame + offset + 4;
+          offset += 8;
+        }
     }
 }
 
@@ -510,6 +544,32 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   return addr;
 }
 
+
+/* Function: saved_regs_size
+   Return the size in bytes of the register save area, based on the
+   saved_regs array in FI.  */
+static int
+saved_regs_size (struct frame_info *fi)
+{
+  int adjust = 0;
+  int i;
+
+  /* Reserve four bytes for every register saved.  */
+  for (i = 0; i < NUM_REGS; i++)
+    if (fi->saved_regs[i])
+      adjust += 4;
+
+  /* If we saved LIR, then it's most likely we used a `movm'
+     instruction with the `other' bit set, in which case the SP is
+     decremented by an extra four bytes, "to simplify calculation
+     of the transfer area", according to the processor manual.  */
+  if (fi->saved_regs[LIR_REGNUM])
+    adjust += 4;
+
+  return adjust;
+}
+
+
 /* Function: frame_chain
    Figure out and return the caller's frame pointer given current
    frame_info struct.
@@ -560,19 +620,7 @@ mn10300_frame_chain (struct frame_info *fi)
     }
   else
     {
-      int adjust = 0;
-
-      adjust += (fi->saved_regs[D2_REGNUM] ? 4 : 0);
-      adjust += (fi->saved_regs[D3_REGNUM] ? 4 : 0);
-      adjust += (fi->saved_regs[A2_REGNUM] ? 4 : 0);
-      adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
-      if (AM33_MODE)
-	{
-	  adjust += (fi->saved_regs[E0_REGNUM + 5] ? 4 : 0);
-	  adjust += (fi->saved_regs[E0_REGNUM + 4] ? 4 : 0);
-	  adjust += (fi->saved_regs[E0_REGNUM + 3] ? 4 : 0);
-	  adjust += (fi->saved_regs[E0_REGNUM + 2] ? 4 : 0);
-	}
+      int adjust = saved_regs_size (fi);
 
       /* Our caller does not have a frame pointer.  So his frame starts
          at the base of our frame (fi->frame) + register save space
@@ -748,19 +796,7 @@ mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static CORE_ADDR
 mn10300_frame_saved_pc (struct frame_info *fi)
 {
-  int adjust = 0;
-
-  adjust += (fi->saved_regs[D2_REGNUM] ? 4 : 0);
-  adjust += (fi->saved_regs[D3_REGNUM] ? 4 : 0);
-  adjust += (fi->saved_regs[A2_REGNUM] ? 4 : 0);
-  adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
-  if (AM33_MODE)
-    {
-      adjust += (fi->saved_regs[E0_REGNUM + 5] ? 4 : 0);
-      adjust += (fi->saved_regs[E0_REGNUM + 4] ? 4 : 0);
-      adjust += (fi->saved_regs[E0_REGNUM + 3] ? 4 : 0);
-      adjust += (fi->saved_regs[E0_REGNUM + 2] ? 4 : 0);
-    }
+  int adjust = saved_regs_size (fi);
 
   return (read_memory_integer (fi->frame + adjust, REGISTER_SIZE));
 }

@@ -1,5 +1,18 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	Correct and expand handling of `movm' instruction, and register
+	saves in general.
+	* config/mn10300/tm-mn10300.h (D0_REGNUM, A0_REGNUM, MDRQ_REGNUM,
+	MCRH_REGNUM, MCRL_REGNUM, MCVF_REGNUM): New definitions.
+	(enum movm_register_bits): New enum.
+	* mn10300-tdep.c (set_movm_offsets): Use symbolic names for the
+	bits, not hex literals.  Handle the `other', `exreg0', and
+	`exother' bits.  Correct handling of `exreg1': it saves r4, r5,
+	r6, and r7, not r2, r3, r4, and r5.
+	(saved_regs_size): New function.
+	(mn10300_frame_chain, mn10300_frame_saved_pc): Use it, instead
+	of computing the same thing inline, incorrectly.
+
 	* mn10300-tdep.c (mn10300_gdbarch_init): We do have a
 	dummy_breakpoint_offset; it's zero.
 

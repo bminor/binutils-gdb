@@ -43,8 +43,10 @@
 #define REGISTER_RAW_SIZE(REG) 4
 #endif
 
+#define D0_REGNUM 0
 #define D2_REGNUM 2
 #define D3_REGNUM 3
+#define A0_REGNUM 4
 #define A2_REGNUM 6
 #define A3_REGNUM 7
 #define SP_REGNUM 8
@@ -53,7 +55,22 @@
 #define PSW_REGNUM 11
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
+#define MDRQ_REGNUM 14
 #define E0_REGNUM 15
+#define MCRH_REGNUM 26
+#define MCRL_REGNUM 27
+#define MCVF_REGNUM 28
+
+enum movm_register_bits {
+  movm_exother_bit = 0x01,
+  movm_exreg1_bit  = 0x02,
+  movm_exreg0_bit  = 0x04,
+  movm_other_bit   = 0x08,
+  movm_a3_bit      = 0x10,
+  movm_a2_bit      = 0x20,
+  movm_d3_bit      = 0x40,
+  movm_d2_bit      = 0x80
+};
 
 #define INIT_FRAME_PC		/* Not necessary */
 
