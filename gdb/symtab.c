@@ -37,6 +37,7 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "linespec.h"
+#include "filenames.h"		/* for FILENAME_CMP */
 
 #include "obstack.h"
 
@@ -141,7 +142,6 @@ lookup_symtab_1 (char *name)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
-  register char *slash;
   register struct objfile *objfile;
 
 got_symtab:
@@ -149,23 +149,15 @@ got_symtab:
   /* First, search for an exact match */
 
   ALL_SYMTABS (objfile, s)
-    if (STREQ (name, s->filename))
-    return s;
-
-  slash = strchr (name, '/');
+    if (FILENAME_CMP (name, s->filename) == 0)
+      return s;
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
-  if (!slash)
+  if (basename (name) == name)
     ALL_SYMTABS (objfile, s)
     {
-      char *p = s->filename;
-      char *tail = strrchr (p, '/');
-
-      if (tail)
-	p = tail + 1;
-
-      if (STREQ (p, name))
+      if (FILENAME_CMP (basename (s->filename), name) == 0)
 	return s;
     }
 
@@ -244,7 +236,7 @@ lookup_partial_symtab (char *name)
 
   ALL_PSYMTABS (objfile, pst)
   {
-    if (STREQ (name, pst->filename))
+    if (FILENAME_CMP (name, pst->filename) == 0)
       {
 	return (pst);
       }
@@ -252,16 +244,10 @@ lookup_partial_symtab (char *name)
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
-  if (!strchr (name, '/'))
+  if (basename (name) == name)
     ALL_PSYMTABS (objfile, pst)
     {
-      char *p = pst->filename;
-      char *tail = strrchr (p, '/');
-
-      if (tail)
-	p = tail + 1;
-
-      if (STREQ (p, name))
+      if (FILENAME_CMP (basename (pst->filename), name) == 0)
 	return (pst);
     }
 

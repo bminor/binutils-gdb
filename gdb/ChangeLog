@@ -1,3 +1,10 @@
+2001-05-06  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* symtab.c (lookup_symtab_1, lookup_partial_symtab): Use basename
+	instead of non-portable search for `/'.  Use FILENAME_CMP instead
+	of STREQ, to account for case-insensitive filesystems.
+	(top-level): #include "filenames.h".
+
 2001-05-05  Jim Blandy  <jimb@redhat.com>
 
 	* breakpoint.c (check_duplicates): Use the breakpoint's type, not
