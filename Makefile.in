@@ -53,7 +53,7 @@ AS = as
 AR = ar
 AR_FLAGS = qc
 CFLAGS = -g
-C++FLAGS = -g -O
+CXXFLAGS = -g -O
 RANLIB = ranlib
 NM = nm
 
@@ -73,9 +73,9 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 # C compiler to use to create programs which must be run in the build
 # environment.
 CC_FOR_BUILD = $(CC)
-C++_FOR_BUILD = gcc
+CXX_FOR_BUILD = gcc
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd z8ksim gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
 OTHERS = 
 
 ALL = all.normal
@@ -95,7 +95,7 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-C++_FOR_TARGET = ` \
+CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
     echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
   else \
@@ -169,8 +169,8 @@ FLAGS_TO_PASS = \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"BISON=$(BISON)" \
-	"C++FLAGS=$(C++FLAGS)" \
-	"C++_FOR_BUILD=$(C++_FOR_BUILD)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
+	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CC=$(CC)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CFLAGS=$(CFLAGS)" \
@@ -186,6 +186,12 @@ FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"tooldir=$(tooldir)" 
 
+# Flags that are concerned with the location of the X11 include files
+# and library files
+X11_FLAGS_TO_PASS = \
+	"X11_INCLUDE_FLAGS=$(X11_INCLUDE_FLAGS)" \
+	"X11_LIB_FLAGS=$(X11_LIB_FLAGS)"
+
 # Flags to pass down to makes which are built with the target
 # environment (e.g. libg++, xiberty, newlib).  -- keep these in alpha order please
 TARGET_FLAGS_TO_PASS = \
@@ -193,8 +199,9 @@ TARGET_FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"AS=$(AS_FOR_TARGET)" \
 	"BISON=$(BISON)" \
-	"C++=$(C++_FOR_TARGET)" \
-	"C++_FOR_BUILD=$(C++_FOR_BUILD)" \
+	"CXX=$(CXX_FOR_TARGET)" \
+	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
 	"CC=$(CC_FOR_TARGET)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CFLAGS=$(CFLAGS)" \
@@ -242,20 +249,20 @@ install-dir.info:
 
 all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-byacc all-flex all-opcodes all-bfd all-ld all-gas all-tgas \
-	all-gcc all-binutils  all-libg++ all-readline all-gdb \
+	all-gcc all-binutils  all-libg++ all-readline all-z8ksim all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
 	all-tcl all-tk all-expect \
 	all-newlib all-gprof all-send_pr all-libm all-deja-gnu
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
-	 all-opcodes all-bfd all-readline all-gdb all-binutils all-gcc \
+	 all-opcodes all-z8ksim all-bfd all-readline all-gdb all-binutils all-gcc \
 	all-newlib all-deja-gnu
 
 clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bfd clean-newlib clean-binutils clean-flex \
 	clean-byacc clean-ld clean-gas clean-etc clean-opcodes \
-	clean-gcc clean-readline clean-glob clean-gdb \
+	clean-gcc clean-readline clean-glob clean-gdb clean-z8ksim \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
 	clean-tcl clean-tk clean-expect \
@@ -312,8 +319,9 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-send_pr \
 	install-tcl \
 	install-texinfo \
-	install-tk 
-	
+	install-tk  \
+	install-z8ksim
+
 gcc-no-fixedincludes:
 	@if [ -f ./gcc/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
@@ -1073,7 +1081,7 @@ all-emacs: force
 	@if [ -f ./emacs/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1091,7 +1099,7 @@ install-emacs: force
 	@if [ -f ./emacs/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./emacs; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1249,7 +1257,7 @@ all-tk: all-tcl
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
 		(cd ./tk; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1269,12 +1277,12 @@ install-tk: force
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
 		(cd ./tk; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
 
-### tk
+### expect
 all-expect: all-tcl
 	@if [ -f ./expect/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
@@ -1300,6 +1308,35 @@ install-expect: force
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
 		(cd ./expect; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+
+### z8ksim
+all-z8ksim: all-bfd 
+	@if [ -f ./z8ksim/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./z8ksim; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-z8ksim: force
+	@if [ -f ./z8ksim/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./z8ksim; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-z8ksim: force
+	@if [ -f ./z8ksim/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./z8ksim; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
