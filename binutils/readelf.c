@@ -5226,10 +5226,10 @@ process_version_sections (FILE *file)
 		    aux.vna_next  = BYTE_GET (eaux->vna_next);
 
 		    if (dynamic_strings)
-		      printf (_("  %#06x: Name: %s"),
+		      printf (_("  %#06x:   Name: %s"),
 			      isum, dynamic_strings + aux.vna_name);
 		    else
-		      printf (_("  %#06x: Name index: %lx"),
+		      printf (_("  %#06x:   Name index: %lx"),
 			      isum, aux.vna_name);
 
 		    printf (_("  Flags: %s  Version: %d\n"),
