@@ -1,3 +1,62 @@
+Tue Aug 31 13:29:12 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (main): Force creation of .bss section.  Set up the
+	sections before looking at the symbols.  Move all common symbols
+	into .bss section.  Automatically define _edata and _end.  Only
+	export symbols in the export list, with multiple prefixes if
+	necessary.  Warn if no version.  Always create extended header.
+	Set date automatically if not already set.
+	(setup_sections): Count size of bss sections.
+	(mangle_relocs, i386_mangle_relocs): Accept section argument, and
+	take reloc_count as a changeable pointer; changed callers.
+	(i386_mangle_relocs): Remove PC relative relocs within a section,
+	as they require no adjustment.
+	* nlmheader.y: Fixed memory allocation throughout: token STRING is
+	now allocated on the heap, and freed if not needed.  Null
+	terminated copyright message.  Accept version with only two
+	strings.
+	(symbol_list_opt): New nonterminal, either symbol_list or empty.
+	(symbol_list): Use left recursion to avoid overflowing parser
+	stack.
+	(yylex): Rearranged beginning of line check.  Accept quoted
+	strings using single quotes.  End generic argument at comment
+	character or parentheses.
+	(string_list_append): Fixed.
+	(string_list_append1): New function.
+
+	* bucomm.h: The first argument to xrealloc is PTR, not char *.
+	* bucomm.c (xrealloc): Use PTR rather than char *.
+	* Makefile.in (objdump.o): Depend upon config.status to notice
+	--with-targets changes.
+	(nlmconv.o): Depend upon bucomm.h.
+
+Tue Aug 17 09:46:01 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* configure.in: Don't pass cpu to config.bfd.
+
+Thu Aug 12 16:43:04 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in ($(NM_PROG)): Depend on demangle.o.
+	(demangle.o): New target.
+	(cplus-dem.o): Depend on it, to force compilation order when doing
+	parallel compiles.
+
+	* nm.c (print_symbol_info_{bsd,sysv,posix}): Take a bfd arg.
+	(struct output_fns print_symbol_info): Ditto.
+	(long_options, usage, main): Add -C --demangle option.
+	(print_symname): New function, demangling if requested.
+	(print_symbols, print_symbol_info_{bsd,sysv,posix}): Use it.
+
+Wed Aug 11 22:57:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in: Put CFLAGS last in compilation rules and omit from
+	linking rules.  Use ARCHDEFS to compile objdump.c.
+	Update dependencies.
+	* configure.in: Construct ARCHDEFS based on the BFD target makefile
+	fragments.
+	* objdump.c: Conditionalize calls to the print_insn_ARCH functions
+	according to ARCHDEFS.
+
 Thu Aug 12 08:06:15 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ar.c: Removed obsolete and non-functional GNU960 code.

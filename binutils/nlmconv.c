@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <ansidecl.h>
 #include <stdio.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <assert.h>
@@ -43,6 +44,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    since it will handle undefined values.  */
 #undef strerror
 extern char *strerror ();
+
+#ifndef localtime
+extern struct tm *localtime ();
+#endif
+
+#ifndef SEEK_SET
+#define SEEK_SET 0
+#endif
 
 /* Global variables.  */
 
@@ -52,19 +61,22 @@ char *program_name;
 /* The version number.  */
 extern char *program_version;
 
-/* The symbols table.  */
+/* Local variables.  */
+
+/* The symbol table.  */
 static asymbol **symbols;
 
-/* Local variables.  */
+/* The total amount of bss space.  */
+static bfd_size_type total_bss_size;
 
 /* The list of long options.  */
 static struct option long_options[] =
 {
   { "header-info", required_argument, 0, 'T' },
-  { "help", no_argument, 0, 'H' },
+  { "help", no_argument, 0, 'h' },
   { "input-format", required_argument, 0, 'I' },
   { "output-format", required_argument, 0, 'O' },
-  { "version", no_argument, 0, 'v' },
+  { "version", no_argument, 0, 'V' },
   { NULL, no_argument, 0, 0 }
 };
 
@@ -76,11 +88,12 @@ static const char *select_output_format PARAMS ((enum bfd_architecture,
 						 long, boolean));
 static void setup_sections PARAMS ((bfd *, asection *, PTR));
 static void copy_sections PARAMS ((bfd *, asection *, PTR));
-static void mangle_relocs PARAMS ((bfd *, arelent **,
-				   bfd_size_type, char *,
+static void mangle_relocs PARAMS ((bfd *, asection *, arelent **,
+				   bfd_size_type *, char *,
 				   bfd_size_type));
-static void i386_mangle_relocs PARAMS ((bfd *, arelent **, bfd_size_type,
-					char *, bfd_size_type));
+static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent **,
+					bfd_size_type *, char *,
+					bfd_size_type));
 
 /* The main routine.  */
 
@@ -95,27 +108,33 @@ main (argc, argv)
   const char *header_file = NULL;
   bfd *inbfd;
   bfd *outbfd;
-  unsigned int symcount;
+  asymbol **newsyms, **outsyms;
+  unsigned int symcount, newsymalloc, newsymcount;
+  asection *bss_sec;
+  asymbol *endsym;
   unsigned int i;
   char inlead, outlead;
   boolean gotstart, gotexit, gotcheck;
   struct stat st;
-  FILE *custom_data, *help_data, *message_data, *rpc_data;
+  FILE *custom_data, *help_data, *message_data, *rpc_data, *shared_data;
   bfd_size_type custom_size, help_size, message_size, module_size, rpc_size;
   asection *custom_section, *help_section, *message_section, *module_section;
-  asection *rpc_section;
+  asection *rpc_section, *shared_section;
+  bfd *sharedbfd;
+  bfd_size_type shared_offset, shared_size;
+  Nlm_Internal_Fixed_Header sharedhdr;
   int len;
 
   program_name = argv[0];
 
   bfd_init ();
 
-  while ((opt = getopt_long (argc, argv, "HI:O:T:v", long_options, (int *) 0))
+  while ((opt = getopt_long (argc, argv, "hI:O:T:V", long_options, (int *) 0))
 	 != EOF)
     {
       switch (opt)
 	{
-	case 'H':
+	case 'h':
 	  show_help ();
 	  /*NOTREACHED*/
 	case 'I':
@@ -127,7 +146,7 @@ main (argc, argv)
 	case 'T':
 	  header_file = optarg;
 	  break;
-	case 'v':
+	case 'V':
 	  printf ("GNU %s version %s\n", program_name, program_version);
 	  exit (0);
 	  /*NOTREACHED*/
@@ -215,12 +234,31 @@ main (argc, argv)
   symbols = (asymbol **) xmalloc (get_symtab_upper_bound (inbfd));
   symcount = bfd_canonicalize_symtab (inbfd, symbols);
 
+  /* Make sure we have a .bss section.  Doing this first is an attempt
+     to ensure that it will be the first bss section.  */
+  bss_sec = bfd_get_section_by_name (outbfd, NLM_UNINITIALIZED_DATA_NAME);
+  if (bss_sec == NULL)
+    {
+      bss_sec = bfd_make_section (outbfd, NLM_UNINITIALIZED_DATA_NAME);
+      if (bss_sec == NULL)
+	bfd_fatal ("make .bss section");
+      bss_sec->flags = SEC_ALLOC;
+      bss_sec->alignment_power = bfd_log2 (0); /* FIXME */
+    }
+
+  /* Set up the sections.  */
+  bfd_map_over_sections (inbfd, setup_sections, (PTR) outbfd);
+
   /* Adjust symbol information.  */
   inlead = bfd_get_symbol_leading_char (inbfd);
   outlead = bfd_get_symbol_leading_char (outbfd);
   gotstart = false;
   gotexit = false;
   gotcheck = false;
+  newsymalloc = 10;
+  newsyms = (asymbol **) xmalloc (newsymalloc * sizeof (asymbol *));
+  newsymcount = 0;
+  endsym = NULL;
   for (i = 0; i < symcount; i++)
     {
       register asymbol *sym;
@@ -258,17 +296,55 @@ main (argc, argv)
 	    }
 	}
 
-      /* If this is a global symbol, see if it's in the export list.
-	 Change the prefix if necessary.  */
-      if ((sym->flags & (BSF_EXPORT | BSF_GLOBAL)) != 0
-	  && export_symbols != NULL)
+      /* NLM's have an uninitialized data section, but they do not
+	 have a common section in the Unix sense.  Move all common
+	 symbols into the .bss section, and mark them as exported.  */
+      if (bfd_is_com_section (bfd_get_section (sym)))
+	{
+	  bfd_vma size;
+	  bfd_size_type align;
+
+	  sym->section = bss_sec;
+	  size = sym->value;
+	  sym->value = bss_sec->_raw_size;
+	  bss_sec->_raw_size += size;
+	  align = 1 << bss_sec->alignment_power;
+	  bss_sec->_raw_size = (bss_sec->_raw_size + align - 1) &~ (align - 1);
+	  total_bss_size += bss_sec->_raw_size - sym->value;
+	  sym->flags |= BSF_EXPORT | BSF_GLOBAL;
+	}
+
+      /* Force _edata and _end to be defined.  This would normally be
+	 done by the linker, but the manipulation of the common
+	 symbols will confuse it.  */
+      if (bfd_asymbol_name (sym)[0] == '_'
+	  && bfd_get_section (sym) == &bfd_und_section)
+	{
+	  if (strcmp (bfd_asymbol_name (sym), "_edata") == 0)
+	    {
+	      sym->section = bss_sec;
+	      sym->value = 0;
+	    }
+	  if (strcmp (bfd_asymbol_name (sym), "_end") == 0)
+	    {
+	      sym->section = bss_sec;
+	      endsym = sym;
+	    }
+	}
+
+      /* If this is a global symbol, check the export list.  */
+      if ((sym->flags & (BSF_EXPORT | BSF_GLOBAL)) != 0)
 	{
 	  register struct string_list *l;
+	  int found_simple;
 
+	  /* Unfortunately, a symbol can appear multiple times on the
+	     export list, with and without prefixes.  */
+	  found_simple = 0;
 	  for (l = export_symbols; l != NULL; l = l->next)
 	    {
 	      if (strcmp (l->string, bfd_asymbol_name (sym)) == 0)
-		break;
+		found_simple = 1;
 	      else
 		{
 		  char *zbase;
@@ -277,15 +353,30 @@ main (argc, argv)
 		  if (zbase != NULL
 		      && strcmp (zbase + 1, bfd_asymbol_name (sym)) == 0)
 		    {
-		      sym->name = l->string;
-		      break;
+		      /* We must add a symbol with this prefix.  */
+		      if (newsymcount >= newsymalloc)
+			{
+			  newsymalloc += 10;
+			  newsyms = ((asymbol **)
+				     xrealloc (newsyms,
+					       (newsymalloc
+						* sizeof (asymbol *))));
+			}
+		      newsyms[newsymcount] =
+			(asymbol *) xmalloc (sizeof (asymbol));
+		      *newsyms[newsymcount] = *sym;
+		      newsyms[newsymcount]->name = l->string;
+		      ++newsymcount;
 		    }
 		}
 	    }
-	  if (l == NULL)
-	    fprintf (stderr,
-		     "%s: warning: symbol %s exported but not in export list\n",
-		     program_name, bfd_asymbol_name (sym));
+	  if (! found_simple)
+	    {
+	      /* The unmodified symbol is actually not exported at
+		 all.  */
+	      sym->flags &=~ (BSF_GLOBAL | BSF_EXPORT);
+	      sym->flags |= BSF_LOCAL;
+	    }
 	}
 
       /* If it's an undefined symbol, see if it's on the import list.
@@ -340,7 +431,21 @@ main (argc, argv)
 	}
     }
 
-  bfd_set_symtab (outbfd, symbols, symcount);
+  if (endsym != NULL)
+    endsym->value = total_bss_size;
+
+  if (newsymcount == 0)
+    outsyms = symbols;
+  else
+    {
+      outsyms = (asymbol **) xmalloc ((symcount + newsymcount + 1)
+				      * sizeof (asymbol *));
+      memcpy (outsyms, symbols, symcount * sizeof (asymbol *));
+      memcpy (outsyms + symcount, newsyms, newsymcount * sizeof (asymbol *));
+      outsyms[symcount + newsymcount] = NULL;
+    }
+
+  bfd_set_symtab (outbfd, outsyms, symcount + newsymcount);
     
   if (! gotstart)
     fprintf (stderr, "%s: warning: START procedure %s not defined\n",
@@ -352,9 +457,6 @@ main (argc, argv)
       && ! gotcheck)
     fprintf (stderr, "%s: warning: CHECK procedure %s not defined\n",
 	     program_name, check_procedure);
-
-  /* Set up the sections.  */
-  bfd_map_over_sections (inbfd, setup_sections, (PTR) outbfd);
 
   /* Add additional sections required for the header information.  */
   if (custom_file != NULL)
@@ -457,6 +559,83 @@ main (argc, argv)
 	    bfd_fatal ("rpc section");
 	  strncpy (nlm_extended_header (outbfd)->stamp, "MeSsAgEs", 8);
 	}
+    }
+  if (sharelib_file != NULL)
+    {
+      sharedbfd = bfd_openr (sharelib_file, output_format);
+      if (sharedbfd == NULL
+	  || ! bfd_check_format (sharedbfd, bfd_object))
+	{
+	  fprintf (stderr, "%s:%s: %s\n", program_name, sharelib_file,
+		   bfd_errmsg (bfd_error));
+	  sharelib_file = NULL;
+	}
+      else
+	{
+	  sharedhdr = *nlm_fixed_header (sharedbfd);
+	  bfd_close (sharedbfd);
+	  shared_data = fopen (sharelib_file, "r");
+	  if (shared_data == NULL
+	      || (fstat (fileno (shared_data), &st) < 0))
+	    {
+	      fprintf (stderr, "%s:%s: %s\n", program_name, sharelib_file,
+		       strerror (errno));
+	      sharelib_file = NULL;
+	    }
+	  else
+	    {
+	      /* If we were clever, we could just copy out the
+		 sections of the shared library which we actually
+		 need.  However, we would have to figure out the sizes
+		 of the external and public information, and that can
+		 not be done without reading through them.  */
+	      shared_offset = st.st_size;
+	      if (shared_offset > sharedhdr.codeImageOffset)
+		shared_offset = sharedhdr.codeImageOffset;
+	      if (shared_offset > sharedhdr.dataImageOffset)
+		shared_offset = sharedhdr.dataImageOffset;
+	      if (shared_offset > sharedhdr.relocationFixupOffset)
+		shared_offset = sharedhdr.relocationFixupOffset;
+	      if (shared_offset > sharedhdr.externalReferencesOffset)
+		shared_offset = sharedhdr.externalReferencesOffset;
+	      if (shared_offset > sharedhdr.publicsOffset)
+		shared_offset = sharedhdr.publicsOffset;
+	      shared_size = st.st_size - shared_offset;
+	      shared_section = bfd_make_section (outbfd, ".nlmshared");
+	      if (shared_section == NULL
+		  || ! bfd_set_section_size (outbfd, shared_section,
+					     shared_size)
+		  || ! bfd_set_section_flags (outbfd, shared_section,
+					      SEC_HAS_CONTENTS))
+		bfd_fatal ("shared section");
+	      strncpy (nlm_extended_header (outbfd)->stamp, "MeSsAgEs", 8);
+	    }
+	}
+    }
+
+  /* Check whether a version was given.  */
+  if (strncmp (version_hdr->stamp, "VeRsIoN#", 8) != 0)
+    fprintf (stderr, "%s: warning: No version number given\n",
+	     program_name);
+
+  /* At least for now, always create an extended header, because that
+     is what NLMLINK does.  */
+  strncpy (nlm_extended_header (outbfd)->stamp, "MeSsAgEs", 8);
+
+  /* If the date was not given, force it in.  */
+  if (nlm_version_header (outbfd)->month == 0
+      && nlm_version_header (outbfd)->day == 0
+      && nlm_version_header (outbfd)->year == 0)
+    {
+      unsigned long now;	/* FIXME: should be time_t.  */
+      struct tm *ptm;
+
+      time (&now);
+      ptm = localtime (&now);
+      nlm_version_header (outbfd)->month = ptm->tm_mon + 1;
+      nlm_version_header (outbfd)->day = ptm->tm_mday;
+      nlm_version_header (outbfd)->year = ptm->tm_year + 1900;
+      strncpy (version_hdr->stamp, "VeRsIoN#", 8);
     }
 
   /* Copy over the sections.  */
@@ -583,6 +762,51 @@ main (argc, argv)
 	}
       free (data);
     }
+  if (sharelib_file != NULL)
+    {
+      PTR data;
+
+      data = xmalloc (shared_size);
+      if (fseek (shared_data, shared_offset, SEEK_SET) != 0
+	  || fread (data, 1, shared_size, shared_data) != shared_size)
+	fprintf (stderr, "%s:%s: read: %s\n", program_name, sharelib_file,
+		 strerror (errno));
+      else
+	{
+	  if (! bfd_set_section_contents (outbfd, shared_section, data,
+					  (file_ptr) 0, shared_size))
+	    bfd_fatal ("shared section");
+	}
+      nlm_extended_header (outbfd)->sharedCodeOffset =
+	sharedhdr.codeImageOffset - shared_offset + shared_section->filepos;
+      nlm_extended_header (outbfd)->sharedCodeLength =
+	sharedhdr.codeImageSize;
+      nlm_extended_header (outbfd)->sharedDataOffset =
+	sharedhdr.dataImageOffset - shared_offset + shared_section->filepos;
+      nlm_extended_header (outbfd)->sharedDataLength =
+	sharedhdr.dataImageSize;
+      nlm_extended_header (outbfd)->sharedRelocationFixupOffset =
+	(sharedhdr.relocationFixupOffset
+	 - shared_offset
+	 + shared_section->filepos);
+      nlm_extended_header (outbfd)->sharedRelocationFixupCount =
+	sharedhdr.numberOfRelocationFixups;
+      nlm_extended_header (outbfd)->sharedExternalReferenceOffset =
+	(sharedhdr.externalReferencesOffset
+	 - shared_offset
+	 + shared_section->filepos);
+      nlm_extended_header (outbfd)->sharedExternalReferenceCount =
+	sharedhdr.numberOfExternalReferences;
+      nlm_extended_header (outbfd)->sharedPublicsOffset =
+	sharedhdr.publicsOffset - shared_offset + shared_section->filepos;
+      nlm_extended_header (outbfd)->sharedPublicsCount =
+	sharedhdr.numberOfPublics;
+      nlm_extended_header (outbfd)->SharedInitializationOffset =
+	sharedhdr.codeStartOffset;
+      nlm_extended_header (outbfd)->SharedExitProcedureOffset =
+	sharedhdr.exitProcedureOffset;
+      free (data);
+    }
   len = strlen (argv[optind + 1]);
   if (len > NLM_MODULE_NAME_SIZE - 2)
     len = NLM_MODULE_NAME_SIZE - 2;
@@ -619,7 +843,7 @@ show_usage (file, status)
      int status;
 {
   fprintf (file, "\
-Usage: %s [-Hv] [-I format] [-O format] [-T header-file]\n\
+Usage: %s [-hV] [-I format] [-O format] [-T header-file]\n\
        [--input-format=format] [--output-format=format]\n\
        [--header-file=file] [--help] [--version]\n\
        in-file out-file\n",
@@ -661,6 +885,7 @@ setup_sections (inbfd, insec, data_ptr)
 {
   bfd *outbfd = (bfd *) data_ptr;
   asection *outsec;
+  flagword f;
 
   outsec = bfd_get_section_by_name (outbfd, bfd_section_name (inbfd, insec));
   if (outsec == NULL)
@@ -685,9 +910,12 @@ setup_sections (inbfd, insec, data_ptr)
 				 bfd_section_alignment (inbfd, insec)))
     bfd_fatal ("set section alignment");
 
-  if (! bfd_set_section_flags (outbfd, outsec,
-			       bfd_get_section_flags (inbfd, insec)))
+  f = bfd_get_section_flags (inbfd, insec);
+  if (! bfd_set_section_flags (outbfd, outsec, f))
     bfd_fatal ("set section flags");
+
+  if ((f & SEC_LOAD) == 0 && (f & SEC_ALLOC) != 0)
+    total_bss_size += bfd_section_size (inbfd, insec);
 }
 
 /* Copy the section contents.  */
@@ -735,7 +963,8 @@ copy_sections (inbfd, insec, data_ptr)
 
       relocs = (arelent **) xmalloc (reloc_size);
       reloc_count = bfd_canonicalize_reloc (inbfd, insec, relocs, symbols);
-      mangle_relocs (outbfd, relocs, reloc_count, (char *) contents, size);
+      mangle_relocs (outbfd, insec, relocs, &reloc_count, (char *) contents,
+		     size);
       bfd_set_reloc (outbfd, outsec, relocs, reloc_count);
     }
 
@@ -752,17 +981,18 @@ copy_sections (inbfd, insec, data_ptr)
    by the input formats.  */
 
 static void
-mangle_relocs (outbfd, relocs, reloc_count, contents, contents_size)
+mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents, contents_size)
      bfd *outbfd;
+     asection *insec;
      arelent **relocs;
-     bfd_size_type reloc_count;
+     bfd_size_type *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
   switch (bfd_get_arch (outbfd))
     {
     case bfd_arch_i386:
-      i386_mangle_relocs (outbfd, relocs, reloc_count, contents,
+      i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 			  contents_size);
       break;
     default:
@@ -792,14 +1022,19 @@ static reloc_howto_type nlm_i386_pcrel_howto =
 	 true);			/* pcrel_offset */
 
 static void
-i386_mangle_relocs (outbfd, relocs, reloc_count, contents, contents_size)
+i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
+		    contents_size)
      bfd *outbfd;
+     asection *insec;
      arelent **relocs;
-     bfd_size_type reloc_count;
+     bfd_size_type *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
-  while (reloc_count-- != 0)
+  bfd_size_type reloc_count, i;
+
+  reloc_count = *reloc_count_ptr;
+  for (i = 0; i < reloc_count; i++)
     {
       arelent *rel;
       asymbol *sym;
@@ -815,6 +1050,20 @@ i386_mangle_relocs (outbfd, relocs, reloc_count, contents, contents_size)
 	 4 byte relocs here, so we insist on having 4 bytes.  */
       if (rel->address + 4 > contents_size)
 	continue;
+
+      /* A PC relative reloc entirely within a single section is
+	 completely unnecessary.  This can be generated by ld -r.  */
+      if (sym == insec->symbol
+	  && rel->howto != NULL
+	  && rel->howto->pc_relative
+	  && ! rel->howto->pcrel_offset)
+	{
+	  --*reloc_count_ptr;
+	  --relocs;
+	  memmove (relocs, relocs + 1,
+		   (reloc_count - i) * sizeof (arelent *));
+	  continue;
+	}
 
       /* NetWare doesn't support reloc addends, so we get rid of them
 	 here by simply adding them into the object data.  We handle
