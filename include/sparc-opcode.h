@@ -629,12 +629,12 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1),			"d,[i+1]", 0, v9 },
 { "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|RS1_G0,		"d,[i]", 0, v9 },
 { "stx",	F3(3, 0x0e, 1), F3(~3, ~0x0e, ~1)|SIMM13(~0),		"d,[1]", 0, v9 }, /* stx d,[rs1+0] */
-{ "stx",	F3(3, 0x2d, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI(~0),	"F,[1+2]", F_ALIAS, v9 },
-{ "stx",	F3(3, 0x2d, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI_RS2(~0),	"F,[1]", F_ALIAS, v9 }, /* st d,[rs1+%g0] */
-{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|RD_G0,		"F,[1+i]", F_ALIAS, v9 },
-{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|RD_G0,		"F,[i+1]", F_ALIAS, v9 },
-{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|RD_G0|RS1_G0,		"F,[i]", F_ALIAS, v9 },
-{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x25, ~1)|SIMM13(~0),		"F,[1]", F_ALIAS, v9 }, /* st d,[rs1+0] */
+{ "stx",	F3(3, 0x2d, 0), F3(~3, ~0x2d, ~0)|RD_G0|ASI(~0),	"F,[1+2]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 0), F3(~3, ~0x2d, ~0)|RD_G0|ASI_RS2(~0),	"F,[1]", F_ALIAS, v9 }, /* st d,[rs1+%g0] */
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x2d, ~1)|RD_G0,		"F,[1+i]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x2d, ~1)|RD_G0,		"F,[i+1]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x2d, ~1)|RD_G0|RS1_G0,		"F,[i]", F_ALIAS, v9 },
+{ "stx",	F3(3, 0x2d, 1), F3(~3, ~0x2d, ~1)|SIMM13(~0),		"F,[1]", F_ALIAS, v9 }, /* st d,[rs1+0] */
 
 { "stxa",	F3(3, 0x1e, 0), F3(~3, ~0x1e, ~0),		"d,[1+2]A", 0, v9 },
 { "stxa",	F3(3, 0x1e, 0), F3(~3, ~0x1e, ~0)|RS2(~0),	"d,[1]A", 0, v9 }, /* stha d,[rs1+%g0] */
@@ -1793,10 +1793,10 @@ condfc("fbule",	"cb013", 0xe),
 { "cpop1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", 0, v6 },
 { "cpop2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", 0, v6 },
     
-{ "casx",	F3(3, 0x0c, 0)|IMMED, F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
-{ "casxa",	F3(3, 0x1c, 0)|IMMED, F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
-{ "cas",	F3(3, 0x0c, 0), IMMED|F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
-{ "casa",	F3(3, 0x1c, 0), IMMED|F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
+{ "casx",	F3(3, 0x0c, 1), F3(~3, ~0x0c, ~1), "[1],2,d", 0, v9 },
+{ "casxa",	F3(3, 0x1c, 1), F3(~3, ~0x1c, ~1), "[1]A,2,d", 0, v9 },
+{ "cas",	F3(3, 0x0c, 0), F3(~3, ~0x0c, ~0), "[1],2,d", 0, v9 },
+{ "casa",	F3(3, 0x1c, 0), F3(~3, ~0x1c, ~0), "[1]A,2,d", 0, v9 },
 
 { "fmaddd",	F3(2, 0x35, 0)|OPF_LOW(0xa), F3(~2, ~0x35, ~0)|OPF_LOW(~0xa), "e,f,j,g", 0, v9 },
 { "fmaddq",	F3(2, 0x35, 0)|OPF_LOW(0xb), F3(~2, ~0x35, ~0)|OPF_LOW(~0xb), "e,f,j,g", 0, v9 },
