@@ -584,7 +584,6 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
       newsect = bfd_make_section (abfd, name);
       if (newsect)
 	{
-	  newsect->filepos = hdr->sh_offset; /* so we can read back the bits */
 	  newsect->flags = SEC_HAS_CONTENTS;
 	  hdr->rawdata = (PTR) newsect;
 	  newsect->_raw_size = hdr->sh_size;
@@ -878,8 +877,10 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   if (i_ehdrp->e_shoff == 0)
     goto got_wrong_format_error;
 
-  if (i_ehdrp->e_type == ET_EXEC || i_ehdrp->e_type == ET_DYN)
+  if (i_ehdrp->e_type == ET_EXEC)
     abfd->flags |= EXEC_P;
+  else if (i_ehdrp->e_type == ET_DYN)
+    abfd->flags |= DYNAMIC;
 
   /* Retrieve the architecture information from the xvec and verify
      that it matches the machine info stored in the ELF header.
@@ -1567,6 +1568,8 @@ assign_file_position_for_section (i_shdrp, offset)
   else
     align = 1;
   i_shdrp->sh_offset = offset = BFD_ALIGN (offset, align);
+  if (i_shdrp->rawdata != NULL)
+    ((asection *) i_shdrp->rawdata)->filepos = offset;
   if (i_shdrp->sh_type != SHT_NOBITS)
     offset += i_shdrp->sh_size;
   return offset;
@@ -2659,21 +2662,29 @@ DEFUN (elf_slurp_reloca_table, (abfd, asect, symbols),
 	  /* non-relocatable, so the offset a virtual address */
 	  cache_ptr->address = dst.r_offset;
 	}
-      /* ELF_R_SYM(dst.r_info) is the symbol table offset; subtract 1
-	 because the first entry is NULL.  */
-      cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
-      {
-	/* Is it an ELF section symbol?  If so, translate it into a
-	   BFD section symbol.  */
-	asymbol *s = *(cache_ptr->sym_ptr_ptr);
-	if (s->flags & BSF_SECTION_SYM)
-	  {
-	    cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
-	    s = *cache_ptr->sym_ptr_ptr;
-	    if (s->name == 0 || s->name[0] == 0)
-	      abort ();
-	  }
-      }
+
+      /* ELF_R_SYM(dst.r_info) is the symbol table offset.  An offset
+	 of zero points to the dummy symbol, which was not read into
+	 the symbol table SYMBOLS.  */
+      if (ELF_R_SYM (dst.r_info) == 0)
+	cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      else
+	{
+	  asymbol *s;
+
+	  cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
+
+	  /* Translate any ELF section symbol into a BFD section
+	     symbol.  */
+	  s = *(cache_ptr->sym_ptr_ptr);
+	  if (s->flags & BSF_SECTION_SYM)
+	    {
+	      cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
+	      s = *cache_ptr->sym_ptr_ptr;
+	      if (s->name == 0 || s->name[0] == 0)
+		abort ();
+	    }
+	}
       cache_ptr->addend = dst.r_addend;
 
       /* Fill in the cache_ptr->howto field from dst.r_type */
@@ -2811,21 +2822,29 @@ DEFUN (elf_slurp_reloc_table, (abfd, asect, symbols),
 	  /* non-relocatable, so the offset a virtual address */
 	  cache_ptr->address = dst.r_offset;
 	}
-      /* ELF_R_SYM(dst.r_info) is the symbol table offset...
-	 -1 is to skip the dummy symbol table entry */
-      cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
-      {
-	/* Is it an ELF section symbol?  If so, translate it into a
-	   BFD section symbol.  */
-	asymbol *s = *(cache_ptr->sym_ptr_ptr);
-	if (s->flags & BSF_SECTION_SYM)
-	  {
-	    cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
-	    s = *cache_ptr->sym_ptr_ptr;
-	    if (s->name == 0 || s->name[0] == 0)
-	      abort ();
-	  }
-      }
+
+      /* ELF_R_SYM(dst.r_info) is the symbol table offset.  An offset
+	 of zero points to the dummy symbol, which was not read into
+	 the symbol table SYMBOLS.  */
+      if (ELF_R_SYM (dst.r_info) == 0)
+	cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      else
+	{
+	  asymbol *s;
+
+	  cache_ptr->sym_ptr_ptr = symbols + ELF_R_SYM (dst.r_info) - 1;
+
+	  /* Translate any ELF section symbol into a BFD section
+	     symbol.  */
+	  s = *(cache_ptr->sym_ptr_ptr);
+	  if (s->flags & BSF_SECTION_SYM)
+	    {
+	      cache_ptr->sym_ptr_ptr = s->section->symbol_ptr_ptr;
+	      s = *cache_ptr->sym_ptr_ptr;
+	      if (s->name == 0 || s->name[0] == 0)
+		abort ();
+	    }
+	}
       BFD_ASSERT (dst.r_offset <= data_max);
       cache_ptr->addend = 0;
 
