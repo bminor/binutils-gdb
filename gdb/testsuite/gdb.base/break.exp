@@ -143,6 +143,9 @@ if !$usestubs then {
   }
 }
 
+gdb_test $cmd "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:56.*56\[\t \]+if .argc.*" \
+	"run until function breakpoint"
+
 #
 # run until the breakpoint at a line number
 #
@@ -192,36 +195,15 @@ expect {
 #
 # test temporary breakpoint at function
 #
-send "tbreak main\n"
-expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line.*$prompt $" {
-	pass "Temporary breakpoint function"
-    }
-    -re ".*$prompt $" {
-	pass "Temporary breakpoint function"
-    }
-    timeout {
-	fail "(timeout) breakpoint function"
-    }
-}
 
+gdb_test "tbreak main" "Breakpoint.*at.* file .*$srcfile, line.*" "Temporary breakpoint function"
 
 #
 # test break at function in file
 #
-send "tbreak $srcfile:factorial\n"
-expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line.*$prompt $" {
-	pass "Temporary breakpoint function in file"
-    }
-    -re ".*$prompt $" {
-	pass "Temporary breakpoint function in file"
-    }
-    timeout {
-	fail "(timeout) breakpoint function in file"
-    }
-}
 
+gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" \
+	"Temporary breakpoint function in file"
 
 #
 # test break at line number
@@ -233,6 +215,7 @@ expect {
 	timeout	    { fail "(timeout) breakpoint line number" }
 }
 
+gdb_test "tbreak 60" "Breakpoint.*at.* file .*$srcfile, line 60.*" "Temporary breakpoint line number"
 
 #
 # test break at line number in file
@@ -244,6 +227,7 @@ expect {
 	timeout	    { fail "(timeout) breakpoint line number in file" }
 }
 
+gdb_test  "tbreak $srcfile:66" "Breakpoint.*at.* file .*$srcfile, line 66.*" "Temporary breakpoint line number in file"
 
 #
 # check to see what breakpoints are set (temporary this time)
@@ -260,7 +244,6 @@ expect {
     -re ".*$prompt $"   { fail "Temporary breakpoint info" }
     timeout	    { fail "(timeout) Temporary breakpoint info" }
 }
-
 
 proc test_clear_command {} {
     gdb_test "break main" "Breakpoint.*at.*"
@@ -292,11 +275,7 @@ proc test_next_with_recursion {} {
 
     delete_breakpoints
 
-    send "break factorial\n"
-    expect {
-	-re "Breakpoint $decimal at .*$prompt" {}
-	timeout { fail "break at factorial" ; return }
-    }
+    gdb_test "break factorial" "Breakpoint $decimal at .*" "break at factorial"
 
     # Run until we call factorial with 6
 
@@ -342,18 +321,7 @@ proc test_next_with_recursion {} {
 
     delete_breakpoints
 
-    send "next\n"
-    expect {
-	-re "return .value.;.*$prompt $" {
-	    # Note that the correct behavior is for GDB to *not* print the
-	    # frame.
-	    pass "next over recursive call"
-	}
-	-re ".*$prompt $" {
-	    fail "next over recursive call" ; return
-	}
-	timeout { fail "next over recursive call (timeout)" ; return }
-    }
+    gdb_test next "75\[\t \]+return \\(value\\);.*" "next over recursive call"
 
     # OK, we should be back in the same stack frame we started from.
     # Do a backtrace just to confirm.
