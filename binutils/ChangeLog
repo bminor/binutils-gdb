@@ -1,3 +1,9 @@
+2005-03-24  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* winduni.c (unicode_from_ascii): Don't declare variables
+	's' and 'w' if _WIN32.  Use MultiByteToWideChar to set the unicode
+	string len.
+
 2005-03-24  Dmitry Diky   <diwil@spec.ru>
 
 	* MAINTAINERS: Add myself as MSP430 maintainer. 

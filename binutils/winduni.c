@@ -43,25 +43,32 @@ void
 unicode_from_ascii (int *length, unichar **unicode, const char *ascii)
 {
   int len;
+#ifndef _WIN32
   const char *s;
   unsigned short *w;
 
   len = strlen (ascii);
-
-  if (length != NULL)
-    *length = len;
-
   *unicode = ((unichar *) res_alloc ((len + 1) * sizeof (unichar)));
-
-#ifdef _WIN32
-  /* FIXME: On Windows, we should be using MultiByteToWideChar to set
-     the length.  */
-  MultiByteToWideChar (CP_ACP, 0, ascii, len + 1, *unicode, len + 1);
-#else
   for (s = ascii, w = *unicode; *s != '\0'; s++, w++)
     *w = *s & 0xff;
   *w = 0;
+#else
+  /* We use  MultiByteToWideChar rather than strlen to get the unicode
+     string length to allow multibyte "ascii" chars. The value returned
+     by this function includes the trailing '\0'.  */
+  len = MultiByteToWideChar (CP_ACP, 0, ascii, -1, NULL, 0);
+  if (len)
+    {
+      *unicode = ((unichar *) res_alloc (len * sizeof (unichar)));
+      MultiByteToWideChar (CP_ACP, 0, ascii, -1, *unicode, len);
+    }
+  /* Discount the trailing '/0'.  If MultiByteToWideChar failed,
+     this will set *length to -1.  */
+  len--;
 #endif
+
+  if (length != NULL)
+    *length = len;
 }
 
 /* Print the unicode string UNICODE to the file E.  LENGTH is the
