@@ -1,3 +1,13 @@
+Fri Mar 21 15:35:27 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (host_tools): Put sim before gdb, so gdb's
+	configure.tgt can determine if the simulator was configured.
+
+Sun Mar 16 16:07:08 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config.sub: Move BeOS $os case to be with other Cygnus
+	local cases.
+
 Sun Mar 16 01:34:55 1997  Martin Hunt <hunt@cygnus.com>
 
 	* config.sub: Remove misplaced comment that broke Linux.

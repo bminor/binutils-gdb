@@ -212,13 +212,13 @@ powerpc-*-aix*)		gdb_target=aix ;;
 powerpcle-*-cygwin32)	gdb_target=cygwin32 ;;
 powerpcle-*-solaris*)	gdb_target=solaris ;;
 powerpc-*-eabi* | powerpc-*-linux* | powerpc-*-sysv* | powerpc-*-elf*)
-			if test x"$powerpc_sim" = x"yes"; then
+			if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim
 			else
 			  gdb_target=ppc-eabi
 			fi ;;
 powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
-			if test x"$powerpc_sim" = x"yes"; then
+			if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppcle-sim
 			else
 			  gdb_target=ppcle-eabi

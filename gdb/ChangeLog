@@ -1,3 +1,12 @@
+Fri Mar 21 15:36:25 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.tgt (powerpc*-{eabi,linux,sysv,elf}*): Determine
+	whether the simulator will be built by whether the Makefile in the
+	simulator directory was built.
+
+	* configure.in (--enable-sim-powerpc): Delete switch.
+	* configure: Regenerate.
+
 Thu Mar 20 20:52:04 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-tdep.c (mn10200_analyze_prologue): Look for save of "a1"
@@ -18,7 +27,7 @@ Wed Mar 19 16:13:22 1997  Geoffrey Noer  <noer@pizza.cygnus.com>
 	* configure.host: added new entries
 
 start-sanitize-gdbtk
-	Wed Mar 19 15:16:17 1997  Martin M. Hunt  <hunt@onions.cygnus.com>
+Wed Mar 19 15:16:17 1997  Martin M. Hunt  <hunt@onions.cygnus.com>
 
 	* Makefile.in:  Install gdbtcl dir instead of gdbtk.tcl.
 	
@@ -27,7 +36,7 @@ start-sanitize-gdbtk
 	(gdb_path_conv): New function.  Convert Cygwin32 pathname to
 	DOS-style pathname.
 
-	* aclocal.m4, configure.in: Changes for Windows builds.
+	* {aclocal.m4,configure.in}: Changes for Windows builds.
 
 	* configure: Rebuilt.
 
