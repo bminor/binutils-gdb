@@ -474,7 +474,7 @@ case "${target}" in
     fi
     ;;
   v810-*-*)
-    noconfigdirs="$noconfigdirs bfd binutils ld gas gcc gdb opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld libg++ libstdc++ opcodes"
     ;;
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld newlib opcodes"
