@@ -1,8 +1,28 @@
+1999-09-15  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (dynamic_segment_parisc_val): Print 0 for DLD_FLAGS if
+	the value is zero.
+	(process_symbol_table): Don't print histogram if hash table is empty.
+
+1999-09-15  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (get_parisc_dynamic_type): Handle DT_HP_GST_* values.
+
+1999-09-02  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (get_symbol_type): Add support for HPUX and PARISC
+	specific symbol types.
+
+	* readelf.c: Add HPUX and PARISC extensions to dynamic and program
+	header table printing.
+
+	* readelf.c (get_machine_flags): Add handling of PARISC.
+
 1999-09-29  Mumit Khan  <khan@xraylith.wisc.edu>
 
-        * dlltool.c (scan_drectve_symbols): Handle type tags in exported
-        symbols.
-        (scan_filtered_symbols): Likewise.
+	* dlltool.c (scan_drectve_symbols): Handle type tags in exported
+	symbols.
+	(scan_filtered_symbols): Likewise.
 
 1999-09-19  Ian Lance Taylor  <ian@zembu.com>
 
@@ -117,7 +137,7 @@
 1999-08-27  Jim Wilson  <wilson@cygnus.com>
 
 	* readelf.c (display_debug_lines, case DW_LNS_const_add_pc): Multiply
-	adv by info.li_min_insn_length. 
+	adv by info.li_min_insn_length.
 
 1999-08-26  Jakub Jelinek  <jj@ultra.linux.cz>
 
@@ -136,7 +156,7 @@
 1999-08-18  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c (make_head): Only emit interworking directive if
-	necessary. 
+	necessary.
 
 Thu Jul 15 22:44:21 1999  Hans-Peter Nilsson  <hp@bitrange.com>
 
@@ -299,7 +319,7 @@ Fri Jun 18 20:17:51 1999  Mumit Khan  <khan@xraylith.wisc.edu>
 1999-06-16  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (get_symbol_type): Detect ARM symbols typed as Thumb
-	functions. 
+	functions.
 
 1999-06-14  Nick Clifton  <nickc@cygnus.com>
 
@@ -309,7 +329,7 @@ Fri Jun 18 20:17:51 1999  Mumit Khan  <khan@xraylith.wisc.edu>
 	(disassemble_data): Initialise disassembler_options field of
 	disassembler_info structure.
 	(main): Add parsing of -M option.
-	
+
 	* binutils.texi: Document new command line switch to objdump.
 
 	* NEWS: Describe new command line switch to objdump.
@@ -397,7 +417,7 @@ Mon Jun  7 12:14:57 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 1999-06-03  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c (mcore_elf_gen_out_file): Use constants for temporary
-	file names. 
+	file names.
 
 Wed Jun  2 12:34:36 1999  Richard Henderson  <rth@cygnus.com>
 
@@ -468,7 +488,7 @@ Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	(usage): Document new command line options.
 	(main): Support new command line options: -M (generate an
 	mcore-elf output file) -L (name of linker to use) -F (flags to
-	pass to linker). 
+	pass to linker).
 	(mcore_elf_cache_filename): Store a filename in a cache.
 	(mcore_elf_gen_out_file): New function: Generate an output file
 	per the mcore-elf spec.
@@ -488,7 +508,7 @@ Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	(scan_drectve_symbols): Use DRECTVE_SECTION_NAME.
 	(make_head, make_tail): Cope if file cannot be created.
 	(usage): Improve layout.
-	
+
 1999-05-13  DJ Delorie  <dj@cygnus.com>
 
 	* rclex.l: add code to suppress certain output from cpp, replace
@@ -540,10 +560,10 @@ Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	(main): Remove -interwork support.
 
 1999-05-05  Catherine Moore  <clm@cygnus.com>
- 
+
         * readelf.c (get_machine_flags):  Check for EF_CPU32.
         (get_data_encoding): Fix typo.
- 
+
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
@@ -609,7 +629,7 @@ Tue Apr 13 21:22:00 1999  Catherine Moore  <clm@cygnus.com>
 1999-04-05  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (decode_location_expression): Fix DW_OP_const8{s|u}
-	decodes. 
+	decodes.
 
 1999-04-04  Ian Lance Taylor  <ian@zembu.com>
 

@@ -132,14 +132,17 @@ static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, 
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
 static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
 static const char *       get_sparc64_dynamic_type    PARAMS ((unsigned long));
+static const char *       get_parisc_dynamic_type     PARAMS ((unsigned long));
 static const char *       get_dynamic_type            PARAMS ((unsigned long));
 static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
 static char *             get_file_type               PARAMS ((unsigned));
 static char *             get_machine_name            PARAMS ((unsigned));
 static char *             get_machine_flags           PARAMS ((unsigned, unsigned));
 static const char *       get_mips_segment_type       PARAMS ((unsigned long));
+static const char *       get_parisc_segment_type     PARAMS ((unsigned long));
 static const char *       get_segment_type            PARAMS ((unsigned long));
 static const char *       get_mips_section_type_name  PARAMS ((unsigned int));
+static const char *       get_parisc_section_type_name PARAMS ((unsigned int));
 static const char *       get_section_type_name       PARAMS ((unsigned int));
 static char *             get_symbol_binding          PARAMS ((unsigned int));
 static char *             get_symbol_type             PARAMS ((unsigned int));
@@ -149,6 +152,7 @@ static int                process_file_header         PARAMS ((void));
 static int                process_program_headers     PARAMS ((FILE *));
 static int                process_section_headers     PARAMS ((FILE *));
 static void               dynamic_segment_mips_val    PARAMS ((Elf_Internal_Dyn *));
+static void               dynamic_segment_parisc_val  PARAMS ((Elf_Internal_Dyn *));
 static int                process_dynamic_segment     PARAMS ((FILE *));
 static int                process_symbol_table        PARAMS ((FILE *));
 static int                process_section_contents    PARAMS ((FILE *));
@@ -416,7 +420,7 @@ byte_get_big_endian (field, size)
 	|   (((bfd_vma) (field [1])) << 48)
 	|   (((bfd_vma) (field [0])) << 56);
 #endif
-      
+
     default:
       error (_("Unhandled data length: %d\n"), size);
       abort ();
@@ -441,7 +445,7 @@ guess_is_rela (e_machine)
     case EM_MIPS:
     case EM_MIPS_RS4_BE:
       return FALSE;
-      
+
       /* Targets that use RELA relocations.  */
     case EM_68K:
     case EM_SPARC32PLUS:
@@ -457,7 +461,7 @@ guess_is_rela (e_machine)
     case EM_ALPHA:
     case EM_MCORE:
       return TRUE;
-      
+
     default:
       warn (_("Don't know about relocations on this machine architecture\n"));
       return FALSE;
@@ -479,7 +483,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
   Elf_Internal_Rel *  rels;
   Elf_Internal_Rela * relas;
 
-  
+
   if (is_rela == UNKNOWN)
     is_rela = guess_is_rela (elf_header.e_machine);
 
@@ -488,59 +492,59 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       if (is_32bit_elf)
 	{
 	  Elf32_External_Rela * erelas;
-	  
+
 	  GET_DATA_ALLOC (rel_offset, rel_size, erelas,
 			  Elf32_External_Rela *, "relocs");
-	  
+
 	  rel_size = rel_size / sizeof (Elf32_External_Rela);
-	  
+
 	  relas = (Elf_Internal_Rela *)
 	    malloc (rel_size * sizeof (Elf_Internal_Rela));
-      
+
 	  if (relas == NULL)
 	    {
 	      error(_("out of memory parsing relocs"));
 	      return 0;
 	    }
-	  
+
 	  for (i = 0; i < rel_size; i++)
 	    {
 	      relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
 	      relas[i].r_info   = BYTE_GET (erelas[i].r_info);
 	      relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
 	    }
-      
+
 	  free (erelas);
-      
+
 	  rels = (Elf_Internal_Rel *) relas;
 	}
       else
 	{
 	  Elf64_External_Rela * erelas;
-	  
+
 	  GET_DATA_ALLOC (rel_offset, rel_size, erelas,
 			  Elf64_External_Rela *, "relocs");
-	  
+
 	  rel_size = rel_size / sizeof (Elf64_External_Rela);
-	  
+
 	  relas = (Elf_Internal_Rela *)
 	    malloc (rel_size * sizeof (Elf_Internal_Rela));
-      
+
 	  if (relas == NULL)
 	    {
 	      error(_("out of memory parsing relocs"));
 	      return 0;
 	    }
-	  
+
 	  for (i = 0; i < rel_size; i++)
 	    {
 	      relas[i].r_offset = BYTE_GET8 (erelas[i].r_offset);
 	      relas[i].r_info   = BYTE_GET8 (erelas[i].r_info);
 	      relas[i].r_addend = BYTE_GET8 (erelas[i].r_addend);
 	    }
-      
+
 	  free (erelas);
-      
+
 	  rels = (Elf_Internal_Rel *) relas;
 	}
     }
@@ -552,26 +556,26 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	  GET_DATA_ALLOC (rel_offset, rel_size, erels,
 			  Elf32_External_Rel *, "relocs");
-	  
+
 	  rel_size = rel_size / sizeof (Elf32_External_Rel);
-	  
+
 	  rels = (Elf_Internal_Rel *)
 	    malloc (rel_size * sizeof (Elf_Internal_Rel));
-	  
+
 	  if (rels == NULL)
 	    {
 	      error(_("out of memory parsing relocs"));
 	      return 0;
 	    }
-	  
+
 	  for (i = 0; i < rel_size; i++)
 	    {
 	      rels[i].r_offset = BYTE_GET (erels[i].r_offset);
 	      rels[i].r_info   = BYTE_GET (erels[i].r_info);
 	    }
-	  
+
 	  free (erels);
-	  
+
 	  relas = (Elf_Internal_Rela *) rels;
 	}
       else
@@ -580,26 +584,26 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	  GET_DATA_ALLOC (rel_offset, rel_size, erels,
 			  Elf64_External_Rel *, "relocs");
-	  
+
 	  rel_size = rel_size / sizeof (Elf64_External_Rel);
-	  
+
 	  rels = (Elf_Internal_Rel *)
 	    malloc (rel_size * sizeof (Elf_Internal_Rel));
-	  
+
 	  if (rels == NULL)
 	    {
 	      error(_("out of memory parsing relocs"));
 	      return 0;
 	    }
-	  
+
 	  for (i = 0; i < rel_size; i++)
 	    {
 	      rels[i].r_offset = BYTE_GET8 (erels[i].r_offset);
 	      rels[i].r_info   = BYTE_GET8 (erels[i].r_info);
 	    }
-	  
+
 	  free (erels);
-	  
+
 	  relas = (Elf_Internal_Rela *) rels;
 	}
     }
@@ -618,7 +622,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       bfd_vma      info;
       bfd_vma      symtab_index;
       bfd_vma      type;
-      
+
       if (is_rela)
 	{
 	  offset = relas [i].r_offset;
@@ -629,7 +633,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  offset = rels [i].r_offset;
 	  info   = rels [i].r_info;
 	}
-      
+
       if (is_32bit_elf)
 	{
 	  type         = ELF32_R_TYPE (info);
@@ -644,7 +648,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  /* The #ifdef BFD64 below is to prevent a compile time warning.
 	     We know that if we do not have a 64 bit data type that we
 	     will never execute this code anyway.  */
-#ifdef BFD64 
+#ifdef BFD64
 	  symtab_index = ELF64_R_SYM  (info);
 #endif
 	}
@@ -654,7 +658,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 #else
       printf ("  %8.8lx  %5.5lx ", offset, info);
 #endif
-      
+
       switch (elf_header.e_machine)
 	{
 	default:
@@ -748,7 +752,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
 
       if (rtype == NULL)
-#ifdef _bfd_int64_low	
+#ifdef _bfd_int64_low
 	printf (_("unrecognised: %-7lx"), _bfd_int64_low (type));
 #else
 	printf (_("unrecognised: %-7lx"), type);
@@ -767,9 +771,9 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 		  Elf_Internal_Sym * psym;
 
 		  psym = symtab + symtab_index;
-		  
+
 		  printf (" %08lx  ", (unsigned long) psym->st_value);
-		  
+
 		  if (psym->st_name == 0)
 		    printf ("%-25.25s",
 			    SECTION_NAME (section_headers + psym->st_shndx));
@@ -777,7 +781,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 		    printf (_("<string table index %3ld>"), psym->st_name);
 		  else
 		    printf ("%-25.25s", strtab + psym->st_name);
-		  
+
 		  if (is_rela)
 		    printf (" + %lx", (unsigned long) relas [i].r_addend);
 		}
@@ -862,7 +866,31 @@ get_sparc64_dynamic_type (type)
     default:
       return NULL;
     }
-}    
+}
+
+static const char *
+get_parisc_dynamic_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case DT_HP_LOAD_MAP:	return "HP_LOAD_MAP";
+    case DT_HP_DLD_FLAGS:	return "HP_DLD_FLAGS";
+    case DT_HP_DLD_HOOK:	return "HP_DLD_HOOK";
+    case DT_HP_UX10_INIT:	return "HP_UX10_INIT";
+    case DT_HP_UX10_INITSZ:	return "HP_UX10_INITSZ";
+    case DT_HP_PREINIT:		return "HP_PREINIT";
+    case DT_HP_PREINITSZ:	return "HP_PREINITSZ";
+    case DT_HP_NEEDED:		return "HP_NEEDED";
+    case DT_HP_TIME_STAMP:	return "HP_TIME_STAMP";
+    case DT_HP_CHECKSUM:	return "HP_CHECKSUM";
+    case DT_HP_GST_SIZE:	return "HP_GST_SIZE";
+    case DT_HP_GST_VERSION:	return "HP_GST_VERSION";
+    case DT_HP_GST_HASHVAL:	return "HP_GST_HASHVAL";
+    default:
+      return NULL;
+    }
+}
 
 static const char *
 get_dynamic_type (type)
@@ -901,7 +929,7 @@ get_dynamic_type (type)
     case DT_FINI_ARRAY: return "FINI_ARRAY";
     case DT_INIT_ARRAYSZ: return "INIT_ARRAYSZ";
     case DT_FINI_ARRAYSZ: return "FINI_ARRAYSZ";
-      
+
     case DT_PLTPADSZ:	return "PLTPADSZ";
     case DT_MOVEENT:	return "MOVEENT";
     case DT_MOVESZ:	return "MOVESZ";
@@ -909,12 +937,12 @@ get_dynamic_type (type)
     case DT_POSFLAG_1:	return "POSFLAG_1";
     case DT_SYMINSZ:	return "SYMINSZ";
     case DT_SYMINENT:	return "SYMINENT"; /* aka VALRNGHI */
-      
+
     case DT_ADDRRNGLO:  return "ADDRRNGLO";
     case DT_SYMINFO:	return "SYMINFO"; /* aka ADDRRNGHI */
-      
+
     case DT_VERSYM:	return "VERSYM";
-      
+
     case DT_RELACOUNT:	return "RELACOUNT";
     case DT_RELCOUNT:	return "RELCOUNT";
     case DT_FLAGS_1:	return "FLAGS_1";
@@ -922,16 +950,16 @@ get_dynamic_type (type)
     case DT_VERDEFNUM:	return "VERDEFNUM";
     case DT_VERNEED:	return "VERNEED";
     case DT_VERNEEDNUM:	return "VERNEEDNUM";
-      
+
     case DT_AUXILIARY:	return "AUXILARY";
     case DT_USED:	return "USED";
     case DT_FILTER:	return "FILTER";
-      
+
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
 	{
 	  const char * result;
-	  
+
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
@@ -952,10 +980,27 @@ get_dynamic_type (type)
 	  sprintf (buff, _("Processor Specific: %lx"), type);
 	}
       else if ((type >= DT_LOOS) && (type <= DT_HIOS))
-	sprintf (buff, _("Operating System specific: %lx"), type);
+	{
+	  const char * result;
+
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_PARISC:
+	      result = get_parisc_dynamic_type (type);
+	      break;
+	    default:
+	      result = NULL;
+	      break;
+	    }
+
+	  if (result != NULL)
+	    return result;
+
+	  sprintf (buff, _("Operating System specific: %lx"), type);
+	}
       else
 	sprintf (buff, _("<unknown>: %lx"), type);
-      
+
       return buff;
     }
 }
@@ -1152,6 +1197,34 @@ get_machine_flags (e_flags, e_machine)
 	    strcat (buf, ", rmo");
 	  break;
 
+	case EM_PARISC:
+	  switch (e_flags & EF_PARISC_ARCH)
+	    {
+	    case EFA_PARISC_1_0:
+	      strcpy (buf, ", PA-RISC 1.0");
+	      break;
+	    case EFA_PARISC_1_1:
+	      strcpy (buf, ", PA-RISC 1.1");
+	      break;
+	    case EFA_PARISC_2_0:
+	      strcpy (buf, ", PA-RISC 2.0");
+	      break;
+	    default:
+	      break;
+	    }
+	  if (e_flags & EF_PARISC_TRAPNIL)
+	    strcat (buf, ", trapnil");
+	  if (e_flags & EF_PARISC_EXT)
+	    strcat (buf, ", ext");
+	  if (e_flags & EF_PARISC_LSB)
+	    strcat (buf, ", lsb");
+	  if (e_flags & EF_PARISC_WIDE)
+	    strcat (buf, ", wide");
+	  if (e_flags & EF_PARISC_NO_KABP)
+	    strcat (buf, ", no kabp");
+	  if (e_flags & EF_PARISC_LAZYSWAP)
+	    strcat (buf, ", lazyswap");
+
 	case EM_PJ:
 	  if ((e_flags & EF_PICOJAVA_NEWCALLS) == EF_PICOJAVA_NEWCALLS)
 	    strcat (buf, ", new calling convention");
@@ -1185,6 +1258,33 @@ get_mips_segment_type (type)
 }
 
 static const char *
+get_parisc_segment_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case PT_HP_TLS:		return "HP_TLS";
+    case PT_HP_CORE_NONE:	return "HP_CORE_NONE";
+    case PT_HP_CORE_VERSION:	return "HP_CORE_VERSION";
+    case PT_HP_CORE_KERNEL:	return "HP_CORE_KERNEL";
+    case PT_HP_CORE_COMM:	return "HP_CORE_COMM";
+    case PT_HP_CORE_PROC:	return "HP_CORE_PROC";
+    case PT_HP_CORE_LOADABLE:	return "HP_CORE_LOADABLE";
+    case PT_HP_CORE_STACK:	return "HP_CORE_STACK";
+    case PT_HP_CORE_SHM:	return "HP_CORE_SHM";
+    case PT_HP_CORE_MMF:	return "HP_CORE_MMF";
+    case PT_HP_PARALLEL:	return "HP_PARALLEL";
+    case PT_HP_FASTBIND:	return "HP_FASTBIND";
+    case PT_PARISC_ARCHEXT:	return "PARISC_ARCHEXT";
+    case PT_PARISC_UNWIND:	return "PARISC_UNWIND";
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+static const char *
 get_segment_type (p_type)
      unsigned long p_type;
 {
@@ -1204,25 +1304,45 @@ get_segment_type (p_type)
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
 	  const char * result;
-	  
+
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
 	    case EM_MIPS_RS4_BE:
 	      result = get_mips_segment_type (p_type);
 	      break;
+	    case EM_PARISC:
+	      result = get_parisc_segment_type (p_type);
+	      break;
 	    default:
 	      result = NULL;
 	      break;
 	    }
-	  
+
 	  if (result != NULL)
 	    return result;
-	  
+
 	  sprintf (buff, "LOPROC+%lx", p_type - PT_LOPROC);
 	}
       else if ((p_type >= PT_LOOS) && (p_type <= PT_HIOS))
-	sprintf (buff, "LOOS+%lx", p_type - PT_LOOS);
+	{
+	  const char * result;
+
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_PARISC:
+	      result = get_parisc_segment_type (p_type);
+	      break;
+	    default:
+	      result = NULL;
+	      break;
+	    }
+
+	  if (result != NULL)
+	    return result;
+
+	  sprintf (buff, "LOOS+%lx", p_type - PT_LOOS);
+	}
       else
 	sprintf (buff, _("<unknown>: %lx"), p_type);
 
@@ -1282,6 +1402,21 @@ get_mips_section_type_name (sh_type)
 }
 
 static const char *
+get_parisc_section_type_name (sh_type)
+     unsigned int sh_type;
+{
+  switch (sh_type)
+    {
+    case SHT_PARISC_EXT:	return "PARISC_EXT";
+    case SHT_PARISC_UNWIND:	return "PARISC_UNWIND";
+    case SHT_PARISC_DOC:	return "PARISC_DOC";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_section_type_name (sh_type)
      unsigned int sh_type;
 {
@@ -1320,6 +1455,9 @@ get_section_type_name (sh_type)
 	    case EM_MIPS_RS4_BE:
 	      result = get_mips_section_type_name (sh_type);
 	      break;
+	    case EM_PARISC:
+	      result = get_parisc_section_type_name (sh_type);
+	      break;
 	    default:
 	      result = NULL;
 	      break;
@@ -1336,7 +1474,7 @@ get_section_type_name (sh_type)
 	sprintf (buff, "SHT_LOUSER+%x", sh_type - SHT_LOUSER);
       else
 	sprintf (buff, _("<unknown>: %x"), sh_type);
-      
+
       return buff;
     }
 }
@@ -1600,7 +1738,7 @@ get_elf_class (elf_class)
      unsigned char elf_class;
 {
   static char buff [32];
-  
+
   switch (elf_class)
     {
     case ELFCLASSNONE: return _("none");
@@ -1617,13 +1755,13 @@ get_data_encoding (encoding)
      unsigned char encoding;
 {
   static char buff [32];
-  
+
   switch (encoding)
     {
     case ELFDATANONE: return _("none");
     case ELFDATA2LSB: return _("2's complement, little endian");
     case ELFDATA2MSB: return _("2's complement, big endian");
-    default:          
+    default:
       sprintf (buff, _("<unknown: %x>"), encoding);
       return buff;
     }
@@ -1634,7 +1772,7 @@ get_osabi_name (osabi)
      unsigned char osabi;
 {
   static char buff [32];
-  
+
   switch (osabi)
     {
     case ELFOSABI_SYSV:       return _("UNIX - System V");
@@ -1712,7 +1850,7 @@ process_file_header ()
       printf (_("  Section header string table index: %ld\n"),
 	      (long) elf_header.e_shstrndx);
     }
-  
+
   return 1;
 }
 
@@ -1726,7 +1864,7 @@ get_32bit_program_headers (file, program_headers)
   Elf32_External_Phdr * external;
   Elf32_Internal_Phdr * internal;
   unsigned int          i;
-  
+
   GET_DATA_ALLOC (elf_header.e_phoff,
 		  elf_header.e_phentsize * elf_header.e_phnum,
 		  phdrs, Elf32_External_Phdr *, "program headers");
@@ -1759,7 +1897,7 @@ get_64bit_program_headers (file, program_headers)
   Elf64_External_Phdr * external;
   Elf64_Internal_Phdr * internal;
   unsigned int          i;
-  
+
   GET_DATA_ALLOC (elf_header.e_phoff,
 		  elf_header.e_phentsize * elf_header.e_phnum,
 		  phdrs, Elf64_External_Phdr *, "program headers");
@@ -1825,13 +1963,13 @@ process_program_headers (file)
       free (program_headers);
       return 0;
     }
-  
+
   if (do_segments)
     {
       printf
 	(_("\nProgram Header%s:\n"), elf_header.e_phnum > 1 ? "s" : "");
       printf
-	(_("  Type        Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
+	(_("  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align\n"));
     }
 
   loadaddr = -1;
@@ -1844,7 +1982,7 @@ process_program_headers (file)
     {
       if (do_segments)
 	{
-	  printf ("  %-11.11s ", get_segment_type (segment->p_type));
+	  printf ("  %-14.14s ", get_segment_type (segment->p_type));
 	  printf ("0x%6.6lx ", (unsigned long) segment->p_offset);
 	  printf ("0x%8.8lx ", (unsigned long) segment->p_vaddr);
 	  printf ("0x%8.8lx ", (unsigned long) segment->p_paddr);
@@ -2153,7 +2291,7 @@ process_section_headers (file)
   dynamic_symbols = NULL;
   dynamic_strings = NULL;
   dynamic_syminfo = NULL;
-  
+
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
        i ++, section ++)
@@ -2270,7 +2408,7 @@ process_relocs (file)
 	{
 	  rel_offset = dynamic_info[DT_JMPREL];
 	  rel_size   = dynamic_info[DT_PLTRELSZ];
-	  
+
 	  switch (dynamic_info[DT_PLTREL])
 	    {
 	    case DT_REL:
@@ -2322,7 +2460,7 @@ process_relocs (file)
 	      char *                strtab;
 	      int                   is_rela;
 	      unsigned long         nsyms;
-	      
+
 	      printf (_("\nRelocation section "));
 
 	      if (string_table == NULL)
@@ -2345,7 +2483,7 @@ process_relocs (file)
 
 	      GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
 			      char *, "string table");
-	      
+
 	      is_rela = section->sh_type == SHT_RELA;
 
 	      dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela);
@@ -2395,7 +2533,7 @@ dynamic_segment_mips_val (entry)
 	  puts ("");
 	}
       break;
-      
+
     case DT_MIPS_IVERSION:
       if (dynamic_strings != NULL)
 	printf ("Interface Version: %s\n",
@@ -2403,7 +2541,7 @@ dynamic_segment_mips_val (entry)
       else
 	printf ("%ld\n", (long) entry->d_un.d_ptr);
       break;
-      
+
     case DT_MIPS_TIME_STAMP:
       {
 	char timebuf[20];
@@ -2412,7 +2550,7 @@ dynamic_segment_mips_val (entry)
 	printf ("Time Stamp: %s\n", timebuf);
       }
       break;
-      
+
     case DT_MIPS_RLD_VERSION:
     case DT_MIPS_LOCAL_GOTNO:
     case DT_MIPS_CONFLICTNO:
@@ -2428,7 +2566,58 @@ dynamic_segment_mips_val (entry)
     case DT_MIPS_COMPACT_SIZE:
       printf ("%ld\n", (long) entry->d_un.d_ptr);
       break;
-      
+
+    default:
+      printf ("%#lx\n", (long) entry->d_un.d_ptr);
+    }
+}
+
+
+static void
+dynamic_segment_parisc_val (entry)
+     Elf_Internal_Dyn * entry;
+{
+  switch (entry->d_tag)
+    {
+    case DT_HP_DLD_FLAGS:
+      {
+	static struct
+	{
+	  long int bit;
+	  const char *str;
+	} flags[] =
+	  {
+	    { DT_HP_DEBUG_PRIVATE, "HP_DEBUG_PRIVATE" },
+	    { DT_HP_DEBUG_CALLBACK, "HP_DEBUG_CALLBACK" },
+	    { DT_HP_DEBUG_CALLBACK_BOR, "HP_DEBUG_CALLBACK_BOR" },
+	    { DT_HP_NO_ENVVAR, "HP_NO_ENVVAR" },
+	    { DT_HP_BIND_NOW, "HP_BIND_NOW" },
+	    { DT_HP_BIND_NONFATAL, "HP_BIND_NONFATAL" },
+	    { DT_HP_BIND_VERBOSE, "HP_BIND_VERBOSE" },
+	    { DT_HP_BIND_RESTRICTED, "HP_BIND_RESTRICTED" },
+	    { DT_HP_BIND_SYMBOLIC, "HP_BIND_SYMBOLIC" },
+	    { DT_HP_RPATH_FIRST, "HP_RPATH_FIRST" },
+	    { DT_HP_BIND_DEPTH_FIRST, "HP_BIND_DEPTH_FIRST" }
+	  };
+	int first = 1;
+	int cnt;
+	long int val = entry->d_un.d_val;
+
+	for (cnt = 0; cnt < sizeof (flags) / sizeof (flags[0]); ++cnt)
+	  if (val & flags[cnt].bit)
+           {
+             if (! first)
+               putchar (' ');
+             fputs (flags[cnt].str, stdout);
+             first = 0;
+             val ^= flags[cnt].bit;
+           }
+	if (val != 0 || first)
+	  printf ("%s%#lx", first ? "" : " ", val);
+	puts ("");
+      }
+      break;
+
     default:
       printf ("%#lx\n", (long) entry->d_un.d_ptr);
     }
@@ -2441,10 +2630,10 @@ get_32bit_dynamic_segment (file)
   Elf32_External_Dyn * edyn;
   Elf_Internal_Dyn *   entry;
   bfd_size_type        i;
-  
+
   GET_DATA_ALLOC (dynamic_addr, dynamic_size,
 		  edyn, Elf32_External_Dyn *, "dynamic segment");
-  
+
   /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
      how large this .dynamic is now.  We can do this even before the byte
      swapping since the DT_NULL tag is recognizable.  */
@@ -2482,10 +2671,10 @@ get_64bit_dynamic_segment (file)
   Elf64_External_Dyn * edyn;
   Elf_Internal_Dyn *   entry;
   bfd_size_type        i;
-  
+
   GET_DATA_ALLOC (dynamic_addr, dynamic_size,
 		  edyn, Elf64_External_Dyn *, "dynamic segment");
-  
+
   /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
      how large this .dynamic is now.  We can do this even before the byte
      swapping since the DT_NULL tag is recognizable.  */
@@ -2925,7 +3114,7 @@ process_dynamic_segment (file)
 		      break;
 		    }
 		}
-	      
+
 	      printf ("%#lx\n", (long) entry->d_un.d_val);
 	    }
 	  break;
@@ -2933,7 +3122,7 @@ process_dynamic_segment (file)
 	case DT_BIND_NOW:
 	  /* The value of this entry is ignored.  */
 	  break;
-	  
+
 	default:
 	  if ((entry->d_tag >= DT_VERSYM) && (entry->d_tag <= DT_VERNEEDNUM))
 	    version_info [DT_VERSIONTAGIDX (entry->d_tag)] =
@@ -2946,6 +3135,9 @@ process_dynamic_segment (file)
 		case EM_MIPS:
 		case EM_MIPS_RS4_BE:
 		  dynamic_segment_mips_val (entry);
+		  break;
+		case EM_PARISC:
+		  dynamic_segment_parisc_val (entry);
 		  break;
 		default:
 		  printf ("%#lx\n", (long) entry->d_un.d_ptr);
@@ -3035,7 +3227,7 @@ process_version_sections (file)
 		Elf_Internal_Verdaux   aux;
 		int                    j;
 		int                    isum;
-		
+
 		vstart = ((char *) edefs) + idx;
 
 		edef = (Elf_External_Verdef *) vstart;
@@ -3092,7 +3284,7 @@ process_version_sections (file)
 	    free (edefs);
 	  }
 	  break;
-	  
+
 	case SHT_GNU_verneed:
 	  {
 	    Elf_External_Verneed *  eneed;
@@ -3172,7 +3364,7 @@ process_version_sections (file)
 
 		idx += ent.vn_next;
 	      }
-	    
+
 	    free (eneed);
 	  }
 	  break;
@@ -3453,7 +3645,7 @@ process_version_sections (file)
 	    free (symbols);
 	  }
 	  break;
-	
+
 	default:
 	  break;
 	}
@@ -3473,9 +3665,9 @@ get_symbol_binding (binding)
 
   switch (binding)
     {
-    case STB_LOCAL:  return _("LOCAL");
-    case STB_GLOBAL: return _("GLOBAL");
-    case STB_WEAK:   return _("WEAK");
+    case STB_LOCAL:  return "LOCAL";
+    case STB_GLOBAL: return "GLOBAL";
+    case STB_WEAK:   return "WEAK";
     default:
       if (binding >= STB_LOPROC && binding <= STB_HIPROC)
 	sprintf (buff, _("<processor specific>: %d"), binding);
@@ -3495,24 +3687,37 @@ get_symbol_type (type)
 
   switch (type)
     {
-    case STT_NOTYPE:   return _("NOTYPE");
-    case STT_OBJECT:   return _("OBJECT");
-    case STT_FUNC:     return _("FUNC");
-    case STT_SECTION:  return _("SECTION");
-    case STT_FILE:     return _("FILE");
+    case STT_NOTYPE:   return "NOTYPE";
+    case STT_OBJECT:   return "OBJECT";
+    case STT_FUNC:     return "FUNC";
+    case STT_SECTION:  return "SECTION";
+    case STT_FILE:     return "FILE";
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
 	  if (elf_header.e_machine == EM_ARM && type == STT_ARM_TFUNC)
-	    return _("THUMB_FUNC");
-	    
+	    return "THUMB_FUNC";
+
 	  if (elf_header.e_machine == EM_SPARCV9 && type == STT_REGISTER)
-	    return _("REGISTER");
-	  
+	    return "REGISTER";
+
+	  if (elf_header.e_machine == EM_PARISC && type == STT_PARISC_MILLI)
+	    return "PARISC_MILLI";
+
 	  sprintf (buff, _("<processor specific>: %d"), type);
 	}
       else if (type >= STT_LOOS && type <= STT_HIOS)
-	sprintf (buff, _("<OS specific>: %d"), type);
+	{
+	  if (elf_header.e_machine == EM_PARISC)
+	    {
+	      if (type == STT_HP_OPAQUE)
+		return "HP_OPAQUE";
+	      if (type == STT_HP_STUB)
+		return "HP_STUB";
+	    }
+
+	  sprintf (buff, _("<OS specific>: %d"), type);
+	}
       else
 	sprintf (buff, _("<unknown>: %d"), type);
       return buff;
@@ -3901,16 +4106,19 @@ process_symbol_table (file)
 	}
 
       for (hn = 0; hn < nbuckets; ++hn)
-	++ counts [lengths [hn]];
+	++counts[lengths [hn]];
 
-      printf ("      0  %-10d (%5.1f%%)\n",
-	      counts[0], (counts[0] * 100.0) / nbuckets);
-      for (si = 1; si <= maxlength; ++si)
+      if (nbuckets > 0)
 	{
-	  nzero_counts += counts[si] * si;
-	  printf ("%7d  %-10d (%5.1f%%)    %5.1f%%\n",
-		  si, counts[si], (counts[si] * 100.0) / nbuckets,
-		  (nzero_counts * 100.0) / nsyms);
+	  printf ("      0  %-10d (%5.1f%%)\n",
+		  counts[0], (counts[0] * 100.0) / nbuckets);
+	  for (si = 1; si <= maxlength; ++si)
+	    {
+	      nzero_counts += counts[si] * si;
+	      printf ("%7d  %-10d (%5.1f%%)    %5.1f%%\n",
+		      si, counts[si], (counts[si] * 100.0) / nbuckets,
+		      (nzero_counts * 100.0) / nsyms);
+	    }
 	}
 
       free (counts);
@@ -4167,7 +4375,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
   unsigned int    len;
   unsigned char * name;
   unsigned long   adr;
-  
+
   len = read_leb128 (data, & bytes_read, 0);
   data += bytes_read;
 
@@ -4181,7 +4389,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
   op_code = * data ++;
 
   printf (_("  Extended opcode %d: "), op_code);
-  
+
   switch (op_code)
     {
     case DW_LNE_end_sequence:
@@ -4198,7 +4406,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
     case DW_LNE_define_file:
       printf (_("  define new File Table entry\n"));
       printf (_("  Entry\tDir\tTime\tSize\tName\n"));
-	 
+
       printf (_("   %d\t"), ++ state_machine_regs.last_file_entry);
       name = data;
       data += strlen (data) + 1;
@@ -4252,7 +4460,7 @@ display_debug_lines (section, start, file)
 	    (_("The line info appears to be corrupt - the section is too small\n"));
 	  return 0;
 	}
-      
+
       /* Check its version number.  */
       info.li_version = BYTE_GET (external->li_version);
       if (info.li_version != 2)
@@ -4260,18 +4468,18 @@ display_debug_lines (section, start, file)
 	  warn (_("Only DWARF version 2 line info is currently supported.\n"));
 	  return 0;
 	}
-      
+
       info.li_prologue_length = BYTE_GET (external->li_prologue_length);
       info.li_min_insn_length = BYTE_GET (external->li_min_insn_length);
       info.li_default_is_stmt = BYTE_GET (external->li_default_is_stmt);
       info.li_line_base       = BYTE_GET (external->li_line_base);
       info.li_line_range      = BYTE_GET (external->li_line_range);
       info.li_opcode_base     = BYTE_GET (external->li_opcode_base);
-      
+
       /* Sign extend the line base field.  */
       info.li_line_base <<= 24;
       info.li_line_base >>= 24;
-      
+
       printf (_("  Length:                      %ld\n"), info.li_length);
       printf (_("  DWARF Version:               %d\n"), info.li_version);
       printf (_("  Prolgue Length:              %d\n"), info.li_prologue_length);
@@ -4284,35 +4492,35 @@ display_debug_lines (section, start, file)
       end_of_sequence = data + info.li_length + sizeof (info.li_length);
 
       reset_state_machine (info.li_default_is_stmt);
-      
+
       /* Display the contents of the Opcodes table.  */
       standard_opcodes = data + sizeof (* external);
-      
+
       printf (_("\n Opcodes:\n"));
-      
+
       for (i = 1; i < info.li_opcode_base; i++)
 	printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
-      
+
       /* Display the contents of the Directory table.  */
       data = standard_opcodes + info.li_opcode_base - 1;
-      
+
       if (* data == 0)
 	printf (_("\n The Directory Table is empty.\n"));
       else
 	{
 	  printf (_("\n The Directory Table:\n"));
-	  
+
 	  while (* data != 0)
 	    {
 	      printf (_("  %s\n"), data);
-	      
+
 	      data += strlen (data) + 1;
 	    }
 	}
-      
+
       /* Skip the NUL at the end of the table.  */
       data ++;
-      
+
       /* Display the contents of the File Name table.  */
       if (* data == 0)
 	printf (_("\n The File Name Table is empty.\n"));
@@ -4320,17 +4528,17 @@ display_debug_lines (section, start, file)
 	{
 	  printf (_("\n The File Name Table:\n"));
 	  printf (_("  Entry\tDir\tTime\tSize\tName\n"));
-	  
+
 	  while (* data != 0)
 	    {
 	      char * name;
 	      int bytes_read;
-	      
+
 	      printf (_("  %d\t"), ++ state_machine_regs.last_file_entry);
 	      name = data;
-	      
+
 	      data += strlen (data) + 1;
-	      
+
 	      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
 	      data += bytes_read;
 	      printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
@@ -4340,33 +4548,33 @@ display_debug_lines (section, start, file)
 	      printf (_("%s\n"), name);
 	    }
 	}
-      
+
       /* Skip the NUL at the end of the table.  */
       data ++;
-      
+
       /* Now display the statements.  */
       printf (_("\n Line Number Statements:\n"));
-      
-      
+
+
       while (data < end_of_sequence)
 	{
 	  unsigned char op_code;
 	  int           adv;
 	  int           bytes_read;
-	  
+
 	  op_code = * data ++;
-	  
+
 	  switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
 	      data += process_extended_line_op (data, info.li_default_is_stmt,
                                                 debug_line_pointer_size);
 	      break;
-	      
+
 	    case DW_LNS_copy:
 	      printf (_("  Copy\n"));
 	      break;
-	      
+
 	    case DW_LNS_advance_pc:
 	      adv = info.li_min_insn_length * read_leb128 (data, & bytes_read, 0);
 	      data += bytes_read;
@@ -4374,7 +4582,7 @@ display_debug_lines (section, start, file)
 	      printf (_("  Advance PC by %d to %lx\n"), adv,
 		      state_machine_regs.address);
 	      break;
-	      
+
 	    case DW_LNS_advance_line:
 	      adv = read_leb128 (data, & bytes_read, 1);
 	      data += bytes_read;
@@ -4382,7 +4590,7 @@ display_debug_lines (section, start, file)
 	      printf (_("  Advance Line by %d to %d\n"), adv,
 		      state_machine_regs.line);
 	      break;
-	      
+
 	    case DW_LNS_set_file:
 	      adv = read_leb128 (data, & bytes_read, 0);
 	      data += bytes_read;
@@ -4390,26 +4598,26 @@ display_debug_lines (section, start, file)
 		      adv);
 	      state_machine_regs.file = adv;
 	      break;
-	      
+
 	    case DW_LNS_set_column:
 	      adv = read_leb128 (data, & bytes_read, 0);
 	      data += bytes_read;
 	      printf (_("  Set column to %d\n"), adv);
 	      state_machine_regs.column = adv;
 	      break;
-	      
+
 	    case DW_LNS_negate_stmt:
 	      adv = state_machine_regs.is_stmt;
 	      adv = ! adv;
 	      printf (_("  Set is_stmt to %d\n"), adv);
 	      state_machine_regs.is_stmt = adv;
 	      break;
-	      
+
 	    case DW_LNS_set_basic_block:
 	      printf (_("  Set basic block\n"));
 	      state_machine_regs.basic_block = 1;
 	      break;
-	      
+
 	    case DW_LNS_const_add_pc:
 	      adv = (((255 - info.li_opcode_base) / info.li_line_range)
 		     * info.li_min_insn_length);
@@ -4417,7 +4625,7 @@ display_debug_lines (section, start, file)
 	      printf (_("  Advance PC by constant %d to 0x%lx\n"), adv,
 		      state_machine_regs.address);
 	      break;
-	      
+
 	    case DW_LNS_fixed_advance_pc:
 	      adv = byte_get (data, 2);
 	      data += 2;
@@ -4425,7 +4633,7 @@ display_debug_lines (section, start, file)
 	      printf (_("  Advance PC by fixed size amount %d to 0x%lx\n"),
 		      adv, state_machine_regs.address);
 	      break;
-	      
+
 	    default:
 	      op_code -= info.li_opcode_base;
 	      adv      = (op_code / info.li_line_range) * info.li_min_insn_length;
@@ -4441,7 +4649,7 @@ display_debug_lines (section, start, file)
 	}
       printf ("\n");
     }
-  
+
   return 1;
 }
 
@@ -5822,7 +6030,7 @@ display_debug_aranges (section, start, file)
 	  /* A pair of zeros marks the end of the list.  */
 	  if (address == 0 && length == 0)
 	    break;
-	  
+
 	  printf ("    %8.8lx %lu\n", address, length);
 	}
 
@@ -5970,7 +6178,7 @@ process_section_contents (file)
 		debug_displays[j].prescan (section, start, file);
 		free (start);
 	      }
-	    
+
             break;
           }
     }
@@ -6379,7 +6587,7 @@ get_note_type (e_type)
      unsigned e_type;
 {
   static char buff[64];
-  
+
   switch (e_type)
     {
     case NT_PRSTATUS:	return _("NT_PRSTATUS (prstatus structure)");
@@ -6403,10 +6611,10 @@ process_note (pnote)
 {
   Elf32_Internal_Note * internal;
   char * pname;
-  
+
   internal = (Elf32_Internal_Note *) pnote;
   pname = malloc (internal->namesz + 1);
-  
+
   if (pname == NULL)
     {
       error (_("Out of memory\n"));
@@ -6416,9 +6624,9 @@ process_note (pnote)
   memcpy (pname, pnote->name, internal->namesz);
   pname[internal->namesz] = '\0';
 
-  printf ("  %s\t\t0x%08lx\t%s\n", 
+  printf ("  %s\t\t0x%08lx\t%s\n",
   	  pname, internal->descsz, get_note_type (internal->type));
-  	   
+
   free (pname);
 
   return 1;
@@ -6437,23 +6645,23 @@ process_corefile_note_segment (file, offset, length)
   unsigned int         nlength;
   unsigned char *      p;
   int                  res = 1;
-  
+
   if (length <= 0)
     return 0;
-    
+
   GET_DATA_ALLOC (offset, length, pnotes, Elf_External_Note *, "notes");
 
-  external = pnotes; 
+  external = pnotes;
   p = (unsigned char *) pnotes;
   nlength = length;
- 
+
   printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"), offset, length);
   printf (_("  Owner\t\tData size\tDescription\n"));
-  
+
   while (nlength > 0)
     {
       res &= process_note (external);
-      
+
       internal = (Elf32_Internal_Note *) p;
       notesz   = 3 * sizeof(unsigned long) + internal->namesz + internal->descsz;
       nlength -= notesz;
@@ -6462,7 +6670,7 @@ process_corefile_note_segment (file, offset, length)
     }
 
   free (pnotes);
-  
+
   return res;
 }
 
@@ -6474,7 +6682,7 @@ process_corefile_note_segments (file)
   Elf_Internal_Phdr * segment;
   unsigned int	      i;
   int                 res = 1;
-  
+
   program_headers = (Elf_Internal_Phdr *) malloc
     (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
 
@@ -6494,17 +6702,17 @@ process_corefile_note_segments (file)
       free (program_headers);
       return 0;
     }
-  
+
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
        i ++, segment ++)
     {
       if (segment->p_type == PT_NOTE)
-	res &= process_corefile_note_segment (file, 
+	res &= process_corefile_note_segment (file,
 					      (unsigned long)segment->p_offset,
 					      (unsigned long)segment->p_filesz);
     }
-    
+
   free (program_headers);
 
   return res;
@@ -6517,11 +6725,11 @@ process_corefile_contents (file)
   /* If we have not been asked to display the notes then do nothing.  */
   if (! do_notes)
     return 1;
-  
+
   /* If file is not a core file then exit.  */
   if (elf_header.e_type != ET_CORE)
     return 1;
-    
+
   /* No program headers means no NOTE segment.  */
   if (elf_header.e_phnum == 0)
     {
@@ -6578,7 +6786,7 @@ get_file_header (file)
 
       if (fread (ehdr32.e_type, sizeof (ehdr32) - EI_NIDENT, 1, file) != 1)
 	return 0;
-      
+
       elf_header.e_type      = BYTE_GET (ehdr32.e_type);
       elf_header.e_machine   = BYTE_GET (ehdr32.e_machine);
       elf_header.e_version   = BYTE_GET (ehdr32.e_version);
@@ -6607,10 +6815,10 @@ get_file_header (file)
 	  error (_("64 bit data type and so it cannot read 64 bit ELF files.\n"));
 	  return 0;
 	}
-      
+
       if (fread (ehdr64.e_type, sizeof (ehdr64) - EI_NIDENT, 1, file) != 1)
 	return 0;
-      
+
       elf_header.e_type      = BYTE_GET (ehdr64.e_type);
       elf_header.e_machine   = BYTE_GET (ehdr64.e_machine);
       elf_header.e_version   = BYTE_GET (ehdr64.e_version);
@@ -6689,9 +6897,9 @@ process_file (file_name)
   process_version_sections (file);
 
   process_section_contents (file);
-  
+
   process_corefile_contents (file);
-  
+
   process_arch_specific (file);
 
   fclose (file);
