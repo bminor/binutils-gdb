@@ -1,3 +1,11 @@
+Sat Jul 20 10:09:28 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (delete_expr): Unset corresponding element of
+	expr_update_list when destroying an expression.
+	(create_expr_window): Initialize expr_num, delete_expr_num,
+	and expr_update_list here when each new expression window
+	is created, rather than once at startup.
+
 Fri Jul 19 14:05:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* dwarf2read.c: New file, DWARF 2 reader originally contributed by

@@ -27,7 +27,6 @@ set cfunc NIL
 set line_numbers 1
 set breakpoint_file(-1) {[garbage]}
 set disassemble_with_source nosource
-set expr_update_list(0) 0
 set gdb_prompt "(gdb) "
 
 # Hint: The following can be toggled from a tclsh window after
@@ -1089,9 +1088,6 @@ proc not_implemented_yet {message} {
 #	Create the expression display window.
 #
 
-set expr_num 0
-set delete_expr_num 0
-
 # Set delete_expr_num, and set -state of Delete button.
 proc expr_update_button {num} {
   global delete_expr_num
@@ -1135,13 +1131,14 @@ proc add_expr {expr} {
 
 proc delete_expr {} {
   global delete_expr_num
+  global expr_update_list
+
   if {$delete_expr_num > 0} then {
     set e .expr.exprs
     set f e${delete_expr_num}
 
     destroy $e.updates.$f $e.expressions.$f $e.values.$f
-
-    # FIXME should we unset an element of expr_update_list here?
+    unset expr_update_list($delete_expr_num)
   }
 }
 
@@ -1171,8 +1168,20 @@ proc update_exprs {} {
 }
 
 proc create_expr_window {} {
+	global expr_num
+	global delete_expr_num
+	global expr_update_list
 
 	if {[winfo exists .expr]} {raise .expr ; return}
+
+	# All the state about individual expressions is stored in the
+	# expression window widgets, so when it is deleted, the
+	# previous values of the expression global variables become
+	# invalid.  Reset to a known initial state.
+	set expr_num 0
+	set delete_expr_num 0
+	catch {unset expr_update_list}
+	set expr_update_list(0) 0
 
 	toplevel .expr
 	wm title .expr "GDB Expressions"
