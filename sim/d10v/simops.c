@@ -584,10 +584,15 @@ OP_17001202 ()
 void
 OP_201 ()
 {
+  uint tmp = State.regs[OP[0]];
   if (OP[1] == 0)
     OP[1] = 16;
   trace_input ("addi", OP_REG, OP_CONSTANT16, OP_VOID);
   State.regs[OP[0]] += OP[1];
+  if (tmp > State.regs[OP[0]])
+    State.C = 1;
+  else
+    State.C = 0;
   trace_output (OP_REG);
 }
 

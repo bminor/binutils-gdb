@@ -9,6 +9,7 @@ Mon Sep  9 13:27:26 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(trace_{input,output}): Support OP_FLAG_OUTPUT.
 	(OP_31000000): This ld2w varient is a 16-bit memory reference, not
 	an 8-bit memory reference instruction for tracing purposes.
+	(OP_201): Addi needs to set the carry.
 
 Fri Sep  6 17:56:17 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
