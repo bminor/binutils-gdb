@@ -1,5 +1,9 @@
 Thu Jun 26 01:26:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_link_add_object_symbols): When a version
+	indirection symbol is overridden, make the original symbol point
+	at the real overriding symbol.
+
 	* elf.c (bfd_elf_string_from_elf_section): Check for an invalid
 	string index.
 

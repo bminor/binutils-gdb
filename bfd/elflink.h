@@ -1411,6 +1411,10 @@ elf_link_add_object_symbols (abfd, info)
 			 mapped to the definition in the regular
 			 object.  */
 
+		      while (hi->root.type == bfd_link_hash_indirect
+			     || hi->root.type == bfd_link_hash_warning)
+			hi = (struct elf_link_hash_entry *) hi->root.u.i.link;
+
 		      h->root.type = bfd_link_hash_indirect;
 		      h->root.u.i.link = (struct bfd_link_hash_entry *) hi;
 		      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
