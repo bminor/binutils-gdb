@@ -1,5 +1,5 @@
 /* BFD back-end for a.out.adobe binaries.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.  Based on bout.c.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -113,7 +113,7 @@ aout_adobe_object_p (abfd)
 
   if (N_BADMAG (anexec)) {
     targ = getenv ("GNUTARGET");
-    if (targ && strcmp (targ, a_out_adobe_vec.name))
+    if (targ && !strcmp (targ, a_out_adobe_vec.name))
       ;		/* Just continue anyway, if specifically set to this format */
     else
       {
@@ -135,7 +135,6 @@ aout_adobe_callback (abfd)
      bfd *abfd;
 {
   struct internal_exec *execp = exec_hdr (abfd);
-  unsigned long bss_start;
   asection *sect;
   struct external_segdesc ext[1];
   char *section_name;
@@ -179,7 +178,7 @@ aout_adobe_callback (abfd)
 
     default:
       fprintf (stderr, "Unknown section type in a.out.adobe file: %x\n", 
-	       ext->e_type);
+	       ext->e_type[0]);
       goto no_more_sections;
     }
 
@@ -475,6 +474,7 @@ DEFUN(aout_adobe_sizeof_headers,(ignore_abfd, ignore),
 
 #define aout_32_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define aout_32_bfd_relax_section                   bfd_generic_relax_section
+#define aout_32_bfd_seclet_link			    bfd_generic_seclet_link
 
 bfd_target a_out_adobe_vec =
 {

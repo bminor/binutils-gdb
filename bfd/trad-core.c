@@ -1,5 +1,5 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
-   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -230,27 +230,30 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	trad_unix_canonicalize_reloc		(unsigned int (*) PARAMS \
 	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
 #define	trad_unix_make_empty_symbol		(struct symbol_cache_entry * \
-	(*) ((bfd *))) bfd_false
+	(*) (bfd *)) bfd_false
 #define	trad_unix_print_symbol			(void (*) PARAMS	\
 	((bfd *, PTR, struct symbol_cache_entry  *,			\
 	bfd_print_symbol_type))) bfd_false
 #define	trad_unix_get_lineno			(alent * (*) PARAMS	\
 	((bfd *, struct symbol_cache_entry *))) bfd_nullvoidptr
 #define	trad_unix_set_arch_mach			(boolean (*) PARAMS	\
-	(bfd *, enum bfd_architecture, unsigned long))) bfd_false
+	((bfd *, enum bfd_architecture, unsigned long))) bfd_false
 #define	trad_unix_find_nearest_line		(boolean (*) PARAMS	\
-        (bfd *abfd, struct sec  *section,				\
+        ((bfd *abfd, struct sec  *section,				\
          struct symbol_cache_entry  **symbols,bfd_vma offset,		\
          CONST char **file, CONST char **func, unsigned int *line))) bfd_false
 #define	trad_unix_sizeof_headers		(int (*) PARAMS	\
-	(bfd *, boolean))) bfd_0
+	((bfd *, boolean))) bfd_0
 
 #define trad_unix_bfd_debug_info_start		bfd_void
 #define trad_unix_bfd_debug_info_end		bfd_void
 #define trad_unix_bfd_debug_info_accumulate	(void (*) PARAMS	\
-	(bfd *, struct sec *))) bfd_void
+	((bfd *, struct sec *))) bfd_void
 #define trad_unix_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define trad_unix_bfd_relax_section		bfd_generic_relax_section
+#define trad_unix_bfd_seclet_link \
+  ((boolean (*) PARAMS ((bfd *, PTR, boolean))) bfd_false)
+
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
 swap_abort()
@@ -270,7 +273,7 @@ bfd_target trad_core_vec =
      HAS_LINENO | HAS_DEBUG |
      HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-    '_',		                                   /* symbol prefix */
+    0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
     3,							   /* minimum alignment power */

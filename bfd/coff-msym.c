@@ -1,5 +1,5 @@
 /* BFD support to byte-swap a symbol table in MIPS (Third-Eye, `ecoff') format.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 

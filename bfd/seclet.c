@@ -1,5 +1,5 @@
 /* seclet.c
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
