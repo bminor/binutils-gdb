@@ -1,5 +1,7 @@
 Thu May  6 16:39:50 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
+	* gdb.texinfo (MIPS Stack): new node.
+
 	* all-config.texi (MIPS) new switch.
 
 	* gdbinv-s.texi (Nindy Options) Remove two instances of future
