@@ -487,6 +487,11 @@ case "${target}" in
     # but that's okay since emacs doesn't work anyway
     noconfigdirs="$noconfigdirs emacs emacs19 target-libgloss"
     ;;
+# start-sanitize-m32r
+  m32r-*-*)
+    noconfigdirs="$noconfigdirs target-libgloss libio libstdc++ libg++ gdb"
+    ;;
+# end-sanitize-m32r
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
     noconfigdirs="$noconfigdirs gprof cvs target-libgloss"

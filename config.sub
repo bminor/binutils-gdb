@@ -168,14 +168,21 @@ case $basic_machine in
 	mips64vr4100 | mips64vr4100el) # CYGNUS LOCAL jsmith/vr4100
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-v850
 	v850)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
 		;;
+# end-sanitize-v850
 # start-sanitize-d10v
 	d10v)				# CYGNUS LOCAL meissner/d10v
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-d10v
+# start-sanitize-m32r
+	m32r)
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-m32r
 	# Object if more than one company name word.
 	*-*-*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
