@@ -1,3 +1,8 @@
+Thu Jan 18 17:35:06 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* dlltool.c (make_tail): Changed the order of the sections to avoid
+	an alignment problem.
+
 Wed Jan 17 14:23:00 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* srconv.c (wr_du): Set du.stackfrmt to 0.
