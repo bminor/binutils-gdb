@@ -3292,6 +3292,8 @@ show_mipsfpu_command (char *args, int from_tty)
     case MIPS_FPU_NONE:
       fpu = "absent (none)";
       break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
   if (mips_fpu_type_auto)
     printf_unfiltered ("The MIPS floating-point coprocessor is set automatically (currently %s)\n",
@@ -4157,9 +4159,10 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 	  ef_mips_arch = 3;
 	  break;
 	case E_MIPS_ARCH_4:
-	  ef_mips_arch = 0;
+	  ef_mips_arch = 4;
 	  break;
 	default:
+	  ef_mips_arch = 0;
 	  break;
 	}
       /* determine the size of a pointer */

@@ -114,7 +114,7 @@ static CORE_ADDR
 mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end, addr, stop;
-  CORE_ADDR stack_size;
+  CORE_ADDR stack_size = 0;
   unsigned char buf[4];
   int status;
   char *name;

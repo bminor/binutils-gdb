@@ -251,7 +251,9 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   CORE_ADDR func_addr, func_end, addr, stop;
   CORE_ADDR stack_size;
   int insn, rn;
-  int status, fp_regnum, flags;
+  int status;
+  int fp_regnum = 0; /* dummy, valid when (flags & MY_FRAME_IN_FP) */
+  int flags;
   int framesize;
   int register_offsets[NUM_REGS];
   char *name;

@@ -1691,7 +1691,6 @@ monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
   char membuf[sizeof (int) * 2 + 1];
   char *p;
   char *cmd;
-  int i;
 
   monitor_debug ("MON read single\n");
 #if 0
@@ -1751,29 +1750,31 @@ monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
       else
 	monitor_error ("monitor_read_memory_single", 
 		       "bad response from monitor",
-		       memaddr, i, membuf, c);
+		       memaddr, 0, NULL, 0);
     }
-  for (i = 0; i < len * 2; i++)
-    {
-      int c;
 
-      while (1)
-	{
-	  c = readchar (timeout);
-	  if (isxdigit (c))
-	    break;
-	  if (c == ' ')
-	    continue;
+  {
+    int i;
+    for (i = 0; i < len * 2; i++)
+      {
+	int c;
 
-	  monitor_error ("monitor_read_memory_single",
-			 "bad response from monitor",
-			 memaddr, i, membuf, c);
-	}
-
+	while (1)
+	  {
+	    c = readchar (timeout);
+	    if (isxdigit (c))
+	      break;
+	    if (c == ' ')
+	      continue;
+	    
+	    monitor_error ("monitor_read_memory_single",
+			   "bad response from monitor",
+			   memaddr, i, membuf, 0);
+	  }
       membuf[i] = c;
     }
-
-  membuf[i] = '\000';		/* terminate the number */
+    membuf[i] = '\000';		/* terminate the number */
+  }
 
 /* If TERM is present, we wait for that to show up.  Also, (if TERM is
    present), we will send TERM_CMD if that is present.  In any case, we collect

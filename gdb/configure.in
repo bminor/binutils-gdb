@@ -652,10 +652,10 @@ fi
 # NOTE: If you add to this list, remember to update
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith"
+-Wformat -Wparentheses -Wpointer-arith -Wuninitialized"
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
 # -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
-# -Wchar-subscripts -Wuninitialized -Wtraditional -Wshadow -Wcast-qual
+# -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
 # -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
 # -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
 # -Woverloaded-virtual -Winline -Werror"

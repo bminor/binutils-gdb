@@ -356,7 +356,8 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 
   for (current_pc = func_addr; current_pc < prologue_end;)
     {
-      int insn, insn2;
+      int insn;
+      int insn2 = -1; /* dummy value */
 
 #ifdef DEBUG
       printf_filtered ("0x%.8lx ", (long) current_pc);

@@ -1766,7 +1766,10 @@ sh_do_fp_register (int regnum)
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
 
   /* Print the value. */
-  printf_filtered (inv ? "<invalid float>" : "%-10.9g", flt);
+  if (inv)
+    printf_filtered ("<invalid float>");
+  else
+    printf_filtered ("%-10.9g", flt);
 
   /* Print the fp register as hex. */
   printf_filtered ("\t(raw 0x");

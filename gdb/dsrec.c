@@ -242,6 +242,7 @@ make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
     {
       tmp = flags >> SREC_TERM_SHIFT;	/* Term record */
       code_table = term_code_table;
+      binbuf = NULL;
     }
 
   if ((tmp & SREC_2_BYTE_ADDR) && (targ_addr <= 0xffff))

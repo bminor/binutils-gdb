@@ -2381,6 +2381,8 @@ sparc64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 		fpreg = FP0_REGNUM + 2 * register_counter;
 		register_counter += 2;
 		break;
+	      default:
+		internal_error (__FILE__, __LINE__, "bad switch");
 	      }
 	      write_register_bytes (REGISTER_BYTE (fpreg),
 				    VALUE_CONTENTS (args[i]),
