@@ -46,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define NAMES_HAVE_UNDERSCORE
 
 /* Sigh. There should be a file for i386 but no sysv stuff in it */
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
 /* I want to test this float info code. See comment in tm-i386v.h */
 #undef FLOAT_INFO

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "tm-lynx.h"
 
 /* Most definitions from sysv could be used. */
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
 #undef SAVED_PC_AFTER_CALL
 

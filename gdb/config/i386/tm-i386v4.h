@@ -1,6 +1,6 @@
 /* Macro definitions for GDB on an Intel i386 running SVR4.
    Copyright (C) 1991, 1994 Free Software Foundation, Inc.
-   Written by Fred Fish at Cygnus Support (fnf@cygint)
+   Written by Fred Fish at Cygnus Support (fnf@cygnus.com)
 
 This file is part of GDB.
 
@@ -18,29 +18,20 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Use the alternate method of determining valid frame chains. */
-
-#define FRAME_CHAIN_VALID_ALTERNATE
-
-/* number of traps that happen between exec'ing the shell 
- * to run an inferior, and when we finally get to 
- * the inferior code.  This is 2 on most implementations.
- */
-#define START_INFERIOR_TRAPS_EXPECTED 2
+#ifndef TM_I386V4_H
+#define TM_I386V4_H 1
 
 /* Pick up most of what we need from the generic i386 target include file. */
 
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
 /* Pick up more stuff from the generic SVR4 host include file. */
 
 #include "tm-sysv4.h"
 
-/* We can't tell how many args there are
-   now that the C compiler delays popping them.  */
+/* Use the alternate method of determining valid frame chains. */
 
-#undef FRAME_NUM_ARGS
-#define FRAME_NUM_ARGS(val,fi) (val = -1)
+#define FRAME_CHAIN_VALID_ALTERNATE
 
 /* Offsets (in target ints) into jmp_buf.  Not defined in any system header
    file, so we have to step through setjmp/longjmp with a debugger and figure
@@ -79,36 +70,9 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 				   || STREQ ("_sigacthandler", name)	\
 				   || STREQ ("sigvechandler", name)))
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-   chain-pointer.
-   In the case of the i386, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
-#undef FRAME_CHAIN
-#define FRAME_CHAIN(thisframe)  \
-  ((thisframe)->signal_handler_caller \
-   ? (thisframe)->frame \
-   : (!inside_entry_file ((thisframe)->pc) \
-      ? read_memory_integer ((thisframe)->frame, 4) \
-      : 0))
-
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#undef FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  do { \
-    if ((FI)->signal_handler_caller) \
-      (FRAMELESS) = 0; \
-    else \
-      (FRAMELESS) = frameless_look_for_prologue(FI); \
-  } while (0)
-
 /* Saved Pc.  Get it from ucontext if within sigtramp.  */
 
-#undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? i386v4_sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)) \
-   )
+#define sigtramp_saved_pc i386v4_sigtramp_saved_pc
 extern CORE_ADDR i386v4_sigtramp_saved_pc PARAMS ((struct frame_info *));
+
+#endif  /* ifndef TM_I386V4_H */

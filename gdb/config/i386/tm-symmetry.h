@@ -20,19 +20,23 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef TM_SYMMETRY_H
+#define TM_SYMMETRY_H 1
+
 /* I don't know if this will work for cross-debugging, even if you do get
    a copy of the right include file.  */
 #include <machine/reg.h>
 
+#include "i386/tm-i386v.h"
+
+#undef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
+/* Amount PC must be decremented by after a breakpoint.  This is often the
+   number of bytes in BREAKPOINT but not always (such as now). */
 
+#undef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 0
-
-#include "i386/tm-i386v.h"
 
 #if 0
 /* --- this code can't be used unless we know we are running native,
@@ -44,29 +48,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 /* Number of machine registers */
+
 #undef NUM_REGS
 #define NUM_REGS 49
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
 
-/* Symmetry registers are in this weird order to match the register
-   numbers in the symbol table entries.  If you change the order,
-   things will probably break mysteriously for no apparent reason.
-   Also note that the st(0)...st(7) 387 registers are represented as
-   st0...st7.  */
+/* Initializer for an array of names of registers.  There should be at least
+   NUM_REGS strings in this initializer.  Any excess ones are simply ignored.
+   Symmetry registers are in this weird order to match the register numbers
+   in the symbol table entries.  If you change the order, things will probably
+   break mysteriously for no apparent reason.  Also note that the st(0)...
+   st(7) 387 registers are represented as st0...st7.  */
 
-#undef REGISTER_NAMES
-#define REGISTER_NAMES { "eax", "edx", "ecx", "st0", "st1", \
-			     "ebx", "esi", "edi", "st2", "st3", \
-			     "st4", "st5", "st6", "st7", "esp", \
-			     "ebp", "eip", "eflags", "fp1", "fp2", \
-			     "fp3", "fp4", "fp5", "fp6", "fp7", \
-			     "fp8", "fp9", "fp10", "fp11", "fp12", \
-			     "fp13", "fp14", "fp15", "fp16", "fp17", \
-			     "fp18", "fp19", "fp20", "fp21", "fp22", \
-			     "fp23", "fp24", "fp25", "fp26", "fp27", \
-			     "fp28", "fp29", "fp30", "fp31" }
+#undef  REGISTER_NAMES
+#define REGISTER_NAMES {     "eax",  "edx",  "ecx",   "st0",  "st1", \
+			     "ebx",  "esi",  "edi",   "st2",  "st3", \
+			     "st4",  "st5",  "st6",   "st7",  "esp", \
+			     "ebp",  "eip",  "eflags","fp1",  "fp2", \
+			     "fp3",  "fp4",  "fp5",   "fp6",  "fp7", \
+			     "fp8",  "fp9",  "fp10",  "fp11", "fp12", \
+			     "fp13", "fp14", "fp15",  "fp16", "fp17", \
+			     "fp18", "fp19", "fp20",  "fp21", "fp22", \
+			     "fp23", "fp24", "fp25",  "fp26", "fp27", \
+			     "fp28", "fp29", "fp30",  "fp31" }
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -94,17 +100,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define FP1_REGNUM 18		/* first 1167 register */
 /* Get %fp2 - %fp31 by addition, since they are contiguous */
 
-#undef SP_REGNUM
-#define SP_REGNUM 14		/* esp--Contains address of top of stack */
+#undef  SP_REGNUM
+#define SP_REGNUM 14	/* (usp) Contains address of top of stack */
 #define ESP_REGNUM 14
-#undef FP_REGNUM
-#define FP_REGNUM 15   /* ebp--Contains address of executing stack frame */
+#undef  FP_REGNUM
+#define FP_REGNUM 15	/* (ebp) Contains address of executing stack frame */
 #define EBP_REGNUM 15
-#undef PC_REGNUM
-#define PC_REGNUM 16		/* eip--Contains program counter */
+#undef  PC_REGNUM
+#define PC_REGNUM 16	/* (eip) Contains program counter */
 #define EIP_REGNUM 16
-#undef PS_REGNUM
-#define PS_REGNUM 17		/* eflags--Contains processor status */
+#undef  PS_REGNUM
+#define PS_REGNUM 17	/* (ps)  Contains processor status */
 #define EFLAGS_REGNUM 17
 
 /*
@@ -209,49 +215,45 @@ switch (regno) { \
 }
 
 /* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  */
-/* 10 i386 registers, 8 i387 registers, and 31 Weitek 1167 registers */
-#undef REGISTER_BYTES
+   register state, the array `registers'.  10 i*86 registers, 8 i387
+   registers, and 31 Weitek 1167 registers */
+
+#undef  REGISTER_BYTES
 #define REGISTER_BYTES ((10 * 4) + (8 * 10) + (31 * 4))
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#undef REGISTER_BYTE
+#undef  REGISTER_BYTE
 #define REGISTER_BYTE(N) 		\
-((N < 3) ? (N * 4) :			\
-(N < 5) ? (((N - 2) * 10) + 2) :	\
-(N < 8) ? (((N - 5) * 4) + 32) :	\
-(N < 14) ? (((N - 8) * 10) + 44) :	\
-    (((N - 14) * 4) + 104))
+(((N) < 3) ? ((N) * 4) :		\
+((N) < 5) ? ((((N) - 2) * 10) + 2) :	\
+((N) < 8) ? ((((N) - 5) * 4) + 32) :	\
+((N) < 14) ? ((((N) - 8) * 10) + 44) :	\
+    ((((N) - 14) * 4) + 104))
 
 /* Number of bytes of storage in the actual machine representation
  * for register N.  All registers are 4 bytes, except 387 st(0) - st(7),
  * which are 80 bits each. 
  */
 
-#undef REGISTER_RAW_SIZE
+#undef  REGISTER_RAW_SIZE
 #define REGISTER_RAW_SIZE(N) \
-((N < 3) ? 4 :	\
-(N < 5) ? 10 :	\
-(N < 8) ? 4 :	\
-(N < 14) ? 10 :	\
+(((N) < 3) ? 4 :	\
+((N) < 5) ? 10 :	\
+((N) < 8) ? 4 :		\
+((N) < 14) ? 10 :	\
     4)
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#undef MAX_REGISTER_RAW_SIZE
-#define MAX_REGISTER_RAW_SIZE 10
 
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 
-#undef REGISTER_CONVERTIBLE
+#undef  REGISTER_CONVERTIBLE
 #define REGISTER_CONVERTIBLE(N) \
-((N < 3) ? 0 : \
-(N < 5) ? 1  : \
-(N < 8) ? 0  : \
-(N < 14) ? 1 : \
+(((N) < 3) ? 0 : \
+((N) < 5) ? 1  : \
+((N) < 8) ? 0  : \
+((N) < 14) ? 1 : \
     0)
 
 #include "floatformat.h"
@@ -294,23 +296,16 @@ switch (regno) { \
    passes it on the stack.  gcc should be fixed in future versions to
    adopt native cc conventions.  */
 
-#undef STORE_STRUCT_RETURN
+#undef  STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(ADDR, SP) write_register(0, (ADDR))
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#undef EXTRACT_RETURN_VALUE
+#undef  EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   symmetry_extract_return_value(TYPE, REGBUF, VALBUF)
-
-
-extern void
-print_387_control_word PARAMS ((unsigned int));
-
-extern void
-print_387_status_word PARAMS ((unsigned int));
 
 /* The following redefines make backtracing through sigtramp work.
    They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
@@ -322,35 +317,5 @@ print_387_status_word PARAMS ((unsigned int));
 /* Offset to saved PC in sigcontext, from <signal.h>.  */
 #define SIGCONTEXT_PC_OFFSET 16
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-   chain-pointer.
-   In the case of the i386, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
-#undef FRAME_CHAIN
-#define FRAME_CHAIN(thisframe)  \
-  (thisframe->signal_handler_caller \
-   ? thisframe->frame \
-   : (!inside_entry_file ((thisframe)->pc) \
-      ? read_memory_integer ((thisframe)->frame, 4) \
-      : 0))
+#endif	/* ifndef TM_SYMMETRY_H */
 
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#undef FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  do { \
-    if ((FI)->signal_handler_caller) \
-      (FRAMELESS) = 0; \
-    else \
-      (FRAMELESS) = frameless_look_for_prologue(FI); \
-  } while (0)
-
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
-
-#undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)) \
-   )

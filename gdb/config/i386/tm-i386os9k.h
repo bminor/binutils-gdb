@@ -16,20 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Override number of expected traps from sysv. */
-#define START_INFERIOR_TRAPS_EXPECTED 2
+#ifndef TM_I386OS9K_H
+#define TM_I386OS9K_H 1
 
-/* Most definitions from sysv could be used. */
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
-/* 386BSD cannot handle the segment registers. */
-/* BSDI can't handle them either.  */
-#if 0
-#undef NUM_REGS
-#define NUM_REGS 10
-#endif 0
+/* Number of machine registers */
 
-#undef REGISTER_NAMES
+#undef  NUM_REGS
+#define NUM_REGS (16)	/* Basic i*86 regs */
+
+/* Initializer for an array of names of registers.  There should be at least
+   NUM_REGS strings in this initializer.  Any excess ones are simply ignored.
+   The order of the first 8 registers must match the compiler's numbering
+   scheme (which is the same as the 386 scheme) and also regmap in the various
+   *-nat.c files. */
+
+#undef  REGISTER_NAMES
 #define REGISTER_NAMES { "eax", "ecx", "edx", "ebx", \
                          "esp", "ebp", "esi", "edi", \
                          "eip", "eflags", "cs", "ss", \
@@ -37,6 +40,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
                          }
 
 #define DATABASE_REG 	3		/* ebx */
+
+/* Amount PC must be decremented by after a breakpoint.  This is often the
+   number of bytes in BREAKPOINT but not always (such as now). */
+
 #undef DECR_PC_AFTER_BREAK
 #define DECR_PC_AFTER_BREAK 0
 
@@ -46,45 +53,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SIGTRAMP_START	0xfdbfdfc0
 #define SIGTRAMP_END	0xfdbfe000
 
-/* The following redefines make backtracing through sigtramp work.
-   They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
-   from the sigcontext structure which is pushed by the kernel on the
-   user stack, along with a pointer to it.  */
-
-/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-   chain-pointer.
-   In the case of the i386, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
-#undef FRAME_CHAIN
-#define FRAME_CHAIN(thisframe)  \
-  (thisframe->signal_handler_caller \
-   ? thisframe->frame \
-   : (!inside_entry_file ((thisframe)->pc) \
-      ? read_memory_integer ((thisframe)->frame, 4) \
-      : 0))
-
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#undef FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  do { \
-    if ((FI)->signal_handler_caller) \
-      (FRAMELESS) = 0; \
-    else \
-      (FRAMELESS) = frameless_look_for_prologue(FI); \
-  } while (0)
-
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 
 /* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
 #define SIGCONTEXT_PC_OFFSET 20
 
-#undef FRAME_SAVED_PC(FRAME)
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)) \
-   )
-
 #define BELIEVE_PCC_PROMOTION 1
+
+#endif	/* #ifndef TM_I386OS9K_H */

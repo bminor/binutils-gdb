@@ -17,7 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define TARGET_BYTE_ORDER LITTLE_ENDIAN
+#if !defined (TM_SUN386_H)
+#define TM_SUN386_H 1
+
+#include "i386/tm-i386.h"
 
 #ifndef sun386
 #define sun386
@@ -38,66 +41,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* sun386 ptrace seems unable to change the frame pointer */
 #define PTRACE_FP_BUG
 
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#define FUNCTION_START_OFFSET 0
-
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
-
-#define SKIP_PROLOGUE(frompc)   {(frompc) = i386_skip_prologue((frompc));}
-
-extern int
-i386_skip_prologue PARAMS ((int));
-
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define SAVED_PC_AFTER_CALL(frame) \
-  (read_memory_integer (read_register (SP_REGNUM), 4))
-
 /* Address of end of stack space.  */
 
 #define STACK_END_ADDR 0xfc000000
 
-/* Stack grows downward.  */
-
-#define INNER_THAN <
-
-/* Sequence of bytes for breakpoint instruction.  */
-
-#define BREAKPOINT {0xcc}
-
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
-
-#define DECR_PC_AFTER_BREAK 1
-
-/* Nonzero if instruction at PC is a return instruction.  */
-
-#define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0xc3)
-
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
-
-#define REGISTER_SIZE 4
-
 /* Number of machine registers */
 
+#undef  NUM_REGS
 #define NUM_REGS 35
 
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.  */
+/* Initializer for an array of names of registers.  There should be NUM_REGS
+   strings in this initializer.  The order of the first 8 registers must match
+   the compiler's numbering scheme (which is the same as the 386 scheme) also,
+   this table must match regmap in i386-pinsn.c. */
 
-/* the order of the first 8 registers must match the compiler's
- * numbering scheme (which is the same as the 386 scheme)
- * also, this table must match regmap in i386-pinsn.c.
- */
+#undef  REGISTER_NAMES
 #define REGISTER_NAMES { "gs", "fs", "es", "ds",		\
 			 "edi", "esi", "ebp", "esp",		\
 			 "ebx", "edx", "ecx", "eax",		\
@@ -116,20 +74,29 @@ i386_skip_prologue PARAMS ((int));
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-#define FP_REGNUM 6		/* Contains address of executing stack frame */
-#define SP_REGNUM 18		/* Contains address of top of stack */
-#define PS_REGNUM 17		/* Contains processor status */
-#define PC_REGNUM 15		/* Contains program counter */
-#define FP0_REGNUM 20		/* Floating point register 0 */
-#define FPC_REGNUM 28		/* 80387 control register */
+#undef  FP_REGNUM
+#define FP_REGNUM   6	/* (ebp) Contains address of executing stack frame */
+#undef  SP_REGNUM
+#define SP_REGNUM  18	/* (usp) Contains address of top of stack */
+#undef  PS_REGNUM
+#define PS_REGNUM  17	/* (ps)  Contains processor status */
+#undef  PC_REGNUM
+#define PC_REGNUM  15	/* (eip) Contains program counter */
+#undef  FP0_REGNUM
+#define FP0_REGNUM 20	/* Floating point register 0 */
+#undef  FPC_REGNUM
+#define FPC_REGNUM 28	/* 80387 control register */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
+
+#undef  REGISTER_BYTES
 #define REGISTER_BYTES (20*4+8*10+7*4)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
+#undef  REGISTER_BYTE
 #define REGISTER_BYTE(N) \
  ((N) >= FPC_REGNUM ? (((N) - FPC_REGNUM) * 4) + 160	\
   : (N) >= FP0_REGNUM ? (((N) - FP0_REGNUM) * 10) + 80	\
@@ -138,29 +105,25 @@ i386_skip_prologue PARAMS ((int));
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
 
+#undef  REGISTER_RAW_SIZE
 #define REGISTER_RAW_SIZE(N) (((unsigned)((N) - FP0_REGNUM)) < 8 ? 10 : 4)
 
 /* Number of bytes of storage in the program's representation
    for register N. */
 
+#undef  REGISTER_VIRTUAL_SIZE
 #define REGISTER_VIRTUAL_SIZE(N) (((unsigned)((N) - FP0_REGNUM)) < 8 ? 8 : 4)
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#define MAX_REGISTER_RAW_SIZE 10
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-
-#define MAX_REGISTER_VIRTUAL_SIZE 8
 
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 
+#undef  REGISTER_CONVERTIBLE
 #define REGISTER_CONVERTIBLE(N) (((unsigned)((N) - FP0_REGNUM)) < 8)
 
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
 
+#undef  REGISTER_CONVERT_TO_VIRTUAL
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
 { \
   double val; \
@@ -173,6 +136,7 @@ i387_to_double PARAMS ((char *, char *));
 /* Convert data from virtual format with type TYPE in buffer FROM
    to raw format for register REGNUM in buffer TO.  */
 
+#undef  REGISTER_CONVERT_TO_RAW
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
@@ -184,41 +148,32 @@ double_to_i387 PARAMS ((char *, char *));
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
+#undef  REGISTER_VIRTUAL_TYPE
 #define REGISTER_VIRTUAL_TYPE(N) \
  (((unsigned)((N) - FP0_REGNUM)) < 8 ? builtin_type_double : builtin_type_int)
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { (SP) -= sizeof (ADDR);		\
-    write_memory ((SP), &(ADDR), sizeof (ADDR)); }
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
+#undef  EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   memcpy (VALBUF, REGBUF + REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 11), TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
+#undef  STORE_RETURN_VALUE
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   write_register_bytes (REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 11), VALBUF, TYPE_LENGTH (TYPE))
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
-
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer. */
 
+#undef  FRAME_CHAIN
 #define FRAME_CHAIN(thisframe) \
   (!inside_entry_file ((thisframe)->pc) ? \
    read_memory_integer ((thisframe)->frame, 4) :\
@@ -229,77 +184,22 @@ double_to_i387 PARAMS ((char *, char *));
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
+
+#undef  FRAMELESS_FUNCTION_INVOCATION
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
 { (FRAMELESS) = frameless_look_for_prologue (FI); }
 
+#undef  FRAME_SAVED_PC
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
-
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
-
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-#define FRAME_NUM_ARGS(numargs, fi) (numargs) = i386_frame_num_args(fi)
-
-#ifdef __STDC__		/* Forward decl's for prototypes */
-struct frame_info;
-struct frame_saved_regs;
-#endif
-
-extern int
-i386_frame_num_args PARAMS ((struct frame_info *));
-
-/* Return number of bytes at start of arglist that are not really args.  */
-
-#define FRAME_ARGS_SKIP 8
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-{ i386_frame_find_saved_regs ((frame_info), &(frame_saved_regs)); }
-
-extern void
-i386_frame_find_saved_regs PARAMS ((struct frame_info *,
-				    struct frame_saved_regs *));
-
-
-/* Things needed for making the inferior call functions.  */
-
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-#define PUSH_DUMMY_FRAME { i386_push_dummy_frame (); }
-
-extern void
-i386_push_dummy_frame PARAMS ((void));
-
-/* Discard from the stack the innermost frame, restoring all registers.  */
-
-#define POP_FRAME  { i386_pop_frame (); }
-
-extern void
-i386_pop_frame PARAMS ((void));
-
-/* this is 
- *   call 11223344 (32 bit relative)
- *   int3
- */
-
-#define CALL_DUMMY { 0x223344e8, 0xcc11 }
-
-#define CALL_DUMMY_LENGTH 8
-
-#define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
+#undef  FIX_CALL_DUMMY
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
 { \
 	*(int *)((char *)(dummyname) + 1) = (int)(fun) - (pc) - 5; \
 }
+
+#endif /* !defined (TM_SUN386_H) */
+

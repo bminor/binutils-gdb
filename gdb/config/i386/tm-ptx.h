@@ -19,28 +19,33 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef TM_PTX_H
+#define TM_PTX_H 1
+
 /* I don't know if this will work for cross-debugging, even if you do get
    a copy of the right include file.  */
+
 #include <sys/reg.h>
-
-/*
-#define SDB_REG_TO_REGNUM(value) ptx_coff_regno_to_gdb(value)
-extern int ptx_coff_regno_to_gdb();
-*/
-
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
-
-#define DECR_PC_AFTER_BREAK 0
 
 #ifdef SEQUENT_PTX4
 #include "i386/tm-i386v4.h"
 #else /* !SEQUENT_PTX4 */
 #include "i386/tm-i386v.h"
 #endif
+
+/* Number of traps that happen between exec'ing the shell to run an
+   inferior, and when we finally get to the inferior code.  This is 2
+   on most implementations. Here we have to undo what tm-i386v.h gave
+   us and restore the default. */
+
+#undef START_INFERIOR_TRAPS_EXPECTED
+#define START_INFERIOR_TRAPS_EXPECTED 2
+
+/* Amount PC must be decremented by after a breakpoint.  This is often the
+   number of bytes in BREAKPOINT but not always (such as now). */
+
+#undef DECR_PC_AFTER_BREAK
+#define DECR_PC_AFTER_BREAK 0
 
 #if 0
  --- this code can't be used unless we know we are running native,
@@ -52,23 +57,30 @@ extern int ptx_coff_regno_to_gdb();
 #endif
 
 /* Number of machine registers */
-#undef NUM_REGS
+
+#undef  NUM_REGS
 #define NUM_REGS 49
 
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.  */
+/* Initializer for an array of names of registers.  There should be at least
+   NUM_REGS strings in this initializer.  Any excess ones are simply ignored.
+   The order of the first 8 registers must match the compiler's numbering
+   scheme (which is the same as the 386 scheme) and also regmap in the various
+   *-nat.c files. */
 
-#undef REGISTER_NAMES
-#define REGISTER_NAMES { "eax", "ecx", "edx", "ebx", \
-			 "esp", "ebp", "esi", "edi", \
-			 "eip", "eflags", "st0", "st1", "st2", \
-			 "st3", "st4", "st5", "st6", "st7", \
-			 "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", \
-			     "fp8", "fp9", "fp10", "fp11", "fp12", \
-			     "fp13", "fp14", "fp15", "fp16", "fp17", \
-			     "fp18", "fp19", "fp20", "fp21", "fp22", \
-			     "fp23", "fp24", "fp25", "fp26", "fp27", \
-			     "fp28", "fp29", "fp30", "fp31" }
+#undef  REGISTER_NAMES
+#define REGISTER_NAMES { "eax",  "ecx",    "edx",  "ebx",  \
+			 "esp",  "ebp",    "esi",  "edi",  \
+			 "eip",  "eflags", "st0",  "st1",  \
+			 "st2",  "st3",    "st4",  "st5",  \
+			 "st6",  "st7",    "fp1",  "fp2",  \
+			 "fp3",  "fp4",    "fp5",  "fp6",  \
+			 "fp7",  "fp8",    "fp9",  "fp10", \
+			 "fp11", "fp12",   "fp13", "fp14", \
+			 "fp15", "fp16",   "fp17", "fp18", \
+			 "fp19", "fp20",   "fp21", "fp22", \
+			 "fp23", "fp24",   "fp25", "fp26", \
+			 "fp27", "fp28",   "fp29", "fp30", \
+			 "fp31" }
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -104,13 +116,13 @@ extern int ptx_coff_regno_to_gdb();
 #define FP1_REGNUM 18		/* first 1167 register */
 /* Get %fp2 - %fp31 by addition, since they are contiguous */
 
-#undef SP_REGNUM
+#undef  SP_REGNUM
 #define SP_REGNUM ESP_REGNUM	/* Contains address of top of stack */
-#undef FP_REGNUM
+#undef  FP_REGNUM
 #define FP_REGNUM EBP_REGNUM	/* Contains address of executing stack frame */
-#undef PC_REGNUM
+#undef  PC_REGNUM
 #define PC_REGNUM EIP_REGNUM	/* Contains program counter */
-#undef PS_REGNUM
+#undef  PS_REGNUM
 #define PS_REGNUM EFLAGS_REGNUM	/* Contains processor status */
 
 /*
@@ -129,36 +141,34 @@ extern int ptx_coff_regno_to_gdb();
 extern int
 ptx_register_u_addr PARAMS ((int, int));
 
-
 /* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  */
-/* 10 i386 registers, 8 i387 registers, and 31 Weitek 1167 registers */
-#undef REGISTER_BYTES
+   register state, the array `registers'.  10 i*86 registers, 8 i387
+   registers, and 31 Weitek 1167 registers */
+
+#undef  REGISTER_BYTES
 #define REGISTER_BYTES ((10 * 4) + (8 * 10) + (31 * 4))
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
+/* Index within `registers' of the first byte of the space for register N. */
 
-#undef REGISTER_BYTE
+#undef  REGISTER_BYTE
 #define REGISTER_BYTE(N) 		\
-((N < ST0_REGNUM) ? (N * 4) : \
- (N < FP1_REGNUM) ? (40 + ((N - ST0_REGNUM) * 10)) : \
- (40 + 80 + ((N - FP1_REGNUM) * 4)))
+(((N) < ST0_REGNUM) ? ((N) * 4) : \
+ ((N) < FP1_REGNUM) ? (40 + (((N) - ST0_REGNUM) * 10)) : \
+ (40 + 80 + (((N) - FP1_REGNUM) * 4)))
 
-/* Number of bytes of storage in the actual machine representation
- * for register N.  All registers are 4 bytes, except 387 st(0) - st(7),
- * which are 80 bits each. 
- */
+/* Number of bytes of storage in the actual machine representation for
+   register N.  All registers are 4 bytes, except 387 st(0) - st(7),
+   which are 80 bits each. */
 
-#undef REGISTER_RAW_SIZE
+#undef  REGISTER_RAW_SIZE
 #define REGISTER_RAW_SIZE(N) \
-((N < ST0_REGNUM) ? 4 : \
- (N < FP1_REGNUM) ? 10 : \
+(((N) < ST0_REGNUM) ? 4 : \
+ ((N) < FP1_REGNUM) ? 10 : \
  4)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#undef MAX_REGISTER_RAW_SIZE
+#undef  MAX_REGISTER_RAW_SIZE
 #define MAX_REGISTER_RAW_SIZE 10
 
 /* Nonzero if register N requires conversion
@@ -209,24 +219,14 @@ extern const struct floatformat floatformat_i387_ext; /* from floatformat.h */
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#undef EXTRACT_RETURN_VALUE
+#undef  EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   symmetry_extract_return_value(TYPE, REGBUF, VALBUF)
 
-
 /*
- * Removed extra PUSH_DUMMY_FRAME, et al: it was identical to the
- * i386-tdep.c version.
- */
-
-extern void
-print_387_control_word PARAMS ((unsigned int));
-
-extern void
-print_387_status_word PARAMS ((unsigned int));
-
-/*
-#undef FRAME_FIND_SAVED_REGS
+#undef  FRAME_FIND_SAVED_REGS
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
 { ptx_frame_find_saved_regs((frame_info), &(frame_saved_regs)); }
 */
+
+#endif  /* ifndef TM_PTX_H */

@@ -79,6 +79,7 @@ sun386.mh
 sun386.mt
 symmetry.mh
 symmetry.mt
+tm-i386.h
 tm-i386aix.h
 tm-i386bsd.h
 tm-i386lynx.h

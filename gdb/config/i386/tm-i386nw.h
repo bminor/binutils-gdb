@@ -17,14 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Override number of expected traps from sysv. */
-#define START_INFERIOR_TRAPS_EXPECTED 2
+#ifndef TM_I386NW_H
+#define TM_I386NW_H 1
 
-/* FIXME:  tm-i386v.h seems to be used in a lot of target config files as a
-   generic i386 target config file.  The parts that are truely generic should
-   be extracted out and placed in a tm-i386.h file that all the others,
-   including tm-i386v.h, includes as needed. */
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
 /* Stop backtracing when we wander into main.  */
 
@@ -48,3 +44,6 @@ extern int
 get_longjmp_target PARAMS ((CORE_ADDR *));
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+
+#endif  /* ifndef TM_I386NW_H */
+
