@@ -1,3 +1,8 @@
+Tue Jan 19 12:21:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (RELOC_SECTION_*, ECOFF_R_*): Defined constants for ECOFF
+	relocs.
+
 Fri Jan 15 18:17:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff-ext.h: Added prototypes for new ECOFF swapping functions.
