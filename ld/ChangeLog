@@ -1,3 +1,9 @@
+Fri Mar 29 00:01:29 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scripttempl/h8300.sc: Make vectors section 0xc4 bytes long
+	so as not to overwrite the magic syscall entry at 0xc4.
+	* scripttempl/h8300h.sc: Likewise.
+
 Thu Mar 28 11:05:47 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.tgt (sparc64-*-solaris2*): Delete.
