@@ -526,11 +526,11 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_LIBPATH:
-      command_line_blibpath=optarg;
+      command_line_blibpath = optarg;
       break;
 
     case OPTION_NOLIBPATH:
-      command_line_blibpath=NULL;
+      command_line_blibpath = NULL;
       break;
 
     }
