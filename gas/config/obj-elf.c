@@ -620,9 +620,9 @@ static struct special_section const special_sections[] =
 };
 
 void
-obj_elf_change_section (name, type, attr, push)
+obj_elf_change_section (name, type, attr, entsize, push)
      char *name;
-     int type, attr, push;
+     int type, attr, entsize, push;
 {
   asection *old_sec;
   segT sec;
@@ -690,7 +690,9 @@ obj_elf_change_section (name, type, attr, push)
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
 	   | ((attr & SHF_ALLOC) ? SEC_ALLOC : 0)
 	   | (((attr & SHF_ALLOC) && type != SHT_NOBITS) ? SEC_LOAD : 0)
-	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
+	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0)
+	   | ((attr & SHF_MERGE) ? SEC_MERGE : 0)
+	   | ((attr & SHF_STRINGS) ? SEC_STRINGS : 0));
 #ifdef md_elf_section_flags
   flags = md_elf_section_flags (flags, attr, type);
 #endif
@@ -704,6 +706,8 @@ obj_elf_change_section (name, type, attr, push)
         seg_info (sec)->bss = 1;
 
       bfd_set_section_flags (stdoutput, sec, flags);
+      if (flags & SEC_MERGE)
+	sec->entsize = entsize;
 
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
@@ -719,8 +723,10 @@ obj_elf_change_section (name, type, attr, push)
 	 saw the first time.  */
       if ((old_sec->flags ^ flags)
 	  & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	     | SEC_EXCLUDE | SEC_SORT_ENTRIES))
+	     | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS))
 	as_warn (_("Ignoring changed section attributes for %s"), name);
+      else if ((flags & SEC_MERGE) && old_sec->entsize != entsize)
+	as_warn (_("Ignoring changed section entity size for %s"), name);
     }
 
 #ifdef md_elf_section_change_hook
@@ -748,9 +754,15 @@ obj_elf_parse_section_letters (str, len)
 	case 'x':
 	  attr |= SHF_EXECINSTR;
 	  break;
+	case 'm':
+	  attr |= SHF_MERGE;
+	  break;
+	case 's':
+	  attr |= SHF_STRINGS;
+	  break;
 	default:
 	  {
-	    char *bad_msg = _("Unrecognized .section attribute: want a,w,x");
+	    char *bad_msg = _("Unrecognized .section attribute: want a,m,s,w,x");
 #ifdef md_elf_section_letter
 	    int md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr >= 0)
@@ -822,6 +834,7 @@ obj_elf_section (push)
 {
   char *name, *beg, *end;
   int type, attr, dummy;
+  int entsize;
 
 #ifndef TC_I370
   if (flag_mri)
@@ -877,6 +890,7 @@ obj_elf_section (push)
 
   type = SHT_NULL;
   attr = 0;
+  entsize = 0;
 
   if (*input_line_pointer == ',')
     {
@@ -919,6 +933,20 @@ obj_elf_section (push)
 		  type = obj_elf_section_type (beg, input_line_pointer - beg);
 		}
 	    }
+
+	  SKIP_WHITESPACE ();
+	  if ((attr & SHF_MERGE) && *input_line_pointer == ',')
+	    {
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      entsize = get_absolute_expression ();
+	      if (entsize < 0)
+		{
+		  as_warn (_("Bad .section directive - invalid merge entity size"));
+		  attr &= ~SHF_MERGE;
+		  entsize = 0;
+		}
+	    }
 	}
       else
 	{
@@ -948,7 +976,13 @@ obj_elf_section (push)
 
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, attr, push);
+  if ((attr & SHF_MERGE) && entsize == 0)
+    {
+      as_warn (_("Entity size for SHF_MERGE not specified.\nSpecify entity size as 4th argument"));
+      attr &= SHF_MERGE;
+    }
+
+  obj_elf_change_section (name, type, attr, entsize, push);
 }
 
 /* Change to the .data section.  */

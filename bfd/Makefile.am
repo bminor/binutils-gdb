@@ -30,14 +30,14 @@ BFD_LIBS = \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
 	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
-	dwarf2.lo
+	merge.lo dwarf2.lo
 
 BFD_LIBS_CFILES = \
 	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
 	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
-	dwarf2.c
+	merge.c dwarf2.c
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -780,6 +780,7 @@ stabs.lo: stabs.c $(INCDIR)/filenames.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def
 stab-syms.lo: stab-syms.c libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab.def
+merge.lo: merge.c $(INCDIR)/filenames.h
 dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf2.h

@@ -1176,7 +1176,21 @@ wild_doit (ptr, section, output, file)
       if (! first && (section->output_section->flags & SEC_READONLY) == 0)
 	flags &= ~ SEC_READONLY;
 
+      /* Keep SEC_MERGE and SEC_STRINGS only if they are the same.  */
+      if (! first
+	  && ((section->output_section->flags & (SEC_MERGE | SEC_STRINGS))
+	      != (flags & (SEC_MERGE | SEC_STRINGS))
+	      || ((flags & SEC_MERGE)
+		  && section->output_section->entsize != section->entsize)))
+	{
+	  section->output_section->flags &= ~ (SEC_MERGE | SEC_STRINGS);
+	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
+	}
+
       section->output_section->flags |= flags;
+
+      if (flags & SEC_MERGE)
+	section->output_section->entsize = section->entsize;
 
       /* If SEC_READONLY is not set in the input section, then clear
          it from the output section.  */

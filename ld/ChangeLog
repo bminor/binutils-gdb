@@ -1,3 +1,13 @@
+2001-04-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldmain.c (main): Default to discard_sec_merge.
+	* lexsup.c (OPTION_DISCARD_NONE): Define.
+	(ld_options): Add --discard-none.
+	(parse_args): Handle OPTION_DISCARD_NONE.
+	* ldlang.c (wild_doit): SEC_MERGE should be set in the output
+	section only if SEC_MERGE and SEC_STRINGS flags and entsize of
+	all its input sections match.
+
 2001-04-05  Steven J. Hill  <sjhill@cotw.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32ltsmip.o.

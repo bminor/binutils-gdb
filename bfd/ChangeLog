@@ -1,3 +1,32 @@
+2001-04-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* libbfd-in.h (_bfd_merge_section): New.
+	(_bfd_write_merged_section): New.
+	(_bfd_merged_section_offset): New.
+	* libbfd.h: Rebuilt.
+	* linker.c (_bfd_generic_link_output_symbols): Handle
+	discard_sec_merge.
+	* aoutx.h (aout_link_write_symbols): Likewise.
+	* pdp11.c (aout_link_write_symbols): Likewise.
+	* elflink.h (elf_link_add_object_symbols): Call _bfd_merge_section.
+	(elf_bfd_final_link): Adjust global symbols pointing into SEC_MERGE
+	sections.
+	(elf_link_sec_merge_syms): New.
+	(elf_link_input_bfd): Call _bfd_merged_section_offset
+	and _bfd_write_merged_section.
+	Handle discard_sec_merge.
+	* elf-bfd.h (struct elf_link_hash_table): Add merge_info
+	field.
+	(struct bfd_elf_section_data): Likewise.
+	* elf.c (_bfd_elf_make_section_from_shdr): Set SEC_MERGE and
+	SEC_STRINGS section flags and entsize from their ELF counterparts.
+	(_bfd_elf_link_hash_table_init): Initialize merge_info.
+	(elf_fake_sections): Set SHF_MERGE, SHF_STRINGS and sh_entsize
+	from their BFD counterparts.
+	* merge.c: New file.
+	* Makefile.am: Add strtab.lo.
+	* Makefile.in: Rebuilt.
+
 2001-04-09  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elflink.h (elf_fix_symbol_flags): For non-default visibilities,

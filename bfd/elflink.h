@@ -2167,6 +2167,18 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
+  if (! info->relocateable && ! dynamic)
+    {
+      asection *s;
+
+      for (s = abfd->sections; s != NULL; s = s->next)
+	if ((s->flags & SEC_MERGE)
+	    && ! _bfd_merge_section (abfd,
+				     &elf_hash_table (info)->merge_info,
+				     s, &elf_section_data (s)->merge_info))
+	  goto error_return;
+    }
+
   return true;
 
  error_return:
@@ -4069,6 +4081,8 @@ static boolean elf_link_flush_output_syms
   PARAMS ((struct elf_final_link_info *));
 static boolean elf_link_output_extsym
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_link_sec_merge_syms
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_input_bfd
   PARAMS ((struct elf_final_link_info *, bfd *));
 static boolean elf_reloc_link_order
@@ -4218,6 +4232,7 @@ elf_bfd_final_link (abfd, info)
   Elf_Internal_Shdr *symstrtab_hdr;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
+  boolean merged;
 
   if (info->shared)
     abfd->flags |= DYNAMIC;
@@ -4263,6 +4278,7 @@ elf_bfd_final_link (abfd, info)
   max_external_reloc_size = 0;
   max_internal_reloc_count = 0;
   max_sym_count = 0;
+  merged = false;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
       o->reloc_count = 0;
@@ -4283,6 +4299,9 @@ elf_bfd_final_link (abfd, info)
 		 to do this so that we can identify any sections which
 		 the linker has decided to not include.  */
 	      sec->linker_mark = true;
+
+	      if (sec->flags & SEC_MERGE)
+		merged = true;
 
 	      if (info->relocateable || info->emitrelocations)
 		o->reloc_count += sec->reloc_count;
@@ -4340,6 +4359,10 @@ elf_bfd_final_link (abfd, info)
 	  && ! o->user_set_vma)
 	o->vma = 0;
     }
+
+  if (! info->relocateable && merged)
+    elf_link_hash_traverse (elf_hash_table (info),
+			    elf_link_sec_merge_syms, (PTR) abfd);
 
   /* Figure out the file positions for everything but the symbol table
      and the relocs.  We set symcount to force assign_section_numbers
@@ -5060,6 +5083,33 @@ elf_link_flush_output_syms (finfo)
   return true;
 }
 
+/* Adjust all external symbols pointing into SEC_MERGE sections
+   to reflect the object merging within the sections.  */
+
+static boolean
+elf_link_sec_merge_syms (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  asection *sec;
+
+  if ((h->root.type == bfd_link_hash_defined
+       || h->root.type == bfd_link_hash_defweak)
+      && ((sec = h->root.u.def.section)->flags & SEC_MERGE)
+      && elf_section_data (sec)->merge_info)
+    {
+      bfd *output_bfd = (bfd *) data;
+
+      h->root.u.def.value =
+	_bfd_merged_section_offset (output_bfd,
+				    &h->root.u.def.section,
+				    elf_section_data (sec)->merge_info,
+				    h->root.u.def.value, (bfd_vma) 0);
+    }
+
+  return true;
+}
+
 /* Add an external symbol to the symbol table.  This is called from
    the hash table traversal routine.  When generating a shared object,
    we go through the symbol table twice.  The first time we output
@@ -5525,7 +5575,15 @@ elf_link_input_bfd (finfo, input_bfd)
 	  name = isec->name;
 	}
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
-	isec = section_from_elf_index (input_bfd, isym->st_shndx);
+	{
+	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
+	  if (isec && elf_section_data (isec)->merge_info
+	      && ELF_ST_TYPE (isym->st_info) != STT_SECTION)
+	    isym->st_value =
+	      _bfd_merged_section_offset (output_bfd, &isec,
+					  elf_section_data (isec)->merge_info,
+					  isym->st_value, (bfd_vma) 0);
+	}
       else if (isym->st_shndx == SHN_ABS)
 	{
 	  isec = bfd_abs_section_ptr;
@@ -5627,7 +5685,9 @@ elf_link_input_bfd (finfo, input_bfd)
       if ((finfo->info->strip == strip_some
 	   && (bfd_hash_lookup (finfo->info->keep_hash, name, false, false)
 	       == NULL))
-	  || (finfo->info->discard == discard_l
+	  || (((finfo->info->discard == discard_sec_merge
+		&& (isec->flags & SEC_MERGE) && ! finfo->info->relocateable)
+	       || finfo->info->discard == discard_l)
 	      && bfd_is_local_label_name (input_bfd, name)))
 	continue;
 
@@ -5889,7 +5949,20 @@ elf_link_input_bfd (finfo, input_bfd)
 	}
 
       /* Write out the modified section contents.  */
-      if (elf_section_data (o)->stab_info == NULL)
+      if (elf_section_data (o)->stab_info)
+	{
+	  if (! (_bfd_write_section_stabs
+		 (output_bfd, &elf_hash_table (finfo->info)->stab_info,
+		  o, &elf_section_data (o)->stab_info, contents)))
+	    return false;
+	}
+      else if (elf_section_data (o)->merge_info)
+	{
+	  if (! (_bfd_write_merged_section
+		 (output_bfd, o, elf_section_data (o)->merge_info)))
+	    return false;
+	}
+      else
 	{
 	  if (! (o->flags & SEC_EXCLUDE) &&
 	      ! bfd_set_section_contents (output_bfd, o->output_section,
@@ -5897,13 +5970,6 @@ elf_link_input_bfd (finfo, input_bfd)
 					  (o->_cooked_size != 0
 					   ? o->_cooked_size
 					   : o->_raw_size)))
-	    return false;
-	}
-      else
-	{
-	  if (! (_bfd_write_section_stabs
-		 (output_bfd, &elf_hash_table (finfo->info)->stab_info,
-		  o, &elf_section_data (o)->stab_info, contents)))
 	    return false;
 	}
     }

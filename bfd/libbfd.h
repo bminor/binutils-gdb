@@ -462,6 +462,21 @@ extern boolean _bfd_write_stab_strings PARAMS ((bfd *, PTR *));
 extern bfd_vma _bfd_stab_section_offset
   PARAMS ((bfd *, PTR *, asection *, PTR *, bfd_vma));
 
+/* Attempt to merge a SEC_MERGE section.  */
+
+extern boolean _bfd_merge_section
+  PARAMS ((bfd *, PTR *, asection *, PTR *));
+
+/* Write out a merged section.  */
+
+extern boolean _bfd_write_merged_section
+  PARAMS ((bfd *, asection *, PTR));
+
+/* Find an offset within a modified SEC_MERGE section.  */
+
+extern bfd_vma _bfd_merged_section_offset
+  PARAMS ((bfd *, asection **, PTR, bfd_vma, bfd_vma));
+
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
 

@@ -225,7 +225,7 @@ main (argc, argv)
   link_info.no_undefined = false;
   link_info.allow_shlib_undefined = false;
   link_info.strip = strip_none;
-  link_info.discard = discard_none;
+  link_info.discard = discard_sec_merge;
   link_info.keep_memory = true;
   link_info.input_bfds = NULL;
   link_info.create_object_symbols_section = NULL;
@@ -278,7 +278,7 @@ main (argc, argv)
   if (link_info.relocateable && link_info.strip == strip_all)
     {
       link_info.strip = strip_debugger;
-      if (link_info.discard == discard_none)
+      if (link_info.discard == discard_sec_merge)
 	link_info.discard = discard_all;
     }
 

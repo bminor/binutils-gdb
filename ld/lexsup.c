@@ -129,6 +129,7 @@ int parsing_defsym = 0;
 #define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
 #define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
 #define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
+#define OPTION_DISCARD_NONE		(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -248,7 +249,9 @@ static const struct ld_option ld_options[] =
   { {"discard-all", no_argument, NULL, 'x'},
       'x', NULL, N_("Discard all local symbols"), TWO_DASHES },
   { {"discard-locals", no_argument, NULL, 'X'},
-      'X', NULL, N_("Discard temporary local symbols"), TWO_DASHES },
+      'X', NULL, N_("Discard temporary local symbols (default)"), TWO_DASHES },
+  { {"discard-none", no_argument, NULL, OPTION_DISCARD_NONE},
+      '\0', NULL, N_("Don't discard any local symbols"), TWO_DASHES },
   { {"trace-symbol", required_argument, NULL, 'y'},
       'y', N_("SYMBOL"), N_("Trace mentions of SYMBOL"), TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
@@ -1043,6 +1046,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);
+	  break;
+	case OPTION_DISCARD_NONE:
+	  link_info.discard = discard_none;
 	  break;
 	case 'X':
 	  link_info.discard = discard_l;

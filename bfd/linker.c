@@ -2279,6 +2279,12 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		case discard_all:
 		  output = false;
 		  break;
+		case discard_sec_merge:
+		  output = true;
+		  if (info->relocateable
+		      || ! (sym->section->flags & SEC_MERGE))
+		    break;
+		  /* FALLTHROUGH */
 		case discard_l:
 		  if (bfd_is_local_label (input_bfd, sym))
 		    output = false;

@@ -4341,6 +4341,7 @@ aout_link_write_symbols (finfo, input_bfd)
 	      switch (discard)
 		{
 		case discard_none:
+		case discard_sec_merge:
 		  break;
 		case discard_l:
 		  if ((type & N_STAB) == 0

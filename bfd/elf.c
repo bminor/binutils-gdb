@@ -386,6 +386,13 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
     flags |= SEC_CODE;
   else if ((flags & SEC_LOAD) != 0)
     flags |= SEC_DATA;
+  if ((hdr->sh_flags & SHF_MERGE) != 0)
+    {
+      flags |= SEC_MERGE;
+      newsect->entsize = hdr->sh_entsize;
+      if ((hdr->sh_flags & SHF_STRINGS) != 0)
+	flags |= SEC_STRINGS;
+    }
 
   /* The debugging sections appear to be recognized only by name, not
      any sort of flag.  */
@@ -1031,6 +1038,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->runpath = NULL;
   table->hgot = NULL;
   table->stab_info = NULL;
+  table->merge_info = NULL;
   table->dynlocal = NULL;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
@@ -1809,6 +1817,13 @@ elf_fake_sections (abfd, asect, failedptrarg)
     this_hdr->sh_flags |= SHF_WRITE;
   if ((asect->flags & SEC_CODE) != 0)
     this_hdr->sh_flags |= SHF_EXECINSTR;
+  if ((asect->flags & SEC_MERGE) != 0)
+    {
+      this_hdr->sh_flags |= SHF_MERGE;
+      this_hdr->sh_entsize = asect->entsize;
+      if ((asect->flags & SEC_STRINGS) != 0)
+	this_hdr->sh_flags |= SHF_STRINGS;
+    }
 
   /* Check for processor-specific section types.  */
   if (bed->elf_backend_fake_sections)

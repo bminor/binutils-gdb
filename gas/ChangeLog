@@ -1,3 +1,12 @@
+2001-04-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Add entsize argument,
+	handle SHF_MERGE and SHF_STRINGS.
+	(obj_elf_parse_section_letters): Set SHF_MERGE and SHF_STRINGS.
+	(obj_elf_section): Allow additional argument specifying entity size.
+	* write.c (adjust_reloc_syms): Keep relocations against local symbols
+	in SEC_MERGE sections.
+
 2001-04-12  Jason Merrill  <jason_merrill@redhat.com>
 
 	* dwarf2dbg.c (process_entries): Don't optimize redundant line notes.

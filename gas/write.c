@@ -872,6 +872,13 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    symbol_mark_used_in_reloc (fixp->fx_addsy);
 	    goto done;
 	  }
+
+	/* Never adjust a reloc against local symbol in a merge section.  */
+	if (symsec->flags & SEC_MERGE)
+	  {
+	    symbol_mark_used_in_reloc (fixp->fx_addsy);
+	    goto done;
+	  }
 #endif
 
 	/* Is there some other reason we can't adjust this one?  (E.g.,

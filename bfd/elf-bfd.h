@@ -241,6 +241,8 @@ struct elf_link_hash_table
   struct elf_link_hash_entry *hgot;
   /* A pointer to information used to link stabs in sections.  */
   PTR stab_info;
+  /* A pointer to information used to merge SEC_MERGE sections.  */
+  PTR merge_info;
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
   /* A linked list of DT_RPATH/DT_RUNPATH names found in dynamic
@@ -712,6 +714,8 @@ struct bfd_elf_section_data
   long dynindx;
   /* A pointer used for .stab linking optimizations.  */
   PTR stab_info;
+  /* A pointer used for SEC_MERGE optimizations.  */
+  PTR merge_info;
   /* A pointer available for the processor specific ELF backend.  */
   PTR tdata;
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
