@@ -1,3 +1,17 @@
+2003-01-21  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (ALPHA_ELF_LINK_HASH_PLT_LOC): New.
+	(struct alpha_elf_link_hash_entry): Add plt_old_section, plt_old_value.
+	(elf64_alpha_adjust_dynamic_symbol): Set them.
+	(elf64_alpha_size_plt_section_1): Reset them when plt entry removed.
+	(elf64_alpha_relax_tls_get_addr): Handle LDM relocs.  Frob the
+	symbol index when relaxing LDM to TPREL.
+	(elf64_alpha_relax_section): Likewise.  Allow relaxation of GD
+	relocs, even if the target isn't locally defined.
+	(elf64_alpha_check_relocs): Frob LDM reloc symndx to zero.
+	(elf64_alpha_relocate_section): Likewise.  Force TP-relative
+	relocs vs symndx 0 to the tp base.
+
 2003-01-21  Fabio Alemagna  <falemagn@aros.org>
 
 	* config.bfd: Handle i[3456]86-*-aros*.

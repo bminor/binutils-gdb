@@ -177,6 +177,11 @@ struct alpha_elf_link_hash_entry
 #define ALPHA_ELF_LINK_HASH_LU_TLSLDM	0x20
 #define ALPHA_ELF_LINK_HASH_LU_FUNC	0x38
 #define ALPHA_ELF_LINK_HASH_TLS_IE	0x40
+#define ALPHA_ELF_LINK_HASH_PLT_LOC	0x80
+
+  /* Used to undo the localization of a plt symbol.  */
+  asection *plt_old_section;
+  bfd_vma plt_old_value;
 
   /* Used to implement multiple .got subsections.  */
   struct alpha_elf_got_entry
@@ -1753,15 +1758,9 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
   unsigned int insn;
   Elf_Internal_Rela *gpdisp, *hint;
   bfd_boolean dynamic, use_gottprel, pos1_unusable;
+  unsigned long new_symndx;
 
   dynamic = alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info);
-
-  /* ??? For LD relaxation, we need a symbol referencing the beginning
-     of the TLS segment.  */
-  /* ??? The STN_UNDEF symbol (dynindex 0) works fine for this.  Adjust
-     the code below to expect that.  */
-  if (!is_gd)
-    return TRUE;
 
   /* If a TLS symbol is accessed using IE at least once, there is no point
      to use dynamic model for it.  */
@@ -1868,6 +1867,7 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
      as appropriate.  */
 
   use_gottprel = FALSE;
+  new_symndx = is_gd ? ELF64_R_SYM (irel->r_info) : 0;
   switch (!dynamic && !info->link_info->shared)
     {
     case 1:
@@ -1886,8 +1886,7 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
 	    bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP, pos[1]);
 
 	    irel[0].r_offset = pos[0] - info->contents;
-	    irel[0].r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
-					   R_ALPHA_TPREL16);
+	    irel[0].r_info = ELF64_R_INFO (new_symndx, R_ALPHA_TPREL16);
 	    irel[1].r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
 	    break;
 	  }
@@ -1901,11 +1900,9 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
 	    bfd_put_32 (info->abfd, (bfd_vma) insn, pos[1]);
 
 	    irel[0].r_offset = pos[0] - info->contents;
-	    irel[0].r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
-					   R_ALPHA_TPRELHI);
+	    irel[0].r_info = ELF64_R_INFO (new_symndx, R_ALPHA_TPRELHI);
 	    irel[1].r_offset = pos[1] - info->contents;
-	    irel[1].r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
-					   R_ALPHA_TPRELLO);
+	    irel[1].r_info = ELF64_R_INFO (new_symndx, R_ALPHA_TPRELLO);
 	    break;
 	  }
       }
@@ -1919,8 +1916,7 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
       bfd_put_32 (info->abfd, (bfd_vma) INSN_UNOP, pos[1]);
 
       irel[0].r_offset = pos[0] - info->contents;
-      irel[0].r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
-				     R_ALPHA_GOTTPREL);
+      irel[0].r_info = ELF64_R_INFO (new_symndx, R_ALPHA_GOTTPREL);
       irel[1].r_info = ELF64_R_INFO (0, R_ALPHA_NONE);
       break;
     }
@@ -2123,6 +2119,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
       bfd_vma symval;
       struct alpha_elf_got_entry *gotent;
       unsigned long r_type = ELF64_R_TYPE (irel->r_info);
+      unsigned long r_symndx = ELF64_R_SYM (irel->r_info);
 
       /* Early exit for unhandled or unrelaxable relocations.  */
       switch (r_type)
@@ -2133,14 +2130,20 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	case R_ALPHA_GOTDTPREL:
 	case R_ALPHA_GOTTPREL:
 	case R_ALPHA_TLSGD:
-	case R_ALPHA_TLSLDM:
 	  break;
+
+	case R_ALPHA_TLSLDM:
+	  /* The symbol for a TLSLDM reloc is ignored.  Collapse the
+             reloc to the 0 symbol so that they all match.  */
+	  r_symndx = 0;
+	  break;
+
 	default:
 	  continue;
 	}
 
       /* Get the value of the symbol referred to by the reloc.  */
-      if (ELF64_R_SYM (irel->r_info) < symtab_hdr->sh_info)
+      if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
 	  Elf_Internal_Sym *isym;
@@ -2157,27 +2160,38 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 		goto error_return;
 	    }
 
-	  isym = isymbuf + ELF64_R_SYM (irel->r_info);
-	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;
-	  else if (isym->st_shndx == SHN_ABS)
-	    info.tsec = bfd_abs_section_ptr;
-	  else if (isym->st_shndx == SHN_COMMON)
-	    info.tsec = bfd_com_section_ptr;
+	  isym = isymbuf + r_symndx;
+
+	  /* Given the symbol for a TLSLDM reloc is ignored, this also
+	     means forcing the symbol value to the tp base.  */
+	  if (r_type == R_ALPHA_TLSLDM)
+	    {
+	      info.tsec = bfd_abs_section_ptr;
+	      symval = alpha_get_tprel_base (info.tls_segment);
+	    }
 	  else
-	    info.tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	    {
+	      symval = isym->st_value;
+	      if (isym->st_shndx == SHN_UNDEF)
+	        continue;
+	      else if (isym->st_shndx == SHN_ABS)
+	        info.tsec = bfd_abs_section_ptr;
+	      else if (isym->st_shndx == SHN_COMMON)
+	        info.tsec = bfd_com_section_ptr;
+	      else
+	        info.tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	    }
 
 	  info.h = NULL;
 	  info.other = isym->st_other;
-	  info.first_gotent = &local_got_entries[ELF64_R_SYM(irel->r_info)];
-	  symval = isym->st_value;
+	  info.first_gotent = &local_got_entries[r_symndx];
 	}
       else
 	{
 	  unsigned long indx;
 	  struct alpha_elf_link_hash_entry *h;
 
-	  indx = ELF64_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+	  indx = r_symndx - symtab_hdr->sh_info;
 	  h = alpha_elf_sym_hashes (abfd)[indx];
 	  BFD_ASSERT (h != NULL);
 
@@ -2193,13 +2207,23 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	  /* If the symbol isn't defined in the current module, again
 	     we can't do anything.  */
 	  if (!(h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
-	    continue;
+	    {
+	      /* Except for TLSGD relocs, which can sometimes be
+		 relaxed to GOTTPREL relocs.  */
+	      if (r_type != R_ALPHA_TLSGD)
+		continue;
+	      info.tsec = bfd_abs_section_ptr;
+	      symval = 0;
+	    }
+	  else
+	    {
+	      info.tsec = h->root.root.u.def.section;
+	      symval = h->root.root.u.def.value;
+	    }
 
 	  info.h = h;
-	  info.tsec = h->root.root.u.def.section;
 	  info.other = h->root.other;
 	  info.first_gotent = &h->got_entries;
-	  symval = h->root.root.u.def.value;
 	}
 
       /* Search for the got entry to be used by this relocation.  */
@@ -3117,8 +3141,15 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	    need = NEED_DYNREL;
 	  break;
 
-	case R_ALPHA_TLSGD:
 	case R_ALPHA_TLSLDM:
+	  /* The symbol for a TLSLDM reloc is ignored.  Collapse the
+	     reloc to the 0 symbol so that they all match.  */
+	  r_symndx = 0;
+	  h = 0;
+	  maybe_dynamic = FALSE;
+	  /* FALLTHRU */
+
+	case R_ALPHA_TLSGD:
 	case R_ALPHA_GOTDTPREL:
 	  need = NEED_GOT | NEED_GOT_ENTRY;
 	  break;
@@ -3320,6 +3351,9 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
       if (! info->shared
 	  && h->root.type != bfd_link_hash_defweak)
 	{
+	  ah->plt_old_section = h->root.u.def.section;
+	  ah->plt_old_value = h->root.u.def.value;
+	  ah->flags |= ALPHA_ELF_LINK_HASH_PLT_LOC;
 	  h->root.u.def.section = s;
 	  h->root.u.def.value = h->plt.offset;
 	}
@@ -3801,6 +3835,14 @@ elf64_alpha_size_plt_section_1 (h, data)
     {
       h->root.elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
       h->root.plt.offset = -1;
+
+      /* Undo the definition frobbing begun in adjust_dynamic_symbol.  */
+      if (h->flags & ALPHA_ELF_LINK_HASH_PLT_LOC)
+	{
+	  h->root.root.u.def.section = h->plt_old_section;
+	  h->root.root.u.def.value = h->plt_old_value;
+	  h->flags &= ~ALPHA_ELF_LINK_HASH_PLT_LOC;
+	}
     }
 
   return TRUE;
@@ -4364,11 +4406,28 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = elf64_alpha_howto_table + r_type;
       r_symndx = ELF64_R_SYM(rel->r_info);
 
+      /* The symbol for a TLSLDM reloc is ignored.  Collapse the
+	 reloc to the 0 symbol so that they all match.  */
+      if (r_type == R_ALPHA_TLSLDM)
+	r_symndx = 0;
+
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+
+	  /* If this is a tp-relative relocation against sym 0,
+	     this is hackery from relax_section.  Force the value to
+	     be the tls base.  */
+	  if (r_symndx == 0
+	      && (r_type == R_ALPHA_TLSLDM
+		  || r_type == R_ALPHA_GOTTPREL
+		  || r_type == R_ALPHA_TPREL64
+		  || r_type == R_ALPHA_TPRELHI
+		  || r_type == R_ALPHA_TPRELLO
+		  || r_type == R_ALPHA_TPREL16))
+	    value = tp_base;
 
 	  if (local_got_entries)
 	    gotent = local_got_entries[r_symndx];
