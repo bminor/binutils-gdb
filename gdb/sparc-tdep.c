@@ -431,8 +431,20 @@ sparc_frame_chain (struct frame_info *frame)
 {
   /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
      value.  If it really is zero, we detect it later in
-     sparc_init_prev_frame.  */
-  return (CORE_ADDR) 1;
+     sparc_init_prev_frame.
+     
+     Note:  kevinb/2003-02-18:  The constant 1 used to be returned
+     here, but, after some recent changes to frame_chain_valid(),
+     this value is no longer suitable for causing frame_chain_valid()
+     to "not worry about the chain value."  The constant ~0 (i.e,
+     0xfff...) causes the failing test in frame_chain_valid() to
+     succeed thus preserving the "not worry" property.  I had considered
+     using something like ``get_frame_base (frame) + 1''.  However, I think
+     a constant value is better, because when debugging this problem,
+     I knew that something funny was going on as soon as I saw the
+     constant 1 being used as the frame chain elsewhere in GDB.  */
+
+  return ~ (CORE_ADDR) 0;
 }
 
 CORE_ADDR
