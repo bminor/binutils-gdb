@@ -121,17 +121,17 @@ static void togdb_force_update (void);
 
 static void view_source (CORE_ADDR);
 
-static void do_gdb (char *, char *, void (*func) PARAMS ((char *, int)), int);
+static void do_gdb (char *, char *, void (*func) (char *, int), int);
 
 
 /* Globals */
 static HWND hidden_hwnd;	/* HWND for messages */
 
-long (__stdcall * ExeAppReq) PARAMS ((char *, long, char *, struct MessageIO *));
+long (__stdcall * ExeAppReq) (char *, long, char *, struct MessageIO *);
 
-long (__stdcall * RegisterClient) PARAMS ((HWND));
+long (__stdcall * RegisterClient) (HWND);
 
-long (__stdcall * UnregisterClient) PARAMS ((void));
+long (__stdcall * UnregisterClient) (void);
 
 extern Tcl_Interp *gdbtk_interp;
 
@@ -346,11 +346,11 @@ v850ice_open (name, from_tty)
       if (handle == NULL)
 	error ("Cannot load necmsg.dll");
 
-      ExeAppReq = (long (*)PARAMS ((char *, long, char *, struct MessageIO *)))
+      ExeAppReq = (long (*) (char *, long, char *, struct MessageIO *))
 	GetProcAddress (handle, "ExeAppReq");
-      RegisterClient = (long (*)PARAMS ((HWND)))
+      RegisterClient = (long (*) (HWND))
 	GetProcAddress (handle, "RegisterClient");
-      UnregisterClient = (long (*)PARAMS ((void)))
+      UnregisterClient = (long (*) (void))
 	GetProcAddress (handle, "UnregisterClient");
 
       if (ExeAppReq == NULL || RegisterClient == NULL || UnregisterClient == NULL)
