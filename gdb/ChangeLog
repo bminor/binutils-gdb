@@ -3,6 +3,10 @@
 	* valops.c (value_assign): Move 'buffer' to the enclosing block,
 	so that its storage isn't referenced after its lifetime ends.
 
+	* valops.c (value_assign): 'use_buffer' is initialized to zero,
+	and never assigned to.   Delete it, and the 'if (use_buffer)'
+	clauses.  Delete 'raw_buffer', since it is now unused.
+
 2004-09-13  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.in (frags): Replace TM_FILE with DEPRECATED_TM_FILE.

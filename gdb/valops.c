@@ -525,8 +525,6 @@ value_assign (struct value *toval, struct value *fromval)
 {
   struct type *type;
   struct value *val;
-  char raw_buffer[MAX_REGISTER_SIZE];
-  int use_buffer = 0;
   struct frame_id old_frame;
 
   if (!toval->modifiable)
@@ -590,12 +588,6 @@ value_assign (struct value *toval, struct value *fromval)
 			  VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	    changed_addr = VALUE_ADDRESS (toval) + VALUE_OFFSET (toval);
 	    dest_buffer = buffer;
-	  }
-	else if (use_buffer)
-	  {
-	    changed_addr = VALUE_ADDRESS (toval) + VALUE_OFFSET (toval);
-	    changed_len = use_buffer;
-	    dest_buffer = raw_buffer;
 	  }
 	else
 	  {
@@ -683,8 +675,6 @@ value_assign (struct value *toval, struct value *fromval)
 	      modify_field (buffer + byte_offset,
 			    value_as_long (fromval),
 			    VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
-	    else if (use_buffer)
-	      memcpy (buffer + VALUE_OFFSET (toval), raw_buffer, use_buffer);
 	    else
 	      memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
 		      TYPE_LENGTH (type));
