@@ -1,3 +1,13 @@
+2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/reloc-1[ab].s: New source files.
+	* ld-mips-elf/reloc-1-{n32,n64,rel}.d: New tests.
+	* ld-mips-elf/reloc-2[ab].s: New source files.
+	* ld-mips-elf/reloc-2.{d,ld}: New test.
+	* ld-mips-elf/reloc-3[ab].s: New source files.
+	* ld-mips-elf/reloc-3-{r,srec}.d: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2003-12-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/elf-rel-xgot-n32.d: Fix offset for "lw $5,dl1+34($5)".

@@ -79,3 +79,21 @@ if { $embedded_elf } {
 
     run_dump_test "region1"
 }
+
+if $embedded_elf {
+    # This could work on other targets too, but would need the appropriate
+    # ld -m switch.
+    run_dump_test "reloc-1-rel"
+}
+if $has_newabi {
+    run_dump_test "reloc-1-n32"
+    if $linux_gnu {
+	# Uses a linux-specific ld -m switch
+	run_dump_test "reloc-1-n64"
+    }
+}
+run_dump_test "reloc-2"
+if $embedded_elf {
+    run_dump_test "reloc-3-r"
+    run_dump_test "reloc-3-srec"
+}
