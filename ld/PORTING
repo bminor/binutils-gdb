@@ -1,25 +1,104 @@
-Some incomplete notes about porting GNU ld
------------------------------------------
+	Preliminary Notes on Porting GNU ld
+	-----------------------------------
 
-Before porting ld itself, you will need to port the BFD library.
+Before porting ld itself, you will need to port the BFD library;
+see ../bfd/PORTING.
 
-We tarlk about the 'host' system as the machine and software
-nevironment where ld runs (generates an execuitble *on*),
-while the 'target' is the machine ld generates an executable *for*.
+The 'host' is the system a tool runs *on*.
+The 'target' is the system a tool runs *for*, i.e.
+a tool can read/write the binaries of the target.
 Most often, host==target, but ld supports cross-linking
 (and to some extent the same ld binary can be used a linker
 for multiple target rachitectures).
 
-Doing a 'host' port means working around broken or missing
-include files or libraries. ...
+Porting to a new host
+---------------------
+Pick a name for your host. Call that <host>.
+You need to create the file config/mh-<host>.
 
 Porting to a new target
 -----------------------
+Pick a name for your target. Call that <target>.
+You need to create at least config/mt-<target>.
+It should contain
+	EMUL=<emulation>
+An <emulation> controls the "personality" of ld,
+such as the default linker script.  Usually, the
+<emulation> will have teh same name as the <target>,
+and you will need to create a new <emulation> (see below).
 
-Writing a new script script
----------------------------
+You will also need to edit Makefile.in and possible configure.in.
+To see how to do that, search for existing examples (e.g. sun3,
+sun4, hp300bsd).
+
+Porting to a new emulation target
+---------------------------------
+Pick a name for your target. Call that <emulation>.
+Usually, <emulation> and <target> are the same.
+You need to create at least <emulation>.sh.
+You will also need to edit Makefile.in,
+To see how to do that, search for existing examples.
+
+The file <emulation>.sh defines a set of parameter that
+are used to generate the emulation.  Its syntax is that
+of a (Bourne) shell script, and it is "sourced" by genscripts.sh.
+
+Writing <emulation.sh>
+----------------------
+
+Usually, <emulation>.sh contains:
+	EMULATION_NAME=<emulation>
+	SCRIPT_NAME=<script>
+	OUTPUT_FORMAT="<target-name>"
+	TEXT_START_ADDR=<text_start_addr>
+	PAGE_SIZE=<page_size>
+	SEGMENT_SIZE=<segment_size>  # If different from PAGE_SIZE.
+	ARCH=<arch>
+
+<target-name>
+	Matches the 'filename' field of the bfd_target you want
+	to use.  (This is a string, and currently the first field.)
+	For an a.out target, <target-name> matches the TARGETNAME
+	defined in ../bfd/<target>.c.
+
+<arch>
+	The architecture: e.g. m68k, sparc, ...
+
+<script>
+	The file <script>.sc-sh is a shell script which when
+	eveluated (by genscripts.sh) writes a linker script
+	file to standard output.  You may need to write a new
+	script.  If you use the a.out format or something
+	similar, you can probably set
+		SCRIPT_NAME=aout
+
+<text_start_addr>
+<page_size>
+<segment_size>
+	These set the shell variables TEXT_START_ADDR, PAGE_SIZE,
+	and SEGEMNT_SIZE for use by <script>.sc-sh.
+	If your script doesn't use these variables, you
+	don't have to define the variables,
+	For emulations using a.out files, you can get these
+	values from ../bfd/<target>c.
+
+In some cases, you may need more more definitions.
+For example, if you can't use generic.em,
+you may need to add:
+	TEMPLATE_NAME=<emulation>
+and write your own <emulation>.em file.
+
+Writing a new <script>.sc-sh
+----------------------------
 
 You may need to write a new script file for your emulation.
+
+Your script can use the shell variable LD_FLAG, which has the value:
+LD_FLAG=	when building a script to be used by default
+LD_FLAG=n	when building a script to be used for ld -n
+LD_FLAG=N	when building a script to be used for ld -N
+LD_FLAG=r	when building a script to be used for ld -r
+LD_FLAG=u	when building a script to be used for ld -Ur
 
 The variable RELOCATING is only set if relocation is happening
 (i.e. unless the linker is invoked with -r).
@@ -39,25 +118,35 @@ The forms:
 should be:
 	 .section { ... } > ${RELOCATING+ section}
 
-Old Makefile comments (re-write - FXIME!)
------------------------------------------
+RELOCATING is set except when LD_FLAG=r or LD_FLAG=u.
+CONSTRUCTING is set except when LD_FLAG=u.
 
-# The .xn script is used if the -n flag is given (write-protect text)..
-# Sunos starts the text segment for demand-paged binaries at 0x2020
-# and other binaries at 0x2000, since the exec header is paged in
-# with the text.  Some other Unix variants do the same.
-# For -n and -N flags the offset of the exec header must be removed.
-# This sed script does this if the master script contains
-# a line of the form ".text 0xAAAA BLOCK(0xBBBB):" - the
-# output will contain ".text 0xBBBB:".  (For Sunos AAAA=2020 and BBBB=2000.)
-.x.xn:
-	sed -e '/text/s/\.text .* BLOCK(\([^)]*\)):/.text \1:/' < $< >$*.xn
+Alignment of the data segments is controlled by the variables
+DATA_ALIGNMENT_ (note trailing underscore), DATA_ALIGNMENT_n,
+DATA_ALIGNMENT_N, DATA_ALIGNMENT_r, or DTA_ALIGNMENT_u
+depending on LD_FLAGS's value.
+Normally, the default value works (this is "ALIGN(${SEGMENT_SIZE})"
+for the _n, and __ (default) variants; "." for the _N, variant;
+and "" for the _r and _u variants).
 
-# The .xN script is used if the -N flag is given (don't write-protect text).
-# This is like -n, except that the data segment need not be page-aligned.
-# So get rid of commands for page-alignment:  We assume these use ALIGN
-# with a hex constant that end with 00, since any normal page size is be
-# at least divisible by 256.  We use the 00 to avoid matching
-# anything that tries to align of (say) 8-byte boundaries.
-.xn.xN:
-	sed -e '/ALIGN/s/ALIGN( *0x[0-9a-fA-F]*00 *)/./' < $< >$*.xN
+Handling -n and -N style binaries in your linker script
+-------------------------------------------------------
+
+The -n linker flag requests the linker to create a binary
+with a write-protected text segment, but not demand-pagable (NMAGIC).
+Sunos starts the text segment for demand-paged binaries at 0x2020
+and other binaries at 0x2000, since the exec header (0x20 bytes)
+is paged in with the text.  Some other Unix variants do the same.
+
+In that case, the <emulation.sh> should define:
+
+NONPAGED_TEXT_START_ADDR
+	The text start address to use when linking with -n or -N flags.
+
+For example, on a sun4:
+	TEXT_START_ADDR=0x2020
+	NONPAGED_TEXT_START_ADDR=0x2000
+
+The -N linker flag requests the linker to create a binary
+without a write-protected text segment (NMAGIC).
+This is like -n, except that the data segment needs not be page-aligned.
