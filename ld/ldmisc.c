@@ -28,6 +28,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldgram.h"
 #include "ldlex.h"
 #include "ldmain.h"
 #include "ldfile.h"
@@ -188,10 +189,7 @@ vfinfo(fp, fmt, arg)
        case 'S':
 	/* print script file and linenumber */
        {
-	 if (ldfile_input_filename == (char *)NULL) {
-	   fprintf(fp,"command line");
-	 }
-	 else {
+	 if (ldfile_input_filename) {
 	   fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
 	 }
        }
@@ -233,12 +231,16 @@ vfinfo(fp, fmt, arg)
 	    asymbols = entry->asymbols;
 	  else
 	    {
-	      unsigned int symsize;
-	      unsigned int symbol_count;
+	      long symsize;
+	      long symbol_count;
 
-	      symsize = get_symtab_upper_bound (abfd);
+	      symsize = bfd_get_symtab_upper_bound (abfd);
+	      if (symsize < 0)
+		einfo ("%B%F: could not read symbols", abfd);
 	      asymbols = (asymbol **) xmalloc (symsize);
 	      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
+	      if (symbol_count < 0)
+		einfo ("%B%F: could not read symbols", abfd);
 	      if (entry != (lang_input_statement_type *) NULL)
 		{
 		  entry->asymbols = asymbols;
@@ -312,66 +314,12 @@ void einfo(va_alist)
   va_end(arg);
 }
 
-/* Warn about a symbol NEWSYM being multiply defined with another symbol OLDSYM.
-   MESSAGE1 and MESSAGE2 should look something like:
-   "%C: warning: multiple commons of `%s'\n"
-   "%C: warning: previous common here\n"  */
-
-void
-multiple_warn (message1, newsym, message2, oldsym)
-     char *message1;
-     asymbol *newsym;
-     char *message2;
-     asymbol *oldsym;
-{
-  lang_input_statement_type *inp_stat;
-  asymbol **stat_symbols;
-
-  inp_stat = (lang_input_statement_type *) bfd_asymbol_bfd (newsym)->usrdata;
-  stat_symbols = inp_stat ? inp_stat->asymbols : 0;
-
-  einfo (message1,
-	 bfd_asymbol_bfd (newsym), newsym->section, stat_symbols, newsym->value,
-	 demangle (newsym->name, 1));
-
-  inp_stat = (lang_input_statement_type *) bfd_asymbol_bfd (oldsym)->usrdata;
-  stat_symbols = inp_stat ? inp_stat->asymbols : 0;
-
-  einfo (message2,
-	 bfd_asymbol_bfd (oldsym), oldsym->section, stat_symbols, oldsym->value);
-}
-
 void 
 info_assert(file, line)
      char *file;
      unsigned int line;
 {
   einfo("%F%P: internal error %s %d\n", file,line);
-}
-
-/* Return a newly-allocated string
-   whose contents concatenate those of S1, S2, S3.  */
-
-char *
-concat (s1, s2, s3)
-     CONST char *s1;
-     CONST char *s2;
-     CONST char *s3;
-{
-  size_t len1 = strlen (s1);
-  size_t len2 = strlen (s2);
-  size_t len3 = strlen (s3);
-  char *result = xmalloc (len1 + len2 + len3 + 1);
-
-  if (len1 != 0)
-    memcpy(result, s1, len1);
-  if (len2 != 0)
-    memcpy(result+len1, s2, len2);
-  if (len3 != 0)
-    memcpy(result+len1+len2, s2, len3);
-  *(result + len1 + len2 + len3) = 0;
-
-  return result;
 }
 
 char *
