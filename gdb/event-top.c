@@ -55,7 +55,9 @@ static void async_stop_sig (gdb_client_data arg);
 static void async_float_handler (gdb_client_data arg);
 
 /* Signal handlers. */
+#ifdef SIGQUIT
 static void handle_sigquit (int sig);
+#endif
 static void handle_sighup (int sig);
 static void handle_sigfpe (int sig);
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
@@ -133,7 +135,9 @@ void *sigint_token;
 #ifdef SIGHUP
 void *sighup_token;
 #endif
+#ifdef SIGQUIT
 void *sigquit_token;
+#endif
 void *sigfpe_token;
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 void *sigwinch_token;
@@ -895,6 +899,7 @@ async_init_signals (void)
   signal (SIGTRAP, SIG_DFL);
 #endif
 
+#ifdef SIGQUIT
   /* If we initialize SIGQUIT to SIG_IGN, then the SIG_IGN will get
      passed to the inferior, which we don't want.  It would be
      possible to do a "signal (SIGQUIT, SIG_DFL)" after we fork, but
@@ -906,6 +911,7 @@ async_init_signals (void)
   signal (SIGQUIT, handle_sigquit);
   sigquit_token =
     create_async_signal_handler (async_do_nothing, NULL);
+#endif
 #ifdef SIGHUP
   if (signal (SIGHUP, handle_sighup) != SIG_IGN)
     sighup_token =
@@ -966,6 +972,7 @@ async_request_quit (gdb_client_data arg)
   quit ();
 }
 
+#ifdef SIGQUIT
 /* Tell the event loop what to do if SIGQUIT is received. 
    See event-signal.c. */
 static void
@@ -974,6 +981,7 @@ handle_sigquit (int sig)
   mark_async_signal_handler_wrapper (sigquit_token);
   signal (sig, handle_sigquit);
 }
+#endif
 
 /* Called by the event loop in response to a SIGQUIT. */
 static void

@@ -186,9 +186,11 @@ net_open (struct serial *scb, const char *name)
 		  (char *)&tmp, sizeof (tmp));
     }
 
+#ifdef SIGPIPE
   /* If we don't do this, then GDB simply exits
      when the remote side dies.  */
   signal (SIGPIPE, SIG_IGN);
+#endif
 
   return 0;
 }
