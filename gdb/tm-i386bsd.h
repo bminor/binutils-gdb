@@ -1,5 +1,5 @@
 /* Macro definitions for i386 running under BSD Unix.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

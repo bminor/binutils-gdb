@@ -1,10 +1,12 @@
 Wed Feb 17 19:24:40 1993  John Gilmore  (gnu@cygnus.com)
 
+	* Makefile.in (VERSION):  Roll to 4.7.9.
+	* xm-hp300bsd.h:  Define PSIGNAL_IN_SIGNAL_H and put a compatible
+	definition here, to handle both BSD 4.3 and 4.4 systems.
 	* mipsread.c (ZMAGIC):  #undef to avoid duplicate define.
 	* remote.c (alarm):  Move declaration to global level, before 
 	first reference to it.
 	* tm-i386bsd.h (NUM_REGS):  There are only eleven, not twelve.
-
 	* dbxread.c (process_one_symbol):  Cast to unsigned char, not int.
 
 Wed Feb 17 13:40:29 1993  K. Richard Pixley  (rich@cygnus.com)
