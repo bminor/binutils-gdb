@@ -368,7 +368,7 @@ changequote([,])dnl
 
     case ${cpu_type} in
       m32r)
-	case ${extra_objects} in
+	case "x${extra_objects}" in
 	*cgen.o*) ;;
 	*) extra_objects="$extra_objects cgen.o"
 	   AC_DEFINE(USING_CGEN)
@@ -464,6 +464,17 @@ esac
 case "${obj_format}" in
   "") AC_MSG_ERROR(GAS does not know what format to use for target ${target}) ;;
 esac
+
+# Unfortunately the cpu in cpu-opc.h file isn't always $(TARGET_CPU).
+cgen_cpu_prefix=""
+case "x${extra_objects}" in
+  *cgen.o*)
+	case ${target_cpu} in
+	  *) cgen_cpu_prefix=${target_cpu} ;;
+	esac
+	;;
+esac
+AC_SUBST(cgen_cpu_prefix)
 
 dnl
 dnl Make sure the desired support files exist.

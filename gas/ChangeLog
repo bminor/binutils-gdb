@@ -1,3 +1,16 @@
+Wed Jul  1 16:35:32 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.am (CGEN_CPU_PREFIX): New variable.
+	(cgen.o): Use it.
+	* Makefile.in: Regenerate.
+	* configure.in: AC_SUBST cgen_cpu_prefix.
+	* configure: Regenerate.
+
+Wed Jul  1 21:38:56 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* config/tc-sh (COND_JUMP_DELAY, COND12_DELAY_LENGTH): Define.
+	Changed all users of COND12_DELAY.
+
 start-sanitize-am33
 Mon Jun 29 14:58:36 1998  Jeffrey A Law  (law@cygnus.com)
 
