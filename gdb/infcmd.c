@@ -389,16 +389,22 @@ Start it from the beginning? "))
 
   clear_breakpoint_hit_counts ();
 
-  exec_file = (char *) get_exec_file (0);
-
   /* Purge old solib objfiles. */
   objfile_purge_solibs ();
 
   do_run_cleanups (NULL);
 
-  /* The exec file is re-read every time we do a generic_mourn_inferior, so
-     we just have to worry about the symbol file.  */
+  /* The comment here used to read, "The exec file is re-read every
+     time we do a generic_mourn_inferior, so we just have to worry
+     about the symbol file."  The `generic_mourn_inferior' function
+     gets called whenever the program exits.  However, suppose the
+     program exits, and *then* the executable file changes?  We need
+     to check again here.  Since reopen_exec_file doesn't do anything
+     if the timestamp hasn't changed, I don't see the harm.  */
+  reopen_exec_file ();
   reread_symbols ();
+
+  exec_file = (char *) get_exec_file (0);
 
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program

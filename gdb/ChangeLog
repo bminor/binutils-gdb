@@ -1,3 +1,9 @@
+2002-01-21  Jim Blandy  <jimb@redhat.com>
+
+	* infcmd.c (run_command): Check that the `exec' target layer's BFD
+	is up-to-date before running the program, not just when a program
+	exits.
+
 2002-01-21  Fred Fish  <fnf@redhat.com>
 
 	* arm-tdep.c (thumb_skip_prologue): Quit scanning prologue

@@ -87,7 +87,7 @@ gdb_expect {
 
 # Restore first executable to its original name, and move
 # second executable into its place.  Ensure that the new
-# executable is at least a second older than the old.
+# executable is at least a second newer than the old.
 
 gdb_test "shell mv ${binfile} ${binfile1}" "" ""
 gdb_test "shell mv ${binfile2} ${binfile}" "" ""
@@ -97,6 +97,8 @@ gdb_test "shell touch ${binfile}" "" ""
 # Run a second time; GDB should detect that the executable has changed
 # and reset the breakpoints correctly.
 # Should see "Breakpoint 1, foo () at reread2.c:9"
+
+set prms_id 0
 
 if ![isnative] {
     unsupported "run to foo() second time ";
@@ -113,6 +115,68 @@ if ![isnative] {
 	}
 	timeout { 
 	    fail "run to foo() second time (timeout)" ; 
+	    gdb_suppress_tests 
+	}
+    }
+}
+
+
+### Second pass: verify that GDB checks the executable file's
+### timestamp when the program is *restarted*, not just when it exits.
+
+if ![isnative] {
+    unsupported "second pass: GDB should check for changes before running"
+} else {
+
+    # Put the older executable back in place.
+    gdb_test "shell mv ${binfile} ${binfile2}" "" ""
+    gdb_test "shell mv ${binfile1} ${binfile}" "" ""
+
+    # Restart GDB entirely.
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load ${binfile}
+
+    # Set a breakpoint on foo and run to it.
+    gdb_test "break foo" \
+            "Breakpoint.*at.* file .*$srcfile1, line 14.*" \
+            "second pass: breakpoint foo in first file"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Breakpoint.* foo .* at .*$srcfile1:14.*$gdb_prompt $"  {
+            pass "second pass: run to foo()";
+        }
+        -re ".*$gdb_prompt $" {
+            fail "second pass: run to foo()";
+            gdb_suppress_tests;
+        }
+        timeout {
+            fail "second pass: run to foo() (timeout)"
+            gdb_suppress_tests
+        }
+    }
+
+    # This time, let the program run to completion.  If GDB checks the
+    # executable file's timestamp now, it won't notice any change.
+    gdb_test "continue" ".*Program exited.*" \
+            "second pass: continue to completion"
+    
+    # Now move the newer executable into place, and re-run.  GDB
+    # should still notice that the executable file has changed,
+    # and still re-set the breakpoint appropriately.
+    gdb_test "shell mv ${binfile} ${binfile1}" "" ""
+    gdb_test "shell mv ${binfile2} ${binfile}" "" ""
+    gdb_run_cmd
+    gdb_expect {
+	-re ".*Breakpoint.* foo .* at .*:9.*$gdb_prompt $" {
+	    pass "second pass: run to foo() second time ";
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "second pass: run to foo() second time";
+	    gdb_suppress_tests;
+	}
+	timeout { 
+	    fail "second pass: run to foo() second time (timeout)" ; 
 	    gdb_suppress_tests 
 	}
     }
