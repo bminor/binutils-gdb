@@ -36,13 +36,11 @@ gdbint.texinfo
 gen.m4
 i80386.m4
 i960.m4
+lpsrc.sed
 m680x0.m4
 none.m4
 pretex.m4
 psrc.sed
-rc-cm.tex
-rc-ps.tex
-rc-pslong.tex
 refcard.tex
 sparc.m4
 threecol.tex
@@ -55,7 +53,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.9  1992/01/18 00:44:04  grossman
+# Revision 2.10  1992/02/01 00:41:18  grossman
+# Distribute lpsrc.sed, remove rc-*.
+#
+# Revision 2.9  1992/01/18  00:44:04  grossman
 # Add psrc.sed
 #
 # Revision 2.8  1991/12/10  02:13:54  pesch
