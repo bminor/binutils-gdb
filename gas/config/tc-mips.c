@@ -5496,6 +5496,12 @@ mips_ip (str, ip)
 			break;
 		      }
 		    new_seg = subseg_new (newname, (subsegT) 0);
+		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+		      bfd_set_section_flags (stdoutput, new_seg,
+					     (SEC_ALLOC
+					      | SEC_LOAD
+					      | SEC_READONLY
+					      | SEC_DATA));
 		    frag_align (*args == 'l' ? 2 : 3, 0);
 		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 		      record_alignment (new_seg, 4);
@@ -6315,7 +6321,7 @@ mips_frob_file ()
   for (l = mips_hi_fixup_list; l != NULL; l = l->next)
     {
       segment_info_type *seginfo;
-      fixS *f, *prev;
+      int pass;
 
       assert (l->fixp->fx_r_type == BFD_RELOC_HI16_S);
 
@@ -6328,46 +6334,57 @@ mips_frob_file ()
 	continue;
 
       /* Look through the fixups for this segment for a matching %lo.
-         When we find one, move the %hi just in front of it.  */
+         When we find one, move the %hi just in front of it.  We do
+         this in two passes.  In the first pass, we try to find a
+         unique %lo.  In the second pass, we permit multiple %hi
+         relocs for a single %lo (this is a GNU extension).  */
       seginfo = seg_info (l->seg);
-      prev = NULL;
-      for (f = seginfo->fix_root; f != NULL; f = f->fx_next)
+      for (pass = 0; pass < 2; pass++)
 	{
-	  /* Check whether this is a %lo fixup which matches l->fixp;
-             we can't use it if the %lo is already matching a %hi.  */
-	  if (f->fx_r_type == BFD_RELOC_LO16
-	      && f->fx_addsy == l->fixp->fx_addsy
-	      && f->fx_offset == l->fixp->fx_offset
-	      && (prev == NULL
-		  || prev->fx_r_type != BFD_RELOC_HI16_S
-		  || prev->fx_addsy != f->fx_addsy
-		  || prev->fx_offset !=  f->fx_offset))
+	  fixS *f, *prev;
+
+	  prev = NULL;
+	  for (f = seginfo->fix_root; f != NULL; f = f->fx_next)
 	    {
-	      fixS **pf;
+	      /* Check whether this is a %lo fixup which matches l->fixp.  */
+	      if (f->fx_r_type == BFD_RELOC_LO16
+		  && f->fx_addsy == l->fixp->fx_addsy
+		  && f->fx_offset == l->fixp->fx_offset
+		  && (pass == 1
+		      || prev == NULL
+		      || prev->fx_r_type != BFD_RELOC_HI16_S
+		      || prev->fx_addsy != f->fx_addsy
+		      || prev->fx_offset !=  f->fx_offset))
+		{
+		  fixS **pf;
 
-	      /* Move l->fixp before f.  */
-	      for (pf = &seginfo->fix_root;
-		   *pf != l->fixp;
-		   pf = &(*pf)->fx_next)
-		assert (*pf != NULL);
+		  /* Move l->fixp before f.  */
+		  for (pf = &seginfo->fix_root;
+		       *pf != l->fixp;
+		       pf = &(*pf)->fx_next)
+		    assert (*pf != NULL);
 
-	      *pf = l->fixp->fx_next;
+		  *pf = l->fixp->fx_next;
 
-	      l->fixp->fx_next = f;
-	      if (prev == NULL)
-		seginfo->fix_root = l->fixp;
-	      else
-		prev->fx_next = l->fixp;
+		  l->fixp->fx_next = f;
+		  if (prev == NULL)
+		    seginfo->fix_root = l->fixp;
+		  else
+		    prev->fx_next = l->fixp;
 
-	      break;
+		  break;
+		}
+
+	      prev = f;
 	    }
 
-	  prev = f;
-	}
+	  if (f != NULL)
+	    break;
 
-      if (f == NULL)
-	as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
-		       "Unmatched %%hi reloc");
+	  if (pass == 1)
+	    as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
+			   "Unmatched %%hi reloc");
+	}
     }
 }
 

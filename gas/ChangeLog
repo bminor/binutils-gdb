@@ -1,3 +1,8 @@
+Fri May 24 18:24:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Mark sections created to hold
+	floating point information as read only.
+
 Fri May 24 12:07:54 1996  David Edelsohn  <edelsohn@mhpcc.edu>
 
 	* config/tc-ppc.c (ppc_set_cpu): Change defaults to match AIX.
