@@ -1,3 +1,9 @@
+2004-06-01  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR symtab/1661.
+	* hpread.c (hpread_pxdb_needed): Call memset after alloca.
+	(hpread_read_struct_type): Likewise.
+
 2004-05-14  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR build/1648.

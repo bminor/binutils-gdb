@@ -385,6 +385,7 @@ hpread_pxdb_needed (bfd *sym_bfd)
       if (header_section_size == (bfd_size_type) sizeof (DOC_info_PXDB_header))
 	{
 	  buf = alloca (sizeof (DOC_info_PXDB_header));
+	  memset (buf, 0, sizeof (DOC_info_PXDB_header));
 
 	  if (!bfd_get_section_contents (sym_bfd,
 					 header_section,
@@ -452,6 +453,7 @@ hpread_pxdb_needed (bfd *sym_bfd)
 	{
 
 	  buf = alloca (sizeof (PXDB_header));
+	  memset (buf, 0, sizeof (PXDB_header));
 	  if (!bfd_get_section_contents (sym_bfd,
 					 header_section,
 					 buf, 0,
@@ -3690,6 +3692,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
 	  /* Get space to record the next field/data-member. */
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  memset (new, 0, sizeof (struct nextfield));
 	  new->next = list;
 	  list = new;
 
@@ -3768,6 +3771,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  n_templ_args++;
 	  /* Allocate and fill in a struct next_template */
 	  t_new = (struct next_template *) alloca (sizeof (struct next_template));
+	  memset (t_new, 0, sizeof (struct next_template));
 	  t_new->next = t_list;
 	  t_list = t_new;
 	  t_list->arg.name = VT (objfile) + fieldp->dtempl_arg.name;
@@ -3908,6 +3912,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		  /* Get space to record this member function */
 		  /* Note: alloca used; this will disappear on routine exit */
 		  fn_new = (struct next_fn_field *) alloca (sizeof (struct next_fn_field));
+		  memset (fn_new, 0, sizeof (struct next_fn_field));
 		  fn_new->next = fn_list;
 		  fn_list = fn_new;
 
@@ -4025,6 +4030,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
 	      /* Get space to record this static member */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      memset (new, 0, sizeof (struct nextfield));
 	      new->next = list;
 	      list = new;
 
@@ -4055,6 +4061,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		warning ("Debug info inconsistent: FIELD of anonymous union doesn't have a_union bit set");
 	      /* Get space to record the next field/data-member. */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      memset (new, 0, sizeof (struct nextfield));
 	      new->next = list;
 	      list = new;
 
@@ -4086,6 +4093,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		warning ("Debug info inconsistent: SVAR field in anonymous union doesn't have a_union bit set");
 	      /* Get space to record the next field/data-member. */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      memset (new, 0, sizeof (struct nextfield));
 	      new->next = list;
 	      list = new;
 
@@ -4106,6 +4114,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 		warning ("Debug info inconsistent: DVAR field in anonymous union doesn't have a_union bit set");
 	      /* Get space to record the next field/data-member. */
 	      new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	      memset (new, 0, sizeof (struct nextfield));
 	      new->next = list;
 	      list = new;
 
@@ -4154,6 +4163,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
 	  /* Get space to record the next field/data-member. */
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
+	  memset (new, 0, sizeof (struct nextfield));
 	  new->next = list;
 	  list = new;
 
@@ -4237,6 +4247,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	    break;
 
 	  i_new = (struct next_instantiation *) alloca (sizeof (struct next_instantiation));
+	  memset (i_new, 0, sizeof (struct next_instantiation));
 	  i_new->next = i_list;
 	  i_list = i_new;
 	  i_list->t = hpread_type_lookup (field, objfile);
