@@ -1,5 +1,10 @@
 2002-03-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
+	* ia64-tdep.c (ia64_gdbarch_init): Call set_gdbarch_frame_args_skip,
+	to fix internal_error from ``maintenance print architecture''.
+
+2002-03-16  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
 	* cp-valprint.c (cp_is_vtbl_ptr_type): Handle vtbl field type
 	for gcc versions after gcc-2.8.1.
 
