@@ -1,3 +1,10 @@
+2004-08-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 324
+	* cofflink.c (coff_link_add_symbols): Check that the comdat
+	pointer in the coff_section_data structure has been initialised
+	before using it.
+
 2004-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 338

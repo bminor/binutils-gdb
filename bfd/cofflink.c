@@ -435,6 +435,7 @@ coff_link_add_symbols (bfd *abfd,
 	  if (obj_pe (abfd)
 	      && (classification == COFF_SYMBOL_GLOBAL
 		  || classification == COFF_SYMBOL_PE_SECTION)
+	      && coff_section_data (abfd, section) != NULL
 	      && coff_section_data (abfd, section)->comdat != NULL
 	      && strncmp (name, "??_", 3) == 0
 	      && strcmp (name, coff_section_data (abfd, section)->comdat->name) == 0)
