@@ -1,3 +1,11 @@
+Tue Jul  5 13:54:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/obj-elf.h (S_GET_ALIGN, S_SET_ALIGN): Define.
+	* config/obj-elf.c (obj_elf_common): Set alignment of common
+	symbol.
+	* config/tc-sparc.c (s_common): If OBJ_ELF, set alignment of
+	common symbol.
+
 Mon Jul  4 18:29:43 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (is_complex): New macro.
