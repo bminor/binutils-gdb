@@ -301,8 +301,7 @@ static int numutypes;		/* Max number of user type pointers */
    more intuitive, since it can be used for both static and external
    definitions. */
 
-static void
-EXFUN (dwarfwarn, (char *fmt DOTS));
+static void dwarfwarn ();	/* EXFUN breaks with <varargs.h> (FIXME)*/
 
 static void
 EXFUN (scan_partial_symbols, (char *thisdie AND char *enddie));

@@ -1,3 +1,8 @@
+Thu Oct 24 23:06:40 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c:  Remove prototype for dwarfwarn.  Does not work
+	with <varargs.h>.
+
 Thu Oct 24 09:33:44 1991  John Gilmore  (gnu at cygnus.com)
 
 	* stack.c (frame_command):  Always print.  Use new
