@@ -12,7 +12,7 @@ SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
 
 
-# Ensure a reasonable default simulator is constructed:
+# Ensure a reasonable default simulator is constructed: (DEPRECATED)
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        SIMCONF="-mips1 -mcpu=r1900 -mno-fp --warnings";;
@@ -30,6 +30,7 @@ case "${target}" in
 esac
 AC_SUBST(SIMCONF)
 
+# DEPRECATED
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
@@ -37,6 +38,7 @@ case "${target}" in
   *)                    SIM_SUBTARGET="";;
 esac
 AC_SUBST(SIM_SUBTARGET)
+
 
 
 #
@@ -59,6 +61,7 @@ esac
 SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
 
 
+
 #
 # Select the bitsize of the target
 #
@@ -75,6 +78,7 @@ case "${target}" in
   *)                    mips_bitsize=64 ; mips_msb=63 ;;
 esac
 SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
+
 
 
 #
@@ -96,6 +100,7 @@ esac
 SIM_AC_OPTION_FLOAT($mips_fpu)
 
 
+
 #
 # Select the level of SMP support
 #
@@ -108,6 +113,7 @@ esac
 SIM_AC_OPTION_SMP($mips_smp)
 
 
+
 #
 # Select the IGEN architecture
 #
@@ -116,7 +122,6 @@ sim_igen_machine="-M mipsIV"
 sim_m16_machine="-M mips16"
 sim_igen_filter="32,64,f"
 sim_m16_filter="16"
-
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)	sim_default_gen=M16
@@ -145,18 +150,25 @@ case "${target}" in
 			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5000"
 # end-sanitize-vr5400
 			;;
+  mips64*-*-*)		sim_default_gen=IGEN
+			sim_igen_filter="32,64,f"
+			sim_use_gen=IGEN
+			;;
   mips16*-*-*)		sim_default_gen=M16
+			sim_igen_filter="32,64,f"
+			sim_m16_filter="16"
 			;;
-  mips32*-*-*)		sim_default_gen=IGEN
+  mips*-*-*)		sim_default_gen=IGEN
 			sim_igen_filter="32,f"
-			;;
-  *)                    sim_default_gen=IGEN
+			sim_use_gen=IGEN
 			;;
 esac
 sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine} ${sim_igen_smp}"
 sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}  ${sim_igen_smp}"
 AC_SUBST(sim_igen_flags)
 AC_SUBST(sim_m16_flags)
+
+
 
 #
 # Enable igen
