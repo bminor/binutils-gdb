@@ -1348,6 +1348,7 @@ cadillac_initialize(cadillac_id, execarg)
   /* Tell the rest of the world that Cadillac is now set up. */
   cadillac = 1;
 
+  setsid();			/* Drop controlling tty, become pgrp master */
   getpty();			/* Setup the pty */
   dup2(inferior_tty, 0);	/* Attach all GDB I/O to the pty */
   dup2(inferior_tty, 1);
