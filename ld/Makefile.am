@@ -675,7 +675,9 @@ bfdsumm.texi: Makefile
 Makefile: configure.host configure.tgt
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
-	ldemul-list.h tmpdir crtbegin.o crtend.o
+	ldemul-list.h crtbegin.o crtend.o
+mostlyclean-local:
+	-rm -rf tmpdir
 CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 
 .PHONY: install-exec-local install-data-local

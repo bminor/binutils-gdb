@@ -306,7 +306,7 @@ ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
 TESTBFDLIB = ../bfd/.libs/libbfd.a
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
-	ldemul-list.h tmpdir crtbegin.o crtend.o
+	ldemul-list.h crtbegin.o crtend.o
 CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 
 # Stuff that should be included in a distribution.  The diststuff
@@ -696,7 +696,8 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
-		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic
+		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
+		mostlyclean-local
 
 clean:  clean-hdr clean-noinstPROGRAMS clean-compile clean-libtool \
 		clean-aminfo clean-tags clean-generic mostlyclean
@@ -1174,6 +1175,8 @@ bfdsumm.texi: Makefile
 
 # We want to reconfigure if configure.host or configure.tgt changes.
 Makefile: configure.host configure.tgt
+mostlyclean-local:
+	-rm -rf tmpdir
 
 .PHONY: install-exec-local install-data-local
 

@@ -1,5 +1,9 @@
 Sat Mar 28 16:48:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (MOSTLYCLEANFILES): Remove tmpdir.
+	(mostlyclean-local): New target to remove tmpdir.
+	* Makefile.in: Rebuild.
+
 	Fix some gcc -Wall warnings:
 	* ldcref.c (output_cref): Add casts to avoid warnings.
 	* ldfile.c (ldfile_add_arch): Likewise.
