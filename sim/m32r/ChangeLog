@@ -1,8 +1,22 @@
-Fri Dec  4 00:19:33 1998  Doug Evans  <devans@canuck.cygnus.com>
+1998-12-04  Doug Evans  <devans@casey.cygnus.com>
 
+	* configure.in: Call SIM_AC_OPTION_INLINE.
+	* configure: Regenerate.
+	* sim-main.h: Protect against multiple inclusion.
+	Don't include cgen-scache.h,cgen-cpu.h,cgen-trace.h,cpuall.h.
+	Done by cgen-sim.h now.
+	* tconfig.in (SIM_HAVE_MODEL): Delete, moved to cgen-types.h.
+	* cpuall.h: Regenerate.
 	* cpu.h,decode.c,sem-switch.c,sem.c: Regenerate.
+	* mloop.in (extract16): Make static inline again.
+	Simplify with call to @cpu@_fill_argbuf,@cpu@_fill_argbuf_tp.
+	(extract32): Ditto.
+	Simplify with call to @cpu@_fill_argbuf,@cpu@_fill_argbuf_tp.
+	(execute): Test ARGBUF_PROFILE_P before profiling.
+	Update calls to TRACE_INSN_INIT,TRACE_INSN_FINI.
 start-sanitize-m32rx
 	* cpux.h,decodex.c,modelx.c,semx-switch.c: Regenerate.
+	* mloopx.in: Rewrite.
 end-sanitize-m32rx
 
 1998-11-22  Doug Evans  <devans@tobor.to.cygnus.com>

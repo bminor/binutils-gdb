@@ -121,6 +121,8 @@ struct argbuf {
   /* These are the baseclass definitions.  */
   PCADDR addr;
   const IDESC *idesc;
+  char trace_p;
+  char profile_p;
   /* cpu specific data follows */
   union sem semantic;
   int written;

@@ -1,19 +1,19 @@
 /* Main header for the m32r.  */
 
+#ifndef SIM_MAIN_H
+#define SIM_MAIN_H
+
 #define USING_SIM_BASE_H /* FIXME: quick hack */
 
 struct _sim_cpu; /* FIXME: should be in sim-basics.h */
 typedef struct _sim_cpu SIM_CPU;
 
-/* sim-basics.h includes config.h but cgen-types.h must be included before
-   sim-basics.h and cgen-types.h needs config.h.  */
-#include "config.h"
-
 #include "ansidecl.h"
 #include "symcat.h"
-#include "cgen-types.h"
-#include "arch.h"
 #include "sim-basics.h"
+#include "cgen-types.h"
+#include "cpu-opc.h"
+#include "arch.h"
 
 /* These must be defined before sim-base.h.  */
 typedef USI sim_cia;
@@ -23,11 +23,7 @@ typedef USI sim_cia;
 
 #include "sim-base.h"
 #include "cgen-sim.h"
-#include "cgen-scache.h"
-#include "cgen-cpu.h"
-#include "cgen-trace.h"
 #include "cpu-sim.h"
-#include "cpuall.h"
 
 /* The _sim_cpu struct.  */
 
@@ -78,3 +74,5 @@ m32r_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
 
 /* Default memory size.  */
 #define M32R_DEFAULT_MEM_SIZE 0x800000 /* 8M */
+
+#endif /* SIM_MAIN_H */
