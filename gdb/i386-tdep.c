@@ -535,8 +535,12 @@ static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
-    return deprecated_read_register_dummy (frame->pc, frame->frame,
-					   PC_REGNUM);
+    {
+      ULONGEST pc;
+
+      frame_unwind_unsigned_register (frame, PC_REGNUM, &pc);
+      return pc;
+    }
 
   if (frame->signal_handler_caller)
     return i386_sigtramp_saved_pc (frame);
