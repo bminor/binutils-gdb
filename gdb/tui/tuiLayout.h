@@ -26,7 +26,6 @@ extern void showLayout (TuiLayoutType);
 extern void tuiAddWinToLayout (TuiWinType);
 extern int tuiDefaultWinHeight (TuiWinType, TuiLayoutType);
 extern int tuiDefaultWinViewportHeight (TuiWinType, TuiLayoutType);
-extern TuiStatus tui_set_layout (const char *);
 extern TuiStatus tuiSetLayout (TuiLayoutType, TuiRegisterDisplayType);
 
 #endif /*TUI_LAYOUT_H */

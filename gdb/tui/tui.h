@@ -126,8 +126,7 @@ extern void tui_vCheckDataValues (va_list);
 extern void tui_vStartNewLines (va_list);
 
 /* tuiLayout.c */
-extern void tui_vAddWinToLayout (va_list);
-extern TuiStatus tui_vSetLayoutTo (va_list);
+extern TuiStatus tui_set_layout (const char *);
 
 /* tuiSourceWin.c */
 extern void tuiDisplayMainFunction (void);
