@@ -1,3 +1,7 @@
+2004-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-iq2000.c: Convert to ISO C90 formatting.
+
 2004-11-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elflink.c (_bfd_elf_create_got_section): Hide _GLOBAL_OFFSET_TABLE_.
