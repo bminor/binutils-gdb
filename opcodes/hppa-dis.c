@@ -42,12 +42,13 @@ static const char *const fp_reg_names[] =
 
 typedef unsigned int CORE_ADDR;
 
-/* Get at various relevent fields of an instruction word. */
+/* Get at various relevent fields of an instruction word.  */
 
 #define MASK_5 0x1f
 #define MASK_10 0x3ff
 #define MASK_11 0x7ff
 #define MASK_14 0x3fff
+#define MASK_16 0xffff
 #define MASK_21 0x1fffff
 
 /* This macro gets bit fields using HP's numbering (MSB = 0) */
@@ -132,7 +133,7 @@ static const char *const read_write_names[] = {",r", ",w"};
 static const char *const add_compl_names[] = { 0, "", ",l", ",tsv" };
 
 /* For a bunch of different instructions form an index into a 
-   completer name table. */
+   completer name table.  */
 #define GET_COMPL(insn) (GET_FIELD (insn, 26, 26) | \
 			 GET_FIELD (insn, 18, 18) << 1)
 
@@ -181,7 +182,7 @@ fput_creg (reg, info)
   (*info->fprintf_func) (info->stream, control_reg[reg]);
 }
 
-/* print constants with sign */
+/* Print constants with sign.  */
 
 static void
 fput_const (num, info)
@@ -195,9 +196,9 @@ fput_const (num, info)
 }
 
 /* Routines to extract various sized constants out of hppa
-   instructions. */
+   instructions.  */
 
-/* extract a 3-bit space register number from a be, ble, mtsp or mfsp */
+/* Extract a 3-bit space register number from a be, ble, mtsp or mfsp.  */
 static int
 extract_3 (word)
      unsigned word;
@@ -212,7 +213,7 @@ extract_5_load (word)
   return low_sign_extend (word >> 16 & MASK_5, 5);
 }
 
-/* extract the immediate field from a st{bhw}s instruction */
+/* Extract the immediate field from a st{bhw}s instruction.  */
 static int
 extract_5_store (word)
      unsigned word;
@@ -220,7 +221,7 @@ extract_5_store (word)
   return low_sign_extend (word & MASK_5, 5);
 }
 
-/* extract the immediate field from a break instruction */
+/* Extract the immediate field from a break instruction.  */
 static unsigned
 extract_5r_store (word)
      unsigned word;
@@ -228,7 +229,7 @@ extract_5r_store (word)
   return (word & MASK_5);
 }
 
-/* extract the immediate field from a {sr}sm instruction */
+/* Extract the immediate field from a {sr}sm instruction.  */
 static unsigned
 extract_5R_store (word)
      unsigned word;
@@ -236,7 +237,7 @@ extract_5R_store (word)
   return (word >> 16 & MASK_5);
 }
 
-/* extract the 10 bit immediate field from a {sr}sm instruction */
+/* Extract the 10 bit immediate field from a {sr}sm instruction.  */
 static unsigned
 extract_10U_store (word)
      unsigned word;
@@ -244,7 +245,7 @@ extract_10U_store (word)
   return (word >> 16 & MASK_10);
 }
 
-/* extract the immediate field from a bb instruction */
+/* Extract the immediate field from a bb instruction.  */
 static unsigned
 extract_5Q_store (word)
      unsigned word;
@@ -252,7 +253,7 @@ extract_5Q_store (word)
   return (word >> 21 & MASK_5);
 }
 
-/* extract an 11 bit immediate field */
+/* Extract an 11 bit immediate field.  */
 static int
 extract_11 (word)
      unsigned word;
@@ -260,7 +261,7 @@ extract_11 (word)
   return low_sign_extend (word & MASK_11, 11);
 }
 
-/* extract a 14 bit immediate field */
+/* Extract a 14 bit immediate field.  */
 static int
 extract_14 (word)
      unsigned word;
@@ -268,7 +269,21 @@ extract_14 (word)
   return low_sign_extend (word & MASK_14, 14);
 }
 
-/* extract a 21 bit constant */
+/* Extract a 16 bit immediate field (PA2.0 wide only).  */
+static int
+extract_16 (word)
+     unsigned word;
+{
+  int m15, m0, m1;
+  m0 = GET_BIT (word, 16);
+  m1 = GET_BIT (word, 17);
+  m15 = GET_BIT (word, 31);
+  word = (word >> 1) & 0x1fff;
+  word = word | (m15 << 15) | ((m15 ^ m0) << 14) | ((m15 ^ m1) << 13);
+  return sign_extend (word, 16);
+}
+
+/* Extract a 21 bit constant.  */
 
 static int
 extract_21 (word)
@@ -290,7 +305,7 @@ extract_21 (word)
   return sign_extend (val, 21) << 11;
 }
 
-/* extract a 12 bit constant from branch instructions */
+/* Extract a 12 bit constant from branch instructions.  */
 
 static int
 extract_12 (word)
@@ -301,8 +316,8 @@ extract_12 (word)
                       (word & 0x1) << 11, 12) << 2;
 }
 
-/* extract a 17 bit constant from branch instructions, returning the
-   19 bit signed value. */
+/* Extract a 17 bit constant from branch instructions, returning the
+   19 bit signed value.  */
 
 static int
 extract_17 (word)
@@ -352,7 +367,10 @@ print_insn_hppa (memaddr, info)
       if ((insn & opcode->mask) == opcode->match)
 	{
 	  register const char *s;
-	  
+#ifndef BFD64
+	  if (opcode->arch == pa20w)
+	    continue;
+#endif
 	  (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
 	  if (!strchr ("cfCY?-+nHNZFIuv", opcode->args[0]))
@@ -473,13 +491,25 @@ print_insn_hppa (memaddr, info)
 			fput_fp_reg (reg, info);
 			break;
 		      }
+
+		    /* 'fe' will not generate a space before the register
+			name.  Normally that is fine.  Except that it
+			causes problems with fstw fe,y(b) which has no FP
+			format completer.  */
+		    case 'E':
+		      fputs_filtered (" ", info);
+
+		    /* FALLTHRU */
+
 		    case 'e':
-		      if (GET_FIELD (insn, 25, 25))
+		      if (GET_FIELD (insn, 30, 30))
 			fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
 		      else
 			fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		      break;
-
+		    case 'x':
+		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
+		      break;
 		    }
 		  break;
 
@@ -835,6 +865,10 @@ print_insn_hppa (memaddr, info)
 		case 'k':
 		  fput_const (extract_21 (insn), info);
 		  break;
+		case 'l':
+		  /* 16-bit long disp., PA2.0 wide only.  */
+		  fput_const (extract_16 (insn), info);
+		  break;
 		case 'n':
 		  if (insn & 0x2)
 		    (*info->fprintf_func) (info->stream, ",n ");
@@ -1037,6 +1071,24 @@ print_insn_hppa (memaddr, info)
 		      disp = imm11;
 
 		    disp <<= 2;
+		    fput_const (disp, info);
+		    break;
+		  }
+
+		case 'y':
+		  {
+		    /* 16-bit long disp., PA2.0 wide only.  */
+		    int disp = extract_16 (insn);
+		    disp &= ~3;
+		    fput_const (disp, info);
+		    break;
+		  }
+
+		case '&':
+		  {
+		    /* 16-bit long disp., PA2.0 wide only.  */
+		    int disp = extract_16 (insn);
+		    disp &= ~7;
 		    fput_const (disp, info);
 		    break;
 		  }
