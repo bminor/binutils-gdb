@@ -15,7 +15,7 @@ Section Headers:
  +\[ 3\] \.dynsym +DYNSYM +0+100001e0 0+1e0 0+d8 18 +A +4 +1 +8
  +\[ 4\] \.dynstr +STRTAB +0+100002b8 0+2b8 0+4c 0+ +A +0 +0 +1
  +\[ 5\] \.rela\.dyn +RELA +0+10000308 0+308 0+30 18 +A +3 +0 +8
- +\[ 6\] \.rela\.plt +RELA +0+10000338 0+338 0+18 18 +A +3 +f +8
+ +\[ 6\] \.rela\.plt +RELA +0+10000338 0+338 0+18 18 +A +3 +15 +8
  +\[ 7\] \.text +PROGBITS +0+10000350 0+350 0+bc 0+ +AX +0 +0 +4
  +\[ 8\] \.data +PROGBITS +0+10010410 0+410 0+ 0+ +WA +0 +0 +1
  +\[ 9\] \.branch_lt +PROGBITS +0+10010410 0+410 0+ 0+ +WA +0 +0 +8
@@ -27,7 +27,7 @@ Section Headers:
  +\[15\] \.plt +NOBITS +0+100105f0 0+5f0 0+30 18 +WA +0 +0 +8
  +\[16\] \.bss +NOBITS +0+10010620 0+5f0 0+ 0+ +WA +0 +0 +1
  +\[17\] \.shstrtab +STRTAB +0+ 0+5f0 0+8a 0+ +0 +0 +1
- +\[18\] \.symtab +SYMTAB +0+ 0+b80 0+420 18 +19 +1c +8
+ +\[18\] \.symtab +SYMTAB +0+ 0+b80 0+420 18 +19 +28 +8
  +\[19\] \.strtab +STRTAB +0+ 0+fa0 0+8c 0+ +0 +0 +1
 #...
 

@@ -10,10 +10,10 @@ Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
  +\[ 0\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
  +\[ 1\] \.hash +HASH +0+b4 0+b4 0+dc 04 +A +2 +0 +4
- +\[ 2\] \.dynsym +DYNSYM +0+190 0+190 0+240 10 +A +3 +11 +4
+ +\[ 2\] \.dynsym +DYNSYM +0+190 0+190 0+240 10 +A +3 +17 +4
  +\[ 3\] \.dynstr +STRTAB +0+3d0 0+3d0 0+81 0+ +A +0 +0 +1
  +\[ 4\] \.rela\.dyn +RELA +0+454 0+454 0+d8 0c +A +2 +0 +4
- +\[ 5\] \.rela\.plt +RELA +0+52c 0+52c 0+c 0c +A +2 +f +4
+ +\[ 5\] \.rela\.plt +RELA +0+52c 0+52c 0+c 0c +A +2 +15 +4
  +\[ 6\] \.text +PROGBITS +0+538 0+538 0+70 0+ +AX +0 +0 +1
  +\[ 7\] \.data +PROGBITS +0+105a8 0+5a8 0+ 0+ +WA +0 +0 +1
  +\[ 8\] \.tdata +PROGBITS +0+105a8 0+5a8 0+1c 0+ WAT +0 +0 +4
@@ -26,7 +26,7 @@ Section Headers:
  +\[15\] \.plt +NOBITS +0+10698 0+698 0+54 0+ WAX +0 +0 +4
  +\[16\] \.bss +NOBITS +0+106ec 0+698 0+ 0+ +WA +0 +0 +1
  +\[17\] \.shstrtab +STRTAB +0+ 0+698 0+86 0+ +0 +0 +1
- +\[18\] \.symtab +SYMTAB +0+ 0+a40 0+2e0 10 +19 +1b +4
+ +\[18\] \.symtab +SYMTAB +0+ 0+a40 0+2e0 10 +19 +27 +4
  +\[19\] \.strtab +STRTAB +0+ 0+d20 0+a9 0+ +0 +0 +1
 #...
 

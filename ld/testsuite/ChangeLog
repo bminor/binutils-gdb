@@ -1,3 +1,12 @@
+2004-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe.r: Update sh_info to decimal.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2004-04-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-elf/merge.d: XFAIL on all MIPS targets.
