@@ -1,3 +1,9 @@
+Mon Jun  1 11:12:02 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_print_private_bfd_data): Also call
+	_bfd_elf_print_private_bfd_data() so that the program header will
+	be displayed.
+
 Mon Jun  1 12:14:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_sym_in): Check for C_SECTION rather than

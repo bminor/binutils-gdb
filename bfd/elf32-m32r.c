@@ -1,5 +1,5 @@
 /* M32R-specific support for 32-bit ELF.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -55,6 +55,9 @@ static boolean m32r_elf_relocate_section
 static boolean m32r_elf_relax_delete_bytes
   PARAMS ((bfd *, asection *, bfd_vma, int));
 #endif
+
+#define NOP_INSN		0x7000
+#define MAKE_PARALLEL(insn)	((insn) | 0x8000)
 
 /* Use REL instead of RELA to save space.
    This only saves space in libraries and object files, but perhaps
@@ -246,13 +249,13 @@ static reloc_howto_type m32r_elf_howto_table[] =
 static bfd_reloc_status_type
 m32r_elf_10_pcrel_reloc (abfd, reloc_entry, symbol, data,
 			 input_section, output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
+     bfd * abfd;
+     arelent * reloc_entry;
+     asymbol * symbol;
      PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     asection * input_section;
+     bfd * output_bfd;
+     char ** error_message;
 {
   /* This part is from bfd_elf_generic_reloc.  */
   if (output_bfd != (bfd *) NULL
@@ -517,10 +520,6 @@ m32r_elf_sda16_reloc (abfd, reloc_entry, symbol, data,
      bfd *output_bfd;
      char **error_message;
 {
-  bfd_vma sda_base;
-  unsigned long x;
-  reloc_howto_type *howto;
-
   /* This part is from bfd_elf_generic_reloc.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -758,7 +757,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
 	  /* Only get the error once.  */
 	  *psb = elf_gp (output_bfd) = 4;
 	  *error_message =
-	    (const char *) "SDA relocation when _SDA_BASE_ not defined";
+	    (const char *) _("SDA relocation when _SDA_BASE_ not defined");
 	  return bfd_reloc_dangerous;
 	}
     }
@@ -815,7 +814,6 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   Elf_Internal_Rela *rel, *relend;
-  bfd *dynobj = elf_hash_table (info)->dynobj;
   /* Assume success.  */
   boolean ret = true;
 
@@ -839,10 +837,11 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
       const char *errmsg = NULL;
 
+      h = NULL;
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= (int) R_M32R_max)
 	{
-	  (*_bfd_error_handler) ("%s: unknown relocation type %d",
+	  (*_bfd_error_handler) (_("%s: unknown relocation type %d"),
 				 bfd_get_filename (input_bfd),
 				 (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
@@ -928,7 +927,6 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma relocation;
 
 	  /* This is a final link.  */
-	  h = NULL;
 	  sym = NULL;
 	  sec = NULL;
 
@@ -1047,7 +1045,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  }
 		else
 		  {
-		    (*_bfd_error_handler) ("%s: The target (%s) of an %s relocation is in the wrong section (%s)",
+		    (*_bfd_error_handler) (_("%s: The target (%s) of an %s relocation is in the wrong section (%s)"),
 					   bfd_get_filename (input_bfd),
 					   sym_name,
 					   m32r_elf_howto_table[(int) r_type].name,
@@ -1104,19 +1102,19 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 
 	    case bfd_reloc_outofrange:
-	      errmsg = "internal error: out of range error";
+	      errmsg = _("internal error: out of range error");
 	      goto common_error;
 
 	    case bfd_reloc_notsupported:
-	      errmsg = "internal error: unsupported relocation error";
+	      errmsg = _("internal error: unsupported relocation error");
 	      goto common_error;
 
 	    case bfd_reloc_dangerous:
-	      errmsg = "internal error: dangerous error";
+	      errmsg = _("internal error: dangerous error");
 	      goto common_error;
 
 	    default:
-	      errmsg = "internal error: unknown error";
+	      errmsg = _("internal error: unknown error");
 	      /* fall through */
 
 	    common_error:
@@ -1373,7 +1371,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 	      /* See if there's a nop following the jl.
 		 Also see if we can use a bl8 insn.  */
 	      code = bfd_get_16 (abfd, contents + irel->r_offset + 10);
-	      nop_p = (code & 0x7fff) == 7000;
+	      nop_p = (code & 0x7fff) == NOP_INSN;
 	      bl8_p = pcrel_value >= -0x200 && pcrel_value < 0x200;
 
 	      if (bl8_p)
@@ -1383,9 +1381,9 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 		     CODE currently must be a nop, but for cleanness we
 		     allow it to be anything).  */
 #ifndef USE_REL /* put in for learning purposes */
-		  code = 0x7e000000 | code;
+		  code = 0x7e000000 | MAKE_PARALLEL (code);
 #else
-		  code = (0x7e000000 + (((addend >> 2) & 0xff) << 16)) | code;
+		  code = (0x7e000000 + (((addend >> 2) & 0xff) << 16)) | MAKE_PARALLEL (code);
 #endif
 		  to_delete = 8;
 		}
@@ -1451,7 +1449,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 	     We don't need to do this in the case of relaxing to ld24,
 	     and the above code sets nop_p so this isn't done.  */
 	  if (! nop_p && to_delete == 4)
-	    bfd_put_16 (abfd, 0x7000, contents + irel->r_offset + 4);
+	    bfd_put_16 (abfd, NOP_INSN, contents + irel->r_offset + 4);
 
 	  /* That will change things, so we should relax again.
 	     Note that this is not required, and it may be slow.  */
@@ -1743,8 +1741,11 @@ m32r_elf_object_p (abfd)
     {
     default:
     case E_M32R_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32r); break;
+/* start-sanitize-m32rx */
     case E_M32RX_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32rx); break;
+/* end-sanitize-m32rx */
     }
+  return true;
 }
 
 /* Store the machine number in the flags field.  */
@@ -1759,7 +1760,9 @@ m32r_elf_final_write_processing (abfd, linker)
     {
     default:
     case bfd_mach_m32r:  val = E_M32R_ARCH; break;
+/* start-sanitize-m32rx */
     case bfd_mach_m32rx: val = E_M32RX_ARCH; break;
+/* end-sanitize-m32rx */
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_M32R_ARCH;
@@ -1807,20 +1810,29 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
      bfd * ibfd;
      bfd * obfd;
 {
-  flagword old_flags;
-  flagword new_flags;
+  flagword out_flags;
+  flagword in_flags;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  old_flags = elf_elfheader (obfd)->e_flags;
+  in_flags  = elf_elfheader (ibfd)->e_flags;
+  out_flags = elf_elfheader (obfd)->e_flags;
 
   if (! elf_flags_init (obfd))
     {
+      /* If the input is the default architecture then do not
+	 bother setting the flags for the output architecture,
+	 instead allow future merges to do this.  If no future
+	 merges ever set these flags then they will retain their
+	 unitialised values, which surprise surprise, correspond
+	 to the default values.  */
+      if (bfd_get_arch_info (ibfd)->the_default)
+	return true;
+      
       elf_flags_init (obfd) = true;
-      elf_elfheader (obfd)->e_flags = new_flags;
+      elf_elfheader (obfd)->e_flags = in_flags;
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && bfd_get_arch_info (obfd)->the_default)
@@ -1832,24 +1844,18 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
     }
 
   /* Check flag compatibility.  */
-  if (new_flags == old_flags)
+  if (in_flags == out_flags)
     return true;
 
-  if ((new_flags & EF_M32R_ARCH) != (old_flags & EF_M32R_ARCH))
+  if ((in_flags & EF_M32R_ARCH) != (out_flags & EF_M32R_ARCH))
     {
-      if ((new_flags & EF_M32R_ARCH) == E_M32RX_ARCH)
+      if ((in_flags & EF_M32R_ARCH) != E_M32R_ARCH)
 	{
-	  _bfd_error_handler ("%s: Instruction set mismatch with previous modules",
+	  _bfd_error_handler (_("%s: Instruction set mismatch with previous modules"),
 			      bfd_get_filename (ibfd));
-#if 1
+
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
-#endif
-	}
-      else
-	{
-	  _bfd_error_handler ("%s: Merging M32R instructions with M32RX instructions",
-			      bfd_get_filename (ibfd));
 	}
     }
 
@@ -1866,13 +1872,17 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
   
   BFD_ASSERT (abfd != NULL && ptr != NULL)
   
-  fprintf (file, "private flags = %x", elf_elfheader (abfd)->e_flags);
+  _bfd_elf_print_private_bfd_data (abfd, ptr);
+  
+  fprintf (file, _("private flags = %lx"), elf_elfheader (abfd)->e_flags);
   
   switch (elf_elfheader (abfd)->e_flags & EF_M32R_ARCH)
     {
     default:
-    case E_M32R_ARCH:  fprintf (file, ": m32r instructions"); break;
-    case E_M32RX_ARCH: fprintf (file, ": m32rx instructions"); break;
+    case E_M32R_ARCH:  fprintf (file, _(": m32r instructions")); break;
+/* start-sanitize-m32rx */
+    case E_M32RX_ARCH: fprintf (file, _(": m32rx instructions")); break;
+/* end-sanitize-m32rx */
     }
   
   fputc ('\n', file);
