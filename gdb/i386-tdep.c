@@ -869,26 +869,12 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  return;
 	}
 
-      /* Floating-point return values can be found in %st(0).  */
-      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
-	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
-	{
-	  /* Copy straight over, but take care of the padding.  */
-	  memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)],
-		  FPU_REG_RAW_SIZE);
-	  memset (valbuf + FPU_REG_RAW_SIZE, 0, len - FPU_REG_RAW_SIZE);
-	}
-      else
-	{
-	  /* Convert the extended floating-point number found in
-             %st(0) to the desired type.  This is probably not exactly
-             how it would happen on the target itself, but it is the
-             best we can do.  */
-	  DOUBLEST val;
-	  floatformat_to_doublest (&floatformat_i387_ext,
-				   &regbuf[REGISTER_BYTE (FP0_REGNUM)], &val);
-	  store_floating (valbuf, TYPE_LENGTH (type), val);
-	}
+      /* Floating-point return values can be found in %st(0).  Convert
+	 its contents to the desired type.  This is probably not
+	 exactly how it would happen on the target itself, but it is
+	 the best we can do.  */
+      convert_typed_floating (&regbuf[REGISTER_BYTE (FP0_REGNUM)],
+			      builtin_type_i387_ext, valbuf, type);
     }
   else
     {
@@ -928,6 +914,7 @@ i386_store_return_value (struct type *type, char *valbuf)
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       unsigned int fstat;
+      char buf[FPU_REG_RAW_SIZE];
 
       if (NUM_FREGS == 0)
 	{
@@ -939,27 +926,13 @@ i386_store_return_value (struct type *type, char *valbuf)
          storing the return value in %st(0), we have to simulate the
          state of the FPU at function return point.  */
 
-      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
-	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
-	{
-	  /* Copy straight over.  */
-	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf,
-				FPU_REG_RAW_SIZE);
-	}
-      else
-	{
-	  char buf[FPU_REG_RAW_SIZE];
-	  DOUBLEST val;
-
-	  /* Convert the value found in VALBUF to the extended
-             floating-point format used by the FPU.  This is probably
-             not exactly how it would happen on the target itself, but
-             it is the best we can do.  */
-	  val = extract_floating (valbuf, TYPE_LENGTH (type));
-	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
-	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
-				FPU_REG_RAW_SIZE);
-	}
+      /* Convert the value found in VALBUF to the extended
+	 floating-point format used by the FPU.  This is probably
+	 not exactly how it would happen on the target itself, but
+	 it is the best we can do.  */
+      convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
+      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
+			    FPU_REG_RAW_SIZE);
 
       /* Set the top of the floating-point register stack to 7.  The
          actual value doesn't really matter, but 7 is what a normal
@@ -1017,7 +990,7 @@ i386_register_virtual_type (int regnum)
     return lookup_pointer_type (builtin_type_void);
 
   if (IS_FP_REGNUM (regnum))
-    return builtin_type_long_double;
+    return builtin_type_i387_ext;
 
   if (IS_SSE_REGNUM (regnum))
     return builtin_type_v4sf;
@@ -1044,8 +1017,7 @@ void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
-  char buf[12];
-  DOUBLEST d;
+  gdb_assert (IS_FP_REGNUM (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1056,14 +1028,9 @@ i386_register_convert_to_virtual (int regnum, struct type *type,
       return;
     }
 
-  /* First add the necessary padding.  */
-  memcpy (buf, from, FPU_REG_RAW_SIZE);
-  memset (buf + FPU_REG_RAW_SIZE, 0, sizeof buf - FPU_REG_RAW_SIZE);
-
-  /* Convert to TYPE.  This should be a no-op, if TYPE is equivalent
-     to the extended floating-point format used by the FPU.  */
-  d = extract_floating (buf, sizeof buf);
-  store_floating (to, TYPE_LENGTH (type), d);
+  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
+     the extended floating-point format used by the FPU.  */
+  convert_typed_floating (from, builtin_type_i387_ext, to, type);
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM to
@@ -1073,11 +1040,20 @@ void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT
-	      && TYPE_LENGTH (type) == 12);
+  gdb_assert (IS_FP_REGNUM (regnum));
 
-  /* Simply omit the two unused bytes.  */
-  memcpy (to, from, FPU_REG_RAW_SIZE);
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert non-floating-point type "
+	       "to floating-point register value.");
+      memset (to, 0, TYPE_LENGTH (type));
+      return;
+    }
+
+  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
+     to the extended floating-point format used by the FPU.  */
+  convert_typed_floating (from, type, to, builtin_type_i387_ext);
 }
      
 

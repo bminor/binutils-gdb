@@ -1,3 +1,16 @@
+2001-10-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_extract_return_value): Use
+	convert_typed_floating to extract floating-point value from
+	register buffer.
+	(i386_store_return_value): Use convert_typed_floating to store
+	floating-point return balue in register buffer
+	(i386_register_virtual_type): Change type of floating-point
+	registers to builtin_type_i387_ext.
+	(i386_register_convert_to_virtual): Use convert_typed_floating to
+	do the conversion.
+	(i386_register_convert_to_raw): Likewise.
+
 2001-10-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* doublest.h (convert_typed_floating): New prototype.
