@@ -1078,15 +1078,11 @@ proc all_fpu_comparison_tests { } {
     global prompt
     global hex
     global decimal
-    global timeout
-
-    set oldtimeout $timeout
-    set timeout 30
 
     set fpu_comparison_formats [list {sgl} {dbl} {quad} ]
 
     foreach i $fpu_comparison_formats {
-	send "x/16i fcmp_$i"; send "_tests_1\n"
+	send "x/8i fcmp_$i"; send "_tests_1\n"
 	expect {
 	    -re ".*
 .*fcmp,$i,false\\? fr4,fr5.*
@@ -1097,6 +1093,14 @@ proc all_fpu_comparison_tests { } {
 .*fcmp,$i,=t fr4,fr5.*
 .*fcmp,$i,\\?= fr4,fr5.*
 .*fcmp,$i,!<> fr4,fr5.*
+.*$prompt $" { pass "$i tests (part1) " }
+	    -re "$prompt $" { fail "fcmp_$i tests (part1) " }
+	    timeout { fail "(timeout) fcmp_$i tests (part1) " }
+	}
+
+	send "x/8i fcmp_$i"; send "_tests_2\n"
+	expect {
+	    -re ".*
 .*fcmp,$i,!\\?>= fr4,fr5.*
 .*fcmp,$i,< fr4,fr5.*
 .*fcmp,$i,\\?< fr4,fr5.*
@@ -1105,12 +1109,12 @@ proc all_fpu_comparison_tests { } {
 .*fcmp,$i,<= fr4,fr5.*
 .*fcmp,$i,\\?<= fr4,fr5.*
 .*fcmp,$i,!> fr4,fr5.*
-.*$prompt $" { pass "$i tests (part1) " }
-	    -re "$prompt $" { fail "fcmp_$i tests (part1) " }
-	    timeout { fail "(timeout) fcmp_$i tests (part1) " }
+.*$prompt $" { pass "$i tests (part2) " }
+	    -re "$prompt $" { fail "fcmp_$i tests (part2) " }
+	    timeout { fail "(timeout) fcmp_$i tests (part2) " }
 	}
 
-	send "x/16i fcmp_$i"; send "_tests_2\n"
+	send "x/8i fcmp_$i"; send "_tests_3\n"
 	expect {
 	    -re ".*
 .*fcmp,$i,!\\?<= fr4,fr5.*
@@ -1121,6 +1125,14 @@ proc all_fpu_comparison_tests { } {
 .*fcmp,$i,>= fr4,fr5.*
 .*fcmp,$i,\\?>= fr4,fr5.*
 .*fcmp,$i,!< fr4,fr5.*
+.*$prompt $" { pass "$i tests (part3) " }
+	    -re "$prompt $" { fail "fcmp_$i tests (part3) " }
+	    timeout { fail "(timeout) fcmp_$i tests (part3) " }
+	}
+
+	send "x/16i fcmp_$i"; send "_tests_4\n"
+	expect {
+	    -re ".*
 .*fcmp,$i,!\\?= fr4,fr5.*
 .*fcmp,$i,<> fr4,fr5.*
 .*fcmp,$i,!= fr4,fr5.*
@@ -1129,13 +1141,11 @@ proc all_fpu_comparison_tests { } {
 .*fcmp,$i,<=> fr4,fr5.*
 .*fcmp,$i,true\\? fr4,fr5.*
 .*fcmp,$i,true fr4,fr5.*
-.*$prompt $" { pass "$i tests (part2) " }
-	    -re "$prompt $" { fail "fcmp_$i tests (part2) " }
-	    timeout { fail "(timeout) fcmp_$i tests (part2) " }
+.*$prompt $" { pass "$i tests (part4) " }
+	    -re "$prompt $" { fail "fcmp_$i tests (part4) " }
+	    timeout { fail "(timeout) fcmp_$i tests (part4) " }
 	}
     }
-
-    set timeout $oldtimeout
 }
 
 proc all_special_tests { } {
@@ -1288,7 +1298,7 @@ proc fmemLRbug_tests { } {
 	timeout { fail "(timeout) fmem LR register selector tests  (part1)" }
     }
 
-    send "x/12i fmemLRbug_tests_1\n"
+    send "x/12i fmemLRbug_tests_2\n"
     expect {
 	-re ".*
 .*fstws fr6R,0\\(sr0,r26\\).*
@@ -1306,6 +1316,46 @@ proc fmemLRbug_tests { } {
 .*$prompt $" { pass "fmem LR register selector tests (part2)" }
 	-re "$prompt $" { fail "fmem LR register selector tests (part2)" }
 	timeout { fail "(timeout) fmem LR register selector tests  (part2)" }
+    }
+
+    send "x/12i fmemLRbug_tests_3\n"
+    expect {
+	-re ".*
+.*fstwx fr6R,r25\\(sr0,r26\\).*
+.*fstwx fr6,r25\\(sr0,r26\\).*
+.*fstwx fr6,r25\\(sr0,r26\\).*
+.*fstdx fr6,r25\\(sr0,r26\\).*
+.*fstdx fr6,r25\\(sr0,r26\\).*
+.*fstdx fr6,r25\\(sr0,r26\\).*
+.*fldwx r25\\(sr0,r26\\),fr6R.*
+.*fldwx r25\\(sr0,r26\\),fr6.*
+.*fldwx r25\\(sr0,r26\\),fr6.*
+.*flddx r25\\(sr0,r26\\),fr6.*
+.*flddx r25\\(sr0,r26\\),fr6.*
+.*flddx r25\\(sr0,r26\\),fr6.*
+.*$prompt $" { pass "fmem LR register selector tests (part3)" }
+	-re "$prompt $" { fail "fmem LR register selector tests (part3)" }
+	timeout { fail "(timeout) fmem LR register selector tests  (part3)" }
+    }
+
+    send "x/12i fmemLRbug_tests_4\n"
+    expect {
+	-re ".*
+.*fstwx fr6R,r25\\(sr0,r26\\).*
+.*fstwx fr6,r25\\(sr0,r26\\).*
+.*fstwx fr6,r25\\(sr0,r26\\).*
+.*fstdx fr6,r25\\(sr0,r26\\).*
+.*fstdx fr6,r25\\(sr0,r26\\).*
+.*fstdx fr6,r25\\(sr0,r26\\).*
+.*fldwx r25\\(sr0,r26\\),fr6R.*
+.*fldwx r25\\(sr0,r26\\),fr6.*
+.*fldwx r25\\(sr0,r26\\),fr6.*
+.*flddx r25\\(sr0,r26\\),fr6.*
+.*flddx r25\\(sr0,r26\\),fr6.*
+.*flddx r25\\(sr0,r26\\),fr6.*
+.*$prompt $" { pass "fmem LR register selector tests (part4)" }
+	-re "$prompt $" { fail "fmem LR register selector tests (part4)" }
+	timeout { fail "(timeout) fmem LR register selector tests  (part4)" }
     }
 }
 

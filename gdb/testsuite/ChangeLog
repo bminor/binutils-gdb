@@ -1,3 +1,9 @@
+Thu Feb 23 17:44:55 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.s (fmemLRbug_tests): Add tests for the indexing
+	FP load/store variants.
+	* gdb.disasm/hppa.exp (fmemLRbug_tests): Test new variants.
+
 Wed Feb 22 18:29:08 1995  Jim Kingdon  <kingdon@rtl.cygnus.com>
 
 	* gdb.base/term.exp: Do not give a warning if not native, it is
