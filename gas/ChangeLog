@@ -1,3 +1,7 @@
+Thu Dec 18 16:42:57 1997  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (cpu_types): 21164pc/pca56 does not have CIX.
+
 Wed Dec 17 21:23:07 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* expr.c (integer_constant 32bit bignum): Mask off bits outside
