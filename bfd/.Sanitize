@@ -101,7 +101,6 @@ opncls.c
 reloc.c
 rs6000-core.c
 sco-core.c
-scripts
 seclet.c
 seclet.h
 section.c
