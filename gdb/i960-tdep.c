@@ -23,7 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Most are called from macros defined in "tm-i960.h".  */
 
 #include "defs.h"
-#include <signal.h>
 #include "symtab.h"
 #include "value.h"
 #include "frame.h"
