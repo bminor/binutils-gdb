@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -65,7 +65,7 @@ parse_args (argc, argv)
      as if it were the argument of an option with character code 1.  */
 
   const char *shortopts =
-    "-a:A:B::b:c:de:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
+    "-a:A:B::b:c:de:F::G:gh:iL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:z:()";
 
   /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
@@ -102,7 +102,8 @@ parse_args (argc, argv)
 #define OPTION_VERBOSE			(OPTION_UR + 1)
 #define OPTION_VERSION			(OPTION_VERBOSE + 1)
 #define OPTION_WARN_COMMON		(OPTION_VERSION + 1)
-#define OPTION_WARN_ONCE		(OPTION_WARN_COMMON + 1)
+#define OPTION_WARN_CONSTRUCTORS	(OPTION_WARN_COMMON + 1)
+#define OPTION_WARN_ONCE		(OPTION_WARN_CONSTRUCTORS + 1)
 #define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_ONCE + 1)
 #define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
@@ -155,6 +156,7 @@ parse_args (argc, argv)
     {"verbose", no_argument, NULL, OPTION_VERBOSE},
     {"version", no_argument, NULL, OPTION_VERSION},
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
+    {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
     {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
     {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
     {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
@@ -380,6 +382,7 @@ parse_args (argc, argv)
 	case OPTION_SHARED:
 	  link_info.shared = true;
 	  break;
+	case 'h': /* Used on Solaris.  */
 	case OPTION_SONAME:
 	  command_line.soname = optarg;
 	  break;
@@ -448,6 +451,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = true;
+	  break;
+	case OPTION_WARN_CONSTRUCTORS:
+	  config.warn_constructors = true;
 	  break;
 	case OPTION_WARN_ONCE:
 	  config.warn_once = true;

@@ -1,3 +1,8 @@
+Wed Aug 16 11:45:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Accept -h as a synonym for --soname, for
+	Solaris compatibility.
+
 Tue Aug 15 17:31:16 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldgram.y (YYDEBUG): If not defined, define as 1.
