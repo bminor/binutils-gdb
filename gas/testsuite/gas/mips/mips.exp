@@ -160,7 +160,6 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "${tmips}${el}empic"
 	if { !$no_mips16 } { 
 	    run_dump_test "${tmips}mips${el}16-e" 
-	    setup_xfail "mips*-*-*"
 	    run_dump_test "mips${el}16-f" 
 	}
     }

@@ -1,3 +1,32 @@
+2001-08-10  H.J. Lu  <hjl@gnu.org>
+
+	* gas/mips/e32-rel2.d: Updated for the objdump output change.
+	* gas/mips/e32el-rel2.d: Likewise.
+	* gas/mips/elf-rel.d: Likewise.
+	* gas/mips/elf-rel2.d: Likewise.
+	* gas/mips/elf-rel3.d: Likewise.
+	* gas/mips/elf_e_flags1.d: Likewise.
+	* gas/mips/elf_e_flags2.d: Likewise.
+	* gas/mips/elf_e_flags3.d: Likewise.
+	* gas/mips/elf_e_flags4.d: Likewise.
+	* gas/mips/elfel-rel.d: Likewise.
+	* gas/mips/elfel-rel2.d: Likewise.
+	* gas/mips/elfel-rel3.d: Likewise.
+	* gas/mips/empic.d: Likewise.
+	* gas/mips/mips16-e.d: Likewise.
+	* gas/mips/mips16-f.d: Likewise.
+	* gas/mips/mipsel16-f.d: Likewise.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+	* gas/mips/tmips16-e.d: Likewise.
+	* gas/mips/tmipsel16-e.d: Likewise.
+
+	* gas/mips/mips16-f.d: Fix the symbol table output.
+
+	* gas/mips/mipsel16-f.d: Fix the endian.
+
+	* gas/mips/mips.exp; Don't xfail mips16-f/mipsel16-f.
+
 2001-08-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/mips-gp32-fp32.d: Expect addu rather than or for moves.

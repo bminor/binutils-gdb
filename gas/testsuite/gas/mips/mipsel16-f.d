@@ -18,7 +18,7 @@ SYMBOL TABLE:
 
 
 RELOCATION RECORDS FOR \[foo\]:
-OFFSET           TYPE              VALUE 
+OFFSET [ ]+ TYPE              VALUE 
 0+0000000 R_MIPS_32         l1
 
 
@@ -31,4 +31,4 @@ Contents of section \.reginfo:
 Contents of section \.(mdebug|pdr):
 #...
 Contents of section foo:
- 0000 00000003 00000000 00000000 00000000  .*
+ 0000 03000000 00000000 00000000 00000000  .*
