@@ -1,3 +1,10 @@
+Fri Oct 21 20:42:29 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-mips.c (md_pseudo_table): If OBJ_ELF, handle .section.
+	(s_elf_section): New static function.
+	* ecoff.c (ecoff_build_symbols): Don't abort if we don't recognize
+	the section when setting the storage class; default to sc_Data.
+
 Thu Oct 20 00:43:38 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_apply_fix): Set new_val to 8 for all

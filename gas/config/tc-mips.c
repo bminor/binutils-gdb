@@ -23,6 +23,7 @@
 
 #include "as.h"
 #include "config.h"
+#include "subsegs.h"
 
 #include <ctype.h>
 
@@ -394,6 +395,9 @@ static void s_loc PARAMS ((int));
 static void s_mask PARAMS ((char));
 #endif
 #endif
+#ifdef OBJ_ELF
+static void s_elf_section PARAMS ((int));
+#endif
 
 /* Pseudo-op table.
 
@@ -472,6 +476,11 @@ const pseudo_typeS md_pseudo_table[] =
   {"loc", s_ignore, 0},
   {"mask", s_ignore, 'R'},
   {"verstamp", s_ignore, 0},
+#endif
+
+#ifdef OBJ_ELF
+  /* We need to tweak the ELF ".section" pseudo-op a bit.  */
+  {"section", s_elf_section, 0},
 #endif
 
  /* Sentinel.  */
@@ -4700,8 +4709,9 @@ mips_ip (str, ip)
 		      || offset_expr.X_add_number < -0x8000)
 		  && (mips_pic != EMBEDDED_PIC
 		      || offset_expr.X_op != O_subtract
-		      || ! S_IS_LOCAL (offset_expr.X_add_symbol)
-		      || ! S_IS_LOCAL (offset_expr.X_op_symbol)))
+		      || now_seg != text_section
+		      || (S_GET_SEGMENT (offset_expr.X_op_symbol)
+			  != text_section)))
 		break;
 
 	      offset_reloc = BFD_RELOC_LO16;
@@ -5398,8 +5408,6 @@ md_apply_fix (fixP, valueP)
 	as_warn_where (fixP->fx_file, fixP->fx_line,
 		       "Branch to odd address (%lx)", value);
       value >>= 2;
-      if (value < -0x8000 || value >= 0x8000)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "Relocation overflow");
 
       /* update old instruction data */
       buf = (unsigned char *) (fixP->fx_where + fixP->fx_frag->fr_literal);
@@ -5417,7 +5425,46 @@ md_apply_fix (fixP, valueP)
 	  internalError ();
 	  return 0;
 	}
-      insn |= value & 0xFFFF;
+
+      if (value >= -0x8000 && value < 0x8000)
+	insn |= value & 0xffff;
+      else
+	{
+	  /* The branch offset is too large.  If this is an
+             unconditional branch, and we are not generating PIC code,
+             we can convert it to an absolute jump instruction.  */
+	  if (mips_pic == NO_PIC
+	      && fixP->fx_done
+	      && fixP->fx_frag->fr_address >= text_section->vma
+	      && (fixP->fx_frag->fr_address
+		  < text_section->vma + text_section->_raw_size)
+	      && ((insn & 0xffff0000) == 0x10000000	 /* beq $0,$0 */
+		  || (insn & 0xffff0000) == 0x04010000	 /* bgez $0 */
+		  || (insn & 0xffff0000) == 0x04110000)) /* bgezal $0 */
+	    {
+	      if ((insn & 0xffff0000) == 0x04110000)	 /* bgezal $0 */
+		insn = 0x0c000000;	/* jal */
+	      else
+		insn = 0x08000000;	/* j */
+	      fixP->fx_r_type = BFD_RELOC_MIPS_JMP;
+	      fixP->fx_done = 0;
+	      fixP->fx_addsy = section_symbol (text_section);
+	      fixP->fx_addnumber = (value << 2) + md_pcrel_from (fixP);
+	    }
+	  else
+	    {
+	      /* FIXME.  It would be possible in principle to handle
+                 conditional branches which overflow.  They could be
+                 transformed into a branch around a jump.  This would
+                 require setting up variant frags for each different
+                 branch type.  The native MIPS assembler attempts to
+                 handle these cases, but it appears to do it
+                 incorrectly.  */
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    "Relocation overflow");
+	    }
+	}
+
       md_number_to_chars ((char *) buf, (valueT) insn, 4);
       break;
 
@@ -5676,6 +5723,22 @@ s_change_sec (sec)
 
   auto_align = 1;
 }
+
+#ifdef OBJ_ELF
+
+/* Handle the ELF .section pseudo-op.  This is a wrapper around
+   obj_elf_section.  */
+
+static void
+s_elf_section (x)
+     int x;
+{
+  mips_emit_delays ();
+  obj_elf_section (x);
+  auto_align = 1;
+}
+
+#endif /* OBJ_ELF */
 
 static void
 s_cons (log_size)

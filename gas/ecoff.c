@@ -3953,7 +3953,12 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			  else if (seg == &bfd_abs_section)
 			    sc = sc_Abs;
 			  else
-			    abort ();
+			    {
+			      /* This must be a user named section.
+                                 This is not possible in ECOFF, but it
+                                 is in ELF.  */
+			      sc = sc_Data;
+			    }
 
 			  sym_ptr->ecoff_sym.asym.st = (int) st;
 			  sym_ptr->ecoff_sym.asym.sc = (int) sc;
@@ -5153,7 +5158,7 @@ ecoff_generate_asm_lineno (filename, lineno)
     ecoff_generate_asm_line_stab(filename, lineno);
 */
 
-  if (strcmp (current_stabs_filename, filename))
+  if (current_stabs_filename == (char *)NULL || strcmp (current_stabs_filename, filename))
     {
       add_file (filename, 0);
       generate_asm_lineno = 1;
