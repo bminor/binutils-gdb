@@ -375,6 +375,10 @@ thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 	{
 	  findmask |= 2;  /* setting of r7 found */
 	}
+      else if (findmask == (4+2+1))
+	{
+	  break;	/* We have found one of each type of prologue instruction */
+	}
       else
 	continue;	/* something in the prolog that we don't care about or some
 	  		   instruction from outside the prolog scheduled here for optimization */

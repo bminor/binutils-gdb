@@ -1,3 +1,8 @@
+2002-01-21  Fred Fish  <fnf@redhat.com>
+
+	* arm-tdep.c (thumb_skip_prologue): Quit scanning prologue
+	when we have found all instructions we are looking for.
+
 2002-01-21  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (arm_register_name): New function.
