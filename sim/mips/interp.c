@@ -390,6 +390,12 @@ static ut_reg HLPC = 0;
 /* UserMode */
 #define UserMode        ((((SR & status_KSU_mask) >> status_KSU_shift) == ksu_user) ? 1 : 0)
 
+/* BigEndianMem */
+/* Hardware configuration. Affects endianness of LoadMemory and
+   StoreMemory and the endianness of Kernel and Supervisor mode
+   execution. The value is 0 for little-endian; 1 for big-endian. */
+#define BigEndianMem    ((state & simBE) ? 1 : 0)
+
 /* ByteSwapMem */
 /* This is true if the host and target have different endianness.  */
 #define ByteSwapMem (!(state & simHOSTBE) != !(state & simBE))
@@ -404,8 +410,8 @@ static ut_reg HLPC = 0;
 /* The endianness for load and store instructions (0=little;1=big). In
    User mode this endianness may be switched by setting the state_RE
    bit in the SR register. Thus, BigEndianCPU may be computed as
-   (!ByteSwapMem EOR ReverseEndian). */
-#define BigEndianCPU    (!ByteSwapMem ^ ReverseEndian) /* Already bits */
+   (BigEndianMem EOR ReverseEndian). */
+#define BigEndianCPU    (BigEndianMem ^ ReverseEndian) /* Already bits */
 
 #if !defined(FASTSIM) || defined(PROFILE)
 /* At the moment these values will be the same, since we do not have
@@ -1058,7 +1064,7 @@ sim_write (addr,buffer,size)
       /* We need to perform the following magic to ensure that that
          bytes are written into same byte positions in the target memory
          world, regardless of the endianness of the host. */
-      if (!ByteSwapMem) {
+      if (BigEndianMem) {
         value =  ((uword64)(*buffer++) << 8);
         value |= ((uword64)(*buffer++) << 0);
       } else {
@@ -1075,7 +1081,7 @@ sim_write (addr,buffer,size)
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
-      if (!ByteSwapMem) {
+      if (BigEndianMem) {
         value =  ((uword64)(*buffer++) << 24);
         value |= ((uword64)(*buffer++) << 16);
         value |= ((uword64)(*buffer++) << 8);
@@ -1096,7 +1102,7 @@ sim_write (addr,buffer,size)
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
-      if (!ByteSwapMem) {
+      if (BigEndianMem) {
         value =  ((uword64)(*buffer++) << 56);
         value |= ((uword64)(*buffer++) << 48);
         value |= ((uword64)(*buffer++) << 40);
@@ -2303,7 +2309,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
          extracts the required bytes. However, to keep performance
          high we only load the required bytes into the relevant
          slots. */
-      if (!ByteSwapMem)
+      if (BigEndianMem)
        switch (AccessLength) { /* big-endian memory */
          case AccessLength_DOUBLEWORD :
           value |= ((uword64)mem[index++] << 56);
@@ -2355,7 +2361,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
          StoreMemory routines to avoid shifting the data before
          returning or using it. */
       if (!raw) { /* do nothing for raw accessess */
-        if (!ByteSwapMem)
+        if (BigEndianMem)
          value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
         else /* little-endian only needs to be shifted up to the correct byte offset */
          value <<= ((pAddr & LOADDRMASK) * 8);
@@ -2433,7 +2439,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
       printf("DBG: StoreMemory: offset = %d MemElem = 0x%08X%08X\n",(unsigned int)(pAddr & LOADDRMASK),WORD64HI(MemElem),WORD64LO(MemElem));
 #endif /* DEBUG */
 
-      if (!ByteSwapMem) {
+      if (BigEndianMem) {
         if (raw)
          shift = ((7 - AccessLength) * 8);
         else /* real memory access */
@@ -2449,7 +2455,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
       printf("DBG: StoreMemory: shift = %d MemElem = 0x%08X%08X\n",shift,WORD64HI(MemElem),WORD64LO(MemElem));
 #endif /* DEBUG */
 
-      if (!ByteSwapMem) {
+      if (BigEndianMem) {
         switch (AccessLength) { /* big-endian memory */
           case AccessLength_DOUBLEWORD :
            mem[index++] = (unsigned char)(MemElem >> 56);
