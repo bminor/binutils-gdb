@@ -1,3 +1,32 @@
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/d10v/instruction_packing-005.d: Adjust.
+	* gas/d10v/instruction_packing-008.d: Ignore disassembled stabs.
+	* gas/d10v/instruction_packing-009.d: Likewise.
+	* gas/d10v/instruction_packing-010.d: Likewise.
+	* gas/d10v/warning-001.d: Use #warning instead of #error.
+	* gas/d10v/warning-002.d: Likewise.
+	* gas/d10v/warning-003.d: Likewise.
+	* gas/d10v/warning-004.d: Likewise.
+	* gas/d10v/warning-005.d: Likewise.
+	* gas/d10v/warning-006.d: Likewise.
+	* gas/d10v/warning-007.d: Likewise.
+	* gas/d10v/warning-008.d: Likewise.
+	* gas/d10v/warning-009.d: Likewise.
+	* gas/d10v/warning-010.d: Likewise.
+	* gas/d10v/warning-011.d: Likewise.
+	* gas/d10v/warning-012.d: Likewise.
+	* gas/d10v/warning-013.d: Likewise.
+	* gas/d10v/warning-015.d: Likewise.
+	* gas/d10v/warning-016.d: Likewise.
+	* gas/d10v/warning-017.d: Likewise.
+	* gas/d10v/warning-018.d: Likewise.
+	* gas/d10v/warning-019.d: Likewise.
+	* lib/gas-defs.exp (run_dump_test): Don't require a dump program if
+	#warning given.  Rearrange to allow $program to remain unset.
+	Fail the test if warning not found when expected.  Conversely fail
+	the test if assembler errors or warnings given when not expected.
+
 2005-02-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/noat-1.s, gas/mips/noat-1.d, gas/mips/noat-2.s,

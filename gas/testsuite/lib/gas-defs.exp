@@ -1,5 +1,5 @@
-# Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-# Free Software Foundation, Inc.
+# Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+# 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -371,59 +371,48 @@ proc run_dump_test { name {extra_options {}} } {
 	append opts($opt_name) $opt_val
     }
 
-    if {$opts(PROG) != ""} {
-	switch -- $opts(PROG) {
-	    objdump
-		{ set program objdump }
-	    nm
-		{ set program nm }
-	    objcopy
-		{ set program objcopy }
-	    readelf
-		{ set program readelf }
-	    default
-		{ perror "unrecognized program option $opts(PROG) in $file.d"
-		  unresolved $subdir/$name
-		  return }
-	}
-    } elseif { $opts(error) != "" } {
-	# It's meaningless to require an output-testing method when we
-	# expect an error.  For simplicity, we fake an arbitrary method.
-	set program "nm"
-    } else {
-	# Guess which program to run, by seeing which option was specified.
-	set program ""
-	foreach p {objdump objcopy nm readelf} {
-	    if {$opts($p) != ""} {
-		if {$program != ""} {
-		    perror "ambiguous dump program in $file.d"
-		    unresolved $subdir/$name
-		    return
-		} else {
-		    set program $p
-		}
-	    }
-	}
-	if {$program == ""} {
-	    perror "dump program unspecified in $file.d"
-	    unresolved $subdir/$name
-	    return
-	}
-    }
-
-    set expmsg $opts(error)
-    if { $opts(warning) != "" } {
-	set expmsg $opts(warning)
-    }
     if { (($opts(warning) != "") && ($opts(error) != "")) \
 	 || (($opts(warning) != "") && ($opts(stderr) != "")) } {
 	perror "$testname: bad mix of stderr, error and warning test-directives"
 	return
     }
 
-    set progopts1 $opts($program)
-    eval set progopts \$[string toupper $program]FLAGS
-    eval set binary \$[string toupper $program]
+    set program ""
+    # It's meaningless to require an output-testing method when we
+    # expect an error.
+    if { $opts(error) == "" } {
+	if {$opts(PROG) != ""} {
+	    switch -- $opts(PROG) {
+		objdump	{ set program objdump }
+		nm	{ set program nm }
+		objcopy	{ set program objcopy }
+		readelf	{ set program readelf }
+		default	{
+		    perror "unrecognized program option $opts(PROG) in $file.d"
+		    unresolved $subdir/$name
+		    return }
+	    }
+	} else {
+	    # Guess which program to run, by seeing which option was specified.
+	    foreach p {objdump objcopy nm readelf} {
+		if {$opts($p) != ""} {
+		    if {$program != ""} {
+			perror "ambiguous dump program in $file.d"
+			unresolved $subdir/$name
+			return
+		    } else {
+			set program $p
+		    }
+		}
+	    }
+	}
+	if { $program == "" && $opts(warning) == "" } {
+	    perror "dump program unspecified in $file.d"
+	    unresolved $subdir/$name
+	    return
+	}
+    }
+
     if { $opts(name) == "" } {
 	set testname "$subdir/$name"
     } else {
@@ -441,7 +430,11 @@ proc run_dump_test { name {extra_options {}} } {
     set cmdret [catch "exec $cmd" comp_output]
     set comp_output [prune_warnings $comp_output]
 
-    if { $cmdret != 0 || $comp_output != "" || $opts(stderr) != "" } then {
+    set expmsg $opts(error)
+    if { $opts(warning) != "" } {
+	set expmsg $opts(warning)
+    }
+    if { $cmdret != 0 || $comp_output != "" || $expmsg != "" } then {
 	# If the executed program writes to stderr and stderr is not
 	# redirected, exec *always* returns failure, regardless of the
 	# program exit code.  Thankfully, we can retrieve the true
@@ -460,18 +453,17 @@ proc run_dump_test { name {extra_options {}} } {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
 
-	    if { $expmsg != "" \
-		    && [regexp $expmsg $comp_output] \
+	    if { [regexp $expmsg $comp_output] \
 		    && (($cmdret == 0) == ($opts(warning) != "")) } {
-		verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
-
-		# Only "pass" and return here if we expected (and got)
-		# an error.
-		if { $opts(error) != "" } {
+		# We have the expected output from gas.
+		# Return if there's nothing more to do.
+		if { $opts(error) != "" || $program == "" } {
 		    pass $testname
 		    return
 		}
-	    } {
+	    } else {
+		verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
+
 		fail $testname
 		return
 	    }
@@ -502,6 +494,13 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	}
     }
+
+    if { $program == "" } {
+	return
+    }
+    set progopts1 $opts($program)
+    eval set progopts \$[string toupper $program]FLAGS
+    eval set binary \$[string toupper $program]
 
     if { [which $binary] == 0 } {
 	untested $testname
