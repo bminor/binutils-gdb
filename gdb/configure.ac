@@ -1092,7 +1092,7 @@ build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
 -Wunused-label -Wunused-function"
 
 # GCC supports -Wuninitialized only with -O or -On, n != 0.
-if test x${CFLAGS+set} == xset; then
+if test x${CFLAGS+set} = xset; then
   case "${CFLAGS}" in
     *"-O0"* ) ;;
     *"-O"* )

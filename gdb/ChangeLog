@@ -1,3 +1,8 @@
+2005-03-13  Jim Blandy  <jimb@redhat.com>
+
+	* configure.ac: Use '=', not '=='; the latter is a GNU extension.
+	* configure: Regenerated.
+
 2005-03-11  Michael Snyder  <msnyder@redhat.com>
 
 	* mn10300-tdep.c (mn10300_dummy_unwind_dummy_id): Replace 
