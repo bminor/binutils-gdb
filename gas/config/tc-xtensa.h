@@ -100,6 +100,8 @@ typedef struct xtensa_segment_info_struct
 typedef struct xtensa_symfield_type_struct
 {
   unsigned int plt : 1;
+  unsigned int is_loop_target : 1;
+  unsigned int is_branch_target : 1;
 } xtensa_symfield_type;
 
 

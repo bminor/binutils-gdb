@@ -1,3 +1,42 @@
+2003-09-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (insn_labels, free_insn_labels, saved_insn_labels,
+	literal_syms): New global variables.
+	(xtensa_define_label, add_target_symbol, xtensa_find_label,
+	map_over_defined_symbols, is_loop_target_label,
+	xtensa_mark_target_fragments, xtensa_move_frag_symbol,
+	xtensa_move_frag_symbols, defined_symbols, branch_targets): Delete.
+	(xtensa_begin_directive): Call md_flush_pending_output.  Move symbols
+	from insn_labels to saved_insn_labels when entering a literal region.
+	(xtensa_end_directive): Call md_flush_pending_output.  Restore
+	insn_labels list when leaving a literal region.
+	(xtensa_literal_position): Call xtensa_clear_insn_labels.
+	(xtensa_literal_pseudo): Add check to disallow .literal inside a
+	literal region.  Move insn_labels to saved_insn_labels and then restore
+	insn_labels on exit.
+	(xg_add_branch_and_loop_targets): Replace add_target_symbol calls with
+	code to set is_loop_target or is_branch_target flag on the symbol
+	(xtensa_create_literal_symbol): Call xtensa_add_literal_sym.
+	(xtensa_add_literal_sym, xtensa_add_insn_label,
+	xtensa_clear_insn_labels): New functions.
+	(xtensa_move_labels): Remove old_frag and old_offset arguments.  Add
+	loops_ok argument.  Rewrite to use insn_labels list instead of
+	calling xtensa_find_label and to check the is_loop_target flag on
+	symbols when loops_ok is false.
+	(xtensa_frob_label): Remove call to xtensa_define_label.  Add call
+	to either xtensa_add_literal_sym or xtensa_add_insn_label.  Adjust
+	call to xtensa_move_labels.  Propagate is_branch_target and
+	is_loop_target flags from symbols to frags.
+	(xtensa_flush_pending_output): Call xtensa_clear_insn_labels.
+	(md_assemble): Use xtensa_move_labels with loops_ok = FALSE when
+	aligning a loop instruction.  Adjust call to xtensa_move_labels for
+	aligning entry instructions.  Add call to xtensa_clear_insn_labels.
+	(xtensa_end): Remove call to xtensa_mark_target_fragments.
+	(xtensa_move_literals): Replace xtensa_move_frag_symbols call with
+	code to use new literal_syms list.
+	* config/tc-xtensa.h (xtensa_symfield_type): Add is_loop_target and
+	is_branch_target flags.
+
 2003-09-09  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_mark_literal_pool_location): Remove
