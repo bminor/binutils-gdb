@@ -45,12 +45,19 @@ static CORE_ADDR read_register_dummy PARAMS ((int regno));
 
 /* Info gleaned from scanning a function's prologue.  */
 
+struct pifsr			/* Info about one saved reg */
+{
+  int framereg;			/* Frame reg (SP or FP) */
+  int offset;			/* Offset from framereg */
+  int reg;			/* Saved register number */
+};
+
 struct prologue_info
 {
   int framereg;
   int frameoffset;
   int start_function;
-  struct frame_saved_regs *fsr;
+  struct pifsr *pifsrs;
 };
 
 static CORE_ADDR scan_prologue PARAMS ((CORE_ADDR pc, struct prologue_info *fs));
@@ -69,6 +76,7 @@ scan_prologue (pc, pi)
      struct prologue_info *pi;
 {
   CORE_ADDR func_addr, prologue_end, current_pc;
+  struct pifsr *pifsr;
   int fp_used;
 
   /* First, figure out the bounds of the prologue so that we can limit the
@@ -85,10 +93,14 @@ scan_prologue (pc, pi)
       else
 	pi->start_function = 0;
 
+#if 0
       if (sal.line == 0)
 	prologue_end = pc;
       else
 	prologue_end = sal.end;
+#else
+      prologue_end = pc;
+#endif
     }
   else
     {				/* We're in the boondocks */
@@ -105,6 +117,7 @@ scan_prologue (pc, pi)
   pi->frameoffset = 0;
   pi->framereg = SP_REGNUM;
   fp_used = 0;
+  pifsr = pi->pifsrs;
 
   for (current_pc = func_addr; current_pc < prologue_end; current_pc += 2)
     {
@@ -112,6 +125,10 @@ scan_prologue (pc, pi)
 
       insn = read_memory_unsigned_integer (current_pc, 2);
 
+      if ((insn & 0x07c0) == 0x0780 /* jarl or jr */
+	  || (insn & 0xffe0) == 0x0060 /* jmp */
+	  || (insn & 0x0780) == 0x0580)	/* branch */
+	break;			/* Ran into end of prologue */
       if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240)) /* add <imm>,sp */
 	pi->frameoffset = ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM)) /* addi <imm>,sp,sp */
@@ -124,26 +141,22 @@ scan_prologue (pc, pi)
       else if ((insn & 0x07ff) == (0x0760 | SP_REGNUM)	/* st.w <reg>,<offset>[sp] */
 	       || (fp_used
 		   && (insn & 0x07ff) == (0x0760 | FP_REGNUM))) /* st.w <reg>,<offset>[fp] */
-	if (pi->fsr)
+	if (pifsr)
 	  {
-	    int framereg;
-	    int reg;
-	    int offset;
+	    pifsr->framereg = insn & 0x1f;
+	    pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
 
-	    framereg = insn & 0x1f;
-	    reg = (insn >> 11) & 0x1f; /* Extract <reg> */
+	    pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
 
-	    offset = read_memory_integer (current_pc + 2, 2) & ~1;
-
-	    if (framereg == SP_REGNUM) /* Using SP? */
-	      offset += pi->frameoffset; /* Yes, correct for frame size */
-
-	    pi->fsr->regs[reg] = offset;
+	    pifsr++;
 	  }
 
       if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
 	current_pc += 2;
     }
+
+  if (pifsr)
+    pifsr->framereg = 0;	/* Tie off last entry */
 
   return current_pc;
 }
@@ -166,6 +179,7 @@ v850_init_extra_frame_info (fi)
      struct frame_info *fi;
 {
   struct prologue_info pi;
+  struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
   int reg;
 
   if (fi->next)
@@ -183,16 +197,20 @@ v850_init_extra_frame_info (fi)
       return;
     }
 
-  pi.fsr = &fi->fsr;
+  pi.pifsrs = pifsrs;
 
   scan_prologue (fi->pc, &pi);
 
- if (!fi->next && pi.framereg == SP_REGNUM)
-   fi->frame = read_register (pi.framereg) - pi.frameoffset;
+  if (!fi->next && pi.framereg == SP_REGNUM)
+    fi->frame = read_register (pi.framereg) - pi.frameoffset;
 
-  for (reg = 0; reg < NUM_REGS; reg++)
-    if (fi->fsr.regs[reg] != 0)
-      fi->fsr.regs[reg] += fi->frame;
+  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
+    {
+      fi->fsr.regs[pifsr->reg] = pifsr->offset + fi->frame;
+
+      if (pifsr->framereg == SP_REGNUM)
+	fi->fsr.regs[pifsr->reg] += pi.frameoffset;
+    }
 }
 
 /* Figure out the frame prior to FI.  Unfortunately, this involves scanning the
@@ -214,7 +232,7 @@ v850_frame_chain (fi)
   if (PC_IN_CALL_DUMMY (callers_pc, NULL, NULL))
     return read_register_dummy (SP_REGNUM); /* XXX Won't work if multiple dummy frames on stack! */
 
-  pi.fsr = NULL;
+  pi.pifsrs = NULL;
 
   scan_prologue (callers_pc, &pi);
 

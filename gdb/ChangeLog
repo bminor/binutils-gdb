@@ -1,3 +1,16 @@
+start-sanitize-v850
+Tue Oct 22 16:28:20 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* v850-tdep.c (scan_prologue):  Changes to deal with scheduled
+	prologues correctly.  First, prologue end is now defined by
+	presence of a branch, jump or call insn.  Second, can no longer
+	fix frame offsets because we may not know the offset until after a
+	register has been saved.
+	* (v850_init_extra_frame_info):  Fixup frame offsets here because
+	we have all the info at this time.
+	* (v850_frame_chain):  Use new calling convention for scan_prologue.
+
+end-sanitize-v850
 start-sanitize-d10v
 Tue Oct 22 10:25:29 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
@@ -25,7 +38,7 @@ Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	sign bugs with scanning prologues.  Get a little smarter about
 	calculating the length of uninteresting instructions.
 
-start-sanitize-v850
+end-sanitize-v850
 Mon Oct 21 14:01:38 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* top.c: Add new commands "set annotate" and "show annotate".
