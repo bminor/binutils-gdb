@@ -238,7 +238,9 @@ mri_script_command:
 	|	CASE casesymlist
 	|	EXTERN extern_name_list
 	|	INCLUDE filename
-		{ ldfile_open_command_file ($2); } mri_script_lines END
+		{ ldlex_script (); ldfile_open_command_file($2); }
+		mri_script_lines END
+		{ ldlex_popstate (); }
 	|	START NAME
 		{ lang_add_entry ($2, false); }
         |
@@ -332,7 +334,9 @@ ifile_p1:
      	|	MAP '(' filename ')'
 		{ lang_add_map($3); }
 	|	INCLUDE filename 
-		{ ldfile_open_command_file($2); } ifile_list END
+		{ ldlex_script (); ldfile_open_command_file($2); }
+		ifile_list END
+		{ ldlex_popstate (); }
 	|	NOCROSSREFS '(' nocrossref_list ')'
 		{
 		  lang_add_nocrossref ($3);

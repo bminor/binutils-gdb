@@ -1,3 +1,15 @@
+2001-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldgram.y (mri_script_command): Surround processing of INCLUDE
+	with ldlex_script, ldlex_popstate.
+	(ifile_p1): Likewise.
+	* ldlex.l (EOF): Don't BEGIN(SCRIPT).  Restore lineno from the
+	correct slot.
+	(lex_push_file): Save current lineno to lineno_stack.  Set lineno
+	to 1.  Don't BEGIN(SCRIPT).
+	(lex_redirect): Similarly.
+	* ldmain.c (main): Set yydebug non-zero if YYDEBUG.
+
 2001-10-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* scripttempl/armcoff.sc: Define __EH_FRAME_BEGIN__ and

@@ -196,6 +196,13 @@ main (argc, argv)
       xexit (1);
     }
 
+#if YYDEBUG
+  {
+    extern int yydebug;
+    yydebug = 1;
+  }
+#endif
+
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
   whole_archive = false;

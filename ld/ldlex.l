@@ -418,11 +418,10 @@ V_IDENTIFIER [*?.$_a-zA-Z]([*?.$_a-zA-Z0-9]|::)*
   else 
   {
     yy_switch_to_buffer(include_stack[include_stack_ptr]);
-
   }
-  BEGIN(SCRIPT);
+
   ldfile_input_filename = file_name_stack[include_stack_ptr - 1];
-  lineno = lineno_stack[include_stack_ptr - 1];
+  lineno = lineno_stack[include_stack_ptr];
 
   return END;
 }
@@ -446,13 +445,13 @@ lex_push_file (file, name)
       einfo("%F:includes nested too deeply\n");
     }
   file_name_stack[include_stack_ptr] = name;
-  lineno_stack[include_stack_ptr] = 1;
+  lineno_stack[include_stack_ptr] = lineno;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
 
   include_stack_ptr++;
+  lineno = 1;
   yyin = file;
   yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-  BEGIN (SCRIPT);
 }
 
 /* Return a newly created flex input buffer containing STRING,
@@ -512,12 +511,12 @@ lex_redirect (string)
       einfo("%F: macros nested too deeply\n");
     }
   file_name_stack[include_stack_ptr] = "redirect";
-  lineno_stack[include_stack_ptr] = 0;
+  lineno_stack[include_stack_ptr] = lineno;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
   include_stack_ptr++;
+  lineno = 1;
   tmp = yy_create_string_buffer (string, strlen (string));
   yy_switch_to_buffer (tmp);
-  BEGIN (SCRIPT);
 }
 
 /* Functions to switch to a different flex start condition,
