@@ -1,3 +1,8 @@
+Tue Aug 16 00:08:22 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Treat --dll-verbose as --version, for Linux compatibility.  From
+	hjl@nynexst.com (H.J. Lu).
+
 Mon Aug 15 17:17:33 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldexp.h (exp_get_abs_int): Declare.
