@@ -1,3 +1,18 @@
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.h (mips_cl_insn): Move definition to...
+	* config/tc-mips.c (mips_cl_insn): ...here.  Add new fields:
+	frag, where, fixp, reloc_type, valid_p, noreorder_p, delay_slot_p
+	and extended_p.
+	(history): New variable.
+	(prev_insn, prev_prev_insn, prev_insn_valid, prev_insn_frag)
+	(prev_insn_where, prev_insn_reloc_type, prev_insn_fixp)
+	(prev_insn_is_delay_slot, prev_insn_unreordered, prev_insn_extended)
+	(prev_prev_insn_unreordered): Delete.
+	(reg_needs_delay, append_insn, mips_no_prev_insn, mips_emit_delays)
+	(macro_start): Replace uses of prev_insn* with the equivalent history[]
+	field.
+
 2005-03-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/Makefile.am: Update as.info dependencies.

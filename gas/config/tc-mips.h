@@ -79,15 +79,6 @@ enum mips_pic_level
 
 extern enum mips_pic_level mips_pic;
 
-struct mips_cl_insn
-{
-  unsigned long insn_opcode;
-  const struct mips_opcode *insn_mo;
-  /* The next two fields are used when generating mips16 code.  */
-  bfd_boolean use_extend;
-  unsigned short extend;
-};
-
 extern int tc_get_register (int frame);
 
 #define md_after_parse_args() mips_after_parse_args()

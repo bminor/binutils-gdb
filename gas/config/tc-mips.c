@@ -119,6 +119,50 @@ extern int target_big_endian;
 			    ? ".rodata" \
 			    : (abort (), ""))
 
+/* Information about an instruction, including its format, operands
+   and fixups.  */
+struct mips_cl_insn
+{
+  /* The opcode's entry in mips_opcodes or mips16_opcodes.  */
+  const struct mips_opcode *insn_mo;
+
+  /* True if this is a mips16 instruction and if we want the extended
+     form of INSN_MO.  */
+  bfd_boolean use_extend;
+
+  /* The 16-bit extension instruction to use when USE_EXTEND is true.  */
+  unsigned short extend;
+
+  /* The 16-bit or 32-bit bitstring of the instruction itself.  This is
+     a copy of INSN_MO->match with the operands filled in.  */
+  unsigned long insn_opcode;
+
+  /* The frag that contains the instruction.  */
+  struct frag *frag;
+
+  /* The offset into FRAG of the first instruction byte.  */
+  long where;
+
+  /* The relocs associated with the instruction, if any.  */
+  fixS *fixp[3];
+
+  /* The reloc types associated with the instruction.  */
+  bfd_reloc_code_real_type reloc_type[3];
+
+  /* True if this entry describes a real instruction.  */
+  unsigned int valid_p : 1;
+
+  /* True if this instruction occured in a .set noreorder block.  */
+  unsigned int noreorder_p : 1;
+
+  /* True if this instruction corresponds to an assembler-filled
+     delay slot.  Always false if noreorder_p.  */
+  unsigned int delay_slot_p : 1;
+
+  /* True for extended mips16 instructions.  */
+  unsigned int extended_p : 1;
+};
+
 /* The ABI to use.  */
 enum mips_abi_level
 {
@@ -520,44 +564,12 @@ static int mips_optimize = 2;
    equivalent to seeing no -g option at all.  */
 static int mips_debug = 0;
 
-/* The previous instruction.  */
-static struct mips_cl_insn prev_insn;
+/* A list of previous instructions, with index 0 being the most recent.  */
+static struct mips_cl_insn history[2];
 
-/* The instruction before prev_insn.  */
-static struct mips_cl_insn prev_prev_insn;
-
-/* If we don't want information for prev_insn or prev_prev_insn, we
+/* If we don't want information for a history[] entry, we
    point the insn_mo field at this dummy integer.  */
 static const struct mips_opcode dummy_opcode = { NULL, NULL, 0, 0, 0, 0, 0 };
-
-/* Non-zero if prev_insn is valid.  */
-static int prev_insn_valid;
-
-/* The frag for the previous instruction.  */
-static struct frag *prev_insn_frag;
-
-/* The offset into prev_insn_frag for the previous instruction.  */
-static long prev_insn_where;
-
-/* The reloc type for the previous instruction, if any.  */
-static bfd_reloc_code_real_type prev_insn_reloc_type[3];
-
-/* The reloc for the previous instruction, if any.  */
-static fixS *prev_insn_fixp[3];
-
-/* Non-zero if the previous instruction was in a delay slot.  */
-static int prev_insn_is_delay_slot;
-
-/* Non-zero if the previous instruction was in a .set noreorder.  */
-static int prev_insn_unreordered;
-
-/* Non-zero if the previous instruction uses an extend opcode (if
-   mips16).  */
-static int prev_insn_extended;
-
-/* Non-zero if the previous previous instruction was in a .set
-   noreorder.  */
-static int prev_prev_insn_unreordered;
 
 /* If this is set, it points to a frag holding nop instructions which
    were inserted before the start of a noreorder section.  If those
@@ -1515,7 +1527,7 @@ reg_needs_delay (unsigned int reg)
 {
   unsigned long prev_pinfo;
 
-  prev_pinfo = prev_insn.insn_mo->pinfo;
+  prev_pinfo = history[0].insn_mo->pinfo;
   if (! mips_opts.noreorder
       && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY)
 	   && ! gpr_interlocks)
@@ -1526,7 +1538,7 @@ reg_needs_delay (unsigned int reg)
 	 delay the use of general register rt for one instruction.  */
       /* Itbl support may require additional care here.  */
       know (prev_pinfo & INSN_WRITE_GPR_T);
-      if (reg == ((prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT))
+      if (reg == ((history[0].insn_opcode >> OP_SH_RT) & OP_MASK_RT))
 	return 1;
     }
 
@@ -1627,7 +1639,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   /* Mark instruction labels in mips16 mode.  */
   mips16_mark_labels ();
 
-  prev_pinfo = prev_insn.insn_mo->pinfo;
+  prev_pinfo = history[0].insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
 
   if (mips_relax.sequence != 2
@@ -1676,7 +1688,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  know (prev_pinfo & INSN_WRITE_GPR_T);
 	  if (mips_optimize == 0
 	      || insn_uses_reg (ip,
-				((prev_insn.insn_opcode >> OP_SH_RT)
+				((history[0].insn_opcode >> OP_SH_RT)
 				 & OP_MASK_RT),
 				MIPS_GR_REG))
 	    ++nops;
@@ -1705,7 +1717,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    {
 	      if (mips_optimize == 0
 		  || insn_uses_reg (ip,
-				    ((prev_insn.insn_opcode >> OP_SH_FT)
+				    ((history[0].insn_opcode >> OP_SH_FT)
 				     & OP_MASK_FT),
 				    MIPS_FP_REG))
 		++nops;
@@ -1714,7 +1726,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    {
 	      if (mips_optimize == 0
 		  || insn_uses_reg (ip,
-				    ((prev_insn.insn_opcode >> OP_SH_FS)
+				    ((history[0].insn_opcode >> OP_SH_FS)
 				     & OP_MASK_FS),
 				    MIPS_FP_REG))
 		++nops;
@@ -1758,7 +1770,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
       else if (mips_7000_hilo_fix
 	       && MF_HILO_INSN (prev_pinfo)
-	       && insn_uses_reg (ip, ((prev_insn.insn_opcode >> OP_SH_RD)
+	       && insn_uses_reg (ip, ((history[0].insn_opcode >> OP_SH_RD)
 				      & OP_MASK_RD),
 				 MIPS_GR_REG))
 	{
@@ -1771,8 +1783,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	 insert one nop.  */
 
       else if (mips_7000_hilo_fix
-	       && MF_HILO_INSN (prev_prev_insn.insn_opcode)
-	       && insn_uses_reg (ip, ((prev_prev_insn.insn_opcode >> OP_SH_RD)
+	       && MF_HILO_INSN (history[1].insn_opcode)
+	       && insn_uses_reg (ip, ((history[1].insn_opcode >> OP_SH_RD)
                                        & OP_MASK_RD),
                                     MIPS_GR_REG))
 
@@ -1805,7 +1817,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		       || (pinfo & MIPS16_INSN_BRANCH)))
 	    ++nops;
 	}
-      else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
+      else if (history[0].insn_mo->pinfo & INSN_READ_HI)
 	{
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
@@ -1831,7 +1843,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       /* If the previous instruction was in a noreorder section, then
          we don't want to insert the nop after all.  */
       /* Itbl support may require additional care here.  */
-      if (prev_insn_unreordered)
+      if (history[0].noreorder_p)
 	nops = 0;
 
       /* There are two cases which require two intervening
@@ -1843,15 +1855,15 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	 instruction, we must check for these cases compared to the
 	 instruction previous to the previous instruction.  */
       if ((! mips_opts.mips16
-	   && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
-	   && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	   && (history[1].insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
+	   && (history[1].insn_mo->pinfo & INSN_WRITE_COND_CODE)
 	   && (pinfo & INSN_READ_COND_CODE)
 	   && ! cop_interlocks)
-	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
+	  || ((history[1].insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
 	      && ! (hilo_interlocks
 		    || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT))))
-	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
+	  || ((history[1].insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
 	      && ! (hilo_interlocks
 		    || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))))
@@ -1859,19 +1871,19 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       else
 	prev_prev_nop = 0;
 
-      if (prev_prev_insn_unreordered)
+      if (history[1].noreorder_p)
 	prev_prev_nop = 0;
 
       if (prev_prev_nop && nops == 0)
 	++nops;
 
-      if (mips_fix_vr4120 && prev_insn.insn_mo->name)
+      if (mips_fix_vr4120 && history[0].insn_mo->name)
 	{
 	  /* We're out of bits in pinfo, so we must resort to string
 	     ops here.  Shortcuts are selected based on opcodes being
 	     limited to the VR4120 instruction set.  */
 	  int min_nops = 0;
-	  const char *pn = prev_insn.insn_mo->name;
+	  const char *pn = history[0].insn_mo->name;
 	  const char *tn = ip->insn_mo->name;
 	  if (strncmp (pn, "macc", 4) == 0
 	      || strncmp (pn, "dmacc", 5) == 0)
@@ -2024,8 +2036,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 #endif
 
   /* Record the frag type before frag_var.  */
-  if (prev_insn_frag)
-    prev_insn_frag_type = prev_insn_frag->fr_type;
+  if (history[0].frag)
+    prev_insn_frag_type = history[0].frag->fr_type;
 
   if (address_expr
       && *reloc_type == BFD_RELOC_16_PCREL_S2
@@ -2064,7 +2076,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 					 mips16_small, mips16_ext,
 					 (prev_pinfo
 					  & INSN_UNCOND_BRANCH_DELAY),
-					 (*prev_insn_reloc_type
+					 (*history[0].reloc_type
 					  == BFD_RELOC_MIPS16_JMP)),
 		    make_expr_symbol (address_expr), 0, NULL);
     }
@@ -2348,10 +2360,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || nops != 0
 	      /* If we don't even know the previous insn, we can not
 		 swap.  */
-	      || ! prev_insn_valid
+	      || ! history[0].valid_p
 	      /* If the previous insn is already in a branch delay
 		 slot, then we can not swap.  */
-	      || prev_insn_is_delay_slot
+	      || history[0].delay_slot_p
 	      /* If the previous previous insn was in a .set
 		 noreorder, we can't swap.  Actually, the MIPS
 		 assembler will swap in this situation.  However, gcc
@@ -2364,11 +2376,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		 in which we can not swap the bne and INSN.  If gcc is
 		 not configured -with-gnu-as, it does not output the
 		 .set pseudo-ops.  We don't have to check
-		 prev_insn_unreordered, because prev_insn_valid will
+		 history[0].noreorder_p, because history[0].valid_p will
 		 be 0 in that case.  We don't want to use
-		 prev_prev_insn_valid, because we do want to be able
+		 history[1].valid_p, because we do want to be able
 		 to swap at the start of a function.  */
-	      || prev_prev_insn_unreordered
+	      || history[1].noreorder_p
 	      /* If the branch is itself the target of a branch, we
 		 can not swap.  We cheat on this; all we check for is
 		 whether there is a label on this instruction.  If
@@ -2428,31 +2440,31 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_T)
 		  && insn_uses_reg (ip,
-				    ((prev_insn.insn_opcode >> OP_SH_RT)
+				    ((history[0].insn_opcode >> OP_SH_RT)
 				     & OP_MASK_RT),
 				    MIPS_GR_REG))
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_D)
 		  && insn_uses_reg (ip,
-				    ((prev_insn.insn_opcode >> OP_SH_RD)
+				    ((history[0].insn_opcode >> OP_SH_RD)
 				     & OP_MASK_RD),
 				    MIPS_GR_REG))
 	      || (mips_opts.mips16
 		  && (((prev_pinfo & MIPS16_INSN_WRITE_X)
 		       && insn_uses_reg (ip,
-					 ((prev_insn.insn_opcode
+					 ((history[0].insn_opcode
 					   >> MIPS16OP_SH_RX)
 					  & MIPS16OP_MASK_RX),
 					 MIPS16_REG))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_Y)
 			  && insn_uses_reg (ip,
-					    ((prev_insn.insn_opcode
+					    ((history[0].insn_opcode
 					      >> MIPS16OP_SH_RY)
 					     & MIPS16OP_MASK_RY),
 					    MIPS16_REG))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_Z)
 			  && insn_uses_reg (ip,
-					    ((prev_insn.insn_opcode
+					    ((history[0].insn_opcode
 					      >> MIPS16OP_SH_RZ)
 					     & MIPS16OP_MASK_RZ),
 					    MIPS16_REG))
@@ -2462,8 +2474,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 			  && insn_uses_reg (ip, RA, MIPS_GR_REG))
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_GPR_Y)
 			  && insn_uses_reg (ip,
-					    MIPS16OP_EXTRACT_REG32R (prev_insn.
-								     insn_opcode),
+					    MIPS16OP_EXTRACT_REG32R
+					      (history[0].insn_opcode),
 					    MIPS_GR_REG))))
 	      /* If the branch writes a register that the previous
 		 instruction sets, we can not swap (we know that
@@ -2471,54 +2483,54 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_T)
 		  && (((pinfo & INSN_WRITE_GPR_D)
-		       && (((prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT)
+		       && (((history[0].insn_opcode >> OP_SH_RT) & OP_MASK_RT)
 			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
 		      || ((pinfo & INSN_WRITE_GPR_31)
-			  && (((prev_insn.insn_opcode >> OP_SH_RT)
+			  && (((history[0].insn_opcode >> OP_SH_RT)
 			       & OP_MASK_RT)
 			      == RA))))
 	      || (! mips_opts.mips16
 		  && (prev_pinfo & INSN_WRITE_GPR_D)
 		  && (((pinfo & INSN_WRITE_GPR_D)
-		       && (((prev_insn.insn_opcode >> OP_SH_RD) & OP_MASK_RD)
+		       && (((history[0].insn_opcode >> OP_SH_RD) & OP_MASK_RD)
 			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
 		      || ((pinfo & INSN_WRITE_GPR_31)
-			  && (((prev_insn.insn_opcode >> OP_SH_RD)
+			  && (((history[0].insn_opcode >> OP_SH_RD)
 			       & OP_MASK_RD)
 			      == RA))))
 	      || (mips_opts.mips16
 		  && (pinfo & MIPS16_INSN_WRITE_31)
 		  && ((prev_pinfo & MIPS16_INSN_WRITE_31)
 		      || ((prev_pinfo & MIPS16_INSN_WRITE_GPR_Y)
-			  && (MIPS16OP_EXTRACT_REG32R (prev_insn.insn_opcode)
+			  && (MIPS16OP_EXTRACT_REG32R (history[0].insn_opcode)
 			      == RA))))
 	      /* If the branch writes a register that the previous
 		 instruction reads, we can not swap (we know that
 		 branches only write to RD or to $31).  */
 	      || (! mips_opts.mips16
 		  && (pinfo & INSN_WRITE_GPR_D)
-		  && insn_uses_reg (&prev_insn,
+		  && insn_uses_reg (&history[0],
 				    ((ip->insn_opcode >> OP_SH_RD)
 				     & OP_MASK_RD),
 				    MIPS_GR_REG))
 	      || (! mips_opts.mips16
 		  && (pinfo & INSN_WRITE_GPR_31)
-		  && insn_uses_reg (&prev_insn, RA, MIPS_GR_REG))
+		  && insn_uses_reg (&history[0], RA, MIPS_GR_REG))
 	      || (mips_opts.mips16
 		  && (pinfo & MIPS16_INSN_WRITE_31)
-		  && insn_uses_reg (&prev_insn, RA, MIPS_GR_REG))
+		  && insn_uses_reg (&history[0], RA, MIPS_GR_REG))
 	      /* If the previous previous instruction has a load
 		 delay, and sets a register that the branch reads, we
 		 can not swap.  */
 	      || (! mips_opts.mips16
               /* Itbl support may require additional care here.  */
-		  && (((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
+		  && (((history[1].insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
 		       && ! cop_interlocks)
-		      || ((prev_prev_insn.insn_mo->pinfo
+		      || ((history[1].insn_mo->pinfo
 			   & INSN_LOAD_MEMORY_DELAY)
 			  && ! gpr_interlocks))
 		  && insn_uses_reg (ip,
-				    ((prev_prev_insn.insn_opcode >> OP_SH_RT)
+				    ((history[1].insn_opcode >> OP_SH_RT)
 				     & OP_MASK_RT),
 				    MIPS_GR_REG))
 	      /* If one instruction sets a condition code and the
@@ -2533,11 +2545,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		  && (prev_pinfo & MIPS16_INSN_READ_PC))
 	      /* If the previous instruction was extended, we can not
                  swap.  */
-	      || (mips_opts.mips16 && prev_insn_extended)
+	      || (mips_opts.mips16 && history[0].extended_p)
 	      /* If the previous instruction had a fixup in mips16
                  mode, we can not swap.  This normally means that the
                  previous instruction was a 4 byte branch anyhow.  */
-	      || (mips_opts.mips16 && prev_insn_fixp[0])
+	      || (mips_opts.mips16 && history[0].fixp[0])
 	      /* If the previous instruction is a sync, sync.l, or
 		 sync.p, we can not swap.  */
 	      || (prev_pinfo & INSN_SYNC))
@@ -2550,8 +2562,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      if (mips_relax.sequence)
 		mips_relax.sizes[mips_relax.sequence - 1] += 4;
 	      /* Update the previous insn information.  */
-	      prev_prev_insn = *ip;
-	      prev_insn.insn_mo = &dummy_opcode;
+	      history[1].insn_mo = ip->insn_mo;
+	      history[1].use_extend = ip->use_extend;
+	      history[1].extend = ip->extend;
+	      history[1].insn_opcode = ip->insn_opcode;
+	      history[0].insn_mo = &dummy_opcode;
 	    }
 	  else
 	    {
@@ -2561,7 +2576,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		  char *prev_f;
 		  char temp[4];
 
-		  prev_f = prev_insn_frag->fr_literal + prev_insn_where;
+		  prev_f = history[0].frag->fr_literal + history[0].where;
 		  if (!relaxed_branch)
 		    {
 		      /* If this is not a relaxed branch, then just
@@ -2580,31 +2595,31 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 			 into the space freed by the moved instruction.  */
 		      f = frag_more (4);
 		      memcpy (f, prev_f, 4);
-		      prev_insn_frag->fr_fix -= 4;
-		      if (prev_insn_frag->fr_type == rs_machine_dependent)
-			memmove (prev_f, prev_f + 4, prev_insn_frag->fr_var);
+		      history[0].frag->fr_fix -= 4;
+		      if (history[0].frag->fr_type == rs_machine_dependent)
+			memmove (prev_f, prev_f + 4, history[0].frag->fr_var);
 		    }
 
-		  if (prev_insn_fixp[0])
+		  if (history[0].fixp[0])
 		    {
-		      prev_insn_fixp[0]->fx_frag = frag_now;
-		      prev_insn_fixp[0]->fx_where = f - frag_now->fr_literal;
+		      history[0].fixp[0]->fx_frag = frag_now;
+		      history[0].fixp[0]->fx_where = f - frag_now->fr_literal;
 		    }
-		  if (prev_insn_fixp[1])
+		  if (history[0].fixp[1])
 		    {
-		      prev_insn_fixp[1]->fx_frag = frag_now;
-		      prev_insn_fixp[1]->fx_where = f - frag_now->fr_literal;
+		      history[0].fixp[1]->fx_frag = frag_now;
+		      history[0].fixp[1]->fx_where = f - frag_now->fr_literal;
 		    }
-		  if (prev_insn_fixp[2])
+		  if (history[0].fixp[2])
 		    {
-		      prev_insn_fixp[2]->fx_frag = frag_now;
-		      prev_insn_fixp[2]->fx_where = f - frag_now->fr_literal;
+		      history[0].fixp[2]->fx_frag = frag_now;
+		      history[0].fixp[2]->fx_where = f - frag_now->fr_literal;
 		    }
-		  if (prev_insn_fixp[0] && HAVE_NEWABI
-		      && prev_insn_frag != frag_now
-		      && (prev_insn_fixp[0]->fx_r_type
+		  if (history[0].fixp[0] && HAVE_NEWABI
+		      && history[0].frag != frag_now
+		      && (history[0].fixp[0]->fx_r_type
 			  == BFD_RELOC_MIPS_GOT_DISP
-			  || (prev_insn_fixp[0]->fx_r_type
+			  || (history[0].fixp[0]->fx_r_type
 			      == BFD_RELOC_MIPS_CALL16)))
 		    {
 		      /* To avoid confusion in tc_gen_reloc, we must
@@ -2617,21 +2632,21 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		    {
 		      if (fixp[0])
 			{
-			  fixp[0]->fx_frag = prev_insn_frag;
-			  fixp[0]->fx_where = prev_insn_where;
+			  fixp[0]->fx_frag = history[0].frag;
+			  fixp[0]->fx_where = history[0].where;
 			}
 		      if (fixp[1])
 			{
-			  fixp[1]->fx_frag = prev_insn_frag;
-			  fixp[1]->fx_where = prev_insn_where;
+			  fixp[1]->fx_frag = history[0].frag;
+			  fixp[1]->fx_where = history[0].where;
 			}
 		      if (fixp[2])
 			{
-			  fixp[2]->fx_frag = prev_insn_frag;
-			  fixp[2]->fx_where = prev_insn_where;
+			  fixp[2]->fx_frag = history[0].frag;
+			  fixp[2]->fx_where = history[0].where;
 			}
 		    }
-		  else if (prev_insn_frag->fr_type == rs_machine_dependent)
+		  else if (history[0].frag->fr_type == rs_machine_dependent)
 		    {
 		      if (fixp[0])
 			fixp[0]->fx_where -= 4;
@@ -2646,10 +2661,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		  char *prev_f;
 		  char temp[2];
 
-		  assert (prev_insn_fixp[0] == NULL);
-		  assert (prev_insn_fixp[1] == NULL);
-		  assert (prev_insn_fixp[2] == NULL);
-		  prev_f = prev_insn_frag->fr_literal + prev_insn_where;
+		  assert (history[0].fixp[0] == NULL);
+		  assert (history[0].fixp[1] == NULL);
+		  assert (history[0].fixp[2] == NULL);
+		  prev_f = history[0].frag->fr_literal + history[0].where;
 		  memcpy (temp, prev_f, 2);
 		  memcpy (prev_f, f, 2);
 		  if (*reloc_type != BFD_RELOC_MIPS16_JMP)
@@ -2664,42 +2679,45 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		    }
 		  if (fixp[0])
 		    {
-		      fixp[0]->fx_frag = prev_insn_frag;
-		      fixp[0]->fx_where = prev_insn_where;
+		      fixp[0]->fx_frag = history[0].frag;
+		      fixp[0]->fx_where = history[0].where;
 		    }
 		  if (fixp[1])
 		    {
-		      fixp[1]->fx_frag = prev_insn_frag;
-		      fixp[1]->fx_where = prev_insn_where;
+		      fixp[1]->fx_frag = history[0].frag;
+		      fixp[1]->fx_where = history[0].where;
 		    }
 		  if (fixp[2])
 		    {
-		      fixp[2]->fx_frag = prev_insn_frag;
-		      fixp[2]->fx_where = prev_insn_where;
+		      fixp[2]->fx_frag = history[0].frag;
+		      fixp[2]->fx_where = history[0].where;
 		    }
 		}
 
-	      /* Update the previous insn information; leave prev_insn
+	      /* Update the previous insn information; leave history[0]
 		 unchanged.  */
-	      prev_prev_insn = *ip;
+	      history[1].insn_mo = ip->insn_mo;
+	      history[1].use_extend = ip->use_extend;
+	      history[1].extend = ip->extend;
+	      history[1].insn_opcode = ip->insn_opcode;
 	    }
-	  prev_insn_is_delay_slot = 1;
+	  history[0].delay_slot_p = 1;
 
 	  /* If that was an unconditional branch, forget the previous
 	     insn information.  */
 	  if (pinfo & INSN_UNCOND_BRANCH_DELAY)
 	    {
-	      prev_prev_insn.insn_mo = &dummy_opcode;
-	      prev_insn.insn_mo = &dummy_opcode;
+	      history[1].insn_mo = &dummy_opcode;
+	      history[0].insn_mo = &dummy_opcode;
 	    }
 
-	  prev_insn_fixp[0] = NULL;
-	  prev_insn_fixp[1] = NULL;
-	  prev_insn_fixp[2] = NULL;
-	  prev_insn_reloc_type[0] = BFD_RELOC_UNUSED;
-	  prev_insn_reloc_type[1] = BFD_RELOC_UNUSED;
-	  prev_insn_reloc_type[2] = BFD_RELOC_UNUSED;
-	  prev_insn_extended = 0;
+	  history[0].fixp[0] = NULL;
+	  history[0].fixp[1] = NULL;
+	  history[0].fixp[2] = NULL;
+	  history[0].reloc_type[0] = BFD_RELOC_UNUSED;
+	  history[0].reloc_type[1] = BFD_RELOC_UNUSED;
+	  history[0].reloc_type[2] = BFD_RELOC_UNUSED;
+	  history[0].extended_p = 0;
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
@@ -2709,60 +2727,77 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     the next instruction.  */
 	  emit_nop ();
 	  /* Update the previous insn information.  */
-	  prev_prev_insn = *ip;
-	  prev_insn.insn_mo = &dummy_opcode;
-	  prev_insn_fixp[0] = NULL;
-	  prev_insn_fixp[1] = NULL;
-	  prev_insn_fixp[2] = NULL;
-	  prev_insn_reloc_type[0] = BFD_RELOC_UNUSED;
-	  prev_insn_reloc_type[1] = BFD_RELOC_UNUSED;
-	  prev_insn_reloc_type[2] = BFD_RELOC_UNUSED;
-	  prev_insn_extended = 0;
-	  prev_insn_is_delay_slot = 1;
+	  history[1].insn_mo = ip->insn_mo;
+	  history[1].use_extend = ip->use_extend;
+	  history[1].extend = ip->extend;
+	  history[1].insn_opcode = ip->insn_opcode;
+	  history[0].insn_mo = &dummy_opcode;
+	  history[0].fixp[0] = NULL;
+	  history[0].fixp[1] = NULL;
+	  history[0].fixp[2] = NULL;
+	  history[0].reloc_type[0] = BFD_RELOC_UNUSED;
+	  history[0].reloc_type[1] = BFD_RELOC_UNUSED;
+	  history[0].reloc_type[2] = BFD_RELOC_UNUSED;
+	  history[0].extended_p = 0;
+	  history[0].delay_slot_p = 1;
 	}
       else
 	{
 	  /* Update the previous insn information.  */
 	  if (nops > 0)
-	    prev_prev_insn.insn_mo = &dummy_opcode;
+	    history[1].insn_mo = &dummy_opcode;
 	  else
-	    prev_prev_insn = prev_insn;
-	  prev_insn = *ip;
+	    {
+	      history[1].insn_mo = history[0].insn_mo;
+	      history[1].use_extend = history[0].use_extend;
+	      history[1].extend = history[0].extend;
+	      history[1].insn_opcode = history[0].insn_opcode;
+	    }
+	  history[0].insn_mo = ip->insn_mo;
+	  history[0].use_extend = ip->use_extend;
+	  history[0].extend = ip->extend;
+	  history[0].insn_opcode = ip->insn_opcode;
 
 	  /* Any time we see a branch, we always fill the delay slot
 	     immediately; since this insn is not a branch, we know it
 	     is not in a delay slot.  */
-	  prev_insn_is_delay_slot = 0;
+	  history[0].delay_slot_p = 0;
 
-	  prev_insn_fixp[0] = fixp[0];
-	  prev_insn_fixp[1] = fixp[1];
-	  prev_insn_fixp[2] = fixp[2];
-	  prev_insn_reloc_type[0] = reloc_type[0];
-	  prev_insn_reloc_type[1] = reloc_type[1];
-	  prev_insn_reloc_type[2] = reloc_type[2];
+	  history[0].fixp[0] = fixp[0];
+	  history[0].fixp[1] = fixp[1];
+	  history[0].fixp[2] = fixp[2];
+	  history[0].reloc_type[0] = reloc_type[0];
+	  history[0].reloc_type[1] = reloc_type[1];
+	  history[0].reloc_type[2] = reloc_type[2];
 	  if (mips_opts.mips16)
-	    prev_insn_extended = (ip->use_extend
-				  || *reloc_type > BFD_RELOC_UNUSED);
+	    history[0].extended_p = (ip->use_extend
+				     || *reloc_type > BFD_RELOC_UNUSED);
 	}
 
-      prev_prev_insn_unreordered = prev_insn_unreordered;
-      prev_insn_unreordered = 0;
-      prev_insn_frag = frag_now;
-      prev_insn_where = f - frag_now->fr_literal;
-      prev_insn_valid = 1;
+      history[1].noreorder_p = history[0].noreorder_p;
+      history[0].noreorder_p = 0;
+      history[0].frag = frag_now;
+      history[0].where = f - frag_now->fr_literal;
+      history[0].valid_p = 1;
     }
   else if (mips_relax.sequence != 2)
     {
       /* We need to record a bit of information even when we are not
          reordering, in order to determine the base address for mips16
          PC relative relocs.  */
-      prev_prev_insn = prev_insn;
-      prev_insn = *ip;
-      prev_insn_reloc_type[0] = reloc_type[0];
-      prev_insn_reloc_type[1] = reloc_type[1];
-      prev_insn_reloc_type[2] = reloc_type[2];
-      prev_prev_insn_unreordered = prev_insn_unreordered;
-      prev_insn_unreordered = 1;
+      history[1].insn_mo = history[0].insn_mo;
+      history[1].use_extend = history[0].use_extend;
+      history[1].extend = history[0].extend;
+      history[1].insn_opcode = history[0].insn_opcode;
+      history[0].insn_mo = ip->insn_mo;
+      history[0].use_extend = ip->use_extend;
+      history[0].extend = ip->extend;
+      history[0].insn_opcode = ip->insn_opcode;
+      history[0].reloc_type[0] = reloc_type[0];
+      history[0].reloc_type[1] = reloc_type[1];
+      history[0].reloc_type[2] = reloc_type[2];
+      history[1].noreorder_p = history[0].noreorder_p;
+      history[0].noreorder_p = 1;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -2778,21 +2813,21 @@ mips_no_prev_insn (int preserve)
 {
   if (! preserve)
     {
-      prev_insn.insn_mo = &dummy_opcode;
-      prev_prev_insn.insn_mo = &dummy_opcode;
+      history[0].insn_mo = &dummy_opcode;
+      history[1].insn_mo = &dummy_opcode;
       prev_nop_frag = NULL;
       prev_nop_frag_holds = 0;
       prev_nop_frag_required = 0;
       prev_nop_frag_since = 0;
     }
-  prev_insn_valid = 0;
-  prev_insn_is_delay_slot = 0;
-  prev_insn_unreordered = 0;
-  prev_insn_extended = 0;
-  prev_insn_reloc_type[0] = BFD_RELOC_UNUSED;
-  prev_insn_reloc_type[1] = BFD_RELOC_UNUSED;
-  prev_insn_reloc_type[2] = BFD_RELOC_UNUSED;
-  prev_prev_insn_unreordered = 0;
+  history[0].valid_p = 0;
+  history[0].delay_slot_p = 0;
+  history[0].noreorder_p = 0;
+  history[0].extended_p = 0;
+  history[0].reloc_type[0] = BFD_RELOC_UNUSED;
+  history[0].reloc_type[1] = BFD_RELOC_UNUSED;
+  history[0].reloc_type[2] = BFD_RELOC_UNUSED;
+  history[1].noreorder_p = 0;
   mips_clear_insn_labels ();
 }
 
@@ -2811,51 +2846,51 @@ mips_emit_delays (bfd_boolean insns)
 
       nops = 0;
       if ((! mips_opts.mips16
-	   && ((prev_insn.insn_mo->pinfo
+	   && ((history[0].insn_mo->pinfo
 		& (INSN_LOAD_COPROC_DELAY
 		   | INSN_COPROC_MOVE_DELAY
 		   | INSN_WRITE_COND_CODE))
 	       && ! cop_interlocks))
 	  || (! hilo_interlocks
-	      && (prev_insn.insn_mo->pinfo
+	      && (history[0].insn_mo->pinfo
 		  & (INSN_READ_LO
 		     | INSN_READ_HI)))
 	  || (! mips_opts.mips16
-	      && (prev_insn.insn_mo->pinfo & INSN_LOAD_MEMORY_DELAY)
+	      && (history[0].insn_mo->pinfo & INSN_LOAD_MEMORY_DELAY)
 	      && ! gpr_interlocks)
 	  || (! mips_opts.mips16
-	      && (prev_insn.insn_mo->pinfo & INSN_COPROC_MEMORY_DELAY)
+	      && (history[0].insn_mo->pinfo & INSN_COPROC_MEMORY_DELAY)
 	      && ! cop_mem_interlocks))
 	{
 	  /* Itbl support may require additional care here.  */
 	  ++nops;
 	  if ((! mips_opts.mips16
-	       && ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	       && ((history[0].insn_mo->pinfo & INSN_WRITE_COND_CODE)
 		   && ! cop_interlocks))
 	      || (! hilo_interlocks
-		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
-		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
+		  && ((history[0].insn_mo->pinfo & INSN_READ_HI)
+		      || (history[0].insn_mo->pinfo & INSN_READ_LO))))
 	    ++nops;
 
-	  if (prev_insn_unreordered)
+	  if (history[0].noreorder_p)
 	    nops = 0;
 	}
       else if ((! mips_opts.mips16
-		&& ((prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+		&& ((history[1].insn_mo->pinfo & INSN_WRITE_COND_CODE)
 		    && ! cop_interlocks))
 	       || (! hilo_interlocks
-		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
-		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
+		   && ((history[1].insn_mo->pinfo & INSN_READ_HI)
+		       || (history[1].insn_mo->pinfo & INSN_READ_LO))))
 	{
 	  /* Itbl support may require additional care here.  */
-	  if (! prev_prev_insn_unreordered)
+	  if (! history[1].noreorder_p)
 	    ++nops;
 	}
 
-      if (mips_fix_vr4120 && prev_insn.insn_mo->name)
+      if (mips_fix_vr4120 && history[0].insn_mo->name)
 	{
 	  int min_nops = 0;
-	  const char *pn = prev_insn.insn_mo->name;
+	  const char *pn = history[0].insn_mo->name;
 	  if (strncmp (pn, "macc", 4) == 0
 	      || strncmp (pn, "dmacc", 5) == 0
 	      || strncmp (pn, "dmult", 5) == 0
@@ -2920,7 +2955,7 @@ macro_start (void)
 {
   memset (&mips_macro_warning.sizes, 0, sizeof (mips_macro_warning.sizes));
   mips_macro_warning.delay_slot_p = (mips_opts.noreorder
-				     && (prev_insn.insn_mo->pinfo
+				     && (history[0].insn_mo->pinfo
 					 & (INSN_UNCOND_BRANCH_DELAY
 					    | INSN_COND_BRANCH_DELAY
 					    | INSN_COND_BRANCH_LIKELY)) != 0);
