@@ -1,3 +1,7 @@
+Wed Feb 11 08:41:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/i386/fbsd.mh (XDEPFILES): Add ser-tcp.o.
+
 Tue Feb 10 17:50:37 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* tracepoint.c (tracepoint_operation): Call the modify_tracepoint_hook
