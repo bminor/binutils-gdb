@@ -285,6 +285,11 @@ The following cleanups have been identified as part of GDB 5.2.
 
 --
 
+Remove old code that does not use ui_out functions and all the related
+"ifdef"s.
+
+--
+
 Eliminate more compiler warnings.
 
 --
