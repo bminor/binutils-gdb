@@ -1554,6 +1554,10 @@ symbol_begin ()
 
 int indent_level;
 
+/* Maximum indent level.
+   Available for modification inside a gdb session.  */
+int max_indent_level = 8;
+
 #if 0
 
 static void
@@ -1602,7 +1606,8 @@ print_symbol_value_1 (file, sym)
           && s != expr_section)
 	fprintf (file, " %lx", (long) S_GET_VALUE (sym));
     }
-  else if (indent_level < 8 && S_GET_SEGMENT (sym) != undefined_section)
+  else if (indent_level < max_indent_level
+	   && S_GET_SEGMENT (sym) != undefined_section)
     {
       indent_level++;
       fprintf (file, "\n%*s<", indent_level * 4, "");

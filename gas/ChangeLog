@@ -1,3 +1,8 @@
+Thu Apr  9 10:29:42 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* symbols.c (max_indent_level): New global.
+	(print_symbol_value_1): Use it.
+
 Wed Apr  8 16:16:11 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* symbols.c (print_binary): New function.
