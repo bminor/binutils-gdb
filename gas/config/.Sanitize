@@ -160,6 +160,7 @@ te-ppcnw.h
 te-psos.h
 te-riscix.h
 te-sco386.h
+te-sparcaout.h
 te-sun3.h
 te-sysv32.h
 vax-inst.h

@@ -1,3 +1,25 @@
+Fri Sep  6 16:00:29 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (sparc-*-aout): Set `em'.
+	* configure: Regenerated.
+	* config/te-sparcaout.h: New file.
+	* config/tc-sparc.h (TARGET_BYTES_BIG_ENDIAN): Define.
+	Ifdef TE_SPARCOUT define TARGET_FORMAT and SPARC_BIENDIAN.
+	* config/tc-sparc.c (INSN_BIG_ENDIAN): New macro.
+	(SPECIAL_CASE_{SETSW,SETX}): Define.
+	({NOP,OR,FMOVS,SETHI,SLLX,SRA}_INSN): Define.
+	(md_begin): Delete setting of `target_big_endian'.
+	(output_insn): New function.
+	(md_assemble): Rewrite.  Add `setx' support.
+	(sparc_ip): Handle `0' operand char.  Recognize setuw, setsw, setx
+	special cases.
+	(md_atof): Add little endian support.
+	(md_number_to_chars): Likewise.
+	(md_apply_fix): Likewise.
+	(md_longopts): Recognize -EL,-EB ifdef SPARC_BIENDIAN.
+	(md_parse_option): Likewise.
+	(md_show_usage): Print -EL, -EB ifdef SPARC_BIENDIAN.
+
 Thu Sep  5 13:40:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_new_file): New function.
