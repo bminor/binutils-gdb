@@ -661,7 +661,7 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      final_type = R_HPPA_PLABEL_32;
 	      break;
 	    case e_tsel:
-	      final_type == R_HPPA_DLT_32;
+	      final_type = R_HPPA_DLT_32;
 	      break;
 	    default:
 	      UNDEFINED;

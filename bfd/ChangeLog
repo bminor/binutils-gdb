@@ -1,5 +1,7 @@
 Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elf32-hppa.c (hppa_elf_gen_reloc_type): Typo (== for =).
+
 	* bfd/aoutx.h (aout_link_input_section_std,
 	aout_link_input_section_ext): Pass additional arguments to
 	reloc_overflow callback.
