@@ -1440,14 +1440,14 @@ c-exp.tab.c: c-exp.y
 	mv c-exp.new ./c-exp.tab.c
 
 cp-names.tab.o: cp-names.tab.c $(safe_ctype_h) $(cp_names_h) \
-	$(srcdir)/../libiberty/cp-demangle.c
+	$(srcdir)/../include/cp-demangle.h
 
 cp-names-main.tab.o: cp-names.tab.c $(safe_ctype_h) $(cp_names_h) \
-	$(srcdir)/../libiberty/cp-demangle.c
+	$(srcdir)/../include/cp-demangle.h
 	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
 		-o cp-names-main.tab.o cp-names.tab.c
-test-cpnames: cp-names-main.tab.o
-	$(CC) -o test-cpnames cp-names-main.tab.o -liberty
+test-cpnames: cp-names-main.tab.o $(LIBIBERTY)
+	$(CC) -o test-cpnames cp-names-main.tab.o $(LIBIBERTY)
 
 .PRECIOUS: cp-names.tab.c
 cp-names.tab.c: cp-names.y

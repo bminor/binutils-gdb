@@ -1,3 +1,11 @@
+2004-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cp-names.tab.o, cp-names-main.tab.o, test-cpnames):
+	Update dependencies.  Link the correct libiberty.
+	* cp-names.y: Include cp-demangle.h instead of cp-demangle.c.
+	Update names of exported functions from cp-demangle.c.  Use
+	cp_v3_d_init_info_alloc and cp_v3_d_free_info.
+
 2003-12-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (yylex): Fix thinko for character constants.

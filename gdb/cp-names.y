@@ -1,6 +1,6 @@
 /* YACC parser for C++ names, for GDB.
 
-   Copyright 2003
+   Copyright 2003, 2004
    Free Software Foundation, Inc.
 
    Parts of the lexer are based on c-exp.y from GDB.
@@ -37,9 +37,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <string.h>
 
 #include "safe-ctype.h"
+#include "libiberty.h"
+#include "demangle.h"
 
-/* #define CP_DEMANGLE_DEBUG */
-#include "../libiberty/cp-demangle.c"
+#define IN_GDB
+#include "cp-demangle.h"
 
 #include "cp-names.h"
 
@@ -318,15 +320,15 @@ function
 		   start_opt is used to handle "function-local" variables and
 		   types.  */
 		|	typespec_2 function_arglist start_opt
-			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
-			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  if ($3) $$ = cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
 		|	colon_ext_only function_arglist start_opt
-			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
-			  if ($3) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  if ($3) $$ = cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, $$, $3); }
 
 		|	conversion_op_name start_opt
 			{ $$ = $1.comp;
-			  if ($2) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $2); }
+			  if ($2) $$ = cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, $$, $2); }
 		|	conversion_op_name abstract_declarator_fn
 			{ if ($2.last)
 			    {
@@ -338,92 +340,92 @@ function
 			    }
 			  /* If we have an arglist, build a function type.  */
 			  if ($2.fn.comp)
-			    $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1.comp, $2.fn.comp);
+			    $$ = cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, $1.comp, $2.fn.comp);
 			  else
 			    $$ = $1.comp;
-			  if ($2.start) $$ = d_make_comp (di, D_COMP_LOCAL_NAME, $$, $2.start);
+			  if ($2.start) $$ = cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, $$, $2.start);
 			}
 		;
 
 demangler_special
 		:	DEMANGLER_SPECIAL start
-			{ $$ = d_make_empty (di, $1);
+			{ $$ = cp_v3_d_make_empty (di, $1);
 			  d_left ($$) = $2;
 			  d_right ($$) = NULL; }
 		|	CONSTRUCTION_VTABLE start CONSTRUCTION_IN start
-			{ $$ = d_make_comp (di, D_COMP_CONSTRUCTION_VTABLE, $2, $4); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_CONSTRUCTION_VTABLE, $2, $4); }
 		|	GLOBAL
-			{ $$ = d_make_empty (di, $1.val);
+			{ $$ = cp_v3_d_make_empty (di, $1.val);
 			  d_left ($$) = $1.type;
 			  d_right ($$) = NULL; }
 		;
 
 operator	:	OPERATOR NEW
-			{ $$ = d_op_from_string ("new"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "new"); }
 		|	OPERATOR DELETE
-			{ $$ = d_op_from_string ("delete"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "delete"); }
 		|	OPERATOR NEW '[' ']'
-			{ $$ = d_op_from_string ("new[]"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "new[]"); }
 		|	OPERATOR DELETE '[' ']'
-			{ $$ = d_op_from_string ("delete[]"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "delete[]"); }
 		|	OPERATOR '+'
-			{ $$ = d_op_from_string ("+"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "+"); }
 		|	OPERATOR '-'
-			{ $$ = d_op_from_string ("-"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "-"); }
 		|	OPERATOR '*'
-			{ $$ = d_op_from_string ("*"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "*"); }
 		|	OPERATOR '/'
-			{ $$ = d_op_from_string ("/"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "/"); }
 		|	OPERATOR '%'
-			{ $$ = d_op_from_string ("%"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "%"); }
 		|	OPERATOR '^'
-			{ $$ = d_op_from_string ("^"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "^"); }
 		|	OPERATOR '&'
-			{ $$ = d_op_from_string ("&"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "&"); }
 		|	OPERATOR '|'
-			{ $$ = d_op_from_string ("|"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "|"); }
 		|	OPERATOR '~'
-			{ $$ = d_op_from_string ("~"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "~"); }
 		|	OPERATOR '!'
-			{ $$ = d_op_from_string ("!"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "!"); }
 		|	OPERATOR '='
-			{ $$ = d_op_from_string ("="); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "="); }
 		|	OPERATOR '<'
-			{ $$ = d_op_from_string ("<"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "<"); }
 		|	OPERATOR '>'
-			{ $$ = d_op_from_string (">"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, ">"); }
 		|	OPERATOR ASSIGN_MODIFY
-			{ $$ = d_op_from_string ($2); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, $2); }
 		|	OPERATOR LSH
-			{ $$ = d_op_from_string ("<<"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "<<"); }
 		|	OPERATOR RSH
-			{ $$ = d_op_from_string (">>"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, ">>"); }
 		|	OPERATOR EQUAL
-			{ $$ = d_op_from_string ("=="); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "=="); }
 		|	OPERATOR NOTEQUAL
-			{ $$ = d_op_from_string ("!="); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "!="); }
 		|	OPERATOR LEQ
-			{ $$ = d_op_from_string ("<="); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "<="); }
 		|	OPERATOR GEQ
-			{ $$ = d_op_from_string (">="); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, ">="); }
 		|	OPERATOR ANDAND
-			{ $$ = d_op_from_string ("&&"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "&&"); }
 		|	OPERATOR OROR
-			{ $$ = d_op_from_string ("||"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "||"); }
 		|	OPERATOR INCREMENT
-			{ $$ = d_op_from_string ("++"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "++"); }
 		|	OPERATOR DECREMENT
-			{ $$ = d_op_from_string ("--"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "--"); }
 		|	OPERATOR ','
-			{ $$ = d_op_from_string (","); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, ","); }
 		|	OPERATOR ARROW '*'
-			{ $$ = d_op_from_string ("->*"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "->*"); }
 		|	OPERATOR ARROW
-			{ $$ = d_op_from_string ("->"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "->"); }
 		|	OPERATOR '(' ')'
-			{ $$ = d_op_from_string ("()"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "()"); }
 		|	OPERATOR '[' ']'
-			{ $$ = d_op_from_string ("[]"); }
+			{ $$ = cp_v3_d_make_operator_from_string (di, "[]"); }
 		;
 
 		/* Conversion operators.  We don't try to handle some of
@@ -431,7 +433,7 @@ operator	:	OPERATOR NEW
 		   since it's not clear that it's parseable.  */
 conversion_op
 		:	OPERATOR typespec_2
-			{ $$ = d_make_comp (di, D_COMP_CAST, $2, NULL); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_CAST, $2, NULL); }
 		;
 
 conversion_op_name
@@ -459,9 +461,9 @@ conversion_op_name
 /* This accepts certain invalid placements of '~'.  */
 unqualified_name:	operator
 		|	operator '<' template_params '>'
-			{ $$ = d_make_comp (di, D_COMP_TEMPLATE, $1, $3.comp); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_TEMPLATE, $1, $3.comp); }
 		|	'~' NAME
-			{ $$ = d_make_dtor (di, gnu_v3_complete_object_dtor, $2); }
+			{ $$ = cp_v3_d_make_dtor (di, gnu_v3_complete_object_dtor, $2); }
 		;
 
 /* This rule is used in name and nested_name, and expanded inline there
@@ -502,27 +504,27 @@ ext_only_name	:	nested_name unqualified_name
 		;
 
 nested_name	:	NAME COLONCOLON
-			{ $$.comp = d_make_empty (di, D_COMP_QUAL_NAME);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_QUAL_NAME);
 			  d_left ($$.comp) = $1;
 			  d_right ($$.comp) = NULL;
 			  $$.last = $$.comp;
 			}
 		|	nested_name NAME COLONCOLON
 			{ $$.comp = $1.comp;
-			  d_right ($1.last) = d_make_empty (di, D_COMP_QUAL_NAME);
+			  d_right ($1.last) = cp_v3_d_make_empty (di, D_COMP_QUAL_NAME);
 			  $$.last = d_right ($1.last);
 			  d_left ($$.last) = $2;
 			  d_right ($$.last) = NULL;
 			}
 		|	template COLONCOLON
-			{ $$.comp = d_make_empty (di, D_COMP_QUAL_NAME);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_QUAL_NAME);
 			  d_left ($$.comp) = $1;
 			  d_right ($$.comp) = NULL;
 			  $$.last = $$.comp;
 			}
 		|	nested_name template COLONCOLON
 			{ $$.comp = $1.comp;
-			  d_right ($1.last) = d_make_empty (di, D_COMP_QUAL_NAME);
+			  d_right ($1.last) = cp_v3_d_make_empty (di, D_COMP_QUAL_NAME);
 			  $$.last = d_right ($1.last);
 			  d_left ($$.last) = $2;
 			  d_right ($$.last) = NULL;
@@ -532,15 +534,15 @@ nested_name	:	NAME COLONCOLON
 /* D_COMP_TEMPLATE */
 /* D_COMP_TEMPLATE_ARGLIST */
 template	:	NAME '<' template_params '>'
-			{ $$ = d_make_comp (di, D_COMP_TEMPLATE, $1, $3.comp); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_TEMPLATE, $1, $3.comp); }
 		;
 
 template_params	:	template_arg
-			{ $$.comp = d_make_comp (di, D_COMP_TEMPLATE_ARGLIST, $1, NULL);
+			{ $$.comp = cp_v3_d_make_comp (di, D_COMP_TEMPLATE_ARGLIST, $1, NULL);
 			$$.last = &d_right ($$.comp); }
 		|	template_params ',' template_arg
 			{ $$.comp = $1.comp;
-			  *$1.last = d_make_comp (di, D_COMP_TEMPLATE_ARGLIST, $3, NULL);
+			  *$1.last = cp_v3_d_make_comp (di, D_COMP_TEMPLATE_ARGLIST, $3, NULL);
 			  $$.last = &d_right (*$1.last);
 			}
 		;
@@ -555,9 +557,9 @@ template_arg	:	typespec_2
 			  *$2.last = $1;
 			}
 		|	'&' start
-			{ $$ = d_make_comp (di, D_COMP_UNARY, d_op_from_string ("&"), $2); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY, cp_v3_d_make_operator_from_string (di, "&"), $2); }
 		|	'&' '(' start ')'
-			{ $$ = d_make_comp (di, D_COMP_UNARY, d_op_from_string ("&"), $3); }
+			{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY, cp_v3_d_make_operator_from_string (di, "&"), $3); }
 		|	exp
 		;
 
@@ -570,30 +572,30 @@ function_args	:	typespec_2
 			    }
 			  else
 			    {
-			      $$.comp = d_make_comp (di, D_COMP_ARGLIST, $1, NULL);
+			      $$.comp = cp_v3_d_make_comp (di, D_COMP_ARGLIST, $1, NULL);
 			      $$.last = &d_right ($$.comp);
 			    }
 			}
 		|	typespec_2 abstract_declarator
 			{ *$2.last = $1;
-			  $$.comp = d_make_comp (di, D_COMP_ARGLIST, $2.comp, NULL);
+			  $$.comp = cp_v3_d_make_comp (di, D_COMP_ARGLIST, $2.comp, NULL);
 			  $$.last = &d_right ($$.comp);
 			}
 		|	function_args ',' typespec_2
-			{ *$1.last = d_make_comp (di, D_COMP_ARGLIST, $3, NULL);
+			{ *$1.last = cp_v3_d_make_comp (di, D_COMP_ARGLIST, $3, NULL);
 			  $$.comp = $1.comp;
 			  $$.last = &d_right (*$1.last);
 			}
 		|	function_args ',' typespec_2 abstract_declarator
 			{ *$4.last = $3;
-			  *$1.last = d_make_comp (di, D_COMP_ARGLIST, $4.comp, NULL);
+			  *$1.last = cp_v3_d_make_comp (di, D_COMP_ARGLIST, $4.comp, NULL);
 			  $$.comp = $1.comp;
 			  $$.last = &d_right (*$1.last);
 			}
 		|	function_args ',' ELLIPSIS
 			{ *$1.last
-			    = d_make_comp (di, D_COMP_ARGLIST,
-					   d_make_builtin_type (di, &d_builtin_types['z' - 'a']),
+			    = cp_v3_d_make_comp (di, D_COMP_ARGLIST,
+					   cp_v3_d_make_builtin_type (di, 'z'),
 					   NULL);
 			  $$.comp = $1.comp;
 			  $$.last = &d_right (*$1.last);
@@ -601,11 +603,11 @@ function_args	:	typespec_2
 		;
 
 function_arglist:	'(' function_args ')' qualifiers_opt
-			{ $$.comp = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $2.comp);
+			{ $$.comp = cp_v3_d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $2.comp);
 			  $$.last = &d_left ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $4, 1); }
 		|	'(' ')' qualifiers_opt
-			{ $$.comp = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL);
+			{ $$.comp = cp_v3_d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL);
 			  $$.last = &d_left ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $3, 1); }
 		;
@@ -654,31 +656,31 @@ int_seq		:	int_part
 builtin_type	:	int_seq
 			{ $$ = d_int_type ($1); }
 		|	FLOAT_KEYWORD
-			{ $$ = d_make_builtin_type (di, &d_builtin_types['f' - 'a']); }
+			{ $$ = cp_v3_d_make_builtin_type (di, 'f'); }
 		|	DOUBLE_KEYWORD
-			{ $$ = d_make_builtin_type (di, &d_builtin_types['d' - 'a']); }
+			{ $$ = cp_v3_d_make_builtin_type (di, 'd'); }
 		|	LONG DOUBLE_KEYWORD
-			{ $$ = d_make_builtin_type (di, &d_builtin_types['e' - 'a']); }
+			{ $$ = cp_v3_d_make_builtin_type (di, 'e'); }
 		|	BOOL
-			{ $$ = d_make_builtin_type (di, &d_builtin_types['b' - 'a']); }
+			{ $$ = cp_v3_d_make_builtin_type (di, 'b'); }
 		|	WCHAR_T
-			{ $$ = d_make_builtin_type (di, &d_builtin_types['w' - 'a']); }
+			{ $$ = cp_v3_d_make_builtin_type (di, 'w'); }
 		|	VOID
-			{ $$ = d_make_builtin_type (di, &d_builtin_types['v' - 'a']); }
+			{ $$ = cp_v3_d_make_builtin_type (di, 'v'); }
 		;
 
 ptr_operator	:	'*' qualifiers_opt
-			{ $$.comp = d_make_empty (di, D_COMP_POINTER);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_POINTER);
 			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_left ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $2, 0); }
 		/* g++ seems to allow qualifiers after the reference?  */
 		|	'&'
-			{ $$.comp = d_make_empty (di, D_COMP_REFERENCE);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_REFERENCE);
 			  $$.comp->u.s_binary.left = $$.comp->u.s_binary.right = NULL;
 			  $$.last = &d_left ($$.comp); }
 		|	nested_name '*' qualifiers_opt
-			{ $$.comp = d_make_empty (di, D_COMP_PTRMEM_TYPE);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_PTRMEM_TYPE);
 			  $$.comp->u.s_binary.left = $1.comp;
 			  /* Convert the innermost D_COMP_QUAL_NAME to a D_COMP_NAME.  */
 			  *$1.last = *d_left ($1.last);
@@ -686,7 +688,7 @@ ptr_operator	:	'*' qualifiers_opt
 			  $$.last = &d_right ($$.comp);
 			  $$.comp = d_qualify ($$.comp, $3, 0); }
 		|	COLONCOLON nested_name '*' qualifiers_opt
-			{ $$.comp = d_make_empty (di, D_COMP_PTRMEM_TYPE);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_PTRMEM_TYPE);
 			  $$.comp->u.s_binary.left = $2.comp;
 			  /* Convert the innermost D_COMP_QUAL_NAME to a D_COMP_NAME.  */
 			  *$2.last = *d_left ($2.last);
@@ -696,11 +698,11 @@ ptr_operator	:	'*' qualifiers_opt
 		;
 
 array_indicator	:	'[' ']'
-			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
+			{ $$ = cp_v3_d_make_empty (di, D_COMP_ARRAY_TYPE);
 			  d_left ($$) = NULL;
 			}
 		|	'[' INT ']'
-			{ $$ = d_make_empty (di, D_COMP_ARRAY_TYPE);
+			{ $$ = cp_v3_d_make_empty (di, D_COMP_ARRAY_TYPE);
 			  d_left ($$) = $2;
 			}
 		;
@@ -854,7 +856,7 @@ direct_declarator
 			  $$.last = &d_right ($2);
 			}
 		|	colon_ext_name
-			{ $$.comp = d_make_empty (di, D_COMP_TYPED_NAME);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_TYPED_NAME);
 			  d_left ($$.comp) = $1;
 			  $$.last = &d_right ($$.comp);
 			}
@@ -871,7 +873,7 @@ declarator_1	:	ptr_operator declarator_1
 			  $$.last = $1.last;
 			  *$2.last = $1.comp; }
 		|	colon_ext_name
-			{ $$.comp = d_make_empty (di, D_COMP_TYPED_NAME);
+			{ $$.comp = cp_v3_d_make_empty (di, D_COMP_TYPED_NAME);
 			  d_left ($$.comp) = $1;
 			  $$.last = &d_right ($$.comp);
 			}
@@ -884,15 +886,15 @@ declarator_1	:	ptr_operator declarator_1
 			   members will not be mangled.  If they are hopefully
 			   they'll end up to the right of the ::.  */
 		|	colon_ext_name function_arglist COLONCOLON start
-			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			{ $$.comp = cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
 			  $$.last = $2.last;
-			  $$.comp = d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
+			  $$.comp = cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
 			}
 		|	direct_declarator_1 function_arglist COLONCOLON start
 			{ $$.comp = $1.comp;
 			  *$1.last = $2.comp;
 			  $$.last = $2.last;
-			  $$.comp = d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
+			  $$.comp = cp_v3_d_make_comp (di, D_COMP_LOCAL_NAME, $$.comp, $4);
 			}
 		;
 
@@ -912,11 +914,11 @@ direct_declarator_1
 			  $$.last = &d_right ($2);
 			}
 		|	colon_ext_name function_arglist
-			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			{ $$.comp = cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
 			  $$.last = $2.last;
 			}
 		|	colon_ext_name array_indicator
-			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2);
+			{ $$.comp = cp_v3_d_make_comp (di, D_COMP_TYPED_NAME, $1, $2);
 			  $$.last = &d_right ($2);
 			}
 		;
@@ -958,8 +960,8 @@ exp	:	'(' type ')' exp  %prec UNARY
 		      d_left ($4) = $2;
 		    }
 		  else
-		    $$ = d_make_comp (di, D_COMP_UNARY,
-				      d_make_comp (di, D_COMP_CAST, $2, NULL),
+		    $$ = cp_v3_d_make_comp (di, D_COMP_UNARY,
+				      cp_v3_d_make_comp (di, D_COMP_CAST, $2, NULL),
 				      $4);
 		}
 	;
@@ -967,22 +969,22 @@ exp	:	'(' type ')' exp  %prec UNARY
 /* Mangling does not differentiate between these, so we don't need to
    either.  */
 exp	:	STATIC_CAST '<' type '>' '(' exp1 ')' %prec UNARY
-		{ $$ = d_make_comp (di, D_COMP_UNARY,
-				    d_make_comp (di, D_COMP_CAST, $3, NULL),
+		{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY,
+				    cp_v3_d_make_comp (di, D_COMP_CAST, $3, NULL),
 				    $6);
 		}
 	;
 
 exp	:	DYNAMIC_CAST '<' type '>' '(' exp1 ')' %prec UNARY
-		{ $$ = d_make_comp (di, D_COMP_UNARY,
-				    d_make_comp (di, D_COMP_CAST, $3, NULL),
+		{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY,
+				    cp_v3_d_make_comp (di, D_COMP_CAST, $3, NULL),
 				    $6);
 		}
 	;
 
 exp	:	REINTERPRET_CAST '<' type '>' '(' exp1 ')' %prec UNARY
-		{ $$ = d_make_comp (di, D_COMP_UNARY,
-				    d_make_comp (di, D_COMP_CAST, $3, NULL),
+		{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY,
+				    cp_v3_d_make_comp (di, D_COMP_CAST, $3, NULL),
 				    $6);
 		}
 	;
@@ -994,8 +996,8 @@ exp	:	REINTERPRET_CAST '<' type '>' '(' exp1 ')' %prec UNARY
    appear in demangler output so it's not a great loss if we need to
    disable it.  */
 exp	:	typespec_2 '(' exp1 ')' %prec UNARY
-		{ $$ = d_make_comp (di, D_COMP_UNARY,
-				    d_make_comp (di, D_COMP_CAST, $1, NULL),
+		{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY,
+				    cp_v3_d_make_comp (di, D_COMP_CAST, $1, NULL),
 				    $3);
 		}
 	;
@@ -1082,9 +1084,9 @@ exp	:	exp '.' NAME
 	;
 
 exp	:	exp '?' exp ':' exp	%prec '?'
-		{ $$ = d_make_comp (di, D_COMP_TRINARY, d_op_from_string ("?"),
-				    d_make_comp (di, D_COMP_TRINARY_ARG1, $1,
-						 d_make_comp (di, D_COMP_TRINARY_ARG2, $3, $5)));
+		{ $$ = cp_v3_d_make_comp (di, D_COMP_TRINARY, cp_v3_d_make_operator_from_string (di, "?"),
+				    cp_v3_d_make_comp (di, D_COMP_TRINARY_ARG1, $1,
+						 cp_v3_d_make_comp (di, D_COMP_TRINARY_ARG2, $3, $5)));
 		}
 	;
 			  
@@ -1102,18 +1104,18 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 /* C++.  */
 exp     :       TRUEKEYWORD    
 		{ struct d_comp *i;
-		  i = d_make_name (di, "1", 1);
-		  $$ = d_make_comp (di, D_COMP_LITERAL,
-				    d_make_builtin_type (di, &d_builtin_types['b' - 'a']),
+		  i = cp_v3_d_make_name (di, "1", 1);
+		  $$ = cp_v3_d_make_comp (di, D_COMP_LITERAL,
+				    cp_v3_d_make_builtin_type (di, 'b'),
 				    i);
 		}
 	;
 
 exp     :       FALSEKEYWORD   
 		{ struct d_comp *i;
-		  i = d_make_name (di, "0", 1);
-		  $$ = d_make_comp (di, D_COMP_LITERAL,
-				    d_make_builtin_type (di, &d_builtin_types['b' - 'a']),
+		  i = cp_v3_d_make_name (di, "0", 1);
+		  $$ = cp_v3_d_make_comp (di, D_COMP_LITERAL,
+				    cp_v3_d_make_builtin_type (di, 'b'),
 				    i);
 		}
 	;
@@ -1134,7 +1136,7 @@ d_qualify (struct d_comp *lhs, int qualifiers, int is_method)
 #define HANDLE_QUAL(TYPE, MTYPE, QUAL)				\
   if ((qualifiers & QUAL) && (type != TYPE) && (type != MTYPE))	\
     {								\
-      *inner_p = d_make_comp (di, is_method ? MTYPE : TYPE,	\
+      *inner_p = cp_v3_d_make_comp (di, is_method ? MTYPE : TYPE,	\
 			      *inner_p, NULL);			\
       inner_p = &d_left (*inner_p);				\
       type = (*inner_p)->type;					\
@@ -1204,40 +1206,20 @@ d_int_type (int flags)
       return NULL;
     }
 
-  return d_make_builtin_type (di, &d_builtin_types[i]);
-}
-
-static struct d_comp *
-d_builtin_type (int which)
-{
-  return d_make_builtin_type (di, &d_builtin_types[which]);
-}
-
-static struct d_comp *
-d_op_from_string (const char *opname)
-{
-  const struct d_operator_info *i = d_operators;
-
-  while (1)
-    {
-      if (strcmp (i->name, opname) == 0)
-	break;
-      i++;
-    }
-  return d_make_operator (di, i);
+  return cp_v3_d_make_builtin_type (di, i + 'a');
 }
 
 static struct d_comp *
 d_unary (const char *name, struct d_comp *lhs)
 {
-  return d_make_comp (di, D_COMP_UNARY, d_op_from_string (name), lhs);
+  return cp_v3_d_make_comp (di, D_COMP_UNARY, cp_v3_d_make_operator_from_string (di, name), lhs);
 }
 
 static struct d_comp *
 d_binary (const char *name, struct d_comp *lhs, struct d_comp *rhs)
 {
-  return d_make_comp (di, D_COMP_BINARY, d_op_from_string (name),
-		      d_make_comp (di, D_COMP_BINARY_ARGS, lhs, rhs));
+  return cp_v3_d_make_comp (di, D_COMP_BINARY, cp_v3_d_make_operator_from_string (di, name),
+		      cp_v3_d_make_comp (di, D_COMP_BINARY_ARGS, lhs, rhs));
 }
 
 static const char *
@@ -1296,20 +1278,20 @@ parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
       if (c == 'f')
       	{
       	  len--;
-      	  type = d_make_builtin_type (di, &d_builtin_types ['f' - 'a']);
+      	  type = cp_v3_d_make_builtin_type (di, 'f');
       	}
       else if (c == 'l')
 	{
 	  len--;
-	  type = d_make_builtin_type (di, &d_builtin_types ['e' - 'a']);
+	  type = cp_v3_d_make_builtin_type (di, 'e');
 	}
       else if (ISDIGIT (c) || c == '.')
-	type = d_make_builtin_type (di, &d_builtin_types ['d' - 'a']);
+	type = cp_v3_d_make_builtin_type (di, 'd');
       else
 	return ERROR;
 
-      name = d_make_name (di, p, len);
-      putithere->comp = d_make_comp (di, literal_type, type, name);
+      name = cp_v3_d_make_name (di, p, len);
+      putithere->comp = cp_v3_d_make_comp (di, literal_type, type, name);
 
       return FLOAT;
     }
@@ -1338,18 +1320,18 @@ parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
 
   if (long_p == 0)
     {
-      unsigned_type = d_builtin_type ('j' - 'a');
-      signed_type = d_builtin_type ('i' - 'a');
+      unsigned_type = cp_v3_d_make_builtin_type (di, 'j');
+      signed_type = cp_v3_d_make_builtin_type (di, 'i');
     }
   else if (long_p == 1)
     {
-      unsigned_type = d_builtin_type ('m' - 'a');
-      signed_type = d_builtin_type ('l' - 'a');
+      unsigned_type = cp_v3_d_make_builtin_type (di, 'm');
+      signed_type = cp_v3_d_make_builtin_type (di, 'l');
     }
   else
     {
-      unsigned_type = d_builtin_type ('x' - 'a');
-      signed_type = d_builtin_type ('y' - 'a');
+      unsigned_type = cp_v3_d_make_builtin_type (di, 'x');
+      signed_type = cp_v3_d_make_builtin_type (di, 'y');
     }
 
    /* If the high bit of the worked out type is set then this number
@@ -1360,8 +1342,8 @@ parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
    else
      type = signed_type;
 
-   name = d_make_name (di, p, len);
-   putithere->comp = d_make_comp (di, literal_type, type, name);
+   name = cp_v3_d_make_name (di, p, len);
+   putithere->comp = cp_v3_d_make_comp (di, literal_type, type, name);
 
    return INT;
 }
@@ -1605,9 +1587,9 @@ yylex (void)
 	 presumably the same one that appears in manglings - the decimal
 	 representation.  But if that isn't in our input then we have to
 	 allocate memory for it somewhere.  */
-      yylval.comp = d_make_comp (di, D_COMP_LITERAL,
-				 d_builtin_type ('c' - 'a'),
-				 d_make_name (di, tokstart, lexptr - tokstart));
+      yylval.comp = cp_v3_d_make_comp (di, D_COMP_LITERAL,
+				 cp_v3_d_make_builtin_type (di, 'c'),
+				 cp_v3_d_make_name (di, tokstart, lexptr - tokstart));
 
       return INT;
 
@@ -1615,7 +1597,7 @@ yylex (void)
       if (strncmp (tokstart, "(anonymous namespace)", 21) == 0)
 	{
 	  lexptr += 21;
-	  yylval.comp = d_make_name (di, "(anonymous namespace)",
+	  yylval.comp = cp_v3_d_make_name (di, "(anonymous namespace)",
 				     sizeof "(anonymous namespace)" - 1);
 	  return NAME;
 	}
@@ -1929,7 +1911,7 @@ yylex (void)
 	  yylval.typed_val_int.val = GLOBAL_CONSTRUCTORS;
 	  /* Find the end of the symbol.  */
 	  p = symbol_end (lexptr);
-	  yylval.typed_val_int.type = d_make_name (di, lexptr, p - lexptr);
+	  yylval.typed_val_int.type = cp_v3_d_make_name (di, lexptr, p - lexptr);
 	  lexptr = p;
 	  return GLOBAL;
 	}
@@ -1940,7 +1922,7 @@ yylex (void)
 	  yylval.typed_val_int.val = GLOBAL_DESTRUCTORS;
 	  /* Find the end of the symbol.  */
 	  p = symbol_end (lexptr);
-	  yylval.typed_val_int.type = d_make_name (di, lexptr, p - lexptr);
+	  yylval.typed_val_int.type = cp_v3_d_make_name (di, lexptr, p - lexptr);
 	  lexptr = p;
 	  return GLOBAL;
 	}
@@ -1998,7 +1980,7 @@ yylex (void)
       break;
     }
 
-  yylval.comp = d_make_name (di, tokstart, namelen);
+  yylval.comp = cp_v3_d_make_name (di, tokstart, namelen);
   return NAME;
 }
 
@@ -2040,7 +2022,7 @@ cp_comp_to_string (struct d_comp *result, int estimated_len)
       prefix = "global constructors keyed to ";
     }
 
-  str = d_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len, &err);
+  str = cp_v3_d_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len, &err);
   if (str == NULL)
     return NULL;
 
@@ -2060,25 +2042,19 @@ cp_comp_to_string (struct d_comp *result, int estimated_len)
 char *
 cp_canonicalize_string (const char *string)
 {
-  struct d_info myinfo;
   int len = strlen (string);
   char *ret;
 
   len = len + len / 8;
 
   lexptr = string;
-  d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, len, &myinfo);
-  myinfo.comps = malloc (myinfo.num_comps * sizeof (struct d_comp));
-  myinfo.subs = NULL;
-  di = &myinfo;
+  di = cp_v3_d_init_info_alloc (NULL, DMGL_PARAMS | DMGL_ANSI, len);
   if (yyparse () || result == NULL)
     return NULL;
 
   ret = cp_comp_to_string (result, len);
 
-  free (myinfo.comps);
-  if (myinfo.subs)
-    free (myinfo.subs);
+  cp_v3_d_free_info (di);
 
   return ret;
 }
@@ -2102,7 +2078,7 @@ cp_print (struct d_comp *result, int len)
       puts ("global constructors keyed to ");
     }
 
-  str = d_print (DMGL_PARAMS | DMGL_ANSI, result, len, &err);
+  str = cp_v3_d_print (DMGL_PARAMS | DMGL_ANSI, result, len, &err);
   if (str == NULL)
     return;
 
@@ -2130,7 +2106,6 @@ trim_chars (char *lexptr, char **extra_chars)
 int
 main (int argc, char **argv)
 {
-  struct d_info myinfo;
   char *str2, *extra_chars, c;
   char buf[65536];
   int arg;
@@ -2162,10 +2137,7 @@ main (int argc, char **argv)
 	    continue;
 	  }
 	len = strlen (lexptr);
-	d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, len, &myinfo);
-	myinfo.comps = malloc (myinfo.num_comps * sizeof (struct d_comp));
-	myinfo.subs = NULL;
-	di = &myinfo;
+	di = cp_v3_d_init_info_alloc (NULL, DMGL_PARAMS | DMGL_ANSI, len);
 	if (yyparse () || result == NULL)
 	  continue;
 	cp_print (result, len);
@@ -2176,24 +2148,18 @@ main (int argc, char **argv)
 	    puts (extra_chars);
 	  }
 	putchar ('\n');
-	free (myinfo.comps);
-	if (myinfo.subs)
-	  free (myinfo.subs);
+	cp_v3_d_free_info (di);
       }
   else
     {
       int len;
       lexptr = argv[arg];
       len = strlen (lexptr);
-      d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, len, &myinfo);
-      myinfo.comps = malloc (myinfo.num_comps * sizeof (struct d_comp));
-      di = &myinfo;
+      di = cp_v3_d_init_info_alloc (NULL, DMGL_PARAMS | DMGL_ANSI, len);
       if (yyparse () || result == NULL)
 	return 0;
       cp_print (result, len);
-      free (myinfo.comps);
-      if (myinfo.subs)
-	free (myinfo.subs);
+      cp_v3_d_free_info (di);
     }
   return 0;
 }
