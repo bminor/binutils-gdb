@@ -1,3 +1,13 @@
+Tue Jun 29 10:49:42 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_find_nearest_line): If procedure has no line
+	number information, return 0 for line number.
+
+Mon Jun 28 10:45:02 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aoutx.h (some_aout_object_p): If *oldrawptr is non-NULL, copy it
+	into *rawptr.
+
 Sun Jun 27 09:05:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/riscos.h: Define NBPG and UPAGES.
