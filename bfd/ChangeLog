@@ -1,5 +1,11 @@
 2001-06-02  H.J. Lu  <hjl@gnu.org>
 
+	* config.bfd (powerpc-*-aix*, powerpc-*-beos*, rs6000-*-*): Add
+	rs6000coff64_vec only if BFD64 is defined.
+	(powerpc64-*-aix*): Enable only if BFD64 is defined.
+
+2001-06-02  H.J. Lu  <hjl@gnu.org>
+
 	* coff-ia64.c (ia64coff_object_p): Rewrite with
 	external_PEI_DOS_hdr and external_PEI_IMAGE_hdr.
 

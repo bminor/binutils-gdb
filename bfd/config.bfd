@@ -723,12 +723,16 @@ case "${targ}" in
 
   powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec
+#ifdef BFD64
     targ_selvecs="rs6000coff64_vec"
+#endif
     ;;
+#ifdef BFD64
   powerpc64-*-aix*)
     targ_defvec=rs6000coff64_vec
     targ_selvecs="rs6000coff_vec"
     ;;
+#endif
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
   powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems* | \
   powerpc-*-chorus* | powerpc-*-vxworks*)
