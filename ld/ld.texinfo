@@ -1234,6 +1234,11 @@ Normally when a symbol has an undefined version, the linker will ignore
 it. This option disallows symbols with undefined version and a fatal error
 will be issued instead.
 
+@kindex --default-symver
+@item --default-symver
+Create and use a default symbol version (the soname) for unversioned
+symbols.
+
 @kindex --no-warn-mismatch
 @item --no-warn-mismatch
 Normally @command{ld} will give an error if you try to link together input

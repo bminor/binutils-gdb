@@ -1,3 +1,12 @@
+2004-10-26  Paul Brook  <paul@codesourcery.com>
+
+	* ld-elfvers/vers.exp (build_binary): Add ldargs parameter.
+	(build_vers_lib_pic_flags): New function.
+	Add vers29 test.
+	* ld-elfvers/vers29.c: New file.
+	* ld-elfvers/vers29.dsym: New file.
+	* ld-elfvers/vers29.ver: New file.
+
 2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/sec-8m.d: Adjust test for dump using correct section

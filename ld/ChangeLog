@@ -1,3 +1,11 @@
+2004-10-26  Paul Brook  <paul@codesourcery.com>
+
+	* ld.texinfo: Document --default-symver.
+	* ldmain.c (main): Set link_info.create_default_symver.
+	* lexsup.c (enum option_values): Add OPTION_DEFAULT_SYMVER.
+	(ld_options): Add default-symver.
+	(parse_args): Handle OPTION_DEFAULT_SYMVER.
+
 2004-10-24 Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-dll.c (process_def_file): Don't export all symbols by default if

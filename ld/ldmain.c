@@ -306,6 +306,7 @@ main (int argc, char **argv)
   link_info.unresolved_syms_in_shared_libs = RM_NOT_YET_SET;
   link_info.allow_multiple_definition = FALSE;
   link_info.allow_undefined_version = TRUE;
+  link_info.create_default_symver = FALSE;
   link_info.keep_memory = TRUE;
   link_info.notice_all = FALSE;
   link_info.nocopyreloc = FALSE;

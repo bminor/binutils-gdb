@@ -498,7 +498,7 @@ proc objdump_versionstuff { objdump object expectfile } {
     }
 }
 
-proc build_binary { shared pic test source libname other mapfile verexp versymexp symexp } {
+proc build_binary { shared pic test source libname other mapfile verexp versymexp symexp ldargs } {
     global ld
     global srcdir
     global subdir
@@ -534,7 +534,7 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
 	set script_arg "$script $srcdir/$subdir/$mapfile"
     }
 
-    if {![ld_simple_link $ld $tmpdir/$libname.so "$shared $tmpdir/$libname.o $other_lib $script_arg"]}     {
+    if {![ld_simple_link $ld $tmpdir/$libname.so "$shared $tmpdir/$libname.o $other_lib $script_arg $ldargs"]}     {
 	fail "$test"
 	return
     }
@@ -566,18 +566,24 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
 }
 
 proc build_executable { test source libname other mapfile verexp versymexp symexp } {
-  build_binary "" "" $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+  build_binary "" "" $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
 }
 
 proc build_vers_lib_no_pic { test source libname other mapfile verexp versymexp symexp } {
   global shared
-  build_binary $shared "" $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+  build_binary $shared "" $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
 }
 
 proc build_vers_lib_pic { test source libname other mapfile verexp versymexp symexp } {
   global picflag
   global shared
-  build_binary $shared $picflag $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+  build_binary $shared $picflag $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
+}
+
+proc build_vers_lib_pic_flags { test source libname other mapfile verexp versymexp symexp ldargs } {
+  global picflag
+  global shared
+  build_binary $shared $picflag $test $source $libname $other $mapfile $verexp $versymexp $symexp $ldargs
 }
 
 proc test_ldfail { test flag source execname other mapfile whyfail } {
@@ -944,3 +950,4 @@ build_executable "vers27d5" vers27d3.c vers27d5 "vers27d4.so vers27b.o vers27a.s
 build_vers_lib_pic "vers28a" vers28a.c vers28a "" "" vers28a.ver vers28a.dsym ""
 build_vers_lib_pic "vers28b" vers28b.c vers28b "" vers28b.map vers28b.ver vers28b.dsym ""
 build_vers_lib_pic "vers28c" vers28c.c vers28c "vers28b.so vers28a.so" "" vers28c.ver vers28c.dsym ""
+build_vers_lib_pic_flags "vers29" vers29.c vers29 "" "" vers29.ver vers29.dsym "" "--default-symver"

@@ -1,3 +1,9 @@
+2004-10-26  Paul Brook  <paul@codesourcery.com>
+
+	* elflink.c (elf_finalize_dynstr): Skip shared aux structure.
+	(bfd_elf_size_dynamic_sections): Create default version definition.
+	(elf_link_output_extsym): Adjust for default symbol version.
+
 2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c: Adjust to ISO C.

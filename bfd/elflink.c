@@ -2895,6 +2895,8 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	  _bfd_elf_swap_verdef_in (output_bfd, (Elf_External_Verdef *) p,
 				   &def);
 	  p += sizeof (Elf_External_Verdef);
+	  if (def.vd_aux != sizeof (Elf_External_Verdef))
+	    continue;
 	  for (i = 0; i < def.vd_cnt; ++i)
 	    {
 	      _bfd_elf_swap_verdaux_in (output_bfd,
@@ -5089,7 +5091,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       if (verdefs != NULL && verdefs->vernum == 0)
 	verdefs = verdefs->next;
 
-      if (verdefs == NULL)
+      if (verdefs == NULL && !info->create_default_symver)
 	_bfd_strip_section_from_output (info, s);
       else
 	{
@@ -5099,6 +5101,9 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  bfd_byte *p;
 	  Elf_Internal_Verdef def;
 	  Elf_Internal_Verdaux defaux;
+	  struct bfd_link_hash_entry *bh;
+	  struct elf_link_hash_entry *h;
+	  const char *name;
 
 	  cdefs = 0;
 	  size = 0;
@@ -5107,6 +5112,13 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  size += sizeof (Elf_External_Verdef);
 	  size += sizeof (Elf_External_Verdaux);
 	  ++cdefs;
+
+	  /* Make space for the default version.  */
+	  if (info->create_default_symver)
+	    {
+	      size += sizeof (Elf_External_Verdef);
+	      ++cdefs;
+	    }
 
 	  for (t = verdefs; t != NULL; t = t->next)
 	    {
@@ -5133,9 +5145,17 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  def.vd_flags = VER_FLG_BASE;
 	  def.vd_ndx = 1;
 	  def.vd_cnt = 1;
-	  def.vd_aux = sizeof (Elf_External_Verdef);
-	  def.vd_next = (sizeof (Elf_External_Verdef)
-			 + sizeof (Elf_External_Verdaux));
+	  if (info->create_default_symver)
+	    {
+	      def.vd_aux = 2 * sizeof (Elf_External_Verdef);
+	      def.vd_next = sizeof (Elf_External_Verdef);
+	    }
+	  else
+	    {
+	      def.vd_aux = sizeof (Elf_External_Verdef);
+	      def.vd_next = (sizeof (Elf_External_Verdef)
+			     + sizeof (Elf_External_Verdaux));
+	    }
 
 	  if (soname_indx != (bfd_size_type) -1)
 	    {
@@ -5143,10 +5163,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 				      soname_indx);
 	      def.vd_hash = bfd_elf_hash (soname);
 	      defaux.vda_name = soname_indx;
+	      name = soname;
 	    }
 	  else
 	    {
-	      const char *name;
 	      bfd_size_type indx;
 
 	      name = basename (output_bfd->filename);
@@ -5162,6 +5182,38 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  _bfd_elf_swap_verdef_out (output_bfd, &def,
 				    (Elf_External_Verdef *) p);
 	  p += sizeof (Elf_External_Verdef);
+	  if (info->create_default_symver)
+	    {
+	      /* Add a symbol representing this version.  */
+	      bh = NULL;
+	      if (! (_bfd_generic_link_add_one_symbol
+		     (info, dynobj, name, BSF_GLOBAL, bfd_abs_section_ptr,
+		      0, NULL, FALSE,
+		      get_elf_backend_data (dynobj)->collect, &bh)))
+		return FALSE;
+	      h = (struct elf_link_hash_entry *) bh;
+	      h->non_elf = 0;
+	      h->def_regular = 1;
+	      h->type = STT_OBJECT;
+	      h->verinfo.vertree = NULL;
+
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+
+	      /* Create a duplicate of the base version with the same
+		 aux block, but different flags.  */
+	      def.vd_flags = 0;
+	      def.vd_ndx = 2;
+	      def.vd_aux = sizeof (Elf_External_Verdef);
+	      if (verdefs)
+		def.vd_next = (sizeof (Elf_External_Verdef)
+			       + sizeof (Elf_External_Verdaux));
+	      else
+		def.vd_next = 0;
+	      _bfd_elf_swap_verdef_out (output_bfd, &def,
+					(Elf_External_Verdef *) p);
+	      p += sizeof (Elf_External_Verdef);
+	    }
 	  _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
 				     (Elf_External_Verdaux *) p);
 	  p += sizeof (Elf_External_Verdaux);
@@ -5170,8 +5222,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      unsigned int cdeps;
 	      struct bfd_elf_version_deps *n;
-	      struct elf_link_hash_entry *h;
-	      struct bfd_link_hash_entry *bh;
 
 	      cdeps = 0;
 	      for (n = t->deps; n != NULL; n = n->next)
@@ -5199,7 +5249,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		  && t->locals.list == NULL
 		  && ! t->used)
 		def.vd_flags |= VER_FLG_WEAK;
-	      def.vd_ndx = t->vernum + 1;
+	      def.vd_ndx = t->vernum + (info->create_default_symver ? 2 : 1);
 	      def.vd_cnt = cdeps + 1;
 	      def.vd_hash = bfd_elf_hash (t->name);
 	      def.vd_aux = sizeof (Elf_External_Verdef);
@@ -5396,7 +5446,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       s = bfd_get_section_by_name (dynobj, ".gnu.version");
       BFD_ASSERT (s != NULL);
       if (dynsymcount == 0
-	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
+	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL
+	      && !info->create_default_symver))
 	{
 	  _bfd_strip_section_from_output (info, s);
 	  /* The DYNSYMCOUNT might have changed if we were going to
@@ -6334,6 +6385,8 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 		iversym.vs_vers = 1;
 	      else
 		iversym.vs_vers = h->verinfo.vertree->vernum + 1;
+	      if (finfo->info->create_default_symver)
+		iversym.vs_vers++;
 	    }
 
 	  if (h->hidden)
