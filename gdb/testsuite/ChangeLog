@@ -1,4 +1,22 @@
+Tue Jun  3 15:20:20 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/monitor.exp(gdb_target_monitor): Call gdb_file_cmd
+ 	here. Call gdb_target_exec before rebooting the target, to make
+ 	sure the connection to the target is closed.
+	(gdb_load): Pass the name of the executable to gdb_target_monitor.
+	Don't call gdb_file_cmd here; let gdb_target_monitor do it.
+
+	* config/gdbserver.exp: Pass the executable being loaded to
+ 	gdb_target_monitor. Don't call gdb_file_cmd here; let
+ 	gdb_target_monitor do it.
+
+	* gdb.disasm/hppa.exp: Don't use exec_output.
+
 Fri May 23 13:28:29 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/list.exp: If we're debugging a non-native target,
+	try to set the pc register to point to the start of the
+	program before doing the first list command.
 
 	* gdb.c++/virtfunc.exp(gdb_virtfunc_restart): Make sure we run
  	test_calls after restarting.

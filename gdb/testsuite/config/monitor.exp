@@ -21,7 +21,7 @@ load_lib gdb.exp
 # gdb_target_monitor
 # Set gdb to target the monitor
 #
-proc gdb_target_monitor { } {
+proc gdb_target_monitor { exec_file } {
     global gdb_prompt
     global exit_status
     global timeout
@@ -47,27 +47,29 @@ proc gdb_target_monitor { } {
     }
 
     for {set j 1} {$j <= 2} {incr j} {
+	if [gdb_file_cmd $exec_file] { return -1; }
+
 	for {set i 1} {$i <= 3} {incr i} {
-	    send_gdb "target $targetname $serialport\n"
+    	    send_gdb "target $targetname $serialport\n"
 	    gdb_expect {
 		-re "A program is being debugged already.*ill it.*y or n. $" {
 		    send_gdb "y\n";
 		    exp_continue;
 		}
 		-re ".*Couldn't establish connection to remote.*$gdb_prompt" {
-		    verbose "Connection failed"
+		    verbose "Connection failed";
 		}
 		-re "Remote MIPS debugging.*$gdb_prompt" {
-		    verbose "Set target to $targetname"
-		    return
+		    verbose "Set target to $targetname";
+		    return 0;
 		}
 		-re "Remote debugging using $serialport.*$gdb_prompt" {
-		    verbose "Set target to $targetname"
-		    return
+		    verbose "Set target to $targetname";
+		    return 0;
 		}
 		-re "Remote target $targetname connected to.*$gdb_prompt" {
-		    verbose "Set target to $targetname"
-		    return
+		    verbose "Set target to $targetname";
+		    return 0;
 		}
 		-re "Ending remote.*$gdb_prompt" { }
 		-re "Connection refused.*$gdb_prompt" {
@@ -81,12 +83,15 @@ proc gdb_target_monitor { } {
 		}
 	    }
 	}
+
+	gdb_target_exec;
+
 	if { $j == 1 && ![reboot_target] } {
 	    break;
 	}
     }
 
-    perror "Couldn't set target for $targetname, port is $serialport."
+    perror "Couldn't set target for $targetname, port is $serialport.";
     return -1;
 }
 
@@ -106,6 +111,21 @@ proc gdb_load { arg } {
     global gdb_prompt
     global timeout
 
+    if { $arg == "" } {
+	send_gdb "info files\n";
+	gdb_expect {
+	    -re "Symbols from \"([^\"]+)\"" {
+		set arg $expect_out(1,string);
+		exp_continue;
+	    }
+	    -re "Local exec file:\[\r\n\]+\[ \t\]*`(\[^'\]+)'," {
+		set arg $expect_out(1,string);
+		exp_continue;
+	    }
+	    -re "$gdb_prompt $" { }
+	}
+    }
+
     for { set j 1; } { $j <= 2 } {incr j; } {
 	if [target_info exists gdb,use_standard_load] {
 	    gdb_target_exec;
@@ -114,21 +134,20 @@ proc gdb_load { arg } {
 	    remote_close target;
 	    remote_pop_conn host;
 	    if { $state == "pass" } {
-		if { $arg != "" } {
-		    if [gdb_file_cmd $arg] { return -1 }
-		}
-		gdb_target_monitor;
+		if [gdb_target_monitor $arg] { return -1; }
 		gdb_test "list main" ".*" ""
 		verbose "Loaded $arg into $GDB\n";
-		return 1;
+		return 0;
 	    }
 	} else {
-	    if { $arg != "" } {
-		if [gdb_file_cmd $arg] { return -1 }
+	    if [is_remote host] {
+		# FIXME:
+		set arg a.out;
 	    }
-	    gdb_target_monitor
 
-	    if [target_info exists gdb_sect_offset] {
+	    if [gdb_target_monitor $arg] { return -1 }
+
+	    if { $arg != "" && [target_info exists gdb_sect_offset] } {
 		set textoff [target_info gdb_sect_offset];
 		send_gdb "sect .text $textoff\n";
 		gdb_expect {
@@ -153,10 +172,6 @@ proc gdb_load { arg } {
 		    -re "$gdb_prompt" { }
 		}
 	    }
-	    if [is_remote host] {
-		# FIXME:
-		set arg a.out;
-	    }
 
 	    verbose "Loading $arg"
 	    if [target_info exists gdb_load_offset] {
@@ -168,12 +183,12 @@ proc gdb_load { arg } {
 	    set timeout 1000
 	    verbose "Timeout is now $timeout seconds" 2
 	    gdb_expect {
-		-re ".*\[Ff\]ailed.*$gdb_prompt $" {
+		-re "\[Ff\]ailed.*$gdb_prompt $" {
 		    verbose "load failed";
 		}
-		-re ".*$gdb_prompt $" {
+		-re "$gdb_prompt $" {
 		    verbose "Loaded $arg into $GDB\n"
-		    return 1
+		    return 0;
 		}
 		timeout {
 		    if { $verbose > 1 } {
@@ -183,6 +198,7 @@ proc gdb_load { arg } {
 	    }
 	}
 
+	# Make sure we don't have an open connection to the target.
 	gdb_target_exec;
 
 	if { $j == 1 } {
@@ -196,21 +212,11 @@ proc gdb_load { arg } {
 }
 
 proc gdb_start { } {
-    global timeout
-    global reboot
     global gdb_prompt;
-
-    # reboot the board to get a clean start
-    if $reboot then {
-	reboot_target;
-    }
 
     if [board_info target exists gdb_prompt] {
 	set gdb_prompt [board_info target gdb_prompt];
     }
 
     catch default_gdb_start;
-
-    set timeout 10
-    verbose "Timeout is now $timeout seconds" 2
 }
