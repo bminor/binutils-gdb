@@ -327,7 +327,7 @@ extern CONST short _bfd_host_big_endian;
 #define bfd_get_architecture(abfd) ((abfd)->obj_arch)
 #define bfd_get_machine(abfd) ((abfd)->obj_machine)
 
-
+#define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
 #define BYTE_SIZE 1
 #define SHORT_SIZE 2
@@ -1274,6 +1274,7 @@ typedef struct bfd_target
   boolean header_byteorder_big_p;
   flagword object_flags;       
   flagword section_flags;
+  char symbol_leading_char;
   char ar_pad_char;            
  unsigned short ar_max_namelen;
   unsigned int align_power_min;

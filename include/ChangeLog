@@ -1,5 +1,11 @@
+Thu Oct  8 09:03:02 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd.h (bfd_get_symbol_leading_char): new macro for getting in xvec
+
 Thu Sep  3 09:10:50 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* bfd.h (struct reloc_howto_struct):  size needs to be signed if
+	it's going to hold negative values.
 
 Sun Aug 30 17:50:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
