@@ -4341,7 +4341,7 @@ dwarf2_const_value_data (struct attribute *attr,
       if (TYPE_UNSIGNED (SYMBOL_TYPE (sym)))
 	l &= ((LONGEST) 1 << bits) - 1;
       else
-	l = (l << (sizeof (l) - bits)) >> (sizeof (l) - bits);
+	l = (l << (sizeof (l) * 8 - bits)) >> (sizeof (l) * 8 - bits);
     }
 
   SYMBOL_VALUE (sym) = l;

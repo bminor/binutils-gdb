@@ -1,3 +1,8 @@
+2000-05-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_const_value_data): Fix typo in sign
+	extension code.
+
 Fri May 12 20:38:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Mention weak symbol problem.  Mention UnixWare thread
