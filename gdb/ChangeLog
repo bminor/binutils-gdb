@@ -1,3 +1,9 @@
+2001-11-19  Keith Seitz  <keiths@redhat.com>
+
+	* varobj.c (c_value_of_child): Use the wrapper function,
+	gdb_value_struct_elt.
+	(cplus_value_of_child): Likewise.
+
 2001-11-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* i386-tdep.c (i386_gdbarch_init): Initialize num_regs.

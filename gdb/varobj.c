@@ -1952,7 +1952,7 @@ c_value_of_child (struct varobj *parent, int index)
 
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_UNION:
-	  value = value_struct_elt (&temp, NULL, name, NULL, "vstructure");
+	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL, "vstructure");
 	  break;
 
 	case TYPE_CODE_PTR:
@@ -1960,8 +1960,7 @@ c_value_of_child (struct varobj *parent, int index)
 	    {
 	    case TYPE_CODE_STRUCT:
 	    case TYPE_CODE_UNION:
-	      value =
-		value_struct_elt (&temp, NULL, name, NULL, "vstructure");
+	      gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL, "vstructure");
 	      break;
 
 	    default:
@@ -2298,9 +2297,11 @@ cplus_value_of_child (struct varobj *parent, int index)
       if (CPLUS_FAKE_CHILD (parent))
 	{
 	  struct value *temp = parent->parent->value;
-	  value = value_struct_elt (&temp, NULL, name,
-				    NULL, "cplus_structure");
-	  release_value (value);
+
+	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
+				"cplus_structure");
+	  if (value != NULL)
+	    release_value (value);
 	}
       else if (index >= TYPE_N_BASECLASSES (type))
 	{
