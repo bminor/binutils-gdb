@@ -1,3 +1,38 @@
+Wed Jun 19 15:29:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h: Correct opcode values for faddp, fsubp, fsubrp, fmulp,
+	fdivp, and fdivrp.  Add ffreep.
+
+Tue Jun 18 16:06:00 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* h8300.h: Reorder various #defines for readability.
+	(ABS32SRC, ABS32DST, DSP32LIST, ABS32LIST, A32LIST): Define.
+	(BITOP): Accept additional (unused) argument.  All callers changed.
+	(EBITOP): Likewise.
+	(O_LAST): Bump.
+	(ldc, stc, movb, movw, movl): Use 32bit offsets and absolutes.
+	
+start-sanitize-h8s
+	* h8300.h (EXR, SHIFT_2, MACREG, SHIFT_IMM, RDINC): Define.
+	(O_TAS, O_CLRMAC, O_LDMAC, O_MAC, O_LDM, O_STM): Define.
+	(BITOP, EBITOP): Handle new H8/S addressing modes for
+	bit insns.
+	(UNOP3): Handle new shift/rotate insns on the H8/S.
+	(insns using exr): New instructions.
+	(tas, mac, ldmac, clrmac, ldm, stm): New instructions.
+	
+end-sanitize-h8s
+Thu May 23 16:56:48 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (add.l): Undo Apr 5th change.  The manual I had
+	was incorrect.
+
+Mon May  6 23:38:22 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (START): Remove.
+	(MEMRELAX): Define.  Mark absolute memory operands in mov.b, mov.w
+	and mov.l insns that can be relaxed.
+
 Tue Apr 30 18:30:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h: Remove Abs32 from lcall.
