@@ -15,12 +15,12 @@
 
 Do-first:
 
-am33_files="am33.s am33.exp"
+cygnus_files="am33.s am33.exp"
 
 if ( echo $* | grep keep\-am33 > /dev/null ) ; then
-        keep_these_too="${am33_files} ${keep_these_too}"
+        keep_these_too="${cygnus_files} ${keep_these_too}"
 else
-        lose_these_too="${am33_files} ${lose_these_too}"
+        lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the

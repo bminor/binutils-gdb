@@ -50,9 +50,9 @@ extern char **mn10300_register_names;
 #define PSW_REGNUM 11
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
-/* start-sanitize-am33 */
+/* start-sanitize-cygnus */
 #define E0_REGNUM 14
-/* end-sanitize-am33 */
+/* end-sanitize-cygnus */
 
 /* Pseudo register that contains true address of executing stack frame */
 #define FP_REGNUM 31

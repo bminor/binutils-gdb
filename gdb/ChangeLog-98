@@ -5055,7 +5055,7 @@ Thu Jul 30 13:53:50 1998  Mark Alexander  <marka@cygnus.com>
 	* symfile.c (add_symbol_file_command): Test for the from_tty
 	parameter and avoid query when not interactive.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Jul 29 10:39:29 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-tdep.c (set_movm_offsets): Do nothing for the am33
@@ -5063,7 +5063,7 @@ Wed Jul 29 10:39:29 1998  Jeffrey A Law  (law@cygnus.com)
 	(mn10300_frame_chain, mn10300_frame_saved_pc): Similarly.
 	(set_machine_hook): Keep track of whether or not we're in am33 mode.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Mon Jul 27 16:11:42 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (remote_set_transparent_ranges): new function.
@@ -5090,14 +5090,14 @@ Mon Jul 27 10:45:56 1998  Martin M. Hunt  <hunt@cygnus.com>
 	stack pointer et al are synthesized from the SP_REGNUM (etc)
 	defines and should not be mentioned in REGISTER_NAMES.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Mon Jul 27 08:54:41 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-tdep.c (mn10300_frame_chain): Account for space saved
 	by am33 register saves.
 	(mn10300_frame_saved_pc): Similarly.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Fri Jul 24 14:41:19 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (encode_actions): Treat register names and simple
@@ -5211,11 +5211,11 @@ Thu Jul  9 16:16:47 1998  Jeffrey A Law  (law@cygnus.com)
 	* tm-mn10300 (NUM_REGS): Bump to 32.
 	(REGISTER_NAMES): Updated accordingly.
 
-start-sanitize-am33
+start-sanitize-cygnus
 	* mn10300-tdep.c (am33_register_names): New variable.
 	(mn10300_analyze_prologue): Handle regs saved by am33 prologues.
 	* tm-mn10300.h (E0_REGNUM): Define.
-end-sanitize-am33
+end-sanitize-cygnus
 
 Tue Jul 7 7:40:13 1998  Ron Unrau  <runrau@cygnus.com>
 

@@ -1,3 +1,14 @@
+Thu Jan 21 15:46:49 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/Makefile.in, gdb.c++/Makefile.in,
+ 	gdb.trace/Makefile.in (clean): Remove all test executables.
+
+Tue Jan 19 17:20:09 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* gdb.base/shlib-call.exp: add test cases to verify that gdb
+	successfully re-sets breakpoints in shared libraries.
+	* gdb.base/shmain.c (main): return 0, don't fall off the end.
+
 Fri Jan 15 14:04:57 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.hp/xdb3.exp: do not execute unless on hppa-hpux platform 
@@ -430,7 +441,7 @@ Fri Jul 24 14:57:19 1998  Keith Seitz  <keiths@cygnus.com>
 	* gdb.gdbtk/stack1.c,stack2.c: Test case for browser window.
 	
 end-sanitize-gdbtk
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jul 24 15:51:34 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/am33.s: Add tests for autoincrement instructions.
@@ -442,7 +453,7 @@ Thu Jul 16 18:20:46 1998  Jeffrey A Law  (law@cygnus.com)
 	* gdb.disasm/am33.s: Add 4 operand mul and mulu tests.
 	* gdb.disasm/am33.exp: Corresponding changes.
 
-end-sanitize-am33
+end-sanitize-cygnus
 start-sanitize-cygnus-never
 Tue Jul 14 16:11:11 1998  Keith Seitz  <keiths@cygnus.com>
 
@@ -485,26 +496,26 @@ Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 	* gdb.base/scope.exp:  Remove extraneous newline in filelocal_bss
 	before run test.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Fri Jun 26 11:12:17 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* am33.exp: Just compile, do not link the testcase.
 	* am33.s: Add ".am33" pseudoop to force am33 mode.
 
-end-sanitize-am33
+end-sanitize-cygnus
 1998-06-25  Felix Lee  <flee@cygnus.com>
 
 	* gdb.base/setshow.exp: make sure $pc is sane.
 
 	* gdb.stabs/weird.exp: split expect patterns properly.
 
-start-sanitize-am33
+start-sanitize-cygnus
 Wed Jun 24 13:03:15 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/am33.s: New disassembler testfile for the am33.
 	* gdb.disasm/am33.exp: Run it.
 
-end-sanitize-am33
+end-sanitize-cygnus
 Tue Jun 23 11:45:01 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/funcargs.exp: simplify expect strings to ease pattern
