@@ -1,3 +1,8 @@
+Thu Jun  6 16:27:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpcle-*-solaris*): Until we get shared
+	libraries working, don't build gdb, sim, make, tcl, or expect.
+
 Tue Jun  4 20:41:45 1996  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* config.guess:  Merge with FSF:

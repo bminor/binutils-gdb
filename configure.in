@@ -1,3 +1,4 @@
+#! /bin/bash
 ##############################################################################
 
 ## This file is a shell script fragment that supplies the information
@@ -465,9 +466,9 @@ case "${target}" in
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
-    # This is temporary until we finish the gdb port.
+    # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb tk tcl"
+    noconfigdirs="$noconfigdirs gdb sim make tcl expect"
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
