@@ -1,3 +1,8 @@
+2003-02-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/expr1.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2003-02-06  Gwenole Beauchesne  <gbeauchesne@mandrakesoft.com>
 
 	* gas/i386/x86-64-opcode.s: More tests for x86-64 MOVD opcodes.

@@ -1,3 +1,7 @@
+2003-02-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (my_getSmallExpression): Rework bracket handling.
+
 2003-02-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Undo part of last change so that

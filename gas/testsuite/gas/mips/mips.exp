@@ -618,6 +618,7 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "${tmips}mips${el}16-f"
 	}
 	run_dump_test "elf-consthilo"
+	run_dump_test "expr1"
     }
 
     if $has_newabi {

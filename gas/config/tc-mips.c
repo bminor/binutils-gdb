@@ -10020,36 +10020,40 @@ my_getSmallExpression (ep, reloc, str)
 {
   bfd_reloc_code_real_type reversed_reloc[3];
   size_t reloc_index, i;
-  int bracket_depth;
-
-  reloc_index = 0;
-  bracket_depth = 0;
+  int crux_depth, str_depth;
+  char *crux;
 
   /* Search for the start of the main expression, recoding relocations
-     in REVERSED_RELOC.  */
-  for (;;)
+     in REVERSED_RELOC.  End the loop with CRUX pointing to the start
+     of the main expression and with CRUX_DEPTH containing the number
+     of open brackets at that point.  */
+  reloc_index = -1;
+  str_depth = 0;
+  do
     {
-      if (*str == '(')
-	bracket_depth++, str++;
-      else if (*str == ' ' || *str == '\t')
-	str++;
-      else if (*str == '%'
-	       && reloc_index < (HAVE_NEWABI ? 3 : 1)
-	       && parse_relocation (&str, &reversed_reloc[reloc_index]))
-	reloc_index++;
-      else
-	break;
-    }
+      reloc_index++;
+      crux = str;
+      crux_depth = str_depth;
 
-  my_getExpression (ep, str);
+      /* Skip over whitespace and brackets, keeping count of the number
+	 of brackets.  */
+      while (*str == ' ' || *str == '\t' || *str == '(')
+	if (*str++ == '(')
+	  str_depth++;
+    }
+  while (*str == '%'
+	 && reloc_index < (HAVE_NEWABI ? 3 : 1)
+	 && parse_relocation (&str, &reversed_reloc[reloc_index]));
+
+  my_getExpression (ep, crux);
   str = expr_end;
 
   /* Match every open bracket.  */
-  while (bracket_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
+  while (crux_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
     if (*str++ == ')')
-      bracket_depth--;
+      crux_depth--;
 
-  if (bracket_depth > 0)
+  if (crux_depth > 0)
     as_bad ("unclosed '('");
 
   expr_end = str;
