@@ -26,6 +26,13 @@
 
 #include "sim-xcat.h"
 
+#ifdef __STDC__
+/* If signed were defined to be say __signed (ie, some versions of Linux),
+   then the signedN macro would not work correctly.  If we have a standard
+   compiler, we have signed.  */
+#undef signed
+#endif
+
 /* NOTE: See end of file for #undef */
 #define unsignedN XCONCAT2(unsigned,N)
 #define signedN XCONCAT2(signed,N)
