@@ -357,11 +357,23 @@ types used to describe C language source files.
 @chapter Encoding for the structure of the program
 
 @menu
+* Main Program::		Indicate what the main program is
 * Source Files::		The path and name of the source file
 * Line Numbers::		
 * Procedures::			
 * Block Structure::		
 @end menu
+
+@node Main Program
+@section Main Program
+
+Most languages allow the main program to have any name.  The
+@code{N_MAIN} stab type is used for a stab telling the debugger what
+name is used in this program.  Only the name is significant; it will be
+the name of a function which is the main program.  Most C compilers do
+not use this stab; they expect the debugger to simply assume that the
+name is @samp{main}, but some C compilers emit an @code{N_MAIN} stab for
+the @samp{main} function.
 
 @node Source Files
 @section The path and name of the source files
@@ -3022,8 +3034,8 @@ Static symbol (data segment variable with internal linkage), @xref{N_STSYM}.
 @item 0x28     N_LCSYM   
 .lcomm symbol (BSS segment variable with internal linkage), @xref{N_LCSYM}.
 
-@item 0x2a     N_MAIN    
-Name of main routine (not used in C), @xref{N_MAIN}.
+@item 0x2a N_MAIN    
+Name of main routine, @xref{Main Program}.
 
 @c FIXME: discuss this in the main body of the text where we talk about
 @c using N_FUN for variables.
@@ -3419,7 +3431,6 @@ Finally, any further information.
 * N_FUN::			C Function name or text segment variable
 * N_STSYM::			Initialized static symbol
 * N_LCSYM::			Uninitialized static symbol
-* N_MAIN::			Name of main routine (not for C)
 * N_PC::			Pascal global symbol
 * N_NSYMS::			Number of symbols
 * N_NOMAP::			No DST map
@@ -3515,18 +3526,6 @@ Unitialized static (.lcomm) symbol(BSS segment w/internal linkage).
                       # -> S (scope global to compilation unit)
                         -> V (scope local to procedure)
 value  -> BSS Address
-@end example
-
-@node N_MAIN
-@section 42 - 0x2a - N_MAIN       
-Name of main routine (not used in C)
-
-@display
-.stabs "name", N_MAIN, NIL, NIL, NIL
-@end display
-
-@example
-"name" -> "name_of_main_routine"  
 @end example
 
 @node N_PC
