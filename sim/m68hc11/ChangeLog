@@ -1,3 +1,8 @@
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_prepare_for_program, sim_open)
+	(sim_create_inferior): Rename _bfd to bfd.
+
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* dv-m68hc11eepr.c (struct m68hc11eepr ): Use const char* for filename.

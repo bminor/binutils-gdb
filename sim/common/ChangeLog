@@ -1,3 +1,9 @@
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-utils.h (sim_analyze_program, sim_load_file): Rename _bfd to bfd.
+	* sim-hload.c (sim_load), sim-base.h (sim_state_base): Ditto.
+	* nrun.c (main): Ditto.
+
 2003-02-26  Andrew Cagney  <cagney@redhat.com>
 
 	* sim-engine.h (sim_engine_abort): Add noreturn attribute.

@@ -1,3 +1,8 @@
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_open): 
+	(sim_create_inferior): 
+
 2003-01-14  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (LUXC1, SUXC1): New, for mipsV and mips64.

@@ -2125,7 +2125,7 @@ set_h8300h (int h_flag, int s_flag)
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, 
 	  struct host_callback_struct *ptr, 
-	  struct _bfd *abfd, 
+	  struct bfd *abfd, 
 	  char **argv)
 {
   /* FIXME: Much of the code in sim_load can be moved here.  */
@@ -2228,7 +2228,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct _bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 {
   if (abfd != NULL)
     cpu.pc = bfd_get_start_address (abfd);

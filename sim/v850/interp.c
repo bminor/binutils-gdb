@@ -192,7 +192,7 @@ SIM_DESC
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
@@ -297,7 +297,7 @@ sim_close (sd, quitting)
 SIM_RC
 sim_create_inferior (sd, prog_bfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *prog_bfd;
+     struct bfd *prog_bfd;
      char **argv;
      char **env;
 {

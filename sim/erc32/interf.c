@@ -184,7 +184,7 @@ SIM_DESC
 sim_open (kind, callback, abfd, argv)
      SIM_OPEN_KIND kind;
      struct host_callback_struct *callback;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
 {
 
@@ -304,7 +304,7 @@ sim_load(sd, prog, abfd, from_tty)
 SIM_RC
 sim_create_inferior(sd, abfd, argv, env)
      SIM_DESC sd;
-     struct _bfd *abfd;
+     struct bfd *abfd;
      char **argv;
      char **env;
 {

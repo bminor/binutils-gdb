@@ -1,3 +1,8 @@
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_open, sim_create_inferior, sim_open)
+	(sim_create_inferior): Rename _bfd to bfd.
+
 2003-02-26  Andrew Cagney  <cagney@redhat.com>
 
 	* am33.igen: Call sim_engine_abort instead of abort.

@@ -31,7 +31,7 @@ SIM_RC
 sim_load (sd, prog_name, prog_bfd, from_tty)
      SIM_DESC sd;
      char *prog_name;
-     struct _bfd *prog_bfd;
+     struct bfd *prog_bfd;
      int from_tty;
 {
   bfd *result_bfd;

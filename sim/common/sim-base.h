@@ -171,7 +171,7 @@ typedef struct {
 #define STATE_PROG_ARGV(sd) ((sd)->base.prog_argv)
 
   /* The program's bfd.  */
-  struct _bfd *prog_bfd;
+  struct bfd *prog_bfd;
 #define STATE_PROG_BFD(sd) ((sd)->base.prog_bfd)
 
   /* Symbol table for prog_bfd */
