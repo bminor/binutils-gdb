@@ -448,7 +448,7 @@ set_pe_subsystem ()
 	      entry = alc_entry;
 	    }
 
-	  lang_add_entry (entry, 1);
+	  lang_add_entry (entry, 0);
 
 	  return;
 	}

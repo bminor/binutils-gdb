@@ -1,3 +1,8 @@
+2002-05-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/pe.em (set_pe_subsystem): Don't set "cmdline" when
+	calling lang_add_entry.
+
 2002-05-21  H.J. Lu  (hjl@gnu.org)
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_parse_args): Handle
