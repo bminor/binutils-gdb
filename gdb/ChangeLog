@@ -1,4 +1,20 @@
+Fri Mar 13 15:51:11 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: pass MAKEINFO down on info.
+
 Thu Mar 12 11:56:46 1992  Per Bothner  (bothner@cygnus.com)
+
+	Merged in patches from metin@ibmpa.awdpa.ibm.com (Metin G.
+	Ozisik) (dated Fri, 6 Mar 92 17:51) for the rs6000.
+	* minsyms.c, symfile.c:  Changes that may be generally
+	applicable, but are #ifdef IBM6000 for now.
+	* rs6000-xdep.c:  Fixed typo in comment.
+	* rs6000-tdep.c:  Non-substatial changes.
+	* xoffread.c:  The main change here is addition of some
+	debugging functions.
+	* xoffexec.c: More changes.
+
+	* xcoffread.c:  Fixed two too-few-parameters bugs.
 
 	* solib.h, infrun.c, tm-rs6000.h:  Add a PID parameter
 	to SOLIB_CREATE_INFERIOR_HOOK macro.
