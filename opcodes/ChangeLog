@@ -1,3 +1,9 @@
+Thu Jan 25 11:56:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386-dis.c (print_insn_i386): Only fetch the mod/reg/rm byte
+	when necessary.  From Ulrich Drepper
+	<drepper@myware.rz.uni-karlsruhe.de>.
+
 Thu Jan 25 03:39:10 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): NUMOPCODES replaced with
