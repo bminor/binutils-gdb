@@ -6497,8 +6497,6 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 							  sreloc, 2))
 			return FALSE;
 		    }
-		  if (sec->flags & SEC_READONLY)
-		    info->flags |= DF_TEXTREL;
 		  elf_section_data (sec)->sreloc = sreloc;
 		}
 
