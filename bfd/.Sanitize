@@ -54,6 +54,7 @@ coff-h8500.c
 coff-i386.c
 coff-i960.c
 coff-m68k.c
+coff-m68k-un.c
 coff-m88k.c
 coff-mips.c
 coff-msym.c
