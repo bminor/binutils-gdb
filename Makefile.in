@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Sat Apr 13 00:40:04 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Sat Apr 13 02:43:05 PDT 1991, by rich@cygint.cygnus.com
 #
 
 # $Id$
@@ -48,7 +48,7 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean
 
-install: all
+install:
 	$(MAKE) subdir_do DO=install
 
 # When installing include files, be sure that machine-dependent
@@ -96,7 +96,17 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.5  1991/04/13 07:40:41  rich
+# Revision 1.7  1991/04/13 13:06:16  tiemann
+# Don't depend `install' on `all'.  Actually, the way things work, all
+# depends on things being incrementally installed, and install depends
+# on everything happening in a topological fashion.
+#
+# This will need to be worked on further, but for now it's ok.
+#
+# Revision 1.6  1991/04/13  10:04:14  rich
+# Now can build gas for a29k on a29k.
+#
+# Revision 1.5  1991/04/13  07:40:41  rich
 # Fixed an ordering bug.  Now everything is built, and then installed.
 #
 # Revision 1.4  1991/04/13  02:11:09  rich
