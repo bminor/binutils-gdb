@@ -77,8 +77,6 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if ((*optarg == '0' || *optarg == '1' || *optarg == '2')
           && optarg[1] == '\0')
       {
-        extern void lang_add_output_format
-          PARAMS ((const char *, const char *, const char *, int));
         static char buf[] = "coffX-${OUTPUT_FORMAT_TEMPLATE}";
         coff_version = *optarg - '0';
         buf[4] = *optarg;

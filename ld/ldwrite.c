@@ -32,15 +32,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ldgram.h>
 #include "ldmain.h"
 
-static void build_link_order PARAMS ((lang_statement_union_type *));
-static asection *clone_section PARAMS ((bfd *, asection *, const char *, int *));
-static void split_sections PARAMS ((bfd *, struct bfd_link_info *));
-
 /* Build link_order structures for the BFD linker.  */
 
 static void
-build_link_order (statement)
-     lang_statement_union_type *statement;
+build_link_order (lang_statement_union_type *statement)
 {
   switch (statement->header.type)
     {
@@ -60,7 +55,7 @@ build_link_order (statement)
 
 	link_order->type = bfd_data_link_order;
 	link_order->offset = statement->data_statement.output_vma;
-	link_order->u.data.contents = (bfd_byte *) xmalloc (QUAD_SIZE);
+	link_order->u.data.contents = xmalloc (QUAD_SIZE);
 
 	value = statement->data_statement.value;
 
@@ -197,9 +192,7 @@ build_link_order (statement)
 	link_order->offset = rs->output_vma;
 	link_order->size = bfd_get_reloc_size (rs->howto);
 
-	link_order->u.reloc.p =
-	  ((struct bfd_link_order_reloc *)
-	   xmalloc (sizeof (struct bfd_link_order_reloc)));
+	link_order->u.reloc.p = xmalloc (sizeof (struct bfd_link_order_reloc));
 
 	link_order->u.reloc.p->reloc = rs->reloc;
 	link_order->u.reloc.p->addend = rs->addend_value;
@@ -292,21 +285,13 @@ build_link_order (statement)
     }
 }
 
-/* Call BFD to write out the linked file.  */
-
-/**********************************************************************/
-
 /* Wander around the input sections, make sure that
    we'll never try and create an output section with more relocs
    than will fit.. Do this by always assuming the worst case, and
    creating new output sections with all the right bits.  */
 #define TESTIT 1
 static asection *
-clone_section (abfd, s, name, count)
-     bfd *abfd;
-     asection *s;
-     const char *name;
-     int *count;
+clone_section (bfd *abfd, asection *s, const char *name, int *count)
 {
   char templ[6];
   char *sname;
@@ -348,8 +333,7 @@ clone_section (abfd, s, name, count)
 
 #if TESTING
 static void
-ds (s)
-     asection *s;
+ds (asection *s)
 {
   struct bfd_link_order *l = s->link_order_head;
   printf ("vma %x size %x\n", s->vma, s->_raw_size);
@@ -368,10 +352,7 @@ ds (s)
   printf ("\n");
 }
 
-dump (s, a1, a2)
-     char *s;
-     asection *a1;
-     asection *a2;
+dump (char *s, asection *a1, asection *a2)
 {
   printf ("%s\n", s);
   ds (a1);
@@ -379,8 +360,7 @@ dump (s, a1, a2)
 }
 
 static void
-sanity_check (abfd)
-     bfd *abfd;
+sanity_check (bfd *abfd)
 {
   asection *s;
   for (s = abfd->sections; s; s = s->next)
@@ -403,9 +383,7 @@ sanity_check (abfd)
 #endif
 
 static void
-split_sections (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
+split_sections (bfd *abfd, struct bfd_link_info *info)
 {
   asection *original_sec;
   int nsecs = abfd->section_count;
@@ -524,10 +502,10 @@ split_sections (abfd, info)
   sanity_check (abfd);
 }
 
-/**********************************************************************/
+/* Call BFD to write out the linked file.  */
 
 void
-ldwrite ()
+ldwrite (void)
 {
   /* Reset error indicator, which can typically something like invalid
      format from opening up the .o files.  */

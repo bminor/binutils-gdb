@@ -99,7 +99,7 @@ gld${EMULATION_NAME}_after_open (void)
 
       /* Double check that all other data sections are empty, as is
          required for embedded PIC code.  */
-      bfd_map_over_sections (abfd, check_sections, (PTR) datasec);
+      bfd_map_over_sections (abfd, check_sections, datasec);
     }
 }
 

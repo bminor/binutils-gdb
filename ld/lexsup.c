@@ -53,10 +53,9 @@
 #define	S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
-static int is_num PARAMS ((const char *, int, int, int));
-static void set_default_dirlist PARAMS ((char *));
-static void set_section_start PARAMS ((char *, char *));
-static void help PARAMS ((void));
+static void set_default_dirlist (char *);
+static void set_section_start (char *, char *);
+static void help (void);
 
 /* Non-zero if we are processing a --defsym from the command line.  */
 int parsing_defsym = 0;
@@ -110,7 +109,7 @@ int parsing_defsym = 0;
 #define OPTION_WARN_ONCE		(OPTION_WARN_MULTIPLE_GP + 1)
 #define OPTION_WARN_SECTION_ALIGN	(OPTION_WARN_ONCE + 1)
 #define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_SECTION_ALIGN + 1)
-#define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
+#define OPTION_SPLIT_BY_FILE 		(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
 #define OPTION_WRAP			(OPTION_WHOLE_ARCHIVE + 1)
 #define OPTION_FORCE_EXE_SUFFIX		(OPTION_WRAP + 1)
@@ -118,13 +117,13 @@ int parsing_defsym = 0;
 #define OPTION_NO_GC_SECTIONS		(OPTION_GC_SECTIONS + 1)
 #define OPTION_CHECK_SECTIONS		(OPTION_NO_GC_SECTIONS + 1)
 #define OPTION_NO_CHECK_SECTIONS	(OPTION_CHECK_SECTIONS + 1)
-#define OPTION_MPC860C0                 (OPTION_NO_CHECK_SECTIONS + 1)
+#define OPTION_MPC860C0			(OPTION_NO_CHECK_SECTIONS + 1)
 #define OPTION_NO_UNDEFINED		(OPTION_MPC860C0 + 1)
-#define OPTION_INIT                     (OPTION_NO_UNDEFINED + 1)
-#define OPTION_FINI                     (OPTION_INIT + 1)
+#define OPTION_INIT			(OPTION_NO_UNDEFINED + 1)
+#define OPTION_FINI			(OPTION_INIT + 1)
 #define OPTION_SECTION_START		(OPTION_FINI + 1)
 #define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
-#define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
+#define OPTION_TARGET_HELP		(OPTION_UNIQUE + 1)
 #define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
 #define OPTION_NO_ALLOW_SHLIB_UNDEFINED	(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
 #define OPTION_ALLOW_MULTIPLE_DEFINITION (OPTION_NO_ALLOW_SHLIB_UNDEFINED + 1)
@@ -440,11 +439,7 @@ static const struct ld_option ld_options[] =
    between MIN and MAX.  The return value is the number or ERR.  */
 
 static int
-is_num (string, min, max, err)
-     const char *string;
-     int min;
-     int max;
-     int err;
+is_num (const char *string, int min, int max, int err)
 {
   int result = 0;
 
@@ -464,9 +459,7 @@ is_num (string, min, max, err)
 }
 
 void
-parse_args (argc, argv)
-     unsigned argc;
-     char **argv;
+parse_args (unsigned argc, char **argv)
 {
   unsigned i;
   int is, il, irl;
@@ -477,11 +470,9 @@ parse_args (argc, argv)
   struct option *really_longopts;
   int last_optind;
 
-  shortopts = (char *) xmalloc (OPTION_COUNT * 3 + 2);
-  longopts = (struct option *) xmalloc (sizeof (*longopts)
-					* (OPTION_COUNT + 1));
-  really_longopts = (struct option *) xmalloc (sizeof (*really_longopts)
-					       * (OPTION_COUNT + 1));
+  shortopts = xmalloc (OPTION_COUNT * 3 + 2);
+  longopts = xmalloc (sizeof (*longopts) * (OPTION_COUNT + 1));
+  really_longopts = xmalloc (sizeof (*really_longopts) * (OPTION_COUNT + 1));
 
   /* Starting the short option string with '-' is for programs that
      expect options and other ARGV-elements in any order and that care about
@@ -566,7 +557,7 @@ parse_args (argc, argv)
 	{
 	  char *n;
 
-	  n = (char *) xmalloc (strlen (argv[i]) + 20);
+	  n = xmalloc (strlen (argv[i]) + 20);
 	  sprintf (n, "--library=%s", argv[i] + 2);
 	  argv[i] = n;
 	}
@@ -613,16 +604,15 @@ parse_args (argc, argv)
 	  einfo (_("%P%F: use the --help option for usage information\n"));
 
 	case 1:			/* File name.  */
-	  lang_add_input_file (optarg, lang_input_file_is_file_enum,
-			       (char *) NULL);
+	  lang_add_input_file (optarg, lang_input_file_is_file_enum, NULL);
 	  break;
 
 	case OPTION_IGNORE:
 	  break;
 	case 'a':
 	  /* For HP/UX compatibility.  Actually -a shared should mean
-             ``use only shared libraries'' but, then, we don't
-             currently support shared libraries on HP/UX anyhow.  */
+	     ``use only shared libraries'' but, then, we don't
+	     currently support shared libraries on HP/UX anyhow.  */
 	  if (strcmp (optarg, "archive") == 0)
 	    config.dynamic_link = FALSE;
 	  else if (strcmp (optarg, "shared") == 0
@@ -714,8 +704,7 @@ parse_args (argc, argv)
 	case 'f':
 	  if (command_line.auxiliary_filters == NULL)
 	    {
-	      command_line.auxiliary_filters =
-		(char **) xmalloc (2 * sizeof (char *));
+	      command_line.auxiliary_filters = xmalloc (2 * sizeof (char *));
 	      command_line.auxiliary_filters[0] = optarg;
 	      command_line.auxiliary_filters[1] = NULL;
 	    }
@@ -727,9 +716,9 @@ parse_args (argc, argv)
 	      c = 0;
 	      for (p = command_line.auxiliary_filters; *p != NULL; p++)
 		++c;
-	      command_line.auxiliary_filters =
-		(char **) xrealloc (command_line.auxiliary_filters,
-				    (c + 2) * sizeof (char *));
+	      command_line.auxiliary_filters
+		= xrealloc (command_line.auxiliary_filters,
+			    (c + 2) * sizeof (char *));
 	      command_line.auxiliary_filters[c] = optarg;
 	      command_line.auxiliary_filters[c + 1] = NULL;
 	    }
@@ -762,8 +751,7 @@ parse_args (argc, argv)
 	  ldfile_add_library_path (optarg, TRUE);
 	  break;
 	case 'l':
-	  lang_add_input_file (optarg, lang_input_file_is_l_enum,
-			       (char *) NULL);
+	  lang_add_input_file (optarg, lang_input_file_is_l_enum, NULL);
 	  break;
 	case 'M':
 	  config.map_filename = "-";
@@ -842,7 +830,7 @@ parse_args (argc, argv)
 	  lang_add_output (optarg, 0);
 	  break;
 	case OPTION_OFORMAT:
-	  lang_add_output_format (optarg, (char *) NULL, (char *) NULL, 0);
+	  lang_add_output_format (optarg, NULL, NULL, 0);
 	  break;
 	case 'q':
 	  link_info.emitrelocations = TRUE;
@@ -882,7 +870,7 @@ parse_args (argc, argv)
 	      {
 		lang_add_input_file (optarg,
 				     lang_input_file_is_symbols_only_enum,
-				     (char *) NULL);
+				     NULL);
 		break;
 	      }
 	  }
@@ -1077,8 +1065,8 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_VERSION_SCRIPT:
 	  /* This option indicates a small script that only specifies
-             version information.  Read it, but don't assume that
-             we've seen a linker script.  */
+	     version information.  Read it, but don't assume that
+	     we've seen a linker script.  */
 	  {
 	    FILE *hold_script_handle;
 
@@ -1220,8 +1208,7 @@ parse_args (argc, argv)
    library search path.  */
 
 static void
-set_default_dirlist (dirlist_ptr)
-     char *dirlist_ptr;
+set_default_dirlist (char *dirlist_ptr)
 {
   char *p;
 
@@ -1239,8 +1226,7 @@ set_default_dirlist (dirlist_ptr)
 }
 
 static void
-set_section_start (sect, valstr)
-     char *sect, *valstr;
+set_section_start (char *sect, char *valstr)
 {
   const char *end;
   bfd_vma val = bfd_scan_vma (valstr, &end, 16);
@@ -1252,7 +1238,7 @@ set_section_start (sect, valstr)
 /* Print help messages for the options.  */
 
 static void
-help ()
+help (void)
 {
   unsigned i;
   const char **targets, **pp;

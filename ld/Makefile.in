@@ -2427,7 +2427,7 @@ ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldexp.h \
   ldver.h ldlang.h ldfile.h ldemul.h ldmisc.h ldmain.h \
   mri.h ldctor.h ldlex.h
-ldlex.o: ldlex.c $(INCDIR)/ansidecl.h ../bfd/bfd.h \
+ldlex.o: ldlex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
   ldmisc.h ldexp.h ldlang.h ldgram.h ldfile.h ldlex.h \

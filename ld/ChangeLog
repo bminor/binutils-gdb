@@ -1,3 +1,41 @@
+2003-06-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.h: Convert to C90, remove unnecessary prototypes and casts.
+	Replace PTR with void *.  Formatting.
+	* ldcref.c: Likewise.
+	* ldctor.c: Likewise.
+	* ldctor.h: Likewise.
+	* ldemul.h: Likewise.
+	* ldexp.c: Likewise.
+	* ldexp.h: Likewise.
+	* ldfile.c: Likewise.
+	* ldfile.h: Likewise.
+	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldlex.h: Likewise.
+	* ldlex.l: Likewise.
+	* ldmain.c: Likewise.
+	* ldmain.h: Likewise.
+	* ldmisc.c: Likewise.
+	* ldmisc.h: Likewise.
+	* ldver.h: Likewise.
+	* ldwrite.c: Likewise.
+	* ldwrite.h: Likewise.
+	* lexsup.c: Likewise.
+	* mri.c: Likewise.
+	* mri.h: Likewise.
+	* pe-dll.c: Likewise.
+	* pe-dll.h: Likewise.
+	* deffilep.y: Likewise.
+	* deffile.h: Likewise.  Don't include ansidecl.h.
+	* emulparams/elf32mcore.sh: Remove unnecessary cast.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/ticoff.em: Remove lang_add_output_format declaration.
+	* sysdep.h: Don't include ansidecl.h.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2003-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* deffilep.y (def_file_add_directive): Cope with NUL seperated
@@ -8,74 +46,74 @@
 
 	* emultempl/aix.em: Convert to C90, remove unnecessary prototypes
 	and casts.  Replace PTR with void *.  Formatting.
-	* emultempl/alphaelf.em: Likewise
-	* emultempl/armcoff.em: Likewise
-	* emultempl/armelf.em: Likewise
-	* emultempl/armelf_oabi.em: Likewise
-	* emultempl/beos.em: Likewise
-	* emultempl/elf32.em: Likewise
-	* emultempl/generic.em: Likewise
-	* emultempl/gld960.em: Likewise
-	* emultempl/gld960c.em: Likewise
-	* emultempl/hppaelf.em: Likewise
-	* emultempl/linux.em: Likewise
-	* emultempl/lnk960.em: Likewise
-	* emultempl/m68hc1xelf.em: Likewise
-	* emultempl/m68kcoff.em: Likewise
-	* emultempl/m68kelf.em: Likewise
-	* emultempl/mipsecoff.em: Likewise
-	* emultempl/mipself.em: Likewise
-	* emultempl/mmix-elfnmmo.em: Likewise
-	* emultempl/mmixelf.em: Likewise
-	* emultempl/mmo.em: Likewise
-	* emultempl/needrelax.em: Likewise
-	* emultempl/netbsd.em: Likewise
-	* emultempl/pe.em: Likewise
-	* emultempl/sh64elf.em: Likewise
-	* emultempl/sunos.em: Likewise
-	* emultempl/ticoff.em: Likewise
-	* emultempl/vanilla.em: Likewise
-	* emultempl/xtensaelf.em: Likewise
+	* emultempl/alphaelf.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/armelf_oabi.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/mipsecoff.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/mmix-elfnmmo.em: Likewise.
+	* emultempl/mmixelf.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/needrelax.em: Likewise.
+	* emultempl/netbsd.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
 	* Makefile.am: Correct dependencies.
 	* Makefile.in: Regenerate.
 
 2003-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Correct spelling of "relocatable".
-	* ldctor.c: Likewise
-	* ldexp.c: Likewise
-	* ldfile.c: Likewise
-	* ldint.texinfo: Likewise
-	* ldlang.c: Likewise
-	* ldmain.c: Likewise
-	* ldwrite.c: Likewise
-	* lexsup.c: Likewise
-	* emultempl/aix.em: Likewise
-	* emultempl/alphaelf.em: Likewise
-	* emultempl/armcoff.em: Likewise
-	* emultempl/armelf_oabi.em: Likewise
-	* emultempl/beos.em: Likewise
-	* emultempl/elf32.em: Likewise
-	* emultempl/generic.em: Likewise
-	* emultempl/gld960.em: Likewise
-	* emultempl/gld960c.em: Likewise
-	* emultempl/hppaelf.em: Likewise
-	* emultempl/linux.em: Likewise
-	* emultempl/lnk960.em: Likewise
-	* emultempl/m68hc1xelf.em: Likewise
-	* emultempl/m68kcoff.em: Likewise
-	* emultempl/m68kelf.em: Likewise
-	* emultempl/mipsecoff.em: Likewise
-	* emultempl/mipself.em: Likewise
-	* emultempl/mmix-elfnmmo.em: Likewise
-	* emultempl/mmo.em: Likewise
-	* emultempl/needrelax.em: Likewise
-	* emultempl/pe.em: Likewise
-	* emultempl/ppc64elf.em: Likewise
-	* emultempl/sh64elf.em: Likewise
-	* emultempl/sunos.em: Likewise
-	* emultempl/ticoff.em: Likewise
-	* emultempl/xtensaelf.em: Likewise
+	* ldctor.c: Likewise.
+	* ldexp.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldint.texinfo: Likewise.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* ldwrite.c: Likewise.
+	* lexsup.c: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/alphaelf.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf_oabi.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/m68kelf.em: Likewise.
+	* emultempl/mipsecoff.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/mmix-elfnmmo.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/needrelax.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
 
 2003-06-24  Alan Modra  <amodra@bigpond.net.au>
 
@@ -3111,7 +3149,7 @@
 	* scripttempl/elfi370.sc (OTHER_READONLY_SECTIONS): Likewise.
 	(OTHER_READWRITE_SECTIONS): Likewise.
 	* scripttempl/nw.sc (OTHER_READONLY_SECTIONS): Likewise.
-	(OTHER_READWRITE_SECTIONS): Likewise
+	(OTHER_READWRITE_SECTIONS): Likewise.
 
 	* emulparams/armelf.sh (OTHER_RELOCATING_SECTIONS): Delete.
 	(STACK_ADDR): Define.

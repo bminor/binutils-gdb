@@ -33,9 +33,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldmain.h"
 #include "ldctor.h"
 
-static int ctor_prio PARAMS ((const char *));
-static int ctor_cmp PARAMS ((const PTR, const PTR));
-
 /* The list of statements needed to handle constructors.  These are
    invoked by the command CONSTRUCTORS in the linker script.  */
 lang_statement_list_type constructor_list;
@@ -56,24 +53,23 @@ struct set_info *sets;
    function will construct the sets.  */
 
 void
-ldctor_add_set_entry (h, reloc, name, section, value)
-     struct bfd_link_hash_entry *h;
-     bfd_reloc_code_real_type reloc;
-     const char *name;
-     asection *section;
-     bfd_vma value;
+ldctor_add_set_entry (struct bfd_link_hash_entry *h,
+		      bfd_reloc_code_real_type reloc,
+		      const char *name,
+		      asection *section,
+		      bfd_vma value)
 {
   struct set_info *p;
   struct set_element *e;
   struct set_element **epp;
 
-  for (p = sets; p != (struct set_info *) NULL; p = p->next)
+  for (p = sets; p != NULL; p = p->next)
     if (p->h == h)
       break;
 
-  if (p == (struct set_info *) NULL)
+  if (p == NULL)
     {
-      p = (struct set_info *) xmalloc (sizeof (struct set_info));
+      p = xmalloc (sizeof (struct set_info));
       p->next = sets;
       sets = p;
       p->h = h;
@@ -109,7 +105,7 @@ ldctor_add_set_entry (h, reloc, name, section, value)
 	}
     }
 
-  e = (struct set_element *) xmalloc (sizeof (struct set_element));
+  e = xmalloc (sizeof (struct set_element));
   e->next = NULL;
   e->name = name;
   e->section = section;
@@ -126,8 +122,7 @@ ldctor_add_set_entry (h, reloc, name, section, value)
    symbol name.  */
 
 static int
-ctor_prio (name)
-     const char *name;
+ctor_prio (const char *name)
 {
   /* The name will look something like _GLOBAL_$I$65535$test02__Fv.
      There might be extra leading underscores, and the $ characters
@@ -155,12 +150,10 @@ ctor_prio (name)
    is called via qsort.  */
 
 static int
-ctor_cmp (p1, p2)
-     const PTR p1;
-     const PTR p2;
+ctor_cmp (const void *p1, const void *p2)
 {
-  const struct set_element **pe1 = (const struct set_element **) p1;
-  const struct set_element **pe2 = (const struct set_element **) p2;
+  const struct set_element * const *pe1 = p1;
+  const struct set_element * const *pe2 = p2;
   const char *n1;
   const char *n2;
   int prio1;
@@ -202,7 +195,7 @@ ctor_cmp (p1, p2)
    themselves into constructor_list.  */
 
 void
-ldctor_build_sets ()
+ldctor_build_sets (void)
 {
   static bfd_boolean called;
   lang_statement_list_type *old;
@@ -230,7 +223,7 @@ ldctor_build_sets ()
 	  for (e = p->elements; e != NULL; e = e->next)
 	    ++c;
 
-	  array = (struct set_element **) xmalloc (c * sizeof *array);
+	  array = xmalloc (c * sizeof *array);
 
 	  i = 0;
 	  for (e = p->elements; e != NULL; e = e->next)
@@ -257,7 +250,7 @@ ldctor_build_sets ()
   lang_list_init (stat_ptr);
 
   header_printed = FALSE;
-  for (p = sets; p != (struct set_info *) NULL; p = p->next)
+  for (p = sets; p != NULL; p = p->next)
     {
       struct set_element *e;
       reloc_howto_type *howto;
@@ -281,7 +274,7 @@ ldctor_build_sets ()
 	 generating relocatable output, we generate relocs instead of
 	 addresses.  */
       howto = bfd_reloc_type_lookup (output_bfd, p->reloc);
-      if (howto == (reloc_howto_type *) NULL)
+      if (howto == NULL)
 	{
 	  if (link_info.relocatable)
 	    {
@@ -331,9 +324,9 @@ ldctor_build_sets ()
 						exp_intop (reloc_size))));
       lang_add_assignment (exp_assop ('=', p->h->root.string,
 				      exp_nameop (NAME, ".")));
-      lang_add_data (size, exp_intop ((bfd_vma) p->count));
+      lang_add_data (size, exp_intop (p->count));
 
-      for (e = p->elements; e != (struct set_element *) NULL; e = e->next)
+      for (e = p->elements; e != NULL; e = e->next)
 	{
 	  if (config.map_file != NULL)
 	    {

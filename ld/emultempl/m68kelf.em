@@ -93,7 +93,7 @@ m68k_elf_after_open (void)
 
 	  /* Double check that all other data sections are empty, as is
 	     required for embedded PIC code.  */
-	  bfd_map_over_sections (abfd, check_sections, (PTR) datasec);
+	  bfd_map_over_sections (abfd, check_sections, datasec);
 	}
     }
 #endif /* SUPPORT_EMBEDDED_RELOCS */
@@ -104,10 +104,10 @@ m68k_elf_after_open (void)
    relocs.  This is called via bfd_map_over_sections.  */
 
 static void
-check_sections (bfd *abfd, asection *sec, PTR datasec)
+check_sections (bfd *abfd, asection *sec, void *datasec)
 {
   if ((bfd_get_section_flags (abfd, sec) & SEC_DATA)
-      && sec != (asection *) datasec
+      && sec != datasec
       && sec->reloc_count != 0)
     einfo ("%B%X: section %s has relocs; can not use --embedded-relocs\n",
 	   abfd, bfd_get_section_name (abfd, sec));
