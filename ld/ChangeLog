@@ -1,3 +1,7 @@
+1999-09-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* emulparams/d10velf.sh (READONLY_START_ADDR): Set to 0x2000004.
+
 1999-09-09  Andreas Schwab  <schwab@suse.de>
 
 	* ld.texinfo: Fix arguments of @var to not contain punctuation.
