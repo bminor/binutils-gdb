@@ -17,7 +17,13 @@ Tue Jan  5 13:05:32 1999  David Taylor  <taylor@texas.cygnus.com>
 	* gdb.base/solib.exp: new file.
 	* gdb.base/step-test.c: new file.
 	* gdb.c++/anon-union.cc: new file.
-
+	* gdb.c++/local.cc: new file.
+	* gdb.c++/member-pointer.cc: new file.
+	* gdb.c++/method.cc: new file.
+	* gdb.c++/ref-types.cc: new file.
+	* gdb.c++/ref-types2.cc: new file.
+	* gdb.c++/userdef.cc: new file.
+	
 	* gdb.base/scope.exp: compile one file at a time, then link.
 	* gdb.base/langs.exp: ditto.
 	* gdb.base/list.exp: ditto.
