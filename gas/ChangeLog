@@ -4,6 +4,19 @@
 
 	* config/tc-m88k.c (md_pseudo_table): Remove redundant "global".
 
+2001-07-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* struc-symbol.h (struct local_symbol): Rename lsy_offset to
+	lsy_value.  Correct typos in comments.
+	* symbols.c (local_symbol_make): Update for name change.
+	(local_symbol_convert): Likewise.
+	(colon): Likewise.
+	(S_GET_VALUE): Likewise.
+	(S_SET_VALUE): Likewise.
+	(print_symbol_value_1): Likewise.
+	(resolve_symbol_value): Likewise.  Don't divide local sym values
+	by OCTETS_PER_BYTE twice.
+
 2001-07-04  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (md_pseudo_table): Add 2byte, 4byte, and 8byte.
