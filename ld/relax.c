@@ -21,7 +21,7 @@ Tie together all the interseting blocks
 #include "ldmisc.h"
 #include "ldsym.h"
 #include "ldgram.h"
-
+#include "relax.h"
 static void
 DEFUN(build_it,(statement),
       lang_statement_union_type *statement)

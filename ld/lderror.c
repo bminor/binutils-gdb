@@ -2,6 +2,7 @@
 #include "sysdep.h"
 #include "../bfd/seclet.h"
 #include "ld.h"
+#include "ldmisc.h"
 
 #define MAX_ERRORS_IN_A_ROW 5
 
@@ -15,7 +16,7 @@ extern bfd_error_vector_type bfd_error_vector;
 static void
 DEFUN(ld_undefined_symbol,(relent, seclet),
       CONST arelent *relent AND
-      bfd_seclet_type *seclet)
+      CONST bfd_seclet_type *seclet)
 {
   asymbol *s = *(relent->sym_ptr_ptr);
   static asymbol *error_symbol;
@@ -76,7 +77,6 @@ DEFUN(ld_reloc_truncated,(relent, seclet),
 void
 DEFUN_VOID(init_bfd_error_vector)
 {
-bfd_error_vector.undefined_symbol = ld_undefined_symbol;  
-bfd_error_vector.reloc_value_truncated = ld_reloc_truncated;
-
+  bfd_error_vector.undefined_symbol = ld_undefined_symbol;  
+  bfd_error_vector.reloc_value_truncated = ld_reloc_truncated;
 }

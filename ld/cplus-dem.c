@@ -1,6 +1,6 @@
 /* Demangler for GNU C++ 
    Copyright 1989, 1991 Free Software Foundation, Inc.
-   written by James Clark (jjc@@jclark.uucp)
+   written by James Clark (jjc@jclark.uucp)
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -47,11 +47,21 @@
    available memory. */
 
 /* define this if names don't start with _ */
-#define nounderscore 1 
-#include <bfd.h>
+/* #define nounderscore 1 */
+#include <ansidecl.h>
 #include <sysdep.h>
+
 #define xmalloc ldmalloc
-#define xrealloc realloc
+#define xrealloc ldrealloc
+
+#if 0
+/* GDB-specific, FIXME.  */
+#include "defs.h"
+#endif
+
+
+
+#define PARAMS(x)  EXFUN(,x)
 
 /* This is '$' on systems where the assembler can deal with that.
    Where the assembler can't, it's '.' (but on many systems '.' is
@@ -163,12 +173,6 @@ typedef struct string {
   char *e;			/* pointer after end of allocated space */
 } string;
 
-#if _STDC_ == 1
-#define PARAMS(x) x
-#else
-#define PARAMS(x) ()
-#endif
-
 static void
 string_need PARAMS ((string *, int));
 
@@ -235,6 +239,8 @@ cplus_mangle_opname (opname, arg_mode)
 {
   int i, len = strlen (opname);
 
+  if (arg_mode != 0 && arg_mode != 1)
+    einfo ("%P%F: invalid arg_mode");
 
   for (i = 0; i < sizeof (optable)/sizeof (optable[0]); i++)
     {
