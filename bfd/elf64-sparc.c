@@ -2358,7 +2358,6 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		off &= ~1;
 	      else
 		{
-		  bfd_put_64 (output_bfd, relocation, sgot->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 
 		  if (info->shared)
@@ -2366,6 +2365,13 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      asection *srelgot;
 		      Elf_Internal_Rela outrel;
 
+		      /* The Solaris 2.7 64-bit linker adds the contents
+			 of the location to the value of the reloc.
+			 Note this is different behaviour to the
+			 32-bit linker, which both adds the contents
+			 and ignores the addend.  So clear the location.  */
+		      bfd_put_64 (output_bfd, 0, sgot->contents + off);
+		      
 		      /* We need to generate a R_SPARC_RELATIVE reloc
 			 for the dynamic linker.  */
 		      srelgot = bfd_get_section_by_name(dynobj, ".rela.got");
@@ -2382,6 +2388,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						  + srelgot->reloc_count));
 		      ++srelgot->reloc_count;
 		    }
+		  else
+		    bfd_put_64 (output_bfd, relocation, sgot->contents + off);
 		}
 	      relocation = sgot->output_offset + off - got_base;
 	    }

@@ -1,5 +1,8 @@
 2000-10-16  Geoffrey Keating  <geoffk@shoggoth.cygnus.com>
 
+	* elf64-sparc.c (sparc64_elf_relocate_section): Clear the location
+	of a GOT reloc.
+
 	* elf32-ppc.c (SYMBOL_REFERENCES_LOCAL): New macro.
 	(SYMBOL_CALLS_LOCAL): New macro.
 	(ppc_elf_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL.
