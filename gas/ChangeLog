@@ -1,3 +1,27 @@
+2000-02-24  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* as.h (flag_m68k_mri): Move declaration after target include, and
+	only declare when TC_M68K defined.  Define as zero otherwise.
+	(LABELS_WITHOUT_COLONS, NO_PSEUDO_DOT): If undefined, define as 0.
+	* app.c (scrub_m68k_mri): Declare only when TC_M68K defined.
+	Define as zero otherwise.
+	(do_scrub_begin): Use m68k_mri parameter only when TC_M68K defined.
+	(struct app_save): Declare scrub_m68k_mri only when TC_M68K.
+	(app_push, app_pop): Save scrub_m68k_mri only when TC_M68K.
+	(do_scrub_chars): Use LABELS_WITHOUT_COLONS directly rather than
+	testing whether defined.
+	* cond.c (ignore_input): Use NO_PSEUDO_DOT directly.
+	* expr.c (operand): #ifdef unused case labels when TC_M68K undefined.
+	* read.c: Use LABELS_WITHOUT_COLONS and NO_PSEUDO_DOT directly
+	rather than testing whether defined.
+	(s_mri): Set flag_m68k_mri only when TC_M68K defined.
+	(parse_mri_cons): Declare and use only when TC_M68K.
+	* config/tc-hppa.h (LABELS_WITHOUT_COLONS): Define as 1.
+	* config/tc-m68k.h (NO_PSEUDO_DOT): Define as 1.
+	* config/tc-m88k.h (NO_PSEUDO_DOT): Define as 1.
+
+	* NEWS: Mention IBM 370 support.
+
 2000-02-23  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): When swapping operands for

@@ -1,5 +1,5 @@
 /* tc-hppa.h -- Header file for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -72,7 +72,7 @@
 #define ASEC_NULL (asection *)0
 
 /* Labels are not required to have a colon for a suffix.  */
-#define LABELS_WITHOUT_COLONS
+#define LABELS_WITHOUT_COLONS 1
 
 /* FIXME.  This should be static and declared in tc-hppa.c, but 
    pa_define_label gets used outside of tc-hppa.c via tc_frob_label.

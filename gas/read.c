@@ -550,11 +550,7 @@ read_a_source_file (name)
 
 	      line_label = NULL;
 
-	      if (flag_m68k_mri
-#ifdef LABELS_WITHOUT_COLONS
-		  || 1
-#endif
-		  )
+	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
 		{
 		  /* Text at the start of a line must be a label, we
 		     run down and stick a colon in.  */
@@ -749,11 +745,7 @@ read_a_source_file (name)
 		  }
 #endif
 
-		  if (flag_m68k_mri
-#ifdef NO_PSEUDO_DOT
-		      || 1
-#endif
-		      )
+		  if (NO_PSEUDO_DOT || flag_m68k_mri)
 		    {
 		      /* The MRI assembler and the m88k use pseudo-ops
                          without a period.  */
@@ -2283,11 +2275,7 @@ s_macro (ignore)
 	  symbol_set_frag (line_label, &zero_address_frag);
 	}
 
-      if (((flag_m68k_mri
-#ifdef NO_PSEUDO_DOT
-	    || 1
-#endif
-	    )
+      if (((NO_PSEUDO_DOT || flag_m68k_mri)
 	   && hash_find (po_hash, name) != NULL)
 	  || (! flag_m68k_mri
 	      && *name == '.'
@@ -2331,7 +2319,9 @@ s_mri (ignore)
   else
     {
       flag_mri = 0;
+#ifdef TC_M68K
       flag_m68k_mri = 0;
+#endif
       macro_mri_mode (0);
     }
 
@@ -3257,8 +3247,10 @@ pseudo_set (symbolP)
    are defined, which is the normal case, then only simple expressions
    are permitted.  */
 
+#ifdef TC_M68K
 static void
 parse_mri_cons PARAMS ((expressionS *exp, unsigned int nbytes));
+#endif
 
 #ifndef TC_PARSE_CONS_EXPRESSION
 #ifdef BITFIELD_CONS_EXPRESSIONS
@@ -3313,9 +3305,11 @@ cons_worker (nbytes, rva)
   c = 0;
   do
     {
+#ifdef TC_M68K
       if (flag_m68k_mri)
 	parse_mri_cons (&exp, (unsigned int) nbytes);
       else
+#endif
 	TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
 
       if (rva)
@@ -3837,6 +3831,7 @@ parse_bitfield_cons (exp, nbytes)
 
 /* Handle an MRI style string expression.  */
 
+#ifdef TC_M68K
 static void
 parse_mri_cons (exp, nbytes)
      expressionS *exp;
@@ -3899,6 +3894,7 @@ parse_mri_cons (exp, nbytes)
 	input_line_pointer++;
     }
 }
+#endif /* TC_M68K */
 
 #ifdef REPEAT_CONS_EXPRESSIONS
 

@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -417,9 +417,6 @@ COMMON int flag_keep_locals; /* -L */
 /* True if we are assembling in MRI mode.  */
 COMMON int flag_mri;
 
-/* True if we are assembling in m68k MRI mode.  */
-COMMON int flag_m68k_mri;
-
 /* Should the data section be made read-only and appended to the text
    section?  */
 COMMON unsigned char flag_readonly_data_in_text; /* -R */
@@ -629,6 +626,13 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 #endif
 #include "listing.h"
 
+#ifdef TC_M68K
+/* True if we are assembling in m68k MRI mode.  */
+COMMON int flag_m68k_mri;
+#else
+#define flag_m68k_mri 0
+#endif
+
 #ifndef NUMBERS_WITH_SUFFIX
 #define NUMBERS_WITH_SUFFIX 0
 #endif
@@ -639,6 +643,14 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 
 #ifndef LOCAL_LABELS_FB
 #define LOCAL_LABELS_FB 0
+#endif
+
+#ifndef LABELS_WITHOUT_COLONS
+#define LABELS_WITHOUT_COLONS 0
+#endif
+
+#ifndef NO_PSEUDO_DOT
+#define NO_PSEUDO_DOT 0
 #endif
 
 #ifndef TEXT_SECTION_NAME

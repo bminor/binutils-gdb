@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1010,6 +1010,7 @@ operand (expressionP)
       /* here with input_line_pointer->char after "(...)" */
       return segment;
 
+#ifdef TC_M68K
     case 'E':
       if (! flag_m68k_mri || *input_line_pointer != '\'')
 	goto de_fault;
@@ -1020,6 +1021,7 @@ operand (expressionP)
 	goto de_fault;
       ++input_line_pointer;
       /* Fall through.  */
+#endif
     case '\'':
       if (! flag_m68k_mri)
 	{
@@ -1039,11 +1041,13 @@ operand (expressionP)
       (void) operand (expressionP);
       break;
 
+#ifdef TC_M68K
     case '"':
       /* Double quote is the bitwise not operator in MRI mode.  */
       if (! flag_m68k_mri)
 	goto de_fault;
       /* Fall through.  */
+#endif
     case '~':
       /* ~ is permitted to start a label on the Delta.  */
       if (is_name_beginner (c))
@@ -1085,6 +1089,7 @@ operand (expressionP)
       }
       break;
 
+#if defined (DOLLAR_DOT) || defined (TC_M68K)
     case '$':
       /* $ is the program counter when in MRI mode, or when DOLLAR_DOT
          is defined.  */
@@ -1105,6 +1110,7 @@ operand (expressionP)
 
       current_location (expressionP);
       break;
+#endif
 
     case '.':
       if (!is_part_of_name (*input_line_pointer))
@@ -1168,6 +1174,7 @@ operand (expressionP)
       input_line_pointer--;
       break;
 
+#ifdef TC_M68K
     case '%':
       if (! flag_m68k_mri)
 	goto de_fault;
@@ -1197,9 +1204,12 @@ operand (expressionP)
 
       current_location (expressionP);
       break;
+#endif
 
     default:
+#ifdef TC_M68K
     de_fault:
+#endif
       if (is_end_of_line[(unsigned char) c])
 	goto eol;
       if (is_name_beginner (c))	/* here if did not begin with a digit */

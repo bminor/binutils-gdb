@@ -1,5 +1,5 @@
 /* This file is tc-m68k.h
-   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -123,7 +123,7 @@ extern const char *m68k_comment_chars;
 #define LEX_TILDE LEX_BEGIN_NAME
 #define tc_canonicalize_symbol_name(s) ((*(s) == '~' ? *(s) = '.' : '.'), s)
 /* On the Delta, dots are not required before pseudo-ops.  */
-#define NO_PSEUDO_DOT
+#define NO_PSEUDO_DOT 1
 #ifndef BFD_ASSEMBLER
 #undef LOCAL_LABEL
 #define LOCAL_LABEL(name) \

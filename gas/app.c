@@ -1,5 +1,5 @@
 /* This is the Assembler Pre-Processor
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -34,10 +34,14 @@
 #endif
 #endif
 
+#ifdef TC_M68K
 /* Whether we are scrubbing in m68k MRI mode.  This is different from
    flag_m68k_mri, because the two flags will be affected by the .mri
    pseudo-op at different times.  */
 static int scrub_m68k_mri;
+#else
+#define scrub_m68k_mri 0
+#endif
 
 /* The pseudo-op which switches in and out of MRI mode.  See the
    comment in do_scrub_chars.  */
@@ -93,8 +97,6 @@ do_scrub_begin (m68k_mri)
   const char *p;
   int c;
 
-  scrub_m68k_mri = m68k_mri;
-
   lex[' '] = LEX_IS_WHITESPACE;
   lex['\t'] = LEX_IS_WHITESPACE;
   lex['\r'] = LEX_IS_WHITESPACE;
@@ -102,7 +104,11 @@ do_scrub_begin (m68k_mri)
   lex[';'] = LEX_IS_LINE_SEPARATOR;
   lex[':'] = LEX_IS_COLON;
 
+#ifdef TC_M68K
+  scrub_m68k_mri = m68k_mri;
+
   if (! m68k_mri)
+#endif
     {
       lex['"'] = LEX_IS_STRINGQUOTE;
 
@@ -165,6 +171,7 @@ do_scrub_begin (m68k_mri)
       lex['/'] = LEX_IS_TWOCHAR_COMMENT_1ST;
     }
 
+#ifdef TC_M68K
   if (m68k_mri)
     {
       lex['\''] = LEX_IS_STRINGQUOTE;
@@ -174,6 +181,7 @@ do_scrub_begin (m68k_mri)
          then it can't be used in an expression.  */
       lex['!'] = LEX_IS_LINE_COMMENT_START;
     }
+#endif
 
 #ifdef TC_V850
   lex['-'] = LEX_IS_DOUBLEDASH_1ST;
@@ -213,7 +221,9 @@ struct app_save
     int          add_newlines;
     char *       saved_input;
     int          saved_input_len;
+#ifdef TC_M68K
     int          scrub_m68k_mri;
+#endif
     const char * mri_state;
     char         mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
@@ -240,7 +250,9 @@ app_push ()
       memcpy (saved->saved_input, saved_input, saved_input_len);
       saved->saved_input_len = saved_input_len;
     }
+#ifdef TC_M68K
   saved->scrub_m68k_mri = scrub_m68k_mri;
+#endif
   saved->mri_state = mri_state;
   saved->mri_last_ch = mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
@@ -277,7 +289,9 @@ app_pop (arg)
       saved_input_len = saved->saved_input_len;
       free (saved->saved_input);
     }
+#ifdef TC_M68K
   scrub_m68k_mri = saved->scrub_m68k_mri;
+#endif
   mri_state = saved->mri_state;
   mri_last_ch = saved->mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
@@ -850,11 +864,7 @@ do_scrub_chars (get, tostart, tolen)
 	      state = 10;	/* Sp after symbol char */
 	      goto recycle;
 	    case 11:
-	      if (flag_m68k_mri
-#ifdef LABELS_WITHOUT_COLONS
-		  || 1
-#endif
-		  )
+	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
 		state = 1;
 	      else
 		{
