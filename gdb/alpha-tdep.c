@@ -377,42 +377,90 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   return sp;
 }
 
-/* Given a return value in `regbuf' with a type `valtype', 
-   extract and copy its value into `valbuf'.  */
+/* Extract from REGCACHE the value about to be returned from a function
+   and copy it into VALBUF.  */
 
 static void
-alpha_extract_return_value (struct type *valtype,
-			    char regbuf[ALPHA_REGISTER_BYTES], char *valbuf)
-{
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
-    alpha_register_convert_to_virtual (FP0_REGNUM, valtype,
-				       regbuf + REGISTER_BYTE (FP0_REGNUM),
-				       valbuf);
-  else
-    memcpy (valbuf, regbuf + REGISTER_BYTE (ALPHA_V0_REGNUM),
-            TYPE_LENGTH (valtype));
-}
-
-/* Given a return value in `regbuf' with a type `valtype', 
-   write its value into the appropriate register.  */
-
-static void
-alpha_store_return_value (struct type *valtype, char *valbuf)
+alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
+			    void *valbuf)
 {
   char raw_buffer[ALPHA_REGISTER_SIZE];
-  int regnum = ALPHA_V0_REGNUM;
-  int length = TYPE_LENGTH (valtype);
+  ULONGEST l;
 
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+  switch (TYPE_CODE (valtype))
     {
-      regnum = FP0_REGNUM;
-      length = ALPHA_REGISTER_SIZE;
-      alpha_register_convert_to_raw (valtype, regnum, valbuf, raw_buffer);
-    }
-  else
-    memcpy (raw_buffer, valbuf, length);
+    case TYPE_CODE_FLT:
+      switch (TYPE_LENGTH (valtype))
+	{
+	case 4:
+	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
+	  alpha_convert_dbl_flt (valbuf, raw_buffer);
+	  break;
 
-  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, length);
+	case 8:
+	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  break;
+
+	default:
+	  abort ();
+	}
+      break;
+
+    default:
+      /* Assume everything else degenerates to an integer.  */
+      regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (valtype), l);
+      break;
+    }
+}
+
+/* Extract from REGCACHE the address of a structure about to be returned
+   from a function.  */
+
+static CORE_ADDR
+alpha_extract_struct_value_address (struct regcache *regcache)
+{
+  ULONGEST addr;
+  regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &addr);
+  return addr;
+}
+
+/* Insert the given value into REGCACHE as if it was being 
+   returned by a function.  */
+
+static void
+alpha_store_return_value (struct type *valtype, struct regcache *regcache,
+			  const void *valbuf)
+{
+  int length = TYPE_LENGTH (valtype);
+  char raw_buffer[ALPHA_REGISTER_SIZE];
+  ULONGEST l;
+
+  switch (TYPE_CODE (valtype))
+    {
+    case TYPE_CODE_FLT:
+      switch (length)
+	{
+	case 4:
+	  alpha_convert_flt_dbl (raw_buffer, valbuf);
+	  valbuf = raw_buffer;
+	  /* FALLTHRU */
+
+	case 8:
+	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  break;
+
+	default:
+	  abort ();
+	}
+      break;
+
+    default:
+      /* Assume everything else degenerates to an integer.  */
+      l = unpack_long (valtype, valbuf);
+      regcache_cooked_write_unsigned (regcache, ALPHA_V0_REGNUM, l);
+      break;
+    }
 }
 
 static int
@@ -420,20 +468,6 @@ alpha_use_struct_convention (int gcc_p, struct type *type)
 {
   /* Structures are returned by ref in extra arg0.  */
   return 1;
-}
-
-static void
-alpha_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* Store the address of the place in which to copy the structure the
-     subroutine will return.  Handled by alpha_push_arguments.  */
-}
-
-static CORE_ADDR
-alpha_extract_struct_value_address (char *regbuf)
-{
-  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (ALPHA_V0_REGNUM),
-				    REGISTER_RAW_SIZE (ALPHA_V0_REGNUM)));
 }
 
 
@@ -1325,10 +1359,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                     generic_frameless_function_invocation_not);
 
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, alpha_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, alpha_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+  set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
 					    alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */

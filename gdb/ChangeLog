@@ -1,5 +1,11 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+        * alpha-tdep.c (alpha_extract_return_value): Convert to regcache.
+        (alpha_extract_struct_value_address): Likewise.
+        (alpha_store_return_value): Likewise.
+        (alpha_store_struct_return): Remove.
+        (alpha_gdbarch_init): Update hook registration to match.
+
         * alpha-tdep.c (alpha_register_convert_to_virtual): Tidy use of
         deprecated interfaces; use ALPHA_REGISTER_SIZE instead of gdbarch
         macros where appropriate.
