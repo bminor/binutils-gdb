@@ -67,10 +67,49 @@ WORKING_DIR := $(host)-objdir
 STAGE1DIR := $(WORKING_DIR).1
 STAGE2DIR := $(WORKING_DIR).2
 STAGE3DIR := $(WORKING_DIR).3
+INPLACEDIR := $(host)-in-place
 HOLESDIR := $(host)-holes
 
 .PHONY: all
-all:	$(TREE) do1 do2 do3 comparison
+all:	$(TREE)-stamp-co do1 do2 do3 comparison
+
+.PHONY: in-place
+in-place:	$(host)-stamp-in-place
+
+$(host)-stamp-in-place: $(TREE)-stamp-co
+	PATH=/bin:/usr/bin:/usr/ucb ; \
+		export PATH ; \
+		SHELL=/bin/sh ; export SHELL ; \
+		$(TIME) $(GNU_MAKE) $(host)-stamp-in-place-installed host=$(host) $(FLAGS_TO_PASS)
+	touch $@
+	mv $(INPLACEDIR) $(STAGE1DIR)
+
+$(host)-stamp-in-place-installed: $(host)-stamp-in-place-checked
+	(cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) install host=$(host))
+	(cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) install-info host=$(host))
+	touch $@
+
+$(host)-stamp-in-place-checked: $(host)-stamp-in-place-built
+#	(cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) check host=$(host))
+	touch $@
+
+$(host)-stamp-in-place-built: $(host)-stamp-in-place-configured
+	(cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) all host=$(host))
+	(cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) info host=$(host))
+	touch $@
+
+$(host)-stamp-in-place-configured: $(host)-stamp-in-place-cp
+	(cd $(INPLACEDIR) ; \
+		$(TIME) ./configure $(host) -v \
+			-prefix=$(release_root) \
+			-exec_prefix=$(release_root)/H-$(host))
+	touch $@
+
+$(host)-stamp-in-place-cp:
+	rm -rf $(INPLACEDIR)
+	mkdir $(INPLACEDIR)
+	(cd $(TREE) ; tar cf - .) | (cd $(INPLACEDIR) ; tar xf -)
+	touch $@
 
 .PHONY: do1
 do1:	$(host)-stamp-holes $(host)-stamp-stage1
@@ -85,7 +124,7 @@ $(host)-stamp-stage1:
 		export PATH ; \
 		SHELL=sh ; export SHELL ; \
 		$(TIME) $(GNU_MAKE) $(host)-stamp-stage1-installed host=$(host) $(FLAGS_TO_PASS)
-	touch $(host)-stamp-stage1
+	touch $@
 	mv $(WORKING_DIR) $(STAGE1DIR)
 
 $(host)-stamp-stage1-installed: $(host)-stamp-stage1-checked
@@ -123,7 +162,7 @@ $(host)-stamp-stage2:
 		export PATH ; \
 		SHELL=sh ; export SHELL ; \
 		$(TIME) $(MAKE) -w $(STAGE2DIR) host=$(host) $(FLAGS_TO_PASS)
-	touch $(host)-stamp-stage2
+	touch $@
 
 $(STAGE2DIR): $(host)-stamp-stage2-installed
 	mv $(WORKING_DIR) $(STAGE2DIR)
@@ -163,7 +202,7 @@ $(host)-stamp-stage3:
 		export PATH ; \
 		SHELL=sh ; export SHELL ; \
 		$(TIME) $(MAKE) -w $(STAGE3DIR) host=$(host) $(FLAGS_TO_PASS)
-	touch $(host)-stamp-stage3
+	touch $@
 
 $(STAGE3DIR): $(host)-stamp-stage3-checked
 	mv $(WORKING_DIR) $(STAGE3DIR)
@@ -306,7 +345,7 @@ $(host)-stamp-holes:
 		*) echo $$i is NOT found ;; \
 		esac ; \
 	done
-	touch $(host)-stamp-holes
+	touch $@
 
 .PHONY: comparison
 comparison:
@@ -324,14 +363,19 @@ endif
 
 .PHONY: clean
 clean:
-	rm -rf $(HOLESDIR) $(WORKING_DIR)* $(host)-stamp-* *~
+	rm -rf $(HOLESDIR) $(INPLACEDIR) $(WORKING_DIR)* $(host)-stamp-* *~
 
 .PHONY: very
 very:
 	rm -rf $(TREE)
 
-$(TREE):
+.PHONY: $(TREE)
+$(TREE): $(TREE)-stamp-co
+
+$(TREE)-stamp-co:
+	rm -rf $(TREE)
 	$(TIME) cvs co $(CVS_TAG) $(CVS_MODULE)
+	touch $@
 
 force:
 
