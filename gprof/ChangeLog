@@ -1,3 +1,7 @@
+Tue Nov 21 13:24:39 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* vax.c: Don't include vax.h here.
+
 Thu Nov 16 03:41:37 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Version 2.6 released.
