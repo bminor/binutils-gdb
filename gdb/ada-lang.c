@@ -319,20 +319,21 @@ extract_string (CORE_ADDR addr, char *buf)
   while (buf[char_index - 1] != '\000');
 }
 
-/* Assuming *OLD_VECT points to an array of *SIZE objects of size
+/* Assuming VECT points to an array of *SIZE objects of size
    ELEMENT_SIZE, grow it to contain at least MIN_SIZE objects,
-   updating *OLD_VECT and *SIZE as necessary.  */
+   updating *SIZE as necessary and returning the (new) array.  */
 
-void
-grow_vect (void **old_vect, size_t * size, size_t min_size, int element_size)
+void *
+grow_vect (void *vect, size_t *size, size_t min_size, int element_size)
 {
   if (*size < min_size)
     {
       *size *= 2;
       if (*size < min_size)
         *size = min_size;
-      *old_vect = xrealloc (*old_vect, *size * element_size);
+      vect = xrealloc (vect, *size * element_size);
     }
+  return vect;
 }
 
 /* True (non-zero) iff TARGET matches FIELD_NAME up to any trailing
