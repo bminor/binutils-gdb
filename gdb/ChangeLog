@@ -1,3 +1,9 @@
+Thu Nov  9 17:34:01 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (gdb_target): Build in the simulator for all
+	PowerPC eabi targets, not just eabisim, providing
+	--enable-sim-powerpc is used, or the host compiler is GCC.
+
 Thu Nov  9 14:04:05 1995  Raymond Jou  (rjou@mexican.cygnus.com)
 
 	* mpw-config.in: Add variable with names of SIOW libraries.

@@ -54,6 +54,14 @@ esac])
 
 # end-sanitize-gm
 
+AC_ARG_ENABLE(sim-powerpc,
+[  --enable-sim-powerpc ],
+[case "${enableval}" in
+yes)	powerpc_sim=yes ;;
+no)	powerpc_sim=no ;;
+*)	AC_MSG_ERROR(bad value ${enableval} given for sim-powerpc option) ;;
+esac],[if test x"$GCC" != x""; then powerpc_sim=yes; else powerpc_sim=no; fi])
+
 # start-sanitize-gdbtk
 ENABLE_GDBTK=
 
@@ -461,10 +469,16 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 
 powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
-powerpc-*-eabisim*)	gdb_target=ppc-sim ;;
-powerpc-*-eabi*)	gdb_target=ppc-eabi ;;
-powerpcle-*-eabisim*)	gdb_target=ppcle-sim ;;
-powerpcle-*-eabi*)	gdb_target=ppcle-eabi ;;
+powerpc-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
+			  gdb_target=ppc-sim
+			else
+			  gdb_target=ppc-eabi
+			fi ;;
+powerpcle-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
+			  gdb_target=ppcle-sim
+			else
+			  gdb_target=ppcle-eabi
+			fi ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;
 

@@ -16,6 +16,8 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-gm "
 ac_help="$ac_help
+  --enable-sim-powerpc "
+ac_help="$ac_help
   --enable-gdbtk "
 ac_help="$ac_help
   --with-x                use the X Window System"
@@ -496,7 +498,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 500 "configure"
+#line 502 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -510,7 +512,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 514 "configure"
+#line 516 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -537,7 +539,7 @@ echo "$ac_t""$CPP" 1>&6
 
 echo $ac_n "checking for AIX""... $ac_c" 1>&6
 cat > conftest.$ac_ext <<EOF
-#line 541 "configure"
+#line 543 "configure"
 #include "confdefs.h"
 #ifdef _AIX
   yes
@@ -564,7 +566,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 568 "configure"
+#line 570 "configure"
 #include "confdefs.h"
 #include <minix/config.h>
 EOF
@@ -889,7 +891,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 893 "configure"
+#line 895 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -910,7 +912,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 914 "configure"
+#line 916 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -932,7 +934,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 936 "configure"
+#line 938 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -950,7 +952,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 954 "configure"
+#line 956 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -971,7 +973,7 @@ if test "$cross_compiling" = yes; then
   ac_cv_header_stdc=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 975 "configure"
+#line 977 "configure"
 #include "confdefs.h"
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -1008,7 +1010,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1012 "configure"
+#line 1014 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1041,7 +1043,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stat_broken'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1045 "configure"
+#line 1047 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1099,7 +1101,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1103 "configure"
+#line 1105 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1229,6 +1231,19 @@ fi
 
 # end-sanitize-gm
 
+# Check whether --enable-sim-powerpc or --disable-sim-powerpc was given.
+enableval="$enable_sim_powerpc"
+if test -n "$enableval"; then
+  case "${enableval}" in
+yes)	powerpc_sim=yes ;;
+no)	powerpc_sim=no ;;
+*)	{ echo "configure: error: bad value ${enableval} given for sim-powerpc option" 1>&2; exit 1; } ;;
+esac
+else
+  if test x"$GCC" != x""; then powerpc_sim=yes; else powerpc_sim=no; fi
+fi
+
+
 # start-sanitize-gdbtk
 ENABLE_GDBTK=
 
@@ -1305,7 +1320,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 1309 "configure"
+#line 1324 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1368,7 +1383,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1372 "configure"
+#line 1387 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1486,7 +1501,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1490 "configure"
+#line 1505 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1529,7 +1544,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1533 "configure"
+#line 1548 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1563,7 +1578,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1567 "configure"
+#line 1582 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1602,7 +1617,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1606 "configure"
+#line 1621 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1640,7 +1655,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1644 "configure"
+#line 1659 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1697,7 +1712,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1701 "configure"
+#line 1716 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
@@ -1799,7 +1814,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1803 "configure"
+#line 1818 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
@@ -2256,10 +2271,16 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 
 powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
-powerpc-*-eabisim*)	gdb_target=ppc-sim ;;
-powerpc-*-eabi*)	gdb_target=ppc-eabi ;;
-powerpcle-*-eabisim*)	gdb_target=ppcle-sim ;;
-powerpcle-*-eabi*)	gdb_target=ppcle-eabi ;;
+powerpc-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
+			  gdb_target=ppc-sim
+			else
+			  gdb_target=ppc-eabi
+			fi ;;
+powerpcle-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
+			  gdb_target=ppcle-sim
+			else
+			  gdb_target=ppcle-eabi
+			fi ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;
 
