@@ -1,5 +1,15 @@
 2003-06-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_link_hash_table): Remove top_index.  Modify
+	input_list.
+	(ppc64_elf_link_hash_table_create): Init input_list here.
+	(ppc64_elf_setup_section_lists): Remove code setting up input lists
+	per output section.  Set toc_off for abs and other standard sections.
+	(ppc64_elf_reinit_toc): Don't set elf_gp on input bfds lacking a toc.
+	(ppc64_elf_next_input_section): Adjust for single input section list.
+	Don't set toc_curr from input bfds that haven't set elf_gp.
+	(group_sections): Adjust for single input section list.
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Correct pcrel section zero.
 
 2003-06-16  Alan Modra  <amodra@bigpond.net.au>

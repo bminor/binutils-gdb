@@ -2773,9 +2773,8 @@ struct ppc_link_hash_table
   /* Temp used when calculating TOC pointers.  */
   bfd_vma toc_curr;
 
-  /* Assorted information used by ppc64_elf_size_stubs.  */
-  int top_index;
-  asection **input_list;
+  /* List of input code sections used by ppc64_elf_size_stubs.  */
+  asection *input_list;
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
@@ -3054,6 +3053,7 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->no_multi_toc = 0;
   htab->multi_toc_needed = 0;
   htab->toc_curr = 0;
+  htab->input_list = NULL;
   htab->sgot = NULL;
   htab->srelgot = NULL;
   htab->splt = NULL;
@@ -6500,9 +6500,8 @@ ppc64_elf_setup_section_lists (output_bfd, info)
      struct bfd_link_info *info;
 {
   bfd *input_bfd;
-  int top_id, top_index;
+  int top_id, id;
   asection *section;
-  asection **input_list, **list;
   bfd_size_type amt;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
@@ -6510,7 +6509,7 @@ ppc64_elf_setup_section_lists (output_bfd, info)
     return 0;
 
   /* Find the top input section id.  */
-  for (input_bfd = info->input_bfds, top_id = 0;
+  for (input_bfd = info->input_bfds, top_id = 3;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next)
     {
@@ -6528,41 +6527,11 @@ ppc64_elf_setup_section_lists (output_bfd, info)
   if (htab->stub_group == NULL)
     return -1;
 
+  /* Set toc_off for com, und, abs and ind sections.  */
+  for (id = 0; id < 3; id++)
+    htab->stub_group[id].toc_off = TOC_BASE_OFF;
+
   elf_gp (output_bfd) = htab->toc_curr = ppc64_elf_toc (output_bfd);
-
-  /* We can't use output_bfd->section_count here to find the top output
-     section index as some sections may have been removed, and
-     _bfd_strip_section_from_output doesn't renumber the indices.  */
-  for (section = output_bfd->sections, top_index = 0;
-       section != NULL;
-       section = section->next)
-    {
-      if (top_index < section->index)
-	top_index = section->index;
-    }
-
-  htab->top_index = top_index;
-  amt = sizeof (asection *) * (top_index + 1);
-  input_list = (asection **) bfd_malloc (amt);
-  htab->input_list = input_list;
-  if (input_list == NULL)
-    return -1;
-
-  /* For sections we aren't interested in, mark their entries with a
-     value we can check later.  */
-  list = input_list + top_index;
-  do
-    *list = bfd_abs_section_ptr;
-  while (list-- != input_list);
-
-  for (section = output_bfd->sections;
-       section != NULL;
-       section = section->next)
-    {
-      if ((section->flags & SEC_CODE) != 0)
-	input_list[section->index] = NULL;
-    }
-
   return 1;
 }
 
@@ -6601,22 +6570,10 @@ ppc64_elf_reinit_toc (output_bfd, info)
      struct bfd_link_info *info;
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
-  bfd *ibfd;
-  bfd_vma curr;
 
   /* toc_curr tracks the TOC offset used for code sections below in
      ppc64_elf_next_input_section.  Start off at 0x8000.  */
-  htab->toc_curr = curr = TOC_BASE_OFF;
-
-  /* Set the TOC base in all input bfds.  Some may not have a TOC
-     section and thus not be set in ppc64_elf_next_toc_section.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
-    {
-      if (elf_gp (ibfd) == 0)
-	elf_gp (ibfd) = curr;
-      else
-	curr = elf_gp (ibfd);
-    }
+  htab->toc_curr = TOC_BASE_OFF;
 }
 
 /* The linker repeatedly calls this function for each input section,
@@ -6631,25 +6588,22 @@ ppc64_elf_next_input_section (info, isec)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  if (isec->output_section->index <= htab->top_index)
+  if ((isec->output_section->flags & SEC_CODE) != 0)
     {
-      asection **list = htab->input_list + isec->output_section->index;
-      if (*list != bfd_abs_section_ptr)
-	{
-	  /* Steal the link_sec pointer for our list.  */
+      /* Steal the link_sec pointer for our list.  */
 #define PREV_SEC(sec) (htab->stub_group[(sec)->id].link_sec)
-	  /* This happens to make the list in reverse order,
-	     which is what we want.  */
-	  PREV_SEC (isec) = *list;
-	  *list = isec;
-	}
+      /* This happens to make the list in reverse order,
+	 which is what we want.  */
+      PREV_SEC (isec) = htab->input_list;
+      htab->input_list = isec;
     }
 
   /* If a code section has a function that uses the TOC then we need
      to use the right TOC (obviously).  Also, make sure that .opd gets
      the correct TOC value.  */
   if (isec->has_gp_reloc || (isec->flags & SEC_CODE) == 0)
-    htab->toc_curr = elf_gp (isec->owner);
+    if (elf_gp (isec->owner) != 0)
+      htab->toc_curr = elf_gp (isec->owner);
 
   /* Functions that don't use the TOC can belong in any TOC group.
      Use the last TOC base.  This happens to make _init and _fini
@@ -6670,75 +6624,73 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
      bfd_size_type stub_group_size;
      bfd_boolean stubs_always_before_branch;
 {
-  asection **list = htab->input_list + htab->top_index;
-  do
+  asection *tail = htab->input_list;
+  while (tail != NULL)
     {
-      asection *tail = *list;
-      if (tail == bfd_abs_section_ptr)
-	continue;
-      while (tail != NULL)
+      asection *curr;
+      asection *prev;
+      bfd_size_type total;
+      bfd_boolean big_sec;
+      bfd_vma curr_toc;
+
+      curr = tail;
+      if (tail->_cooked_size)
+	total = tail->_cooked_size;
+      else
+	total = tail->_raw_size;
+      big_sec = total >= stub_group_size;
+      curr_toc = htab->stub_group[tail->id].toc_off;
+
+      while ((prev = PREV_SEC (curr)) != NULL
+	     && ((total += (curr->output_section->vma
+			    + curr->output_offset
+			    - prev->output_section->vma
+			    - prev->output_offset))
+		 < stub_group_size)
+	     && htab->stub_group[prev->id].toc_off == curr_toc)
+	curr = prev;
+
+      /* OK, the size from the start of CURR to the end is less
+	 than stub_group_size and thus can be handled by one stub
+	 section.  (or the tail section is itself larger than
+	 stub_group_size, in which case we may be toast.)  We
+	 should really be keeping track of the total size of stubs
+	 added here, as stubs contribute to the final output
+	 section size.  That's a little tricky, and this way will
+	 only break if stubs added make the total size more than
+	 2^25, ie. for the default stub_group_size, if stubs total
+	 more than 2097152 bytes, or nearly 75000 plt call stubs.  */
+      do
 	{
-	  asection *curr;
-	  asection *prev;
-	  bfd_size_type total;
-	  bfd_boolean big_sec;
-	  bfd_vma curr_toc;
+	  prev = PREV_SEC (tail);
+	  /* Set up this stub group.  */
+	  htab->stub_group[tail->id].link_sec = curr;
+	}
+      while (tail != curr && (tail = prev) != NULL);
 
-	  curr = tail;
-	  if (tail->_cooked_size)
-	    total = tail->_cooked_size;
-	  else
-	    total = tail->_raw_size;
-	  big_sec = total >= stub_group_size;
-	  curr_toc = htab->stub_group[tail->id].toc_off;
-
-	  while ((prev = PREV_SEC (curr)) != NULL
-		 && ((total += curr->output_offset - prev->output_offset)
+      /* But wait, there's more!  Input sections up to stub_group_size
+	 bytes before the stub section can be handled by it too.
+	 Don't do this if we have a really large section after the
+	 stubs, as adding more stubs increases the chance that
+	 branches may not reach into the stub section.  */
+      if (!stubs_always_before_branch && !big_sec)
+	{
+	  total = 0;
+	  while (prev != NULL
+		 && ((total += (tail->output_section->vma
+				+ tail->output_offset
+				- prev->output_section->vma
+				- prev->output_offset))
 		     < stub_group_size)
 		 && htab->stub_group[prev->id].toc_off == curr_toc)
-	    curr = prev;
-
-	  /* OK, the size from the start of CURR to the end is less
-	     than stub_group_size and thus can be handled by one stub
-	     section.  (or the tail section is itself larger than
-	     stub_group_size, in which case we may be toast.)  We
-	     should really be keeping track of the total size of stubs
-	     added here, as stubs contribute to the final output
-	     section size.  That's a little tricky, and this way will
-	     only break if stubs added make the total size more than
-	     2^25, ie. for the default stub_group_size, if stubs total
-	     more than 2097152 bytes, or nearly 75000 plt call stubs.  */
-	  do
 	    {
+	      tail = prev;
 	      prev = PREV_SEC (tail);
-	      /* Set up this stub group.  */
 	      htab->stub_group[tail->id].link_sec = curr;
 	    }
-	  while (tail != curr && (tail = prev) != NULL);
-
-	  /* But wait, there's more!  Input sections up to stub_group_size
-	     bytes before the stub section can be handled by it too.
-	     Don't do this if we have a really large section after the
-	     stubs, as adding more stubs increases the chance that
-	     branches may not reach into the stub section.  */
-	  if (!stubs_always_before_branch && !big_sec)
-	    {
-	      total = 0;
-	      while (prev != NULL
-		     && ((total += tail->output_offset - prev->output_offset)
-			 < stub_group_size)
-		     && htab->stub_group[prev->id].toc_off == curr_toc)
-		{
-		  tail = prev;
-		  prev = PREV_SEC (tail);
-		  htab->stub_group[tail->id].link_sec = curr;
-		}
-	    }
-	  tail = prev;
 	}
+      tail = prev;
     }
-  while (list-- != htab->input_list);
-  free (htab->input_list);
 #undef PREV_SEC
 }
 
