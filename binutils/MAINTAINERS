@@ -75,6 +75,7 @@ responsibility among the other maintainers.
   M68k		   Ben Elliston <bje@wasabisystems.com>
   M88k		   Ben Elliston <bje@wasabisystems.com>
   MIPS		   Eric Christopher <echristo@redhat.com>
+  MIPS		   Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   MN10300	   Eric Christopher <echristo@redhat.com>
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
