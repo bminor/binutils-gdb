@@ -1269,6 +1269,7 @@ obj_elf_symver (ignore)
     }
 
   ++input_line_pointer;
+  SKIP_WHITESPACE ();
   name = input_line_pointer;
 
   /* Temporarily include '@' in symbol names.  */
