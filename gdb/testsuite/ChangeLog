@@ -1,3 +1,12 @@
+2003-11-26  Ben Elliston  <bje@wasabisystems.com>
+
+	* gdb.asm/asm-source.exp: Make sure the final link succeeds on
+	NetBSD as it does on FreeBSD.  Modelled on a similar change by
+	Mark Kettenis on 2003-05-30.
+	(link-flags): Set to "--entry _start" regardless of target.
+	Special linker flags are to be appended to $link-flags.
+	* gdb.asm/mips.inc (gdbasm_startup): Remove __start label.
+
 2003-11-25  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/method.exp: Accept output of new demangler.
