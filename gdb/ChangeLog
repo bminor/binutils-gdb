@@ -1,3 +1,8 @@
+2004-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	GDB 6.1 branch created.
+	* version.in: Bump to version 6.0.90_0000-00-00-cvs.
+
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* inflow.c (terminal_inferior): Don't give up the terminal if we
