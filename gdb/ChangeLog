@@ -2,7 +2,11 @@
 
 	Restore h8300 support.
 	* configure.tgt: Add h8300-*-*
-	* h8300-tdep.c: Newfile. Rewrite new frame code.
+	* h8300-tdep.c: New file. Rewrite new frame code.
+	* config/h8300/h8300.mt: New file. Restored Rev 1.3
+	* config/h8300/tm-h8300.h: New file. Restored Rev 1.21
+
+	* MAINTAINERS: Add myself to "Write After Approval".
 
 2005-02-11  Andrew Cagney  <cagney@gnu.org>
 
