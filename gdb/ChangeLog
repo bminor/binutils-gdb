@@ -1,5 +1,7 @@
 Fri Jun 11 10:17:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* stack.c (print_frame_info): Use catch_errors around print_frame_args.
+
 	* Makefile.in (install): Don't depend on gdb.
 
 	* Rename remote-es1800.c to remote-es.c

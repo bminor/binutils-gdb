@@ -130,6 +130,25 @@ print_stack_frame (frame, level, source)
   print_frame_info (fi, level, source, 1);
 }
 
+struct print_args_args {
+  struct symbol *func;
+  struct frame_info *fi;
+};
+
+static int print_args_stub PARAMS ((char *));
+
+/* Pass the args the way catch_errors wants them.  */
+static int
+print_args_stub (args)
+     char *args;
+{
+  int numargs;
+  struct print_args_args *p = (struct print_args_args *)args;
+  FRAME_NUM_ARGS (numargs, (p->fi));
+  print_frame_args (p->func, p->fi, numargs, stdout);
+  return 0;
+}
+
 void
 print_frame_info (fi, level, source, args)
      struct frame_info *fi;
@@ -223,8 +242,10 @@ print_frame_info (fi, level, source, args)
       fputs_filtered (" (", stdout);
       if (args)
 	{
-	  FRAME_NUM_ARGS (numargs, fi);
-	  print_frame_args (func, fi, numargs, stdout);
+	  struct print_args_args args;
+	  args.fi = fi;
+	  args.func = func;
+	  catch_errors (print_args_stub, (char *)&args, "");
 	}
       printf_filtered (")");
       if (sal.symtab && sal.symtab->filename)
@@ -250,7 +271,8 @@ print_frame_info (fi, level, source, args)
       int done = 0;
       int mid_statement = source < 0 && fi->pc != sal.pc;
       if (frame_file_full_name)
-	done = identify_source_line (sal.symtab, sal.line, mid_statement);
+	done = identify_source_line (sal.symtab, sal.line, mid_statement,
+				     fi->pc);
       if (!done)
 	{
 	  if (addressprint && mid_statement)
