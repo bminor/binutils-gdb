@@ -1,5 +1,10 @@
 2001-03-01  J.T. Conklin  <jtc@redback.com>
 
+	* defs.h (__CYGWIN__): Moved conditional which defines __CYGWIN__
+ 	if __CYGWIN32__ is set from here.
+	* config/i386/xm-cygwin.h: To here.
+	* config/powerpc/xm-cygwin.h: To here.
+
 	* i386-stub.c (handle_exception): Use 'T' response packet.
 
 2001-03-01  Michael Snyder  <msnyder@mvstp600e.cygnus.com>

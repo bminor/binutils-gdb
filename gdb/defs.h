@@ -1259,14 +1259,6 @@ extern int use_windows;
 #define MERGEPID(PID, TID) (PID)
 #endif
 
-/* If under Cygwin, provide backwards compatibility with older
-   Cygwin compilers that don't define the current cpp define. */
-#ifdef __CYGWIN32__
-#ifndef __CYGWIN__
-#define __CYGWIN__
-#endif
-#endif
-
 /* Define well known filenos if the system does not define them.  */
 #ifndef STDIN_FILENO
 #define STDIN_FILENO   0

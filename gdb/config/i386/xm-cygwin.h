@@ -1,5 +1,5 @@
 /* Definitions for hosting on WIN32, for GDB.
-   Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,3 +33,11 @@
 #define CRLF_SOURCE_FILES
 
 #define HAVE_SIGSETMASK 0
+
+/* If under Cygwin, provide backwards compatibility with older
+   Cygwin compilers that don't define the current cpp define. */
+#ifdef __CYGWIN32__
+#ifndef __CYGWIN__
+#define __CYGWIN__
+#endif
+#endif 
