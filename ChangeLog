@@ -1,3 +1,7 @@
+Sun Nov  5 00:15:41 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* configure:  Remove dubious bug reporting address.
+
 Fri Nov  3 08:17:54 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in ($(CONFIGURE_TARGET_MODULES)):  If subdir has

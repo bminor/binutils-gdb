@@ -19,13 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-# Please report any problems running this configure script to
-# configure@cygnus.com
-# Please do not send reports about other problems to this address.  See
-# gdb/README, gas/README, etc., for info on where and how to report
-# problems about particular tools.
-
-# This file was written by K. Richard Pixley.
+# This file was originally written by K. Richard Pixley.
 
 #
 # Shell script to create proper links to machine-dependent files in
@@ -686,6 +680,9 @@ fi
 
 CXX=${CXX-"g++ -O"}
 
+export CC
+export CXX
+
 for subdir in . ${subdirs} ; do
 
     # ${subdir} is relative path from . to the directory we're currently
@@ -936,21 +933,17 @@ EOF
             sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
                     -e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
 		    -e "/^CC[ 	]*=/{
-			b chkcc
-			:contcc
-			N
-			:chkcc
-			s/\\\\$//
-			t contcc
+			:loop1
+			/\\\\$/ N
+			/\\\\$/ b loop1
+			s/\\\\\\n//g
 			s%^CC[ 	]*=.*$%CC = ${CC}%
 			}" \
 		    -e "/^CXX[ 	]*=/{
-			b chkcxx
-			:contcxx
-			N
-			:chkcxx
-			s/\\\\$//
-			t contcxx
+			:loop2
+			/\\\\$/ N
+			/\\\\$/ b loop2
+			s/\\\\\\n//g
 			s%^CXX[ 	]*=.*$%CXX = ${CXX}%
 			}" \
 		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
