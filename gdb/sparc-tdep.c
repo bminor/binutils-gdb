@@ -466,13 +466,6 @@ sparc_frame_chain (struct frame_info *frame)
   return ~ (CORE_ADDR) 0;
 }
 
-CORE_ADDR
-sparc_extract_struct_value_address (char *regbuf)
-{
-  return extract_address (regbuf + REGISTER_BYTE (O0_REGNUM),
-			  REGISTER_RAW_SIZE (O0_REGNUM));
-}
-
 /* Find the pc saved in frame FRAME.  */
 
 CORE_ADDR
@@ -2282,33 +2275,117 @@ sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
+#define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
+#define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
+#define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
+#define SPARC_O1_REGNUM		O1_REGNUM	/* %o1 */
 
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
+/* Extract from REGCACHE a function return value of type TYPE and copy
+   that into VALBUF.
+
+   Note that REGCACHE specifies the register values for the frame of
+   the calling function.  This means that we need to fetch the value
+   form %o0 and %o1, which correspond to %i0 and %i1 in the frame of
+   the called function.  */
 
 void
-sparc32_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+sparc32_extract_return_value (struct type *type, struct regcache *regcache,
+			      void *valbuf)
 {
-  int typelen = TYPE_LENGTH (type);
-  int regsize = REGISTER_RAW_SIZE (O0_REGNUM);
+  int len = TYPE_LENGTH (type);
+  char buf[8];
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)], typelen);
+    {
+      if (len == 4 || len == 8)
+	{
+	  regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
+	  regcache_cooked_read (regcache, SPARC_F1_REGNUM, buf + 4);
+	  memcpy (valbuf, buf, len);
+	  return;
+	}
+      else
+	internal_error (__FILE__, __LINE__, "\
+Cannot extract floating-point return value of %d bytes long.", len);
+    }
+
+  if (len <= 4)
+    {
+      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      memcpy (valbuf, buf + 4 - len, len);
+    }
+  else if (len <= 8)
+    {
+      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      regcache_cooked_read (regcache, SPARC_O1_REGNUM, buf + 4);
+      memcpy (valbuf, buf + 8 - len, len);
+    }
   else
-    memcpy (valbuf,
-	    &regbuf[O0_REGNUM * regsize +
-		    (typelen >= regsize
-		     || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE ? 0
-		     : regsize - typelen)],
-	    typelen);
+    internal_error (__FILE__, __LINE__,
+		    "Cannot extract return value of %d bytes long.", len);
 }
 
+/* Write into REGBUF a function return value VALBUF of type TYPE.  */
 
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  On SPARCs with FPUs,
-   float values are returned in %f0 (and %f1).  In all other cases,
-   values are returned in register %o0.  */
+void
+sparc32_store_return_value (struct type *type, struct regcache *regcache,
+			    const void *valbuf)
+{
+  int len = TYPE_LENGTH (type);
+  char buf[8];
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
+    {
+      const char *buf = valbuf;
+
+      if (len == 4)
+	{
+	  regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
+	  return;
+	}
+      else if (len == 8)
+	{
+	  regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
+	  regcache_cooked_write (regcache, SPARC_F1_REGNUM, buf + 4);
+	  return;
+	}
+      else
+	internal_error (__FILE__, __LINE__, "\
+Cannot extract floating-point return value of %d bytes long.", len);
+    }
+
+  /* Add leading zeros to the value.  */
+  memset (buf, 0, sizeof buf);
+
+  if (len <= 4)
+    {
+      memcpy (buf + 4 - len, valbuf, len);
+      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
+    }
+  else if (len <= 8)
+    {
+      memcpy (buf + 8 - len, valbuf, len);
+      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
+      regcache_cooked_write (regcache, SPARC_O1_REGNUM, buf);
+    }
+  else
+    internal_error (__FILE__, __LINE__,
+		    "Cannot extract return value of %d bytes long.", len);
+}
+
+/* Extract from REGCACHE the address in which a function should return
+   its structure value.  */
+
+CORE_ADDR
+sparc_extract_struct_value_address (struct regcache *regcache)
+{
+  ULONGEST addr;
+
+  regcache_cooked_read_unsigned (regcache, SPARC_O0_REGNUM, &addr);
+  return addr;
+}
+
+/* FIXME: kettenis/2003/05/24: Still used for sparc64.  */
 
 void
 sparc_store_return_value (struct type *type, char *valbuf)
@@ -3164,7 +3241,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					   sparc_extract_struct_value_address);
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_fp_regnum (gdbarch, SPARC_FP_REGNUM);
@@ -3379,11 +3457,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_sparc:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
       // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
 #endif
@@ -3415,11 +3493,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       // OBSOLETE       break;
 #endif
     case bfd_mach_sparc_v8plus:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->print_insn_mach = bfd_mach_sparc;
       tdep->fp_register_bytes = 32 * 4;
 #if 0
@@ -3427,11 +3505,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #endif
       break;
     case bfd_mach_sparc_v8plusa:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
       // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
 #endif

@@ -1,3 +1,27 @@
+2003-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (SPARC_F0_REGNUM, SPARC_F1_REGNUM, SPARC_O0_REGNUM,
+	SPARC_O1_REGNUM): New defines.
+	(sparc32_extract_return_value): Rewrite to operate on a regcache.
+	(sparc32_store_return_value): New function.
+	(sparc_extract_struct_value_address): Rewrite to operate on a
+	regcache.
+	(sparc_gdbarch_init): Don't set
+	deprecated_extract_struct_value_address.  Set
+	extract_struct_value_address instead. Don't set
+	deprecated_extract_return_value and deprecated_store_return_value
+	for 32-bit targets.  Set extract_return_value and
+	store_return_value instead.
+	* config/sparc/tm-sparc.h (DEPRECATED_STORE_RETURN_VALUE,
+	DEPRECTAED_EXTRACT_RETURN_VALUE,
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Don't define these.
+	(STORE_RETURN_VALUE, EXTRACT_RETURN_VALUE,
+	EXTRACT_STRUCT_VALUE_ADDRESS): Define these instead.
+	(sparc_store_return_value): Remove prototype.
+	(sparc32_store_return_value): New prototype.
+	(sparc32_extract_return_value, sparc_extract_struct_value_address):
+	Adjust prototypes.
+
 2003-05-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparcnbsd-tdep.c: Include "gdb_string.h".
