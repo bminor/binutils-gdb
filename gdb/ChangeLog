@@ -1,6 +1,7 @@
 2002-01-30  Michael Snyder  <msnyder@redhat.com>
 
-	* NEWS: Mention generate-core-file command.
+	* NEWS: Mention "set trust-readonly-sections" command.
+	Mention generate-core-file command.
 
 2002-01-15  Michael Snyder  <msnyder@redhat.com>
 

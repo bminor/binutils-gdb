@@ -3,6 +3,15 @@
 
 *** Changes since GDB 5.1:
 
+* New command "set trust-readonly-sections on[off]".
+
+This command is a hint that tells gdb that read-only sections
+really are read-only (ie. that their contents will not change).
+In this mode, gdb will go to the object file rather than the
+target to read memory from read-only sections (such as ".text").
+This can be a significant performance improvement on some
+(notably embedded) targets.
+
 * New command "generate-core-file" (or "gcore").
 
 This new gdb command allows the user to drop a core file of the
