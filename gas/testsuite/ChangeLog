@@ -1,3 +1,12 @@
+1998-07-02  Ken Raeburn  <raeburn@cygnus.com>
+
+	* lib/gas-defs.exp (gas_init): Complain if target name isn't in
+	canonical form.
+
+Wed Jul  1 15:35:09 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/all/gas.exp: Expect ARM and Thumb cofftag test to fail.
+
 Wed Jul  1 17:31:39 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/ppc/simpshft.s: Add alignment so that it works on AIX.
