@@ -1,5 +1,11 @@
 2004-09-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* fbsd-nat.c: New files with cleaned up contents of fbsd-proc.c.
+	* fbsd-nat.h: New file.
+	* Makefile.in (ALLDEPFILES): Add fbsd-nat.c.
+	(fbsd_nat_h): New variable.
+	(fbsd-nat.o): New dependency.
+
 	* config/sparc/nbsd64.mt, config/sparc/obsd.mt,
 	config/sparc/obsd64.mt (DEPRECATED_TM_FILE): Set to solib.h.
 

@@ -668,6 +668,7 @@ event_loop_h = event-loop.h
 event_top_h = event-top.h
 exec_h = exec.h $(target_h)
 expression_h = expression.h $(symtab_h) $(doublest_h)
+fbsd_nat_h = fbsd-nat.h
 f_lang_h = f-lang.h
 frame_base_h = frame-base.h
 frame_h = frame.h
@@ -1358,7 +1359,9 @@ ALLDEPFILES = \
 	bsd-kvm.c \
 	coff-solib.c \
 	core-regset.c core-aout.c corelow.c \
-	dcache.c exec.c fork-child.c \
+	dcache.c exec.c \
+	fbsd-nat.c \
+	fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
@@ -1868,6 +1871,9 @@ exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(value_h) $(language_h) $(parser_defs_h) $(user_regs_h) $(target_h) \
 	$(gdb_string_h) $(block_h)
+fbsd-nat.o: fbsd-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h) \
+	$(regset_h) $(gdb_assert_h) $(gdb_string_h) $(elf_bfd_h) \
+	$(fbsd_nat_h)
 fbsd-proc.o: fbsd-proc.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h) \
 	$(regset_h) $(gdb_assert_h) $(gdb_string_h) $(elf_bfd_h)
 f-exp.o: f-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
