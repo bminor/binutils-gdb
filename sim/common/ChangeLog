@@ -1,3 +1,9 @@
+2001-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* sim-load.c (sim_load_file): Delete call bfd_cache_close.  BFD
+	internal interface.
+	* sim-utils.c (sim_analyze_program): Ditto.
+
 2001-04-19  Frank Ch. Eigler  <fche@redhat.com>
 
 	* sim-utils.c (sim_analyze_program): Call bfd_cache_close after

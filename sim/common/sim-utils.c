@@ -287,8 +287,6 @@ sim_analyze_program (sd, prog_name, prog_bfd)
 	break;
       }
 
-  bfd_cache_close (prog_bfd);
-
   return SIM_RC_OK;
 }
 
