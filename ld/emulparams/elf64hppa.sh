@@ -34,6 +34,15 @@ OTHER_BSS_SECTIONS='.hbss : { *(.hbss) } .tbss : { *(.tbss) } __TLS_SIZE = SIZEO
 # HPs use .dlt where systems use .got.  Sigh.
 OTHER_GOT_RELOC_SECTIONS='.rela.dlt : { *(.rela.dlt) }'
 
+# This does not have to be strictly the bottom of the text segment since
+# it is merely for performing relocations relative to a symbol that is not
+# going to be referenced in any other manner.
+#
+# If it was the true base of the text segment, then we could use it for
+# building unwinders instead of computing the base of the text segment
+# in the BFD backend.
+TEXT_START_SYMBOLS='__text_dummy = . ;'
+
 # The linker is required to define these two symbols.
 EXECUTABLE_SYMBOLS='__SYSTEM_ID = 0x214; _FPU_STATUS = 0x0;'
 DATA_PLT=
