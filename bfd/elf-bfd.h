@@ -1202,10 +1202,6 @@ struct elf_obj_tdata
   /* Symbol version references to external objects.  */
   Elf_Internal_Verneed *verref;
 
-  /* A mapping from local symbols to offsets into the various linker
-     sections added.  This is index by the symbol index.  */
-  void **linker_section_pointers;
-
   /* The Irix 5 support uses two virtual sections, which represent
      text/data symbols defined in dynamic objects.  */
   asymbol *elf_data_symbol;

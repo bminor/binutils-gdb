@@ -109,9 +109,32 @@ typedef struct elf_linker_section_pointers
   bfd_boolean written_address_p;
 } elf_linker_section_pointers_t;
 
+struct ppc_elf_obj_tdata
+{
+  struct elf_obj_tdata elf;
+
+  /* A mapping from local symbols to offsets into the various linker
+     sections added.  This is index by the symbol index.  */
+  elf_linker_section_pointers_t **linker_section_pointers;
+};
+
+#define ppc_elf_tdata(bfd) \
+  ((struct ppc_elf_obj_tdata *) (bfd)->tdata.any)
+
 #define elf_local_ptr_offsets(bfd) \
-  ((elf_linker_section_pointers_t **) \
-   (elf_tdata (bfd)->linker_section_pointers))
+  (ppc_elf_tdata (bfd)->linker_section_pointers)
+
+/* Override the generic function because we store some extras.  */
+
+static bfd_boolean
+ppc_elf_mkobject (bfd *abfd)
+{
+  bfd_size_type amt = sizeof (struct ppc_elf_obj_tdata);
+  abfd->tdata.any = bfd_zalloc (abfd, amt);
+  if (abfd->tdata.any == NULL)
+    return FALSE;
+  return TRUE;
+}
 
 /* The PPC linker needs to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
@@ -6022,6 +6045,7 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 #define elf_backend_plt_header_size	PLT_INITIAL_ENTRY_SIZE
 #define elf_backend_rela_normal		1
 
+#define bfd_elf32_mkobject			ppc_elf_mkobject
 #define bfd_elf32_bfd_merge_private_bfd_data	ppc_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_relax_section		ppc_elf_relax_section
 #define bfd_elf32_bfd_reloc_type_lookup		ppc_elf_reloc_type_lookup
