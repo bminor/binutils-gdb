@@ -12,7 +12,7 @@ ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
-  --enable-sim-powerpc "
+  --enable-sim "
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -1173,22 +1173,21 @@ else
 fi
 
 
-# The PowerPC simulator uses the GCC extension long long as well as
-# ANSI prototypes, so don't enable it for random host compilers
-# unless asked to.
-
-# Check whether --enable-sim-powerpc or --disable-sim-powerpc was given.
-if test "${enable_sim_powerpc+set}" = set; then
-  enableval="$enable_sim_powerpc"
+# If a cpu ever has more than one simulator to choose from, use
+# --enable-sim=... to choose.
+# Check whether --enable-sim or --disable-sim was given.
+if test "${enable_sim+set}" = set; then
+  enableval="$enable_sim"
   case "${enableval}" in
-yes)	powerpc_sim=yes ;;
-no)	powerpc_sim=no ;;
-*)	{ echo "configure: error: bad value ${enableval} given for sim-powerpc option" 1>&2; exit 1; } ;;
+yes | no) ;;
+*)	{ echo "configure: error: bad value ${enableval} given for --enable-sim option" 1>&2; exit 1; } ;;
 esac
-else
-  if test x"$GCC" != x""; then powerpc_sim=yes; else powerpc_sim=no; fi
 fi
 
+
+# Assume simulator can be built with cc.
+# If the user passes --enable-sim built it regardless of $(CC).
+only_if_gcc=no
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -1203,42 +1202,55 @@ case "${target}" in
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)
-				# The MIPS simulator can only be compiled
-				# by gcc.
-				if test "${GCC}" = "yes"; then
-				  sim_target=mips
-				else
-				  sim_target=none
-				fi
-				;;
-  sh*-*-*)		sim_target=sh ;; 
-  powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* )
-			if test x"$powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
+	# The MIPS simulator can only be compiled by gcc.
+	sim_target=mips
+	only_if_gcc=yes
+	;;
+  sh*-*-*)		sim_target=sh ;;
+  powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* | powerpc*-*-linux* )
+	# The PowerPC simulator uses the GCC extension long long as well as
+	# ANSI prototypes, so don't enable it for random host compilers
+	# unless asked to.
+	sim_target=ppc
+	only_if_gcc=yes
+	;;
 # start-sanitize-v850
   v850-*-*)
-				# The V850 simulator can only be compiled
-				# by gcc.
-				if test "${GCC}" = "yes"; then
-				  sim_target=v850
-				else
-				  sim_target=none
-				fi
-				;;
+	# The V850 simulator can only be compiled by gcc.
+	sim_target=v850
+	only_if_gcc=yes
+	;;
 # end-sanitize-v850
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
-  sparc*-*-*)			# The SPARC simulator can only be compiled
-				# by gcc.
-				if test "${GCC}" = "yes"; then
-				  sim_target=erc32
-				else
-				  sim_target=none
-				fi
-				;;
+  sparc*-*-*)
+	# The SPARC simulator can only be compiled by gcc.
+	sim_target=erc32
+	only_if_gcc=yes
+	;;
   *)			sim_target=none ;;
 esac
 
-configdirs=${sim_target}
+case "${enable_sim}" in
+no)	sim_target=none ;;
+yes)
+	if test ${only_if_gcc} = yes ; then
+		if test "${GCC}" != yes ; then
+			echo "Can't enable simulator since not compiling with GCC."
+			sim_target=none
+		fi
+	fi
+	;;
+*)
+	if test ${only_if_gcc} = yes ; then
+		if test "${GCC}" != yes ; then
+			sim_target=none
+		fi
+	fi
+	;;
+esac
+
+configdirs="common ${sim_target}"
 subdirs="$configdirs"
 
 

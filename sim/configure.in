@@ -56,7 +56,7 @@ case "${target}" in
 	sim_target=mips
 	only_if_gcc=yes
 	;;
-  sh*-*-*)		sim_target=sh ;; 
+  sh*-*-*)		sim_target=sh ;;
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* | powerpc*-*-linux* )
 	# The PowerPC simulator uses the GCC extension long long as well as
 	# ANSI prototypes, so don't enable it for random host compilers
@@ -100,7 +100,7 @@ yes)
 	;;
 esac
 
-configdirs=${sim_target}
+configdirs="common ${sim_target}"
 AC_CONFIG_SUBDIRS($configdirs)
 
 AC_OUTPUT(Makefile)
