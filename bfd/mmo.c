@@ -481,7 +481,7 @@ mmo_init ()
   static const char letters[]
     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_";
 
-  if (inited == true)
+  if (inited)
     return;
   inited = true;
 
@@ -846,10 +846,9 @@ mmo_write_chunk (abfd, loc, len)
       if (loc[0] == LOP)
 	mmo_write_tetra_raw (abfd, LOP_QUOTE_NEXT);
 
-      retval
-	= (retval == true
-	   && abfd->tdata.mmo_data->have_error == false
-	   && 4 == bfd_bwrite ((PTR) loc, 4, abfd));
+      retval = (retval
+		&& ! abfd->tdata.mmo_data->have_error
+		&& 4 == bfd_bwrite ((PTR) loc, 4, abfd));
 
       loc += 4;
       len -= 4;
@@ -861,7 +860,7 @@ mmo_write_chunk (abfd, loc, len)
       abfd->tdata.mmo_data->byte_no = len;
     }
 
-  if (retval == false)
+  if (! retval)
     abfd->tdata.mmo_data->have_error = true;
   return retval;
 }
@@ -882,7 +881,7 @@ mmo_flush_chunk (abfd)
       abfd->tdata.mmo_data->byte_no = 0;
     }
 
-  return abfd->tdata.mmo_data->have_error == false;
+  return ! abfd->tdata.mmo_data->have_error;
 }
 
 /* Same, but from a list.  */
@@ -941,9 +940,8 @@ mmo_write_loc_chunk (abfd, vma, loc, len, last_vmap)
   /* Update to reflect end of this chunk, with trailing zeros omitted.  */
   *last_vmap = vma + len;
 
-  return
-    abfd->tdata.mmo_data->have_error == false
-    && mmo_write_chunk (abfd, loc, len);
+  return (! abfd->tdata.mmo_data->have_error
+	  && mmo_write_chunk (abfd, loc, len));
 }
 
 /* Same, but from a list.  */
@@ -1161,7 +1159,7 @@ mmo_get_byte (abfd)
 
   if (abfd->tdata.mmo_data->byte_no == 0)
     {
-      if (abfd->tdata.mmo_data->have_error == false
+      if (! abfd->tdata.mmo_data->have_error
 	  && bfd_bread (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
 	{
 	  abfd->tdata.mmo_data->have_error = true;
@@ -1188,7 +1186,7 @@ mmo_write_byte (abfd, value)
   abfd->tdata.mmo_data->buf[(abfd->tdata.mmo_data->byte_no++ % 4)] = value;
   if ((abfd->tdata.mmo_data->byte_no % 4) == 0)
     {
-      if (abfd->tdata.mmo_data->have_error == false
+      if (! abfd->tdata.mmo_data->have_error
 	  && bfd_bwrite (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
 	abfd->tdata.mmo_data->have_error = true;
     }
@@ -1354,7 +1352,7 @@ SUBSECTION
   bfd_byte m = mmo_get_byte (abfd);
 
   /* Check first if we have a bad hair day.  */
-  if (abfd->tdata.mmo_data->have_error == true)
+  if (abfd->tdata.mmo_data->have_error)
     return false;
 
   if (m & MMO3_LEFT)
@@ -1438,7 +1436,7 @@ SUBSECTION
 	  serno -= 128;
 
 	  /* Got it.  Now enter it.  Skip a leading ":".  */
-	  if (abfd->tdata.mmo_data->have_error == false
+	  if (! abfd->tdata.mmo_data->have_error
 	      && ! mmo_create_symbol (abfd,
 				      abfd->tdata.mmo_data->lop_stab_symbol
 				      + 1,
@@ -1457,7 +1455,7 @@ SUBSECTION
     /* Traverse right trie.  */
     mmo_get_symbols (abfd);
 
-  return abfd->tdata.mmo_data->have_error == false;
+  return ! abfd->tdata.mmo_data->have_error;
 }
 
 /* Get the location of memory area [VMA..VMA + SIZE - 1], which we think
@@ -2060,7 +2058,7 @@ mmo_scan (abfd)
   for (i = 0; i < sizeof (file_names) / sizeof (file_names[0]); i++)
     if (file_names[i])
       free (file_names[i]);
-  return error ? false : true;
+  return ! error;
 }
 
 /* A hook to set up object file dependent section information.  For mmo,
@@ -2335,9 +2333,7 @@ mmo_internal_write_post (abfd, z, sec)
      Z == 255, don't assume DATA is valid.  */
   bfd_put_64 (abfd, bfd_get_start_address (abfd), buf);
 
-  return
-    abfd->tdata.mmo_data->have_error == false
-    && bfd_bwrite (buf, 8, abfd) == 8;
+  return ! abfd->tdata.mmo_data->have_error && bfd_bwrite (buf, 8, abfd) == 8;
 }
 
 /* Translate to and from BFD flags.  This is to make sure that we don't
@@ -2442,11 +2438,10 @@ mmo_internal_write_section (abfd, sec)
     {
       int n = atoi (sec->name + strlen (MMIX_OTHER_SPEC_SECTION_PREFIX));
       mmo_write_tetra_raw (abfd, (LOP << 24) | (LOP_SPEC << 16) | n);
-      return
-	abfd->tdata.mmo_data->have_error == false
-	&& mmo_write_chunk_list (abfd,
-				 ((struct mmo_section_data_struct *)
-				  (sec->used_by_bfd))->head);
+      return (! abfd->tdata.mmo_data->have_error
+	      && mmo_write_chunk_list (abfd,
+				       ((struct mmo_section_data_struct *)
+					(sec->used_by_bfd))->head));
     }
   /* Ignore sections that are just allocated or empty; we write out
      _contents_ here.  */
@@ -2563,13 +2558,13 @@ EXAMPLE
       /* Writing a LOP_LOC ends the LOP_SPEC data, and makes data actually
 	 loaded.  */
       if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
-	  return
-	    abfd->tdata.mmo_data->have_error == false
+	  return 
+	    ! abfd->tdata.mmo_data->have_error
 	    && mmo_write_loc_chunk_list (abfd,
 					 ((struct mmo_section_data_struct *)
 					  (sec->used_by_bfd))->head);
       return
-	abfd->tdata.mmo_data->have_error == false
+	! abfd->tdata.mmo_data->have_error
 	&& mmo_write_chunk_list (abfd,
 				 ((struct mmo_section_data_struct *)
 				  (sec->used_by_bfd))->head);
@@ -3088,7 +3083,7 @@ mmo_write_section_unless_reg_contents (abfd, sec, p)
 {
   struct mmo_write_sec_info *infop = (struct mmo_write_sec_info *) p;
 
-  if (infop->retval == false)
+  if (! infop->retval)
     return;
 
   if (strcmp (sec->name, MMIX_REG_CONTENTS_SECTION_NAME) == 0)
@@ -3139,7 +3134,7 @@ mmo_write_object_contents (abfd)
   bfd_map_over_sections (abfd, mmo_write_section_unless_reg_contents,
 			 (PTR) &wsecinfo);
 
-  if (wsecinfo.retval == false)
+  if (! wsecinfo.retval)
     return false;
 
   if (wsecinfo.reg_section != NULL)

@@ -1,5 +1,5 @@
 /* NLM (NetWare Loadable Module) executable support for BFD.
-   Copyright 1993, 1994, 1995, 1998, 2000, 2001
+   Copyright 1993, 1994, 1995, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, using ELF support as the
@@ -936,7 +936,7 @@ nlm_get_symtab (abfd, alocation)
   nlm_symbol_type *symbase;
   bfd_size_type counter = 0;
 
-  if (nlm_slurp_symbol_table (abfd) == false)
+  if (! nlm_slurp_symbol_table (abfd))
     return -1;
   symbase = nlm_get_symbols (abfd);
   while (counter < bfd_get_symcount (abfd))
@@ -1095,7 +1095,7 @@ nlm_slurp_symbol_table (abfd)
 	{
 	  /* Most backends can use the code below, but unfortunately
 	     some use a different scheme.  */
-	  if ((*set_public_section_func) (abfd, sym) == false)
+	  if (! (*set_public_section_func) (abfd, sym))
 	    return false;
 	}
       else
@@ -1181,7 +1181,7 @@ nlm_slurp_symbol_table (abfd)
       symcount += i_fxdhdrp->numberOfExternalReferences;
       while (abfd->symcount < symcount)
 	{
-	  if ((*read_import_func) (abfd, sym) == false)
+	  if (! (*read_import_func) (abfd, sym))
 	    return false;
 	  sym++;
 	  abfd->symcount++;
@@ -1238,7 +1238,7 @@ nlm_slurp_reloc_fixups (abfd)
      the machine specific reloc information is.  */
   while (count-- != 0)
     {
-      if ((*read_func) (abfd, (nlm_symbol_type *) NULL, secs, rels) == false)
+      if (! (*read_func) (abfd, (nlm_symbol_type *) NULL, secs, rels))
 	{
 	  nlm_relocation_fixups (abfd) = NULL;
 	  nlm_relocation_fixup_secs (abfd) = NULL;
@@ -1274,7 +1274,7 @@ nlm_get_reloc_upper_bound (abfd, sec)
   syms = nlm_get_symbols (abfd);
   if (syms == NULL)
     {
-      if (nlm_slurp_symbol_table (abfd) == false)
+      if (! nlm_slurp_symbol_table (abfd))
 	return -1;
       syms = nlm_get_symbols (abfd);
     }
@@ -1309,7 +1309,7 @@ nlm_canonicalize_reloc (abfd, sec, relptr, symbols)
   rels = nlm_relocation_fixups (abfd);
   if (rels == NULL)
     {
-      if (nlm_slurp_reloc_fixups (abfd) == false)
+      if (! nlm_slurp_reloc_fixups (abfd))
 	return -1;
       rels = nlm_relocation_fixups (abfd);
     }
@@ -1386,7 +1386,7 @@ nlm_compute_section_file_positions (abfd)
   asection *bss_sec;
   asymbol **sym_ptr_ptr;
 
-  if (abfd->output_has_begun == true)
+  if (abfd->output_has_begun)
     return true;
 
   /* Make sure we have a section to hold uninitialized data.  */
@@ -1587,8 +1587,8 @@ nlm_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (abfd->output_has_begun == false
-      && nlm_compute_section_file_positions (abfd) == false)
+  if (! abfd->output_has_begun
+      && ! nlm_compute_section_file_positions (abfd))
     return false;
 
   if (count == 0)
@@ -1690,16 +1690,16 @@ nlm_write_object_contents (abfd)
   if (fixed_header == NULL)
     goto error_return;
 
-  if (abfd->output_has_begun == false
-      && nlm_compute_section_file_positions (abfd) == false)
+  if (! abfd->output_has_begun
+      && ! nlm_compute_section_file_positions (abfd))
     goto error_return;
 
   /* Write out the variable length headers.  */
   pos = nlm_optional_prefix_size (abfd) + nlm_fixed_header_size (abfd);
   if (bfd_seek (abfd, pos, SEEK_SET) != 0)
     goto error_return;
-  if (nlm_swap_variable_header_out (abfd) == false
-      || nlm_swap_auxiliary_headers_out (abfd) == false)
+  if (! nlm_swap_variable_header_out (abfd)
+      || ! nlm_swap_auxiliary_headers_out (abfd))
     {
       bfd_set_error (bfd_error_system_call);
       goto error_return;
@@ -1760,7 +1760,7 @@ nlm_write_object_contents (abfd)
 	  if (! bfd_is_und_section (bfd_get_section (sym)))
 	    {
 	      ++internal_reloc_count;
-	      if ((*write_import_func) (abfd, sec, rel) == false)
+	      if (! (*write_import_func) (abfd, sec, rel))
 		goto error_return;
 	    }
 	  else
@@ -1832,9 +1832,8 @@ nlm_write_object_contents (abfd)
 	   j++)
 	++cnt;
 
-      if ((*nlm_write_external_func (abfd)) (abfd, cnt, sym,
-					     &external_relocs[i])
-	  == false)
+      if (! (*nlm_write_external_func (abfd)) (abfd, cnt, sym,
+					       &external_relocs[i]))
 	goto error_return;
 
       i += cnt;
@@ -1902,7 +1901,7 @@ nlm_write_object_contents (abfd)
 
 	  if (write_export_func)
 	    {
-	      if ((*write_export_func) (abfd, sym, offset) == false)
+	      if (! (*write_export_func) (abfd, sym, offset))
 		goto error_return;
 	    }
 	  else
@@ -2036,7 +2035,7 @@ nlm_write_object_contents (abfd)
   write_prefix_func = nlm_write_prefix_func (abfd);
   if (write_prefix_func)
     {
-      if ((*write_prefix_func) (abfd) == false)
+      if (! (*write_prefix_func) (abfd))
 	goto error_return;
     }
 

@@ -1674,8 +1674,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 			  abort ();
 
 			if (! ((*info->callbacks->constructor)
-			       (info,
-				c == 'I' ? true : false,
+			       (info, c == 'I',
 				h->root.string, abfd, section, value)))
 			  return false;
 		      }
@@ -2391,7 +2390,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	 Gross.  .bss and similar sections won't have the linker_mark
 	 field set.  */
       if ((sym->section->flags & SEC_HAS_CONTENTS) != 0
-	  && sym->section->linker_mark == false)
+	  && ! sym->section->linker_mark)
 	output = false;
 
       if (output)

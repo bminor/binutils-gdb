@@ -742,7 +742,7 @@ xcoff64_write_object_contents (abfd)
 
   bfd_set_error (bfd_error_system_call);
 
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       if (! bfd_coff_compute_section_file_positions (abfd))
 	return false;

@@ -1322,7 +1322,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 		nop
 	foo:
         	nop      */
-  if (reloc->howto->pc_relative == true)
+  if (reloc->howto->pc_relative)
     {
       /* Here the variable relocation holds the final address of the
 	 symbol we are relocating against, plus any addend.  */

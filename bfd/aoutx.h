@@ -1310,9 +1310,9 @@ aout_get_external_symbols (abfd)
       count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
 
 #ifdef USE_MMAP
-      if (bfd_get_file_window (abfd,
-			       obj_sym_filepos (abfd), exec_hdr (abfd)->a_syms,
-			       &obj_aout_sym_window (abfd), true) == false)
+      if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
+				 exec_hdr (abfd)->a_syms,
+				 &obj_aout_sym_window (abfd), true))
 	return false;
       syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
 #else
@@ -1352,8 +1352,8 @@ aout_get_external_symbols (abfd)
       stringsize = GET_WORD (abfd, string_chars);
 
 #ifdef USE_MMAP
-      if (bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
-			       &obj_aout_string_window (abfd), true) == false)
+      if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
+				 &obj_aout_string_window (abfd), true))
 	return false;
       strings = (char *) obj_aout_string_window (abfd).data;
 #else

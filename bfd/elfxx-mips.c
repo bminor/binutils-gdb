@@ -610,9 +610,8 @@ _bfd_mips_elf_read_ecoff_info (abfd, section, debug)
   if (ext_hdr == NULL && swap->external_hdr_size != 0)
     goto error_return;
 
-  if (bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
-				swap->external_hdr_size)
-      == false)
+  if (! bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
+				  swap->external_hdr_size))
     goto error_return;
 
   symhdr = &debug->symbolic_header;
@@ -7547,7 +7546,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
   asection *sec;
 
   /* Check if we have the same endianess */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour

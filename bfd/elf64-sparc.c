@@ -711,7 +711,7 @@ init_insn_reloc (abfd,
       return bfd_reloc_ok;
     }
 
-  /* This works because partial_inplace == false.  */
+  /* This works because partial_inplace is false.  */
   if (output_bfd != NULL)
     return bfd_reloc_continue;
 

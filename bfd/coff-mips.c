@@ -819,8 +819,7 @@ mips_gprel_reloc (abfd,
       output_bfd = symbol->section->output_section->owner;
     }
 
-  if (bfd_is_und_section (symbol->section)
-      && relocateable == false)
+  if (bfd_is_und_section (symbol->section) && ! relocateable)
     return bfd_reloc_undefined;
 
   /* We have to figure out the gp value, so that we can adjust the
@@ -830,10 +829,10 @@ mips_gprel_reloc (abfd,
      external symbol if we are producing relocateable output.  */
   gp = _bfd_get_gp_value (output_bfd);
   if (gp == 0
-      && (relocateable == false
+      && (! relocateable
 	  || (symbol->flags & BSF_SECTION_SYM) != 0))
     {
-      if (relocateable != false)
+      if (relocateable)
 	{
 	  /* Make up a value.  */
 	  gp = symbol->section->output_section->vma + 0x4000;
@@ -899,14 +898,14 @@ mips_gprel_reloc (abfd,
   /* Adjust val for the final section location and GP value.  If we
      are producing relocateable output, we don't want to do this for
      an external symbol.  */
-  if (relocateable == false
+  if (! relocateable
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
   insn = (insn &~ (unsigned) 0xffff) | (val & 0xffff);
   bfd_put_32 (abfd, (bfd_vma) insn, (bfd_byte *) data + reloc_entry->address);
 
-  if (relocateable != false)
+  if (relocateable)
     reloc_entry->address += input_section->output_offset;
 
   /* Make sure it fit in 16 bits.  */

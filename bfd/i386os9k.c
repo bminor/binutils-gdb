@@ -284,7 +284,7 @@ os9k_set_section_contents (abfd, section, location, offset, count)
      int count;
 {
 
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {				/* set by bfd.c handler */
       if (! aout_32_make_sections (abfd))
 	return false;

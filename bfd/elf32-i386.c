@@ -2428,7 +2428,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (r_type == R_386_TLS_LE_32)
 	    {
-	      BFD_ASSERT (unresolved_reloc == false);
+	      BFD_ASSERT (! unresolved_reloc);
 	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
 		{
 		  unsigned int val, type;
@@ -2578,7 +2578,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (indx == 0)
 		    {
-	    	      BFD_ASSERT (unresolved_reloc == false);
+	    	      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
 				  relocation - dtpoff_base (info),
 				  htab->sgot->contents + off + 4);

@@ -1,3 +1,67 @@
+2002-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* aout-adobe.c: Don't compare against "true" or "false.
+	* aout-target.h: Likewise.
+	* aoutx.h: Likewise.
+	* archive.c: Likewise.
+	* bout.c: Likewise.
+	* cache.c: Likewise.
+	* coff-a29k.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-i386.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-or32.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffgen.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* ecoff.c: Likewise.
+	* ecofflink.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.h: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-d30v.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.h: Likewise.
+	* elfxx-mips.c: Likewise.
+	* i386os9k.c: Likewise.
+	* ieee.c: Likewise.
+	* libbfd.c: Likewise.
+	* linker.c: Likewise.
+	* mmo.c: Likewise.
+	* nlm32-alpha.c: Likewise.
+	* nlm32-i386.c: Likewise.
+	* nlm32-ppc.c: Likewise.
+	* nlm32-sparc.c: Likewise.
+	* nlmcode.h: Likewise.
+	* oasys.c: Likewise.
+	* pdp11.c: Likewise.
+	* peicode.h: Likewise.
+	* reloc.c: Likewise.
+	* som.c: Likewise.
+	* srec.c: Likewise.
+	* tekhex.c: Likewise.
+	* vms.c: Likewise.
+	* xcofflink.c: Likewise.
+	* elf64-sparc.c: Edit comment to not use "== false".
+
+	* aoutf1.h: Don't use "? true : false".
+	* ecoff.c: Likewise.
+	* format.c: Likewise.
+	* ieee.c: Likewise.
+	* linker.c: Likewise.
+	* mmo.c: Likewise.
+	* oasys.c: Likewise.
+
 2002-06-23  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_archive_symbols): For the default

@@ -2940,7 +2940,7 @@ compute_bucket_count (info)
    size requires an integer type with more the 32 bits.  If
    BFD_HOST_U_64_BIT is set we know about such a type.  */
 #ifdef BFD_HOST_U_64_BIT
-  if (info->optimize == true)
+  if (info->optimize)
     {
       unsigned long int nsyms = hashcodesp - hashcodes;
       size_t minsize;

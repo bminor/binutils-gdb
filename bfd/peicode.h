@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -312,7 +312,7 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   pe_data_type *pe;
 
-  if (pe_mkobject (abfd) == false)
+  if (! pe_mkobject (abfd))
     return NULL;
 
   pe = pe_data (abfd);

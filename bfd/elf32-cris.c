@@ -3003,7 +3003,7 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 {
   flagword old_flags, new_flags;
 
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour

@@ -430,7 +430,7 @@ vms_object_p (abfd)
       if ((prev_type == EOBJ_S_C_EGSD)
 	   && (PRIV (rec_type) != EOBJ_S_C_EGSD))
 	{
-	  if (vms_fixup_sections (abfd) == false)
+	  if (! vms_fixup_sections (abfd))
 	    {
 #if VMS_DEBUG
 	      vms_debug (2, "vms_fixup_sections failed\n");
@@ -496,7 +496,7 @@ vms_object_p (abfd)
 
   if (target_vector == &vms_vax_vec)
     {
-      if (vms_fixup_sections (abfd) == false)
+      if (! vms_fixup_sections (abfd))
 	{
 #if VMS_DEBUG
 	  vms_debug (2, "vms_fixup_sections failed\n");

@@ -559,9 +559,9 @@ elf_object_p (abfd)
      section header table (FIXME: See comments re sections at top of this
      file).  */
 
-  if ((elf_file_p (&x_ehdr) == false) ||
-      (x_ehdr.e_ident[EI_VERSION] != EV_CURRENT) ||
-      (x_ehdr.e_ident[EI_CLASS] != ELFCLASS))
+  if (! elf_file_p (&x_ehdr)
+      || x_ehdr.e_ident[EI_VERSION] != EV_CURRENT
+      || x_ehdr.e_ident[EI_CLASS] != ELFCLASS)
     goto got_wrong_format_error;
 
   /* Check that file's byte order matches xvec's */
@@ -821,7 +821,7 @@ elf_object_p (abfd)
      information.  */
   if (ebd->elf_backend_object_p)
     {
-      if ((*ebd->elf_backend_object_p) (abfd) == false)
+      if (! (*ebd->elf_backend_object_p) (abfd))
 	goto got_wrong_format_error;
     }
 

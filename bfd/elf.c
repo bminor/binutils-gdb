@@ -4506,7 +4506,7 @@ copy_private_bfd_data (ibfd, obfd)
     || (IS_CONTAINED_BY_FILEPOS (section, segment, bed)			\
         && (section->flags & SEC_ALLOC) == 0))				\
    && section->output_section != NULL					\
-   && section->segment_mark == false)
+   && ! section->segment_mark)
 
   /* Returns true iff seg1 starts after the end of seg2.  */
 #define SEGMENT_AFTER_SEGMENT(seg1, seg2)		\
@@ -5965,8 +5965,8 @@ _bfd_elf_set_section_contents (abfd, section, location, offset, count)
   bfd_signed_vma pos;
 
   if (! abfd->output_has_begun
-      && ! _bfd_elf_compute_section_file_positions
-      (abfd, (struct bfd_link_info *) NULL))
+      && ! (_bfd_elf_compute_section_file_positions
+	    (abfd, (struct bfd_link_info *) NULL)))
     return false;
 
   hdr = &elf_section_data (section)->this_hdr;

@@ -207,7 +207,7 @@ static boolean
 MY(mkobject) (abfd)
      bfd *abfd;
 {
-  if (NAME(aout,mkobject) (abfd) == false)
+  if (! NAME(aout,mkobject) (abfd))
     return false;
 #if 0 /* Sizes get set in set_sizes callback, later, after we know
 	 the architecture and machine.  */

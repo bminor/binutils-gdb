@@ -1740,7 +1740,7 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
   int found;
 
   /* som_mkobject will set bfd_error if som_mkobject fails.  */
-  if (som_mkobject (abfd) != true)
+  if (! som_mkobject (abfd))
     return 0;
 
   /* Set BFD flags based on what information is available in the SOM.  */
@@ -1905,9 +1905,9 @@ setup_sections (abfd, file_hdr, current_offset)
 	space_asect->flags |= SEC_DEBUGGING;
 
       /* Set up all the attributes for the space.  */
-      if (bfd_som_set_section_attributes (space_asect, space.is_defined,
-					  space.is_private, space.sort_key,
-					  space.space_number) == false)
+      if (! bfd_som_set_section_attributes (space_asect, space.is_defined,
+					    space.is_private, space.sort_key,
+					    space.space_number))
 	goto error_return;
 
       /* If the space has no subspaces, then we're done.  */
@@ -1968,10 +1968,10 @@ setup_sections (abfd, file_hdr, current_offset)
 	    goto error_return;
 
 	  /* Store private information about the section.  */
-	  if (bfd_som_set_subsection_attributes (subspace_asect, space_asect,
-						 subspace.access_control_bits,
-						 subspace.sort_key,
-						 subspace.quadrant) == false)
+	  if (! bfd_som_set_subsection_attributes (subspace_asect, space_asect,
+						   subspace.access_control_bits,
+						   subspace.sort_key,
+						   subspace.quadrant))
 	    goto error_return;
 
 	  /* Keep an easy mapping between subspaces and sections.
@@ -3457,7 +3457,7 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->space_strings_location = current_offset;
 
   /* Scribble out the space strings.  */
-  if (som_write_space_strings (abfd, current_offset, &strings_size) == false)
+  if (! som_write_space_strings (abfd, current_offset, &strings_size))
     return false;
 
   /* Record total string table size in the header and update the
@@ -3727,10 +3727,9 @@ som_finish_writing (abfd)
   obj_som_file_hdr (abfd)->symbol_strings_location = current_offset;
 
   /* Scribble out the symbol strings.  */
-  if (som_write_symbol_strings (abfd, current_offset, syms,
-				num_syms, &strings_size,
-				obj_som_compilation_unit (abfd))
-      == false)
+  if (! som_write_symbol_strings (abfd, current_offset, syms,
+				  num_syms, &strings_size,
+				  obj_som_compilation_unit (abfd)))
     return false;
 
   /* Record total string table size in header and update the
@@ -3751,7 +3750,7 @@ som_finish_writing (abfd)
 
   /* Write the fixups and update fields in subspace headers which
      relate to the fixup stream.  */
-  if (som_write_fixups (abfd, current_offset, &total_reloc_size) == false)
+  if (! som_write_fixups (abfd, current_offset, &total_reloc_size))
     return false;
 
   /* Record the total size of the fixup stream in the file header.  */
@@ -3762,7 +3761,7 @@ som_finish_writing (abfd)
 
   /* Now that the symbol table information is complete, build and
      write the symbol table.  */
-  if (som_build_and_write_symbol_table (abfd) == false)
+  if (! som_build_and_write_symbol_table (abfd))
     return false;
 
   /* Subspaces are written first so that we can set up information
@@ -4191,7 +4190,7 @@ static boolean
 som_write_object_contents (abfd)
      bfd *abfd;
 {
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       /* Set up fixed parts of the file, space, and subspace headers.
 	 Notify the world that output has begun.  */
@@ -5036,7 +5035,7 @@ som_canonicalize_reloc (abfd, section, relptr, symbols)
   arelent *tblptr;
   int count;
 
-  if (som_slurp_reloc_table (abfd, section, symbols, false) == false)
+  if (! som_slurp_reloc_table (abfd, section, symbols, false))
     return -1;
 
   count = section->reloc_count;
@@ -5339,7 +5338,7 @@ som_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       /* Set up fixed parts of the file, space, and subspace headers.
 	 Notify the world that output has begun.  */
@@ -5749,8 +5748,7 @@ som_slurp_armap (abfd)
     }
 
   /* Count the number of symbols in the library symbol table.  */
-  if (som_bfd_count_ar_symbols (abfd, &lst_header, &ardata->symdef_count)
-      == false)
+  if (! som_bfd_count_ar_symbols (abfd, &lst_header, &ardata->symdef_count))
     return false;
 
   /* Get back to the start of the library symbol table.  */
@@ -5767,8 +5765,7 @@ som_slurp_armap (abfd)
     return false;
 
   /* Now fill in the canonical archive symbols.  */
-  if (som_bfd_fill_in_ar_symbols (abfd, &lst_header, &ardata->symdefs)
-      == false)
+  if (! som_bfd_fill_in_ar_symbols (abfd, &lst_header, &ardata->symdefs))
     return false;
 
   /* Seek back to the "first" file in the archive.  Note the "first"
@@ -5814,7 +5811,7 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
       /* Make sure the symbol table has been read, then snag a pointer
 	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
 	 but doing so avoids allocating lots of extra memory.  */
-      if (som_slurp_symbol_table (curr_bfd) == false)
+      if (! som_slurp_symbol_table (curr_bfd))
 	return false;
 
       sym = obj_som_symtab (curr_bfd);
@@ -5969,7 +5966,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst, elength)
       /* Make sure the symbol table has been read, then snag a pointer
 	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
 	 but doing so avoids allocating lots of extra memory.  */
-      if (som_slurp_symbol_table (curr_bfd) == false)
+      if (! som_slurp_symbol_table (curr_bfd))
 	goto error_return;
 
       sym = obj_som_symtab (curr_bfd);
@@ -6205,7 +6202,7 @@ som_write_armap (abfd, elength, map, orl_count, stridx)
 
   /* Count how many symbols we will have on the hash chains and the
      size of the associated string table.  */
-  if (som_bfd_prep_for_ar_write (abfd, &nsyms, &stringsize) == false)
+  if (! som_bfd_prep_for_ar_write (abfd, &nsyms, &stringsize))
     return false;
 
   lst_size += sizeof (struct lst_symbol_record) * nsyms;

@@ -416,7 +416,7 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
   sec_ptr sect;
 
   /* Set by bfd.c handler.  */
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       /* Assign file offsets to sections.  Text sections are first, and
 	 are contiguous.  Then data sections.  Everything else at the end.  */

@@ -1314,12 +1314,12 @@ bfd_ecoff_debug_externals (abfd, debug, swap, relocateable, get_extr,
       sym_ptr = *sym_ptr_ptr;
 
       /* Get the external symbol information.  */
-      if ((*get_extr) (sym_ptr, &esym) == false)
+      if (! (*get_extr) (sym_ptr, &esym))
 	continue;
 
       /* If we're producing an executable, move common symbols into
 	 bss.  */
-      if (relocateable == false)
+      if (! relocateable)
 	{
 	  if (esym.asym.sc == scCommon)
 	    esym.asym.sc = scBss;
@@ -1376,20 +1376,18 @@ bfd_ecoff_debug_one_external (abfd, debug, swap, name, esym)
   if ((size_t) (debug->ssext_end - debug->ssext)
       < symhdr->issExtMax + namelen + 1)
     {
-      if (ecoff_add_bytes ((char **) &debug->ssext,
-			   (char **) &debug->ssext_end,
-			   symhdr->issExtMax + namelen + 1)
-	  == false)
+      if (! ecoff_add_bytes ((char **) &debug->ssext,
+			     (char **) &debug->ssext_end,
+			     symhdr->issExtMax + namelen + 1))
 	return false;
     }
   if ((size_t) ((char *) debug->external_ext_end
 		- (char *) debug->external_ext)
       < (symhdr->iextMax + 1) * external_ext_size)
     {
-      if (ecoff_add_bytes ((char **) &debug->external_ext,
-			   (char **) &debug->external_ext_end,
-			   (symhdr->iextMax + 1) * (size_t) external_ext_size)
-	  == false)
+      if (! ecoff_add_bytes ((char **) &debug->external_ext,
+			     (char **) &debug->external_ext_end,
+			     (symhdr->iextMax + 1) * (size_t) external_ext_size))
 	return false;
     }
 

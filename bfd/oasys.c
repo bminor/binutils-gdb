@@ -254,7 +254,7 @@ oasys_get_symtab (abfd, location)
 {
   asymbol *symbase;
   unsigned int counter;
-  if (oasys_slurp_symbol_table (abfd) == false)
+  if (! oasys_slurp_symbol_table (abfd))
     {
       return -1;
     }
@@ -411,7 +411,7 @@ oasys_mkobject (abfd)
 {
   bfd_size_type amt = sizeof (oasys_data_type);
   abfd->tdata.oasys_obj_data = (oasys_data_type *) bfd_alloc (abfd, amt);
-  return abfd->tdata.oasys_obj_data ? true : false;
+  return abfd->tdata.oasys_obj_data != NULL;
 }
 
 #define MAX_SECS 16
@@ -496,7 +496,7 @@ oasys_object_p (abfd)
 	case oasys_record_is_module_enum:
 	case oasys_record_is_named_section_enum:
 	case oasys_record_is_end_enum:
-	  if (had_usefull == false)
+	  if (! had_usefull)
 	    goto fail;
 	  loop = false;
 	  break;
@@ -600,7 +600,7 @@ oasys_slurp_section_data (abfd)
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       per = oasys_per_section (s);
-      if (per->initialized == true)
+      if (per->initialized)
 	return true;
     }
 
@@ -632,7 +632,7 @@ oasys_slurp_section_data (abfd)
 
 	    per = oasys_per_section (section);
 
-	    if (per->initialized == false)
+	    if (! per->initialized)
 	      {
 		per->data = (bfd_byte *) bfd_zalloc (abfd, section->_raw_size);
 		if (!per->data)
@@ -646,7 +646,7 @@ oasys_slurp_section_data (abfd)
 	      }
 
 	    dst_offset = H_GET_32 (abfd, record.data.addr);
-	    if (per->had_vma == false)
+	    if (! per->had_vma)
 	      {
 		/* Take the first vma we see as the base */
 		section->vma = dst_offset;
@@ -728,16 +728,13 @@ oasys_slurp_section_data (abfd)
 				  r->relent.sym_ptr_ptr = (asymbol **) NULL;
 				  section->reloc_count++;
 
-				  /* Fake up the data to look like it's got the -ve pc in it, this makes
-				       it much easier to convert into other formats. This is done by
-				       hitting the addend.
-				       */
-				  if (r->relent.howto->pc_relative == true)
-				    {
-				      r->relent.addend -= dst_ptr - dst_base_ptr;
-				    }
-
-
+				  /* Fake up the data to look like
+				     it's got the -ve pc in it, this
+				     makes it much easier to convert
+				     into other formats.  This is done
+				     by hitting the addend.  */
+				  if (r->relent.howto->pc_relative)
+				    r->relent.addend -= dst_ptr - dst_base_ptr;
 				}
 				break;
 
@@ -772,17 +769,13 @@ oasys_slurp_section_data (abfd)
 				  section->reloc_count++;
 
 				  src += 2;
-				  /* Fake up the data to look like it's got the -ve pc in it, this makes
-				       it much easier to convert into other formats. This is done by
-				       hitting the addend.
-				       */
-				  if (r->relent.howto->pc_relative == true)
-				    {
-				      r->relent.addend -= dst_ptr - dst_base_ptr;
-				    }
-
-
-
+				  /* Fake up the data to look like
+				     it's got the -ve pc in it, this
+				     makes it much easier to convert
+				     into other formats.  This is done
+				     by hitting the addend.  */
+				  if (r->relent.howto->pc_relative)
+				    r->relent.addend -= dst_ptr - dst_base_ptr;
 				}
 				break;
 			      case RELOCATION_TYPE_COM:
@@ -850,7 +843,7 @@ oasys_get_section_contents (abfd, section, location, offset, count)
 {
   oasys_per_section_type *p = (oasys_per_section_type *) section->used_by_bfd;
   oasys_slurp_section_data (abfd);
-  if (p->initialized == false)
+  if (! p->initialized)
     {
       (void) memset (location, 0, (size_t) count);
     }

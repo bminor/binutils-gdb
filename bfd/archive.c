@@ -1746,7 +1746,7 @@ _bfd_write_archive_contents (arch)
 
   if (makemap && hasobjects)
     {
-      if (_bfd_compute_and_write_armap (arch, (unsigned int) elength) != true)
+      if (! _bfd_compute_and_write_armap (arch, (unsigned int) elength))
 	return false;
     }
 
@@ -1876,8 +1876,8 @@ _bfd_compute_and_write_armap (arch, elength)
        current != (bfd *) NULL;
        current = current->next, elt_no++)
     {
-      if ((bfd_check_format (current, bfd_object) == true)
-	  && ((bfd_get_file_flags (current) & HAS_SYMS)))
+      if (bfd_check_format (current, bfd_object)
+	  && (bfd_get_file_flags (current) & HAS_SYMS) != 0)
 	{
 	  long storage;
 	  long symcount;

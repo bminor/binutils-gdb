@@ -2878,7 +2878,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
     }
 
   /* __rtinit */
-  if (info->init_function || info->fini_function || rtld == true) 
+  if (info->init_function || info->fini_function || rtld) 
     {
       struct xcoff_link_hash_entry *hsym;
       struct internal_ldsym *ldsym;

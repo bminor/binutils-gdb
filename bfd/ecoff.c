@@ -125,7 +125,7 @@ _bfd_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
   struct internal_aouthdr *internal_a = (struct internal_aouthdr *) aouthdr;
   ecoff_data_type *ecoff;
 
-  if (_bfd_ecoff_mkobject (abfd) == false)
+  if (! _bfd_ecoff_mkobject (abfd))
     return NULL;
 
   ecoff = ecoff_data (abfd);
@@ -1056,7 +1056,7 @@ _bfd_ecoff_get_symtab (abfd, alocation)
   ecoff_symbol_type *symbase;
   ecoff_symbol_type **location = (ecoff_symbol_type **) alocation;
 
-  if (_bfd_ecoff_slurp_symbol_table (abfd) == false)
+  if (! _bfd_ecoff_slurp_symbol_table (abfd))
     return -1;
   if (bfd_get_symcount (abfd) == 0)
     return 0;
@@ -1677,7 +1677,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
       || (section->flags & SEC_CONSTRUCTOR) != 0)
     return true;
 
-  if (_bfd_ecoff_slurp_symbol_table (abfd) == false)
+  if (! _bfd_ecoff_slurp_symbol_table (abfd))
     return false;
 
   amt = section->reloc_count;
@@ -1793,7 +1793,7 @@ _bfd_ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
     {
       arelent *tblptr;
 
-      if (ecoff_slurp_reloc_table (abfd, section, symbols) == false)
+      if (! ecoff_slurp_reloc_table (abfd, section, symbols))
 	return -1;
 
       tblptr = section->relocation;
@@ -2267,7 +2267,7 @@ _bfd_ecoff_set_section_contents (abfd, section, location, offset, count)
 
   /* This must be done first, because bfd_set_section_contents is
      going to set output_has_begun to true.  */
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       if (! ecoff_compute_section_file_positions (abfd))
 	return false;
@@ -2750,11 +2750,9 @@ _bfd_ecoff_write_object_contents (abfd)
       symhdr->issExtMax = 0;
       debug->external_ext = debug->external_ext_end = NULL;
       debug->ssext = debug->ssext_end = NULL;
-      if (bfd_ecoff_debug_externals (abfd, debug, &backend->debug_swap,
-				     (((abfd->flags & EXEC_P) == 0)
-				      ? true : false),
-				     ecoff_get_extr, ecoff_set_index)
-	  == false)
+      if (! bfd_ecoff_debug_externals (abfd, debug, &backend->debug_swap,
+				       (abfd->flags & EXEC_P) == 0,
+				       ecoff_get_extr, ecoff_set_index))
 	goto error_return;
 
       /* Write out the relocs.  */
@@ -2858,9 +2856,8 @@ _bfd_ecoff_write_object_contents (abfd)
       if (bfd_get_symcount (abfd) > 0)
 	{
 	  /* Write out the debugging information.  */
-	  if (bfd_ecoff_write_debug (abfd, debug, &backend->debug_swap,
-				     ecoff_data (abfd)->sym_filepos)
-	      == false)
+	  if (! bfd_ecoff_write_debug (abfd, debug, &backend->debug_swap,
+				       ecoff_data (abfd)->sym_filepos))
 	    goto error_return;
 	}
     }
@@ -3347,8 +3344,8 @@ _bfd_ecoff_archive_p (abfd)
   bfd_ardata (abfd)->extended_names = NULL;
   bfd_ardata (abfd)->tdata = NULL;
 
-  if (_bfd_ecoff_slurp_armap (abfd) == false
-      || _bfd_ecoff_slurp_extended_name_table (abfd) == false)
+  if (! _bfd_ecoff_slurp_armap (abfd)
+      || ! _bfd_ecoff_slurp_extended_name_table (abfd))
     {
       bfd_release (abfd, bfd_ardata (abfd));
       abfd->tdata.aout_ar_data = tdata_hold;

@@ -1,5 +1,5 @@
 /* BFD support for the ns32k architecture.
-   Copyright 1990, 1991, 1994, 1995, 1998, 2000, 2001
+   Copyright 1990, 1991, 1994, 1995, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Almost totally rewritten by Ian Dall from initial work
    by Andrew Cagney.
@@ -220,7 +220,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (output_bfd && howto->partial_inplace == false)
+  if (output_bfd != NULL && ! howto->partial_inplace)
     output_base = 0;
   else
     output_base = reloc_target_output_section->vma;
@@ -233,7 +233,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  if (howto->pc_relative == true)
+  if (howto->pc_relative)
     {
       /* This is a PC relative relocation.  We want to set RELOCATION
 	 to the distance between the address of the symbol and the
@@ -266,13 +266,13 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
       relocation -=
 	input_section->output_section->vma + input_section->output_offset;
 
-      if (howto->pcrel_offset == true)
+      if (howto->pcrel_offset)
 	relocation -= reloc_entry->address;
     }
 
   if (output_bfd != (bfd *) NULL)
     {
-      if (howto->partial_inplace == false)
+      if (! howto->partial_inplace)
 	{
 	  /* This is a partial relocation, and we want to apply the relocation
 	     to the reloc entry rather than the raw data. Modify the reloc

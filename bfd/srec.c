@@ -160,7 +160,7 @@ srec_init ()
 {
   static boolean inited = false;
 
-  if (inited == false)
+  if (! inited)
     {
       inited = true;
       hex_init ();

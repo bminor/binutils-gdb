@@ -221,7 +221,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
 
   /* Set the arch/mach *before* swapping in sections; section header swapping
      may depend on arch/mach info.  */
-  if (bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f) == false)
+  if (! bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f))
     goto fail;
 
   /* Now copy data as required; construct all asections etc */
@@ -288,7 +288,7 @@ coff_object_p (abfd)
      only read in f_opthdr bytes in the call to bfd_bread.  We should
      also attempt to catch corrupt or non-COFF binaries with a strange
      value for f_opthdr.  */
-  if (bfd_coff_bad_format_hook (abfd, &internal_f) == false
+  if (! bfd_coff_bad_format_hook (abfd, &internal_f)
       || internal_f.f_opthdr > aoutsz)
     {
       bfd_set_error (bfd_error_wrong_format);
@@ -2413,7 +2413,7 @@ coff_sizeof_headers (abfd, reloc)
 {
   size_t size;
 
-  if (reloc == false)
+  if (! reloc)
     {
       size = bfd_coff_filhsz (abfd) + bfd_coff_aoutsz (abfd);
     }

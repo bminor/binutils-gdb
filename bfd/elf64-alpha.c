@@ -2606,9 +2606,8 @@ elf64_alpha_read_ecoff_info (abfd, section, debug)
   if (ext_hdr == NULL && swap->external_hdr_size != 0)
     goto error_return;
 
-  if (bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
-				swap->external_hdr_size)
-      == false)
+  if (! bfd_get_section_contents (abfd, section, ext_hdr, (file_ptr) 0,
+				  swap->external_hdr_size))
     goto error_return;
 
   symhdr = &debug->symbolic_header;

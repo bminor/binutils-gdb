@@ -795,7 +795,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   gp = _bfd_get_gp_value (abfd);
   if (gp == 0)
     {
-      if (relocateable != false)
+      if (relocateable)
 	{
 	  asection *sec;
 	  bfd_vma lo;
