@@ -47,6 +47,38 @@ const char *mode_names[] = {
   "TF",
 };
 
+/* Initialize cgen things.
+   This is called after sim_post_argv_init.  */
+
+void
+cgen_init (SIM_DESC sd)
+{
+  int i, c;
+  int run_fast_p = 1;
+
+  /* If no profiling or tracing has been enabled, run in fast mode.  */
+  for (c = 0; c < MAX_NR_PROCESSORS; ++c)
+    {
+      sim_cpu *cpu = STATE_CPU (sd, c);
+
+      for (i = 0; i < MAX_PROFILE_VALUES; ++i)
+	if (CPU_PROFILE_FLAGS (cpu) [i])
+	  {
+	    run_fast_p = 0;
+	    break;
+	  }
+      for (i = 0; i < MAX_TRACE_VALUES; ++i)
+	if (CPU_TRACE_FLAGS (cpu) [i])
+	  {
+	    run_fast_p = 0;
+	    break;
+	  }
+      if (! run_fast_p)
+	break;
+    }
+  STATE_RUN_FAST_P (sd) = run_fast_p;
+}
+
 void
 engine_halt (cpu, reason, sigrc)
      sim_cpu *cpu;
@@ -183,11 +215,8 @@ disasm_sprintf VPARAMS ((SFILE *f, const char *format, ...))
 }
 
 void
-sim_disassemble_insn (insn, abuf, pc, buf)
-     const struct cgen_insn *insn;
-     const struct argbuf *abuf;
-     PCADDR pc;
-     char *buf;
+sim_disassemble_insn (SIM_CPU *cpu, const struct cgen_insn *insn,
+		      const struct argbuf *abuf, PCADDR pc, char *buf)
 {
   int length;
   unsigned long insn_value;
@@ -195,28 +224,26 @@ sim_disassemble_insn (insn, abuf, pc, buf)
   struct cgen_fields fields;
   SFILE sfile;
   char insn_buf[20];
-  STATE state = current_state;
+  SIM_DESC sd = CPU_STATE (cpu);
 
   sfile.buffer = sfile.current = buf;
   INIT_DISASSEMBLE_INFO (disasm_info, (FILE *) &sfile,
 			 (fprintf_ftype) disasm_sprintf);
   disasm_info.endian =
-    (bfd_big_endian (STATE_PROG_BFD (state)) ? BFD_ENDIAN_BIG
-     : bfd_little_endian (STATE_PROG_BFD (state)) ? BFD_ENDIAN_LITTLE
+    (bfd_big_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_BIG
+     : bfd_little_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_LITTLE
      : BFD_ENDIAN_UNKNOWN);
-
-/*  (*STATE_MEM_READ (state)) (state, pc, insn_buf, abuf->length);*/
 
   switch (abuf->length)
     {
     case 1 :
-      insn_value = insn_buf[0];
+      insn_value = sim_core_read_1 (CPU_STATE (cpu), sim_core_read_map, pc);
       break;
     case 2 :
-      insn_value = disasm_info.endian == BFD_ENDIAN_BIG ? bfd_getb16 (insn_buf) : bfd_getl16 (insn_buf);
+      insn_value = sim_core_read_2 (CPU_STATE (cpu), sim_core_read_map, pc);
       break;
     case 4 :
-      insn_value = disasm_info.endian == BFD_ENDIAN_BIG ? bfd_getb32 (insn_buf) : bfd_getl32 (insn_buf);
+      insn_value = sim_core_read_4 (CPU_STATE (cpu), sim_core_read_map, pc);
       break;
     default:
       abort ();

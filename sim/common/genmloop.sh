@@ -161,6 +161,8 @@ cat <<EOF
 	    engine_halt (current_cpu, EXEC_STATE_STOPPED, SIM_SIGTRAP);
 	}
       while (keep_running);
+      /* If the loop exists, engine_stop was called.  */
+      engine_halt (current_cpu, EXEC_STATE_STOPPED, SIM_SIGINT);
 #undef FAST
     }
   else
@@ -180,6 +182,8 @@ cat <<EOF
 	  ++insn_count;
         }
       while (keep_running);
+      /* If the loop exists, engine_stop was called.  */
+      engine_halt (current_cpu, EXEC_STATE_STOPPED, SIM_SIGINT);
     }
 }
 EOF

@@ -1,5 +1,16 @@
 Thu May  1 10:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* configure: Regenerated.
+
+	* cgen-sim.h (sim_signal_type): Add SIM_SIGINT.
+	(cgen_state): New member run_fast_p.
+	(cgen_init): Add prototype.
+	(sim_disassemble_insn): New arg `cpu'.
+	* cgen-trace.c (trace_insn): Update call to sim_disassemble_insn.
+	* cgen-utils.c (cgen_init): New function.
+	(sim_disassemble_insn): New arg `cpu'.  Rewrite fetching of insn.
+	* genmloop.sh: Call engine_halt if loop exits.
+
 	* Makefile.in (sim-options_h): Define.
 	(sim-{module,options,trace,profile,utils}.o): Clean up dependencies.
 	(sim-model.o): Add new rule.
