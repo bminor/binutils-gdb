@@ -35,6 +35,7 @@
 #include "osabi.h"
 #include "gdb_assert.h"
 #include "infttrace.h"
+#include "arch-utils.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
 #include "infcall.h"
@@ -113,6 +114,8 @@ static int extract_5_load (unsigned int);
 static unsigned extract_5R_store (unsigned int);
 
 static unsigned extract_5r_store (unsigned int);
+
+static void hppa_frame_init_saved_regs (struct frame_info *frame);
 
 static void find_dummy_frame_regs (struct frame_info *, CORE_ADDR *);
 
@@ -4226,7 +4229,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
    that do not yet implement DEPRECATED_FRAME_INIT_SAVED_REGS.  */
 /* Find the addresses in which registers are saved in FRAME.  */
 
-void
+static void
 hppa_frame_init_saved_regs (struct frame_info *frame)
 {
   if (deprecated_get_frame_saved_regs (frame) == NULL)
@@ -5214,6 +5217,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #if 0
 #else
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, hppa_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
   set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);
   set_gdbarch_deprecated_frame_chain_valid (gdbarch, hppa_frame_chain_valid);

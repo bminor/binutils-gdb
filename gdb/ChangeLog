@@ -1,3 +1,15 @@
+2004-02-22  Andrew Cagney  <cagney@redhat.com>
+
+	* config/pa/tm-hppa.h: Update copyright.
+	(DEPRECATED_INIT_FRAME_PC): Delete macro.
+	(deprecated_init_frame_pc_default): Delete declaration.
+	(hppa_frame_init_saved_regs): Delete declaration.
+	(DEPRECATED_FRAME_INIT_SAVED_REGS): Delete macro.
+	* hppa-tdep.c: Include "arch-utils.h".
+	(hppa_gdbarch_init): Set deprecated init_frame_pc
+	and deprecated frame_init_saved_regs.
+	(hppa_frame_init_saved_regs): Make static.
+
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
 	Remove old 386BSD support.

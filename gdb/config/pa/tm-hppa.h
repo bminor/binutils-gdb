@@ -1,6 +1,8 @@
 /* Parameters for execution on any Hewlett-Packard PA-RISC machine.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -35,8 +37,6 @@
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 /* Hack, get around problem with including "arch-utils.h".  */
 struct frame_info;
-extern CORE_ADDR deprecated_init_frame_pc_default (int fromleaf, struct frame_info *prev);
-#define DEPRECATED_INIT_FRAME_PC(l,f) (deprecated_init_frame_pc_default (l, f))
 
 /* Forward declarations of some types we use in prototypes */
 
@@ -108,10 +108,6 @@ extern void pa_do_registers_info (int, int);
 extern int hppa_instruction_nullified (void);
 #define INSTRUCTION_NULLIFIED hppa_instruction_nullified ()
 #endif
-
-extern void hppa_frame_init_saved_regs (struct frame_info *);
-#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) \
-  hppa_frame_init_saved_regs (FI)
 
 #define INSTRUCTION_SIZE 4
 
