@@ -262,6 +262,9 @@ do_captured_list_thread_ids (struct ui_out *uiout,
   struct thread_info *tp;
   int num = 0;
 
+  prune_threads ();
+  target_find_new_threads ();
+
   ui_out_tuple_begin (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)

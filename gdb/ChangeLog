@@ -1,3 +1,9 @@
+2002-12-19  Keith Seitz  <keiths@redhat.com>
+
+	patch committed by Elena Zannoni  <ezannoni@redhat.com>
+	* thread.c (do_captured_list_thread_ids): Call prune_threads and
+	target_find_new_threads. Fix for PR mi/669.
+
 2002-12-19  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (decode_line_1): Move code into decode_all_digits.
