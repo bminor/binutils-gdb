@@ -118,7 +118,7 @@ case "${target}" in
   z8k*-*-*)		sim_target=z8k ;;
   sparc64-*-*)
 	only_if_gcc=yes
-	if test "x${with_cgen}" = xyes ; then
+	if test "x${with_cgen}" = xyes -o "x${with_cgen_sim}" = xyes ; then
 		sim_target=sparc
 		extra_subdirs="${extra_subdirs} testsuite"
 	else
@@ -128,7 +128,7 @@ case "${target}" in
   sparclite*-*-* | sparc86x*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	only_if_gcc=yes
-	if test "x${with_cgen}" = xyes ; then
+	if test "x${with_cgen}" = xyes -o "x${with_cgen_sim}" = xyes ; then
 		sim_target=sparc
 		extra_subdirs="${extra_subdirs} testsuite"
 	else
@@ -138,7 +138,7 @@ case "${target}" in
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	only_if_gcc=yes
-	if test "x${with_cgen}" = xyes ; then
+	if test "x${with_cgen}" = xyes -o "x${with_cgen_sim}" = xyes ; then
 		sim_target=sparc
 		extra_subdirs="${extra_subdirs} testsuite"
 	else
