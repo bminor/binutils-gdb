@@ -2,6 +2,7 @@
 
 	* utils.c (phex_nz): For default case, set str to phex_nz return
 	value.
+	(phex): Ditto.
 
 2001-11-15  Andrew Cagney  <ac131313@redhat.com>
 

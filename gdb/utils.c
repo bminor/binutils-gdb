@@ -2418,22 +2418,25 @@ static int thirty_two = 32;
 char *
 phex (ULONGEST l, int sizeof_l)
 {
-  char *str = get_cell ();
+  char *str;
   switch (sizeof_l)
     {
     case 8:
+      str = get_cell ();
       sprintf (str, "%08lx%08lx",
 	       (unsigned long) (l >> thirty_two),
 	       (unsigned long) (l & 0xffffffff));
       break;
     case 4:
+      str = get_cell ();
       sprintf (str, "%08lx", (unsigned long) l);
       break;
     case 2:
+      str = get_cell ();
       sprintf (str, "%04x", (unsigned short) (l & 0xffff));
       break;
     default:
-      phex (l, sizeof (l));
+      str = phex (l, sizeof (l));
       break;
     }
   return str;
