@@ -19,6 +19,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HARRIS_TARGET 1
 
+#define CXUX_TARGET 1
+
 /* Type of X registers, as supplied by the OS */
 
 typedef struct {

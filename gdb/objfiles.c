@@ -123,6 +123,7 @@ allocate_objfile (abfd, mapped)
      int mapped;
 {
   struct objfile *objfile = NULL;
+  struct objfile *last_one = NULL;
 
   mapped |= mapped_symbol_files;
 
@@ -257,11 +258,18 @@ allocate_objfile (abfd, mapped)
 	     objfile -> name, bfd_errmsg (bfd_get_error ()));
     }
 
-  /* Push this file onto the head of the linked list of other such files. */
+  /* Add this file onto the tail of the linked list of other such files. */
 
-  objfile -> next = object_files;
-  object_files = objfile;
-
+  objfile -> next = NULL;
+  if (object_files == NULL)
+    object_files = objfile;
+  else
+    {
+      for (last_one = object_files;
+	   last_one -> next;
+	   last_one = last_one -> next);
+      last_one -> next = objfile;
+    }
   return (objfile);
 }
 

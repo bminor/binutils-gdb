@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "obstack.h"
 #include "symtab.h"
-#include <dis-asm.h>
+#include "dis-asm.h"
 #include "gdbcmd.h"
 #include "gdbtypes.h"
 

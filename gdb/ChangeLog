@@ -1,3 +1,27 @@
+Fri Sep  2 16:40:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* objfiles.c (allocate_objfile): Add the newly-created objfile to
+	the end of the list of objfiles, instead of at the beginning.
+
+	* xcoffread.c (allocate_include_entry): New function, abstracted
+	from code in record_include_begin.
+	(record_include_begin, record_include_end): Call it.
+
+	* blockframe.c (reinit_frame_cache): Test inferior_pid instead of
+	target_has_stack to decide whether to create a real stack frame
+	for the cache.
+
+	* coffread.c (process_coff_symbol) [CXUX_TARGET]: Ignore vendor
+	section.
+	* config/m88k/tm-cxux.h (CXUX_TARGET): Define.
+
+	* h8300-tdep.c: Include "dis-asm.h" instead of <dis-asm.h>.
+
+Fri Sep  2 09:51:46 1994  J.T. Conklin  (jtc@cygnus.com)
+
+	* config/sparc/tm-nbsd.h: Add #defines to map NetBSD struct and
+	  field names into what is expected by sparc-nat.c.
+
 Thu Sep  1 17:32:54 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* c-typeprint.c (c_typedef_print):  Add missing Chill support.
@@ -24,6 +48,7 @@ Thu Sep  1 12:36:39 1994  Jim Kingdon  (kingdon@cygnus.com)
 Thu Sep  1 11:01:40 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* config/tm-nbsd.h: New file, support for all NetBSD targets.
+	* config/xm-nbsd.h: fix typo.
 	* config/sparc/{nm,tm,xm}-nbsd.h: New files, renamed from
 	  {nm,tm,xm}-sparcnbsd.h to conform to prefered file naming
 	  conventions.
