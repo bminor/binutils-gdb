@@ -20,10 +20,14 @@
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
 #
+test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 cat <<EOF
-OUTPUT_FORMAT("${OUTPUT_FORMAT}")
+OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
+	      "${LITTLE_OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
 ${RELOCATING+${LIB_SEARCH_DIRS}}
@@ -40,14 +44,30 @@ SECTIONS
   ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
   ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
   ${CREATE_SHLIB-${INTERP}}
-  .hash     ${RELOCATING-0} : { *(.hash)	}
-  .dynsym   ${RELOCATING-0} : { *(.dynsym)	}
-  .dynstr   ${RELOCATING-0} : { *(.dynstr)	}
-  .rel.bss  ${RELOCATING-0} : { *(.rel.bss)	}
-  .rel.plt  ${RELOCATING-0} : { *(.rel.plt)	}
-  .rela.bss ${RELOCATING-0} : { *(.rela.bss)	}
-  .rela.plt ${RELOCATING-0} : { *(.rela.plt)	}
-  .init     ${RELOCATING-0} : { *(.init)	} =${NOP-0}
+  .hash        ${RELOCATING-0} : { *(.hash)		}
+  .dynsym      ${RELOCATING-0} : { *(.dynsym)		}
+  .dynstr      ${RELOCATING-0} : { *(.dynstr)		}
+  .rel.text    ${RELOCATING-0} : { *(.rel.text)		}
+  .rela.text   ${RELOCATING-0} : { *(.rela.text) 	}
+  .rel.data    ${RELOCATING-0} : { *(.rel.data)		}
+  .rela.data   ${RELOCATING-0} : { *(.rela.data) 	}
+  .rel.rodata  ${RELOCATING-0} : { *(.rel.rodata) 	}
+  .rela.rodata ${RELOCATING-0} : { *(.rela.rodata) 	}
+  .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
+  .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
+  .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
+  .rela.ctors  ${RELOCATING-0} : { *(.rela.ctors)	}
+  .rel.dtors   ${RELOCATING-0} : { *(.rel.dtors)	}
+  .rela.dtors  ${RELOCATING-0} : { *(.rela.dtors)	}
+  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
+  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
+  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
+  .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
+  .rel.bss     ${RELOCATING-0} : { *(.rel.bss)		}
+  .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
+  .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
+  .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
+  .init        ${RELOCATING-0} : { *(.init)	} =${NOP-0}
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
@@ -73,7 +93,7 @@ SECTIONS
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
-  .got         ${RELOCATING-0} : { *(.got)     }
+  .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
   .dynamic     ${RELOCATING-0} : { *(.dynamic) }
   ${DATA_PLT+${PLT}}
   /* We want the small data sections together, so single-instruction offsets
