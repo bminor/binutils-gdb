@@ -1,3 +1,12 @@
+2002-11-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c Replace occurrences of Elf32_Internal_* and
+	Elf64_Internal_* with Elf_Internal_*.
+	(slurp_rel_relocs): Change Elf_Internal_Rel to Elf_Internal_Rela.
+	Zero r_addend fields.
+	(dump_relocations): Remove relas variable, change Elf_Internal_Rel to
+	Elf_Internal_Rela.
+
 2002-11-23  Nick Clifton  <nickc@redhat.com>
 
 	* size.c (usage): Fix typo describing switch for hex format.
