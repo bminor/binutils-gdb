@@ -1147,12 +1147,13 @@ elf32_hppa_check_relocs (bfd *abfd,
 	    }
 	  break;
 
-	case R_PARISC_SEGBASE: /* Used to set segment base.  */
+	case R_PARISC_SEGBASE:  /* Used to set segment base.  */
 	case R_PARISC_SEGREL32: /* Relative reloc, used for unwind.  */
 	case R_PARISC_PCREL14F: /* PC relative load/store.  */
 	case R_PARISC_PCREL14R:
 	case R_PARISC_PCREL17R: /* External branches.  */
 	case R_PARISC_PCREL21L: /* As above, and for load/store too.  */
+	case R_PARISC_PCREL32:
 	  /* We don't need to propagate the relocation if linking a
 	     shared object since these are section relative.  */
 	  continue;
@@ -3145,6 +3146,7 @@ final_link_relocate (asection *input_section,
     case R_PARISC_PCREL17R:
     case R_PARISC_PCREL14R:
     case R_PARISC_PCREL14F:
+    case R_PARISC_PCREL32:
       /* Make it a pc relative offset.  */
       value -= location;
       addend -= 8;
@@ -3238,6 +3240,7 @@ final_link_relocate (asection *input_section,
     case R_PARISC_DIR17F:
     case R_PARISC_PCREL17C:
     case R_PARISC_PCREL14F:
+    case R_PARISC_PCREL32:
     case R_PARISC_DPREL14F:
     case R_PARISC_PLABEL32:
     case R_PARISC_DLTIND14F:
