@@ -1,6 +1,3 @@
-
-
-
 /* ar.c - Archive modify and extract. */
 /*
    Bugs: should use getopt the way tar does (complete w/optional -) and
@@ -75,6 +72,9 @@ enum pos {
     pos_default, pos_before, pos_after, pos_end
 }               postype = pos_default;
 
+
+boolean operation_alters_arch = false;
+
 /*
    The option parsing should be in its own function.  It will be when I have
    getopt working.
@@ -131,18 +131,22 @@ main(argc, argv)
 	    switch (c) {
 	    case 'd':
 		operation = delete;
+		operation_alters_arch = true;
 		break;
 	    case 'm':
 		operation = move;
+		operation_alters_arch = true;
 		break;
 	    case 'p':
 		operation = print_files;
 		break;
 	    case 'q':
 		operation = quick_append;
+		operation_alters_arch = true;
 		break;
 	    case 'r':
 		operation = replace;
+		operation_alters_arch = true;
 		break;
 	    case 't':
 		operation = print_table;
@@ -220,14 +224,13 @@ main(argc, argv)
     /*
        If we have no archive, and we've been asked to replace then create one
     */
-
-    if (operation == replace &&
-	inarch == &bogus_archive) {
-	silent_create = 1;
-	do_quick_append(inarch_filename, 0);
-	open_inarch(inarch_filename);
+#if 0
+    if (operation == replace && inarch == &bogus_archive) {
+      silent_create = 1;
+      do_quick_append(inarch_filename, 0);
+      open_inarch(inarch_filename);
     }
-
+#endif
     switch (operation) {
 
     case print_table:
@@ -290,6 +293,11 @@ open_inarch(archive_filename)
     if (stat(archive_filename, &sbuf) != 0) {
 	if (errno != ENOENT)
 	    bfd_fatal(archive_filename);
+	if (!operation_alters_arch) {
+	  fprintf (stderr, "%s: %s not found.\n", program_name,
+		   archive_filename);
+	  exit (1);
+	}	
 	if (!silent_create)
 	    fprintf(stderr,
 		    "%s: creating %s\n", program_name, archive_filename);
@@ -444,6 +452,14 @@ extract_file(abfd)
     bfd_seek(abfd, 0, SEEK_SET);
 
     ostream = 0;
+    if (size == 0) {
+      /* Seems like an abstraction violation, eh?  Well it's OK! */
+      ostream = fopen(abfd->filename, "w");
+      if (!ostream) {
+	perror(abfd->filename);
+	exit(1);
+      }
+    } else
     while (ncopied < size) {
 	tocopy = size - ncopied;
 	if (tocopy > BUFSIZE)
@@ -462,7 +478,6 @@ extract_file(abfd)
 		exit(1);
 	    }
 	}
-	/* no need to byte-swap; the two formats are presumably compatible(!) */
 	fwrite(cbuf, 1, nread, ostream);
 	ncopied += tocopy;
     }
@@ -589,15 +604,18 @@ write_archive()
     int             namelen = strlen(inarch->filename);
     char           *new_name = xmalloc(namelen + 6);
     bfd            *contents_head = inarch->next;
+#if 0
     if (inarch == &bogus_archive) {
 	/* How can this be ? */
 	return;
     }
     else {
-
+#endif
 	strcpy(new_name, inarch->filename);
 	strcpy(new_name + namelen, ".art");
-	obfd = bfd_openw(new_name, bfd_get_target(inarch));
+	obfd = bfd_openw(new_name,
+			 /* violates abstraction; need a better protocol */
+			 (inarch->xvec ? bfd_get_target(inarch) : NULL));
 
 	if (obfd == NULL)
 	    bfd_fatal(inarch->filename);
@@ -612,7 +630,9 @@ write_archive()
 	    bfd_fatal(inarch->filename);
 	if (rename(new_name, inarch->filename) != 0)
 	    bfd_fatal(inarch->filename);
+#if 0
     }
+#endif
 }
 
 
