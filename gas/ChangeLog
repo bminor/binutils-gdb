@@ -1,5 +1,13 @@
 Wed Feb 19 00:53:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Eric Youngdale <eric@andante.jic.com>:
+	* config/obj-elf.c (elf_pseudo_table): Add "symver".
+	(obj_elf_symver): New static function.
+	* config/obj-elf.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Copy the st_other
+	field.
+
+	* write.c (relax_segment): Make type and printf format agree.
+
 	* read.c (get_line_sb): Don't end the line on a semicolon inside a
 	string.
 
