@@ -65,7 +65,9 @@ cpu-alpha.c
 cpu-arc.c
 cpu-arm.c
 cpu-avr.c
+cpu-cr16c.c
 cpu-cris.c
+cpu-crx.c
 cpu-d10v.c
 cpu-d30v.c
 cpu-dlx.c
@@ -126,7 +128,9 @@ elf32-arc.c
 elf32-arm.h
 elf32-avr.c
 elf32.c
+elf32-cr16c.c
 elf32-cris.c
+elf32-crx.c
 elf32-d10v.c
 elf32-d30v.c
 elf32-dlx.c
@@ -159,6 +163,7 @@ elf32-s390.c
 elf32-sh64.c
 elf32-sh64-com.c
 elf32-sh.c
+elf32-sh-symbian.c
 elf32-sparc.c
 elf32-v850.c
 elf32-vax.c

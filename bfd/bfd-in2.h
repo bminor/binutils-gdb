@@ -1484,7 +1484,7 @@ void bfd_map_over_sections
 
 asection *bfd_sections_find_if
    (bfd *abfd,
-    bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+    bfd_boolean (*operation) (bfd *abfd, asection *sect, void *obj),
     void *obj);
 
 bfd_boolean bfd_set_section_size
