@@ -1341,8 +1341,8 @@ ia64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 int
 ia64_frameless_function_invocation (struct frame_info *frame)
 {
-  /* FIXME: Implement */
-  return 0;
+  FRAME_INIT_SAVED_REGS (frame);
+  return (frame->extra_info->mem_stack_frame_size == 0);
 }
 
 CORE_ADDR

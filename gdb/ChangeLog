@@ -1,3 +1,13 @@
+2001-02-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (ia64_frameless_function_invocation): Implement.
+	* config/ia64/linux.mh (NATDEPFILES): Use thread-db.o and lin-lwp.o
+	for thread support instead of linux-thread.o and lin-thread.o.
+	* config/ia64/nm-linux.h (PREPARE_TO_PROCEED, GET_THREAD_SIGNALS,
+	ATTACH_LWP): Define to use the following lin-lwp.c functions...
+	(lin_lwp_prepare_to_proceed, lin_thread_get_thread_signals,
+	lin_lwp_attach_lwp): Declare.
+
 2001-02-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* mips-tdep.c (do_fp_register_row, do_fp_register_row): Fix printf
