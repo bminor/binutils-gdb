@@ -1,3 +1,9 @@
+1999-01-15  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (lang_size_sections): Only update the current
+          address of a region if the section just placed into it is an
+          allocated section.
+
 1999-01-12  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Replace efr30.o with eelf32fr30.o.
