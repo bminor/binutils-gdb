@@ -38,6 +38,13 @@ Thu Feb  2 15:21:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(VMS_RSYM_Parse):  move S_GET_VALUE() inside switch to avoid
 	calling it for uninteresting cases.
 
+Wed Feb  1 23:52:45 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): Go ahead and call
+	hppa_field_adjust to get a new value for R_DATA_ONE_SYMBOL
+	relocations in SOM.
+	(hppa_fix_adjustable): Refine somewhat.
+
 Fri Jan 27 21:29:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.h (NO_STRING_ESCAPES): Don't define if we are

@@ -2215,7 +2215,7 @@ pa_ip (str)
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 671108864, 0, 0);
-	      INSERT_FIELD_AND_CONTINUE (opcode, num, 1);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 3 bit SFU identifier at 25.  */
 	    case 'f':
@@ -2855,8 +2855,18 @@ md_apply_fix (fixP, valp)
 	 which will need a SOM relocation (except for some PC-relative relocs).
 	 In such cases we should treat the "val" or "addend" as zero since it
 	 will be added in as needed from fx_offset in tc_gen_reloc.  */
-      if (fixP->fx_addsy != NULL
-	  || fixP->fx_r_type == R_HPPA_NONE)
+      if ((fixP->fx_addsy != NULL
+	   || fixP->fx_r_type == R_HPPA_NONE)
+#ifdef OBJ_SOM
+	  && fmt != 32
+	  || hppa_fixP->fx_r_field == e_psel
+	  || hppa_fixP->fx_r_field == e_rpsel
+	  || hppa_fixP->fx_r_field == e_lpsel
+	  || hppa_fixP->fx_r_field == e_tsel
+	  || hppa_fixP->fx_r_field == e_rtsel
+	  || hppa_fixP->fx_r_field == e_ltsel
+#endif
+	  )
 	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
       else
 	new_val = hppa_field_adjust (*valp, 0, hppa_fixP->fx_r_field);
@@ -5379,6 +5389,9 @@ pa_subspace (unused)
       else
 	section = subseg_new (ss_name, 0);
 
+      if (zero)
+	seg_info (section)->bss = 1;
+
       /* Now set the flags.  */
       bfd_set_section_flags (stdoutput, section, applicable);
 
@@ -6123,13 +6136,11 @@ pa_text (unused)
    selectors).
 
    Reject reductions involving symbols with external scope; such
-   reductions make life a living hell for object file editors.
+   reductions make life a living hell for object file editors. 
 
-   FIXME.  Also reject R_HPPA relocations which are 32 bits
-   wide.  Helps with code lables in arrays for SOM.  (SOM BFD code
-   needs to generate relocations to push the addend and symbol value
-   onto the stack, add them, then pop the value off the stack and
-   use it in a relocation -- yuk.  */
+   FIXME.  Also reject R_HPPA relocations which are 32bits wide in
+   the code space.  The SOM BFD backend doesn't know how to pull the
+   right bits out of an instruction.  */
 
 int
 hppa_fix_adjustable (fixp)
@@ -6145,10 +6156,14 @@ hppa_fix_adjustable (fixp)
     return 0;
 #endif
 
-  /* Reject reductions of symbols in DLT relative relocs.  */
+  /* Reject reductions of symbols in DLT relative relocs,
+     relocations with plabels.  */
   if (hppa_fix->fx_r_field == e_tsel
       || hppa_fix->fx_r_field == e_ltsel
-      || hppa_fix->fx_r_field == e_rtsel)
+      || hppa_fix->fx_r_field == e_rtsel
+      || hppa_fix->fx_r_field == e_psel
+      || hppa_fix->fx_r_field == e_rpsel
+      || hppa_fix->fx_r_field == e_lpsel)
     return 0;
 
   if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_GLOBAL)
