@@ -11,7 +11,6 @@ ENTRY(_mainCRTStartup)
 
 SECTIONS
 {
-
   .text ${RELOCATING+ 0x401000} : 
 	{
 	    ${RELOCATING+ *(.init);}
@@ -23,7 +22,9 @@ SECTIONS
 
   .rdata BLOCK(0x1000) :
   { 					
-    *(.rdata)
+	*(.rdata)
+	${CONSTRUCTING+ __CTOR_LIST__ = .; LONG (-1); *(.ctors); LONG (0); }
+	${CONSTRUCTING+ __DTOR_LIST__ = .; LONG (-1); *(.dtors); LONG (0); }
     ;
   }
   .data BLOCK(0x1000) : {
@@ -85,15 +86,16 @@ SECTIONS
 	end = . ;
 	}
 
-  .stab  0 ${RELOCATING+(NOLOAD)} : 
+  .stab  0 :
   {
     [ .stab ]
   }
 
-  .stabstr  0 ${RELOCATING+(NOLOAD)} :
+  .stabstr  0 :
   {
     [ .stabstr ]
   }
-	stack =  0x800000 ;
+
+${RELOCATING+ stack =  0x800000 ;}
 }
 EOF
