@@ -778,7 +778,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 
   /* None of the remaining use the selected frame.  */
   if (selected_frame_p != NULL)
-    (*selected_frame_p) = 1;
+    (*selected_frame_p) = 0;
 
   /* Assume the single arg[0] is an integer, and try using that to
      select a frame relative to current.  */
