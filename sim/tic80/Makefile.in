@@ -140,6 +140,7 @@ ENGINE_H = \
 	$(srcdir)/../common/sim-alu.h \
 	$(srcdir)/../common/sim-core.h \
 	$(srcdir)/../common/sim-events.h \
+	$(srcdir)/../common/sim-fpu.h \
 
 idecode.o: $(ENGINE_H)
 semantics.o: $(ENGINE_H)

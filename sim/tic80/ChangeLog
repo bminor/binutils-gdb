@@ -1,5 +1,13 @@
 Thu May 15 11:45:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* insns (do_shift): When rot==0 and zero/sign merge treat it as
+ 	32.
+	(set_fp_reg): For interger conversion, use sim-fpu fpu2i
+ 	functions.
+	(do_fmpy): Perform iii and uuu using integer arithmetic.
+	
+	* Makefile.in (ENGINE_H): Assume everything depends on the fpu.
+
 	* insns (get_fp_reg): Use sim_fpu_u32to to perform unsigned
  	conversion.
 	(do_fcmp): Update to use new fp compare functions. Make reg nr arg

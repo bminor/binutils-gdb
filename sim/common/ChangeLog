@@ -1,7 +1,14 @@
 Thu May 15 10:58:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* sim-fpu.h, sim-fpu.c (sim_fpu_[iu]{32,64}to): New integer
+	* sim-fpu.c (pack_fpu, unpack_fpu): New functions - decode a
+ 	float.
+
+	* sim-inline.c (SIM_INLINE_C): Rename from _SIM_INLINE_C_.
+	* sim-lnline.h: Update.
+
+	* sim-fpu.h, sim-fpu.c (sim_fpu_[iu]{32,64}to): New int2fp
  	conversion functions.
+	(sim_fpu_to{32,64}[iu]): New fp2int functions.
 	
 	* sim-fpu.h, sim-fpu.c (sim_fpu_is_{lt,le,eq,ne,ge,gt}): New fp
  	compare functions.  Replacing.

@@ -434,13 +434,15 @@ void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	      break;
 	    }
 	  case 2: /* signed */
-	    /* FIXME - rounding */
-	    GPR (Dest) = sim_fpu_2d (val);
-	    break;
+	    {
+	      GPR (Dest) = sim_fpu_to32i (val);
+	      break;
+	    }
 	  case 3: /* unsigned */
-	    /* FIXME - rounding */
-	    GPR (Dest) = sim_fpu_2d (val);
-	    break;
+	    {
+	      GPR (Dest) = sim_fpu_to32u (val);
+	      break;
+	    }
 	  default:
 	    engine_error (SD, CPU, cia, "Unsupported FP precision");
 	  }
@@ -516,9 +518,27 @@ void::function::do_fdiv:int Dest, int PD, sim_fpu s1, sim_fpu s2
 
 // fmpy.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 void::function::do_fmpy:int Dest, int PD, sim_fpu s1, sim_fpu s2
-	sim_fpu ans = sim_fpu_mul (s1, s2);
-	TRACE_FPU3 (MY_INDEX, ans, s1, s2);
-	set_fp_reg (_SD, Dest, ans, PD);
+	switch (PD)
+	  {
+	  case 2: /* signed */
+	    {
+	      GPR (Dest) = sim_fpu_to64i (s1) * sim_fpu_to64i (s2);
+	      TRACE_FPU2I (MY_INDEX, GPR (Dest), s1, s2);
+	      break;
+	    }
+	  case 3: /* unsigned */
+	    {
+	      GPR (Dest) = sim_fpu_to64u (s1) * sim_fpu_to64u (s2);
+	      TRACE_FPU2I (MY_INDEX, GPR (Dest), s1, s2);
+	      break;
+	    }
+	  default:
+	    {
+	      sim_fpu ans = sim_fpu_mul (s1, s2);
+	      set_fp_reg (_SD, Dest, ans, PD);
+	      TRACE_FPU3 (MY_INDEX, ans, s1, s2);
+	    }
+	  }
 31.Dest,26.Source2,21.0b111110010,12.0,11./,10.PD,8.P2,6.P1,4.Source1::f::fmpy r
 	do_fmpy (_SD, Dest, PD,
 	         get_fp_reg (_SD, Source1, rSource1, P1),
@@ -832,8 +852,14 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	  case 0: case 1: case 2:
 	    shiftmask = ~ (unsigned32)0;	/* disabled */
 	    break;
-	  case 3: case 4: case 5:
-	    shiftmask = ((1 << nRotate) - 1);	/* enabled */
+	  case 3: case 5:			/* enabled - 0 -> 32 */
+	    if (nRotate == 0)
+	      shiftmask = ~ (unsigned32)0;
+	    else
+	      shiftmask = ((1 << nRotate) - 1);	/* enabled - 0 -> 0 */
+	    break;
+	  case 4:
+	    shiftmask = ((1 << nRotate) - 1);	/* enabled - 0 -> 0 */
 	    break;
 	  case 6: case 7:
 	    shiftmask = ~((1 << nRotate) - 1);	/* inverted */
