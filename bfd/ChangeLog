@@ -1,5 +1,23 @@
 2002-08-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-rs6000.c: Formatting fixes.
+	(xcoff_calculate_relocation): Use PARAMS in declaration.
+	(xcoff_complain_overflow): Likewise.
+	(xcoff_ppc_relocate_section): Use old-style function pointer call.
+	(bfd_xcoff_backend_data): Remove useless comments.
+	(rs6000coff_vec): Likewise.
+	(bfd_pmac_xcoff_backend_data): Likewise.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c: Formatting fixes.
+	(xcoff64_calculate_relocation): Use PARAMS in declaration.
+	(xcoff64_ppc_relocate_section): Use old-style function pointer call.
+	(bfd_xcoff_backend_data): Remove useless comments.
+	(rs6000coff64_vec): Likewise.
+	(bfd_xcoff_aix5_backend_data): Likewise.
+	(aix5coff64_vec): Likewise.
+
+2002-08-06  Alan Modra  <amodra@bigpond.net.au>
+
 	* coff-rs6000.c (xcoff_howto_table): Revert some of last change to
 	mask entries.  Use complain_overflow_dont for R_REF.
 	(xcoff_reloc_type_ba): Revert last change.
