@@ -6362,44 +6362,48 @@ overlay's machine code from the large memory into the space set aside
 for it in the instruction memory, and then jump to its entry point
 there.
 
+@c NB:  In the below the mapped area's size is greater or equal to the
+@c size of all overlays.  This is intentional to remind the developer
+@c that overlays don't necessarily need to be the same size.
+
 @example
 @group
-    Data                   Instruction            Larger
-Address Space             Address Space        Address Space
-+-----------+             +-----------+        +-----------+
-|           |             |           |        |           |
-+-----------+             +-----------+        +-----------+<-- overlay 1
-| program   |             |   main    |        |           | load address
-| variables |             |  program  |        | overlay 1 |
-| and heap  |             |           |    ,---|           |
-+-----------+             |           |    |   |           |
-|           |             +-----------+    |   +-----------+
-+-----------+             |           |    |   |           |
-               mapped --->+-----------+    /   +-----------+<-- overlay 2
-               address    |  overlay  | <-'    | overlay 2 | load address
-                          |   area    |  <-----|           |
-                          |           | <---.  +-----------+
-                          |           |     |  |           |
-                          +-----------+     |  |           |
-                          |           |     |  +-----------+<-- overlay 3
-                          +-----------+     `--|           | load address
-                                               | overlay 3 |
-                                               |           |
-                                               +-----------+
-                                               |           |
-                                               +-----------+
+    Data             Instruction            Larger
+Address Space       Address Space        Address Space
++-----------+       +-----------+        +-----------+
+|           |       |           |        |           |
++-----------+       +-----------+        +-----------+<-- overlay 1
+| program   |       |   main    |   .----| overlay 1 | load address
+| variables |       |  program  |   |    +-----------+
+| and heap  |       |           |   |    |           |
++-----------+       |           |   |    +-----------+<-- overlay 2
+|           |       +-----------+   |    |           | load address
++-----------+       |           |   |  .-| overlay 2 |
+                    |           |   |  | |           |
+         mapped --->+-----------+   |  | +-----------+
+         address    |           |   |  | |           |
+                    |  overlay  | <-'  | |           |
+                    |   area    |  <---' +-----------+<-- overlay 3
+                    |           | <---.  |           | load address
+                    +-----------+     `--| overlay 3 |
+                    |           |        |           |
+                    +-----------+        |           |
+                                         +-----------+
+                                         |           |
+                                         +-----------+
 
-    To map an overlay, copy its code from the larger address space
-    to the instruction address space.  Since the overlays shown here
-    all use the same mapped address, only one may be mapped at a time.
+                    @anchor{A code overlay}A code overlay
 @end group
 @end example
 
-This diagram shows a system with separate data and instruction address
-spaces.  For a system with a single address space for data and
-instructions, the diagram would be similar, except that the program
-variables and heap would share an address space with the main program
-and the overlay area.
+The diagram (@pxref{A code overlay}) shows a system with separate data
+and instruction address spaces.  To map an overlay, the program copies
+its code from the larger address space to the instruction address space.
+Since the overlays shown here all use the same mapped address, only one
+may be mapped at a time.  For a system with a single address space for
+data and instructions, the diagram would be similar, except that the
+program variables and heap would share an address space with the main
+program and the overlay area.
 
 An overlay loaded into instruction memory and ready for use is called a
 @dfn{mapped} overlay; its @dfn{mapped address} is its address in the

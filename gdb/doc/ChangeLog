@@ -1,3 +1,7 @@
+2002-02-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (How Overlays Work): Shrink the overlay diagram.
+
 2002-02-06  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo (overlays): Mention new magic symbol
