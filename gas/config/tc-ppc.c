@@ -130,7 +130,7 @@ static void ppc_elf_cons PARAMS ((int));
 static void ppc_elf_rdata PARAMS ((int));
 static void ppc_elf_lcomm PARAMS ((int));
 static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
-static void ppc_apuinfo_section_add PARAMS((unsigned int apu, unsigned int version));
+static void ppc_apuinfo_section_add PARAMS ((unsigned int apu, unsigned int version));
 #endif
 
 #ifdef TE_PE
@@ -1281,6 +1281,7 @@ md_begin ()
 void
 ppc_cleanup ()
 {
+#ifdef OBJ_ELF
   if (ppc_apuinfo_list == NULL)
     return;
 
@@ -1334,6 +1335,7 @@ ppc_cleanup ()
     if (seg && subseg)
       subseg_set (seg, subseg);
   }
+#endif
 }
 
 /* Insert an operand value into an instruction.  */
@@ -1933,16 +1935,17 @@ parse_toc_entry (toc_kind)
 #endif
 
 
+#ifdef OBJ_ELF
 #define APUID(a,v)	((((a) & 0xffff) << 16) | ((v) & 0xffff))
 static void
-ppc_apuinfo_section_add(apu, version)
+ppc_apuinfo_section_add (apu, version)
       unsigned int apu, version;
 {
   unsigned int i;
 
   /* Check we don't already exist.  */
   for (i = 0; i < ppc_apuinfo_num; i++)
-    if (ppc_apuinfo_list[i] == APUID(apu, version))
+    if (ppc_apuinfo_list[i] == APUID (apu, version))
       return;
     
   if (ppc_apuinfo_num == ppc_apuinfo_num_alloc)
@@ -1960,9 +1963,10 @@ ppc_apuinfo_section_add(apu, version)
 	      sizeof (unsigned long) * ppc_apuinfo_num_alloc);
 	}
     }
-  ppc_apuinfo_list[ppc_apuinfo_num++] = APUID(apu, version);
+  ppc_apuinfo_list[ppc_apuinfo_num++] = APUID (apu, version);
 }
 #undef APUID
+#endif
 
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -2449,6 +2453,7 @@ md_assemble (str)
   if (*str != '\0')
     as_bad (_("junk at end of line: `%s'"), str);
 
+#ifdef OBJ_ELF
   /* Do we need/want a APUinfo section? */
   if (ppc_cpu & (PPC_OPCODE_SPE
    	       | PPC_OPCODE_ISEL | PPC_OPCODE_EFS
@@ -2457,20 +2462,21 @@ md_assemble (str)
     {
       /* These are all version "1".  */
       if (opcode->flags & PPC_OPCODE_SPE)
-        ppc_apuinfo_section_add(PPC_APUINFO_SPE, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_SPE, 1);
       if (opcode->flags & PPC_OPCODE_ISEL)
-        ppc_apuinfo_section_add(PPC_APUINFO_ISEL, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_ISEL, 1);
       if (opcode->flags & PPC_OPCODE_EFS)
-        ppc_apuinfo_section_add(PPC_APUINFO_EFS, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_EFS, 1);
       if (opcode->flags & PPC_OPCODE_BRLOCK)
-        ppc_apuinfo_section_add(PPC_APUINFO_BRLOCK, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_BRLOCK, 1);
       if (opcode->flags & PPC_OPCODE_PMR)
-        ppc_apuinfo_section_add(PPC_APUINFO_PMR, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_PMR, 1);
       if (opcode->flags & PPC_OPCODE_CACHELCK)
-        ppc_apuinfo_section_add(PPC_APUINFO_CACHELCK, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_CACHELCK, 1);
       if (opcode->flags & PPC_OPCODE_RFMCI)
-        ppc_apuinfo_section_add(PPC_APUINFO_RFMCI, 1);
+        ppc_apuinfo_section_add (PPC_APUINFO_RFMCI, 1);
     }
+#endif
 
   /* Write out the instruction.  */
   f = frag_more (4);

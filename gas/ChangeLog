@@ -1,3 +1,11 @@
+2002-08-21  Elena Zannoni  <ezannoni@redhat.com>
+
+        * config/tc-ppc.c (ppc_cleanup): Do something only if format
+        is ELF.
+        (ppc_apuinfo_section_add): Define only if format is ELF.
+        (md_assemble): Emit APUinfo section only if format is ELF.
+        Fix formatting.
+
 2002-08-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-arc.c (md_pseudo_table <dwarf2_directive_file>): Cast. 
