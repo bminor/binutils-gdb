@@ -788,10 +788,8 @@ adjust_z_magic (abfd, execp)
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
     execp->a_text += adata(abfd).exec_bytes_size;
   N_SET_MAGIC (*execp, ZMAGIC);
+
   /* Spec says data section should be rounded up to page boundary.  */
-  /* If extra space in page is left after data section, fudge data
-     in the header so that the bss section looks smaller by that
-     amount.  We'll start the bss section there, and lie to the OS.  */
   obj_datasec(abfd)->_raw_size
     = align_power (obj_datasec(abfd)->_raw_size,
 		   obj_bsssec(abfd)->alignment_power);
@@ -803,8 +801,19 @@ adjust_z_magic (abfd, execp)
   if (!obj_bsssec(abfd)->user_set_vma)
     obj_bsssec(abfd)->vma = (obj_datasec(abfd)->vma
 			     + obj_datasec(abfd)->_raw_size);
-  execp->a_bss = (data_pad > obj_bsssec(abfd)->_raw_size) ? 0 :
-    obj_bsssec(abfd)->_raw_size - data_pad;
+  /* If the BSS immediately follows the data section and extra space
+     in the page is left after the data section, fudge data
+     in the header so that the bss section looks smaller by that
+     amount.  We'll start the bss section there, and lie to the OS.
+     (Note that a linker script, as well as the above assignment,
+     could have explicitly set the BSS vma to immediately follow
+     the data section.)  */
+  if (align_power (obj_bsssec(abfd)->vma, obj_bsssec(abfd)->alignment_power)
+      == obj_datasec(abfd)->vma + obj_datasec(abfd)->_raw_size)
+    execp->a_bss = (data_pad > obj_bsssec(abfd)->_raw_size) ? 0 :
+      obj_bsssec(abfd)->_raw_size - data_pad;
+  else
+    execp->a_bss = obj_bsssec(abfd)->_raw_size;
 }
 
 static void
