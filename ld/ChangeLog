@@ -1,3 +1,8 @@
+Thu Oct 23 00:44:20 1997  Richard Henderson  <rth@dot.cygnus.com>
+
+	* configure.tgt: Add sparc64-*-linux*.
+	* emulparams/elf64_sparc.sh (GENERATE_SHLIB_SCRIPT, NOP): New.
+
 Wed Oct 22 11:29:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/pe.sc: Put .eh_frame in .rdata.

@@ -31,6 +31,12 @@ sparc*-*-linux*aout*)	targ_emul=sparclinux
 			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/aout//'`
 			tdir_sun4=sparc-sun-sunos4
 			;;
+sparc64-*-linux*)	targ_emul=elf64_sparc
+			targ_extra_emuls="elf32_sparc sparclinux sun4"
+			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'`
+			tdir_sparclinux=${tdir_elf32_sparc}aout
+			tdir_sun4=sparc-sun-sunos4
+			;;
 sparc*-*-linux*)	targ_emul=elf32_sparc
 			targ_extra_emuls="sparclinux sun4"
 			tdir_sparclinux=${targ_alias}aout
