@@ -1,3 +1,41 @@
+Fri Nov 19 04:33:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (write_object_file): Disable obj_check_file_symbols
+	hook; only back end using it wasn't using it correctly.
+	(write_object_file): Always call obj_frob_symbol and
+	tc_frob_symbol; always retain symbol if it's used by a relocation,
+	regardless of what these routines indicate.
+	* config/obj-coff.c (coff_frob_symbol): Renamed from
+	coff_check_file_symbols.
+	* config/obj-coff.h (obj_check_file_symbols): Deleted.
+	(coff_frob_symbol): Declare.
+	(obj_frob_symbol): Call it.
+
+	* config/obj-coff.c (obj_crawl_symbol_chain, obj_emit_strings,
+	obj_pre_write_hook): Don't define for BFD_ASSEMBLER.
+	(c_section_header): Ditto.  Delete superfluous return at end of
+	function.
+
+	* config/obj-coff.h [TC_SPARC]: Include coff/sparc.h, and specify
+	coff-sparc-lynx.
+	(SA_GET_SYM_TAGNDX): Use BFD_HEADERS version for BFD_ASSEMBLER
+	too.
+	(c_section_header): Rewrite prototype so that it contains no
+	preprocessing directives.  Don't declare it at all if
+	BFD_ASSEMBLER.
+
+	* configure.in (sparc*-*-lynxos): New target, using coff and
+	BFD_ASSEMBLER.
+
+	* stabs.c: New file.
+	* Makefile.in (REAL_SOURCES, OBJS): List it.
+	* read.c (STAB_SECTION_NAME, STAB_STRING_SECTION_NAME,
+	get_stab_string_offset, s_stab_generic, s_stab, s_xstab, s_desc):
+	Moved to new file.
+
+	* config/tc-sparc.c (tc_gen_reloc): Handle coff files like elf
+	files.
+
 Wed Nov 17 17:23:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in (mips-*-irix5*): New target.  Use elf and mips-big.
