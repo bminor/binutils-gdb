@@ -1,3 +1,8 @@
+Wed Apr 21 01:50:10 1993  John Gilmore  (gnu@cygnus.com)
+
+	* libbfd.c:  Whitespace changes around byteswap macros.
+	* libbfd-in.h:  Whitespace changes around byteswap declarations.
+
 Tue Apr 20 15:59:07 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* aoutf1.h (sunos4_core_file_p):  Don't default bfd_error to
