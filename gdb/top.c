@@ -477,7 +477,7 @@ void (*call_command_hook) PARAMS ((struct cmd_list_element * c, char *cmd,
 /* Called after a `set' command has finished.  Is only run if the
    `set' command succeeded.  */
 
-void (*set_hook) PARAMS ((struct cmd_list_element *c));
+void (*set_hook) (struct cmd_list_element * c);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
@@ -486,8 +486,7 @@ void (*context_hook) PARAMS ((int id));
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
 
-NORETURN void (*error_hook)
-PARAMS ((void)) ATTR_NORETURN;
+NORETURN void (*error_hook) (void) ATTR_NORETURN;
 
 
 /* One should use catch_errors rather than manipulating these
@@ -540,7 +539,7 @@ return_to_top_level (reason)
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h. */
 
-  (NORETURN void) SIGLONGJMP (*catch_return, (int)reason);
+  (NORETURN void) SIGLONGJMP (*catch_return, (int) reason);
 }
 
 /* Call FUNC with arg ARGS, catching any errors.  If there is no
@@ -690,7 +689,7 @@ do_captured_command (void *data)
 }
 
 int
-catch_command_errors (catch_command_errors_ftype *command,
+catch_command_errors (catch_command_errors_ftype * command,
 		      char *arg, int from_tty, return_mask mask)
 {
   struct captured_command_args args;
@@ -1504,7 +1503,7 @@ execute_command (p, from_tty)
     {
       char *arg;
       line = p;
-      
+
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
 
       /* If the target is running, we allow only a limited set of
@@ -1527,13 +1526,13 @@ execute_command (p, from_tty)
 	    p--;
 	  *(p + 1) = '\0';
 	}
-      
+
       /* If this command has been hooked, run the hook first. */
       if (c->hook)
 	execute_user_command (c->hook, (char *) 0);
 
       if (c->flags & DEPRECATED_WARN_USER)
-      deprecated_cmd_warning (&line);
+	deprecated_cmd_warning (&line);
 
       if (c->class == class_user)
 	execute_user_command (c, arg);
@@ -3645,13 +3644,13 @@ cd_command (dir, from_tty)
 #endif
 
   len = strlen (dir);
-  if (SLASH_P (dir[len-1]))
+  if (SLASH_P (dir[len - 1]))
     {
       /* Remove the trailing slash unless this is a root directory
-	 (including a drive letter on non-Unix systems).  */
-      if (!(len == 1) /* "/" */
+         (including a drive letter on non-Unix systems).  */
+      if (!(len == 1)		/* "/" */
 #if defined(_WIN32) || defined(__MSDOS__)
-	  && !(!SLASH_P (*dir) && ROOTED_P (dir) && len <= 3) /* "d:/" */
+	  && !(!SLASH_P (*dir) && ROOTED_P (dir) && len <= 3)	/* "d:/" */
 #endif
 	  )
 	len--;
@@ -3997,20 +3996,19 @@ float_handler (signo)
 
 static void
 set_debug (arg, from_tty)
-	char *arg;
-	int from_tty;
+     char *arg;
+     int from_tty;
 {
-	printf_unfiltered (
-			"\"set debug\" must be followed by the name of a print subcommand.\n");
-	help_list (setdebuglist, "set debug ", -1, gdb_stdout);
+  printf_unfiltered ("\"set debug\" must be followed by the name of a print subcommand.\n");
+  help_list (setdebuglist, "set debug ", -1, gdb_stdout);
 }
 
 static void
 show_debug (args, from_tty)
-	char *args;
-	int from_tty;
+     char *args;
+     int from_tty;
 {
-	          cmd_show_list (showdebuglist, from_tty, "");
+  cmd_show_list (showdebuglist, from_tty, "");
 }
 
 static void
@@ -4067,8 +4065,8 @@ init_history ()
          directories the file written will be the same as the one
          that was read.  */
 #ifdef __MSDOS__
-    /* No leading dots in file names are allowed on MSDOS.  */
-    history_filename = concat (current_directory, "/_gdb_history", NULL);
+      /* No leading dots in file names are allowed on MSDOS.  */
+      history_filename = concat (current_directory, "/_gdb_history", NULL);
 #else
       history_filename = concat (current_directory, "/.gdb_history", NULL);
 #endif
@@ -4338,18 +4336,20 @@ This value is used to set the speed of the serial port when debugging\n\
 using remote targets.", &setlist),
 		     &showlist);
 
-  c = add_set_cmd("remotedebug", no_class, var_zinteger, (char *) &remote_debug, "Set debugging of remote protocol.\n\
+  c = add_set_cmd ("remotedebug", no_class, var_zinteger,
+		   (char *) &remote_debug,
+		   "Set debugging of remote protocol.\n\
 When enabled, each packet sent or received with the remote target\n\
-is displayed.",&setlist);
-  deprecate_cmd(c,"set debug remote");
-  deprecate_cmd(add_show_from_set(c,&showlist),"show debug remote");
+is displayed.", &setlist);
+  deprecate_cmd (c, "set debug remote");
+  deprecate_cmd (add_show_from_set (c, &showlist), "show debug remote");
 
-  add_show_from_set (
-  add_set_cmd ("remote", no_class, var_zinteger, (char *) &remote_debug,
-	       "Set debugging of remote protocol.\n\
+  add_show_from_set (add_set_cmd ("remote", no_class, var_zinteger,
+				  (char *) &remote_debug,
+				  "Set debugging of remote protocol.\n\
 When enabled, each packet sent or received with the remote target\n\
 is displayed.", &setdebuglist),
-		      &showdebuglist);
+		     &showdebuglist);
 
   add_show_from_set (
 		      add_set_cmd ("remotetimeout", no_class, var_integer, (char *) &remote_timeout,
@@ -4389,7 +4389,11 @@ from the target.", &setlist),
 Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),
 	 &showlist);
     }
-	add_prefix_cmd("debug",no_class,set_debug, "Generic command for setting gdb debugging flags", &setdebuglist, "set debug ", 0, &setlist);
+  add_prefix_cmd ("debug", no_class, set_debug,
+		  "Generic command for setting gdb debugging flags",
+		  &setdebuglist, "set debug ", 0, &setlist);
 
-	add_prefix_cmd("debug",no_class,show_debug,"Generic command for showing gdb debugging flags", &showdebuglist, "show debug ", 0, &showlist);
+  add_prefix_cmd ("debug", no_class, show_debug,
+		  "Generic command for showing gdb debugging flags",
+		  &showdebuglist, "show debug ", 0, &showlist);
 }

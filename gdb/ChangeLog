@@ -1,3 +1,8 @@
+Mon Apr  3 14:56:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c: Re-indent.
+	(set_hook, error_hook): Remove PARAMS.
+
 Mon Apr  3 14:45:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* symtab.h (add_minsym_to_demangled_hash_table): Revert 2000-03-29
