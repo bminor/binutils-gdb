@@ -1,3 +1,8 @@
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Files): Document solib-absolute-prefix and
+	solib-search-path.
+
 2003-01-09  Michael Chastain  <mec@shout.net>
 
 	* gdbint.texinfo (Configuring @value{GDBN} for Release): Delete.

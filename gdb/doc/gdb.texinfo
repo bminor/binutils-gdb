@@ -9719,6 +9719,49 @@ Mb).
 Display the current autoloading size threshold, in megabytes.
 @end table
 
+Shared libraries are also supported in many cross or remote debugging
+configurations.  A copy of the target's libraries need to be present on the
+host system; they need to be the same as the target libraries, although the
+copies on the target can be stripped as long as the copies on the host are
+not.
+
+You need to tell @value{GDBN} where the target libraries are, so that it can
+load the correct copies---otherwise, it may try to load the host's libraries.
+@value{GDBN} has two variables to specify the search directories for target
+libraries.
+
+@table @code
+@kindex set solib-absolute-prefix
+@item set solib-absolute-prefix @var{path}
+If this variable is set, @var{path} will be used as a prefix for any
+absolute shared library paths; many runtime loaders store the absolute
+paths to the shared library in the target program's memory.  If you use
+@samp{solib-absolute-prefix} to find shared libraries, they need to be laid
+out in the same way that they are on the target, with e.g.@: a
+@file{/usr/lib} hierarchy under @var{path}.
+
+You can set the default value of @samp{solib-absolute-prefix} by using the
+configure-time @samp{--with-sysroot} option.
+
+@kindex show solib-absolute-prefix
+@item show solib-absolute-prefix
+Display the current shared library prefix.
+
+@kindex set solib-search-path
+@item set solib-search-path @var{path}
+If this variable is set, @var{path} is a colon-separated list of directories
+to search for shared libraries.  @samp{solib-search-path} is used after
+@samp{solib-absolute-prefix} fails to locate the library, or if the path to
+the library is relative instead of absolute.  If you want to use
+@samp{solib-search-path} instead of @samp{solib-absolute-prefix}, be sure to
+set @samp{solib-absolute-prefix} to a nonexistant directory to prevent
+@value{GDBN} from finding your host's libraries.
+
+@kindex show solib-search-path
+@item show solib-search-path
+Display the current shared library search path.
+@end table
+
 @node Symbol Errors
 @section Errors reading symbol files
 
