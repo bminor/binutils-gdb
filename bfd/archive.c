@@ -28,7 +28,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ 
  * $Log$
- * Revision 1.3  1991/04/04 14:56:42  gumby
+ * Revision 1.4  1991/04/04 17:55:47  steve
+ * *** empty log message ***
+ *
+ * Revision 1.3  1991/04/04  14:56:42  gumby
  * Minor format fixes.
  *
  * Revision 1.2  1991/04/03  22:09:43  steve
@@ -499,9 +502,11 @@ bfd_slurp_coff_armap (abfd)
   carsym *carsyms;
 
   if (bfd_read ((void *)&nextname, 1, 1, abfd) != 1) {
+  bfd_seek (abfd, -1L, SEEK_CUR);
     bfd_has_map(abfd) = false;
     return true;
   }
+  bfd_seek (abfd, -1L, SEEK_CUR);
 
   if (nextname != '/') {
     /* Actually I think this is an error for a COFF archive */
@@ -509,7 +514,6 @@ bfd_slurp_coff_armap (abfd)
     return true;
   }
 
-  bfd_seek (abfd, -1L, SEEK_CUR);
   mapdata = snarf_ar_hdr (abfd);
   if (mapdata == NULL) return false;
 
@@ -683,11 +687,14 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 	char *normal =normalize( current->filename);
 	unsigned int thislen = strlen (normal);
 	if (thislen > maxname) {
+	  /* Works for now; may need to be re-engineered if we encounter an oddball
+	     archive format and want to generalise this hack. */
+	  struct ar_hdr *hdr = arch_hdr(current);
 	    strcpy (strptr, normal);
-	    current->filename[0] = ' ';
+	    hdr->ar_name[0] = ' ';
 	    /* We know there will always be enough room (one of the few cases
 	       where you may safely use sprintf). */
-	    sprintf ((current->filename) + 1, "-%o", (unsigned) (strptr - *tabloc));
+	    sprintf ((hdr->ar_name) + 1, "%-o", (unsigned) (strptr - *tabloc));
 
 	    strptr += thislen + 1;
 	}

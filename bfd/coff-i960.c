@@ -231,7 +231,7 @@ bfd_target icoff_little_vec =
 
   bfd_slurp_coff_armap,		/* bfd_slurp_armap */
   _bfd_slurp_extended_name_table, /* bfd_slurp_extended_name_table*/
-#if 0				/*  */
+#if 1				/*  */
   bfd_dont_truncate_arname,	/* bfd_truncate_arname */
 #else
   bfd_bsd_truncate_arname,

@@ -148,7 +148,7 @@ bfd *obfd;
     bfd *this_element;
     /* Read each archive element in turn from the input, copy the
        contents to a temp file, and keep the temp file handle */
-    char *dir = cat("./",make_tempname(this_element->filename),"copy-dir");
+    char *dir = cat("./",make_tempname(""),"copy-dir");
 
     /* Make a temp directory to hold the contents */
     mkdir(dir,0777);
