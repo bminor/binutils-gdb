@@ -1331,6 +1331,13 @@ main.o: main.c
 monitor.o: $(srcdir)/monitor.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/monitor.c
 
+# FIXME: cagney/2003-08-10: Do not try to build "printcmd.c" with
+# -Wformat-nonliteral.  It needs to be overhauled so that it doesn't
+# pass user input strings as the format parameter to host printf
+# function calls.
+printcmd.o: $(srcdir)/printcmd.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/printcmd.c
+
 # FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
 # match output format strings.
 procfs.o: $(srcdir)/procfs.c
