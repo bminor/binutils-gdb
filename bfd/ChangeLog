@@ -1,3 +1,14 @@
+2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_section_description): New function broken out
+	of mmo_internal_write_section.
+	(mmo_internal_write_section): For each of .text and .data, call
+	mmo_write_section_description before outputting contents if it has
+	nontrivially deducible vma or contents.
+	(mmo_has_leading_or_trailing_zero_tetra_p): New function.
+	(mmo_canonicalize_symtab): Adjust absolute symbols to .data
+	symbols if found within the .data address range.
+
 2004-10-24  Daniel Jacobowitz  <dan@debian.org>
 
 	* opncls.c (bfd_close): Return TRUE for BFD_IN_MEMORY.

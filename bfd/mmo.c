@@ -464,6 +464,10 @@ static bfd_boolean mmo_write_object_contents
   PARAMS ((bfd *));
 static long mmo_canonicalize_reloc
   PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
+static bfd_boolean mmo_write_section_description
+  PARAMS ((bfd *, asection *));
+static bfd_boolean mmo_has_leading_or_trailing_zero_tetra_p
+  PARAMS ((bfd *, asection *));
 
 /* Global "const" variables initialized once.  Must not depend on
    particular input or caller; put such things into the bfd or elsewhere.
@@ -2264,12 +2268,30 @@ mmo_canonicalize_symtab (abfd, alocation)
 	    {
 	      asection *textsec
 		= bfd_get_section_by_name (abfd, MMO_TEXT_SECTION_NAME);
+	      asection *datasec;
 
 	      if (textsec != NULL
 		  && c->value >= textsec->vma
 		  && c->value <= textsec->vma + textsec->size)
 		{
 		  c->section = textsec;
+		  c->value -= c->section->vma;
+		}
+	      /* In mmo, symbol types depend on the VMA.  Therefore, if
+		 the data section isn't within the usual bounds, its
+		 symbols are marked as absolute.  Correct that.  This
+		 means we can't have absolute symbols with values matching
+		 data section addresses, but we also can't have with
+		 absolute symbols with values matching text section
+		 addresses.  For such needs, use the ELF format.  */
+	      else if ((datasec
+			= bfd_get_section_by_name (abfd,
+						   MMO_DATA_SECTION_NAME))
+		       != NULL
+		       && c->value >= datasec->vma
+		       && c->value <= datasec->vma + datasec->size)
+		{
+		  c->section = datasec;
 		  c->value -= c->section->vma;
 		}
 	      else
@@ -2441,6 +2463,27 @@ bfd_sec_flags_from_mmo_flags (flags)
   return oflags;
 }
 
+/* Return TRUE iff the leading or trailing tetrabyte in SEC is defined and
+   is 0.  */
+
+static bfd_boolean
+mmo_has_leading_or_trailing_zero_tetra_p (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  bfd_vma secaddr = bfd_get_section_vma (abfd, sec);
+
+  if (sec->size < 4)
+    return FALSE;
+
+  if (bfd_get_32 (abfd, mmo_get_loc (sec, secaddr, 4)) == 0
+      && bfd_get_32 (abfd,
+		     mmo_get_loc (sec, secaddr + sec->size - 4, 4)) == 0)
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Write a section.  */
 
 static bfd_boolean
@@ -2461,10 +2504,44 @@ mmo_internal_write_section (abfd, sec)
    above.  */
 
   if (strcmp (sec->name, MMO_TEXT_SECTION_NAME) == 0)
-    /* FIXME: Output source file name and line number.  */
-    return mmo_write_loc_chunk_list (abfd, mmo_section_data (sec)->head);
+    {
+      bfd_vma secaddr = bfd_get_section_vma (abfd, sec);
+
+      /* Because leading and trailing zeros are omitted in output, we need to
+	 specify the section boundaries so they're correct when the file
+	 is read in again.  That's also the case if this section is
+	 specified as not within its usual boundaries or alignments.  */
+      if (sec->size != 0
+	  && (secaddr + sec->size >= (bfd_vma) 1 << 56
+	      || (secaddr & 3) != 0
+	      || (sec->size & 3) != 0
+	      || mmo_has_leading_or_trailing_zero_tetra_p (abfd, sec)))
+	{
+	  if (!mmo_write_section_description (abfd, sec))
+	    return FALSE;
+	}
+
+      /* FIXME: Output source file name and line number.  */
+      return mmo_write_loc_chunk_list (abfd, mmo_section_data (sec)->head);
+    }
   else if (strcmp (sec->name, MMO_DATA_SECTION_NAME) == 0)
-    return mmo_write_loc_chunk_list (abfd, mmo_section_data (sec)->head);
+    {
+      bfd_vma secaddr = bfd_get_section_vma (abfd, sec);
+
+      /* Same goes as for MMO_TEXT_SECTION_NAME above.  */
+      if (sec->size != 0
+	  && (secaddr < (bfd_vma) 0x20 << 56
+	      || secaddr + sec->size >= (bfd_vma) 0x21 << 56
+	      || (secaddr & 3) != 0
+	      || (sec->size & 3) != 0
+	      || mmo_has_leading_or_trailing_zero_tetra_p (abfd, sec)))
+	{
+	  if (!mmo_write_section_description (abfd, sec))
+	    return FALSE;
+	}
+
+      return mmo_write_loc_chunk_list (abfd, mmo_section_data (sec)->head);
+    }
   else if (strcmp (sec->name, MMIX_REG_CONTENTS_SECTION_NAME) == 0)
     /* Not handled here.  */
     {
@@ -2486,7 +2563,31 @@ mmo_internal_write_section (abfd, sec)
   else if ((bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS) != 0
 	   && sec->size != 0)
     {
-      /* Keep the document-comment formatted the way it is.  */
+      if (!mmo_write_section_description (abfd, sec))
+	return FALSE;
+
+      /* Writing a LOP_LOC ends the LOP_SPEC data, and makes data actually
+	 loaded.  */
+      if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
+	return (! abfd->tdata.mmo_data->have_error
+		&& mmo_write_loc_chunk_list (abfd,
+					 mmo_section_data (sec)->head));
+      return (! abfd->tdata.mmo_data->have_error
+	      && mmo_write_chunk_list (abfd, mmo_section_data (sec)->head));
+    }
+
+  /* Some section without contents.  */
+  return TRUE;
+}
+
+/* Write the description of a section, extended-mmo-style.  */
+
+static bfd_boolean
+mmo_write_section_description (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  /* Keep the following document-comment formatted the way it is.  */
 /*
 INODE
 mmo section mapping, , Symbol-table, mmo
@@ -2579,29 +2680,19 @@ EXAMPLE
 	special data.  The address is usually unimportant but might
 	provide information for e.g.@: the DWARF 2 debugging format.  */
 
-      mmo_write_tetra_raw (abfd, LOP_SPEC_SECTION);
-      mmo_write_tetra (abfd, (strlen (sec->name) + 3) / 4);
-      mmo_write_chunk (abfd, sec->name, strlen (sec->name));
-      mmo_flush_chunk (abfd);
-      /* FIXME: We can get debug sections (.debug_line & Co.) with a
-	 section flag still having SEC_RELOC set.  Investigate.  This
-	 might be true for all alien sections; perhaps mmo.em should clear
-	 that flag.  Might be related to weak references.  */
-      mmo_write_tetra (abfd,
-		       mmo_sec_flags_from_bfd_flags
-		       (bfd_get_section_flags (abfd, sec)));
-      mmo_write_octa (abfd, sec->size);
-      mmo_write_octa (abfd, bfd_get_section_vma (abfd, sec));
-
-      /* Writing a LOP_LOC ends the LOP_SPEC data, and makes data actually
-	 loaded.  */
-      if (bfd_get_section_flags (abfd, sec) & SEC_LOAD)
-	return (! abfd->tdata.mmo_data->have_error
-		&& mmo_write_loc_chunk_list (abfd,
-					     mmo_section_data (sec)->head));
-      return (! abfd->tdata.mmo_data->have_error
-	      && mmo_write_chunk_list (abfd, mmo_section_data (sec)->head));
-    }
+  mmo_write_tetra_raw (abfd, LOP_SPEC_SECTION);
+  mmo_write_tetra (abfd, (strlen (sec->name) + 3) / 4);
+  mmo_write_chunk (abfd, sec->name, strlen (sec->name));
+  mmo_flush_chunk (abfd);
+  /* FIXME: We can get debug sections (.debug_line & Co.) with a section
+     flag still having SEC_RELOC set.  Investigate.  This might be true
+     for all alien sections; perhaps mmo.em should clear that flag.  Might
+     be related to weak references.  */
+  mmo_write_tetra (abfd,
+		   mmo_sec_flags_from_bfd_flags
+		   (bfd_get_section_flags (abfd, sec)));
+  mmo_write_octa (abfd, sec->size);
+  mmo_write_octa (abfd, bfd_get_section_vma (abfd, sec));
   return TRUE;
 }
 
