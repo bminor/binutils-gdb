@@ -1,5 +1,8 @@
 2002-03-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h: Formatting fixes.
+	(elf_link_output_extsym): Merge undefined and undef weak cases.
+
 	* elflink.h (elf_bfd_final_link): Only call elf_link_input_bfd
 	when word size of input matches output word size.
 

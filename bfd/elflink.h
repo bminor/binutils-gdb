@@ -6029,10 +6029,6 @@ elf_link_output_extsym (h, data)
       return false;
 
     case bfd_link_hash_undefined:
-      input_sec = bfd_und_section_ptr;
-      sym.st_shndx = SHN_UNDEF;
-      break;
-
     case bfd_link_hash_undefweak:
       input_sec = bfd_und_section_ptr;
       sym.st_shndx = SHN_UNDEF;
@@ -8219,7 +8215,8 @@ elf_bfd_discard_info (output_bfd, info)
 	}
 
       stab = strip ? NULL : bfd_get_section_by_name (abfd, ".stab");
-      if ((! stab || elf_section_data(stab)->sec_info_type != ELF_INFO_TYPE_STABS)
+      if ((! stab
+	   || elf_section_data(stab)->sec_info_type != ELF_INFO_TYPE_STABS)
 	  && ! eh
 	  && (strip || ! bed->elf_backend_discard_info))
 	continue;
@@ -8307,8 +8304,7 @@ elf_bfd_discard_info (output_bfd, info)
 	  cookie.relend = NULL;
 	  if (eh->reloc_count)
 	    cookie.rels = (NAME(_bfd_elf,link_read_relocs)
-			   (abfd, eh, (PTR) NULL,
-			    (Elf_Internal_Rela *) NULL,
+			   (abfd, eh, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 			    info->keep_memory));
 	  if (cookie.rels)
 	    {
@@ -8337,9 +8333,7 @@ elf_bfd_discard_info (output_bfd, info)
 	free (freesyms);
     }
 
-  if (ehdr
-      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd,
-						info, ehdr))
+  if (ehdr && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info, ehdr))
     ret = true;
   return ret;
 }
@@ -8348,6 +8342,8 @@ static boolean
 elf_section_ignore_discarded_relocs (sec)
      asection *sec;
 {
+  struct elf_backend_data *bed;
+
   switch (elf_section_data (sec)->sec_info_type)
     {
     case ELF_INFO_TYPE_STABS:
@@ -8356,10 +8352,10 @@ elf_section_ignore_discarded_relocs (sec)
     default:
       break;
     }
-  if ((get_elf_backend_data (sec->owner)->elf_backend_ignore_discarded_relocs
-       != NULL)
-      && (*get_elf_backend_data (sec->owner)
-	   ->elf_backend_ignore_discarded_relocs) (sec))
+
+  bed = get_elf_backend_data (sec->owner);
+  if (bed->elf_backend_ignore_discarded_relocs != NULL
+      && (*bed->elf_backend_ignore_discarded_relocs) (sec))
     return true;
 
   return false;
