@@ -77,12 +77,13 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define INNER_THAN <
 
-#define BREAKPOINT {0x7A, 0xFF}
+/*#define BREAKPOINT {0x7A, 0xFF}*/
+#define BREAKPOINT {0x01, 0x80}  /* Sleep */
 
 /* If your kernel resets the pc after the trap happens you may need to
-   define this before including this file.  */
+   define this before including this file.    */
 
-#define DECR_PC_AFTER_BREAK 2
+#define DECR_PC_AFTER_BREAK 0
 
 /* Nonzero if instruction at PC is a return instruction.  */
 /* Allow any of the return instructions, including a trapv and a return
@@ -254,4 +255,4 @@ typedef unsigned short INSN_WORD;
 #define GDB_TARGET_IS_H8300
 
 #define NUM_REALREGS 10
-#define NOP {0,0}
+#define NOP { 0x01, 0x80} /* A sleep insn */
