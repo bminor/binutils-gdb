@@ -1114,7 +1114,9 @@ s_ltorg (internal)
   symbol_table_insert (current_poolP);
 
   ARM_SET_THUMB (current_poolP, thumb_mode);
+#ifdef OBJ_COFF
   ARM_SET_INTERWORK (current_poolP, support_interwork);
+#endif
   
   while (lit_count < next_literal_pool_place)
     /* First output the expression in the instruction to the pool */
@@ -5070,13 +5072,13 @@ md_apply_fix3 (fixP, val, seg)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_ARM_IMMEDIATE:
-      newval = validate_immediate (value);
+      newval = (offsetT) validate_immediate (value);
       temp = md_chars_to_number (buf, INSN_SIZE);
 
       /* If the instruction will fail, see if we can fix things up by
 	 changing the opcode.  */
-      if (newval == FAIL
-	  && (newval = negate_data_op (&temp, value)) == FAIL)
+      if (newval == (offsetT) FAIL
+	  && (newval = negate_data_op (&temp, value)) == (offsetT) FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			"invalid constant after fixup\n");
@@ -6245,8 +6247,10 @@ arm_frob_label (sym)
 {
   last_label_seen = sym;
   ARM_SET_THUMB (sym, thumb_mode);
+#ifdef OBJ_COFF
   ARM_SET_INTERWORK (sym, support_interwork);
-
+#endif
+  
   if (label_is_thumb_function_name)
     {
       /* When the address of a Thumb function is taken the bottom
