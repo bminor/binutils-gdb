@@ -1,3 +1,7 @@
+Wed Sep 22 10:28:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-nindy.c: Declare ninMemGet and ninMemPut.
+
 Wed Sep 22 08:02:57 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  Add i386lynx-tdep to the right places.

@@ -132,6 +132,8 @@ extern FILE *instream;
 extern struct ext_format ext_format_i960;	/* i960-tdep.c */
 
 extern char ninStopWhy ();
+extern int ninMemGet ();
+extern int ninMemPut ();
 
 int nindy_initial_brk;	/* nonzero if want to send an initial BREAK to nindy */
 int nindy_old_protocol;	/* nonzero if want to use old protocol */
