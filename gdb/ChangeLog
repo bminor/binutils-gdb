@@ -1,5 +1,7 @@
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in: Update all dependencies.
+
 	* configure.in (CONFIG_INITS, CONFIG_LIB_OBS): Delete.
 	* configure: Re-generate.
 	* Makefile.in (INIT_FILES): Replace CONFIG_INITS with CONFIG_SRCS.
