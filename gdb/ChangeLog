@@ -1,3 +1,30 @@
+2000-08-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (m68hc11_register_names): Update name of registers.
+	(m68hc11_get_register_info): New function.
+	(m68hc11_initialize_register_info): New function to get addresses
+	of soft registers.
+	(m68hc11_which_soft_register): New function.
+	(m68hc11_fetch_pseudo_register, m68hc11_store_pseudo_register):
+	New functions to translate read/write of soft registers into a
+	memory read/write.
+	(m68hc11_guess_from_prologue): Initialize soft register addresses.
+	Use the soft register addresses to guess the prologue.
+	(m68hc11_gdbarch_init): Install the pseudo registers.
+
+	* m68hc11-tdep.c (m68hc11_register_name, m68hc11_breakpoint_from_pc,
+	m68hc11_saved_pc_after_call, m68hc11_frame_saved_pc,
+	m68hc11_frame_args_address, m68hc11_frame_locals_address,
+	m68hc11_guess_from_prologue, m68hc11_push_arguments,
+	m68hc11_call_dummy_address, m68hc11_call_dymmy_address,
+	m68hc11_register_virtual_type, m68hc11_store_struct_return,
+	m68hc11_store_return_value, m68hc11_extract_return_value,
+	m68hc11_use_struct_convention, m68hc11_return_value_on_stack,
+	m68hc11_extract_struct_value_address, m68hc11_push_return_address,
+	m68hc11_register_byte, m68hc11_register_raw_size,
+	m68hc11_gdbarch_init): New functions for multi-arch support.
+	(m68hc11_not_yet): Remove.
+
 Fri Aug 25 16:57:05 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* regcache.c (register_changed): New function.
