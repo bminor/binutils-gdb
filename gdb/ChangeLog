@@ -1,3 +1,10 @@
+Thu Jun 20 13:42:23 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in: Revise sol-thread.o test.
+	* configure: Regenerated.
+
+	* source.c (find_source_lines): Reassign size to result of read.
+
 start-sanitize-gdbtk
 Thu Jun 20 08:18:59 1996  Fred Fish  <fnf@cygnus.com>
 
