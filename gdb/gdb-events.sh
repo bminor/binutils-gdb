@@ -64,6 +64,7 @@ f:void:breakpoint_modify:int b:b
 f:void:tracepoint_create:int number:number
 f:void:tracepoint_delete:int number:number
 f:void:tracepoint_modify:int number:number
+f:void:architecture_changed:void
 #*:void:annotate_starting_hook:void
 #*:void:annotate_stopped_hook:void
 #*:void:annotate_signalled_hook:void

@@ -61,6 +61,7 @@
 #include "floatformat.h"
 
 #include "gdb_assert.h"
+#include "gdb-events.h"
 
 /* Static function declarations */
 
@@ -4733,6 +4734,7 @@ gdbarch_update_p (struct gdbarch_info info)
 				new_gdbarch->bfd_arch_info->printable_name);
 	  current_gdbarch = new_gdbarch;
 	  swapin_gdbarch_swap (new_gdbarch);
+	  architecture_changed_event ();
 	  return 1;
 	}
     }
@@ -4766,7 +4768,8 @@ gdbarch_update_p (struct gdbarch_info info)
      registered an interest in this architecture.  CURRENT_GDBARCH
      must be updated before these modules are called. */
   init_gdbarch_data (new_gdbarch);
-  
+  architecture_changed_event ();
+
   if (gdbarch_debug)
     gdbarch_dump (current_gdbarch, gdb_stdlog);
 

@@ -57,6 +57,7 @@ typedef void (gdb_events_breakpoint_modify_ftype) (int b);
 typedef void (gdb_events_tracepoint_create_ftype) (int number);
 typedef void (gdb_events_tracepoint_delete_ftype) (int number);
 typedef void (gdb_events_tracepoint_modify_ftype) (int number);
+typedef void (gdb_events_architecture_changed_ftype) (void);
 
 
 /* gdb-events: object. */
@@ -69,6 +70,7 @@ struct gdb_events
     gdb_events_tracepoint_create_ftype *tracepoint_create;
     gdb_events_tracepoint_delete_ftype *tracepoint_delete;
     gdb_events_tracepoint_modify_ftype *tracepoint_modify;
+    gdb_events_architecture_changed_ftype *architecture_changed;
   };
 
 
@@ -81,6 +83,7 @@ extern void breakpoint_modify_event (int b);
 extern void tracepoint_create_event (int number);
 extern void tracepoint_delete_event (int number);
 extern void tracepoint_modify_event (int number);
+extern void architecture_changed_event (void);
 
 
 /* When GDB_EVENTS are not being used, completly disable them. */
@@ -92,6 +95,7 @@ extern void tracepoint_modify_event (int number);
 #define tracepoint_create_event(number) 0
 #define tracepoint_delete_event(number) 0
 #define tracepoint_modify_event(number) 0
+#define architecture_changed_event() 0
 #endif
 
 /* Install custom gdb-events hooks. */

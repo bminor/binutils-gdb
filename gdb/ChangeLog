@@ -1,3 +1,12 @@
+2001-08-10  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Add architecture_changed event.
+	* gdbarch.sh: Include gdb-event.h.
+	(gdbarch_update_p): Notify UIs when architecture changes.
+	* gdb-events.h: Regenerated.
+	* gdb-events.c: Regenerated.
+	* gdbarch.c: Regenerated.
+
 2001-08-10  Michael Snyder  <msnyder@redhat.com>
 
 	* regcache.c (legacy_write_register_gen): Don't 'optimize out'
