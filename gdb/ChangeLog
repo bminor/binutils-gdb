@@ -1,3 +1,8 @@
+2004-03-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-tdep.c (thumb_get_next_pc): Handle BX.
+	(arm_get_next_pc): Handle BX and BLX.
+
 2004-03-07  Andrew Cagney  <cagney@redhat.com>
 
 	* hppa-tdep.c: Replace DEPRECATED_FP_REGNUM with HPPA_FP_REGNUM,
