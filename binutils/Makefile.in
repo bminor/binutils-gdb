@@ -70,14 +70,14 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=2.2
+VERSION=cygnus-2.3.1
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
 version=`./../gcc/gcc -dumpversion`
 
 # Where to find texinfo.tex to format docn with TeX
-TEXIDIR = $(srcdir)/../texinfo/fsf
+TEXIDIR = $(srcdir)/../texinfo
 
 MANPAGES= ar nm objdump ranlib size strings strip c++filt objcopy
 
@@ -105,7 +105,7 @@ NLMCONV_PROG=nlmconv
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
-DISTSTUFF=arparse.c arlex.c
+DISTSTUFF=arparse.c arlex.c nlmheader.c info
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -145,12 +145,12 @@ BFD = ../bfd/libbfd.a
 OPCODES = ../opcodes/libopcodes.a
 
 RUNTEST = runtest
-RUNTESTFLAGS = 
+RUNTEST_FLAGS = 
 FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS) \
+	"RUNTEST_FLAGS=$(RUNTEST_FLAGS) \
 	SIZE=`if [ -f $$rootme/$(SIZE_PROG) ] ; then echo $$rootme/$(SIZE_PROG) ; else echo $(SIZE_PROG); fi` \
 	OBJCOPY=`if [ -f $$rootme/$(OBJCOPY_PROG) ] ; then echo $$rootme/$(OBJCOPY_PROG) ; else echo $(OBJCOPY_PROG); fi` \
 	NM=`if [ -f $$rootme/$(NM_PROG) ] ; then echo $$rootme/$(NM_PROG) ; else echo $(NM_PROG); fi` \
@@ -186,22 +186,22 @@ info: binutils.info
 dvi: binutils.dvi
 
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRINGS_PROG): $(ADDL_LIBS) strings.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o demangle.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(NM_PROG) nm.o demangle.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o demangle.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(OBJDUMP_PROG): $(ADDL_LIBS) objdump.o $(BFD) $(OPCODES)
-	$(CC) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 objdump.o: objdump.c config.status
 	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(ARCHDEFS) $(CFLAGS) $(srcdir)/objdump.c
@@ -230,7 +230,7 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h demangle.o
 	$(CC) -c -DMAIN $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o version.o
-	$(CC) $(LDFLAGS)  -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
+	$(CC) $(CFLAGS) $(LDFLAGS)  -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
 
 arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -242,10 +242,10 @@ arlex.c: arlex.l
 	mv lex.yy.c arlex.c
 
 $(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
-	$(CC) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -255,14 +255,14 @@ $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
 # Alternatively, you can install ranlib.sh as ranlib.
 
 ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
 # objcopy and strip in one binary that uses argv[0] to decide its action.
 
 objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
-	$(CC) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
@@ -272,7 +272,7 @@ nlmheader.c: nlmheader.y
 	-mv y.tab.c nlmheader.c
 
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
-	$(CC) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This list of dependencies was generated by doing a make with gcc -MM
 # saving the output in a file and removing the gcc commands
@@ -355,7 +355,7 @@ de-stage3: force
 # DOCUMENTATION TARGETS
 # TeX output
 binutils.dvi: $(srcdir)/binutils.texi
-	$(TEXI2DVI) $(srcdir)/binutils.texi
+	TEXINPUTS=$(TEXIDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/binutils.texi
 
 # info file for online browsing
 binutils.info: $(srcdir)/binutils.texi
@@ -366,7 +366,7 @@ binutils.info: $(srcdir)/binutils.texi
 # If you want an index, see texi2roff doc for postprocessing 
 # and add -i to texi2roff invocations below.
 # Workarounds for texi2roff-2 (probably fixed in later texi2roff's, delete
-#    correspondint -e lines when later texi2roff's are current)
+#    corresponding -e lines when later texi2roff's are current)
 # + @ifinfo's deleted explicitly due to texi2roff-2 bug w nested constructs.
 # + @c's deleted explicitly because texi2roff sees texinfo commands in them
 # + @   (that's at-BLANK) not recognized by texi2roff, turned into blank
@@ -426,10 +426,17 @@ binutils.me: $(srcdir)/binutils.texi
 mostlyclean:
 	-rm -f *.o *~ \#* core binutils.?? binutils.???
 clean: mostlyclean
+	@if [ -d testsuite ] ; then \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) clean ; \
+	else true; fi
 	-rm -f $(PROGS) underscore.c
-distclean: clean
-	-rm -f Makefile config.status sysdep.h
-realclean: distclean
+distclean:
+	@if [ -d testsuite ] ; then \
+	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) distclean ; \
+	else true; fi
+	-rm -f Makefile config.status sysdep.h *.o *~ \#* core \
+		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
+realclean: clean distclean
 	-rm -f $(DISTSTUFF) TAGS
 
 etags tags: TAGS
@@ -446,15 +453,17 @@ install: all
 	done
 	-if [ -d $(tooldir) ]; then \
 	   if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	   for i in nm strings strip ar ranlib; do \
+	   for i in nm strip ar ranlib; do \
 	     rm -f $(tooldir)/bin/$$i; \
 	     ln $(bindir)/`t='$(program_transform_name)'; echo $$i | sed -e "" $$t` $(tooldir)/bin/$$i \
 	      || $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$i; \
 	   done; \
 	 else true; fi		
 
-install-info: info
-	for i in *.info* ; do \
+# Use binutils.info as the target so that VPATH will DTRT.
+# (Use "$<*" in case the output is multiple files, though.)
+install-info: binutils.info
+	for i in $<* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 

@@ -1,3 +1,7 @@
+Wed Nov 17 12:03:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in: Use CFLAGS as well as LDFLAGS when linking.
+
 Wed Nov 17 04:50:55 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* strings.1: Fix typo.
