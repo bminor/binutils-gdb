@@ -290,7 +290,7 @@ changequote([,])dnl
 # end-sanitize-tic80
 
 # start-sanitize-sky
-      txvu-*-*)		    fmt=elf bfd_gas=yes ;;
+      dvp-*-*)		    fmt=elf bfd_gas=yes ;;
 # end-sanitize-sky
 
       v850-*-*)		    fmt=elf bfd_gas=yes ;;

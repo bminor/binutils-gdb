@@ -1,17 +1,16 @@
+start-sanitize-sky
+Wed Jan 28 10:00:40 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in: Add dvp support.
+	* configure: Regenerate.
+	* config/tc-dvp.[ch]: New files.
+
+end-sanitize-sky
 Wed Jan 28 09:52:00 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (v850_insert_operand): Display instruction when
 	an error is encountered.
 
-start-sanitize-sky
-Tue Jan 27 14:13:37 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* config/tc-txvu.c (*): Update to use handle new arguments for
-	parse/insert/extract/print handlers.
-	({encode,decode}_fixup_reloc_type): New function.
-	(assemble_pke): Write out insn after parsing it.
-
-end-sanitize-sky
 Tue Jan 27 13:32:01 1998  Robert Lipe  <robertl@dgii.com>
 
 	* configure.in (i386-*-sco3.2v5*): Defaults to ELF now.
@@ -59,16 +58,6 @@ Tue Jan 27 05:32:05 1998  Richard Henderson  <rth@cygnus.com>
 	* config/obj-bout.h (S_IS_LOCAL): Likewise.
 	* config/obj-coff.h (S_IS_LOCAL): Likewise.
 
-start-sanitize-sky
-Mon Jan 26 16:29:49 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* config/tc-txvu.c: First pass at dma/pke/gpuif support.
-	(assemble_one_insn): Renamed from assemble_insn.
-	Initialize errmsg = NULL before calling parse fn.
-	Allow [] in suffix operand.
-	(fixups,fixup_count): Make static globals.
-
-end-sanitize-sky
 Mon Jan 26 13:07:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c: Detect if explicitly parallel instructions
@@ -83,18 +72,6 @@ Mon Jan 26 12:38:54 1998  Nick Clifton  <nickc@cygnus.com>
 	reads_from_src_reg().
 
 end-sanitize-m32rx
-start-sanitize-sky
-Fri Jan 23 18:41:18 1998  Doug Evans  <devans@canuck.cygnus.com>
-
-	* config/tc-txvu.c (assemble_insn): Initialize errmsg = NULL
-	before calling insert routine.	Delete test for !isalpha
-	after parsing mnemonic.  ASCII operand chars are case insensitive.
-
-Thu Jan 22 20:30:24 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* config/tc-txvu.c (assemble_insn): Commas moved to opcode table.
-
-end-sanitize-sky
 Thu Jan 22 17:51:44 1998  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-m32rx
@@ -201,21 +178,6 @@ Tue Jan  6 15:36:02 1998  Richard Henderson  <rth@cygnus.com>
 	* symbols.c (S_SET_SEGMENT): Don't set the segment for section syms.
 	(S_IS_EXTERNAL, S_IS_LOCAL): Correct parenthetication.
 
-start-sanitize-sky
-Tue Jan  6 13:10:20 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* config/tc-txvu.c (md_assemble): Handle no separator between
-	upper and lower insn #ifndef VERTICAL_BAR_SEPARATOR.
-	(assemble_insn): Likewise.
-
-Mon Jan  5 14:54:09 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* config/tc-txvu.c: #include dis-asm.h, opcode/txvu.h, elf/txvu.h.
-	(md_begin): Call txvu_opcode_init_tables.
-	(assemble_insn): New function.
-	(md_assemble): Beginnings of implementation.
-
-end-sanitize-sky
 Fri Jan  2 16:08:54 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Give an error if there are
@@ -225,14 +187,6 @@ Wed Dec 31 12:29:47 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_relax_table): Correct branch ranges.
 
-start-sanitize-sky
-Mon Dec 22 17:57:51 1997  Doug Evans  <devans@canuck.cygnus.com>
-
-	* configure.in: Add txvu support.
-	* configure: Regenerate.
-	* config/tc-txvu.[ch]: New files.
-
-end-sanitize-sky
 Mon Dec 22 13:06:05 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * configure.in (i386*-go32-rtems*): Fix to be the same as
