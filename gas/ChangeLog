@@ -1,3 +1,19 @@
+Mon Apr 10 15:57:42 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* doc/Makefile.in (Makefile): Fix rule for running config.status.
+	(internals.dvi, internals.ps, internals.ps4): New targets, not
+	built by default.
+
+	* doc/internals.texi: Add loud disclaimer.  Refill to 79 columns,
+	specify fill-column in local-variables section.  Change
+	subheadings to subsections so they can be cross-referenced.
+	Describe broken words, frags, frag chains, generic relaxation,
+	relax table, m68k relaxation, m68k addressing modes, test suite
+	code.  Add a few words about various file formats.
+
+	* doc/as.texinfo (m68k): Recommend using `%' with registers as the
+	normal case, instead of the exceptional case.
+
 start-sanitize-arc
 Thu Apr  6 20:00:11 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
