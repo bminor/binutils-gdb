@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Oct 22 22:34:49 PDT 1991, by rich@cygnus.com
+# Last Mod Tue Oct 22 22:40:07 PDT 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -36,15 +36,32 @@ BISON = `if [ -d $(unsubdir)/../bison ] ; \
 SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib
 OTHERS = 
 
+ALL = all.normal
+
 #### host and target specific makefile fragments come in here.
 ###
 
-all:
+all:	$(ALL)
+
+all.normal:
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
+
+# this is a bad hack.
+all.xclib:	all.normal
+	if [ -d clib ] ; then \
+		(cd clib ; $(MAKE)) ; \
+	fi
 
 subdir_do: force
 	for i in $(DODIRS); do \
-		if [ -d $(unsubdir)/$$i -o -d $(unsubdir)/$$i.$(target) ] ; then \
+		if [ -f $(unsubdir)/$$i/localenv -o -f $(unsubdir)/$$i.$(target)/localenv ] ; then \
+			if (cd $(unsubdir)/$$i`if [ -d $(unsubdir)/$$i.$(target) ] ; \
+				then echo .$(target) ; fi`$(subdir); \
+				$(MAKE) \
+					"against=$(against)" \
+					"BISON=$(BISON)" $(DO)) ; then true ; \
+				else exit 1 ; fi ; \
+		else if [ -d $(unsubdir)/$$i -o -d $(unsubdir)/$$i.$(target) ] ; then \
 			if (cd $(unsubdir)/$$i`if [ -d $(unsubdir)/$$i.$(target) ] ; \
 				then echo .$(target) ; fi`$(subdir); \
 				$(MAKE) \
@@ -58,7 +75,10 @@ subdir_do: force
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
+	fi ; \
 	done
+
+
 
 bootstrap:
 	$(MAKE) all
