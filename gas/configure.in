@@ -707,6 +707,10 @@ else
 fi
 AC_MSG_RESULT($cross_gas)
 
+# Look for win32 specific settings.
+CY_CYGWIN32
+CY_EXEEXT
+
 dnl ansidecl.h will deal with const
 dnl AC_CONST
 AC_FUNC_ALLOCA

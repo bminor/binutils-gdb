@@ -78,6 +78,7 @@ RPATH_ENVVAR = @RPATH_ENVVAR@
 CFLAGS = @CFLAGS@
 LDFLAGS =
 DEP = mkdep
+EXEEXT = @EXEEXT@
 
 MAKEOVERRIDES=
 
@@ -431,7 +432,7 @@ GASPOBJS = \
 	sb.o \
 	hash.o
 
-all: .gdbinit as.new gasp.new
+all: .gdbinit as.new$(EXEEXT) gasp.new$(EXEEXT)
 	@cd doc; $(MAKE) $(FLAGS_TO_PASS) all
 
 dvi info install-info clean-info:
@@ -477,8 +478,8 @@ STAGESTUFF = *.o as.new gasp.new
 
 $(OBJS): @ALL_OBJ_DEPS@
 
-as.new: $(OBJS) $(LIBDEPS)
-	$(HLDENV) $(CC) $(HLDFLAGS) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
+as.new$(EXEEXT): $(OBJS) $(LIBDEPS)
+	$(HLDENV) $(CC) $(HLDFLAGS) $(ALL_CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) $(LOADLIBES)
 
 # Stuff that every object file depends upon.  If anything is removed
 # from this list, remove it from dep-in.sed as well.
@@ -486,8 +487,8 @@ $(OBJS): config.h as.h $(TARG_ENV_H) $(OBJ_FORMAT_H) $(TARG_CPU_H) flonum.h \
 	expr.h struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h \
 	obj.h listing.h bignum.h bit_fix.h $(INCDIR)/libiberty.h
 
-gasp.new: $(GASPOBJS) ../libiberty/libiberty.a
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) ../libiberty/libiberty.a $(LOADLIBES)
+gasp.new$(EXEEXT): $(GASPOBJS) ../libiberty/libiberty.a
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o $@ $(GASPOBJS) ../libiberty/libiberty.a $(LOADLIBES)
 
 installcheck:
 	@echo No installcheck target is available yet for the GNU assembler.
@@ -684,15 +685,15 @@ maintainer-clean realclean: clean-here
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
-install: as.new gasp.new installdirs
+install: as.new$(EXEEXT) gasp.new$(EXEEXT) installdirs
 	n=`echo as | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) as.new $(bindir)/$$n; \
+	$(INSTALL_PROGRAM) as.new$(EXEEXT) $(bindir)/$$n$(EXEEXT); \
 	$(INSTALL_DATA) $(srcdir)/doc/as.1 $(man1dir)/$$n.1; \
-	rm -f $(tooldir)/bin/as; \
-	ln $(bindir)/$$n $(tooldir)/bin/as >/dev/null 2>/dev/null \
-	 || $(INSTALL_PROGRAM) as.new $(tooldir)/bin/as
+	rm -f $(tooldir)/bin/as$(EXEEXT); \
+	ln $(bindir)/$$n $(tooldir)/bin/as$(EXEEXT) >/dev/null 2>/dev/null \
+	 || $(INSTALL_PROGRAM) as.new$(EXEEXT) $(tooldir)/bin/as$(EXEEXT)
 	n=`echo gasp | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) gasp.new $(bindir)/$$n
+	$(INSTALL_PROGRAM) gasp.new$(EXEEXT) $(bindir)/$$n$(EXEEXT)
 
 installdirs:
 	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir) $(man1dir) $(tooldir)/bin
