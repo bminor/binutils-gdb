@@ -1080,11 +1080,13 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       h8300hmode = 0;
       break;
     case bfd_mach_h8300h:
+    case bfd_mach_h8300hn:
       h8300sxmode = 0;
       h8300smode = 0;
       h8300hmode = 1;
       break;
     case bfd_mach_h8300s:
+    case bfd_mach_h8300sn:
       h8300sxmode = 0;
       h8300smode = 1;
       h8300hmode = 1;

@@ -1,3 +1,7 @@
+2003-06-04  Michael Snyder  <msnyder@redhat.com>
+
+	* h8300-tdep.c (h8300_gdbarch_init): Add h8300hn, h8300sn.
+
 2003-06-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (struct comp_unit): Add member `dbase'.
