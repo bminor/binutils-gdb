@@ -1,3 +1,9 @@
+Fri Sep 30 06:42:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/nm-lynx.h (PTRACE_ARG3_TYPE): Define to int, not char *.
+
+	* lynx-nat.c (child_wait): Pass fourth argument to ptrace.
+
 Thu Sep 29 08:22:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* xcoffread.c (read_xcoff_symtab): Fix comment for yesterday's change.

@@ -649,7 +649,7 @@ child_wait (pid, ourstatus)
 	{
 	  int realsig;
 
-	  realsig = ptrace (PTRACE_GETTRACESIG, pid, 0);
+	  realsig = ptrace (PTRACE_GETTRACESIG, pid, (PTRACE_ARG3_TYPE)0, 0);
 
 	  if (realsig == SIGNEWTHREAD)
 	    {
