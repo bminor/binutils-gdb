@@ -1205,20 +1205,20 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
 {
   N_ ("Export Directory [.edata (or where ever we found it)]"),
   N_ ("Import Directory [parts of .idata]"),
-  _("Resource Directory [.rsrc]"),
-  _("Exception Directory [.pdata]"),
-  _("Security Directory"),
-  _("Base Relocation Directory [.reloc]"),
-  _("Debug Directory"),
-  _("Description Directory"),
-  _("Special Directory"),
-  _("Thread Storage Directory [.tls]"),
-  _("Load Configuration Directory"),
-  _("Bound Import Directory"),
-  _("Import Address Table Directory"),
-  _("Reserved"),
-  _("Reserved"),
-  _("Reserved")
+  N_ ("Resource Directory [.rsrc]"),
+  N_ ("Exception Directory [.pdata]"),
+  N_ ("Security Directory"),
+  N_ ("Base Relocation Directory [.reloc]"),
+  N_ ("Debug Directory"),
+  N_ ("Description Directory"),
+  N_ ("Special Directory"),
+  N_ ("Thread Storage Directory [.tls]"),
+  N_ ("Load Configuration Directory"),
+  N_ ("Bound Import Directory"),
+  N_ ("Import Address Table Directory"),
+  N_ ("Reserved"),
+  N_ ("Reserved"),
+  N_ ("Reserved")
 };
 
 /**********************************************************************/

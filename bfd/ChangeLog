@@ -1,3 +1,7 @@
+Thu Apr 23 08:13:04 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* peicode.h (dir_names): Add missing N_() macros to dir_names array.
+
 Wed Apr 22 13:06:15 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (MKINSTALLDIRS): Don't look in $(top_srcdir).
