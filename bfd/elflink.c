@@ -2534,3 +2534,52 @@ _bfd_elf_dynamic_symbol_p (h, info, ignore_protected)
      us that it remains local.  */
   return !binding_stays_local_p;
 }
+
+/* Return true if the symbol referred to by H should be considered
+   to resolve local to the current module, and false otherwise.  Differs
+   from (the inverse of) _bfd_elf_dynamic_symbol_p in the treatment of
+   undefined symbols and weak symbols.  */
+
+bfd_boolean
+_bfd_elf_symbol_refs_local_p (h, info, local_protected)
+     struct elf_link_hash_entry *h;
+     struct bfd_link_info *info;
+     bfd_boolean local_protected;
+{
+  /* If it's a local sym, of course we resolve locally.  */
+  if (h == NULL)
+    return TRUE;
+
+  /* If we don't have a definition in a regular file, then we can't
+     resolve locally.  The sym is either undefined or dynamic.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    return FALSE;
+
+  /* Forced local symbols resolve locally.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)
+    return TRUE;
+
+  /* As do non-dynamic symbols.  */
+  if (h->dynindx == -1)
+    return TRUE;
+
+  /* At this point, we know the symbol is defined and dynamic.  In an
+     executable it must resolve locally, likewise when building symbolic
+     shared libraries.  */
+  if (info->executable || info->symbolic)
+    return TRUE;
+
+  /* Now deal with defined dynamic symbols in shared libraries.  Ones
+     with default visibility might not resolve locally.  */
+  if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+    return FALSE;
+
+  /* However, STV_HIDDEN or STV_INTERNAL ones must be local.  */
+  if (ELF_ST_VISIBILITY (h->other) != STV_PROTECTED)
+    return TRUE;
+
+  /* Function pointer equality tests may require that STV_PROTECTED
+     symbols be treated as dynamic symbols, even when we know that the
+     dynamic linker will resolve them locally.  */
+  return local_protected;
+}

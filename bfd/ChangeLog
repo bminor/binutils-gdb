@@ -1,3 +1,14 @@
+2003-07-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL, SYMBOL_CALLS_LOCAL): Use..
+	(_bfd_elf_symbol_refs_local_p): ..this.  Declare.
+	* elflink.c (_bfd_elf_symbol_refs_local_p): New function.
+	* elf32-i386.c (elf_i386_relocate_section): Remove h NULL test
+	now done in _bfd_elf_symbol_refs_local_p.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+
 2003-07-18  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_dynamic_symbol_p): Undo the last change.

@@ -5175,9 +5175,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_REL14_BRNTAKEN:
 	  /* If these relocations are not to a named symbol, they can be
 	     handled right here, no need to bother the dynamic linker.  */
-	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	      || SYMBOL_REFERENCES_LOCAL (info, h))
+	  if (SYMBOL_REFERENCES_LOCAL (info, h)
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
 	  /* fall through */
 
@@ -5207,8 +5206,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
-		   || (h != NULL
-		       && !SYMBOL_CALLS_LOCAL (info, h))))
+		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && (input_section->flags & SEC_ALLOC) != 0
@@ -5263,8 +5261,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (h != NULL
-		       && !SYMBOL_REFERENCES_LOCAL (info, h))
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, h))
 		{
 		  unresolved_reloc = FALSE;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);

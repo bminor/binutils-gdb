@@ -8159,8 +8159,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
-		   || (h != NULL
-		       && !SYMBOL_CALLS_LOCAL (info, h))))
+		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
@@ -8206,8 +8205,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (h != NULL
-		       && !SYMBOL_REFERENCES_LOCAL (info, h)
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
 		       && !is_opd
 		       && r_type != R_PPC64_TOC)
 		outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
@@ -8758,7 +8756,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 					s->_raw_size))
 	return FALSE;
     }
-  
+
   return TRUE;
 }
 

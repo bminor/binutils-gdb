@@ -2015,8 +2015,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	       && ((r_type != R_X86_64_PC8
 		    && r_type != R_X86_64_PC16
 		    && r_type != R_X86_64_PC32)
-		   || (h != NULL
-		       && !SYMBOL_CALLS_LOCAL (info, h))))
+		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
