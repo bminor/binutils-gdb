@@ -1,3 +1,10 @@
+2000-12-31  H.J. Lu  <hjl@gnu.org>
+
+	* listing.c (listing_message): Allocate string only if it is
+	used.
+
+	* configure: Rebuild.
+
 2000-12-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* doc/internals.texi (Relaxing with a table) <after relaxation>:

@@ -226,12 +226,12 @@ listing_message (name, message)
      const char *name;
      const char *message;
 {
-  unsigned int l = strlen (name) + strlen (message) + 1;
-  char *n = (char *) xmalloc (l);
-  strcpy (n, name);
-  strcat (n, message);
   if (listing_tail != (list_info_type *) NULL)
     {
+      unsigned int l = strlen (name) + strlen (message) + 1;
+      char *n = (char *) xmalloc (l);
+      strcpy (n, name);
+      strcat (n, message);
       listing_tail->message = n;
     }
 }
