@@ -1017,7 +1017,7 @@ ETC_SUPPORT= Makefile.in cfg-paper.texi configure.in configure.man \
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
 # Directories that might want `make diststuff' run.
-DISTSTUFFDIRS= ld gprof gdb libg++ binutils gnats
+DISTSTUFFDIRS= ld gprof gdb libg++ binutils gnats gas
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
 # Directories where "info" should be built.
@@ -1136,6 +1136,14 @@ GDB_SUPPORT_DIRS= bfd glob include libiberty mmalloc opcodes readline sim
 gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
 	$(MAKE) -f Makefile.in taz TOOL=gdb \
 		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"
+
+.PHONY: newlib.tar.gz
+NEWLIB_SUPPORT_DIRS=
+newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
+	$(MAKE) -f Makefile.in taz TOOL=newlib \
+		SUPPORT_FILES="$(NEWLIB_SUPPORT_DIRS)" \
+		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" \
+		DISTDOCDIRS="$(DISTDOCDIRS) newlib"
 
 .NOEXPORT:
 MAKEOVERRIDES=
