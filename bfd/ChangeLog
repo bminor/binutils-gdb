@@ -1,12 +1,6 @@
-Fri Oct 31 15:50:57 1997  Richard Henderson  <rth@cygnus.com>
+Tue Nov  4 12:05:56 1997  Klaus K"ampf  <kkaempf@progis.de>
 
-	* elf32-sparc.c (elf32_sparc_relocate_section): Give a helpful error
-	message instead of merely aborting.
-	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
-
-	* elf64-sparc.c (sparc64_elf_check_relocs): Use SEC_ALLOC to control
-	whether we output dynamic relocs instead of SEC_DEBUGGING.
-	(sparc64_elf_relocate_section): Likewise.
+	* configure.com: Get version info from configure.in
 
 Fri Oct 24 11:15:58 1997  Jakub Jelinek  <jj@sunsite.mff.cuni.cz>
 
