@@ -69,8 +69,10 @@ native_only="autoconf cvs emacs fileutils find grep groff gzip hello indent
 cross_only="xiberty newlib"
 
 ## All tools belong in one of the four categories, and are assigned above
+## We assign ${configdirs} this way to remove all embedded newlines.  This
+## is important because configure will choke if they ever get through.
 #
-configdirs="${host_libs} ${host_tools} ${target_libs} ${target_tools}"
+configdirs=`echo ${host_libs} ${host_tools} ${target_libs} ${target_tools}`
 
 ################################################################################
 
@@ -125,7 +127,7 @@ case ${with_x} in
   yes | "")  # the default value for this tree is that X11 is available
 	;;
   no)
-    	configdirs=`echo ${configdirs} | sed -e 's/tk//;/gash//'`
+    	configdirs=`echo " ${configdirs} " | sed -e 's/ tk / /;/ gash / /'`
 	;;
   *)
     	echo "*** bad value \"${with_x}\" for -with-x flag; ignored" 1>&2
@@ -143,13 +145,13 @@ if [ x"${host}" = x"${target}" ] ; then
 	# when doing a native toolchain, don't build the targets
 	# that are in the 'cross only' list
 	for i in ${cross_only} ; do
-	  configdirs=`echo ${configdirs} | sed -e "s/$i//"`
+	  configdirs=`echo " ${configdirs} " | sed -e "s/ $i / /"`
 	done
 else
 	# similarly, don't build the targets in the 'native only' 
 	# list when building a cross compiler
 	for i in ${native_only} ; do
-	  configdirs=`echo ${configdirs} | sed -e "s/$i//"`
+	  configdirs=`echo " ${configdirs} " | sed -e "s/ $i / /"`
 	done
 fi	
 
@@ -263,7 +265,7 @@ esac
 notsupp=""
 for dir in . $noconfigdirs ; do
   if [ $dir != . ] && echo "# ${configdirs} #" | grep "${dir} " >/dev/null 2>&1 ; then
-    configdirs=`echo $configdirs | sed -e "s/${dir} / /"`
+    configdirs=`echo " ${configdirs} " | sed -e "s/ ${dir} / /"`
     if [ -r $srcdir/$dir/configure ] || [ -r $srcdir/$dir/configure.in ]; then
       notsupp="$notsupp $dir"
     fi

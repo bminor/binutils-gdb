@@ -1,3 +1,9 @@
+Fri Feb 18 12:50:15 1994  Doug Evans  (dje@cygnus.com)
+
+	* configure.in: Remove embedded newlines from configdirs.
+	Avoid mismatches of substrings.  Fix matching strings at end
+	of configdirs.
+
 Fri Feb 11 15:33:33 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* config.guess:  Add Lynx/rs6000 config support.
