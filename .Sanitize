@@ -34,6 +34,7 @@ binutils
 clib
 config
 config.sub
+configdos.bat
 configure
 configure.in
 cvs
