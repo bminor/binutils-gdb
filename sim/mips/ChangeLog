@@ -1,3 +1,24 @@
+Wed Nov 25 17:33:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (vr4100): Only include vr4100 instructions in
+ 	simulator.
+	* configure: Re-generate.
+	* m16.igen (*): Tag all mips16 instructions as also being vr4100.
+
+Mon Nov 23 18:20:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SIM_CFLAGS): Do not define WITH_IGEN.
+	* sim-main.h, sim-main.c, interp.c: Delete #if WITH_IGEN keeping
+ 	true alternative.
+
+	* configure.in (sim_default_gen, sim_use_gen): Replace with
+ 	sim_gen.
+	(--enable-sim-igen): Delete config option. Always using IGEN.
+	* configure: Re-generate.
+	
+	* Makefile.in (gencode): Kill, kill, kill.
+	* gencode.c: Ditto.
+	
 Mon Nov 23 18:07:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: Configure mips64vr4100-elf nee mips64vr41* as a 64
