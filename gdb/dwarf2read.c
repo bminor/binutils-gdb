@@ -52,6 +52,10 @@
 #include "gdb_assert.h"
 #include <sys/types.h>
 
+/* Loaded secondary compilation units are kept in memory until they have not
+   been referenced for the processing of this many compilation units.  */
+#define MAX_CACHE_AGE 20
+
 #ifndef DWARF2_REG_TO_REGNUM
 #define DWARF2_REG_TO_REGNUM(REG) (REG)
 #endif
@@ -274,6 +278,9 @@ struct dwarf2_cu
 
   /* Backchain to our per_cu entry if the tree has been built.  */
   struct dwarf2_per_cu_data *per_cu;
+
+  /* How many compilation units ago was this CU last referenced?  */
+  int last_used;
 };
 
 static const struct objfile_data *dwarf2_cu_tree;
@@ -970,7 +977,11 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
   (unsigned long offset, struct dwarf2_cu *cu);
 
-static void clear_per_cu_pointer (void *data);
+static void clear_per_cu_pointer (void *);
+
+static void free_cached_comp_units (void *);
+
+static void free_one_cached_comp_unit (struct dwarf2_cu *, struct dwarf2_cu *);
 
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
@@ -1270,6 +1281,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   struct cleanup *back_to;
   CORE_ADDR lowpc, highpc, baseaddr;
   splay_tree cu_tree = NULL;
+  struct dwarf2_cu cu;
 
   info_ptr = dwarf_info_buffer;
 
@@ -1304,6 +1316,13 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
+  /* read_in_chain, unlike every other field in the dwarf2_cu object,
+     is live across the loop.  The function clear_per_cu_pointer will
+     free any allocated compilation units that have not been used in
+     several psymtabs.  Others will remain on the list.  */
+  cu.read_in_chain = NULL;
+  make_cleanup (free_cached_comp_units, &cu);
+
   /* Since the objects we're extracting from dwarf_info_buffer vary in
      length, only the individual functions to extract them (like
      read_comp_unit_head and load_partial_die) can really know whether
@@ -1320,7 +1339,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
       struct cleanup *back_to_inner;
-      struct dwarf2_cu cu;
       struct abbrev_info *abbrev;
       unsigned int bytes_read;
       struct dwarf2_per_cu_data *this_cu;
@@ -1390,6 +1408,14 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	  node = splay_tree_lookup (cu_tree, cu.header.offset);
 	  gdb_assert (node != NULL);
 	  per_cu = (struct dwarf2_per_cu_data *) node->value;
+
+	  /* If we were already read in, free ourselves to read in again.
+	     Yes, this is pointless duplication.  Fixing this will provide
+	     a nice speed boost but require a lot of editing in this
+	     function.  */
+	  if (per_cu->cu != NULL)
+	    free_one_cached_comp_unit (&cu, per_cu->cu);
+
 	  cu.per_cu = per_cu;
 
 	  /* Note that this is a pointer to our stack frame.  It will
@@ -1401,7 +1427,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	cu.per_cu = NULL;
 
       make_cleanup (clear_per_cu_pointer, &cu);
-      cu.read_in_chain = NULL;
 
       /* Check if comp unit has_children.
          If so, read the rest of the partial symbols from this comp unit.
@@ -5064,6 +5089,7 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu,
       cu->read_in_chain = per_cu;
     }
 
+  per_cu->cu->last_used = 0;
   *target_cu = per_cu->cu;
   return find_partial_die_in_comp_unit (offset, per_cu->cu);
 }
@@ -8765,31 +8791,66 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
 }
 
 static void
-clear_per_cu_pointer (void *data)
+free_comp_units_worker (struct dwarf2_cu *cu, int aging,
+			struct dwarf2_cu *target_cu)
 {
-  struct dwarf2_per_cu_data *this_cu, *per_cu;
-  struct dwarf2_cu *cu = data;
+  struct dwarf2_per_cu_data *this_cu, *per_cu, **last_chain;
 
   this_cu = cu->per_cu;
-  if (this_cu == NULL)
+  if (this_cu == NULL && target_cu == NULL)
     return;
 
-  per_cu = this_cu->cu->read_in_chain;
+  per_cu = cu->read_in_chain;
+  last_chain = &cu->read_in_chain;
   while (per_cu != NULL)
     {
       struct dwarf2_per_cu_data *next_cu;
 
-      obstack_free (&per_cu->cu->partial_die_obstack, NULL);
-
       next_cu = per_cu->cu->read_in_chain;
-      xfree (per_cu->cu);
-      per_cu->cu = NULL;
+
+      if ((aging && per_cu->cu->last_used < MAX_CACHE_AGE)
+	  || (target_cu && per_cu->cu == target_cu)
+	  || (!aging && target_cu == NULL))
+	{
+	  obstack_free (&per_cu->cu->partial_die_obstack, NULL);
+	  xfree (per_cu->cu);
+	  per_cu->cu = NULL;
+	  *last_chain = next_cu;
+	}
+      else
+	{
+	  per_cu->cu->last_used++;
+	  last_chain = &per_cu->cu->read_in_chain;
+	}
+
       per_cu = next_cu;
     }
 
   /* This compilation unit is on the stack in dwarf2_build_psymtabs_hard,
-     so we should not xfree it.  */
-  this_cu->cu = NULL;
+     so we should not xfree it.  Just unlink it.  */
+  if (target_cu == NULL)
+    {
+      cu->per_cu = NULL;
+      this_cu->cu = NULL;
+    }
+}
+
+static void
+clear_per_cu_pointer (void *data)
+{
+  free_comp_units_worker (data, 1, NULL);
+}
+
+static void
+free_cached_comp_units (void *data)
+{
+  free_comp_units_worker (data, 0, NULL);
+}
+
+static void
+free_one_cached_comp_unit (struct dwarf2_cu *cu, struct dwarf2_cu *target_cu)
+{
+  free_comp_units_worker (cu, 0, target_cu);
 }
 
 void _initialize_dwarf2_read (void);

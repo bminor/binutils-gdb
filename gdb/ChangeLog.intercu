@@ -1,5 +1,18 @@
 2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (MAX_CACHE_AGE): Define.
+	(struct dwarf2_cu): Add last_used counter.
+	(free_comp_units_worker): New function, based on
+	clear_per_cu_pointer.  Support aging.
+	(clear_per_cu_pointer): Use it.
+	(free_cached_comp_units, free_one_cached_comp_unit): New functions.
+	(dwarf2_build_psymtabs_hard): Keep read_in_chain across iterations.
+	Free all cached comp units after building psymtabs.  Free any cached
+	copy of a comp unit before building a psymtab for it.
+	(find_partial_die): Clear the last_used counter.
+
+2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (partial_die_full_name): Always return NULL or
 	malloc'd memory.  Don't try to free real_parent->full_name.
 
