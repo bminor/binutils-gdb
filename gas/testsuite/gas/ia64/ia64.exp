@@ -45,4 +45,5 @@ if [istarget "ia64-*"] then {
     run_dump_test "real"
     run_dump_test "align"
     run_dump_test "order"
+    run_dump_test "global"
 }

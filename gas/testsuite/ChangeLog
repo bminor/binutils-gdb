@@ -1,3 +1,10 @@
+2003-05-01  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/ia64.exp: Add "global".
+
+	* gas/ia64/global.d: New file.
+	* gas/ia64/global.s: Likewise.
+
 2003-04-30  H.J. Lu <hjl@gnu.org>
 
 	* gas/ia64/ia64.exp: Add order.
