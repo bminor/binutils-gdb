@@ -1,3 +1,13 @@
+start-sanitize-sky
+Fri Sep 18 16:23:32 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (gif_opcodes): Support EOP on gifimage.
+
+end-sanitize-sky
+Tue Sep 15 15:14:45 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-opc.h,m32r-opc.c: Add bbpc,bbpsw support.
+
 start-sanitize-nortel-ppc750
 1998-09-09  Michael Meissner  <meissner@cygnus.com>
 
