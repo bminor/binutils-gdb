@@ -36,6 +36,9 @@
 
 2001-11-07  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.c++/templates.exp: Replace "void \\*" with "void ?\\*",
+	making the whitespace optional.  Argument for "new" may be
+	"unsigned" as well as "unsigned int/long".
 	* gdb.c++/templates.exp: Replace "const &" with "const ?&", 
 	making the whitespace optional.  Also replace "(void) with
 	"((void|)), making the keyword "void" optional.
