@@ -65,7 +65,7 @@ tramp_frame_this_id (struct frame_info *next_frame,
 {
   struct trad_frame_cache *trad_cache
     = tramp_frame_cache (next_frame, this_cache);
-  (*this_id) = trad_cache->this_id;
+  trad_frame_get_id (trad_cache, this_id);
 }
 
 static void
@@ -79,8 +79,8 @@ tramp_frame_prev_register (struct frame_info *next_frame,
 {
   struct trad_frame_cache *trad_cache
     = tramp_frame_cache (next_frame, this_cache);
-  trad_frame_prev_register (next_frame, trad_cache->prev_regs, prev_regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  trad_frame_get_register (trad_cache, next_frame, prev_regnum, optimizedp,
+			   lvalp, addrp, realnump, valuep);
 }
 
 static CORE_ADDR

@@ -111,10 +111,7 @@ frame_base_set_default (struct gdbarch *gdbarch,
 }
 
 const struct frame_base *
-frame_base_find_by_frame (struct frame_info *next_frame,
-			  void **this_base_cache,
-			  const struct frame_unwind *unwinder,
-			  void **this_prologue_cache)
+frame_base_find_by_frame (struct frame_info *next_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct frame_base_table *table = gdbarch_data (gdbarch, frame_base_data);

@@ -1,5 +1,15 @@
 2004-03-21  Andrew Cagney  <cagney@redhat.com>
 
+	* tramp-frame.h, tramp-frame.h: New files.
+	* Makefile.in (SFILES, tramp_frame_h, COMMON_OBS, tramp-frame.o):
+	Update rules to include "tramp-frame.h" and "tramp-frame.c".
+
+	* Makefile.in (ppcnbsd-tdep.o): Update dependencies.
+	* ppcnbsd-tdep.c: Include "tramp-frame.h" and "trad-frame.h".
+	(ppcnbsd_sigtramp_cache_init, ppcnbsd_sigtramp): Handle signal
+	trampoline.
+	(ppcnbsd_init_abi): Call tramp_frame_append with ppcnbsd_sigtramp.
+	
 	* infrun.c (handle_inferior_event): For non legacy frames, use the
 	frame ID and frame type to identify a signal trampoline.  Update
 	comments.

@@ -26,14 +26,22 @@
 
 struct frame_info;
 
-struct trad_frame_cache
-{
-  CORE_ADDR this_base;
-  struct trad_frame_saved_reg *prev_regs;
-  struct frame_id this_id;
-};
+struct trad_frame_cache;
 
 struct trad_frame_cache *trad_frame_cache_zalloc (struct frame_info *next_frame);
+
+void trad_frame_set_id (struct trad_frame_cache *this_trad_cache,
+			     struct frame_id this_id);
+void trad_frame_get_id (struct trad_frame_cache *this_trad_cache,
+			struct frame_id *this_id);
+
+void trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
+			      int regnum, CORE_ADDR addr);
+void trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
+			      struct frame_info *next_frame,
+			      int regnum, int *optimizedp,
+			      enum lval_type *lvalp, CORE_ADDR *addrp,
+			      int *realregp, void *bufferp);
 
 /* A traditional saved regs table, indexed by REGNUM, encoding where
    the value of REGNUM for the previous frame can be found in this

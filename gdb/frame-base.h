@@ -29,18 +29,6 @@ struct frame_base;
 struct gdbarch;
 struct regcache;
 
-/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
-   the PC and attributes) and if SELF is the applicable frame-base
-   handler return non-zero.  Optionally also initialize
-   THIS_BASE_CACHE.
-
-   If THIS frame's unwinder is the same as frame-base.unwind, THIS
-   frame's prologue-cache will be passed as THIS_BASE_CACHE.  */
-
-typedef int (frame_base_sniffer) (const struct frame_base *self,
-				  struct frame_info *next_frame,
-				  void **this_base_cache);
-
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    and that this is a `normal frame'; use the NEXT frame, and its
    register unwind method, to determine the address of THIS frame's
@@ -52,10 +40,7 @@ typedef int (frame_base_sniffer) (const struct frame_base *self,
 
    A typical implmentation will return the same value for base,
    locals-base and args-base.  That value, however, will likely be
-   different to the frame ID's stack address.
-
-   If THIS frame's unwinder is the same as frame-base.unwind, THIS
-   frame's prologue-cache will be passed as THIS_BASE_CACHE.  */
+   different to the frame ID's stack address.  */
 
 /* A generic base address.  */
 
@@ -80,8 +65,6 @@ struct frame_base
   frame_this_base_ftype *this_base;
   frame_this_locals_ftype *this_locals;
   frame_this_args_ftype *this_args;
-  const struct frame_data *base_data;
-  frame_base_sniffer *sniffer;
 };
 
 /* Given the NEXT frame, return the frame base methods for THIS frame,
@@ -95,12 +78,6 @@ typedef const struct frame_base *(frame_base_sniffer_ftype) (struct frame_info *
 extern void frame_base_append_sniffer (struct gdbarch *gdbarch,
 				       frame_base_sniffer_ftype *sniffer);
 
-/* Register a frame base, appending it to the list that need to be
-   searched.  */
-extern void frame_base_register_base (struct gdbarch *gdbarch,
-				      const struct frame_base *base);
-
-
 /* Set the default frame base.  If all else fails, this one is
    returned.  If this isn't set, the default is to use legacy code
    that uses things like the frame ID's base (ulgh!).  */
@@ -111,9 +88,6 @@ extern void frame_base_set_default (struct gdbarch *gdbarch,
 /* Iterate through the list of frame base handlers until one returns
    an implementation.  */
 
-extern const struct frame_base *frame_base_find_by_frame (struct frame_info *next_frame,
-							  void **this_base_cache,
-							  const struct frame_unwind *unwinder,
-							  void **this_prologue_cache);
+extern const struct frame_base *frame_base_find_by_frame (struct frame_info *next_frame);
 
 #endif

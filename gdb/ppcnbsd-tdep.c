@@ -235,32 +235,33 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
+  CORE_ADDR base;
   CORE_ADDR offset;
   int i;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  this_cache->this_base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
-  offset = this_cache->this_base + 0x18 + 2 * tdep->wordsize;
+  base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  offset = base + 0x18 + 2 * tdep->wordsize;
   for (i = 0; i < 32; i++)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
-      this_cache->prev_regs[regnum].addr = offset;
+      trad_frame_set_reg_addr (this_cache, regnum, offset);
       offset += tdep->wordsize;
     }
-  this_cache->prev_regs[tdep->ppc_lr_regnum].addr = offset;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_lr_regnum, offset);
   offset += tdep->wordsize;
-  this_cache->prev_regs[tdep->ppc_cr_regnum].addr = offset;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_cr_regnum, offset);
   offset += tdep->wordsize;
-  this_cache->prev_regs[tdep->ppc_xer_regnum].addr = offset;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_xer_regnum, offset);
   offset += tdep->wordsize;
-  this_cache->prev_regs[tdep->ppc_ctr_regnum].addr = offset;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum, offset);
   offset += tdep->wordsize;
-  this_cache->prev_regs[PC_REGNUM].addr = offset; /* SRR0? */
+  trad_frame_set_reg_addr (this_cache, PC_REGNUM, offset); /* SRR0? */
   offset += tdep->wordsize;
 
   /* Construct the frame ID using the function start.  */
-  this_cache->this_id = frame_id_build (this_cache->this_base, func);
+  trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
 /* Given the NEXT frame, examine the instructions at and around this
