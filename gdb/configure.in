@@ -181,7 +181,7 @@ sh-*-*)			gdb_target=sh ;;
 
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
-hppa*-*-hiux*)		gdb_target=hppahiux ;;
+hppa*-*-hiux*)		gdb_target=hppahpux ;;
 
 i[34]86-sequent-*)	gdb_target=symmetry ;;
 i[34]86-ncr-*)		gdb_target=ncr3000 ;;
