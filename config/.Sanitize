@@ -59,6 +59,12 @@ mh-sysv
 mh-sysv4
 mh-vaxult2
 mt-v810
+mt-x86pic
+mt-papic
+mt-sparcpic
+mh-papic
+mh-x86pic
+mh-sparcpic
 
 Things-to-lose:
 

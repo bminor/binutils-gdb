@@ -153,6 +153,30 @@ case "${host}" in
   ;;
 esac
 
+# We default to --with-shared on platforms where -fpic is meaningless.
+# Well, we don't yet, but we will.
+if false && [ "${host}" = "${target}" ] && [ x${enable_shared} = x ]; then
+  case "${target}" in
+    alpha-dec-osf*)	enable_shared=yes ;;
+    mips-sgi-irix5*)	enable_shared=yes ;;
+    *)			enable_shared=no ;;
+  esac
+fi
+
+if [ x${enable_shared} = xyes ]; then
+  waugh=
+  case "${host}" in
+    hppa*-*-*)		waugh=config/mh-papic ;;
+    i[345]86-*-*)	waugh=config/mh-x86pic ;;
+    *-*-*)		waugh=config/mh-${target_cpu}pic ;;
+  esac
+  if [ -n "${host_makefile_frag}" ] && [ -f ${srcdir}/${waugh} ]; then
+    cat ${srcdir}/${host_makefile_frag} > mh-frag
+    cat ${srcdir}/${waugh} >> mh-frag
+    host_makefile_frag=mh-frag
+  fi
+fi
+
 # per-target:
 
 case "${target}" in
@@ -496,6 +520,14 @@ if [ x${use_gnu_ld} = x ] ; then
     with_gnu_ld=yes
     withoptions="$withoptions --with-gnu-ld"
   fi
+fi
+
+if [ x${enable_shared} = xyes ]; then
+  case "${target}" in
+    hppa*-*-*)		target_makefile_frag=config/mt-papic ;;
+    i[345]86-*-*)	target_makefile_frag=config/mt-x86pic ;;
+    *-*-*)		target_makefile_frag=config/mt-${target_cpu}pic ;;
+  esac
 fi
 
 #
