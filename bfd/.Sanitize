@@ -27,7 +27,6 @@ echo Sanitizing `pwd`.
 
 Things-to-keep:
 COPYING
-CVS.adm
 ChangeLog
 Makefile.in
 TODO
@@ -105,7 +104,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1991/07/31 22:28:30  gnu
+# Revision 1.11  1991/08/01 01:27:44  gnu
+# Delete CVS.adm from the release!
+#
+# Revision 1.10  1991/07/31  22:28:30  gnu
 # Remove archures.h
 #
 # Revision 1.9  1991/07/31  17:37:00  gnu
