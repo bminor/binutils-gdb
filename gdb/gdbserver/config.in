@@ -43,6 +43,9 @@
 /* Define if you have the <thread_db.h> header file.  */
 #undef HAVE_THREAD_DB_H
 
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T
 
