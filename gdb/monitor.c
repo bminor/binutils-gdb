@@ -42,8 +42,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "inferior.h"
 
-static void make_xmodem_packet ();
-static void print_xmodem_packet ();
+static void monitor_command PARAMS ((char *args, int fromtty));
+static void monitor_load_srec PARAMS ((char *args, int protocol));
+static int getacknak PARAMS ((int byte));
+
+static void make_xmodem_packet PARAMS ((unsigned char *packet,
+					unsigned char *data,
+					int len));
+static void print_xmodem_packet PARAMS ((char *packet));
 
 static void monitor_load_ascii_srec PARAMS ((char *file, int fromtty));
 
@@ -54,10 +60,10 @@ static int monitor_make_srec PARAMS ((char *buffer, int type,
 static void monitor_fetch_register PARAMS ((int regno));
 static void monitor_store_register PARAMS ((int regno));
 
-static int from_hex ();
+static int from_hex PARAMS ((int a));
 static unsigned long get_hex_word PARAMS ((void));
 
-struct monitor_ops *current_monitor;
+static struct monitor_ops *current_monitor;
 
 static char *loadtype_str = "srec";
 static char *loadproto_str = "none";
@@ -82,8 +88,6 @@ static int expect_prompt PARAMS ((char *buf, int buflen));
    program starts.  */
 
 static serial_t monitor_desc = NULL;
-
-static void monitor_load_srec ();
 
 /* These definitions are for xmodem protocol. */
 
@@ -266,72 +270,6 @@ expect_prompt (buf, buflen)
   return expect (PROMPT, buf, buflen);
 }
 
-/* Ignore junk characters. Returns a 1 if junk, 0 otherwise.  */
-
-static int
-junk (ch)
-     char ch;
-{
-  switch (ch)
-    {
-    case '\0':
-    case ' ':
-    case '-':
-    case '\t':
-    case '\r':
-    case '\n':
-      return 1;
-    default:
-      return 0;
-    }
-}
-
-/* Get a hex digit from the remote system & return its value.  If
-   ignore is nonzero, ignore spaces, newline & tabs.  */
-
-static int
-get_hex_digit (ignore)
-     int ignore;
-{
-  static int ch;
-
-  while (1)
-    {
-      ch = readchar (timeout);
-      if (junk (ch))
-	continue;
-
-      if (ch >= '0' && ch <= '9')
-	return ch - '0';
-      else if (ch >= 'A' && ch <= 'F')
-	return ch - 'A' + 10;
-      else if (ch >= 'a' && ch <= 'f')
-	return ch - 'a' + 10;
-      else if (ch == ' ' && ignore)
-	;
-      else
-	{
-	  expect_prompt (NULL, 0);
-	  error ("Invalid hex digit from remote system. (0x%x)", ch);
-	}
-    }
-}
-
-/* Get a byte from monitor and put it in *BYT. Accept any number of
-   leading spaces.  */
-
-static void
-get_hex_byte (byt)
-     char *byt;
-{
-  int val;
-
-  val = get_hex_digit (1) << 4;
- 
-  val |= get_hex_digit (0);
-  *byt = val;
-}
-
 /* Get N 32-bit words from remote, each preceded by a space, and put
    them in registers starting at REGNO.  */
 
@@ -359,50 +297,11 @@ get_hex_word ()
   return val;
 }
 
-/* This is called not only when we first attach, but also when the
-   user types "run" after having attached.  */
-
-void
-monitor_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
-{
-  int entry_pt;
-
-  if (args && *args)
-    error ("Can't pass arguments to remote MONITOR process");
-
-  if (execfile == 0 || exec_bfd == 0)
-    error ("No exec file specified");
-
-  entry_pt = (int) bfd_get_start_address (exec_bfd);
-
-  /* The "process" (board) is already stopped awaiting our commands, and
-     the program is already downloaded.  We just set its PC and go.  */
-
-  clear_proceed_status ();
-
-  /* Tell wait_for_inferior that we've started a new process.  */
-  init_wait_for_inferior ();
-
-  /* Set up the "saved terminal modes" of the inferior
-     based on what modes we are starting it with.  */
-  target_terminal_init ();
-
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
-  /* insert_step_breakpoint ();  FIXME, do we need this?  */
-
-  /* Let 'er rip... */
-  proceed ((CORE_ADDR)entry_pt, TARGET_SIGNAL_DEFAULT, 0);
-}
-
 /* Open a connection to a remote debugger. NAME is the filename used
    for communication.  */
 
 static char *dev_name;
+static struct target_ops *targ_ops;
 
 void
 monitor_open (args, mon_ops, from_tty)
@@ -410,7 +309,6 @@ monitor_open (args, mon_ops, from_tty)
      struct monitor_ops *mon_ops;
      int from_tty;
 {
-  struct target_ops *targ_ops;
   char *name;
   int i;
 
@@ -557,20 +455,6 @@ monitor_wait (pid, status)
   return inferior_pid;
 }
 
-/* Return the name of register number regno in the form input and output by
-   monitor.  Currently, register_names just happens to contain exactly what
-   monitor wants.  Lets take advantage of that just as long as possible! */
-
-static char *
-get_reg_name (regno)
-     int regno;
-{
-  if (regno < 0 || regno > NUM_REGS)
-    return NULL;
-  else
-    return REGNAMES (regno);
-}
-
 /* Fetch register REGNO, or all registers if REGNO is -1. Returns
    errno value.  */
 
@@ -585,7 +469,7 @@ monitor_fetch_register (regno)
   char *name;
   int resp_len;
 
-  name = get_reg_name (regno);
+  name = REGNAMES (regno);
 
   if (!name)
     return;
@@ -603,7 +487,8 @@ monitor_fetch_register (regno)
       resp_len = expect (current_monitor->getreg.term, buf, sizeof buf); /* get response */
 
       if (resp_len <= 0)
-	error ("monitor_fetch_register (%d):  excessive response from monitor: %.*s.", resp_len, buf);
+	error ("monitor_fetch_register (%d):  excessive response from monitor: %.*s.",
+	       regno, resp_len, buf);
 
       if (current_monitor->getreg.term_cmd)
 	{
@@ -624,7 +509,8 @@ monitor_fetch_register (regno)
     {
       p = strstr (buf, current_monitor->getreg.resp_delim);
       if (!p)
-	error ("monitor_fetch_register (%d):  bad response from monitor: %.*s.", resp_len, buf);
+	error ("monitor_fetch_register (%d):  bad response from monitor: %.*s.",
+	       regno, resp_len, buf);
       p += strlen (current_monitor->getreg.resp_delim);
     }
   else
@@ -634,7 +520,7 @@ monitor_fetch_register (regno)
 
   if (val == 0 && p == p1)
     error ("monitor_fetch_register (%d):  bad value from monitor: %.*s.",
-	   resp_len, buf);
+	   regno, resp_len, buf);
 
   /* supply register stores in target byte order, so swap here */
 
@@ -668,7 +554,7 @@ monitor_store_register (regno)
   char *name;
   unsigned LONGEST val;
 
-  name = get_reg_name (regno);
+  name = REGNAMES (regno);
   if (!name)
     return;
 
@@ -770,7 +656,8 @@ monitor_read_memory (memaddr, myaddr, len)
       resp_len = expect (current_monitor->getmem.term, buf, sizeof buf); /* get response */
 
       if (resp_len <= 0)
-	error ("monitor_read_memory (%d):  excessive response from monitor: %.*s.", resp_len, buf);
+	error ("monitor_read_memory (0x%x):  excessive response from monitor: %.*s.",
+	       memaddr, resp_len, buf);
 
       if (current_monitor->getmem.term_cmd)
 	{
@@ -790,7 +677,8 @@ monitor_read_memory (memaddr, myaddr, len)
     {
       p = strstr (buf, current_monitor->getmem.resp_delim);
       if (!p)
-	error ("monitor_read_memory (%d):  bad response from monitor: %.*s.", resp_len, buf);
+	error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
+	       memaddr, resp_len, buf);
       p += strlen (current_monitor->getmem.resp_delim);
     }
   else
@@ -799,7 +687,7 @@ monitor_read_memory (memaddr, myaddr, len)
   val = strtoul (p, &p1, 16);
 
   if (val == 0 && p == p1)
-    error ("monitor_read_memory (%d):  bad value from monitor: %.*s.",
+    error ("monitor_read_memory (0x%x):  bad value from monitor: %.*s.", memaddr,
 	   resp_len, buf);
 
   *myaddr = val;
@@ -839,7 +727,7 @@ monitor_kill (args, from_tty)
 void
 monitor_mourn_inferior ()
 {
-  remove_breakpoints ();
+  unpush_target (targ_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 
@@ -1021,7 +909,7 @@ monitor_load_ascii_srec (file, fromtty)
    is placed on the users terminal until the prompt is seen. FIXME: We
    read the characters ourseleves here cause of a nasty echo.  */
 
-void
+static void
 monitor_command (args, fromtty)
      char *args;
      int fromtty;
@@ -1206,7 +1094,7 @@ monitor_load_srec (args, protocol)
    *** Command syntax error
    */
 
-int
+static int
 getacknak (byte)
      int byte;
 {
