@@ -1,3 +1,7 @@
+Thu Sep 25 13:08:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip): Remove ` operand specifier.
+
 Wed Sep 24 16:54:40 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * configure.in (sh*-*-rtems*): New target, like sh-*-elf*.
