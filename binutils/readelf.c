@@ -2517,7 +2517,7 @@ parse_args (argc, argv)
 	    do_debugging = 1;
 	  else
 	    {
-	      const char *debug_dump_opt[]
+	      static const char *debug_dump_opt[]
 		= { "line", "info", "abbrev", "pubnames", "ranges",
 		    "macro", "frames", "frames-interp", "str", "loc", NULL };
 	      unsigned int index;
