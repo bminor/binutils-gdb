@@ -1,0 +1,86 @@
+# Makefile template for Configure for the m32r simulator
+# Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+# Contributed by Cygnus Support.
+#
+# This file is part of GDB, the GNU debugger.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+## COMMON_PRE_CONFIG_FRAG
+
+SIM_OBJS = sim-if.o m32r.o mainloop.o \
+	decode.o extract.o semantics.o seman-cache.o model.o \
+	sim-io.o sim-utils.o sim-load.o sim-abort.o sim-watch.o \
+	sim-module.o sim-options.o sim-trace.o sim-profile.o sim-model.o \
+	sim-core.o sim-events.o sim-endian.o sim-bits.o sim-config.o \
+	sim-hload.o \
+	cgen-utils.o cgen-trace.o cgen-scache.o
+
+# Extra headers included by sim-main.h.
+SIM_EXTRA_DEPS = \
+	$(srcdir)/../common/cgen-types.h \
+	$(srcdir)/../common/cgen-sim.h \
+	$(srcdir)/../common/cgen-trace.h \
+	arch-defs.h
+
+SIM_ENDIAN = @sim_endian@
+SIM_HOSTENDIAN = @sim_hostendian@
+SIM_SCACHE = @sim_scache@
+SIM_DEFAULT_MODEL = @sim_default_model@
+SIM_EXTRA_CFLAGS = \
+	$(SIM_ENDIAN) $(SIM_HOSTENDIAN) \
+	$(SIM_SCACHE) $(SIM_DEFAULT_MODEL)
+
+SIM_RUN_OBJS = nrun.o
+SIM_EXTRA_CLEAN = m32r-clean
+
+## COMMON_POST_CONFIG_FRAG
+
+CPU = m32r
+MAIN_INCLUDE_DEPS = \
+	sim-main.h \
+	$(srcdir)/../common/sim-config.h \
+	$(srcdir)/../common/sim-base.h \
+	$(srcdir)/../common/sim-basics.h \
+	$(srcdir)/../common/sim-module.h \
+	$(srcdir)/../common/sim-trace.h \
+	$(srcdir)/../common/sim-profile.h \
+	tconfig.h
+INCLUDE_DEPS = $(MAIN_INCLUDE_DEPS) $(SIM_EXTRA_DEPS) cpu-sim.h
+OPS_INCLUDE_DEPS = mem-ops.h sem-ops.h
+
+sim-if.o: sim-if.c $(INCLUDE_DEPS) $(srcdir)/../common/sim-core.h
+m32r.o: m32r.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
+
+# FIXME: Use of `mono' is wip.
+mainloop.c: $(srcdir)/../common/genmloop.sh mainloop.in
+	rm -f mainloop.c
+	$(SHELL) $(srcdir)/../common/genmloop.sh mono $(CPU) $(srcdir)/mainloop.in >mainloop.c
+mainloop.o: mainloop.c sem-switch.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) \
+	$(srcdir)/../common/cgen-scache.h
+
+decode.o: decode.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h
+extract.o: extract.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
+semantics.o: semantics.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
+model.o: model.c $(INCLUDE_DEPS) cpu-opc.h
+
+# wip
+#extr-cache.o: extract.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
+#	$(CC) -c $(srcdir)/extract.c -o extr-cache.o -DSCACHE_P $(ALL_CFLAGS)
+seman-cache.o: semantics.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
+	$(CC) -c $(srcdir)/semantics.c -o seman-cache.o -DSCACHE_P $(ALL_CFLAGS)
+
+m32r-clean:
+	rm -f mainloop.c

@@ -1,3 +1,25 @@
+Wed Aug 27 11:55:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-utils.c (sim_analyze_program): Add prog_name argument.
+  	Update STATE_PROG_BFD when needed with a dup'd copy of the
+ 	program.
+
+	* sim-config.c (sim_config): Delete ABFD argument, use
+ 	STATE_PROG_BFD directly.
+
+Tue Aug 26 12:55:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* run.c (main): Pass the open ABFD to sim_create_inferior.
+	
+	* nrun.c (main): Determine prog_bfd.  Pass to sim_create_inferior
+ 	and sim_load.
+	(bfd.h): Include.
+	
+	* sim-hload.c (sim_load): New file. Implement generic sim_load for
+ 	hardware only simulator targets.
+
+	* Make-common.in (sim-hload.o): Add rule.
+
 Wed Aug 27 09:51:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-utils.c (sim_copy_argv): Rewrite to match malloc strategy

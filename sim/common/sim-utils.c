@@ -119,9 +119,7 @@ char **
 sim_copy_argv (argv)
      char **argv;
 {
-  int i;
   int argc;
-  int len;
   char **copy;
 
   if (argv == NULL)
@@ -149,16 +147,56 @@ sim_copy_argv (argv)
   return copy;
 }
 
-/* Analyze a bfd and set various fields in the state struct.  */
+/* Analyze a prog_name/prog_bfd and set various fields in the state
+   struct.  */
 
-void
-sim_analyze_program (sd, prog_bfd)
+SIM_RC
+sim_analyze_program (sd, prog_name, prog_bfd)
      SIM_DESC sd;
+     char *prog_name;
      bfd *prog_bfd;
 {
   asection *s;
-
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  if (prog_bfd != NULL)
+    {
+      if (prog_bfd == STATE_PROG_BFD (sd))
+	/* already analyzed */
+	return SIM_RC_OK;
+      else
+	/* duplicate needed, save the name of the file to be re-opened */
+	prog_name = bfd_get_filename (prog_bfd);
+    }
+
+  /* do we need to duplicate anything? */
+  if (prog_name == NULL)
+    return SIM_RC_OK;
+
+  /* open a new copy of the prog_bfd */
+  prog_bfd = bfd_openr (prog_name, 0);
+  if (prog_bfd == NULL)
+    {
+      sim_io_eprintf (sd, "%s: can't open \"%s\": %s\n", 
+		      STATE_MY_NAME (sd),
+		      prog_name,
+		      bfd_errmsg (bfd_get_error ()));
+      return SIM_RC_FAIL;
+    }
+  if (!bfd_check_format (prog_bfd, bfd_object)) 
+    {
+      sim_io_eprintf (sd, "%s: \"%s\" is not an object file: %s\n",
+		      STATE_MY_NAME (sd),
+		      prog_name,
+		      bfd_errmsg (bfd_get_error ()));
+      bfd_close (prog_bfd);
+      return SIM_RC_FAIL;
+    }
+
+
+  /* update the sim structure */
+  if (STATE_PROG_BFD (sd) != NULL)
+    bfd_close (STATE_PROG_BFD (sd));
   STATE_PROG_BFD (sd) = prog_bfd;
   STATE_START_ADDR (sd) = bfd_get_start_address (prog_bfd);
 
@@ -170,6 +208,8 @@ sim_analyze_program (sd, prog_bfd)
 	STATE_TEXT_END (sd) = STATE_TEXT_START (sd) + bfd_section_size (prog_bfd, s);
 	break;
       }
+
+  return SIM_RC_OK;
 }
 
 /* Simulator timing support.  */

@@ -820,9 +820,20 @@ sim_open (kind, cb, abfd, argv)
       return 0;
     }
 
+  /* check for/establish the a reference program image */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL),
+			   abfd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
   /* Configure/verify the target byte order and other runtime
      configuration options */
-  if (sim_config (sd, abfd) != SIM_RC_OK)
+  if (sim_config (sd) != SIM_RC_OK)
     {
       sim_module_uninstall (sd);
       return 0;
@@ -920,6 +931,82 @@ sim_open (kind, cb, abfd, argv)
   if (state & simTRACE)
     open_trace();
 #endif /* TRACE */
+
+  /* Write the monitor trap address handlers into the monitor (eeprom)
+     address space.  This can only be done once the target endianness
+     has been determined. */
+  {
+    unsigned loop;
+    /* Entry into the IDT monitor is via fixed address vectors, and
+       not using machine instructions. To avoid clashing with use of
+       the MIPS TRAP system, we place our own (simulator specific)
+       "undefined" instructions into the relevant vector slots. */
+    for (loop = 0; (loop < monitor_size); loop += 4) {
+      uword64 vaddr = (monitor_base + loop);
+      uword64 paddr;
+      int cca;
+      if (AddressTranslation(vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
+	StoreMemory(cca, AccessLength_WORD,
+		    (RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT)),
+		    0, paddr, vaddr, isRAW);
+    }
+    /* The PMON monitor uses the same address space, but rather than
+       branching into it the address of a routine is loaded. We can
+       cheat for the moment, and direct the PMON routine to IDT style
+       instructions within the monitor space. This relies on the IDT
+       monitor not using the locations from 0xBFC00500 onwards as its
+       entry points.*/
+    for (loop = 0; (loop < 24); loop++)
+      {
+        uword64 vaddr = (monitor_base + 0x500 + (loop * 4));
+        uword64 paddr;
+        int cca;
+        unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
+        switch (loop)
+          {
+            case 0: /* read */
+              value = 7;
+              break;
+
+            case 1: /* write */
+              value = 8;
+              break;
+
+            case 2: /* open */
+              value = 6;
+              break;
+
+            case 3: /* close */
+              value = 10;
+              break;
+
+            case 5: /* printf */
+              value = ((0x500 - 16) / 8); /* not an IDT reason code */
+              break;
+
+            case 8: /* cliexit */
+              value = 17;
+              break;
+
+            case 11: /* flush_cache */
+              value = 28;
+              break;
+          }
+	    /* FIXME - should monitor_base be SIM_ADDR?? */
+        value = ((unsigned int)monitor_base + (value * 8));
+        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
+        else
+          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
+
+	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
+	vaddr -= 0x300;
+        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
+        else
+          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
+      }
+  }
 
   return sd;
 }
@@ -1308,108 +1395,11 @@ sim_info (sd,verbose)
     }
 }
 
-SIM_RC
-sim_load (sd,prog,abfd,from_tty)
-     SIM_DESC sd;
-     char *prog;
-     bfd *abfd;
-     int from_tty;
-{
-  bfd *prog_bfd;
-
-  prog_bfd = sim_load_file (sd,
-			    STATE_MY_NAME (sd),
-			    callback,
-			    prog,
-			    /* pass NULL for abfd, we always open our own */
-			    NULL,
-			    STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-  sim_analyze_program (sd, prog_bfd);
-
-  /* (re) Write the monitor trap address handlers into the monitor
-     (eeprom) address space.  This can only be done once the target
-     endianness has been determined. */
-  {
-    unsigned loop;
-    /* Entry into the IDT monitor is via fixed address vectors, and
-       not using machine instructions. To avoid clashing with use of
-       the MIPS TRAP system, we place our own (simulator specific)
-       "undefined" instructions into the relevant vector slots. */
-    for (loop = 0; (loop < monitor_size); loop += 4) {
-      uword64 vaddr = (monitor_base + loop);
-      uword64 paddr;
-      int cca;
-      if (AddressTranslation(vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
-	StoreMemory(cca, AccessLength_WORD,
-		    (RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT)),
-		    0, paddr, vaddr, isRAW);
-    }
-    /* The PMON monitor uses the same address space, but rather than
-       branching into it the address of a routine is loaded. We can
-       cheat for the moment, and direct the PMON routine to IDT style
-       instructions within the monitor space. This relies on the IDT
-       monitor not using the locations from 0xBFC00500 onwards as its
-       entry points.*/
-    for (loop = 0; (loop < 24); loop++)
-      {
-        uword64 vaddr = (monitor_base + 0x500 + (loop * 4));
-        uword64 paddr;
-        int cca;
-        unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
-        switch (loop)
-          {
-            case 0: /* read */
-              value = 7;
-              break;
-
-            case 1: /* write */
-              value = 8;
-              break;
-
-            case 2: /* open */
-              value = 6;
-              break;
-
-            case 3: /* close */
-              value = 10;
-              break;
-
-            case 5: /* printf */
-              value = ((0x500 - 16) / 8); /* not an IDT reason code */
-              break;
-
-            case 8: /* cliexit */
-              value = 17;
-              break;
-
-            case 11: /* flush_cache */
-              value = 28;
-              break;
-          }
-	    /* FIXME - should monitor_base be SIM_ADDR?? */
-        value = ((unsigned int)monitor_base + (value * 8));
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-        else
-          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
-
-	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
-	vaddr -= 0x300;
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-        else
-          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
-      }
-  }
-
-  return SIM_RC_OK;
-}
 
 SIM_RC
-sim_create_inferior (sd, argv,env)
+sim_create_inferior (sd, abfd, argv,env)
      SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
@@ -1426,10 +1416,13 @@ sim_create_inferior (sd, argv,env)
      patterns (e.g. simulating ROM monitors). */
 
 #if 1
-  PC = (uword64) STATE_START_ADDR(sd);
+  if (abfd != NULL)
+    PC = (unsigned64) bfd_get_start_address(abfd);
+  else
+    PC = 0; /* ???? */
 #else
   /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
-  PC = SIGNEXTEND(bfd_get_start_address(prog_bfd),32);
+  PC = SIGNEXTEND(bfd_get_start_address(abfd),32);
 #endif
 
   /* Prepare to execute the program to be simulated */

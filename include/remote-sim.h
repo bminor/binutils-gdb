@@ -69,8 +69,8 @@ struct _bfd;
    (This function is called when the simulator is selected from the
    gdb command line.)
 
-   KIND specifies how the simulator will be used.  Currently there are only
-   two kinds: stand-alone and debug.
+   KIND specifies how the simulator shall be used.  Currently there
+   are only two kinds: stand-alone and debug.
 
    CALLBACK specifies a standard host callback (defined in callback.h).
 
@@ -80,6 +80,8 @@ struct _bfd;
    ARGV is a standard ARGV pointer such as that passed from the
    command line.  The syntax of the argument list is is assumed to be
    ``SIM-PROG { SIM-OPTION } [ TARGET-PROGRAM { TARGET-OPTION } ]''.
+   The trailing TARGET-PROGRAM and args are only valid for a
+   stand-alone simulator.
 
    On success, the result is a non NULL descriptor that shall be
    passed to the other sim_foo functions.  While the simulator
@@ -88,14 +90,14 @@ struct _bfd;
    successful creation of the simulator shall not dependent on the
    presence of any of these arguments/options.
 
-   For a simulator modeling real hardware, the created simulator shall
-   be sufficiently initialized to handle, with out restrictions any
-   client requests (including memory reads/writes, register
-   fetch/stores and a resume).
+   Hardware simulator: The created simulator shall be sufficiently
+   initialized to handle, with out restrictions any client requests
+   (including memory reads/writes, register fetch/stores and a
+   resume).
 
-   For a simulator modeling a process, that process is not created
-   until a call to sim_create_inferior.  FIXME: What should the state
-   of the simulator be? */
+   Process simulator: that process is not created until a call to
+   sim_create_inferior.  FIXME: What should the state of the simulator
+   be? */
 
 SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, struct host_callback_struct *callback, struct _bfd *abfd, char **argv));
 
@@ -116,58 +118,38 @@ void sim_close PARAMS ((SIM_DESC sd, int quitting));
    If ABFD is non-NULL, the bfd for the file has already been opened.
    The result is a return code indicating success.
 
-   For a simulator modeling real hardware, the client is permitted to
-   make multiple calls to this function.  Such calls have an
-   accumulative effect.
+   Hardware simulator: A call to this function should not effect the
+   state of the processor registers.  Multiple calls to this function
+   are permitted and have an accumulative effect.
 
-   For a simulator modeling a process, calls to this function may be
-   ignored.  */
+   Process simulator: Calls to this function may be ignored.
+
+   FIXME: Some hardware targets, before a loaded program can be
+   executed, require the manipulation of VM registers and tables.
+   Such manipulation should probably (?) occure in
+   sim_create_inferior. */
 
 SIM_RC sim_load PARAMS ((SIM_DESC sd, char *prog, struct _bfd *abfd, int from_tty));
 
 
 /* Prepare to run the simulated program.
 
-   ARGV and ENV are NULL terminated lists of pointers.
+   ABFD, if not NULL, provides initial processor state information.
+   ARGV and ENV, if non NULL, are NULL terminated lists of pointers.
 
-   For a simulator modeling real hardware, this function shall
-   initialize the processor registers to a known value.  The program
-   counter shall be set to the start address obtained from the last
-   program loaded (or the hardware reset default).  The ARGV and ENV
-   arguments can be ignored.
+   Hardware simulator: This function shall initialize the processor
+   registers to a known value.  The program counter and possibly stack
+   pointer shall be set using information obtained from ABFD (or
+   hardware reset defaults).  ARGV and ENV, dependant on the target
+   ABI, may be written to memory.
 
-   For a simulator modeling a process, after a call to this function a
-   new process instance shall exist - the TEXT, DATA, BSS and stack
-   regions shall all be initialized, ARGV and ENV shall be written to
-   process address space (according to the applicable ABI), and the
-   program counter and stack pointer set accordingly. (NB: A simulator
-   may in fact initialize the TEXT, DATA and BSS sections during an
-   earlier stage).
+   Process simulator: After a call to this function, a new process
+   instance shall exist. The TEXT, DATA, BSS and stack regions shall
+   all be initialized, ARGV and ENV shall be written to process
+   address space (according to the applicable ABI) and the program
+   counter and stack pointer set accordingly. */
 
-   --
-
-   FIXME: Is the below a better definition - assuming that ABFD arg is
-   added.
-
-   Prepare to run the simulated program.
-
-   ABFD, if not NULL, can be used to obtain initial processor state
-   information (eg PC value).
-   ARGV and ENV, if non NULL,  are NULL terminated lists of pointers.
-
-   For a simulator modeling real hardware, this function shall
-   initialize the processor registers to a known value.  The program
-   counter shall be set to the start address obtained from the ABFD
-   struct (or the hardware reset default).  The ARGV and ENV arguments
-   can be ignored.
-
-   For a simulator modeling a process, after a call to this function a
-   new process instance shall exist - the TEXT, DATA, BSS and stack
-   regions shall all be initialized, ARGV and ENV shall be written to
-   process address space (according to the applicable ABI), and the
-   program counter and stack pointer set accordingly. */
-
-SIM_RC sim_create_inferior PARAMS ((SIM_DESC sd, char **argv, char **env));
+SIM_RC sim_create_inferior PARAMS ((SIM_DESC sd, struct _bfd *abfd, char **argv, char **env));
 
 
 /* Read LENGTH bytes of the simulated program's memory and store in

@@ -1,6 +1,11 @@
 Tue Aug 26 10:38:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* compile.c (sim_kill): Delete.
+	(sim_create_inferior): Add ABFD argument.
+	(sim_load): Move setting of PC from here.
+	(sim_create_inferior): To here.
+ 	(sim_open, sim_load, set_h8300h): Add fixme explaining why much of
+ 	the sim_load code should be moved to sim_open.
 
 Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

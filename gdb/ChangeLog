@@ -1,3 +1,12 @@
+Tue Aug 26 15:19:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_create_inferior): Pass exec_bfd into
+ 	sim_create_inferior.
+	(gdbsim_create_inferior): Pass -1 to proceed, sim_create_inferior
+ 	has already set the PC.
+	(gdbsim_create_inferior): Allow exec_file to be NULL, make "No
+ 	exec file" a warning.  Ditto for "No program loaded".
+
 Mon Aug 25 17:08:01 1997  Geoffrey Noer  <noer@cygnus.com>
 
         * ocd.c: revert Sun change -- enable log file handling

@@ -1,7 +1,10 @@
+Tue Aug 26 12:25:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h (sim_create_inferior): Add ABFD arg. Document.
+
 Mon Aug 25 10:50:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* remote-sim.h (sim_open): Add ABFD arg. Change ARGV to PARGV.
-  	Document.
+	* remote-sim.h (sim_open): Add ABFD arg. Document.
 
 Fri Aug  8 16:43:56 1997  Doug Evans  <dje@canuck.cygnus.com>
 

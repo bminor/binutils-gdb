@@ -14,7 +14,6 @@ enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
 static char *myname;
 static SIM_OPEN_KIND sim_kind;
-static bfd_vma start_address;
 int d10v_debug;
 host_callback *d10v_callback;
 unsigned long ins_type_counters[ (int)INS_MAX ];
@@ -797,20 +796,26 @@ sim_info (sd, verbose)
 }
 
 SIM_RC
-sim_create_inferior (sd, argv, env)
+sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
-#ifdef DEBUG
-  if (d10v_debug)
-    (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%x\n", start_address);
-#endif
+  bfd_vma start_address;
 
   /* reset all state information */
   memset (&State.regs, 0, (int)&State.imem - (int)&State.regs[0]);
 
   /* set PC */
+  if (abfd != NULL)
+    start_address = bfd_get_start_address (prog_bfd);
+  else
+    start_address = 0xffc0 << 2;
+#ifdef DEBUG
+  if (d10v_debug)
+    (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
+#endif
   PC = start_address >> 2;
 
   /* cpu resets imap0 to 0 and imap1 to 0x7f, but D10V-EVA board */
@@ -924,7 +929,6 @@ sim_load (sd, prog, abfd, from_tty)
 			    sim_kind == SIM_OPEN_DEBUG);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
-  start_address = bfd_get_start_address (prog_bfd);
   prog_bfd_was_opened_p = abfd == NULL;
   return SIM_RC_OK;
 } 

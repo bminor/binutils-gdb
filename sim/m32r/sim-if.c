@@ -100,31 +100,9 @@ sim_close (sd, quitting)
 }
 
 SIM_RC
-sim_load (sd, prog, abfd, from_tty)
+sim_create_inferior (sd, abfd, argv, envp)
      SIM_DESC sd;
-     char *prog;
-     bfd *abfd;
-     int from_tty;
-{
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
-  bfd *prog_bfd;
-
-  prog_bfd = sim_load_file (sd, STATE_MY_NAME (sd),
-			    STATE_CALLBACK (sd),
-			    prog,
-			    /* pass NULL for abfd, we always open our own */
-			    NULL,
-			    STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-  sim_analyze_program (sd, prog_bfd);
-  STATE_CPU_CPU (sd, 0)->pc = STATE_START_ADDR (sd);
-  return SIM_RC_OK;
-} 
-
-SIM_RC
-sim_create_inferior (sd, argv, envp)
-     SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **envp;
 {
@@ -132,6 +110,10 @@ sim_create_inferior (sd, argv, envp)
   STATE_ARGV (sd) = sim_copy_argv (argv);
   STATE_ENVP (sd) = sim_copy_argv (envp);
 #endif
+  if (abfd != NULL)
+    STATE_CPU_CPU (sd, 0)->pc = bfd_get_start_address (abfd);
+  else
+    STATE_CPU_CPU (sd, 0)->pc = 0;
   return SIM_RC_OK;
 }
 

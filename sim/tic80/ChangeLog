@@ -1,6 +1,14 @@
-Tue Aug 26 10:42:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+Wed Aug 27 13:41:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Add call to sim_analyze_program, update
+ 	call to sim_config.
 
 	* sim-calls.c (sim_kill): Delete.
+	(sim_create_inferior): Add ABFD argument.  Initialize PC from ABFD
+ 	and not SD.
+	(sim_load): Delete, use sim-hload.c.
+
+	* Makefile.in (SIM_OBJS): Add sim-hload.o module.
 
 Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

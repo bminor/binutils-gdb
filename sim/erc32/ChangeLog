@@ -1,6 +1,12 @@
 Tue Aug 26 10:38:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* float.c (__setfpucw): Compile on any i386 target.  Not just NT.
+
 	* interf.c (sim_kill): Delete.
+	(sim_create_inferior): Add ABFD argument.  Initialize PC from ABFD
+ 	argument.
+	(sim_load): Don't save start address.
+	(start_address): Delete variable.
 
 Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

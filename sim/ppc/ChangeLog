@@ -11,6 +11,10 @@ Wed Aug 27 10:15:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 Tue Aug 26 10:41:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim_calls.c (sim_kill): Delete.
+	(sim_create_inferior): Add ABFD argument.
+	(entry_point): Delete variable.
+	(sim_load): Move setting of PC from here.
+	(sim_create_inferior): To here.
 
 Mon Aug 25 16:17:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

@@ -546,8 +546,7 @@ extern int current_stdio;
 /* complete/verify/print the simulator configuration */
 
 extern SIM_RC sim_config
-(SIM_DESC sd,
- struct _bfd *abfd);
+(SIM_DESC sd);
 
 
 extern void print_sim_config (SIM_DESC sd);

@@ -3,15 +3,52 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_OBJS = interp.o
+srcdir=@srcdir@
+srcroot=$(srcdir)/../../
+
+SIM_OBJS = interp.o \
+	sim-load.o \
+	sim-utils.o \
+	sim-hload.o \
+	sim-io.o \
+	sim-config.o \
+	sim-endian.o \
+	sim-engine.o \
+	sim-stop.o \
+	sim-resume.o \
+	sim-reason.o \
+	sim-events.o \
+	sim-module.o \
+	sim-trace.o \
+	sim-options.o \
+	sim-core.o \
+	sim-watch.o
+
+# List of flags to always pass to $(CC).
+SIM_WARNINGS=@sim_warnings@
+SIM_ENDIAN=@sim_endian@
+SIM_HOSTENDIAN=@sim_hostendian@
+SIM_INLINE=@sim_inline@
+
 # FIXME: Hack to find syscall.h?  Better support for syscall.h
 # is in progress.
-SIM_EXTRA_CFLAGS = -I$(srcdir)/../../newlib/libc/sys/idt
+SIM_EXTRA_CFLAGS = \
+	$(SIM_WARNINGS) \
+	$(SIM_ENDIAN) \
+	$(SIM_HOSTENDIAN) \
+	$(SIM_INLINE) \
+	-I$(srcdir)/../../newlib/libc/sys/idt
+
 SIM_EXTRA_CLEAN = clean-extra
+
+# List of main object files for `run'.
+SIM_RUN_OBJS = nrun.o
+
+
 
 ## COMMON_POST_CONFIG_FRAG
 
-interp.o: interp.c engine.c support.h config.h
+interp.o: $(srcdir)/interp.c engine.c $(srcdir)/support.h config.h
 
 engine.c: gencode
 	./gencode @SIMCONF@ > $@

@@ -132,45 +132,15 @@ config_floating_point_to_a (int floating_point)
 
 
 SIM_RC
-sim_config (SIM_DESC sd,
-	    struct _bfd *abfd)
+sim_config (SIM_DESC sd)
 {
   int prefered_target_byte_order;
 
-  /* clone the bfd struct (or open prog_name directly) */
-  {
-    const char *prog_name;
-    if (STATE_PROG_ARGV (sd) == NULL)
-      {
-	if (abfd != NULL)
-	  prog_name = bfd_get_filename (abfd);
-	else
-	  prog_name = NULL;
-      }
-    else
-      prog_name = *STATE_PROG_ARGV (sd);
-    if (prog_name != NULL)
-      {
-	abfd = bfd_openr (prog_name, 0);
-	if (abfd == NULL)
-	  {
-	    sim_io_eprintf (sd, "%s: can't open \"%s\": %s\n", 
-			    STATE_MY_NAME (sd),
-			    prog_name,
-			    bfd_errmsg (bfd_get_error ()));
-	    return SIM_RC_FAIL;
-	  }
-	STATE_PROG_BFD (sd) = abfd;
-      }
-    else
-      STATE_PROG_BFD (sd) = NULL;
-  }
-    
   /* extract all relevant information */
-  if (abfd == NULL)
+  if (STATE_PROG_BFD (sd) == NULL)
     prefered_target_byte_order = 0;
   else
-    prefered_target_byte_order = (bfd_little_endian(abfd)
+    prefered_target_byte_order = (bfd_little_endian(STATE_PROG_BFD (sd))
 				  ? LITTLE_ENDIAN
 				  : BIG_ENDIAN);
 
@@ -210,16 +180,16 @@ sim_config (SIM_DESC sd,
   /* verify the target byte order */
   if (CURRENT_TARGET_BYTE_ORDER == 0)
     {
-      sim_io_eprintf (sd, "target byte order unspecified");
+      sim_io_eprintf (sd, "Target byte order unspecified\n");
       return SIM_RC_FAIL;
     }
   if (CURRENT_TARGET_BYTE_ORDER != current_target_byte_order)
-    sim_io_eprintf (sd, "target (%s) and configured (%s) byte order in conflict",
+    sim_io_eprintf (sd, "Target (%s) and configured (%s) byte order in conflict\n",
 		  config_byte_order_to_a (current_target_byte_order),
 		  config_byte_order_to_a (CURRENT_TARGET_BYTE_ORDER));
   if (prefered_target_byte_order != 0
       && CURRENT_TARGET_BYTE_ORDER != prefered_target_byte_order)
-    sim_io_eprintf (sd, "target (%s) and specified (%s) byte order in conflict",
+    sim_io_eprintf (sd, "Target (%s) and specified (%s) byte order in conflict\n",
 		  config_byte_order_to_a (CURRENT_TARGET_BYTE_ORDER),
 		  config_byte_order_to_a (prefered_target_byte_order));
 
@@ -233,12 +203,12 @@ sim_config (SIM_DESC sd,
   /* verify the stdio */
   if (CURRENT_STDIO == 0)
     {
-      sim_io_eprintf (sd, "target standard IO unspecified");
+      sim_io_eprintf (sd, "Target standard IO unspecified\n");
       return SIM_RC_FAIL;
     }
   if (CURRENT_STDIO != current_stdio)
     {
-      sim_io_eprintf (sd, "target (%s) and configured (%s) standard IO in conflict",
+      sim_io_eprintf (sd, "Target (%s) and configured (%s) standard IO in conflict\n",
 		      config_stdio_to_a (CURRENT_STDIO),
 		      config_stdio_to_a (current_stdio));
       return SIM_RC_FAIL;
@@ -249,7 +219,7 @@ sim_config (SIM_DESC sd,
   if (WITH_TARGET_WORD_MSB != 0
       && WITH_TARGET_WORD_MSB != (WITH_TARGET_WORD_BITSIZE - 1))
     {
-      sim_io_eprintf (sd, "target bitsize (%d) contradicts target most significant bit (%d)",
+      sim_io_eprintf (sd, "Target bitsize (%d) contradicts target most significant bit (%d)\n",
 		      WITH_TARGET_WORD_BITSIZE, WITH_TARGET_WORD_MSB);
       return SIM_RC_FAIL;
     }
@@ -281,12 +251,12 @@ sim_config (SIM_DESC sd,
   /* verify the environment */
   if (CURRENT_ENVIRONMENT == 0)
     {
-      sim_io_eprintf (sd, "target environment unspecified");
+      sim_io_eprintf (sd, "Target environment unspecified\n");
       return SIM_RC_FAIL;
     }
   if (CURRENT_ENVIRONMENT != current_environment)
     {
-      sim_io_eprintf (sd, "target (%s) and configured (%s) environment in conflict",
+      sim_io_eprintf (sd, "Target (%s) and configured (%s) environment in conflict\n",
 		      config_environment_to_a (CURRENT_ENVIRONMENT),
 		      config_environment_to_a (current_environment));
       return SIM_RC_FAIL;
@@ -310,12 +280,12 @@ sim_config (SIM_DESC sd,
   /* verify the alignment */
   if (CURRENT_ALIGNMENT == 0)
     {
-      sim_io_eprintf (sd, "target alignment unspecified");
+      sim_io_eprintf (sd, "Target alignment unspecified\n");
       return SIM_RC_FAIL;
     }
   if (CURRENT_ALIGNMENT != current_alignment)
     {
-      sim_io_eprintf (sd, "target (%s) and configured (%s) alignment in conflict",
+      sim_io_eprintf (sd, "Target (%s) and configured (%s) alignment in conflict\n",
 		      config_alignment_to_a (CURRENT_ALIGNMENT),
 		      config_alignment_to_a (current_alignment));
       return SIM_RC_FAIL;
@@ -332,12 +302,12 @@ sim_config (SIM_DESC sd,
   /* verify the floating point */
   if (CURRENT_FLOATING_POINT == 0)
     {
-      sim_io_eprintf (sd, "target floating-point unspecified");
+      sim_io_eprintf (sd, "Target floating-point unspecified\n");
       return SIM_RC_FAIL;
     }
   if (CURRENT_FLOATING_POINT != current_floating_point)
     {
-      sim_io_eprintf (sd, "target (%s) and configured (%s) floating-point in conflict",
+      sim_io_eprintf (sd, "Target (%s) and configured (%s) floating-point in conflict\n",
 		      config_alignment_to_a (CURRENT_FLOATING_POINT),
 		      config_alignment_to_a (current_floating_point));
       return SIM_RC_FAIL;

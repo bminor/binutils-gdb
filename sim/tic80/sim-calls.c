@@ -74,8 +74,19 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-  /* establish the simulator configuration */
-  if (sim_config (sd, abfd) != SIM_RC_OK)
+  /* check for/establish the a reference program image */
+  if (sim_analyze_program (sd,
+			   (STATE_PROG_ARGV (sd) != NULL
+			    ? *STATE_PROG_ARGV (sd)
+			    : NULL),
+			   abfd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  /* establish any remaining configuration options */
+  if (sim_config (sd) != SIM_RC_OK)
     {
       sim_module_uninstall (sd);
       return 0;
@@ -123,24 +134,6 @@ sim_close (SIM_DESC sd, int quitting)
   /* Uninstall the modules to avoid memory leaks,
      file descriptor leaks, etc.  */
   sim_module_uninstall (sd);
-}
-
-
-SIM_RC
-sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
-{
-  bfd *prog_bfd;
-
-  prog_bfd = sim_load_file (sd, STATE_MY_NAME (sd),
-			    STATE_CALLBACK (sd),
-			    prog,
-			    /* pass NULL for abfd, we always open our own */
-			    NULL,
-			    STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG);
-  if (prog_bfd == NULL)
-    return SIM_RC_FAIL;
-  sim_analyze_program (sd, prog_bfd);
-  return SIM_RC_OK;
 }
 
 
@@ -217,11 +210,15 @@ sim_info (SIM_DESC sd, int verbose)
 
 SIM_RC
 sim_create_inferior (SIM_DESC sd,
+		     struct _bfd *abfd,
 		     char **argv,
 		     char **envp)
 {
-  STATE_CPU (sd, 0)->cia.ip = STATE_START_ADDR(sd);
-  STATE_CPU (sd, 0)->cia.dp = (STATE_START_ADDR(sd)
+  if (abfd != NULL)
+    STATE_CPU (sd, 0)->cia.ip = bfd_get_start_address (abfd);
+  else
+    STATE_CPU (sd, 0)->cia.ip = 0;
+  STATE_CPU (sd, 0)->cia.dp = (STATE_CPU (sd, 0)->cia.ip
 			       + sizeof (instruction_word));
   STATE_CPU (sd, 0)->cr[IE_CR] |= IE_CR_IE;
   STATE_CPU (sd, 0)->reg[1] = TIC80_MEM_START + TIC80_MEM_SIZE - 16;

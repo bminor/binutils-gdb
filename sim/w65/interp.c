@@ -360,14 +360,18 @@ sim_load (prog, from_tty)
 
 
 void
-sim_create_inferior (start_address, argv, env)
-     SIM_ADDR start_address;
+sim_create_inferior (abfd, argv, env)
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
-  /* ??? We assume this is a 4 byte quantity.  */
+  SIM_ADDR start_address;
   int pc;
-
+  if (abfd != NULL)
+    start_address = bfd_get_start_address (abfd);
+  else
+    start_address = 0; /*??*/
+  /* ??? We assume this is a 4 byte quantity.  */
   pc = start_address;
   sim_store_register (16, (unsigned char *) &pc);
 }

@@ -2009,6 +2009,9 @@ void
 set_h8300h (flag)
      int flag;
 {
+  /* FIXME: Much of the code in sim_load can be moved to sim_open.
+     This function being replaced by a sim_open:ARGV configuration
+     option */
   h8300hmode = flag;
 }
 
@@ -2019,6 +2022,8 @@ sim_open (kind, ptr, abfd, argv)
      struct _bfd *abfd;
      char **argv;
 {
+  /* FIXME: Much of the code in sim_load can be moved here */
+
   sim_kind = kind;
   myname = argv[0];
   sim_callback = ptr;
@@ -2044,6 +2049,9 @@ sim_load (sd, prog, abfd, from_tty)
      int from_tty;
 {
   bfd *prog_bfd;
+
+  /* FIXME: The code below that sets a specific variant of the h8/300
+     being simulated should be moved to sim_open(). */
 
   /* See if the file is for the h8/300 or h8/300h.  */
   /* ??? This may not be the most efficient way.  The z8k simulator
@@ -2109,7 +2117,6 @@ sim_load (sd, prog, abfd, from_tty)
       return SIM_RC_FAIL;
     }
 
-  cpu.pc = bfd_get_start_address (prog_bfd);
   /* Close the bfd if we opened it.  */
   if (abfd == NULL && prog_bfd != NULL)
     bfd_close (prog_bfd);
@@ -2117,11 +2124,16 @@ sim_load (sd, prog, abfd, from_tty)
 }
 
 SIM_RC
-sim_create_inferior (sd, argv, env)
+sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
+  if (abfd != NULL)
+    cpu.pc = bfd_get_start_address (abfd);
+  else
+    cpu.pc = 0;
   return SIM_RC_OK;
 }
 

@@ -418,6 +418,9 @@ gdbsim_load (prog, fromtty)
   if (sim_load (gdbsim_desc, prog, NULL, fromtty) == SIM_RC_FAIL)
     error ("unable to load program");
 
+  /* FIXME: If a load command should reset the targets registers then
+     a call to sim_create_inferior() should go here. */
+
   program_loaded = 1;
 }
 
@@ -438,37 +441,41 @@ gdbsim_create_inferior (exec_file, args, env)
 {
   int len;
   char *arg_buf,**argv;
-  CORE_ADDR entry_pt;
 
+  if (exec_file == 0 || exec_bfd == 0)
+    warning ("No exec file specified.");
   if (! program_loaded)
-    error ("No program loaded.");
+    warning ("No program loaded.");
 
   if (sr_get_debug ())
     printf_filtered ("gdbsim_create_inferior: exec_file \"%s\", args \"%s\"\n",
-      exec_file, args);
-
-  if (exec_file == 0 || exec_bfd == 0)
-   error ("No exec file specified.");
-
-  entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
+		     (exec_file ? exec_file: "(NULL)"),
+		     args);
 
   gdbsim_kill ();	 
   remove_breakpoints ();
   init_wait_for_inferior ();
 
-  len = strlen (exec_file) + 1 + strlen (args) + 1 + /*slop*/ 10;
-  arg_buf = (char *) alloca (len);
-  arg_buf[0] = '\0';
-  strcat (arg_buf, exec_file);
-  strcat (arg_buf, " ");
-  strcat (arg_buf, args);
-  argv = buildargv (arg_buf);
-  make_cleanup (freeargv, (char *) argv);
-  sim_create_inferior (gdbsim_desc, argv, env);
+  if (exec_file != NULL)
+    {
+      len = strlen (exec_file) + 1 + strlen (args) + 1 + /*slop*/ 10;
+      arg_buf = (char *) alloca (len);
+      arg_buf[0] = '\0';
+      strcat (arg_buf, exec_file);
+      strcat (arg_buf, " ");
+      strcat (arg_buf, args);
+      argv = buildargv (arg_buf);
+      make_cleanup (freeargv, (char *) argv);
+    }
+  else
+    argv = NULL;
+  sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
   inferior_pid = 42;
-  insert_breakpoints ();	/* Needed to get correct instruction in cache */
-  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  insert_breakpoints (); /* Needed to get correct instruction in cache */
+
+  /* NB: Entry point already set by sim_create_inferior. */
+  proceed ((CORE_ADDR)-1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* The open routine takes the rest of the parameters from the command,

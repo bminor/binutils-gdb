@@ -53,10 +53,6 @@ static device *root_device;
 static const char *register_names[] = REGISTER_NAMES;
 static host_callback *callbacks;
 
-/* For communication between sim_load and sim_create_inferior.
-   This can be made to go away, please do.  */
-static unsigned_word entry_point;
-
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
 	  host_callback *callback,
@@ -114,9 +110,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
   psim_init(simulator);
 
   /* get the start address */
-  if (abfd != NULL)
-    entry_point = bfd_get_start_address (abfd);
-  else
+  if (abfd == NULL)
     {
       abfd = bfd_openr (argv[0], 0);
       if (abfd == NULL)
@@ -129,7 +123,6 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 	  error ("psim: \"%s\" is not an object file: %s\n",
 		 argv[0], errmsg);
 	}
-      entry_point = bfd_get_start_address (abfd);
       bfd_close (abfd);
     }
 
@@ -199,10 +192,18 @@ sim_info (SIM_DESC sd, int verbose)
 
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, char **argv, char **envp)
+sim_create_inferior (SIM_DESC sd,
+		     struct _bfd *abfd,
+		     char **argv,
+		     char **envp)
 {
+  unsigned_word entry_point;
   TRACE(trace_gdb, ("sim_create_inferior(start_address=0x%x, ...)\n",
 		    entry_point));
+  if (abfd != NULL)
+    entry_point = bfd_get_start_address (abfd);
+  else
+    entry_point = 0xfff00000; /* ??? */
 
   psim_init(simulator);
   psim_stack(simulator, argv, envp);

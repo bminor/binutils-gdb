@@ -1242,18 +1242,22 @@ sim_load (sd, prog, abfd, from_tty)
 			    sim_kind == SIM_OPEN_DEBUG);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
-  saved_state.asregs.pc = bfd_get_start_address (prog_bfd);
   if (abfd == NULL)
     bfd_close (prog_bfd);
   return SIM_RC_OK;
 }
 
 SIM_RC
-sim_create_inferior (sd, argv, env)
+sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd;
+     struct _bfd *abfd;
      char **argv;
      char **env;
 {
+  if (abfd != NULL)
+    saved_state.asregs.pc = bfd_get_start_address (abfd);
+  else
+    saved_state.asregs.pc = 0;
   return SIM_RC_OK;
 }
 
