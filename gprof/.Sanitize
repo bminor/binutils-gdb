@@ -24,8 +24,10 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
+ChangeLog
 Makefile.in
 arcs.c
+blurbs.c
 config
 configure.in
 dfn.c
@@ -41,7 +43,7 @@ hertz.c
 i386.c
 i386.h
 lookup.c
-pathnames.h
+make-c-prog.awk
 printgprof.c
 printlist.c
 sparc.c
