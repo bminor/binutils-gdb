@@ -1,3 +1,11 @@
+start-sanitize-d10v
+Thu Nov  7 15:19:08 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-tdep.c: Fix some problems with inferior function calls.
+	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Change dummy to be
+	a pointer to the dummy's stack instead of just a flag.
+	
+end-sanitize-d10v	
 start-sanitize-m32r
 Tue Nov  5 10:21:02 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 

@@ -502,7 +502,7 @@ d10v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
   CORE_ADDR sp;
   char buffer[MAX_REGISTER_RAW_SIZE];
   struct frame_info *frame = get_current_frame ();
-  frame->dummy = 1;
+  frame->dummy = start_sp;
   start_sp |= DMEM_START;
 
   sp = start_sp;
@@ -522,18 +522,15 @@ static void
 d10v_pop_dummy_frame (fi)
      struct frame_info *fi;
 {
-  CORE_ADDR sp = fi->frame;
+  CORE_ADDR sp = fi->dummy;
   int regnum;
 
-  for (regnum = NUM_REGS-1; regnum >= 0; regnum--)
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
+      sp -= REGISTER_RAW_SIZE(regnum);
       write_register(regnum, read_memory_unsigned_integer (sp, REGISTER_RAW_SIZE(regnum)));
-      sp += REGISTER_RAW_SIZE(regnum);
     }
-  target_store_registers (-1);
-  flush_cached_frames ();
-
-  write_register(SP_REGNUM, sp & 0xffff);
+  flush_cached_frames (); /* needed? */
 }
 
 
@@ -545,35 +542,75 @@ d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int struct_return;
      CORE_ADDR struct_addr;
 {
-  int i, len, regnum=2;
-  char *contents;
+  int i, len, index=0, regnum=2;
+  char buffer[4], *contents;
   LONGEST val;
-  
+  CORE_ADDR ptrs[10];
+
+  /* Pass 1. Put all large args on stack */
   for (i = 0; i < nargs; i++)
     {
       value_ptr arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-      switch (TYPE_CODE (arg_type))
-        {
-	case TYPE_CODE_INT:
-	case TYPE_CODE_BOOL:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_ENUM:
-	  break;
-	default:
-	  break;
-	}
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS(arg);
       val = extract_signed_integer (contents, len);
-      if (len == 4)
-	write_register (regnum++, val>>16);
-      write_register (regnum++, val & 0xffff);
+      if (len > 4)
+	{
+	  /* put on stack and pass pointers */
+	  sp -= len;
+	  write_memory (sp, contents, len);
+	  ptrs[index++] = sp;
+	}
+    }
+
+  index = 0;
+
+  for (i = 0; i < nargs; i++)
+    {
+      value_ptr arg = args[i];
+      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      len = TYPE_LENGTH (arg_type);
+      contents = VALUE_CONTENTS(arg);
+      val = extract_signed_integer (contents, len);
+      if (len > 4)
+	{
+	  /* use a pointer to previously saved data */
+	  if (regnum < 6)
+	    write_register (regnum++, ptrs[index++]);
+	  else
+	    {
+	      /* no more registers available.  put it on the stack */
+	      sp -= 2;
+	      store_address (buffer, 2, ptrs[index++]);
+	      write_memory (sp, buffer, 2);
+	    }
+	}
+      else
+	{
+	  if (regnum < 6 )
+	    {
+	      if (len == 4)
+		write_register (regnum++, val>>16);
+	      write_register (regnum++, val & 0xffff);
+	    }
+	  else
+	    {
+	      sp -= len;
+	      store_address (buffer, len, val);
+	      write_memory (sp, buffer, len);
+	    }
+	}
     }
   return sp;
 }
 
+
+/* pick an out-of-the-way place to set the return value */
+/* for an inferior function call.  The link register is set to this  */
+/* value and a momentary breakpoint is set there.  When the breakpoint */
+/* is hit, the dummy frame is popped and the previous environment is */
+/* restored. */
 
 CORE_ADDR
 d10v_call_dummy_address ()
@@ -603,5 +640,5 @@ d10v_extract_return_value (valtype, regbuf, valbuf)
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
-  memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
+ memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
 }

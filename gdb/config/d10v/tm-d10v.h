@@ -154,7 +154,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define EXTRA_FRAME_INFO \
     CORE_ADDR return_pc; \
-    int dummy; \
+    CORE_ADDR dummy; \
     int frameless; \
     int size;
 
