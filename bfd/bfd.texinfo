@@ -37,10 +37,10 @@ original English.
 
 @c@finalout
 @c@setchapternewpage odd
-@settitle LIB BFD, the Binary File Desciptor Library
+@settitle LIB BFD, the Binary File Descriptor Library
 @titlepage
 @title{libbfd}
-@subtitle{The Big File Descriptor Library}
+@subtitle{The Binary File Descriptor Library}
 @sp 1
 @subtitle First Edition---@code{bfd} version < 2.0
 @subtitle April 1991
@@ -131,7 +131,6 @@ their own use, for greater efficiency.
 @node History, How It Works, Overview,Top
 @section History
 
-Gumby really knows this, so his bit goes here.
 One spur behind @code{bfd} was the Intel Oregon's GNU 960 team desire for
 interoperability of applications on their COFF and b.out file formats.
 Cygnus was providing GNU support for the team, and Cygnus were
@@ -147,7 +146,8 @@ different object file formats, IEEE-695, Oasys, Srecords, a.out and 68k coff.
 
 BFD was first implemented by Steve Chamberlain (steve@@cygnus.com),
 John Gilmore (gnu@@cygnus.com),  K. Richard Pixley (rich@@cygnus.com) and
-Gumby Wallace (gumby@@cygnus.com).
+Gumby Wallace (gumby@@cygnus.com) at Cygnus Support in Palo Alto,
+California.
 
 @node How It Works, History, Porting, Top
 @section How It Works
