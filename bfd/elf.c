@@ -5553,7 +5553,11 @@ elfcore_grok_pstatus (abfd, note)
      bfd *abfd;
      Elf_Internal_Note *note;
 {
-  if (note->descsz == sizeof (pstatus_t))
+  if (note->descsz == sizeof (pstatus_t)
+#if defined (HAVE_PXSTATUS_T)
+      || note->descsz == sizeof (pxstatus_t)
+#endif
+      )
     {
       pstatus_t pstat;
 
@@ -5591,7 +5595,11 @@ elfcore_grok_lwpstatus (abfd, note)
   char *name;
   asection *sect;
 
-  if (note->descsz != sizeof (lwpstat))
+  if (note->descsz != sizeof (lwpstat)
+#if defined (HAVE_LWPXSTATUS_T)
+      && note->descsz != sizeof (lwpxstatus_t)
+#endif
+      )
     return true;
 
   memcpy (&lwpstat, note->descdata, sizeof (lwpstat));

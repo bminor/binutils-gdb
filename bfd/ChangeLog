@@ -1,3 +1,10 @@
+2000-09-30  Petr Sorfa <petrs@sco.com>
+
+	* elf.c (elfcore_grok_pstatus): Check for size of pxstatus_t.
+	(elfcore_grok_lwpstatus): Check for size of lwpxstatus_t.
+	* configure.in: Add check for pxstatus_t and lwpxstatus_t.
+	* configure: Regenerate.
+
 2000-09-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	Define two bfd_targets for absence and presence of leading
