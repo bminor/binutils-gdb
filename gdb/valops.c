@@ -1641,7 +1641,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   else
     sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
 
-  if (PUSH_RETURN_ADDRESS_P ())
+  if (DEPRECATED_PUSH_RETURN_ADDRESS_P ())
     /* for targets that use no CALL_DUMMY */
     /* There are a number of targets now which actually don't write
        any CALL_DUMMY instructions into the target, but instead just
@@ -1652,7 +1652,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        return-address register as appropriate.  Formerly this has been
        done in PUSH_ARGUMENTS, but that's overloading its
        functionality a bit, so I'm making it explicit to do it here.  */
-    sp = PUSH_RETURN_ADDRESS (real_pc, sp);
+    sp = DEPRECATED_PUSH_RETURN_ADDRESS (real_pc, sp);
 
   /* NOTE: cagney/2003-03-23: Diable this code when there is a
      push_dummy_call() method.  Since that method will have already

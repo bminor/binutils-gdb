@@ -96,7 +96,6 @@ static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype ia64_frameless_function_invocation;
-static gdbarch_push_return_address_ftype ia64_push_return_address;
 static gdbarch_saved_pc_after_call_ftype ia64_saved_pc_after_call;
 static void ia64_pop_frame_regular (struct frame_info *frame);
 static struct type *is_float_or_hfa_type (struct type *t);
@@ -2216,7 +2215,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_deprecated_push_arguments (gdbarch, ia64_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, ia64_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, ia64_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, ia64_pop_frame);
 
   set_gdbarch_call_dummy_p (gdbarch, 1);

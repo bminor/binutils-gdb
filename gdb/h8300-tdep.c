@@ -1148,7 +1148,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_return_address (gdbarch, h8300_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, h8300_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
   set_gdbarch_deprecated_push_arguments (gdbarch, h8300_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);

@@ -4663,7 +4663,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_push_return_address (gdbarch, sh_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, sh_push_return_address);
 
   set_gdbarch_deprecated_store_return_value (gdbarch, sh_store_return_value);
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);

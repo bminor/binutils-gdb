@@ -2943,7 +2943,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, arm_push_return_address);
+
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
   /* Frame handling.  */
