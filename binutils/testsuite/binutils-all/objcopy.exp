@@ -398,6 +398,7 @@ strip_test_with_saving_a_symbol
 proc copy_setup { } {
     global srcdir
     global subdir
+    global gcc_gas_flag
     
     set res [build_wrapper testglue.o];
     set flags { debug };
@@ -409,6 +410,11 @@ proc copy_setup { } {
 	set add_libs "";
     }
 
+    if { [istarget *-*-linux*] } {
+	foreach i $gcc_gas_flag {
+	    set flags "additional_flags=$i $flags"
+	}
+    }
     if { [target_compile "$srcdir/$subdir/testprog.c $add_libs" tmpdir/testprog executable $flags]  != "" } {
 	return 2
     }

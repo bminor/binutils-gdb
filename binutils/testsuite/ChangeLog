@@ -1,3 +1,13 @@
+2001-02-11  H.J. Lu  <hjl@gnu.org>
+
+	* config/default.exp: Set up gcc_gas_flag.
+
+	* binutils-all/objcopy.exp (copy_setup): Process gcc_gas_flag
+	for Linux only.
+
+	* binutils-all/testprog.c: Include <string.h> and don't use
+	exit ().
+
 2001-01-16  Matthew Green  <mrg@redhat.com>
 
 	* binutils-all/readelf.s-64: Match readelf -S output.
