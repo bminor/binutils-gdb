@@ -363,12 +363,7 @@ extern const struct ext_format ext_format_68881;
 #endif /* no FIND_FRAME_SAVED_REGS.  */
 
 
-/* Things needed for making the inferior call functions.
-   It seems like every m68k based machine has almost identical definitions
-   in the individual machine's configuration files.  Most other cpu types
-   (mips, i386, etc) have routines in their *-tdep.c files to handle this
-   for most configurations.  The m68k family should be able to do this as
-   well.  These macros can still be overridden when necessary.  */
+/* Things needed for making the inferior call functions.  */
 
 /* The CALL_DUMMY macro is the sequence of instructions, as disassembled
    by gdb itself:
