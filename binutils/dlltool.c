@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -49,7 +49,7 @@
 
    EXPORTS  ( (  ( <name1> [ = <name2> ] )
                | ( <name1> = <module-name> . <external-name>))
-            [ @ <integer> ] [ NONAME ] [CONSTANT] [DATA] ) *
+            [ @ <integer> ] [ NONAME ] [CONSTANT] [DATA] [PRIVATE] ) *
    Declares name1 as an exported symbol from the
    DLL, with optional ordinal number <integer>.
    Or declares name1 as an alias (forward) of the function <external-name>
@@ -643,7 +643,8 @@ typedef struct export
     const char *internal_name;
     int ordinal;
     int constant;
-    int noname;
+    int noname;		/* Don't put name in image file.  */
+    int private;	/* Don't put reference in import lib.  */
     int data;
     int hint;
     int forward;	/* Number of forward label, 0 means no forward.  */
@@ -889,7 +890,7 @@ yyerror (const char * err ATTRIBUTE_UNUSED)
 
 void
 def_exports (const char *name, const char *internal_name, int ordinal,
-	     int noname, int constant, int data)
+	     int noname, int constant, int data, int private)
 {
   struct export *p = (struct export *) xmalloc (sizeof (*p));
 
@@ -898,6 +899,7 @@ def_exports (const char *name, const char *internal_name, int ordinal,
   p->ordinal = ordinal;
   p->constant = constant;
   p->noname = noname;
+  p->private = private;
   p->data = data;
   p->next = d_exports;
   d_exports = p;
@@ -1246,7 +1248,7 @@ scan_drectve_symbols (bfd *abfd)
 	  /* FIXME: The 5th arg is for the `constant' field.
 	     What should it be?  Not that it matters since it's not
 	     currently useful.  */
-	  def_exports (c, 0, -1, 0, 0, ! (flags & BSF_FUNCTION));
+	  def_exports (c, 0, -1, 0, 0, ! (flags & BSF_FUNCTION), 0);
 
 	  if (add_stdcall_alias && strchr (c, '@'))
 	    {
@@ -1255,7 +1257,7 @@ scan_drectve_symbols (bfd *abfd)
 	      char *atsym = strchr (exported_name, '@');
 	      *atsym = '\0';
 	      /* Note: stdcall alias symbols can never be data.  */
-	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0);
+	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0, 0);
 	    }
 	}
       else
@@ -1294,7 +1296,7 @@ scan_filtered_symbols (bfd *abfd, void *minisyms, long symcount,
 	++symbol_name;
 
       def_exports (xstrdup (symbol_name) , 0, -1, 0, 0,
-		   ! (sym->flags & BSF_FUNCTION));
+		   ! (sym->flags & BSF_FUNCTION), 0);
 
       if (add_stdcall_alias && strchr (symbol_name, '@'))
         {
@@ -1303,7 +1305,7 @@ scan_filtered_symbols (bfd *abfd, void *minisyms, long symcount,
 	  char *atsym = strchr (exported_name, '@');
 	  *atsym = '\0';
 	  /* Note: stdcall alias symbols can never be data.  */
-	  def_exports (exported_name, xstrdup (symbol_name), -1, 0, 0, 0);
+	  def_exports (exported_name, xstrdup (symbol_name), -1, 0, 0, 0, 0);
 	}
     }
 }
@@ -1518,13 +1520,14 @@ dump_def_info (FILE *f)
   fprintf (f, "\n");
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
-      fprintf (f, "%s  %d = %s %s @ %d %s%s%s\n",
+      fprintf (f, "%s  %d = %s %s @ %d %s%s%s%s\n",
 	       ASM_C,
 	       i,
 	       exp->name,
 	       exp->internal_name,
 	       exp->ordinal,
 	       exp->noname ? "NONAME " : "",
+	       exp->private ? "PRIVATE " : "",
 	       exp->constant ? "CONSTANT" : "",
 	       exp->data ? "DATA" : "");
     }
@@ -1595,20 +1598,20 @@ gen_def_file (void)
 
       if (strcmp (exp->name, exp->internal_name) == 0)
 	{
-
-	  fprintf (output_def, "\t%s%s%s @ %d%s%s\n",
+	  fprintf (output_def, "\t%s%s%s @ %d%s%s%s\n",
 		   quote,
 		   exp->name,
 		   quote,
 		   exp->ordinal,
 		   exp->noname ? " NONAME" : "",
+		   exp->private ? "PRIVATE " : "",
 		   exp->data ? " DATA" : "");
 	}
       else
 	{
-	  char *quote1 = strchr (exp->internal_name, '.') ? "\"" : "";
+	  char * quote1 = strchr (exp->internal_name, '.') ? "\"" : "";
 	  /* char *alias =  */
-	  fprintf (output_def, "\t%s%s%s = %s%s%s @ %d%s%s\n",
+	  fprintf (output_def, "\t%s%s%s = %s%s%s @ %d%s%s%s\n",
 		   quote,
 		   exp->name,
 		   quote,
@@ -1617,6 +1620,7 @@ gen_def_file (void)
 		   quote1,
 		   exp->ordinal,
 		   exp->noname ? " NONAME" : "",
+		   exp->private ? "PRIVATE " : "",
 		   exp->data ? " DATA" : "");
 	}
     }
@@ -2794,7 +2798,11 @@ gen_lib_file (void)
 
   for (i = 0; (exp = d_exports_lexically[i]); i++)
     {
-      bfd *n = make_one_lib_file (exp, i);
+      bfd *n;
+      /* Don't add PRIVATE entries to import lib.  */
+      if (exp->private)
+	continue;
+      n = make_one_lib_file (exp, i);
       n->next = head;
       head = n;
     }
@@ -2831,8 +2839,11 @@ gen_lib_file (void)
       char *name;
 
       name = (char *) alloca (strlen (TMP_STUB) + 10);
-      for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+      for (i = 0; (exp = d_exports_lexically[i]); i++)
 	{
+	  /* Don't delete non-existent stubs for PRIVATE entries.  */
+          if (exp->private)
+	    continue;
 	  sprintf (name, "%s%05d.o", TMP_STUB, i);
 	  if (unlink (name) < 0)
 	    /* xgettext:c-format */
@@ -2843,10 +2854,9 @@ gen_lib_file (void)
   inform (_("Created lib file"));
 }
 
-/**********************************************************************/
-
 /* Run through the information gathered from the .o files and the
    .def file and work out the best stuff.  */
+
 static int
 pfunc (const void *a, const void *b)
 {
@@ -2890,11 +2900,7 @@ remove_null_names (export_type **ptr)
 }
 
 static void
-dtab (export_type **ptr
-#ifndef SACDEBUG
-ATTRIBUTE_UNUSED
-#endif
-      )
+dtab (export_type **ptr ATTRIBUTE_UNUSED)
 {
 #ifdef SACDEBUG
   int i;
@@ -2922,7 +2928,6 @@ process_duplicates (export_type **d_export_vec)
 
   while (more)
     {
-
       more = 0;
       /* Remove duplicates.  */
       qsort (d_export_vec, d_nfuncs, sizeof (export_type *), nfunc);
@@ -2933,7 +2938,6 @@ process_duplicates (export_type **d_export_vec)
 	  if (strcmp (d_export_vec[i]->name,
 		      d_export_vec[i + 1]->name) == 0)
 	    {
-
 	      export_type *a = d_export_vec[i];
 	      export_type *b = d_export_vec[i + 1];
 
@@ -2963,13 +2967,10 @@ process_duplicates (export_type **d_export_vec)
 	}
     }
 
-
   /* Count the names.  */
   for (i = 0; i < d_nfuncs; i++)
-    {
-      if (!d_export_vec[i]->noname)
-	d_named_nfuncs++;
-    }
+    if (!d_export_vec[i]->noname)
+      d_named_nfuncs++;
 }
 
 static void
@@ -3008,7 +3009,7 @@ fill_ordinals (export_type **d_export_vec)
     {
       if (d_export_vec[i]->ordinal == -1)
 	{
-	  register int j;
+	  int j;
 
 	  /* First try within or after any user supplied range.  */
 	  for (j = lowest; j < size; j++)
@@ -3063,8 +3064,7 @@ mangle_defs (void)
 
   int i;
   int hint = 0;
-  export_type **d_export_vec
-  = (export_type **) xmalloc (sizeof (export_type *) * d_nfuncs);
+  export_type **d_export_vec = xmalloc (sizeof (export_type *) * d_nfuncs);
 
   inform (_("Processing definitions"));
 
@@ -3100,8 +3100,6 @@ mangle_defs (void)
 
   inform (_("Processed definitions"));
 }
-
-/**********************************************************************/
 
 static void
 usage (FILE *file, int status)
@@ -3239,7 +3237,7 @@ main (int ac, char **av)
 	  as_flags = optarg;
 	  break;
 
-	  /* ignored for compatibility */
+	  /* Ignored for compatibility.  */
 	case 'u':
 	  break;
 	case 'a':
