@@ -254,14 +254,13 @@ fetch_register (int regno)
 /* 
  * Read AMD's Binary Compatibilty Standard conforming core file.
  * struct ptrace_user is the first thing in the core file
+ *
+ * CORE_REG_SECT, CORE_REG_SIZE, WHICH, and REG_ADDR are all ignored.
  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;	/* Unused in this version */
-     unsigned core_reg_size;	/* Unused in this version */
-     int which;			/* Unused in this version */
-     CORE_ADDR reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR reg_addr)
 {
   register int regno;
   int val;

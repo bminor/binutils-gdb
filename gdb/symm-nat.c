@@ -314,7 +314,6 @@ print_1167_control_word (unsigned int pcr)
 }
 
 print_1167_regs (long regs[FPA_NREGS])
-
 {
   int i;
 

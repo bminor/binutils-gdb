@@ -1,3 +1,10 @@
+2000-11-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* symm-nat.c (print_1167_regs): Remove extraneous blank line
+	after function declarator.
+	* symtab.c (search_symbols): Likewise.
+	* ultra3-nat.c (fetch_core_registers): Protoize.
+
 2000-10-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/sh/tm-linux.h: New file.  Include generic tm-linux.h, 

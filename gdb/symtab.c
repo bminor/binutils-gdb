@@ -3535,7 +3535,6 @@ make_cleanup_free_search_symbols (struct symbol_search *symbols)
 void
 search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		struct symbol_search **matches)
-
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
