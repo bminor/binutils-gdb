@@ -1,3 +1,7 @@
+Tue Jan 11 14:27:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* remote-udi.c (udi_resume): Correct prototype.
+
 Tue Jan 11 11:10:30 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * config/pa/tm-hppa.h (FRAME_FIND_SAVED_REGS): Call
@@ -51,7 +55,6 @@ Mon Jan 10 15:48:36 1994  Tom Lord  (lord@rtl.cygnus.com)
 	* m68k-stub.c, sparc-stub.c: removed spurious introduction of 
 	_filtered io routines from these two files.
 
->>>>>>> 1.2095
 Fri Jan  7 12:42:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/i386/tm-i386v.h, config/m68k/tm-m68k.h, config/mips/tm-mips.h,
