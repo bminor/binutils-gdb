@@ -72,6 +72,12 @@ const struct v850_operand v850_operands[] = {
 #define D8	(CCCC+1)
   { 8, 0, 0, 0, 0 },
 
+/* System register operands.  */
+#define SR1	(D8+1)
+  { 5, 0, 0, 0, V850_OPERAND_SRG }, 
+
+#define SR2	(SR1+1)
+  { 5, 11, 0, 0, V850_OPERAND_SRG },
 } ; 
 
 
@@ -220,8 +226,8 @@ const struct v850_opcode v850_opcodes[] = {
 { "halt",	two(0x07e0,0x0120),	two(0xffff,0xffff),	{0}, 4 },
 { "reti",	two(0x07e0,0x0140),	two(0xffff,0xffff),	{0}, 4 },
 { "trap",	two(0x07e0,0x0100),	two(0xffe0,0xffff),	{I5U}, 4 },
-{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	IF1, 4 },
-{ "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	IF1, 4 },
+{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R1,SR2}, 4 },
+{ "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	{SR1,R2}, 4 },
 { "nop",	one(0x00),		one(0xff),		{0}, 2 },
 
 } ;
