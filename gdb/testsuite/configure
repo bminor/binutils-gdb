@@ -1049,7 +1049,8 @@ done
 
 ac_given_srcdir=$srcdir
 
-trap 'rm -fr `echo "Makefile gdb.ada/Makefile gdb.ada/gnat_ada.gpr \
+trap 'rm -fr `echo "Makefile \
+  gdb.ada/Makefile gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
   gdb.cp/Makefile gdb.disasm/Makefile gdb.java/Makefile gdb.mi/Makefile \
   gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
@@ -1144,7 +1145,8 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile gdb.ada/Makefile gdb.ada/gnat_ada.gpr \
+CONFIG_FILES=\${CONFIG_FILES-"Makefile \
+  gdb.ada/Makefile gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
   gdb.cp/Makefile gdb.disasm/Makefile gdb.java/Makefile gdb.mi/Makefile \
   gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile"}
