@@ -1,3 +1,8 @@
+Sat Mar  8 00:16:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sparc-tdep.c (isbranch):  Always handle v9 branch instructions,
+	they might get used on 32 bit targets as well.
+
 Wed Mar  5 19:34:09 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* remote-mips.c (mips_exit_debug): Some IDT boards don't
