@@ -686,6 +686,9 @@ proc mi_step { test } {
 # cmd should not include the number or newline (i.e. "exec-step 3", not
 # "220-exec-step 3\n"
 
+# Can not match -re ".*\r\n${mi_gdb_prompt}", because of false positives
+# after the first prompt is printed.
+
 proc mi_run_to_helper { cmd reason func args file line extra test } {
     global suppress_flag
     if { $suppress_flag } {
@@ -708,12 +711,6 @@ proc mi_run_to_helper { cmd reason func args file line extra test } {
 	    fail "$test (unknown output after running)"
 	    return -1
 	}
-# Can not check for this, because of false positives after half of a running
-# prompt.
-#	-re ".*\r\n${mi_gdb_prompt}" {
-#	    fail "$test (unknown output)"
-#	    return -1
-#	}
 	timeout {
 	    fail "$test (timeout)"
 	    return -1
