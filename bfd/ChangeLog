@@ -1,3 +1,10 @@
+2004-11-24  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_swap_symbol_in): New function.
+	(elf32_arm_swap_symbol_out): New function.
+	(elf32_arm_size_info): Add.
+	(elf_backend_size_info): Define.
+
 2004-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* hpux-core.c (hpux_core_core_file_p): Use offsetof macro in calls to

@@ -1,3 +1,7 @@
+2004-11-24  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/mixed-lib.sym: Update for THUMB_FUNC change.
+
 2004-11-19  Nick Clifton  <nickc@redhat.com>
 
 	* ld-scripts/script.exp: Add test of memory linker script.

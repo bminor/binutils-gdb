@@ -5662,6 +5662,82 @@ elf32_arm_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
     elfsym->symbol.flags |= BSF_FUNCTION;
 }
 
+
+/* Mangle thumb function symbols as we read them in.  */
+
+static void
+elf32_arm_swap_symbol_in (bfd * abfd,
+			  const void *psrc,
+			  const void *pshn,
+			  Elf_Internal_Sym *dst)
+{
+  bfd_elf32_swap_symbol_in (abfd, psrc, pshn, dst);
+
+  /* New EABI objects mark thumb function symbols by setting the low bit of
+     the address.  Turn these into STT_ARM_TFUNC.  */
+  if (ELF_ST_TYPE (dst->st_info) == STT_FUNC
+      && (dst->st_value & 1))
+    {
+      dst->st_info = ELF_ST_INFO (ELF_ST_BIND (dst->st_info), STT_ARM_TFUNC);
+      dst->st_value &= ~(bfd_vma) 1;
+    }
+}
+
+
+/* Mangle thumb function symbols as we write them out.  */
+
+static void
+elf32_arm_swap_symbol_out (bfd *abfd,
+			   const Elf_Internal_Sym *src,
+			   void *cdst,
+			   void *shndx)
+{
+  Elf_Internal_Sym newsym;
+
+  /* We convert STT_ARM_TFUNC symbols into STT_FUNC with the low bit
+     of the address set, as per the new EABI.  We do this unconditionally
+     because objcopy does not set the elf header flags until after
+     it writes out the symbol table.  */
+  if (ELF_ST_TYPE (src->st_info) == STT_ARM_TFUNC)
+    {
+      newsym = *src;
+      newsym.st_info = ELF_ST_INFO (ELF_ST_BIND (src->st_info), STT_FUNC);
+      newsym.st_value |= 1;
+      
+      src = &newsym;
+    }
+  bfd_elf32_swap_symbol_out (abfd, src, cdst, shndx);
+}
+
+/* We use this to override swap_symbol_in and swap_symbol_out.  */
+const struct elf_size_info elf32_arm_size_info = {
+  sizeof (Elf32_External_Ehdr),
+  sizeof (Elf32_External_Phdr),
+  sizeof (Elf32_External_Shdr),
+  sizeof (Elf32_External_Rel),
+  sizeof (Elf32_External_Rela),
+  sizeof (Elf32_External_Sym),
+  sizeof (Elf32_External_Dyn),
+  sizeof (Elf_External_Note),
+  4,
+  1,
+  32, 2,
+  ELFCLASS32, EV_CURRENT,
+  bfd_elf32_write_out_phdrs,
+  bfd_elf32_write_shdrs_and_ehdr,
+  bfd_elf32_write_relocs,
+  elf32_arm_swap_symbol_in,
+  elf32_arm_swap_symbol_out,
+  bfd_elf32_slurp_reloc_table,
+  bfd_elf32_slurp_symbol_table,
+  bfd_elf32_swap_dyn_in,
+  bfd_elf32_swap_dyn_out,
+  bfd_elf32_swap_reloc_in,
+  bfd_elf32_swap_reloc_out,
+  bfd_elf32_swap_reloca_in,
+  bfd_elf32_swap_reloca_out
+};
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #ifdef __QNXTARGET__
@@ -5701,6 +5777,7 @@ elf32_arm_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_final_write_processing      elf32_arm_final_write_processing
 #define elf_backend_copy_indirect_symbol        elf32_arm_copy_indirect_symbol
 #define elf_backend_symbol_processing		elf32_arm_symbol_processing
+#define elf_backend_size_info			elf32_arm_size_info
 
 #define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1
