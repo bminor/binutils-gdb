@@ -27,7 +27,7 @@
 #include "inferior.h"
 #include "osabi.h"
 #include "reggroups.h"
-
+#include "dwarf2-frame.h"
 #include "gdb_string.h"
 
 #include "i386-tdep.h"

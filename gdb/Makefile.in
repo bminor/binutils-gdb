@@ -1827,12 +1827,7 @@ c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 c-valprint.o: c-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(valprint_h) $(language_h) \
 	$(c_lang_h) $(cp_abi_h) $(target_h)
-d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
-	$(frame_base_h) $(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(gdb_string_h) $(value_h) $(inferior_h) $(dis_asm_h) $(symfile_h) \
-	$(objfiles_h) $(language_h) $(arch_utils_h) $(regcache_h) \
-	$(remote_h) $(floatformat_h) $(gdb_sim_d10v_h) $(sim_regno_h) \
-	$(disasm_h) $(trad_frame_h) $(gdb_assert_h)
+# OBSOLETE d10v-tdep.o: d10v-tdep.c
 dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
@@ -2021,8 +2016,8 @@ i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_proc_service_h)
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
-	$(gdb_string_h) $(i386_tdep_h) $(i386_linux_tdep_h) $(glibc_tdep_h) \
-	$(solib_svr4_h)
+	$(dwarf2_frame_h) $(gdb_string_h) $(i386_tdep_h) \
+	$(i386_linux_tdep_h) $(glibc_tdep_h) $(solib_svr4_h)
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(osabi_h) $(i386_tdep_h)
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
@@ -2170,8 +2165,8 @@ m32r-stub.o: m32r-stub.c $(syscall_h)
 m32r-tdep.o: m32r-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(gdb_string_h) $(value_h) $(inferior_h) $(symfile_h) $(objfiles_h) \
-	$(language_h) $(arch_utils_h) $(regcache_h) $(trad_frame_h) \
-	$(dis_asm_h) $(gdb_assert_h) $(osabi_h) $(m32r_tdep_h)
+	$(osabi_h) $(language_h) $(arch_utils_h) $(regcache_h) \
+	$(trad_frame_h) $(dis_asm_h) $(gdb_assert_h) $(m32r_tdep_h)
 m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(dwarf2_frame_h) $(trad_frame_h) $(symtab_h) \
 	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
@@ -2673,7 +2668,8 @@ user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(charset_h) $(annotate_h) \
-	$(filenames_h) $(symfile_h) $(inferior_h) $(readline_h)
+	$(filenames_h) $(symfile_h) $(inferior_h) $(gdb_curses_h) \
+	$(readline_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
 v850ice.o: v850ice.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
