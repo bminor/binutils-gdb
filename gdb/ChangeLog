@@ -12,36 +12,6 @@
 	%eflags isn't modified.  This fixes a bug where every call to a
 	function in the program beyond the first call would fail.
 
-2000-03-10  Daniel Berlin  <dan@cgsoftware.com>
-	Fix C++ overloading, add support for seeing through references.
-
-	* defs.h (STREQ_IW): add STREQ_IW, like STREQ, except it's
-	whitespace insensitive
-
-	* valops.c (find_overload_match): Handle STABS overloading for
-	C++.
-	(find_overload_match): Look in right place for function arguments
-	in the debug info.
-	(find_overload_match): Rather than giving up when we have >1
-	perfect match, just choose one, especially since the
-	recommendation GDB gives ("disambiguate it by specifying function
-	signature"), is basically impossible.
-	(check_field_in): STREQ->STREQ_IW
-	(search_struct_field): STREQ->STREQ_IW
-	(find_method_list): STREQ->STREQ_IW
-
-	* gdbtypes.c (rank_one_type): Add ability to see through
-	references.
-	(rank_one_type): strcmp->strcmp_iw, because the whitespace could
-	be different.
-	(rank_function): Rank function properly (was doing it wrong
-	before, comparing the wrong parts of the arrays)
-	(rank_one_type): Change #if 0 to #ifdef DEBUG_OLOAD.
-
-	* gdbtypes.h: Add REFERENCE_CONVERSION_BADNESS for "badness"
-	associated with converting a non-reference to a reference.
-
-
 Fri Mar 10 11:44:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Devolve responsibility for domain maintenance.
@@ -58,8 +28,8 @@ Fri Mar 10 11:44:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Mar  9 14:21:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS (Core): Anthony Green is the Java - including
-	testsuite - maintainer.  Reformat testsuite and language support
-	sections
+ 	testsuite - maintainer.  Reformat testsuite and language support
+ 	sections
 
 2000-03-08  Mark Kettenis  <kettenis@gnu.org>
 
@@ -95,7 +65,7 @@ Thu Mar  9 14:21:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
-	From  Eli Zaretskii  <eliz@is.elta.co.il>:
+        From  Eli Zaretskii  <eliz@is.elta.co.il>:
 
 	* event-loop.c (poll_timers): Don't compare delta.tv_sec with
 	zero, since time_t might be unsigned.
@@ -172,13 +142,13 @@ Sun Mar  5 19:40:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(i386_linux_sigcontext_addr): New function.  Recognize the names
 	of the signal tranmpolines used by recent versions of the GNU C
 	library, and add support for RT signals.
-	(LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_SP_OFFSET):  New
+        (LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_SP_OFFSET):  New
 	defines.  Moved here from config/i386/tm-linux.h.
 	(i386_linux_sigtramp_saved_pc, i386_linux_sigtramp_saved_sp):
 	Reimplement in terms of i386_linux_sigcontext_addr.
 	* config/i386/tm-linux.h (LINUX_SIGCONTEXT_SIZE): Removed.
-	(LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_SP_OFFSET):
-	Moved to i386-tdep.c.
+        (LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_SP_OFFSET):
+        Moved to i386-tdep.c.
 	(IN_SIGTRAMP): Redefine to call i386_linux_in_sigtramp.
 
 Sat Mar  4 19:38:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
@@ -189,57 +159,57 @@ Sat Mar  4 19:38:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Sat Mar  4 17:23:06 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Frank Ch. Eigler and Andrew Cagney co-ordinate the
-	sim directory.
+ 	sim directory.
 
 Sat Mar  4 16:19:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Michael Snyder and Peter Schauer to list of
-	``Blanket Write Privs'' maintainers.
+ 	``Blanket Write Privs'' maintainers.
 
 Sat Mar  4 15:58:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Sun 20 Feb 2000 Robert Lipe <robertl@sco.com>:
 	* language.c (longest_local_hex_string_custom): Don't compile
-	'long long' section if host doesn't have 'long long'.
+ 	'long long' section if host doesn't have 'long long'.
 
 Sat Mar  4 15:45:38 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* language.c (longest_raw_hex_string): Comment out.  Appears
-	unused.
+ 	unused.
 
 Sat Mar  4 13:02:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* utils.c (mcalloc), defs.h (mcalloc): Keep consistent with
-	"mmalloc.h" which means using PTRs.
+ 	"mmalloc.h" which means using PTRs.
 	(init_malloc, msavestring, mstrsave): Convert to PTR free ISO-C.
 
 Sat Mar  4 11:49:21 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (store_address, store_unsigned_integer, store_address):
-	Replace PTR with void* in delcaration.
+ 	Replace PTR with void* in delcaration.
 	* findvar.c (extract_signed_integer, extract_unsigned_integer,
-	extract_long_unsigned_integer, extract_address,
-	store_signed_integer, store_unsigned_integer, store_address):
-	Convert definition to ISO-C.  Replace PTR with void*.
+ 	extract_long_unsigned_integer, extract_address,
+ 	store_signed_integer, store_unsigned_integer, store_address):
+ 	Convert definition to ISO-C.  Replace PTR with void*.
 
 Sat Mar  4 10:57:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (make_cleanup_func): Document as deprecated.
 	(make_cleanup_ftype): New typedef.  Make signature consistent with
-	other function typedefs.  Document as not be used out side of
-	make_cleanup code. Use in make_cleanup declarations.
+ 	other function typedefs.  Document as not be used out side of
+ 	make_cleanup code. Use in make_cleanup declarations.
 	(null_cleanup): Replace PTR with void*.
-
+	
 	* utils.c (make_cleanup, make_final_cleanup, make_run_cleanup,
-	make_exec_cleanup, make_exec_error_cleanup, make_my_cleanup,
-	null_cleanup): Change K&R definition to ISO-C using void* and
-	make_cleanup_fytpe.
+ 	make_exec_cleanup, make_exec_error_cleanup, make_my_cleanup,
+ 	null_cleanup): Change K&R definition to ISO-C using void* and
+ 	make_cleanup_fytpe.
 	(discard_my_cleanups): Don't cast argument to free.
 
 2000-03-03  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* defs.h (struct continuation_arg): Change type of field 'data'
-	from PTR to void *.
+ 	from PTR to void *.
 
 	* event-loop.h: Eliminate uses of PTR, use 'void *' instead.
 
@@ -248,13 +218,13 @@ Sat Mar  4 10:57:25 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri Mar  3 15:39:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (CONFIG_CLEAN, CONFIG_ALL, LN_S): Defined by
-	configure.
+ 	configure.
 	(SUBDIR_MI_CLEAN, SUBDIR_GDBTK_CLEAN, SUBDIR_MI_ALL,
-	SUBDIR_GDBTK_ALL): Define.
+ 	SUBDIR_GDBTK_ALL): Define.
 	(all-gdbtk, clean-gdbtk): New targets.
 	(all): Add CONFIG_ALL as dependency.
 	(clean): Add CONFIG_CLEAN as dependency.
-
+	
 	* configure.in (CONFIG_ALL, CONFIG_CLEAN): Define.
 	(LN_S): Define.  Delete GDBtk's link code.
 
@@ -268,7 +238,7 @@ Fri Mar  3 13:12:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-03-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/alpha/alpha-linux.mh: Remove core-regset.o fron the
-	NATDEPFILES list.
+ 	NATDEPFILES list.
 
 2000-03-02  Mark Kettenis  <kettenis@gnu.org>
 
@@ -294,25 +264,25 @@ Fri Mar  3 13:12:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Thu Mar  2 09:04:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* MAINTAINERS: Daniel Berlin is C++ maintainer.
+	* MAINTAINERS: Daniel Berlin is C++ maintainer.		
 
 Thu Mar  2 08:55:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Mark Kettenis is the x86 architcture maintainer and
-	a joint GNU/Linux/x86 maintainer.  Nick Duffeck and Robert Lipe
-	share SCO/Unixware.  Nick Duffek and Peter Schauer share
-	Solaris/x86.
+ 	a joint GNU/Linux/x86 maintainer.  Nick Duffeck and Robert Lipe
+ 	share SCO/Unixware.  Nick Duffek and Peter Schauer share
+ 	Solaris/x86.
 
 Wed Mar  1 22:12:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
-
+	
 	From Wed 23 Feb 2000 Fernando Nasser <fnasser@redhat.com>:
 	* remote-sim.c (gdbsim_close): Call generic_mourn_inferior.
-	* remote-rdi.c (arm_rdi_close): Ditto.
+	* remote-rdi.c (arm_rdi_close): Ditto. 
 
 Wed Mar  1 19:31:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* CONTRIBUTE (configure.in): Note that patches to configure are
-	not needed.
+ 	not needed.
 
 2000-03-01  Mark Kettenis  <kettenis@gnu.org>
 
@@ -327,10 +297,10 @@ Wed Mar  1 00:49:06 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	From 2000-02-28 Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
 	Make NEW_PROC_ABI interface functional on Solaris x86.
 	* sol-thread.c (ps_lgetLDT): Rewrite to use new
-	procfs_find_LDT_entry function from procfs.c, mostly copied from
-	lin-thread.c.
+ 	procfs_find_LDT_entry function from procfs.c, mostly copied from
+ 	lin-thread.c.
 	* inferior.h, procfs.c (procfs_get_pid_fd): Removed, no longer
-	needed.
+ 	needed.
 
 Wed Mar  1 00:34:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -340,11 +310,11 @@ Wed Mar  1 00:34:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Wed Mar  1 00:06:19 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 1999-08-13 J.T. Conklin <jtc@redback.com>:
-	* config/i386/tm-i386.h (FRAME_INIT_SAVED_REGS): Replace
-	FRAME_FIND_SAVED_REGS.
-	(i386_frame_init_saved_regs): Replace i386_frame_find_saved_regs.
-	* i386-tdep.c (i386_frame_init_saved_regs, i386_pop_frame):
-	Update.
+        * config/i386/tm-i386.h (FRAME_INIT_SAVED_REGS): Replace
+        FRAME_FIND_SAVED_REGS.
+        (i386_frame_init_saved_regs): Replace i386_frame_find_saved_regs.
+        * i386-tdep.c (i386_frame_init_saved_regs, i386_pop_frame):
+        Update.
 
 Tue Feb 29 23:56:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -366,7 +336,7 @@ Tue Feb 29 18:47:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	to the list of targets which return FP values in FP registers.
 
 	* i386-tdep.c (i386_extract_return_value): Add FIXME recommending
-	that this function be re-implemented using multi-arch.
+ 	that this function be re-implemented using multi-arch.
 
 Tue Feb 29 18:40:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -389,24 +359,24 @@ Tue Feb 29 17:33:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Wed, 23 Feb 2000 Fernando Nasser <fnasser@redhat.com>:
 	* stack.c (backtrace_command_1), infrun.c (normal_stop): Check
-	that the target's stack was valid.
+ 	that the target's stack was valid.
 
 Tue Feb 29 15:14:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-02-22 Stephane Carrez <stcarrez@worldnet.fr>:
-	* dwarf2read.c (read_address): Read 16-bits addresses.
+        * dwarf2read.c (read_address): Read 16-bits addresses.
 
 2000-02-28  Scott Bambrough <scottb@netwinder.org>
 
 	* arm-linux-nat.c (fetch_nw_fpe_*):
-	Renamed to fetch_nwfpe_* to use the same naming convention
+ 	Renamed to fetch_nwfpe_* to use the same naming convention
 	as in the Linux kernel.  Modified prototype to get rid of
 	unused parameters.
 	(store_nw_fpe_*): Renamed to store_nwfpe_* to use the same
-	naming convention as in the Linux kernel.  Fixed calls to
+	naming convention as in the Linux kernel.  Fixed calls to 
 	fetch_nwfpe_*.
 	(store_fpregs): Fixed calls to store_nwfpe_*.  Removed
-	unused variable.
+	unused variable. 
 
 Mon Feb 28 18:24:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -424,7 +394,7 @@ Mon Feb 28 13:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Mon Feb 28 10:58:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Mention mmalloc.  Expand Host/Native and
-	Target/Architecture maintainers descriptions.
+ 	Target/Architecture maintainers descriptions.
 
 2000-02-26  Mark Kettenis  <kettenis@gnu.org>
 
@@ -479,8 +449,8 @@ Mon Feb 28 10:58:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Sat Feb 26 17:15:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Chris Faylor is responsible for all MS Windows
-	systems.  Note that Jim Blandy as maintainer for ``tracing
-	bytecode stuff''
+ 	systems.  Note that Jim Blandy as maintainer for ``tracing
+ 	bytecode stuff''
 
 2000-02-25  Fernando Nasser  <fnasser@cygnus.com>
 
@@ -516,23 +486,23 @@ Wed Feb 23 23:27:48 2000  Andrew Cagney  <cagney@behemoth.cygnus.com>
 Thu Feb 24 18:42:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Set to
-	$(SUBDIR_*_INSTALL) when so configured.
+ 	$(SUBDIR_*_INSTALL) when so configured.
 	* configure: Regenerate.
-
+	
 	* Makefile.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Define using
-	configure.
+ 	configure.
 	(install-only): Add dependency on $(CONFIG_INSTALL).  Delete code
-	installing GDBtk.
+ 	installing GDBtk.
 	(uninstall): Add dependency on $(CONFIG_UNINSTALL).
 	(SUBDIR_MI_INSTALL, SUBDIR_MI_UNINSTALL, SUBDIR_GDBTK_UNINSTALL,
-	SUBDIR_GDBTK_INSTALL): Define.
+ 	SUBDIR_GDBTK_INSTALL): Define.
 	(install-gdbtk): New target.
 
 Thu Feb 24 18:19:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SUBDIR_MI_CFLAGS): Fix typo, wrong brace.
 	* configure: Regenerate.
-
+	
 2000-02-24  Christopher Faylor  <cgf@cygnus.com>
 
 	* configure.tgt: Add arm, mips, sh wince targets.
@@ -573,7 +543,7 @@ Wed Feb 23 19:01:45 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 Wed Feb 23 12:58:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (dis_asm_read_memory): Change LEN to unsigned long.
-	Match ../include/dis-asm.h change.
+  	Match ../include/dis-asm.h change.
 	* gdbarch.h: Regenerate.
 	* corefile.c (dis_asm_read_memory): Update.
 
@@ -582,38 +552,38 @@ Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.in (CONFIG_INITS): Fix typo, was CONFIG_INIT.
 	(ENABLE_CFLAGS): Move initialization to start of file.
 	(enable-gdbmi): Add new configure option --enable-gdbmi.  When
-	selected and an ${srcdir}/mi directory is present enable MI
-	interface.
+ 	selected and an ${srcdir}/mi directory is present enable MI
+ 	interface.
 
 	* configure: Regenerate.
-
+	
 	* Makefile.in (SUBDIR_MI_OBS, SUBDIR_MI_SRCS, SUBDIR_MI_DEPS,
-	SUBDIR_MI_INITS, SUBDIR_MI_LDFLAGS, SUBDIR_MI_CFLAGS): New macros.
+ 	SUBDIR_MI_INITS, SUBDIR_MI_LDFLAGS, SUBDIR_MI_CFLAGS): New macros.
 	(CONFIG_OBS, CONFIG_SRCS, CONFIG_DEPS, CONFIG_INITS,
-	CONFIG_LDFLAGS): New macros.  Initialized by autoconf via
-	@CONFIG...@.
+ 	CONFIG_LDFLAGS): New macros.  Initialized by autoconf via
+ 	@CONFIG...@.
 	(INTERNAL_LDFLAGS, CDEPS, LINTFILES, DEPFILES, SOURCES,
-	INIT_FILES): Use $(CONFIG_...) instead of @CONFIG...@.
+ 	INIT_FILES): Use $(CONFIG_...) instead of @CONFIG...@.
 
 	* mi: New directory. MI interface to GDB.
 
 	* defs.h (interpreter_p): Declare when UI_OUT.
 	* top.c (gdb_init): When interpreter_p, check that the interpreter
-	was recognized by one of the linked in interpreters.
+ 	was recognized by one of the linked in interpreters.
 	* main.c (interpreter_p): Define.
 	(captured_main): When UI_OUT, check for ``-i <interpreter>'' option.
 	* event-top.c (display_gdb_prompt): When interpreter_p, assume
-	interpreter displays prompt.
+ 	interpreter displays prompt.
 
 	* breakpoint.c (print_it_typical, watchpoint_check,
-	print_one_breakpoint, mention): When MI include additional
+ 	print_one_breakpoint, mention): When MI include additional
 	target status information.
 	* infrun.c (print_stop_reason, normal_stop): Ditto.
 
 2000-02-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdbarch.sh: Make the `default' field really default to zero, as
-	documented.
+ 	documented.
 
 	Bring COERCE_FLOAT_TO_DOUBLE under gdbarch's control.
 	* valops.c (COERCE_FLOAT_TO_DOUBLE): Rework definition to be
@@ -626,8 +596,8 @@ Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdbarch.sh (coerce_float_to_double): New entry, replacing macro.
 	* gdbarch.c, gdbarch.h: Regenerated.
 	* tm-alpha.h, tm-fr30.h, tm-m32r.h, tm-mips.h, tm-hppa.h,
-	tm-rs6000.h, tm-sh.h, tm-sparc.h (COERCE_FLOAT_TO_DOUBLE): Change
-	definitions.
+ 	tm-rs6000.h, tm-sh.h, tm-sparc.h (COERCE_FLOAT_TO_DOUBLE): Change
+ 	definitions.
 	* mips-tdep.c (mips_coerce_float_to_double): Supply our own custom
 	function here.
 	(mips_gdbarch_init): Install that as our coerce_float_to_double
@@ -680,8 +650,8 @@ Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	From Philippe De Muyter  <phdm@macqel.be>
 
 	* event-loop.c (handle_file_event): In case of poll, enable
-	printing of informational message if an error/exception is
-	detected on the file descriptor.
+ 	printing of informational message if an error/exception is
+ 	detected on the file descriptor.
 
 2000-02-21  Jim Kingdon  <kingdon@redhat.com>
 
@@ -690,33 +660,33 @@ Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Mon Feb 21 12:50:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* buildsym.c: Include "language.h" and "expression.h" for
-	longest_local_hex_string_custom.
+ 	longest_local_hex_string_custom.
 
 Mon Feb 21 11:17:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh: Include <gdb_wait.h> instead of <wait.h>.
 	* gdbarch.c: Already updated by Wed Feb 9 18:59:16 2000 Andrew
-	Cagney <cagney@b1.cygnus.com>.
+ 	Cagney <cagney@b1.cygnus.com>.
 
 Mon Feb 21 11:03:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Update: IA-64 - Kevin Buettner; ARM - Fernando
-	nasser, Jim Ingham and Scott Bambrough; GNU/Linux ARM - Scott
-	Bambrough; event loop - Elena Zannoni; SDS and RDI/APD protocol -
-	to Fernando Nasser and Jim Ingham; KOD - Fernando Nasser; MI -
-	Andrew Cagney, Elena Zannoni and Fernando Nasser; Web pages - Jim
-	Kingdon.
+ 	nasser, Jim Ingham and Scott Bambrough; GNU/Linux ARM - Scott
+ 	Bambrough; event loop - Elena Zannoni; SDS and RDI/APD protocol -
+ 	to Fernando Nasser and Jim Ingham; KOD - Fernando Nasser; MI -
+ 	Andrew Cagney, Elena Zannoni and Fernando Nasser; Web pages - Jim
+ 	Kingdon.
 	* MAINTAINERS: Add Nick Clifton to write after approval list.
-
+	
 Mon Feb 21 10:30:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add note on multiple maintainers.
 
 2000-02-19  Philippe De Muyter  <phdm@macqel.be>
 
-	* cli-out.c (cli_table_header): Type of parameter `alignment' is
-	`enum ui_align', not `int'.
-	(cli_field_string, cli_field_skip): Likewise.
+        * cli-out.c (cli_table_header): Type of parameter `alignment' is
+        `enum ui_align', not `int'.
+        (cli_field_string, cli_field_skip): Likewise.
 
 2000-02-18  Jim Blandy  <jimb@redhat.com>
 
@@ -729,8 +699,8 @@ Mon Feb 21 10:30:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-02-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote.c (remote_async_detach): Use target_mourn_inferior(), to
-	make sure that all is cleaned up after we disconnect from the
-	target.
+ 	make sure that all is cleaned up after we disconnect from the
+ 	target.
 	(remote_detach): Ditto.
 
 2000-02-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
@@ -786,7 +756,7 @@ Mon Feb 21 10:30:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Wed Feb 16 19:00:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-01-26 Rodney Brown <RodneyBrown@pmsc.com>:
-	* procfs.c: Define MERGEPID if not defined. For osf4.0e.
+        * procfs.c: Define MERGEPID if not defined. For osf4.0e.
 
 2000-02-15  Jason Molenda  (jsm@bugshack.cygnus.com)
 
@@ -800,11 +770,11 @@ Wed Feb 16 19:00:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	to correct value for generic dummy frames.  When using
 	generic dummy frames, don't attempt to write TOC value or
 	function to call into the call dummy.
-	(rs6000_push_arguments): Adapt USE_GENERIC_DUMMY_FRAMES
+        (rs6000_push_arguments): Adapt USE_GENERIC_DUMMY_FRAMES
 	code to also handle the PowerOpen ABI.
 	(ppc_push_return_address): Enable for all ports.
 	* config/powerpc/tm-ppc-aix.h (USE_GENERIC_DUMMY_FRAMES,
-	PUSH_DUMMY_FRAME, PUSH_RETURN_ADDRESS, GET_SAVED_REGISTER,
+	PUSH_DUMMY_FRAME, PUSH_RETURN_ADDRESS, GET_SAVED_REGISTER, 
 	CALL_DUMMY_BREAKPOINT_OFFSET, CALL_DUMMY_LOCATION,
 	CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET): Override defaults
 	provided by generic RS6000 definitions so that call dummies
@@ -827,7 +797,7 @@ Wed Feb 16 19:00:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-02-15  Jesper Skov  <jskov@cygnus.co.uk>
 
 	Patch applied by Kevin Buettner <kevinb@redhat.com>
-
+	
 	* rs6000-tdep.c (skip_prologue): skip copying of argument
 	registers to local variable registers.
 
@@ -866,9 +836,9 @@ Mon Feb 14 15:20:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/i386/nbsd.mt (GDBSERVER_DEPFILES): Add low-nbsd.o
 	* configure.tgt (i[3456]86-*-netbsd*): add gdbserver to
-	configdirs.
+ 	configdirs.
 	* gdbserver/low-nbsd.c: New file.
-
+	
 	* gdbserver/Makefile.in: convert to autoconf.
 	* gdbserver/configure.in: likewise.
 	* gdbserver/configure: generate.
@@ -880,9 +850,9 @@ Sun Feb 13 11:21:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Sun Feb 13 10:34:48 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Eli Zaretskii to djgpp maintiners.  Add Kevin
-	Buettner to powerpc maintainers.  Make Kevin Buettner the
-	GNU/LINUX PPC native maintainer.  Add J.T. Conklin, Jim Kingdon
-	and Jason Molenda to write after aproval list.
+ 	Buettner to powerpc maintainers.  Make Kevin Buettner the
+ 	GNU/LINUX PPC native maintainer.  Add J.T. Conklin, Jim Kingdon
+ 	and Jason Molenda to write after aproval list.
 
 Sun Feb 13 10:18:44 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -924,28 +894,28 @@ Sat Feb 12 01:08:21 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 
 2000-02-09  Mark Kettenis  <kettenis@gnu.org>
 
-	* linux-thread.c: Include defs.h before gdb_wait.h.
+        * linux-thread.c: Include defs.h before gdb_wait.h.
 
 Wed Feb  9 18:59:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (wait_h): Delete macro.  Update all dependencies
-	specifying gdb_wait.h instead.
+ 	specifying gdb_wait.h instead.
 
 	* ser-unix.c, ser-pipe.c, remote.c, remote-udi.c, remote-sds.c,
-	remote-os9k.c, remote-es.c, remote-rdp.c, remote-vx960.c,
-	remote-vx.c, remote-st.c, remote-nindy.c, remote-mm.c,
-	convex-xdep.c, convex-tdep.c, target.c, win32-nat.c, standalone.c,
-	remote-vxmips.c, remote-vxsparc.c, remote-vx68.c, remote-vx29k.c,
-	remote-sim.c, remote-rdi.c, remote-mips.c, remote-eb.c,
-	remote-e7000.c, remote-bug.c, remote-array.c, remote-adapt.c,
-	ppc-bdm.c, ocd.c, monitor.c, m3-nat.c, linux-thread.c,
-	infttrace.c, lin-thread.c, infptrace.c, gnu-nat.c, gdbarch.c,
-	fork-child.c, command.c: Include "gdb_wait.h" instead of <wait.h>
-	or <sys/wait.h>.
+ 	remote-os9k.c, remote-es.c, remote-rdp.c, remote-vx960.c,
+ 	remote-vx.c, remote-st.c, remote-nindy.c, remote-mm.c,
+ 	convex-xdep.c, convex-tdep.c, target.c, win32-nat.c, standalone.c,
+ 	remote-vxmips.c, remote-vxsparc.c, remote-vx68.c, remote-vx29k.c,
+ 	remote-sim.c, remote-rdi.c, remote-mips.c, remote-eb.c,
+ 	remote-e7000.c, remote-bug.c, remote-array.c, remote-adapt.c,
+ 	ppc-bdm.c, ocd.c, monitor.c, m3-nat.c, linux-thread.c,
+ 	infttrace.c, lin-thread.c, infptrace.c, gnu-nat.c, gdbarch.c,
+ 	fork-child.c, command.c: Include "gdb_wait.h" instead of <wait.h>
+ 	or <sys/wait.h>.
 	* nindy-share/nindy.c, nindy-share/Onindy.c: Ditto.
 
 	* gdb_wait.h: New file.  Based on ../include/wait.h. Include
-	<sys/wait.h> or <wait.h> and then define any missing WIF macros.
+ 	<sys/wait.h> or <wait.h> and then define any missing WIF macros.
 
 Wed Feb  9 01:14:54 2000  Andrew Cagney  <cagney@amy.cygnus.com>
 
@@ -956,15 +926,15 @@ Wed Feb  9 01:14:54 2000  Andrew Cagney  <cagney@amy.cygnus.com>
 
 1999-08-23  J.T. Conklin  <jtc@redback.com>
 
-	* top.c (remote_timeout): Change default to 2.  Add comment
-	explaining history of changes to the default value.
-	* remote.c (_initialize_remote): Remove code that adds set/
-	show remotetimeout, as that's also done in top.c
+        * top.c (remote_timeout): Change default to 2.  Add comment
+        explaining history of changes to the default value.
+        * remote.c (_initialize_remote): Remove code that adds set/
+        show remotetimeout, as that's also done in top.c
 
 1999-10-18  J.T. Conklin  <jtc@redback.com>
 
-	* m32r-stub.c, sparcl-stub.c, sparclet-stub.c (handle_exception):
-	Return E01 instead of P01 when 'P' command fails.
+        * m32r-stub.c, sparcl-stub.c, sparclet-stub.c (handle_exception):
+        Return E01 instead of P01 when 'P' command fails.
 
 2000-02-05  J.T. Conklin  <jtc@redback.com>
 
@@ -1009,13 +979,13 @@ Wed Feb  9 01:14:54 2000  Andrew Cagney  <cagney@amy.cygnus.com>
 2000-02-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* infrun.c (resume): Make just one call to target_resume(), instead
-	of four: set up correct parameters in all the cases ahead of time,
-	and do call at the end.
+ 	of four: set up correct parameters in all the cases ahead of time,
+ 	and do call at the end.
 
 2000-02-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/powerpc/tm-ppc-eabi.h: Define
-	SOFUN_ADDRESS_MAYBE_MISSING.
+ 	SOFUN_ADDRESS_MAYBE_MISSING.
 
 2000-02-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
@@ -1029,16 +999,16 @@ Fri Feb  4 22:42:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(links): Link srcdir/gdbtk/library to gdbtcl2.
 	* gdbtcl2: Moved to gdbtk/library.
 	ChangeLog-gdbtk, gdbtk-cmds.c, gdbtk-hooks.c, gdbtk-variable.c,
-	gdbtk-varobj.c, gdbtk-wrapper.c, gdbtk-wrapper.h, gdbtk.c,
-	gdbtk.h: Moved to gdbtk/generic.
+ 	gdbtk-varobj.c, gdbtk-wrapper.c, gdbtk-wrapper.h, gdbtk.c,
+ 	gdbtk.h: Moved to gdbtk/generic.
 
 2000-02-03  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* printcmd.c (build_address_symbolic): New function. Returns all
-	the parts that are necessary to print an address in a symbolic
-	form.
+ 	the parts that are necessary to print an address in a symbolic
+ 	form.
 	(print_address_symbolic): Split into a printing part and an
-	information building part, build_address_symbolic().
+ 	information building part, build_address_symbolic().
 
 	* defs.h (build_address_symbolic): Export.
 
@@ -1060,39 +1030,39 @@ Fri Feb  4 22:42:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-02-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote.c (getpkt_sane): New function. It is the old getpkt(),
-	which now returns a timeout indication.
+ 	which now returns a timeout indication.
 	(getpkt): New function. Wrapper for getpkt_sane(), so that return
-	value can still be ignored.
+ 	value can still be ignored.
 
 Tue Feb  1 18:47:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.c (print_gdb_version): Print ``UI_OUT'' when configured with
-	UI_OUT.
+ 	UI_OUT.
 
 Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ui-file.c, ui-file.h: Rename gdb-file.h, gdb-file.c.  Rename
-	``struct gdb_file'' to ``struct ui_file''.  Delete typedef
-	GDB_FILE.
-
+ 	``struct gdb_file'' to ``struct ui_file''.  Delete typedef
+ 	GDB_FILE.
+	
 	* Makefile.in: Update.
 
 	* ax-gdb.c, ax-general.c, ax.h, buildsym.c, c-lang.c, c-lang.h,
-	c-typeprint.c, c-valprint.c, ch-lang.c, ch-lang.h, ch-typeprint.c,
-	ch-valprint.c, command.c, command.h, convex-tdep.c, corefile.c,
-	cp-valprint.c, d10v-tdep.c, d30v-tdep.c, defs.h, expprint.c,
-	expression.h, f-lang.c, f-lang.h, f-typeprint.c, f-valprint.c,
-	frame.h, gdb-events.sh, gdb-file.c, gdb-file.h, gdbcmd.h,
-	gdbtypes.h, hppa-tdep.c, jv-lang.c, jv-lang.h, jv-typeprint.c,
-	jv-valprint.c, language.c, language.h, m2-lang.c, m2-lang.h,
-	m2-typeprint.c, m2-valprint.c, m3-nat.c, main.c, monitor.c,
-	printcmd.c, pyr-tdep.c, remote-mips.c, remote-sim.c, remote-udi.c,
-	remote.c, scm-lang.c, scm-lang.h, scm-valprint.c, ser-e7kpc.c,
-	ser-go32.c, ser-mac.c, ser-ocd.c, ser-unix.c, ser-unix.h,
-	serial.c, serial.h, stack.c, symfile.c, symmisc.c, tahoe-tdep.c,
-	target.c, target.h, top.c, top.h, typeprint.c, typeprint.h,
-	utils.c, v850ice.c, valprint.c, valprint.h, value.h,
-	config/pa/tm-hppa.h: Update.
+ 	c-typeprint.c, c-valprint.c, ch-lang.c, ch-lang.h, ch-typeprint.c,
+ 	ch-valprint.c, command.c, command.h, convex-tdep.c, corefile.c,
+ 	cp-valprint.c, d10v-tdep.c, d30v-tdep.c, defs.h, expprint.c,
+ 	expression.h, f-lang.c, f-lang.h, f-typeprint.c, f-valprint.c,
+ 	frame.h, gdb-events.sh, gdb-file.c, gdb-file.h, gdbcmd.h,
+ 	gdbtypes.h, hppa-tdep.c, jv-lang.c, jv-lang.h, jv-typeprint.c,
+ 	jv-valprint.c, language.c, language.h, m2-lang.c, m2-lang.h,
+ 	m2-typeprint.c, m2-valprint.c, m3-nat.c, main.c, monitor.c,
+ 	printcmd.c, pyr-tdep.c, remote-mips.c, remote-sim.c, remote-udi.c,
+ 	remote.c, scm-lang.c, scm-lang.h, scm-valprint.c, ser-e7kpc.c,
+ 	ser-go32.c, ser-mac.c, ser-ocd.c, ser-unix.c, ser-unix.h,
+ 	serial.c, serial.h, stack.c, symfile.c, symmisc.c, tahoe-tdep.c,
+ 	target.c, target.h, top.c, top.h, typeprint.c, typeprint.h,
+ 	utils.c, v850ice.c, valprint.c, valprint.h, value.h,
+ 	config/pa/tm-hppa.h: Update.
 	* cli-out.c, cli-out.h, ui-out.c, ui-out.h, varobj.c: Update.
 
 2000-01-31  Jason Molenda  (jsm@bugshack.cygnus.com)
@@ -1112,30 +1082,30 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* top.c (fputs_unfiltered_hook): Moved to tui/tui-file.c.
 
 	* main.c (captured_main): Only use the legacy tui_file code when
-	linking in older code such as the TUI.
+ 	linking in older code such as the TUI.
 
 	* gdb-file.h, gdb-file.c: New files.
 	* utils.c, defs.h (struct gdb_file, gdb_file_new, gdb_file_delete,
-	null_file_isatty, null_file_rewind, null_file_put,
-	null_file_flush, null_file_write, null_file_fputs,
-	null_file_delete, gdb_file_data, gdb_flush, gdb_file_isatty,
-	gdb_file_rewind, gdb_file_put, gdb_file_write, fputs_unfiltered,
-	set_gdb_file_flush, set_gdb_file_isatty, set_gdb_file_rewind,
-	set_gdb_file_put, set_gdb_file_write, set_gdb_file_fputs,
-	set_gdb_file_data, struct accumulated_gdb_file,
-	do_gdb_file_xstrdup, gdb_file_xstrdup, struct mem_file):
-	mem_file_new, mem_file_delete, mem_fileopen, mem_file_rewind,
-	mem_file_put, mem_file_write, struct stdio_file): stdio_file_new,
-	stdio_file_delete, stdio_file_flush, stdio_file_write,
-	stdio_file_fputs, stdio_file_isatty, stdio_fileopen, gdb_fopen):
-	Moved to gdb-file.h and gdb-file.c.
+ 	null_file_isatty, null_file_rewind, null_file_put,
+ 	null_file_flush, null_file_write, null_file_fputs,
+ 	null_file_delete, gdb_file_data, gdb_flush, gdb_file_isatty,
+ 	gdb_file_rewind, gdb_file_put, gdb_file_write, fputs_unfiltered,
+ 	set_gdb_file_flush, set_gdb_file_isatty, set_gdb_file_rewind,
+ 	set_gdb_file_put, set_gdb_file_write, set_gdb_file_fputs,
+ 	set_gdb_file_data, struct accumulated_gdb_file,
+ 	do_gdb_file_xstrdup, gdb_file_xstrdup, struct mem_file):
+ 	mem_file_new, mem_file_delete, mem_fileopen, mem_file_rewind,
+ 	mem_file_put, mem_file_write, struct stdio_file): stdio_file_new,
+ 	stdio_file_delete, stdio_file_flush, stdio_file_write,
+ 	stdio_file_fputs, stdio_file_isatty, stdio_fileopen, gdb_fopen):
+ 	Moved to gdb-file.h and gdb-file.c.
 	* utils.c (enum streamtype, struct tui_stream, tui_file_new,
-	tui_file_delete, tui_fileopen, tui_sfileopen, tui_file_isatty,
-	tui_file_rewind, tui_file_put, tui_file_fputs,
-	tui_file_get_strbuf, tui_file_adjust_strbuf, tui_file_flush,
+ 	tui_file_delete, tui_fileopen, tui_sfileopen, tui_file_isatty,
+ 	tui_file_rewind, tui_file_put, tui_file_fputs,
+ 	tui_file_get_strbuf, tui_file_adjust_strbuf, tui_file_flush,
 	fputs_unfiltered_hook):
-	Moved to tui/tui-file.c and tui/tui-file.h.
-
+ 	Moved to tui/tui-file.c and tui/tui-file.h.
+	
 	* Makefile.in (COMMON_OBS): Add gdb-file.o, tui-file.o.
 	(tui-file.o, gdb-file.o): Add dependencies.
 	(corefile.o, main.o, utils.o, simmisc.o): Update dependencies.
@@ -1164,18 +1134,18 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-01-27  Jim Blandy  <jimb@cygnus.com>
 
 	* symtab.c (decode_line_1): Don't let commas that are within
-	quotes or parenthesis terminate the line spec.  Don't use pp when
-	removing the final double quote of a double-quoted string.  Don't
-	forget to skip the opening double quote.  I have no clue whether
-	this change is correct; probably we've just moved this function
-	from one buggy place to another buggy place, and never came within
-	an outhouse whiff of correctness.
+ 	quotes or parenthesis terminate the line spec.  Don't use pp when
+ 	removing the final double quote of a double-quoted string.  Don't
+ 	forget to skip the opening double quote.  I have no clue whether
+ 	this change is correct; probably we've just moved this function
+ 	from one buggy place to another buggy place, and never came within
+ 	an outhouse whiff of correctness.
 	(find_toplevel_char): New function.
 
 2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* arm-tdep.c (arm_push_arguments): Set the thumb mode bit when
-	passing the pointer to a thumb function as an argument.
+        passing the pointer to a thumb function as an argument.
 
 2000-01-27  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
@@ -1247,22 +1217,22 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* proc-why.c: New file. Add include of proc-utils.h.
 
 	* procfs.c: Add includes of gdbthread.h, sys/wait.h, signal.h,
-	ctype.h, proc-utils.h.
+ 	ctype.h, proc-utils.h.
 	(find_procinfo_or_die): Add braces to avoid ambiguous else clause.
 	(open_procinfo_files): Conditionalize local variable tmp, to avoid
-	compiler warnings.
+ 	compiler warnings.
 	(proc_iterate_over_mappings): Conditionalize local vars mapfd and
-	pathname.
+ 	pathname.
 	(procfs_wait): Adjust format in some printf_filetered calls to
-	avoid compiler warnings.
+ 	avoid compiler warnings.
 	(make_signal_thread_runnable): Ifdef 0. The calls to this function
-	are also ifdef'd 0 .
+ 	are also ifdef'd 0 .
 	(procfs_resume): Add parentheses around '&&' operation.
 	(procfs_set_exec_trap): Remove unused variable.
 	(info_proc_cmd): Add braces to avoid ambiguous else clause.
 
 	* Makefile.in (procfs.o, proc-api.o, proc-events.o, proc-flags.o,
-	proc-why.o): Update dependencies.
+ 	proc-why.o): Update dependencies.
 
 	* config/sparc/sun4sol2.mh (NATDEPFILES): Change proc_*.o files to
 	proc-*.o.
@@ -1276,30 +1246,30 @@ Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-01-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* stack.c (print_frame_info_base): Break up into the frame info
-	(location) printing part and the rest (source line printing).
+ 	(location) printing part and the rest (source line printing).
 	(print_frame): New function. Take care of printing the location
-	information.
+ 	information.
 	Update copyright.
 
 	* infrun.c (normal_stop): Use enum values rather than integers for the
 	source_flag to be passed to show_and_print_stack_frame().
-	Update copyright.
-
+        Update copyright.
+	
 	* frame.h (print_what): New enum for 'source' argument to
-	print_frame_info_base(). Use this instead of obscure numbers.
+ 	print_frame_info_base(). Use this instead of obscure numbers.
 	Update copyright.
-
+	
 Sun Jan 16 17:58:00 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* event-top.c (stdin_event_handler): call quit_command rather than
-	exit -- run cleanups, give target code a chance to say goodbye to
-	the target.  Fixes bug where the inferior processes were left
-	around on Solaris (and probably elsewhere) by the testsuite.
+ 	exit -- run cleanups, give target code a chance to say goodbye to
+ 	the target.  Fixes bug where the inferior processes were left
+ 	around on Solaris (and probably elsewhere) by the testsuite.
 
 2000-01-14  Mark Salter  <msalter@cygnus.com>
 
 	* v850-tdep.c (v850_target_architecture_hook): Setup correct
-	machine id for disassembly.
+ 	machine id for disassembly.
 
 2000-01-13  Jim Blandy  <jimb@cygnus.com>
 
@@ -1340,7 +1310,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 2000-01-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* thread.c (do_captured_thread_select): New function. Switch
-	current thread, safely from within catch_errors().
+ 	current thread, safely from within catch_errors().
 	(gdb_thread_select): New function. Switch threads safely.
 	(thread_command): Use gdb_thread_select().
 	Include ui-out.h.
@@ -1402,7 +1372,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 	(proc_flags): combine flags that UnixWare splits into two locations.
 	(proc_modify_flag): add support for PR_KLC (kill on last close).
 	(proc_[un]set_kill_on_last_close): new functions.
-
+	
 2000-01-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* infrun.c (normal_stop): Print out thread id when we stop.
@@ -1434,14 +1404,14 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 2000-01-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* breakpoint.c (until_break_command): Add an argument for the
-	continuation, the beginning of the cleanups set up by this
-	command.
+ 	continuation, the beginning of the cleanups set up by this
+ 	command.
 	(until_break_command_continuation): Do cleanups until the one
-	passed in as argument instead of doing all of them.
+ 	passed in as argument instead of doing all of them.
 
 	* infcmd.c (finish_command_continuation): Expect a new argument,
-	which indicates up to where to do cleanups. Update calls to
-	do_exec_cleanups to use this marker, instead of ALL_CLEANUPS.
+ 	which indicates up to where to do cleanups. Update calls to
+ 	do_exec_cleanups to use this marker, instead of ALL_CLEANUPS.
 	(finish_command): Add another argument for the continuation: the
 	starting cleanup for this command.
 

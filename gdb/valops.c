@@ -240,8 +240,8 @@ value_cast (type, arg2)
       && TYPE_NAME (type) != 0)
     {
       /* Look in the type of the source to see if it contains the
-	 type of the target as a superclass.  If so, we'll need to
-	 offset the object in addition to changing its type.  */
+         type of the target as a superclass.  If so, we'll need to
+         offset the object in addition to changing its type.  */
       value_ptr v = search_struct_field (type_name_no_tag (type),
 					 arg2, 0, type2, 1);
       if (v)
@@ -297,8 +297,8 @@ value_cast (type, arg2)
 	      value_ptr v;
 
 	      /* Look in the type of the source to see if it contains the
-		 type of the target as a superclass.  If so, we'll need to
-		 offset the pointer rather than just change its type.  */
+	         type of the target as a superclass.  If so, we'll need to
+	         offset the pointer rather than just change its type.  */
 	      if (TYPE_NAME (t1) != NULL)
 		{
 		  v = search_struct_field (type_name_no_tag (t1),
@@ -312,9 +312,9 @@ value_cast (type, arg2)
 		}
 
 	      /* Look in the type of the target to see if it contains the
-		 type of the source as a superclass.  If so, we'll need to
-		 offset the pointer rather than just change its type.
-		 FIXME: This fails silently with virtual inheritance.  */
+	         type of the source as a superclass.  If so, we'll need to
+	         offset the pointer rather than just change its type.
+	         FIXME: This fails silently with virtual inheritance.  */
 	      if (TYPE_NAME (t2) != NULL)
 		{
 		  v = search_struct_field (type_name_no_tag (t2),
@@ -411,14 +411,14 @@ value_zero (type, lv)
   return val;
 }
 
-/* Return a value with type TYPE located at ADDR.
+/* Return a value with type TYPE located at ADDR.  
 
    Call value_at only if the data needs to be fetched immediately;
    if we can be 'lazy' and defer the fetch, perhaps indefinately, call
    value_at_lazy instead.  value_at_lazy simply records the address of
-   the data and sets the lazy-evaluation-required flag.  The lazy flag
-   is tested in the VALUE_CONTENTS macro, which is used if and when
-   the contents are actually required.
+   the data and sets the lazy-evaluation-required flag.  The lazy flag 
+   is tested in the VALUE_CONTENTS macro, which is used if and when 
+   the contents are actually required. 
 
    Note: value_at does *NOT* handle embedded offsets; perform such
    adjustments before or after calling it. */
@@ -491,9 +491,9 @@ value_at_lazy (type, addr, sect)
   return val;
 }
 
-/* Called only from the VALUE_CONTENTS and VALUE_CONTENTS_ALL macros,
-   if the current data for a variable needs to be loaded into
-   VALUE_CONTENTS(VAL).  Fetches the data from the user's process, and
+/* Called only from the VALUE_CONTENTS and VALUE_CONTENTS_ALL macros, 
+   if the current data for a variable needs to be loaded into 
+   VALUE_CONTENTS(VAL).  Fetches the data from the user's process, and 
    clears the lazy flag to indicate that the data in the buffer is valid.
 
    If the value is zero-length, we avoid calling read_memory, which would
@@ -688,10 +688,10 @@ value_assign (toval, fromval)
 #endif
 	}
       /* Assigning to the stack pointer, frame pointer, and other
-	 (architecture and calling convention specific) registers may
-	 cause the frame cache to be out of date.  We just do this
-	 on all assignments to registers for simplicity; I doubt the slowdown
-	 matters.  */
+         (architecture and calling convention specific) registers may
+         cause the frame cache to be out of date.  We just do this
+         on all assignments to registers for simplicity; I doubt the slowdown
+         matters.  */
       reinit_frame_cache ();
       break;
 
@@ -929,8 +929,8 @@ value_addr (arg1)
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
       /* Copy the value, but change the type from (T&) to (T*).
-	 We keep the same location information, which is efficient,
-	 and allows &(&X) to get the location containing the reference. */
+         We keep the same location information, which is efficient,
+         and allows &(&X) to get the location containing the reference. */
       arg2 = value_copy (arg1);
       VALUE_TYPE (arg2) = lookup_pointer_type (TYPE_TARGET_TYPE (type));
       return arg2;
@@ -1131,7 +1131,7 @@ default_push_arguments (nargs, args, sp, struct_return, struct_addr)
 #ifndef COERCE_FLOAT_TO_DOUBLE
 #define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
   (default_coerce_float_to_double ((formal), (actual)))
-#endif
+#endif   
 
 
 /* A default function for COERCE_FLOAT_TO_DOUBLE: do the coercion only
@@ -1199,16 +1199,16 @@ value_arg_coerce (arg, param_type, is_prototyped)
 	    type = builtin_type_int;
 	}
       /* Currently all target ABIs require at least the width of an integer
-	 type for an argument.  We may have to conditionalize the following
-	 type coercion for future targets.  */
+         type for an argument.  We may have to conditionalize the following
+         type coercion for future targets.  */
       if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
 	type = builtin_type_int;
       break;
     case TYPE_CODE_FLT:
       /* FIXME: We should always convert floats to doubles in the
-	 non-prototyped case.  As many debugging formats include
-	 no information about prototyping, we have to live with
-	 COERCE_FLOAT_TO_DOUBLE for now.  */
+         non-prototyped case.  As many debugging formats include
+         no information about prototyping, we have to live with
+         COERCE_FLOAT_TO_DOUBLE for now.  */
       if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE (param_type, arg_type))
 	{
 	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
@@ -1244,7 +1244,7 @@ value_arg_coerce (arg, param_type, is_prototyped)
   return value_cast (type, arg);
 }
 
-/* Determine a function's address and its return type from its value.
+/* Determine a function's address and its return type from its value. 
    Calls error() if the function is not valid for calling.  */
 
 static CORE_ADDR
@@ -1287,7 +1287,7 @@ find_function_addr (function, retval_type)
   else if (code == TYPE_CODE_INT)
     {
       /* Handle the case of functions lacking debugging info.
-	 Their values are characters since their addresses are char */
+         Their values are characters since their addresses are char */
       if (TYPE_LENGTH (ftype) == 1)
 	funaddr = value_as_pointer (value_addr (function));
       else
@@ -1335,7 +1335,7 @@ hand_function_call (function, nargs, args)
   /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
      is in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap it
      and remove any extra bytes which might exist because ULONGEST is
-     bigger than REGISTER_SIZE.
+     bigger than REGISTER_SIZE.  
 
      NOTE: This is pretty wierd, as the call dummy is actually a
      sequence of instructions.  But CISC machines will have
@@ -1471,8 +1471,8 @@ hand_function_call (function, nargs, args)
   for (i = nargs - 1; i >= 0; i--)
     {
       /* If we're off the end of the known arguments, do the standard
-	 promotions.  FIXME: if we had a prototype, this should only
-	 be allowed if ... were present.  */
+         promotions.  FIXME: if we had a prototype, this should only
+         be allowed if ... were present.  */
       if (i >= TYPE_NFIELDS (ftype))
 	args[i] = value_arg_coerce (args[i], NULL, 0);
 
@@ -1484,25 +1484,25 @@ hand_function_call (function, nargs, args)
 	  args[i] = value_arg_coerce (args[i], param_type, is_prototyped);
 	}
 
-      /*elz: this code is to handle the case in which the function to be called
-	 has a pointer to function as parameter and the corresponding actual argument
-	 is the address of a function and not a pointer to function variable.
-	 In aCC compiled code, the calls through pointers to functions (in the body
-	 of the function called by hand) are made via $$dyncall_external which
-	 requires some registers setting, this is taken care of if we call
-	 via a function pointer variable, but not via a function address.
-	 In cc this is not a problem. */
+      /*elz: this code is to handle the case in which the function to be called 
+         has a pointer to function as parameter and the corresponding actual argument 
+         is the address of a function and not a pointer to function variable.
+         In aCC compiled code, the calls through pointers to functions (in the body
+         of the function called by hand) are made via $$dyncall_external which
+         requires some registers setting, this is taken care of if we call 
+         via a function pointer variable, but not via a function address. 
+         In cc this is not a problem. */
 
       if (using_gcc == 0)
 	if (param_type)
 	  /* if this parameter is a pointer to function */
 	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
 	    if (TYPE_CODE (param_type->target_type) == TYPE_CODE_FUNC)
-	      /* elz: FIXME here should go the test about the compiler used
-		 to compile the target. We want to issue the error
-		 message only if the compiler used was HP's aCC.
-		 If we used HP's cc, then there is no problem and no need
-		 to return at this point */
+	      /* elz: FIXME here should go the test about the compiler used 
+	         to compile the target. We want to issue the error
+	         message only if the compiler used was HP's aCC. 
+	         If we used HP's cc, then there is no problem and no need 
+	         to return at this point */
 	      if (using_gcc == 0)	/* && compiler == aCC */
 		/* go see if the actual parameter is a variable of type
 		   pointer to function or just a function */
@@ -1591,8 +1591,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       int len = TYPE_LENGTH (value_type);
 #ifdef STACK_ALIGN
       /* MVS 11/22/96: I think at least some of this stack_align code is
-	 really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-	 a target-defined manner.  */
+         really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
+         a target-defined manner.  */
       len = STACK_ALIGN (len);
 #endif
       if (INNER_THAN (1, 2))
@@ -1611,7 +1611,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 /* elz: on HPPA no need for this extra alignment, maybe it is needed
    on other architectures. This is because all the alignment is taken care
-   of in the above code (ifdef REG_STRUCT_HAS_ADDR) and in
+   of in the above code (ifdef REG_STRUCT_HAS_ADDR) and in 
    hppa_push_arguments */
 #ifndef NO_EXTRA_ALIGNMENT_NEEDED
 
@@ -1642,7 +1642,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      function.  Since this doesn't actually involve executing a JSR/BSR
      instruction, the return address must be set up by hand, either by
      pushing onto the stack or copying into a return-address register
-     as appropriate.  Formerly this has been done in PUSH_ARGUMENTS,
+     as appropriate.  Formerly this has been done in PUSH_ARGUMENTS, 
      but that's overloading its functionality a bit, so I'm making it
      explicit to do it here.  */
   sp = PUSH_RETURN_ADDRESS (real_pc, sp);
@@ -1652,7 +1652,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (!INNER_THAN (1, 2))
     {
       /* If stack grows up, we must leave a hole at the bottom, note
-	 that sp already has been advanced for the arguments!  */
+         that sp already has been advanced for the arguments!  */
       if (CALL_DUMMY_STACK_ADJUST_P)
 	sp += CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
@@ -1677,7 +1677,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      it doesn't cost us anything but space and if the function is pcc
      it will ignore this value, we will make that assumption.
 
-     Also note that on some machines (like the sparc) pcc uses a
+     Also note that on some machines (like the sparc) pcc uses a 
      convention like gcc's.  */
 
   if (struct_return)
@@ -1733,12 +1733,12 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	/* We stopped inside the FUNCTION because of a random signal.
 	   Further execution of the FUNCTION is not allowed. */
 
-	if (unwind_on_signal_p)
+        if (unwind_on_signal_p)
 	  {
 	    /* The user wants the context restored. */
 
-	    /* We must get back to the frame we were before the dummy call. */
-	    POP_FRAME;
+            /* We must get back to the frame we were before the dummy call. */
+            POP_FRAME;
 
 	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
 	       a C++ name with arguments and stuff.  */
@@ -2032,8 +2032,8 @@ typecmp (staticp, t1, t2)
       /* Array to pointer is a `trivial conversion' according to the ARM.  */
 
       /* We should be doing much hairier argument matching (see section 13.2
-	 of the ARM), but as a quick kludge, just check for the same type
-	 code.  */
+         of the ARM), but as a quick kludge, just check for the same type
+         code.  */
       if (TYPE_CODE (t1[i]) != TYPE_CODE (VALUE_TYPE (t2[i])))
 	return i + 1;
     }
@@ -2068,7 +2068,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       {
 	char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-	if (t_field_name && STREQ_IW (t_field_name, name))
+	if (t_field_name && STREQ (t_field_name, name))
 	  {
 	    value_ptr v;
 	    if (TYPE_FIELD_STATIC (type, i))
@@ -2083,7 +2083,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	if (t_field_name
 	    && (t_field_name[0] == '\0'
 		|| (TYPE_CODE (type) == TYPE_CODE_UNION
-		    && STREQ_IW (t_field_name, "else"))))
+		    && STREQ (t_field_name, "else"))))
 	  {
 	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
 	    if (TYPE_CODE (field_type) == TYPE_CODE_UNION
@@ -2124,11 +2124,11 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       value_ptr v;
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
       /* If we are looking for baseclasses, this is what we get when we
-	 hit them.  But it could happen that the base part's member name
-	 is not yet filled in.  */
+         hit them.  But it could happen that the base part's member name
+         is not yet filled in.  */
       int found_baseclass = (looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
-			     && STREQ_IW (name, TYPE_BASECLASS_NAME (type, i)));
+			     && STREQ (name, TYPE_BASECLASS_NAME (type, i)));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -2270,7 +2270,7 @@ find_rt_vbase_offset (type, basetype, valaddr, offset, boffset_p, skip_p)
    * virtual base entries.  Offset is negative -- virtual base entries
    * appear _before_ the address point of the virtual table. */
 
-  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier
+  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier 
      & use long type */
 
   /* epstein : FIXME -- added param for overlay section. May not be correct */
@@ -2314,7 +2314,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
 	    t_field_name = dem_opname;
 	}
-      if (t_field_name && !strcmp_iw (t_field_name, name))
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -2351,7 +2351,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	  if (TYPE_HAS_VTABLE (type))
 	    {
 	      /* HP aCC compiled type, search for virtual base offset
-		 according to HP/Taligent runtime spec.  */
+	         according to HP/Taligent runtime spec.  */
 	      int skip;
 	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
 				    VALUE_CONTENTS_ALL (*arg1p),
@@ -2366,8 +2366,8 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 	      char *base_valaddr;
 
 	      /* The virtual base class pointer might have been clobbered by the
-		 user program. Make sure that it still points to a valid memory
-		 location.  */
+	         user program. Make sure that it still points to a valid memory
+	         location.  */
 
 	      if (offset < 0 || offset >= TYPE_LENGTH (type))
 		{
@@ -2467,13 +2467,13 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
       /* if there are no arguments ...do this...  */
 
       /* Try as a field first, because if we succeed, there
-	 is less work to be done.  */
+         is less work to be done.  */
       v = search_struct_field (name, *argp, 0, t, 0);
       if (v)
 	return v;
 
       /* C++: If it was not found as a data field, then try to
-	 return it as a pointer to a method.  */
+         return it as a pointer to a method.  */
 
       if (destructor_name_p (name, t))
 	error ("Cannot get value of destructor");
@@ -2525,8 +2525,8 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
   else if (v == 0)
     {
       /* See if user tried to invoke data as function.  If so,
-	 hand it back.  If it's not callable (i.e., a pointer to function),
-	 gdb should give an error.  */
+         hand it back.  If it's not callable (i.e., a pointer to function),
+         gdb should give an error.  */
       v = search_struct_field (name, *argp, 0, t, 0);
     }
 
@@ -2570,7 +2570,7 @@ find_method_list (argp, method, offset, static_memfuncp, type, num_fns, basetype
     {
       /* pai: FIXME What about operators and type conversions? */
       char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-      if (fn_field_name && STREQ_IW (fn_field_name, method))
+      if (fn_field_name && STREQ (fn_field_name, method))
 	{
 	  *num_fns = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	  *basetype = type;
@@ -2736,16 +2736,13 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 
   char *obj_type_name = NULL;
   char *func_name = NULL;
-  int i,j,len,len2;
-  struct type *domain;
-  struct fn_field *f;
 
   /* Get the list of overloaded methods or functions */
   if (method)
     {
       obj_type_name = TYPE_NAME (VALUE_TYPE (obj));
       /* Hack: evaluate_subexp_standard often passes in a pointer
-	 value rather than the object itself, so try again */
+         value rather than the object itself, so try again */
       if ((!obj_type_name || !*obj_type_name) &&
 	  (TYPE_CODE (VALUE_TYPE (obj)) == TYPE_CODE_PTR))
 	obj_type_name = TYPE_NAME (TYPE_TARGET_TYPE (VALUE_TYPE (obj)));
@@ -2759,26 +2756,6 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name);
-      domain=TYPE_DOMAIN_TYPE(fns_ptr[0].type);
-      len = TYPE_NFN_FIELDS (domain);
-      /*This stuff is for STABS, which won't give us the info we need directly in the types.
-       * We have to use the method stub conversion to get it.
-       * Be aware that this is by no means perfect, and if you use
-       * STABS, please move to DWARF-2, or something like it, because
-       * trying to improve overloading using STABS is really a waste
-       * of time.
-       */
-      for (i = 0; i < len; i++)
-	{
-	  f = TYPE_FN_FIELDLIST1 (domain, i);
-	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-	  for (j = 0; j < len2; j++)
-	    {
-	      if (TYPE_FN_FIELD_STUB (f, j))
-		check_stub_method (domain, i, j);
-	    }
-	}
     }
   else
     {
@@ -2786,12 +2763,12 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
       func_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_NO_OPTS);
 
       /* If the name is NULL this must be a C-style function.
-	 Just return the same symbol. */
+         Just return the same symbol. */
       if (!func_name)
-	{
+        {
 	  *symp = fsym;
-	  return 0;
-	}
+          return 0;
+        }
 
       oload_syms = make_symbol_overload_list (fsym);
       while (oload_syms[++i])
@@ -2805,28 +2782,14 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
   /* Consider each candidate in turn */
   for (ix = 0; ix < num_fns; ix++)
     {
-      if (method)
-	{
-	  /* For static member functions, we won't have a this pointer, but nothing
-	     else seems to handle them right now, so we just pretend ourselves */
-	  nparms=0;
-
-	  if (TYPE_FN_FIELD_ARGS(fns_ptr,ix))
-	    {
-	      while (TYPE_CODE(TYPE_FN_FIELD_ARGS(fns_ptr,ix)[nparms]) != TYPE_CODE_VOID)
-		nparms++;
-	    }
-	}
-      else
-	{
-	  /* If it's not a method, this is the proper place */
-	  nparms=TYPE_NFIELDS(SYMBOL_TYPE(oload_syms[ix]));
-	}
+      /* Number of parameters for current candidate */
+      nparms = method ? TYPE_NFIELDS (fns_ptr[ix].type)
+	: TYPE_NFIELDS (SYMBOL_TYPE (oload_syms[ix]));
 
       /* Prepare array of parameter types */
       parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
       for (jj = 0; jj < nparms; jj++)
-	parm_types[jj] = method ? (TYPE_FN_FIELD_ARGS(fns_ptr,ix)[jj])
+	parm_types[jj] = method ? TYPE_FIELD_TYPE (fns_ptr[ix].type, jj)
 	  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj);
 
       /* Compare parameter types to supplied argument types */
@@ -2867,16 +2830,12 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	printf ("Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
       else
 	printf ("Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-      for (jj = 0; jj < nargs; jj++)
+      for (jj = 0; jj <= nargs; jj++)
 	printf ("...Badness @ %d : %d\n", jj, bv->rank[jj]);
       printf ("Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
 #endif
     }				/* end loop over all candidates */
 
-/* Seems to be a better idea to just pick one if they have the exact same goodness.
- * This is because there is no way to differentiate based on return type, which we need
- * to in cases like overloads of .begin() <It's both const and non-const> */
-#if 0
   if (oload_ambiguous)
     {
       if (method)
@@ -2888,7 +2847,6 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	error ("Cannot resolve overloaded function %s to unique instance; disambiguate by specifying function signature",
 	       func_name);
     }
-#endif
 
   /* Check how bad the best match is */
   for (ix = 1; ix <= nargs; ix++)
@@ -2985,7 +2943,7 @@ check_field_in (type, name)
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
-      if (t_field_name && STREQ_IW (t_field_name, name))
+      if (t_field_name && STREQ (t_field_name, name))
 	return 1;
     }
 
@@ -3002,7 +2960,7 @@ check_field_in (type, name)
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
-      if (STREQ_IW (TYPE_FN_FIELDLIST_NAME (type, i), name))
+      if (STREQ (TYPE_FN_FIELDLIST_NAME (type, i), name))
 	return 1;
     }
 
@@ -3203,7 +3161,7 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
  * USING_ENC is the flag that distinguishes the two cases.
  * If it is 1, then the offset is for the enclosing object,
  * otherwise for the embedded object.
- *
+ * 
  * This currently works only for RTTI information generated
  * by the HP ANSI C++ compiler (aCC).  g++ today (1997-06-10)
  * does not appear to support RTTI. This function returns a
@@ -3523,8 +3481,8 @@ value_slice (array, lowbound, length)
 	    }
 	}
       /* We should set the address, bitssize, and bitspos, so the clice
-	 can be used on the LHS, but that may require extensions to
-	 value_assign.  For now, just leave as a non_lval.  FIXME.  */
+         can be used on the LHS, but that may require extensions to
+         value_assign.  For now, just leave as a non_lval.  FIXME.  */
     }
   else
     {
@@ -3564,10 +3522,10 @@ varying_to_slice (varray)
   return value_slice (value_primitive_field (varray, 0, 1, vtype), 0, length);
 }
 
-/* Create a value for a FORTRAN complex number.  Currently most of
-   the time values are coerced to COMPLEX*16 (i.e. a complex number
-   composed of 2 doubles.  This really should be a smarter routine
-   that figures out precision inteligently as opposed to assuming
+/* Create a value for a FORTRAN complex number.  Currently most of 
+   the time values are coerced to COMPLEX*16 (i.e. a complex number 
+   composed of 2 doubles.  This really should be a smarter routine 
+   that figures out precision inteligently as opposed to assuming 
    doubles. FIXME: fmb */
 
 value_ptr
