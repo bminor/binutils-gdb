@@ -1,3 +1,7 @@
+2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* proc-api.c (ioctl_with_trace): Fix uninitialized variable.
+
 2001-05-10  Fernando Nasser  <fnasser@redhat.com>
 
 	* MAINTAINERS: Add testsuite subdirectory co-maintainers.

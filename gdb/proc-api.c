@@ -27,6 +27,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdbcmd.h"
+#include "completer.h"
 
 #if defined (NEW_PROC_API)
 #define _STRUCTURED_PROC 1
@@ -219,7 +220,9 @@ static struct trans ioctl_table[] = {
 int
 ioctl_with_trace (int fd, long opcode, void *ptr, char *file, int line)
 {
-  int i, ret, arg1;
+  int i = 0;
+  int ret;
+  int arg1;
 
   prepare_to_trace ();
 
