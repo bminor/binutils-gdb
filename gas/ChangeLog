@@ -1,6 +1,7 @@
-1999-07-21  Ian Lance Taylor  <ian@zembu.com>
+1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
-	From Mark Elbrecht:
+	* config/te-go32.h (COFF_LONG_SECTION_NAMES): Define.
+
 	* configure.bat: Remove; obsolete.
 	* config/go32.cfg: Likewise.
 
