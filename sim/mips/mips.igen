@@ -956,7 +956,7 @@
 	  ++sign;
 	}
     }
-  /* multuply out the 4 sub products */
+  /* multiply out the 4 sub products */
   m00 = ((unsigned64) VL4_8 (op1) * (unsigned64) VL4_8 (op2));
   m10 = ((unsigned64) VH4_8 (op1) * (unsigned64) VL4_8 (op2));
   m01 = ((unsigned64) VL4_8 (op1) * (unsigned64) VH4_8 (op2));
