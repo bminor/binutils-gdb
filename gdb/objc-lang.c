@@ -1273,7 +1273,7 @@ parse_method (char *method, char *type, char **class,
   return s2;
 }
 
-void
+static void
 find_methods (struct symtab *symtab, char type, 
 	      const char *class, const char *category, 
 	      const char *selector, struct symbol **syms, 

@@ -1,3 +1,7 @@
+2003-02-20  Adam Fedor  <fedor@gnu.org>
+
+        * objc-lang.c (find_methods): Make static.
+
 2003-02-20  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (get_image_name): Check return value from
