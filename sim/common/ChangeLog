@@ -1,3 +1,7 @@
+2000-08-09  Andrew Cagney  <cagney@lulu.cygnus.com>
+
+	* dv-sockser.c (dv_sockser_init): Eliminate MIN macro.
+
 2000-07-27  Frank Ch. Eigler  <fche@redhat.com>
 
 	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>
