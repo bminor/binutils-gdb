@@ -1,3 +1,8 @@
+2000-12-31  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* doc/internals.texi (Relaxing with a table) <after relaxation>:
+	Point out caveats with generating fixups for the opcode in a frag.
+
 Sat Dec 30 19:02:48 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 	* configure.in: Add support for x86_64 and x86_64-*-linux-gnu*

@@ -1601,6 +1601,16 @@ called to convert the frag to an @code{rs_fill} frag with no variant part.
 Sometimes changing addressing modes may also require rewriting the instruction.
 It can be accessed via @code{fr_opcode} or @code{fr_fix}.
 
+If you generate frags separately for the basic insn opcode and any relaxable
+operands, do not call @code{fix_new} thinking you can emit fixups for the
+opcode field from the relaxable frag.  It is not garanteed to be the same frag.
+If you need to emit fixups for the opcode field from inspection of the
+relaxable frag, then you need to generate a common frag for both the basic
+opcode and relaxable fields, or you need to provide the frag for the opcode to
+pass to @code{fix_new}.  The latter can be done for example by defining
+@code{TC_FRAG_TYPE} to include a pointer to it and defining @code{TC_FRAG_INIT}
+to set the pointer.
+
 Sometimes @code{fr_var} is increased instead, and @code{frag_wane} is not
 called.  I'm not sure, but I think this is to keep @code{fr_fix} referring to
 an earlier byte, and @code{fr_subtype} set to @code{rs_machine_dependent} so
