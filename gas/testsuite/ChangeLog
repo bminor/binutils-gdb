@@ -1,3 +1,8 @@
+Tue Dec 13 18:21:09 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* gas/mips/jal-svr4pic.d: Fix 0-strings to work with 64-bit hosted
+	disassembly.
+
 Fri Dec  9 19:54:04 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* gas/all/gas.exp (comment.s test): Make the "\r" optional, since
