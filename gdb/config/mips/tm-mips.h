@@ -235,7 +235,8 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
    as a CORE_ADDR (or an expression that can be used as one).  */
 /* The address is passed in a0 upon entry to the function, but when
    the function exits, the compiler has copied the value to v0.  This
-   seems to be a convention followed by both cc and gcc.  */
+   convention is specified by the System V ABI, so I think we can rely
+   on it.  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
