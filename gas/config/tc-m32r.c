@@ -74,6 +74,17 @@ static int m32r_relax;
    This allows runtime additions to the assembler.  */
 static char * m32r_cpu_desc;
 
+/* Non-zero if warn when a high/shigh reloc has no matching low reloc.
+   Each high/shigh reloc must be paired with it's low cousin in order to
+   properly calculate the addend in a relocatable link (since there is a
+   potential carry from the low to the high/shigh).
+   This option is off by default though for user-written assembler code it
+   might make sense to make the default be on (i.e. have gcc pass a flag
+   to turn it off).  This warning must not be on for GCC created code as
+   optimization may delete the low but not the high/shigh (at least we
+   shouldn't assume or require it to).  */
+static int warn_unmatched_high = 0;
+
 /* start-sanitize-m32rx */
 /* Non-zero if --m32rx has been specified, in which case support for the
    extended M32RX instruction set should be enabled.  */
@@ -151,20 +162,28 @@ struct option md_longopts[] =
 /* start-sanitize-m32rx */
 #define OPTION_M32RX	(OPTION_MD_BASE)
   {"m32rx", no_argument, NULL, OPTION_M32RX},
-#define OPTION_WARN	(OPTION_MD_BASE + 1)
-  {"warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_WARN},
-  {"Wp", no_argument, NULL, OPTION_WARN},
-#define OPTION_NO_WARN	(OPTION_MD_BASE + 2)
-  {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN},
-  {"Wnp", no_argument, NULL, OPTION_NO_WARN},
+#define OPTION_WARN_PARALLEL	(OPTION_MD_BASE + 1)
+  {"warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_WARN_PARALLEL},
+  {"Wp", no_argument, NULL, OPTION_WARN_PARALLEL},
+#define OPTION_NO_WARN_PARALLEL	(OPTION_MD_BASE + 2)
+  {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
+  {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
 #define OPTION_SPECIAL	(OPTION_MD_BASE + 3)
   {"enable-special", no_argument, NULL, OPTION_SPECIAL},
 /* end-sanitize-m32rx */
 
+  /* Sigh.  I guess all warnings must now have both variants.  */
+#define OPTION_WARN_UNMATCHED (OPTION_MD_BASE + 4)
+  {"warn-unmatched-high", OPTION_WARN_UNMATCHED},
+  {"Wuh", OPTION_WARN_UNMATCHED},
+#define OPTION_NO_WARN_UNMATCHED (OPTION_MD_BASE + 5)
+  {"no-warn-unmatched-high", OPTION_WARN_UNMATCHED},
+  {"Wnuh", OPTION_WARN_UNMATCHED},
+
 #if 0 /* not supported yet */
-#define OPTION_RELAX  (OPTION_MD_BASE + 4)
+#define OPTION_RELAX  (OPTION_MD_BASE + 6)
   {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_CPU_DESC (OPTION_MD_BASE + 5)
+#define OPTION_CPU_DESC (OPTION_MD_BASE + 7)
   {"cpu-desc", required_argument, NULL, OPTION_CPU_DESC},
 #endif
 
@@ -188,19 +207,27 @@ md_parse_option (c, arg)
       allow_m32rx (1);
       break;
       
-    case OPTION_WARN:
+    case OPTION_WARN_PARALLEL:
       warn_explicit_parallel_conflicts = 1;
       break;
       
-    case OPTION_NO_WARN:
+    case OPTION_NO_WARN_PARALLEL:
       warn_explicit_parallel_conflicts = 0;
       break;
-      
+
     case OPTION_SPECIAL:
       allow_m32rx (1);
       enable_special = 1;
       break;
 /* end-sanitize-m32rx */
+
+    case OPTION_WARN_UNMATCHED:
+      warn_unmatched_high = 1;
+      break;
+
+    case OPTION_NO_WARN_UNMATCHED:
+      warn_unmatched_high = 0;
+      break;
       
 #if 0 /* not supported yet */
     case OPTION_RELAX:
@@ -210,6 +237,7 @@ md_parse_option (c, arg)
       m32r_cpu_desc = arg;
       break;
 #endif
+
     default:
       return 0;
     }
@@ -220,8 +248,9 @@ void
 md_show_usage (stream)
   FILE * stream;
 {
+  fprintf (stream, _("M32R specific command line options:\n"));
+
 /* start-sanitize-m32rx */
-  fprintf (stream, _("M32R/X specific command line options:\n"));
   fprintf (stream, _("\
 --m32rx			support the extended m32rx instruction set\n"));
   fprintf (stream, _("\
@@ -239,6 +268,15 @@ md_show_usage (stream)
   fprintf (stream, _("\
 --Wnp					synonym for --no-warn-explicit-parallel-conflicts\n"));
 /* end-sanitize-m32rx */
+
+  fprintf (stream, _("\
+--warn-unmatched-high			warn when a high or shigh reloc has no matching low reloc\n"));
+  fprintf (stream, _("\
+--no-warn-unmatched-high		do not warn when a high or shigh reloc has no matching low reloc\n"));
+  fprintf (stream, _("\
+--Wuh					synonym for --warn-unmatched-high\n"));
+  fprintf (stream, _("\
+--Wnuh					synonym for --no-warn-unmatched-high\n"));
 
 #if 0
   fprintf (stream, _("\
@@ -719,7 +757,6 @@ assemble_parallel_insn (str, str2)
     {
       /* xgettext:c-format */
       as_bad (_("unknown instruction '%s'"), str);
-
       return;
     }
   else if (! enable_m32rx
@@ -728,7 +765,6 @@ assemble_parallel_insn (str, str2)
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' is for the M32RX only"), str);
-	
       return;
     }
     
@@ -780,7 +816,6 @@ assemble_parallel_insn (str, str2)
     {
       /* xgettext:c-format */
       as_bad (_("unknown instruction '%s'"), str);
-
       return;
     }
   else if (! enable_m32rx
@@ -927,7 +962,6 @@ md_assemble (str)
     {
       /* xgettext:c-format */
       as_bad (_("unknown instruction '%s'"), str);
-
       return;
     }
   else if (! enable_m32rx
@@ -1662,7 +1696,8 @@ m32r_frob_file ()
 	  if (f != NULL)
 	    break;
 
-	  if (pass == 1)
+	  if (pass == 1
+	      && warn_unmatched_high)
 	    as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
 			   _("Unmatched high/shigh reloc"));
 	}

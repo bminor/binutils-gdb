@@ -1,5 +1,13 @@
 Wed May 13 10:16:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	* config/tc-m32r.c (warn_unmatched_high): New static local.
+	(OPTION_WARN_PARALLEL): Rename from OPTION_WARN.
+	(OPTION_NO_WARN_PARALLEL): Rename from OPTION_NO_WARN.
+	(md_longopts): Recognize --{no-,}warn-unmatched-high.
+	(md_parse_option): Likewise.
+	(md_show_usage): Likewise.
+	(m32r_frob_file): Likewise.
+
 	* read.c (generate_file_debug,generate_lineno_debug): New functions.
 	(read_a_source_file): Call them.
 	* read.h (stabs_generate_asm_file): Declare.
