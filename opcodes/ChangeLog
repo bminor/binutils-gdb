@@ -1,3 +1,7 @@
+2004-03-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
 2003-03-03  Andrew Stubbs  <andrew.stubbs@superh.com>
 
 	* sh-dis.c (print_insn_sh): Don't disassemble fp instructions in
