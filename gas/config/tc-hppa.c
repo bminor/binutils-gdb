@@ -210,6 +210,8 @@ struct pa_it
     fp_operand_format fpof1;
     fp_operand_format fpof2;
 
+    /* Whether or not we saw a truncation request on an fcnv insn.  */
+    int trunc;
 
     /* Holds the field selector for this instruction
        (for example L%, LR%, etc).  */
@@ -565,6 +567,8 @@ static int is_same_frag PARAMS ((fragS *, fragS *));
 static void process_exit PARAMS ((void));
 static int log2 PARAMS ((int));
 static unsigned int pa_stringer_aux PARAMS ((char *));
+static fp_operand_format pa_parse_fp_cnv_format PARAMS ((char **s));
+static int pa_parse_ftest_gfx_completer PARAMS ((char **));
 
 #ifdef OBJ_ELF
 static void hppa_elf_mark_end_of_function PARAMS ((void));
@@ -2724,6 +2728,43 @@ pa_ip (str)
 		break;
 	      continue;
 
+	    /* Handle 3 bit entry into the fp compare array.   Valid values
+	       are 0..6 inclusive.  */
+	    case 'h':
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  num = evaluate_absolute (&the_insn);
+		  CHECK_FIELD (num, 6, 0, 0);
+		  num++;
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
+		}
+	      else
+		break;
+
+	    /* Handle 3 bit entry into the fp compare array.   Valid values
+	       are 0..6 inclusive.  */
+	    case 'm':
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  num = evaluate_absolute (&the_insn);
+		  CHECK_FIELD (num, 6, 0, 0);
+		  num = (num + 1) ^ 1;
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
+		}
+	      else
+		as_bad (_("Invalid CBit Specification: %s"), s);
+
+	    /* Handle graphics test completers for ftest */
+	    case '=':
+	      {
+		num = pa_parse_ftest_gfx_completer (&s);
+		INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+	      }
+
 	    /* Handle a 11 bit immediate at 31.  */
 	    case 'i':
 	      the_insn.field_selector = pa_chk_field_selector (&s);
@@ -3143,6 +3184,81 @@ pa_ip (str)
 	      num = (num & 0x1f) | ((num & 0x003fffe0) << 4);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
+	    /* Handle a source FP operand format completer.  */
+	    case '{':
+	      if (*s == ',' && *(s+1) == 't')
+		{
+		  the_insn.trunc = 1;
+		  s += 2;
+		}
+	      else
+		the_insn.trunc = 0;
+	      flag = pa_parse_fp_cnv_format (&s);
+	      the_insn.fpof1 = flag;
+	      if (flag == W || flag == UW)
+		flag = SGL;
+	      if (flag == DW || flag == UDW)
+		flag = DBL;
+	      if (flag == QW || flag == UQW)
+		flag = QUAD;
+	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
+	    /* Handle a destination FP operand format completer.  */
+	    case '_':
+	      /* pa_parse_format needs the ',' prefix.  */
+	      s--;
+	      flag = pa_parse_fp_cnv_format (&s);
+	      the_insn.fpof2 = flag;
+	      if (flag == W || flag == UW)
+		flag = SGL;
+	      if (flag == DW || flag == UDW)
+		flag = DBL;
+	      if (flag == QW || flag == UQW)
+		flag = QUAD;
+	      opcode |= flag << 13;
+	      if (the_insn.fpof1 == SGL
+		  || the_insn.fpof1 == DBL 
+		  || the_insn.fpof1 == QUAD)
+		{
+		  if (the_insn.fpof2 == SGL
+		      || the_insn.fpof2 == DBL
+		      || the_insn.fpof2 == QUAD)
+		    flag = 0;
+		  else if (the_insn.fpof2 == W
+		      || the_insn.fpof2 == DW
+		      || the_insn.fpof2 == QW)
+		    flag = 2;
+		  else if (the_insn.fpof2 == UW
+		      || the_insn.fpof2 == UDW
+		      || the_insn.fpof2 == UQW)
+		    flag = 6;
+		  else
+		    abort ();
+		}
+	      else if (the_insn.fpof1 == W
+		       || the_insn.fpof1 == DW 
+		       || the_insn.fpof1 == QW)
+		{
+		  if (the_insn.fpof2 == SGL
+		      || the_insn.fpof2 == DBL
+		      || the_insn.fpof2 == QUAD)
+		    flag = 1;
+		  else
+		    abort ();
+		}
+	      else if (the_insn.fpof1 == UW
+		       || the_insn.fpof1 == UDW 
+		       || the_insn.fpof1 == UQW)
+		{
+		  if (the_insn.fpof2 == SGL
+		      || the_insn.fpof2 == DBL
+		      || the_insn.fpof2 == QUAD)
+		    flag = 5;
+		  else
+		    abort ();
+		}
+	      flag |= the_insn.trunc;
+	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 15);
 
 	    /* Handle a source FP operand format completer.  */
 	    case 'F':
@@ -4377,6 +4493,126 @@ pa_parse_fp_cmp_cond (s)
   return 0;
 }
 
+/* Parse a graphics test complete for ftest.  */
+
+static int
+pa_parse_ftest_gfx_completer (s)
+     char **s;
+{
+  int value;
+
+  value = 0;
+  if (strncasecmp (*s, "acc8", 4) == 0)
+    {
+      value = 5;
+      *s += 4;
+    }
+  else if (strncasecmp (*s, "acc6", 4) == 0)
+    {
+      value = 9;
+      *s += 4;
+    }
+  else if (strncasecmp (*s, "acc4", 4) == 0)
+    {
+      value = 13;
+      *s += 4;
+    }
+  else if (strncasecmp (*s, "acc2", 4) == 0)
+    {
+      value = 17;
+      *s += 4;
+    }
+  else if (strncasecmp (*s, "acc", 3) == 0)
+    {
+      value = 1;
+      *s += 3;
+    }
+  else if (strncasecmp (*s, "rej8", 4) == 0)
+    {
+      value = 6;
+      *s += 4;
+    }
+  else if (strncasecmp (*s, "rej", 3) == 0)
+    {
+      value = 2;
+      *s += 3;
+    }
+  else
+    {
+      value = 0;
+      as_bad (_("Invalid FTEST completer: %s"), *s);
+    }
+
+  return value;
+}
+
+/* Parse an FP operand format completer returning the completer
+   type.  */
+
+static fp_operand_format
+pa_parse_fp_cnv_format (s)
+     char **s;
+{
+  int format;
+
+  format = SGL;
+  if (**s == ',')
+    {
+      *s += 1;
+      if (strncasecmp (*s, "sgl", 3) == 0)
+	{
+	  format = SGL;
+	  *s += 4;
+	}
+      else if (strncasecmp (*s, "dbl", 3) == 0)
+	{
+	  format = DBL;
+	  *s += 4;
+	}
+      else if (strncasecmp (*s, "quad", 4) == 0)
+	{
+	  format = QUAD;
+	  *s += 5;
+	}
+      else if (strncasecmp (*s, "w", 1) == 0)
+	{
+	  format = W;
+	  *s += 2;
+	}
+      else if (strncasecmp (*s, "uw", 2) == 0)
+	{
+	  format = UW;
+	  *s += 3;
+	}
+      else if (strncasecmp (*s, "dw", 2) == 0)
+	{
+	  format = DW;
+	  *s += 3;
+	}
+      else if (strncasecmp (*s, "udw", 3) == 0)
+	{
+	  format = UDW;
+	  *s += 4;
+	}
+      else if (strncasecmp (*s, "qw", 2) == 0)
+	{
+	  format = QW;
+	  *s += 3;
+	}
+      else if (strncasecmp (*s, "uqw", 3) == 0)
+	{
+	  format = UQW;
+	  *s += 4;
+	}
+      else
+	{
+	  format = ILLEGAL_FMT;
+	  as_bad (_("Invalid FP Operand Format: %3s"), *s);
+	}
+    }
+
+  return format;
+}
 
 /* Parse an FP operand format completer returning the completer
    type.  */
