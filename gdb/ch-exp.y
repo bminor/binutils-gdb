@@ -162,7 +162,6 @@ yyerror PARAMS ((char *));
 %token <voidval> FIXME_20
 %token <voidval> FIXME_21
 %token <voidval> FIXME_22
-%token <voidval> FIXME_23
 %token <voidval> FIXME_24
 %token <voidval> FIXME_25
 %token <voidval> FIXME_26
@@ -292,7 +291,6 @@ yyerror PARAMS ((char *));
 %type <voidval>		lower_element
 %type <voidval>		upper_element
 %type <voidval>		first_element
-%type <voidval>		structure_primitive_value
 %type <voidval>		mode_argument
 %type <voidval>		upper_lower_argument
 %type <voidval>		length_argument
@@ -984,7 +982,6 @@ slice_size 		:	FIXME_19 { $$ = 0; }
 lower_element 		:	FIXME_20 { $$ = 0; }
 upper_element 		:	FIXME_21 { $$ = 0; }
 first_element 		:	FIXME_22 { $$ = 0; }
-structure_primitive_value:	FIXME_23 { $$ = 0; }
 boolean_expression 	:	FIXME_26 { $$ = 0; }
 case_selector_list 	:	FIXME_27 { $$ = 0; }
 subexpression 		:	FIXME_28 { $$ = 0; }

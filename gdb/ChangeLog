@@ -1,3 +1,10 @@
+Wed Apr 21 14:24:19 1993  Per Bothner  (bothner@cygnus.com)
+
+	* ch-exp.y:  Removed unused structure_primitive_value and FIXME_23.
+	* Makefile.in:  Add $(YFLAGS) when using $(YACC).
+	* Makefile.in:  Remove message to expect conflicts and unused
+	rules in ch-exp.y, since there no longer are any such.
+
 Wed Apr 21 13:27:50 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* stabs.texinfo: fixed bad xrefs (un-initialized statics)
