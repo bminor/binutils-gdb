@@ -2542,6 +2542,7 @@ fi
 
 case "$host_cpu" in
 *cray*)	LOCAL_CFLAGS=-DCRAY ;;
+*s390*)	LOCAL_CFLAGS=-fsigned-char ;;
 esac
 
 case "$host_os" in

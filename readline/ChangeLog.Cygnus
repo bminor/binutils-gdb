@@ -1,3 +1,9 @@
+2001-06-15  Elena Zannoni  <ezannoni@redhat.com>
+
+        * configure.in: Add -fsigned-char to LOCAL_CFLAGS for Linux
+        running on the IBM S/390.
+	* configure: Ditto.
+
 2001-01-07  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* rltty.c (save_tty_chars): Fix compilation-stopping typo.
