@@ -1,5 +1,9 @@
 2001-05-24  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.threads/linux-dp.exp: Remove assumptions about thread ordering.
+	Don't require that the main thread and the manager thread are the
+	first in the list.
+
 	* gdb.threads/pthreads.exp (test_startup): Relax test for thread
 	debugging.  If test fails, issue an "unsupported" not a "fail".
 

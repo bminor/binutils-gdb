@@ -146,9 +146,15 @@ proc select_thread {thread} {
 ### Return true if the thread had a stack which was not only
 ### acceptable, but interesting.  SEEN should be an array in which
 ### SEEN(N) exists iff we have found philosopher number N before.
+
+set main_seen 0
+set manager_seen 0
+
 proc check_philosopher_stack {thread seen_name} {
     global gdb_prompt
     upvar $seen_name seen
+    global main_seen
+    global manager_seen
 
     set name "philosopher is distinct: $thread"
     set interesting 0
@@ -169,6 +175,24 @@ proc check_philosopher_stack {thread seen_name} {
 	-re "pthread_start_thread.*\r\n$gdb_prompt $" {
 	    ## Maybe the thread hasn't started yet.
 	    pass $name
+	}
+	-re ".* in main \\(.*$gdb_prompt $" {
+	    if {$main_seen == 1} {
+		fail "main is distinct: $thread"
+	    } else {
+		set main_seen 1
+		pass "main is distinct: $thread"
+	    }
+	    set interesting 1
+	}
+	-re ".* in __pthread_manager \\(.*$gdb_prompt $" {
+	    if {$manager_seen == 1} {
+		fail "manager thread is distinct: $thread"
+	    } else {
+		set manager_seen 1
+		pass "manager thread is distinct: $thread"
+	    }
+	    set interesting 1
 	}
 	-re " in \\?\\?.*\r\n$gdb_prompt $" {
 	    ## Sometimes we can't get a backtrace.  I'm going to call
@@ -191,7 +215,7 @@ proc check_philosopher_stack {thread seen_name} {
 
 set any_interesting 0
 array set seen {}
-for {set i 3} {$i <= 7} {incr i} {
+for {set i 1} {$i <= 7} {incr i} {
     if [check_philosopher_stack $i seen] {
 	set any_interesting 1
     }
