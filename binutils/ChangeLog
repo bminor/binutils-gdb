@@ -1,3 +1,9 @@
+2001-12-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/es.po: Import from translation project.
+	* configure.in (ALL_LINGUAS): Add es.
+	* configure: Regenerate.
+
 2002-01-09  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* readelf.c (get_netbsd_elfcore_note_type): Use
