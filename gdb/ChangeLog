@@ -1,5 +1,8 @@
 2002-05-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-cygwin.h (NO_PTRACE_H): Remove define.
+	* config/i386/nm-go32.h (NO_PTRACE_H): Remove define.
+
 	* corelow.c (core_open): Only call set_gdbarch_from_file if
 	exec_bfd is NULL.
 
