@@ -1,5 +1,20 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* config/mips/embed.mt (TDEPFILES): Add mips-mdebug-tdep.o.
+	* mips-mdebug-tdep.h, mips-mdebug-tdep.c: New files.
+	* mips-tdep.c (mips_mdebug_frame_cache)
+	(mips_mdebug_frame_this_id, mips_mdebug_frame_prev_register)
+	(mips_mdebug_frame_unwind, mips_mdebug_frame_sniffer)
+	(mips_mdebug_frame_base_address, mips_mdebug_frame_sniffer)
+	(mips_mdebug_frame_base_sniffer, non_heuristic_proc_desc)
+	(compare_pdr_entries, the_bfd, mips16_fetch_instruction): Delete.
+	(mips_gdbarch_init): Do not append mdebug sniffers.
+	(PROC_LOW_ADDR, PROC_HIGH_ADDR, PROC_FRAME_OFFSET) 
+	(PROC_FRAME_REG, PROC_FRAME_ADJUST, PROC_REG_MASK) 
+	(PROC_FREG_MASK, PROC_REG_OFFSET, PROC_FREG_OFFSET, PROC_PC_REG) 
+	(PROC_SYMBOL, _PROC_MAGIC_): Delete.
+	* Makefile.in: Update dependencies.
+
 	* mips-tdep.h (mips_abi_regsize): Declare.
 	* mips-tdep.c (mips_abi_regsize): Make non-static.
 
