@@ -119,7 +119,7 @@ cli_table_begin (struct ui_out *uiout, int nbrofcols,
     data->suppress_output = 1;
   else
     /* Only the table suppresses the output and, fortunately, a table
-       is not a recursive data structure. */
+       is not a recursive data structure.  */
     gdb_assert (data->suppress_output == 0);
 }
 
@@ -263,7 +263,7 @@ cli_field_string (struct ui_out *uiout,
     field_separator ();
 }
 
-/* This is the only field function that does not align */
+/* This is the only field function that does not align.  */
 
 void
 cli_field_fmt (struct ui_out *uiout, int fldno,
@@ -348,7 +348,7 @@ cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
 /* local functions */
 
 /* Like cli_field_fmt, but takes a variable number of args
-   and makes a va_list and does not insert a separator */
+   and makes a va_list and does not insert a separator.  */
 
 /* VARARGS */
 static void
@@ -365,7 +365,7 @@ out_field_fmt (struct ui_out *uiout, int fldno,
   va_end (args);
 }
 
-/* access to ui_out format private members */
+/* Access to ui_out format private members.  */
 
 static void
 field_separator (void)
@@ -374,7 +374,7 @@ field_separator (void)
   fputc_filtered (' ', data->stream);
 }
 
-/* initalize private members at startup */
+/* Initalize private members at startup.  */
 
 struct ui_out *
 cli_out_new (struct ui_file *stream)
@@ -397,7 +397,7 @@ cli_out_set_stream (struct ui_out *uiout, struct ui_file *stream)
   return old;
 }
 
-/* standard gdb initialization hook */
+/* Standard gdb initialization hook.  */
 void
 _initialize_cli_out (void)
 {

@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* cli-out.c: Whitespace tweaks.
 	* breakpoint.c: Whitespace tweaks.
 	* cli/cli-interp.c: Tweak comments, per coding standard.
 
