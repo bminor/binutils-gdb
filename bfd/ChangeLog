@@ -1,5 +1,10 @@
 Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* libbfd-in.h (DEFAULT_STRING_SPACE_SIZE): Don't define.
+	(bfd_add_to_string_table): Don't declare.
+	* libbfd.h: Rebuild.
+	* libbfd.c (bfd_add_to_string_table): Remove.
+
 	* elfcode.h (elf_swap_shdr_in): Use rawdata, not bfd_section.
 	Clear contents field.
 	(bfd_section_from_shdr): In SHT_STRTAB case, check bfd_section,
