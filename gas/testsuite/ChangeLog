@@ -1,3 +1,10 @@
+2004-01-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/relax-swap1.s: Add extra space at end, so the
+	disassembly will consistently have "..." at its end.
+	* gas/mips/relax-swap2.s: Likewise.
+	* gas/mips/relax-swap1-mips2.d: Expect "..." at end of disassembly.
+
 2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gas/arm/arm.exp: Add "undefined" test.

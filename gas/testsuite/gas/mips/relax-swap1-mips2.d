@@ -277,4 +277,4 @@ Disassembly of section \.text:
 0+0364 <[^>]*> jalr	v0,v1
 0+0368 <[^>]*> nop
 	\.\.\.
-0+2036c <[^>]*> nop
+	\.\.\.
