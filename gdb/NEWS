@@ -14,6 +14,11 @@ The shell script gdb/testsuite/gdb.stabs/configure lacked execute
 permission.  This bug would cause configure to fail on a number of
 systems (Solaris, IRIX).  Ref: server/519.
 
+* Fixed build problem on hpux2.0w-hp-hpux11.00 using the HP ANSI C compiler
+
+Older HPUX ANSI C compilers did not accept variable array sizes.  somsolib.c
+has been updated to use constant array sizes.
+
 *** Changes in GDB 6.1:
 
 * Removed --with-mmalloc

@@ -1,3 +1,10 @@
+2004-06-03  Randolph Chung  <tausq@debian.org>
+
+	Fix PR build/1458 (partial)
+	* somsolib.c (som_solib_remove_inferior_hook): Use constant array size
+	for dld_flags_buffer and make all size references consistent.
+	* NEWS: Mention this fix.
+
 2004-06-02  Albert Chin-A-Young  <china@thewrittenword.com>
 
 	Committed by Andrew Cagney.

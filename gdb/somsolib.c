@@ -1062,7 +1062,7 @@ som_solib_remove_inferior_hook (int pid)
   CORE_ADDR addr;
   struct minimal_symbol *msymbol;
   int status;
-  char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
+  char dld_flags_buffer[4];
   unsigned int dld_flags_value;
   struct cleanup *old_cleanups = save_inferior_ptid ();
 
@@ -1079,16 +1079,13 @@ som_solib_remove_inferior_hook (int pid)
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
 
   addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  status = target_read_memory (addr, dld_flags_buffer, TARGET_INT_BIT / TARGET_CHAR_BIT);
+  status = target_read_memory (addr, dld_flags_buffer, 4);
 
-  dld_flags_value = extract_unsigned_integer (dld_flags_buffer,
-					      sizeof (dld_flags_value));
+  dld_flags_value = extract_unsigned_integer (dld_flags_buffer, 4);
 
   dld_flags_value &= ~DLD_FLAGS_HOOKVALID;
-  store_unsigned_integer (dld_flags_buffer,
-			  sizeof (dld_flags_value),
-			  dld_flags_value);
-  status = target_write_memory (addr, dld_flags_buffer, TARGET_INT_BIT / TARGET_CHAR_BIT);
+  store_unsigned_integer (dld_flags_buffer, 4, dld_flags_value);
+  status = target_write_memory (addr, dld_flags_buffer, 4);
 
   do_cleanups (old_cleanups);
 }
