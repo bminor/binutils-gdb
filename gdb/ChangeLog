@@ -1,5 +1,10 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+        * Makefile.in (mi-main.o, mi-cmd-break.o, event-loop.o): Update
+        dependencies on interps.h.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* interps.h (GDB_INTERPRETER_MI2): Define.
 	(GDB_INTERPRETER_MI0): Remove.
 
