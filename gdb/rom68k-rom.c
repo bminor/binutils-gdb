@@ -157,11 +157,24 @@ rom68k_supply_register (char *regname, int regnamelen, char *val, int vallen)
    than does GDB, and don't necessarily support all the registers
    either. So, typing "info reg sp" becomes a "r30".  */
 
-static char *rom68k_regnames[NUM_REGS] =
+static const char *
+rom68k_regname (int index) 
 {
-  "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
-  "A0", "A1", "A2", "A3", "A4", "A5", "A6", "ISP",
-  "SR", "PC"};
+
+  static char *regnames[] =
+  {
+    "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7",
+    "A0", "A1", "A2", "A3", "A4", "A5", "A6", "ISP",
+    "SR", "PC"
+  };
+  
+  if ((index >= (sizeof (regnames) / sizeof(regnames[0]))) 
+       || (index < 0) || (index >= NUM_REGS))
+    return NULL;
+  else
+    return regnames[index];
+
+}
 
 /* Define the monitor command strings. Since these are passed directly
    through to a printf style function, we may include formatting
@@ -220,7 +233,8 @@ init_rom68k_cmds (void)
   rom68k_cmds.cmd_end = ".\r";
   rom68k_cmds.target = &rom68k_ops;
   rom68k_cmds.stopbits = SERIAL_1_STOPBITS;
-  rom68k_cmds.regnames = rom68k_regnames;
+  rom68k_cmds.regnames = NULL;
+  rom68k_cmds.regname = rom68k_regname;
   rom68k_cmds.magic = MONITOR_OPS_MAGIC;
 }				/* init_rom68k_cmds */
 

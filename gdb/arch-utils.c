@@ -118,22 +118,6 @@ legacy_register_sim_regno (int regnum)
 }
 
 int
-legacy_register_sim_regno (int regnum)
-{
-  /* Only makes sense to supply raw registers.  */
-  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
-  /* NOTE: cagney/2002-05-13: The old code did it this way and it is
-     suspected that some GDB/SIM combinations may rely on this
-     behavour.  The default should be one2one_register_sim_regno
-     (below).  */
-  if (REGISTER_NAME (regnum) != NULL
-      && REGISTER_NAME (regnum)[0] != '\0')
-    return regnum;
-  else
-    return LEGACY_SIM_REGNO_IGNORE;
-}
-
-int
 generic_frameless_function_invocation_not (struct frame_info *fi)
 {
   return 0;

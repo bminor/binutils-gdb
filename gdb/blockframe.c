@@ -1144,7 +1144,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
-struct regcache *
+static struct regcache *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
@@ -1159,6 +1159,15 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
       return dummyframe->regcache;
 
   return 0;
+}
+
+char *
+deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+{
+  struct regcache *regcache = generic_find_dummy_frame (pc, fp);
+  if (regcache == NULL)
+    return NULL;
+  return deprecated_grub_regcache_for_registers (regcache);
 }
 
 /* Function: pc_in_call_dummy (pc, sp, fp)
@@ -1233,7 +1242,7 @@ generic_push_dummy_frame (void)
   dummy_frame->sp = read_sp ();
   dummy_frame->top = dummy_frame->sp;
   dummy_frame->fp = fp;
-  regcache_save (dummy_frame->regcache);
+  regcache_cpy (dummy_frame->regcache, current_regcache);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
@@ -1281,7 +1290,7 @@ generic_pop_dummy_frame (void)
   if (!dummy_frame)
     error ("Can't pop dummy frame!");
   dummy_frame_stack = dummy_frame->next;
-  regcache_restore (dummy_frame->regcache);
+  regcache_cpy (current_regcache, dummy_frame->regcache);
   flush_cached_frames ();
 
   regcache_xfree (dummy_frame->regcache);
@@ -1366,10 +1375,11 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
 #endif
       gdb_assert (registers != NULL);
       /* Return the actual value.  */
-      memcpy (bufferp,
-	      (deprecated_grub_regcache_for_registers (registers)
-	       + REGISTER_BYTE (regnum)),
-	      REGISTER_RAW_SIZE (regnum));
+      /* FIXME: cagney/2002-06-26: This should be via the
+         gdbarch_register_read() method so that it, on the fly,
+         constructs either a raw or pseudo register from the raw
+         register cache.  */
+      regcache_read (registers, regnum, bufferp);
     }
 }
 
@@ -1515,6 +1525,10 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
 	  if (raw_buffer)
+	    /* FIXME: cagney/2002-06-26: This should be via the
+	       gdbarch_register_read() method so that it, on the fly,
+	       constructs either a raw or pseudo register from the raw
+	       register cache.  */
 	    regcache_read (generic_find_dummy_frame (frame->pc, frame->frame),
 			   regnum, raw_buffer);
 	  return;

@@ -955,7 +955,7 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
   if (fi->extra_info && fi->extra_info->saved_pc_valid)
     return fi->extra_info->saved_pc;
 
-  if (generic_find_dummy_frame (fi->pc, fi->frame))
+  if (deprecated_generic_find_dummy_frame (fi->pc, fi->frame))
     return generic_read_register_dummy (fi->pc, fi->frame, S390_PC_REGNUM);
 
   s390_frame_init_saved_regs (fi);
@@ -1009,7 +1009,7 @@ s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
 
-  if (generic_find_dummy_frame (thisframe->pc, thisframe->frame))
+  if (deprecated_generic_find_dummy_frame (thisframe->pc, thisframe->frame))
     return generic_read_register_dummy (thisframe->pc, thisframe->frame,
                                         S390_SP_REGNUM);
   else

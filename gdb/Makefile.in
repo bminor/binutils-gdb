@@ -641,7 +641,7 @@ macrotab_h =    macrotab.h $(obstack_h) $(bcache_h)
 macroscope_h =  macroscope.h $(macrotab_h) $(symtab_h)
 memattr_h =     memattr.h
 monitor_h =	monitor.h
-objfiles_h =	objfiles.h
+objfiles_h =	objfiles.h $(bcache_h)
 parser_defs_h =	parser-defs.h $(doublest_h)
 ppc_tdep_h =	ppc-tdep.h osabi.h
 regcache_h =	regcache.h
@@ -655,7 +655,7 @@ solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
 symfile_h =	symfile.h
-symtab_h =	symtab.h $(bcache_h)
+symtab_h =	symtab.h
 target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h =	terminal.h
 top_h =		top.h
@@ -665,6 +665,7 @@ ui_out_h =      ui-out.h
 valprint_h =	valprint.h
 value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h) $(doublest_h)
 varobj_h =      varobj.h $(symtab_h) $(gdbtypes_h)
+vax_tdep_h =	vax-tdep.h osabi.h
 version_h = 	version.h
 wrapper_h =	wrapper.h
 xcoffsolib_h =	xcoffsolib.h
@@ -875,7 +876,7 @@ init.c: $(INIT_FILES)
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
-	( echo _initialize_gdbtypes ; grep -v -e '^_initialize_gdbtypes$$' ) > init.l-tmp
+	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
 	@echo '#include "defs.h"' >>init.c-tmp
@@ -2236,7 +2237,7 @@ values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdb_string_h) scm-lang.h $(doublest_h)
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h) \
-	$(arch_utils_h) $(inferior_h) vax-tdep.h
+	$(arch_utils_h) $(inferior_h) $(vax_tdep_h)
 
 x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
 	$(gdbcore_h) $(regcache_h) x86-64-tdep.h i386-tdep.h $(dwarf2cfi_h)

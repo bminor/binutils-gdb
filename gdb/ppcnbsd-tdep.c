@@ -200,6 +200,8 @@ static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
+  /* Stop at main.  */
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);

@@ -42,6 +42,15 @@
 #define P_FMOVM		0xf237
 #define P_TRAP		0x4e40
 
+enum
+{
+  E_FP_REGNUM = 14,		/* Contains address of executing stack frame */
+  E_SP_REGNUM = 15,		/* Contains address of top of stack */
+  E_PS_REGNUM = 16,		/* Contains processor status */
+  E_PC_REGNUM = 17,		/* Contains program counter */
+  E_FP0_REGNUM = 18		/* Floating point register 0 */
+};
+
 void m68k_frame_init_saved_regs (struct frame_info *frame_info);
 
 static int
@@ -917,7 +926,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #if 0
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
 #endif
-
+ 
   gdbarch = gdbarch_alloc (&info, 0);
 
   set_gdbarch_long_double_format (gdbarch, &floatformat_m68881_ext);
@@ -932,6 +941,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_stack_align (gdbarch, m68k_stack_align);
 
+
+  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
   set_gdbarch_store_struct_return (gdbarch, m68k_store_struct_return);
@@ -940,10 +951,16 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_return_value (gdbarch, m68k_store_return_value);
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
   set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     m68k_frameless_function_invocation);
+  /* OK to default this value to 'unknown'. */
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
 
   set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, m68k_register_virtual_size);
@@ -956,6 +973,11 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, 29);
   set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_register_bytes (gdbarch, (16 * 4 + 8 + 8 * 12 + 3 * 4));
+  set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
+  set_gdbarch_fp_regnum (gdbarch, E_FP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
+  set_gdbarch_ps_regnum (gdbarch, E_PS_REGNUM);
+  set_gdbarch_fp0_regnum (gdbarch, E_FP0_REGNUM);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
