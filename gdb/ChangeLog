@@ -1,3 +1,10 @@
+Wed Jul 22 21:39:33 1992  Fred Fish  (fnf@cygnus.com)
+
+	* lmode_inferior_valid, lmode_ours_valid:  New static vars.
+	* inflow.c (terminal_init_inferior, terminal_inferior,
+	terminal_ours_1, initialize_inflow):  Record and use state
+	of lmode_inferior_valid and lmode_ours_valid.
+
 Mon Jul 20 21:09:53 1992  Fred Fish  (fnf@cygnus.com)
 
 	* buildsym.c (read_struct_type):  Initialize structs allocated
