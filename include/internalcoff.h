@@ -18,12 +18,21 @@ struct internal_filehdr
  *	F_AR32WR	file has byte ordering of an AR32WR machine (e.g. vax)
  */
 
-#define F_RELFLG	(0x0001)
-#define F_EXEC		(0x0002)
-#define F_LNNO		(0x0004)
-#define F_LSYMS		(0x0008)
-#define F_AR32WR	(0x0010)
-#define F_AR32W     0x200
+#define F_RELFLG	0000001
+#define F_EXEC		0000002
+#define F_LNNO		0000004
+#define F_LSYMS		0000010
+#define F_MINMAL        0000020
+#define F_UPDATE        0000040
+#define F_SWABD         0000100
+#define F_AR16WR        0000200
+#define F_AR32WR        0000400
+#define F_AR32W         0001000
+#define F_PATCH         0002000
+#define F_NODF          0002000
+#define F_XPG3          0004000
+#define F_MC68NULLPTR   0020000
+
 /********************** AOUT "OPTIONAL HEADER" **********************/
 struct internal_aouthdr {
 	short		magic;	/* type of file				*/
@@ -104,6 +113,13 @@ struct internal_scnhdr {
 #endif
 };
 
+/*
+ * names of "special" sections
+ */
+#define _TEXT	".text"
+#define _DATA	".data"
+#define _BSS	".bss"
+#define _COMMENT ".comment"
 
 /*
  * s_flags "type"

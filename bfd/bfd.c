@@ -21,14 +21,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ */
 
 /*proto*
-@section typedef bfd
+@section @code{typedef bfd}
 
-Pointers to bfd structs are the cornerstone of any application using
-@code{libbfd}. References though the BFD and to data in the BFD give the
-entire BFD functionality.
+A BFD is has type @code{bfd}; objects of this type are the cornerstone
+of any application using @code{libbfd}. References though the BFD and
+to data in the BFD give the entire BFD functionality.
 
-Here is the BFD struct itself.  This contains the major data about
-the file, and contains pointers to the rest of the data.
+Here is the struct used to define the type @code{bfd}.  This contains
+the major data about the file, and contains pointers to the rest of
+the data.
 
 *+++
 
@@ -81,7 +82,7 @@ File modified time
 
 $  long mtime;          
 
-For output files, channel we locked (is this used?).
+Reserved for an unimplemented file locking extension.
 
 $int ifd;
 
@@ -218,7 +219,7 @@ bfd_error_vector_type bfd_error_vector =
   bfd_nonrepresentable_section 
   };
 
-#if 1 || !defined(ANSI_LIBRARIES) && !defined(__STDC__)
+#if  !defined(ANSI_LIBRARIES) && !defined(__STDC__) || HOST_SYS==SUN4_SYS
 char *
 strerror (code)
      int code;
