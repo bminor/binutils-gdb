@@ -453,7 +453,7 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
       /* Note: Here is OK to compare with ".text" because this is the
          name that gdb itself gives to that section, not the SOM
          name. */
-      for (i = 0; i < SECT_OFF_MAX && addrs->other[i].name; i++)
+      for (i = 0; i < objfile->num_sections && addrs->other[i].name; i++)
 	if (strcmp (addrs->other[i].name, ".text") == 0)
 	  break;
       text_addr = addrs->other[i].addr;

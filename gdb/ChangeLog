@@ -1,3 +1,7 @@
+2003-07-09  Joel Brobecker  <brobecker@gnat.com>      
+
+	* somread.c (som_symfile_offsets): Fix compilation error.   
+
 2003-07-08  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in: Make dependency section headers consistent.
