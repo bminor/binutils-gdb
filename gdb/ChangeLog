@@ -1,3 +1,11 @@
+2003-11-03  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_sh4_nofpu_register_name): New function.
+	(sh_sh4al_dsp_register_name): Ditto.
+	(sh4_nofpu_show_regs): Ditto.
+	(sh_gdbarch_init): Add cases for bfd_mach_sh4al_dsp, bfd_mach_sh4a,
+	bfd_mach_sh4_nofpu and bfd_mach_sh4a_nofpu.
+
 2003-11-03  Andrew Cagney  <cagney@redhat.com>
 
 	* bcache.c: Include "gdb_assert.h".

@@ -256,6 +256,60 @@ sh_sh4_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
+static const char *
+sh_sh4_nofpu_register_name (int reg_nr)
+{
+  static char *register_names[] = {
+    /* general registers 0-15 */
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    /* 16 - 22 */
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
+    /* 23, 24 */
+    "", "",
+    /* floating point registers 25 - 40 -- not for nofpu target */
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+    /* 41, 42 */
+    "ssr", "spc",
+    /* bank 0 43 - 50 */
+    "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
+    /* bank 1 51 - 58 */
+    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
+    /* double precision (pseudo) 59 - 66 -- not for nofpu target */
+    "", "", "", "", "", "", "", "",
+    /* vectors (pseudo) 67 - 70 -- not for nofpu target */
+    "", "", "", "",
+  };
+  if (reg_nr < 0)
+    return NULL;
+  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+    return NULL;
+  return register_names[reg_nr];
+}
+
+static const char *
+sh_sh4al_dsp_register_name (int reg_nr)
+{
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
+    "", "dsr",
+    "a0g", "a0", "a1g", "a1", "m0", "m1", "x0", "x1",
+    "y0", "y1", "", "", "", "", "", "mod",
+    "ssr", "spc",
+    "rs", "re", "", "", "", "", "", "",
+    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b"
+      "", "", "", "", "", "", "", "",
+  };
+  if (reg_nr < 0)
+    return NULL;
+  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+    return NULL;
+  return register_names[reg_nr];
+}
+
 static const unsigned char *
 sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
@@ -1340,6 +1394,36 @@ sh4_show_regs (void)
 }
 
 static void
+sh4_nofpu_show_regs (void)
+{
+  printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
+		   paddr (read_register (PC_REGNUM)),
+		   (long) read_register (SR_REGNUM),
+		   (long) read_register (PR_REGNUM),
+		   (long) read_register (MACH_REGNUM),
+		   (long) read_register (MACL_REGNUM));
+
+  printf_filtered ("GBR=%08lx VBR=%08lx",
+		   (long) read_register (GBR_REGNUM),
+		   (long) read_register (VBR_REGNUM));
+  printf_filtered (" SSR=%08lx SPC=%08lx",
+		   (long) read_register (SSR_REGNUM),
+		   (long) read_register (SPC_REGNUM));
+
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
+  printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
+}
+
+static void
 sh_dsp_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
@@ -2097,11 +2181,18 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_sh3_dsp:
+    case bfd_mach_sh4al_dsp:
       sh_show_regs = sh3_dsp_show_regs;
       break;
 
     case bfd_mach_sh4:
+    case bfd_mach_sh4a:
       sh_show_regs = sh4_show_regs;
+      break;
+
+    case bfd_mach_sh4_nofpu:
+    case bfd_mach_sh4a_nofpu:
+      sh_show_regs = sh4_nofpu_show_regs;
       break;
 
     case bfd_mach_sh5:
@@ -2222,6 +2313,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_sh4:
+    case bfd_mach_sh4a:
       set_gdbarch_register_name (gdbarch, sh_sh4_register_name);
       set_gdbarch_register_type (gdbarch, sh_sh4_register_type);
       set_gdbarch_fp0_regnum (gdbarch, 25);
@@ -2232,6 +2324,16 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_extract_return_value (gdbarch,
 					sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
+      break;
+
+    case bfd_mach_sh4_nofpu:
+    case bfd_mach_sh4a_nofpu:
+      set_gdbarch_register_name (gdbarch, sh_sh4_nofpu_register_name);
+      break;
+
+    case bfd_mach_sh4al_dsp:
+      set_gdbarch_register_name (gdbarch, sh_sh4al_dsp_register_name);
+      set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
       break;
 
     default:
