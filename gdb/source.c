@@ -514,7 +514,7 @@ source_info (char *ignore, int from_tty)
    get that particular version of foo or an error message).
 
    If FILENAME_OPENED is non-null, set it to a newly allocated string naming
-   the actual file opened (this string will always start with a "/".  We
+   the actual file opened (this string will always start with a "/").  We
    have to take special pains to avoid doubling the "/" between the directory
    and the file, sigh!  Emacs gets confuzzed by this when we print the
    source file name!!! 
@@ -609,10 +609,15 @@ openp (const char *path, int try_cwd_first, const char *string,
 done:
   if (filename_opened)
     {
+      /* If a file was opened, canonicalize its filename. Use xfullpath
+         rather than gdb_realpath to avoid resolving the basename part
+         of filenames when the associated file is a symbolic link. This
+         fixes a potential inconsistency between the filenames known to
+         GDB and the filenames it prints in the annotations.  */
       if (fd < 0)
 	*filename_opened = NULL;
       else if (IS_ABSOLUTE_PATH (filename))
-	*filename_opened = gdb_realpath (filename);
+	*filename_opened = xfullpath (filename);
       else
 	{
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
@@ -621,7 +626,7 @@ done:
            IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
 				     ? "" : SLASH_STRING,
 				     filename, NULL);
-	  *filename_opened = gdb_realpath (f);
+	  *filename_opened = xfullpath (f);
 	  xfree (f);
 	}
     }
