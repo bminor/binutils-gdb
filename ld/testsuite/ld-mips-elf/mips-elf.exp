@@ -1,5 +1,5 @@
 # Expect script for MIPS ELF linker tests
-#   Copyright 2002 Free Software Foundation, Inc.
+#   Copyright 2002, 2003 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ if { [istarget mips*-*-*] } then {
 
     set elf [expr [istarget mips*-*-elf] || [istarget mips*-*-linux*] || \
 		  [istarget mips*-*-netbsd] || [istarget mips*-*-irix*]]
+    set linux_gnu [expr [istarget mips*-*-linux*]]
     set embedded_elf [expr [istarget mips*-*-elf]]
 
 
@@ -33,6 +34,13 @@ if { [istarget mips*-*-*] } then {
 	# Test multi-got link.
 	run_dump_test "multi-got-1"
     }
+
+    if { $linux_gnu } {
+	run_dump_test "rel32-o32"
+	run_dump_test "rel32-n32"
+	run_dump_test "rel64"
+    }
+
 
     if { $embedded_elf } {
 	# Check basic Embedded-PIC PC-relative HI/LO relocs.
