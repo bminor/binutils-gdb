@@ -99,6 +99,7 @@ TODO
 a29k-tdep.c
 a68v-nat.c
 aclocal.m4
+acconfig.h
 alpha-nat.c
 alpha-tdep.c
 altos-xdep.c
@@ -135,6 +136,7 @@ command.h
 complaints.c
 complaints.h
 config
+config.h.in
 configure
 configure.in
 convex-tdep.c
