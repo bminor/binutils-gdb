@@ -1,6 +1,14 @@
 Fri Nov 22 08:27:40 1991  John Gilmore  (gnu at cygnus.com)
 
-	* infptrace.c:  Lint.
+	* infptrace.c, language.h:  Lint.
+	* m2-exp.y:  #undef MAX and MIN in case system includes set them.
+	* xm-tahoe.h:  Set HOST_BYTE_ORDER.  Include system versions of
+	{BIG,LITTLE}_ENDIAN and the INT_MAX family first, to avoid
+	redefinition warnings.
+	* defs.h:  Reorder things so that the xm-file gets first crack
+	at #define's, followed by defs.h and then the tm-file.
+	* Makefile.in:  Remove spaces after 'ignore exit code' - flags.
+	Late-model BSD 'make's don't cope with them.
 
 Thu Nov 21 23:48:56 1991  John Gilmore  (gnu at cygnus.com)
 

@@ -99,10 +99,10 @@ extern enum language_mode
    evaluator.  */
 
 /* Should we strictly type check expressions? */
-#define STRICT_TYPE (type_check != range_check_off)
+#define STRICT_TYPE (type_check != type_check_off)
 
 /* Should we range check values against the domain of their type? */
-#define RANGE_CHECK (range_check != type_check_off)
+#define RANGE_CHECK (range_check != range_check_off)
 
 /* "cast" really means conversion */
 /* FIXME -- should be a setting in language_defn */

@@ -1,5 +1,7 @@
 /* Definitions to make GDB hosted on a tahoe running 4.3-Reno
    Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Contributed by the State University of New York at Buffalo, by the
+   Distributed Computer Systems Lab, Department of Computer Science, 1991.
 
 This file is part of GDB.
 
@@ -17,10 +19,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
- * Ported by the State University of New York at Buffalo by the Distributed
- * Computer Systems Lab, Department of Computer Science, 1991.
- */
+/* Make sure the system include files define BIG_ENDIAN, UINT_MAX, const,
+   etc, rather than GDB's files.  */
+#include <stdio.h>
+#include <sys/param.h>
+
+/* Host is big-endian */
+
+#define	HOST_BYTE_ORDER	BIG_ENDIAN
 
 /* Get rid of any system-imposed stack limit if possible.  */
 

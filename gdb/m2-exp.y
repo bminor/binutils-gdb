@@ -39,6 +39,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "parser-defs.h"
 
+/* In case the system defines these as macros, get rid of them; we use
+   them as tokens.  */
+#undef MAX
+#undef MIN
+
 /* These MUST be included in any grammar file!!!!
    Please choose unique names! */
 #define	yymaxdepth m2_maxdepth

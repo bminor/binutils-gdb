@@ -570,18 +570,18 @@ comparison: force
 	$(MAKE) subdir_do DO=comparison "DODIRS=$(SUBDIRS)"
 
 de-stage1: force
-	- (cd stage1 ; mv -f * ..)
-	- rmdir stage1
+	-(cd stage1 ; mv -f * ..)
+	-rmdir stage1
 	$(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
 
 de-stage2: force
-	- (cd stage2 ; mv -f * ..)
-	- rmdir stage2
+	-(cd stage2 ; mv -f * ..)
+	-rmdir stage2
 	$(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
 
 de-stage3: force
-	- (cd stage3 ; mv -f * ..)
-	- rmdir stage3
+	-(cd stage3 ; mv -f * ..)
+	-rmdir stage3
 	$(MAKE) subdir_do DO=de-stage3 "DODIRS=$(SUBDIRS)"
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
@@ -628,14 +628,14 @@ c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: $(srcdir)/c-exp.y
 	@echo 'Expect 4 shift/reduce conflicts.'
 	${YACC} $(srcdir)/c-exp.y
-	- mv y.tab.c c-exp.tab.c
+	-mv y.tab.c c-exp.tab.c
 
 # m2-exp.tab.c is generated in target dir from m2-exp.y if it doesn't exist
 # in srcdir, then compiled in target dir to m2-exp.tab.o.
 m2-exp.tab.o: m2-exp.tab.c
 m2-exp.tab.c: $(srcdir)/m2-exp.y
 	${YACC} $(srcdir)/m2-exp.y
-	- mv y.tab.c m2-exp.tab.c
+	-mv y.tab.c m2-exp.tab.c
 
 # The symbol-file readers have dependencies on BFD header files.
 dbxread.o: ${srcdir}/dbxread.c
