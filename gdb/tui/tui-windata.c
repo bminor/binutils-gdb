@@ -122,7 +122,7 @@ tuiDeleteDataContentWindows (void)
 
 
 void
-tuiEraseDataContent (char *prompt)
+tui_erase_data_content (char *prompt)
 {
   werase (dataWin->generic.handle);
   tui_check_and_display_highlight_if_needed (dataWin);
@@ -141,24 +141,19 @@ tuiEraseDataContent (char *prompt)
 		 prompt);
     }
   wrefresh (dataWin->generic.handle);
-
-  return;
-}				/* tuiEraseDataContent */
+}
 
 
-/*
-   ** tuiDisplayAllData().
-   **        This function displays the data that is in the data window's
-   **        content.  It does not set the content.
- */
+/* This function displays the data that is in the data window's
+   content.  It does not set the content.  */
 void
-tuiDisplayAllData (void)
+tui_display_all_data (void)
 {
   if (dataWin->generic.contentSize <= 0)
-    tuiEraseDataContent (NO_DATA_STRING);
+    tui_erase_data_content (NO_DATA_STRING);
   else
     {
-      tuiEraseDataContent ((char *) NULL);
+      tui_erase_data_content ((char *) NULL);
       tuiDeleteDataContentWindows ();
       tui_check_and_display_highlight_if_needed (dataWin);
       tui_display_registers_from (0);
@@ -171,8 +166,7 @@ tuiDisplayAllData (void)
 	{
 	}
     }
-  return;
-}				/* tuiDisplayAllData */
+}
 
 
 /*
@@ -241,7 +235,7 @@ tuiDisplayDataFrom (int elementNo, int reuseWindows)
 
   if (firstLine >= 0)
     {
-      tuiEraseDataContent ((char *) NULL);
+      tui_erase_data_content ((char *) NULL);
       if (!reuseWindows)
 	tuiDeleteDataContentWindows ();
       tuiDisplayDataFromLine (firstLine);
@@ -251,14 +245,11 @@ tuiDisplayDataFrom (int elementNo, int reuseWindows)
 }				/* tuiDisplayDataFrom */
 
 
-/*
-   ** tuiRefreshDataWin()
-   **        Function to redisplay the contents of the data window.
- */
+/* Function to redisplay the contents of the data window.  */
 void
-tuiRefreshDataWin (void)
+tui_refresh_data_win (void)
 {
-  tuiEraseDataContent ((char *) NULL);
+  tui_erase_data_content ((char *) NULL);
   if (dataWin->generic.contentSize > 0)
     {
       int firstElement = tuiFirstDataItemDisplayed ();
@@ -266,17 +257,12 @@ tuiRefreshDataWin (void)
       if (firstElement >= 0)	/* re-use existing windows */
 	tuiDisplayDataFrom (firstElement, TRUE);
     }
-
-  return;
-}				/* tuiRefreshDataWin */
+}
 
 
-/*
-   ** tuiCheckDataValues().
-   **        Function to check the data values and hilite any that have changed
- */
+/* Function to check the data values and hilite any that have changed.  */
 void
-tuiCheckDataValues (struct frame_info *frame)
+tui_check_data_values (struct frame_info *frame)
 {
   tui_check_register_values (frame);
 
@@ -305,15 +291,12 @@ tuiCheckDataValues (struct frame_info *frame)
 #endif
 	}
     }
-}				/* tuiCheckDataValues */
+}
 
 
-/*
-   ** tuiVerticalDataScroll()
-   **        Scroll the data window vertically forward or backward.
- */
+/* Scroll the data window vertically forward or backward.   */
 void
-tuiVerticalDataScroll (TuiScrollDirection scrollDirection, int numToScroll)
+tui_vertical_data_scroll (TuiScrollDirection scrollDirection, int numToScroll)
 {
   int firstElementNo;
   int firstLine = (-1);
@@ -335,7 +318,7 @@ tuiVerticalDataScroll (TuiScrollDirection scrollDirection, int numToScroll)
 	firstLine += numToScroll;
       else
 	firstLine -= numToScroll;
-      tuiEraseDataContent ((char *) NULL);
+      tui_erase_data_content ((char *) NULL);
       tuiDeleteDataContentWindows ();
       tuiDisplayDataFromLine (firstLine);
     }

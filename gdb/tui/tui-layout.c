@@ -246,7 +246,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 	      if (!regsPopulate &&
 		  (newLayout == SRC_DATA_COMMAND ||
 		   newLayout == DISASSEM_DATA_COMMAND))
-		tuiDisplayAllData ();
+		tui_display_all_data ();
 
 	      tui_update_source_windows_with_addr (addr);
 	    }

@@ -225,7 +225,7 @@ tui_rl_other_window (int count, int key)
     {
       tuiSetWinFocusTo (winInfo);
       if (dataWin && dataWin->generic.isVisible)
-        tuiRefreshDataWin ();
+        tui_refresh_data_win ();
       keypad (cmdWin->generic.handle, (winInfo != cmdWin));
     }
   return 0;

@@ -1,5 +1,22 @@
 2004-02-06  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-windata.h: Update copyright.  Include "tui-data.h".
+	(tui_erase_data_content): Rename tuiEraseDataContent.
+	(tui_display_all_data): Rename tuiDisplayAllData.
+	(tui_check_data_values): Rename tuiCheckDataValues.
+	(tui_display_data_from_line): Rename tuiDisplayDataFromLine.
+	(tui_first_data_item_displayed): Rename tuiFirstDataItemDisplayed.
+	(tui_first_data_element_no_in_line): Rename
+	tuiFirstDataElementNoInLine.
+	(tui_delete_data_content_windows): Rename
+	tuiDeleteDataContentWindows.
+	(tui_refresh_data_win): Rename tuiRefreshDataWin.
+	(tui_display_data_from): Rename tuiDisplayDataFrom.
+	(tui_vertical_data_scroll): Rename tuiVerticalDataScroll.
+	* tui/tui-windata.c, tui/tui-hooks.c: Update references.
+	* tui/tui-win.c, tui/tui-regs.c: Update references.
+	* tui/tui-layout.c, tui/tui.c: Update references.
+
 	* tui/tui-wingeneral.h: Update copyright.
 	(m_allBeVisible): Delete macro.
 	(m_allBeInvisible): Delete macro.	

@@ -469,7 +469,7 @@ tuiScrollForward (TuiWinInfoPtr winToScroll, int numToScroll)
       else if (winToScroll == disassemWin)
 	tui_vertical_disassem_scroll (FORWARD_SCROLL, _numToScroll);
       else if (winToScroll == dataWin)
-	tuiVerticalDataScroll (FORWARD_SCROLL, _numToScroll);
+	tui_vertical_data_scroll (FORWARD_SCROLL, _numToScroll);
     }
 
   return;
@@ -499,7 +499,7 @@ tuiScrollBackward (TuiWinInfoPtr winToScroll, int numToScroll)
       else if (winToScroll == disassemWin)
 	tui_vertical_disassem_scroll (BACKWARD_SCROLL, _numToScroll);
       else if (winToScroll == dataWin)
-	tuiVerticalDataScroll (BACKWARD_SCROLL, _numToScroll);
+	tui_vertical_data_scroll (BACKWARD_SCROLL, _numToScroll);
     }
   return;
 }				/* tuiScrollBackward */
@@ -608,7 +608,7 @@ tuiRefreshAll (void)
 	      tui_update_exec_info (winList[type]);
 	      break;
 	    case DATA_WIN:
-	      tuiRefreshDataWin ();
+	      tui_refresh_data_win ();
 	      break;
 	    default:
 	      break;
@@ -910,7 +910,7 @@ The window name specified must be valid and visible.\n");
 	}
 
       if (dataWin && dataWin->generic.isVisible)
-	tuiRefreshDataWin ();
+	tui_refresh_data_win ();
       tuiFree (bufPtr);
       printf_filtered ("Focus set to %s window.\n",
 		       winName ((TuiGenWinInfoPtr) tuiWinWithFocus ()));
@@ -1412,7 +1412,7 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	}
       break;
     case DATA_WIN:
-      tuiDisplayAllData ();
+      tui_display_all_data ();
       break;
     case CMD_WIN:
       winInfo->detail.commandInfo.curLine = 0;

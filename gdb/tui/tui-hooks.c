@@ -156,7 +156,7 @@ tui_register_changed_hook (int regno)
   if (fi && tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
-      tuiCheckDataValues (fi);
+      tui_check_data_values (fi);
       tui_refreshing_registers = 0;
     }
 }
@@ -256,7 +256,7 @@ tui_selected_frame_level_changed_hook (int level)
       if (tui_is_window_visible (DATA_WIN))
         {
           tui_refreshing_registers = 1;
-          tuiCheckDataValues (fi);
+          tui_check_data_values (fi);
           tui_refreshing_registers = 0;
         }
     }

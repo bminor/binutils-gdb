@@ -249,7 +249,7 @@ tui_show_registers (TuiRegisterDisplayType dpyType)
   if (ret == TUI_FAILURE)
     {
       dataWin->detail.dataDisplayInfo.regsDisplayType = TUI_UNDEFINED_REGS;
-      tuiEraseDataContent (NO_REGS_STRING);
+      tui_erase_data_content (NO_REGS_STRING);
     }
   else
     {
@@ -266,7 +266,7 @@ tui_show_registers (TuiRegisterDisplayType dpyType)
 	     dataItemWin->content[0])->whichElement.data)->highlight = FALSE;
 	}
       dataWin->detail.dataDisplayInfo.regsDisplayType = dpyType;
-      tuiDisplayAllData ();
+      tui_display_all_data ();
     }
   (tuiLayoutDef ())->regsDisplayType = dpyType;
 
