@@ -1,3 +1,7 @@
+Tue Apr 16 11:17:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (CLEAN_MODULES): Add clean-apache.
+
 Mon Apr 15 15:09:05 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* Makefile.in (ALL_MODULES): Include all-apache.
