@@ -261,7 +261,7 @@ coff_swap_reloc_out (abfd, src, dst)
   SWAP_OUT_RELOC_EXTRA(abfd,reloc_src, reloc_dst);
 #endif
 
-  return RELSZ;
+  return bfd_coff_relsz (abfd);
 }
 
 #endif /* NO_COFF_RELOCS */
@@ -321,7 +321,7 @@ coff_swap_filehdr_out (abfd, in, out)
 #ifdef COFF_ADJUST_FILEHDR_OUT_POST
   COFF_ADJUST_FILEHDR_OUT_POST (abfd, in, out);
 #endif
-  return FILHSZ;
+  return bfd_coff_filhsz (abfd);
 }
 
 
@@ -845,7 +845,7 @@ coff_swap_scnhdr_out (abfd, in, out)
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
   SCNHDR *scnhdr_ext = (SCNHDR *)out;
-  unsigned int ret = SCNHSZ;
+  unsigned int ret = bfd_coff_scnhsz (abfd);
 
 #ifdef COFF_ADJUST_SCNHDR_OUT_PRE
   COFF_ADJUST_SCNHDR_OUT_PRE (abfd, in, out);

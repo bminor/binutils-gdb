@@ -763,7 +763,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 	  char *target_name;
 
 	  esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
-	  esymend = esym + obj_raw_syment_count (abfd) * SYMESZ;
+	  esymend = esym + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd);
 
 	  while (esym < esymend)
 	    {
@@ -852,7 +852,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
   
 			/* This is the section symbol.  */
 
-			bfd_coff_swap_aux_in (abfd, (PTR) (esym + SYMESZ),
+			bfd_coff_swap_aux_in (abfd, (PTR) (esym + bfd_coff_symesz (abfd)),
 					      isym.n_type, isym.n_sclass,
 					      0, isym.n_numaux, (PTR) &aux);
 
@@ -940,7 +940,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 				  symname + (TARGET_UNDERSCORE ? 1 : 0)) != 0)
 			{
 			    /* Not the name we're looking for */
-	                    esym += (isym.n_numaux + 1) * SYMESZ;
+	                    esym += (isym.n_numaux + 1) * bfd_coff_symesz (abfd);
 			    continue;
 			}
 		      /* Fall through.  */
@@ -960,7 +960,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 		        if (section->comdat == NULL)
 		          abort ();
 		        section->comdat->symbol =
-			  (esym - esymstart) / SYMESZ;
+			  (esym - esymstart) / bfd_coff_symesz (abfd);
 
 		        newname = bfd_alloc (abfd, strlen (symname) + 1);
 		        if (newname == NULL)
@@ -975,7 +975,7 @@ styp_to_sec_flags (abfd, hdr, name, section)
 		    }
 		}
 
-	      esym += (isym.n_numaux + 1) * SYMESZ;
+	      esym += (isym.n_numaux + 1) * bfd_coff_symesz (abfd);
 	    }
 	  breakloop:
 	}
@@ -1362,7 +1362,7 @@ coff_bad_format_hook (abfd, filehdr)
      */
 
 #if defined(M88) || defined(I960)
-  if (internal_f->f_opthdr != 0 && AOUTSZ != internal_f->f_opthdr)
+  if (internal_f->f_opthdr != 0 && bfd_coff_aoutsz (abfd) != internal_f->f_opthdr)
     return false;
 #endif
 
@@ -1672,9 +1672,9 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
   coff->local_n_btshft = N_BTSHFT;
   coff->local_n_tmask = N_TMASK;
   coff->local_n_tshift = N_TSHIFT;
-  coff->local_symesz = SYMESZ;
-  coff->local_auxesz = AUXESZ;
-  coff->local_linesz = LINESZ;
+  coff->local_symesz = bfd_coff_symesz (abfd);
+  coff->local_auxesz = bfd_coff_auxesz (abfd);
+  coff->local_linesz = bfd_coff_linesz (abfd);
 
   coff->timestamp = internal_f->f_timdat;
 
@@ -1685,7 +1685,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
 #ifdef RS6000COFF_C
   if ((internal_f->f_flags & F_SHROBJ) != 0)
     abfd->flags |= DYNAMIC;
-  if (aouthdr != NULL && internal_f->f_opthdr >= AOUTSZ)
+  if (aouthdr != NULL && internal_f->f_opthdr >= bfd_coff_aoutsz (abfd))
     {
       struct internal_aouthdr *internal_a =
 	(struct internal_aouthdr *) aouthdr;
@@ -1880,11 +1880,11 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	      cputype = 0;
 	    else
 	      {
-		bfd_byte buf[SYMESZ];
+		bfd_byte buf[bfd_coff_symesz (abfd)];
 		struct internal_syment sym;
 
 		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-		    || bfd_read (buf, 1, SYMESZ, abfd) != SYMESZ)
+		    || bfd_read (buf, 1, bfd_coff_symesz (abfd), abfd) != bfd_coff_symesz (abfd))
 		  return false;
 		coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
 		if (sym.n_sclass == C_FILE)
@@ -2293,7 +2293,8 @@ coff_write_relocs (abfd, first_undef)
 	  n.r_type = q->howto->type;
 #endif
 	  coff_swap_reloc_out (abfd, &n, &dst);
-	  if (bfd_write ((PTR) & dst, 1, RELSZ, abfd) != RELSZ)
+	  if (bfd_write ((PTR) & dst, 1, bfd_coff_relsz (abfd), abfd)
+	      != bfd_coff_relsz (abfd))
 	    return false;
 	}
 
@@ -2613,7 +2614,7 @@ coff_compute_section_file_positions (abfd)
 {
   asection *current;
   asection *previous = (asection *) NULL;
-  file_ptr sofar = FILHSZ;
+  file_ptr sofar = bfd_coff_filhsz (abfd);
   boolean align_adjust;
 #ifdef ALIGN_SECTIONS_IN_FILE
   file_ptr old_sofar;
@@ -2680,22 +2681,22 @@ coff_compute_section_file_positions (abfd)
     }
 
   if (abfd->flags & EXEC_P)
-    sofar += AOUTSZ;
+    sofar += bfd_coff_aoutsz (abfd);
 #ifdef RS6000COFF_C
   else if (xcoff_data (abfd)->full_aouthdr)
-    sofar += AOUTSZ;
+    sofar += bfd_coff_aoutsz (abfd);
   else
     sofar += SMALL_AOUTSZ;
 #endif
 
-  sofar += abfd->section_count * SCNHSZ;
+  sofar += abfd->section_count * bfd_coff_scnhsz (abfd);
 
 #ifdef RS6000COFF_C
   /* XCOFF handles overflows in the reloc and line number count fields
      by allocating a new section header to hold the correct counts.  */
   for (current = abfd->sections; current != NULL; current = current->next)
     if (current->reloc_count >= 0xffff || current->lineno_count >= 0xffff)
-      sofar += SCNHSZ;
+      sofar += bfd_coff_scnhsz (abfd);
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
@@ -3015,7 +3016,7 @@ coff_write_object_contents (abfd)
   /* Make a pass through the symbol table to count line number entries and
      put them into the correct asections */
 
-  lnno_size = coff_count_linenumbers (abfd) * LINESZ;
+  lnno_size = coff_count_linenumbers (abfd) * bfd_coff_linesz (abfd);
 
   if (abfd->output_has_begun == false)
     {
@@ -3029,7 +3030,7 @@ coff_write_object_contents (abfd)
 
   for (current = abfd->sections; current != NULL; current =
        current->next)
-    reloc_size += current->reloc_count * RELSZ;
+    reloc_size += current->reloc_count * bfd_coff_relsz (abfd);
 
   lineno_base = reloc_base + reloc_size;
   sym_base = lineno_base + lnno_size;
@@ -3042,7 +3043,7 @@ coff_write_object_contents (abfd)
 	{
 	  current->line_filepos = lineno_base;
 	  current->moving_line_filepos = lineno_base;
-	  lineno_base += current->lineno_count * LINESZ;
+	  lineno_base += current->lineno_count * bfd_coff_linesz (abfd);
 	}
       else
 	{
@@ -3051,7 +3052,7 @@ coff_write_object_contents (abfd)
       if (current->reloc_count)
 	{
 	  current->rel_filepos = reloc_base;
-	  reloc_base += current->reloc_count * RELSZ;
+	  reloc_base += current->reloc_count * bfd_coff_relsz (abfd);
 	}
       else
 	{
@@ -3063,13 +3064,13 @@ coff_write_object_contents (abfd)
   internal_f.f_nscns = 0;
 
   if ((abfd->flags & EXEC_P) != 0)
-    scn_base = FILHSZ + AOUTSZ;
+    scn_base = bfd_coff_filhsz (abfd) + bfd_coff_aoutsz (abfd);
   else
     {
-      scn_base = FILHSZ;
+      scn_base = bfd_coff_filhsz (abfd);
 #ifdef RS6000COFF_C
       if (xcoff_data (abfd)->full_aouthdr)
-	scn_base += AOUTSZ;
+	scn_base += bfd_coff_aoutsz (abfd);
       else
 	scn_base += SMALL_AOUTSZ;
 #endif
@@ -3214,7 +3215,8 @@ coff_write_object_contents (abfd)
 	{
 	  SCNHDR buff;
 	  if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
-	      || bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
+	      || bfd_write ((PTR) (&buff), 1, bfd_coff_scnhsz (abfd), abfd)
+	           != bfd_coff_scnhsz (abfd))
 	    return false;
 	}
 
@@ -3335,7 +3337,8 @@ coff_write_object_contents (abfd)
 	  scnhdr.s_nlnno = current->target_index;
 	  scnhdr.s_flags = STYP_OVRFLO;
 	  if (coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
-	      || bfd_write ((PTR) &buff, 1, SCNHSZ, abfd) != SCNHSZ)
+	      || bfd_write ((PTR) &buff, 1, bfd_coff_scnhsz (abfd), abfd)
+	           != bfd_coff_scnhsz (abfd))
 	    return false;
 	}
     }
@@ -3356,13 +3359,13 @@ coff_write_object_contents (abfd)
   internal_f.f_flags = 0;
 
   if (abfd->flags & EXEC_P)
-    internal_f.f_opthdr = AOUTSZ;
+    internal_f.f_opthdr = bfd_coff_aoutsz (abfd);
   else
     {
       internal_f.f_opthdr = 0;
 #ifdef RS6000COFF_C
       if (xcoff_data (abfd)->full_aouthdr)
-	internal_f.f_opthdr = AOUTSZ;
+	internal_f.f_opthdr = bfd_coff_aoutsz (abfd);
       else
 	internal_f.f_opthdr = SMALL_AOUTSZ;
 #endif
@@ -3678,18 +3681,19 @@ coff_write_object_contents (abfd)
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return false;
   {
-    char buff[FILHSZ];
+    char buff[bfd_coff_filhsz (abfd)];
     coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
-    if (bfd_write ((PTR) buff, 1, FILHSZ, abfd) != FILHSZ)
+    if (bfd_write ((PTR) buff, 1, bfd_coff_filhsz (abfd), abfd)
+	!= bfd_coff_filhsz (abfd))
       return false;
   }
   if (abfd->flags & EXEC_P)
     {
       /* Note that peicode.h fills in a PEAOUTHDR, not an AOUTHDR. 
 	 include/coff/pe.h sets AOUTSZ == sizeof(PEAOUTHDR)) */
-      char buff[AOUTSZ];
+      char buff[bfd_coff_aoutsz (abfd)];
       coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) buff);
-      if (bfd_write ((PTR) buff, 1, AOUTSZ, abfd) != AOUTSZ)
+      if (bfd_write ((PTR) buff, 1, bfd_coff_aoutsz (abfd), abfd) != bfd_coff_aoutsz (abfd))
 	return false;
     }
 #ifdef RS6000COFF_C
@@ -3701,7 +3705,7 @@ coff_write_object_contents (abfd)
       /* XCOFF seems to always write at least a small a.out header.  */
       coff_swap_aouthdr_out (abfd, (PTR) &internal_a, (PTR) &buff);
       if (xcoff_data (abfd)->full_aouthdr)
-	size = AOUTSZ;
+	size = bfd_coff_aoutsz (abfd);
       else
 	size = SMALL_AOUTSZ;
       if (bfd_write ((PTR) &buff, 1, size, abfd) != size)
@@ -3860,7 +3864,7 @@ coff_slurp_line_table (abfd, asect)
   native_lineno = (LINENO *) buy_and_read (abfd,
 					   asect->line_filepos,
 					   SEEK_SET,
-					   (size_t) (LINESZ *
+					   (size_t) (bfd_coff_linesz (abfd) *
 						     asect->lineno_count));
   lineno_cache =
     (alent *) bfd_alloc (abfd, (size_t) ((asect->lineno_count + 1) * sizeof (alent)));
@@ -4179,7 +4183,7 @@ coff_slurp_symbol_table (abfd)
 		for (sec = abfd->sections; sec != NULL; sec = sec->next)
 		  if (sec->line_filepos <= (file_ptr) src->u.syment.n_value
 		      && ((file_ptr) (sec->line_filepos
-				      + sec->lineno_count * LINESZ)
+				      + sec->lineno_count * bfd_coff_linesz (abfd))
 			  > (file_ptr) src->u.syment.n_value))
 		    break;
 		if (sec == NULL)
@@ -4189,7 +4193,7 @@ coff_slurp_symbol_table (abfd)
 		    dst->symbol.section = sec;
 		    dst->symbol.value = ((src->u.syment.n_value
 					  - sec->line_filepos)
-					 / LINESZ);
+					 / bfd_coff_linesz (abfd));
 		    src->fix_line = 1;
 		  }
 	      }
@@ -4471,7 +4475,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
     (RELOC *) buy_and_read (abfd,
 			    asect->rel_filepos,
 			    SEEK_SET,
-			    (size_t) (RELSZ *
+			    (size_t) (bfd_coff_relsz (abfd) *
 				      asect->reloc_count));
   reloc_cache = (arelent *)
     bfd_alloc (abfd, (size_t) (asect->reloc_count * sizeof (arelent)));
