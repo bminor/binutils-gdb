@@ -7,10 +7,6 @@
 	* ppc-linux-tdep.c (ppc64_desc_entry_point): New function.
 	(ppc64_standard_linkage_target): Use it.
 
-	* ppc-linux-nat.c (ppc_register_u_addr): Correctly compute u-area
-	offsets for floating-point registers in both 32- and 64-bit
-	interfaces.
-
 	Merged from trunk:
 	
 	2003-05-29  Kevin Buettner  <kevinb@redhat.com>
@@ -52,9 +48,6 @@
 	* ppc-linux-nat.c (store_altivec_registers): Don't cast fourth
 	argument to ptrace to int; the system headers should give it the
 	right type, and pointers don't fit in ints on powerpc64-*-*.
-
-	* ppc-linux-nat.c (ppc_register_u_addr): Compute u-area offsets
-	using the tdep's wordsize, not just '4'.
 
 	* config/powerpc/nm-ppc64-linux.h (PTRACE_XFER_TYPE): This is
 	'long' on ppc64-*-linux*.
