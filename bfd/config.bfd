@@ -358,6 +358,16 @@ case "${targ}" in
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec"
     ;;
 
+  powerpcle-*-pe | powerpcle-*-winnt*)
+    targ_defvec=bfd_powerpcle_pe_vec
+    targ_selvecs="bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
+    ;;
+
+  powerpc-*-pe | powerpc-*-winnt*)
+    targ_defvec=bfd_powerpc_pe_vec
+    targ_selvecs="bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
+    ;;
+
   rs6000-*-*)
     targ_defvec=rs6000coff_vec
     ;;

@@ -499,6 +499,12 @@ extern const bfd_target i386bsd_vec;
 extern const bfd_target i386dynix_vec;
 extern const bfd_target i386os9k_vec;
 extern const bfd_target i386coff_vec;
+extern const bfd_target bfd_powerpc_vec;
+extern const bfd_target bfd_powerpcle_vec;
+extern const bfd_target bfd_powerpc_pe_vec;
+extern const bfd_target bfd_powerpcle_pe_vec;
+extern const bfd_target bfd_powerpc_pei_vec;
+extern const bfd_target bfd_powerpcle_pei_vec;
 extern const bfd_target i386pe_vec;
 extern const bfd_target i386pei_vec;
 extern const bfd_target go32coff_vec;
@@ -644,6 +650,12 @@ const bfd_target * const bfd_target_vector[] = {
 	&i386aout_vec,
 	&i386bsd_vec,
 	&i386coff_vec,
+	&bfd_powerpc_vec,
+	&bfd_powerpcle_vec,
+	&bfd_powerpc_pe_vec,
+	&bfd_powerpcle_pe_vec,
+	&bfd_powerpc_pei_vec,
+	&bfd_powerpcle_pei_vec,
 	&go32coff_vec,
 #if 0
 	/* Since a.out files lack decent magic numbers, no way to recognize
@@ -809,6 +821,7 @@ bfd_find_target (target_name, abfd)
   }
 
   bfd_set_error (bfd_error_invalid_target);
+  fprintf(stderr,"Target = %s\n", target_name);
   return NULL;
 }
 

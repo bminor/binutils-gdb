@@ -1365,6 +1365,10 @@ do
     pc532netbsd_vec)		tb="$tb ns32knetbsd.o aout-ns32k.o stab-syms.o" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
+    bfd_powerpc_pe_vec)         tb="$tb pe-ppc.o cofflink.o" ;;  
+    bfd_powerpcle_pe_vec)       tb="$tb pe-ppc.o cofflink.o" ;;  
+    bfd_powerpc_pei_vec)        tb="$tb pei-ppc.o cofflink.o" ;;
+    bfd_powerpcle_pei_vec)      tb="$tb pei-ppc.o cofflink.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
 # start-sanitize-rce
     rce_aout_vec)		tb="$tb aout-rce.o aout32.o stab-syms.o" ;;
