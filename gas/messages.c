@@ -414,6 +414,10 @@ as_fatal (const char *format, ...)
   vfprintf (stderr, format, args);
   (void) putc ('\n', stderr);
   va_end (args);
+  /* Delete the output file, if it exists.  This will prevent make from
+     thinking that a file was created and hence does not need rebuilding.  */
+  if (out_file_name != NULL)
+    unlink (out_file_name);
   xexit (EXIT_FAILURE);
 }
 #else

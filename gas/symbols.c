@@ -439,7 +439,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 			    S_GET_OTHER (symbolP),
 			    S_GET_DESC (symbolP));
 #endif
-		  as_fatal (_("Symbol \"%s\" is already defined as \"%s\"/%s%ld."),
+		  as_bad (_("Symbol \"%s\" is already defined as \"%s\"/%s%ld."),
 			    sym_name,
 			    segment_name (S_GET_SEGMENT (symbolP)),
 			    od_buf,
@@ -453,8 +453,8 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 	  if (!(frag_now == symbolP->sy_frag
 		&& S_GET_VALUE (symbolP) == frag_now_fix ()
 		&& S_GET_SEGMENT (symbolP) == now_seg))
-	    as_fatal (_("Symbol %s already defined."), sym_name);
-	}			/* if this symbol is not yet defined  */
+	    as_bad (_("Symbol %s already defined."), sym_name);
+	}
 
     }
 #ifdef BFD_ASSEMBLER
@@ -474,7 +474,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 #endif /* OBJ_VMS */
 
       symbol_table_insert (symbolP);
-    }				/* if we have seen this symbol before  */
+    }
 
   if (mri_common_symbol != NULL)
     {

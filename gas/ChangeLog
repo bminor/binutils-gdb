@@ -1,3 +1,12 @@
+2001-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* symbols.c (colon): Change 'already defined symbol' from a
+	fatal error to an ordinary error.  There is no reason why this
+	error should be fatal.
+
+	* message.c (as_fatal): Delete output file, if one has been
+	created. 
+
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.h (TARGET_FORMAT): Add hppa-linux variants.
