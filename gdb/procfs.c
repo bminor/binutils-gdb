@@ -2562,7 +2562,7 @@ proc_set_watchpoint (pi, addr, len, wflags)
   prwatch_t *pwatch;
 
   pwatch            = (prwatch_t *) &arg.watch;
-  pwatch->pr_vaddr  = addr;
+  pwatch->pr_vaddr  = address_to_host_pointer (addr);
   pwatch->pr_size   = len;
   pwatch->pr_wflags = wflags;
 #if defined(NEW_PROC_API) && defined (PCWATCH)
@@ -2683,7 +2683,8 @@ proc_iterate_over_mappings (func)
 	 not a problem.  */
 
       /* Stop looping if the callback returns non-zero.  */
-      if ((funcstat = (*func) (fd, (CORE_ADDR) map[i].pr_vaddr)) != 0)
+      funcstat = (*func) (fd, host_pointer_to_address (map[i].pr_vaddr));
+      if (funcstat != 0)
 	break;
     }
 #endif

@@ -1,3 +1,32 @@
+Wed May 31 21:41:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (POINTER_TO_ADDRESS, ADDRESS_TO_POINTER): Change buf
+ 	to a void pointer.  Update initial values.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
+	* findvar.c (address_to_signed_pointer,
+ 	signed_pointer_to_address): New functions.
+	* inferior.h (signed_pointer_to_address,
+ 	signed_address_to_pointer): Declare.
+
+	* inferior.h, findvar.c (unsigned_pointer_to_address,
+ 	address_to_unsigned_pointer): Rename generic_address_to_pointer
+ 	and generic_pointer_to_address.  Update signatures to match
+ 	gdbarch changes.
+
+	* config/mips/tm-mips.h (POINTER_TO_ADDRESS, ADDRESS_TO_POINTER):
+ 	Define. MIPS has signed pointers.
+
+	* defs.h, utils.c (host_pointer_to_address,
+ 	address_to_host_pointer): New functions.
+	* irix5-nat.c (next_link_map_member, first_link_map_member),
+ 	procfs.c (proc_set_watchpoint, proc_iterate_over_mappings): Use.
+
+	* irix5-nat.c (solib_map_sections, symbol_add_stub): Change
+ 	function signature to match catch_errors_ftype.
+
+	* TODO: Update. GDB builds using the IRIX native compiler.
+	
 Sat Jun  3 20:43:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (strsignal, safe_strsignal): Delete declarations.

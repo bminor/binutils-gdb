@@ -160,10 +160,13 @@ extern void write_fp (CORE_ADDR);
 
 extern void generic_target_write_fp (CORE_ADDR);
 
-extern CORE_ADDR generic_pointer_to_address (struct type *type, char *buf);
+extern CORE_ADDR unsigned_pointer_to_address (struct type *type, void *buf);
 
-extern void generic_address_to_pointer (struct type *type, char *buf,
-					CORE_ADDR addr);
+extern void unsigned_address_to_pointer (struct type *type, void *buf,
+					 CORE_ADDR addr);
+extern CORE_ADDR signed_pointer_to_address (struct type *type, void *buf);
+extern void address_to_signed_pointer (struct type *type, void *buf,
+				       CORE_ADDR addr);
 
 extern void wait_for_inferior (void);
 

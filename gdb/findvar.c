@@ -1210,20 +1210,30 @@ write_fp (val)
 /* Given a pointer of type TYPE in target form in BUF, return the
    address it represents.  */
 CORE_ADDR
-generic_pointer_to_address (struct type *type, char *buf)
+unsigned_pointer_to_address (struct type *type, void *buf)
 {
   return extract_address (buf, TYPE_LENGTH (type));
 }
 
+CORE_ADDR
+signed_pointer_to_address (struct type *type, void *buf)
+{
+  return extract_signed_integer (buf, TYPE_LENGTH (type));
+}
 
 /* Given an address, store it as a pointer of type TYPE in target
    format in BUF.  */
 void
-generic_address_to_pointer (struct type *type, char *buf, CORE_ADDR addr)
+unsigned_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 {
   store_address (buf, TYPE_LENGTH (type), addr);
 }
 
+void
+address_to_signed_pointer (struct type *type, void *buf, CORE_ADDR addr)
+{
+  store_signed_integer (buf, TYPE_LENGTH (type), addr);
+}
 
 /* Will calling read_var_value or locate_var_value on SYM end
    up caring what frame it is being evaluated relative to?  SYM must

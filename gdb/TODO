@@ -15,15 +15,6 @@ release.
 
 --
 
-GDB requires GCC to build under IRIX
-
-IRIX, being more pedantic than GCC reports as errors certain
-assignments that GCC treats as warnings.
-
-This can be worked around by building GDB with the GCC compiler.
-
---
-
 The BFD directory requires bug-fixed AUTOMAKE et.al.
 
 AUTOMAKE 1.4 incorrectly set the TEXINPUTS environment variable.  It

@@ -383,8 +383,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->call_dummy_stack_adjust_p = -1;
   gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   gdbarch->register_convertible = generic_register_convertible_not;
-  gdbarch->pointer_to_address = generic_pointer_to_address;
-  gdbarch->address_to_pointer = generic_address_to_pointer;
+  gdbarch->pointer_to_address = unsigned_pointer_to_address;
+  gdbarch->address_to_pointer = unsigned_address_to_pointer;
   gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
   gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
@@ -2134,7 +2134,7 @@ set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, char *buf)
+gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf)
 {
   if (gdbarch->pointer_to_address == 0)
     internal_error ("gdbarch: gdbarch_pointer_to_address invalid");
@@ -2151,7 +2151,7 @@ set_gdbarch_pointer_to_address (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, char *buf, CORE_ADDR addr)
+gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, void *buf, CORE_ADDR addr)
 {
   if (gdbarch->address_to_pointer == 0)
     internal_error ("gdbarch: gdbarch_address_to_pointer invalid");
