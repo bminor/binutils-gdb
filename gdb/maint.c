@@ -171,8 +171,8 @@ print_section_table (abfd, asect, ignore)
     printf_filtered (" HAS_CONTENTS");
   if (flags & SEC_NEVER_LOAD)
     printf_filtered (" NEVER_LOAD");
-  if (flags & SEC_SHARED_LIBRARY)
-    printf_filtered (" SHARED_LIBRARY");
+  if (flags & SEC_COFF_SHARED_LIBRARY)
+    printf_filtered (" COFF_SHARED_LIBRARY");
   if (flags & SEC_IS_COMMON)
     printf_filtered (" IS_COMMON");
 
