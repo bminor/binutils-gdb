@@ -1,5 +1,8 @@
 Thu Feb 27 00:26:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-elf.c (obj_elf_common): Set BSF_OBJECT in flags.
+	* config/tc-sparc.c (s_common): Likewise, if BFD_ASSEMBLER.
+
 	* expr.c (operand): Simplify 0b handling.  Don't treat 0b as a
 	binary number if the next character is '+' or '-'.
 
