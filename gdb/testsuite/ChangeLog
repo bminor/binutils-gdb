@@ -1,3 +1,8 @@
+2003-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/float.exp: Expect similar output for x86_64-*-* as for
+	i?86-*-*.
+
 2003-05-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Make sure the final link succeeds on
