@@ -1,3 +1,9 @@
+Fri Jul 12 12:08:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Look for g-mpw-make.sed in config/mpw.
+	* mpw-build.in: No builds should depend on building byacc or flex,
+	they are assumed to be installed already.
+
 Fri Jul 12 09:52:52 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (CONFIGURE_TARGET_MODULES): Set r environment
