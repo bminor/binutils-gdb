@@ -14,6 +14,7 @@ m68k)
 	apollo*)
 		case "${host_os}" in
 		sysv*)	gdb_host=apollo68v ;;
+		bsd*)	gdb_host=apollo68b ;;
 		esac
 		;;
 	att)	gdb_host=3b1 ;;

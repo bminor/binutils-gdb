@@ -1,3 +1,8 @@
+Mon Aug  3 17:06:20 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Add support for apollo 68k under BSD environment.
+	* xm-apollo68b.h:  New file to support above.
+
 Mon Aug  3 00:25:56 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in:  Recognize i486 host cpu.
