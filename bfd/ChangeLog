@@ -1,3 +1,30 @@
+Thu Jan 12 16:30:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (diststuff): Include `headers'.
+
+	* sunos.c (m68k_plt_first_entry, sparc_plt_first_entry): Now
+	const.
+	* tekhex.c (digs): Ditto.
+	* elf32-i386.c (elf_i386_plt0_entry, elf_i386_plt_entry): Ditto.
+
+	* srec.c, tekhex.c: Include libiberty.h.  Delete static array
+	hex_value and replace references to it with references to
+	hex_init, hex_p, and hex_value.
+	* Makefile.in: Updated dependencies.
+
+	* archures.c (archures_init_table): Now const.
+	(bfd_arch_init): Adjusted type of local var `ptable'.
+start-sanitize-rce
+
+	* Makefile.in (ALL_MACHINES): Include cpu-rce.o.
+	(BFD32_BACKENDS): Include aout-rce.o.
+end-sanitize-rce
+start-sanitize-arc
+
+	* Makefile.in (ALL_MACHINES): Include cpu-arc.o.
+	(BFD32_BACKENDS): Include elf32-arc.o.
+end-sanitize-arc
+
 Thu Jan 12 09:33:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* hosts/symmetry.h:  Redefine `shared' to enable compilation
