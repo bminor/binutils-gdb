@@ -2819,31 +2819,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
-#if OLD_STYLE_ARM_DUMMY_FRAMES
-  /* NOTE: cagney/2002-05-07: Enable the below to restore the old ARM
-     specific (non-generic) dummy frame code.  Might be useful if
-     there appears to be a problem with the generic dummy frame
-     mechanism that replaced it.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-
-  /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  /* We have to give this a value now, even though we will re-set it 
-     during each call to arm_fix_call_dummy.  */
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 8);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-
-  set_gdbarch_call_dummy_words (gdbarch, arm_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (arm_call_dummy_words));
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-
-  set_gdbarch_fix_call_dummy (gdbarch, arm_fix_call_dummy);
-
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
-#else
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
 
@@ -2863,7 +2838,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
-#endif
 
   set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
@@ -2883,15 +2857,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
-#if OLD_STYLE_ARM_DUMMY_FRAMES
-  /* NOTE: cagney/2002-05-07: Enable the below to restore the old ARM
-     specific (non-generic) dummy frame code.  Might be useful if
-     there appears to be a problem with the generic dummy frame
-     mechanism that replaced it.  */
-  set_gdbarch_push_dummy_frame (gdbarch, arm_push_dummy_frame);
-#else
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-#endif
   set_gdbarch_pop_frame (gdbarch, arm_pop_frame);
 
   /* Address manipulation.  */

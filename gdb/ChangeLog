@@ -1,3 +1,9 @@
+2002-11-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* arm-tdep.c (arm_gdbarch_init): Remove old style non-generic
+	dummy frame initialization code.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+
 2002-11-22  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (child_attach): Reset saw_create counter or subsequent

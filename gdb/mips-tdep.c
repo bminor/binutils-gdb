@@ -5990,38 +5990,23 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-#else
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-#endif
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-  set_gdbarch_push_dummy_frame (gdbarch, mips_push_dummy_frame);
-#else
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-#endif
   set_gdbarch_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-#else
   set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
-#endif
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
-#if OLD_STYLE_MIPS_DUMMY_FRAMES
-#else
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-#endif
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   mips_register_convert_to_virtual);
