@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opcodes 2.11\n"
 "POT-Creation-Date: 2001-01-11 12:44-0800\n"
-"PO-Revision-Date: 2001-10-23 15:35+0200\n"
+"PO-Revision-Date: 2001-10-23 17:35+0200\n"
 "Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -16,11 +16,11 @@ msgstr ""
 
 #: alpha-opc.c:335
 msgid "branch operand unaligned"
-msgstr "grenoperanden ligger ikke på lige adresse"
+msgstr "operanden for betinget hop ligger på skæv adresse"
 
 #: alpha-opc.c:358 alpha-opc.c:380
 msgid "jump hint unaligned"
-msgstr "hopperådet ligger ikke på lige adresse"
+msgstr "hopperådet ligger på skæv adresse"
 
 #: arc-dis.c:52
 msgid "Illegal limm reference in last instruction!\n"
@@ -70,12 +70,12 @@ msgstr "ukendt navn på nøgleord/register"
 #: cgen-asm.c:332 fr30-ibld.c:232 m32r-ibld.c:232
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
-msgstr "operanden er udenfor intervallet (%ld er ikke mellem %ld og %ld)"
+msgstr "operanden er uden for intervallet (%ld er ikke mellem %ld og %ld)"
 
 #: cgen-asm.c:353
 #, c-format
 msgid "operand out of range (%lu not between %lu and %lu)"
-msgstr "operanden er udenfor intervallet (%lu er ikke mellem %lu og %lu)"
+msgstr "operanden er uden for intervallet (%lu er ikke mellem %lu og %lu)"
 
 #: d30v-dis.c:306
 #, c-format
@@ -91,7 +91,7 @@ msgstr "Ukendt fejl %d\n"
 #: dis-buf.c:61
 #, c-format
 msgid "Address 0x%x is out of bounds.\n"
-msgstr "Adressen 0x%x ligger udenfor tilladte grænser.\n"
+msgstr "Adressen 0x%x ligger uden for tilladte grænser.\n"
 
 #: fr30-asm.c:305 m32r-asm.c:313
 #, c-format
@@ -135,7 +135,7 @@ msgstr "Ukendt felt %d ved udskrift af instruktion.\n"
 #: fr30-ibld.c:216 m32r-ibld.c:216
 #, c-format
 msgid "operand out of range (%lu not between 0 and %lu)"
-msgstr "operanden udenfor intervallet (%lu ikke mellem 0 og %lu)"
+msgstr "operanden uden for intervallet (%lu ikke mellem 0 og %lu)"
 
 #: fr30-ibld.c:790 m32r-ibld.c:719
 #, c-format
@@ -247,15 +247,15 @@ msgstr "forsøg på at sætte y-bitten når modifikatoren + eller - blev brugt"
 
 #: ppc-opc.c:707
 msgid "ignoring least significant bits in branch offset"
-msgstr "ignorerer mindste betydende bit i grenafsæt"
+msgstr "ignorerer mindste betydende bit i afsæt for betinget hop"
 
 #: ppc-opc.c:742 ppc-opc.c:779
 msgid "illegal bitmask"
-msgstr "ugyldig bitmask"
+msgstr "ugyldig bitmaske"
 
 #: ppc-opc.c:848
 msgid "value out of range"
-msgstr "værdien er udenfor intervallet"
+msgstr "værdien er uden for intervallet"
 
 #: ppc-opc.c:922
 msgid "index register in load range"
@@ -306,7 +306,7 @@ msgstr "forskydningsværdien er ikke indenfor intervallet og ligger ikke på lige 
 
 #: v850-opc.c:47
 msgid "displacement value is out of range"
-msgstr "forskydningsværdien er udenfor intervallet"
+msgstr "forskydningsværdien er uden for intervallet"
 
 #: v850-opc.c:48
 msgid "displacement value is not aligned"
@@ -314,23 +314,23 @@ msgstr "forskydningsværdien ligger ikke på lige adresse"
 
 #: v850-opc.c:50
 msgid "immediate value is out of range"
-msgstr "umiddelbar værdi er udenfor intervallet"
+msgstr "umiddelbar værdi er uden for intervallet"
 
 #: v850-opc.c:61
 msgid "branch value not in range and to odd offset"
-msgstr "grenværdien er ikke indenfor intervallet og til et ulige afsæt"
+msgstr "værdien for betinget hop er ikke inden for intervallet og til et ulige afsæt"
 
 #: v850-opc.c:63 v850-opc.c:95
 msgid "branch value out of range"
-msgstr "grenværdien er udenfor intervallet"
+msgstr "værdien for betinget hop er uden for intervallet"
 
 #: v850-opc.c:66 v850-opc.c:98
 msgid "branch to odd offset"
-msgstr "forgrening til ulige afsæt"
+msgstr "betinget hop til ulige afsæt"
 
 #: v850-opc.c:93
 msgid "branch value not in range and to an odd offset"
-msgstr "grenværdien er ikke indenfor intervallet og til et ulige afsæt"
+msgstr "værdien for betinget hop er ikke indenfor intervallet og til et ulige afsæt"
 
 #: v850-opc.c:321
 msgid "invalid register for stack adjustment"
