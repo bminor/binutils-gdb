@@ -1,3 +1,12 @@
+Tue May 11 08:04:41 1993  Fred Fish  (fnf@cygnus.com)
+
+	* README:  Update known bugs to include the Solaris bug that
+	leaves core dumps in the current directory when restarting the
+	inferior with "run".  Expand on the testsuite information.
+
+	* Makefile.in (VERSION):  Bump to 4.8.96 for what should hopefully
+	be the last 4.9 prerelease test archive.
+
 Mon May 10 22:13:23 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config/m68k/xm-hp300bsd.h: Include <sys/param.h> to avoid INT_MAX
