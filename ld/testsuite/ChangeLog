@@ -1,3 +1,11 @@
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers18.dsym: Updated for weak definiton change.
+	* ld-elfvers/vers18.ver: Likewise.
+	* ld-elfvers/vers19.ver: Likewise.
+
+	* ld-elfweak/elfweak.exp: Remove xfail.
+
 2003-05-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-mips-elf/multi-got-1.d: Force into big-endian mode.

@@ -484,6 +484,7 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
+  bfd_boolean newweakdef, oldweakdef, newweakundef, oldweakundef;
 
   *skip = FALSE;
   *override = FALSE;
@@ -670,6 +671,49 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       return TRUE;
     }
 
+  /* We need to treat weak definiton right, depending on if there is a
+     definition from a dynamic object.  */
+  if (bind == STB_WEAK)
+    {
+      if (olddef)
+	{
+	   newweakdef = TRUE;
+	   newweakundef = FALSE;
+	}
+      else
+	{
+	   newweakdef = FALSE;
+	   newweakundef = TRUE;
+	}
+    }
+  else
+    newweakdef = newweakundef = FALSE;
+
+  /* If the new weak definition comes from a relocatable file and the
+     old symbol comes from a dynamic object, we treat the new one as
+     strong.  */
+  if (newweakdef && !newdyn && olddyn)
+    newweakdef = FALSE;
+
+  if (h->root.type == bfd_link_hash_defweak)
+    {
+      oldweakdef = TRUE;
+      oldweakundef = FALSE;
+    }
+  else if (h->root.type == bfd_link_hash_undefweak)
+    {
+      oldweakdef = FALSE;
+      oldweakundef = TRUE;
+    }
+  else
+    oldweakdef = oldweakundef = FALSE;
+
+  /* If the old weak definition comes from a relocatable file and the
+     new symbol comes from a dynamic object, we treat the old one as
+     strong.  */
+  if (oldweakdef && !olddyn && newdyn)
+    oldweakdef = FALSE;
+
   /* NEWDYNCOMMON and OLDDYNCOMMON indicate whether the new or old
      symbol, respectively, appears to be a common symbol in a dynamic
      object.  If a symbol appears in an uninitialized section, and is
@@ -698,7 +742,8 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       && (sec->flags & SEC_ALLOC) != 0
       && (sec->flags & SEC_LOAD) == 0
       && sym->st_size > 0
-      && bind != STB_WEAK
+      && !newweakdef
+      && !newweakundef
       && ELF_ST_TYPE (sym->st_info) != STT_FUNC)
     newdyncommon = TRUE;
   else
@@ -721,9 +766,10 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
      a shared object, in which case, the DT_NEEDED entry may not be
      required at the run time.  */
 
-  if ((! dt_needed && h->root.type == bfd_link_hash_defweak)
-      || h->root.type == bfd_link_hash_undefweak
-      || bind == STB_WEAK)
+  if ((! dt_needed && oldweakdef)
+      || oldweakundef
+      || newweakdef
+      || newweakundef)
     *type_change_ok = TRUE;
 
   /* It's OK to change the size if either the existing symbol or the
@@ -781,11 +827,13 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (bind == STB_WEAK
+	      && (newweakdef
+		  || newweakundef
 		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC)))
-      && (h->root.type != bfd_link_hash_defweak
+      && (!oldweakdef
 	  || dt_needed
-	  || bind == STB_WEAK))
+	  || newweakdef
+	  || newweakundef))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -838,13 +886,11 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
   if (! newdyn
       && (newdef
 	  || (bfd_is_com_section (sec)
-	      && (h->root.type == bfd_link_hash_defweak
-		  || h->type == STT_FUNC)))
+	      && (oldweakdef || h->type == STT_FUNC)))
       && olddyn
       && olddef
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-      && (bind != STB_WEAK
-	  || h->root.type == bfd_link_hash_defweak))
+      && ((!newweakdef && !newweakundef) || oldweakdef))
     {
       /* Change the hash table entry to undefined, and let
 	 _bfd_generic_link_add_one_symbol do the right thing with the
@@ -940,10 +986,11 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
      the DT_NEEDED entry may not be required at the run time.  */
   if (olddef
       && ! dt_needed
-      && h->root.type == bfd_link_hash_defweak
+      && oldweakdef
       && newdef
       && newdyn
-      && bind != STB_WEAK)
+      && !newweakdef
+      && !newweakundef)
     {
       /* To make this work we have to frob the flags so that the rest
 	 of the code does not think we are using the regular
@@ -969,10 +1016,10 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
      as a definition.  */
   if (olddef
       && olddyn
-      && h->root.type != bfd_link_hash_defweak
+      && !oldweakdef
       && newdef
       && ! newdyn
-      && bind == STB_WEAK)
+      && (newweakdef || newweakundef))
     *override = TRUE;
 
   return TRUE;

@@ -1,5 +1,9 @@
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
+	* elflink.h (elf_merge_symbol): Correctly handle weak definiton.
+
+2003-05-04  H.J. Lu <hjl@gnu.org>
+
 	* elflink.h (elf_merge_symbol): Don't record a hidden/internal
 	symbol dynamic. Check indirection when removing the old
 	definition for symbols with non-default visibility.
