@@ -174,6 +174,8 @@ char *make_tempname (char *);
 
 bfd_vma parse_vma (const char *, const char *);
 
+off_t get_file_size (const char *);
+
 extern char *program_name;
 
 /* filemode.c */

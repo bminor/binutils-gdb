@@ -370,6 +370,9 @@ strings_object_file (const char *file)
 static bfd_boolean
 strings_file (char *file)
 {
+  if (get_file_size (file) < 1)
+    return FALSE;
+
   /* If we weren't told to scan the whole file,
      try to open it as an object file and only look at
      initialized data sections.  If that fails, fall back to the

@@ -1,5 +1,5 @@
 /* input_file.c - Deal with Input Files -
-   Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001
+   Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "as.h"
 #include "input-file.h"
 #include "safe-ctype.h"
@@ -135,15 +136,31 @@ input_file_open (filename, pre)
 
   assert (filename != 0);	/* Filename may not be NULL.  */
   if (filename[0])
-    {				/* We have a file name. Suck it and see.  */
+    {
+      struct stat statbuf;
+
+      if (stat (filename, &statbuf) < 0)
+	{
+	  as_bad (_("%s: No such file"), filename);
+	  return;
+	}
+      else if (! S_ISREG (statbuf.st_mode))
+	{
+	  as_bad (_("'%s' is not an ordinary file"), filename);
+	  return;
+	}
+
       f_in = fopen (filename, FOPEN_RT);
       file_name = filename;
     }
   else
-    {				/* use stdin for the input file.  */
+    {
+      /* Use stdin for the input file.  */
       f_in = stdin;
-      file_name = _("{standard input}");	/* For error messages.  */
+      /* For error messages.  */
+      file_name = _("{standard input}");
     }
+
   if (f_in == (FILE *) 0)
     {
       as_bad (_("can't open %s for reading"), file_name);

@@ -341,8 +341,12 @@ display_archive (bfd *file)
 static void
 display_file (char *filename)
 {
-  bfd *file = bfd_openr (filename, target);
+  bfd *file;
 
+  if (get_file_size (filename) < 1)
+    return;
+
+  file = bfd_openr (filename, target);
   if (file == NULL)
     {
       bfd_nonfatal (filename);

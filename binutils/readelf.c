@@ -10457,14 +10457,24 @@ process_file (char *file_name)
 
   if (stat (file_name, &statbuf) < 0)
     {
-      error (_("Cannot stat input file %s.\n"), file_name);
+      if (errno == ENOENT)
+	error (_("'%s': No such file\n"), file_name);
+      else
+	error (_("Could not locate '%s'.  System error message: %s\n"),
+	       file_name, strerror (errno));
+      return 1;
+    }
+
+  if (! S_ISREG (statbuf.st_mode))
+    {
+      error (_("'%s' is not an ordinary file\n"), file_name);
       return 1;
     }
 
   file = fopen (file_name, "rb");
   if (file == NULL)
     {
-      error (_("Input file %s not found.\n"), file_name);
+      error (_("Input file '%s' is not readable.\n"), file_name);
       return 1;
     }
 

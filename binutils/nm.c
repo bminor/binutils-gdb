@@ -602,6 +602,9 @@ display_file (char *filename)
   bfd *file;
   char **matching;
 
+  if (get_file_size (filename) < 1)
+    return FALSE;
+
   file = bfd_openr (filename, target);
   if (file == NULL)
     {

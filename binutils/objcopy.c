@@ -583,28 +583,27 @@ add_specific_symbol (const char *name, struct symlist **list)
 static void
 add_specific_symbols (const char *filename, struct symlist **list)
 {
-  struct stat st;
+  off_t  size;
   FILE * f;
   char * line;
   char * buffer;
   unsigned int line_count;
 
-  if (stat (filename, & st) < 0)
-    fatal (_("cannot stat: %s: %s"), filename, strerror (errno));
-  if (st.st_size == 0)
+  size = get_file_size (filename);
+  if (size == 0)
     return;
 
-  buffer = xmalloc (st.st_size + 2);
+  buffer = xmalloc (size + 2);
   f = fopen (filename, FOPEN_RT);
   if (f == NULL)
-    fatal (_("cannot open: %s: %s"), filename, strerror (errno));
+    fatal (_("cannot open '%s': %s"), filename, strerror (errno));
 
-  if (fread (buffer, 1, st.st_size, f) == 0 || ferror (f))
+  if (fread (buffer, 1, size, f) == 0 || ferror (f))
     fatal (_("%s: fread failed"), filename);
 
   fclose (f);
-  buffer [st.st_size] = '\n';
-  buffer [st.st_size + 1] = '\0';
+  buffer [size] = '\n';
+  buffer [size + 1] = '\0';
 
   line_count = 1;
 
@@ -1571,6 +1570,12 @@ copy_file (const char *input_filename, const char *output_filename,
   char **obj_matching;
   char **core_matching;
 
+  if (get_file_size (input_filename) < 1)
+    {
+      status = 1;
+      return;
+    }
+
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
   ibfd = bfd_openr (input_filename, input_target);
@@ -2246,14 +2251,13 @@ strip_main (int argc, char *argv[])
       struct stat statbuf;
       char *tmpname;
 
+      if (get_file_size (argv[i]) < 1)
+	continue;
+
       if (preserve_dates)
-	{
-	  if (stat (argv[i], &statbuf) < 0)
-	    {
-	      non_fatal (_("%s: cannot stat: %s"), argv[i], strerror (errno));
-	      continue;
-	    }
-	}
+	/* No need to check the return value of stat().
+	   It has already been checked in get_file_size().  */
+	stat (argv[i], &statbuf);
 
       if (output_file != NULL)
 	tmpname = output_file;
@@ -2416,7 +2420,7 @@ copy_main (int argc, char *argv[])
 	case OPTION_ADD_SECTION:
 	  {
 	    const char *s;
-	    struct stat st;
+	    off_t size;
 	    struct section_add *pa;
 	    int len;
 	    char *name;
@@ -2427,8 +2431,9 @@ copy_main (int argc, char *argv[])
 	    if (s == NULL)
 	      fatal (_("bad format for %s"), "--add-section");
 
-	    if (stat (s + 1, & st) < 0)
-	      fatal (_("cannot stat: %s: %s"), s + 1, strerror (errno));
+	    size = get_file_size (s + 1);
+	    if (size < 1)
+	      break;
 
 	    pa = xmalloc (sizeof (struct section_add));
 
@@ -2439,10 +2444,9 @@ copy_main (int argc, char *argv[])
 	    pa->name = name;
 
 	    pa->filename = s + 1;
+	    pa->size = size;
+	    pa->contents = xmalloc (size);
 
-	    pa->size = st.st_size;
-
-	    pa->contents = xmalloc (pa->size);
 	    f = fopen (pa->filename, FOPEN_RB);
 
 	    if (f == NULL)
@@ -2800,7 +2804,8 @@ copy_main (int argc, char *argv[])
 
   if (preserve_dates)
     if (stat (input_filename, & statbuf) < 0)
-      fatal (_("Cannot stat: %s: %s"), input_filename, strerror (errno));
+      fatal (_("warning: could not locate '%s'.  System error message: %s"),
+	     input_filename, strerror (errno));
 
   /* If there is no destination file, or the source and destination files
      are the same, then create a temp and rename the result into the input.  */

@@ -2623,7 +2623,11 @@ display_bfd (bfd *abfd)
 static void
 display_file (char *filename, char *target)
 {
-  bfd *file, *arfile = NULL;
+  bfd *file;
+  bfd *arfile = NULL;
+
+  if (get_file_size (filename) < 1)
+    return;
 
   file = bfd_openr (filename, target);
   if (file == NULL)

@@ -1305,7 +1305,9 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 
       /* Add to the end of the archive.  */
       after_bfd = get_pos_bfd (&arch->next, pos_end, NULL);
-      if (ar_emul_append (after_bfd, *files_to_move, verbose))
+
+      if (get_file_size (* files_to_move) > 0
+	  && ar_emul_append (after_bfd, *files_to_move, verbose))
 	changed = TRUE;
 
     next_file:;
@@ -1324,6 +1326,8 @@ ranlib_only (const char *archname)
 {
   bfd *arch;
 
+  if (get_file_size (archname) < 1)
+    return;
   write_armap = 1;
   arch = open_inarch (archname, (char *) NULL);
   if (arch == NULL)
@@ -1344,6 +1348,8 @@ ranlib_touch (const char *archname)
   bfd *arch;
   char **matching;
 
+  if (get_file_size (archname) < 1)
+    return;
   f = open (archname, O_RDWR | O_BINARY, 0);
   if (f < 0)
     {

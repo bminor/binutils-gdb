@@ -374,10 +374,10 @@ ldfile_open_file (lang_input_statement_type *entry)
       if (ldfile_try_open_bfd (entry->filename, entry))
 	return;
       if (strcmp (entry->filename, entry->local_sym_name) != 0)
-	einfo (_("%F%P: cannot open %s for %s: %E\n"),
+	einfo (_("%F%P: %s (%s): No such file: %E\n"),
 	       entry->filename, entry->local_sym_name);
       else
-	einfo (_("%F%P: cannot open %s: %E\n"), entry->local_sym_name);
+	einfo (_("%F%P: %s: No such file: %E\n"), entry->local_sym_name);
     }
   else
     {

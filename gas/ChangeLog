@@ -1,3 +1,8 @@
+2003-11-07  Jonathan R. Grant  <jg-binutils@jguk.org>
+
+	* input-file.c (input_file_open): Use "No such file" error
+	message.
+
 2003-11-06  Pete Gonzalez  <pgonzalez@bluel.com>
 
 	* config/tc-arm.texi (struct reg_entry): Add new field 'builtin'.

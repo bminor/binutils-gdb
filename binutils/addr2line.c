@@ -230,6 +230,9 @@ process_file (const char *file_name, const char *target)
   bfd *abfd;
   char **matching;
 
+  if (get_file_size (file_name) < 1)
+    return;
+
   abfd = bfd_openr (file_name, target);
   if (abfd == NULL)
     bfd_fatal (file_name);

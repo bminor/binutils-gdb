@@ -1,3 +1,18 @@
+2003-11-07  Jonathan R. Grant  <jg-binutils@jguk.org>
+
+	* bucomm,c (get_file_size): New function.  Returns the size of a
+	  file.
+	* bucomm.h: Add prototype for get_file_size.
+	* addr2line.c (process_file): Use new function.
+	* ar.c (main, ranlib_only, ranlib_touch): Likewise.
+	* nm.c (display_file): Likewise.
+	* objcopy.c (add_specific_symbols, copy_file, strip_main,
+	  copy_main): Likewise.
+	* objdump.c (display_file): Likewise.
+	* size.c (display_file): Likewise.
+	* strings.c (strings_file): Likewise.
+	* readelf.c (process_file): Use similar code to get_file_size.
+
 2003-11-06  Bruno Rohee  <bruno@rohee.com>
 
 	* ieee.c: Fix "the the" typo.
