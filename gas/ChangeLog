@@ -1,3 +1,8 @@
+Fri Aug 12 17:51:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-mips.c (md_begin): Drop "el" from the end of
+	TARGET_CPU.  Check for mips64orion.
+
 Tue Aug  9 19:43:45 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* configure.in:  Recognize ppc-*-netware.
