@@ -30,6 +30,8 @@
 # 	config.status is removed.
 #
 
+set -e
+
 remove=rm
 hard_link=ln
 symbolic_link='ln -s'
@@ -60,8 +62,16 @@ targets=
 commontargets=
 configdirs=
 targetsubdir=
-template=
 verbose=
+
+#if [ "$0" != "./configure" ] ; then
+#	exec ./configure $*
+#fi
+
+#if [ ! -f ./config.sub ] ; then
+#	echo '***' Can not find config.sub.
+#	exit 1
+#fi
 
 for arg in $*;
 do
@@ -110,9 +120,6 @@ do
 		newtargets="${targets} `echo ${arg} | sed 's/[+-]t[a-z]*=//'`"
 		targets="${newtargets}"
 		;;
-	-template=* | +template=* | +templat=* | +templa=* | +templ=* | +temp=* | +tem=* | +te=*)
-		template=`echo ${arg} | sed 's/[+-]template=//'`
-		;;
 	-v | -verbose | +v*)
 		verbose=${arg}
 		;;
@@ -137,8 +144,8 @@ if [ -n "${verbose}" ] ; then
 	echo `pwd`/configure $*
 fi
 
-# process host and target only if not rebuilding configure itself or removing.
-if [ -z "${template}" -a -z "${removing}" -a -z "${fatal}" ] ; then
+# process host and target only if not removing.
+if [ -z "${removing}" -a -z "${fatal}" ] ; then
 	# Complain if an arg is missing
 	if [ -z "${hosts}" ] ; then
 		(echo ;
@@ -162,7 +169,6 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo " +norecursion	configure this directory only. [recurse]" ;
 	echo " +rm		remove this configuration. [build a configuration]" ;
 	echo " +target=TARGET	configure for TARGET.  [TARGET = HOST]" ;
-	echo " +template=TEM	rebuild configure using TEM. [normal config]" ;
 	echo ;
 	echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
 	echo "Asking for more than one \"+target\" implies \"+subdirs\".  Any other" ;
@@ -175,137 +181,42 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	exit 1
 fi
 
-#### configure.in common parts come in here.
-# This file is a shell script fragment that supplies the information
-# necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
-# any existing configure script.
-
-configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb emacs make grep diff rcs gdbm cvs prms"
-srctrigger=README.configure
-srcname="gnu development package"
-
-## end of common part.
-
-# are we rebuilding config itself?
-if [ -n "${template}" ] ; then
-	if [ ! -r ${template} ] ; then
-		echo '***' "Can't find template ${template}." 1>&2
+### break up configure.in.
+if [ -r configure.in ] ; then
+	if [ -z "`grep '^# per\-host:' configure.in`" ] ; then
+		echo '***' `pwd`/configure.in has no "per-host:" line. 1>&2
 		exit 1
 	fi
 
-# prep the template
-	sed -e '/^#### configure.in common parts come in here.$/,/^## end of common part.$/c\
-#### configure.in common parts come in here.\
-## end of common part.' \
-	-e '/^#### configure.in per-host parts come in here.$/,/^## end of per-host part.$/c\
-#### configure.in per-host parts come in here.\
-## end of per-host part.' \
-	-e '/^#### configure.in per-target parts come in here.$/,/^## end of per-target part.$/c\
-#### configure.in per-target parts come in here.\
-## end of per-target part.' \
-	-e '/^#### configure.in post-target parts come in here.$/,/^## end of post-target part.$/c\
-#### configure.in post-target parts come in here.\
-## end of post-target part.' \
-	< ${template} > template.new
+	if [ -z "`grep '^# per\-target:' configure.in`" ] ; then
+		echo '***' `pwd`/configure.in has no "per-target:" line. 1>&2
+		exit 1
+	fi
 
-	if [ -r configure.in ] ; then
-		if [ -z "`grep '^# per\-host:' configure.in`" ] ; then
-			echo '***' `pwd`/configure.in has no "per-host:" line. 1>&2
-			exit 1
-		fi
-
-		if [ -z "`grep '^# per\-target:' configure.in`" ] ; then
-			echo '***' `pwd`/configure.in has no "per-target:" line. 1>&2
-			exit 1
-		fi
-
-		# split configure.in into common, per-host, per-target,
-		# and post-target parts.  Post-target is optional.
-		sed -e '/^# per\-host:/,$d' configure.in > configure.com
-		sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
-		if grep -s '^# post-target:' configure.in ; then
-		  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > configure.tgt
-		  sed -e '1,/^# post\-target:/d' configure.in > configure.pos
-		else
-		  sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
-		  echo >configure.pos
-		fi
-
-		# and insert them
-		sed -e '/^#### configure.in common parts come in here.$/  r configure.com' \
-			-e '/^#### configure.in per\-host parts come in here.$/  r configure.hst' \
-			-e '/^#### configure.in per\-target parts come in here.$/  r configure.tgt' \
-			-e '/^#### configure.in post\-target parts come in here.$/  r configure.pos' \
-			template.new > configure.new
-
-		rm -f configure.com configure.tgt configure.hst configure.pos
+	# split configure.in into common, per-host, per-target,
+	# and post-target parts.  Post-target is optional.
+	sed -e '/^# per\-host:/,$d' configure.in > configure.com
+	sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
+	if grep -s '^# post-target:' configure.in ; then
+	  sed -e '1,/^# per\-target:/d' -e '/^# post\-target:/,$d' configure.in > configure.tgt
+	  sed -e '1,/^# post\-target:/d' configure.in > configure.pos
 	else
-		echo Warning: no configure.in in `pwd`
-		cat ${template} >> configure
+	  sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
+	  echo >configure.pos
 	fi
 
-	chmod a+x configure.new
-	rm template.new
-#	mv configure configure.old
-	mv configure.new configure
-
-	if [ -n "${verbose}" ] ; then
-		echo Rebuilt configure in `pwd`
-	fi
-
-	# Now update config.sub from the template directory.
-	if echo "$template" | grep -s 'configure$' ; then
-		cp `echo "$template" | sed s/configure$/config.sub/` ./config.sub.new
-	#	mv config.sub config.sub.old
-		mv config.sub.new config.sub
-
-		if [ -n "${verbose}" ] ; then
-			echo Rebuilt config.sub in `pwd`
-		fi
-	fi
-
-	if [ -z "${norecursion}" ] ; then
-		# If template is relative path, make it absolute for recurring.
-		if echo "${template}" | grep -s '^/' ; then
-		   true
-		else
-		   template=`pwd`/${template}
-		fi
-
-		while [ -n "${configdirs}" ] ; do
-			# set configdir to car of configdirs, configdirs to cdr of configdirs
-			set ${configdirs}; configdir=$1; shift; configdirs=$*
-
-			if [ "`echo ${configdir}.*`" != "${configdir}.*" ] ; then
-				targetspecificdirs=${configdir}.*
-			else
-				targetspecificdirs=
-			fi
-
-			for i in ${configdir} ${targetspecificdirs} ; do
-				if [ -d $i ] ; then
-					if [ -r $i/configure ] ; then
-						(cd $i ;
-							./configure +template=${template} ${verbose})
-					else
-						echo Warning: No configure script in `pwd`/$i
-					fi
-				else
-					if [ -n "${verbose}" ] ; then
-					  echo Warning: directory $i is missing.
-					fi
-				fi
-			done
-		done
-	fi
-
-	exit 0
+else
+	echo '***' No configure.in in `pwd`
+	exit 1
 fi
+
+### do common part of configure.in
+
+. ./configure.com
 
 # some sanity checks on configure.in
 if [ -z "${srctrigger}" ] ; then
-	echo Warning: srctrigger not set in configure.in. `pwd` not configured.
+	echo '***' srctrigger not set in `pwd`/configure.in.
 	exit 1
 fi
 
@@ -325,15 +236,7 @@ for host in ${hosts} ; do
 	host=${host_cpu}-${host_vendor}-${host_os}
 	host_makefile_frag=config/hmake-${host}
 
-#### configure.in per-host parts come in here.
-
-# XXX - FIXME there needs to be a case for hmake-dgux
-
-case "${host_os}" in
-sysv* | irix*) host_makefile_frag=config/hmake-sysv ;;
-esac
-
-## end of per-host part.
+	. ./configure.hst
 
 	for target in ${targets} ; do
 
@@ -345,16 +248,7 @@ esac
 		target=${target_cpu}-${target_vendor}-${target_os}
 		target_makefile_frag=config/tmake-${target}
 
-#### configure.in per-target parts come in here.
-
-# XXX - FIXME there needs to be a case for tmake-a29k
-
-#
-# Local Variables:
-# fill-column: 131
-# End:
-#
-## end of per-target part.
+		. ./configure.tgt
 
 		# Temporarily, we support only direct subdir builds.
 		hostsubdir=H-${host_alias}
@@ -365,7 +259,7 @@ esac
 				if [ -d "${hostsubdir}" ] ; then
 					rm -rf ${hostsubdir}/${targetsubdir}
 
-					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target- | grep -v Target-independent`" ] ; then
+					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep T- | grep -v T-independent`" ] ; then
 						rm -rf ${hostsubdir}
 					fi
 				else
@@ -389,11 +283,11 @@ esac
 					if [ -z "${commontargets}" ] ; then
 						mkdir ${targetsubdir}
 					else
-						if [ ! -d Target-independent ] ; then
-							mkdir Target-independent
+						if [ ! -d T-independent ] ; then
+							mkdir T-independent
 						fi
 
-						${symbolic_link} Target-independent ${targetsubdir}
+						${symbolic_link} T-independent ${targetsubdir}
 					fi # if target independent
 				fi # if no target dir yet
 
@@ -402,9 +296,11 @@ esac
 				srcdir=../..
 			else
 				# if not subdir builds, then make sure none exist.
-				if [ -n "`(ls .) 2>&1 | grep Host-`" ] ; then
+				if [ -n "`(ls .) 2>&1 | (grep H- ; true)`" ] ; then
 					echo '***' "Configured subdirs exist.  `pwd` not configured." 1>&2
 					exit 1
+				else
+					true
 				fi
 			fi
 
@@ -565,9 +461,9 @@ esac
 				echo "Created \"${Makefile}\"" in `pwd`${andusing}.
 			fi
 
-#### configure.in post-target parts come in here.
-
-## end of post-target part.
+			if [ -f ./configure.pos ] ; then
+				. ./configure.pos
+			fi
 
 			# describe the chosen configuration in config.status.
 			# Make that file a shellscript which will reestablish
@@ -592,7 +488,7 @@ ${srcdir}/configure" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norec
 
 				if [ -d ${configdir} ] ; then
 					(cd ${configdir} ;
-						./configure +recurring ${host_alias} +target=${target_alias} \
+						configure +recurring ${host_alias} +target=${target_alias} \
 							${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 						| sed 's/^/	/'
 				else
@@ -610,7 +506,7 @@ ${srcdir}/configure" ${arguments} `if [ -z "${norecursion}" ] ; then echo +norec
 		cat > GNUmakefile << E!O!F
 # Makefile generated by configure for host ${host_alias}.
 
-ALL := $(shell ls -d Target-*)
+ALL := $(shell ls -d T-*)
 
 %:
 	$(foreach subdir,$(ALL),$(MAKE) -C $(subdir) \$@ &&) true
@@ -620,6 +516,10 @@ E!O!F
 		cd ..
 	fi
 done # for each host
+
+### clean up.
+
+rm -f configure.com configure.tgt configure.hst configure.pos
 
 exit 0
 
