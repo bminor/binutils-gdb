@@ -1,5 +1,13 @@
 Mon Sep 11 11:39:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (do_scrub_chars): Grab all available spaces at start of
+	line before preserving a single space.  Remove state == 0 test
+	which will never succeed.
+	* macro.c (macro_expand_body): Delete local variables from the
+	formal hash table.
+	(macro_expand): In MRI mode, stop when whitespace is seen in the
+	argument list.
+
 	* sb.c: Include "libiberty.h".
 	* macro.c: Likewise.  Also include <stdlib.h> if it exists.
 
