@@ -1,3 +1,20 @@
+Mon Jan 25 15:27:36 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffcode.h (_bfd_coff_mkobject_hook): Pass aouthdr argument.
+	(coff_mkobject_hook): Accept aouthdr argument.
+	* coffgen.c (coff_real_object_p): Pass aouthdr to mkobject_hook.
+	Handle NULL aouthdr argument.
+	(coff_object_p): If there is no aouthdr, pass it as NULL to
+	coff_real_object_p.
+	* libcoff.h: Rebuilt for mkobject_hook changes.
+
+	* coffswap.h (coff_swap_aouthdr_in, coff_swap_aouthdr_in): Swap
+	additional MIPS ECOFF fields.
+
+Wed Jan 20 17:15:52 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/decstation.mt: Set DEFAULT_VECTOR to ecoff_little_vec.
+
 Tue Jan 19 09:06:14 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* bfd-in.h (bfd_asymbol_value): Add needed parentheses.
