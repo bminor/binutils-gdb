@@ -177,6 +177,17 @@ expr_build_binary (op, s1, s2)
   e.X_add_number = 0;
   return make_expr_symbol (&e);
 }
+
+/* Build an expression for the current location ('.').  */
+
+symbolS *
+expr_build_dot ()
+{
+  expressionS e;
+
+  current_location (&e);
+  return make_expr_symbol (&e);
+}
 
 /*
  * Build any floating-point literal here.
@@ -215,11 +226,11 @@ floating_constant (expressionP)
     {
       if (error_code == ERROR_EXPONENT_OVERFLOW)
 	{
-	  as_bad ("bad floating-point constant: exponent overflow, probably assembling junk");
+	  as_bad (_("bad floating-point constant: exponent overflow, probably assembling junk"));
 	}
       else
 	{
-	  as_bad ("bad floating-point constant: unknown error code=%d.", error_code);
+	  as_bad (_("bad floating-point constant: unknown error code=%d."), error_code);
 	}
     }
   expressionP->X_op = O_big;
@@ -399,7 +410,7 @@ integer_constant (radix, expressionP)
 
 	  /* Check for 8 digit per word max.  */
 	  if (ndigit > 8) 
-	    as_bad ("An bignum with underscores may not have more than 8 hex digits in any word.");
+	    as_bad (_("A bignum with underscores may not have more than 8 hex digits in any word."));
 
 	  /* Add this chunk to the bignum.  Shift things down 2 little digits.*/
 	  know (LITTLENUM_NUMBER_OF_BITS == 16);
@@ -419,7 +430,7 @@ integer_constant (radix, expressionP)
       assert (num_little_digits >= 4);
 
       if (num_little_digits != 8)
-	as_bad ("A bignum with underscores must have exactly 4 words.");
+	as_bad (_("A bignum with underscores must have exactly 4 words."));
 
       /* We might have some leading zeros.  These can be trimmed to give
        * us a change to fit this constant into a small number.
@@ -546,7 +557,7 @@ integer_constant (radix, expressionP)
 	      /* either not seen or not defined. */
 	      /* @@ Should print out the original string instead of
 		 the parsed number.  */
-	      as_bad ("backw. ref to unknown label \"%d:\", 0 assumed.",
+	      as_bad (_("backw. ref to unknown label \"%d:\", 0 assumed."),
 		      (int) number);
 	      expressionP->X_op = O_constant;
 	    }
@@ -670,7 +681,7 @@ mri_char_constant (expressionP)
 
   if (i < 0)
     {
-      as_bad ("Character constant too large");
+      as_bad (_("Character constant too large"));
       i = 0;
     }
 
@@ -902,7 +913,7 @@ operand (expressionP)
 		    else
 		      goto is_0f_float;
 		  default:
-		    as_fatal ("expr.c(operand): bad atof_generic return val %d",
+		    as_fatal (_("expr.c(operand): bad atof_generic return val %d"),
 			      r);
 		  }
 	      }
@@ -960,7 +971,7 @@ operand (expressionP)
       if ((c == '(' && *input_line_pointer++ != ')')
 	  || (c == '[' && *input_line_pointer++ != ']'))
 	{
-	  as_bad ("Missing ')' assumed");
+	  as_bad (_("Missing ')' assumed"));
 	  input_line_pointer--;
 	}
       SKIP_WHITESPACE ();
@@ -970,7 +981,7 @@ operand (expressionP)
     case 'E':
       if (! flag_m68k_mri || *input_line_pointer != '\'')
 	goto de_fault;
-      as_bad ("EBCDIC constants are not supported");
+      as_bad (_("EBCDIC constants are not supported"));
       /* Fall through.  */
     case 'A':
       if (! flag_m68k_mri || *input_line_pointer != '\'')
@@ -1037,7 +1048,7 @@ operand (expressionP)
 	    expressionP->X_add_number = 0;
 	  }
 	else
-	  as_warn ("Unary operator %c ignored because bad operand follows",
+	  as_warn (_("Unary operator %c ignored because bad operand follows"),
 		   c);
       }
       break;
@@ -1081,7 +1092,7 @@ operand (expressionP)
 	  input_line_pointer += start ? 8 : 7;
 	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer != '(')
-	    as_bad ("syntax error in .startof. or .sizeof.");
+	    as_bad (_("syntax error in .startof. or .sizeof."));
 	  else
 	    {
 	      char *buf;
@@ -1106,7 +1117,7 @@ operand (expressionP)
 	      *input_line_pointer = c;
 	      SKIP_WHITESPACE ();
 	      if (*input_line_pointer != ')')
-		as_bad ("syntax error in .startof. or .sizeof.");
+		as_bad (_("syntax error in .startof. or .sizeof."));
 	      else
 		++input_line_pointer;
 	    }
@@ -1255,7 +1266,7 @@ operand (expressionP)
 	  if (expressionP->X_op == O_absent)
 	    {
 	      ++input_line_pointer;
-	      as_bad ("Bad expression");
+	      as_bad (_("Bad expression"));
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = 0;
 	    }
@@ -1366,7 +1377,7 @@ clean_up_expression (expressionP)
 #undef __
 #define __ O_illegal
 
-static operatorT op_encoding[256] =
+static const operatorT op_encoding[256] =
 {				/* maps ASCII->operators */
 
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
@@ -1441,20 +1452,38 @@ static operator_rankT op_rank[] =
   1	/* O_logical_or */
 };
 
+/* Unfortunately, in MRI mode for the m68k, multiplication and
+   division have lower precedence than the bit wise operators.  This
+   function sets the operator precedences correctly for the current
+   mode.  Also, MRI uses a different bit_not operator, and this fixes
+   that as well.  */
+
+#define STANDARD_MUL_PRECEDENCE (7)
+#define MRI_MUL_PRECEDENCE (5)
+
+void
+expr_set_precedence ()
+{
+  if (flag_m68k_mri)
+    {
+      op_rank[O_multiply] = MRI_MUL_PRECEDENCE;
+      op_rank[O_divide] = MRI_MUL_PRECEDENCE;
+      op_rank[O_modulus] = MRI_MUL_PRECEDENCE;
+    }
+  else
+    {
+      op_rank[O_multiply] = STANDARD_MUL_PRECEDENCE;
+      op_rank[O_divide] = STANDARD_MUL_PRECEDENCE;
+      op_rank[O_modulus] = STANDARD_MUL_PRECEDENCE;
+    }
+}
+
 /* Initialize the expression parser.  */
 
 void
 expr_begin ()
 {
-  /* In MRI mode for the m68k, multiplication and division have lower
-     precedence than the bit wise operators.  */
-  if (flag_m68k_mri)
-    {
-      op_rank[O_multiply] = 5;
-      op_rank[O_divide] = 5;
-      op_rank[O_modulus] = 5;
-      op_encoding['"'] = O_bit_not;
-    }
+  expr_set_precedence ();
 
   /* Verify that X_op field is wide enough.  */
   {
@@ -1578,7 +1607,7 @@ expr (rank, resultP)
       rightseg = expr (op_rank[(int) op_left], &right);
       if (right.X_op == O_absent)
 	{
-	  as_warn ("missing operand; zero assumed");
+	  as_warn (_("missing operand; zero assumed"));
 	  right.X_op = O_constant;
 	  right.X_add_number = 0;
 	  right.X_add_symbol = NULL;
@@ -1600,7 +1629,7 @@ expr (rank, resultP)
 	       && op_left != O_subtract
 #endif
 	       )
-	as_bad ("operation combines symbols in different segments");
+	as_bad (_("operation combines symbols in different segments"));
 
       op_right = operator ();
 
@@ -1615,8 +1644,10 @@ expr (rank, resultP)
 
       if (resultP->X_op == O_big)
 	{
-	  as_warn ("left operand is a %s; integer 0 assumed",
-		   resultP->X_add_number > 0 ? "bignum" : "float");
+	  if (resultP->X_add_number > 0)
+	    as_warn (_("left operand is a bignum; integer 0 assumed"));
+	  else
+	    as_warn (_("left operand is a float; integer 0 assumed"));
 	  resultP->X_op = O_constant;
 	  resultP->X_add_number = 0;
 	  resultP->X_add_symbol = NULL;
@@ -1624,8 +1655,9 @@ expr (rank, resultP)
 	}
       if (right.X_op == O_big)
 	{
-	  as_warn ("right operand is a %s; integer 0 assumed",
-		   right.X_add_number > 0 ? "bignum" : "float");
+	  if (right.X_add_number > 0)
+	  as_warn (_("right operand is a bignum; integer 0 assumed"));
+	  as_warn (_("right operand is a float; integer 0 assumed"));
 	  right.X_op = O_constant;
 	  right.X_add_number = 0;
 	  right.X_add_symbol = NULL;
@@ -1673,7 +1705,7 @@ expr (rank, resultP)
 	  offsetT v = right.X_add_number;
 	  if (v == 0 && (op_left == O_divide || op_left == O_modulus))
 	    {
-	      as_warn ("division by zero");
+	      as_warn (_("division by zero"));
 	      v = 1;
 	    }
 	  switch (op_left)

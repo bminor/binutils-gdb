@@ -1,3 +1,12 @@
+Fri Jul  3 15:34:34 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (op_encoding): Make const.
+	(expr_set_precedence): New function.
+	(expr_begin): Don't set operator rankings, just call
+	expr_set_precedence.
+	* expr.h (expr_set_precedence): Declare.
+	* read.c (s_mri): Call expr_set_precedence.
+
 Thu Jul  2 16:24:58 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo (Statements): Remove paragraph discussing
