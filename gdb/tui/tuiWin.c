@@ -189,21 +189,6 @@ tuiSetWinFocusTo (TuiWinInfoPtr winInfo)
 }				/* tuiSetWinFocusTo */
 
 
-char *
-tuiStrDup (char *str)
-{
-  char *newStr = (char *) NULL;
-
-  if (str != (char *) NULL)
-    {
-      newStr = (char *) xmalloc (strlen (str) + 1);
-      strcpy (newStr, str);
-    }
-
-  return newStr;
-}				/* tuiStrDup */
-
-
 /*
    ** tuiScrollForward().
  */
@@ -578,6 +563,8 @@ _tuiScrollForward_command (char *arg, int fromTTY)
   int numToScroll = 1;
   TuiWinInfoPtr winToScroll;
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   if (arg == (char *) NULL)
     _parseScrollingArgs (arg, &winToScroll, (int *) NULL);
   else
@@ -595,6 +582,8 @@ _tuiScrollBackward_command (char *arg, int fromTTY)
   int numToScroll = 1;
   TuiWinInfoPtr winToScroll;
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   if (arg == (char *) NULL)
     _parseScrollingArgs (arg, &winToScroll, (int *) NULL);
   else
@@ -612,6 +601,8 @@ _tuiScrollLeft_command (char *arg, int fromTTY)
   int numToScroll;
   TuiWinInfoPtr winToScroll;
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   _parseScrollingArgs (arg, &winToScroll, &numToScroll);
   tui_scroll (LEFT_SCROLL, winToScroll, numToScroll);
 }
@@ -626,6 +617,8 @@ _tuiScrollRight_command (char *arg, int fromTTY)
   int numToScroll;
   TuiWinInfoPtr winToScroll;
 
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   _parseScrollingArgs (arg, &winToScroll, &numToScroll);
   tui_scroll (RIGHT_SCROLL, winToScroll, numToScroll);
 }
@@ -640,7 +633,7 @@ _tuiSetFocus (char *arg, int fromTTY)
 {
   if (arg != (char *) NULL)
     {
-      char *bufPtr = (char *) tuiStrDup (arg);
+      char *bufPtr = (char *) xstrdup (arg);
       int i;
       TuiWinInfoPtr winInfo = (TuiWinInfoPtr) NULL;
 
@@ -675,28 +668,14 @@ The window name specified must be valid and visible.\n");
   return;
 }				/* _tuiSetFocus */
 
-
-/*
-   ** _tui_vSetFocus()
- */
-static void
-_tui_vSetFocus (va_list args)
-{
-  char *arg = va_arg (args, char *);
-  int fromTTY = va_arg (args, int);
-
-  _tuiSetFocus (arg, fromTTY);
-
-  return;
-}				/* tui_vSetFocus */
-
-
 /*
    ** _tuiSetFocus_command()
  */
 static void
 _tuiSetFocus_command (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   _tuiSetFocus (arg, fromTTY);
 }
 
@@ -733,6 +712,9 @@ _tuiAllWindowsInfo (char *arg, int fromTTY)
 static void
 _tuiRefreshAll_command (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
+
   tuiRefreshAll ();
 }
 
@@ -744,6 +726,8 @@ _tuiRefreshAll_command (char *arg, int fromTTY)
 static void
 _tuiSetTabWidth_command (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   if (arg != (char *) NULL)
     {
       int ts;
@@ -766,9 +750,11 @@ _tuiSetTabWidth_command (char *arg, int fromTTY)
 static void
 _tuiSetWinHeight (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   if (arg != (char *) NULL)
     {
-      char *buf = tuiStrDup (arg);
+      char *buf = xstrdup (arg);
       char *bufPtr = buf;
       char *wname = (char *) NULL;
       int newHeight, i;
@@ -847,23 +833,6 @@ The window name specified must be valid and visible.\n");
   return;
 }				/* _tuiSetWinHeight */
 
-
-/*
-   ** _tui_vSetWinHeight().
-   **        Set the height of the specified window, with va_list.
- */
-static void
-_tui_vSetWinHeight (va_list args)
-{
-  char *arg = va_arg (args, char *);
-  int fromTTY = va_arg (args, int);
-
-  _tuiSetWinHeight (arg, fromTTY);
-
-  return;
-}				/* _tui_vSetWinHeight */
-
-
 /*
    ** _tuiSetWinHeight_command().
    **        Set the height of the specified window, with va_list.
@@ -871,6 +840,8 @@ _tui_vSetWinHeight (va_list args)
 static void
 _tuiSetWinHeight_command (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   _tuiSetWinHeight (arg, fromTTY);
 }
 
@@ -883,6 +854,8 @@ _tuiSetWinHeight_command (char *arg, int fromTTY)
 static void
 _tuiXDBsetWinHeight (char *arg, int fromTTY)
 {
+  /* Make sure the curses mode is enabled.  */
+  tui_enable ();
   if (arg != (char *) NULL)
     {
       int inputNo = atoi (arg);
@@ -906,23 +879,6 @@ _tuiXDBsetWinHeight (char *arg, int fromTTY)
 
   return;
 }				/* _tuiXDBsetWinHeight */
-
-
-/*
-   ** _tui_vXDBsetWinHeight().
-   **        Set the height of the specified window, with va_list.
- */
-static void
-_tui_vXDBsetWinHeight (va_list args)
-{
-  char *arg = va_arg (args, char *);
-  int fromTTY = va_arg (args, int);
-
-  _tuiXDBsetWinHeight (arg, fromTTY);
-
-  return;
-}				/* _tui_vXDBsetWinHeight */
-
 
 /*
    ** _tuiSetWinHeight_command().
@@ -1363,7 +1319,7 @@ _parseScrollingArgs (char *arg, TuiWinInfoPtr * winToScroll, int *numToScroll)
       char *buf, *bufPtr;
 
       /* process the number of lines to scroll */
-      buf = bufPtr = tuiStrDup (arg);
+      buf = bufPtr = xstrdup (arg);
       if (isdigit (*bufPtr))
 	{
 	  char *numStr;

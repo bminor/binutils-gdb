@@ -1,3 +1,22 @@
+2001-07-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiWin.c (tuiStrDup): Remove, replaced by xstrdup.
+	(_parseScrollingArgs): Use xstrdup.
+	(_tuiScrollForward_command): Call tui_enable() to force TUI mode.
+	(_tuiScrollBackward_command): Likewise.
+	(_tuiScrollLeft_command): Likewise.
+	(_tuiScrollRight_command): Likewise.
+	(_tuiSetFocus): Likewise.
+	(_tuiSetFocus_command): Likewise.
+	(_tuiRefreshAll_command): Likewise.
+	(_tuiSetTabWidth_command): Likewise.
+	(_tuiSetWinHeight): Likewise.
+	(_tuiSetWinHeight_command): Likewise.
+	(_tuiXDBsetWinHeight): Likewise.
+	(_tui_vSetFocus): Remove.
+	(_tui_vSetWinHeight): Remove.
+	(_tui_vXDBsetWinHeight): Remove.
+
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiCommand.h: Remove unused declarations.
