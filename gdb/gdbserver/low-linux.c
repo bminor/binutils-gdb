@@ -155,8 +155,26 @@ myresume (int step, int signal)
 #endif
 
 #ifdef I386_GNULINUX_TARGET
-/* i386_register_raw_size[i] is the number of bytes of storage in the
-   actual machine representation for register i.  */
+/* This module only supports access to the general purpose registers.
+   Adjust the relevant constants accordingly.
+
+   FIXME: kettenis/2001-03-28: We should really use PTRACE_GETREGS to
+   get at the registers.  Better yet, we should try to share code with
+   i386-linux-nat.c.  */
+#undef NUM_FREGS
+#define NUM_FREGS 0
+#undef NUM_REGS
+#define NUM_REGS NUM_GREGS
+
+/* This stuff comes from i386-tdep.c.  */
+
+/* i386_register_byte[i] is the offset into the register file of the
+   start of register number i.  We initialize this from
+   i386_register_raw_size.  */
+int i386_register_byte[MAX_NUM_REGS];
+
+/* i386_register_raw_size[i] is the number of bytes of storage in
+   GDB's register array occupied by register i.  */
 int i386_register_raw_size[MAX_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
@@ -170,8 +188,6 @@ int i386_register_raw_size[MAX_NUM_REGS] = {
   16, 16, 16, 16,
    4
 };
-
-int i386_register_byte[MAX_NUM_REGS];
 
 static void
 initialize_arch (void)
@@ -190,36 +206,25 @@ initialize_arch (void)
   }
 }
 
-/* this table must line up with REGISTER_NAMES in tm-i386v.h */
-/* symbols like 'EAX' come from <sys/reg.h> */
-static int regmap[] =
+/* This stuff comes from i386-linux-nat.c.  */
+
+/* Mapping between the general-purpose registers in `struct user'
+   format and GDB's register array layout.  */
+static int regmap[] = 
 {
   EAX, ECX, EDX, EBX,
   UESP, EBP, ESI, EDI,
   EIP, EFL, CS, SS,
-  DS, ES, FS, GS,
+  DS, ES, FS, GS
 };
 
-int
-i386_register_u_addr (int blockend, int regnum)
-{
-#if 0
-  /* this will be needed if fp registers are reinstated */
-  /* for now, you can look at them with 'info float'
-   * sys5 wont let you change them with ptrace anyway
-   */
-  if (regnum >= FP0_REGNUM && regnum <= FP7_REGNUM)
-    {
-      int ubase, fpstate;
-      struct user u;
-      ubase = blockend + 4 * (SS + 1) - KSTKSZ;
-      fpstate = ubase + ((char *) &u.u_fpstate - (char *) &u);
-      return (fpstate + 0x1c + 10 * (regnum - FP0_REGNUM));
-    }
-  else
-#endif
-    return (blockend + 4 * regmap[regnum]);
+/* Return the address of register REGNUM.  BLOCKEND is the value of
+   u.u_ar0, which should point to the registers.  */
 
+CORE_ADDR
+register_u_addr (CORE_ADDR blockend, int regnum)
+{
+  return (blockend + 4 * regmap[regnum]);
 }
 #elif defined(TARGET_M68K)
 static void

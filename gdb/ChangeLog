@@ -1,5 +1,14 @@
 2001-03-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdbserver/low-linux.c [I386_GNULINUX_TARGET]: Cleanup code and
+	make it work again.
+	(NUM_FREGS): Redefine to 0.
+	(NUM_REGS): Redefine as NUM_GREGS.
+	(i386_register_byte, i386_register_raw_size): Update from
+	i386-tdep.c.  Add comment about their origin.
+	(regmap, register_u_addr): Take these from i386-linux-nat.c.
+	(i386_register_u_addr): Removed.
+
 	* i386-linux-nat.c (i386_linux_dr_get): Return 0 if ptrace call
 	fails instead of calling perror_with_name.  This should fix
 	debugging remote i386 targets with a native Linux/x86 GDB.  Add
