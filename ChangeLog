@@ -1,3 +1,8 @@
+Fri May 20 08:25:49 1994  Steve Chamberlain  (sac@deneb.cygnus.com)
+
+	* Makefile.in (INSTALL_LAST): Delete.
+	(INSTALL_DOSREL): New.
+
 Thu May 19 17:12:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Use ld for i[34]86-*-sysv4* and sparc-*-solaris2*.

@@ -50,9 +50,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 
-INSTALL_LAST_FAKE = install_last_fake
-INSTALL_LAST_REAL = install_last_real
-INSTALL_LAST = $(INSTALL_LAST_FAKE)
+INSTALL_DOSREL = install-dosrel-fake
 
 AS = as
 AR = ar
@@ -132,7 +130,7 @@ INSTALL_TARGET = install-dirs \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
 	install-gcc \
-	$(INSTALL_LAST)
+	$(INSTALL_DOSREL)
 
 
 CC_FOR_TARGET = ` \
@@ -842,8 +840,8 @@ install-gcc:
 # EXPERIMENTAL STUFF
 # This rule is used to install the modules which use FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
-.PHONY: $(INSTALL_LAST_REAL)
-$(INSTALL_LAST_REAL): install-dirs
+.PHONY: install-dosrel
+install-dosrel: install-dirs info
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
@@ -853,7 +851,7 @@ $(INSTALL_LAST_REAL): install-dirs
 	  true; \
 	fi
 
-install_last_fake:
+install-dosrel-fake:
 
 
 # This is a list of inter-dependencies among modules.
