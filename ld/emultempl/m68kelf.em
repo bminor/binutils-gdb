@@ -127,7 +127,7 @@ static void
 m68k_elf_after_allocation ()
 {
   /* Call the standard elf routine.  */
-  gld${EMULATION_NAME}_before_allocation ();
+  after_allocation_default ();
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
   if (command_line.embedded_relocs

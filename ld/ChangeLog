@@ -1,3 +1,8 @@
+2001-03-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/m68kelf.em (m68k_elf_after_allocation): Call
+	after_allocation_default, not gld..._before_allocation.
+
 2001-02-28  Matt Hiller  <hiller@redhat.com>
 
 	* testsuite/ld-scripts/crossref.exp: Initialize flags to
