@@ -12,6 +12,8 @@ Wed Oct 20 17:47:42 1993  Stu Grossman  (grossman at cygnus.com)
 	* remote.c:  Use remote_debug and baud_rate globals directly,
 	instead of sr_ functions, so that we don't need to load
 	remote-utils.c.
+	* config/a29k/a29k-udi.mt:  Define REMOTE_O as null so that we don't
+	get the default remote* modules.
 
 Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
