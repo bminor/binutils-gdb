@@ -4322,21 +4322,26 @@ _GDBN__ is unable to locate the saved registers, the selected stack
 frame will make no difference.
 
 _if__(_AMD29K__)
+@table @code
 @item set rstack_high_address @var{address}
 @kindex set rstack_high_address
-@cindex AMD 29K
-On AMD 29000 family processors, registers are saved in a separate ``register
-stack''.  There is no way for GDB to determine the extent of this stack.
-Normally, GDB just assumes that the stack is ``large enough''.
-This may result in GDB referencing memory locations that don't
-exist, so you can specify the ending address of the register stack with the
-@code{set rstack_high_address} command.  The argument should be an address,
-which you will probably want to precede with 0x and specify in hexadecimal.
+@cindex AMD 29K register stack
+@cindex register stack, AMD29K
+On AMD 29000 family processors, registers are saved in a separate
+``register stack''.  There is no way for _GDBN__ to determine the extent
+of this stack.  Normally, _GDBN__ just assumes that the stack is ``large
+enough''.  This may result in _GDBN__ referencing memory locations that
+don't exist.  If necessary, you can get around this problem by
+specifying the ending address of the register stack with the @code{set
+rstack_high_address} command.  The argument should be an address, which
+you will probably want to precede with @samp{0x} to specify in
+hexadecimal.
 
 @item show rstack_high_address
 @kindex show rstack_high_address
-@cindex AMD 29K
-Display the current limit of the register stack.
+Display the current limit of the register stack, on AMD 29000 family
+processors.
+@end table
 _fi__(_AMD29K__)
 
 @node Floating Point Hardware,  , Registers, Data
