@@ -6,8 +6,7 @@ Mon Nov 20 17:40:38 1995  Doug Evans  <dje@canuck.cygnus.com>
 	(main): Call arm_sim_set_verbosity.
 	Only load sections marked SEC_LOAD.
 	* wrapper.c (mem_size, verbosity): New static global.
-	(arm_sim_set_mem_size): Renamed from sim_size.
-	Callers updated
+	(arm_sim_set_mem_size): Renamed from sim_size.	Callers updated.
 	(arm_sim_set_profile{,_size}): Renamed from sim_foo.  Callers updated.
 	
 Fri Nov 17 19:35:11 1995  Doug Evans  <dje@canuck.cygnus.com>
