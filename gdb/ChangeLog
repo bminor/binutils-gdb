@@ -1,3 +1,12 @@
+2004-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in: Update dependencies.
+	Changes from Ulrich Weigand,
+	* s390-tdep.c: Include "dwarf2-frame.h".
+	(s390_dwarf2_frame_init_reg): New function.
+	(s390_gdbarch_init): Install dwarf2_frame_sniffer and
+	dwarf2_frame_base_sniffer.  Call dwarf2_frame_set_init_reg.
+
 2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* breakpoint.c (pending_break_support): New setting variable.

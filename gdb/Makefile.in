@@ -617,7 +617,9 @@ nm_h =		@nm_h@
 ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
 alphabsd_tdep_h = alphabsd-tdep.h
 alpha_tdep_h = alpha-tdep.h
+amd64_linux_tdep_h = amd64-linux-tdep.h
 amd64_nat_h = amd64-nat.h
+amd64_tdep_h = amd64-tdep.h $(i386_tdep_h)
 annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h = arch-utils.h
 arm_tdep_h = arm-tdep.h
@@ -770,8 +772,6 @@ vax_tdep_h = vax-tdep.h
 version_h = version.h
 wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
-amd64_linux_tdep_h = amd64-linux-tdep.h
-amd64_tdep_h = amd64-tdep.h $(i386_tdep_h)
 xcoffsolib_h = xcoffsolib.h
 xmodem_h = xmodem.h
 
@@ -1532,9 +1532,9 @@ amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
 	$(amd64_linux_tdep_h) $(i386_linux_tdep_h) $(amd64_nat_h)
-amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(inferior_h) \
-	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
-	$(amd64_tdep_h) $(amd64_linux_tdep_h)
+amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(regcache_h) $(osabi_h) $(gdb_string_h) $(amd64_tdep_h) \
+	$(amd64_linux_tdep_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(i386_tdep_h) $(amd64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
@@ -1892,7 +1892,7 @@ ia64-aix-tdep.o: ia64-aix-tdep.c $(defs_h)
 ia64-linux-nat.o: ia64-linux-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(target_h) $(gdbcore_h) $(regcache_h) $(gdb_wait_h) $(gregset_h)
 ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(ia64_tdep_h) \
-	$(arch_utils_h) $(gdbcore_h)
+	$(arch_utils_h) $(gdbcore_h) $(regcache_h)
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) $(regcache_h) $(reggroups_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(doublest_h) \
@@ -2247,9 +2247,9 @@ s390-nat.o: s390-nat.c $(defs_h) $(tm_h) $(regcache_h) $(inferior_h) \
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) \
 	$(tm_h) $(__bfd_bfd_h) $(floatformat_h) $(regcache_h) \
-	$(trad_frame_h) $(frame_base_h) $(frame_unwind_h) $(reggroups_h) \
-	$(regset_h) $(value_h) $(gdb_assert_h) $(dis_asm_h) $(solib_svr4_h) \
-	$(s390_tdep_h)
+	$(trad_frame_h) $(frame_base_h) $(frame_unwind_h) $(dwarf2_frame_h) \
+	$(reggroups_h) $(regset_h) $(value_h) $(gdb_assert_h) $(dis_asm_h) \
+	$(solib_svr4_h) $(s390_tdep_h)
 scm-exp.o: scm-exp.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(value_h) $(c_lang_h) $(scm_lang_h) \
 	$(scm_tags_h)
