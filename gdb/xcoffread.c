@@ -20,12 +20,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* RS/6000 and PowerPC only:
-   Needs xcoff_add_toc_to_loadinfo and xcoff_init_loadinfo in
-   rs6000-tdep.c from target.
-   However, if you define FAKING_RS6000, then this code will link with
-   any target.  */
-
 #include "defs.h"
 #include "bfd.h"
 
@@ -94,6 +88,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This is output from LD.  */
 #define N_SETV	0x1C		/* Pointer to set vector in data area.  */
+
+/* Hook for recording the toc offset value of a symbol table into
+   the ldinfo structure. */
+
+void (*xcoff_add_toc_to_loadinfo_hook) PARAMS ((unsigned long)) = NULL;
+
+/* Hook for recording how to call xcoff_init_loadinfo for a native
+   rs6000 config only. */
+
+void (*xcoff_init_loadinfo_hook) PARAMS ((void)) = NULL;
+
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -2570,9 +2575,8 @@ scan_xcoff_symtab (section_offsets, objfile)
      If no XMC_TC0 is found, toc_offset should be zero. Another place to obtain
      this information would be file auxiliary header. */
 
-#ifndef FAKING_RS6000
-  xcoff_add_toc_to_loadinfo (toc_offset);
-#endif
+  if (xcoff_add_toc_to_loadinfo_hook != NULL)
+    (*xcoff_add_toc_to_loadinfo_hook) ((unsigned long) toc_offset);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -2601,11 +2605,9 @@ xcoff_initial_scan (objfile, section_offsets, mainline)
   char *name;
   unsigned int size;
 
-#ifndef FAKING_RS6000
   /* Initialize load info structure. */
-  if (mainline)
-    xcoff_init_loadinfo ();
-#endif
+  if (mainline && xcoff_init_loadinfo_hook != NULL)
+    (*xcoff_init_loadinfo_hook) ();
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd = objfile->obfd;

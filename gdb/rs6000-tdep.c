@@ -1268,6 +1268,21 @@ gdb_print_insn_powerpc (memaddr, info)
 void
 _initialize_rs6000_tdep ()
 {
+  /* Initialize hook in xcoffread for recording the toc offset value
+     of a symbol table into the ldinfo structure, for native rs6000
+     config. */
+  {
+    extern void (*xcoff_add_toc_to_loadinfo_hook) PARAMS ((unsigned long));
+    xcoff_add_toc_to_loadinfo_hook = &xcoff_add_toc_to_loadinfo;
+  }
+
+  /* Initialize hook in xcoffread for calling xcoff_init_loadinfo in
+     a native rs6000 config. */
+  {
+    extern void (*xcoff_init_loadinfo_hook) PARAMS ((void));
+    xcoff_init_loadinfo_hook = &xcoff_init_loadinfo;
+  }
+
   /* FIXME, this should not be decided via ifdef. */
 #ifdef GDB_TARGET_POWERPC
   tm_print_insn = gdb_print_insn_powerpc;

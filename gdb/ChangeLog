@@ -1,3 +1,22 @@
+Wed May  1 17:29:18 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (rs6000-nat.o): Dependant on xcoffsolib.h.
+	* config/rs6000/rs6000.mh (NATDEPFILES): Move xcoffread.o ...
+	* config/rs6000/rs6000.mt (TDEPFILES): ... to here
+	* xcoffsolib.c (xcoff_relocate_symtab_hook): Define and initialize.
+	(solib_info): Call xcoff_relocate_symtab via the hook.
+	(sharedlibrary_command): Ditto.
+	* xcoffread.c: Remove all FAKING_RS6000 comments and defines.
+	(xcoff_add_toc_to_loadinfo_hook): Define and initialize here.
+	(xcoff_init_loadinfo_hook): Define and initialize here.
+	(scan_xcoff_symtab): Call xcoff_add_toc_to_loadinfo via the hook.
+	(xcoff_initial_scan): Call xcoff_init_loadinfo via the hook.
+	* xcoffsolib.h (xcoff_relocate_symtab_hook): Declare extern func.
+	* rs6000-tdep.c (_initialize_rs6000_tdep): Add initializations
+	of xcoff_add_toc_to_loadinfo_hook and xcoff_init_loadinfo_hook.
+	* rs6000-nat.c (_initialize_core_rs6000): Add initialization
+	of xcoff_relocate_symtab_hook.
+
 Tue Apr 30 13:22:02 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure (powerpcle-*-solaris*): Add Solaris support.

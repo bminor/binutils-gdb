@@ -818,5 +818,9 @@ static struct core_fns rs6000_core_fns =
 void
 _initialize_core_rs6000 ()
 {
+  /* For native configurations, where this module is included, inform
+     the xcoffsolib module where it can find the function for symbol table
+     relocation at runtime. */
+  xcoff_relocate_symtab_hook = &xcoff_relocate_symtab;
   add_core_fns (&rs6000_core_fns);
 }
