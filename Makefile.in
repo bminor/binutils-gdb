@@ -53,8 +53,8 @@ AS = as
 AR = ar
 AR_FLAGS = rc
 CC = cc
-$(start-sanitize-chill)
 CFLAGS = -g
+$(start-sanitize-chill)
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
 $(end-sanitize-chill)
@@ -1483,20 +1483,23 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 	ln proto-toplev/gdb/COPYING proto-toplev/include/COPYING
 	rm                          proto-toplev/readline/COPYING
 	ln proto-toplev/gdb/COPYING proto-toplev/readline/COPYING
-	# Take out texinfo from configurable dirs
-	rm proto-toplev/configure.in
-	sed '/^configdirs=/s/texinfo //' <configure.in >proto-toplev/configure.in
-	# Take out glob from buildable dirs
-	rm proto-toplev/Makefile.in
 
-	sed -e '/^SUBDIRS =/s/glob //' \
-	    -e '/^all\.normal: /s/\all-texinfo //' \
-	    -e '/^clean: /s/clean-texinfo //' \
-	    -e '/^install\.all: /s/install-texinfo //' \
+	# Take out texinfo and glob from configurable dirs
+	rm proto-toplev/configure.in
+	sed -e '/^host_tools=/s/texinfo //' \
+	    -e '/^host_libs=/s/glob //' \
+	    <configure.in >proto-toplev/configure.in
+
+	# Take out texinfo from a few places; make simple BISON=bison line.
+	rm proto-toplev/Makefile.in
+	sed -e '/^all\.normal: /s/\all-texinfo //' \
+	    -e '/^	install-texinfo /d' \
+	    -e '\/^BISON =/,\/^$$/c\
+		BISON = bison' \
 	<Makefile.in >proto-toplev/Makefile.in
 
 	mkdir proto-toplev/texinfo
-	ln -s ../../../texinfo/texinfo.tex proto-toplev/texinfo/
+	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
 	chmod og=u `find proto-toplev -print`
 	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
 		echo "==> Making gdb-$$VER.tar.Z"; \
