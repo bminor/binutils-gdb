@@ -1,8 +1,10 @@
 /* Main header file for the bfd library -- portable access to object files.
-   ==> The bfd.h file is generated from bfd-in.h and various .c files; if you
-   ==> change it, your changes will probably be lost.
    Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
+
+** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
+** instead, change bfd-in.h or the other BFD source files processed to
+** generate these files.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -53,6 +55,14 @@ here.  */
 #define BFD64
 #endif
 
+#ifndef INLINE
+#if __GNUC__ >= 2
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+#endif
+
 /* 64-bit type definition (if any) from bfd's sysdep.h goes here */
 
 
@@ -101,12 +111,21 @@ typedef HOST_64_BIT int64_type;
 typedef unsigned HOST_64_BIT uint64_type;
 #endif
 
+#if !defined (uint64_type) && defined (__GNUC__)
+#define uint64_type unsigned long long
+#define int64_type long long
+#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
+#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
+#endif
+
 typedef unsigned HOST_64_BIT bfd_vma;
 typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
+#define sprintf_vma(s,x) \
+		sprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
@@ -125,6 +144,7 @@ typedef unsigned long bfd_size_type;
 
 /* Print a bfd_vma x on stream s.  */
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
+#define sprintf_vma(s,x) sprintf(s, "%08lx", x)
 #endif /* not BFD64  */
 #define printf_vma(x) fprintf_vma(stdout,x)
 
@@ -301,14 +321,28 @@ typedef struct _symbol_info
    the standard routine suffix), or it must #define the routines that
    are not so named, before calling JUMP_TABLE in the initializer.  */
 
-/* Semi-portable string concatenation in cpp */
+/* Semi-portable string concatenation in cpp.
+   The CAT4 hack is to avoid a problem with some strict ANSI C preprocessors.
+   The problem is, "32_" is not a valid preprocessing token, and we don't
+   want extra underscores (e.g., "nlm_32_").  The XCAT2 macro will cause the
+   inner CAT macros to be evaluated first, producing still-valid pp-tokens.
+   Then the final concatenation can be done.  (Sigh.)  */
 #ifndef CAT
+#ifdef SABER
+#define CAT(a,b)	a##b
+#define CAT3(a,b,c)	a##b##c
+#define CAT4(a,b,c,d)	a##b##c##d
+#else
 #ifdef __STDC__
 #define CAT(a,b) a##b
 #define CAT3(a,b,c) a##b##c
+#define XCAT2(a,b)	CAT(a,b)
+#define CAT4(a,b,c,d)	XCAT2(CAT(a,b),CAT(c,d))
 #else
 #define CAT(a,b) a/**/b
 #define CAT3(a,b,c) a/**/b/**/c
+#define CAT4(a,b,c,d)	a/**/b/**/c/**/d
+#endif
 #endif
 #endif
 
@@ -320,7 +354,7 @@ CAT(NAME,_slurp_armap),\
 CAT(NAME,_slurp_extended_name_table),\
 CAT(NAME,_truncate_arname),\
 CAT(NAME,_write_armap),\
-CAT(NAME,_close_and_cleanup),	\
+CAT(NAME,_close_and_cleanup),\
 CAT(NAME,_set_section_contents),\
 CAT(NAME,_get_section_contents),\
 CAT(NAME,_new_section_hook),\
