@@ -1568,8 +1568,7 @@ elf_link_add_object_symbols (abfd, info)
 	 SEC_NEVER_LOAD flag is not the one we want, because that one
 	 still implies that the section takes up space in the output
 	 file.  */
-      abfd->sections = NULL;
-      abfd->section_count = 0;
+      bfd_section_list_clear (abfd);
 
       /* If this is the first dynamic object found in the link, create
 	 the special sections required for dynamic linking.  */

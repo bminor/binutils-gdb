@@ -1,3 +1,11 @@
+2002-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.h (elf32_arm_size_dynamic_sections): When removing
+	sections, use bfd_section_list_remove.
+	* elf32-i370.c (i370_elf_size_dynamic_sections): Likewise.
+	* elflink.h (elf_link_add_object_symbols): When removing all
+	sections, use bfd_section_list_clear.
+
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/sv.po: New file: Swedish translation.
