@@ -24,6 +24,10 @@
 #include "remote-sim.h"
 #include <sys/syscall.h>
 
+/* start-sanitize-sh3e */
+#include <math.h>
+/* end-sanitize-sh3e */
+
 #if !defined (SYS_wait) && defined (SYS_wait4)
 #define SYS_wait SYS_wait4	/* SunOS 4.1.3 for example */
 #endif
@@ -120,9 +124,6 @@ typedef union
   {
 
     int regs[16];
-/* start-sanitize-sh3e */
-    float fregs[16];
-/* end-sanitize-sh3e */
     int pc;
     int pr;
 
@@ -130,11 +131,6 @@ typedef union
     int vbr;
     int mach;
     int macl;
-
-/* start-sanitize-sh3e */
-    float fpscr;
-    int fpul;
-/* end-sanitize-sh3e */
 
     union
       {
@@ -160,6 +156,11 @@ typedef union
 
     int prevlock;
     int thislock;
+/* start-sanitize-sh3e */
+    float fregs[16];
+    float fpscr;
+    int fpul;
+/* end-sanitize-sh3e */
     int exception;
     int msize;
 #define PROFILE_FREQ 1

@@ -1,3 +1,11 @@
+start-sanitize-sh3e
+Thu Sep 14 19:32:59 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* gencode.c:  Back up PC by 2 for breakpoints.
+	* interp.c:  Move fp regs beyond pc/pr/etc to avoid confusing GDB,
+	which expect pc to immediatly follow regs[].
+
+end-sanitize-sh3e
 Fri Sep  8 14:18:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Define CC_FOR_BUILD.  Don't call AC_PROG_INSTALL.
