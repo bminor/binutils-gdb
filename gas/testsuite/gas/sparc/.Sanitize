@@ -29,6 +29,8 @@ membar.d
 membar.s
 prefetch.d
 prefetch.s
+synth64.d
+synth64.s
 sparc.exp
 
 Things-to-lose:
