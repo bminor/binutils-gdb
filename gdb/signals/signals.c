@@ -39,8 +39,8 @@
 #  define REALTIME_LO __SIGRTMIN
 #  define REALTIME_HI __SIGRTMAX
 # elif defined(SIGRTMIN)
-#  define REALTIME_LO __SIGRTMIN
-#  define REALTIME_HI __SIGRTMAX
+#  define REALTIME_LO SIGRTMIN
+#  define REALTIME_HI SIGRTMAX
 # endif
 #endif
 

@@ -1,5 +1,9 @@
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 
+	* signals/signals.c: Fix typos in last change.
+
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
 	* signals/signals.c (REALTIME_LO, REALTIME_HI): Define if
 	not already defined.  Use __SIGRTMIN if available.
 	(target_signal_from_host): Remove SIGRTMIN block.
