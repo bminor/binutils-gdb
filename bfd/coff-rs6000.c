@@ -1575,7 +1575,6 @@ normalize_filename (abfd)
 
 /* Write out an XCOFF armap.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
      bfd *abfd;

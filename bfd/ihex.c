@@ -948,7 +948,6 @@ ihex_set_arch_mach (abfd, arch, mach)
 
 /* Get the size of the headers, for the linker.  */
 
-/*ARGSUSED*/
 static int
 ihex_sizeof_headers (abfd, exec)
      bfd *abfd ATTRIBUTE_UNUSED;

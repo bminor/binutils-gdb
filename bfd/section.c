@@ -1025,7 +1025,6 @@ DESCRIPTION
 
 */
 
-/*ARGSUSED*/
 bfd_boolean
 bfd_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
 		       sec_ptr section,
@@ -1074,7 +1073,6 @@ DESCRIPTION
 
 */
 
-/*VARARGS2*/
 void
 bfd_map_over_sections (bfd *abfd,
 		       void (*operation) (bfd *, asection *, void *),

@@ -1338,7 +1338,6 @@ elf_vax_size_dynamic_sections (output_bfd, info)
    in regular objects.  We allocated space for them in the check_relocs
    routine, but we won't fill them in in the relocate_section routine.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 elf_vax_discard_copies (h, ignore)
      struct elf_vax_link_hash_entry *h;
@@ -1366,7 +1365,6 @@ elf_vax_discard_copies (h, ignore)
    creating a shared object or executable, space in the .got and .rela.got
    will be reserved for the symbol.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 elf_vax_instantiate_got_entries (h, infoptr)
      struct elf_link_hash_entry *h;

@@ -1246,7 +1246,6 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 
 /* Return the list of objects needed by BFD.  */
 
-/*ARGSUSED*/
 struct bfd_link_needed_list *
 bfd_sunos_get_needed_list (abfd, info)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -2165,7 +2164,6 @@ sunos_scan_dynamic_symbol (h, data)
    this point.  This entry point exists to prevent the regular linker
    code from doing anything with the object.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 sunos_link_dynamic_object (info, abfd)
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
@@ -2410,7 +2408,6 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
    copy it over, and tell the caller to not bother processing this
    reloc.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 sunos_check_dynamic_reloc (info, input_bfd, input_section, harg, reloc,
 			   contents, skip, relocationp)

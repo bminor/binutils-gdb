@@ -1,3 +1,22 @@
+2003-12-01  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* coff-rs6000.c: Remove ARGSUSED and VARARGS.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* elf32-vax.c: Likewise.
+	* hash.c: Likewise.
+	* hppabsd-core.c: Likewise.
+	* hpux-core.c: Likewise.
+	* ihex.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* osf-core.c: Likewise.
+	* pdp11.c: Likewise.
+	* ptrace-core.c: Likewise.
+	* sco5-core.c: Likewise.
+	* section.c: Likewise.
+	* sunos.c: Likewise.
+	* trad-core.c: Likewise.
+
 2003-12-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (is_elf_hash_table): Take hash tab rather than info arg.

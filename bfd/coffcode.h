@@ -5122,7 +5122,6 @@ static reloc_howto_type *coff_rtype_to_howto
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
 
-/*ARGSUSED*/
 static reloc_howto_type *
 coff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd ATTRIBUTE_UNUSED;
