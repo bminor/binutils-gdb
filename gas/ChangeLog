@@ -5,6 +5,9 @@ Mon Dec  9 16:48:20 1996  Jeffrey A Law  (law@cygnus.com)
 
 Mon Dec  9 17:09:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (do_scrub_chars): At the end of a C comment, pass space to
+	UNGET rather than PUT.  Set old_state before setting state to -2.
+
 	* config/tc-mips.c (mips16_extended_frag): Avoid an infinite loop
 	when extending because the value is exactly maxtiny + 1.
 
