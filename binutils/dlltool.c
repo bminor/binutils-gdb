@@ -350,6 +350,8 @@ static iheadtype *import_list = NULL;
 static char *as_name = NULL;
 static char * as_flags = "";
 
+static char *tmp_prefix = "d";
+
 static int no_idata4;
 static int no_idata5;
 static char *exp_name;
@@ -431,12 +433,19 @@ static char * mcore_elf_linker_flags = NULL;
 
 #define PATHMAX 250		/* What's the right name for this ?  */
 
-#define TMP_ASM		"dc.s"
-#define TMP_HEAD_S	"dh.s"
-#define TMP_HEAD_O	"dh.o"
-#define TMP_TAIL_S	"dt.s"
-#define TMP_TAIL_O	"dt.o"
-#define TMP_STUB	"ds"
+char *tmp_asm_buf;
+char *tmp_head_s_buf;
+char *tmp_head_o_buf;
+char *tmp_tail_s_buf;
+char *tmp_tail_o_buf;
+char *tmp_stub_buf;
+
+#define TMP_ASM		dlltmp (tmp_asm_buf, "%sc.s")
+#define TMP_HEAD_S	dlltmp (tmp_head_s_buf, "%sh.s")
+#define TMP_HEAD_O	dlltmp (tmp_head_o_buf, "%sh.o")
+#define TMP_TAIL_S	dlltmp (tmp_tail_s_buf, "%st.s")
+#define TMP_TAIL_O	dlltmp (tmp_tail_o_buf, "%st.o")
+#define TMP_STUB	dlltmp (tmp_stub_buf, "%ss")
 
 /* This bit of assemly does jmp * ....  */
 static const unsigned char i386_jtab[] =
@@ -741,6 +750,14 @@ static void usage
 static void inform
   PARAMS ((const char *, ...));
 
+static char *
+dlltmp PARAMS ((char *buf, const char *fmt))
+{
+  if (!buf)
+    buf = malloc (strlen (tmp_prefix) + 17);
+  sprintf (buf, fmt, tmp_prefix);
+  return buf;
+}
 
 static void
 inform VPARAMS ((const char * message, ...))
@@ -3263,6 +3280,7 @@ static const struct option long_options[] =
   {"as-flags", required_argument, NULL, 'f'},
   {"mcore-elf", required_argument, NULL, 'M'},
   {"compat-implib", no_argument, NULL, 'C'},
+  {"temp-prefix", required_argument, NULL, 't'},
   {NULL,0,NULL,0}
 };
 
@@ -3319,6 +3337,9 @@ main (ac, av)
 	  break;
 	case 'S':
 	  as_name = optarg;
+	  break;
+	case 't':
+	  tmp_prefix = optarg;
 	  break;
 	case 'f':
 	  as_flags = optarg;

@@ -425,10 +425,11 @@ handle_quotes (input, len)
 	  ++t;
 	  assert (ISSPACE (*t));
 	  while (ISSPACE (*t))
-	  {
-	    if ((*t) == '\n') ++rc_lineno;
-	    ++t;
-	  }
+	    {
+	      if ((*t) == '\n')
+		++rc_lineno;
+	      ++t;
+	    }
 	  if (*t == '\0')
 	    break;
 	  assert (*t == '"');

@@ -1,6 +1,11 @@
+2003-02-19  Christopher Faylor  <cgf@redhat.com>
+
+	* rclex.l (handle_quotes): Fix minor formatting problems introduced in
+	previous change.
+
 2003-02-19  Mark Blackburn  <marklist@fangorn.ca>
 
-	* rclex.l: Handle strings spanning more than one line.
+	* rclex.l (handle_quotes): Handle strings spanning more than one line.
 
 2003-02-12  Bob Wilson  <bob.wilson@acm.org>
 
