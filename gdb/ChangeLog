@@ -44,8 +44,10 @@ Wed Mar  8 23:35:10 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 Wed Mar  8 16:12:21 1995  Stu Grossman  (grossman@cygnus.com)
 
+start-sanitize-gdbtk
 	* gdbtk.c (gdb_get_breakpoint_info):  Return error if breakpoint
 	type is not bp_breakpoint.
+end-sanitize-gdbtk
 
 	* source.c (forward_search_command reverse_search_command):  Set
 	convenience variable $_ to be the line # of the match.
@@ -254,11 +256,13 @@ Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
 	* defs.h (SWAP_TARGET_AND_HOST): check endianess at runtime not
 	compile time.
 
+start-sanitize-arc
 	* arc-tdep.c (_initialize_arc_tdep): set tm_print_insn according to 
 	processor.
 	* remote-arc.c (arc_wait): when a processor stops, stop other two
 	processors too.
 	* remote-arc.c (switch_command): switch tm_print_insn.
+end-sanitize-arc
 
 	* vx-share/ptrace.h: merge in WRS new ptrace requests.
 
@@ -876,12 +880,14 @@ Wed Jan 25 18:13:14 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 	(value_subscript):  Use enhanced value_subscripted_rvalue if
 	c_style_arrays is false (and index is in range).
 
+start-sanitize-gdbtk
 Wed Jan 25 18:23:46 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.c (gdbtk_init):  Prevent segfault when gdbtk.tcl can't be
 	found.
 	* gdbtk.tcl:  Initialize expr_update_list() to prevent errors when
 	popping up expression window for the first time.
+end-sanitize-gdbtk
 
 Wed Jan 25 18:13:14 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
