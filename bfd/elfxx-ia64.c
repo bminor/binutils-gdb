@@ -1792,7 +1792,10 @@ elfNN_ia64_hash_hide_symbol (info, xh, force_local)
   _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
 
   for (dyn_i = h->info; dyn_i; dyn_i = dyn_i->next)
-    dyn_i->want_plt2 = 0;
+    {
+      dyn_i->want_plt2 = 0;
+      dyn_i->want_plt = 0;
+    }
 }
 
 /* Create the derived linker hash table.  The IA-64 ELF port uses this
@@ -3890,6 +3893,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sym_sec;
       bfd_byte *hit_addr;
       bfd_boolean dynamic_symbol_p;
+      bfd_boolean local_symbol_p;
       bfd_boolean undef_weak_ref;
 
       r_type = ELFNN_R_TYPE (rel->r_info);
@@ -4001,6 +4005,11 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       hit_addr = contents + rel->r_offset;
       value += rel->r_addend;
       dynamic_symbol_p = elfNN_ia64_dynamic_symbol_p (h, info);
+      /* Is this symbol locally defined? A protected symbol is locallly
+	 defined. But its function descriptor may not. Use it with
+	 caution.  */
+      local_symbol_p = (! dynamic_symbol_p
+			|| ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);
 
       switch (r_type)
 	{
@@ -4033,7 +4042,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* If we don't need dynamic symbol lookup, find a
 		 matching RELATIVE relocation.  */
 	      dyn_r_type = r_type;
-	      if (dynamic_symbol_p)
+	      if (! local_symbol_p)
 		{
 		  dynindx = h->dynindx;
 		  addend = rel->r_addend;
@@ -4362,7 +4371,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* If we don't need dynamic symbol lookup, install two
 		 RELATIVE relocations.  */
-	      if (! dynamic_symbol_p)
+	      if (local_symbol_p)
 		{
 		  unsigned int dyn_r_type;
 

@@ -1,5 +1,12 @@
 2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
 
+	* elfxx-ia64.c (_bfd_elf_link_hash_hide_symbol): Also clear the
+	want_plt field.
+	(elfNN_ia64_relocate_section): Don't do dynamic symbol lookup
+	for symbols with non-default visibility.
+
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
 	* elflink.h (elf_link_check_versioned_symbol): Also handle the
 	case that a DSO references a hidden symbol which may be
 	satisfied by a versioned symbol in another DSO.
