@@ -165,6 +165,7 @@ gldppcmacos_parse_args (argc, argv)
     {"bmodtype", required_argument, NULL, OPTION_MODTYPE},
     {"bnoautoimp", no_argument, NULL, OPTION_NOAUTOIMP},
     {"bnodelcsect", no_argument, NULL, OPTION_IGNORE},
+    {"bnoentry", no_argument, NULL, OPTION_IGNORE},
     {"bnogc", no_argument, &gc, 0},
     {"bnso", no_argument, NULL, OPTION_NOAUTOIMP},
     {"bnostrcmpct", no_argument, NULL, OPTION_NOSTRCMPCT},
@@ -395,6 +396,45 @@ gldppcmacos_parse_args (argc, argv)
   return 1;
 }
 
+/* This is called when an input file can not be recognized as a BFD
+   object or an archive.  If the file starts with #!, we must treat it
+   as an import file.  This is for AIX compatibility.  */
+
+static boolean
+gldppcmacos_unrecognized_file (entry)
+     lang_input_statement_type *entry;
+{
+  FILE *e;
+  boolean ret;
+
+  e = fopen (entry->filename, FOPEN_RT);
+  if (e == NULL)
+    return false;
+
+  ret = false;
+
+  if (getc (e) == '#' && getc (e) == '!')
+    {
+      struct filelist *n;
+      struct filelist **flpp;
+
+      n = (struct filelist *) xmalloc (sizeof (struct filelist));
+      n->next = NULL;
+      n->name = entry->filename;
+      flpp = &import_files;
+      while (*flpp != NULL)
+	flpp = &(*flpp)->next;
+      *flpp = n;
+
+      ret = true;
+      entry->loaded = true;
+    }
+
+  fclose (e);
+
+  return ret;
+}
+
 /* This is called after the input files have been opened.  */
 
 static void
@@ -406,9 +446,11 @@ gldppcmacos_after_open ()
   /* Call ldctor_build_sets, after pretending that this is a
      relocateable link.  We do this because AIX requires relocation
      entries for all references to symbols, even in a final
-     executable.  */
+     executable.  Of course, we only want to do this if we are
+     producing an XCOFF output file.  */
   r = link_info.relocateable;
-  link_info.relocateable = true;
+  if (strstr (bfd_get_target (output_bfd), "xcoff") != NULL)
+    link_info.relocateable = true;
   ldctor_build_sets ();
   link_info.relocateable = r;
 
@@ -446,7 +488,6 @@ gldppcmacos_before_allocation ()
   struct filelist *fl;
   struct export_symbol_list *el;
   char *libpath;
-  boolean export_defineds;
   asection *special_sections[6];
   int i;
 
@@ -497,12 +538,6 @@ gldppcmacos_before_allocation ()
 	}
     }
 
-  /* If we are emulating the Unix linker, we want to export all
-     defined symbols, unless an explicit -bE option was used.  */
-  export_defineds = false;
-  if (unix_ld && export_symbols == NULL)
-    export_defineds = true;
-
   /* Let the XCOFF backend set up the .loader section.  */
   if (! bfd_xcoff_size_dynamic_sections (output_bfd, &link_info, libpath,
 					 entry_symbol, file_align,
@@ -510,7 +545,7 @@ gldppcmacos_before_allocation ()
 					 gc && ! unix_ld ? true : false,
 					 modtype,
 					 textro ? true : false,
-					 export_defineds,
+					 unix_ld,
 					 special_sections))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
@@ -640,7 +675,7 @@ gldppcmacos_read_file (filename, import)
   o = (struct obstack *) xmalloc (sizeof (struct obstack));
   obstack_specify_allocation (o, 0, 0, xmalloc, gldppcmacos_free);
 
-  f = fopen (filename, "r");
+  f = fopen (filename, FOPEN_RT);
   if (f == NULL)
     {
       bfd_set_error (bfd_error_system_call);
@@ -1185,4 +1220,5 @@ struct ld_emulation_xfer_struct ld_ppcmacos_emulation =
   0,	/* place_orphan */
   0,	/* set_symbols */
   gldppcmacos_parse_args,
+  gldppcmacos_unrecognized_file
 };
