@@ -1,3 +1,9 @@
+Thu Aug 13 15:09:59 1998  Drew Moseley  <dmoseley@cygnus.com>
+
+	* gdbtk.c (gdbtk_cleanup): added a scope-level around the contents
+	of the #ifdef so that the variable declarations in there would not
+	be illegal in a C compilation.
+
 Mon Jul 27 13:07:16 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk.c (gdbtk_call_command): Removed because it is now
