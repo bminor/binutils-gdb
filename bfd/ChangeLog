@@ -1,5 +1,10 @@
 2001-08-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* bfd.c: Fix formatting.
+	* bfd-in2.h: Regenerate.
+
+2001-08-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
 	* elf32-arc.c (R_ARC_B22_PCREL): Change 'partial_inplace' to
 	true (this target uses REL relocations) and 'pcrel_offset' to
 	false (the PC is implied, not stored in the offset).

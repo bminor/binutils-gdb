@@ -2958,7 +2958,7 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
 struct _bfd
 {
     /* The filename the application opened the BFD with.  */
-    CONST char *filename;
+    const char *filename;
 
     /* A pointer to the target jump table.             */
     const struct bfd_target *xvec;
@@ -3141,11 +3141,11 @@ bfd_get_error PARAMS ((void));
 void
 bfd_set_error PARAMS ((bfd_error_type error_tag));
 
-CONST char *
+const char *
 bfd_errmsg PARAMS ((bfd_error_type error_tag));
 
 void
-bfd_perror PARAMS ((CONST char *message));
+bfd_perror PARAMS ((const char *message));
 
 typedef void (*bfd_error_handler_type) PARAMS ((const char *, ...));
 
@@ -3197,7 +3197,7 @@ void
 bfd_set_gp_size PARAMS ((bfd *abfd, int i));
 
 bfd_vma
-bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
+bfd_scan_vma PARAMS ((const char *string, const char **end, int base));
 
 boolean
 bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));

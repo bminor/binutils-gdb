@@ -37,7 +37,7 @@ CODE_FRAGMENT
 .struct _bfd
 .{
 .    {* The filename the application opened the BFD with.  *}
-.    CONST char *filename;
+.    const char *filename;
 .
 .    {* A pointer to the target jump table.             *}
 .    const struct bfd_target *xvec;
@@ -269,27 +269,28 @@ CODE_FRAGMENT
 
 static bfd_error_type bfd_error = bfd_error_no_error;
 
-CONST char *CONST bfd_errmsgs[] = {
-                        N_("No error"),
-                        N_("System call error"),
-                        N_("Invalid bfd target"),
-                        N_("File in wrong format"),
-                        N_("Invalid operation"),
-                        N_("Memory exhausted"),
-                        N_("No symbols"),
-			N_("Archive has no index; run ranlib to add one"),
-                        N_("No more archived files"),
-                        N_("Malformed archive"),
-                        N_("File format not recognized"),
-                        N_("File format is ambiguous"),
-                        N_("Section has no contents"),
-                        N_("Nonrepresentable section on output"),
-			N_("Symbol needs debug section which does not exist"),
-			N_("Bad value"),
-			N_("File truncated"),
-			N_("File too big"),
-                        N_("#<Invalid error code>")
-                       };
+const char *const bfd_errmsgs[] =
+{
+  N_("No error"),
+  N_("System call error"),
+  N_("Invalid bfd target"),
+  N_("File in wrong format"),
+  N_("Invalid operation"),
+  N_("Memory exhausted"),
+  N_("No symbols"),
+  N_("Archive has no index; run ranlib to add one"),
+  N_("No more archived files"),
+  N_("Malformed archive"),
+  N_("File format not recognized"),
+  N_("File format is ambiguous"),
+  N_("Section has no contents"),
+  N_("Nonrepresentable section on output"),
+  N_("Symbol needs debug section which does not exist"),
+  N_("Bad value"),
+  N_("File truncated"),
+  N_("File too big"),
+  N_("#<Invalid error code>")
+};
 
 /*
 FUNCTION
@@ -331,14 +332,14 @@ FUNCTION
 	bfd_errmsg
 
 SYNOPSIS
-	CONST char *bfd_errmsg (bfd_error_type error_tag);
+	const char *bfd_errmsg (bfd_error_type error_tag);
 
 DESCRIPTION
 	Return a string describing the error @var{error_tag}, or
 	the system error if @var{error_tag} is <<bfd_error_system_call>>.
 */
 
-CONST char *
+const char *
 bfd_errmsg (error_tag)
      bfd_error_type error_tag;
 {
@@ -348,8 +349,8 @@ bfd_errmsg (error_tag)
   if (error_tag == bfd_error_system_call)
     return xstrerror (errno);
 
-  if ((((int)error_tag <(int) bfd_error_no_error) ||
-       ((int)error_tag > (int)bfd_error_invalid_error_code)))
+  if ((((int) error_tag < (int) bfd_error_no_error) ||
+       ((int) error_tag > (int) bfd_error_invalid_error_code)))
     error_tag = bfd_error_invalid_error_code;/* sanity check */
 
   return _(bfd_errmsgs [(int)error_tag]);
@@ -360,7 +361,7 @@ FUNCTION
 	bfd_perror
 
 SYNOPSIS
-	void bfd_perror (CONST char *message);
+	void bfd_perror (const char *message);
 
 DESCRIPTION
 	Print to the standard error stream a string describing the
@@ -372,16 +373,18 @@ DESCRIPTION
 
 void
 bfd_perror (message)
-     CONST char *message;
+     const char *message;
 {
   if (bfd_get_error () == bfd_error_system_call)
-    perror((char *)message);            /* must be system error then...  */
-  else {
-    if (message == NULL || *message == '\0')
-      fprintf (stderr, "%s\n", bfd_errmsg (bfd_get_error ()));
-    else
-      fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
-  }
+    /* Must be a system error then.  */
+    perror ((char *)message);
+  else
+    {
+      if (message == NULL || *message == '\0')
+	fprintf (stderr, "%s\n", bfd_errmsg (bfd_get_error ()));
+      else
+	fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
+    }
 }
 
 /*
@@ -550,10 +553,11 @@ bfd_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  if (abfd->format != bfd_object) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return -1;
-  }
+  if (abfd->format != bfd_object)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
 
   return BFD_SEND (abfd, _get_reloc_upper_bound, (abfd, asect));
 }
@@ -589,10 +593,12 @@ bfd_canonicalize_reloc (abfd, asect, location, symbols)
      arelent **location;
      asymbol **symbols;
 {
-  if (abfd->format != bfd_object) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return -1;
-  }
+  if (abfd->format != bfd_object)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
   return BFD_SEND (abfd, _bfd_canonicalize_reloc,
 		   (abfd, asect, location, symbols));
 }
@@ -648,23 +654,26 @@ bfd_set_file_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
 {
-  if (abfd->format != bfd_object) {
-    bfd_set_error (bfd_error_wrong_format);
-    return false;
-  }
+  if (abfd->format != bfd_object)
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
 
-  if (bfd_read_p (abfd)) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return false;
-  }
+  if (bfd_read_p (abfd))
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
 
   bfd_get_file_flags (abfd) = flags;
-  if ((flags & bfd_applicable_file_flags (abfd)) != flags) {
-    bfd_set_error (bfd_error_invalid_operation);
-    return false;
-  }
+  if ((flags & bfd_applicable_file_flags (abfd)) != flags)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
 
-return true;
+  return true;
 }
 
 void
@@ -786,9 +795,9 @@ RETURNS
 */
 
 boolean
-bfd_set_start_address(abfd, vma)
-bfd *abfd;
-bfd_vma vma;
+bfd_set_start_address (abfd, vma)
+     bfd *abfd;
+     bfd_vma vma;
 {
   abfd->start_address = vma;
   return true;
@@ -869,7 +878,7 @@ bfd_get_size (abfd)
     return ((struct bfd_in_memory *) abfd->iostream)->size;
 
   fp = bfd_cache_lookup (abfd);
-  if (0 != fstat (fileno (fp), &buf))
+  if (0 != fstat (fileno (fp), & buf))
     return 0;
 
   return buf.st_size;
@@ -920,9 +929,10 @@ bfd_set_gp_size (abfd, i)
      bfd *abfd;
      int i;
 {
-  /* Don't try to set GP size on an archive or core file! */
+  /* Don't try to set GP size on an archive or core file!  */
   if (abfd->format != bfd_object)
     return;
+
   if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
     ecoff_data (abfd)->gp_size = i;
   else if (abfd->xvec->flavour == bfd_target_elf_flavour)
@@ -937,13 +947,14 @@ bfd_vma
 _bfd_get_gp_value (abfd)
      bfd *abfd;
 {
-  if (abfd->format == bfd_object)
-    {
-      if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
-	return ecoff_data (abfd)->gp;
-      else if (abfd->xvec->flavour == bfd_target_elf_flavour)
-	return elf_gp (abfd);
-    }
+  if (abfd->format != bfd_object)
+    return 0;
+
+  if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
+    return ecoff_data (abfd)->gp;
+  else if (abfd->xvec->flavour == bfd_target_elf_flavour)
+    return elf_gp (abfd);
+
   return 0;
 }
 
@@ -956,6 +967,7 @@ _bfd_set_gp_value (abfd, v)
 {
   if (abfd->format != bfd_object)
     return;
+
   if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
     ecoff_data (abfd)->gp = v;
   else if (abfd->xvec->flavour == bfd_target_elf_flavour)
@@ -967,7 +979,7 @@ FUNCTION
 	bfd_scan_vma
 
 SYNOPSIS
-	bfd_vma bfd_scan_vma(CONST char *string, CONST char **end, int base);
+	bfd_vma bfd_scan_vma(const char *string, const char **end, int base);
 
 DESCRIPTION
 	Convert, like <<strtoul>>, a numerical expression
@@ -984,8 +996,8 @@ DESCRIPTION
 
 bfd_vma
 bfd_scan_vma (string, end, base)
-     CONST char *string;
-     CONST char **end;
+     const char *string;
+     const char **end;
      int base;
 {
   bfd_vma value;
@@ -1005,17 +1017,18 @@ bfd_scan_vma (string, end, base)
 	{
 	  if ((string[1] == 'x') || (string[1] == 'X'))
 	    base = 16;
-	  /* XXX should we also allow "0b" or "0B" to set base to 2? */
+	  /* XXX should we also allow "0b" or "0B" to set base to 2?  */
 	  else
 	    base = 8;
 	}
       else
 	base = 10;
     }
+
   if ((base == 16) &&
       (string[0] == '0') && ((string[1] == 'x') || (string[1] == 'X')))
     string += 2;
-  /* XXX should we also skip over "0b" or "0B" if base is 2? */
+  /* XXX should we also skip over "0b" or "0B" if base is 2?  */
 
 /* Speed could be improved with a table like hex_value[] in gas.  */
 #define HEX_VALUE(c) \
@@ -1025,13 +1038,11 @@ bfd_scan_vma (string, end, base)
       : (10 + c - (islower ((unsigned char) c) ? 'a' : 'A')))	\
    : 42)
 
-  for (value = 0; (digit = HEX_VALUE(*string)) < base; string++)
-    {
-      value = value * base + digit;
-    }
+  for (value = 0; (digit = HEX_VALUE (* string)) < base; string ++)
+    value = value * base + digit;
 
   if (end)
-    *end = string;
+    * end = string;
 
   return value;
 }
@@ -1194,11 +1205,12 @@ bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
   if (link_order->type == bfd_indirect_link_order)
     {
       abfd2 = link_order->u.indirect.section->owner;
-      if (abfd2 == 0)
+      if (abfd2 == NULL)
 	abfd2 = abfd;
     }
   else
     abfd2 = abfd;
+
   fn = abfd2->xvec->_bfd_get_relocated_section_contents;
 
   return (*fn) (abfd, link_info, link_order, data, relocateable, symbols);
