@@ -24,6 +24,7 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+README
 configure.in
 remote-gutils.c
 remote-inflow.c
