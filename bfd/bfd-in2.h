@@ -418,6 +418,7 @@ CAT(NAME,_bfd_make_debug_symbol)
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
+#define bfd_get_cacheable(abfd) ((abfd)->cacheable)
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
 #define bfd_get_flavour(abfd) ((abfd)->xvec->flavour)
@@ -436,6 +437,8 @@ CAT(NAME,_bfd_make_debug_symbol)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
+
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), true)
 
 /* Byte swapping routines.  */
 
@@ -1236,6 +1239,14 @@ typedef enum bfd_reloc_code_real
    /* 16 bit relocation relative to the global pointer.  */
   BFD_RELOC_MIPS_GPREL,
 
+   /* Relocation against a MIPS literal section.  */
+  BFD_RELOC_MIPS_LITERAL,
+
+   /* MIPS ELF relocations.  */
+  BFD_RELOC_MIPS_GOT16,
+  BFD_RELOC_MIPS_CALL16,
+  BFD_RELOC_MIPS_GPREL32,
+
    /* These are, so far, specific to HPPA processors.  I'm not sure that some
      don't duplicate other reloc types, such as BFD_RELOC_32 and _32_PCREL.
      Also, many more were in the list I got that don't fit in well in the
@@ -1495,7 +1506,8 @@ struct _bfd
        is the result of an fopen on the filename. */
     char *iostream;
 
-     /* Is the file being cached */
+     /* Is the file descriptor being cached?  That is, can it be closed as
+       needed, and re-opened when accessed later?  */
 
     boolean cacheable;
 
