@@ -1,11 +1,10 @@
-/* Not sure why this is needed -- Fred Fish put it in */
-#define USG
-
+/* Amiga Unix host system */
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <utime.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
@@ -15,6 +14,8 @@
 #endif
 #define SEEK_SET 0
 #define SEEK_CUR 1
+
+#define POSIX_UTIME
 
 extern PROTO(int,  abort,(void));
 extern PROTO(int,  close,(int));

@@ -12,11 +12,8 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-/*
- * Some things that need to be defined in order to make code written for
- * BSD Unix compile under System V ("USG") Unix.  This file should be
- * conditionally included in the source.
- */
+/* Some things that need to be defined in order to make code written for
+   BSD Unix compile under System V Unix.  */
 
 #include <memory.h>
 #define bcmp(b1,b2,len)		memcmp(b1,b2,len)

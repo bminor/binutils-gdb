@@ -6,6 +6,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
+#include <stdlib.h>		/* for malloc() */
+
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
