@@ -1,3 +1,8 @@
+Mon May 10 19:38:34 1993  John Gilmore  (gnu@cygnus.com)
+
+	* ch-exp.y (MAX, MIN):  Rename to MAX_TOKEN, MIN_TOKEN.
+	* target.c (MIN):  #undef before defining.
+
 Mon May 10 16:03:03 1993  Jim Kingdon  (kingdon@cygnus.com)
 
         Patch from Jeffrey Law:
@@ -39,6 +44,7 @@ Sat May  8 01:39:30 1993  (pes@regent.e-technik.tu-muenchen.de)
 	* coffread.c (read_coff_symtab): Don't fclose stream as it is no
 	longer opened twice.
 
+>>>>>>> 1.1257
 Thu May  6 21:08:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* solib.c (clear_solib): Don't close bfd if it is NULL.

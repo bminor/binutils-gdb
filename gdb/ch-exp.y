@@ -1,5 +1,5 @@
 /* YACC grammar for Chill expressions, for GDB.
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -227,8 +227,8 @@ yyerror PARAMS ((char *));
 %token <voidval>	SUCC
 %token <voidval>	ABS
 %token <voidval>	CARD
-%token <voidval>	MAX
-%token <voidval>	MIN
+%token <voidval>	MAX_TOKEN
+%token <voidval>	MIN_TOKEN
 %token <voidval>	SIZE
 %token <voidval>	UPPER
 %token <voidval>	LOWER
@@ -889,11 +889,11 @@ chill_value_built_in_routine_call :
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	MAX '(' expression ')'
+		|	MAX_TOKEN '(' expression ')'
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	MIN '(' expression ')'
+		|	MIN_TOKEN '(' expression ')'
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -1739,8 +1739,8 @@ static const struct token idtokentab[] =
     { "orif", ORIF },
     { "num", NUM },
     { "abs", ABS },
-    { "max", MAX },
-    { "min", MIN },
+    { "max", MAX_TOKEN },
+    { "min", MIN_TOKEN },
     { "mod", MOD },
     { "rem", REM },
     { "not", NOT },
