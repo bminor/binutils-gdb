@@ -1935,15 +1935,6 @@ OP_C7C0 ()
   return 4;
 }
 
-/* breakpoint */
-int
-OP_FFFF ()
-{
-  sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
-		   sim_stopped, SIGTRAP);
-  return 0;
-}
-
 /* di */
 int
 OP_16007E0 ()
@@ -2297,32 +2288,6 @@ OP_10007E0 ()
 
       return 0;
     }
-}
-
-/* ldsr, reg,reg */
-int
-OP_2007E0 ()
-{
-  trace_input ("ldsr", OP_LDSR, 0);
-  
-  State.sregs[ OP[1] ] = State.regs[ OP[0] ];
-  
-  trace_output (OP_LDSR);
-
-  return 4;
-}
-
-/* stsr */
-int
-OP_4007E0 ()
-{
-  trace_input ("stsr", OP_STSR, 0);
-  
-  State.regs[ OP[1] ] = State.sregs[ OP[0] ];
-  
-  trace_output (OP_STSR);
-
-  return 4;
 }
 
 /* start-sanitize-v850e */

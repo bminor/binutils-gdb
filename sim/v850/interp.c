@@ -220,10 +220,7 @@ sim_open (kind, cb, abfd, argv)
      char **argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
-#if 0
-  struct simops *s;
-  struct hash_entry *h;
-#endif
+  int mach;
 
   /* for compatibility */
   simulator = sd;
@@ -285,26 +282,33 @@ sim_open (kind, cb, abfd, argv)
       return 0;
     }
 
-#if 0
-  /* put all the opcodes in the hash table */
-  for (s = Simops; s->func; s++)
-    {
-      h = &hash_table[hash(s->opcode)];
-      
-      /* go to the last entry in the chain */
-      while (h->next)
-	  h = h->next;
 
-      if (h->ops)
-	{
-	  h->next = (struct hash_entry *) calloc(1,sizeof(struct hash_entry));
-	  h = h->next;
-	}
-      h->ops = s;
-      h->mask = s->mask;
-      h->opcode = s->opcode;
+  /* determine the machine type */
+  if (STATE_ARCHITECTURE (sd) != NULL
+      && STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850)
+    mach = STATE_ARCHITECTURE (sd)->mach;
+  else
+    mach = bfd_mach_v850; /* default */
+
+  /* set machine specific configuration */
+  switch (mach)
+    {
+    case bfd_mach_v850:
+      /* start-sanitize-v850e */
+    case bfd_mach_v850e:
+      /* end-sanitize-v850e */
+      STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT
+				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
+      break;
+      /* start-sanitize-v850eq */
+    case bfd_mach_v850eq:
+      PSW |= PSW_US;
+      STATE_CPU (sd, 0)->psw_mask = (PSW_US
+				     | PSW_NP | PSW_EP | PSW_ID | PSW_SAT
+				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
+      break;
+      /* end-sanitize-v850eq */
     }
-#endif
 
   return sd;
 }

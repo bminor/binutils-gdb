@@ -545,7 +545,15 @@ rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 rrrrr,111111,RRRRR + 0000000000100000:IX:::ldsr
 "ldsr r<reg1>, r<regID>"
 {
-  COMPAT_2 (OP_2007E0 ());
+  SAVE_2;
+  trace_input ("ldsr", OP_LDSR, 0);
+  
+  if (&PSW == &State.sregs[ regID ])
+    PSW = (State.regs[ reg1 ] & (CPU)->psw_mask);
+  else
+    State.sregs[ regID ] = State.regs[ reg1 ];
+  
+  trace_output (OP_LDSR);
 }
 
 
@@ -1047,7 +1055,13 @@ rrrrr,111011,RRRRR + ddddddddddddddd,1:VII:::st.w
 rrrrr,111111,RRRRR + 0000000001000000:IX:::stsr
 "stsr r<regID>, r<reg1>"
 {
-  COMPAT_2 (OP_4007E0 ());
+  SAVE_2;
+
+  trace_input ("stsr", OP_STSR, 0);
+  
+  State.regs[ reg1 ] = State.sregs[ regID ];
+  
+  trace_output (OP_STSR);
 }
 
 

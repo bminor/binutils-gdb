@@ -48,6 +48,7 @@ struct _sim_cpu
 {
   /* ... simulator specific members ... */
   v850_regs reg;
+  reg_t psw_mask;               /* only allow non-reserved bits to be set */
   /* ... base type ... */
   sim_cpu_base base;
 };
