@@ -63,7 +63,7 @@
 *** 200,206 ****
   	 mem-break.c target.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
-  	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
+  	 language.c parse.c buildsym.c objfiles.c \
 ! 	 minsyms.c mipsread.c maint.c
   
   # Source files in subdirectories (which will be handled separately by
@@ -71,7 +71,7 @@
 --- 207,213 ----
   	 mem-break.c target.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
-  	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
+  	 language.c parse.c buildsym.c objfiles.c \
 ! 	 minsyms.c mipsread.c maint.c energize.c
   
   # Source files in subdirectories (which will be handled separately by
@@ -80,7 +80,7 @@
 *** 289,295 ****
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) mem-break.o target.o \
-      ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
+      putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
       stabsread.o core.o
@@ -88,7 +88,7 @@
 --- 296,302 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) mem-break.o target.o \
-      ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
+      putenv.o parse.o language.o $(YYOBJ) \
 !     buildsym.o objfiles.o minsyms.o maint.o demangle.o energize.o \
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
       stabsread.o core.o

@@ -133,9 +133,7 @@ i960-pinsn.o : i960-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
   gdbtypes.h expression.h 
 i960-tdep.o : i960-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h value.h gdbtypes.h expression.h frame.h \
-  ieee-float.h 
-ieee-float.o : ieee-float.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ieee-float.h 
+  ${srcdir}/../include/ieee-float.h 
 infcmd.o : infcmd.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h gdbtypes.h frame.h inferior.h breakpoint.h \
   value.h expression.h environ.h gdbcmd.h command.h gdbcore.h ${srcdir}/../include/bfd.h \
@@ -171,9 +169,9 @@ m2-valprint.o : m2-valprint.c defs.h ${srcdir}/../include/ansidecl.h xm.h config
   tm.h config.status ${srcdir}/../include/obstack.h symtab.h gdbtypes.h valprint.h 
 m68k-pinsn.o : m68k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status symtab.h ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/m68k.h gdbcore.h ${srcdir}/../include/bfd.h \
-  ieee-float.h 
+  ${srcdir}/../include/ieee-float.h 
 m68k-tdep.o : m68k-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
-  tm.h config.status ieee-float.h frame.h symtab.h ${srcdir}/../include/obstack.h 
+  tm.h config.status ${srcdir}/../include/ieee-float.h frame.h symtab.h ${srcdir}/../include/obstack.h 
 m88k-nat.o : m88k-nat.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h /usr/include/setjmp.h 
@@ -255,7 +253,7 @@ remote-mm.o : remote-mm.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   gdbtypes.h expression.h ${srcdir}/../include/wait.h terminal.h minimon.h target.h ${srcdir}/../include/bfd.h 
 remote-nindy.o : remote-nindy.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
-  gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h gdbcore.h command.h ieee-float.h \
+  gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h gdbcore.h command.h ${srcdir}/../include/ieee-float.h \
   ${srcdir}/../include/wait.h ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/demux.h ${srcdir}/nindy-share/env.h \
   ${srcdir}/nindy-share/stop.h 
 remote-st2000.o : remote-st2000.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
@@ -295,7 +293,7 @@ sparc-pinsn.o : sparc-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config
   target.h 
 sparc-tdep.o : sparc-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status frame.h inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h \
-  gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h ieee-float.h gdbcore.h 
+  gdbtypes.h expression.h target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ieee-float.h gdbcore.h 
 stabsread.o : stabsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h gdbtypes.h symfile.h \
   ${srcdir}/../include/demangle.h objfiles.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def \

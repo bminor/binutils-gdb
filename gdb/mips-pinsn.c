@@ -32,10 +32,15 @@ print_insn (memaddr, stream)
      FILE *stream;
 {
   unsigned char buffer[MAXLEN];
+  disassemble_info info;
+
+  GDB_INIT_DISASSEMBLE_INFO(info, stream);
 
   read_memory (memaddr, buffer, MAXLEN);
 
   /* print_insn_mips is in opcodes/mips-dis.c.  */
-  return print_insn_mips (memaddr, buffer, stream,
-			  TARGET_BYTE_ORDER == BIG_ENDIAN);
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    print_insn_big_mips (memaddr, buffer, &info);
+  else
+    print_insn_little_mips (memaddr, buffer, &info);
 }

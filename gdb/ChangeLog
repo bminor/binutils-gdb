@@ -1,3 +1,18 @@
+Thu Mar 18 14:26:57 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ieee-float.c: Moved to ../libiberty.
+	* ieee-float.h: Moved to ../include.
+	* Makefile.in:  Update accordingly.
+	* i386-pinsn.c (print_insn), m68k-pinsn.c (print_insn):
+	Convert to stubs that call disassemblers in ../opcodes/*-dis.c.
+	* m68k-tdep.c:  Removed definition of ext_format ext_format_68881;
+	it is now in ../opcodes/m68881-ext.c.
+	* mips-tdep.c (mips_skip_prologue):  Try to skip more of the
+	prologue (some callers _do_ care).
+	* mips-pinsn.c (print_insn), z8k-tdep.c (print_insn):  Convert to
+	new interface of ../opcodes/*-dis.c. 
+	* ch-exp.y:  Add #include <ctype.h>.
+
 Thu Mar 18 11:57:49 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffexec.c (exec_close): Don't close exec_bfd twice.

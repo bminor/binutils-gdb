@@ -121,8 +121,6 @@ i386v4-nat.c
 i387-tdep.c
 i960-pinsn.c
 i960-tdep.c
-ieee-float.c
-ieee-float.h
 infcmd.c
 inferior.h
 inflow.c

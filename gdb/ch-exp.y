@@ -54,6 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 %{
 
 #include "defs.h"
+#include <ctype.h>
 #include "expression.h"
 #include "language.h"
 #include "value.h"
