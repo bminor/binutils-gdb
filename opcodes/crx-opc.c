@@ -472,13 +472,12 @@ const inst crx_instruction[] =
   REGLIST_INST ("popret", 0x326),
   REG1_INST ("popret",    0xFFD),
 
-  REGLIST_INST ("loadm", 0x324),
+  REGLIST_INST ("loadm",  0x324),
   REGLIST_INST ("loadma", 0x325),
-  REGLIST_INST ("popma", 0x325),
+  REGLIST_INST ("popa",	  0x325),
 
-  REGLIST_INST ("storm", 0x344),
+  REGLIST_INST ("storm",  0x344),
   REGLIST_INST ("storma", 0x345),
-  REGLIST_INST ("pushma", 0x345),
 
 /* Create a branch instruction.  */
 #define  BR_INST(NAME, OPC1, OPC2, INS_TYPE) \
@@ -512,9 +511,9 @@ const inst crx_instruction[] =
   /* opc12 c4 opc8 copreg r */
   {"mfcr",    2, 0x301031,  8, COP_REG_INS | FMT_2, {{i4,16}, {copregr,4}, {regr,0}}},
   /* opc12 c4 opc8 r copsreg */
-  {"mtcsr",   2, 0x301032,  8, COP_REG_INS | FMT_2, {{i4,16}, {regr,4}, {copregr,0}}},
+  {"mtcsr",   2, 0x301032,  8, COP_REG_INS | FMT_2, {{i4,16}, {regr,4}, {copsregr,0}}},
   /* opc12 c4 opc8 copsreg r */
-  {"mfcsr",   2, 0x301033,  8, COP_REG_INS | FMT_2, {{i4,16}, {copregr,4}, {regr,0}}},
+  {"mfcsr",   2, 0x301033,  8, COP_REG_INS | FMT_2, {{i4,16}, {copsregr,4}, {regr,0}}},
 
   /* CO-processor extensions */
   /* opc12 c4 opc4 i4 disps9 */

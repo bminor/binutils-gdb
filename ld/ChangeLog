@@ -1,3 +1,11 @@
+2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* scripttempl/elf32crx.sc: Edit file with comments.
+	(.init): Add new section.
+	(.fini): Likewise.
+	(.ctor): Control the linkage order.
+	(.dtor): Likewise.
+
 2004-08-27  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (after_open): Do not assume that either bfd is

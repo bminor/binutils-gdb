@@ -1,3 +1,41 @@
+2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* ld-crx: New directory.
+	* ld-crx/crx.exp: New test script.
+	* ld-crx/crx.ld: New linker script.
+	* ld-crx/reloc-abs32.s: New file.
+	* ld-crx/reloc-abs32.d: Likewise.
+	* ld-crx/reloc-imm16.s: Likewise.
+	* ld-crx/reloc-imm16.d: Likewise.
+	* ld-crx/reloc-imm32.s: Likewise.
+	* ld-crx/reloc-imm32.d: Likewise.
+	* ld-crx/reloc-num8.s: Likewise.
+	* ld-crx/reloc-num8.d: Likewise.
+	* ld-crx/reloc-num16.s: Likewise.
+	* ld-crx/reloc-num16.d: Likewise.
+	* ld-crx/reloc-num32.s: Likewise.
+	* ld-crx/reloc-num32.d: Likewise.
+	* ld-crx/reloc-regrel12.s: Likewise.
+	* ld-crx/reloc-regrel12.d: Likewise.
+	* ld-crx/reloc-regrel22.s: Likewise.
+	* ld-crx/reloc-regrel22.d: Likewise.
+	* ld-crx/reloc-regrel28.s: Likewise.
+	* ld-crx/reloc-regrel28.d: Likewise.
+	* ld-crx/reloc-regrel32.s: Likewise.
+	* ld-crx/reloc-regrel32.d: Likewise.
+	* ld-crx/reloc-rel4.s: Likewise.
+	* ld-crx/reloc-rel4.d: Likewise.
+	* ld-crx/reloc-rel8.s: Likewise.
+	* ld-crx/reloc-rel8.d: Likewise.
+	* ld-crx/reloc-rel8-cmp.s: Likewise.
+	* ld-crx/reloc-rel8-cmp.d: Likewise.
+	* ld-crx/reloc-rel16.s: Likewise.
+	* ld-crx/reloc-rel16.d: Likewise.
+	* ld-crx/reloc-rel24.s: Likewise.
+	* ld-crx/reloc-rel24.d: Likewise.
+	* ld-crx/reloc-rel32.s: Likewise.
+	* ld-crx/reloc-rel32.d: Likewise.
+
 2004-08-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/expdyn1.d, ld-cris/expdyn5.d, ld-cris/expdyn6.d,

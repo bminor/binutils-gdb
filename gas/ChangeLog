@@ -1,3 +1,13 @@
+2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c (gettrap): Exception vector can be case
+	insensitive.
+	(process_label_constant): Fix a 32-bit displacement bug in branch 
+	instructions.
+	(get_operandtype) : Bug fix, wrong operand was used.
+	(process_label_constant): Initialize relocation type to 
+	BFD_RELOC_NONE
+
 2004-09-01  Richard Earnshaw < reanrsha@arm.com>
 
 	* tc-arm.c (arm_cpus, arm_fpus): Allow <cpu>-s as well as <cpu>s

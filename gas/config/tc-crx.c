@@ -28,7 +28,6 @@
 #include "opcode/crx.h"
 #include "elf/crx.h"
 
-/* Include <limits.h> do define ULONG_MAX, LONG_MAX, LONG_MIN.  */
 #include <limits.h>
 
 /* Word is considered here as a 16-bit unsigned short int.  */
@@ -123,7 +122,8 @@ const char FLT_CHARS[] = "f'";
 
 /* Target-specific multicharacter options, not const-declared at usage.  */
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -282,7 +282,7 @@ reset_vars (char *op, ins *crx_ins)
 
   processing_arg_number = relocatable = size_was_set
     = signflag = post_inc_mode = cst4flag = 0;
-  memset (&output_opcode, '\0', sizeof (output_opcode));
+  memset (& output_opcode, '\0', sizeof (output_opcode));
 
   /* Memset the 'signflag' field in every argument.  */
   for (i = 0; i < MAX_OPERANDS; i++)
@@ -328,7 +328,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
   arelent * reloc;
 
   reloc = xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr  =  xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr  = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->addend = fixP->fx_offset;
@@ -340,7 +340,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
 	  /* Keep the current difference in the addend.  */
 	  reloc->addend = (S_GET_VALUE (fixP->fx_addsy)
 			   - S_GET_VALUE (fixP->fx_subsy) + fixP->fx_offset);
-      
+
 	  switch (fixP->fx_r_type)
 	    {
 	    case BFD_RELOC_CRX_NUM8:
@@ -879,17 +879,25 @@ process_label_constant (char *str, ins * crx_ins, int number)
 
   switch (crx_ins->exp.X_op)
     {
+    case O_big:
+    case O_absent:
+      /* Missing or bad expr becomes absolute 0.  */
+      as_bad (_("missing or invalid displacement expression `%s' taken as 0"),
+	      str);
+      crx_ins->exp.X_op = O_constant;
+      crx_ins->exp.X_add_number = 0;
+      crx_ins->exp.X_add_symbol = (symbolS *) 0;
+      crx_ins->exp.X_op_symbol = (symbolS *) 0;
+      break;
+
     case O_constant:
       crx_ins->arg[number].constant = crx_ins->exp.X_add_number;
       constant_val = crx_ins->exp.X_add_number;
       if ((IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
 	   && number == 2)
         {
-	  /* This variable causes a warning (is to be handles by string
-	     type implementation).  */
           LONGLONG temp64 = 0;
-
-          char ptr[20];
+          char ptr;
           char temp_str[30];
           unsigned int jump_value = 0;
           int BR_MASK = 0, BR_SIZE = 0;
@@ -900,27 +908,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
               temp_str[1] = '\0';
             }
           strncat (temp_str, str, strlen (str));
-	  temp64 = strtol (temp_str, (char **) &ptr,0);
-	  /* This is not accurate :
-	     Actually overflow is allowed here (see comment below).
-	     Originally the call was to 'strtoll', which isn't
-	     identified by MSVC.  */
-	  if ((temp64 == LONG_MAX) || (temp64 == LONG_MIN))
-	    as_bad (_("Overflow in displacement in Instruction `%s'"),
-		    ins_parse);
-
-          /* If br *+x
-	     It will be returned as '0' padded with 'x' uptill 64 bits
-	     If br *-x
-	     It will be returned as sign extended form
-
-	     Then search for validity of representation
-	     Check whether upper 38 bits are all zeroes or all ones
-	     If not report error.  */
-          if (!(((temp64 & UPPER31_MASK) == UPPER31_MASK)
-		|| ((temp64 & UPPER31_MASK) == 0x0)))
-	    as_bad (_("Overflow in displacement in Instruction `%s'"),
-		    ins_parse);
+	  temp64 = strtoll (temp_str, (char **) &ptr,0);
 
           if (temp64 % 2 != 0)
 	    as_bad (_("Odd Offset in displacement in Instruction `%s'"),
@@ -955,7 +943,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
 	  || IS_INSN_TYPE (DCR_BRANCH_INS))
         {
           LONGLONG temp64 = 0;
-          char ptr[20];
+          char ptr;
           char temp_str[30];
           unsigned int jump_value = 0;
           int BR_MASK = 0, BR_SIZE = 0;
@@ -967,27 +955,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
               temp_str[1] = '\0';
             }
           strncat (temp_str, str, strlen (str));
-	  temp64 = strtol (temp_str, (char **) &ptr,0);
-	  /* This is not accurate :
-	     Actually overflow is allowed here (see comment below).
-	     Originally the call was to 'strtoll', which isn't
-	     identified by MSVC.  */
-	  if ((temp64 == LONG_MAX) || (temp64 == LONG_MIN))
-	    as_bad (_("Overflow in displacement in Instruction `%s'"),
-		    ins_parse);
-
-          /* If br *+x
-	     It will be returned as '0' padded with 'x' uptill 64 bits
-	     If br *-x
-	     It will be returned as sign extended form
-
-	     Then search for validity of representation
-	     Check whether upper 31 bits are all zeroes or all ones
-	     If not report error.  */
-          if (!(((temp64 & UPPER31_MASK) == UPPER31_MASK)
-		|| ((temp64 & UPPER31_MASK) == 0x0)))
-	    as_bad (_("Overflow in displacement in Instruction `%s'"),
-		    ins_parse);
+	  temp64 = strtoll (temp_str, (char **) &ptr,0);
 
 	  if (temp64 % 2 != 0)
 	    as_bad (_("Odd Offset in displacement in Instruction `%s'"),
@@ -1002,9 +970,8 @@ process_label_constant (char *str, ins * crx_ins, int number)
               BR_MASK = 0xFF;
               BR_SIZE = 8;
             }
-          else
-            if (((jump_value & 0xFFFF0000) == 0xFFFF0000)
-		|| ((jump_value & 0xFFFF0000) == 0x0))
+          else if (((jump_value & 0xFFFF0000) == 0xFFFF0000)
+		   || ((jump_value & 0xFFFF0000) == 0x0))
             {
               BR_MASK = 0xFFFF;
               BR_SIZE = 16;
@@ -1069,28 +1036,24 @@ process_label_constant (char *str, ins * crx_ins, int number)
                 ~(crx_ins->arg[number].constant) + 1;
               if (IS_INSN_TYPE (ARITH_INS) || IS_INSN_TYPE (ARITH_BYTE_INS))
                 {
-                  char ptr[30];
+                  char ptr;
                   LONGLONG temp64;
 
-	  	  /* Tomer - Originally the call was to 'strtoull', which isn't
-		     identified by MSVC. Instead we check for overflow.  */
-		  temp64 = strtoul (str, (char **) &ptr, 0);
+		  temp64 = strtoull (str, (char **) &ptr, 0);
                   if (cnt < 4)
 		    crx_ins->arg[number].size = 5;
 
                   if (IS_INSN_TYPE (ARITH_INS))
                     {
                       if (crx_ins->arg[number].size > 32
-			  /* Tomer - check for overflow.  */
-			  || (temp64 == ULONG_MAX))
+			  || (temp64 > ULONG_MAX))
 			{
                           if (crx_ins->arg[number].size > 32)
 			    as_bad (_("In Instruction `%s': Immediate size is \
 				    %lu bits cannot be accomodated"),
 				    ins_parse, cnt + 1);
 
-			  /* Tomer - check for overflow.  */
-			  if (temp64 == ULONG_MAX)
+			  if (temp64 > ULONG_MAX)
 			    as_bad (_("Value given more than 32 bits in \
 				    Instruction `%s'"), ins_parse);
                         }
@@ -1191,6 +1154,7 @@ process_label_constant (char *str, ins * crx_ins, int number)
     case O_symbol:
     case O_subtract:
       crx_ins->arg[number].constant = 0;
+      crx_ins->rtype = BFD_RELOC_NONE;
       relocatable = 1;
 
       switch (crx_ins->arg[number].type)
@@ -1536,7 +1500,7 @@ get_operandtype (char *operand, int number, ins * crx_ins)
         {
           crx_ins->arg[number].type = arg_cr;
           crx_ins->arg[number].constant = 0;
-          set_cons_rparams (operand, crx_ins, number);
+          set_cons_rparams (temp_operand, crx_ins, number);
           get_number_of_bits (crx_ins, number);
           if ((! strneq (instruction->mnemonic, "load", 4))
               && (! strneq (instruction->mnemonic, "stor", 4)))
@@ -1696,7 +1660,7 @@ gettrap (char *s)
   const trap_entry *trap;
 
   for (trap = crx_traps; trap < (crx_traps + NUMTRAPS); trap++)
-    if (streq (trap->name, s))
+    if (strcasecmp (trap->name, s) == 0)
       return trap->entry;
 
   as_bad (_("Unknown exception: `%s'"), s);

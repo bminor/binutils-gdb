@@ -1,3 +1,32 @@
+2004-09-03  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* gas/crx: New directory.
+	* gas/crx/allinsn.exp: New test script.
+	* gas/crx/arith_insn.s: New file.
+	* gas/crx/arith_insn.d: Likewise.
+	* gas/crx/beq_insn.s: Likewise.
+	* gas/crx/beq_insn.d: Likewise.
+	* gas/crx/bit_insn.s: Likewise.
+	* gas/crx/bit_insn.d: Likewise.
+	* gas/crx/br_insn.s: Likewise.
+	* gas/crx/br_insn.d: Likewise.
+	* gas/crx/cmov_insn.s: Likewise.
+	* gas/crx/cmov_insn.d: Likewise.
+	* gas/crx/cmpbr_insn.s: Likewise.
+	* gas/crx/cmpbr_insn.d: Likewise.
+	* gas/crx/jscond_insn.s: Likewise.
+	* gas/crx/jscond_insn.d: Likewise.
+	* gas/crx/list_insn.s: Likewise.
+	* gas/crx/list_insn.d: Likewise.
+	* gas/crx/load_stor_insn.s: Likewise.
+	* gas/crx/load_stor_insn.d: Likewise.
+	* gas/crx/misc_insn.s: Likewise.
+	* gas/crx/misc_insn.d: Likewise.
+	* gas/crx/no_op_insn.s: Likewise.
+	* gas/crx/no_op_insn.d: Likewise.
+	* gas/crx/shift_insn.s: Likewise.
+	* gas/crx/shift_insn.d: Likewise.
+
 2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/frv/fr550-pack1.[sd]: New test.
