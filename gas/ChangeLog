@@ -1,3 +1,25 @@
+Thu Feb 10 11:24:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* as.c: Include libiberty.h.
+
+	* read.c (do_align): Don't define label just_record_alignment
+	unless it might be used.
+
+	* as.c (main): If md_parse_long_option is defined, call it with a
+	long option.
+	* config/tc-mips.h (md_parse_long_option): Define.
+	* config/tc-mips.c (mips_trap): New static variable.
+	(md_begin): Report an error if mips_trap is set at ISA level 1.
+	(macro): If mips_trap, use trap instructions instead of break
+	instructions for overflow and divide by zero detection.
+	(mips_parse_long_option): New function.  Support --trap,
+	--no-break, --break and --no-trap.
+	* doc/as.texinfo: Document new options.
+
+	* read.c (potable): Add "zero".
+	* config/tc-i386.c (md_pseudo_table): Remove "zero".
+	* config/tc-m88k.c (md_pseudo_table): Likewise.
+
 Thu Feb 10 01:24:27 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip): Reject integer values for
