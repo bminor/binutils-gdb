@@ -4682,14 +4682,14 @@ process_exit ()
   /* ELF does not have EXIT relocations.  All we do is create a
      temporary symbol marking the end of the function.  */
   {
-    char *name = (char *) xmalloc (strlen ("L\001end_") +
+    char *name = (char *) xmalloc (strlen ("L$\001end_") +
 		    strlen (S_GET_NAME (last_call_info->start_symbol)) + 1);
 
     if (name)
       {
 	symbolS *symbolP;
 
-	strcpy (name, "L\001end_");
+	strcpy (name, "L$\001end_");
 	strcat (name, S_GET_NAME (last_call_info->start_symbol));
 
 	symbolP = symbol_find (name);

@@ -1,5 +1,8 @@
 Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (process_exit): Create temporary symbols with
+	correct prefixes so they can be eliminated later.
+
 	* config/tc-hppa.c (call_info struct): Delete unused "frame" field.
 	(pa_callinfo): Insert framesize into the unwind information as 
 	soon as it's available.
