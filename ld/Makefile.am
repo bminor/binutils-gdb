@@ -169,6 +169,7 @@ ALL_EMULATIONS = \
 	eelf32lppcnto.o \
 	eelf32lppcsim.o \
 	eelf32mcore.o \
+	eelf32mipswindiss.o \
 	eelf32openrisc.o \
 	eelf32ppc.o \
 	eelf32ppc_fbsd.o \
@@ -662,6 +663,9 @@ eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(srcdir)/emultempl/mipself.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip "$(tdir_elf32lmip)"
+eelf32mipswindiss.c: $(srcdir)/emulparams/elf32mipswindiss.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32mipswindiss "$(tdir_elf32mipswindiss)"
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emultempl/ppc32elf.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

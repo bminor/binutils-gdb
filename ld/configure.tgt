@@ -227,7 +227,7 @@ i[3-7]86-*-interix*)	targ_emul=i386pe_posix;
  			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 i[3-7]86-*-beospe*)	targ_emul=i386beos ;;
 i[3-7]86-*-beos*)	targ_emul=elf_i386_be ;;
-i[3-7]86-*-vxworks*)	targ_emul=i386aout ;;
+i[3-7]86-*-vxworks*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-chaos)	targ_emul=elf_i386_chaos ;;
 m8*-*-*)		targ_emul=m88kbcs ;;
 a29k-*-udi)		targ_emul=sa29200 ;;
@@ -237,7 +237,6 @@ a29k-*-*)		targ_emul=a29k ;;
 arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
-arm-*-vxworks)		targ_emul=armcoff ;;
 arm-*-freebsd* | arm-*-kfreebsd*-gnu)
 	       		targ_emul=armelf_fbsd
 			targ_extra_emuls="armelf" ;;
@@ -251,7 +250,8 @@ arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 armeb-*-elf)		targ_emul=armelfb ;;
-arm-*-elf)		targ_emul=armelf ;;
+arm-*-elf | arm-*-vxworks)
+	  		targ_emul=armelf ;;
 arm-*-kaos*)		targ_emul=armelf ;;
 arm9e-*-elf)		targ_emul=armelf ;;
 arm-*-oabi)		targ_emul=armelf_oabi ;;
@@ -329,7 +329,7 @@ shle*-*-elf* | sh[1234]*le*-*-elf | shle*-*-kaos*)
 			targ_emul=shlelf
 			targ_extra_emuls="shelf shl sh"
 			;;
-sh-*-elf* | sh[1234]*-*-elf | sh-*-rtemself* | sh-*-kaos*)
+sh-*-elf* | sh[1234]*-*-elf | sh-*-rtemself* | sh-*-kaos* | sh-*-vxworks)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
@@ -421,7 +421,9 @@ mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*el-*-rtems*)	targ_emul=elf32elmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
 mips*el-*-vxworks*)	targ_emul=elf32elmip ;;
-mips*-*-vxworks*)	targ_emul=elf32ebmip ;;
+mips*-*-vxworks*)	targ_emul=elf32ebmip
+		        targ_extra_emuls="elf32elmip" ;;
+mips*-*-windiss)	targ_emul=elf32mipswindiss ;;
 mips64*el-*-linux-gnu*)	targ_emul=elf32ltsmipn32
 			targ_extra_emuls="elf32btsmipn32 elf32ltsmip elf32btsmip elf64ltsmip elf64btsmip"
 			;;

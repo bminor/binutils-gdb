@@ -1,3 +1,13 @@
+2003-10-30 Phil Edwards <phil@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add elf32mipswindiss.o.
+	(eelf32mipswindiss.c): New target.
+	* Makefile.in:  Regenerated.
+	* emulparams/elf32mipswindiss.sh:  New file.
+	* configure.tgt (i[3-7]86-*-vxworks*, arm-*-vxworks, sh-*-vxworks,
+	mips*-*-vxworks*):  Use ELF now.
+	(mips*-*-windiss):  New stanza, use elf32mipswindiss.
+
 2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* scripttempl/elfm68hc12.sc: Define eeprom memory region.
