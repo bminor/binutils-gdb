@@ -465,6 +465,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int prev_insn_was_prologue_insn = 1;
   int num_skip_non_prologue_insns = 0;
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   /* Attempt to find the end of the prologue when no limit is specified.
      Note that refine_prologue_limit() has been written so that it may
@@ -694,7 +695,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	{			/* mr r31, r1 */
 	  fdata->frameless = 0;
 	  framep = 1;
-	  fdata->alloca_reg = 31;
+	  fdata->alloca_reg = (tdep->ppc_gp0_regnum + 31);
 	  continue;
 
 	  /* Another way to set up the frame pointer.  */
@@ -703,7 +704,8 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	{			/* addi rX, r1, 0x0 */
 	  fdata->frameless = 0;
 	  framep = 1;
-	  fdata->alloca_reg = (op & ~0x38010000) >> 21;
+	  fdata->alloca_reg = (tdep->ppc_gp0_regnum
+			       + ((op & ~0x38010000) >> 21));
 	  continue;
 	}
       /* AltiVec related instructions.  */
