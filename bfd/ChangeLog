@@ -1,3 +1,20 @@
+Wed Nov 23 19:21:41 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* coff-sh.c (shlcoff_vec): New target vector.
+	(no_archive): New function.
+	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags): Handle
+	little endian SH.
+	* configure.in: Handle shl.
+	* targets.c (bfd_target_vector): Add shlcoff_vec.
+	* config/sh-coff.mt (SELECT_VECS): Handle shl_coff_vec.
+
+Wed Nov 23 10:50:13 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elfcode.h (write_relocs): Do not subtract the section's vma from
+	the reloc's offset when writing .o's.  Instead add the section's
+	vma to the reloc's offset when writing an executable or shared
+	library.
+
 Tue Nov 22 23:34:37 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Do not add

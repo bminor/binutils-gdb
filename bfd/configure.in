@@ -198,10 +198,11 @@ do
 				target64=true ;;
     riscix_vec)			tb="$tb aout32.o riscix.o stab-syms.o" ;;
     nlm32_powerpc_vec)		tb="$tb nlm32-ppc.o nlm32.o nlm.o" ;;
-    ns32knetbsd_vec)		tb="$tb ns32knetbsd.o aout-ns32k.o stab-syms.o" ;;
+    pc532netbsd_vec)		tb="$tb ns32knetbsd.o aout-ns32k.o stab-syms.o" ;;
     pc532machaout_vec)		tb="$tb pc532-mach.o aout-ns32k.o stab-syms.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o cofflink.o" ;;
+    shlcoff_vec)		tb="$tb coff-sh.o cofflink.o" ;;
     som_vec)			tb="$tb som.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o stab-syms.o" ;;

@@ -32,7 +32,7 @@ static bfd_reloc_status_type sh_reloc();
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 
-#define COFF_LONG_FILENAMES
+/*#define COFF_LONG_FILENAMES*/
 
 static reloc_howto_type r_imm32 =
   {R_SH_IMM32,  0, 2, 32, false, 0, 
@@ -263,7 +263,6 @@ coff_sh_relocate_section (output_bfd, info, input_bfd, input_section,
 }
 
 #define coff_relocate_section coff_sh_relocate_section
-
 #include "coffcode.h"
 
 const bfd_target shcoff_vec =
@@ -291,6 +290,58 @@ const bfd_target shcoff_vec =
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
      bfd_generic_archive_p, _bfd_dummy_target},
+  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
+     bfd_false},
+  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
+
+     BFD_JUMP_TABLE_GENERIC (coff),
+     BFD_JUMP_TABLE_COPY (coff),
+     BFD_JUMP_TABLE_CORE (_bfd_nocore),
+     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
+     BFD_JUMP_TABLE_SYMBOLS (coff),
+     BFD_JUMP_TABLE_RELOCS (coff),
+     BFD_JUMP_TABLE_WRITE (coff),
+     BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+
+    COFF_SWAP_TABLE,
+};
+
+
+static int no_archive()
+{
+  bfd_set_error (bfd_error_wrong_format);
+  return 0;
+}
+const bfd_target shlcoff_vec =
+{
+  "coff-shl",			/* name */
+  bfd_target_coff_flavour,
+  false,			/* data byte order is little */
+  false,			/* header byte order is little endian too*/
+
+  (HAS_RELOC | EXEC_P |		/* object flags */
+   HAS_LINENO | HAS_DEBUG |
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE ),
+
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
+  '_',				/* leading symbol underscore */
+  '/',				/* ar_pad_char */
+  15,				/* ar_max_namelen */
+  2,				/* minimum section alignment */
+     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
+     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
+
+/* Note that we use a special archive recognizer.
+   This is so that we only use one archive format for both
+   object file types */
+  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+     no_archive, _bfd_dummy_target},   
   {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
      bfd_false},
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */

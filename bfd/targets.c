@@ -472,6 +472,7 @@ extern const bfd_target m68kcoff_vec;
 extern const bfd_target m68kcoffun_vec;
 extern const bfd_target m68klynx_aout_vec;
 extern const bfd_target m68klynx_coff_vec;
+extern const bfd_target m68knetbsd_vec;
 extern const bfd_target m88kbcs_vec;
 extern const bfd_target m88kmach3_vec;
 extern const bfd_target newsos3_vec;
@@ -485,6 +486,7 @@ extern const bfd_target pc532machaout_vec;
 extern const bfd_target riscix_vec;
 extern const bfd_target rs6000coff_vec;
 extern const bfd_target shcoff_vec;
+extern const bfd_target shlcoff_vec;
 extern const bfd_target sparclynx_aout_vec;
 extern const bfd_target sparclynx_coff_vec;
 extern const bfd_target sparcnetbsd_vec;
@@ -609,6 +611,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&m68kcoffun_vec,
 	&m68klynx_aout_vec,
 	&m68klynx_coff_vec,
+	&m68knetbsd_vec,
 	&m88kbcs_vec,
 	&m88kmach3_vec,
 	&newsos3_vec,
@@ -633,6 +636,7 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&rs6000coff_vec,
 	&shcoff_vec,
+	&shlcoff_vec,
 	&sparclynx_aout_vec,
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,
