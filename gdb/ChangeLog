@@ -1,3 +1,18 @@
+2000-10-11  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From Grant Edwards <grante@visi.com>
+	This keeps the GUI alive while running an RDI target and lets the
+	STOP button be used to stop the target.
+	* remote-rdi.c (arm_rdi_stop): New function.  Implements target_stop.
+	(init_rdi_ops): Set to_stop target vector entry to the above.
+	* rdi-share/ardi.c (stop_request): New variable.  Tells when a stop
+	has been requested.
+	(angel_RDI_stop_request): New function. Registers that a stop has
+	been requested.
+	(angel_RDI_ExecuteOrStep): Add call to ui_loop_hook() in loop that
+	waits while target is executing.  Initialize and reset stop_request.
+	* rdi-share/ardi.h: Add declaration of angel_RDI_stop_request().
+
 2000-10-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-rdp.c (remote_rdp_xfer_inferior_memory): Protoize.

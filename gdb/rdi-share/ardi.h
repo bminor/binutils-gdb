@@ -60,6 +60,8 @@ int angel_RDI_pointinq(ARMword *address, unsigned type, unsigned datatype,
 
 int angel_RDI_execute(PointHandle *handle);
 
+void angel_RDI_stop_request(void);
+
 int angel_RDI_step(unsigned ninstr, PointHandle *handle);
 
 int angel_RDI_info(unsigned type, ARMword *arg1, ARMword *arg2);

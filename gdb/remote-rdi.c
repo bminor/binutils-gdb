@@ -929,6 +929,13 @@ rdi_error_signal (int err)
       return TARGET_SIGNAL_UNKNOWN;
     }
 }
+
+static void
+arm_rdi_stop(void)
+{
+  angel_RDI_stop_request();
+}
+
 
 /* Define the target operations structure.  */
 
@@ -944,6 +951,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   arm_rdi_ops.to_detach = arm_rdi_detach;
   arm_rdi_ops.to_resume = arm_rdi_resume;
   arm_rdi_ops.to_wait = arm_rdi_wait;
+  arm_rdi_ops.to_stop = arm_rdi_stop;
   arm_rdi_ops.to_fetch_registers = arm_rdi_fetch_registers;
   arm_rdi_ops.to_store_registers = arm_rdi_store_registers;
   arm_rdi_ops.to_prepare_to_store = arm_rdi_prepare_to_store;
