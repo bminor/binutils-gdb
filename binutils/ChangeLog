@@ -1,3 +1,8 @@
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
 1999-07-14  Richard Henderson  <rth@cygnus.com>
 
 	* objdump.c (dump_section_header): Print SEC_SHORT.
