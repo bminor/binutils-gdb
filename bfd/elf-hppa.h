@@ -159,8 +159,8 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_PARISC_PCREL16DF, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_PCREL16DF"},
 
   {R_PARISC_DIR64, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DIR64"},
-  {R_PARISC_DIR64WR, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DIR64WR"},
-  {R_PARISC_DIR64DR, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DIR64DR"},
+  {R_PARISC_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_NONE"},
+  {R_PARISC_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_NONE"},
   {R_PARISC_DIR14WR, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DIR14WR"},
   {R_PARISC_DIR14DR, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DIR14DR"},
   {R_PARISC_DIR16F, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DIR16F"},
@@ -182,8 +182,8 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 
   {R_PARISC_DLTIND14DR, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_DLTIND14DR"},
   {R_PARISC_LTOFF16F, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_LTOFF16F"},
+  {R_PARISC_LTOFF16WF, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_LTOFF16DF"},
   {R_PARISC_LTOFF16DF, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_LTOFF16DF"},
-  {R_PARISC_SECREL64, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_SECREL64"},
   {R_PARISC_UNIMPLEMENTED, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_UNIMPLEMENTED"},
   {R_PARISC_UNIMPLEMENTED, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_UNIMPLEMENTED"},
   {R_PARISC_BASEREL14WR, 0, 0, 0, false, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_PARISC_BSEREL14WR"},
@@ -1116,6 +1116,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_LTOFF_TP16F:
     case R_PARISC_LTOFF_TP16WF:
     case R_PARISC_LTOFF_TP16DF:
+    case R_PARISC_LTOFF16F:
+    case R_PARISC_LTOFF16WF:
+    case R_PARISC_LTOFF16DF:
       {
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
@@ -1132,6 +1135,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		 || r_type == R_PARISC_LTOFF_FPTR16F
 		 || r_type == R_PARISC_LTOFF_FPTR16WF
 		 || r_type == R_PARISC_LTOFF_FPTR16DF
+		 || r_type == R_PARISC_LTOFF16F
+		 || r_type == R_PARISC_LTOFF16DF
+		 || r_type == R_PARISC_LTOFF16WF
 		 || r_type == R_PARISC_LTOFF_TP16F
 		 || r_type == R_PARISC_LTOFF_TP16WF
 		 || r_type == R_PARISC_LTOFF_TP16DF)
@@ -1172,6 +1178,33 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		 || r_type == R_PARISC_GPREL16F
 		 || r_type == R_PARISC_GPREL16WF
 		 || r_type == R_PARISC_GPREL16DF)
+	  value = hppa_field_adjust (value, addend, e_fsel);
+	else
+	  value = hppa_field_adjust (value, addend, e_rrsel);
+
+	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	break;
+      }
+
+    case R_PARISC_DIR21L:
+    case R_PARISC_DIR17R:
+    case R_PARISC_DIR17F:
+    case R_PARISC_DIR14R:
+    case R_PARISC_DIR14WR:
+    case R_PARISC_DIR14DR:
+    case R_PARISC_DIR16F:
+    case R_PARISC_DIR16WF:
+    case R_PARISC_DIR16DF:
+      {
+	/* All DIR relocations are basically the same at this point,
+	   except that we need different field selectors for the 21bit
+	   version vs the 14bit versions.  */
+	if (r_type == R_PARISC_DIR21L)
+	  value = hppa_field_adjust (value, addend, e_lrsel);
+	else if (r_type == R_PARISC_DIR17F
+		 || r_type == R_PARISC_DIR16F
+		 || r_type == R_PARISC_DIR16WF
+		 || r_type == R_PARISC_DIR16DF)
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
@@ -1246,6 +1279,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       bfd_put_64 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
+    case R_PARISC_LTOFF64:
+      /* We want the value of the DLT offset for this symbol, not
+          the symbol's actual address.  */
+      value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+
+      bfd_put_64 (input_bfd, value + addend, hit_data);
+      return bfd_reloc_ok;
+
     case R_PARISC_PCREL32:
       {
 	/* If this is a call to a function defined in another dynamic
@@ -1294,9 +1335,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	 the basic support is functional we will return the not_supported
 	 error conditional appropriately.  */
 #if 0
-      return bfd_reloc_not_supported;
+	return bfd_reloc_not_supported;
 #else
-      return bfd_reloc_ok;
+	return bfd_reloc_ok;
 #endif
     }
 
@@ -1348,6 +1389,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
        the "B" instruction as well as BE.  */
     case R_PARISC_PCREL17F:
     case R_PARISC_DIR17F:
+    case R_PARISC_DIR17R:
     case R_PARISC_PCREL17C:
     case R_PARISC_PCREL17R:
       {
@@ -1377,6 +1419,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_TP21L:
     case R_PARISC_DPREL21L:
     case R_PARISC_PLTOFF21L:
+    case R_PARISC_DIR21L:
       {
         int w;
 
@@ -1409,6 +1452,9 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_PLTOFF14R:
     case R_PARISC_PLTOFF14F:
     case R_PARISC_PLTOFF16F:
+    case R_PARISC_DIR14R:
+    case R_PARISC_DIR16F:
+    case R_PARISC_LTOFF16F:
       {
         int w;
 
@@ -1435,6 +1481,9 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_GPREL16DF:
     case R_PARISC_PLTOFF14DR:
     case R_PARISC_PLTOFF16DF:
+    case R_PARISC_DIR14DR:
+    case R_PARISC_DIR16DF:
+    case R_PARISC_LTOFF16DF:
       {
         int w;
 
@@ -1467,6 +1516,9 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_GPREL16WF:
     case R_PARISC_PLTOFF14WR:
     case R_PARISC_PLTOFF16WF:
+    case R_PARISC_DIR16WF:
+    case R_PARISC_DIR14WR:
+    case R_PARISC_LTOFF16WF:
       {
         int w;
 

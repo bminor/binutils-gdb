@@ -1,5 +1,11 @@
 Wed Sep  8 17:56:11 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* elf-hppa.h (elf_hppa_howto_table); There is no DIR64WR, DIR64DR
+	relocation, remove them.  SECREL64->LTOFF16WF.
+	(elf_hppa_final_link_relocate): Handle LTOFF* relocations.  Handle
+	DIR* relocations.
+	(elf_hppa_relocate_insn): Similarly.
+
 	* elf-hppa.h (elf_hppa_final_link_relocate): Handle PLTOFF* relocs.
 	(elf_hppa_relocate_insn): Similarly.
 
