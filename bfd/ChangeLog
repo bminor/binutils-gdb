@@ -1,3 +1,9 @@
+Tue Apr  5 15:50:01 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_free_cached_info): Add missing PARAMS decl.
+	Don't free anything if we don't have a bfd_object.
+	(som_close_and_cleanup): Call som_bfd_free_cached_info.
+
 Tue Apr  5 11:22:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-mips.c (mips_elf_final_link): Don't remove empty sections.

@@ -234,6 +234,7 @@ static CONST char *normalize PARAMS ((CONST char *file));
 static boolean som_is_space PARAMS ((asection *));
 static boolean som_is_subspace PARAMS ((asection *));
 static boolean som_is_container PARAMS ((asection *, asection *));
+static boolean som_bfd_free_cached_info PARAMS ((bfd *));
 	
 /* Map SOM section names to POSIX/BSD single-character symbol types.
 
@@ -5457,6 +5458,9 @@ som_bfd_free_cached_info (abfd)
 {
   asection *o;
 
+  if (bfd_get_format (abfd) != bfd_object)
+    return true;
+
 #define FREE(x) if (x != NULL) { free (x); x = NULL; }
   /* Free the native string and symbol tables.  */
   FREE (obj_som_symtab (abfd));
@@ -5486,7 +5490,7 @@ som_bfd_free_cached_info (abfd)
 #define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
 
 #define som_get_lineno                   (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-#define	som_close_and_cleanup	           bfd_generic_close_and_cleanup
+#define	som_close_and_cleanup		som_bfd_free_cached_info
 
 #define som_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
