@@ -1,5 +1,8 @@
 2004-03-18  Andrew Cagney  <cagney@redhat.com>
 
+	* stack.c (return_command): Delete code wrapped in #ifdef
+	DEPRECATED_CALL_DUMMY_HAS_COMPLETED, macro no longer defined.
+
 	* rs6000-tdep.c (skip_prologue): Record only the first LR save.
 
 2004-03-18  Andrew Cagney  <cagney@redhat.com>
