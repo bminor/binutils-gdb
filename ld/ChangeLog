@@ -1,3 +1,12 @@
+Sat May 18 13:12:05 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	Support for --force-exe-suffix
+	* ld.h (args_type): Add force_exe_suffix.
+	* ld.texinfo: Add documentation.
+	* ldmain.c (main):  Add support for option.
+	* lexsup.c (OPTION_FORCE_EXE_SUFFIX): New.
+	(ld_options, parse_args):  Add support for option.
+
 Wed May 15 12:50:25 1996  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* emultempl/pe.em (set_pe_value): Pass 0 not 16 to strtoul call.
