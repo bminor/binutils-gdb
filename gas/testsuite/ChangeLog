@@ -1,3 +1,8 @@
+2004-07-29  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/basic.exp: Don't do sh2a test for sh5.
+	* gas/sh/sh2a.d: Match elf32-sh* format too.
+
 2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-12-30  DJ Delorie  <dj@redhat.com>

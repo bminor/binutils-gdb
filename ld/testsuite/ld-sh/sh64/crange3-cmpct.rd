@@ -11,7 +11,7 @@ ELF Header:
   Entry point address:               0x10c4
   Start of program headers:          52 \(bytes into file\)
   Start of section headers:          664 \(bytes into file\)
-  Flags:                             0xa
+  Flags:                             0xa, sh5
   Size of this header:               52 \(bytes\)
   Size of program headers:           32 \(bytes\)
   Number of program headers:         3
