@@ -56,6 +56,9 @@ extern unsigned long i386bsd_dr_get_status (void);
 /* Override child_resume in `infptrace.c' to work around a kernel bug.  */
 #define CHILD_RESUME
 
+/* Override child_pid_to_exec_file in 'inftarg.c'.  */
+#define CHILD_PID_TO_EXEC_FILE
+
 /* We can attach and detach.  */
 #define ATTACH_DETACH
 
