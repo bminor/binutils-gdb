@@ -1,4 +1,16 @@
-Sat Dec 21 02:08:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+Sat Dec 21 12:57:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/mips/tm-mips.h (PC_IN_CALL_DUMMY):  Removed, the default
+	definition in inferior.h is sufficient.
+	* mips-tdep.c (mips_pc_in_call_dummy):  Ditto.
+	(mips_push_arguments):  Make sure that the stack is aligned to a
+	multiple of 8 after the arguments are pushed.
+	Structures are always passed by value in the old ABI.
+	Adjust argument register value on big endian targets when passing
+	a value whose length is less than the register size.
+	Write stack arguments with a single write_memory call.
+	(mips_pop_frame):  Use frame_saved_regs instead of proc_desc to
+	decide which registers have to be restored.
 
 	* irix5-nat.c (fill_gregset):  Sign extend registers before
 	filling in the gregset structure.

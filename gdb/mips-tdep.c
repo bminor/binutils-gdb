@@ -875,15 +875,6 @@ setup_arbitrary_frame (argc, argv)
   return create_new_frame (argv[0], argv[1]);
 }
 
-
-int
-mips_pc_in_call_dummy (pc)
-     CORE_ADDR pc;
-{
-  return pc >= CALL_DUMMY_ADDRESS ()
-	 && pc <= CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK;
-}
-
 CORE_ADDR
 mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      int nargs;
@@ -914,7 +905,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      passed in registers, but that's OK. */
   for (argnum = 0; argnum < nargs; argnum++)
     len += ROUND_UP (TYPE_LENGTH(VALUE_TYPE(args[argnum])), MIPS_REGSIZE);
-  sp -= ROUND_UP (len, MIPS_REGSIZE);
+  sp -= ROUND_UP (len, 8);
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -941,9 +932,9 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
 
-      /* The EABI passes structures that fit in a register by value.
-	 In all other cases, pass the structure by reference.  */
-      if (typecode == TYPE_CODE_STRUCT && (!MIPS_EABI || len > MIPS_REGSIZE))
+      /* The EABI passes structures that do not fit in a register by
+	 reference. In all other cases, pass the structure by value.  */
+      if (typecode == TYPE_CODE_STRUCT && MIPS_EABI && len > MIPS_REGSIZE)
 	{
 	  store_address (valbuf, MIPS_REGSIZE, VALUE_ADDRESS (arg));
 	  len = MIPS_REGSIZE;
@@ -995,11 +986,18 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	  while (len > 0)
 	    {
 	      int partial_len = len < MIPS_REGSIZE ? len : MIPS_REGSIZE;
-	      CORE_ADDR regval = extract_address (val, partial_len);
-	      
+
 	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
-		  /* It's a simple argument being passed in a general register.  */
+		  CORE_ADDR regval = extract_address (val, partial_len);
+
+		  /* It's a simple argument being passed in a general
+		     register.
+		     If the argument length is smaller than the register size,
+		     we have to adjust the argument on big endian targets.  */
+		  if (TARGET_BYTE_ORDER == BIG_ENDIAN
+		      && partial_len < MIPS_REGSIZE)
+		    regval <<= ((MIPS_REGSIZE - partial_len) * TARGET_CHAR_BIT);
 		  write_register (argreg, regval);
 		  argreg++;
     
@@ -1011,12 +1009,10 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		}
 	      else
 		{
-		  /* Promote this portion of the argument to a register-sized
-		     chunk before pushing it on the stack.  */
-		  char partial_buf[MIPS_REGSIZE];
-		  store_address (partial_buf, MIPS_REGSIZE, regval);
-		  write_memory (sp + stack_offset, partial_buf, MIPS_REGSIZE);
-		  stack_offset += MIPS_REGSIZE;
+		  /* Write this portion of the argument to the stack.  */
+		  partial_len = len;
+		  write_memory (sp + stack_offset, val, partial_len);
+		  stack_offset += ROUND_UP (partial_len, MIPS_REGSIZE);
 		}
     
 	      len -= partial_len;
@@ -1135,17 +1131,13 @@ mips_pop_frame()
   write_register (PC_REGNUM, FRAME_SAVED_PC(frame));
   if (frame->saved_regs == NULL)
     mips_find_saved_regs (frame);
-  if (proc_desc)
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
-      for (regnum = MIPS_NUMREGS; --regnum >= 0; )
-	if (PROC_REG_MASK(proc_desc) & (1 << regnum))
-	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs->regs[regnum],
-					       MIPS_REGSIZE)); 
-      for (regnum = MIPS_NUMREGS; --regnum >= 0; )
-	if (PROC_FREG_MASK(proc_desc) & (1 << regnum))
-	  write_register (regnum + FP0_REGNUM,
-			  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], MIPS_REGSIZE)); 
+      if (regnum != SP_REGNUM && regnum != PC_REGNUM
+	  && frame->saved_regs->regs[regnum])
+	write_register (regnum,
+			read_memory_integer (frame->saved_regs->regs[regnum],
+					     MIPS_REGSIZE)); 
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
