@@ -26,15 +26,21 @@
 #define TARGET_BYTE_ORDER_DEFAULT LITTLE_ENDIAN
 
 /* All registers are 32bits (phew!).  */
+#if !GDB_MULTI_ARCH
 #define REGISTER_SIZE 4
 #define MAX_REGISTER_RAW_SIZE 4
 #define NUM_REGS 32
+#endif
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
+#endif
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_BYTE(REG) ((REG) * 4)
 #define REGISTER_VIRTUAL_SIZE(REG) 4
 #define REGISTER_RAW_SIZE(REG) 4
+#endif
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
 

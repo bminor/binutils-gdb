@@ -820,6 +820,114 @@ mn10300_reg_struct_has_addr (int gcc_p, struct type *type)
   return (TYPE_LENGTH (type) > 8);
 }
 
+static struct type *
+mn10300_register_virtual_type (int reg)
+{
+  return builtin_type_int;
+}
+
+static int
+mn10300_register_byte (int reg)
+{
+  return (reg * 4);
+}
+
+static int
+mn10300_register_virtual_size (int reg)
+{
+  return 4;
+}
+
+static int
+mn10300_register_raw_size (int reg)
+{
+  return 4;
+}
+
+static void
+mn10300_print_register (const char *name, int regnum, int reg_width)
+{
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+
+  if (reg_width)
+    printf_filtered ("%*s: ", reg_width, name);
+  else
+    printf_filtered ("%s: ", name);
+
+  /* Get the data */
+  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+    {
+      printf_filtered ("[invalid]");
+      return;
+    }
+  else
+    {
+      int byte;
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	{
+	  for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
+	       byte < REGISTER_RAW_SIZE (regnum);
+	       byte++)
+	    printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
+	}
+      else
+	{
+	  for (byte = REGISTER_VIRTUAL_SIZE (regnum) - 1;
+	       byte >= 0;
+	       byte--)
+	    printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
+	}
+    }
+}
+
+static void
+mn10300_do_registers_info (int regnum, int fpregs)
+{
+  if (regnum >= 0)
+    {
+      const char *name = REGISTER_NAME (regnum);
+      if (name == NULL || name[0] == '\0')
+	error ("Not a valid register for the current processor type");
+      mn10300_print_register (name, regnum, 0);
+      printf_filtered ("\n");
+    }
+  else
+    {
+      /* print registers in an array 4x8 */
+      int r;
+      int reg;
+      const int nr_in_row = 4;
+      const int reg_width = 4;
+      for (r = 0; r < NUM_REGS; r += nr_in_row)
+	{
+	  int c;
+	  int printing = 0;
+	  int padding = 0;
+	  for (c = r; c < r + nr_in_row; c++)
+	    {
+	      const char *name = REGISTER_NAME (c);
+	      if (name != NULL && *name != '\0')
+		{
+		  printing = 1;
+		  while (padding > 0)
+		    {
+		      printf_filtered (" ");
+		      padding--;
+		    }
+		  mn10300_print_register (name, c, reg_width);
+		  printf_filtered (" ");
+		}
+	      else
+		{
+		  padding += (reg_width + 2 + 8 + 1);
+		}
+	    }
+	  if (printing)
+	    printf_filtered ("\n");
+	}
+    }
+}
+
 /* Dump out the mn10300 speciic architecture information. */
 
 static void
@@ -848,13 +956,14 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   gdbarch = gdbarch_alloc (&info, tdep);
 
   if (info.bfd_arch_info != NULL
-      && info.bfd_arch_info->arch == bfd_arch_mips)
+      && info.bfd_arch_info->arch == bfd_arch_mn10300)
     mach = info.bfd_arch_info->mach;
   else
     mach = 0;
   switch (mach)
     {
     case 0:
+    case bfd_mach_mn10300:
       am33_mode = 0;
       register_name = mn10300_generic_register_name;
       num_regs = 32;
@@ -869,6 +978,12 @@ mn10300_gdbarch_init (struct gdbarch_info info,
       return NULL; /* keep GCC happy. */
     }
 
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
+  set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
+  set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
+  set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_register_name (gdbarch, register_name);
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
@@ -881,6 +996,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_num_regs (gdbarch, num_regs);
+  set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
+
   tdep->am33_mode = am33_mode;
 
   return gdbarch;

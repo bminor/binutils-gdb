@@ -1,3 +1,18 @@
+Fri Aug 11 19:00:51 2000  Andrew Cagney  <cagney@makita.cygnus.com>
+
+	* config/mn10300/tm-mn10300.h (REGISTER_SIZE,
+ 	MAX_REGISTER_RAW_SIZE, REGISTER_VIRTUAL_TYPE, REGISTER_BYTE,
+ 	REGISTER_VIRTUAL_SIZE, REGISTER_RAW_SIZE): Disable.
+	* mn10300-tdep.c (mn10300_do_registers_info,
+ 	mn10300_print_register): New functions.  Pretty print registers.
+	(mn10300_register_virtual_type, mn10300_register_byte,
+	mn10300_register_virtual_size, mn10300_register_raw_size): New
+ 	functions.
+ 	(mn10300_gdbarch_init): Update.
+
+	* mn10300-tdep.c (mn10300_gdbarch_init): Check for mn10300 variant
+	and not mips variant in the info struct.
+
 2000-08-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c [! HAVE_PTRACE_GETFPXREGS] (fetch_fpxregs,
