@@ -1,3 +1,8 @@
+Thu May 30 10:36:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* stabs.c (s_stab_generic): Under PowerPC Solaris, convert a
+	.stabd with 4 arguments into a .stabn.
+
 Wed May 29 16:43:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro): When passing X_add_number to
