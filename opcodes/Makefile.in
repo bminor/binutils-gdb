@@ -53,7 +53,7 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-INCDIR = $(srcdir)/../include
+INCDIR = $(srcdir)/../include $(srcdir)/../bfd
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
@@ -149,7 +149,7 @@ install:
 	-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
-	$(INSTALL_DATA) $(TARGET_LIB) $(libdir)/libopcodes.a
+	$(INSTALL_DATA) $(TARGETLIB) $(libdir)/libopcodes.a
 	$(RANLIB) $(libdir)/libopcodes.a
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
