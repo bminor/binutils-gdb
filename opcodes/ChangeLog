@@ -1,3 +1,40 @@
+2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	Introduce SH2a support.
+	* sh-opc.h (arch_sh2a_base): Renumber.
+	(arch_sh2a_nofpu_base): Remove.
+	(arch_sh_base_mask): Adjust.
+	(arch_opann_mask): New.
+	(arch_sh2a, arch_sh2a_nofpu): Adjust.
+	(arch_sh2a_up, arch_sh2a_nofpu_up): Likewise.
+	(sh_table): Adjust whitespace.
+	2004-02-24  Corinna Vinschen  <vinschen@redhat.com>
+	* sh-opc.h (arch_sh2a_nofpu_up): New.  Use instead of arch_sh2a_up in
+	instruction list throughout.
+	(arch_sh2a_up): Redefine to include fpu instruction set.  Use instead
+	of arch_sh2a in instruction list throughout.
+	(arch_sh2e_up): Accomodate above changes.
+	(arch_sh2_up): Ditto.
+	2004-02-20  Corinna Vinschen  <vinschen@redhat.com>
+	* sh-opc.h: Add arch_sh2a_nofpu to arch_sh2_up.
+	2004-02-18  Corinna Vinschen  <vinschen@redhat.com>
+	* sh-dis.c (print_insn_sh): Add bfd_mach_sh2a_nofpu handling.
+	* sh-opc.h (arch_sh2a_nofpu): New.
+	(arch_sh2a_up): New, defines sh2a and sh2a_nofpu.
+	(sh_table): Change all arch_sh2a to arch_sh2a_up unless FPU
+	instruction.
+	2004-01-20  DJ Delorie  <dj@redhat.com>
+	* sh-dis.c (print_insn_sh): SH2A does not have 'X' fp regs.
+	2003-12-29  DJ Delorie  <dj@redhat.com>
+	* sh-opc.c (sh_nibble_type, sh_arg_type, arch_2a, arch_2e_up,
+	sh_opcode_info, sh_table): Add sh2a support.
+	(arch_op32): New, to tag 32-bit opcodes.
+	* sh-dis.c (print_insn_sh): Support sh2a opcodes.
+	2003-12-02  Michael Snyder  <msnyder@redhat.com>
+	* sh-opc.h (arch_sh2a): Add.
+	* sh-dis.c (arch_sh2a): Handle.
+	* sh-opc.h (arch_sh2_up): Fix up to include arch_sh2a.
+
 2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c: Add popx,pushx insns. Indent code, fix comments.
