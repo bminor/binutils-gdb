@@ -1,5 +1,5 @@
 /* Default profiling support.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <strings.h>
 #endif
 #endif
+#include <ctype.h>
 
 #define COMMAS(n) sim_add_commas (comma_buf, sizeof (comma_buf), (n))
 
@@ -48,6 +49,7 @@ enum {
   OPTION_PROFILE_MODEL,
   OPTION_PROFILE_FILE,
   OPTION_PROFILE_CORE,
+  OPTION_PROFILE_CPU_FREQUENCY,
   OPTION_PROFILE_PC,
   OPTION_PROFILE_PC_RANGE,
   OPTION_PROFILE_PC_GRANULARITY,
@@ -70,6 +72,10 @@ static const OPTION profile_options[] = {
       profile_option_handler },
   { {"profile-model", optional_argument, NULL, OPTION_PROFILE_MODEL},
       '\0', "on|off", "Perform model profiling",
+      profile_option_handler },
+  { {"profile-cpu-frequency", required_argument, NULL,
+     OPTION_PROFILE_CPU_FREQUENCY},
+      '\0', "CPU FREQUENCY", "Specify the speed of the simulated cpu clock",
       profile_option_handler },
 
   { {"profile-file", required_argument, NULL, OPTION_PROFILE_FILE},
@@ -189,6 +195,53 @@ sim_profile_set_option (SIM_DESC sd, const char *name, int idx, const char *arg)
 }
 
 static SIM_RC
+parse_frequency (SIM_DESC sd, const char *arg, unsigned long *freq)
+{
+  const char *ch;
+  /* First, parse a decimal number.  */
+  *freq = 0;
+  ch = arg;
+  if (isdigit (*arg))
+    {
+      for (/**/; *ch != '\0'; ++ch)
+	{
+	  if (! isdigit (*ch))
+	    break;
+	  *freq = *freq * 10 + (*ch - '0');
+	}
+
+      /* Accept KHz, MHz or Hz as a suffix.  */
+      if (tolower (*ch) == 'm')
+	{
+	  *freq *= 1000000;
+	  ++ch;
+	}
+      else if (tolower (*ch) == 'k')
+	{
+	  *freq *= 1000;
+	  ++ch;
+	}
+
+      if (tolower (*ch) == 'h')
+	{
+	  ++ch;
+	  if (tolower (*ch) == 'z')
+	    ++ch;
+	}
+    }
+
+  if (*ch != '\0')
+    {
+      sim_io_eprintf (sd, "Invalid argument for --profile-cpu-frequency: %s\n",
+		      arg);
+      *freq = 0;
+      return SIM_RC_FAIL;
+    }
+
+  return SIM_RC_OK;
+}
+
+static SIM_RC
 profile_option_handler (SIM_DESC sd,
 			sim_cpu *cpu,
 			int opt,
@@ -236,6 +289,18 @@ profile_option_handler (SIM_DESC sd,
       else
 	sim_io_eprintf (sd, "Model profiling not compiled in, `--profile-model' ignored\n");
       break;
+
+    case OPTION_PROFILE_CPU_FREQUENCY :
+      {
+	unsigned long val;
+	SIM_RC rc = parse_frequency (sd, arg, &val);
+	if (rc == SIM_RC_OK)
+	  {
+	    for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; ++cpu_nr)
+	      PROFILE_CPU_FREQ (CPU_PROFILE_DATA (STATE_CPU (sd,cpu_nr))) = val;
+	  }
+	return rc;
+      }
 
     case OPTION_PROFILE_FILE :
       /* FIXME: Might want this to apply to pc profiling only,
@@ -924,31 +989,59 @@ profile_print_speed (sim_cpu *cpu)
   PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
   unsigned long milliseconds = sim_events_elapsed_time (sd);
   unsigned long total = PROFILE_TOTAL_INSN_COUNT (data);
+  double clock;
+  double secs;
   char comma_buf[20];
 
   sim_io_printf (sd, "Simulator Execution Speed\n\n");
 
   if (total != 0)
-    sim_io_printf (sd, "  Total instructions:   %s\n", COMMAS (total));
+    sim_io_printf (sd, "  Total instructions:      %s\n", COMMAS (total));
 
   if (milliseconds < 1000)
-    sim_io_printf (sd, "  Total execution time: < 1 second\n\n");
+    sim_io_printf (sd, "  Total execution time:    < 1 second\n\n");
   else
     {
       /* The printing of the time rounded to 2 decimal places makes the speed
 	 calculation seem incorrect [even though it is correct].  So round
 	 MILLISECONDS first. This can marginally affect the result, but it's
 	 better that the user not perceive there's a math error.  */
-      double secs = (double) milliseconds / 1000;
+      secs = (double) milliseconds / 1000;
       secs = ((double) (unsigned long) (secs * 100 + .5)) / 100;
-      sim_io_printf (sd, "  Total execution time: %.2f seconds\n", secs);
+      sim_io_printf (sd, "  Total execution time   : %.2f seconds\n", secs);
       /* Don't confuse things with data that isn't useful.
 	 If we ran for less than 2 seconds, only use the data if we
 	 executed more than 100,000 insns.  */
       if (secs >= 2 || total >= 100000)
-	sim_io_printf (sd, "  Simulator speed:      %s insns/second\n\n",
+	sim_io_printf (sd, "  Simulator speed:         %s insns/second\n",
 		       COMMAS ((unsigned long) ((double) total / secs)));
     }
+
+#if WITH_PROFILE_MODEL_P
+  /* Print simulated execution time if the cpu frequency has been specified.  */
+  clock = PROFILE_CPU_FREQ (data);
+  if (clock != 0)
+    {
+      if (clock >= 1000000)
+	sim_io_printf (sd, "  Simulated cpu frequency: %.2f MHz\n",
+		       clock / 1000000);
+      else
+	sim_io_printf (sd, "  Simulated cpu frequency: %.2f Hz\n", clock);
+
+      if (PROFILE_FLAGS (data) [PROFILE_MODEL_IDX])
+	{
+	  /* The printing of the time rounded to 2 decimal places makes the
+	     speed calculation seem incorrect [even though it is correct].
+	     So round 	 SECS first. This can marginally affect the result,
+	     but it's 	 better that the user not perceive there's a math
+	     error.  */
+	  secs = PROFILE_MODEL_TOTAL_CYCLES (data) / clock;
+	  secs = ((double) (unsigned long) (secs * 100 + .5)) / 100;
+	  sim_io_printf (sd, "  Simulated execution time: %.2f seconds\n",
+			 secs);
+	}
+    }
+#endif /* WITH_PROFILE_MODEL_P */
 }
 
 /* Print selected address ranges.  */

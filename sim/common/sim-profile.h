@@ -150,6 +150,10 @@ typedef struct {
   unsigned long total_insn_count;
 #define PROFILE_TOTAL_INSN_COUNT(p) ((p)->total_insn_count)
 
+  /* CPU frequency.  Always accepted, regardless of profiling options.  */
+  unsigned long cpu_freq;
+#define PROFILE_CPU_FREQ(p) ((p)->cpu_freq)
+
 #if WITH_PROFILE_INSN_P
   unsigned int *insn_count;
 #define PROFILE_INSN_COUNT(p) ((p)->insn_count)
