@@ -1,5 +1,7 @@
 Fri Nov 23 09:20:43 2001  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/all/gas.exp (incbin): Do not run on the PA.
+
 	* gas/hppa/parse/parse.exp: Expect failure on line separator bug.
 
 2001-11-16  Chris Demetriou  <cgd@broadcom.cOm>
