@@ -93,7 +93,7 @@ static void mention (struct breakpoint *);
 
 struct breakpoint *set_raw_breakpoint (struct symtab_and_line);
 
-static void check_duplicates (CORE_ADDR, asection *);
+static void check_duplicates (struct breakpoint *);
 
 static void describe_other_breakpoints (CORE_ADDR, asection *);
 
@@ -3719,18 +3719,20 @@ set_default_breakpoint (int valid, CORE_ADDR addr, struct symtab *symtab,
   default_breakpoint_line = line;
 }
 
-/* Rescan breakpoints at address ADDRESS,
+/* Rescan breakpoints at the same address and section as BPT,
    marking the first one as "first" and any others as "duplicates".
    This is so that the bpt instruction is only inserted once.
-   If we have a permanent breakpoint at ADDRESS, make that one
-   the official one, and the rest as duplicates.  */
+   If we have a permanent breakpoint at the same place as BPT, make
+   that one the official one, and the rest as duplicates.  */
 
 static void
-check_duplicates (CORE_ADDR address, asection *section)
+check_duplicates (struct breakpoint *bpt)
 {
   register struct breakpoint *b;
   register int count = 0;
   struct breakpoint *perm_bp = 0;
+  CORE_ADDR address = bpt->address;
+  asection *section = bpt->section;
 
   if (address == 0)		/* Watchpoints are uninteresting */
     return;
@@ -3837,7 +3839,7 @@ set_raw_breakpoint (struct symtab_and_line sal)
       b1->next = b;
     }
 
-  check_duplicates (sal.pc, sal.section);
+  check_duplicates (b);
   breakpoints_changed ();
 
   return b;
@@ -3904,7 +3906,7 @@ enable_longjmp_breakpoint (void)
     if (b->type == bp_longjmp)
     {
       b->enable = enabled;
-      check_duplicates (b->address, b->section);
+      check_duplicates (b);
     }
 }
 
@@ -3918,7 +3920,7 @@ disable_longjmp_breakpoint (void)
 	|| b->type == bp_longjmp_resume)
     {
       b->enable = disabled;
-      check_duplicates (b->address, b->section);
+      check_duplicates (b);
     }
 }
 
@@ -4261,7 +4263,7 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
 	b->frame = frame->frame;
       else
 	b->frame = 0;
-      check_duplicates (b->address, b->section);
+      check_duplicates (b);
       return;
     }
 }
@@ -4281,7 +4283,7 @@ disable_watchpoints_before_interactive_call_start (void)
 	&& (b->enable == enabled))
       {
 	b->enable = call_disabled;
-	check_duplicates (b->address, b->section);
+	check_duplicates (b);
       }
   }
 }
@@ -4301,7 +4303,7 @@ enable_watchpoints_after_interactive_call_stop (void)
 	&& (b->enable == call_disabled))
       {
 	b->enable = enabled;
-	check_duplicates (b->address, b->section);
+	check_duplicates (b);
       }
   }
 }
@@ -6770,7 +6772,7 @@ delete_breakpoint (struct breakpoint *bpt)
 	}
     }
 
-  check_duplicates (bpt->address, bpt->section);
+  check_duplicates (bpt);
   /* If this breakpoint was inserted, and there is another breakpoint
      at the same address, we need to insert the other breakpoint.  */
   if (bpt->inserted
@@ -7013,7 +7015,7 @@ breakpoint_re_set_one (PTR bint)
 
 	  /* Now that this is re-enabled, check_duplicates
 	     can be used. */
-	  check_duplicates (b->address, b->section);
+	  check_duplicates (b);
 
 	}
       xfree (sals.sals);
@@ -7278,7 +7280,7 @@ disable_breakpoint (struct breakpoint *bpt)
 
   bpt->enable = disabled;
 
-  check_duplicates (bpt->address, bpt->section);
+  check_duplicates (bpt);
 
   if (modify_breakpoint_hook)
     modify_breakpoint_hook (bpt);
@@ -7343,7 +7345,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
   if (bpt->enable != permanent)
     bpt->enable = enabled;
   bpt->disposition = disposition;
-  check_duplicates (bpt->address, bpt->section);
+  check_duplicates (bpt);
   breakpoints_changed ();
 
   if (bpt->type == bp_watchpoint || 
