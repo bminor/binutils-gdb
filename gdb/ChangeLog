@@ -1,3 +1,8 @@
+2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/djgpp/fnchange.lst: Add entries for
+	mips-linux-nat.c and mips-linux-tdep.c.
+
 2001-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/powerpc/xm-linux.h: Fix corrupted file.
