@@ -5062,31 +5062,53 @@ Something goes here.
 
 @section Create a Release
 
-This procedure can be followed when creating beta and final final
-releases.  With a beta many of the steps can be skipped.
+The process of creating and then making available a release is broken
+down into a number of stages.  The first part addresses the technical
+process of creating a releasable tar ball.  The later stages address the
+process of releasing that tar ball.
 
-@subheading Establish a few defaults.
+When making a release candidate just the first section is needed.
+
+@subsection Create a release candidate
+
+The objective at this stage is to create a set of tar balls that can be
+made available as a formal release (or as a less formal release
+candidate).
+
+@subsubheading Freeze the branch
+
+Send out an e-mail notifying everyone that the branch is frozen to
+@email{gdb-patches@@sources.redhat.com}.
+
+@subsubheading Establish a few defaults.
 
 @smallexample
-$  b=gdb_5_1-2001-07-29-branch
-$  v=5.1.1
+$  b=gdb_5_2-branch
+$  v=5.2
 $  t=/sourceware/snapshot-tmp/gdbadmin-tmp
 $  echo $t/$b/$v
+/sourceware/snapshot-tmp/gdbadmin-tmp/gdb_5_2-branch/5.2
 $  mkdir -p $t/$b/$v
 $  cd $t/$b/$v
 $  pwd
-/sourceware/snapshot-tmp/gdbadmin-tmp/gdb_5_1-2001-07-29-branch/5.1.1
+/sourceware/snapshot-tmp/gdbadmin-tmp/gdb_5_2-branch/5.2
 $  which autoconf
 /home/gdbadmin/bin/autoconf
 $
 @end smallexample
 
-NB: Check the autoconf version carefully.  You want to be using the
-version taken from the binutils snapshot directory.  It is most likely
-that your system's installed version (@file{/usr/bin}?) is probably
-correct.
+@noindent
+Notes:
 
-@subheading Check out the relevant modules:
+@itemize @bullet
+@item
+Check the @code{autoconf} version carefully.  You want to be using the
+version taken from the @file{binutils} snapshot directory.  It is very
+unlikely that a system installed version of @code{autoconf} (e.g.,
+@file{/usr/bin/autoconf}) is correct.
+@end itemize
+
+@subsubheading Check out the relevant modules:
 
 @smallexample
 $  for m in gdb insight dejagnu
@@ -5096,18 +5118,26 @@ done
 $
 @end smallexample
 
-NB: The reading of @file{.cvsrc} is disabled (@file{-f}) so that there
-isn't any confusion between what is written here and what your local CVS
-really does.
+@noindent
+Note:
 
-@subheading Update relevant files.
+@itemize @bullet
+@item
+The reading of @file{.cvsrc} is disabled (@file{-f}) so that there isn't
+any confusion between what is written here and what your local
+@code{cvs} really does.
+@end itemize
 
-@subsubheading @file{gdb/NEWS}
+@subsubheading Update relevant files.
+
+@table @file
+
+@item gdb/NEWS
 
 Major releases get their comments added as part of the mainline.  Minor
 releases should probably mention any significant bugs that were fixed.
 
-Don't forget to update the ChangeLog.
+Don't forget to include the @file{ChangeLog} entry.
 
 @smallexample
 $  emacs gdb/src/gdb/NEWS
@@ -5119,9 +5149,18 @@ $  cp gdb/src/gdb/NEWS insight/src/gdb/NEWS
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
 @end smallexample
 
-@subsubheading @file{gdb/README}
+@item gdb/README
 
-You'll need to update: the version, the update date, and who did it.
+You'll need to update:
+
+@itemize @bullet
+@item
+the version
+@item
+the update date
+@item
+who did it
+@end itemize
 
 @smallexample
 $  emacs gdb/src/gdb/README
@@ -5133,190 +5172,276 @@ $  cp gdb/src/gdb/README insight/src/gdb/README
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
 @end smallexample
 
-@emph{Maintainer note: Hopefully the README file was reviewed before the
-initial branch was cut so just a simple substitute is needed to get it
-updated.}
+@emph{Maintainer note: Hopefully the @file{README} file was reviewed
+before the initial branch was cut so just a simple substitute is needed
+to get it updated.}
 
 @emph{Maintainer note: Other projects generate @file{README} and
 @file{INSTALL} from the core documentation.  This might be worth
 pursuing.}
 
-@subsubheading @file{gdb/version.in}
+@item gdb/version.in
 
 @smallexample
 $  echo $v > gdb/src/gdb/version.in
+$  cat gdb/src/gdb/version.in
+5.2
 $  emacs gdb/src/gdb/version.in
 ...
 c-x 4 a
-...
+... Bump to version ...
 c-x c-s c-x c-c
 $  cp gdb/src/gdb/version.in insight/src/gdb/version.in 
 $  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
 @end smallexample
 
-@subsubheading @file{dejagnu/src/dejagnu/configure.in}
+@item dejagnu/src/dejagnu/configure.in
 
 Dejagnu is more complicated.  The version number is a parameter to
-@var{AM_INIT_AUTOMAKE}.  Tweak it to read something like
-@var{gdb-5.1.1}.
+@code{AM_INIT_AUTOMAKE}.  Tweak it to read something like gdb-5.1.91.
 
-Re-generate configure.
+Don't forget to re-generate @file{configure}.
 
-Add a ChangeLog.
-
-@subheading Do the dirty work
-
-This is identical to the process used when creating the daily snapshot.
+Don't forget to include a @file{ChangeLog} entry.
 
 @smallexample
-$  for m in gdb insight dejagnu
-do
-( cd $m/src && gmake -f Makefile.in $m.tar.bz2 )
-done
+$  emacs dejagnu/src/dejagnu/configure.in
+...
+c-x 4 a
+...
+c-x c-s c-x c-c
+$  ( cd  dejagnu/src/dejagnu && autoconf )
 @end smallexample
 
-@subheading Check the source files
+@end table
 
-You're looking for files that have mysteriously disappeared as the
+@subsubheading Do the dirty work
+
+This is identical to the process used to create the daily snapshot.
+
+@smallexample
+$  for m in gdb insight
+do
+( cd $m/src && gmake -f Makefile.in $m.tar )
+done
+$  ( m=dejagnu; cd $m/src && gmake -f Makefile.in $m.tar.bz2 )
+@end smallexample
+
+@subsubheading Check the source files
+
+You're looking for files that have mysteriously disappeared.
 @kbd{distclean} has the habit of deleting files it shouldn't.  Watch out
 for the @file{version.in} update @kbd{cronjob}.
 
 @smallexample
 $  ( cd gdb/src && cvs -f -q -n update )
 M djunpack.bat
+? gdb-5.1.91.tar
 ? proto-toplev
-? gdb-5.1.1.tar.bz2
+@dots{} lots of generated files @dots{}
 M gdb/ChangeLog
 M gdb/NEWS
 M gdb/README
 M gdb/version.in
-? gdb/p-exp.tab.c
-? gdb/doc/gdb.info-11
-? gdb/doc/gdb.info-12
-? gdb/doc/gdb.info-13
-? gdb/doc/gdb.info-14
-? gdb/doc/gdb.info-15
-? gdb/doc/gdbint.info-4
-? gdb/doc/gdbint.info-5
+@dots{} lots of generated files @dots{}
 $
 @end smallexample
 
+@noindent
 @emph{Don't worry about the @file{gdb.info-??} or
 @file{gdb/p-exp.tab.c}.  They were generated (and yes @file{gdb.info-1}
 was also generated only something strange with CVS means that they
 didn't get supressed).  Fixing it would be nice though.}
 
-@subheading Re-pack the release with @code{gzip}
+@subsubheading Create compressed versions of the release
 
 @smallexample
-$  cp */*/*.bz2 .
-$  bunzip2 -k -v *.bz2
-$  gzip -9 -v *.tar
+$  cp */src/*.tar .
+$  cp */src/*.bz2 .
+$  ls -F
+dejagnu/ dejagnu-gdb-5.2.tar.bz2 gdb/ gdb-5.2.tar insight/ insight-5.2.tar
+$  for m in gdb insight
+do
+bzip2 -v -9 -c $m-$v.tar > $m-$v.tar.bz2
+gzip -v -9 -c $m-$v.tar > $m-$v.tar.gz
+done
+$
 @end smallexample
 
-NB: A pipe such as @kbd{bunzip2 < xxx.bz2 | gzip -9 > xxx.gz} shouldn't
-be used since, in that mode, gzip doesn't know the file name information
-and consequently can't include it.  This is also why the release process
-runs @code{tar} and @code{bzip2} as separate passes.
-
-@emph{Maintainer note: The release process could be changed to create
-@file{.tar} rather than @file{.tar.bz2} files.}
-
-@section Check the release
-
-Grab the @file{gdb.tar.bz2}, copy it to your local machine and then try
-a simple build using it.
-
-If this is a pre-release just copy the @file{.bz2} files to the snapshot
-directory and skip the remaining steps.
-
-If it is a final release, also make it available under a bogus name so
-that others can download and check it.
-
-@emph{Maintainer note: This adds an extra day to the release process but
-is very much worth it.  Other developers are given the opportunity to
-check that things like your @file{NEWS} entries are correct or that
-other changes actually work.}
-
-@section Release the tar ball
-
-This is where, unfortunately, the notes just get vague.
-
-@subheading Install on sware
-
-@smallexample
-$  cp *.bz2 *.gz ~ftp/pub/gdb/releases
-@end smallexample
-
-@subheading Create and update the web pages.
-
-Try the following:
+@noindent
+Note:
 
 @itemize @bullet
 @item
-create the directory @file{htdocs/@var{version}} (e.g., @file{htdocs/5.1.1}
-@item
-copy @file{index.html} and @file{ANNOUNCE} from the previous release
-into the @file{htdocs/@var{version}} directory and edit for content.
-Things like the MD5 sums, @kbd{ls -l} output, the version number and so
-on will need updating.  Add NEWS entries to the @file{ANNOUNCE}.  This
-ensures that the previous announcement is kept somewhere handy.
-@item
-copy the @file{NEWS} from the distro into the
-@file{htdocs/@var{version}} directory, trim down to just the most recent
-news items
-@item
-Add a short (identical) announcement to both @file{htdocs/index.html}
-and @file{htdocs/news/index.html}
-@item
-edit the script @file{htdocs/index.sh} to link in the new release
-number.  Run it across all @file{index.html} files vis @kbd{./index.sh
-index.html */index.html}.
-@item
-grep the @file{htdocs} tree for references to the previous release
-version (@file{htdocs/download/index.html})
+A pipe such as @kbd{bunzip2 < xxx.bz2 | gzip -9 > xxx.gz} is not since,
+in that mode, @code{gzip} does not know the name of the file and, hence,
+can not include it in the compressed file.  This is also why the release
+process runs @code{tar} and @code{bzip2} as separate passes.
 @end itemize
 
-@emph{Maintainer note: This step is too fragile --- it is too easy to
-mis one of the entries and forget to update it.}
+@subsection Sanity check the tar ball
 
-@subheading Generate online docs
+Pick a popular machine (Solaris/PPC?) and try the build on that.
 
+@smallexample
+$  bunzip2 < gdb-5.2.tar.bz2 | tar xpf -
+$  cd gdb-5.2
+$  ./configure 
+$  make
+@dots{}
+$  ./gdb/gdb ./gdb/gdb
+GNU gdb 5.2
+@dots{}
+(gdb)  b main
+Breakpoint 1 at 0x80732bc: file main.c, line 734.
+(gdb)  run
+Starting program: /tmp/gdb-5.2/gdb/gdb 
+
+Breakpoint 1, main (argc=1, argv=0xbffff8b4) at main.c:734
+734       catch_errors (captured_main, &args, "", RETURN_MASK_ALL);
+(gdb)  print args
+$1 = @{argc = 136426532, argv = 0x821b7f0@}
+(gdb)
+@end smallexample
+
+@subsection Make a release candidate available
+
+If this is a release candidate then the only remaining steps are:
+
+@enumerate
+@item
+Commit @file{version.in} and @file{ChangeLog}
+@item
+Tweak @file{version.in} (and @file{ChangeLog} to read
+@var{L}.@var{M}.@var{N}-0000-00-00-cvs so that the version update
+process can restart.
+@item
+Make the release candidate available in
+@uref{ftp://sources.redhat.com/pub/gdb/snapshots/branch}
+@item
+Notify the relevant mailing lists ( @email{gdb@@sources.redhat.com} and
+@email{gdb-testers@@sources.redhat.com} that the candidate is available.
+@end enumerate
+
+@subsection Make a formal release available
+
+(And you thought all that was required was to post an e-mail.)
+
+@subsubheading Install on sware
+
+Copy the new files to both the release and the old release directory:
+
+@smallexample
+$  cp *.bz2 *.gz ~ftp/pub/gdb/old-releases/
+$  cp *.bz2 *.gz ~ftp/pub/gdb/releases
+@end smallexample
+
+@noindent
+Clean up the releases directory so that only the most recent releases
+are available (e.g. keep 5.2 and 5.2.1 but remove 5.1):
+
+@smallexample
+$  cd ~ftp/pub/gdb/releases
+$  rm @dots{}
+@end smallexample
+
+@noindent
+Update the file @file{README} and @file{.message} in the releases
+directory:
+
+@smallexample
+$  vi README
+@dots{}
+$  rm -f .message
+$  ln README .message
+@end smallexample
+
+@subsubheading Update the web pages.
+
+@table @file
+
+@item htdocs/download/ANNOUNCEMENT
+This file, which is posted as the official announcement, includes:
+@itemize @bullet
+@item
+General announcement
+@item
+News.  If making an @var{M}.@var{N}.1 release, retain the news from
+earlier @var{M}.@var{N} release.
+@item
+Errata
+@end itemize
+
+@item htdocs/index.html
+@itemx htdocs/news/index.html
+@itemx htdocs/download/index.html
+These files include:
+@itemize @bullet
+@item
+announcement of the most recent release
+@item
+news entry (remember to update both the top level and the news directory).
+@end itemize
+These pages also need to be regenerate using @code{index.sh}.
+
+@item download/onlinedocs/
 You need to find the magic command that is used to generate the online
 docs from the @file{.tar.bz2}.  The best way is to look in the output
-from one of the nightly cronjobs and then just edit accordingly.
+from one of the nightly @code{cron} jobs and then just edit accordingly.
 Something like:
 
 @smallexample
 $  ~/ss/update-web-docs \
- ~ftp/pub/gdb/releases/gdb-5.1.1.tar.bz2 \
+ ~ftp/pub/gdb/releases/gdb-5.2.tar.bz2 \
  $PWD/www \
- /www/sourceware/htdocs/gdb/5.1.1/onlinedocs \
+ /www/sourceware/htdocs/gdb/download/onlinedocs \
  gdb
 @end smallexample
 
-@subheading Something about @file{ANNOUNCEMENT}
+@item download/ari/
+Just like the online documentation.  Something like:
 
-Send the @file{ANNOUNCEMENT} file you created above to:
+@smallexample
+$  /bin/sh ~/ss/update-web-ari \
+ ~ftp/pub/gdb/releases/gdb-5.2.tar.bz2 \
+ $PWD/www \
+ /www/sourceware/htdocs/gdb/download/ari \
+ gdb
+@end smallexample
+
+@end table
+
+@subsubheading Shadow the pages onto gnu
+
+Something goes here.
+
+
+@subsubheading Install the @value{GDBN} tar ball on GNU
+
+At the time of writing, the GNU machine was @kbd{gnudist.gnu.org} in
+@file{~ftp/gnu/gdb}.
+
+@subsubheading Make the @file{ANNOUNCEMENT}
+
+Post the @file{ANNOUNCEMENT} file you created above to:
 
 @itemize @bullet
 @item
 @email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
 @item
-The gnu announce list (but delay it a day or so to let things get out).
+@email{info-gnu@@gnu.org, General GNU Announcement list} (but delay it a
+day or so to let things get out)
+@item
+@email{bug-gdb@@gnu.org, GDB Bug Report mailing list}
 @end itemize
 
-@subheading Install it on GNU
+@subsection Cleanup
 
-At the time of writing, the GNU machine was @kbd{gnudist.gnu.org} in
-@file{~ftp/gnu/gdb} (I think, I'm still waiting for it to copy into my
-home directory).
+The release is out but you're still not finished.
 
-@section Cleanup
+@subsubheading Commit outstanding changes
 
-@subheading Commit outstanding changes
-
-In particular you'll need to commit the changes to:
+In particular you'll need to commit any changes to:
 
 @itemize @bullet
 @item
@@ -5329,7 +5454,7 @@ In particular you'll need to commit the changes to:
 @file{gdb/README}
 @end itemize
 
-@subheading Tag the release
+@subsubheading Tag the release
 
 Something like:
 
@@ -5338,26 +5463,48 @@ $  d=`date -u +%Y-%m-%d`
 $  echo $d
 2002-01-24
 $  ( cd insight/src/gdb && cvs -f -q update )
-$  ( cd insight/src && cvs -f -q tag gdb_5_1_1-$d-release )
+$  ( cd insight/src && cvs -f -q tag gdb_5_2-$d-release )
 @end smallexample
 
-Insight is used since that contains more of the release than GDB (yes
-dejagnu doesn't get tagged but I think we can live with that.).
+Insight is used since that contains more of the release than
+@value{GDBN} (@code{dejagnu} doesn't get tagged but I think we can live
+with that).
 
-@subheading Restart @file{gdb/version.in}
+@subsubheading Mention the release on the trunk
+
+Just put something in the @file{ChangeLog} so that the trunk also
+indicates when the release was made.
+
+@subsubheading Restart @file{gdb/version.in}
 
 If @file{gdb/version.in} does not contain an ISO date such as
 @kbd{2002-01-24} then the daily @code{cronjob} won't update it.  Having
 committed all the release changes it can be set to
-@file{5.1.0_0000-00-00-cvs} which will restart things (yes the @kbd{_}
+@file{5.2.0_0000-00-00-cvs} which will restart things (yes the @kbd{_}
 is important - it affects the snapshot process).
 
 Don't forget the @file{ChangeLog}.
 
-@subheading Merge into trunk
+@subsubheading Merge into trunk
 
 The files committed to the branch may also need changes merged into the
 trunk.
+
+@subsubheading Revise the release schedule
+
+Post a revised release schedule to @email{gdb@@sources.redhat.com, GDB
+Discussion List} with an updated announcement.  The schedule can be
+generated by running:
+
+@smallexample
+$  ~/ss/schedule `date +%s` schedule
+@end smallexample
+
+@noindent
+The first parameter is approximate date/time in seconds (from the epoch)
+of the most recent release.
+
+Also update the schedule @code{cronjob}.
 
 @section Post release
 

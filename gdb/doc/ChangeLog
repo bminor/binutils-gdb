@@ -1,5 +1,9 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbint.texinfo (Releasing GDB): Revise `Create a Release'.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb.texinfo: Delete obsolete references to a29k.
 
 2002-04-24  Andrew Cagney  <ac131313@redhat.com>
