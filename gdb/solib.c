@@ -174,8 +174,7 @@ enable_break PARAMS ((void));
 static void
 info_sharedlibrary_command PARAMS ((char *, int));
 
-static int
-symbol_add_stub PARAMS ((char *));
+static int symbol_add_stub PARAMS ((PTR));
 
 static struct so_list *
 find_solib PARAMS ((struct so_list *));
@@ -186,8 +185,7 @@ first_link_map_member PARAMS ((void));
 static CORE_ADDR
 locate_base PARAMS ((void));
 
-static int
-solib_map_sections PARAMS ((char *));
+static int solib_map_sections PARAMS ((PTR));
 
 #ifdef SVR4_SHARED_LIBS
 
@@ -247,7 +245,7 @@ FIXMES
 
 static int
 solib_map_sections (arg)
-     char *arg;
+     PTR arg;
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
@@ -999,7 +997,7 @@ find_solib (so_list_ptr)
 	  strncpy (new -> so_name, buffer, MAX_PATH_SIZE - 1);
 	  new -> so_name[MAX_PATH_SIZE - 1] = '\0';
 	  free (buffer);
-	  catch_errors (solib_map_sections, (char *) new,
+	  catch_errors (solib_map_sections, new,
 			"Error while mapping shared library sections:\n",
 			RETURN_MASK_ALL);
 	}      
@@ -1011,7 +1009,7 @@ find_solib (so_list_ptr)
 
 static int
 symbol_add_stub (arg)
-     char *arg;
+     PTR arg;
 {
   register struct so_list *so = (struct so_list *) arg;	/* catch_errs bogon */
   CORE_ADDR text_addr = 0;
@@ -1176,7 +1174,7 @@ solib_add (arg_string, from_tty, target)
 		}
 	    }
 	  else if (catch_errors
-		   (symbol_add_stub, (char *) so,
+		   (symbol_add_stub, so,
 		    "Error while reading shared library symbols:\n",
 		    RETURN_MASK_ALL))
 	    {

@@ -1,3 +1,11 @@
+Tue Jan 19 18:07:11 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* corelow.c (solib_add_stub): Ditto.
+	(core_file_to_sym_file): Cast make_cleanup parameter.
+
+	* solib.c (symbol_add_stub, solib_map_sections): Change argument
+ 	to PTR insted of a char*.  Matches catch_errors interface.
+
 Mon Jan 18 14:01:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-array.c (array_open): Don't use fprintf_filtered to send

@@ -42,7 +42,7 @@ static struct core_fns *core_file_fns = NULL;
 static void core_files_info PARAMS ((struct target_ops *));
 
 #ifdef SOLIB_ADD
-static int solib_add_stub PARAMS ((char *));
+static int solib_add_stub PARAMS ((PTR));
 #endif
 
 static void core_open PARAMS ((char *, int));
@@ -119,7 +119,7 @@ core_close (quitting)
 
 static int 
 solib_add_stub (from_ttyp)
-     char *from_ttyp;
+     PTR from_ttyp;
 {
   SOLIB_ADD (NULL, *(int *)from_ttyp, &current_target);
   re_enable_breakpoints_in_shlibs ();
@@ -401,7 +401,7 @@ core_file_to_sym_file (core)
       /* FIXME: should be checking for errors from bfd_close (for one thing,
 	 on error it does not free all the storage associated with the
 	 bfd).  */
-      make_cleanup (bfd_close, temp_bfd);
+      make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     core, bfd_errmsg (bfd_get_error ()));
     }
