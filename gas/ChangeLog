@@ -1,3 +1,9 @@
+Wed Apr 10 16:48:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-alpha.c (alpha_ip): If we are going to call emit_add64
+	for addq with a 16 bit signed value, just emit a lda instruction
+	instead.
+
 Wed Apr 10 14:34:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (do_a_fix_imm): Don't cut off high bits
