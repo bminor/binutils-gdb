@@ -1,5 +1,11 @@
 1999-06-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* Makefile.am: Rebuild dependencies.
+	($(OBJS)): Don't depend upon struc-symbol.h.
+	(.dep1, .tcdep, .objdep): Create itbl-parse.h.
+	* dep-in.sed: Don't remove struc-symbol.h.
+	* Makefile.in: Rebuild.
+
 	* doc/internals.texi (Symbols): Describe changes in symbol
 	handling.
 

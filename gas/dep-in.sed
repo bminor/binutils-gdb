@@ -18,7 +18,6 @@ s! obj-format.h!!g
 s! targ-cpu.h!!g
 s! flonum.h!!g
 s! expr.h!!g
-s! struc-symbol.h!!g
 s! write.h!!g
 s! frags.h!!g
 s! hash.h!!g
