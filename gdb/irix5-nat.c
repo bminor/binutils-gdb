@@ -405,7 +405,7 @@ locate_base ()
   struct minimal_symbol *msymbol;
   CORE_ADDR address = 0;
 
-  msymbol = lookup_minimal_symbol (DEBUG_BASE, symfile_objfile);
+  msymbol = lookup_minimal_symbol (DEBUG_BASE, NULL, symfile_objfile);
   if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
     {
       address = SYMBOL_VALUE_ADDRESS (msymbol);

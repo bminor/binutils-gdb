@@ -81,7 +81,7 @@ free_elfinfo PARAMS ((void *));
 static struct section_offsets *
 elf_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
 
-static void
+static struct minimal_symbol *
 record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
 					enum minimal_symbol_type, char *,
 					struct objfile *));
@@ -171,7 +171,7 @@ elf_interpreter (abfd)
 
 #endif
 
-static void
+static struct minimal_symbol *
 record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
      char *name;
      CORE_ADDR address;
@@ -206,8 +206,8 @@ record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
     }
 
   name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
-				       objfile);
+  return prim_record_minimal_symbol_and_info
+    (name, address, ms_type, info, section, objfile);
 }
 
 /*
@@ -258,6 +258,10 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
   /* If filesym is nonzero, it points to a file symbol, but we haven't
      seen any section info for it yet.  */
   asymbol *filesym = 0;
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+  /* Name of filesym, as saved on the symbol_obstack.  */
+  char *filesymname;
+#endif
   struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
 				 objfile->sym_stab_info;
   unsigned long size;
@@ -340,9 +344,16 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		  sectinfo = NULL;
 		}
 	      filesym = sym;
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+	      filesymname =
+		obsavestring ((char *)filesym->name, strlen (filesym->name),
+			      &objfile->symbol_obstack);
+#endif
 	    }
 	  else if (sym -> flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
 	    {
+	      struct minimal_symbol *msym;
+
 	      /* Select global/local/weak symbols.  Note that bfd puts abs
 		 symbols in their own section, so all symbols we are
 		 interested in will have a section. */
@@ -498,8 +509,12 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		}
 	      /* Pass symbol size field in via BFD.  FIXME!!!  */
 	      size = ((elf_symbol_type *) sym) -> internal_elf_sym.st_size;
-	      record_minimal_symbol_and_info ((char *) sym -> name, symaddr,
-					      ms_type, (PTR) size, objfile);
+	      msym = record_minimal_symbol_and_info
+		((char *) sym -> name, symaddr,
+		 ms_type, (PTR) size, objfile);
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+	      msym->filename = filesymname;
+#endif
 	    }
 	}
       do_cleanups (back_to);

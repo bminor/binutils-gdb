@@ -1116,7 +1116,7 @@ alpha_call_dummy_address ()
   if (entry != 0)
     return entry;
 
-  sym = lookup_minimal_symbol ("_Prelude", symfile_objfile);
+  sym = lookup_minimal_symbol ("_Prelude", NULL, symfile_objfile);
 
   if (!sym || MSYMBOL_TYPE (sym) != mst_text)
     return 0;

@@ -2462,7 +2462,7 @@ lookup_address_of_variable (name)
 
   if (! symaddr)
     {
-      msymbol = lookup_minimal_symbol (name, (struct objfile *) NULL);
+      msymbol = lookup_minimal_symbol (name, NULL, NULL);
 
       if (msymbol && msymbol->type == mst_data)
 	symaddr = SYMBOL_VALUE_ADDRESS (msymbol);

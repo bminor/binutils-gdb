@@ -633,8 +633,7 @@ variable:	qualified_name
 			      break;
 			    }
 
-			  msymbol = lookup_minimal_symbol (name,
-				      (struct objfile *) NULL);
+			  msymbol = lookup_minimal_symbol (name, NULL, NULL);
 			  if (msymbol != NULL)
 			    {
 			      write_exp_msymbol (msymbol,
@@ -689,8 +688,8 @@ variable:	name_not_typename
 			      struct minimal_symbol *msymbol;
 			      register char *arg = copy_name ($1.stoken);
 
-			      msymbol = lookup_minimal_symbol (arg,
-					  (struct objfile *) NULL);
+			      msymbol =
+				lookup_minimal_symbol (arg, NULL, NULL);
 			      if (msymbol != NULL)
 				{
 				  write_exp_msymbol (msymbol,

@@ -1,3 +1,27 @@
+Wed Feb  8 20:32:18 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* config/sparc/tm-sun4sol2.h, dbxread.c: Rename
+	N_SO_ADDRESS_MAYBE_MISSING to SOFUN_ADDRESS_MAYBE_MISSING.
+	* symtab.h (minimal_symbol) [SOFUN_ADDRESS_MAYBE_MISSING]: Add
+	filename field.
+	* elfread.c (record_minimal_symbol_and_info),
+	minsyms.c, symtab.h (prim_record_minimal_symbol_and_info): Return
+	newly created symbol.
+	* elfread.c (elf_symtab_read) [SOFUN_ADDRESS_MAYBE_MISSING]:
+	Set filename field of minimal symbol.
+	* symmisc.c (dump_msymbols) [SOFUN_ADDRESS_MAYBE_MISSING]:
+	Print filename field.
+	* minsyms.c, symtab.h (lookup_minimal_symbol): New arg sfile.
+	* symm-tdep.c, somsolib.c, hppa-tdep.c, c-exp.y, f-exp.y,
+	m2-exp.y, nindy-tdep.c, m3-nat.c, irix5-nat.c, hpread.c,
+	os9kread.c, breakpoint.c, alpha-tdep.c, valops.c, symtab.c,
+	printcmd.c, dbxread.c: Change callers to pass NULL for sfile.
+	* dbxread.c (process_one_symbol) [SOFUN_ADDRESS_MAYBE_MISSING]:
+	Find address of function from minimal symbols.
+	* partial-stab.h, case 'f', 'F': Call find_stab_function_addr
+	instead of getting pst->textlow from the stab.
+	* minsyms.c (find_stab_function_addr): New function.
+
 Wed Feb  8 19:19:56 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* monitor.c: Fix so all the output shows up in the GUI command

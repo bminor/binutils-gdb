@@ -1080,7 +1080,7 @@ os9k_end_psymtab (pst, include_list, num_includes, capping_symbol_cnt,
     strncpy (p, last_function_name, n);
     p[n] = 0;
     
-    minsym = lookup_minimal_symbol (p, objfile);
+    minsym = lookup_minimal_symbol (p, NULL, objfile);
 
     if (minsym) {
       pst->texthigh = SYMBOL_VALUE_ADDRESS(minsym)+(long)MSYMBOL_INFO(minsym);

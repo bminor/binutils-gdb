@@ -625,7 +625,8 @@ variable:	NAME
 			      struct minimal_symbol *msymbol;
 			      register char *arg = copy_name ($1);
 
-			      msymbol = lookup_minimal_symbol (arg, NULL);
+			      msymbol =
+				lookup_minimal_symbol (arg, NULL, NULL);
 			      if (msymbol != NULL)
 				{
 				  write_exp_msymbol

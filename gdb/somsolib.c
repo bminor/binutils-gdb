@@ -138,7 +138,7 @@ som_solib_add (arg_string, from_tty, target)
   if (bfd_section_size (symfile_objfile->obfd, shlib_info) == 0)
     return;
 
-  msymbol = lookup_minimal_symbol ("__dld_flags", (struct objfile *) NULL);
+  msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (msymbol == NULL)
     {
       error ("Unable to find __dld_flags symbol in object file.\n");
@@ -166,12 +166,12 @@ som_solib_add (arg_string, from_tty, target)
   if ((dld_flags & 1) == 0)
     warning ("The shared libraries were not privately mapped; setting a\nbreakpoint in a shared library will not work until you rerun the program.\n");
 
-  msymbol = lookup_minimal_symbol ("__dld_list", (struct objfile *) NULL);
+  msymbol = lookup_minimal_symbol ("__dld_list", NULL, NULL);
   if (!msymbol)
     {
       /* Older crt0.o files (hpux8) don't have __dld_list as a symbol,
 	 but the data is still available if you know where to look.  */
-      msymbol = lookup_minimal_symbol ("__dld_flags", (struct objfile *)NULL);
+      msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
       if (!msymbol)
 	{
 	  error ("Unable to find dynamic library list.\n");
@@ -471,7 +471,7 @@ som_solib_create_inferior_hook()
 
   /* Get the address of __dld_flags, if no such symbol exists, then we can
      not debug the shared code.  */
-  msymbol = lookup_minimal_symbol ("__dld_flags", (struct objfile *) NULL);
+  msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (msymbol == NULL)
     {
       error ("Unable to find __dld_flags symbol in object file.\n");
@@ -499,7 +499,7 @@ som_solib_create_inferior_hook()
     }
 
   /* Now find the address of _start and set a breakpoint there.  */
-  msymbol = lookup_minimal_symbol ("_start", symfile_objfile);
+  msymbol = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
       error ("Unable to find _start symbol in object file.\n");

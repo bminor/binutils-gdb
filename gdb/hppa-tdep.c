@@ -1066,7 +1066,7 @@ frame_chain_valid (chain, thisframe)
      which is (legitimately, since it is in the user's namespace)
      named Ltext_end, so we can't just ignore it.  */
   msym_us = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
-  msym_start = lookup_minimal_symbol ("_start", NULL);
+  msym_start = lookup_minimal_symbol ("_start", NULL, NULL);
   if (msym_us
       && msym_start
       && SYMBOL_VALUE_ADDRESS (msym_us) == SYMBOL_VALUE_ADDRESS (msym_start))
@@ -1415,7 +1415,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   int flags = read_register (FLAGS_REGNUM);
   struct unwind_table_entry *u;
 
-  msymbol = lookup_minimal_symbol ("$$dyncall", (struct objfile *) NULL);
+  msymbol = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
   if (msymbol == NULL)
     error ("Can't find an address for $$dyncall trampoline");
 
@@ -1457,7 +1457,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	  ALL_OBJFILES (objfile)
 	    {
 	      stub_symbol = lookup_minimal_symbol (SYMBOL_NAME (funsymbol),
-						   objfile);
+						   NULL, objfile);
 	      /* Found a symbol with the right name.  */
 	      if (stub_symbol)
 		{
@@ -1492,9 +1492,9 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   if (u && u->stub_type == IMPORT)
     {
       CORE_ADDR new_fun;
-      msymbol = lookup_minimal_symbol ("__d_plt_call", (struct objfile *) NULL);
+      msymbol = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
       if (msymbol == NULL)
-	msymbol = lookup_minimal_symbol ("__gcc_plt_call", NULL);
+	msymbol = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
 
       if (msymbol == NULL)
 	error ("Can't find an address for __d_plt_call or __gcc_plt_call trampoline");
@@ -1507,7 +1507,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
       else
 	{
 	  /* We have to store the address of the stub in __shlib_funcptr.  */
-	  msymbol = lookup_minimal_symbol ("__shlib_funcptr",
+	  msymbol = lookup_minimal_symbol ("__shlib_funcptr", NULL,
 					   (struct objfile *)NULL);
 	  if (msymbol == NULL)
 	    error ("Can't find an address for __shlib_funcptr");
@@ -1518,7 +1518,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
     }
 
   /* We still need sr4export's address too.  */
-  msymbol = lookup_minimal_symbol ("_sr4export", (struct objfile *) NULL);
+  msymbol = lookup_minimal_symbol ("_sr4export", NULL, NULL);
   if (msymbol == NULL)
     error ("Can't find an address for _sr4export trampoline");
 
@@ -1749,7 +1749,7 @@ in_solib_call_trampoline (pc, name)
   /* First see if PC is in one of the two C-library trampolines.  */
   if (!dyncall)
     {
-      minsym = lookup_minimal_symbol ("$$dyncall", NULL);
+      minsym = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
       if (minsym)
 	dyncall = SYMBOL_VALUE_ADDRESS (minsym);
       else
@@ -1758,7 +1758,7 @@ in_solib_call_trampoline (pc, name)
 
   if (!sr4export)
     {
-      minsym = lookup_minimal_symbol ("_sr4export", NULL);
+      minsym = lookup_minimal_symbol ("_sr4export", NULL, NULL);
       if (minsym)
 	sr4export = SYMBOL_VALUE_ADDRESS (minsym);
       else
@@ -1918,7 +1918,7 @@ skip_trampoline_code (pc, name)
 
   if (!dyncall)
     {
-      msym = lookup_minimal_symbol ("$$dyncall", NULL);
+      msym = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
       if (msym)
 	dyncall = SYMBOL_VALUE_ADDRESS (msym);
       else
@@ -1927,7 +1927,7 @@ skip_trampoline_code (pc, name)
 
   if (!sr4export)
     {
-      msym = lookup_minimal_symbol ("_sr4export", NULL);
+      msym = lookup_minimal_symbol ("_sr4export", NULL, NULL);
       if (msym)
 	sr4export = SYMBOL_VALUE_ADDRESS (msym);
       else
@@ -2021,7 +2021,7 @@ skip_trampoline_code (pc, name)
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  libsym = lookup_minimal_symbol (SYMBOL_NAME (stubsym), NULL);
+	  libsym = lookup_minimal_symbol (SYMBOL_NAME (stubsym), NULL, NULL);
 	  if (libsym == NULL)
 	    {
 	      warning ("Unable to find library symbol for %s\n",

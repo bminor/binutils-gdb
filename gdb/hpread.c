@@ -700,7 +700,7 @@ hpread_get_textlow (global, index, objfile)
     return 0;
 
   /* The minimal symbols are typically more accurate for some reason.  */
-  msymbol = lookup_minimal_symbol (dn_bufp->dfunc.name + VT (objfile),
+  msymbol = lookup_minimal_symbol (dn_bufp->dfunc.name + VT (objfile), NULL,
 				   objfile);
   if (msymbol)
     return SYMBOL_VALUE_ADDRESS (msymbol);

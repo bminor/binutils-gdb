@@ -47,7 +47,7 @@ symmetry_extract_return_value(type, regbuf, valbuf)
   float f;
 
   if (TYPE_CODE_FLT == TYPE_CODE(type)) { 
-    msymbol = lookup_minimal_symbol ("1167_flt", (struct objfile *) NULL);
+    msymbol = lookup_minimal_symbol ("1167_flt", NULL, NULL);
     if (msymbol != NULL) {
       /* found "1167_flt" means 1167, %fp2-%fp3 */ 
       /* float & double; 19= %fp2, 20= %fp3 */

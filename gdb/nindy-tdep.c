@@ -63,7 +63,7 @@ nindy_frame_chain_valid (chain, curframe)
 	if ( sym != 0 ){
 		a = SYMBOL_VALUE (sym);
 	} else {
-		msymbol = lookup_minimal_symbol (sf, (struct objfile *) NULL);
+		msymbol = lookup_minimal_symbol (sf, NULL, NULL);
 		if (msymbol == NULL)
 			return 0;
 		a = SYMBOL_VALUE_ADDRESS (msymbol);

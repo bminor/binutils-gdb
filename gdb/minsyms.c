@@ -79,10 +79,11 @@ compare_minimal_symbols PARAMS ((const void *, const void *));
 static int
 compact_minimal_symbols PARAMS ((struct minimal_symbol *, int));
 
-/* Look through all the current minimal symbol tables and find the first
-   minimal symbol that matches NAME.  If OBJF is non-NULL, it specifies a
-   particular objfile and the search is limited to that objfile.  Returns
-   a pointer to the minimal symbol that matches, or NULL if no match is found.
+/* Look through all the current minimal symbol tables and find the
+   first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
+   the search to that objfile.  If SFILE is non-NULL, limit the search
+   to that source file.  Returns a pointer to the minimal symbol that
+   matches, or NULL if no match is found.
 
    Note:  One instance where there may be duplicate minimal symbols with
    the same name is when the symbol tables for a shared library and the
@@ -90,8 +91,9 @@ compact_minimal_symbols PARAMS ((struct minimal_symbol *, int));
    names (the dynamic linker deals with the duplication). */
 
 struct minimal_symbol *
-lookup_minimal_symbol (name, objf)
+lookup_minimal_symbol (name, sfile, objf)
      register const char *name;
+     const char *sfile;
      struct objfile *objf;
 {
   struct objfile *objfile;
@@ -99,6 +101,15 @@ lookup_minimal_symbol (name, objf)
   struct minimal_symbol *found_symbol = NULL;
   struct minimal_symbol *found_file_symbol = NULL;
   struct minimal_symbol *trampoline_symbol = NULL;
+
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+  if (sfile != NULL)
+    {
+      char *p = strrchr (sfile, '/');
+      if (p != NULL)
+	sfile = p + 1;
+    }
+#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;
@@ -118,10 +129,17 @@ lookup_minimal_symbol (name, objf)
 		    case mst_file_text:
 		    case mst_file_data:
 		    case mst_file_bss:
-		      /* It is file-local.  If we find more than one, just
-			 return the latest one (the user can't expect
-			 useful behavior in that case).  */
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+		      if (sfile == NULL || STREQ (msymbol->filename, sfile))
+			found_file_symbol = msymbol;
+#else
+		      /* We have neither the ability nor the need to
+			 deal with the SFILE parameter.  If we find
+			 more than one symbol, just return the latest
+			 one (the user can't expect useful behavior in
+			 that case).  */
 		      found_file_symbol = msymbol;
+#endif
 		      break;
 
 		    case mst_solib_trampoline:
@@ -260,6 +278,31 @@ lookup_minimal_symbol_by_pc (pc)
   return (best_symbol);
 }
 
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+CORE_ADDR
+find_stab_function_addr (namestring, pst, objfile)
+     char *namestring;
+     struct partial_symtab *pst;
+     struct objfile *objfile;
+{
+  struct minimal_symbol *msym;
+  char *p;
+  int n;
+
+  p = strchr (namestring, ':');
+  if (p == NULL)
+    p = namestring;
+  n = p - namestring;
+  p = alloca (n + 1);
+  strncpy (p, namestring, n);
+  p[n] = 0;
+
+  msym = lookup_minimal_symbol (p, pst->filename, objfile);
+  return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
+}
+#endif /* SOFUN_ADDRESS_MAYBE_MISSING */
+
+
 /* Return leading symbol character for a BFD. If BFD is NULL,
    return the leading symbol character from the main objfile.  */
 
@@ -320,7 +363,9 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
 				       NULL, section, objfile);
 }
 
-void
+/* Record a minimal symbol in the msym bunches.  Returns the symbol
+   newly created.  */
+struct minimal_symbol *
 prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
 				     objfile)
      const char *name;
@@ -372,6 +417,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   MSYMBOL_INFO (msymbol) = info; /* FIXME! */
   msym_bunch_index++;
   msym_count++;
+  return msymbol;
 }
 
 /* Compare two minimal symbols by address and return a signed result based
