@@ -1,5 +1,9 @@
 Sun Jan 31 04:32:48 1993  Michael Tiemann  (tiemann@rtl.cygnus.com)
 
+	* gdbtypes.c (fill_in_vptr_fieldno): Don't ignore the first
+	baseclass--we don't always inherit its virtual function table
+	pointer.
+
 	* eval.c (evaluate_subexp): In OP_FUNCALL case, adjust `this'
 	pointer correctly in case value_struct_elt moves it around.
 

@@ -690,9 +690,9 @@ lookup_template_type (name, type, block)
   return (SYMBOL_TYPE (sym));
 }
 
-/* Given a type TYPE, lookup the type of the component of type named
-   NAME.  
-   If NOERR is nonzero, return zero if NAME is not suitably defined.  */
+/* Given a type TYPE, lookup the type of the component of type named NAME.  
+   If NOERR is nonzero, return zero if NAME is not suitably defined.
+   If NAME is the name of a baseclass type, return that type.  */
 
 struct type *
 lookup_struct_elt_type (type, name, noerr)
@@ -717,6 +717,9 @@ lookup_struct_elt_type (type, name, noerr)
     }
 
   check_stub_type (type);
+
+  if (STREQ (type_name_no_tag (type), name))
+    return type;
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
@@ -765,7 +768,10 @@ fill_in_vptr_fieldno (type)
   if (TYPE_VPTR_FIELDNO (type) < 0)
     {
       int i;
-      for (i = 1; i < TYPE_N_BASECLASSES (type); i++)
+
+      /* We must start at zero in case the first (and only) baseclass is
+	 virtual (and hence we cannot share the table pointer).  */
+      for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
 	{
 	  fill_in_vptr_fieldno (TYPE_BASECLASS (type, i));
 	  if (TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i)) >= 0)
