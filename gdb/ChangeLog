@@ -1,3 +1,8 @@
+2001-12-13  Jackie Smith Cashion  <jsmith@redhat.com>
+
+	* cli/cli-script.c (print_command_lines): Remove extra
+	"if", "else", "while", and "end" from show user output.
+
 2001-12-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* i387-nat.c (i387_fill_fxsave): Change type of ``val'' from char

@@ -171,14 +171,13 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
       /* A while command.  Recursively print its subcommands and continue.  */
       if (list->control_type == while_control)
 	{
-	  ui_out_text (uiout, "while ");
 	  ui_out_field_fmt (uiout, NULL, "while %s", list->line);
 	  ui_out_text (uiout, "\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
-	  ui_out_field_string (uiout, NULL, "end");
 	  if (depth)
 	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_text (uiout, "end\n");
+	  ui_out_field_string (uiout, NULL, "end");
+	  ui_out_text (uiout, "\n");
 	  list = list->next;
 	  continue;
 	}
@@ -186,7 +185,6 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
       /* An if command.  Recursively print both arms before continueing.  */
       if (list->control_type == if_control)
 	{
-	  ui_out_text (uiout, "if ");
 	  ui_out_field_fmt (uiout, NULL, "if %s", list->line);
 	  ui_out_text (uiout, "\n");
 	  /* The true arm. */
@@ -198,14 +196,14 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	      if (depth)
 		ui_out_spaces (uiout, 2 * depth);
 	      ui_out_field_string (uiout, NULL, "else");
-	      ui_out_text (uiout, "else\n");
+	      ui_out_text (uiout, "\n");
 	      print_command_lines (uiout, list->body_list[1], depth + 1);
 	    }
 
-	  ui_out_field_string (uiout, NULL, "end");
 	  if (depth)
 	    ui_out_spaces (uiout, 2 * depth);
-	  ui_out_text (uiout, "end\n");
+	  ui_out_field_string (uiout, NULL, "end");
+	  ui_out_text (uiout, "\n");
 	  list = list->next;
 	  continue;
 	}

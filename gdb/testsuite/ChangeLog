@@ -1,3 +1,8 @@
+2001-12-13  Jackie Smith Cashion  <jsmith@redhat.com>
+
+        * gdb.base/commands.exp (user_defined_command_test): Make "show user"
+        test expect string more specific.
+
 2001-12-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add support for xstormy16.

@@ -261,7 +261,7 @@ proc user_defined_command_test {} {
 	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
 	    "execute user defined command in user_defined_command_test"
    gdb_test "show user mycommand" \
-	   "while.*set.*if.*p/x.*else.*p/x.*end.*" \
+	"  while \\\$arg0.*set.*    if \\\(\\\$arg0.*p/x.*    else\[^\n\].*p/x.*    end\[^\n\].*  end\[^\n\].*" \
 	   "display user command in user_defined_command_test"
 }
 
