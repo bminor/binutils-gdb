@@ -139,6 +139,10 @@ case "${targ}" in
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
     ;;
+  arm-*-rtems*)
+    targ_defvec=bfd_elf32_littlearm_vec
+    targ_selvecs=bfd_elf32_bigarm_vec
+    ;;
   armeb-*-elf | arm*b-*-linux-gnu*)
     targ_defvec=bfd_elf32_bigarm_vec
     targ_selvecs=bfd_elf32_littlearm_vec
@@ -195,7 +199,7 @@ case "${targ}" in
     ;;
 
   a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
-  a29k-*-vxworks* | a29k-*-sysv*)
+  a29k-*-vxworks* | a29k-*-sysv* | a29k-*rtems*)
     targ_defvec=a29kcoff_big_vec
     targ_selvecs=sunos_big_vec
     targ_underscore=yes
@@ -806,6 +810,15 @@ case "${targ}" in
 #endif /* BFD64 */
   sparc*-*-coff*)
     targ_defvec=sparccoff_vec
+    ;;
+  sparc*-*-rtemsaout*)
+    targ_defvec=sunos_big_vec
+    targ_selvecs="bfd_elf32_sparc_vec sparccoff_vec"
+    targ_underscore=yes
+    ;;
+  sparc*-*-rtems* | sparc*-*-rtemself*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs="sunos_big_vec sparccoff_vec"
     ;;
   sparc*-*-* | sparc*-*-rtems*)
     targ_defvec=sunos_big_vec

@@ -1,3 +1,9 @@
+2000-12-01      Joel Sherrill <joel@OARcorp.com>
+
+	* config.bfd (arm-*-rtems*, a29k-*rtems*): New targets.
+	(sparc*-*-rtemself*, sparc*-*-rtemsaout*): New targets.
+	(sparc*-*-rtems*): Switched from a.out to ELF.
+
 2000-11-30  Jan Hubicka  <jh@suse.cz>
 	
         * Makefile.am (BFD64_BACKENDS): Add elf64-x86-64.lo
