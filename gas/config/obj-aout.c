@@ -755,4 +755,4 @@ const struct format_ops aout_format_ops =
   0,	/* read_begin_hook */
   0 	/* symbol_new_hook */
 };
-#endif BFD_ASSEMBLER
+#endif /* BFD_ASSEMBLER */

@@ -1,3 +1,8 @@
+2001-09-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* as.c: Add missing function prototype.
+	* config/obj-aout.c: Fix compile time warning.
+
 2001-09-21  Bruno Haible  <haible@clisp.cons.org>
 
 	* config/tc-openrisc.c: Don't include <ctype.h>.

@@ -766,6 +766,8 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 
 static long start_time;
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;
