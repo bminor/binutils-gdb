@@ -3981,7 +3981,12 @@ md_convert_frag (abfd, sec, fragP)
   target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
 #ifdef BFD_ASSEMBLER
   /* Not needed otherwise?  */
-  target_address += symbol_get_frag (fragP->fr_symbol)->fr_address;
+  {
+    /* Local symbols which have already been resolved have a NULL frags.  */
+    fragS *sym_frag = symbol_get_frag (fragP->fr_symbol);
+    if (sym_frag)
+      target_address += sym_frag->fr_address;
+  }
 #endif
 
   /* Address opcode resides at in file space.  */

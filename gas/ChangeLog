@@ -1,3 +1,11 @@
+2001-03-30  Richard Henderson  <rth@redhat.com>
+
+	* write.c (relax_seg, size_seg): Split from relax_and_size_seg.
+	(write_object_file): Relax code then data, then size sections.
+
+	* config/tc-i386.c (md_convert_frag): Don't die on local symbols
+	that have been finalized.
+
 2001-03-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (DEFAULT_LEVEL): Define.

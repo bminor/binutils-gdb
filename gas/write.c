@@ -121,7 +121,8 @@ static fragS *chain_frchains_together_1 PARAMS ((segT, struct frchain *));
 #ifdef BFD_ASSEMBLER
 static void chain_frchains_together PARAMS ((bfd *, segT, PTR));
 static void cvt_frag_to_fill PARAMS ((segT, fragS *));
-static void relax_and_size_seg PARAMS ((bfd *, asection *, PTR));
+static void relax_seg PARAMS ((bfd *, asection *, PTR));
+static void size_seg PARAMS ((bfd *, asection *, PTR));
 static void adjust_reloc_syms PARAMS ((bfd *, asection *, PTR));
 static void write_relocs PARAMS ((bfd *, asection *, PTR));
 static void write_contents PARAMS ((bfd *, asection *, PTR));
@@ -593,7 +594,21 @@ cvt_frag_to_fill (headersP, sec, fragP)
 
 #ifdef BFD_ASSEMBLER
 static void
-relax_and_size_seg (abfd, sec, xxx)
+relax_seg (abfd, sec, do_code)
+     bfd *abfd;
+     asection *sec;
+     PTR do_code;
+{
+  flagword flags = bfd_get_section_flags (abfd, sec);
+  segment_info_type *seginfo = seg_info (sec);
+
+  if (!(flags & SEC_CODE) == !do_code
+      && seginfo && seginfo->frchainP)
+    relax_segment (seginfo->frchainP->frch_root, sec);
+}
+
+static void
+size_seg (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
      PTR xxx ATTRIBUTE_UNUSED;
@@ -606,12 +621,9 @@ relax_and_size_seg (abfd, sec, xxx)
 
   subseg_change (sec, 0);
 
-  flags = bfd_get_section_flags (abfd, sec);
-
   seginfo = seg_info (sec);
   if (seginfo && seginfo->frchainP)
     {
-      relax_segment (seginfo->frchainP->frch_root, sec);
       for (fragp = seginfo->frchainP->frch_root; fragp; fragp = fragp->fr_next)
 	cvt_frag_to_fill (sec, fragp);
       for (fragp = seginfo->frchainP->frch_root;
@@ -623,6 +635,8 @@ relax_and_size_seg (abfd, sec, xxx)
     }
   else
     size = 0;
+
+  flags = bfd_get_section_flags (abfd, sec);
 
   if (size > 0 && ! seginfo->bss)
     flags |= SEC_HAS_CONTENTS;
@@ -1514,7 +1528,9 @@ write_object_file ()
 #endif
 
 #ifdef BFD_ASSEMBLER
-  bfd_map_over_sections (stdoutput, relax_and_size_seg, (char *) 0);
+  bfd_map_over_sections (stdoutput, relax_seg, (char *) 1);
+  bfd_map_over_sections (stdoutput, relax_seg, (char *) 0);
+  bfd_map_over_sections (stdoutput, size_seg, (char *) 0);
 #else
   relax_and_size_all_segments ();
 #endif /* BFD_ASSEMBLER  */
