@@ -1,3 +1,9 @@
+start-sanitize-sh4
+Wed Nov 19 17:44:42 1997  Richard Henderson  <rth@cygnus.com>
+
+        * tc-sh.c (parse_reg): Properly quote for fv4.
+
+end-sanitize-sh4
 Wed Nov 19 23:46:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (resolve_symbol_value): Add missing breaks in case on
