@@ -1017,6 +1017,7 @@ Show a summary of the options to @code{objcopy}.
 objdump [ -a | --archive-headers ] 
         [ -b @var{bfdname} | --target=@var{bfdname} ] [ --debugging ]
         [ -d | --disassemble ]  [ -D | --disassemble-all ] 
+        [ -EB | -EL | --endian=@{big | little @} ]
         [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
         [ -j @var{section} | --section=@var{section} ]
@@ -1089,6 +1090,15 @@ expected to contain instructions.
 Like @samp{-d}, but disassemble the contents of all sections, not just
 those expected to contain instructions.
 
+@item -EB
+@itemx -EL
+@itemx --endian=@{big|little@}
+@cindex endianness
+@cindex disassembly endianness
+Specify the endianness of the object files.  This only affects
+disassembly.  This can be useful when disassembling a file format which
+does not describe endianness information, such as S-records.
+
 @item -f
 @itemx --file-header
 @cindex object file header
@@ -1136,9 +1146,11 @@ Only useful with @samp{-d}, @samp{-D}, or @samp{-r}.
 @item -m @var{machine}
 @itemx --architecture=@var{machine}
 @cindex architecture
-Specify that the object files @var{objfile} are for architecture
-@var{machine}.  You can list available architectures using the @samp{-i}
-option. 
+@cindex disassembly architecture
+Specify the architecture to use when disassembling object files.  This
+can be useful when disasembling object files which do not describe
+architecture information, such as S-records.  You can list the available
+architectures with the @samp{-i} option.
 
 @item -r
 @itemx --reloc
