@@ -5779,7 +5779,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, mips_register_type);
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
-  set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
 

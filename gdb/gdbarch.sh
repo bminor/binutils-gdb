@@ -736,14 +736,17 @@ f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char
 # no name, assume we are not in sigtramp).
 #
 # FIXME: cagney/2002-04-21: The function find_pc_partial_function
-# calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
-# This means PC_IN_SIGTRAMP function can't be implemented by doing its
-# own local NAME lookup.
+# calls find_pc_sect_partial_function() which calls
+# DEPRECATED_PC_IN_SIGTRAMP.  This means DEPRECATED_PC_IN_SIGTRAMP
+# function can't be implemented by doing its own local NAME lookup.
 #
-# FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
-# Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
-# does not.
-f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp::0
+# FIXME: cagney/2002-04-21: DEPRECATED_PC_IN_SIGTRAMP is something of
+# a mess.  Some code also depends on SIGTRAMP_START and SIGTRAMP_END
+# but other does not.
+#
+# NOTE: cagney/2004-03-16: DEPRECATED_PC_IN_SIGTRAMP has been made
+# obsolete by signal trampoline frame unwind sniffers.
+F::DEPRECATED_PC_IN_SIGTRAMP:int:deprecated_pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp
 F:2:SIGTRAMP_START:CORE_ADDR:sigtramp_start:CORE_ADDR pc:pc
 F:2:SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
 # A target might have problems with watchpoints as soon as the stack

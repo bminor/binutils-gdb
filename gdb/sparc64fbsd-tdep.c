@@ -208,7 +208,7 @@ sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->fpregset->supply_regset = sparc64fbsd_supply_fpregset;
   tdep->sizeof_fpregset = 272;
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, sparc64fbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc64fbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc64fbsd_sigtramp_frame_sniffer);
 
   sparc64_init_abi (info, gdbarch);

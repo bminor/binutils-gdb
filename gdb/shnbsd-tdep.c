@@ -177,7 +177,7 @@ static void
 shnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
-  set_gdbarch_pc_in_sigtramp (gdbarch, shnbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, shnbsd_pc_in_sigtramp);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 		                nbsd_ilp32_solib_svr4_fetch_link_map_offsets);

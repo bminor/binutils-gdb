@@ -296,7 +296,7 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_store_return_value (gdbarch, m68k_linux_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68k_linux_extract_struct_value_address);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, m68k_linux_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, m68k_linux_pc_in_sigtramp);
 
   /* Shared library handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);

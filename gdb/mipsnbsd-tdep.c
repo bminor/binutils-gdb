@@ -345,7 +345,7 @@ static void
 mipsnbsd_init_abi (struct gdbarch_info info,
                    struct gdbarch *gdbarch)
 {
-  set_gdbarch_pc_in_sigtramp (gdbarch, mipsnbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mipsnbsd_pc_in_sigtramp);
 
   set_gdbarch_get_longjmp_target (gdbarch, mipsnbsd_get_longjmp_target);
 

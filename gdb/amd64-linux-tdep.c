@@ -203,7 +203,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   amd64_init_abi (info, gdbarch);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, amd64_linux_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, amd64_linux_pc_in_sigtramp);
   tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
   tdep->sc_reg_offset = amd64_linux_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);

@@ -1019,7 +1019,7 @@ i386_sigtramp_frame_sniffer (struct frame_info *next_frame)
     return NULL;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
+  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
     return &i386_sigtramp_frame_unwind;
 
   return NULL;
@@ -1785,7 +1785,7 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
   tdep->sc_pc_offset = 36 + 14 * 4;
   tdep->sc_sp_offset = 36 + 17 * 4;
@@ -1800,7 +1800,7 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386_go32_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_go32_pc_in_sigtramp);
 
   tdep->jb_pc_offset = 36;
 }
@@ -1993,7 +1993,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */
   set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);

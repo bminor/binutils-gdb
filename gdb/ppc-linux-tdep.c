@@ -114,8 +114,8 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
 /* Determine if pc is in a signal trampoline...
 
    Ha!  That's not what this does at all.  wait_for_inferior in
-   infrun.c calls PC_IN_SIGTRAMP in order to detect entry into a
-   signal trampoline just after delivery of a signal.  But on
+   infrun.c calls DEPRECATED_PC_IN_SIGTRAMP in order to detect entry
+   into a signal trampoline just after delivery of a signal.  But on
    GNU/Linux, signal trampolines are used for the return path only.
    The kernel sets things up so that the signal handler is called
    directly.
@@ -150,11 +150,11 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
    first instruction long after the fact, just in case the observed
    behavior is ever fixed.)
 
-   PC_IN_SIGTRAMP is called from blockframe.c as well in order to set
-   the frame's type (if a SIGTRAMP_FRAME).  Because of our strange
-   definition of in_sigtramp below, we can't rely on the frame's type
-   getting set correctly from within blockframe.c.  This is why we
-   take pains to set it in init_extra_frame_info().
+   DEPRECATED_PC_IN_SIGTRAMP is called from blockframe.c as well in
+   order to set the frame's type (if a SIGTRAMP_FRAME).  Because of
+   our strange definition of in_sigtramp below, we can't rely on the
+   frame's type getting set correctly from within blockframe.c.  This
+   is why we take pains to set it in init_extra_frame_info().
 
    NOTE: cagney/2002-11-10: I suspect the real problem here is that
    the get_prev_frame() only initializes the frame's type after the

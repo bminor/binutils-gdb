@@ -240,7 +240,7 @@ frv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      address points to a bit of code on the stack.  This function is
      used to identify this bit of code as a signal trampoline in order
      to support backtracing through calls to signal handlers.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, frv_linux_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, frv_linux_pc_in_sigtramp);
   frv_set_sigcontext_reg_addr (gdbarch, frv_linux_sigcontext_reg_addr);
 }
 

@@ -1448,7 +1448,7 @@ frv_sigtramp_frame_sniffer (struct frame_info *next_frame)
     return NULL;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
+  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
     return &frv_sigtramp_frame_unwind;
 
   return NULL;

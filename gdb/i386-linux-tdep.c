@@ -87,9 +87,9 @@ i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
    It kind of sucks that we have to read memory from the process in
    order to identify a signal trampoline, but there doesn't seem to be
-   any other way.  The PC_IN_SIGTRAMP macro in tm-linux.h arranges to
-   only call us if no function name could be identified, which should
-   be the case since the code is on the stack.
+   any other way.  The DEPRECATED_PC_IN_SIGTRAMP macro in tm-linux.h
+   arranges to only call us if no function name could be identified,
+   which should be the case since the code is on the stack.
 
    Detection of signal trampolines for handlers that set the
    SA_RESTORER flag is in general not possible.  Unfortunately this is
@@ -402,7 +402,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      address points to a bit of code on the stack.  This function is
      used to identify this bit of code as a signal trampoline in order
      to support backtracing through calls to signal handlers.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386_linux_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_linux_pc_in_sigtramp);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets

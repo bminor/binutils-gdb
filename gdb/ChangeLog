@@ -1,5 +1,53 @@
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (PC_IN_SIGTRAMP): Change to a function with
+	predicate, deprecate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Update.
+	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Update.
+	* alpha-tdep.c (alpha_sigtramp_frame_sniffer): Update.
+	* alphafbsd-tdep.c (alphafbsd_init_abi): Update.
+	* alphanbsd-tdep.c (alphanbsd_init_abi): Update.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Update.
+	* amd64-tdep.c (amd64_sigtramp_frame_sniffer): Update.
+	* amd64nbsd-tdep.c (amd64nbsd_init_abi): Update.
+	* amd64obsd-tdep.c (amd64obsd_init_abi): Update.
+	* arm-tdep.c (arm_sigtramp_unwind_sniffer): Update.
+	* blockframe.c (find_pc_partial_function): Update.
+	* breakpoint.c (bpstat_what): Update.
+	* frame.c (frame_type_from_pc, legacy_get_prev_frame): Update.
+	* frv-linux-tdep.c (frv_linux_init_abi): Update.
+	* frv-tdep.c (frv_sigtramp_frame_sniffer): Update.
+	* hppa-hpux-tdep.c (hppa_hpux_init_abi): Update.
+	* i386-interix-tdep.c (i386_interix_init_abi): Update.
+	* i386-linux-tdep.c (i386_linux_init_abi): Update.
+	* i386-nto-tdep.c (i386nto_init_abi): Update.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Update.
+	* i386-tdep.c (i386_sigtramp_frame_sniffer)
+	(i386_svr4_init_abi, i386_go32_init_abi, i386_gdbarch_init): Update.
+	* i386bsd-tdep.c (i386bsd_init_abi): Update.
+	* i386nbsd-tdep.c (i386nbsd_init_abi): Update.
+	* i386obsd-tdep.c (i386obsd_init_abi): Update.
+	* ia64-tdep.c (ia64_sigtramp_frame_sniffer): Update.
+	* infrun.c (pc_in_sigtramp): Update.
+	* m68k-tdep.c (m68k_sigtramp_frame_sniffer): Update.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mipsnbsd-tdep.c (mipsnbsd_init_abi): Update.
+	* ppc-linux-tdep.c: Update comment.
+	* ppcnbsd-tdep.c (ppcnbsd_init_abi): Update.
+	* shnbsd-tdep.c (shnbsd_init_abi): Update.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Update.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Update.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Update.
+	* sparc64fbsd-tdep.c (sparc64fbsd_init_abi): Update.
+	* sparc64nbsd-tdep.c (sparc64nbsd_init_abi): Update.
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Update.
+	* sparcnbsd-tdep.c (sparc32nbsd_init_abi): Update.
+	* sparcobsd-tdep.c (sparc32obsd_init_abi): Update.
+	
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
 	* tramp-frame.h, tramp-frame.h: New files.
 	* Makefile.in (SFILES, tramp_frame_h, COMMON_OBS, tramp-frame.o):
 	Update rules to include "tramp-frame.h" and "tramp-frame.c".

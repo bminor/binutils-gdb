@@ -382,7 +382,8 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
-  if (SIGTRAMP_START_P () && PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
+  if (SIGTRAMP_START_P ()
+      && DEPRECATED_PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
       cache_pc_function_low = SIGTRAMP_START (mapped_pc);
       cache_pc_function_high = SIGTRAMP_END (mapped_pc);

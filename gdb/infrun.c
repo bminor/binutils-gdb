@@ -1203,8 +1203,8 @@ context_switch (struct execution_control_state *ecs)
   inferior_ptid = ecs->ptid;
 }
 
-/* Wrapper for PC_IN_SIGTRAMP that takes care of the need to find the
-   function's name.
+/* Wrapper for DEPRECATED_PC_IN_SIGTRAMP that takes care of the need
+   to find the function's name.
 
    In a classic example of "left hand VS right hand", "infrun.c" was
    trying to improve GDB's performance by caching the result of calls
@@ -1233,7 +1233,7 @@ pc_in_sigtramp (CORE_ADDR pc)
 {
   char *name;
   find_pc_partial_function (pc, &name, NULL, NULL);
-  return PC_IN_SIGTRAMP (pc, name);
+  return DEPRECATED_PC_IN_SIGTRAMP (pc, name);
 }
 
 /* Handle the inferior event in the cases when we just stepped

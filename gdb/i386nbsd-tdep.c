@@ -225,7 +225,7 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = 16 * 4;
 
   /* NetBSD has different signal trampoline conventions.  */
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
+  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
   /* FIXME: kettenis/20020906: We should probably provide
      NetBSD-specific versions of these functions if we want to
      recognize signal trampolines that live on the stack.  */

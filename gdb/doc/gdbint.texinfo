@@ -3636,8 +3636,8 @@ them.
 @findex PCC_SOL_BROKEN
 (Used only in the Convex target.)
 
-@item PC_IN_SIGTRAMP (@var{pc}, @var{name})
-@findex PC_IN_SIGTRAMP
+@item DEPRECATED_PC_IN_SIGTRAMP (@var{pc}, @var{name})
+@findex DEPRECATED_PC_IN_SIGTRAMP
 @cindex sigtramp
 The @dfn{sigtramp} is a routine that the kernel calls (which then calls
 the signal handler).  On most machines it is a library routine that is

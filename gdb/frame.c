@@ -1161,7 +1161,7 @@ frame_type_from_pc (CORE_ADDR pc)
     {
       char *name;
       find_pc_partial_function (pc, &name, NULL, NULL);
-      if (PC_IN_SIGTRAMP (pc, name))
+      if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
 	return SIGTRAMP_FRAME;
       else
 	return NORMAL_FRAME;
@@ -1696,7 +1696,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	 22).  */
       char *name;
       find_pc_partial_function (get_frame_pc (prev), &name, NULL, NULL);
-      if (PC_IN_SIGTRAMP (get_frame_pc (prev), name))
+      if (DEPRECATED_PC_IN_SIGTRAMP (get_frame_pc (prev), name))
 	prev->type = SIGTRAMP_FRAME;
       /* FIXME: cagney/2002-11-11: Leave prev->type alone.  Some
          architectures are forcing the frame's type in INIT so we

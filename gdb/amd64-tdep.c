@@ -968,7 +968,7 @@ amd64_sigtramp_frame_sniffer (struct frame_info *next_frame)
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
+  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
     {
       gdb_assert (gdbarch_tdep (current_gdbarch)->sigcontext_addr);
 

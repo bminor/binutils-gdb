@@ -2122,22 +2122,40 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
    no name, assume we are not in sigtramp).
   
    FIXME: cagney/2002-04-21: The function find_pc_partial_function
-   calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
-   This means PC_IN_SIGTRAMP function can't be implemented by doing its
-   own local NAME lookup.
+   calls find_pc_sect_partial_function() which calls
+   DEPRECATED_PC_IN_SIGTRAMP.  This means DEPRECATED_PC_IN_SIGTRAMP
+   function can't be implemented by doing its own local NAME lookup.
   
-   FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
-   Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
-   does not. */
+   FIXME: cagney/2002-04-21: DEPRECATED_PC_IN_SIGTRAMP is something of
+   a mess.  Some code also depends on SIGTRAMP_START and SIGTRAMP_END
+   but other does not.
+  
+   NOTE: cagney/2004-03-16: DEPRECATED_PC_IN_SIGTRAMP has been made
+   obsolete by signal trampoline frame unwind sniffers. */
 
-typedef int (gdbarch_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
-extern int gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
-extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PC_IN_SIGTRAMP)
-#error "Non multi-arch definition of PC_IN_SIGTRAMP"
+#if defined (DEPRECATED_PC_IN_SIGTRAMP)
+/* Legacy for systems yet to multi-arch DEPRECATED_PC_IN_SIGTRAMP */
+#if !defined (DEPRECATED_PC_IN_SIGTRAMP_P)
+#define DEPRECATED_PC_IN_SIGTRAMP_P() (1)
 #endif
-#if !defined (PC_IN_SIGTRAMP)
-#define PC_IN_SIGTRAMP(pc, name) (gdbarch_pc_in_sigtramp (current_gdbarch, pc, name))
+#endif
+
+extern int gdbarch_deprecated_pc_in_sigtramp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_SIGTRAMP_P)
+#error "Non multi-arch definition of DEPRECATED_PC_IN_SIGTRAMP"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_SIGTRAMP_P)
+#define DEPRECATED_PC_IN_SIGTRAMP_P() (gdbarch_deprecated_pc_in_sigtramp_p (current_gdbarch))
+#endif
+
+typedef int (gdbarch_deprecated_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
+extern int gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+extern void set_gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_deprecated_pc_in_sigtramp_ftype *deprecated_pc_in_sigtramp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_SIGTRAMP)
+#error "Non multi-arch definition of DEPRECATED_PC_IN_SIGTRAMP"
+#endif
+#if !defined (DEPRECATED_PC_IN_SIGTRAMP)
+#define DEPRECATED_PC_IN_SIGTRAMP(pc, name) (gdbarch_deprecated_pc_in_sigtramp (current_gdbarch, pc, name))
 #endif
 
 #if defined (SIGTRAMP_START)
