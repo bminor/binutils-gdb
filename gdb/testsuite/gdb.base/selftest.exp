@@ -54,6 +54,10 @@ proc do_steps_and_nexts {} {
 
     for {set count 0} {$count < 26} {incr count} {
 	send_gdb "list\n"
+	# NOTE: carlton/2002-12-11: The "initial brace" and
+	# "current_directory initialization" possibilities happen to
+	# me with GCC 3.1 on i686-pc-linux-gnu when I compile with
+	# optimization.
 	gdb_expect {
 	    -re ".*context = data.*$gdb_prompt $" {
 		set description "step over context initialization"
@@ -157,6 +161,14 @@ proc do_steps_and_nexts {} {
 	    -re ".*textdomain .PACKAGE.;.*$gdb_prompt $" {
 		set description "next over textdomain PACKAGE"
 		set command "next"
+	    }
+	    -re "\[0-9\]*\t\{\r\n$gdb_prompt $" {
+		set description "step over initial brace"
+		set command "step"
+	    }
+	    -re ".*current_directory = gdb_dirbuf.*$gdb_prompt $" {
+		set description "step over current_directory initialization"
+		set command "step"
 	    }
 	    -re "\[ \t\]+\{\r\n$gdb_prompt $" {
 		setup_xfail "mips-*-irix5*"

@@ -1,3 +1,8 @@
+2002-12-23  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Allow initial brace
+	and current_directory initialization.
+
 2002-12-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.trace/tfind.exp: Pass '-O1' flag via the 'optimize' option,
