@@ -1,5 +1,10 @@
 1999-07-14  Mark Mitchell  <mark@codesourcery.com>
 
+	* elf32-mips.c (mips_elf_obtain_contents): Swap the 16-bit
+	subwords when handling an R_MIPS16_26 relocation.
+	(mips_elf_perform_relocation): Don't be paranoid abour right-shift
+	semantics.
+	
 	* elf32-mips.c (elf_mips16_gprel_howto): Adjust src_mask and
 	dst_mask to match reality.
 	(_bfd_mips_elf_calculate_relocation): Handle R_MIPS16_GPREL.

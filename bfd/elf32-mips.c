@@ -5884,7 +5884,7 @@ mips_elf_calculate_relocation (abfd,
     case R_MIPS16_26:
       /* The calculation for R_MIPS_26 is just the same as for an
 	 R_MIPS_26.  It's only the storage of the relocated field into
-	 the output file that's different.  That's handle in
+	 the output file that's different.  That's handled in
 	 mips_elf_perform_relocation.  So, we just fall through to the
 	 R_MIPS_26 case here.  */
     case R_MIPS_26:
@@ -6071,6 +6071,12 @@ mips_elf_obtain_contents (howto, relocation, input_bfd, contents)
   /* Obtain the bytes.  */
   x = bfd_get (8 * bfd_get_reloc_size (howto), input_bfd, location);
 
+  if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26
+      && bfd_little_endian (input_bfd))
+    /* The two 16-bit words will be reversed on a little-endian
+       system.  See mips_elf_perform_relocation for more details.  */
+    x = (((x & 0xffff) << 16) | ((x & 0xffff0000) >> 16));
+
   return x;
 }
 
@@ -6179,7 +6185,7 @@ mips_elf_perform_relocation (info, howto, relocation, value,
          systems.  */
       if (bfd_little_endian (input_bfd))
 	x = (((x & 0xffff) << 16)
-	     | (((x & 0xffff0000) >> 16) & 0xffff));
+	     | ((x & 0xffff0000) >> 16));
 
       /* Store the value.  */
       bfd_put_32 (input_bfd, x, location);
