@@ -221,13 +221,6 @@ mipsnbsd_sigtramp_offset (CORE_ADDR pc)
   return -1;
 }
 
-static int
-mipsnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
-{
-  return (nbsd_pc_in_sigtramp (pc, func_name)
-	  || mipsnbsd_sigtramp_offset (pc) >= 0);
-}
-
 /* Figure out where the longjmp will land.  We expect that we have
    just entered longjmp and haven't yet setup the stack frame, so
    the args are still in the argument regs.  A0_REGNUM points at the
@@ -345,8 +338,6 @@ static void
 mipsnbsd_init_abi (struct gdbarch_info info,
                    struct gdbarch *gdbarch)
 {
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mipsnbsd_pc_in_sigtramp);
-
   set_gdbarch_get_longjmp_target (gdbarch, mipsnbsd_get_longjmp_target);
 
   set_gdbarch_cannot_fetch_register (gdbarch, mipsnbsd_cannot_fetch_register);
