@@ -183,12 +183,11 @@ struct complaint pdr_static_symbol_complaint =
 	(((a) == GLEVEL_3) ? ((b) < GLEVEL_3) :			\
 	 ((b) == GLEVEL_3) ? -1 : (int)((b) - (a)))
 
-/* When looking at .o files, avoid tripping over bad addresses */
+/* When looking at .o files, avoid tripping over zero pointers.
+   FIXME; places that use this should be fixed to convert from
+   external to internal format, rather than examining in-place. */
 
-#define SAFE_TEXT_ADDR 0x400000
-#define SAFE_DATA_ADDR 0x10000000
-
-#define UNSAFE_DATA_ADDR(p)	((unsigned)p < SAFE_DATA_ADDR || (unsigned)p > 2*SAFE_DATA_ADDR)
+#define	UNSAFE_DATA_ADDR(p)	((p) == 0)
 
 /* Things that really are local to this module */
 
