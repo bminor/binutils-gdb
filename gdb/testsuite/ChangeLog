@@ -1,3 +1,14 @@
+Tue Nov 26 18:29:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/callfuncs.exp: Turn on function call tests for h8300.
+	* gdb.base/default.exp:   ditto.
+	* gdb.base/nodebug.exp:   ditto.
+	* gdb.base/printcmds.exp: ditto.
+	* gdb.base/ptype.exp:     ditto.
+	* gdb.base/setvar.exp:    ditto.
+	* gdb.base/structs.exp:   ditto.
+	* gdb.base/setshow.c:     Guard against uninitialized values of argc.
+
 Tue Nov 26 17:23:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, */configure: Rebuild with autoconf 2.12.

@@ -12,7 +12,10 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 # Get rid of any -g options (including -gstabs, -gdwarf, etc...
-regsub -all -- {[ 	]-g[^ 	]*} $target_info(target,cflags) { } target_info(target,cflags)
+if [info exists target_info(target,cflags)] {
+	set saved_cflags $target_info(target,cflags)
+	regsub -all -- {[ 	]-g[^ 	]*} $target_info(target,cflags) { } target_info(target,cflags)
+}
 
 if  { [compile "${srcdir}/${subdir}/${srcfile} -o ${binfile}"] != "" } {
     perror "Couldn't compile ${srcfile}"
@@ -26,6 +29,11 @@ if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
     perror "Couldn't make ${binfile}.ci file"
     return -1
 }
+
+if [info exists target_info(target,cflags)] {
+	set target_info(target,cflags) $saved_cflags
+}
+
 source ${binfile}.ci
 
 gdb_reinitialize_dir $srcdir/$subdir
@@ -107,25 +115,23 @@ if [runto inner] then {
     if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
     
-    gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
+    gdb_test "backtrace 10" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
 	"backtrace from inner in nodebug.exp"
     # Or if that doesn't work, at least hope for the external symbols
     # Commented out because if we aren't going to xfail the above test
     # ever, why bother with a weaker test?
-    #gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main.*" \
+    #gdb_test "backtrace 10" "#0.*inner.*#1.*#2.*top.*#3.*main.*" \
 	#    "backtrace from inner in nodebug.exp for externals"
     
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
-    setup_xfail "h8300*-*-*"
     if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
     gdb_test {p/c array_index("abcdef",2)} " = 99 'c'"
     
     # Now, try that we can give names of file-local symbols which happen
     # to be unique, and have it still work
     if [runto middle] then {
-	setup_xfail "h8300*-*-*"
-	gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main.*" \
+	gdb_test "backtrace 10" "#0.*middle.*#1.*top.*#2.*main.*" \
 	    "backtrace from middle in nodebug.exp"
     }
 }
