@@ -1,3 +1,9 @@
+2003-04-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* blockframe.c (legacy_frame_chain_valid): Move call to
+	DEPRECATED_FRAME_CHAIN_VALID before calls to inside_entry_func and
+	inside_entry_file.
+
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (struct frame_id): Replace "pc" and "base" with

@@ -575,6 +575,11 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   if (INNER_THAN (fp, get_frame_base (fi)))
     return 0;
   
+  /* If the architecture has a custom DEPRECATED_FRAME_CHAIN_VALID,
+     call it now.  */
+  if (DEPRECATED_FRAME_CHAIN_VALID_P ())
+    return DEPRECATED_FRAME_CHAIN_VALID (fp, fi);
+
   /* If we're already inside the entry function for the main objfile, then it
      isn't valid.  */
   if (inside_entry_func (get_frame_pc (fi)))
@@ -586,11 +591,6 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
      dbxread) figure out which object is the entry file is somewhat hokey.  */
   if (inside_entry_file (frame_pc_unwind (fi)))
       return 0;
-
-  /* If the architecture has a custom DEPRECATED_FRAME_CHAIN_VALID,
-     call it now.  */
-  if (DEPRECATED_FRAME_CHAIN_VALID_P ())
-    return DEPRECATED_FRAME_CHAIN_VALID (fp, fi);
 
   return 1;
 }
