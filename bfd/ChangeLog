@@ -1,5 +1,8 @@
 2002-04-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (elf_bfd_final_link): Ensure input bfd class is the
+	same as the output before calling elf_link_input_bfd.
+
 	* coffcode.h (coff_compute_section_file_positions): Set
 	section_tail after shuffling section list.
 

@@ -5347,21 +5347,11 @@ elf_bfd_final_link (abfd, info)
     {
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
-	  Elf_Internal_Shdr *rhdr;
-
 	  if (p->type == bfd_indirect_link_order
-	      && (bfd_get_flavour (p->u.indirect.section->owner)
+	      && (bfd_get_flavour ((sub = p->u.indirect.section->owner))
 		  == bfd_target_elf_flavour)
-	      && (((rhdr = &elf_section_data (p->u.indirect.section)->rel_hdr)
-		   ->sh_entsize == 0)
-		  || rhdr->sh_entsize == sizeof (Elf_External_Rel)
-		  || rhdr->sh_entsize == sizeof (Elf_External_Rela))
-	      && (((rhdr = elf_section_data (p->u.indirect.section)->rel_hdr2)
-		   == NULL)
-		  || rhdr->sh_entsize == sizeof (Elf_External_Rel)
-		  || rhdr->sh_entsize == sizeof (Elf_External_Rela)))
+	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass)
 	    {
-	      sub = p->u.indirect.section->owner;
 	      if (! sub->output_has_begun)
 		{
 		  if (! elf_link_input_bfd (&finfo, sub))
