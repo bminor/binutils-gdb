@@ -53,6 +53,7 @@ i386-mach.mt
 i386-nbsd.mt
 i386-nw.mt
 i386bsd.mh
+i386lynx.mh
 i386sco.mh
 i386v.mh
 i386v.mt
