@@ -455,7 +455,6 @@ c_type_print_base (type, stream, show, level)
      int show;
      int level;
 {
-  char *name;
   register int i;
   register int len;
   register int lastval;
@@ -472,9 +471,13 @@ c_type_print_base (type, stream, show, level)
     }
 
   /* When SHOW is zero or less, and there is a valid type name, then always
-     just print the type name directly from the type. */
+     just print the type name directly from the type.  */
+  /* If we have "typedef struct foo {. . .} bar;" do we want to print it
+     as "struct foo" or as "bar"?  Pick the latter, because C++ folk tend
+     to expect things like "class5 *foo" rather than "struct class5 *foo".  */
 
-  if ((show <= 0) && (TYPE_NAME (type) != NULL))
+  if (show <= 0
+      && TYPE_NAME (type) != NULL)
     {
       fputs_filtered (TYPE_NAME (type), stream);
       return;
@@ -494,67 +497,32 @@ c_type_print_base (type, stream, show, level)
     case TYPE_CODE_STRUCT:
       if (HAVE_CPLUS_STRUCT (type))
 	{
-	  /* Always print it as "class foo" even if foo is a typedef'd
-	     name, not a tag.  */
 	  fprintf_filtered (stream, "class ");
-	  name = type_name_no_tag (type);
-	  if (name != NULL)
-	    {
-	      fputs_filtered (name, stream);
-	      fputs_filtered (" ", stream);
-	      wrap_here ("    ");
-	    }
 	}
       else
 	{
 	  fprintf_filtered (stream, "struct ");
-	  name = TYPE_NAME (type);
-	  /* If the name does not start with "struct " it means that the
-	     type was defined without a tag, so don't print a tag.  It is
-	     possible that we should have a better way of distinguising
-	     tag names from typedef'd names.  (e.g. a new tagname field in
-	     the struct type).  */
-	  if (name != NULL && strncmp (name, "struct ", 7) == 0)
-	    {
-	      fputs_filtered (name + 7, stream);
-	      fputs_filtered (" ", stream);
-	    }
 	}
       goto struct_union;
 
     case TYPE_CODE_UNION:
       fprintf_filtered (stream, "union ");
-      if (HAVE_CPLUS_STRUCT (type))
-	{
-	  /* Always print it as "union foo" even if foo is a typedef'd
-	     name, not a tag.  */
-	  name = type_name_no_tag (type);
-	  if (name != NULL)
-	    {
-	      fputs_filtered (name, stream);
-	      fputs_filtered (" ", stream);
-	      wrap_here ("    ");
-	    }
-	}
-      else
-	{
-	  name = TYPE_NAME (type);
-	  /* If the name does not start with "union " it means that the
-	     type was defined without a tag, so don't print a tag.  It is
-	     possible that we should have a better way of distinguising
-	     tag names from typedef'd names.  (e.g. a new tagname field in
-	     the struct type).  */
-	  if (name != NULL && strncmp (name, "union ", 6) == 0)
-	    {
-	      fputs_filtered (name + 6, stream);
-	      fputs_filtered (" ", stream);
-	    }
-	}
+
     struct_union:
+      if (TYPE_TAG_NAME (type) != NULL)
+	{
+	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  if (show > 0)
+	    fputs_filtered (" ", stream);
+	}
       wrap_here ("    ");
       if (show < 0)
-	fprintf_filtered (stream, "{...}");
-      else
+	{
+	  /* If we just printed a tag name, no need to print anything else.  */
+	  if (TYPE_TAG_NAME (type) == NULL)
+	    fprintf_filtered (stream, "{...}");
+	}
+      else if (show > 0)
 	{
 	  check_stub_type (type);
 	  
@@ -653,6 +621,7 @@ c_type_print_base (type, stream, show, level)
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
+	      char *name = type_name_no_tag (type);
 	      int is_constructor = name && STREQ(method_name, name);
 	      for (j = 0; j < len2; j++)
 		{
@@ -739,23 +708,21 @@ c_type_print_base (type, stream, show, level)
 
     case TYPE_CODE_ENUM:
       fprintf_filtered (stream, "enum ");
-      name = TYPE_NAME (type);
-
-      /* If the name does not start with "enum " it means that the
-	 type was defined without a tag, so don't print a tag.  It is
-	 possible that we should have a better way of distinguising
-	 tag names from typedef'd names.  (e.g. a new tagname field in
-	 the struct type).  */
-      if (name != NULL && strncmp (name, "enum ", 5) == 0)
+      if (TYPE_TAG_NAME (type) != NULL)
 	{
-	  fputs_filtered (name + 5, stream);
-	  fputs_filtered (" ", stream);
+	  fputs_filtered (TYPE_TAG_NAME (type), stream);
+	  if (show > 0)
+	    fputs_filtered (" ", stream);
 	}
 
       wrap_here ("    ");
       if (show < 0)
-	fprintf_filtered (stream, "{...}");
-      else
+	{
+	  /* If we just printed a tag name, no need to print anything else.  */
+	  if (TYPE_TAG_NAME (type) == NULL)
+	    fprintf_filtered (stream, "{...}");
+	}
+      else if (show > 0)
 	{
 	  fprintf_filtered (stream, "{");
 	  len = TYPE_NFIELDS (type);

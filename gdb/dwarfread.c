@@ -1026,7 +1026,6 @@ struct_type (dip, thisdie, enddie, objfile)
   struct nextfield *new;
   int nfields = 0;
   int n;
-  char *tpart1;
   struct dieinfo mbr;
   char *nextdie;
 #if !BITS_BIG_ENDIAN
@@ -1043,20 +1042,16 @@ struct_type (dip, thisdie, enddie, objfile)
     {
       case TAG_class_type:
         TYPE_CODE (type) = TYPE_CODE_CLASS;
-	tpart1 = "class";
 	break;
       case TAG_structure_type:
         TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	tpart1 = "struct";
 	break;
       case TAG_union_type:
 	TYPE_CODE (type) = TYPE_CODE_UNION;
-	tpart1 = "union";
 	break;
       default:
 	/* Should never happen */
 	TYPE_CODE (type) = TYPE_CODE_UNDEF;
-	tpart1 = "???";
 	complain (&missing_tag, DIE_ID, DIE_NAME);
 	break;
     }
@@ -1067,8 +1062,8 @@ struct_type (dip, thisdie, enddie, objfile)
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
     {
-      TYPE_NAME (type) = obconcat (&objfile -> type_obstack,
-				   tpart1, " ", dip -> at_name);
+      TYPE_TAG_NAME (type) = obconcat (&objfile -> type_obstack,
+				       "", "", dip -> at_name);
     }
   /* Use whatever size is known.  Zero is a valid size.  We might however
      wish to check has_at_byte_size to make sure that some byte size was
@@ -1756,8 +1751,8 @@ enum_type (dip, objfile)
       && *dip -> at_name != '~'
       && *dip -> at_name != '.')
     {
-      TYPE_NAME (type) = obconcat (&objfile -> type_obstack, "enum",
-				   " ", dip -> at_name);
+      TYPE_TAG_NAME (type) = obconcat (&objfile -> type_obstack,
+				       "", "", dip -> at_name);
     }
   if (dip -> at_byte_size != 0)
     {

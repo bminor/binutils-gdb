@@ -1086,14 +1086,9 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	TYPE_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile -> type_obstack, "",
-		      (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_ENUM
-		       ? "enum "
-		       : (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-			  ? "struct " : "union ")),
-		      SYMBOL_NAME (sym));
+      if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
+	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
+	  = obconcat (&objfile -> type_obstack, "", "", SYMBOL_NAME (sym));
       add_symbol_to_list (sym, &file_symbols);
 
       if (synonym)
@@ -1105,6 +1100,9 @@ define_symbol (valu, string, desc, type, objfile)
 	  SYMBOL_CLASS (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
+	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	    TYPE_NAME (SYMBOL_TYPE (sym))
+	      = obconcat (&objfile -> type_obstack, "", "", SYMBOL_NAME (sym));
 	  add_symbol_to_list (typedef_sym, &file_symbols);
 	}
       break;
@@ -1317,15 +1315,12 @@ read_type (pp, objfile)
 	    {
 	    case 's':
 	      code = TYPE_CODE_STRUCT;
-	      prefix = "struct ";
 	      break;
 	    case 'u':
 	      code = TYPE_CODE_UNION;
-	      prefix = "union ";
 	      break;
 	    case 'e':
 	      code = TYPE_CODE_ENUM;
-	      prefix = "enum ";
 	      break;
 	    default:
 	      return error_type (pp);
@@ -1333,17 +1328,8 @@ read_type (pp, objfile)
 	  
 	  to = type_name = (char *)
 	    obstack_alloc (&objfile -> type_obstack,
-			   (strlen (prefix) +
-			    ((char *) strchr (*pp, ':') - (*pp)) + 1));
+			   (((char *) strchr (*pp, ':') - (*pp)) + 1));
 	
-	  /* Copy the prefix.  */
-	  from = prefix;
-	  while ((*to++ = *from++) != '\0')
-	    ;
-	  to--; 
-	
-	  type_name_only = to;
-
 	  /* Copy the name.  */
 	  from = *pp + 1;
 	  while ((*to++ = *from++) != ':')
@@ -1352,23 +1338,6 @@ read_type (pp, objfile)
 	  
 	  /* Set the pointer ahead of the name which we just read.  */
 	  *pp = from;
-	
-#if 0
-	  /* The following hack is clearly wrong, because it doesn't
-	     check whether we are in a baseclass.  I tried to reproduce
-	     the case that it is trying to fix, but I couldn't get
-	     g++ to put out a cross reference to a basetype.  Perhaps
-	     it doesn't do it anymore.  */
-	  /* Note: for C++, the cross reference may be to a base type which
-	     has not yet been seen.  In this case, we skip to the comma,
-	     which will mark the end of the base class name.  (The ':'
-	     at the end of the base class name will be skipped as well.)
-	     But sometimes (ie. when the cross ref is the last thing on
-	     the line) there will be no ','.  */
-	  from = (char *) strchr (*pp, ',');
-	  if (from)
-	    *pp = from;
-#endif /* 0 */
 	}
 
 	/* Now check to see whether the type has already been declared.  */
@@ -1386,7 +1355,7 @@ read_type (pp, objfile)
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-		  && STREQ (SYMBOL_NAME (sym), type_name_only))
+		  && STREQ (SYMBOL_NAME (sym), type_name))
 		{
 		  obstack_free (&objfile -> type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
@@ -1401,7 +1370,7 @@ read_type (pp, objfile)
 	   type.  */
 	type = dbx_alloc_type (typenums, objfile);
 	TYPE_CODE (type) = code;
-	TYPE_NAME (type) = type_name;
+	TYPE_TAG_NAME (type) = type_name;
 	INIT_CPLUS_SPECIFIC(type);
 	TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
 
@@ -3482,7 +3451,7 @@ cleanup_undefined_types ()
 		struct pending *ppt;
 		int i;
 		/* Name of the type, without "struct" or "union" */
-		char *typename = type_name_no_tag (*type);
+		char *typename = TYPE_TAG_NAME (*type);
 
 		if (typename == NULL)
 		  {

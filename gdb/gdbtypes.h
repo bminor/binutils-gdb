@@ -142,6 +142,12 @@ struct type
 
   char *name;
 
+  /* Tag name for this type, or NULL if none.  This is a feature which is
+     specific to C/C++ for structs, unions, or enums.  
+     This is used for printing only, except by poorly designed C++ code.  */
+
+  char *tag_name;
+
   /* Length, in units of TARGET_CHAR_BIT bits,
      of storage for a value of this type */
 
@@ -399,6 +405,7 @@ allocate_cplus_struct_type PARAMS ((struct type *));
   (TYPE_CPLUS_SPECIFIC(type) != &cplus_struct_default)
 
 #define TYPE_NAME(thistype) (thistype)->name
+#define TYPE_TAG_NAME(type) ((type)->tag_name)
 #define TYPE_TARGET_TYPE(thistype) (thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
