@@ -590,7 +590,6 @@ static void do_branch		PARAMS ((char *, unsigned long));
 static void do_swi		PARAMS ((char *, unsigned long));
 /* Pseudo Op codes.  */
 static void do_adr		PARAMS ((char *, unsigned long));
-static void do_adrl		PARAMS ((char *, unsigned long));
 static void do_nop		PARAMS ((char *, unsigned long));
 /* ARM 2.  */
 static void do_mul		PARAMS ((char *, unsigned long));
@@ -679,6 +678,10 @@ static void set_constant_flonums	PARAMS ((void));
 static valueT md_chars_to_number	PARAMS ((char *, int));
 static void insert_reg_alias	PARAMS ((char *, int));
 static void output_inst		PARAMS ((void));
+static int accum0_required_here PARAMS ((char **));
+static int ld_mode_required_here PARAMS ((char **));
+static void do_branch25         PARAMS ((char *, unsigned long));
+static symbolS * find_real_start PARAMS ((symbolS *));
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 #endif

@@ -1,3 +1,7 @@
+2001-09-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c: Add missing prototypes.
+
 2001-09-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* input-file.c (input_file_open): When reading the
