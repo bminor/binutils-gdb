@@ -5,8 +5,14 @@ EXE=${CONSTRUCTING+${RELOCATING+-exe}}
 
 # These are substituted in as variables in order to get '}' in a shell
 # conditional expansion.
-CTOR='.ctor : { *(.ctor) }'
-DTOR='.dtor : { *(.dtor) }'
+CTOR='.ctor : {
+    *(SORT(.ctors.*))
+    *(.ctor)
+  }'
+DTOR='.dtor : {
+    *(SORT(.dtors.*))
+    *(.dtor)
+  }'
 
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}${EXE}")
@@ -26,9 +32,11 @@ SECTIONS
   }
   .data ${RELOCATING+ ${DATA_ALIGNMENT}} : {
     ${RELOCATING+djgpp_first_ctor = . ;
+    *(SORT(.ctors.*))
     *(.ctor)
     djgpp_last_ctor = . ;}
     ${RELOCATING+djgpp_first_dtor = . ;
+    *(SORT(.dtors.*))
     *(.dtor)
     djgpp_last_dtor = . ;}
     *(.data)

@@ -1,3 +1,8 @@
+2000-07-12  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* scripttempl/i386go32.sc: Support the g++ attribute init_priority in
+	  gcc 2.95.2 and later.
+
 2000-07-11  Kazu Hirata  <kazu@hxi.com>
 
         * ldfile.c (ldfile_try_open_bfd): Output '\n' after an error
