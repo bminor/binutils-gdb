@@ -774,14 +774,6 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
   return pc + avr_scan_arg_moves (vpc, prologue);;
 }
 
-/* Returns the return address for a dummy. */
-
-static CORE_ADDR
-avr_call_dummy_address (void)
-{
-  return entry_point_address ();
-}
-
 static CORE_ADDR
 avr_skip_prologue (CORE_ADDR pc)
 {
@@ -1070,7 +1062,7 @@ static const struct frame_unwind avr_frame_unwind = {
 };
 
 const struct frame_unwind *
-avr_frame_p (CORE_ADDR pc)
+avr_frame_sniffer (struct frame_info *next_frame)
 {
   return &avr_frame_unwind;
 }
@@ -1321,7 +1313,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
-  set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
   set_gdbarch_push_dummy_call (gdbarch, avr_push_dummy_call);
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
@@ -1341,7 +1332,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                              frameless_look_for_prologue);
 
-  frame_unwind_append_predicate (gdbarch, avr_frame_p);
+  frame_unwind_append_sniffer (gdbarch, avr_frame_sniffer);
   frame_base_set_default (gdbarch, &avr_frame_base);
 
   set_gdbarch_unwind_dummy_id (gdbarch, avr_unwind_dummy_id);

@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 860 COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Created mostly by substituting "860" for "386" in coff-i386.c
    Harry Dolan <dolan@ssd.intel.com>, October 1995
@@ -30,13 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "libcoff.h"
 
-static bfd_reloc_status_type coff_i860_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static reloc_howto_type *coff_i860_rtype_to_howto
-  PARAMS ((bfd *, asection *, struct internal_reloc *,
-	   struct coff_link_hash_entry *, struct internal_syment *,
-	   bfd_vma *));
-static const bfd_target * i3coff_object_p PARAMS ((bfd *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
@@ -47,21 +40,19 @@ static const bfd_target * i3coff_object_p PARAMS ((bfd *));
    section for a reference to a common symbol is the value itself plus
    any desired offset.  Ian Taylor, Cygnus Support.  */
 
-/* If we are producing relocateable output, we need to do some
+/* If we are producing relocatable output, we need to do some
    adjustments to the object file that are not done by the
    bfd_perform_relocation function.  This function is called by every
    reloc type to make any required adjustments.  */
 
 static bfd_reloc_status_type
-coff_i860_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
-		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section ATTRIBUTE_UNUSED;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+coff_i860_reloc (bfd *abfd,
+		 arelent *reloc_entry,
+		 asymbol *symbol,
+		 void *data,
+		 asection *input_section ATTRIBUTE_UNUSED,
+		 bfd *output_bfd,
+		 char **error_message ATTRIBUTE_UNUSED)
 {
   symvalue diff;
 
@@ -87,7 +78,7 @@ coff_i860_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
     {
       /* For some reason bfd_perform_relocation always effectively
 	 ignores the addend for a COFF target when producing
-	 relocateable output.  This seems to be always wrong for 860
+	 relocatable output.  This seems to be always wrong for 860
 	 COFF, so we handle the addend here instead.  */
       diff = reloc_entry->addend;
     }
@@ -312,13 +303,12 @@ static reloc_howto_type howto_table[] =
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
 static reloc_howto_type *
-coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
-     bfd_vma *addendp;
+coff_i860_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+			  asection *sec,
+			  struct internal_reloc *rel,
+			  struct coff_link_hash_entry *h,
+			  struct internal_syment *sym,
+			  bfd_vma *addendp)
 {
 
   reloc_howto_type *howto;
@@ -348,7 +338,7 @@ coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     }
 
   /* If the output symbol is common (in which case this must be a
-     relocateable link), we need to add in the final size of the
+     relocatable link), we need to add in the final size of the
      common symbol.  */
   if (h != NULL && h->root.type == bfd_link_hash_common)
     *addendp += h->root.u.c.size;
@@ -361,8 +351,7 @@ coff_i860_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 #include "coffcode.h"
 
 static const bfd_target *
-i3coff_object_p(a)
-     bfd *a;
+i3coff_object_p(bfd *a)
 {
   return coff_object_p (a);
 }

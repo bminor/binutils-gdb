@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002
+   Copyright 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -1277,7 +1277,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 			 + sec->output_offset);
 		}
 	      else if ((0 == (h->flags & (XCOFF_DEF_DYNAMIC | XCOFF_IMPORT)))
-		       && ! info->relocateable)
+		       && ! info->relocatable)
 		{
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd, input_section,

@@ -24,9 +24,9 @@
 #include "frame.h"
 
 /* A default frame base implementations.  If it wasn't for the old
-   FRAME_LOCALS_ADDRESS and FRAME_ARGS_ADDRESS, these could be
-   combined into a single function.  All architectures really need to
-   override this.  */
+   DEPRECATED_FRAME_LOCALS_ADDRESS and DEPRECATED_FRAME_ARGS_ADDRESS,
+   these could be combined into a single function.  All architectures
+   really need to override this.  */
 
 static CORE_ADDR
 default_frame_base_address (struct frame_info *next_frame, void **this_cache)
@@ -38,15 +38,25 @@ default_frame_base_address (struct frame_info *next_frame, void **this_cache)
 static CORE_ADDR
 default_frame_locals_address (struct frame_info *next_frame, void **this_cache)
 {
-  struct frame_info *this_frame = get_prev_frame (next_frame);
-  return FRAME_LOCALS_ADDRESS (this_frame);
+  if (DEPRECATED_FRAME_LOCALS_ADDRESS_P ())
+    {
+      /* This is bad.  The computation of per-frame locals address
+	 should use a per-frame frame-base.  */
+      struct frame_info *this_frame = get_prev_frame (next_frame);
+      return DEPRECATED_FRAME_LOCALS_ADDRESS (this_frame);
+    }
+  return default_frame_base_address (next_frame, this_cache);
 }
 
 static CORE_ADDR
 default_frame_args_address (struct frame_info *next_frame, void **this_cache)
 {
-  struct frame_info *this_frame = get_prev_frame (next_frame);
-  return FRAME_ARGS_ADDRESS (this_frame);
+  if (DEPRECATED_FRAME_ARGS_ADDRESS_P ())
+    {
+      struct frame_info *this_frame = get_prev_frame (next_frame);
+      return DEPRECATED_FRAME_ARGS_ADDRESS (this_frame);
+    }
+  return default_frame_base_address (next_frame, this_cache);
 }
 
 const struct frame_base default_frame_base = {
@@ -60,7 +70,6 @@ static struct gdbarch_data *frame_base_data;
 
 struct frame_base_table
 {
-  frame_base_p_ftype **p;
   frame_base_sniffer_ftype **sniffer;
   const struct frame_base *default_base;
   int nr;
@@ -72,16 +81,6 @@ frame_base_init (struct gdbarch *gdbarch)
   struct frame_base_table *table = XCALLOC (1, struct frame_base_table);
   table->default_base = &default_frame_base;
   return table;
-}
-
-static void
-frame_base_free (struct gdbarch *gdbarch, void *data)
-{
-  struct frame_base_table *table =
-    gdbarch_data (gdbarch, frame_base_data);
-  xfree (table->p);
-  xfree (table->sniffer);
-  xfree (table);
 }
 
 static struct frame_base_table *
@@ -100,25 +99,14 @@ frame_base_table (struct gdbarch *gdbarch)
 
 /* Append a predicate to the end of the table.  */
 static void
-append_predicate (struct frame_base_table *table, frame_base_p_ftype *p,
+append_predicate (struct frame_base_table *table,
 		  frame_base_sniffer_ftype *sniffer)
 {
-  table->p = xrealloc (table->p, ((table->nr + 1)
-				  * sizeof (frame_base_p_ftype *)));
   table->sniffer = xrealloc (table->sniffer,
 			     ((table->nr + 1)
 			      * sizeof (frame_base_sniffer_ftype *)));
-  table->p[table->nr] = p;
   table->sniffer[table->nr] = sniffer;
   table->nr++;
-}
-
-void
-frame_base_append_predicate (struct gdbarch *gdbarch,
-			     frame_base_p_ftype *p)
-{
-  struct frame_base_table *table = frame_base_table (gdbarch);
-  append_predicate (table, p, NULL);
 }
 
 void
@@ -126,7 +114,7 @@ frame_base_append_sniffer (struct gdbarch *gdbarch,
 			   frame_base_sniffer_ftype *sniffer)
 {
   struct frame_base_table *table = frame_base_table (gdbarch);
-  append_predicate (table, NULL, sniffer);
+  append_predicate (table, sniffer);
 }
 
 void
@@ -146,10 +134,7 @@ frame_base_find_by_frame (struct frame_info *next_frame)
   for (i = 0; i < table->nr; i++)
     {
       const struct frame_base *desc = NULL;
-      if (table->p[i] != NULL)
-	desc = table->p[i] (frame_pc_unwind (next_frame));
-      else if (table->sniffer[i] != NULL)
-	desc = table->sniffer[i] (next_frame);
+      desc = table->sniffer[i] (next_frame);
       if (desc != NULL)
 	return desc;
     }
@@ -161,6 +146,5 @@ extern initialize_file_ftype _initialize_frame_base; /* -Wmissing-prototypes */
 void
 _initialize_frame_base (void)
 {
-  frame_base_data = register_gdbarch_data (frame_base_init,
-					   frame_base_free);
+  frame_base_data = register_gdbarch_data (frame_base_init);
 }

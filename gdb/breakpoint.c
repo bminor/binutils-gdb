@@ -584,17 +584,17 @@ commands_command (char *arg, int from_tty)
 
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
-    {
-      char tmpbuf[128];
-      sprintf (tmpbuf, 
-	       "Type commands for when breakpoint %d is hit, one per line.", 
-	       bnum);
-      l = read_command_lines (tmpbuf, from_tty);
-      free_command_lines (&b->commands);
-      b->commands = l;
-      breakpoints_changed ();
-      breakpoint_modify_event (b->number);
-      return;
+      {
+	char *tmpbuf = xstrprintf ("Type commands for when breakpoint %d is hit, one per line.", 
+				 bnum);
+	struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
+	l = read_command_lines (tmpbuf, from_tty);
+	do_cleanups (cleanups);
+	free_command_lines (&b->commands);
+	b->commands = l;
+	breakpoints_changed ();
+	breakpoint_modify_event (b->number);
+	return;
     }
   error ("No breakpoint number %d.", bnum);
 }
@@ -748,9 +748,6 @@ insert_breakpoints (void)
 #ifdef ONE_PROCESS_WRITETEXT
   int process_warning = 0;
 #endif
-
-  static char message1[] = "Error inserting catchpoint %d:\n";
-  static char message[sizeof (message1) + 30];
 
   struct ui_file *tmp_error_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_error_stream);
@@ -912,9 +909,6 @@ insert_breakpoints (void)
 	/* If we get here, we must have a callback mechanism for exception
 	   events -- with g++ style embedded label support, we insert
 	   ordinary breakpoints and not catchpoints. */
-	/* Format possible error message */
-	sprintf (message, message1, b->number);
-
 	val = target_insert_breakpoint (b->address, b->shadow_contents);
 	if (val)
 	  {
@@ -932,14 +926,18 @@ insert_breakpoints (void)
 	else
 	  {
 	    /* Bp set, now make sure callbacks are enabled */
+	    /* Format possible error msg */
+	    char *message = xstrprintf ("Error inserting catchpoint %d:\n",
+					b->number);
+	    struct cleanup *cleanups = make_cleanup (xfree, message);
 	    int val;
 	    args_for_catchpoint_enable args;
 	    args.kind = b->type == bp_catch_catch ? 
 	      EX_EVENT_CATCH : EX_EVENT_THROW;
 	    args.enable_p = 1;
 	    val = catch_errors (cover_target_enable_exception_callback,
-				&args,
-				message, RETURN_MASK_ALL);
+				&args, message, RETURN_MASK_ALL);
+	    do_cleanups (cleanups);
 	    if (val != 0 && val != -1)
 	      {
 		b->inserted = 1;
@@ -1083,11 +1081,12 @@ insert_breakpoints (void)
 	     && !b->inserted
 	     && !b->duplicate)
       {
-	char prefix[64];
-
-	sprintf (prefix, "warning: inserting catchpoint %d: ", b->number);
+	char *prefix = xstrprintf ("warning: inserting catchpoint %d: ",
+				   b->number);
+	struct cleanup *cleanups = make_cleanup (xfree, prefix);
 	val = catch_exceptions (uiout, insert_catchpoint, b, prefix,
 				RETURN_MASK_ERROR);
+	do_cleanups (cleanups);
 	if (val < 0)
 	  b->enable_state = bp_disabled;
 	else
@@ -2508,9 +2507,6 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
-  static char message1[] =
-  "Error evaluating expression for watchpoint %d\n";
-  char message[sizeof (message1) + 30 /* slop */ ];
 
   /* Get the address where the breakpoint would have been.  The
      "not_a_sw_breakpoint" argument is meant to distinguish between a
@@ -2609,12 +2605,16 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
     bs->stop = 1;
     bs->print = 1;
 
-    sprintf (message, message1, b->number);
     if (b->type == bp_watchpoint ||
 	b->type == bp_hardware_watchpoint)
       {
-	switch (catch_errors (watchpoint_check, bs, message, 
-			      RETURN_MASK_ALL))
+	char *message = xstrprintf ("Error evaluating expression for watchpoint %d\n",
+				    b->number);
+	struct cleanup *cleanups = make_cleanup (xfree, message);
+	int e = catch_errors (watchpoint_check, bs, message, 
+			      RETURN_MASK_ALL);
+	do_cleanups (cleanups);
+	switch (e)
 	  {
 	  case WP_DELETED:
 	    /* We've already printed what needs to be printed.  */
@@ -2682,42 +2682,49 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	      }
 	  }
 	if (found)
-	  switch (catch_errors (watchpoint_check, bs, message,
-				RETURN_MASK_ALL))
-	    {
-	    case WP_DELETED:
-	      /* We've already printed what needs to be printed.  */
-	      bs->print_it = print_it_done;
-	      /* Stop.  */
-	      break;
-	    case WP_VALUE_CHANGED:
-	      if (b->type == bp_read_watchpoint)
-		{
-		  /* Don't stop: read watchpoints shouldn't fire if
-		     the value has changed.  This is for targets which
-		     cannot set read-only watchpoints.  */
-		  bs->print_it = print_it_noop;
-		  bs->stop = 0;
-		  continue;
-		}
-	      ++(b->hit_count);
-	      break;
-	    case WP_VALUE_NOT_CHANGED:
-	      /* Stop.  */
-	      ++(b->hit_count);
-	      break;
-	    default:
-	      /* Can't happen.  */
-	    case 0:
-	      /* Error from catch_errors.  */
-	      printf_filtered ("Watchpoint %d deleted.\n", b->number);
-	      if (b->related_breakpoint)
-		b->related_breakpoint->disposition = disp_del_at_next_stop;
-	      b->disposition = disp_del_at_next_stop;
-	      /* We've already printed what needs to be printed.  */
-	      bs->print_it = print_it_done;
-	      break;
-	    }
+	  {
+	    char *message = xstrprintf ("Error evaluating expression for watchpoint %d\n",
+					b->number);
+	    struct cleanup *cleanups = make_cleanup (xfree, message);
+	    int e = catch_errors (watchpoint_check, bs, message,
+				  RETURN_MASK_ALL);
+	    do_cleanups (cleanups);
+	    switch (e)
+	      {
+	      case WP_DELETED:
+		/* We've already printed what needs to be printed.  */
+		bs->print_it = print_it_done;
+		/* Stop.  */
+		break;
+	      case WP_VALUE_CHANGED:
+		if (b->type == bp_read_watchpoint)
+		  {
+		    /* Don't stop: read watchpoints shouldn't fire if
+		       the value has changed.  This is for targets
+		       which cannot set read-only watchpoints.  */
+		    bs->print_it = print_it_noop;
+		    bs->stop = 0;
+		    continue;
+		  }
+		++(b->hit_count);
+		break;
+	      case WP_VALUE_NOT_CHANGED:
+		/* Stop.  */
+		++(b->hit_count);
+		break;
+	      default:
+		/* Can't happen.  */
+	      case 0:
+		/* Error from catch_errors.  */
+		printf_filtered ("Watchpoint %d deleted.\n", b->number);
+		if (b->related_breakpoint)
+		  b->related_breakpoint->disposition = disp_del_at_next_stop;
+		b->disposition = disp_del_at_next_stop;
+		/* We've already printed what needs to be printed.  */
+		bs->print_it = print_it_done;
+		break;
+	      }
+	  }
 	else	/* found == 0 */
 	  {
 	    /* This is a case where some watchpoint(s) triggered,
@@ -4985,7 +4992,6 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
   CORE_ADDR low, high, selected_pc = 0;
   char *extra_args = NULL;
   char *level_arg;
-  char *addr_string;
   int extra_args_len = 0, if_arg = 0;
 
   if (!arg ||
@@ -5039,11 +5045,11 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
     {
       if (find_pc_partial_function (selected_pc, (char **) NULL, &low, &high))
 	{
-	  addr_string = (char *) xmalloc (26 + extra_args_len);
+	  char *addr_string;
 	  if (extra_args_len)
-	    sprintf (addr_string, "*0x%s %s", paddr_nz (high), extra_args);
+	    addr_string = xstrprintf ("*0x%s %s", paddr_nz (high), extra_args);
 	  else
-	    sprintf (addr_string, "*0x%s", paddr_nz (high));
+	    addr_string = xstrprintf ("*0x%s", paddr_nz (high));
 	  break_command_1 (addr_string, flag, from_tty);
 	  xfree (addr_string);
 	}
@@ -5074,9 +5080,8 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
 	{
 	  if (deprecated_selected_frame)
 	    {
-	      addr_string = (char *) xmalloc (15);
-	      sprintf (addr_string, "*0x%s",
-		       paddr_nz (get_frame_pc (deprecated_selected_frame)));
+	      addr_string = xstrprintf ("*0x%s",
+					paddr_nz (get_frame_pc (deprecated_selected_frame)));
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -5122,11 +5127,12 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
       sal = sals.sals[i];
       if (find_pc_partial_function (sal.pc, (char **) NULL, &low, &high))
 	{
-	  break_string = (char *) xmalloc (extra_args_len + 26);
+	  break_string;
 	  if (extra_args_len)
-	    sprintf (break_string, "*0x%s %s", paddr_nz (high), extra_args);
+	    break_string = xstrprintf ("*0x%s %s", paddr_nz (high),
+				       extra_args);
 	  else
-	    sprintf (break_string, "*0x%s", paddr_nz (high));
+	    break_string = xstrprintf ("*0x%s", paddr_nz (high));
 	  break_command_1 (break_string, flag, from_tty);
 	  xfree (break_string);
 	}
@@ -6537,17 +6543,17 @@ delete_breakpoint (struct breakpoint *bpt)
      exceptions are supported in this way, it's OK for now. FIXME */
   if (ep_is_exception_catchpoint (bpt) && target_has_execution)
     {
-      static char message1[] = "Error in deleting catchpoint %d:\n";
-      static char message[sizeof (message1) + 30];
-      args_for_catchpoint_enable args;
-
       /* Format possible error msg */
-      sprintf (message, message1, bpt->number);
+      char *message = xstrprintf ("Error in deleting catchpoint %d:\n",
+				  bpt->number);
+      struct cleanup *cleanups = make_cleanup (xfree, message);
+      args_for_catchpoint_enable args;
       args.kind = bpt->type == bp_catch_catch ? 
 	EX_EVENT_CATCH : EX_EVENT_THROW;
       args.enable_p = 0;
       catch_errors (cover_target_enable_exception_callback, &args,
 		    message, RETURN_MASK_ALL);
+      do_cleanups (cleanups);
     }
 
 
@@ -6937,16 +6943,17 @@ breakpoint_re_set (void)
   struct breakpoint *b, *temp;
   enum language save_language;
   int save_input_radix;
-  static char message1[] = "Error in re-setting breakpoint %d:\n";
-  char message[sizeof (message1) + 30 /* slop */ ];
 
   save_language = current_language->la_language;
   save_input_radix = input_radix;
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
     /* Format possible error msg */
-    sprintf (message, message1, b->number);
+    char *message = xstrprintf ("Error in re-setting breakpoint %d:\n",
+				b->number);
+    struct cleanup *cleanups = make_cleanup (xfree, message);
     catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
+    do_cleanups (cleanups);
   }
   set_language (save_language);
   input_radix = save_input_radix;

@@ -51,8 +51,11 @@ extern void reggroup_add (struct gdbarch *gdbarch, struct reggroup *group);
 extern const char *reggroup_name (struct reggroup *reggroup);
 extern enum reggroup_type reggroup_type (struct reggroup *reggroup);
 
-/* The register groups for the current architecture.  */
-extern struct reggroup *const *reggroups (struct gdbarch *gdbarch);
+/* Interator for the architecture's register groups.  Pass in NULL,
+   returns the first group.  Pass in a group, returns the next group,
+   or NULL when the last group is reached.  */
+extern struct reggroup *reggroup_next (struct gdbarch *gdbarch,
+				       struct reggroup *last);
 
 /* Is REGNUM a member of REGGROUP?  */
 extern int default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,

@@ -1377,10 +1377,6 @@ find_sym_fns (struct objfile *objfile)
       || our_flavour == bfd_target_tekhex_flavour)
     return;	/* No symbols. */
 
-  /* Special kludge for apollo.  See dstread.c.  */
-  if (STREQN (our_target, "apollo", 6))
-    our_flavour = (enum bfd_flavour) -2;
-
   for (sf = symtab_fns; sf != NULL; sf = sf->next)
     {
       if (our_flavour == sf->sym_flavour)

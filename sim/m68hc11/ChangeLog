@@ -1,3 +1,57 @@
+2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* dv-m68hc11tim.c (cycle_to_string): Add flags parameter to better
+	control the translation.
+	(m68hc11tim_print_timer): Update cycle_to_string conversion.
+	(m68hc11tim_timer_event): Fix handling of output
+	compare register with its interrupts.
+	(m68hc11tim_io_write_buffer): Check output compare
+	after setting M6811_TMSK1.
+	(m68hc11tim_io_read_buffer): Fix compilation warning.
+	* dv-m68hc11.c (m68hc11_option_handler): Likewise.
+	* dv-m68hc11spi.c (m68hc11spi_info): Likewise.
+	* dv-m68hc11sio.c (m68hc11sio_info): Likewise.
+	* interrupts.c (interrupts_info): Likewise.
+	(interrupts_reset): Recognize bootstrap mode.
+	* sim-main.h (PRINT_CYCLE, PRINT_TIME): New defines.
+	(_sim_cpu): Add cpu_start_mode.
+	(cycle_to_string): Add flags member.
+	* m68hc11_sim.c (OPTION_CPU_BOOTSTRAP): New option.
+	(cpu_options): Declare new option bootstrap.
+	(cpu_option_handler): Handle it.
+	(cpu_info): Update call to cycle_to_string.
+
+2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* sim-main.h (phys_to_virt): Use memory bank parameters to translate
+	the physical address in virtual address.
+	(struct _sim_cpu): Add memory bank members.
+	* m68hc11_sim.c (cpu_initialize): Clear memory bank parameters.
+	* interp.c (sim_hw_configure): Create memory bank according to memory
+	bank parameters.
+	(sim_get_bank_parameters): New function to obtain memory bank config
+	from the symbol table.
+	(sim_prepare_for_program): Call it to obtain the memory bank parameters.
+	(sim_open): Call sim_prepare_for_program.
+	* dv-m68hc11.c (m68hc11cpu_io_write_buffer): Use memory bank parameters
+	to check if address is within bank window.
+	(m68hc11cpu_io_read_buffer): Likewise.
+	(attach_m68hc11_regs): Map the memory bank according to memory bank
+	parameters.
+
+2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>,
+
+	* sim-main.h (PAGE_REGNUM, Z_REGNUM): Use same numbering as gdb.
+
+2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>,
+	    Gary Piercey <gpiercey@northstar-technical.com>
+
+	* m68hc11_sim.c (print_io_word): New function to print 16-bit value.
+	* sim-main.h (print_io_word): Declare.
+	* dv-m68hc11tim.c (tmsk1_desc): New description table for TMSK1.
+	(tflg1_desc): Likewise for TFLG1.
+	(m68hc11tim_info): Print input and output compare registers
+
 2003-03-02  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* Makefile.in (SIM_EXTRA_CFLAGS): Set WITH_TARGET_ADDRESS_BITSIZE

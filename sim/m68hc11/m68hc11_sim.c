@@ -1,5 +1,5 @@
 /* m6811_cpu.c -- 68HC11&68HC12 CPU Emulation
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -27,6 +27,7 @@ enum {
   OPTION_CPU_RESET = OPTION_START,
   OPTION_EMUL_OS,
   OPTION_CPU_CONFIG,
+  OPTION_CPU_BOOTSTRAP,
   OPTION_CPU_MODE
 };
 
@@ -44,6 +45,10 @@ static const OPTION cpu_options[] =
 
   { {"cpu-config", required_argument, NULL, OPTION_CPU_CONFIG },
       '\0', NULL, "Specify the initial CPU configuration register",
+      cpu_option_handler },
+
+  { {"bootstrap", no_argument, NULL, OPTION_CPU_BOOTSTRAP },
+      '\0', NULL, "Start the processing in bootstrap mode",
       cpu_option_handler },
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
@@ -77,7 +82,11 @@ cpu_option_handler (SIM_DESC sd, sim_cpu *cpu,
       else
         cpu->cpu_use_local_config = 0;
       break;
-      
+
+    case OPTION_CPU_BOOTSTRAP:
+       cpu->cpu_start_mode = "bootstrap";
+       break;
+
     case OPTION_CPU_MODE:
       break;
     }
@@ -464,6 +473,9 @@ cpu_initialize (SIM_DESC sd, sim_cpu *cpu)
   cpu->cpu_use_elf_start = 0;
   cpu->cpu_elf_start     = 0;
   cpu->cpu_use_local_config = 0;
+  cpu->bank_start = 0;
+  cpu->bank_end   = 0;
+  cpu->bank_shift = 0;
   cpu->cpu_config        = M6811_NOSEC | M6811_NOCOP | M6811_ROMON |
     M6811_EEON;
   interrupts_initialize (sd, cpu);
@@ -577,6 +589,15 @@ print_io_byte (SIM_DESC sd, const char *name, io_reg_desc *desc,
 	       uint8 val, uint16 addr)
 {
   sim_io_printf (sd, "  %-9.9s @ 0x%04x 0x%02x ", name, addr, val);
+  if (desc)
+    print_io_reg_desc (sd, desc, val, 0);
+}
+
+void
+print_io_word (SIM_DESC sd, const char *name, io_reg_desc *desc,
+	       uint16 val, uint16 addr)
+{
+  sim_io_printf (sd, "  %-9.9s @ 0x%04x 0x%04x ", name, addr, val);
   if (desc)
     print_io_reg_desc (sd, desc, val, 0);
 }
@@ -1037,7 +1058,8 @@ cpu_info (SIM_DESC sd, sim_cpu *cpu)
 {
   sim_io_printf (sd, "CPU info:\n");
   sim_io_printf (sd, "  Absolute cycle: %s\n",
-                 cycle_to_string (cpu, cpu->cpu_absolute_cycle));
+                 cycle_to_string (cpu, cpu->cpu_absolute_cycle,
+                                  PRINT_TIME | PRINT_CYCLE));
   
   sim_io_printf (sd, "  Syscall emulation: %s\n",
                  cpu->cpu_emul_syscall ? "yes, via 0xcd <n>" : "no");

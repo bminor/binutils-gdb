@@ -433,7 +433,7 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
 static void
 init_gnuv3_ops (void)
 {
-  vtable_type_gdbarch_data = register_gdbarch_data (build_gdb_vtable_type, 0);
+  vtable_type_gdbarch_data = register_gdbarch_data (build_gdb_vtable_type);
 
   gnu_v3_abi_ops.shortname = "gnu-v3";
   gnu_v3_abi_ops.longname = "GNU G++ Version 3 ABI";

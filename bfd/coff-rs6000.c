@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
-   Copyright 1990-1999, 2000, 2001, 2002
+   Copyright 1990-1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?
    Using the following chars caused a compiler warning on HIUX (so I replaced
@@ -3426,7 +3426,7 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 
 		}
 	      else if ((0 == (h->flags & (XCOFF_DEF_DYNAMIC | XCOFF_IMPORT)))
-		       && ! info->relocateable)
+		       && ! info->relocatable)
 		{
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd, input_section,

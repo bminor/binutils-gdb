@@ -3559,7 +3559,7 @@ add_symbols_from_enclosing_procs (const char *name, domain_enum domain,
 	  QUIT;
 	  frame = get_prev_frame (frame);
 	}
-      while (frame != NULL && FRAME_LOCALS_ADDRESS (frame) != target_link);
+      while (frame != NULL && DEPRECATED_FRAME_LOCALS_ADDRESS (frame) != target_link);
 
       if (frame == NULL)
 	break;

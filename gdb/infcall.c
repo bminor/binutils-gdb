@@ -421,7 +421,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       vector.  Hence this direct call.
 
       A follow-on change is to modify this interface so that it takes
-      thread OR frame OR tpid as a parameter, and returns a dummy
+      thread OR frame OR ptid as a parameter, and returns a dummy
       frame handle.  The handle can then be used further down as a
       parameter to generic_save_dummy_frame_tos().  Hmm, thinking
       about it, since everything is ment to be using generic dummy
@@ -440,12 +440,24 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     CORE_ADDR old_sp = read_sp ();
     if (gdbarch_frame_align_p (current_gdbarch))
       {
+	sp = gdbarch_frame_align (current_gdbarch, old_sp);
+	/* NOTE: cagney/2003-08-13: Skip the "red zone".  For some
+	   ABIs, a function can use memory beyond the inner most stack
+	   address.  AMD64 called that region the "red zone".  Skip at
+	   least the "red zone" size before allocating any space on
+	   the stack.  */
+	if (INNER_THAN (1, 2))
+	  sp -= gdbarch_frame_red_zone_size (current_gdbarch);
+	else
+	  sp += gdbarch_frame_red_zone_size (current_gdbarch);
+	/* Still aligned?  */
+	gdb_assert (sp == gdbarch_frame_align (current_gdbarch, sp));
 	/* NOTE: cagney/2002-09-18:
 	   
 	   On a RISC architecture, a void parameterless generic dummy
 	   frame (i.e., no parameters, no result) typically does not
 	   need to push anything the stack and hence can leave SP and
-	   FP.  Similarly, a framelss (possibly leaf) function does
+	   FP.  Similarly, a frameless (possibly leaf) function does
 	   not push anything on the stack and, hence, that too can
 	   leave FP and SP unchanged.  As a consequence, a sequence of
 	   void parameterless generic dummy frame calls to frameless
@@ -460,7 +472,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   stack.  That way, two dummy frames can never be identical.
 	   It does burn a few bytes of stack but that is a small price
 	   to pay :-).  */
-	sp = gdbarch_frame_align (current_gdbarch, old_sp);
 	if (sp == old_sp)
 	  {
 	    if (INNER_THAN (1, 2))
@@ -476,12 +487,16 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     else
       /* FIXME: cagney/2002-09-18: Hey, you loose!
 
-	 Who knows how badly aligned the SP is!  Further, per comment
-	 above, if the generic dummy frame ends up empty (because
-	 nothing is pushed) GDB won't be able to correctly perform
-	 back traces.  If a target is having trouble with backtraces,
-	 first thing to do is add FRAME_ALIGN() to the architecture
-	 vector. If that fails, try unwind_dummy_id().  */
+	 Who knows how badly aligned the SP is!
+
+	 If the generic dummy frame ends up empty (because nothing is
+	 pushed) GDB won't be able to correctly perform back traces.
+	 If a target is having trouble with backtraces, first thing to
+	 do is add FRAME_ALIGN() to the architecture vector. If that
+	 fails, try unwind_dummy_id().
+
+         If the ABI specifies a "Red Zone" (see the doco) the code
+         below will quietly trash it.  */
       sp = old_sp;
   }
 
@@ -547,6 +562,23 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
          it's address is the same as the address of the dummy.  */
       bp_addr = dummy_addr;
       break;
+    case AT_SYMBOL:
+      /* Some executables define a symbol __CALL_DUMMY_ADDRESS whose
+	 address is the location where the breakpoint should be
+	 placed.  Once all targets are using the overhauled frame code
+	 this can be deleted - ON_STACK is a better option.  */
+      {
+	struct minimal_symbol *sym;
+
+	sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
+	real_pc = funaddr;
+	if (sym)
+	  dummy_addr = SYMBOL_VALUE_ADDRESS (sym);
+	else
+	  dummy_addr = entry_point_address ();
+	bp_addr = dummy_addr;
+	break;
+      }
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
@@ -920,7 +952,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (stopped_by_random_signal || !stop_stack_dummy)
     {
       /* Find the name of the function we're about to complain about.  */
-      char *name = NULL;
+      const char *name = NULL;
       {
 	struct symbol *symbol = find_pc_function (funaddr);
 	if (symbol)
@@ -932,17 +964,17 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	    if (msymbol)
 	      name = SYMBOL_PRINT_NAME (msymbol);
 	  }
+	if (name == NULL)
+	  {
+	    /* Can't use a cleanup here.  It is discarded, instead use
+               an alloca.  */
+	    char *tmp = xstrprintf ("at %s", local_hex_string (funaddr));
+	    char *a = alloca (strlen (tmp) + 1);
+	    strcpy (a, tmp);
+	    xfree (tmp);
+	    name = a;
+	  }
       }
-      if (name == NULL)
-	{
-	  /* NOTE: cagney/2003-04-23: Don't blame me.  This code dates
-             back to 1993-07-08, I simply moved it.  */
-	  char format[80];
-	  sprintf (format, "at %s", local_hex_format ());
-	  name = alloca (80);
-	  /* FIXME-32x64: assumes funaddr fits in a long.  */
-	  sprintf (name, format, (unsigned long) funaddr);
-	}
       if (stopped_by_random_signal)
 	{
 	  /* We stopped inside the FUNCTION because of a random

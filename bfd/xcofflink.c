@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
@@ -2932,7 +2932,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
     }
 
   /* Garbage collect unused sections.  */
-  if (info->relocateable
+  if (info->relocatable
       || ! gc
       || hentry == NULL
       || (hentry->root.type != bfd_link_hash_defined
@@ -5294,7 +5294,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		    }
 		  else
 		    {
-		      if (! finfo->info->relocateable
+		      if (! finfo->info->relocatable
 			  && (h->flags & XCOFF_DEF_DYNAMIC) == 0
 			  && (h->flags & XCOFF_IMPORT) == 0)
 			{

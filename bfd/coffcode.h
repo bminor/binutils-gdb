@@ -3873,7 +3873,9 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= IMAGE_FILE_DEBUG_STRIPPED;
 #endif
 
-#ifndef COFF_WITH_PE
+#ifdef COFF_WITH_PE
+  internal_f.f_flags |= IMAGE_FILE_32BIT_MACHINE;
+#else
   if (bfd_little_endian (abfd))
     internal_f.f_flags |= F_AR32WR;
   else
@@ -4405,6 +4407,13 @@ coff_slurp_line_table (abfd, asect)
 
   amt = (bfd_size_type) bfd_coff_linesz (abfd) * asect->lineno_count;
   native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos, amt);
+  if (native_lineno == NULL)
+    {
+      (*_bfd_error_handler)
+        (_("%s: warning: line number table read failed"),
+	 bfd_archive_filename (abfd));
+      return FALSE;
+    }
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
   lineno_cache = (alent *) bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)
@@ -4693,7 +4702,9 @@ coff_slurp_symbol_table (abfd)
 	    case C_RSYM:
 	    case C_RPSYM:
 	    case C_STSYM:
+	    case C_TCSYM:
 	    case C_BCOMM:
+	    case C_ECOML:
 	    case C_ECOMM:
 	    case C_DECL:
 	    case C_ENTRY:

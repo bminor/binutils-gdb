@@ -380,7 +380,10 @@ elf64_hppa_object_p (abfd)
   i_ehdrp = elf_elfheader (abfd);
   if (strcmp (bfd_get_target (abfd), "elf64-hppa-linux") == 0)
     {
-      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX)
+      /* GCC on hppa-linux produces binaries with OSABI=Linux,
+	 but the kernel produces corefiles with OSABI=SysV.  */
+      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX &&
+	  i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_NONE) /* aka SYSV */
 	return FALSE;
     }
   else
@@ -599,7 +602,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   size_t buf_len;
   int sec_symndx;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* If this is the first dynamic object found in the link, create
@@ -710,13 +713,14 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
     {
-      enum {
-	NEED_DLT = 1,
-	NEED_PLT = 2,
-	NEED_STUB = 4,
-	NEED_OPD = 8,
-	NEED_DYNREL = 16,
-      };
+      enum
+	{
+	  NEED_DLT = 1,
+	  NEED_PLT = 2,
+	  NEED_STUB = 4,
+	  NEED_OPD = 8,
+	  NEED_DYNREL = 16,
+	};
 
       struct elf_link_hash_entry *h = NULL;
       unsigned long r_symndx = ELF64_R_SYM (rel->r_info);
@@ -746,7 +750,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((info->shared
-		    && (!info->symbolic || info->allow_shlib_undefined) )
+		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = TRUE;
@@ -956,30 +960,19 @@ elf64_hppa_dynamic_symbol_p (h, info)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
 {
-  if (h == NULL)
+  /* ??? What, if anything, needs to happen wrt STV_PROTECTED symbols
+     and relocations that retrieve a function descriptor?  Assume the
+     worst for now.  */
+  if (_bfd_elf_dynamic_symbol_p (h, info, 1))
+    {
+      /* ??? Why is this here and not elsewhere is_local_label_name.  */
+      if (h->root.root.string[0] == '$' && h->root.root.string[1] == '$')
+	return FALSE;
+
+      return TRUE;
+    }
+  else
     return FALSE;
-
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->dynindx == -1)
-    return FALSE;
-
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
-    return TRUE;
-
-  if (h->root.root.string[0] == '$' && h->root.root.string[1] == '$')
-    return FALSE;
-
-  if ((info->shared && (!info->symbolic || info->allow_shlib_undefined))
-      || ((h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
-	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
-    return TRUE;
-
-  return FALSE;
 }
 
 /* Mark all funtions exported by this file so that we can later allocate
@@ -2269,7 +2262,9 @@ elf64_hppa_finalize_dlt (dyn_h, data)
 		   + hppa_info->opd_sec->output_offset
 		   + hppa_info->opd_sec->output_section->vma);
 	}
-      else if (h->root.u.def.section)
+      else if ((h->root.type == bfd_link_hash_defined
+		|| h->root.type == bfd_link_hash_defweak)
+	       && h->root.u.def.section)
 	{
 	  value = h->root.u.def.value + h->root.u.def.section->output_offset;
 	  if (h->root.u.def.section->output_section)
@@ -2678,6 +2673,16 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
     return type;
 }
 
+static struct bfd_elf_special_section const elf64_hppa_special_sections[]=
+{
+  { ".fini",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".init",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 /* The hash bucket size is the standard one, namely 4.  */
 
 const struct elf_size_info hppa64_elf_size_info =
@@ -2775,6 +2780,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_get_symbol_type	elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class
 #define elf_backend_rela_normal		1
+#define elf_backend_special_sections	elf64_hppa_special_sections
 
 #include "elf64-target.h"
 
@@ -2782,6 +2788,8 @@ const struct elf_size_info hppa64_elf_size_info =
 #define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
+
+#undef elf_backend_special_sections
 
 #define INCLUDED_TARGET_FILE 1
 #include "elf64-target.h"

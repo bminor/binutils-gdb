@@ -40,6 +40,7 @@ if [is_remote target] then {
 set testfile "attach"
 set srcfile  ${testfile}.c
 set binfile  ${objdir}/${subdir}/${testfile}
+set escapedbinfile  [string_to_regexp ${objdir}/${subdir}/${testfile}]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -48,12 +49,13 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 proc do_detach_tests {} {
   global srcdir
   global binfile
+  global escapedbinfile
   global subdir
   global pass
 
   runto_main
   gdb_test "set should_exit = 1" "" "set should_exit, $pass"
-  gdb_test "detach" "Detaching from program: .*$binfile, .*" "detach, $pass"
+  gdb_test "detach" "Detaching from program: .*$escapedbinfile, .*" "detach, $pass"
 }
 
 # Start with a fresh gdb

@@ -1,4 +1,4 @@
-#   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
+#   Copyright 1997, 1998, 1999, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ get_debug_format
 proc local_compiler_xfail_check { } {
     global gcc_compiled;
 
-    if {$gcc_compiled} then {
+    if {$gcc_compiled == 2} then {
 	if { ![test_debug_format "HP"] \
 		&& ![test_debug_format "DWARF 2"] } then {
 	    setup_xfail "*-*-*" 
@@ -258,6 +258,11 @@ gdb_test "ptype vendor" "type = const volatile unsigned char \\* const volatile.
 
 # test function parameters
 local_compiler_xfail_check
+if {$gcc_compiled == 3 && [test_debug_format "stabs"]} then {
+    # For reasons unknown, GCC 3 with stabs mangles several cv-qualified
+    # arguments to this function.
+    setup_xfail "*-*-*"
+}
 send_gdb "ptype qux2\n"
 gdb_expect {
     -re "type = int \\(volatile unsigned char, const volatile int, volatile short( int)?, volatile long( int)? \\*, float \\* volatile, const volatile signed char \\* const volatile\\).*$gdb_prompt $" {

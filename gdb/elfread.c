@@ -610,8 +610,9 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 			    ei.lnoffset, ei.lnsize);
     }
 
-  if (DWARF2_BUILD_FRAME_INFO_P ())
-    DWARF2_BUILD_FRAME_INFO(objfile);
+  /* FIXME: kettenis/20030504: This still needs to be integrated with
+     dwarf2read.c in a better way.  */
+  dwarf2_build_frame_info (objfile);
 }
 
 /* This cleans up the objfile's sym_stab_info pointer, and the chain of

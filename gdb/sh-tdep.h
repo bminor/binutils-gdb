@@ -85,7 +85,8 @@ struct gdbarch_tdep
     int FV_LAST_C_REGNUM; /*                            sh5-compact*/
     int ARG0_REGNUM;
     int ARGLAST_REGNUM;
-    int FLOAT_ARGLAST_REGNUM;
+    int FLOAT_ARG0_REGNUM;	/* sh4 */
+    int FLOAT_ARGLAST_REGNUM;	/* sh4, sh5 */
     int RETURN_REGNUM;
     enum sh_abi sh_abi;
   };

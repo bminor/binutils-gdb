@@ -47,7 +47,7 @@
 #define ECOFF_64
 #include "ecoffswap.h"
 
-static int alpha_elf_dynamic_symbol_p
+static bfd_boolean alpha_elf_dynamic_symbol_p
   PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
 static struct bfd_hash_entry * elf64_alpha_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
@@ -269,49 +269,17 @@ struct alpha_elf_link_hash_table
 #define alpha_elf_sym_hashes(abfd) \
   ((struct alpha_elf_link_hash_entry **)elf_sym_hashes(abfd))
 
-/* Should we do dynamic things to this symbol?  */
+/* Should we do dynamic things to this symbol?  This differs from the 
+   generic version in that we never need to consider function pointer
+   equality wrt PLT entries -- we don't create a PLT entry if a symbol's
+   address is ever taken.  */
 
-static int
+static inline bfd_boolean
 alpha_elf_dynamic_symbol_p (h, info)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
 {
-  if (h == NULL)
-    return FALSE;
-
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->dynindx == -1)
-    return FALSE;
-
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_defweak)
-    return TRUE;
-
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_DEFAULT:
-      break;
-    case STV_HIDDEN:
-    case STV_INTERNAL:
-      return FALSE;
-    case STV_PROTECTED:
-      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
-        return FALSE;
-      break;
-    }
-
-  if ((info->shared && !info->symbolic)
-      || ((h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_DEF_DYNAMIC
-	      | ELF_LINK_HASH_DEF_REGULAR
-	      | ELF_LINK_HASH_REF_REGULAR))
-	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
-    return TRUE;
-
-  return FALSE;
+  return _bfd_elf_dynamic_symbol_p (h, info, 0);
 }
 
 /* Create an entry in a Alpha ELF linker hash table.  */
@@ -2058,7 +2026,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   /* We are not currently changing any sizes, so only one pass.  */
   *again = FALSE;
 
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;
@@ -2465,7 +2433,7 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd_vma *valp;
 {
   if (sym->st_shndx == SHN_COMMON
-      && !info->relocateable
+      && !info->relocatable
       && sym->st_size <= elf_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are
@@ -3057,7 +3025,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
   bfd_boolean got_created;
   bfd_size_type amt;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table(info)->dynobj;
@@ -3106,7 +3074,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
          this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((info->shared
-		 && (!info->symbolic || info->allow_shlib_undefined))
+		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
 		|| ! (h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.root.type == bfd_link_hash_defweak))
         maybe_dynamic = TRUE;
@@ -3863,7 +3831,7 @@ elf64_alpha_always_size_sections (output_bfd, info)
 {
   bfd *i;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* First, take care of the indirect symbols created by versioning.  */
@@ -4330,7 +4298,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   const char *section_name;
 
   /* Handle relocatable links with a smaller loop.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return elf64_alpha_relocate_section_r (output_bfd, info, input_bfd,
 					   input_section, contents, relocs,
 					   local_syms, local_sections);
@@ -4477,48 +4445,25 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = alpha_elf_sym_hashes (input_bfd)[r_symndx - symtab_hdr->sh_info];
+	  bfd_boolean warned;
+	  bfd_boolean unresolved_reloc;
+	  struct elf_link_hash_entry *hh;
+	  
+	  RELOC_FOR_GLOBAL_SYMBOL (hh,
+				   (struct elf_link_hash_entry *) alpha_elf_sym_hashes (input_bfd),
+				   r_symndx, symtab_hdr, value,
+				   sec, unresolved_reloc, info,
+				   warned);
 
-	  while (h->root.root.type == bfd_link_hash_indirect
-		 || h->root.root.type == bfd_link_hash_warning)
-	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
+	  if (warned)
+	    continue;
 
-	  value = 0;
-	  if (h->root.root.type == bfd_link_hash_defined
-	      || h->root.root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.root.u.def.section;
-
-	      /* Detect the cases that sym_sec->output_section is
-		 expected to be NULL -- all cases in which the symbol
-		 is defined in another shared module.  This includes
-		 PLT relocs for which we've created a PLT entry and
-		 other relocs for which we're prepared to create
-		 dynamic relocations.  */
-	      /* ??? Just accept it NULL and continue.  */
-
-	      if (sec->output_section != NULL)
-		value = (h->root.root.u.def.value
-			 + sec->output_section->vma
-			      + sec->output_offset);
-	    }
-	  else if (h->root.root.type == bfd_link_hash_undefweak)
+	  if (value == 0
+	      && ! unresolved_reloc
+	      && hh->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;
-	  else if (info->shared
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
-	    ;
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->root.other)))))
-		return FALSE;
-	      continue;
-	    }
 
+	  h = (struct alpha_elf_link_hash_entry *) hh;
           dynamic_symbol_p = alpha_elf_dynamic_symbol_p (&h->root, info);
 	  gotent = h->got_entries;
 	}
@@ -5497,6 +5442,16 @@ elf64_alpha_reloc_type_class (rela)
     }
 }
 
+static struct bfd_elf_special_section const elf64_alpha_special_sections[]=
+{
+  { ".sdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { ".sbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
+
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  Copied
    from elf32-mips.c.  */
@@ -5634,6 +5589,9 @@ static const struct elf_size_info alpha_elf_size_info =
 
 #define elf_backend_size_info \
   alpha_elf_size_info
+
+#define elf_backend_special_sections \
+  elf64_alpha_special_sections
 
 /* A few constants that determine how the .plt section is set up.  */
 #define elf_backend_want_got_plt 0

@@ -285,6 +285,15 @@ struct cleanup
 #endif
 #endif
 
+/* Be conservative and use enum bitfields only with GCC.
+   This is copied from gcc 3.3.1, system.h.  */
+
+#if defined(__GNUC__) && (__GNUC__ >= 2)
+#define ENUM_BITFIELD(TYPE) enum TYPE
+#else
+#define ENUM_BITFIELD(TYPE) unsigned int
+#endif
+
 /* Needed for various prototypes */
 
 struct symtab;
@@ -780,16 +789,6 @@ typedef struct ptid ptid_t;
 #include "tm.h"
 #endif
 
-/* GDB_MULTI_ARCH is normally set by configure.in using information
-   from configure.tgt or the config/%/%.mt Makefile fragment.  Since
-   some targets have defined it in their "tm.h" file, delay providing
-   a default definition until after "tm.h" has been included.. */
-
-#ifndef GDB_MULTI_ARCH
-#define GDB_MULTI_ARCH 0
-#endif
-
-
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text
    files */
@@ -864,6 +863,9 @@ extern void xfree (void *);
    fails. */
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
 extern void xvasprintf (char **ret, const char *format, va_list ap);
+
+/* Like asprintf, but return the string, throw an error if no memory.  */
+extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern int parse_escape (char **);
 

@@ -742,8 +742,9 @@ static const struct frame_base dwarf2_frame_base =
 };
 
 const struct frame_base *
-dwarf2_frame_base_p (CORE_ADDR pc)
+dwarf2_frame_base_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (dwarf2_frame_find_fde (&pc))
     return &dwarf2_frame_base;
 

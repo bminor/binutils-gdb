@@ -731,7 +731,7 @@ insn_ds_field (unsigned int insn)
 }
 
 
-/* If DESC is the address of a 64-bit PowerPC Linux function
+/* If DESC is the address of a 64-bit PowerPC GNU/Linux function
    descriptor, return the descriptor's entry point.  */
 static CORE_ADDR
 ppc64_desc_entry_point (CORE_ADDR desc)
@@ -894,22 +894,22 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
 }
 
 
-/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR) on PPC64 Linux.
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR) on PPC64 GNU/Linux.
 
    Usually a function pointer's representation is simply the address
-   of the function. On Linux on the 64-bit PowerPC however, a function
-   pointer is represented by a pointer to a TOC entry. This TOC entry
-   contains three words, the first word is the address of the
-   function, the second word is the TOC pointer (r2), and the third
-   word is the static chain value.  Throughout GDB it is currently
-   assumed that a function pointer contains the address of the
-   function, which is not easy to fix.  In addition, the conversion of
-   a function address to a function pointer would require allocation
-   of a TOC entry in the inferior's memory space, with all its
-   drawbacks.  To be able to call C++ virtual methods in the inferior
-   (which are called via function pointers), find_function_addr uses
-   this function to get the function address from a function
-   pointer.  */
+   of the function. On GNU/Linux on the 64-bit PowerPC however, a
+   function pointer is represented by a pointer to a TOC entry. This
+   TOC entry contains three words, the first word is the address of
+   the function, the second word is the TOC pointer (r2), and the
+   third word is the static chain value.  Throughout GDB it is
+   currently assumed that a function pointer contains the address of
+   the function, which is not easy to fix.  In addition, the
+   conversion of a function address to a function pointer would
+   require allocation of a TOC entry in the inferior's memory space,
+   with all its drawbacks.  To be able to call C++ virtual methods in
+   the inferior (which are called via function pointers),
+   find_function_addr uses this function to get the function address
+   from a function pointer.  */
 
 /* Return real function address if ADDR (a function pointer) is in the data
    space and is therefore a special function pointer.  */
@@ -929,7 +929,7 @@ ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
 }
 
 
-/* On 64-bit PowerPC Linux, the ELF header's e_entry field is the
+/* On 64-bit PowerPC GNU/Linux, the ELF header's e_entry field is the
    address of a function descriptor for the entry point function, not
    the actual entry point itself.  So to find the actual address at
    which execution should begin, we need to fetch the function's entry
@@ -1062,7 +1062,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
   
   if (tdep->wordsize == 8)
     {
-      /* Handle PPC64 Linux function pointers (which are really
+      /* Handle PPC64 GNU/Linux function pointers (which are really
          function descriptors).  */
       set_gdbarch_convert_from_func_ptr_addr
         (gdbarch, ppc64_linux_convert_from_func_ptr_addr);

@@ -60,6 +60,7 @@ static int mi_interp_query_hook (const char *ctlstr, va_list ap);
 static char *mi_interp_read_one_line_hook (char *prompt, int repeat,
 					   char *anno);
 
+static void mi3_command_loop (void);
 static void mi2_command_loop (void);
 static void mi1_command_loop (void);
 
@@ -133,10 +134,12 @@ mi_interpreter_resume (void *data)
   /* If we're _the_ interpreter, take control. */
   if (current_interp_named_p (INTERP_MI1))
     command_loop_hook = mi1_command_loop;
-  else if (current_interp_named_p (INTERP_MI))
+  else if (current_interp_named_p (INTERP_MI2))
     command_loop_hook = mi2_command_loop;
+  else if (current_interp_named_p (INTERP_MI3))
+    command_loop_hook = mi3_command_loop;
   else
-    return 0;
+    command_loop_hook = mi2_command_loop;
 
   return 1;
 }
@@ -334,6 +337,12 @@ mi2_command_loop (void)
 }
 
 static void
+mi3_command_loop (void)
+{
+  mi_command_loop (3);
+}
+
+static void
 mi_command_loop (int mi_version)
 {
 #if 0
@@ -407,8 +416,12 @@ _initialize_mi_interp (void)
     mi_interpreter_prompt_p	/* prompt_proc_p */
   };
 
-  /* Create MI1 interpreter */
+  /* The various interpreter levels.  */
   interp_add (interp_new (INTERP_MI1, NULL, mi_out_new (1), &procs));
+  interp_add (interp_new (INTERP_MI2, NULL, mi_out_new (2), &procs));
+  interp_add (interp_new (INTERP_MI3, NULL, mi_out_new (3), &procs));
 
-  interp_add (interp_new (INTERP_MI, NULL, mi_out_new (3), &procs));
+  /* "mi" selects the most recent released version.  "mi2" was
+     released as part of GDB 6.0.  */
+  interp_add (interp_new (INTERP_MI, NULL, mi_out_new (2), &procs));
 }

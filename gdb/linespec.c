@@ -94,6 +94,8 @@ static void build_canonical_line_spec (struct symtab_and_line *,
 
 static char *find_toplevel_char (char *s, char c);
 
+static int is_objc_method_format (const char *s);
+
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
 
@@ -443,6 +445,25 @@ find_toplevel_char (char *s, char c)
   return 0;
 }
 
+/* Determines if the gives string corresponds to an Objective-C method
+   representation, such as -[Foo bar:] or +[Foo bar]. Objective-C symbols
+   are allowed to have spaces and parentheses in them.  */
+
+static int 
+is_objc_method_format (const char *s)
+{
+  if (s == NULL || *s == '\0')
+    return 0;
+  /* Handle arguments with the format FILENAME:SYMBOL.  */
+  if ((s[0] == ':') && (strchr ("+-", s[1]) != NULL) 
+      && (s[2] == '[') && strchr(s, ']'))
+    return 1;
+  /* Handle arguments that are just SYMBOL.  */
+  else if ((strchr ("+-", s[0]) != NULL) && (s[1] == '[') && strchr(s, ']'))
+    return 1;
+  return 0;
+}
+
 /* Given a list of NELTS symbols in SYM_ARR, return a list of lines to
    operate on (ask user if necessary).
    If CANONICAL is non-NULL return a corresponding array of mangled names
@@ -669,8 +690,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   /* Check if this is an Objective-C method (anything that starts with
      a '+' or '-' and a '[').  */
-  if (*p && (p[0] == ':') && (strchr ("+-", p[1]) != NULL) 
-      && (p[2] == '['))
+  if (is_objc_method_format (p))
     {
       is_objc_method = 1;
       paren_pointer  = NULL; /* Just a category name.  Ignore it.  */
@@ -972,8 +992,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	}
       /* Check for a colon and a plus or minus and a [ (which
          indicates an Objective-C method) */
-      if (*p && (p[0] == ':') && (strchr ("+-", p[1]) != NULL) 
-	  && (p[2] == '['))
+      if (is_objc_method_format (p))
 	{
 	  break;
 	}

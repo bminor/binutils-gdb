@@ -178,9 +178,20 @@ extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 
 /* Initialize a SVR4 architecture variant.  */
 extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
+
 
-/* Functions exported from i386bsd-tdep.c.  */
+/* Functions and variables exported from i386bsd-tdep.c.  */
 
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
+extern CORE_ADDR i386fbsd_sigtramp_start;
+extern CORE_ADDR i386fbsd_sigtramp_end;
+extern CORE_ADDR i386obsd_sigtramp_start;
+extern CORE_ADDR i386obsd_sigtramp_end;
+extern int i386fbsd4_sc_reg_offset[];
+extern int i386fbsd_sc_reg_offset[];
+extern int i386nbsd_sc_reg_offset[];
+extern int i386obsd_sc_reg_offset[];
+extern int i386bsd_sc_reg_offset[];
 
 #endif /* i386-tdep.h */
+

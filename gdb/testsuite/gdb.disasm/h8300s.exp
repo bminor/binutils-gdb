@@ -189,22 +189,22 @@ proc all_inc_dec_adds_subs_tests { } {
     send_gdb "x/16i inc_dec_adds_subs_tests\n"
     gdb_expect {
 	-re "
-.*inc.b\tr0l.*
-.*inc.w\t#0x1,r4.*
-.*inc.w\t#0x2,r3.*
-.*inc.l\t#0x1,er2.*
-.*inc.l\t#0x2,er1.*
+.*inc(.b|)\tr0l.*
+.*inc.w\t#(0x|)1,r4.*
+.*inc.w\t#(0x|)2,r3.*
+.*inc.l\t#(0x|)1,er2.*
+.*inc.l\t#(0x|)2,er1.*
 .*dec.b\tr0l.*
-.*dec.w\t#0x1,r4.*
-.*dec.w\t#0x2,r3.*
-.*dec.l\t#0x1,er2.*
-.*dec.l\t#0x2,er1.*
-.*adds\t#0x1,er7.*
-.*adds\t#0x2,er6.*
-.*adds\t#0x4,er5.*
-.*subs\t#0x1,er7.*
-.*subs\t#0x2,er6.*
-.*subs\t#0x4,er5.*
+.*dec.w\t#(0x|)1,r4.*
+.*dec.w\t#(0x|)2,r3.*
+.*dec.l\t#(0x|)1,er2.*
+.*dec.l\t#(0x|)2,er1.*
+.*adds\t#(0x|)1,er7.*
+.*adds\t#(0x|)2,er6.*
+.*adds\t#(0x|)4,er5.*
+.*subs\t#(0x|)1,er7.*
+.*subs\t#(0x|)2,er6.*
+.*subs\t#(0x|)4,er5.*
 .*$gdb_prompt $" { pass "inc_dec_adds_subs_tests" }
 	-re "$gdb_prompt $" { fail "inc_dec_adds_subs_tests" }
 	timeout { fail "(timeout) inc_dec_adds_subs_tests" }
@@ -313,7 +313,7 @@ proc all_tas_mac_tests { } {
     gdb_expect {
 	-re "
 .*tas\t@er0.*
-.*mac\t@er1+,@er2+.*
+.*mac\t@er1\\+,@er2\\+.*
 .*clrmac.*
 .*ldmac\ter4,mach.*
 .*ldmac\ter5,macl.*
@@ -345,8 +345,8 @@ proc all_logic_operations_tests { } {
 .*or.w\tr1,r2.*
 .*or.l\t#0x12345678,er0.*
 .*or.l\ter1,er2.*
-.*xor.b\t#0x12,r0l.*
-.*xor.b\tr1l,r2h.*
+.*xor(.b|)\t#0x12,r0l.*
+.*xor(.b|)\tr1l,r2h.*
 .*xor.w\t#0x1234,r0.*
 .*xor.w\tr1,r2.*
 .*xor.l\t#0x12345678,er0.*
@@ -368,18 +368,18 @@ proc all_sha_shl_tests { } {
     send_gdb "x/12i sha_shl_tests\n"
     gdb_expect {
 	-re "
-.*shal\tr0l.*
-.*shal\tr1.*
-.*shal\ter2.*
-.*shar\tr3l.*
-.*shar\tr4.*
-.*shar\ter5.*
-.*shll\tr0l.*
-.*shll\tr1.*
-.*shll\ter2.*
-.*shlr\tr3l.*
-.*shlr\tr4.*
-.*shlr\ter5.*
+.*shal(.b|)\tr0l.*
+.*shal(.w|)\tr1.*
+.*shal(.l|)\ter2.*
+.*shar(.b|)\tr3l.*
+.*shar(.w|)\tr4.*
+.*shar(.l|)\ter5.*
+.*shll(.b|)\tr0l.*
+.*shll(.w|)\tr1.*
+.*shll(.l|)\ter2.*
+.*shlr(.b|)\tr3l.*
+.*shlr(.w|)\tr4.*
+.*shlr(.l|)\ter5.*
 .*$gdb_prompt $" { pass "sha_shl_tests" }
 	-re "$gdb_prompt $" { fail "sha_shl_tests" }
 	timeout { fail "(timeout) sha_shl_tests" }
@@ -394,18 +394,18 @@ proc all_rot_rotx_tests { } {
     send_gdb "x/12i rot_rotx_tests\n"
     gdb_expect {
 	-re "
-.*rotl\tr0l.*
-.*rotl\tr1.*
-.*rotl\ter2.*
-.*rotr\tr3l.*
-.*rotr\tr4.*
-.*rotr\ter5.*
-.*rotxl\tr0l.*
-.*rotxl\tr1.*
-.*rotxl\ter2.*
-.*rotxr\tr3l.*
-.*rotxr\tr4.*
-.*rotxr\ter5.*
+.*rotl(.b|)\tr0l.*
+.*rotl(.w|)\tr1.*
+.*rotl(.l|)\ter2.*
+.*rotr(.b|)\tr3l.*
+.*rotr(.w|)\tr4.*
+.*rotr(.l|)\ter5.*
+.*rotxl(.b|)\tr0l.*
+.*rotxl(.w|)\tr1.*
+.*rotxl(.l|)\ter2.*
+.*rotxr(.b|)\tr3l.*
+.*rotxr(.w|)\tr4.*
+.*rotxr(.l|)\ter5.*
 .*$gdb_prompt $" { pass "rot_rotx_tests" }
 	-re "$gdb_prompt $" { fail "rot_rotx_tests" }
 	timeout { fail "(timeout) rot_rotx_tests" }
@@ -551,30 +551,30 @@ proc all_branch_tests { } {
     send_gdb "x/25i branch_tests\n"
     gdb_expect {
 	-re "
-.*bra\tbranch_tests.*
-.*brn\tbranch_tests.*
-.*bhi\tbranch_tests.*
-.*bls\tbranch_tests.*
-.*bcc\tbranch_tests.*
-.*bcs\tbranch_tests.*
-.*bne\tbranch_tests.*
-.*beq\tbranch_tests.*
-.*bvc\tbranch_tests.*
-.*bvs\tbranch_tests.*
-.*bpl\tbranch_tests.*
-.*bmi\tbranch_tests.*
-.*bge\tbranch_tests.*
-.*blt\tbranch_tests.*
-.*bgt\tbranch_tests.*
-.*ble\tbranch_tests.*
+.*bra\t(branch_tests|.-2 ).*
+.*brn\t(branch_tests|.-4 ).*
+.*bhi\t(branch_tests|.-6 ).*
+.*bls\t(branch_tests|.-8 ).*
+.*bcc\t(branch_tests|.-10 ).*
+.*bcs\t(branch_tests|.-12 ).*
+.*bne\t(branch_tests|.-14 ).*
+.*beq\t(branch_tests|.-16 ).*
+.*bvc\t(branch_tests|.-18 ).*
+.*bvs\t(branch_tests|.-20 ).*
+.*bpl\t(branch_tests|.-22 ).*
+.*bmi\t(branch_tests|.-24 ).*
+.*bge\t(branch_tests|.-26 ).*
+.*blt\t(branch_tests|.-28 ).*
+.*bgt\t(branch_tests|.-30 ).*
+.*ble\t(branch_tests|.-32 ).*
 .*jmp\t@er0.*
-.*jmp\t@branch_tests.*
-.*jmp\t@@0 (0).*
-.*bsr\tbranch_tests.*
-.*bsr\tbranch_tests.*
+.*jmp\t@(branch_tests|0x).*
+.*jmp\t@@0 \\((0x|)0\\).*
+.*bsr\t(branch_tests|.-42 ).*
+.*bsr\t(branch_tests|.-46 ).*
 .*jsr\t@er0.*
-.*jsr\t@branch_tests.*
-.*jsr\t@@0 (0).*
+.*jsr\t@(branch_tests|0x).*
+.*jsr\t@@0 \\((0x|)0\\).*
 .*rts.*
 .*$gdb_prompt $" { pass "branch_tests" }
 	-re "$gdb_prompt $" { fail "branch_tests" }

@@ -30,12 +30,6 @@ struct regcache;
 
 #include "frame.h"		/* For enum frame_type.  */
 
-/* For compatibility with the old frame code.  See end of header for
-   new methods.  */
-typedef const struct frame_unwind *(frame_unwind_p_ftype) (CORE_ADDR pc);
-extern void frame_unwind_append_predicate (struct gdbarch *gdbarch,
-					   frame_unwind_p_ftype *p);
-
 /* The following unwind functions assume a chain of frames forming the
    sequence: (outer) prev <-> this <-> next (inner).  All the
    functions are called with called with the next frame's `struct

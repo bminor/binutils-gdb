@@ -3202,7 +3202,7 @@ decode_modified_type (char *modifiers, unsigned int modcount, int mtype)
 #if 0
 /* This part of the test would always be true, and it triggers a compiler
    warning.  */
-  		  && (unsigned char) modifier <= MOD_hi_user))
+		&& (unsigned char) modifier <= MOD_hi_user))
 #endif
 	    {
 	      complaint (&symfile_complaints,

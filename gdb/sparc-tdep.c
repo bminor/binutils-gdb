@@ -132,9 +132,6 @@ struct gdbarch_tdep
  *       TARGET_ARCHITECTURE->mach == bfd_mach_sparc_v9a))
  */
 
-/* From infrun.c */
-extern int stop_after_trap;
-
 /* We don't store all registers immediately when requested, since they
    get sent over in large chunks anyway.  Instead, we accumulate most
    of the changes and send them over once.  "deferred_stores" keeps
@@ -2876,6 +2873,22 @@ sparc_print_extra_frame_info (struct frame_info *fi)
 
 /* MULTI_ARCH support */
 
+const char *
+legacy_register_name (int i)
+{
+#ifdef REGISTER_NAMES
+  static char *names[] = REGISTER_NAMES;
+  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
+    return NULL;
+  else
+    return names[i];
+#else
+  internal_error (__FILE__, __LINE__,
+		  "legacy_register_name: called.");
+  return NULL;
+#endif
+}
+
 static const char *
 sparc32_register_name (int regno)
 {
@@ -3205,7 +3218,7 @@ sparc_reg_struct_has_addr (int gcc_p, struct type *type)
     return (gcc_p != 1);
 }
 
-static int
+int
 sparc_intreg_size (void)
 {
   return SPARC_INTREG_SIZE;

@@ -637,7 +637,7 @@ get_image_name (HANDLE h, void *address, int unicode)
 
   /* See if we could read the address of a string, and that the
      address isn't null. */
-  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done) 
+  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done)
       || done != sizeof (address_ptr) || !address_ptr)
     return NULL;
 

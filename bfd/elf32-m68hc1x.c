@@ -512,11 +512,12 @@ elf32_m68hc11_size_stubs (output_bfd, stub_bfd, info, add_stub_section)
                   bfd_boolean is_far;
 
                   sym = local_syms + r_indx;
-                  hdr = elf_elfsections (input_bfd)[sym->st_shndx];
-                  sym_sec = hdr->bfd_section;
                   is_far = (sym && (sym->st_other & STO_M68HC12_FAR));
                   if (!is_far)
                     continue;
+
+                  hdr = elf_elfsections (input_bfd)[sym->st_shndx];
+                  sym_sec = hdr->bfd_section;
                   stub_name = (bfd_elf_string_from_elf_section
                                (input_bfd, symtab_hdr->sh_link,
                                 sym->st_name));
@@ -956,7 +957,7 @@ elf32_m68hc11_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *     rel;
   const Elf_Internal_Rela *     rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
@@ -1118,7 +1119,7 @@ elf32_m68hc11_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel, *relend;
   const char *name;
   struct m68hc11_page_info *pinfo;
-  struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
+  const struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1152,9 +1153,9 @@ elf32_m68hc11_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_M68HC11_GNU_VTINHERIT )
         continue;
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */

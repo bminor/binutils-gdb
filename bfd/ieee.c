@@ -3590,7 +3590,7 @@ static const unsigned char exten[] =
   0xf0, 0x20, 0x00,
   0xf1, 0xce, 0x20, 0x00, 37, 3, 3,	/* Set version 3 rev 3.  */
   0xf1, 0xce, 0x20, 0x00, 39, 2,	/* Keep symbol in  original case.  */
-  0xf1, 0xce, 0x20, 0x00, 38		/* Set object type relocateable to x.  */
+  0xf1, 0xce, 0x20, 0x00, 38		/* Set object type relocatable to x.  */
 };
 
 static const unsigned char envi[] =

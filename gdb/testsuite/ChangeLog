@@ -1,3 +1,51 @@
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp: Add testcase for PR backtrace/1338.
+	* gdb.arch/i386-prologue.c (gdb1338): Add function.
+
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-var-display.exp (-var-list-children weird): Accept function
+	pointers with argument types.
+	* mi1-var-display.exp (-var-list-children weird): Likewise.
+	* mi2-var-display.exp (-var-list-children weird): Likewise.
+
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/annota3.exp: Add missing newline.
+
+2003-08-06  Michael Chastain  <mec@shout.net>
+
+	* gdb.java/jmisc1.exp: Add test for pr gdb/1322.
+
+2003-08-12  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/float.exp: Add test for SH.
+
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.c, gdb.arch/i386-prologue.exp: New files.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
+       * gdb.base/completion.exp: Remove reduntant completion test
+       on filename.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/attach.exp, gdb.base/detach.exp, gdb.base/gcore.exp,
+        gdb.mi/mi-basics.exp, gdb.threads/gcore-thread.exp,
+        gdb.trace/save-trace.exp: Make sure that full pathnames are
+        escaped correctly.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+        
+        * configure.in: Don't generate config.h from config.hin.
+        * configure: Regenerate.
+        * config.hin: Remove file.
+        * gdb.mi/pthreads.c: Remove include of config.h, and other ifdefs.
+        * gdb.threads/pthreads.c: Ditto.
+
 2003-08-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	From Kei Sakamoto <sakamoto.kei@renesas.com>:
@@ -12,23 +60,101 @@
 	* gdb.c++/annota3.exp: New file.
 	* gdb.c++/annota3.cc: New file.
 
+2003-07-29  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/tls.c (spin): Check errno only if sem_wait
+	actually failed.
+	(do_pass): Likewise.
+	* gdb.threads/tls.exp: Always initialize no_of_threads.
+
 2003-07-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/print-threads.exp (test_all_threads): Loosen KFAIL
 	pattern.
+	* gdb.threads/tls-shared.exp: Don't use gdb_suppress_entire_file.
+	* gdb.threads/tls.exp: Recognize one case of the host library not
+	supporting TLS.
 
 2003-07-27  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/fileio.exp: Use SH when running commands using
 	remote_exec.
 
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* gdb.base/relocate.c (dummy): New padding array.
+
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.disasm/8300s.s: Fix syntax of bsr insn.  
+
+	* gdb.disasm/h8300s.exp : Minor changes in disassembler output require
+	patterns to be more general, accepting old and new output.
+	Some output chars (such as '+') also must be quoted.
+	Some addresses are displayed numerically instead of 
+	symbolically.
+
+2003-07-23  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/return2.exp: Don't test long-long return.
+
+	* gdb.disasm/t01_mov.s: New file, h8300sx disassembly tests.
+	* gdb.disasm/t01_mov.exp: Ditto.
+	* gdb.disasm/t02_mova.s: Ditto.
+	* gdb.disasm/t02_mova.exp: Ditto.
+	* gdb.disasm/t03_add.s: Ditto.
+	* gdb.disasm/t03_add.exp: Ditto.
+	* gdb.disasm/t04_sub.s: Ditto.
+	* gdb.disasm/t04_sub.exp: Ditto.
+	* gdb.disasm/t05_cmp.s: Ditto.
+	* gdb.disasm/t05_cmp.exp: Ditto.
+	* gdb.disasm/t06_ari2.s: Ditto.
+	* gdb.disasm/t06_ari2.exp: Ditto.
+	* gdb.disasm/t07_ari3.s: Ditto.
+	* gdb.disasm/t07_ari3.exp: Ditto.
+	* gdb.disasm/t08_or.s: Ditto.
+	* gdb.disasm/t08_or.exp: Ditto.
+	* gdb.disasm/t09_xor.s: Ditto.
+	* gdb.disasm/t09_xor.exp: Ditto.
+	* gdb.disasm/t10_and.s: Ditto.
+	* gdb.disasm/t10_and.exp: Ditto.
+	* gdb.disasm/t11_logs.s: Ditto.
+	* gdb.disasm/t11_logs.exp: Ditto.
+	* gdb.disasm/t12_bit.s: Ditto.
+	* gdb.disasm/t12_bit.exp: Ditto.
+	* gdb.disasm/t13_otr.s: Ditto.
+	* gdb.disasm/t13_otr.exp: Ditto.
+
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.threads/tls.exp :Add kfail for 'info address' case.
+
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/tls.c : New file.
+        * gdb.threads/tls.exp : New file.
+        * gdb.threads/tls-main.c : New file.
+        * gdb.threads/tls-shared.c : New file.
+        * gdb.threads/tls-shared.exp : New file.
+
 2003-07-22  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.asm/powerpc.inc (gdbasm_startup): Force alignment.
 
+2003-07-20  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Add more patterns
+	due to insn reordering.
+
 2003-07-15  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.asm/asm-source.exp: Do not allow "start" in the backtrace.
+
+2003-07-15  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1250.exp: New file.
+	* gdb.base/gdb1250.c: New file.
 
 2003-07-09  Michal Ludvig  <mludvig@suse.cz>
 
@@ -37,9 +163,17 @@
 
 2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
 
-        * gdb.base/annota1.exp: Make sure that we properly escape the
-        full path of the source file. Xfail more permissive patterns,
-        due to a compiler debug info problem. 
+        * gdb.threads/tls.c: New file.
+        * gdb.threads/tls.exp: New file.
+        * gdb.threads/tls-main.c: New file.
+        * gdb.threads/tls-shared.c: New file.
+        * gdb.threads/tls-shared.exp: New file.
+
+2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/annota1.exp: Make sure that we properly escape the
+	full path of the source file. Xfail more permissive patterns,
+	due to a compiler debug info problem. 
 
 2003-07-07  Andreas Schwab  <schwab@suse.de>
 
@@ -62,28 +196,43 @@
 	the call.
 	* gdb.base/store.exp: Accomodate store.c changes.
 
+2003-06-30  David Carlton  <carlton@kealia.com>
+
+	* gdb.c++/maint.exp (test_invalid_name): New.
+	(test_first_component): Add tests for invalid names.
+
 2003-06-29  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/inherit.exp (test_print_svi_classes): Accept gdb
 	output of '<VTT for class>' for virtual base classes.
 
-2003-06-30  David Carlton  <carlton@kealia.com>
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
-	* gdb.c++/maint.exp (test_invalid_name): New.
-	(test_first_component): Add tests for invalid names.
+	* gdb.base/completion.exp: Tab-complete "complet" instead of
+	"compl".
+	* gdb.base/complex.exp, gdb.base/complex.c: New files.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/constvars.exp: Remove most xfails for GCC 3.x.
+	* gdb.base/volatile.exp: Likewise.
 
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/print-threads.exp (test_all_threads): Add kfail for
 	gdb/1265.
 
-2003-06-29  Michael Chastain  <mec@shout.net>
+2003-06-28  Michael Chastain  <mec@shout.net>
 	    Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Increase maximum
 	initial line count of 'captured_main' from 26 to 32.
 	(test_with_self): Allow xmalloc call to be interleaved with the
 	preceding two lines.
+
+2003-06-24  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/bang.exp: New testcase.
 
 2003-06-23  Joel Brobecker  <brobecker@gnat.com>
 
@@ -92,8 +241,8 @@
 
 2003-06-23  Elena Zannoni  <ezannoni@redhat.com>
 
-        * gdb.objc/basicclass.exp: Return -1 if we cannot compile
-        the testcase.
+	* gdb.objc/basicclass.exp: Return -1 if we cannot compile
+	the testcase.
 
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 

@@ -446,7 +446,7 @@ linux_info_proc_cmd (char *args, int from_tty)
       if ((procfile = fopen (fname1, "r")) > 0)
 	{
 	  while (fgets (buffer, sizeof (buffer), procfile) != NULL)
-	    printf_filtered (buffer);
+	    puts_filtered (buffer);
 	  fclose (procfile);
 	}
       else

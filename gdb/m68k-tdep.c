@@ -784,7 +784,7 @@ static const struct frame_unwind m68k_frame_unwind =
 };
 
 static const struct frame_unwind *
-m68k_frame_p (CORE_ADDR pc)
+m68k_frame_sniffer (struct frame_info *next_frame)
 {
   return &m68k_frame_unwind;
 }
@@ -851,8 +851,9 @@ static const struct frame_unwind m68k_sigtramp_frame_unwind =
 };
 
 static const struct frame_unwind *
-m68k_sigtramp_frame_p (CORE_ADDR pc)
+m68k_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   /* We shouldn't even bother to try if the OSABI didn't register
@@ -1162,8 +1163,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, m68k_get_longjmp_target);
 
-  frame_unwind_append_predicate (gdbarch, m68k_sigtramp_frame_p);
-  frame_unwind_append_predicate (gdbarch, m68k_frame_p);
+  frame_unwind_append_sniffer (gdbarch, m68k_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, m68k_frame_sniffer);
 
   return gdbarch;
 }

@@ -306,7 +306,7 @@ libopcodes.a: stamp-lib ; @true
 
 POTFILES = $(HFILES) $(CFILES)
 po/POTFILES.in: @MAINT@ Makefile
-	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 # We should reconfigure whenever bfd/configure.in changes, because
@@ -515,9 +515,9 @@ arc-ext.lo: arc-ext.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h arm-opc.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
-  opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/arm.h \
-  $(INCDIR)/elf/reloc-macros.h
+  opintl.h $(INCDIR)/safe-ctype.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/opcode/avr.h
@@ -624,7 +624,7 @@ ia64-gen.lo: ia64-gen.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h sysdep.h config.h $(INCDIR)/getopt.h \
   ia64-opc.h $(INCDIR)/opcode/ia64.h $(BFD_H) $(INCDIR)/symcat.h \
   ia64-opc-a.c ia64-opc-i.c ia64-opc-m.c ia64-opc-b.c \
-  ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c ../intl/libintl.h
+  ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c
 ia64-asmtab.lo: ia64-asmtab.c
 ip2k-asm.lo: ip2k-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \

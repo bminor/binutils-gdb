@@ -1,3 +1,30 @@
+2003-07-18  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (decode): Enhancements for mova.
+	Initialize cst, reg, and rdisp inside the loop, for each
+	new instruction.  Defer correction of the disp2 values until
+	later, and then adjust them by the size of the first operand,
+	rather than the size of the instruction.
+	(sim_resume): For mova, adjust the size of the second operand
+	according to the type of the first operand (INDEXB vs. INDEXW).
+	In cases where there is only one operand, the other two must
+	both be composed on the fly.
+
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_resume): Revert 6-24 change, it does not
+	work with gdb breakpoints.
+
+2003-07-17  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_resume): Handle shll reg, reg and shlr reg, reg.
+	(decode): IMM16 is always zero-extended.
+
+2003-06-24  Michael Snyder  <msnyder@redhat.com>
+
+	* sim-main.h (SIM_WIFSTOPPED, SIM_WSTOPSIG): Define.
+	* compile.c (sim_resume): Use the above to return stop signal.
+
 2003-06-18  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c: Replace "Hitachi" with "Renesas".

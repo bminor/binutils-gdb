@@ -652,7 +652,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
   int other = 0;
   const char *common = (const char *)0;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
 #ifdef DEBUG
@@ -1632,7 +1632,7 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
@@ -2520,7 +2520,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 
   *again = FALSE;
 
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;
@@ -3139,6 +3139,38 @@ v850_elf_relax_section (abfd, sec, link_info, again)
   result = FALSE;
   goto finish;
 }
+
+static struct bfd_elf_special_section const v850_elf_special_sections[]=
+{
+  { ".sdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL },
+  { ".rosdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_V850_GPREL },
+  { ".sbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL },
+  { ".scommon",		0,	NULL,	0,
+    SHT_V850_SCOMMON, 	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL },
+  { ".tdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL },
+  { ".tbss",		0,	NULL,	0,
+    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL },
+  { ".tcommon",		0,	NULL,	0,
+    SHT_V850_TCOMMON,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
+  { ".zdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
+  { ".rozdata",		0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_V850_R0REL },
+  { ".zbss",		0,	NULL,	0,
+    SHT_NOBITS,	  	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
+  { ".zcommon",		0,	NULL,	0,
+    SHT_V850_ZCOMMON, 	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
+  { ".call_table_data",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
+  { ".call_table_text",	0,	NULL,	0,
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
+  { NULL,		0,	NULL,	0,
+    0,			0 }
+};
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"
@@ -3162,6 +3194,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 #define elf_backend_fake_sections		v850_elf_fake_sections
 #define elf_backend_gc_mark_hook                v850_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook               v850_elf_gc_sweep_hook
+#define elf_backend_special_sections		v850_elf_special_sections
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_rela_normal 1

@@ -108,18 +108,26 @@ extern mi_cmd_argv_ftype mi_cmd_var_update;
 
 /* Description of a single command. */
 
+struct mi_cli
+{
+  /* Corresponding CLI command.  If ARGS_P is non-zero, the MI
+     command's argument list is appended to the CLI command.  */
+  const char *cmd;
+  int args_p;
+};
+
 struct mi_cmd
-  {
-    /* official name of the command */
-    const char *name;
-    /* If non-null, the corresponding CLI command that can be used to
-       implement this MI command */
-    const char *cli;
-    /* If non-null, the function implementing the MI command */
-    mi_cmd_args_ftype *args_func;
-    /* If non-null, the function implementing the MI command */
-    mi_cmd_argv_ftype *argv_func;
-  };
+{
+  /* official name of the command.  */
+  const char *name;
+  /* The corresponding CLI command that can be used to implement this
+     MI command (if cli.lhs is non NULL).  */
+  struct mi_cli cli;
+  /* If non-null, the function implementing the MI command.  */
+  mi_cmd_args_ftype *args_func;
+  /* If non-null, the function implementing the MI command.  */
+  mi_cmd_argv_ftype *argv_func;
+};
 
 /* Lookup a command in the mi comand table */
 

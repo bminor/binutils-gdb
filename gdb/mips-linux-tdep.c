@@ -716,7 +716,7 @@ _initialize_mips_linux_tdep (void)
   const struct bfd_arch_info *arch_info;
 
   register_addr_data =
-    register_gdbarch_data (init_register_addr_data, 0);
+    register_gdbarch_data (init_register_addr_data);
 
   for (arch_info = bfd_lookup_arch (bfd_arch_mips, 0);
        arch_info != NULL;

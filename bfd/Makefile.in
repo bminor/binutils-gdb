@@ -335,6 +335,7 @@ BFD32_BACKENDS = \
 	ecofflink.lo \
 	efi-app-ia32.lo \
 	elf.lo \
+	elf32-am33lin.lo \
 	elf32-arc.lo \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
@@ -500,6 +501,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	efi-app-ia32.c \
 	elf.c \
+	elf32-am33lin.c \
 	elf32-arc.c \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
@@ -1175,21 +1177,14 @@ mostlyclean distclean maintainer-clean
 
 
 po/SRC-POTFILES.in: @MAINT@ Makefile $(SRC_POTFILES)
-	for file in $(SRC_POTFILES); do echo $$file; done | sort > tmp.src \
+	for file in $(SRC_POTFILES); do echo $$file; done \
+	  | LC_COLLATE= sort > tmp.src \
 	  && mv tmp.src $(srcdir)/po/SRC-POTFILES.in
 
 po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
-	for file in $(BLD_POTFILES); do echo $$file; done | sort > tmp.bld \
+	for file in $(BLD_POTFILES); do echo $$file; done \
+	  | LC_COLLATE= sort > tmp.bld \
 	  && mv tmp.bld $(srcdir)/po/BLD-POTFILES.in
-
-# The following target is retained for upgrade purposes.
-# This target used to exist in older versions of this makefile, and was
-# referenced by <builddir>/po/Makefile (which is created from <srcdir>/po/Make-in)
-# So old versions of <builddir>/po/Makefile will try to regenerate themselves
-# when make is next run, but that dependency cannot be completed without a build
-# of po/POTFILES.in.  Hence the presence of this rule.  This rule will be deleted
-# once it is no longer needed - probably in the fall of 2001.
-po/POTFILES.in:
 
 diststuff: info
 
@@ -1656,6 +1651,10 @@ efi-app-ia32.lo: efi-app-ia32.c $(INCDIR)/filenames.h \
 elf.lo: elf.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h
+elf32-am33lin.lo: elf32-am33lin.c elf-m10300.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/mn10300.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-arc.lo: elf32-arc.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \

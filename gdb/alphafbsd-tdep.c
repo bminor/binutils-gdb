@@ -32,7 +32,7 @@ alphafbsd_use_struct_convention (int gcc_p, struct type *type)
 
   /* All aggregate types that won't fit in a register must be returned
      in memory.  */
-  if (TYPE_LENGTH (type) > DEPRECATED_REGISTER_SIZE)
+  if (TYPE_LENGTH (type) > ALPHA_REGISTER_SIZE)
     return 1;
 
   /* The only aggregate types that can be returned in a register are
@@ -54,13 +54,40 @@ alphafbsd_use_struct_convention (int gcc_p, struct type *type)
 
   return 0;
 }
+
+
+/* Support for signal handlers.  */
+
+/* Return whether PC is in a BSD sigtramp routine.  */
+
+CORE_ADDR alphafbsd_sigtramp_start = 0x11ffff68;
+CORE_ADDR alphafbsd_sigtramp_end = 0x11ffffe0;
 
 static int
 alphafbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 {
-  /* FIXME */
-  return 0;
+  return (pc >= alphafbsd_sigtramp_start && pc < alphafbsd_sigtramp_end);
 }
+
+static LONGEST
+alphafbsd_sigtramp_offset (CORE_ADDR pc)
+{
+  return pc - alphafbsd_sigtramp_start;
+}
+
+/* Assuming NEXT_FRAME is for a frame following a BSD sigtramp
+   routine, return the address of the associated sigcontext structure.  */
+
+static CORE_ADDR
+alphafbsd_sigcontext_addr (struct frame_info *next_frame)
+{
+  ULONGEST sp;
+
+  frame_unwind_unsigned_register (next_frame, ALPHA_SP_REGNUM, &sp);
+  return sp + 24;
+}
+
+/* FreeBSD 5.0-RELEASE or later.  */
 
 static void
 alphafbsd_init_abi (struct gdbarch_info info,
@@ -74,13 +101,23 @@ alphafbsd_init_abi (struct gdbarch_info info,
   /* Hook into the MDEBUG frame unwinder.  */
   alpha_mdebug_init_abi (info, gdbarch);
 
+  set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);
+
   set_gdbarch_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
 
-  set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);
+  tdep->dynamic_sigtramp_offset = alphafbsd_sigtramp_offset;
+  tdep->sigcontext_addr = alphafbsd_sigcontext_addr;
+  tdep->sc_pc_offset = 288;
+  tdep->sc_regs_offset = 24;
+  tdep->sc_fpregs_offset = 320;
 
   tdep->jb_pc = 2;
   tdep->jb_elt_size = 8;
 }
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_alphafbsd_tdep (void);
 
 void
 _initialize_alphafbsd_tdep (void)

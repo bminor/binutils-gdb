@@ -1229,9 +1229,9 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_symndx = ELF64_R_SYM (rel->r_info);
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
              anything, unless the reloc is against a section symbol,
              in which case we have to adjust according to where the
              section symbol winds up in the output section.  */
@@ -1669,7 +1669,7 @@ mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* We currently have to abuse this COFF-specific member, since there's
@@ -1780,7 +1780,7 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -2352,10 +2352,10 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
   if (sec->_cooked_size == 0)
     sec->_cooked_size = sec->_raw_size;
 
-  /* We don't have to do anything for a relocateable link, if
+  /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
      code section.  */
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0

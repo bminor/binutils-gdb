@@ -22,6 +22,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+
 #include "regcache.h"
 
 struct type;
@@ -158,6 +160,8 @@ extern int sparc_intreg_size (void);
                                                                 \
   "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" 	\
 }
+extern const char *legacy_register_name (int i);
+#define REGISTER_NAME legacy_register_name
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -439,9 +443,9 @@ extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
-#define FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
+#define DEPRECATED_FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
 
-#define FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */

@@ -425,8 +425,10 @@ extern void put_frame_register (struct frame_info *frame, int regnum,
    includes builtin registers.  If NAMELEN is negative, use the NAME's
    length when doing the comparison.  */
 
-extern int frame_map_name_to_regnum (const char *name, int namelen);
-extern const char *frame_map_regnum_to_name (int regnum);
+extern int frame_map_name_to_regnum (struct frame_info *frame,
+				     const char *name, int namelen);
+extern const char *frame_map_regnum_to_name (struct frame_info *frame,
+					     int regnum);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the
    calling frame.  For GDB, `pc' is the resume address and not a
@@ -539,10 +541,6 @@ extern struct block *get_frame_block (struct frame_info *,
 extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
-
-/* DEPRECATED: Replaced by tye pair get_frame_address_in_block and
-   frame_unwind_address_in_block.  */
-extern CORE_ADDR frame_address_in_block (struct frame_info *);
 
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 

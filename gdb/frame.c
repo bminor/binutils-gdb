@@ -28,7 +28,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include "builtin-regs.h"
+#include "user-regs.h"
 #include "gdb_obstack.h"
 #include "dummy-frame.h"
 #include "sentinel-frame.h"
@@ -135,9 +135,11 @@ struct frame_info
 
 static int frame_debug;
 
-/* Flag to indicate whether backtraces should stop at main.  */
+/* Flag to indicate whether backtraces should stop at main et.al.  */
 
-static int backtrace_below_main;
+static int backtrace_past_main;
+static unsigned int backtrace_limit = UINT_MAX;
+
 
 void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
@@ -499,7 +501,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "{ frame_register_unwind (frame=%d,regnum=\"%s\",...) ",
-			  frame->level, frame_map_regnum_to_name (regnum));
+			  frame->level, frame_map_regnum_to_name (frame, regnum));
     }
 
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
@@ -774,42 +776,15 @@ frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
    includes builtin registers.  */
 
 int
-frame_map_name_to_regnum (const char *name, int len)
+frame_map_name_to_regnum (struct frame_info *frame, const char *name, int len)
 {
-  int i;
-
-  if (len < 0)
-    len = strlen (name);
-
-  /* Search register name space. */
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
-	&& strncmp (name, REGISTER_NAME (i), len) == 0)
-      {
-	return i;
-      }
-
-  /* Try builtin registers.  */
-  i = builtin_reg_map_name_to_regnum (name, len);
-  if (i >= 0)
-    {
-      /* A builtin register doesn't fall into the architecture's
-         register range.  */
-      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
-      return i;
-    }
-
-  return -1;
+  return user_reg_map_name_to_regnum (get_frame_arch (frame), name, len);
 }
 
 const char *
-frame_map_regnum_to_name (int regnum)
+frame_map_regnum_to_name (struct frame_info *frame, int regnum)
 {
-  if (regnum < 0)
-    return NULL;
-  if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-    return REGISTER_NAME (regnum);
-  return builtin_reg_map_regnum_to_name (regnum);
+  return user_reg_map_regnum_to_name (get_frame_arch (frame), regnum);
 }
 
 /* Create a sentinel frame.  */
@@ -1829,7 +1804,7 @@ get_prev_frame (struct frame_info *this_frame)
   gdb_assert (this_frame != NULL);
 
   if (this_frame->level >= 0
-      && !backtrace_below_main
+      && !backtrace_past_main
       && inside_main_func (get_frame_pc (this_frame)))
     /* Don't unwind past main(), bug always unwind the sentinel frame.
        Note, this is done _before_ the frame has been marked as
@@ -1839,6 +1814,11 @@ get_prev_frame (struct frame_info *this_frame)
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog, "-> NULL // inside main func }\n");
       return NULL;
+    }
+
+  if (this_frame->level > backtrace_limit)
+    {
+      error ("Backtrace limit of %d exceeded", backtrace_limit);
     }
 
   /* If we're already inside the entry function for the main objfile,
@@ -2299,7 +2279,8 @@ deprecated_set_frame_context (struct frame_info *fi,
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {
-  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  struct frame_info *frame = XMALLOC (struct frame_info);
+  memset (frame, 0, sizeof (*frame));
   frame->this_id.p = 1;
   return frame;
 }
@@ -2397,18 +2378,39 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
+static struct cmd_list_element *set_backtrace_cmdlist;
+static struct cmd_list_element *show_backtrace_cmdlist;
+
+static void
+set_backtrace_cmd (char *args, int from_tty)
+{
+  help_list (set_backtrace_cmdlist, "set backtrace ", -1, gdb_stdout);
+}
+
+static void
+show_backtrace_cmd (char *args, int from_tty)
+{
+  cmd_show_list (show_backtrace_cmdlist, from_tty, "");
+}
+
 void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
 
-  /* FIXME: cagney/2003-01-19: This command needs a rename.  Suggest
-     `set backtrace {past,beyond,...}-main'.  Also suggest adding `set
-     backtrace ...-start' to control backtraces past start.  The
-     problem with `below' is that it stops the `up' command.  */
+  add_prefix_cmd ("backtrace", class_maintenance, set_backtrace_cmd, "\
+Set backtrace specific variables.\n\
+Configure backtrace variables such as the backtrace limit",
+		  &set_backtrace_cmdlist, "set backtrace ",
+		  0/*allow-unknown*/, &setlist);
+  add_prefix_cmd ("backtrace", class_maintenance, show_backtrace_cmd, "\
+Show backtrace specific variables\n\
+Show backtrace variables such as the backtrace limit",
+		  &show_backtrace_cmdlist, "show backtrace ",
+		  0/*allow-unknown*/, &showlist);
 
-  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
-			   &backtrace_below_main, "\
+  add_setshow_boolean_cmd ("past-main", class_obscure,
+			   &backtrace_past_main, "\
 Set whether backtraces should continue past \"main\".\n\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
@@ -2417,8 +2419,17 @@ Show whether backtraces should continue past \"main\".\n\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.",
-			   NULL, NULL, &setlist, &showlist);
+			   NULL, NULL, &set_backtrace_cmdlist,
+			   &show_backtrace_cmdlist);
 
+  add_setshow_uinteger_cmd ("limit", class_obscure,
+			    &backtrace_limit, "\
+Set an upper bound on the number of backtrace levels.\n\
+No more than the specified number of frames can be displayed or examined.\n\
+Zero is unlimited.", "\
+Show the upper bound on the number of backtrace levels.",
+			    NULL, NULL, &set_backtrace_cmdlist,
+			    &show_backtrace_cmdlist);
 
   /* Debug this files internals. */
   add_show_from_set (add_set_cmd ("frame", class_maintenance, var_zinteger,

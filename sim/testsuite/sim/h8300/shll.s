@@ -90,6 +90,28 @@ shll_b_reg8_4:
 	test_gr_a5a5 5
 	test_gr_a5a5 6
 	test_gr_a5a5 7
+
+shll_b_reg8_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	set_ccr_zero
+
+	mov	#5, r0h
+	shll.b	r0h, r0l	; shift left logical by register value
+
+	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
+	test_zero_clear
+	test_ovf_clear
+	test_neg_set
+	test_h_gr16 0x05a0 r0	; 1010 0101 -> 1010 0000
+	test_h_gr32 0xa5a505a0 er0
+
+	test_gr_a5a5 1		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
 .endif
 
 .if (sim_cpu)			; Not available in h8300 mode
@@ -173,6 +195,28 @@ shll_w_reg16_8:
 	test_neg_set
 	test_h_gr16 0xa500 r0	; 1010 0101 1010 0101 -> 1010 0101 0000 0000
 	test_h_gr32 0xa5a5a500 er0
+
+	test_gr_a5a5 1		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+shll_w_reg16_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	set_ccr_zero
+
+	mov	#5, r0h
+	shll.w	r0h, r0		; shift left logical by register value
+
+	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
+	test_zero_clear
+	test_ovf_clear
+	test_neg_set
+	test_h_gr16 0xb4a0 r0	; 1010 0101 1010 0101 -> 1011 0100 1010 0000
+	test_h_gr32 0xa5a5b4a0 er0
 
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
@@ -294,6 +338,29 @@ shll_l_reg32_16:
 
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+shll_l_reg32_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	set_ccr_zero
+
+	mov	#5, r1l
+	shll.l	r1l, er0	; shift left logical by register value
+
+	test_carry_clear	; H=0 N=1 Z=0 V=0 C=0
+	test_zero_clear
+	test_ovf_clear
+	test_neg_set
+	; 1010 0101 1010 0101 1010 0101 1010 0101
+	; -> 1011 0100 1011 0100 1011 0100 1010 0000
+	test_h_gr32  0xb4b4b4a0 er0
+
+	test_h_gr32  0xa5a5a505 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
 	test_gr_a5a5 3
 	test_gr_a5a5 4
 	test_gr_a5a5 5

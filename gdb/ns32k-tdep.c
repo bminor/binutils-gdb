@@ -327,7 +327,7 @@ ns32k_sigtramp_saved_pc (struct frame_info *frame)
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (get_next_frame (frame))
     sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (get_next_frame (frame)) + FRAME_ARGS_SKIP + sigcontext_offs,
+      (DEPRECATED_FRAME_ARGS_ADDRESS (get_next_frame (frame)) + FRAME_ARGS_SKIP + sigcontext_offs,
        builtin_type_void_data_ptr);
   else
     sigcontext_addr = read_memory_typed_address
@@ -569,7 +569,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_chain (gdbarch, ns32k_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
 
-  set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, ns32k_frame_args_address);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
 

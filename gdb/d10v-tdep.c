@@ -797,9 +797,9 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     ULONGEST pc, psw, rpt_s, rpt_e, rpt_c;
     frame_read_unsigned_register (frame, D10V_PC_REGNUM, &pc);
     frame_read_unsigned_register (frame, PSW_REGNUM, &psw);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_s", -1), &rpt_s);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_e", -1), &rpt_e);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_c", -1), &rpt_c);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_s", -1), &rpt_s);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_e", -1), &rpt_e);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_c", -1), &rpt_c);
     fprintf_filtered (file, "PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
 		     (long) pc, (long) d10v_make_iaddr (pc), (long) psw,
 		     (long) rpt_s, (long) rpt_e, (long) rpt_c);
@@ -1440,7 +1440,7 @@ static const struct frame_unwind d10v_frame_unwind = {
 };
 
 static const struct frame_unwind *
-d10v_frame_p (CORE_ADDR pc)
+d10v_frame_sniffer (struct frame_info *next_frame)
 {
   return &d10v_frame_unwind;
 }
@@ -1580,7 +1580,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
 
-  frame_unwind_append_predicate (gdbarch, d10v_frame_p);
+  frame_unwind_append_sniffer (gdbarch, d10v_frame_sniffer);
   frame_base_set_default (gdbarch, &d10v_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  The ID's

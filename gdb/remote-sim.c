@@ -331,7 +331,7 @@ gdbsim_fetch_register (int regno)
 	    warn_user = 0;
 	  }
 	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
-	   indicatingthat GDB and the SIM have different ideas about
+	   indicating that GDB and the SIM have different ideas about
 	   which registers are fetchable.  */
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
@@ -369,7 +369,7 @@ gdbsim_store_register (int regno)
 	internal_error (__FILE__, __LINE__,
 			"Register size different to expected");
       /* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
-	 indicatingthat GDB and the SIM have different ideas about
+	 indicating that GDB and the SIM have different ideas about
 	 which registers are fetchable.  */
       if (sr_get_debug ())
 	{

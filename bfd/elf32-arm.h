@@ -564,7 +564,7 @@ bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
 
   /* If we are only performing a partial
      link do not bother adding the glue.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   sec = bfd_get_section_by_name (abfd, ARM2THUMB_GLUE_SECTION_NAME);
@@ -620,7 +620,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 
   /* If we are only performing a partial link
      do not bother getting a bfd to hold the glue.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   globals = elf32_arm_hash_table (info);
@@ -652,7 +652,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
-  if (link_info->relocateable)
+  if (link_info->relocatable)
     return TRUE;
 
   /* Here we have a bfd that is to be included on the link.  We have a hook
@@ -1037,6 +1037,18 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 
   return TRUE;
 }
+
+/* This is the condition under which elf32_arm_finish_dynamic_symbol
+   will be called from elflink.h.  If elflink.h doesn't call our
+   finish_dynamic_symbol routine, we'll need to do something about
+   initializing any .plt and .got entries in elf32_arm_relocate_section
+   and elf32_arm_final_link_relocate.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H)			\
+  ((DYN)								\
+   && ((SHARED)							 	\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 
 /* Perform a relocation as part of a final link.  */
 
@@ -1605,13 +1617,16 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       if (h != NULL)
 	{
 	  bfd_vma off;
+	  bfd_boolean dyn = elf_hash_table (info)->dynamic_sections_created;
 
 	  off = h->got.offset;
 	  BFD_ASSERT (off != (bfd_vma) -1);
 
-	  if (!elf_hash_table (info)->dynamic_sections_created ||
-	      (info->shared && (info->symbolic || h->dynindx == -1)
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+	  if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
+	      || (info->shared
+		  && (info->symbolic || h->dynindx == -1
+		      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
+		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	    {
 	      /* This is actually a static link, or it is a -Bsymbolic link
 		 and the symbol is defined locally.  We must initialize this
@@ -1838,7 +1853,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   const char *name;
 
 #if !USE_REL
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 #endif
 
@@ -1870,9 +1885,9 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = bfd_reloc.howto;
 
 #if USE_REL
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
@@ -1948,19 +1963,16 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  bfd_boolean warned;
+	  bfd_boolean unresolved_reloc;
 
-	  while (   h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  if (   h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation,
+				   sec, unresolved_reloc, info,
+				   warned);
+	  
+	  if (unresolved_reloc || relocation != 0)
 	    {
-	      int relocation_needed = 1;
-
-	      sec = h->root.u.def.section;
-
 	      /* In these cases, we don't need the relocation value.
 	         We check specially because in some obscure cases
 	         sec->output_section will be NULL.  */
@@ -1983,63 +1995,39 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			      && (h->elf_link_hash_flags
 				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 		      )
-	            relocation_needed = 0;
+	            relocation = 0;
 		  break;
 
 	        case R_ARM_GOTPC:
-	          relocation_needed = 0;
+	          relocation = 0;
 		  break;
 
 	        case R_ARM_GOT32:
-	          if (elf_hash_table(info)->dynamic_sections_created
-	              && (!info->shared
+	          if ((WILL_CALL_FINISH_DYNAMIC_SYMBOL
+		       (elf_hash_table (info)->dynamic_sections_created,
+			info->shared, h))
+		      && (!info->shared
 	                  || (!info->symbolic && h->dynindx != -1)
-	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
-			  )
-		      )
-	            relocation_needed = 0;
+	                  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
+	            relocation = 0;
 		  break;
 
 	        case R_ARM_PLT32:
 	          if (h->plt.offset != (bfd_vma)-1)
-	            relocation_needed = 0;
+	            relocation = 0;
 		  break;
 
 	        default:
-		  if (sec->output_section == NULL)
-		    {
-		      (*_bfd_error_handler)
-			(_("%s: warning: unresolvable relocation %d against symbol `%s' from %s section"),
-			 bfd_archive_filename (input_bfd),
-			 r_type,
-			 h->root.root.string,
-			 bfd_get_section_name (input_bfd, input_section));
-		      relocation_needed = 0;
-		    }
+		  if (unresolved_reloc)
+		    _bfd_error_handler
+		      (_("%s: warning: unresolvable relocation %d against symbol `%s' from %s section"),
+		       bfd_archive_filename (input_bfd),
+		       r_type,
+		       h->root.root.string,
+		       bfd_get_section_name (input_bfd, input_section));
+		  break;
 		}
-
-	      if (relocation_needed)
-		relocation = h->root.u.def.value
-		  + sec->output_section->vma
-		  + sec->output_offset;
-	      else
-		relocation = 0;
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else if (info->shared && !info->symbolic
-		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset,
-		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->other)))))
-		return FALSE;
-	      relocation = 0;
 	    }
 	}
 
@@ -2630,7 +2618,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   asection *sgot, *srelgot, *sreloc;
   bfd_vma *local_got_offsets;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   sgot = srelgot = sreloc = NULL;
@@ -3699,7 +3687,11 @@ elf32_arm_final_write_processing (abfd, linker)
 
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
+#ifdef __QNXTARGET__
+#define ELF_MAXPAGESIZE			0x1000
+#else
 #define ELF_MAXPAGESIZE			0x8000
+#endif
 
 #define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data

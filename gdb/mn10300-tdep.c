@@ -169,7 +169,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   get_frame_extra_info (dummy)->status = 0;
   get_frame_extra_info (dummy)->stack_size = 0;
   memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
-  mn10300_analyze_prologue (dummy, 0);
+  mn10300_analyze_prologue (dummy, pc);
   return dummy;
 }
 
@@ -401,8 +401,13 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   char *name;
 
   /* Use the PC in the frame if it's provided to look up the
-     start of this function.  */
-  pc = (fi ? get_frame_pc (fi) : pc);
+     start of this function.
+
+     Note: kevinb/2003-07-16: We used to do the following here:
+	pc = (fi ? get_frame_pc (fi) : pc);
+     But this is (now) badly broken when called from analyze_dummy_frame().
+  */
+  pc = (pc ? pc : get_frame_pc (fi));
 
   /* Find the start of this function.  */
   status = find_pc_partial_function (pc, &name, &func_addr, &func_end);
@@ -432,6 +437,9 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (status != 0)
     return pc;
 
+#if 0
+  /* Note: kevinb/2003-07-16: We shouldn't be making these sorts of
+     changes to the frame in prologue examination code.  */
   /* If we're physically on an "rets" instruction, then our frame has
      already been deallocated.  Note this can also be true for retf
      and ret if they specify a size of zero.
@@ -452,9 +460,10 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
+#endif
 
   /* Figure out where to stop scanning.  */
-  stop = fi ? get_frame_pc (fi) : func_end;
+  stop = fi ? pc : func_end;
 
   /* Don't walk off the end of the function.  */
   stop = stop > func_end ? func_end : stop;

@@ -961,7 +961,7 @@ static const struct frame_unwind m68hc11_frame_unwind = {
 };
 
 const struct frame_unwind *
-m68hc11_frame_p (CORE_ADDR pc)
+m68hc11_frame_sniffer (struct frame_info *next_frame)
 {
   return &m68hc11_frame_unwind;
 }
@@ -1267,6 +1267,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   return sp + 2;
 }
 
+
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
@@ -1555,13 +1556,13 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
+  set_gdbarch_push_dummy_call (gdbarch, m68hc11_push_dummy_call);
+
   set_gdbarch_extract_return_value (gdbarch, m68hc11_extract_return_value);
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
   set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
-
-  set_gdbarch_push_dummy_call (gdbarch, m68hc11_push_dummy_call);
 
   set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
@@ -1580,9 +1581,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   /* Hook in the DWARF CFI frame unwinder.  */
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 
-  frame_unwind_append_predicate (gdbarch, m68hc11_frame_p);
+  frame_unwind_append_sniffer (gdbarch, m68hc11_frame_sniffer);
   frame_base_set_default (gdbarch, &m68hc11_frame_base);
   
   /* Methods for saving / extracting a dummy frame's ID.  The ID's

@@ -606,6 +606,10 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 	  (q->available == AV_H8H  && !h8300hmode))
 	continue;
 
+      cst[0]   = cst[1]   = cst[2]   = 0;
+      reg[0]   = reg[1]   = reg[2]   = 0;
+      rdisp[0] = rdisp[1] = rdisp[2] = 0;
+
       while (1)
 	{
 	  op_type looking_for = *nib;
@@ -770,26 +774,11 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		       (looking_for & MODE) == INDEXB ||
 		       (looking_for & MODE) == INDEXW ||
 		       (looking_for & MODE) == INDEXL)
-
 		{
 		  switch (looking_for & SIZE)
 		    {
 		    case L_2:
 		      cst[opnum] = thisnib & 3;
-
-		      /* DISP2 special treatment.  */
-		      if ((looking_for & MODE) == DISP)
-			{
-			  switch (OP_SIZE (q->how)) {
-			  default: break;
-			  case SW:
-			    cst[opnum] *= 2;
-			    break;
-			  case SL:
-			    cst[opnum] *= 4;
-			    break;
-			  }
-			}
 		      break;
 		    case L_8:
 		      cst[opnum] = SEXTCHAR (data[len / 2]);
@@ -818,7 +807,9 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		       (looking_for & SIZE) == L_16U)
 		{
 		  cst[opnum] = (data[len / 2] << 8) + data[len / 2 + 1];
-		  if ((looking_for & SIZE) != L_16U)
+		  /* Immediates are always unsigned.  */
+		  if ((looking_for & SIZE) != L_16U &&
+		      (looking_for & MODE) != IMM)
 		    cst[opnum] = (short) cst[opnum];	/* Sign extend.  */
 		}
 	      else if (looking_for & ABSJMP)
@@ -1070,29 +1061,62 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 			    p->type = X (OP_IMM, SP);
 			    p->literal = cst[opnum];
 			  }
-			else if ((x & MODE) == INDEXB ||
-				 (x & MODE) == INDEXW ||
-				 (x & MODE) == INDEXL ||
-				 (x & MODE) == DISP)
+			else if ((x & MODE) == INDEXB)
 			  {
-			    /* Use the instruction to determine 
-			       the operand size.  */
-			    switch (x & MODE) {
-			    case INDEXB:
-			      p->type = X (OP_INDEXB, OP_SIZE (q->how));
-			      break;
-			    case INDEXW:
-			      p->type = X (OP_INDEXW, OP_SIZE (q->how));
-			      break;
-			    case INDEXL:
-			      p->type = X (OP_INDEXL, OP_SIZE (q->how));
-			      break;
-			    case DISP:
-			      p->type = X (OP_DISP,   OP_SIZE (q->how));
-			      break;
-			    }
-
+			    p->type = X (OP_INDEXB, OP_SIZE (q->how));
 			    p->literal = cst[opnum];
+			    p->reg     = rdisp[opnum];
+			  }
+			else if ((x & MODE) == INDEXW)
+			  {
+			    p->type = X (OP_INDEXW, OP_SIZE (q->how));
+			    p->literal = cst[opnum];
+			    p->reg     = rdisp[opnum];
+			  }
+			else if ((x & MODE) == INDEXL)
+			  {
+			    p->type = X (OP_INDEXL, OP_SIZE (q->how));
+			    p->literal = cst[opnum];
+			    p->reg     = rdisp[opnum];
+			  }
+			else if ((x & MODE) == DISP)
+			  {
+			    /* Yuck -- special for mova args.  */
+			    if (strncmp (q->name, "mova", 4) == 0 &&
+				(x & SIZE) == L_2)
+			      {
+				/* Mova can have a DISP2 dest, with an
+				   INDEXB or INDEXW src.  The multiplier
+				   for the displacement value is determined
+				   by the src operand, not by the insn.  */
+
+				switch (OP_KIND (dst->src.type))
+				  {
+				  case OP_INDEXB:
+				    p->type = X (OP_DISP, SB);
+				    p->literal = cst[opnum];
+				    break;
+				  case OP_INDEXW:
+				    p->type = X (OP_DISP, SW);
+				    p->literal = cst[opnum] * 2;
+				    break;
+				  default:
+				    goto fail;
+				  }
+			      }
+			    else
+			      {
+				p->type = X (OP_DISP,   OP_SIZE (q->how));
+				p->literal = cst[opnum];
+				/* DISP2 is special.  */
+				if ((x & SIZE) == L_2)
+				  switch (OP_SIZE (q->how))
+				    {
+				    case SB:                  break;
+				    case SW: p->literal *= 2; break;
+				    case SL: p->literal *= 4; break;
+				    }
+			      }
 			    p->reg     = rdisp[opnum];
 			  }
 			else if (x & CTRL)
@@ -1977,8 +2001,44 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	        (mova/b, mova/w, mova/l).
 	     4) Add literal value of 1st argument (src).
 	     5) Store result in 3rd argument (op3).
-
 	  */
+
+	  /* Alas, since this is the only instruction with 3 arguments, 
+	     decode doesn't handle them very well.  Some fix-up is required.
+
+	     a) The size of dst is determined by whether src is 
+	        INDEXB or INDEXW.  */
+
+	  if (OP_KIND (code->src.type) == OP_INDEXB)
+	    code->dst.type = X (OP_KIND (code->dst.type), SB);
+	  else if (OP_KIND (code->src.type) == OP_INDEXW)
+	    code->dst.type = X (OP_KIND (code->dst.type), SW);
+
+	  /* b) If op3 == null, then this is the short form of the insn.
+	        Dst is the dispreg of src, and op3 is the 32-bit form
+		of the same register.
+	  */
+
+	  if (code->op3.type == 0)
+	    {
+	      /* Short form: src == INDEXB/INDEXW, dst == op3 == 0.
+		 We get to compose dst and op3 as follows:
+
+		     op3 is a 32-bit register, ID == src.reg.
+		     dst is the same register, but 8 or 16 bits
+		     depending on whether src is INDEXB or INDEXW.
+	      */
+
+	      code->op3.type = X (OP_REG, SL);
+	      code->op3.reg  = code->src.reg;
+	      code->op3.literal = 0;
+
+	      if (OP_KIND (code->src.type) == OP_INDEXB)
+		code->dst.type = X (OP_REG, SB);
+	      else
+		code->dst.type = X (OP_REG, SW);
+	    }
+
 	  if (fetch (sd, &code->dst, &ea))
 	    goto end;
 
@@ -3151,10 +3211,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch2 (sd, &code->dst, &rd))
 	    goto end;
 
-	  if (code->src.type == X (OP_IMM, SB))
+	  if (memcmp (&code->src, &code->dst, sizeof (code->src)) == 0)
+	    ea = 1;		/* unary  op */
+	  else			/* binary op */
 	    fetch (sd, &code->src, &ea);
-	  else
-	    ea = 1;
 
 	  if (code->opcode == O (O_SHLL, SB))
 	    {
@@ -3175,10 +3235,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch2 (sd, &code->dst, &rd))
 	    goto end;
 
-	  if (code->src.type == X (OP_IMM, SW))
-	    fetch (sd, &code->src, &ea);
+	  if (memcmp (&code->src, &code->dst, sizeof (code->src)) == 0)
+	    ea = 1;		/* unary  op */
 	  else
-	    ea = 1;
+	    fetch (sd, &code->src, &ea);
 
 	  if (code->opcode == O (O_SHLL, SW))
 	    {
@@ -3199,10 +3259,10 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  if (fetch2 (sd, &code->dst, &rd))
 	    goto end;
 
-	  if (code->src.type == X (OP_IMM, SL))
-	    fetch (sd, &code->src, &ea);
+	  if (memcmp (&code->src, &code->dst, sizeof (code->src)) == 0)
+	    ea = 1;		/* unary  op */
 	  else
-	    ea = 1;
+	    fetch (sd, &code->src, &ea);
 
 	  if (code->opcode == O (O_SHLL, SL))
 	    {
@@ -3575,6 +3635,17 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	      sim_engine_set_run_state (sd, sim_exited, 
 					SIM_WEXITSTATUS (h8_get_reg (sd, 0)));
 	    }
+#if 0
+	  /* Unfortunately this won't really work, because
+	     when we take a breakpoint trap, R0 has a "random", 
+	     user-defined value.  Don't see any immediate solution.  */
+	  else if (SIM_WIFSTOPPED (h8_get_reg (sd, 0)))
+	    {
+	      /* Pass the stop signal up to gdb.  */
+	      sim_engine_set_run_state (sd, sim_stopped, 
+					SIM_WSTOPSIG (h8_get_reg (sd, 0)));
+	    }
+#endif
 	  else
 	    {
 	      /* Treat it as a sigtrap.  */

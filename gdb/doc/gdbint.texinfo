@@ -1499,7 +1499,7 @@ loop.  A client would need to either plug its self into this loop or,
 implement a new event-loop that GDB would use.
 
 The event-loop will eventually be made re-entrant.  This is so that
-@value{GDB} can better handle the problem of some commands blocking
+@value{GDBN} can better handle the problem of some commands blocking
 instead of returning.
 
 @subheading Library - @file{gdb.h}
@@ -3228,6 +3228,24 @@ Unlike @code{STACK_ALIGN}, this function always adjusts the address in
 the direction of stack growth.
 
 By default, no frame based stack alignment is performed.
+
+@item int frame_red_zone_size
+
+The number of bytes, beyond the innermost-stack-address, reserved by the
+@sc{abi}.  A function is permitted to use this scratch area (instead of
+allocating extra stack space).
+
+When performing an inferior function call, to ensure that it does not
+modify this area, @value{GDBN} adjusts the innermost-stack-address by
+@var{frame_red_zone_size} bytes before pushing parameters onto the
+stack.
+
+By default, zero bytes are allocated.  The value must be aligned
+(@pxref{frame_align}).
+
+The @sc{amd64} (nee x86-64) @sc{abi} documentation refers to the
+@emph{red zone} when describing this scratch area.
+@cindex red zone
 
 @item DEPRECATED_FRAME_CHAIN(@var{frame})
 @findex DEPRECATED_FRAME_CHAIN
@@ -5003,8 +5021,9 @@ that use register windows.
 @item -Wtrigraphs
 
 @item -Wformat
+@itemx -Wformat-nonliteral
 Since @value{GDBN} uses the @code{format printf} attribute on all
-@code{printf} like functions this checks not just @code{printf} calls
+@code{printf} like functions these check not just @code{printf} calls
 but also calls to functions such as @code{fprintf_unfiltered}.
 
 @item -Wparentheses

@@ -5540,25 +5540,6 @@ mips_ignore_helper (CORE_ADDR pc)
 }
 
 
-/* Return a location where we can set a breakpoint that will be hit
-   when an inferior function call returns.  This is normally the
-   program's entry point.  Executables that don't have an entry
-   point (e.g. programs in ROM) should define a symbol __CALL_DUMMY_ADDRESS
-   whose address is the location where the breakpoint should be placed.  */
-
-static CORE_ADDR
-mips_call_dummy_address (void)
-{
-  struct minimal_symbol *sym;
-
-  sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
-  if (sym)
-    return SYMBOL_VALUE_ADDRESS (sym);
-  else
-    return entry_point_address ();
-}
-
-
 /* When debugging a 64 MIPS target running a 32 bit ABI, the size of
    the register stored on the stack (32) is different to its real raw
    size (64).  The below ensures that registers are fetched from the
@@ -6113,7 +6094,10 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* MIPS version of CALL_DUMMY */
 
-  set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
+  /* NOTE: cagney/2003-08-05: Eventually call dummy location will be
+     replaced by a command, and all targets will default to on stack
+     (regardless of the stack's execute status).  */
+  set_gdbarch_call_dummy_location (gdbarch, AT_SYMBOL);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);

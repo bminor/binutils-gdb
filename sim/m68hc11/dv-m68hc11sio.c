@@ -463,7 +463,8 @@ m68hc11sio_info (struct hw *me)
       n = (clock_cycle - t) / controller->baud_cycle;
       n = controller->data_length - n;
       sim_io_printf (sd, "  Transmit finished in %s (%d bit%s)\n",
-		     cycle_to_string (cpu, t), n, (n > 1 ? "s" : ""));
+		     cycle_to_string (cpu, t, PRINT_TIME | PRINT_CYCLE),
+                     n, (n > 1 ? "s" : ""));
     }
   if (controller->rx_poll_event)
     {
@@ -471,7 +472,7 @@ m68hc11sio_info (struct hw *me)
 
       t = hw_event_remain_time (me, controller->rx_poll_event);
       sim_io_printf (sd, "  Receive finished in %s\n",
-		     cycle_to_string (cpu, t));
+		     cycle_to_string (cpu, t, PRINT_TIME | PRINT_CYCLE));
     }
   
 }
