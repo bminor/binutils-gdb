@@ -1,3 +1,9 @@
+2002-03-04  Michael Chastain  <mec@shout.net>
+
+	* mi-var-cmd.exp: In test "create local variable func",
+	accommodate gcc v3 function signature.
+	* mi0-var-cmd-exp: Ditto.
+
 2002-02-05  Jim Blandy  <jimb@redhat.com>
 
 	* mi-regs.exp: Various cleanups for SPARC-only tests.
