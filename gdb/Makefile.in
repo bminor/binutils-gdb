@@ -1837,13 +1837,8 @@ remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) serial.h \
 	$(inferior_h) target.h terminal.h $(remote_utils_h) $(gdb_string_h) \
 	$(regcache_h)
 
-# FIXME: For the SH target, remote-e7000 contains numerous -Wformat
-# warnings.  Since the fixes involve modifications to the code that
-# handles the SH remote protocol the changes need to be tested against
-# an SH board before they can be committed. cagney 1999-09-01.
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) target.h \
 	serial.h $(gdb_string_h) $(regcache_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 remote-eb.o: remote-eb.c $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h \

@@ -652,7 +652,7 @@ e7000_open (char *args, int from_tty)
 
   if (SERIAL_SETBAUDRATE (e7000_desc, baudrate))
     {
-      SERIAL_CLOSE (dev_name);
+      SERIAL_CLOSE (e7000_desc);
       perror_with_name (dev_name);
     }
   SERIAL_RAW (e7000_desc);
@@ -789,6 +789,9 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 
   int thischar = nextchar ();
 
+  if (want == NULL)
+    internal_error (__FILE__, __LINE__, "Register set not selected.");
+
   while (*want)
     {
       switch (*want)
@@ -891,7 +894,7 @@ static void
 e7000_fetch_registers (void)
 {
   int regno;
-  char *wanted;
+  char *wanted = NULL;
 
   puts_e7000debug ("R\r");
 
@@ -966,18 +969,18 @@ e7000_store_register (int regno)
     {
       if (regno <= 7)
 	{
-	  sprintf (buf, ".ER%d %lx\r", regno, read_register (regno));
+	  sprintf (buf, ".ER%d %s\r", regno, phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
       else if (regno == PC_REGNUM)
 	{
-	  sprintf (buf, ".PC %lx\r", read_register (regno));
+	  sprintf (buf, ".PC %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 #ifdef CCR_REGNUM
       else if (regno == CCR_REGNUM)
 	{
-	  sprintf (buf, ".CCR %lx\r", read_register (regno));
+	  sprintf (buf, ".CCR %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 #endif
@@ -987,48 +990,48 @@ e7000_store_register (int regno)
     {
       if (regno == PC_REGNUM)
 	{
-	  sprintf (buf, ".PC %lx\r", read_register (regno));
+	  sprintf (buf, ".PC %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 
       else if (regno == SR_REGNUM)
 	{
-	  sprintf (buf, ".SR %lx\r", read_register (regno));
+	  sprintf (buf, ".SR %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 
       else if (regno ==  PR_REGNUM)
 	{
-	  sprintf (buf, ".PR %lx\r", read_register (regno));
+	  sprintf (buf, ".PR %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 
       else if (regno == GBR_REGNUM)
 	{
-	  sprintf (buf, ".GBR %lx\r", read_register (regno));
+	  sprintf (buf, ".GBR %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 
       else if (regno == VBR_REGNUM)
 	{
-	  sprintf (buf, ".VBR %lx\r", read_register (regno));
+	  sprintf (buf, ".VBR %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 
       else if (regno == MACH_REGNUM)
 	{
-	  sprintf (buf, ".MACH %lx\r", read_register (regno));
+	  sprintf (buf, ".MACH %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
 
       else if (regno == MACL_REGNUM)
 	{
-	  sprintf (buf, ".MACL %lx\r", read_register (regno));
+	  sprintf (buf, ".MACL %s\r", phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
       else
 	{
-	  sprintf (buf, ".R%d %lx\r", regno, read_register (regno));
+	  sprintf (buf, ".R%d %s\r", regno, phex_nz (read_register (regno), 0));
 	  puts_e7000debug (buf);
 	}
     }
@@ -1570,10 +1573,10 @@ e7000_load (char *args, int from_tty)
 	  section_size = bfd_get_section_size_before_reloc (section);
 
 	  if (!quiet)
-	    printf_filtered ("[Loading section %s at 0x%x (%ud bytes)]\n",
+	    printf_filtered ("[Loading section %s at 0x%s (%s bytes)]\n",
 			     bfd_get_section_name (pbfd, section),
-			     section_address,
-			     section_size);
+			     paddr_nz (section_address),
+			     paddr_u (section_size));
 
 	  fptr = 0;
 
@@ -1647,7 +1650,7 @@ e7000_load (char *args, int from_tty)
       entry = bfd_get_start_address (pbfd);
 
       if (!quiet)
-	printf_unfiltered ("[Starting %s at 0x%x]\n", filename, entry);
+	printf_unfiltered ("[Starting %s at 0x%s]\n", filename, paddr_nz (entry));
 
 /*      start_routine (entry); */
     }
@@ -1965,7 +1968,7 @@ sub2_from_pc (void)
 			REGISTER_RAW_SIZE (PC_REGNUM),
 			read_register (PC_REGNUM) - 2);
   supply_register (PC_REGNUM, buf);
-  sprintf (buf2, ".PC %lx\r", read_register (PC_REGNUM));
+  sprintf (buf2, ".PC %s\r", phex_nz (read_register (PC_REGNUM), 0));
   puts_e7000debug (buf2);
 }
 
@@ -1994,7 +1997,7 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
   int running_count = 0;
   int had_sleep = 0;
   int loop = 1;
-  char *wanted_nopc;
+  char *wanted_nopc = NULL;
 
   /* Then echo chars until PC= string seen */
   gch ();			/* Drop cr */

@@ -1,3 +1,16 @@
+2001-07-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* remote-e7000.c (fetch_regs_from_dump): If register set is null,
+	generate an internal error.
+	(e7000_fetch_registers): Initialize variable 'wanted'.
+	(e7000_wait): Initialize variable 'wanted_nopc'.
+	(e7000_store_register): Fix sprintf compiler warnings.
+	(sub2_from_pc): Ditto.
+	(e7000_open): Close the descriptor, not the name.
+	(e7000_load): Fix compiler warnings.
+	(sub2_from_pc): Ditto.
+	* Makefile.in (remote-e7000.o): Can now compile with -Werror.
+
 2001-07-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c: Include <signal.h>, <stddef.h> and
