@@ -1,0 +1,99 @@
+# Sanitize.in for devo/gas/testsuite/gasp.
+#
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+INC1.H
+INC2.H
+assign.asm
+assign.was
+condass.asm
+condass.was
+crash.asm
+crash.was
+crash1.asm
+crash1.was
+crash2.asm
+crash2.was
+data.asm
+data.was
+exp.asm
+exp.was
+include.asm
+include.was
+listing.asm
+listing.was
+macro.asm
+macro.was
+mdouble.asm
+mdouble.was
+pl1.asm
+pl1.was
+pl2.asm
+pl2.was
+pl3.asm
+pl3.was
+pl4.asm
+pl4.was
+pl5.asm
+pl5.was
+pl6.asm
+pl6.was
+pl7.asm
+pl7.was
+pl8.asm
+pl8.was
+reg.asm
+reg.was
+rep.asm
+rep.was
+repeat.asm
+repeat.was
+reperr.asm
+reperr.was
+reperr1.asm
+reperr1.was
+reperr2.asm
+reperr2.was
+reperr3.asm
+reperr3.was
+sdata.asm
+sdata.was
+sfunc.asm
+sfunc.was
+t1.asm
+t1.was
+t2.asm
+t2.was
+t3.asm
+t3.was
+while.asm
+while.was
+
+Things-to-lose:
+
+Do-last:
+
+# End of file.
