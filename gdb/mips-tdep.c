@@ -2062,6 +2062,23 @@ setup_arbitrary_frame (argc, argv)
   return create_new_frame (argv[0], argv[1]);
 }
 
+/* According to the current ABI, should the type be passed in a
+   floating-point register (assuming that there is space)?  When there
+   is no FPU, FP are not even considered as possibile candidates for
+   FP registers and, consequently this returns false - forces FP
+   arguments into integer registers. */
+
+static int
+fp_register_arg_p (enum type_code typecode, struct type *arg_type)
+{
+  return ((typecode == TYPE_CODE_FLT
+	   || (MIPS_EABI
+	       && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
+	       && TYPE_NFIELDS (arg_type) == 1
+	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
+	   && MIPS_FPU_TYPE != MIPS_FPU_NONE);
+}
+
 CORE_ADDR
 mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
@@ -2165,13 +2182,8 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
       /* MIPS_EABI squeeses a struct that contains a single floating
          point value into an FP register instead of pusing it onto the
          stack. */
-      if ((typecode == TYPE_CODE_FLT
-	   || (MIPS_EABI
-	       && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
-	       && TYPE_NFIELDS (arg_type) == 1
-	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
-	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM
-	  && MIPS_FPU_TYPE != MIPS_FPU_NONE)
+      if (fp_register_arg_p (typecode, arg_type)
+	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
 	  if (!FP_REGISTER_DOUBLE && len == 8)
 	    {
@@ -2241,14 +2253,17 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	     are treated specially: Irix cc passes them in registers
 	     where gcc sometimes puts them on the stack.  For maximum
 	     compatibility, we will put them in both places.  */
-
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
+	  /* Note: Floating-point values that didn't fit into an FP
+             register are only written to memory. */
 	  while (len > 0)
 	    {
 	      int partial_len = len < MIPS_SAVED_REGSIZE ? len : MIPS_SAVED_REGSIZE;
 
-	      if (argreg > MIPS_LAST_ARG_REGNUM || odd_sized_struct)
+	      if (argreg > MIPS_LAST_ARG_REGNUM
+		  || odd_sized_struct
+		  || fp_register_arg_p (typecode, arg_type))
 		{
 		  /* Write this portion of the argument to the stack.  */
 		  /* Should shorter than int integer values be
@@ -2291,9 +2306,11 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		  write_memory (addr, val, partial_len);
 		}
 
-	      /* Note!!! This is NOT an else clause.
-	         Odd sized structs may go thru BOTH paths.  */
-	      if (argreg <= MIPS_LAST_ARG_REGNUM)
+	      /* Note!!! This is NOT an else clause.  Odd sized
+	         structs may go thru BOTH paths.  Floating point
+	         arguments will not. */
+	      if (argreg <= MIPS_LAST_ARG_REGNUM
+		  && !fp_register_arg_p (typecode, arg_type))
 		{
 		  LONGEST regval = extract_unsigned_integer (val, partial_len);
 
