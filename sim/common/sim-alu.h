@@ -25,169 +25,364 @@
 
 #include "sim-xcat.h"
 
-/* 32bit target expressions:
 
-   Each calculation is performed three times using each of the
-   signed64, unsigned64 and long integer types.  The macro ALU_END
-   (in _ALU_RESULT_VAL) then selects which of the three alternative
-   results will be used in the final assignment of the target
-   register.  As this selection is determined at compile time by
-   fields in the instruction (OE, EA, Rc) the compiler has sufficient
-   information to firstly simplify the selection code into a single
-   case and then back anotate the equations and hence eliminate any
-   resulting dead code.  That dead code being the calculations that,
-   as it turned out were not in the end needed.
-
-   64bit arrithemetic is used firstly because it allows the use of
-   gcc's efficient long long operators (typically efficiently output
-   inline) and secondly because the resultant answer will contain in
-   the low 32bits the answer while in the high 32bits is either carry
-   or status information. */
+/* Binary addition, carry and overflow:
 
 
+   Overflow - method 1:
 
-/* 16bit target expressions:
+   Overflow occures when the sign of the two operands is identical but
+   different to the sign of the result:
 
-   These are a simplified version of the 32bit target expressions */
+		SIGN_BIT (~(a ^ b) & ((a + b) ^ b))
 
-
-
-/* 64bit target expressions:
-
-   Unfortunatly 128bit arrithemetic isn't that common.  Consequently
-   the 32/64 bit trick can not be used.  Instead all calculations are
-   required to retain carry/overflow information in separate
-   variables.  Even with this restriction it is still possible for the
-   trick of letting the compiler discard the calculation of unneeded
-   values */
+   Note that, for subtraction, care must be taken with MIN_INTn.
 
 
-/* Start a section of ALU code */
+   Overflow - method 2:
+
+   The two N bit operands are sign extended to M>N bits and then
+   added.  Overflow occures when SIGN_BIT<n> and SIGN_BIT<m> do not
+   match.
+  
+		SIGN_BIT (r >> (M-N) ^ r)
+
+
+   Overflow - method 3:
+
+   The two N bit operands are sign extended to M>N bits and then
+   added.  Overflow occures when the result is outside of signextended
+   MIN_INTn, MAX_INTn.
+
+
+   Overflow - method 4:
+
+   Given the carry bit, the overflow can be computed using the
+   equation:
+
+		SIGN_BIT (((A ^ B) ^ R) ^ C)
+
+   As shown in the table below:
+
+         I  A  B  R  C | V | A^B  ^R  ^C
+        ---------------+---+-------------
+         0  0  0  0  0 | 0 |  0    0   0
+         0  0  1  1  0 | 0 |  1    0   0
+         0  1  0  1  0 | 0 |  1    0   0
+         0  1  1  0  1 | 1 |  0    0   1
+         1  0  0  1  0 | 1 |  0    1   1
+         1  0  1  0  1 | 0 |  1    1   0
+         1  1  0  0  1 | 0 |  1    1   0
+         1  1  1  1  1 | 0 |  0    1   0
+
+
+
+   Carry - method 1:
+
+   Consider the truth table (carryIn, Result, Carryout, Result):
+
+         I  A  B  R | C
+        ------------+---
+         0  0  0  0 | 0
+         0  0  1  1 | 0
+         0  1  0  1 | 0
+         0  1  1  0 | 1
+         1  0  0  1 | 0
+         1  0  1  0 | 1
+         1  1  0  0 | 1
+         1  1  1  1 | 1
+
+   Looking at the terms A, B and R we want an equation for C.
+
+       AB\R  0  1
+          +-------
+       00 |  0  0 
+       01 |  1  0
+       11 |  1  1
+       10 |  1  0
+
+   This giving us the sum-of-prod equation:
+
+		SIGN_BIT ((A & B) | (A & ~R) | (B & ~R))
+
+   Verifying:
+
+         I  A  B  R | C | A&B  A&~R B&~R 
+        ------------+---+---------------
+         0  0  0  0 | 0 |  0    0    0
+         0  0  1  1 | 0 |  0    0    0
+         0  1  0  1 | 0 |  0    0    0
+         0  1  1  0 | 1 |  1    1    1
+         1  0  0  1 | 0 |  0    0    0
+         1  0  1  0 | 1 |  0    0    1
+         1  1  0  0 | 1 |  0    1    0
+         1  1  1  1 | 1 |  1    0    0
+
+
+
+   Carry - method 2:
+
+   Given two signed N bit numbers, a carry can be detected by treating
+   the numbers as N bit unsigned and adding them using M>N unsigned
+   arrithmetic.  Carry is indicated by bit (1 << N) being set (result
+   >= 2**N).
+
+		SIGN_BITm (r)
+
+
+   Carry - method 3:
+
+   Given the overflow bit.  The carry can be computed from:
+
+		(~R&V) | (R&V)
+
+   Carry - method 4:
+
+   Add the two signed N bit numbers as unsigned N bit numbers, and then
+   compare the result to either one of the inputs via unsigned compare.
+   If the result is less than the inputs, carry occurred.   
+
+	C = ((unsigned)(a+b)) < (unsigned)a	if adding
+		(or)
+	C = (unsigned)a < (unsigned)b		if subtracting
+   */
+
+
+
+/* 8 bit target expressions:
+
+   Since the host's natural bitsize > 8 bits, carry method 2 and
+   overflow method 2 are used. */
+
+#define ALU8_BEGIN(VAL) \
+signed alu8_cr = (unsigned8) (VAL); \
+unsigned alu8_vr = (signed8) (alu8_cr)
+
+#define ALU8_SET(VAL) \
+alu8_cr = (unsigned8) (VAL); \
+alu8_vr = (signed8) (alu8_cr)
+
+#define ALU8_SET_CARRY(CARRY)						\
+do {									\
+  if (CARRY)								\
+    alu8_cr |= ((signed)-1) << 8;					\
+  else									\
+    alu8_cr &= 0xff;							\
+} while (0)
+    
+#define ALU8_HAD_CARRY (alu8_cr & LSBIT32(8))
+#define ALU8_HAD_OVERFLOW (((alu8_vr >> 8) ^ alu8_vr) & LSBIT32 (8-1))
+
+#define ALU8_RESULT ((unsigned8) alu8_cr)
+#define ALU8_CARRY_RESULT ((unsigned8) alu8_cr)
+#define ALU8_OVERFLOW_RESULT ((unsigned8) alu8_vr)
+
+/* #define ALU8_END ????? - target dependant */
+
+
+
+/* 16 bit target expressions:
+
+   Since the host's natural bitsize > 16 bits, carry method 2 and
+   overflow method 2 are used. */
 
 #define ALU16_BEGIN(VAL) \
-{ \
-  signed_word alu_carry_val; \
-  unsigned_word alu_overflow_val; \
-  ALU16_SET(VAL)
-
-#define ALU32_BEGIN(VAL) \
-{ \
-  natural_word alu_val; \
-  unsigned64 alu_carry_val; \
-  signed64 alu_overflow_val; \
-  ALU32_SET(VAL)
-
-#define ALU64_BEGIN(VAL) \
-{ \
-  natural64 alu_val; \
-  unsigned64 alu_carry_val; \
-  signed64 alu_overflow_val; \
-  ALU64_SET(VAL)
-
-
-#define ALU_BEGIN(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_BEGIN)(VAL)
-
-/* More basic alu operations */
-
-
+signed alu16_cr = (unsigned16) (VAL); \
+unsigned alu16_vr = (signed16) (alu16_cr)
 
 #define ALU16_SET(VAL) \
-do { \
-  alu_carry_val = (unsigned16)(VAL); \
-  alu_overflow_val = (signed16)(VAL); \
+alu16_cr = (unsigned16) (VAL); \
+alu16_vr = (signed16) (alu16_cr)
+
+#define ALU16_SET_CARRY(CARRY)						\
+do {									\
+  if (CARRY)								\
+    alu16_cr |= ((signed)-1) << 16;					\
+  else									\
+    alu16_cr &= 0xffff;							\
 } while (0)
+
+#define ALU16_HAD_CARRY (alu16_cr & LSBIT32(16))
+#define ALU16_HAD_OVERFLOW (((alu16_vr >> 16) ^ alu16_vr) & LSBIT32 (16-1))
+
+#define ALU16_RESULT ((unsigned16) alu16_cr)
+#define ALU16_CARRY_RESULT ((unsigned16) alu16_cr)
+#define ALU16_OVERFLOW_RESULT ((unsigned16) alu16_vr)
+
+/* #define ALU16_END ????? - target dependant */
+
+
+
+/* 32 bit target expressions:
+
+   Since most hosts do not support 64 (> 32) bit arrithmetic, carry
+   method 4 and overflow method 4 are used.
+
+   FIXME: 64 bit hosts should use the same method as for the 16 bit
+   ALU. */
+
+#define ALU32_BEGIN(VAL) \
+unsigned32 alu32_r = (VAL); \
+int alu32_c = 0; \
+int alu32_v = 0
 
 #define ALU32_SET(VAL) \
-do { \
-  alu_val = (unsigned32)(VAL); \
-  alu_carry_val = (unsigned32)(alu_val); \
-  alu_overflow_val = (signed32)(alu_val); \
-} while (0)
+alu32_r = (VAL); \
+alu32_c = 0; \
+alu32_v = 0
+
+#define ALU32_SET_CARRY(CARRY) alu32_c = (CARRY)
+
+#define ALU32_HAD_OVERFLOW (alu32_v)
+#define ALU32_HAD_CARRY (alu32_c)
+
+#define ALU32_RESULT (alu32_r)
+#define ALU32_CARRY_RESULT (alu32_r)
+#define ALU32_OVERFLOW_RESULT (alu32_r)
+
+
+
+/* 64 bit target expressions:
+
+   Even though the host typically doesn't support native 64 bit
+   arrithmetic, it is still used. */
+
+#define ALU64_BEGIN(VAL) \
+natural64 alu64_r = (VAL); \
+int alu64_c = 0; \
+int alu64_v = 0
 
 #define ALU64_SET(VAL) \
-do { \
-  alu_val = (VAL); \
-  alu_carry_val = ((unsigned64)alu_val) >> 32; \
-  alu_overflow_val = ((signed64)alu_val) >> 32; \
+alu64_r = (VAL); \
+alu64_c = 0; \
+alu64_v = 0
+
+#define ALU64_SET_CARRY(CARRY) alu64_c = (CARRY)
+
+#define ALU64_HAD_CARRY (alu64_c)
+#define ALU64_HAD_OVERFLOW (alu64_v)
+
+#define ALU64_RESULT (alu64_r)
+#define ALU64_CARRY_RESULT (alu64_r)
+#define ALU64_OVERFLOW_RESULT (alu64_r)
+
+
+
+/* Generic versions of above macros */
+
+#define ALU_BEGIN	    XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_BEGIN)
+#define ALU_SET		    XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SET)
+#define ALU_SET_CARRY	    XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SET_CARRY)
+
+#define ALU_HAD_OVERFLOW    XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_HAD_OVERFLOW)
+#define ALU_HAD_CARRY       XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_HAD_CARRY)
+
+#define ALU_RESULT          XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_RESULT)
+#define ALU_OVERFLOW_RESULT XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_OVERFLOW_RESULT)
+#define ALU_CARRY_RESULT    XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_CARRY_RESULT)
+
+
+
+/* Basic operations */
+
+
+#define ALU8_ADD(VAL)							\
+do {									\
+  unsigned8 alu8_tmp = (VAL);						\
+  alu8_cr += (unsigned8)(alu8_tmp);					\
+  alu8_vr += (signed8)(alu8_tmp);					\
 } while (0)
 
-#define ALU_SET(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SET)(VAL)
-
-
-
-
-#define ALU16_ADD(VAL) \
-do { \
-  alu_carry_val += (unsigned16)(VAL); \
-  alu_overflow_val += (signed16)(VAL); \
+#define ALU16_ADD(VAL)							\
+do {									\
+  unsigned16 alu16_tmp = (VAL);						\
+  alu16_cr += (unsigned16)(alu16_tmp);					\
+  alu16_vr += (signed16)(alu16_tmp);					\
 } while (0)
 
-#define ALU32_ADD(VAL) \
-do { \
-  alu_val += (VAL); \
-  alu_carry_val += (unsigned32)(VAL); \
-  alu_overflow_val += (signed32)(VAL); \
+#define ALU32_ADD(VAL)							\
+do {									\
+  unsigned32 alu32_tmp = (unsigned32) (VAL);				\
+  unsigned32 alu32_sign = alu32_tmp ^ alu32_r;				\
+  alu32_r += (alu32_tmp);						\
+  alu32_c = (alu32_r < alu32_tmp);					\
+  alu32_v = ((alu32_sign ^ - (unsigned32)alu32_c) ^ alu32_r) >> 31;	\
 } while (0)
 
-#define ALU64_ADD(VAL) \
-do { \
-  unsigned64 val = (VAL); \
-  unsigned64 alu_lo = alu_val + val; \
-  signed alu_carry = ((alu_lo & LSBIT64 (31)) != 0); \
-  alu_carry_val = (alu_carry_val \
-		   + MSEXTRACTED64 (val, 0, 31) \
-		   + alu_carry); \
-  alu_overflow_val = (alu_overflow_val \
-		      + MSEXTRACTED64 (val, 0, 31) \
-		      + alu_carry); \
-  alu_val = alu_val + val; \
+#define ALU64_ADD(VAL)							\
+do {									\
+  unsigned64 alu64_tmp = (unsigned64) (VAL);				\
+  unsigned64 alu64_sign = alu64_tmp ^ alu64_r;				\
+  alu64_r += (alu64_tmp);						\
+  alu64_c = (alu64_r < alu64_tmp);					\
+  alu64_v = ((alu64_sign ^ - (unsigned64)alu64_c) ^ alu64_r) >> 63;	\
 } while (0)
 
 #define ALU_ADD(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_ADD)(VAL)
 
 
 
-
-#define ALU16_ADD_CA \
-do { \
-  signed carry = ALU_CARRY; \
-  ALU16_ADD(carry); \
+#define ALU8_ADD_CA(VAL)						\
+do {									\
+  unsigned8 alu8_ca_tmp = (VAL) + ALU8_HAD_CARRY;			\
+  ALU8_ADD(alu8_ca_tmp);						\
 } while (0)
 
-#define ALU32_ADD_CA \
-do { \
-  signed carry = ALU_CARRY; \
-  ALU32_ADD(carry); \
+#define ALU16_ADD_CA(VAL)						\
+do {									\
+  unsigned16 alu16_ca_tmp = (VAL) + ALU16_HAD_CARRY;			\
+  ALU16_ADD(alu16_ca_tmp);						\
 } while (0)
 
-#define ALU64_ADD_CA \
-do { \
-  signed carry = ALU_CARRY; \
-  ALU64_ADD(carry); \
+#define ALU32_ADD_CA(VAL)						\
+do {									\
+  unsigned32 alu32_ca_tmp = (VAL) + ALU32_HAD_CARRY;			\
+  ALU32_ADD(alu32_ca_tmp);						\
 } while (0)
 
-#define ALU_ADD_CA XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_ADD_CA)
-
-
-
-
-#define ALU16_SUB(VAL) \
-do { \
-  alu_carry_val -= (unsigned16)(VAL); \
-  alu_overflow_val -= (signed16)(VAL); \
+#define ALU64_ADD_CA(VAL)						\
+do {									\
+  unsigned64 alu64_ca_tmp = (VAL) + ALU64_HAD_CARRY;			\
+  ALU64_ADD(alu64_ca_tmp);						\
 } while (0)
 
-#define ALU32_SUB(VAL) \
-do { \
-  alu_val -= (VAL); \
-  alu_carry_val -= (unsigned32)(VAL); \
-  alu_overflow_val -= (signed32)(VAL); \
+#define ALU_ADD_CA(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_ADD_CA)(VAL)
+
+
+
+/* Remember: Hardware implements subtract as an ADD with a carry in of
+   1 into the least significant bit */
+
+#define ALU8_SUB(VAL)							\
+do {									\
+  signed alu8sub_val = ~(VAL);						\
+  ALU8_ADD (alu8sub_val);						\
+  ALU8_ADD (1);								\
 } while (0)
 
-#define ALU64_SUB(VAL) \
-do { \
-  signed64 subval = -(VAL); /* -MININT? */ \
-  ALU64_ADD (subval); \
+#define ALU16_SUB(VAL)							\
+do {									\
+  signed alu16sub_val = ~(VAL);						\
+  ALU16_ADD (alu16sub_val);						\
+  ALU16_ADD (1);							\
+} while (0)
+
+#define ALU32_SUB(VAL)							\
+do {									\
+  unsigned32 alu32_tmp = (unsigned32) (VAL);				\
+  unsigned32 alu32_sign = alu32_tmp ^ alu32_r;				\
+  alu32_c = (alu32_r < alu32_tmp);					\
+  alu32_r -= (alu32_tmp);						\
+  alu32_v = ((alu32_sign ^ - (unsigned32)alu32_c) ^ alu32_r) >> 31;	\
+} while (0)
+
+#define ALU64_SUB(VAL)							\
+do {									\
+  unsigned64 alu64_tmp = (unsigned64) (VAL);				\
+  unsigned64 alu64_sign = alu64_tmp ^ alu64_r;				\
+  alu64_c = (alu64_r < alu64_tmp);					\
+  alu64_r -= (alu64_tmp);						\
+  alu64_v = ((alu64_sign ^ - (unsigned64)alu64_c) ^ alu64_r) >> 63;	\
 } while (0)
 
 #define ALU_SUB(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SUB)(VAL)
@@ -195,66 +390,74 @@ do { \
 
 
 
-#define ALU16_SUB_CA \
-do { \
-  signed carry = ALU_CARRY; \
-  ALU16_SUB(carry); \
+#define ALU8_SUB_CA(VAL)						\
+do {									\
+  unsigned8 alu8_ca_tmp = (VAL) + ALU8_HAD_CARRY;			\
+  ALU8_SUB(alu8_ca_tmp);						\
 } while (0)
 
-#define ALU32_SUB_CA \
-do { \
-  signed carry = ALU_CARRY; \
-  ALU32_SUB(carry); \
+#define ALU16_SUB_CA(VAL)						\
+do {									\
+  unsigned16 alu16_ca_tmp = (VAL) + ALU16_HAD_CARRY;			\
+  ALU16_SUB(alu16_ca_tmp);						\
 } while (0)
 
-#define ALU64_SUB_CA \
-do { \
-  signed carry = ALU_CARRY; \
-  ALU64_SUB(carry); \
+#define ALU32_SUB_CA(VAL)						\
+do {									\
+  unsigned32 alu32_ca_tmp = (VAL) + ALU32_HAD_CARRY;			\
+  ALU32_SUB(alu32_ca_tmp);						\
 } while (0)
 
-#define ALU_SUB_CA XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SUB_CA)
-
-
-
-
-#define ALU16_OR(VAL) \
-do { \
-  error("ALU16_OR"); \
+#define ALU64_SUB_CA(VAL)						\
+do {									\
+  unsigned64 alu64_ca_tmp = (VAL) + ALU64_HAD_CARRY;			\
+  ALU64_SUB(alu64_ca_tmp);						\
 } while (0)
 
-#define ALU32_OR(VAL) \
-do { \
-  alu_val |= (VAL); \
-  alu_carry_val = (unsigned32)(alu_val); \
-  alu_overflow_val = (signed32)(alu_val); \
+#define ALU_SUB_CA(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_SUB_CA)(VAL)
+
+
+
+#define ALU16_OR(VAL)							\
+do {									\
+  error("ALU16_OR");							\
 } while (0)
 
-#define ALU64_OR(VAL) \
-do { \
-  error("ALU_OR64"); \
+#define ALU32_OR(VAL)							\
+do {									\
+  alu32_r |= (VAL);							\
+  alu32_c = 0;								\
+  alu32_v = 0;								\
+} while (0)
+
+#define ALU64_OR(VAL)							\
+do {									\
+  alu64_r |= (VAL);							\
+  alu64_c = 0;								\
+  alu64_v = 0;								\
 } while (0)
 
 #define ALU_OR(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_OR)(VAL)
 
 
 
-
-#define ALU16_XOR(VAL) \
-do { \
-  error("ALU16_XOR"); \
+#define ALU16_XOR(VAL)							\
+do {									\
+  error("ALU16_XOR");							\
 } while (0)
 
-#define ALU32_XOR(VAL) \
-do { \
-  alu_val ^= (VAL); \
-  alu_carry_val = (unsigned32)(alu_val); \
-  alu_overflow_val = (signed32)(alu_val); \
+#define ALU32_XOR(VAL)							\
+do {									\
+  alu32_r ^= (VAL);							\
+  alu32_c = 0;								\
+  alu32_v = 0;								\
 } while (0)
 
-#define ALU64_XOR(VAL) \
-do { \
-  error("ALU_XOR64"); \
+#define ALU64_XOR(VAL)							\
+do {									\
+  alu64_r ^= (VAL);							\
+  alu64_c = 0;								\
+  alu64_v = 0;								\
 } while (0)
 
 #define ALU_XOR(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_XOR)(VAL)
@@ -262,21 +465,32 @@ do { \
 
 
 
-#define ALU16_NEGATE \
-do { \
-  error("ALU_NEGATE16"); \
+#define ALU8_NEGATE()							\
+do {									\
+  signed alu8neg_val = ~(ALU8_RESULT);					\
+  ALU8_SET (1);								\
+  ALU8_ADD (alu8neg_val);						\
 } while (0)
 
-#define ALU32_NEGATE \
-do { \
-  alu_val = -alu_val; \
-  alu_carry_val = -alu_carry_val; \
-  alu_overflow_val = -alu_overflow_val; \
+#define ALU16_NEGATE()							\
+do {									\
+  signed alu16neg_val = ~(ALU16_RESULT);				\
+  ALU16_SET (1);							\
+  ALU16_ADD (alu16neg_val);						\
+} while (0)
+
+#define ALU32_NEGATE()							\
+do {									\
+  unsigned32 alu32_tmp_orig = alu32_r;					\
+  ALU32_SET (0);							\
+  ALU32_SUB (alu32_tmp_orig);						\
 } while(0)
 
-#define ALU64_NEGATE \
-do { \
-  error("ALU_NEGATE64"); \
+#define ALU64_NEGATE()							\
+do {									\
+  unsigned64 alu64_tmp_orig = alu64_r;					\
+  ALU64_SET (0);							\
+  ALU64_SUB (alu64_tmp_orig);						\
 } while (0)
 
 #define ALU_NEGATE XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_NEGATE)
@@ -284,21 +498,23 @@ do { \
 
 
 
-#define ALU16_AND(VAL) \
-do { \
-  error("ALU_AND16"); \
+#define ALU16_AND(VAL)							\
+do {									\
+  error("ALU_AND16");							\
 } while (0)
 
-#define ALU32_AND(VAL) \
-do { \
-  alu_val &= (VAL); \
-  alu_carry_val = (unsigned32)(alu_val); \
-  alu_overflow_val = (signed32)(alu_val); \
+#define ALU32_AND(VAL)							\
+do {									\
+  alu32_r &= (VAL);							\
+  alu32_r = 0;								\
+  alu32_v = 0;								\
 } while (0)
 
-#define ALU64_AND(VAL) \
-do { \
-  error("ALU_AND64"); \
+#define ALU64_AND(VAL)							\
+do {									\
+  alu64_r &= (VAL);							\
+  alu64_r = 0;								\
+  alu64_v = 0;								\
 } while (0)
 
 #define ALU_AND(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_AND)(VAL)
@@ -306,51 +522,25 @@ do { \
 
 
 
-#define ALU16_NOT(VAL) \
-do { \
-  error("ALU_NOT16"); \
+#define ALU16_NOT(VAL)							\
+do {									\
+  error("ALU_NOT16");							\
 } while (0)
 
-#define ALU32_NOT \
-do { \
-  signed64 new_alu_val = ~alu_val; \
-  ALU_SET(new_alu_val); \
+#define ALU32_NOT							\
+do {									\
+  alu32_r = ~alu32_r;							\
+  alu32_c = 0;								\
+  alu32_v = 0;								\
 } while (0)
 
-#define ALU64_NOT \
-do { \
-  error("ALU_NOT64"); \
+#define ALU64_NOT							\
+do {									\
+  alu64_r = ~alu64_r;							\
+  alu64_c = 0;								\
+  alu64_v = 0;								\
 } while (0)
 
 #define ALU_NOT XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_NOT)
-
-
-
-/* Make available various results */
-
-
-/* overflow occures if the sign bit differs from the carry bit */
-
-#define ALU16_HAD_OVERFLOW \
-  (!(alu_overflow_val & MSBIT32 (0)) != !(alu_overflow_val & MSBIT32 (16)))
-  
-#define ALU32_HAD_OVERFLOW \
-  ((((unsigned64)(alu_overflow_val & MSBIT64(0))) >> 32) \
-   != (unsigned64)(alu_overflow_val & MSBIT64(32)))
-
-#define ALU64_HAD_OVERFLOW \
-  ((alu_val & MSBIT64 (0)) != (alu_overflow_val & MSBIT64 (0)))
-
-#define ALU_HAD_OVERFLOW XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_HAD_OVERFLOW)
-
-
-/* carry found in bit before sign */
-
-#define ALU16_HAD_CARRY \
-    (alu_carry_val & MSBIT32(16))
-
-#define ALU32_HAD_CARRY \
-    (alu_carry_val & MSBIT64(31))
-
 
 #endif
