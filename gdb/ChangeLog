@@ -1,3 +1,8 @@
+2003-09-30  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set the PowerOpen red zone
+	to 224, not 220.
+
 2003-09-29  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention Objective-C.

@@ -2948,8 +2948,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     /* PPC64 SYSV.  */
     set_gdbarch_frame_red_zone_size (gdbarch, 288);
   else if (!sysv_abi && wordsize == 4)
-    /* PowerOpen / AIX 32 bit.  */
-    set_gdbarch_frame_red_zone_size (gdbarch, 220);
+    /* PowerOpen / AIX 32 bit.  The saved area or red zone consists of
+       19 4 byte GPRS + 18 8 byte FPRs giving a total of 220 bytes.
+       Problem is, 220 isn't frame (16 byte) aligned.  Round it up to
+       224.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 224);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
