@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Tue Oct 28 16:34:54 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v-opc.c (pre_defined_registers): Add eit_vb, int_s, and int_m
+	control registers.
+
+end-sanitize-d30v
 Mon Oct 27 22:34:03 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips-opc.c: Fix bug in mask for "not" pseudo-instruction.
