@@ -29,6 +29,8 @@ arm.exp
 arm3.s
 arm6.s
 arm7dm.s
+arm7t.d
+arm7t.s
 copro.s
 float.s
 inst.s
