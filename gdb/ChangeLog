@@ -1,3 +1,8 @@
+2003-02-05  Michael Chastain  <mec@shout.net>
+
+	* PROBLEMS (i[3456]86-*-linux*): Warn about binutils
+	2.12.1 and earlier versions.
+
 2003-02-05  Andrew Cagney  <ac131313@redhat.com>
 
 	Remove orphaned hosts, targets and files.

@@ -65,3 +65,12 @@ building GDB vis:
 
     $ make CFLAGS='-O2 -D__digital__'
 
+
+i[3456]86-*-linux*
+------------------
+
+gdb/1030: GNU binutils 2.12.1 and earlier versions do not work properly
+with gdb.  If you use GNU binutils, upgrade to version 2.13 or later.
+You can check the version of binutils with the command:
+
+    $ ld --version
