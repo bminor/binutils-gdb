@@ -175,7 +175,7 @@ tui_file_fputs (const char *linebuffer, struct ui_file *file)
     }
   else
     {
-      tuiPuts_unfiltered (linebuffer, file);
+      tui_puts (linebuffer);
     }
 }
 
