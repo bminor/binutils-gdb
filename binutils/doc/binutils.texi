@@ -2314,6 +2314,7 @@ the Info entries for @file{binutils}.
 c++filt [@option{-_}|@option{--strip-underscores}]
         [@option{-j}|@option{--java}]
         [@option{-n}|@option{--no-strip-underscores}]
+        [@option{-p}|@option{--no-params}]
         [@option{-s} @var{format}|@option{--format=}@var{format}]
         [@option{--help}]  [@option{--version}]  [@var{symbol}@dots{}]
 @c man end
@@ -2368,6 +2369,11 @@ syntax.
 @item -n
 @itemx --no-strip-underscores
 Do not remove the initial underscore.
+
+@item -p
+@itemx --no-params
+When demangling the name of a function, do not display the types of
+the function's parameters.
 
 @item -s @var{format}
 @itemx --format=@var{format}

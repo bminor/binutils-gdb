@@ -100,6 +100,7 @@ static const struct option long_options[] = {
   {"strip-underscores", no_argument, 0, '_'},
   {"format", required_argument, 0, 's'},
   {"help", no_argument, 0, 'h'},
+  {"no-params", no_argument, 0, 'p'},
   {"no-strip-underscores", no_argument, 0, 'n'},
   {"version", no_argument, 0, 'v'},
   {0, no_argument, 0, 0}
@@ -171,7 +172,7 @@ main (int argc, char **argv)
 
   strip_underscore = TARGET_PREPENDS_UNDERSCORE;
 
-  while ((c = getopt_long (argc, argv, "_ns:", long_options, (int *) 0)) != EOF)
+  while ((c = getopt_long (argc, argv, "_nps:", long_options, (int *) 0)) != EOF)
     {
       switch (c)
 	{
@@ -182,6 +183,9 @@ main (int argc, char **argv)
 	  usage (stdout, 0);
 	case 'n':
 	  strip_underscore = 0;
+	  break;
+	case 'p':
+	  flags &= ~ DMGL_PARAMS;
 	  break;
 	case 'v':
 	  print_version ("c++filt");

@@ -1,3 +1,9 @@
+2003-11-22  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* cxxfilt.c (long_options): Add --no-params.
+	(main): Handle -p/--no-params.
+	* doc/binutils.texi (c++filt): Document -p/--no-params.
+
 2003-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c: Wrap long lines, init vars separately from decl.
