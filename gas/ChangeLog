@@ -1,3 +1,8 @@
+Fri Apr 18 13:37:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_fix_adjustable): Handle zero length csects
+	correctly.
+
 Fri Apr 18 11:51:35 1997  Niklas Hallqvist  <niklas@appli.se>
 
 	* configure.in (alpha*-*-openbsd*): New target.
