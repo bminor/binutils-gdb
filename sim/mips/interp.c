@@ -2141,27 +2141,23 @@ NaN(op,fmt)
      FP_formats fmt; 
 {
   int boolean = 0;
-
-  /* Check if (((E - bias) == (E_max + 1)) && (fraction != 0)). We
-     know that the exponent field is biased... we we cheat and avoid
-     removing the bias value. */
   switch (fmt) {
    case fmt_single:
-    boolean = ((FP_S_be(op) == 0xFF) && (FP_S_f(op) != 0));
-    /* We could use "FP_S_fb(1,op)" to ascertain whether we are
-       dealing with a SNaN or QNaN */
-    break;
-   case fmt_double:
-    boolean = ((FP_D_be(op) == 0x7FF) && (FP_D_f(op) != 0));
-    /* We could use "FP_S_fb(1,op)" to ascertain whether we are
-       dealing with a SNaN or QNaN */
-    break;
    case fmt_word:
-    boolean = (op == FPQNaN_WORD);
-    break;
+    {
+      sim_fpu wop;
+      sim_fpu_32to (&wop, op);
+      boolean = sim_fpu_is_nan (&wop);
+      break;
+    }
+   case fmt_double:
    case fmt_long:
-    boolean = (op == FPQNaN_LONG);
-    break;
+    {
+      sim_fpu wop;
+      sim_fpu_64to (&wop, op);
+      boolean = sim_fpu_is_nan (&wop);
+      break;
+    }
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2185,16 +2181,21 @@ Infinity(op,fmt)
   printf("DBG: Infinity: format %s 0x%s\n",DOFMT(fmt),pr_addr(op));
 #endif /* DEBUG */
 
-  /* Check if (((E - bias) == (E_max + 1)) && (fraction == 0)). We
-     know that the exponent field is biased... we we cheat and avoid
-     removing the bias value. */
   switch (fmt) {
    case fmt_single:
-    boolean = ((FP_S_be(op) == 0xFF) && (FP_S_f(op) == 0));
-    break;
+    {
+      sim_fpu wop;
+      sim_fpu_32to (&wop, op);
+      boolean = sim_fpu_is_infinity (&wop);
+      break;
+    }
    case fmt_double:
-    boolean = ((FP_D_be(op) == 0x7FF) && (FP_D_f(op) == 0));
-    break;
+    {
+      sim_fpu wop;
+      sim_fpu_64to (&wop, op);
+      boolean = sim_fpu_is_infinity (&wop);
+      break;
+    }
    default:
     printf("DBG: TODO: unrecognised format (%s) for Infinity check\n",DOFMT(fmt));
     break;
@@ -2225,14 +2226,22 @@ Less(op1,op2,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop1 = (unsigned int)op1;
-      unsigned int wop2 = (unsigned int)op2;
-      boolean = (*(float *)&wop1 < *(float *)&wop2);
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu_32to (&wop1, op1);
+      sim_fpu_32to (&wop2, op2);
+      boolean = sim_fpu_is_lt (&wop1, &wop2);
+      break;
     }
-    break;
    case fmt_double:
-    boolean = (*(double *)&op1 < *(double *)&op2);
-    break;
+    {
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu_64to (&wop1, op1);
+      sim_fpu_64to (&wop2, op2);
+      boolean = sim_fpu_is_lt (&wop1, &wop2);
+      break;
+    }
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2262,11 +2271,23 @@ Equal(op1,op2,fmt)
   /* The format type should already have been checked: */
   switch (fmt) {
    case fmt_single:
-    boolean = ((op1 & 0xFFFFFFFF) == (op2 & 0xFFFFFFFF));
-    break;
+    {
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu_32to (&wop1, op1);
+      sim_fpu_32to (&wop2, op2);
+      boolean = sim_fpu_is_eq (&wop1, &wop2);
+      break;
+    }
    case fmt_double:
-    boolean = (op1 == op2);
-    break;
+    {
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu_64to (&wop1, op1);
+      sim_fpu_64to (&wop2, op2);
+      boolean = sim_fpu_is_eq (&wop1, &wop2);
+      break;
+    }
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2294,15 +2315,23 @@ AbsoluteValue(op,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop = (unsigned int)op;
-      float tmp = ((float)fabs((double)*(float *)&wop));
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop;
+      unsigned32 ans;
+      sim_fpu_32to (&wop, op);
+      sim_fpu_abs (&wop, &wop);
+      sim_fpu_to32 (&ans, &wop);
+      result = ans;
+      break;
     }
-    break;
    case fmt_double:
     {
-      double tmp = (fabs(*(double *)&op));
-      result = *(uword64 *)&tmp;
+      sim_fpu wop;
+      unsigned64 ans;
+      sim_fpu_64to (&wop, op);
+      sim_fpu_abs (&wop, &wop);
+      sim_fpu_to64 (&ans, &wop);
+      result = ans;
+      break;
     }
    default:
     fprintf (stderr, "Bad switch\n");
@@ -2327,17 +2356,24 @@ Negate(op,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop = (unsigned int)op;
-      float tmp = ((float)0.0 - *(float *)&wop);
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop;
+      unsigned32 ans;
+      sim_fpu_32to (&wop, op);
+      sim_fpu_neg (&wop, &wop);
+      sim_fpu_to32 (&ans, &wop);
+      result = ans;
+      break;
     }
-    break;
    case fmt_double:
     {
-      double tmp = ((double)0.0 - *(double *)&op);
-      result = *(uword64 *)&tmp;
+      sim_fpu wop;
+      unsigned64 ans;
+      sim_fpu_64to (&wop, op);
+      sim_fpu_neg (&wop, &wop);
+      sim_fpu_to64 (&ans, &wop);
+      result = ans;
+      break;
     }
-    break;
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2365,18 +2401,30 @@ Add(op1,op2,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop1 = (unsigned int)op1;
-      unsigned int wop2 = (unsigned int)op2;
-      float tmp = (*(float *)&wop1 + *(float *)&wop2);
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned32 res;
+      sim_fpu_32to (&wop1, op1);
+      sim_fpu_32to (&wop2, op2);
+      sim_fpu_add (&ans, &wop1, &wop2);
+      sim_fpu_to32 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    case fmt_double:
     {
-      double tmp = (*(double *)&op1 + *(double *)&op2);
-      result = *(uword64 *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned64 res;
+      sim_fpu_64to (&wop1, op1);
+      sim_fpu_64to (&wop2, op2);
+      sim_fpu_add (&ans, &wop1, &wop2);
+      sim_fpu_to64 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2408,16 +2456,28 @@ Sub(op1,op2,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop1 = (unsigned int)op1;
-      unsigned int wop2 = (unsigned int)op2;
-      float tmp = (*(float *)&wop1 - *(float *)&wop2);
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned32 res;
+      sim_fpu_32to (&wop1, op1);
+      sim_fpu_32to (&wop2, op2);
+      sim_fpu_sub (&ans, &wop1, &wop2);
+      sim_fpu_to32 (&res, &ans);
+      result = res;
     }
     break;
    case fmt_double:
     {
-      double tmp = (*(double *)&op1 - *(double *)&op2);
-      result = *(uword64 *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned64 res;
+      sim_fpu_64to (&wop1, op1);
+      sim_fpu_64to (&wop2, op2);
+      sim_fpu_sub (&ans, &wop1, &wop2);
+      sim_fpu_to64 (&res, &ans);
+      result = res;
     }
     break;
    default:
@@ -2451,18 +2511,30 @@ Multiply(op1,op2,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop1 = (unsigned int)op1;
-      unsigned int wop2 = (unsigned int)op2;
-      float tmp = (*(float *)&wop1 * *(float *)&wop2);
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned32 res;
+      sim_fpu_32to (&wop1, op1);
+      sim_fpu_32to (&wop2, op2);
+      sim_fpu_mul (&ans, &wop1, &wop2);
+      sim_fpu_to32 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    case fmt_double:
     {
-      double tmp = (*(double *)&op1 * *(double *)&op2);
-      result = *(uword64 *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned64 res;
+      sim_fpu_64to (&wop1, op1);
+      sim_fpu_64to (&wop2, op2);
+      sim_fpu_mul (&ans, &wop1, &wop2);
+      sim_fpu_to64 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2494,18 +2566,30 @@ Divide(op1,op2,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop1 = (unsigned int)op1;
-      unsigned int wop2 = (unsigned int)op2;
-      float tmp = (*(float *)&wop1 / *(float *)&wop2);
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned32 res;
+      sim_fpu_32to (&wop1, op1);
+      sim_fpu_32to (&wop2, op2);
+      sim_fpu_div (&ans, &wop1, &wop2);
+      sim_fpu_to32 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    case fmt_double:
     {
-      double tmp = (*(double *)&op1 / *(double *)&op2);
-      result = *(uword64 *)&tmp;
+      sim_fpu wop1;
+      sim_fpu wop2;
+      sim_fpu ans;
+      unsigned64 res;
+      sim_fpu_64to (&wop1, op1);
+      sim_fpu_64to (&wop2, op2);
+      sim_fpu_div (&ans, &wop1, &wop2);
+      sim_fpu_to64 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2536,17 +2620,26 @@ Recip(op,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop = (unsigned int)op;
-      float tmp = ((float)1.0 / *(float *)&wop);
-      result = (uword64)*(unsigned int *)&tmp;
+      sim_fpu wop;
+      sim_fpu ans;
+      unsigned32 res;
+      sim_fpu_32to (&wop, op);
+      sim_fpu_inv (&ans, &wop);
+      sim_fpu_to32 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    case fmt_double:
     {
-      double tmp = ((double)1.0 / *(double *)&op);
-      result = *(uword64 *)&tmp;
+      sim_fpu wop;
+      sim_fpu ans;
+      unsigned64 res;
+      sim_fpu_64to (&wop, op);
+      sim_fpu_inv (&ans, &wop);
+      sim_fpu_to64 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2577,27 +2670,26 @@ SquareRoot(op,fmt)
   switch (fmt) {
    case fmt_single:
     {
-      unsigned int wop = (unsigned int)op;
-#ifdef HAVE_SQRT
-      float tmp = ((float)sqrt((double)*(float *)&wop));
-      result = (uword64)*(unsigned int *)&tmp;
-#else
-      /* TODO: Provide square-root */
-      result = (uword64)0;
-#endif
+      sim_fpu wop;
+      sim_fpu ans;
+      unsigned32 res;
+      sim_fpu_32to (&wop, op);
+      sim_fpu_sqrt (&ans, &wop);
+      sim_fpu_to32 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    case fmt_double:
     {
-#ifdef HAVE_SQRT
-      double tmp = (sqrt(*(double *)&op));
-      result = *(uword64 *)&tmp;
-#else
-      /* TODO: Provide square-root */
-      result = (uword64)0;
-#endif
+      sim_fpu wop;
+      sim_fpu ans;
+      unsigned64 res;
+      sim_fpu_64to (&wop, op);
+      sim_fpu_sqrt (&ans, &wop);
+      sim_fpu_to64 (&res, &ans);
+      result = res;
+      break;
     }
-    break;
    default:
     fprintf (stderr, "Bad switch\n");
     abort ();
@@ -2619,204 +2711,103 @@ convert(sd,cia,rm,op,from,to)
      FP_formats from; 
      FP_formats to; 
 {
-  uword64 result = 0;
+  sim_fpu wop;
+  sim_fpu_round round;
+  unsigned32 result32;
+  unsigned64 result64;
 
 #ifdef DEBUG
   printf("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n",RMMODE(rm),pr_addr(op),DOFMT(from),DOFMT(to),pr_addr(IPC));
 #endif /* DEBUG */
 
-  /* The value "op" is converted to the destination format, rounding
-     using mode "rm". When the destination is a fixed-point format,
-     then a source value of Infinity, NaN or one which would round to
-     an integer outside the fixed point range then an IEEE Invalid
+  switch (rm)
+    {
+    case FP_RM_NEAREST:
+      /* Round result to nearest representable value. When two
+	 representable values are equally near, round to the value
+	 that has a least significant bit of zero (i.e. is even). */
+      round = sim_fpu_round_near;
+      break;
+    case FP_RM_TOZERO:
+      /* Round result to the value closest to, and not greater in
+	 magnitude than, the result. */
+      round = sim_fpu_round_zero;
+      break;
+    case FP_RM_TOPINF:
+      /* Round result to the value closest to, and not less than,
+	 the result. */
+      round = sim_fpu_round_up;
+      break;
+      
+    case FP_RM_TOMINF:
+      /* Round result to the value closest to, and not greater than,
+	 the result. */
+      round = sim_fpu_round_down;
+      break;
+    default:
+      round = 0;
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  
+  /* Convert the input to sim_fpu internal format */
+  switch (from)
+    {
+    case fmt_double:
+      sim_fpu_64to (&wop, op);
+      break;
+    case fmt_single:
+      sim_fpu_32to (&wop, op);
+      break;
+    case fmt_word:
+      sim_fpu_i32to (&wop, op, round);
+      break;
+    case fmt_long:
+      sim_fpu_i64to (&wop, op, round);
+      break;
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+
+  /* Convert sim_fpu format into the output */
+  /* The value WOP is converted to the destination format, rounding
+     using mode RM. When the destination is a fixed-point format, then
+     a source value of Infinity, NaN or one which would round to an
+     integer outside the fixed point range then an IEEE Invalid
      Operation condition is raised. */
-  switch (to) {
-   case fmt_single:
+  switch (to)
     {
-      float tmp;
-      switch (from) {
-       case fmt_double:
-        tmp = (float)(*(double *)&op);
-        break;
-
-       case fmt_word:
-        tmp = (float)((int)(op & 0xFFFFFFFF));
-        break;
-
-       case fmt_long:
-        tmp = (float)((word64)op);
-        break;
-       default:
-	fprintf (stderr, "Bad switch\n");
-	abort ();
-      }
-
-#if 0
-      /* FIXME: This code is incorrect.  The rounding mode does not
-         round to integral values; it rounds to the nearest
-         representable value in the format.  */
-
-      switch (rm) {
-       case FP_RM_NEAREST:
-        /* Round result to nearest representable value. When two
-           representable values are equally near, round to the value
-           that has a least significant bit of zero (i.e. is even). */
-#ifdef HAVE_ANINT
-        tmp = (float)anint((double)tmp);
-#else
-        /* TODO: Provide round-to-nearest */
-#endif
-        break;
-
-       case FP_RM_TOZERO:
-        /* Round result to the value closest to, and not greater in
-           magnitude than, the result. */
-#ifdef HAVE_AINT
-        tmp = (float)aint((double)tmp);
-#else
-        /* TODO: Provide round-to-zero */
-#endif
-        break;
-
-       case FP_RM_TOPINF:
-        /* Round result to the value closest to, and not less than,
-           the result. */
-        tmp = (float)ceil((double)tmp);
-        break;
-
-       case FP_RM_TOMINF:
-        /* Round result to the value closest to, and not greater than,
-           the result. */
-        tmp = (float)floor((double)tmp);
-        break;
-      }
-#endif /* 0 */
-
-      result = (uword64)*(unsigned int *)&tmp;
+    case fmt_single:
+      sim_fpu_round_32 (&wop, round, 0);
+      sim_fpu_to32 (&result32, &wop);
+      result64 = result32;
+      break;
+    case fmt_double:
+      sim_fpu_round_64 (&wop, round, 0);
+      sim_fpu_to64 (&result64, &wop);
+      break;
+    case fmt_word:
+      sim_fpu_to32i (&result32, &wop, round);
+      result64 = result32;
+      break;
+    case fmt_long:
+      sim_fpu_to64i (&result64, &wop, round);
+      break;
+    default:
+      result64 = 0;
+      fprintf (stderr, "Bad switch\n");
+      abort ();
     }
-    break;
-
-   case fmt_double:
-    {
-      double tmp;
-      word64 xxx;
-
-      switch (from) {
-       case fmt_single:
-        {
-          unsigned int wop = (unsigned int)op;
-          tmp = (double)(*(float *)&wop);
-        }
-        break;
-
-       case fmt_word:
-        xxx = SIGNEXTEND((op & 0xFFFFFFFF),32);
-        tmp = (double)xxx;
-        break;
-
-       case fmt_long:
-        tmp = (double)((word64)op);
-        break;
-
-       default:
-        fprintf (stderr, "Bad switch\n");
-        abort ();
-      }
-
-#if 0
-      /* FIXME: This code is incorrect.  The rounding mode does not
-         round to integral values; it rounds to the nearest
-         representable value in the format.  */
-
-      switch (rm) {
-       case FP_RM_NEAREST:
-#ifdef HAVE_ANINT
-        tmp = anint(*(double *)&tmp);
-#else
-        /* TODO: Provide round-to-nearest */
-#endif
-        break;
-
-       case FP_RM_TOZERO:
-#ifdef HAVE_AINT
-        tmp = aint(*(double *)&tmp);
-#else
-        /* TODO: Provide round-to-zero */
-#endif
-        break;
-
-       case FP_RM_TOPINF:
-        tmp = ceil(*(double *)&tmp);
-        break;
-
-       case FP_RM_TOMINF:
-        tmp = floor(*(double *)&tmp);
-        break;
-      }
-#endif /* 0 */
-
-      result = *(uword64 *)&tmp;
-    }
-    break;
-
-   case fmt_word:
-   case fmt_long:
-    if (Infinity(op,from) || NaN(op,from) || (1 == 0/*TODO: check range */)) {
-      printf("DBG: TODO: update FCSR\n");
-      SignalExceptionFPE ();
-    } else {
-      if (to == fmt_word) {
-        int tmp = 0;
-        switch (from) {
-         case fmt_single:
-          {
-            unsigned int wop = (unsigned int)op;
-            tmp = (int)*((float *)&wop);
-          }
-          break;
-         case fmt_double:
-          tmp = (int)*((double *)&op);
+ 
 #ifdef DEBUG
-          printf("DBG: from double %.30f (0x%s) to word: 0x%08X\n",*((double *)&op),pr_addr(op),tmp);
-#endif /* DEBUG */
-          break;
-	 default:
-	  fprintf (stderr, "Bad switch\n");
-	  abort ();
-        }
-        result = (uword64)tmp;
-      } else { /* fmt_long */
-	word64 tmp = 0;
-        switch (from) {
-         case fmt_single:
-          {
-            unsigned int wop = (unsigned int)op;
-            tmp = (word64)*((float *)&wop);
-          }
-          break;
-         case fmt_double:
-          tmp = (word64)*((double *)&op);
-          break;
-	 default:
-	  fprintf (stderr, "Bad switch\n");
-	  abort ();
-        }
-	result = (uword64)tmp;
-      }
-    }
-    break;
-   default:
-    fprintf (stderr, "Bad switch\n");
-    abort ();
-  }
-
-#ifdef DEBUG
-  printf("DBG: Convert: returning 0x%s (to format = %s)\n",pr_addr(result),DOFMT(to));
+  printf("DBG: Convert: returning 0x%s (to format = %s)\n",pr_addr(result64),DOFMT(to));
 #endif /* DEBUG */
 
-  return(result);
+  return(result64);
 }
 #endif /* HASFPU */
+
 
 /*-- co-processor support routines ------------------------------------------*/
 
@@ -3272,7 +3263,7 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 #if (WITH_TARGET_WORD_BITSIZE != GPRLEN)
 #error "Mismatch between configure WITH_TARGET_WORD_BITSIZE and gencode GPRLEN"
 #endif
-#if (WITH_FLOATING_POINT == HARD_FLOATING_POINT != defined (HASFPU))
+#if ((WITH_FLOATING_POINT == HARD_FLOATING_POINT) != defined (HASFPU))
 #error "Mismatch between configure WITH_FLOATING_POINT and gencode HASFPU"
 #endif
 

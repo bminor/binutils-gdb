@@ -1,3 +1,12 @@
+1997-12-29  Felix Lee  <flee@cygnus.com>
+
+	* interp.c (sim_engine_run): msvc cpp barfs on #if (a==b!=c).
+
+Wed Dec 17 14:48:20 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (tmp-igen): Arrange for $zero to always be
+	reset to zero after every instruction.
+
 Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
