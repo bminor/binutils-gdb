@@ -2259,11 +2259,11 @@ assemble_ppi (op_end, opcode)
 		default:
 		  as_bad (_("bad padd / psub pmuls output operand"));
 		}
-		/* Generate waring if destination register for padd / psub
-		   and pmuls is same ( only for A0 or A1 )
-		   If last nibble is 1010 then A0 is used in both padd / psub
-		   and pmuls. If it is 1111 then A1 is used as destination
-		   register in both padd / psub and pmuls */
+		/* Generate warning if the destination register for padd / psub
+		   and pmuls is the same ( only for A0 or A1 ).
+		   If the last nibble is 1010 then A0 is used in both
+		   padd / psub and pmuls. If it is 1111 then A1 is used
+		   as destination register in both padd / psub and pmuls.  */
 
 		if ((((field_b | reg_efg) & 0x000F) == 0x000A)
 		    || (((field_b | reg_efg) & 0x000F) == 0x000F))
