@@ -1,3 +1,7 @@
+2002-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* aoutx.h (aout_link_write_symbols): Correct handling of warning syms.
+
 2002-08-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (edit_opd): Arrange to drop symbols for discarded .opd

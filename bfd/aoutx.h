@@ -4211,7 +4211,8 @@ aout_link_write_symbols (finfo, input_bfd)
 
 	  /* Use the name from the hash table, in case the symbol was
              wrapped.  */
-	  if (h != NULL)
+	  if (h != NULL
+	      && h->root.type != bfd_link_hash_warning)
 	    name = h->root.root.string;
 
 	  /* If this is an indirect or warning symbol, then change
@@ -4233,7 +4234,6 @@ aout_link_write_symbols (finfo, input_bfd)
 
 	  /* If the symbol has already been written out, skip it.  */
 	  if (h != (struct aout_link_hash_entry *) NULL
-	      && h->root.type != bfd_link_hash_warning
 	      && h->written)
 	    {
 	      if ((type & N_TYPE) == N_INDR
