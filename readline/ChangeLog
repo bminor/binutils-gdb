@@ -1,3 +1,19 @@
+Tue Dec 22 10:00:30 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* shell.c (savestring): ifdef'd it out. 
+
+	* Imported new version of Readline 2.2.1. Removed all the Cygnus
+	local changes.
+
+	New files: acconfig.h, aclocal.m4, ansi_stdlib.h, callback.c,
+ 	config.h.in, configure, histexpand.c, histfile.c, histlib.h,
+ 	histsearch.c, input.c, kill.c, macro.c, nls.c, posixdir.h,
+ 	posixjmp.h, posixstat.h, rlconf.h, rltty.h, rlwinsize.h, shell.c,
+ 	tcap.h, terminal.c, undo.c, util.c, support directory.
+
+	Removed files: sysdep*, config directory.
+	
+
 Fri Dec  4 15:25:41 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Jim Blandy
