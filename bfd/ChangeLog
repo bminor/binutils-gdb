@@ -1,5 +1,13 @@
 Mon Jun 23 18:03:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_merge_symbol): In the case of a new defined
+	symbol overriding an old defined symbol, return the hash table
+	entry which we modify, even if it is the target of an
+	indirection.
+	(elf_link_add_object_symbols): If the real name of the symbol gets
+	overridden, convert the versioned symbol into an indirect symbol
+	to the real symbol.
+
 	* elflink.h (elf_merge_symbol): New static function, broken out of
 	elf_link_add_object_symbols.
 	(elf_link_add_object_symbols): Call it.

@@ -568,6 +568,13 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 	 NULL, so that it is correct for a regular symbol.  */
 
       h->verinfo.vertree = NULL;
+
+      /* In this special case, if H is the target of an indirection,
+         we want the caller to frob with H rather than with the
+         indirect symbol.  That will permit the caller to redefine the
+         target of the indirection, rather than the indirect symbol
+         itself.  */
+      *sym_hash = h;
     }
 
   /* Handle the special case of a new common symbol merging with an
@@ -1376,70 +1383,113 @@ elf_link_add_object_symbols (abfd, info)
 			      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
 			      collect, (struct bfd_link_hash_entry **) &hi)))
 			goto error_return;
+		    }
+		  else
+		    {
+		      /* In this case the symbol named SHORTNAME is
+                         overriding the indirect symbol we want to
+                         add.  We were planning on making SHORTNAME an
+                         indirect symbol referring to NAME.  SHORTNAME
+                         is the name without a version.  NAME is the
+                         fully versioned name, and it is the default
+                         version.
 
-		      /* If there is a duplicate definition somewhere,
-                         then HI may not point to an indirect symbol.
-                         We will have reported an error to the user in
-                         that case.  */
+			 Overriding means that we already saw a
+			 definition for the symbol SHORTNAME in a
+			 regular object, and it is overriding the
+			 symbol defined in the dynamic object.
 
-		      if (hi->root.type == bfd_link_hash_indirect)
+			 When this happens, we actually want to change
+			 NAME, the symbol we just added, to refer to
+			 SHORTNAME.  This will cause references to
+			 NAME in the shared object to become
+			 references to SHORTNAME in the regular
+			 object.  This is what we expect when we
+			 override a function in a shared object: that
+			 the references in the shared object will be
+			 mapped to the definition in the regular
+			 object.  */
+
+		      h->root.type = bfd_link_hash_indirect;
+		      h->root.u.i.link = (struct bfd_link_hash_entry *) hi;
+		      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
 			{
-			  /* If the symbol became indirect, then we
-                             assume that we have not seen a definition
-                             before.  */
-			  BFD_ASSERT ((hi->elf_link_hash_flags
-				       & (ELF_LINK_HASH_DEF_DYNAMIC
-					  | ELF_LINK_HASH_DEF_REGULAR))
-				      == 0);
+			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_DEF_DYNAMIC;
+			  hi->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+			  if (! _bfd_elf_link_record_dynamic_symbol (info, hi))
+			    goto error_return;
+			}
 
-			  /* Copy down any references that we may have
-                             already seen to the symbol which just
-                             became indirect.  */
-			  h->elf_link_hash_flags |=
-			    (hi->elf_link_hash_flags
-			     & (ELF_LINK_HASH_REF_DYNAMIC
-				| ELF_LINK_HASH_REF_REGULAR));
+		      /* Now set HI to H, so that the following code
+                         will set the other fields correctly.  */
+		      hi = h;
+		    }
 
-			  /* Copy over the global table offset entry.
-                             This may have been already set up by a
-                             check_relocs routine.  */
-			  if (h->got_offset == (bfd_vma) -1)
+		  /* If there is a duplicate definition somewhere,
+		     then HI may not point to an indirect symbol.  We
+		     will have reported an error to the user in that
+		     case.  */
+
+		  if (hi->root.type == bfd_link_hash_indirect)
+		    {
+		      struct elf_link_hash_entry *ht;
+
+		      /* If the symbol became indirect, then we assume
+			 that we have not seen a definition before.  */
+		      BFD_ASSERT ((hi->elf_link_hash_flags
+				   & (ELF_LINK_HASH_DEF_DYNAMIC
+				      | ELF_LINK_HASH_DEF_REGULAR))
+				  == 0);
+
+		      ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
+
+		      /* Copy down any references that we may have
+			 already seen to the symbol which just became
+			 indirect.  */
+		      ht->elf_link_hash_flags |=
+			(hi->elf_link_hash_flags
+			 & (ELF_LINK_HASH_REF_DYNAMIC
+			    | ELF_LINK_HASH_REF_REGULAR));
+
+		      /* Copy over the global table offset entry.
+			 This may have been already set up by a
+			 check_relocs routine.  */
+		      if (ht->got_offset == (bfd_vma) -1)
+			{
+			  ht->got_offset = hi->got_offset;
+			  hi->got_offset = (bfd_vma) -1;
+			}
+		      BFD_ASSERT (hi->got_offset == (bfd_vma) -1);
+
+		      if (ht->dynindx == -1)
+			{
+			  ht->dynindx = hi->dynindx;
+			  ht->dynstr_index = hi->dynstr_index;
+			  hi->dynindx = -1;
+			  hi->dynstr_index = 0;
+			}
+		      BFD_ASSERT (hi->dynindx == -1);
+
+		      /* FIXME: There may be other information to copy
+			 over for particular targets.  */
+
+		      /* See if the new flags lead us to realize that
+			 the symbol must be dynamic.  */
+		      if (! dynsym)
+			{
+			  if (! dynamic)
 			    {
-			      h->got_offset = hi->got_offset;
-			      hi->got_offset = (bfd_vma) -1;
+			      if (info->shared
+				  || ((hi->elf_link_hash_flags
+				       & ELF_LINK_HASH_REF_DYNAMIC)
+				      != 0))
+				dynsym = true;
 			    }
-			  BFD_ASSERT (hi->got_offset == (bfd_vma) -1);
-
-			  if (h->dynindx == -1)
+			  else
 			    {
-			      h->dynindx = hi->dynindx;
-			      h->dynstr_index = hi->dynstr_index;
-			      hi->dynindx = -1;
-			      hi->dynstr_index = 0;
-			    }
-			  BFD_ASSERT (hi->dynindx == -1);
-
-			  /* FIXME: There may be other information to
-                             copy over for particular targets.  */
-
-			  /* See if the new flags lead us to realize
-                             that the symbol must be dynamic.  */
-			  if (! dynsym)
-			    {
-			      if (! dynamic)
-				{
-				  if (info->shared
-				      || ((hi->elf_link_hash_flags
-					   & ELF_LINK_HASH_REF_DYNAMIC)
-					  != 0))
-				    dynsym = true;
-				}
-			      else
-				{
-				  if ((hi->elf_link_hash_flags
-				       & ELF_LINK_HASH_REF_REGULAR) != 0)
-				    dynsym = true;
-				}
+			      if ((hi->elf_link_hash_flags
+				   & ELF_LINK_HASH_REF_REGULAR) != 0)
+				dynsym = true;
 			    }
 			}
 		    }
@@ -1460,7 +1510,16 @@ elf_link_add_object_symbols (abfd, info)
 					  &type_change_ok, &size_change_ok))
 		    goto error_return;
 
-		  if (! override)
+		  if (override)
+		    {
+		      /* Here SHORTNAME is a versioned name, so we
+                         don't expect to see the type of override we
+                         do in the case above.  */
+		      (*_bfd_error_handler)
+			("%s: warning: unexpected redefinition of `%s'",
+			 bfd_get_filename (abfd), shortname);
+		    }
+		  else
 		    {
 		      if (! (_bfd_generic_link_add_one_symbol
 			     (info, abfd, shortname, BSF_INDIRECT,
