@@ -1,3 +1,8 @@
+Wed Nov  4 09:30:50 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* aoutx.h (some_aout_object_p): Section list should be set up
+	correctly anyways; don't have to set up "next" pointers manually.
+
 Mon Nov  2 12:36:14 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/delta88.mh, config/hp300.mh, config/hppahpux.mh,
