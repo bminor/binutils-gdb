@@ -39,17 +39,20 @@ case "${target}" in
 		  ;;
 esac
 
-# remove various programs from consideration, if this is a cross-compiler 
-# (host != target) build, AND if the host is one that has a
-# "native" environment that we support
+
+# remove various programs from consideration.  some of these are not
+# reasonable to build for a native compilation (eg newlib).  some of these
+# aren't built for each cross compiler toolchain (eg emacs).
 
 if [ x"${host}" = x"${target}" ] ; then
-         configdirs=`echo ${configdirs} | sed -e 's/newlib//'`
+	# remove from native toolchains
+	configdirs=`echo ${configdirs} | sed -e 's/newlib//'`
 else
-	true
+	# remove from cross compilers in general
+	configdirs=`echo ${configdirs} | sed -e 's/emacs//;s/ispell//;s/rcs//;s/cvs//'`
 fi	
 
-# remove various programs from consideration, based on the host or 
+# remove more programs from consideration, based on the host or 
 # target this usually means that a port of the program doesn't
 # exist yet.
 
@@ -64,13 +67,13 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/gas//;s/binutils//;s/ld//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   hppa*-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/gas//;s/bfd//;s/gdb//;s/binutils//;s/gdbtest//;s/ld//;s/libg++//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/bfd//;s/gdb//;s/libg++//'`
     ;;
   *-*-solaris2)
-    configdirs=`echo ${configdirs} | sed -e 's/gas//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
 esac
 
