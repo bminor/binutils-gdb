@@ -6767,7 +6767,7 @@ Tue Feb 10 12:17:13 1998  Fred Fish  <fnf@cygnus.com>
 
 Mon Feb 10 12:37:47 1998  Philippe De Muyter  <phdm@macqel.be>
 
-        * m68k/tm-delta68.h (EXTRACT_RETURN_VALUE): Type argument for
+        * config/m68k/tm-delta68.h (EXTRACT_RETURN_VALUE): Type argument for
         `REGISTER_CONVERT_TO_VIRTUAL is `TYPE', not
         `REGISTER_VIRTUAL_TYPE (FP0_REGNUM)';
         (STORE_RETURN_VALUE): Ditto, and offset for `write_register_bytes'
@@ -6808,7 +6808,7 @@ Mon Feb  9 15:35:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Sun Feb  6 02:44:28 1998  Philippe De Muyter  <phdm@macqel.be>
 
-        * m68k/tm-delta68.h (CPLUS_MARKER): Macro deleted.
+        * config/m68k/tm-delta68.h (CPLUS_MARKER): Macro deleted.
         (EXTRACT_STRUCT_VALUE_ADDRESS): Macro defined.
         (EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE): Macros modified
         because floating-point values return via %fp0.
