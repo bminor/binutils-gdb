@@ -2511,9 +2511,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
   bfd *input_bfd;
   asection *section, *stub_sec;
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Sym *local_syms, *isym;
+  Elf_Internal_Sym *local_syms, *isym, **all_local_syms;
   Elf32_External_Sym *ext_syms, *esym;
-  unsigned int bfd_count = 0;
+  unsigned int i, index, bfd_count = 0;
   struct elf32_hppa_stub_hash_table *stub_hash_table = 0;
   struct elf32_hppa_args_hash_table *args_hash_table = 0;
 
@@ -2567,9 +2567,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 
   /* Walk over all the input BFDs adding entries to the args hash table
      for all the external functions.  */
-  for (input_bfd = link_info->input_bfds, i = 0;
+  for (input_bfd = link_info->input_bfds, index = 0;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next, i++)
+       input_bfd = input_bfd->link_next, index++)
     {
       /* We'll need the symbol table in a second.  */
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -2585,12 +2585,12 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  for (i = 0; i < bfd_count; i++)
-	    if (all_local_symbols[i])
-	      free (all_local_symbols[i]);
-	  free (all_local_symbols);
+	    if (all_local_syms[i])
+	      free (all_local_syms[i]);
+	  free (all_local_syms);
 	  goto error_return;
 	}
-      all_local_symbols[i] = local_syms;
+      all_local_syms[index] = local_syms;
 
       ext_syms
 	= (Elf32_External_Sym *)malloc (symtab_hdr->sh_info
@@ -2599,9 +2599,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  for (i = 0; i < bfd_count; i++)
-	    if (all_local_symbols[i])
-	      free (all_local_symbols[i]);
-	  free (all_local_symbols);
+	    if (all_local_syms[i])
+	      free (all_local_syms[i]);
+	  free (all_local_syms);
 	  goto error_return;
 	}
 
@@ -2612,9 +2612,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym)))
 	{
 	  for (i = 0; i < bfd_count; i++)
-	    if (all_local_symbols[i])
-	      free (all_local_symbols[i]);
-	  free (all_local_symbols);
+	    if (all_local_syms[i])
+	      free (all_local_syms[i]);
+	  free (all_local_syms);
 	  free (ext_syms);
 	  goto error_return;
 	}
@@ -2632,9 +2632,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 				       local_syms) == false)
 	{
 	  for (i = 0; i < bfd_count; i++)
-	    if (all_local_symbols[i])
-	      free (all_local_symbols[i]);
-	  free (all_local_symbols);
+	    if (all_local_syms[i])
+	      free (all_local_syms[i]);
+	  free (all_local_syms);
 	  goto error_return;
 	}
     }
@@ -2647,26 +2647,24 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
   if (link_info->relocateable)
     {
       for (i = 0; i < bfd_count; i++)
-	if (all_local_symbols[i])
-	  free (all_local_symbols[i]);
-      free (all_local_symbols);
+	if (all_local_syms[i])
+	  free (all_local_syms[i]);
+      free (all_local_syms);
       return true;
     }
 
   /* Now that we have argument location information for all the global
      functions we can start looking for stubs.  */
-  for (input_bfd = link_info->input_bfds, i = 0;
+  for (input_bfd = link_info->input_bfds, index = 0;
        input_bfd != NULL;
-       input_bfd = input_bfd->link_next, i++)
+       input_bfd = input_bfd->link_next, index++)
     {
-      unsigned int i;
-
       /* We'll need the symbol table in a second.  */
       symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
       if (symtab_hdr->sh_info == 0)
 	continue;
 
-      local_syms = all_local_symbols[i];
+      local_syms = all_local_syms[index];
 
       /* Walk over each section attached to the input bfd.  */
       for (section = input_bfd->sections;
@@ -2689,9 +2687,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
 	      for (i = 0; i < bfd_count; i++)
-		if (all_local_symbols[i])
-		  free (all_local_symbols[i]);
-	      free (all_local_symbols);
+		if (all_local_syms[i])
+		  free (all_local_syms[i]);
+	      free (all_local_syms);
 	      goto error_return;
 	    }
 
@@ -2703,9 +2701,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	      bfd_set_error (bfd_error_no_memory);
 	      free (external_relocs);
 	      for (i = 0; i < bfd_count; i++)
-		if (all_local_symbols[i])
-		  free (all_local_symbols[i]);
-	      free (all_local_symbols);
+		if (all_local_syms[i])
+		  free (all_local_syms[i]);
+	      free (all_local_syms);
 	      goto error_return;
 	    }
 
@@ -2718,9 +2716,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	      free (external_relocs);
 	      free (internal_relocs);
 	      for (i = 0; i < bfd_count; i++)
-		if (all_local_symbols[i])
-		  free (all_local_symbols[i]);
-	      free (all_local_symbols);
+		if (all_local_syms[i])
+		  free (all_local_syms[i]);
+	      free (all_local_syms);
 	      goto error_return;
 	    }
 
@@ -2758,9 +2756,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 		  bfd_set_error (bfd_error_bad_value);
 		  free (internal_relocs);
 		  for (i = 0; i < bfd_count; i++)
-		    if (all_local_symbols[i])
-		      free (all_local_symbols[i]);
-		  free (all_local_symbols);
+		    if (all_local_syms[i])
+		      free (all_local_syms[i]);
+		  free (all_local_syms);
 		  goto error_return;
 		}
 
@@ -2802,9 +2800,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 		      bfd_set_error (bfd_error_bad_value);
 		      free (internal_relocs);
 		      for (i = 0; i < bfd_count; i++)
-			if (all_local_symbols[i])
-			  free (all_local_symbols[i]);
-		      free (all_local_symbols);
+			if (all_local_syms[i])
+			  free (all_local_syms[i]);
+		      free (all_local_syms);
 		      goto error_return;
 		    }
 		  sprintf (new_name, "%s_%08x", sym_name, (int)sym_sec);
@@ -2831,9 +2829,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 		      bfd_set_error (bfd_error_bad_value);
 		      free (internal_relocs);
 		      for (i = 0; i < bfd_count; i++)
-			if (all_local_symbols[i])
-			  free (all_local_symbols[i]);
-		      free (all_local_symbols);
+			if (all_local_syms[i])
+			  free (all_local_syms[i]);
+		      free (all_local_syms);
 		      goto error_return;
 		    }
 		}
@@ -2894,9 +2892,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 
 		      free (internal_relocs);
 		      for (i = 0; i < bfd_count; i++)
-			if (all_local_symbols[i])
-			  free (all_local_symbols[i]);
-		      free (all_local_symbols);
+			if (all_local_syms[i])
+			  free (all_local_syms[i]);
+		      free (all_local_syms);
 		      goto error_return;
 		    }
 		  elf32_hppa_name_of_stub (caller_args, callee_args,
@@ -2933,9 +2931,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 			  free (stub_name);
 			  free (internal_relocs);
 			  for (i = 0; i < bfd_count; i++)
-			    if (all_local_symbols[i])
-			      free (all_local_symbols[i]);
-			  free (all_local_symbols);
+			    if (all_local_syms[i])
+			      free (all_local_syms[i]);
+			  free (all_local_syms);
 			  goto error_return;
 			}
 
@@ -2950,12 +2948,12 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 	  /* We're done with the internal relocs, free them.  */
 	  free (internal_relocs);
 	}
-      /* We're done with the local symbols, free them.  */
-      for (i = 0; i < bfd_count; i++)
-	if (all_local_symbols[i])
-	  free (all_local_symbols[i]);
-      free (all_local_symbols);
     }
+  /* We're done with the local symbols, free them.  */
+  for (i = 0; i < bfd_count; i++)
+    if (all_local_syms[i])
+      free (all_local_syms[i]);
+  free (all_local_syms);
   return true;
 
 error_return:
