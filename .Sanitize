@@ -22,9 +22,9 @@ else
 fi
 
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
-	keep_these_too="${keep_these_too} release release-info"
+	keep_these_too="${keep_these_too} release release-info build-all.mk"
 else
-	lose_these_too="${lose_these_too} release release-info"
+	lose_these_too="${lose_these_too} release release-info build-all.mk"
 fi
 
 
@@ -46,7 +46,6 @@ README
 autoconf
 bfd
 binutils
-build-all.mk
 byacc
 config
 config.guess
