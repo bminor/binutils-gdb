@@ -1,3 +1,8 @@
+2003-08-13  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (hppa_gdbarch_init): Set the addr_bits_remove
+	gdbarch method to clear the 2 low bits of text addresses.
+
 2003-08-12  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (dsrec.o): Update dependencies.
