@@ -1,3 +1,11 @@
+Wed Jun 29 00:26:17 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.c++/misc.cc:  Instantiate classes to inhibit the compiler
+	from optimizing them away.
+	* gdb.c++/classes.exp, gdb.c++/inherit.exp:  Update ptype expect
+	patterns to include default constructors and assignment operators,
+	to match gcc versions beyond 2.5.8.
+
 Fri Jun 24 08:15:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.c++/cplusfuncs.exp:  Use string_to_regexp and a regular
