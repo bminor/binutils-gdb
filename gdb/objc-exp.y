@@ -203,9 +203,6 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 %token <opcode> ASSIGN_MODIFY
 
-/* C++ */
-%token THIS
-
 %left ','
 %left ABOVE_COMMA
 %right '=' ASSIGN_MODIFY
@@ -612,14 +609,6 @@ exp     :	NSSTRING	/* ObjC NextStep NSString constant
 			  write_exp_string ($1);
 			  write_exp_elt_opcode (OP_NSSTRING); }
 	;
-
-/* C++.  */
-exp	:	THIS
-			{ write_exp_elt_opcode (OP_THIS);
-			  write_exp_elt_opcode (OP_THIS); }
-	;
-
-/* end of C++.  */
 
 block	:	BLOCKNAME
 			{
@@ -1631,18 +1620,6 @@ yylex ()
 	return ENUM;
       if (STREQN (tokstart, "long", 4))
 	return LONG;
-      if (current_language->la_language == language_cplus
-	  && STREQN (tokstart, "this", 4))
-	{
-	  static const char this_name[] = {
-	    CPLUS_MARKER, 't', 'h', 'i', 's', '\0' 
-	  };
-
-	  if (lookup_symbol (this_name, expression_context_block,
-			     VAR_NAMESPACE, (int *) NULL,
-			     (struct symtab **) NULL))
-	    return THIS;
-	}
       break;
     case 3:
       if (STREQN (tokstart, "int", 3))

@@ -1035,19 +1035,17 @@ sigtramp_saved_pc (struct frame_info *frame)
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (frame->next)
-    sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
-					   + FRAME_ARGS_SKIP
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr = read_memory_typed_address
+      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+       builtin_type_void_data_ptr);
   else
-    sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr = read_memory_typed_address
+      (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
 
   /* Don't cause a memory_error when accessing sigcontext in case the stack
      layout has changed or the stack is corrupt.  */
   target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_unsigned_integer (buf, ptrbytes);
+  return extract_typed_address (buf, builtin_type_void_data_ptr);
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
 

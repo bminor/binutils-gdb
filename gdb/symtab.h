@@ -89,6 +89,11 @@ struct general_symbol_info
       char *demangled_name;
     }
     cplus_specific;
+    struct objc_specific
+    {
+      char *demangled_name;
+    }
+    objc_specific;
 #if 0
 /* OBSOLETE struct chill_specific        *//* For Chill */
     /* OBSOLETE   { */
@@ -146,6 +151,10 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
       {									\
 	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
       }									\
+    else if (SYMBOL_LANGUAGE (symbol) == language_objc)			\
+      {									\
+	SYMBOL_OBJC_DEMANGLED_NAME (symbol) = NULL;			\
+      }									\
     /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */ \
     /* OBSOLETE   { */						 	\
     /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */	\
@@ -170,12 +179,17 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
   (SYMBOL_LANGUAGE (symbol) == language_cplus				\
    || SYMBOL_LANGUAGE (symbol) == language_java				\
    ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
+      : (SYMBOL_LANGUAGE (symbol) == language_objc			\
+         ? SYMBOL_OBJC_DEMANGLED_NAME (symbol)				\
    : /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */		\
      /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */		\
-     NULL)
+	 NULL))
 
 /* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
 /* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
+
+#define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
+   (symbol)->ginfo.language_specific.objc_specific.demangled_name
 
 /* Macro that returns the "natural source name" of a symbol.  In C++ this is
    the "demangled" form of the name if demangle is on and the "mangled" form
@@ -736,15 +750,6 @@ struct partial_symbol
 #define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
 
-/* Source-file information.  This describes the relation between source files,
-   line numbers and addresses in the program text.  */
-
-struct sourcevector
-{
-  int length;			/* Number of source files described */
-  struct source *source[1];	/* Descriptions of the files */
-};
-
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
    the files which are actually debugged are read in to core, we don't
@@ -781,14 +786,6 @@ struct linetable
      `struct hack', you can shove it up your ANSI (seriously, if the
      committee tells us how to do it, we can probably go along).  */
   struct linetable_entry item[1];
-};
-
-/* All the information on one source file.  */
-
-struct source
-{
-  char *name;			/* Name of file */
-  struct linetable contents;
 };
 
 /* How to relocate the symbols from each section in a symbol file.

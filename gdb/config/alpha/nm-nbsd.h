@@ -26,6 +26,6 @@
 #include "config/nm-nbsd.h"
 
 /* The Alpha does not step over a breakpoint.  */
-#define CANNOT_STEP_BREAKPOINT
+#define CANNOT_STEP_BREAKPOINT 1
 
 #endif /* NM_NBSD_H */

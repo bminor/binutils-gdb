@@ -1,3 +1,231 @@
+2002-10-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib-sunos.c (allocate_rt_common_objfile): Use bcache_xmalloc
+	to allocate partial syms and macro byte caches.
+
+2002-10-18  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h: Delete 'struct source' and 'struct sourcevector'.
+
+2002-10-18  Adam Fedor  <fedor@gnu.org>
+
+	* stabsread.c (find_name_end): New function.
+	(define_symbol): Use it.
+
+2002-10-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+	* config/alpha/nm-linux.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+	* config/alpha/nm-nbsd.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+	* config/alpha/nm-osf.h (CANNOT_STEP_BREAKPOINT): Define to 1.
+
+2002-10-17  David Carlton  <carlton@math.stanford.edu>
+
+	* symfile.h: Add opaque declaration for struct obstack.
+	Declare obsavestring to take a const char *.
+	* symfile.c (obsavestring): Make first argument a const char *.
+
+2002-10-16  Adam Fedor  <fedor@gnu.org>
+
+	* breakpoint.c (parse_breakpoint_sals): Ignore ObjC method
+	names when matching breakpoints in current file.
+
+2002-10-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_invalid_pointer_size): New complaint.
+	(read_tag_pointer_type): Add address class support.
+	* gdbarch.sh (ADDRESS_CLASS_TYPE_FLAGS)
+	(ADDRESS_CLASS_TYPE_FLAGS_TO_NAME, ADDRESS_CLASS_NAME_TO_TYPE_FLAGS):
+	New methods.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* gdbtypes.c (address_space_name_to_int, address_space_int_to_name)
+	(make_type_with_address_space, recursive_type_dump): Add address
+	class support.
+	* gdbtypes.h (TYPE_FLAG_ADDRESS_CLASS_1, TYPE_FLAG_ADDRESS_CLASS_2)
+	(TYPE_FLAG_ADDRESS_CLASS_ALL, TYPE_ADDRESS_CLASS_1)
+	(TYPE_ADDRESS_CLASS_2, TYPE_ADDRESS_CLASS_ALL): New defines
+
+2002-10-16  Klee Dienes  <kdienes@apple.com>
+
+	* stabsread.c (read_tilde_fields): Use name[sizeof(vptr_name)-2]
+	to get the last character of a char[] buffer, not
+	name[sizeof(vptr_name)-1].
+
+2002-10-14  Adam Fedor  <fedor@gnu.org>
+
+	* symtab.h: New objc_specific struct.
+	(SYMBOL_INIT_LANGUAGE_SPECIFIC): Handle ObjC.
+	(SYMBOL_DEMANGLED_NAME): Likewise.
+
+2002-10-14  Adam Fedor  <fedor@gnu.org>
+
+	* symfile.c (init_filename_language_table): Add ObjC file extension.
+
+2002-10-14  Adam Fedor  <fedor@gnu.org>
+
+	* utils.c (puts_filtered_tabular): New function.
+	(fprintf_symbol_filtered): Get ObjC demangled name.
+	* defs.h (puts_filtered_tabular): Declared.
+
+2002-10-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* c-lang.h (c_type_print_varspec_prefix): Delete.
+	* c-typeprint.c (c_type_print_varspec_prefix): Make static.  Add
+	``need_post_space'' parameter.  Adjust all callers.
+
+2002-10-14  Daniel Jacobowitz  <drow@mvista.com>  
+ 
+	* config/mips/nm-irix4.h (HAVE_NONSTEPPABLE_WATCHPOINT): Define to 1.
+	* config/mips/nm-irix5.h (HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+	* config/mips/tm-embed.h (HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+	* config/pa/nm-hppah.h (HAVE_NONSTEPPABLE_WATCHPOINT): Likewise.
+
+2002-10-13  Adam Fedor  <fedor@gnu.org>
+
+	* source.c (print_source_lines): Update comments.
+
+2002-10-13  Adam Fedor  <fedor@gnu.org>
+
+	* valops.c (value_of_local): New function.
+	(value_of_this): Use it.
+	* value.h (value_of_local): Declared.
+
+2002-10-13  Adam Fedor  <fedor@gnu.org>
+
+	* parse.c: (length_of_subexp, prefixify_subexp): Handle
+	OP_MSGCALL, OP_SELECTOR, OP_NSSTRING, and OP_SELF.
+
+2002-10-12  Adam Fedor  <fedor@gnu.org>
+
+	* language.c (binop_result_type): Add language_objc to case.
+        (integral_type): Likewise.
+        (character_type): Likewise.
+        (string_type): Likewise.
+        (boolean_type): Likewise.
+        (structured_type): Likewise.
+        (binop_type_check): Likewise.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
+	* printcmd.c (address_info): Print 'self' for ObjC.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
+	* expression.h: New ops OP_NSSTRING, OP_SELECTOR, OP_MSGCALL, and
+	OP_SELF.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
+	* language.h (CAST_IS_CONVERSION): Add language_objc.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
+	* defs.h (enum language): Add language_objc.
+
+2002-10-11  Klee Dienes  <kdienes@apple.com>
+
+        * findvar.c (read_memory_typed_address): New function.
+        * gdbcore.h (read_memory_typed_address): Add prototype.
+        * blockframe.c (sigtramp_saved_pc): Use read_memory_typed_address
+	to read a value destined for a CORE_ADDR, not read_memory_integer.
+        * f-valprint.c (f77_get_dynamic_upperbound): Ditto.
+        (f77_get_dynamic_lowerbound): Ditto.
+
+2002-10-11  Martin M. Hunt  <hunt@redhat.com>
+
+	* utils.c (string_to_core_addr): After turning string into
+	a number, convert to a CORE_ADDR using INTEGER_TO_ADDRESS
+	which will do necessary sign-extension, etc.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* cp-valprint.c (vtbl_ptr_name_old): Delete.
+	(cp_is_vtbl_ptr_type): Don't check vtbl_ptr_name_old.
+	* demangle.c (cplus_markers): Update comment.  Put '$'
+	first.  Remove CPLUS_MARKER.
+	(_initialize_demangler): Don't call set_cplus_marker_for_demangling.
+	* jv-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* mips-tdep.c (mips_dump_tdep): Don't dump CPLUS_MARKER.
+	* objc-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* p-exp.y (yylex): Remove reference to CPLUS_MARKER.
+	* stabsread.c (vptr_name, vb_name): Replace CPLUS_MARKER with '$'.
+	(read_member_functions): Likewise for opname.
+	(read_tilde_fields): Use is_cplus_marker.
+
+	* defs.h (CPLUS_MARKER): Don't define.
+	* config/tm-sysv4.h (CPLUS_MARKER): Likewise.
+	* config/i386/xm-i386sco.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix3.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix6.h (CPLUS_MARKER): Likewise.
+	* config/rs6000/tm-rs6000.h (CPLUS_MARKER): Likewise.
+
+	* config/i386/tm-i386v4.h: Delete file.
+	* config/djgpp/fnchange.lst: Delete tm-i386v4.h.
+	* config/i386/tm-i386sol2.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-i386v42mp.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-ptx.h: Include "i386/tm-i386.h" instead.
+	* config/i386/i386gnu.mt (TM_FILE): Use tm-i386.h.
+	* config/i386/i386sco5.mt (TM_FILE): Likewise.
+	* config/i386/i386v4.mt (TM_FILE): Likewise.
+	* config/i386/ncr3000.mt (TM_FILE): Likewise.
+
+2002-10-10  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C,
+	accidentially not commited 2002-10-09
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-09  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C.
+	* gdbarch.sh (HAVE_NONSTEPPABLE_WATCHPOINT): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-08  Petr Sorfa <petrs@caldera.com>
+
+	Revised and re-submitted by John Wolfe <jlw@caldera.com>
+
+	Move the Dwarf 2 abbrev table to a per-compilation-unit structure,
+	so we can work on more than one compilation unit at a time.  This
+	helps prepare GDB to handle inter-CU die references.
+	* dwarf2read.c (ABBREV_HASH_SIZE): moved definition forward in
+	the code to be defined before struct comp_unit_head.
+	(comp_unit_head): Added new members - offset, cu_head,
+	begin_die, next and dwarf2_abbrevs.
+	(dwarf2_abbrevs): Removed single static var; now member of
+	struct comp_unit_head.
+	dwarf2_build_psymtabs_hard): Complete new struct comp_unit_head
+	members.
+	(psymtab_to_symtab_1): Changed to work with the new
+	struct comp_unit_head.
+	(dwarf2_read_abbrevs): Now accepts a cu_header parameter and
+	constructs the dwarf2_abbrevs[] inside the cu_header.
+	(dwarf2_empty_abbrev_table): Now expects a ptr to a
+	dwarf2_abbrev table to clean up.
+	(dwarf2_lookup_abbrev): Now accepts a cu_header parameter and
+	handling of dwarf2_abbrevs inside the cu_header.
+	(read_partial_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+	(read_full_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+
+2002-10-06  Christopher Faylor  <cgf@redhat.com>
+
+	* Makefile.in (install-gdbtk): Add missing continuation backslash to
+	insure that shell variables, such as "transformed_name" are propagated
+	to later shell statements in rule.
+
+2002-10-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386sco.h: Add protection against
+	multiple-inclusion.  Include "i386/nm-i386v.h".
+	(REGISTER_U_ADDR): Remove define.
+	(i386_register_u_addr): Remove prototype.
+
 2002-10-04  Michael Snyder  <msnyder@redhat.com>
 
 	* m32r-stub.c (handle_exception): Make sure exception is "trap"

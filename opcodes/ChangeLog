@@ -1,3 +1,8 @@
+2002-10-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c (print_insn): Treat bitmask and branch operands
+	at the end.
+
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
             Ken Raeburn  <raeburn@cygnus.com>
             Aldy Hernandez  <aldyh@redhat.com>

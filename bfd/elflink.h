@@ -921,6 +921,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
   boolean size_change_ok;
   char *shortname;
   struct elf_link_hash_entry *hi;
+  struct bfd_link_hash_entry *bh;
   struct elf_backend_data *bed;
   boolean collect;
   boolean dynamic;
@@ -979,11 +980,12 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 
   if (! override)
     {
+      bh = &hi->root;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, shortname, BSF_INDIRECT, bfd_ind_section_ptr,
-	      (bfd_vma) 0, name, false, collect,
-	      (struct bfd_link_hash_entry **) &hi)))
+	      (bfd_vma) 0, name, false, collect, &bh)))
 	return false;
+      hi = (struct elf_link_hash_entry *) bh;
     }
   else
     {
@@ -1098,11 +1100,12 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
     }
   else
     {
+      bh = &hi->root;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, shortname, BSF_INDIRECT,
-	      bfd_ind_section_ptr, (bfd_vma) 0, name, false,
-	      collect, (struct bfd_link_hash_entry **) &hi)))
+	      bfd_ind_section_ptr, (bfd_vma) 0, name, false, collect, &bh)))
 	return false;
+      hi = (struct elf_link_hash_entry *) bh;
 
       /* If there is a duplicate definition somewhere, then HI may not
 	 point to an indirect symbol.  We will have reported an error
@@ -1295,6 +1298,14 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       bfd_size_type oldsize;
       bfd_size_type strindex;
+      struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+
+      /* ld --just-symbols and dynamic objects don't mix very well.
+	 Test for --just-symbols by looking at info set up by
+	 _bfd_elf_link_just_syms.  */
+      if ((s = abfd->sections) != NULL
+	  && elf_section_data (s)->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	goto error_return;
 
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
@@ -1324,8 +1335,6 @@ elf_link_add_object_symbols (abfd, info)
 	  Elf_External_Dyn *extdynend;
 	  int elfsec;
 	  unsigned long shlink;
-	  int rpath;
-	  int runpath;
 
 	  dynbuf = (Elf_External_Dyn *) bfd_malloc (s->_raw_size);
 	  if (dynbuf == NULL)
@@ -1342,8 +1351,6 @@ elf_link_add_object_symbols (abfd, info)
 
 	  extdyn = dynbuf;
 	  extdynend = extdyn + s->_raw_size / sizeof (Elf_External_Dyn);
-	  rpath = 0;
-	  runpath = 0;
 	  for (; extdyn < extdynend; extdyn++)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -1387,13 +1394,6 @@ elf_link_add_object_symbols (abfd, info)
 		  char *fnm, *anm;
 		  unsigned int tagv = dyn.d_un.d_val;
 
-		  /* When we see DT_RPATH before DT_RUNPATH, we have
-		     to clear runpath.  Do _NOT_ bfd_release, as that
-		     frees all more recently bfd_alloc'd blocks as
-		     well.  */
-		  if (rpath && hash_table->runpath)
-		    hash_table->runpath = NULL;
-
 		  amt = sizeof (struct bfd_link_needed_list);
 		  n = (struct bfd_link_needed_list *) bfd_alloc (abfd, amt);
 		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
@@ -1407,13 +1407,11 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->runpath;
+		  for (pn = & runpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
-		  runpath = 1;
-		  rpath = 0;
 		}
 	      /* Ignore DT_RPATH if we have seen DT_RUNPATH.  */
 	      if (!runpath && dyn.d_tag == DT_RPATH)
@@ -1439,16 +1437,30 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->runpath;
+		  for (pn = & rpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
-		  rpath = 1;
 		}
 	    }
 
 	  free (dynbuf);
+	}
+
+      /* DT_RUNPATH overrides DT_RPATH.  Do _NOT_ bfd_release, as that
+	 frees all more recently bfd_alloc'd blocks as well.  */
+      if (runpath)
+	rpath = runpath;
+
+      if (rpath)
+	{
+	  struct bfd_link_needed_list **pn;
+	  for (pn = & hash_table->runpath;
+	       *pn != NULL;
+	       pn = &(*pn)->next)
+	    ;
+	  *pn = rpath;
 	}
 
       /* We do not want to include any of the sections in a dynamic
@@ -2292,6 +2304,7 @@ elf_link_create_dynamic_sections (abfd, info)
   flagword flags;
   register asection *s;
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
   struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (info))
@@ -2384,12 +2397,12 @@ elf_link_create_dynamic_sections (abfd, info)
      creating a .dynamic section.  We don't want to define it if there
      is no .dynamic section, since on some ELF platforms the start up
      code examines it to decide how to initialize the process.  */
-  h = NULL;
+  bh = NULL;
   if (! (_bfd_generic_link_add_one_symbol
 	 (info, abfd, "_DYNAMIC", BSF_GLOBAL, s, (bfd_vma) 0,
-	  (const char *) NULL, false, get_elf_backend_data (abfd)->collect,
-	  (struct bfd_link_hash_entry **) &h)))
+	  (const char *) 0, false, get_elf_backend_data (abfd)->collect, &bh)))
     return false;
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
@@ -3326,19 +3339,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	      unsigned int cdeps;
 	      struct bfd_elf_version_deps *n;
 	      struct elf_link_hash_entry *h;
+	      struct bfd_link_hash_entry *bh;
 
 	      cdeps = 0;
 	      for (n = t->deps; n != NULL; n = n->next)
 		++cdeps;
 
 	      /* Add a symbol representing this version.  */
-	      h = NULL;
+	      bh = NULL;
 	      if (! (_bfd_generic_link_add_one_symbol
 		     (info, dynobj, t->name, BSF_GLOBAL, bfd_abs_section_ptr,
 		      (bfd_vma) 0, (const char *) NULL, false,
-		      get_elf_backend_data (dynobj)->collect,
-		      (struct bfd_link_hash_entry **) &h)))
+		      get_elf_backend_data (dynobj)->collect, &bh)))
 		return false;
+	      h = (struct elf_link_hash_entry *) bh;
 	      h->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
 	      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	      h->type = STT_OBJECT;
@@ -6815,20 +6829,12 @@ elf_link_input_bfd (finfo, input_bfd)
 			   || h->root.type == bfd_link_hash_defweak)
 			  && elf_discarded_section (h->root.u.def.section))
 			{
-#if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0)
 			    {
-#if BFD_VERSION_DATE > 20021005
-			      (*finfo->info->callbacks->warning)
-				(finfo->info,
-				 _("warning: relocation against removed section; zeroing"),
-				 NULL, input_bfd, o, rel->r_offset);
-#endif
 			      BFD_ASSERT (r_symndx != 0);
 			      memset (rel, 0, sizeof (*rel));
 			    }
 			  else
-#endif
 			    {
 			      if (! ((*finfo->info->callbacks->undefined_symbol)
 				     (finfo->info, h->root.root.string,
@@ -6844,23 +6850,15 @@ elf_link_input_bfd (finfo, input_bfd)
 
 		      if (sec != NULL && elf_discarded_section (sec))
 			{
-#if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0
 			      || (sec->flags & SEC_LINK_ONCE) != 0)
 			    {
-#if BFD_VERSION_DATE > 20021005
-			      (*finfo->info->callbacks->warning)
-				(finfo->info,
-				 _("warning: relocation against removed section"),
-				 NULL, input_bfd, o, rel->r_offset);
-#endif
 			      BFD_ASSERT (r_symndx != 0);
 			      rel->r_info
 				= ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
 			      rel->r_addend = 0;
 			    }
 			  else
-#endif
 			    {
 			      boolean ok;
 			      const char *msg

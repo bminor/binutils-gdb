@@ -345,7 +345,7 @@ static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
 	   Elf_Internal_Sym *, asection **, bfd_vma *, const char **,
-	   boolean *));
+	   boolean *, boolean));
 static bfd_vma mips_elf_obtain_contents
   PARAMS ((reloc_howto_type *, const Elf_Internal_Rela *, bfd *, bfd_byte *));
 static boolean mips_elf_perform_relocation
@@ -1901,6 +1901,7 @@ mips_elf_create_got_section (abfd, info)
   flagword flags;
   register asection *s;
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
   struct mips_got_info *g;
   bfd_size_type amt;
 
@@ -1920,13 +1921,14 @@ mips_elf_create_got_section (abfd, info)
   /* Define the symbol _GLOBAL_OFFSET_TABLE_.  We don't do this in the
      linker script because we don't want to define the symbol if we
      are not creating a global offset table.  */
-  h = NULL;
+  bh = NULL;
   if (! (_bfd_generic_link_add_one_symbol
 	 (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
 	  (bfd_vma) 0, (const char *) NULL, false,
-	  get_elf_backend_data (abfd)->collect,
-	  (struct bfd_link_hash_entry **) &h)))
+	  get_elf_backend_data (abfd)->collect, &bh)))
     return false;
+
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
@@ -2004,7 +2006,7 @@ static bfd_reloc_status_type
 mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 			       relocation, addend, howto, local_syms,
 			       local_sections, valuep, namep,
-			       require_jalxp)
+			       require_jalxp, save_addend)
      bfd *abfd;
      bfd *input_bfd;
      asection *input_section;
@@ -2017,6 +2019,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
      bfd_vma *valuep;
      const char **namep;
      boolean *require_jalxp;
+     boolean save_addend;
 {
   /* The eventual value we will return.  */
   bfd_vma value;
@@ -2041,7 +2044,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   struct mips_elf_link_hash_entry *h = NULL;
   /* True if the symbol referred to by this relocation is a local
      symbol.  */
-  boolean local_p;
+  boolean local_p, was_local_p;
   /* True if the symbol referred to by this relocation is "_gp_disp".  */
   boolean gp_disp_p = false;
   Elf_Internal_Shdr *symtab_hdr;
@@ -2069,6 +2072,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   local_p = mips_elf_local_relocation_p (input_bfd, relocation,
 					 local_sections, false);
+  was_local_p = local_p;
   if (! elf_bad_symtab (input_bfd))
     extsymoff = symtab_hdr->sh_info;
   else
@@ -2456,10 +2460,19 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	 order.  We don't need to do anything special here; the
 	 differences are handled in mips_elf_perform_relocation.  */
     case R_MIPS_GPREL16:
-      if (local_p)
-	value = mips_elf_sign_extend (addend, 16) + symbol + gp0 - gp;
-      else
-	value = mips_elf_sign_extend (addend, 16) + symbol - gp;
+      /* Only sign-extend the addend if it was extracted from the
+	 instruction.  If the addend was separate, leave it alone,
+	 otherwise we may lose significant bits.  */
+      if (howto->partial_inplace)
+	addend = mips_elf_sign_extend (addend, 16);
+      value = symbol + addend - gp;
+      /* If the symbol was local, any earlier relocatable links will
+	 have adjusted its addend with the gp offset, so compensate
+	 for that now.  Don't do it for symbols forced local in this
+	 link, though, since they won't have had the gp offset applied
+	 to them before.  */
+      if (was_local_p)
+	value += gp0;
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -2492,7 +2505,9 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_GPREL32:
-      value = (addend + symbol + gp0 - gp) & howto->dst_mask;
+      value = (addend + symbol + gp0 - gp);
+      if (!save_addend)
+	value &= howto->dst_mask;
       break;
 
     case R_MIPS_PC16:
@@ -2938,6 +2953,10 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	 know where the shared library will wind up at load-time.  */
       outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
 				     R_MIPS_REL32);
+      outrel[1].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
+				     R_MIPS_NONE);
+      outrel[2].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
+				     R_MIPS_NONE);
 
       /* Adjust the output offset of the relocation to reference the
 	 correct location in the output file.  */
@@ -3825,15 +3844,17 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       && strcmp (*namep, "__rld_obj_head") == 0)
     {
       struct elf_link_hash_entry *h;
+      struct bfd_link_hash_entry *bh;
 
       /* Mark __rld_obj_head as dynamic.  */
-      h = NULL;
+      bh = NULL;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, *namep, BSF_GLOBAL, *secp,
 	      (bfd_vma) *valp, (const char *) NULL, false,
-	      get_elf_backend_data (abfd)->collect,
-	      (struct bfd_link_hash_entry **) &h)))
+	      get_elf_backend_data (abfd)->collect, &bh)))
 	return false;
+
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
@@ -3889,6 +3910,7 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
      struct bfd_link_info *info;
 {
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
   flagword flags;
   register asection *s;
   const char * const *namep;
@@ -3947,13 +3969,14 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
     {
       for (namep = mips_elf_dynsym_rtproc_names; *namep != NULL; namep++)
 	{
-	  h = NULL;
+	  bh = NULL;
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, *namep, BSF_GLOBAL, bfd_und_section_ptr,
 		  (bfd_vma) 0, (const char *) NULL, false,
-		  get_elf_backend_data (abfd)->collect,
-		  (struct bfd_link_hash_entry **) &h)))
+		  get_elf_backend_data (abfd)->collect, &bh)))
 	    return false;
+
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_SECTION;
@@ -3989,26 +4012,17 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 
   if (!info->shared)
     {
-      h = NULL;
-      if (SGI_COMPAT (abfd))
-	{
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, abfd, "_DYNAMIC_LINK", BSF_GLOBAL, bfd_abs_section_ptr,
-		 (bfd_vma) 0, (const char *) NULL, false,
-		 get_elf_backend_data (abfd)->collect,
-		 (struct bfd_link_hash_entry **) &h)))
-	    return false;
-	}
-      else
-	{
-	  /* For normal mips it is _DYNAMIC_LINKING.  */
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, abfd, "_DYNAMIC_LINKING", BSF_GLOBAL,
-		 bfd_abs_section_ptr, (bfd_vma) 0, (const char *) NULL, false,
-		 get_elf_backend_data (abfd)->collect,
-		 (struct bfd_link_hash_entry **) &h)))
-	    return false;
-	}
+      const char *name;
+
+      name = SGI_COMPAT (abfd) ? "_DYNAMIC_LINK" : "_DYNAMIC_LINKING";
+      bh = NULL;
+      if (!(_bfd_generic_link_add_one_symbol
+	    (info, abfd, name, BSF_GLOBAL, bfd_abs_section_ptr,
+	     (bfd_vma) 0, (const char *) NULL, false,
+	     get_elf_backend_data (abfd)->collect, &bh)))
+	return false;
+
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
@@ -4025,26 +4039,15 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	  s = bfd_get_section_by_name (abfd, ".rld_map");
 	  BFD_ASSERT (s != NULL);
 
-	  h = NULL;
-	  if (SGI_COMPAT (abfd))
-	    {
-	      if (!(_bfd_generic_link_add_one_symbol
-		    (info, abfd, "__rld_map", BSF_GLOBAL, s,
-		     (bfd_vma) 0, (const char *) NULL, false,
-		     get_elf_backend_data (abfd)->collect,
-		     (struct bfd_link_hash_entry **) &h)))
-		return false;
-	    }
-	  else
-	    {
-	      /* For normal mips the symbol is __RLD_MAP.  */
-	      if (!(_bfd_generic_link_add_one_symbol
-		    (info, abfd, "__RLD_MAP", BSF_GLOBAL, s,
-		     (bfd_vma) 0, (const char *) NULL, false,
-		     get_elf_backend_data (abfd)->collect,
-		     (struct bfd_link_hash_entry **) &h)))
-		return false;
-	    }
+	  name = SGI_COMPAT (abfd) ? "__rld_map" : "__RLD_MAP";
+	  bh = NULL;
+	  if (!(_bfd_generic_link_add_one_symbol
+		(info, abfd, name, BSF_GLOBAL, s,
+		 (bfd_vma) 0, (const char *) NULL, false,
+		 get_elf_backend_data (abfd)->collect, &bh)))
+	    return false;
+
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
@@ -5261,7 +5264,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					     input_section, info, rel,
 					     addend, howto, local_syms,
 					     local_sections, &value,
-					     &name, &require_jalx))
+					     &name, &require_jalx,
+					     use_saved_addend_p))
 	{
 	case bfd_reloc_continue:
 	  /* There's nothing to do.  */
