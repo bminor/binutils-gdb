@@ -1,3 +1,8 @@
+Fri Jul  8 13:18:33 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* rttty.c (control_meta_key_on): Remove superfluous testing of
+	__GO32__.
+
 Thu Jun 30 15:21:54 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* rltty.c (control_meta_key_on): Don't compile if __GO32__ is
