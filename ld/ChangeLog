@@ -1,5 +1,8 @@
 Fri Jan  3 14:04:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (clean): Don't remove configdoc.texi.
+ 	(maintainer-clean): Do remove configdoc.texi.
+
 	* ld.texinfo (Operators): Remove '@' from @smallexmple in comment
 	to avoid confusing texi2roff.
 
