@@ -1,3 +1,7 @@
+2002-05-09  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c: Add "tlbiel" for POWER4.
+
 2002-05-07  Graydon Hoare  <graydon@redhat.com>
 
 	* cgen-dis.in: (print_insn_@arch@): Cache list of opened CPUs rather 
