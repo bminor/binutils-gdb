@@ -1,3 +1,10 @@
+start-sanitize-vr5400
+Fri Dec 12 12:26:07 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in (sim_igen_filter): Multi-sim vr5000 - vr5000 or
+	vr5400 with the vr5000 as the default.
+
+end-sanitize-vr5400
 Wed Dec 10 17:10:45 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mips.igen (MSUB): Fix to work like MADD.
@@ -257,7 +264,7 @@ Mon Oct 27 17:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 	end-sanitize-r5900
 	start-sanitize-vr5400
 	* vr5400.igen: New file. 
-	end-sanitize-v5400
+	end-sanitize-vr5400
 	* m16.igen: New file.  Copy mips16 insns here.
 	* mips.igen: From here.
 
