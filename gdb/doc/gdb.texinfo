@@ -775,13 +775,13 @@ you won't think it has crashed.
 
 Currently, the messages controlled by @samp{set verbose} are those which
 announce that the symbol table for a source file is being read
-(@pxref{File Commands}, in the description of the command
+(@pxref{Files}, in the description of the command
 @samp{symbol-file}).
 @c The following is the right way to do it, but emacs 18.55 doesn't support
 @c @ref, and neither the emacs lisp manual version of texinfmt or makeinfo
 @c is released.  
 @ignore
-see @samp{symbol-file} in @ref{File Commands}).
+see @samp{symbol-file} in @ref{Files}).
 @end ignore
 
 @table @code
@@ -801,7 +801,7 @@ By default, if GDB encounters bugs in the symbol table of an object file,
 it prints a single message about each type of problem it finds, then 
 shuts up.  You can suppress these messages, or allow more than one such
 message to be printed if you want to see how frequent the problems are.
-@xref{File Commands}.
+@xref{Files}.
 
 @table @code
 @kindex set complaints
@@ -1200,7 +1200,7 @@ parameters are required for that target type.
 Displays the names of all targets available.  Beware: the similar
 command @samp{info target} displays targets currently in use rather than
 all available ones.  @samp{info files} gives the same information as
-@samp{info target} (@pxref{File Commands}).
+@samp{info target} (@pxref{Files}).
 @end table
 
 @node Running, Stopping, Targets, Top
