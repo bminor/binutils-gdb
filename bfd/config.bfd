@@ -68,8 +68,21 @@ esac
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
 #  convention, else the table becomes a real mess to understand and maintain.
+#
+#  Keep obsolete entries above the START comment, to keep them out of
+#  targmatch.h.
 
 case "${targ}" in
+  mips*-dec-bsd*)
+    echo "This target is obsolete and has been removed." 
+    exit 1
+    ;;
+
+  mips*-*-pe*)
+    echo "This target is obsolete and has been removed." 
+    exit 1
+    ;;
+
 # START OF targmatch.h
 #ifdef BFD64
   alpha*-*-freebsd*)
@@ -718,10 +731,6 @@ case "${targ}" in
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
-  mips*-dec-bsd*)
-    echo "This target is obsolete and has been removed." 
-    exit 1
-    ;;
   mips*-dec-mach3*)
     targ_defvec=aout_mips_little_vec
     targ_cflags=-DSTAT_FOR_EXEC
@@ -755,10 +764,6 @@ case "${targ}" in
   mips*-*-mach3*)
     targ_defvec=aout_mips_little_vec
     targ_cflags=-DSTAT_FOR_EXEC
-    ;;
-  mips*-*-pe*)
-    echo "This target is obsolete and has been removed." 
-    exit 1
     ;;
   mips*-*-sysv4*)
     targ_defvec=bfd_elf32_tradbigmips_vec
