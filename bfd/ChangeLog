@@ -1,5 +1,9 @@
 Wed Sep 15 11:48:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libbfd.h (COERCExx): Cast x to bfd_signed_vma before doing the
+	xor and subtract.  Otherwise it will not sign extend if the type
+	of bfd_vma is larger than int.
+
 	* ecoffswap.h (ecoff_swap_pdr_in): Get regoffset, iopt, fregoffset
 	and frameoffset as signed numbers.  From Peter Schauer.
 
