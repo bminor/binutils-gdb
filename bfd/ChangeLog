@@ -1,3 +1,8 @@
+2002-01-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf.c (elf_fake_sections): Propagate errors from
+	elf_backend_fake_section.
+
 2002-01-07  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add elf32-sh-nbsd.lo.

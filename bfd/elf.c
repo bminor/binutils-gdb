@@ -1,5 +1,5 @@
 /* ELF executable support for BFD.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -2213,8 +2213,9 @@ elf_fake_sections (abfd, asect, failedptrarg)
     this_hdr->sh_flags |= SHF_GROUP;
 
   /* Check for processor-specific section types.  */
-  if (bed->elf_backend_fake_sections)
-    (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
+  if (bed->elf_backend_fake_sections
+      && !(*bed->elf_backend_fake_sections) (abfd, this_hdr, asect))
+    *failedptr = true;
 
   /* If the section has relocs, set up a section header for the
      SHT_REL[A] section.  If two relocation sections are required for
