@@ -1,3 +1,8 @@
+Mon Dec 29 11:41:16 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (coff_arm_relocate_section): Fix typo from previous
+	delta.
+
 Tue Dec 23 17:01:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libbfd-in.h (_bfd_dwarf2_find_nearest_line): Declare.

@@ -1165,7 +1165,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      
 		      if ((my_offset & 0x01) == 0x01)
 			{
-			  if (h->sec_owner != NULL
+			  if (h_sec->owner != NULL
 			      && INTERWORK_SET (h_sec->owner)
 			      && ! INTERWORK_FLAG (h_sec->owner))
 			    _bfd_error_handler ("%s: warning: interworking not enabled.",
