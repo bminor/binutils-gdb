@@ -1,3 +1,12 @@
+Wed Nov  3 09:20:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c: Add variables source_line_number, source_file_name,
+	source_error, source_error_allocated, and source_pre_error.
+	(command_line_input): If source_file_name set, increment
+	source_line_number and set error_pre_print with them.
+	(source_command): Set source_* and make a cleanup so they get
+	set back.
+
 Tue Nov  2 16:28:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stack.c (down_silently_command): Add comment about PR 1913.
