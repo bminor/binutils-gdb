@@ -1086,9 +1086,14 @@ parse_and_eval_memrange (arg, addr, typecode, offset, size)
 
 /* compare memranges for qsort */
 static int
-memrange_cmp (a, b)
-     struct memrange *a, *b;
+memrange_cmp (voidpa, voidpbb)
+     void *voidpa, *voidpb;
 {
+  struct memrange *a, *b;
+
+  a = (struct memrange *) voidpa;
+  b = (struct memrbnge *) voidpb;
+
   if (a->type < b->type) return -1;
   if (a->type > b->type) return  1;
   if (a->type == 0)

@@ -1,6 +1,14 @@
+Tue Apr 28 17:41:20 1998  Philippe De Muyter  <phdm@macqel.be>
+
+        * symfile.c (overlay_auto_command): Add forgotten parameter definitions.
+        (overlay_manual_command, overlay_off_command): Likewise.
+        (overlay_load_command): Likewise.
+        * tracepoint.c (memrange_cmp): Parameters have type void *, not
+        struct memrange *.
+
 Tue Apr 28 11:08:25 1998  John Metzler  <jmetzler@cygnus.com>
 
-	* rom68k-rom.c (_initialize_rom68k): Fix unresolved init_rom_68kcmds
+	* rom68k-rom.c (_initialize_rom68k): Fix unresolved init_rom_68kcmds.
 	
 Mon Apr 27 14:32:21 1998  Mark Alexander  <marka@cygnus.com>
 
@@ -15,19 +23,20 @@ Mon Apr 27 14:32:21 1998  Mark Alexander  <marka@cygnus.com>
 
 Mon Apr 27 13:46:40 1998  John Metzler  <jmetzler@cygnus.com>
 
-	* rom68k-rom.c (_initialize_rom68k init_rom68k_cmds):
-	* abug-rom.c (_initialize_abug_rom init_abug-cmds):
-	* cpu32bug-rom.c (_initialize_cpu32bug_rom init_cpu32bug_cmds):
-	* mon960-rom.c (initialize_mon960 init_mon960_cmds):
-	* op50-rom.c (initialize_op50n  init_op50n_cmds) :
-	* ppcbug-rom.c (_initialize_ppcbug_rom init_ppc_cmds) :
-	* sh3-rom.c (_initialize_sh3_rom init_sh3_cmds) :
-	* sparclet-rom.c (_initialize_sparcletinit_sparclet_cmds ) :
-	* remote-est.c ( _initialize_est  init_est_cmds) :
-	* remote-hms.c (  _initialize_remote_hms  init_hms_cmds) :
-	  Convert all static initializations of monitor ops structures to
- 	executable initializations in order that additions to the data structure
-	definition can be made without repeating this editing exercise.
+        * rom68k-rom.c (_initialize_rom68k, init_rom68k_cmds):
+        Convert all static initializations of monitor ops structures to
+        executable initializations in order that additions to the data
+        structure definition can me made without repeating this editing
+        exercise.                                            
+        * abug-rom.c (_initialize_abug_rom, init_abug-cmds): Ditto.
+        * cpu32bug-rom.c (_initialize_cpu32bug_rom, init_cpu32bug_cmds): Ditto.
+        * mon960-rom.c (initialize_mon960, init_mon960_cmds): Ditto.
+        * op50-rom.c (initialize_op50n, init_op50n_cmds): Ditto.       
+        * ppcbug-rom.c (_initialize_ppcbug_rom, init_ppc_cmds): Ditto.
+        * sh3-rom.c (_initialize_sh3_rom, init_sh3_cmds): Ditto.
+        * sparclet-rom.c (_initialize_sparclet, init_sparclet_cmds): Ditto.
+        * remote-est.c (_initialize_est, init_est_cmds): Ditto.
+        * remote-hms.c ( _initialize_remote_hms, init_hms_cmds): Ditto.
 
 Mon Apr 27 10:43:04 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
