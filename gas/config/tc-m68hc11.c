@@ -152,6 +152,10 @@ static alias alias_opcodes[] = {
 /* Local functions.  */
 static register_id reg_name_search PARAMS ((char *));
 static register_id register_name PARAMS ((void));
+static int cmp_opcode PARAMS ((struct m68hc11_opcode *,
+                               struct m68hc11_opcode *));
+static char *print_opcode_format PARAMS ((struct m68hc11_opcode *, int));
+static char *skip_whites PARAMS ((char *));
 static int check_range PARAMS ((long, int));
 static void print_opcode_list PARAMS ((void));
 static void get_default_target PARAMS ((void));
@@ -159,12 +163,22 @@ static void print_insn_format PARAMS ((char *));
 static int get_operand PARAMS ((operand *, int, long));
 static void fixup8 PARAMS ((expressionS *, int, int));
 static void fixup16 PARAMS ((expressionS *, int, int));
+static unsigned char convert_branch PARAMS ((unsigned char));
+static char *m68hc11_new_insn PARAMS ((int));
+static void build_dbranch_insn PARAMS ((struct m68hc11_opcode *,
+                                        operand *, int, int));
+static int build_indexed_byte PARAMS ((operand *, int, int));
+static int build_reg_mode PARAMS ((operand *, int));
+
+static struct m68hc11_opcode *find
+  PARAMS ((struct m68hc11_opcode_def *, operand *, int));
 static struct m68hc11_opcode *find_opcode
   PARAMS ((struct m68hc11_opcode_def *, operand *, int *));
 static void build_jump_insn
   PARAMS ((struct m68hc11_opcode *, operand *, int, int));
 static void build_insn
   PARAMS ((struct m68hc11_opcode *, operand *, int));
+static int relaxable_symbol PARAMS ((symbolS *));
 
 /* Controls whether relative branches can be turned into long branches.
    When the relative offset is too large, the insn are changed:
@@ -803,7 +817,7 @@ print_insn_format (name)
     {
       char *fmt;
 
-      fmt = print_opcode_format (opcode, 0, 0);
+      fmt = print_opcode_format (opcode, 0);
       sprintf (buf, "\t%-5.5s %s", opcode->name, fmt);
 
       as_bad ("%s", buf);
@@ -2359,7 +2373,7 @@ md_assemble (str)
      relative and must be in the range -256..255 (9-bits).  */
   if ((opcode->format & M6812_XBCC_MARKER)
       && (opcode->format & M6811_OP_JUMP_REL))
-    build_dbranch_insn (opcode, operands, nb_operands);
+    build_dbranch_insn (opcode, operands, nb_operands, branch_optimize);
 
   /* Relative jumps instructions are taken care of separately.  We have to make
      sure that the relative branch is within the range -128..127.  If it's out

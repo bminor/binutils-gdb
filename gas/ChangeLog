@@ -1,3 +1,13 @@
+2001-09-30  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.c (cmp_opcode): Define prototype.
+	(print_opcode_format, skip_whites): Likewise.
+	(convert_branch, m68hc11_new_insn): Likewise.
+	(build_dbranch_insn, build_indexed_byte): Likewise.
+	(build_reg_mode, find, find_opcode): Likewise.
+	(print_insn_format): Fix call to print_opcode_format.
+	(md_assemble): Fix call to build_dbranch_insn.
+
 2001-09-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c: Add missing prototypes.
