@@ -1,5 +1,19 @@
 2002-10-31  Andrew Cagney  <cagney@redhat.com>
 
+	* h8500-tdep.c (h8500_print_registers_info): New static function,
+	clone of infcmd.c's default_print_registers_info.
+	(h8500_do_registers_info): New funtion.
+	(h8500_print_register_hook): Rename print_register_hook, make
+	static.
+
+	* config/h8500/tm-h8500.h: Update copyright.
+	(DEPRECATED_DO_REGISTERS_INFO): Define.
+	(h8500_do_registers_info: Declare.
+	(PRINT_REGISTER_HOOK): Delete macro.
+	(print_register_hook): Delete function.
+
+2002-10-31  Andrew Cagney  <cagney@redhat.com>
+
 	* z8k-tdep.c (z8k_print_register_hook): Make static.
 	(z8k_print_registers_info): New static function, clone of
 	infcmd.c's default_print_registers_info.
