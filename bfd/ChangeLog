@@ -1,3 +1,8 @@
+2000-12-15  Miloslav Trmac <mitr@volny.cz>
+
+	* elfcore.h (elf_core_file_p): Move to the start of the program
+	headers before attempting to read them.
+
 2000-12-14  Kazu Hirata  <kazu@hxi.com>
 
 	* peigen.c: Fix formatting.

@@ -182,6 +182,10 @@ elf_core_file_p (abfd)
   if (i_ehdrp->e_phentsize != sizeof (Elf_External_Phdr))
     goto wrong;
 
+  /* Move to the start of the program headers.  */
+  if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0)
+    goto wrong;
+  
   /* Allocate space for the program headers. */
   i_phdrp = (Elf_Internal_Phdr *)
     bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
