@@ -1,3 +1,9 @@
+2004-06-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Don't set COREFILE to trad-core.lo for FreeBSD
+	4.10 and beyond.
+	* configure: Regenerate.
+
 2004-06-16  Daniel Jacobowitz  <dan@debian.org>
 
 	* elf32-ppc.c (ppc_elf_create_linker_section): Create symbols in
