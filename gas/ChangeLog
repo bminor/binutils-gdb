@@ -1,3 +1,73 @@
+Tue Nov 28 10:42:36 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* stabs.c (s_stab_generic): In 's' case, free string from
+	obstack.
+
+	* config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS): Remove unused field
+	sy_name_offset.
+	* config/obj-multi.h (ELF_TARGET_SYMBOL_FIELDS) [OBJ_MAYBE_ELF]:
+	Ditto.
+
+	* subsegs.h (segment_info_type): Make bitfields unsigned.
+
+	* expr.h (struct expressionS): Make X_op and X_unsigned bitfields,
+	and move them together.  On most systems this will reduce the
+	structure size by one word.
+	(operatorT): Define O_max.
+	* expr.c (expr_begin): Verify that X_op is wide enough to hold
+	O_max.
+
+	* read.c (pop_insert): Print error returned by hash table
+	insertion code.
+
+	* as.c (dump_statistics): Split out from main; dump some hash
+	table stats and target-specific stats.
+	(start_time): No longer automatic to main.
+	(main): Set file-level start_time and call dump_statistics at
+	exit.  Exit by calling xexit.
+	(show_usage): Make --statistics description less specific.
+	* subsegs.c (subsegs_print_statistics): New function.
+	* write.c (write_print_statistics): New function.
+	(n_fixups): New static variable.
+	(fix_new_internal): Increment it.
+	* read.c (read_print_statistics): New function.
+	* read.h (read_print_statistics): Declare.
+	* symbol.c (symbol_print_statistics): New function.
+	* symbol.h (symbol_print_statistics): Declare.
+	* hash.c (hash_print_statistics): New function.
+	* hash.h (hash_print_statistics): Declare.
+	* config/tc-i386.c (i386_print_statistics): New function.
+	* config/tc-i386.h (i386_print_statistics): Declare.
+	(tc_print_statistics): New macro.
+	* messages.c (as_fatal, as_assert, as_abort): Use xexit, not
+	exit.
+
+	* hash.c (DELETED): Rewrite to use a valid but unique address.
+	(START_POWER): Reduce to 10.
+	(enum stat_enum): New enumerator, replacing STAT_* index macros.
+	Add new values for counting strcmp calls.
+	(GROW_FACTOR): New macro.
+	(hash_grow): Use GROW_FACTOR.  Rewrite for quick returns instead
+	of nesting blocks.
+	(FULL_VALUE): New macro.  Use 1/4 of table size instead of 1/2.
+	(hash_new): Use FULL_VALUE.
+	(struct hash_control): Definition moved here.
+	(hash_code): Don't mask to low bits.
+	(hash_ask): Mask returned hash code here.  Check hash value before
+	calling strcmp; count strcmp calls.
+	* hash.h (struct hash_control): Declare, don't define, here.
+	(HASH_STATLENGTH): Deleted.
+	(struct hash_entry): Add field for hash code.
+	(hash_say, hash_apply): Don't declare.
+
+	* hash.c (destroy): Return void.
+	(applicatee): Ditto.
+	(main): Fix declarations.
+	(hash_apply): Return void.  Argument `function' returns void.  Put
+	inside "#ifdef TEST".
+	(hash_say): Define only if TEST is defined.
+	* hash.h (hash_apply, hash_say): Declarations deleted.
+
 Mon Nov 27 13:18:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.7.
