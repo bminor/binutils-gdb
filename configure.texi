@@ -168,10 +168,6 @@ the build directory.  This shell script, when run from the build
 directory, will reconfigure the build directory (but not its
 subdirectories).  This is most often used to have a @code{Makefile} update
 itself automatically if a new source directory is available.
-@c (see @ref{Top, ,Introduction , bash}.)
-@c That's a rather extraordinary xref.  What's it meant to clarify
-@c ---shell scripts in general??  Disabled, since we don't seem to have
-@c the doc anyhow. 
 
 @item Recursion
 If the source directory has subdirectories that should also be
@@ -231,17 +227,13 @@ subdirectories, when you configure for multiple hosts in a single
 invocation of @code{configure}.
 
 @item -nfp
-@c singular "target" due to apparent direction of configure.
 @emph{No floating point} unit available on the target; configure to
 avoid dependencies on hardware floating point.
-@c Can we even say "configure to use software floating point support"?
 
 @item -norecursion
 Configure only this directory; ignore any subdirectories.  This is used
 by the executable shell script @file{config.status} to reconfigure the
 current directory.  (see @ref{config.status}).
-@c Why *does* that use no recursion?  Speed? geometric combinations
-@c under some other script?
 
 @ignore
 @c This is complicated enough without "no longer supported" entries.
@@ -259,7 +251,7 @@ This option sets the @code{configure} variable @code{prefix}.  If
 @code{prefix} variables set to this value. (See @ref{Install Details}.)
 
 @item -recurring
-@c Wouldn't it make more sense to call this "-quiet"?
+@c Wouldn't it make more sense to call this "-quiet"? (FIXME).
 This option is used internally by @code{configure} when recurring on
 subdirectories.  Its sole purpose is to suppress status output.  You can
 override this effect with the @code{-verbose} option.
@@ -301,7 +293,8 @@ are created and @code{-subdirs} is assumed.
 
 @item -tmpdir=@var{tmpdir}
 Use the directory @var{tmpdir} for @code{configure}'s temporary files.
-@c default?
+The default is the value of the environment variable TMPDIR, or
+@file{/tmp} if the environment variable is not set.
 
 @item -verbose
 @itemx -v
@@ -369,7 +362,6 @@ or you will end up with a broken installation.
 To make this easier, the value of the @code{configure} variable
 @code{prefix} can be set on the command line to @code{configure}
 using the option @code{-prefix=}.  
-@c This is self-referential.  What was intended?: (See @ref{prefix}).
 
 
 @node datadir, Install Details, prefix, Install Locations
@@ -401,7 +393,6 @@ make all info install install-info
 The first line configures the source for @var{host1} to place host
 specific programs in subdirectories of @file{/usr/gnu/H-@var{host1}},
 and host independent files in @file{/usr/gnu/H-independent}.  
-@c Self-ref? (See @ref{datadir}.)
 
 The second line builds and installs all programs for @var{host1},
 including both host independent and host specific files.
@@ -416,8 +407,6 @@ specific files are installed in new directories, but the host
 independent files are installed @emph{on top of} the host
 independent files installed for @var{host1}.  This results in a single
 copy of the host independent files, suitable for use by both hosts.
-@c Won't make notice the installed copies aren't out of date and leave
-@c 'em alone?
 
 NOTE: support for @code{-subdirs} and multiple hosts is at least
 temporarily suspended. FIXME-soon
@@ -426,7 +415,7 @@ Previously this was:
 
 @example
 configure @var{host1} @var{host2} -prefix=/usr/gnu
-@c and make something-or-other, surely?
+make all install
 @end example
 
 @node Install Details,  , datadir, Install Locations
@@ -559,11 +548,6 @@ in the same directory as the source files.  This is the typical
 @sc{un*x} way to build programs, but it has limitations.  For instance,
 using this approach, you can only build for one host at a time.
 
-@c "Makefile" treated as ordinary word through most of this; I've left it
-@c that way since that seems to agree w ordinary usage.  This one was
-@c @code'd; if the intent is to emphasize that we're now talking of it
-@c as a file, I suggest
-@c "...builds @file{Makefile} files"
 We refer to the directories where @code{configure} builds a
 Makefile as the @emph{build directories} or sometimes as
 @emph{objdir} because these are the directories in which @code{make}
@@ -1019,8 +1003,6 @@ fragment.
 @section The format of the @file{configure.in} file
 @kindex configure.in
 
-@c "per-invocation" replaced "declaration" below as name of 1st section
-@c to conform to usage later in doc.
 A @file{configure.in} file for Cygnus configure consists of a
 @dfn{per-invocation} section, followed by a @dfn{per-host} section,
 followed by a @dfn{per-target} section, optionally followed by a
@@ -1109,7 +1091,8 @@ with @code{SUBDIRS =}, then it will be replaced with an assignment to
 @code{SUBDIRS} using the value of @code{configdirs}.  This can be used
 to determine which directories to configure and build depending on the
 host and target configurations.
-@c Most other matching makefile/config vars use the same name.  Why not this?
+@c Most other matching makefile/config vars use the same name.  Why not
+@c this? (FIXME).
 @end defvar
 
 @defvar{target_dependent}
@@ -1125,13 +1108,12 @@ how many targets are being built.
 @end defvar
 
 @defvar{host}
-@c 1st ref to "canonical triple".  Need explanation, or assume readers know?
-Contains the  name that the user entered for the host.  Since many
-things that the user could enter would map to the same canonical triple,
-this variable is innappropriate to use for picking available
-configurations.  For that, use @code{host_cpu}, @code{host_vendor},
-and/or @code{host_os}.  This variable is useful, however, for error
-messages.
+Contains the name that the user entered for the host.  Since many things
+that the user could enter would map to the same output from
+@code{config.sub}, this variable is innappropriate to use for picking
+available configurations.  For that, use @code{host_cpu},
+@code{host_vendor}, and/or @code{host_os}.  This variable is useful,
+however, for error messages.
 @end defvar
 
 @defvar{host_cpu}
@@ -1346,9 +1328,7 @@ Here is a small example of a @file{configure.in} file.
 @example
 # This file is a collection of shell script fragments used to tailor
 # a template configure script as appropriate for this directory.  
-# For more information, check any existing configure script.
-@c What does "any existing configure script" mean?  That if one's been
-@c generated here it'll show how the frags are used?
+# For more information, see configure.texi.
 
 configdirs=
 srctrigger=warshall.c
