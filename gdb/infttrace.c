@@ -4925,7 +4925,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 {
   register int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -sizeof (TTRACE_XFER_TYPE);
+  register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (TTRACE_XFER_TYPE);
   /* Round ending address up; get number of longwords that makes.  */
   register int count
   = (((memaddr + len) - addr) + sizeof (TTRACE_XFER_TYPE) - 1)

@@ -1,3 +1,21 @@
+2001-07-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	* infptrace.c (child_xfer_memory): Add cast to CORE_ADDR.
+	* infttrace.c (child_xfer_memory): Likewise.
+	* symm-nat.c (child_xfer_memory): Likewise.
+	* gdbserver/low-hppabsd.c (read_inferior_memory): Likewise.
+	(write_inferior_memory): Likewise.
+	* gdbserver/low-linux.c (read_inferior_memory): Likewise.
+	(write_inferior_memory): Likewise.
+	* gdbserver/low-lynx.c (read_inferior_memory): Likewise.
+	(write_inferior_memory): Likewise.
+	* gdbserver/low-nbsd.c (read_inferior_memory): Likewise.
+	(write_inferior_memory): Likewise.
+	* gdbserver/low-sparc.c (read_inferior_memory): Likewise.
+	(write_inferior_memory): Likewise.
+	* gdbserver/low-sun3.c (read_inferior_memory): Likewise.
+	(write_inferior_memory): Likewise.
+
 2001-07-25  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* README: Mention how to make gdb.pdf.
