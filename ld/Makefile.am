@@ -1011,7 +1011,7 @@ lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
   ldmain.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h \
-  ldfile.h ldver.h ldemul.h
+  ldfile.h ldver.h ldemul.h $(INCDIR)/demangle.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
   ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h

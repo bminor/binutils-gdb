@@ -1,3 +1,8 @@
+2000-09-07  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (lexsup.o): Also depend on $(INCDIR)/demangle.h.
+	* Makefile.in: Rebuild.
+
 2000-09-07  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Fix
