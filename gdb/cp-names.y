@@ -434,11 +434,12 @@ function_args	:	type
 			}
 		;
 
-/*FIXME d_qualify */
 function_arglist:	'(' function_args ')' qualifiers_opt
-			{ $$ = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $2.comp); }
+			{ $$ = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, $2.comp);
+			  $$ = d_qualify ($$, $4, 1); }
 		|	'(' ')' qualifiers_opt
-			{ $$ = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL); }
+			{ $$ = d_make_comp (di, D_COMP_FUNCTION_TYPE, NULL, NULL);
+			  $$ = d_qualify ($$, $3, 1); }
 		;
 
 /*
@@ -457,6 +458,7 @@ typed_function	:	type base_function
 		;
 */
 
+/* FIXME actions all wrong */
 qualified	:	ext_name function_arglist
 		{}
 		|	type1a ext_name function_arglist
@@ -601,10 +603,10 @@ ptr_operator	:	ptr_operator_1
 		;
 
 ptr_operator_seq:	ptr_operator
-		|	ptr_operator ptr_operator_seq
-			{ $$.comp = $2.comp;
-			  $$.last = $1.last;
-			  *$2.last = $1.comp; }
+		|	ptr_operator_seq ptr_operator
+			{ $$.comp = $1.comp;
+			  $$.last = $2.last;
+			  *$1.last = $2.comp; }
 		;
 
 /* "type1" are the type productions which can legally be followed by a ::
@@ -657,13 +659,12 @@ type1b		:	ext_name '(' ptr_operator_seq ')' '(' function_args ')'
 			  *$3.last = funtype; }
 		;
 
-/* FIXME ACTION */
-/* FIXME when I add the name here I get a conflict on ptr-to-members that I don't see a soln for */
-decl1b		:	ext_name '(' ptr_operator_seq ')' '(' function_args ')'
+/* FIXME ACTION is quite wrong; need a new type for identifiers? */
+decl1b		:	ext_name '(' ptr_operator_seq ext_name '(' function_args ')' ')'
 			{ struct d_comp *funtype;
 			  funtype = d_make_comp (di, D_COMP_FUNCTION_TYPE, $1, $6.comp);
-			  $$ = $3.comp;
-			  *$3.last = funtype; }
+			  *$3.last = funtype;
+			  $$ = d_make_comp (di, D_COMP_TYPED_NAME, $4, $3.comp); }
 
 /*
 		|	COLONCOLON ext_name '(' ptr_operator_seq ')' '(' function_args ')'

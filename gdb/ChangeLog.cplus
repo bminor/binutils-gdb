@@ -1,3 +1,9 @@
+2003-12-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y (function_arglist): Call d_qualify.
+	(ptr_operator_seq): Reverse the list.
+	(decl1b): Add the declarator-id.
+
 2003-12-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in: Add cp-names.y.
