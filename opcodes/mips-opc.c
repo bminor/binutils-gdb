@@ -548,7 +548,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mtlo",    "s",	0x00000013, 0xfc1fffff,	RD_s|WR_LO,	I1	},
   /* start-sanitize-r5900 */
 {"mtlo1",   "s",	0x70000013, 0xfc1fffff,	RD_s|WR_LO,	T5	},
-{"mtsa",    "s",        0x00000019, 0xfc1fffff, RD_s,	T5	},
+{"mtsa",    "s",        0x00000029, 0xfc1fffff, RD_s,	T5	},
 {"mtsab",   "s,j",	0x04180000, 0xfc1f0000, RD_s,	T5	},
 {"mtsah",   "s,j",	0x04190000, 0xfc1f0000, RD_s,	T5	},
   /* end-sanitize-r5900 */
