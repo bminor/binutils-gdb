@@ -1,3 +1,9 @@
+2003-12-06  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/ctrl-names.d: New file.
+	* gas/z8k/ctrl-names.s: New file.
+	* gas/z8k/z8k.exp: Run new tests.
+
 2003-12-02  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* gas/m32r/m32r2.exp: New file for m32r2.

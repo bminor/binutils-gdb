@@ -41,4 +41,8 @@ if [istarget z8k-*-*] then {
 
      run_dump_test "jmp-cc"
      run_dump_test "ret-cc"
+
+# ctrl names test
+
+     run_dump_test "ctrl-names"
 }
