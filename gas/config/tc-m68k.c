@@ -90,12 +90,27 @@ static struct obstack robyn;
 #define LONG		2
 #define SZ_UNDEF	3
 #undef BRANCH
+/* Case `g' except when BCC68000 is applicable.  */
 #define ABRANCH		1
+/* Coprocessor branches.  */
 #define FBRANCH		2
+/* Mode 7.2 -- program counter indirect with (16-bit) displacement,
+   supported on all cpus.  Widens to 32-bit absolute.  */
 #define PCREL		3
+/* For inserting an extra jmp instruction with long offset on 68000,
+   for expanding conditional branches.  (Not bsr or bra.)  Since the
+   68000 doesn't support 32-bit displacements for conditional
+   branches, we fake it by reversing the condition and branching
+   around a jmp with an absolute long operand.  */
 #define BCC68000        4
+/* For the DBcc "instructions".  If the displacement requires 32 bits,
+   the branch-around-a-jump game is played here too.  */
 #define DBCC            5
+/* Not currently used?  */
 #define PCLEA		6
+/* Mode AINDX (apc-relative) using PC, with variable target, might fit
+   in 16 or 8 bits.  */
+#define PCINDEX		7
 
 struct m68k_incant
   {
@@ -522,7 +537,7 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    How many bytes this mode will add to the size of the frag
    Which mode to go to if the offset won't fit in this one
    */
-CONST relax_typeS md_relax_table[] =
+relax_typeS md_relax_table[] =
 {
   {1, 1, 0, 0},			/* First entries aren't used */
   {1, 1, 0, 0},			/* For no good reason except */
@@ -559,6 +574,11 @@ CONST relax_typeS md_relax_table[] =
   {0, 0, 6, 0},
   {1, 1, 0, 0},
 
+  /* For, e.g., jmp pcrel indexed.  */
+  {125, -130, 0, TAB (PCINDEX, SHORT)},
+  {32765, -32770, 2, TAB (PCINDEX, LONG)},
+  {0, 0, 4, 0},
+  {1, 1, 0, 0},
 };
 
 /* These are the machine dependent pseudo-ops.  These are included so
@@ -2309,10 +2329,16 @@ m68k_ip (instring)
 		    {
 		      if (opP->reg == PC)
 			{
+#if 0
 			  addword (0x0170);
 			  opP->con1->e_exp.X_add_number += 6;
 			  add_fix ('l', opP->con1, 1);
 			  addword (0), addword (0);
+#else
+			  add_frag (adds (opP->con1),
+				    offs (opP->con1),
+				    TAB (PCLEA, SZ_UNDEF));
+#endif
 			  break;
 			}
 		      else
@@ -2400,29 +2426,58 @@ m68k_ip (instring)
 		  /* IF its simple,
 		     GET US OUT OF HERE! */
 
-		  /* Must be INDEX, with an index
-		     register.  Address register
-		     cannot be ZERO-PC, and either
-		     :b was forced, or we know
-		     it will fit */
+		  /* Must be INDEX, with an index register.  Address
+		     register cannot be ZERO-PC, and either :b was
+		     forced, or we know it will fit.  For a 68000 or
+		     68010, force this mode anyways, because the
+		     larger modes aren't supported.  */
 		  if (opP->mode == AINDX
 		      && opP->reg != FAIL
 		      && opP->reg != ZPC
-		      && (siz1 == 1
+		      && (/* :b specified */
+			  siz1 == 1
+			  /* known to fit in 8 bits */
+			  || (issbyte (baseo) && !isvar (opP->con1))
+			  /* doesn't support wider modes */
 			  || cpu_of_arch (current_architecture) < m68020
-			  || (issbyte (baseo)
-			      && !isvar (opP->con1))))
+			  /* simple enough to do relaxation */
+			  || op (opP->con1) == O_symbol
+			  ))
 		    {
-		      nextword += baseo & 0xff;
-		      addword (nextword);
 		      if (isvar (opP->con1))
-			add_fix ('B', opP->con1, 0);
+			{
+			  if (op (opP->con1) != O_symbol)
+			    {
+			      /* Can't handle more complex expressions
+				 here yet.  Should only wind up here
+				 if the CPU doesn't support wider
+				 modes or byte mode was explcitly
+				 specified, so do a byte relocation
+				 and let the fixup processing later
+				 complain if it won't reach.  */
+			      nextword += baseo & 0xff;
+			      addword (nextword);
+			      add_fix ('B', opP->con1, 0);
+			    }
+			  else if (opP->reg != PC)
+			    {
+			      goto no_pc_relax;
+			    }
+			  else
+			    {
+			      nextword += baseo & 0xff;
+			      addword (nextword);
+			      add_frag (adds (opP->con1), offs (opP->con1),
+					TAB (PCINDEX, SZ_UNDEF));
+			    }
+			}
 		      break;
 		    }
 		}
 	      else
 		nextword |= 0x40;	/* No index reg */
 
+	    no_pc_relax:
 	      /* It isn't simple.  */
 	      nextword |= 0x100;
 	      /* If the guy specified a width, we assume that it is
@@ -2549,7 +2604,8 @@ m68k_ip (instring)
 				TAB (PCREL, SZ_UNDEF));
 		      break;
 		    }
-		case 3:	/* Fall through into long */
+		  /* Fall through into long */
+		case 3:
 		  if (isvar (opP->con1))
 		    add_fix ('l', opP->con1, 0);
 
@@ -3228,6 +3284,16 @@ reverse_8_bits (in)
   return out;
 }				/* reverse_8_bits() */
 
+/* Cause an extra frag to be generated here, inserting up to 10 bytes
+   (that value is chosen in the frag_var call in md_assemble).  TYPE
+   is the subtype of the frag to be generated; its primary type is
+   rs_machine_dependent.
+
+   The TYPE parameter is also used by md_convert_frag_1 and
+   md_estimate_size_before_relax.  The appropriate type of fixup will
+   be emitted by md_convert_frag_1.
+
+   ADD becomes the FR_SYMBOL field of the frag, and OFF the FR_OFFSET.  */
 static void
 install_operand (mode, val)
      int mode;
@@ -3929,6 +3995,9 @@ m68k_init_after_args ()
     default:
       abort ();
     }
+
+  if (cpu_of_arch (current_architecture) < m68020)
+    md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
 }
 
 /* Equal to MAX_PRECISION in atof-ieee.c */
@@ -4137,6 +4206,7 @@ md_convert_frag_1 (fragP)
       if (cpu_of_arch (current_architecture) < m68020)
 	{
 	  if (fragP->fr_opcode[0] == 0x61)
+	    /* BSR */
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
 	      fragP->fr_opcode[1] = (char) 0xB9; /* JBSR with ABSL LONG offset */
@@ -4153,6 +4223,7 @@ md_convert_frag_1 (fragP)
 	      fragP->fr_fix += 4;
 	      ext = 0;
 	    }
+	  /* BRA */
 	  else if (fragP->fr_opcode[0] == 0x60)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
@@ -4242,16 +4313,51 @@ md_convert_frag_1 (fragP)
       fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
 	       fragP->fr_offset, 1, NO_RELOC);
       fragP->fr_opcode[1] &= ~0x3F;
-      fragP->fr_opcode[1] |= 0x3A;
+      fragP->fr_opcode[1] |= 0x3A; /* 072 - mode 7.2 */
       ext = 2;
       break;
     case TAB (PCLEA, LONG):
       subseg_change (text_section, 0);
       fix_new (fragP, (int) (fragP->fr_fix) + 2, 4, fragP->fr_symbol,
-	       fragP->fr_offset + 2, 1, NO_RELOC);
+	       fragP->fr_offset + 4, 1, NO_RELOC);
+      /* Already set to mode 7.3; this indicates: PC indirect with
+	 suppressed index, 32-bit displacement.  */
       *buffer_address++ = 0x01;
       *buffer_address++ = 0x70;
       fragP->fr_fix += 2;
+      ext = 4;
+      break;
+
+    case TAB (PCINDEX, BYTE):
+      disp += 2;
+      if (!issbyte (disp))
+	{
+	  as_bad ("displacement doesn't fit in one byte");
+	  disp = 0;
+	}
+      fragP->fr_opcode[2] &= ~1;
+      fragP->fr_opcode[3] = disp;
+      ext = 0;
+      break;
+    case TAB (PCINDEX, SHORT):
+      subseg_change (text_section, 0);
+      disp += 2;
+      assert (issword (disp));
+      fragP->fr_opcode[2] |= 0x1;
+      fragP->fr_opcode[3] = 0x20;
+      fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
+	       fragP->fr_offset + 4, (fragP->fr_opcode[1] & 077) == 073,
+	       NO_RELOC);
+      ext = 2;
+      break;
+    case TAB (PCINDEX, LONG):
+      subseg_change (text_section, 0);
+      disp += 2;
+      fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,
+	       fragP->fr_offset + 6, (fragP->fr_opcode[1] & 077) == 073,
+	       NO_RELOC);
+      fragP->fr_opcode[2] |= 0x1;
+      fragP->fr_opcode[3] = 0x30;
       ext = 4;
       break;
     }
@@ -4484,10 +4590,22 @@ md_estimate_size_before_relax (fragP, segment)
 	break;
       }				/* TAB(PCLEA,SZ_UNDEF) */
 
-    default:
+    case TAB (PCINDEX, SZ_UNDEF):
+      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+	  || cpu_of_arch (current_architecture) < m68020)
+	{
+	  fragP->fr_subtype = TAB (PCINDEX, BYTE);
+	}
+      else
+	{
+	  fragP->fr_subtype = TAB (PCINDEX, LONG);
+	  fragP->fr_var += 6;
+	}
       break;
 
-    }				/* switch on subtype looking for SZ_UNDEF's. */
+    default:
+      break;
+    }
 
   /* now that SZ_UNDEF are taken care of, check others */
   switch (fragP->fr_subtype)
