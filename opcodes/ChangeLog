@@ -1,5 +1,11 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-opc.c: Update call operand to accept the page definition.
+	Identify instructions that are branches and calls to generate a
+	RL_JUMP relocation.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-dis.c (print_insn): Take into account 68HC12 memory
 	banks and fix disassembling of call instruction.
 	(print_indexed_operand): New param to tell whether
