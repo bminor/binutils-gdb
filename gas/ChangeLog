@@ -1,3 +1,9 @@
+Mon Aug 17 13:18:51 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* messages.c (as_tsktsk): Use correct ANSI form for stdarg
+	version.  Discard bogus DONTDEF version.
+	(as_warn, as_bad, as_fatal): Likewise.
+
 Fri Aug 14 18:31:14 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip): If instruction is invalid for the

@@ -1,5 +1,5 @@
 /* messages.c - error reporter -
-   Copyright (C) 1987, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -117,16 +117,13 @@ void as_perror(gripe, filename)
 char *gripe;		/* Unpunctuated error theme. */
 char *filename;
 {
-	extern int sys_nerr;
-	extern char *sys_errlist[];
-	
+#ifndef HAVE_STRERROR
+	extern char *strerror();
+#endif /* HAVE_STRERROR */
+
 	as_where();
-	fprintf(stderr,gripe,filename);
-	
-	if (errno > sys_nerr)
-	    fprintf(stderr, "Unknown error #%d.\n", errno);
-	else
-	    fprintf(stderr, "%s.\n", sys_errlist[errno]);
+	fprintf(stderr, gripe, filename);
+	fprintf(stderr, "%s.\n", strerror(errno));
 	errno = 0; /* After reporting, clear it. */
 } /* as_perror() */
 
@@ -140,8 +137,7 @@ char *filename;
  */
 
 #ifndef NO_STDARG
-void as_tsktsk(Format)
-const char *Format;
+void as_tsktsk(const char *Format, ...)
 {
 	va_list args;
 	
@@ -178,15 +174,6 @@ char *Format;
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 
-#ifdef DONTDEF
-void as_tsktsk(Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an)
-char *format;
-{
-	as_where();
-	fprintf(stderr,Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an);
-	(void)putc('\n',stderr);
-} /* as_tsktsk() */
-#endif
 /*
  *			a s _ w a r n ()
  *
@@ -197,8 +184,7 @@ char *format;
  */
 
 #ifndef NO_STDARG
-void as_warn(Format)
-const char *Format;
+void as_warn(const char *Format, ...)
 {
 	va_list args;
 	char buffer[200];
@@ -257,18 +243,6 @@ char *Format;
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 
-#ifdef DONTDEF
-void as_warn(Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an)
-char *format;
-{
-	if(!flagseen['W']) {
-		++warning_count;
-		as_where();
-		fprintf(stderr,Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an);
-		(void)putc('\n',stderr);
-	}
-} /* as_warn() */
-#endif
 /*
  *			a s _ b a d ()
  *
@@ -280,8 +254,7 @@ char *format;
  */
 
 #ifndef NO_STDARG
-void as_bad(Format)
-const char *Format;
+void as_bad(const char *Format, ...)
 {
 	va_list args;
 	char buffer[200];
@@ -336,17 +309,6 @@ char *Format;
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 
-#ifdef DONTDEF
-void as_bad(Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an)
-char *format;
-{
-	++error_count;
-	as_where();
-	fprintf(stderr,Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an);
-	(void)putc('\n',stderr);
-} /* as_bad() */
-#endif
-
 /*
  *			a s _ f a t a l ()
  *
@@ -357,8 +319,7 @@ char *format;
  */
 
 #ifndef NO_STDARG
-void as_fatal(Format)
-const char *Format;
+void as_fatal(const char *Format, ...)
 {
 	va_list args;
 	
@@ -400,17 +361,5 @@ char *Format;
 } /* as_fatal() */
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
-
-#ifdef DONTDEF
-void as_fatal(Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an)
-char *Format;
-{
-	as_where();
-	fprintf (stderr, "FATAL:");
-	fprintf(stderr, Format,aa,ab,ac,ad,ae,af,ag,ah,ai,aj,ak,al,am,an);
-	(void) putc('\n', stderr);
-	exit(33);
-} /* as_fatal() */
-#endif
 
 /* end of messages.c */
