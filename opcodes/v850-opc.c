@@ -76,7 +76,7 @@ const struct v850_operand v850_operands[] = {
 /* 32-bit load/store instruction (Format VII) */
 #define IF7	{R1, R2, D16}
 
-/* Bit manipulation function 
+/* Bit manipulation function.  */
 
 
 
