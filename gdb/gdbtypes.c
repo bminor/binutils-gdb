@@ -569,7 +569,7 @@ create_range_type (struct type *result_type, struct type *index_type,
     }
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
   TYPE_TARGET_TYPE (result_type) = index_type;
-  if (TYPE_FLAGS (index_type) & TYPE_FLAG_STUB)
+  if (TYPE_STUB (index_type))
     TYPE_FLAGS (result_type) |= TYPE_FLAG_TARGET_STUB;
   else
     TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
@@ -732,7 +732,7 @@ create_set_type (struct type *result_type, struct type *domain_type)
     TYPE_ALLOC (result_type, 1 * sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
 
-  if (!(TYPE_FLAGS (domain_type) & TYPE_FLAG_STUB))
+  if (!TYPE_STUB (domain_type))
     {
       if (get_discrete_bounds (domain_type, &low_bound, &high_bound) < 0)
 	low_bound = high_bound = 0;
@@ -1245,7 +1245,7 @@ check_typedef (struct type *type)
 	make_cv_type (is_const, is_volatile, newtype, &type);
     }
   /* Otherwise, rely on the stub flag being set for opaque/stubbed types */
-  else if ((TYPE_FLAGS (type) & TYPE_FLAG_STUB) && !currently_reading_symtab)
+  else if (TYPE_STUB (type) && !currently_reading_symtab)
     {
       char *name = type_name_no_tag (type);
       /* FIXME: shouldn't we separately check the TYPE_NAME and the
@@ -1263,12 +1263,12 @@ check_typedef (struct type *type)
 	make_cv_type (is_const, is_volatile, SYMBOL_TYPE (sym), &type);
     }
 
-  if (TYPE_FLAGS (type) & TYPE_FLAG_TARGET_STUB)
+  if (TYPE_TARGET_STUB (type))
     {
       struct type *range_type;
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-      if (TYPE_FLAGS (target_type) & (TYPE_FLAG_STUB | TYPE_FLAG_TARGET_STUB))
+      if (TYPE_STUB (target_type) || TYPE_TARGET_STUB (target_type))
 	{
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_ARRAY

@@ -869,7 +869,7 @@ read_cfront_member_functions (struct field_info *fip, char **pp,
       TYPE_CODE (new_sublist->fn_field.type) = TYPE_CODE_METHOD;
 
       /* If this is just a stub, then we don't have the real name here. */
-      if (TYPE_FLAGS (new_sublist->fn_field.type) & TYPE_FLAG_STUB)
+      if (TYPE_STUB (new_sublist->fn_field.type))
 	{
 	  if (!TYPE_DOMAIN_TYPE (new_sublist->fn_field.type))
 	    TYPE_DOMAIN_TYPE (new_sublist->fn_field.type) = type;
@@ -3100,7 +3100,7 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 
 	  /* If this is just a stub, then we don't have the real name here. */
 
-	  if (TYPE_FLAGS (new_sublist->fn_field.type) & TYPE_FLAG_STUB)
+	  if (TYPE_STUB (new_sublist->fn_field.type))
 	    {
 	      if (!TYPE_DOMAIN_TYPE (new_sublist->fn_field.type))
 		TYPE_DOMAIN_TYPE (new_sublist->fn_field.type) = type;
@@ -4941,7 +4941,7 @@ cleanup_undefined_types (void)
 	       as well as in check_typedef to deal with the (legitimate in
 	       C though not C++) case of several types with the same name
 	       in different source files.  */
-	    if (TYPE_FLAGS (*type) & TYPE_FLAG_STUB)
+	    if (TYPE_STUB (*type))
 	      {
 		struct pending *ppt;
 		int i;

@@ -142,7 +142,7 @@ val_print (struct type *type, char *valaddr, int embedded_offset,
      only a stub and we can't find and substitute its complete type, then
      print appropriate string and return.  */
 
-  if (TYPE_FLAGS (real_type) & TYPE_FLAG_STUB)
+  if (TYPE_STUB (real_type))
     {
       fprintf_filtered (stream, "<incomplete type>");
       gdb_flush (stream);

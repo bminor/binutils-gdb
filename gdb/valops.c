@@ -1458,10 +1458,8 @@ hand_function_call (value_ptr function, int nargs, value_ptr *args)
 
       else
 	{
-	  int is_prototyped = TYPE_FLAGS (ftype) & TYPE_FLAG_PROTOTYPED;
 	  param_type = TYPE_FIELD_TYPE (ftype, i);
-
-	  args[i] = value_arg_coerce (args[i], param_type, is_prototyped);
+	  args[i] = value_arg_coerce (args[i], param_type, TYPE_PROTOTYPED (ftype));
 	}
 
       /*elz: this code is to handle the case in which the function to be called

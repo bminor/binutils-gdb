@@ -2134,7 +2134,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	arg_types[iparams] = TYPE_FIELD_TYPE (die->type, iparams);
 
       /* Set last entry in argument type vector.  */
-      if (TYPE_FLAGS (die->type) & TYPE_FLAG_VARARGS)
+      if (TYPE_VARARGS (die->type))
 	arg_types[nparams] = NULL;
       else
 	arg_types[nparams] = dwarf2_fundamental_type (objfile, FT_VOID);

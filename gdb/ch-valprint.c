@@ -335,7 +335,7 @@ chill_val_print (struct type *type, char *valaddr, int embedded_offset,
     case TYPE_CODE_SET:
       elttype = TYPE_INDEX_TYPE (type);
       CHECK_TYPEDEF (elttype);
-      if (TYPE_FLAGS (elttype) & TYPE_FLAG_STUB)
+      if (TYPE_STUB (elttype))
 	{
 	  fprintf_filtered (stream, "<incomplete type>");
 	  gdb_flush (stream);

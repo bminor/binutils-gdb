@@ -1,5 +1,28 @@
 2001-12-11  Fred Fish  <fnf@redhat.com>
 
+	* c-typeprint.c (c_type_print_base): Use type flags access macros
+	to test bits.
+	* ch-typeprint.c (chill_type_print_base): Ditto.
+	* ch-valprint.c (chill_val_print): Ditto.
+	* d10v-tdep.c (d10v_pointer_to_address): Ditto.
+	* dwarf2read.c (dwarf2_add_member_fn): Ditto.
+	* dwarfread.c (read_structure_scope): Ditto.
+	* gdbtypes.c (create_range_type): Dittol
+	(create_set_type): Ditto.
+	(check_typedef): Ditto.
+	* jv-typeprint.c (java_type_print_base): Ditto.
+	* p-typeprint.c (pascal_type_print_base): Ditto
+	* p-valprint.c (pascal_val_print): Ditto.
+	* stabsread.c (read_cfront_member_functions): Ditto.
+	(read_member_functions): Ditto.
+	(cleanup_undefined_types): Ditto.
+	* valprint.c (val_print): Ditto.
+
+	* valops.c (hand_function_call): Remove is_prototyped
+	variable and just use type flag test macro directly.
+
+2001-12-11  Fred Fish  <fnf@redhat.com>
+
 	* gdbtypes.c (print_bound_type): New function.
 	(recursive_dump_type): Print type struct code values
 	TYPE_CODE_BITSTRING, TYPE_CODE_COMPLEX, TYPE_CODE_TEMPLATE,

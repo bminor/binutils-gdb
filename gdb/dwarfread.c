@@ -1147,7 +1147,7 @@ read_structure_scope (struct dieinfo *dip, char *thisdie, char *enddie,
   struct symbol *sym;
 
   type = struct_type (dip, thisdie, enddie, objfile);
-  if (!(TYPE_FLAGS (type) & TYPE_FLAG_STUB))
+  if (!TYPE_STUB (type))
     {
       sym = new_symbol (dip, objfile);
       if (sym != NULL)

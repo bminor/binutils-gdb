@@ -207,7 +207,7 @@ chill_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  fprintf_filtered (stream, "(\n");
 	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
-	      if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+	      if (TYPE_STUB (type))
 		{
 		  fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
 		}
