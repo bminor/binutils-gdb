@@ -1,39 +1,38 @@
-/* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+/* Machine-independent support for SVR4 /proc (process file system)
+
+   Copyright 1999, 2000, 2004 Free Software Foundation, Inc.
+
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
 
-This file is part of GDB.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation, 
-Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+/* Pretty-print "events of interest".
 
-/*
- * Pretty-print "events of interest".
- *
- * This module includes pretty-print routines for:
- *	faults  (hardware exceptions):
- *	signals (software interrupts):
- *	syscalls
- *
- * FIXME: At present, the syscall translation table must be initialized, 
- * which is not true of the other translation tables.
- */
+   This module includes pretty-print routines for:
+   * faults (hardware exceptions)
+   * signals (software interrupts)
+   * syscalls
+
+   FIXME: At present, the syscall translation table must be
+   initialized, which is not true of the other translation tables.  */
 
 #include "defs.h"
 
-#if defined (NEW_PROC_API)
+#ifdef NEW_PROC_API
 #define _STRUCTURED_PROC 1
 #endif
 
@@ -47,22 +46,23 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/fault.h>
 #endif
 
-/*  Much of the information used in the /proc interface, particularly for
-    printing status information, is kept as tables of structures of the
-    following form.  These tables can be used to map numeric values to
-    their symbolic names and to a string that describes their specific use. */
+/* Much of the information used in the /proc interface, particularly
+   for printing status information, is kept as tables of structures of
+   the following form.  These tables can be used to map numeric values
+   to their symbolic names and to a string that describes their
+   specific use.  */
 
-struct trans {
-  int value;                    /* The numeric value */
-  char *name;                   /* The equivalent symbolic value */
-  char *desc;                   /* Short description of value */
+struct trans
+{
+  int value;                    /* The numeric value.  */
+  char *name;                   /* The equivalent symbolic value.  */
+  char *desc;                   /* Short description of value.  */
 };
+
 
-/*
- * pretty print syscalls
- */
+/* Pretty print syscalls.  */
 
-/* Ugh -- Unixware and Solaris spell these differently! */
+/* Ugh -- UnixWare and Solaris spell these differently!  */
 
 #ifdef  SYS_lwpcreate
 #define SYS_lwp_create	SYS_lwpcreate
@@ -101,1303 +101,1301 @@ struct trans {
 #endif
 
 
-/* Syscall translation table. */
+/* Syscall translation table.  */
 
-#define MAX_SYSCALLS 262	/* pretty arbitrary */
-static char * syscall_table[MAX_SYSCALLS];
+#define MAX_SYSCALLS 262	/* Pretty arbitrary.  */
+static char *syscall_table[MAX_SYSCALLS];
 
 void
 init_syscall_table (void)
 {
-#if defined (SYS_BSD_getime)
+#ifdef SYS_BSD_getime
   syscall_table[SYS_BSD_getime] = "BSD_getime";
 #endif
-#if defined (SYS_BSDgetpgrp)
+#ifdef SYS_BSDgetpgrp
   syscall_table[SYS_BSDgetpgrp] = "BSDgetpgrp";
 #endif
-#if defined (SYS_BSDsetpgrp)
+#ifdef SYS_BSDsetpgrp
   syscall_table[SYS_BSDsetpgrp] = "BSDsetpgrp";
 #endif
-#if defined (SYS_acancel)
+#ifdef SYS_acancel
   syscall_table[SYS_acancel] = "acancel";
 #endif
-#if defined (SYS_accept)
+#ifdef SYS_accept
   syscall_table[SYS_accept] = "accept";
 #endif
-#if defined (SYS_access)
+#ifdef SYS_access
   syscall_table[SYS_access] = "access";
 #endif
-#if defined (SYS_acct)
+#ifdef SYS_acct
   syscall_table[SYS_acct] = "acct";
 #endif
-#if defined (SYS_acl)
+#ifdef SYS_acl
   syscall_table[SYS_acl] = "acl";
 #endif
-#if defined (SYS_aclipc)
+#ifdef SYS_aclipc
   syscall_table[SYS_aclipc] = "aclipc";
 #endif
-#if defined (SYS_adjtime)
+#ifdef SYS_adjtime
   syscall_table[SYS_adjtime] = "adjtime";
 #endif
-#if defined (SYS_afs_syscall)
+#ifdef SYS_afs_syscall
   syscall_table[SYS_afs_syscall] = "afs_syscall";
 #endif
-#if defined (SYS_alarm)
+#ifdef SYS_alarm
   syscall_table[SYS_alarm] = "alarm";
 #endif
-#if defined (SYS_alt_plock)
+#ifdef SYS_alt_plock
   syscall_table[SYS_alt_plock] = "alt_plock";
 #endif
-#if defined (SYS_alt_sigpending)
+#ifdef SYS_alt_sigpending
   syscall_table[SYS_alt_sigpending] = "alt_sigpending";
 #endif
-#if defined (SYS_async)
+#ifdef SYS_async
   syscall_table[SYS_async] = "async";
 #endif
-#if defined (SYS_async_daemon)
+#ifdef SYS_async_daemon
   syscall_table[SYS_async_daemon] = "async_daemon";
 #endif
-#if defined (SYS_audcntl)
+#ifdef SYS_audcntl
   syscall_table[SYS_audcntl] = "audcntl";
 #endif
-#if defined (SYS_audgen)
+#ifdef SYS_audgen
   syscall_table[SYS_audgen] = "audgen";
 #endif
-#if defined (SYS_auditbuf)
+#ifdef SYS_auditbuf
   syscall_table[SYS_auditbuf] = "auditbuf";
 #endif
-#if defined (SYS_auditctl)
+#ifdef SYS_auditctl
   syscall_table[SYS_auditctl] = "auditctl";
 #endif
-#if defined (SYS_auditdmp)
+#ifdef SYS_auditdmp
   syscall_table[SYS_auditdmp] = "auditdmp";
 #endif
-#if defined (SYS_auditevt)
+#ifdef SYS_auditevt
   syscall_table[SYS_auditevt] = "auditevt";
 #endif
-#if defined (SYS_auditlog)
+#ifdef SYS_auditlog
   syscall_table[SYS_auditlog] = "auditlog";
 #endif
-#if defined (SYS_auditsys)
+#ifdef SYS_auditsys
   syscall_table[SYS_auditsys] = "auditsys";
 #endif
-#if defined (SYS_bind)
+#ifdef SYS_bind
   syscall_table[SYS_bind] = "bind";
 #endif
-#if defined (SYS_block)
+#ifdef SYS_block
   syscall_table[SYS_block] = "block";
 #endif
-#if defined (SYS_brk)
+#ifdef SYS_brk
   syscall_table[SYS_brk] = "brk";
 #endif
-#if defined (SYS_cachectl)
+#ifdef SYS_cachectl
   syscall_table[SYS_cachectl] = "cachectl";
 #endif
-#if defined (SYS_cacheflush)
+#ifdef SYS_cacheflush
   syscall_table[SYS_cacheflush] = "cacheflush";
 #endif
-#if defined (SYS_cancelblock)
+#ifdef SYS_cancelblock
   syscall_table[SYS_cancelblock] = "cancelblock";
 #endif
-#if defined (SYS_cg_bind)
+#ifdef SYS_cg_bind
   syscall_table[SYS_cg_bind] = "cg_bind";
 #endif
-#if defined (SYS_cg_current)
+#ifdef SYS_cg_current
   syscall_table[SYS_cg_current] = "cg_current";
 #endif
-#if defined (SYS_cg_ids)
+#ifdef SYS_cg_ids
   syscall_table[SYS_cg_ids] = "cg_ids";
 #endif
-#if defined (SYS_cg_info)
+#ifdef SYS_cg_info
   syscall_table[SYS_cg_info] = "cg_info";
 #endif
-#if defined (SYS_cg_memloc)
+#ifdef SYS_cg_memloc
   syscall_table[SYS_cg_memloc] = "cg_memloc";
 #endif
-#if defined (SYS_cg_processors)
+#ifdef SYS_cg_processors
   syscall_table[SYS_cg_processors] = "cg_processors";
 #endif
-#if defined (SYS_chdir)
+#ifdef SYS_chdir
   syscall_table[SYS_chdir] = "chdir";
 #endif
-#if defined (SYS_chflags)
+#ifdef SYS_chflags
   syscall_table[SYS_chflags] = "chflags";
 #endif
-#if defined (SYS_chmod)
+#ifdef SYS_chmod
   syscall_table[SYS_chmod] = "chmod";
 #endif
-#if defined (SYS_chown)
+#ifdef SYS_chown
   syscall_table[SYS_chown] = "chown";
 #endif
-#if defined (SYS_chroot)
+#ifdef SYS_chroot
   syscall_table[SYS_chroot] = "chroot";
 #endif
-#if defined (SYS_clocal)
+#ifdef SYS_clocal
   syscall_table[SYS_clocal] = "clocal";
 #endif
-#if defined (SYS_clock_getres)
+#ifdef SYS_clock_getres
   syscall_table[SYS_clock_getres] = "clock_getres";
 #endif
-#if defined (SYS_clock_gettime)
+#ifdef SYS_clock_gettime
   syscall_table[SYS_clock_gettime] = "clock_gettime";
 #endif
-#if defined (SYS_clock_settime)
+#ifdef SYS_clock_settime
   syscall_table[SYS_clock_settime] = "clock_settime";
 #endif
-#if defined (SYS_close)
+#ifdef SYS_close
   syscall_table[SYS_close] = "close";
 #endif
-#if defined (SYS_connect)
+#ifdef SYS_connect
   syscall_table[SYS_connect] = "connect";
 #endif
-#if defined (SYS_context)
+#ifdef SYS_context
   syscall_table[SYS_context] = "context";
 #endif
-#if defined (SYS_creat)
+#ifdef SYS_creat
   syscall_table[SYS_creat] = "creat";
 #endif
-#if defined (SYS_creat64)
+#ifdef SYS_creat64
   syscall_table[SYS_creat64] = "creat64";
 #endif
-#if defined (SYS_devstat)
+#ifdef SYS_devstat
   syscall_table[SYS_devstat] = "devstat";
 #endif
-#if defined (SYS_dmi)
+#ifdef SYS_dmi
   syscall_table[SYS_dmi] = "dmi";
 #endif
-#if defined (SYS_door)
+#ifdef SYS_door
   syscall_table[SYS_door] = "door";
 #endif
-#if defined (SYS_dshmsys)
+#ifdef SYS_dshmsys
   syscall_table[SYS_dshmsys] = "dshmsys";
 #endif
-#if defined (SYS_dup)
+#ifdef SYS_dup
   syscall_table[SYS_dup] = "dup";
 #endif
-#if defined (SYS_dup2)
+#ifdef SYS_dup2
   syscall_table[SYS_dup2] = "dup2";
 #endif
-#if defined (SYS_evsys)
+#ifdef SYS_evsys
   syscall_table[SYS_evsys] = "evsys";
 #endif
-#if defined (SYS_evtrapret)
+#ifdef SYS_evtrapret
   syscall_table[SYS_evtrapret] = "evtrapret";
 #endif
-#if defined (SYS_exec)
+#ifdef SYS_exec
   syscall_table[SYS_exec] = "exec";
 #endif
-#if defined (SYS_exec_with_loader)
+#ifdef SYS_exec_with_loader
   syscall_table[SYS_exec_with_loader] = "exec_with_loader";
 #endif
-#if defined (SYS_execv)
+#ifdef SYS_execv
   syscall_table[SYS_execv] = "execv";
 #endif
-#if defined (SYS_execve)
+#ifdef SYS_execve
   syscall_table[SYS_execve] = "execve";
 #endif
-#if defined (SYS_exit)
+#ifdef SYS_exit
   syscall_table[SYS_exit] = "exit";
 #endif
-#if defined (SYS_exportfs)
+#ifdef SYS_exportfs
   syscall_table[SYS_exportfs] = "exportfs";
 #endif
-#if defined (SYS_facl)
+#ifdef SYS_facl
   syscall_table[SYS_facl] = "facl";
 #endif
-#if defined (SYS_fchdir)
+#ifdef SYS_fchdir
   syscall_table[SYS_fchdir] = "fchdir";
 #endif
-#if defined (SYS_fchflags)
+#ifdef SYS_fchflags
   syscall_table[SYS_fchflags] = "fchflags";
 #endif
-#if defined (SYS_fchmod)
+#ifdef SYS_fchmod
   syscall_table[SYS_fchmod] = "fchmod";
 #endif
-#if defined (SYS_fchown)
+#ifdef SYS_fchown
   syscall_table[SYS_fchown] = "fchown";
 #endif
-#if defined (SYS_fchroot)
+#ifdef SYS_fchroot
   syscall_table[SYS_fchroot] = "fchroot";
 #endif
-#if defined (SYS_fcntl)
+#ifdef SYS_fcntl
   syscall_table[SYS_fcntl] = "fcntl";
 #endif
-#if defined (SYS_fdatasync)
+#ifdef SYS_fdatasync
   syscall_table[SYS_fdatasync] = "fdatasync";
 #endif
-#if defined (SYS_fdevstat)
+#ifdef SYS_fdevstat
   syscall_table[SYS_fdevstat] = "fdevstat";
 #endif
-#if defined (SYS_fdsync)
+#ifdef SYS_fdsync
   syscall_table[SYS_fdsync] = "fdsync";
 #endif
-#if defined (SYS_filepriv)
+#ifdef SYS_filepriv
   syscall_table[SYS_filepriv] = "filepriv";
 #endif
-#if defined (SYS_flock)
+#ifdef SYS_flock
   syscall_table[SYS_flock] = "flock";
 #endif
-#if defined (SYS_flvlfile)
+#ifdef SYS_flvlfile
   syscall_table[SYS_flvlfile] = "flvlfile";
 #endif
-#if defined (SYS_fork)
+#ifdef SYS_fork
   syscall_table[SYS_fork] = "fork";
 #endif
-#if defined (SYS_fork1)
+#ifdef SYS_fork1
   syscall_table[SYS_fork1] = "fork1";
 #endif
-#if defined (SYS_forkall)
+#ifdef SYS_forkall
   syscall_table[SYS_forkall] = "forkall";
 #endif
-#if defined (SYS_fpathconf)
+#ifdef SYS_fpathconf
   syscall_table[SYS_fpathconf] = "fpathconf";
 #endif
-#if defined (SYS_fstat)
+#ifdef SYS_fstat
   syscall_table[SYS_fstat] = "fstat";
 #endif
-#if defined (SYS_fstat64)
+#ifdef SYS_fstat64
   syscall_table[SYS_fstat64] = "fstat64";
 #endif
-#if defined (SYS_fstatfs)
+#ifdef SYS_fstatfs
   syscall_table[SYS_fstatfs] = "fstatfs";
 #endif
-#if defined (SYS_fstatvfs)
+#ifdef SYS_fstatvfs
   syscall_table[SYS_fstatvfs] = "fstatvfs";
 #endif
-#if defined (SYS_fstatvfs64)
+#ifdef SYS_fstatvfs64
   syscall_table[SYS_fstatvfs64] = "fstatvfs64";
 #endif
-#if defined (SYS_fsync)
+#ifdef SYS_fsync
   syscall_table[SYS_fsync] = "fsync";
 #endif
-#if defined (SYS_ftruncate)
+#ifdef SYS_ftruncate
   syscall_table[SYS_ftruncate] = "ftruncate";
 #endif
-#if defined (SYS_ftruncate64)
+#ifdef SYS_ftruncate64
   syscall_table[SYS_ftruncate64] = "ftruncate64";
 #endif
-#if defined (SYS_fuser)
+#ifdef SYS_fuser
   syscall_table[SYS_fuser] = "fuser";
 #endif
-#if defined (SYS_fxstat)
+#ifdef SYS_fxstat
   syscall_table[SYS_fxstat] = "fxstat";
 #endif
-#if defined (SYS_get_sysinfo)
+#ifdef SYS_get_sysinfo
   syscall_table[SYS_get_sysinfo] = "get_sysinfo";
 #endif
-#if defined (SYS_getaddressconf)
+#ifdef SYS_getaddressconf
   syscall_table[SYS_getaddressconf] = "getaddressconf";
 #endif
-#if defined (SYS_getcontext)
+#ifdef SYS_getcontext
   syscall_table[SYS_getcontext] = "getcontext";
 #endif
-#if defined (SYS_getdents)
+#ifdef SYS_getdents
   syscall_table[SYS_getdents] = "getdents";
 #endif
-#if defined (SYS_getdents64)
+#ifdef SYS_getdents64
   syscall_table[SYS_getdents64] = "getdents64";
 #endif
-#if defined (SYS_getdirentries)
+#ifdef SYS_getdirentries
   syscall_table[SYS_getdirentries] = "getdirentries";
 #endif
-#if defined (SYS_getdomainname)
+#ifdef SYS_getdomainname
   syscall_table[SYS_getdomainname] = "getdomainname";
 #endif
-#if defined (SYS_getdtablesize)
+#ifdef SYS_getdtablesize
   syscall_table[SYS_getdtablesize] = "getdtablesize";
 #endif
-#if defined (SYS_getfh)
+#ifdef SYS_getfh
   syscall_table[SYS_getfh] = "getfh";
 #endif
-#if defined (SYS_getfsstat)
+#ifdef SYS_getfsstat
   syscall_table[SYS_getfsstat] = "getfsstat";
 #endif
-#if defined (SYS_getgid)
+#ifdef SYS_getgid
   syscall_table[SYS_getgid] = "getgid";
 #endif
-#if defined (SYS_getgroups)
+#ifdef SYS_getgroups
   syscall_table[SYS_getgroups] = "getgroups";
 #endif
-#if defined (SYS_gethostid)
+#ifdef SYS_gethostid
   syscall_table[SYS_gethostid] = "gethostid";
 #endif
-#if defined (SYS_gethostname)
+#ifdef SYS_gethostname
   syscall_table[SYS_gethostname] = "gethostname";
 #endif
-#if defined (SYS_getitimer)
+#ifdef SYS_getitimer
   syscall_table[SYS_getitimer] = "getitimer";
 #endif
-#if defined (SYS_getksym)
+#ifdef SYS_getksym
   syscall_table[SYS_getksym] = "getksym";
 #endif
-#if defined (SYS_getlogin)
+#ifdef SYS_getlogin
   syscall_table[SYS_getlogin] = "getlogin";
 #endif
-#if defined (SYS_getmnt)
+#ifdef SYS_getmnt
   syscall_table[SYS_getmnt] = "getmnt";
 #endif
-#if defined (SYS_getmsg)
+#ifdef SYS_getmsg
   syscall_table[SYS_getmsg] = "getmsg";
 #endif
-#if defined (SYS_getpagesize)
+#ifdef SYS_getpagesize
   syscall_table[SYS_getpagesize] = "getpagesize";
 #endif
-#if defined (SYS_getpeername)
+#ifdef SYS_getpeername
   syscall_table[SYS_getpeername] = "getpeername";
 #endif
-#if defined (SYS_getpgid)
+#ifdef SYS_getpgid
   syscall_table[SYS_getpgid] = "getpgid";
 #endif
-#if defined (SYS_getpgrp)
+#ifdef SYS_getpgrp
   syscall_table[SYS_getpgrp] = "getpgrp";
 #endif
-#if defined (SYS_getpid)
+#ifdef SYS_getpid
   syscall_table[SYS_getpid] = "getpid";
 #endif
-#if defined (SYS_getpmsg)
+#ifdef SYS_getpmsg
   syscall_table[SYS_getpmsg] = "getpmsg";
 #endif
-#if defined (SYS_getpriority)
+#ifdef SYS_getpriority
   syscall_table[SYS_getpriority] = "getpriority";
 #endif
-#if defined (SYS_getrlimit)
+#ifdef SYS_getrlimit
   syscall_table[SYS_getrlimit] = "getrlimit";
 #endif
-#if defined (SYS_getrlimit64)
+#ifdef SYS_getrlimit64
   syscall_table[SYS_getrlimit64] = "getrlimit64";
 #endif
-#if defined (SYS_getrusage)
+#ifdef SYS_getrusage
   syscall_table[SYS_getrusage] = "getrusage";
 #endif
-#if defined (SYS_getsid)
+#ifdef SYS_getsid
   syscall_table[SYS_getsid] = "getsid";
 #endif
-#if defined (SYS_getsockname)
+#ifdef SYS_getsockname
   syscall_table[SYS_getsockname] = "getsockname";
 #endif
-#if defined (SYS_getsockopt)
+#ifdef SYS_getsockopt
   syscall_table[SYS_getsockopt] = "getsockopt";
 #endif
-#if defined (SYS_gettimeofday)
+#ifdef SYS_gettimeofday
   syscall_table[SYS_gettimeofday] = "gettimeofday";
 #endif
-#if defined (SYS_getuid)
+#ifdef SYS_getuid
   syscall_table[SYS_getuid] = "getuid";
 #endif
-#if defined (SYS_gtty)
+#ifdef SYS_gtty
   syscall_table[SYS_gtty] = "gtty";
 #endif
-#if defined (SYS_hrtsys)
+#ifdef SYS_hrtsys
   syscall_table[SYS_hrtsys] = "hrtsys";
 #endif
-#if defined (SYS_inst_sync)
+#ifdef SYS_inst_sync
   syscall_table[SYS_inst_sync] = "inst_sync";
 #endif
-#if defined (SYS_install_utrap)
+#ifdef SYS_install_utrap
   syscall_table[SYS_install_utrap] = "install_utrap";
 #endif
-#if defined (SYS_invlpg)
+#ifdef SYS_invlpg
   syscall_table[SYS_invlpg] = "invlpg";
 #endif
-#if defined (SYS_ioctl)
+#ifdef SYS_ioctl
   syscall_table[SYS_ioctl] = "ioctl";
 #endif
-#if defined (SYS_kaio)
+#ifdef SYS_kaio
   syscall_table[SYS_kaio] = "kaio";
 #endif
-#if defined (SYS_keyctl)
+#ifdef SYS_keyctl
   syscall_table[SYS_keyctl] = "keyctl";
 #endif
-#if defined (SYS_kill)
+#ifdef SYS_kill
   syscall_table[SYS_kill] = "kill";
 #endif
-#if defined (SYS_killpg)
+#ifdef SYS_killpg
   syscall_table[SYS_killpg] = "killpg";
 #endif
-#if defined (SYS_kloadcall)
+#ifdef SYS_kloadcall
   syscall_table[SYS_kloadcall] = "kloadcall";
 #endif
-#if defined (SYS_kmodcall)
+#ifdef SYS_kmodcall
   syscall_table[SYS_kmodcall] = "kmodcall";
 #endif
-#if defined (SYS_ksigaction)
+#ifdef SYS_ksigaction
   syscall_table[SYS_ksigaction] = "ksigaction";
 #endif
-#if defined (SYS_ksigprocmask)
+#ifdef SYS_ksigprocmask
   syscall_table[SYS_ksigprocmask] = "ksigprocmask";
 #endif
-#if defined (SYS_ksigqueue)
+#ifdef SYS_ksigqueue
   syscall_table[SYS_ksigqueue] = "ksigqueue";
 #endif
-#if defined (SYS_lchown)
+#ifdef SYS_lchown
   syscall_table[SYS_lchown] = "lchown";
 #endif
-#if defined (SYS_link)
+#ifdef SYS_link
   syscall_table[SYS_link] = "link";
 #endif
-#if defined (SYS_listen)
+#ifdef SYS_listen
   syscall_table[SYS_listen] = "listen";
 #endif
-#if defined (SYS_llseek)
+#ifdef SYS_llseek
   syscall_table[SYS_llseek] = "llseek";
 #endif
-#if defined (SYS_lseek)
+#ifdef SYS_lseek
   syscall_table[SYS_lseek] = "lseek";
 #endif
-#if defined (SYS_lseek64)
+#ifdef SYS_lseek64
   syscall_table[SYS_lseek64] = "lseek64";
 #endif
-#if defined (SYS_lstat)
+#ifdef SYS_lstat
   syscall_table[SYS_lstat] = "lstat";
 #endif
-#if defined (SYS_lstat64)
+#ifdef SYS_lstat64
   syscall_table[SYS_lstat64] = "lstat64";
 #endif
-#if defined (SYS_lvldom)
+#ifdef SYS_lvldom
   syscall_table[SYS_lvldom] = "lvldom";
 #endif
-#if defined (SYS_lvlequal)
+#ifdef SYS_lvlequal
   syscall_table[SYS_lvlequal] = "lvlequal";
 #endif
-#if defined (SYS_lvlfile)
+#ifdef SYS_lvlfile
   syscall_table[SYS_lvlfile] = "lvlfile";
 #endif
-#if defined (SYS_lvlipc)
+#ifdef SYS_lvlipc
   syscall_table[SYS_lvlipc] = "lvlipc";
 #endif
-#if defined (SYS_lvlproc)
+#ifdef SYS_lvlproc
   syscall_table[SYS_lvlproc] = "lvlproc";
 #endif
-#if defined (SYS_lvlvfs)
+#ifdef SYS_lvlvfs
   syscall_table[SYS_lvlvfs] = "lvlvfs";
 #endif
-#if defined (SYS_lwp_alarm)
+#ifdef SYS_lwp_alarm
   syscall_table[SYS_lwp_alarm] = "lwp_alarm";
 #endif
-#if defined (SYS_lwp_cond_broadcast)
+#ifdef SYS_lwp_cond_broadcast
   syscall_table[SYS_lwp_cond_broadcast] = "lwp_cond_broadcast";
 #endif
-#if defined (SYS_lwp_cond_signal)
+#ifdef SYS_lwp_cond_signal
   syscall_table[SYS_lwp_cond_signal] = "lwp_cond_signal";
 #endif
-#if defined (SYS_lwp_cond_wait)
+#ifdef SYS_lwp_cond_wait
   syscall_table[SYS_lwp_cond_wait] = "lwp_cond_wait";
 #endif
-#if defined (SYS_lwp_continue)
+#ifdef SYS_lwp_continue
   syscall_table[SYS_lwp_continue] = "lwp_continue";
 #endif
-#if defined (SYS_lwp_create)
+#ifdef SYS_lwp_create
   syscall_table[SYS_lwp_create] = "lwp_create";
 #endif
-#if defined (SYS_lwp_exit)
+#ifdef SYS_lwp_exit
   syscall_table[SYS_lwp_exit] = "lwp_exit";
 #endif
-#if defined (SYS_lwp_getprivate)
+#ifdef SYS_lwp_getprivate
   syscall_table[SYS_lwp_getprivate] = "lwp_getprivate";
 #endif
-#if defined (SYS_lwp_info)
+#ifdef SYS_lwp_info
   syscall_table[SYS_lwp_info] = "lwp_info";
 #endif
-#if defined (SYS_lwp_kill)
+#ifdef SYS_lwp_kill
   syscall_table[SYS_lwp_kill] = "lwp_kill";
 #endif
-#if defined (SYS_lwp_mutex_init)
+#ifdef SYS_lwp_mutex_init
   syscall_table[SYS_lwp_mutex_init] = "lwp_mutex_init";
 #endif
-#if defined (SYS_lwp_mutex_lock)
+#ifdef SYS_lwp_mutex_lock
   syscall_table[SYS_lwp_mutex_lock] = "lwp_mutex_lock";
 #endif
-#if defined (SYS_lwp_mutex_trylock)
+#ifdef SYS_lwp_mutex_trylock
   syscall_table[SYS_lwp_mutex_trylock] = "lwp_mutex_trylock";
 #endif
-#if defined (SYS_lwp_mutex_unlock)
+#ifdef SYS_lwp_mutex_unlock
   syscall_table[SYS_lwp_mutex_unlock] = "lwp_mutex_unlock";
 #endif
-#if defined (SYS_lwp_private)
+#ifdef SYS_lwp_private
   syscall_table[SYS_lwp_private] = "lwp_private";
 #endif
-#if defined (SYS_lwp_self)
+#ifdef SYS_lwp_self
   syscall_table[SYS_lwp_self] = "lwp_self";
 #endif
-#if defined (SYS_lwp_sema_post)
+#ifdef SYS_lwp_sema_post
   syscall_table[SYS_lwp_sema_post] = "lwp_sema_post";
 #endif
-#if defined (SYS_lwp_sema_trywait)
+#ifdef SYS_lwp_sema_trywait
   syscall_table[SYS_lwp_sema_trywait] = "lwp_sema_trywait";
 #endif
-#if defined (SYS_lwp_sema_wait)
+#ifdef SYS_lwp_sema_wait
   syscall_table[SYS_lwp_sema_wait] = "lwp_sema_wait";
 #endif
-#if defined (SYS_lwp_setprivate)
+#ifdef SYS_lwp_setprivate
   syscall_table[SYS_lwp_setprivate] = "lwp_setprivate";
 #endif
-#if defined (SYS_lwp_sigredirect)
+#ifdef SYS_lwp_sigredirect
   syscall_table[SYS_lwp_sigredirect] = "lwp_sigredirect";
 #endif
-#if defined (SYS_lwp_suspend)
+#ifdef SYS_lwp_suspend
   syscall_table[SYS_lwp_suspend] = "lwp_suspend";
 #endif
-#if defined (SYS_lwp_wait)
+#ifdef SYS_lwp_wait
   syscall_table[SYS_lwp_wait] = "lwp_wait";
 #endif
-#if defined (SYS_lxstat)
+#ifdef SYS_lxstat
   syscall_table[SYS_lxstat] = "lxstat";
 #endif
-#if defined (SYS_madvise)
+#ifdef SYS_madvise
   syscall_table[SYS_madvise] = "madvise";
 #endif
-#if defined (SYS_memcntl)
+#ifdef SYS_memcntl
   syscall_table[SYS_memcntl] = "memcntl";
 #endif
-#if defined (SYS_mincore)
+#ifdef SYS_mincore
   syscall_table[SYS_mincore] = "mincore";
 #endif
-#if defined (SYS_mincore)
+#ifdef SYS_mincore
   syscall_table[SYS_mincore] = "mincore";
 #endif
-#if defined (SYS_mkdir)
+#ifdef SYS_mkdir
   syscall_table[SYS_mkdir] = "mkdir";
 #endif
-#if defined (SYS_mkmld)
+#ifdef SYS_mkmld
   syscall_table[SYS_mkmld] = "mkmld";
 #endif
-#if defined (SYS_mknod)
+#ifdef SYS_mknod
   syscall_table[SYS_mknod] = "mknod";
 #endif
-#if defined (SYS_mldmode)
+#ifdef SYS_mldmode
   syscall_table[SYS_mldmode] = "mldmode";
 #endif
-#if defined (SYS_mmap)
+#ifdef SYS_mmap
   syscall_table[SYS_mmap] = "mmap";
 #endif
-#if defined (SYS_mmap64)
+#ifdef SYS_mmap64
   syscall_table[SYS_mmap64] = "mmap64";
 #endif
-#if defined (SYS_modadm)
+#ifdef SYS_modadm
   syscall_table[SYS_modadm] = "modadm";
 #endif
-#if defined (SYS_modctl)
+#ifdef SYS_modctl
   syscall_table[SYS_modctl] = "modctl";
 #endif
-#if defined (SYS_modload)
+#ifdef SYS_modload
   syscall_table[SYS_modload] = "modload";
 #endif
-#if defined (SYS_modpath)
+#ifdef SYS_modpath
   syscall_table[SYS_modpath] = "modpath";
 #endif
-#if defined (SYS_modstat)
+#ifdef SYS_modstat
   syscall_table[SYS_modstat] = "modstat";
 #endif
-#if defined (SYS_moduload)
+#ifdef SYS_moduload
   syscall_table[SYS_moduload] = "moduload";
 #endif
-#if defined (SYS_mount)
+#ifdef SYS_mount
   syscall_table[SYS_mount] = "mount";
 #endif
-#if defined (SYS_mprotect)
+#ifdef SYS_mprotect
   syscall_table[SYS_mprotect] = "mprotect";
 #endif
-#if defined (SYS_mremap)
+#ifdef SYS_mremap
   syscall_table[SYS_mremap] = "mremap";
 #endif
-#if defined (SYS_msfs_syscall)
+#ifdef SYS_msfs_syscall
   syscall_table[SYS_msfs_syscall] = "msfs_syscall";
 #endif
-#if defined (SYS_msgctl)
+#ifdef SYS_msgctl
   syscall_table[SYS_msgctl] = "msgctl";
 #endif
-#if defined (SYS_msgget)
+#ifdef SYS_msgget
   syscall_table[SYS_msgget] = "msgget";
 #endif
-#if defined (SYS_msgrcv)
+#ifdef SYS_msgrcv
   syscall_table[SYS_msgrcv] = "msgrcv";
 #endif
-#if defined (SYS_msgsnd)
+#ifdef SYS_msgsnd
   syscall_table[SYS_msgsnd] = "msgsnd";
 #endif
-#if defined (SYS_msgsys)
+#ifdef SYS_msgsys
   syscall_table[SYS_msgsys] = "msgsys";
 #endif
-#if defined (SYS_msleep)
+#ifdef SYS_msleep
   syscall_table[SYS_msleep] = "msleep";
 #endif
-#if defined (SYS_msync)
+#ifdef SYS_msync
   syscall_table[SYS_msync] = "msync";
 #endif
-#if defined (SYS_munmap)
+#ifdef SYS_munmap
   syscall_table[SYS_munmap] = "munmap";
 #endif
-#if defined (SYS_mvalid)
+#ifdef SYS_mvalid
   syscall_table[SYS_mvalid] = "mvalid";
 #endif
-#if defined (SYS_mwakeup)
+#ifdef SYS_mwakeup
   syscall_table[SYS_mwakeup] = "mwakeup";
 #endif
-#if defined (SYS_naccept)
+#ifdef SYS_naccept
   syscall_table[SYS_naccept] = "naccept";
 #endif
-#if defined (SYS_nanosleep)
+#ifdef SYS_nanosleep
   syscall_table[SYS_nanosleep] = "nanosleep";
 #endif
-#if defined (SYS_nfssvc)
+#ifdef SYS_nfssvc
   syscall_table[SYS_nfssvc] = "nfssvc";
 #endif
-#if defined (SYS_nfssys)
+#ifdef SYS_nfssys
   syscall_table[SYS_nfssys] = "nfssys";
 #endif
-#if defined (SYS_ngetpeername)
+#ifdef SYS_ngetpeername
   syscall_table[SYS_ngetpeername] = "ngetpeername";
 #endif
-#if defined (SYS_ngetsockname)
+#ifdef SYS_ngetsockname
   syscall_table[SYS_ngetsockname] = "ngetsockname";
 #endif
-#if defined (SYS_nice)
+#ifdef SYS_nice
   syscall_table[SYS_nice] = "nice";
 #endif
-#if defined (SYS_nrecvfrom)
+#ifdef SYS_nrecvfrom
   syscall_table[SYS_nrecvfrom] = "nrecvfrom";
 #endif
-#if defined (SYS_nrecvmsg)
+#ifdef SYS_nrecvmsg
   syscall_table[SYS_nrecvmsg] = "nrecvmsg";
 #endif
-#if defined (SYS_nsendmsg)
+#ifdef SYS_nsendmsg
   syscall_table[SYS_nsendmsg] = "nsendmsg";
 #endif
-#if defined (SYS_ntp_adjtime)
+#ifdef SYS_ntp_adjtime
   syscall_table[SYS_ntp_adjtime] = "ntp_adjtime";
 #endif
-#if defined (SYS_ntp_gettime)
+#ifdef SYS_ntp_gettime
   syscall_table[SYS_ntp_gettime] = "ntp_gettime";
 #endif
-#if defined (SYS_nuname)
+#ifdef SYS_nuname
   syscall_table[SYS_nuname] = "nuname";
 #endif
-#if defined (SYS_obreak)
+#ifdef SYS_obreak
   syscall_table[SYS_obreak] = "obreak";
 #endif
-#if defined (SYS_old_accept)
+#ifdef SYS_old_accept
   syscall_table[SYS_old_accept] = "old_accept";
 #endif
-#if defined (SYS_old_fstat)
+#ifdef SYS_old_fstat
   syscall_table[SYS_old_fstat] = "old_fstat";
 #endif
-#if defined (SYS_old_getpeername)
+#ifdef SYS_old_getpeername
   syscall_table[SYS_old_getpeername] = "old_getpeername";
 #endif
-#if defined (SYS_old_getpgrp)
+#ifdef SYS_old_getpgrp
   syscall_table[SYS_old_getpgrp] = "old_getpgrp";
 #endif
-#if defined (SYS_old_getsockname)
+#ifdef SYS_old_getsockname
   syscall_table[SYS_old_getsockname] = "old_getsockname";
 #endif
-#if defined (SYS_old_killpg)
+#ifdef SYS_old_killpg
   syscall_table[SYS_old_killpg] = "old_killpg";
 #endif
-#if defined (SYS_old_lstat)
+#ifdef SYS_old_lstat
   syscall_table[SYS_old_lstat] = "old_lstat";
 #endif
-#if defined (SYS_old_recv)
+#ifdef SYS_old_recv
   syscall_table[SYS_old_recv] = "old_recv";
 #endif
-#if defined (SYS_old_recvfrom)
+#ifdef SYS_old_recvfrom
   syscall_table[SYS_old_recvfrom] = "old_recvfrom";
 #endif
-#if defined (SYS_old_recvmsg)
+#ifdef SYS_old_recvmsg
   syscall_table[SYS_old_recvmsg] = "old_recvmsg";
 #endif
-#if defined (SYS_old_send)
+#ifdef SYS_old_send
   syscall_table[SYS_old_send] = "old_send";
 #endif
-#if defined (SYS_old_sendmsg)
+#ifdef SYS_old_sendmsg
   syscall_table[SYS_old_sendmsg] = "old_sendmsg";
 #endif
-#if defined (SYS_old_sigblock)
+#ifdef SYS_old_sigblock
   syscall_table[SYS_old_sigblock] = "old_sigblock";
 #endif
-#if defined (SYS_old_sigsetmask)
+#ifdef SYS_old_sigsetmask
   syscall_table[SYS_old_sigsetmask] = "old_sigsetmask";
 #endif
-#if defined (SYS_old_sigvec)
+#ifdef SYS_old_sigvec
   syscall_table[SYS_old_sigvec] = "old_sigvec";
 #endif
-#if defined (SYS_old_stat)
+#ifdef SYS_old_stat
   syscall_table[SYS_old_stat] = "old_stat";
 #endif
-#if defined (SYS_old_vhangup)
+#ifdef SYS_old_vhangup
   syscall_table[SYS_old_vhangup] = "old_vhangup";
 #endif
-#if defined (SYS_old_wait)
+#ifdef SYS_old_wait
   syscall_table[SYS_old_wait] = "old_wait";
 #endif
-#if defined (SYS_oldquota)
+#ifdef SYS_oldquota
   syscall_table[SYS_oldquota] = "oldquota";
 #endif
-#if defined (SYS_online)
+#ifdef SYS_online
   syscall_table[SYS_online] = "online";
 #endif
-#if defined (SYS_open)
+#ifdef SYS_open
   syscall_table[SYS_open] = "open";
 #endif
-#if defined (SYS_open64)
+#ifdef SYS_open64
   syscall_table[SYS_open64] = "open64";
 #endif
-#if defined (SYS_ovadvise)
+#ifdef SYS_ovadvise
   syscall_table[SYS_ovadvise] = "ovadvise";
 #endif
-#if defined (SYS_p_online)
+#ifdef SYS_p_online
   syscall_table[SYS_p_online] = "p_online";
 #endif
-#if defined (SYS_pagelock)
+#ifdef SYS_pagelock
   syscall_table[SYS_pagelock] = "pagelock";
 #endif
-#if defined (SYS_pathconf)
+#ifdef SYS_pathconf
   syscall_table[SYS_pathconf] = "pathconf";
 #endif
-#if defined (SYS_pause)
+#ifdef SYS_pause
   syscall_table[SYS_pause] = "pause";
 #endif
-#if defined (SYS_pgrpsys)
+#ifdef SYS_pgrpsys
   syscall_table[SYS_pgrpsys] = "pgrpsys";
 #endif
-#if defined (SYS_pid_block)
+#ifdef SYS_pid_block
   syscall_table[SYS_pid_block] = "pid_block";
 #endif
-#if defined (SYS_pid_unblock)
+#ifdef SYS_pid_unblock
   syscall_table[SYS_pid_unblock] = "pid_unblock";
 #endif
-#if defined (SYS_pipe)
+#ifdef SYS_pipe
   syscall_table[SYS_pipe] = "pipe";
 #endif
-#if defined (SYS_plock)
+#ifdef SYS_plock
   syscall_table[SYS_plock] = "plock";
 #endif
-#if defined (SYS_poll)
+#ifdef SYS_poll
   syscall_table[SYS_poll] = "poll";
 #endif
-#if defined (SYS_prctl)
+#ifdef SYS_prctl
   syscall_table[SYS_prctl] = "prctl";
 #endif
-#if defined (SYS_pread)
+#ifdef SYS_pread
   syscall_table[SYS_pread] = "pread";
 #endif
-#if defined (SYS_pread64)
+#ifdef SYS_pread64
   syscall_table[SYS_pread64] = "pread64";
 #endif
-#if defined (SYS_pread64)
+#ifdef SYS_pread64
   syscall_table[SYS_pread64] = "pread64";
 #endif
-#if defined (SYS_prepblock)
+#ifdef SYS_prepblock
   syscall_table[SYS_prepblock] = "prepblock";
 #endif
-#if defined (SYS_priocntl)
+#ifdef SYS_priocntl
   syscall_table[SYS_priocntl] = "priocntl";
 #endif
-#if defined (SYS_priocntllst)
+#ifdef SYS_priocntllst
   syscall_table[SYS_priocntllst] = "priocntllst";
 #endif
-#if defined (SYS_priocntlset)
+#ifdef SYS_priocntlset
   syscall_table[SYS_priocntlset] = "priocntlset";
 #endif
-#if defined (SYS_priocntlsys)
+#ifdef SYS_priocntlsys
   syscall_table[SYS_priocntlsys] = "priocntlsys";
 #endif
-#if defined (SYS_procblk)
+#ifdef SYS_procblk
   syscall_table[SYS_procblk] = "procblk";
 #endif
-#if defined (SYS_processor_bind)
+#ifdef SYS_processor_bind
   syscall_table[SYS_processor_bind] = "processor_bind";
 #endif
-#if defined (SYS_processor_exbind)
+#ifdef SYS_processor_exbind
   syscall_table[SYS_processor_exbind] = "processor_exbind";
 #endif
-#if defined (SYS_processor_info)
+#ifdef SYS_processor_info
   syscall_table[SYS_processor_info] = "processor_info";
 #endif
-#if defined (SYS_procpriv)
+#ifdef SYS_procpriv
   syscall_table[SYS_procpriv] = "procpriv";
 #endif
-#if defined (SYS_profil)
+#ifdef SYS_profil
   syscall_table[SYS_profil] = "profil";
 #endif
-#if defined (SYS_proplist_syscall)
+#ifdef SYS_proplist_syscall
   syscall_table[SYS_proplist_syscall] = "proplist_syscall";
 #endif
-#if defined (SYS_pset)
+#ifdef SYS_pset
   syscall_table[SYS_pset] = "pset";
 #endif
-#if defined (SYS_ptrace)
+#ifdef SYS_ptrace
   syscall_table[SYS_ptrace] = "ptrace";
 #endif
-#if defined (SYS_putmsg)
+#ifdef SYS_putmsg
   syscall_table[SYS_putmsg] = "putmsg";
 #endif
-#if defined (SYS_putpmsg)
+#ifdef SYS_putpmsg
   syscall_table[SYS_putpmsg] = "putpmsg";
 #endif
-#if defined (SYS_pwrite)
+#ifdef SYS_pwrite
   syscall_table[SYS_pwrite] = "pwrite";
 #endif
-#if defined (SYS_pwrite64)
+#ifdef SYS_pwrite64
   syscall_table[SYS_pwrite64] = "pwrite64";
 #endif
-#if defined (SYS_quotactl)
+#ifdef SYS_quotactl
   syscall_table[SYS_quotactl] = "quotactl";
 #endif
-#if defined (SYS_rdblock)
+#ifdef SYS_rdblock
   syscall_table[SYS_rdblock] = "rdblock";
 #endif
-#if defined (SYS_read)
+#ifdef SYS_read
   syscall_table[SYS_read] = "read";
 #endif
-#if defined (SYS_readlink)
+#ifdef SYS_readlink
   syscall_table[SYS_readlink] = "readlink";
 #endif
-#if defined (SYS_readv)
+#ifdef SYS_readv
   syscall_table[SYS_readv] = "readv";
 #endif
-#if defined (SYS_reboot)
+#ifdef SYS_reboot
   syscall_table[SYS_reboot] = "reboot";
 #endif
-#if defined (SYS_recv)
+#ifdef SYS_recv
   syscall_table[SYS_recv] = "recv";
 #endif
-#if defined (SYS_recvfrom)
+#ifdef SYS_recvfrom
   syscall_table[SYS_recvfrom] = "recvfrom";
 #endif
-#if defined (SYS_recvmsg)
+#ifdef SYS_recvmsg
   syscall_table[SYS_recvmsg] = "recvmsg";
 #endif
-#if defined (SYS_rename)
+#ifdef SYS_rename
   syscall_table[SYS_rename] = "rename";
 #endif
-#if defined (SYS_resolvepath)
+#ifdef SYS_resolvepath
   syscall_table[SYS_resolvepath] = "resolvepath";
 #endif
-#if defined (SYS_revoke)
+#ifdef SYS_revoke
   syscall_table[SYS_revoke] = "revoke";
 #endif
-#if defined (SYS_rfsys)
+#ifdef SYS_rfsys
   syscall_table[SYS_rfsys] = "rfsys";
 #endif
-#if defined (SYS_rmdir)
+#ifdef SYS_rmdir
   syscall_table[SYS_rmdir] = "rmdir";
 #endif
-#if defined (SYS_rpcsys)
+#ifdef SYS_rpcsys
   syscall_table[SYS_rpcsys] = "rpcsys";
 #endif
-#if defined (SYS_sbrk)
+#ifdef SYS_sbrk
   syscall_table[SYS_sbrk] = "sbrk";
 #endif
-#if defined (SYS_schedctl)
+#ifdef SYS_schedctl
   syscall_table[SYS_schedctl] = "schedctl";
 #endif
-#if defined (SYS_secadvise)
+#ifdef SYS_secadvise
   syscall_table[SYS_secadvise] = "secadvise";
 #endif
-#if defined (SYS_secsys)
+#ifdef SYS_secsys
   syscall_table[SYS_secsys] = "secsys";
 #endif
-#if defined (SYS_security)
+#ifdef SYS_security
   syscall_table[SYS_security] = "security";
 #endif
-#if defined (SYS_select)
+#ifdef SYS_select
   syscall_table[SYS_select] = "select";
 #endif
-#if defined (SYS_semctl)
+#ifdef SYS_semctl
   syscall_table[SYS_semctl] = "semctl";
 #endif
-#if defined (SYS_semget)
+#ifdef SYS_semget
   syscall_table[SYS_semget] = "semget";
 #endif
-#if defined (SYS_semop)
+#ifdef SYS_semop
   syscall_table[SYS_semop] = "semop";
 #endif
-#if defined (SYS_semsys)
+#ifdef SYS_semsys
   syscall_table[SYS_semsys] = "semsys";
 #endif
-#if defined (SYS_send)
+#ifdef SYS_send
   syscall_table[SYS_send] = "send";
 #endif
-#if defined (SYS_sendmsg)
+#ifdef SYS_sendmsg
   syscall_table[SYS_sendmsg] = "sendmsg";
 #endif
-#if defined (SYS_sendto)
+#ifdef SYS_sendto
   syscall_table[SYS_sendto] = "sendto";
 #endif
-#if defined (SYS_set_program_attributes)
+#ifdef SYS_set_program_attributes
   syscall_table[SYS_set_program_attributes] = "set_program_attributes";
 #endif
-#if defined (SYS_set_speculative)
+#ifdef SYS_set_speculative
   syscall_table[SYS_set_speculative] = "set_speculative";
 #endif
-#if defined (SYS_set_sysinfo)
+#ifdef SYS_set_sysinfo
   syscall_table[SYS_set_sysinfo] = "set_sysinfo";
 #endif
-#if defined (SYS_setcontext)
+#ifdef SYS_setcontext
   syscall_table[SYS_setcontext] = "setcontext";
 #endif
-#if defined (SYS_setdomainname)
+#ifdef SYS_setdomainname
   syscall_table[SYS_setdomainname] = "setdomainname";
 #endif
-#if defined (SYS_setegid)
+#ifdef SYS_setegid
   syscall_table[SYS_setegid] = "setegid";
 #endif
-#if defined (SYS_seteuid)
+#ifdef SYS_seteuid
   syscall_table[SYS_seteuid] = "seteuid";
 #endif
-#if defined (SYS_setgid)
+#ifdef SYS_setgid
   syscall_table[SYS_setgid] = "setgid";
 #endif
-#if defined (SYS_setgroups)
+#ifdef SYS_setgroups
   syscall_table[SYS_setgroups] = "setgroups";
 #endif
-#if defined (SYS_sethostid)
+#ifdef SYS_sethostid
   syscall_table[SYS_sethostid] = "sethostid";
 #endif
-#if defined (SYS_sethostname)
+#ifdef SYS_sethostname
   syscall_table[SYS_sethostname] = "sethostname";
 #endif
-#if defined (SYS_setitimer)
+#ifdef SYS_setitimer
   syscall_table[SYS_setitimer] = "setitimer";
 #endif
-#if defined (SYS_setlogin)
+#ifdef SYS_setlogin
   syscall_table[SYS_setlogin] = "setlogin";
 #endif
-#if defined (SYS_setpgid)
+#ifdef SYS_setpgid
   syscall_table[SYS_setpgid] = "setpgid";
 #endif
-#if defined (SYS_setpgrp)
+#ifdef SYS_setpgrp
   syscall_table[SYS_setpgrp] = "setpgrp";
 #endif
-#if defined (SYS_setpriority)
+#ifdef SYS_setpriority
   syscall_table[SYS_setpriority] = "setpriority";
 #endif
-#if defined (SYS_setregid)
+#ifdef SYS_setregid
   syscall_table[SYS_setregid] = "setregid";
 #endif
-#if defined (SYS_setreuid)
+#ifdef SYS_setreuid
   syscall_table[SYS_setreuid] = "setreuid";
 #endif
-#if defined (SYS_setrlimit)
+#ifdef SYS_setrlimit
   syscall_table[SYS_setrlimit] = "setrlimit";
 #endif
-#if defined (SYS_setrlimit64)
+#ifdef SYS_setrlimit64
   syscall_table[SYS_setrlimit64] = "setrlimit64";
 #endif
-#if defined (SYS_setsid)
+#ifdef SYS_setsid
   syscall_table[SYS_setsid] = "setsid";
 #endif
-#if defined (SYS_setsockopt)
+#ifdef SYS_setsockopt
   syscall_table[SYS_setsockopt] = "setsockopt";
 #endif
-#if defined (SYS_settimeofday)
+#ifdef SYS_settimeofday
   syscall_table[SYS_settimeofday] = "settimeofday";
 #endif
-#if defined (SYS_setuid)
+#ifdef SYS_setuid
   syscall_table[SYS_setuid] = "setuid";
 #endif
-#if defined (SYS_sgi)
+#ifdef SYS_sgi
   syscall_table[SYS_sgi] = "sgi";
 #endif
-#if defined (SYS_sgifastpath)
+#ifdef SYS_sgifastpath
   syscall_table[SYS_sgifastpath] = "sgifastpath";
 #endif
-#if defined (SYS_sgikopt)
+#ifdef SYS_sgikopt
   syscall_table[SYS_sgikopt] = "sgikopt";
 #endif
-#if defined (SYS_sginap)
+#ifdef SYS_sginap
   syscall_table[SYS_sginap] = "sginap";
 #endif
-#if defined (SYS_shmat)
+#ifdef SYS_shmat
   syscall_table[SYS_shmat] = "shmat";
 #endif
-#if defined (SYS_shmctl)
+#ifdef SYS_shmctl
   syscall_table[SYS_shmctl] = "shmctl";
 #endif
-#if defined (SYS_shmdt)
+#ifdef SYS_shmdt
   syscall_table[SYS_shmdt] = "shmdt";
 #endif
-#if defined (SYS_shmget)
+#ifdef SYS_shmget
   syscall_table[SYS_shmget] = "shmget";
 #endif
-#if defined (SYS_shmsys)
+#ifdef SYS_shmsys
   syscall_table[SYS_shmsys] = "shmsys";
 #endif
-#if defined (SYS_shutdown)
+#ifdef SYS_shutdown
   syscall_table[SYS_shutdown] = "shutdown";
 #endif
-#if defined (SYS_sigaction)
+#ifdef SYS_sigaction
   syscall_table[SYS_sigaction] = "sigaction";
 #endif
-#if defined (SYS_sigaltstack)
+#ifdef SYS_sigaltstack
   syscall_table[SYS_sigaltstack] = "sigaltstack";
 #endif
-#if defined (SYS_sigaltstack)
+#ifdef SYS_sigaltstack
   syscall_table[SYS_sigaltstack] = "sigaltstack";
 #endif
-#if defined (SYS_sigblock)
+#ifdef SYS_sigblock
   syscall_table[SYS_sigblock] = "sigblock";
 #endif
-#if defined (SYS_signal)
+#ifdef SYS_signal
   syscall_table[SYS_signal] = "signal";
 #endif
-#if defined (SYS_signotify)
+#ifdef SYS_signotify
   syscall_table[SYS_signotify] = "signotify";
 #endif
-#if defined (SYS_signotifywait)
+#ifdef SYS_signotifywait
   syscall_table[SYS_signotifywait] = "signotifywait";
 #endif
-#if defined (SYS_sigpending)
+#ifdef SYS_sigpending
   syscall_table[SYS_sigpending] = "sigpending";
 #endif
-#if defined (SYS_sigpoll)
+#ifdef SYS_sigpoll
   syscall_table[SYS_sigpoll] = "sigpoll";
 #endif
-#if defined (SYS_sigprocmask)
+#ifdef SYS_sigprocmask
   syscall_table[SYS_sigprocmask] = "sigprocmask";
 #endif
-#if defined (SYS_sigqueue)
+#ifdef SYS_sigqueue
   syscall_table[SYS_sigqueue] = "sigqueue";
 #endif
-#if defined (SYS_sigreturn)
+#ifdef SYS_sigreturn
   syscall_table[SYS_sigreturn] = "sigreturn";
 #endif
-#if defined (SYS_sigsendset)
+#ifdef SYS_sigsendset
   syscall_table[SYS_sigsendset] = "sigsendset";
 #endif
-#if defined (SYS_sigsendsys)
+#ifdef SYS_sigsendsys
   syscall_table[SYS_sigsendsys] = "sigsendsys";
 #endif
-#if defined (SYS_sigsetmask)
+#ifdef SYS_sigsetmask
   syscall_table[SYS_sigsetmask] = "sigsetmask";
 #endif
-#if defined (SYS_sigstack)
+#ifdef SYS_sigstack
   syscall_table[SYS_sigstack] = "sigstack";
 #endif
-#if defined (SYS_sigsuspend)
+#ifdef SYS_sigsuspend
   syscall_table[SYS_sigsuspend] = "sigsuspend";
 #endif
-#if defined (SYS_sigvec)
+#ifdef SYS_sigvec
   syscall_table[SYS_sigvec] = "sigvec";
 #endif
-#if defined (SYS_sigwait)
+#ifdef SYS_sigwait
   syscall_table[SYS_sigwait] = "sigwait";
 #endif
-#if defined (SYS_sigwaitprim)
+#ifdef SYS_sigwaitprim
   syscall_table[SYS_sigwaitprim] = "sigwaitprim";
 #endif
-#if defined (SYS_sleep)
+#ifdef SYS_sleep
   syscall_table[SYS_sleep] = "sleep";
 #endif
-#if defined (SYS_so_socket)
+#ifdef SYS_so_socket
   syscall_table[SYS_so_socket] = "so_socket";
 #endif
-#if defined (SYS_so_socketpair)
+#ifdef SYS_so_socketpair
   syscall_table[SYS_so_socketpair] = "so_socketpair";
 #endif
-#if defined (SYS_sockconfig)
+#ifdef SYS_sockconfig
   syscall_table[SYS_sockconfig] = "sockconfig";
 #endif
-#if defined (SYS_socket)
+#ifdef SYS_socket
   syscall_table[SYS_socket] = "socket";
 #endif
-#if defined (SYS_socketpair)
+#ifdef SYS_socketpair
   syscall_table[SYS_socketpair] = "socketpair";
 #endif
-#if defined (SYS_sproc)
+#ifdef SYS_sproc
   syscall_table[SYS_sproc] = "sproc";
 #endif
-#if defined (SYS_sprocsp)
+#ifdef SYS_sprocsp
   syscall_table[SYS_sprocsp] = "sprocsp";
 #endif
-#if defined (SYS_sstk)
+#ifdef SYS_sstk
   syscall_table[SYS_sstk] = "sstk";
 #endif
-#if defined (SYS_stat)
+#ifdef SYS_stat
   syscall_table[SYS_stat] = "stat";
 #endif
-#if defined (SYS_stat64)
+#ifdef SYS_stat64
   syscall_table[SYS_stat64] = "stat64";
 #endif
-#if defined (SYS_statfs)
+#ifdef SYS_statfs
   syscall_table[SYS_statfs] = "statfs";
 #endif
-#if defined (SYS_statvfs)
+#ifdef SYS_statvfs
   syscall_table[SYS_statvfs] = "statvfs";
 #endif
-#if defined (SYS_statvfs64)
+#ifdef SYS_statvfs64
   syscall_table[SYS_statvfs64] = "statvfs64";
 #endif
-#if defined (SYS_stime)
+#ifdef SYS_stime
   syscall_table[SYS_stime] = "stime";
 #endif
-#if defined (SYS_stty)
+#ifdef SYS_stty
   syscall_table[SYS_stty] = "stty";
 #endif
-#if defined (SYS_subsys_info)
+#ifdef SYS_subsys_info
   syscall_table[SYS_subsys_info] = "subsys_info";
 #endif
-#if defined (SYS_swapctl)
+#ifdef SYS_swapctl
   syscall_table[SYS_swapctl] = "swapctl";
 #endif
-#if defined (SYS_swapon)
+#ifdef SYS_swapon
   syscall_table[SYS_swapon] = "swapon";
 #endif
-#if defined (SYS_symlink)
+#ifdef SYS_symlink
   syscall_table[SYS_symlink] = "symlink";
 #endif
-#if defined (SYS_sync)
+#ifdef SYS_sync
   syscall_table[SYS_sync] = "sync";
 #endif
-#if defined (SYS_sys3b)
+#ifdef SYS_sys3b
   syscall_table[SYS_sys3b] = "sys3b";
 #endif
-#if defined (SYS_syscall)
+#ifdef SYS_syscall
   syscall_table[SYS_syscall] = "syscall";
 #endif
-#if defined (SYS_sysconfig)
+#ifdef SYS_sysconfig
   syscall_table[SYS_sysconfig] = "sysconfig";
 #endif
-#if defined (SYS_sysfs)
+#ifdef SYS_sysfs
   syscall_table[SYS_sysfs] = "sysfs";
 #endif
-#if defined (SYS_sysi86)
+#ifdef SYS_sysi86
   syscall_table[SYS_sysi86] = "sysi86";
 #endif
-#if defined (SYS_sysinfo)
+#ifdef SYS_sysinfo
   syscall_table[SYS_sysinfo] = "sysinfo";
 #endif
-#if defined (SYS_sysmips)
+#ifdef SYS_sysmips
   syscall_table[SYS_sysmips] = "sysmips";
 #endif
-#if defined (SYS_syssun)
+#ifdef SYS_syssun
   syscall_table[SYS_syssun] = "syssun";
 #endif
-#if defined (SYS_systeminfo)
+#ifdef SYS_systeminfo
   syscall_table[SYS_systeminfo] = "systeminfo";
 #endif
-#if defined (SYS_table)
+#ifdef SYS_table
   syscall_table[SYS_table] = "table";
 #endif
-#if defined (SYS_time)
+#ifdef SYS_time
   syscall_table[SYS_time] = "time";
 #endif
-#if defined (SYS_timedwait)
+#ifdef SYS_timedwait
   syscall_table[SYS_timedwait] = "timedwait";
 #endif
-#if defined (SYS_timer_create)
+#ifdef SYS_timer_create
   syscall_table[SYS_timer_create] = "timer_create";
 #endif
-#if defined (SYS_timer_delete)
+#ifdef SYS_timer_delete
   syscall_table[SYS_timer_delete] = "timer_delete";
 #endif
-#if defined (SYS_timer_getoverrun)
+#ifdef SYS_timer_getoverrun
   syscall_table[SYS_timer_getoverrun] = "timer_getoverrun";
 #endif
-#if defined (SYS_timer_gettime)
+#ifdef SYS_timer_gettime
   syscall_table[SYS_timer_gettime] = "timer_gettime";
 #endif
-#if defined (SYS_timer_settime)
+#ifdef SYS_timer_settime
   syscall_table[SYS_timer_settime] = "timer_settime";
 #endif
-#if defined (SYS_times)
+#ifdef SYS_times
   syscall_table[SYS_times] = "times";
 #endif
-#if defined (SYS_truncate)
+#ifdef SYS_truncate
   syscall_table[SYS_truncate] = "truncate";
 #endif
-#if defined (SYS_truncate64)
+#ifdef SYS_truncate64
   syscall_table[SYS_truncate64] = "truncate64";
 #endif
-#if defined (SYS_tsolsys)
+#ifdef SYS_tsolsys
   syscall_table[SYS_tsolsys] = "tsolsys";
 #endif
-#if defined (SYS_uadmin)
+#ifdef SYS_uadmin
   syscall_table[SYS_uadmin] = "uadmin";
 #endif
-#if defined (SYS_ulimit)
+#ifdef SYS_ulimit
   syscall_table[SYS_ulimit] = "ulimit";
 #endif
-#if defined (SYS_umask)
+#ifdef SYS_umask
   syscall_table[SYS_umask] = "umask";
 #endif
-#if defined (SYS_umount)
+#ifdef SYS_umount
   syscall_table[SYS_umount] = "umount";
 #endif
-#if defined (SYS_uname)
+#ifdef SYS_uname
   syscall_table[SYS_uname] = "uname";
 #endif
-#if defined (SYS_unblock)
+#ifdef SYS_unblock
   syscall_table[SYS_unblock] = "unblock";
 #endif
-#if defined (SYS_unlink)
+#ifdef SYS_unlink
   syscall_table[SYS_unlink] = "unlink";
 #endif
-#if defined (SYS_unmount)
+#ifdef SYS_unmount
   syscall_table[SYS_unmount] = "unmount";
 #endif
-#if defined (SYS_usleep_thread)
+#ifdef SYS_usleep_thread
   syscall_table[SYS_usleep_thread] = "usleep_thread";
 #endif
-#if defined (SYS_uswitch)
+#ifdef SYS_uswitch
   syscall_table[SYS_uswitch] = "uswitch";
 #endif
-#if defined (SYS_utc_adjtime)
+#ifdef SYS_utc_adjtime
   syscall_table[SYS_utc_adjtime] = "utc_adjtime";
 #endif
-#if defined (SYS_utc_gettime)
+#ifdef SYS_utc_gettime
   syscall_table[SYS_utc_gettime] = "utc_gettime";
 #endif
-#if defined (SYS_utime)
+#ifdef SYS_utime
   syscall_table[SYS_utime] = "utime";
 #endif
-#if defined (SYS_utimes)
+#ifdef SYS_utimes
   syscall_table[SYS_utimes] = "utimes";
 #endif
-#if defined (SYS_utssys)
+#ifdef SYS_utssys
   syscall_table[SYS_utssys] = "utssys";
 #endif
-#if defined (SYS_vfork)
+#ifdef SYS_vfork
   syscall_table[SYS_vfork] = "vfork";
 #endif
-#if defined (SYS_vhangup)
+#ifdef SYS_vhangup
   syscall_table[SYS_vhangup] = "vhangup";
 #endif
-#if defined (SYS_vtrace)
+#ifdef SYS_vtrace
   syscall_table[SYS_vtrace] = "vtrace";
 #endif
-#if defined (SYS_wait)
+#ifdef SYS_wait
   syscall_table[SYS_wait] = "wait";
 #endif
-#if defined (SYS_waitid)
+#ifdef SYS_waitid
   syscall_table[SYS_waitid] = "waitid";
 #endif
-#if defined (SYS_waitsys)
+#ifdef SYS_waitsys
   syscall_table[SYS_waitsys] = "waitsys";
 #endif
-#if defined (SYS_write)
+#ifdef SYS_write
   syscall_table[SYS_write] = "write";
 #endif
-#if defined (SYS_writev)
+#ifdef SYS_writev
   syscall_table[SYS_writev] = "writev";
 #endif
-#if defined (SYS_xenix)
+#ifdef SYS_xenix
   syscall_table[SYS_xenix] = "xenix";
 #endif
-#if defined (SYS_xmknod)
+#ifdef SYS_xmknod
   syscall_table[SYS_xmknod] = "xmknod";
 #endif
-#if defined (SYS_xstat)
+#ifdef SYS_xstat
   syscall_table[SYS_xstat] = "xstat";
 #endif
-#if defined (SYS_yield)
+#ifdef SYS_yield
   syscall_table[SYS_yield] = "yield";
 #endif
 }
 
-/*
- * Prettyprint a single syscall by number.
- */
+/* Prettyprint syscall NUM.  */
 
 void
 proc_prettyfprint_syscall (FILE *file, int num, int verbose)
@@ -1414,9 +1412,7 @@ proc_prettyprint_syscall (int num, int verbose)
   proc_prettyfprint_syscall (stdout, num, verbose);
 }
 
-/*
- * Prettyprint all of the syscalls in a sysset_t set.
- */
+/* Prettyprint all syscalls in SYSSET.  */
 
 void
 proc_prettyfprint_syscalls (FILE *file, sysset_t *sysset, int verbose)
@@ -1436,8 +1432,10 @@ proc_prettyprint_syscalls (sysset_t *sysset, int verbose)
 {
   proc_prettyfprint_syscalls (stdout, sysset, verbose);
 }
+
+/* Prettyprint signals.  */
 
-/* FIXME: add real-time signals */
+/* Signal translation table.  */
 
 static struct trans signal_table[] = 
 {
@@ -1580,13 +1578,11 @@ static struct trans signal_table[] =
 #ifdef SIGAIO
   { SIGAIO, "SIGAIO", "Asynchronous I/O signal" },
 #endif
+
+  /* FIXME: add real-time signals.  */
 };
 
-/*
- * Prettyprint a single signal by number.
- * Accepts a signal number and finds it in the signal table, 
- * then pretty-prints it. 
- */
+/* Prettyprint signal number SIGNO.  */
 
 void
 proc_prettyfprint_signal (FILE *file, int signo, int verbose)
@@ -1612,21 +1608,16 @@ proc_prettyprint_signal (int signo, int verbose)
   proc_prettyfprint_signal (stdout, signo, verbose);
 }
 
-/*
- * Prettyprint all of the signals in a sigset_t set.
- *
- * This function loops over all signal numbers from 0 to NSIG, 
- * uses them as indexes for prismember, and prints them pretty.
- * 
- * It does not loop over the signal table, as is done with the
- * fault table, because the signal table may contain aliases.
- * If it did, both aliases would be printed.
- */
+/* Prettyprint all signals in SIGSET.  */
 
 void
 proc_prettyfprint_signalset (FILE *file, sigset_t *sigset, int verbose)
 {
   int i;
+
+  /* Loop over all signal numbers from 0 to NSIG, using them as the
+     index to prismember.  The signal table had better not contain
+     aliases, for if it does they will both be printed.  */
 
   for (i = 0; i < NSIG; i++)
     if (prismember (sigset, i))
@@ -1641,61 +1632,63 @@ proc_prettyprint_signalset (sigset_t *sigset, int verbose)
 {
   proc_prettyfprint_signalset (stdout, sigset, verbose);
 }
+
 
-/*  Hardware fault translation table. */
+/* Prettyprint faults.  */
+
+/* Fault translation table.  */
 
 static struct trans fault_table[] =
 {
-#if defined (FLTILL)
+#ifdef FLTILL
   { FLTILL, "FLTILL", "Illegal instruction" },
 #endif
-#if defined (FLTPRIV)
+#ifdef FLTPRIV
   { FLTPRIV, "FLTPRIV", "Privileged instruction" },
 #endif
-#if defined (FLTBPT)
+#ifdef FLTBPT
   { FLTBPT, "FLTBPT", "Breakpoint trap" },
 #endif
-#if defined (FLTTRACE)
+#ifdef FLTTRACE
   { FLTTRACE, "FLTTRACE", "Trace trap" },
 #endif
-#if defined (FLTACCESS)
+#ifdef FLTACCESS
   { FLTACCESS, "FLTACCESS", "Memory access fault" },
 #endif
-#if defined (FLTBOUNDS)
+#ifdef FLTBOUNDS
   { FLTBOUNDS, "FLTBOUNDS", "Memory bounds violation" },
 #endif
-#if defined (FLTIOVF)
+#ifdef FLTIOVF
   { FLTIOVF, "FLTIOVF", "Integer overflow" },
 #endif
-#if defined (FLTIZDIV)
+#ifdef FLTIZDIV
   { FLTIZDIV, "FLTIZDIV", "Integer zero divide" },
 #endif
-#if defined (FLTFPE)
+#ifdef FLTFPE
   { FLTFPE, "FLTFPE", "Floating-point exception" },
 #endif
-#if defined (FLTSTACK)
+#ifdef FLTSTACK
   { FLTSTACK, "FLTSTACK", "Unrecoverable stack fault" },
 #endif
-#if defined (FLTPAGE)
+#ifdef FLTPAGE
   { FLTPAGE, "FLTPAGE", "Recoverable page fault" },
 #endif
-#if defined (FLTPCINVAL)
+#ifdef FLTPCINVAL
   { FLTPCINVAL, "FLTPCINVAL", "Invalid PC exception" },
 #endif
-#if defined (FLTWATCH)
+#ifdef FLTWATCH
   { FLTWATCH, "FLTWATCH", "User watchpoint" },
 #endif
-#if defined (FLTKWATCH)
+#ifdef FLTKWATCH
   { FLTKWATCH, "FLTKWATCH", "Kernel watchpoint" },
 #endif
-#if defined (FLTSCWATCH)
+#ifdef FLTSCWATCH
   { FLTSCWATCH, "FLTSCWATCH", "Hit a store conditional on a watched page" },
 #endif
 };
 
-/*
- * Work horse.  Accepts an index into the fault table, prints it pretty. 
- */
+/* Work horse.  Accepts an index into the fault table, prints it
+   pretty.  */
 
 static void
 prettyfprint_faulttable_entry (FILE *file, int i, int verbose)
@@ -1707,16 +1700,14 @@ prettyfprint_faulttable_entry (FILE *file, int i, int verbose)
     fprintf (file, " ");
 }
 
-/* 
- * Prettyprint a hardware fault by number.
- */
+/* Prettyprint hardware fault number FAULTNO.  */
 
 void
 proc_prettyfprint_fault (FILE *file, int faultno, int verbose)
 {
   int i;
 
-  for (i = 0; i < sizeof (fault_table) / sizeof (fault_table[0]); i++)
+  for (i = 0; i < ARRAY_SIZE (fault_table); i++)
     if (faultno == fault_table[i].value)
       {
 	prettyfprint_faulttable_entry (file, i, verbose);
@@ -1733,21 +1724,18 @@ proc_prettyprint_fault (int faultno, int verbose)
   proc_prettyfprint_fault (stdout, faultno, verbose);
 }
 
-/*
- * Prettyprint all the faults in a fltset_t set.
- *
- * This function loops thru the fault table, 
- * using the value field as the index to prismember.
- * The fault table had better not contain aliases, 
- * for if it does they will both be printed.
- */
+/* Prettyprint all faults in FLTSET.  */
 
 void
 proc_prettyfprint_faultset (FILE *file, fltset_t *fltset, int verbose)
 {
   int i;
 
-  for (i = 0; i < sizeof (fault_table) / sizeof (fault_table[0]); i++)
+  /* Loop through the fault table, using the value field as the index
+     to prismember.  The fault table had better not contain aliases,
+     for if it does they will both be printed.  */
+
+  for (i = 0; i < ARRAY_SIZE (fault_table); i++)
     if (prismember (fltset, fault_table[i].value))
       prettyfprint_faulttable_entry (file, i, verbose);
 
@@ -1761,14 +1749,16 @@ proc_prettyprint_faultset (fltset_t *fltset, int verbose)
   proc_prettyfprint_faultset (stdout, fltset, verbose);
 }
 
-/*
- * Todo: actions, holds...
- */
+/* TODO: actions, holds...  */
 
 void
 proc_prettyprint_actionset (struct sigaction *actions, int verbose)
 {
 }
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_proc_events (void);
 
 void
 _initialize_proc_events (void)

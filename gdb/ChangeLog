@@ -1,5 +1,11 @@
 2004-10-28  Mark Kettenis  <kettenis@jive.nl>
 
+	* proc-events.c: Fix several coding-style issues.  Consistently
+	use #ifdef instead of #if defined().
+	(proc_prettyfprint_fault, proc_prettyfprint_faultset): Use
+	ARRAY_SIZE.
+	(_initialize_proc_events): New prototype.
+
 	* proc-why.c: Fix several coding-style issues.
 	(proc_prettyfprint_why): Use ARRAY_SIZE.
 
