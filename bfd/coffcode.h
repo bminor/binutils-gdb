@@ -985,6 +985,10 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     {
       section->alignment_power = 1;
     }
+  else if (strncmp (section->name, ".stab", 5) == 0)
+    {
+      section->alignment_power = 2;
+    }
 #endif
 }
 #undef ALIGN_SET

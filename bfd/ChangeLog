@@ -1,3 +1,26 @@
+Thu Jan 18 18:25:34 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (coff_ppc_relocate_section): changed TOCDEFN relocs.
+	(coff_ppc_relocate_section): Handle special values for gcc built dlls.
+	(dump_toc): fix diagnosing code to identify out-of-toc-bounds entries.
+	Also begin the toc at 4 as an eye catcher ('31313131' marks the first
+	toc entry in an objdump) for now.
+	(ppc_do_last, ppc_get_last): New function - needed to save processing 
+	the toc owner to the end.
+	(ppc_coff_swap_sym_in_hook): Removed an incorrect hack for doing the 
+	toc owner last.
+
+	* cofflink.c (_bfd_coff_final_link): Added a new hack to keep the 
+	toc owner from being done till last. Must define POWERPC_LE_PC 
+	to enable it.
+
+	* coffcode.h (coff_set_alignment_hook): alignment setting for .stab
+
+	* peicode.h (coff_swap_scnhdr_out): set section flags for stab/str
+	to INFO.
+	(coff_swap_aouthdr_out): Removed a non-working hack for computing the
+	SizeOfImage for PowerPC. Ignore the size of the .junk section.
+
 Thu Jan 18 17:42:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcore.h: Include <signal.h> before <sys/procfs.h>.
