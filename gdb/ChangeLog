@@ -1,3 +1,8 @@
+2005-01-04  Andrew Cagney  <cagney@gnu.org>
+
+	* version.in: Change format from 6.3.50_2005-01-04-cvs to
+	6.3.50.20050104-cvs.
+
 2005-01-04  Andreas Schwab  <schwab@suse.de>
 
 	* breakpoint.c (break_command_1): Always free err_msg before
