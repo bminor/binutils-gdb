@@ -99,7 +99,6 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   struct internal_aouthdr *internal_a = (struct internal_aouthdr *) aouthdr;
   ecoff_data_type *ecoff;
-  asection *regsec;
 
   if (ecoff_mkobject (abfd) == false)
     return NULL;
@@ -107,13 +106,6 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
   ecoff = ecoff_data (abfd);
   ecoff->gp_size = 8;
   ecoff->sym_filepos = internal_f->f_symptr;
-
-  /* Create the .reginfo section to give programs outside BFD a way to
-     see the information stored in the a.out header.  See the comment
-     in coff/ecoff.h.  */
-  regsec = bfd_make_section (abfd, REGINFO);
-  if (regsec == NULL)
-    return NULL;
 
   if (internal_a != (struct internal_aouthdr *) NULL)
     {
@@ -183,15 +175,6 @@ ecoff_new_section_hook (abfd, section)
     {
       /* An Irix 4 shared libary.  */
       section->flags |= SEC_SHARED_LIBRARY;
-    }
-  else if (strcmp (section->name, REGINFO) == 0)
-    {
-      /* Setting SEC_SHARED_LIBRARY should make the linker leave the
-	 section completely alone.  */
-      section->flags |= (SEC_SHARED_LIBRARY
-			 | SEC_HAS_CONTENTS
-			 | SEC_NEVER_LOAD);
-      section->_raw_size = sizeof (struct ecoff_reginfo);
     }
 
   /* Probably any other section name is SEC_NEVER_LOAD, but I'm
@@ -2187,12 +2170,21 @@ ecoff_bfd_copy_private_bfd_data (ibfd, obfd)
 {
   struct ecoff_debug_info *iinfo = &ecoff_data (ibfd)->debug_info;
   struct ecoff_debug_info *oinfo = &ecoff_data (obfd)->debug_info;
+  register int i;
   asymbol **sym_ptr_ptr;
   size_t c;
   boolean local;
 
   BFD_ASSERT (ibfd->xvec == obfd->xvec);
 
+  /* Copy the GP value and the register masks.  */
+  ecoff_data (obfd)->gp = ecoff_data (ibfd)->gp;
+  ecoff_data (obfd)->gprmask = ecoff_data (ibfd)->gprmask;
+  ecoff_data (obfd)->fprmask = ecoff_data (ibfd)->fprmask;
+  for (i = 0; i < 3; i++)
+    ecoff_data (obfd)->cprmask[i] = ecoff_data (ibfd)->cprmask[i];
+
+  /* Copy the version stamp.  */
   oinfo->symbolic_header.vstamp = iinfo->symbolic_header.vstamp;
 
   /* If there are no symbols, don't copy any debugging information.  */
@@ -2287,8 +2279,7 @@ ecoff_set_arch_mach (abfd, arch, machine)
   return arch == ecoff_backend (abfd)->arch;
 }
 
-/* Get the size of the section headers.  We do not output the .reginfo
-   section.  */
+/* Get the size of the section headers.  */
 
 /*ARGSUSED*/
 int
@@ -2304,8 +2295,7 @@ ecoff_sizeof_headers (abfd, reloc)
   for (current = abfd->sections;
        current != (asection *)NULL; 
        current = current->next) 
-    if (strcmp (current->name, REGINFO) != 0)
-      ++c;
+    ++c;
 
   ret = (bfd_coff_filhsz (abfd)
 	 + bfd_coff_aoutsz (abfd)
@@ -2313,9 +2303,7 @@ ecoff_sizeof_headers (abfd, reloc)
   return BFD_ALIGN (ret, 16);
 }
 
-/* Get the contents of a section.  This is where we handle reading the
-   .reginfo section, which implicitly holds the contents of an
-   ecoff_reginfo structure.  */
+/* Get the contents of a section.  */
 
 boolean
 ecoff_get_section_contents (abfd, section, location, offset, count)
@@ -2325,26 +2313,8 @@ ecoff_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  ecoff_data_type *tdata = ecoff_data (abfd);
-  struct ecoff_reginfo s;
-  int i;
-
-  if (strcmp (section->name, REGINFO) != 0)
-    return _bfd_generic_get_section_contents (abfd, section, location,
-					     offset, count);
-
-  s.gp_value = tdata->gp;
-  s.gprmask = tdata->gprmask;
-  for (i = 0; i < 4; i++)
-    s.cprmask[i] = tdata->cprmask[i];
-  s.fprmask = tdata->fprmask;
-
-  /* bfd_get_section_contents has already checked that the offset and
-     size is reasonable.  We don't have to worry about swapping or any
-     such thing; the .reginfo section is defined such that the
-     contents are an ecoff_reginfo structure as seen on the host.  */
-  memcpy (location, ((char *) &s) + offset, (size_t) count);
-  return true;
+  return _bfd_generic_get_section_contents (abfd, section, location,
+					    offset, count);
 }
 
 /* Calculate the file position for each section, and set
@@ -2369,8 +2339,7 @@ ecoff_compute_section_file_positions (abfd)
       unsigned int alignment_power;
 
       /* Only deal with sections which have contents */
-      if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0
-	  || strcmp (current->name, REGINFO) == 0)
+      if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0)
 	continue;
 
       /* For the Alpha ECOFF .pdata section the lnnoptr field is
@@ -2460,8 +2429,6 @@ ecoff_compute_reloc_file_positions (abfd)
        current != (asection *)NULL; 
        current = current->next) 
     {
-      if (strcmp (current->name, REGINFO) == 0)
-	continue;
       if (current->reloc_count == 0)
 	current->rel_filepos = 0;
       else
@@ -2490,9 +2457,7 @@ ecoff_compute_reloc_file_positions (abfd)
   return reloc_size;
 }
 
-/* Set the contents of a section.  This is where we handle setting the
-   contents of the .reginfo section, which implicitly holds a
-   ecoff_reginfo structure.  */
+/* Set the contents of a section.  */
 
 boolean
 ecoff_set_section_contents (abfd, section, location, offset, count)
@@ -2516,42 +2481,79 @@ ecoff_set_section_contents (abfd, section, location, offset, count)
   if (count == 0)
     return true;
 
-  if (strcmp (section->name, REGINFO) == 0)
-    {
-      ecoff_data_type *tdata = ecoff_data (abfd);
-      struct ecoff_reginfo s;
-      int i;
-
-      /* If the caller is only changing part of the structure, we must
-	 retrieve the current information before the memcpy.  */
-      if (offset != 0 || count != sizeof (struct ecoff_reginfo))
-	{
-	  s.gp_value = tdata->gp;
-	  s.gprmask = tdata->gprmask;
-	  for (i = 0; i < 4; i++)
-	    s.cprmask[i] = tdata->cprmask[i];
-	  s.fprmask = tdata->fprmask;
-	}
-
-      /* bfd_set_section_contents has already checked that the offset
-	 and size is reasonable.  We don't have to worry about
-	 swapping or any such thing; the .reginfo section is defined
-	 such that the contents are an ecoff_reginfo structure as seen
-	 on the host.  */
-      memcpy (((char *) &s) + offset, location, (size_t) count);
-
-      tdata->gp = s.gp_value;
-      tdata->gprmask = s.gprmask;
-      for (i = 0; i < 4; i++)
-	tdata->cprmask[i] = s.cprmask[i];
-      tdata->fprmask = s.fprmask;
-
-      return true;
-    }
-
   if (bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0
       || bfd_write (location, 1, count, abfd) != count)
     return false;
+
+  return true;
+}
+
+/* Get the GP value for an ECOFF file.  This is a hook used by
+   nlmconv.  */
+
+bfd_vma
+bfd_ecoff_get_gp_value (abfd)
+     bfd *abfd;
+{
+  if (bfd_get_flavour (abfd) != bfd_target_ecoff_flavour
+      || bfd_get_format (abfd) != bfd_object)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return 0;
+    }
+  
+  return ecoff_data (abfd)->gp;
+}
+
+/* Set the GP value for an ECOFF file.  This is a hook used by the
+   assembler.  */
+
+boolean
+bfd_ecoff_set_gp_value (abfd, gp_value)
+     bfd *abfd;
+     bfd_vma gp_value;
+{
+  if (bfd_get_flavour (abfd) != bfd_target_ecoff_flavour
+      || bfd_get_format (abfd) != bfd_object)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  ecoff_data (abfd)->gp = gp_value;
+
+  return true;
+}
+
+/* Set the register masks for an ECOFF file.  This is a hook used by
+   the assembler.  */
+
+boolean
+bfd_ecoff_set_regmasks (abfd, gprmask, fprmask, cprmask)
+     bfd *abfd;
+     unsigned long gprmask;
+     unsigned long fprmask;
+     unsigned long *cprmask;
+{
+  ecoff_data_type *tdata;
+
+  if (bfd_get_flavour (abfd) != bfd_target_ecoff_flavour
+      || bfd_get_format (abfd) != bfd_object)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  tdata = ecoff_data (abfd);
+  tdata->gprmask = gprmask;
+  tdata->fprmask = fprmask;
+  if (cprmask != (unsigned long *) NULL)
+    {
+      register int i;
+
+      for (i = 0; i < 3; i++)
+	tdata->cprmask[i] = cprmask[i];
+    }
 
   return true;
 }
@@ -2681,8 +2683,6 @@ ecoff_write_object_contents (abfd)
        current != (asection *)NULL; 
        current = current->next) 
     {
-      if (strcmp (current->name, REGINFO) == 0)
-	continue;
       current->target_index = count;
       ++count;
     }
@@ -2726,12 +2726,6 @@ ecoff_write_object_contents (abfd)
     {
       struct internal_scnhdr section;
       bfd_vma vma;
-
-      if (strcmp (current->name, REGINFO) == 0)
-	{
-	  BFD_ASSERT (current->reloc_count == 0);
-	  continue;
-	}
 
       ++internal_f.f_nscns;
 
@@ -4150,6 +4144,7 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 
       name = ssext + esym.asym.iss;
 
+      h = NULL;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, name, BSF_GLOBAL, section, value,
 	      (const char *) NULL, true, true,
@@ -4359,11 +4354,6 @@ ecoff_bfd_final_link (abfd, info)
 
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
-      /* Ignore any link_orders for the .reginfo section, which does
-	 not really exist.  */
-      if (strcmp (o->name, REGINFO) == 0)
-	continue;
-      
       for (p = o->link_order_head;
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)

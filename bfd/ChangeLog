@@ -1,5 +1,15 @@
 Mon May  9 11:53:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* linker.c (_bfd_generic_link_add_one_symbol): If hashp and *hashp
+	are not NULL, assume the caller has already looked up the symbol
+	in the hash table and has stored the entry in *hashp.
+	(generic_link_add_symbol_list): Set h to NULL before calling
+	_bfd_generic_link_add_one_symbol.
+	* ecoff.c (ecoff_link_add_externals): Likewise.
+
+	* elfcode.h (assign_file_positions_except_relocs): Don't require
+	page shared between .data and .bss segments to contain zeroes.
+
 	* elfcode.h: Include bfdlink.h.  Added several new functions to do
 	linking.
 	(ELF_R_TYPE): Define.
