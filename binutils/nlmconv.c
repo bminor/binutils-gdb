@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ansidecl.h>
 #include <stdio.h>
 #include <time.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <assert.h>
@@ -65,9 +66,6 @@ extern char *program_version;
 
 /* The symbol table.  */
 static asymbol **symbols;
-
-/* The total amount of bss space.  */
-static bfd_size_type total_bss_size;
 
 /* The list of long options.  */
 static struct option long_options[] =
@@ -110,7 +108,9 @@ main (argc, argv)
   bfd *outbfd;
   asymbol **newsyms, **outsyms;
   unsigned int symcount, newsymalloc, newsymcount;
-  asection *bss_sec;
+  asection *bss_sec, *data_sec;
+  bfd_vma vma;
+  bfd_size_type align;
   asymbol *endsym;
   unsigned int i;
   char inlead, outlead;
@@ -124,6 +124,7 @@ main (argc, argv)
   bfd_size_type shared_offset, shared_size;
   Nlm_Internal_Fixed_Header sharedhdr;
   int len;
+  char *modname;
 
   program_name = argv[0];
 
@@ -234,20 +235,41 @@ main (argc, argv)
   symbols = (asymbol **) xmalloc (get_symtab_upper_bound (inbfd));
   symcount = bfd_canonicalize_symtab (inbfd, symbols);
 
-  /* Make sure we have a .bss section.  Doing this first is an attempt
-     to ensure that it will be the first bss section.  */
+  /* Make sure we have a .bss section.  */
   bss_sec = bfd_get_section_by_name (outbfd, NLM_UNINITIALIZED_DATA_NAME);
   if (bss_sec == NULL)
     {
       bss_sec = bfd_make_section (outbfd, NLM_UNINITIALIZED_DATA_NAME);
-      if (bss_sec == NULL)
+      if (bss_sec == NULL
+	  || ! bfd_set_section_flags (outbfd, bss_sec, SEC_ALLOC)
+	  || ! bfd_set_section_alignment (outbfd, bss_sec, 1))
 	bfd_fatal ("make .bss section");
-      bss_sec->flags = SEC_ALLOC;
-      bss_sec->alignment_power = bfd_log2 (0); /* FIXME */
     }
 
   /* Set up the sections.  */
   bfd_map_over_sections (inbfd, setup_sections, (PTR) outbfd);
+
+  /* The .bss section immediately follows the .data section.  */
+  data_sec = bfd_get_section_by_name (outbfd, NLM_INITIALIZED_DATA_NAME);
+  if (data_sec != NULL)
+    {
+      bfd_size_type add;
+
+      vma = bfd_get_section_size_before_reloc (data_sec);
+      align = 1 << bss_sec->alignment_power;
+      add = ((vma + align - 1) &~ (align - 1)) - vma;
+      vma += add;
+      if (! bfd_set_section_vma (outbfd, bss_sec, vma))
+	bfd_fatal ("set .bss vma");
+      if (add != 0)
+	{
+	  bfd_size_type data_size;
+
+	  data_size = bfd_get_section_size_before_reloc (data_sec);
+	  if (! bfd_set_section_size (outbfd, data_sec, data_size + add))
+	    bfd_fatal ("set .data size");
+	}
+    }
 
   /* Adjust symbol information.  */
   inlead = bfd_get_symbol_leading_char (inbfd);
@@ -302,7 +324,6 @@ main (argc, argv)
       if (bfd_is_com_section (bfd_get_section (sym)))
 	{
 	  bfd_vma size;
-	  bfd_size_type align;
 
 	  sym->section = bss_sec;
 	  size = sym->value;
@@ -310,8 +331,15 @@ main (argc, argv)
 	  bss_sec->_raw_size += size;
 	  align = 1 << bss_sec->alignment_power;
 	  bss_sec->_raw_size = (bss_sec->_raw_size + align - 1) &~ (align - 1);
-	  total_bss_size += bss_sec->_raw_size - sym->value;
 	  sym->flags |= BSF_EXPORT | BSF_GLOBAL;
+	}
+      else if (bfd_get_section (sym)->output_section != NULL)
+	{
+	  /* Move the symbol into the output section.  */
+	  sym->value += bfd_get_section (sym)->output_offset;
+	  sym->section = bfd_get_section (sym)->output_section;
+	  /* This is no longer a section symbol.  */
+	  sym->flags &=~ BSF_SECTION_SYM;
 	}
 
       /* Force _edata and _end to be defined.  This would normally be
@@ -432,7 +460,7 @@ main (argc, argv)
     }
 
   if (endsym != NULL)
-    endsym->value = total_bss_size;
+    endsym->value = bfd_get_section_size_before_reloc (bss_sec);
 
   if (newsymcount == 0)
     outsyms = symbols;
@@ -627,7 +655,7 @@ main (argc, argv)
       && nlm_version_header (outbfd)->day == 0
       && nlm_version_header (outbfd)->year == 0)
     {
-      unsigned long now;	/* FIXME: should be time_t.  */
+      time_t now;
       struct tm *ptm;
 
       time (&now);
@@ -811,9 +839,16 @@ main (argc, argv)
   if (len > NLM_MODULE_NAME_SIZE - 2)
     len = NLM_MODULE_NAME_SIZE - 2;
   nlm_fixed_header (outbfd)->moduleName[0] = len;
+
   strncpy (nlm_fixed_header (outbfd)->moduleName + 1, argv[optind + 1],
 	   NLM_MODULE_NAME_SIZE - 2);
   nlm_fixed_header (outbfd)->moduleName[NLM_MODULE_NAME_SIZE - 1] = '\0';
+  for (modname = nlm_fixed_header (outbfd)->moduleName;
+       *modname != '\0';
+       modname++)
+    if (islower (*modname))
+      *modname = toupper (*modname);
+
   strncpy (nlm_variable_header (outbfd)->oldThreadName, " LONG",
 	   NLM_OLD_THREAD_NAME_LENGTH);
 
@@ -874,8 +909,9 @@ select_output_format (arch, mach, bigendian)
   /*NOTREACHED*/
 }
 
-/* The BFD sections are copied in two passes.  This function sets up
-   the section name, size, etc.  */
+/* The BFD sections are copied in two passes.  This function selects
+   the output section for each input section, and sets up the section
+   name, size, etc.  */
 
 static void
 setup_sections (inbfd, insec, data_ptr)
@@ -884,38 +920,44 @@ setup_sections (inbfd, insec, data_ptr)
      PTR data_ptr;
 {
   bfd *outbfd = (bfd *) data_ptr;
-  asection *outsec;
   flagword f;
+  const char *outname;
+  asection *outsec;
 
-  outsec = bfd_get_section_by_name (outbfd, bfd_section_name (inbfd, insec));
+  f = bfd_get_section_flags (inbfd, insec);
+  if (f & SEC_CODE)
+    outname = NLM_CODE_NAME;
+  else if ((f & SEC_LOAD) && (f & SEC_HAS_CONTENTS))
+    outname = NLM_INITIALIZED_DATA_NAME;
+  else if (f & SEC_ALLOC)
+    outname = NLM_UNINITIALIZED_DATA_NAME;
+  else
+    outname = bfd_section_name (inbfd, insec);
+
+  outsec = bfd_get_section_by_name (outbfd, outname);
   if (outsec == NULL)
     {
-      outsec = bfd_make_section (outbfd, bfd_section_name (inbfd, insec));
+      outsec = bfd_make_section (outbfd, outname);
       if (outsec == NULL)
 	bfd_fatal ("make section");
     }
 
   insec->output_section = outsec;
-  insec->output_offset = 0;
+  insec->output_offset = bfd_section_size (outbfd, outsec);
 
   if (! bfd_set_section_size (outbfd, outsec,
-			      bfd_section_size (inbfd, insec)))
+			      (bfd_section_size (outbfd, outsec)
+			       + bfd_section_size (inbfd, insec))))
     bfd_fatal ("set section size");
 
-  if (! bfd_set_section_vma (outbfd, outsec,
-			     bfd_section_vma (inbfd, insec)))
-    bfd_fatal ("set section vma");
-
-  if (! bfd_set_section_alignment (outbfd, outsec,
-				 bfd_section_alignment (inbfd, insec)))
+  if ((bfd_section_alignment (inbfd, insec)
+       > bfd_section_alignment (outbfd, outsec))
+      && ! bfd_set_section_alignment (outbfd, outsec,
+				      bfd_section_alignment (inbfd, insec)))
     bfd_fatal ("set section alignment");
 
-  f = bfd_get_section_flags (inbfd, insec);
   if (! bfd_set_section_flags (outbfd, outsec, f))
     bfd_fatal ("set section flags");
-
-  if ((f & SEC_LOAD) == 0 && (f & SEC_ALLOC) != 0)
-    total_bss_size += bfd_section_size (inbfd, insec);
 }
 
 /* Copy the section contents.  */
@@ -932,7 +974,7 @@ copy_sections (inbfd, insec, data_ptr)
   PTR contents;
   bfd_size_type reloc_size;
 
-  outsec = bfd_get_section_by_name (outbfd, bfd_section_name (inbfd, insec));
+  outsec = insec->output_section;
   assert (outsec != NULL);
 
   size = bfd_get_section_size_before_reloc (insec);
@@ -971,7 +1013,7 @@ copy_sections (inbfd, insec, data_ptr)
   if (contents != NULL)
     {
       if (! bfd_set_section_contents (outbfd, outsec, contents,
-				      (file_ptr) 0, size))
+				      insec->output_offset, size))
 	bfd_fatal (bfd_get_filename (outbfd));
       free (contents);
     }
@@ -1065,13 +1107,36 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  continue;
 	}
 
+      /* Get the amount the relocation will add in.  */
+      addend = rel->addend + sym->value;
+
+      /* NetWare doesn't support PC relative relocs against defined
+	 symbols, so we have to eliminate them by doing the relocation
+	 now.  We can only do this if the reloc is within a single
+	 section.  */
+      if (rel->howto != NULL
+	  && rel->howto->pc_relative
+	  && bfd_get_section (sym) == insec->output_section)
+	{
+	  bfd_vma val;
+
+	  if (rel->howto->pcrel_offset)
+	    addend -= rel->address;
+
+	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
+	  val += addend;
+	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
+
+	  --*reloc_count_ptr;
+	  --relocs;
+	  memmove (relocs, relocs + 1,
+		   (reloc_count - i) * sizeof (arelent *));
+	  continue;
+	}
+
       /* NetWare doesn't support reloc addends, so we get rid of them
 	 here by simply adding them into the object data.  We handle
 	 the symbol value, if any, the same way.  */
-      addend = rel->addend;
-      if (! bfd_is_com_section (bfd_get_section (sym)))
-	addend += sym->value;
-
       if (addend != 0
 	  && rel->howto != NULL
 	  && rel->howto->rightshift == 0
@@ -1083,14 +1148,13 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	{
 	  bfd_vma val;
 
-	  val = bfd_get_32 (outbfd, contents + rel->address);
+	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
 	  val += addend;
-	  bfd_put_32 (outbfd, val, contents + rel->address);
+	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
 
 	  /* Adjust the reloc for the changes we just made.  */
 	  rel->addend = 0;
-	  if (! bfd_is_com_section (bfd_get_section (sym))
-	      && sym->value != 0)
+	  if (bfd_get_section (sym) != &bfd_und_section)
 	    rel->sym_ptr_ptr = bfd_get_section (sym)->symbol_ptr_ptr;
 	}
 
@@ -1115,9 +1179,9 @@ i386_mangle_relocs (outbfd, insec, relocs, reloc_count_ptr, contents,
 	  /* When pcrel_offset is not set, it means that the negative
 	     of the address of the memory location is stored in the
 	     memory location.  We must add it back in.  */
-	  val = bfd_get_32 (outbfd, contents + rel->address);
+	  val = bfd_get_32 (outbfd, (bfd_byte *) contents + rel->address);
 	  val += rel->address;
-	  bfd_put_32 (outbfd, val, contents + rel->address);
+	  bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
 
 	  /* We must change to a new howto.  */
 	  rel->howto = &nlm_i386_pcrel_howto;
