@@ -177,7 +177,6 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
   asymbol **symbol_table;
   long number_of_symbols;
   long i;
-  int index;
   struct cleanup *back_to;
   CORE_ADDR symaddr;
   CORE_ADDR offset;
@@ -372,28 +371,21 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		    }
 		  else if (sym->flags & BSF_LOCAL)
 		    {
-		      int special_local_sym_p = 0;
-		      /* Named Local variable in a Data section.  Check its
-		         name for stabs-in-elf.  The STREQ macro checks the
-		         first character inline, so we only actually do a
-		         strcmp function call on names that start with 'B'
-		         or 'D' */
-		      if (STREQ ("Bbss.bss", sym->name))
-			{
-			  index = SECT_OFF_BSS (objfile);
-			  special_local_sym_p = 1;
-			}
-		      else if (STREQ ("Ddata.data", sym->name))
-			{
-			  index = SECT_OFF_DATA (objfile);
-			  special_local_sym_p = 1;
-			}
-		      else if (STREQ ("Drodata.rodata", sym->name))
-			{
-			  index = SECT_OFF_RODATA (objfile);
-			  special_local_sym_p = 1;
-			}
-		      if (special_local_sym_p)
+		      /* Named Local variable in a Data section.
+		         Check its name for stabs-in-elf.  The STREQ
+		         macro checks the first character inline, so
+		         we only actually do a strcmp function call on
+		         names that start with 'B' or 'D'.  */
+		      int special_local_sect;
+		      if (strcmp ("Bbss.bss", sym->name) == 0)
+			special_local_sect = SECT_OFF_BSS (objfile);
+		      else if (strcmp ("Ddata.data", sym->name) == 0)
+			special_local_sect = SECT_OFF_DATA (objfile);
+		      else if (strcmp ("Drodata.rodata", sym->name) == 0)
+			special_local_sect = SECT_OFF_RODATA (objfile);
+		      else
+			special_local_sect = -1;
+		      if (special_local_sect >= 0)
 			{
 			  /* Found a special local symbol.  Allocate a
 			     sectinfo, if needed, and fill it in.  */
@@ -425,36 +417,23 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				    (char *) filesym->name;
 				}
 			    }
-			  if (index != -1)
-			    { 
-			      if (sectinfo->sections[index] != 0)
-				{
-				  complaint (&symfile_complaints,
-					     "duplicated elf/stab section information for %s",
-					     sectinfo->filename);
-				}
-			    }
-			  else
-			    internal_error (__FILE__, __LINE__,
-					    "Section index uninitialized.");
-			  /* Bfd symbols are section relative. */
+			  if (sectinfo->sections[special_local_sect] != 0)
+			    complaint (&symfile_complaints,
+				       "duplicated elf/stab section information for %s",
+				       sectinfo->filename);
+			  /* BFD symbols are section relative.  */
 			  symaddr = sym->value + sym->section->vma;
-			  /* Relocate non-absolute symbols by the section offset. */
+			  /* Relocate non-absolute symbols by the
+                             section offset.  */
 			  if (sym->section != &bfd_abs_section)
-			    {
-			      symaddr += offset;
-			    }
-			  if (index != -1)
-			    sectinfo->sections[index] = symaddr;
-			  else
-			    internal_error (__FILE__, __LINE__,
-					    "Section index uninitialized.");
+			    symaddr += offset;
+			  sectinfo->sections[special_local_sect] = symaddr;
 			  /* The special local symbols don't go in the
-			     minimal symbol table, so ignore this one. */
+			     minimal symbol table, so ignore this one.  */
 			  continue;
 			}
 		      /* Not a special stabs-in-elf symbol, do regular
-		         symbol processing. */
+		         symbol processing.  */
 		      if (sym->section->flags & SEC_LOAD)
 			{
 			  ms_type = mst_file_data;

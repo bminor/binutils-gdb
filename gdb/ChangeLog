@@ -1,3 +1,9 @@
+2003-06-07  Andrew Cagney  <cagney@redhat.com>
+
+	* elfread.c (elf_symtab_read): Replace "special_local_sym_p" and
+	"index" with "special_local_sect".  Use strcmp instead of STREQ.
+	Append period to coments.
+
 2003-06-06  Mark Mitchell  <mark@codesourcery.com>
 
 	* elfread.c (elf_symtab_read): Avoid use of SECT_OFF_MAX.
