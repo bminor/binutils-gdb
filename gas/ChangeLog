@@ -1,3 +1,14 @@
+Mon Jan 29 12:21:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (localsym_t): Add addend field.
+	(add_ecoff_symbol): Add addend argument.  Change all callers.
+	(coff_sym_value): Make static.
+	(coff_sym_addend): New static variable.
+	(ecoff_directive_def): Initialize coff_sym_addend.
+	(ecoff_directive_val): Accept symbol + constant.
+	(ecoff_directive_endef): Pass coff_sym_addend to add_ecoff_symbol.
+	(ecoff_build_symbols): Include the addend in the symbol value.
+
 Fri Jan 26 19:28:52 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* config/tc-ppc.c (md_assemble): Ignore overflow on 
