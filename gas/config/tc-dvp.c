@@ -2113,7 +2113,9 @@ s_endgif (ignore)
      int ignore;
 {
   long count;
-  int nloop = gif_nloop ();
+  int specified_nloop = gif_nloop ();
+  int computed_nloop;
+  int nregs = gif_nregs ();
 
   if (CUR_ASM_STATE != ASM_GIF)
     {
@@ -2124,10 +2126,7 @@ s_endgif (ignore)
 
   /* The -16 is because the `gif_data_name' label is emitted at the start
      of the gif tag.  */
-  if (gif_insn_type == GIF_REGLIST)
-    count = eval_expr (0, 0, "(. - %s - 16) >> 3", gif_data_name);
-  else
-    count = eval_expr (0, 0, "(. - %s - 16) >> 4", gif_data_name);
+  count = eval_expr (0, 0, ". - %s - 16", gif_data_name);
 
   if (count < 0
       || fixup_count != 0)
@@ -2136,23 +2135,51 @@ s_endgif (ignore)
       return;
     }
 
+  /* Compute a value for nloop.
+     Also check whether we're left on a double/quadword boundary.  */
+  switch (gif_insn_type)
+    {
+    case GIF_PACKED :
+      if (count % 16 != 0)
+	as_warn ("data doesn't fill last quadword");
+      if (nregs == 0)
+	{
+	  if (count != 0)
+	    as_warn ("non-zero amount of data, but no registers specified");
+	  computed_nloop = 0;
+	}
+      else
+	computed_nloop = (count >> 4) / nregs;
+      break;
+    case GIF_REGLIST :
+      if (count % 8 != 0)
+	as_warn ("data doesn't fill last doubleword");
+      /* Fill out to quadword if odd number of doublewords.  */
+      if (nregs == 0)
+	{
+	  if (count != 0)
+	    as_warn ("non-zero amount of data, but no registers specified");
+	  computed_nloop = 0;
+	}
+      else
+	computed_nloop = (count >> 3) / nregs;
+      break;
+    case GIF_IMAGE :
+      if (count % 16 != 0)
+	as_warn ("data doesn't fill last quadword");
+      computed_nloop = count >> 4;
+      break;
+    }
+
+  /* FIXME: How should be handle the case where count is not a proper
+     multiple of 8/16?  We could just always emit a .align 16 or some
+     such.  */
+
   /* Validate nloop if specified.  Otherwise write the computed value into
      the insn.  */
-  if (nloop != -1)
+  if (specified_nloop != -1)
     {
-      int ok_p;
-
-      switch (gif_insn_type)
-	{
-	case GIF_PACKED : 
-	case GIF_REGLIST :
-	  ok_p = count == nloop * gif_nregs ();
-	  break;
-	case GIF_IMAGE :
-	  ok_p = count == nloop;
-	  break;
-	}
-      if (! ok_p)
+      if (computed_nloop != specified_nloop)
 	{
 	  as_warn ("nloop value does not match size of data");
 	  return;
@@ -2160,14 +2187,14 @@ s_endgif (ignore)
     }
   else
     {
-      DVP_INSN insn = bfd_getl32 (gif_insn_frag + 12);
+      DVP_INSN insn = bfd_getl32 (gif_insn_frag);
       char *file;
       unsigned int line;
       as_where (&file, &line);
       insert_operand_final (DVP_GIF, &gif_operands[gif_operand_nloop],
 			    DVP_MOD_THIS_WORD, &insn,
-			    (offsetT) nloop, file, line);
-      bfd_putl32 ((bfd_vma) insn, gif_insn_frag + 12);
+			    (offsetT) computed_nloop, file, line);
+      bfd_putl32 ((bfd_vma) insn, gif_insn_frag);
     }
 
   gif_data_name = NULL;

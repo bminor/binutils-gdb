@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Mar  6 11:36:37 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (s_endgif): Fix nloop calc and test.  Warn if
+	insufficient data present.  Fix insertion of computed nloop value.
+
+end-sanitize-sky
 start-sanitize-vr4320
 Tue Mar  3 11:37:26 1998  Gavin Koch  <gavin@cygnus.com>
 
