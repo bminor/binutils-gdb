@@ -720,7 +720,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   info->sp_offset = 0;
 
   info->uses_frame = 0;
-  for (pc = get_pc_function_start (frame_pc_unwind (next_frame));
+  for (pc = frame_func_unwind (next_frame);
        pc < frame_pc_unwind (next_frame);
        pc += 4)
     {

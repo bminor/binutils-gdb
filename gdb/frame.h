@@ -149,6 +149,12 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    this frame.  */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+/* Following on from the `resume' address.  Return the entry point
+   address of the function containing that resume address, or zero if
+   that function isn't known.  */
+extern CORE_ADDR frame_func_unwind (struct frame_info *fi);
+extern CORE_ADDR get_frame_func (struct frame_info *fi);
+
 /* Closely related to the resume address, various symbol table
    attributes that are determined by the PC.  Note that for a normal
    frame, the PC refers to the resume address after the return, and
@@ -409,6 +415,13 @@ struct frame_info
     /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
+
+    /* Cached copy of the previous frame's function address.  */
+    struct
+    {
+      CORE_ADDR addr;
+      int p;
+    } prev_func;
 
     /* This frame's ID.  Note that the frame's ID, base and PC contain
        redundant information.  */

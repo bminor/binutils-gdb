@@ -146,7 +146,7 @@ frameless_look_for_prologue (struct frame_info *frame)
 {
   CORE_ADDR func_start, after_prologue;
 
-  func_start = get_pc_function_start (get_frame_pc (frame));
+  func_start = get_frame_func (frame);
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;

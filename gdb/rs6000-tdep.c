@@ -990,7 +990,7 @@ rs6000_pop_frame (void)
      still in the link register, otherwise walk the frames and retrieve the
      saved %pc value in the previous frame.  */
 
-  addr = get_pc_function_start (get_frame_pc (frame));
+  addr = get_frame_func (frame);
   (void) skip_prologue (addr, get_frame_pc (frame), &fdata);
 
   wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
@@ -1499,7 +1499,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
       && !(get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     return 0;
 
-  func_start = get_pc_function_start (get_frame_pc (fi));
+  func_start = get_frame_func (fi);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1540,7 +1540,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     return deprecated_read_register_dummy (get_frame_pc (fi),
 					   get_frame_base (fi), PC_REGNUM);
 
-  func_start = get_pc_function_start (get_frame_pc (fi));
+  func_start = get_frame_func (fi);
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1596,8 +1596,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   if (fdatap == NULL)
     {
       fdatap = &work_fdata;
-      (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
-			    get_frame_pc (fi), fdatap);
+      (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), fdatap);
     }
 
   frame_saved_regs_zalloc (fi);
@@ -1720,8 +1719,7 @@ frame_initial_stack_address (struct frame_info *fi)
 
   /* Find out if this function is using an alloca register.  */
 
-  (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
-			get_frame_pc (fi), &fdata);
+  (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), &fdata);
 
   /* If saved registers of this frame are not known yet, read and
      cache them.  */

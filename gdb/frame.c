@@ -190,6 +190,23 @@ frame_pc_unwind (struct frame_info *this_frame)
   return this_frame->pc_unwind_cache;
 }
 
+CORE_ADDR
+frame_func_unwind (struct frame_info *fi)
+{
+  if (!fi->prev_func.p)
+    {
+      fi->prev_func.p = 1;
+      fi->prev_func.addr = get_pc_function_start (frame_pc_unwind (fi));
+    }
+  return fi->prev_func.addr;
+}
+
+CORE_ADDR
+get_frame_func (struct frame_info *fi)
+{
+  return frame_func_unwind (fi->next);
+}
+
 static int
 do_frame_unwind_register (void *src, int regnum, void *buf)
 {

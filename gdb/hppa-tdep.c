@@ -3912,7 +3912,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 
   /* Get the starting address of the function referred to by the PC
      saved in frame.  */
-  pc = get_pc_function_start (frame_info->pc);
+  pc = get_frame_func (frame_info);
 
   /* Yow! */
   u = find_unwind_entry (pc);

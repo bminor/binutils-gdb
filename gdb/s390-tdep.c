@@ -775,7 +775,7 @@ s390_function_start (struct frame_info *fi)
   if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->initialised)
     function_start = get_frame_extra_info (fi)->function_start;
   else if (get_frame_pc (fi))
-    function_start = get_pc_function_start (get_frame_pc (fi));
+    function_start = get_frame_func (fi);
   return function_start;
 }
 

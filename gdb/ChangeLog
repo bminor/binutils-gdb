@@ -1,5 +1,29 @@
 2003-04-05  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (frame_func_unwind, get_frame_func): New functions.
+	* frame.h (get_frame_func, frame_func_unwind): Declare.
+	(struct frame_info): Add field "prev_func" for caching the
+	previous frame's function address.
+	* arm-tdep.c (arm_frameless_function_invocation): Combine
+	get_pc_function_start and get_frame_pc into get_frame_func.
+	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Ditto.
+	(sh64_nofp_frame_init_saved_regs): Ditto.
+	* s390-tdep.c (s390_function_start): Ditto.
+	* rs6000-tdep.c (rs6000_pop_frame): Ditto.
+	(rs6000_frameless_function_invocation): Ditto.
+	(rs6000_frame_saved_pc): Ditto.
+	* m68k-tdep.c (m68k_frame_init_saved_regs): Ditto.
+	* ia64-tdep.c (ia64_frame_init_saved_regs): Ditto.
+	* i386-tdep.c (i386_frameless_signal_p): Ditto.
+	(i386_frame_init_saved_regs): Ditto.
+	* hppa-tdep.c (hppa_frame_find_saved_regs): Ditto.
+	* d10v-tdep.c (d10v_frame_unwind_cache): Combine
+	get_pc_function_start and frame_pc_unwind into frame_func_unwind.
+	* cris-tdep.c (cris_frame_init_saved_regs): Ditto.
+	* blockframe.c (frameless_look_for_prologue): Ditto.
+
+2003-04-05  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (legacy_get_prev_frame): Link prev to next at the
 	function start.  Update comments.
 
