@@ -1,3 +1,14 @@
+2004-01-08  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* config/tc-mips.c (ISA_HAS_COPROC_DELAYS): Remove.
+	(cop_interlocks): Check ISA level.
+	(cop_mem_interlocks): Define.
+	(reg_needs_delay): Check cop_interlocks rather than
+	ISA_HAS_COPROC_DELAYS.
+	(append_insn): Likewise.  Use cop_mem_interlocks rather than
+	directly checking mips_opts.isa.
+	(mips_emit_delays): Likewise.
+
 2004-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (unwind): Move next_slot_number and

@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -237,20 +237,6 @@ static const char *mips_tune_string;
 /* True when generating 32-bit code for a 64-bit processor.  */
 static int mips_32bitmode = 0;
 
-/* Some ISA's have delay slots for instructions which read or write
-   from a coprocessor (eg. mips1-mips3); some don't (eg mips4).
-   Return true if instructions marked INSN_LOAD_COPROC_DELAY,
-   INSN_COPROC_MOVE_DELAY, or INSN_WRITE_COND_CODE actually have a
-   delay slot in this ISA.  The uses of this macro assume that any
-   ISA that has delay slots for one of these, has them for all.  They
-   also assume that ISAs which don't have delays for these insns, don't
-   have delays for the INSN_LOAD_MEMORY_DELAY instructions either.  */
-#define ISA_HAS_COPROC_DELAYS(ISA) (        \
-   (ISA) == ISA_MIPS1                       \
-   || (ISA) == ISA_MIPS2                    \
-   || (ISA) == ISA_MIPS3                    \
-   )
-
 /* True if the given ABI requires 32-bit registers.  */
 #define ABI_NEEDS_32BIT_REGS(ABI) ((ABI) == O32_ABI)
 
@@ -350,21 +336,40 @@ static int mips_32bitmode = 0;
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
-   from the GPRs, and thus does not require nops to be inserted.  */
+   from the GPRs after they are loaded from memory, and thus does not
+   require nops to be inserted.  This applies to instructions marked
+   INSN_LOAD_MEMORY_DELAY.  These nops are only required at MIPS ISA
+   level I.  */
 #define gpr_interlocks \
   (mips_opts.isa != ISA_MIPS1  \
    || mips_opts.arch == CPU_VR5400  \
    || mips_opts.arch == CPU_VR5500  \
    || mips_opts.arch == CPU_R3900)
 
-/* As with other "interlocks" this is used by hardware that has FP
-   (co-processor) interlocks.  */
+/* Whether the processor uses hardware interlocks to avoid delays
+   required by coprocessor instructions, and thus does not require
+   nops to be inserted.  This applies to instructions marked
+   INSN_LOAD_COPROC_DELAY, INSN_COPROC_MOVE_DELAY, and to delays
+   between instructions marked INSN_WRITE_COND_CODE and ones marked
+   INSN_READ_COND_CODE.  These nops are only required at MIPS ISA
+   levels I, II, and III.  */
 /* Itbl support may require additional care here.  */
-#define cop_interlocks (mips_opts.arch == CPU_R4300                        \
-                        || mips_opts.arch == CPU_VR5400                    \
-                        || mips_opts.arch == CPU_VR5500                    \
-                        || mips_opts.arch == CPU_SB1                       \
-			)
+#define cop_interlocks                                \
+  ((mips_opts.isa != ISA_MIPS1                        \
+    && mips_opts.isa != ISA_MIPS2                     \
+    && mips_opts.isa != ISA_MIPS3)                    \
+   || mips_opts.arch == CPU_R4300                     \
+   || mips_opts.arch == CPU_VR5400                    \
+   || mips_opts.arch == CPU_VR5500                    \
+   || mips_opts.arch == CPU_SB1                       \
+   )
+
+/* Whether the processor uses hardware interlocks to protect reads
+   from coprocessor registers after they are loaded from memory, and
+   thus does not require nops to be inserted.  This applies to
+   instructions marked INSN_COPROC_MEMORY_DELAY.  These nops are only
+   requires at MIPS ISA level I.  */
+#define cop_mem_interlocks (mips_opts.isa != ISA_MIPS1)
 
 /* Is this a mfhi or mflo instruction?  */
 #define MF_HILO_INSN(PINFO) \
@@ -1479,15 +1484,13 @@ reg_needs_delay (unsigned int reg)
 
   prev_pinfo = prev_insn.insn_mo->pinfo;
   if (! mips_opts.noreorder
-      && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-      && ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
-	  || (! gpr_interlocks
-	      && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))))
+      && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY)
+	   && ! gpr_interlocks)
+	  || ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
+	      && ! cop_interlocks)))
     {
-      /* A load from a coprocessor or from memory.  All load
-	 delays delay the use of general register rt for one
-	 instruction on the r3000.  The r6000 and r4000 use
-	 interlocks.  */
+      /* A load from a coprocessor or from memory.  All load delays
+	 delay the use of general register rt for one instruction.  */
       /* Itbl support may require additional care here.  */
       know (prev_pinfo & INSN_WRITE_GPR_T);
       if (reg == ((prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT))
@@ -1580,16 +1583,14 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
       /* The previous insn might require a delay slot, depending upon
 	 the contents of the current insn.  */
       if (! mips_opts.mips16
-	  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-	  && (((prev_pinfo & INSN_LOAD_COPROC_DELAY)
-               && ! cop_interlocks)
-	      || (! gpr_interlocks
-		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))))
+	  && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY)
+	       && ! gpr_interlocks)
+	      || ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
+		  && ! cop_interlocks)))
 	{
 	  /* A load from a coprocessor or from memory.  All load
 	     delays delay the use of general register rt for one
-	     instruction on the r3000.  The r6000 and r4000 use
-	     interlocks.  */
+	     instruction.  */
 	  /* Itbl support may require additional care here.  */
 	  know (prev_pinfo & INSN_WRITE_GPR_T);
 	  if (mips_optimize == 0
@@ -1600,11 +1601,10 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	    ++nops;
 	}
       else if (! mips_opts.mips16
-	       && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 	       && (((prev_pinfo & INSN_COPROC_MOVE_DELAY)
 		    && ! cop_interlocks)
-		   || (mips_opts.isa == ISA_MIPS1
-		       && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))))
+		   || ((prev_pinfo & INSN_COPROC_MEMORY_DELAY)
+		       && ! cop_mem_interlocks)))
 	{
 	  /* A generic coprocessor delay.  The previous instruction
 	     modified a coprocessor general or control register.  If
@@ -1612,9 +1612,6 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	     coprocessor instruction (this is probably not always
 	     required, but it sometimes is).  If it modified a general
 	     register, we avoid using that register.
-
-	     On the r6000 and r4000 loading a coprocessor register
-	     from memory is interlocked, and does not require a delay.
 
 	     This case is not handled very well.  There is no special
 	     knowledge of CP0 handling, and the coprocessors other
@@ -1659,7 +1656,6 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	    }
 	}
       else if (! mips_opts.mips16
-	       && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 	       && (prev_pinfo & INSN_WRITE_COND_CODE)
                && ! cop_interlocks)
 	{
@@ -1766,7 +1762,6 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	 instruction, we must check for these cases compared to the
 	 instruction previous to the previous instruction.  */
       if ((! mips_opts.mips16
-	   && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 	   && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
 	   && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
 	   && (pinfo & INSN_READ_COND_CODE)
@@ -2285,30 +2280,30 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 		 we can not swap, and I don't feel like handling that
 		 case.  */
 	      || (! mips_opts.mips16
-		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-		  && (pinfo & INSN_READ_COND_CODE))
+		  && (pinfo & INSN_READ_COND_CODE)
+		  && ! cop_interlocks)
 	      /* We can not swap with an instruction that requires a
 		 delay slot, because the target of the branch might
 		 interfere with that instruction.  */
 	      || (! mips_opts.mips16
-		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 		  && (prev_pinfo
               /* Itbl support may require additional care here.  */
 		      & (INSN_LOAD_COPROC_DELAY
 			 | INSN_COPROC_MOVE_DELAY
-			 | INSN_WRITE_COND_CODE)))
+			 | INSN_WRITE_COND_CODE))
+		  && ! cop_interlocks)
 	      || (! (hilo_interlocks
 		     || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
 	      || (! mips_opts.mips16
-		  && ! gpr_interlocks
-		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))
+		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY)
+		  && ! gpr_interlocks)
 	      || (! mips_opts.mips16
-		  && mips_opts.isa == ISA_MIPS1
                   /* Itbl support may require additional care here.  */
-		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))
+		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY)
+		  && ! cop_mem_interlocks)
 	      /* We can not swap with a branch instruction.  */
 	      || (prev_pinfo
 		  & (INSN_UNCOND_BRANCH_DELAY
@@ -2411,12 +2406,12 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 		 delay, and sets a register that the branch reads, we
 		 can not swap.  */
 	      || (! mips_opts.mips16
-		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
               /* Itbl support may require additional care here.  */
-		  && ((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
-		      || (! gpr_interlocks
-			  && (prev_prev_insn.insn_mo->pinfo
-			      & INSN_LOAD_MEMORY_DELAY)))
+		  && (((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
+		       && ! cop_interlocks)
+		      || ((prev_prev_insn.insn_mo->pinfo
+			   & INSN_LOAD_MEMORY_DELAY)
+			  && ! gpr_interlocks))
 		  && insn_uses_reg (ip,
 				    ((prev_prev_insn.insn_opcode >> OP_SH_RT)
 				     & OP_MASK_RT),
@@ -2684,31 +2679,27 @@ mips_emit_delays (bfd_boolean insns)
 
       nops = 0;
       if ((! mips_opts.mips16
-	   && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-	   && (! cop_interlocks
-               && (prev_insn.insn_mo->pinfo
-                   & (INSN_LOAD_COPROC_DELAY
-                      | INSN_COPROC_MOVE_DELAY
-                      | INSN_WRITE_COND_CODE))))
+	   && ((prev_insn.insn_mo->pinfo
+		& (INSN_LOAD_COPROC_DELAY
+		   | INSN_COPROC_MOVE_DELAY
+		   | INSN_WRITE_COND_CODE))
+	       && ! cop_interlocks))
 	  || (! hilo_interlocks
 	      && (prev_insn.insn_mo->pinfo
 		  & (INSN_READ_LO
 		     | INSN_READ_HI)))
 	  || (! mips_opts.mips16
-	      && ! gpr_interlocks
-	      && (prev_insn.insn_mo->pinfo
-                  & INSN_LOAD_MEMORY_DELAY))
+	      && (prev_insn.insn_mo->pinfo & INSN_LOAD_MEMORY_DELAY)
+	      && ! gpr_interlocks)
 	  || (! mips_opts.mips16
-	      && mips_opts.isa == ISA_MIPS1
-	      && (prev_insn.insn_mo->pinfo
-		  & INSN_COPROC_MEMORY_DELAY)))
+	      && (prev_insn.insn_mo->pinfo & INSN_COPROC_MEMORY_DELAY)
+	      && ! cop_mem_interlocks))
 	{
 	  /* Itbl support may require additional care here.  */
 	  ++nops;
 	  if ((! mips_opts.mips16
-	       && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-	       && (! cop_interlocks
-                   && prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
+	       && ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+		   && ! cop_interlocks))
 	      || (! hilo_interlocks
 		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
@@ -2718,9 +2709,8 @@ mips_emit_delays (bfd_boolean insns)
 	    nops = 0;
 	}
       else if ((! mips_opts.mips16
-		&& ISA_HAS_COPROC_DELAYS (mips_opts.isa)
-		&& (! cop_interlocks
-                    && prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
+		&& ((prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+		    && ! cop_interlocks))
 	       || (! hilo_interlocks
 		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
