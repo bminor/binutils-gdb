@@ -348,37 +348,37 @@ greediest open bfd, close it to reclaim the memory, perform some
 operation and reopen the bfd again, to get a fresh copy of the data structures.
 
 @node Sections,Symbols ,Memory Usage, Top
-@include  section.c.texi
+@include  section.texi
 @page
 @node Symbols, Archives ,Sections, To
-@include  syms.c.texi
+@include  syms.texi
 @page
 @node Archives, Formats, Symbols, Top
-@include  archive.c.texi
+@include  archive.texi
 @page
 @node Formats, Relocations, Archives, Top
-@include  format.c.texi
+@include  format.texi
 @page
 @node Relocations, Core Files,Formats, Top
-@include  reloc.c.texi
+@include  reloc.texi
 @page
 @node Core Files, Targets,  Relocations, Top
-@include  core.c.texi
+@include  core.texi
 @page
 @node Targets, Architectures, Core Files, Top
-@include  targets.c.texi
+@include  targets.texi
 @page
 @node Architectures, Opening and Closing, Targets, Top
-@include  archures.c.texi
+@include  archures.texi
 @page
 @node Opening and Closing, Internal, Architectures, Top
-@include  opncls.c.texi
+@include  opncls.texi
 @page
 @node Internal, File Caching, Opening and Closing, Top
-@include  libbfd.c.texi
+@include  libbfd.texi
 @page
 @node File Caching, Top, Internal, Top
-@include  cache.c.texi
+@include  cache.texi
 @page
 @chapter BFD back end
 @node BFD back end, ,BFD front end, Top
