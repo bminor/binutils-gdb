@@ -11,52 +11,90 @@ MEMORY
 
 SECTIONS
 {
+  /* Read-only sections, merged into text segment: */
+  ${TEXT_DYNAMIC+${DYNAMIC}}
+  .hash			${RELOCATING-0} : { *(.hash) }
+  .dynsym		${RELOCATING-0} : { *(.dynsym) }
+  .dynstr		${RELOCATING-0} : { *(.dynstr) }
+  .gnu.version		${RELOCATING-0} : { *(.gnu.version) }
+  .gnu.version_d	${RELOCATING-0} : { *(.gnu.version_d) }
+  .gnu.version_r	${RELOCATING-0} : { *(.gnu.version_r) }
+
+  .rela.text		${RELOCATING-0} : { *(.rela.text) *(.rela.gnu.linkonce.t*) }
+  .rela.data		${RELOCATING-0} : { *(.rela.data) *(.rela.gnu.linkonce.d*) }
+  .rela.rodata		${RELOCATING-0} : { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
+  .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
+  .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
+  .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
+  .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
+  .rela.sbss		${RELOCATING-0} : { *(.rela.sbss) }
+  .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
+  .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
+  .rela.erodata		${RELOCATING-0} : { *(.rela.erodata) }
+  .rela.got		${RELOCATING-0} : { *(.rela.got) }
+  .rela.ctors		${RELOCATING-0} : { *(.rela.ctors) }
+  .rela.dtors		${RELOCATING-0} : { *(.rela.dtors) }
+  .rela.init		${RELOCATING-0} : { *(.rela.init) }
+  .rela.fini		${RELOCATING-0} : { *(.rela.fini) }
+  .rela.bss		${RELOCATING-0} : { *(.rela.bss) }
+  .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
+
+  .rel.data		${RELOCATING-0} : { *(.rel.data) *(.rel.gnu.linkonce.d*) }
+  .rel.rodata		${RELOCATING-0} : { *(.rel.rodata) *(.rel.gnu.linkonce.r*) }
+  .rel.stext		${RELOCATING-0} : { *(.rel.stest) }
+  .rel.etext		${RELOCATING-0} : { *(.rel.etest) }
+  .rel.sdata		${RELOCATING-0} : { *(.rel.sdata) }
+  .rel.edata		${RELOCATING-0} : { *(.rel.edata) }
+  .rel.sbss		${RELOCATING-0} : { *(.rel.sbss) }
+  .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
+  .rel.srodata		${RELOCATING-0} : { *(.rel.srodata) }
+  .rel.erodata		${RELOCATING-0} : { *(.rel.erodata) }
+  .rel.got		${RELOCATING-0} : { *(.rel.got) }
+  .rel.ctors		${RELOCATING-0} : { *(.rel.ctors) }
+  .rel.dtors		${RELOCATING-0} : { *(.rel.dtors) }
+  .rel.init		${RELOCATING-0} : { *(.rel.init) }
+  .rel.fini		${RELOCATING-0} : { *(.rel.fini) }
+  .rel.bss		${RELOCATING-0} : { *(.rel.bss) }
+  .rel.plt		${RELOCATING-0} : { *(.rel.plt) }
+
+  .init			${RELOCATING-0} : { *(.init) } =${NOP-0}
+  ${DATA_PLT-${PLT}}
+
   /* Internal text space */
-  .stext	${RELOCATING-0} :
-  {
-    ${RELOCATING+ PROVIDE (__stext_start = .) ; }
-    *(.stext)
-    ${RELOCATING+ PROVIDE (__stext_end = .) ; }
-  } ${RELOCATING+ > text}
+  .stext	${RELOCATING-0} : { *(.stext) }		${RELOCATING+ > text}
 
   /* Internal text space or external memory */
   .text :
   {
-    ${RELOCATING+ PROVIDE (__text_start = .) ; }
     *(.text)
     *(.gnu.linkonce.t*)
     *(.init)
     *(.fini)
-    ${RELOCATING+ PROVIDE (__text_end = .) ; }
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   /* Internal data space */
-  .sdata	${RELOCATING-0} :
-  {
-    ${RELOCATING+ PROVIDE (__sdata_start = .) ; }
-    *(.sdata)
-    ${RELOCATING+ PROVIDE (__sdata_end = .) ; }
-  } ${RELOCATING+ > data}
+  .srodata	${RELOCATING-0} : { *(.srodata) }	${RELOCATING+ > data}
+  .sdata	${RELOCATING-0} : { *(.sdata) }		${RELOCATING+ > data}
 
   /* Internal data space or external memory */
-  .strings	${RELOCATING-0} : { *(.strings) }	${RELOCATING+ > ${DATA_MEMORY}}
   .rodata	${RELOCATING-0} : { *(.rodata) }	${RELOCATING+ > ${DATA_MEMORY}}
-  .rodata1	${RELOCATING-0} : { *(.rodata1) }	${RELOCATING+ > ${DATA_MEMORY}}
-  .data1	${RELOCATING-0} : { *(.data1) }		${RELOCATING+ > ${DATA_MEMORY}}
+
+  /* C++ exception support.  */
+  .eh_frame	${RELOCATING-0} : { *(.eh_frame) }	${RELOCATING+ > ${DATA_MEMORY}}
 
   .ctors	${RELOCATING-0} :
   {
-    ${CONSTRUCTING+${CTOR_START}}
+    ${CONSTRUCTING+ __CTOR_LIST__ = .; }
     *(.ctors)
-    ${CONSTRUCTING+${CTOR_END}}
+    ${CONSTRUCTING+ __CTOR_END__ = .; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
 
   .dtors	${RELOCATING-0} :
   {
-    ${CONSTRUCTING+${DTOR_START}}
+    ${CONSTRUCTING+ __DTOR_LIST__ = .; }
     *(.dtors)
-    ${CONSTRUCTING+${DTOR_END}}
+    ${CONSTRUCTING+ __DTOR_END__ = .; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
 
   .data		${RELOCATING-0} :
@@ -75,12 +113,8 @@ SECTIONS
     ${RELOCATING+ PROVIDE (__etext_end = .) ; }
   } ${RELOCATING+ > emem}
 
-  .edata	${RELOCATING-0} :
-  {
-    ${RELOCATING+ PROVIDE (__edata_start = .) ; }
-    *(.edata)
-    ${RELOCATING+ PROVIDE (__edata_end = .) ; }
-  } ${RELOCATING+ > emem}
+  .erodata	${RELOCATING-0} : { *(.erodata) }	${RELOCATING+ > emem}
+  .edata	${RELOCATING-0} : { *(.edata) }		${RELOCATING+ > emem}
 
   .sbss		${RELOCATING-0} :
   {
