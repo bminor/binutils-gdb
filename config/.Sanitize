@@ -28,9 +28,9 @@ else
 fi
 
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
-	keep_these_too="${keep_these_too} mt-sky"
+	keep_these_too="${keep_these_too} mt-sky mt-skyb"
 else
-        lose_these_too="${lose_these_too} mt-sky"
+        lose_these_too="${lose_these_too} mt-sky mt-skyb"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
