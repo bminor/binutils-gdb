@@ -26,9 +26,9 @@
 
 #include "tm-linux.h"
 
-/* Target byte order on ARM Linux is not selectable.  */
+/* Target byte order on ARM Linux is little endian and not selectable.  */
 #undef TARGET_BYTE_ORDER_SELECTABLE_P
-#define TARGET_BYTE_ORDER_SELECTABLE_P		0
+#define TARGET_BYTE_ORDER_SELECTABLE_P	0
 
 /* Under ARM Linux the traditional way of performing a breakpoint is to
    execute a particular software interrupt, rather than use a particular
@@ -59,6 +59,21 @@ extern void arm_linux_extract_return_value (struct type *, char[], char *);
 #undef EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
 	arm_linux_extract_return_value ((TYPE), (REGBUF), (VALBUF))
+
+/* Things needed for making the inferior call functions.  
+
+   FIXME:  This and arm_push_arguments should be merged.  However this 
+   	   function breaks on a little endian host, big endian target
+   	   using the COFF file format.  ELF is ok.  
+   	   
+   	   ScottB.  */
+
+#undef PUSH_ARGUMENTS
+#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+     sp = arm_linux_push_arguments ((nargs), (args), (sp), (struct_return), \
+     				    (struct_addr))
+extern CORE_ADDR arm_linux_push_arguments (int, struct value **, CORE_ADDR, 
+					   int, CORE_ADDR);
 
 /* The first page is not writeable in ARM Linux.  */
 #undef LOWEST_PC

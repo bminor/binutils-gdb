@@ -32,6 +32,7 @@
 #define STACK_END_ADDR (0x01000000 - (TARGET_UPAGES * TARGET_NBPG))
 
 /* The first 0x20 bytes are the trap vectors.  */
+#undef LOWEST_PC
 #define LOWEST_PC	0x20
 
 /* Override defaults.  */

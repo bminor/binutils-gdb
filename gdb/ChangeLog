@@ -1,4 +1,17 @@
-2000-04-05  Scott Bambrough <scottb@netwinder.org>
+2000-04-07  Scott Bambrough <scottb@netwinder.org>
+
+	* ChangeLog: Correct date on last entry.
+	* arm-linux-tdep.c (arm_linux_push_arguments): New function.
+	* config/arm/tm-linux: Redefined PUSH_ARGUMENTS for Linux.  
+	* config/arm/tm-embed: Fix build warning from redefinition of
+	LOWEST_PC.
+	* config/arm/tm-arm.h: Remove TARGET_BYTE_ORDER_SELECTABLE.
+	* config/arm/tm-wince.h: Remove TARGET_BYTE_ORDER_SELECTABLE and 
+	TARGET_BYTE_ORDER.  Add TARGET_BYTE_ORDER_SELECTABLE_P to 
+	override default in tm-arm.h.  Use default target byte order
+	from tm-arm.h.
+
+2000-04-07  Scott Bambrough <scottb@netwinder.org>
 
 	* Makefile.in: Add dependency information for arm-linux-tdep.c.
 	* config/djgpp/fnchange.lst: Add arm-linux-tdep.c, arm-linux-nat.c.
