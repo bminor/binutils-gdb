@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-09-02 13:48-0700\n"
+"POT-Creation-Date: 2000-09-05 17:04-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -424,7 +424,7 @@ msgstr ""
 msgid "Attempt to put an undefined symbol into set %s"
 msgstr ""
 
-#: config/obj-aout.c:198 config/obj-coff.c:1247 config/obj-elf.c:1712
+#: config/obj-aout.c:198 config/obj-coff.c:1247 config/obj-elf.c:1716
 #: ecoff.c:3668
 #, c-format
 msgid "Symbol `%s' can not be both weak and common"
@@ -562,7 +562,7 @@ msgstr ""
 msgid "error setting flags for \"%s\": %s"
 msgstr ""
 
-#: config/obj-coff.c:1494 config/obj-elf.c:727
+#: config/obj-coff.c:1494 config/obj-elf.c:725
 #, c-format
 msgid "Ignoring changed section attributes for %s"
 msgstr ""
@@ -662,137 +662,137 @@ msgstr ""
 msgid "Can't set register masks"
 msgstr ""
 
-#: config/obj-elf.c:310 config/tc-sparc.c:3637 config/tc-v850.c:261
+#: config/obj-elf.c:308 config/tc-sparc.c:3637 config/tc-v850.c:261
 msgid "Expected comma after symbol-name"
 msgstr ""
 
-#: config/obj-elf.c:317 config/tc-arc.c:779 config/tc-sparc.c:3647
+#: config/obj-elf.c:315 config/tc-arc.c:779 config/tc-sparc.c:3647
 #, c-format
 msgid ".COMMon length (%d.) <0! Ignored."
 msgstr ""
 
-#: config/obj-elf.c:327 config/tc-alpha.c:4320 config/tc-sparc.c:3657
+#: config/obj-elf.c:325 config/tc-alpha.c:4320 config/tc-sparc.c:3657
 #: config/tc-v850.c:284
 msgid "Ignoring attempt to re-define symbol"
 msgstr ""
 
-#: config/obj-elf.c:335 config/tc-arc.c:797 config/tc-sparc.c:3665
+#: config/obj-elf.c:333 config/tc-arc.c:797 config/tc-sparc.c:3665
 #: config/tc-v850.c:294
 #, c-format
 msgid "Length of .comm \"%s\" is already %ld. Not changed to %d."
 msgstr ""
 
-#: config/obj-elf.c:358 config/tc-arc.c:816 config/tc-v850.c:321
+#: config/obj-elf.c:356 config/tc-arc.c:816 config/tc-v850.c:321
 msgid "Common alignment negative; 0 assumed"
 msgstr ""
 
-#: config/obj-elf.c:377 config/tc-m32r.c:1296 config/tc-ppc.c:1515
+#: config/obj-elf.c:375 config/tc-m32r.c:1296 config/tc-ppc.c:1515
 #: config/tc-v850.c:384
 msgid "Common alignment not a power of 2"
 msgstr ""
 
-#: config/obj-elf.c:440 config/tc-arc.c:876 config/tc-sparc.c:3789
+#: config/obj-elf.c:438 config/tc-arc.c:876 config/tc-sparc.c:3789
 #: config/tc-v850.c:566
 #, c-format
 msgid "bad .common segment %s"
 msgstr ""
 
-#: config/obj-elf.c:668
+#: config/obj-elf.c:666
 #, c-format
 msgid "Setting incorrect section type for %s"
 msgstr ""
 
-#: config/obj-elf.c:672
+#: config/obj-elf.c:670
 #, c-format
 msgid "Ignoring incorrect section type for %s"
 msgstr ""
 
-#: config/obj-elf.c:685
+#: config/obj-elf.c:683
 #, c-format
 msgid "Setting incorrect section attributes for %s"
 msgstr ""
 
-#: config/obj-elf.c:757
+#: config/obj-elf.c:755
 msgid "Unrecognized .section attribute: want a,w,x"
 msgstr ""
 
-#: config/obj-elf.c:797
+#: config/obj-elf.c:795
 msgid "Unrecognized section attribute"
 msgstr ""
 
-#: config/obj-elf.c:819
+#: config/obj-elf.c:817
 msgid "Unrecognized section type"
 msgstr ""
 
-#: config/obj-elf.c:870
+#: config/obj-elf.c:868
 msgid "Missing section name"
 msgstr ""
 
-#: config/obj-elf.c:936
+#: config/obj-elf.c:934
 msgid "Bad .section directive - character following name is not '#'"
 msgstr ""
 
-#: config/obj-elf.c:1037
+#: config/obj-elf.c:1035
 msgid ".previous without corresponding .section; ignored"
 msgstr ""
 
-#: config/obj-elf.c:1064
+#: config/obj-elf.c:1062
 msgid ".popsection without corresponding .pushsection; ignored"
 msgstr ""
 
-#: config/obj-elf.c:1116
+#: config/obj-elf.c:1114
 #, c-format
 msgid "multiple .symver directives for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1125
+#: config/obj-elf.c:1123
 msgid "expected comma after name in .symver"
 msgstr ""
 
-#: config/obj-elf.c:1146
+#: config/obj-elf.c:1144
 #, c-format
 msgid "missing version name in `%s' for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1355 config/obj-som.c:155 config/obj-som.c:201
+#: config/obj-elf.c:1353 config/obj-som.c:155 config/obj-som.c:201
 msgid "Expected quoted string"
 msgstr ""
 
-#: config/obj-elf.c:1376
+#: config/obj-elf.c:1374
 #, c-format
 msgid "expected comma after name `%s' in .size directive"
 msgstr ""
 
-#: config/obj-elf.c:1385
+#: config/obj-elf.c:1383
 msgid "missing expression in .size directive"
 msgstr ""
 
-#: config/obj-elf.c:1455
+#: config/obj-elf.c:1459
 #, c-format
 msgid "ignoring unrecognized symbol type \"%s\""
 msgstr ""
 
-#: config/obj-elf.c:1636
+#: config/obj-elf.c:1640
 msgid ".size expression too complicated to fix up"
 msgstr ""
 
-#: config/obj-elf.c:1667
+#: config/obj-elf.c:1671
 #, c-format
 msgid ""
 "invalid attempt to declare external version name as default in symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1799
+#: config/obj-elf.c:1803
 #, c-format
 msgid "Failed to set up debugging information: %s"
 msgstr ""
 
-#: config/obj-elf.c:1819
+#: config/obj-elf.c:1823
 #, c-format
 msgid "Can't start writing .mdebug section: %s"
 msgstr ""
 
-#: config/obj-elf.c:1827
+#: config/obj-elf.c:1831
 #, c-format
 msgid "Could not write .mdebug section: %s"
 msgstr ""
@@ -970,7 +970,7 @@ msgid "Unknown segment type"
 msgstr ""
 
 #. Probably a memory allocation problem?  Give up now.
-#: config/tc-a29k.c:330 config/tc-hppa.c:1417 config/tc-mips.c:1076
+#: config/tc-a29k.c:330 config/tc-hppa.c:1416 config/tc-mips.c:1076
 #: config/tc-mips.c:1118 config/tc-sparc.c:838
 msgid "Broken assembler.  No assembly attempted."
 msgstr ""
@@ -978,14 +978,14 @@ msgstr ""
 #: config/tc-a29k.c:375 config/tc-arc.c:535 config/tc-avr.c:1124
 #: config/tc-d10v.c:511 config/tc-d30v.c:552 config/tc-h8300.c:296
 #: config/tc-h8500.c:297 config/tc-mcore.c:656 config/tc-mn10200.c:954
-#: config/tc-mn10300.c:1339 config/tc-ppc.c:1971 config/tc-sh.c:834
+#: config/tc-mn10300.c:1337 config/tc-ppc.c:1971 config/tc-sh.c:834
 #: config/tc-tic80.c:283 config/tc-v850.c:2081 config/tc-w65.c:247
 #: config/tc-z8k.c:340
 msgid "missing operand"
 msgstr ""
 
 #: config/tc-a29k.c:415 config/tc-cris.c:870 config/tc-cris.c:878
-#: config/tc-hppa.c:1563 config/tc-i860.c:444 config/tc-i860.c:461
+#: config/tc-hppa.c:1562 config/tc-i860.c:444 config/tc-i860.c:461
 #: config/tc-sparc.c:1403 config/tc-sparc.c:1409
 #, c-format
 msgid "Unknown opcode: `%s'"
@@ -1052,7 +1052,7 @@ msgid "syntax error"
 msgstr ""
 
 #: config/tc-alpha.c:1025 config/tc-arm.c:5443 config/tc-h8300.c:1373
-#: config/tc-h8500.c:1201 config/tc-hppa.c:4002 config/tc-i860.c:946
+#: config/tc-h8500.c:1201 config/tc-hppa.c:3956 config/tc-i860.c:946
 #: config/tc-m68hc11.c:480 config/tc-m68k.c:4126 config/tc-m88k.c:1106
 #: config/tc-ns32k.c:1664 config/tc-sparc.c:2793 config/tc-z8k.c:1332
 msgid "Bad call to MD_ATOF()"
@@ -1149,7 +1149,7 @@ msgid "operand out of range (%s not between %d and %d)"
 msgstr ""
 
 #: config/tc-alpha.c:2434 config/tc-arc.c:548 config/tc-d10v.c:600
-#: config/tc-d30v.c:640 config/tc-mn10200.c:1009 config/tc-mn10300.c:1410
+#: config/tc-d30v.c:640 config/tc-mn10200.c:1009 config/tc-mn10300.c:1408
 #: config/tc-ppc.c:1937 config/tc-ppc.c:2045 config/tc-ppc.c:2057
 #: config/tc-v850.c:1861 config/tc-v850.c:1884 config/tc-v850.c:2104
 msgid "too many fixups"
@@ -1364,9 +1364,9 @@ msgid ""
 msgstr ""
 
 #: config/tc-arc.c:155 config/tc-arc.c:178 config/tc-arc.c:922
-#: config/tc-hppa.c:1377 config/tc-hppa.c:6898 config/tc-hppa.c:6904
-#: config/tc-hppa.c:6910 config/tc-hppa.c:6916 config/tc-mn10300.c:928
-#: config/tc-mn10300.c:2136
+#: config/tc-hppa.c:1376 config/tc-hppa.c:6852 config/tc-hppa.c:6858
+#: config/tc-hppa.c:6864 config/tc-hppa.c:6870 config/tc-mn10300.c:926
+#: config/tc-mn10300.c:2131
 msgid "could not set architecture and machine"
 msgstr ""
 
@@ -1374,7 +1374,7 @@ msgstr ""
 msgid "virtual memory exhausted"
 msgstr ""
 
-#: config/tc-arc.c:254 config/tc-mn10200.c:1374 config/tc-mn10300.c:2048
+#: config/tc-arc.c:254 config/tc-mn10200.c:1374 config/tc-mn10300.c:2043
 #: config/tc-ppc.c:1221 config/tc-v850.c:1662
 #, c-format
 msgid "operand out of range (%s not between %ld and %ld)"
@@ -1390,12 +1390,12 @@ msgid "too many suffixes"
 msgstr ""
 
 #: config/tc-arc.c:533 config/tc-d10v.c:509 config/tc-d30v.c:550
-#: config/tc-mn10200.c:951 config/tc-mn10300.c:1336 config/tc-ppc.c:1969
+#: config/tc-mn10200.c:951 config/tc-mn10300.c:1334 config/tc-ppc.c:1969
 #: config/tc-tic80.c:279 config/tc-v850.c:2078
 msgid "illegal operand"
 msgstr ""
 
-#: config/tc-arc.c:620 config/tc-mn10200.c:1050 config/tc-mn10300.c:1480
+#: config/tc-arc.c:620 config/tc-mn10200.c:1050 config/tc-mn10300.c:1478
 #: config/tc-ppc.c:2094 config/tc-v850.c:2157
 #, c-format
 msgid "junk at end of line: `%s'"
@@ -1957,7 +1957,7 @@ msgstr ""
 msgid "Illegal Thumb shift value: %ld"
 msgstr ""
 
-#: config/tc-arm.c:6186 config/tc-mn10300.c:1964
+#: config/tc-arm.c:6186 config/tc-mn10300.c:1959
 #, c-format
 msgid "Bad relocation fixup type (%d)"
 msgstr ""
@@ -2228,7 +2228,7 @@ msgid "only constant expression allowed"
 msgstr ""
 
 #: config/tc-avr.c:1060 config/tc-d10v.c:1473 config/tc-d30v.c:1807
-#: config/tc-mn10200.c:1254 config/tc-mn10300.c:1827 config/tc-ppc.c:5154
+#: config/tc-mn10200.c:1254 config/tc-mn10300.c:1825 config/tc-ppc.c:5154
 #: config/tc-v850.c:2301
 #, c-format
 msgid "reloc %d not supported by object file format"
@@ -2848,395 +2848,403 @@ msgstr ""
 msgid "invalid operands for opcode"
 msgstr ""
 
-#: config/tc-hppa.c:1167
+#: config/tc-hppa.c:1165
 msgid "Missing .exit\n"
 msgstr ""
 
-#: config/tc-hppa.c:1170
+#: config/tc-hppa.c:1168
 msgid "Missing .procend\n"
 msgstr ""
 
-#: config/tc-hppa.c:1350
+#: config/tc-hppa.c:1349
 msgid "Invalid field selector.  Assuming F%%."
 msgstr ""
 
-#: config/tc-hppa.c:1383
+#: config/tc-hppa.c:1382
 msgid "-R option not supported on this target."
 msgstr ""
 
-#: config/tc-hppa.c:1399 config/tc-sparc.c:794 config/tc-sparc.c:830
+#: config/tc-hppa.c:1398 config/tc-sparc.c:794 config/tc-sparc.c:830
 #, c-format
 msgid "Internal error: can't hash `%s': %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:1407 config/tc-i860.c:201
+#: config/tc-hppa.c:1406 config/tc-i860.c:201
 #, c-format
 msgid "internal error: losing opcode: `%s' \"%s\"\n"
 msgstr ""
 
-#: config/tc-hppa.c:1476 config/tc-hppa.c:7037 config/tc-hppa.c:7092
+#: config/tc-hppa.c:1475 config/tc-hppa.c:6991 config/tc-hppa.c:7046
 msgid "Missing function name for .PROC (corrupted label chain)"
 msgstr ""
 
-#: config/tc-hppa.c:1479 config/tc-hppa.c:7095
+#: config/tc-hppa.c:1478 config/tc-hppa.c:7049
 msgid "Missing function name for .PROC"
 msgstr ""
 
-#: config/tc-hppa.c:1600 config/tc-hppa.c:4915
+#: config/tc-hppa.c:1599 config/tc-hppa.c:4818
 msgid "could not update architecture and machine"
 msgstr ""
 
-#: config/tc-hppa.c:1813
+#: config/tc-hppa.c:1806
 msgid "Invalid Indexed Load Completer."
 msgstr ""
 
-#: config/tc-hppa.c:1818
+#: config/tc-hppa.c:1811
 msgid "Invalid Indexed Load Completer Syntax."
 msgstr ""
 
-#: config/tc-hppa.c:1854
+#: config/tc-hppa.c:1847
 msgid "Invalid Short Load/Store Completer."
 msgstr ""
 
-#: config/tc-hppa.c:1913 config/tc-hppa.c:1918
+#: config/tc-hppa.c:1906 config/tc-hppa.c:1911
 msgid "Invalid Store Bytes Short Completer"
 msgstr ""
 
-#: config/tc-hppa.c:2229 config/tc-hppa.c:2235
+#: config/tc-hppa.c:2222 config/tc-hppa.c:2228
 msgid "Invalid left/right combination completer"
 msgstr ""
 
-#: config/tc-hppa.c:2284 config/tc-hppa.c:2291
+#: config/tc-hppa.c:2277 config/tc-hppa.c:2284
 msgid "Invalid permutation completer"
 msgstr ""
 
-#: config/tc-hppa.c:2392
+#: config/tc-hppa.c:2385
 #, c-format
 msgid "Invalid Add Condition: %s"
 msgstr ""
 
-#: config/tc-hppa.c:2403 config/tc-hppa.c:2413
+#: config/tc-hppa.c:2396 config/tc-hppa.c:2406
 #, c-format
 msgid "Invalid Add and Branch Condition: %c"
 msgstr ""
 
-#: config/tc-hppa.c:2434
+#: config/tc-hppa.c:2427
 msgid "Invalid Compare/Subtract Condition"
 msgstr ""
 
-#: config/tc-hppa.c:2474
+#: config/tc-hppa.c:2467
 #, c-format
 msgid "Invalid Bit Branch Condition: %c"
 msgstr ""
 
-#: config/tc-hppa.c:2560
+#: config/tc-hppa.c:2553
 #, c-format
 msgid "Invalid Compare/Subtract Condition: %s"
 msgstr ""
 
-#: config/tc-hppa.c:2572
+#: config/tc-hppa.c:2565
 #, c-format
 msgid "Invalid Compare/Subtract Condition: %c"
 msgstr ""
 
-#: config/tc-hppa.c:2587
+#: config/tc-hppa.c:2580
 msgid "Invalid Compare and Branch Condition."
 msgstr ""
 
-#: config/tc-hppa.c:2683
+#: config/tc-hppa.c:2676
 msgid "Invalid Logical Instruction Condition."
 msgstr ""
 
-#: config/tc-hppa.c:2738
+#: config/tc-hppa.c:2731
 msgid "Invalid Shift/Extract/Deposit Condition."
 msgstr ""
 
-#: config/tc-hppa.c:2850
+#: config/tc-hppa.c:2843
 msgid "Invalid Unit Instruction Condition."
 msgstr ""
 
-#: config/tc-hppa.c:3198 config/tc-hppa.c:3229 config/tc-hppa.c:3262
-#: config/tc-hppa.c:3294
+#: config/tc-hppa.c:3191 config/tc-hppa.c:3222 config/tc-hppa.c:3255
+#: config/tc-hppa.c:3287
 msgid "Branch to unaligned address"
 msgstr ""
 
-#: config/tc-hppa.c:3476
+#: config/tc-hppa.c:3467
 msgid "Invalid SFU identifier"
 msgstr ""
 
-#: config/tc-hppa.c:3526
+#: config/tc-hppa.c:3517
 msgid "Invalid COPR identifier"
 msgstr ""
 
-#: config/tc-hppa.c:3655
+#: config/tc-hppa.c:3646
 msgid "Invalid Floating Point Operand Format."
 msgstr ""
 
-#: config/tc-hppa.c:3793 config/tc-hppa.c:3817 config/tc-hppa.c:3840
-#: config/tc-hppa.c:3863 config/tc-hppa.c:3886
+#: config/tc-hppa.c:3763 config/tc-hppa.c:3783 config/tc-hppa.c:3803
+#: config/tc-hppa.c:3823 config/tc-hppa.c:3843
 msgid "Invalid register for single precision fmpyadd or fmpysub"
 msgstr ""
 
-#: config/tc-hppa.c:3946
+#: config/tc-hppa.c:3900
 #, c-format
 msgid "Invalid operands %s"
 msgstr ""
 
-#: config/tc-hppa.c:4399
+#: config/tc-hppa.c:4310
 msgid "  -Q                      ignored\n"
 msgstr ""
 
-#: config/tc-hppa.c:4403
+#: config/tc-hppa.c:4314
 msgid "  -c                      print a warning if a comment is found\n"
 msgstr ""
 
-#: config/tc-hppa.c:4615
+#: config/tc-hppa.c:4531
 msgid "Unknown relocation encountered in md_apply_fix."
 msgstr ""
 
-#: config/tc-hppa.c:4625
+#: config/tc-hppa.c:4541
 #, c-format
 msgid "no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n"
 msgstr ""
 
-#: config/tc-hppa.c:4767 config/tc-hppa.c:4792
+#: config/tc-hppa.c:4681 config/tc-hppa.c:4706
 #, c-format
 msgid "Undefined register: '%s'."
 msgstr ""
 
-#: config/tc-hppa.c:4830
+#: config/tc-hppa.c:4740
 #, c-format
 msgid "Non-absolute symbol: '%s'."
 msgstr ""
 
-#: config/tc-hppa.c:4845
+#: config/tc-hppa.c:4755
 #, c-format
 msgid "Undefined absolute constant: '%s'."
 msgstr ""
 
-#: config/tc-hppa.c:4954
+#: config/tc-hppa.c:4857
 #, c-format
 msgid "Invalid FP Compare Condition: %s"
 msgstr ""
 
-#: config/tc-hppa.c:5010
+#: config/tc-hppa.c:4913
 #, c-format
 msgid "Invalid FTEST completer: %s"
 msgstr ""
 
-#: config/tc-hppa.c:5077 config/tc-hppa.c:5115
+#: config/tc-hppa.c:4980 config/tc-hppa.c:5018
 #, c-format
 msgid "Invalid FP Operand Format: %3s"
 msgstr ""
 
-#: config/tc-hppa.c:5194
+#: config/tc-hppa.c:5097
 msgid "Bad segment in expression."
 msgstr ""
 
-#: config/tc-hppa.c:5253
+#: config/tc-hppa.c:5156
 msgid "Bad segment (should be absolute)."
 msgstr ""
 
-#: config/tc-hppa.c:5296
+#: config/tc-hppa.c:5199
 #, c-format
 msgid "Invalid argument location: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:5327
+#: config/tc-hppa.c:5230
 #, c-format
 msgid "Invalid argument description: %d"
 msgstr ""
 
-#: config/tc-hppa.c:5350
+#: config/tc-hppa.c:5253
 #, c-format
 msgid "Invalid Nullification: (%c)"
 msgstr ""
 
-#: config/tc-hppa.c:6092
+#: config/tc-hppa.c:5995
 #, c-format
 msgid "Invalid .CALL argument: %s"
 msgstr ""
 
-#: config/tc-hppa.c:6224
+#: config/tc-hppa.c:6127
 msgid ".callinfo is not within a procedure definition"
 msgstr ""
 
-#: config/tc-hppa.c:6244
+#: config/tc-hppa.c:6147
 #, c-format
 msgid "FRAME parameter must be a multiple of 8: %d\n"
 msgstr ""
 
-#: config/tc-hppa.c:6263
+#: config/tc-hppa.c:6166
 msgid "Value for ENTRY_GR must be in the range 3..18\n"
 msgstr ""
 
-#: config/tc-hppa.c:6275
+#: config/tc-hppa.c:6178
 msgid "Value for ENTRY_FR must be in the range 12..21\n"
 msgstr ""
 
-#: config/tc-hppa.c:6285
+#: config/tc-hppa.c:6188
 msgid "Value for ENTRY_SR must be 3\n"
 msgstr ""
 
-#: config/tc-hppa.c:6341
+#: config/tc-hppa.c:6244
 #, c-format
 msgid "Invalid .CALLINFO argument: %s"
 msgstr ""
 
-#: config/tc-hppa.c:6452
+#: config/tc-hppa.c:6355
 msgid "The .ENTER pseudo-op is not supported"
 msgstr ""
 
-#: config/tc-hppa.c:6468
+#: config/tc-hppa.c:6371
 msgid "Misplaced .entry. Ignored."
 msgstr ""
 
-#: config/tc-hppa.c:6472
+#: config/tc-hppa.c:6375
 msgid "Missing .callinfo."
 msgstr ""
 
-#: config/tc-hppa.c:6520
+#: config/tc-hppa.c:6439
+msgid ".REG expression must be a register"
+msgstr ""
+
+#: config/tc-hppa.c:6455 read.c:4735
+msgid "bad or irreducible absolute expression; zero assumed"
+msgstr ""
+
+#: config/tc-hppa.c:6466
 msgid ".REG must use a label"
 msgstr ""
 
-#: config/tc-hppa.c:6522
+#: config/tc-hppa.c:6468
 msgid ".EQU must use a label"
 msgstr ""
 
-#: config/tc-hppa.c:6575
+#: config/tc-hppa.c:6521
 msgid ".EXIT must appear within a procedure"
 msgstr ""
 
-#: config/tc-hppa.c:6579
+#: config/tc-hppa.c:6525
 msgid "Missing .callinfo"
 msgstr ""
 
-#: config/tc-hppa.c:6583
+#: config/tc-hppa.c:6529
 msgid "No .ENTRY for this .EXIT"
 msgstr ""
 
-#: config/tc-hppa.c:6610
+#: config/tc-hppa.c:6556
 #, c-format
 msgid "Cannot define export symbol: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:6667
+#: config/tc-hppa.c:6614
 #, c-format
 msgid "Using ENTRY rather than CODE in export directive for %s"
 msgstr ""
 
-#: config/tc-hppa.c:6777
+#: config/tc-hppa.c:6731
 #, c-format
 msgid "Undefined .EXPORT/.IMPORT argument (ignored): %s"
 msgstr ""
 
-#: config/tc-hppa.c:6859
+#: config/tc-hppa.c:6813
 msgid "Missing label name on .LABEL"
 msgstr ""
 
-#: config/tc-hppa.c:6864
+#: config/tc-hppa.c:6818
 msgid "extra .LABEL arguments ignored."
 msgstr ""
 
-#: config/tc-hppa.c:6881
+#: config/tc-hppa.c:6835
 msgid "The .LEAVE pseudo-op is not supported"
 msgstr ""
 
-#: config/tc-hppa.c:6920
+#: config/tc-hppa.c:6874
 msgid "Unrecognized .LEVEL argument\n"
 msgstr ""
 
-#: config/tc-hppa.c:6956
+#: config/tc-hppa.c:6910
 #, c-format
 msgid "Cannot define static symbol: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:6991
+#: config/tc-hppa.c:6945
 msgid "Nested procedures"
 msgstr ""
 
-#: config/tc-hppa.c:7001
+#: config/tc-hppa.c:6955
 msgid "Cannot allocate unwind descriptor\n"
 msgstr ""
 
-#: config/tc-hppa.c:7099
+#: config/tc-hppa.c:7053
 msgid "misplaced .procend"
 msgstr ""
 
-#: config/tc-hppa.c:7102
+#: config/tc-hppa.c:7056
 msgid "Missing .callinfo for this procedure"
 msgstr ""
 
-#: config/tc-hppa.c:7105
+#: config/tc-hppa.c:7059
 msgid "Missing .EXIT for a .ENTRY"
 msgstr ""
 
-#: config/tc-hppa.c:7144
+#: config/tc-hppa.c:7098
 msgid "Not in a space.\n"
 msgstr ""
 
-#: config/tc-hppa.c:7147
+#: config/tc-hppa.c:7101
 msgid "Not in a subspace.\n"
 msgstr ""
 
-#: config/tc-hppa.c:7237
+#: config/tc-hppa.c:7192
 msgid "Invalid .SPACE argument"
 msgstr ""
 
-#: config/tc-hppa.c:7285
+#: config/tc-hppa.c:7239
 msgid "Can't change spaces within a procedure definition. Ignored"
 msgstr ""
 
-#: config/tc-hppa.c:7412
+#: config/tc-hppa.c:7368
 #, c-format
 msgid "Undefined space: '%s' Assuming space number = 0."
 msgstr ""
 
-#: config/tc-hppa.c:7436
+#: config/tc-hppa.c:7392
 msgid "Must be in a space before changing or declaring subspaces.\n"
 msgstr ""
 
-#: config/tc-hppa.c:7440
+#: config/tc-hppa.c:7396
 msgid "Can't change subspaces within a procedure definition. Ignored"
 msgstr ""
 
-#: config/tc-hppa.c:7475
+#: config/tc-hppa.c:7431
 msgid "Parameters of an existing subspace can't be modified"
 msgstr ""
 
-#: config/tc-hppa.c:7526
+#: config/tc-hppa.c:7482
 msgid "Alignment must be a power of 2"
 msgstr ""
 
-#: config/tc-hppa.c:7568
+#: config/tc-hppa.c:7524
 msgid "FIRST not supported as a .SUBSPACE argument"
 msgstr ""
 
-#: config/tc-hppa.c:7570
+#: config/tc-hppa.c:7526
 msgid "Invalid .SUBSPACE argument"
 msgstr ""
 
-#: config/tc-hppa.c:7753
+#: config/tc-hppa.c:7709
 #, c-format
 msgid "Internal error: Unable to find containing space for %s."
 msgstr ""
 
-#: config/tc-hppa.c:7794
+#: config/tc-hppa.c:7750
 #, c-format
 msgid "Out of memory: could not allocate new space chain entry: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:7880
+#: config/tc-hppa.c:7836
 #, c-format
 msgid "Out of memory: could not allocate new subspace chain entry: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:8547
+#: config/tc-hppa.c:8515
 #, c-format
 msgid "Symbol '%s' could not be created."
 msgstr ""
 
-#: config/tc-hppa.c:8551
+#: config/tc-hppa.c:8519
 msgid "No memory for symbol name."
 msgstr ""
 
@@ -3831,82 +3839,82 @@ msgstr ""
 msgid "callj to difference of two symbols"
 msgstr ""
 
-#: config/tc-ia64.c:3977
+#: config/tc-ia64.c:3976
 msgid "Register name expected"
 msgstr ""
 
-#: config/tc-ia64.c:3982 config/tc-ia64.c:4264
+#: config/tc-ia64.c:3981 config/tc-ia64.c:4263
 msgid "Comma expected"
 msgstr ""
 
-#: config/tc-ia64.c:3990
+#: config/tc-ia64.c:3989
 msgid "Register value annotation ignored"
 msgstr ""
 
-#: config/tc-ia64.c:4013
+#: config/tc-ia64.c:4012
 msgid "Directive invalid within a bundle"
 msgstr ""
 
-#: config/tc-ia64.c:4079
+#: config/tc-ia64.c:4078
 msgid "Missing predicate relation type"
 msgstr ""
 
-#: config/tc-ia64.c:4095
+#: config/tc-ia64.c:4094
 msgid "Unrecognized predicate relation type"
 msgstr ""
 
-#: config/tc-ia64.c:4115 config/tc-ia64.c:4139
+#: config/tc-ia64.c:4114 config/tc-ia64.c:4138
 msgid "Predicate register expected"
 msgstr ""
 
-#: config/tc-ia64.c:4127
+#: config/tc-ia64.c:4126
 msgid "Duplicate predicate register ignored"
 msgstr ""
 
-#: config/tc-ia64.c:4148
+#: config/tc-ia64.c:4147
 msgid "Bad register range"
 msgstr ""
 
-#: config/tc-ia64.c:4175
+#: config/tc-ia64.c:4174
 msgid "Predicate source and target required"
 msgstr ""
 
-#: config/tc-ia64.c:4177 config/tc-ia64.c:4189
+#: config/tc-ia64.c:4176 config/tc-ia64.c:4188
 msgid "Use of p0 is not valid in this context"
 msgstr ""
 
-#: config/tc-ia64.c:4184
+#: config/tc-ia64.c:4183
 msgid "At least two PR arguments expected"
 msgstr ""
 
-#: config/tc-ia64.c:4198
+#: config/tc-ia64.c:4197
 msgid "At least one PR argument expected"
 msgstr ""
 
-#: config/tc-ia64.c:4234
+#: config/tc-ia64.c:4233
 #, c-format
 msgid "Inserting \"%s\" into entry hint table failed: %s"
 msgstr ""
 
 #. FIXME -- need 62-bit relocation type
-#: config/tc-ia64.c:4653
+#: config/tc-ia64.c:4652
 msgid "62-bit relocation not yet implemented"
 msgstr ""
 
-#: config/tc-ia64.c:4715
+#: config/tc-ia64.c:4714
 msgid "lower 16 bits of mask ignored"
 msgstr ""
 
-#: config/tc-ia64.c:5122
+#: config/tc-ia64.c:5121
 msgid "Value truncated to 62 bits"
 msgstr ""
 
-#: config/tc-ia64.c:5629
+#: config/tc-ia64.c:5630
 #, c-format
 msgid "Unrecognized option '-x%s'"
 msgstr ""
 
-#: config/tc-ia64.c:5657
+#: config/tc-ia64.c:5658
 msgid ""
 "IA-64 options:\n"
 "  -Milp32|-Milp64|-Mlp64|-Mp64\tselect data model (default -Mlp64)\n"
@@ -3916,15 +3924,15 @@ msgid ""
 "  -xdebug\t\t  debug dependency violation checker\n"
 msgstr ""
 
-#: config/tc-ia64.c:5957
+#: config/tc-ia64.c:5958
 msgid "Explicit stops are ignored in auto mode"
 msgstr ""
 
-#: config/tc-ia64.c:6003
+#: config/tc-ia64.c:6004
 msgid "Found '{' after explicit switch to automatic mode"
 msgstr ""
 
-#: config/tc-ia64.c:7514
+#: config/tc-ia64.c:7515
 #, c-format
 msgid "Unrecognized dependency specifier %d\n"
 msgstr ""
@@ -5624,23 +5632,23 @@ msgid ""
 "none yet\n"
 msgstr ""
 
-#: config/tc-mn10200.c:807 config/tc-mn10300.c:957 config/tc-ppc.c:1733
+#: config/tc-mn10200.c:807 config/tc-mn10300.c:955 config/tc-ppc.c:1733
 #: config/tc-v850.c:1733
 #, c-format
 msgid "Unrecognized opcode: `%s'"
 msgstr ""
 
-#: config/tc-mn10300.c:541
+#: config/tc-mn10300.c:544
 msgid ""
 "MN10300 options:\n"
 "none yet\n"
 msgstr ""
 
-#: config/tc-mn10300.c:974
+#: config/tc-mn10300.c:972
 msgid "Invalid opcode/operands"
 msgstr ""
 
-#: config/tc-mn10300.c:1451
+#: config/tc-mn10300.c:1449
 msgid "Invalid register specification."
 msgstr ""
 
@@ -8822,10 +8830,6 @@ msgstr ""
 
 #: read.c:4717
 msgid "some symbol undefined; zero assumed"
-msgstr ""
-
-#: read.c:4735
-msgid "bad or irreducible absolute expression; zero assumed"
 msgstr ""
 
 #: read.c:4770

@@ -1,3 +1,10 @@
+2000-09-05  Nick Clifton  <nickc@redhat.com>
+
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+	
 2000-09-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c: Correct comment typos.

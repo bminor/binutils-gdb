@@ -1,3 +1,16 @@
+2000-09-05  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
+	* ldint.texinfo: Remove CVS revision marker - it foils local
+	comparisons.
+
+	* emultempl/ticoff.em: Remove extraneous comma.
+	
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/hppaelf.em (hppaelf_add_stub_section): Add SEC_RELOC

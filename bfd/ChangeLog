@@ -1,3 +1,11 @@
+2000-09-05  Nick Clifton  <nickc@redhat.com>
+
+	* config.in: Regenerate.
+	* libbfd.h: Regenerate.
+	* po/bfd.pot: Regenerate.
+	* doc/bfdint.texi: Remove CVS date string - it foils compares with
+	local versions.
+	
 2000-09-05  Steven Johnson  <sbjohnson@ozemail.com.au>
 
 	* cpu-powerpc.c  (arch_info_struct): Added MPC860 Family entry.

@@ -1,3 +1,9 @@
+2000-09-05  Nick Clifton  <nickc@redhat.com>
+
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2000-09-04  Todd Vierling  <tv@wasabisystems.com>
 
 	* strip.1: Fix stray '\' in -o formatting.
