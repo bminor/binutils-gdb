@@ -1,3 +1,8 @@
+2003-02-24  Andrew Cagney  <cagney@redhat.com>
+
+	* infptrace.c (udot_info): Change type of udot_off to long.  Use
+	paddr when printing udot_off's value.
+
 2003-02-24  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (make_symbol_overload_list): Only read in partial

@@ -629,7 +629,7 @@ static void
 udot_info (char *dummy1, int dummy2)
 {
 #if defined (KERNEL_U_SIZE)
-  int udot_off;			/* Offset into user struct */
+  long udot_off;			/* Offset into user struct */
   int udot_val;			/* Value from user struct at udot_off */
   char mess[128];		/* For messages */
 #endif
@@ -657,12 +657,13 @@ udot_info (char *dummy1, int dummy2)
 	    {
 	      printf_filtered ("\n");
 	    }
-	  printf_filtered ("%04x:", udot_off);
+	  printf_filtered ("%s:", paddr (udot_off));
 	}
       udot_val = ptrace (PT_READ_U, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) udot_off, 0);
       if (errno != 0)
 	{
-	  sprintf (mess, "\nreading user struct at offset 0x%x", udot_off);
+	  sprintf (mess, "\nreading user struct at offset 0x%s",
+		   paddr_nz (udot_off));
 	  perror_with_name (mess);
 	}
       /* Avoid using nonportable (?) "*" in print specs */
