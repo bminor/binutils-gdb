@@ -1,3 +1,12 @@
+Sun May 30 15:35:21 1993  Fred Fish  (fnf@cygnus.com)
+
+	* dbxread.c (read_ofile_symtab):  Remove "#if 1" around code to
+	set demangling style automatically.
+	* defs.h (CPLUS_MARKER):  Clarify comment that this is only for
+	GNU C++, not C++ in general.
+	* symtab.h (general_symbol_info):  Simplify by eliminating one
+	structure level for the language dependent info.
+
 Sat May 29 15:59:29 1993  Fred Fish  (fnf@cygnus.com)
 
 	* c-typeprint.c (c_type_print_base):  Avoid dereferencing NULL

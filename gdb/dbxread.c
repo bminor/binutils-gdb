@@ -1154,7 +1154,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 
       subpst->readin = 0;
       subpst->symtab = 0;
-      subpst->read_symtab = dbx_psymtab_to_symtab;
+      subpst->read_symtab = pst->read_symtab;
     }
 
   sort_pst_symbols (pst);
@@ -1358,12 +1358,10 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 
       if (processing_gcc_compilation)
 	{
-#if 1	  /* Works, but is experimental.  -fnf */
 	  if (AUTO_DEMANGLING)
 	    {
 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 	    }
-#endif
 	}
     }
   else
@@ -1416,12 +1414,10 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 2;
 
-#if 1	  /* Works, but is experimental.  -fnf */
 	  if (AUTO_DEMANGLING)
 	    {
 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 	    }
-#endif
 	}
       else if (type & N_EXT || type == (unsigned char)N_TEXT
 	       || type == (unsigned char)N_NBTEXT
