@@ -1,5 +1,93 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	Shared library and PIC support.
+	* elf32-hppa.c (PLT_ENTRY_SIZE): New.
+	(GOT_ENTRY_SIZE): New.
+	(ELF_DYNAMIC_INTERPRETER): New.
+	(STUB_SUFFIX): Define.
+	(LONG_BRANCH_PIC_IN_SHLIB): Define.
+	(RELATIVE_DYNAMIC_RELOCS): Define.
+	(enum elf32_hppa_stub_type): New.
+	(struct elf32_hppa_stub_hash_entry): Rename offset to
+	stub_offset.  Add a number of new fields.
+	(struct elf32_hppa_link_hash_entry): New.
+	(struct elf32_hppa_link_hash_table): Add numerous fields.  Remove
+	global_value.
+	(elf32_hppa_hash_table): Rename to hppa_link_hash_table.
+	(elf32_hppa_stub_hash_lookup): Rename to hppa_stub_hash_lookup.
+	(elf32_hppa_stub_hash_newfunc): Rename to stub_hash_newfunc.  Init
+	new fields.
+	(hppa_link_hash_newfunc): New function.
+	(elf32_hppa_link_hash_table_create): Use above function. Init new
+	fields.
+	(elf32_hppa_stub_name): Rename to hppa_stub_name.  Pass in reloc
+	instead of addend, and remove sym_name from args.  Don't use
+	symbol name for local syms, instead use sym index.
+	(elf32_hppa_size_of_stub): Rename to hppa_type_of_stub, and return
+	stub type rather than size.  Pass in hash and handle import stub
+	case.  Also pass in reloc instead of offset so we can calculate
+	PCREL22F and PCREL12F branches properly.
+	(elf32_hppa_build_one_stub): Rename to hppa_build_one_stub.  Build
+	import and export stubs too.
+	(elf32_hppa_size_one_stub): Rename to hppa_size_one_stub.  Handle
+	import and export stub sizing.
+	(elf32_hppa_check_relocs): New function.
+	(elf32_hppa_adjust_dynamic_symbol): New function.
+	(hppa_discard_copies): New function.
+	(elf32_hppa_size_dynamic_sections): New function.
+	(elf_backend_size_dynamic_sections): Define.
+	(elf32_hppa_finish_dynamic_symbol): New function.
+	(elf_backend_finish_dynamic_symbol): Define.
+	(elf32_hppa_size_stubs): Stash params in link hash table, and move
+	some local vars into the link hash table too.  For shared links,
+	trundle over function syms, generating export stubs.  Handle
+	PCREL22F branches.  Break out stub creation code from here..
+	(hppa_add_stub): .. to here.  New function.
+	(elf32_hppa_final_link): Rename to elf32_hppa_set_gp, and don't
+	call the bfd linker.  Use elf_gp to record global pointer.
+	Calculate a value from sections if $global$ is missing.
+	(bfd_elf32_bfd_final_link): Define as _bfd_elf32_gc_common_final_link.
+	(elf32_hppa_gc_mark_hook): New function.
+	(elf_backend_gc_mark_hook): Define.
+	(elf32_hppa_gc_sweep_hook): New function.
+	(elf_backend_gc_sweep_hook): Define.
+	(elf32_hppa_bfd_final_link_relocate): Rename to final_link_relocate.
+	Add rel to args, and remove howto, input_bfd, offset, addend,
+	sym_name as we can recalculate these locally.  Handle calls to
+	dynamic objects, extra PIC relocs, PCREL22F branches.  Change
+	handling of undefined weak syms.  Check that stubs are in range.
+	Only look for import stubs on PCREL17F and PCREL22F relocs.  Add
+	message on hitting a DPREL21L reloc that needs fixing.  Subtract
+	off PC for PCREL14F.  Break out code that does a stub lookup from
+	here..
+	(hppa_get_stub_entry): ..to here.  New function.
+	(elf32_hppa_relocate_insn): Merge into final_link_relocate.
+	(elf32_hppa_relocate_section): Handle got and plt relocs, dynamic
+	relocs, etc. etc.
+	(elf32_hppa_finish_dynamic_sections): New function.
+	(elf_backend_finish_dynamic_sections): Define.
+	(elf_backend_final_write_processing) Define.
+	(hppa_handle_PIC_calls): New function.
+	(elf32_hppa_build_stubs): Call it.  Pass link_info to
+	hppa_build_one_stub.
+	(elf32_hppa_create_dynamic_sections): New function
+	to create .plt and .got then set .plt flags correctly.
+	(elf_backend_create_dynamic_sections): Define.
+	(elf32_hppa_object_p): New function.
+	(elf_backend_object_p): Define.
+	(elf32_hppa_elf_get_symbol_type): New function.
+	(elf_backend_get_symbol_type): Define.
+	(elf_backend_can_gc_sections): Define.
+	(elf_backend_want_got_plt): Define.
+	(elf_backend_plt_alignment): Set to 2.
+	(elf_backend_plt_readonly): Define.
+	(elf_backend_want_plt_sym): Define.
+	(elf_backend_got_header_size): Reserve one entry.
+
+	* elf32-hppa.h (elf32_hppa_build_stubs): Don't pass stub bfd.
+	(elf32_hppa_size_stubs): Pass in multi_subspace.
+	(elf32_hppa_set_gp): Declare.
+
 	* section.c (SEC_HAS_GOT_REF): Define new flag for asection.
 	(bfd_get_unique_section_name): New function.
 	* bfd_in2.h: Regenerate.
