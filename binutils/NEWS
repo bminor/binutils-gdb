@@ -1,5 +1,8 @@
 -*- text -*-
 
+* readelf can handle the extensions to the DWARF2 spec used by the Unified
+  Parallel C compiler.
+
 * BFD no longer declares a "boolean" type, to avoid clashes with other
   headers that declare the same.  Users of BFD should replace boolean,
   false and true, with int, 0 and 1, or define their own boolean type.

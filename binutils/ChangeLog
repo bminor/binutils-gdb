@@ -1,3 +1,10 @@
+2002-12-10  James Cownie <jcownie@etnus.com>
+
+	* readelf.h (get_TAG_name, get_AT_name,
+	read_and_display_attr_value): Add support for UPC extenstions to
+	DWARF2 spec.
+	* NEWS: Mention this new support.
+
 2002-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Mention that bfd no longer declares a "boolean" type.

@@ -6735,6 +6735,10 @@ get_TAG_name (tag)
     case DW_TAG_unspecified_type:	return "DW_TAG_unspecified_type";
     case DW_TAG_partial_unit:		return "DW_TAG_partial_unit";
     case DW_TAG_imported_unit:		return "DW_TAG_imported_unit";
+      /* UPC values.  */
+    case DW_TAG_upc_shared_type:        return "DW_TAG_upc_shared_type";
+    case DW_TAG_upc_strict_type:        return "DW_TAG_upc_strict_type";
+    case DW_TAG_upc_relaxed_type:       return "DW_TAG_upc_relaxed_type";
     default:
       {
 	static char buffer[100];
@@ -6847,6 +6851,8 @@ get_AT_name (attribute)
     case DW_AT_body_begin:		return "DW_AT_body_begin";
     case DW_AT_body_end:		return "DW_AT_body_end";
     case DW_AT_GNU_vector:		return "DW_AT_GNU_vector";
+      /* UPC extension.  */
+    case DW_AT_upc_threads_scaled:	return "DW_AT_upc_threads_scaled";
     default:
       {
 	static char buffer[100];
@@ -7933,6 +7939,8 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 	case DW_LANG_Fortran95:		printf ("(Fortran 95)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
+	  /* UPC extension.  */
+	case DW_LANG_Upc:		printf ("(Unified Parallel C)"); break;
 	default:
 	  printf ("(Unknown: %lx)", uvalue);
 	  break;
