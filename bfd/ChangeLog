@@ -1,3 +1,9 @@
+1999-12-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Divide R_MIPS_PC16
+	value by 4 before storing it back in the field.  From
+	Koundinya. K <kk@ddeorg.soft.net>.
+
 Tue Nov 30 22:41:14 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* archures.c (bfd_mach_am33): Define.
