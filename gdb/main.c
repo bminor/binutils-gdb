@@ -180,11 +180,11 @@ extern char *version;
 
 /* Canonical host name as a string. */
 
-extern char *host_canonical;
+extern char *host_name;
 
 /* Canonical target name as a string. */
 
-extern char *target_canonical;
+extern char *target_name;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
@@ -2183,10 +2183,10 @@ print_gdb_version (stream)
   GDB_FILE *stream;
 {
   fprintf_filtered (stream, "\
-GDB %s (%s", version, host_canonical);
+GDB %s (%s", version, host_name);
 
-  if (strcmp(host_canonical, target_canonical))
-    fprintf_filtered (stream, " --target %s", target_canonical);
+  if (!STREQ (host_name, target_name))
+    fprintf_filtered (stream, " --target %s", target_name);
 
   fprintf_filtered (stream, "), ");
   wrap_here("");

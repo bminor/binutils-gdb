@@ -775,8 +775,8 @@ copying.c: COPYING copying.awk
 
 version.c: Makefile
 	echo 'char *version = "$(VERSION)";' >version.c
-	echo 'char *host_canonical = "$(host_canonical)";' >> version.c
-	echo 'char *target_canonical = "$(target_canonical)";' >> version.c
+	echo 'char *host_name = "$(host_alias)";' >> version.c
+	echo 'char *target_name = "$(target_alias)";' >> version.c
 
 # c-exp.tab.c is generated in objdir from c-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to c-exp.tab.o.

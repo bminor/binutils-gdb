@@ -1,3 +1,9 @@
+Thu Jan 27 15:12:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (version.c), main.c (print_gdb_version): Use
+	host_alias and target_alias, not host_canonical and
+	target_canonical, to print configuration.
+
 Wed Jan 26 10:57:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* parse.c (write_exp_msymbol): Use new type msymbol_addr_type instead
