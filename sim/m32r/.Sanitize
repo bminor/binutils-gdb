@@ -87,7 +87,7 @@ else
         done
 fi
 
-m32rx_files="ChangeLog Makefile.in sim-if.c sim-main.h arch.h arch.c cpuall.h tconfig.in"
+m32rx_files="ChangeLog Makefile.in sim-if.c sim-main.h arch.h arch.c cpuall.h cpu.h m32r-sim.h tconfig.in"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
         for i in $m32rx_files ; do
                 if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
