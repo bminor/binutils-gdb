@@ -1412,22 +1412,15 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
 
-      double dd;
-      float ff;
       /* floats and doubles are returned in fpr1. fpr's have a size of 8 bytes.
          We need to truncate the return value into float size (4 byte) if
          necessary.  */
 
-      if (TYPE_LENGTH (valtype) > 4)	/* this is a double */
-	memcpy (valbuf,
-		&regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1)],
-		TYPE_LENGTH (valtype));
-      else
-	{			/* float */
-	  memcpy (&dd, &regbuf[DEPRECATED_REGISTER_BYTE (FP0_REGNUM + 1)], 8);
-	  ff = (float) dd;
-	  memcpy (valbuf, &ff, sizeof (float));
-	}
+      convert_typed_floating (&regbuf[DEPRECATED_REGISTER_BYTE
+                                      (FP0_REGNUM + 1)],
+                              builtin_type_double,
+                              valbuf,
+                              valtype);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
            && TYPE_LENGTH (valtype) == 16

@@ -1,3 +1,8 @@
+2004-04-23  Jerome Guitton  <guitton@gnat.fr>
+
+	* rs6000-tdep.c (rs6000_extract_return_value): When extracting a float,
+	use convert_typed_floating to get the appropriate format.
+
 2004-04-22  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.h (find_unwind_entry, hppa_get_field, hppa_extract_5_load)
