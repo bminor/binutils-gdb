@@ -1,3 +1,9 @@
+2003-09-19  Andrew Cagney  <cagney@redhat.com>
+
+	* sparcnbsd-nat.c (getregs_supplies): Rename NPC_REGNUM to
+	DEPRECATED_NPC_REGNUM.
+	* sparc64nbsd-nat.c (getregs_supplies): Ditto.
+
 2003-09-19  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (mappings): Remove HAVE_SSE conditional.
