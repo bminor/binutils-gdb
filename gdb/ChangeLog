@@ -1,3 +1,9 @@
+Wed Oct  2 17:21:07 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Fix step/next so that you only
+	stop at the beginning of a new line.  This fixes various problems
+	with for loops, nested if-else's and switch statements.
+
 Mon Sep 30 13:15:31 1991  John Gilmore  (gnu at cygnus.com)
 
 	* dbxread.c:  Enable, but soften, const_vol_complaint.
