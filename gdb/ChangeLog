@@ -1,3 +1,18 @@
+2001-07-16  Elena Zannoni  <ezannoni@redhat.com>
+
+        * top.c (is_complete_command, init_cmd_lists, init_cli_cmds,
+        execute_user_command, do_setshow_command, get_prompt, init_proc,
+        serial_log_command): Remove extern declarations.  Include
+        cli/cli-cmds.h, cli/cli-script.h, cli/cli-setshow.h, serial.h.
+        * gdbcmd.h (execute_user_command): Remove declaration, it's already
+        in cli/cli-script.h.
+        * command.h (do_setshow_command): Remove declaration, it's already
+        in cli/cli-setshow.h.
+        * infrun.c: Include "cli/cli-script.h" for execute_user_command.
+        * Makefile.in (infrun.o): Update dependencies.
+        (top.o): Ditto.
+        * cli/cli-setshow.h: Add comment for do_setshow_command.
+
 2001-07-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* cli/cli-cmds.c (shell_escape) [GLOBAL_CURDIR]: Condition the

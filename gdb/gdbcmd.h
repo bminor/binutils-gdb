@@ -112,8 +112,6 @@ extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
 
-extern void execute_user_command (struct cmd_list_element *, char *);
-
 extern void execute_command (char *, int);
 
 enum command_control_type execute_control_command (struct command_line *);

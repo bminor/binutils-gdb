@@ -344,13 +344,6 @@ extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element
 						   **);
 
-/* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
-   of the argument, and FROM_TTY is nonzero if this command is being entered
-   directly by the user (i.e. these are just like any other
-   command).  C is the command list element for the command.  */
-
-extern void do_setshow_command (char *, int, struct cmd_list_element *);
-
 /* Do a "show" command for each thing on a command list.  */
 
 extern void cmd_show_list (struct cmd_list_element *, int, char *);

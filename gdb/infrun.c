@@ -29,6 +29,7 @@
 #include "gdb_wait.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
+#include "cli/cli-script.h"
 #include "target.h"
 #include "gdbthread.h"
 #include "annotate.h"

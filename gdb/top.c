@@ -22,6 +22,9 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "call-cmds.h"
+#include "cli/cli-cmds.h"
+#include "cli/cli-script.h"
+#include "cli/cli-setshow.h"
 #include "symtab.h"
 #include "inferior.h"
 #include <signal.h>
@@ -36,6 +39,7 @@
 #include "completer.h"
 #include "top.h"
 #include "version.h"
+#include "serial.h"
 
 /* readline include files */
 #include <readline/readline.h>
@@ -56,22 +60,6 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #endif
-
-/* From completer.c */
-
-extern int is_complete_command (void (*func) (char *args, int from_tty));
-
-/* From cli/cli-cmds.c */
-
-extern void init_cmd_lists (void);
-
-extern void init_cli_cmds (void);
-
-extern void execute_user_command (struct cmd_list_element *c, char *args);
-
-/* From cli/cli-setshow.c */
-
-extern void do_setshow_command (char *, int, struct cmd_list_element *);
 
 /* Default command line prompt.  This is overriden in some configs. */
 
@@ -123,7 +111,6 @@ int xgdb_verbose;
 
 /* gdb prints this when reading a command interactively */
 static char *gdb_prompt_string;	/* the global prompt string */
-extern char *get_prompt (void);	/* access function for prompt string */
 
 /* Buffer used for reading command lines, and the size
    allocated for it so far.  */
@@ -592,8 +579,6 @@ read_command_file (FILE *stream)
   do_cleanups (cleanups);
 }
 
-extern void init_proc (void);
-
 void (*pre_init_ui_hook) (void);
 
 #ifdef __MSDOS__
@@ -615,8 +600,6 @@ execute_command (char *p, int from_tty)
   register enum language flang;
   static int warned = 0;
   char *line;
-  /* FIXME: These should really be in an appropriate header file */
-  extern void serial_log_command (const char *);
   
   free_all_values ();
 

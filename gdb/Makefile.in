@@ -1585,7 +1585,8 @@ inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	$(gdb_string_h) gdb_wait.h $(command_h) $(regcache_h)
 
-infrun.o: infrun.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+infrun.o: infrun.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(cli_script_h) \
+	$(gdbcore_h) \
 	$(inferior_h) target.h gdbthread.h $(gdb_string_h) $(event_loop_h) \
 	$(event_top_h) $(regcache_h)
 
@@ -2039,9 +2040,11 @@ completer.o: completer.c $(completer_h) $(gdbtypes_h) $(symtab_h) \
 	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
+	$(cli_cmds_h) $(cli_script_h) $(cli_setshow_h) \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h \
 	$(remote_utils_h) $(gdb_string_h) $(event_loop_h) $(event_top_h) \
-	$(completer_h) $(version_h) $(ui_out_h)
+	$(completer_h) $(version_h) $(ui_out_h) \
+	serial.h
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
