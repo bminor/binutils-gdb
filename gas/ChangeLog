@@ -1,3 +1,7 @@
+Wed Apr  5 06:35:45 2000  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* config/tc-sparc.c (sparc_ip): Avoid string pasting.
+
 Tue Apr  4 19:27:50 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* internals.texi (CPU backend): Document
