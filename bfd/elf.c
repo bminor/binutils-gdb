@@ -223,6 +223,7 @@ DEFUN(bfd_section_from_shdr, (abfd, hdr, shstrtab),
 
   name = hdr -> sh_name ? shstrtab + hdr -> sh_name : "unnamed";
   newsect = bfd_make_section (abfd, name);
+  if (!newsect) return false;
   newsect -> vma = hdr -> sh_addr;
   newsect -> _raw_size = hdr -> sh_size;
   if (!(hdr -> sh_type == SHT_NOBITS))
@@ -551,7 +552,7 @@ DEFUN(elf_corefile_note, (abfd, hdr),
   asection *newsect;
 
   if (hdr -> p_filesz > 0
-      && (buf = (char *)malloc(hdr -> p_filesz)) != NULL
+      && (buf = (char *) bfd_xmalloc (hdr -> p_filesz)) != NULL
       && bfd_seek (abfd, hdr -> p_offset, SEEK_SET) != -1L
       && bfd_read ((PTR) buf, hdr -> p_filesz, 1, abfd) == hdr -> p_filesz)
     {
@@ -648,8 +649,8 @@ DEFUN (elf_object_p, (abfd), bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form */
-  Elf_External_Shdr *x_shdr;	/* Section header table, external form */
-  Elf_Internal_Shdr *i_shdr;	/* Section header table, internal form */
+  Elf_External_Shdr x_shdr;	/* Section header table entry, external form */
+  Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
   int shstrtabsize;		/* Size of section header string table */
@@ -695,10 +696,12 @@ wrong:
   /* Switch xvec to match the specified byte order.  */
   switch (x_ehdr.e_ident[EI_DATA]) {
   case ELFDATA2MSB:			/* Big-endian */ 
-    abfd->xvec = &elf_big_vec;
+    if (!abfd->xvec->header_byteorder_big_p)
+      goto wrong;
     break;
   case ELFDATA2LSB:			/* Little-endian */
-    abfd->xvec = &elf_little_vec;
+    if (abfd->xvec->header_byteorder_big_p)
+      goto wrong;
     break;
   case ELFDATANONE:			/* No data encoding specified */
   default:				/* Unknown data encoding specified */
@@ -734,16 +737,10 @@ wrong:
      check, verify that the what BFD thinks is the size of each section
      header table entry actually matches the size recorded in the file. */
 
-  if (i_ehdr.e_shentsize != sizeof (*x_shdr))
+  if (i_ehdr.e_shentsize != sizeof (x_shdr))
     goto wrong;
-  if ((x_shdr = (Elf_External_Shdr *)
-	bfd_alloc (abfd, sizeof (*x_shdr) * i_ehdr.e_shnum)) == NULL)
-    {
-      bfd_error = no_memory;
-      return (NULL);
-    }
-  if ((i_shdr = (Elf_Internal_Shdr *)
-	bfd_alloc (abfd, sizeof (*i_shdr) * i_ehdr.e_shnum)) == NULL)
+  if ((i_shdrp = (Elf_Internal_Shdr *)
+       bfd_alloc (abfd, sizeof (*i_shdrp) * i_ehdr.e_shnum)) == NULL)
     {
       bfd_error = no_memory;
       return (NULL);
@@ -755,20 +752,20 @@ wrong:
     }
   for (shindex = 0; shindex < i_ehdr.e_shnum; shindex++)
     {
-      if (bfd_read ((PTR) (x_shdr + shindex), sizeof (*x_shdr), 1, abfd)
-	  != sizeof (*x_shdr))
+      if (bfd_read ((PTR) &x_shdr, sizeof (x_shdr), 1, abfd)
+	  != sizeof (x_shdr))
 	{
 	  bfd_error = system_call_error;
 	  return (NULL);
 	}
-      elf_swap_shdr_in (abfd, x_shdr + shindex, i_shdr + shindex);
+      elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
     }
 
   /* Read in the string table containing the names of the sections.  We
      will need the base pointer to this table later. */
 
-  shstrtabsize = i_shdr[i_ehdr.e_shstrndx].sh_size;
-  offset = i_shdr[i_ehdr.e_shstrndx].sh_offset;
+  shstrtabsize = i_shdrp[i_ehdr.e_shstrndx].sh_size;
+  offset = i_shdrp[i_ehdr.e_shstrndx].sh_offset;
   if ((shstrtab = elf_read (abfd, offset, shstrtabsize)) == NULL)
     {
       return (NULL);
@@ -784,14 +781,14 @@ wrong:
 
   for (shindex = 1; shindex < i_ehdr.e_shnum; shindex++)
     {
-      Elf_Internal_Shdr *hdr = i_shdr + shindex;
+      Elf_Internal_Shdr *hdr = i_shdrp + shindex;
       bfd_section_from_shdr (abfd, hdr, shstrtab);
       if (hdr -> sh_type == SHT_SYMTAB)
 	{
-	  elf_symtab_filepos(abfd) = hdr -> sh_offset;
-	  elf_symtab_filesz(abfd) = hdr -> sh_size;
-	  elf_strtab_filepos(abfd) = (i_shdr + hdr -> sh_link) -> sh_offset;
-	  elf_strtab_filesz(abfd) = (i_shdr + hdr -> sh_link) -> sh_size;
+	  elf_symtab_filepos (abfd) = hdr -> sh_offset;
+	  elf_symtab_filesz (abfd) = hdr -> sh_size;
+	  elf_strtab_filepos (abfd) = (i_shdrp + hdr -> sh_link) -> sh_offset;
+	  elf_strtab_filesz (abfd) = (i_shdrp + hdr -> sh_link) -> sh_size;
 	}
     }
 
@@ -820,8 +817,8 @@ DEFUN (elf_core_file_p, (abfd), bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form */
-  Elf_External_Phdr *x_phdr;	/* Program header table, external form */
-  Elf_Internal_Phdr *i_phdr;	/* Program header table, internal form */
+  Elf_External_Phdr x_phdr;	/* Program header table entry, external form */
+  Elf_Internal_Phdr *i_phdrp;	/* Program header table, internal form */
   int phindex;
   
   /* Read in the ELF header in external format.  */
@@ -899,16 +896,10 @@ wrong:
      check, verify that the what BFD thinks is the size of each program
      header table entry actually matches the size recorded in the file. */
 
-  if (i_ehdr.e_phentsize != sizeof (*x_phdr))
+  if (i_ehdr.e_phentsize != sizeof (x_phdr))
     goto wrong;
-  if ((x_phdr = (Elf_External_Phdr *)
-	bfd_alloc (abfd, sizeof (*x_phdr) * i_ehdr.e_phnum)) == NULL)
-    {
-      bfd_error = no_memory;
-      return (NULL);
-    }
-  if ((i_phdr = (Elf_Internal_Phdr *)
-	bfd_alloc (abfd, sizeof (*i_phdr) * i_ehdr.e_phnum)) == NULL)
+  if ((i_phdrp = (Elf_Internal_Phdr *)
+	bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdr.e_phnum)) == NULL)
     {
       bfd_error = no_memory;
       return (NULL);
@@ -920,13 +911,13 @@ wrong:
     }
   for (phindex = 0; phindex < i_ehdr.e_phnum; phindex++)
     {
-      if (bfd_read ((PTR) (x_phdr + phindex), sizeof (*x_phdr), 1, abfd)
-	  != sizeof (*x_phdr))
+      if (bfd_read ((PTR) &x_phdr, sizeof (x_phdr), 1, abfd)
+	  != sizeof (x_phdr))
 	{
 	  bfd_error = system_call_error;
 	  return (NULL);
 	}
-      elf_swap_phdr_in (abfd, x_phdr + phindex, i_phdr + phindex);
+      elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);
     }
 
   /* Once all of the program headers have been read and converted, we
@@ -934,10 +925,10 @@ wrong:
 
   for (phindex = 0; phindex < i_ehdr.e_phnum; phindex++)
     {
-      bfd_section_from_phdr (abfd, i_phdr + phindex, phindex);
-      if ((i_phdr + phindex) -> p_type == PT_NOTE)
+      bfd_section_from_phdr (abfd, i_phdrp + phindex, phindex);
+      if ((i_phdrp + phindex) -> p_type == PT_NOTE)
 	{
-	  elf_corefile_note (abfd, i_phdr + phindex);
+	  elf_corefile_note (abfd, i_phdrp + phindex);
 	}
     }
 
@@ -1054,7 +1045,7 @@ DEFUN (elf_slurp_symbol_table, (abfd), bfd *abfd)
 	    }
 	  else if (i_sym.st_shndx == SHN_ABS)
 	    {
-/*	      sym -> flags |= BSF_ABSOLUTE; OBSOLETE */
+	      sym -> section = &bfd_abs_section;
 	    }
 	  else if (i_sym.st_shndx == SHN_COMMON)
 	    {
