@@ -22,7 +22,6 @@
 #ifndef _SIM_CORE_C_
 #define _SIM_CORE_C_
 
-#include "libiberty.h"
 #include "sim-main.h"
 #include "sim-assert.h"
 
@@ -341,10 +340,8 @@ sim_core_attach (SIM_DESC sd,
       if (optional_buffer == NULL)
 	{
 	  int padding = (addr % sizeof (unsigned64));
-	  unsigned int bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
-	  free_buffer = xmalloc (bytes);
-	  /* #if WITH_DETERMINISTIC_SIMULATION? */
-	  memset (free_buffer, 0xa5, bytes);
+	  unsigned long bytes = (modulo == 0 ? nr_bytes : modulo) + padding;
+	  free_buffer = zalloc (bytes);
 	  buffer = (char*) free_buffer + padding;
 	}
       else
@@ -428,7 +425,7 @@ sim_core_map_detach (SIM_DESC sd,
 	  sim_core_mapping *dead = (*entry);
 	  (*entry) = dead->next;
 	  if (dead->free_buffer != NULL)
-	    free (dead->free_buffer);
+	    zfree (dead->free_buffer);
 	  zfree (dead);
 	  return;
 	}
