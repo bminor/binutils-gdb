@@ -1,3 +1,12 @@
+Thu May 27 18:19:51 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* bfd.h: Moved to bfd directory.  Small stub here includes it
+	without requiring "-I../bfd".
+
+Thu Apr 29 12:06:13 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* bfd.h: Updated with BSF_FUNCTION.
+
 Mon Apr 26 18:15:50 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* bfd.h, dis-asm.h: Updated with Hitachi SH.
