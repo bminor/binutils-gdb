@@ -1,3 +1,18 @@
+2005-03-29  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (marked_pr_dependency): New bitmap, bit N indicates
+	whether personality routine index N has been output for this section.
+	(mapping_state): tc_segment_info_data now struct not enum.
+	(arm_elf_change_section): Likewise, and marked_pr_dependency is now
+	handled on section change.
+	(create_unwind_entry): Previous code to output dependency removed.
+	(s_arm_unwind_fnend): Output dependency if it hasn't been done already
+	for this section.
+	* config/tc-arm.h (TC_SEGMENT_INFO_TYPE): Redefined as struct
+	arm_segment_info_type.
+	(arm_segment_info_type): New struct.
+	* testsuite/gas/arm/unwind.d: Update expected output.
+
 2005-03-28  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 
