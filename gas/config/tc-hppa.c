@@ -1787,6 +1787,7 @@ pa_ip (str)
 		case 'm':
 		case 'q':
 		case 'J':
+		case 'c':
 		  {
 		    int a = 0;
 		    int m = 0;
@@ -1810,6 +1811,10 @@ pa_ip (str)
 			  as_bad (_("Invalid Short Load/Store Completer."));
 			s += 2;
 		      }
+		    /* If we did not get a ma/mb completer, then we do not
+		       consider this a positive match for 'cc'.  */
+		    else if (*args == 'c')
+		      break;
 
 		   /* 'J', 'm' and 'q' are the same, except for where they
 		       encode the before/after field.  */
@@ -1827,6 +1832,14 @@ pa_ip (str)
 		      {
 		        /* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
+		      }
+		    else if (*args == 'c')
+		      {
+			/* Gross!  Hide these values in the immediate field
+			   of the instruction, then pull them out later.  */
+			opcode |= m << 8;
+			opcode |= a << 9;
+			continue;
 		      }
 		  }
 
@@ -2804,6 +2817,67 @@ pa_ip (str)
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 11;
 		  continue;
+		}
+
+	    /* Handle a 14 bit immediate at 31.  */
+	    case 'J':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  int a, m;
+
+		  /* XXX the completer stored away tibits of information
+		     for us to extract.  We need a cleaner way to do this.
+		     Now that we have lots of letters again, it would be
+		     good to rethink this.  */
+		  m = (opcode & (1 << 8)) != 0;
+		  a = (opcode & (1 << 9)) != 0;
+		  opcode &= ~ (3 << 8);
+		  num = evaluate_absolute (&the_insn);
+		  if (a == 1 && num >= 0 || (a == 0 && num < 0))
+		    break;
+		  CHECK_FIELD (num, 8191, -8192, 0);
+		  low_sign_unext (num, 14, &num);
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+		}
+	      else
+		{
+		  break;
+		}
+
+	    /* Handle a 14 bit immediate at 31.  */
+	    case 'K':
+	      the_insn.field_selector = pa_chk_field_selector (&s);
+	      get_expression (s);
+	      s = expr_end;
+	      if (the_insn.exp.X_op == O_constant)
+		{
+		  int a, m;
+
+		  /* XXX the completer stored away tibits of information
+		     for us to extract.  We need a cleaner way to do this.
+		     Now that we have lots of letters again, it would be
+		     good to rethink this.  */
+		  m = (opcode & (1 << 8)) != 0;
+		  a = (opcode & (1 << 9)) != 0;
+		  opcode &= ~ (3 << 8);
+		  num = evaluate_absolute (&the_insn);
+		  if (a == 1 && num < 0 || (a == 0 && num > 0))
+		    break;
+		  if (num % 4)
+		    break;
+		  CHECK_FIELD (num, 8191, -8192, 0);
+		  if (num < 0)
+		    opcode |= 1;
+                  num &= 0x1fff;
+                  num >>= 2;
+                  INSERT_FIELD_AND_CONTINUE (opcode, num, 3);
+		}
+	      else
+		{
+		  break;
 		}
 
 	    /* Handle 14 bit immediated, shifted left three times.  */
