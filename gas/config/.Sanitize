@@ -188,6 +188,34 @@ Things-to-lose:
 
 Do-last:
 
+am33_files="tc-mn10300.c"
+if ( echo $* | grep keep\-am33 > /dev/null ) ; then
+	for i in $am33_files ; do
+		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping am33 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $am33_files ; do
+		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"am33\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-am33/,/end-\sanitize\-am33/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 r5900_files="tc-mips.c"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
