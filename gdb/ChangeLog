@@ -1,3 +1,12 @@
+Tue Jun  8 17:39:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* coffread.c (init_stringtab): Fix bug where sizeof(long) != 4.
+	* gdbcore.h, core.c (read_memory_unsigned_integer): New function.
+	* findvar.c (read_register, write_register): Fix thinko where
+	sizeof(host long) != sizeof(target int).
+	* h8300-tdep.c: Use new read_memory_unsigned_integer call.
+	* sh-tdep.c (_initialize_sh_tdep): Add memory_size command.
+
 Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* Move config/m68k/tm-m68k.h (FRAME_FIND_SAVED_REGS) to

@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "obstack.h"
 #include "symtab.h"
+#include <dis-asm.h>
 #undef NUM_REGS
 #define NUM_REGS 11
 
@@ -57,19 +58,19 @@ h8300_skip_prologue (start_pc)
 {
   short int w;
 
-  w = read_memory_short (start_pc);
+  w = read_memory_unsigned_integer (start_pc, 2);
   /* Skip past all push insns */
   while (IS_PUSH_FP (w))
     {
       start_pc += 2;
-      w = read_memory_short (start_pc);
+      w = read_memory_unsigned_integer (start_pc, 2);
     }
 
   /* Skip past a move to FP */
   if (IS_MOVE_FP (w))
     {
       start_pc += 2;
-      w = read_memory_short (start_pc);
+      w = read_memory_unsigned_integer (start_pc, 2);
     }
 
   /* Skip the stack adjust */
@@ -77,17 +78,17 @@ h8300_skip_prologue (start_pc)
   if (IS_MOVK_R5 (w))
     {
       start_pc += 2;
-      w = read_memory_short (start_pc);
+      w = read_memory_unsigned_integer (start_pc, 2);
     }
   if (IS_SUB_R5SP (w))
     {
       start_pc += 2;
-      w = read_memory_short (start_pc);
+      w = read_memory_unsigned_integer (start_pc, 2);
     }
   while (IS_SUB2_SP (w))
     {
       start_pc += 2;
-      w = read_memory_short (start_pc);
+      w = read_memory_unsigned_integer (start_pc, 2);
     }
 
   return start_pc;
@@ -99,11 +100,9 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      FILE *stream;
 {
-  /* Nothing is bigger than 8 bytes */
-  char data[8];
-
-  read_memory (memaddr, data, sizeof (data));
-  return print_insn_h8300 (memaddr, data, stream);
+  disassemble_info info;
+  GDB_INIT_DISASSEMBLE_INFO(info, stream);
+  return print_insn_h8300 (memaddr, &info);
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
@@ -297,14 +296,15 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
   /* Locals are always reffed based from the fp */
   fi->locals_pointer = after_prolog_fp;
   /* The PC is at a known place */
-  fi->from_pc = read_memory_short (after_prolog_fp + 2);
+  fi->from_pc = read_memory_unsigned_integer (after_prolog_fp + 2, BINWORD);
 
   /* Rememeber any others too */
   in_frame[PC_REGNUM] = 0;
 
   if (have_fp)
     /* We keep the old FP in the SP spot */
-    fsr->regs[SP_REGNUM] = (read_memory_short (fsr->regs[6]));
+    fsr->regs[SP_REGNUM] = (read_memory_unsigned_integer
+			    (fsr->regs[6]), BINWORD);
   else
     fsr->regs[SP_REGNUM] = after_prolog_fp + auto_depth;
 
@@ -384,7 +384,7 @@ h8300_pop_frame ()
     {
       if (fsr.regs[regnum])
 	{
-	  write_register (regnum, read_memory_short (fsr.regs[regnum]));
+	  write_register (regnum, read_memory_integer(fsr.regs[regnum]), BINWORD);
 	}
 
       flush_cached_frames ();

@@ -33,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "../opcodes/sh-opc.h"
 
 
+
+
 /* Prologue looks like
    [mov.l	<regs>,@-r15]...
    [sts.l	pr,@-r15]
@@ -152,7 +154,8 @@ frame_find_saved_regs (fi, fsr)
 	  depth += -((char) (insn & 0xff));
 	  insn = read_memory_integer (pc, 2);
 	}
-      else break;
+      else
+	break;
     }
 
   /* Now we know how deep things are, we can work out their addresses */
@@ -174,7 +177,6 @@ frame_find_saved_regs (fi, fsr)
 
   if (have_fp)
     {
-
       fsr->regs[SP_REGNUM] = read_memory_integer (fsr->regs[FP_REGNUM], 4);
     }
   else
@@ -182,7 +184,6 @@ frame_find_saved_regs (fi, fsr)
       fsr->regs[SP_REGNUM] = fi->frame - 4;
     }
 
-  /* Remember the address of the frame pointer */
 
   /* Work out the return pc - either from the saved pr or the pr
      value */
@@ -239,4 +240,16 @@ pop_frame ()
   flush_cached_frames ();
   set_current_frame (create_new_frame (read_register (FP_REGNUM),
 				       read_pc ()));
+}
+
+
+_initialize_sh_tdep ()
+{
+  extern int sim_memory_size;
+  /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
+  add_show_from_set
+    (add_set_cmd ("memory_size", class_support, var_uinteger,
+		  (char *) &sim_memory_size,
+		"Set simulated memory size of simulator target.", &setlist),
+     &showlist);
 }

@@ -304,26 +304,40 @@ read_register (regno)
      int regno;
 {
   unsigned short sval;
+  unsigned int ival;
   unsigned long lval;
 
+  int size;
+  
   if (!register_valid[regno])
     target_fetch_registers (regno);
 
-  switch (REGISTER_RAW_SIZE(regno))
+  size = REGISTER_RAW_SIZE(regno);
+
+  if (size == sizeof (unsigned char)) 
+    return registers[REGISTER_BYTE (regno)];
+  else if (size == sizeof (sval)) 
     {
-    case sizeof (unsigned char):
-      return registers[REGISTER_BYTE (regno)];
-    case sizeof (sval):
       memcpy (&sval, &registers[REGISTER_BYTE (regno)], sizeof (sval));
       SWAP_TARGET_AND_HOST (&sval, sizeof (sval));
       return sval;
-    case sizeof (lval):
+    }
+  else if (size == sizeof (ival))
+    {
+      memcpy (&ival, &registers[REGISTER_BYTE (regno)], sizeof (ival));
+      SWAP_TARGET_AND_HOST (&ival, sizeof (ival));
+      return ival;
+    }
+  else if (size == sizeof (lval))
+    {
       memcpy (&lval, &registers[REGISTER_BYTE (regno)], sizeof (lval));
       SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
       return lval;
-    default:
+    }
+  else
+    {
       error ("GDB Internal Error in read_register() for register %d, size %d",
-	     regno, RAW_REGISTER_SIZE(regno));
+	     regno, REGISTER_RAW_SIZE(regno));
     }
 }
 
@@ -340,37 +354,62 @@ void
 write_register (regno, val)
      int regno, val;
 {
+  unsigned char cval;
   unsigned short sval;
+  unsigned int ival;
   unsigned long lval;
-
+  int size;
+  PTR ptr;
+  
   /* On the sparc, writing %g0 is a no-op, so we don't even want to change
      the registers array if something writes to this register.  */
   if (CANNOT_STORE_REGISTER (regno))
     return;
 
+  /* If we have a valid copy of the register, and new value == old value,
+     then don't bother doing the actual store. */
+
+  size = REGISTER_RAW_SIZE(regno);
+
+  if (size == sizeof(cval)) 
+    {
+      ptr = (PTR) &cval;
+      cval = val;
+    }
+  else if (size == sizeof(sval)) 
+    {
+      ptr = (PTR) &sval;
+      sval = val;
+    }
+  else if (size == sizeof(ival)) 
+    {
+      ptr = (PTR) &ival;
+      ival = val;
+    }
+  else if (size == sizeof(lval)) 
+    {
+      ptr = (PTR) &lval;
+      lval = val;
+    }
+  else 
+    {
+      error ("GDB Internal Error in write_register() for register %d, size %d",
+	     regno, size);
+    }
+  
+  if (register_valid [regno]) 
+    {
+      SWAP_TARGET_AND_HOST (ptr, size);
+      if (memcmp (&registers[REGISTER_BYTE (regno)],
+		  ptr, size) == 0)
+	return;
+    }
+  
   target_prepare_to_store ();
 
-  register_valid [regno] = 1;
+  memcpy (&registers[REGISTER_BYTE (regno)], ptr, size);
 
-  switch (REGISTER_RAW_SIZE(regno))
-    {
-    case sizeof (unsigned char):
-      registers[REGISTER_BYTE (regno)] = val;
-      break;
-    case sizeof (sval):
-      sval = val;
-      SWAP_TARGET_AND_HOST (&sval, sizeof (sval));
-      memcpy (&registers[REGISTER_BYTE (regno)], &sval, sizeof (sval));
-      break;
-    case sizeof (lval):
-      lval = val;
-      SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
-      memcpy (&registers[REGISTER_BYTE (regno)], &lval, sizeof (lval));
-      break;
-    default:
-      error ("GDB Internal Error in write_register() for register %d, size %d",
-	     regno, RAW_REGISTER_SIZE(regno));
-    }
+  register_valid [regno] = 1;
 
   target_store_registers (regno);
 }
@@ -626,10 +665,8 @@ value_from_register (type, regnum, frame)
 	  if (lval == lval_register)
 	    reg_stor++;
 	  else
-	    {
-	      mem_stor++;
-	      first_addr = addr;
-	    }
+	    mem_stor++;
+	  first_addr = addr;
 	  last_addr = addr;
 
 	  get_saved_register (value_bytes + 2,
@@ -661,14 +698,14 @@ value_from_register (type, regnum, frame)
 				frame,
 				local_regnum,
 				&lval);
+
+	    if (regnum == local_regnum)
+	      first_addr = addr;
 	    if (lval == lval_register)
 	      reg_stor++;
 	    else
 	      {
 		mem_stor++;
-
-		if (regnum == local_regnum)
-		  first_addr = addr;
 	      
 		mem_tracking =
 		  (mem_tracking
@@ -710,6 +747,11 @@ value_from_register (type, regnum, frame)
       /* Copy into the contents section of the value.  */
       memcpy (VALUE_CONTENTS_RAW (v), value_bytes, len);
 
+      /* Finally do any conversion necessary when extracting this
+         type from more than one register.  */
+#ifdef REGISTER_CONVERT_TO_TYPE
+      REGISTER_CONVERT_TO_TYPE(regnum, type, VALUE_CONTENTS_RAW(v));
+#endif
       return v;
     }
 
