@@ -202,6 +202,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @smallexample
 @value{AS} [ -a[cdhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
  [ -f ] [ --gstabs ] [ --gdwarf2 ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
+ [ --listing--lhs-width=NUM ][ --listing-lhs-width2=NUM ]
+ [ --listing-rhs-width=NUM ][ --listing-cont-lines=NUM ]
  [ --keep-locals ] [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ]
  [ -version ] [ --version ] [ -W ] [ --warn ] [ --fatal-warnings ] 
  [ -w ] [ -x ] [ -Z ] [ --target-help ]
@@ -368,6 +370,22 @@ Issue warnings when difference tables altered for long displacements.
 Keep (in the symbol table) local symbols.  On traditional a.out systems
 these start with @samp{L}, but different systems have different local
 label prefixes.
+
+@item --listing-lhs-width=@var{number}
+Set the maximum width, in words, of the output data column for an assembler
+listing to @var{number}.
+
+@item --listing-lhs-width2=@var{number}
+Set the maximum width, in words, of the output data column for continuation
+lines in an assembler listing to @var{number}.
+
+@item --listing-rhs-width=@var{number}
+Set the maximum width of an input source line, as displayed in a listing, to
+@var{number} bytes.
+
+@item --listing-cont-lines=@var{number}
+Set the maximum number of lines printed in a listing for a single line of input
+to @var{number} + 1.
 
 @item -o @var{objfile}
 Name the object-file output from @code{@value{AS}} @var{objfile}.
@@ -1154,6 +1172,7 @@ assembler.)
 @end ifset
 
 * L::             -L to retain local labels
+* listing::       --listing-XXX to configure listing output
 * M::		  -M or --mri to assemble in MRI compatibility mode
 * MD::            --MD for dependency tracking
 * o::             -o to name the object file
@@ -1206,6 +1225,13 @@ listing-control directives have no effect.
 
 The letters after @samp{-a} may be combined into one option,
 @emph{e.g.}, @samp{-aln}.
+
+Note if the assembler source is coming from the standard input (eg because it
+is being created by @code{@value{GCC}} and the @samp{-pipe} command line switch
+is being used) then the listing will not contain any comments or preprocessor
+directives.  This is because the listing code buffers input source lines from
+stdin only after they have been preprocessed by the assembler.  This reduces
+memory usage and makes the code more efficient.
 
 @node D
 @section @code{-D}
@@ -1291,6 +1317,45 @@ target is allowed to redefine the local label prefix.
 @ifset HPPA
 On the HPPA local labels begin with @samp{L$}.
 @end ifset
+
+@node listing
+@section Configuringh listing output: @code{--listing}
+
+The listing feature of the assembler can be enabled via the command line switch
+@samp{-a} (@pxref{a}).  This feature combines the input source file(s) with a
+hex dump of the corresponding locations in the output object file, and displays
+them as a listing file.  The format of this listing can be controlled by pseudo
+ops inside the assembler source (@pxref{List} @pxref{Title} @pxref{Sbttl}
+@pxref{Psize} @pxref{Eject}) and also by the following switches:
+
+@table @code
+@item --listing-lhs-width=@samp{number}
+@kindex --listing-lhs-width
+@cindex Width of first line disassembly output
+Sets the maximum width, in words, of the first line of the hex byte dump.  This
+dump appears on the left hand side of the listing output.
+
+@item --listing-lhs-width2=@samp{number}
+@kindex --listing-lhs-width2
+@cindex Width of continuation lines of disassembly output
+Sets the maximum width, in words, of any further lines of the hex byte dump for
+a given inut source line.  If this value is not specified, it defaults to being
+the same as the value specified for @samp{--listing-lhs-width}.  If neither
+switch is used the default is to one.
+
+@item --listing-rhs-width=@samp{number}
+@kindex --listing-rhs-width
+@cindex Width of source line output
+Sets the maximum width, in characters, of the source line that is displayed
+alongside the hex dump.  The default value for this parameter is 100.  The
+source line is displayed on the right hand side of the listing output.
+
+@item --listing-cont-lines=@samp{number}
+@kindex --listing-cont-lines
+@cindex Maximum number of continuation lines
+Sets the maximum number of continuation lines of hex dump that will be
+displayed for a given single line of source input.  The default value is 4.
+@end table
 
 @node M
 @section Assemble in MRI Compatibility Mode: @code{-M}
