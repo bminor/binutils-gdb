@@ -1123,17 +1123,17 @@ FUNCTION
 SYNOPSIS
 	asection *bfd_sections_find_if
 	  (bfd *abfd,
-	   bfd_boolean (*func) (bfd *abfd, asection *sect, void *obj),
+	   bfd_boolean (*operation) (bfd *abfd, asection *sect, void *obj),
 	   void *obj);
 
 DESCRIPTION
-	Call the provided function @var{func} for each section
+	Call the provided function @var{operation} for each section
 	attached to the BFD @var{abfd}, passing @var{obj} as an
 	argument. The function will be called as if by
 
-|	func (abfd, the_section, obj);
+|	operation (abfd, the_section, obj);
 
-	It returns the first section for which @var{func} returns true.
+	It returns the first section for which @var{operation} returns true.
 
 */
 

@@ -1,3 +1,8 @@
+2004-09-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* section.c (bfd_sections_find_if): Fix parameter name in
+	comment to match code.
+
 2004-09-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c  (assign_file_positions_except_relocs): Assign relocs
