@@ -26,14 +26,6 @@
 #define GDB_MULTI_ARCH 1
 #endif
 
-#include "regcache.h"
-#include "floatformat.h"
-
-/* IEEE format floating point.  */
-#define TARGET_DOUBLE_FORMAT  (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG \
-			       ? &floatformat_ieee_double_big	 \
-			       : &floatformat_ieee_double_littlebyte_bigword)
-
 /* The following define instruction sequences that will cause ARM
    cpu's to take an undefined instruction trap.  These are used to
    signal a breakpoint to GDB.
@@ -68,18 +60,6 @@
 #define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE}
 #define THUMB_LE_BREAKPOINT {0xfe,0xdf}
 #define THUMB_BE_BREAKPOINT {0xdf,0xfe}
-
-/* The system C compiler uses a similar structure return convention to gcc */
-extern use_struct_convention_fn arm_use_struct_convention;
-#define USE_STRUCT_CONVENTION(gcc_p, type) \
-     arm_use_struct_convention (gcc_p, type)
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (extract_address ((PTR)(REGBUF), REGISTER_RAW_SIZE(0)))
 
 /* Specify that for the native compiler variables for a particular
    lexical context are listed after the beginning LBRAC instead of

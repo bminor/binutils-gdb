@@ -1,3 +1,15 @@
+2002-02-13  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_use_struct_convention): Make static.  Move to be
+	with other related struct-returning functions.
+	(arm_extract_struct_value_address): New function.
+	(arm_gdbarch_init): Initialize the above in multi-arch vector.  Also
+	initialize float_format, double_format and long_double_format as
+	appropriate to the endianness of the target.
+	* config/arm/tm-arm.h (TARGET_DOUBLE_FORMAT): Delete.
+	(arm_use_struct_convention): Delete declaration.
+	(USE_STRUCT_CONVENTION, EXTRACT_STRUCT_VALUE_ADDRESS): Delete.
+
 2002-02-13  Keith Seitz  <keiths@redhat.com>
 
         * defs.h (core_addr_to_string_nz): New function.

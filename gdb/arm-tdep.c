@@ -145,100 +145,6 @@ struct frame_extra_info
 #define MAKE_THUMB_ADDR(addr)	((addr) | 1)
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
-/* Will a function return an aggregate type in memory or in a
-   register?  Return 0 if an aggregate type can be returned in a
-   register, 1 if it must be returned in memory.  */
-
-int
-arm_use_struct_convention (int gcc_p, struct type *type)
-{
-  int nRc;
-  register enum type_code code;
-
-  /* In the ARM ABI, "integer" like aggregate types are returned in
-     registers.  For an aggregate type to be integer like, its size
-     must be less than or equal to REGISTER_SIZE and the offset of
-     each addressable subfield must be zero.  Note that bit fields are
-     not addressable, and all addressable subfields of unions always
-     start at offset zero.
-
-     This function is based on the behaviour of GCC 2.95.1.
-     See: gcc/arm.c: arm_return_in_memory() for details.
-
-     Note: All versions of GCC before GCC 2.95.2 do not set up the
-     parameters correctly for a function returning the following
-     structure: struct { float f;}; This should be returned in memory,
-     not a register.  Richard Earnshaw sent me a patch, but I do not
-     know of any way to detect if a function like the above has been
-     compiled with the correct calling convention.  */
-
-  /* All aggregate types that won't fit in a register must be returned
-     in memory.  */
-  if (TYPE_LENGTH (type) > REGISTER_SIZE)
-    {
-      return 1;
-    }
-
-  /* The only aggregate types that can be returned in a register are
-     structs and unions.  Arrays must be returned in memory.  */
-  code = TYPE_CODE (type);
-  if ((TYPE_CODE_STRUCT != code) && (TYPE_CODE_UNION != code))
-    {
-      return 1;
-    }
-
-  /* Assume all other aggregate types can be returned in a register.
-     Run a check for structures, unions and arrays.  */
-  nRc = 0;
-
-  if ((TYPE_CODE_STRUCT == code) || (TYPE_CODE_UNION == code))
-    {
-      int i;
-      /* Need to check if this struct/union is "integer" like.  For
-         this to be true, its size must be less than or equal to
-         REGISTER_SIZE and the offset of each addressable subfield
-         must be zero.  Note that bit fields are not addressable, and
-         unions always start at offset zero.  If any of the subfields
-         is a floating point type, the struct/union cannot be an
-         integer type.  */
-
-      /* For each field in the object, check:
-         1) Is it FP? --> yes, nRc = 1;
-         2) Is it addressable (bitpos != 0) and
-         not packed (bitsize == 0)?
-         --> yes, nRc = 1  
-       */
-
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
-	{
-	  enum type_code field_type_code;
-	  field_type_code = TYPE_CODE (TYPE_FIELD_TYPE (type, i));
-
-	  /* Is it a floating point type field?  */
-	  if (field_type_code == TYPE_CODE_FLT)
-	    {
-	      nRc = 1;
-	      break;
-	    }
-
-	  /* If bitpos != 0, then we have to care about it.  */
-	  if (TYPE_FIELD_BITPOS (type, i) != 0)
-	    {
-	      /* Bitfields are not addressable.  If the field bitsize is 
-	         zero, then the field is not packed.  Hence it cannot be
-	         a bitfield or any other packed type.  */
-	      if (TYPE_FIELD_BITSIZE (type, i) == 0)
-		{
-		  nRc = 1;
-		  break;
-		}
-	    }
-	}
-    }
-
-  return nRc;
-}
-
 static int
 arm_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
@@ -2206,6 +2112,109 @@ arm_extract_return_value (struct type *type,
 	    TYPE_LENGTH (type));
 }
 
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value.  */
+
+static CORE_ADDR
+arm_extract_struct_value_address (char *regbuf)
+{
+  return extract_address (regbuf, REGISTER_RAW_SIZE(ARM_A1_REGNUM));
+}
+
+/* Will a function return an aggregate type in memory or in a
+   register?  Return 0 if an aggregate type can be returned in a
+   register, 1 if it must be returned in memory.  */
+
+static int
+arm_use_struct_convention (int gcc_p, struct type *type)
+{
+  int nRc;
+  register enum type_code code;
+
+  /* In the ARM ABI, "integer" like aggregate types are returned in
+     registers.  For an aggregate type to be integer like, its size
+     must be less than or equal to REGISTER_SIZE and the offset of
+     each addressable subfield must be zero.  Note that bit fields are
+     not addressable, and all addressable subfields of unions always
+     start at offset zero.
+
+     This function is based on the behaviour of GCC 2.95.1.
+     See: gcc/arm.c: arm_return_in_memory() for details.
+
+     Note: All versions of GCC before GCC 2.95.2 do not set up the
+     parameters correctly for a function returning the following
+     structure: struct { float f;}; This should be returned in memory,
+     not a register.  Richard Earnshaw sent me a patch, but I do not
+     know of any way to detect if a function like the above has been
+     compiled with the correct calling convention.  */
+
+  /* All aggregate types that won't fit in a register must be returned
+     in memory.  */
+  if (TYPE_LENGTH (type) > REGISTER_SIZE)
+    {
+      return 1;
+    }
+
+  /* The only aggregate types that can be returned in a register are
+     structs and unions.  Arrays must be returned in memory.  */
+  code = TYPE_CODE (type);
+  if ((TYPE_CODE_STRUCT != code) && (TYPE_CODE_UNION != code))
+    {
+      return 1;
+    }
+
+  /* Assume all other aggregate types can be returned in a register.
+     Run a check for structures, unions and arrays.  */
+  nRc = 0;
+
+  if ((TYPE_CODE_STRUCT == code) || (TYPE_CODE_UNION == code))
+    {
+      int i;
+      /* Need to check if this struct/union is "integer" like.  For
+         this to be true, its size must be less than or equal to
+         REGISTER_SIZE and the offset of each addressable subfield
+         must be zero.  Note that bit fields are not addressable, and
+         unions always start at offset zero.  If any of the subfields
+         is a floating point type, the struct/union cannot be an
+         integer type.  */
+
+      /* For each field in the object, check:
+         1) Is it FP? --> yes, nRc = 1;
+         2) Is it addressable (bitpos != 0) and
+         not packed (bitsize == 0)?
+         --> yes, nRc = 1  
+       */
+
+      for (i = 0; i < TYPE_NFIELDS (type); i++)
+	{
+	  enum type_code field_type_code;
+	  field_type_code = TYPE_CODE (TYPE_FIELD_TYPE (type, i));
+
+	  /* Is it a floating point type field?  */
+	  if (field_type_code == TYPE_CODE_FLT)
+	    {
+	      nRc = 1;
+	      break;
+	    }
+
+	  /* If bitpos != 0, then we have to care about it.  */
+	  if (TYPE_FIELD_BITPOS (type, i) != 0)
+	    {
+	      /* Bitfields are not addressable.  If the field bitsize is 
+	         zero, then the field is not packed.  Hence it cannot be
+	         a bitfield or any other packed type.  */
+	      if (TYPE_FIELD_BITSIZE (type, i) == 0)
+		{
+		  nRc = 1;
+		  break;
+		}
+	    }
+	}
+    }
+
+  return nRc;
+}
+
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  */
 
@@ -2442,6 +2451,28 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* XXX We'll probably need to set the tdep field soon.  */
   gdbarch = gdbarch_alloc (&info, NULL);
 
+  /* Floating point sizes and format.  */
+  switch (info.byte_order)
+    {
+    case BFD_ENDIAN_BIG:
+      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
+      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
+      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+      break;
+
+    case BFD_ENDIAN_LITTLE:
+      set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
+      set_gdbarch_double_format (gdbarch,
+				 &floatformat_ieee_double_littlebyte_bigword);
+      set_gdbarch_long_double_format (gdbarch,
+				 &floatformat_ieee_double_littlebyte_bigword);
+      break;
+
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "arm_gdbarch_init: bad byte order for float format");
+    }
+
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
   /* Call dummy code.  */
@@ -2522,6 +2553,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
+  set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    arm_extract_struct_value_address);
 
   /* Single stepping.  */
   /* XXX For an RDI target we should ask the target if it can single-step.  */
