@@ -1,0 +1,4 @@
+TARG_CPU_DEPENDENTS=
+LOCAL_LOADLIBES=$(srcdir)/../bfd/$(srcdir)/libbfd.a
+TDEFINES=-DBFD_HEADERS
+
