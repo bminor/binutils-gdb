@@ -1,3 +1,7 @@
+Sun Mar 23 12:47:13 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.host: Remove extra bogus Linux case.
+
 Sat Mar 22 16:41:35 1997  Fred Fish  <fnf@cygnus.com>
 
 	* remote-sim.c (simulator_command): Add comment about dealing with
