@@ -336,8 +336,19 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
     fprintf_filtered (stream, " ");
 }
 
+static void
+c_type_print_modifier_before (struct type *type, struct ui_file *stream)
+{
+  if (current_language->la_language != language_cplus)
+    c_type_print_modifier (type, stream, 0, 1);
+}
 
-
+static void
+c_type_print_modifier_after (struct type *type, struct ui_file *stream)
+{
+  if (current_language->la_language == language_cplus)
+    c_type_print_modifier (type, stream, 1, 0);
+}
 
 static void
 c_type_print_args (struct type *type, struct ui_file *stream)
@@ -675,8 +686,9 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
   if (show <= 0
       && TYPE_NAME (type) != NULL)
     {
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier_before (type, stream);
       fputs_filtered (TYPE_NAME (type), stream);
+      c_type_print_modifier_after (type, stream);
       return;
     }
 
@@ -695,7 +707,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_STRUCT:
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier_before (type, stream);
       /* Note TYPE_CODE_STRUCT and TYPE_CODE_CLASS have the same value,
        * so we use another means for distinguishing them.
        */
@@ -728,7 +740,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       goto struct_union;
 
     case TYPE_CODE_UNION:
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier_before (type, stream);
       fprintf_filtered (stream, "union ");
 
     struct_union:
@@ -752,6 +764,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  /* If we just printed a tag name, no need to print anything else.  */
 	  if (TYPE_TAG_NAME (type) == NULL)
 	    fprintf_filtered (stream, "{...}");
+	  c_type_print_modifier_after (type, stream);
 	}
       else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
 	{
@@ -1026,6 +1039,8 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 	  fprintfi_filtered (level, stream, "}");
 
+	  c_type_print_modifier_after (type, stream);
+
 	  if (TYPE_LOCALTYPE_PTR (type) && show >= 0)
 	    fprintfi_filtered (level, stream, " (Local at %s:%d)\n",
 			       TYPE_LOCALTYPE_FILE (type),
@@ -1036,7 +1051,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ENUM:
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier_before (type, stream);
       /* HP C supports sized enums */
       if (hp_som_som_object_present)
 	switch (TYPE_LENGTH (type))
@@ -1117,7 +1132,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
          template <class T1, class T2> class "
          and then merges with the struct/union/class code to
          print the rest of the definition. */
-      c_type_print_modifier (type, stream, 0, 1);
+      c_type_print_modifier_before (type, stream);
       fprintf_filtered (stream, "template <");
       for (i = 0; i < TYPE_NTEMPLATE_ARGS (type); i++)
 	{
@@ -1152,8 +1167,9 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
          is no type name, then complain. */
       if (TYPE_NAME (type) != NULL)
 	{
-	  c_type_print_modifier (type, stream, 0, 1);
+	  c_type_print_modifier_before (type, stream);
 	  fputs_filtered (TYPE_NAME (type), stream);
+	  c_type_print_modifier_after (type, stream);
 	}
       else
 	{

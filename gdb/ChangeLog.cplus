@@ -1,3 +1,10 @@
+2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-typeprint.c (c_type_print_modifier_before): New function.
+	(c_type_print_modifier_after): New function.
+	(c_type_print_base): Call c_type_print_modifier_before and
+	c_type_print_modifier_after.
+
 2002-10-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-typeprint.c (c_type_print_base): Print method qualifiers.
