@@ -1,3 +1,15 @@
+Fri Nov 17 16:07:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (xvasprintf, xasprintf): New functions.
+	* defs.h (xvasprintf, xasprintf): Add declarations.
+
+	* remote.c (add_packet_config_cmd): Use function xasprintf instead
+ 	of asprintf.
+	* utils.c (vfprintf_maybe_filtered, vfprintf_unfiltered): Use
+ 	function xvasprintf instead of vasprintf.
+
+	* TODO (xasprintf): Update.
+
 Mon Nov 20 12:22:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Mention ``extern'' and ``STREQ'' cleanups.

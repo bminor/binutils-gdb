@@ -835,6 +835,11 @@ extern PTR xmmalloc (PTR, long);
 extern PTR xmrealloc (PTR, PTR, long);
 #endif
 
+/* Like asprintf/vasprintf but get an internal_error if the call
+   fails. */
+extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
+extern void xvasprintf (char **ret, const char *format, va_list ap);
+
 extern int parse_escape (char **);
 
 /* Message to be printed before the error message, when an error occurs.  */

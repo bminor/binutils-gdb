@@ -366,13 +366,6 @@ needed.
 
 --
 
-Replace asprintf() calls with xasprintf() calls.
-
-As with things like strdup() most calls to asprintf() don't check the
-return value.
-
---
-
 Replace strsave() + mstrsave() with libiberty:xstrdup().
 
 --

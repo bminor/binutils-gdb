@@ -1,3 +1,8 @@
+Fri Nov 17 16:07:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-main.c: Replace asprintf with xasprintf.
+	* mi-cmd-var.c (mi_cmd_var_create): Ditto.
+
 2000-10-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbmi.texinfo (GDB/MI Variable Objects): Dimensions of

@@ -1079,6 +1079,35 @@ xrealloc (PTR ptr, size_t size)
 }
 
 
+/* Like asprintf/vasprintf but get an internal_error if the call
+   fails. */
+
+void
+xasprintf (char **ret, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  xvasprintf (ret, format, args);
+  va_end (args);
+}
+
+void
+xvasprintf (char **ret, const char *format, va_list ap)
+{
+  int status = vasprintf (ret, format, ap);
+  /* NULL could be returned due to a memory allocation problem; a
+     badly format string; or something else. */
+  if ((*ret) == NULL)
+    internal_error ("%s:%d: vasprintf returned NULL buffer (errno %d)",
+		    __FILE__, __LINE__, errno);
+  /* A negative status with a non-NULL buffer shouldn't never
+     happen. But to be sure. */
+  if (status < 0)
+    internal_error ("%s:%d: vasprintf call failed (errno %d)",
+		    __FILE__, __LINE__, errno);
+}
+
+
 /* My replacement for the read system call.
    Used like `read' but keeps going if `read' returns too soon.  */
 
@@ -1952,12 +1981,7 @@ vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  vasprintf (&linebuffer, format, args);
-  if (linebuffer == NULL)
-    {
-      fputs_unfiltered ("\ngdb: virtual memory exhausted.\n", gdb_stderr);
-      exit (1);
-    }
+  xvasprintf (&linebuffer, format, args);
   old_cleanups = make_cleanup (free, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
   do_cleanups (old_cleanups);
@@ -1976,12 +2000,7 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  vasprintf (&linebuffer, format, args);
-  if (linebuffer == NULL)
-    {
-      fputs_unfiltered ("\ngdb: virtual memory exhausted.\n", gdb_stderr);
-      exit (1);
-    }
+  xvasprintf (&linebuffer, format, args);
   old_cleanups = make_cleanup (free, linebuffer);
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);
