@@ -1,3 +1,19 @@
+Mon Mar  8 14:55:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hppa.c (_PA_RISC_ID): Defined if not already defined (e.g., for
+	hpux 7).  Patch from friedman@gnu.ai.mit.edu.
+
+	* aix386-core.c: Include uinfo.h and coredump.h.  Patch from Minh
+	Tran-Le, tranle@intellicorp.com.
+
+Fri Mar  5 14:54:21 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_generic_reloc): If the addend is non-zero, go
+	ahead and do the relocation.
+	(ecoff_refhi_reloc): Don't to the relocation here, just remember
+	what needs to be done.
+	(ecoff_reflo_reloc): Do the REFHI relocation here.
+
 Thu Mar  4 14:44:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_bfd_reloc_type_lookup): New function.
