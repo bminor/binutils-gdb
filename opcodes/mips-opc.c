@@ -107,12 +107,15 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
    Many instructions are short hand for other instructions (i.e., The
    jal <register> instruction is short for jalr <register>).  */
 
-const struct mips_opcode mips_builtin_opcodes[] = {
+const struct mips_opcode mips_builtin_opcodes[] =
+{
 /* These instructions appear first so that the disassembler will find
    them first.  The assemblers uses a hash table based on the
    instruction name anyhow.  */
 /* name,    args,	match,	    mask,	pinfo,          membership */
-{"nop",     "",		0x00000000, 0xffffffff,	0,		I1	},
+{"pref",    "k,o(b)",   0xcc000000, 0xfc000000, RD_b,           G3|M1|P4},
+{"nop",     "",         0x00000000, 0xffffffff, 0,              I1      },
+{"ssnop",   "",         0x00000040, 0xffffffff, 0,              M1|P4   },
 {"li",      "t,j",      0x24000000, 0xffe00000, WR_t,		I1	}, /* addiu */
 {"li",	    "t,i",	0x34000000, 0xffe00000, WR_t,		I1	}, /* ori */
 {"li",      "t,I",	0,    (int) M_LI,	INSN_MACRO,	I1	},
@@ -220,6 +223,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"bnel",    "s,t,p",	0x54000000, 0xfc000000,	CBL|RD_s|RD_t, 	I2|T3	},
 {"bnel",    "s,I,p",	0,    (int) M_BNEL_I,	INSN_MACRO,	I2	},
 {"break",   "",		0x0000000d, 0xffffffff,	TRAP,		I1	},
+{"break",   "B",        0x0000000d, 0xfc00003f, TRAP,           P4      },
 {"break",   "c",	0x0000000d, 0xfc00ffff,	TRAP,		I1	},
 {"break",   "c,q",	0x0000000d, 0xfc00003f,	TRAP,		I1	},
 {"c.f.d",   "S,T",	0x46200030, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
@@ -328,8 +332,8 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"cfc1",    "t,S",	0x44400000, 0xffe007ff,	LCD|WR_t|RD_C1|FP_S,	I1	},
 {"cfc2",    "t,G",	0x48400000, 0xffe007ff,	LCD|WR_t|RD_C2,	I1	},
 {"cfc3",    "t,G",	0x4c400000, 0xffe007ff,	LCD|WR_t|RD_C3,	I1	},
-{"clo",     "d,s",	0x70000021, 0xfc1f07ff, WR_d|RD_s,	P4	},
-{"clz",     "d,s",	0x70000020, 0xfc1f07ff, WR_d|RD_s,	P4	},
+{"clo",     "U,s",      0x70000021, 0xfc0007ff, WR_d|RD_s,      P4      },
+{"clz",     "U,s",      0x70000020, 0xfc0007ff, WR_d|RD_s,      P4      },
 {"ctc0",    "t,G",	0x40c00000, 0xffe007ff,	COD|RD_t|WR_CC,	I1	},
 {"ctc1",    "t,G",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC|FP_S,	I1	},
 {"ctc1",    "t,S",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC|FP_S,	I1	},
@@ -545,8 +549,11 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mfc0",    "t,G,H",	0x40000000, 0xffe007f8, LCD|WR_t|RD_C0,	P4	},
 {"mfc1",    "t,S",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1},
 {"mfc1",    "t,G",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S|FP_S,	I1},
+{"mfc1",    "t,G,H",    0x44000000, 0xffe007f8, LCD|WR_t|RD_S|FP_S,     P4},
 {"mfc2",    "t,G",	0x48000000, 0xffe007ff,	LCD|WR_t|RD_C2,	I1	},
+{"mfc2",    "t,G,H",    0x48000000, 0xffe007f8, LCD|WR_t|RD_C2, P4      },
 {"mfc3",    "t,G",	0x4c000000, 0xffe007ff,	LCD|WR_t|RD_C3,	I1	},
+{"mfc3",    "t,G,H",    0x4c000000, 0xffe007f8, LCD|WR_t|RD_C3, P4      },
 {"mfhi",    "d",	0x00000010, 0xffff07ff,	WR_d|RD_HI,	I1	},
 {"mflo",    "d",	0x00000012, 0xffff07ff,	WR_d|RD_LO,	I1	},
 {"mov.d",   "D,S",	0x46200006, 0xffff003f,	WR_D|RD_S|FP_D,	I1	},
@@ -580,8 +587,11 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mtc0",    "t,G,H",	0x40800000, 0xffe007f8, COD|RD_t|WR_C0|WR_CC,	P4	},
 {"mtc1",    "t,S",	0x44800000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I1	},
 {"mtc1",    "t,G",	0x44800000, 0xffe007ff,	COD|RD_t|WR_S|FP_S,	I1	},
+{"mtc1",    "t,G,H",    0x44800000, 0xffe007f8, COD|RD_t|WR_S|FP_S,     P4      },
 {"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC,	I1	},
+{"mtc2",    "t,G,H",    0x48800000, 0xffe007f8, COD|RD_t|WR_C2|WR_CC,   P4      },
 {"mtc3",    "t,G",	0x4c800000, 0xffe007ff,	COD|RD_t|WR_C3|WR_CC,	I1	},
+{"mtc3",    "t,G,H",    0x4c800000, 0xffe007f8, COD|RD_t|WR_C3|WR_CC,   P4      },
 {"mthi",    "s",	0x00000011, 0xfc1fffff,	RD_s|WR_HI,	I1	},
 {"mtlo",    "s",	0x00000013, 0xfc1fffff,	RD_s|WR_LO,	I1	},
 {"mul.d",   "D,V,T",	0x46200002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I1	},
@@ -620,7 +630,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"pll.ps",  "D,V,T",	0x46c0002c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5},
 {"plu.ps",  "D,V,T",	0x46c0002d, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5},
 
-{"pref",    "k,o(b)",	0xcc000000, 0xfc000000, RD_b,		G3|M1|P4	},
+/* pref is at the start of the table.  */
 {"prefx",   "h,t(b)",	0x4c00000f, 0xfc0007ff, RD_b|RD_t,	I4	},
 
 {"pul.ps",  "D,V,T",	0x46c0002e, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I5},
@@ -657,7 +667,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"sdbbp",   "",		0x0000000e, 0xffffffff,	TRAP,           G2|M1	},
 {"sdbbp",   "c",	0x0000000e, 0xfc00ffff,	TRAP,		G2|M1	},
 {"sdbbp",   "c,q",	0x0000000e, 0xfc00003f,	TRAP,		G2|M1	},
-{"sdbbp",   "m",	0x7000003f, 0xfc00003f, TRAP,		P4	},
+{"sdbbp",   "B",        0x7000003f, 0xfc00003f, TRAP,           P4      },
 {"sdc1",    "T,o(b)",	0xf4000000, 0xfc000000, SM|RD_T|RD_b|FP_D,	I2	},
 {"sdc1",    "E,o(b)",	0xf4000000, 0xfc000000, SM|RD_T|RD_b|FP_D,	I2	},
 {"sdc1",    "T,A(b)",	0,    (int) M_SDC1_AB,	INSN_MACRO,	I2	},
@@ -711,7 +721,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"srlv",    "d,t,s",	0x00000006, 0xfc0007ff,	WR_d|RD_t|RD_s,	I1	},
 {"srl",     "d,w,s",	0x00000006, 0xfc0007ff,	WR_d|RD_t|RD_s,	I1	}, /* srlv */
 {"srl",     "d,w,<",	0x00000002, 0xffe0003f,	WR_d|RD_t,	I1	},
-{"ssnop",     "",	0x00000040, 0xffffffff,	0,		M1	},
+/* ssnop is at the start of the table.  */
 {"standby", "",         0x42000021, 0xffffffff,	0,		V1	},
 {"sub",     "d,v,t",	0x00000022, 0xfc0007ff,	WR_d|RD_s|RD_t,	I1	},
 {"sub",     "d,v,I",	0,    (int) M_SUB_I,	INSN_MACRO,	I1	},
@@ -810,6 +820,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"xor",     "t,r,I",	0,    (int) M_XOR_I,	INSN_MACRO,	I1	},
 {"xori",    "t,r,i",	0x38000000, 0xfc000000,	WR_t|RD_s,	I1	},
 {"wait",    "",		0x42000020, 0xffffffff,	TRAP,	I3|M1|P4	},
+{"wait",    "J",        0x42000020, 0xfe00003f, TRAP,   P4      },
 {"waiti",   "",		0x42000020, 0xffffffff,	TRAP,	L1	},
 {"wb", 	    "o(b)",	0xbc040000, 0xfc1f0000, SM|RD_b,	L1	},
 /* No hazard protection on coprocessor instructions--they shouldn't

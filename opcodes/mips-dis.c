@@ -157,6 +157,30 @@ print_insn_arg (d, l, pc, info)
 			     reg_names[(l >> OP_SH_RD) & OP_MASK_RD]);
       break;
 
+    case 'U':
+      {
+      /* First check for both rd and rt being equal. */
+      int reg = (l >> OP_SH_RD) & OP_MASK_RD;
+      if (reg == ((l >> OP_SH_RT) & OP_MASK_RT))
+        (*info->fprintf_func) (info->stream, "$%s",
+                               reg_names[reg]);
+      else                        
+        {
+          /* If one is zero use the other. */
+          if (reg == 0)
+            (*info->fprintf_func) (info->stream, "$%s",
+                                   reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+          else if (((l >> OP_SH_RT) & OP_MASK_RT) == 0)
+            (*info->fprintf_func) (info->stream, "$%s",
+                                   reg_names[reg]);
+          else /* Bogus, result depends on processor. */
+            (*info->fprintf_func) (info->stream, "$%s or $%s",
+                                   reg_names[reg],
+                                   reg_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+          }
+      }
+      break;
+
     case 'z':
       (*info->fprintf_func) (info->stream, "$%s", reg_names[0]);
       break;
@@ -171,15 +195,9 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_CODE) & OP_MASK_CODE);
       break;
 
-
     case 'q':
       (*info->fprintf_func) (info->stream, "0x%x",
 			     (l >> OP_SH_CODE2) & OP_MASK_CODE2);
-      break;
-
-    case 'm':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_CODE20) & OP_MASK_CODE20);
       break;
 
     case 'C':
@@ -189,7 +207,12 @@ print_insn_arg (d, l, pc, info)
 
     case 'B':
       (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_SYSCALL) & OP_MASK_SYSCALL);
+			     (l >> OP_SH_CODE20) & OP_MASK_CODE20);
+      break;
+
+    case 'J':
+      (*info->fprintf_func) (info->stream, "0x%x",
+			     (l >> OP_SH_CODE19) & OP_MASK_CODE19);
       break;
 
     case 'S':
@@ -197,7 +220,6 @@ print_insn_arg (d, l, pc, info)
       (*info->fprintf_func) (info->stream, "$f%d",
 			     (l >> OP_SH_FS) & OP_MASK_FS);
       break;
-
 
     case 'T':
     case 'W':

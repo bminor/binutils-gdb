@@ -2597,6 +2597,15 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	  insn.insn_opcode |= va_arg (args, int) << 11;
 	  continue;
 
+	case 'U':
+	  {
+	    int tmp = va_arg (args, int);
+
+	    insn.insn_opcode |= tmp << 16;
+	    insn.insn_opcode |= tmp << 11;
+	    continue; 
+	  }
+
 	case 'V':
 	case 'S':
 	  insn.insn_opcode |= va_arg (args, int) << 11;
@@ -2614,6 +2623,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	  continue;
 
 	case 'B':
+	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  continue;
+
+	case 'J':
 	  insn.insn_opcode |= va_arg (args, int) << 6;
 	  continue;
 
@@ -6976,7 +6989,7 @@ validate_mips_insn (opc)
       case '<': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
       case '>':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
       case 'A': break;
-      case 'B':	USE_BITS (OP_MASK_SYSCALL,	OP_SH_SYSCALL);	break;
+      case 'B': USE_BITS (OP_MASK_CODE20,       OP_SH_CODE20);  break;
       case 'C':	USE_BITS (OP_MASK_COPZ,		OP_SH_COPZ);	break;
       case 'D':	USE_BITS (OP_MASK_FD,		OP_SH_FD);	break;
       case 'E':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
@@ -6984,6 +6997,7 @@ validate_mips_insn (opc)
       case 'G':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
       case 'H': USE_BITS (OP_MASK_SEL,		OP_SH_SEL);	break;
       case 'I': break;
+      case 'J':       USE_BITS (OP_MASK_CODE19,       OP_SH_CODE19);  break;
       case 'L': break;
       case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
       case 'N':	USE_BITS (OP_MASK_BCC,		OP_SH_BCC);	break;
@@ -7002,7 +7016,6 @@ validate_mips_insn (opc)
       case 'j':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'k':	USE_BITS (OP_MASK_CACHE,	OP_SH_CACHE);	break;
       case 'l': break;
-      case 'm': USE_BITS (OP_MASK_CODE20,	OP_SH_CODE20);	break;
       case 'o': USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'p':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'q':	USE_BITS (OP_MASK_CODE2,	OP_SH_CODE2);	break;
@@ -7015,6 +7028,8 @@ validate_mips_insn (opc)
       case 'x': break;
       case 'z': break;
       case 'P': USE_BITS (OP_MASK_PERFREG,	OP_SH_PERFREG);	break;
+      case 'U': USE_BITS (OP_MASK_RD,           OP_SH_RD);
+	        USE_BITS (OP_MASK_RT,           OP_SH_RT);	break;
       default:
 	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
 		c, opc->name, opc->args);
@@ -7268,29 +7283,11 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
-	    case 'm':		/* Full 20 bit break code.  */
-	      my_getExpression (&imm_expr, s);
-
-	      check_absolute_expr (ip, &imm_expr);
-
-	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
-		{
-		  as_warn (_("Illegal break code (%ld)"),
-			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 0xfffff;
-		}
-
-	      ip->insn_opcode |= imm_expr.X_add_number << 6;
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-
-	      continue;
-
-	    case 'B':		/* syscall code */
+	    case 'B':           /* 20-bit syscall/break code.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned) imm_expr.X_add_number > 0xfffff)
-		as_warn (_("Illegal syscall code (%ld)"),
+		as_warn (_("Illegal 20-bit code (%ld)"),
 			 (long) imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << 6;
 	      imm_expr.X_op = O_absent;
@@ -7310,6 +7307,17 @@ mips_ip (str, ip)
               imm_expr.X_op = O_absent;
               s = expr_end;
               continue;
+
+	    case 'J':           /* 19-bit wait code.  */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned) imm_expr.X_add_number > 0x7ffff)
+		as_warn (_("Illegal 19-bit code (%ld)"),
+			 (long) imm_expr.X_add_number);
+	      ip->insn_opcode |= imm_expr.X_add_number << 6;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
 
 	    case 'P':		/* Performance register */
               my_getExpression (&imm_expr, s);
@@ -7336,6 +7344,7 @@ mips_ip (str, ip)
 	    case 'G':		/* coprocessor destination register */
 	    case 'x':		/* ignore register name */
 	    case 'z':		/* must be zero register */
+	    case 'U':           /* destination register (clo/clz).  */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -7449,6 +7458,10 @@ mips_ip (str, ip)
 		    case 'd':
 		    case 'G':
 		      ip->insn_opcode |= regno << 11;
+		      break;
+		    case 'U':
+		      ip->insn_opcode |= regno << 11;
+		      ip->insn_opcode |= regno << 16;
 		      break;
 		    case 'w':
 		    case 't':

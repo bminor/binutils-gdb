@@ -1,3 +1,17 @@
+2000-12-01  Chris Demetriou <cgd@sibyte.com>
+
+        mips-dis.c (print_insn_arg): Handle new 'U' and 'J' argument
+        specifiers.  Update 'B' for new constant names, and remove
+        'm'.
+        mips-opc.c (mips_builtin_opcodes): Place "pref" and "ssnop"
+        near the top of the array, so they are disassembled properly.
+        Enable "ssnop" for MIPS32.  Add "break" variant with 20 bit
+        code for MIPS32.  Update "clo" and "clz" to use 'U' operand
+        specifier.  Add 'H' format specifier variants for "mfc1,"
+        "mfc2," "mfc3," "mtc1," "mtc2," and "mtc3" for MIPS32.  Update
+        MIPS32 "sdbbp" to use 'B' operand specifier.  Add MIPS32
+        "wait" variant which uses 'J' operand specifier.
+        
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* sh-dis.c (print_insn_ddt): Make insn_x, insn_y unsigned.
