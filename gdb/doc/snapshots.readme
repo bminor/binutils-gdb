@@ -125,14 +125,16 @@ are not exhaustive.  New tests are welcomed.
 GETTING HELP, GDB DISCUSSIONS, etc
 ----------------------------------
 
-Mail sent to gdb-testers@cygnus.com goes to everyone on the list of gdb
-testers, which should include everyone getting the gdb snapshots.  It is
-appropriate whenever you wish your mail to be seen by all the testers.  This
-would include announcements of any kind, notices of intent to implement a
-specific enhancement (to coordinate with other people on the list), etc.
-Before sending something to gdb-testers, ask yourself if what you are about to
-send would be something you would care to see show up in your mailbox if it
-was sent by someone else.
+Mail sent to gdb-testers@cygnus.com goes to everyone on the list of
+gdb testers, which should include everyone getting the gdb snapshots.
+It is appropriate whenever you wish your mail to be seen by all the
+testers.  This would include announcements of any kind, notices of
+intent to implement a specific enhancement (to coordinate with other
+people on the list), etc.  Before sending something to gdb-testers,
+ask yourself if what you are about to send would be something you
+would care to see show up in your mailbox if it was sent by someone
+else.  For administrative things ("remove me from gdb-testers", etc.),
+send mail to gdb-testers-request@cygnus.com.
 
 Mail sent to gdb-patches@cygnus.com goes to gdb support people internal to
 Cygnus.  Despite the name, it is appropriate for more than just patches.
