@@ -1,5 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
-   Copyright (C) 1993, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -474,7 +475,7 @@ sparc64_elf_write_relocs (abfd, sec, data)
 {
   boolean *failedp = (boolean *) data;
   Elf_Internal_Shdr *rela_hdr;
-  Elf64_External_Rela *outbound_relocas;
+  Elf64_External_Rela *outbound_relocas, *src_rela;
   unsigned int idx, count;
   asymbol *last_sym = 0;
   int last_sym_idx = 0;
@@ -534,17 +535,16 @@ sparc64_elf_write_relocs (abfd, sec, data)
 
   /* orelocation has the data, reloc_count has the count... */
   outbound_relocas = (Elf64_External_Rela *) rela_hdr->contents;
+  src_rela = outbound_relocas;
 
   for (idx = 0; idx < sec->reloc_count; idx++)
     {
       Elf_Internal_Rela dst_rela;
-      Elf64_External_Rela *src_rela;
       arelent *ptr;
       asymbol *sym;
       int n;
 
       ptr = sec->orelocation[idx];
-      src_rela = outbound_relocas + idx;
 
       /* The address of an ELF reloc is section relative for an object
 	 file, and absolute for an executable file or shared library.
@@ -602,6 +602,7 @@ sparc64_elf_write_relocs (abfd, sec, data)
 
       dst_rela.r_addend = ptr->addend;
       bfd_elf64_swap_reloca_out (abfd, &dst_rela, src_rela);
+      ++src_rela;
     }
 }
 
@@ -2799,25 +2800,40 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
     {
       error = false;
   
-      old_flags |= (new_flags & (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1));
-      new_flags |= (old_flags & (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1));
-      if ((old_flags & (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1)) ==
-           (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1))
-        {
-          error = true;
-          (*_bfd_error_handler)
-            (_("%s: linking UltraSPARC specific with HAL specific code"),
-             bfd_get_filename (ibfd));
-        }
-        
-      /* Choose the most restrictive memory ordering */
-      old_mm = (old_flags & EF_SPARCV9_MM);
-      new_mm = (new_flags & EF_SPARCV9_MM);
-      old_flags &= ~EF_SPARCV9_MM;
-      new_flags &= ~EF_SPARCV9_MM;
-      if (new_mm < old_mm) old_mm = new_mm;
-      old_flags |= old_mm;
-      new_flags |= old_mm;
+      if ((ibfd->flags & DYNAMIC) != 0)
+	{
+	  /* We don't want dynamic objects memory ordering and
+	     architecture to have any role. That's what dynamic linker
+	     should do.  */
+	  old_flags &= ~(EF_SPARCV9_MM | EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1);
+	  old_flags |= (new_flags
+			& (EF_SPARCV9_MM
+			   | EF_SPARC_SUN_US1
+			   | EF_SPARC_HAL_R1));
+	}
+      else
+	{
+	  /* Choose the highest architecture requirements.  */
+	  old_flags |= (new_flags & (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1));
+	  new_flags |= (old_flags & (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1));
+	  if ((old_flags & (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1))
+	      == (EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1))
+	    {
+	      error = true;
+	      (*_bfd_error_handler)
+		(_("%s: linking UltraSPARC specific with HAL specific code"),
+		 bfd_get_filename (ibfd));
+	    }
+	  /* Choose the most restrictive memory ordering.  */
+	  old_mm = (old_flags & EF_SPARCV9_MM);
+	  new_mm = (new_flags & EF_SPARCV9_MM);
+	  old_flags &= ~EF_SPARCV9_MM;
+	  new_flags &= ~EF_SPARCV9_MM;
+	  if (new_mm < old_mm)
+	    old_mm = new_mm;
+	  old_flags |= old_mm;
+	  new_flags |= old_mm;
+	}
 
       /* Warn about any other mismatches */
       if (new_flags != old_flags)

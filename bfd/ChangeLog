@@ -1,3 +1,11 @@
+2000-02-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Don't bump
+	architecture if the object causing the bump is dynamic.
+	* elf64-sparc.c (sparc64_elf_merge_private_bfd_data): Likewise,
+	and also don't it for memory ordering.
+	(sparc64_elf_write_relocs): Take src_rela out of the loop.
+
 2000-02-27  Ian Lance Taylor  <ian@zembu.com>
 
 	* dwarf2.c (read_abbrevs): Use _raw_size directly rather than
