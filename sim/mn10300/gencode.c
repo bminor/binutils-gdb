@@ -28,7 +28,7 @@ write_header ()
   struct mn10300_opcode *opcode;
 
   for (opcode = (struct mn10300_opcode *)mn10300_opcodes; opcode->name; opcode++)
-    printf("void OP_%X PARAMS ((void));\t\t/* %s */\n",
+    printf("void OP_%X PARAMS ((unsigned long, unsigned long));\t\t/* %s */\n",
 	   opcode->opcode, opcode->name);
 }
 
@@ -47,7 +47,7 @@ write_template ()
 
   for (opcode = (struct mn10300_opcode *)mn10300_opcodes; opcode->name; opcode++)
     {
-      printf("/* %s */\nvoid\nOP_%X ()\n{\n", opcode->name, opcode->opcode);
+      printf("/* %s */\nvoid\nOP_%X ()\n     unsigned long insn, extension;\n{\n", opcode->name, opcode->opcode);
 	  
       /* count operands */
       j = 0;

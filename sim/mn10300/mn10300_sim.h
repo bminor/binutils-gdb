@@ -59,7 +59,7 @@ struct simops
 
 struct _state
 {
-  reg_t regs[10];		/* registers, d0-d3, a0-a3, sp, mdr */
+  reg_t regs[12];		/* registers, d0-d3, a0-a3, sp, mdr, lar, lir */
   reg_t sregs[8];		/* system registers, including psw */
   reg_t pc;
   uint8 *mem;			/* main memory */
@@ -68,7 +68,6 @@ struct _state
 
 extern uint32 OP[4];
 extern struct simops Simops[];
-extern unsigned long insn, extension;
 
 #define PC	(State.pc)
 
@@ -82,6 +81,8 @@ extern unsigned long insn, extension;
 #define REG_A0 4
 #define REG_SP 8
 #define REG_MDR 9
+#define REG_LAR 10
+#define REG_LIR 11
 
 #define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
 

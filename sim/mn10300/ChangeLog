@@ -1,3 +1,14 @@
+Fri Dec  6 14:13:34 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gencode.c (write_header): Add "insn" and "extension" arguments
+	to the OP_* declarations.
+	(write_template): Similarly for function templates.
+	* interp.c (insn, extension): Remove global variables.  Instead
+	pass them as arguments to the OP_* functions.
+	* mn10300_sim.h: Remove decls for "insn" and "extension".
+	* simops.c (OP_*): Accept "insn" and "extension" as arguments
+	instead of using globals.
+
 Thu Dec  5 22:26:31 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix typos in "mov am,(d16,an)" and "mov am,(d32,an)"
