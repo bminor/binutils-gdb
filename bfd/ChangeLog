@@ -1,3 +1,18 @@
+Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (bfd_som_set_section_attributes): New function.
+	(bfd_som_set_subsection_attributes): Likewise.
+	(bfd_som_set_symboL_type): Likewise.
+	(bfd_som_attach_unwind_info): Likewise.
+	* som.h: Declare new exported functions.
+
+	* som.h (struct som_symbol): Add new fields to hold additional
+	information needed to build/write symbol tables and fixup streams.
+	(struct som_section_data_struct): Add new fields to hold additional
+	information needed to build/write space and subspace headers.
+	(som_symbol_data): New accessor macro for SOM symbol information.
+	(R_HPPA_*): Basic relocation types to be used by the assembler.
+
 Fri Nov 12 11:00:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* trad-core.c (trad_unix_core_file_p): If new hook

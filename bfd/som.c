@@ -103,7 +103,9 @@ static int log2 PARAMS ((unsigned int));
 
 
 /* Return the logarithm of X, base 2, considering X unsigned. 
-   Abort if X is not a power of two -- this should never happen.  */
+   Abort if X is not a power of two -- this should never happen (FIXME:
+   It will happen on corrupt executables.  GDB should give an error, not
+   a coredump, in that case).  */
 
 static int
 log2 (x)
@@ -829,6 +831,74 @@ som_new_section_hook (abfd, newsect)
   return true;
 }
 
+/* Set backend info for sections which can not be described
+   in the BFD data structures.  */
+
+void
+bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
+     asection *section;
+     char defined;
+     char private;
+     unsigned char sort_key;
+     int spnum;
+{
+  struct space_dictionary_record *space_dict;
+
+  som_section_data (section)->is_space = 1;
+  space_dict = &som_section_data (section)->space_dict;
+  space_dict->is_defined = defined;
+  space_dict->is_private = private;
+  space_dict->sort_key = sort_key;
+  space_dict->space_number = spnum;
+}
+
+/* Set backend info for subsections which can not be described 
+   in the BFD data structures.  */
+
+void
+bfd_som_set_subsection_attributes (section, container, access,
+				   sort_key, quadrant)
+     asection *section;
+     asection *container;
+     int access;
+     unsigned char sort_key;
+     int quadrant;
+{
+  struct subspace_dictionary_record *subspace_dict;
+  som_section_data (section)->is_subspace = 1;
+  subspace_dict = &som_section_data (section)->subspace_dict;
+  subspace_dict->access_control_bits = access;
+  subspace_dict->sort_key = sort_key;
+  subspace_dict->quadrant = quadrant;
+  som_section_data (section)->containing_space = container;
+}
+
+/* Set the full SOM symbol type.  SOM needs far more symbol information
+   than any other object file format I'm aware of.  It is mandatory
+   to be able to know if a symbol is an entry point, millicode, data,
+   code, absolute, storage request, or procedure label.  If you get
+   the symbol type wrong your program will not link.  */
+
+void
+bfd_som_set_symbol_type (symbol, type)
+     asymbol *symbol;
+     unsigned int type;
+{
+  (*som_symbol_data (symbol))->som_type = type;
+}
+
+/* Attach 64bits of unwind information to a symbol (which hopefully
+   is a function of some kind!).  It would be better to keep this
+   in the R_ENTRY relocation, but there is not enough space.  */
+
+void
+bfd_som_attach_unwind_info (symbol, unwind_desc)
+     asymbol *symbol;
+     char *unwind_desc;
+{
+  (*som_symbol_data (symbol))->unwind = unwind_desc;
+}
+
 static boolean
 som_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
@@ -933,7 +1003,7 @@ bfd_target som_vec =
   true,				/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
    | SEC_ALLOC | SEC_LOAD | SEC_RELOC),		/* section flags */
 
