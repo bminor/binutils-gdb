@@ -130,7 +130,7 @@ static char * extract_word (char *from, char *to, int limit);
 static unsigned int avr_operand (struct avr_opcodes_s *opcode,
 				 int where, char *op, char **line);
 static unsigned int avr_operands (struct avr_opcodes_s *opcode, char **line);
-static unsigned int avr_get_constant (char * str, unsigned int max);
+static unsigned int avr_get_constant (char * str, int max);
 static char *parse_exp (char *s, expressionS * op);
 static bfd_reloc_code_real_type avr_ldi_expression (expressionS *exp);
 long md_pcrel_from_section PARAMS ((fixS *, segT));
@@ -371,8 +371,8 @@ extract_word (char *from, char *to, int limit)
 
 int
 md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+     fragS *fragp ATTRIBUTE_UNUSED;
+     asection *seg ATTRIBUTE_UNUSED;
 {
   abort ();
   return 0;
@@ -396,7 +396,7 @@ md_show_usage (stream)
 
 static void
 avr_set_arch (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   char * str;
   str = (char *)alloca (20);
@@ -438,7 +438,7 @@ md_parse_option (c, arg)
 
 symbolS *
 md_undefined_symbol(name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -487,9 +487,9 @@ md_atof (type, litP, sizeP)
 
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *abfd;
-  asection *sec;
-  fragS *fragP;
+  bfd *abfd ATTRIBUTE_UNUSED;
+  asection *sec ATTRIBUTE_UNUSED;
+  fragS *fragP ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -498,7 +498,7 @@ md_convert_frag (abfd, sec, fragP)
 void
 md_begin ()
 {
-  int i;
+  unsigned int i;
   struct avr_opcodes_s *opcode;
   avr_hash = hash_new();
 
@@ -513,29 +513,35 @@ md_begin ()
 
   for (i = 0; i < sizeof (exp_mod) / sizeof (exp_mod[0]); ++i)
     hash_insert (avr_mod_hash, EXP_MOD_NAME(i), (void*)(i+10));
-
-  /* Construct symbols for each register */
-  /* FIXME: register names are in the same namespace as labels.
-     This means that C functions or global variables with the same
-     name as a register will cause assembler errors, even though
-     such names (r0-r31) are perfectly valid in C.  I'd suggest to
-     put '%' or "." in front of register names both here and in avr-gcc.  */
-
-  for (i = 0; i < 32; i++)
-    {
-      char buf[10];
-
-      sprintf (buf, "r%d", i);
-      symbol_table_insert (symbol_new (buf, reg_section, i,
-				       &zero_address_frag));
-      sprintf (buf, "R%d", i);
-      symbol_table_insert (symbol_new (buf, reg_section, i,
-				       &zero_address_frag));
-    }
   
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
 }
 
+
+/* Resolve STR as a constant expression and return the result.
+   If result greater than MAX then error. */
+
+static unsigned int
+avr_get_constant (str, max)
+     char * str;
+     int max;
+{
+  expressionS ex;
+  str = skip_space (str);
+  input_line_pointer = str;
+  expression (&ex);
+
+  if (ex.X_op != O_constant)
+    as_bad (_("constant value required"));
+
+  if (ex.X_add_number > max || ex.X_add_number < 0)
+    as_bad (_("number must be less than %d"), max+1);
+  return ex.X_add_number;
+}
+
+
+/* Parse instruction operands.
+   Returns binary opcode. */
 
 static unsigned int
 avr_operands (opcode, line)
@@ -622,24 +628,10 @@ avr_operands (opcode, line)
   return bin;
 }
 
-static unsigned int
-avr_get_constant (str, max)
-     char * str;
-     unsigned int max;
-{
-  expressionS ex;
-  str = skip_space (str);
-  input_line_pointer = str;
-  expression (&ex);
 
-  if (ex.X_op != O_constant)
-    as_bad (_("constant value required"));
-
-  if (ex.X_add_number > max)
-    as_bad (_("number must be less than %d"), max+1);
-  return ex.X_add_number;
-}
-
+/* Parse one instruction operand.
+   Returns operand bitmask. Also fixups can be generated.  */
+   
 static unsigned int
 avr_operand (opcode, where, op, line)
      struct avr_opcodes_s *opcode;
@@ -647,11 +639,10 @@ avr_operand (opcode, where, op, line)
      char *op;
      char **line;
 {
-  unsigned int op_mask = 0;
-  char *str = *line;
   expressionS op_expr;
+  unsigned int op_mask = 0;
+  char *str = skip_space (*line);
 
-  str = skip_space (str);
   switch (*op)
     {
       /* Any register operand.  */
@@ -661,12 +652,13 @@ avr_operand (opcode, where, op, line)
     case 'a':
     case 'v':
       {
-	char r_name[256];
 	op_mask = -1;
 
-	str = extract_word (str, r_name, sizeof (r_name));
-	if (r_name[0] == 'r' || r_name[0] == 'R')
-	  {
+	if (*str == 'r' || *str == 'R')
+	  {	    
+	    char r_name[20];
+	    
+	    str = extract_word (str, r_name, sizeof (r_name));
 	    if (isdigit(r_name[1]))
 	      {
 		if (r_name[2] == '\0')
@@ -679,12 +671,11 @@ avr_operand (opcode, where, op, line)
 	  }
 	else
 	  {
-	    parse_exp (r_name, &op_expr);
-	    if (op_expr.X_op == O_register)
-	      op_mask = op_expr.X_add_number;
+	    op_mask = avr_get_constant (str, 31);
+	    str = input_line_pointer;
 	  }
 	
-	if (op_mask <= 31 && op_mask >= 0)
+	if (op_mask <= 31)
 	  {
 	    switch (*op)
 	      {
@@ -715,7 +706,7 @@ avr_operand (opcode, where, op, line)
 	      }
 	    break;
 	  }
-	as_bad (_ ("register required"));
+	as_bad (_ ("register name or number from 0 to 31 required"));
       }
       break;
 
@@ -1147,7 +1138,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -1184,7 +1175,7 @@ md_assemble (str)
   struct avr_opcodes_s * opcode;
   char op[11];
 
-  str = extract_word (str, op, sizeof(op));
+  str = skip_space (extract_word (str, op, sizeof(op)));
 
   if (!op[0])
     as_bad (_ ("can't find opcode "));

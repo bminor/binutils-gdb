@@ -1,3 +1,15 @@
+Mon May  1 14:19:39 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* config/tc-avr.c: ATTRIBUTE_UNUSED added to the necessary places.
+	More comments added.
+	(md_begin): Removed "construct symbols for each register name".
+	Because register names conflicts with GCC generated function
+	names.
+	(avr_operand): Now constant numbers can be used as a register
+	identifiers (0 as r0, 31 as r31).
+	(md_assemble): use skip_space () before parsing instruction
+	operands.
+
 Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c: New AVR_ISA_ defined.
