@@ -57,7 +57,7 @@
 
    IMPORTS  (  (   <internal-name> =   <module-name> . <integer> )
              | ( [ <internal-name> = ] <module-name> . <external-name> )) *
-   Declares that <external-name> or the exported function whoes ordinal number
+   Declares that <external-name> or the exported function whose ordinal number
    is <integer> is to be imported from the file <module-name>.  If
    <internal-name> is specified then this is the name that the imported
    function will be refereed to in the body of the DLL.

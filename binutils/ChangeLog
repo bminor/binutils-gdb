@@ -1,5 +1,9 @@
 2004-12-06  Ben Elliston  <bje@au.ibm.com>
 
+	* dlltool.c: Comment fix.
+
+2004-12-06  Ben Elliston  <bje@au.ibm.com>
+
 	* doc/binutils.texi: Update copyright years.
 
 2004-12-03  Richard Sandiford  <rsandifo@redhat.com>
