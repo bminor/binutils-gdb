@@ -27,13 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include <sys/ptrace.h>
 
-#ifdef FIVE_ARG_PTRACE
-
-/* Deal with HPUX 8.0 braindamage.  */
-#define ptrace(a,b,c,d) ptrace(a,b,c,d,0)
-
-#endif
-
 #ifndef PT_ATTACH
 #define PT_ATTACH PTRACE_ATTACH
 #endif
@@ -52,14 +45,15 @@ call_ptrace (request, pid, addr, data)
      PTRACE_ARG3_TYPE addr;
      int data;
 {
-  return ptrace (request, pid, addr, data);
+  return ptrace (request, pid, addr, data, 0);
 }
 
-#ifdef DEBUG_PTRACE
-/* For the rest of the file, use an extra level of indirection */
-/* This lets us breakpoint usefully on call_ptrace. */
+/* Use an extra level of indirection for ptrace calls.
+   This lets us breakpoint usefully on call_ptrace.   It also
+   allows us to pass an extra argument to ptrace without
+   using an ANSI-C specific macro.  */
+
 #define ptrace call_ptrace
-#endif
 
 void
 kill_inferior ()
