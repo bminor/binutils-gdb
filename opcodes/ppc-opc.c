@@ -403,8 +403,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define SR SPRG + 1
   { 4, 16, 0, 0, 0 },
 
+  /* The STRM field in an X AltiVec form instruction.  */
+#define STRM SR + 1
+#define STRM_MASK (0x3 << 21)
+  { 2, 21, 0, 0, 0 },
+
   /* The SV field in a POWER SC form instruction.  */
-#define SV SR + 1
+#define SV STRM + 1
   { 14, 2, 0, 0, 0 },
 
   /* The TBR field in an XFX form instruction.  This is like the SPR
@@ -1289,6 +1294,10 @@ extract_tbr (insn, invalid)
 /* An X form sync instruction with everything filled in except the LS field.  */
 #define XSYNC_MASK (0xff9fffff)
 
+/* An X form AltiVec dss instruction.  */
+#define XDSS(op, xop, a) (X ((op), (xop)) | ((((unsigned long)(a)) & 1) << 25))
+#define XDSS_MASK XDSS(0x3f, 0x3ff, 1)
+
 /* An XFL form instruction.  */
 #define XFL(op, xop, rc) (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1) | (((unsigned long)(rc)) & 1))
 #define XFL_MASK (XFL (0x3f, 0x3ff, 1) | (((unsigned long)1) << 25) | (((unsigned long)1) << 16))
@@ -1584,7 +1593,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "nmaclhwso",	XO(4,494,1,0), XO_MASK,	PPC405,		{ RT, RA, RB } },
 { "nmaclhwso.",	XO(4,494,1,1), XO_MASK,	PPC405,		{ RT, RA, RB } },
 { "mfvscr",  VX(4, 1540), VX_MASK,	PPCVEC,		{ VD } },
-{ "mtvscr",  VX(4, 1604), VX_MASK,	PPCVEC,		{ VD } },
+{ "mtvscr",  VX(4, 1604), VX_MASK,	PPCVEC,		{ VB } },
 { "vaddcuw", VX(4,  384), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vaddfp",  VX(4,   10), VX_MASK, 	PPCVEC,		{ VD, VA, VB } },
 { "vaddsbs", VX(4,  768), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
@@ -2972,9 +2981,15 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lwax",    X(31,341),	X_MASK,		PPC64,		{ RT, RA, RB } },
 
+{ "dst",     XDSS(31,342,0), XDSS_MASK,	PPCVEC,		{ RA, RB, STRM } },
+{ "dstt",    XDSS(31,342,1), XDSS_MASK,	PPCVEC,		{ RA, RB, STRM } },
+
 { "lhax",    X(31,343),	X_MASK,		COM,		{ RT, RA, RB } },
 
 { "lhaxe",   X(31,351),	X_MASK,		BOOKE64,	{ RT, RA, RB } },
+
+{ "dstst",   XDSS(31,374,0), XDSS_MASK,	PPCVEC,		{ RA, RB, STRM } },
+{ "dststt",  XDSS(31,374,1), XDSS_MASK,	PPCVEC,		{ RA, RB, STRM } },
 
 { "dccci",   X(31,454),	XRT_MASK,	PPC403,		{ RA, RB } },
 
@@ -3365,6 +3380,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lduxe",   X(31,831),	X_MASK,		BOOKE64,	{ RT, RA, RB } },
 
 { "rac",     X(31,818),	X_MASK,		PWRCOM,		{ RT, RA, RB } },
+
+{ "dss",     XDSS(31,822,0), XDSS_MASK,	PPCVEC,		{ STRM } },
+{ "dssall",  XDSS(31,822,1), XDSS_MASK,	PPCVEC,		{ STRM } },
 
 { "srawi",   XRC(31,824,0), X_MASK,	PPCCOM,		{ RA, RS, SH } },
 { "srai",    XRC(31,824,0), X_MASK,	PWRCOM,		{ RA, RS, SH } },

@@ -1,3 +1,8 @@
+2001-10-17  matthew green  <mrg@redhat.com>
+
+	* config/tc-ppc.c (md_show_usage): Add missing -maltivec, -m7400,
+	-m7410, -m7450 and -m7455 options.
+
 2001-10-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (PPC_HA, PPC_HIGHERA, PPC_HIGHESTA): Simplify.

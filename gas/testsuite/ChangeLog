@@ -1,3 +1,9 @@
+2001-10-17  matthew green  <mrg@redhat.com>
+
+	* gas/ppc/altivec.s: New test for AltiVec.
+	* gas/ppc/altivec.d: New file.
+	* gas/ppc/ppc.exp: Test altivec.s
+
 2001-10-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/sh/err-le.s, gas/sh/err-be.s: New tests.

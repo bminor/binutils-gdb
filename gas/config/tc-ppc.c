@@ -1028,10 +1028,13 @@ PowerPC options:\n\
 -mppc, -mppc32, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
 -m403, -m405            generate code for Motorola PowerPC 403/405\n\
+-m7400, -m7410, -m7450, -m7455\n\
+			generate code For Motorola PowerPC 7400/7410/7450/7455\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
--mbooke64               generate code for 64-bit Motorola BookE\n\
--mbooke, mbooke32       generate code for 32-bit Motorola BookE\n\
+-mbooke64		generate code for 64-bit Motorola BookE\n\
+-mbooke, mbooke32	generate code for 32-bit Motorola BookE\n\
+-maltivec		generate code for AltiVec\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n\
 -mregnames		Allow symbolic names for registers\n\

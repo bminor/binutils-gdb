@@ -1,3 +1,10 @@
+2001-10-17  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (STRM): New AltiVec operand.
+	(XDSS): New AltiVec instruction form.
+	(mtvscr): Correct operand list.
+	(dst, dstt, dstst, dststt, dss, dssall): AltiVec instructions.
+
 2001-10-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.
