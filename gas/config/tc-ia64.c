@@ -3617,7 +3617,7 @@ dot_saveb (dummy)
     add_unwind_entry (output_br_mem (brmask));
 
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-    ignore_rest_of_line ();
+    demand_empty_rest_of_line ();
 }
 
 static void
@@ -3649,7 +3649,7 @@ dot_spill (dummy)
 
   sep = parse_operand (&e);
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-    ignore_rest_of_line ();
+    demand_empty_rest_of_line ();
 
   if (e.X_op != O_constant)
     as_bad ("Operand to .spill must be a constant");
@@ -3925,7 +3925,7 @@ dot_unwabi (dummy)
     }
   sep = parse_operand (&e2);
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-    ignore_rest_of_line ();
+    demand_empty_rest_of_line ();
 
   if (e1.X_op != O_constant)
     {
@@ -4020,7 +4020,7 @@ dot_prologue (dummy)
 	as_bad ("No second operand to .prologue");
       sep = parse_operand (&e2);
       if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-	ignore_rest_of_line ();
+	demand_empty_rest_of_line ();
 
       if (e1.X_op == O_constant)
 	{

@@ -1,5 +1,19 @@
 2004-03-18  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* read.c (read_a_source_file): Use demand_empty_rest_of_line.
+	(demand_empty_rest_of_line): Issue an error here.
+	(ignore_rest_of_line): Silently skip to end.
+	(demand_copy_string): Issue an error, not warning.
+	(equals): Likewise.
+	* config/obj-elf.c (obj_elf_section_name): Likewise.
+	(obj_elf_section): Likewise.
+	* config/tc-arc.c (arc_extoper): Remove bogus NULL checks.
+	(arc_extinst): Likewise.
+	* config/tc-ia64.c (dot_saveb): Use demand_empty_rest_of_line.
+	(dot_spill): Likewise.
+	(dot_unwabi): Likewise.
+	(dot_prologue): Likewise.
+
 	* expr.c (operand): Reject ++ and --.
 	(operator): Likewise.
 
