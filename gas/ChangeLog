@@ -1,5 +1,7 @@
 Thu Jul  4 11:59:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (VERSION): Set to cygnus-2.7.1.
+
 	* Released binutils 2.7.
 
 Thu Jul  4 10:11:33 1996  James G. Smith  <jsmith@cygnus.co.uk>

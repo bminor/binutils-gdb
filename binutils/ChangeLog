@@ -1,3 +1,9 @@
+Thu Jul  4 12:00:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (VERSION): Set to cygnus-2.7.1.
+
+	* Released binutils 2.7.
+
 Sat Jun 29 21:18:09 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (strip_main): Add -o option, and handle it.
