@@ -1,4 +1,9 @@
-2003-06-22  Michael Chastain  <mec@shout.net>
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/print-threads.exp (test_all_threads): Add kfail for
+	gdb/1265.
+
+2003-06-28  Michael Chastain  <mec@shout.net>
 	    Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Increase maximum
