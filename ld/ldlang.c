@@ -912,6 +912,9 @@ init_os (s)
      mention are initialized.  */
   if (s->addr_tree != NULL)
     exp_init_os (s->addr_tree);
+
+  if (s->load_base != NULL)
+    exp_init_os (s->load_base);
 }
 
 /* Make sure that all output sections mentioned in an expression are
