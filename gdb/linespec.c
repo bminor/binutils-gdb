@@ -59,63 +59,76 @@ static void dl1_initialize_defaults (struct symtab **default_symtab,
 
 static struct symtabs_and_lines dl1_indirect (char **argptr);
 
-static void dl1_set_flags (char **argptr, int *is_quoted,
+static void dl1_set_flags (char *arg, int *is_quoted,
 			   char **paren_pointer);
-
-enum dl1_control_flow { DO_NOTHING, DO_RETURN, DO_SYMBOL_FOUND };
-
-static enum
-dl1_control_flow dl1_handle_multipart (char **argptr,
-				       int funfirstline,
-				       char ***canonical,
-				       char *saved_arg,
-				       int is_quoted,
-				       char *paren_pointer,
-				       char **temp_copy,
-				       struct symbol **sym,
-				       struct symtab **sym_symtab,
-				       struct symtab **s,
-				       struct symtabs_and_lines *values);
 
 static char *dl1_locate_first_half (char **argptr, int *is_quote_enclosed);
 
-static enum
-dl1_control_flow dl1_multipart_compound (char **argptr,
-					 int funfirstline,
-					 char ***canonical,
-					 char *saved_arg,
-					 char *p,
-					 char **temp_copy,
-					 struct symbol **sym,
-					 struct symtab **sym_symtab,
-					 struct symtab **s,
-					 struct symtabs_and_lines *values);
+static struct symtabs_and_lines dl1_compound (char **argptr,
+					      int funfirstline,
+					      char ***canonical,
+					      char *saved_arg,
+					      char *p);
 
-static enum
-dl1_control_flow dl1_examine_compound_token (char **argptr,
-					     int funfirstline,
-					     char ***canonical,
-					     char *saved_arg,
-					     char *p,
-					     struct symtabs_and_lines *values);
+static int dl1_examine_compound_token (char **argptr,
+				       int funfirstline,
+				       char ***canonical,
+				       char *saved_arg,
+				       char *p,
+				       struct symtabs_and_lines *values);
 
 static struct symbol *dl1_locate_class_sym (char **argptr, char *p);
 
 static char *dl1_find_next_token (char **argptr);
 
-static void dl1_find_method (int funfirstline, char ***canonical,
-			     char *saved_arg, char *copy,
-			     struct type *t,
-			     struct symbol *sym_class,
-			     struct symbol **sym_arr,
-			     struct symtabs_and_lines *values);
+static struct symtabs_and_lines dl1_find_method (int funfirstline,
+						 char ***canonical,
+						 char *saved_arg,
+						 char *copy,
+						 struct type *t,
+						 struct symbol *sym_class,
+						 struct symbol **sym_arr);
 
 static int dl1_count_methods (char *copy, struct type *t,
 			      struct symbol **sym_arr);
 
-static void dl1_handle_filename (char **argptr, char *p,
-				 int is_quote_enclosed,
-				 struct symtab **s);
+static struct symtab *dl1_handle_filename (char **argptr, char *p,
+					    int is_quote_enclosed);
+
+static int dl1_is_all_digits (char *arg);
+
+static struct symtabs_and_lines dl1_all_digits (char **argptr,
+						struct symtab *default_symtab,
+						int default_line,
+						char ***canonical,
+						struct symtab *file_symtab);
+
+static char *dl1_skip_digits (char *arg);
+
+static struct symtabs_and_lines dl1_dollar (char **argptr,
+					    int funfirstline,
+					    struct symtab *default_symtab,
+					    char ***canonical,
+					    struct symtab *file_symtab);
+
+static struct symtabs_and_lines dl1_variable (char **argptr,
+					      int funfirstline,
+					      char ***canonical,
+					      int is_quoted,
+					      char *paren_pointer,
+					      struct symtab *file_symtab);
+
+static struct
+symtabs_and_lines dl1_symbol_found (int funfirstline,
+				    char ***canonical,
+				    char *copy,
+				    struct symbol *sym,
+				    struct symtab *file_symtab,
+				    struct symtab *sym_symtab);
+
+static struct
+symtabs_and_lines dl1_minsym_found (int funfirstline,
+				    struct minimal_symbol *msymbol);
 
 /* Helper functions. */
 
@@ -572,26 +585,13 @@ struct symtabs_and_lines
 decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	       int default_line, char ***canonical)
 {
-  struct symtabs_and_lines values;
-  struct symtab_and_line val;
-  char *p;
-  char *q, *ii;
   /* This is NULL if there are no parens in argptr, or a pointer to
      the closing parenthesis if there are parens.  */
   char *paren_pointer;
-  struct symtab *s = NULL;
-
-  struct symbol *sym;
-  /* The symtab that SYM was found in.  */
-  struct symtab *sym_symtab;
-
-  struct minimal_symbol *msymbol;
-  char *copy;
+  /* If a file name is specified, this is its symtab.  */
+  struct symtab *file_symtab = NULL;
   int is_quoted;
-  int is_quote_enclosed;
   char *saved_arg = *argptr;
-
-  init_sal (&val);		/* initialize to zeroes */
 
   /* Defaults have defaults.  */
 
@@ -608,317 +608,60 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
    *     (gdb) break c::f(int)
    */
 
-  dl1_set_flags (argptr, &is_quoted, &paren_pointer);
+  dl1_set_flags (*argptr, &is_quoted, &paren_pointer);
 
-  /* Handle multipart linespecs (with colons or periods).  */
+  /* Check to see if it's a multipart linespec (with colons or periods).  */
   {
-    /* The code after symbol_found depends on having access to a
-       string 'copy' which is allocated via alloca.  But we can't
-       allocate via alloca within dl1_handle_multipart and still
-       expect it to be valid after we exit.  temp_copy will help us
-       get around that.  */
-    char *temp_copy;
+    char *p;
+    int is_quote_enclosed;
+    
+    /* Locate the first half of the linespec, ending in a colon, period,
+       or whitespace.  (More or less.)  */
 
-    switch (dl1_handle_multipart (argptr, funfirstline, canonical,
-				  saved_arg, is_quoted, paren_pointer,
-				  &temp_copy, &sym, &sym_symtab,
-				  &s, &values))
+    p = dl1_locate_first_half (argptr, &is_quote_enclosed);
+
+    /* Does it look like there actually were two parts?  */
+
+    if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
       {
-      case DO_RETURN:
-	return values;
-      case DO_SYMBOL_FOUND:
-	{
-	  int temp_copy_len = strlen (temp_copy);
-	  copy = (char *) alloca (temp_copy_len + 1);
-	  memcpy (copy, temp_copy, temp_copy_len + 1);
-	  xfree (temp_copy);
-	  goto symbol_found;
-	}
-      default:
-	/* Do nothing.  */
-	;
+	if (is_quoted)
+	  *argptr = *argptr + 1;
+      
+	/* Is it a C++ or Java compound data structure?  */
+      
+	if (p[0] == '.' || p[1] == ':')
+	  return dl1_compound (argptr, funfirstline, canonical,
+			       saved_arg, p);
+
+	/* No, the first part is a filename; set file_symtab
+	   accordingly.  Also, move argptr past the filename.  */
+      
+	file_symtab = dl1_handle_filename (argptr, p, is_quote_enclosed);
       }
   }
 
-  /* S is specified file's symtab, or 0 if no file specified.
-     arg no longer contains the file name.  */
-
   /* Check whether arg is all digits (and sign) */
 
-  q = *argptr;
-  if (*q == '-' || *q == '+')
-    q++;
-  while (*q >= '0' && *q <= '9')
-    q++;
-
-  if (q != *argptr && (*q == 0 || *q == ' ' || *q == '\t' || *q == ','))
-    {
-      /* We found a token consisting of all digits -- at least one digit.  */
-      enum sign
-	{
-	  none, plus, minus
-	}
-      sign = none;
-
-      /* We might need a canonical line spec if no file was specified.  */
-      int need_canonical = (s == 0) ? 1 : 0;
-
-      /* This is where we need to make sure that we have good defaults.
-         We must guarantee that this section of code is never executed
-         when we are called with just a function name, since
-	 set_default_source_symtab_and_line uses
-         select_source_symtab that calls us with such an argument  */
-
-      if (s == 0 && default_symtab == 0)
-	{
-          struct symtab_and_line cursal;
-
-	  /* Make sure we have at least a default source file. */
-	  set_default_source_symtab_and_line ();
-          cursal = get_current_source_symtab_and_line ();
-      
-          default_symtab = cursal.symtab;
-          default_line = cursal.line;
-	}
-
-      if (**argptr == '+')
-	sign = plus, (*argptr)++;
-      else if (**argptr == '-')
-	sign = minus, (*argptr)++;
-      val.line = atoi (*argptr);
-      switch (sign)
-	{
-	case plus:
-	  if (q == *argptr)
-	    val.line = 5;
-	  if (s == 0)
-	    val.line = default_line + val.line;
-	  break;
-	case minus:
-	  if (q == *argptr)
-	    val.line = 15;
-	  if (s == 0)
-	    val.line = default_line - val.line;
-	  else
-	    val.line = 1;
-	  break;
-	case none:
-	  break;		/* No need to adjust val.line.  */
-	}
-
-      while (*q == ' ' || *q == '\t')
-	q++;
-      *argptr = q;
-      if (s == 0)
-	s = default_symtab;
-
-      /* It is possible that this source file has more than one symtab, 
-         and that the new line number specification has moved us from the
-         default (in s) to a new one.  */
-      val.symtab = find_line_symtab (s, val.line, NULL, NULL);
-      if (val.symtab == 0)
-	val.symtab = s;
-
-      val.pc = 0;
-      values.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
-      values.sals[0] = val;
-      values.nelts = 1;
-      if (need_canonical)
-	build_canonical_line_spec (values.sals, NULL, canonical);
-      return values;
-    }
+  if (dl1_is_all_digits (*argptr))
+    return dl1_all_digits (argptr, default_symtab, default_line,
+			   canonical, file_symtab);
 
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
 
-  if (**argptr == '$')		/* May be a convenience variable */
-    p = skip_quoted (*argptr + (((*argptr)[1] == '$') ? 2 : 1));	/* One or two $ chars possible */
-  else if (is_quoted)
-    {
-      p = skip_quoted (*argptr);
-      if (p[-1] != '\'')
-	error ("Unmatched single quote.");
-    }
-  else if (paren_pointer != NULL)
-    {
-      p = paren_pointer + 1;
-    }
-  else
-    {
-      p = skip_quoted (*argptr);
-    }
-
-  copy = (char *) alloca (p - *argptr + 1);
-  memcpy (copy, *argptr, p - *argptr);
-  copy[p - *argptr] = '\0';
-  if (p != *argptr
-      && copy[0]
-      && copy[0] == copy[p - *argptr - 1]
-      && strchr (get_gdb_completer_quote_characters (), copy[0]) != NULL)
-    {
-      copy[p - *argptr - 1] = '\0';
-      copy++;
-    }
-  while (*p == ' ' || *p == '\t')
-    p++;
-  *argptr = p;
-
   /* If it starts with $: may be a legitimate variable or routine name
      (e.g. HP-UX millicode routines such as $$dyncall), or it may
      be history value, or it may be a convenience variable */
-
-  if (*copy == '$')
-    {
-      struct value *valx;
-      int index = 0;
-      int need_canonical = 0;
-
-      p = (copy[1] == '$') ? copy + 2 : copy + 1;
-      while (*p >= '0' && *p <= '9')
-	p++;
-      if (!*p)			/* reached end of token without hitting non-digit */
-	{
-	  /* We have a value history reference */
-	  sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
-	  valx = access_value_history ((copy[1] == '$') ? -index : index);
-	  if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
-	    error ("History values used in line specs must have integer values.");
-	}
-      else
-	{
-	  /* Not all digits -- may be user variable/function or a
-	     convenience variable */
-
-	  /* Look up entire name as a symbol first */
-	  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
-	  s = (struct symtab *) 0;
-	  need_canonical = 1;
-	  /* Symbol was found --> jump to normal symbol processing.
-	     Code following "symbol_found" expects "copy" to have the
-	     symbol name, "sym" to have the symbol pointer, "s" to be
-	     a specified file's symtab, and sym_symtab to be the symbol's
-	     symtab. */
-	  if (sym)
-	    goto symbol_found;
-
-	  /* If symbol was not found, look in minimal symbol tables */
-	  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
-	  /* Min symbol was found --> jump to minsym processing. */
-	  if (msymbol)
-	    goto minimal_symbol_found;
-
-	  /* Not a user variable or function -- must be convenience variable */
-	  need_canonical = (s == 0) ? 1 : 0;
-	  valx = value_of_internalvar (lookup_internalvar (copy + 1));
-	  if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
-	    error ("Convenience variables used in line specs must have integer values.");
-	}
-
-      /* Either history value or convenience value from above, in valx */
-      val.symtab = s ? s : default_symtab;
-      val.line = value_as_long (valx);
-      val.pc = 0;
-
-      values.sals = (struct symtab_and_line *) xmalloc (sizeof val);
-      values.sals[0] = val;
-      values.nelts = 1;
-
-      if (need_canonical)
-	build_canonical_line_spec (values.sals, NULL, canonical);
-
-      return values;
-    }
-
-
+  
+  if (**argptr == '$')
+    return dl1_dollar (argptr, funfirstline, default_symtab, canonical,
+		       file_symtab);
+  
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
 
-  sym = lookup_symbol (copy,
-		       (s ? BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
-			: get_selected_block (0)),
-		       VAR_NAMESPACE, 0, &sym_symtab);
-
-symbol_found:			/* We also jump here from inside the C++ class/namespace 
-				   code on finding a symbol of the form "A::B::C" */
-
-  if (sym != NULL)
-    {
-      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
-	{
-	  /* Arg is the name of a function */
-	  values.sals = (struct symtab_and_line *)
-	    xmalloc (sizeof (struct symtab_and_line));
-	  values.sals[0] = find_function_start_sal (sym, funfirstline);
-	  values.nelts = 1;
-
-	  /* Don't use the SYMBOL_LINE; if used at all it points to
-	     the line containing the parameters or thereabouts, not
-	     the first line of code.  */
-
-	  /* We might need a canonical line spec if it is a static
-	     function.  */
-	  if (s == 0)
-	    {
-	      struct blockvector *bv = BLOCKVECTOR (sym_symtab);
-	      struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
-		build_canonical_line_spec (values.sals, copy, canonical);
-	    }
-	  return values;
-	}
-      else
-	{
-	  if (funfirstline)
-	    error ("\"%s\" is not a function", copy);
-	  else if (SYMBOL_LINE (sym) != 0)
-	    {
-	      /* We know its line number.  */
-	      values.sals = (struct symtab_and_line *)
-		xmalloc (sizeof (struct symtab_and_line));
-	      values.nelts = 1;
-	      memset (&values.sals[0], 0, sizeof (values.sals[0]));
-	      values.sals[0].symtab = sym_symtab;
-	      values.sals[0].line = SYMBOL_LINE (sym);
-	      return values;
-	    }
-	  else
-	    /* This can happen if it is compiled with a compiler which doesn't
-	       put out line numbers for variables.  */
-	    /* FIXME: Shouldn't we just set .line and .symtab to zero
-	       and return?  For example, "info line foo" could print
-	       the address.  */
-	    error ("Line number not known for symbol \"%s\"", copy);
-	}
-    }
-
-  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
-
-minimal_symbol_found:		/* We also jump here from the case for variables
-				   that begin with '$' */
-
-  if (msymbol != NULL)
-    {
-      values.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
-      values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
-					  (struct sec *) 0, 0);
-      values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
-      if (funfirstline)
-	{
-	  values.sals[0].pc += FUNCTION_START_OFFSET;
-	  values.sals[0].pc = SKIP_PROLOGUE (values.sals[0].pc);
-	}
-      values.nelts = 1;
-      return values;
-    }
-
-  if (!have_full_symbols () &&
-      !have_partial_symbols () && !have_minimal_symbols ())
-    error ("No symbol table is loaded.  Use the \"file\" command.");
-
-  error ("Function \"%s\" not defined.", copy);
-  return values;		/* for lint */
+  return dl1_variable (argptr, funfirstline, canonical, is_quoted,
+		       paren_pointer, file_symtab);
 }
 
 /* Now come a bunch of helper functions for decode_line_1.  Warning:
@@ -966,7 +709,7 @@ dl1_indirect (char **argptr)
 }
 
 static void
-dl1_set_flags (char **argptr, int *is_quoted, char **paren_pointer)
+dl1_set_flags (char *arg, int *is_quoted, char **paren_pointer)
 {
   char *ii;
   int has_if = 0;
@@ -974,12 +717,12 @@ dl1_set_flags (char **argptr, int *is_quoted, char **paren_pointer)
   /* 'has_if' is for the syntax:
    *     (gdb) break foo if (a==b)
    */
-  if ((ii = strstr (*argptr, " if ")) != NULL ||
-      (ii = strstr (*argptr, "\tif ")) != NULL ||
-      (ii = strstr (*argptr, " if\t")) != NULL ||
-      (ii = strstr (*argptr, "\tif\t")) != NULL ||
-      (ii = strstr (*argptr, " if(")) != NULL ||
-      (ii = strstr (*argptr, "\tif( ")) != NULL)
+  if ((ii = strstr (arg, " if ")) != NULL ||
+      (ii = strstr (arg, "\tif ")) != NULL ||
+      (ii = strstr (arg, " if\t")) != NULL ||
+      (ii = strstr (arg, "\tif\t")) != NULL ||
+      (ii = strstr (arg, " if(")) != NULL ||
+      (ii = strstr (arg, "\tif( ")) != NULL)
     has_if = 1;
   /* Temporarily zap out "if (condition)" to not
    * confuse the parenthesis-checking code below.
@@ -998,11 +741,11 @@ dl1_set_flags (char **argptr, int *is_quoted, char **paren_pointer)
 
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
 
-  *is_quoted = (**argptr
+  *is_quoted = (*arg
 		&& strchr (get_gdb_completer_quote_characters (),
-			   **argptr) != NULL);
+			   *arg) != NULL);
 
-  *paren_pointer = strchr (*argptr, '(');
+  *paren_pointer = strchr (arg, '(');
 
   if (*paren_pointer != NULL)
     *paren_pointer = strrchr (*paren_pointer, ')');
@@ -1012,47 +755,6 @@ dl1_set_flags (char **argptr, int *is_quoted, char **paren_pointer)
    */
   if (has_if)
     *ii = ' ';
-}
-
-static enum dl1_control_flow
-dl1_handle_multipart (char **argptr, int funfirstline, char ***canonical,
-		      char *saved_arg, int is_quoted, char *paren_pointer,
-		      char **temp_copy,
-		      struct symbol **sym, struct symtab **sym_symtab,
-		      struct symtab **s,
-		      struct symtabs_and_lines *values)
-{
-  char *p;
-  int is_quote_enclosed;
-
-  /* Locate the first half of the linespec, ending in a colon, period,
-     or whitespace.  (More or less.)  */
-
-  p = dl1_locate_first_half (argptr, &is_quote_enclosed);
-
-  /* Does it look like there actually were two parts?  */
-
-  if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
-    {
-      if (is_quoted)
-	*argptr = *argptr + 1;
-      
-      /* Is it a C++ or Java compound data structure?  */
-      
-      if (p[0] == '.' || p[1] == ':')
-	{
-	  return dl1_multipart_compound (argptr, funfirstline, canonical,
-					 saved_arg, p, temp_copy, sym,
-					 sym_symtab, s, values);
-	}
-
-      /* No, the first part is a filename; update argptr and s
-	 accordingly.  */
-      
-      dl1_handle_filename (argptr, p, is_quote_enclosed, s);
-    }
-  
-  return DO_NOTHING;
 }
 
 static char *
@@ -1145,17 +847,16 @@ dl1_locate_first_half (char **argptr, int *is_quote_enclosed)
   return p;
 }
 
-static enum dl1_control_flow
-dl1_multipart_compound (char **argptr, int funfirstline, char ***canonical,
-			char *saved_arg, char *p,
-			char **temp_copy, struct symbol **sym,
-			struct symtab **sym_symtab,
-			struct symtab **s,
-			struct symtabs_and_lines *values)
+static struct symtabs_and_lines
+dl1_compound (char **argptr, int funfirstline, char ***canonical,
+	      char *saved_arg, char *p)
 {
   char *saved_arg2 = *argptr;
   char *temp_end;
   char *p2;
+  char *copy;
+  struct symtab *sym_symtab;
+  struct symbol *sym;
   
   /* First check for "global" namespace specification,
      of the form "::foo". If found, skip over the colons
@@ -1187,12 +888,11 @@ dl1_multipart_compound (char **argptr, int funfirstline, char ***canonical,
   p2 = p;		/* save for restart */
   while (1)
     {
-      enum dl1_control_flow do_next
-	= dl1_examine_compound_token (argptr, funfirstline, canonical,
-				      saved_arg, p, values);
-
-      if (do_next != DO_NOTHING)
-	return do_next;
+      struct symtabs_and_lines values;
+      
+      if (dl1_examine_compound_token (argptr, funfirstline, canonical,
+				      saved_arg, p, &values))
+	return values;
       
       /* Move pointer up to next possible class/namespace token */
       p = p2 + 1;	/* restart with old value +1 */
@@ -1213,45 +913,34 @@ dl1_multipart_compound (char **argptr, int funfirstline, char ***canonical,
 	}
 
       if (*p != ':')
-	break;		/* out of the while (1) */
+	break;
 	  
       p2 = p;		/* save restart for next time around */
       *argptr = saved_arg2;	/* restore argptr */
-    }			/* while (1) */
+    }
 
   /* Last chance attempt -- check entire name as a symbol */
-  /* Use "temp_copy" in preparation for jumping out of the block
-     after we make it back to decode_line_1.  */
-  *temp_copy = xmalloc (p - saved_arg2 + 1);
-  memcpy (*temp_copy, saved_arg2, p - saved_arg2);
+  copy = alloca (p - saved_arg2 + 1);
+  memcpy (copy, saved_arg2, p - saved_arg2);
   /* Note: if is_quoted should be true, we snuff out quote here anyway */
-  (*temp_copy)[p - saved_arg2] = '\000';
+  copy[p - saved_arg2] = '\0';
   /* Set argptr to skip over the name */
   *argptr = (*p == '\'') ? p + 1 : p;
   /* Look up entire name */
-  *sym = lookup_symbol (*temp_copy, 0, VAR_NAMESPACE, 0, sym_symtab);
-  *s = (struct symtab *) 0;
-  /* Prepare to jump: restore the " if (condition)" so outer layers see it */
-  /* Symbol was found --> jump to normal symbol processing.
-     Code following "symbol_found" expects "copy" to have the
-     symbol name, "sym" to have the symbol pointer, "s" to be
-     a specified file's symtab, and sym_symtab to be the symbol's
-     symtab. */
-  /* By jumping there we avoid falling through the FILE:LINE and
-     FILE:FUNC processing stuff below */
-  if (*sym)
-    return DO_SYMBOL_FOUND;
+  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+
+  if (sym != NULL)
+    return dl1_symbol_found (funfirstline, canonical, copy,
+			     sym, NULL, sym_symtab);
 
   /* Couldn't find any interpretation as classes/namespaces, so give up */
-  /* FIXME: carlton/2002-10-31: I should arrange for *temp_copy to be
-     xfree'd.  */
   /* The quotes are important if copy is empty.  */
   cplusplus_error (saved_arg,
 		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
-		   *temp_copy);
+		   copy);
 }
 
-static enum dl1_control_flow
+static int
 dl1_examine_compound_token (char **argptr, int funfirstline,
 			    char ***canonical, 
 			    char *saved_arg, char *p,
@@ -1295,14 +984,14 @@ dl1_examine_compound_token (char **argptr, int funfirstline,
       sym_arr = (struct symbol **) alloca (total_number_of_methods (t)
 					   * sizeof (struct symbol *));
       
-      dl1_find_method (funfirstline, canonical, saved_arg, copy, t,
-		       sym_class, sym_arr, values);
+      *values = dl1_find_method (funfirstline, canonical, saved_arg, copy,
+				 t, sym_class, sym_arr);
       
-      return DO_RETURN;
+      return 1;
     }
   else
     {
-      return DO_NOTHING;
+      return 0;
     }
 }
 
@@ -1351,12 +1040,12 @@ dl1_find_next_token (char **argptr)
   return p;
 }
 
-static void
+static struct symtabs_and_lines
 dl1_find_method (int funfirstline, char ***canonical, char *saved_arg,
 		 char *copy, struct type *t, struct symbol *sym_class,
-		 struct symbol **sym_arr,
-		 struct symtabs_and_lines *values)
+		 struct symbol **sym_arr)
 {
+  struct symtabs_and_lines values;
   int i1 = dl1_count_methods (copy, t, sym_arr);
 
   if (i1 == 1)
@@ -1366,20 +1055,20 @@ dl1_find_method (int funfirstline, char ***canonical, char *saved_arg,
 
       if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
 	{
-	  values->sals = xmalloc (sizeof (struct symtab_and_line));
-	  values->nelts = 1;
-	  values->sals[0] = find_function_start_sal (sym, funfirstline);
+	  values.sals = xmalloc (sizeof (struct symtab_and_line));
+	  values.nelts = 1;
+	  values.sals[0] = find_function_start_sal (sym, funfirstline);
 	}
       else
 	{
-	  values->nelts = 0;
+	  values.nelts = 0;
 	}
     }
   else if (i1 > 0)
     {
       /* There is more than one field with that name
 	 (overloaded).  Ask the user which one to use.  */
-      *values = decode_line_2 (sym_arr, i1, funfirstline, canonical);
+      values = decode_line_2 (sym_arr, i1, funfirstline, canonical);
     }
   else
     {
@@ -1402,6 +1091,8 @@ dl1_find_method (int funfirstline, char ***canonical, char *saved_arg,
 			 "the class %s does not have any method named %s\n",
 			 SYMBOL_SOURCE_NAME (sym_class), tmp);
     }
+
+  return values;
 }
 
 static int
@@ -1432,12 +1123,12 @@ dl1_count_methods (char *copy, struct type *t, struct symbol **sym_arr)
   return i1;
 }
 
-static void
-dl1_handle_filename (char **argptr, char *p, int is_quote_enclosed,
-		     struct symtab **s)
+static struct symtab *
+dl1_handle_filename (char **argptr, char *p, int is_quote_enclosed)
 {
   char *p1;
   char *copy;
+  struct symtab *s;
   
   /* Extract the file name.  */
   p1 = p;
@@ -1454,8 +1145,8 @@ dl1_handle_filename (char **argptr, char *p, int is_quote_enclosed,
     copy[p - *argptr] = 0;
       
   /* Find that file's data.  */
-  *s = lookup_symtab (copy);
-  if (*s == 0)
+  s = lookup_symtab (copy);
+  if (s == NULL)
     {
       if (!have_full_symbols () && !have_partial_symbols ())
 	error ("No symbol table is loaded.  Use the \"file\" command.");
@@ -1467,4 +1158,329 @@ dl1_handle_filename (char **argptr, char *p, int is_quote_enclosed,
   while (*p == ' ' || *p == '\t')
     p++;
   *argptr = p;
+
+  return s;
+}
+
+static int
+dl1_is_all_digits (char *arg)
+{
+  char *q = dl1_skip_digits (arg);
+
+  return q != arg && (*q == 0 || *q == ' ' || *q == '\t' || *q == ',');
+}
+
+static struct symtabs_and_lines
+dl1_all_digits (char **argptr, struct symtab *default_symtab,
+		int default_line, char ***canonical,
+		struct symtab *file_symtab)
+{
+  struct symtabs_and_lines values;
+  struct symtab_and_line val;
+  char *end_of_digits = dl1_skip_digits (*argptr);
+
+  enum sign
+    {
+      none, plus, minus
+    }
+  sign = none;
+
+  init_sal (&val);
+
+  /* We might need a canonical line spec if no file was specified.  */
+  int need_canonical = (file_symtab == NULL) ? 1 : 0;
+
+  /* This is where we need to make sure that we have good defaults.
+     We must guarantee that this section of code is never executed
+     when we are called with just a function name, since
+     set_default_source_symtab_and_line uses
+     select_source_symtab that calls us with such an argument  */
+
+  if (file_symtab == NULL && default_symtab == NULL)
+    {
+      struct symtab_and_line cursal;
+	  
+      /* Make sure we have at least a default source file. */
+      set_default_source_symtab_and_line ();
+      cursal = get_current_source_symtab_and_line ();
+      
+      default_symtab = cursal.symtab;
+      default_line = cursal.line;
+    }
+
+  if (**argptr == '+')
+    sign = plus, (*argptr)++;
+  else if (**argptr == '-')
+    sign = minus, (*argptr)++;
+  val.line = atoi (*argptr);
+  switch (sign)
+    {
+    case plus:
+      if (end_of_digits == *argptr)
+	val.line = 5;
+      if (file_symtab == NULL)
+	val.line = default_line + val.line;
+      break;
+    case minus:
+      if (end_of_digits == *argptr)
+	val.line = 15;
+      if (file_symtab == NULL)
+	val.line = default_line - val.line;
+      else
+	val.line = 1;
+      break;
+    case none:
+      break;		/* No need to adjust val.line.  */
+    }
+
+  while (*end_of_digits == ' ' || *end_of_digits == '\t')
+    end_of_digits++;
+  *argptr = end_of_digits;
+  if (file_symtab == 0)
+    file_symtab = default_symtab;
+
+  /* It is possible that this source file has more than one symtab, 
+     and that the new line number specification has moved us from the
+     default (in file_symtab) to a new one.  */
+  val.symtab = find_line_symtab (file_symtab, val.line, NULL, NULL);
+  if (val.symtab == 0)
+    val.symtab = file_symtab;
+
+  val.pc = 0;
+  values.sals = xmalloc (sizeof (struct symtab_and_line));
+  values.sals[0] = val;
+  values.nelts = 1;
+  if (need_canonical)
+    build_canonical_line_spec (values.sals, NULL, canonical);
+  return values;
+}
+
+static char *
+dl1_skip_digits (char *arg)
+{
+  if (*arg == '-' || *arg == '+')
+    arg++;
+  while (*arg >= '0' && *arg <= '9')
+    arg++;
+
+  return arg;
+}
+
+static struct symtabs_and_lines
+dl1_dollar (char **argptr, int funfirstline, struct symtab *default_symtab,
+	    char ***canonical, struct symtab *file_symtab)
+{
+  struct value *valx;
+  int index = 0;
+  int need_canonical = 0;
+  char *p;
+  struct symtabs_and_lines values;
+  char *copy;
+
+  /* One or two $ chars possible */
+  p = skip_quoted (*argptr + (((*argptr)[1] == '$') ? 2 : 1));
+
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  copy[p - *argptr] = '\0';
+
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+  
+  p = (copy[1] == '$') ? copy + 2 : copy + 1;
+  while (*p >= '0' && *p <= '9')
+    p++;
+  if (!*p)		/* reached end of token without hitting non-digit */
+    {
+      /* We have a value history reference */
+      sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
+      valx = access_value_history ((copy[1] == '$') ? -index : index);
+      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+	error ("History values used in line specs must have integer values.");
+    }
+  else
+    {
+      /* Not all digits -- may be user variable/function or a
+	 convenience variable */
+
+      struct symbol *sym;
+      struct symtab *sym_symtab;
+      struct minimal_symbol *msymbol;
+      
+      /* Look up entire name as a symbol first */
+      sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
+      if (sym != NULL)
+	return dl1_symbol_found (funfirstline, canonical, copy,
+				 sym, NULL, sym_symtab);
+
+      /* If symbol was not found, look in minimal symbol tables */
+      msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+      if (msymbol != NULL)
+	return dl1_minsym_found (funfirstline, msymbol);
+
+      /* Not a user variable or function -- must be convenience variable */
+      file_symtab = NULL;
+      need_canonical = 1;
+      valx = value_of_internalvar (lookup_internalvar (copy + 1));
+      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+	error ("Convenience variables used in line specs must have integer values.");
+    }
+
+  /* Either history value or convenience value from above, in valx */
+  values.sals = xmalloc (sizeof (struct symtab_and_line));
+  init_sal (values.sals);
+  values.sals[0].symtab  = file_symtab != NULL ? file_symtab : default_symtab;
+  values.sals[0].line = value_as_long (valx);
+  values.sals[0].pc = 0;
+  values.nelts = 1;
+
+  if (need_canonical)
+    build_canonical_line_spec (values.sals, NULL, canonical);
+
+  return values;
+}
+
+static struct symtabs_and_lines
+dl1_variable (char **argptr, int funfirstline, char ***canonical,
+	      int is_quoted, char *paren_pointer,
+	      struct symtab *file_symtab)
+{
+  char *p;
+  char *copy;
+  struct symbol *sym;
+  struct symtab *sym_symtab;
+  struct minimal_symbol *msymbol;
+
+  if (is_quoted)
+    {
+      p = skip_quoted (*argptr);
+      if (p[-1] != '\'')
+	error ("Unmatched single quote.");
+    }
+  else if (paren_pointer != NULL)
+    {
+      p = paren_pointer + 1;
+    }
+  else
+    {
+      p = skip_quoted (*argptr);
+    }
+
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  copy[p - *argptr] = '\0';
+
+  /* If it's completer-quoted, get rid of the quotes.  */
+
+  if (p != *argptr
+      && copy[0]
+      && copy[0] == copy[p - *argptr - 1]
+      && strchr (get_gdb_completer_quote_characters (), copy[0]) != NULL)
+    {
+      copy[p - *argptr - 1] = '\0';
+      copy++;
+    }
+  
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+
+  /* Look up that token as a variable.
+     If file specified, use that file's per-file block to start with.  */
+
+  sym = lookup_symbol (copy,
+		       (file_symtab != NULL
+			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
+					     STATIC_BLOCK)
+			: get_selected_block (0)),
+		       VAR_NAMESPACE, 0, &sym_symtab);
+
+  if (sym != NULL)
+    {
+      return dl1_symbol_found (funfirstline, canonical, copy,
+			       sym, file_symtab, sym_symtab);
+    }
+
+  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+
+  if (msymbol != NULL)
+    return dl1_minsym_found (funfirstline, msymbol);
+
+  if (!have_full_symbols () &&
+      !have_partial_symbols () && !have_minimal_symbols ())
+    error ("No symbol table is loaded.  Use the \"file\" command.");
+
+  error ("Function \"%s\" not defined.", copy);
+}
+
+static struct symtabs_and_lines
+dl1_symbol_found (int funfirstline, char ***canonical, char *copy,
+		  struct symbol *sym, struct symtab *file_symtab,
+		  struct symtab *sym_symtab)
+{
+  struct symtabs_and_lines values;
+  
+  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+    {
+      /* Arg is the name of a function */
+      values.sals = xmalloc (sizeof (struct symtab_and_line));
+      values.sals[0] = find_function_start_sal (sym, funfirstline);
+      values.nelts = 1;
+
+      /* Don't use the SYMBOL_LINE; if used at all it points to
+	 the line containing the parameters or thereabouts, not
+	 the first line of code.  */
+
+      /* We might need a canonical line spec if it is a static
+	 function.  */
+      if (file_symtab == NULL)
+	{
+	  struct blockvector *bv = BLOCKVECTOR (sym_symtab);
+	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
+	    build_canonical_line_spec (values.sals, copy, canonical);
+	}
+      return values;
+    }
+  else
+    {
+      if (funfirstline)
+	error ("\"%s\" is not a function", copy);
+      else if (SYMBOL_LINE (sym) != 0)
+	{
+	  /* We know its line number.  */
+	  values.sals = xmalloc (sizeof (struct symtab_and_line));
+	  values.nelts = 1;
+	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
+	  values.sals[0].symtab = sym_symtab;
+	  values.sals[0].line = SYMBOL_LINE (sym);
+	  return values;
+	}
+      else
+	/* This can happen if it is compiled with a compiler which doesn't
+	   put out line numbers for variables.  */
+	/* FIXME: Shouldn't we just set .line and .symtab to zero
+	   and return?  For example, "info line foo" could print
+	   the address.  */
+	error ("Line number not known for symbol \"%s\"", copy);
+    }
+}
+
+static struct symtabs_and_lines
+dl1_minsym_found (int funfirstline, struct minimal_symbol *msymbol)
+{
+  struct symtabs_and_lines values;
+  
+  values.sals = xmalloc (sizeof (struct symtab_and_line));
+  values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
+				      (struct sec *) 0, 0);
+  values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
+  if (funfirstline)
+    {
+      values.sals[0].pc += FUNCTION_START_OFFSET;
+      values.sals[0].pc = SKIP_PROLOGUE (values.sals[0].pc);
+    }
+  values.nelts = 1;
+  return values;
 }

@@ -1,3 +1,20 @@
+2002-11-01  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (dl1_set_flags): Change arguments.
+	(dl1_compound): Rename from dl1_multipart_compound, and shuffle
+	components.
+	(dl1_examine_compound_token): Change call structure.
+	(dl1_find_method): Ditto.
+	(dl1_handle_filename): Ditto.
+	(dl1_is_all_digits): New function.
+	(dl1_all_digits): Ditto.
+	(dl1_skip_digits): Ditto.
+	(dl1_dollar): Ditto.
+	(dl1_variable): Ditto.
+	(dl1_symbol_found): Ditto.
+	(dl1_minsym_found): Ditto.
+	(decode_line_1): Slim down dramatically.
+
 2002-10-31  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (dl1_handle_multipart): New function.
