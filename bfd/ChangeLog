@@ -1,3 +1,16 @@
+Tue May  5 16:47:54 1998  Richard Henderson  <rth@cygnus.com>
+
+	* srec.c (srec_write_symbols): Use bfd_is_local_label rather than
+	an ad-hoc test.  Kill bogus #if 0 code.
+	* syms.c (bfd_is_local_label): Consider BSF_DEBUGGING symbols local.
+
+Mon May  4 16:10:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (sunos_check_dynamic_reloc): Don't use the PLT address
+	when generating a normal executable for a symbol defined in a
+	regular file.  When copying a reloc into the output file, adjust
+	the addend for a PC relative reloc against a global symbol.
+
 Mon May  4 10:08:18 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* libbfd.h: Rebuilt.
