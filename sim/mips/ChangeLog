@@ -1,3 +1,11 @@
+2002-02-11  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (ADD, ADDI, DADDI, DSUB, SUB): Add comment
+	indicating that ALU32_END or ALU64_END are there to check
+	for overflow.
+	(DADD): Likewise, but also remove previous comment about
+	overflow checking.
+
 2002-02-10  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (DDIV, DIV, DIVU, DMULT, DMULTU, DSLL, DSLL32,

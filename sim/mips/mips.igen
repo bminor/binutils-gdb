@@ -237,7 +237,7 @@
   {
     ALU32_BEGIN (GPR[RS]);
     ALU32_ADD (GPR[RT]);
-    ALU32_END (GPR[RD]);
+    ALU32_END (GPR[RD]);   /* This checks for overflow.  */
   }
   TRACE_ALU_RESULT (GPR[RD]);
 }
@@ -255,7 +255,7 @@
   {
     ALU32_BEGIN (GPR[RS]);
     ALU32_ADD (EXTEND16 (IMMEDIATE));
-    ALU32_END (GPR[RT]);
+    ALU32_END (GPR[RT]);   /* This checks for overflow.  */
   }
   TRACE_ALU_RESULT (GPR[RT]);
 }
@@ -709,12 +709,11 @@
 *vr4100:
 *vr5000:
 {
-  /* this check's for overflow */
   TRACE_ALU_INPUT2 (GPR[RS], GPR[RT]);
   {
     ALU64_BEGIN (GPR[RS]);
     ALU64_ADD (GPR[RT]);
-    ALU64_END (GPR[RD]);
+    ALU64_END (GPR[RD]);   /* This checks for overflow.  */
   }
   TRACE_ALU_RESULT (GPR[RD]);
 }
@@ -732,7 +731,7 @@
   {
     ALU64_BEGIN (GPR[RS]);
     ALU64_ADD (EXTEND16 (IMMEDIATE));
-    ALU64_END (GPR[RT]);
+    ALU64_END (GPR[RT]);   /* This checks for overflow.  */
   }
   TRACE_ALU_RESULT (GPR[RT]);
 }
@@ -1181,7 +1180,7 @@
   {
     ALU64_BEGIN (GPR[RS]);
     ALU64_SUB (GPR[RT]);
-    ALU64_END (GPR[RD]);
+    ALU64_END (GPR[RD]);   /* This checks for overflow.  */
   }
   TRACE_ALU_RESULT (GPR[RD]);
 }
@@ -2210,7 +2209,7 @@
   {
     ALU32_BEGIN (GPR[RS]);
     ALU32_SUB (GPR[RT]);
-    ALU32_END (GPR[RD]);
+    ALU32_END (GPR[RD]);   /* This checks for overflow.  */
   }
   TRACE_ALU_RESULT (GPR[RD]);
 }
