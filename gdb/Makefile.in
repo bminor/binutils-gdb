@@ -1969,7 +1969,7 @@ rom68k-rom.o: rom68k-rom.c $(monitor_h) $(bfd_h) gdb_wait.h $(defs_h) \
 
 rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(xcoffsolib_h) $(symfile_h) $(objfiles_h) \
-	$(gdb_stabs_h) $(regcache_h)
+	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h)
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) ppc-tdep.h $(regcache_h) $(value_h) $(parser_defs_h)

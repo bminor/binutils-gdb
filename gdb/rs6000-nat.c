@@ -1,6 +1,6 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -31,6 +31,7 @@
 #include "bfd.h"
 #include "gdb-stabs.h"
 #include "regcache.h"
+#include "arch-utils.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>
@@ -928,6 +929,24 @@ set_host_arch (int pid)
       arch = bfd_arch_powerpc;
       mach = bfd_mach_ppc;
     }
+
+  /* FIXME: schauer/2002-02-25:
+     We don't know if we are executing a 32 or 64 bit executable,
+     and have no way to pass the proper word size to rs6000_gdbarch_init.
+     So we have to avoid switching to a new architecture, if the architecture
+     matches already.
+     Blindly calling rs6000_gdbarch_init used to work in older versions of
+     GDB, as rs6000_gdbarch_init incorrectly used the previous tdep to
+     determine the wordsize.  */
+  if (exec_bfd)
+    {
+      const struct bfd_arch_info *exec_bfd_arch_info;
+
+      exec_bfd_arch_info = bfd_get_arch_info (exec_bfd);
+      if (arch == exec_bfd_arch_info->arch)
+	return;
+    }
+
   bfd_default_set_arch_mach (&abfd, arch, mach);
 
   gdbarch_info_init (&info);

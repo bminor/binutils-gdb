@@ -1,3 +1,10 @@
+2002-02-25  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* rs6000-nat.c (set_host_arch): Do not switch to a new architecture
+	if it already matches the current architecture from the exec file.
+	Include arch-utils.h for gdbarch_info_init prototype.
+	* Makefile.in (rs6000-nat.o): Update dependencies.
+
 2002-02-25  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/djconfig.sh: Set NM=nm and CFLAGS="-g -O2" in the
