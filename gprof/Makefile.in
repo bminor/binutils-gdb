@@ -15,6 +15,9 @@ CFLAGS=	-I. -I../include -DMACHINE_H=\"${MACHINE}.h\" ${TCFLAGS} ${HCFLAGS}
 
 all:	${PROG}
 
+.PHONY: check
+check:
+
 beforeinstall:
 	install -c -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
 	    ${.CURDIR}/gprof.flat ${.CURDIR}/gprof.callg \
