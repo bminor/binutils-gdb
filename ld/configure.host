@@ -64,6 +64,13 @@ arm*-*-linux-gnu*)
   HOSTING_CRT0='-p '`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]*\*,ld-linux,g"`
   ;;
 
+hppa*64*-*-hpux11*)
+  NATIVE_LIB_DIRS=/usr/lib/pa20_64
+  HOSTING_CRT0=/usr/ccs/lib/pa20_64/crt0.o
+  # Even if CC is not gcc, the tests use gcc.
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else if test "$GCC" = yes; then ${CC} --print-libgcc-file-name; else gcc --print-libgcc-file-name; fi fi` -lc /usr/lib/pa20_64/milli.a'
+  ;;
+
 i[3456]86-*-bsd* | i[34567]86-*-freebsd[12] | i[34567]86-*-freebsd[12]\.* | i[34567]86-*-freebsd*aout* | i[3456]86-*-netbsd*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;

@@ -1,3 +1,8 @@
+2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* configure.host (hppa*64*-*-hpux11*): Define NATIVE_LIB_DIRS,
+	HOSTING_CRT0 and HOSTING_LIBS.
+
 Wed Jun  5 20:42:31 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* configure.tgt (shle*-*-elf*, sh64le-*-elf*): New configurations.
