@@ -1,3 +1,9 @@
+Tue Apr  7 12:35:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* archures.c (bfd_default_scan): Add m68k cases back to default
+	switch, reverting patch of March 25, since IEEE support depends
+	upon them.
+
 Mon Apr  6 14:06:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (diststuff): New target.
