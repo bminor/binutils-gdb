@@ -1,3 +1,8 @@
+2001-02-23   Richard Sandiford <rsandifo@redhat.com>
+
+	* config/tc-mn10300.c (md_apply_fix3): Don't mark a fixup as
+	done if it's against a symbol.
+
 2001-02-22  Timothy Wall  <twall@cygnus.com>
 
 	* config/tc-ia64.c (ia64_target_format): Return ia64-aix-specific
