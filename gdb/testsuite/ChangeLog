@@ -1,3 +1,7 @@
+Mon Jun 30 18:31:43 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/arm-ice.exp: New file.
+
 Sun Jun 29 16:43:30 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/overlays.exp: Preliminary fixes; temporarily disabled

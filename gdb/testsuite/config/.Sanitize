@@ -20,6 +20,7 @@ Do-first:
 Things-to-keep:
 
 abug.exp
+arm-ice.exp
 cpu32bug.exp
 d10v.exp
 est.exp
