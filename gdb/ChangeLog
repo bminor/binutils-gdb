@@ -1,5 +1,7 @@
 2004-03-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS (New native configurations): Mention OpenBSD/amd64.
+
 	* config/i386/nm-fbsd.h: Include "config/nm-bsd.h".
 	(PTRACE_ARG3_TYPE, FETCH_INFERIOR_REGISTERS, ATTACH_DETACH):
 	Remove defines.
