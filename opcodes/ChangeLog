@@ -1,3 +1,11 @@
+Fri Aug 22 10:35:15 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-dis.c (disassemble): Use curly brace syntax for register
+	lists.
+
+	* v850-opc.c (v850_opcodes[]): Add NOT_R0 flag to decect cases
+	where r0 is being used as a destination register.
+
 start-sanitize-v850e
 Thu Aug 21 11:09:09 1997  Nick Clifton  <nickc@cygnus.com>
 

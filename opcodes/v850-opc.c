@@ -335,7 +335,8 @@ extract_i5div (insn, invalid)
 /* end-sanitize-v850eq */
 
 
-const struct v850_operand v850_operands[] = {
+const struct v850_operand v850_operands[] =
+{
 #define UNUSED	0
   { 0, 0, 0, 0, 0 }, 
 
@@ -343,12 +344,20 @@ const struct v850_operand v850_operands[] = {
 #define R1	(UNUSED+1)
   { 5, 0, 0, 0, V850_OPERAND_REG }, 
 
+/* The R1 field in a format 1, 6, 7, or 9 insn. */
+#define R1_NOTR0 (R1 + 1)
+  { 5, 0, 0, 0, V850_OPERAND_REG | V850_NOT_R0 }, 
+
 /* The R2 field in a format 1, 2, 4, 5, 6, 7, 9 insn. */
-#define R2	(R1+1)
+#define R2	(R1_NOTR0 + 1)
   { 5, 11, 0, 0, V850_OPERAND_REG },
 
+/* The R2 field in a format 1, 2, 4, 5, 6, 7, 9 insn. */
+#define R2_NOTR0 (R2 + 1)
+  { 5, 11, 0, 0, V850_OPERAND_REG | V850_NOT_R0 },
+
 /* The IMM5 field in a format 2 insn. */
-#define I5	(R2+1)
+#define I5	(R2_NOTR0 + 1)
   { 5, 0, 0, 0, V850_OPERAND_SIGNED }, 
 
 #define I5U	(I5+1)
@@ -465,7 +474,7 @@ const struct v850_operand v850_operands[] = {
 
 /* Reg2 in dispose instruction. */
 #define R2DISPOSE	(IMM5 + 1)
-  { 5, 16, 0, 0, V850_OPERAND_REG },
+  { 5, 16, 0, 0, V850_OPERAND_REG | V850_NOT_R0 },
 
 /* Stack pointer in prepare instruction. */
 #define SP	(R2DISPOSE + 1)
@@ -533,15 +542,15 @@ const struct v850_opcode v850_opcodes[] =
   
 /* load/store instructions */
 #ifdef ARCH_v850eq
-{ "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1 },
-{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1 },
+{ "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2_NOTR0},	1 },
+{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1 },
 { "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1 },
 { "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1 },
 #else
 { "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1 },
 { "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1 },
-{ "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1 },
-{ "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1 },
+{ "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1 },
+{ "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1 },
 #endif
 { "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1 },
 { "sst.b",	one (0x0380),		one (0x0780),	      	{R2,   D7,   EP}, 	2 },
@@ -569,8 +578,8 @@ const struct v850_opcode v850_opcodes[] =
 { "ld.h",	two (0x0720, 0x0000),	two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1 },
 { "ld.w",	two (0x0720, 0x0001),	two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1 },
 /* start-sanitize-v850e */
-{ "ld.bu",	two (0x0780, 0x0001),   two (0x07c0, 0x0001), 	{D16_16, R1, R2}, 	1 },
-{ "ld.hu",	two (0x07e0, 0x0001),   two (0x07e0, 0x0001), 	{D16_15, R1, R2}, 	1 },  
+{ "ld.bu",	two (0x0780, 0x0001),   two (0x07c0, 0x0001), 	{D16_16, R1, R2_NOTR0},	1 },
+{ "ld.hu",	two (0x07e0, 0x0001),   two (0x07e0, 0x0001), 	{D16_15, R1, R2_NOTR0},	1 },  
 /* end-sanitize-v850e */
 { "st.b",	two (0x0740, 0x0000),	two (0x07e0, 0x0000), 	{R2, D16, R1}, 		2 },
 { "st.h",	two (0x0760, 0x0000),	two (0x07e0, 0x0001), 	{R2, D16_15, R1}, 	2 },
@@ -578,10 +587,10 @@ const struct v850_opcode v850_opcodes[] =
 
 /* start-sanitize-v850e */
 /* byte swap/extend instructions */
-{ "zxb",	one (0x0080),		one (0xffe0), 	      	{R1}, 			0 },
-{ "zxh",	one (0x00c0),		one (0xffe0), 	      	{R1}, 			0 },
-{ "sxb",	one (0x00a0),		one (0xffe0), 	      	{R1}, 			0 },
-{ "sxh",	one (0x00e0),		one (0xffe0),	      	{R1}, 			0 },
+{ "zxb",	one (0x0080),		one (0xffe0), 	      	{R1_NOTR0},		0 },
+{ "zxh",	one (0x00c0),		one (0xffe0), 	      	{R1_NOTR0}, 		0 },
+{ "sxb",	one (0x00a0),		one (0xffe0), 	      	{R1_NOTR0},		0 },
+{ "sxh",	one (0x00e0),		one (0xffe0),	      	{R1_NOTR0},		0 },
 { "bsh",	two (0x07e0, 0x0342),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0 },
 { "bsw",	two (0x07e0, 0x0340),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0 },
 { "hsw",	two (0x07e0, 0x0344),	two (0x07ff, 0x07ff), 	{R2, R3}, 		0 },
@@ -611,7 +620,7 @@ const struct v850_opcode v850_opcodes[] =
 { "divhu",	two (0x07e0, 0x0282),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
 { "divh",	two (0x07e0, 0x0280),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
 /* end-sanitize-v850e */
-{ "divh",	OP  (0x02),		OP_MASK,		IF1, 			0 },
+{ "divh",	OP  (0x02),		OP_MASK,		{R1, R2_NOTR0},		0 },
   
 /* start-sanitize-v850eq */
 { "divhn",	two (0x07e0, 0x0280),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0 },
@@ -625,30 +634,30 @@ const struct v850_opcode v850_opcodes[] =
 /* end-sanitize-v850eq */
   
 { "nop",	one (0x00),		one (0xffff),		{0}, 			0 },
-{ "mov",        OP  (0x00),		OP_MASK,		IF1, 			0 },
-{ "mov",	OP  (0x10),		OP_MASK,		IF2, 			0 },
+{ "mov",	OP  (0x10),		OP_MASK,		{I5, R2_NOTR0},		0 },
 /* start-sanitize-v850e */
-{ "mov",	one (0x0620),		one (0xffe0),		{IMM32, R1}, 		0 },
+{ "mov",	one (0x0620),		one (0xffe0),		{IMM32, R1_NOTR0},	0 },
 /* end-sanitize-v850e */
-{ "movea",	OP  (0x31),		OP_MASK,		IF6, 			0 },
-{ "movhi",	OP  (0x32),		OP_MASK,		IF6, 			0 },
+{ "mov",        OP  (0x00),		OP_MASK,		{R1, R2_NOTR0},		0 },
+{ "movea",	OP  (0x31),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
+{ "movhi",	OP  (0x32),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
 { "add",	OP  (0x0e),		OP_MASK,		IF1, 			0 },
 { "add",	OP  (0x12),		OP_MASK,		IF2, 			0 },
 { "addi",	OP  (0x30),		OP_MASK,		IF6, 			0 },
 { "sub",	OP  (0x0d),		OP_MASK,		IF1, 			0 },
 { "subr", 	OP  (0x0c),		OP_MASK,		IF1, 			0 },
-{ "mulh",	OP  (0x07),		OP_MASK,		IF1, 			0 },
-{ "mulh",	OP  (0x17),		OP_MASK,		IF2, 			0 },
-{ "mulhi",	OP  (0x37),		OP_MASK,		IF6, 			0 },
+{ "mulh",	OP  (0x17),		OP_MASK,		{I5, R2_NOTR0},		0 },
+{ "mulh",	OP  (0x07),		OP_MASK,		{R1, R2_NOTR0},		0 },
+{ "mulhi",	OP  (0x37),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
 { "cmp",	OP  (0x0f),		OP_MASK,		IF1, 			0 },
 { "cmp",	OP  (0x13),		OP_MASK,		IF2, 			0 },
   
 /* saturated operation instructions */
-{ "satadd",	OP (0x06),		OP_MASK,		IF1, 			0 },
-{ "satadd",	OP (0x11),		OP_MASK,		IF2, 			0 },
-{ "satsub",	OP (0x05),		OP_MASK,		IF1, 			0 },
-{ "satsubi",	OP (0x33),		OP_MASK,		IF6, 			0 },
-{ "satsubr",	OP (0x04),		OP_MASK,		IF1, 			0 },
+{ "satadd",	OP (0x11),		OP_MASK,		{I5, R2_NOTR0},		0 },
+{ "satadd",	OP (0x06),		OP_MASK,		{R1, R2_NOTR0},		0 },
+{ "satsub",	OP (0x05),		OP_MASK,		{R1, R2_NOTR0},		0 },
+{ "satsubi",	OP (0x33),		OP_MASK,		{I16, R1, R2_NOTR0},	0 },
+{ "satsubr",	OP (0x04),		OP_MASK,		{R1, R2_NOTR0},		0 },
 
 /* logical operation instructions */
 { "tst",	OP (0x0b),		OP_MASK,		IF1, 			0 },
