@@ -1,5 +1,15 @@
 Wed Sep 13 12:33:03 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (EXPECT): New variable.
+	(CHECKFLAGS): Remove.
+	(site.exp): New target.
+	(check): Rewrite to invoke runtest directly, rather than recurring
+	down into testsuite.
+	(clean-here): Remove testsuite directory.
+	(clean, distclean): Don't recur into testsuite.
+	* configure.in: Don't call AC_CONFIG_SUBDIRS(testsuite).
+	* configure: Rebuild.
+
 	* write.c (relax_and_size_seg): Change to the segment we are
 	relaxing, in case md_convert_frag, called by cvt_frag_to_fill,
 	wants to call fix_new.

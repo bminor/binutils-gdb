@@ -248,8 +248,8 @@ changequote([,])dnl
       rce-*-aout)           fmt=aout ;;
 # end-sanitize-rce
 
-      ns32k-pc532-mach*)    fmt=aout em=pc532mach ;;
-      ns32k-pc532-netbsd*)  fmt=aout em=nbsd532 ;;
+      ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
+      ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
 
       sparc-*-sunos4*)      fmt=aout em=sun3 ;;
       sparc-*-aout | sparc*-*-vxworks)
@@ -300,6 +300,14 @@ changequote([,])dnl
       *)		;;
     esac
 
+# Other random stuff.
+
+    test -n "$want_sparcv9" && AC_DEFINE(sparcv9)
+
+    case ${cpu_type} in
+      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
+    esac
+
 # See if we really can support this configuration with the emulation code.
 
     if test $this_target = $target ; then
@@ -332,14 +340,6 @@ changequote([,])dnl
     esac
 
     emulations="$emulations $emulation"
-
-# Other random stuff.
-
-    test -n "$want_sparcv9" && AC_DEFINE(sparcv9)
-
-    case ${cpu_type} in
-      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
-    esac
 
 done
 
@@ -562,7 +562,7 @@ gas_test_headers="
 #endif
 "
 GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(free, f, int f, $gas_test_headers)
+GAS_CHECK_DECL_NEEDED(free, f, void (*f)(), $gas_test_headers)
 
 # Does errno.h declare errno, or do we have to add a separate declaration
 # for it?
@@ -571,8 +571,6 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 #include <errno.h>
 #endif
 ])
-
-AC_CONFIG_SUBDIRS(testsuite)
 
 dnl This must come last.
 AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in)
