@@ -1789,6 +1789,17 @@ DEFUN(coff_write_relocs,(abfd),
       struct internal_reloc    n;
       arelent        *q = p[i];
       memset((PTR)&n, 0, sizeof(n));
+
+
+#ifndef SWAP_OUT_RELOC_OFFSET
+      /* @@FIXME COFF relocs don't support addends.  Code should probably be
+	 in the target-independent code, using a target flag to decide whether
+	 to fold the addend into the section contents.  */
+
+      if (q->addend != 0)
+	abort ();
+#endif
+
       n.r_vaddr = q->address + s->vma;
       /* The 29k const/consth reloc pair is a real kludge - the consth
 	 part doesn't have a symbol - it has an offset. So rebuilt
@@ -2275,21 +2286,25 @@ coff_add_missing_symbols (abfd)
     {
       coff_symbol_type *csym = coff_symbol_from (abfd, sympp[i]);
       CONST char *name;
-
-      if (csym->native && csym->native->u.syment.n_sclass == C_FILE)
+      if (csym) 
+      {
+	/* only do this if there is a coff representation of the input
+	   symbol */
+	if (csym->native && csym->native->u.syment.n_sclass == C_FILE)
 	{
 	  need_file = 0;
 	  continue;
 	}
-      name = csym->symbol.name;
-      if (!name)
-	continue;
-      if (!strcmp (name, _TEXT))
-	need_text = 0;
-      else if (!strcmp (name, _DATA))
-	need_data = 0;
-      else if (!strcmp (name, _BSS))
-	need_bss = 0;
+	name = csym->symbol.name;
+	if (!name)
+	 continue;
+	if (!strcmp (name, _TEXT))
+	 need_text = 0;
+	else if (!strcmp (name, _DATA))
+	 need_data = 0;
+	else if (!strcmp (name, _BSS))
+	 need_bss = 0;
+      }
     }
   /* Now i == bfd_get_symcount (abfd).  */
   /* @@ For now, don't deal with .file symbol.  */
@@ -2311,7 +2326,7 @@ coff_add_missing_symbols (abfd)
     sympp2[i++] = coff_section_symbol (abfd, _DATA);
   if (need_bss)
     sympp2[i++] = coff_section_symbol (abfd, _BSS);
-  assert (i == nsyms);
+  BFD_ASSERT (i == nsyms);
   bfd_set_symtab (abfd, sympp2, nsyms);
 }
 #endif /* NO_COFF_SYMBOLS */
@@ -3787,7 +3802,7 @@ DEFUN(perform_slip,(s, slip, input_section, value),
       /* This was pointing into this section, so mangle it */
       if (p->value > value)
       {
-	p->value -=2;
+	p->value -= slip;
       }
     }
     s++;
@@ -4027,7 +4042,7 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
 	     */
 	  if (data[dst_address-1] != 0x6a)
 	   abort();
-	  switch (data[dst_address] & 0xf0) 
+	  switch (data[src_address] & 0xf0) 
 	  {
 	  case 0x00:
 	    /* Src is memory */
@@ -4072,7 +4087,7 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
 	case R_RELBYTE:
 	{
 	  unsigned  int gap =get_value(reloc,seclet);
-	  if (gap > 256)
+	  if (gap > 0xff && gap < ~0xff)
 	  {
 	    bfd_error_vector.reloc_value_truncated(reloc, seclet);
 	  }

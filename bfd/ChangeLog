@@ -1,3 +1,12 @@
+Mon Aug 24 12:06:31 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coffcode.h (coff_add_missing_symbols): if symbols don't come
+	from a coff file (csym is null), dont deref them
+
+	* ieee.c (parse_expression): get the answer right when adding an
+	abs+(sec+off), (ieee_generic_stat_arch_elt): call ieee_object_p
+	on elts so that filename is filled in.
+
 Thu Aug 20 19:05:48 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* bout.c (howto_align_table): New set of relocs, with enough

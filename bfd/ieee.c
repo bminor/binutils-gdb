@@ -1,5 +1,6 @@
+
 /* bfd back-end for ieee-695 objects.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990-1992 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -18,6 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#define KEEPMINUSPCININST 1
+
 /* IEEE 695 format is a stream of records, which we parse using a simple one-
    token (which is one byte in this lexicon) lookahead recursive decent
    parser.  */
@@ -27,6 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 #include "ieee.h"
 #include "libieee.h"
+
+
+#include "obstack.h"
+#define obstack_chunk_alloc bfd_xmalloc
+#define obstack_chunk_free free
 
 /* Functions for writing to ieee files in the strange way that the
    standard requires. */
@@ -362,26 +370,29 @@ reloc_howto_type abs8_howto
 
 static 
 reloc_howto_type rel32_howto 
- = HOWTO(1,0,2,32,true,0,false,true,0,"rel32",true,0xffffffff, 0xffffffff,true);
+ = HOWTO(1,0,2,32,true,0,false,true,0,"rel32",true,0xffffffff,
+	 0xffffffff,false);
+
 static
 reloc_howto_type rel16_howto 
- = HOWTO(1,0,1,16,true,0,false,true,0,"rel16",true,0x0000ffff, 0x0000ffff,true);
+ = HOWTO(1,0,1,16,true,0,false,true,0,"rel16",true,0x0000ffff, 0x0000ffff,false);
 
 static
 reloc_howto_type rel8_howto 
- = HOWTO(1,0,0,8,true,0,false,true,0,"rel8",true,0x000000ff, 0x000000ff,true);
+ = HOWTO(1,0,0,8,true,0,false,true,0,"rel8",true,0x000000ff, 0x000000ff,false);
 
 
 static ieee_symbol_index_type NOSYMBOL = {  0, 0};
 
 
 static void
-DEFUN(parse_expression,(ieee, value, symbol, pcrel, extra),
+DEFUN(parse_expression,(ieee, value, symbol, pcrel, extra, section),
       ieee_data_type *ieee AND
       bfd_vma *value AND
       ieee_symbol_index_type *symbol AND
       boolean *pcrel AND
-      unsigned int *extra)
+      unsigned int *extra AND
+      asection **section)
 
 {
 #define POS sp[1]
@@ -467,7 +478,7 @@ DEFUN(parse_expression,(ieee, value, symbol, pcrel, extra),
 
 	      POP(sy1, section1, value1);
 	      POP(sy2, section2, value2);
-	      PUSH(sy1.letter ? sy1 : sy2, section1 ? section1: section2, value1+value2);
+	      PUSH(sy1.letter ? sy1 : sy2, section1!=&bfd_abs_section ? section1: section2, value1+value2);
 	    }
 	  break;
 	default: 
@@ -497,8 +508,9 @@ DEFUN(parse_expression,(ieee, value, symbol, pcrel, extra),
 		}
 	      {
 		asection *dummy;
-		
+
 		POP(*symbol, dummy, *value);
+		if (section) *section = dummy;
 	      }
 		
 		loop = false;
@@ -639,10 +651,10 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
 	  symbol_name_index = must_parse_int(&(ieee->h));
 	  parse_expression(ieee,
 			   &symbol->symbol.value,
-			   &symbol->symbol.section,
 			   &symbol_ignore, 
 			   &pcrel_ignore, 
-			   &extra);
+			   &extra,
+			   &symbol->symbol.section);
 
 	    symbol->symbol.flags  = BSF_GLOBAL | BSF_EXPORT;
 
@@ -981,12 +993,13 @@ DEFUN(ieee_archive_p,(abfd),
 
   unsigned int i;
 uint8e_type buffer[512];
-
+  struct obstack ob;
   int buffer_offset = 0;
   ieee_ar_data_type *save = abfd->tdata.ieee_ar_data;
   ieee_ar_data_type *ieee ;
   abfd->tdata.ieee_ar_data = (ieee_ar_data_type *)bfd_alloc(abfd, sizeof(ieee_ar_data_type));
   ieee=  IEEE_AR_DATA(abfd);
+
 
 
   bfd_read((PTR)buffer, 1, sizeof(buffer), abfd);
@@ -1013,6 +1026,10 @@ uint8e_type buffer[512];
   free( read_id(&(ieee->h)));
   /* This must be an IEEE archive, so we'll buy some space to do
      things */
+
+  obstack_begin(&ob, 128);
+
+
   ieee->element_count = 0;
   ieee->element_index = 0;
 
@@ -1030,7 +1047,8 @@ uint8e_type buffer[512];
       t.file_offset = must_parse_int(&(ieee->h));
       t.abfd = (bfd *)NULL;
       ieee->element_count++;
-      bfd_alloc_grow(abfd, (PTR)&t, sizeof(t));
+
+      obstack_grow(&ob, (PTR)&t, sizeof(t));
 
       /* Make sure that we don't go over the end of the buffer */
 
@@ -1046,7 +1064,7 @@ uint8e_type buffer[512];
     else loop = false;
   }
 
-  ieee->elements = (ieee_ar_obstack_type *)bfd_alloc_finish(abfd);
+  ieee->elements = obstack_finish(&ob);
 
   /* Now scan the area again, and replace BB offsets with file */
   /* offsets */
@@ -1095,8 +1113,9 @@ DEFUN(ieee_object_p,(abfd),
   ieee_data_type *save = IEEE_DATA(abfd);
   abfd->tdata.ieee_data = 0;
   ieee_mkobject(abfd);
-  ieee = IEEE_DATA(abfd);
   
+  ieee = IEEE_DATA(abfd);
+  bfd_seek(abfd, 0, 0);
   /* Read the first few bytes in to see if it makes sense */
   bfd_read((PTR)buffer, 1, sizeof(buffer), abfd);
 
@@ -1278,9 +1297,8 @@ asection *section;
 			    
 			    parse_expression(ieee,
 					     &r->relent.addend,
-					     &section,
 					     &r->symbol,
-					     &pcrel, &extra);
+					     &pcrel, &extra, &section);
 			    r->relent.address = current_map->pc;
 			    s->reloc_count++;
 if (r->relent.sym_ptr_ptr == 0) {
@@ -1468,9 +1486,9 @@ DEFUN(ieee_slurp_section_data,(abfd),
 		    next_byte(&(ieee->h));
 		    must_parse_int(&(ieee->h)); /* Thow away section #*/
 		    parse_expression(ieee, &value,
-				      &dsection, 
 				     &symbol,
-				     &pcrel, &extra);
+				     &pcrel, &extra,
+				     0);
 		    current_map->pc = value;
 		    BFD_ASSERT((unsigned)(value - s->vma) <= s->_raw_size);
 		  }
@@ -2848,7 +2866,7 @@ ieee_generic_stat_arch_elt(abfd, buf)
 bfd *abfd;
 struct stat *buf;
 {
-  ieee_ar_data_type *ar = IEEE_AR_DATA(abfd);
+  ieee_ar_data_type *ar = abfd->my_archive->tdata.ieee_ar_data;
   if (ar == (ieee_ar_data_type *)NULL) {
     bfd_error = invalid_operation;
     return -1;
@@ -2856,7 +2874,7 @@ struct stat *buf;
   else {
     buf->st_size = 0x1;
     buf->st_mode = 0666;
-  return 0;
+    return !    ieee_object_p(abfd);
   }
 }
 static int 
