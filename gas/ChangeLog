@@ -304,7 +304,6 @@ Tue Jun 18 13:19:51 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 	Don't always promote L_8 to L_16.
 	(do_a_fix_imm): Clean up L_32 and L_24 handling.
 
-start-sanitize-h8s
 	* config/tc-h8300.c (Smode): New variable.
 	(h8300hmode): Turn off Hmode.
 	(h8300smode): New function.  Turn on Smode and Hmode.
@@ -317,7 +316,6 @@ start-sanitize-h8s
 	* config/tc-h8300.h (COFF_MAGIC): Handle H8/S magic number.
 	(Smode): Declare.
 
-end-sanitize-h8s
 Mon Jun 17 15:50:53 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* doc/as.texinfo: Reorder chapter of machine dependent options so

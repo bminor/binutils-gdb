@@ -1245,8 +1245,6 @@ proc do_h8300h_extend {} {
     if [expr $x == 4] then { pass $testname } else { fail $testname }
 }
 
-# start-sanitize-h8s
-
 proc do_h8300s_add_sub {} {
     set testname "addsubs.s: h8300s add/sub tests"
     set x 0
@@ -2086,7 +2084,6 @@ proc do_h8300s_multiple {} {
     if [expr $x == 6] then { pass $testname } else { fail $testname }
 }
 
-# end-sanitize-h8s
 proc do_h8300h_mov32bug {} {
     set testname "mov32bug.s: h8300h mov32bug test"
     set x 0
@@ -2153,7 +2150,6 @@ if [istarget h8300*-*-*] then {
     do_h8300h_rotate_shift
     do_h8300h_extend
 
-    # start-sanitize-h8s
     # Now test the h8300s instruction parser
     do_h8300s_add_sub
     do_h8300s_logical
@@ -2177,7 +2173,6 @@ if [istarget h8300*-*-*] then {
     do_h8300s_mac
     do_h8300s_multiple
 
-    # end-sanitize-h8s
     do_h8300h_mov32bug
 
     # Now some random tests

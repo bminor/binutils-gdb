@@ -47,9 +47,7 @@ const char line_comment_chars[] = "#";
 void cons ();
 
 int Hmode;
-/* start-sanitize-h8s */
 int Smode;
-/* end-sanitize-h8s */
 #define PSIZE (Hmode ? L_32 : L_16)
 #define DMODE (L_16)
 #define DSYMMODE (Hmode ? L_24 : L_16)
@@ -60,19 +58,15 @@ void
 h8300hmode ()
 {
   Hmode = 1;
-/* start-sanitize-h8s */
   Smode = 0;
-/* end-sanitize-h8s */
 }
 
-/* start-sanitize-h8s */
 void
 h8300smode ()
 {
   Smode = 1;
   Hmode = 1;
 }
-/* end-sanitize-h8s */
 void
 sbranch (size)
      int size;
@@ -89,9 +83,7 @@ const pseudo_typeS md_pseudo_table[] =
 {
 
   {"h8300h", h8300hmode, 0},
-/* start-sanitize-h8s */
   {"h8300s", h8300smode, 0},
-/* end-sanitize-h8s */
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
 
@@ -228,14 +220,12 @@ parse_reg (src, mode, reg, direction)
       *reg = 0;
       return 3;
     }
-/* start-sanitize-h8s */
   if (src[0] == 'e' && src[1] == 'x' && src[2] == 'r')
     {
       *mode = EXR;
       *reg = 0;
       return 3;
     }
-/* end-sanitize-h8s */
   if (src[0] == 'f' && src[1] == 'p')
     {
       *mode = PSIZE | REG | direction;
@@ -405,7 +395,6 @@ get_operand (ptr, op, dst, direction)
 
   op->mode = E;
 
-/* start-sanitize-h8s */
   /* Gross.  Gross.  ldm and stm have a format not easily handled
      by get_operand.  We deal with it explicitly here.  */
   if (src[0] == 'e' && src[1] == 'r' && isdigit(src[2])
@@ -438,7 +427,6 @@ get_operand (ptr, op, dst, direction)
       *ptr = src + 7;
       return;
     }
-/* end-sanitize-h8s */
 
   len = parse_reg (src, &op->mode, &op->reg, direction);
   if (len)
@@ -586,7 +574,6 @@ get_operand (ptr, op, dst, direction)
 
       return;
     }
-/* start-sanitize-h8s */
   else if (strncmp (src, "mach", 4) == 0
 	   || strncmp (src, "macl", 4) == 0)
     {
@@ -595,7 +582,6 @@ get_operand (ptr, op, dst, direction)
       *ptr = src + 4;
       return;
     }
-/* end-sanitize-h8s */
   else
     {
       src = parse_exp (src, &op->exp);
@@ -774,12 +760,10 @@ get_specific (opcode, operands)
 		       && ((op & SIZE) != (x & SIZE)))
 		found = 0;
 	    }
-/* start-sanitize-h8s */
 	  else if ((op & MACREG) != (x & MACREG))
 	    {
 	      found = 0;
 	    }
-/* end-sanitize-h8s */
 	  else if ((op & MODE) != (x & MODE))
 	    {
 	      found = 0;
@@ -961,7 +945,7 @@ build_bytes (this_try, operand)
       int d;
       c = *nibble_ptr++;
 
-      d = (c & DST) != 0;
+      d = (c & (DST | SRC_IN_DST)) != 0;
 
       if (c < 16)
 	{
@@ -1042,19 +1026,16 @@ build_bytes (this_try, operand)
 	      nib |= 0x8;
 	    }
 
-/* start-sanitize-h8s */
 	  if (c & MACREG)
 	    {
 	      nib = 2 + operand[d].reg;
 	    }
-/* end-sanitize-h8s */
 	}
       nibble_count++;
 
       *p++ = nib;
     }
 
-/* start-sanitize-h8s */
   /* Disgusting.  Why, oh why didn't someone ask us for advice
      on the assembler format.  */
   if (strcmp (this_try->name, "stm.l") == 0
@@ -1067,7 +1048,6 @@ build_bytes (this_try, operand)
       asnibbles[2] = high - low;
       asnibbles[7] = (this_try->name[0] == 'l') ? high : low;
     }
-/* end-sanitize-h8s */
 
   for (i = 0; i < this_try->length; i++)
     {

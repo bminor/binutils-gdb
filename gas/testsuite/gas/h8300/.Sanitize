@@ -17,14 +17,6 @@
 
 Do-first:
 
-h8s_files="addsubs.s bitops1s.s bitops2s.s bitops3s.s bitops4s.s branchs.s cbranchs.s compares.s decimals.s divmuls.s extends.s incdecs.s logicals.s macs.s miscs.s movbs.s movls.s movws.s multiples.s pushpops.s rotshs.s"
-
-if ( echo $* | grep keep\-h8s > /dev/null ) ; then
-	keep_these_too="${h8s_files} ${keep_these_too}"
-else
-	lose_these_too="${h8s_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -35,45 +27,66 @@ Things-to-keep:
 
 addsub.s
 addsubh.s
+addsubs.s
 bitops1.s
 bitops1h.s
+bitops1s.s
 bitops2.s
 bitops2h.s
+bitops2s.s
 bitops3.s
 bitops3h.s
+bitops3s.s
 bitops4.s
 bitops4h.s
+bitops4s.s
 branch.s
 branchh.s
+branchs.s
 cbranch.s
 cbranchh.s
+cbranchs.s
 cmpsi2.s
 compare.s
 compareh.s
+compares.s
 decimal.s
 decimalh.s
+decimals.s
 divmul.s
 divmulh.s
+divmuls.s
 extendh.s
+extends.s
 ffxx1.d
 ffxx1.s
 h8300.exp
 incdec.s
 incdech.s
+incdecs.s
 logical.s
 logicalh.s
+logicals.s
+macs.s
 misc.s
 misch.s
+miscs.s
 mov32bug.s
 movb.s
 movbh.s
+movbs.s
 movlh.s
+movls.s
 movw.s
 movwh.s
+movws.s
+multiples.s
 pushpop.s
 pushpoph.s
+pushpops.s
 rotsh.s
 rotshh.s
+rotshs.s
 
 Things-to-lose:
 
