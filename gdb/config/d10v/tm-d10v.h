@@ -159,8 +159,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define EXTRA_FRAME_INFO \
     CORE_ADDR return_pc; \
-    int leaf_function;   \
-    int f_offset;    
+    int size;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
     d10v_init_extra_frame_info(fromleaf, fi) 
@@ -173,7 +172,7 @@ extern CORE_ADDR d10v_skip_prologue ();
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
 #define FRAME_CHAIN(FRAME)       d10v_frame_chain(FRAME)
-#define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)
+#define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)   
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
 
