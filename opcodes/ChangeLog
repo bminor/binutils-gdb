@@ -1,3 +1,10 @@
+2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* sh-dis.c (print_insn_ddt): Make insn_x, insn_y unsigned.
+	(print_insn_ppi): Make nib1, nib2, nib3 unsigned.
+	Initialize variable dc to NULL.
+	(print_insn_shx): Remove unused label d_reg_n.
+
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* arm-opc.h: Add new opcode formatting parameter 'B'.

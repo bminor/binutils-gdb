@@ -99,7 +99,7 @@ print_insn_ddt (insn, info)
     {
       static sh_opcode_info *first_movx, *first_movy;
       sh_opcode_info *opx, *opy;
-      int insn_x, insn_y;
+      unsigned int insn_x, insn_y;
 
       if (! first_movx)
 	{
@@ -182,8 +182,8 @@ print_insn_ppi (field_b, info)
   static char *sy_tab[] = { "y0", "y1", "m0", "m1" };
   fprintf_ftype fprintf_fn = info->fprintf_func;
   void *stream = info->stream;
-  int nib1, nib2, nib3;
-  char *dc;
+  unsigned int nib1, nib2, nib3;
+  char *dc = NULL;
   sh_opcode_info *op;
 
   if ((field_b & 0xe800) == 0)
@@ -612,7 +612,6 @@ print_insn_shx (memaddr, info)
 		  fprintf_fn (stream, "xd%d", rn & ~1);
 		  break;
 		}
-	    d_reg_n:
 	    case D_REG_N:
 	      fprintf_fn (stream, "dr%d", rn);
 	      break;
