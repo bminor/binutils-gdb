@@ -1,3 +1,9 @@
+2004-06-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR gdb/1636.
+	* gdb.threads/manythreads.exp: Change asynchronous 'after'
+	calls to synchronous.
+
 2004-05-26  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.arch/e500-prologue.exp, gdb.arch/e500-prologue.c: New tests.

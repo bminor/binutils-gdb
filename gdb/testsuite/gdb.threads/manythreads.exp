@@ -60,7 +60,8 @@ gdb_test_multiple "continue" "first continue" {
 }
 
 # Send a Ctrl-C and verify that we can do info threads and continue
-after 1000 {send_gdb "\003"}
+after 1000
+send_gdb "\003"
 set message "stop threads 1"
 gdb_test_multiple "" "stop threads 1" {
   -re "\\\[New \[^\]\]*\\\]\r\n" {
@@ -93,7 +94,8 @@ gdb_test_multiple "continue" "second continue" {
 }
 
 # Send another Ctrl-C and verify that we can do info threads and quit
-after 1000 {send_gdb "\003"}
+after 1000
+send_gdb "\003"
 set message "stop threads 2"
 gdb_test_multiple "" "stop threads 2" {
   -re "\\\[New \[^\]\]*\\\]\r\n" {
