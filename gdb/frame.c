@@ -1007,6 +1007,18 @@ get_frame_pc (struct frame_info *frame)
   return frame->pc;
 }
 
+/* Level of the selected frame: 0 for innermost, 1 for its caller, ...
+   or -1 for a NULL frame.  */
+
+int
+frame_relative_level (struct frame_info *fi)
+{
+  if (fi == NULL)
+    return -1;
+  else
+    return fi->level;
+}
+
 enum frame_type
 get_frame_type (struct frame_info *frame)
 {

@@ -115,22 +115,6 @@ extern int addressprint;	/* Print addresses, or stay symbolic only? */
 
 struct frame_info *selected_frame;
 
-/* Level of the selected frame:
-   0 for innermost, 1 for its caller, ...
-   or -1 for frame specified by address with no defined level.  */
-
-/* Level of the selected frame: 0 for innermost, 1 for its caller, ...
-   or -1 for NULL frame.  */
-
-int
-frame_relative_level (struct frame_info *fi)
-{
-  if (fi == NULL)
-    return -1;
-  else
-    return fi->level;
-}
-
 /* Zero means do things normally; we are interacting directly with the
    user.  One means print the full filename and linenumber when a
    frame is printed, and do so in a format emacs18/emacs19.22 can

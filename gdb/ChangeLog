@@ -1,5 +1,10 @@
 2002-11-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* stack.c (frame_relative_level): Copy function from here ...
+	* frame.c (frame_relative_level): ...to here.
+
+2002-11-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.h (enum frame_type): Define.
 	(get_frame_type): Declare.
 	(struct frame_info): Add field `type'.  Delete field
