@@ -509,7 +509,8 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		}
 
 	      ++*pgarbage;
-	      if (*pgarbage > mips_syn_garbage)
+	      if (mips_syn_garbage > 0
+		  && *pgarbage > mips_syn_garbage)
 		mips_error ("Debug protocol failure:  more than %d characters before a sync.", 
 			    mips_syn_garbage);
 	    }
@@ -2169,4 +2170,14 @@ _initialize_remote_mips ()
 This is the number of seconds to wait for an acknowledgement to a packet\n\
 before resending the packet.", &setlist),
 	&showlist);
+
+  add_show_from_set (
+    add_set_cmd ("syn-garbage-limit", no_class, var_zinteger,
+		 (char *) &mips_syn_garbage,
+"Set the maximum number of characters to ignore when scanning for a SYN.\n\
+This is the maximum number of characters GDB will ignore when trying to\n\
+synchronize with the remote system.  A value of -1 means that there is no limit\n\
+(Note that these characters are printed out even though they are ignored.)",
+		 &setlist),
+		     &showlist);
 }
