@@ -267,6 +267,3 @@ texdoc:
 	
 quickdoc: $(DSRC) docs
 	tex bfd.texinfo
-
-
-
