@@ -1,3 +1,9 @@
+Wed Apr 27 16:33:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* lynx-nat.c (CANNOT_STORE_REGISTER): Add a fallback definition
+	for Lynx platforms that need it.
+	* config/nm-lynx.h (__LYNXOS): Define if not already defined.
+
 Wed Apr 27 16:01:37 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* procfs.c (procfs_wait): Use the signal from the pr_info rather
