@@ -30,7 +30,7 @@ SHELL=/bin/sh
 
 RANLIB = ranlib
 AR = ar
-AR_FLAGS = cqv
+AR_FLAGS = cq
 BISONPATH = 
 
 BISON = `if [ -d $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`$(subdir) ] ; then echo $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`$(subdir)/bison -L $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`/; else echo yacc ; fi`
@@ -238,7 +238,10 @@ force_update:
 
 #
 # $Log$
-# Revision 1.36  1991/10/01 03:45:39  rich
+# Revision 1.37  1991/10/01 13:41:00  gnu
+# Avoid 'v' flag on archive updates, since it just wastes space in the log.
+#
+# Revision 1.36  1991/10/01  03:45:39  rich
 # Exploit the new executable config.status
 #
 # Revision 1.35  1991/09/25  04:34:40  rich
