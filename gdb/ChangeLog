@@ -1,3 +1,12 @@
+Fri Mar 18 10:25:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* regex.c (EXTEND_BUFFER): Adjust pointers within buffer by
+	computing their offset from the start of the old buffer and adding
+	to the new buffer, rather than by assuming we can add the
+	difference between the old buffer and the new buffer (it might not
+	fit in an int).  Merge in cosmetic differences from emacs regex.c
+	version of this macro.
+
 Wed Mar 16 15:28:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (install-only): Fix use of program_transform_name.

@@ -146,23 +146,40 @@ re_set_syntax (syntax)
 
 #define PATUNFETCH p--
 
-#define EXTEND_BUFFER \
-  { char *old_buffer = bufp->buffer; \
-    if (bufp->allocated == (1<<16)) goto too_big; \
-    bufp->allocated *= 2; \
-    if (bufp->allocated > (1<<16)) bufp->allocated = (1<<16); \
-    if (!(bufp->buffer = (char *) realloc (bufp->buffer, bufp->allocated))) \
-      goto memory_exhausted; \
-    c = bufp->buffer - old_buffer; \
-    b += c; \
-    if (fixup_jump) \
-      fixup_jump += c; \
-    if (laststart) \
-      laststart += c; \
-    begalt += c; \
-    if (pending_exact) \
-      pending_exact += c; \
-  }
+/* This is not an arbitrary limit: the arguments which represent offsets
+   into the pattern are two bytes long.  So if 2^16 bytes turns out to
+   be too small, many things would have to change.  */
+#define MAX_BUF_SIZE (1 << 16)
+
+
+/* Extend the buffer by twice its current size via realloc and
+   reset the pointers that pointed into the old block to point to the
+   correct places in the new one.  If extending the buffer results in it
+   being larger than MAX_BUF_SIZE, then flag memory exhausted.  */
+#define EXTEND_BUFFER                                                 \
+  do {                                                                  \
+    char *old_buffer = bufp->buffer;                           \
+    if (bufp->allocated == MAX_BUF_SIZE)                                \
+      goto too_big;                                                 \
+    bufp->allocated <<= 1;                                              \
+    if (bufp->allocated > MAX_BUF_SIZE)                                 \
+      bufp->allocated = MAX_BUF_SIZE;                                   \
+    bufp->buffer = (char *) realloc (bufp->buffer, bufp->allocated);\
+    if (bufp->buffer == NULL)                                           \
+      goto memory_exhausted;                                                \
+    /* If the buffer moved, move all the pointers into it.  */          \
+    if (old_buffer != bufp->buffer)                                     \
+      {                                                                 \
+        b = (b - old_buffer) + bufp->buffer;                            \
+        begalt = (begalt - old_buffer) + bufp->buffer;                  \
+        if (fixup_jump)                                             \
+          fixup_jump = (fixup_jump - old_buffer) + bufp->buffer;\
+        if (laststart)                                                  \
+          laststart = (laststart - old_buffer) + bufp->buffer;          \
+        if (pending_exact)                                              \
+          pending_exact = (pending_exact - old_buffer) + bufp->buffer;  \
+      }                                                                 \
+  } while (0)
 
 static void store_jump (), insert_jump ();
 
