@@ -2,4 +2,3 @@ CC=cc
 CFLAGS=
 RANLIB=true
 AR_FLAGS=
-HOST_FLAGS="srcroot=$(srcdir)"
