@@ -3484,12 +3484,14 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	     external symbol. */
 	  h = *sym_hash;
 
-	  /* If this is an indirect symbol, then change hresolve to
-	     the base symbol.  We also change sym_hash so that the
-	     relocation routines relocate against the real symbol.  */
+	  /* If this is an indirect or warning symbol, then change
+	     hresolve to the base symbol.  We also change *sym_hash so
+	     that the relocation routines relocate against the real
+	     symbol.  */
 	  hresolve = h;
 	  if (h != (struct aout_link_hash_entry *) NULL
-	      && h->root.type == bfd_link_hash_indirect)
+	      && (h->root.type == bfd_link_hash_indirect
+		  || h->root.type == bfd_link_hash_warning))
 	    {
 	      hresolve = (struct aout_link_hash_entry *) h->root.u.i.link;
 	      while (hresolve->root.type == bfd_link_hash_indirect)

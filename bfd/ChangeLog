@@ -3,8 +3,8 @@ Tue Jan 18 16:43:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	* aoutx.h (aout_link_add_symbols): Increment sym_hash as well as p
 	for an indirect or warning symbol.
 	(aout_link_write_symbols): Update sym_hash with the target of an
-	indirect symbol.  If an indirect symbol is defined, output the
-	calculated value and don't output the target symbol.
+	indirect or warning symbol.  If an indirect symbol is defined,
+	output the calculated value and don't output the target symbol.
 
 Tue Jan 18 03:54:59 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
