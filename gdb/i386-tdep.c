@@ -188,13 +188,6 @@ static const char *valid_flavors[] =
 };
 static const char *disassembly_flavor = att_flavor;
 
-/* This is used to keep the bfd arch_info in sync with the disassembly
-   flavor.  */
-static void set_disassembly_flavor_sfunc (char *, int,
-					  struct cmd_list_element *);
-static void set_disassembly_flavor (void);
-
-
 /* Stdio style buffering was used to minimize calls to ptrace, but
    this buffering did not take into account that the code section
    being accessed may not be an even number of buffers long (even if
@@ -1200,26 +1193,6 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
   internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
-/* If the disassembly mode is intel, we have to also switch the bfd
-   mach_type.  This function is run in the set disassembly_flavor
-   command, and does that.  */
-
-static void
-set_disassembly_flavor_sfunc (char *args, int from_tty,
-			      struct cmd_list_element *c)
-{
-  set_disassembly_flavor ();
-}
-
-static void
-set_disassembly_flavor (void)
-{
-  if (disassembly_flavor == att_flavor)
-    set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386);
-  else if (disassembly_flavor == intel_flavor)
-    set_architecture_from_arch_mach (bfd_arch_i386,
-				     bfd_mach_i386_i386_intel_syntax);
-}
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -1255,11 +1228,6 @@ _initialize_i386_tdep (void)
 Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
 and the default value is \"att\".",
 				&setlist);
-    new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
     add_show_from_set (new_cmd, &showlist);
   }
-
-  /* Finally, initialize the disassembly flavor to the default given
-     in the disassembly_flavor variable.  */
-  set_disassembly_flavor ();
 }

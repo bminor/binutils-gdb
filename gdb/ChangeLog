@@ -1,3 +1,8 @@
+Wed Nov  7 20:45:32 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.c (set_disassembly_flavor): Delete function.
+	(set_disassembly_flavor_sfunc): Delete function.
+
 2001-11-07  Elena Zannoni  <ezannoni@redhat.com>
 
 	* dbxread.c (set_namestring): New function, replacing the
