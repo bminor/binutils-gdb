@@ -385,9 +385,12 @@ main (argc, argv)
 #endif
 
   myname = argv[0];
+  xmalloc_set_program_name (myname);
+
 #ifndef OBJ_DEFAULT_OUTPUT_FILE_NAME
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME "a.out"
 #endif
+
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
 
 #ifdef BFD_ASSEMBLER

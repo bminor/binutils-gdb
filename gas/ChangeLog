@@ -1,5 +1,12 @@
 Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	Use libiberty version of xmalloc:
+	* Makefile.in (REAL_SOURCES): Delete xmalloc.c.
+	(OBJS): Delete xmalloc.o.
+	(xmalloc.o): Delete dependencies.
+	* as.c (main): Call xmalloc_set_program_name once program name is
+	known.
+
 	* config/tc-alpha.c (in_range_signed, in_range_unsigned): New
 	routines, split from in_range.
 	(in_range): Deleted.  All calls changed to in_range_*signed.
