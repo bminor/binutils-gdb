@@ -1,3 +1,8 @@
+2002-12-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Version 2.13.2 released, set is_release.
+	* configure: Regenerate.
+
 2002-12-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Bump version to 2.13.2.
