@@ -1,3 +1,7 @@
+2004-02-02  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (movua.l): Set thislock to 0, not n.
+
 2004-02-12  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c (table): Change from char to short.
