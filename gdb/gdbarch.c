@@ -387,6 +387,15 @@ struct gdbarch startup_gdbarch =
 
 struct gdbarch *current_gdbarch = &startup_gdbarch;
 
+/* Do any initialization needed for a non-multiarch configuration
+   after the _initialize_MODULE functions have been run.  */
+void
+initialize_non_multiarch ()
+{
+  alloc_gdbarch_data (&startup_gdbarch);
+  init_gdbarch_data (&startup_gdbarch);
+}
+
 
 /* Create a new ``struct gdbarch'' based on information provided by
    ``struct gdbarch_info''. */

@@ -705,6 +705,8 @@ initialize_current_architecture (void)
 			  "initialize_current_architecture: Selection of initial architecture failed");
 	}
     }
+  else
+    initialize_non_multiarch ();
 
   /* Create the ``set architecture'' command appending ``auto'' to the
      list of architectures. */

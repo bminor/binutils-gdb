@@ -1834,6 +1834,10 @@ extern void set_gdbarch_from_file (bfd *);
 
 extern void initialize_current_architecture (void);
 
+/* For non-multiarched targets, do any initialization of the default
+   gdbarch object necessary after the _initialize_MODULE functions
+   have run.  */
+extern void initialize_non_multiarch ();
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;

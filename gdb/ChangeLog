@@ -1,3 +1,11 @@
+2001-06-06  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh: Changes to effect the following:
+	* gdbarch.c (initialize_non_multiarch): New function.
+	* gdbarch.h (initialize_non_multiarch): New declaration.
+	* arch-utils.c (initialize_current_architecture): For
+	non-multiarch configurations, call initialize_non_multiarch.
+
 2001-06-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* symfile.c (compare_psymbols): Replace PTR with void*. Delete
