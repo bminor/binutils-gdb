@@ -420,7 +420,7 @@ remote_wait (status)
 
   WSETEXIT ((*status), 0);
 
-  ofunc = (void (*)) signal (SIGINT, remote_interrupt);
+  ofunc = (void (*)()) signal (SIGINT, remote_interrupt);
   getpkt ((char *) buf);
   signal (SIGINT, ofunc);
 
@@ -793,6 +793,8 @@ getpkt (buf)
   unsigned char csum;
   int c;
   unsigned char c1, c2;
+  int retries = 0;
+#define MAX_RETRIES	10
 
 #if 0
   /* Sorry, this will cause all hell to break loose, i.e. we'll end
@@ -839,9 +841,18 @@ getpkt (buf)
 	break;
       printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	      (c1 << 4) + c2, csum & 0xff, buf);
+
       /* Try the whole thing again.  */
 whole:
-      write (remote_desc, "-", 1);
+      if (++retries < MAX_RETRIES)
+	{
+	  write (remote_desc, "-", 1);
+	}
+      else
+	{
+	  printf ("Ignoring packet error, continuing...\n");
+	  break;
+	}
     }
 
 #if 0
