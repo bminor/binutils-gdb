@@ -304,11 +304,7 @@ extern int current_floating_point;
 /* Default macro to simplify control several of key the inlines */
 
 #ifndef DEFAULT_INLINE
-#if defined(__GNUC__) && defined(__OPTIMIZE__)
-#define	DEFAULT_INLINE			2
-#else
 #define	DEFAULT_INLINE			0
-#endif
 #endif
 
 /* Code that converts between hosts and target byte order.  Used on
