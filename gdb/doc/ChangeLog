@@ -1,3 +1,8 @@
+2003-10-14  Kevin Buettner  <kevinb@redhat.com>
+
+ 	* gdb.texinfo (Breakpoint related warnings): New node.
+ 	* gdbint.texinfo (ADJUST_BREAKPOINT_ADDRESS): Document.
+	
 2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Remote Protocol): Document v and vCont.

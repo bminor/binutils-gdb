@@ -3052,6 +3052,39 @@ custom breakpoint insertion and removal routines if
 @code{BREAKPOINT_FROM_PC} needs to read the target's memory for some
 reason.
 
+@item ADJUST_BREAKPOINT_ADDRESS (@var{address})
+@findex ADJUST_BREAKPOINT_ADDRESS
+@cindex breakpoint address adjusted
+Given an address at which a breakpoint is desired, return a breakpoint
+address adjusted to account for architectural constraints on
+breakpoint placement.  This method is not needed by most targets.
+
+The FR-V target (see @file{frv-tdep.c}) requires this method.
+The FR-V is a VLIW architecture in which a number of RISC-like
+instructions are grouped (packed) together into an aggregate
+instruction or instruction bundle.  When the processor executes
+one of these bundles, the component instructions are executed
+in parallel.
+
+In the course of optimization, the compiler may group instructions
+from distinct source statements into the same bundle.  The line number
+information associated with one of the latter statements will likely
+refer to some instruction other than the first one in the bundle.  So,
+if the user attempts to place a breakpoint on one of these latter
+statements, @value{GDBN} must be careful to @emph{not} place the break
+instruction on any instruction other than the first one in the bundle.
+(Remember though that the instructions within a bundle execute
+in parallel, so the @emph{first} instruction is the instruction
+at the lowest address and has nothing to do with execution order.)
+
+The FR-V's @code{ADJUST_BREAKPOINT_ADDRESS} method will adjust a
+breakpoint's address by scanning backwards for the beginning of
+the bundle, returning the address of the bundle.
+
+Since the adjustment of a breakpoint may significantly alter a user's
+expectation, @value{GDBN} prints a warning when an adjusted breakpoint
+is initially set and each time that that breakpoint is hit.
+
 @item DEPRECATED_CALL_DUMMY_WORDS
 @findex DEPRECATED_CALL_DUMMY_WORDS
 Pointer to an array of @code{LONGEST} words of data containing
