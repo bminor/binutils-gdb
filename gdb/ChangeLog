@@ -1,3 +1,8 @@
+Wed Jul  5 18:10:44 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-06-12 Bill Nottingham <notting@redhat.com>:
+	* Makefile.in: add $(infodir) to FLAGS_TO_PASS
+	
 Wed Jul  5 18:03:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Updates.
