@@ -1,3 +1,14 @@
+Fri Oct 27 18:14:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c: More improvements, mostly to fix handling of
+	constructors and a few other special cases.
+	* coff-rs6000.c (rs6000coff_vec): Set symbol_leading_char back to
+	zero, reverting yesterday's change.
+	* bfd-in.h (bfd_xcoff_link_record_set): Declare.
+	(bfd_xcoff_link_count_reloc): Declare.
+	(bfd_xcoff_record_link_assignment): Declare.
+	* bfd-in2.h: Rebuild.
+
 start-sanitize-gm
 Fri Oct 27 09:41:51 1995  Stu Grossman  (grossman@cygnus.com)
 

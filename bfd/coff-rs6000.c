@@ -1353,8 +1353,7 @@ const bfd_target rs6000coff_vec =
    HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-  /* Making the leading_char a period should make for nicer messages.  */
-  '.',				/* leading char */
+  0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
 

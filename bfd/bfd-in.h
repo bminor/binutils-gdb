@@ -602,12 +602,19 @@ extern boolean bfd_linux_size_dynamic_sections
 
 /* XCOFF support routines for the linker.  */
 
+extern boolean bfd_xcoff_link_record_set
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
+	   bfd_size_type));
 extern boolean bfd_xcoff_import_symbol
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
 	   bfd_vma, const char *, const char *, const char *));
 extern boolean bfd_xcoff_export_symbol
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
 	   boolean));
+extern boolean bfd_xcoff_link_count_reloc
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+extern boolean bfd_xcoff_record_link_assignment
+  PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_xcoff_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
 	   unsigned long, unsigned long, unsigned long, boolean,
