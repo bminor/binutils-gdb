@@ -144,7 +144,7 @@ char *s;
 {
 	char *symbol_decode;
 	int label_number;
-	int label_version;
+/*	int label_version; */
 	char *message_format = "\"%d\" (instance number %s of a local label)";
 
 	if (s[0] != 'L'
@@ -196,6 +196,7 @@ fragS *frag;			/* Associated fragment */
 	unsigned int name_length;
 	char *preserved_copy_of_name;
 	symbolS *symbolP;
+	extern int memset();
 	
 	name_length = strlen(name) + 1; /* +1 for \0 */
 	obstack_grow(&notes, name, name_length);
