@@ -1,5 +1,29 @@
 2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* config/tc-m68hc11.h (MD_PCREL_FROM_SECTION): Remove.
+	(TC_HANDLES_FX_DONE): Define to let md_apply_fix3 set fx_done flag
+	according to the reloc.
+	(tc_fix_adjustable, tc_m68hc11_fix_adjustable): Define.
+	(TC_FORCE_RELOCATION): Define.
+	(tc_m68hc11_force_relocation): Declare.
+
+	* config/tc-m68hc11.c (md_pseudo_table): Add relax command.
+	(s_m68hc11_relax): New function for relax group.
+	(build_insn, build_jump_insn): Emit a M68HC11_RL_JUMP reloc at 
+	beginning of jump instruction.
+	(md_pcrel_from): Rename from md_pcrel_from_section and fix
+	address computation.
+	(tc-gen_reloc): Update.
+	(md_estimate_size_before_relax): Create the BFD_RELOC_16_PCREL as 
+	PC-relative fixup.
+	(tc_m68hc11_force_relocation): New function, handle new relocs.
+	(tc_m68hc11_fix_adjustable): New to make sure there are enough
+	reloc for the linker relax pass.
+	(md_apply_fix3): Handle M68HC11_RL_JUMP, M68HC11_RL_GROUP
+	and VTABLE relocs.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* config/tc-m68hc11.c (m68hc11_elf_final_processing): New function.
 	(md_pseudo_table): Add .mode, .far and .interrupt pseudo op.
 	(s_m68hc11_mode): New function for .mode pseudo op.

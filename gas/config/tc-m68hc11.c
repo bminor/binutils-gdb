@@ -182,6 +182,9 @@ static void build_insn
   PARAMS ((struct m68hc11_opcode *, operand *, int));
 static int relaxable_symbol PARAMS ((symbolS *));
 
+/* Pseudo op to indicate a relax group.  */
+static void s_m68hc11_relax PARAMS((int));
+
 /* Pseudo op to control the ELF flags.  */
 static void s_m68hc11_mode PARAMS ((int));
 
@@ -263,6 +266,9 @@ const pseudo_typeS md_pseudo_table[] = {
 
   /* Motorola ALIS.  */
   {"xrefb", s_ignore, 0}, /* Same as xref  */
+
+  /* Gcc driven relaxation.  */
+  {"relax", s_m68hc11_relax, 0},
 
   /* .mode instruction (ala SH).  */
   {"mode", s_m68hc11_mode, 0},
@@ -1516,6 +1522,8 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
   unsigned char code;
   char *f;
   unsigned long n;
+  fragS *frag;
+  int where;
 
   /* The relative branch convertion is not supported for
      brclr and brset.  */
@@ -1536,6 +1544,12 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
 	  && (!check_range (n, opcode->format) &&
 	      (jmp_mode == 1 || flag_fixed_branchs == 0))))
     {
+      frag = frag_now;
+      where = frag_now_fix ();
+
+      fix_new (frag_now, frag_now_fix (), 1,
+               &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
+
       if (code == M6811_BSR || code == M6811_BRA || code == M6812_BSR)
 	{
 	  code = convert_branch (code);
@@ -1590,6 +1604,12 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
     }
   else if (opcode->format & M6812_OP_JUMP_REL16)
     {
+      frag = frag_now;
+      where = frag_now_fix ();
+
+      fix_new (frag_now, frag_now_fix (), 1,
+               &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
+
       f = m68hc11_new_insn (2);
       number_to_chars_bigendian (f, M6811_OPCODE_PAGE2, 1);
       number_to_chars_bigendian (f + 1, code, 1);
@@ -1598,6 +1618,12 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
   else
     {
       char *opcode;
+
+      frag = frag_now;
+      where = frag_now_fix ();
+      
+      fix_new (frag_now, frag_now_fix (), 1,
+               &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
       /* Branch offset must fit in 8-bits, don't do some relax.  */
       if (jmp_mode == 0 && flag_fixed_branchs)
@@ -2002,9 +2028,19 @@ build_insn (opcode, operands, nb_operands)
   char *f;
   long format;
   int move_insn = 0;
+  fragS *frag;
+  int where;
 
   /* Put the page code instruction if there is one.  */
   format = opcode->format;
+
+  frag = frag_now;
+  where = frag_now_fix ();
+
+  if (format & M6811_OP_BRANCH)
+    fix_new (frag, where, 1,
+             &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
+
   if (format & OP_EXTENDED)
     {
       int page_code;
@@ -2592,21 +2628,42 @@ s_m68hc11_mark_symbol (mark)
 
   demand_empty_rest_of_line ();
 }
+
+static void
+s_m68hc11_relax (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  expressionS ex;
+
+  expression (&ex);
+
+  if (ex.X_op != O_symbol || ex.X_add_number != 0)
+    {
+      as_bad (_("bad .relax format"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  fix_new_exp (frag_now, frag_now_fix (), 1, &ex, 1,
+               BFD_RELOC_M68HC11_RL_GROUP);
+
+  demand_empty_rest_of_line ();
+}
+
 
 /* Relocation, relaxation and frag conversions.  */
+
+/* PC-relative offsets are relative to the start of the
+   next instruction.  That is, the address of the offset, plus its
+   size, since the offset is always the last part of the insn.  */
 long
-md_pcrel_from_section (fixp, sec)
-     fixS *fixp;
-     segT sec;
+md_pcrel_from (fixP)
+     fixS *fixP;
 {
-  int adjust;
-  if (fixp->fx_addsy != (symbolS *) NULL
-      && (!S_IS_DEFINED (fixp->fx_addsy)
-	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
+  if (fixP->fx_r_type == BFD_RELOC_M68HC11_RL_JUMP)
     return 0;
 
-  adjust = fixp->fx_pcrel_adjust;
-  return fixp->fx_frag->fr_address + fixp->fx_where + adjust;
+  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
 /* If while processing a fixup, a reloc really needs to be created
@@ -2638,10 +2695,10 @@ tc_gen_reloc (section, fixp)
     reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = (section->vma
-		     + (fixp->fx_pcrel_adjust == 64
-			? -1 : fixp->fx_pcrel_adjust)
+		     /*+ (fixp->fx_pcrel_adjust == 64
+                       ? -1 : fixp->fx_pcrel_adjust)*/
 		     + fixp->fx_addnumber
-		     + md_pcrel_from_section (fixp, section));
+		     + md_pcrel_from (fixp));
   return reloc;
 }
 
@@ -2873,7 +2930,7 @@ md_estimate_size_before_relax (fragP, segment)
 	      fragP->fr_opcode[0] = M6811_OPCODE_PAGE2;
 
 	      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-		       fragP->fr_offset, 0, BFD_RELOC_16_PCREL);
+                       fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
 	      fragP->fr_fix += 2;
 	      break;
 
@@ -2932,6 +2989,54 @@ md_estimate_size_before_relax (fragP, segment)
 
   /* Return the size of the variable part of the frag.  */
   return md_relax_table[fragP->fr_subtype].rlx_length;
+}
+
+/* See whether we need to force a relocation into the output file.  */
+int
+tc_m68hc11_force_relocation (fixP)
+     fixS * fixP;
+{
+  switch (fixP->fx_r_type)
+    {
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+    case BFD_RELOC_M68HC11_RL_GROUP:
+      return 1;
+
+    default:
+      return 0;
+    }
+}
+
+/* Here we decide which fixups can be adjusted to make them relative
+   to the beginning of the section instead of the symbol.  Basically
+   we need to make sure that the linker relaxation is done
+   correctly, so in some cases we force the original symbol to be
+   used.  */
+int
+tc_m68hc11_fix_adjustable (fixP)
+     fixS *fixP;
+{
+  /* Prevent all adjustments to global symbols.  */
+  if (! relaxable_symbol (fixP->fx_addsy))
+    return 0;
+
+  switch (fixP->fx_r_type)
+    {
+      /* For the linker relaxation to work correctly, these relocs
+         need to be on the symbol itself.  */
+    case BFD_RELOC_16:
+    case BFD_RELOC_LO16:
+    case BFD_RELOC_M68HC11_RL_JUMP:
+    case BFD_RELOC_M68HC11_RL_GROUP:
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      return 0;
+
+    case BFD_RELOC_32:
+    default:
+      return 1;
+    }
 }
 
 void
@@ -3037,10 +3142,21 @@ md_apply_fix3 (fixP, valP, seg)
       where[0] = where[0] | (value & 0x07);
       break;
 
+    case BFD_RELOC_M68HC11_RL_JUMP:
+    case BFD_RELOC_M68HC11_RL_GROUP:
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixP->fx_done = 0;
+      return;
+
     default:
       as_fatal (_("Line %d: unknown relocation type: 0x%x."),
 		fixP->fx_line, fixP->fx_r_type);
     }
+
+  /* Are we finished with this relocation now?  */
+  if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
+    fixP->fx_done = 1;
 }
 
 /* Set the ELF specific flags.  */

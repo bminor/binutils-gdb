@@ -72,12 +72,10 @@ extern const char *m68hc11_arch_format PARAMS ((void));
 #define LISTING_HEADER m68hc11_listing_header ()
 extern const char *m68hc11_listing_header PARAMS ((void));
 
-/* call md_pcrel_from_section, not md_pcrel_from */
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
-extern long md_pcrel_from_section PARAMS ((struct fix *fixp, segT sec));
-
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
+
+#define TC_HANDLES_FX_DONE
 
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
 
@@ -98,6 +96,12 @@ extern int m68hc11_parse_long_option PARAMS ((char *));
    absolute branches.  */
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 extern struct relax_type md_relax_table[];
+
+#define TC_FORCE_RELOCATION(fix) tc_m68hc11_force_relocation (fix)
+extern int tc_m68hc11_force_relocation PARAMS ((struct fix *));
+
+#define tc_fix_adjustable(X) tc_m68hc11_fix_adjustable(X)
+extern int tc_m68hc11_fix_adjustable PARAMS ((struct fix *));
 
 #define md_operand(x)
 #define tc_frob_label(sym) do {\
