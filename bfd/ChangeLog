@@ -1,3 +1,8 @@
+2000-05-22  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_output_extsym): Clear the visibility
+	field for symbols not defined locally.
+
 2000-05-18  Alan Modra  <alan@linuxcare.com.au>
 
 	* libhppa.h (re_assemble_3, re_assemble_12, re_assemble_16,
