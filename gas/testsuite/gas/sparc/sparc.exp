@@ -5,4 +5,6 @@ if [istarget sparc*-*-*] then {
     set sparc64 [istarget sparc64*-*-*]
 
     if $sparc64 { run_dump_test "asi" }
+    if $sparc64 { run_dump_test "membar" }
+    if $sparc64 { run_dump_test "prefetch" }
 }

@@ -27,6 +27,8 @@ asi.d
 asi.s
 membar.d
 membar.s
+prefetch.d
+prefetch.s
 sparc.exp
 
 Things-to-lose:
