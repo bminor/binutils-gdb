@@ -1,3 +1,13 @@
+Fri Jan 28 11:26:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-coff.c (obj_coff_section_header_append): Do not
+	declare if BFD_ASSEMBLER.
+	(stack_pop): Correct test for stack underflow.
+	(obj_coff_endef, obj_coff_dim, obj_coff_line, obj_coff_size,
+	obj_coff_scl, obj_coff_tag, obj_coff_type, obj_coff_val): Declare
+	type of ignored argument to avoid gcc warning.
+	(align): Removed unused function.
+
 Thu Jan 27 18:14:19 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-alpha.c, config/tc-alpha.h, config/alpha-opcode.h: New

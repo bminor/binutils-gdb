@@ -61,11 +61,15 @@ const segT N_TYPE_seg[32] =
 const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *tag_find_or_make PARAMS ((char *name));
 static symbolS *tag_find PARAMS ((char *name));
+
+#ifndef BFD_ASSEMBLER
 #ifdef BFD_HEADERS
 static void obj_coff_section_header_append PARAMS ((char **where, struct internal_scnhdr * header));
 #else
 static void obj_coff_section_header_append PARAMS ((char **where, SCNHDR * header));
 #endif
+#endif
+
 static void obj_coff_def PARAMS ((int what));
 static void obj_coff_dim PARAMS ((int));
 static void obj_coff_endef PARAMS ((int));
@@ -1104,11 +1108,12 @@ char *
 stack_pop (st)
      stack *st;
 {
-  if ((st->pointer -= st->element_size) < 0)
+  if (st->pointer < st->element_size)
     {
       st->pointer = 0;
       return (char *) 0;
     }
+  st->pointer -= st->element_size;
   return st->data + st->pointer;
 }
 
@@ -1272,8 +1277,10 @@ obj_coff_def (what)
 }
 
 unsigned int dim_index;
+
 static void
 obj_coff_endef (ignored)
+     int ignored;
 {
   symbolS *symbolP;
   /* DIM BUG FIX sac@cygnus.com */
@@ -1459,6 +1466,7 @@ obj_coff_endef (ignored)
 
 static void
 obj_coff_dim (ignored)
+     int ignored;
 {
   int dim_index;
 
@@ -1498,6 +1506,7 @@ obj_coff_dim (ignored)
 
 static void
 obj_coff_line (ignored)
+     int ignored;
 {
   int this_base;
 
@@ -1520,6 +1529,7 @@ obj_coff_line (ignored)
 
 static void
 obj_coff_size (ignored)
+     int ignored;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1535,6 +1545,7 @@ obj_coff_size (ignored)
 
 static void
 obj_coff_scl (ignored)
+     int ignored;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1549,6 +1560,7 @@ obj_coff_scl (ignored)
 
 static void
 obj_coff_tag (ignored)
+     int ignored;
 {
   char *symbol_name;
   char name_end;
@@ -1581,6 +1593,7 @@ obj_coff_tag (ignored)
 
 static void
 obj_coff_type (ignored)
+     int ignored;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1602,6 +1615,7 @@ obj_coff_type (ignored)
 
 static void
 obj_coff_val (ignored)
+     int ignored;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -2250,14 +2264,6 @@ obj_pre_write_hook (headers)
 #endif
 
 #ifdef BFD_ASSEMBLER
-static
-unsigned long
-align (val, exp)
-{
-  int n = (1 << exp) - 1;
-  val = (val + n) & ~n;
-  return val;
-}
 
 void
 coff_frob_symbol (symp, punt)
