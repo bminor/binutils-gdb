@@ -1,3 +1,13 @@
+Fri Mar 13 15:44:37 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: pass down MAKEINFO on info.
+
+Fri Mar 13 07:41:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/mt-<foo> now <foo>.mt, config/mh-<foo> now <foo>.mh.
+	host/h-<foo> now just <foo>. 
+	* configure.in: reflect changes
+
 Thu Mar 12 11:15:02 1992  Per Bothner  (bothner@cygnus.com)
 
 	* libbfd-in.h (set_tdata):  Make change of Feb 27 in the
