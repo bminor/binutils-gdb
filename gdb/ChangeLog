@@ -1,4 +1,8 @@
 
+Wed Feb 12 15:30:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* defs.h: Fix prototypes for new cleanup functions.
+
 Wed Feb 12 15:08:47 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* debugify.c, debugify.h: Fix for general gnu use.  Remove C++ 
