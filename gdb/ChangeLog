@@ -1,5 +1,8 @@
 Fri Sep  3 08:57:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* target.c (pop_target): Don't try to deal with the stack becoming
+	empty.  Shouldn't happen and the code that tried was broken.
+
 	* dcache.c: Cast return value from xmalloc.
 
 	* remote.c: Move setting of immediate_quit from remote_open to
