@@ -1,3 +1,12 @@
+Thu Feb 27 12:04:24 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c: Remove form feeds (^L) from source.
+	(mips_initialize): LSI PMON doesn't support 'set regsize' command.
+	(pmon_wait): Don't need to exit and re-enter debug mode on LSI
+	PMON after a continue; it causes target program misbehavior.
+	(mips_fetch_register): Don't fetch unsupported registers; this
+	cuts down on wasted serial traffic.
+
 Thu Feb 27 09:38:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure.in configure (HPUX/OSF thread support):  Enable this

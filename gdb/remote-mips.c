@@ -47,7 +47,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern void mips_set_processor_type_command PARAMS ((char *, int));
 
-
+
+
 /* Prototypes for local functions.  */
 
 static int mips_readchar PARAMS ((int timeout));
@@ -152,7 +153,8 @@ static void common_open PARAMS ((struct target_ops *ops, char *name,
 extern struct target_ops mips_ops;
 extern struct target_ops pmon_ops;
 extern struct target_ops ddb_ops;
-
+
+
 /* The MIPS remote debugging interface is built on top of a simple
    packet protocol.  Each packet is organized as follows:
 
@@ -297,7 +299,7 @@ enum mips_monitor_type {
   /* PMON monitor being used: */
   MON_PMON, /* 3.0.83 [COGENT,EB,FP,NET] Algorithmics Ltd. Nov  9 1995 17:19:50 */
   MON_DDB,  /* 2.7.473 [DDBVR4300,EL,FP,NET] Risq Modular Systems,  Thu Jun 6 09:28:40 PDT 1996 */
-  MON_LSI,  /* 4.2.5 [EB], LSI LOGIC Corp. Wed Dec  6 07:57:45 1995 */
+  MON_LSI,  /* 4.3.12 [EB,FP], LSI LOGIC Corp. Tue Feb 25 13:22:14 1997 */
   /* Last and unused value, for sizing vectors, etc. */
   MON_LAST
 };
@@ -1147,7 +1149,8 @@ mips_receive_packet (buff, throw_error, timeout)
 
   return len;
 }
-
+
+
 /* Optionally send a request to the remote system and optionally wait
    for the reply.  This implements the remote debugging protocol,
    which is built on top of the packet protocol defined above.  Each
@@ -1432,7 +1435,8 @@ mips_initialize ()
   if (mips_monitor != MON_IDT)
     {
       /* Ensure the correct target state: */
-      mips_send_command ("set regsize 64\r", -1);
+      if (mips_monitor != MON_LSI)
+	mips_send_command ("set regsize 64\r", -1);
       mips_send_command ("set hostport tty0\r", -1);
       mips_send_command ("set brkcmd \"\"\r", -1);
       /* Delete all the current breakpoints: */
@@ -1668,6 +1672,7 @@ mips_resume (pid, step, siggnal)
      int pid, step;
      enum target_signal siggnal;
 {
+  int err;
 
 /* start-sanitize-gm */
 #ifndef GENERAL_MAGIC
@@ -1678,10 +1683,12 @@ mips_resume (pid, step, siggnal)
 #endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
 
+  /* LSI PMON requires returns a reply packet "0x1 s 0x0 0x57f" after
+     a single step, so we wait for that.  */
   mips_request (step ? 's' : 'c',
 		(unsigned int) 1,
 		(unsigned int) siggnal,
-		(int *) NULL,
+		mips_monitor == MON_LSI && step ? &err : (int *) NULL,
 		mips_receive_wait, NULL);
 }
 
@@ -1844,7 +1851,7 @@ pmon_wait (pid, status)
      seems to be caused by a check on the number of arguments, and the
      command length, within the monitor causing it to echo the command
      as a bad packet. */
-  if (mips_monitor != MON_DDB)
+  if (mips_monitor != MON_DDB && mips_monitor != MON_LSI)
     {
       mips_exit_debug ();
       mips_enter_debug ();
@@ -1928,18 +1935,26 @@ mips_fetch_registers (regno)
     val = 0;
   else
     {
-      /* Unfortunately the PMON version in the Vr4300 board has been
-         compiled without the 64bit register access commands. This
-         means we cannot get hold of the full register width. */
-      if (mips_monitor == MON_DDB)
-        val = (unsigned)mips_request ('t', (unsigned int) mips_map_regno (regno),
-                            (unsigned int) 0, &err, mips_receive_wait, NULL);
+      /* If PMON doesn't support this register, don't waste serial
+         bandwidth trying to read it.  */
+      int pmon_reg = mips_map_regno (regno);
+      if (regno != 0 && pmon_reg == 0)
+	val = 0;
       else
-        val = mips_request ('r', (unsigned int) mips_map_regno (regno),
-                            (unsigned int) 0, &err, mips_receive_wait, NULL);
-      if (err)
-	mips_error ("Can't read register %d: %s", regno,
-		    safe_strerror (errno));
+	{
+	  /* Unfortunately the PMON version in the Vr4300 board has been
+	     compiled without the 64bit register access commands. This
+	     means we cannot get hold of the full register width. */
+	  if (mips_monitor == MON_DDB)
+	    val = (unsigned)mips_request ('t', (unsigned int) pmon_reg,
+				(unsigned int) 0, &err, mips_receive_wait, NULL);
+	  else
+	    val = mips_request ('r', (unsigned int) pmon_reg,
+				(unsigned int) 0, &err, mips_receive_wait, NULL);
+	  if (err)
+	    mips_error ("Can't read register %d: %s", regno,
+			safe_strerror (errno));
+	}
     }
 
   {
@@ -2235,7 +2250,8 @@ mips_mourn_inferior ()
     unpush_target (current_ops);
   generic_mourn_inferior ();
 }
-
+
+
 /* We can write a breakpoint and read the shadow contents in one
    operation.  */
 
@@ -2540,7 +2556,8 @@ common_breakpoint (cmd, addr, mask, flags)
 
   return 0;
 }
-
+
+
 static void
 send_srec (srec, len, addr)
      char *srec;
@@ -3212,7 +3229,8 @@ mips_load (file, from_tty)
 
   clear_symtab_users ();
 }
-
+
+
 /* The target vector.  */
 
 struct target_ops mips_ops =
@@ -3261,7 +3279,8 @@ HOST:PORT to access a board over a network",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-
+
+
 /* An alternative target vector: */
 struct target_ops pmon_ops =
 {
@@ -3309,7 +3328,8 @@ colon, HOST:PORT to access a board over a network",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-
+
+
 /* Another alternative target vector. This is a PMON system, but with
    a different monitor prompt, aswell as some other operational
    differences: */
@@ -3415,7 +3435,8 @@ of the TFTP temporary file, if it differs from the filename seen by the board",
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-
+
+
 void
 _initialize_remote_mips ()
 {
