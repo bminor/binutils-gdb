@@ -21,11 +21,6 @@
 /* Look in this environment name for the linker to pretend to be */
 #define EMULATION_ENVIRON "LDEMULATION"
 /* If in there look for the strings: */
-/* Otherwise default to this emulation */
-
-#ifndef DEFAULT_EMULATION
-error you must set a default emulation
-#endif /* DEFAULT_EMULATION */
 
 /* Look in this variable for a target format */
 #define TARGET_ENVIRON "GNUTARGET"
