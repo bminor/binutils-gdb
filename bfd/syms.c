@@ -634,7 +634,7 @@ _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep)
   if (storage < 0)
     goto error_return;
 
-  syms = (asymbol **) malloc (storage);
+  syms = (asymbol **) malloc ((size_t) storage);
   if (syms == NULL)
     {
       bfd_set_error (bfd_error_no_memory);

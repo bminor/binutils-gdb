@@ -1,5 +1,58 @@
 Thu Jul 13 10:33:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (NAME(aout,slurp_reloc_table)): Cast argument to size_t
+	for malloc.
+	* coff-mips.c (mips_relocate_section): Likewise, for memmove.
+	(mips_relax_section): Likewise, for malloc.
+	* cofflink.c (process_embedded_commands): Likewise.
+	(_bfd_coff_final_link): Likewise.
+	* ecoff.c (_bfd_ecoff_write_object_contents): Likewise.
+	(ecoff_final_link_debug_accumulate): Likewise.
+	(ecoff_indirect_link_order): Likewise, for memcpy and malloc.
+	(ecoff_reloc_link_order): Likewise, for malloc.
+	* ecofflink.c (ecoff_align_debug): Likewise, for memset.
+	(ecoff_write_symhdr): Likewise, for malloc.
+	* elf32-hppa.c (elf32_hppa_read_symext_info): Likewise.
+	* elf.c (assign_file_positions_except_relocs): Likewise, for
+	qsort.
+	* elf32-mips.c (mips_elf_read_ecoff_info): Likewise, for malloc.
+	* elfcode.h (elf_slurp_reloc_table): Likewise.
+	* elfcore.h (elf_corefile_note): Likewise.
+	* elflink.h (elf_link_add_object_symbols): Likewise.
+	(elf_link_read_relocs): Likewise.
+	(NAME(bfd_elf,size_dynamic_sections)): Likewise, for memset.
+	* i386linux.c (bfd_linux_size_dynamic_sections): Likewise.
+	* ieee.c (do_with_relocs): Likewise.
+	* linker.c (default_indirect_link_order): Likewise, for malloc.
+	* nlmcode.h (nlm_object_p): Likewise.
+	(nlm_write_object_contents): Likewise.
+	* oasys.c (oasys_set_section_contents): Likewise, for memcpy.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Likewise,
+	for malloc.
+	* section.c (bfd_get_section_contents): Likewise, for memcpy.
+	* srec.c (srec_get_section_contents): Likewise.
+	(srec_set_section_contents): Likewise.
+	* sunos.c (bfd_sunos_size_dynamic_sections): Likewise, for
+	realloc and memset.
+	(sunos_scan_relocs): Likewise, for malloc.
+	(sunos_scan_dynamic_symbol): Likewise, for realloc.
+	* syms.c (_bfd_generic_read_minisymbols): Likewise, for malloc.
+	* versados.c (versados_get_section_contents): Likewise, for
+	memcpy.
+
+	* libbfd.c (real_read): Add prototype.  Change argument types from
+	int to size_t.
+	(bfd_read): Cast real_read argument to size_t, not int.
+	(bfd_write): Cast fwrite argument to size_t, not int.
+
+	* elf64-gen.c (elf_info_to_howto): Fix definition for recent elf.c
+	changes.
+
+	* configure.in: Fix typo: change {$enableval} to ${enableval}.
+	* configure: Rebuild.
+
+	* Makefile.in (BFD32_BACKENDS): Add elflink.o.
+
 	* targets.c (bfd_target): Add fields _read_minisymbols and
 	_minisymbol_to_symbol.
 	(BFD_JUMP_TABLE_SYMBOLS): Add _read_minisymbols and

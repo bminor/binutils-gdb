@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1409,7 +1409,7 @@ mips_elf_read_ecoff_info (abfd, section, debug)
 
   swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
 
-  ext_hdr = (char *) malloc (swap->external_hdr_size);
+  ext_hdr = (char *) malloc ((size_t) swap->external_hdr_size);
   if (ext_hdr == NULL && swap->external_hdr_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1431,7 +1431,7 @@ mips_elf_read_ecoff_info (abfd, section, debug)
     debug->ptr = NULL;							\
   else									\
     {									\
-      debug->ptr = (type) malloc (size * symhdr->count);		\
+      debug->ptr = (type) malloc ((size_t) (size * symhdr->count));	\
       if (debug->ptr == NULL)						\
 	{								\
 	  bfd_set_error (bfd_error_no_memory);				\

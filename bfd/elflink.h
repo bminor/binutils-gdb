@@ -362,7 +362,7 @@ elf_link_add_object_symbols (abfd, info)
 	  int elfsec;
 	  unsigned long link;
 
-	  dynbuf = (Elf_External_Dyn *) malloc (s->_raw_size);
+	  dynbuf = (Elf_External_Dyn *) malloc ((size_t) s->_raw_size);
 	  if (dynbuf == NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
@@ -1057,7 +1057,7 @@ elf_link_read_relocs (abfd, o, external_relocs, internal_relocs, keep_memory)
 
   if (external_relocs == NULL)
     {
-      alloc1 = (PTR) malloc (rel_hdr->sh_size);
+      alloc1 = (PTR) malloc ((size_t) rel_hdr->sh_size);
       if (alloc1 == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -1365,7 +1365,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      memset (s->contents, 0, s->_raw_size);
+      memset (s->contents, 0, (size_t) s->_raw_size);
 
       put_word (output_bfd, bucketcount, s->contents);
       put_word (output_bfd, dynsymcount, s->contents + (ARCH_SIZE / 8));

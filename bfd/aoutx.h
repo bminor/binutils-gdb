@@ -2287,7 +2287,7 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
     }
   memset (reloc_cache, 0, count * sizeof (arelent));
 
-  relocs = malloc (reloc_size);
+  relocs = malloc ((size_t) reloc_size);
   if (relocs == NULL && reloc_size != 0)
     {
       free (reloc_cache);
