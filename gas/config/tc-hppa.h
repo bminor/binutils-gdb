@@ -468,6 +468,8 @@ extern struct default_space_dict pa_def_spaces[];
 	space.
  */
 
+#define tc_frob_label(sym) pa_define_label (sym)
+
 typedef struct label_symbol_struct
   {
     symbolS *lss_label;		/* the label symbol		*/

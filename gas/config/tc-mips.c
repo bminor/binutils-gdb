@@ -95,6 +95,37 @@ static char *insn_error;
 static int byte_order = BYTE_ORDER;
 
 static int auto_align = 1;
+
+/* Symbol labelling the current insn.  */
+static symbolS *insn_label;
+
+/* To output NOP instructions correctly, we need to keep information
+   about the previous two instructions.  */
+
+/* The previous instruction.  */
+static struct mips_cl_insn prev_insn;
+
+/* The instruction before prev_insn.  */
+static struct mips_cl_insn prev_prev_insn;
+
+/* If we don't want information for prev_insn or prev_prev_insn, we
+   point the insn_mo field at this dummy integer.  */
+static const struct mips_opcode dummy_opcode = { 0 };
+
+/* Non-zero if prev_insn is valid.  */
+static int prev_insn_valid;
+
+/* The frag for the previous instruction.  */
+static struct frag *prev_insn_frag;
+
+/* The offset into prev_insn_frag for the previous instruction.  */
+static long prev_insn_where;
+
+/* The reloc for the previous instruction, if any.  */
+static fixS *prev_insn_fixp;
+
+/* Non-zero if the previous instruction was in a delay slot.  */
+static int prev_insn_is_delay_slot;
 
 /* Prototypes for static functions.  */
 
@@ -105,9 +136,13 @@ static int auto_align = 1;
 #define internalError() as_fatal ("MIPS internal Error");
 #endif
 
+static int insn_uses_reg PARAMS ((struct mips_cl_insn *ip,
+				  int reg, int fpr));
 static void append_insn PARAMS ((struct mips_cl_insn * ip,
 				 expressionS * p,
 				 bfd_reloc_code_real_type r));
+static void mips_no_prev_insn PARAMS ((void));
+static void mips_emit_delays PARAMS ((void));
 static int gp_reference PARAMS ((expressionS * ep));
 static void macro_build PARAMS ((int *counter, expressionS * ep,
 				 const char *name, const char *fmt,
@@ -127,7 +162,9 @@ static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
 static void my_getExpression PARAMS ((expressionS * ep, char *str));
 static symbolS *get_symbol PARAMS ((void));
 static long get_optional_absolute_expression PARAMS ((void));
+static void mips_align PARAMS ((int to, int fill));
 static void s_align PARAMS ((int));
+static void s_stringer PARAMS ((int));
 static void s_change_sec PARAMS ((int));
 static void s_cons PARAMS ((int));
 static void s_err PARAMS ((int));
@@ -135,6 +172,7 @@ static void s_extern PARAMS ((int));
 static void s_float_cons PARAMS ((int));
 static void s_option PARAMS ((int));
 static void s_mipsset PARAMS ((int));
+static void s_mips_space PARAMS ((int));
 #ifndef OBJ_ECOFF
 static void md_obj_begin PARAMS ((void));
 static void md_obj_end PARAMS ((void));
@@ -175,7 +213,7 @@ const pseudo_typeS md_pseudo_table[] =
 
  /* Relatively generic pseudo-ops that happen to be used on MIPS
      chips.  */
-  {"asciiz", stringer, 1},
+  {"asciiz", s_stringer, 1},
   {"bss", s_change_sec, 'b'},
   {"err", s_err, 0},
   {"half", s_cons, 1},
@@ -183,11 +221,14 @@ const pseudo_typeS md_pseudo_table[] =
  /* These pseudo-ops are defined in read.c, but must be overridden
      here for one reason or another.  */
   {"align", s_align, 0},
+  {"ascii", s_stringer, 0},
+  {"asciz", s_stringer, 1},
   {"byte", s_cons, 0},
   {"data", s_change_sec, 'd'},
-  {"double", s_float_cons, 1},
+  {"double", s_float_cons, 'd'},
   {"extern", s_extern, 0},
-  {"float", s_float_cons, 0},
+  {"float", s_float_cons, 'f'},
+  {"space", s_mips_space, 0},
   {"text", s_change_sec, 't'},
   {"word", s_cons, 2},
 
@@ -262,6 +303,8 @@ md_begin ()
       while ((i < NUMOPCODES) && !strcmp (mips_opcodes[i].name, name));
     }
 
+  mips_no_prev_insn ();
+
 #ifndef OBJ_ECOFF
   md_obj_begin ();
 #endif
@@ -317,6 +360,48 @@ md_assemble (str)
     }
 }
 
+/* See whether instruction IP reads register REG.  If FPR is non-zero,
+   REG is a floating point register.  */
+
+static int
+insn_uses_reg (ip, reg, fpr)
+     struct mips_cl_insn *ip;
+     int reg;
+     int fpr;
+{
+  /* Don't report on general register 0, since it never changes.  */
+  if (! fpr && reg == 0)
+    return 0;
+
+  if (fpr)
+    {
+      /* If we are called with either $f0 or $f1, we must check $f0.
+	 This is not optimal, because it will introduce an unnecessary
+	 NOP between "lwc1 $f0" and "swc1 $f1".  To fix this we would
+	 need to distinguish reading both $f0 and $f1 or just one of
+	 them.  Note that we don't have to check the other way,
+	 because there is no instruction that sets both $f0 and $f1
+	 and requires a delay.  */
+      if ((ip->insn_mo->pinfo & INSN_READ_FPR_S)
+	  && ((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS) == (reg &~ 1))
+	return 1;
+      if ((ip->insn_mo->pinfo & INSN_READ_FPR_T)
+	  && ((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT) == (reg &~ 1))
+	return 1;
+    }
+  else
+    {
+      if ((ip->insn_mo->pinfo & INSN_READ_GPR_S)
+	  && ((ip->insn_opcode >> OP_SH_RS) & OP_MASK_RS) == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo & INSN_READ_GPR_T)
+	  && ((ip->insn_opcode >> OP_SH_RT) & OP_MASK_RT) == reg)
+	return 1;
+    }
+
+  return 0;
+}
+
 #define ALIGN_ERR "Attempt to assemble instruction onto non word boundary."
 #define ALIGN_ERR2 "GAS doesn't do implicit alignment; use .align directive."
 
@@ -331,20 +416,161 @@ append_insn (ip, address_expr, reloc_type)
      bfd_reloc_code_real_type reloc_type;
 {
   char *f;
+  fixS *fixp;
+  int nops = 0;
 
+  if (! mips_noreorder)
+    {
+      /* If the previous insn required any delay slots, see if we need
+	 to insert a NOP or two.  There are six kinds of possible
+	 hazards, of which an instruction can have at most one type.
+	 (1) a load delay
+	 (2) an unconditional branch delay
+	 (3) a conditional branch delay
+	 (4) a generic coprocessor delay
+	 (5) a coprocessor condition code delay
+	 (6) a HI/LO special register delay
+
+	 There are a lot of optimizations we could do that we don't.
+	 In particular, we do not, in general, reorder instructions.
+	 If you use gcc with optimization, it will reorder
+	 instructions and generally do much more optimization then we
+	 do here; repeating all that work in the assembler would only
+	 benefit hand written assembly code, and does not seem worth
+	 it.  */
+
+      /* This is how a NOP is emitted.  */
+#define emit_nop() md_number_to_chars (frag_more (4), 0, 4)
+
+      /* The previous insn might require a delay slot, depending upon
+	 the contents of the current insn.  */
+      if (prev_insn.insn_mo->pinfo & INSN_LOAD_DELAY)
+	{
+	  /* A load delay.  All load delays delay the use of general
+	     register rt for one instruction.  */
+	  know (prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T);
+	  if (insn_uses_reg (ip,
+			     (prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT,
+			     0))
+	    ++nops;
+	}
+      else if (prev_insn.insn_mo->pinfo & INSN_COPROC_DELAY)
+	{
+	  /* A generic coprocessor delay.  The previous instruction
+	     modified a coprocessor general or control register.  If
+	     it modified a control register, we need to avoid any
+	     coprocessor instruction (this is probably not always
+	     required, but it sometimes is).  If it modified a general
+	     register, we avoid using that register.
+
+	     This case is not handled very well.  There is no special
+	     knowledge of CP0 handling, and the coprocessors other
+	     than the floating point unit are not distinguished at
+	     all.  */
+	  if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_T)
+	    {
+	      if (insn_uses_reg (ip,
+				 ((prev_insn.insn_opcode >> OP_SH_RT)
+				  & OP_MASK_RT),
+				 1))
+		++nops;
+	    }
+	  else if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_D)
+	    {
+	      if (insn_uses_reg (ip,
+				 ((prev_insn.insn_opcode >> OP_SH_RD)
+				  & OP_MASK_RD),
+				 1))
+		++nops;
+	    }
+	  else
+	    {
+	      /* We don't know exactly what the previous instruction
+		 does.  If the current instruction uses a coprocessor
+		 register, we must insert a NOP.  If previous
+		 instruction may set the condition codes, and the
+		 current instruction uses them, we must insert two
+		 NOPS.  */
+	      if ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+		  && (ip->insn_mo->pinfo & INSN_READ_COND_CODE))
+		nops += 2;
+	      else if (ip->insn_mo->pinfo & INSN_COP)
+		++nops;
+	    }
+	}
+      else if (prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	{
+	  /* The previous instruction sets the coprocessor condition
+	     codes, but does not require a general coprocessor delay
+	     (this means it is a floating point comparison
+	     instruction).  If this instruction uses the condition
+	     codes, we need to insert a single NOP.  */
+	  if (ip->insn_mo->pinfo & INSN_READ_COND_CODE)
+	    ++nops;
+	}
+      else if (prev_insn.insn_mo->pinfo & INSN_READ_LO)
+	{
+	  /* The previous instruction reads the LO register; if the
+	     current instruction writes to the LO register, we must
+	     insert two NOPS.  */
+	  if (ip->insn_mo->pinfo & INSN_WRITE_LO)
+	    nops += 2;
+	}
+      else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
+	{
+	  /* The previous instruction reads the HI register; if the
+	     current instruction writes to the HI register, we must
+	     insert a NOP.  */
+	  if (ip->insn_mo->pinfo & INSN_WRITE_HI)
+	    nops += 2;
+	}
+
+      /* There are two cases which require two intervening
+	 instructions: 1) setting the condition codes using a move to
+	 coprocessor instruction which requires a general coprocessor
+	 delay and then reading the condition codes 2) reading the HI
+	 or LO register and then writing to it.  If we are not already
+	 emitting a NOP instruction, we must check for these cases
+	 compared to the instruction previous to the previous
+	 instruction.  */
+      if (nops == 0
+	  && (((prev_prev_insn.insn_mo->pinfo & INSN_COPROC_DELAY)
+	       && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	       && (ip->insn_mo->pinfo & INSN_READ_COND_CODE))
+	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
+		  && (ip->insn_mo->pinfo & INSN_WRITE_LO))
+	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
+		  && (ip->insn_mo->pinfo & INSN_WRITE_HI))))
+	++nops;
+
+      /* Now emit the right number of NOP instructions.  */
+      if (nops > 0)
+	{
+	  emit_nop ();
+	  if (nops > 1)
+	    emit_nop ();
+	  if (insn_label != NULL)
+	    {
+	      assert (S_GET_SEGMENT (insn_label) == now_seg);
+	      insn_label->sy_frag = frag_now;
+	      S_SET_VALUE (insn_label, frag_now_fix ());
+	    }
+	}
+    }
+  
   f = frag_more (4);
-#if 0				/* This is testing the address of the frag, not the alignment of
-	 the instruction in the current section.  */
+#if 0
+  /* This is testing the address of the frag, not the alignment of
+     the instruction in the current section.  */
   if ((int) f & 3)
     {
       as_bad (ALIGN_ERR);
       as_bad (ALIGN_ERR2);
     }
 #endif
+  fixp = NULL;
   if (address_expr != NULL)
     {
-      fixS *fixP;
-
       if (address_expr->X_seg == &bfd_abs_section)
 	{
 	  switch (reloc_type)
@@ -369,7 +595,7 @@ append_insn (ip, address_expr, reloc_type)
 	{
 	  assert (reloc_type != BFD_RELOC_UNUSED);
 	need_reloc:
-	  fixP = fix_new (frag_now, f - frag_now->fr_literal, 4,
+	  fixp = fix_new (frag_now, f - frag_now->fr_literal, 4,
 			  address_expr->X_add_symbol,
 			  address_expr->X_subtract_symbol,
 			  address_expr->X_add_number,
@@ -377,25 +603,203 @@ append_insn (ip, address_expr, reloc_type)
 			  reloc_type);
 	}
     }
+
   md_number_to_chars (f, ip->insn_opcode, 4);
 
-  /*
-   * Fill all delay slots with nops.
-   */
-  if (!mips_noreorder)
+  if (! mips_noreorder)
     {
-      if (ip->insn_mo->pinfo & ANY_DELAY)
+      /* Filling the branch delay slot is more complex.  We try to
+	 switch the branch with the previous instruction, which we can
+	 do if the previous instruction does not set up a condition
+	 that the branch tests and if the branch is not itself the
+	 target of any branch.  */
+      if ((ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
+	  || (ip->insn_mo->pinfo & INSN_COND_BRANCH_DELAY))
 	{
-	  f = frag_more (4);
-	  md_number_to_chars (f, 0, 4);
-	};
+	  /* If we had to emit any NOP instructions, then we already
+	     know we can not swap.  */
+	  if (nops != 0
+	      /* If we don't even know the previous insn, we can not
+		 swap. */
+	      || ! prev_insn_valid
+	      /* If the previous insn is already in a branch delay
+		 slot, then we can not swap.  */
+	      || prev_insn_is_delay_slot
+	      /* If the branch is itself the target of a branch, we
+		 can not swap.  We cheat on this; all we check for is
+		 whether there is a label on this instruction.  If
+		 there are any branches to anything other than a
+		 label, users must use .set noreorder.  */
+	      || insn_label != NULL
+	      /* If the branch reads the condition codes, we don't
+		 even try to swap, because in the sequence
+		   ctc1 $X,$31
+		   INSN
+		   INSN
+		   bc1t LABEL
+		 we can not swap, and I don't feel like handling that
+		 case.  */
+	      || (ip->insn_mo->pinfo & INSN_READ_COND_CODE)
+	      /* We can not swap with an instruction that requires a
+		 delay slot, becase the target of the branch might
+		 interfere with that instruction.  */
+	      || (prev_insn.insn_mo->pinfo
+		  & (INSN_LOAD_DELAY
+		     | INSN_COPROC_DELAY
+		     | INSN_WRITE_COND_CODE
+		     | INSN_READ_LO
+		     | INSN_READ_HI))
+	      /* We can not swap with a branch instruction.  */
+	      || (prev_insn.insn_mo->pinfo
+		  & (INSN_UNCOND_BRANCH_DELAY | INSN_COND_BRANCH_DELAY))
+	      /* If the branch reads a register that the previous
+		 instruction sets, we can not swap.  */
+	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T)
+		  && insn_uses_reg (ip,
+				    ((prev_insn.insn_opcode >> OP_SH_RT)
+				     & OP_MASK_RT),
+				    0))
+	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_D)
+		  && insn_uses_reg (ip,
+				    ((prev_insn.insn_opcode >> OP_SH_RD)
+				     & OP_MASK_RD),
+				    0))
+	      /* If the branch writes a register that the previous
+		 instruction reads, we can not swap (we know that
+		 branches only write to RD or to $31).  */
+	      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
+		  && insn_uses_reg (&prev_insn,
+				    ((ip->insn_opcode >> OP_SH_RD)
+				     & OP_MASK_RD),
+				    0))
+	      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_31)
+		  && insn_uses_reg (&prev_insn, 31, 0))
+	      /* If the previous previous instruction has a load
+		 delay, and sets a register that the branch reads, we
+		 can not swap.  */
+	      || ((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_DELAY)
+		  && insn_uses_reg (ip,
+				    ((prev_prev_insn.insn_opcode >> OP_SH_RT)
+				     & OP_MASK_RT),
+				    0)))
+	    {
+	      /* We could do even better for unconditional branches to
+		 portions of this object file; we could pick up the
+		 instruction at the destination, put it in the delay
+		 slot, and bump the destination address.  */
+	      emit_nop ();
+	      /* Update the previous insn information.  */
+	      prev_prev_insn = *ip;
+	      prev_insn.insn_mo = &dummy_opcode;
+	    }
+	  else
+	    {
+	      char *prev_f;
+	      char temp[4];
 
-      /* One extra nop */
-      if (ip->insn_mo->pinfo & (INSN_READ_HI | INSN_READ_LO))
-	{
-	  f = frag_more (4);
-	  md_number_to_chars (f, 0, 4);
+	      /* It looks like we can actually do the swap.  */
+	      prev_f = prev_insn_frag->fr_literal + prev_insn_where;
+	      memcpy (temp, prev_f, 4);
+	      memcpy (prev_f, f, 4);
+	      memcpy (f, temp, 4);
+	      if (prev_insn_fixp)
+		{
+		  prev_insn_fixp->fx_frag = frag_now;
+		  prev_insn_fixp->fx_where = f - frag_now->fr_literal;
+		}
+	      if (fixp)
+		{
+		  fixp->fx_frag = prev_insn_frag;
+		  fixp->fx_where = prev_insn_where;
+		}
+	      /* Update the previous insn information; leave prev_insn
+		 unchanged.  */
+	      prev_prev_insn = *ip;
+	    }
+	  prev_insn_is_delay_slot = 1;
+
+	  /* If that was an unconditional branch, forget the previous
+	     insn information.  */
+	  if (ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
+	    {
+	      prev_prev_insn.insn_mo = &dummy_opcode;
+	      prev_insn.insn_mo = &dummy_opcode;
+	    }
 	}
+      else
+	{
+	  /* Update the previous insn information.  */
+	  if (nops > 0)
+	    prev_prev_insn.insn_mo = &dummy_opcode;
+	  else
+	    prev_prev_insn = prev_insn;
+	  prev_insn = *ip;
+
+	  /* Any time we see a branch, we always fill the delay slot
+	     immediately; since this insn is not a branch, we know it
+	     is not in a delay slot.  */
+	  prev_insn_is_delay_slot = 0;
+	}
+
+      prev_insn_frag = frag_now;
+      prev_insn_where = f - frag_now->fr_literal;
+      prev_insn_fixp = fixp;
+      prev_insn_valid = 1;
+    }
+
+  /* We just output an insn, so the next one doesn't have a label.  */
+  insn_label = NULL;
+}
+
+/* This function forgets that there was any previous instruction or
+   label.  */
+
+static void
+mips_no_prev_insn ()
+{
+  prev_insn.insn_mo = &dummy_opcode;
+  prev_prev_insn.insn_mo = &dummy_opcode;
+  prev_insn_valid = 0;
+  prev_insn_is_delay_slot = 0;
+  insn_label = NULL;
+}
+
+/* This function must be called whenever we turn on noreorder or emit
+   something other than instructions.  It inserts any NOPS which might
+   be needed by the previous instruction, and clears the information
+   kept for the previous instructions.  */
+
+static void
+mips_emit_delays ()
+{
+  if (! mips_noreorder)
+    {
+      int nop;
+
+      nop = 0;
+      if (prev_insn.insn_mo->pinfo & ANY_DELAY)
+	{
+	  nop = 1;
+	  if ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	      || (prev_insn.insn_mo->pinfo & INSN_READ_HI)
+	      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))
+	    emit_nop ();
+	}
+      else if ((prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
+	       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))
+	nop = 1;
+      if (nop)
+	{
+	  emit_nop ();
+	  if (insn_label != NULL)
+	    {
+	      assert (S_GET_SEGMENT (insn_label) == now_seg);
+	      insn_label->sy_frag = frag_now;
+	      S_SET_VALUE (insn_label, frag_now_fix ());
+	    }
+	}
+      mips_no_prev_insn ();
     }
 }
 
@@ -769,7 +1173,6 @@ macro (ip)
   int mask;
   int icnt = 0;
   int used_at;
-  int save_reorder_condition;
   expressionS expr1;
   const char *s;
   const char *fmt;
@@ -796,8 +1199,8 @@ macro (ip)
 	<main+12>:	nop
 	*/
 
-      save_reorder_condition = mips_noreorder;
-      mips_noreorder = 1;
+      mips_emit_delays ();
+      ++mips_noreorder;
 
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bgez", "s,p", sreg);
@@ -805,7 +1208,7 @@ macro (ip)
       macro_build (&icnt, NULL, mask == M_ABS ? "sub" : "subu", "d,v,t",
 		   dreg, 0, sreg);
 
-      mips_noreorder = save_reorder_condition;
+      --mips_noreorder;
       return;
 
     case M_ADD_I:
@@ -1110,8 +1513,8 @@ macro (ip)
 	  return;
 	}
 
-      save_reorder_condition = mips_noreorder;
-      mips_noreorder = 1;
+      mips_emit_delays ();
+      ++mips_noreorder;
       macro_build (&icnt, NULL, "div", "s,t", sreg, treg);
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, 0);
@@ -1127,7 +1530,7 @@ macro (ip)
       macro_build (&icnt, &expr1, "bne", "s,t,p", sreg, AT);
       macro_build (&icnt, NULL, "nop", "", 0);
       macro_build (&icnt, NULL, "break", "c", 6);
-      mips_noreorder = save_reorder_condition;
+      --mips_noreorder;
       macro_build (&icnt, NULL, mask == M_DIV_3 ? "mflo" : "mfhi", "d", dreg);
       /* with reorder on there will be two implicit nop instructions here. */
       break;
@@ -1166,14 +1569,14 @@ macro (ip)
 
     case M_DIVU_3:
     case M_REMU_3:
-      save_reorder_condition = mips_noreorder;
-      mips_noreorder = 1;
+      mips_emit_delays ();
+      ++mips_noreorder;
       macro_build (&icnt, NULL, "divu", "s,t", sreg, treg);
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, 0);
       macro_build (&icnt, NULL, "nop", "", 0);
       macro_build (&icnt, NULL, "break", "c", 7);
-      mips_noreorder = save_reorder_condition;
+      --mips_noreorder;
       macro_build (&icnt, NULL, mask == M_DIVU_3 ? "mflo" : "mfhi", "d", dreg);
       /* with reorder on there will be two implicit nop instructions here. */
       return;
@@ -1347,13 +1750,9 @@ macro (ip)
     case M_L_DOB:
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
-      save_reorder_condition = mips_noreorder;
-      mips_noreorder = 1;
       macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
 		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
 		   breg);
-      /* unecessary implicit nop */
-      mips_noreorder = save_reorder_condition;
       offset_expr.X_add_number += 4;
       macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
 		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
@@ -1391,13 +1790,9 @@ macro (ip)
 	}
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
-      save_reorder_condition = mips_noreorder;
-      mips_noreorder = 1;
       macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
 		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
 		   tempreg);
-      /* unecessary implicit nop */
-      mips_noreorder = save_reorder_condition;
       offset_expr.X_add_number += 4;
       macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
 		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
@@ -1782,8 +2177,8 @@ macro (ip)
        * Is the double cfc1 instruction a bug in the mips assembler;
        * or is there a reason for it?
        */
-      save_reorder_condition = mips_noreorder;
-      mips_noreorder = 1;
+      mips_emit_delays ();
+      ++mips_noreorder;
       macro_build (&icnt, NULL, "cfc1", "t,G", treg, 31);
       macro_build (&icnt, NULL, "cfc1", "t,G", treg, 31);
       macro_build (&icnt, NULL, "nop", "");
@@ -1797,7 +2192,7 @@ macro (ip)
 	      mask == M_TRUNCWD ? "cvt.w.d" : "cvt.w.s", "D,S", dreg, sreg);
       macro_build (&icnt, NULL, "ctc1", "t,G", treg, 31);
       macro_build (&icnt, NULL, "nop", "");
-      mips_noreorder = save_reorder_condition;
+      --mips_noreorder;
       break;
 
     case M_ULH:
@@ -2443,13 +2838,60 @@ my_getExpression (ep, str)
   input_line_pointer = save_in;
 }
 
+/* Turn a string in input_line_pointer into a floating point constant
+   of type type, and store the appropriate bytes in *litP.  The number
+   of LITTLENUMS emitted is stored in *sizeP .  An error message is
+   returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
-     char type;
+     int type;
      char *litP;
      int *sizeP;
 {
-  internalError ();
+  int prec;
+  LITTLENUM_TYPE words[4];
+  char *t;
+  int i;
+
+  switch (type)
+    {
+    case 'f':
+      prec = 2;
+      break;
+
+    case 'd':
+      prec = 4;
+      break;
+
+    default:
+      *sizeP = 0;
+      return "bad call to md_atof";
+    }
+
+  t = atof_ieee (input_line_pointer, type, words);
+  if (t)
+    input_line_pointer = t;
+
+  *sizeP = prec * 2;
+
+  if (byte_order == LITTLE_ENDIAN)
+    {
+      for (i = prec - 1; i >= 0; i--)
+	{
+	  md_number_to_chars (litP, (valueT) words[i], 2);
+	  litP += 2;
+	}
+    }
+  else
+    {
+      for (i = 0; i < prec; i++)
+	{
+	  md_number_to_chars (litP, (valueT) words[i], 2);
+	  litP += 2;
+	}
+    }
+     
   return NULL;
 }
 
@@ -2729,6 +3171,28 @@ get_optional_absolute_expression ()
   return exp.X_add_number;
 }
 
+/* Align the current frag to a given power of two.  The MIPS assembler
+   also automatically adjusts any preceding label.  */
+
+static void
+mips_align (to, fill)
+     int to;
+     int fill;
+{
+  mips_emit_delays ();
+  frag_align (to, fill);
+  record_alignment (now_seg, to);
+  if (insn_label != NULL)
+    {
+      assert (S_GET_SEGMENT (insn_label) == now_seg);
+      insn_label->sy_frag = frag_now;
+      S_SET_VALUE (insn_label, frag_now_fix ());
+    }
+}
+
+/* Align to a given power of two.  .align 0 turns off the automatic
+   alignment used by the data creating pseudo-ops.  */
+
 static void
 s_align (x)
      int x;
@@ -2767,23 +3231,35 @@ s_align (x)
   if (temp)
     {
       auto_align = 1;
-      if (!need_pass_2)
-	frag_align (temp, (int) temp_fill);
+      mips_align (temp, (int) temp_fill);
     }
   else
     {
       auto_align = 0;
     }
 
-  record_alignment (now_seg, temp);
-
   demand_empty_rest_of_line ();
+}
+
+/* Handle .ascii and .asciiz.  This just calls stringer and forgets
+   that there was a previous instruction.  */
+
+static void
+s_stringer (append_zero)
+     int append_zero;
+{
+  mips_emit_delays ();
+  stringer (append_zero);
 }
 
 static void
 s_change_sec (sec)
      int sec;
 {
+  segT segment;
+
+  mips_emit_delays ();
+  segment = now_seg;
   switch (sec)
     {
     case 't':
@@ -2792,6 +3268,7 @@ s_change_sec (sec)
     case 'r':
 #ifdef OBJ_ECOFF
       subseg_new (".rdata", (subsegT) get_absolute_expression ());
+      demand_empty_rest_of_line ();
       break;
 #else
       /* Fall through.  */
@@ -2810,9 +3287,11 @@ s_change_sec (sec)
     case 's':
 #ifdef OBJ_ECOFF
       subseg_new (".sdata", (subsegT) get_absolute_expression ());
+      demand_empty_rest_of_line ();
       break;
 #else
       as_bad ("Global pointers not supported; recompile -G 0");
+      demand_empty_rest_of_line ();
       return;
 #endif
     }
@@ -2823,9 +3302,9 @@ static void
 s_cons (log_size)
      int log_size;
 {
-
+  mips_emit_delays ();
   if (log_size > 0 && auto_align)
-    frag_align (log_size, 0);
+    mips_align (log_size, 0);
   cons (1 << log_size);
 }
 
@@ -2858,85 +3337,18 @@ s_extern (x)
 }
 
 static void
-s_float_cons (is_double)
-     int is_double;
+s_float_cons (type)
+     int type;
 {
-  char *f;
-  short words[4];
-  int error_code, repeat;
-  extern FLONUM_TYPE generic_floating_point_number;
+  mips_emit_delays ();
 
   if (auto_align)
-    if (is_double)
-      frag_align (3, 0);
+    if (type == 'd')
+      mips_align (3, 0);
     else
-      frag_align (2, 0);
+      mips_align (2, 0);
 
-  SKIP_WHITESPACE ();
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      do
-	{
-	  error_code = atof_generic (&input_line_pointer, ".", EXP_CHARS,
-				     &generic_floating_point_number);
-	  if (error_code)
-	    {
-	      if (error_code == ERROR_EXPONENT_OVERFLOW)
-		as_warn ("Bad floating-point constant: exponent overflow");
-	      else
-		as_warn ("Bad floating-point constant: unknown error code=%d.", error_code);
-	    }
-
-	  if (is_double)
-	    {
-	      gen_to_words ((LITTLENUM_TYPE *) words,
-			    4 /* precision */ ,
-			    11 /* exponent_bits */ );
-	    }
-	  else
-	    {
-	      gen_to_words ((LITTLENUM_TYPE *) words,
-			    2 /* precision */ ,
-			    8 /* exponent_bits */ );
-	    }
-	  if (*input_line_pointer == ':')
-	    {
-	      input_line_pointer++;
-	      repeat = get_absolute_expression ();
-	    }
-	  else
-	    {
-	      repeat = 1;
-	    }
-	  if (is_double)
-	    {
-	      f = frag_more (repeat * 8);
-	      for (; repeat--; f += 8)
-		{
-		  md_number_to_chars (f + 6, words[0], 2);
-		  md_number_to_chars (f + 4, words[1], 2);
-		  md_number_to_chars (f + 2, words[2], 2);
-		  md_number_to_chars (f, words[3], 2);
-		}
-	    }
-	  else
-	    {
-	      f = frag_more (repeat * 4);
-	      for (; repeat--; f += 4)
-		{
-		  md_number_to_chars (f + 2, words[0], 2);
-		  md_number_to_chars (f, words[1], 2);
-		}
-	    }
-	  SKIP_WHITESPACE ();
-	  if (*input_line_pointer != ',')
-	    break;
-	  input_line_pointer++;
-	  SKIP_WHITESPACE ();
-	}
-      while (1);
-    }
-  demand_empty_rest_of_line ();
+  float_cons (type);
 }
 
 static void
@@ -2966,6 +3378,7 @@ s_mipsset (x)
     }
   else if (strcmp (name, "noreorder") == 0)
     {
+      mips_emit_delays ();
       mips_noreorder = 1;
     }
   else if (strcmp (name, "at") == 0)
@@ -3008,6 +3421,17 @@ s_mipsset (x)
     }
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
+}
+
+/* The same as the usual .space directive, except that we have to
+   forget about any previous instruction.  */
+
+static void
+s_mips_space (param)
+     int param;
+{
+  mips_emit_delays ();
+  s_space (param);
 }
 
 int
@@ -3098,6 +3522,17 @@ md_estimate_size_before_relax (fragP, segtype)
   as_fatal ("md_estimate_size_before_relax");
   return (1);
 }				/* md_estimate_size_before_relax() */
+
+/* This function is called whenever a label is defined.  It is used
+   when handling branch delays; if a branch has a label, we assume we
+   can not move it.  */
+
+void
+mips_define_label (sym)
+     symbolS *sym;
+{
+  insn_label = sym;
+}
 
 #ifndef OBJ_ECOFF
 
