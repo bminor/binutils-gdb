@@ -1,3 +1,10 @@
+Sun Jun 12 16:25:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-configure (config.status): Write only if changed.
+	* mpw-config.in (readline): Configure it (not built, just used for
+	definitions).
+	* mpw-README: Add/update information.
+
 Tue Apr 26 12:54:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in (elf/mips.h): Add a forward include.
