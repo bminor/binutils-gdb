@@ -2087,7 +2087,7 @@ get_osabi_name (osabi)
     case ELFOSABI_LINUX:      return _("UNIX - Linux");
     case ELFOSABI_HURD:       return _("GNU/Hurd");
     case ELFOSABI_SOLARIS:    return _("UNIX - Solaris");
-    case ELFOSABI_MONTEREY:   return _("UNIX - Monterey");
+    case ELFOSABI_AIX:        return _("UNIX - AIX");
     case ELFOSABI_IRIX:       return _("UNIX - IRIX");
     case ELFOSABI_FREEBSD:    return _("UNIX - FreeBSD");
     case ELFOSABI_TRU64:      return _("UNIX - TRU64");

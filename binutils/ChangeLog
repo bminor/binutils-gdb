@@ -1,3 +1,8 @@
+2000-11-20  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_osabi_name): Change ELFOSABI_MONTEREY to
+	ELFOSABI_AIX.
+
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
 	* readelf.c (display_debug_lines): Adjust last change to
