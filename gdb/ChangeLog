@@ -1,3 +1,8 @@
+2001-02-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* f-exp.y: Include <ctype.h>.
+	(parse_number): Ensure that ``i'' is always initialized.
+
 2001-02-14  Jim Kingdon  <jkingdon@engr.sgi.com>
 
 	* MAINTAINERS: Add myself to paper trail section.
