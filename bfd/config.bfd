@@ -117,6 +117,7 @@ case "${canon}" in
   powerpc-*-aix*)	bfd_name=rs6000 ;;
   powerpc-*-elf*)	bfd_name=ppc-elf ;;
   powerpc-*-sysv4*)	bfd_name=ppc-elf ;;
+  powerpc-*-eabi*)	bfd_name=ppc-elf ;;
   powerpc-*-netware*)	bfd_name=ppc-nlm ;;
   rs6000-*-*)		bfd_name=rs6000 ;;
   sparc-*-lynxos*)	bfd_name=sparc-lynx ;;

@@ -1,3 +1,19 @@
+Thu Jan 26 11:12:54 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* elfcode.h (prep_headers): Use EM_PPC instead of
+	EM_CYGNUS_POWERPC.
+
+	* elf32-ppc.c (reloc_type): Add all System V.4 and eABI
+	relocations currently defined.
+	(powerpc_reloc_map): Adjust to new relocation names.
+	(elf_powerpc_howto_table): Add most of the new relocations.
+	(ELF_MACHINE_CODE): Use EM_PPC instead of EM_CYGNUS_POWERPC.
+
+	* config.bfd: Add support for powerpc-*-eabi.
+
+	* config/ppc-elf.mt: Add rs6000 architecture support to the
+	PowerPC.  Also add XCOFF support.
+
 Wed Jan 25 23:26:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (CALC_ADDEND): Don't define.

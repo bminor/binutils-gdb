@@ -2229,7 +2229,7 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_PARISC;
       break;
     case bfd_arch_powerpc:
-      i_ehdrp->e_machine = EM_CYGNUS_POWERPC;
+      i_ehdrp->e_machine = EM_PPC;
       break;
 /* start-sanitize-arc */
     case bfd_arch_arc:
