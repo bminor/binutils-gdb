@@ -1,6 +1,9 @@
 start-sanitize-am33
 Mon Jul  6 15:39:22 1998  Jeffrey A Law  (law@cygnus.com)
 
+	* Makefile.in: Use multi-sim to support both a mn10300 and am33
+	simulator.
+
 	* am33.igen: Add many more am33 instructions.
 
 end-sanitize-am33

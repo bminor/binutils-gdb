@@ -85,7 +85,7 @@ else
         done
 fi
 
-am33_files="ChangeLog mn10300_sim.h mn10300.igen"
+am33_files="ChangeLog mn10300_sim.h mn10300.igen Makefile.in"
 if ( echo $* | grep keep\-am33 > /dev/null ) ; then
         for i in $am33_files ; do
                 if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
