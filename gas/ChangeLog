@@ -1,3 +1,11 @@
+Mon Aug 25 14:25:48 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_change_csect): Temporarily lower the
+	chunksize while creating the new subsection.
+	* as.c (chunksize): Initialize to zero.
+	* subsegs.c (subseg_set_rest): Change 5000 to chunksize when
+	calling obstack_begin.
+
 start-sanitize-v850
 Mon Aug 25 11:21:48 1997  Nick Clifton  <nickc@cygnus.com>
 
