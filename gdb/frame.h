@@ -95,6 +95,10 @@ extern int frame_id_eq (struct frame_id l, struct frame_id r);
    above about frameless functions.  */
 extern int frame_id_inner (struct frame_id l, struct frame_id r);
 
+/* Write the internal representation of a frame ID on the specified
+   stream.  */
+extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
+
 
 /* For every stopped thread, GDB tracks two frames: current and
    selected.  Current frame is the inner most frame of the selected

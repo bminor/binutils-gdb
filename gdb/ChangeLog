@@ -1,5 +1,15 @@
 2003-05-05  Andrew Cagney  <cagney@redhat.com>
 
+	* dummy-frame.c: Include "command.h" and "gdbcmd.h".
+	(fprint_dummy_frames): New function.
+	(maintenance_print_dummy_frames): New function.
+	(_initialize_dummy_frame): Add command "maint print dummy-frames".
+	* frame.c (fprint_frame_id): Make global.
+	* frame.h (fprint_frame_id): Declare.
+	* Makefile.in (dummy-frame.o): Update dependencies.
+
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_REGISTER_SIZE): Rename REGISTER_SIZE.
 	(DEPRECATED_SIZEOF_CALL_DUMMY_WORDS): Rename
 	SIZEOF_CALL_DUMMY_WORDS.

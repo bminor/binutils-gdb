@@ -19373,6 +19373,28 @@ Create a core file? (y or n) @kbd{n}
 Takes an optional parameter that is used as the text of the error or
 warning message.
 
+@kindex maint print dummy-frames
+@item maint print dummy-frames
+
+Prints the contents of @value{GDBN}'s internal dummy-frame stack.
+
+@smallexample
+(gdb) @kbd{b add}
+@dots{}
+(gdb) @kbd{print add(2,3)}
+Breakpoint 2, add (a=2, b=3) at @dots{}
+58	  return (a + b);
+The program being debugged stopped while in a function called from GDB.
+@dots{}
+(gdb) @kbd{maint print dummy-frames}
+0x1a57c80: pc=0x01014068 fp=0x0200bddc sp=0x0200bdd6
+ top=0x0200bdd4 id=@{stack=0x200bddc,code=0x101405c@}
+ call_lo=0x01014000 call_hi=0x01014001
+(gdb) 
+@end smallexample
+
+Takes an optional file parameter.
+
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers

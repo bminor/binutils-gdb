@@ -1,5 +1,9 @@
 2003-05-05  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.base/maint.exp: Add tests for "maint print dummy-frames".
+
+2003-05-05  Andrew Cagney  <cagney@redhat.com>
+
 	* gdb.base/watchpoint.exp: Rename CALL_DUMMY_BREAKPOINT_OFFSET to
 	DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET in comments.
 

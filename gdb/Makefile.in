@@ -1662,7 +1662,8 @@ doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h)
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
-	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h)
+	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h) \
+	$(command_h) $(gdbcmd_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h)
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(gdbcore_h) $(symtab_h) $(symfile_h) \

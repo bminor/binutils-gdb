@@ -139,7 +139,7 @@ static int frame_debug;
 
 static int backtrace_below_main;
 
-static void
+void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
   fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",

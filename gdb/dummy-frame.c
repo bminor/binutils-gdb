@@ -29,6 +29,8 @@
 #include "inferior.h"
 #include "gdb_assert.h"
 #include "frame-unwind.h"
+#include "command.h"
+#include "gdbcmd.h"
 
 static void dummy_frame_this_id (struct frame_info *next_frame,
 				 void **this_prologue_cache,
@@ -418,4 +420,50 @@ dummy_frame_p (CORE_ADDR pc)
     return &dummy_frame_unwind;
   else
     return NULL;
+}
+
+static void
+fprint_dummy_frames (struct ui_file *file)
+{
+  struct dummy_frame *s;
+  for (s = dummy_frame_stack; s != NULL; s = s->next)
+    {
+      gdb_print_host_address (s, file);
+      fprintf_unfiltered (file, ":");
+      fprintf_unfiltered (file, " pc=0x%s", paddr (s->pc));
+      fprintf_unfiltered (file, " fp=0x%s", paddr (s->fp));
+      fprintf_unfiltered (file, " sp=0x%s", paddr (s->sp));
+      fprintf_unfiltered (file, " top=0x%s", paddr (s->top));
+      fprintf_unfiltered (file, " id=");
+      fprint_frame_id (file, s->id);
+      fprintf_unfiltered (file, " call_lo=0x%s", paddr (s->call_lo));
+      fprintf_unfiltered (file, " call_hi=0x%s", paddr (s->call_hi));
+      fprintf_unfiltered (file, "\n");
+    }
+}
+
+static void
+maintenance_print_dummy_frames (char *args, int from_tty)
+{
+  if (args == NULL)
+    fprint_dummy_frames (gdb_stdout);
+  else
+    {
+      struct ui_file *file = gdb_fopen (args, "w");
+      if (file == NULL)
+	perror_with_name ("maintenance print dummy-frames");
+      fprint_dummy_frames (file);    
+      ui_file_delete (file);
+    }
+}
+
+extern void _initialize_dummy_frame (void);
+
+void
+_initialize_dummy_frame (void)
+{
+  add_cmd ("dummy-frames", class_maintenance, maintenance_print_dummy_frames,
+	   "Print the contents of the internal dummy-frame stack.",
+	   &maintenanceprintlist);
+
 }
