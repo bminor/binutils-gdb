@@ -1,5 +1,8 @@
 2001-10-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Fix typos in last
+	change.
+
 	* configure.in (AC_OUTPUT <bfd-in3.h>): Remove version.h.
 	* configure: Regenerate.
 	* Makefile.am (BFD_H_FILES): Add version.h.

@@ -1512,8 +1512,8 @@ elfNN_ia64_hash_copy_indirect (xdir, xind)
 {
   struct elfNN_ia64_link_hash_entry *dir, *ind;
 
-  dir = (struct elfNN_ia64_link_hash_entry *)xdir;
-  ind = (struct elfNN_ia64_link_hash_entry *)xind;
+  dir = (struct elfNN_ia64_link_hash_entry *) xdir;
+  ind = (struct elfNN_ia64_link_hash_entry *) xind;
 
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
@@ -1524,7 +1524,7 @@ elfNN_ia64_hash_copy_indirect (xdir, xind)
         | ELF_LINK_HASH_REF_REGULAR
         | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
 
-  if (dir == ind->weakdef)
+  if (xdir == xind->weakdef)
     return;
 
   /* Copy over the got and plt data.  This would have been done
