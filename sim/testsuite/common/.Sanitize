@@ -27,6 +27,8 @@ Make-common.in
 Makefile.in
 bits-gen.c
 bits-tst.c
+fpu-tst.c
+alu-tst.c
 
 Things-to-lose:
 
