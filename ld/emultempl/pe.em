@@ -1,6 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-(echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
+rm -f e${EMULATION_NAME}.c
+(echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
