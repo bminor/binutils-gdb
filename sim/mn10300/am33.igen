@@ -1,3 +1,24 @@
+// Helper:            
+//
+// Given an extended register number, translate it into an index into the
+// register array.  This is necessary as the upper 8 extended registers are
+// actually synonyms for the d0-d3/a0-a3 registers.
+//
+//
+
+:function:::int:translate_rreg:int rreg
+{
+  
+  /* The higher register numbers actually correspond to the
+     basic machine's address and data registers.  */
+  if (rreg > 7 && rreg < 12)
+    return REG_A0 + rreg - 8;
+  else if (rreg > 11 && rreg < 16)
+    return REG_D0 + rreg - 12;
+  else
+    return REG_E0 + rreg;
+}
+
 // 1111 0000 0010 00An; mov USP,An
 8.0xf0+4.0x2,00,2.AN0:D0m:::mov
 "mov"
@@ -107,15 +128,10 @@
 "mov"
 *am33
 {
+  int destreg = translate_rreg (SD_, RN0);
+
   PC = cia;
-  /* The higher register numbers actually correspond to the
-     basic machine's address and data registers.  */
-  if (RN0 > 7 && RN0 < 12)
-    State.regs[REG_A0 + RN0 - 8] = State.regs[REG_A0 + AM1];
-  else if (RN0 > 11 && RN0 < 16)
-    State.regs[REG_D0 + RN0 - 12] = State.regs[REG_A0 + AM1];
-  else
-    State.regs[REG_E0 + RN0] = State.regs[REG_A0 + AM1] ;
+  State.regs[destreg] = State.regs[REG_A0 + AM1];
 }
 
 // 1111 0101 01Dm Rn; mov Dm,Rn
@@ -123,15 +139,10 @@
 "mov"
 *am33
 {
+  int destreg = translate_rreg (SD_, RN0);
+
   PC = cia;
-  /* The higher register numbers actually correspond to the
-     basic machine's address and data registers.  */
-  if (RN0 > 7 && RN0 < 12)
-    State.regs[REG_A0 + RN0 - 8] = State.regs[REG_D0 + DM1];
-  else if (RN0 > 11 && RN0 < 16)
-    State.regs[REG_D0 + RN0 - 12] = State.regs[REG_D0 + DM1];
-  else
-    State.regs[REG_E0 + RN0] = State.regs[REG_D0 + DM1] ;
+  State.regs[destreg] = State.regs[REG_D0 + DM1];
 }
 
 // 1111 0101 10Rm An; mov Rm,An
@@ -139,15 +150,10 @@
 "mov"
 *am33
 {
+  int destreg = translate_rreg (SD_, RM1);
+
   PC = cia;
-  /* The higher register numbers actually correspond to the
-     basic machine's address and data registers.  */
-  if (RM1 > 7 && RM1 < 12)
-    State.regs[REG_A0 + AN0] = State.regs[REG_A0 + RM1 - 8];
-  else if (RM1 > 11 && RM1 < 16)
-    State.regs[REG_A0 + AN0] = State.regs[REG_D0 + RM1 - 12];
-  else
-    State.regs[REG_A0 + AN0] = State.regs[REG_E0 + RM1];
+  State.regs[REG_A0 + AN0] = State.regs[destreg];
 }
 
 // 1111 0101 11Rm Dn; mov Rm,Dn
@@ -155,15 +161,10 @@
 "mov"
 *am33
 {
+  int destreg = translate_rreg (SD_, RM1);
+
   PC = cia;
-  /* The higher register numbers actually correspond to the
-     basic machine's address and data registers.  */
-  if (RM1 > 7 && RM1 < 12)
-    State.regs[REG_D0 + DN0] = State.regs[REG_A0 + RM1 - 8];
-  else if (RM1 > 11 && RM1 < 16)
-    State.regs[REG_D0 + DN0] = State.regs[REG_D0 + RM1 - 12];
-  else
-    State.regs[REG_D0 + DN0] = State.regs[REG_E0 + RM1];
+  State.regs[REG_D0 + DN0] = State.regs[destreg];
 }
 
 
@@ -376,20 +377,8 @@
 
   PC = cia;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = State.regs[srcreg];
 }
 
@@ -398,17 +387,10 @@
 "mov"
 *am33
 {
-  int srcreg, dstreg;
+  int srcreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg = REG_D0 + RN0 - 12;
-  else
-    srcreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RN0);
   if (State.regs[srcreg] & 0x80000000)
     State.regs[REG_MDR] = -1;
   else
@@ -423,21 +405,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = EXTEND8 (State.regs[srcreg]);
 }
 
@@ -449,21 +418,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = State.regs[srcreg] & 0xff;
 }
 
@@ -475,21 +431,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = EXTEND16 (State.regs[srcreg]);
 }
 
@@ -501,21 +444,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = State.regs[srcreg] & 0xffff;
 }
 
@@ -524,19 +454,11 @@
 "clr"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = 0;
-
   PSW |= PSW_Z;
   PSW &= ~(PSW_V | PSW_C | PSW_N);
 }
@@ -549,21 +471,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   genericAdd (State.regs[srcreg], dstreg);
 }
 
@@ -577,20 +486,8 @@
   unsigned long reg1, reg2, sum;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   reg1 = State.regs[srcreg];
   reg2 = State.regs[dstreg];
@@ -616,21 +513,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   genericSub (State.regs[srcreg], dstreg);
 }
 
@@ -644,20 +528,8 @@
   unsigned long reg1, reg2, difference;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   reg1 = State.regs[srcreg];
   reg2 = State.regs[dstreg];
@@ -683,14 +555,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   genericAdd (1, dstreg);
 }
 
@@ -702,13 +567,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] += 4;
 }
 
@@ -720,20 +579,8 @@
   int srcreg1, srcreg2;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg1 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg1 = REG_D0 + RN0 - 12;
-  else
-    srcreg1 = REG_E0 + RN0;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg2 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg2 = REG_D0 + RM2 - 12;
-  else
-    srcreg2 = REG_E0 + RM2;
+  srcreg1 = translate_rreg (SD_, RN0);
+  srcreg2 = translate_rreg (SD_, RM2);
   genericCmp (State.regs[srcreg2], State.regs[srcreg1]);
 }
 
@@ -742,15 +589,10 @@
 "mov"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
 
   PC = cia;
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   if (XRM2 == 0)
     {
@@ -768,13 +610,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
+  srcreg = translate_rreg (SD_, RM2);
 
   if (XRN0 == 0)
     {
@@ -794,19 +630,8 @@
 
   PC = cia;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] &= State.regs[srcreg];
   z = (State.regs[dstreg] == 0);
@@ -824,20 +649,8 @@
   int z, n;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] |= State.regs[srcreg];
   z = (State.regs[dstreg] == 0);
@@ -855,20 +668,8 @@
   int z, n;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] ^= State.regs[srcreg];
   z = (State.regs[dstreg] == 0);
@@ -886,13 +687,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] = ~State.regs[dstreg];
   z = (State.regs[dstreg] == 0);
@@ -911,20 +706,8 @@
   int c, z, n;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[dstreg];
   c = temp & 1;
@@ -946,19 +729,8 @@
 
   PC = cia;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   c = State.regs[dstreg] & 1;
   State.regs[dstreg] >>= State.regs[srcreg];
@@ -977,20 +749,8 @@
   int z, n;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] <<= State.regs[srcreg];
   z = (State.regs[dstreg] == 0);
@@ -1008,13 +768,7 @@
   int n, z;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] <<= 2;
   z = (State.regs[dstreg] == 0);
@@ -1033,13 +787,7 @@
   unsigned long value;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   value = State.regs[dstreg];
   c = (value & 0x1);
@@ -1063,13 +811,7 @@
   unsigned long value;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   value = State.regs[dstreg];
   c = (value & 0x80000000) ? 1 : 0;
@@ -1093,20 +835,8 @@
   int n, z;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = ((signed64)(signed32)State.regs[dstreg]
           *  (signed64)(signed32)State.regs[srcreg]);
@@ -1128,20 +858,8 @@
   int n, z;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = ((unsigned64)State.regs[dstreg]
           * (unsigned64)State.regs[srcreg]);
@@ -1163,20 +881,8 @@
   int n, z;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[REG_MDR];
   temp <<= 32;
@@ -1200,20 +906,8 @@
   int n, z;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[REG_MDR];
   temp <<= 32;
@@ -1236,21 +930,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]);
 }
 
@@ -1262,21 +943,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg], State.regs[srcreg]);
 }
 
@@ -1288,21 +956,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[srcreg]);
 }
 
@@ -1314,21 +969,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_byte (State.regs[dstreg], State.regs[srcreg]);
 }
 
@@ -1340,21 +982,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]);
 }
 
@@ -1366,21 +995,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg], State.regs[srcreg]);
 }
 
@@ -1392,21 +1008,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]);
   State.regs[srcreg] += 4;
 }
@@ -1419,21 +1022,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg], State.regs[srcreg]);
   State.regs[dstreg] += 4;
 }
@@ -1443,17 +1033,10 @@
 "mov"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[REG_SP]);
 }
 
@@ -1462,18 +1045,11 @@
 "mov"
 *am33
 {
-  int srcreg, dstreg;
+  int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    dstreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    dstreg = REG_D0 + RM2 - 12;
-  else
-    dstreg = REG_E0 + RM2;
-
-  store_word (State.regs[REG_SP], State.regs[dstreg]);
+  srcreg = translate_rreg (SD_, RM2);
+  store_word (State.regs[REG_SP], State.regs[srcreg]);
 }
 
 // 1111 1001 1010 1010 Rn 0000; mobvu (sp),Rn
@@ -1481,17 +1057,10 @@
 "movbu"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[REG_SP]);
 }
 
@@ -1500,18 +1069,11 @@
 "movbu"
 *am33
 {
-  int srcreg, dstreg;
+  int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    dstreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    dstreg = REG_D0 + RM2 - 12;
-  else
-    dstreg = REG_E0 + RM2;
-
-  store_byte (State.regs[REG_SP], State.regs[dstreg]);
+  srcreg = translate_rreg (SD_, RM2);
+  store_byte (State.regs[REG_SP], State.regs[srcreg]);
 }
 
 // 1111 1001 1000 1100 Rn 0000; movhu (sp),Rn
@@ -1519,17 +1081,10 @@
 "movhu"
 *am33
 {
-  int srcreg, dstreg;
+  int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[REG_SP]);
 }
 
@@ -1538,18 +1093,11 @@
 "movhu"
 *am33
 {
-  int srcreg, dstreg;
+  int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    dstreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    dstreg = REG_D0 + RM2 - 12;
-  else
-    dstreg = REG_E0 + RM2;
-
-  store_half (State.regs[REG_SP], State.regs[dstreg]);
+  srcreg = translate_rreg (SD_, RM2);
+  store_half (State.regs[REG_SP], State.regs[srcreg]);
 }
 
 // 1111 1001 1110 1010 Rm Rn; movhu (Rm+),Rn
@@ -1560,21 +1108,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]);
   State.regs[srcreg] += 2;
 }
@@ -1587,21 +1122,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg], State.regs[srcreg]);
   State.regs[dstreg] += 2;
 }
@@ -1617,20 +1139,8 @@
   int c, v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((signed64)State.regs[srcreg2]
           * (signed64)State.regs[srcreg1]);
@@ -1657,20 +1167,8 @@
   int c, v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((unsigned64)State.regs[srcreg2]
           * (unsigned64)State.regs[srcreg1]);
@@ -1697,20 +1195,8 @@
   int v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((signed32)(State.regs[srcreg2] & 0xff)
           * (signed32)(State.regs[srcreg1] & 0xff));
@@ -1732,20 +1218,8 @@
   int v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((unsigned32)(State.regs[srcreg2] & 0xff)
           * (unsigned32)(State.regs[srcreg1] & 0xff));
@@ -1767,20 +1241,8 @@
   int c, v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((unsigned64)(State.regs[srcreg2] & 0xffff)
           * (unsigned64)(State.regs[srcreg1] & 0xffff));
@@ -1807,20 +1269,8 @@
   int c, v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((unsigned64)(State.regs[srcreg2] & 0xffff)
           * (unsigned64)(State.regs[srcreg1] & 0xffff));
@@ -1847,20 +1297,8 @@
   int v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((signed32)(State.regs[srcreg2] & 0xffff)
           * (signed32)(State.regs[srcreg1] & 0xffff));
@@ -1884,20 +1322,8 @@
   int v;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
 
   temp = ((unsigned32)(State.regs[srcreg2] & 0xffff)
           * (unsigned32)(State.regs[srcreg1] & 0xffff));
@@ -1920,20 +1346,8 @@
   long temp;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = ((signed32)(State.regs[dstreg] & 0xffff)
           * (signed32)(State.regs[srcreg] & 0xffff));
@@ -1952,20 +1366,8 @@
   unsigned long temp;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = ((unsigned32)(State.regs[dstreg] & 0xffff)
           * (unsigned32)(State.regs[srcreg] & 0xffff));
@@ -1984,20 +1386,8 @@
   int value;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   value = State.regs[srcreg];
 
@@ -2018,19 +1408,9 @@
 {
   int srcreg, dstreg;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  PC = cia;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] = (((State.regs[srcreg] & 0xff) << 24)
 			| (((State.regs[srcreg] >> 8) & 0xff) << 16)
@@ -2045,19 +1425,9 @@
 {
   int srcreg, dstreg;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  PC = cia;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] = (((State.regs[srcreg] & 0xff) << 8)
 			| ((State.regs[srcreg] >> 8) & 0xff)
@@ -2072,19 +1442,9 @@
 {
   int srcreg, dstreg;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  PC = cia;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] = (((State.regs[srcreg] & 0xffff) << 16)
 			| ((State.regs[srcreg] >> 16) & 0xffff));
@@ -2100,20 +1460,8 @@
   int start;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[srcreg];
   start = (State.regs[dstreg] & 0x1f) - 1;
@@ -2148,14 +1496,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = EXTEND8 (IMM8);
 }
 
@@ -2167,14 +1508,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = IMM8 & 0xff;
 }
 
@@ -2186,14 +1520,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   genericAdd (EXTEND8 (IMM8), dstreg);
 }
 
@@ -2207,13 +1534,7 @@
   unsigned long reg1, reg2, sum;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   imm = EXTEND8 (IMM8);
   reg2 = State.regs[dstreg];
@@ -2239,13 +1560,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   genericSub (EXTEND8 (IMM8), dstreg);
 }
@@ -2260,13 +1575,7 @@
   unsigned long reg1, reg2, difference;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   imm = EXTEND8 (IMM8);
   reg2 = State.regs[dstreg];
@@ -2292,14 +1601,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg = REG_D0 + RN0 - 12;
-  else
-    srcreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RN0);
   genericCmp (EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2327,13 +1629,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] &= (IMM8 & 0xff);
   z = (State.regs[dstreg] == 0);
@@ -2351,13 +1647,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] |= (IMM8 & 0xff);
   z = (State.regs[dstreg] == 0);
@@ -2375,13 +1665,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] ^= (IMM8 & 0xff);
   z = (State.regs[dstreg] == 0);
@@ -2400,13 +1684,7 @@
   int c, z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[dstreg];
   c = temp & 1;
@@ -2427,13 +1705,7 @@
   int z, n, c;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   c = State.regs[dstreg] & 1;
   State.regs[dstreg] >>= (IMM8 & 0xff);
@@ -2452,13 +1724,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] <<= (IMM8 & 0xff);
   z = (State.regs[dstreg] == 0);
@@ -2477,13 +1743,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = ((signed64)(signed32)State.regs[dstreg]
           *  (signed64)(signed32)EXTEND8 (IMM8));
@@ -2505,13 +1765,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = ((unsigned64)State.regs[dstreg]
           * (unsigned64)(IMM8 & 0xff));
@@ -2531,16 +1785,8 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
+  srcreg = translate_rreg (SD_, RM0);
   genericBtst(IMM8, State.regs[srcreg]);
-
 }
 
 
@@ -2552,21 +1798,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg] + EXTEND8 (IMM8));
 }
 
@@ -2577,21 +1810,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2602,21 +1822,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[srcreg] + EXTEND8 (IMM8));
 }
 
@@ -2627,21 +1834,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_byte (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2652,21 +1846,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg] + EXTEND8 (IMM8));
 }
 
@@ -2677,21 +1858,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2703,21 +1871,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg] + EXTEND8 (IMM8));
   State.regs[srcreg] += 4;
 }
@@ -2729,21 +1884,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
   State.regs[dstreg] += 4;
 }
@@ -2756,14 +1898,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[REG_SP] + EXTEND8 (IMM8));
 }
 
@@ -2774,14 +1909,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_word (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2792,14 +1920,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[REG_SP] + EXTEND8 (IMM8));
 }
 
@@ -2810,14 +1931,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_byte (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2828,14 +1942,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[REG_SP] + EXTEND8 (IMM8));
 }
 
@@ -2846,14 +1953,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_half (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
 }
 
@@ -2865,21 +1965,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg] + EXTEND8 (IMM8));
   State.regs[srcreg] += 2;
 }
@@ -2891,21 +1978,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
   State.regs[dstreg] += 2;
 }
@@ -2915,21 +1989,15 @@
 8.0xfb+8.0x0b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mac
 "mac"
 {
-  int srcreg1, srcreg2;
+  int srcreg;
   long long temp, sum;
   int c, v;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    srcreg1 = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    srcreg1 = REG_D0 + RN2 - 12;
-  else
-    srcreg1 = REG_E0 + RN2;
+  srcreg = translate_rreg (SD_, RN2);
 
   temp = ((signed64)EXTEND8 (IMM8)
-          * (signed64)State.regs[srcreg1]);
+          * (signed64)State.regs[srcreg]);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -2947,21 +2015,15 @@
 8.0xfb+8.0x1b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macu
 "macu"
 {
-  int srcreg1, srcreg2;
+  int srcreg;
   long long temp, sum;
   int c, v;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    srcreg1 = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    srcreg1 = REG_D0 + RN2 - 12;
-  else
-    srcreg1 = REG_E0 + RN2;
+  srcreg = translate_rreg (SD_, RN2);
 
   temp = ((unsigned64) (IMM8)
-          * (unsigned64)State.regs[srcreg1]);
+          * (unsigned64)State.regs[srcreg]);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -2979,21 +2041,15 @@
 8.0xfb+8.0x2b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macb
 "macb"
 {
-  int srcreg1, srcreg2;
+  int srcreg;
   long long temp, sum;
   int c, v;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    srcreg1 = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    srcreg1 = REG_D0 + RN2 - 12;
-  else
-    srcreg1 = REG_E0 + RN2;
+  srcreg = translate_rreg (SD_, RN2);
 
   temp = ((signed64)EXTEND8 (IMM8)
-          * (signed64)State.regs[srcreg1] & 0xff);
+          * (signed64)State.regs[srcreg] & 0xff);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -3011,21 +2067,15 @@
 8.0xfb+8.0x3b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macbu
 "macbu"
 {
-  int srcreg1, srcreg2;
+  int srcreg;
   long long temp, sum;
   int c, v;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    srcreg1 = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    srcreg1 = REG_D0 + RN2 - 12;
-  else
-    srcreg1 = REG_E0 + RN2;
+  srcreg = translate_rreg (SD_, RN2);
 
   temp = ((unsigned64) (IMM8)
-          * (unsigned64)State.regs[srcreg1] & 0xff);
+          * (unsigned64)State.regs[srcreg] & 0xff);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -3043,21 +2093,15 @@
 8.0xfb+8.0x4b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mach
 "mach"
 {
-  int srcreg1, srcreg2;
+  int srcreg;
   long long temp, sum;
   int c, v;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    srcreg1 = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    srcreg1 = REG_D0 + RN2 - 12;
-  else
-    srcreg1 = REG_E0 + RN2;
+  srcreg = translate_rreg (SD_, RN2);
 
   temp = ((signed64)EXTEND8 (IMM8)
-          * (signed64)State.regs[srcreg1] & 0xffff);
+          * (signed64)State.regs[srcreg] & 0xffff);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -3075,21 +2119,15 @@
 8.0xfb+8.0x5b+4.RN2,4.RN0=RN2+8.IMM8:D2:::machu
 "machu"
 {
-  int srcreg1, srcreg2;
+  int srcreg;
   long long temp, sum;
   int c, v;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    srcreg1 = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    srcreg1 = REG_D0 + RN2 - 12;
-  else
-    srcreg1 = REG_E0 + RN2;
+  srcreg = translate_rreg (SD_, RN2);
 
   temp = ((unsigned64) (IMM8)
-          * (unsigned64)State.regs[srcreg1] & 0xffff);
+          * (unsigned64)State.regs[srcreg] & 0xffff);
   sum = State.regs[REG_MCRL] + (temp & 0xffffffff);
   c = (sum < State.regs[REG_MCRL]) || (sum < (temp & 0xffffffff));
   State.regs[REG_MCRL] = sum;
@@ -3115,27 +2153,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   source1 = State.regs[srcreg1];
   source2 = State.regs[srcreg2];
@@ -3163,27 +2183,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   source1 = State.regs[srcreg1];
   source2 = State.regs[srcreg2];
@@ -3211,27 +2213,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   source1 = State.regs[srcreg1];
   source2 = State.regs[srcreg2];
@@ -3259,27 +2243,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   source1 = State.regs[srcreg1];
   source2 = State.regs[srcreg2];
@@ -3306,27 +2272,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   State.regs[dstreg] = State.regs[srcreg1] & State.regs[srcreg2];
 
@@ -3346,27 +2294,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   State.regs[dstreg] = State.regs[srcreg1] | State.regs[srcreg2];
 
@@ -3386,27 +2316,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   State.regs[dstreg] = State.regs[srcreg1] ^ State.regs[srcreg2];
 
@@ -3427,27 +2339,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   temp = State.regs[srcreg2];
   c = temp & 1;
@@ -3470,27 +2364,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   c = State.regs[srcreg2] & 1;
   State.regs[dstreg] = State.regs[srcreg2] >> State.regs[srcreg1];
@@ -3511,27 +2387,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg = REG_D0 + RD0 - 12;
-  else
-    dstreg = REG_E0 + RD0;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg = translate_rreg (SD_, RD0);
 
   State.regs[dstreg] = State.regs[srcreg2] << State.regs[srcreg1];;
 
@@ -3551,34 +2409,10 @@
   signed long long temp;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg1 = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg1 = REG_D0 + RD0 - 12;
-  else
-    dstreg1 = REG_E0 + RD0;
-
-  if (RD2 > 7 && RD2 < 12)
-    dstreg2 = REG_A0 + RD2 - 8;
-  else if (RD2 > 11 && RD2 < 16)
-    dstreg2 = REG_D0 + RD2 - 12;
-  else
-    dstreg2 = REG_E0 + RD2;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg1 = translate_rreg (SD_, RD0);
+  dstreg2 = translate_rreg (SD_, RD2);
 
   temp = ((signed64)(signed32)State.regs[srcreg1]
           *  (signed64)(signed32)State.regs[srcreg2]);
@@ -3595,34 +2429,10 @@
   signed long long temp;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg1 = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg1 = REG_D0 + RM2 - 12;
-  else
-    srcreg1 = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg2 = REG_D0 + RN0 - 12;
-  else
-    srcreg2 = REG_E0 + RN0;
-
-  if (RD0 > 7 && RD0 < 12)
-    dstreg1 = REG_A0 + RD0 - 8;
-  else if (RD0 > 11 && RD0 < 16)
-    dstreg1 = REG_D0 + RD0 - 12;
-  else
-    dstreg1 = REG_E0 + RD0;
-
-  if (RD2 > 7 && RD2 < 12)
-    dstreg2 = REG_A0 + RD2 - 8;
-  else if (RD2 > 11 && RD2 < 16)
-    dstreg2 = REG_D0 + RD2 - 12;
-  else
-    dstreg2 = REG_E0 + RD2;
+  srcreg1 = translate_rreg (SD_, RM2);
+  srcreg2 = translate_rreg (SD_, RN0);
+  dstreg1 = translate_rreg (SD_, RD0);
+  dstreg2 = translate_rreg (SD_, RD2);
 
   temp = ((unsigned64)(unsigned32)State.regs[srcreg1]
           *  (unsigned64)(unsigned32)State.regs[srcreg2]);
@@ -3638,13 +2448,7 @@
   int dstreg;
 
   PC = cia;
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (IMM8);
 }
 
@@ -3655,13 +2459,8 @@
 {
   int srcreg;
 
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  PC = cia;
+  srcreg = translate_rreg (SD_, RM2);
   store_word (IMM8, State.regs[srcreg]);
 }
 
@@ -3673,13 +2472,7 @@
   int dstreg;
 
   PC = cia;
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (IMM8);
 }
 
@@ -3691,13 +2484,7 @@
   int srcreg;
 
   PC = cia;
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_byte (IMM8, State.regs[srcreg]);
 }
 
@@ -3709,13 +2496,7 @@
   int dstreg;
 
   PC = cia;
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (IMM8);
 }
 
@@ -3727,13 +2508,7 @@
   int srcreg;
 
   PC = cia;
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_half (IMM8, State.regs[srcreg]);
 }
 
@@ -3745,28 +2520,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg1 = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg1 = REG_D0 + RM0 - 12;
-  else
-    srcreg1 = REG_E0 + RM0;
-
-  if (RI0 > 7 && RI0 < 12)
-    srcreg2 = REG_A0 + RI0 - 8;
-  else if (RI0 > 11 && RI0 < 16)
-    srcreg2 = REG_D0 + RI0 - 12;
-  else
-    srcreg2 = REG_E0 + RI0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg1 = translate_rreg (SD_, RM0);
+  srcreg1 = translate_rreg (SD_, RI0);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = load_word (State.regs[srcreg1] + State.regs[srcreg2]);
 }
 
@@ -3778,28 +2534,9 @@
   int srcreg, dstreg1, dstreg2;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RI0 > 7 && RI0 < 12)
-    dstreg1 = REG_A0 + RI0 - 8;
-  else if (RI0 > 11 && RI0 < 16)
-    dstreg1 = REG_D0 + RI0 - 12;
-  else
-    dstreg1 = REG_E0 + RI0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg2 = REG_D0 + RN0 - 12;
-  else
-    dstreg2 = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg1 = translate_rreg (SD_, RI0);
+  dstreg2 = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg1] + State.regs[dstreg2], State.regs[srcreg]);
 }
 
@@ -3811,28 +2548,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg1 = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg1 = REG_D0 + RM0 - 12;
-  else
-    srcreg1 = REG_E0 + RM0;
-
-  if (RI0 > 7 && RI0 < 12)
-    srcreg2 = REG_A0 + RI0 - 8;
-  else if (RI0 > 11 && RI0 < 16)
-    srcreg2 = REG_D0 + RI0 - 12;
-  else
-    srcreg2 = REG_E0 + RI0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg1 = translate_rreg (SD_, RM0);
+  srcreg1 = translate_rreg (SD_, RI0);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = load_byte (State.regs[srcreg1] + State.regs[srcreg2]);
 }
 
@@ -3844,28 +2562,9 @@
   int srcreg, dstreg1, dstreg2;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RI0 > 7 && RI0 < 12)
-    dstreg1 = REG_A0 + RI0 - 8;
-  else if (RI0 > 11 && RI0 < 16)
-    dstreg1 = REG_D0 + RI0 - 12;
-  else
-    dstreg1 = REG_E0 + RI0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg2 = REG_D0 + RN0 - 12;
-  else
-    dstreg2 = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg1 = translate_rreg (SD_, RI0);
+  dstreg2 = translate_rreg (SD_, RN0);
   store_byte (State.regs[dstreg1] + State.regs[dstreg2], State.regs[srcreg]);
 }
 
@@ -3877,28 +2576,9 @@
   int srcreg1, srcreg2, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg1 = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg1 = REG_D0 + RM0 - 12;
-  else
-    srcreg1 = REG_E0 + RM0;
-
-  if (RI0 > 7 && RI0 < 12)
-    srcreg2 = REG_A0 + RI0 - 8;
-  else if (RI0 > 11 && RI0 < 16)
-    srcreg2 = REG_D0 + RI0 - 12;
-  else
-    srcreg2 = REG_E0 + RI0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg1 = translate_rreg (SD_, RM0);
+  srcreg1 = translate_rreg (SD_, RI0);
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = load_half (State.regs[srcreg1] + State.regs[srcreg2]);
 }
 
@@ -3910,28 +2590,9 @@
   int srcreg, dstreg1, dstreg2;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RI0 > 7 && RI0 < 12)
-    dstreg1 = REG_A0 + RI0 - 8;
-  else if (RI0 > 11 && RI0 < 16)
-    dstreg1 = REG_D0 + RI0 - 12;
-  else
-    dstreg1 = REG_E0 + RI0;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg2 = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg2 = REG_D0 + RN0 - 12;
-  else
-    dstreg2 = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg1 = translate_rreg (SD_, RI0);
+  dstreg2 = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg1] + State.regs[dstreg2], State.regs[srcreg]);
 }
 
@@ -3955,20 +2616,8 @@
   int value;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
 
   value = State.regs[srcreg];
 
@@ -3990,14 +2639,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
@@ -4009,14 +2651,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff;
 }
 
@@ -4028,14 +2663,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   genericAdd (FETCH24 (IMM24A, IMM24B, IMM24C), dstreg);
 }
 
@@ -4048,13 +2676,7 @@
   unsigned long sum, imm, reg2;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   imm = EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C));
   reg2 = State.regs[dstreg];
@@ -4080,14 +2702,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   genericSub (FETCH24 (IMM24A, IMM24B, IMM24C), dstreg);
 }
 
@@ -4100,13 +2715,7 @@
   unsigned long difference, imm, reg2;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   imm = EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C));
   reg2 = State.regs[dstreg];
@@ -4132,14 +2741,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg = REG_D0 + RN0 - 12;
-  else
-    srcreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RN0);
   genericCmp (EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)), State.regs[srcreg]);
 }
 
@@ -4148,8 +2750,6 @@
 "mov"
 *am33
 {
-  int dstreg;
-
   PC = cia;
 
   if (XRN0 == 0)
@@ -4169,13 +2769,7 @@
   int z,n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] &= (FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff);
   z = (State.regs[dstreg] == 0);
@@ -4193,13 +2787,7 @@
   int z,n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] |= (FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff);
   z = (State.regs[dstreg] == 0);
@@ -4217,13 +2805,7 @@
   int z,n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] ^= (FETCH24 (IMM24A, IMM24B, IMM24C) & 0xffffff);
   z = (State.regs[dstreg] == 0);
@@ -4242,13 +2824,7 @@
   int c, z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[dstreg];
   c = temp & 1;
@@ -4270,13 +2846,7 @@
   int z, n, c;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   c = State.regs[dstreg] & 1;
   State.regs[dstreg] >>= (FETCH24 (IMM24A, IMM24B, IMM24C));
@@ -4295,13 +2865,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] <<= (FETCH24 (IMM24A, IMM24B, IMM24C));
   z = (State.regs[dstreg] == 0);
@@ -4321,14 +2885,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg = REG_D0 + RN0 - 12;
-  else
-    srcreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RN0);
   genericBtst (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
 }
 
@@ -4340,21 +2897,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
@@ -4367,21 +2911,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
@@ -4394,21 +2925,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[srcreg]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
@@ -4421,21 +2939,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_byte (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
@@ -4448,21 +2953,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
@@ -4475,21 +2967,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
@@ -4502,21 +2981,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
   State.regs[srcreg] += 4;
@@ -4530,21 +2996,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
   State.regs[dstreg] += 4;
@@ -4559,14 +3012,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[REG_SP]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
@@ -4579,14 +3025,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_word (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
@@ -4599,14 +3038,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[REG_SP]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
@@ -4619,14 +3051,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_byte (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
@@ -4639,14 +3064,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[REG_SP]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
@@ -4659,14 +3077,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_half (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
@@ -4679,21 +3090,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]
 				  + FETCH24 (IMM24A, IMM24B, IMM24C));
   State.regs[dstreg] += 2;
@@ -4707,21 +3105,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
   State.regs[srcreg] += 2;
@@ -4741,14 +3126,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
@@ -4760,14 +3138,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_word (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
 }
 
@@ -4780,14 +3151,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
@@ -4799,14 +3163,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_byte (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
 }
 
@@ -4819,14 +3176,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
@@ -4838,14 +3188,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_half (FETCH24 (IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
 }
 
@@ -4858,14 +3201,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
 }
 
@@ -4877,14 +3213,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   State.regs[dstreg] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
 }
 
@@ -4896,14 +3225,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   genericAdd (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), dstreg);
 }
 
@@ -4917,13 +3239,7 @@
   int z, n, c, v;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
   reg2 = State.regs[dstreg];
@@ -4949,14 +3265,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  dstreg = translate_rreg (SD_, RN0);
   genericSub (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), dstreg);
 }
 
@@ -4970,13 +3279,7 @@
   int z, n, c, v;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   imm = FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D);
   reg2 = State.regs[dstreg];
@@ -5002,14 +3305,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg = REG_D0 + RN0 - 12;
-  else
-    srcreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RN0);
   genericCmp (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
 
@@ -5018,8 +3314,6 @@
 "mov"
 *am33
 {
-  int dstreg;
-
   PC = cia;
 
   if (XRN0 == 0)
@@ -5037,13 +3331,7 @@
   int z,n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] &= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
   z = (State.regs[dstreg] == 0);
@@ -5061,13 +3349,7 @@
   int z,n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] |= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
   z = (State.regs[dstreg] == 0);
@@ -5085,13 +3367,7 @@
   int z,n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] ^= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
   z = (State.regs[dstreg] == 0);
@@ -5110,13 +3386,7 @@
   int c, z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   temp = State.regs[dstreg];
   c = temp & 1;
@@ -5137,13 +3407,7 @@
   int z, n, c;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   c = State.regs[dstreg] & 1;
   State.regs[dstreg] >>= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
@@ -5162,13 +3426,7 @@
   int z, n;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
+  dstreg = translate_rreg (SD_, RN0);
 
   State.regs[dstreg] <<= (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
   z = (State.regs[dstreg] == 0);
@@ -5188,14 +3446,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RN0 > 7 && RN0 < 12)
-    srcreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    srcreg = REG_D0 + RN0 - 12;
-  else
-    srcreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RN0);
   genericBtst (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
 
@@ -5207,21 +3458,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -5234,21 +3472,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
 }
@@ -5261,21 +3486,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[srcreg]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -5288,21 +3500,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_byte (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
 }
@@ -5315,21 +3514,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -5342,21 +3528,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
 }
@@ -5369,21 +3542,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[srcreg]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
   State.regs[srcreg] += 4;
@@ -5397,21 +3557,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_word (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
   State.regs[dstreg] += 4;
@@ -5426,14 +3573,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[REG_SP]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -5446,14 +3586,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_word (State.regs[REG_SP] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
 }
@@ -5466,14 +3599,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[REG_SP]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -5486,14 +3612,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_byte (State.regs[REG_SP] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
 }
@@ -5506,14 +3625,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[REG_SP]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -5526,14 +3638,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_half (State.regs[REG_SP] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
 }
@@ -5547,21 +3652,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM0 > 7 && RM0 < 12)
-    srcreg = REG_A0 + RM0 - 8;
-  else if (RM0 > 11 && RM0 < 16)
-    srcreg = REG_D0 + RM0 - 12;
-  else
-    srcreg = REG_E0 + RM0;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  srcreg = translate_rreg (SD_, RM0);
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[srcreg]
 				  + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
   State.regs[srcreg] += 2;
@@ -5575,21 +3667,8 @@
   int srcreg, dstreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
-  if (RN0 > 7 && RN0 < 12)
-    dstreg = REG_A0 + RN0 - 8;
-  else if (RN0 > 11 && RN0 < 16)
-    dstreg = REG_D0 + RN0 - 12;
-  else
-    dstreg = REG_E0 + RN0;
-
+  srcreg = translate_rreg (SD_, RM2);
+  dstreg = translate_rreg (SD_, RN0);
   store_half (State.regs[dstreg] + FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[srcreg]);
   State.regs[dstreg] += 2;
@@ -5615,14 +3694,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
 
@@ -5634,14 +3706,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_word (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
 
@@ -5653,14 +3718,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
 
@@ -5672,14 +3730,7 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_byte (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
 
@@ -5691,14 +3742,7 @@
   int dstreg;
 
   PC = cia;
-
-  if (RN2 > 7 && RN2 < 12)
-    dstreg = REG_A0 + RN2 - 8;
-  else if (RN2 > 11 && RN2 < 16)
-    dstreg = REG_D0 + RN2 - 12;
-  else
-    dstreg = REG_E0 + RN2;
-
+  dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D));
 }
 
@@ -5710,15 +3754,8 @@
   int srcreg;
 
   PC = cia;
-
-  if (RM2 > 7 && RM2 < 12)
-    srcreg = REG_A0 + RM2 - 8;
-  else if (RM2 > 11 && RM2 < 16)
-    srcreg = REG_D0 + RM2 - 12;
-  else
-    srcreg = REG_E0 + RM2;
-
+  srcreg = translate_rreg (SD_, RM2);
   store_half (FETCH32 (IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
 }
 
-// DSP
+// ??? DSP
