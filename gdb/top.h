@@ -70,5 +70,6 @@ extern char *source_error;
 extern char *source_pre_error;
 extern int history_expansion_p;
 extern int server_command;
+extern char *lim_at_start;
 
 #endif

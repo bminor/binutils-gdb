@@ -171,6 +171,11 @@ int target_executing = 0;
 /* Level of control structure.  */
 static int control_level;
 
+/* Sbrk location on entry to main.  Used for statistics only.  */
+#ifdef HAVE_SBRK
+char *lim_at_start;
+#endif
+
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 
 #ifndef STOP_SIGNAL
@@ -782,10 +787,8 @@ command_loop (void)
       if (display_space)
 	{
 #ifdef HAVE_SBRK
-	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
-
-	  space_at_cmd_start = (long) (lim - (char *) &environ);
+	  space_at_cmd_start = lim - lim_at_start;
 #endif
 	}
 
@@ -805,9 +808,8 @@ command_loop (void)
       if (display_space)
 	{
 #ifdef HAVE_SBRK
-	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
-	  long space_now = lim - (char *) &environ;
+	  long space_now = lim - lim_at_start;
 	  long space_diff = space_now - space_at_cmd_start;
 
 	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",

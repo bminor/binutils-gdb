@@ -492,10 +492,8 @@ command_handler (char *command)
   if (display_space)
     {
 #ifdef HAVE_SBRK
-      extern char **environ;
       char *lim = (char *) sbrk (0);
-
-      space_at_cmd_start = (long) (lim - (char *) &environ);
+      space_at_cmd_start = lim - lim_at_start;
 #endif
     }
 
@@ -538,9 +536,8 @@ command_handler (char *command)
       if (display_space)
 	{
 #ifdef HAVE_SBRK
-	  extern char **environ;
 	  char *lim = (char *) sbrk (0);
-	  long space_now = lim - (char *) &environ;
+	  long space_now = lim - lim_at_start;
 	  long space_diff = space_now - space_at_cmd_start;
 
 	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
@@ -577,9 +574,8 @@ command_line_handler_continuation (struct continuation_arg *arg)
   if (display_space)
     {
 #ifdef HAVE_SBRK
-      extern char **environ;
       char *lim = (char *) sbrk (0);
-      long space_now = lim - (char *) &environ;
+      long space_now = lim - lim_at_start;
       long space_diff = space_now - space_at_cmd_start;
 
       printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",

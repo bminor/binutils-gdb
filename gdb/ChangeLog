@@ -1,3 +1,11 @@
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
+	* top.h (lim_at_start): Declare.
+	* main.c (captured_main): Set it.
+	* top.c (lim_at_start): Define.
+	(command_loop): Use it instead of &environ.
+	* event-top.c (command_handler): Likewise.
+
 2003-06-01  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* mipsnbsd-tdep.c: Update copyright years.
