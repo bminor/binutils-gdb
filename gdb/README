@@ -1,5 +1,5 @@
 		     README for gdb-5.1 release
-		Updated 20 October 2001 by Andrew Cagney
+		Updated 11 November 2001 by Andrew Cagney
 
 This is GDB, the GNU source-level debugger.
 A summary of new features is in the file `NEWS'.
@@ -447,8 +447,20 @@ configure on HP/UX 11.00.
 
 alpha-dec-osf5.1
 
-Due to a problem in GDB's symbol table reader, GDB builds but does not
-run on this platform.  See gdb/237.
+GDB has a number of problems on this platform (Ref PR gdb/237).  A GDB
+built with ``CC="cc -DUSE_LDR_ROUTINES"'' is reported to be more
+reliable.
+
+
+sparcv9-sun-solaris2.8
+
+There are known problems with GCC 3.0.x for the 64 bit sparc target
+(bad code gen).  You could try a development version of GCC.
+
+
+i586-sco-sysv5uw7.1.1
+
+There are known problems with GDB's thread support on this platform.
 
 
 Remote debugging
