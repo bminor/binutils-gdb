@@ -1,3 +1,15 @@
+2001-11-01  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c: Re-arrange prototypes by architecture.
+	(insns): Re-arrange instructions by archtitecture.  Pld instruction
+	is part of ARMv5E.
+	(tinsns): blx and bkpt are part of ARMv5T.
+	(do_fp_{ctrl,ldst,ldstm,dyadic,monadic,cmp,from_reg,to_reg}): Rename
+	to do_fpa_*.  All callers changed.
+
+	* tc-arm.c (insns): Add two temporary instructions to handle 
+	ldrd/strd.
+
 2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (build_jump_insn): Allocate worst case storage

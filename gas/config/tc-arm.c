@@ -622,30 +622,29 @@ static void do_ldst		PARAMS ((char *, unsigned long));
 static void do_ldmstm		PARAMS ((char *, unsigned long));
 static void do_branch		PARAMS ((char *, unsigned long));
 static void do_swi		PARAMS ((char *, unsigned long));
+
 /* Pseudo Op codes.  */
 static void do_adr		PARAMS ((char *, unsigned long));
 static void do_nop		PARAMS ((char *, unsigned long));
-/* ARM 2.  */
+
+/* ARM v2.  */
 static void do_mul		PARAMS ((char *, unsigned long));
 static void do_mla		PARAMS ((char *, unsigned long));
-/* ARM 3.  */
+
+/* ARM v2S.  */
 static void do_swap		PARAMS ((char *, unsigned long));
-/* ARM 6.  */
+
+/* ARM v3.  */
 static void do_msr		PARAMS ((char *, unsigned long));
 static void do_mrs		PARAMS ((char *, unsigned long));
-/* ARM 7M.  */
+
+/* ARM v3M.  */
 static void do_mull		PARAMS ((char *, unsigned long));
-/* ARM THUMB.  */
+
+/* ARM v4T.  */
 static void do_bx               PARAMS ((char *, unsigned long));
 
-/* ARM_EXT_XScale.  */
-static void do_mia		PARAMS ((char *, unsigned long));
-static void do_mar		PARAMS ((char *, unsigned long));
-static void do_mra		PARAMS ((char *, unsigned long));
-static void do_pld		PARAMS ((char *, unsigned long));
-static void do_ldrd		PARAMS ((char *, unsigned long));
-
-/* ARM_EXT_V5.  */
+/* ARM_v5.  */
 static void do_blx		PARAMS ((char *, unsigned long));
 static void do_bkpt		PARAMS ((char *, unsigned long));
 static void do_clz		PARAMS ((char *, unsigned long));
@@ -653,28 +652,36 @@ static void do_lstc2		PARAMS ((char *, unsigned long));
 static void do_cdp2		PARAMS ((char *, unsigned long));
 static void do_co_reg2		PARAMS ((char *, unsigned long));
 
-static void do_t_blx		PARAMS ((char *));
-static void do_t_bkpt		PARAMS ((char *));
-
-/* ARM_EXT_V5E.  */
+/* ARM v5ExP.  */
 static void do_smla		PARAMS ((char *, unsigned long));
 static void do_smlal		PARAMS ((char *, unsigned long));
 static void do_smul		PARAMS ((char *, unsigned long));
 static void do_qadd		PARAMS ((char *, unsigned long));
+
+/* ARM v5E.  */
+static void do_pld		PARAMS ((char *, unsigned long));
+static void do_ldrd		PARAMS ((char *, unsigned long));
 static void do_co_reg2c		PARAMS ((char *, unsigned long));
 
 /* Coprocessor Instructions.  */
 static void do_cdp		PARAMS ((char *, unsigned long));
 static void do_lstc		PARAMS ((char *, unsigned long));
 static void do_co_reg		PARAMS ((char *, unsigned long));
-static void do_fp_ctrl		PARAMS ((char *, unsigned long));
-static void do_fp_ldst		PARAMS ((char *, unsigned long));
-static void do_fp_ldmstm	PARAMS ((char *, unsigned long));
-static void do_fp_dyadic	PARAMS ((char *, unsigned long));
-static void do_fp_monadic	PARAMS ((char *, unsigned long));
-static void do_fp_cmp		PARAMS ((char *, unsigned long));
-static void do_fp_from_reg	PARAMS ((char *, unsigned long));
-static void do_fp_to_reg	PARAMS ((char *, unsigned long));
+
+/* FPA instructions.  */
+static void do_fpa_ctrl		PARAMS ((char *, unsigned long));
+static void do_fpa_ldst		PARAMS ((char *, unsigned long));
+static void do_fpa_ldmstm	PARAMS ((char *, unsigned long));
+static void do_fpa_dyadic	PARAMS ((char *, unsigned long));
+static void do_fpa_monadic	PARAMS ((char *, unsigned long));
+static void do_fpa_cmp		PARAMS ((char *, unsigned long));
+static void do_fpa_from_reg	PARAMS ((char *, unsigned long));
+static void do_fpa_to_reg	PARAMS ((char *, unsigned long));
+
+/* XScale.  */
+static void do_mia		PARAMS ((char *, unsigned long));
+static void do_mar		PARAMS ((char *, unsigned long));
+static void do_mra		PARAMS ((char *, unsigned long));
 
 /* ARM_EXT_MAVERICK.  */
 static void do_c_binops		PARAMS ((char *, unsigned long, int));
@@ -796,20 +803,11 @@ struct asm_opcode
 
 static const struct asm_opcode insns[] =
 {
-/* Intel XScale extensions to ARM V5 ISA.  */
-  {"mia",   0x0e200010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miaph", 0x0e280010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miabb", 0x0e2c0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miabt", 0x0e2d0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miatb", 0x0e2e0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miatt", 0x0e2f0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"mar",   0x0c400000, NULL,   NULL,        ARM_EXT_XSCALE, do_mar},
-  {"mra",   0x0c500000, NULL,   NULL,        ARM_EXT_XSCALE, do_mra},
-  {"pld",   0xf450f000, "",     NULL,        ARM_EXT_XSCALE, do_pld},
+  /* XXX Temporary hack.  Override the normal load/store entry points.  */
   {"ldr",   0x000000d0, NULL,   ldr_flags,   ARM_EXT_V1,        do_ldrd},
   {"str",   0x000000f0, NULL,   str_flags,   ARM_EXT_V1,        do_ldrd},
 
-/* ARM Instructions.  */
+  /* Core ARM Instructions.  */
   {"and",   0x00000000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
   {"eor",   0x00200000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
   {"sub",   0x00400000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
@@ -832,6 +830,7 @@ static const struct asm_opcode insns[] =
   {"ldm",   0x08100000, NULL,   ldm_flags,   ARM_EXT_V1,      do_ldmstm},
   {"swi",   0x0f000000, NULL,   NULL,        ARM_EXT_V1,      do_swi},
 #ifdef TE_WINCE
+  /* XXX This is the wrong place to do this.  Think multi-arch.  */
   {"bl",    0x0b000000, NULL,   NULL,        ARM_EXT_V1,      do_branch},
   {"b",     0x0a000000, NULL,   NULL,        ARM_EXT_V1,      do_branch},
 #else
@@ -839,93 +838,45 @@ static const struct asm_opcode insns[] =
   {"b",     0x0afffffe, NULL,   NULL,        ARM_EXT_V1,      do_branch},
 #endif
 
-/* Pseudo ops.  */
+  /* Pseudo ops.  */
   {"adr",   0x028f0000, NULL,   long_flag,   ARM_EXT_V1,      do_adr},
   {"nop",   0x01a00000, NULL,   NULL,        ARM_EXT_V1,      do_nop},
 
-/* ARM 2 multiplies.  */
+  /* ARM 2 multiplies.  */
   {"mul",   0x00000090, NULL,   s_flag,      ARM_EXT_V2,      do_mul},
   {"mla",   0x00200090, NULL,   s_flag,      ARM_EXT_V2,      do_mla},
 
-/* ARM 3 - swp instructions.  */
-  {"swp",   0x01000090, NULL,   byte_flag,   ARM_EXT_V2S,      do_swap},
-
-/* ARM 6 Coprocessor instructions.  */
-  {"mrs",   0x010f0000, NULL,   NULL,        ARM_EXT_V3,      do_mrs},
-  {"msr",   0x0120f000, NULL,   NULL,        ARM_EXT_V3,      do_msr},
-/* ScottB: our code uses 0x0128f000 for msr.
-   NickC:  but this is wrong because the bits 16 through 19 are
-           handled by the PSR_xxx defines above.  */
-
-/* ARM 7M long multiplies - need signed/unsigned flags!  */
-  {"smull", 0x00c00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-  {"umull", 0x00800090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-
-/* ARM THUMB interworking.  */
-  /* Note: bx (and blx) are required on V5, even if the processor does
-     not support Thumb.   */
-  {"bx",    0x012fff10, NULL,   NULL,        ARM_EXT_V4T | ARM_EXT_V5, do_bx},
-
-/* Floating point instructions.  */
-  {"wfs",   0x0e200110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
-  {"rfs",   0x0e300110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
-  {"wfc",   0x0e400110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
-  {"rfc",   0x0e500110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_ctrl},
-  {"ldf",   0x0c100100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fp_ldst},
-  {"stf",   0x0c000100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fp_ldst},
-  {"lfm",   0x0c100200, NULL,   lfm_flags,   FPU_FPA_EXT_V2, do_fp_ldmstm},
-  {"sfm",   0x0c000200, NULL,   sfm_flags,   FPU_FPA_EXT_V2, do_fp_ldmstm},
-  {"mvf",   0x0e008100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"mnf",   0x0e108100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"abs",   0x0e208100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"rnd",   0x0e308100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"sqt",   0x0e408100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"log",   0x0e508100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"lgn",   0x0e608100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"exp",   0x0e708100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"sin",   0x0e808100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"cos",   0x0e908100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"tan",   0x0ea08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"asn",   0x0eb08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"acs",   0x0ec08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"atn",   0x0ed08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"urd",   0x0ee08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"nrm",   0x0ef08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_monadic},
-  {"adf",   0x0e000100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"suf",   0x0e200100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"rsf",   0x0e300100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"muf",   0x0e100100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"dvf",   0x0e400100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"rdf",   0x0e500100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"pow",   0x0e600100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"rpw",   0x0e700100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"rmf",   0x0e800100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"fml",   0x0e900100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"fdv",   0x0ea00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"frd",   0x0eb00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"pol",   0x0ec00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_dyadic},
-  {"cmf",   0x0e90f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fp_cmp},
-  {"cnf",   0x0eb0f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fp_cmp},
-/* The FPA10 data sheet suggests that the 'E' of cmfe/cnfe should not
-   be an optional suffix, but part of the instruction.  To be compatible,
-   we accept either.  */
-  {"cmfe",  0x0ed0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_cmp},
-  {"cnfe",  0x0ef0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fp_cmp},
-  {"flt",   0x0e000110, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fp_from_reg},
-  {"fix",   0x0e100110, NULL,   fix_flags,   FPU_FPA_EXT_V1,      do_fp_to_reg},
-
-/* Generic copressor instructions.  */
+  /* Generic copressor instructions.  */
   {"cdp",   0x0e000000, NULL,  NULL,         ARM_EXT_V2,      do_cdp},
   {"ldc",   0x0c100000, NULL,  long_flag,    ARM_EXT_V2,      do_lstc},
   {"stc",   0x0c000000, NULL,  long_flag,    ARM_EXT_V2,      do_lstc},
   {"mcr",   0x0e000010, NULL,  NULL,         ARM_EXT_V2,      do_co_reg},
   {"mrc",   0x0e100010, NULL,  NULL,         ARM_EXT_V2,      do_co_reg},
 
-/*  ARM ISA extension 5.  */
-/* Note: blx is actually 2 opcodes, so the .value is set dynamically.
-   And it's sometimes conditional and sometimes not.  */
+  /* ARM 3 - swp instructions.  */
+  {"swp",   0x01000090, NULL,   byte_flag,   ARM_EXT_V2S,      do_swap},
+
+  /* ARM 6 Status register instructions.  */
+  {"mrs",   0x010f0000, NULL,   NULL,        ARM_EXT_V3,      do_mrs},
+  {"msr",   0x0120f000, NULL,   NULL,        ARM_EXT_V3,      do_msr},
+  /* ScottB: our code uses 0x0128f000 for msr.
+     NickC:  but this is wrong because the bits 16 through 19 are
+	     handled by the PSR_xxx defines above.  */
+
+  /* ARM 7M long multiplies - need signed/unsigned flags!  */
+  {"smull", 0x00c00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"umull", 0x00800090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+
+  /* ARM Architecture 4T.  */
+  /* Note: bx (and blx) are required on V5, even if the processor does
+     not support Thumb.   */
+  {"bx",    0x012fff10, NULL,   NULL,        ARM_EXT_V4T | ARM_EXT_V5, do_bx},
+
+  /*  ARM ISA extension 5.  */
+  /* Note: blx is actually 2 opcodes, so the .value is set dynamically.
+     And it's sometimes conditional and sometimes not.  */
   {"blx",            0, NULL,   NULL,        ARM_EXT_V5, do_blx},
   {"clz",   0x016f0f10, NULL,   NULL,        ARM_EXT_V5, do_clz},
   {"bkpt",  0xe1200070, "",   	NULL,        ARM_EXT_V5, do_bkpt},
@@ -935,35 +886,99 @@ static const struct asm_opcode insns[] =
   {"mcr2",  0xfe000010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
   {"mrc2",  0xfe100010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
 
-/*  ARM ISA extension 5E, El Segundo.  */
-  {"smlabb", 0x01000080, NULL,   NULL,        ARM_EXT_V5E, do_smla},
-  {"smlatb", 0x010000a0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
-  {"smlabt", 0x010000c0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
-  {"smlatt", 0x010000e0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+/*  ARM Architecture 5ExP.  */
+  {"smlabb", 0x01000080, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
+  {"smlatb", 0x010000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
+  {"smlabt", 0x010000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
+  {"smlatt", 0x010000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
 
-  {"smlawb", 0x01200080, NULL,   NULL,        ARM_EXT_V5E, do_smla},
-  {"smlawt", 0x012000c0, NULL,   NULL,        ARM_EXT_V5E, do_smla},
+  {"smlawb", 0x01200080, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
+  {"smlawt", 0x012000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
 
-  {"smlalbb",0x01400080, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
-  {"smlaltb",0x014000a0, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
-  {"smlalbt",0x014000c0, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
-  {"smlaltt",0x014000e0, NULL,   NULL,        ARM_EXT_V5E, do_smlal},
+  {"smlalbb",0x01400080, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
+  {"smlaltb",0x014000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
+  {"smlalbt",0x014000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
+  {"smlaltt",0x014000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
 
-  {"smulbb", 0x01600080, NULL,   NULL,        ARM_EXT_V5E, do_smul},
-  {"smultb", 0x016000a0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
-  {"smulbt", 0x016000c0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
-  {"smultt", 0x016000e0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+  {"smulbb", 0x01600080, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
+  {"smultb", 0x016000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
+  {"smulbt", 0x016000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
+  {"smultt", 0x016000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
 
-  {"smulwb", 0x012000a0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
-  {"smulwt", 0x012000e0, NULL,   NULL,        ARM_EXT_V5E, do_smul},
+  {"smulwb", 0x012000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
+  {"smulwt", 0x012000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
 
-  {"qadd",   0x01000050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
-  {"qdadd",  0x01400050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
-  {"qsub",   0x01200050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
-  {"qdsub",  0x01600050, NULL,   NULL,        ARM_EXT_V5E, do_qadd},
+  {"qadd",   0x01000050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
+  {"qdadd",  0x01400050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
+  {"qsub",   0x01200050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
+  {"qdsub",  0x01600050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
 
+  /*  ARM Architecture 5E.  */
+  {"pld",   0xf450f000, "",     NULL,         ARM_EXT_V5E, do_pld},
+  {"ldr",   0x000000d0, NULL,   ldr_flags,    ARM_EXT_V5E, do_ldrd},
+  {"str",   0x000000f0, NULL,   str_flags,    ARM_EXT_V5E, do_ldrd},
   {"mcrr",  0x0c400000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
   {"mrrc",  0x0c500000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
+
+  /* Core FPA instruction set (V1).  */
+  {"wfs",   0x0e200110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
+  {"rfs",   0x0e300110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
+  {"wfc",   0x0e400110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
+  {"rfc",   0x0e500110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
+  {"ldf",   0x0c100100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fpa_ldst},
+  {"stf",   0x0c000100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fpa_ldst},
+  {"mvf",   0x0e008100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"mnf",   0x0e108100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"abs",   0x0e208100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"rnd",   0x0e308100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"sqt",   0x0e408100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"log",   0x0e508100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"lgn",   0x0e608100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"exp",   0x0e708100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"sin",   0x0e808100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"cos",   0x0e908100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"tan",   0x0ea08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"asn",   0x0eb08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"acs",   0x0ec08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"atn",   0x0ed08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"urd",   0x0ee08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"nrm",   0x0ef08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
+  {"adf",   0x0e000100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"suf",   0x0e200100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"rsf",   0x0e300100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"muf",   0x0e100100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"dvf",   0x0e400100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"rdf",   0x0e500100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"pow",   0x0e600100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"rpw",   0x0e700100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"rmf",   0x0e800100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"fml",   0x0e900100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"fdv",   0x0ea00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"frd",   0x0eb00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"pol",   0x0ec00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
+  {"cmf",   0x0e90f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fpa_cmp},
+  {"cnf",   0x0eb0f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fpa_cmp},
+  /* The FPA10 data sheet suggests that the 'E' of cmfe/cnfe should not
+     be an optional suffix, but part of the instruction.  To be compatible,
+     we accept either.  */
+  {"cmfe",  0x0ed0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_cmp},
+  {"cnfe",  0x0ef0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_cmp},
+  {"flt",   0x0e000110, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_from_reg},
+  {"fix",   0x0e100110, NULL,   fix_flags,   FPU_FPA_EXT_V1,      do_fpa_to_reg},
+
+  /* Instructions that were new with the real FPA, call them V2.  */
+  {"lfm",   0x0c100200, NULL,   lfm_flags,   FPU_FPA_EXT_V2, do_fpa_ldmstm},
+  {"sfm",   0x0c000200, NULL,   sfm_flags,   FPU_FPA_EXT_V2, do_fpa_ldmstm},
+
+  /* Intel XScale extensions to ARM V5 ISA.  (All use CP0).  */
+  {"mia",   0x0e200010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miaph", 0x0e280010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miabb", 0x0e2c0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miabt", 0x0e2d0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miatb", 0x0e2e0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"miatt", 0x0e2f0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
+  {"mar",   0x0c400000, NULL,   NULL,        ARM_EXT_XSCALE, do_mar},
+  {"mra",   0x0c500000, NULL,   NULL,        ARM_EXT_XSCALE, do_mra},
 
   /* Cirrus DSP instructions.  */
   {"cfldrs",	0x0c100400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_1},
@@ -1077,6 +1092,7 @@ static const struct asm_opcode insns[] =
 #define OPCODE_BIC	14
 #define OPCODE_MVN	15
 
+/* Thumb v1 (ARMv4T).  */
 static void do_t_nop		PARAMS ((char *));
 static void do_t_arit		PARAMS ((char *));
 static void do_t_add		PARAMS ((char *));
@@ -1101,6 +1117,10 @@ static void do_t_strh		PARAMS ((char *));
 static void do_t_sub		PARAMS ((char *));
 static void do_t_swi		PARAMS ((char *));
 static void do_t_adr		PARAMS ((char *));
+
+/* Thumb v2 (ARMv5T).  */
+static void do_t_blx		PARAMS ((char *));
+static void do_t_bkpt		PARAMS ((char *));
 
 #define T_OPCODE_MUL 0x4340
 #define T_OPCODE_TST 0x4200
@@ -1200,6 +1220,7 @@ struct thumb_opcode
 
 static const struct thumb_opcode tinsns[] =
 {
+  /* Thumb v1 (ARMv4T).  */
   {"adc",	0x4140,		2,	ARM_EXT_V4T, do_t_arit},
   {"add",	0x0000,		2,	ARM_EXT_V4T, do_t_add},
   {"and",	0x4000,		2,	ARM_EXT_V4T, do_t_arit},
@@ -1225,8 +1246,6 @@ static const struct thumb_opcode tinsns[] =
   {"bal",	0xdefe,		2,	ARM_EXT_V4T, do_t_branch9},
   {"bic",	0x4380,		2,	ARM_EXT_V4T, do_t_arit},
   {"bl",	0xf7fffffe,	4,	ARM_EXT_V4T, do_t_branch23},
-  {"blx",	0,		0,	ARM_EXT_V5, do_t_blx},
-  {"bkpt",	0xbe00,		2,	ARM_EXT_V5, do_t_bkpt},
   {"bx",	0x4700,		2,	ARM_EXT_V4T, do_t_bx},
   {"cmn",	T_OPCODE_CMN,	2,	ARM_EXT_V4T, do_t_arit},
   {"cmp",	0x0000,		2,	ARM_EXT_V4T, do_t_compare},
@@ -1260,6 +1279,9 @@ static const struct thumb_opcode tinsns[] =
   /* Pseudo ops:  */
   {"adr",       0x0000,         2,      ARM_EXT_V4T, do_t_adr},
   {"nop",       0x46C0,         2,      ARM_EXT_V4T, do_t_nop},      /* mov r8,r8  */
+  /* Thumb v2 (ARMv5T).  */
+  {"blx",	0,		0,	ARM_EXT_V5T, do_t_blx},
+  {"bkpt",	0xbe00,		2,	ARM_EXT_V5T, do_t_bkpt},
 };
 
 struct reg_entry
@@ -1282,9 +1304,9 @@ struct reg_entry
 #define cirrus_mvax_register(reg)	((reg) >= 130 && (reg) <= 133)
 #define ARM_EXT_MAVERICKsc_register(reg) 	((reg) == ARM_EXT_MAVERICKSC_REG)
 
-#define REG_PC	15
-#define REG_LR  14
 #define REG_SP  13
+#define REG_LR  14
+#define REG_PC	15
 
 /* These are the standard names.  Users can add aliases with .req.  */
 static const struct reg_entry reg_table[] =
@@ -3581,7 +3603,7 @@ do_mra (str, flags)
     end_of_line (str);
 }
 
-/* Xscale: Preload-Cache
+/* ARMv5TE: Preload-Cache
 
     PLD <addr_mode>
 
@@ -3669,7 +3691,7 @@ do_pld (str, flags)
   end_of_line (str);
 }
 
-/* Xscale load-consecutive (argument parse)
+/* ARMv5TE load-consecutive (argument parse)
    Mode is like LDRH.
 
      LDRccD R, mode
@@ -5174,7 +5196,7 @@ do_co_reg (str, flags)
 }
 
 static void
-do_fp_ctrl (str, flags)
+do_fpa_ctrl (str, flags)
      char * str;
      unsigned long flags ATTRIBUTE_UNUSED;
 {
@@ -5195,7 +5217,7 @@ do_fp_ctrl (str, flags)
 }
 
 static void
-do_fp_ldst (str, flags)
+do_fpa_ldst (str, flags)
      char * str;
      unsigned long flags ATTRIBUTE_UNUSED;
 {
@@ -5237,7 +5259,7 @@ do_fp_ldst (str, flags)
 }
 
 static void
-do_fp_ldmstm (str, flags)
+do_fpa_ldmstm (str, flags)
      char * str;
      unsigned long flags;
 {
@@ -5377,7 +5399,7 @@ do_fp_ldmstm (str, flags)
 }
 
 static void
-do_fp_dyadic (str, flags)
+do_fpa_dyadic (str, flags)
      char * str;
      unsigned long flags;
 {
@@ -5426,7 +5448,7 @@ do_fp_dyadic (str, flags)
 }
 
 static void
-do_fp_monadic (str, flags)
+do_fpa_monadic (str, flags)
      char * str;
      unsigned long flags;
 {
@@ -5467,7 +5489,7 @@ do_fp_monadic (str, flags)
 }
 
 static void
-do_fp_cmp (str, flags)
+do_fpa_cmp (str, flags)
      char * str;
      unsigned long flags;
 {
@@ -5494,7 +5516,7 @@ do_fp_cmp (str, flags)
 }
 
 static void
-do_fp_from_reg (str, flags)
+do_fpa_from_reg (str, flags)
      char * str;
      unsigned long flags;
 {
@@ -5535,7 +5557,7 @@ do_fp_from_reg (str, flags)
 }
 
 static void
-do_fp_to_reg (str, flags)
+do_fpa_to_reg (str, flags)
      char * str;
      unsigned long flags;
 {
