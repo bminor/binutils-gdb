@@ -38,9 +38,12 @@
 #include "expression.h"
 #include "filenames.h"	/* for DOSish file names */
 #include "macrotab.h"
-
 #include "language.h"
 #include "complaints.h"
+#include "bcache.h"
+#include "dwarf2expr.h"
+#include "dwarf2loc.h"
+
 #include <fcntl.h>
 #include "gdb_string.h"
 #include "gdb_assert.h"
@@ -936,6 +939,11 @@ static void dwarf_decode_macros (struct line_header *, unsigned int,
                                  struct objfile *);
 
 static int attr_form_is_block (struct attribute *);
+
+static void
+dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
+			     const struct comp_unit_head *,
+			     struct objfile *objfile);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -2230,6 +2238,13 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
 
   new = push_context (0, lowpc);
   new->name = new_symbol (die, die->type, objfile, cu_header);
+
+  /* If there was a location expression for DW_AT_frame_base above,
+     record it.  We still need to decode it above because not all
+     symbols use location expressions exclusively.  */
+  if (attr)
+    dwarf2_symbol_mark_computed (attr, new->name, cu_header, objfile);
+
   list_in_scope = &local_symbols;
 
   if (die->has_children)
@@ -3211,7 +3226,7 @@ read_enumeration (struct die_info *die, struct objfile *objfile,
 				  * sizeof (struct field));
 		    }
 
-		  FIELD_NAME (fields[num_fields]) = SYMBOL_NAME (sym);
+		  FIELD_NAME (fields[num_fields]) = DEPRECATED_SYMBOL_NAME (sym);
 		  FIELD_TYPE (fields[num_fields]) = NULL;
 		  FIELD_BITPOS (fields[num_fields]) = SYMBOL_VALUE (sym);
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
@@ -5273,6 +5288,61 @@ dwarf2_start_subfile (char *filename, char *dirname)
   start_subfile (filename, dirname);
 }
 
+static void
+var_decode_location (struct attribute *attr, struct symbol *sym,
+		     struct objfile *objfile,
+		     const struct comp_unit_head *cu_header)
+{
+  /* NOTE drow/2003-01-30: There used to be a comment and some special
+     code here to turn a symbol with DW_AT_external and a
+     SYMBOL_VALUE_ADDRESS of 0 into a LOC_UNRESOLVED symbol.  This was
+     necessary for platforms (maybe Alpha, certainly PowerPC GNU/Linux
+     with some versions of binutils) where shared libraries could have
+     relocations against symbols in their debug information - the
+     minimal symbol would have the right address, but the debug info
+     would not.  It's no longer necessary, because we will explicitly
+     apply relocations when we read in the debug information now.  */
+
+  /* A DW_AT_location attribute with no contents indicates that a
+     variable has been optimized away.  */
+  if (attr_form_is_block (attr) && DW_BLOCK (attr)->size == 0)
+    {
+      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
+      return;
+    }
+
+  /* Handle one degenerate form of location expression specially, to
+     preserve GDB's previous behavior when section offsets are
+     specified.  If this is just a DW_OP_addr then mark this symbol
+     as LOC_STATIC.  */
+
+  if (attr_form_is_block (attr)
+      && DW_BLOCK (attr)->size == 1 + cu_header->addr_size
+      && DW_BLOCK (attr)->data[0] == DW_OP_addr)
+    {
+      int dummy;
+
+      SYMBOL_VALUE_ADDRESS (sym) =
+	read_address (objfile->obfd, DW_BLOCK (attr)->data + 1, cu_header,
+		      &dummy);
+      fixup_symbol_section (sym, objfile);
+      SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
+					      SYMBOL_SECTION (sym));
+      SYMBOL_CLASS (sym) = LOC_STATIC;
+      return;
+    }
+
+  /* NOTE drow/2002-01-30: It might be worthwhile to have a static
+     expression evaluator, and use LOC_COMPUTED only when necessary
+     (i.e. when the value of a register or memory location is
+     referenced, or a thread-local block, etc.).  Then again, it might
+     not be worthwhile.  I'm assuming that it isn't unless performance
+     or memory numbers show me otherwise.  */
+
+  dwarf2_symbol_mark_computed (attr, sym, cu_header, objfile);
+  SYMBOL_CLASS (sym) = LOC_COMPUTED;
+}
+
 /* Given a pointer to a DWARF information entry, figure out if we need
    to make a symbol table entry for it, and if so, create a new entry
    and return a pointer to it.
@@ -5361,106 +5431,12 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  attr = dwarf_attr (die, DW_AT_location);
 	  if (attr)
 	    {
+	      var_decode_location (attr, sym, objfile, cu_header);
 	      attr2 = dwarf_attr (die, DW_AT_external);
 	      if (attr2 && (DW_UNSND (attr2) != 0))
-		{
-                  /* Support the .debug_loc offsets */
-                  if (attr_form_is_block (attr))
-                    {
-		      SYMBOL_VALUE_ADDRESS (sym) =
-		        decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
-                    }
-                  else if (attr->form == DW_FORM_data4
-                           || attr->form == DW_FORM_data8)
-                    {
-		      dwarf2_complex_location_expr_complaint ();
-                    }
-                  else
-                    {
-		      dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
-							     "external variable");
-                    }
-		  add_symbol_to_list (sym, &global_symbols);
-                  if (is_thread_local)
-                    {
-                      /* SYMBOL_VALUE_ADDRESS contains at this point the
-		         offset of the variable within the thread local
-			 storage.  */
-                      SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
-                      SYMBOL_OBJFILE (sym) = objfile;
-                    }
-
-		  /* In shared libraries the address of the variable
-		     in the location descriptor might still be relocatable,
-		     so its value could be zero.
-		     Enter the symbol as a LOC_UNRESOLVED symbol, if its
-		     value is zero, the address of the variable will then
-		     be determined from the minimal symbol table whenever
-		     the variable is referenced.  */
-		  else if (SYMBOL_VALUE_ADDRESS (sym))
-		    {
-		      fixup_symbol_section (sym, objfile);
-		      SYMBOL_VALUE_ADDRESS (sym) +=
-			ANOFFSET (objfile->section_offsets,
-			          SYMBOL_SECTION (sym));
-		      SYMBOL_CLASS (sym) = LOC_STATIC;
-		    }
-		  else
-		    SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
-		}
+		add_symbol_to_list (sym, &global_symbols);
 	      else
-		{
-                  /* Support the .debug_loc offsets */
-                  if (attr_form_is_block (attr))
-                    {
-		      SYMBOL_VALUE (sym) = addr =
-		        decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
-                    }
-                  else if (attr->form == DW_FORM_data4
-                           || attr->form == DW_FORM_data8)
-                    {
-		      dwarf2_complex_location_expr_complaint ();
-                    }
-                  else
-                    {
-		      dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
-							     "external variable");
-                      addr = 0;
-                    }
-		  add_symbol_to_list (sym, list_in_scope);
-		  if (optimized_out)
-		    {
-		      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
-		    }
-		  else if (isreg)
-		    {
-		      SYMBOL_CLASS (sym) = LOC_REGISTER;
-		      SYMBOL_VALUE (sym) = 
-			DWARF2_REG_TO_REGNUM (SYMBOL_VALUE (sym));
-		    }
-		  else if (offreg)
-		    {
-		      SYMBOL_CLASS (sym) = LOC_BASEREG;
-		      SYMBOL_BASEREG (sym) = DWARF2_REG_TO_REGNUM (basereg);
-		    }
-		  else if (islocal)
-		    {
-		      SYMBOL_CLASS (sym) = LOC_LOCAL;
-		    }
-                  else if (is_thread_local)
-                    {
-                      SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
-                      SYMBOL_OBJFILE (sym) = objfile;
-                    }
-		  else
-		    {
-		      fixup_symbol_section (sym, objfile);
-		      SYMBOL_VALUE_ADDRESS (sym) =
-		        addr + ANOFFSET (objfile->section_offsets,
-			                 SYMBOL_SECTION (sym));
-		      SYMBOL_CLASS (sym) = LOC_STATIC;
-		    }
-		}
+		add_symbol_to_list (sym, list_in_scope);
 	    }
 	  else
 	    {
@@ -5542,7 +5518,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		{
 		  /* FIXME: carlton/2003-01-10: We're being a bit
 		     profligate with memory names here.  */
-		  SYMBOL_NAME (sym)
+		  DEPRECATED_SYMBOL_NAME (sym)
 		    = obsavestring (TYPE_TAG_NAME (type),
 				    strlen (TYPE_TAG_NAME (type)),
 				    &objfile->symbol_obstack);
@@ -5579,8 +5555,8 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 		  TYPE_NAME (SYMBOL_TYPE (sym)) =
-		    obsavestring (SYMBOL_NAME (sym),
-				  strlen (SYMBOL_NAME (sym)),
+		    obsavestring (DEPRECATED_SYMBOL_NAME (sym),
+				  strlen (DEPRECATED_SYMBOL_NAME (sym)),
 				  &objfile->type_obstack);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
@@ -5590,10 +5566,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      SYMBOL_NAME (sym) = obconcat (&objfile->symbol_obstack,
-					    processing_current_prefix,
-					    "::",
-					    name);
+	      DEPRECATED_SYMBOL_NAME (sym) = obconcat (&objfile->symbol_obstack,
+						       processing_current_prefix,
+						       "::",
+						       name);
 	    }
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -5608,10 +5584,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	  if (processing_has_namespace_info
 	      && processing_current_prefix[0] != '\0')
 	    {
-	      SYMBOL_NAME (sym) = obconcat (&objfile->symbol_obstack,
-					    processing_current_prefix,
-					    "::",
-					    name);
+	      DEPRECATED_SYMBOL_NAME (sym) = obconcat (&objfile->symbol_obstack,
+						       processing_current_prefix,
+						       "::",
+						       name);
 	    }
 	  attr = dwarf_attr (die, DW_AT_const_value);
 	  if (attr)
@@ -5657,7 +5633,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     {
     case DW_FORM_addr:
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != cu_header->addr_size)
-	dwarf2_const_value_length_mismatch_complaint (SYMBOL_NAME (sym),
+	dwarf2_const_value_length_mismatch_complaint (DEPRECATED_SYMBOL_NAME (sym),
 						      cu_header->addr_size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
@@ -5673,7 +5649,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     case DW_FORM_block:
       blk = DW_BLOCK (attr);
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != blk->size)
-	dwarf2_const_value_length_mismatch_complaint (SYMBOL_NAME (sym),
+	dwarf2_const_value_length_mismatch_complaint (DEPRECATED_SYMBOL_NAME (sym),
 						      blk->size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
@@ -7795,4 +7771,33 @@ attr_form_is_block (struct attribute *attr)
       || attr->form == DW_FORM_block2
       || attr->form == DW_FORM_block4
       || attr->form == DW_FORM_block);
+}
+
+static void
+dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
+			     const struct comp_unit_head *cu_header,
+			     struct objfile *objfile)
+{
+  struct dwarf2_locexpr_baton *baton;
+
+  /* When support for location lists is added, this will go away.  */
+  if (!attr_form_is_block (attr))
+    {
+      dwarf2_complex_location_expr_complaint ();
+      return;
+    }
+
+  baton = obstack_alloc (&objfile->symbol_obstack,
+			 sizeof (struct dwarf2_locexpr_baton));
+  baton->objfile = objfile;
+
+  /* Note that we're just copying the block's data pointer here, not
+     the actual data.  We're still pointing into the dwarf_info_buffer
+     for SYM's objfile; right now we never release that buffer, but
+     when we do clean up properly this may need to change.  */
+  baton->size = DW_BLOCK (attr)->size;
+  baton->data = DW_BLOCK (attr)->data;
+
+  SYMBOL_LOCATION_FUNCS (sym) = &dwarf2_locexpr_funcs;
+  SYMBOL_LOCATION_BATON (sym) = baton;
 }

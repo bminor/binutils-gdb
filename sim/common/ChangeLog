@@ -1,3 +1,33 @@
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-engine.c (sim_engine_halt): If jmpbuf is invalid, abort.
+	(sim_engine_vabort): Ditto.
+
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-utils.h (sim_analyze_program, sim_load_file): Rename _bfd to bfd.
+	* sim-hload.c (sim_load), sim-base.h (sim_state_base): Ditto.
+	* nrun.c (main): Ditto.
+
+2003-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-engine.h (sim_engine_abort): Add noreturn attribute.
+	(sim_engine_vabort): Ditto.
+	(sim_engine_halt, sim_engine_restart): Ditto.
+
+2003-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Remove sim-break.o
+	(sim-break_h): Delete macro.
+	(sim-break.o): Delete rule.
+	* sim-break.c: Delete file.
+	* sim-break.h: Delete file.
+	* sim-base.h [SIM_HAVE_BREAKPOINTS]: Don't include "sim-break.h".
+	(STATE_BREAKPOINTS): Delete macro.
+	(sim_state_base): Delete field breakpoints.
+	* sim-module.c (modules) [SIM_HAVE_BREAKPOINTS]: Don't add
+	sim_break_install to array.
+
 2003-01-08  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* run.c (usage): Fix typos.

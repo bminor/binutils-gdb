@@ -35,7 +35,8 @@
 #if defined (HAVE_WCTYPE_H) && defined (HAVE_WCHAR_H)
 #  include <wchar.h>
 #  include <wctype.h>
-#  if defined (HAVE_MBSRTOWCS) /* system is supposed to support XPG5 */
+#  if defined (HAVE_MBRTOWC) && defined (HAVE_MBSRTOWCS)
+     /* system is supposed to support XPG5 */
 #    define HANDLE_MULTIBYTE      1
 #  endif
 #endif

@@ -31,6 +31,9 @@
 /* Define if you have the lstat function. */
 #undef HAVE_LSTAT
 
+/* Define if you have the mbrtowc function. */
+#undef HAVE_MBRTOWC
+
 /* Define if you have the mbsrtowcs function. */
 #undef HAVE_MBSRTOWCS
 

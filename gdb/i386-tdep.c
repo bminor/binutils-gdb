@@ -1293,7 +1293,7 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
       unsigned long indirect = read_memory_unsigned_integer (pc + 2, 4);
       struct minimal_symbol *indsym =
 	indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
-      char *symname = indsym ? SYMBOL_NAME (indsym) : 0;
+      char *symname = indsym ? SYMBOL_LINKAGE_NAME (indsym) : 0;
 
       if (symname)
 	{
@@ -1558,8 +1558,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, i386_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
-  set_gdbarch_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
-  set_gdbarch_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
 
   set_gdbarch_print_float_info (gdbarch, i387_print_float_info);
@@ -1590,7 +1590,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
@@ -1599,7 +1598,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
 
   /* Stack grows downward.  */

@@ -51,8 +51,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#undef MAX_REGISTER_RAW_SIZE
-#define MAX_REGISTER_RAW_SIZE 8
+#undef DEPRECATED_MAX_REGISTER_RAW_SIZE
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 8
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */

@@ -877,8 +877,8 @@ corefile.lo: corefile.c $(INCDIR)/filenames.h
 format.lo: format.c $(INCDIR)/filenames.h
 init.lo: init.c $(INCDIR)/filenames.h
 libbfd.lo: libbfd.c $(INCDIR)/filenames.h
-opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/objalloc.h
+opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h \
+  $(INCDIR)/libiberty.h
 reloc.lo: reloc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 section.lo: section.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
@@ -1250,7 +1250,7 @@ elf32-pj.lo: elf32-pj.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-ppc.lo: elf32-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  elf32-ppc.h elf32-target.h
 elf32-sh64.lo: elf32-sh64.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \

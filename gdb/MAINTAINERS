@@ -185,7 +185,6 @@ MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@redhat.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
-			Jim Blandy		jimb@redhat.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
 GNU/Linux MIPS native & host
 			Daniel Jacobowitz	dan@debian.org
@@ -209,8 +208,10 @@ generic arch support	Andrew Cagney		cagney@redhat.com
 			Any host/target maintainer can add to
 			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
 target vector		Andrew Cagney		cagney@redhat.com
-main (main.c, top.c)	Elena Zannoni		ezannoni@redhat.com
+
 event loop		Elena Zannoni           ezannoni@redhat.com
+                        For the part of top.c related to the event loop,
+                        send questions to ezannoni@redhat.com
 
 generic symtabs		Jim Blandy		jimb@redhat.com
 			Elena Zannoni		ezannoni@redhat.com
@@ -223,8 +224,7 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
-  linespec		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
+  linespec		Elena Zannoni		ezannoni@redhat.com
 			Fernando Nasser		fnasser@redhat.com
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
@@ -234,15 +234,12 @@ tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
 breakpoints		Michael Snyder		msnyder@redhat.com
-			Jim Blandy		jimb@redhat.com
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
   Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
-  Scheme support	Jim Blandy		jimb@redhat.com
 
-shared libs (devolved)	Jim Blandy		jimb@redhat.com
-			Kevin Buettner		kevinb@redhat.com
+shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 remote.c		Andrew Cagney		cagney@redhat.com
@@ -342,7 +339,7 @@ Richard Henderson				rth@redhat.com
 Aldy Hernandez					aldyh@redhat.com
 Paul Hilfinger					hilfinger@gnat.com
 Matt Hiller					hiller@redhat.com
-Kazu Hirata					kazu@hxi.com
+Kazu Hirata					kazu@cs.umass.edu
 Jeff Holcomb					jeffh@redhat.com
 Don Howard					dhoward@redhat.com
 Martin Hunt					hunt@redhat.com
@@ -391,7 +388,8 @@ Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
-Jim Wilson					wilson@redhat.com
+Kris Warkentin					kewarken@qnx.com
+Jim Wilson					wilson@tuliptree.org
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
 

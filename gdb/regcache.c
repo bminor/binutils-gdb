@@ -172,13 +172,20 @@ init_regcache_descr (struct gdbarch *gdbarch)
 				  struct type *);
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
-      descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i);
+      if (gdbarch_register_type_p (gdbarch))
+	{
+	  gdb_assert (!REGISTER_VIRTUAL_TYPE_P ()); /* OK */
+	  descr->register_type[i] = gdbarch_register_type (gdbarch, i);
+	}
+      else
+	descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i); /* OK */
     }
 
   /* If an old style architecture, fill in the remainder of the
      register cache descriptor using the register macros.  */
   if (!gdbarch_pseudo_register_read_p (gdbarch)
-      && !gdbarch_pseudo_register_write_p (gdbarch))
+      && !gdbarch_pseudo_register_write_p (gdbarch)
+      && !gdbarch_register_type_p (gdbarch))
     {
       descr->legacy_p = 1;
       init_legacy_regcache_descr (gdbarch, descr);
@@ -283,6 +290,36 @@ max_register_size (struct gdbarch *gdbarch)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);
   return descr->max_register_size;
+}
+
+int
+legacy_max_register_raw_size (void)
+{
+  if (DEPRECATED_MAX_REGISTER_RAW_SIZE_P ())
+    return DEPRECATED_MAX_REGISTER_RAW_SIZE;
+  else
+    return max_register_size (current_gdbarch);
+}
+
+int
+legacy_max_register_virtual_size (void)
+{
+  if (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ())
+    return DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE;
+  else
+    return max_register_size (current_gdbarch);
+}
+
+int
+register_size (struct gdbarch *gdbarch, int regnum)
+{
+  struct regcache_descr *descr = regcache_descr (gdbarch);
+  int size;
+  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
+  size = descr->sizeof_register[regnum];
+  gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
+  gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
+  return size;
 }
 
 /* The register cache for storing raw register values.  */

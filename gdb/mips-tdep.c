@@ -28,7 +28,6 @@
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
-#include "block.h"
 #include "value.h"
 #include "gdbcmd.h"
 #include "language.h"
@@ -41,6 +40,7 @@
 #include "regcache.h"
 #include "osabi.h"
 #include "mips-tdep.h"
+#include "block.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"
@@ -1590,20 +1590,28 @@ read_next_frame_reg (struct frame_info *fi, int regno)
   int realnum;
   enum lval_type lval;
   void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  frame_register_unwind (fi, regno, &optimized, &lval, &addr, &realnum,
-			 raw_buffer);
-  /* FIXME: cagney/2002-09-13: This is just soooo bad.  The MIPS
-     should have a pseudo register range that correspons to the ABI's,
-     rather than the ISA's, view of registers.  These registers would
-     then implicitly describe their size and hence could be used
-     without the below munging.  */
-  if (lval == lval_memory)
+
+  if (fi == NULL)
     {
-      if (regno < 32)
+      regcache_cooked_read (current_regcache, regno, raw_buffer);
+    }
+  else
+    {
+      frame_register_unwind (fi, regno, &optimized, &lval, &addr, &realnum,
+			     raw_buffer);
+      /* FIXME: cagney/2002-09-13: This is just soooo bad.  The MIPS
+	 should have a pseudo register range that correspons to the ABI's,
+	 rather than the ISA's, view of registers.  These registers would
+	 then implicitly describe their size and hence could be used
+	 without the below munging.  */
+      if (lval == lval_memory)
 	{
-	  /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
-	     saved. */
-	  return read_memory_integer (addr, MIPS_SAVED_REGSIZE);
+	  if (regno < 32)
+	    {
+	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+		 saved. */
+	      return read_memory_integer (addr, MIPS_SAVED_REGSIZE);
+	    }
 	}
     }
 
@@ -2474,11 +2482,16 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
   if (get_frame_type (fci) == DUMMY_FRAME)
     return;
 
-  /* Use proc_desc calculated in frame_chain */
+  /* Use proc_desc calculated in frame_chain.  When there is no
+     next frame, i.e, get_next_frame (fci) == NULL, we call
+     find_proc_desc () to calculate it, passing an explicit
+     NULL as the frame parameter.  */
   proc_desc =
     get_next_frame (fci)
     ? cached_proc_desc
-    : find_proc_desc (get_frame_pc (fci), get_next_frame (fci), 1);
+    : find_proc_desc (get_frame_pc (fci),
+                      NULL /* i.e, get_next_frame (fci) */,
+		      1);
 
   frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
 
@@ -3833,7 +3846,7 @@ mips_pop_frame (void)
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
   if (get_frame_saved_regs (frame) == NULL)
-    FRAME_INIT_SAVED_REGS (frame);
+    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (regnum != SP_REGNUM && regnum != PC_REGNUM
 	&& get_frame_saved_regs (frame)[regnum])
@@ -5482,7 +5495,6 @@ mips_get_saved_register (char *raw_buffer,
   CORE_ADDR addrx;
   enum lval_type lvalx;
   int optimizedx;
-  int realnum;
 
   if (!target_has_registers)
     error ("No registers.");
@@ -5494,8 +5506,8 @@ mips_get_saved_register (char *raw_buffer,
     lvalp = &lvalx;
   if (optimizedp == NULL)
     optimizedp = &optimizedx;
-  frame_register_unwind (get_next_frame (frame), regnum, optimizedp, lvalp,
-			 addrp, &realnum, raw_buffer);
+  generic_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
+                                     regnum, lvalp);
   /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
      have a pseudo register range that correspons to the ABI's, rather
      than the ISA's, view of registers.  These registers would then
@@ -5741,8 +5753,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_max_register_virtual_size (gdbarch, 8);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
@@ -5970,8 +5982,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
 
   /* Initialize a frame */
-  set_gdbarch_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
-  set_gdbarch_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
 
   /* MIPS version of CALL_DUMMY */
 
@@ -5979,7 +5991,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
@@ -6052,6 +6063,38 @@ mips_abi_update (char *ignore_args, int from_tty,
      mips_gdbarch_init will take care of the rest.  */
   gdbarch_info_init (&info);
   gdbarch_update_p (info);
+}
+
+/* Print out which MIPS ABI is in use.  */
+
+static void
+show_mips_abi (char *ignore_args, int from_tty)
+{
+  if (gdbarch_bfd_arch_info (current_gdbarch)->arch != bfd_arch_mips)
+    printf_filtered (
+      "The MIPS ABI is unknown because the current architecture is not MIPS.\n");
+  else
+    {
+      enum mips_abi global_abi = global_mips_abi ();
+      enum mips_abi actual_abi = mips_abi (current_gdbarch);
+      const char *actual_abi_str = mips_abi_strings[actual_abi];
+
+      if (global_abi == MIPS_ABI_UNKNOWN)
+	printf_filtered ("The MIPS ABI is set automatically (currently \"%s\").\n",
+	                 actual_abi_str);
+      else if (global_abi == actual_abi)
+	printf_filtered (
+	  "The MIPS ABI is assumed to be \"%s\" (due to user setting).\n",
+	  actual_abi_str);
+      else
+	{
+	  /* Probably shouldn't happen...  */
+	  printf_filtered (
+	    "The (auto detected) MIPS ABI \"%s\" is in use even though the user setting was \"%s\".\n",
+	    actual_abi_str,
+	    mips_abi_strings[global_abi]);
+	}
+    }
 }
 
 static void
@@ -6501,8 +6544,9 @@ This option can be set to one of:\n\
      "  eabi32\n"
      "  eabi64",
      &setmipscmdlist);
-  add_show_from_set (c, &showmipscmdlist);
   set_cmd_sfunc (c, mips_abi_update);
+  add_cmd ("abi", class_obscure, show_mips_abi,
+           "Show ABI in use by MIPS target", &showmipscmdlist);
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */

@@ -23,7 +23,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "frame.h"
 #include "value.h"
@@ -36,6 +35,7 @@
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
 #include "builtin-regs.h"
+#include "block.h"
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -288,7 +288,7 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
 
 /* Return a `value' with the contents of (virtual or cooked) register
    REGNUM as found in the specified FRAME.  The register's type is
-   determined by REGISTER_VIRTUAL_TYPE.
+   determined by register_type().
 
    NOTE: returns NULL if register value is not available.  Caller will
    check return value or die!  */
@@ -320,13 +320,13 @@ value_of_register (int regnum, struct frame_info *frame)
   if (register_cached (regnum) < 0)
     return NULL;		/* register value not available */
 
-  reg_val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
+  reg_val = allocate_value (register_type (current_gdbarch, regnum));
 
   /* Convert raw data to virtual format if necessary.  */
 
   if (REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+      REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
 				   raw_buffer, VALUE_CONTENTS_RAW (reg_val));
     }
   else if (REGISTER_RAW_SIZE (regnum) == REGISTER_VIRTUAL_SIZE (regnum))
@@ -384,6 +384,14 @@ symbol_read_needs_frame (const struct symbol *sym)
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
          we failed to consider one.  */
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      {
+	struct location_funcs *symfuncs = SYMBOL_LOCATION_FUNCS (sym);
+	return (symfuncs->read_needs_frame) (sym);
+      }
+      break;
+
     case LOC_REGISTER:
     case LOC_ARG:
     case LOC_REF_ARG:
@@ -605,11 +613,23 @@ addresses have not been bound by the dynamic loader. Try again when executable i
       }
       break;
 
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      {
+	struct location_funcs *funcs = SYMBOL_LOCATION_FUNCS (var);
+
+	if (frame == 0 && (funcs->read_needs_frame) (var))
+	  return 0;
+	return (funcs->read_variable) (var, frame);
+
+      }
+      break;
+
     case LOC_UNRESOLVED:
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (SYMBOL_NAME (var), NULL, NULL);
+	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (var), NULL, NULL);
 	if (msym == NULL)
 	  return 0;
 	if (overlay_debugging)

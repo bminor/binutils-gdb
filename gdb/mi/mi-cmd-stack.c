@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright 2000, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -254,6 +254,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_REGPARM_ADDR:	/* indirect register arg */
 	    case LOC_LOCAL_ARG:	/* stack arg             */
 	    case LOC_BASEREG_ARG:	/* basereg arg           */
+	    case LOC_COMPUTED_ARG:	/* arg with computed location */
 	      if (!locals)
 		print_me = 1;
 	      break;
@@ -262,6 +263,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_BASEREG:	/* basereg local         */
 	    case LOC_STATIC:	/* static                */
 	    case LOC_REGISTER:	/* register              */
+	    case LOC_COMPUTED:	/* computed location     */
 	      if (locals)
 		print_me = 1;
 	      break;
@@ -272,13 +274,13 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	      if (values)
 		cleanup_tuple = 
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	      ui_out_field_string (uiout, "name", SYMBOL_NAME (sym));
+	      ui_out_field_string (uiout, "name", DEPRECATED_SYMBOL_NAME (sym));
 
 	      if (values)
 		{
 		  struct symbol *sym2;
 		  if (!locals)
-		    sym2 = lookup_symbol (SYMBOL_NAME (sym),
+		    sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
 					  block, VAR_NAMESPACE,
 					  (int *) NULL,
 					  (struct symtab **) NULL);

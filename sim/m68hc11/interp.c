@@ -295,7 +295,7 @@ sim_hw_configure (SIM_DESC sd)
 }
 
 static int
-sim_prepare_for_program (SIM_DESC sd, struct _bfd* abfd)
+sim_prepare_for_program (SIM_DESC sd, struct bfd* abfd)
 {
   sim_cpu *cpu;
 
@@ -341,7 +341,7 @@ sim_prepare_for_program (SIM_DESC sd, struct _bfd* abfd)
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
-          struct _bfd *abfd, char **argv)
+          struct bfd *abfd, char **argv)
 {
   SIM_DESC sd;
   sim_cpu *cpu;
@@ -486,7 +486,7 @@ sim_info (SIM_DESC sd, int verbose)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct _bfd *abfd,
+sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
                      char **argv, char **env)
 {
   return sim_prepare_for_program (sd, abfd);
@@ -554,8 +554,15 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
       val = 0;
       break;
     }
-  memory[0] = val >> 8;
-  memory[1] = val & 0x0FF;
+  if (size == 1)
+    {
+      memory[0] = val;
+    }
+  else
+    {
+      memory[0] = val >> 8;
+      memory[1] = val & 0x0FF;
+    }
   return size;
 }
 

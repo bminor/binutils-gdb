@@ -1004,6 +1004,15 @@ proc skip_cplus_tests {} {
     if { [istarget "h8300-*-*"] } {
 	return 1
     }
+
+    # The C++ IO streams are too large for HC11/HC12 and are thus not
+    # available.  The gdb C++ tests use them and don't compile.
+    if { [istarget "m6811-*-*"] } {
+	return 1
+    }
+    if { [istarget "m6812-*-*"] } {
+	return 1
+    }
     return 0
 }
 

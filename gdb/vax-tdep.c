@@ -46,14 +46,13 @@ static gdbarch_frame_chain_ftype vax_frame_chain;
 static gdbarch_frame_saved_pc_ftype vax_frame_saved_pc;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
-static gdbarch_frame_init_saved_regs_ftype vax_frame_init_saved_regs;
 
 static gdbarch_store_struct_return_ftype vax_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
-static gdbarch_push_dummy_frame_ftype vax_push_dummy_frame;
+static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
 static gdbarch_pop_frame_ftype vax_pop_frame;
 static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
@@ -636,9 +635,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, VAX_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, vax_register_byte);
   set_gdbarch_register_raw_size (gdbarch, vax_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_register_virtual_size (gdbarch, vax_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch,
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          VAX_MAX_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, vax_register_virtual_type);
 
@@ -656,7 +655,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, vax_frame_locals_address);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, vax_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, vax_frame_init_saved_regs);
 
   set_gdbarch_frame_args_skip (gdbarch, 4);
 
@@ -669,7 +668,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, vax_extract_struct_value_address);
 
   /* Call dummy info */
-  set_gdbarch_push_dummy_frame (gdbarch, vax_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_p (gdbarch, 1);

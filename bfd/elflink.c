@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -31,14 +31,15 @@ _bfd_elf_create_got_section (abfd, info)
      struct bfd_link_info *info;
 {
   flagword flags;
-  register asection *s;
+  asection *s;
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
 
   /* This function may be called more than once.  */
-  if (bfd_get_section_by_name (abfd, ".got") != NULL)
+  s = bfd_get_section_by_name (abfd, ".got");
+  if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
     return TRUE;
 
   switch (bed->s->arch_size)
@@ -111,7 +112,7 @@ _bfd_elf_create_dynamic_sections (abfd, info)
      struct bfd_link_info *info;
 {
   flagword flags, pltflags;
-  register asection *s;
+  asection *s;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
 
@@ -272,7 +273,7 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	}
 
       /* We don't put any version information in the dynamic string
-         table.  */
+	 table.  */
       name = h->root.root.string;
       p = strchr (name, ELF_VER_CHR);
       if (p == NULL)
@@ -525,18 +526,19 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
 
       s->_raw_size = align_power (s->_raw_size, lsect->alignment);
 
-      /* Is there a hole we have to provide?  If so check whether the segment is
-	 too big already */
+      /* Is there a hole we have to provide?  If so check whether the
+	 segment is too big already */
       if (lsect->hole_size)
 	{
 	  lsect->hole_offset = s->_raw_size;
 	  s->_raw_size += lsect->hole_size;
 	  if (lsect->hole_offset > lsect->max_hole_offset)
 	    {
-	      (*_bfd_error_handler) (_("%s: Section %s is too large to add hole of %ld bytes"),
-				     bfd_get_filename (abfd),
-				     lsect->name,
-				     (long) lsect->hole_size);
+	      (*_bfd_error_handler)
+		(_("%s: Section %s is too large to add hole of %ld bytes"),
+		 bfd_get_filename (abfd),
+		 lsect->name,
+		 (long) lsect->hole_size);
 
 	      bfd_set_error (bfd_error_bad_value);
 	      return (elf_linker_section_t *)0;

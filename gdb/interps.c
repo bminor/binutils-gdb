@@ -275,6 +275,8 @@ current_interp_command_loop (void)
   else if (current_interpreter != NULL
 	   && current_interpreter->procs->command_loop_proc != NULL)
     current_interpreter->procs->command_loop_proc (current_interpreter->data);
+  else if (event_loop_p)
+    cli_command_loop ();
   else
     command_loop ();
 }
@@ -318,7 +320,7 @@ interp_exec (struct interp *interp, const char *command_str)
    common command hooks.  Use it when removing your interpreter in its 
    suspend proc. */
 void
-clear_interpreter_hooks ()
+clear_interpreter_hooks (void)
 {
   init_ui_hook = 0;
   print_frame_info_listing_hook = 0;

@@ -24,7 +24,6 @@
 #include "defs.h"
 #include <ctype.h>
 #include "symtab.h"
-#include "block.h"
 #include "frame.h"
 #include "breakpoint.h"
 #include "gdbtypes.h"
@@ -50,6 +49,7 @@
 #include "cli/cli-script.h"
 #include "dictionary.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 #include "gdb-events.h"
 
@@ -5830,7 +5830,7 @@ get_catch_sals (int this_level_only)
 
 	      ALL_BLOCK_SYMBOLS (b, iter, sym)
 		{
-		  if (STREQ (SYMBOL_NAME (sym), "default"))
+		  if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 		    {
 		      if (have_default)
 			continue;

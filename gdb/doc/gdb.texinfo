@@ -2514,6 +2514,8 @@ example, on the DSU, only two data breakpoints can be set at a time, and
 @value{GDBN} will reject this command if more than two are used.  Delete
 or disable unused hardware breakpoints before setting new ones
 (@pxref{Disabling, ,Disabling}).  @xref{Conditions, ,Break conditions}.
+@xref{set remote hardware-breakpoint-limit}.
+
 
 @kindex thbreak
 @item thbreak @var{args}
@@ -2749,6 +2751,8 @@ software watchpoints as usual.  However, @value{GDBN} may not notice
 when a non-current thread's activity changes the expression.  (Hardware
 watchpoints, in contrast, watch an expression in all threads.)
 @end quotation
+
+@xref{set remote hardware-watchpoint-limit}.
 
 @node Set Catchpoints
 @subsection Setting catchpoints
@@ -10352,6 +10356,7 @@ is supported other than to try it.
 @menu
 * Server::	                Using the gdbserver program
 * NetWare::                     Using the gdbserve.nlm program
+* Remote configuration::        Remote configuration
 * remote stub::                 Implementing a remote stub
 @end menu
 
@@ -10522,6 +10527,23 @@ argument is a device name (usually a serial device, like
 
 @noindent
 communications with the server via serial line @file{/dev/ttyb}.
+@end table
+
+@node Remote configuration
+@section Remote configuration
+
+The following configuration options are available when debugging remote
+programs:
+
+@table @code
+@kindex set remote hardware-watchpoint-limit
+@kindex set remote hardware-breakpoint-limit
+@anchor{set remote hardware-watchpoint-limit}
+@anchor{set remote hardware-breakpoint-limit}
+@item set remote hardware-watchpoint-limit @var{limit}
+@itemx set remote hardware-breakpoint-limit @var{limit}
+Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
+watchpoints.  A limit of -1, the default, is treated as unlimited.
 @end table
 
 @node remote stub
@@ -11142,9 +11164,12 @@ This command is supported only with some DPMI servers.
 @cindex native Cygwin debugging
 @cindex Cygwin-specific commands
 
-@value{GDBN} supports native debugging of MS Windows programs, and
-defines a few commands specific to the Cygwin port.  This
-subsection describes those commands.
+@value{GDBN} supports native debugging of MS Windows programs, including
+DLLs with and without symbolic debugging information. There are various
+additional Cygwin-specific commands, described in this subsection.  The
+subsubsection @pxref{Non-debug DLL symbols} describes working with DLLs
+that have no debugging symbols.
+
 
 @table @code
 @kindex info w32
@@ -11221,6 +11246,130 @@ via a shell or directly (default value is on).
 Displays if the debuggee will be started with a shell.
 
 @end table
+
+@menu
+* Non-debug DLL symbols::  Support for DLLs without debugging symbols
+@end menu
+
+@node Non-debug DLL symbols
+@subsubsection Support for DLLs without debugging symbols
+@cindex DLLs with no debugging symbols
+@cindex Minimal symbols and DLLs
+
+Very often on windows, some of the DLLs that your program relies on do
+not include symbolic debugging information (for example,
+@file{kernel32.dll}). When @value{GDBN} doesn't recognize any debugging
+symbols in a DLL, it relies on the minimal amount of symbolic
+information contained in the DLL's export table. This subsubsection
+describes working with such symbols, known internally to @value{GDBN} as
+``minimal symbols''.
+
+Note that before the debugged program has started execution, no DLLs
+will have been loaded. The easiest way around this problem is simply to
+start the program --- either by setting a breakpoint or letting the
+program run once to completion. It is also possible to force
+@value{GDBN} to load a particular DLL before starting the executable ---
+see the shared library information in @pxref{Files} or the
+@code{dll-symbols} command in @pxref{Cygwin Native}. Currently,
+explicitly loading symbols from a DLL with no debugging information will
+cause the symbol names to be duplicated in @value{GDBN}'s lookup table,
+which may adversely affect symbol lookup performance.
+
+@subsubsection DLL name prefixes
+
+In keeping with the naming conventions used by the Microsoft debugging
+tools, DLL export symbols are made available with a prefix based on the
+DLL name, for instance @code{KERNEL32!CreateFileA}.  The plain name is
+also entered into the symbol table, so @code{CreateFileA} is often
+sufficient. In some cases there will be name clashes within a program
+(particularly if the executable itself includes full debugging symbols)
+necessitating the use of the fully qualified name when referring to the
+contents of the DLL. Use single-quotes around the name to avoid the
+exclamation mark (``!'')  being interpreted as a language operator.
+
+Note that the internal name of the DLL may be all upper-case, even
+though the file name of the DLL is lower-case, or vice-versa. Since
+symbols within @value{GDBN} are @emph{case-sensitive} this may cause
+some confusion. If in doubt, try the @code{info functions} and
+@code{info variables} commands or even @code{maint print msymbols} (see
+@pxref{Symbols}). Here's an example:
+
+@smallexample
+(gdb) info function CreateFileA
+All functions matching regular expression "CreateFileA":
+
+Non-debugging symbols:
+0x77e885f4  CreateFileA
+0x77e885f4  KERNEL32!CreateFileA
+@end smallexample
+
+@smallexample
+(gdb) info function !
+All functions matching regular expression "!":
+
+Non-debugging symbols:
+0x6100114c  cygwin1!__assert
+0x61004034  cygwin1!_dll_crt0@@0
+0x61004240  cygwin1!dll_crt0(per_process *)
+[etc...]
+@end smallexample
+
+@subsubsection Working with minimal symbols
+
+Symbols extracted from a DLL's export table do not contain very much
+type information. All that @value{GDBN} can do is guess whether a symbol
+refers to a function or variable depending on the linker section that
+contains the symbol. Also note that the actual contents of the memory
+contained in a DLL are not available unless the program is running. This
+means that you cannot examine the contents of a variable or disassemble
+a function within a DLL without a running program.
+
+Variables are generally treated as pointers and dereferenced
+automatically. For this reason, it is often necessary to prefix a
+variable name with the address-of operator (``&'') and provide explicit
+type information in the command. Here's an example of the type of
+problem:
+
+@smallexample
+(gdb) print 'cygwin1!__argv'
+$1 = 268572168
+@end smallexample
+
+@smallexample
+(gdb) x 'cygwin1!__argv'
+0x10021610:      "\230y\""
+@end smallexample
+
+And two possible solutions:
+
+@smallexample
+(gdb) print ((char **)'cygwin1!__argv')[0]
+$2 = 0x22fd98 "/cygdrive/c/mydirectory/myprogram"
+@end smallexample
+
+@smallexample
+(gdb) x/2x &'cygwin1!__argv'
+0x610c0aa8 <cygwin1!__argv>:    0x10021608      0x00000000
+(gdb) x/x 0x10021608
+0x10021608:     0x0022fd98
+(gdb) x/s 0x0022fd98
+0x22fd98:        "/cygdrive/c/mydirectory/myprogram"
+@end smallexample
+
+Setting a break point within a DLL is possible even before the program
+starts execution. However, under these circumstances, @value{GDBN} can't
+examine the initial instructions of the function in order to skip the
+function's frame set-up code. You can work around this by using ``*&''
+to set the breakpoint at a raw memory address:
+
+@smallexample
+(gdb) break *&'python22!PyOS_Readline'
+Breakpoint 1 at 0x1e04eff0
+@end smallexample
+
+The author of these extensions is not entirely convinced that setting a
+break point within a shared DLL like @file{kernel32.dll} is completely
+safe.
 
 @node Embedded OS
 @section Embedded Operating Systems
@@ -12695,6 +12844,32 @@ to an unprototyped function.  This is the default setting.
 @item set coerce-float-to-double off
 Arguments of type @code{float} will be passed directly to unprototyped
 functions.
+@end table
+
+@kindex set cp-abi
+@kindex show cp-abi
+@value{GDBN} needs to know the ABI used for your program's C@t{++}
+objects.  The correct C@t{++} ABI depends on which C@t{++} compiler was
+used to build your application.  @value{GDBN} only fully supports
+programs with a single C@t{++} ABI; if your program contains code using
+multiple C@t{++} ABI's or if @value{GDBN} can not identify your
+program's ABI correctly, you can tell @value{GDBN} which ABI to use.
+Currently supported ABI's include ``gnu-v2'', for @code{g++} versions
+before 3.0, ``gnu-v3'', for @code{g++} versions 3.0 and later, and
+``hpaCC'' for the HP ANSI C@t{++} compiler.  Other C@t{++} compilers may
+use the ``gnu-v2'' or ``gnu-v3'' ABI's as well.  The default setting is
+``auto''.
+
+@table @code
+@item show cp-abi
+Show the C@t{++} ABI currently in use.
+
+@item set cp-abi
+With no argument, show the list of supported C@t{++} ABI's.
+
+@item set cp-abi @var{abi}
+@itemx set cp-abi auto
+Set the current C@t{++} ABI to @var{abi}, or return to automatic detection.
 @end table
 
 @node Messages/Warnings

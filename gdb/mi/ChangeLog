@@ -1,3 +1,27 @@
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Use register_type instead of
+	REGISTER_VIRTUAL_TYPE.
+
+2003-02-25  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c: Replace all instances of SYMBOL_NAME with
+	DEPRECATED_SYMBOL_NAME.  Update copyright.
+
+2003-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-cmd-stack.c (list_args_or_locals): Handle LOC_COMPUTED and
+	LOC_COMPUTED_ARG.
+
+2003-02-19  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c: #include "block.h"
+
+2003-02-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-interp.c (mi_remove_notify_hooks): Convert function
+	definition to ISO C.
+
 2003-02-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-cmd-env.c: Include "gdb_stat.h" instead of <sys/stat.h>.

@@ -1,3 +1,100 @@
+2003-03-04  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Accept valid const in "print
+	Garply<Garply<char> >:: garply".
+	(test_ptype_of_templates): KFAIL "ptype T5<int>" and "ptype t5i"
+	with respect to PR c++/1111; note also PR c++/1113.
+	(test_template_breakpoints): KFAIL "constructor breakpoint" with
+	respect to PR c++/1062.
+	KFAIL "destructor breakpoint" with respect to PR c++/1112.
+
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/classes.exp (test_enums): KFAIL "ptype obj_with_enum"
+	with respect to PR c++/57.
+	KFAIL "print (ClassWithEnum::PrivEnum) 42" with respect to PR
+	c++/826.
+	Create "print ('ClassWithEnum::PrivEnum') 42"; KFAIL it with
+	respect to PR c++/57.
+
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Convert the KFAILs with
+	respect to PR c++/33 into FAILs.
+
+2003-03-03  Michael Chastain  <mec@shout.net>
+
+	* configure.in: Update copyright years.
+
+2003-03-03  Michael Chastain  <mec@shout.net>
+
+	* Makefile.in: Update copyright years.
+
+2003-02-28  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/classes.exp (test_ptype_class_objects): Accept it if we
+	print class instead of struct and/or superfluous protection
+	specifiers, as long as the resulting output is equivalent to the
+	source code.
+	Delete FIXME from end of messages on tests that don't need
+	fixing.
+
+2003-02-28  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Allow const in the two
+	Foo<volatile char *>::foo tests.
+
+2003-02-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/restore.c (main): Return zero, so exit code 
+	will be consistant.
+
+2003-02-26  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): KFAIL the "print Foo<volatile
+	char *>::foo" test with respect to PR c++/33.  Create a new test
+	which is identical to that one except that it doesn't put the
+	space between the "char" and the "*"; KFAIL it, too.
+
+2003-02-26  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Convert XFAILs about printing
+	template types into either PASSes or KFAILs (corresponding to PR
+	c++/57).  Tweak indentation.  Update copyright.
+
+2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* lib/gdb.exp: Don't execute C++ tests on m6811/m6812 targets.
+
+2003-02-13  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/exprs.exp: Remove i960 remnants.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+
+2003-02-14  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/virtfunc.exp (test_virtual_calls): Change 'print
+	pEe->D::vg()" from XFAIL to KFAIL.
+
+2003-02-13  Jason Molenda  (jmolenda@apple.com)
+
+	* gdb.base/maint.exp: Update maint print statistics regexp to include
+	new entries.
+
+2003-02-13  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/inherit.exp: Remove call to get_debug_format.
+
+2003-02-12  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/classes.exp: Remove setup_xfail_format for DWARF 1.
+	* gdb.c++/inherit.exp: Likewise.
+	* gdb.c++/cplusfuncs.exp: Remove suppression logic for DWARF 1.
+	* gdb.c++/templates.exp: Likewise.
+	* gdb.c++/virtfunc.exp: Likewise.
+
 2003-02-06  Jason Molenda  (jason-cl@molenda.com)
 
 	* gdb.mi/mi-syn-frame.c (subroutine): Add a comment explaining
@@ -107,6 +204,8 @@
 
 2003-01-29  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/maint.exp: Allow for leading underscore in symbol.
+	* gdb.base/display.exp: Allow for leading underscore in symbol.
 	* gdb.base/args.exp: Skip if target does not support args passing.
 
 2003-01-22  Daniel Jacobowitz  <drow@mvista.com>

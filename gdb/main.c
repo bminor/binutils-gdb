@@ -60,9 +60,6 @@ int event_loop_p = 1;
    do_setshow_command will free it. */
 char *interpreter_p;
 
-/* Whether this is the command line version or not */
-int tui_version = 0;
-
 /* Whether xdb commands will be handled */
 int xdb_commands = 0;
 
@@ -229,10 +226,10 @@ captured_main (void *data)
 #endif
 
   /* There will always be an interpreter.  Either the one passed into
-     this captured main (not yet implemented), or one specified by the
-     user at start up, or the console.  Make life easier by always
-     initializing the interpreter to something.  */
-  interpreter_p = xstrdup (INTERP_CONSOLE);
+     this captured main, or one specified by the user at start up, or
+     the console.  Initialize the interpreter to the one requested by 
+     the application.  */
+  interpreter_p = xstrdup (context->interpreter_p);
 
   /* Parse arguments and options.  */
   {
@@ -240,12 +237,21 @@ captured_main (void *data)
     /* When var field is 0, use flag field to record the equivalent
        short option (or arbitrary numbers starting at 10 for those
        with no equivalent).  */
+    enum {
+      OPT_SE = 10,
+      OPT_CD,
+      OPT_ANNOTATE,
+      OPT_STATISTICS,
+      OPT_TUI,
+      OPT_NOWINDOWS,
+      OPT_WINDOWS
+    };
     static struct option long_options[] =
     {
       {"async", no_argument, &event_loop_p, 1},
       {"noasync", no_argument, &event_loop_p, 0},
 #if defined(TUI)
-      {"tui", no_argument, &tui_version, 1},
+      {"tui", no_argument, 0, OPT_TUI},
 #endif
       {"xdb", no_argument, &xdb_commands, 1},
       {"dbx", no_argument, &dbx_commands, 1},
@@ -267,9 +273,9 @@ captured_main (void *data)
       {"fullname", no_argument, 0, 'f'},
       {"f", no_argument, 0, 'f'},
 
-      {"annotate", required_argument, 0, 12},
+      {"annotate", required_argument, 0, OPT_ANNOTATE},
       {"help", no_argument, &print_help, 1},
-      {"se", required_argument, 0, 10},
+      {"se", required_argument, 0, OPT_SE},
       {"symbols", required_argument, 0, 's'},
       {"s", required_argument, 0, 's'},
       {"exec", required_argument, 0, 'e'},
@@ -291,15 +297,15 @@ captured_main (void *data)
       {"i", required_argument, 0, 'i'},
       {"directory", required_argument, 0, 'd'},
       {"d", required_argument, 0, 'd'},
-      {"cd", required_argument, 0, 11},
+      {"cd", required_argument, 0, OPT_CD},
       {"tty", required_argument, 0, 't'},
       {"baud", required_argument, 0, 'b'},
       {"b", required_argument, 0, 'b'},
-      {"nw", no_argument, &use_windows, 0},
-      {"nowindows", no_argument, &use_windows, 0},
-      {"w", no_argument, &use_windows, 1},
-      {"windows", no_argument, &use_windows, 1},
-      {"statistics", no_argument, 0, 13},
+      {"nw", no_argument, NULL, OPT_NOWINDOWS},
+      {"nowindows", no_argument, NULL, OPT_NOWINDOWS},
+      {"w", no_argument, NULL, OPT_WINDOWS},
+      {"windows", no_argument, NULL, OPT_WINDOWS},
+      {"statistics", no_argument, 0, OPT_STATISTICS},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
       {0, no_argument, 0, 0}
@@ -323,21 +329,37 @@ captured_main (void *data)
 	  case 0:
 	    /* Long option that just sets a flag.  */
 	    break;
-	  case 10:
+	  case OPT_SE:
 	    symarg = optarg;
 	    execarg = optarg;
 	    break;
-	  case 11:
+	  case OPT_CD:
 	    cdarg = optarg;
 	    break;
-	  case 12:
+	  case OPT_ANNOTATE:
 	    /* FIXME: what if the syntax is wrong (e.g. not digits)?  */
 	    annotation_level = atoi (optarg);
 	    break;
-	  case 13:
+	  case OPT_STATISTICS:
 	    /* Enable the display of both time and space usage.  */
 	    display_time = 1;
 	    display_space = 1;
+	    break;
+	  case OPT_TUI:
+	    /* --tui is equivalent to -i=tui.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup ("tui");
+	    break;
+	  case OPT_WINDOWS:
+	    /* FIXME: cagney/2003-03-01: Not sure if this option is
+               actually useful, and if it is, what it should do.  */
+	    use_windows = 1;
+	    break;
+	  case OPT_NOWINDOWS:
+	    /* -nw is equivalent to -i=console.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup (INTERP_CONSOLE);
+	    use_windows = 0;
 	    break;
 	  case 'f':
 	    annotation_level = 1;
@@ -455,18 +477,7 @@ extern int gdbtk_test (char *);
     if (print_help || print_version)
       {
 	use_windows = 0;
-#ifdef TUI
-	/* Disable the TUI as well.  */
-	tui_version = 0;
-#endif
       }
-
-#ifdef TUI
-    /* An explicit --tui flag overrides the default UI, which is the
-       window system.  */
-    if (tui_version)
-      use_windows = 0;
-#endif
 
     if (set_args)
       {

@@ -1012,7 +1012,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
-  set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     m68k_frameless_function_invocation);
   /* OK to default this value to 'unknown'. */
@@ -1021,8 +1021,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, m68k_register_virtual_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 12);
-  set_gdbarch_max_register_virtual_size (gdbarch, 12);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 12);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 12);
   set_gdbarch_register_virtual_type (gdbarch, m68k_register_virtual_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
   set_gdbarch_register_size (gdbarch, 4);
@@ -1050,7 +1050,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
-  set_gdbarch_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, m68k_pop_frame);
 
   return gdbarch;

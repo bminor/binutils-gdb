@@ -25,7 +25,6 @@
 #include "gdb_string.h"
 #include "frame.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "value.h"
 #include "language.h"
@@ -42,6 +41,7 @@
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "block.h"
 #include "dictionary.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
@@ -645,7 +645,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
       if (do_demangle || asm_demangle)
 	name_temp = SYMBOL_PRINT_NAME (symbol);
       else
-	name_temp = SYMBOL_NAME (symbol);
+	name_temp = DEPRECATED_SYMBOL_NAME (symbol);
     }
 
   if (msymbol != NULL)
@@ -660,7 +660,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  if (do_demangle || asm_demangle)
 	    name_temp = SYMBOL_PRINT_NAME (msymbol);
 	  else
-	    name_temp = SYMBOL_NAME (msymbol);
+	    name_temp = DEPRECATED_SYMBOL_NAME (msymbol);
 	}
     }
   if (symbol == NULL && msymbol == NULL)
@@ -1124,7 +1124,7 @@ address_info (char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
+  fprintf_symbol_filtered (gdb_stdout, DEPRECATED_SYMBOL_NAME (sym),
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
@@ -1149,6 +1149,11 @@ address_info (char *exp, int from_tty)
 	  print_address_numeric (load_addr, 1, gdb_stdout);
 	  printf_filtered (" in overlay section %s", section->name);
 	}
+      break;
+
+    case LOC_COMPUTED:
+    case LOC_COMPUTED_ARG:
+      (SYMBOL_LOCATION_FUNCS (sym)->describe_location) (sym, gdb_stdout);
       break;
 
     case LOC_REGISTER:
@@ -1237,7 +1242,7 @@ address_info (char *exp, int from_tty)
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);
+	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, NULL);
 	if (msym == NULL)
 	  printf_filtered ("unresolved");
 	else
@@ -1366,7 +1371,9 @@ display_command (char *exp, int from_tty)
   int display_it = 1;
 
 #if defined(TUI)
-  if (tui_version && *exp == '$')
+  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+     `tui_version'.  */
+  if (tui_active && *exp == '$')
     display_it = (tui_set_layout (exp) == TUI_FAILURE);
 #endif
 
@@ -1811,6 +1818,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	    case LOC_REGPARM_ADDR:
 	    case LOC_LOCAL_ARG:
 	    case LOC_BASEREG_ARG:
+	    case LOC_COMPUTED_ARG:
 	      break;
 
 	    /* Other types of symbols we just skip over.  */
@@ -1831,11 +1839,11 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 	     Null parameter names occur on the RS/6000, for traceback tables.
 	     FIXME, should we even print them?  */
 
-	  if (*SYMBOL_NAME (sym))
+	  if (*DEPRECATED_SYMBOL_NAME (sym))
 	    {
 	      struct symbol *nsym;
 	      nsym = lookup_symbol
-		(SYMBOL_NAME (sym),
+		(DEPRECATED_SYMBOL_NAME (sym),
 		 b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
 		{

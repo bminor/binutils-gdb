@@ -25,6 +25,7 @@
 /* Opaque declarations.  */
 
 struct symbol;
+struct symtab;
 struct dictionary;
 struct namespace_info;
 struct using_direct;
@@ -138,6 +139,15 @@ struct blockvector
 extern struct symbol *block_function (const struct block *);
 
 extern int contained_in (const struct block *, const struct block *);
+
+extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
+
+extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, asection *,
+						    int *, struct symtab *);
+
+extern struct block *block_for_pc (CORE_ADDR);
+
+extern struct block *block_for_pc_sect (CORE_ADDR, asection *);
 
 extern const char *block_scope (const struct block *block);
 

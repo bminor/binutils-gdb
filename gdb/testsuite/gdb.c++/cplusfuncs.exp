@@ -552,18 +552,7 @@ proc do_tests {} {
     send_gdb "set width 0\n"
     gdb_expect -re "$gdb_prompt $"
 
-    # Get the debug format for the compiled test case.  If that
-    # format is DWARF 1 then just skip all the tests since none of
-    # them will pass.
-
-    if [ runto_main] then {
-	get_debug_format
-	if [ setup_xfail_format "DWARF 1" ] then {
-	    fail "C++ tests skipped due to limited C++ support in DWARF 1 debug format"
-	    return
-	}
-	clear_xfail "*-*-*"
-    }
+    runto_main
 
     probe_demangler
     test_paddr_overloaded_functions

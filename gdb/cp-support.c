@@ -503,7 +503,7 @@ cp_check_namespace_symbol (const char *name, int len)
       sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_LANGUAGE (sym) = language_cplus;
-      SYMBOL_NAME (sym) = name_copy;
+      DEPRECATED_SYMBOL_NAME (sym) = name_copy;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -562,7 +562,7 @@ check_one_possible_namespace_symbol (const char *name, int len)
       sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_LANGUAGE (sym) = language_cplus;
-      SYMBOL_NAME (sym) = name_copy;
+      DEPRECATED_SYMBOL_NAME (sym) = name_copy;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -637,12 +637,12 @@ maintenance_print_namespace (char *args, int from_tty)
   printf_unfiltered ("Definite namespaces:\n");
   ALL_BLOCK_SYMBOLS (namespace_block, iter, sym)
     {
-      printf_unfiltered ("%s\n", SYMBOL_BEST_NAME (sym));
+      printf_unfiltered ("%s\n", SYMBOL_PRINT_NAME (sym));
     }
   printf_unfiltered ("Possible namespaces:\n");
   ALL_BLOCK_SYMBOLS (possible_namespace_block, iter, sym)
     {
-      printf_unfiltered ("%s\n", SYMBOL_BEST_NAME (sym));
+      printf_unfiltered ("%s\n", SYMBOL_PRINT_NAME (sym));
     }
 }
 

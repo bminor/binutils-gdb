@@ -28,6 +28,7 @@
 #include "gdb-events.h"
 
 struct value;
+struct block;
 
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size

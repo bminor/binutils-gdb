@@ -1,6 +1,6 @@
 /* BFD back-end for Hitachi H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -210,7 +210,7 @@ h8300_coff_link_hash_table_create (abfd)
   ret->vectors_sec = NULL;
   ret->funcvec_hash_table = NULL;
 
-  /* OK.  Everything's intialized, return the base pointer.  */
+  /* OK.  Everything's initialized, return the base pointer.  */
   return &ret->root.root;
 }
 
@@ -396,13 +396,9 @@ reloc_processing (relent, reloc, symbols, abfd, section)
   rtype2howto (relent, reloc);
 
   if (((int) reloc->r_symndx) > 0)
-    {
-      relent->sym_ptr_ptr = symbols + obj_convert (abfd)[reloc->r_symndx];
-    }
+    relent->sym_ptr_ptr = symbols + obj_convert (abfd)[reloc->r_symndx];
   else
-    {
-      relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-    }
+    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 
   relent->addend = reloc->r_offset;
 
@@ -428,6 +424,7 @@ h8300_symbol_address_p (abfd, input_section, address)
   while (*s)
     {
       asymbol *p = *s;
+
       if (p->section == input_section
 	  && (input_section->output_section->vma
 	      + input_section->output_offset
@@ -472,8 +469,8 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
   /* Only examine the relocs which might be relaxable.  */
   switch (reloc->howto->type)
     {
-    /* This is the 16/24 bit absolute branch which could become an 8 bit
-       pc-relative branch.  */
+      /* This is the 16/24 bit absolute branch which could become an 8 bit
+	 pc-relative branch.  */
     case R_JMP1:
     case R_JMPL1:
       /* Get the address of the target of this branch.  */
@@ -720,7 +717,6 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 
       /* Everything looks OK.  Apply the relocation and update the
 	 src/dst address appropriately.  */
-
       bfd_put_8 (abfd, gap, data + dst_address);
       dst_address++;
       src_address++;
@@ -752,7 +748,6 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 
       /* Everything looks OK.  Apply the relocation and update the
 	 src/dst address appropriately.  */
-
       bfd_put_16 (abfd, (bfd_vma) gap, data + dst_address);
       dst_address += 2;
       src_address += 2;
@@ -773,7 +768,6 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	{
 	  /* Everything looks OK.  Apply the relocation and update the
 	     src/dst address appropriately.  */
-
 	  bfd_put_8 (abfd, value & 0xff, data + dst_address);
 	  dst_address += 1;
 	  src_address += 1;

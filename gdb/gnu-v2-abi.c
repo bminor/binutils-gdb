@@ -250,7 +250,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   /* Try to find a symbol that is the vtable */
   minsym=lookup_minimal_symbol_by_pc(vtbl);
   if (minsym==NULL
-      || (demangled_name=SYMBOL_NAME(minsym))==NULL
+      || (demangled_name=DEPRECATED_SYMBOL_NAME (minsym))==NULL
       || !is_vtable_name (demangled_name))
     return NULL;
 
@@ -405,6 +405,6 @@ void
 _initialize_gnu_v2_abi (void)
 {
   init_gnuv2_ops ();
-  register_cp_abi (gnu_v2_abi_ops);
-  switch_to_cp_abi ("gnu-v2");
+  register_cp_abi (&gnu_v2_abi_ops);
+  set_cp_abi_as_auto_default (gnu_v2_abi_ops.shortname);
 }

@@ -1,3 +1,48 @@
+2003-03-05  James Ingham <jingham@apple.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Configuring the current ABI): Document "set cp-abi"
+	and "show cp-abi".
+
+2003-03-03  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	register_type.
+
+2003-03-03  Andrew Cagney  <cagney@redhat.com>
+
+	* stabs.texinfo (Structures): Use @samp and separate @var's
+	instead of a single @var containing a comma separated list.
+	(Unions): Ditto.
+
+2003-03-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (distclean): Remove config.log.
+
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	FRAME_INIT_SAVED_REGS to DEPRECATED_FRAME_INIT_SAVED_REGS.
+
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo: Rename INIT_EXTRA_FRAME_INFO to
+	DEPRECATED_INIT_EXTRA_FRAME_INFO.
+
+2003-02-23  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* gdb.texinfo (Cygwin Native): Links to Non-debug DLL symbols.
+	(Non-debug DLL symbols): New node, describing the minimal symbols
+	loaded from DLLs without real debugging symbols.
+
+2003-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Set Breaks): Add cross reference to "set remote
+	hardware-breakpoint-limit".
+	(Set Watchpoints): Add cross reference to "set remote
+	hardware-watchpoint-limit".
+	(Remote configuration options): New section.
+
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

@@ -534,7 +534,8 @@ get_register (int regnum, int format)
 
   if (REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+      REGISTER_CONVERT_TO_VIRTUAL (regnum,
+				   register_type (current_gdbarch, regnum),
 				   raw_buffer, virtual_buffer);
     }
   else
@@ -559,7 +560,7 @@ get_register (int regnum, int format)
     }
   else
     {
-      val_print (REGISTER_VIRTUAL_TYPE (regnum), virtual_buffer, 0, 0,
+      val_print (register_type (current_gdbarch, regnum), virtual_buffer, 0, 0,
 		 stb->stream, format, 1, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);

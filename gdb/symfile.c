@@ -25,7 +25,6 @@
 #include "defs.h"
 #include "bfdlink.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "frame.h"
@@ -48,6 +47,7 @@
 #include "hashtab.h"
 #include <readline/readline.h>
 #include "gdb_assert.h"
+#include "block.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -210,7 +210,7 @@ compare_symbols (const void *s1p, const void *s2p)
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
-  return (strcmp (SYMBOL_BEST_NAME (*s1), SYMBOL_BEST_NAME (*s2)));
+  return (strcmp (SYMBOL_NATURAL_NAME (*s1), SYMBOL_NATURAL_NAME (*s2)));
 }
 
 /* This compares two partial symbols by names, using strcmp_iw_ordered
@@ -222,8 +222,8 @@ compare_psymbols (const void *s1p, const void *s2p)
   struct partial_symbol *const *s1 = s1p;
   struct partial_symbol *const *s2 = s2p;
 
-  return strcmp_iw_ordered (SYMBOL_BEST_NAME (*s1),
-			    SYMBOL_BEST_NAME (*s2));
+  return strcmp_iw_ordered (SYMBOL_NATURAL_NAME (*s1),
+			    SYMBOL_NATURAL_NAME (*s2));
 }
 
 void
@@ -2685,7 +2685,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
+  DEPRECATED_SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
 
   buf = alloca (dem_namelength + 1);
   memcpy (buf, dem_name, dem_namelength);

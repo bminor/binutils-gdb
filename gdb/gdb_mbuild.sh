@@ -85,7 +85,7 @@ do
 	;;
     -f )
 	# Force a rebuild
-	force=true
+	force=true ;
 	;;
     -v )
 	# Be more, and more, and more, verbose

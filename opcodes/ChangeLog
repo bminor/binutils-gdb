@@ -1,3 +1,23 @@
+2003-02-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* hppa-dis.c: Formatting.
+
+2003-02-25  Matthew Wilcox  <willy@debian.org>
+
+	* hppa-dis.c (print_insn_hppa): Implement fcnv instruction modifiers.
+
+	* hppa-dis.c (print_insn_hppa <2 bit space register>): Do not print
+	the space register when the value is zero.
+
+2003-02-23  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* mips-dis.c (print_mips_disassembler_options): Make 'i' unsigned,
+	use ARRAY_SIZE in loops.
+
+2003-02-12  Dave Brolley  <brolley@redhat.com>
+
+	* fr30-desc.c: Regenerate.
+
 2003-02-06  Gwenole Beauchesne  <gbeauchesne@mandrakesoft.com>
 
 	* i386-dis.c (dq_mode, Edq): Define.

@@ -25,6 +25,7 @@
 
 struct symtab_and_line;
 struct frame_unwind;
+struct block;
 
 /* The traditional frame unwinder.  */
 extern const struct frame_unwind *trad_frame_unwind;
@@ -242,7 +243,7 @@ extern enum frame_type get_frame_type (struct frame_info *);
    PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and
    DEPRECATED_PC_IN_CALL_DUMMY() indicates a DUMMY_FRAME.  I suspect
    the real problem here is that get_prev_frame() only sets
-   initialized after INIT_EXTRA_FRAME_INFO as been called.
+   initialized after DEPRECATED_INIT_EXTRA_FRAME_INFO as been called.
    Consequently, some targets found that the frame's type was wrong
    and tried to fix it.  The correct fix is to modify get_prev_frame()
    so that it initializes the frame's type before calling any other
@@ -308,10 +309,6 @@ extern const char *frame_map_regnum_to_name (int regnum);
    specific register.  */
 
 extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
-
-/* Unwind the frame ID.  Return an ID that uniquely identifies the
-   caller's frame.  */
-extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */
@@ -380,7 +377,7 @@ struct frame_info
        special, the address here is the sp for the previous frame, not
        the address where the sp was saved.  */
     /* Allocated by frame_saved_regs_zalloc () which is called /
-       initialized by FRAME_INIT_SAVED_REGS(). */
+       initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
     CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
 
 #ifdef EXTRA_FRAME_INFO
@@ -393,7 +390,7 @@ struct frame_info
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */
     /* Allocated by frame_extra_info_zalloc () which is called /
-       initialized by INIT_EXTRA_FRAME_INFO */
+       initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
     /* If dwarf2 unwind frame informations is used, this structure holds all
@@ -411,9 +408,9 @@ struct frame_info
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
 
-    /* Cached copy of the previous frame's ID.  */
-    int id_unwind_cache_p;
-    struct frame_id id_unwind_cache;
+    /* This frame's ID.  Note that the frame's ID, base and PC contain
+       redundant information.  */
+    struct frame_id id;
 
     /* Pointers to the next (down, inner, younger) and previous (up,
        outer, older) frame_info's in the frame cache.  */
@@ -464,7 +461,7 @@ extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
 
 #ifdef FRAME_FIND_SAVED_REGS
 /* XXX - deprecated */
-#define FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
+#define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) deprecated_get_frame_saved_regs (FI, NULL)
 extern void deprecated_get_frame_saved_regs (struct frame_info *,
 					     struct frame_saved_regs *);
 #endif
@@ -505,10 +502,6 @@ extern struct symbol *get_frame_function (struct frame_info *);
 extern CORE_ADDR frame_address_in_block (struct frame_info *);
 
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);
-
-extern struct block *block_for_pc (CORE_ADDR);
-
-extern struct block *block_for_pc_sect (CORE_ADDR, asection *);
 
 extern int frameless_look_for_prologue (struct frame_info *);
 
@@ -552,6 +545,13 @@ extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 extern void generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 				    int nargs, struct value **args,
 				    struct type *type, int gcc_p);
+
+void generic_unwind_get_saved_register (char *raw_buffer,
+				        int *optimizedp,
+				        CORE_ADDR *addrp,
+				        struct frame_info *frame,
+				        int regnum,
+				        enum lval_type *lvalp);
 
 /* The function generic_get_saved_register() has been made obsolete.
    GET_SAVED_REGISTER now defaults to the recursive equivalent -

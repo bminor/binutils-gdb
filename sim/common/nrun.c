@@ -47,7 +47,7 @@ main (int argc, char **argv)
 {
   char *name;
   char **prog_argv = NULL;
-  struct _bfd *prog_bfd;
+  struct bfd *prog_bfd;
   enum sim_stop reason;
   int sigrc = 0;
   int single_step = 0;

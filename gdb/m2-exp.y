@@ -45,12 +45,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "expression.h"
 #include "language.h"
 #include "value.h"
-#include "block.h"
 #include "parser-defs.h"
 #include "m2-lang.h"
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
+#include "block.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -1042,6 +1042,8 @@ yylex ()
        case LOC_CONST:
        case LOC_CONST_BYTES:
        case LOC_OPTIMIZED_OUT:
+       case LOC_COMPUTED:
+       case LOC_COMPUTED_ARG:
 	  return NAME;
 
        case LOC_TYPEDEF:

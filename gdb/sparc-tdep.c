@@ -431,8 +431,20 @@ sparc_frame_chain (struct frame_info *frame)
 {
   /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
      value.  If it really is zero, we detect it later in
-     sparc_init_prev_frame.  */
-  return (CORE_ADDR) 1;
+     sparc_init_prev_frame.
+     
+     Note:  kevinb/2003-02-18:  The constant 1 used to be returned
+     here, but, after some recent changes to frame_chain_valid(),
+     this value is no longer suitable for causing frame_chain_valid()
+     to "not worry about the chain value."  The constant ~0 (i.e,
+     0xfff...) causes the failing test in frame_chain_valid() to
+     succeed thus preserving the "not worry" property.  I had considered
+     using something like ``get_frame_base (frame) + 1''.  However, I think
+     a constant value is better, because when debugging this problem,
+     I knew that something funny was going on as soon as I saw the
+     constant 1 being used as the frame chain elsewhere in GDB.  */
+
+  return ~ (CORE_ADDR) 0;
 }
 
 CORE_ADDR
@@ -3133,22 +3145,22 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
   set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
-  set_gdbarch_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     frameless_look_for_prologue);
   set_gdbarch_get_saved_register (gdbarch, sparc_get_saved_register);
-  set_gdbarch_init_extra_frame_info (gdbarch, sparc_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sparc_init_extra_frame_info);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_max_register_virtual_size (gdbarch, 8);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_pop_frame (gdbarch, sparc_pop_frame);
   set_gdbarch_push_return_address (gdbarch, sparc_push_return_address);
-  set_gdbarch_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_register_convert_to_raw (gdbarch, sparc_convert_to_raw);
   set_gdbarch_register_convert_to_virtual (gdbarch, 

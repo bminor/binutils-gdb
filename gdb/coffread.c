@@ -23,7 +23,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "demangle.h"
 #include "breakpoint.h"
@@ -45,6 +44,9 @@
 #include "complaints.h"
 #include "target.h"
 #include "gdb_assert.h"
+#include "block.h"
+
+#include "coff-pe-read.h"
 #include "dictionary.h"
 
 extern void _initialize_coffread (void);
@@ -524,7 +526,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   unsigned int num_symbols;
   int symtab_offset;
   int stringtab_offset;
-  struct cleanup *back_to;
+  struct cleanup *back_to, *cleanup_minimal_symbols;
   int stabstrsize;
   int len;
   char * target;
@@ -604,7 +606,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
     error ("\"%s\": can't get string table", name);
 
   init_minimal_symbol_collection ();
-  make_cleanup_discard_minimal_symbols ();
+  cleanup_minimal_symbols = make_cleanup_discard_minimal_symbols ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
@@ -615,6 +617,9 @@ coff_symfile_read (struct objfile *objfile, int mainline)
      minimal symbols for this objfile.  */
 
   install_minimal_symbols (objfile);
+
+  /* Free the installed minimal symbol data.  */
+  do_cleanups (cleanup_minimal_symbols);
 
   bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
@@ -1087,6 +1092,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	}
     }
 
+  if ((nsyms == 0) && (pe_file))
+    {
+      /* We've got no debugging symbols, but it's is a portable
+	 executable, so try to read the export table */
+      read_pe_exported_syms (objfile);
+    }
+
   if (last_source_file)
     coff_end_symtab (objfile);
 
@@ -1417,15 +1429,15 @@ patch_opaque_types (struct symtab *s)
 	  TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&
 	  TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
-	  register char *name = SYMBOL_NAME (real_sym);
+	  register char *name = DEPRECATED_SYMBOL_NAME (real_sym);
 	  register int hash = hashname (name);
 	  register struct symbol *sym, *prev;
 
 	  prev = 0;
 	  for (sym = opaque_type_chain[hash]; sym;)
 	    {
-	      if (name[0] == SYMBOL_NAME (sym)[0] &&
-		  STREQ (name + 1, SYMBOL_NAME (sym) + 1))
+	      if (name[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
+		  STREQ (name + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
 		{
 		  if (prev)
 		    {
@@ -1627,7 +1639,7 @@ process_coff_symbol (register struct coff_symbol *cs,
 		}
 	      else
 		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  concat (SYMBOL_NAME (sym), NULL);
+		  concat (DEPRECATED_SYMBOL_NAME (sym), NULL);
 	    }
 #ifdef CXUX_TARGET
 	  /* Ignore vendor section for Harris CX/UX targets. */
@@ -1645,7 +1657,7 @@ process_coff_symbol (register struct coff_symbol *cs,
 	      TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) !=
 	      TYPE_CODE_UNDEF)
 	    {
-	      register int i = hashname (SYMBOL_NAME (sym));
+	      register int i = hashname (DEPRECATED_SYMBOL_NAME (sym));
 
 	      SYMBOL_VALUE_CHAIN (sym) = opaque_type_chain[i];
 	      opaque_type_chain[i] = sym;
@@ -1663,11 +1675,11 @@ process_coff_symbol (register struct coff_symbol *cs,
 	     names for anonymous enums, structures, and unions, like
 	     "~0fake" or ".0fake".  Thanks, but no thanks... */
 	  if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
-	    if (SYMBOL_NAME (sym) != NULL
-		&& *SYMBOL_NAME (sym) != '~'
-		&& *SYMBOL_NAME (sym) != '.')
+	    if (DEPRECATED_SYMBOL_NAME (sym) != NULL
+		&& *DEPRECATED_SYMBOL_NAME (sym) != '~'
+		&& *DEPRECATED_SYMBOL_NAME (sym) != '.')
 	      TYPE_TAG_NAME (SYMBOL_TYPE (sym)) =
-		concat (SYMBOL_NAME (sym), NULL);
+		concat (DEPRECATED_SYMBOL_NAME (sym), NULL);
 
 	  add_symbol_to_list (sym, &file_symbols);
 	  break;
@@ -2063,7 +2075,7 @@ coff_read_enum_type (int index, int length, int lastsym)
 	     sizeof (struct symbol));
 	  memset (sym, 0, sizeof (struct symbol));
 
-	  SYMBOL_NAME (sym) =
+	  DEPRECATED_SYMBOL_NAME (sym) =
 	    obsavestring (name, strlen (name),
 			  &current_objfile->symbol_obstack);
 	  SYMBOL_CLASS (sym) = LOC_CONST;
@@ -2111,7 +2123,7 @@ coff_read_enum_type (int index, int length, int lastsym)
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = DEPRECATED_SYMBOL_NAME (xsym);
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;

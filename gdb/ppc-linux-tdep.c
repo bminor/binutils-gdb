@@ -732,9 +732,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_frame_chain (gdbarch, ppc_linux_frame_chain);
       set_gdbarch_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
 
-      set_gdbarch_frame_init_saved_regs (gdbarch,
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
                                          ppc_linux_frame_init_saved_regs);
-      set_gdbarch_init_extra_frame_info (gdbarch,
+      set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
                                          ppc_linux_init_extra_frame_info);
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,

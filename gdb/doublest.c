@@ -663,7 +663,7 @@ extract_floating (const void *addr, int len)
 
   if (fmt == NULL)
     {
-      warning ("Can't store a floating-point number of %d bytes.", len);
+      warning ("Can't extract a floating-point number of %d bytes.", len);
       return NAN;
     }
 

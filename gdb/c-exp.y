@@ -43,7 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 #include "expression.h"
 #include "value.h"
-#include "block.h"
 #include "parser-defs.h"
 #include "language.h"
 #include "c-lang.h"
@@ -51,6 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "charset.h"
+#include "block.h"
 
 /* Flag indicating we're dealing with HP-compiled objects */ 
 extern int hp_som_som_object_present;

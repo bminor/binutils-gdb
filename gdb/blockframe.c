@@ -24,7 +24,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -39,6 +38,7 @@
 #include "dummy-frame.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "block.h"
 
 /* Prototypes for exported functions. */
 
@@ -258,96 +258,6 @@ get_frame_function (struct frame_info *frame)
 }
 
 
-/* Return the blockvector immediately containing the innermost lexical block
-   containing the specified pc value and section, or 0 if there is none.
-   PINDEX is a pointer to the index value of the block.  If PINDEX
-   is NULL, we don't pass this information back to the caller.  */
-
-struct blockvector *
-blockvector_for_pc_sect (register CORE_ADDR pc, struct sec *section,
-			 int *pindex, struct symtab *symtab)
-{
-  register struct block *b;
-  register int bot, top, half;
-  struct blockvector *bl;
-
-  if (symtab == 0)		/* if no symtab specified by caller */
-    {
-      /* First search all symtabs for one whose file contains our pc */
-      if ((symtab = find_pc_sect_symtab (pc, section)) == 0)
-	return 0;
-    }
-
-  bl = BLOCKVECTOR (symtab);
-  b = BLOCKVECTOR_BLOCK (bl, 0);
-
-  /* Then search that symtab for the smallest block that wins.  */
-  /* Use binary search to find the last block that starts before PC.  */
-
-  bot = 0;
-  top = BLOCKVECTOR_NBLOCKS (bl);
-
-  while (top - bot > 1)
-    {
-      half = (top - bot + 1) >> 1;
-      b = BLOCKVECTOR_BLOCK (bl, bot + half);
-      if (BLOCK_START (b) <= pc)
-	bot += half;
-      else
-	top = bot + half;
-    }
-
-  /* Now search backward for a block that ends after PC.  */
-
-  while (bot >= 0)
-    {
-      b = BLOCKVECTOR_BLOCK (bl, bot);
-      if (BLOCK_END (b) > pc)
-	{
-	  if (pindex)
-	    *pindex = bot;
-	  return bl;
-	}
-      bot--;
-    }
-  return 0;
-}
-
-/* Return the blockvector immediately containing the innermost lexical block
-   containing the specified pc value, or 0 if there is none.
-   Backward compatibility, no section.  */
-
-struct blockvector *
-blockvector_for_pc (register CORE_ADDR pc, int *pindex)
-{
-  return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
-				  pindex, NULL);
-}
-
-/* Return the innermost lexical block containing the specified pc value
-   in the specified section, or 0 if there is none.  */
-
-struct block *
-block_for_pc_sect (register CORE_ADDR pc, struct sec *section)
-{
-  register struct blockvector *bl;
-  int index;
-
-  bl = blockvector_for_pc_sect (pc, section, &index, NULL);
-  if (bl)
-    return BLOCKVECTOR_BLOCK (bl, index);
-  return 0;
-}
-
-/* Return the innermost lexical block containing the specified pc value,
-   or 0 if there is none.  Backward compatibility, no section.  */
-
-struct block *
-block_for_pc (register CORE_ADDR pc)
-{
-  return block_for_pc_sect (pc, find_pc_mapped_section (pc));
-}
-
 /* Return the function containing pc value PC in section SECTION.
    Returns 0 if function is not known.  */
 
@@ -454,7 +364,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 	    {
 	      cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
 	      cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
-	      cache_pc_function_name = SYMBOL_NAME (f);
+	      cache_pc_function_name = DEPRECATED_SYMBOL_NAME (f);
 	      cache_pc_function_section = section;
 	      goto return_cached_value;
 	    }
@@ -475,7 +385,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 	      if (address)
 		*address = SYMBOL_VALUE_ADDRESS (psb);
 	      if (name)
-		*name = SYMBOL_NAME (psb);
+		*name = DEPRECATED_SYMBOL_NAME (psb);
 	      /* endaddr non-NULL can't happen here.  */
 	      return 1;
 	    }
@@ -506,7 +416,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
     }
 
   cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-  cache_pc_function_name = SYMBOL_NAME (msymbol);
+  cache_pc_function_name = DEPRECATED_SYMBOL_NAME (msymbol);
   cache_pc_function_section = section;
 
   /* Use the lesser of the next minimal symbol in the same section, or
@@ -516,14 +426,14 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
      other sections, to find the next symbol in this section with
      a different address.  */
 
-  for (i = 1; SYMBOL_NAME (msymbol + i) != NULL; i++)
+  for (i = 1; DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL; i++)
     {
       if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
 	  && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
 	break;
     }
 
-  if (SYMBOL_NAME (msymbol + i) != NULL
+  if (DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL
       && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
     cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
   else

@@ -23,7 +23,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "frame.h"
@@ -46,6 +45,7 @@
 #include "hashtab.h"
 
 #include "gdb_obstack.h"
+#include "block.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -80,6 +80,7 @@ static int find_line_common (struct linetable *, int, int *);
 char *operator_chars (char *p, char **end);
 
 static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *,
 						     const char *, int,
 						     namespace_enum);
 
@@ -442,13 +443,10 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
 {
   gsymbol->language = language;
   if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java)
+      || gsymbol->language == language_java
+      || gsymbol->language == language_objc)
     {
       gsymbol->language_specific.cplus_specific.demangled_name = NULL;
-    }
-  else if (gsymbol->language == language_objc)
-    {
-      gsymbol->language_specific.objc_specific.demangled_name = NULL;
     }
   else
     {
@@ -608,17 +606,34 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 }
 
 
+/* Return the source code name of a symbol.  In languages where
+   demangling is necessary, this is the demangled name.  */
+
+char *
+symbol_natural_name (const struct general_symbol_info *gsymbol)
+{
+  if ((gsymbol->language == language_cplus
+       || gsymbol->language == language_java
+       || gsymbol->language == language_objc)
+      && (gsymbol->language_specific.cplus_specific.demangled_name != NULL))
+    {
+      return gsymbol->language_specific.cplus_specific.demangled_name;
+    }
+  else
+    {
+      return gsymbol->name;
+    }
+}
+
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
 const char *
 symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java)
+      || gsymbol->language == language_java
+      || gsymbol->language == language_objc)
     return gsymbol->language_specific.cplus_specific.demangled_name;
-
-  else if (gsymbol->language == language_objc)
-    return gsymbol->language_specific.objc_specific.demangled_name;
 
   else 
     return NULL;
@@ -1214,7 +1229,8 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   ALL_PSYMTABS (objfile, ps)
   {
     if (!ps->readin
-	&& lookup_partial_symbol (ps, name, psymtab_index, namespace))
+	&& lookup_partial_symbol (ps, name, linkage_name,
+				  psymtab_index, namespace))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
@@ -1362,7 +1378,7 @@ lookup_symbol_minsym (const struct minimal_symbol *minsym)
   int block_index = minsym_static (minsym) ? STATIC_BLOCK : GLOBAL_BLOCK;
 
   return lookup_symbol_aux_nonlocal (block_index,
-				     SYMBOL_BEST_NAME (minsym),
+				     SYMBOL_NATURAL_NAME (minsym),
 				     SYMBOL_LINKAGE_NAME (minsym),
 				     VAR_NAMESPACE,
 				     NULL);
@@ -1458,12 +1474,15 @@ lookup_nested_type (struct type *parent_type,
     }
 }
 
-/* Look, in partial_symtab PST, for symbol NAME.  Check the global
-   symbols if GLOBAL, the static symbols if not */
+/* Look, in partial_symtab PST, for symbol whose natural name is NAME.
+   If LINKAGE_NAME is non-NULL, check in addition that the symbol's
+   linkage name matches it.  Check the global symbols if GLOBAL, the
+   static symbols if not */
 
 static struct partial_symbol *
 lookup_partial_symbol (struct partial_symtab *pst, const char *name,
-		       int global, namespace_enum namespace)
+		       const char *linkage_name, int global,
+		       namespace_enum namespace)
 {
   struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
@@ -1485,8 +1504,9 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 
       /* Binary search.  This search is guaranteed to end with center
          pointing at the earliest partial symbol whose name might be
-         correct.  At that point *all* partial symbols with that name
-         will be checked against the correct namespace. */
+         correct.  At that point *all* partial symbols with an
+         appropriate name will be checked against the correct
+         namespace.  */
 
       bottom = start;
       top = start + length - 1;
@@ -1502,7 +1522,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp_iw_ordered (SYMBOL_BEST_NAME (*center), name) >= 0)
+	  if (strcmp_iw_ordered (SYMBOL_NATURAL_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1515,10 +1535,10 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	internal_error (__FILE__, __LINE__,
 			"failed internal consistency check");
 
-      /* djb - 2000-06-03 - Use SYMBOL_MATCHES_NAME, not a strcmp, so
-         we don't have to force a linear search on C++. Probably holds true
-         for JAVA as well, no way to check. */
-      while (top <= real_top && SYMBOL_MATCHES_NAME (*top, name))
+      while (top <= real_top
+	     && (linkage_name != NULL
+		 ? strcmp (SYMBOL_LINKAGE_NAME (*top), linkage_name) == 0
+		 : SYMBOL_MATCHES_NATURAL_NAME (*top,name)))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
@@ -1537,7 +1557,9 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	{
 	  if (namespace == SYMBOL_NAMESPACE (*psym))
 	    {
-	      if (SYMBOL_MATCHES_NAME (*psym, name))
+	      if (linkage_name != NULL
+		  ? strcmp (SYMBOL_LINKAGE_NAME (*psym), linkage_name) == 0
+		  : SYMBOL_MATCHES_NATURAL_NAME (*psym, name))
 		{
 		  return (*psym);
 		}
@@ -1597,7 +1619,8 @@ lookup_transparent_type (const char *name)
 
   ALL_PSYMTABS (objfile, ps)
   {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 1, STRUCT_NAMESPACE))
+    if (!ps->readin && lookup_partial_symbol (ps, name, NULL,
+					      1, STRUCT_NAMESPACE))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
@@ -1644,7 +1667,7 @@ lookup_transparent_type (const char *name)
 
   ALL_PSYMTABS (objfile, ps)
   {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 0, STRUCT_NAMESPACE))
+    if (!ps->readin && lookup_partial_symbol (ps, name, NULL, 0, STRUCT_NAMESPACE))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
@@ -1685,7 +1708,7 @@ find_main_psymtab (void)
 
   ALL_PSYMTABS (objfile, pst)
   {
-    if (lookup_partial_symbol (pst, main_name (), 1, VAR_NAMESPACE))
+    if (lookup_partial_symbol (pst, main_name (), NULL, 1, VAR_NAMESPACE))
       {
 	return (pst);
       }
@@ -1743,6 +1766,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (linkage_name
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
+
 	    {
 	      /* If SYM has aliases, then use any alias that is active
 	         at the current PC.  If no alias is active at the current
@@ -1773,7 +1797,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
-		  SYMBOL_CLASS (sym) != LOC_BASEREG_ARG)
+		  SYMBOL_CLASS (sym) != LOC_BASEREG_ARG &&
+		  SYMBOL_CLASS (sym) != LOC_COMPUTED_ARG)
 		{
 		  break;
 		}
@@ -2040,8 +2065,7 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
   if (msymbol != NULL)
     if (MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
       {
-	mfunsym =
-	  lookup_minimal_symbol_text (SYMBOL_NAME (msymbol), NULL, NULL);
+	mfunsym = lookup_minimal_symbol_text (DEPRECATED_SYMBOL_NAME (msymbol), NULL, NULL);
 	if (mfunsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:
@@ -2052,14 +2076,12 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 	   * so of course we can't find the real func/line info,
 	   * but the "break" still works, and the warning is annoying.
 	   * So I commented out the warning. RT */
-	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_NAME(msymbol)) */
-	    ;
+	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
 	/* fall through */
 	else if (SYMBOL_VALUE (mfunsym) == SYMBOL_VALUE (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out */
-	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_NAME(msymbol)) */
-	    ;
+	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
 	/* fall through */
 	else
 	  return find_pc_line (SYMBOL_VALUE (mfunsym), 0);
@@ -2769,8 +2791,8 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search **sym_a = (struct symbol_search **) sa;
   struct symbol_search **sym_b = (struct symbol_search **) sb;
 
-  return strcmp (SYMBOL_BEST_NAME ((*sym_a)->symbol),
-		 SYMBOL_BEST_NAME ((*sym_b)->symbol));
+  return strcmp (SYMBOL_PRINT_NAME ((*sym_a)->symbol),
+		 SYMBOL_PRINT_NAME ((*sym_b)->symbol));
 }
 
 /* Sort the ``nfound'' symbols in the list after prevtail.  Leave
@@ -2949,17 +2971,13 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    /* If it would match (logic taken from loop below)
 	       load the file and go on to the next one */
 	    if (file_matches (ps->filename, files, nfiles)
-		&& ((regexp == NULL || SYMBOL_MATCHES_REGEXP (*psym))
-		    &&
-		    ((kind == VARIABLES_NAMESPACE
-		      && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
-		      && SYMBOL_CLASS (*psym) != LOC_BLOCK)
-		     || (kind == FUNCTIONS_NAMESPACE
-			 && SYMBOL_CLASS (*psym) == LOC_BLOCK)
-		     || (kind == TYPES_NAMESPACE
-			 && SYMBOL_CLASS (*psym) == LOC_TYPEDEF)
-		     || (kind == METHODS_NAMESPACE
-			 && SYMBOL_CLASS (*psym) == LOC_BLOCK))))
+		&& ((regexp == NULL
+		     || re_exec (SYMBOL_NATURAL_NAME (*psym)) != 0)
+		    && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
+			 && SYMBOL_CLASS (*psym) != LOC_BLOCK)
+			|| (kind == FUNCTIONS_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_BLOCK)
+			|| (kind == TYPES_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_TYPEDEF)
+			|| (kind == METHODS_NAMESPACE && SYMBOL_CLASS (*psym) == LOC_BLOCK))))
 	      {
 		PSYMTAB_TO_SYMTAB (ps);
 		keep_going = 0;
@@ -2990,7 +3008,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    MSYMBOL_TYPE (msymbol) == ourtype3 ||
 	    MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
+	    if (regexp == NULL
+		|| re_exec (SYMBOL_NATURAL_NAME (msymbol)) != 0)
 	      {
 		if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		  {
@@ -3018,39 +3037,33 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	  int nfound = 0;
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
-	  {
-	    QUIT;
-	    if (file_matches (s->filename, files, nfiles)
-		&& ((regexp == NULL || SYMBOL_MATCHES_REGEXP (sym))
-		    &&
-		    ((kind == VARIABLES_NAMESPACE
-		      && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-		      && SYMBOL_CLASS (sym) != LOC_BLOCK
-		      && SYMBOL_CLASS (sym) != LOC_CONST)
-		     || (kind == FUNCTIONS_NAMESPACE
-			 && SYMBOL_CLASS (sym) == LOC_BLOCK)
-		     || (kind == TYPES_NAMESPACE
-			 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-		     || (kind == METHODS_NAMESPACE
-			 && SYMBOL_CLASS (sym) == LOC_BLOCK))))
-	      {
-		/* match */
-		psr =
-		  (struct symbol_search *)
-		  xmalloc (sizeof (struct symbol_search));
-		psr->block = i;
-		psr->symtab = s;
-		psr->symbol = sym;
-		psr->msymbol = NULL;
-		psr->next = NULL;
-		if (tail == NULL)
-		  sr = psr;
-		else
-		  tail->next = psr;
-		tail = psr;
-		nfound++;
-	      }
-	  }
+	    {
+	      QUIT;
+	      if (file_matches (s->filename, files, nfiles)
+		  && ((regexp == NULL
+		       || re_exec (SYMBOL_NATURAL_NAME (sym)) != 0)
+		      && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+			   && SYMBOL_CLASS (sym) != LOC_BLOCK
+			   && SYMBOL_CLASS (sym) != LOC_CONST)
+			  || (kind == FUNCTIONS_NAMESPACE && SYMBOL_CLASS (sym) == LOC_BLOCK)
+			  || (kind == TYPES_NAMESPACE && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+			  || (kind == METHODS_NAMESPACE && SYMBOL_CLASS (sym) == LOC_BLOCK))))
+		{
+		  /* match */
+		  psr = (struct symbol_search *) xmalloc (sizeof (struct symbol_search));
+		  psr->block = i;
+		  psr->symtab = s;
+		  psr->symbol = sym;
+		  psr->msymbol = NULL;
+		  psr->next = NULL;
+		  if (tail == NULL)
+		    sr = psr;
+		  else
+		    tail->next = psr;
+		  tail = psr;
+		  nfound ++;
+		}
+	    }
 	  if (nfound > 0)
 	    {
 	      if (prevtail == NULL)
@@ -3082,7 +3095,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	    MSYMBOL_TYPE (msymbol) == ourtype3 ||
 	    MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
+	    if (regexp == NULL
+		|| re_exec (SYMBOL_NATURAL_NAME (msymbol)) != 0)
 	      {
 		/* Functions:  Look up by address. */
 		if (kind != FUNCTIONS_NAMESPACE ||
@@ -3148,7 +3162,8 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
     {
       type_print (SYMBOL_TYPE (sym),
 		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-		   ? "" : SYMBOL_PRINT_NAME (sym)), gdb_stdout, 0);
+		   ? "" : SYMBOL_PRINT_NAME (sym)),
+		  gdb_stdout, 0);
 
       printf_filtered (";\n");
     }
@@ -3166,8 +3181,10 @@ print_msymbol_info (struct minimal_symbol *msymbol)
     tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
 				   & (CORE_ADDR) 0xffffffff, "08l");
   else
-    tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol), "016l");
-  printf_filtered ("%s  %s\n", tmp, SYMBOL_PRINT_NAME (msymbol));
+    tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
+				   "016l");
+  printf_filtered ("%s  %s\n",
+		   tmp, SYMBOL_PRINT_NAME (msymbol));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -3260,11 +3277,11 @@ rbreak_command (char *regexp, int from_tty)
       if (p->msymbol == NULL)
 	{
 	  char *string = (char *) alloca (strlen (p->symtab->filename)
-					  + strlen (SYMBOL_NAME (p->symbol))
+					  + strlen (DEPRECATED_SYMBOL_NAME (p->symbol))
 					  + 4);
 	  strcpy (string, p->symtab->filename);
 	  strcat (string, ":'");
-	  strcat (string, SYMBOL_NAME (p->symbol));
+	  strcat (string, DEPRECATED_SYMBOL_NAME (p->symbol));
 	  strcat (string, "'");
 	  break_command (string, from_tty);
 	  print_symbol_info (FUNCTIONS_NAMESPACE,
@@ -3273,7 +3290,7 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  break_command (SYMBOL_NAME (p->msymbol), from_tty);
+	  break_command (DEPRECATED_SYMBOL_NAME (p->msymbol), from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
 			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
@@ -3299,7 +3316,7 @@ static char **return_val;
 	(SYMBOL_DEMANGLED_NAME (symbol), (sym_text), (len), (text), (word)); \
     else \
       completion_list_add_name \
-	(SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
+	(DEPRECATED_SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
   } while (0)
 
 /*  Test to see if the symbol specified by SYMNAME (which is already
@@ -3955,7 +3972,7 @@ overload_list_add_symbol (struct symbol *sym, const char *oload_name)
 
   /* skip any symbols that we've already considered. */
   for (i = 0; i < sym_return_val_index; ++i)
-    if (!strcmp (SYMBOL_NAME (sym), SYMBOL_NAME (sym_return_val[i])))
+    if (!strcmp (DEPRECATED_SYMBOL_NAME (sym), DEPRECATED_SYMBOL_NAME (sym_return_val[i])))
       return;
 
   /* Get the demangled name without parameters */
@@ -4154,8 +4171,10 @@ read_in_psymtabs (const char *func_name)
     if (ps->readin)
       continue;
 
-    if ((lookup_partial_symbol (ps, func_name, 1, VAR_NAMESPACE) != NULL)
-	|| (lookup_partial_symbol (ps, func_name, 0, VAR_NAMESPACE) != NULL))
+    if ((lookup_partial_symbol (ps, func_name, NULL, 1, VAR_NAMESPACE)
+	 != NULL)
+	|| (lookup_partial_symbol (ps, func_name, NULL, 0, VAR_NAMESPACE)
+	    != NULL))
       psymtab_to_symtab (ps);
   }
 }

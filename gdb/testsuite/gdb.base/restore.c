@@ -257,4 +257,5 @@ int main ()
 #endif
   driver ();
   printf("exiting\n");
+  return 0;
 }

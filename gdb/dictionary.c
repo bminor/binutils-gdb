@@ -630,7 +630,7 @@ iter_name_first_hashed (const struct dictionary *dict,
        sym = sym->hash_next)
     {
       /* Warning: the order of arguments to strcmp_iw matters!  */
-      if (strcmp_iw (SYMBOL_BEST_NAME (sym), name) == 0)
+      if (strcmp_iw (SYMBOL_NATURAL_NAME (sym), name) == 0)
 	{
 	  break;
 	}
@@ -649,7 +649,7 @@ iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
   for (next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
        next; next = next->hash_next)
     {
-      if (strcmp_iw (SYMBOL_BEST_NAME (next), name) == 0)
+      if (strcmp_iw (SYMBOL_NATURAL_NAME (next), name) == 0)
 	break;
     }
 
@@ -667,7 +667,7 @@ insert_symbol_hashed (struct dictionary *dict,
   unsigned int hash_index;
   struct symbol **buckets = DICT_HASHED_BUCKETS (dict);
 
-  hash_index = (msymbol_hash_iw (SYMBOL_BEST_NAME (sym))
+  hash_index = (msymbol_hash_iw (SYMBOL_NATURAL_NAME (sym))
 		% DICT_HASHED_NBUCKETS (dict));
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
@@ -770,7 +770,7 @@ iter_name_next_linear (const char *name, struct dict_iterator *iterator)
   for (i = DICT_ITERATOR_INDEX (iterator) + 1; i < nsyms; ++i)
     {
       sym = DICT_LINEAR_SYM (dict, i);
-      if (strcmp_iw (SYMBOL_BEST_NAME (sym), name) == 0)
+      if (strcmp_iw (SYMBOL_NATURAL_NAME (sym), name) == 0)
 	{
 	  retval = sym;
 	  break;

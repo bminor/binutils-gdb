@@ -602,8 +602,8 @@ register_loaded_dll (const char *name, DWORD load_addr)
   so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
   so->loaded = 0;
   so->load_addr = load_addr;
-  if (!VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
-		       sizeof (m)))
+  if (VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
+		      sizeof (m)))
     so->end_addr = (DWORD) m.AllocationBase + m.RegionSize;
   else
     so->end_addr = load_addr + 0x2000;	/* completely arbitrary */
@@ -635,21 +635,16 @@ get_image_name (HANDLE h, void *address, int unicode)
   if (address == NULL)
     return NULL;
 
-  ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done);
-
   /* See if we could read the address of a string, and that the
      address isn't null. */
-
-  if (done != sizeof (address_ptr) || !address_ptr)
+  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done) 
+      || done != sizeof (address_ptr) || !address_ptr)
     return NULL;
 
   /* Find the length of the string */
-  do
-    {
-      ReadProcessMemory (h, address_ptr + len * size, &b, size, &done);
-      len++;
-    }
-  while ((b[0] != 0 || b[size - 1] != 0) && done == size);
+  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
+	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
+    continue;
 
   if (!unicode)
     ReadProcessMemory (h, address_ptr, buf, len, &done);
@@ -949,7 +944,7 @@ display_selector (HANDLE thread, DWORD sel)
 	     + info.BaseLow;
       limit = (info.HighWord.Bits.LimitHi << 16) + info.LimitLow;
       if (info.HighWord.Bits.Granularity)
-       limit = (limit << 12) | 0xfff;
+	limit = (limit << 12) | 0xfff;
       printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
       if (info.HighWord.Bits.Default_Big)
 	puts_filtered(" 32-bit ");
@@ -1571,7 +1566,7 @@ child_attach (char *args, int from_tty)
 	ok = DebugActiveProcess (pid);
 
       if (!ok)
-    error ("Can't attach to process.");
+	error ("Can't attach to process.");
     }
 
   if (has_detach_ability ())
@@ -1863,21 +1858,23 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 		   int write, struct mem_attrib *mem,
 		   struct target_ops *target)
 {
-  DWORD done;
+  DWORD done = 0;
   if (write)
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) memaddr));
-      WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
-			  len, &done);
+      if (!WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
+			       len, &done))
+	done = 0;
       FlushInstructionCache (current_process_handle, (LPCVOID) memaddr, len);
     }
   else
     {
       DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) memaddr));
-      ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our, len,
-			 &done);
+      if (!ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our,
+			      len, &done))
+	done = 0;
     }
   return done;
 }
@@ -1964,16 +1961,16 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (th->context.ContextFlags)
 	{
-     if (debug_registers_changed)
-       {
-	  th->context.Dr0 = dr[0];
-	  th->context.Dr1 = dr[1];
-	  th->context.Dr2 = dr[2];
-	  th->context.Dr3 = dr[3];
-	  /* th->context.Dr6 = dr[6];
-	   FIXME: should we set dr6 also ?? */
-	  th->context.Dr7 = dr[7];
-       }
+	  if (debug_registers_changed)
+	    {
+	      th->context.Dr0 = dr[0];
+	      th->context.Dr1 = dr[1];
+	      th->context.Dr2 = dr[2];
+	      th->context.Dr3 = dr[3];
+	      /* th->context.Dr6 = dr[6];
+	       FIXME: should we set dr6 also ?? */
+	      th->context.Dr7 = dr[7];
+	    }
 	  CHECK (SetThreadContext (th->h, &th->context));
 	  th->context.ContextFlags = 0;
 	}

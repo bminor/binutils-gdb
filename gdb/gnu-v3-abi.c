@@ -453,5 +453,5 @@ _initialize_gnu_v3_abi (void)
 {
   init_gnuv3_ops ();
 
-  register_cp_abi (gnu_v3_abi_ops);
+  register_cp_abi (&gnu_v3_abi_ops);
 }

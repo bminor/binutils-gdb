@@ -30,6 +30,8 @@ struct obstack;
 struct objfile;
 struct block;
 struct blockvector;
+struct axs_value;
+struct agent_expr;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -52,9 +54,11 @@ struct blockvector;
 
 struct general_symbol_info
 {
-  /* Name of the symbol.  This is a required field.  Storage for the name is
-     allocated on the psymbol_obstack or symbol_obstack for the associated
-     objfile. */
+  /* Name of the symbol.  This is a required field.  Storage for the
+     name is allocated on the psymbol_obstack or symbol_obstack for
+     the associated objfile.  For languages like C++ that make a
+     distinction between the mangled name and demangled name, this is
+     the mangled name.  */
 
   char *name;
 
@@ -88,17 +92,12 @@ struct general_symbol_info
 
   union
   {
-    struct cplus_specific	/* For C++ */
-      /*  and Java */
+    struct cplus_specific
     {
-      const char *demangled_name;
+      /* This is in fact used for C++, Java, and Objective C.  */
+      char *demangled_name;
     }
     cplus_specific;
-    struct objc_specific
-    {
-      const char *demangled_name;
-    }
-    objc_specific;
   }
   language_specific;
 
@@ -132,6 +131,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
 
+#define DEPRECATED_SYMBOL_NAME(symbol)	(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
@@ -140,14 +140,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
 #define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
 #define SYMBOL_BFD_SECTION(symbol)	(symbol)->ginfo.bfd_section
-
-/* FIXME: carlton/2002-12-20: The situation with all of these names is
-   a mess.  As a first step, try to avoid using SYMBOL_NAME to access
-   the name of a symbol: use SYMBOL_BEST_NAME or SYMBOL_LINKAGE_NAME
-   instead, depending on which one you want.  I'll try to add some
-   initialization functions later, too.  */
-
-#define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
 
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.language_specific.cplus_specific.demangled_name
@@ -170,6 +162,37 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
 			      const char *name, int len,
 			      struct objfile *objfile);
 
+/* Now come lots of name accessor macros.  Short version as to when to
+   use which: Use SYMBOL_NATURAL_NAME to refer to the name of the
+   symbol in the original source code.  Use SYMBOL_LINKAGE_NAME if you
+   want to know what the linker thinks the symbol's name is.  Use
+   SYMBOL_PRINT_NAME for output.  Use SYMBOL_DEMANGLED_NAME if you
+   specifically need to know whether SYMBOL_NATURAL_NAME and
+   SYMBOL_LINKAGE_NAME are different.  Don't use
+   DEPRECATED_SYMBOL_NAME at all: instances of that macro should be
+   replaced by SYMBOL_NATURAL_NAME, SYMBOL_LINKAGE_NAME, or perhaps
+   SYMBOL_PRINT_NAME.  */
+
+/* Return SYMBOL's "natural" name, i.e. the name that it was called in
+   the original source code.  In languages like C++ where symbols may
+   be mangled for ease of manipulation by the linker, this is the
+   demangled name.  */
+
+#define SYMBOL_NATURAL_NAME(symbol) \
+  (symbol_natural_name (&(symbol)->ginfo))
+extern char *symbol_natural_name (const struct general_symbol_info *symbol);
+
+/* Return SYMBOL's name from the point of view of the linker.  In
+   languages like C++ where symbols may be mangled for ease of
+   manipulation by the linker, this is the mangled name; otherwise,
+   it's the same as SYMBOL_NATURAL_NAME.  This is currently identical
+   to DEPRECATED_SYMBOL_NAME, but please use SYMBOL_LINKAGE_NAME when
+   appropriate: it conveys the additional semantic information that
+   you really have thought about the issue and decided that you mean
+   SYMBOL_LINKAGE_NAME instead of SYMBOL_NATURAL_NAME.  */
+
+#define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->ginfo.name
+
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
@@ -177,34 +200,16 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
 extern const char *symbol_demangled_name (const struct general_symbol_info
 					  *symbol);
 
-/* Macro that returns the demangled name of the symbol if if possible
-   and the symbol name if not possible.  The result should never be
-   NULL.  */
-
-#define SYMBOL_BEST_NAME(symbol)					\
-  (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
-
-/* Use this if you want to get at the linkage name of a symbol (which
-   might be mangled).  */
-
-#define SYMBOL_LINKAGE_NAME(symbol)	SYMBOL_NAME (symbol)
-
-#define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
-   (symbol)->ginfo.language_specific.objc_specific.demangled_name
-
-/* Macro that returns the name of a name of a symbol that we want to
-   print.  In C++ this is the "demangled" form of the name if demangle
-   is on and the "mangled" form of the name if demangle is off.  In
-   other languages this is just the symbol name.  The result should
-   never be NULL. */
-
-/* NOTE: carlton/2002-09-26: For external use only; in many
-   situations, SYMBOL_BEST_NAME is more appropriate.  */
+/* Macro that returns a version of the name of a symbol that is
+   suitable for output.  In C++ this is the "demangled" form of the
+   name if demangle is on and the "mangled" form of the name if
+   demangle is off.  In other languages this is just the symbol name.
+   The result should never be NULL.  Don't use this for internal
+   purposes (e.g. storing in a hashtable): it's only suitable for
+   output.  */
 
 #define SYMBOL_PRINT_NAME(symbol)					\
-  (demangle ? SYMBOL_BEST_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
+  (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
@@ -213,26 +218,23 @@ extern const char *symbol_demangled_name (const struct general_symbol_info
    "foo :: bar (int, long)".
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
-/* FIXME: carlton/2002-09-26: Should these two be rewritten to always
-   match against SYMBOL_BEST_NAME (symbol) instead?  Or should there
-   be separate SYMBOL_BMATCHES_BEST_NAME and
-   SYMBOL_MATCHES_BEST_REGEXP macros?  I'm worried about false
-   positive matches against mangled names.  */
+/* FIXME: carlton/2003-02-27: This is an unholy mixture of linkage
+   names and natural names.  If you want to test the linkage names
+   with strcmp, do that.  If you want to test the natural names with
+   strcmp_iw, use SYMBOL_MATCHES_NATURAL_NAME.  */
 
-#define SYMBOL_MATCHES_NAME(symbol, name)				\
-  (STREQ (SYMBOL_NAME (symbol), (name))					\
+#define DEPRECATED_SYMBOL_MATCHES_NAME(symbol, name)			\
+  (STREQ (DEPRECATED_SYMBOL_NAME (symbol), (name))			\
    || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
        && strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
 
-/* Macro that tests a symbol for an re-match against the last compiled regular
-   expression.  First test the unencoded name, then look for and test a C++
-   encoded name if it exists.
-   Evaluates to zero if the match fails, or nonzero if it succeeds. */
+/* Macro that tests a symbol for a match against a specified name
+   string.  It tests against SYMBOL_NATURAL_NAME, and it ignores
+   whitespace and trailing parentheses.  (See strcmp_iw for details
+   about its behavior.)  */
 
-#define SYMBOL_MATCHES_REGEXP(symbol)					\
-  (re_exec (SYMBOL_NAME (symbol)) != 0					\
-   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
-       && re_exec (SYMBOL_DEMANGLED_NAME (symbol)) != 0))
+#define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
+  (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)
 
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
@@ -512,7 +514,60 @@ enum address_class
    * with a level of indirection.
    */
 
-  LOC_INDIRECT
+  LOC_INDIRECT,
+
+  /* The variable's address is computed by a set of location
+     functions (see "struct location_funcs" below).  */
+  LOC_COMPUTED,
+
+  /* Same as LOC_COMPUTED, but for function arguments.  */
+  LOC_COMPUTED_ARG
+};
+
+/* A structure of function pointers describing the location of a
+   variable, structure member, or structure base class.
+
+   These functions' BATON arguments are generic data pointers, holding
+   whatever data the functions need --- the code which provides this
+   structure also provides the actual contents of the baton, and
+   decides its form.  However, there may be other rules about where
+   the baton data must be allocated; whoever is pointing to this
+   `struct location_funcs' object will know the rules.  For example,
+   when a symbol S's location is LOC_COMPUTED, then
+   SYMBOL_LOCATION_FUNCS(S) is pointing to a location_funcs structure,
+   and SYMBOL_LOCATION_BATON(S) is the baton, which must be allocated
+   on the same obstack as the symbol itself.  */
+
+struct location_funcs
+{
+
+  /* Return the value of the variable SYMBOL, relative to the stack
+     frame FRAME.  If the variable has been optimized out, return
+     zero.
+
+     Iff `read_needs_frame (SYMBOL)' is zero, then FRAME may be zero.  */
+
+  struct value *(*read_variable) (const struct symbol * symbol,
+				  struct frame_info * frame);
+
+  /* Return non-zero if we need a frame to find the value of the SYMBOL.  */
+  int (*read_needs_frame) (const struct symbol * symbol);
+
+  /* Write to STREAM a natural-language description of the location of
+     SYMBOL.  */
+  int (*describe_location) (const struct symbol * symbol,
+			    struct ui_file * stream);
+
+  /* Tracepoint support.  Append bytecodes to the tracepoint agent
+     expression AX that push the address of the object SYMBOL.  Set
+     VALUE appropriately.  Note --- for objects in registers, this
+     needn't emit any code; as long as it sets VALUE properly, then
+     the caller will generate the right code in the process of
+     treating this as an lvalue or rvalue.  */
+
+  void (*tracepoint_var_ref) (const struct symbol * symbol,
+			      struct agent_expr * ax,
+			      struct axs_value * value);
 };
 
 /* Linked list of symbol's live ranges. */
@@ -574,6 +629,21 @@ struct symbol
        variable declared with the `__thread' storage class), we may
        need to know which object file it's in.  */
     struct objfile *objfile;
+
+    /* For a LOC_COMPUTED or LOC_COMPUTED_ARG symbol, this is the
+       baton and location_funcs structure to find its location.  For a
+       LOC_BLOCK symbol for a function in a compilation unit compiled
+       with DWARF 2 information, this is information used internally
+       by the DWARF 2 code --- specifically, the location expression
+       for the frame base for this function.  */
+    /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
+       to add a magic symbol to the block containing this information,
+       or to have a generic debug info annotation slot for symbols.  */
+    struct
+    {
+      void *baton;
+      struct location_funcs *funcs;
+    } loc;
   }
   aux_value;
 
@@ -598,6 +668,8 @@ struct symbol
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_ALIASES(symbol)		(symbol)->aliases
 #define SYMBOL_RANGES(symbol)		(symbol)->ranges
+#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.loc.baton
+#define SYMBOL_LOCATION_FUNCS(symbol)   (symbol)->aux_value.loc.funcs
 
 /* A partial_symbol records the name, namespace, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
@@ -755,9 +827,6 @@ struct symtab
 
   /* A function to call to free space, if necessary.  This is IN
      ADDITION to the action indicated by free_code.  */
-
-  /* NOTE: carlton/2002-09-20: This is currently only used by
-     jv-lang.c.  */
 
   void (*free_func)(struct symtab *symtab);
 
@@ -1241,13 +1310,6 @@ extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
 extern struct symtab_and_line find_function_start_sal (struct symbol *sym,
 						       int);
-
-/* blockframe.c */
-
-extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
-
-extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, asection *,
-						    int *, struct symtab *);
 
 /* symfile.c */
 

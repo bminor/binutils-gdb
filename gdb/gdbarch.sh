@@ -470,11 +470,32 @@ f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_n
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte::0
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
 f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
+V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
 f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
-f:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
+V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE have all being replaced
+# by REGISTER_TYPE.
+F:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
+M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
 #
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
@@ -536,7 +557,7 @@ F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf
 #
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
 f:2:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr:::default_push_arguments::0
-f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-:::0
+F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
 F:2:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
 F:2:POP_FRAME:void:pop_frame:void:-:::0
 #
@@ -551,8 +572,8 @@ F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:struct r
 F:2:DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:deprecated_extract_struct_value_address:char *regbuf:regbuf:::0
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::generic_use_struct_convention::0
 #
-F:2:FRAME_INIT_SAVED_REGS:void:frame_init_saved_regs:struct frame_info *frame:frame:::0
-F:2:INIT_EXTRA_FRAME_INFO:void:init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame:::0
+F:2:DEPRECATED_FRAME_INIT_SAVED_REGS:void:deprecated_frame_init_saved_regs:struct frame_info *frame:frame:::0
+F:2:DEPRECATED_INIT_EXTRA_FRAME_INFO:void:deprecated_init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame:::0
 #
 f:2:SKIP_PROLOGUE:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
 f:2:PROLOGUE_FRAMELESS_P:int:prologue_frameless_p:CORE_ADDR ip:ip::0:generic_prologue_frameless_p::0
@@ -797,7 +818,7 @@ extern struct gdbarch *current_gdbarch;
 
 #if GDB_MULTI_ARCH
 #if defined (FRAME_FIND_SAVED_REGS)
-#error "FRAME_FIND_SAVED_REGS: replaced by FRAME_INIT_SAVED_REGS"
+#error "FRAME_FIND_SAVED_REGS: replaced by DEPRECATED_FRAME_INIT_SAVED_REGS"
 #endif
 #endif
 

@@ -50,11 +50,13 @@ i386bsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 CORE_ADDR
 i386bsd_sigcontext_addr (struct frame_info *frame)
 {
-  if (frame->next)
+  struct frame_info *next_frame = get_next_frame (frame);
+
+  if (next_frame)
     /* If this isn't the top frame, the next frame must be for the
        signal handler itself.  A pointer to the sigcontext structure
        is passed as the third argument to the signal handler.  */
-    return read_memory_unsigned_integer (frame->next->frame + 16, 4);
+    return read_memory_unsigned_integer (get_frame_base (next_frame) + 16, 4);
 
   /* This is the top frame.  We'll have to find the address of the
      sigcontext structure by looking at the stack pointer.  */

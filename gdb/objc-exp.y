@@ -44,7 +44,6 @@
 #include "objc-lang.h"	/* For objc language constructs.  */
 
 #include "value.h"
-#include "block.h"
 #include "parser-defs.h"
 #include "language.h"
 #include "c-lang.h"
@@ -53,6 +52,7 @@
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols.  */
 #include "top.h"
 #include "completer.h" /* For skip_quoted().  */
+#include "block.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc), as well as gratuitiously global symbol names, so we can have

@@ -643,8 +643,8 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame. */
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame. */
 
 CORE_ADDR
 mcore_frame_chain (struct frame_info * fi)
@@ -1101,8 +1101,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* All registers are 32 bits */
   set_gdbarch_register_size (gdbarch, MCORE_REG_SIZE);
-  set_gdbarch_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
-  set_gdbarch_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_register_name (gdbarch, mcore_register_name);
   set_gdbarch_register_virtual_type (gdbarch, mcore_register_virtual_type);
   set_gdbarch_register_virtual_size (gdbarch, mcore_register_size);
@@ -1131,15 +1131,14 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
   set_gdbarch_push_return_address (gdbarch, mcore_push_return_address);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, mcore_push_arguments);
   set_gdbarch_call_dummy_length (gdbarch, 0);
 
   /* Frames:  */
 
-  set_gdbarch_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
-  set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
   set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);
   set_gdbarch_deprecated_extract_return_value (gdbarch, 

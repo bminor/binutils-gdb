@@ -324,5 +324,5 @@ _initialize_hpacc_abi (void)
   regcomp (&operator_pattern,
 	   "^This will never match anything, please fill it in$", REG_NOSUB);
 
-  register_cp_abi (hpacc_abi_ops);
+  register_cp_abi (&hpacc_abi_ops);
 }

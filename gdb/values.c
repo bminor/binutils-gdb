@@ -24,7 +24,6 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "value.h"
 #include "gdbcore.h"
@@ -37,6 +36,7 @@
 #include "doublest.h"
 #include "gdb_assert.h"
 #include "regcache.h"
+#include "block.h"
 
 /* Prototypes for exported functions. */
 

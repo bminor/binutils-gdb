@@ -226,13 +226,6 @@ a command like `return' or `jump' to continue execution.");
 #define HAVE_STEPPABLE_WATCHPOINT 1
 #endif
 
-#ifndef HAVE_CONTINUABLE_WATCHPOINT
-#define HAVE_CONTINUABLE_WATCHPOINT 0
-#else
-#undef  HAVE_CONTINUABLE_WATCHPOINT
-#define HAVE_CONTINUABLE_WATCHPOINT 1
-#endif
-
 #ifndef CANNOT_STEP_HW_WATCHPOINTS
 #define CANNOT_STEP_HW_WATCHPOINTS 0
 #else

@@ -26,7 +26,6 @@
 #include "gdb_string.h"
 #include "value.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "language.h"
@@ -40,6 +39,7 @@
 #include "inferior.h"
 #include "annotate.h"
 #include "ui-out.h"
+#include "block.h"
 #include "dictionary.h"
 
 /* Prototypes for exported functions. */
@@ -357,7 +357,7 @@ print_frame (struct frame_info *fi,
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
       else
@@ -374,7 +374,7 @@ print_frame (struct frame_info *fi,
 	     here, while we still have our hands on the function
 	     symbol.) */
 	  char *demangled;
-	  funname = SYMBOL_NAME (func);
+	  funname = DEPRECATED_SYMBOL_NAME (func);
 	  funlang = SYMBOL_LANGUAGE (func);
 	  if (funlang == language_cplus)
 	    {
@@ -392,7 +392,7 @@ print_frame (struct frame_info *fi,
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (frame_address_in_block (fi));
       if (msymbol != NULL)
 	{
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
     }
@@ -654,7 +654,7 @@ frame_info (char *addr_exp, int from_tty)
        * have our hands on the function symbol.)
        */
       char *demangled;
-      funname = SYMBOL_NAME (func);
+      funname = DEPRECATED_SYMBOL_NAME (func);
       funlang = SYMBOL_LANGUAGE (func);
       if (funlang == language_cplus)
 	{
@@ -672,7 +672,7 @@ frame_info (char *addr_exp, int from_tty)
       register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
-	  funname = SYMBOL_NAME (msymbol);
+	  funname = DEPRECATED_SYMBOL_NAME (msymbol);
 	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
     }
@@ -783,9 +783,9 @@ frame_info (char *addr_exp, int from_tty)
       }
   }
 
-  if (FRAME_INIT_SAVED_REGS_P ()
+  if (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()
       && get_frame_saved_regs (fi) == NULL)
-    FRAME_INIT_SAVED_REGS (fi);
+    DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
   /* Print as much information as possible on the location of all the
      registers.  */
   {
@@ -1085,6 +1085,7 @@ print_block_frame_locals (struct block *b, register struct frame_info *fi,
 	case LOC_REGISTER:
 	case LOC_STATIC:
 	case LOC_BASEREG:
+	case LOC_COMPUTED:
 	  values_printed = 1;
 	  for (j = 0; j < num_tabs; j++)
 	    fputs_filtered ("\t", stream);
@@ -1114,7 +1115,7 @@ print_block_frame_labels (struct block *b, int *have_default,
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      if (STREQ (SYMBOL_NAME (sym), "default"))
+      if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 	{
 	  if (*have_default)
 	    continue;
@@ -1311,6 +1312,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	case LOC_REGPARM:
 	case LOC_REGPARM_ADDR:
 	case LOC_BASEREG_ARG:
+	case LOC_COMPUTED_ARG:
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
@@ -1326,7 +1328,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	     float).  There are also LOC_ARG/LOC_REGISTER pairs which
 	     are not combined in symbol-reading.  */
 
-	  sym2 = lookup_symbol (SYMBOL_NAME (sym),
+	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
 		   b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
 	  print_variable_value (sym2, fi, stream);
 	  fprintf_filtered (stream, "\n");

@@ -28,7 +28,6 @@
 #include "defs.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
-#include "block.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
@@ -43,6 +42,7 @@
 #include "hashtab.h"
 
 #include "breakpoint.h"
+#include "block.h"
 #include "dictionary.h"
 
 /* Prototypes for local functions */
@@ -374,7 +374,7 @@ terminate_minimal_symbol_table (struct objfile *objfile)
       = &objfile->msymbols[objfile->minimal_symbol_count];
 
     memset (m, 0, sizeof (*m));
-    SYMBOL_NAME (m) = NULL;
+    DEPRECATED_SYMBOL_NAME (m) = NULL;
     SYMBOL_VALUE_ADDRESS (m) = 0;
     MSYMBOL_INFO (m) = NULL;
     MSYMBOL_TYPE (m) = mst_unknown;
@@ -684,7 +684,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 
 	      else if (SYMBOL_CLASS (sym) == LOC_CONST
 		       && SYMBOL_NAMESPACE (sym) == LABEL_NAMESPACE
-		       && strcmp (SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
+		       && strcmp (DEPRECATED_SYMBOL_NAME (sym), MIPS_EFI_SYMBOL_NAME) == 0)
 		ecoff_relocate_efi (sym, ANOFFSET (delta,
 						   s->block_line_section));
 #endif

@@ -160,6 +160,11 @@ solib_open (char *in_pathname, char **found_pathname)
                         1, lbasename (in_pathname), O_RDONLY, 0,
                         &temp_pathname);
 
+  /* If not found, try to use target supplied solib search method */
+  if (found_file < 0 && TARGET_SO_FIND_AND_OPEN_SOLIB != NULL)
+    found_file = TARGET_SO_FIND_AND_OPEN_SOLIB
+                 (in_pathname, O_RDONLY, &temp_pathname);
+
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
@@ -844,6 +849,13 @@ no_shared_libraries (char *ignored, int from_tty)
   do_clear_solib (NULL);
 }
 
+static void
+reload_shared_libraries (char *ignored, int from_tty)
+{
+  no_shared_libraries (NULL, from_tty);
+  solib_add (NULL, from_tty, NULL, auto_solib_add);
+}
+
 void
 _initialize_solib (void)
 {
@@ -873,6 +885,7 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 For other (relative) files, you can add values using `set solib-search-path'.",
 		   &setlist);
   add_show_from_set (c, &showlist);
+  set_cmd_cfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 
   /* Set the default value of "solib-absolute-prefix" from the sysroot, if
@@ -885,5 +898,6 @@ For other (relative) files, you can add values using `set solib-search-path'.",
 This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
 		   &setlist);
   add_show_from_set (c, &showlist);
+  set_cmd_cfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 }

@@ -39,15 +39,12 @@
 /* readline defines this.  */
 #undef savestring
 
-extern void _initialize_event_loop (void);
-
 static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
 static void command_line_handler_continuation (struct continuation_arg *arg);
 static void change_line_handler (void);
 static void change_annotation_level (void);
 static void command_handler (char *command);
-void cli_command_loop (void);
 static void async_do_nothing (gdb_client_data arg);
 static void async_disconnect (gdb_client_data arg);
 static void async_stop_sig (gdb_client_data arg);
@@ -1199,12 +1196,3 @@ gdb_disable_readline (void)
       delete_file_handler (input_fd);
     }
 }
-
-void
-_initialize_event_loop (void)
-{
-  /* Tell gdb to use the cli_command_loop as the main loop. */
-  if (event_loop_p && command_loop_hook == NULL)
-    command_loop_hook = cli_command_loop;
-}
-

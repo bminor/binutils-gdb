@@ -23,7 +23,6 @@
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
-#include "block.h"
 #include "value.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
@@ -36,6 +35,7 @@
 #include "doublest.h"
 #include "arch-utils.h"
 #include "osabi.h"
+#include "block.h"
 
 #include "elf-bfd.h"
 
@@ -69,13 +69,10 @@ static gdbarch_skip_prologue_ftype alpha_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
 static gdbarch_frame_chain_ftype alpha_frame_chain;
 static gdbarch_frame_saved_pc_ftype alpha_frame_saved_pc;
-static gdbarch_frame_init_saved_regs_ftype alpha_frame_init_saved_regs;
 
 static gdbarch_push_arguments_ftype alpha_push_arguments;
-static gdbarch_push_dummy_frame_ftype alpha_push_dummy_frame;
 static gdbarch_pop_frame_ftype alpha_pop_frame;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
-static gdbarch_init_extra_frame_info_ftype alpha_init_extra_frame_info;
 
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
 
@@ -1823,9 +1820,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, ALPHA_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, alpha_register_byte);
   set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, ALPHA_MAX_REGISTER_RAW_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, ALPHA_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_register_virtual_size (gdbarch, alpha_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch,
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          ALPHA_MAX_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, alpha_register_virtual_type);
 
@@ -1848,7 +1845,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, alpha_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
 
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
@@ -1873,7 +1870,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, alpha_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, alpha_frame_locals_address);
-  set_gdbarch_init_extra_frame_info (gdbarch, alpha_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, alpha_init_extra_frame_info);
 
   /* Alpha OSF/1 inhibits execution of code on the stack.  But there is
      no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all
@@ -1884,7 +1881,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);

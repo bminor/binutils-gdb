@@ -2783,9 +2783,10 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
      peculiarities of function_start_offset.  */
   static CORE_ADDR last_function_start;
 
-  /* If this is nonzero, we've seen an N_SLINE since the start of the current
-     function.  Initialized to nonzero to assure that last_function_start
-     is never used uninitialized.  */
+  /* If this is nonzero, we've seen an N_SLINE since the start of the
+     current function.  We use this to tell us to move the first sline
+     to the beginning of the function regardless of what its given
+     value is. */
   static int sline_found_in_function = 1;
 
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
@@ -2829,7 +2830,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
  	      break;
  	    }
 
-	  record_line (current_subfile, 0, function_start_offset + valu);
+	  /* The following check is added before recording line 0 at
+	     end of function so as to handle hand-generated stabs
+	     which may have an N_FUN stabs at the end of the function, but
+	     no N_SLINE stabs.  */
+	  if (sline_found_in_function)
+	    record_line (current_subfile, 0, last_function_start + valu);
+
 	  within_function = 0;
 	  new = pop_context ();
 
@@ -3259,13 +3266,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  int l = colon_pos - name;
 
 		  m = lookup_minimal_symbol_by_pc (last_pc_address);
-		  if (m && STREQN (SYMBOL_NAME (m), name, l)
-		      && SYMBOL_NAME (m)[l] == '\0')
+		  if (m && STREQN (DEPRECATED_SYMBOL_NAME (m), name, l)
+		      && DEPRECATED_SYMBOL_NAME (m)[l] == '\0')
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
-		  else if (m && SYMBOL_NAME (m + 1)
-			   && STREQN (SYMBOL_NAME (m + 1), name, l)
-			   && SYMBOL_NAME (m + 1)[l] == '\0')
+		  else if (m && DEPRECATED_SYMBOL_NAME (m + 1)
+			   && STREQN (DEPRECATED_SYMBOL_NAME (m + 1), name, l)
+			   && DEPRECATED_SYMBOL_NAME (m + 1)[l] == '\0')
 		    /* last_pc_address was in last function */
 		    valu = SYMBOL_VALUE (m + 1);
 		  else
@@ -3554,7 +3561,6 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
   buildsym_new_init ();
   free_header_files ();
   init_header_files ();
-  install_minimal_symbols (objfile);
 
   processing_acc_compilation = 1;
 
@@ -3566,7 +3572,10 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
-     incremental load here. */
+     incremental load here.  dbx_symfile_read should not generate any new
+     minimal symbols, since we will have already read the ELF dynamic symbol
+     table and normal symbol entries won't be in the ".stab" section; but in
+     case it does, it will install them itself.  */
   dbx_symfile_read (objfile, 0);
 
   if (back_to)
@@ -3648,7 +3657,6 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
   buildsym_new_init ();
   free_header_files ();
   init_header_files ();
-  install_minimal_symbols (objfile);
 
   /* Now, do an incremental load */
 

@@ -1758,7 +1758,7 @@ void
 print_mips_disassembler_options (stream)
      FILE *stream;
 {
-  int i;
+  unsigned int i;
 
   fprintf (stream, _("\n\
 The following MIPS specific disassembler options are supported for use\n\
@@ -1793,14 +1793,14 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("\n\
   For the options above, the following values are supported for \"ABI\":\n\
    "));
-  for (i = 0; mips_abi_choices[i].name != NULL; i++)
+  for (i = 0; i < ARRAY_SIZE (mips_abi_choices); i++)
     fprintf (stream, " %s", mips_abi_choices[i].name);
   fprintf (stream, _("\n"));
 
   fprintf (stream, _("\n\
   For the options above, The following values are supported for \"ARCH\":\n\
    "));
-  for (i = 0; mips_arch_choices[i].name != NULL; i++)
+  for (i = 0; i < ARRAY_SIZE (mips_arch_choices); i++)
     if (*mips_arch_choices[i].name != '\0')
       fprintf (stream, " %s", mips_arch_choices[i].name);
   fprintf (stream, _("\n"));

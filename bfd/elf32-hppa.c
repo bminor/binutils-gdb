@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -8,21 +8,21 @@
 	University of Utah
    Largely rewritten by Alan Modra <alan@linuxcare.com.au>
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -111,7 +111,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    :		ldw -24(%sp),%rp		; restore the original rp
    :		ldsid (%rp),%r1
    :		mtsp %r1,%sr0
-   :		be,n 0(%sr0,%rp)		; inter-space return  */
+   :		be,n 0(%sr0,%rp)		; inter-space return.  */
 
 #define PLT_ENTRY_SIZE 8
 #define GOT_ENTRY_SIZE 4
@@ -1685,10 +1685,6 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   bfd_signed_vma *local_got_refcounts;
   bfd_signed_vma *local_plt_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
-  struct elf32_hppa_link_hash_table *htab;
-  bfd *dynobj;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1698,112 +1694,81 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   local_plt_refcounts = local_got_refcounts;
   if (local_plt_refcounts != NULL)
     local_plt_refcounts += symtab_hdr->sh_info;
-  htab = hppa_link_hash_table (info);
-  dynobj = htab->elf.dynobj;
-  if (dynobj == NULL)
-    return TRUE;
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch ((unsigned int) ELF32_R_TYPE (rel->r_info))
-      {
-      case R_PARISC_DLTIND14F:
-      case R_PARISC_DLTIND14R:
-      case R_PARISC_DLTIND21L:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount -= 1;
-	  }
-	else if (local_got_refcounts != NULL)
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx] -= 1;
-	  }
-	break;
+    {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
 
-      case R_PARISC_PCREL12F:
-      case R_PARISC_PCREL17C:
-      case R_PARISC_PCREL17F:
-      case R_PARISC_PCREL22F:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-	  }
-	break;
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf32_hppa_link_hash_entry *eh;
+	  struct elf32_hppa_dyn_reloc_entry **pp;
+	  struct elf32_hppa_dyn_reloc_entry *p;
 
-      case R_PARISC_PLABEL14R:
-      case R_PARISC_PLABEL21L:
-      case R_PARISC_PLABEL32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf32_hppa_link_hash_entry *eh;
-	    struct elf32_hppa_dyn_reloc_entry **pp;
-	    struct elf32_hppa_dyn_reloc_entry *p;
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct elf32_hppa_link_hash_entry *) h;
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
 
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
+      r_type = ELF32_R_TYPE (rel->r_info);
+      switch (r_type)
+	{
+	case R_PARISC_DLTIND14F:
+	case R_PARISC_DLTIND14R:
+	case R_PARISC_DLTIND21L:
+	  if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-	    eh = (struct elf32_hppa_link_hash_entry *) h;
+	case R_PARISC_PCREL12F:
+	case R_PARISC_PCREL17C:
+	case R_PARISC_PCREL17F:
+	case R_PARISC_PCREL22F:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
 
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-#if RELATIVE_DYNRELOCS
-		  if (!IS_ABSOLUTE_RELOC (rtype))
-		    p->relative_count -= 1;
-#endif
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	else if (local_plt_refcounts != NULL)
-	  {
-	    if (local_plt_refcounts[r_symndx] > 0)
-	      local_plt_refcounts[r_symndx] -= 1;
-	  }
-	break;
+	case R_PARISC_PLABEL14R:
+	case R_PARISC_PLABEL21L:
+	case R_PARISC_PLABEL32:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  else if (local_plt_refcounts != NULL)
+	    {
+	      if (local_plt_refcounts[r_symndx] > 0)
+		local_plt_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-      case R_PARISC_DIR32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf32_hppa_link_hash_entry *eh;
-	    struct elf32_hppa_dyn_reloc_entry **pp;
-	    struct elf32_hppa_dyn_reloc_entry *p;
-
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-
-	    eh = (struct elf32_hppa_link_hash_entry *) h;
-
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-#if RELATIVE_DYNRELOCS
-		  if (!IS_ABSOLUTE_RELOC (R_PARISC_DIR32))
-		    p->relative_count -= 1;
-#endif
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
-
-      default:
-	break;
-      }
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
 }
@@ -2686,12 +2651,15 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  asection *curr;
 	  asection *prev;
 	  bfd_size_type total;
+	  bfd_boolean big_sec;
 
 	  curr = tail;
 	  if (tail->_cooked_size)
 	    total = tail->_cooked_size;
 	  else
 	    total = tail->_raw_size;
+	  big_sec = total >= stub_group_size;
+
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
 		     < stub_group_size))
@@ -2719,8 +2687,11 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  while (tail != curr && (tail = prev) != NULL);
 
 	  /* But wait, there's more!  Input sections up to 240000
-	     bytes before the stub section can be handled by it too.  */
-	  if (!stubs_always_before_branch)
+	     bytes before the stub section can be handled by it too.
+	     Don't do this if we have a really large section after the
+	     stubs, as adding more stubs increases the chance that
+	     branches may not reach into the stub section.  */
+	  if (!stubs_always_before_branch && !big_sec)
 	    {
 	      total = 0;
 	      while (prev != NULL
@@ -2901,11 +2872,22 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace, group_size,
   if (stub_group_size == 1)
     {
       /* Default values.  */
-      stub_group_size = 7680000;
-      if (htab->has_17bit_branch || htab->multi_subspace)
-	stub_group_size = 240000;
-      if (htab->has_12bit_branch)
-	stub_group_size = 7500;
+      if (stubs_always_before_branch)
+	{
+	  stub_group_size = 7680000;
+	  if (htab->has_17bit_branch || htab->multi_subspace)
+	    stub_group_size = 240000;
+	  if (htab->has_12bit_branch)
+	    stub_group_size = 7500;
+	}
+      else
+	{
+	  stub_group_size = 6971392;
+	  if (htab->has_17bit_branch || htab->multi_subspace)
+	    stub_group_size = 217856;
+	  if (htab->has_12bit_branch)
+	    stub_group_size = 6808;
+	}
     }
 
   group_sections (htab, stub_group_size, stubs_always_before_branch);
@@ -3688,14 +3670,11 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		   && ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
 		   && h->elf.type != STT_PARISC_MILLI)
 	    {
-	      if (info->symbolic && !info->allow_shlib_undefined)
-		{
-		  if (!((*info->callbacks->undefined_symbol)
-			(info, h->elf.root.root.string, input_bfd,
-			 input_section, rel->r_offset, FALSE)))
-		    return FALSE;
-		  warned_undef = TRUE;
-		}
+	      if (!((*info->callbacks->undefined_symbol)
+		    (info, h->elf.root.root.string, input_bfd,
+		     input_section, rel->r_offset, FALSE)))
+		return FALSE;
+	      warned_undef = TRUE;
 	    }
 	  else
 	    {

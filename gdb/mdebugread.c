@@ -43,7 +43,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "symfile.h"
@@ -54,6 +53,7 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "gdb_assert.h"
+#include "block.h"
 #include "dictionary.h"
 
 /* These are needed if the tm.h file does not contain the necessary
@@ -668,7 +668,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* It is a FORTRAN common block.  At least for SGI Fortran the
 	     address is not in the symbol; we need to fix it later in
 	     scan_file_globals.  */
-	  int bucket = hashname (SYMBOL_NAME (s));
+	  int bucket = hashname (DEPRECATED_SYMBOL_NAME (s));
 	  SYMBOL_VALUE_CHAIN (s) = global_sym_chain[bucket];
 	  global_sym_chain[bucket] = s;
 	}
@@ -1100,7 +1100,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 			    obstack_alloc (&current_objfile->symbol_obstack,
 					   sizeof (struct symbol)));
 		memset (enum_sym, 0, sizeof (struct symbol));
-		SYMBOL_NAME (enum_sym) =
+		DEPRECATED_SYMBOL_NAME (enum_sym) =
 		  obsavestring (f->name, strlen (f->name),
 				&current_objfile->symbol_obstack);
 		SYMBOL_CLASS (enum_sym) = LOC_CONST;
@@ -1371,7 +1371,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	         for anything except pointers or functions.  */
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (s)) = SYMBOL_NAME (s);
+	    TYPE_NAME (SYMBOL_TYPE (s)) = DEPRECATED_SYMBOL_NAME (s);
 	}
       break;
 
@@ -4444,10 +4444,10 @@ mylookup_symbol (char *name, register struct block *block,
   inc = name[0];
   ALL_BLOCK_SYMBOLS (block, iter, sym)
     {
-      if (SYMBOL_NAME (sym)[0] == inc
+      if (DEPRECATED_SYMBOL_NAME (sym)[0] == inc
 	  && SYMBOL_NAMESPACE (sym) == namespace
 	  && SYMBOL_CLASS (sym) == class
-	  && strcmp (SYMBOL_NAME (sym), name) == 0)
+	  && strcmp (DEPRECATED_SYMBOL_NAME (sym), name) == 0)
 	return sym;
     }
 
@@ -4747,6 +4747,14 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 {
   bfd *abfd = objfile->obfd;
   struct ecoff_debug_info *info;
+  struct cleanup *back_to;
+
+  /* FIXME: It's not clear whether we should be getting minimal symbol
+     information from .mdebug in an ELF file, or whether we will.
+     Re-initialize the minimal symbol reader in case we do.  */
+
+  init_minimal_symbol_collection ();
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   info = ((struct ecoff_debug_info *)
 	  obstack_alloc (&objfile->psymbol_obstack,
@@ -4757,6 +4765,9 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 	   bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, swap, info);
+
+  install_minimal_symbols (objfile);
+  do_cleanups (back_to);
 }
 
 

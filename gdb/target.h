@@ -256,6 +256,7 @@ struct target_ops
     int (*to_remove_watchpoint) (CORE_ADDR, int, int);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
+    int to_have_continuable_watchpoint;
     CORE_ADDR (*to_stopped_data_address) (void);
     int (*to_region_size_ok_for_hw_watchpoint) (int);
     void (*to_terminal_init) (void);
@@ -961,6 +962,13 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 #ifndef STOPPED_BY_WATCHPOINT
 #define STOPPED_BY_WATCHPOINT(w) \
    (*current_target.to_stopped_by_watchpoint) ()
+#endif
+
+/* Non-zero if we have continuable watchpoints  */
+
+#ifndef HAVE_CONTINUABLE_WATCHPOINT
+#define HAVE_CONTINUABLE_WATCHPOINT \
+   (current_target.to_have_continuable_watchpoint)
 #endif
 
 /* HP-UX supplies these operations, which respectively disable and enable

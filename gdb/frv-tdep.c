@@ -38,7 +38,6 @@ static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_frame_chain_ftype frv_frame_chain;
 static gdbarch_frame_saved_pc_ftype frv_frame_saved_pc;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
-static gdbarch_frame_init_saved_regs_ftype frv_frame_init_saved_regs;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype frv_use_struct_convention;
@@ -1067,9 +1066,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, frv_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, frv_register_byte);
   set_gdbarch_register_raw_size (gdbarch, frv_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_register_virtual_size (gdbarch, frv_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, frv_register_virtual_type);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
@@ -1084,7 +1083,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, frv_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, frv_frame_saved_pc);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
 
   set_gdbarch_use_struct_convention (gdbarch, frv_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
@@ -1103,7 +1102,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -1119,7 +1118,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

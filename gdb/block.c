@@ -21,6 +21,8 @@
 
 #include "defs.h"
 #include "block.h"
+#include "symtab.h"
+#include "symfile.h"
 #include "gdb_obstack.h"
 #include "cp-support.h"
 
@@ -63,6 +65,96 @@ block_function (const struct block *bl)
     bl = BLOCK_SUPERBLOCK (bl);
 
   return BLOCK_FUNCTION (bl);
+}
+
+/* Return the blockvector immediately containing the innermost lexical block
+   containing the specified pc value and section, or 0 if there is none.
+   PINDEX is a pointer to the index value of the block.  If PINDEX
+   is NULL, we don't pass this information back to the caller.  */
+
+struct blockvector *
+blockvector_for_pc_sect (register CORE_ADDR pc, struct sec *section,
+			 int *pindex, struct symtab *symtab)
+{
+  register struct block *b;
+  register int bot, top, half;
+  struct blockvector *bl;
+
+  if (symtab == 0)		/* if no symtab specified by caller */
+    {
+      /* First search all symtabs for one whose file contains our pc */
+      if ((symtab = find_pc_sect_symtab (pc, section)) == 0)
+	return 0;
+    }
+
+  bl = BLOCKVECTOR (symtab);
+  b = BLOCKVECTOR_BLOCK (bl, 0);
+
+  /* Then search that symtab for the smallest block that wins.  */
+  /* Use binary search to find the last block that starts before PC.  */
+
+  bot = 0;
+  top = BLOCKVECTOR_NBLOCKS (bl);
+
+  while (top - bot > 1)
+    {
+      half = (top - bot + 1) >> 1;
+      b = BLOCKVECTOR_BLOCK (bl, bot + half);
+      if (BLOCK_START (b) <= pc)
+	bot += half;
+      else
+	top = bot + half;
+    }
+
+  /* Now search backward for a block that ends after PC.  */
+
+  while (bot >= 0)
+    {
+      b = BLOCKVECTOR_BLOCK (bl, bot);
+      if (BLOCK_END (b) > pc)
+	{
+	  if (pindex)
+	    *pindex = bot;
+	  return bl;
+	}
+      bot--;
+    }
+  return 0;
+}
+
+/* Return the blockvector immediately containing the innermost lexical block
+   containing the specified pc value, or 0 if there is none.
+   Backward compatibility, no section.  */
+
+struct blockvector *
+blockvector_for_pc (register CORE_ADDR pc, int *pindex)
+{
+  return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
+				  pindex, NULL);
+}
+
+/* Return the innermost lexical block containing the specified pc value
+   in the specified section, or 0 if there is none.  */
+
+struct block *
+block_for_pc_sect (register CORE_ADDR pc, struct sec *section)
+{
+  register struct blockvector *bl;
+  int index;
+
+  bl = blockvector_for_pc_sect (pc, section, &index, NULL);
+  if (bl)
+    return BLOCKVECTOR_BLOCK (bl, index);
+  return 0;
+}
+
+/* Return the innermost lexical block containing the specified pc value,
+   or 0 if there is none.  Backward compatibility, no section.  */
+
+struct block *
+block_for_pc (register CORE_ADDR pc)
+{
+  return block_for_pc_sect (pc, find_pc_mapped_section (pc));
 }
 
 /* Now come some functions designed to deal with C++ namespace issues.

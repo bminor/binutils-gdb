@@ -247,14 +247,15 @@ create_new_frame (read_register (FP_REGNUM), read_pc ()));
 Other than that, all the meaning imparted to @code{FP_REGNUM} is
 imparted by the machine-dependent code.  So, @code{FP_REGNUM} can have
 any value that is convenient for the code that creates new frames.
-(@code{create_new_frame} calls @code{INIT_EXTRA_FRAME_INFO} if it is
-defined; that is where you should use the @code{FP_REGNUM} value, if
-your frames are nonstandard.)
+(@code{create_new_frame} calls @code{DEPRECATED_INIT_EXTRA_FRAME_INFO}
+if it is defined; that is where you should use the @code{FP_REGNUM}
+value, if your frames are nonstandard.)
 
 @cindex frame chain
 Given a @value{GDBN} frame, define @code{FRAME_CHAIN} to determine the
 address of the calling function's frame.  This will be used to create a
-new @value{GDBN} frame struct, and then @code{INIT_EXTRA_FRAME_INFO} and
+new @value{GDBN} frame struct, and then
+@code{DEPRECATED_INIT_EXTRA_FRAME_INFO} and
 @code{DEPRECATED_INIT_FRAME_PC} will be called for the new frame.
 
 @section Breakpoint Handling
@@ -3251,12 +3252,13 @@ chain pointers, dummy frames, and frames whose PC values are inside the
 startup file (e.g.@: @file{crt0.o}), inside @code{main}, or inside
 @code{_start}.
 
-@item FRAME_INIT_SAVED_REGS(@var{frame})
-@findex FRAME_INIT_SAVED_REGS
+@item DEPRECATED_FRAME_INIT_SAVED_REGS(@var{frame})
+@findex DEPRECATED_FRAME_INIT_SAVED_REGS
 See @file{frame.h}.  Determines the address of all registers in the
 current stack frame storing each in @code{frame->saved_regs}.  Space for
 @code{frame->saved_regs} shall be allocated by
-@code{FRAME_INIT_SAVED_REGS} using @code{frame_saved_regs_zalloc}.
+@code{DEPRECATED_FRAME_INIT_SAVED_REGS} using
+@code{frame_saved_regs_zalloc}.
 
 @code{FRAME_FIND_SAVED_REGS} and @code{EXTRA_FRAME_INFO} are deprecated.
 
@@ -3357,8 +3359,8 @@ On HP-UX, certain system routines (millicode) have names beginning with
 @samp{$} or @samp{$$}.  For example, @code{$$dyncall} is a millicode
 routine that handles inter-space procedure calls on PA-RISC.
 
-@item INIT_EXTRA_FRAME_INFO (@var{fromleaf}, @var{frame})
-@findex INIT_EXTRA_FRAME_INFO
+@item DEPRECATED_INIT_EXTRA_FRAME_INFO (@var{fromleaf}, @var{frame})
+@findex DEPRECATED_INIT_EXTRA_FRAME_INFO
 If additional information about the frame is required this should be
 stored in @code{frame->extra_info}.  Space for @code{frame->extra_info}
 is allocated using @code{frame_extra_info_zalloc}.
@@ -3503,6 +3505,12 @@ Return the virtual size of @var{reg}.
 @findex REGISTER_VIRTUAL_TYPE
 Return the virtual type of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
+
+@item struct type *register_type (@var{gdbarch}, @var{reg})
+@findex register_type
+If defined, return the type of register @var{reg}.  This function
+superseeds @code{REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
+Definition, , Raw and Virtual Register Representations}.
 
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
 @findex REGISTER_CONVERT_TO_VIRTUAL
@@ -4095,7 +4103,7 @@ Some mechanisms do not work with multi-arch.  They include:
 @item EXTRA_FRAME_INFO
 Delete.
 @item FRAME_FIND_SAVED_REGS
-Replaced with @code{FRAME_INIT_SAVED_REGS}
+Replaced with @code{DEPRECATED_FRAME_INIT_SAVED_REGS}
 @end table
 
 @noindent

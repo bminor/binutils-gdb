@@ -1,8 +1,8 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2002 Free Software Foundation,
-   Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,7 +23,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "bfd.h"
 #include "symfile.h"
@@ -33,6 +32,7 @@
 #include "gdb_obstack.h"
 #include "language.h"
 #include "bcache.h"
+#include "block.h"
 #include "dictionary.h"
 
 #include "gdb_string.h"
@@ -101,12 +101,12 @@ free_symtab_block (struct objfile *objfile, struct block *b)
       for (sym = dict_iterator_next (&iter); sym;
 	   sym = dict_iterator_next (&iter))
 	{
-	  xmfree (objfile->md, SYMBOL_NAME (prev_sym));
+	  xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (prev_sym));
 	  xmfree (objfile->md, prev_sym);
 	  prev_sym = sym;
 	}
 
-      xmfree (objfile->md, SYMBOL_NAME (prev_sym));
+      xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (prev_sym));
       xmfree (objfile->md, prev_sym);
     }
 
@@ -189,6 +189,9 @@ void
 print_objfile_statistics (void)
 {
   struct objfile *objfile;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  int i, linetables, blockvectors;
 
   immediate_quit++;
   ALL_OBJFILES (objfile)
@@ -209,6 +212,28 @@ print_objfile_statistics (void)
     if (OBJSTAT (objfile, n_types) > 0)
       printf_filtered ("  Number of \"types\" defined: %d\n",
 		       OBJSTAT (objfile, n_types));
+    i = 0;
+    ALL_OBJFILE_PSYMTABS (objfile, ps)
+      {
+        if (ps->readin == 0)
+          i++;
+      }
+    printf_filtered ("  Number of psym tables (not yet expanded): %d\n", i);
+    i = linetables = blockvectors = 0;
+    ALL_OBJFILE_SYMTABS (objfile, s)
+      {
+        i++;
+        if (s->linetable != NULL)
+          linetables++;
+        if (s->primary == 1)
+          blockvectors++;
+      }
+    printf_filtered ("  Number of symbol tables: %d\n", i);
+    printf_filtered ("  Number of symbol tables with line tables: %d\n", 
+                     linetables);
+    printf_filtered ("  Number of symbol tables with blockvectors: %d\n", 
+                     blockvectors);
+    
     if (OBJSTAT (objfile, sz_strtab) > 0)
       printf_filtered ("  Space used by a.out string tables: %d\n",
 		       OBJSTAT (objfile, sz_strtab));
@@ -296,7 +321,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       return;
     }
   for (index = 0, msymbol = objfile->msymbols;
-       SYMBOL_NAME (msymbol) != NULL; msymbol++, index++)
+       DEPRECATED_SYMBOL_NAME (msymbol) != NULL; msymbol++, index++)
     {
       switch (msymbol->type)
 	{
@@ -333,7 +358,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	}
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
       print_address_numeric (SYMBOL_VALUE_ADDRESS (msymbol), 1, outfile);
-      fprintf_filtered (outfile, " %s", SYMBOL_NAME (msymbol));
+      fprintf_filtered (outfile, " %s", DEPRECATED_SYMBOL_NAME (msymbol));
       if (SYMBOL_BFD_SECTION (msymbol))
 	fprintf_filtered (outfile, " section %s",
 			  bfd_section_name (objfile->obfd,
@@ -497,7 +522,7 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  print_address_numeric (BLOCK_END (b), 1, outfile);
 	  if (BLOCK_FUNCTION (b))
 	    {
-	      fprintf_filtered (outfile, ", function %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
+	      fprintf_filtered (outfile, ", function %s", DEPRECATED_SYMBOL_NAME (BLOCK_FUNCTION (b)));
 	      if (SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)) != NULL)
 		{
 		  fprintf_filtered (outfile, ", %s",
@@ -615,7 +640,7 @@ print_symbol (void *args)
 			  ? "enum"
 		     : (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_STRUCT
 			? "struct" : "union")),
-			    SYMBOL_NAME (symbol));
+			    DEPRECATED_SYMBOL_NAME (symbol));
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
 	}
       fprintf_filtered (outfile, ";\n");
@@ -744,6 +769,11 @@ print_symbol (void *args)
 			       SYMBOL_BFD_SECTION (symbol)));
 	  break;
 
+	case LOC_COMPUTED:
+	case LOC_COMPUTED_ARG:
+	  fprintf_filtered (outfile, "computed at runtime");
+	  break;
+
 	case LOC_UNRESOLVED:
 	  fprintf_filtered (outfile, "unresolved");
 	  break;
@@ -818,7 +848,7 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
   while (count-- > 0)
     {
-      fprintf_filtered (outfile, "    `%s'", SYMBOL_NAME (*p));
+      fprintf_filtered (outfile, "    `%s'", DEPRECATED_SYMBOL_NAME (*p));
       if (SYMBOL_DEMANGLED_NAME (*p) != NULL)
 	{
 	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (*p));
@@ -894,6 +924,10 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  break;
 	case LOC_OPTIMIZED_OUT:
 	  fputs_filtered ("optimized out", outfile);
+	  break;
+	case LOC_COMPUTED:
+	case LOC_COMPUTED_ARG:
+	  fputs_filtered ("computed at runtime", outfile);
 	  break;
 	default:
 	  fputs_filtered ("<invalid location>", outfile);
@@ -993,12 +1027,12 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     length = ps->n_static_syms;
     while (length--)
       {
-	sym = lookup_block_symbol (b, SYMBOL_NAME (*psym),
+	sym = lookup_block_symbol (b, DEPRECATED_SYMBOL_NAME (*psym),
 				   NULL, SYMBOL_NAMESPACE (*psym));
 	if (!sym)
 	  {
 	    printf_filtered ("Static symbol `");
-	    puts_filtered (SYMBOL_NAME (*psym));
+	    puts_filtered (DEPRECATED_SYMBOL_NAME (*psym));
 	    printf_filtered ("' only found in ");
 	    puts_filtered (ps->filename);
 	    printf_filtered (" psymtab\n");
@@ -1010,12 +1044,12 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     length = ps->n_global_syms;
     while (length--)
       {
-	sym = lookup_block_symbol (b, SYMBOL_NAME (*psym),
+	sym = lookup_block_symbol (b, DEPRECATED_SYMBOL_NAME (*psym),
 				   NULL, SYMBOL_NAMESPACE (*psym));
 	if (!sym)
 	  {
 	    printf_filtered ("Global symbol `");
-	    puts_filtered (SYMBOL_NAME (*psym));
+	    puts_filtered (DEPRECATED_SYMBOL_NAME (*psym));
 	    printf_filtered ("' only found in ");
 	    puts_filtered (ps->filename);
 	    printf_filtered (" psymtab\n");

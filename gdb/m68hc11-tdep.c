@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "reggroups.h"
 
 #include "target.h"
 #include "opcode/m68hc11.h"
@@ -441,7 +442,7 @@ m68hc11_pop_frame (void)
   else
     {
       fp = get_frame_base (frame);
-      FRAME_INIT_SAVED_REGS (frame);
+      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame.  */
       for (regnum = 0; regnum < M68HC11_ALL_REGS; regnum++)
@@ -464,24 +465,27 @@ m68hc11_pop_frame (void)
 
 /* 68HC11 opcodes.  */
 #undef M6811_OP_PAGE2
-#define M6811_OP_PAGE2 (0x18)
-#define M6811_OP_LDX   (0xde)
-#define M6811_OP_PSHX  (0x3c)
-#define M6811_OP_STS   (0x9f)
-#define M6811_OP_TSX   (0x30)
-#define M6811_OP_XGDX  (0x8f)
-#define M6811_OP_ADDD  (0xc3)
-#define M6811_OP_TXS   (0x35)
-#define M6811_OP_DES   (0x34)
+#define M6811_OP_PAGE2   (0x18)
+#define M6811_OP_LDX     (0xde)
+#define M6811_OP_LDX_EXT (0xfe)
+#define M6811_OP_PSHX    (0x3c)
+#define M6811_OP_STS     (0x9f)
+#define M6811_OP_STS_EXT (0xbf)
+#define M6811_OP_TSX     (0x30)
+#define M6811_OP_XGDX    (0x8f)
+#define M6811_OP_ADDD    (0xc3)
+#define M6811_OP_TXS     (0x35)
+#define M6811_OP_DES     (0x34)
 
 /* 68HC12 opcodes.  */
-#define M6812_OP_PAGE2 (0x18)
-#define M6812_OP_MOVW  (0x01)
-#define M6812_PB_PSHW  (0xae)
-#define M6812_OP_STS   (0x7f)
-#define M6812_OP_LEAS  (0x1b)
-#define M6812_OP_PSHX  (0x34)
-#define M6812_OP_PSHY  (0x35)
+#define M6812_OP_PAGE2   (0x18)
+#define M6812_OP_MOVW    (0x01)
+#define M6812_PB_PSHW    (0xae)
+#define M6812_OP_STS     (0x5f)
+#define M6812_OP_STS_EXT (0x7f)
+#define M6812_OP_LEAS    (0x1b)
+#define M6812_OP_PSHX    (0x34)
+#define M6812_OP_PSHY    (0x35)
 
 /* Operand extraction.  */
 #define OP_DIRECT      (0x100) /* 8-byte direct addressing.  */
@@ -513,6 +517,10 @@ static struct insn_sequence m6811_prologue[] = {
                      M6811_OP_PSHX } },
   { P_SAVE_REG, 5, { M6811_OP_PAGE2, M6811_OP_LDX, OP_DIRECT,
                      M6811_OP_PAGE2, M6811_OP_PSHX } },
+  { P_SAVE_REG, 4, { M6811_OP_LDX_EXT, OP_IMM_HIGH, OP_IMM_LOW,
+                     M6811_OP_PSHX } },
+  { P_SAVE_REG, 6, { M6811_OP_PAGE2, M6811_OP_LDX_EXT, OP_IMM_HIGH, OP_IMM_LOW,
+                     M6811_OP_PAGE2, M6811_OP_PSHX } },
 
   /* Sequences to allocate local variables.  */
   { P_LOCAL_N,  7, { M6811_OP_TSX,
@@ -531,6 +539,7 @@ static struct insn_sequence m6811_prologue[] = {
 
   /* Initialize the frame pointer.  */
   { P_SET_FRAME, 2, { M6811_OP_STS, OP_DIRECT } },
+  { P_SET_FRAME, 3, { M6811_OP_STS_EXT, OP_IMM_HIGH, OP_IMM_LOW } },
   { P_LAST, 0, { 0 } }
 };
 
@@ -539,7 +548,8 @@ static struct insn_sequence m6811_prologue[] = {
 static struct insn_sequence m6812_prologue[] = {  
   { P_SAVE_REG,  5, { M6812_OP_PAGE2, M6812_OP_MOVW, M6812_PB_PSHW,
                       OP_IMM_HIGH, OP_IMM_LOW } },
-  { P_SET_FRAME, 3, { M6812_OP_STS, OP_IMM_HIGH, OP_IMM_LOW } },
+  { P_SET_FRAME, 2, { M6812_OP_STS, OP_DIRECT } },
+  { P_SET_FRAME, 3, { M6812_OP_STS_EXT, OP_IMM_HIGH, OP_IMM_LOW } },
   { P_LOCAL_N,   2, { M6812_OP_LEAS, OP_PBYTE } },
   { P_LOCAL_2,   1, { M6812_OP_PSHX } },
   { P_LOCAL_2,   1, { M6812_OP_PSHY } },
@@ -806,8 +816,8 @@ m68hc11_skip_prologue (CORE_ADDR pc)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.  */
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.  */
 
 static CORE_ADDR
 m68hc11_frame_chain (struct frame_info *frame)
@@ -1205,6 +1215,66 @@ gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
     return print_insn_m68hc12 (memaddr, info);
 }
 
+
+
+/* 68HC11/68HC12 register groups.
+   Identify real hard registers and soft registers used by gcc.  */
+
+static struct reggroup *m68hc11_soft_reggroup;
+static struct reggroup *m68hc11_hard_reggroup;
+
+static void
+m68hc11_init_reggroups (void)
+{
+  m68hc11_hard_reggroup = reggroup_new ("hard", USER_REGGROUP);
+  m68hc11_soft_reggroup = reggroup_new ("soft", USER_REGGROUP);
+}
+
+static void
+m68hc11_add_reggroups (struct gdbarch *gdbarch)
+{
+  reggroup_add (gdbarch, m68hc11_hard_reggroup);
+  reggroup_add (gdbarch, m68hc11_soft_reggroup);
+  reggroup_add (gdbarch, general_reggroup);
+  reggroup_add (gdbarch, float_reggroup);
+  reggroup_add (gdbarch, all_reggroup);
+  reggroup_add (gdbarch, save_reggroup);
+  reggroup_add (gdbarch, restore_reggroup);
+  reggroup_add (gdbarch, vector_reggroup);
+  reggroup_add (gdbarch, system_reggroup);
+}
+
+static int
+m68hc11_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+                             struct reggroup *group)
+{
+  /* We must save the real hard register as well as gcc
+     soft registers including the frame pointer.  */
+  if (group == save_reggroup || group == restore_reggroup)
+    {
+      return (regnum <= gdbarch_num_regs (gdbarch)
+              || ((regnum == SOFT_FP_REGNUM
+                   || regnum == SOFT_TMP_REGNUM
+                   || regnum == SOFT_ZS_REGNUM
+                   || regnum == SOFT_XY_REGNUM)
+                  && m68hc11_register_name (regnum)));
+    }
+
+  /* Group to identify gcc soft registers (d1..dN).  */
+  if (group == m68hc11_soft_reggroup)
+    {
+      return regnum >= SOFT_D1_REGNUM && m68hc11_register_name (regnum);
+    }
+
+  if (group == m68hc11_hard_reggroup)
+    {
+      return regnum == HARD_PC_REGNUM || regnum == HARD_SP_REGNUM
+        || regnum == HARD_X_REGNUM || regnum == HARD_D_REGNUM
+        || regnum == HARD_Y_REGNUM || regnum == HARD_CCR_REGNUM;
+    }
+  return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
 static struct gdbarch *
 m68hc11_gdbarch_init (struct gdbarch_info info,
                       struct gdbarch_list *arches)
@@ -1283,16 +1353,16 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_int_bit (gdbarch, elf_flags & E_M68HC11_I32 ? 32 : 16);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, elf_flags & E_M68HC11_F64 ? 64 : 32);
-  set_gdbarch_long_double_bit (gdbarch, elf_flags & E_M68HC11_F64 ? 64 : 32);
+  set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_bit (gdbarch, 32);
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_long_long_bit (gdbarch, 64);
 
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
-  set_gdbarch_max_register_raw_size (gdbarch, 2);
-  set_gdbarch_max_register_virtual_size (gdbarch, 2);
-  set_gdbarch_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 2);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 2);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
@@ -1324,7 +1394,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, m68hc11_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, m68hc11_push_return_address);
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
@@ -1348,7 +1417,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
-  set_gdbarch_init_extra_frame_info (gdbarch, m68hc11_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, m68hc11_init_extra_frame_info);
   set_gdbarch_pop_frame (gdbarch, m68hc11_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -1357,6 +1426,9 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
+
+  m68hc11_add_reggroups (gdbarch);
+  set_gdbarch_register_reggroup_p (gdbarch, m68hc11_register_reggroup_p);
 
   /* Minsymbol frobbing.  */
   set_gdbarch_elf_make_msymbol_special (gdbarch,
@@ -1372,6 +1444,7 @@ _initialize_m68hc11_tdep (void)
 {
   register_gdbarch_init (bfd_arch_m68hc11, m68hc11_gdbarch_init);
   register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);
+  m68hc11_init_reggroups ();
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 } 

@@ -1,5 +1,5 @@
 /* Low level interface for debugging Solaris threads for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1476,7 +1476,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  struct minimal_symbol *msym;
 	  msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
 	  if (msym)
-	    printf_filtered ("   startfunc: %s\n", SYMBOL_NAME (msym));
+	    printf_filtered ("   startfunc: %s\n", DEPRECATED_SYMBOL_NAME (msym));
 	  else
 	    printf_filtered ("   startfunc: 0x%s\n", paddr (ti.ti_startfunc));
 	}
@@ -1487,7 +1487,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  struct minimal_symbol *msym;
 	  msym = lookup_minimal_symbol_by_pc (ti.ti_pc);
 	  if (msym)
-	    printf_filtered (" - Sleep func: %s\n", SYMBOL_NAME (msym));
+	    printf_filtered (" - Sleep func: %s\n", DEPRECATED_SYMBOL_NAME (msym));
 	  else
 	    printf_filtered (" - Sleep func: 0x%s\n", paddr (ti.ti_startfunc));
 	}

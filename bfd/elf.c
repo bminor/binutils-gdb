@@ -97,6 +97,12 @@ static bfd_boolean elfcore_grok_netbsd_procinfo
   PARAMS ((bfd *, Elf_Internal_Note *));
 static bfd_boolean elfcore_grok_netbsd_note
   PARAMS ((bfd *, Elf_Internal_Note *));
+static bfd_boolean elfcore_grok_nto_gregs
+  PARAMS ((bfd *, Elf_Internal_Note *, pid_t));
+static bfd_boolean elfcore_grok_nto_status
+  PARAMS ((bfd *, Elf_Internal_Note *, pid_t *));
+static bfd_boolean elfcore_grok_nto_note
+  PARAMS ((bfd *, Elf_Internal_Note *));
 
 /* Swap version information in and out.  The version information is
    currently size independent.  If that ever changes, this code will
@@ -3542,7 +3548,7 @@ elf_sort_sections (arg1, arg2)
 
   /* Put !SEC_LOAD sections after SEC_LOAD ones.  */
 
-#define TOEND(x) (((x)->flags & (SEC_LOAD|SEC_THREAD_LOCAL)) == 0)
+#define TOEND(x) (((x)->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0)
 
   if (TOEND (sec1))
     {
@@ -4656,13 +4662,20 @@ copy_private_bfd_data (ibfd, obfd)
    && ! section->segment_mark)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
-#define SEGMENT_AFTER_SEGMENT(seg1, seg2)				\
-  (seg1->p_vaddr >= SEGMENT_END (seg2, seg2->p_vaddr))
+#define SEGMENT_AFTER_SEGMENT(seg1, seg2, field)			\
+  (seg1->field >= SEGMENT_END (seg2, seg2->field))
 
-  /* Returns TRUE iff seg1 and seg2 overlap.  */
+  /* Returns TRUE iff seg1 and seg2 overlap. Segments overlap iff both
+     their VMA address ranges and their LMA address ranges overlap.
+     It is possible to have overlapping VMA ranges without overlapping LMA
+     ranges.  RedBoot images for example can have both .data and .bss mapped
+     to the same VMA range, but with the .data section mapped to a different
+     LMA.  */
 #define SEGMENT_OVERLAPS(seg1, seg2)					\
-  (!(SEGMENT_AFTER_SEGMENT (seg1, seg2)					\
-     || SEGMENT_AFTER_SEGMENT (seg2, seg1)))
+  (   !(SEGMENT_AFTER_SEGMENT (seg1, seg2, p_vaddr)			\
+        || SEGMENT_AFTER_SEGMENT (seg2, seg1, p_vaddr)) 		\
+   && !(SEGMENT_AFTER_SEGMENT (seg1, seg2, p_paddr)			\
+        || SEGMENT_AFTER_SEGMENT (seg2, seg1, p_paddr)))
 
   /* Initialise the segment mark field.  */
   for (section = ibfd->sections; section != NULL; section = section->next)
@@ -4760,13 +4773,14 @@ copy_private_bfd_data (ibfd, obfd)
 	continue;
 
       /* Compute how many sections might be placed into this segment.  */
-      section_count = 0;
-      for (section = ibfd->sections; section != NULL; section = section->next)
+      for (section = ibfd->sections, section_count = 0;
+	   section != NULL;
+	   section = section->next)
 	if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	  ++section_count;
-
-      /* Allocate a segment map big enough to contain all of the
-	 sections we have selected.  */
+ 
+      /* Allocate a segment map big enough to contain
+	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map);
       amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
       map = (struct elf_segment_map *) bfd_alloc (obfd, amt);
@@ -4838,7 +4852,7 @@ copy_private_bfd_data (ibfd, obfd)
 	    and possibly its LMA changed, and a new segment or segments will
 	    have to be created to contain the other sections.
 
-	 4. The sections have been moved, but not be the same amount.
+	 4. The sections have been moved, but not by the same amount.
 	    In this case we can change the segment's LMA to match the LMA
 	    of the first section and we will have to create a new segment
 	    or segments to contain the other sections.
@@ -5082,10 +5096,8 @@ copy_private_bfd_data (ibfd, obfd)
     if (map->p_paddr != 0)
       break;
   if (map == NULL)
-    {
-      for (map = map_first; map != NULL; map = map->next)
-	map->p_paddr_valid = 0;
-    }
+    for (map = map_first; map != NULL; map = map->next)
+      map->p_paddr_valid = 0;
 
   elf_tdata (obfd)->segment_map = map_first;
 
@@ -6961,6 +6973,104 @@ elfcore_grok_netbsd_note (abfd, note)
     /* NOTREACHED */
 }
 
+static bfd_boolean
+elfcore_grok_nto_status (abfd, note, tid)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+     pid_t *tid;
+{
+  void *ddata = note->descdata;
+  char buf[100];
+  char *name;
+  asection *sect;
+
+  /* nto_procfs_status 'pid' field is at offset 0.  */
+  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
+
+  /* nto_procfs_status 'tid' field is at offset 4.  */
+  elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
+
+  /* nto_procfs_status 'what' field is at offset 14.  */
+  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, (bfd_byte *) ddata + 14);
+
+  /* Pass tid back.  */
+  *tid = elf_tdata (abfd)->core_lwpid;
+
+  /* Make a ".qnx_core_status/%d" section.  */
+  sprintf (buf, ".qnx_core_status/%d", *tid);
+
+  name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  if (name == NULL)
+    return FALSE;
+  strcpy (name, buf);
+
+  sect = bfd_make_section (abfd, name);
+  if (sect == NULL)
+    return FALSE;
+
+  sect->_raw_size       = note->descsz;
+  sect->filepos         = note->descpos;
+  sect->flags           = SEC_HAS_CONTENTS;
+  sect->alignment_power = 2;
+
+  return (elfcore_maybe_make_sect (abfd, ".qnx_core_status", sect));
+}
+
+static bfd_boolean
+elfcore_grok_nto_gregs (abfd, note, tid)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+     pid_t tid;
+{
+  char buf[100];
+  char *name;
+  asection *sect;
+
+  /* Make a ".reg/%d" section.  */
+  sprintf (buf, ".reg/%d", tid);
+
+  name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  if (name == NULL)
+    return FALSE;
+  strcpy (name, buf);
+
+  sect = bfd_make_section (abfd, name);
+  if (sect == NULL)
+    return FALSE;
+
+  sect->_raw_size       = note->descsz;
+  sect->filepos         = note->descpos;
+  sect->flags           = SEC_HAS_CONTENTS;
+  sect->alignment_power = 2;
+
+  return elfcore_maybe_make_sect (abfd, ".reg", sect);
+}
+
+#define BFD_QNT_CORE_INFO	7
+#define BFD_QNT_CORE_STATUS	8
+#define BFD_QNT_CORE_GREG	9
+#define BFD_QNT_CORE_FPREG	10
+
+static bfd_boolean
+elfcore_grok_nto_note (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  /* Every GREG section has a STATUS section before it.  Store the
+     tid from the previous call to pass down to the next gregs 
+     function.  */
+  static pid_t tid = 1;
+
+  switch (note->type)
+    {
+    case BFD_QNT_CORE_INFO:   return elfcore_make_note_pseudosection (abfd, ".qnx_core_info", note);
+    case BFD_QNT_CORE_STATUS: return elfcore_grok_nto_status (abfd, note, &tid);
+    case BFD_QNT_CORE_GREG:   return elfcore_grok_nto_gregs (abfd, note, tid);
+    case BFD_QNT_CORE_FPREG:  return elfcore_grok_prfpreg (abfd, note);
+    default:                  return TRUE;
+    }
+}
+
 /* Function: elfcore_write_note
 
    Inputs:
@@ -7200,6 +7310,11 @@ elfcore_read_notes (abfd, offset, size)
           if (! elfcore_grok_netbsd_note (abfd, &in))
             goto error;
         }
+      else if (strncmp (in.namedata, "QNX", 3) == 0)
+	{
+	  if (! elfcore_grok_nto_note (abfd, &in))
+	    goto error;
+	}
       else
         {
           if (! elfcore_grok_note (abfd, &in))

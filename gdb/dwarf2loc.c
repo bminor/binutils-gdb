@@ -118,7 +118,7 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
    SIZE, to find the current location of variable VAR in the context
    of FRAME.  */
 static struct value *
-dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
+dwarf2_evaluate_loc_desc (const struct symbol *var, struct frame_info *frame,
 			  unsigned char *data, unsigned short size,
 			  struct objfile *objfile)
 {
@@ -244,7 +244,7 @@ dwarf2_loc_desc_needs_frame (unsigned char *data, unsigned short size)
 /* Return the value of SYMBOL in FRAME using the DWARF-2 expression
    evaluator to calculate the location.  */
 static struct value *
-locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
+locexpr_read_variable (const struct symbol *symbol, struct frame_info *frame)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
@@ -256,7 +256,7 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
 
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
 static int
-locexpr_read_needs_frame (struct symbol *symbol)
+locexpr_read_needs_frame (const struct symbol *symbol)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   return dwarf2_loc_desc_needs_frame (dlbaton->data, dlbaton->size);
@@ -264,7 +264,7 @@ locexpr_read_needs_frame (struct symbol *symbol)
 
 /* Print a natural-language description of SYMBOL to STREAM.  */
 static int
-locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
+locexpr_describe_location (const struct symbol *symbol, struct ui_file *stream)
 {
   /* FIXME: be more extensive.  */
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
@@ -294,7 +294,8 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
    against.  When there is one this function should be revisited.  */
 
 void
-locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
+locexpr_tracepoint_var_ref (const struct symbol * symbol,
+			    struct agent_expr * ax,
 			    struct axs_value * value)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);

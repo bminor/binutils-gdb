@@ -102,7 +102,7 @@ static Keymap tui_readline_standard_keymap;
 /* TUI readline command.
    Switch the output mode between TUI/standard gdb.  */
 static int
-tui_rl_switch_mode (void)
+tui_rl_switch_mode (int notused1, int notused2)
 {
   if (tui_active)
     {
@@ -138,10 +138,10 @@ tui_rl_switch_mode (void)
    a functionality close to the Emacs split-window command.  We always
    show two windows (src+asm), (src+regs) or (asm+regs).  */
 static int
-tui_rl_change_windows (void)
+tui_rl_change_windows (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode ();
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
   if (tui_active)
     {
@@ -186,10 +186,10 @@ tui_rl_change_windows (void)
 /* TUI readline command.
    Delete the second TUI window to only show one.  */
 static int
-tui_rl_delete_other_windows (void)
+tui_rl_delete_other_windows (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode ();
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
   if (tui_active)
     {
@@ -255,7 +255,7 @@ tui_rl_command_mode (int count, int key)
 /* TUI readline command.
    Switch between TUI SingleKey mode and gdb readline editing.  */
 static int
-tui_rl_next_keymap (void)
+tui_rl_next_keymap (int notused1, int notused2)
 {
   tui_set_key_mode (tui_current_key_mode == tui_command_mode
                     ? tui_single_key_mode : tui_command_mode);
@@ -393,7 +393,6 @@ tui_enable (void)
   
   tui_setup_io (1);
 
-  tui_version = 1;
   tui_active = 1;
   if (deprecated_selected_frame)
      tuiShowFrameInfo (deprecated_selected_frame);
@@ -435,7 +434,6 @@ tui_disable (void)
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();
 
-  tui_version = 0;
   tui_active = 0;
   tui_update_gdb_sizes ();
 }
@@ -563,7 +561,7 @@ tui_show_assembly (CORE_ADDR addr)
 int
 tui_is_window_visible (TuiWinType type)
 {
-  if (tui_version == 0)
+  if (tui_active == 0)
     return 0;
 
   if (winList[type] == 0)
@@ -575,7 +573,7 @@ tui_is_window_visible (TuiWinType type)
 int
 tui_get_command_dimension (int *width, int *height)
 {
-  if (!tui_version || !m_winPtrNotNull (cmdWin))
+  if (!tui_active || !m_winPtrNotNull (cmdWin))
     {
       return 0;
     }

@@ -353,6 +353,14 @@ som_symfile_read (struct objfile *objfile, int mainline)
 
   som_symtab_read (abfd, objfile, objfile->section_offsets);
 
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile. 
+     Further symbol-reading is done incrementally, file-by-file,
+     in a step known as "psymtab-to-symtab" expansion. hp-symtab-read.c
+     contains the code to do the actual DNTT scanning and symtab building. */
+  install_minimal_symbols (objfile);
+  do_cleanups (back_to);
+
   /* Now read information from the stabs debug sections.
      This is a no-op for SOM.
      Perhaps it is intended for some kind of mixed STABS/SOM
@@ -366,16 +374,8 @@ som_symfile_read (struct objfile *objfile, int mainline)
      together with a scan of the GNTT. See hp-psymtab-read.c. */
   hpread_build_psymtabs (objfile, mainline);
 
-  /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. 
-     Further symbol-reading is done incrementally, file-by-file,
-     in a step known as "psymtab-to-symtab" expansion. hp-symtab-read.c
-     contains the code to do the actual DNTT scanning and symtab building. */
-  install_minimal_symbols (objfile);
-
   /* Force hppa-tdep.c to re-read the unwind descriptors.  */
   objfile->obj_private = NULL;
-  do_cleanups (back_to);
 }
 
 /* Initialize anything that needs initializing when a completely new symbol

@@ -45,13 +45,6 @@
 
 #include "gdb_assert.h"
 
-struct frame_extra_info
-  {
-    CORE_ADDR return_pc;
-    int frameless;
-    int size;
-  };
-
 struct gdbarch_tdep
   {
     int a0_regnum;
@@ -348,7 +341,7 @@ d10v_register_raw_size (int reg_nr)
    of data in register N.  */
 
 static struct type *
-d10v_register_virtual_type (int reg_nr)
+d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == PC_REGNUM)
     return builtin_type_void_func_ptr;
@@ -617,10 +610,13 @@ d10v_skip_prologue (CORE_ADDR pc)
 struct d10v_unwind_cache
 {
   CORE_ADDR return_pc;
-  int frameless;
   int size;
   CORE_ADDR *saved_regs;
-  CORE_ADDR next_addr;
+  /* How far the SP and r11 (FP) have been offset from the start of
+     the stack frame (as defined by the previous frame's stack
+     pointer).  */
+  LONGEST sp_offset;
+  LONGEST r11_offset;
   int uses_frame;
   void **regs;
 };
@@ -635,8 +631,8 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
   if ((op & 0x7E1F) == 0x6C1F)
     {
       n = (op & 0x1E0) >> 5;
-      info->next_addr -= 2;
-      info->saved_regs[n] = info->next_addr;
+      info->sp_offset -= 2;
+      info->saved_regs[n] = info->sp_offset;
       return 1;
     }
 
@@ -644,9 +640,9 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
   else if ((op & 0x7E3F) == 0x6E1F)
     {
       n = (op & 0x1E0) >> 5;
-      info->next_addr -= 4;
-      info->saved_regs[n] = info->next_addr;
-      info->saved_regs[n + 1] = info->next_addr + 2;
+      info->sp_offset -= 4;
+      info->saved_regs[n] = info->sp_offset;
+      info->saved_regs[n + 1] = info->sp_offset + 2;
       return 1;
     }
 
@@ -656,7 +652,7 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
       n = (op & 0x1E) >> 1;
       if (n == 0)
 	n = 16;
-      info->next_addr -= n;
+      info->sp_offset -= n;
       return 1;
     }
 
@@ -664,6 +660,15 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
   if (op == 0x417E)
     {
       info->uses_frame = 1;
+      info->r11_offset = info->sp_offset;
+      return 1;
+    }
+
+  /* st  rn, @r11 */
+  if ((op & 0x7E1F) == 0x6816)
+    {
+      n = (op & 0x1E0) >> 5;
+      info->saved_regs[n] = info->r11_offset;
       return 1;
     }
 
@@ -675,7 +680,7 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
   if ((op & 0x7E1F) == 0x681E)
     {
       n = (op & 0x1E0) >> 5;
-      info->saved_regs[n] = info->next_addr;
+      info->saved_regs[n] = info->sp_offset;
       return 1;
     }
 
@@ -683,8 +688,8 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
   if ((op & 0x7E3F) == 0x3A1E)
     {
       n = (op & 0x1E0) >> 5;
-      info->saved_regs[n] = info->next_addr;
-      info->saved_regs[n + 1] = info->next_addr + 2;
+      info->saved_regs[n] = info->sp_offset;
+      info->saved_regs[n + 1] = info->sp_offset + 2;
       return 1;
     }
 
@@ -714,12 +719,11 @@ d10v_frame_unwind_cache (struct frame_info *fi,
   (*cache) = info;
   info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
 
-  info->frameless = 0;
   info->size = 0;
   info->return_pc = 0;
 
   fp = get_frame_base (fi);
-  info->next_addr = 0;
+  info->sp_offset = 0;
 
   pc = get_pc_function_start (get_frame_pc (fi));
 
@@ -734,22 +738,22 @@ d10v_frame_unwind_cache (struct frame_info *fi,
 	    {
 	      /* add3 sp,sp,n */
 	      short n = op & 0xFFFF;
-	      info->next_addr += n;
+	      info->sp_offset += n;
 	    }
 	  else if ((op & 0x3F0F0000) == 0x340F0000)
 	    {
 	      /* st  rn, @(offset,sp) */
 	      short offset = op & 0xFFFF;
 	      short n = (op >> 20) & 0xF;
-	      info->saved_regs[n] = info->next_addr + offset;
+	      info->saved_regs[n] = info->sp_offset + offset;
 	    }
 	  else if ((op & 0x3F1F0000) == 0x350F0000)
 	    {
 	      /* st2w  rn, @(offset,sp) */
 	      short offset = op & 0xFFFF;
 	      short n = (op >> 20) & 0xF;
-	      info->saved_regs[n] = info->next_addr + offset;
-	      info->saved_regs[n + 1] = info->next_addr + offset + 2;
+	      info->saved_regs[n] = info->sp_offset + offset;
+	      info->saved_regs[n + 1] = info->sp_offset + offset + 2;
 	    }
 	  else
 	    break;
@@ -774,7 +778,7 @@ d10v_frame_unwind_cache (struct frame_info *fi,
       pc += 4;
     }
 
-  info->size = -info->next_addr;
+  info->size = -info->sp_offset;
 
   if (!(fp & 0xffff))
     fp = d10v_read_sp ();
@@ -782,14 +786,14 @@ d10v_frame_unwind_cache (struct frame_info *fi,
   for (i = 0; i < NUM_REGS - 1; i++)
     if (info->saved_regs[i])
       {
-	info->saved_regs[i] = fp - (info->next_addr - info->saved_regs[i]);
+	info->saved_regs[i] = fp - (info->sp_offset - info->saved_regs[i]);
       }
 
   if (info->saved_regs[LR_REGNUM])
     {
       CORE_ADDR return_pc 
 	= read_memory_unsigned_integer (info->saved_regs[LR_REGNUM], 
-					REGISTER_RAW_SIZE (LR_REGNUM));
+					register_size (current_gdbarch, LR_REGNUM));
       info->return_pc = d10v_make_iaddr (return_pc);
     }
   else
@@ -810,7 +814,6 @@ d10v_frame_unwind_cache (struct frame_info *fi,
       else
 	{
 	  info->saved_regs[SP_REGNUM] = fp + info->size;
-	  info->frameless = 1;
 	  info->saved_regs[FP_REGNUM] = 0;
 	}
     }
@@ -889,7 +892,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	int i;
 	fprintf_filtered (file, "  ");
 	frame_register_read (frame, a, num);
-	for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
+	for (i = 0; i < max_register_size (current_gdbarch); i++)
 	  {
 	    fprintf_filtered (file, "%02x", (num[i] & 0xff));
 	  }
@@ -1078,7 +1081,7 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
   printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), 
 	 TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, 
 	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), 
-					 REGISTER_RAW_SIZE (RET1_REGNUM)));
+					 register_size (current_gdbarch, RET1_REGNUM)));
 #endif
   if (TYPE_LENGTH (type) == 1)
     {
@@ -1464,7 +1467,7 @@ d10v_frame_id_unwind (struct frame_info *frame,
     }
 
   addr = read_memory_unsigned_integer (info->saved_regs[FP_REGNUM],
-				       REGISTER_RAW_SIZE (FP_REGNUM));
+				       register_size (current_gdbarch, FP_REGNUM));
   if (addr == 0)
     return;
 
@@ -1495,7 +1498,7 @@ saved_regs_unwinder (struct frame_info *frame,
 	  *addrp = 0;
 	  *realnump = -1;
 	  if (bufferp != NULL)
-	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
+	    store_address (bufferp, register_size (current_gdbarch, regnum),
 			   saved_regs[regnum]);
 	}
       else
@@ -1510,7 +1513,7 @@ saved_regs_unwinder (struct frame_info *frame,
 	    {
 	      /* Read the value in from memory.  */
 	      read_memory (saved_regs[regnum], bufferp,
-			   REGISTER_RAW_SIZE (regnum));
+			   register_size (current_gdbarch, regnum));
 	    }
 	}
       return;
@@ -1566,7 +1569,8 @@ d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
   frame_unwind_register (fi, LR_REGNUM, raw_buffer);
   regcache_cooked_write (regcache, PC_REGNUM, raw_buffer);
 
-  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (SP_REGNUM),
+  store_unsigned_integer (raw_buffer,
+			  register_size (current_gdbarch, SP_REGNUM),
 			  fp + info->size);
   regcache_cooked_write (regcache, SP_REGNUM, raw_buffer);
 
@@ -1648,10 +1652,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, (d10v_num_regs - 2) * 2 + 16);
   set_gdbarch_register_byte (gdbarch, d10v_register_byte);
   set_gdbarch_register_raw_size (gdbarch, d10v_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 8);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 8);
-  set_gdbarch_register_virtual_type (gdbarch, d10v_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, d10v_register_type);
 
   set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_addr_bit (gdbarch, 32);
@@ -1697,7 +1699,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
 
   set_gdbarch_store_struct_return (gdbarch, d10v_store_struct_return);

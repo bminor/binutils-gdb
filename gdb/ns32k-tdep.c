@@ -429,7 +429,7 @@ ns32k_pop_frame (void)
   int regnum;
 
   fp = get_frame_base (frame);
-  FRAME_INIT_SAVED_REGS (frame);
+  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   for (regnum = 0; regnum < 8; regnum++)
     if (get_frame_saved_regs (frame)[regnum])
@@ -558,9 +558,9 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_size (gdbarch, NS32K_REGISTER_SIZE);
   set_gdbarch_register_raw_size (gdbarch, ns32k_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_register_virtual_size (gdbarch, ns32k_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch,
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          NS32K_MAX_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, ns32k_register_virtual_type);
 
@@ -578,7 +578,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);
 
-  set_gdbarch_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
@@ -592,7 +592,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                             ns32k_extract_struct_value_address);
 
   /* Call dummy info */
-  set_gdbarch_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
   set_gdbarch_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_p (gdbarch, 1);

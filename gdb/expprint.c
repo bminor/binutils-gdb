@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "value.h"
@@ -31,6 +30,7 @@
 #include "frame.h"		/* For frame_map_regnum_to_name.  */
 #include "target.h"
 #include "gdb_string.h"
+#include "block.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -890,7 +890,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
       fprintf_filtered (stream, ", symbol @");
       gdb_print_host_address (exp->elts[elt + 1].symbol, stream);
       fprintf_filtered (stream, " (%s)",
-			SYMBOL_NAME (exp->elts[elt + 1].symbol));
+			DEPRECATED_SYMBOL_NAME (exp->elts[elt + 1].symbol));
       elt += 3;
       break;
     case OP_LAST:

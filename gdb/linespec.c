@@ -1264,7 +1264,7 @@ select_symbols_args (struct symbol **sym_arr, int nelts,
 		{
 		  if (canonical_arr[j] == NULL)
 		    {
-		      char *symname = SYMBOL_NAME (sym_arr[j]);
+		      char *symname = DEPRECATED_SYMBOL_NAME (sym_arr[j]);
 		      canonical_arr[j]
 			= savestring (symname, strlen (symname));
 		    }
@@ -1288,7 +1288,7 @@ select_symbols_args (struct symbol **sym_arr, int nelts,
 	    {
 	      if (canonical_arr != NULL)
 		{
-		  char *symname = SYMBOL_NAME (sym_arr[num]);
+		  char *symname = DEPRECATED_SYMBOL_NAME (sym_arr[num]);
 		  make_cleanup (xfree, symname);
 		  canonical_arr[i] = savestring (symname, strlen (symname));
 		}

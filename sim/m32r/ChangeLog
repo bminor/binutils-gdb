@@ -1,3 +1,7 @@
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-if.c (sim_open, sim_create_inferior): Rename _bfd to bfd.
+
 2002-12-19  Doug Evans  <dje@sebabeach.org>
 
 	* arch.c,arch.h,cpuall.h: Regenerate.

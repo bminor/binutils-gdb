@@ -1,6 +1,6 @@
 /* Objective-C language support routines for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
    Written by Michael Snyder.
@@ -24,7 +24,6 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "block.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "parser-defs.h"
@@ -42,6 +41,7 @@
 #include "frame.h"
 #include "gdb_regex.h"
 #include "regcache.h"
+#include "block.h"
 
 #include <ctype.h>
 
@@ -799,8 +799,8 @@ compare_selectors (const void *a, const void *b)
 {
   char *aname, *bname;
 
-  aname = SYMBOL_BEST_NAME (*(struct symbol **) a);
-  bname = SYMBOL_BEST_NAME (*(struct symbol **) b);
+  aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
+  bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
     error ("internal: compare_selectors(1)");
 
@@ -868,7 +868,7 @@ selectors_info (char *regexp, int from_tty)
       QUIT;
       name = SYMBOL_DEMANGLED_NAME (msymbol);
       if (name == NULL)
-	name = SYMBOL_NAME (msymbol);
+	name = DEPRECATED_SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')		/* Got a method name.  */
@@ -901,7 +901,7 @@ selectors_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (msymbol);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (msymbol);
+	    name = DEPRECATED_SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')		/* Got a method name.  */
@@ -927,7 +927,7 @@ selectors_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (sym_arr[ix]);
+	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;		/* Seen this one already (not unique).  */
@@ -957,8 +957,8 @@ compare_classes (const void *a, const void *b)
 {
   char *aname, *bname;
 
-  aname = SYMBOL_BEST_NAME (*(struct symbol **) a);
-  bname = SYMBOL_BEST_NAME (*(struct symbol **) b);
+  aname = SYMBOL_PRINT_NAME (*(struct symbol **) a);
+  bname = SYMBOL_PRINT_NAME (*(struct symbol **) b);
   if (aname == NULL || bname == NULL)
     error ("internal: compare_classes(1)");
 
@@ -1011,7 +1011,7 @@ classes_info (char *regexp, int from_tty)
       QUIT;
       name = SYMBOL_DEMANGLED_NAME (msymbol);
       if (name == NULL)
-	name = SYMBOL_NAME (msymbol);
+	name = DEPRECATED_SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
 	  name[1] == '[')			/* Got a method name.  */
@@ -1037,7 +1037,7 @@ classes_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (msymbol);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (msymbol);
+	    name = DEPRECATED_SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
@@ -1056,7 +1056,7 @@ classes_info (char *regexp, int from_tty)
 	  QUIT;
 	  name = SYMBOL_DEMANGLED_NAME (sym_arr[ix]);
 	  if (name == NULL)
-	    name = SYMBOL_NAME (sym_arr[ix]);
+	    name = DEPRECATED_SYMBOL_NAME (sym_arr[ix]);
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
 	    continue;	/* Seen this one already (not unique).  */
@@ -1273,7 +1273,7 @@ parse_method (char *method, char *type, char **class,
   return s2;
 }
 
-void
+static void
 find_methods (struct symtab *symtab, char type, 
 	      const char *class, const char *category, 
 	      const char *selector, struct symbol **syms, 
@@ -1319,7 +1319,7 @@ find_methods (struct symtab *symtab, char type,
 
       symname = SYMBOL_DEMANGLED_NAME (msymbol);
       if (symname == NULL)
-	symname = SYMBOL_NAME (msymbol);
+	symname = DEPRECATED_SYMBOL_NAME (msymbol);
       if (symname == NULL)
 	continue;
 
@@ -1358,7 +1358,7 @@ find_methods (struct symtab *symtab, char type,
           const char *newsymname = SYMBOL_DEMANGLED_NAME (sym);
 	  
           if (newsymname == NULL)
-            newsymname = SYMBOL_NAME (sym);
+            newsymname = DEPRECATED_SYMBOL_NAME (sym);
           if (strcmp (symname, newsymname) == 0)
             {
               /* Found a high-level method sym: swap it into the

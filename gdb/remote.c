@@ -4839,8 +4839,8 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
 }
 
 
-int remote_hw_watchpoint_limit = 0;
-int remote_hw_breakpoint_limit = 0;
+int remote_hw_watchpoint_limit = -1;
+int remote_hw_breakpoint_limit = -1;
 
 int
 remote_check_watch_resources (int type, int cnt, int ot)
@@ -4849,6 +4849,8 @@ remote_check_watch_resources (int type, int cnt, int ot)
     {
       if (remote_hw_breakpoint_limit == 0)
 	return 0;
+      else if (remote_hw_breakpoint_limit < 0)
+	return 1;
       else if (cnt <= remote_hw_breakpoint_limit)
 	return 1;
     }
@@ -4856,6 +4858,8 @@ remote_check_watch_resources (int type, int cnt, int ot)
     {
       if (remote_hw_watchpoint_limit == 0)
 	return 0;
+      else if (remote_hw_watchpoint_limit < 0)
+	return 1;
       else if (ot)
 	return -1;
       else if (cnt <= remote_hw_watchpoint_limit)
@@ -6143,6 +6147,19 @@ terminating `#' character and checksum.",
 	   show_memory_read_packet_size,
 	   "Show the maximum number of bytes per memory-read packet.\n",
 	   &remote_show_cmdlist);
+
+  add_setshow_cmd ("hardware-watchpoint-limit", no_class,
+		   var_zinteger, &remote_hw_watchpoint_limit, "\
+Set the maximum number of target hardware watchpoints.\n\
+Specify a negative limit for unlimited.", "\
+Show the maximum number of target hardware watchpoints.\n",
+		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
+  add_setshow_cmd ("hardware-breakpoint-limit", no_class,
+		   var_zinteger, &remote_hw_breakpoint_limit, "\
+Set the maximum number of target hardware breakpoints.\n\
+Specify a negative limit for unlimited.", "\
+Show the maximum number of target hardware breakpoints.\n",
+		   NULL, NULL, &remote_set_cmdlist, &remote_show_cmdlist);
 
   add_show_from_set
     (add_set_cmd ("remoteaddresssize", class_obscure,

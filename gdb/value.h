@@ -24,6 +24,7 @@
 #define VALUE_H 1
 
 struct regcache;
+struct block;
 
 #include "doublest.h"
 

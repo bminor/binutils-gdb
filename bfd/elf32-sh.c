@@ -179,6 +179,8 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 TRUE),			/* pcrel_offset */
 
   /* 12 bit PC relative branch divided by 2.  */
+  /* This cannot be partial_inplace because relaxation can't know the
+     eventual value of a symbol.  */
   HOWTO (R_SH_IND12W,		/* type */
 	 1,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -186,10 +188,10 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 sh_elf_reloc,		/* special_function */
+	 NULL,			/* special_function */
 	 "R_SH_IND12W",		/* name */
-	 TRUE,			/* partial_inplace */
-	 0xfff,			/* src_mask */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
 	 0xfff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
@@ -2232,6 +2234,12 @@ sh_elf_relax_section (abfd, sec, link_info, again)
       /* Change the R_SH_USES reloc into an R_SH_IND12W reloc, and
 	 replace the jsr with a bsr.  */
       irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irelfn->r_info), R_SH_IND12W);
+      /* We used to test (ELF32_R_SYM (irelfn->r_info) < symtab_hdr->sh_info)
+	 here, but that only checks if the symbol is an external symbol,
+	 not if the symbol is in a different section.  Besides, we need
+	 a consistent meaning for the relocation, so we just assume here that
+	 the value of the symbol is not available.  */
+#if 0
       if (ELF32_R_SYM (irelfn->r_info) < symtab_hdr->sh_info)
 	{
 	  /* If this needs to be changed because of future relaxing,
@@ -2242,12 +2250,14 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 		      contents + irel->r_offset);
 	}
       else
+#endif
 	{
 	  /* We can't fully resolve this yet, because the external
 	     symbol value may be changed by future relaxing.  We let
 	     the final link phase handle it.  */
 	  bfd_put_16 (abfd, (bfd_vma) 0xb000, contents + irel->r_offset);
 	}
+      irel->r_addend = -4;
 
       /* See if there is another R_SH_USES reloc referring to the same
 	 register load.  */
@@ -2316,7 +2326,8 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 
   /* Look for load and store instructions that we can align on four
      byte boundaries.  */
-  if (have_code)
+  if ((elf_elfheader (abfd)->e_flags & EF_SH_MACH_MASK) != EF_SH4
+      && have_code)
     {
       bfd_boolean swapped;
 
@@ -2542,14 +2553,28 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	  break;
 
 	case R_SH_IND12W:
-	  if (ELF32_R_SYM (irel->r_info) >= symtab_hdr->sh_info)
-	    start = stop = addr;
+	  off = insn & 0xfff;
+	  if (! off)
+	    {
+	      /* This has been made by previous relaxation.  Since the
+		 relocation will be against an external symbol, the
+		 final relocation will just do the right thing.  */
+	      start = stop = addr;
+	    }
 	  else
 	    {
-	      off = insn & 0xfff;
 	      if (off & 0x800)
 		off -= 0x1000;
 	      stop = (bfd_vma) ((bfd_signed_vma) start + 4 + off * 2);
+
+	      /* The addend will be against the section symbol, thus
+		 for adjusting the addend, the relevant start is the
+		 start of the section.
+		 N.B. If we want to abandom in-place changes here and
+		 test directly using symbol + addend, we have to take into
+		 account that the addend has already been adjusted by -4.  */
+	      if (stop > addr && stop < toaddr)
+		irel->r_addend -= count;
 	    }
 	  break;
 
@@ -3500,6 +3525,9 @@ struct elf_sh_dyn_relocs
 
   /* Number of pc-relative relocs copied for the input section.  */
   bfd_size_type pc_count;
+
+  /* If TRUE, R_SH_TLS_TPOFF32 relocation is generated.  */
+  bfd_boolean tls_tpoff32;
 };
 
 /* sh ELF linker hash entry.  */
@@ -3524,9 +3552,6 @@ struct elf_sh_link_hash_entry
   enum {
     GOT_UNKNOWN = 0, GOT_NORMAL, GOT_TLS_GD, GOT_TLS_IE
   } tls_type;
-
-  /* If TRUE, R_SH_TLS_TPOFF32 relocation is generated.  */
-  bfd_boolean tls_tpoff32;
 };
 
 #define sh_elf_hash_entry(ent) ((struct elf_sh_link_hash_entry *)(ent))
@@ -3630,7 +3655,6 @@ sh_elf_link_hash_newfunc (entry, table, string)
       ret->datalabel_got.refcount = ret->root.got.refcount;
 #endif
       ret->tls_type = GOT_UNKNOWN;
-      ret->tls_tpoff32 = FALSE;
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -4053,7 +4077,7 @@ allocate_dynrelocs (h, inf)
       && eh->gotplt_refcount > 0)
     {
       /* The symbol has been forced local, or we have some direct got refs,
-         so treat all the gotplt refs as got refs. */
+	 so treat all the gotplt refs as got refs. */
       h->got.refcount += eh->gotplt_refcount;
       if (h->plt.refcount >= eh->gotplt_refcount)
 	h->plt.refcount -= eh->gotplt_refcount;
@@ -4207,8 +4231,9 @@ allocate_dynrelocs (h, inf)
     }
   else
     {
-      if (sh_elf_hash_entry (h)->tls_tpoff32)
-	goto keep;
+      for (p = eh->dyn_relocs; p; p = p->next)
+	if (p->tls_tpoff32)
+	  goto keep;
 
       /* For the non-shared case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
@@ -4785,7 +4810,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared
-		   && (! info->symbolic || info->allow_shlib_undefined)
 		   && ! info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -4812,7 +4836,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_SH_IND12W:
-	  relocation -= 4;
 	  goto final_link_relocate;
 
 	case R_SH_DIR8WPN:
@@ -5256,10 +5279,18 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      tls_type = sh_elf_hash_entry (h)->tls_type;
 	      if (! info->shared
 		  && (h->dynindx == -1
-		      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
-		  && (tls_type == GOT_TLS_IE
-		      || sh_elf_hash_entry (h)->tls_tpoff32))
-		r_type = R_SH_TLS_LE_32;
+		      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		{
+		  struct elf_sh_dyn_relocs *p;
+
+		  /* If TPOFF32 relocation can be created, convert it.  */
+		  for (p = sh_elf_hash_entry (h)->dyn_relocs; p; p = p->next)
+		    if (p->sec == input_section && p->tls_tpoff32)
+		      {
+			r_type = R_SH_TLS_LE_32;
+			break;
+		      }
+		}
 	    }
 
 	  if (r_type == R_SH_TLS_GD_32 && tls_type == GOT_TLS_IE)
@@ -5368,7 +5399,13 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (sreloc != NULL);
 		}
 
-	      indx = (h && h->dynindx != -1) ? h->dynindx : 0;
+	      if (h == NULL
+		  || h->dynindx == -1
+		  || (! info->shared
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		indx = 0;
+	      else
+		indx = h->dynindx;
 	      outrel.r_offset = (input_section->output_section->vma
 				 + input_section->output_offset
 				 + rel->r_offset);
@@ -5400,7 +5437,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if ((off & 1) != 0)
 	    off &= ~1;
-          else
+	  else
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -5415,7 +5452,13 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (sgot->output_section->vma
 				 + sgot->output_offset + off);
 
-	      indx = (h && h->dynindx != -1) ? h->dynindx : 0;
+	      if (h == NULL
+		  || h->dynindx == -1
+		  || (! info->shared
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		indx = 0;
+	      else
+		indx = h->dynindx;
 	      dr_type = (r_type == R_SH_TLS_GD_32 ? R_SH_TLS_DTPMOD32 :
 			 R_SH_TLS_TPOFF32);
 	      if (dr_type == R_SH_TLS_TPOFF32 && indx == 0)
@@ -5900,9 +5943,6 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
-  struct elf_sh_link_hash_entry *eh;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -5913,15 +5953,20 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
 #ifdef INCLUDE_SHMEDIA
       int seen_stt_datalabel = 0;
 #endif
 
       r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
-      else
+      if (r_symndx >= symtab_hdr->sh_info)
 	{
+	  struct elf_sh_link_hash_entry *eh;
+	  struct elf_sh_dyn_relocs **pp;
+	  struct elf_sh_dyn_relocs *p;
+
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 #ifdef INCLUDE_SHMEDIA
 	  while (h->root.type == bfd_link_hash_indirect
@@ -5931,12 +5976,18 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	      h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	    }
 #endif
+	  eh = (struct elf_sh_link_hash_entry *) h;
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
 	}
-      eh = (struct elf_sh_link_hash_entry *) h;
 
-      switch (sh_elf_optimized_tls_reloc (info, ELF32_R_TYPE (rel->r_info),
-					  ELF32_R_SYM (rel->r_info)
-					  >= symtab_hdr->sh_info))
+      r_type = ELF32_R_TYPE (rel->r_info);
+      switch (sh_elf_optimized_tls_reloc (info, r_type, h != NULL))
 	{
 	case R_SH_TLS_LD_32:
 	  if (sh_elf_hash_table (info)->tls_ldm_got.refcount > 0)
@@ -5969,6 +6020,8 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 #ifdef INCLUDE_SHMEDIA
 	      if (seen_stt_datalabel)
 		{
+		  struct elf_sh_link_hash_entry *eh;
+		  eh = (struct elf_sh_link_hash_entry *) h;
 		  if (eh->datalabel_got.refcount > 0)
 		    eh->datalabel_got.refcount -= 1;
 		}
@@ -5994,27 +6047,9 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
 	case R_SH_DIR32:
 	case R_SH_REL32:
-	  if (h != NULL)
-	    {
-	      struct elf_sh_dyn_relocs **pp;
-	      struct elf_sh_dyn_relocs *p;
-
-
-	      if (!info->shared && h->plt.refcount > 0)
-		h->plt.refcount -= 1;
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    if (ELF32_R_TYPE (rel->r_info) == R_SH_REL32)
-		      p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
+	  if (info->shared)
+	    break;
+	  /* Fall thru */
 
 	case R_SH_PLT32:
 #ifdef INCLUDE_SHMEDIA
@@ -6041,6 +6076,8 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 #endif
 	  if (h != NULL)
 	    {
+	      struct elf_sh_link_hash_entry *eh;
+	      eh = (struct elf_sh_link_hash_entry *) h;
 	      if (eh->gotplt_refcount > 0)
 		{
 		  eh->gotplt_refcount -= 1;
@@ -6596,6 +6633,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 		  p->sec = sec;
 		  p->count = 0;
 		  p->pc_count = 0;
+		  p->tls_tpoff32 = FALSE;
 		}
 
 	      p->count += 1;
@@ -6693,11 +6731,11 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 		  p->sec = sec;
 		  p->count = 0;
 		  p->pc_count = 0;
+		  p->tls_tpoff32 = FALSE;
 		}
 
 	      p->count += 1;
-	      if (h)
-		sh_elf_hash_entry (h)->tls_tpoff32 = TRUE;
+	      p->tls_tpoff32 = TRUE;
 	    }
 	  break;
 

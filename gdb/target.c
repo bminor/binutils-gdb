@@ -573,6 +573,7 @@ update_current_target (void)
       INHERIT (to_remove_watchpoint, t);
       INHERIT (to_stopped_data_address, t);
       INHERIT (to_stopped_by_watchpoint, t);
+      INHERIT (to_have_continuable_watchpoint, t);
       INHERIT (to_region_size_ok_for_hw_watchpoint, t);
       INHERIT (to_terminal_init, t);
       INHERIT (to_terminal_inferior, t);
