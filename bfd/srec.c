@@ -521,6 +521,7 @@ srec_scan (abfd)
 		      goto error_return;
 		    sec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 		    sec->vma = address;
+		    sec->lma = address;
 		    sec->_raw_size = bytes;
 		    sec->filepos = pos;
 		  }
