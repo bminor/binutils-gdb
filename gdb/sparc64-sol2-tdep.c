@@ -31,6 +31,7 @@
 #include "gdb_assert.h"
 
 #include "sparc64-tdep.h"
+#include "solib-svr4.h"
 
 /* From <sys/regset.h>.  */
 const struct sparc_gregset sparc64_sol2_gregset =
@@ -161,6 +162,8 @@ sparc64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Solaris has SVR4-style shared libraries...  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
   /* ...which means that we need some special handling when doing
      prologue analysis.  */

@@ -1,3 +1,13 @@
+2004-04-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-sol2-tdep.c: Update copyright year.  Include
+	"solib-svr4.h".
+	(sparc32_sol2_init_abi): Set solib_svr4_fetch_link_map_offsets.
+	* sparc64-sol2-tdep.c: Include "solib-svr4.h".
+	(sparc64_sol2_init_abi): Set solib_svr4_fetch_link_map_offsets.
+	* Makefile.in (sparc-sol2-tdep.o, sparc64-sol2-tdep.o): ): Update
+	dependencies.
+
 2004-04-06  Andrew Cagney  <cagney@redhat.com>
 
 	* infttrace.c: Include "infttrace.h".
