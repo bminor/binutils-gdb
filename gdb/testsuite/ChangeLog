@@ -1,3 +1,7 @@
+2002-09-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/pc-fp.exp, gdb.base/pc-fp.c: New test.
+
 2002-09-03  Keith Seitz  <keiths@redhat.com>
 
 	* lib/gdb.exp (gdb_compile_pthreads): Fix "build_bin" typo.

@@ -27,6 +27,8 @@
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
+#include "builtin-regs.h"
 
 /* Return a frame uniq ID that can be used to, later re-find the
    frame.  */
@@ -242,4 +244,45 @@ frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
     return 0;			/* register value not available */
 
   return !optim;
+}
+
+
+/* Map between a frame register number and its name.  A frame register
+   space is a superset of the cooked register space --- it also
+   includes builtin registers.  */
+
+int
+frame_map_name_to_regnum (const char *name, int len)
+{
+  int i;
+
+  /* Search register name space. */
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
+	&& strncmp (name, REGISTER_NAME (i), len) == 0)
+      {
+	return i;
+      }
+
+  /* Try builtin registers.  */
+  i = builtin_reg_map_name_to_regnum (name, len);
+  if (i >= 0)
+    {
+      /* A builtin register doesn't fall into the architecture's
+         register range.  */
+      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
+      return i;
+    }
+
+  return -1;
+}
+
+const char *
+frame_map_regnum_to_name (int regnum)
+{
+  if (regnum < 0)
+    return NULL;
+  if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+    return REGISTER_NAME (regnum);
+  return builtin_reg_map_regnum_to_name (regnum);
 }
