@@ -1,5 +1,12 @@
 2002-09-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* genscripts.sh (SEGMENT_SIZE): Use MAXPAGESIZE before
+	TARGET_PAGE_SIZE.
+	* scripttempl/elf.sc (DATA_SEGMENT_ALIGN): Incorporate
+	SEGMENT_SIZE alignment.
+	* emulparams/elf64ppc.sh (DATA_ADDR): Delete.
+	(SEGMENT_SIZE): Define.
+
 	* ldexp.c (fold_unary): New.  Split out from exp_fold_tree.
 	(fold_binary): Correct abs - non-abs case.
 	(fold_trinary): New.  Split out from exp_fold_tree.

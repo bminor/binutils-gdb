@@ -90,7 +90,7 @@ if [ "x$SCRIPT_NAME" = "xelf" ]; then
   GENERATE_COMBRELOC_SCRIPT=yes
 fi
 
-SEGMENT_SIZE=${SEGMENT_SIZE-${TARGET_PAGE_SIZE}}
+SEGMENT_SIZE=${SEGMENT_SIZE-${MAXPAGESIZE-${TARGET_PAGE_SIZE}}}
 
 # Determine DATA_ALIGNMENT for the 5 variants, using
 # values specified in the emulparams/<emulation>.sh file or default.
