@@ -1,3 +1,8 @@
+Fri Feb 25 18:55:54 1994  Ted Lemon  (mellon@pepper.ncd.com)
+
+	* ldlang.c (lookup_name): don't call bfd_set_gp_size.
+	(ldlang_add_file): call it here instead.
+
 Fri Feb 25 18:13:46 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* ldgram.y: Include ldlex.h after %token decls, for byacc.

@@ -796,8 +796,6 @@ lookup_name (name, force_load)
   else
     einfo ("%F%B: file not recognized: %E\n", search->the_bfd);
 
-  bfd_set_gp_size (search->the_bfd, g_switch_value);
-
   if (bfd_link_add_symbols (search->the_bfd, &link_info) == false)
     einfo ("%F%B: could not read symbols: %E\n", search->the_bfd);
 
@@ -2318,6 +2316,7 @@ ldlang_add_file (entry)
     ;
   *pp = entry->the_bfd;
   entry->the_bfd->usrdata = (PTR) entry;
+  bfd_set_gp_size (entry->the_bfd, g_switch_value);
 }
 
 void
