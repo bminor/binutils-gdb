@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -118,7 +118,6 @@ bfd_default_target_size = @bfd_default_target_size@
 bfd_libs = @bfd_libs@
 bfd_machines = @bfd_machines@
 bfd_version = @bfd_version@
-bfd_version_date = @bfd_version_date@
 bfd_version_string = @bfd_version_string@
 l = @l@
 tdefaults = @tdefaults@
@@ -758,7 +757,7 @@ BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
 LOCAL_H_DEPS = libbfd.h sysdep.h config.h
 
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c version.h
+	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c
 
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
@@ -774,7 +773,7 @@ DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =  bfd-in3.h
+CONFIG_CLEAN_FILES =  bfd-in3.h bfdver.h
 LIBRARIES =  $(noinst_LIBRARIES)
 
 
@@ -797,7 +796,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README ./stamp-h.in COPYING ChangeLog Makefile.am \
 Makefile.in TODO acinclude.m4 aclocal.m4 bfd-in2.h config.in configure \
-configure.in
+configure.in version.h
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -851,6 +850,8 @@ distclean-hdr:
 maintainer-clean-hdr:
 bfd-in3.h: $(top_builddir)/config.status bfd-in2.h
 	cd $(top_builddir) && CONFIG_FILES=$@:bfd-in2.h CONFIG_HEADERS= $(SHELL) ./config.status
+bfdver.h: $(top_builddir)/config.status version.h
+	cd $(top_builddir) && CONFIG_FILES=$@:version.h CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-noinstLIBRARIES:
 
@@ -953,7 +954,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -1397,7 +1398,7 @@ config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
 archive.lo: archive.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/aout/ranlib.h $(INCDIR)/safe-ctype.h
 archures.lo: archures.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h
-bfd.lo: bfd.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+bfd.lo: bfd.c bfdver.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
@@ -1434,7 +1435,7 @@ merge.lo: merge.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
 dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf2.h
-simple.lo: simple.c $(INCDIR)/filenames.h
+simple.lo: simple.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h
 cpu-a29k.lo: cpu-a29k.c $(INCDIR)/filenames.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h
@@ -2033,8 +2034,8 @@ vms.lo: vms.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
 vms-gsd.lo: vms-gsd.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
-vms-hdr.lo: vms-hdr.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/safe-ctype.h vms.h
+vms-hdr.lo: vms-hdr.c bfdver.h $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h vms.h
 vms-misc.lo: vms-misc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
 vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \

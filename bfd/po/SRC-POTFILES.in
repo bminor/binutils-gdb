@@ -160,6 +160,7 @@ elf32-sh-lin.c
 elf32-sh-nbsd.c
 elf32-sh.c
 elf32-sh64-com.c
+elf32-sh64-lin.c
 elf32-sh64-nbsd.c
 elf32-sh64.c
 elf32-shqnx.c
@@ -177,6 +178,7 @@ elf64-mips.c
 elf64-mmix.c
 elf64-ppc.c
 elf64-s390.c
+elf64-sh64-lin.c
 elf64-sh64-nbsd.c
 elf64-sh64.c
 elf64-sparc.c
@@ -274,6 +276,7 @@ reloc16.c
 riscix.c
 sco5-core.c
 section.c
+simple.c
 som.c
 som.h
 sparclinux.c

@@ -1,5 +1,20 @@
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	(BFD_H_FILES): Remove version.h.
+	* bfd-in.h (BFD_VERSION, BFD_VERSION_DATE, BFD_VERSION_STRING): Move..
+	* version.h: ..to here.
+	* configure.in (bfd_version_date): Remove.
+	(AC_OUTPUT): Make bfdver.h from version.h.
+	* bfd.c: #include "bfdver.h".
+	* vms-hdr.c: Likewise.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
 	* archures.c (bfd_mach_i386_i386, bfd_mach_i386_i8086,
 	bfd_mach_i386_i386_intel_syntax, bfd_mach_x86_64,
 	bfd_mach_x86_64_intel_syntax bfd_mach_ppc, bfd_mach_ppc64,
@@ -66,7 +81,12 @@
 
 2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
 
+	* Makefile.in: Regenerated.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.am: Run dep-am.
+	(BFD_H_DEP): Add simple.c and linker.c.
 	(BFD32_LIBS): Add simple.lo.
 	(BFD32_LIBS_CFILES): Add simple.c.
 	* Makefile.in: Regenerated.

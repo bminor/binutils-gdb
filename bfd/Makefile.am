@@ -810,7 +810,7 @@ stmp-bfd-h: bfd-in3.h
 	touch stmp-bfd-h
 
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c version.h
+	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c
 BFD64_H_FILES = archive64.c
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
@@ -867,7 +867,7 @@ config.status: $(srcdir)/configure $(srcdir)/config.bfd $(srcdir)/configure.host
 archive.lo: archive.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/aout/ranlib.h $(INCDIR)/safe-ctype.h
 archures.lo: archures.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h
-bfd.lo: bfd.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+bfd.lo: bfd.c bfdver.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
@@ -904,7 +904,7 @@ merge.lo: merge.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
 dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf2.h
-simple.lo: simple.c $(INCDIR)/filenames.h
+simple.lo: simple.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h
 cpu-a29k.lo: cpu-a29k.c $(INCDIR)/filenames.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h
@@ -1503,8 +1503,8 @@ vms.lo: vms.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
 vms-gsd.lo: vms-gsd.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
-vms-hdr.lo: vms-hdr.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/safe-ctype.h vms.h
+vms-hdr.lo: vms-hdr.c bfdver.h $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h vms.h
 vms-misc.lo: vms-misc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   vms.h
 vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
