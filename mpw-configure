@@ -76,11 +76,15 @@ If "`Exists "{srcdir}"mpw-xconfig.in`" != ""
 End If
 
 If "`Exists "{srcdir}"mpw-make.in`" != ""
-	Echo "srcroot = " {srcroot} > "{objdir}"Makefile.tem
-	Echo "topsrcdir = " {srcroot} > "{objdir}"Makefile.tem
+	Echo "# This Makefile produced by mpw-configure.  Changes may get lost!" > "{objdir}"Makefile.tem
+	Echo "srcroot = " {srcroot} >> "{objdir}"Makefile.tem
+	Echo "topsrcdir = " {srcroot} >> "{objdir}"Makefile.tem
 	Echo "srcdir = " {srcdir} >> "{objdir}"Makefile.tem
 	Echo "target_canonical = " {target_canonical} >> "{objdir}"Makefile.tem
 	Echo "mdname = " {mdname} >> "{objdir}"Makefile.tem
+	Echo "host_makefile_frag = " >> "{objdir}"Makefile.tem
+	Echo "target_makefile_frag = " >> "{objdir}"Makefile.tem
+	mpw-7to8 "{srcroot}"config:mpw-mh-mpw >>"{objdir}"Makefile.tem
 	mpw-7to8 "{srcdir}"mpw-make.in >>"{objdir}"Makefile.tem
 	MoveIfChange "{objdir}"Makefile.tem "{objdir}"Makefile
 	If {verify} == 1
