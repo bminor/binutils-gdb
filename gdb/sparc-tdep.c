@@ -43,12 +43,11 @@
 
 struct regset;
 
-/* This file implements the The SPARC 32-bit ABI as defined by the
-   section "Low-Level System Information" of the SPARC Compliance
-   Definition (SCD) 2.4.1, which is the 32-bit System V psABI for
-   SPARC.  The SCD lists changes with respect to the origional 32-bit
-   psABI as defined in the "System V ABI, SPARC Processor
-   Supplement".
+/* This file implements the SPARC 32-bit ABI as defined by the section
+   "Low-Level System Information" of the SPARC Compliance Definition
+   (SCD) 2.4.1, which is the 32-bit System V psABI for SPARC.  The SCD
+   lists changes with respect to the origional 32-bit psABI as defined
+   in the "System V ABI, SPARC Processor Supplement".
 
    Note that if we talk about SunOS, we mean SunOS 4.x, which was
    BSD-based, which is sometimes (retroactively?) referred to as
