@@ -25,6 +25,8 @@ Do-first:
 Things-to-keep:
 
 arc.exp
+alias.s
+alias.d
 branch.s
 branch.d
 flag.s
