@@ -125,10 +125,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00665.html
 GDB misses watchpoint triggers after proceeding over a breakpoint on
 x86 targets.
 
-I think
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00664.html
-fixed this.
-
 --
 
 x86 linux GDB and SIGALRM (???)
