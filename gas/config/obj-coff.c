@@ -446,12 +446,17 @@ add_lineno (frag, offset, num)
     {
       abort ();
     }
+
+#ifndef OBJ_XCOFF
+  /* The native aix assembler accepts negative line number */
+
   if (num <= 0)
     {
       /* Zero is used as an end marker in the file.  */
       as_warn (_("Line numbers must be positive integers\n"));
       num = 1;
     }
+#endif /* OBJ_XCOFF */
   new_line->next = line_nos;
   new_line->frag = frag;
   new_line->l.line_number = num;
