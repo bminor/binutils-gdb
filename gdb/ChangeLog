@@ -1,5 +1,9 @@
 2003-05-28  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-nat.c (store_altivec_registers): Don't cast fourth
+	argument to ptrace to int; the system headers should give it the
+	right type, and pointers don't fit in ints on powerpc64-*-*.
+
 	* ppc-linux-nat.c (ppc_register_u_addr): Compute u-area offsets
 	using the tdep's wordsize, not just '4'.
 
