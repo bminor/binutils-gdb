@@ -51,7 +51,6 @@ symbolic_link='ln -s'
 
 Makefile=Makefile
 Makefile_in=Makefile.in
-ansi=
 arguments=$*
 commontargets=
 configdirs=
@@ -144,10 +143,6 @@ do
 
 	else
 		case ${arg} in
-		-ansi | --a*)
-			ansi=true
-			clib=clib
-			;;
 		-datadir=* | --datadir=* | --datadi=* | --datad=* | --data=* | --dat=* | --da=* | --d=*)
 			datadir=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			datadiroption=${arg}
@@ -173,11 +168,6 @@ do
 				echo '***' Can only configure for one host at a time.
 				fatal=yes
 			fi
-			;;
-		-languages=* | --languages=* | --language=* | --languag=* \
-			| --langua=* | --langu=* | --lang=* | --lan=* | --la=* \
-			| --l=*)
-			languages="${languages} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 			;;
 #		-namesubdir | --namesubdir | --namesubdi | --namesubd | --namesub | --namesu | --names | --name | --nam | --na)
 #			next_namesubdir=yes
@@ -325,7 +315,6 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	(echo "Usage: configure HOST" ;
 	echo ;
 	echo "Options: [defaults in brackets]" ;
-	echo " -ansi		configure w/ANSI library. [no ansi lib]" ;
 	echo " -datadir=MYDIR	configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
 	echo " -gas		configure the compilers for use with gas. [native as]" ;
 	echo " -help		print this message. [normal config]" ;

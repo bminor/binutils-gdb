@@ -75,8 +75,11 @@ INSTALL_TARGET = install.all
 
 all:	$(ALL)
 
-info: doc.info
+info: configure.info doc.info
 	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
+
+configure.info: configure.texi
+	$(MAKEINFO) -o configure.info $(srcdir)/configure.texi
 
 doc.info: doc.texi
 	$(MAKEINFO) -o doc.info $(srcdir)/doc.texi
@@ -101,6 +104,7 @@ clean: clean-libiberty clean-texinfo clean-bfd clean-binutils clean-bison \
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 install: $(INSTALL_TARGET)
+	$(INSTALL_DATA) configure.man $(man1dir)/configure.1
 
 install.all: install-dirs install-libiberty install-texinfo install-binutils install-bison \
 	install-byacc install-ld install-gas install-gcc install-gnulib \
