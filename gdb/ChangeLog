@@ -1,3 +1,10 @@
+2004-04-28  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa32_return_value): Handle both 4- and 8-byte fp
+	return values.
+	(hppa32_push_dummy_call): Fix small struct and floating point argument 
+	passing, and make sure the stack frame is properly aligned.
+
 2004-04-28  Andrew Cagney  <cagney@redhat.com>
 
 	* stack.c (print_stack_frame): Fix description.

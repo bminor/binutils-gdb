@@ -121,22 +121,12 @@ hppa32_return_value (struct gdbarch *gdbarch,
 		     struct type *type, struct regcache *regcache,
 		     void *readbuf, const void *writebuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, FP4_REGNUM, 0,
-				   TYPE_LENGTH (type), readbuf);
-      if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, FP4_REGNUM, 0,
-				    TYPE_LENGTH (type), writebuf);
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
   if (TYPE_LENGTH (type) <= 2 * 4)
     {
       /* The value always lives in the right hand end of the register
 	 (or register pair)?  */
       int b;
-      int reg = 28;
+      int reg = TYPE_CODE (type) == TYPE_CODE_FLT ? FP4_REGNUM : 28;
       int part = TYPE_LENGTH (type) % 4;
       /* The left hand register contains only part of the value,
 	 transfer that first so that the rest can be xfered as entire
@@ -765,9 +755,6 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
-  /* NOTE: cagney/2004-02-27: This is a guess - its implemented by
-     reverse engineering testsuite failures.  */
-
   /* Stack base address at which any pass-by-reference parameters are
      stored.  */
   CORE_ADDR struct_end = 0;
@@ -784,9 +771,13 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   for (write_pass = 0; write_pass < 2; write_pass++)
     {
       CORE_ADDR struct_ptr = 0;
-      CORE_ADDR param_ptr = 0;
-      int reg = 27;	      /* NOTE: Registers go down.  */
+      /* The first parameter goes into sp-36, each stack slot is 4-bytes.  
+         struct_ptr is adjusted for each argument below, so the first
+	 argument will end up at sp-36.  */
+      CORE_ADDR param_ptr = 32;
       int i;
+      int small_struct = 0;
+
       for (i = 0; i < nargs; i++)
 	{
 	  struct value *arg = args[i];
@@ -817,23 +808,64 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 				      unpack_long (type,
 						   VALUE_CONTENTS (arg)));
 	    }
+	  else if (TYPE_CODE (type) == TYPE_CODE_FLT)
+            {
+	      /* Floating point value store, right aligned.  */
+	      param_len = align_up (TYPE_LENGTH (type), 4);
+	      memcpy (param_val, VALUE_CONTENTS (arg), param_len);
+            }
 	  else
 	    {
-	      /* Small struct value, store right aligned?  */
 	      param_len = align_up (TYPE_LENGTH (type), 4);
+
+	      /* Small struct value are stored right-aligned.  */
 	      memcpy (param_val + param_len - TYPE_LENGTH (type),
 		      VALUE_CONTENTS (arg), TYPE_LENGTH (type));
+
+	      /* Structures of size 5, 6 and 7 bytes are special in that
+	         the higher-ordered word is stored in the lower-ordered
+		 argument, and even though it is a 8-byte quantity the
+		 registers need not be 8-byte aligned.  */
+	      if (param_len > 4)
+		small_struct = 1;
 	    }
+
 	  param_ptr += param_len;
-	  reg -= param_len / 4;
+	  if (param_len == 8 && !small_struct)
+            param_ptr = align_up (param_ptr, 8);
+
+	  /* First 4 non-FP arguments are passed in gr26-gr23.
+	     First 4 32-bit FP arguments are passed in fr4L-fr7L.
+	     First 2 64-bit FP arguments are passed in fr5 and fr7.
+
+	     The rest go on the stack, starting at sp-36, towards lower
+	     addresses.  8-byte arguments must be aligned to a 8-byte
+	     stack boundary.  */
 	  if (write_pass)
 	    {
 	      write_memory (param_end - param_ptr, param_val, param_len);
-	      if (reg >= 23)
+
+	      /* There are some cases when we don't know the type
+		 expected by the callee (e.g. for variadic functions), so 
+		 pass the parameters in both general and fp regs.  */
+	      if (param_ptr <= 48)
 		{
-		  regcache_cooked_write (regcache, reg, param_val);
+		  int grreg = 26 - (param_ptr - 36) / 4;
+		  int fpLreg = 72 + (param_ptr - 36) / 4 * 2;
+		  int fpreg = 74 + (param_ptr - 32) / 8 * 4;
+
+		  regcache_cooked_write (regcache, grreg, param_val);
+		  regcache_cooked_write (regcache, fpLreg, param_val);
+
 		  if (param_len > 4)
-		    regcache_cooked_write (regcache, reg + 1, param_val + 4);
+		    {
+		      regcache_cooked_write (regcache, grreg + 1, 
+					     param_val + 4);
+
+		      regcache_cooked_write (regcache, fpreg, param_val);
+		      regcache_cooked_write (regcache, fpreg + 1, 
+					     param_val + 4);
+		    }
 		}
 	    }
 	}
@@ -841,13 +873,13 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       /* Update the various stack pointers.  */
       if (!write_pass)
 	{
-	  struct_end = sp + struct_ptr;
+	  struct_end = sp + align_up (struct_ptr, 64);
 	  /* PARAM_PTR already accounts for all the arguments passed
 	     by the user.  However, the ABI mandates minimum stack
 	     space allocations for outgoing arguments.  The ABI also
 	     mandates minimum stack alignments which we must
 	     preserve.  */
-	  param_end = struct_end + max (align_up (param_ptr, 8), 16);
+	  param_end = struct_end + align_up (param_ptr, 64);
 	}
     }
 
@@ -860,10 +892,9 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
 
   /* Update the Stack Pointer.  */
-  regcache_cooked_write_unsigned (regcache, SP_REGNUM, param_end + 32);
+  regcache_cooked_write_unsigned (regcache, SP_REGNUM, param_end);
 
-  /* The stack will have 32 bytes of additional space for a frame marker.  */
-  return param_end + 32;
+  return param_end;
 }
 
 /* This function pushes a stack frame with arguments as part of the
