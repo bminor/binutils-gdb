@@ -95,7 +95,7 @@ extern CORE_ADDR d30v_skip_prologue ();
 #define CREGS_START	66
 
 #define PSW_REGNUM 	(CREGS_START + 0) /* psw, bpsw, or dpsw??? */
-#define    PSW_SM (((unsigned long)0x80000000) >> 0)	/* Stack mode: 0/SPI */
+#define     PSW_SM (((unsigned long)0x80000000) >> 0)	/* Stack mode: 0/SPI */
 							/*	       1/SPU */
 #define     PSW_EA (((unsigned long)0x80000000) >> 2)	/* Execution status */
 #define     PSW_DB (((unsigned long)0x80000000) >> 3)	/* Debug mode */
