@@ -22,6 +22,9 @@ Do-first:
 Things-to-keep:
 
 alpha-osf1.mh
+alpha-osf1.mt
+nm-alpha.h
+tm-alpha.h
 xm-alpha.h
 
 Things-to-lose:
