@@ -189,6 +189,7 @@ x86_64-*-netbsd*)	targ_emul=elf_x86_64
 			;;
 i[3456]86-*-netware)	targ_emul=i386nw ;;
 i[3456]86-*-elf*)	targ_emul=elf_i386 ;;
+i[3456]86-*-kaos*)	targ_emul=elf_i386 ;;
 i[3456]86-*-freebsdaout* | i[3456]86-*-freebsd[12].* | i[3456]86-*-freebsd[12])
 			targ_emul=i386bsd ;;
 i[3456]86-*-freebsd*)	targ_emul=elf_i386_fbsd
@@ -240,6 +241,7 @@ arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 arm-*-elf)		targ_emul=armelf ;;
+arm-*-kaos*)		targ_emul=armelf ;;
 arm9e-*-elf)		targ_emul=armelf ;;
 arm-*-oabi)		targ_emul=armelf_oabi ;;
 arm*-*-linux-gnu*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
@@ -248,6 +250,7 @@ arm*-*-conix*)		targ_emul=armelf ;;
 thumb-*-linux-gnu* | thumb-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
 strongarm-*-coff)	targ_emul=armcoff ;;
 strongarm-*-elf)	targ_emul=armelf ;;
+strongarm-*-kaos*)	targ_emul=armelf ;;
 thumb-*-coff)		targ_emul=armcoff ;;
 thumb-*-elf)		targ_emul=armelf ;;
 thumb-*-oabi)           targ_emul=armelf_oabi ;;
@@ -310,11 +313,11 @@ sh*-*-netbsdelf*)
 			targ_emul=shelf_nbsd
 			targ_extra_emuls=shlelf_nbsd
 			;;
-shle*-*-elf* | sh[1234]*le*-*-elf)
+shle*-*-elf* | sh[1234]*le*-*-elf | shle*-*-kaos*)
 			targ_emul=shlelf
 			targ_extra_emuls="shelf shl sh"
 			;;
-sh-*-elf* | sh[1234]*-*-elf | sh-*-rtemself*)
+sh-*-elf* | sh[1234]*-*-elf | sh-*-rtemself* | sh-*-kaos*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
@@ -484,7 +487,7 @@ powerpc*le-*-elf* | powerpc*le-*-eabi* | powerpc*le-*-solaris* \
 		targ_extra_emuls="elf32ppcsim" ;;
 	esac ;;
 powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
-  | powerpc*-*-netbsd* | powerpc-*-openbsd* | powerpc*-*-vxworks*)
+  | powerpc*-*-netbsd* | powerpc-*-openbsd* | powerpc*-*-vxworks* | powerpc*-*-kaos*)
 	case "${targ}" in
 	*64*)	targ_emul=elf64ppc
 		targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim"

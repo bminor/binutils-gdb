@@ -1,3 +1,8 @@
+2003-02-11  Uwe Stieber  <uwe@wwws.de>
+
+	* configure.tgt: Add support for kaOS as cross build target
+	system.
+
 2003-02-10  John Daivid Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* hppaelf.em (group_size): Change default back to 1.

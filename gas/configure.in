@@ -190,6 +190,7 @@ changequote([,])dnl
       arm-*-coff | thumb-*-coff)	fmt=coff ;;
       arm-*-rtems | thumb-*-rtems)	fmt=elf ;;
       arm-*-elf | thumb-*-elf)		fmt=elf ;;
+      arm-*-kaos*)			fmt=elf ;;
       arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)		fmt=aout em=linux ;;
       arm*-*-linux-gnu*)		fmt=elf  em=linux ;;
@@ -247,6 +248,7 @@ changequote([,])dnl
       i386-*-beos*)			fmt=elf ;;
       i386-*-coff)			fmt=coff ;;
       i386-*-elf)			fmt=elf ;;
+      i386-*-kaos*)			fmt=elf ;;
       i386-*-bsd*)			fmt=aout em=386bsd ;;
       i386-*-netbsd0.8)			fmt=aout em=386bsd ;;
       i386-*-netbsdpe*)			fmt=coff em=pe ;;
@@ -409,6 +411,7 @@ changequote([,])dnl
       ppc-**-nto*)			fmt=elf ;;
       ppc-*-vxworks*)			fmt=elf ;;
       ppc-*-windiss*)			fmt=elf ;;
+      ppc-*-kaos*)			fmt=elf ;;
 
       s390x-*-linux-gnu*)		fmt=elf em=linux ;;
       s390-*-linux-gnu*)		fmt=elf em=linux ;;
@@ -427,6 +430,8 @@ changequote([,])dnl
       sh-*-pe*)				fmt=coff em=pe bfd_gas=yes endian=little ;;
       sh-*-rtemself*)			fmt=elf ;;
       sh-*-rtems*)			fmt=coff ;;
+      sh-*-kaos*)			fmt=elf ;;
+      shle*-*-kaos*)			fmt=elf ;;
       sh64-*-elf*)			fmt=elf ;;
 
       ns32k-pc532-mach*)		fmt=aout em=pc532mach ;;
@@ -454,6 +459,7 @@ changequote([,])dnl
 			esac ;;
       strongarm-*-coff)			fmt=coff ;;
       strongarm-*-elf)			fmt=elf ;;
+      strongarm-*-kaos*)		fmt=elf ;;
       xscale-*-coff)			fmt=coff ;;
       xscale-*-elf)			fmt=elf ;;
 

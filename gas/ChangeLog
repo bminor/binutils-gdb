@@ -1,3 +1,8 @@
+2003-02-11  Uwe Stieber  <uwe@wwws.de>
+
+	* configure.in: Add support for kaOS as cross build target system.
+	* configure: Regenerated.
+
 2003-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (md_begin): If the Maverick co-processor is
