@@ -1,5 +1,5 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-# Free Software Foundation, Inc.
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+# 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,6 @@ proc test_ptype_class_objects {} {
     # Accept it as an expected failure if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype struct protected_struct\n"
     gdb_expect {
 	-re "type = struct protected_struct \{${ws}protected:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
@@ -109,7 +108,6 @@ proc test_ptype_class_objects {} {
     # Accept it as an expected failure if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype struct private_struct\n"
     gdb_expect {
 	-re "type = struct private_struct \{${ws}private:${ws}int a;${ws}int b;$nl\}$nl$gdb_prompt $" {
@@ -126,7 +124,6 @@ proc test_ptype_class_objects {} {
     # Accept it as an expected failure if gdb just fails to distinguish between
     # class and struct, and everything else is OK.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype struct mixed_protection_struct\n"
     gdb_expect {
 	-re "type = struct mixed_protection_struct \{${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
@@ -177,7 +174,6 @@ proc test_ptype_class_objects {} {
     # structs (where we don't print the "public:" attribute) we don't print
     # the "private:" attribute.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class default_private_class\n"
     gdb_expect {
 	-re "type = class default_private_class \{${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
@@ -236,7 +232,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class B\n"
     gdb_expect {
 	-re "type = class B : public A \{${ws}public:${ws}int b;${ws}int x;${ws}B & operator=\\(B const ?&\\);${ws}B\\((B const|const B) ?&\\);${ws}B\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -254,7 +249,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class C\n"
     gdb_expect {
 	-re "type = class C : public A \{${ws}public:${ws}int c;${ws}int x;${ws}C & operator=\\(C const ?&\\);${ws}C\\((C const|const C) ?&\\);${ws}C\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -272,7 +266,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class D\n"
     gdb_expect {
 	-re "type = class D : public B, public C \{${ws}public:${ws}int d;${ws}int x;${ws}D & operator=\\(D const ?&\\);${ws}D\\((D const|const D) ?&\\);${ws}D\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -290,7 +283,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class E\n"
     gdb_expect {
 	-re "type = class E : public D \{${ws}public:${ws}int e;${ws}int x;${ws}E & operator=\\(E const ?&\\);${ws}E\\((E const|const E) ?&\\);${ws}E\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -354,7 +346,6 @@ proc test_ptype_class_objects {} {
     # The format of a g++ virtual base pointer.
     set vbptr "(_vb\[$.\]|__vb_)\[0-9\]?"
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class vB\n"
     gdb_expect {
 	-re "type = class vB : public virtual vA \{${ws}public:${ws}int vb;${ws}int vx;${ws}vB & operator=\\(vB const ?&\\);${ws}vB\\((vB const|const vB) ?&\\);${ws}vB\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -384,7 +375,6 @@ proc test_ptype_class_objects {} {
     # for now, but with a FIXME.  At some future point, gdb should use a
     # portable representation for the virtual table constructs.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class vC\n"
     gdb_expect {
 	-re "type = class vC : public virtual vA \{${ws}public:${ws}int vc;${ws}int vx;${ws}vC & operator=\\(vC const ?&\\);${ws}vC\\((vC const|const vC) ?&\\);${ws}vC\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -414,7 +404,6 @@ proc test_ptype_class_objects {} {
     # for now, but with a FIXME.  At some future point, gdb should use a
     # portable representation for the virtual table constructs.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class vD\n"
     gdb_expect {
 	-re "type = class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;${ws}vD & operator=\\(vD const ?&\\);${ws}vD\\((vD const|const vD) ?&\\);${ws}vD\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -444,7 +433,6 @@ proc test_ptype_class_objects {} {
     # for now, but with a FIXME.  At some future point, gdb should use a
     # portable representation for the virtual table constructs.
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class vE\n"
     gdb_expect {
 	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;${ws}vE & operator=\\(vE const ?&\\);${ws}vE\\((vE const|const vE) ?&\\);${ws}vE\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
@@ -470,7 +458,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class Base1\n"
     gdb_expect {
 	-re "type = class Base1 \{${ws}public:${ws}int x;${ws}Base1 & operator=\\(Base1 const ?&\\);${ws}Base1\\(((Base1 const)|(const Base1)) ?&\\);${ws}Base1\\(int\\);${ws}\}$nl$gdb_prompt $" {
@@ -491,7 +478,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class Foo\n"
     gdb_expect {
         -re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;\r\n${ws}Foo\\(int, int\\);${ws}int operator!\\((void|)\\);${ws}operator int\\((void|)\\);${ws}int times\\(int\\);$nl\}$nl$gdb_prompt $" {
@@ -512,7 +498,6 @@ proc test_ptype_class_objects {} {
 	}
     }
 
-    setup_xfail_format "DWARF 1"
     send_gdb "ptype class Bar\n"
     gdb_expect {
 	-re "type = class Bar : public Base1, public Foo \{${ws}public:${ws}int z;${ws}Bar & operator=\\(Bar const ?&\\);${ws}Bar\\((Bar const|const Bar) ?&\\);${ws}Bar\\(int, int, int\\);${ws}\}$nl$gdb_prompt $" {
@@ -737,7 +722,6 @@ proc test_pointers_to_class_members {} {
     }
     clear_xfail "*-*-*"
 
-    setup_xfail_format "DWARF 1"
     gdb_test "print (int)pmi == sizeof(int)" ".* = false" "print (int)pmi == sizeof(int)"
 }
 
@@ -822,11 +806,9 @@ proc test_static_members {} {
 	"print cnsi without static members"
 
     gdb_test "set print static-members on" ""
-    setup_xfail_format "DWARF 1"
     gdb_test "print csi" \
 	"{x = 10, y = 20, static null = {x = 0, y = 0, static null = <same as static member of an already seen type>}}" \
 	"print csi with static members"
-    setup_xfail_format "DWARF 1"
     gdb_test "print cnsi" \
 	"{x = 30, y = 40, static null = {x = 0, y = 0, static null = <same as static member of an already seen type>, static yy = {z = 5, static xx = {x = 1, y = 2, static null = <same as static member of an already seen type>, static yy = <same as static member of an already seen type>}}}, static yy = <same as static member of an already seen type>}" \
 	"print cnsi with static members"
@@ -856,12 +838,7 @@ proc do_tests {} {
     send_gdb "set width 0\n"
     gdb_expect -re "$gdb_prompt $"
 
-    # Get the debug format for the compiled test case.
-
-    if [ runto_main ] then {
-	get_debug_format
-    }
-
+    runto_main
     test_ptype_class_objects
 
     if [ runto 'inheritance2' ] then {

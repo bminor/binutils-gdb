@@ -1,3 +1,11 @@
+2003-02-12  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/classes.exp: Remove setup_xfail_format for DWARF 1.
+	* gdb.c++/inherit.exp: Likewise.
+	* gdb.c++/cplusfuncs.exp: Remove suppression logic for DWARF 1.
+	* gdb.c++/templates.exp: Likewise.
+	* gdb.c++/virtfunc.exp: Likewise.
+
 2003-02-06  Jason Molenda  (jason-cl@molenda.com)
 
 	* gdb.mi/mi-syn-frame.c (subroutine): Add a comment explaining
