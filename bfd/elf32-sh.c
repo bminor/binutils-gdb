@@ -6002,7 +6002,9 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
     return 0;
   /* SH TLS ABI is variant I and static TLS block start just after tcbhead
      structure which has 2 pointer fields.  */
-  return address - elf_hash_table (info)->tls_sec->vma + 8;
+  return (address - elf_hash_table (info)->tls_sec->vma
+	  + align_power ((bfd_vma) 8,
+			 elf_hash_table (info)->tls_sec->alignment_power));
 }
 
 static asection *
