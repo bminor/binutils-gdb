@@ -43,6 +43,7 @@ mt-sparclite
 nind-gdb.exp
 udi-gdb.exp
 unix-gdb.exp
+unknown.exp
 vx-gdb.exp
 
 Things-to-lose:
