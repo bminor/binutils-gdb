@@ -1,7 +1,50 @@
-Fri Jun  7 12:35:46 1991  Sean Fagan  (sef at cygint.cygnus.com)
+Thu Jul  4 09:53:16 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
-	* coffcode.h (coff_swap_aux_in): added else case to deal with
-	filenames less than 9 characters.
+	* Everything: created some new files, core.c format.c, reloc.c,
+	section.c and syms.c to split the functionality a bit better.
+	Cleaned up the rest of the files a bit, and added some
+	documentation.
+
+
+Mon Jul  1 13:29:47 1991  David Wood (wood at david.ultra.nya.edu)
+
+	* opncls.c, ../include/sys/h-sun3.h ../include/sys/h-sun4.h: fcntl
+	really takes 3 arguments, patched code and ammended prototypes.
+
+Fri Jun 14 13:19:40 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* ../include/bfd.h (struct bfd_target): Added new field
+	"align_power_min" which contains the minimum alignment for a
+	section. This is used in coff_new_section_hook. The field
+	insertion necessitates an update of all backends..
+
+	* aoutf1.h jump table field inserted
+	
+	* archive.c(snarf_ar_hdr)(bfd_slurp_coff_armap) can now parse dgux style extended
+	filenames too.
+
+	* bout.c(b_out_squirt_out_relocs) fix to assertion tests. Jump
+	table field inserted.
+	
+	* coffcode.h(just about everything) Now patches up symbol tables
+	using a different mechanism. The Intel major bug has been fixed,
+	and the linker can self host on the Aviion and be debugged with
+	gdb.
+
+	* ecoff.c: new include and jump table patch, i386coff.c: new
+	include and jump table patch,  icoff.c: new include and jump table
+	patch, ieee.c: can now read archives containing ieee modules.,
+	libcoff.h: added (combined_entry_type), libieee.h: uped max
+	sections to 20, m68kcoff.c: new include and jump table patch,
+	m88kbcs.c: new include and jump table patch, oasys.c: various bugs
+	fixed. opncls.c: added bfd_alloc_grow and bfd_alloc_finish.
+	srec.c: jump table patch. trad-code.c fixed #IF typeo
+
+Fri Jun  7 12:35:46 1991  Sean Fagan  (sef at cygint.cygnus.com)
+ 
+ 	* coffcode.h (coff_swap_aux_in): added else case to deal with
+ 	filenames less than 9 characters.
+ 
 
 Thu Jun  6 18:27:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
