@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: GNU binutils 2.15.96\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-03-03 21:03+1030\n"
-"PO-Revision-Date: 2005-03-14 08:00-0500\n"
+"PO-Revision-Date: 2005-03-22 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -5235,39 +5235,39 @@ msgid "no argument types in mangled string\n"
 msgstr "aucun type d'argument dans la chaîne encodé par mutilation\n"
 
 #: stabs.c:5093
-#, fuzzy, c-format
+#, c-format
 msgid "Demangled name is not a function\n"
-msgstr "valeurs par défaut ne sont pas dans une fonction en C++"
+msgstr "nom démutilé n'est pas une fonction\n"
 
 #: stabs.c:5135
 #, c-format
 msgid "Unexpected type in v3 arglist demangling\n"
-msgstr ""
+msgstr "Type inattendu dans la arglist v3 en démutilation\n"
 
 #: stabs.c:5202
-#, fuzzy, c-format
+#, c-format
 msgid "Unrecognized demangle component %d\n"
-msgstr "Option de débug non reconnue « %s »\n"
+msgstr "Composant de démutilation non reconnu %d\n"
 
 #: stabs.c:5254
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to print demangled template\n"
-msgstr "%s: échec de lecture de l'en-tête du fichier\n"
+msgstr "Échec d'affichage du modèle de démutilation\n"
 
 #: stabs.c:5334
 #, c-format
 msgid "Couldn't get demangled builtin type\n"
-msgstr ""
+msgstr "N'a pu obtenir le type de démutilation construit\n"
 
 #: stabs.c:5383
 #, c-format
 msgid "Unexpected demangled varargs\n"
-msgstr ""
+msgstr "Varargs inattendu de démutilation\n"
 
 #: stabs.c:5390
-#, fuzzy, c-format
+#, c-format
 msgid "Unrecognized demangled builtin type\n"
-msgstr "type par défaut en C++ n'est pas reconnu"
+msgstr "type de construit de démutilation non reconnu\n"
 
 #: strings.c:206
 #, c-format
