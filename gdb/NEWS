@@ -11,6 +11,7 @@ Irix 6.x					mips*-sgi-irix6*
 PowerPC Linux					powerpc-*-linux*
 PowerPC Solaris					powerpcle-*-solaris*
 Sparc Linux					sparc-*-linux*
+Motorola sysV68 R3V7.1				m68k-motorola-sysv
 
 * New targets
 
