@@ -1,3 +1,11 @@
+2005-03-21  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (do_initial_child_stuff): Don't clear the thread list
+	here.
+	(do_initial_child_stuff): Move clearing of thread list to a place
+	before a thread ould be created.
+	(child_attach): Ditto.
+
 2005-03-21  Michael Snyder  <msnyder@redhat.com>
 
 	* mn10300-tdep.c (mn10300_frame_unwind_cache): Use func addr

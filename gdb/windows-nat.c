@@ -1442,7 +1442,6 @@ do_initial_child_stuff (DWORD pid)
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
   push_target (&deprecated_child_ops);
-  child_init_thread_list ();
   disable_breakpoints_in_shlibs (1);
   child_clear_solibs ();
   clear_proceed_status ();
@@ -1588,6 +1587,7 @@ child_attach (char *args, int from_tty)
 
   pid = strtoul (args, 0, 0);		/* Windows pid */
 
+  child_init_thread_list ();
   ok = DebugActiveProcess (pid);
   saw_create = 0;
 
@@ -1860,6 +1860,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
 	}
     }
 
+  child_init_thread_list ();
   ret = CreateProcess (0,
 		       args,	/* command line */
 		       NULL,	/* Security */
