@@ -1,3 +1,9 @@
+Thu Apr  2 16:10:36 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo: Add some credits, mention bug monitor.
+	* remote.texi: Mention mips monitor targets.
+	* gdbint.texinfo: Describe SP_REGNUM, STEP_SKIPS_DELAY.
+	
 Mon Feb  2 17:13:03 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo: Remove obsolete mentions of pinsn.c and opcode.h

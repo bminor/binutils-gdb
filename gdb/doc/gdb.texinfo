@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 1988 1989 1990 1991 1992 1993 1994 1995
+@c Copyright 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header 
@@ -35,10 +35,6 @@
 
 @c !!set GDB manual's revision date
 @set DATE January 1994
-
-@c GDB CHANGELOG CONSULTED BETWEEN:
-@c Fri Oct 11 23:27:06 1991  John Gilmore  (gnu at cygnus.com)
-@c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
 
@@ -304,6 +300,8 @@ Henkel-Wallace, Rich Pixley, Steve Chamberlain, and John Gilmore.
 David Johnson wrote the original COFF support; Pace Willison did
 the original support for encapsulated COFF.
 
+Brent Benson of Harris Computer Systems contributed DWARF 2 support.
+
 Adam de Boor and Bradley Davis contributed the ISI Optimum V support.
 Per Bothner, Noboyuki Hikichi, and Alessandro Forin contributed MIPS
 support.
@@ -329,9 +327,10 @@ libraries.
 Jay Fenlason and Roland McGrath ensured that @value{GDBN} and GAS agree about
 several machine instruction sets.
 
-Patrick Duval, Ted Goldstein, Vikram Koka and Glenn Engel helped
-develop remote debugging.  Intel Corporation and Wind River Systems
-contributed remote debugging modules for their products.
+Patrick Duval, Ted Goldstein, Vikram Koka and Glenn Engel helped develop
+remote debugging.  Intel Corporation, Wind River Systems, AMD, and ARM
+contributed remote debugging modules for the i960, VxWorks, A29K UDI,
+and RDI targets, respectively.
 
 Brian Fox is the author of the readline libraries providing
 command-line editing and command history.
@@ -353,10 +352,15 @@ Hitachi America, Ltd. sponsored the support for Hitachi microprocessors.
 Kung Hsu, Jeff Law, and Rick Sladkey added support for hardware
 watchpoints.
 
+Michael Snyder added support for tracepoints.
+
 Stu Grossman wrote gdbserver.
 
 Jim Kingdon, Peter Schauer, Ian Taylor, and Stu Grossman made
 nearly innumerable bug fixes and cleanups throughout GDB.
+
+Cygnus Solutions has sponsored GDB maintenance and much of its
+development since 1991.
 
 @ifclear BARETARGET
 @node Sample Session
@@ -7599,6 +7603,10 @@ A VxWorks system, attached via TCP/IP.  The argument @var{machinename}
 is the target system's machine name or IP address.
 @xref{VxWorks Remote, ,@value{GDBN} and VxWorks}.
 @end ifset
+
+@kindex target bug
+@item target bug @var{dev}
+BUG monitor, running on a MVME187 (m88k) board.
 
 @kindex target cpu32bug
 @item target cpu32bug @var{dev}

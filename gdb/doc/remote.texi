@@ -1529,7 +1529,18 @@ On some @value{GDBN} host configurations, you can specify a TCP
 connection (for instance, to a serial line managed by a terminal
 concentrator) instead of a serial port, using the syntax
 @samp{@var{hostname}:@var{portnumber}}.
+
+@item target pmon @var{port}
+@kindex target pmon @var{port}
+
+@item target ddb @var{port}
+@kindex target ddb @var{port}
+
+@item target lsi @var{port}
+@kindex target lsi @var{port}
+
 @end table
+
 
 @noindent
 @value{GDBN} also supports these special commands for MIPS targets:
