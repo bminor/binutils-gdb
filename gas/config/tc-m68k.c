@@ -511,7 +511,7 @@ CONST pseudo_typeS mote_pseudo_table[] =
 #define isuword(x)	((x)>=0 && (x)<=65535)
 
 #define isbyte(x)	((x)>= -255 && (x)<=255)
-#define isword(x)	((x)>=-32768 && (x)<=65535)
+#define isword(x)	((x)>=-65536 && (x)<=65535)
 #define islong(x)	(1)
 
 extern char *input_line_pointer;
@@ -859,8 +859,8 @@ m68k_ip (instring)
 		  if (opP->mode == CONTROL
 		      || opP->mode == FPREG
 		      || opP->mode == REGLST
+		      || opP->mode == IMMED
 		      || (opP->mode != ABSL
-			  && opP->mode != IMMED
 			  && (opP->reg == PC
 			      || opP->reg == ZPC)))
 		    losing++;
