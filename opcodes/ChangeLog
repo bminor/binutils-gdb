@@ -1,3 +1,8 @@
+Mon Feb 23 13:16:17 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-asm.c: Include symcat.h.
+	* cgen-dis.c,cgen-opc.c,cgen-asm.in,cgen-dis.in: Ditto.
+
 start-sanitize-sky
 Mon Feb 23 09:51:39 1998  Doug Evans  <devans@canuck.cygnus.com>
 

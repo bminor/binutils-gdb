@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ansidecl.h"
 #include "dis-asm.h"
 #include "bfd.h"
+#include "symcat.h"
 #include "@arch@-opc.h"
 
 /* ??? The layout of this stuff is still work in progress.
@@ -87,6 +88,8 @@ extract_normal (buf_ctrl, insn_value, attrs, start, length, shift, total_length,
     value <<= shift;
 
   *valuep = value;
+
+  /* FIXME: for now */
   return 1;
 }
 
@@ -166,7 +169,7 @@ extract_insn_normal (insn, buf_ctrl, insn_value, fields)
 	continue;
 
       length = @arch@_cgen_extract_operand (CGEN_SYNTAX_FIELD (*syn),
-					   buf_ctrl, insn_value, fields);
+					    buf_ctrl, insn_value, fields);
       if (length == 0)
 	return 0;
     }
