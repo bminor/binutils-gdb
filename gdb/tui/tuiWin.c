@@ -664,9 +664,9 @@ _tuiSetFocus (char *arg, int fromTTY)
       for (i = 0; (i < strlen (bufPtr)); i++)
 	bufPtr[i] = toupper (arg[i]);
 
-      if (subsetCompare (bufPtr, "NEXT"))
+      if (subset_compare (bufPtr, "NEXT"))
 	winInfo = tuiNextWin (tuiWinWithFocus ());
-      else if (subsetCompare (bufPtr, "PREV"))
+      else if (subset_compare (bufPtr, "PREV"))
 	winInfo = tuiPrevWin (tuiWinWithFocus ());
       else
 	winInfo = partialWinByName (bufPtr);

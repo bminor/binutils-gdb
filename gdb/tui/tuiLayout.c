@@ -499,17 +499,17 @@ _tuiSetLayoutTo (char *layoutName)
 	}
       else
 	{
-	  if (subsetCompare (bufPtr, "SRC"))
+	  if (subset_compare (bufPtr, "SRC"))
 	    newLayout = SRC_COMMAND;
-	  else if (subsetCompare (bufPtr, "ASM"))
+	  else if (subset_compare (bufPtr, "ASM"))
 	    newLayout = DISASSEM_COMMAND;
-	  else if (subsetCompare (bufPtr, "SPLIT"))
+	  else if (subset_compare (bufPtr, "SPLIT"))
 	    newLayout = SRC_DISASSEM_COMMAND;
-	  else if (subsetCompare (bufPtr, "REGS") ||
-		   subsetCompare (bufPtr, TUI_GENERAL_SPECIAL_REGS_NAME) ||
-		   subsetCompare (bufPtr, TUI_GENERAL_REGS_NAME) ||
-		   subsetCompare (bufPtr, TUI_FLOAT_REGS_NAME) ||
-		   subsetCompare (bufPtr, TUI_SPECIAL_REGS_NAME))
+	  else if (subset_compare (bufPtr, "REGS") ||
+		   subset_compare (bufPtr, TUI_GENERAL_SPECIAL_REGS_NAME) ||
+		   subset_compare (bufPtr, TUI_GENERAL_REGS_NAME) ||
+		   subset_compare (bufPtr, TUI_FLOAT_REGS_NAME) ||
+		   subset_compare (bufPtr, TUI_SPECIAL_REGS_NAME))
 	    {
 	      if (curLayout == SRC_COMMAND || curLayout == SRC_DATA_COMMAND)
 		newLayout = SRC_DATA_COMMAND;
@@ -521,7 +521,7 @@ _tuiSetLayoutTo (char *layoutName)
    layout command issued by the user. HP has asked us to hook up this code 
    - edie epstein
  */
-	      if (subsetCompare (bufPtr, TUI_FLOAT_REGS_NAME))
+	      if (subset_compare (bufPtr, TUI_FLOAT_REGS_NAME))
 		{
 		  if (dataWin->detail.dataDisplayInfo.regsDisplayType !=
 		      TUI_SFLOAT_REGS &&
@@ -532,12 +532,12 @@ _tuiSetLayoutTo (char *layoutName)
 		    dpyType =
 		      dataWin->detail.dataDisplayInfo.regsDisplayType;
 		}
-	      else if (subsetCompare (bufPtr,
+	      else if (subset_compare (bufPtr,
 				      TUI_GENERAL_SPECIAL_REGS_NAME))
 		dpyType = TUI_GENERAL_AND_SPECIAL_REGS;
-	      else if (subsetCompare (bufPtr, TUI_GENERAL_REGS_NAME))
+	      else if (subset_compare (bufPtr, TUI_GENERAL_REGS_NAME))
 		dpyType = TUI_GENERAL_REGS;
-	      else if (subsetCompare (bufPtr, TUI_SPECIAL_REGS_NAME))
+	      else if (subset_compare (bufPtr, TUI_SPECIAL_REGS_NAME))
 		dpyType = TUI_SPECIAL_REGS;
 	      else
 		{
@@ -559,9 +559,9 @@ _tuiSetLayoutTo (char *layoutName)
 /*              dpyType = TUI_GENERAL_REGS; 
  */
 	    }
-	  else if (subsetCompare (bufPtr, "NEXT"))
+	  else if (subset_compare (bufPtr, "NEXT"))
 	    newLayout = _nextLayout ();
-	  else if (subsetCompare (bufPtr, "PREV"))
+	  else if (subset_compare (bufPtr, "PREV"))
 	    newLayout = _prevLayout ();
 	  else
 	    status = TUI_FAILURE;

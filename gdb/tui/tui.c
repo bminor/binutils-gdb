@@ -600,9 +600,9 @@ _tui_vToggle_command (va_list args)
       for (i = 0; (ptr[i]); i++)
 	ptr[i] = toupper (arg[i]);
 
-      if (subsetCompare (ptr, TUI_FLOAT_REGS_NAME))
+      if (subset_compare (ptr, TUI_FLOAT_REGS_NAME))
 	tuiToggleFloatRegs ();
-/*        else if (subsetCompare(ptr, "ANOTHER TOGGLE OPTION"))
+/*        else if (subset_compare(ptr, "ANOTHER TOGGLE OPTION"))
    ...
  */
       else

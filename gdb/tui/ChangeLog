@@ -1,3 +1,9 @@
+2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiWin.c (_tuiSetFocus): Replace subsetCompare with subset_compare.
+	* tuiLayout.c (_tuiSetLayoutTo): Likewise.
+	* tui.c (_tui_vToggle_command): Likewise.
+
 2001-07-17  Elena Zannoni  <ezannoni@redhat.com>
 
 	* tui-file.c: Add include of tuiIO.h, for tuiPuts_unfiltered.
