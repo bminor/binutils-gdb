@@ -1,3 +1,7 @@
+Mon Jun 14 10:38:36 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* ld.texinfo: Fix use of @item vs. @itemx.
+
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
 	From Thomas Zenker <thz@lennartz-electronic.de>:

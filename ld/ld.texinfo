@@ -757,7 +757,7 @@ platforms which support shared libraries.
 @kindex --check-sections
 @kindex --no-check-sections
 @item --check-sections
-@item --no-check-sections
+@itemx --no-check-sections
 Asks the linker @emph{not} to check section addresses after they have
 been assigned to see if there any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
@@ -1118,7 +1118,7 @@ for compatibility with other linkers, you may omit the leading
 @kindex --verbose
 @cindex verbose
 @item --dll-verbose
-@item --verbose
+@itemx --verbose
 Display the version number for @code{ld} and list the linker emulations
 supported.  Display which input files can and cannot be opened.  Display
 the linker script if using a default builtin script.
