@@ -1,3 +1,9 @@
+Thu Oct  1 15:37:54 1998  Richard Henderson  <rth@cygnus.com>
+
+	* read.c (discard_rest_of_line): New function.
+	* read.h: Declare it.
+	* config/tc-alpha.c (s_alpha_mask, s_alpha_frame): Use it.
+
 Thu Oct  1 10:33:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d10v.c (find_symbol_matching_register): New function.
