@@ -751,6 +751,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
 {"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
   /* start-sanitize-r5900 */
+{"mult1",   "s,t",	0x70000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,      T5},
 {"mult1",   "d,s,t",	0x70000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
 {"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
