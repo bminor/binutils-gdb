@@ -1969,7 +1969,7 @@ find_pc_sect_line (CORE_ADDR pc, struct bfd_section *section, int notcurrent)
     if (MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
       {
 	mfunsym = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol),
-					      NULL, NULL);
+					      NULL);
 	if (mfunsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:

@@ -4005,7 +4005,7 @@ create_longjmp_breakpoint (char *func_name)
     b = create_internal_breakpoint (0, bp_longjmp_resume);
   else
     {
-      if ((m = lookup_minimal_symbol_text (func_name, NULL, NULL)) == NULL)
+      if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
 	return;
  
       b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), bp_longjmp);
@@ -4054,7 +4054,7 @@ create_overlay_event_breakpoint (char *func_name)
   struct breakpoint *b;
   struct minimal_symbol *m;
 
-  if ((m = lookup_minimal_symbol_text (func_name, NULL, NULL)) == NULL)
+  if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
     return;
  
   b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), 

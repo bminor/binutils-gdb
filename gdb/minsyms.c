@@ -260,16 +260,13 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
-   is non-NULL, limit the search to that objfile.  If SFILE is non-NULL,
-   the only file-scope symbols considered will be from that source file
-   (global symbols are still preferred).  Returns a pointer to the minimal
-   symbol that matches, or NULL if no match is found.
+   is non-NULL, limit the search to that objfile.  Returns a pointer
+   to the minimal symbol that matches, or NULL if no match is found.
 
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_text (const char *name, const char *sfile,
-			    struct objfile *objf)
+lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -277,15 +274,6 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
   struct minimal_symbol *found_file_symbol = NULL;
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
-
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-  if (sfile != NULL)
-    {
-      char *p = strrchr (sfile, '/');
-      if (p != NULL)
-	sfile = p + 1;
-    }
-#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;
@@ -304,17 +292,7 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
 		  switch (MSYMBOL_TYPE (msymbol))
 		    {
 		    case mst_file_text:
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-		      if (sfile == NULL || STREQ (msymbol->filename, sfile))
-			found_file_symbol = msymbol;
-#else
-		      /* We have neither the ability nor the need to
-		         deal with the SFILE parameter.  If we find
-		         more than one symbol, just return the latest
-		         one (the user can't expect useful behavior in
-		         that case).  */
 		      found_file_symbol = msymbol;
-#endif
 		      break;
 		    default:
 		      found_symbol = msymbol;
@@ -336,11 +314,10 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
 }
 
 /* Look through all the current minimal symbol tables and find the
-   first minimal symbol that matches NAME and is a solib trampoline.  If OBJF
-   is non-NULL, limit the search to that objfile.  If SFILE is non-NULL,
-   the only file-scope symbols considered will be from that source file
-   (global symbols are still preferred).  Returns a pointer to the minimal
-   symbol that matches, or NULL if no match is found.
+   first minimal symbol that matches NAME and is a solib trampoline.
+   If OBJF is non-NULL, limit the search to that objfile.  Returns a
+   pointer to the minimal symbol that matches, or NULL if no match is
+   found.
 
    This function only searches the mangled (linkage) names.  */
 

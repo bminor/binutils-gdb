@@ -1164,7 +1164,6 @@ extern struct minimal_symbol *lookup_minimal_symbol (const char *,
 						     struct objfile *);
 
 extern struct minimal_symbol *lookup_minimal_symbol_text (const char *,
-							  const char *,
 							  struct objfile *);
 
 struct minimal_symbol *lookup_minimal_symbol_solib_trampoline (const char *,

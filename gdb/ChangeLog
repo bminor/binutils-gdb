@@ -1,3 +1,13 @@
+2003-10-21  Elena Zannoni  <ezannoni@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol_text): Remove unused parameter.
+	Remove SOFUN_ADDRESS_MAYBE_MISSING ifdeffed code.
+	* symtab.h (lookup_minimal_symbol_text): Update.
+ 	* breakpoint.c (create_overlay_event_breakpoint,
+ 	create_longjmp_breakpoint): Update callers.
+	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Update caller.
+	* symtab.c (find_pc_sect_line): Ditto.
+
 2003-10-21  Andrew Cagney  <cagney@redhat.com>
 
 	* target.c (errno): Delete extern declaration.

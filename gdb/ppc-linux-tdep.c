@@ -331,7 +331,7 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   /* This might not work right if we have multiple symbols with the
      same name; the only way to really get it right is to perform
      the same sort of lookup as the dynamic linker. */
-  msymbol = lookup_minimal_symbol_text (symname, NULL, NULL);
+  msymbol = lookup_minimal_symbol_text (symname, NULL);
   if (!msymbol)
     return 0;
 
