@@ -1,3 +1,8 @@
+2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/gas-defs.exp (run_dump_test): Support using readelf.
+	* config/default.exp: Default READELF and READELFFLAGS.
+
 2001-03-31  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/all/cond.s: Add .if .elseif tree.
