@@ -23,6 +23,9 @@ Things-to-keep:
 
 none.mh
 none.mt
+nm-none.h
+tm-none.h
+xm-none.h
 
 Do-last:
 
