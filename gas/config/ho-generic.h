@@ -29,9 +29,10 @@
 
 #ifdef __STDC__
 extern void *malloc (), *realloc ();
+extern void free ();
 #else
 extern char *malloc (), *realloc ();
-#endif
 extern int free ();
+#endif
 
 /* end of ho-generic.h */
