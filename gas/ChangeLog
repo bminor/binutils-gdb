@@ -1,3 +1,7 @@
+2001-01-15  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-m68hc11.c: Fix formatting.
+
 2001-01-15  Nick Clifton  <nickc@redhat.com>
 
 	* symbols.c (colon): Change 'already defined symbol' from a

@@ -61,8 +61,7 @@ const char FLT_CHARS[] = "dD";
    How many bytes this mode will add to the size of the frag.
    Which mode to go to if the offset won't fit in this one.  */
 
-relax_typeS md_relax_table[] =
-{
+relax_typeS md_relax_table[] = {
   {1, 1, 0, 0},			/* First entries aren't used.  */
   {1, 1, 0, 0},			/* For no good reason except.  */
   {1, 1, 0, 0},			/* that the VAX doesn't either.  */
@@ -105,8 +104,7 @@ relax_typeS md_relax_table[] =
 };
 
 /* 68HC11 and 68HC12 registers.  They are numbered according to the 68HC12.  */
-typedef enum register_id
-{
+typedef enum register_id {
   REG_NONE = -1,
   REG_A = 0,
   REG_B = 1,
@@ -118,16 +116,14 @@ typedef enum register_id
   REG_PC = 8
 } register_id;
 
-typedef struct operand
-{
+typedef struct operand {
   expressionS exp;
   register_id reg1;
   register_id reg2;
   int mode;
 } operand;
 
-struct m68hc11_opcode_def
-{
+struct m68hc11_opcode_def {
   long format;
   int min_operands;
   int max_operands;
@@ -139,15 +135,12 @@ struct m68hc11_opcode_def
 static struct m68hc11_opcode_def *m68hc11_opcode_defs = 0;
 static int m68hc11_nb_opcode_defs = 0;
 
-typedef struct alias
-{
+typedef struct alias {
   const char *name;
   const char *alias;
-}
-alias;
+} alias;
 
-static alias alias_opcodes[] =
-{
+static alias alias_opcodes[] = {
   {"cpd", "cmpd"},
   {"cpx", "cmpx"},
   {"cpy", "cmpy"},
@@ -227,8 +220,7 @@ static struct m68hc11_opcode *m68hc11_sorted_opcodes;
    pseudo-op name without dot
    function to call to execute this pseudo-op
    Integer arg to pass to the function.  */
-const pseudo_typeS md_pseudo_table[] =
-{
+const pseudo_typeS md_pseudo_table[] = {
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"fcb", cons, 1},
   {"fdb", cons, 2},
@@ -244,8 +236,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 CONST char *md_shortopts = "Sm:";
 
-struct option md_longopts[] =
-{
+struct option md_longopts[] = {
 #define OPTION_FORCE_LONG_BRANCH (OPTION_MD_BASE)
   {"force-long-branchs", no_argument, NULL, OPTION_FORCE_LONG_BRANCH},
 
@@ -1073,8 +1064,8 @@ get_operand (oper, which, opmode)
 
       if (*p == ',')
 	{
-          int possible_mode = M6811_OP_NONE;
-          char *old_input_line;
+	  int possible_mode = M6811_OP_NONE;
+	  char *old_input_line;
 	  p++;
 
 	  /* 68HC12 pre increment or decrement.  */
@@ -1092,27 +1083,27 @@ get_operand (oper, which, opmode)
 		}
 	      p = skip_whites (p);
 	    }
-          old_input_line = input_line_pointer;
+	  old_input_line = input_line_pointer;
 	  input_line_pointer = p;
 	  reg = register_name ();
 
-          /* Backtrack if we have a valid constant expression and
-             it does not correspond to the offset of the 68HC12 indexed
-             addressing mode (as in N,x).  */
-          if (reg == REG_NONE && mode == M6811_OP_NONE
-              && possible_mode != M6811_OP_NONE)
-            {
-              oper->mode = M6811_OP_IND16 | M6811_OP_JUMP_REL;
-              input_line_pointer = skip_whites (old_input_line);
-              return 1;
-            }
+	  /* Backtrack if we have a valid constant expression and
+	     it does not correspond to the offset of the 68HC12 indexed
+	     addressing mode (as in N,x).  */
+	  if (reg == REG_NONE && mode == M6811_OP_NONE
+	      && possible_mode != M6811_OP_NONE)
+	    {
+	      oper->mode = M6811_OP_IND16 | M6811_OP_JUMP_REL;
+	      input_line_pointer = skip_whites (old_input_line);
+	      return 1;
+	    }
 
-          if (possible_mode != M6811_OP_NONE)
-            mode = possible_mode;
+	  if (possible_mode != M6811_OP_NONE)
+	    mode = possible_mode;
 
-          if ((current_architecture & cpu6811)
-              && possible_mode != M6811_OP_NONE)
-            as_bad (_("Pre-increment mode is not valid for 68HC11"));
+	  if ((current_architecture & cpu6811)
+	      && possible_mode != M6811_OP_NONE)
+	    as_bad (_("Pre-increment mode is not valid for 68HC11"));
 	  /* Backtrack.  */
 	  if (which == 0 && opmode & M6812_OP_IDX_P2
 	      && reg != REG_X && reg != REG_Y
@@ -1717,7 +1708,7 @@ build_indexed_byte (op, format, move_insn)
 	  if (move_insn && !(val >= -16 && val <= 15))
 	    {
 	      as_bad (_("Offset out of 5-bit range for movw/movb insn: %ld."),
-                      val);
+		      val);
 	      return -1;
 	    }
 
@@ -1755,25 +1746,25 @@ build_indexed_byte (op, format, move_insn)
 	    }
 	}
       if (op->reg1 != REG_PC)
-        {
-          byte = (byte << 3) | 0xe2;
-          f = frag_more (1);
-          number_to_chars_bigendian (f, byte, 1);
+	{
+	  byte = (byte << 3) | 0xe2;
+	  f = frag_more (1);
+	  number_to_chars_bigendian (f, byte, 1);
 
-          f = frag_more (2);
-          fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
-                       &op->exp, false, BFD_RELOC_16);
-          number_to_chars_bigendian (f, 0, 2);
-        }
+	  f = frag_more (2);
+	  fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
+		       &op->exp, false, BFD_RELOC_16);
+	  number_to_chars_bigendian (f, 0, 2);
+	}
       else
-        {
-          f = frag_more (1);
-          number_to_chars_bigendian (f, byte, 1);
-          frag_var (rs_machine_dependent, 2, 2,
-                    ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
-                    op->exp.X_add_symbol,
-                    op->exp.X_add_number, f);
-        }
+	{
+	  f = frag_more (1);
+	  number_to_chars_bigendian (f, byte, 1);
+	  frag_var (rs_machine_dependent, 2, 2,
+		    ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
+		    op->exp.X_add_symbol,
+		    op->exp.X_add_number, f);
+	}
       return 3;
     }
 
@@ -2499,9 +2490,9 @@ md_convert_frag (abfd, sec, fragP)
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
       fragP->fr_opcode[0] = fragP->fr_opcode[0] << 6;
       if ((fragP->fr_opcode[0] & 0x0ff) == 0x0c0)
-        fragP->fr_opcode[0] |= disp & 0x1f;
+	fragP->fr_opcode[0] |= disp & 0x1f;
       else
-        fragP->fr_opcode[0] |= value & 0x1f;
+	fragP->fr_opcode[0] |= value & 0x1f;
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
@@ -2516,17 +2507,17 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
       fragP->fr_opcode[0] |= 0xe2;
       if ((fragP->fr_opcode[0] & 0x0ff) == 0x0fa)
-        {
-          fixp = fix_new (fragP, fragP->fr_fix, 2,
-                          fragP->fr_symbol, fragP->fr_offset,
-                          1, BFD_RELOC_16_PCREL);
-          fixp->fx_pcrel_adjust = 2;
-        }
+	{
+	  fixp = fix_new (fragP, fragP->fr_fix, 2,
+			  fragP->fr_symbol, fragP->fr_offset,
+			  1, BFD_RELOC_16_PCREL);
+	  fixp->fx_pcrel_adjust = 2;
+	}
       else
-        {
-          fix_new (fragP, fragP->fr_fix, 2,
-                   fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_16);
-        }
+	{
+	  fix_new (fragP, fragP->fr_fix, 2,
+		   fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_16);
+	}
       fragP->fr_fix += 2;
       break;
 
@@ -2557,7 +2548,7 @@ md_convert_frag (abfd, sec, fragP)
    at final link time by a non weak symbol.  */
 static int
 relaxable_symbol (symbol)
-     symbolS* symbol;
+     symbolS *symbol;
 {
   return ! S_IS_EXTERNAL (symbol) && ! S_IS_WEAK (symbol);
 }
@@ -2585,7 +2576,7 @@ md_estimate_size_before_relax (fragP, segment)
 
       /* A relaxable case.  */
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-          && relaxable_symbol (fragP->fr_symbol))
+	  && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_PC_RELATIVE, STATE_BYTE);
 	}
@@ -2612,7 +2603,7 @@ md_estimate_size_before_relax (fragP, segment)
       assert (current_architecture & cpu6811);
 
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-          && relaxable_symbol (fragP->fr_symbol))
+	  && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH,
 					    STATE_BYTE);
@@ -2638,7 +2629,7 @@ md_estimate_size_before_relax (fragP, segment)
       assert (current_architecture & cpu6812);
 
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-          && relaxable_symbol (fragP->fr_symbol))
+	  && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_INDEXED_OFFSET,
 					    STATE_BITS5);
@@ -2646,8 +2637,8 @@ md_estimate_size_before_relax (fragP, segment)
       else
 	{
 	  /* Switch the indexed operation to 16-bit mode.  */
-          fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
-          fragP->fr_opcode[0] |= 0xe2;
+	  fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
+	  fragP->fr_opcode[0] |= 0xe2;
 	  fragP->fr_fix++;
 	  fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		   fragP->fr_offset, 0, BFD_RELOC_16);
@@ -2660,7 +2651,7 @@ md_estimate_size_before_relax (fragP, segment)
       assert (current_architecture & cpu6812);
 
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-          && relaxable_symbol (fragP->fr_symbol))
+	  && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_XBCC_BRANCH, STATE_BYTE);
 	}
@@ -2685,7 +2676,7 @@ md_estimate_size_before_relax (fragP, segment)
       assert (current_architecture & cpu6812);
 
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-          && relaxable_symbol (fragP->fr_symbol))
+	  && relaxable_symbol (fragP->fr_symbol))
 	{
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH_6812,
 					    STATE_BYTE);
