@@ -5,6 +5,9 @@
 
 #define PA_LEVEL_0		/* Disables touching space regs and fp */
 
+/* All the PRO targets use software floating point at the moment.  */
+#define SOFT_FLOAT 1
+
 /* It's mostly just the common stuff.  */
 #include "pa/tm-hppa.h"
 

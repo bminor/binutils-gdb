@@ -1,3 +1,10 @@
+Wed Jan 31 17:20:26 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/pa/tm-hppa.h (EXTRACT_RETURN_VALUE): Handle software
+	floating point correctly.
+	(STORE_RETURN_VALUE): Likewise.
+	* config/pa/tm-pro.h (SOFT_FLOAT): define.
+
 Wed Jan 31 13:34:52 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/i386/xm-linux.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT): 

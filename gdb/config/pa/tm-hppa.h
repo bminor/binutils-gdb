@@ -1,5 +1,5 @@
 /* Parameters for execution on any Hewlett-Packard PA-RISC machine.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1995
    Free Software Foundation, Inc. 
 
    Contributed by the Center for Software Science at the
@@ -70,19 +70,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
   in_solib_return_trampoline (pc, name)
-
-/* For some stupid reason find_pc_partial_function wants to treat
-   trampoline symbols differently.
-
-   In a nutshell, find_pc_partial_fucntion sets the low address for
-   the function to the PC value that was passed in if the PC value
-   passed in is a mst_trampoline symbol.
-
-   This causes wait_for_inferior to execute code for stepping over
-   or around a function (stop_pc == stop_func_start).  This is
-   extremely bad when we're stepping through a return from a shared
-   library back to user code (which on the PA uses trampolines).  */
-#define INHIBIT_SUNSOLIB_TRANSFER_TABLE_HACK
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -264,9 +251,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   { \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
+    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
       memcpy ((VALBUF), \
-	      ((int *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM), \
+	      ((char *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM), \
 	      TYPE_LENGTH (TYPE)); \
     else \
       memcpy ((VALBUF), \
@@ -285,10 +272,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   write_register_bytes (REGISTER_BYTE (28),(VALBUF), TYPE_LENGTH (TYPE)) ; \
-  write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_FLT \
-			 ? REGISTER_BYTE (FP4_REGNUM) \
-			 : REGISTER_BYTE (28)),		\
-			(VALBUF), TYPE_LENGTH (TYPE))
+  if (!SOFT_FLOAT) \
+    write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_FLT \
+			   ? REGISTER_BYTE (FP4_REGNUM) \
+			   : REGISTER_BYTE (28)),		\
+			  (VALBUF), TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
