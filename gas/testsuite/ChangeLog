@@ -1,3 +1,13 @@
+Mon Jun 12 22:27:18 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/parse/badfmpyadd.s: New test.
+	* gas/hppa/parse/parse.exp: Run it.
+
+Sun May 21 20:26:18 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/unsorted/unsorted.exp: Disable align4 tests for
+	ELF targets.
+
 Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)	
 
 	* arm/arm7dm.s: New file -- tests for ARM7DM instructions.
