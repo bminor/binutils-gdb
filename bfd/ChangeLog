@@ -1,3 +1,7 @@
+2002-05-29  Andrey Volkov  <avolkov@transas.com>
+
+	* cpu-h8300.c: Make default h8300 machine first in machine list.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* config.bfd: Added DLX configuraton.
