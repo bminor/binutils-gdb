@@ -1,3 +1,15 @@
+2004-05-26  Ben Elliston  <bje@au.ibm.com>
+
+	* corefile.c (core_init): Use a separate local variable,
+	core_sym_bytes, to make the units from bfd_get_symtab_upper_bound
+	more obvious.
+	(core_create_function_syms): Discard cbfd argument.  Eliminate
+	`offset' variable and calculate VMA directly. Update all users.
+	* corefile.h (core_create_function_syms): Update prototype.
+	(core_create_line_syms): Likewise.
+	* gprof.c (main): Remove #ifdef PROF_SUPPORT_IMPLEMENTED code.
+	Tidy.	
+
 2004-05-17  Ben Elliston  <bje@au.ibm.com>
 
 	* gprof.texi (Output Options): Correct last patch to use @itemx, not

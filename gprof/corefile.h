@@ -41,7 +41,7 @@ extern int offset_to_code;	/* Offset (in bytes) of code from entry
 
 extern void core_init                  PARAMS ((const char *));
 extern void core_get_text_space        PARAMS ((bfd *));
-extern void core_create_function_syms  PARAMS ((bfd *));
-extern void core_create_line_syms      PARAMS ((bfd *));
+extern void core_create_function_syms  PARAMS ((void));
+extern void core_create_line_syms      PARAMS ((void));
 
 #endif /* corefile_h */

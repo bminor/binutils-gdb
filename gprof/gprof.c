@@ -483,7 +483,8 @@ This program is free software.  This program has absolutely no warranty.\n"));
       done (1);
     }
 
-  /* --sum implies --line, otherwise we'd lose b-b counts in gmon.sum */
+  /* --sum implies --line, otherwise we'd lose basic block counts in
+       gmon.sum */
   if (output_style & STYLE_SUMMARY_FILE)
     {
       line_granularity = 1;
@@ -520,71 +521,36 @@ This program is free software.  This program has absolutely no warranty.\n"));
    * functions off the flat profile:
    */
   if (line_granularity)
-    {
-      for (sp = &default_excluded_list[0]; *sp; sp++)
-	{
-	  sym_id_add (*sp, EXCL_FLAT);
-	}
-    }
+    for (sp = &default_excluded_list[0]; *sp; sp++)
+      sym_id_add (*sp, EXCL_FLAT);
 
-  /*
-   * Read symbol table from core file:
-   */
+  /* Read symbol table from core file.  */
   core_init (a_out_name);
 
-  /*
-   * If we should ignore direct function calls, we need to load
-   * to core's text-space:
-   */
+  /* If we should ignore direct function calls, we need to load to
+     core's text-space.  */
   if (ignore_direct_calls)
-    {
-      core_get_text_space (core_bfd);
-    }
+    core_get_text_space (core_bfd);
 
-  /*
-   * Create symbols from core image:
-   */
+  /* Create symbols from core image.  */
   if (line_granularity)
-    {
-      core_create_line_syms (core_bfd);
-    }
+    core_create_line_syms ();
   else
-    {
-      core_create_function_syms (core_bfd);
-    }
+    core_create_function_syms ();
 
-  /*
-   * Translate sym specs into syms:
-   */
+  /* Translate sym specs into syms.  */
   sym_id_parse ();
 
   if (file_format == FF_PROF)
     {
-#ifdef PROF_SUPPORT_IMPLEMENTED
-      /*
-       * Get information about mon.out file(s):
-       */
-      do
-	{
-	  mon_out_read (gmon_name);
-	  if (optind < argc)
-	    {
-	      gmon_name = argv[optind];
-	    }
-	}
-      while (optind++ < argc);
-#else
       fprintf (stderr,
 	       _("%s: sorry, file format `prof' is not yet supported\n"),
 	       whoami);
       done (1);
-#endif
     }
   else
     {
-      /*
-       * Get information about gmon.out file(s):
-       */
+      /* Get information about gmon.out file(s).  */
       do
 	{
 	  gmon_out_read (gmon_name);
@@ -603,19 +569,15 @@ This program is free software.  This program has absolutely no warranty.\n"));
   if (output_style == 0)
     {
       if (gmon_input & (INPUT_HISTOGRAM | INPUT_CALL_GRAPH))
-	{
-	  output_style = STYLE_FLAT_PROFILE | STYLE_CALL_GRAPH;
-	}
+	output_style = STYLE_FLAT_PROFILE | STYLE_CALL_GRAPH;
       else
-	{
-	  output_style = STYLE_EXEC_COUNTS;
-	}
+	output_style = STYLE_EXEC_COUNTS;
+
       output_style &= ~user_specified;
     }
 
-  /*
-   * Dump a gmon.sum file if requested (before any other processing!):
-   */
+  /* Dump a gmon.sum file if requested (before any other
+     processing!)  */
   if (output_style & STYLE_SUMMARY_FILE)
     {
       gmon_out_write (GMONSUM);
@@ -631,8 +593,7 @@ This program is free software.  This program has absolutely no warranty.\n"));
       cg = cg_assemble ();
     }
 
-  /* do some simple sanity checks: */
-
+  /* Do some simple sanity checks.  */
   if ((output_style & STYLE_FLAT_PROFILE)
       && !(gmon_input & INPUT_HISTOGRAM))
     {
