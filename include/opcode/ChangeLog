@@ -1,3 +1,13 @@
+Wed Nov 17 17:13:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h: (M_J_A): Added.
+	(M_LA): Removed.
+
+Mon Nov  8 12:12:47 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (OP_MASK_CACHE, OP_SH_CACHE): Define.  From Ted Lemon
+	<mellon@pepper.ncd.com>.
+
 Sun Nov  7 00:30:11 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa.h: Immediate field in probei instructions is unsigned,
