@@ -3218,19 +3218,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  asection ** spp;
-
-	  for (spp = &s->output_section->owner->sections;
-	       *spp != NULL;
-	       spp = &(*spp)->next)
-	    {
-	      if (*spp == s->output_section)
-		{
-		  bfd_section_list_remove (s->output_section->owner, spp);
-		  --s->output_section->owner->section_count;
-		  break;
-		}
-	    }
+	  _bfd_strip_section_from_output (info, s);
 	  continue;
 	}
 

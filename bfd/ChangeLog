@@ -1,3 +1,9 @@
+2002-11-09  Jeroen Dobbelaere  <jeroen.dobbelaere@acunia.com>
+
+	* elf32-arm.h (elf32_arm_size_dynamic_sections): Don't strip output
+	section when dynamic section unused;  _bfd_strip_section_from_output
+	instead.
+
 2002-11-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* targets.c (_bfd_target_vector): Disable pef_vec, pef_xlib_vec
