@@ -1,3 +1,25 @@
+start-sanitize-arc
+Thu Apr  6 20:00:11 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* config/tc-arc.c (arc_condition_codes): Deleted.
+	(init_opcode_tables): Delete cpu_type_map, call
+	arc_get_opcode_mach instead.
+	(arc_common): Delete non-ELF stuff.  Require leading '.' in .data.
+	(md_apply_fix): Delete non-ELF stuff.
+	Disable special handling of limm values, treat them normally.
+	(get_arc_exp_reloc_type): New argument `data_p'.  Callers updated.
+	(md_assemble): All limm operands must be output by gas, the opcode
+	insertion routines cannot be used (they don't do anything and we're
+	using implicit addends now so we need to output something). 
+	* config/tc-arc.h (FAKE_LABEL_NAME): Define.
+end-sanitize-arc
+
+Thu Mar 30 14:38:47 1995  H.J. Lu (hjl@nynexst.com)
+
+	* configure.in: Change linux to default to elf.  Using
+	i[345]86-*-linuxaout will defaults to a.out.
+	* configure: Rebuild.
+
 Wed Mar 29 17:16:30 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
 
 	* config/tc-m68k.c (md_apply_fix_2): Cast negative offsets to offsetT
