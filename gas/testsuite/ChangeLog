@@ -1,5 +1,8 @@
 Sun Nov 28 12:12:50 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gas/hppa/more.parse/appbug.s: New test.
+	* gas/hppa/more.parse/parse.exp: Run it.
+
 	* gas/hppa/unsorted/align3.s: New test.
 	* gas/hppa/unsorted/unsorted.exp: Run it.
 

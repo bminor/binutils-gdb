@@ -200,5 +200,8 @@ if [istarget hppa*-*-*] then {
 
     # Make sure GAS will accept a label without a colon.
     gas_test "labelbug.s" "" "" "Test label without colon"
+
+    # Make sure we grok # line directives.
+    gas_test "appbug.s" "" "" "Test acceptance of #line directives"
 }
 
