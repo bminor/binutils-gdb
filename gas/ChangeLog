@@ -1,3 +1,8 @@
+Fri Feb 23 21:44:39 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* configure.in: Add support for a29-coff.
+	* configure: Rebuild.
+
 Thu Feb 22 16:39:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (sh_coff_frob_file): Don't consider the address

@@ -97,6 +97,7 @@ changequote([,])dnl
 
     # assign object format
     case ${generic_target} in
+      a29k-*-coff)          fmt=coff targ=ebmon29k ;;
       a29k-amd-udi)         fmt=coff targ=ebmon29k ;;
       a29k-amd-ebmon)       fmt=coff targ=ebmon29k ;;
       a29k-nyu-sym1)        fmt=coff targ=ebmon29k ;;
