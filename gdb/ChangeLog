@@ -1,3 +1,8 @@
+Wed Apr 19 17:03:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Philippe De Muyter <phdm@macqel.be>:
+	* bcache.c (free_bcache): Do not free NULL.
+
 Wed Apr 19 16:37:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Cleanup.
