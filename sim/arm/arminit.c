@@ -253,6 +253,7 @@ void
 ARMul_Abort (ARMul_State * state, ARMword vector)
 {
   ARMword temp;
+  int isize = INSN_SIZE;
 
   state->Aborted = FALSE;
 
@@ -270,53 +271,29 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
   switch (vector)
     {
     case ARMul_ResetV:		/* RESET */
-      state->Spsr[SVCBANK] = CPSR;
-      SETABORT (INTBITS, state->prog32Sig ? SVC32MODE : SVC26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp;
+      SETABORT (INTBITS, state->prog32Sig ? SVC32MODE : SVC26MODE, 0);
       break;
     case ARMul_UndefinedInstrV:	/* Undefined Instruction */
-      state->Spsr[state->prog32Sig ? UNDEFBANK : SVCBANK] = CPSR;
-      SETABORT (IBIT, state->prog32Sig ? UNDEF32MODE : SVC26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;
+      SETABORT (IBIT, state->prog32Sig ? UNDEF32MODE : SVC26MODE, isize);
       break;
     case ARMul_SWIV:		/* Software Interrupt */
-      state->Spsr[SVCBANK] = CPSR;
-      SETABORT (IBIT, state->prog32Sig ? SVC32MODE : SVC26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;
+      SETABORT (IBIT, state->prog32Sig ? SVC32MODE : SVC26MODE, isize);
       break;
     case ARMul_PrefetchAbortV:	/* Prefetch Abort */
       state->AbortAddr = 1;
-      state->Spsr[state->prog32Sig ? ABORTBANK : SVCBANK] = CPSR;
-      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;
+      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE, isize);
       break;
     case ARMul_DataAbortV:	/* Data Abort */
-      state->Spsr[state->prog32Sig ? ABORTBANK : SVCBANK] = CPSR;
-      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;	/* the PC must have been incremented */
+      SETABORT (IBIT, state->prog32Sig ? ABORT32MODE : SVC26MODE, isize);
       break;
     case ARMul_AddrExceptnV:	/* Address Exception */
-      state->Spsr[SVCBANK] = CPSR;
-      SETABORT (IBIT, SVC26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;
+      SETABORT (IBIT, SVC26MODE, isize);
       break;
     case ARMul_IRQV:		/* IRQ */
-      state->Spsr[IRQBANK] = CPSR;
-      SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;
+      SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE, isize);
       break;
     case ARMul_FIQV:		/* FIQ */
-      state->Spsr[FIQBANK] = CPSR;
-      SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE);
-      ARMul_CPSRAltered (state);
-      state->Reg[14] = temp - 4;
+      SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE, isize);
       break;
     }
   if (ARMul_MODE32BIT)

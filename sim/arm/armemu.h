@@ -73,6 +73,9 @@ extern ARMword isize;
 #define SETT state->TFlag = 1
 #define CLEART state->TFlag = 0
 #define ASSIGNT(res) state->TFlag = res
+#define INSN_SIZE (TFLAG ? 2 : 4)
+#else
+#define INSN_SIZE 4
 #endif
 
 #define NFLAG state->NFlag
@@ -179,7 +182,13 @@ extern ARMword isize;
                         state->Reg[15] = R15PC | ((s) & (CCBITS | R15INTBITS | R15MODEBITS)) ; \
                         ARMul_R15Altered (state) ; \
                         }
-#define SETABORT(i,m) state->Cpsr = ECC | EINT | (i) | (m)
+#define SETABORT(i,m,d) do { \
+  int SETABORT_mode = (m); \
+  ARMul_SetSPSR (state, SETABORT_mode, ARMul_GetCPSR (state)); \
+  ARMul_SetCPSR (state, ((ARMul_GetCPSR (state) & ~(EMODE | TBIT)) \
+			 | (i) | SETABORT_mode)); \
+  state->Reg[14] = temp - (d); \
+} while (0)
 
 #ifndef MODE32
 #define VECTORS 0x20

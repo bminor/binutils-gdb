@@ -299,14 +299,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 
   do
     {				/* just keep going */
-#ifdef MODET
-      if (TFLAG)
-	{
-	  isize = 2;
-	}
-      else
-#endif
-	isize = 4;
+      isize = INSN_SIZE;
       switch (state->NextInstr)
 	{
 	case SEQ:
@@ -3104,8 +3097,15 @@ WriteR15 (ARMul_State * state, ARMword src)
 {
   /* The ARM documentation states that the two least significant bits
      are discarded when setting PC, except in the cases handled by
-     WriteR15Branch() below.  */
-  src &= 0xfffffffc;
+     WriteR15Branch() below.  It's probably an oversight: in THUMB
+     mode, the second least significant bit should probably not be
+     discarded.  */
+#ifdef MODET
+  if (TFLAG)
+    src &= 0xfffffffe;
+  else
+#endif
+    src &= 0xfffffffc;
 #ifdef MODE32
   state->Reg[15] = src & PCBITS;
 #else
@@ -3122,15 +3122,26 @@ WriteR15 (ARMul_State * state, ARMword src)
 static void
 WriteSR15 (ARMul_State * state, ARMword src)
 {
-  src &= 0xfffffffc;
 #ifdef MODE32
-  state->Reg[15] = src & PCBITS;
   if (state->Bank > 0)
     {
       state->Cpsr = state->Spsr[state->Bank];
       ARMul_CPSRAltered (state);
     }
+#ifdef MODET
+  if (TFLAG)
+    src &= 0xfffffffe;
+  else
+#endif
+    src &= 0xfffffffc;
+  state->Reg[15] = src & PCBITS;
 #else
+#ifdef MODET
+  if (TFLAG)
+    abort (); /* ARMul_R15Altered would have to support it.  */
+  else
+#endif
+    src &= 0xfffffffc;
   if (state->Bank == USERBANK)
     state->Reg[15] = (src & (CCBITS | R15PCBITS)) | ER15INT | EMODE;
   else

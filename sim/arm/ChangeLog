@@ -1,5 +1,11 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armemu.h (INSN_SIZE): New macro.
+	(SET_ABORT): Save CPSR in SPSR and set LR.
+	* armemu.c (ARMul_Emulate, isize): Set to INSN_SIZE.
+	(WriteR15, WriteSR15): Do not discard bit 1 in Thumb mode.
+	* arminit.c (ARMul_Abort): Use new SETABORT and INSN_SIZE.
+
 	* armemu.c (LoadSMult): Use WriteR15() to discard the least
 	significant bits of PC.
 
