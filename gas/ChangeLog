@@ -1,5 +1,8 @@
 Tue Dec 14 21:38:25 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* configure.in (hppa*-*-osf*): Do not consider this a developmental
+	configuration.
+
 	* config/tc-hppa.c (md_apply_fix): Handle cases where no
 	relocation will be emitted for 32bit formats.
 
