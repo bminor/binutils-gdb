@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Fri Jun 19 19:56:50 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (hilo_interlocks): Check mips_5900, not
+	mips_cpu == 5900.
+
+end-sanitize-r5900
 start-sanitize-am33
 Fri Jun 19 16:49:56 1998  Jeffrey A Law  (law@cygnus.com)
 

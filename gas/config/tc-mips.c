@@ -257,7 +257,7 @@ static int mips_4900 = -1;
 			 || mips_cpu == 4320			    \
 			 /* end-sanitize-vr4320 */		    \
 			 /* start-sanitize-r5900 */		    \
-			 || mips_cpu == 5900			    \
+			 || mips_5900
 			 /* end-sanitize-r5900 */		    \
                          )
 
