@@ -1,5 +1,8 @@
 Wed Feb 11 16:53:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* simops.c (OP_5F00): Call error instead of abort for unknown
+ 	syscalls.
+
 	* d10v_sim.h (enum): Define DPSW_CR.
 
 	* simops.c (move_to_cr): Mask out hardwired zero bits in DPSW.

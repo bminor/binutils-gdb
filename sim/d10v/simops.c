@@ -3029,7 +3029,7 @@ OP_5F00 ()
 #endif
 	    
 	  default:
-	    abort ();
+	    d10v_callback->error (d10v_callback, "Unknown syscall %d", FUNC);
 	  }
 	RETERR = (RETVAL == (uint16) -1) ? d10v_callback->get_errno(d10v_callback) : 0;
 	break;
