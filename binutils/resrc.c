@@ -819,7 +819,7 @@ define_dialog (id, resinfo, dialog)
 
 struct dialog_control *
 define_control (iid, id, x, y, width, height, class, style, exstyle)
-     struct res_id iid;
+     const struct res_id iid;
      unsigned long id;
      unsigned long x;
      unsigned long y;

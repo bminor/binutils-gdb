@@ -1,3 +1,16 @@
+2003-06-28  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* binutils-all/windres/checkbox.rc: New file.
+	* binutils-all/windres/checkbox.rsd: New file.
+	* binutils-all/windres/combobox.rc: New file.
+	* binutils-all/windres/combobox.rsd: New file.
+	* binutils-all/windres/edittext.rc: New file.
+	* binutils-all/windres/edittext.rsd: New file.
+	* binutils-all/windres/listbox.rc: New file.
+	* binutils-all/windres/listbox.rsd: New file.
+	* binutils-all/windres/scrollbar.rc: New file.
+	* binutils-all/windres/scrollbar.rsd: New file.
+
 2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* binutils-all/readelf.ss-tmips: Adjust symbol indices.

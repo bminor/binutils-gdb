@@ -1,3 +1,19 @@
+2003-06-28  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* rcparse.y (res_text_field): New res_id variable.
+	(res_null_text): New static const struct res_id object,
+	with empty unicode name field.
+	(control): Pop parsing of optresidc up one level. Set
+	res_text_field to $2 except for controls which do not accept
+	a text field.  Set res_text_field to res_null_text for the
+	special cases (viz. COMBOBOX, EDITTEXT, LISTBOX, SCROLLBAR).
+	(control_params): Adjust to use res_text_field rather
+	than optresidc.
+	(COMBOBOX): Add comment about discrepency between documented
+	vs. observed default style.
+	* resrc.c (define_control): Make first param const.
+	* windres.h (define_control): Adjust prototype.
+
 2003-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Replace call to

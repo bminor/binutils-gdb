@@ -814,7 +814,7 @@ extern void define_cursor
 extern void define_dialog
   PARAMS ((struct res_id, const struct res_res_info *, const struct dialog *));
 extern struct dialog_control *define_control
-  PARAMS ((struct res_id, unsigned long, unsigned long, unsigned long,
+  PARAMS ((const struct res_id, unsigned long, unsigned long, unsigned long,
 	   unsigned long, unsigned long, unsigned long, unsigned long,
 	   unsigned long));
 extern struct dialog_control *define_icon_control
