@@ -1,5 +1,8 @@
 1999-09-01  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-arm.c (md_section_align): Do not align sections in ELF
+	format. 
+
 	* as.c (show_usage): Add --gdwarf2 to list of options displayed.
 	* as.texinfo: Document --gdwarf2 command line option.
 	Add additional documentation of ARM command line switches.

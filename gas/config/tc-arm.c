@@ -5181,9 +5181,7 @@ md_section_align (segment, size)
      valueT size;
 {
 #ifdef OBJ_ELF
-  /* Don't align the dwarf2 debug sections */
-  if (!strncmp (segment->name, ".debug", 5))
-    return size;
+  return size;
 #endif
   /* Round all sects to multiple of 4 */
   return (size + 3) & ~3;
