@@ -90,6 +90,15 @@ struct tracepoint
   int thread;
 };
 
+enum actionline_type
+{
+  BADLINE  = -1,
+  GENERIC  =  0,
+  END      =  1,
+  STEPPING =  2,
+};
+
+
 /* The tracepont chain of all tracepoints */
 
 extern struct tracepoint *tracepoint_chain;
@@ -103,7 +112,11 @@ void (*delete_tracepoint_hook) PARAMS ((struct tracepoint *));
 void (*modify_tracepoint_hook) PARAMS ((struct tracepoint *));
 
 struct tracepoint *get_tracepoint_by_number PARAMS ((char **));
+int get_traceframe_number PARAMS ((void));
 void  free_actions PARAMS((struct tracepoint *));
+enum actionline_type validate_actionline PARAMS((char **,
+                                                        struct tracepoint *));
+
 
 /* Walk the following statement or block through all tracepoints.
    ALL_TRACEPOINTS_SAFE does so even if the statment deletes the current
