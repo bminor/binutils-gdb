@@ -1,3 +1,10 @@
+2004-07-13  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/ena-dis-br.exp: Update copyright.
+	(break_at): New function.  Replace send_gdb with gdb_test,
+	break_at, and gdb_test_multiple.  Replace XFAIL of "continue with
+	ignore count, not stopped at bpt", with KFAIL.
+
 2004-07-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/attach.exp: Remove cleanupfile handling.
