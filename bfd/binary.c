@@ -1,5 +1,5 @@
 /* BFD back-end for binary objects.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 95, 96, 97, 98, 99 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -155,7 +155,7 @@ mangle_name (abfd, suffix)
 
   /* Change any non-alphanumeric characters to underscores.  */
   for (p = buf; *p; p++)
-    if (! isalnum (*p))
+    if (! isalnum ((unsigned char) *p))
       *p = '_';
 
   return buf;
@@ -229,7 +229,7 @@ binary_get_symbol_info (ignore_abfd, symbol, ret)
   bfd_symbol_info (symbol, ret);
 }
 
-#define binary_bfd_is_local_label bfd_generic_is_local_label
+#define binary_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define binary_get_lineno _bfd_nosymbols_get_lineno
 #define binary_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define binary_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
@@ -255,21 +255,50 @@ binary_set_section_contents (abfd, sec, data, offset, size)
      file_ptr offset;
      bfd_size_type size;
 {
+  /* We don't want to output anything for a section that is neither
+     loaded nor allocated.  The contents of such a section are not
+     meaningful in the binary format.  */
+  if ((sec->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
+    return true;
+  if ((sec->flags & SEC_NEVER_LOAD) != 0)
+    return true;
+
   if (! abfd->output_has_begun)
     {
+      boolean found_low;
       bfd_vma low;
       asection *s;
 
-      /* The lowest section VMA sets the virtual address of the start
-         of the file.  We use the set the file position of all the
+      /* The lowest section LMA sets the virtual address of the start
+         of the file.  We use this to set the file position of all the
          sections.  */
-      low = abfd->sections->vma;
-      for (s = abfd->sections->next; s != NULL; s = s->next)
-	if (s->vma < low)
-	  low = s->vma;
+      found_low = false;
+      low = 0;
+      for (s = abfd->sections; s != NULL; s = s->next)
+	if (((s->flags & (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC))
+	     == (SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC))
+	    && (! found_low || s->lma < low))
+	  {
+	    low = s->lma;
+	    found_low = true;
+	  }
 
       for (s = abfd->sections; s != NULL; s = s->next)
-	s->filepos = s->vma - low;
+	{
+	  s->filepos = s->lma - low;
+
+	  /* If attempting to generate a binary file from a bfd with
+	     LMA's all over the place, huge (sparse?) binary files may
+	     result.  This condition attempts to detect this situation
+	     and print a warning.  Better heuristics would be nice to
+	     have. */
+
+	  if (s->filepos < 0)
+	    (*_bfd_error_handler)
+	      (_("Warning: Writing section `%s' to huge offset %lu."),
+	       bfd_get_section_name (abfd, s),
+	       (unsigned long) s->filepos);
+	}
 
       abfd->output_has_begun = true;
     }
@@ -290,6 +319,7 @@ binary_sizeof_headers (abfd, exec)
 #define binary_bfd_get_relocated_section_contents \
   bfd_generic_get_relocated_section_contents
 #define binary_bfd_relax_section bfd_generic_relax_section
+#define binary_bfd_gc_sections bfd_generic_gc_sections
 #define binary_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define binary_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define binary_bfd_final_link _bfd_generic_final_link
@@ -301,8 +331,8 @@ const bfd_target binary_vec =
 {
   "binary",			/* name */
   bfd_target_unknown_flavour,	/* flavour */
-  true,				/* byteorder_big_p */
-  true,				/* header_byteorder_big_p */
+  BFD_ENDIAN_UNKNOWN,		/* byteorder */
+  BFD_ENDIAN_UNKNOWN,		/* header_byteorder */
   EXEC_P,			/* object_flags */
   (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE | SEC_DATA
    | SEC_ROM | SEC_HAS_CONTENTS), /* section_flags */

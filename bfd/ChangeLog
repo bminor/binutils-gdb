@@ -1,3 +1,8 @@
+1999-01-26  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* binary.c (binary_set_section_contents): Emit warning for
+	huge file offsets due to widely-dispersed section LMAs.
+
 Mon Jan 18 03:35:35 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (assign_file_positions_for_segments): If not D_PAGED,
