@@ -1,3 +1,9 @@
+2001-11-29  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_frame_saved_pc_nofix): If the prologue didn't
+	save the return address register, assume that the return address
+	is still in there.
+
 2001-11-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Clarify obvious fix a little (as suggested by Eli

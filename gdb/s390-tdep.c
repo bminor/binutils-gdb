@@ -901,6 +901,8 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
 					(fi->saved_regs[S390_RETADDR_REGNUM],
 					 S390_GPR_SIZE)));
 	    }
+          else
+            return read_register (S390_RETADDR_REGNUM);
 	}
     }
   return 0;
