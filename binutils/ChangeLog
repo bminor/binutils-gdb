@@ -1,3 +1,17 @@
+1998-12-02  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (process_mips_specific): Print l_flags in liblist in
+	textual form.
+
+1998-11-30  Nick Clifton  <nickc@cygnus.com>
+
+	* ar.c (extract_file): Add some paranoia checks for negatively
+	sized files.
+
+Tue Nov 24 09:39:24 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* stabs.c (DIR_SEPARATOR): Define as '\\' if WIN32 is defined.
+
 Tue Nov 17 10:25:26 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.in: Regenerate.
@@ -29,7 +43,7 @@ Tue Nov 10 15:31:52 1998  Nick Clifton  <nickc@cygnus.com>
 
 Wed Nov  4 16:25:55 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* readelf.c: Add support for the FR30. 
+	* readelf.c: Add support for the FR30.
 
 Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
@@ -50,12 +64,12 @@ Tue Oct 27 14:39:00 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* objdump.c (disassemble_bytes): Applied this patch from Philip
 	Blundell <pb@nexus.co.uk>:  Make address variables unsigned to
-	avoid problems when disassembling code at high-bit-set addresses. 
+	avoid problems when disassembling code at high-bit-set addresses.
 
 Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
-        
+
         * dllwrap.c (strhash): New function.
-        (main): Use it to supply image base if not supplied by user. 
+        (main): Use it to supply image base if not supplied by user.
         (program_version): Up to 0.2.4.
 
 Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
@@ -86,7 +100,7 @@ Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
 Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
 
         * dllwrap.c (mybasename): New function.
-        (main): Run dlltool to create export definition file and import 
+        (main): Run dlltool to create export definition file and import
         library file if necessary.
         Change exp_file_name so that it's based on the dll name.
 
@@ -139,7 +153,7 @@ Tue Oct  6 18:20:10 1998  Geoffrey Noer  <noer@cygnus.com>
 	* Makefile.am (windres_SOURCES): Add resres.c.
 	(windres_OBJECTS): Add resres.o.
 	* Makefile.in: regenerate with automake
- 
+
         From Anders Norlander <anorland@hem2.passagen.se>.
         * resres.c: New file.  Implementation of read_res_file and
         write_res_file functions for windres.
