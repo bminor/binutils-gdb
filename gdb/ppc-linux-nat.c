@@ -127,10 +127,11 @@ ppc_register_u_addr (int regno)
 {
   int u_addr = -1;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int wordsize = tdep->wordsize;
 
   /* General purpose registers occupy 1 slot each in the buffer */
   if (regno >= tdep->ppc_gp0_regnum && regno <= tdep->ppc_gplast_regnum )
-    u_addr =  ((PT_R0 + regno) * 4);
+    u_addr =  ((PT_R0 + regno) * wordsize);
 
   /* Floating point regs: 2 slots each */
   if (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM)
@@ -138,23 +139,23 @@ ppc_register_u_addr (int regno)
 
   /* UISA special purpose registers: 1 slot each */
   if (regno == PC_REGNUM)
-    u_addr = PT_NIP * 4;
+    u_addr = PT_NIP * wordsize;
   if (regno == tdep->ppc_lr_regnum)
-    u_addr = PT_LNK * 4;
+    u_addr = PT_LNK * wordsize;
   if (regno == tdep->ppc_cr_regnum)
-    u_addr = PT_CCR * 4;
+    u_addr = PT_CCR * wordsize;
   if (regno == tdep->ppc_xer_regnum)
-    u_addr = PT_XER * 4;
+    u_addr = PT_XER * wordsize;
   if (regno == tdep->ppc_ctr_regnum)
-    u_addr = PT_CTR * 4;
+    u_addr = PT_CTR * wordsize;
 #ifdef PT_MQ
   if (regno == tdep->ppc_mq_regnum)
-    u_addr = PT_MQ * 4;
+    u_addr = PT_MQ * wordsize;
 #endif
   if (regno == tdep->ppc_ps_regnum)
-    u_addr = PT_MSR * 4;
+    u_addr = PT_MSR * wordsize;
   if (regno == tdep->ppc_fpscr_regnum)
-    u_addr = PT_FPSCR * 4;
+    u_addr = PT_FPSCR * wordsize;
 
   return u_addr;
 }
