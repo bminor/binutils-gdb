@@ -50,7 +50,7 @@ static int executing_breakpoint_commands;
 enum enable { disabled, enabled, temporary, delete};
 
 /* Not that the ->silent field is not currently used by any commands
-   (though the code is in there if it was to be and set_raw_breakpoint
+   (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
    useful for a hack I had to put in; I'm going to leave it in because
    I can see how there might be times when it would indeed be useful */
@@ -825,10 +825,10 @@ breakpoint_1 (bnum, watchpoints)
 	  }
 
 	printf_filtered ("#%-3d %c ", b->number, "nyod"[(int) b->enable]);
-	if (b->address == NULL)
+	if (b->address == NULL) {
+	  printf_filtered (" ");
 	  print_expression (b->exp, stdout);
-	else
-	  {
+	} else {
 	    if (addressprint)
 	      printf_filtered (" 0x%08x ", b->address);
 
@@ -967,6 +967,9 @@ check_duplicates (address)
   register struct breakpoint *b;
   register int count = 0;
 
+  if (address == NULL)		/* Watchpoints are uninteresting */
+    return;
+
   ALL_BREAKPOINTS (b)
     if (b->enable != disabled && b->address == address)
       {
@@ -979,7 +982,11 @@ check_duplicates (address)
    Takes as args the three things that every breakpoint must have.
    Returns the breakpoint object so caller can set other things.
    Does not set the breakpoint number!
-   Does not print anything.  */
+   Does not print anything.
+
+   ==> This routine should not be called if there is a chance of later
+   error(); otherwise it leaves a bogus breakpoint on the chain.  Validate
+   your arguments BEFORE calling this routine!  */
 
 static struct breakpoint *
 set_raw_breakpoint (sal)
@@ -1260,19 +1267,28 @@ watch_command (arg, from_tty)
 {
   struct breakpoint *b;
   struct symtab_and_line sal;
+  struct expression *exp;
+  struct block *exp_valid_block;
+  struct value *val;
 
   sal.pc = NULL;
   sal.symtab = NULL;
   sal.line = 0;
   
+  /* Parse arguments.  */
+  innermost_block = NULL;
+  exp = parse_c_expression (arg);
+  exp_valid_block = innermost_block;
+  val = evaluate_expression (exp);
+  release_value (val);
+
+  /* Now set up the breakpoint.  */
   b = set_raw_breakpoint (sal);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  innermost_block = NULL;
-  b->exp = parse_c_expression (arg);
-  b->exp_valid_block = innermost_block;
-  b->val = evaluate_expression (b->exp);
-  release_value (b->val);
+  b->exp = exp;
+  b->exp_valid_block = exp_valid_block;
+  b->val = val;
   b->cond = 0;
   b->cond_string = NULL;
   mention (b);
@@ -1986,6 +2002,15 @@ enable_breakpoint (bpt)
   check_duplicates (bpt->address);
   if (bpt->val != NULL)
     {
+      if (bpt->exp_valid_block != NULL
+       && !contained_in (get_selected_block (), bpt->exp_valid_block))
+	{
+	  printf_filtered ("\
+Cannot enable watchpoint %d because the block in which its expression\n\
+is valid is not currently in scope.\n", bpt->number);
+	  return;
+	}
+
       value_free (bpt->val);
 
       bpt->val = evaluate_expression (bpt->exp);
@@ -2189,7 +2214,6 @@ Also a prefix command for deletion of other GDB objects.\n\
 The \"unset\" command is also an alias for \"delete\".",
 		  &deletelist, "delete ", 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
-  add_com_alias ("unset", "delete", class_alias, 1);
 
   add_cmd ("breakpoints", class_alias, delete_command,
 	   "Delete some breakpoints or auto-display expressions.\n\

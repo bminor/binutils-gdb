@@ -505,19 +505,14 @@ val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
 	    }
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {
-	      LONGEST val;
-	      char *valp = (char *) & val;
+	      value v;
 
-	      val = unpack_field_as_long (type, valaddr, i);
+	      /* Bitfields require special handling, especially due to byte
+		 order problems.  */
+	      v = value_from_long (TYPE_FIELD_TYPE (type, i),
+				   unpack_field_as_long (type, valaddr, i));
 
-	      /* Since we have moved the bitfield into a long,
-		 if it is declared with a smaller type, we need to
-		 offset its address *in gdb* to match the type we
-		 are passing to val_print.  */
-#if HOST_BYTE_ORDER == BIG_ENDIAN
-	      valp += sizeof val - TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
-#endif
-	      val_print (TYPE_FIELD_TYPE (type, i), valp, 0,
+	      val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
 			 stream, format, 0, recurse + 1, pretty);
 	    }
 	  else
@@ -1805,49 +1800,77 @@ set_radix (arg, from_tty, c)
   set_output_radix (arg, 0, c);
 }
 
+struct cmd_list_element *setprintlist = NULL;
+struct cmd_list_element *showprintlist = NULL;
+
+/*ARGSUSED*/
+static void
+set_print (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  printf (
+"\"set print\" must be followed by the name of a print subcommand.\n");
+  help_list (setprintlist, "set print ", -1, stdout);
+}
+
+/*ARGSUSED*/
+static void
+show_print (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  cmd_show_list (showprintlist, from_tty, "");
+}
+
 void
 _initialize_valprint ()
 {
   struct cmd_list_element *c;
 
+  add_prefix_cmd ("print", no_class, set_print,
+		  "Generic command for setting how things print.",
+		  &setprintlist, "set print ", 0, &setlist);
+  add_prefix_cmd ("print", no_class, show_print,
+		  "Generic command for showing print settings.",
+		  &showprintlist, "show print ", 0, &showlist);
+
   add_show_from_set
-    (add_set_cmd ("array-max", class_vars, var_uinteger, (char *)&print_max,
+    (add_set_cmd ("elements", no_class, var_uinteger, (char *)&print_max,
 		  "Set limit on string chars or array elements to print.\n\
-\"set array-max 0\" causes there to be no limit.",
-		  &setlist),
-     &showlist);
+\"set print elements 0\" causes there to be no limit.",
+		  &setprintlist),
+     &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("prettyprint", class_support, var_boolean, (char *)&prettyprint,
+    (add_set_cmd ("pretty", class_support, var_boolean, (char *)&prettyprint,
 		  "Set prettyprinting of structures.",
-		  &setlist),
-     &showlist);
-
-  add_alias_cmd ("pp", "prettyprint", class_support, 1, &setlist);
+		  &setprintlist),
+     &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("unionprint", class_support, var_boolean, (char *)&unionprint,
+    (add_set_cmd ("union", class_support, var_boolean, (char *)&unionprint,
 		  "Set printing of unions interior to structures.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
   
   add_show_from_set
-    (add_set_cmd ("vtblprint", class_support, var_boolean, (char *)&vtblprint,
+    (add_set_cmd ("vtbl", class_support, var_boolean, (char *)&vtblprint,
 		  "Set printing of C++ virtual function tables.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("arrayprint", class_support, var_boolean, (char *)&arrayprint,
+    (add_set_cmd ("array", class_support, var_boolean, (char *)&arrayprint,
 		  "Set prettyprinting of arrays.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("addressprint", class_support, var_boolean, (char *)&addressprint,
+    (add_set_cmd ("address", class_support, var_boolean, (char *)&addressprint,
 		  "Set printing of addresses.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
 
 #if 0
   /* The "show radix" cmd isn't good enough to show two separate values.

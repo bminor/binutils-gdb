@@ -272,6 +272,7 @@ void
 init_malloc ()
 {
   mcheck (malloc_botch);
+  mtrace ();
 }
 #endif /* Have mcheck().  */
 
@@ -1275,20 +1276,20 @@ _initialize_utils ()
     (add_set_cmd ("demangle", class_support, var_boolean, 
 		  (char *)&demangle,
 		"Set demangling of encoded C++ names when displaying symbols.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
 
   add_show_from_set
     (add_set_cmd ("sevenbit-strings", class_support, var_boolean, 
 		  (char *)&sevenbit_strings,
    "Set printing of 8-bit characters in strings as \\nnn.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
 
   add_show_from_set
     (add_set_cmd ("asm-demangle", class_support, var_boolean, 
 		  (char *)&asm_demangle,
 	"Set demangling of C++ names in disassembly listings.",
-		  &setlist),
-     &showlist);
+		  &setprintlist),
+     &showprintlist);
 }

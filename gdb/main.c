@@ -68,6 +68,8 @@ int original_stack_limit;
 #endif
 char gdbinit[] = GDBINIT_FILENAME;
 
+#define	ALL_CLEANUPS	((struct cleanup *)0)
+
 /* Version number of GDB, as a string.  */
 
 extern char *version;
@@ -206,7 +208,7 @@ return_to_top_level ()
   bpstat_clear_actions(stop_bpstat);	/* Clear queued breakpoint commands */
   clear_momentary_breakpoints ();
   disable_current_display ();
-  do_cleanups (0);
+  do_cleanups (ALL_CLEANUPS);
   longjmp (to_top_level, 1);
 }
 
@@ -536,10 +538,14 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	  init_source_path ();
 	}
     }
+  do_cleanups (ALL_CLEANUPS);
+
   for (i = 0; i < ndir; i++)
     if (!setjmp (to_top_level))
       directory_command (dirarg[i], 0);
   free (dirarg);
+  do_cleanups (ALL_CLEANUPS);
+
   if (execarg != NULL
       && symarg != NULL
       && strcmp (execarg, symarg) == 0)
@@ -561,15 +567,19 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	if (!setjmp (to_top_level))
 	  symbol_file_command (symarg, !batch);
     }
+  do_cleanups (ALL_CLEANUPS);
+
   if (corearg != NULL)
     if (!setjmp (to_top_level))
       core_file_command (corearg, !batch);
     else if (!setjmp (to_top_level))
       attach_command (corearg, !batch);
+  do_cleanups (ALL_CLEANUPS);
 
   if (ttyarg != NULL)
     if (!setjmp (to_top_level))
       tty_command (ttyarg, !batch);
+  do_cleanups (ALL_CLEANUPS);
 
 #ifdef ADDITIONAL_OPTION_HANDLER
   ADDITIONAL_OPTION_HANDLER;
@@ -591,6 +601,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
 	  if (!setjmp (to_top_level))
 	    source_command (homeinit, 0);
+	do_cleanups (ALL_CLEANUPS);
 
 	/* Do stats; no need to do them elsewhere since we'll only
 	   need them if homedir is set.  Make sure that they are
@@ -615,6 +626,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
 	if (!setjmp (to_top_level))
 	  source_command (gdbinit, 0);
+	do_cleanups (ALL_CLEANUPS);
   }
 
   for (i = 0; i < ncmd; i++)
@@ -624,6 +636,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	  read_command_file (stdin);
 	else
 	  source_command (cmdarg[i], !batch);
+	do_cleanups (ALL_CLEANUPS);
       }
   free (cmdarg);
 
@@ -646,6 +659,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
     {
       if (!setjmp (to_top_level))
 	{
+	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
 	  command_loop ();
           quit_command ((char *)0, instream == stdin);
 	}
@@ -710,8 +724,8 @@ execute_command (p, from_tty)
 }
 
 /* ARGSUSED */
-static void
-do_nothing (foo)
+void
+command_loop_marker (foo)
      int foo;
 {
 }
@@ -733,7 +747,7 @@ command_loop ()
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup (do_nothing, 0);
+      old_chain = make_cleanup (command_loop_marker, 0);
       command = command_line_input (instream == stdin ? prompt : 0,
 				      instream == stdin);
       if (command == 0)
@@ -1055,6 +1069,11 @@ catch_termination (sig)
 #endif
 
 /* Initialize signal handlers. */
+static void
+do_nothing ()
+{
+}
+
 static void
 init_signals ()
 {
@@ -1557,7 +1576,7 @@ GDB is free software and you are welcome to distribute copies of it\n\
 }
 
 static void
-version_info (args, from_tty)
+show_version (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -1580,7 +1599,7 @@ quit_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  if (inferior_pid != 0)
+  if (inferior_pid != 0 && target_has_execution)
     {
       if (query ("The program is running.  Quit anyway? "))
 	{
@@ -1731,6 +1750,7 @@ echo_command (text, from_tty)
 	else
 	  fputc (c, stdout);
       }
+  fflush (stdout);
 }
 
 /* ARGSUSED */
@@ -1748,10 +1768,10 @@ dump_me_command (args, from_tty)
 
 /* Functions to manipulate command line editing control variables.  */
 
-/* Number of commands to print in each call to editing_info.  */
+/* Number of commands to print in each call to show_commands.  */
 #define Hist_print 10
 static void
-editing_info (args, from_tty)
+show_commands (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -1878,7 +1898,7 @@ show_history (args, from_tty)
      char *args;
      int from_tty;
 {
-  cmd_show_list (showhistlist, from_tty);
+  cmd_show_list (showhistlist, from_tty, "");
 }
 
 int info_verbose = 0;		/* Default verbose msgs off */
@@ -2084,7 +2104,7 @@ Without an argument, history expansion is enabled.", &sethistlist),
      &showhistlist);
 
   add_show_from_set
-    (add_set_cmd ("write", no_class, var_boolean, (char *)&write_history_p,
+    (add_set_cmd ("save", no_class, var_boolean, (char *)&write_history_p,
 	   "Set saving of the history record on exit.\n\
 Use \"on\" to enable to enable the saving, and \"off\" to disable it.\n\
 Without an argument, saving is enabled.", &sethistlist),
@@ -2103,11 +2123,10 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
      &showhistlist);
 
   add_show_from_set
-    (add_set_cmd ("caution", class_support, var_boolean,
+    (add_set_cmd ("confirm", class_support, var_boolean,
 		  (char *)&caution,
-	   "Set expected caution of user.\n\
-If on (the default), more warnings are printed, and the user is asked whether\n\
-they really want to do various major commands.", &setlist),
+		  "Set whether to confirm potentially dangerous operations.",
+		  &setlist),
      &showlist);
 
   add_prefix_cmd ("info", class_info, info_command,
@@ -2121,7 +2140,9 @@ they really want to do various major commands.", &setlist),
   /* Another way to get at the same thing.  */
   add_info ("set", show_command, "Show all GDB settings.");
 
-  add_info ("editing", editing_info, "Status of command editor.");
+  add_cmd ("commands", no_class, show_commands, "Status of command editor.",
+	   &showlist);
 
-  add_info ("version", version_info, "Report what version of GDB this is.");
+  add_cmd ("version", no_class, show_version,
+	   "Report what version of GDB this is.", &showlist);
 }

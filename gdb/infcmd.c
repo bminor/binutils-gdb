@@ -915,6 +915,7 @@ attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  dont_repeat ();			/* Not for the faint of heart */
   target_attach (args, from_tty);
 }
 
@@ -934,6 +935,7 @@ detach_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  dont_repeat ();			/* Not for the faint of heart */
   target_detach (args, from_tty);
 }
 
@@ -949,6 +951,18 @@ float_info (addr_exp)
 #endif
 }
 
+struct cmd_list_element *unsetlist = NULL;
+
+/* ARGSUSED */
+static void
+unset_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  printf ("\"unset\" must be followed by the name of an unset subcommand.\n");
+  help_list (unsetlist, "unset ", -1, stdout);
+}
+
 void
 _initialize_infcmd ()
 {
@@ -973,10 +987,14 @@ give the program being debugged.  With no arguments, prints the entire\n\
 environment to be given to the program.", &showlist);
   c->completer = noop_completer;
 
+  add_prefix_cmd ("unset", no_class, unset_command,
+		  "Complement to certain \"set\" commands",
+		  &unsetlist, "unset ", 0, &cmdlist);
+  
   c = add_cmd ("environment", class_run, unset_environment_command,
 	      "Cancel environment variable VAR for the program.\n\
 This does not affect the program until the next \"run\" command.",
-	   &deletelist);
+	   &unsetlist);
   c->completer = noop_completer;
 
   c = add_cmd ("environment", class_run, set_environment_command,

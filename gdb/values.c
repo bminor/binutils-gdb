@@ -26,6 +26,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "frame.h"
 #include "command.h"
+#include "gdbcmd.h"
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk
@@ -286,7 +287,7 @@ clear_value_history ()
 }
 
 static void
-value_history_info (num_exp, from_tty)
+show_values (num_exp, from_tty)
      char *num_exp;
      int from_tty;
 {
@@ -446,7 +447,7 @@ clear_internalvars ()
 }
 
 static void
-convenience_info ()
+show_convenience ()
 {
   register struct internalvar *var;
   int varseen = 0;
@@ -1331,15 +1332,16 @@ set_return_value (val)
 void
 _initialize_values ()
 {
-  add_info ("convenience", convenience_info,
+  add_cmd ("convenience", no_class, show_convenience,
 	    "Debugger convenience (\"$foo\") variables.\n\
 These variables are created when you assign them values;\n\
 thus, \"print $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\n\
 A few convenience variables are given values automatically:\n\
 \"$_\"holds the last address examined with \"x\" or \"info lines\",\n\
-\"$__\" holds the contents of the last address examined with \"x\".");
+\"$__\" holds the contents of the last address examined with \"x\".",
+	   &showlist);
 
-  add_info ("values", value_history_info,
-	    "Elements of value history around item number IDX (or last ten).");
-  add_info_alias ("history", "values", 0);
+  add_cmd ("values", no_class, show_values,
+	   "Elements of value history around item number IDX (or last ten).",
+	   &showlist);
 }
