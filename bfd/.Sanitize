@@ -121,6 +121,8 @@ elfcode.h
 filemode.c
 format.c
 gen-aout.c
+genlink.h
+hash.c
 host-aout.c
 hosts
 hp300bsd.c
@@ -148,6 +150,7 @@ libhppa.h
 libieee.h
 libnlm.h
 liboasys.h
+linker.c
 lynx-core.c
 m68klynx.c
 mipsbsd.c
@@ -171,8 +174,6 @@ ptrace-core.c
 reloc.c
 reloc16.c
 rs6000-core.c
-seclet.c
-seclet.h
 section.c
 som.c
 som.h
