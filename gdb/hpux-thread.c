@@ -44,8 +44,10 @@
 #include "inferior.h"
 #include "regcache.h"
 #include <fcntl.h>
+#include <string.h>
 #include "gdb_stat.h"
 #include "gdbcore.h"
+#include "hppa-tdep.h"
 
 extern int child_suppress_run;
 
@@ -220,7 +222,7 @@ hpux_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   return rtnval;
 }
 
-static char regmap[NUM_REGS] =
+static char regmap[] =
 {
   -2, -1, -1, 0, 4, 8, 12, 16, 20, 24,	/* flags, r1 -> r9 */
   28, 32, 36, 40, 44, 48, 52, 56, 60, -1,	/* r10 -> r19 */
@@ -291,12 +293,12 @@ hpux_thread_fetch_registers (int regno)
 
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
 
-	  if (regno == FLAGS_REGNUM)
+	  if (regno == HPPA_FLAGS_REGNUM)
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
 	    memset (buf, '\000', register_size (current_gdbarch, regno));
-	  else if (regno == SP_REGNUM)
+	  else if (regno == HPPA_SP_REGNUM)
 	    store_unsigned_integer (buf, sizeof sp, sp);
-	  else if (regno == PC_REGNUM)
+	  else if (regno == HPPA_PCOQ_HEAD_REGNUM)
 	    read_memory (sp - 20, buf, register_size (current_gdbarch, regno));
 	  else
 	    read_memory (sp + regmap[regno], buf, register_size (current_gdbarch, regno));
@@ -353,25 +355,28 @@ hpux_thread_store_registers (int regno)
 
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
 
-	  if (regno == FLAGS_REGNUM)
+	  if (regno == HPPA_FLAGS_REGNUM)
 	    deprecated_child_ops.to_store_registers (regno);	/* Let lower layer handle this... */
-	  else if (regno == SP_REGNUM)
+	  else if (regno == HPPA_SP_REGNUM)
 	    {
-	      write_memory ((CORE_ADDR) & tcb_ptr->static_ctx.sp,
-			    &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
+	      regcache_raw_read (current_regcache, regno, buf);
+	      write_memory ((CORE_ADDR) &tcb_ptr->static_ctx.sp, buf,
 			    register_size (current_gdbarch, regno));
-	      tcb_ptr->static_ctx.sp = (cma__t_hppa_regs *)
-		(extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-					   register_size (current_gdbarch, regno)) + 160);
+	      tcb_ptr->static_ctx.sp
+		= (cma__t_hppa_regs *) ((CORE_ADDR) buf + 160);
 	    }
-	  else if (regno == PC_REGNUM)
-	    write_memory (sp - 20,
-			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			  register_size (current_gdbarch, regno));
+	  else if (regno == HPPA_PCOQ_HEAD_REGNUM)
+	    {
+	      regcache_raw_read (current_regcache, regno, buf);
+	      write_memory (sp - 20, buf,
+			    register_size (current_gdbarch, regno));
+	    }
 	  else
-	    write_memory (sp + regmap[regno],
-			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			  register_size (current_gdbarch, regno));
+	    {
+	      regcache_raw_read (current_regcache, regno, buf);
+	      write_memory (sp + regmap[regno], buf,
+			    register_size (current_gdbarch, regno));
+	    }
 	}
     }
 

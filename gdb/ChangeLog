@@ -1,3 +1,16 @@
+2004-11-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hppa-hpux-nat.c (child_suppress_run): Add variable to allow
+	hpux-thread.c to suppress children from running.
+	(hppa_hpux_child_can_run): New function.
+	(_initialize_hppa_hpux_nat): Use hppa_hpux_child_can_run.
+	* hpux-thread.c: Include string.h and hppa-tdep.h.
+	(FLAGS_REGNUM, SP_REGNUM, PC_REGNUM): Rename to HPPA_FLAGS_REGNUM,
+	HPPA_SP_REGNUM and HPPA_PCOQ_HEAD_REGNUM, respectively.
+	(hpux_thread_store_registers): Replace deprecated_registers with
+	calls to regcache_raw_read.
+	* config/pa/hpux11.mh, config/pa/hpux11w.mh: Delete HOST_IPC.
+
 2004-11-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64fbsd-nat.c: Update copyright year.

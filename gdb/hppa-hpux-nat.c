@@ -31,6 +31,9 @@
 #include "hppa-tdep.h"
 #include "inf-ptrace.h"
 
+int child_suppress_run = 0;     /* Non-zero if we should pretend not to be
+				   a runnable target.  */
+
 static int hppa_hpux_save_state_offset[] =
 {
   ssoff(ss_flags),
@@ -273,6 +276,16 @@ hppa_hpux_store_inferior_registers (int regnum)
   else
     hppa_hpux_store_register (regnum);
 }
+
+static int
+hppa_hpux_child_can_run (void)
+{
+  /* This variable is controlled by modules that layer their own process
+     structure atop that provided here.  hpux-thread.c does this because
+     of the HP-UX user-mode level thread model.  */
+
+  return !child_suppress_run;
+}
 
 
 /* Prevent warning from -Wmissing-prototypes.  */
@@ -286,5 +299,6 @@ _initialize_hppa_hpux_nat (void)
   t = inf_ptrace_target ();
   t->to_fetch_registers = hppa_hpux_fetch_inferior_registers;
   t->to_store_registers = hppa_hpux_store_inferior_registers;
+  t->to_can_run = hppa_hpux_child_can_run;
   add_target (t);
 }
