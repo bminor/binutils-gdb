@@ -54,8 +54,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "wait.h"
 #include "gdbcmd.h"
+#include "gdbcore.h"
 
+#if 0
 #include <servers/machid_lib.h>
+#else
+#define	MACH_TYPE_TASK			1
+#define MACH_TYPE_THREAD		2
+#endif
 
 /* Included only for signal names and NSIG
  *
@@ -253,6 +259,8 @@ int must_suspend_thread = 0;
 #define NULL_CLEANUP (struct cleanup *)0
 struct cleanup *cleanup_step = NULL_CLEANUP;
 
+
+extern struct target_ops m3_ops;
 
 #if 0
 #define MACH_TYPE_EXCEPTION_PORT	-1
@@ -986,7 +994,7 @@ select_thread (task, thread_id, flag)
   if (ret != KERN_SUCCESS)
     {
       warning ("Can not select a thread from a dead task");
-      kill_inferior ();
+      m3_kill_inferior ();
       return KERN_FAILURE;
     }
 
@@ -1784,7 +1792,7 @@ mach3_read_inferior (addr, myaddr, length)
 
       if (! port_valid (inferior_task, MACH_PORT_TYPE_SEND))
 	{
-	  kill_inferior ();
+	  m3_kill_inferior ();
 	  error ("Inferior killed (task port invalid)");
 	}
       else
@@ -2133,7 +2141,7 @@ fetch_thread_info (task, mthreads_out)
     {
       warning ("Error getting inferior's thread list:%s",
 	       mach_error_string(ret));
-      kill_inferior ();
+      m3_kill_inferior ();
       return -1;
     }
   
@@ -2279,6 +2287,8 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
   int index;
   gdb_thread_t scan;
   boolean_t all_mapped = TRUE;
+  LONGEST stack_base;
+  LONGEST stack_size;
 
   for (scan = cprocs; scan; scan = scan->next)
     {
@@ -2288,11 +2298,11 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
       /* Check if the cproc is found by its stack */
       for (index = 0; index < thread_count; index++)
 	{
-	  LONGEST stack_base =
-	    extract_signed_integer (scan.raw_cproc + CPROC_BASE_OFFSET,
+	  stack_base =
+	    extract_signed_integer (scan->raw_cproc + CPROC_BASE_OFFSET,
 				    CPROC_BASE_SIZE);
-	  LONGEST stack_size = 
-	    extract_signed_integer (scan.raw_cproc + CPROC_SIZE_OFFSET,
+	  stack_size = 
+	    extract_signed_integer (scan->raw_cproc + CPROC_SIZE_OFFSET,
 				    CPROC_SIZE_SIZE);
 	  if ((mthreads + index)->sp > stack_base &&
 	      (mthreads + index)->sp <= stack_base + stack_size)
@@ -2353,13 +2363,23 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
 		       * the user stack pointer saved in the
 		       * emulator.
 		       */
-		      if (scan->reverse_map == -1 &&
-			  usp > scan->stack_base &&
-			  usp <= scan->stack_base + scan->stack_size)
+		      if (scan->reverse_map == -1)
 			{
-			  mthread->cproc = scan;
-			  scan->reverse_map = index;
-			  break;
+			  stack_base =
+			    extract_signed_integer
+			      (scan->raw_cproc + CPROC_BASE_OFFSET,
+			       CPROC_BASE_SIZE);
+			  stack_size = 
+			    extract_signed_integer
+			      (scan->raw_cproc + CPROC_SIZE_OFFSET,
+			       CPROC_SIZE_SIZE);
+			  if (usp > stack_base &&
+			      usp <= stack_base + stack_size)
+			    {
+			      mthread->cproc = scan;
+			      scan->reverse_map = index;
+			      break;
+			    }
 			}
 		    }
 		}
@@ -2422,7 +2442,7 @@ lookup_address_of_variable (name)
       msymbol = lookup_minimal_symbol (name, (struct objfile *) NULL);
 
       if (msymbol && msymbol->type == mst_data)
-	symaddr = msymbol->address;
+	symaddr = SYMBOL_VALUE_ADDRESS (msymbol);
     }
 
   return symaddr;
@@ -2485,16 +2505,15 @@ get_cprocs()
 						 sizeof (struct gdb_thread));
 
       if (!mach3_read_inferior (their_cprocs,
-				&cproc_copy.raw_cproc[0],
+				&cproc_copy->raw_cproc[0],
 				CPROC_SIZE))
 	error("Can't read next cproc at 0x%x.", their_cprocs);
-      cproc_copy = extract_address (buf, TARGET_PTR_BIT / HOST_CHAR_BIT);
 
       their_cprocs =
-	extract_address (cproc_copy.raw_cproc + CPROC_LIST_OFFSET,
+	extract_address (cproc_copy->raw_cproc + CPROC_LIST_OFFSET,
 			 CPROC_LIST_SIZE);
       cproc_copy_incarnation =
-	extract_address (cproc_copy.raw_cproc + CPROC_INCARNATION_OFFSET,
+	extract_address (cproc_copy->raw_cproc + CPROC_INCARNATION_OFFSET,
 			 CPROC_INCARNATION_SIZE);
 
       if (cproc_copy_incarnation == (CORE_ADDR)0)
@@ -2549,12 +2568,14 @@ mach3_cproc_state (mthread)
 {
   int context;
 
-  if (! mthread || !mthread->cproc || !mthread->cproc->context)
+  if (! mthread || !mthread->cproc)
     return -1;
 
   context = extract_signed_integer
     (mthread->cproc->raw_cproc + CPROC_CONTEXT_OFFSET,
      CPROC_CONTEXT_SIZE);
+  if (context == 0)
+    return -1;
 
   mthread->sp = context + MACHINE_CPROC_SP_OFFSET;
 
@@ -2625,6 +2646,9 @@ thread_list_command()
       int mid;
       char buf[10];
       char slot[3];
+      int cproc_state =
+	extract_signed_integer
+	  (scan->raw_cproc + CPROC_STATE_OFFSET, CPROC_STATE_SIZE);
       
       selected = ' ';
       
@@ -2687,7 +2711,7 @@ thread_list_command()
 			   kthread->in_emulator ? "E" : "",
 			   translate_state (ths.run_state),
 			   buf,
-			   translate_cstate (scan->state),
+			   translate_cstate (cproc_state),
 			   wired);
 	  print_tl_address (gdb_stdout, kthread->pc);
 	}
@@ -2715,7 +2739,7 @@ thread_list_command()
 			   "",
 			   "-",	/* kernel state */
 			   "",
-			   translate_cstate (scan->state),
+			   translate_cstate (cproc_state),
 			   "");
 	  state.cproc = scan;
 
@@ -2919,7 +2943,7 @@ suspend_all_threads (from_tty)
   if (ret != KERN_SUCCESS)
     {
       warning ("Could not suspend inferior threads.");
-      kill_inferior ();
+      m3_kill_inferior ();
       return_to_top_level ();
     }
   
@@ -3022,7 +3046,7 @@ resume_all_threads (from_tty)
     ret = task_threads (inferior_task, &thread_list, &thread_count);
     if (ret != KERN_SUCCESS)
       {
-	kill_inferior ();
+	m3_kill_inferior ();
 	error("task_threads", mach_error_string( ret));
       }
 
@@ -3466,7 +3490,7 @@ mach3_exception_actions (w, force_print_only, who)
 
   if (exception_map[stop_exception].print || force_print)
     {
-      int giveback = grab_terminal ();
+      target_terminal_ours ();
       
       printf_filtered ("\n%s received %s exception : ",
 		       who,
@@ -3503,9 +3527,6 @@ mach3_exception_actions (w, force_print_only, who)
       default:
 	fatal ("Unknown exception");
       }
-      
-      if (giveback)
-	terminal_inferior ();
     }
 }
 
@@ -3879,7 +3900,7 @@ m3_create_inferior (exec_file, allargs, env)
      char *allargs;
      char **env;
 {
-  fork_inferior (exec_file, allargs, env, m3_trace_m3, m3_trace_him, NULL);
+  fork_inferior (exec_file, allargs, env, m3_trace_me, m3_trace_him, NULL);
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */
   proceed ((CORE_ADDR) -1, 0, 0);
@@ -4093,7 +4114,7 @@ m3_attach (args, from_tty)
 
   m3_do_attach (pid);
   inferior_pid = pid;
-  push_target (&procfs_ops);
+  push_target (&m3_ops);
 }
 
 void
@@ -4224,6 +4245,31 @@ m3_detach (args, from_tty)
   unpush_target (&m3_ops);		/* Pop out of handling an inferior */
 }
 #endif /* ATTACH_DETACH */
+
+/* Get ready to modify the registers array.  On machines which store
+   individual registers, this doesn't need to do anything.  On machines
+   which store all the registers in one fell swoop, this makes sure
+   that registers contains all the registers from the program being
+   debugged.  */
+
+static void
+m3_prepare_to_store ()
+{
+#ifdef CHILD_PREPARE_TO_STORE
+  CHILD_PREPARE_TO_STORE ();
+#endif
+}
+
+/* Print status information about what we're accessing.  */
+
+static void
+m3_files_info (ignore)
+     struct target_ops *ignore;
+{
+  /* FIXME: should print MID and all that crap.  */
+  printf_unfiltered ("\tUsing the running image of %s %s.\n",
+		       attach_flag? "attached": "child", target_pid_to_str (inferior_pid));
+}
 
 static void
 m3_open (arg, from_tty)
@@ -4461,12 +4507,9 @@ struct target_ops m3_ops = {
   mach_really_wait,			/* to_wait */
   fetch_inferior_registers,	/* to_fetch_registers */
   store_inferior_registers,	/* to_store_registers */
-  child_prepare_to_store,	/* to_prepare_to_store */
+  m3_prepare_to_store,	/* to_prepare_to_store */
   m3_xfer_memory,		/* to_xfer_memory */
-
-  /* FIXME: Should print MID and all that crap.  */
-  child_files_info,		/* to_files_info */
-
+  m3_files_info,		/* to_files_info */
   memory_insert_breakpoint,	/* to_insert_breakpoint */
   memory_remove_breakpoint,	/* to_remove_breakpoint */
   terminal_init_inferior,	/* to_terminal_init */

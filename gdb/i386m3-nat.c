@@ -120,7 +120,7 @@ fetch_inferior_registers (regno)
 			  &stateCnt);
 
   if (ret != KERN_SUCCESS)
-    message ("fetch_inferior_registers: %s ",
+    warning ("fetch_inferior_registers: %s ",
 	     mach_error_string (ret));
 #if 0
   /* It may be more effective to store validate all of them,
@@ -168,7 +168,7 @@ store_inferior_registers (regno)
 
    if (ret != KERN_SUCCESS) 
     {
-      message ("store_inferior_registers (get): %s",
+      warning ("store_inferior_registers (get): %s",
 	       mach_error_string (ret));
       if (must_suspend_thread)
 	setup_thread (current_thread, 0);
@@ -199,7 +199,7 @@ store_inferior_registers (regno)
 			  i386_THREAD_STATE_COUNT);
   
   if (ret != KERN_SUCCESS)
-    message ("store_inferior_registers (set): %s",
+    warning ("store_inferior_registers (set): %s",
 	     mach_error_string (ret));
 
   if (must_suspend_thread)
@@ -362,7 +362,7 @@ get_i387_state (fstate)
 
   if (ret != KERN_SUCCESS)
     {
-      message ("Can not get live floating point state: %s",
+      warning ("Can not get live floating point state: %s",
 	       mach_error_string (ret));
       return FALSE;
     }
@@ -411,7 +411,7 @@ i386_mach3_float_info()
 
   if (!valid) 
     {
-      message("no floating point status saved");
+      warning ("no floating point status saved");
       return;
     }
   

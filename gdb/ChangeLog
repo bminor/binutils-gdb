@@ -1,5 +1,14 @@
 Fri Mar 25 12:40:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	*  m3-nat.c, i386m3-nat.c, config/i386/i386m3.mh: Many minor
+	changes to make it compile (it doesn't link yet).
+
+	* buildsym.c (start_subfile, patch_subfile_names), demangle.c
+	(set_demangling_style, set_demangling_command): Use savestring not
+	strdup.  We were not dealing properly with a NULL return from
+	strdup, and were not declaring strdup (the system header may or
+	may not have it).
+
 	* valprint.c (val_print): Remove inaccurate comment about what
 	types can be stub types.
 
