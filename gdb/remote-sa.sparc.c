@@ -845,7 +845,7 @@ remote_single_step ()
     {
       Error, not_branch, bicc, bicca, ba, baa, ticc, ta
     } branch_type;
-  branch_type br, isannulled();
+  branch_type br, isbranch ();
 
   npc4 = remote_next_pc + 4; /* branch not taken */
 
@@ -856,7 +856,7 @@ remote_single_step ()
 
   /* printf ("set break at %x\n",remote_next_pc); */
   
-  br = isannulled (remote_pc, &target);
+  br = isbranch (remote_pc, &target);
   
   if (br == bicca)
     {
