@@ -1010,7 +1010,23 @@ md_begin ()
      the command line, or will be set otherwise if one was.  */
   if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
     {
-      /* We have it all.  There's nothing to do.  */
+      /* We have to check if the isa is the default isa of arch.  Otherwise
+         we'll get invalid object file headers.  */
+      ci = mips_cpu_info_from_cpu (mips_arch);
+      assert (ci != NULL);
+      if (mips_opts.isa != ci->isa)
+	{
+	  /* This really should be an error instead of a warning, but old
+	     compilers only have -mcpu which sets both arch and tune.  For
+	     now, we discard arch and preserve tune.  */
+	  as_warn (_("The -march option is incompatible to -mipsN and "
+		     "therefore ignored."));
+	  if (mips_tune == CPU_UNKNOWN)
+	    mips_tune = mips_arch;
+	  ci = mips_cpu_info_from_isa (mips_opts.isa);
+	  assert (ci != NULL);
+	  mips_arch = ci->cpu;
+	}
     }
   else if (mips_arch != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
     {

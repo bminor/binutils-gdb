@@ -1,5 +1,10 @@
 2001-08-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* tc_mips.c (md_begin): Warn about incompatibility between -march=FOO
+	and -mipsN option, continue with default ISA.
+
+2001-08-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (md_parse_option): #ifdef the
 	traditional/non-traditional names as it is done in mips_target_format.
 
