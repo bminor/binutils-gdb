@@ -1,3 +1,8 @@
+2003-09-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-sol2-nat.c: Move include of "gregset.h" after
+	<sys/procfs.h>.
+
 2003-09-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/sparc/nm-sol2.h: New file.

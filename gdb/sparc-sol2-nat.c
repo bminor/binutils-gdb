@@ -20,10 +20,10 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "gregset.h"
 #include "regcache.h"
 
 #include <sys/procfs.h>
+#include "gregset.h"
 
 #include "sparc-tdep.h"
 
