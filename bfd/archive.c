@@ -594,8 +594,11 @@ bfd_slurp_coff_armap (abfd)
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
 
-/*  bfd_release (abfd, (PTR)raw_armap);
-  bfd_release (abfd, (PTR)mapdata);*/
+  /* We'd like to release these allocations, but we have allocated stuff
+     since then (using the same obstack, if bfd_release is obstack based).
+     So they will stick around until the bfd is closed.  */
+  /*  bfd_release (abfd, (PTR)raw_armap);
+      bfd_release (abfd, (PTR)mapdata);  */
   bfd_has_map (abfd) = true;
   return true;
 }
