@@ -2546,6 +2546,12 @@ pa_ip (str)
 	      the_insn.fpof2 = flag;
 	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 13);
 
+	    /* Handle a source FP operand format completer at 20.  */
+	    case 'I':
+	      flag = pa_parse_fp_format (&s);
+	      the_insn.fpof1 = flag;
+	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
+
 	    /* Handle L/R register halves like 't'.  */
 	    case 'v':
 	      {

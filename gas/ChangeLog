@@ -1,3 +1,7 @@
+Sat Aug 28 00:26:26 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* config/tc-hppa.c (pa_ip):  Add case for 'I'.  
+
 1999-08-27  Jim Wilson  <wilson@cygnus.com>
 
 	* dwarf2dbg.c (MAX_SPECIAL_ADDR_DELTA): Correct typo in comment.
