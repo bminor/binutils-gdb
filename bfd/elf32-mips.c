@@ -53,6 +53,10 @@ static void bfd_mips_elf32_swap_gptab_in
   PARAMS ((bfd *, const Elf32_External_gptab *, Elf32_gptab *));
 static void bfd_mips_elf32_swap_gptab_out
   PARAMS ((bfd *, const Elf32_gptab *, Elf32_External_gptab *));
+static void bfd_mips_elf_swap_msym_in 
+  PARAMS ((bfd *, const Elf32_External_Msym *, Elf32_Internal_Msym *));
+static void bfd_mips_elf_swap_msym_out
+  PARAMS ((bfd *, const Elf32_Internal_Msym *, Elf32_External_Msym *));
 static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
 static boolean mips_elf32_object_p PARAMS ((bfd *));
 static boolean mips_elf_create_procedure_table
@@ -124,6 +128,8 @@ static bfd_reloc_status_type mips_elf_final_gp
 static bfd_byte *elf32_mips_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
+static asection *mips_elf_create_msym_section 
+  PARAMS ((bfd *));
 
 /* The level of IRIX compatibility we're striving for.  */
 
@@ -162,6 +168,9 @@ struct mips_got_info
   /* The number of local .got entries we have used.  */
   unsigned int assigned_gotno;
 };
+
+/* The name of the msym section.  */
+#define MIPS_ELF_MSYM_SECTION_NAME(abfd) ".msym"
 
 /* The number of local .got entries we reserve.  */
 #define MIPS_RESERVED_GOTNO (2)
@@ -1932,6 +1941,31 @@ bfd_mips_elf_swap_options_out (abfd, in, ex)
   bfd_h_put_16 (abfd, in->section, ex->section);
   bfd_h_put_32 (abfd, in->info, ex->info);
 }
+
+/* Swap in an MSYM entry.  */
+
+static void
+bfd_mips_elf_swap_msym_in (abfd, ex, in)
+     bfd *abfd;
+     const Elf32_External_Msym *ex;
+     Elf32_Internal_Msym *in;
+{
+  in->ms_hash_value = bfd_h_get_32 (abfd, ex->ms_hash_value);
+  in->ms_info = bfd_h_get_32 (abfd, ex->ms_info);
+}
+
+/* Swap out an MSYM entry.  */
+
+static void
+bfd_mips_elf_swap_msym_out (abfd, in, ex)
+     bfd *abfd;
+     const Elf32_Internal_Msym *in;
+     Elf32_External_Msym *ex;
+{
+  bfd_h_put_32 (abfd, in->ms_hash_value, ex->ms_hash_value);
+  bfd_h_put_32 (abfd, in->ms_info, ex->ms_info);
+}
+
 
 /* Determine whether a symbol is global for the purposes of splitting
    the symbol table into global symbols and local symbols.  At least
@@ -2042,6 +2076,7 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
     {
       switch ((*hdrpp)->sh_type)
 	{
+	case SHT_MIPS_MSYM:
 	case SHT_MIPS_LIBLIST:
 	  sec = bfd_get_section_by_name (abfd, ".dynstr");
 	  if (sec != NULL)
@@ -2381,7 +2416,7 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 	return false;
       break;
     case SHT_MIPS_MSYM:
-      if (strcmp (name, ".msym") != 0)
+      if (strcmp (name, MIPS_ELF_MSYM_SECTION_NAME (abfd)) != 0)
 	return false;
       break;
     case SHT_MIPS_CONFLICT:
@@ -2546,7 +2581,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_info = sec->_raw_size / sizeof (Elf32_Lib);
       /* The sh_link field is set in final_write_processing.  */
     }
-  else if (strcmp (name, ".msym") == 0)
+  else if (strcmp (name, MIPS_ELF_MSYM_SECTION_NAME (abfd)) == 0)
     {
       hdr->sh_type = SHT_MIPS_MSYM;
       hdr->sh_entsize = 8;
@@ -2632,6 +2667,12 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_type = SHT_MIPS_EVENTS;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
       /* The sh_link field is set in final_write_processing.  */
+    }
+  else if (strcmp (name, MIPS_ELF_MSYM_SECTION_NAME (abfd)) == 0)
+    {
+      hdr->sh_type = SHT_MIPS_MSYM;
+      hdr->sh_flags |= SHF_ALLOC;
+      hdr->sh_entsize = 8;
     }
 
   return true;
@@ -3441,6 +3482,10 @@ struct mips_elf_link_hash_entry
   /* Number of MIPS_32 or MIPS_REL32 relocs against this symbol.  */
   unsigned int mips_32_relocs;
 
+  /* The index of the first dynamic relocation (in the .rel.dyn
+     section) against this symbol.  */
+  unsigned int min_dyn_reloc_index;
+
   /* If there is a stub that 32 bit functions should use to call this
      16 bit function, this points to the section containing the stub.  */
   asection *fn_stub;
@@ -3536,6 +3581,7 @@ mips_elf_link_hash_newfunc (entry, table, string)
 	 not been set.  -1 means there is no associated ifd.  */
       ret->esym.ifd = -2;
       ret->mips_32_relocs = 0;
+      ret->min_dyn_reloc_index = 0;
       ret->fn_stub = NULL;
       ret->need_fn_stub = false;
       ret->call_stub = NULL;
@@ -5800,6 +5846,13 @@ mips_elf_create_dynamic_sections (abfd, info)
   if (! mips_elf_create_got_section (abfd, info))
     return false;
 
+  /* Create the .msym section on IRIX6.  It is used by the dynamic
+     linker to speed up dynamic relocations, and to avoid computing
+     the ELF hash for symbols.  */
+  if (IRIX_COMPAT (abfd) == ict_irix6
+      && !mips_elf_create_msym_section (abfd))
+    return false;
+  
   /* Create .stub section.  */
   if (bfd_get_section_by_name (abfd, ".stub") == NULL)
     {
@@ -5996,6 +6049,33 @@ mips_elf_create_got_section (abfd, info)
   elf_section_data (s)->tdata = (PTR) g;
 
   return true;
+}
+
+/* Returns the .msym section for ABFD, creating it if it does not
+   already exist.  Returns NULL to indicate error.  */
+
+static asection *
+mips_elf_create_msym_section (abfd)
+     bfd *abfd;
+{
+  asection *s;
+
+  s = bfd_get_section_by_name (abfd, MIPS_ELF_MSYM_SECTION_NAME (abfd));
+  if (!s) 
+    {
+      s = bfd_make_section (abfd, MIPS_ELF_MSYM_SECTION_NAME (abfd));
+      if (!s
+	  || !bfd_set_section_flags (abfd, s, 
+				     SEC_ALLOC
+				     | SEC_LOAD
+				     | SEC_HAS_CONTENTS
+				     | SEC_LINKER_CREATED 
+				     | SEC_READONLY)
+	  || !bfd_set_section_alignment (abfd, s, 2))
+	return NULL;
+    }
+
+  return s;
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -6868,6 +6948,11 @@ mips_elf_size_dynamic_sections (output_bfd, info)
       else if (SGI_COMPAT (output_bfd)
 	       && strncmp (name, ".compact_rel", 12) == 0)
 	s->_raw_size += mips_elf_hash_table (info)->compact_rel_size;
+      else if (strcmp (name, MIPS_ELF_MSYM_SECTION_NAME (output_bfd))
+	       == 0)
+	s->_raw_size = (sizeof (Elf32_External_Msym) 
+			* (elf_hash_table (info)->dynsymcount
+			   + bfd_count_sections (output_bfd)));
       else if (strncmp (name, ".init", 5) != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
@@ -6999,6 +7084,11 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	if (! bfd_elf32_add_dynamic_entry (info, DT_FINI, 0))
 	  return false;
 #endif
+
+      if (bfd_get_section_by_name (dynobj, 
+				   MIPS_ELF_MSYM_SECTION_NAME (dynobj))
+	  && !bfd_elf32_add_dynamic_entry (info, DT_MIPS_MSYM, 0))
+	return false;
     }
 
   /* If we use dynamic linking, we generate a section symbol for each
@@ -7111,11 +7201,14 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   bfd *dynobj;
   bfd_vma gval;
   asection *sgot;
+  asection *smsym;
   struct mips_got_info *g;
   const char *name;
+  struct mips_elf_link_hash_entry *mh;
 
   dynobj = elf_hash_table (info)->dynobj;
   gval = sym->st_value;
+  mh = (struct mips_elf_link_hash_entry *) h;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -7180,6 +7273,22 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      && offset < sgot->_raw_size);
 	  bfd_put_32 (output_bfd, gval, sgot->contents + offset);
 	}
+    }
+
+  /* Create a .msym entry, if appropriate.  */
+  smsym = bfd_get_section_by_name (dynobj, 
+				   MIPS_ELF_MSYM_SECTION_NAME (dynobj));
+  if (smsym)
+    {
+      Elf32_Internal_Msym msym;
+
+      msym.ms_hash_value = bfd_elf_hash (h->root.root.string);
+      /* It is undocumented what the `1' indicates, but IRIX6 uses
+	 this value.  */
+      msym.ms_info = ELF32_MS_INFO (mh->min_dyn_reloc_index, 1);
+      bfd_mips_elf_swap_msym_out 
+	(dynobj, &msym,
+	 ((Elf32_External_Msym *) smsym->contents) + h->dynindx);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
@@ -7428,6 +7537,12 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
+	    case DT_MIPS_MSYM:
+	      s = (bfd_get_section_by_name 
+		   (output_bfd, MIPS_ELF_MSYM_SECTION_NAME (output_bfd)));
+	      dyn.d_un.d_ptr = s->vma;
+	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+	      break;
 	    }
 	}
     }
@@ -7446,6 +7561,7 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 
   {
     asection *sdynsym;
+    asection *smsym;
     asection *s;
     Elf_Internal_Sym sym;
     Elf32_compact_rel cpt;
@@ -7454,6 +7570,8 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
        the STT_NOTYPE attribute for these symbols.  Should we do so?  */
 
     sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
+    smsym = bfd_get_section_by_name (dynobj, 
+				     MIPS_ELF_MSYM_SECTION_NAME (dynobj));
     if (sdynsym != NULL)
       {
 #if 0
@@ -7512,25 +7630,39 @@ mips_elf_finish_dynamic_sections (output_bfd, info)
 	else
 #endif /* 0 */
 	  {
+	    Elf32_Internal_Msym msym;
+
 	    sym.st_size = 0;
 	    sym.st_name = 0;
 	    sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
 	    sym.st_other = 0;
 
+	    msym.ms_hash_value = 0;
+	    msym.ms_info = ELF32_MS_INFO (0, 1);
+
 	    for (s = output_bfd->sections; s != NULL; s = s->next)
 	      {
 		int indx;
+		long dynindx;
 
 		sym.st_value = s->vma;
 
 		indx = elf_section_data (s)->this_idx;
 		BFD_ASSERT (indx > 0);
 		sym.st_shndx = indx;
+		
+		dynindx  = elf_section_data (s)->dynindx;
 
-		bfd_elf32_swap_symbol_out (output_bfd, &sym,
-					   (((Elf32_External_Sym *)
-					     sdynsym->contents)
-					    + elf_section_data (s)->dynindx));
+		bfd_elf32_swap_symbol_out 
+		  (output_bfd, &sym,
+		   (((Elf32_External_Sym *) sdynsym->contents)
+		    + dynindx));
+		
+		if (smsym)
+		  bfd_mips_elf_swap_msym_out 
+		    (output_bfd, &msym,
+		     (((Elf32_External_Msym *) smsym->contents)
+		      + dynindx));
 	      }
 
 	    /* Set the sh_info field of the output .dynsym section to

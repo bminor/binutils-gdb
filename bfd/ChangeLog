@@ -1,5 +1,26 @@
 1999-06-26  Mark Mitchell  <mark@codesourcery.com>
 
+	* elf32-mips.c (mips_elf_swap_msym_in): New function.
+	(mips_elf_swap_msym_out): New function.
+	(mips_elf_create_msym_section): Likewise.
+	(MIPS_ELF_MSYM_SECTION_NAME): New macro.
+	(_bfd_mips_elf_final_write_processing): Set sh_link for .msym.
+	(_bfd_mips_elf_section_from_shdr): Reject an SHT_MIPS_MSYM
+	section not named .msym.
+	(_bfd_mips_elf_fake_sections): Use MIPS_ELF_MSYM_SECTION_NAME, not
+	.msym directly.  Set appropriate attributes for the .msym
+	section.
+	(mips_elf_link_hash_entry): Add min_dyn_reloc_index field.
+	(mips_elf_link_hash_newfunc): Clear it.
+	(mips_elf_create_dynamic_sections): Create the .msym section
+	on IRIX6.
+	(mips_elf_size_dynamic_sections):  Allocate space for the
+	.msym section.  Add a DT_MIPS_MSYM entry.
+	(mips_elf_finish_dynamic_symbol): Write out a .msym entry for
+	the symbol.
+	(mips_elf_finish_dynamic_sections): Assign a value for
+	DT_MIPS_MSYM.  Add .msym entries for the section symbols as well.
+
 	* elf32-mips.c (irix_compat_t): New enumeration.
 	(ABI_N32_P): New macro.
 	(IRIX_COMPAT): Likewise.
