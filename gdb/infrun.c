@@ -1039,20 +1039,22 @@ wait_for_inferior ()
 	    {
 	      extern int auto_solib_add;
 
+	      /* Remove breakpoints, we eventually want to step over the
+		 shlib event breakpoint, and SOLIB_ADD might adjust
+		 breakpoint addresses via breakpoint_re_set.  */
+	      if (breakpoints_inserted)
+		remove_breakpoints ();
+	      breakpoints_inserted = 0;
+
 	      /* Check for any newly added shared libraries if we're
 		 supposed to be adding them automatically.  */
 	      if (auto_solib_add)
 		{
-		  /* Remove breakpoints, SOLIB_ADD might adjust breakpoint
-		     addresses via breakpoint_re_set.  */
-		  if (breakpoints_inserted)
-		    remove_breakpoints ();
-		  breakpoints_inserted = 0;
-
 		  /* Switch terminal for any messages produced by
 		     breakpoint_re_set.  */
 	          target_terminal_ours_for_output ();
 		  SOLIB_ADD (NULL, 0, NULL);
+		  re_enable_breakpoints_in_shlibs ();
 	          target_terminal_inferior ();
 		}
 
@@ -1069,7 +1071,6 @@ wait_for_inferior ()
 		{
 		  /* We want to step over this breakpoint, then keep going.  */
 		  another_trap = 1;
-		  remove_breakpoints_on_following_step = 1;
 		  break;
 		}
 	    }

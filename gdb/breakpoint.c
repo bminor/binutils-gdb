@@ -447,16 +447,17 @@ read_memory_nobpt (memaddr, myaddr, len)
 int
 insert_breakpoints ()
 {
-  register struct breakpoint *b;
+  register struct breakpoint *b, *temp;
   int val = 0;
   int disabled_breaks = 0;
 
-  ALL_BREAKPOINTS (b)
+  ALL_BREAKPOINTS_SAFE (b, temp)
     if (b->type != bp_watchpoint
 	&& b->type != bp_hardware_watchpoint
 	&& b->type != bp_read_watchpoint
 	&& b->type != bp_access_watchpoint
 	&& b->enable != disabled
+	&& b->enable != shlib_disabled
 	&& ! b->inserted
 	&& ! b->duplicate)
       {
@@ -471,13 +472,13 @@ insert_breakpoints ()
 	    if (DISABLE_UNSETTABLE_BREAK (b->address))
 	      {
 		val = 0;
-		b->enable = disabled;
+		b->enable = shlib_disabled;
 		if (!disabled_breaks)
 		  {
 		    target_terminal_ours_for_output ();
 		    fprintf_unfiltered (gdb_stderr,
 			 "Cannot insert breakpoint %d:\n", b->number);
-		    printf_filtered ("Disabling shared library breakpoints:\n");
+		    printf_filtered ("Temporarily disabling shared library breakpoints:\n");
 		  }
 		disabled_breaks = 1;
 		printf_filtered ("%d ", b->number);
@@ -719,7 +720,9 @@ breakpoint_here_p (pc)
   register struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
-    if (b->enable != disabled && b->address == pc)
+    if (b->enable != disabled
+	&& b->enable != shlib_disabled
+	&& b->address == pc)
       return 1;
 
   return 0;
@@ -771,6 +774,7 @@ breakpoint_thread_match (pc, pid)
 
   ALL_BREAKPOINTS (b)
     if (b->enable != disabled
+	&& b->enable != shlib_disabled
 	&& b->address == pc
 	&& (b->thread == -1 || b->thread == thread))
       return 1;
@@ -1199,7 +1203,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
      CORE_ADDR *pc;
      int not_a_breakpoint;
 {
-  register struct breakpoint *b;
+  register struct breakpoint *b, *temp;
   CORE_ADDR bp_addr;
 #if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
@@ -1216,9 +1220,10 @@ bpstat_stop_status (pc, not_a_breakpoint)
   /* Get the address where the breakpoint would have been.  */
   bp_addr = *pc - DECR_PC_AFTER_BREAK;
 
-  ALL_BREAKPOINTS (b)
+  ALL_BREAKPOINTS_SAFE (b, temp)
     {
-      if (b->enable == disabled)
+      if (b->enable == disabled
+	  || b->enable == shlib_disabled)
 	continue;
 
       if (b->type != bp_watchpoint
@@ -1860,7 +1865,8 @@ describe_other_breakpoints (pc)
 	    printf_filtered
 	      ("%d%s%s ",
 	       b->number,
-	       (b->enable == disabled) ? " (disabled)" : "",
+	       ((b->enable == disabled || b->enable == shlib_disabled)
+		? " (disabled)" : ""),
 	       (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
       printf_filtered ("also set at pc ");
@@ -1900,7 +1906,9 @@ check_duplicates (address)
     return;
 
   ALL_BREAKPOINTS (b)
-    if (b->enable != disabled && b->address == address)
+    if (b->enable != disabled
+	&& b->enable != shlib_disabled
+	&& b->address == address)
       {
 	count++;
 	b->duplicate = count > 1;
@@ -2034,9 +2042,9 @@ disable_longjmp_breakpoint()
 void
 remove_solib_event_breakpoints ()
 {
-  register struct breakpoint *b;
+  register struct breakpoint *b, *temp;
 
-  ALL_BREAKPOINTS (b)
+  ALL_BREAKPOINTS_SAFE (b, temp)
     if (b->type == bp_shlib_event)
       delete_breakpoint (b);
 }
@@ -2056,6 +2064,25 @@ create_solib_event_breakpoint (address)
   b->disposition = donttouch;
   b->type = bp_shlib_event;
 }
+
+/* Try to reenable any breakpoints in shared libraries.  */
+void
+re_enable_breakpoints_in_shlibs ()
+{
+  struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->enable == shlib_disabled)
+      {
+	char buf[1];
+
+	/* Do not reenable the breakpoint if the shared library
+	   is still not mapped in.  */
+	if (target_read_memory (b->address, buf, 1) == 0)
+	  b->enable = enabled;
+      }
+}
+
 #endif
 
 int
@@ -2155,8 +2182,8 @@ set_momentary_breakpoint (sal, frame, type)
 void
 clear_momentary_breakpoints ()
 {
-  register struct breakpoint *b;
-  ALL_BREAKPOINTS (b)
+  register struct breakpoint *b, *temp;
+  ALL_BREAKPOINTS_SAFE (b, temp)
     if (b->disposition == delete)
       {
 	delete_breakpoint (b);
@@ -2215,6 +2242,7 @@ mention (b)
     case bp_through_sigtramp:
     case bp_call_dummy:
     case bp_watchpoint_scope:
+    case bp_shlib_event:
       break;
     }
   if (say_where)
@@ -3248,7 +3276,8 @@ delete_breakpoint (bpt)
       ALL_BREAKPOINTS (b)
 	if (b->address == bpt->address
 	    && !b->duplicate
-	    && b->enable != disabled)
+	    && b->enable != disabled
+	    && b->enable != shlib_disabled)
 	  {
 	    int val;
 	    val = target_insert_breakpoint (b->address, b->shadow_contents);
@@ -3425,18 +3454,26 @@ breakpoint_re_set_one (bint)
     default:
       printf_filtered ("Deleting unknown breakpoint type %d\n", b->type);
       /* fall through */
-    case bp_until:
-    case bp_finish:
+    /* Delete longjmp breakpoints, they will be reset later by
+       breakpoint_re_set.  */
     case bp_longjmp:
     case bp_longjmp_resume:
-    case bp_watchpoint_scope:
-    case bp_call_dummy:
       delete_breakpoint (b);
       break;
 
     /* This breakpoint is special, it's set up when the inferior
        starts and we really don't want to touch it.  */
     case bp_shlib_event:
+
+    /* Keep temporary breakpoints, which can be encountered when we step
+       over a dlopen call and SOLIB_ADD is resetting the breakpoints.
+       Otherwise these should have been blown away via the cleanup chain
+       or by breakpoint_init_inferior when we rerun the executable.  */
+    case bp_until:
+    case bp_finish:
+    case bp_watchpoint_scope:
+    case bp_call_dummy:
+    case bp_step_resume:
       break;
     }
 
