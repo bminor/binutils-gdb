@@ -599,6 +599,8 @@ start_remote ()
   clear_proceed_status ();
   stop_soon_quietly = 1;
   trap_expected = 0;
+  wait_for_inferior ();
+  normal_stop ();
 }
 
 /* Initialize static vars when a new inferior begins.  */
