@@ -1,4 +1,7 @@
-Fri Sep 30 06:42:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+Fri Sep 30 06:42:42 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* lynx-nat.c (child_wait): Use status.w_status, not status, in
+	arithmetic.  status is a `union wait'.
 
 	* config/nm-lynx.h (PTRACE_ARG3_TYPE): Define to int, not char *.
 

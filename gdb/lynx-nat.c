@@ -608,7 +608,7 @@ child_wait (pid, ourstatus)
       pid = wait (&status);
 #ifdef SPARC
 /* Swap halves of status so that the rest of GDB can understand it */
-      status = (status << 16) | ((unsigned)status >> 16);
+      status.w_status = ((unsigned)status.w_status << 16) | ((unsigned)status.w_status >> 16);
 #endif
 
       save_errno = errno;
