@@ -24,6 +24,7 @@ cpu32bug.exp
 d10v.exp
 est.exp
 gdbserver.exp
+h8300.exp
 hmsirom.exp
 hppro.exp
 m32r.exp
