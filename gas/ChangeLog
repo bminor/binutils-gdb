@@ -1,4 +1,6 @@
-Fri Jul 30 01:03:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+Thu Jul 29 22:21:28 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* write.c: Don't use short int in a prototype.
 
 	* expr.c (operand): Make return value simply depend on contents of
 	returned expression.
