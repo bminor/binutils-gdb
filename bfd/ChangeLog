@@ -1,3 +1,9 @@
+2000-09-08  Kazu Hirata  <kazu@hxi.com>
+
+	* archive.c: Fix formatting.
+	* coff-arm.c: Likewise.
+	* doc/chew.c: Likewise.
+
 2000-09-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* section.c (bfd_get_unique_section_name): Put a dot before the
