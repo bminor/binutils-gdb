@@ -1320,7 +1320,7 @@ void OP_FCC40000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_D0 + ((insn & 0x300) >> 16)];
+  reg1 = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
   imm = ((insn & 0xffff) << 16) | extension;
   value = reg1 - imm;
 
@@ -1333,7 +1333,7 @@ void OP_FCC40000 ()
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
-  State.regs[REG_D0 + ((insn & 0x300) >> 16)] = value;
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = value;
 }
 
 /* sub imm32, an */
@@ -1342,7 +1342,7 @@ void OP_FCD40000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_A0 + ((insn & 0x300) >> 16)];
+  reg1 = State.regs[REG_A0 + ((insn & 0x30000) >> 16)];
   imm = ((insn & 0xffff) << 16) | extension;
   value = reg1 - imm;
 
@@ -1355,7 +1355,7 @@ void OP_FCD40000 ()
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
   PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
 	  | (c ? PSW_C : 0) | (v ? PSW_V : 0));
-  State.regs[REG_A0 + ((insn & 0x300) >> 16)] = value;
+  State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
 }
 
 /* subc dm, dn */
@@ -1423,8 +1423,6 @@ void OP_F260 ()
   temp |= State.regs[REG_D0 + (insn & 0x3)];
   State.regs[REG_MDR] = temp % State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   temp /= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
-  temp = (State.regs[REG_D0 + (insn & 0x3)]
-          *  State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
@@ -1444,8 +1442,6 @@ void OP_F270 ()
   temp |= State.regs[REG_D0 + (insn & 0x3)];
   State.regs[REG_MDR] = temp % State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   temp /= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
-  temp = (State.regs[REG_D0 + (insn & 0x3)]
-          *  State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
@@ -1604,7 +1600,7 @@ void OP_FAC80000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_D0 + ((insn & 0x300) >> 16)];
+  reg1 = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
   imm = SEXT16 (insn & 0xffff);
   value = reg1 - imm;
 
@@ -1625,7 +1621,7 @@ void OP_FCC80000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_D0 + ((insn & 0x300) >> 16)];
+  reg1 = State.regs[REG_D0 + ((insn & 0x30000) >> 16)];
   imm = ((insn & 0xffff) << 16) | extension;
   value = reg1 - imm;
 
@@ -1646,7 +1642,7 @@ void OP_FAD80000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_A0 + ((insn & 0x300) >> 16)];
+  reg1 = State.regs[REG_A0 + ((insn & 0x30000) >> 16)];
   imm = insn & 0xffff;
   value = reg1 - imm;
 
@@ -1667,7 +1663,7 @@ void OP_FCD80000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_A0 + ((insn & 0x300) >> 16)];
+  reg1 = State.regs[REG_A0 + ((insn & 0x30000) >> 16)];
   imm = ((insn & 0xffff) << 16) | extension;
   value = reg1 - imm;
 
