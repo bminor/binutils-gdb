@@ -40,12 +40,14 @@ RPATH_ENVVAR = @RPATH_ENVVAR@
 TESTS = \
 	exit47.ko \
 	hello.hi \
+	t-mac.ok \
+	t-mvtac.ok \
+	t-mulxu.ok \
 	t-rachi.ok \
 	t-rep.ok \
-	t-subi.ok \
 	t-sub2w.ok \
-	t-mvtac.ok \
-	t-mac.ok 
+	t-subi.ok \
+#
 
 AS_FOR_TARGET = `\
   if [ -x ../../../gas/as-new ]; then \

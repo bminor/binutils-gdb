@@ -1577,11 +1577,14 @@ OP_1C00 ()
 void
 OP_3C00 ()
 {
-  int64 tmp;
+  uint64 tmp;
+  uint32 src1;
+  uint32 src2;
 
   trace_input ("mulxu", OP_ACCUM_OUTPUT, OP_REG, OP_REG);
-  tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
-
+  src1 = (uint16) State.regs[OP[1]];
+  src2 = (uint16) State.regs[OP[2]];
+  tmp = src1 * src2;
   if (State.FX)
     tmp <<= 1;
 
