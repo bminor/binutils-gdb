@@ -95,6 +95,8 @@ ldwrite.h
 lexsup.c
 lnk960.em
 lnk960.sh
+m68kcoff.sc-sh
+m68kcoff.sh
 m88kbcs.sc-sh
 m88kbcs.sh
 mri.c
@@ -123,7 +125,20 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.43  1992/09/03 22:56:45  bothner
+# Revision 1.44  1992/09/09 18:59:04  ian
+# Brought in from p3.  If anybody knows good numbers for m68k COFF,
+# please let me know, or plug them in yourself.
+#
+# Wed Sep  9 11:52:58 1992  Ian Lance Taylor  (ian@cygnus.com)
+#
+# 	* Makefile.in, m68kcoff.sh, m68kcoff.sc-sh, config/m68k-coff.mt:
+# 	added m68k-coff emulation mode, stolen from a29k emulation.
+# 	Almost certainly wrong, but perhaps better than sun3.
+#
+# Also fixed an error message in configure.in so that it started with
+# '***' like the other error messages do.
+#
+# Revision 1.43  1992/09/03  22:56:45  bothner
 # Add TODO.
 #
 # Revision 1.42  1992/09/01  22:14:49  bothner

@@ -1,4 +1,20 @@
+Wed Sep  9 11:52:58 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in, m68kcoff.sh, m68kcoff.sc-sh, config/m68k-coff.mt:
+	added m68k-coff emulation mode, stolen from a29k emulation.
+	Almost certainly wrong, but perhaps better than sun3.
+
 Thu Sep  3 14:19:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in, Makefile.dos, generic.em, genscripts.sh,
+	gld960.em, h8300hms.em, h8300xray.em, lnk960.em, st2000.em,
+	vanilla.em:  Rename all (generated) ld__*.c files to em_.c.
+	This is one character shorter, and lets people build on
+	SVR3 system. (ld__h8300xray.[co] was the killer there;
+	h8300xray.sc-sh is also overlong, but seems harmless.)
+	Based on a patch from Jonathan Ryshpan <hitachi!amito!jon>.
+	* Makefile.in (clean):  Fix typo mostclean -> mostlyclean.
+	* configure.in:  Add host isc.
 
 	* ldver.c:  Call it version 2.0.
 

@@ -9,102 +9,68 @@ target_dependent=true
 
 # per-host:
 
-case "${host_cpu}" in
+case "${host}" in
 
-rs6000)	my_host=rs6000
-	;;
-
-hppa*)
-	case "${host_vendor}" in
-	hp)
-		case "${host_os}" in
-		hpux)	my_host=hppahpux ;;
-		bsd)	my_host=hppabsd ;;
-		esac
-		;;
-	esac
-	;;
-
-mips)
-	case "${host_vendor}" in
-	dec)	my_host=decstation ;;
-	sgi)	my_host=irix3 ;;
-	esac
-	;;
-m88k)
-	case "${host_vendor}" in
-	motorola)
-		my_host=delta88 ;;
-	*)
-		case "${host_os}" in
-		dgux)	my_host=dgux ;;
-		esac
-		;;
-	esac
-	;;
-
-m68*)
-	case "${host_vendor}" in
-	cbm)
-		case ${host_os} in
-		amigados)	my_host=amigados ;;
-		svr4)		my_host=amix ;;
-		esac
-		;;
-	hp)	
-		case "${host_os}" in
-		hpux)	my_host=hp9000 ;;
-		bsd)	my_host=hp300bsd ;;
-		esac
-		;;
-	apollo*)
-		case "${host_os}" in
-		sysv*)	my_host=apollov68 ;;
-		bsd*)	my_host=apollo68;;
-		esac
-		;;
-	sony)	my_host=news ;;
-	sun)	my_host=sun3 ;;
-	esac
-	;;
-
-i386)
-	case "${host_vendor}" in
-	*)
-		case "${host_os}" in
-		go32)	my_host=go32 ;;
-		sysv)	my_host=i386v ;;
-		mach)	my_host=i386mach ;;
-		bsd)	my_host=i386-aout ;;
-		msdos)	my_host=dose ;;
-		esac
-		;;
-	esac
-	;;
-
-sparc)
-	case "${host_os}" in
-	sunos64)	my_host=sparc-ll ;;
-	*)		my_host=sparc ;;
-	esac
-	;;
-
-romp)	my_host=rtbsd
-	;;
-
-a29k)	my_host=ultra3
-	;;
-
-tahoe)
-	my_host=tahoe
-	;;
-
-vax)
-	case "${host_os}" in
-	ultrix) my_host=vaxult ;;
-	*) my_host=vaxbsd ;;
-	esac
-	;;
+  rs6000-ibm-aix*)	my_host=rs6000
+			;;
+  hppa*-hp-hpux)	my_host=hppahpux
+			;;
+  hppa*-hp-bsd)		my_host=hppabsd
+			;;
+  mips-dec-ultrix*)	my_host=decstation
+			;;
+  mips-sgi-irix3*)	my_host=irix3 
+			;;
+  mips-sgi-irix4*)	my_host=irix4
+			;;
+  m88k-motorola-*)	my_host=delta88
+			;;
+  m88k-dg-dgux*)	my_host=dgux
+			;;
+  m68k-cbm-amigados)	my_host=amigados
+			;;
+  m68k-cbm-svr4)	my_host=amix
+			;;
+  m68k-hp-hpux)		my_host=hp9000    # FIXME this should 9000/xxx
+			;;
+  m68k-hp-bsd)		my_host=hp300bsd
+			;;
+  m68k-apollo*-sysv*)   my_host=apollov68
+			;;
+  m68k-apollo*-bsd*)    my_host=apollo68
+			;;
+  m68k-sony-*)		my_host=news
+			;;
+  m68k-sun-sunos*)	my_host=sun3
+			;;
+  i386-go32-*)		my_host=go32
+			;;
+  i386-*-sysv)		my_host=i386v
+			;;
+  i386-*-isc)		my_host=isc
+			;;
+  i386-*-mach)		my_host=i386mach
+			;;
+  i386-*-bsd)		my_host=i386-aout
+			;;
+  i386-*-msdos)		my_host=dose
+			;;
+  sparc-sun-sunos64)	my_host=sparc-ll
+			;;
+  sparc-sun-sunos4*)	my_host=sparc
+			;;
+  sparc-sun-solaris2)	my_host=solaris2
+			;;
+  romp-*-*)		my_host=rtbsd
+			;;
+  a29k-*-*)		my_host=ultra3
+			;;
+  tahoe-*-*)		my_host=tahoe
+			;;
+  vax-dec-ultrix*)	my_host=vaxult
+			;;
+  vax-dec-bsd*)		my_host=vaxbsd
+			;;
 esac
 
 # Set up to make a link between the host's include file and "sysdep.h".
@@ -118,64 +84,68 @@ if [ ! -f ${srcdir}/${files} ] ; then
 	echo '***' ${srcname} does not support host ${host} 1>&2
 	exit 1
 fi
+
 host_makefile_frag=
+
 if [ -f ${srcdir}/config/${my_host}.mh ] ; then
 	host_makefile_frag=config/${my_host}.mh
 fi
 
 # per-target:
 
-case ${target_vendor} in
-aout | coff)	my_target=${target_cpu}-${target_vendor} ;;
-sun)
-	case ${target_cpu} in
-	sparc)	my_target=sun4 ;;
-	m68k)	my_target=sun3 ;;
-	esac
-	;;
-wrs)	
-	case ${target_cpu} in
-	i960) my_target=vxworks960 ;;
-	m68k) my_target=vxworks68;;
-	m680[01234]0) my_target=vxworks68;;
-	m683?2) my_target=vxworks68;;
-	sparc) my_target=vxsparc;;
-	esac
-	;;
-ericsson) my_target=ose68 ;;
-tandem) my_target=st2000 ;;
-*)
-	case ${target_cpu} in
-	i386)	my_target=go32 ;;
-	m88k)	my_target=m88k-bcs ;;
-	a29k)	case ${target_os} in
-		udi) my_target=sa29200 ;;
-		ebmon) my_target=ebmon29k ;;
-		*) my_target=coff-a29k ;;
-		esac
-		;;
-	h8300)	case ${target_os} in
-		hms) my_target=coff-h8300 ;;
-		xray) my_target=ieee-h8300 ;;
-		esac
-		;;
-	m68*)	
-		case ${target_vendor} in
-		sony)	my_target=news ;;
-		hp)	my_target=hp300bsd ;;
-		*)
-			case "${target_os}" in
-			aout)	my_target=m68k-aout ;;
-			coff)	my_target=m68k-coff ;;
-			*)	echo "Unknown m68k target vendor:" ${target_vendor} 1>&2
-				exit 1
-				;;
-			esac
+case "${target}" in
+
+  sparc-sun-sunos4*) 	my_target=sun4 
 			;;
-		esac
-		;;
-	esac
-	;;
+  m68k-sun-sunos4*)	my_target=sun3
+			;;
+  sparclite-fujitsu-*)  my_target=sun4
+			;;
+  i960-wrs-vxworks*)    my_target=vxworks960
+			;;
+  m68k-wrs-vxworks*)    my_target=vxworks68
+			;;
+  m680[01234]0-wrs-vxworks*) my_target=vxworks68
+			;;
+  m683?2-wrs-vxworks*)  my_target=vxworks68
+			;;
+  sparc-wrs-vxworks*)   my_target=vxsparc
+			;;
+  m68k-ericsson-ose)	my_target=ose68
+			;;
+  *-tandem-none)	my_target=st2000 # FIXME needs better name
+			;;
+  i386-go32-*)		my_target=go32
+			;;
+  m88k-*-*)		my_target=m88k-bcs
+			;;
+  a29k-*-udi)		my_target=sa29200
+			;;
+  a29k-*-ebmon)		my_target=ebmon29k
+			;;
+  a29k-*-*)		my_target=coff-a29k
+			;;
+  h8300-*-hms)		my_target=coff-h8300
+			;;
+  h8300-*-xray)		my_target=ieee-h8300
+			;;
+  m68k-sony-*)		my_target=news
+			;;
+  m68k-hp-bsd*)		my_target=hp300bsd
+			;;
+  m68*-*-aout)		my_target=m68k
+			;;
+  m68*-*-coff)		my_target=m68k-coff
+			;;
+  m68*-*-*)		echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
+			exit 1
+			;;
+  *-*-aout)		my_target=${target_cpu}-${target_vendor} 
+			;;
+  *-*-coff)		my_target=${target_cpu}-${target_vendor} 
+			;;
 esac
+
+
 
 target_makefile_frag=config/${my_target}.mt
