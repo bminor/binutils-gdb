@@ -7391,7 +7391,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  sec = local_sections[r_symndx];
 	  sym_name = bfd_elf_local_sym_name (input_bfd, sym);
 	  sym_type = ELF64_ST_TYPE (sym->st_info);
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	  if (elf_section_data (sec) != NULL)
 	    {
 	      long *opd_sym_adjust;
@@ -8184,7 +8184,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  relocation = TOCstart;
 	  if (r_symndx == 0)
 	    relocation += htab->stub_group[input_section->id].toc_off;
-	  else if (sec != NULL && !unresolved_reloc)
+	  else if (unresolved_reloc)
+	    ;
+	  else if (sec != NULL && sec->id <= htab->top_id)
 	    relocation += htab->stub_group[sec->id].toc_off;
 	  else
 	    unresolved_reloc = TRUE;

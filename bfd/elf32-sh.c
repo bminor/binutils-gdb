@@ -4805,7 +4805,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  else if (! howto->partial_inplace)
 	    {
-	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	      addend = rel->r_addend;
 	    }
 	  else if ((sec->flags & SEC_MERGE)

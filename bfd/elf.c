@@ -7368,9 +7368,10 @@ _bfd_elf_reloc_type_class (const Elf_Internal_Rela *rela ATTRIBUTE_UNUSED)
 bfd_vma
 _bfd_elf_rela_local_sym (bfd *abfd,
 			 Elf_Internal_Sym *sym,
-			 asection *sec,
+			 asection **psec,
 			 Elf_Internal_Rela *rel)
 {
+  asection *sec = *psec;
   bfd_vma relocation;
 
   relocation = (sec->output_section->vma
@@ -7380,16 +7381,14 @@ _bfd_elf_rela_local_sym (bfd *abfd,
       && ELF_ST_TYPE (sym->st_info) == STT_SECTION
       && sec->sec_info_type == ELF_INFO_TYPE_MERGE)
     {
-      asection *msec;
-
-      msec = sec;
       rel->r_addend =
-	_bfd_merged_section_offset (abfd, &msec,
+	_bfd_merged_section_offset (abfd, psec,
 				    elf_section_data (sec)->sec_info,
 				    sym->st_value + rel->r_addend,
-				    0)
-	- relocation;
-      rel->r_addend += msec->output_section->vma + msec->output_offset;
+				    0);
+      sec = *psec;
+      rel->r_addend -= relocation;
+      rel->r_addend += sec->output_section->vma + sec->output_offset;
     }
   return relocation;
 }

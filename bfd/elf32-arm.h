@@ -2127,7 +2127,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_put_32 (input_bfd, value, contents + rel->r_offset);
 	    }
 #else
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 #endif
 	}
       else

@@ -1582,7 +1582,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	  else if (! howto->partial_inplace)
 	    {
-	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	      relocation |= ((sym->st_other & STO_SH5_ISA32) != 0);
 	    }
 	  else if ((sec->flags & SEC_MERGE)

@@ -1295,7 +1295,7 @@ extern void _bfd_elf_fprintf_vma
 extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
   (const Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rela_local_sym
-  (bfd *, Elf_Internal_Sym *, asection *, Elf_Internal_Rela *);
+  (bfd *, Elf_Internal_Sym *, asection **, Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rel_local_sym
   (bfd *, Elf_Internal_Sym *, asection **, bfd_vma);
 extern bfd_vma _bfd_elf_section_offset

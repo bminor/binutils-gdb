@@ -4338,9 +4338,11 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
+	  asection *msec;
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  msec = sec;
+	  value = _bfd_elf_rela_local_sym (output_bfd, sym, &msec, rel);
 
 	  /* If this is a tp-relative relocation against sym 0,
 	     this is hackery from relax_section.  Force the value to
@@ -4368,7 +4370,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && !gotent->reloc_xlated)
 	    {
 	      struct alpha_elf_got_entry *ent;
-	      asection *msec;
 
 	      for (ent = gotent; ent; ent = ent->next)
 		{

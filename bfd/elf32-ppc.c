@@ -4715,7 +4715,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  sec = local_sections[r_symndx];
 	  sym_name = bfd_elf_local_sym_name (input_bfd, sym);
 
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
       else
 	{
@@ -5441,44 +5441,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC_RELAX32:
-	  {
-	    unsigned long r_symndx;
-	    Elf_Internal_Sym *sym;
-	    asection *sym_sec;
-	    bfd_byte *hit_addr = 0;
-	    bfd_vma value = 0;
-
-	    r_symndx = ELF32_R_SYM (rel->r_info);
-
-	    if (r_symndx < symtab_hdr->sh_info)
-	      {
-		sym = local_syms + r_symndx;
-		sym_sec = local_sections[r_symndx];
-
-		value = _bfd_elf_rela_local_sym (output_bfd, sym, sym_sec, rel);
-	      }
-	    else
-	      {
-		bfd_boolean warned;
-		bfd_boolean unresolved_reloc;
-
-		RELOC_FOR_GLOBAL_SYMBOL (h, elf_sym_hashes (input_bfd),
-					 r_symndx, symtab_hdr,
-					 value, sym_sec,
-					 unresolved_reloc, info,
-					 warned);
-		if (warned)
-		  continue;
-	      }
-	    hit_addr = contents + rel->r_offset;
-	    value += rel->r_addend;
-
-	    r = ppc_elf_install_value (output_bfd, hit_addr, value, r_type);
-	    if (r != bfd_reloc_ok)
-	      break;
-	    else
-	      continue;
-	  }
+	  ppc_elf_install_value (output_bfd, contents + rel->r_offset,
+				 relocation + addend, r_type);
+	  continue;
 
 	  /* Indirect .sdata relocation.  */
 	case R_PPC_EMB_SDAI16:

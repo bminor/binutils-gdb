@@ -1107,7 +1107,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sec = local_sections[r_symndx];
 	      sym_name = "<local symbol>";
 #if !USE_REL
-	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	      addend = rel->r_addend;
 #else
 	      /* FIXME: This won't handle local relocations against SEC_MERGE

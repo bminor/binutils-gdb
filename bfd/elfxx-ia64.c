@@ -3846,9 +3846,11 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* Reloc against local symbol.  */
+	  asection *msec;
 	  sym = local_syms + r_symndx;
 	  sym_sec = local_sections[r_symndx];
-	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sym_sec, rel);
+	  msec = sym_sec;
+	  value = _bfd_elf_rela_local_sym (output_bfd, sym, &msec, rel);
 	  if ((sym_sec->flags & SEC_MERGE)
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
 	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
@@ -3859,7 +3861,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (loc_h && ! loc_h->sec_merge_done)
 		{
 		  struct elfNN_ia64_dyn_sym_info *dynent;
-		  asection *msec;
 
 		  for (dynent = loc_h->info; dynent; dynent = dynent->next)
 		    {
