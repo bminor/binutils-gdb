@@ -8537,6 +8537,22 @@ arm_validate_fix (fixP)
   return false;
 }
 
+#ifdef OBJ_COFF
+/* This is a little hack to help the gas/arm/adrl.s test.  It prevents
+   local labels from being added to the output symbol table when they
+   are used with the ADRL pseudo op.  The ADRL relocation should always
+   be resolved before the binbary is emitted, so it is safe to say that
+   it is adjustable.  */
+
+boolean
+arm_fix_adjustable (fixP)
+   fixS * fixP;
+{
+  if (fixP->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
+    return 1;
+  return 0;
+}
+#endif
 #ifdef OBJ_ELF
 /* Relocations against Thumb function names must be left unadjusted,
    so that the linker can use this information to correctly set the

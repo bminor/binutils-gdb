@@ -1,5 +1,10 @@
 2001-01-10  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-arm.c (arm_fix_adjustable): Define for OBJ_COFF.
+	* config/tc-arm.h (obj_fix_adjustable): Define for OBJ_COFF
+
+2001-01-10  Nick Clifton  <nickc@redhat.com>
+
 	* symbols.c (DOLLAR_LABEL_CHAR): New constant - the magic
 	character used to dollar local symbols.
 	(LOCAL_LABEL_CHAR): New constant - the magic character used to

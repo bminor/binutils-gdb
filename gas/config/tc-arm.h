@@ -116,7 +116,7 @@
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
 
-#ifdef OBJ_ELF
+#if defined OBJ_ELF || defined OBJ_COFF
 #include "write.h"        /* For definition of fixS */
 #define obj_fix_adjustable(fixP) arm_fix_adjustable (fixP)
 boolean arm_fix_adjustable PARAMS ((fixS *));
