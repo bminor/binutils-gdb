@@ -1,3 +1,10 @@
+Fri Feb  4 06:31:31 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo (Continuing and Stepping): When talking about "step"
+	versus functions without line numbers, also mention stepping into
+	them as well as "step" when you are in them.  Tell the user how to
+	deal with the situation.  Add comment about "debugging information".
+
 Thu Feb  3 11:39:59 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Enumerations): Document restriction on where

@@ -2846,10 +2846,17 @@ line, then stop it and return control to @value{GDBN}.  This command is
 abbreviated @code{s}.
 
 @quotation
+@c "without debugging information" is imprecise; actually "without line
+@c numbers in the debugging information".  (gcc -g1 has debugging info but
+@c not line numbers).  But it seems complex to try to make that
+@c distinction here.
 @emph{Warning:} If you use the @code{step} command while control is
 within a function that was compiled without debugging information,
 execution proceeds until control reaches a function that does have
-debugging information.
+debugging information.  Likewise, it will not step into a function which
+is compiled without debugging information.  To step through functions
+without debugging information, use the @code{stepi} command, described
+below.
 @end quotation
 
 @item step @var{count}
