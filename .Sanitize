@@ -47,7 +47,6 @@ gcc
 gdb
 gdbm
 glob
-gnulib
 grep
 include
 ld
