@@ -1,3 +1,28 @@
+2003-03-05  James Ingham <jingham@apple.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-abi.c: Include "command.h", "gdbcmd.h", and "ui-out.h".
+	(auto_cp_abi): New variable.
+	(current_cp_abi, num_cp_abis): Make static.
+	(CP_ABI_MAX): Define.
+	(cp_abis): Turn into an array.
+	(value_virtual_fn_field): Fix formatting.
+	(switch_to_cp_abi, register_cp_abi): Update.  register_cp_abi now
+	takes a pointer.
+	(set_cp_abi_as_auto_default, set_cp_abi_cmd, show_cp_abi_cmd)
+	(list_cp_abis, _initialize_cp_abi): New functions.
+	* cp-abi.h: Add prototype for set_cp_abi_as_auto_default.  Remove
+	declarations for cp_abis, num_cp_abis, current_cp_abi, and
+	switch_to_cp_abi.  Update prototype for register_cp_abi.
+	* Makefile.in (cp-abi.o): Update dependencies.
+	* minsyms.c (install_minimal_symbols): Call set_cp_abi_as_auto_default
+	instead of switch_to_cp_abi.
+	* gnu-v2-abi.c (_initialize_gnu_v2_abi): Likewise.  Update call to
+	register_cp_abi.
+	* gnu-v3-abi.c (_initialize_gnu_v3_abi): Update call to
+	register_cp_abi.
+	* hpacc-abi.c (_initialize_hpacc_abi): Likewise.
+
 2003-03-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2expr.c (new_dwarf_expr_context): Add (void) to definition.
