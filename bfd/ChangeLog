@@ -1,3 +1,22 @@
+Mon Aug 25 12:08:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aout-target.h (MY(vec)): Add SEC_CODE and SEC_DATA to section
+	flags.
+	* aout-arm.c (aout_arm_little_vec): Likewise.
+	(aout_arm_big_vec): Likewise.
+	* bout.c (b_out_vec_big_host): Likewise.
+	(b_out_vec_little_host): Likewise.
+	* mipsbsd.c (aout_mips_little_vec): Likewise.
+	(aout_mips_big_vec): Likewise.
+
+start-sanitize-tic80
+Tue Aug 19 10:09:10 1997  Fred Fish  <fnf@cygnus.com>
+
+	* coff-tic80.c (COFF_ALIGN_IN_SFLAGS): Define to 1.
+	* coffcode.h (styp_to_sec_flags): Ignore incoming STYP_INFO
+	bit in s_flags if COFF_ALIGN_IN_S_FLAGS is defined.
+
+end-sanitize-tic80
 Tue Aug 19 08:47:17 1997  Fred Fish  <fnf@cygnus.com>
 
 	* coff-i960.c (COFF_ALIGN_IN_SECTION_HEADER): Define to 1.
