@@ -54,7 +54,11 @@
 #define TC_HANDLES_FX_DONE
 
 /* Called after parsing a file.  */
-#define md_after_pass_hook() dvp_parse_done ()
+extern void dvp_parse_done PARAMS ((void));
+#define md_after_pass_hook() dvp_after_pass_hook ()
+
+extern void dvp_frob_label PARAMS ((struct symbol *));
+#define tc_frob_label(sym) dvp_frob_label (sym)
 
 /* Default section names. */
 #define TEXT_SECTION_NAME	".vutext"

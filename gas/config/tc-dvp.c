@@ -1058,7 +1058,7 @@ md_undefined_symbol (name)
 /* Called after parsing the file via md_after_pass_hook.  */
 
 void
-dvp_parse_done ()
+dvp_after_pass_hook ()
 {
 #if 0 /* ??? Doesn't work unless we keep track of the nested include file
 	 level.  */
@@ -1070,6 +1070,17 @@ dvp_parse_done ()
   else if (CUR_ASM_STATE == ASM_UNPACK)
     s_endunpack (0);
 #endif
+}
+
+/* Called when a label is defined via tc_frob_label.  */
+
+void
+dvp_frob_label (sym)
+     symbolS *sym;
+{
+  if (CUR_ASM_STATE == ASM_MPG
+      || CUR_ASM_STATE == ASM_VU)
+    S_SET_OTHER (sym, STO_DVP_VU);
 }
 
 /* Functions concerning relocs.  */
