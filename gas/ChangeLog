@@ -25,8 +25,16 @@ Mon Jan 22 17:24:47 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* config/tc-mips.c (load_register): Optimise "dli" loads.
 	(md_show_usage): add "-mcpu=vr4100" to help text.
-	
+
 Mon Jan 22 11:53:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (resolve_symbol_value): If a symbol is equated to an
+	undefined symbol, preserve the X_op of O_symbol.
+	(S_GET_VALUE): Fix check to permit this case.
+	* write.c (write_relocs): If a reloc is against an undefined
+	symbol equated to another symbol, change the reloc to be against
+	the latter symbol.
+	* config/obj-coff.c (do_relocs_for): Likewise.
 
 	* config/tc-ppc.c (ppc_csect): An unnamed csect is storage class
 	XMC_PR.
