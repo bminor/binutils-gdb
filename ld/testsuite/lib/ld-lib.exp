@@ -43,6 +43,37 @@ proc default_ld_relocate { ld target objects } {
     }
 }
 
+# Look for big-endian or little-endian switches in the multlib
+# options and translate these into a -EB or -EL switch.  Note
+# we cannot rely upon proc process_multilib_options to do this
+# for us because for some targets the compiler does not support
+# -EB/-EL but it does support -mbig-endian/-mlittle-endian, and
+# the site.exp file will include the switch "-mbig-endian"
+# (rather than "big-endian") which is not detected by proc
+# process_multilib_options.
+
+proc big_or_little_endian {} {
+    
+    if [board_info [target_info name] exists multilib_flags] {
+	set tmp_flags " [board_info [target_info name] multilib_flags]";
+
+	foreach x $tmp_flags {
+	    case $x in {
+		{*big*endian eb EB} {
+		    set flags " -EB"
+		    return $flags
+		}
+		{*little*endian el EL} {
+		    set flags " -EL"
+		    return $flags
+		}
+	    }
+	}
+    }
+
+    set flags ""
+    return $flags
+}
 
 #
 # default_ld_link 
@@ -62,9 +93,11 @@ proc default_ld_link { ld target objects } {
 	return 0
     }
     
-    verbose -log "$ld $HOSTING_EMU -o $target $objs $libs"
+    set flags [big_or_little_endian]
     
-    catch "exec $ld $HOSTING_EMU -o $target $objs $libs" exec_output
+    verbose -log "$ld $HOSTING_EMU $flags -o $target $objs $libs"
+    
+    catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	return 1
@@ -86,9 +119,11 @@ proc default_ld_simple_link { ld target objects } {
 	return 0
     }
     
-    verbose -log "$ld -o $target $objects"
+    set flags [big_or_little_endian]
     
-    catch "exec $ld -o $target $objects" exec_output
+    verbose -log "$ld $flags -o $target $objects"
+    
+    catch "exec $ld $flags -o $target $objects" exec_output
     set exec_output [prune_warnings $exec_output]
 
     # We don't care if we get a warning about a non-existent start
@@ -132,6 +167,10 @@ proc default_ld_compile { cc source object } {
     # based on the name of the compiler.
     if {[string match "*gcc*" $cc] || [string match "*++*" $cc]} then {
 	set flags "$gcc_gas_flag $flags"
+    }
+
+    if [board_info [target_info name] exists multilib_flags] {
+	append flags " [board_info [target_info name] multilib_flags]";
     }
 
     verbose -log "$cc $flags -c $source -o $object"
@@ -180,9 +219,11 @@ proc default_ld_assemble { as source object } {
 
     if ![info exists ASFLAGS] { set ASFLAGS "" }
 
-    verbose -log "$as $ASFLAGS -o $object $source"
+    set flags [big_or_little_endian]
 
-    catch "exec $as $ASFLAGS -o $object $source" exec_output
+    verbose -log "$as $flags $ASFLAGS -o $object $source"
+
+    catch "exec $as $flags $ASFLAGS -o $object $source" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	return 1

@@ -1,3 +1,18 @@
+1999-07-28  Nick Clifton  <nickc@cygnus.com>
+
+	* lib/ld-lib.exp (proc big_or_little_endian): New proc.
+	Determine if a big endian or little endian output format hass
+	been selected by any of the multilib options, and if so return
+	a suitable command line option for the linker/assembler.
+	(proc default_ld_link): Include the result of proc
+	big_or_little_endian on the command line to the linker.
+	(proc ld_simple_link): Include the result of proc
+	big_or_little_endian on the command line to the linker.
+	(proc default_ld_compile): Append multilib flags to compiler
+	switches.
+	(proc default_ld_assemble): Include the result of proc
+	big_or_little_endian on the command line to the linker.
+
 1999-07-21  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfvers/vers1.c: Add missing prototypes and include
