@@ -1,5 +1,10 @@
 2002-12-02  J. Brobecker  <brobecker@gnat.com>
 
+	* xcoffread.c (read_symbol_lineno): Replace boolean by int.
+	Fixes a compilation failure on AiX.
+
+2002-12-02  J. Brobecker  <brobecker@gnat.com>
+
 	* config/powerpc/aix432.mh (NATDEPFILES): Add a comment explaining
 	why aix-thread.o is not listed.
 

@@ -1634,7 +1634,7 @@ static int
 read_symbol_lineno (int symno)
 {
   struct objfile *objfile = this_symtab_psymtab->objfile;
-  boolean xcoff64 = bfd_xcoff_is_xcoff64 (objfile->obfd);
+  int xcoff64 = bfd_xcoff_is_xcoff64 (objfile->obfd);
 
   struct coff_symfile_info *info =
     (struct coff_symfile_info *)objfile->sym_private;
