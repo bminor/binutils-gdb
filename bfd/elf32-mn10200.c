@@ -1,5 +1,5 @@
 /* Matsushita 10200 specific support for 32-bit ELF
-   Copyright (C) 1996 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -40,13 +40,9 @@ enum reloc_type
   R_MN10200_32,
   R_MN10200_16,
   R_MN10200_8,
-#if 0
-  R_MN10200_PCREL32_1BYTE,
-  R_MN10200_PCREL16_1BYTE,
-  R_MN10200_PCREL8_1BYTE,
-  R_MN10200_PCREL32_2BYTE,
-  R_MN10200_PCREL16_2BYTE,
-#endif
+  R_MN10200_24,
+  R_MN10200_PCREL8,
+  R_MN10200_PCREL24,
   R_MN10200_MAX
 };
 
@@ -108,40 +104,22 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 0xff,
 	 0xff,
 	 false),
-#if 0
-  /* Simple 32bit pc-relative reloc with a 1 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10200_PCREL32_1BYTE,
+  /* Standard 24 bit reloc.  */
+  HOWTO (R_MN10200_24,
 	 0,
 	 2,
-	 32,
-	 true,
+	 24,
+	 false,
 	 0,
 	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_PCREL32_1BYTE",
-	 true,
-	 0xffffffff,
-	 0xffffffff,
+	 bfd_elf_generic_reloc,
+	 "R_MN10200_24",
+	 false,
+	 0xffffff,
+	 0xffffff,
 	 false),
-  /* Simple 16bit pc-relative reloc with a 1 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10200_PCREL16_1BYTE,
-	 0,
-	 1,
-	 16,
-	 true,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_PCREL16_1BYTE",
-	 true,
-	 0xffff,
-	 0xffff,
-	 false),
-  /* Simple 8 pc-relative reloc with a 1 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10200_PCREL8_1BYTE,
+  /* Simple 8 pc-relative reloc.  */
+  HOWTO (R_MN10200_PCREL8,
 	 0,
 	 0,
 	 8,
@@ -149,42 +127,26 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 0,
 	 complain_overflow_bitfield,
 	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_PCREL8_1BYTE",
+	 "R_MN10200_PCREL8",
 	 true,
 	 0xff,
 	 0xff,
 	 true),
-  /* Simple 32 pc-relative reloc with a 2 byte adjustment
+  /* Simple 32bit pc-relative reloc with a 1 byte adjustment
      to get the pc-relative offset correct.  */
-  HOWTO (R_MN10200_PCREL32_2BYTE,
+  HOWTO (R_MN10200_PCREL24,
 	 0,
 	 2,
-	 32,
+	 24,
 	 true,
 	 0,
 	 complain_overflow_bitfield,
 	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_PCREL32_2BYTE",
+	 "R_MN10200_PCREL24",
 	 true,
-	 0xffffffff,
-	 0xffffffff,
-	 true),
-  /* Simple 16 pc-relative reloc with a 2 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10200_PCREL16_2BYTE,
-	 0,
-	 1,
-	 16,
-	 true,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
-	 "R_MN10200_PCREL16_2BYTE",
-	 true,
-	 0xffff,
-	 0xffff,
-	 true),
-#endif
+	 0xffffff,
+	 0xffffff,
+	 false),
 };
 
 struct mn10200_reloc_map
@@ -199,15 +161,9 @@ static const struct mn10200_reloc_map mn10200_reloc_map[] =
   { BFD_RELOC_32, R_MN10200_32, },
   { BFD_RELOC_16, R_MN10200_16, },
   { BFD_RELOC_8, R_MN10200_8, },
-#if 0
-  { BFD_RELOC_MN10200_32B, R_MN10200_32B, },
-  { BFD_RELOC_MN10200_16B, R_MN10200_16B, },
-  { BFD_RELOC_32_PCREL, R_MN10200_PCREL32_1BYTE, },
-  { BFD_RELOC_16_PCREL, R_MN10200_PCREL16_1BYTE, },
-  { BFD_RELOC_8_PCREL, R_MN10200_PCREL8_1BYTE, },
-  { BFD_RELOC_MN10200_32_PCREL, R_MN10200_PCREL32_2BYTE, },
-  { BFD_RELOC_MN10200_16_PCREL, R_MN10200_PCREL16_2BYTE, },
-#endif
+  { BFD_RELOC_24, R_MN10200_24, },
+  { BFD_RELOC_8_PCREL, R_MN10200_PCREL8, },
+  { BFD_RELOC_24_PCREL, R_MN10200_PCREL24, },
 };
 
 static reloc_howto_type *

@@ -1,3 +1,10 @@
+Fri Jan  3 16:54:08 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* reloc.c: Add BFD_RELOC_24.
+	* elf32-mn10200.c (enum reloc_type): Add 24bit and pcrel relocs.
+	(elf_mn10200_howto, mn10200_reloc_map): Corresponding changes.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
 Fri Jan  3 16:58:31 1997  Richard Henderson  <rth@tamu.edu>
 
 	elf64-alpha multiple .got rewrite:
