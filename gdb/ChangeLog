@@ -1,5 +1,13 @@
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_frame_id): Eliminate code updating "frame".
+	(legacy_get_prev_frame): Ditto.
+	(get_frame_base): Return id.base directly.
+	(deprecated_update_frame_base_hack): Update "id.base".
+	* frame.h (struct frame_info): Delete field "frame".
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
 	* NEWS: Mention that the "Sequent family" is obsolete.
 	* configure.tgt: Obsolete i[3456]86-sequent-bsd*,
 	i[3456]86-sequent-sysv4*, and i[3456]86-sequent-sysv*.

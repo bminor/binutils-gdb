@@ -64,11 +64,8 @@ get_frame_id (struct frame_info *fi)
       /* Find THIS frame's ID.  */
       fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
       fi->id_p = 1;
-      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
-	 store the frame ID in PREV_FRAME.  */
-      fi->frame = fi->id.base;
     }
-  return frame_id_build (fi->frame, get_frame_pc (fi));
+  return frame_id_build (fi->id.base, get_frame_pc (fi));
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -1172,12 +1169,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	 after the switch to storing the frame ID, instead of the
 	 frame base, in the frame object.  */
 
-      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
-	 store the frame ID in PREV_FRAME.  */
-      /* FIXME: cagney/2003-04-04: Once ->frame is eliminated, this
-         assignment can go.  */
-      prev->frame = prev->id.base;
-
       /* Link it in.  */
       this_frame->prev = prev;
 
@@ -1682,13 +1673,7 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
-  if (!fi->id_p)
-    {
-      /* HACK: Force the ID code to (indirectly) initialize the
-         ->frame pointer.  */
-      get_frame_id (fi);
-    }
-  return fi->frame;
+  return get_frame_id (fi).base;
 }
 
 /* High-level offsets into the frame.  Used by the debug info.  */
@@ -1812,7 +1797,7 @@ void
 deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 {
   /* See comment in "frame.h".  */
-  frame->frame = base;
+  frame->id.base = base;
 }
 
 void

@@ -337,12 +337,6 @@ extern void frame_pop (struct frame_info *frame);
 
 struct frame_info
   {
-    /* Nominal address of the frame described.  See comments at
-       get_frame_base() about what this means outside the *FRAME*
-       macros; in the *FRAME* macros, it can mean whatever makes most
-       sense for this machine.  */
-    CORE_ADDR frame;
-
     /* Address at which execution is occurring in this frame.
        For the innermost frame, it's the current pc.
        For other frames, it is a pc saved in the next frame.  */
