@@ -109,7 +109,8 @@ c_printstr (struct ui_file *stream, char *string, unsigned int length,
      style.  */
   if (!force_ellipses
       && length > 0
-  && extract_unsigned_integer (string + (length - 1) * width, width) == '\0')
+      && (extract_unsigned_integer (string + (length - 1) * width, width)
+          == '\0'))
     length--;
 
   if (length == 0)
@@ -381,23 +382,23 @@ const struct op_print c_op_print_tab[] =
 struct type **CONST_PTR (c_builtin_types[]) =
 {
   &builtin_type_int,
-    &builtin_type_long,
-    &builtin_type_short,
-    &builtin_type_char,
-    &builtin_type_float,
-    &builtin_type_double,
-    &builtin_type_void,
-    &builtin_type_long_long,
-    &builtin_type_signed_char,
-    &builtin_type_unsigned_char,
-    &builtin_type_unsigned_short,
-    &builtin_type_unsigned_int,
-    &builtin_type_unsigned_long,
-    &builtin_type_unsigned_long_long,
-    &builtin_type_long_double,
-    &builtin_type_complex,
-    &builtin_type_double_complex,
-    0
+  &builtin_type_long,
+  &builtin_type_short,
+  &builtin_type_char,
+  &builtin_type_float,
+  &builtin_type_double,
+  &builtin_type_void,
+  &builtin_type_long_long,
+  &builtin_type_signed_char,
+  &builtin_type_unsigned_char,
+  &builtin_type_unsigned_short,
+  &builtin_type_unsigned_int,
+  &builtin_type_unsigned_long,
+  &builtin_type_unsigned_long_long,
+  &builtin_type_long_double,
+  &builtin_type_complex,
+  &builtin_type_double_complex,
+  0
 };
 
 const struct language_defn c_language_defn =
@@ -432,24 +433,24 @@ const struct language_defn c_language_defn =
 struct type **const (cplus_builtin_types[]) =
 {
   &builtin_type_int,
-    &builtin_type_long,
-    &builtin_type_short,
-    &builtin_type_char,
-    &builtin_type_float,
-    &builtin_type_double,
-    &builtin_type_void,
-    &builtin_type_long_long,
-    &builtin_type_signed_char,
-    &builtin_type_unsigned_char,
-    &builtin_type_unsigned_short,
-    &builtin_type_unsigned_int,
-    &builtin_type_unsigned_long,
-    &builtin_type_unsigned_long_long,
-    &builtin_type_long_double,
-    &builtin_type_complex,
-    &builtin_type_double_complex,
-    &builtin_type_bool,
-    0
+  &builtin_type_long,
+  &builtin_type_short,
+  &builtin_type_char,
+  &builtin_type_float,
+  &builtin_type_double,
+  &builtin_type_void,
+  &builtin_type_long_long,
+  &builtin_type_signed_char,
+  &builtin_type_unsigned_char,
+  &builtin_type_unsigned_short,
+  &builtin_type_unsigned_int,
+  &builtin_type_unsigned_long,
+  &builtin_type_unsigned_long_long,
+  &builtin_type_long_double,
+  &builtin_type_complex,
+  &builtin_type_double_complex,
+  &builtin_type_bool,
+  0
 };
 
 const struct language_defn cplus_language_defn =

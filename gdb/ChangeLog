@@ -1,5 +1,8 @@
 2001-12-18  Jim Blandy  <jimb@redhat.com>
 
+	* c-lang.c (c_printstr, c_builtin_types, cplus_builtin_types): 
+	Fix indentation.
+
 	* Makefile.in (c-exp.tab.o): Delete duplicate build rule.  Fix
  	dependency list on remaining build rule.
 
