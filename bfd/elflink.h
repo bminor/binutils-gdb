@@ -5515,14 +5515,24 @@ elf_link_input_bfd (finfo, input_bfd)
 	    }
 	}
 
+      name = NULL;
       if (isym->st_shndx == SHN_UNDEF)
-	isec = bfd_und_section_ptr;
+        {
+	  isec = bfd_und_section_ptr;
+	  name = isec->name;
+	}
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
 	isec = section_from_elf_index (input_bfd, isym->st_shndx);
       else if (isym->st_shndx == SHN_ABS)
-	isec = bfd_abs_section_ptr;
+	{
+	  isec = bfd_abs_section_ptr;
+	  name = isec->name;
+	}
       else if (isym->st_shndx == SHN_COMMON)
-	isec = bfd_com_section_ptr;
+	{
+	  isec = bfd_com_section_ptr;
+	  name = isec->name;
+	}
       else
 	{
 	  /* Who knows?  */
@@ -5541,7 +5551,18 @@ elf_link_input_bfd (finfo, input_bfd)
 
 	  /* Save away all section symbol values.  */
 	  if (isec != NULL)
-	    isec->symbol->value = isym->st_value;
+	    {
+	      if (name)
+		{
+		  if (isec->symbol->value != isym->st_value)
+		    (*_bfd_error_handler)
+		      (_("%s: invalid section symbol index 0x%x (%s) ingored"),
+		       bfd_get_filename (input_bfd), isym->st_shndx,
+		       name);
+		  continue;
+		}
+	      isec->symbol->value = isym->st_value;
+	    }
 
 	  /* If this is a discarded link-once section symbol, update
 	     it's value to that of the kept section symbol.  The

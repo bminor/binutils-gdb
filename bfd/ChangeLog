@@ -1,3 +1,8 @@
+2001-02-18  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_input_bfd): Ignore invalid section symbol
+	index.
+
 2001-02-18  Kazu Hirata  <kazu@hxi.com>
 
 	* vms-misc.c: Fix formatting.
