@@ -1,3 +1,14 @@
+Thu Aug 29 11:29:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (L_tmpnam): Never define.
+	(display_target_list): Use choose_temp_base instead of tmpnam.
+	(display_info_table): Likewise.
+
+Tue Aug 27 18:15:01 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (parse_stab): An N_FUN symbol with an empty string
+	indicates the end of a function.
+
 Thu Aug 22 17:08:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* wrstabs.c (struct string_hash_entry): Add next field.
