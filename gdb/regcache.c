@@ -183,12 +183,13 @@ regcache_xmalloc_with_cleanup (struct gdbarch *gdbarch)
 }
 
 void
-regcache_move (struct regcache *dst, struct regcache *src)
+regcache_cpy (struct regcache *dst, struct regcache *src)
 {
   int i;
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   gdb_assert (src != NULL && dst != NULL);
   gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
+  gdb_assert (src != dst);
   /* FIXME: cagney/2002-05-17: To say this bit is bad is being polite.
      It keeps the existing code working where things rely on going
      through the register cache.  */
@@ -200,6 +201,17 @@ regcache_move (struct regcache *dst, struct regcache *src)
       read_register_bytes (0, dst->registers, REGISTER_BYTES);
       return;
     }
+  /* FIXME: cagney/2002-05-17: To say this bit is bad is being polite.
+     It keeps the existing code working where things rely on going
+     through the register cache.  */
+  if (dst == current_regcache
+      && !gdbarch_register_read_p (dst->descr->gdbarch))
+    {
+      /* ULGH!!!!  Old way.  Use REGISTER bytes and let code below
+	 untangle fetch.  */
+      write_register_bytes (0, src->registers, REGISTER_BYTES);
+      return;
+    }
   for (i = 0; i < current_regcache->descr->nr_registers; i++)
     {
       /* Should we worry about the valid bit here?  */
@@ -209,7 +221,7 @@ regcache_move (struct regcache *dst, struct regcache *src)
 }
 
 void
-regcache_move_no_passthrough (struct regcache *dst, struct regcache *src)
+regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
 {
   int i;
   gdb_assert (src != NULL && dst != NULL);
@@ -230,7 +242,7 @@ regcache_dup (struct regcache *src)
   struct regcache *newbuf;
   gdb_assert (current_regcache != NULL);
   newbuf = regcache_xmalloc (src->descr->gdbarch);
-  regcache_move (newbuf, src);
+  regcache_cpy (newbuf, src);
   return newbuf;
 }
 
@@ -240,7 +252,7 @@ regcache_dup_no_passthrough (struct regcache *src)
   struct regcache *newbuf;
   gdb_assert (current_regcache != NULL);
   newbuf = regcache_xmalloc (src->descr->gdbarch);
-  regcache_move_no_passthrough (newbuf, src);
+  regcache_cpy_no_passthrough (newbuf, src);
   return newbuf;
 }
 
@@ -1035,7 +1047,7 @@ regcache_save (struct regcache *regcache)
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_move (regcache, current_regcache);
+  regcache_cpy (regcache, current_regcache);
 }
 
 void
@@ -1043,7 +1055,7 @@ regcache_save_no_passthrough (struct regcache *regcache)
 {
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_move_no_passthrough (regcache, current_regcache);
+  regcache_cpy_no_passthrough (regcache, current_regcache);
 }
 
 void
@@ -1053,7 +1065,7 @@ regcache_restore (struct regcache *regcache)
   char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_move (current_regcache, regcache);
+  regcache_cpy (current_regcache, regcache);
 }
 
 void
@@ -1062,7 +1074,7 @@ regcache_restore_no_passthrough (struct regcache *regcache)
   char *regcache_registers;
   gdb_assert (current_regcache != NULL && regcache != NULL);
   gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_move_no_passthrough (current_regcache, regcache);
+  regcache_cpy_no_passthrough (current_regcache, regcache);
 }
 
 void
