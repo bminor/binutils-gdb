@@ -1,3 +1,7 @@
+Thu Feb  6 11:54:24 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* objcopy.1: Add missing space after .B.
+
 Fri Jan 31 10:33:07 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* objdump.c (disassemble_data): Initialize `aux.require_sec'.
