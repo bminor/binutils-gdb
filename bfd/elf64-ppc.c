@@ -3753,7 +3753,23 @@ edit_opd (obfd, info)
 		    }
 
 		  skip = sym_sec->output_section == bfd_abs_section_ptr;
-		  if (!skip)
+		  if (skip)
+		    {
+		      if (h != NULL)
+			{
+			  /* Arrange for the function descriptor sym
+			     to be dropped.  */
+			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fh;
+
+			  fh = (struct ppc_link_hash_entry *) h;
+			  BFD_ASSERT (fh->is_func);
+			  fdh = fh->oh;
+			  fdh->root.u.def.value = 0;
+			  fdh->root.u.def.section = sym_sec;
+			}
+		    }
+		  else
 		    {
 		      /* We'll be keeping this opd entry.  */
 
