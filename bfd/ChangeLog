@@ -1,3 +1,8 @@
+Thu Feb 15 11:29:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.c (_bfd_elf_create_linker_section): Remove unused
+	zero_section variable.
+
 Thu Feb 15 10:39:17 1996  H.J. Lu  <hjl@zoom.com>
 
 	* Makefile.in ($(srcdir)/bfd-in2.h): Rename target from bfd-in2.h.
