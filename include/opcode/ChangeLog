@@ -1,3 +1,10 @@
+start-sanitize-sky
+Mon Apr  6 17:33:31 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp.h (dvp_expand_macro): Declare.
+	(vif_macros,vif_macro_count): Declare.
+
+start-sanitize-sky
 Fri Apr  3 12:04:48 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h: Remove NoModrm flag from all insns: it's never checked.
