@@ -48,7 +48,7 @@ cmp_w_imm16:			; cmp.w immediate not available in h8300 mode.
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	;;  fixme set ccr
 
-	;;  cmp.w #xx:8,Rd
+	;;  cmp.w #xx:16,Rd
 	cmp.w	#0xa5a5, r0	; Immediate 16-bit operand
 	beq	eqi
 	fail
@@ -71,6 +71,22 @@ gti:
 	test_gr_a5a5 5
 	test_gr_a5a5 6
 	test_gr_a5a5 7
+
+cmp_w_imm16_less_than_zero:	; Test for less-than-zero immediate
+	set_grs_a5a5
+	;; cmp.w #xx:16, Rd, where #xx < 0 (ie. #xx > 0x7fff).
+	sub.w	r0, r0
+	cmp.w	#0x8001, r0
+	bls	ltz
+	fail
+ltz:	test_gr_a5a5	1
+	test_gr_a5a5	2
+	test_gr_a5a5	3
+	test_gr_a5a5	4
+	test_gr_a5a5	5
+	test_gr_a5a5	6
+	test_gr_a5a5	7
+
 .endif
 	
 cmp_w_reg:

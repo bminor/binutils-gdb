@@ -1,3 +1,10 @@
+2003-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* cmpw.s: Add test for less-than-zero immediate.
+	* shll.s: Test for shll reg, reg.
+	* shlr.s: Test for shlr reg, reg.
+	* mova.s: Add dozens of new mova tests.
+
 2003-05-30  Alexandre Oliva  <aoliva@redhat.com>
 
 	* allinsn.exp: Fix typos introduced on 2003-05-27.
