@@ -5,7 +5,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -68,8 +68,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <assert.h>
 
-#define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	xfree
+#define obstack_chunk_alloc	((void *(*) ()) xmalloc)
+#define obstack_chunk_free	((void (*) ()) xfree)
 
 #define BAD_CASE(value)							\
 {									\
@@ -140,7 +140,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * X_add_symbol != X_sub_symbol (then we just cancel them, => SEG_ABSOLUTE).
  */
 
-typedef enum {
+typedef enum _segT {
 	SEG_ABSOLUTE = 0,
 	SEG_TEXT,
 	SEG_DATA,
@@ -178,24 +178,23 @@ extern int section_alignment[];
 
 /* relax() */
 
-typedef enum
-{
-	rs_fill,		/* Variable chars to be repeated fr_offset */
-				/* times. Fr_symbol unused. */
-				/* Used with fr_offset == 0 for a constant */
-				/* length frag. */
+typedef enum _relax_state {
+	rs_fill, /* Variable chars to be repeated fr_offset times. Fr_symbol
+		    unused. Used with fr_offset == 0 for a constant length
+		    frag. */
+	
+	rs_align, /* Align: Fr_offset: power of 2. 1 variable char: fill
+		     character. */
 
-	rs_align,		/* Align: Fr_offset: power of 2. */
-				/* 1 variable char: fill character. */
-	rs_org,			/* Org: Fr_offset, fr_symbol: address. */
-				/* 1 variable char: fill character. */
-
+	rs_org,	/* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
+		   character. */
+	
 	rs_machine_dependent,
+
 #ifndef WORKING_DOT_WORD
 	rs_broken_word,		/* JF: gunpoint */
 #endif
-}
-relax_stateT;
+} relax_stateT;
 
 /* typedef unsigned char relax_substateT; */
 /* JF this is more likely to leave the end of a struct frag on an align
@@ -299,6 +298,7 @@ void as_warn();
 
 char *app_push(void);
 char *atof_ieee(char *str, int what_kind, LITTLENUM_TYPE *words);
+char *decode_local_label_name(char *s);
 char *input_scrub_include_file(char *filename, char *position);
 char *input_scrub_new_file(char *filename);
 char *input_scrub_next_buffer(char **bufp);
@@ -336,6 +336,7 @@ void subsegs_begin(void);
 
 char *app_push();
 char *atof_ieee();
+char *decode_local_label_name()
 char *input_scrub_include_file();
 char *input_scrub_new_file();
 char *input_scrub_next_buffer();
