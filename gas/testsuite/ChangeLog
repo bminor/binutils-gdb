@@ -1,3 +1,10 @@
+2002-10-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mips/mips.exp: Don't xfail relax.
+	* gas/mips/relax.s: Increase coverage.
+	* gas/mips/relax.d: Add expected output.  Use relax.l for as stderr.
+	* gas/mips/relax.l: New file.
+
 2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/tlsd.s, gas/sh/tlsd.d: New.

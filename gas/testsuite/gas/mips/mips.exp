@@ -168,8 +168,6 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "sb1-ext-mdmx"
     run_dump_test "sb1-ext-ps"
 
-    # It will always fail until someone fixes it.
-    setup_xfail "mips*-*-*"
     run_dump_test "relax"
 
     run_list_test "illegal" ""
