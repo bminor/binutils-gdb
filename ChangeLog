@@ -1,3 +1,15 @@
+Fri Oct 27 09:32:30 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Make sure that CC is undefined (as opposed to
+	null) if toplevel/config/mh-{host} doesn't define it.  Fixes a
+	problem with autoconf trying to configure on a host without GCC.
+
+start-sanitize-gm
+Fri Oct 27 09:32:25 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* config.sub:  Add `magic' as an OS target for General Magic.
+
+end-sanitize-gm
 Thu Oct 26 22:35:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Set host alias from choice of host compiler,
