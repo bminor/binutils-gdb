@@ -175,11 +175,13 @@ is_delayed_branch (insn)
   return 0;
 }
 
-/* Nonzero of opcode table has been initialized.  */
-static int opcodes_initialized = 0;
-
 /* extern void qsort (); */
 static int compare_opcodes ();
+
+/* Records current mask of SPARC_OPCODE_ARCH_FOO values, used to pass value
+   to compare_opcodes.  */
+static unsigned int current_arch_mask;
+static int compute_arch_mask ();
 
 /* Print one instruction from MEMADDR on INFO->STREAM.
 
@@ -199,13 +201,19 @@ print_insn_sparc (memaddr, info)
   unsigned long insn;
   register unsigned int i;
   register struct opcode_hash *op;
-  int sparc_v9_p = bfd_mach_sparc_v9_p (info->mach);
+  /* Nonzero of opcode table has been initialized.  */
+  static int opcodes_initialized = 0;
+  /* bfd mach number of last call.  */
+  static unsigned long current_mach = 0;
 
-  if (!opcodes_initialized)
+  if (!opcodes_initialized
+      || info->mach != current_mach)
     {
+      current_arch_mask = compute_arch_mask (info->mach);
       qsort ((char *) sparc_opcodes, sparc_num_opcodes,
 	     sizeof (sparc_opcodes[0]), compare_opcodes);
       build_hash_table (sparc_opcodes, opcode_hash_table, sparc_num_opcodes);
+      current_mach = info->mach;
       opcodes_initialized = 1;
     }
 
@@ -230,16 +238,8 @@ print_insn_sparc (memaddr, info)
     {
       CONST struct sparc_opcode *opcode = op->opcode;
 
-      /* ??? These architecture tests need to be more selective.  */
-
-      /* If the current architecture isn't sparc64, skip sparc64 insns.  */
-      if (!sparc_v9_p
-	  && V9_ONLY_P (opcode))
-	continue;
-
-      /* If the current architecture is sparc64, skip sparc32 only insns.  */
-      if (sparc_v9_p
-	  && ! V9_P (opcode))
+      /* If the insn isn't supported by the current architecture, skip it.  */
+      if (! (opcode->architecture & current_arch_mask))
 	continue;
 
       if ((opcode->match & insn) == opcode->match
@@ -265,6 +265,10 @@ print_insn_sparc (memaddr, info)
 
 	  if (X_RS1 (insn) != X_RD (insn)
 	      && strchr (opcode->args, 'r') != 0)
+	      /* Can't do simple format if source and dest are different.  */
+	      continue;
+	  if (X_RS2 (insn) != X_RD (insn)
+	      && strchr (opcode->args, 'O') != 0)
 	      /* Can't do simple format if source and dest are different.  */
 	      continue;
 
@@ -325,6 +329,7 @@ print_insn_sparc (memaddr, info)
 		    break;
 
 		  case '2':
+		  case 'O':
 		    reg (X_RS2 (insn));
 		    break;
 
@@ -691,6 +696,34 @@ print_insn_sparc (memaddr, info)
   return sizeof (buffer);
 }
 
+/* Given BFD mach number, return a mask of SPARC_OPCODE_ARCH_FOO values.  */
+
+static int
+compute_arch_mask (unsigned long mach)
+{
+  switch (mach)
+    {
+    case 0 :
+    case bfd_mach_sparc :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V8);
+    case bfd_mach_sparc_sparclet :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_SPARCLET);
+    case bfd_mach_sparc_sparclite :
+      /* sparclites insns are recognized by default (because that's how
+	 they've always been treated, for better or worse).  Kludge this by
+	 indicating generic v8 is also selected.  */
+      return (SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_SPARCLITE)
+	      | SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V8));
+    case bfd_mach_sparc_v8plus :
+    case bfd_mach_sparc_v9 :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9);
+    case bfd_mach_sparc_v8plusa :
+    case bfd_mach_sparc_v9a :
+      return SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9A);
+    }
+  abort ();
+}
+
 /* Compare opcodes A and B.  */
 
 static int
@@ -702,6 +735,24 @@ compare_opcodes (a, b)
   unsigned long int match0 = op0->match, match1 = op1->match;
   unsigned long int lose0 = op0->lose, lose1 = op1->lose;
   register unsigned int i;
+
+  /* If one (and only one) insn isn't supported by the current architecture,
+     prefer the one that is.  If neither are supported, but they're both for
+     the same architecture, continue processing.  Otherwise (both unsupported
+     and for different architectures), prefer lower numbered arch's (fudged
+     by comparing the bitmasks).  */
+  if (op0->architecture & current_arch_mask)
+    {
+      if (! (op1->architecture & current_arch_mask))
+	return -1;
+    }
+  else
+    {
+      if (op1->architecture & current_arch_mask)
+	return 1;
+      else if (op0->architecture != op1->architecture)
+	return op0->architecture - op1->architecture;
+    }
 
   /* If a bit is set in both match and lose, there is something
      wrong with the opcode table.  */
@@ -743,10 +794,6 @@ compare_opcodes (a, b)
 	return x1 - x0;
     }
 
-  /* Put non-sparc64 insns ahead of sparc64 ones.  */
-  if (V9_ONLY_P (op0) != V9_ONLY_P (op1))
-    return V9_ONLY_P (op0) - V9_ONLY_P (op1);
-
   /* They are functionally equal.  So as long as the opcode table is
      valid, we can put whichever one first we want, on aesthetic grounds.  */
 
@@ -762,12 +809,14 @@ compare_opcodes (a, b)
      better have the same opcode.  This is a sanity check on the table.  */
   i = strcmp (op0->name, op1->name);
   if (i)
+    {
       if (op0->flags & F_ALIAS) /* If they're both aliases, be arbitrary. */
-	  return i;
+	return i;
       else
-	  fprintf (stderr,
-		   "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
-		   op0->name, op1->name);
+	fprintf (stderr,
+		 "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
+		 op0->name, op1->name);
+    }
 
   /* Fewer arguments are preferred.  */
   {

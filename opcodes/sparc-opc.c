@@ -29,17 +29,20 @@ Boston, MA 02111-1307, USA.	*/
 #include "opcode/sparc.h"
 
 /* Some defines to make life easy.  */
-#define MASK_V6		(1 << SPARC_OPCODE_ARCH_V6)
-#define MASK_V7		(1 << SPARC_OPCODE_ARCH_V7)
-#define MASK_V8		(1 << SPARC_OPCODE_ARCH_V8)
-#define MASK_SPARCLET	(1 << SPARC_OPCODE_ARCH_SPARCLET)
-#define MASK_SPARCLITE	(1 << SPARC_OPCODE_ARCH_SPARCLITE)
-#define MASK_V9		(1 << SPARC_OPCODE_ARCH_V9)
-#define MASK_V9A	(1 << SPARC_OPCODE_ARCH_V9A)
+#define MASK_V6		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V6)
+#define MASK_V7		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V7)
+#define MASK_V8		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V8)
+#define MASK_SPARCLET	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_SPARCLET)
+#define MASK_SPARCLITE	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_SPARCLITE)
+#define MASK_V9		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9)
+#define MASK_V9A	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9A)
 
 /* Bit masks of architectures supporting the insn.  */
 
 #define v6		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET \
+			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A)
+/* v6 insns not supported on the sparclet */
+#define v6notlet	(MASK_V6 | MASK_V7 | MASK_V8 \
 			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A)
 #define v7		(MASK_V7 | MASK_V8 | MASK_SPARCLET \
 			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A)
@@ -59,7 +62,9 @@ Boston, MA 02111-1307, USA.	*/
 			 | MASK_SPARCLET | MASK_SPARCLITE)
 
 /* Table of opcode architectures.
-   The order is defined in opcode/sparc.h.  */
+   The order is defined in opcode/sparc.h.
+   The names must match the arguments to gas' -A<arch> option in tc-sparc.c.
+*/
 const struct sparc_opcode_arch sparc_opcode_archs[] = {
   { "v6", MASK_V6 },
   { "v7", MASK_V6 | MASK_V7 },
@@ -67,6 +72,7 @@ const struct sparc_opcode_arch sparc_opcode_archs[] = {
   { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET },
   { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE },
   /* ??? Don't some v8 priviledged insns conflict with v9?  */
+  /* ??? Will we want v8plus{,a} entries?  */
   { "v9", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 },
   /* v9 with ultrasparc additions */
   { "v9a", MASK_V6 | MASK_V7 | MASK_V8 | MASK_V9 | MASK_V9A },
@@ -979,12 +985,12 @@ cond ("bcc",	"tcc",  CONDCC, F_CONDBR),
 cond ("bcs",	"tcs",  CONDCS, F_CONDBR),
 cond ("be",	"te",   CONDE, F_CONDBR),
 cond ("bg",	"tg",   CONDG, F_CONDBR),
-cond ("bgt",	"tgt",   CONDG, F_CONDBR|F_ALIAS),
+cond ("bgt",	"tgt",  CONDG, F_CONDBR|F_ALIAS),
 cond ("bge",	"tge",  CONDGE, F_CONDBR),
 cond ("bgeu",	"tgeu", CONDGEU, F_CONDBR|F_ALIAS), /* for cc */
 cond ("bgu",	"tgu",  CONDGU, F_CONDBR),
 cond ("bl",	"tl",   CONDL, F_CONDBR),
-cond ("blt",	"tlt",   CONDL, F_CONDBR|F_ALIAS),
+cond ("blt",	"tlt",  CONDL, F_CONDBR|F_ALIAS),
 cond ("ble",	"tle",  CONDLE, F_CONDBR),
 cond ("bleu",	"tleu", CONDLEU, F_CONDBR),
 cond ("blu",	"tlu",  CONDLU, F_CONDBR|F_ALIAS), /* for cs */
@@ -1249,11 +1255,18 @@ cond ("bz",	"tz",   CONDZ, F_CONDBR|F_ALIAS), /* for e */
 #undef FM_QF /* v9 */
 #undef FM_SF /* v9 */
 
-#define brfc(opcode, mask, lose, flags) \
+/* Coprocessor branches.  */
+#define CBR(opcode, mask, lose, flags, arch) \
+ { opcode, (mask), ANNUL|(lose), "l",    flags|F_DELAYED, arch }, \
+ { opcode, (mask)|ANNUL, (lose), ",a l", flags|F_DELAYED, arch }
+
+/* Floating point branches.  */
+#define FBR(opcode, mask, lose, flags) \
  { opcode, (mask), ANNUL|(lose), "l",    flags|F_DELAYED, v6 }, \
  { opcode, (mask)|ANNUL, (lose), ",a l", flags|F_DELAYED, v6 }
 
-#define brfcx(opcode, mask, lose, flags) /* v9 */ \
+/* V9 extended floating point branches.  */
+#define FBRX(opcode, mask, lose, flags) /* v9 */ \
  { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), "6,G",      flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T 6,G",   flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a 6,G",   flags|F_DELAYED, v9 }, \
@@ -1279,43 +1292,51 @@ cond ("bz",	"tz",   CONDZ, F_CONDBR|F_ALIAS), /* for e */
  { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N 9,G",   flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N  9,G", flags|F_DELAYED, v9 }
 
-/* v9: We must put `brfcx' before `brfc', to ensure that we never match
+/* v9: We must put `FBRX' before `FBR', to ensure that we never match
    v9: something against an expression unless it is an expression.  Otherwise,
    v9: we end up with undefined symbol tables entries, because they get added,
    v9: but are not deleted if the pattern fails to match.  */
 
-#define condfc(fop, cop, mask, flags) \
-  brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
-  brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags), \
-  brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)), flags)
+#define CONDFC(fop, cop, mask, flags) \
+  FBRX(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
+  FBR(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags), \
+  CBR(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)), flags, v6notlet)
 
-#define condf(fop, mask, flags) \
-  brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
-  brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags)
+#define CONDFCL(fop, cop, mask, flags) \
+  FBRX(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
+  FBR(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags), \
+  CBR(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)), flags, v6)
 
-condfc("fb",	"cb",	 0x8, 0),
-condfc("fba",	"cba",	 0x8, F_ALIAS),
-condfc("fbe",	"cb0",	 0x9, 0),
-condf("fbz",		 0x9, F_ALIAS),
-condfc("fbg",	"cb2",	 0x6, 0),
-condfc("fbge",	"cb02",	 0xb, 0),
-condfc("fbl",	"cb1",	 0x4, 0),
-condfc("fble",	"cb01",	 0xd, 0),
-condfc("fblg",	"cb12",	 0x2, 0),
-condfc("fbn",	"cbn",	 0x0, 0),
-condfc("fbne",	"cb123", 0x1, 0),
-condf("fbnz",		 0x1, F_ALIAS),
-condfc("fbo",	"cb012", 0xf, 0),
-condfc("fbu",	"cb3",	 0x7, 0),
-condfc("fbue",	"cb03",	 0xa, 0),
-condfc("fbug",	"cb23",	 0x5, 0),
-condfc("fbuge",	"cb023", 0xc, 0),
-condfc("fbul",	"cb13",	 0x3, 0),
-condfc("fbule",	"cb013", 0xe, 0),
+#define CONDF(fop, mask, flags) \
+  FBRX(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
+  FBR(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags)
 
-#undef condfc
-#undef brfc
-#undef brfcx	/* v9 */
+CONDFC  ("fb",    "cb",    0x8, 0),
+CONDFCL ("fba",	  "cba",   0x8, F_ALIAS),
+CONDFC  ("fbe",	  "cb0",   0x9, 0),
+CONDF   ("fbz",            0x9, F_ALIAS),
+CONDFC  ("fbg",	  "cb2",   0x6, 0),
+CONDFC  ("fbge",  "cb02",  0xb, 0),
+CONDFC  ("fbl",	  "cb1",   0x4, 0),
+CONDFC  ("fble",  "cb01",  0xd, 0),
+CONDFC  ("fblg",  "cb12",  0x2, 0),
+CONDFCL ("fbn",	  "cbn",   0x0, 0),
+CONDFC  ("fbne",  "cb123", 0x1, 0),
+CONDF   ("fbnz",           0x1, F_ALIAS),
+CONDFC  ("fbo",	  "cb012", 0xf, 0),
+CONDFC  ("fbu",	  "cb3",   0x7, 0),
+CONDFC  ("fbue",  "cb03",  0xa, 0),
+CONDFC  ("fbug",  "cb23",  0x5, 0),
+CONDFC  ("fbuge", "cb023", 0xc, 0),
+CONDFC  ("fbul",  "cb13",  0x3, 0),
+CONDFC  ("fbule", "cb013", 0xe, 0),
+
+#undef CONDFC
+#undef CONDFCL
+#undef CONDF
+#undef CBR
+#undef FBR
+#undef FBRX	/* v9 */
 
 { "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI(~0),	"1+2", F_UNBR|F_DELAYED, v6 }, /* jmpl rs1+rs2,%g0 */
 { "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI_RS2(~0),	"1", F_UNBR|F_DELAYED, v6 }, /* jmpl rs1+%g0,%g0 */
@@ -1516,14 +1537,14 @@ COMMUTEOP ("smuld", 0x0d, sparclet),
 { "cpull",	F3(2, 0x36, 0)|ASI(2), F3(~2, ~0x36, ~0)|ASI(~2)|RS1(~0)|RS2(~0), "d", 0, sparclet },
 
 /* sparclet coprocessor branch insns */
-/* FIXME: We have to mark these as aliases until we can sort opcodes based
-   on selected cpu.  */
 #define SLCBCC2(opcode, mask, lose) \
- { opcode, (mask), ANNUL|(lose), "l",    F_DELAYED|F_CONDBR|F_ALIAS, sparclet }, \
- { opcode, (mask)|ANNUL, (lose), ",a l", F_DELAYED|F_CONDBR|F_ALIAS, sparclet }
+ { opcode, (mask), ANNUL|(lose), "l",    F_DELAYED|F_CONDBR, sparclet }, \
+ { opcode, (mask)|ANNUL, (lose), ",a l", F_DELAYED|F_CONDBR, sparclet }
 #define SLCBCC(opcode, mask) \
   SLCBCC2(opcode, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)))
 
+/* cbn,cba can't be defined here because they're defined elsewhere and GAS
+   requires all mnemonics of the same name to be consecutive.  */
 /*SLCBCC("cbn", 0), - already defined */
 SLCBCC("cbe", 1),
 SLCBCC("cbf", 2),

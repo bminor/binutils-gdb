@@ -1,3 +1,22 @@
+Wed Apr  3 10:40:45 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-dis.c (opcodes_initialized): Move inside print_insn_sparc.
+	(current_arch_mask): New static global.
+	(compute_arch_mask): New static function.
+	(print_insn_sparc): Delete sparc_v9_p.  New static local
+	current_mach.  Resort opcode table if current_mach changes.
+	Generalize "insn not supported" test.
+	(compare_opcodes): Prefer supported opcodes to nonsupported ones.
+	Delete test for v9/!v9.
+	* sparc-opc.c (MASK_*): Use SPARC_OPCODE_ARCH_MASK.
+	(v6notlet): Define.
+	(brfc): Split into CBR and FBR for coprocessor/fp branches.
+	(brfcx): Renamed to FBRX.
+	(condfc): Renamed to CONDFC.  Pass v6notlet to CBR (standard
+	coprocessor mnemonics are not supported on the sparclet).
+	(condf): Renamed to CONDF.
+	(SLCBCC2): Delete F_ALIAS flag.
+
 Sat Mar 30 21:45:59 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): rd must be 0 for
