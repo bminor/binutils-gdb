@@ -1,3 +1,31 @@
+Fri Feb 12 10:05:20 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (LIBIBERTY_SRC_DIR, LIBIBERTY_BIN_DIR): New macros.
+	* Makefile.in (LIBIBERTY):  Use LIBIBERTY_BIN_DIR.
+	* Makefile.in (DEMANGLER_PROG):  New program to build.  Add macro
+	and rule.
+	* Makefile.in (PROGS):  Add DEMANGLER_PROG.
+
+Tue Jan 26 11:56:33 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* copy.c, nm.c, objdump.c, size.c: Use new bfd_is_com_section
+	macro rather than checking for equality to bfd_com_section.
+
+Fri Jan  8 15:50:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (disassemble_data): Fix code to find first useless
+	symbol.
+
+Thu Jan  7 13:13:31 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (disassemble_data): Use mips_print_insn for MIPS.
+	Don't core dump if bfd_find_nearest_line returns false.
+
+Wed Jan  6 17:14:01 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* objdump.c (disassemble_data): know how to disassemble z8000s
+	too.
+
 Wed Jan  6 15:16:27 1993  Per Bothner  (bothner@cygnus.com)
 
 	* arsup.h (interactive), bucomm.h (program_name):  Prefix

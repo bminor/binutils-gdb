@@ -52,6 +52,7 @@ AR = ar
 AR_FLAGS = qv
 CFLAGS = -g
 MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
 RANLIB = ranlib
 BISONFLAGS = -d
 TEXI2ROFF=texi2roff
@@ -89,7 +90,10 @@ SIZE_PROG=size
 NM_PROG=nm
 OBJDUMP_PROG=objdump
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
+# This is the demangler, as a standalone program.
+DEMANGLER_PROG=demangle
+
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 DISTSTUFF=arparse.c arlex.c binutils.mm
@@ -126,7 +130,9 @@ DISASMS = m68k-pinsn.o i960-pinsn.o i386-pinsn.o sparc-pinsn.o  am29k-pinsn.o
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
 # libmalloc rather than the ordinary malloc.
-LIBIBERTY = ./../libiberty/libiberty.a
+LIBIBERTY_SRC_DIR = $(srcdir)/../libiberty
+LIBIBERTY_BIN_DIR = ./../libiberty
+LIBIBERTY = $(LIBIBERTY_BIN_DIR)/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
@@ -148,6 +154,8 @@ test-install:
 
 info: binutils.info
 
+dvi: binutils.dvi
+
 #$(BFD):$(LIBDIR)/../common/*.c
 #	(cd $(LIBDIR); make)
 
@@ -165,6 +173,9 @@ $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 
 $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD) $(OPCODES)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(OPCODES) $(LOADLIBES)
+
+$(DEMANGLER_PROG): $(LIBIBERTY_SRC_DIR)/cplus-dem.c
+	$(CC) $(LDFLAGS) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DMAIN -o $(DEMANGLER_PROG) $(LIBIBERTY_SRC_DIR)/cplus-dem.c $(LIBIBERTY) $(LOADLIBES)
 
 arparse.c:arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -234,9 +245,7 @@ de-stage3: force
 # DOCUMENTATION TARGETS
 # TeX output
 binutils.dvi: $(srcdir)/binutils.texi
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/binutils.texi
-	texindex binutils.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/binutils.texi
+	$(TEXI2DVI) $(srcdir)/binutils.texi
 
 # info file for online browsing
 binutils.info: $(srcdir)/binutils.texi
