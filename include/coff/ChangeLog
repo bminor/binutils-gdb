@@ -1,3 +1,7 @@
+Thu Mar 31 16:28:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (STYP_ECOFF_LIB): Define as used on Irix 4.
+
 Fri Mar 25 17:16:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.h (struct ecoff_debug_info): Add adjust field.
