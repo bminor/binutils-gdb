@@ -423,10 +423,6 @@ struct _sim_cpu {
   hilo_history lo_history;
 #define LOHISTORY (&(CPU)->lo_history)
 
-#define check_branch_bug() 
-#define mark_branch_bug(TARGET) 
-
-
 
   sim_cpu_base base;
 };

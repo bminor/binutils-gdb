@@ -1,3 +1,9 @@
+2002-12-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* sim-main.h (check_branch_bug, mark_branch_bug): Remove.
+	* mips.igen: Remove all invocations of check_branch_bug and
+	mark_branch_bug.
+
 2002-12-16  Chris Demetriou  <cgd@broadcom.com>
 
         * tconfig.in: Include "gdb/callback.h" and "gdb/remote-sim.h".
