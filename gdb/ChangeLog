@@ -1,5 +1,9 @@
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (legacy_saved_regs_this_id): Return a null frame ID.
+	(get_frame_id): Allow the UNKNOWN_FRAME.
+	(frame_register_unwind, get_frame_type): Ditto.
+
 	* frame.c (legacy_frame_p): Check for DEPRECATED_TARGET_READ_FP_P
 	and DEPRECATED_FP_REGNUM.  Don't assume that the lack of
 	unwind_dummy_id indicates a legacy frame.

@@ -234,7 +234,6 @@ get_frame_id (struct frame_info *fi)
 	     directly.  Unfortunately, legacy code, called by
 	     legacy_get_prev_frame, explicitly set the frames type
 	     using the method deprecated_set_frame_type().  */
-	  gdb_assert (fi->unwind->type != UNKNOWN_FRAME);
 	  fi->type = fi->unwind->type;
 	}
       /* Find THIS frame's ID.  */
@@ -538,7 +537,6 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
-      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
       frame->type = frame->unwind->type;
     }
 
@@ -1029,9 +1027,12 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   struct frame_id *id)
 {
-  /* legacy_get_prev_frame() always sets ->this_id.p, hence this is
-     never needed.  */
-  internal_error (__FILE__, __LINE__, "legacy_saved_regs_this_id() called");
+  /* A developer is trying to bring up a new architecture, help them
+     by providing a default unwinder that refuses to unwind anything
+     (the ID is always NULL).  In the case of legacy code,
+     legacy_get_prev_frame() will have previously set ->this_id.p, so
+     this code won't be called.  */
+  (*id) = null_frame_id;
 }
 	
 const struct frame_unwind legacy_saved_regs_unwinder = {
@@ -2133,7 +2134,6 @@ get_frame_type (struct frame_info *frame)
 	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
-      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
       frame->type = frame->unwind->type;
     }
   if (frame->type == UNKNOWN_FRAME)
