@@ -38,6 +38,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
+
+/* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
+#define	ONE_PROCESS_WRITETEXT
 
 /* Interface definitions for kernel debugger KDB */
 

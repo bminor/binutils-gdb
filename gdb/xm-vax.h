@@ -36,6 +36,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   if (regno == AP_REGNUM) addr = blockend - 0124;	\
   if (regno == SP_REGNUM) addr = blockend - 20; }
 
+/* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
+#define	ONE_PROCESS_WRITETEXT
+
 /* Interface definitions for kernel debugger KDB.  */
 
 /* Map machine fault codes into signal numbers.

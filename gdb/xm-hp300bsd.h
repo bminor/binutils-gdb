@@ -64,6 +64,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Compensate for lack of `vprintf' function.  */
 #define MISSING_VPRINTF
 
+/* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
+#define	ONE_PROCESS_WRITETEXT
 
 /* Interface definitions for kernel debugger KDB.  */
 
