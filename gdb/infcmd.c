@@ -526,7 +526,7 @@ run_stack_dummy (addr, buffer)
   if (stack_dummy_testing & 4)
     {
       POP_FRAME;
-      return;
+      return(0);
     }
   proceed_to_finish = 1;	/* We want stop_registers, please... */
   proceed (addr, 0, 0);
@@ -918,7 +918,6 @@ write_pc (val)
 #endif
 #endif
 #endif
-  pc_changed = 0;
 }
 
 /* Cope with strage ways of getting to the stack and frame pointers */

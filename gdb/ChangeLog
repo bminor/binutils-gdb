@@ -1,5 +1,9 @@
 Mon Sep 13 12:53:09 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
+	* inferior.h, infrun.c, thread.c, infcmd.c: Remove all uses of
+	pc_changed.  If it was ever set to a non-zero value, it was before
+	GDB 2.8.  It doesn't seem to have any useful function.
+
 	* defs.h: Don't define NORETURN (see comment).
 
 Sat Sep 11 10:46:09 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)

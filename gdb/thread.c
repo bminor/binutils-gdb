@@ -187,7 +187,6 @@ thread_switch (pid)
     return;
 
   inferior_pid = pid;
-  pc_changed = 0;
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc();

@@ -232,11 +232,6 @@ int stop_after_trap;
 
 int stop_soon_quietly;
 
-/* Nonzero if pc has been changed by the debugger
-   since the inferior stopped.  */
-
-int pc_changed;
-
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */
 
@@ -300,7 +295,7 @@ resume (step, sig)
   DO_DEFERRED_STORES;
 #endif
 
-  target_resume (step, sig);
+  target_resume (inferior_pid, step, sig);
   discard_cleanups (old_cleanups);
 }
 
@@ -356,7 +351,7 @@ proceed (addr, siggnal, step)
 	 step one instruction before inserting breakpoints
 	 so that we do not stop right away.  */
 
-      if (!pc_changed && breakpoint_here_p (read_pc ()))
+      if (breakpoint_here_p (read_pc ()))
 	oneproc = 1;
     }
   else
@@ -470,16 +465,16 @@ wait_for_inferior ()
   WAITTYPE w;
   int another_trap;
   int random_signal;
-  CORE_ADDR stop_sp;
+  CORE_ADDR stop_sp = 0;
   CORE_ADDR stop_func_start;
   char *stop_func_name;
-  CORE_ADDR prologue_pc, tmp;
+  CORE_ADDR prologue_pc = 0, tmp;
   struct symtab_and_line sal;
   int remove_breakpoints_on_following_step = 0;
   int current_line;
   int handling_longjmp = 0;	/* FIXME */
-  struct symtab *symtab;
   struct breakpoint *step_resume_breakpoint = NULL;
+  int pid;
 
   old_cleanups = make_cleanup (delete_breakpoint_current_contents,
 			       &step_resume_breakpoint);
@@ -489,11 +484,10 @@ wait_for_inferior ()
   while (1)
     {
       /* Clean up saved state that will become invalid.  */
-      pc_changed = 0;
       flush_cached_frames ();
       registers_changed ();
 
-      target_wait (&w);
+      pid = target_wait (&w);
 
 #ifdef SIGTRAP_STOP_AFTER_LOAD
 
@@ -550,6 +544,76 @@ wait_for_inferior ()
 	  break;
 	}
       
+      if (pid != inferior_pid)
+	{
+	  int printed = 0;
+
+	  if (!in_thread_list (pid))
+	    {
+	      fprintf (stderr, "[New %s]\n", target_pid_to_str (pid));
+	      add_thread (pid);
+
+	      target_resume (pid, 0, 0);
+	      continue;
+	    }
+	  else
+	    {
+	      stop_signal = WSTOPSIG (w);
+
+	      if (stop_signal >= NSIG || signal_print[stop_signal])
+		{
+		  char *signame;
+
+		  printed = 1;
+		  target_terminal_ours_for_output ();
+		  printf_filtered ("\nProgram received signal ");
+		  signame = strsigno (stop_signal);
+		  if (signame == NULL)
+		    printf_filtered ("%d", stop_signal);
+		  else
+		    printf_filtered ("%s (%d)", signame, stop_signal);
+		  printf_filtered (", %s\n", safe_strsignal (stop_signal));
+
+		  fflush (stdout);
+		}
+
+	      if (stop_signal >= NSIG || signal_stop[stop_signal])
+		{
+		  inferior_pid = pid;
+		  printf_filtered ("[Switching to %s]\n", target_pid_to_str (pid));
+
+		  flush_cached_frames ();
+		  registers_changed ();
+		  trap_expected = 0;
+		  if (step_resume_breakpoint)
+		    {
+		      delete_breakpoint (step_resume_breakpoint);
+		      step_resume_breakpoint = NULL;
+		    }
+		  prev_pc = 0;
+		  prev_sp = 0;
+		  prev_func_name = NULL;
+		  step_range_start = 0;
+		  step_range_end = 0;
+		  step_frame_address = 0;
+		  handling_longjmp = 0;
+		  another_trap = 0;
+		}
+	      else
+		{
+		  if (printed)
+		    target_terminal_inferior ();
+
+		  /* Clear the signal if it should not be passed.  */
+		  if (signal_program[stop_signal] == 0)
+		    stop_signal = 0;
+
+		  target_resume (pid, 0, stop_signal);
+		  continue;
+		}
+	    }
+	}
+
 #ifdef NO_SINGLE_STEP
       if (one_stepped)
 	single_step (0);	/* This actually cleans up the ss */
@@ -565,8 +629,7 @@ wait_for_inferior ()
 	}
 
       stop_pc = read_pc ();
-      set_current_frame ( create_new_frame (read_fp (),
-					    read_pc ()));
+      set_current_frame ( create_new_frame (read_fp (), stop_pc));
 
       stop_frame_address = FRAME_FP (get_current_frame ());
       stop_sp = read_sp ();
@@ -574,7 +637,8 @@ wait_for_inferior ()
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
-      find_pc_partial_function (stop_pc, &stop_func_name, &stop_func_start);
+      find_pc_partial_function (stop_pc, &stop_func_name, &stop_func_start,
+				(CORE_ADDR *)NULL);
       stop_func_start += FUNCTION_START_OFFSET;
       another_trap = 0;
       bpstat_clear (&stop_bpstat);
@@ -1573,7 +1637,6 @@ save_inferior_status (inf_status, restore_stack_info)
      struct inferior_status *inf_status;
      int restore_stack_info;
 {
-  inf_status->pc_changed = pc_changed;
   inf_status->stop_signal = stop_signal;
   inf_status->stop_pc = stop_pc;
   inf_status->stop_frame_address = stop_frame_address;
@@ -1597,20 +1660,53 @@ save_inferior_status (inf_status, restore_stack_info)
   inf_status->proceed_to_finish = proceed_to_finish;
   
   memcpy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
-  
+
+  read_register_bytes (0, inf_status->registers, REGISTER_BYTES);
+
   record_selected_frame (&(inf_status->selected_frame_address),
 			 &(inf_status->selected_level));
   return;
+}
+
+struct restore_selected_frame_args {
+  FRAME_ADDR frame_address;
+  int level;
+};
+
+static int restore_selected_frame PARAMS ((char *));
+
+/* Restore the selected frame.  args is really a struct
+   restore_selected_frame_args * (declared as char * for catch_errors)
+   telling us what frame to restore.  Returns 1 for success, or 0 for
+   failure.  An error message will have been printed on error.  */
+static int
+restore_selected_frame (args)
+     char *args;
+{
+  struct restore_selected_frame_args *fr =
+    (struct restore_selected_frame_args *) args;
+  FRAME fid;
+  int level = fr->level;
+
+  fid = find_relative_frame (get_current_frame (), &level);
+
+  /* If inf_status->selected_frame_address is NULL, there was no
+     previously selected frame.  */
+  if (fid == 0 ||
+      FRAME_FP (fid) != fr->frame_address ||
+      level != 0)
+    {
+      warning ("Unable to restore previously selected frame.\n");
+      return 0;
+    }
+  select_frame (fid, fr->level);
+  return(1);
 }
 
 void
 restore_inferior_status (inf_status)
      struct inferior_status *inf_status;
 {
-  FRAME fid;
-  int level = inf_status->selected_level;
-
-  pc_changed = inf_status->pc_changed;
   stop_signal = inf_status->stop_signal;
   stop_pc = inf_status->stop_pc;
   stop_frame_address = inf_status->stop_frame_address;
@@ -1633,32 +1729,33 @@ restore_inferior_status (inf_status)
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
+  if (target_has_execution)
+    write_register_bytes (0, inf_status->registers, REGISTER_BYTES);
+
+  /* The inferior can be gone if the user types "print exit(0)"
+     (and perhaps other times).  */
+
+  /* FIXME: If we are being called after stopping in a function which
+     is called from gdb, we should not be trying to restore the
+     selected frame; it just prints a spurious error message (The
+     message is useful, however, in detecting bugs in gdb (like if gdb
+     clobbers the stack)).  In fact, should we be restoring the
+     inferior status at all in that case?  .  */
+
   if (target_has_stack && inf_status->restore_stack_info)
     {
-      fid = find_relative_frame (get_current_frame (),
-				 &level);
-
-      /* If inf_status->selected_frame_address is NULL, there was no
-	 previously selected frame.  */
-      if (fid == 0 ||
-	  FRAME_FP (fid) != inf_status->selected_frame_address ||
-	  level != 0)
-	{
-#if 1
-	  /* I'm not sure this error message is a good idea.  I have
-	     only seen it occur after "Can't continue previously
-	     requested operation" (we get called from do_cleanups), in
-	     which case it just adds insult to injury (one confusing
-	     error message after another.  Besides which, does the
-	     user really care if we can't restore the previously
-	     selected frame?  */
-	  fprintf (stderr, "Unable to restore previously selected frame.\n");
-#endif
-	  select_frame (get_current_frame (), 0);
-	  return;
-	}
-      
-      select_frame (fid, inf_status->selected_level);
+      struct restore_selected_frame_args fr;
+      fr.level = inf_status->selected_level;
+      fr.frame_address = inf_status->selected_frame_address;
+      /* The point of catch_errors is that if the stack is clobbered,
+	 walking the stack might encounter a garbage pointer and error()
+	 trying to dereference it.  */
+      if (catch_errors (restore_selected_frame, &fr,
+			"Unable to restore previously selected frame:\n",
+			RETURN_MASK_ERROR) == 0)
+	/* Error in restoring the selected frame.  Select the innermost
+	   frame.  */
+	select_frame (get_current_frame (), 0);
     }
 }
 
