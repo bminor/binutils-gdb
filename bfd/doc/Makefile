@@ -1,19 +1,19 @@
 .SUFFIXES: .texi .o .c .h .p .ip
 VPATH=..
 .c.texi:
-	scanit $< $@
+	./scanit $< $@
 
 .h.texi:
-	scanit $< $@
+	./scanit $< $@
 
 .c.p:
-	scanph $< $@
+	./scanph $< $@
 
 .h.p:
-	scanph $< $@
+	./scanph $< $@
 
 .c.ip:
-	scanph -i $< $@
+	./scanph -i $< $@
 
 # main GDB source directory
 srcdir = ..
