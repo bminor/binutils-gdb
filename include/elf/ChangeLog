@@ -1,3 +1,10 @@
+start-sanitize-m32r
+Fri Feb 21 13:00:34 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* m32r.h (enum reloc_type): Add R_M32R_SDA16.
+	(SHN_M32R_SCOMMON): Define.
+
+end-sanitize-m32r
 Wed Feb 19 15:35:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Eric Youngdale <eric@andante.jic.com>:
