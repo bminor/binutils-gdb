@@ -64,6 +64,3 @@ extern void *memset();
 
    But we have termios, at least as of Ultrix 4.2A, so use it.  */
 #define HAVE_TERMIOS
-
-/* Mips hosts need aligned va_list arguments.  */
-#include "mips/xm-makeva.h"

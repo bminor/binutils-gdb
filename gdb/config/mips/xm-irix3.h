@@ -35,6 +35,3 @@ extern void *memset();
       addr = regno;					\
   else							\
       addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
-
-/* Mips hosts need aligned va_list arguments.  */
-#include "mips/xm-makeva.h"

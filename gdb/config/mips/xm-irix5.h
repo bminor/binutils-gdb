@@ -29,6 +29,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
       addr = regno;					\
   else							\
       addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
-
-/* Mips hosts need aligned va_list arguments.  */
-#include "mips/xm-makeva.h"

@@ -28,6 +28,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* setjmp.h requires uid_t.  */
 #include <sys/types.h>
-
-/* Mips hosts need aligned va_list arguments.  */
-#include "mips/xm-makeva.h"
