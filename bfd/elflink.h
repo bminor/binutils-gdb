@@ -679,7 +679,7 @@ elf_link_add_object_symbols (abfd, info)
 
   weaks = NULL;
 
-  ever = extversym != NULL ? extversym + hdr->sh_info : NULL;
+  ever = extversym != NULL ? extversym + extsymoff : NULL;
   esymend = buf + extsymcount;
   for (esym = buf;
        esym < esymend;
@@ -805,7 +805,16 @@ elf_link_add_object_symbols (abfd, info)
 		  int namelen, newlen;
 		  char *newname, *p;
 
-		  if (vernum > 1)
+		  if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
+		    {
+		      (*_bfd_error_handler)
+			("%s: %s: invalid version %d (max %d)",
+			 abfd->filename, name, vernum,
+			 elf_tdata (abfd)->dynverdef_hdr.sh_info);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_return;
+		    }
+		  else if (vernum > 1)
 		    verstr = elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
 		  else
 		    verstr = "";
@@ -1128,15 +1137,64 @@ elf_link_add_object_symbols (abfd, info)
 		      if (hi->root.type == bfd_link_hash_indirect)
 			{
 			  hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
-			  if (dynamic)
-			    hi->elf_link_hash_flags |=
-			      ELF_LINK_HASH_DEF_DYNAMIC;
-			  /* We don't set DEF_REGULAR because we don't
-			     the symbol to get exported even if we are
-			     exporting all defined symbols.  FIXME:
-			     What a hack. */
-			  /* FIXME: Do we need to copy any flags from
-			     H to HI?  */
+
+			  /* If the symbol became indirect, then we
+                             assume that we have not seen a definition
+                             before.  */
+			  BFD_ASSERT ((hi->elf_link_hash_flags
+				       & (ELF_LINK_HASH_DEF_DYNAMIC
+					  | ELF_LINK_HASH_DEF_REGULAR))
+				      == 0);
+
+			  /* Copy down any references that we may have
+                             already seen to the symbol which just
+                             became indirect.  */
+			  h->elf_link_hash_flags |=
+			    (hi->elf_link_hash_flags
+			     & (ELF_LINK_HASH_REF_DYNAMIC
+				| ELF_LINK_HASH_REF_REGULAR));
+
+			  /* Copy over the global table offset entry.
+                             This may have been already set up by a
+                             check_relocs routine.  */
+			  if (h->got_offset == (bfd_vma) -1)
+			    {
+			      h->got_offset = hi->got_offset;
+			      hi->got_offset = (bfd_vma) -1;
+			    }
+			  BFD_ASSERT (hi->got_offset == (bfd_vma) -1);
+
+			  if (h->dynindx == -1)
+			    {
+			      h->dynindx = hi->dynindx;
+			      h->dynstr_index = hi->dynstr_index;
+			      hi->dynindx = -1;
+			      hi->dynstr_index = 0;
+			    }
+			  BFD_ASSERT (hi->dynindx == -1);
+
+			  /* FIXME: There may be other information to
+                             copy over for particular targets.  */
+
+			  /* See if the new flags lead us to realize
+                             that the symbol must be dynamic.  */
+			  if (! dynsym)
+			    {
+			      if (! dynamic)
+				{
+				  if (info->shared
+				      || ((hi->elf_link_hash_flags
+					   & ELF_LINK_HASH_REF_DYNAMIC)
+					  != 0))
+				    dynsym = true;
+				}
+			      else
+				{
+				  if ((hi->elf_link_hash_flags
+				       & ELF_LINK_HASH_REF_REGULAR) != 0)
+				    dynsym = true;
+				}
+			    }
 			}
 		    }
 
@@ -1211,15 +1269,64 @@ elf_link_add_object_symbols (abfd, info)
 		      if (hi->root.type == bfd_link_hash_indirect)
 			{
 			  hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
-			  if (dynamic)
-			    hi->elf_link_hash_flags |=
-			      ELF_LINK_HASH_DEF_DYNAMIC;
-			  /* We don't set DEF_REGULAR because we don't
-			     the symbol to get exported even if we are
-			     exporting all defined symbols.  FIXME:
-			     What a hack. */
-			  /* FIXME: Do we need to copy any flags from
-			     H to HI?  */
+
+			  /* If the symbol became indirect, then we
+                             assume that we have not seen a definition
+                             before.  */
+			  BFD_ASSERT ((hi->elf_link_hash_flags
+				       & (ELF_LINK_HASH_DEF_DYNAMIC
+					  | ELF_LINK_HASH_DEF_REGULAR))
+				      == 0);
+
+			  /* Copy down any references that we may have
+                             already seen to the symbol which just
+                             became indirect.  */
+			  h->elf_link_hash_flags |=
+			    (hi->elf_link_hash_flags
+			     & (ELF_LINK_HASH_REF_DYNAMIC
+				| ELF_LINK_HASH_REF_REGULAR));
+
+			  /* Copy over the global table offset entry.
+                             This may have been already set up by a
+                             check_relocs routine.  */
+			  if (h->got_offset == (bfd_vma) -1)
+			    {
+			      h->got_offset = hi->got_offset;
+			      hi->got_offset = (bfd_vma) -1;
+			    }
+			  BFD_ASSERT (hi->got_offset == (bfd_vma) -1);
+
+			  if (h->dynindx == -1)
+			    {
+			      h->dynindx = hi->dynindx;
+			      h->dynstr_index = hi->dynstr_index;
+			      hi->dynindx = -1;
+			      hi->dynstr_index = 0;
+			    }
+			  BFD_ASSERT (hi->dynindx == -1);
+
+			  /* FIXME: There may be other information to
+                             copy over for particular targets.  */
+
+			  /* See if the new flags lead us to realize
+                             that the symbol must be dynamic.  */
+			  if (! dynsym)
+			    {
+			      if (! dynamic)
+				{
+				  if (info->shared
+				      || ((hi->elf_link_hash_flags
+					   & ELF_LINK_HASH_REF_DYNAMIC)
+					  != 0))
+				    dynsym = true;
+				}
+			      else
+				{
+				  if ((hi->elf_link_hash_flags
+				       & ELF_LINK_HASH_REF_REGULAR) != 0)
+				    dynsym = true;
+				}
+			    }
 			}
 		    }
 		}
@@ -1818,6 +1925,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   bfd_size_type soname_indx;
   bfd *dynobj;
   struct elf_backend_data *bed;
+  bfd_size_type old_dynsymcount;
 
   *sinterpptr = NULL;
 
@@ -1959,6 +2067,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
+  old_dynsymcount = elf_hash_table (info)->dynsymcount;
   if (! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
     return false;
 
@@ -2018,11 +2127,15 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  if (sinfo.removed_dynamic)
 	    {
 	      /* Some dynamic symbols were changed to be local
-                 symbols.  In this case, we renumber all of the
-                 dynamic symbols, so that we don't have a hole.
-                 FIXME: The names of the removed symbols will still be
-                 in the dynamic string table, wasting space.  */
-	      elf_hash_table (info)->dynsymcount = 1;
+		 symbols.  In this case, we renumber all of the
+		 dynamic symbols, so that we don't have a hole.  If
+		 the backend changed dynsymcount, then assume that the
+		 new symbols are at the start.  This is the case on
+		 the MIPS.  FIXME: The names of the removed symbols
+		 will still be in the dynamic string table, wasting
+		 space.  */
+	      elf_hash_table (info)->dynsymcount =
+		1 + (elf_hash_table (info)->dynsymcount - old_dynsymcount);
 	      elf_link_hash_traverse (elf_hash_table (info),
 				      elf_link_renumber_dynsyms,
 				      (PTR) info);
@@ -2307,16 +2420,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	}
       else
 	{
-	  Elf_Internal_Versym intversym;
-
 	  s->_raw_size = dynsymcount * sizeof (Elf_External_Versym);
-	  s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
+	  s->contents = (bfd_byte *) bfd_zalloc (output_bfd, s->_raw_size);
 	  if (s->contents == NULL)
 	    return false;
-
-	  intversym.vs_vers = 0;
-	  _bfd_elf_swap_versym_out (output_bfd, &intversym,
-				    (Elf_External_Versym *) s->contents);
 
 	  if (! elf_add_dynamic_entry (info, DT_VERSYM, 0))
 	    return false;
@@ -2389,7 +2496,7 @@ elf_adjust_dynamic_symbol (h, data)
   bfd *dynobj;
   struct elf_backend_data *bed;
 
-  /* Ignore indirect symbols.  There are added by the versioning code.  */
+  /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->root.type == bfd_link_hash_indirect)
     return true;
 
@@ -2545,6 +2652,10 @@ elf_export_symbol (h, data)
      PTR data;
 {
   struct elf_info_failed *eif = (struct elf_info_failed *) data;
+
+  /* Ignore indirect symbols.  These are added by the versioning code.  */
+  if (h->root.type == bfd_link_hash_indirect)
+    return true;
 
   if (h->dynindx == -1
       && (h->elf_link_hash_flags
@@ -3853,7 +3964,8 @@ elf_link_output_extsym (h, data)
 	  }
 	else
 	  {
-	    BFD_ASSERT ((input_sec->owner->flags & DYNAMIC) != 0);
+	    BFD_ASSERT (input_sec->owner == NULL
+			|| (input_sec->owner->flags & DYNAMIC) != 0);
 	    sym.st_shndx = SHN_UNDEF;
 	    input_sec = bfd_und_section_ptr;
 	  }

@@ -1,3 +1,45 @@
+Wed Mar 12 21:36:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Use extsymoff when
+	setting ever.  Sanity check the version number.  Sort out copying
+	flags and other information when adding an indirect symbol.
+	(NAME(bfd_elf,size_dynamic_sections)): Preserve any dynamic
+	symbols added by the backend.  Clear the entire contents of the
+	versym section.
+	(elf_export_symbol): Ignore indirect symbols.
+	(elf_link_output_extsym): Accept a section without an owner in an
+	assert.
+	* elfcode.h (elf_slurp_symbol_table): Add a sanity check on the
+	version count.  Correct the allocation of x_versymp.
+
+	* elf32-mips.c (mips_elf_add_symbol_hook): Don't set the owner of
+	the magic sections used for SHN_MIPS_TEXT and SHN_MIPS_DATA.
+	Don't return bfd_und_section_ptr when info->shared.
+	(mips_elf_final_link): Set the alignment of .rtproc to 4, not 12.
+	(mips_elf_create_dynamic_sections): Correct type: ^= for &=.
+	(mips_elf_check_relocs): Resolve an indirect symbol in
+	sym_hashes.
+	(mips_elf_finish_dynamic_symbol): Don't change SHN_ABS into
+	SHN_MIPS_TEXT or SHN_MIPS_DATA.
+
+	* elf.c (bfd_elf_print_symbol): Tweak version output slightly.
+
+Tue Mar 11 01:38:36 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* elf-bfd.h (ELF_LINK_FORCED_LOCAL): Define.
+	* elf.c (bfd_elf_print_symbol): Correct errors in last change.
+	* elflink.h (elf_link_add_object_symbols): Handle cases in which a
+	versioned symbol appears in both a regular and a shared object.
+	(elf_link_assign_sym_version): Set ELF_LINK_FORCED_LOCAL when
+	appropriate.  Improve error message.
+	(struct elf_outext_info): Rename from elf_finfo_failed.  Change
+	all uses.  Add localsyms field.
+	(elf_bfd_final_link): When generating a shared library, call
+	elf_link_output_extsym to output all local symbols.
+	(elf_link_output_extsym): Handle symbols which were forced to
+	become local.
+
 Sun Mar  9 23:08:49 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Eric Youngdale <eric@andante.jic.com>:
