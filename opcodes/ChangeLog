@@ -1,3 +1,20 @@
+Wed Jan 10 15:13:21 MET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* i386-dis.c (PREGRP15 - PREGRP24): New.
+	(dis386_twobyt): Add SSE2 instructions.
+	(twobyte_uses_SSE_prefix: Rename from ... ; add new SSE instructions.
+	(twobyte_uses_f3_prefix): ... this one.
+	(grps): Add SSE instructions.
+	(prefix_user_table): Add two new slots; add SSE2 instructions.
+	(print_insn_i386): Rename uses_f3_prefix to uses_SSE_prefix;
+	Handle the REPNZ and Data16 prefixes as well; do proper lookup
+	to prefix_user_table.
+	(OP_E): Accept mfence and lfence as well.
+	(OP_MMX): Data16 prefix turns MMX to SSE; support REX extensions.
+	(OP_XMM): Support REX extensions.
+	(OP_EM): Likewise.
+	(OP_EX): Likewise.
+
 2001-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn): Set pc to zero for instructions with
