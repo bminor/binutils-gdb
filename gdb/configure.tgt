@@ -25,6 +25,7 @@ pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
+v850*)			gdb_target_cpu=v850 ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
 esac
@@ -299,31 +300,14 @@ vax-*-*)		gdb_target=vax ;;
 fr30-*-*)		gdb_target=fr30
 			;;
 
-v850-*-*)		gdb_target=v850
+v850*-*-*)		gdb_target=v850
 			case ${gdb_host}-${enable_gdbtk-no} in
 			cygwin*-yes )
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
 			* ) ;;
 			esac
 			;;
-# start-sanitize-v850e
-v850e-*-*)		gdb_target=v850
-			gdb_target_cpu=v850
-			case "${gdb_host}-${enable_gdbtk-no}" in
-			cygwin*-yes )
-				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
-			* ) ;;
-			esac
-			;;
-v850ea-*-*)		gdb_target=v850
-			gdb_target_cpu=v850
-			case "${gdb_host}-${enable_gdbtk-no}" in
-			cygwin*-yes )
-				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
-			* ) ;;
-			esac
-			;;
-# end-sanitize-v850e
+
 w65-*-*)		gdb_target=w65 ;;
 
 z8k-*-coff*)		gdb_target=z8k ;;
