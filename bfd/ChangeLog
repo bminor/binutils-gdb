@@ -1,3 +1,9 @@
+2002-12-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* elf64-mips.c (elf64_mips_grok_prstatus, elf64_mips_grok_psinfo):
+	New functions.
+	(elf_backend_grok_prstatus, elf_backend_grok_psinfo): Define.
+
 2002-12-04  David Mosberger  <davidm@hpl.hp.com>
 
 	* cpu-ia64-opc.c: Add operand constant "ar.csd".

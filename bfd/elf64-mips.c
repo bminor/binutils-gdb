@@ -125,6 +125,10 @@ static bfd_boolean mips_elf64_object_p
   PARAMS ((bfd *));
 static irix_compat_t elf64_mips_irix_compat
   PARAMS ((bfd *));
+static bfd_boolean elf64_mips_grok_prstatus
+  PARAMS ((bfd *, Elf_Internal_Note *));
+static bfd_boolean elf64_mips_grok_psinfo
+  PARAMS ((bfd *, Elf_Internal_Note *));
 
 extern const bfd_target bfd_elf64_bigmips_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
@@ -2529,6 +2533,71 @@ elf64_mips_irix_compat (abfd)
     return ict_none;
 }
 
+/* Support for core dump NOTE sections.  */
+static bfd_boolean
+elf64_mips_grok_prstatus (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  int offset;
+  unsigned int raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return FALSE;
+
+      case 480:		/* Linux/MIPS - N64 kernel */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 32);
+
+	/* pr_reg */
+	offset = 112;
+	raw_size = 360;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
+static bfd_boolean
+elf64_mips_grok_psinfo (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  switch (note->descsz)
+    {
+      default:
+	return FALSE;
+
+      case 136:		/* Linux/MIPS - N64 kernel elf_prpsinfo */
+	elf_tdata (abfd)->core_program
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
+	elf_tdata (abfd)->core_command
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 56, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core_command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return TRUE;
+}
+
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  */
 static const struct ecoff_debug_swap mips_elf64_ecoff_debug_swap =
@@ -2658,6 +2727,9 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_mips_rtype_to_howto	mips_elf64_rtype_to_howto
 #define elf_backend_ecoff_debug_swap	&mips_elf64_ecoff_debug_swap
 #define elf_backend_size_info		mips_elf64_size_info
+
+#define elf_backend_grok_prstatus	elf64_mips_grok_prstatus
+#define elf_backend_grok_psinfo		elf64_mips_grok_psinfo
 
 #define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)
 #define elf_backend_plt_header_size	0
