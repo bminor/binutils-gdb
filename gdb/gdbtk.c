@@ -97,10 +97,6 @@ static void get_register PARAMS ((int, void *));
 
 static Tcl_Interp *interp = NULL;
 
-/* Handle for TK main window */
-
-static Tk_Window mainWindow = NULL;
-
 static int x_fd;		/* X network socket */
 
 /* This variable is true when the inferior is running.  Although it's
@@ -1145,10 +1141,6 @@ static void
 cleanup_init (ignored)
      int ignored;
 {
-  if (mainWindow != NULL)
-    Tk_DestroyWindow (mainWindow);
-  mainWindow = NULL;
-
   if (interp != NULL)
     Tcl_DeleteInterp (interp);
   interp = NULL;
@@ -1257,11 +1249,6 @@ gdbtk_init ()
   if (!interp)
     error ("Tcl_CreateInterp failed");
 
-  mainWindow = Tk_CreateMainWindow (interp, NULL, "gdb", "Gdb");
-
-  if (!mainWindow)
-    return;			/* DISPLAY probably not set */
-
   if (Tcl_Init(interp) != TCL_OK)
     error ("Tcl_Init failed: %s", interp->result);
 
@@ -1305,7 +1292,7 @@ gdbtk_init ()
 
   /* Get the file descriptor for the X server */
 
-  x_fd = ConnectionNumber (Tk_Display (mainWindow));
+  x_fd = ConnectionNumber (Tk_Display (Tk_MainWindow (interp)));
 
   /* Setup for I/O interrupts */
 

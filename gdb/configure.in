@@ -228,78 +228,26 @@ case "$host" in
 
 if test "${enable_gdbtk}" = "yes"; then
 
-    AC_PATH_X
-    AC_PATH_XTRA
+    CY_AC_PATH_TCLCONFIG
+    CY_AC_LOAD_TCLCONFIG
+    CY_AC_PATH_TKCONFIG
 
-    CY_AC_PATH_TCL
-    CY_AC_PATH_TK
+    # If $no_tk is nonempty, then we can't do Tk, and there is no
+    # point to doing Tcl.
+    if test -z "${no_tk}"; then
+       CY_AC_LOAD_TKCONFIG
+       CY_AC_PATH_TCLH
+       CY_AC_PATH_TKH
 
-    # Look for dynamic linking libraries that Tcl might need.  This is
-    # only done for Tcl 7.5 and greater.  It would be good to look for and
-    # use the "configInfo" file that Tcl generates, but for now that is
-    # beyond us.
-    if test $tclmajor -ge 7 -a $tclminor -ge 5 ; then
-       AC_CHECK_LIB(dl, main, , AC_CHECK_LIB(dld, main))
+       # Include some libraries that Tcl and Tk want.
+       LIBS="$LIBS $TK_LIBS"
+
+       ENABLE_GDBTK=1
+
+       TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
+       ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS}"
+       ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
     fi
-
-    ENABLE_GDBTK=1
-
-    if test "x$no_x" != "xyes"; then
-        if test "x$x_includes" != "x" ;
-        then
-            X_CFLAGS="-I$x_includes"
-        else
-            X_CFLAGS=""
-        fi
-    
-        if test "x$x_libraries" != "x" ;
-        then
-            X_LDFLAGS="-L$x_libraries"
-        else
-            X_LDFLAGS=""
-        fi
-    
-        case "$host" in
-#
-# gdb linked statically w/ Solaris iff GCC is used, otherwise dynamic
-#
-            sparc*-sun-solaris2*)
-                if test "x$GCC" = "xyes";
-                then
-                    X_LIBS="-Wl,-Bstatic -lX11 -lXext -lX11 -Wl,-Bdynamic -ldl -lw"
-                else
-                    if test "x$x_libraries" != "x" ;
-                    then
-                        X_LDFLAGS="$X_LDFLAGS -R$x_libraries"
-                    fi
-                    X_LIBS="-lX11 -lXext -lX11"
-                fi ;;
-#
-# gdb linked statically w/ SunOS or HPUX
-#
-            m68k-hp-hpux*|hppa*-hp-hpux*|sparc-sun-sunos*)
-                if test "x$x_libraries" != "x" ;
-                then
-                    X_LIBS="$x_libraries/libX11.a"
-                else
-                    X_LIBS="/usr/lib/libX11.a"
-                fi ;;
-#
-# default is to link dynamically
-#
-            *)
-                X_LIBS="-lX11" ;;
-        esac
-    else
-        X_LDLAGS=""
-        X_CFLAGS=""
-        X_LIBS=""
-        AC_MSG_WARN([No X based programs will be built])
-    fi
-    
-    TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
-    ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS} -lm"
-    ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
 fi
 
 AC_SUBST(ENABLE_GDBTK)

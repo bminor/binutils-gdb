@@ -129,16 +129,16 @@ SIM =
 
 #start-sanitize-gdbtk
 # Where is the TCL library?  Typically in ../tcl.
-TCL = @TCLLIB@
+TCL = @TCL_BUILD_LIB_SPEC@
 TCL_CFLAGS = @TCLHDIR@
 
 # Where is the TK library?  Typically in ../tk.
-TK = @TKLIB@
+TK = @TK_BUILD_LIB_SPEC@
 TK_CFLAGS = @TKHDIR@
 
-X11_CFLAGS = @X_CFLAGS@ $(X11_EXTRA_CFLAGS)
-X11_LDFLAGS = @X_LDFLAGS@
-X11_LIBS = @X_LIBS@ $(X11_EXTRA_LIBS)
+X11_CFLAGS = @TK_XINCLUDES@
+X11_LDFLAGS =
+X11_LIBS =
 
 ENABLE_GDBTK= @ENABLE_GDBTK@
 #end-sanitize-gdbtk

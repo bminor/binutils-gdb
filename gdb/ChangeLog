@@ -1,3 +1,19 @@
+start-sanitize-gdbtk
+Thu Aug  1 20:35:01 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.c (mainWindow): Deleted.
+	(cleanup_init): Don't destroy main window.
+	(gdbtk_init): Main window now created by Tk_Init.
+
+	* configure.in: Most X checks now handled automatically by Tk.
+	Use new macros to find Tcl/Tk.
+	* aclocal.m4: New version for new Tcl/Tk; from Don Libes.
+	* config.in, configure: Regenerated.
+
+	* Makefile.in (TCL, TCL_CFLAGS, TK, TK_CFLAGS, X11_CFLAGS,
+	X11_LDFLAGS, X11_LIBS): Changed for new Tcl and Tk.
+
+end-sanitize-gdbtk
 Thu Aug  1 10:11:34 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/mips/tm-mips.h (TM_MIPS_H): Enclose file contents in
