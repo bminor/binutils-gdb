@@ -1,3 +1,11 @@
+Fri Oct  6 10:54:13 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/arm/arm.exp: Renamed from gas.exp.
+
+Fri Sep 29 15:12:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/mri.exp: Only run tests for m68k target.
+
 Mon Sep 25 12:31:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/mri.exp: Add setup_xfail for arm*-*-* for constants
