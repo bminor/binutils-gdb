@@ -878,17 +878,10 @@ mips_fetch_instruction (CORE_ADDR addr)
 #define rtype_shamt(x) ((x >> 6) & 0x1f)
 #define rtype_funct(x) (x & 0x3f)
 
-static CORE_ADDR
-mips32_relative_offset (unsigned long inst)
+static LONGEST
+mips32_relative_offset (ULONGEST inst)
 {
-  long x;
-  x = itype_immediate (inst);
-  if (x & 0x8000)		/* sign bit set */
-    {
-      x |= 0xffff0000;		/* sign extension */
-    }
-  x = x << 2;
-  return x;
+  return ((itype_immediate (inst) ^ 0x8000) - 0x8000) << 2;
 }
 
 /* Determine whate to set a single step breakpoint while considering

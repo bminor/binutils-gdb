@@ -1,3 +1,8 @@
+2004-11-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (mips32_relative_offset): Change return type to
+	LONGEST, change argument type to ULONGEST.  Fix sign-extension.
+
 2004-11-10  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa32_register_name, hppa64_register_name): Make static.
