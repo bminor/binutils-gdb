@@ -1,3 +1,8 @@
+Sat Feb 12 22:11:32 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* libiberty.h (xexit): Use __volatile__ to avoid losing if
+	compiling with gcc -traditional.
+
 Thu Feb 10 14:05:41 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* libiberty.h: New file.  Declares functions provided by
