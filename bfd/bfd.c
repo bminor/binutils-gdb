@@ -157,7 +157,7 @@ CODE_FRAGMENT
 .      struct sun_core_struct *sun_core_data;
 .      struct trad_core_struct *trad_core_data;
 .      struct hppa_data_struct *hppa_data;
-.      struct hppa_core_struct *hppa_core_data;
+.      struct hpux_core_struct *hpux_core_data;
 .      struct sgi_core_struct *sgi_core_data;
 .      PTR any;
 .      } tdata;

@@ -12,6 +12,8 @@
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+#define HOST_HP300HPUX
+
 #define USE_UTIME
 
 void free();

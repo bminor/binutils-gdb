@@ -102,7 +102,7 @@ BFD64_BACKENDS = \
 	nlm64.o nlm64-gen.o \
 	aout64.o demo64.o
 
-OPTIONAL_BACKENDS = trad-core.o
+OPTIONAL_BACKENDS = trad-core.o sco-core.o aix386-core.o hpux-core.o
 
 # These are defined by configure.in:
 # WORDSIZE=32
@@ -452,6 +452,11 @@ reloc.o : reloc.c $(BFD_H) \
 
 trad-core.o : trad-core.c $(BFD_H) $(INCDIR)/obstack.h \
   libbfd.h libaout.h 
+sco-core.o : sco-core.c $(BFD_H) libbfd.h libcoff.h \
+  $(INCDIR)/obstack.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h
+aix386-core.o : aix386-core.c $(BFD_H) libbfd.h libcoff.h \
+  $(INCDIR)/obstack.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h
+hpux-core.o : hpux-core.c $(BFD_H) libbfd.h libhppa.h
 
 coff-msym.o: coff-msym.c $(BFD_H)  $(INCDIR)/coff/ecoff-ext.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h

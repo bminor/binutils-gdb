@@ -328,16 +328,18 @@ in this structure.
 #if MINIMIZE && defined(DEFAULT_VECTOR) && !defined(SELECT_VECS)
 #ifdef TRAD_CORE
 #define SELECT_VECS &DEFAULT_VECTOR,&trad_core_vec
-#else
+#endif
 #ifdef SCO_CORE
 #define SELECT_VECS &DEFAULT_VECTOR,&sco_core_vec
-#else
+#endif
 #ifdef AIX386_CORE
 #define SELECT_VECS &DEFAULT_VECTOR,&aix386_core_vec
-#else
+#endif
+#ifdef HPUX_CORE
+#define SELECT_VECS &DEFAULT_VECTOR,&hpux_core_vec
+#endif
+#ifndef SELECT_VECS
 #define SELECT_VECS &DEFAULT_VECTOR
-#endif
-#endif
 #endif
 #endif
 
@@ -385,6 +387,7 @@ extern bfd_target a29kcoff_big_vec;
 extern bfd_target trad_core_vec;
 extern bfd_target sco_core_vec;
 extern bfd_target aix386_core_vec;
+extern bfd_target hpux_core_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target h8300coff_vec;
 extern bfd_target h8500coff_vec;
@@ -479,6 +482,9 @@ bfd_target *target_vector[] = {
 #endif
 #ifdef AIX386_CORE
 	&aix386_core_vec,
+#endif
+#ifdef HPUX_CORE
+	&hpux_core_vec,
 #endif
 
 #endif /* not SELECT_VECS */

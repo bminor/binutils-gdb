@@ -1,5 +1,25 @@
 Thu Jul 22 13:34:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* hpux-core.c: New file; backend for HP/UX style core files.
+	* bfd.c (struct _bfd): Renamed hppa_core_data field to
+	hpux_core_data.
+	* bfd-in2.h: Updated.
+	* hppa.c (make_bfd_asection, hppa_core_file_p,
+	hppa_core_file_failing_command, hppa_core_file_failing_signal,
+	hppa_core_file_matches_executable_p): Moved into hpux-core.c.
+	Removed from target vector.
+	* libhppa.h (struct hppa_core_struct and accessor macros): Moved
+	into hpux-core.c.
+	* targets.c: If HPUX_CORE is defined, add hpux_core_vec to
+	target list.
+	* config/hp300.mh (HDEFINES): Set to -DHPUX_CORE.
+	(HDEPFILES): Set to hpux-core.o.
+	* config/hppabsd.mh, config/hppahpux.mh: Likewise.
+	* hosts/hp300.h (HOST_HP300HPUX): Define.
+	* Makefile.in (OPTIONAL_BACKENDS): Added sco-core.o,
+	aix386-core.o, hpux-core.o.
+	(sco-core.o, aix386-core.o, hpux-core.o): New dependencies.
+
 	* reloc.c (enum complain_overflow): New enumeration with the
 	various flavours of overflow checking.
 	(srtuct reloc_howto_struct): Changed complain_on_overflow field

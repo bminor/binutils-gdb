@@ -511,134 +511,6 @@ hppa_sizeof_headers (abfd, reloc)
   return (0);
 }
 
-static asection *
-make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
-     bfd *abfd;
-     CONST char *name;
-     flagword flags;
-     bfd_size_type _raw_size;
-     bfd_vma vma;
-     unsigned int alignment_power;
-{
-  asection *asect;
-
-  asect = bfd_make_section (abfd, name);
-  if (!asect)
-    return NULL;
-
-  asect->flags = flags;
-  asect->_raw_size = _raw_size;
-  asect->vma = vma;
-  asect->filepos = bfd_tell (abfd);
-  asect->alignment_power = alignment_power;
-
-  return asect;
-}
-
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
-/* This requires system include files.  */
-
-static bfd_target *
-hppa_core_file_p (abfd)
-     bfd *abfd;
-{
-  core_hdr (abfd) = bfd_zalloc (abfd, sizeof (struct hppa_core_struct));
-  if (!core_hdr (abfd))
-    return NULL;
-
-  while (1)
-    {
-      int val;
-      struct corehead core_header;
-
-      val = bfd_read ((void *) &core_header, 1, sizeof core_header, abfd);
-      if (val <= 0)
-	break;
-      switch (core_header.type)
-	{
-	case CORE_KERNEL:
-	case CORE_FORMAT:
-	  bfd_seek (abfd, core_header.len, SEEK_CUR);	/* Just skip this */
-	  break;
-	case CORE_EXEC:
-	  {
-	    struct proc_exec proc_exec;
-	    bfd_read ((void *) &proc_exec, 1, core_header.len, abfd);
-	    strncpy (core_command (abfd), proc_exec.cmd, MAXCOMLEN + 1);
-	  }
-	  break;
-	case CORE_PROC:
-	  {
-	    struct proc_info proc_info;
-	    core_regsec (abfd) = make_bfd_asection (abfd, ".reg",
-					       SEC_ALLOC + SEC_HAS_CONTENTS,
-						    core_header.len,
-				(int) &proc_info - (int) &proc_info.hw_regs,
-						    2);
-	    bfd_read (&proc_info, 1, core_header.len, abfd);
-	    core_signal (abfd) = proc_info.sig;
-	  }
-	  if (!core_regsec (abfd))
-	    return NULL;
-	  break;
-	case CORE_DATA:
-	  core_datasec (abfd) = make_bfd_asection (abfd, ".data",
-				    SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
-						   core_header.len,
-						   core_header.addr,
-						   2);
-	  if (!core_datasec (abfd))
-	    return NULL;
-	  bfd_seek (abfd, core_header.len, SEEK_CUR);
-	  break;
-	case CORE_STACK:
-	  core_stacksec (abfd) = make_bfd_asection (abfd, ".stack",
-				    SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
-						    core_header.len,
-						    core_header.addr,
-						    2);
-	  if (!core_stacksec (abfd))
-	    return NULL;
-	  bfd_seek (abfd, core_header.len, SEEK_CUR);
-	  break;
-	default:
-	  fprintf (stderr, "Unknown HPPA/HPUX core file section type %d\n",
-		   core_header.type);
-	  bfd_seek (abfd, core_header.len, SEEK_CUR);
-	  break;
-	}
-    }
-
-  /* OK, we believe you.  You're a core file (sure, sure).  */
-
-  return abfd->xvec;
-}
-
-static char *
-hppa_core_file_failing_command (abfd)
-     bfd *abfd;
-{
-  return core_command (abfd);
-}
-
-/* ARGSUSED */
-static int
-hppa_core_file_failing_signal (abfd)
-     bfd *abfd;
-{
-  return core_signal (abfd);
-}
-
-/* ARGSUSED */
-static boolean
-hppa_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
-{
-  return true;			/* FIXME, We have no way of telling at this point */
-}
-
-#endif /* HPUX or BSD.  */
-
 /* Miscellaneous Support Functions -- Control Structures and Functions
    for the PA.  */
 
@@ -1036,6 +908,11 @@ hppa_get_symbol_info (ignore_abfd, symbol, ret)
 #define hppa_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
+/* Core file support is in the hpux-core backend.  */
+#define hppa_core_file_failing_command	_bfd_dummy_core_file_failing_command
+#define hppa_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
+#define hppa_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
+
 bfd_target hppa_vec =
 {
   "hppa",			/* name */
@@ -1063,7 +940,7 @@ bfd_target hppa_vec =
   {_bfd_dummy_target,
    hppa_object_p,		/* bfd_check_format */
    bfd_generic_archive_p,
-   hppa_core_file_p,
+   bfd_false
   },
   {
     bfd_false,
