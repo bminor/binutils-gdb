@@ -518,6 +518,20 @@ dwarf2_frame_init (struct gdbarch *gdbarch)
   return ops;
 }
 
+static struct dwarf2_frame_ops *
+dwarf2_frame_ops (struct gdbarch *gdbarch)
+{
+  struct dwarf2_frame_ops *ops = gdbarch_data (gdbarch, dwarf2_frame_data);
+  if (ops == NULL)
+    {
+      /* ULGH, called during architecture initialization.  Patch
+         things up.  */
+      ops = dwarf2_frame_init (gdbarch);
+      set_gdbarch_data (gdbarch, dwarf2_frame_data, ops);
+    }
+  return ops;
+}
+
 /* Set the architecture-specific register state initialization
    function for GDBARCH to INIT_REG.  */
 
@@ -528,7 +542,7 @@ dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 {
   struct dwarf2_frame_ops *ops;
 
-  ops = gdbarch_data (gdbarch, dwarf2_frame_data);
+  ops = dwarf2_frame_ops (gdbarch);
   ops->init_reg = init_reg;
 }
 
@@ -540,7 +554,7 @@ dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 {
   struct dwarf2_frame_ops *ops;
 
-  ops = gdbarch_data (gdbarch, dwarf2_frame_data);
+  ops = dwarf2_frame_ops (gdbarch);
   ops->init_reg (gdbarch, regnum, reg);
 }
 

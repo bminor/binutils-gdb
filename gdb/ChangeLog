@@ -1,5 +1,9 @@
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
+	* dwarf2-frame.c (dwarf2_frame_ops): New function.
+	(dwarf2_frame_set_init_reg): Use, instead of gdbarch_data.
+	(dwarf2_frame_init_reg): Ditto.
+
 	* printcmd.c (display_command): Check that EXP isn't NULL.  Fix
 	suggested by Joshua Neuheisel
 
