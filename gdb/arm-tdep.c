@@ -845,7 +845,8 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 	}
       else if (insn == 0xe52de004)	/* str lr, [sp, #-4]! */
 	{
-	  /* Function is frameless: extra_info defaults OK?  */
+	  sp_offset -= 4;
+	  cache->saved_regs[ARM_LR_REGNUM].addr = sp_offset;
 	  continue;
 	}
       else if ((insn & 0xffff0000) == 0xe92d0000)
@@ -967,7 +968,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < NUM_REGS; reg++)
-    if (cache->saved_regs[reg].addr != 0)
+    if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
   return cache;

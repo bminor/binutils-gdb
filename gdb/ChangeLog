@@ -1,3 +1,10 @@
+2003-09-29  Jerome Guitton  <guitton@act-europe.fr>
+
+	* arm-tdep.c (arm_make_prologue_cache): Use trad_frame_addr_p to
+	test if the register has been saved on the stack.
+	(arm_scan_prologue_cache): When analysing the instruction
+	"str lr, [sp, #-4]", save the address where lr has been stored.
+
 2003-09-28  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (frame_read_unsigned_register): Delete function.
