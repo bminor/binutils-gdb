@@ -1,3 +1,11 @@
+Fri Oct 16 14:11:25 1998  Catherine Moore  <clm@cygnus.com>
+
+        * m32r.h:  Add vtable relocs.
+
+Tue Oct  6 09:22:22 1998  Catherine Moore  <clm@cygnus.com>
+
+        * sparc.h:  Add vtable relocs.
+
 Mon Oct  5 09:39:22 1998  Catherine Moore  <clm@cygnus.com>
 
         * v850.h:  Add vtable relocs.
