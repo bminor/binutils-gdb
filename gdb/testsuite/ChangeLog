@@ -1,3 +1,8 @@
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/thread-specific.exp: Stop early if no threads are
+	found.
+
 2004-02-09  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/pending.exp: Remove extra \n from gdb_test calls.

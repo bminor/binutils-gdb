@@ -86,6 +86,11 @@ gdb_continue_to_breakpoint "all threads started"
 set line [gdb_get_line_number "thread-specific.exp: thread loop"]
 set threads [get_thread_list]
 
+if {[llength $threads] == 0} {
+  # We have already issued a FAIL above.
+  return 1
+}
+
 gdb_test_multiple "break $line thread [lindex $threads 0]" \
   "breakpoint $line main thread" {
     -re "Breakpoint (\[0-9\]*) at.* file .*$srcfile, line.*$gdb_prompt $" {
