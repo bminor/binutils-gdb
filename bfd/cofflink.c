@@ -27,6 +27,7 @@
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "safe-ctype.h"
 
 static bfd_boolean coff_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info);
 static bfd_boolean coff_link_check_archive_element (bfd *abfd, struct bfd_link_info *info, bfd_boolean *pneeded);
@@ -582,7 +583,7 @@ coff_link_add_symbols (bfd *abfd,
 	  for (stab = abfd->sections; stab; stab = stab->next)
 	    if (strncmp (".stab", stab->name, 5) == 0
 		&& (!stab->name[5]
-		    || (stab->name[5] == '.' && isdigit (stab->name[6]))))
+		    || (stab->name[5] == '.' && ISDIGIT (stab->name[6]))))
 	    {
 	      struct coff_link_hash_table *table;
 	      struct coff_section_tdata *secdata

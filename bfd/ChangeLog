@@ -1,3 +1,8 @@
+2003-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* cofflink.c: Include "safe-ctype.h".
+	(coff_link_add_symbols): Use ISDIGIT instead of isdigit.
+
 2003-10-08  Dave Brolley  <brolley@redhat.com>
 	On behalf of Michael Snyder  <msnyder@redhat.com>
 
