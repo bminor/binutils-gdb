@@ -1,3 +1,7 @@
+2000-06-07  Philippe De Muyter  <phdm@macqel.be>
+
+	* source.c: Remove direct inclusion of sys/stat.h.
+
 2000-05-31  Nick Clifton  <nickc@cygnus.com>
 
 	* gprof.h (_): Revert previous delta.  We want to use gettext,
