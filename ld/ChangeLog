@@ -1,3 +1,16 @@
+2001-07-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldcref.c (check_section_sym_xref): New function.
+	(check_nocrossrefs): Call it.
+	(check_nocrossref): Interate over h->refs here instead of..
+	(check_refs): ..here.  Pass in the symbol name, section, and bfd
+	rather than hash_entry pointers.
+	(struct check_refs_info): Keep symbol name rather than hash entry.
+	Remove "same".
+	(check_reloc_refs): Tweak for above changes in check_refs_info.
+	Only report references to section syms when symname is NULL to
+	prevent duplicate messages for the same reloc.
+
 2001-07-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ldexp.c (exp_print_tree): Use stderr if config.map_file is not
