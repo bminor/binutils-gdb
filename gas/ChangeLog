@@ -1,5 +1,8 @@
 Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (pa_comm): Delete incorrect check for symbol
+	redefinition.
+
 	* config/obj-som.[ch]: New files for SOM support.  Note SOM
 	support is not yet complete in GAS or BFD.
 

@@ -1345,9 +1345,12 @@ md_begin ()
 
   /* Folding of text and data segments fails miserably on the PA.
      Warn user and disable "-R" option.  */
-  as_warn ("-R option not supported on this target.");
-  flag_readonly_data_in_text = 0;
-  flagseen['R'] = 0;
+  if (flagseen['R'])
+    {
+      as_warn ("-R option not supported on this target.");
+      flag_readonly_data_in_text = 0;
+      flagseen['R'] = 0;
+    }
 
   pa_spaces_begin ();
 
@@ -4477,12 +4480,10 @@ pa_comm (unused)
 
   if (symbol)
     {
-      if (S_IS_DEFINED (symbol) && S_GET_SEGMENT (symbol) == bss_section)
-	{
-	  as_bad ("Ignoring attempt to re-define symbol");
-	  ignore_rest_of_line ();
-	  return;
-	}
+      /* It is incorrect to check S_IS_DEFINED at this point as 
+	 the symbol will *always* be defined.  FIXME.  How to 
+	 correctly determine when this label really as been 
+	 defined before.  */
       if (S_GET_VALUE (symbol))
 	{
 	  if (S_GET_VALUE (symbol) != size)
