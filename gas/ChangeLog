@@ -1,3 +1,13 @@
+Tue Dec 20 13:40:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/obj-coff.h: Include bfd/libcoff.h, not libcoff.h.
+
+start-sanitize-arc
+Tue Dec 20 09:10:40 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.c: Delete lots of sparc pseudo-ops.
+end-sanitize-arc
+
 Mon Dec 19 16:53:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (load_register): Rewrite to handle O_big 64 bit
