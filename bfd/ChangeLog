@@ -1,5 +1,9 @@
 Mon Feb  5 10:38:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libcoff-in.h: Add comment reminding people that libcoff.h is a
+	generated file.
+	* libcoff.h: Rebuild.
+
 	* elflink.h (elf_adjust_dynamic_symbol): Don't try to get the
 	flavour of a section with no owner.
 
