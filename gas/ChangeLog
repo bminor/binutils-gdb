@@ -1,7 +1,7 @@
-2002-03-21  Nick Clifton  <nickc@cambridge.redhat.com>
+2002-03-20  Albert Chin-A-Young  <china@thewrittenword.com>
 
-	* config/tc-arm.c (vfp_dp_reg_required_here): Fix typo in type of
-	'pos' argument.
+	* config/tc-arm.c (vfp_dp_reg_required_here): Fix typo
+	(vfp_sp_reg_pos -> vfp_dp_reg_pos).
 
 2002-03-19  Alexandre Oliva  <aoliva@redhat.com>
 
