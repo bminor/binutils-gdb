@@ -1,5 +1,12 @@
 2003-11-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.host: Add sparc64-*-solaris2* and sparcv9-*-solaris2*.
+	* configure.tgt: Add sparc64-*-solaris2* and sparcv9-*-solaris2*.
+	* config/sparc/sol64.mh: New file.
+	* config/sparc/sol64.mt: New file.
+	* Makefile.in (sparc64-sol2-nat.o): Fix typo.
+
+
 	* lin-lwp.c (lin_lwp_thread_alive): Use PTRACE_PEEKDATA instead of
 	PTRACE_PEEKUSER.  Return zero if the call failed with ESRCH.
 

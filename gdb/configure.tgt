@@ -202,10 +202,13 @@ sh*-*-netbsdelf*)	gdb_target=nbsd ;;
 sh-*-nto*)		gdb_target=nto ;;
 sh*)			gdb_target=embed ;;
 
-sparc-*-solaris2*)	gdb_target=sol2 ;;
 sparc-*-linux*)		gdb_target=linux ;;
+sparc-*-solaris2*)	gdb_target=sol2 ;;
 sparc-*-*)		gdb_target=sparc ;;
 sparc64-*-linux*)	gdb_target=linux64 ;;
+sparc64-*-solaris2* | sparcv9-*-solaris2*)
+			gdb_target=sol64
+			;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 
