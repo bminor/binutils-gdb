@@ -206,6 +206,11 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 
 @end ifhtml
 
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@iftex
+@contents
+@end iftex
+
 @node Summary
 @unnumbered Summary of @value{GDBN}
 
@@ -12863,5 +12868,12 @@ needed for special purposes only.
 % Blame: doc@cygnus.com, 1991.
 @end tex
 
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@ifinfo
 @contents
+@end ifinfo
+@ifhtml
+@contents
+@end ifhtml
+
 @bye

@@ -63,6 +63,11 @@ are preserved on all copies.
 
 @end titlepage
 
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@iftex
+@contents
+@end iftex
+
 @node Top
 @c Perhaps this should be the title of the document (but only for info,
 @c not for TeX).  Existing GNU manuals seem inconsistent on this point.
@@ -3172,6 +3177,12 @@ exec.c
 
 @end table
 
-
+@c TeX can handle the contents at the start but makeinfo 3.12 can not
+@ifinfo
 @contents
+@end ifinfo
+@ifhtml
+@contents
+@end ifhtml
+
 @bye
