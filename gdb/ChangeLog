@@ -1,3 +1,10 @@
+Wed Dec  3 12:00:42 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* tracepoint.c (finish_tfind_command): call do_display so that
+	auto-displays are updated by tfind.  Also, keep track of frame
+	and current-function so that tfind behaves like stepping (only
+	show the stack frame if we step into a new function or return).
+
 Wed Dec  3 14:14:58 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* sol-thread.c: additional support for debugging threaded core

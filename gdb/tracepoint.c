@@ -1611,11 +1611,20 @@ trace_status_command (args, from_tty)
 
 /* Worker function for the various flavors of the tfind command */
 static void
-finish_tfind_command (reply, from_tty)
-     char *reply;
+finish_tfind_command (msg, from_tty)
+     char *msg;
      int from_tty;
 {
   int target_frameno = -1, target_tracept = -1;
+  CORE_ADDR old_frame_addr;
+  struct symbol *old_func;
+  char *reply;
+
+  old_frame_addr = FRAME_FP (get_current_frame ());
+  old_func       = find_pc_function (read_pc ());
+
+  putpkt (msg);
+  reply = remote_get_noisy_reply (msg);
 
   while (reply && *reply)
     switch (*reply) {
@@ -1651,6 +1660,8 @@ finish_tfind_command (reply, from_tty)
 		printf_filtered ("End of trace buffer.\n");
 	      /* The following will not recurse, since it's special-cased */
 	      trace_find_command ("-1", from_tty);
+	      reply = NULL;	/* break out of loop, 
+				   (avoid recursive nonsense) */
 	    }
 	}
       break;
@@ -1673,10 +1684,24 @@ finish_tfind_command (reply, from_tty)
   select_frame (get_current_frame (), 0);
   set_traceframe_num (target_frameno);
   set_tracepoint_num (target_tracept);
-  set_traceframe_context ((get_current_frame ())->pc);
+  if (target_frameno == -1)
+    set_traceframe_context (-1);
+  else
+    set_traceframe_context (read_pc ());
 
   if (from_tty)
-    print_stack_frame (selected_frame, selected_frame_level, 1);
+    {
+      int source_only;
+
+      if (old_frame_addr == FRAME_FP (get_current_frame ()) &&
+	  old_func       == find_pc_function (read_pc ()))
+	source_only = -1;
+      else
+	source_only =  1;
+
+      print_stack_frame (selected_frame, selected_frame_level, source_only);
+      do_displays ();
+    }
 }
 
 /* trace_find_command takes a trace frame number n, 
@@ -1722,37 +1747,26 @@ trace_find_command (args, from_tty)
 
 	  frameno = traceframe_number - 1;
 	}
-#if 0
-      else if (0 == strcasecmp (args, "start"))
-	frameno = 0;
-      else if (0 == strcasecmp (args, "none") ||
-	       0 == strcasecmp (args, "end"))
-	frameno = -1;
-#endif
       else
 	frameno = parse_and_eval_address (args);
 
       sprintf (target_buf, "QTFrame:%x", frameno);
+#if 0
       putpkt  (target_buf);
       tmp = remote_get_noisy_reply (target_buf);
 
       if (frameno == -1)	/* end trace debugging */
 	{			/* hopefully the stub has complied! */
-	  if (0 != strcmp (tmp, "F-1"))
+	  if (0 != strcmp (tmp, "OK"))
 	    error ("Bogus response from target: %s", tmp);
 
-	  flush_cached_frames ();
-	  registers_changed ();
-	  select_frame (get_current_frame (), 0);
-	  set_traceframe_num (-1);
-	  set_tracepoint_num (-1);
-	  set_traceframe_context (-1);
-
-	  if (from_tty)
-	    print_stack_frame (selected_frame, selected_frame_level, 1);
+	finish_tfind_command (NULL, from_tty);
 	}
       else
 	finish_tfind_command (tmp, from_tty);
+#else
+      finish_tfind_command (target_buf, from_tty);
+#endif
     }
   else
     error ("Trace can only be run on remote targets.");
@@ -1803,10 +1817,14 @@ trace_find_pc_command (args, from_tty)
 	pc = parse_and_eval_address (args);
 
       sprintf (target_buf, "QTFrame:pc:%x", pc);
+#if 0
       putpkt (target_buf);
       tmp = remote_get_noisy_reply (target_buf);
 
       finish_tfind_command (tmp, from_tty);
+#else
+      finish_tfind_command (target_buf, from_tty);
+#endif
     }
   else
     error ("Trace can only be run on remote targets.");
@@ -1832,10 +1850,14 @@ trace_find_tracepoint_command (args, from_tty)
 	tdp = parse_and_eval_address (args);
 
       sprintf (target_buf, "QTFrame:tdp:%x", tdp);
+#if 0
       putpkt (target_buf);
       tmp = remote_get_noisy_reply (target_buf);
 
       finish_tfind_command (tmp, from_tty);
+#else
+      finish_tfind_command (target_buf, from_tty);
+#endif
     }
   else
     error ("Trace can only be run on remote targets.");
@@ -1930,10 +1952,14 @@ trace_find_line_command (args, from_tty)
 	sprintf (target_buf, "QTFrame:range:%x:%x", start_pc, end_pc - 1);
       else			/* find OUTSIDE OF range of CURRENT line */
 	sprintf (target_buf, "QTFrame:outside:%x:%x", start_pc, end_pc - 1);
+#if 0
       putpkt (target_buf);
       tmp = remote_get_noisy_reply (target_buf);
 
       finish_tfind_command (tmp, from_tty);
+#else
+      finish_tfind_command (target_buf, from_tty);
+#endif
       do_cleanups (old_chain);
     }
   else
@@ -1973,10 +1999,14 @@ trace_find_range_command (args, from_tty)
 	}
 
       sprintf (target_buf, "QTFrame:range:%x:%x", start, stop);
+#if 0
       putpkt (target_buf);
       tmp = remote_get_noisy_reply (target_buf);
 
       finish_tfind_command (tmp, from_tty);
+#else
+      finish_tfind_command (target_buf, from_tty);
+#endif
     }
   else
       error ("Trace can only be run on remote targets.");
@@ -2015,10 +2045,14 @@ trace_find_outside_command (args, from_tty)
 	}
 
       sprintf (target_buf, "QTFrame:outside:%x:%x", start, stop);
+#if 0
       putpkt (target_buf);
       tmp = remote_get_noisy_reply (target_buf);
 
       finish_tfind_command (tmp, from_tty);
+#else
+      finish_tfind_command (target_buf, from_tty);
+#endif
     }
   else
       error ("Trace can only be run on remote targets.");
