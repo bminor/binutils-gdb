@@ -394,8 +394,12 @@ static const struct m68k_cpu archs[] = {
   /* Aliases (effectively, so far as gas is concerned) for the above
      cpus.  */
   { m68020, "68k", 1 },
-  { m68000, "68302", 1 },
   { m68000, "68008", 1 },
+  { m68000, "68302", 1 },
+  { m68000, "68306", 1 },
+  { m68000, "68307", 1 },
+  { m68000, "68322", 1 },
+  { m68000, "68356", 1 },
   { m68000, "68ec000", 1 },
   { m68000, "68hc000", 1 },
   { m68000, "68hc001", 1 },
@@ -407,7 +411,11 @@ static const struct m68k_cpu archs[] = {
   { cpu32,  "68331", 1 },
   { cpu32,  "68332", 1 },
   { cpu32,  "68333", 1 },
+  { cpu32,  "68334", 1 },
+  { cpu32,  "68336", 1 },
   { cpu32,  "68340", 1 },
+  { cpu32,  "68341", 1 },
+  { cpu32,  "68349", 1 },
   { cpu32,  "68360", 1 },
   { m68881, "68882", 1 },
 };
@@ -1066,24 +1074,6 @@ m68k_ip (instring)
 		    case AINC:
 		    case ADEC:
 		    case REGLST:
-		      losing++;
-		      break;
-		    default:
-		      break;
-		    }
-		  break;
-
-		case '`':
-		  switch (opP->mode)
-		    {
-		    case IMMED:
-		    case DREG:
-		    case AREG:
-		    case FPREG:
-		    case CONTROL:
-		    case AINC:
-		    case REGLST:
-		    case AINDR:
 		      losing++;
 		      break;
 		    default:
@@ -1818,7 +1808,6 @@ m68k_ip (instring)
 	case '$':
 	case '?':
 	case '/':
-	case '`':
 	case '<':
 	case '>':
 	case 'm':

@@ -1,5 +1,13 @@
 Thu Oct  9 15:17:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Robin Kirkham <Robin.Kirkham@mlb.dmt.csiro.au>:
+	* config/tc-m68k.c (archs): Add 68306, 68307, 68322, 68356, 68334,
+	68336, 68341, 68349.
+	* doc/c-m68k.texi (M68K-Opts): Add -m68ec000 -m68hc000 -m68hc001
+	-m68306, -m68307, -m68322, -m68356, -m68ec020, -m68ec030,
+	-m68ec040, -m68ec060, -m68330, -m68334, -m68336, -m68341,
+	-m68349.
+
 	* doc/Makefile.am (CPU_DOCS): Define.
 	(as.info): Depend upon $(CPU_DOCS).
 	* doc/Makefile.in: Rebuild.
