@@ -541,7 +541,7 @@ typedef enum
   }
 dst_var_loc_t;
 
-/* Locations come in two versions. The sort, and the long. The difference
+/* Locations come in two versions. The short, and the long. The difference
  * between the short and the long is the addition of a statement number
  * field to the start andend of the range of the long, and and unkown
  * purpose field in the middle. Also, loc_type and loc_index aren't
