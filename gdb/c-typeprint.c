@@ -135,14 +135,16 @@ c_print_type (type, varstring, stream, show, level)
     fputs_filtered (" ", stream);
   c_type_print_varspec_prefix (type, stream, show, 0);
 
-  fputs_filtered (varstring, stream);
+  if (varstring != NULL)
+    {
+      fputs_filtered (varstring, stream);
 
-  /* For demangled function names, we have the arglist as part of the name,
-     so don't print an additional pair of ()'s */
+      /* For demangled function names, we have the arglist as part of the name,
+	 so don't print an additional pair of ()'s */
 
-  demangled_args = strchr(varstring, '(') != NULL;
-  c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
-
+      demangled_args = strchr(varstring, '(') != NULL;
+      c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
+    }
 }
   
 /* If TYPE is a derived type, then print out derivation information.
