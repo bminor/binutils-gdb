@@ -2,6 +2,8 @@ Mon Oct 27 11:25:10 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-n-endian.h: Add TAGS entrys for 16 byte versions.
 
+	* sim-endian.h: Disable 16 byte support.
+
 Mon Oct 27 12:00:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-endian.c (_SWAP_16): Define.  Generate 126 bit swap code.

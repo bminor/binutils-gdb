@@ -138,7 +138,7 @@ do { \
   case 2: VARIABLE = H2T_2(VARIABLE); break; \
   case 4: VARIABLE = H2T_4(VARIABLE); break; \
   case 8: VARIABLE = H2T_8(VARIABLE); break; \
-  case 16: VARIABLE = H2T_16(VARIABLE); break; \
+  /*case 16: VARIABLE = H2T_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
@@ -149,7 +149,7 @@ do { \
   case 2: VARIABLE = T2H_2(VARIABLE); break; \
   case 4: VARIABLE = T2H_4(VARIABLE); break; \
   case 8: VARIABLE = T2H_8(VARIABLE); break; \
-  case 16: VARIABLE = T2H_16(VARIABLE); break; \
+  /*case 16: VARIABLE = T2H_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
@@ -160,7 +160,7 @@ do { \
   case 2: VARIABLE = SWAP_2(VARIABLE); break; \
   case 4: VARIABLE = SWAP_4(VARIABLE); break; \
   case 8: VARIABLE = SWAP_8(VARIABLE); break; \
-  case 16: VARIABLE = SWAP_16(VARIABLE); break; \
+  /*case 16: VARIABLE = SWAP_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
@@ -171,7 +171,7 @@ do { \
   case 2: VARIABLE = H2BE_2(VARIABLE); break; \
   case 4: VARIABLE = H2BE_4(VARIABLE); break; \
   case 8: VARIABLE = H2BE_8(VARIABLE); break; \
-  case 16: VARIABLE = H2BE_16(VARIABLE); break; \
+  /*case 16: VARIABLE = H2BE_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
@@ -182,7 +182,7 @@ do { \
   case 2: VARIABLE = BE2H_2(VARIABLE); break; \
   case 4: VARIABLE = BE2H_4(VARIABLE); break; \
   case 8: VARIABLE = BE2H_8(VARIABLE); break; \
-  case 16: VARIABLE = BE2H_16(VARIABLE); break; \
+  /*case 16: VARIABLE = BE2H_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
@@ -193,7 +193,7 @@ do { \
   case 2: VARIABLE = H2LE_2(VARIABLE); break; \
   case 4: VARIABLE = H2LE_4(VARIABLE); break; \
   case 8: VARIABLE = H2LE_8(VARIABLE); break; \
-  case 16: VARIABLE = H2LE_16(VARIABLE); break; \
+  /*case 16: VARIABLE = H2LE_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
@@ -204,7 +204,7 @@ do { \
   case 2: VARIABLE = LE2H_2(VARIABLE); break; \
   case 4: VARIABLE = LE2H_4(VARIABLE); break; \
   case 8: VARIABLE = LE2H_8(VARIABLE); break; \
-  case 16: VARIABLE = LE2H_16(VARIABLE); break; \
+  /*case 16: VARIABLE = LE2H_16(VARIABLE); break;*/ \
   } \
 } while (0)
 
