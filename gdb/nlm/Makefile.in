@@ -90,10 +90,6 @@ AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
 
-# Flags that describe where you can find the termcap library.
-# This can be overridden in the host Makefile fragment file.
-TERMCAP = -ltermcap
-
 # System V: If you compile gdb with a compiler which uses the coff
 # encapsulation feature (this is a function of the compiler used, NOT
 # of the m-?.h file selected by config.gdb), you must make sure that
@@ -116,11 +112,6 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
-# If you use bison instead of yacc, it needs to include the "-y" argument.
-#BISON=bison -y
-BISON=yacc
-YACC=$(BISON)
-
 # where to find texinfo; GDB dist should include a recent one
 TEXIDIR=${srcdir}/../texinfo
 
@@ -135,24 +126,6 @@ CC-LD=${CC}
 # Where is the "include" directory?  Traditionally ../include or ./include
 INCLUDE_DIR =  ${srcdir}/../../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
-
-# Where is the source dir for the MMALLOC library? Traditionally ../mmalloc
-# or ./mmalloc  (When we want the binary library built from it, we use
-# ${MMALLOC_DIR}${subdir}.)
-# Note that mmalloc can still be used on systems without mmap().
-# To use your system malloc, comment out the following defines.
-MMALLOC_DIR = ${srcdir}/../mmalloc
-MMALLOC_DEP = $$(MMALLOC_DIR)
-# To use your system malloc, uncomment MMALLOC_DISABLE.
-#MMALLOC_DISABLE = -DNO_MMALLOC
-# To use mmalloc but disable corruption checking, uncomment MMALLOC_CHECK
-#MMALLOC_CHECK = -DNO_MMALLOC_CHECK
-MMALLOC_CFLAGS = ${MMALLOC_CHECK} ${MMALLOC_DISABLE}
-
-# Where is the source dir for the READLINE library?  Traditionally in .. or .
-# (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
-READLINE_DIR = ${srcdir}/../readline
-READLINE_DEP = $$(READLINE_DIR)
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
@@ -169,7 +142,7 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = -g
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MMALLOC_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS} ${NWINCLUDES}
+INTERNAL_CFLAGS = ${CFLAGS} ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS} ${NWINCLUDES}
 LDFLAGS = $(CFLAGS)
 
 # Perhaps should come from parent Makefile
@@ -247,27 +220,21 @@ tags: TAGS
 
 clean:
 	rm -f *.o ${ADD_FILES} *~
-	rm -f init.c version.c
 	rm -f gdbserve.O gdbserve.nlm core make.log
 
-distclean: clean c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
-	rm -f tm.h xm.h config.status
+distclean: clean TAGS
+	rm -f config.status
 	rm -f Makefile
 
 realclean: clean
-	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
-	rm -f tm.h xm.h config.status
+	rm -f TAGS
+	rm -f config.status
 	rm -f Makefile
-
-STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
 
 force:
-
-version.c: Makefile
-	echo 'char *version = "$(VERSION)";' >version.c
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
 # into the environment, unless you include this target as a circumvention.

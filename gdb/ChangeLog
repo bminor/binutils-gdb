@@ -1,5 +1,8 @@
 Fri Sep  9 15:52:09 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* nlm/Makefile.in: remove MMALLOC, READLINE, TERMCAP, and other
+	  cruft.
+
 	* config/i386/gdbserve.mt: New file, defs for i386 nlm stub.
 
 Thu Sep  8 17:14:43 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
