@@ -16,6 +16,9 @@ arm-*-pe)		targ_emul=armpe ;;
 arc-*-elf*)		targ_emul=arcelf ;;
 # end-sanitize-arc
 d10v-*-*)		targ_emul=d10velf ;;
+# start-sanitize-d30v
+d30v-*-*)		targ_emul=d30velf ;;
+# end-sanitize-d30v
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
@@ -36,9 +39,7 @@ i960-wrs-vxworks*)	targ_emul=gld960 ;;
 i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-rtems*)		targ_emul=gld960coff ;;
-# start-sanitize-m32r
 m32r-*-*)		targ_emul=m32relf ;;
-# end-sanitize-m32r
 m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
 m68*-ericsson-ose)	targ_emul=sun3 ;;
@@ -143,8 +144,13 @@ mips*vr5900-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
-mips*el-*-linux*)	targ_emul=elf32elmip ;;
-mips*-*-linux*)		targ_emul=elf32ebmip ;;
+mips*el-*-linux*)	targ_emul=elf32lmip
+			targ_extra_emuls="elf32bmip mipslit mipsbig"
+			;;
+mips*-*-linux*)		targ_emul=elf32bmip
+			targ_extra_emuls="elf32lmip mipsbig mipslit"
+			;;
+mips*-*-lnews*)		targ_emul=mipslnews ;;
 mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300 ;;
 alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
@@ -169,9 +175,10 @@ powerpcle-*-pe)         targ_emul=ppcpe ;;
 powerpcle-*-winnt*)     targ_emul=ppcpe ;;
 powerpcle-*-cygwin32)   targ_emul=ppcpe ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
+powerpc-*-beos*)	targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
 # start-sanitize-tic80
-tic80-*-coff)		targ_emul=tic80coff ;;
+tic80-*-*)		targ_emul=tic80coff ;;
 # end-sanitize-tic80
 # start-sanitize-v850
 v850-*-*)		targ_emul=v850 ;;
