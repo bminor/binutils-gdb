@@ -2831,7 +2831,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
  	      break;
  	    }
 
-	  record_line (current_subfile, 0, last_function_start + valu);
+	  /* The following check is added before recording line 0 at
+	     end of function so as to handle hand-generated stabs
+	     which may have an N_FUN stabs at the end of the function, but
+	     no N_SLINE stabs.  */
+	  if (sline_found_in_function)
+	    record_line (current_subfile, 0, last_function_start + valu);
+
 	  within_function = 0;
 	  new = pop_context ();
 

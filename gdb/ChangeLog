@@ -1,3 +1,9 @@
+2003-02-26  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+	From Elena Zannoni  <ezannoni@redhat.com>
+	* dbxread.c (process_one_symbol): Only record line 0 if one or 
+	more sline entries have been seen for the function.
+
 2003-02-26  Michael Chastain  <mec@shout.net>
 
 	* configure: Regenerate with autoconf 000227.
