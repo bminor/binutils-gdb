@@ -1,5 +1,17 @@
 Thu Aug 12 11:24:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* alpha.h (struct external_reloc): Add r_symndx field.
+	(RELSZ): Correct.
+	(RELOC_BITS*): Correct.
+	(ALPHA_R_*): Define.
+	* ecoff.h (RELOC_SECTION_{XDATA,PDATA,FINI,LITA,ABS}): Define.
+	(r_extern): Undefine.
+	* internal.h (struct internal_reloc): Make r_vaddr bfd_vma rather
+	than long.  Add r_extern field.
+
+	* alpha.h (PDR_BITS*): Define.
+	* sym.h (PDR): Give correct names to new fields.
+
 	* ecoff.h: Moved MIPS reloc definitions from here...
 	* mips.h: to here.
 
