@@ -89,6 +89,7 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
 #define OPTION_ARCHITECTURE     (OPTION_START + 3)
 #define OPTION_TARGET           (OPTION_START + 4)
 #define OPTION_ARCHITECTURE_INFO (OPTION_START + 5)
+#define OPTION_ALIGNMENT        (OPTION_START + 6)
 
 static const OPTION standard_options[] =
 {
@@ -101,6 +102,10 @@ static const OPTION standard_options[] =
       'E', "big|little", "Set endianness",
       standard_option_handler },
 #endif
+
+  { {"alignment", required_argument, NULL, OPTION_ALIGNMENT},
+      '\0', "strict|nonstrict|forced", "Set memory access alignment",
+      standard_option_handler },
 
   { {"debug", no_argument, NULL, 'D'},
       'D', NULL, "Print debugging messages",
@@ -193,6 +198,50 @@ standard_option_handler (sd, opt, arg, is_command)
 	}
       break;
 #endif
+
+    case OPTION_ALIGNMENT:
+      if (strcmp (arg, "strict") == 0)
+	{
+	  if (WITH_ALIGNMENT == 0 || WITH_ALIGNMENT == STRICT_ALIGNMENT)
+	    {
+	      current_alignment = STRICT_ALIGNMENT;
+	      break;
+	    }
+	}
+      else if (strcmp (arg, "nonstrict") == 0)
+	{
+	  if (WITH_ALIGNMENT == 0 || WITH_ALIGNMENT == NONSTRICT_ALIGNMENT)
+	    {
+	      current_alignment = NONSTRICT_ALIGNMENT;
+	      break;
+	    }
+	}
+      else if (strcmp (arg, "forced") == 0)
+	{
+	  if (WITH_ALIGNMENT == 0 || WITH_ALIGNMENT == FORCED_ALIGNMENT)
+	    {
+	      current_alignment = FORCED_ALIGNMENT;
+	      break;
+	    }
+	}
+      else
+	{
+	  sim_io_eprintf (sd, "Invalid alignment specification `%s'\n", arg);
+	  return SIM_RC_FAIL;
+	}
+      switch (WITH_ALIGNMENT)
+	{
+	case STRICT_ALIGNMENT:
+	  sim_io_eprintf (sd, "Simulator compiled for strict alignment only.\n");
+	  break;
+	case NONSTRICT_ALIGNMENT:
+	  sim_io_eprintf (sd, "Simulator compiled for nonsitrct alignment only.\n");
+	  break;
+	case FORCED_ALIGNMENT:
+	  sim_io_eprintf (sd, "Simulator compiled for forced alignment only.\n");
+	  break;
+	}
+      return SIM_RC_FAIL;
 
     case 'D' :
       if (! WITH_DEBUG)
@@ -556,7 +605,7 @@ sim_print_help (sd, is_command)
 
 	{
 	  const char *chp = opt->doc;
-	  int doc_width = 80 - indent;
+	  unsigned doc_width = 80 - indent;
 	  while (strlen (chp) >= doc_width) /* some slack */
 	    {
 	      const char *end = chp + doc_width - 1;

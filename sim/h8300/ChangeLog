@@ -1,3 +1,11 @@
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Sep 17 12:00:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (compile.o): Depend on config.h in local directory.
+
 Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

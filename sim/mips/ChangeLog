@@ -1,3 +1,24 @@
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Sat Sep 20 14:07:28 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c (SDBBP,DERET): Added (3900) insns.
+	(RFE): Turn on for 3900.
+	* interp.c (DebugBreakPoint,DEPC,Debug,Debug_*): Added.
+	(dsstate): Made global.
+	(SUBTARGET_R3900): Added.
+	(CANCELDELAYSLOT): New.
+	(SignalException): Ignore SystemCall rather than ignore and
+	terminate.  Add DebugBreakPoint handling.
+	(decode_coproc): New insns RFE, DERET; and new registers Debug
+	and DEPC protected by SUBTARGET_R3900.
+	(sim_engine_run): Use CANCELDELAYSLOT rather than clearing
+	bits explicitly.
+	* Makefile.in,configure.in: Add mips subtarget option.
+	* configure: Update.	
+
 Fri Sep 19 09:33:27 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c: Add r3900 (tx39).

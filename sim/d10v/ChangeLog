@@ -1,3 +1,11 @@
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Sep 10 22:30:24 1997  Martin M. Hunt  <hunt@cygnus.com>
 
 	* interp.c (sim_resume): Increment PC at end of rep

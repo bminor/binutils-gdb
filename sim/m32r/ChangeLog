@@ -1,3 +1,16 @@
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Sep 17 17:44:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_open): Allocate memory under sim-memopt module
+ 	using sim_do_commandf.
+	(sim_open): Set magic-number at the start.
+	(sim_do_command): Implement.
+
+	* sim-main.h (sim_engine_halt): Map onto engine_halt.
+
 Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -339,27 +339,21 @@ extern int current_environment;
 
 
 
-/* Callback/Default Memory.
+/* Callback & Modulo Memory.
 
    Core includes a builtin memory type (raw_memory) that is
    implemented using an array.  raw_memory does not require any
    additional functions etc.
 
    Callback memory is where the core calls a core device for the data
-   it requires.
+   it requires.  Callback memory can be layered using priorities.
 
-   Default memory is an extenstion of this where for addresses that do
-   not map into either a callback or core memory range a default map
-   can be used.
+   Modulo memory is a variation on raw_memory where ADDRESS & (MODULO
+   - 1) is used as the index into the memory array.
 
-   The OEA model uses callback memory for devices and default memory
-   for buses.
+   The OEA model uses callback memory for devices.
 
    The VEA model uses callback memory to capture `page faults'.
-
-   While it may be possible to eliminate callback/default memory (and
-   hence also eliminate an additional test per memory fetch) it
-   probably is not worth the effort.
 
    BTW, while raw_memory could have been implemented as a callback,
    profiling has shown that there is a biger win (at least for the
@@ -368,6 +362,10 @@ extern int current_environment;
 
 #ifndef WITH_CALLBACK_MEMORY
 #define WITH_CALLBACK_MEMORY		1
+#endif
+
+#ifndef WITH_MODULO_MEMORY
+#define WITH_MODULO_MEMORY              0
 #endif
 
 
@@ -398,6 +396,13 @@ extern enum sim_alignments current_alignment;
 #if !defined (WITH_ALIGNMENT)
 #define WITH_ALIGNMENT NONSTRICT_ALIGNMENT
 #endif
+
+#if !defined (WITH_DEFAULT_ALIGNMENT)
+#define WITH_DEFAULT_ALIGNMENT 0 /* fatal */
+#endif
+
+
+
 
 #define CURRENT_ALIGNMENT (WITH_ALIGNMENT \
 			   ? WITH_ALIGNMENT \

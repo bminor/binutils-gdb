@@ -21,7 +21,7 @@
 AC_DEFUN(SIM_AC_COMMON,
 [
 # autoconf.info says this should be called right after AC_INIT.
-AC_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_HEADER(ifelse([$1],,config.h,[$1]):config.in)
 
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
@@ -212,19 +212,36 @@ dnl and SIM_AC_OUTPUT lines.
 
 dnl Specify the alignment restrictions of the target architecture.
 dnl Without this option all possible alignment restrictions are accomidated.
+dnl arg[1] is hardwired target alignment
+dnl arg[2] is default target alignment
 AC_DEFUN(SIM_AC_OPTION_ALIGNMENT,
+wire_alignment="ifelse([$2],,ifelse([$1],,,[$1]),[$2])"
+default_alignment="ifelse([$2],,ifelse([$1],,,[$1]),[$2])"
+default_sim_alignment="ifelse([$1],,ifelse([$2],,,-DWITH_DEFAULT_ALIGNMENT=[$2]),-DWITH_ALIGNMENT=[$1])"
 [
 AC_ARG_ENABLE(sim-alignment,
-[  --enable-sim-alignment=align		Specify strict or nonstrict alignment.],
+[  --enable-sim-alignment=align		Specify strict,  nonstrict or forced alignment of memory accesses.],
 [case "${enableval}" in
-  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
-  0 | default | DEFAULT)	sim_alignment="-DWITH_ALIGNMENT=0";;
-  *)				AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
+  strict | STRICT)       sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
+  nonstrict | NONSTRICT) sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
+  forced | FORCED)       sim_alignment="-DWITH_ALIGNMENT=FORCED_ALIGNMENT";;
+  yes) if test x"$wire_alignment" != x; then
+	 sim_alignment="-DWITH_ALIGNMENT=${wire_alignment}"
+       else
+	 echo "No hard-wired alignment for target $target" 1>&6
+	 sim_alignment="-DWITH_ALIGNMENT=0"
+       fi;;
+  no)  if test x"$default_alignment" != x; then
+	 sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${default_alignment}"
+       else
+	 echo "No default alignment for target $target" 1>&6
+	 sim_alignment="-DWITH_DEFAULT_ALIGNMENT=0"
+       fi;;
+  *)   AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
   echo "Setting alignment flags = $sim_alignment" 6>&1
-fi],[sim_alignment=""])dnl
+fi],[sim_alignment="${default_sim_alignment}"])dnl
 AC_SUBST(sim_alignment)
 ])dnl
 

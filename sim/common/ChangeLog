@@ -1,3 +1,21 @@
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Sep 19 17:26:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-config.c (sim_config): Check for default alignment.
+
+	* sim-options.c (standard_option_handler): Add alignment option.
+
+	* aclocal.m4 (sim_alignment): Allow configuration of hardwired and
+ 	default alignment requirements on memory accesses.
+	
+Fri Sep 19 11:51:35 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* sim-load.c (sim_load_file): Return failure if the executable
+	had no loadable sections.
+
 Wed Sep 17 13:33:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (ETRACE): Use trace_printf not sim_io_printf for

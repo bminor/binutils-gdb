@@ -1,3 +1,11 @@
+Fri Sep 19 17:45:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Sep  9 20:52:21 1997  Felix Lee  <flee@cygnus.com>
 
 	* interp.c (sim_resume): poll_quit() at least once per call;
