@@ -1,3 +1,8 @@
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-stack.c (mi_cmd_stack_select_frame): Remove stray statement.
+        Remove include of gdb-events.h.
+
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
 	* mi.h: Clean up interface, removing unnecessarily exported
