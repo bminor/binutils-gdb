@@ -1,3 +1,13 @@
+2001-11-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-tdep.c (find_proc_desc): Add cur_frame argument.  Pass
+	cur_frame to heuristic_proc_desc.
+	(heuristic_proc_desc): Add cur_frame argument.  Do not read SP
+	if cur_frame == 0.
+	(after_prologue): Pass cur_frame == 0 to find_proc_desc.
+	(mips_frame_chain): Pass cur_frame == 1 to find_proc_desc.
+	(mips_init_extra_frame_info): Likewise.
+
 2001-11-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (return_to_top_level): Comment.

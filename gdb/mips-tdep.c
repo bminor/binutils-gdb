@@ -239,7 +239,7 @@ int gdb_print_insn_mips (bfd_vma, disassemble_info *);
 static void mips_print_register (int, int);
 
 static mips_extra_func_info_t
-heuristic_proc_desc (CORE_ADDR, CORE_ADDR, struct frame_info *);
+heuristic_proc_desc (CORE_ADDR, CORE_ADDR, struct frame_info *, int);
 
 static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
@@ -252,7 +252,7 @@ static void mips_show_processor_type_command (char *, int);
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
 static mips_extra_func_info_t
-find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame);
+find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame);
 
 static CORE_ADDR after_prologue (CORE_ADDR pc,
 				 mips_extra_func_info_t proc_desc);
@@ -561,8 +561,13 @@ after_prologue (CORE_ADDR pc,
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
 
+  /* Pass cur_frame == 0 to find_proc_desc.  We should not attempt
+     to read the stack pointer from the current machine state, because
+     the current machine state has nothing to do with the information
+     we need from the proc_desc; and the process may or may not exist
+     right now.  */
   if (!proc_desc)
-    proc_desc = find_proc_desc (pc, NULL);
+    proc_desc = find_proc_desc (pc, NULL, 0);
 
   if (proc_desc)
     {
@@ -1858,9 +1863,14 @@ restart:
 
 static mips_extra_func_info_t
 heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-		     struct frame_info *next_frame)
+		     struct frame_info *next_frame, int cur_frame)
 {
-  CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
+  CORE_ADDR sp;
+
+  if (cur_frame)
+    sp = read_next_frame_reg (next_frame, SP_REGNUM);
+  else
+    sp = 0;
 
   if (start_pc == 0)
     return NULL;
@@ -1919,7 +1929,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 
 
 static mips_extra_func_info_t
-find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
+find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 {
   mips_extra_func_info_t proc_desc;
   CORE_ADDR startaddr;
@@ -1951,7 +1961,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 	    {
 	      mips_extra_func_info_t found_heuristic =
 	      heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				   pc, next_frame);
+				   pc, next_frame, cur_frame);
 	      if (found_heuristic)
 		proc_desc = found_heuristic;
 	    }
@@ -1975,7 +1985,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame)
 	startaddr = heuristic_proc_start (pc);
 
       proc_desc =
-	heuristic_proc_desc (startaddr, pc, next_frame);
+	heuristic_proc_desc (startaddr, pc, next_frame, cur_frame);
     }
   return proc_desc;
 }
@@ -2007,7 +2017,7 @@ mips_frame_chain (struct frame_info *frame)
     saved_pc = tmp;
 
   /* Look up the procedure descriptor for this PC.  */
-  proc_desc = find_proc_desc (saved_pc, frame);
+  proc_desc = find_proc_desc (saved_pc, frame, 1);
   if (!proc_desc)
     return 0;
 
@@ -2033,7 +2043,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc =
-  fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next);
+  fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next, 1);
 
   fci->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
