@@ -1,5 +1,8 @@
 Thu Oct  9 15:57:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* binutils.texi (strip): Remove duplicate --target.  From Marty
+	Leisner <leisner@sdsp.mc.xerox.com>.
+
 	* nm.c (lineno_cache_bfd): New file static variable.
 	(lineno_cache_rel_bfd): New file static variable.
 	(display_archive): Clear lineno_cache_bfd and lineno_cache_rel_bfd

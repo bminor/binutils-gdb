@@ -1520,7 +1520,7 @@ Print the program version number on the standard output and exit.
 @cindex symbols, discarding
 
 @smallexample
-strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
+strip [ -F @var{bfdname} | --target=@var{bfdname} ]
       [ -I @var{bfdname} | --input-target=@var{bfdname} ]
       [ -O @var{bfdname} | --output-target=@var{bfdname} ]
       [ -s | --strip-all ] [ -S | -g | --strip-debug ]
