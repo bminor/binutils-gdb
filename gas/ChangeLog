@@ -1,3 +1,57 @@
+Wed Apr 12 12:20:19 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (TDEFINES): Put empty definition into
+	makefile fragment.
+	* mpw-make.in (xmalloc.c.o): Remove.
+	(as.new): Depend on Version.r.
+	(Version.r): Generate from version info.
+
+	* mpw-make.in: Delete references to hex-value.c.
+
+	* mpw-config.in: Add mapping from configs to object file formats,
+	get VERSION from Makefile.in and add to mk.tmp.
+	(mips-idt-ecoff) [TDEFINES]: Add TARGET_BYTES_BIG_ENDIAN.
+	* mpw-make.in (VERSION, gC): Don't define.
+	(ALL_CFLAGS): Remove -d flags.
+	(config.h): Remove definition of MPW, add HAVE_STDARG_H,
+	BFD_ASSEMBLER.
+
+	* mpw-make.in (ALL_CFLAGS): Add definition of HAVE_STDARG_H,
+	include of ::libiberty:.
+	(config.h): Ifdef contents on GAS_VERSION.
+
+	* mpw-make.in (as.c): Compile with C not gC.
+	(config-stamp): Touch correctly.
+	(install-only): New target.
+	(install): Depend on all and install-only.
+
+	* mpw-config.in: Parse target and use to generate forward includes
+	to tc-, obj-, and atof- files, use te-generic.h for emulation.
+	* mpw-make.in (VERSION): Define.
+	(as.c): Compile with GCC.
+	(TARG_OBJECTS, CLIBS): Define.
+	(as.new): Use LDFLAGS, TARG_OBJECTS, CLIBS and EXTRALIBS in link
+	command.
+	(config.h, config-stamp): Build.
+
+	* mpw-make.in (C, CFLAGS): Removed definitions.
+	(ALL_CFLAGS): Define.
+	Set default rule to use {CC} instead of {C}.
+
+	* mpw-make.in (install): Moved here from mpw-build.in.
+	* mpw-build.in: Removed, functionality in mpw-make.in
+
+	* mpw-make.in (CFLAGS): Add more include paths.
+
+	* mpw-config.in (varargs.h, sys/*.h): Don't create when
+	configuring.
+	* mpw-make.in (CFLAGS): Add -w flag.
+
+	* mpw-make.in: Replace 8-bit chars with their names.
+
+	* mpw-config.in: New file, MPW version of configure.in.
+	* mpw-make.in: New file, MPW version of Makefile.in.
+
 start-sanitize-arc
 Wed Apr 12 07:35:44 1995  Doug Evans  <dje@canuck.cygnus.com>
 
