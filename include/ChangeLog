@@ -1,3 +1,14 @@
+Fri Jul 30 18:38:02 1993  John Gilmore  (gnu@cygnus.com)
+
+	* dis-asm.h:  Add new fields insn_info_valid, branch_delay_insns, 
+	data_size, insn_type, target, target2.  These are used to return
+	information from the instruction decoders back to the calling
+	program.  Add comments, make more readable.
+
+Mon Jul 19 22:14:14 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* nlm:  New directory containing NLM/NetWare includes.
+
 Thu Jul 15 12:10:04 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* dis-asm.h (struct disassemble_info): New field application_data.
