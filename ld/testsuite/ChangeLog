@@ -1,3 +1,9 @@
+2003-05-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-m68hc11/link-hcs12.d: New test.
+	* ld-m68hc11/link-hcs12.s: New file.
+	* ld-m68hc11/link-hc12.s: New file.
+
 2003-05-13  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ld-elfweak/elfweak.exp: Fix typo.
