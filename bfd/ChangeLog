@@ -1,4 +1,13 @@
+Wed Dec  4 14:18:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): #if 0 code that
+	expects a .got.plt until we actually create it.
+
 Mon Dec  2 12:13:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Print an error
+	message for bfd_reloc_outofrange, rather than aborting.  From
+	Philippe De Muyter <phdm@info.ucl.ac.be>.
 
 	* cofflink.c (_bfd_coff_final_link): If there aren't any relocs in
 	a relocateable link, don't try to process them.  From Heinz Wrobel
@@ -449,7 +458,7 @@ Tue Oct  1 12:31:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (coff_link_add_symbols): Don't override a meaningful
 	symbol type with T_NULL.  Warn if symbol type changes.  Based on
-	patch from Philippe De Muyter <phdm@labauto1.ulb.ac.be>.
+	patch from Philippe De Muyter <phdm@info.ucl.ac.be>.
 
 	* elflink.h (elf_link_add_object_symbols): Only put a symbol from
 	a dynamic object in the dynamic symbol table if it is referenced
