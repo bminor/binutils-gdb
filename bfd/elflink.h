@@ -3130,7 +3130,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	      const char *name;
 	      bfd_size_type indx;
 
-	      name = output_bfd->filename;
+	      name = basename (output_bfd->filename);
 	      def.vd_hash = bfd_elf_hash (name);
 	      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
 					    name, true, false);

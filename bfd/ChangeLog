@@ -1,5 +1,10 @@
 2001-05-17  H.J. Lu  <hjl@gnu.org>
 
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set the
+	version definition to basename of the output filename.
+
+2001-05-17  H.J. Lu  <hjl@gnu.org>
+
 	* elflink.h (elf_link_add_object_symbols): Set DT_NEEDED to
 	basename of the bfd filename.
 
