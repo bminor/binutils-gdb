@@ -798,8 +798,8 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 }
 
 
-char *
-x86_64_register_nr2name (int reg_nr)
+const char *
+x86_64_register_name (int reg_nr)
 {
   if (reg_nr < 0 || reg_nr >= X86_64_NUM_REGS)
     return NULL;
@@ -807,7 +807,7 @@ x86_64_register_nr2name (int reg_nr)
 }
 
 int
-x86_64_register_name2nr (const char *name)
+x86_64_register_number (const char *name)
 {
   int reg_nr;
 
@@ -989,7 +989,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
 
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
-  set_gdbarch_register_name (gdbarch, x86_64_register_nr2name);
+  set_gdbarch_register_name (gdbarch, x86_64_register_name);
   set_gdbarch_register_size (gdbarch, 8);
   set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 16);

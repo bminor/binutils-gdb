@@ -1,3 +1,13 @@
+2002-06-20  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_register_nr2name): Rename to 
+	x86_64_register_name. Return type changed to 'const char *'.
+	(x86_64_register_name2nr): Rename to x86_64_register_number.
+	(x86_64_gdbarch_init): Update to reflect the change.
+	* x86-64-tdep.h: Ditto.
+	* x86-64-linux-nat.c (x86_64_fxsave_offset)
+	(supply_fpregset): Ditto.
+
 2002-06-19  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.h: Update copyright.
