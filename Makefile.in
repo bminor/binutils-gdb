@@ -56,7 +56,7 @@ CC = cc
 CFLAGS = -g
 CXX = gcc
 CXXFLAGS = -g -O
-GCC_FOR_TARGET = ./gcc -B./
+GCC_FOR_TARGET = ./xgcc -B./
 RANLIB = ranlib
 NM = nm
 
@@ -89,7 +89,7 @@ INSTALL_TARGET = install.all
 
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
-    echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
+    echo $${rootme}/gcc/xgcc -B$${rootme}/gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
@@ -100,7 +100,7 @@ CC_FOR_TARGET = ` \
 
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
-    echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
+    echo $${rootme}/gcc/xgcc -B$${rootme}/gcc/; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
