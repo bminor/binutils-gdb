@@ -432,10 +432,11 @@ struct stat *vip;
 	  ALL_MSYMBOLS (objfile, msymbol)
 #else
 	  for (msymbol = objfile->msymbols;
-		msymbol->name || msymbol->address; (msymbol)++)
+	       SYMBOL_NAME (msymbol) || SYMBOL_VALUE_ADDRESS (msymbol);
+	       (msymbol)++)
 #endif
-	      if (msymbol->address < TEXT_SEGMENT_BASE)
-		msymbol -> address += vp->tstart - old_start;
+	      if (SYMBOL_VALUE_ADDRESS (msymbol) < TEXT_SEGMENT_BASE)
+		SYMBOL_VALUE_ADDRESS (msymbol) += vp->tstart - old_start;
 
 	   break;
 	}

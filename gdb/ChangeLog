@@ -1,5 +1,8 @@
 Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
 
+	* xcoffexec.c (vmap_symtab):  Use new macros to access minimal
+	symbol name and value fields.
+
 	* c-exp.y (yylex):  Make static, to match prototype and other
 	<lang>-exp.y files.
 
