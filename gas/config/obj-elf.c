@@ -31,10 +31,12 @@ static void obj_elf_section PARAMS ((int));
 static void obj_elf_size PARAMS ((void));
 static void obj_elf_type PARAMS ((void));
 static void obj_elf_ident PARAMS ((void));
+static void obj_elf_previous PARAMS ((void));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
   {"ident", obj_elf_ident, 0},
+  {"previous", obj_elf_previous, 0},
   {"section", obj_elf_section, 0},
   {"size", obj_elf_size, 0},
   {"type", obj_elf_type, 0},
@@ -48,6 +50,10 @@ const pseudo_typeS obj_pseudo_table[] =
   {"stabs", obj_elf_stab, 's'},
 /* This is used on Solaris 2.x on SPARC, but not supported yet.  */
   {"xstabs", obj_elf_xstab, 's'},
+
+  /* These are used for dwarf. */
+  {"2byte", cons, 2},
+  {"4byte", cons, 4},
 
   {NULL}			/* end sentinel */
 };
@@ -74,6 +80,9 @@ elf_file_symbol (s)
     }
 }
 
+static segT previous_section;
+static int previous_subsection;
+
 static void
 obj_elf_section (xxx)
      int xxx;
@@ -88,9 +97,26 @@ obj_elf_section (xxx)
   flagword flags = SEC_READONLY | SEC_ALLOC | SEC_RELOC;
   /* Initialize this with the default flags to be used if none are
      specified.  */
-  flagword default_flags = SEC_ALLOC | SEC_RELOC;
+  flagword default_flags = 0;
 
-  string = demand_copy_C_string (&xxx);
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '"')
+    string = demand_copy_C_string (&xxx);
+  else
+    {
+      char *p = input_line_pointer;
+      char c;
+      while (0 == strchr ("\n\t,; ", *p))
+	p++;
+      c = *p;
+      *p = 0;
+      string = xmalloc (p - input_line_pointer + 1);
+      strcpy (string, input_line_pointer);
+      *p = c;
+      input_line_pointer = p;
+    }
+  if (!strcmp (string, ".rodata"))
+      default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC;
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     flags = default_flags;
@@ -137,6 +163,10 @@ obj_elf_section (xxx)
     }
   demand_empty_rest_of_line ();
 
+  /* If the C string wasn't valid, `string' could be null.  */
+  if (!string)
+    return;
+
   sec = bfd_get_section_by_name (stdoutput, string);
   if (sec == 0)
     {
@@ -144,7 +174,21 @@ obj_elf_section (xxx)
       bfd_set_section_flags (stdoutput, sec, flags);
       sec->output_section = sec;
     }
+  previous_section = now_seg;
+  previous_subsection = now_subseg;
   subseg_set (sec, 0);
+}
+
+static void
+obj_elf_previous ()
+{
+  if (previous_section == 0)
+    {
+      as_bad (".previous without corresponding .section; ignored");
+      return;
+    }
+  subseg_set (previous_section, previous_subsection);
+  previous_section = 0;
 }
 
 int
