@@ -1,4 +1,11 @@
+1999-09-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (dump_section_relocs): Call print_symbol_value_1 to
+	print the symbol, rather than printing it here.
+
 1999-09-11  Donn Terry  <donn@interix.com>
+
+	* write.c (adjust_reloc_syms): Print adjusted fixup.
 
 	* expr.c (integer_constant): Correct too_many_digits calculation
 	in base 10 case.

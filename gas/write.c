@@ -645,7 +645,7 @@ relax_and_size_seg (abfd, sec, xxx)
 #ifdef DEBUG2
 static void
 dump_section_relocs (abfd, sec, stream_)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      char *stream_;
 {
@@ -660,22 +660,16 @@ dump_section_relocs (abfd, sec, stream_)
   while (fixp)
     {
       symbolS *s = fixp->fx_addsy;
-      if (s)
-	{
-	  fprintf (stream, "  %08x: %s(%s", fixp, S_GET_NAME (s),
-		   s->bsym->section->name);
-	  if (s->bsym->flags & BSF_SECTION_SYM)
-	    {
-	      fprintf (stream, " section sym");
-	      if (S_GET_VALUE (s))
-		fprintf (stream, "+%x", S_GET_VALUE (s));
-	    }
-	  else
-	    fprintf (stream, "+%x", S_GET_VALUE (s));
-	  fprintf (stream, ")+%x\n", fixp->fx_offset);
-	}
+
+      fprintf (stream, "  %08lx: type %d ", (unsigned long) fixp,
+	       (int) fixp->fx_r_type);
+      if (s == NULL)
+	fprintf (stream, "no sym\n");
       else
-	fprintf (stream, "  %08x: type %d no sym\n", fixp, fixp->fx_r_type);
+	{
+	  print_symbol_value_1 (stream, s);
+	  fprintf (stream, "\n");
+	}
       fixp = fixp->fx_next;
     }
 }
@@ -866,6 +860,10 @@ adjust_reloc_syms (abfd, sec, xxx)
 	fixp->fx_offset += S_GET_VALUE (sym);
 	fixp->fx_addsy = section_symbol (S_GET_SEGMENT (sym));
 	symbol_mark_used_in_reloc (fixp->fx_addsy);
+#ifdef DEBUG5
+	fprintf (stderr, "\nadjusted fixup:\n");
+	print_fixup (fixp);
+#endif
 
       done:
 	;
