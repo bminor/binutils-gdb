@@ -6403,7 +6403,7 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
 	    return false;
 
 	  oldbytes = (h->vtable_entries_size/FILE_ALIGN + 1) * sizeof(boolean);
-	  memset (ptr + oldbytes, 0, bytes - oldbytes);
+	  memset (((char *)ptr) + oldbytes, 0, bytes - oldbytes);
 	}
       else
 	{
