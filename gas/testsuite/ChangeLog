@@ -1,3 +1,10 @@
+Fri Nov  3 12:35:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/link.s: Use "&" instead of "#" for immediate values.
+
+	* gas/m68k/fmoveml.s, gas/m68k/fmoveml.d: New test.
+	* gas/m68k/all.exp: Run it.
+
 Thu Nov  2 23:11:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/m68k/link.s, gas/m68k/link.d: New test.
