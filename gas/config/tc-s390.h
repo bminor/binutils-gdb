@@ -44,6 +44,10 @@ struct fix;
            && S_IS_DEFINED ((FIX)->fx_addsy)      \
            && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
+#define TC_FORCE_RELOCATION(FIXP)       \
+  ((FIXP)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
+   || (FIXP)->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+
 #define tc_fix_adjustable(X)  tc_s390_fix_adjustable(X)
 extern int tc_s390_fix_adjustable PARAMS ((struct fix *));
 
