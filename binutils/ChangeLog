@@ -1,3 +1,8 @@
+1999-11-03  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (flush_page): Clip short values to prevent warnings
+	from the assembler.
+
 1999-10-27  Fred Fish  <fnf@cygnus.com>
 
 	* objdump.c (display_bfd): Break into two functions.  The

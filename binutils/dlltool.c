@@ -1572,10 +1572,11 @@ flush_page (f, need, page_addr, on_page)
 	   ASM_LONG,
 	   (on_page * 2) + (on_page & 1) * 2 + 8,
 	   ASM_C);
+  
   for (i = 0; i < on_page; i++)
-    {
-      fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, (need[i] - page_addr) | 0x3000);
-    }
+    fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT,
+	     ((need[i] - page_addr) | 0x3000) & 0xffff);
+
   /* And padding */
   if (on_page & 1)
     fprintf (f, "\t%s\t0x%x\n", ASM_SHORT, 0 | 0x0000);
