@@ -1,5 +1,7 @@
 Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/ns32k/{merlin.mh,xm-merlin.h}: Be consistent about name.
+
 	* dbxread.c (copy_pending): Change name and function of begi argument
 	to endi, since that is what the caller needs.
 

@@ -25,7 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Under Utek, a ptrace'd process can be the only active process for
    an executable.  Therefore instead of /bin/sh use gdb-sh (which should
    just be a copy of /bin/sh which is world readable and writeable).  */
-#define SHELL_FILE "/usr/gnu/lib/gdb-sh"
+/* FIXME: name should be passed in from Makefile so it can use prefix.  */
+#define SHELL_FILE "/usr/local/lib/gdb-sh"
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
