@@ -235,7 +235,7 @@
  171                       	
  172                       	.code32
  173 0180 EB98              		jmp	1b
- 174 0182 E9(FCFF|90FE)FF FF       		jmp	xxx
+ 174 0182 E9(FCFF|79FE)FF FF       		jmp	xxx
  175 0187 FF250000 0000     		jmp	\*xxx
  176 018d FF250000 0000     		jmp	xxx\(,1\)
 .*Warning:.*
@@ -254,7 +254,7 @@
  185 01b5 EA000000 003412   		ljmp	\$0x1234,\$xxx
  186                       	
  187 01bc E859FFFF FF       		call	1b
- 188 01c1 E8(FCFF|51FE)FF FF       		call	xxx
+ 188 01c1 E8(FCFF|3AFE)FF FF       		call	xxx
  189 01c6 FF150000 0000     		call	\*xxx
  190 01cc FF150000 0000     		call	xxx\(,1\)
 .*Warning:.*
