@@ -5199,7 +5199,7 @@ errata_nop_necessary_p (slot, insn_unit)
 	    || idesc->operands[i] == IA64_OPND_P2)
 	  {
 	    int regno = slot->opnd[i].X_add_number - REG_P;
-	    if (regno > 16)
+	    if (regno >= 64)
 	      abort ();
 	    this_group->p_reg_set[regno] = 1;
 	  }
@@ -5215,7 +5215,7 @@ errata_nop_necessary_p (slot, insn_unit)
 	    || idesc->operands[i] == IA64_OPND_R3)
 	  {
 	    int regno = slot->opnd[i].X_add_number - REG_GR;
-	    if (regno > 128)
+	    if (regno >= 128)
 	      abort ();
 	    if (strncmp (idesc->name, "add", 3) != 0
 		&& strncmp (idesc->name, "sub", 3) != 0
@@ -5246,7 +5246,7 @@ errata_nop_necessary_p (slot, insn_unit)
 	  || idesc->operands[i] == IA64_OPND_MR3)
 	{
 	  int regno = slot->opnd[i].X_add_number - REG_GR;
-	  if (regno > 128)
+	  if (regno >= 128)
 	    abort ();
 	  if (idesc->operands[i] == IA64_OPND_R3)
 	    {

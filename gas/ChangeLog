@@ -1,3 +1,9 @@
+2000-11-16  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (errata_nop_necessary_p): Abort if general regno
+	>= 128 instead of > 128.  Abort if predicate regno is >= 64 instead of
+	> 16.
+
 2000-11-16  H.J. Lu  <hjl@gnu.org>
 
 	* config/obj-elf.c (obj_elf_symver): Don't check the missing
