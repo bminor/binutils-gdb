@@ -578,6 +578,21 @@ struct priv_reg_entry priv_reg_table[] =
   {"", -1},			/* end marker */
 };
 
+/* v9a specific asrs */
+
+struct priv_reg_entry v9a_asr_table[] =
+{
+  {"tick_cmpr", 23},
+  {"softint", 22},
+  {"set_softint", 20},
+  {"pic", 17},
+  {"pcr", 16},
+  {"gsr", 19},
+  {"dcr", 18},
+  {"clear_softint", 21},
+  {"", -1},			/* end marker */
+};
+
 static int
 cmp_reg_entry (parg, qarg)
      const PTR parg;
@@ -1229,6 +1244,47 @@ sparc_ip (str, pinsn)
 	      else
 		{
 		  error_message = ": unrecognizable privileged register";
+		  goto error;
+		}
+
+	    case '_':
+	    case '/':
+	      /* Parse a v9a ancillary state register.  */
+	      if (*s == '%')
+		{
+		  struct priv_reg_entry *p = v9a_asr_table;
+		  unsigned int len = 9999999; /* init to make gcc happy */
+
+		  s += 1;
+		  while (p->name[0] > s[0])
+		    p++;
+		  while (p->name[0] == s[0])
+		    {
+		      len = strlen (p->name);
+		      if (strncmp (p->name, s, len) == 0)
+			break;
+		      p++;
+		    }
+		  if (p->name[0] != s[0])
+		    {
+		      error_message = ": unrecognizable v9a ancillary state register";
+		      goto error;
+		    }
+		  if (*args == '/' && (p->regnum == 20 || p->regnum == 21))
+		    {
+		      error_message = ": rd on write only ancillary state register";
+		      goto error;
+		    }		      
+		  if (*args == '/')
+		    opcode |= (p->regnum << 14);
+		  else
+		    opcode |= (p->regnum << 25);
+		  s += len;
+		  continue;
+		}
+	      else
+		{
+		  error_message = ": unrecognizable v9a ancillary state register";
 		  goto error;
 		}
 
