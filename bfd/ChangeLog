@@ -1,3 +1,8 @@
+Fri Jun 18 04:24:57 1999  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Don't adjust
+	GPDISP or LITUSE in a relocatable link.
+
 Thu Jun 17 21:24:43 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* dwarf1.c (alloc_dwarf1_unit): Allocate using bfd_zalloc.

@@ -3423,6 +3423,12 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
+
+	  /* The symbol associated with GPDISP and LITUSE is 
+	     immaterial.  Only the addend is significant.  */
+	  if (r_type == R_ALPHA_GPDISP || r_type == R_ALPHA_LITUSE)
+	    continue;
+
 	  if (r_symndx < symtab_hdr->sh_info)
 	    {
 	      sym = local_syms + r_symndx;
