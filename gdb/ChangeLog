@@ -152,7 +152,6 @@ Fri Dec 15 22:58:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure.tgt (m68*-*-netbsd*, ns32k-*-netbsd*): Add gdbserver
  	to configdirs.
 
->>>>>>> 1.847
 2000-12-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h (struct gdbarch_tdep): Rename fields
