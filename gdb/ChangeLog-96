@@ -1308,7 +1308,7 @@ Thu Sep  5 12:09:13 1996  Per Bothner  <bothner@deneb.cygnus.com>
 	* value.h (COERCE_REF):  Fix previous change.
 	(COERCE_ENUM):  Add a check_typedef  (this is the real fix).
 
-Thu Sep  5 03:28:30 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Thu Sep  5 03:28:30 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* eval.c (evaluate_subexp_standard): In case of OP_ARRAY: make a
 	better check of array boundaries.
@@ -1359,7 +1359,7 @@ Wed Sep  4 13:06:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* terminal.h: Don't use #elif.
 
-Wed Sep  4 06:49:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Wed Sep  4 06:49:35 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (parse_tuple_element): Allow (*): for array tuples
 	if we have a type.
@@ -2732,7 +2732,7 @@ Thu Jun 27 18:24:17 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* config/i386/cygwin32.mh, config/powerpc/cygwin32.mh
 	(NATDEPFILES): Add a space.
 
-Wed Jun 26 06:05:39 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Wed Jun 26 06:05:39 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* gdbtypes.c (create_array_type): If TYPE_LENGTH (result_type)
 	is zero, set TYPE_FLAG_TARGET_STUB to force reevaluation of the type.
@@ -2851,7 +2851,7 @@ Thu May 30 09:43:17 1996  Mark Alexander <marka@cygnus.com>
 	* dsrec.c (make_srec):  Fix calculation of address size
 	to allow addresses less than 0x100.
 
-Thu May 30 04:24:09 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Thu May 30 04:24:09 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (ch_lex): In case of LOC_TYPEDEF call calculate_array_length.
 
@@ -3505,7 +3505,7 @@ Thu Apr 11 13:47:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* nindy-share/nindy.c (ninMemGet ninMemPut):  Return number of bytes
 	actually read or written.
 
-Wed Apr 10 02:56:06 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Wed Apr 10 02:56:06 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-valprint.c (chill_val_print): Remove call to calculate_array_length.
 	(calculate_array_length): Move function from here ...
@@ -3514,7 +3514,7 @@ Wed Apr 10 02:56:06 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 	(parse_primval): If we have a symbol with an array type
 	and the length is 0, call calculate_array_length.
 
-Tue Apr  9 01:23:05 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Tue Apr  9 01:23:05 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* eval.c (evaluate_subexp_standard): In case of TYPE_CODE_SET:
 	Add some checks for powerset compatibility.
@@ -3992,12 +3992,12 @@ Wed Mar  6 17:57:59 1996  Jeffrey A Law  (law@cygnus.com)
 	* breakpoint.c (internal_breakpoint_number): Move to file scope.
 	(create_solib_event_breakpoint): Use an internal breakpoint number.
 
-Wed Mar  6 00:32:44 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Wed Mar  6 00:32:44 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* valarith.c (value_in): Change builtin_type_chill_bool to
 	LA_BOOL_TYPE.
 
-Tue Mar  5 23:48:36 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Tue Mar  5 23:48:36 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (parse_primval): Handle CARD, MAX, MIN.
 	(match_string_literal): Handle control sequence.
@@ -4670,7 +4670,7 @@ Mon Jan 29 18:44:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/m88k/xm-cxux.h (BP_HIT_COUNT): Remove, never used.
 
-Mon Jan 29 00:10:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Mon Jan 29 00:10:35 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-valprint.c (calculate_array_length): New function to
  	determine the length of an array type.
@@ -4969,7 +4969,7 @@ Tue Jan  9 09:33:53 1996  Jeffrey A Law  (law@cygnus.com)
 	* hpread.c (hpread_build_psymtabs): Finish Jan 4th 
 	enum namespace -> enum_namespace change.
 
-Tue Jan  9 04:44:47 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Tue Jan  9 04:44:47 1996  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (parse_primval): In case ARRAY, add missing
 	FORWARD_TOKEN ().

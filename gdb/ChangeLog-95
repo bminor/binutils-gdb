@@ -117,7 +117,7 @@ Mon Dec 11 15:56:55 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* eval.c (evaluate_struct_tuple):  Fix thinko.
 
-Mon Dec 11 06:52:02 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+Mon Dec 11 06:52:02 1995  Wilfried Moser  <moser@rtl.cygnus.com>
 
 	* ch-typeprint.c (chill_type_print_base): Slightly change of printing
 	of variant structures.
