@@ -4,6 +4,11 @@
 	errors.  Translate \n sequences in expected output to newline char.
 	(slurp_options): Make parentheses optional.
 	(sim_run): Look for board_info sim,options.
+	* sim/fr30/hello.ms: Add trailing \n to expected output.
+	* sim/m32r/hello.ms: Ditto.
+	* sim/m32r/hw-trap.ms: Ditto.
+
+	* sim/m32r/trap.cgs: Properly align trap2_handler.
 
 1998-12-14  Dave Brolley  <brolley@cygnus.com>
 
