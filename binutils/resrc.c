@@ -498,12 +498,6 @@ read_rc_file (filename, preprocessor, preprocargs, language, use_temp_file)
 static void
 close_input_stream ()
 {
-  if (cpp_pipe != NULL)
-    {
-      pclose (cpp_pipe);
-      cpp_pipe = NULL;
-    }
-  
   if (istream_type == ISTREAM_FILE)
     {
       if (cpp_pipe != NULL)

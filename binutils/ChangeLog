@@ -1,3 +1,7 @@
+2000-08-30  Jamie Guinan  <guinan@bluebutton.com>
+
+	* resrc.c (close_input_stream): delete extraneous logic
+
 2000-08-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* NEWS: Mention support for CRIS.
