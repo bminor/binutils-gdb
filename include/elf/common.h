@@ -123,15 +123,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EM_CYGNUS_D30V	0x7676
 /* end-sanitize-d30v */
 
-/* start-sanitize-v850 */
 /* V850 backend magic number.  Written in the absense of an ABI.  */
 #define EM_CYGNUS_V850	0x9080
-/* end-sanitize-v850 */
 
 /* mn10200 and mn10300 backend magic numbers.
    Written in the absense of an ABI.  */
 #define EM_CYGNUS_MN10200	0xdead
 #define EM_CYGNUS_MN10300	0xbeef
+
+/* start-sanitize-sky */
+/* TXVU backend magic number.  Written in the absence of an ABI.  */
+#define EM_CYGNUS_TXVU	0xedac
+/* end-sanitize-sky */
 
 /* See the above comment before you add a new EM_* value here.  */
 

@@ -133,7 +133,7 @@ else
 	done
 fi
 
-sky_files="ChangeLog"
+sky_files="ChangeLog common.h"
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	for i in $sky_files ; do
 		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then

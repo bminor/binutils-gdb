@@ -2,6 +2,7 @@ start-sanitize-sky
 Mon Dec 22 13:56:28 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* txvu.h: New file.
+	* common.h (EM_CYGNUS_TXVU): New macro.
 
 end-sanitize-sky
 Mon Dec 15 15:07:49 1997  Nick Clifton  <nickc@cygnus.com>
