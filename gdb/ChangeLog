@@ -1,3 +1,14 @@
+Sun Oct  6 15:48:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	* buildsym.c (finish_block): Change innerblock_anon_complaint to
+	print the addresses as part of the complaint.  Add a complaint for
+	cases where the block end address is smaller than the block start
+	address, in case any such conditions slip through our fixup mechanism.
+	* symmisc.c (dump_symtab): Only print blockvector for primary
+ 	symtabs, to avoid massive duplication of output due to secondary
+ 	symtabs that point to same blockvector.  Also do some minor 
+	formatting tweaks.
+
 Mon Oct  7 10:42:32 1996  Per Bothner  <bothner@deneb.cygnus.com>
 
 	Replace header_files global by per-objfile field.

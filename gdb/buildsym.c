@@ -60,11 +60,17 @@ make_blockvector PARAMS ((struct objfile *));
 
 /* Complaints about the symbols we have encountered.  */
 
+struct complaint block_end_complaint =
+  {"block end address less than block start address in %s (patched it)", 0, 0};
+
+struct complaint anon_block_end_complaint =
+  {"block end address 0x%lx less than block start address 0x%lx (patched it)", 0, 0};
+
 struct complaint innerblock_complaint =
   {"inner block not inside outer block in %s", 0, 0};
 
 struct complaint innerblock_anon_complaint =
-  {"inner block not inside outer block", 0, 0};
+  {"inner block (0x%lx-0x%lx) not inside outer block (0x%lx-0x%lx)", 0, 0};
 
 struct complaint blockvector_complaint = 
   {"block at 0x%lx out of order", 0, 0};
@@ -320,6 +326,25 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
     }
   *listhead = NULL;
 
+#if 1
+  /* Check to be sure that the blocks have an end address that is
+     greater than starting address */
+
+  if (BLOCK_END (block) < BLOCK_START (block))
+    {
+      if (symbol)
+	{
+	  complain (&block_end_complaint, SYMBOL_SOURCE_NAME (symbol));
+	}
+      else
+	{
+	  complain (&anon_block_end_complaint, BLOCK_END (block), BLOCK_START (block));
+	}
+      /* Better than nothing */
+      BLOCK_END (block) = BLOCK_START (block);
+    }
+#endif
+
   /* Install this block as the superblock
      of all blocks made since the start of this scope
      that don't have superblocks yet.  */
@@ -343,7 +368,9 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		}
 	      else
 		{
-		  complain (&innerblock_anon_complaint);
+		  complain (&innerblock_anon_complaint, BLOCK_START (pblock->block),
+			    BLOCK_END (pblock->block), BLOCK_START (block),
+			    BLOCK_END (block));
 		}
 	      BLOCK_START (pblock->block) = BLOCK_START (block);
 	      BLOCK_END   (pblock->block) = BLOCK_END   (block);
