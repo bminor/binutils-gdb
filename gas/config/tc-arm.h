@@ -180,6 +180,19 @@ enum mstate
   MAP_THUMB
 };
 
+/* We want .cfi_* pseudo-ops for generating unwind info.  */
+#define TARGET_USE_CFIPOP              1
+
+/* The lr register is r14.  */
+#define DWARF2_DEFAULT_RETURN_COLUMN  14
+
+/* Registers are generally saved at negative offsets to the CFA.  */
+#define DWARF2_CIE_DATA_ALIGNMENT     -4
+
+/* CFI hooks.  */
+#define tc_regname_to_dw2regnum            tc_arm_regname_to_dw2regnum
+#define tc_cfi_frame_initial_instructions  tc_arm_frame_initial_instructions
+
 #else /* Not OBJ_ELF.  */
 #define GLOBAL_OFFSET_TABLE_NAME "__GLOBAL_OFFSET_TABLE_"
 #endif
@@ -211,4 +224,5 @@ extern void arm_init_frag (struct frag *);
 extern void arm_handle_align (struct frag *);
 extern bfd_boolean arm_fix_adjustable (struct fix *);
 extern int arm_elf_section_type (const char *, size_t);
-
+extern int tc_arm_regname_to_dw2regnum (const char *regname);
+extern void tc_arm_frame_initial_instructions (void);

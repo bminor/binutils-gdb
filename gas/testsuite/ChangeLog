@@ -1,3 +1,8 @@
+2004-10-23  Daniel Jacobowitz  <dan@debian.org>
+
+	* gas/cfi/cfi-arm-1.d, gas/cfi/cfi-arm-1.s: New files.
+	* gas/cfi/cfi.exp: Run cfi-arm-1 test.
+
 2004-10-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/crx/cop_insn.s: Reverse operands order in store co-processor 

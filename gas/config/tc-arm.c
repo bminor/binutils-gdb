@@ -41,6 +41,7 @@
 #ifdef OBJ_ELF
 #include "elf/arm.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 #endif
 
 /* XXX Set this to 1 after the next binutils release.  */
@@ -14858,6 +14859,31 @@ arm_init_frag (fragS * fragP)
   /* Record whether this frag is in an ARM or a THUMB area.  */
   fragP->tc_frag_data = thumb_mode;
 }
+
+#ifdef OBJ_ELF
+
+/* Convert REGNAME to a DWARF-2 register number.  */
+
+int
+tc_arm_regname_to_dw2regnum (const char *regname)
+{
+  unsigned int i;
+
+  for (i = 0; rn_table[i].name; i++)
+    if (streq (regname, rn_table[i].name))
+      return rn_table[i].number;
+
+  return -1;
+}
+
+/* Initialize the DWARF-2 unwind information for this procedure.  */
+
+void
+tc_arm_frame_initial_instructions (void)
+{
+  cfi_add_CFA_def_cfa (REG_SP, 0);
+}
+#endif
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:

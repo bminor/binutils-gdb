@@ -1,3 +1,19 @@
+2004-10-25  Daniel Jacobowitz  <dan@debian.org>
+
+	* Makefile.am: Run dep-am.
+	* aclocal.m4: Regenerate with automake 1.9.2.
+	* Makefile.in: Regenerate with automake 1.9.2.
+	* doc/Makefile.in: Likewise.
+
+	* config/tc-arm.c: Include "dw2gencfi.h".
+	(tc_arm_regname_to_dw2regnum, tc_arm_frame_initial_instructions):
+	New functions.
+	* config/tc-arm.h (TARGET_USE_CFIPOP, DWARF2_DEFAULT_RETURN_COLUMN)
+	(DWARF2_CIE_DATA_ALIGNMENT, tc_regname_to_dw2regnum)
+	(tc_cfi_frame_initial_instructions): Define.
+	(tc_arm_regname_to_dw2regnum, tc_arm_frame_initial_instructions):
+	Add prototypes.
+
 2004-10-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c (assemble_insn): Check unsigned immediate
