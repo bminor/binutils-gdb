@@ -59,6 +59,7 @@ h8300xray.em
 h8300xray.sc-sh
 h8300xray.sh
 i386aout.sh
+i386coff.sc-sh
 i386coff.sh
 i960.sc-sh
 ld.h
@@ -126,7 +127,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.45  1992/09/11 17:47:22  sac
+# Revision 1.46  1992/09/11 20:43:30  sac
+# Sanitize slip
+#
+# Revision 1.45  1992/09/11  17:47:22  sac
 # Add i386coff.sh
 #
 # Revision 1.44  1992/09/09  18:59:04  ian
