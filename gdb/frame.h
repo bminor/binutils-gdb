@@ -15,54 +15,25 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
-/* A FRAME identifies a specific stack frame.  It is not constant over
-   calls to the inferior (frame addresses are, see below).
+/* Describe the saved registers of a frame.  */
 
-   This is implemented as a "struct frame_info *".  This file and
-   blockframe.c are the only places which are allowed to use the
-   equivalence between FRAME and struct frame_info *.  Exception:
-   Prototypes in other files use "struct frame_info *" because this
-   file might not be included.
+struct frame_saved_regs
+  {
 
-   The distinction between a FRAME and a "struct frame_info *" is made
-   with the idea of maybe someday changing a FRAME to be something else,
-   but seems to me that a "struct frame_info *" is fully general (since
-   any necessarily fields can be added; changing the meaning of existing
-   fields is not helped by the FRAME distinction), and this distinction
-   merely creates unnecessary hair.  -kingdon, 18 May 93.  */
-typedef struct frame_info *FRAME;
+    /* For each register, address of where it was saved on entry to
+       the frame, or zero if it was not saved on entry to this frame.
+       This includes special registers such as pc and fp saved in
+       special ways in the stack frame.  The SP_REGNUM is even more
+       special, the address here is the sp for the next frame, not the
+       address where the sp was saved.  */
 
-/* Convert from a "struct frame_info *" into a FRAME.  */
-#define FRAME_INFO_ID(f)	(f)
-
-/* Convert from a FRAME into a "struct frame_info *".  */
-extern struct frame_info *
-get_frame_info PARAMS ((FRAME));
-
-/* Type of the address of a frame.  It is widely assumed (at least in
-   prototypes in headers which might not include this header) that
-   this is the same as CORE_ADDR, and no one can think of a case in
-   which it wouldn't be, so it might be best to remove this typedef.  */
-typedef CORE_ADDR	FRAME_ADDR;
-
-/* Convert from a FRAME into a frame address.  Except in the
-   machine-dependent *FRAME* macros, a frame address has no defined
-   meaning other than as a magic cookie which identifies a frame over
-   calls to the inferior.  The only known exception is inferior.h
-   (PC_IN_CALL_DUMMY) [ON_STACK]; see comments there.  You cannot
-   assume that a frame address contains enough information to
-   reconstruct the frame; if you want more than just to identify the
-   frame (e.g. be able to fetch variables relative to that frame),
-   then save the whole struct frame_info (and the next struct
-   frame_info, since the latter is used for fetching variables on some
-   machines).  */
-
-#define FRAME_FP(fr)	((fr)->frame)
+    CORE_ADDR regs[NUM_REGS];
+  };
 
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
@@ -80,7 +51,7 @@ struct frame_info
     /* Nominal address of the frame described.  See comments at FRAME_FP
        about what this means outside the *FRAME* macros; in the *FRAME*
        macros, it can mean whatever makes most sense for this machine.  */
-    FRAME_ADDR frame;
+    CORE_ADDR frame;
 
     /* Address at which execution is occurring in this frame.
        For the innermost frame, it's the current pc.
@@ -108,23 +79,36 @@ struct frame_info
        but there is no reason it couldn't be general.  */
 
     /* Pointers to the next and previous frame_info's in the frame cache.  */
-    FRAME next, prev;
+   struct frame_info *next, *prev;
   };
 
-/* Describe the saved registers of a frame.  */
+/* Dummy frame.  This saves the processor state just prior to setting up the
+   inferior function call.  On most targets, the registers are saved on the
+   target stack, but that really slows down function calls.  */
 
-struct frame_saved_regs
-  {
+struct dummy_frame
+{
+  struct dummy_frame *next;
 
-    /* For each register, address of where it was saved on entry to
-       the frame, or zero if it was not saved on entry to this frame.
-       This includes special registers such as pc and fp saved in
-       special ways in the stack frame.  The SP_REGNUM is even more
-       special, the address here is the sp for the next frame, not the
-       address where the sp was saved.  */
+  CORE_ADDR pc;
+  CORE_ADDR fp;
+  CORE_ADDR sp;
+  char regs[REGISTER_BYTES];
+};
 
-    CORE_ADDR regs[NUM_REGS];
-  };
+/* Return the frame address from FR.  Except in the machine-dependent
+   *FRAME* macros, a frame address has no defined meaning other than
+   as a magic cookie which identifies a frame over calls to the
+   inferior.  The only known exception is inferior.h
+   (PC_IN_CALL_DUMMY) [ON_STACK]; see comments there.  You cannot
+   assume that a frame address contains enough information to
+   reconstruct the frame; if you want more than just to identify the
+   frame (e.g. be able to fetch variables relative to that frame),
+   then save the whole struct frame_info (and the next struct
+   frame_info, since the latter is used for fetching variables on some
+   machines).  */
+
+#define FRAME_FP(fi) ((fi)->frame)
 
 /* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
@@ -156,25 +140,10 @@ struct frame_saved_regs
 
 #endif	/* FRAME_CHAIN_VALID */
 
-/* If we encounter a request to use base register addressing of variables
-   on a machine for which gdb has not been configured to support such
-   access, report the failure to support this access mode. */
-
-/* FIXME: Code using this should be using get_saved_register, and a
-   basereg number should just be an ordinary register number.  There
-   is no reason for this to be machine-specific.  */
-
-#if !defined (FRAME_GET_BASEREG_VALUE)
-
-#define FRAME_GET_BASEREG_VALUE(frame, regno) \
-  (error ("Missing valid method for finding contents of base register."),0)
-
-#endif
-
 /* The stack frame that the user has specified for commands to act on.
    Note that one cannot assume this is the address of valid data.  */
 
-extern FRAME selected_frame;
+extern struct frame_info *selected_frame;
 
 /* Level of the selected frame:
    0 for innermost, 1 for its caller, ...
@@ -182,72 +151,82 @@ extern FRAME selected_frame;
 
 extern int selected_frame_level;
 
-extern struct frame_info *
-get_prev_frame_info PARAMS ((FRAME));
+extern struct frame_info *get_prev_frame_info PARAMS ((struct frame_info *));
 
-extern FRAME
-create_new_frame PARAMS ((FRAME_ADDR, CORE_ADDR));
+extern struct frame_info *create_new_frame PARAMS ((CORE_ADDR, CORE_ADDR));
 
-extern void
-flush_cached_frames PARAMS ((void));
+extern void flush_cached_frames PARAMS ((void));
 
-extern void
-reinit_frame_cache PARAMS ((void));
+extern void reinit_frame_cache PARAMS ((void));
 
-extern void
-get_frame_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
+extern void get_frame_saved_regs PARAMS ((struct frame_info *,
+					  struct frame_saved_regs *));
 
-extern void
-set_current_frame PARAMS ((FRAME));
+extern void set_current_frame PARAMS ((struct frame_info *));
 
-extern FRAME
-get_prev_frame PARAMS ((FRAME));
+extern struct frame_info *get_prev_frame PARAMS ((struct frame_info *));
 
-extern FRAME
-get_current_frame PARAMS ((void));
+extern struct frame_info *get_current_frame PARAMS ((void));
 
-extern FRAME
-get_next_frame PARAMS ((FRAME));
+extern struct frame_info *get_next_frame PARAMS ((struct frame_info *));
 
-extern struct block *
-get_frame_block PARAMS ((FRAME));
+extern struct block *get_frame_block PARAMS ((struct frame_info *));
 
-extern struct block *
-get_current_block PARAMS ((void));
+extern struct block *get_current_block PARAMS ((void));
 
-extern struct block *
-get_selected_block PARAMS ((void));
+extern struct block *get_selected_block PARAMS ((void));
 
-extern struct symbol *
-get_frame_function PARAMS ((FRAME));
+extern struct symbol *get_frame_function PARAMS ((struct frame_info *));
 
-extern CORE_ADDR
-get_frame_pc PARAMS ((FRAME));
+extern CORE_ADDR get_frame_pc PARAMS ((struct frame_info *));
 
-extern CORE_ADDR
-get_pc_function_start PARAMS ((CORE_ADDR));
+extern CORE_ADDR get_pc_function_start PARAMS ((CORE_ADDR));
 
 extern struct block * block_for_pc PARAMS ((CORE_ADDR));
 
-extern int frameless_look_for_prologue PARAMS ((FRAME));
+extern struct block * block_for_pc_sect PARAMS ((CORE_ADDR, asection *));
+
+extern int frameless_look_for_prologue PARAMS ((struct frame_info *));
 
 extern void print_frame_args PARAMS ((struct symbol *, struct frame_info *,
-				      int, FILE *));
+				      int, GDB_FILE *));
 
-extern FRAME find_relative_frame PARAMS ((FRAME, int*));
+extern struct frame_info *find_relative_frame PARAMS ((struct frame_info *, int*));
 
-extern void print_stack_frame PARAMS ((FRAME, int, int));
+extern void print_stack_frame PARAMS ((struct frame_info *, int, int));
 
-extern void select_frame PARAMS ((FRAME, int));
+extern void select_frame PARAMS ((struct frame_info *, int));
 
-extern void record_selected_frame PARAMS ((FRAME_ADDR *, int *));
+extern void record_selected_frame PARAMS ((CORE_ADDR *, int *));
 
 extern void print_frame_info PARAMS ((struct frame_info *, int, int, int));
 
-extern CORE_ADDR find_saved_register PARAMS ((FRAME, int));
+extern CORE_ADDR find_saved_register PARAMS ((struct frame_info *, int));
 
-extern FRAME block_innermost_frame PARAMS ((struct block *));
+extern struct frame_info *block_innermost_frame PARAMS ((struct block *));
 
-extern CORE_ADDR sigtramp_saved_pc PARAMS ((FRAME));
+extern struct frame_info *find_frame_addr_in_frame_chain PARAMS ((CORE_ADDR));
+
+extern CORE_ADDR sigtramp_saved_pc PARAMS ((struct frame_info *));
+
+extern int       generic_frame_chain_valid   PARAMS ((CORE_ADDR, 
+						      struct frame_info *));
+extern CORE_ADDR generic_read_register_dummy PARAMS ((CORE_ADDR pc, 
+						      CORE_ADDR fp, 
+						      int));
+extern void      generic_push_dummy_frame    PARAMS ((void));
+extern void      generic_pop_dummy_frame     PARAMS ((void));
+
+extern int       generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
+						      CORE_ADDR fp));
+extern char *    generic_find_dummy_frame    PARAMS ((CORE_ADDR pc, 
+						      CORE_ADDR fp));
+
+#ifdef __GNUC__
+enum lval_type;
+#endif
+
+extern void	 generic_get_saved_register  PARAMS ((char *, int *, CORE_ADDR *, struct frame_info *, int, enum lval_type *));
+
 
 #endif /* !defined (FRAME_H)  */
