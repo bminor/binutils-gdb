@@ -229,10 +229,10 @@ captured_main (void *data)
 #endif
 
   /* There will always be an interpreter.  Either the one passed into
-     this captured main (not yet implemented), or one specified by the
-     user at start up, or the console.  Make life easier by always
-     initializing the interpreter to something.  */
-  interpreter_p = xstrdup (INTERP_CONSOLE);
+     this captured main, or one specified by the user at start up, or
+     the console.  Initialize the interpreter to the one requested by 
+     the application.  */
+  interpreter_p = xstrdup (context->interpreter_p);
 
   /* Parse arguments and options.  */
   {

@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "main.h"
 #include "gdb_string.h"
+#include "interps.h"
 
 int
 main (int argc, char **argv)
@@ -30,5 +31,6 @@ main (int argc, char **argv)
   args.argc = argc;
   args.argv = argv;
   args.use_windows = 0;
+  args.interpreter_p = INTERP_CONSOLE;
   return gdb_main (&args);
 }

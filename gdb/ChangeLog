@@ -1,3 +1,10 @@
+2003-02-13  Keith R Seitz  <keiths@redhat.com>
+
+	* main.h (struct captured_main_args): Add interpreter_p.
+	* main.c (captured_main): Initialize interpreter_p from context.
+	* gdb.c (main): Set interpreter_p argument.
+	* Makefile.in (gdb.o): Add dependency for interps.h.
+
 2003-02-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* event-top.c (cli_command_loop): Delete declaration.
