@@ -54,6 +54,9 @@ bfd *output_bfd = 0;
 
 extern boolean option_v;
 
+/* set if -y on the command line */
+int had_y;
+
 /* The local symbol prefix */
 char lprefix = 'L';
 
@@ -342,6 +345,8 @@ DEFUN (Q_enter_global_ref, (nlist_p, name),
   flagword this_symbol_flags = sym->flags;
 
   sp = ldsym_get (name);
+
+
   /* If this symbol already has udata, it means that something strange 
      has happened.
      
@@ -371,7 +376,7 @@ DEFUN (Q_enter_global_ref, (nlist_p, name),
   }
   else
   {
-    if (sym->section == &bfd_com_section)
+    if (bfd_is_com_section (sym->section))
     {
       /* If we have a definition of this symbol already then
 	 this common turns into a reference. Also we only
@@ -431,17 +436,19 @@ DEFUN (Q_enter_global_ref, (nlist_p, name),
       {
 	/* Multiple definition */
 	asymbol *sy = *(sp->sdefs_chain);
-	lang_input_statement_type *stat = (lang_input_statement_type *) sy->the_bfd->usrdata;
-	lang_input_statement_type *stat1 = (lang_input_statement_type *) sym->the_bfd->usrdata;
+	lang_input_statement_type *stat =
+	  (lang_input_statement_type *) bfd_asymbol_bfd(sy)->usrdata;
+	lang_input_statement_type *stat1 =
+	  (lang_input_statement_type *) bfd_asymbol_bfd(sym)->usrdata;
 	asymbol **stat1_symbols = stat1 ? stat1->asymbols : 0;
 	asymbol **stat_symbols = stat ? stat->asymbols : 0;
 
 	multiple_def_count++;
 	einfo ("%X%C: multiple definition of `%T'\n",
-	       sym->the_bfd, sym->section, stat1_symbols, sym->value, sym);
+	       bfd_asymbol_bfd(sym), sym->section, stat1_symbols, sym->value, sym);
 
 	einfo ("%X%C: first seen here\n",
-	       sy->the_bfd, sy->section, stat_symbols, sy->value);
+	       bfd_asymbol_bfd(sy), sy->section, stat_symbols, sy->value);
       }
       else
       {
@@ -489,61 +496,76 @@ Q_enter_file_symbols (entry)
   asymbol **q;
 
   entry->common_section =
-    bfd_make_section_old_way (entry->the_bfd, "COMMON");
+   bfd_make_section_old_way (entry->the_bfd, "COMMON");
 
   ldlang_add_file (entry);
 
 
   if (trace_files || option_v)
-    {
-      info ("%I\n", entry);
-    }
+  {
+    info ("%I\n", entry);
+  }
 
   total_symbols_seen += entry->symbol_count;
   total_files_seen++;
   if (entry->symbol_count)
+  {
+    for (q = entry->asymbols; *q; q++)
     {
-      for (q = entry->asymbols; *q; q++)
+      asymbol *p = *q;
+
+      if (had_y && p->name) 
+      {
+	/* look up the symbol anyway to see if the trace bit was
+	   set */
+	ldsym_type *s = ldsym_get(p->name);
+	if (s->flags & SYM_Y) 
 	{
-	  asymbol *p = *q;
-
-	  if (p->flags & BSF_INDIRECT)
-	    {
-	      add_indirect (q);
-	    }
-	  else if (p->flags & BSF_WARNING)
-	    {
-	      add_warning (p);
-	    }
-	  else if (p->section == &bfd_und_section
-		   || (p->flags & BSF_GLOBAL)
-		   || p->section == &bfd_com_section
-		   || (p->flags & BSF_CONSTRUCTOR))
-
-	    {
-
-	      asymbol *p = *q;
-
-	      if (p->flags & BSF_INDIRECT)
-		{
-		  add_indirect (q);
-		}
-	      else if (p->flags & BSF_WARNING)
-		{
-		  add_warning (p);
-		}
-	      else if (p->section == &bfd_und_section
-		       || (p->flags & BSF_GLOBAL)
-		       || p->section == &bfd_com_section
-		       || (p->flags & BSF_CONSTRUCTOR))
-		{
-		  Q_enter_global_ref (q, p->name);
-		}
-
-	    }
+	  einfo("%B: %s %T\n", entry->the_bfd,
+		p->section ==  &bfd_und_section ? "reference to" : "definition of ",
+		p);
 	}
+      }
+
+      if (p->flags & BSF_INDIRECT)
+      {
+	add_indirect (q);
+      }
+      else if (p->flags & BSF_WARNING)
+      {
+	add_warning (p);
+      }
+      else if (p->section == &bfd_und_section
+	       || (p->flags & BSF_GLOBAL)
+	       || bfd_is_com_section (p->section)
+	       || (p->flags & BSF_CONSTRUCTOR))
+
+      {
+
+	asymbol *p = *q;
+
+	if (p->flags & BSF_INDIRECT)
+	{
+	  add_indirect (q);
+	}
+	else if (p->flags & BSF_WARNING)
+	{
+	  add_warning (p);
+	}
+	else if (p->section == &bfd_und_section
+		 || (p->flags & BSF_GLOBAL)
+		 || bfd_is_com_section (p->section)
+		 || (p->flags & BSF_CONSTRUCTOR))
+	{
+	  Q_enter_global_ref (q, p->name);
+	}
+
+      }
+
     }
+  }
 }
+
 
 /* Searching libraries */
 
@@ -652,21 +674,37 @@ decode_library_subfile (library_entry, subfile_offset)
      bfd *subfile_offset;
 {
   register struct lang_input_statement_struct *subentry;
-  subentry = (struct lang_input_statement_struct *) ldmalloc ((bfd_size_type) (sizeof (struct lang_input_statement_struct)));
 
-  subentry->filename = subfile_offset->filename;
-  subentry->local_sym_name = subfile_offset->filename;
-  subentry->asymbols = 0;
-  subentry->the_bfd = subfile_offset;
-  subentry->subfiles = 0;
-  subentry->next = 0;
-  subentry->superfile = library_entry;
-  subentry->is_archive = false;
 
-  subentry->just_syms_flag = false;
-  subentry->loaded = false;
-  subentry->chain = 0;
+  /* First, check if we already have a loaded
+     lang_input_statement_struct  for this library subfile.  If so,
+     just return it.  Otherwise, allocate some space and build a new one. */
 
+  if ( subfile_offset->usrdata
+      && ((struct lang_input_statement_struct *)subfile_offset->usrdata)->
+      loaded == true ) 
+  {
+    subentry = (struct lang_input_statement_struct *)subfile_offset->usrdata;
+  }
+  else 
+  {
+    subentry =
+     (struct lang_input_statement_struct *)
+      ldmalloc ((bfd_size_type) (sizeof (struct lang_input_statement_struct)));
+
+    subentry->filename = subfile_offset->filename;
+    subentry->local_sym_name = subfile_offset->filename;
+    subentry->asymbols = 0;
+    subentry->the_bfd = subfile_offset;
+    subentry->subfiles = 0;
+    subentry->next = 0;
+    subentry->superfile = library_entry;
+    subentry->is_archive = false;
+
+    subentry->just_syms_flag = false;
+    subentry->loaded = false;
+    subentry->chain = 0;
+  }
   return subentry;
 }
 
@@ -818,9 +856,15 @@ linear_library (entry)
 
   if (entry->complained == false)
     {
-      einfo ("%P: library %s has bad table of contents, rerun ranlib\n",
-	     entry->the_bfd->filename);
+      if (entry->the_bfd->xvec->flavour != bfd_target_ieee_flavour) 
+                                           
+      {
+	/* IEEE can use table of contents, so this message is bogus */
+	einfo ("%P: library %s has bad table of contents, rerun ranlib\n",
+	       entry->the_bfd->filename);
+      }
       entry->complained = true;
+
     }
   while (more_to_do)
     {
@@ -900,7 +944,7 @@ subfile_wanted_p (entry)
 /**	add_indirect(q);*/
 	}
 
-      if (p->section == &bfd_com_section
+      if (bfd_is_com_section (p->section)
 	  || (p->flags & BSF_GLOBAL)
 	  || (p->flags & BSF_INDIRECT))
 	{
@@ -917,7 +961,7 @@ subfile_wanted_p (entry)
 		  /* This is a symbol we are looking for.  It is either
 		     not yet defined or common.  */
 
-		  if (p->section == &bfd_com_section)
+		  if (bfd_is_com_section (p->section))
 		    {
 
 		      /* If the symbol in the table is a constructor, we won't to
@@ -962,12 +1006,12 @@ subfile_wanted_p (entry)
 			    asymbol *com = *(sp->scoms_chain);
 
 			    if (((lang_input_statement_type *)
-				 (com->the_bfd->usrdata))->common_section ==
+				 (bfd_asymbol_bfd(com)->usrdata))->common_section ==
 				(asection *) NULL)
 			      {
 				((lang_input_statement_type *)
-				 (com->the_bfd->usrdata))->common_section =
-				  bfd_make_section_old_way (com->the_bfd, "COMMON");
+				 (bfd_asymbol_bfd(com)->usrdata))->common_section =
+				  bfd_make_section_old_way (bfd_asymbol_bfd(com), "COMMON");
 			      }
 			  }
 			}
@@ -988,4 +1032,13 @@ subfile_wanted_p (entry)
     }
 
   return false;
+}
+
+void
+add_ysym(text)
+char *text;
+{
+  ldsym_type *lookup = ldsym_get(text);
+  lookup->flags |= SYM_Y;
+  had_y = 1;
 }

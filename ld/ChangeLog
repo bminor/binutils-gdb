@@ -1,3 +1,8 @@
+Tue Jan 26 11:49:50 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldmain.c, ldsym.c: Use new bfd_is_com_section macro rather than
+	checking for equality to bfd_com_section.
+
 Fri Jan 22 14:22:44 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips.sc-sh: New file.  Ultrix, and hopefully other MIPS ECOFF

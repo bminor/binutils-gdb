@@ -275,7 +275,7 @@ process_keepsyms (table, size)
     {
       asymbol *s = *sym;
       if (s->section == &bfd_und_section
-	  || s->section == &bfd_com_section
+	  || bfd_is_com_section (s->section)
 	  || s->flags & BSF_KEEP_G)
 	KEEP (sym);
     }
@@ -483,7 +483,7 @@ asymbol **output_buffer;
 	  }
 	}
 	else if (p->section == &bfd_und_section
-		 || p->section == &bfd_com_section)
+		 || bfd_is_com_section (p->section))
 	{
 	  /* These must be global.  */
 	}
