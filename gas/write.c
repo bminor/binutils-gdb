@@ -116,6 +116,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_pcrel_adjust = 0;
   fixP->fx_bit_fixP = 0;
   fixP->fx_addnumber = 0;
+  fixP->tc_fix_data = NULL;
 
 #ifdef TC_something
   fixP->fx_bsr = 0;
@@ -441,13 +442,12 @@ relax_and_size_seg (abfd, sec, xxx)
       x = bfd_set_section_flags (abfd, sec, flags);
       assert (x == true);
     }
-  size = md_section_align (sec, size);
-  x = bfd_set_section_size (abfd, sec, size);
+  newsize = md_section_align (sec, size);
+  x = bfd_set_section_size (abfd, sec, newsize);
   assert (x == true);
 
   /* If the size had to be rounded up, add some padding in the last
      non-empty frag.  */
-  newsize = bfd_get_section_size_before_reloc (sec);
   assert (newsize >= size);
   if (size != newsize)
     {
@@ -552,7 +552,10 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   the PA.  */
 #ifdef tc_fix_adjustable
 	if (! tc_fix_adjustable (fixp))
-	  continue;
+	  {
+	    fixp->fx_addsy->sy_used_in_reloc = 1;
+	    continue;
+	  }
 #endif
 
 	/* If the section symbol isn't going to be output, the relocs
@@ -1914,15 +1917,15 @@ fixup_segment (fixP, this_segment_type)
 			    segment_name (S_GET_SEGMENT (sub_symbolP)),
 			    S_GET_NAME (sub_symbolP), buf);
 		  }
-#else
-                else
-                  {
-                    seg_reloc_count++;
-		    fixP->fx_addnumber = add_number;	/* Remember value for emit_reloc */
-                    continue;
-                  }		/* if absolute */
-#endif
 	      }
+#else
+              else
+                {
+                  seg_reloc_count++;
+		  fixP->fx_addnumber = add_number;	/* Remember value for emit_reloc */
+                  continue;
+                }		/* if absolute */
+#endif
 	  }
 
 	if (add_symbolP)

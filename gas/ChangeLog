@@ -1,5 +1,8 @@
 Sun Oct 31 00:36:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* write.c (relax_and_size_seg): Correct test to determine if
+	the section's size was rounded up.
+
 	* config/obj-som.h (obj_set_symbol_type): Define a hook so GAS
 	can properly set all the SOM symbol types.
 	* config/tc-hppa.c (pa_symbol_type): New enum to represent the 
