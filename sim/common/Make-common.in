@@ -239,6 +239,7 @@ sim-events_h = $(srcdir)/../common/sim-events.h
 sim-fpu_h = $(srcdir)/../common/sim-fpu.h
 sim-io_h = $(srcdir)/../common/sim-io.h
 sim-options_h = $(srcdir)/../common/sim-options.h
+sim-break_h = $(srcdir)/../common/sim-break.h
 
 # FIXME: If this complicated way of building .o files from ../common is
 # necessary, the reason should be documented here.
@@ -352,6 +353,10 @@ sim-watch.o: $(srcdir)/../common/sim-watch.c $(sim_main_headers) \
 
 sim-load.o: $(srcdir)/../common/sim-load.c
 	$(CC) -c $(srcdir)/../common/sim-load.c $(ALL_CFLAGS)
+
+sim-break.o: $(srcdir)/../common/sim-break.c $(sim_main_headers) \
+	  $(SIM_EXTRA_DEPS) $(sim_break_h)
+	$(CC) -c $(srcdir)/../common/sim-break.c $(ALL_CFLAGS)
 
 nrun.o: $(srcdir)/../common/nrun.c config.h tconfig.h \
 	  $(srcroot)/include/callback.h $(sim_main_headers)

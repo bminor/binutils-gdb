@@ -1,3 +1,11 @@
+Wed Sep 24 17:41:40 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* Make-common.in:  New files sim-break.c, sim-break.h.
+	* sim-base.h:  Add point to breakpoint list to sim_state_base.
+	* sim-break.c sim-break.h:  New modules that implement intrinsic
+	breakpoint support.
+	* sim-module.c:  Add breakpoint module.
+	
 Tue Sep 23 00:26:39 1997  Felix Lee  <flee@yin.cygnus.com>
 
 	* sim-events.c (SIM_EVENTS_POLL_RATE): poll more often than once

@@ -53,6 +53,8 @@ sim-base.h
 sim-basics.h
 sim-bits.c
 sim-bits.h
+sim-break.c
+sim-break.h
 sim-config.c
 sim-config.h
 sim-core.c
