@@ -1414,6 +1414,10 @@ extern int in_prologue (CORE_ADDR pc, CORE_ADDR func_start);
 extern struct symbol *fixup_symbol_section (struct symbol *,
 					    struct objfile *);
 
+extern struct partial_symbol *fixup_psymbol_section (struct partial_symbol
+						     *psym,
+						     struct objfile *objfile);
+
 /* Symbol searching */
 
 /* When using search_symbols, a list of the following structs is returned.

@@ -81,10 +81,6 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *, int,
 						     namespace_enum);
 
-static struct partial_symbol *fixup_psymbol_section (struct
-						     partial_symbol *,
-						     struct objfile *);
-
 static struct symtab *lookup_symtab_1 (char *);
 
 static void cplusplus_hint (char *);
@@ -520,7 +516,10 @@ fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
   msym = lookup_minimal_symbol (ginfo->name, NULL, objfile);
 
   if (msym)
-    ginfo->bfd_section = SYMBOL_BFD_SECTION (msym);
+    {
+      ginfo->bfd_section = SYMBOL_BFD_SECTION (msym);
+      ginfo->section = SYMBOL_SECTION (msym);
+    }
 }
 
 struct symbol *
@@ -537,7 +536,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   return sym;
 }
 
-static struct partial_symbol *
+struct partial_symbol *
 fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 {
   if (!psym)

@@ -1,5 +1,14 @@
 2000-08-04  Kevin Buettner  <kevinb@redhat.com>
 
+	* symtab.h (fixup_psymbol_section): Declare.
+	* symtab.c (fixup_psymbol_section): Make extern.
+	(fixup_section): Fix up section as well as bfd_section.
+	* objfiles.c (objfile_relocate): Call fixup_symbol_section
+	or fixup_psymbol_section before attempting to access
+	the SYMBOL_SECTION component of a symbol or partial symbol.
+
+2000-08-04  Kevin Buettner  <kevinb@redhat.com>
+
 	* minsyms.c (build_minimal_symbol_hash_tables): New function.
 	(compact_minimal_symbols): Don't construct hash tables here.
 	(install_minimal_symbols): Instead, construct them here.

@@ -564,6 +564,9 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	  for (j = 0; j < BLOCK_NSYMS (b); ++j)
 	    {
 	      struct symbol *sym = BLOCK_SYM (b, j);
+
+	      fixup_symbol_section (sym, objfile);
+
 	      /* The RS6000 code from which this was taken skipped
 	         any symbols in STRUCT_NAMESPACE or UNDEF_NAMESPACE.
 	         But I'm leaving out that test, on the theory that
@@ -606,15 +609,21 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
     for (psym = objfile->global_psymbols.list;
 	 psym < objfile->global_psymbols.next;
 	 psym++)
-      if (SYMBOL_SECTION (*psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
-						  SYMBOL_SECTION (*psym));
+      {
+	fixup_psymbol_section (*psym, objfile);
+	if (SYMBOL_SECTION (*psym) >= 0)
+	  SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
+						    SYMBOL_SECTION (*psym));
+      }
     for (psym = objfile->static_psymbols.list;
 	 psym < objfile->static_psymbols.next;
 	 psym++)
-      if (SYMBOL_SECTION (*psym) >= 0)
-	SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
-						  SYMBOL_SECTION (*psym));
+      {
+	fixup_psymbol_section (*psym, objfile);
+	if (SYMBOL_SECTION (*psym) >= 0)
+	  SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
+						    SYMBOL_SECTION (*psym));
+      }
   }
 
   {
