@@ -500,7 +500,6 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
-elf_bfd_h =     $(BFD_SRC)/elf-bfd.h
 dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
 
@@ -1243,7 +1242,7 @@ dwarfread.o: dwarfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
 	$(symtab_h) gdb_string.h
 
-dwarf2read.o: dwarf2read.c $(bfd_h) $(elf_bfd_h) buildsym.h $(defs_h) \
+dwarf2read.o: dwarf2read.c $(bfd_h) buildsym.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
 	$(symtab_h) gdb_string.h
 

@@ -1,3 +1,16 @@
+2000-04-08  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c: Revert Andrew Cagney's change of Dec 15, 1997.
+	Don't include "bfd-elf.h".
+	(address_significant_size): Delete variable.
+	(dwarf2_build_psymtabs_hard): Don't set it, or check for
+	consistency between it and the Dwarf 2 compilation unit header
+	address size.
+	(read_address): Don't mask off bits above
+	address_significant_size.
+	* Makefile.in (dwarf2read.o): Don't depend on $(elf_bfd_h).
+	(elf_bfd_h): Remove variable; it's no longer used.
+
 2000-04-08  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* configure.in (NEW_PROC_API):  Escape square brackets when testing
