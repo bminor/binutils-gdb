@@ -169,10 +169,9 @@ STAGESTUFF = *.x *.x[ru] *.sc[ru] $(GENERATED_SOURCES) $(GENERATED_HEADERS) $(OF
 all: Makefile $(LD_PROG) ld.info
 
 ldgram.h ldgram.c: ldgram.y
-	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y -o ldgram.c
-#	These are in case BISON is really yacc (which ignores -o).
-	if [ -f y.tab.c -a ! -f ldgram.c ]; then mv y.tab.c ldgram.c; else true ; fi
-	if [ -f y.tab.h -a ! -f ldgram.h ]; then mv y.tab.h ldgram.h; else true ; fi
+	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y
+	mv -f y.tab.c ldgram.c
+	mv -f y.tab.h ldgram.h
 
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c 
