@@ -1,3 +1,7 @@
+2002-10-11  David O'Brien  <obrien@FreeBSD.org>
+
+	* gas/gasp.texi: Fix typo in noting that gasp is now deprecated.
+
 2002-10-11  Michel Six  <msix@ccr.jussieu.fr>
 	    Alan Modra  <amodra@bigpond.net.au>
 
