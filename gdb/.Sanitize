@@ -269,7 +269,6 @@ somread.c
 somsolib.c
 somsolib.h
 source.c
-sp64-tdep.c
 sparc-nat.c
 sparc-stub.c
 sparc-tdep.c
