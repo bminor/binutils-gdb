@@ -1244,30 +1244,32 @@ If there is more than one possibility for the next word when you press
 characters and try again, or just press @key{TAB} a second time, and
 _GDBN__ will display all the possible completions for that word.  For
 example, you might want to set a breakpoint on a subroutine whose name
-begins with @samp{mak}, but when you type @kbd{b mak@key{TAB}} _GDBN__
+begins with @samp{make_}, but when you type @kbd{b make_@key{TAB}} _GDBN__
 just sounds the bell.  Typing @key{TAB} again will display all the
 function names in your program that begin with those characters, for
 example:
 
 @example
-(_GDBP__) b mak@key{TAB}
+(_GDBP__) b make_@key{TAB}
+@exdent _GDBN__ sounds bell; press @key{TAB} again, to see:
 make_a_section_from_file     make_environ               
 make_abs_section             make_function_type         
 make_blockvector             make_pointer_type          
 make_cleanup                 make_reference_type        
 make_command                 make_symbol_completion_list
-(GDBP__) b mak
+(GDBP__) b make_
 @end example
 
 @noindent
 After displaying the available possibilities, _GDBN__ copies your
-partial input (@samp{b mak} in the example) so you can finish the
+partial input (@samp{b make_} in the example) so you can finish the
 command.
 
 If you just want to see the list of alternatives in the first place, you
-can press @kbd{M-?} rather than pressing @key{TAB} twice. (@kbd{M-?}
-means @kbd{@key{META} ?}.  If your keyboard doesn't have a Meta shift,
-you can type @key{ESC} followed by @kbd{?} instead.)
+can press @kbd{M-?} rather than pressing @key{TAB} twice. @kbd{M-?}
+means @kbd{@key{META} ?}.  You can type this either by holding down a
+key designated as the @key{META} shift on your keyboard (if there is
+one) while typing @kbd{?}, or by typing @key{ESC} followed by @kbd{?}.
 
 @cindex quotes in commands
 @cindex completion of quoted strings
@@ -1279,17 +1281,19 @@ you may enclose words in @code{'} (single quote marks) in _GDBN__ commands.
 The most likely situation where you might need this is in typing the
 name of a C++ function.  This is because C++ allows function overloading
 (multiple definitions of the same function, distinguished by argument
-type).  For example, you may need to distinguish whether you mean
-@samp{name(int)} or @samp{name(float)} when you want to set a
-breakpoint.  To use the word-completion facilities in this situation,
-type a single quote @code{'} at the beginning of the function name.
-This alerts _GDBN__ that it may need to consider more information than
-usual when you press @key{TAB} or @kbd{M-?} to request word completion:
+type).  For example, when you want to set a breakpoint you may need to
+distinguish whether you mean the version of @code{name} that takes an
+@code{int} parameter, @code{name(int)}, or the version that takes a
+@code{float} parameter, @code{name(float)}.  To use the word-completion
+facilities in this situation, type a single quote @code{'} at the
+beginning of the function name.  This alerts _GDBN__ that it may need to
+consider more information than usual when you press @key{TAB} or
+@kbd{M-?} to request word completion:
 
 @example
 (_GDBP__) b 'name(@key{M-?}
 name(int)    name(float)
-(_GDBP__) b 'name
+(_GDBP__) b 'name(
 @end example
 
 @node Help,  , Completion, Commands
@@ -4991,8 +4995,31 @@ Pointer constants are an integral value.
 @subsubsection C++ Expressions
 
 @cindex expressions in C++
-_GDBN__'s expression handling has the following extensions to
-interpret a significant subset of C++ expressions:
+_GDBN__'s expression handling has a number of extensions to
+interpret a significant subset of C++ expressions.
+
+@cindex C++ support, not in @sc{coff}
+@cindex @sc{coff} versus C++
+@cindex C++ and object formats
+@cindex object formats and C++
+@cindex a.out and C++
+@cindex @sc{ecoff} and C++
+@cindex @sc{xcoff} and C++
+@cindex @sc{elf}/stabs and C++
+@cindex @sc{elf}/@sc{dwarf} and C++
+@quotation
+@emph{Warning:} Most of these extensions depend on the use of additional
+debugging information in the symbol table, and thus require a rich,
+extendable object code format.  In particular, if your system uses
+a.out, MIPS @sc{ecoff}, RS/6000 @sc{xcoff}, or Sun @sc{elf} with stabs
+extensions to the symbol table, these facilities are all available.
+Where the object code format is standard @sc{coff}, on the other hand,
+most of the C++ support in _GDBN__ will @emph{not} work, nor can it.
+For the standard SVr4 debugging format, @sc{dwarf} in @sc{elf}, the
+standard is still evolving, so the C++ support in _GDBN__ is still
+fragile; when this debugging format stabilizes, however, C++ support
+will also be available on systems that use it.
+@end quotation
 
 @enumerate
 
@@ -7648,11 +7675,11 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @cindex GDB reference card
 @cindex reference card
 The GDB 4 release includes an already-formatted reference card, ready
-for printing on a PostScript or GhostScript printer, in the @file{gdb}
+for printing with PostScript or GhostScript, in the @file{gdb}
 subdirectory of the main source directory---in
-@file{gdb-_GDB_VN__/gdb/refcard.ps} of the version _GDB_VN__ release.  If you have
-a PostScript or GhostScript printer, you can print the reference card
-by just sending @file{refcard.ps} to the printer.
+@file{gdb-_GDB_VN__/gdb/refcard.ps} of the version _GDB_VN__ release.
+If you can use PostScript or GhostScript with your printer, you can
+print the reference card immediately with @file{refcard.ps}.
 
 The release also includes the source for the reference card.  You
 can format it, using @TeX{}, by typing:
@@ -7927,7 +7954,7 @@ aliases.  @code{configure} calls the Bourne shell script
 script, if you wish, or you can use it to test your guesses on
 abbreviations---for example:
 
-@example
+@smallexample
 % sh config.sub sun4
 sparc-sun-sunos411
 % sh config.sub sun3
@@ -7940,7 +7967,7 @@ m68k-hp-bsd
 i386-unknown-sysv
 % sh config.sub i786v
 Invalid configuration `i786v': machine `i786v' not recognized
-@end example
+@end smallexample
 
 @noindent
 @code{config.sub} is also distributed in the GDB source
