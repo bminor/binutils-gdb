@@ -2406,6 +2406,52 @@ make_cleanup_free_search_symbols (struct symbol_search *symbols)
   return make_cleanup (do_free_search_symbols_cleanup, symbols);
 }
 
+/* Helper function for sort_search_symbols and qsort.  Can only
+   sort symbols, not minimal symbols.  */
+static int
+compare_search_syms (const void *sa, const void *sb)
+{
+  struct symbol_search **sym_a = (struct symbol_search **) sa;
+  struct symbol_search **sym_b = (struct symbol_search **) sb;
+
+  return strcmp (SYMBOL_SOURCE_NAME ((*sym_a)->symbol),
+		 SYMBOL_SOURCE_NAME ((*sym_b)->symbol));
+}
+
+/* Sort the ``nfound'' symbols in the list after prevtail.  Leave
+   prevtail where it is, but update its next pointer to point to
+   the first of the sorted symbols.  */
+static struct symbol_search *
+sort_search_symbols (struct symbol_search *prevtail, int nfound)
+{
+  struct symbol_search **symbols, *symp, *old_next;
+  int i;
+
+  symbols = (struct symbol_search **) xmalloc (sizeof (struct symbol_search *)
+					       * nfound);
+  symp = prevtail->next;
+  for (i = 0; i < nfound; i++)
+    {
+      symbols[i] = symp;
+      symp = symp->next;
+    }
+  /* Generally NULL.  */
+  old_next = symp;
+
+  qsort (symbols, nfound, sizeof (struct symbol_search *),
+	 compare_search_syms);
+
+  symp = prevtail;
+  for (i = 0; i < nfound; i++)
+    {
+      symp->next = symbols[i];
+      symp = symp->next;
+    }
+  symp->next = old_next;
+
+  free (symbols);
+  return symp;
+}
 
 /* Search the symbol table for matches to the regular expression REGEXP,
    returning the results in *MATCHES.
@@ -2418,6 +2464,9 @@ make_cleanup_free_search_symbols (struct symbol_search *symbols)
    and constants (enums)
 
    free_search_symbols should be called when *MATCHES is no longer needed.
+
+   The results are sorted locally; each symtab's global and static blocks are
+   separately alphabetized.
  */
 void
 search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
@@ -2607,10 +2656,9 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
     if (bv != prev_bv)
       for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	{
+	  struct symbol_search *prevtail = tail;
+	  int nfound = 0;
 	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  /* Skip the sort if this block is always sorted.  */
-	  if (!BLOCK_SHOULD_SORT (b))
-	    sort_block_syms (b);
 	  for (j = 0; j < BLOCK_NSYMS (b); j++)
 	    {
 	      QUIT;
@@ -2632,14 +2680,27 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 		  psr->msymbol = NULL;
 		  psr->next = NULL;
 		  if (tail == NULL)
-		    {
-		      sr = psr;
-		      old_chain = make_cleanup_free_search_symbols (sr);
-		    }
+		    sr = psr;
 		  else
 		    tail->next = psr;
 		  tail = psr;
+		  nfound ++;
 		}
+	    }
+	  if (nfound > 0)
+	    {
+	      if (prevtail == NULL)
+		{
+		  struct symbol_search dummy;
+
+		  dummy.next = sr;
+		  tail = sort_search_symbols (&dummy, nfound);
+		  sr = dummy.next;
+
+		  old_chain = make_cleanup_free_search_symbols (sr);
+		}
+	      else
+		tail = sort_search_symbols (prevtail, nfound);
 	    }
 	}
     prev_bv = bv;

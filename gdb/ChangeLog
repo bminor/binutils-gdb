@@ -1,3 +1,10 @@
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symtab.c (compare_search_syms): New function.
+	(sort_search_symbols): New function.
+	(search_symbols): Sort symbols after searching rather than
+	before.
+
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Linux -> GNU/Linux.
