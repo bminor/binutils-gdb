@@ -80,11 +80,6 @@ srcdir = .
 BISON=yacc
 YACC=$(BISON)
 
-# Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
-# Berkeley/Sun don't have quite enough. 
-#M4=/usr/5bin/m4
-M4=gm4
-
 # where to find texinfo; GDB dist should include a recent one
 TEXIDIR=${srcdir}/../texinfo
 
@@ -653,23 +648,23 @@ force:
 
 # Documentation!
 # GDB QUICK REFERENCE (TeX dvi file, CM fonts)
-refcard.dvi: $(srcdir)/doc/refcard.tex
+refcard.dvi:
 	( cd ./doc; $(MAKE) refcard.dvi $(FLAGS_TO_PASS) )
 	mv ./doc/refcard.dvi .
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts)
-refcard.ps: $(srcdir)/doc/refcard.tex
+refcard.ps:
 	( cd ./doc; $(MAKE) refcard.ps $(FLAGS_TO_PASS) )
 	mv ./doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi:
-	( cd ./doc; $(MAKE) M4=$(M4) gdb.dvi $(FLAGS_TO_PASS) )
+	( cd ./doc; $(MAKE) gdb.dvi $(FLAGS_TO_PASS) )
 	mv ./doc/gdb.dvi .
 
 # GDB MANUAL: info file
 gdb.info:
-	( cd ./doc; $(MAKE) M4=$(M4) gdb.info $(FLAGS_TO_PASS) )
+	( cd ./doc; $(MAKE) gdb.info $(FLAGS_TO_PASS) )
 	mv ./doc/gdb.info* .
 
 # Make copying.c from COPYING

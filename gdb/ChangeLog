@@ -1,3 +1,7 @@
+Mon Feb  1 18:09:58 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* Makefile.in: fix GDB doc targets for new doc subdir structure
+
 Mon Feb  1 17:56:47 1993  John Gilmore  (gnu@cygnus.com)
 
 	* stack.c (parse_frame_specification):  Parse as many arguments
