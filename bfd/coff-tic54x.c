@@ -1,6 +1,6 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright (C) 1998 Free Software Foundation, Inc.
-   Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
+   Copyright (C) 1999,2000 Free Software Foundation, Inc.
+   Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of BFD, the Binary File Descriptor library.
 
