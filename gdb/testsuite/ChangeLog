@@ -1,3 +1,13 @@
+Tue Aug 23 19:14:06 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* lib/gdb.exp (gdb_run_cmd): Move comment out from between expect
+	patterns, since that is not a valid context for comments.
+
+Fri Aug 19 15:07:30 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* gdb.c++/demangle.exp (test_arm_style_demangling): Add tests for
+	repeated types and repeated types with indices > 9.
+
 Tue Aug 16 15:57:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* gdb.base/printcmds.exp: Remove all the a29k XFAILs tagged with

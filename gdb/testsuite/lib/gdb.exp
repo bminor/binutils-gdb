@@ -113,7 +113,11 @@ proc delete_breakpoints {} {
 
 
 #
+# Generic run command.
 #
+# The second pattern below matches up to the first newline *only*.
+# Using ``.*$'' could swallow up output that we attempt to match
+# elsewhere.
 #
 proc gdb_run_cmd {} {
     send "run\n"
@@ -122,10 +126,6 @@ proc gdb_run_cmd {} {
 	    send "y\n"
 	    exp_continue
 	}
-
-	# The following pattern matches up to to the first newline *only*.
-	# Using ``.*$'' could swallow up output that we attempt to match
-	# elsewhere.
 	-re "Starting program: \[^\n\]*" {}
     }
 }
@@ -221,13 +221,15 @@ proc gdb_test { args } {
 
     set result -1
     set errmess ""
-    # trap the send so any problems don't crash things
-    catch "send \"$command\n\"" errmess
-    if [string match "write.spawn_id=\[0-9\]+.:" $errmess] then {
-	perror "sent \"$command\" got expect error \"$errmess\""
-	catch "close"
-	gdb_start
-	return -1
+    if ![string match $command ""] {
+	# trap the send so any problems don't crash things
+	catch "send \"$command\n\"" errmess
+	if [string match "write.spawn_id=\[0-9\]+.:" $errmess] then {
+	    perror "sent \"$command\" got expect error \"$errmess\""
+	    catch "close"
+	    gdb_start
+	    return -1
+	}
     }
 
     expect {
