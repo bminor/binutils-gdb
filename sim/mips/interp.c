@@ -1128,7 +1128,7 @@ Recognized firmware names are: `idt', `pmon', `lsipmon', and `none'.\n",
 
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
-void
+int
 sim_monitor (SIM_DESC sd,
 	     sim_cpu *cpu,
 	     address_word cia,
@@ -1358,11 +1358,10 @@ sim_monitor (SIM_DESC sd,
       }
 
     default:
-      sim_io_error (sd, "TODO: sim_monitor(%d) : PC = 0x%s\n",
-		    reason, pr_addr(cia));
-      break;
+      /* Unknown reason.  */
+      return 0;
   }
-  return;
+  return 1;
 }
 
 /* Store a word into memory.  */
@@ -1713,7 +1712,10 @@ signal_exception (SIM_DESC sd,
           perform this magic. */
        if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION)
 	 {
-	   sim_monitor (SD, CPU, cia, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
+	   int reason = (instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK;
+	   if (!sim_monitor (SD, CPU, cia, reason))
+	     sim_io_error (sd, "sim_monitor: unhandled reason = %d, pc = 0x%s\n", reason, pr_addr (cia));
+
 	   /* NOTE: This assumes that a branch-and-link style
 	      instruction was used to enter the vector (which is the
 	      case with the current IDT monitor). */

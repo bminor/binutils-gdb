@@ -690,7 +690,7 @@ void decode_coproc PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigne
 #define DecodeCoproc(instruction) \
 decode_coproc (SD, CPU, cia, (instruction))
 
-void sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
+int sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
   
 
 
