@@ -1443,12 +1443,6 @@ Fri Jul 14 19:54:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(md_pcrel_from): Don't add in size for an external symbol when
 	PIC.
 
-start-sanitize-arc
-Fri Jul 14 10:26:43 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.c (byte_order): Provide explicit initial value.
-end-sanitize-arc
-
 Thu Jul 13 21:16:43 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.h (UNDEFINED_DIFFERENCE_OK): Define for SOM.
@@ -1843,14 +1837,6 @@ Thu Jun  8 19:33:02 1995  Pat Rankin  (rankin@eql.caltech.edu)
 	replace third loop with pointer to last list element determined
 	in first loop.
 
-start-sanitize-arc
-Thu Jun  8 11:44:35 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* config/tc-arc.h (MD_APPLY_FIX3): Define.
-	* config/tc-arc.c (md_apply_fix3): Renamed from md_apply_fix.
-	Undo effects of md_pcrel_from if symbol is in another section.
-end-sanitize-arc
-
 Tue Jun  6 13:53:06 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-sparc.c (sparc_ip): Handle defined absolute symbols as
@@ -1946,12 +1932,6 @@ Mon May 22 20:03:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(select_emulation_mode): Set emulation_name.  Don't change argv.
 	(parse_args): Handle --emulation; complain if the supplied name
 	isn't what select_emulation_name came up with.
-
-start-sanitize-arc
-Mon May 22 16:56:58 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* config/tc-arc.c (md_pcrel_from): Return 0 for undefined symbols.
-end-sanitize-arc
 
 Sun May 21 21:36:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
@@ -2378,9 +2358,6 @@ Tue May  2 00:17:04 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 	instead of TARG_CPU_DEPENDENTS.
 	* configure.in: Substitute $cpu_type, $obj_format, $atof, and
 	$emulation into Makefile.in.
-start-sanitize-arc
-	* config/arc.mt: Deleted.
-end-sanitize-arc
 	* config/h8300.mt: Deleted.
 	* config/h8500.mt: Deleted.
 	* config/i386coff.mt (TARG_CPU_DEPENDENTS): Deleted.
@@ -2418,15 +2395,6 @@ Mon May  1 15:59:56 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* config/obj-coff.h (OUTPUT_FLAVOR) [BFD_ASSEMBLER]: Define.
 	* config/obj-ecoff.h (OUTPUT_FLAVOR): Define.
 	* config/obj-elf.h (OUTPUT_FLAVOR): Define.
-
-start-sanitize-arc
-Sat Apr 29 21:44:57 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* config/tc-arc.c (delay_slot_type): Deleted.
-	(md_assemble): Remember suffixes seen.
-	Issue warnings for 8 byte jump with delay slot, and conditional
-	branch immediately following set of condition codes.
-end-sanitize-arc
 
 Thu Apr 27 20:07:33 1995  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -2543,18 +2511,6 @@ Wed Apr 12 12:20:19 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	* mpw-config.in: New file, MPW version of configure.in.
 	* mpw-make.in: New file, MPW version of Makefile.in.
 
-start-sanitize-arc
-Wed Apr 12 07:35:44 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.c (delay_slot_type): New function.
-	(md_assemble): Use hashed list of insns.
-	Print warning if 8 byte insn appears in delay slot.
-	(md_operand): Handle %st(sym1-sym2).
-	(get_arc_exp_reloc_type): Likewise.
-	(md_apply_fix, case BFD_RELOC_ARC_B26): Now using implicit addends
-	so must store them here.
-end-sanitize-arc
-
 Tue Apr 11 01:42:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure.in: Require at least autoconf 2.3, because earlier
@@ -2599,10 +2555,6 @@ Tue Apr 11 01:42:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* config/tc-w65.c (md_relax_table): Ditto.
 	* config/tc-sparc.c (md_short_jump_size, md_long_jump_size):
 	Deleted.
-start-sanitize-arc
-	* config/tc-arc.c (md_relax_table, md_short_jump_size,
-	md_long_jump_size): Deleted.
-end-sanitize-arc
 	* doc/internals.texi: Describe TC_GENERIC_RELAX_TABLE and
 	WORKING_DOT_WORD.  Mention md_*_jump_size (but description needs
 	to be fleshed out later).  Note m68k PCINDEX mode has been checked
@@ -2656,22 +2608,6 @@ Mon Apr 10 15:57:42 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* doc/as.texinfo (m68k): Recommend using `%' with registers as the
 	normal case, instead of the exceptional case.
-
-start-sanitize-arc
-Thu Apr  6 20:00:11 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* config/tc-arc.c (arc_condition_codes): Deleted.
-	(init_opcode_tables): Delete cpu_type_map, call
-	arc_get_opcode_mach instead.
-	(arc_common): Delete non-ELF stuff.  Require leading '.' in .data.
-	(md_apply_fix): Delete non-ELF stuff.
-	Disable special handling of limm values, treat them normally.
-	(get_arc_exp_reloc_type): New argument `data_p'.  Callers updated.
-	(md_assemble): All limm operands must be output by gas, the opcode
-	insertion routines cannot be used (they don't do anything and we're
-	using implicit addends now so we need to output something).
-	* config/tc-arc.h (FAKE_LABEL_NAME): Define.
-end-sanitize-arc
 
 Thu Mar 30 14:38:47 1995  H.J. Lu (hjl@nynexst.com)
 
@@ -2788,21 +2724,6 @@ Wed Mar  8 02:57:53 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	after main opcode table.
 	(md_apply_fix_2, case 4): Recode setting of lower_limit to avoid
 	gcc warning.
-
-start-sanitize-arc
-Tue Mar  7 20:42:35 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* config/tc-arc.h (LITTLE_ENDIAN, BIG_ENDIAN): Define.
-	(DEFAULT_TARGET_FORMAT): Define.
-	(DEFAULT_BYTE_ORDER): Define to little endian.
-	(TARGET_FORMAT): Byte order is now selectable.
-	* config/tc-arc.c (arc_target_format): New variable.
-	(byte_order): New variable.
-	(md_longopts): New options -EL, -EB.
-	(md_parse_option): Recognize them.
-	(md_show_usage): Print them.
-	(md_begin): Set target_big_endian.
-end-sanitize-arc
 
 Tue Mar  7 16:07:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -2980,47 +2901,10 @@ Mon Feb 13 14:44:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 	fixup_segment.  This was previously corrected, if the reloc was
 	changed to be against a section symbol, in tc_gen_reloc.
 
-start-sanitize-arc
-Mon Feb 13 10:02:35 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.h (TC_PARSE_CONS_EXPRESSION): Define.
-	(TC_CONS_FIX_NEW): Define.
-	* config/tc-arc.c (get_arc_exp_operand_type): New function.
-	(init_opcode_tables): Insert registers into global symbol table.
-	(md_assemble): Call `expression' to parse all expressions.
-	Call `get_arc_exp_operand_type'.
-	(md_operand): Recognize %st(foo).
-	(arc_parse_cons_expression): New function.
-	(arc_cons_fix_new): New function.
-	(md_apply_fix): Handle new reloc BFD_RELOC_ARC_B26.
-end-sanitize-arc
-
 Fri Feb 10 14:04:04 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Use S_IS_EXTERN
 	rather than !S_IS_LOCAL.
-
-start-sanitize-arc
-Thu Feb  9 17:44:29 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.c (md_pseudo_table): Add .cpu.
-	(comment_chars): Add ';'.
-	(arc_mach_type, mach_type_specified, cpu_tables_init_p): New globals.
-	(md_parse_option): Delete support for -mmult.  Add -mcpu=xxx.
-	(md_begin): Current ARCs are little endian.
-	Call bfd_set_arch_mach to set the cpu type.
-	(init_opcode_tables): New function.
-	(md_begin): Ignore suffixes and registers not supported by cpu.
-	(md_assemble): Initialize opcode tables here.
-	Ignore opcodes not supported by selected cpu.
-	Always ask for more memory in one piece.
-	(arc_cpu): New function.
-	(md_numbers_to_chars): Support both endians (will probably be needed
-	eventually anyway).
-	(md_apply_fix): Likewise.
-	* config/tc-arc.h (LOCAL_LABEL): Delete "_.L_", gcc works around
-	dwarfout.c quirk.
-end-sanitize-arc
 
 Thu Feb  9 18:16:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -3461,12 +3345,6 @@ Tue Dec 20 13:40:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/obj-coff.h: Include bfd/libcoff.h, not libcoff.h.
 
-start-sanitize-arc
-Tue Dec 20 09:10:40 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.c: Delete lots of sparc pseudo-ops.
-end-sanitize-arc
-
 Mon Dec 19 16:53:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (load_register): Rewrite to handle O_big 64 bit
@@ -3492,21 +3370,6 @@ Mon Dec 19 14:15:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 	(pa_procend): Likewise.
 	(hppa_fix_adjustable): Only reject 32bit relocations for SOM.
 	(elf_hppa_final_processing): Simplify.
-
-start-sanitize-arc
-Mon Dec 19 12:57:09 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* config/tc-arc.c (arc_insert_operand): Change reg parm to pointer
-	to table entry.  All callers changed.
-	(md_shortopts): New argument -mmult.
-	(md_parse_option): Recognize it.
-	(md_show_usage): Print it.
-	(md_begin): If -mmult, say we have the new multiply and shift insns.
-	(md_assemble): Fix reloc generation for 32 bit immediate values.
-	Clean up modifier handling.  Try next insn if fake operand says there's
-	an error.  Update to new syntax of insertion/extraction fns.
-	Recognize predefined aux regs.  Don't abort if insertion fn missing.
-end-sanitize-arc
 
 Mon Dec 19 13:49:07 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -3602,14 +3465,6 @@ Thu Dec  8 17:48:25 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(mips-sony-bsd*): Use ecoff.
 	(mips-*-gnu*): New target, using aout format, from Roland McGrath.
 	* configure: Regenerated.
-
-start-sanitize-arc
-Tue Nov 29 18:12:22 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* configure.in (arc-*-elf*): Recognize.
-	* configure: "regenerated".
-	* config/tc-arc.c, config/tc-arc.h, config/arc.mt: New files.
-end-sanitize-arc
 
 Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
