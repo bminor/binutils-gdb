@@ -663,6 +663,7 @@ struct instruction MIPS_DECODE[] = {
  {"ORI",     1,"001101ssssstttttzzzzzzzzzzzzzzzz",NORMAL, OR,       (NONE)},
 
  /* start-sanitize-r5900 */
+#ifdef TARGET_5900
  {"PABSH",  T5,"01110000000TTTTTddddd00101101000",MMI1,   PABS,     (HALFWORD)},
  {"PABSW",  T5,"01110000000TTTTTddddd00001101000",MMI1,   PABS,     (WORD)},
 
@@ -782,6 +783,7 @@ struct instruction MIPS_DECODE[] = {
  {"PSUBW",  T5,"011100SSSSSTTTTTddddd00001001000",MMI0,   PADD,     (SUBTRACT | WORD)},
 
  {"PXOR",   T5,"011100SSSSSTTTTTddddd10011001001",MMI2,   POP,      (POP_XOR)},
+#endif /* TARGET_5900 */
  /* end-sanitize-r5900 */
 
  {"PREF",   G2,"110011sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, PREFETCH, (NONE)},
