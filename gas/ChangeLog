@@ -1,3 +1,7 @@
+2000-06-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c: Fix compile time warnings.
+
 2000-06-18  H.J. Lu <hjl@gnu.org>
 
 	* configure.in: Don't emulate i386-pc-pe-coff with i386coff.
