@@ -192,6 +192,7 @@ ser-go32.c
 ser-unix.c
 serial.c
 serial.h
+sh-tdep.c
 signals.h
 solib.c
 solib.h

@@ -1,3 +1,8 @@
+Mon Apr 26 13:24:43 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in, archures.c, coffcode.h, targets.c: Support for
+	Hitachi SH.
+
 Mon Apr 26 13:55:42 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* trad-core.c (trad_unix_core_file_p): Check the file size.

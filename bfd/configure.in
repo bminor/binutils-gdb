@@ -34,12 +34,15 @@ fi
 #  convention, else the table becomes a real mess to understand and maintain.
 
 case "${target}" in
+  alpha-*-*)		bfd_target=alphaosf ;;
   a29k-*-ebmon)		bfd_target=a29k-coff ;;
   a29k-*-udi)		bfd_target=a29k-coff ;;
   a29k-*-aout)		bfd_target=a29k-aout ;;
   a29k-*-coff)		bfd_target=a29k-coff ;;
   a29k-*-sym1)		bfd_target=a29k-coff ;;
   h8300-*-*)		bfd_target=h8300-coff ;;
+  h8500-*-*)		bfd_target=h8500-coff ;;
+  sh-*-*)		bfd_target=sh-coff ;;
   hppa*-*-bsd)		bfd_target=hppabsd ;;
   hppa*-*-hpux)		bfd_target=hppahpux ;;
   i[34]86-*-sysv4*)	bfd_target=i386-elf ;;
@@ -63,10 +66,11 @@ case "${target}" in
   m68*-ericsson-*)	bfd_target=m68k-aout ;;
   m68*-netx-*)		bfd_target=m68k-aout ;;
   m88k-*-*)		bfd_target=m88k-coff ;;
-  mips-big-*)		bfd_target=irix3 ;;
+  mips-big-*)		bfd_target=bigmips ;;
   mips-dec-bsd*)        bfd_target=mipsdecbsd ;;
   mips-dec-*)		bfd_target=decstation ;;
-  mips-sgi-*)		bfd_target=irix3 ;;
+  mips-*-ecoff)		bfd_target=bigmips ;;
+  mips-sgi-*)		bfd_target=bigmips ;;
   rs6000-*-*)		bfd_target=rs6000 ;;
   sparc-*-solaris2*)	bfd_target=sparc-elf ;;
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;

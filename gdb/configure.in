@@ -152,6 +152,8 @@ c2-*-*)			gdb_target=convex ;;
 h8300-*-*)		gdb_target=h8300hms ;;
 h8500-*-*)		gdb_target=h8500hms ;;
 
+sh-*-*)			gdb_target=sh ;;
+
 hppa*-*-bsd)		gdb_target=hppabsd ;;
 hppa*-*-hpux)		gdb_target=hppahpux ;;
 

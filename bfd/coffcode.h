@@ -342,7 +342,7 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
   }
   else if (!strcmp (sec_name, _LIT))
   {
-    stype_flags = STYP_LIT;
+    styp_flags = STYP_LIT;
 #endif /* _LIT */
 
   }
@@ -921,6 +921,13 @@ DEFUN (coff_set_arch_mach_hook, (abfd, filehdr),
     break;
 #endif
 
+#ifdef SHMAGIC
+  case SHMAGIC:
+    arch = bfd_arch_sh;
+    machine = 0;
+    break;
+#endif
+
 #ifdef H8500MAGIC
   case H8500MAGIC:
     arch = bfd_arch_h8500;
@@ -1117,6 +1124,14 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
       return true;
       break;
 #endif
+
+#ifdef SHMAGIC
+  case bfd_arch_sh:
+      *magicp = SHMAGIC;
+      return true;
+      break;
+#endif
+
 #ifdef H8500MAGIC
     case bfd_arch_h8500:
       *magicp = H8500MAGIC;

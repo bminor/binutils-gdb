@@ -75,7 +75,7 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
-	cpu-z8k.o cpu-we32k.o cpu-h8500.o
+	cpu-z8k.o cpu-we32k.o cpu-h8500.o cpu-alpha.o cpu-sh.o
 
 BFD_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	i386aout.o i386bsd.o i386linux.o \
@@ -85,7 +85,7 @@ BFD_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	coff-mips.o coff-msym.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
 	bout.o \
-	hppa.o oasys.o ieee.o srec.o stab-syms.o
+	hppa.o oasys.o ieee.o srec.o stab-syms.o coff-alpha.o coff-sh.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -124,7 +124,8 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
 	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c \
-	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c
+	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
+	 coff-alpha.c cpu-alpha.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -138,7 +139,7 @@ check:
 installcheck:
 
 info dvi : force
-	@$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
+	@$(MAKE) subdir_do DO=$@ "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 clean-info:
 	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
@@ -325,7 +326,8 @@ bfd.ps:
 
 libbfd.o : libbfd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
 opncls.o : opncls.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
-bfd.o : bfd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
+bfd.o : bfd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff/sym.h libecoff.h
 archive.o : archive.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/ar.h $(INCDIR)/aout/ranlib.h 
 targets.o : targets.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 

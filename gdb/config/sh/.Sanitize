@@ -21,36 +21,8 @@ Do-first:
 
 Things-to-keep:
 
-a29k
-arm
-convex
-gould
-h8300
-h8500
-i386
-i960
-m68k
-m88k
-mips
-nm-sysv4.h
-nm-trash.h
-none
-ns32k
-pa
-pyr
-romp
-rs6000
-sh
-sparc
-tahoe
-tm-sunos.h
-tm-sysv4.h
-vax
-xm-sysv4.h
-z8k
-
-# Things which are explicitly *not* kept, for now.
-# i860		- Not yet ready for prime time.
+sh.mt
+tm-sh.h
 
 Do-last:
 
