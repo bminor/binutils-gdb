@@ -673,6 +673,8 @@ c-exp.tab.c: $(srcdir)/c-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > c-exp.tab.c
 	-rm y.tab.c
 
@@ -684,6 +686,8 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > m2-exp.tab.c
 	-rm y.tab.c
 

@@ -26,9 +26,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    See expression.h for the details of the format.
    What is important here is that it can be built up sequentially
    during the process of parsing; the lower levels of the tree always
-   come first in the result.  */
+   come first in the result.
+
+   Note that malloc's and realloc's in this file are transformed to
+   xmalloc and xrealloc respectively by the same sed command in the
+   makefile that remaps any other malloc/realloc inserted by the parser
+   generator.  Doing this with #defines and trying to control the interaction
+   with include files (<malloc.h> and <stdlib.h> for example) just became
+   too messy, particularly when such includes can be inserted at random
+   times by the parser generator. */
    
 %{
+
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
@@ -177,18 +186,7 @@ struct block *modblock=0;
 %right QID
 */
 
-%{
-/* Ensure that if the generated parser contains any calls to malloc/realloc,
-   that they get mapped to xmalloc/xrealloc.  We have to do this here
-   rather than earlier in the file because this is the first point after
-   the place where the SVR4 yacc includes <malloc.h>, and if we do it
-   before that, then the remapped declarations in <malloc.h> will collide
-   with the ones in "defs.h". */
-
-#define malloc	xmalloc
-#define realloc	xrealloc
-%}
-
+
 %%
 
 start   :	exp
@@ -1159,7 +1157,7 @@ static char *
 make_qualname(mod,ident)
    char *mod, *ident;
 {
-   char *new = xmalloc(strlen(mod)+strlen(ident)+2);
+   char *new = malloc(strlen(mod)+strlen(ident)+2);
 
    strcpy(new,mod);
    strcat(new,".");

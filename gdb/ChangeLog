@@ -1,3 +1,11 @@
+FFri Oct 30 16:33:02 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (c-exp.tab.c, m2-exp.tab.c):  Add sed patterns to
+	  remap all malloc's to xmalloc's and all realloc's to xrealloc's.
+	* c-exp.y, m2-exp.y:  Add comment about how malloc/realloc are
+	  remapped to xmalloc/xrealloc, use only malloc/realloc in grammer
+	  file.  Remove preprocessor defines that previously did remapping.
+
 Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	hp300 native support (hp300hpux untested).
