@@ -1,7 +1,7 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -456,7 +456,7 @@ extern void bfd_hash_traverse
 extern bfd_size_type bfd_bread (void *, bfd_size_type, bfd *);
 extern bfd_size_type bfd_bwrite (const void *, bfd_size_type, bfd *);
 extern int bfd_seek (bfd *, file_ptr, int);
-extern ufile_ptr bfd_tell (bfd *);
+extern file_ptr bfd_tell (bfd *);
 extern int bfd_flush (bfd *);
 extern int bfd_stat (bfd *, struct stat *);
 

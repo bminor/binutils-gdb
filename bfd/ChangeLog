@@ -1,5 +1,22 @@
 2004-02-11  Andrew Cagney  <cagney@redhat.com>
 
+	* bfd-in.h: Update copyright.
+	(bfd_tell): Change return type to file_ptr.
+	* bfd-in2.h: Re-generate.
+	* cache.c: Update copyright.
+	(bfd_cache_lookup_worker): Use real_fseek, do not cast offset
+	parameter.
+	(close_one): Use real_ftell.
+	* bfdio.c: Update copyright.
+	(real_ftell, real_fseek): New functions.
+	(bfd_tell): Use real_fseek and real_ftell, change return type to
+	file_ptr.
+	(bfd_seek): Use real_ftell and real_fseek, change type of
+	file_position to a file_ptr.
+	* libbfd-in.h: Update copyright.
+	(real_ftell, real_fseek): Declare.
+	* libbfd.h: Re-generate.
+
 	* configure.in (AC_CHECK_FUNCS): Check for ftello, ftello64,
 	fseeko and fseeko64.  Determine bfd_file_ptr.
 	* configure: Re-generate.
