@@ -50,7 +50,7 @@ Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
 	(dm_type_unsigned_int): Ditto.
 	(dm_type_void): Ditto.
 	(dm_type_void_star): Ditto.
-	* gdb.c++/cplusfuncs.exp (probe_demangler): New function.
+	* gdb.base/cplusfuncs.exp (probe_demangler): New function.
 	Probe the gdb demangler and set variables to accommodate
 	formatting differences.
 	(info_func_regexp): New function.  Same as info_func, but
@@ -71,28 +71,6 @@ Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
 2001-01-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.c++/templates.cc (printf): Remove unused function definition.
-
-2001-01-28  Michael Chastain  <chastain@redhat.com>
-
-	* gdb.c++/ovldbreak.exp (take_gdb_out_of_choice_menu): New proc
-	to call when tests fail.  It takes gdb out of the overloaded
-	function choice menu back to the main prompt, so that the test
-	program stays synchronized.
-	(set_bp_overloaded): New proc to collect all the common
-	code for setting a breakpoint on an overloaded name.  Calls
-	take_gdb_out_of_choice_menu when needed.
-	(menu_overload1arg): New variable to collect the repeated
-	instances of the expected menu for an overloaded name.  Change
-	the regular expression to handle changes in g++ type encoding:
-	"void" can be either "void" or "", and "unsigned int" can be
-	either "unsigned int" or "unsigned".
-	(continue_to_bp_overloaded): Change regular expressions to handle
-	changes in g++ type encoding.
-	(no proc): Call take_gdb_out_of_choice_menu when needed.
-	Remove redundant calls to "info break".  Accept either "canceled"
-	or "cancelled".  Change regular expressions in "info break"
-	calls to handle changes in g++ type encoding.  Give all tests
-	unique strings.
 
 2001-01-17  Ben Elliston  <bje@redhat.com>
 
@@ -2491,48 +2469,9 @@ Sun Jun 29 16:43:30 1997  Bob Manson  <manson@charmed.cygnus.com>
 	* gdb.base/overlays.exp: Preliminary fixes; temporarily disabled
  	until it has been modified to work with the new testsuite.
 
-	* lib/gdb.exp: Instead of causing 1 unresolved test when the
+	* gdb.*/*.exp: Instead of causing 1 unresolved test when the
  	testcase won't compile, cause all of the testcases in the file to
  	fail instead.
-	* gdb.base/a2-run.exp: Ditto
-	* gdb.base/bitfields.exp: Ditto
-	* gdb.base/break.exp: Ditto
-	* gdb.base/callfuncs.exp: Ditto
-	* gdb.base/commands.exp: Ditto
-	* gdb.base/corefile.exp: Ditto
-	* gdb.base/exprs.exp: Ditto
-	* gdb.base/funcargs.exp: Ditto
-	* gdb.base/interrupt.exp: Ditto
-	* gdb.base/langs.exp: Ditto
-	* gdb.base/list.exp: Ditto
-	* gdb.base/mips_pro.exp: Ditto
-	* gdb.base/nodebug.exp: Ditto
-	* gdb.base/opaque.exp: Ditto
-	* gdb.base/overlays.exp: Ditto
-	* gdb.base/printcmds.exp: Ditto
-	* gdb.base/ptype.exp: Ditto
-	* gdb.base/recurse.exp: Ditto
-	* gdb.base/return.exp: Ditto
-	* gdb.base/scope.exp: Ditto
-	* gdb.base/setshow.exp: Ditto
-	* gdb.base/setvar.exp: Ditto
-	* gdb.base/sigall.exp: Ditto
-	* gdb.base/signals.exp: Ditto
-	* gdb.base/structs.exp: Ditto
-	* gdb.base/term.exp: Ditto
-	* gdb.base/twice.exp: Ditto
-	* gdb.base/watchpoint.exp: Ditto
-	* gdb.base/whatis.exp: Ditto
-	* gdb.c++/classes.exp: Ditto
-	* gdb.c++/cplusfuncs.exp: Ditto
-	* gdb.c++/inherit.exp: Ditto
-	* gdb.c++/misc.exp: Ditto
-	* gdb.c++/templates.exp: Ditto
-	* gdb.c++/virtfunc.exp: Ditto
-	* gdb.disasm/mn10200.exp: Ditto
-	* gdb.disasm/mn10300.exp: Ditto
-	* gdb.disasm/sh3.exp: Ditto
-	* gdb.stabs/weird.exp: Ditto
 
 	* lib/gdb.exp(gdb_suppress_entire_file): New procedure.
 	(gdb_clear_suppressed): New procedure.
@@ -2898,67 +2837,9 @@ Sun Feb 23 19:56:02 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/vr4300.exp: New file.
 
-	* lib/gdb.exp (gdb_expect): New function.
-	* config/m32r-stub.exp: Call gdb_expect instead of expect.
-	* config/monitor.exp: Ditto.
-	* config/netware.exp: Ditto.
-	* config/sim.exp: Ditto.
-	* config/slite.exp: Ditto.
-	* config/sparclet.exp: Ditto.
-	* config/udi.exp: Ditto.
-	* config/vx.exp: Ditto.
-	* gdb.base/a2-run.exp: Ditto.
-	* gdb.base/bitfields.exp: Ditto.
-	* gdb.base/break.exp: Ditto.
-	* gdb.base/callfuncs.exp: Ditto.
-	* gdb.base/commands.exp: Ditto.
-	* gdb.base/corefile.exp: Ditto.
-	* gdb.base/default.exp: Ditto.
-	* gdb.base/funcargs.exp: Ditto.
-	* gdb.base/gdbvars.exp: Ditto.
-	* gdb.base/interrupt.exp: Ditto.
-	* gdb.base/list.exp: Ditto.
-	* gdb.base/ptype.exp: Ditto.
-	* gdb.base/return.exp: Ditto.
-	* gdb.base/scope.exp: Ditto.
-	* gdb.base/setshow.exp: Ditto.
-	* gdb.base/setvar.exp: Ditto.
-	* gdb.base/sigall.exp: Ditto.
-	* gdb.base/signals.exp: Ditto.
-	* gdb.base/structs.exp: Ditto.
-	* gdb.base/term.exp: Ditto.
-	* gdb.base/watchpoint.exp: Ditto.
-	* gdb.c++/classes.exp: Ditto.
-	* gdb.c++/cplusfuncs.exp: Ditto.
-	* gdb.c++/demangle.exp: Ditto.
-	* gdb.c++/inherit.exp: Ditto.
-	* gdb.c++/misc.exp: Ditto.
-	* gdb.c++/templates.exp: Ditto.
-	* gdb.c++/virtfunc.exp: Ditto.
-	* gdb.chill/builtins.exp: Ditto.
-	* gdb.chill/callch.exp: Ditto.
-	* gdb.chill/chexp.exp: Ditto.
-	* gdb.chill/enum.exp: Ditto.
-	* gdb.chill/gch1041.exp: Ditto.
-	* gdb.chill/gch1272.exp: Ditto.
-	* gdb.chill/gch1280.exp: Ditto.
-	* gdb.chill/gch922.exp: Ditto.
-	* gdb.chill/gch981.exp: Ditto.
-	* gdb.chill/misc.exp: Ditto.
-	* gdb.chill/powerset.exp: Ditto.
-	* gdb.chill/pr-5984.exp: Ditto.
-	* gdb.chill/pr-6292.exp: Ditto.
-	* gdb.chill/pr-9946.exp: Ditto.
-	* gdb.chill/tests1.exp: Ditto.
-	* gdb.chill/tests2.exp: Ditto.
-	* gdb.disasm/hppa.exp: Ditto.
-	* gdb.disasm/mn10200.exp: Ditto.
-	* gdb.disasm/sh3.exp: Ditto.
-	* gdb.stabs/weird.exp: Ditto.
-	* gdb.threads/pthreads.exp: Ditto.
-	* gdb.threads/step.exp: Ditto.
-	* gdb.threads/step2.exp: Ditto.
-	* lib/gdb.exp: Ditto.
+	* gdb.*/*.exp: Call gdb_expect instead of expect.
+	
+	* lib/gdb.exp(gdb_expect): New function.
 
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
@@ -3131,55 +3012,7 @@ Sun Feb  2 00:55:14 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 Sat Feb  1 23:51:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
-	* lib/gdb.exp: Replace $prompt with $gdb_prompt.
-	* config/gdbserver.exp: Ditto.
-	* config/m32r-stub.exp: Ditto.
-	* config/monitor.exp: Ditto.
-	* config/netware.exp: Ditto.
-	* config/nind.exp: Ditto.
-	* config/sim.exp: Ditto.
-	* config/slite.exp: Ditto.
-	* config/sparclet.exp: Ditto.
-	* config/udi.exp: Ditto.
-	* config/vx.exp: Ditto.
-	* gdb.base/a2-run.exp: Ditto.
-	* gdb.base/bitfields.exp: Ditto.
-	* gdb.base/break.exp: Ditto.
-	* gdb.base/callfuncs.exp: Ditto.
-	* gdb.base/commands.exp: Ditto.
-	* gdb.base/corefile.exp: Ditto.
-	* gdb.base/default.exp: Ditto.
-	* gdb.base/funcargs.exp: Ditto.
-	* gdb.base/gdbvars.exp: Ditto.
-	* gdb.base/help.exp: Ditto.
-	* gdb.base/interrupt.exp: Ditto.
-	* gdb.base/list.exp: Ditto.
-	* gdb.base/printcmds.exp: Ditto.
-	* gdb.base/ptype.exp: Ditto.
-	* gdb.base/return.exp: Ditto.
-	* gdb.base/scope.exp: Ditto.
-	* gdb.base/setshow.exp: Ditto.
-	* gdb.base/setvar.exp: Ditto.
-	* gdb.base/sigall.exp: Ditto.
-	* gdb.base/signals.exp: Ditto.
-	* gdb.base/structs.exp: Ditto.
-	* gdb.base/term.exp: Ditto.
-	* gdb.base/watchpoint.exp: Ditto.
-	* gdb.c++/classes.exp: Ditto.
-	* gdb.c++/cplusfuncs.exp: Ditto.
-	* gdb.c++/demangle.exp: Ditto.
-	* gdb.c++/inherit.exp: Ditto.
-	* gdb.c++/misc.exp: Ditto.
-	* gdb.c++/templates.exp: Ditto.
-	* gdb.c++/virtfunc.exp: Ditto.
-	* gdb.disasm/hppa.exp: Ditto.
-	* gdb.disasm/sh3.exp: Ditto.
-	* gdb.fortran/exprs.exp: Ditto.
-	* gdb.fortran/types.exp: Ditto.
-	* gdb.stabs/weird.exp: Ditto.
-	* gdb.threads/pthreads.exp: Ditto.
-	* gdb.threads/step.exp: Ditto.
-	* gdb.threads/step2.exp: Ditto.
+	* gdb.*/*.exp: Replace $prompt with $gdb_prompt.
 	
 	* gdb.base/scope.exp: Use gdb_test.
 	* gdb.c++/classes.exp: Ditto.
