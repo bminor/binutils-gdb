@@ -1,3 +1,23 @@
+Mon Mar 30 12:46:15 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set version to 2.9.1.
+	* configure: Rebuild.
+
+	* Branched binutils 2.9.
+
+Mon Mar 30 12:20:50 1998  Brent Baccala  <baccala@freesoft.org>
+
+	* syms.c (ENABLE_CACHING): Define.
+	(struct indexentry): Define.
+	(struct stab_cache): Remove.
+	(cmpindexentry): New static function.
+	(struct stab_find_info): Add new fields: indextable,
+	indextablesize, cached_indexentry, cached_offset, cached_stab, and
+	cached_file_name.  Remove fields: file_cache, function_cache, and
+	line_cache.
+	(_bfd_stab_section_find_nearest_line): Rewrite to build a sorted
+	index table and search it.
+
 Mon Mar 30 10:39:34 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (_bfd_elf_copy_private_section_data): Call

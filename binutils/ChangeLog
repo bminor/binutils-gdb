@@ -1,4 +1,18 @@
+Mon Mar 30 12:47:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set version to 2.9.1.
+	* configure: Rebuild.
+
+	* Branched binutils 2.9.
+
+	* Makefile.am (DISTCLEANFILES): Remove defparse.h, arparse.h,
+	rcparse.h, and nlmheader.h.
+	* Makefile.in: Rebuild.
+
 Sat Mar 28 17:39:27 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (MOSTLYCLEANFILES): Define.
+	* Makefile.in: Rebuild.
 
 	Fix some gcc -Wall warnings:
 	* nlmconv.c (main): Add casts to avoid warnings.

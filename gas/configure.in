@@ -10,7 +10,7 @@ AC_INIT(as.h)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(gas, 2.8.2)
+AM_INIT_AUTOMAKE(gas, 2.9.1)
 
 AM_PROG_LIBTOOL
 
@@ -267,7 +267,7 @@ changequote([,])dnl
 
       sh-*-elf*)	    fmt=elf ;;
       sh-*-coff*)           fmt=coff ;;
-      sh-*-rtems*)	    fmt=elf ;;
+      sh-*-rtems*)	    fmt=coff ;;
 
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
