@@ -75,12 +75,14 @@ static boolean mips_elf_final_link
 static void mips_elf_relocate_hi16
   PARAMS ((bfd *, Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_byte *,
 	   bfd_vma));
-static void mips_elf_relocate_got_local
+static boolean mips_elf_relocate_got_local
   PARAMS ((bfd *, bfd *, asection *, Elf_Internal_Rela *,
 	   Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 static void mips_elf_relocate_global_got
    PARAMS ((bfd *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 static bfd_reloc_status_type mips16_jump_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type mips16_gprel_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean mips_elf_adjust_dynindx
   PARAMS ((struct elf_link_hash_entry *, PTR));
@@ -134,6 +136,8 @@ struct mips_got_info
   unsigned long global_gotsym;
   /* The number of local .got entries.  */
   unsigned int local_gotno;
+  /* The number of local .got entries we have used.  */
+  unsigned int assigned_gotno;
 };
 
 /* The number of local .got entries we reserve.  */
@@ -306,8 +310,9 @@ enum reloc_type
   R_MIPS_HIGHER,	R_MIPS_HIGHEST,
   R_MIPS_CALL_HI16,	R_MIPS_CALL_LO16,
   R_MIPS_max,
-  /* This reloc is used for the mips16.  */
-  R_MIPS16_26 = 100
+  /* These relocs are used for the mips16.  */
+  R_MIPS16_26 = 100,
+  R_MIPS16_GPREL = 101
 };
 
 static reloc_howto_type elf_mips_howto_table[] =
@@ -710,6 +715,25 @@ static reloc_howto_type elf_mips16_jump_howto =
 	 true,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
 	 0x3ffffff,		/* dst_mask */
+	 false);		/* pcrel_offset */
+
+/* The reloc used for the mips16 gprel instruction.  The src_mask and
+   dsk_mask for this howto do not reflect the actual instruction, in
+   which the value is not contiguous; the masks are for the
+   convenience of the relocate_section routine.  */
+static reloc_howto_type elf_mips16_gprel_howto =
+  HOWTO (R_MIPS16_GPREL,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 mips16_gprel_reloc,	/* special_function */
+	 "R_MIPS16_GPREL",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
 	 false);		/* pcrel_offset */
 
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
@@ -1343,6 +1367,82 @@ mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
   abort ();
 }
 
+/* Handle a mips16 GP relative reloc.  */
+
+static bfd_reloc_status_type
+mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
+		    output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  boolean relocateable;
+  bfd_reloc_status_type ret;
+  bfd_vma gp;
+  unsigned short extend, insn;
+  unsigned long final;
+
+  /* If we're relocating, and this is an external symbol with no
+     addend, we don't want to change anything.  We will only have an
+     addend if this is a newly created reloc, not read from an ELF
+     file.  */
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && reloc_entry->addend == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  if (output_bfd != NULL)
+    relocateable = true;
+  else
+    {
+      relocateable = false;
+      output_bfd = symbol->section->output_section->owner;
+    }
+
+  ret = mips_elf_final_gp (output_bfd, symbol, relocateable, error_message,
+			   &gp);
+  if (ret != bfd_reloc_ok)
+    return ret;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Pick up the mips16 extend instruction and the real instruction.  */
+  extend = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address);
+  insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address + 2);
+
+  /* Stuff the current addend back as a 32 bit value, do the usual
+     relocation, and then clean up.  */
+  bfd_put_32 (abfd,
+	      (((extend & 0x1f) << 11)
+	       | (extend & 0x7e0)
+	       | (insn & 0x1f)),
+	      (bfd_byte *) data + reloc_entry->address);
+
+  ret = gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
+			 relocateable, data, gp);
+
+  final = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  bfd_put_16 (abfd,
+	      ((extend & 0xf800)
+	       | ((final >> 11) & 0x1f)
+	       | (final & 0x7e0)),
+	      (bfd_byte *) data + reloc_entry->address);
+  bfd_put_16 (abfd,
+	      ((insn & 0xffe0)
+	       | (final & 0x1f)),
+	      (bfd_byte *) data + reloc_entry->address + 2);
+
+  return ret;
+}
+
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
 
 struct elf_reloc_map {
@@ -1387,10 +1487,12 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 	return &elf_mips_howto_table[(int) mips_reloc_map[i].elf_reloc_val];
     }
 
-  /* Special handling for the MIPS16 jump, since it is a made up reloc
-     type with a large value.  */
+  /* Special handling for the MIPS16 relocs, since they are made up
+     reloc types with a large value.  */
   if (code == BFD_RELOC_MIPS16_JMP)
     return &elf_mips16_jump_howto;
+  else if (code == BFD_RELOC_MIPS16_GPREL)
+    return &elf_mips16_gprel_howto;
 
   return NULL;
 }
@@ -1408,6 +1510,8 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
   r_type = ELF32_R_TYPE (dst->r_info);
   if (r_type == R_MIPS16_26)
     cache_ptr->howto = &elf_mips16_jump_howto;
+  else if (r_type == R_MIPS16_GPREL)
+    cache_ptr->howto = &elf_mips16_gprel_howto;
   else
     {
       BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
@@ -4299,7 +4403,7 @@ mips_elf_relocate_hi16 (input_bfd, relhi, rello, contents, addend)
 
 /* Handle a MIPS ELF local GOT16 reloc.  */
 
-static void
+static boolean
 mips_elf_relocate_got_local (output_bfd, input_bfd, sgot, relhi, rello,
 			     contents, addend)
      bfd *output_bfd;
@@ -4310,8 +4414,8 @@ mips_elf_relocate_got_local (output_bfd, input_bfd, sgot, relhi, rello,
      bfd_byte *contents;
      bfd_vma addend;
 {
-  int local_gotno;
-  int i;
+  unsigned int assigned_gotno;
+  unsigned int i;
   bfd_vma insn;
   bfd_vma addlo;
   bfd_vma address;
@@ -4336,33 +4440,36 @@ mips_elf_relocate_got_local (output_bfd, input_bfd, sgot, relhi, rello,
   g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
   BFD_ASSERT (g != NULL);
 
-  local_gotno = g->local_gotno;
+  assigned_gotno = g->assigned_gotno;
   got_contents = sgot->contents;
   hipage = addend & 0xffff0000;
 
-  for (i = MIPS_RESERVED_GOTNO; i < local_gotno; i++)
+  for (i = MIPS_RESERVED_GOTNO; i < assigned_gotno; i++)
     {
       address = bfd_get_32 (input_bfd, got_contents + i * 4);
       if (hipage == (address & 0xffff0000))
 	break;
-      if (address == (bfd_vma) 0)
-	{
-	  bfd_put_32 (input_bfd, hipage, got_contents + i * 4);
-	  break;
-	}
     }
 
-  BFD_ASSERT (i < local_gotno);
-#if 1
-  if (i == local_gotno)
-    (*_bfd_error_handler)
-      ("ELF MIPS linker: more got entries are needed for hipage: %x",
-       hipage);
-#endif
+  if (i == assigned_gotno)
+    {
+      if (assigned_gotno >= g->local_gotno)
+	{
+	  (*_bfd_error_handler)
+	    ("more got entries are needed for hipage relocations");
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      bfd_put_32 (input_bfd, hipage, got_contents + assigned_gotno * 4);
+      ++g->assigned_gotno;
+    }
 
   i = - ELF_MIPS_GP_OFFSET (output_bfd) + i * 4;
   bfd_put_32 (input_bfd, (insn & 0xffff0000) | (i & 0xffff),
 	      contents + relhi->r_offset);
+
+  return true;
 }
 
 /* Handle MIPS ELF CALL16 reloc and global GOT16 reloc.  */
@@ -4446,15 +4553,19 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      if ((r_type < 0 || r_type >= (int) R_MIPS_max) && r_type != R_MIPS16_26)
+      if ((r_type < 0 || r_type >= (int) R_MIPS_max)
+	  && r_type != R_MIPS16_26
+	  && r_type != R_MIPS16_GPREL)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
-      if (r_type != R_MIPS16_26)
-	howto = elf_mips_howto_table + r_type;
-      else
+      if (r_type == R_MIPS16_26)
 	howto = &elf_mips16_jump_howto;
+      else if (r_type == R_MIPS16_GPREL)
+	howto = &elf_mips16_gprel_howto;
+      else
+	howto = elf_mips_howto_table + r_type;
 
       if (dynobj != NULL
 	  && (r_type == R_MIPS_CALL16
@@ -4480,7 +4591,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       /* Mix in the change in GP address for a GP relative reloc.  */
       if (r_type != R_MIPS_GPREL16
 	  && r_type != R_MIPS_LITERAL
-	  && r_type != R_MIPS_GPREL32)
+	  && r_type != R_MIPS_GPREL32
+	  && r_type != R_MIPS16_GPREL)
 	addend = 0;
       else
 	{
@@ -4833,10 +4945,11 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if ((rel + 1) < relend
 		  && ELF32_R_TYPE ((rel + 1)->r_info) == R_MIPS_LO16)
 		{
-		  mips_elf_relocate_got_local (output_bfd, input_bfd, sgot,
-					       rel, rel + 1,
-					       contents,
-					       relocation + addend);
+		  if (! mips_elf_relocate_got_local (output_bfd, input_bfd,
+						     sgot, rel, rel + 1,
+						     contents,
+						     relocation + addend))
+		    return false;
 		  r = bfd_reloc_ok;
 		}
 	      else
@@ -5071,10 +5184,67 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_put_16 (input_bfd, insn, contents + rel->r_offset);
 		}
 	    }
+	  else if (r_type == R_MIPS16_GPREL)
+	    {
+	      unsigned short extend, insn;
+	      bfd_byte buf[4];
+	      unsigned long final;
+
+	      /* Extract the addend into buf, run the regular reloc,
+                 and stuff the resulting value back into the
+                 instructions.  */
+	      if (rel->r_offset > input_section->_raw_size)
+		r = bfd_reloc_outofrange;
+	      else
+		{
+		  extend = bfd_get_16 (input_bfd, contents + rel->r_offset);
+		  insn = bfd_get_16 (input_bfd, contents + rel->r_offset + 2);
+		  bfd_put_32 (input_bfd,
+			      (((extend & 0x1f) << 11)
+			       | (extend & 0x7e0)
+			       | (insn & 0x1f)),
+			      buf);
+		  r = _bfd_final_link_relocate (howto, input_bfd,
+						input_section, buf,
+						(bfd_vma) 0, relocation,
+						addend);
+		  final = bfd_get_32 (input_bfd, buf);
+		  bfd_put_16 (input_bfd,
+			      ((extend & 0xf800)
+			       | ((final >> 11) & 0x1f)
+			       | (final & 0x7e0)),
+			      contents + rel->r_offset);
+		  bfd_put_16 (input_bfd,
+			      ((insn & 0xffe0)
+			       | (final & 0x1f)),
+			      contents + rel->r_offset + 2);
+		}
+	    }
 	  else
 	    r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					  contents, rel->r_offset,
 					  relocation, addend);
+
+	  /* The jal instruction can only jump to an address which is
+             divisible by 4, and it can only jump to an address with
+             the same upper 4 bits as the PC.  */
+	  if (r == bfd_reloc_ok
+	      && (r_type == R_MIPS16_26 || r_type == R_MIPS_26))
+	    {
+	      bfd_vma addr;
+
+	      addr = relocation;
+	      if (other == STO_MIPS16)
+		addr &= ~ (bfd_vma) 1;
+	      addr += addend;
+	      if ((addr & 3) != 0
+		  || ((addr & 0xf0000000)
+		      != ((input_section->output_section->vma
+			   + input_section->output_offset
+			   + rel->r_offset)
+			  & 0xf0000000)))
+		r = bfd_reloc_overflow;
+	    }
 
 	  if (SGI_COMPAT (abfd)
 	      && scpt != NULL
@@ -5396,6 +5566,7 @@ mips_elf_create_got_section (abfd, info)
     return false;
   g->global_gotsym = 0;
   g->local_gotno = MIPS_RESERVED_GOTNO;
+  g->assigned_gotno = MIPS_RESERVED_GOTNO;
   if (elf_section_data (s) == NULL)
     {
       s->used_by_bfd =

@@ -1,3 +1,13 @@
+Thu Feb 27 18:36:23 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (struct mips_got_info): Add assigned_gotno field.
+	(mips_elf_relocate_got_local): Change return type to boolean.
+	Don't assume that the first zero entry is unassigned; instead, use
+	assigned_gotno.
+	(mips_elf_relocate_section): Check return value of
+	mips_elf_relocate_got_local.
+	(mips_elf_create_got_section): Initialize assigned_gotno field.
+
 start-sanitize-d30v
 Wed Feb 26 15:19:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
