@@ -1,3 +1,16 @@
+2001-11-02  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvsb/elfvsb.exp: Add the "ld -r" test.
+
+	* ld-elfvsb/hidden0.d: New.
+	* ld-elfvsb/hidden1.d: New.
+	* ld-elfvsb/internal0.d: New.
+	* ld-elfvsb/internal1.d: New.
+	* ld-elfvsb/protected0.d: New.
+	* ld-elfvsb/protected1.d: New.
+	* ld-elfvsb/undef.s: New.
+	* ld-elfvsb/undef.s: New.
+
 2001-11-02  NIIBE Yutaka  <gniibe@m17n.org>
 
 	* ld-sh/sh.exp: Have its own start.s for linux.
