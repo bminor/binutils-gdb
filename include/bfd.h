@@ -144,7 +144,7 @@ typedef int symtype;		/* Who knows, yet? */
 #define bfd_get_output_section(x) ((x)->section->output_section)
 #define bfd_set_section(x,y) ((x)->section) = (y)
 #define bfd_asymbol_base(x) ((x)->section->vma)
-#define bfd_asymbol_value(x) (bfd_asymbol_base(x) + x->value)
+#define bfd_asymbol_value(x) (bfd_asymbol_base(x) + (x)->value)
 #define bfd_asymbol_name(x) ((x)->name)
 /*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
 #define bfd_asymbol_bfd(x) ((x)->the_bfd)
