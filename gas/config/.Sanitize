@@ -32,22 +32,6 @@ atof-ieee.c
 atof-vax.c
 coff.gnu.h
 cplus-dem.c
-mh-a29k
-mt-ebmon29k	
-mt-m68k		
-obj-ieee.h	
-tc-mips.c
-mt-h8300	
-mt-mips		
-tc-h8300.c	
-tc-mips.h
-mh-i386		
-mt-h8300hds	
-obj-ieee.c	
-tc-h8300.h	
-tc-sparc.c
-mh-a29k
-mh-cygnus
 ho-a29k.h
 ho-ansi.h
 ho-cygnus.h
@@ -62,6 +46,14 @@ ho-sun4.h
 ho-sunos.h
 ho-sysv.h
 ho-vax.h
+mh-a29k
+mh-cygnus
+mh-i386
+mt-ebmon29k
+mt-h8300
+mt-h8300hds
+mt-m68k
+mt-mips
 obj-aout.c
 obj-aout.h
 obj-bfd-sunos.c
@@ -72,6 +64,8 @@ obj-coff.c
 obj-coff.h
 obj-generic.c
 obj-generic.h
+obj-ieee.c
+obj-ieee.h
 ranlib.h
 signame.h
 stab.h
@@ -79,6 +73,8 @@ tc-a29k.c
 tc-a29k.h
 tc-generic.c
 tc-generic.h
+tc-h8300.c
+tc-h8300.h
 tc-i386.c
 tc-i386.h
 tc-i860.c
@@ -88,9 +84,10 @@ tc-i960.h
 tc-m68851.h
 tc-m68k.c
 tc-m68k.h
+tc-mips.c
+tc-mips.h
 tc-ns32k.c
 tc-ns32k.h
-tc-sparc.c
 tc-sparc.h
 tc-vax.c
 tc-vax.h
@@ -126,7 +123,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1991/11/06 09:14:33  sac
+# Revision 1.8  1991/11/06 11:53:16  sac
+# Wouldn't it be nice if Sanitize ignored spaces ?
+#
+# Revision 1.7  1991/11/06  09:14:33  sac
 # Uniq contents, since configure gets confused if the same file is in more than once.
 #
 # Revision 1.6  1991/11/05  21:21:12  sac
