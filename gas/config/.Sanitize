@@ -15,6 +15,10 @@
 
 Do-first:
 
+if [ -d vms ]; then
+	lose_these_too="vms ${lose_these_too}"
+fi
+
 d30v_files="tc-d30v.c tc-d30v.h"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -165,8 +169,6 @@ vms-conf.h
 vms-a-conf.h
 
 Things-to-lose:
-
-vms
 
 Do-last:
 
