@@ -4,14 +4,6 @@
 	* configure.tgt (powerpc64-*-linux*): Build gdbserver, please.
 	* regformats/reg-ppc64.dat: New file.
 
-	Use gdbarch methods for solib stuff on PowerPC Linux.
-	* config/powerpc/tm-linux.h (IN_SOLIB_CALL_TRAMPOLINE,
-	SKIP_TRAMPOLINE_CODE): #undef these, so the gdbarch methods will
-	show through.
-	* ppc-linux-tdep.c (ppc_linux_init_abi): Register
-	IN_SOLIB_CALL_TRAMPOLINE and SKIP_TRAMPOLINE_CODE methods here,
-	giving the same effect as the #definitions above.
-
 2003-05-28  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (store_altivec_registers): Don't cast fourth
