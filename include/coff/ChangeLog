@@ -1,3 +1,42 @@
+Fri Jan  8 16:19:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff-ext.h: Added prototypes for ECOFF swapping functions.
+	* internal.h (internal_scnhdr): Always provide s_align field, not
+	just on i960.
+	(internal_reloc): Always provide r_size field, not just on
+	RS/6000.
+	* mips.h (_RDATA, _SDATA, _SBSS, _LIT4, _LIT8, STYP_RDATA,
+	STYP_SDATA, STYP_SBSS, STYP_LIT4, STYP_LIT8): Defined.
+	(CODE_MASK, MIPS_IS_STAB, MIPS_MARK_STAB, MIPS_UNMARK_STAB,
+	STABS_SYMBOL): Moved in from gdb/mipsread.c.
+
+Wed Jan  6 14:01:46 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i386.h, we32k.h: removed STYP_* defines, since they duplicated
+	those in internal.h.
+
+Tue Dec 29 15:40:07 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* i386.h: define I386AIXMAGIC for Danbury AIX PS/2 compiler.
+
+Sat Dec 12 16:07:57 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* i386.h: don't define BTYPE, ISPTR, ISFCN, ISARY, DECREF: they
+	are defined in internal.h.
+
+Thu Nov 12 09:52:01 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* internal.h: (internal_reloc): r_offset is now a long.
+	* z8k.h: slight comment enhancement
+
+Wed Sep 30 07:46:08 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* internal.h: changed z8k reloc types
+
+Fri Aug 28 10:16:31 1992  Brendan Kehoe  (brendan@cygnus.com)
+
+	* we32k.h: new file
+
 Thu Aug 27 13:00:01 1992  Brendan Kehoe  (brendan@cygnus.com)
 
 	* symconst.h: comment out cruft at the end of #endif

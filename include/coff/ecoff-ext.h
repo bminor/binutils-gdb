@@ -278,8 +278,8 @@ union aux_ext {
 };
 
 /* FIXME!  These are copied from ../bfd/libbfd.h */
-PROTO (bfd_vma, _do_getb32, (unsigned char *addr));
-PROTO (bfd_vma, _do_getl32, (unsigned char *addr));
+extern bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
+extern bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
 
 #define	AUX_GET_DNLOW(bigend, ax)	(bigend? _do_getb32 ((ax)->a_dnLow): \
 						 _do_getl32 ((ax)->a_dnLow))
@@ -299,3 +299,15 @@ PROTO (bfd_vma, _do_getl32, (unsigned char *addr));
 struct rfd_ext {
   unsigned char	rfd[4];
 };
+
+/* Prototypes for the swapping functions.  These require that sym.h be
+   included before this file.  */
+extern void ecoff_swap_hdr_in PARAMS ((bfd *, struct hdr_ext *, HDRR *));
+extern void ecoff_swap_fdr_in PARAMS ((bfd *, struct fdr_ext *, FDR *));
+extern void ecoff_swap_pdr_in PARAMS ((bfd *, struct pdr_ext *, PDR *));
+extern void ecoff_swap_sym_in PARAMS ((bfd *, struct sym_ext *, SYMR *));
+extern void ecoff_swap_ext_in PARAMS ((bfd *, struct ext_ext *, EXTR *));
+extern void ecoff_swap_tir_in PARAMS ((int bigend, struct tir_ext *, TIR *));
+extern void ecoff_swap_rndx_in PARAMS ((int bigend, struct rndx_ext *,
+					RNDXR *));
+extern void ecoff_swap_rfd_in PARAMS ((bfd *, struct rfd_ext *, RFDT *));
