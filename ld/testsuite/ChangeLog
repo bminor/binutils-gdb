@@ -1,3 +1,19 @@
+2004-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp: Add new tests for versioned weak
+	definition. 
+
+	* ld-elfvers/vers28a.c: New file.
+	* ld-elfvers/vers28a.dsym: Likewise.
+	* ld-elfvers/vers28a.ver: Likewise.
+	* ld-elfvers/vers28b.c: Likewise.
+	* ld-elfvers/vers28b.dsym: Likewise.
+	* ld-elfvers/vers28b.map: Likewise.
+	* ld-elfvers/vers28b.ver: Likewise.
+	* ld-elfvers/vers28c.c: Likewise.
+	* ld-elfvers/vers28c.dsym: Likewise.
+	* ld-elfvers/vers28c.ver: Likewise.
+
 2004-03-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/provide-2.d: Ignore random symbols.
