@@ -1,3 +1,33 @@
+Fri Mar 29 09:57:36 1996  Fred Fish  <fnf@cygnus.com>
+
+	* mmalloc.h (mmtrace): Add prototype.
+
+Sat Feb  3 12:41:00 1996  Fred Fish  <fnf@cygnus.com>
+
+	From H.J. Lu (hjl@gnu.ai.mit.edu):
+	* mvalloc.c (valloc): new.
+	* mmemalign.c: Allocate (SIZE + ALIGNMENT - 1) and then trim
+	if possible.
+	(memalign): don't put the node on the _aligned_blocks list more
+ 	than once.
+
+Mon Nov 20 12:04:32 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (OFILES): Make objects depend upon Makefile,
+	since Makefile sets DEFS which can definitely affect how
+	objects are to be compiled.
+
+Mon Nov  6 14:12:13 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (AC_CHECK_HEADERS): add limits.h.
+	(AC_HEADER_STDC): remove.
+
+	* mmalloc.h: document necessity of defining size_t before
+	including mmalloc.h.
+
+	* mmprivate.h: add check for limits.h, remove definition of
+	NULL and size_t.
+
 Sun Nov  5 00:27:36 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in: AC_CHECK_HEADERS, not AC_CHECK_HEADER.
