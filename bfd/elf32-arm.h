@@ -827,6 +827,10 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
 	  /* These are the only relocation types we care about.  */
 	  if (   r_type != R_ARM_PC24
+#ifndef OLD_ARM_ABI
+	      && r_type != R_ARM_CALL
+	      && r_type != R_ARM_JUMP24
+#endif
 	      && r_type != R_ARM_THM_PC22)
 	    continue;
 
@@ -864,6 +868,10 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  switch (r_type)
 	    {
 	    case R_ARM_PC24:
+#ifndef OLD_ARM_ABI
+	    case R_ARM_CALL:
+	    case R_ARM_JUMP24:
+#endif
 	      /* This one is a call from arm code.  We need to look up
 	         the target of the call.  If it is a thumb target, we
 	         insert glue.  */
@@ -1295,6 +1303,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_ABS32:
     case R_ARM_REL32:
 #ifndef OLD_ARM_ABI
+    case R_ARM_CALL:
+    case R_ARM_JUMP24:
     case R_ARM_XPC25:
     case R_ARM_PREL31:
 #endif
@@ -1344,6 +1354,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	      || h->root.type != bfd_link_hash_undefweak)
 	  && r_type != R_ARM_PC24
+#ifndef OLD_ARM_ABI
+	  && r_type != R_ARM_CALL
+	  && r_type != R_ARM_JUMP24
+#endif
 	  && r_type != R_ARM_PLT32)
 	{
 	  Elf_Internal_Rela outrel;
@@ -1416,6 +1430,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	{
 #ifndef OLD_ARM_ABI
 	case R_ARM_XPC25:	  /* Arm BLX instruction.  */
+	case R_ARM_CALL:
+	case R_ARM_JUMP24:
 #endif
 	case R_ARM_PC24:	  /* Arm B/BL instruction */
 	case R_ARM_PLT32:
@@ -2028,6 +2044,10 @@ arm_add_to_rel (bfd *              abfd,
 	  break;
 
 	case R_ARM_PC24:
+#ifndef OLD_ARM_ABI
+	case R_ARM_CALL:
+	case R_ARM_JUMP24:
+#endif
 	  addend <<= howto->size;
 	  addend += increment;
 
@@ -2188,6 +2208,10 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	      switch (r_type)
 		{
 	        case R_ARM_PC24:
+#ifndef OLD_ARM_ABI
+		case R_ARM_CALL:
+		case R_ARM_JUMP24:
+#endif
 	        case R_ARM_ABS32:
 		case R_ARM_THM_PC22:
 	        case R_ARM_PLT32:
@@ -2861,6 +2885,8 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 	case R_ARM_PC24:
 	case R_ARM_PLT32:
 #ifndef OLD_ARM_ABI
+	case R_ARM_CALL:
+	case R_ARM_JUMP24:
 	case R_ARM_PREL31:
 #endif
 	  r_symndx = ELF32_R_SYM (rel->r_info);
@@ -3004,6 +3030,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
 #ifndef OLD_ARM_ABI
+	  case R_ARM_CALL:
+	  case R_ARM_JUMP24:
 	  case R_ARM_PREL31:
 #endif
 	    if (h != NULL)
@@ -3022,6 +3050,10 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   sure yet, because something later might force the
 		   symbol local.  */
 		if (r_type == R_ARM_PC24
+#ifndef OLD_ARM_ABI
+		    || r_type == R_ARM_CALL
+		    || r_type == R_ARM_JUMP24
+#endif
 		    || r_type == R_ARM_PLT32)
 		  h->needs_plt = 1;
 
@@ -3047,6 +3079,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		&& ((r_type != R_ARM_PC24
 		     && r_type != R_ARM_PLT32
 #ifndef OLD_ARM_ABI
+		     && r_type != R_ARM_CALL
+		     && r_type != R_ARM_JUMP24
 		     && r_type != R_ARM_PREL31
 #endif
 		     && r_type != R_ARM_REL32)
@@ -3336,9 +3370,9 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
     }
   else
     /* It's possible that we incorrectly decided a .plt reloc was
-       needed for an R_ARM_PC24 reloc to a non-function sym in
-       check_relocs.  We can't decide accurately between function and
-       non-function syms in check-relocs;  Objects loaded later in
+       needed for an R_ARM_PC24 or similar reloc to a non-function sym
+       in check_relocs.  We can't decide accurately between function
+       and non-function syms in check-relocs; Objects loaded later in
        the link may change h->type.  So fix it now.  */
     h->plt.offset = (bfd_vma) -1;
 

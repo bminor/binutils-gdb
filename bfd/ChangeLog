@@ -1,3 +1,16 @@
+2004-10-27  Richard Earnshaw  <rearnsha@arm.com>
+
+	* elf32-arm.h (bfd_elf32_arm_process_before_allocation): Handle
+	R_ARM_CALL and R_ARM_JUMP24 as aliases of R_ARM_PC24.
+	(elf32_arm_final_link_relocate): Ditto.
+	(arm_add_to_rel, elf32_arm_relocate_section): Ditto.
+	(elf32_arm_gc_sweep_hook, elf32_arm_check_relocs): Ditto
+	(elf32_arm_adjust_dynamic_symbol): Ditto.
+	* elfarm-nabi.c (elf32_arm_howto_table): Add R_ARM_CALL and
+	R_ARM_JUMP32.  Move R_ARM_R{REL32,ABS32,PC24,BASE}...
+	(elf32_arm_r_howto): ... To here.
+	(elf32_arm_howto_from_type): Use elf32_arm_r_howto.
+
 2004-10-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 475
