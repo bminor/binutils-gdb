@@ -1,3 +1,9 @@
+start-sanitize-sky
+Thu May 21 15:14:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/upper-2.[sd]: Test absent dest -> xyzw.
+
+end-sanitize-sky
 Thu May 21 15:03:06 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/arm/thumb.s: Add period to start of labels to prevent
