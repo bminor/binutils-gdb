@@ -28,49 +28,172 @@
 #include "osabi.h"
 
 #include "gdb_string.h"
+#include "gdb_assert.h"
 
 #include "x86-64-tdep.h"
 #include "x86-64-linux-tdep.h"
+#include "i386-linux-tdep.h"	/* For I386_LINUX_ORIG_EAX_REGNUM.  */
 
 /* Register indexes to 'struct user' come from <sys/reg.h>.  */
 
-#define USER_R15    0
-#define USER_R14    1
-#define USER_R13    2
-#define USER_R12    3
-#define USER_RBP    4
-#define USER_RBX    5
-#define USER_R11    6
-#define USER_R10    7
-#define USER_R9     8
-#define USER_R8     9
-#define USER_RAX    10
-#define USER_RCX    11
-#define USER_RDX    12
-#define USER_RSI    13
-#define USER_RDI    14
-#define USER_RIP    16
-#define USER_CS     17
-#define USER_EFLAGS 18
-#define USER_RSP    19
-#define USER_SS     20
-#define USER_DS     23
-#define USER_ES     24
-#define USER_FS     25
-#define USER_GS     26
-
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
-
-static int user_to_gdb_regmap[] =
+enum user_regs
 {
-  USER_RAX, USER_RBX, USER_RCX, USER_RDX,
-  USER_RSI, USER_RDI, USER_RBP, USER_RSP,
-  USER_R8, USER_R9, USER_R10, USER_R11,
-  USER_R12, USER_R13, USER_R14, USER_R15,
-  USER_RIP, USER_EFLAGS, USER_CS, USER_SS,
-  USER_DS, USER_ES, USER_FS, USER_GS
+  USER_R15,
+  USER_R14,
+  USER_R13,
+  USER_R12,
+  USER_RBP,
+  USER_RBX,
+  USER_R11,
+  USER_R10,
+  USER_R9,
+  USER_R8,
+  USER_RAX,
+  USER_RCX,
+  USER_RDX,
+  USER_RSI,
+  USER_RDI,
+  USER_ORIG_RAX,
+  USER_RIP,
+  USER_CS,
+  USER_EFLAGS,
+  USER_RSP,
+  USER_SS,
+  USER_FS_BASE,
+  USER_GS_BASE,
+  USER_DS,
+  USER_ES,
+  USER_FS,
+  USER_GS,
+  USER_MAX
 };
+
+/* Map from GDB's i386/x86-64 REGNUM indexed general-purpose registers
+   to a `struct user' array of registers..  */
+
+struct regnum_map
+{
+  int regnum;
+  int user;
+};
+
+struct regnum_to_user
+{
+  long nr;
+  const struct regnum_map *map;
+};
+
+long
+x86_64_linux_greg_offset (int regnum)
+{
+  const static struct regnum_map i386_regnum_map[] =
+  {
+    { I386_EAX_REGNUM, USER_RAX },
+    { I386_ECX_REGNUM, USER_RCX },
+    { I386_EDX_REGNUM, USER_RDX },
+    { I386_EBX_REGNUM, USER_RBX },
+    { I386_ESP_REGNUM, USER_RSP },
+    { I386_EBP_REGNUM, USER_RBP },
+    { I386_ESI_REGNUM, USER_RSI },
+    { I386_EDI_REGNUM, USER_RDI },
+    { I386_EIP_REGNUM, USER_RIP },
+    { I386_EFLAGS_REGNUM, USER_EFLAGS },
+    { I386_CS_REGNUM, USER_CS },
+    { I386_SS_REGNUM, USER_SS },
+    { I386_DS_REGNUM, USER_DS },
+    { I386_ES_REGNUM, USER_ES },
+    { I386_FS_REGNUM, USER_FS },
+    { I386_GS_REGNUM, USER_GS },
+    { I386_ST0_REGNUM, -1 },
+    { I386_ST1_REGNUM, -1 },
+    { I386_ST2_REGNUM, -1 },
+    { I386_ST3_REGNUM, -1 },
+    { I386_ST4_REGNUM, -1 },
+    { I386_ST5_REGNUM, -1 },
+    { I386_ST6_REGNUM, -1 },
+    { I386_ST7_REGNUM, -1 },
+    { I386_FCTRL_REGNUM, -1 },
+    { I386_FSTAT_REGNUM, -1 },
+    { I386_FTAG_REGNUM, -1 },
+    { I386_FISEG_REGNUM, -1 },
+    { I386_FIOFF_REGNUM, -1 },
+    { I386_FOSEG_REGNUM, -1 },
+    { I386_FOOFF_REGNUM, -1 },
+    { I386_FOP_REGNUM, -1 },
+    { I386_XMM0_REGNUM, -1 },
+    { I386_XMM1_REGNUM, -1 },
+    { I386_XMM2_REGNUM, -1 },
+    { I386_XMM3_REGNUM, -1 },
+    { I386_XMM4_REGNUM, -1 },
+    { I386_XMM5_REGNUM, -1 },
+    { I386_XMM6_REGNUM, -1 },
+    { I386_XMM7_REGNUM, -1 },
+    { I386_MXCSR_REGNUM, -1 },
+    { I386_LINUX_ORIG_EAX_REGNUM, USER_ORIG_RAX },
+  };
+  const static struct regnum_to_user i386_regnum_to_user =
+  {
+    ARRAY_SIZE (i386_regnum_map), i386_regnum_map
+  };
+  const static struct regnum_map x86_64_regnum_map[] =
+  {
+    { X86_64_RAX_REGNUM, USER_RAX },
+    { X86_64_RBX_REGNUM, USER_RBX },
+    { X86_64_RCX_REGNUM, USER_RCX },
+    { X86_64_RDX_REGNUM, USER_RDX },
+    { X86_64_RSI_REGNUM, USER_RSI },
+    { X86_64_RDI_REGNUM, USER_RDI },
+    { X86_64_RBP_REGNUM, USER_RBP },
+    { X86_64_RSP_REGNUM, USER_RSP },
+    { X86_64_R8_REGNUM, USER_R8 },
+    { X86_64_R9_REGNUM, USER_R9 },
+    { X86_64_R10_REGNUM, USER_R10 },
+    { X86_64_R11_REGNUM, USER_R11 },
+    { X86_64_R12_REGNUM, USER_R12 },
+    { X86_64_R13_REGNUM, USER_R13 },
+    { X86_64_R14_REGNUM, USER_R14 },
+    { X86_64_R15_REGNUM, USER_R15 },
+    { X86_64_RIP_REGNUM, USER_RIP },
+    { X86_64_EFLAGS_REGNUM, USER_EFLAGS },
+    /* { X86_64_CS_REGNUM, USER_CS }, */
+    /* { X86_64_SS_REGNUM, USER_SS }, */
+    { X86_64_DS_REGNUM, USER_DS },
+    { X86_64_ES_REGNUM, USER_ES },
+    { X86_64_FS_REGNUM, USER_FS },
+    { X86_64_GS_REGNUM, USER_GS },
+  };
+  const static struct regnum_to_user x86_64_regnum_to_user =
+  {
+    ARRAY_SIZE (x86_64_regnum_map), x86_64_regnum_map
+  };
+  const struct regnum_to_user *regnum_to_user;
+
+  gdb_assert (TARGET_ARCHITECTURE->arch == bfd_arch_i386);
+  switch (TARGET_ARCHITECTURE->mach)
+    {
+    case bfd_mach_i386_i386:
+    case bfd_mach_i386_i386_intel_syntax:
+      regnum_to_user = &i386_regnum_to_user;
+      break;
+    case bfd_mach_x86_64:
+    case bfd_mach_x86_64_intel_syntax:
+      regnum_to_user = &x86_64_regnum_to_user;
+      break;
+    case bfd_mach_i386_i8086:
+      /* Better suggestion?  */
+      return -1;
+    default:
+      internal_error (__FILE__, __LINE__, "bad_switch");
+    }
+  if (regnum < 0)
+    return USER_MAX * 8;
+  if (regnum >= regnum_to_user->nr)
+    return -1;
+  gdb_assert (regnum_to_user->map[regnum].regnum == regnum);
+  if (regnum_to_user->map[regnum].user < 0)
+    return -1;
+  return regnum_to_user->map[regnum].user * 8;
+}
 
 /* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
@@ -79,9 +202,15 @@ void
 x86_64_linux_supply_gregset (char *regp)
 {
   int i;
+  char buf[MAX_REGISTER_SIZE];
+  int bad = 0;
 
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
-    supply_register (i, regp + (user_to_gdb_regmap[i] * 8));
+  for (i = 0; i < NUM_REGS; i++)
+    {
+      long offset = x86_64_linux_greg_offset (i);
+      if (offset >= 0)
+	supply_register (i, regp + offset);
+    }
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -93,9 +222,20 @@ x86_64_linux_fill_gregset (char *regp, int regno)
 {
   int i;
 
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (i, regp + (user_to_gdb_regmap[i] * 8));
+      {
+	long offset = x86_64_linux_greg_offset (i);
+	if (offset >= 0)
+	  {
+	    char buf[MAX_REGISTER_SIZE];
+	    memset (buf, 0, sizeof buf);
+	    /* Assume little endian - LHS of buffer is the correct
+               place to put the collected bytes.  */
+	    regcache_collect (i, buf);
+	    memcpy (regp + offset, buf, 8);
+	  }
+    }
 }
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
@@ -111,7 +251,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
   switch (which)
     {
     case 0:  /* Integer registers.  */
-      if (core_reg_size != 216)
+      if (x86_64_linux_greg_offset (-1) > core_reg_size)
 	warning ("Wrong size register set in core file.");
       else
 	x86_64_linux_supply_gregset (core_reg_sect);
@@ -132,11 +272,23 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 }
 
+static int
+x86_64_core_sniffer (struct core_fns *our_fns, bfd *abfd)
+{
+  int result;
+
+  result = ((bfd_get_flavour (abfd) == our_fns -> core_flavour)
+	    && bfd_get_arch (abfd) == bfd_arch_i386
+	    && (bfd_get_mach (abfd) == bfd_mach_x86_64
+		|| bfd_get_mach (abfd) == bfd_mach_x86_64_intel_syntax));
+  return (result);
+}
+
 static struct core_fns x86_64_core_fns = 
 {
   bfd_target_elf_flavour,		/* core_flavour */
   default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
+  x86_64_core_sniffer,			/* core_sniffer */
   fetch_core_registers,			/* core_read_registers */
   NULL					/* next */
 };

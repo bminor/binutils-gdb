@@ -36,4 +36,10 @@ void x86_64_linux_supply_gregset (char *regp);
 
 void x86_64_linux_fill_gregset (char *regp, int regno);
 
+/* Given a GDB REGNUM, return the byte offset in the target's GREGs
+   buffer, or -1 if there is no corresponding GREGSET / FPREGSET
+   entry.  Given a -ve REGNUM, returns the GREG's upper bound.  */
+
+extern long x86_64_linux_greg_offset (int regnum);
+
 #endif /* x86-64-linux-tdep.h */

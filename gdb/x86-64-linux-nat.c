@@ -54,12 +54,8 @@
 /* Which ptrace request retrieves which registers?
    These apply to the corresponding SET requests as well.  */
 
-#define GETREGS_SUPPLIES(regno) \
-  (0 <= (regno) && (regno) < X86_64_NUM_GREGS)
-
 #define GETFPREGS_SUPPLIES(regno) \
   (FP0_REGNUM <= (regno) && (regno) <= MXCSR_REGNUM)
-
 
 /* Transfering the general-purpose registers between GDB, inferiors
    and core files.  */
@@ -191,7 +187,7 @@ fetch_inferior_registers (int regno)
       return;
     }
 
-  if (GETREGS_SUPPLIES (regno))
+  if (x86_64_linux_greg_offset (regno) >= 0)
     {
       fetch_regs (tid);
       return;
@@ -228,7 +224,7 @@ store_inferior_registers (int regno)
       return;
     }
 
-  if (GETREGS_SUPPLIES (regno))
+  if (x86_64_linux_greg_offset (regno) >= 0)
     {
       store_regs (tid, regno);
       return;

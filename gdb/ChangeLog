@@ -1,5 +1,33 @@
 2003-08-21  Andrew Cagney  <cagney@redhat.com>
 
+	* x86-64-tdep.h (enum x86_64_regnums): Replace #define of
+	X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, X86_64_RDI_REGNUM,
+	X86_64_RBP_REGNUM, X86_64_RSP_REGNUM, X86_64_RIP_REGNUM,
+	X86_64_EFLAGS_REGNUM, X86_64_ST0_REGNUM, X86_64_XMM0_REGNUM,
+	X86_64_XMM1_REGNUM.
+	* x86-64-linux-tdep.h (x86_64_linux_greg_offset): Declare.
+	(x86_64_linux_supply_gregset): Add "sizeof_gregs" param.
+	(x86_64_linux_fill_gregset): Add "sizeof_gregs" param.
+	* x86-64-linux-tdep.c: Include "gdb_assert.h" and
+	"i386-linux-tdep.h".
+	(enum user_regs): Replace user reg #defines, add USER_ORIG_RAX,
+	USER_FS_BASE and USER_GS_BASE.
+	(struct regnum_map, struct regnum_to_user): Define.
+	(x86_64_linux_greg_offset): New function.
+	(user_to_gdb_regmap): Delete.
+	(x86_64_linux_supply_gregset, x86_64_linux_fill_gregset): Use
+	x86_64_linux_greg_offset.
+	(x86_64_core_sniffer): New function
+	(x86_64_core_fns): Set the sniffer to x86_64_core_sniffer.
+	(fetch_core_registers): Pass "core_reg_size" to the supply
+	functions.
+	* x86-64-linux-nat.c (GETREGS_SUPPLIES): Delete macro.
+	(fetch_inferior_registers): Use x86_64_linux_greg_offset.
+	(store_inferior_registers): Ditto.
+	* Makefile.in (x86-64-linux-tdep.o): Update dependencies.
+
+2003-08-21  Andrew Cagney  <cagney@redhat.com>
+
 	* i386-tdep.h (i386_regnums): Replace I386_EAX_REGNUM,
 	I386_EDX_REGNUM, I386_ESP_REGNUM, I386_EBP_REGNUM,
 	I386_EIP_REGNUM, I386_EFLAGS_REGNUM, I386_ST0_REGNUM.
