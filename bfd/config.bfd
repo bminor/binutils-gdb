@@ -1017,6 +1017,7 @@ case "${targ}" in
   s390-*-linux*)
     targ_defvec=bfd_elf32_s390_vec
     targ64_selvecs=bfd_elf64_s390_vec
+    want64=true
     ;;
 #ifdef BFD64
   s390x-*-linux*)

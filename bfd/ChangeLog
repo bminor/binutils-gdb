@@ -1,3 +1,7 @@
+2004-07-02  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config.bfd: Add want64 to configuration target s390-*-linux*.
+
 2004-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_get_section_ident): New.
