@@ -1,3 +1,8 @@
+Mon Jan 11 16:43:44 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (remote_wait): Add inferior_pid to thread list only
+	if it is not already there.
+
 1999-01-11  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* scm-tags.h: Update FSF's address on copyright notice.

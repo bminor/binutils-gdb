@@ -1814,7 +1814,8 @@ Packet: '%s'\n",
       if (inferior_pid == MAGIC_NULL_PID)
 	{
 	  inferior_pid = thread_num;
-	  add_thread (inferior_pid);
+	  if (!in_thread_list (inferior_pid))
+	    add_thread (inferior_pid);
 	}
       return thread_num;
     }
