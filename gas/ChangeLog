@@ -1,3 +1,67 @@
+Fri Sep  3 16:44:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-elf.h (elf_symbol): Fixed name of elf_symbol_type.
+
+	* config/tc-hppa.h (struct default_subspace_dict, struct
+	default_space_dict): Field "sort" is now unsigned char.
+
+	* config/tc-hppa.c (pa_def_subspaces, pa_def_spaces): Align
+	columns for easier reading.
+	(bcmp, index): Deleted USG-specific definitions.  Should be dealt
+	with in ho-*.h, or in libiberty.  Changed mention of index to
+	strchr.
+	(label_symbolP, label_symbol_defined, callinfo_found,
+	within_entry_exit, exit_processing_complete, within_procedure,
+	pa_def_subspaces, pa_def_spaces, pa_pseudo_op_moves_pc,
+	label_symbols_rootP, pa_get_label, pa_label_is_defined,
+	pa_undefine_label): Now static.
+	(movers): Now const, in addition to pointing to const data.
+	* config/tc-hppa.h (label_symbolS_rootP, pa_get_label,
+	pa_label_is_defined, pa_undefine_label, pa_pseudo_op_moves_pc):
+	Delete declarations.
+
+	Merged more changes from Jeff Law and Pete Hoogenboom:
+
+	* config/tc-hppa.c (pa_def_subspaces, pa_def_subspaces): Remove
+	entries for .stab and .stabstr.
+
+	* config/obj-elf.c: (elf_stab_symbol_string):  Set the
+	SEC_LOAD attribute for the .stabstr section.
+	(obj_elf_stab_generic):  Set the SEC_LOAD attribute for the
+	.stab section.
+	(obj_elf_stab_generic):  Change '#if 1' to '#if 0'.
+	(obj_elf_stab_generic):  Incorrect byte count on call to
+	md_number_to_chars function.
+
+	* config/tc-hppa.c (hppa_tc_symbol): Static functions need
+	argument relocation bits too.
+
+	* config/tc-hppa.c (pa_stringer): Correctly handle escaping
+	characters which should appear unaltered in the output string (for
+	example an escaped double-quote).
+
+	* config/tc-hppa.c (pa_parse_nonneg_cmpsub_cmpltr): Always
+	initialize name.
+	(pa_parse_neg_cmpsub_cmpltr): Likewise.
+	(pa_parse_nonneg_add_cmpltr): Likewise.
+	(pa_parse_neg_add_cmpltr): Likewise.
+
+	* config/tc-hppa.h (parse_cons_expression_hppa): Remove prototype
+	for now.
+	(cons_fix_new_hppa): Likewise.
+	* config/tc-hppa.c (md_apply_fix): Fix type of valp to match
+	prototype.
+
+	* config/tc-hppa.c: Include libhppa.h.
+
+	* config/tc-hppa.h: Delete extern declarations of functions 
+	found in libhppa.h.
+
+	* config/tc-hppa.c (pa_space): Rework to avoid unwanted #ifdef
+	OBJ_ELF conditionals.
+	* config/tc-hppa.h (LOCAL_LABEL): Correctly identify local labels
+	on the PA.
+
 Thu Sep  2 10:43:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (macro_build): Accept 'z', and ignore it.
