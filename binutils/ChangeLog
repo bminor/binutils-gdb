@@ -1,3 +1,8 @@
+Fri May  3 11:30:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_data): Don't refer to bytes past the end
+	of data.
+
 Wed Apr 24 14:10:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rddbg.c (read_symbol_stabs_debugging_info): Move call to
