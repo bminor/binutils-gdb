@@ -368,8 +368,12 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
   /* In cases involving weak versioned symbols, we may wind up trying
      to merge a symbol with itself.  Catch that here, to avoid the
      confusion that results if we try to override a symbol with
-     itself.  */
-  if (abfd == oldbfd)
+     itself.  The additional tests catch cases like
+     _GLOBAL_OFFSET_TABLE_, which are regular symbols defined in a
+     dynamic object, which we do want to handle here.  */
+  if (abfd == oldbfd
+      && ((abfd->flags & DYNAMIC) == 0
+	  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0))
     return true;
 
   /* NEWDYN and OLDDYN indicate whether the new or old symbol,

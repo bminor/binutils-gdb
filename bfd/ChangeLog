@@ -1,3 +1,8 @@
+1999-07-19  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_merge_symbol): Do merge symbols from the same BFD
+	if they appear to be specially created by the linker.
+
 1999-07-19  Nick Clifton  <nickc@cygnus.com>
 
 	* targets.c (alternative_target): New field in bfd_target
