@@ -1,3 +1,11 @@
+2002-12-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb_dirent.h: Cleanup and update code to match the example in
+	the Autoconf manual.
+	* configure.in: Call AC_HEADER_DIRENT.  Remove dirent.h,
+	sys/ndir.h, sys/dir.h and ndir.h from call to AC_CHECK_HEADERS.
+	* configure: Regenerated.
+
 2002-12-30  Adam Fedor  <fedor@gnu.org>
 
 	* objc-exp.y (parse_number): Cast sscanf arguments to proper type.
