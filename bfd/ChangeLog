@@ -1,3 +1,8 @@
+2004-08-24  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* elf32-m32r.c (m32r_elf_relocate_section): Handle
+	R_M32R_SDA16_RELA in the same way as R_M32R_SDA16.
+
 2004-08-20  Daniel Jacobowitz  <dan@debian.org>
 
 	* elflink.c (_bfd_elf_section_already_linked): Handle

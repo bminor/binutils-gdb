@@ -3031,7 +3031,6 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
             case R_M32R_26_PCREL_RELA:
             case R_M32R_HI16_ULO_RELA:
             case R_M32R_LO16_RELA:
-            case R_M32R_SDA16_RELA:
               if (info->shared
                   && r_symndx != 0
                   && (input_section->flags & SEC_ALLOC) != 0
@@ -3164,6 +3163,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
               goto check_reloc;
 
+            case (int) R_M32R_SDA16_RELA:
 	    case (int) R_M32R_SDA16 :
 	      {
 		const char *name;
