@@ -165,7 +165,8 @@ static int elf_sort_hdrs PARAMS ((const PTR, const PTR));
 static void assign_file_positions_for_relocs PARAMS ((bfd *));
 static bfd_size_type get_program_header_size PARAMS ((bfd *));
 static file_ptr map_program_segments
-  PARAMS ((bfd *, file_ptr, Elf_Internal_Shdr *, bfd_size_type));
+  PARAMS ((bfd *, file_ptr, Elf_Internal_Shdr *, Elf_Internal_Shdr **,
+	   bfd_size_type));
 
 static boolean elf_map_symbols PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **));
@@ -1754,14 +1755,16 @@ get_program_header_size (abfd)
 
 /* Create the program header.  OFF is the file offset where the
    program header should be written.  FIRST is the first loadable ELF
-   section.  PHDR_SIZE is the size of the program header as returned
+   section.  SORTED_HDRS is the ELF sections sorted by section
+   address.  PHDR_SIZE is the size of the program header as returned
    by get_program_header_size.  */
 
 static file_ptr
-map_program_segments (abfd, off, first, phdr_size)
+map_program_segments (abfd, off, first, sorted_hdrs, phdr_size)
      bfd *abfd;
      file_ptr off;
      Elf_Internal_Shdr *first;
+     Elf_Internal_Shdr **sorted_hdrs;
      bfd_size_type phdr_size;
 {
   Elf_Internal_Phdr phdrs[10];
@@ -1840,7 +1843,7 @@ map_program_segments (abfd, off, first, phdr_size)
      sh_addr for this to work correctly.  */
   phdr->p_type = PT_NULL;
   last_type = SHT_PROGBITS;
-  for (i = 1, hdrpp = elf_elfsections (abfd) + 1;
+  for (i = 1, hdrpp = sorted_hdrs;
        i < elf_elfheader (abfd)->e_shnum;
        i++, hdrpp++)
     {
@@ -2113,7 +2116,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
 	  off = assign_file_position_for_section (hdr, off, false);
 	}
 
-      phdr_map = map_program_segments (abfd, phdr_off, first, phdr_size);
+      phdr_map = map_program_segments (abfd, phdr_off, first, sorted_hdrs,
+				       phdr_size);
       if (phdr_map == (file_ptr) -1)
 	return false;
       BFD_ASSERT ((bfd_size_type) phdr_map <= (bfd_size_type) phdr_off + phdr_size);
@@ -4827,6 +4831,9 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name)
 {
   struct elf_link_hash_entry *h;
 
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+    return true;
+
   h = elf_link_hash_lookup (elf_hash_table (info), name, true, true, false);
   if (h == NULL)
     return false;
@@ -4890,6 +4897,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   struct elf_backend_data *bed;
 
   *sinterpptr = NULL;
+
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+    return true;
 
   dynobj = elf_hash_table (info)->dynobj;
 

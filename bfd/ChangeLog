@@ -1,3 +1,10 @@
+Tue Jan 31 15:27:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h (map_program_segments): Add sorted_hdrs parameter.
+	Search through it rather than through unsorted section headers.
+	(assign_file_positions_except_relocs): Pass sorted_hdrs to
+	map_program_segments.
+
 Mon Jan 30 22:04:53 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* ecoff.c (_bfd_ecoff_find_nearest_line): Fix problems in range
