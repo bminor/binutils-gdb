@@ -1,3 +1,11 @@
+Tue Jul 30 14:14:57 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h (R_HPPA_ESEL): New field selector.
+	(e_esel): Similarly.
+	* som.c (hppa_som_gen_reloc_type): If we encounter an e_esel,
+	then generate R_COMP2 (PUSH_SYM), R_DATA_EXPR fixup stream.
+	(som_write_fixups): Handle R_DATA_EXPR just like R_CODE_EXPR.
+
 Tue Jul 30 13:31:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Do the regular

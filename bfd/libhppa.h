@@ -34,6 +34,46 @@
 #endif /* GNU C? */
 #endif /* INLINE */
 
+#if __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
+/* Declare the functions with the unused attribute to avoid warnings.  */
+static INLINE unsigned int assemble_3 (unsigned int)
+     __attribute__ ((__unused__));
+static INLINE void dis_assemble_3 (unsigned int, unsigned int *)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_12 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE void dis_assemble_12 (unsigned int, unsigned int *,
+				    unsigned int *)
+     __attribute__ ((__unused__));
+static INLINE unsigned long assemble_17 (unsigned int, unsigned int,
+					 unsigned int)
+     __attribute__ ((__unused__));
+static INLINE void dis_assemble_17 (unsigned int, unsigned int *,
+				    unsigned int *, unsigned int *)
+     __attribute__ ((__unused__));
+static INLINE unsigned long assemble_21 (unsigned int)
+     __attribute ((__unused__));
+static INLINE void dis_assemble_21 (unsigned int, unsigned int *)
+     __attribute__ ((__unused__));
+static INLINE unsigned long sign_extend (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int ones (int) __attribute ((__unused__));
+static INLINE void sign_unext (unsigned int, unsigned int, unsigned int *)
+     __attribute__ ((__unused__));
+static INLINE unsigned long low_sign_extend (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE void low_sign_unext (unsigned int, unsigned int, unsigned int *)
+     __attribute__ ((__unused__));
+static INLINE unsigned long hppa_field_adjust (unsigned long, unsigned long,
+					       unsigned short)
+     __attribute__ ((__unused__));
+static INLINE char bfd_hppa_insn2fmt (unsigned long)
+     __attribute__ ((__unused__));
+static INLINE  unsigned long hppa_rebuild_insn (bfd *, unsigned long,
+						unsigned long, unsigned long)
+     __attribute__ ((__unused__));
+#endif /* gcc 2.7 or higher */
+
 /* The PA instruction set variants.  */
 enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20};
 
@@ -58,7 +98,8 @@ enum hppa_reloc_field_selector_type
     R_HPPA_RPSEL = 0xe,
     R_HPPA_TSEL = 0xf,
     R_HPPA_LTSEL = 0x10,
-    R_HPPA_RTSEL = 0x11
+    R_HPPA_RTSEL = 0x11,
+    R_HPPA_ESEL = 0xff
   };
 
 /* /usr/include/reloc.h defines these to constants.  We want to use
@@ -84,6 +125,7 @@ enum hppa_reloc_field_selector_type
 #undef e_tsel
 #undef e_ltsel
 #undef e_rtsel
+#undef e_esel
 #undef e_one
 #undef e_two
 #undef e_pcrel
@@ -111,7 +153,8 @@ enum hppa_reloc_field_selector_type_alt
     e_rpsel = R_HPPA_RPSEL,
     e_tsel = R_HPPA_TSEL,
     e_ltsel = R_HPPA_LTSEL,
-    e_rtsel = R_HPPA_RTSEL
+    e_rtsel = R_HPPA_RTSEL,
+    e_esel = R_HPPA_ESEL
   };
 
 enum hppa_reloc_expr_type
@@ -517,9 +560,13 @@ hppa_rebuild_insn (abfd, insn, value, r_format)
       }
 
     case 14:
-      const_part = insn & 0xffffc000;
-      low_sign_unext (value, 14, &rebuilt_part);
-      return const_part | rebuilt_part;
+      {
+	unsigned int ext;
+	
+	const_part = insn & 0xffffc000;
+	low_sign_unext (value, 14, &ext);
+	return const_part | ext;
+      }
 
     case 17:
       {
@@ -532,9 +579,13 @@ hppa_rebuild_insn (abfd, insn, value, r_format)
       }
 
     case 21:
-      const_part = insn & 0xffe00000;
-      dis_assemble_21 (value, &rebuilt_part);
-      return const_part | rebuilt_part;
+      {
+	unsigned int w;
+
+	const_part = insn & 0xffe00000;
+	dis_assemble_21 (value, &w);
+	return const_part | w;
+      }
 
     case 32:
       const_part = 0;
