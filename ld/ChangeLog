@@ -1,5 +1,8 @@
 Thu Feb  5 12:16:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/pe.sc: Remove ${RELOCATING-0} from all sections.
+	From Thomas de Lellis <tdel@wrs.com>.
+
 	* configure, Makefile.in, aclocal.m4: Rebuild with new libtool.
 
 Wed Feb  4 13:02:32 1998  Ian Lance Taylor  <ian@cygnus.com>
